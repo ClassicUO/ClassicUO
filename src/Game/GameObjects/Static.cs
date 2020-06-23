@@ -34,62 +34,31 @@ namespace ClassicUO.Game.GameObjects
 {
     internal sealed partial class Static : GameObject
     {
-        private static readonly Queue<Static> _pool = new Queue<Static>();
-        static Static()
+        private static readonly QueuedPool<Static> _pool = new QueuedPool<Static>(Constants.PREDICTABLE_STATICS, s =>
         {
-            for (int i = 0; i < Constants.PREDICTABLE_STATICS; i++)
-                _pool.Enqueue(new Static());
-        }
+            s.IsDestroyed = false;
+            s.AlphaHue = 0;
+            s.FoliageIndex = 0;
+        });
 
-        private Static()
-        {
-
-        }
-
-        public Static(ushort graphic, ushort hue, int index)
-        {
-            Graphic = OriginalGraphic = graphic;
-            Hue = hue;
-
-            UpdateGraphicBySeason();
-
-            if (ItemData.Height > 5)
-                _canBeTransparent = 1;
-            else if (ItemData.IsRoof || ItemData.IsSurface && ItemData.IsBackground || ItemData.IsWall)
-                _canBeTransparent = 1;
-            else if (ItemData.Height == 5 && ItemData.IsSurface && !ItemData.IsBackground)
-                _canBeTransparent = 1;
-            else
-                _canBeTransparent = 0;
-        }
 
         public static Static Create(ushort graphic, ushort hue, int index)
         {
-            if (_pool.Count != 0)
-            {
-                var s = _pool.Dequeue();
-                s.Graphic = s.OriginalGraphic = graphic;
-                s.Hue = hue;
-                s.IsDestroyed = false;
-                s.AlphaHue = 0;
-                s.FoliageIndex = 0;
-                s.UpdateGraphicBySeason();
+            Static s = _pool.GetOne();
+            s.Graphic = s.OriginalGraphic = graphic;
+            s.Hue = hue;
+            s.UpdateGraphicBySeason();
 
-                if (s.ItemData.Height > 5)
-                    s._canBeTransparent = 1;
-                else if (s.ItemData.IsRoof || s.ItemData.IsSurface && s.ItemData.IsBackground || s.ItemData.IsWall)
-                    s._canBeTransparent = 1;
-                else if (s.ItemData.Height == 5 && s.ItemData.IsSurface && !s.ItemData.IsBackground)
-                    s._canBeTransparent = 1;
-                else
-                    s._canBeTransparent = 0;
+            if (s.ItemData.Height > 5)
+                s._canBeTransparent = 1;
+            else if (s.ItemData.IsRoof || s.ItemData.IsSurface && s.ItemData.IsBackground || s.ItemData.IsWall)
+                s._canBeTransparent = 1;
+            else if (s.ItemData.Height == 5 && s.ItemData.IsSurface && !s.ItemData.IsBackground)
+                s._canBeTransparent = 1;
+            else
+                s._canBeTransparent = 0;
 
-                return s;
-            }
-
-            Log.Debug(string.Intern("Created new Static"));
-
-            return new Static(graphic, hue, index);
+            return s;
         }
 
         public string Name => ItemData.Name;
@@ -173,7 +142,7 @@ namespace ClassicUO.Game.GameObjects
             if (IsDestroyed)
                 return;
             base.Destroy();
-            _pool.Enqueue(this);
+            _pool.ReturnOne(this);
         }
     }
 }

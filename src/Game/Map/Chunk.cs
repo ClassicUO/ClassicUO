@@ -25,61 +25,36 @@ using System.Runtime.CompilerServices;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
 using ClassicUO.IO.Resources;
+using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
 
 namespace ClassicUO.Game.Map
 {
     internal sealed class Chunk
     {
-        private static readonly Queue<Chunk> _pool = new Queue<Chunk>();
-
-        static Chunk()
+        private static readonly QueuedPool<Chunk> _pool = new QueuedPool<Chunk>(Constants.PREDICTABLE_CHUNKS, c =>
         {
-            for (int i = 0; i < Constants.PREDICTABLE_CHUNKS; i++)
-                _pool.Enqueue(new Chunk(0xFFFF, 0xFFFF));
-        }
+            c.LastAccessTime = Time.Ticks + Constants.CLEAR_TEXTURES_DELAY;
+            c.IsDestroyed = false;
+        });
+
 
         public static Chunk Create(int x, int y)
         {
-            Chunk c;
-
-            if (_pool.Count != 0)
-            {
-                c = _pool.Dequeue();
-                c.X = x;
-                c.Y = y;
-                c.LastAccessTime = Time.Ticks + Constants.CLEAR_TEXTURES_DELAY;
-                c.IsDestroyed = false;
-            }
-            else
-            {
-                Log.Debug(string.Intern("Created new Chunk"));
-
-                c = new Chunk(x, y);
-            }
+            Chunk c = _pool.GetOne();
+            c.X = x;
+            c.Y = y;
 
             return c;
         }
 
 
-
-        private Chunk(int x, int y)
-        {
-            X = x;
-            Y = y;
-            Tiles = new GameObject[8, 8];
-            LastAccessTime = Time.Ticks + Constants.CLEAR_TEXTURES_DELAY;
-        }
-
-        public int X { get; set; }
-        public int Y { get; set; }
-
+        public int X;
+        public int Y;
         public bool IsDestroyed;
+        public long LastAccessTime;
 
-        public GameObject[,] Tiles { get; }
-
-        public long LastAccessTime { get; set; }
-
+        public GameObject[,] Tiles { get; } = new GameObject[8, 8];
         public LinkedListNode<int> Node;
 
 
@@ -376,7 +351,7 @@ namespace ClassicUO.Game.Map
             if (Node.Next != null || Node.Previous != null)
                 Node.List?.Remove(Node);
             IsDestroyed = true;
-            _pool.Enqueue(this);
+            _pool.ReturnOne(this);
         }
 
         public void Clear()

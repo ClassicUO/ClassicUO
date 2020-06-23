@@ -23,6 +23,7 @@ using System;
 using System.Collections.Generic;
 using ClassicUO.Data;
 using ClassicUO.IO.Resources;
+using ClassicUO.Utility;
 using ClassicUO.Utility.Collections;
 using Microsoft.Xna.Framework;
 using StbTextEditSharp;
@@ -51,35 +52,18 @@ namespace ClassicUO.Renderer
         private string _text;
         private FontTexture _texture;
 
-        private static readonly Queue<RenderedText> _pool = new Queue<RenderedText>();
-
-        private RenderedText()
+        private static readonly QueuedPool<RenderedText> _pool = new QueuedPool<RenderedText>(3000, r =>
         {
+            r.IsDestroyed = false;
+            r.Links.Count = 0;
+        });
 
-        }
-
-        static RenderedText()
-        {
-            for (int i = 0; i < 3000; i++)
-                _pool.Enqueue(new RenderedText());
-        }
 
         public static RenderedText Create(string text, ushort hue = 0xFFFF, byte font = 0xFF, bool isunicode = true, FontStyle style = 0, TEXT_ALIGN_TYPE align = 0, 
                                           int maxWidth = 0, byte cell = 30, bool isHTML = false, 
                                           bool recalculateWidthByInfo = false, bool saveHitmap = false)
         {
-            RenderedText r;
-            if (_pool.Count != 0)
-            {
-                r = _pool.Dequeue();
-                r.IsDestroyed = false;
-                r.Links.Count = 0;
-            }
-            else
-            {
-                r = new RenderedText();
-            }
-
+            RenderedText r = _pool.GetOne();
             r.Hue = hue;
             r.Font = font;
             r.IsUnicode = isunicode;
@@ -100,6 +84,7 @@ namespace ClassicUO.Renderer
                 r.Text = text; // here makes the texture
             else 
                 r.CreateTexture();
+
             return r;
         }
 
@@ -484,7 +469,7 @@ namespace ClassicUO.Renderer
             if (Texture != null && !Texture.IsDisposed)
                 Texture.Dispose();
 
-            _pool.Enqueue(this);
+            _pool.ReturnOne(this);
         }
     }
 }

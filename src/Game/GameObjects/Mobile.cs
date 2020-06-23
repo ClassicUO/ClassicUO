@@ -49,85 +49,80 @@ namespace ClassicUO.Game.GameObjects
             CalculateRandomIdleTime();
         }
 
-
-        private static readonly Queue<Mobile> _pool = new Queue<Mobile>();
-
-        static Mobile()
+        public Mobile() : base(0)
         {
-            for (int i = 0; i < Constants.PREDICTABLE_CHUNKS; i++)
-                _pool.Enqueue(new Mobile(0));
+
         }
+
+        private static readonly QueuedPool<Mobile> _pool = new QueuedPool<Mobile>(Constants.PREDICTABLE_CHUNKS, (mobile) =>
+        {
+            mobile.IsDestroyed = false;
+            mobile.Graphic = 0;
+            mobile.Steps.Clear();
+            mobile.Offset = Vector3.Zero;
+            mobile.SpeedMode = CharacterSpeedType.Normal;
+            mobile.DeathScreenTimer = 0;
+            mobile.Race = 0;
+            mobile.Hits = 0;
+            mobile.HitsMax = 0;
+            mobile.Mana = 0;
+            mobile.ManaMax = 0;
+            mobile.Stamina = 0;
+            mobile.StaminaMax = 0;
+            mobile.NotorietyFlag = 0;
+            mobile.IsRenamable = false;
+            mobile.Flags = 0;
+            mobile.IsFemale = false;
+            mobile.InWarMode = false;
+            mobile.IsRunning = false;
+            mobile.AnimationInterval = 0;
+            mobile.AnimationFrameCount = 0;
+            mobile.AnimationRepeatMode = 1;
+            mobile.AnimationRepeat = false;
+            mobile.AnimationFromServer = false;
+            mobile.AnimationDirection = false;
+            mobile.LastStepSoundTime = 0;
+            mobile.StepSoundOffset = 0;
+            mobile.Title = string.Empty;
+            mobile.AnimationGroup = 0xFF;
+            mobile._isDead = false;
+            mobile._isSA_Poisoned = false;
+            mobile._lastAnimationIdleDelay = 0;
+            mobile.X = 0;
+            mobile.Y = 0;
+            mobile.Z = 0;
+            mobile.Direction = 0;
+            mobile.LastAnimationChangeTime = Time.Ticks;
+            mobile.TextContainer?.Clear();
+            mobile.HitsPercentage = 0;
+            mobile.HitsTexture?.Destroy();
+            mobile.HitsTexture = null;
+            mobile.IsFlipped = false;
+            mobile.FrameInfo = Rectangle.Empty;
+            mobile.UseObjectHandles = false;
+            mobile.ClosedObjectHandles = false;
+            mobile.ObjectHandlesOpened = false;
+            mobile.AlphaHue = 0;
+            mobile.DrawTransparent = false;
+            mobile.AllowedToDraw = true;
+            mobile.IsClicked = false;
+            mobile.RemoveFromTile();
+            mobile.Clear();
+            mobile.Next = null;
+            mobile.Previous = null;
+            mobile.Name = null;
+
+            mobile.CalculateRandomIdleTime();
+        });
+
+
 
         public static Mobile Create(uint serial)
         {
-            if (_pool.Count != 0)
-            {
-                Mobile mobile = _pool.Dequeue();
-                mobile.IsDestroyed = false;
-                mobile.Graphic = 0;
-                mobile.Serial = serial;
-                mobile.Steps.Clear();
-                mobile.Offset = Vector3.Zero;
-                mobile.SpeedMode = CharacterSpeedType.Normal;
-                mobile.DeathScreenTimer = 0;
-                mobile.Race = 0;
-                mobile.Hits = 0;
-                mobile.HitsMax = 0;
-                mobile.Mana = 0;
-                mobile.ManaMax = 0;
-                mobile.Stamina = 0;
-                mobile.StaminaMax = 0;
-                mobile.NotorietyFlag = 0;
-                mobile.IsRenamable = false;
-                mobile.Flags = 0;
-                mobile.IsFemale = false;
-                mobile.InWarMode = false;
-                mobile.IsRunning = false;
-                mobile.AnimationInterval = 0;
-                mobile.AnimationFrameCount = 0;
-                mobile.AnimationRepeatMode = 1;
-                mobile.AnimationRepeat = false;
-                mobile.AnimationFromServer = false;
-                mobile.AnimationDirection = false;
-                mobile.LastStepSoundTime = 0;
-                mobile.StepSoundOffset = 0;
-                mobile.Title = string.Empty;
-                mobile.AnimationGroup = 0xFF;
-                mobile._isDead = false;
-                mobile._isSA_Poisoned = false;
-                mobile._lastAnimationIdleDelay = 0;
-                mobile.X = 0;
-                mobile.Y = 0;
-                mobile.Z = 0;
-                mobile.Direction = 0;
-                mobile.LastAnimationChangeTime = Time.Ticks;
-                mobile.TextContainer?.Clear();
-                mobile.HitsPercentage = 0;
-                mobile.HitsTexture?.Destroy();
-                mobile.HitsTexture = null;
-                mobile.IsFlipped = false;
-                mobile.FrameInfo = Rectangle.Empty;
-                mobile.UseObjectHandles = false;
-                mobile.ClosedObjectHandles = false;
-                mobile.ObjectHandlesOpened = false;
-                mobile.AlphaHue = 0;
-                mobile.DrawTransparent = false;
-                mobile.AllowedToDraw = true;
-                mobile.IsClicked = false;
-                mobile.RemoveFromTile();
-                mobile.Clear();
-                mobile.Next = null;
-                mobile.Previous = null;
-                mobile.Name = null;
+            Mobile mobile = _pool.GetOne();
+            mobile.Serial = serial;
 
-                mobile.CalculateRandomIdleTime();
-
-                return mobile;
-            }
-
-            Log.Debug(string.Intern("Created new Mobile"));
-
-            return new Mobile(serial);
+            return mobile;
         }
 
 
@@ -1159,7 +1154,7 @@ namespace ClassicUO.Game.GameObjects
             if (!(this is PlayerMobile))
             {
                 UIManager.GetGump<PaperDollGump>(serial)?.Dispose();
-                _pool.Enqueue(this);
+                _pool.ReturnOne(this);
             }
         }
 

@@ -19,20 +19,25 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
 
+using System;
 using System.Collections.Generic;
 
 namespace ClassicUO.Utility
 {
+    delegate void ActionRef1<T>(ref T arg);
+
     internal class QueuedPool<T> where T : class, new()
     {
         private readonly Stack<T> _pool;
+        private Action<T> _on_pickup;
 
         private int _maxSize;
 
-        public QueuedPool(int size = 0)
+        public QueuedPool(int size, Action<T> onpickup = null)
         {
             _maxSize = size;
             _pool = new Stack<T>(size);
+            _on_pickup = onpickup;
 
             for (int i = 0; i < size; i++)
                 _pool.Push(new T());
@@ -40,10 +45,17 @@ namespace ClassicUO.Utility
 
         public T GetOne()
         {
-            T result = _pool.Count > 0 ? _pool.Pop() : _maxSize == 0 ? new T() : null;
+            T result;
 
-            //if (result is IPoolable poolable)
-            //    poolable.OnPickup();
+            if (_pool.Count != 0)
+            {
+                result = _pool.Pop();
+                _on_pickup?.Invoke(result);
+            }
+            else
+            {
+                result = new T();
+            }
 
             return result;
         }

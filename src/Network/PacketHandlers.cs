@@ -3569,10 +3569,10 @@ namespace ClassicUO.Network
                             if ((spells & (1 << i)) != 0)
                             {
                                 ushort cc = (ushort) ((j * 32) + i + 1);
-
-                                Item spellItem = new Item(cc)
+                                // FIXME: should i call Item.Create ?
+                                Item spellItem = new Item()
                                 {
-                                    Graphic = 0x1F2E, Amount = cc, Container = spellbook
+                                   Serial = cc, Graphic = 0x1F2E, Amount = cc, Container = spellbook
                                 };
                                 spellbook.PushToBack(spellItem);
                             }

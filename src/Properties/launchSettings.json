@@ -2,7 +2,7 @@
   "profiles": {
     "ClassicUO": {
       "commandName": "Project",
-      "commandLineArgs": "-debug -skiploginscreen"
+      "commandLineArgs": "-skiploginscreen"
     }
   }
 }
