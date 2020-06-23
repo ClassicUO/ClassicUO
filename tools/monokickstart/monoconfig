@@ -20,8 +20,8 @@
 	<dllmap dll="System.Native" target="__Internal" os="linux,osx"/>
 	<dllmap dll="System.Net.Security.Native" target="__Internal" os="linux,osx"/>
 	<dllmap dll="System.Security.Cryptography.Native.Apple" target="__Internal" os="linux,osx"/>
-	<dllmap dll="libmono-btls-shared" target="$mono_libdir/libmono-btls-shared.so" os="linux"/>
-	<dllmap dll="libmono-btls-shared" target="$mono_libdir/libmono-btls-shared.dylib" os="osx"/>
+	<dllmap dll="libmono-btls-shared" target="libmono-btls-shared.so" os="linux"/>
+	<dllmap dll="libmono-btls-shared" target="libmono-btls-shared.dylib" os="osx"/>
 	<dllmap dll="i:msvcrt" target="libc.so.6" os="linux"/>
 	<dllmap dll="i:msvcrt" target="libc.dylib" os="osx"/>
 	<dllmap dll="i:msvcrt.dll" target="libc.so.6" os="linux"/>
