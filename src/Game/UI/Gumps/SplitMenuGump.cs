@@ -36,6 +36,8 @@ namespace ClassicUO.Game.UI.Gumps
 
         private bool _firstChange;
         private int _lastValue;
+        private bool _updating;
+
 
         public SplitMenuGump(uint serial, Point offset) : base(serial, 0)
         {
@@ -70,6 +72,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 X = 29, Y = 42,
                 Width = 60,
+                Height = 20,
                 NumbersOnly = true,
             });
             _textBox.SetText(item.Amount.ToString());
@@ -77,7 +80,7 @@ namespace ClassicUO.Game.UI.Gumps
             _textBox.SetKeyboardFocus();
             _slider.ValueChanged += (sender, args) => { UpdateText(); };
         }
-        private bool _updating;
+
         private void UpdateText()
         {
             if (_updating)

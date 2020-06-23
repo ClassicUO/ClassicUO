@@ -536,7 +536,10 @@ namespace ClassicUO.Game.UI.Controls
                 if (_maxCharCount >= 0 && text.Length > _maxCharCount)
                     text = text.Substring(0, _maxCharCount);
 
-                _stb.InsertChars(index, text);
+                _stb.ClearState(!Multiline);
+                Text = text;
+
+                _stb.CursorIndex = Length;
 
                 if (!_is_writing)
                 {
@@ -656,7 +659,6 @@ namespace ClassicUO.Game.UI.Controls
         }
 
         protected static readonly Color SELECTION_COLOR = new Color(0, 148, 216);
-
 
         private protected void DrawSelection(UltimaBatcher2D batcher, int x, int y)
         {
