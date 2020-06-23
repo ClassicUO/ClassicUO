@@ -52,8 +52,8 @@ namespace ClassicUO.Game.UI.Gumps
                 Y = 0,
                 Width = 220,
                 IsEditable = false,
-                Text = page
             };
+            _textBox.SetText(page);
             Add(_background = new ExpandableScroll(0, 0, Height, 0x0820));
             _scrollArea.Add(_textBox);
             Add(_scrollArea);
@@ -136,7 +136,7 @@ namespace ClassicUO.Game.UI.Gumps
             if (page >= 0 && page < _pages.Count)
             {
                 _idx = page;
-                _textBox.Text = _pages[_idx];
+                _textBox.SetText(_pages[_idx]);
             }
         }
     }

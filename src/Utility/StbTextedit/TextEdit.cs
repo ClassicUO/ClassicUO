@@ -626,10 +626,11 @@ namespace StbTextEditSharp
 		public void Undo()
 		{
 			var s = UndoState;
-			var u = new UndoRecord();
 			if (s.undo_point == 0)
 				return;
-			u = s.undo_rec[s.undo_point - 1];
+
+            var u = new UndoRecord();
+            u = s.undo_rec[s.undo_point - 1];
 			var rpos = s.redo_point - 1;
 			s.undo_rec[rpos].char_storage = -1;
 			s.undo_rec[rpos].insert_length = u.delete_length;

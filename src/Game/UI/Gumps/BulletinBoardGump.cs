@@ -207,7 +207,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Width = 150,
                 IsEditable = variant == 0
             });
-            _subjectTextbox.Text = subject;
+            _subjectTextbox.SetText(subject);
 
             Add(new GumpPicTiled(30, 106, 235, 4, 0x0835)); 
 
@@ -217,10 +217,10 @@ namespace ClassicUO.Game.UI.Gumps
                     Y = 0,
                     Width = 220,
                     Height = 300,
-                    Text = data,
                     IsEditable = variant == 0,
                     Multiline = true
                 });
+            _textBox.SetText(data);
             _textBox.TextChanged += _textBox_TextChanged;
             Add(_scrollArea);
             switch (variant)

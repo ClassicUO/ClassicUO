@@ -494,8 +494,11 @@ namespace ClassicUO.Game.UI.Gumps
                 if (!string.IsNullOrEmpty(entity.Name) && _name != entity.Name)
                 {
                     _name = entity.Name;
+
                     if (_textBox != null)
-                        _textBox.Text = _name;
+                    {
+                        _textBox.SetText(_name);
+                    }
                 }
 
                 if (_outOfRange)
@@ -693,7 +696,6 @@ namespace ClassicUO.Game.UI.Gumps
                         Width = HPB_BAR_WIDTH,
                         IsEditable = false,
                         CanMove = true,
-                        Text = _name
                     });
                 }
                 else
@@ -705,9 +707,7 @@ namespace ClassicUO.Game.UI.Gumps
                         Width = HPB_BAR_WIDTH,
                         IsEditable = false,
                         CanMove = true,
-                        Text = _name
                     });
-
                 }
 
                 Add(_outline = new LineCHB(HPB_BAR_SPACELEFT - HPB_OUTLINESIZE, 27 - HPB_OUTLINESIZE, HPB_BAR_WIDTH + (HPB_OUTLINESIZE * 2), (HPB_BAR_HEIGHT * 3) + 2 + (HPB_OUTLINESIZE * 2), HPB_COLOR_DRAW_BLACK.PackedValue));
@@ -740,7 +740,6 @@ namespace ClassicUO.Game.UI.Gumps
                         Width = HPB_BAR_WIDTH,
                         IsEditable = false,
                         CanMove = true,
-                        Text = _name
                     });
 
                     Add(_outline = new LineCHB(HPB_BAR_SPACELEFT - HPB_OUTLINESIZE, 27 - HPB_OUTLINESIZE, HPB_BAR_WIDTH + (HPB_OUTLINESIZE * 2), (HPB_BAR_HEIGHT * 3) + 2 + (HPB_OUTLINESIZE * 2), HPB_COLOR_DRAW_BLACK.PackedValue));
@@ -794,13 +793,13 @@ namespace ClassicUO.Game.UI.Gumps
                         AcceptKeyboardInput = _canChangeName,
                         WantUpdateSize = false,
                         CanMove = true,
-                        Text = _name
                     });
                     if (_canChangeName)
                         _textBox.MouseUp += TextBoxOnMouseUp;
                 }
             }
 
+            _textBox.SetText(_name);
 
             if (entity == null)
             {
@@ -928,8 +927,9 @@ namespace ClassicUO.Game.UI.Gumps
                         Height = 50,
                         IsEditable = false,
                         CanMove = true,
-                        Text = "[* SELF *]"
                     });
+
+                    _textBox.SetText("[* SELF *]");
                 }
                 else
                 {
@@ -941,8 +941,8 @@ namespace ClassicUO.Game.UI.Gumps
                         Height = 50,
                         IsEditable = false,
                         CanMove = true,
-                        Text = _name
                     });
+                    _textBox.SetText(_name);
                 }
 
                 Add(_buttonHeal1 = new Button((int) ButtonParty.Heal1, 0x0938, 0x093A, 0x0938) { ButtonAction = ButtonAction.Activate, X = 0, Y = 20 });
@@ -1012,8 +1012,9 @@ namespace ClassicUO.Game.UI.Gumps
                         AcceptKeyboardInput = _canChangeName,
                         WantUpdateSize = false,
                         CanMove = true,
-                        Text = _name
                     });
+                    _textBox.SetText(_name);
+
                     if (_canChangeName)
                         _textBox.MouseUp += TextBoxOnMouseUp;
                 }
@@ -1133,7 +1134,7 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     _name = entity.Name;
                     if (_textBox != null)
-                        _textBox.Text = _name;
+                        _textBox.SetText(_name);
                 }
 
                 if (_outOfRange)

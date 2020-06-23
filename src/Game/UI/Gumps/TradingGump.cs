@@ -352,8 +352,8 @@ namespace ClassicUO.Game.UI.Gumps
                     Height = 20,
                     NumbersOnly = true,
                     Tag = 0,
-                    Text = "0"
                 };
+                _myCoinsEntries[0].SetText("0");
                 Add(_myCoinsEntries[0]);
 
                 _myCoinsEntries[1] = new StbTextBox(9, -1, 100, false, FontStyle.None, 0, IO.Resources.TEXT_ALIGN_TYPE.TS_LEFT)
@@ -364,8 +364,8 @@ namespace ClassicUO.Game.UI.Gumps
                     Height = 20,
                     NumbersOnly = true,
                     Tag = 1,
-                    Text = "0"
                 };
+                _myCoinsEntries[1].SetText("0");
                 Add(_myCoinsEntries[1]);
 
                 uint my_gold_entry = 0, my_plat_entry = 0;
@@ -379,7 +379,7 @@ namespace ClassicUO.Game.UI.Gumps
                     {
                         if (string.IsNullOrEmpty(entry.Text))
                         {
-                            entry.Text = "0";
+                            entry.SetText("0");
 
                             if ((int) entry.Tag == 0)
                             {
@@ -387,7 +387,7 @@ namespace ClassicUO.Game.UI.Gumps
                                 {
                                     my_gold_entry = 0;
                                     send = true;
-                        }
+                                }
                             }
                             else if (my_plat_entry != 0)
                             {
@@ -426,7 +426,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                             if (send)
                             {
-                                entry.Text = value.ToString();
+                                entry.SetText(value.ToString());
                             }
                         }
 

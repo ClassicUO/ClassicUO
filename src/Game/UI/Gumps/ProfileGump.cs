@@ -65,9 +65,10 @@ namespace ClassicUO.Game.UI.Gumps
                 X = 35,
                 Y = 0,
                 IsEditable = canEdit,
-                Text = _originalText = body,
                 Multiline = true
             };
+            _originalText = body;
+            _textBox.SetText(body);
             _textBox.TextChanged += _textBox_TextChanged;
             _scrollArea.Add(_textBox);
             AddHorizontalBar(_scrollArea, 95, 35, 220);

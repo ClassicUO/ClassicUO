@@ -418,7 +418,7 @@ namespace ClassicUO.Game.Managers
                     string txt = Utility.StringHelper.GetClipboardText(true);
 
                     if (txt != null)
-                        UIManager.SystemChat.TextBoxControl.Text += txt;
+                        UIManager.SystemChat.TextBoxControl.AppendText(txt);
 
                     break;
 

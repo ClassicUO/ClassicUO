@@ -384,7 +384,7 @@ namespace ClassicUO.Game.UI.Controls
                             Width = 236,
                             Height = box.Height * 2
                         };
-                        textbox.Text = obj.HasString() ? ((MacroObjectString) obj).Text : string.Empty;
+                        textbox.SetText(obj.HasString() ? ((MacroObjectString) obj).Text : string.Empty);
                         textbox.TextChanged += (sss, eee) =>
                         {
                             if (obj.HasString())

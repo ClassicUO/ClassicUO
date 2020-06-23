@@ -71,9 +71,8 @@ namespace ClassicUO.Game.UI.Gumps
                 X = 29, Y = 42,
                 Width = 60,
                 NumbersOnly = true,
-                Text = item.Amount.ToString()
             });
-
+            _textBox.SetText(item.Amount.ToString());
             _textBox.TextChanged += (sender, args) => { UpdateText(); };
             _textBox.SetKeyboardFocus();
             _slider.ValueChanged += (sender, args) => { UpdateText(); };
@@ -88,7 +87,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (_slider.Value != _lastValue)
             {
-                _textBox.Text = _slider.Value.ToString();
+                _textBox.SetText(_slider.Value.ToString());
             }
             else
             {
@@ -96,7 +95,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _slider.Value = _slider.MinValue;
                 else if (!int.TryParse(_textBox.Text, out int textValue))
                 {
-                    _textBox.Text = _slider.Value.ToString();
+                    _textBox.SetText(_slider.Value.ToString());
                 }
                 else
                 {
@@ -115,7 +114,7 @@ namespace ClassicUO.Game.UI.Gumps
                             else
                                 _slider.Value = _slider.MaxValue;
 
-                            _textBox.Text = _slider.Value.ToString();
+                            _textBox.SetText(_slider.Value.ToString());
                         }
                     }
                 }

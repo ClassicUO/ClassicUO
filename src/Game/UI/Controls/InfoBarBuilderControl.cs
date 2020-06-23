@@ -37,7 +37,8 @@ namespace ClassicUO.Game.UI.Controls
 
         public InfoBarBuilderControl(InfoBarItem item)
         {
-            infoLabel = new StbTextBox(0xFF, 10, 80) { X = 5, Y = 0, Width = 130, Height = 30, Text = item.label };
+            infoLabel = new StbTextBox(0xFF, 10, 80) { X = 5, Y = 0, Width = 130, Height = 30};
+            infoLabel.SetText(item.label);
 
             string[] dataVars = InfoBarManager.GetVars();
             varStat = new Combobox(200, 0, 170, dataVars, (int) item.var);

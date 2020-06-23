@@ -69,7 +69,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             }
             _bookPage._ServerUpdate = true;
-            _bookPage.Text = sb.ToString();
+            _bookPage.SetText(sb.ToString());
             _bookPage.UpdatePageCoords();
             _bookPage._ServerUpdate = false;
         }
@@ -130,8 +130,8 @@ namespace ClassicUO.Game.UI.Gumps
                 Height = 25,
                 Width = 155,
                 IsEditable = IsEditable,
-                Text = title
             }, 1);
+            _titleTextBox.SetText(title);
             _titleTextBox.TextChanged += PageZero_TextChanged;
             Add(new Label("by", true, 1) { X = 40, Y = 130 }, 1);
             Add(_authorTextBox = new StbTextBox(DefaultFont, 29, 150, IsNewBook, FontStyle.None, 0)
@@ -141,8 +141,8 @@ namespace ClassicUO.Game.UI.Gumps
                 Height = 25,
                 Width = 155,
                 IsEditable = IsEditable,
-                Text = author
             }, 1);
+            _authorTextBox.SetText(author);
             _authorTextBox.TextChanged += PageZero_TextChanged;
 
             for (int k = 1, x = 38; k <= BookPageCount; k++)
@@ -191,13 +191,13 @@ namespace ClassicUO.Game.UI.Gumps
 
         public void SetTile(string title, bool editable)
         {
-            _titleTextBox.Text = title;
+            _titleTextBox.SetText(title);
             _titleTextBox.IsEditable = editable;
         }
 
         public void SetAuthor(string author, bool editable)
         {
-            _authorTextBox.Text = author;
+            _authorTextBox.SetText(author);
             _authorTextBox.IsEditable = editable;
         }
 

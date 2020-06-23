@@ -95,7 +95,7 @@ namespace ClassicUO.Game.Managers
             {
                 if (_keyboardFocusControl != value)
                 {
-                    _keyboardFocusControl?.OnFocusLeft();
+                    _keyboardFocusControl?.OnFocusLost();
                     _keyboardFocusControl = value;
 
                     if (value != null && value.AcceptKeyboardInput)
@@ -153,7 +153,7 @@ namespace ClassicUO.Game.Managers
                 {
                     if (_lastFocus != MouseOverControl)
                     {
-                        _lastFocus?.OnFocusLeft();
+                        _lastFocus?.OnFocusLost();
                         MouseOverControl.OnFocusEnter();
                         _lastFocus = MouseOverControl;
                     }
@@ -302,7 +302,7 @@ namespace ClassicUO.Game.Managers
                 {
                     if (_lastFocus != MouseOverControl)
                     {
-                        _lastFocus?.OnFocusLeft();
+                        _lastFocus?.OnFocusLost();
                         MouseOverControl.OnFocusEnter();
                         _lastFocus = MouseOverControl;
                     }
@@ -367,7 +367,7 @@ namespace ClassicUO.Game.Managers
                 {
                     if (_lastFocus != MouseOverControl)
                     {
-                        _lastFocus?.OnFocusLeft();
+                        _lastFocus?.OnFocusLost();
                         MouseOverControl.OnFocusEnter();
                         _lastFocus = MouseOverControl;
                     }

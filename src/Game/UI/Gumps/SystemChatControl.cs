@@ -135,7 +135,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _trans.IsVisible = true;
                     _trans.Y = TextBoxControl.Y;
                     TextBoxControl.Width = _trans.Width;
-                    TextBoxControl.Text = string.Empty;
+                    TextBoxControl.ClearText();
                     TextBoxControl.SetKeyboardFocus();
                 }
                 else
@@ -162,7 +162,7 @@ namespace ClassicUO.Game.UI.Gumps
                         case ChatMode.Default:
                             DisposeChatModePrefix();
                             TextBoxControl.Hue = ProfileManager.Current.SpeechHue;
-                            TextBoxControl.Text = string.Empty;
+                            TextBoxControl.ClearText();
 
                             break;
 
@@ -285,7 +285,7 @@ namespace ClassicUO.Game.UI.Gumps
                     str = TextBoxControl.Text.Substring(idx, TextBoxControl.Text.Length - labelText.Length - 1);
                 }
 
-                TextBoxControl.Text = str;
+                TextBoxControl.SetText(str);
             }
         }
 
@@ -358,7 +358,7 @@ namespace ClassicUO.Game.UI.Gumps
                                 }
 
                                 Mode = ChatMode.Party;
-                                TextBoxControl.Text = $"{index} ";
+                                TextBoxControl.SetText($"{index} ");
                             }
                             else
                                 Mode = ChatMode.Party;
@@ -440,7 +440,7 @@ namespace ClassicUO.Game.UI.Gumps
                         _messageHistoryIndex--;
 
                     Mode = _messageHistory[_messageHistoryIndex].Item1;
-                    TextBoxControl.Text = _messageHistory[_messageHistoryIndex].Item2;
+                    TextBoxControl.SetText(_messageHistory[_messageHistoryIndex].Item2);
 
                     break;
 
@@ -460,10 +460,10 @@ namespace ClassicUO.Game.UI.Gumps
                     {
                         _messageHistoryIndex++;
                         Mode = _messageHistory[_messageHistoryIndex].Item1;
-                        TextBoxControl.Text = _messageHistory[_messageHistoryIndex].Item2;
+                        TextBoxControl.SetText(_messageHistory[_messageHistoryIndex].Item2);
                     }
                     else
-                        TextBoxControl.Text = string.Empty;
+                        TextBoxControl.ClearText();
 
                     break;
 
@@ -488,7 +488,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             if ((!IsActive && ProfileManager.Current.ActivateChatAfterEnter) || (Mode != ChatMode.Default && string.IsNullOrEmpty(text)))
             {
-                TextBoxControl.Text = string.Empty;
+                TextBoxControl.ClearText();
                 text = string.Empty;
                 Mode = ChatMode.Default;
             }
@@ -500,7 +500,7 @@ namespace ClassicUO.Game.UI.Gumps
 
 
             ChatMode sentMode = Mode;
-            TextBoxControl.Text = string.Empty;
+            TextBoxControl.ClearText();
             _messageHistory.Add(new Tuple<ChatMode, string>(Mode, text));
             _messageHistoryIndex = _messageHistory.Count;
             Mode = ChatMode.Default;

@@ -26,6 +26,7 @@ namespace ClassicUO.Game.UI.Controls
         protected Point _caretScreenPosition;
         protected bool _leftWasDown, _fromServer;
         private FontStyle _fontStyle;
+        protected bool _is_writing = false;
 
 
         public StbTextBox(byte font, int max_char_count = -1, int maxWidth = 0, bool isunicode = true, FontStyle style = FontStyle.None, ushort hue = 0, TEXT_ALIGN_TYPE align = 0)
@@ -60,14 +61,6 @@ namespace ClassicUO.Game.UI.Controls
 
             if (Height < 50)
                 Height = 50;
-
-            FocusLost += StbTextBox_FocusLost;
-        }
-
-        private void StbTextBox_FocusLost(object sender, EventArgs e)
-        {
-            if (_stb != null)
-                _stb.SelectStart = _stb.SelectEnd = 0;
         }
 
         public StbTextBox(List<string> parts, string[] lines) : this(1, parts[0] == "textentrylimited" ? int.Parse(parts[8]) : byte.MaxValue, int.Parse(parts[3]), style: FontStyle.BlackBorder | FontStyle.CropTexture, hue: (ushort) (UInt16Converter.Parse(parts[5]) + 1))
@@ -82,7 +75,9 @@ namespace ClassicUO.Game.UI.Controls
             int index = int.Parse(parts[7]);
 
             if (index >= 0 && index < lines.Length)
-                Text = lines[index];
+            {
+                SetText(lines[index]);
+            }
         }
 
 
@@ -92,7 +87,6 @@ namespace ClassicUO.Game.UI.Controls
         {
             get => _rendererText.Text;
 
-            
             set
             {
                 if (_maxCharCount >= 0 && value != null && value.Length > _maxCharCount)
@@ -332,6 +326,12 @@ namespace ClassicUO.Game.UI.Controls
             CaretIndex = Text?.Length ?? 0;
         }
 
+        internal override void OnFocusLost()
+        {
+            if (_stb != null)
+                _stb.SelectStart = _stb.SelectEnd = 0;
+        }
+
         protected override void OnKeyDown(SDL.SDL_Keycode key, SDL.SDL_Keymod mod)
         {
             ControlKeys? stb_key = null;
@@ -525,7 +525,46 @@ namespace ClassicUO.Game.UI.Controls
             base.OnKeyDown(key, mod);
         }
 
-        protected bool _is_writing = false;
+        public void SetText(string text, int index = 0)
+        {
+            if (string.IsNullOrEmpty(text))
+            {
+                ClearText();
+            }
+            else
+            {
+                if (_maxCharCount >= 0 && text.Length > _maxCharCount)
+                    text = text.Substring(0, _maxCharCount);
+
+                _stb.InsertChars(index, text);
+
+                if (!_is_writing)
+                {
+                    OnTextChanged();
+                }
+            }
+        }
+
+        public void ClearText()
+        {
+            if (Length != 0)
+            {
+                SelectionStart = 0;
+                SelectionEnd = 0;
+                _stb.Delete(0, Length);
+
+                if (!_is_writing)
+                {
+                    OnTextChanged();
+                }
+            }
+        }
+
+        public void AppendText(string text)
+        {
+            _stb.Paste(text);
+        }
+
 
         protected override void OnTextInput(string c)
         {

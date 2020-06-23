@@ -91,11 +91,6 @@ namespace ClassicUO.Game.UI.Controls
             });
         }
 
-        public string Text
-        {
-            get => _textBox.Text;
-            set => _textBox.Text = value;
-        }
 
         private void UpdateValue()
         {
@@ -108,7 +103,7 @@ namespace ClassicUO.Game.UI.Controls
             ValidateValue(i);
         }
 
-        internal override void OnFocusLeft()
+        internal override void OnFocusLost()
         {
             if (IsDisposed)
                 return;
@@ -120,7 +115,7 @@ namespace ClassicUO.Game.UI.Controls
         private void ValidateValue(int val)
         {
             Tag = val = Math.Max(_Min, Math.Min(_Max, val));
-            _textBox.Text = val.ToString();
+            _textBox.SetText(val.ToString());
         }
 
         public override void Update(double totalMS, double frameMS)

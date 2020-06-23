@@ -223,8 +223,9 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 Y = offsetY,
                 Width = 190,
                 Height = 25,
-                Text = Settings.GlobalSettings.Username
             });
+
+            _textboxAccount.SetText(Settings.GlobalSettings.Username);
 
             Add(_passwordFake = new PasswordStbTextBox(5, 16, 190, false, hue: 0x034F)
             {
@@ -348,7 +349,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 }
                 set
                 {
-                    Text = value;
+                    SetText(value);
                 }
             }
 

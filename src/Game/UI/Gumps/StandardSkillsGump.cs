@@ -303,11 +303,11 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     X = 16,
                     Y = -5,
-                    Text = group.Name,
                     Width = 200,
                     Height = 17,
                     IsEditable = false,
                 });
+                _textbox.SetText(group.Name);
 
                 int xx = width + 11 + 16;
 
@@ -494,7 +494,7 @@ namespace ClassicUO.Game.UI.Gumps
                 if (string.IsNullOrWhiteSpace(text))
                 {
                     text = "No Name";
-                    _textbox.Text = text;
+                    _textbox.SetText(text);
                 }
 
                 int width = FontsLoader.Instance.GetWidthASCII(6, text);

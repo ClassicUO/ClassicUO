@@ -697,7 +697,7 @@ namespace ClassicUO.Game.UI.Controls
             }
         }
 
-        internal virtual void OnFocusLeft()
+        internal virtual void OnFocusLost()
         {
             if (IsFocused)
             {

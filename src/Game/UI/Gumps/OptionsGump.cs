@@ -340,8 +340,8 @@ namespace ClassicUO.Game.UI.Gumps
                 Width = 50,
                 Height = 30,
                 NumbersOnly = true,
-                Text = ProfileManager.Current.AutoOpenCorpseRange.ToString()
             }, "Corpse Open Range:");
+            _autoOpenCorpseRange.SetText(ProfileManager.Current.AutoOpenCorpseRange.ToString());
             text = new Label("Corpse Open Options:", true, HUE_FONT)
             {
                 Y = _autoOpenCorpseRange.Y + _autoOpenCorpseRange.Height + 5,
@@ -585,23 +585,22 @@ namespace ClassicUO.Game.UI.Gumps
 
                 _gameWindowWidth = CreateInputField(_windowSizeArea, new StbTextBox(FONT, 5, 80)
                 {
-                    Text = ProfileManager.Current.GameWindowSize.X.ToString(),
                     X = 30,
                     Y = 70,
                     Width = 50,
                     Height = 30,
                     NumbersOnly = true
                 }, "");
-
+                _gameWindowWidth.SetText(ProfileManager.Current.GameWindowSize.X.ToString());
                 _gameWindowHeight = CreateInputField(_windowSizeArea, new StbTextBox(FONT, 5, 80)
                 {
-                    Text = ProfileManager.Current.GameWindowSize.Y.ToString(),
                     X = 100,
                     Y = 70,
                     Width = 50,
                     Height = 30,
                     NumbersOnly = true
                 });
+                _gameWindowHeight.SetText(ProfileManager.Current.GameWindowSize.Y.ToString());
 
                 text = new Label("Game Play Window Position: ", true, HUE_FONT)
                 {
@@ -612,23 +611,23 @@ namespace ClassicUO.Game.UI.Gumps
 
                 _gameWindowPositionX = CreateInputField(_windowSizeArea, new StbTextBox(FONT, 5, 80)
                 {
-                    Text = ProfileManager.Current.GameWindowPosition.X.ToString(),
                     X = 215,
                     Y = 70,
                     Width = 50,
                     Height = 30,
                     NumbersOnly = true
                 });
+                _gameWindowPositionX.SetText(ProfileManager.Current.GameWindowPosition.X.ToString());
 
                 _gameWindowPositionY = CreateInputField(_windowSizeArea, new StbTextBox(FONT, 5, 80)
                 {
-                    Text = ProfileManager.Current.GameWindowPosition.Y.ToString(),
                     X = 285,
                     Y = 70,
                     Width = 50,
                     Height = 30,
                     NumbersOnly = true
                 });
+                _gameWindowPositionY.SetText(ProfileManager.Current.GameWindowPosition.Y.ToString());
 
                 rightArea.Add(_windowSizeArea);
                 _windowSizeArea.IsVisible = !_gameWindowFullsize.IsChecked;
@@ -1153,13 +1152,12 @@ namespace ClassicUO.Game.UI.Gumps
 
             _spellFormatBox = CreateInputField(it, new StbTextBox(FONT, 30, 200)
             {
-                Text = ProfileManager.Current.SpellDisplayFormat,
                 X = 0,
                 Y = 20,
                 Width = 200,
                 Height = 30
             }, " Spell Overhead format: ({power} for powerword - {spell} for spell name)", rightArea.Width - 20);
-
+            _spellFormatBox.SetText(ProfileManager.Current.SpellDisplayFormat);
             rightArea.Add(it);
 
             Add(rightArea, PAGE);
@@ -1183,9 +1181,8 @@ namespace ClassicUO.Game.UI.Gumps
                 Width = 50,
                 Height = 30,
                 NumbersOnly = true,
-                Text = ProfileManager.Current.CounterBarAbbreviatedAmount.ToString()
             });
-
+            _abbreviatedAmount.SetText(ProfileManager.Current.CounterBarAbbreviatedAmount.ToString());
             rightArea.Add(item);
 
             _highlightOnAmount = CreateCheckBox(rightArea, "Highlight red when amount is below", ProfileManager.Current.CounterBarHighlightOnAmount, 0, SPACE_Y);
@@ -1199,9 +1196,8 @@ namespace ClassicUO.Game.UI.Gumps
                 Width = 50,
                 Height = 30,
                 NumbersOnly = true,
-                Text = ProfileManager.Current.CounterBarHighlightAmount.ToString()
             });
-
+            _highlightAmount.SetText(ProfileManager.Current.CounterBarHighlightAmount.ToString());
             rightArea.Add(item);
 
             item = new ScrollAreaItem();
@@ -1238,8 +1234,8 @@ namespace ClassicUO.Game.UI.Gumps
                 Width = 50,
                 Height = 30,
                 NumbersOnly = true,
-                Text = ProfileManager.Current.CounterBarRows.ToString()
             }, "Rows:");
+            _rows.SetText(ProfileManager.Current.CounterBarRows.ToString());
 
             _columns = CreateInputField(item, new StbTextBox(FONT, 5, 80)
             {
@@ -1248,9 +1244,8 @@ namespace ClassicUO.Game.UI.Gumps
                 Width = 50,
                 Height = 30,
                 NumbersOnly = true,
-                Text = ProfileManager.Current.CounterBarColumns.ToString()
             }, "Columns:");
-
+            _columns.SetText(ProfileManager.Current.CounterBarColumns.ToString());
             rightArea.Add(item);
 
             Add(rightArea, PAGE);
@@ -1547,10 +1542,10 @@ namespace ClassicUO.Game.UI.Gumps
                     _savezoomCheckbox.IsChecked = false;
                     _restorezoomCheckbox.IsChecked = false;
                     _use_old_status_gump.IsChecked = false;
-                    _gameWindowWidth.Text = "600";
-                    _gameWindowHeight.Text = "480";
-                    _gameWindowPositionX.Text = "20";
-                    _gameWindowPositionY.Text = "20";
+                    _gameWindowWidth.SetText("600");
+                    _gameWindowHeight.SetText("480");
+                    _gameWindowPositionX.SetText("20");
+                    _gameWindowPositionY.SetText("20");
                     _gameWindowLock.IsChecked = false;
                     _gameWindowFullsize.IsChecked = false;
                     _enableDeathScreen.IsChecked = true;
@@ -1628,7 +1623,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _beneficColorPickerBox.SetColor(0x0059, HuesLoader.Instance.GetPolygoneColor(12, 0x0059));
                     _harmfulColorPickerBox.SetColor(0x0020, HuesLoader.Instance.GetPolygoneColor(12, 0x0020));
                     _neutralColorPickerBox.SetColor(0x03B1, HuesLoader.Instance.GetPolygoneColor(12, 0x03B1));
-                    _spellFormatBox.Text = "{power} [{spell}]";
+                    _spellFormatBox.SetText("{power} [{spell}]");
                     _spellColoringCheckbox.IsChecked = false;
                     _spellFormatCheckbox.IsChecked = false;
 
@@ -1638,12 +1633,12 @@ namespace ClassicUO.Game.UI.Gumps
                     _enableCounters.IsChecked = false;
                     _highlightOnUse.IsChecked = false;
                     _enableAbbreviatedAmount.IsChecked = false;
-                    _columns.Text = "1";
-                    _rows.Text = "1";
+                    _columns.SetText("1");
+                    _rows.SetText("1");
                     _cellSize.Value = 40;
                     _highlightOnAmount.IsChecked = false;
-                    _highlightAmount.Text = "5";
-                    _abbreviatedAmount.Text = "1000";
+                    _highlightAmount.SetText("5");
+                    _abbreviatedAmount.SetText("1000");
 
                     break;
 
@@ -1860,8 +1855,8 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     Point n = vp.ResizeGameWindow(new Point(gameWindowSizeWidth, gameWindowSizeHeight));
 
-                    _gameWindowWidth.Text = n.X.ToString();
-                    _gameWindowHeight.Text = n.Y.ToString();
+                    _gameWindowWidth.SetText(n.X.ToString());
+                    _gameWindowHeight.SetText(n.Y.ToString());
                 }
             }
 
@@ -1907,10 +1902,10 @@ namespace ClassicUO.Game.UI.Gumps
                     }
                 }
 
-                _gameWindowPositionX.Text = loc.X.ToString();
-                _gameWindowPositionY.Text = loc.Y.ToString();
-                _gameWindowWidth.Text = n.X.ToString();
-                _gameWindowHeight.Text = n.Y.ToString();
+                _gameWindowPositionX.SetText(loc.X.ToString());
+                _gameWindowPositionY.SetText(loc.Y.ToString());
+                _gameWindowWidth.SetText(n.X.ToString());
+                _gameWindowHeight.SetText(n.Y.ToString());
 
                 ProfileManager.Current.GameWindowFullSize = _gameWindowFullsize.IsChecked;
             }
@@ -2155,10 +2150,10 @@ namespace ClassicUO.Game.UI.Gumps
 
         internal void UpdateVideo()
         {            
-            _gameWindowWidth.Text = ProfileManager.Current.GameWindowSize.X.ToString();
-            _gameWindowHeight.Text = ProfileManager.Current.GameWindowSize.Y.ToString();
-            _gameWindowPositionX.Text = ProfileManager.Current.GameWindowPosition.X.ToString();
-            _gameWindowPositionY.Text = ProfileManager.Current.GameWindowPosition.Y.ToString();
+            _gameWindowWidth.SetText(ProfileManager.Current.GameWindowSize.X.ToString());
+            _gameWindowHeight.SetText(ProfileManager.Current.GameWindowSize.Y.ToString());
+            _gameWindowPositionX.SetText(ProfileManager.Current.GameWindowPosition.X.ToString());
+            _gameWindowPositionY.SetText(ProfileManager.Current.GameWindowPosition.Y.ToString());
         }
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
