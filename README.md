@@ -79,14 +79,14 @@ Follow instructions on https://brew.sh/
 `nuget restore`
 
 6. Build:
-  - Debug version: `msbuild /t:Rebuild`
+  - Debug version: `msbuild /t:Rebuild /p:Configuration=Debug`
   - Release version: `msbuild /t:Rebuild /p:Configuration=Release`
 
 7. Run ClassicUO via Mono:
-  - Debug version: `mono ./bin/Debug/ClassicUO.exe`
-  - Release version: `mono ./bin/Release/ClassicUO.exe`
+  - Debug version: `DYLD_LIBRARY_PATH=./bin/Debug/osx/ mono ./bin/Debug/ClassicUO.exe`
+  - Release version: `DYLD_LIBRARY_PATH=./bin/Release/osx/ mono ./bin/Release/ClassicUO.exe`
 
-After the first run, ignore the error message and a new file named `settings.json` will be automatically created in the directory with ClassicUO.exe.
+After the first run, ignore the error message and a new file called `settings.json` will be automatically created in the directory that contains ClassicUO.exe.
 
 Other useful commands:
 - `msbuild /t:Clean`
