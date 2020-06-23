@@ -89,7 +89,7 @@ Follow instructions on https://brew.sh/
 After the first run, ignore the error message and a new file called `settings.json` will be automatically created in the directory that contains ClassicUO.exe.
 
 Other useful commands:
-- `msbuild /t:Clean`
+- `msbuild /t:Clean /p:Configuration=Debug`
 - `msbuild /t:Clean /p:Configuration=Release`
 
 # Contribute
