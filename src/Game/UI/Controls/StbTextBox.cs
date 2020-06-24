@@ -525,7 +525,7 @@ namespace ClassicUO.Game.UI.Controls
             base.OnKeyDown(key, mod);
         }
 
-        public void SetText(string text, int index = 0)
+        public void SetText(string text, int index = 0, bool updae_caret = true)
         {
             if (string.IsNullOrEmpty(text))
             {
@@ -625,7 +625,7 @@ namespace ClassicUO.Game.UI.Controls
                     _stb.Paste(c);
                     OnTextChanged();
                 }
-                else if (_rendererText.GetCharWidth(c[0]) > 0)
+                else if (_rendererText.GetCharWidth(c[0]) > 0 || c[0] == '\n')
                 {
                     _stb.InputChar(c[0]);
                     OnTextChanged();
