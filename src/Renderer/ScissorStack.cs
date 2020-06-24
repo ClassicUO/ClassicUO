@@ -57,7 +57,7 @@ namespace ClassicUO.Renderer
             }
 
             // fix to avoid crash on macOS
-            if (scissor.X + scissor.Width > device.Viewport.Width)
+            /*if (scissor.X + scissor.Width > device.Viewport.Width)
                 scissor.Width = device.Viewport.Width - scissor.X;
             if (scissor.Y + scissor.Height > device.Viewport.Height)
                 scissor.Height = device.Viewport.Height - scissor.Y;
@@ -73,6 +73,8 @@ namespace ClassicUO.Renderer
                 scissor.Height += scissor.Y;
                 scissor.Y = device.Viewport.Y;
             }
+            */
+
 
             _scissors.Push(scissor);
             
