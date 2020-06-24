@@ -21,6 +21,7 @@
 
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
@@ -60,31 +61,76 @@ namespace ClassicUO.Network
 
         public NetStatistics Statistics { get; }
 
-        public uint ClientAddress
+        private static uint? _client_address;
+
+
+        //public static uint GetLocalIpAddress()
+        //{
+        //    UnicastIPAddressInformation mostSuitableIp = null;
+
+        //    var networkInterfaces = NetworkInterface.GetAllNetworkInterfaces();
+
+        //    foreach (var network in networkInterfaces)
+        //    {
+        //        if (network.OperationalStatus != OperationalStatus.Up)
+        //            continue;
+
+        //        var properties = network.GetIPProperties();
+
+        //        if (properties.GatewayAddresses.Count == 0)
+        //            continue;
+
+        //        foreach (var address in properties.UnicastAddresses)
+        //        {
+        //            if (address.Address.AddressFamily != AddressFamily.InterNetwork)
+        //                continue;
+
+        //            if (IPAddress.IsLoopback(address.Address))
+        //                continue;
+
+        //            if (!address.IsDnsEligible)
+        //            {
+        //                if (mostSuitableIp == null)
+        //                    mostSuitableIp = address;
+        //                continue;
+        //            }
+
+        //            // The best IP is the IP got from DHCP server
+        //            if (address.PrefixOrigin != PrefixOrigin.Dhcp)
+        //            {
+        //                if (mostSuitableIp == null || !mostSuitableIp.IsDnsEligible)
+        //                    mostSuitableIp = address;
+        //                continue;
+        //            }
+
+        //            return BitConverter.ToUInt32(address.Address.GetAddressBytes(), 0);
+        //        }
+        //    }
+
+        //    return mostSuitableIp != null ? BitConverter.ToUInt32(mostSuitableIp.Address.GetAddressBytes(), 0) : 0x100007f;
+        //}
+
+        public static uint ClientAddress
         {
             get
             {
-                uint address;
-
-                try
+                if (!_client_address.HasValue)
                 {
-                    IPHostEntry localEntry = Dns.GetHostEntry(Dns.GetHostName());
-
-                    if (localEntry.AddressList.Length > 0)
+                    try
                     {
-    #pragma warning disable 618
-                        address = (uint)localEntry.AddressList.FirstOrDefault(s => s.AddressFamily == AddressFamily.InterNetwork).Address;
-    #pragma warning restore 618
+                        _client_address = 0x100007f;
+
+                        //var address = GetLocalIpAddress();
+
+                        //_client_address = ((address & 0xff) << 0x18) | ((address & 65280) << 8) | ((address >> 8) & 65280) | ((address >> 0x18) & 0xff);
                     }
-                    else
-                        address = 0x100007f;
-                }
-                catch (SocketException e)
-                {
-                    address = 0x100007f;
+                    catch
+                    {
+                        _client_address = 0x100007f;
+                    }
                 }
 
-                return ((address & 0xff) << 0x18) | ((address & 65280) << 8) | ((address >> 8) & 65280) | ((address >> 0x18) & 0xff);
+                return _client_address.Value;
             }
         }
 

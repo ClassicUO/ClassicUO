@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using ClassicUO.Utility;
+
 namespace ClassicUO.Network.Encryption
 {
     sealed class LoginCryptBehaviour
@@ -16,10 +18,10 @@ namespace ClassicUO.Network.Encryption
 
         public void Initialize(uint seed, uint k1, uint k2, uint k3)
         {
-            _seed[0] = (byte) (seed >> 24);
-            _seed[1] = (byte) (seed >> 16);
-            _seed[2] = (byte) (seed >> 8);
-            _seed[3] = (byte) seed;
+            _seed[0] = (byte) ((seed >> 24) & 0xFF);
+            _seed[1] = (byte) ((seed >> 16) & 0xFF);
+            _seed[2] = (byte) ((seed >> 8) & 0xFF);
+            _seed[3] = (byte) (seed & 0xFF);
 
             _k1 = k1;
             _k2 = k2;
@@ -36,7 +38,7 @@ namespace ClassicUO.Network.Encryption
         {
             for (int i = 0; i < size; i++)
             {
-                dst[i] = (byte) (src[i] ^ _key[0]);
+                dst[i] = (byte) (src[i] ^ (byte) _key[0]);
 
                 uint table0 = _key[0];
                 uint table1 = _key[1];
