@@ -340,13 +340,14 @@ namespace ClassicUO.Game.UI.Gumps
                 }
 
                 RenderedText h = RenderedText.Create($"{time:t} ", 1150, 1, true, FontStyle.BlackBorder);
-
                 _hours.AddToBack(h);
 
-                _entries.AddToBack(RenderedText.Create(text, hue, (byte)font, isUnicode, FontStyle.Indention | FontStyle.BlackBorder, maxWidth: Width - (18 + h.Width)));
+                RenderedText rtext = RenderedText.Create(text, hue, (byte) font, isUnicode, FontStyle.Indention | FontStyle.BlackBorder, maxWidth: Width - (18 + h.Width));
+                _entries.AddToBack(rtext);
 
-                _scrollBar.MaxValue += _entries[_entries.Count - 1].Height;
-                if (maxScroll) _scrollBar.Value = _scrollBar.MaxValue;
+                _scrollBar.MaxValue += rtext.Height;
+                if (maxScroll) 
+                    _scrollBar.Value = _scrollBar.MaxValue;
             }
 
 

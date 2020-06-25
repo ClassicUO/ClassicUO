@@ -41,8 +41,7 @@ namespace ClassicUO.Game.Managers
 
         public void Add(string text, ushort hue, string name, bool isunicode = true)
         {
-            if (Entries.Count >= Constants.MAX_JOURNAL_HISTORY_COUNT)
-                Entries.RemoveFromFront();
+            JournalEntry entry = Entries.Count >= Constants.MAX_JOURNAL_HISTORY_COUNT ? Entries.RemoveFromFront() : new JournalEntry();
 
             byte font = (byte) (isunicode ? 0 : 9);
 
@@ -54,7 +53,12 @@ namespace ClassicUO.Game.Managers
 
             DateTime timeNow = DateTime.Now;
 
-            JournalEntry entry = new JournalEntry(text, font, hue, name, isunicode, timeNow);
+            entry.Text = text;
+            entry.Font = font;
+            entry.Hue = hue;
+            entry.Name = name;
+            entry.IsUnicode = isunicode;
+            entry.Time = timeNow;
 
             if (ProfileManager.Current != null && ProfileManager.Current.ForceUnicodeJournal)
             {
@@ -126,14 +130,14 @@ namespace ClassicUO.Game.Managers
         public string Text;
         public DateTime Time;
 
-        public JournalEntry(string text, byte font, ushort hue, string name, bool isunicode, DateTime time)
-        {
-            IsUnicode = isunicode;
-            Font = font;
-            Hue = hue;
-            Name = name;
-            Text = text;
-            Time = time;
-        }
+        //public JournalEntry(string text, byte font, ushort hue, string name, bool isunicode, DateTime time)
+        //{
+        //    IsUnicode = isunicode;
+        //    Font = font;
+        //    Hue = hue;
+        //    Name = name;
+        //    Text = text;
+        //    Time = time;
+        //}
     }
 }
