@@ -91,6 +91,17 @@ namespace ClassicUO.Game.UI.Controls
             });
         }
 
+        internal string Text
+        {
+            get
+            {
+                return _textBox?.Text ?? string.Empty;
+            }
+            set
+            {
+                _textBox?.SetText(value);
+            }
+        }
 
         private void UpdateValue()
         {
