@@ -69,9 +69,6 @@ namespace ClassicUO.Configuration
         [JsonProperty("is_win_maximized")]
         public bool IsWindowMaximized { get; set; } = true;
 
-        [JsonProperty("profiler")]
-        public bool Profiler { get; set; } = true;
-
         [JsonProperty("saveaccount")]
         public bool SaveAccount { get; set; }
 

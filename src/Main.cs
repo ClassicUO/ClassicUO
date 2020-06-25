@@ -343,7 +343,7 @@ namespace ClassicUO
                         break;
 
                     case "profiler":
-                        Settings.GlobalSettings.Profiler = bool.Parse(value);
+                        CUOEnviroment.Profiler = bool.Parse(value);
 
                         break;
 

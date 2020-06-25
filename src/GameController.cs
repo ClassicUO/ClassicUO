@@ -399,7 +399,7 @@ namespace ClassicUO
 
         private void UpdateWindowCaption(GameTime gameTime)
         {
-            if (!Settings.GlobalSettings.Profiler || CUOEnviroment.DisableUpdateWindowCaption)
+            if (!CUOEnviroment.Profiler || CUOEnviroment.DisableUpdateWindowCaption)
                 return;
 
             double timeDraw = Profiler.GetContext("RenderFrame").TimeInContext;
