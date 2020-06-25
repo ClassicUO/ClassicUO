@@ -392,30 +392,8 @@ namespace ClassicUO
             Profiler.EnterContext("OutOfContext");
 
             Plugin.ProcessDrawCmdList(GraphicsDevice);
-
-            UpdateWindowCaption(gameTime);
         }
 
-
-        private void UpdateWindowCaption(GameTime gameTime)
-        {
-            if (!CUOEnviroment.Profiler || CUOEnviroment.DisableUpdateWindowCaption)
-                return;
-
-            double timeDraw = Profiler.GetContext("RenderFrame").TimeInContext;
-            double timeUpdate = Profiler.GetContext("Update").TimeInContext;
-            double timeFixedUpdate = Profiler.GetContext("FixedUpdate").TimeInContext;
-            double timeOutOfContext = Profiler.GetContext("OutOfContext").TimeInContext;
-            //double timeTotalCheck = timeOutOfContext + timeDraw + timeUpdate;
-            double timeTotal = Profiler.TrackedTime;
-            double avgDrawMs = Profiler.GetContext("RenderFrame").AverageTime;
-
-#if DEV_BUILD
-            Window.Title = string.Format("ClassicUO [dev] {5} - Draw:{0:0.0}% Update:{1:0.0}% FixedUpd:{6:0.0} AvgDraw:{2:0.0}ms {3} - FPS: {4}", 100d * (timeDraw / timeTotal), 100d * (timeUpdate / timeTotal), avgDrawMs, gameTime.IsRunningSlowly ? "*" : string.Empty, CUOEnviroment.CurrentRefreshRate, CUOEnviroment.Version, 100d * (timeFixedUpdate / timeTotal));
-#else
-            Window.Title = string.Format("ClassicUO {5} - Draw:{0:0.0}% Update:{1:0.0}% FixedUpd:{6:0.0} AvgDraw:{2:0.0}ms {3} - FPS: {4}", 100d * (timeDraw / timeTotal), 100d * (timeUpdate / timeTotal), avgDrawMs, gameTime.IsRunningSlowly ? "*" : string.Empty, CUOEnviroment.CurrentRefreshRate, CUOEnviroment.Version, 100d * (timeFixedUpdate / timeTotal));
-#endif
-        }
 
         private void OnNetworkUpdate(double totalMS, double frameMS)
         {

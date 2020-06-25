@@ -325,13 +325,11 @@ namespace ClassicUO.Network
 
         private static void SetWindowTitle(string str)
         {
-            if (string.IsNullOrEmpty(str))
-                CUOEnviroment.DisableUpdateWindowCaption = false;
-            else
-            {
-                CUOEnviroment.DisableUpdateWindowCaption = true;
-                Client.Game.Window.Title = str;
-            }
+#if DEV_BUILD
+            Client.Game.Window.Title = $"ClassicUO [dev] - {CUOEnviroment.Version} - {str}";
+#else
+            Client.Game.Window.Title = $"ClassicUO - {CUOEnviroment.Version} - {str}";
+#endif
         }
 
         private static void GetStaticImage(ushort g, ref ArtInfo info)
