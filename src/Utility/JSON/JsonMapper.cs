@@ -127,7 +127,8 @@ namespace TinyJson
 			return value;
 		}
 
-		public static object DecodeValue(object value, Type targetType) {
+		public static object DecodeValue(object value, Type targetType) 
+        {
 			if (value == null) return null;
 
 			if (JsonBuilder.IsSupported(value)) {
@@ -135,48 +136,109 @@ namespace TinyJson
 			}
 
 			// use a registered decoder
-			if (value != null && !targetType.IsAssignableFrom(value.GetType())) {
+			if (value != null && !targetType.IsInstanceOfType(value))
+            {
 				Decoder decoder = GetDecoder(targetType);
 				value = decoder(targetType, value);
 			}
 
-			if (value != null && targetType.IsAssignableFrom(value.GetType())) {
+			if (value != null && targetType.IsInstanceOfType(value)) 
+            {
 				return value;
-			} else {
+			} 
+            else 
+            {
 				Console.WriteLine("Couldn't decode: " + targetType);
 				return null;
 			}
 		}
 
-		public static bool DecodeValue(object target, string name, object value) {
-			Type type = target.GetType();
-			bool matchSnakeCase = type.GetCustomAttributes(typeof(MatchSnakeCaseAttribute), true).Length == 1;
+		public static bool DecodeValue(object target, string name, object value, PropertyInfo[] properties, bool matchSnakeCase) 
+        {
+            foreach (var property in properties)
+            {
+                if (property.GetCustomAttribute<JsonIgnore>(true) == null)
+                {
+                    string propname = property.UnwrappedPropertyName();
 
-			while (type != null) {
-				foreach (FieldInfo field in type.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly)) {
-					if (field.GetCustomAttributes(typeof(NonSerializedAttribute), true).Length == 0) {
-						if (field.MatchFieldName(name, type, matchSnakeCase)) {
-							if (value != null) {
-								Type targetType = Nullable.GetUnderlyingType(field.FieldType) ?? field.FieldType;
-								object decodedValue = DecodeValue(value, targetType);
+                    if (matchSnakeCase)
+                    {
+                        propname = propname.SnakeCaseToCamelCase();
+                        name = name.SnakeCaseToCamelCase();
+                    }
 
-								if (decodedValue != null && targetType.IsAssignableFrom(decodedValue.GetType())) {
-									field.SetValue(target, decodedValue);
-									return true;
-								} else {
-									return false;
-								}
-							} else {
-								field.SetValue(target, null);
-								return true;
-							}
-						}
-					}
-				}
-				type = type.BaseType;
-			}
+                    if (propname.Equals(name, StringComparison.CurrentCultureIgnoreCase))
+                    {
+                        Type targetType = Nullable.GetUnderlyingType(property.PropertyType) ?? property.PropertyType;
+
+                        if (value == null)
+                        {
+                            property.SetValue(target, null);
+
+                            return true;
+                        }
+
+
+						object decodedValue = DecodeValue(value, targetType);
+
+                        if (decodedValue != null && targetType.IsInstanceOfType(decodedValue))
+                        {
+                            property.SetValue(target, decodedValue);
+                            return true;
+                        }
+
+						return false;
+                    }
+
+					
+                }
+            }
+
 			return false;
 		}
+
+        public static bool DecodeValue(object target, string name, object value, FieldInfo[] fields, bool matchSnakeCase)
+        {
+            foreach (var field in fields)
+            {
+                if (field.GetCustomAttribute<JsonIgnore>(true) == null)
+                {
+                    string propname = field.UnwrappedFieldName();
+
+                    if (matchSnakeCase)
+                    {
+                        propname = propname.SnakeCaseToCamelCase();
+                        name = name.SnakeCaseToCamelCase();
+                    }
+
+                    if (propname.Equals(name, StringComparison.CurrentCultureIgnoreCase))
+                    {
+                        Type targetType = Nullable.GetUnderlyingType(field.FieldType) ?? field.FieldType;
+
+                        if (value == null)
+                        {
+                            field.SetValue(target, null);
+
+                            return true;
+                        }
+
+                        object decodedValue = DecodeValue(value, targetType);
+
+                        if (decodedValue != null && targetType.IsInstanceOfType(decodedValue))
+                        {
+                            field.SetValue(target, decodedValue);
+                            return true;
+                        }
+
+                        return false;
+                    }
+
+
+                }
+            }
+
+            return false;
+        }
 	}
 }
 

@@ -11,6 +11,14 @@ namespace TinyJson
 		}
 	}
 
+    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, Inherited = false, AllowMultiple = false)]
+    public class JsonIgnore : Attribute
+    {
+        public JsonIgnore()
+        {
+        }
+    }
+
 	[AttributeUsage(AttributeTargets.Class, Inherited = false, AllowMultiple = false)]
 	public class MatchSnakeCaseAttribute : Attribute {
 	}

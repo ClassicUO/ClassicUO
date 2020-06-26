@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Text;
 
 namespace TinyJson
@@ -81,7 +83,7 @@ namespace TinyJson
 			return interfaceTest(type) || type.GetInterfaces().Any(i => interfaceTest(i));
 		}
 
-		static string UnwrapFieldName(string name) 
+        static string UnwrapFieldName(string name)
         {
             if (!string.IsNullOrEmpty(name))
             {
@@ -95,46 +97,79 @@ namespace TinyJson
                 }
             }
             return name;
+        }
+
+        //private static Dictionary<Type, PropertyInfo[]> _properties_cache = new Dictionary<Type, PropertyInfo[]>();
+
+        //public static string UnwrappedFieldName(this FieldInfo field, Type type, bool convertSnakeCase)
+        //{
+        //    string name = UnwrapFieldName(field.Name);
+
+        //    var attr = field.GetCustomAttribute<JsonPropertyAttribute>(true);
+
+        //    if (attr != null)
+        //    {
+        //        name = attr.Name;
+        //    }
+        //    else
+        //    {
+
+        //    //    if (!_properties_cache.TryGetValue(type, out var lists))
+        //    //    {
+        //    //        lists = type.GetProperties();
+        //    //        _properties_cache[type] = lists;
+        //    //    }
+
+
+        //        foreach (var property in lists)
+        //        {
+        //            string prop_name = UnwrapFieldName(property.Name);
+
+        //            if (prop_name.Equals(name, StringComparison.OrdinalIgnoreCase))
+        //            {
+
+        //                //name = property.UnwrappedPropertyName();
+        //                break;
+        //            }
+        //        }
+        //    }
+
+        //    return convertSnakeCase ? name.SnakeCaseToCamelCase() : name;
+        //}
+
+        public static string UnwrappedPropertyName(this PropertyInfo property)
+        {
+            var attr = property.GetCustomAttribute<JsonPropertyAttribute>(true);
+
+            if (attr != null)
+            {
+                return attr.Name;
+            }
+
+			return property.Name;
 		}
 
-		public static string UnwrappedFieldName(this FieldInfo field, Type type, bool convertSnakeCase) {
-			string name = UnwrapFieldName(field.Name);
+        public static string UnwrappedFieldName(this FieldInfo field)
+        {
+            var attr = field.GetCustomAttribute<JsonPropertyAttribute>(true);
 
-			if (field.GetCustomAttributes(typeof(JsonPropertyAttribute), true).Length == 1) {
-				var jsonProperty = field.GetCustomAttributes(typeof(JsonPropertyAttribute), true)[0] as JsonPropertyAttribute;
-				name = jsonProperty.Name;
-			} else {
-				foreach (var property in type.GetProperties()) {
-					if (UnwrapFieldName(property.Name).Equals(name, StringComparison.OrdinalIgnoreCase)) {
-						name = property.UnwrappedPropertyName();
-						break;
-					}
-				}
-			}
+            if (attr != null)
+            {
+                return attr.Name;
+            }
 
-			return convertSnakeCase ? name.SnakeCaseToCamelCase() : name;
-		}
+            return field.Name;
+        }
 
-		public static string UnwrappedPropertyName(this PropertyInfo property) {
-			string name = UnwrapFieldName(property.Name);
+        //public static bool MatchFieldName(this FieldInfo field, String name, Type type, bool matchSnakeCase) {
+        //	string fieldName = field.UnwrappedFieldName(type, matchSnakeCase);
+        //	if (matchSnakeCase) {
+        //		name = name.SnakeCaseToCamelCase();
+        //	}
 
-			if (property.GetCustomAttributes(typeof(JsonPropertyAttribute), true).Length == 1) {
-				var jsonProperty = property.GetCustomAttributes(typeof(JsonPropertyAttribute), true)[0] as JsonPropertyAttribute;
-				name = jsonProperty.Name;
-			}
-
-			return name;
-		}
-
-		public static bool MatchFieldName(this FieldInfo field, String name, Type type, bool matchSnakeCase) {
-			string fieldName = field.UnwrappedFieldName(type, matchSnakeCase);
-			if (matchSnakeCase) {
-				name = name.SnakeCaseToCamelCase();
-			}
-
-			return name.Equals(fieldName, StringComparison.CurrentCultureIgnoreCase);
-		}
-	}
+        //	return name.Equals(fieldName, StringComparison.CurrentCultureIgnoreCase);
+        //}
+    }
 
 	public static class JsonExtensions {
 		public static bool IsNullable(this Type type) {

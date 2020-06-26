@@ -3,23 +3,55 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
 
+using Microsoft.Xna.Framework;
+
 namespace TinyJson {
 
 	using Decoder = Func<Type, object, object>;
 
 	public static class DefaultDecoder {
 
-		public static Decoder GenericDecoder() {
-			return (type, jsonObj) => {
+		public static Decoder GenericDecoder() 
+        {
+			return (type, jsonObj) => 
+            {
 				object instance = Activator.CreateInstance(type, true);
-				if (jsonObj is IDictionary) {
-					foreach (DictionaryEntry item in (IDictionary)jsonObj) {
-						string name = (string)item.Key;
-						if (!JsonMapper.DecodeValue(instance, name, item.Value)) {
-							Console.WriteLine("Couldn't decode field \"" + name + "\" of " + type);
-						}
+				if (jsonObj is IDictionary)
+                {
+                    PropertyInfo[] properties = type.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);
+                    bool match_snake_case = type.GetCustomAttribute<MatchSnakeCaseAttribute>() != null;
+
+                    if (properties.Length == 0)
+                    {
+                        FieldInfo[] fields = type.GetFields(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);
+
+                        foreach (DictionaryEntry item in (IDictionary)jsonObj)
+                        {
+                            string name = (string)item.Key;
+                            object value = item.Value;
+
+                            if (!JsonMapper.DecodeValue(instance, name, value, fields, match_snake_case))
+                            {
+                                Console.WriteLine("Couldn't decode field \"" + name + "\" of " + type);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        foreach (DictionaryEntry item in (IDictionary)jsonObj)
+                        {
+                            string name = (string)item.Key;
+                            object value = item.Value;
+
+                            if (!JsonMapper.DecodeValue(instance, name, value, properties, match_snake_case))
+                            {
+                                Console.WriteLine("Couldn't decode field \"" + name + "\" of " + type);
+                            }
+                        }
 					}
-				} else {
+                } 
+                else 
+                {
 					Console.WriteLine("Unsupported json type: " + (jsonObj != null ? jsonObj.GetType().ToString() : "null"));
 				}
 				return instance;

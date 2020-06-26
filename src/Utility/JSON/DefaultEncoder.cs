@@ -13,23 +13,51 @@ namespace TinyJson
 			return (obj, builder) => {
 				builder.AppendBeginObject();
 				Type type = obj.GetType();
-				bool matchSnakeCase = type.GetCustomAttributes(typeof(MatchSnakeCaseAttribute), true).Length == 1;
+                bool matchSnakeCase = type.GetCustomAttribute<MatchSnakeCaseAttribute>(true) != null;
 				bool first = true;
-				while (type != null) {
-					foreach (FieldInfo field in type.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly)) {
-						if (field.GetCustomAttributes(typeof(NonSerializedAttribute), true).Length == 0) {
-							if (first) first = false; else builder.AppendSeperator();
 
-							var fieldName = field.UnwrappedFieldName(type, false);
+                var properties = type.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);
+
+                if (properties.Length == 0)
+                {
+                    var fields = type.GetFields(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);
+
+					foreach (FieldInfo fieldinfo in fields)
+                    {
+                        if (fieldinfo.GetCustomAttribute<JsonIgnore>(true) == null)
+                        {
+                            if (first) first = false; else builder.AppendSeperator();
+
+                            var fieldName = fieldinfo.UnwrappedFieldName();
                             if (matchSnakeCase)
                             {
                                 fieldName = fieldName.CamelCaseToSnakeCase();
                             }
-                            JsonMapper.EncodeNameValue(fieldName, field.GetValue(obj), builder);
-						}
-					}
-					type = type.BaseType;
+
+                            JsonMapper.EncodeNameValue(fieldName, fieldinfo.GetValue(obj), builder);
+                        }
+                    }
 				}
+                else
+                {
+                    foreach (PropertyInfo property in properties)
+                    {
+                        if (property.GetCustomAttribute<JsonIgnore>(true) == null)
+                        {
+                            if (first) first = false; else builder.AppendSeperator();
+
+                            var fieldName = property.UnwrappedPropertyName();
+                            if (matchSnakeCase)
+                            {
+                                fieldName = fieldName.CamelCaseToSnakeCase();
+                            }
+
+                            JsonMapper.EncodeNameValue(fieldName, property.GetValue(obj), builder);
+                        }
+                    }
+				}
+
+
 				builder.AppendEndObject();
 			};
 		}
