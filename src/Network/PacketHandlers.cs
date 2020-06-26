@@ -787,6 +787,13 @@ namespace ClassicUO.Network
                 }
                 // else
                 {
+                    BaseHealthBarGump bar = UIManager.GetGump<BaseHealthBarGump>(serial);
+
+                    if (bar == null)
+                    {
+                        NetClient.Socket.Send(new PCloseStatusBarGump(serial));
+                    }
+
                     World.RemoveMobile(serial, true);
                 }
             }
