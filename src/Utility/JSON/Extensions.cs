@@ -8,10 +8,9 @@ using System.Text;
 
 namespace TinyJson
 {
-
-	public static class StringExtensions 
+    public static class StringExtensions 
     {
-		private static readonly StringBuilder _sb = new StringBuilder();
+		private static readonly StringBuilder _sb = new StringBuilder(256);
 
 		public static string SnakeCaseToCamelCase(this string snakeCaseName)
         {
@@ -99,44 +98,6 @@ namespace TinyJson
             return name;
         }
 
-        //private static Dictionary<Type, PropertyInfo[]> _properties_cache = new Dictionary<Type, PropertyInfo[]>();
-
-        //public static string UnwrappedFieldName(this FieldInfo field, Type type, bool convertSnakeCase)
-        //{
-        //    string name = UnwrapFieldName(field.Name);
-
-        //    var attr = field.GetCustomAttribute<JsonPropertyAttribute>(true);
-
-        //    if (attr != null)
-        //    {
-        //        name = attr.Name;
-        //    }
-        //    else
-        //    {
-
-        //    //    if (!_properties_cache.TryGetValue(type, out var lists))
-        //    //    {
-        //    //        lists = type.GetProperties();
-        //    //        _properties_cache[type] = lists;
-        //    //    }
-
-
-        //        foreach (var property in lists)
-        //        {
-        //            string prop_name = UnwrapFieldName(property.Name);
-
-        //            if (prop_name.Equals(name, StringComparison.OrdinalIgnoreCase))
-        //            {
-
-        //                //name = property.UnwrappedPropertyName();
-        //                break;
-        //            }
-        //        }
-        //    }
-
-        //    return convertSnakeCase ? name.SnakeCaseToCamelCase() : name;
-        //}
-
         public static string UnwrappedPropertyName(this PropertyInfo property)
         {
             var attr = property.GetCustomAttribute<JsonPropertyAttribute>(true);
@@ -160,15 +121,6 @@ namespace TinyJson
 
             return field.Name;
         }
-
-        //public static bool MatchFieldName(this FieldInfo field, String name, Type type, bool matchSnakeCase) {
-        //	string fieldName = field.UnwrappedFieldName(type, matchSnakeCase);
-        //	if (matchSnakeCase) {
-        //		name = name.SnakeCaseToCamelCase();
-        //	}
-
-        //	return name.Equals(fieldName, StringComparison.CurrentCultureIgnoreCase);
-        //}
     }
 
 	public static class JsonExtensions {
@@ -212,12 +164,6 @@ namespace TinyJson
 				default:
 					return false;
 			}
-		}
-	}
-
-	public static class StringBuilderExtensions {
-		public static void Clear(this System.Text.StringBuilder sb) {
-			sb.Length = 0;
 		}
 	}
 }
