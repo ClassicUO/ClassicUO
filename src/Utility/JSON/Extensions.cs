@@ -119,7 +119,7 @@ namespace TinyJson
                 return attr.Name;
             }
 
-            return field.Name;
+            return UnwrapFieldName(field.Name);
         }
     }
 
