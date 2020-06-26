@@ -21,10 +21,11 @@ namespace TinyJson
 							if (first) first = false; else builder.AppendSeperator();
 
 							var fieldName = field.UnwrappedFieldName(type, false);
-							if (matchSnakeCase) {
-								fieldName = fieldName.CamelCaseToSnakeCase();
-							}
-							JsonMapper.EncodeNameValue(fieldName, field.GetValue(obj), builder);
+                            if (matchSnakeCase)
+                            {
+                                fieldName = fieldName.CamelCaseToSnakeCase();
+                            }
+                            JsonMapper.EncodeNameValue(fieldName, field.GetValue(obj), builder);
 						}
 					}
 					type = type.BaseType;

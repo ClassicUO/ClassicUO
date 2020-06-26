@@ -2,18 +2,68 @@
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
+using System.Text;
 
 namespace TinyJson
 {
 
-	public static class StringExtensions {
-		public static string SnakeCaseToCamelCase(this string snakeCaseName) {
-			return snakeCaseName.Split(new[] { "_" }, StringSplitOptions.RemoveEmptyEntries).Select(s => char.ToUpperInvariant(s[0]) + s.Substring(1, s.Length - 1)).Aggregate(string.Empty, (s1, s2) => s1 + s2);
-		}
+	public static class StringExtensions 
+    {
+		private static readonly StringBuilder _sb = new StringBuilder();
 
-		public static string CamelCaseToSnakeCase(this string camelCaseName) {
-			return string.Concat(camelCaseName.Select((x, i) => i > 0 && char.IsUpper(x) ? "_" + x.ToString() : x.ToString()).ToArray()).ToLower(CultureInfo.InvariantCulture);
-		}
+		public static string SnakeCaseToCamelCase(this string snakeCaseName)
+        {
+            _sb.Clear();
+
+            bool next_upper = true;
+
+            for (int i = 0; i < snakeCaseName.Length; i++)
+            {
+				if(snakeCaseName[i] == '_')
+                {
+                    next_upper = true;
+                }
+                else
+                {
+                    if (next_upper)
+                    {
+                        _sb.Append(char.ToUpperInvariant(snakeCaseName[i]));
+                        next_upper = false;
+					}
+                    else
+                    {
+                        _sb.Append(snakeCaseName[i]);
+                    }
+                }
+            }
+
+            return _sb.ToString();
+        }
+
+		public static string CamelCaseToSnakeCase(this string camelCaseName) 
+        {
+            _sb.Clear();
+
+			if (char.IsUpper(camelCaseName[0]))
+            {
+                _sb.Append(char.ToLowerInvariant(camelCaseName[0]));
+            }
+
+			for (int i = 1; i < camelCaseName.Length; i++)
+            {
+                if (char.IsUpper(camelCaseName[i]))
+                {
+                    _sb.Append("_");
+                    _sb.Append(char.ToLowerInvariant(camelCaseName[i]));
+                }
+				else
+                {
+                    _sb.Append(camelCaseName[i]);
+                }
+            }
+
+            return _sb.ToString();
+        }
 	}
 
 	public static class TypeExtensions {
@@ -31,11 +81,20 @@ namespace TinyJson
 			return interfaceTest(type) || type.GetInterfaces().Any(i => interfaceTest(i));
 		}
 
-		static string UnwrapFieldName(string name) {
-			if (name.StartsWith("<", StringComparison.Ordinal) && name.Contains(">")) {
-				return name.Substring(name.IndexOf("<", StringComparison.Ordinal) + 1, name.IndexOf(">", StringComparison.Ordinal) - 1);
-			}
-			return name;
+		static string UnwrapFieldName(string name) 
+        {
+            if (!string.IsNullOrEmpty(name))
+            {
+                if (name[0] == '<')
+                {
+                    for (int i = 1; i < name.Length; i++)
+                    {
+                        if (name[i] == '>')
+                            return name.Substring(1, i - 1);
+                    }
+                }
+            }
+            return name;
 		}
 
 		public static string UnwrappedFieldName(this FieldInfo field, Type type, bool convertSnakeCase) {
