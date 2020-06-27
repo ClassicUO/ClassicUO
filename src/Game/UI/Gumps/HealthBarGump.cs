@@ -165,6 +165,11 @@ namespace ClassicUO.Game.UI.Gumps
             if (e.Button != MouseButtonType.Left)
                 return;
 
+            if (World.Get(LocalSerial) == null)
+            {
+                return;
+            }
+
             Point p = Mouse.LDroppedOffset;
 
             if (Math.Max(Math.Abs(p.X), Math.Abs(p.Y)) >= 1)
@@ -215,6 +220,8 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 if (_textBox != null)
                     _textBox.IsEditable = false;
+
+                UIManager.KeyboardFocusControl = null;
                 UIManager.SystemChat?.SetFocus();
             }
 
@@ -225,6 +232,15 @@ namespace ClassicUO.Game.UI.Gumps
         {
             if (button != MouseButtonType.Left)
                 return false;
+
+            if (_canChangeName)
+            {
+                if (_textBox != null)
+                    _textBox.IsEditable = false;
+
+                UIManager.KeyboardFocusControl = null;
+                UIManager.SystemChat?.SetFocus();
+            }
 
             var entity = World.Get(LocalSerial);
 
@@ -378,6 +394,7 @@ namespace ClassicUO.Game.UI.Gumps
             _background = null;
             _hpLineRed = _manaLineRed = _stamLineRed = null;
 
+            _textBox.MouseUp -= TextBoxOnMouseUp;
             _textBox = null;
 
             BuildGump();
@@ -438,8 +455,6 @@ namespace ClassicUO.Game.UI.Gumps
                             if (_textBox.Hue != textColor)
                                 _textBox.Hue = textColor;
 
-                            if (_canChangeName)
-                                _textBox.MouseUp -= TextBoxOnMouseUp;
                             _textBox.IsEditable = false;
                         }
                     }
@@ -478,13 +493,9 @@ namespace ClassicUO.Game.UI.Gumps
 
                     if (_textBox != null)
                     {
-                        _textBox.MouseUp -= TextBoxOnMouseUp;
-
-                        if (_canChangeName)
-                        {
-                            _textBox.MouseUp += TextBoxOnMouseUp;
-                        }
-                        else
+                        _textBox.AcceptMouseInput = _canChangeName;
+                        _textBox.AcceptKeyboardInput = _canChangeName;
+                        if (!_canChangeName)
                             _textBox.IsEditable = false;
                     }
                 }
@@ -515,8 +526,6 @@ namespace ClassicUO.Game.UI.Gumps
                     if (_canChangeName)
                     {
                         textColor = 0x000E;
-                        if (_textBox != null)
-                            _textBox.MouseUp += TextBoxOnMouseUp;
                     }
 
                     if (inparty && _bars.Length >= 2 && _bars[1] != null)
@@ -795,11 +804,10 @@ namespace ClassicUO.Game.UI.Gumps
                         WantUpdateSize = false,
                         CanMove = true,
                     });
-                    if (_canChangeName)
-                        _textBox.MouseUp += TextBoxOnMouseUp;
                 }
             }
 
+            _textBox.MouseUp += TextBoxOnMouseUp;
             _textBox.SetText(_name);
 
             if (entity == null)
@@ -897,6 +905,7 @@ namespace ClassicUO.Game.UI.Gumps
             _background = _hpLineRed = _manaLineRed = _stamLineRed = null;
             _buttonHeal1 = _buttonHeal2 = null;
 
+            _textBox.MouseUp -= TextBoxOnMouseUp;
             _textBox = null;
 
             BuildGump();
@@ -930,7 +939,7 @@ namespace ClassicUO.Game.UI.Gumps
                         CanMove = true,
                     });
 
-                    _textBox.SetText("[* SELF *]");
+                    _name = "[* SELF *]";
                 }
                 else
                 {
@@ -943,7 +952,6 @@ namespace ClassicUO.Game.UI.Gumps
                         IsEditable = false,
                         CanMove = true,
                     });
-                    _textBox.SetText(_name);
                 }
 
                 Add(_buttonHeal1 = new Button((int) ButtonParty.Heal1, 0x0938, 0x093A, 0x0938) { ButtonAction = ButtonAction.Activate, X = 0, Y = 20 });
@@ -1014,12 +1022,11 @@ namespace ClassicUO.Game.UI.Gumps
                         WantUpdateSize = false,
                         CanMove = true,
                     });
-                    _textBox.SetText(_name);
-
-                    if (_canChangeName)
-                        _textBox.MouseUp += TextBoxOnMouseUp;
                 }
             }
+
+            _textBox.MouseUp += TextBoxOnMouseUp;
+            _textBox.SetText(_name);
         }
 
 
@@ -1079,9 +1086,6 @@ namespace ClassicUO.Game.UI.Gumps
                         {
                             if (_textBox.Hue != textColor)
                                 _textBox.Hue = textColor;
-
-                            if (_canChangeName)
-                                _textBox.MouseUp -= TextBoxOnMouseUp;
                             _textBox.IsEditable = false;
                         }
                     }
@@ -1117,13 +1121,9 @@ namespace ClassicUO.Game.UI.Gumps
 
                     if (_textBox != null)
                     {
-                        _textBox.MouseUp -= TextBoxOnMouseUp;
-
-                        if (_canChangeName)
-                        {
-                            _textBox.MouseUp += TextBoxOnMouseUp;
-                        }
-                        else
+                        _textBox.AcceptMouseInput = _canChangeName;
+                        _textBox.AcceptKeyboardInput = _canChangeName;
+                        if (!_canChangeName)
                             _textBox.IsEditable = false;
                     }
                 }
@@ -1146,15 +1146,6 @@ namespace ClassicUO.Game.UI.Gumps
                     _outOfRange = false;
 
                     _canChangeName = !inparty && mobile != null && mobile.IsRenamable;
-
-                    if (_canChangeName)
-                    {
-                        if (_textBox != null)
-                        {
-                            _textBox.MouseUp -= TextBoxOnMouseUp;
-                            _textBox.MouseUp += TextBoxOnMouseUp;
-                        }
-                    }
 
                     hitsColor = 0;
 
