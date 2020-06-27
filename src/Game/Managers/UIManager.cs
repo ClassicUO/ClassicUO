@@ -100,7 +100,8 @@ namespace ClassicUO.Game.Managers
 
                     if (value != null && value.AcceptKeyboardInput)
                     {
-                        value.OnFocusEnter();
+                        if (!value.IsFocused)
+                            value.OnFocusEnter();
                     }
                 }
             }
