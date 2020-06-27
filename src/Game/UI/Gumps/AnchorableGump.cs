@@ -129,7 +129,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 ResetHueVector();
 
-                UOTexture lock_texture = GumpsLoader.Instance.GetTexture(0x082C);
+                UOTexture32 lock_texture = GumpsLoader.Instance.GetTexture(0x082C);
 
                 if (lock_texture != null)
                 {

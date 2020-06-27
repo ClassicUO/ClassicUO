@@ -55,7 +55,7 @@ namespace ClassicUO.Game.UI.Gumps
 {
     internal class WorldMapGump : ResizableGump
     {
-        private UOTexture _mapTexture;
+        private UOTexture32 _mapTexture;
 
         private readonly float[] _zooms = new float[10] { 0.125f, 0.25f, 0.5f, 0.75f, 1f, 1.5f, 2f, 4f, 6f, 8f };
         private int _zoomIndex = 4;

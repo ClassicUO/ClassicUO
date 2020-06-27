@@ -31,7 +31,7 @@ namespace ClassicUO.Game.UI.Controls
 {
     internal class ResizePic : Control
     {
-        private readonly UOTexture[] _gumpTexture = new UOTexture[9];
+        private readonly UOTexture32[] _gumpTexture = new UOTexture32[9];
 
         public ResizePic(ushort graphic)
         {
@@ -40,7 +40,7 @@ namespace ClassicUO.Game.UI.Controls
 
             for (int i = 0; i < _gumpTexture.Length; i++)
             {
-                UOTexture t = GumpsLoader.Instance.GetTexture((ushort) (graphic + i));
+                UOTexture32 t = GumpsLoader.Instance.GetTexture((ushort) (graphic + i));
 
                 if (t == null)
                 {
@@ -199,7 +199,7 @@ namespace ClassicUO.Game.UI.Controls
         }
 
 
-        private static bool PixelsInXY(UOTexture texture, int x, int y, int width = 0, int height = 0)
+        private static bool PixelsInXY(UOTexture32 texture, int x, int y, int width = 0, int height = 0)
         {
             if (x < 0 || y < 0 || (width > 0 && x >= width) || (height > 0 && y >= height))
                 return false;
@@ -289,7 +289,7 @@ namespace ClassicUO.Game.UI.Controls
 
             for (int i = 0; i < 9; i++)
             {
-                UOTexture t = _gumpTexture[i];
+                UOTexture32 t = _gumpTexture[i];
                 if (t == null)
                     continue;
 

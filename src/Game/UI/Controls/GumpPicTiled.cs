@@ -54,7 +54,7 @@ namespace ClassicUO.Game.UI.Controls
             Height = int.Parse(parts[4]);
         }
 
-        internal GumpPicTiled(int x, int y, int width, int heigth, UOTexture texture)
+        internal GumpPicTiled(int x, int y, int width, int heigth, UOTexture32 texture)
         {
             CanMove = true;
             AcceptMouseInput = true;

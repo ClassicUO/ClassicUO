@@ -245,7 +245,7 @@ namespace ClassicUO.Game.UI.Gumps
 
     internal class BorderControl : Control
     {
-        private readonly UOTexture[] _borders = new UOTexture[2];
+        private readonly UOTexture32[] _borders = new UOTexture32[2];
         private readonly int _borderSize;
 
         public BorderControl(int x, int y, int w, int h, int borderSize)
@@ -267,7 +267,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             base.Update(totalMS, frameMS);
 
-            foreach (UOTexture t in _borders)
+            foreach (UOTexture32 t in _borders)
                 t.Ticks = (long) totalMS;
         }
 

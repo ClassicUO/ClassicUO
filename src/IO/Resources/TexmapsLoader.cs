@@ -29,7 +29,7 @@ using ClassicUO.Utility;
 
 namespace ClassicUO.IO.Resources
 {
-    internal class TexmapsLoader : UOFileLoader<UOTexture>
+    internal class TexmapsLoader : UOFileLoader<UOTexture32>
     {
         private readonly uint[] _textmapPixels128 = new uint[128 * 128];
         private readonly uint[] _textmapPixels64 = new uint[64 * 64];
@@ -142,7 +142,7 @@ namespace ClassicUO.IO.Resources
 
         }
 
-        public override UOTexture GetTexture(uint g)
+        public override UOTexture32 GetTexture(uint g)
         {
             if (g >= Resources.Length)
                 return null;

@@ -44,7 +44,7 @@ namespace ClassicUO.Game.UI.Controls
         private readonly string _caption;
         private readonly RenderedText[] _fontTexture;
         private readonly ushort[] _gumpGraphics = new ushort[3];
-        private readonly UOTexture[] _textures = new UOTexture[3];
+        private readonly UOTexture32[] _textures = new UOTexture32[3];
 
         private bool _entered;
 
@@ -57,7 +57,7 @@ namespace ClassicUO.Game.UI.Controls
             _textures[NORMAL] = GumpsLoader.Instance.GetTexture(normal);
             _textures[PRESSED] = GumpsLoader.Instance.GetTexture(pressed);
             if (over > 0) _textures[OVER] = GumpsLoader.Instance.GetTexture(over);
-            UOTexture t = _textures[NORMAL];
+            UOTexture32 t = _textures[NORMAL];
 
             if (t == null)
             {
@@ -174,7 +174,7 @@ namespace ClassicUO.Game.UI.Controls
 
             for (int i = 0; i < _textures.Length; i++)
             {
-                UOTexture t = _textures[i];
+                UOTexture32 t = _textures[i];
 
                 if (t != null)
                     t.Ticks = Time.Ticks;
@@ -193,7 +193,7 @@ namespace ClassicUO.Game.UI.Controls
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
-            UOTexture texture = GetTextureByState();
+            UOTexture32 texture = GetTextureByState();
 
             ResetHueVector();
 
@@ -253,7 +253,7 @@ namespace ClassicUO.Game.UI.Controls
             }
         }
 
-        private UOTexture GetTextureByState()
+        private UOTexture32 GetTextureByState()
         {
             if (_entered || IsClicked)
             {

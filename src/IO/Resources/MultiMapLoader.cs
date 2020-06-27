@@ -79,7 +79,7 @@ namespace ClassicUO.IO.Resources
             });
         }
 
-        public unsafe UOTexture LoadMap(int width, int height, int startx, int starty, int endx, int endy)
+        public unsafe UOTexture32 LoadMap(int width, int height, int startx, int starty, int endx, int endy)
         {
             if (_file == null || _file.Length == 0)
             {

@@ -47,6 +47,11 @@ namespace ClassicUO.Game.GameObjects
             o.IsTextGump = false;
             o.RenderedText?.Destroy();
             o.RenderedText = null;
+
+            if (!o.IsEmpty)
+            {
+
+            }
             o.Clear();
         });
 

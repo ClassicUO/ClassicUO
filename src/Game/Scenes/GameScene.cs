@@ -846,7 +846,7 @@ namespace ClassicUO.Game.Scenes
             {
                 ref var l = ref _lights[i];
 
-                UOTexture texture = LightsLoader.Instance.GetTexture(l.ID);
+                UOTexture32 texture = LightsLoader.Instance.GetTexture(l.ID);
                 if (texture == null)
                     continue;
 

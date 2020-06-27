@@ -45,7 +45,7 @@ namespace ClassicUO.Game.Managers
 
 
 
-        private readonly UOTexture _background_texture, _hp_texture;
+        private readonly UOTexture32 _background_texture, _hp_texture;
 
         public HealthLinesManager()
         {

@@ -36,7 +36,7 @@ namespace ClassicUO.Game.UI.Controls
 
         public ushort Hue { get; set; }
         public bool IsPartial { get; set; }
-        public UOTexture Texture { get; set; }
+        public UOTexture32 Texture { get; set; }
 
         public override void Update(double totalMS, double frameMS)
         {
