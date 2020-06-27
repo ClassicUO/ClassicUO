@@ -257,6 +257,7 @@ namespace ClassicUO.Game.UI.Gumps
             if ((key == SDL.SDL_Keycode.SDLK_RETURN || key == SDL.SDL_Keycode.SDLK_KP_ENTER) && _textBox != null && _textBox.IsEditable)
             {
                 GameActions.Rename(entity, _textBox.Text);
+                UIManager.KeyboardFocusControl = null;
                 UIManager.SystemChat?.SetFocus();
                 _textBox.IsEditable = false;
             }

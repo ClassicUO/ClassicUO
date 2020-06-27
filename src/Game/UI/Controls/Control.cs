@@ -363,8 +363,10 @@ namespace ClassicUO.Game.UI.Controls
 
         public void SetKeyboardFocus()
         {
-            if (AcceptKeyboardInput && !HasKeyboardFocus) 
+            if (AcceptKeyboardInput && !HasKeyboardFocus)
+            {
                 UIManager.KeyboardFocusControl = this;
+            }
         }
 
         internal event EventHandler<MouseEventArgs> MouseDown, MouseUp, MouseOver, MouseEnter, MouseExit, DragBegin, DragEnd;
