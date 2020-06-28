@@ -1025,8 +1025,12 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             }
 
-            _textBox.MouseUp += TextBoxOnMouseUp;
-            _textBox.SetText(_name);
+
+            if (_textBox != null)
+            {
+                _textBox.MouseUp += TextBoxOnMouseUp;
+                _textBox.SetText(_name);
+            }
         }
 
 
