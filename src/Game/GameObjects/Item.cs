@@ -47,7 +47,7 @@ namespace ClassicUO.Game.GameObjects
             i.IsDestroyed = false;
             i.Graphic = 0;
             i.Amount = 0;
-            i.Container = 0;
+            i.Container = 0xFFFF_FFFF;
             i._isMulti = false;
             i.Layer = 0;
             i.Price = 0;
@@ -132,7 +132,7 @@ namespace ClassicUO.Game.GameObjects
 
         public uint Price;
         public ushort Amount;
-        public uint Container;
+        public uint Container = 0xFFFF_FFFF;
         public Layer Layer;
         public bool UsedLayer;
         public bool Opened;

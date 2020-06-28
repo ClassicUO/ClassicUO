@@ -266,7 +266,7 @@ namespace ClassicUO.Game.GameObjects
         //            var next = obj.Next;
         //            Item it = (Item) obj;
 
-        //            it.Container = 0;
+        //            it.Container = 0xFFFF_FFFF;
         //            World.Items.Remove(it);
 
         //            Remove(obj);
@@ -298,7 +298,7 @@ namespace ClassicUO.Game.GameObjects
                     }
                     else
                     {
-                        it.Container = 0;
+                        it.Container = 0xFFFF_FFFF;
                         World.Items.Remove(it);
                         it.Destroy();
                         Remove(obj);

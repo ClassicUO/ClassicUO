@@ -851,9 +851,9 @@ namespace ClassicUO.IO
 
             internal unsafe void ReloadBlock(int map, int blocknum)
             {
-                int mapblocksize = UnsafeMemoryManager.SizeOf<MapBlock>();
-                int staticidxblocksize = UnsafeMemoryManager.SizeOf<StaidxBlock>();
-                int staticblocksize = UnsafeMemoryManager.SizeOf<StaticsBlock>();
+                int mapblocksize = sizeof(MapBlock);
+                int staticidxblocksize = sizeof(StaidxBlock);
+                int staticblocksize = sizeof(StaticsBlock);
                 UOFile file = _filesMap[map];
                 UOFile fileidx = _filesIdxStatics[map];
                 UOFile staticfile = _filesStatics[map];

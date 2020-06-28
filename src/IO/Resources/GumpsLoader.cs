@@ -221,10 +221,10 @@ namespace ClassicUO.IO.Resources
         }
 
         [StructLayout(LayoutKind.Sequential, Pack = 1)]
-        private readonly struct GumpBlock
+        private ref struct GumpBlock
         {
-            public readonly ushort Value;
-            public readonly ushort Run;
+            public ushort Value;
+            public ushort Run;
         }
     }
 }

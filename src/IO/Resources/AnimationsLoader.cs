@@ -275,7 +275,7 @@ namespace ClassicUO.IO.Resources
         };
 
 
-        public override Task Load()
+        public override unsafe Task Load()
         {
             return Task.Run(() =>
             {
@@ -311,7 +311,7 @@ namespace ClassicUO.IO.Resources
                     LoadUop();
                 }
 
-                int animIdxBlockSize = UnsafeMemoryManager.SizeOf<AnimIdxBlock>();
+                int animIdxBlockSize = sizeof(AnimIdxBlock);
                 UOFile idxfile0 = _files[0]?.IdxFile;
                 long? maxAddress0 = (long?)idxfile0?.StartAddress + idxfile0?.Length;
                 UOFile idxfile2 = _files[1]?.IdxFile;
@@ -1789,7 +1789,7 @@ namespace ClassicUO.IO.Resources
             }
         }
 
-        public readonly struct SittingInfoData
+        public struct SittingInfoData
         {
             public SittingInfoData(ushort graphic, sbyte d1,
                                    sbyte d2, sbyte d3, sbyte d4,
@@ -1821,11 +1821,11 @@ namespace ClassicUO.IO.Resources
         }
 
         [StructLayout(LayoutKind.Sequential, Pack = 1)]
-        private readonly struct AnimIdxBlock
+        private ref struct AnimIdxBlock
         {
-            public readonly uint Position;
-            public readonly uint Size;
-            public readonly uint Unknown;
+            public uint Position;
+            public uint Size;
+            public uint Unknown;
         }
     }
 

@@ -3909,76 +3909,76 @@ namespace ClassicUO.Network
                     argument = p.ReadUnicodeReversed(length);
                 }
 
-                    string str = ClilocLoader.Instance.Translate(cliloc, argument, true);
+                string str = ClilocLoader.Instance.Translate(cliloc, argument, true);
 
-                    for (int i = 0; i < list.Count; i++)
+                for (int i = 0; i < list.Count; i++)
+                {
+                    var tempstr = list[i];
+
+                    if (tempstr == str)
                     {
-                        var tempstr = list[i];
-
-                        if (tempstr == str)
-                        {
-                            list.RemoveAt(i);
-                            break;
-                        }
-                    }
-
-                    list.Add(str);
-                }
-
-                Item container = null;
-
-                if (entity is Item it && SerialHelper.IsValid(it.Container))
-                {
-                    container = World.Items.Get(it.Container);
-                }
-
-                bool inBuyList = false;
-
-                if (container != null)
-                {
-                    inBuyList = container.Layer == Layer.ShopBuy ||
-                                container.Layer == Layer.ShopBuyRestock ||
-                                container.Layer == Layer.ShopSell;
-                }
-
-
-                bool first = true;
-
-                string name = string.Empty;
-                string data = string.Empty;
-
-                if (list.Count != 0)
-                {
-                    foreach (string str in list)
-                    {
-                        if (first)
-                        {
-                            name = str;
-
-                            if (entity != null && !SerialHelper.IsMobile(serial))
-                            {
-                                entity.Name = str;
-                            }
-
-                            first = false;
-                        }
-                        else
-                        {
-                            if (data.Length != 0)
-                                data += "\n";
-
-                            data += str;
-                        }
+                        list.RemoveAt(i);
+                        break;
                     }
                 }
 
-                World.OPL.Add(serial, revision, name, data);
+                list.Add(str);
+            }
 
-                if (inBuyList && container != null && SerialHelper.IsValid(container.Serial))
+            Item container = null;
+
+            if (entity is Item it && SerialHelper.IsValid(it.Container))
+            {
+                container = World.Items.Get(it.Container);
+            }
+
+            bool inBuyList = false;
+
+            if (container != null)
+            {
+                inBuyList = container.Layer == Layer.ShopBuy ||
+                            container.Layer == Layer.ShopBuyRestock ||
+                            container.Layer == Layer.ShopSell;
+            }
+
+
+            bool first = true;
+
+            string name = string.Empty;
+            string data = string.Empty;
+
+            if (list.Count != 0)
+            {
+                foreach (string str in list)
                 {
-                UIManager.GetGump<ShopGump>(container.RootContainer)?.SetNameTo((Item) entity, name);
+                    if (first)
+                    {
+                        name = str;
+
+                        if (entity != null && !SerialHelper.IsMobile(serial))
+                        {
+                            entity.Name = str;
+                        }
+
+                        first = false;
+                    }
+                    else
+                    {
+                        if (data.Length != 0)
+                            data += "\n";
+
+                        data += str;
+                    }
                 }
             }
+
+            World.OPL.Add(serial, revision, name, data);
+
+            if (inBuyList && container != null && SerialHelper.IsValid(container.Serial))
+            {
+                UIManager.GetGump<ShopGump>(container.RootContainer)?.SetNameTo((Item) entity, name);
+            }
+        }
 
         private static void GenericAOSCommandsR(Packet p)
         {
@@ -5050,7 +5050,7 @@ namespace ClassicUO.Network
 
                 obj.Next = null;
                 obj.Previous = null;
-                obj.Container = 0;
+                obj.Container = 0xFFFF_FFFF;
             }
 
             obj.RemoveFromTile();
