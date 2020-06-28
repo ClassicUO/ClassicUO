@@ -26,6 +26,8 @@ using ClassicUO.Game.Managers;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
 
+using Microsoft.Xna.Framework;
+
 namespace ClassicUO.Game.GameObjects
 {
     internal class TextObject : BaseGameObject
@@ -41,17 +43,13 @@ namespace ClassicUO.Game.GameObjects
             o.Type = 0;
             o.X = 0;
             o.Y = 0;
+            o.RealScreenPosition = Point.Zero;
             o.OffsetY = 0;
             o.Owner = null;
             o.UnlinkD();
             o.IsTextGump = false;
             o.RenderedText?.Destroy();
             o.RenderedText = null;
-
-            if (!o.IsEmpty)
-            {
-
-            }
             o.Clear();
         });
 
@@ -82,6 +80,7 @@ namespace ClassicUO.Game.GameObjects
 
             UnlinkD();
 
+            RealScreenPosition = Point.Zero;
             IsDestroyed = true;
             RenderedText?.Destroy();
             RenderedText = null;

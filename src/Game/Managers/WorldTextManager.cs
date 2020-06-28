@@ -231,7 +231,7 @@ namespace ClassicUO.Game.Managers
                 return;
             
             obj.UnlinkD();
-            
+
             var item = _firstNode;
 
             if (item != null)
@@ -251,10 +251,6 @@ namespace ClassicUO.Game.Managers
                     obj.DLeft = item;
                     obj.DRight = null;
                 }
-            }
-            else
-            {
-                _firstNode = this;
             }
         }
 
@@ -297,7 +293,7 @@ namespace ClassicUO.Game.Managers
                 }
             }
            
-            _firstNode = null;
+            _firstNode = this;
             _drawPointer = null;
         }
     }

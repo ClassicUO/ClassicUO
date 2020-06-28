@@ -514,8 +514,8 @@ namespace ClassicUO.Game.Scenes
             }
 
 
-            UpdateTextServerEntities(World.Mobiles);
-            UpdateTextServerEntities(World.Items);
+            UpdateTextServerEntities(World.Mobiles, true);
+            UpdateTextServerEntities(World.Items, false);
 
             _renderIndex++;
 
@@ -524,11 +524,11 @@ namespace ClassicUO.Game.Scenes
             UpdateDrawPosition = false;
         }
 
-        private void UpdateTextServerEntities(IEnumerable<Entity> entities)
+        private void UpdateTextServerEntities<T>(IEnumerable<T> entities, bool force) where T : Entity
         {
-            foreach (Entity e in entities)
+            foreach (T e in entities)
             {
-                if (e.UseInRender != _renderIndex && e.TextContainer != null)
+                if (e.UseInRender != _renderIndex && e.TextContainer != null && !e.TextContainer.IsEmpty && (force || e.Graphic == 02006))
                 {
                     e.UpdateRealScreenPosition(_offset.X, _offset.Y);
                     e.UseInRender = (byte) _renderIndex;
