@@ -241,6 +241,7 @@ namespace ClassicUO.Game
                                     uint* p_line_end = pixels_ptr + w;
                                     uint* p_img_end = pixels_ptr + (stride * h);
                                     int delta = stride - w;
+                                    Color c = default;
 
                                     while (pixels_ptr < p_img_end)
                                     {
@@ -248,7 +249,8 @@ namespace ClassicUO.Game
                                         {
                                             if (*pixels_ptr != 0 && *pixels_ptr != 0xFF_00_00_00)
                                             {
-                                                *pixels_ptr = HuesHelper.Color16To32(HuesLoader.Instance.GetColor16( (ushort) (HuesHelper.Color32To16(*pixels_ptr) ) , 0x0033)) | 0xFF_00_00_00;
+                                                c.PackedValue = *pixels_ptr;
+                                                * pixels_ptr = HuesHelper.Color16To32(HuesLoader.Instance.GetColor16(HuesHelper.ColorToHue(c), 0x0033)) | 0xFF_00_00_00;
                                             }
 
                                             ++pixels_ptr;
