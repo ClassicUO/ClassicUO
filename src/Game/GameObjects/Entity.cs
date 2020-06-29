@@ -248,7 +248,7 @@ namespace ClassicUO.Game.GameObjects
             {
                 Item it = (Item) i;
 
-                if (it.Layer == layer)
+                if (!it.IsDestroyed && it.Layer == layer)
                     return it;
             }
 

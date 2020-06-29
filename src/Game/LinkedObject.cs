@@ -21,6 +21,7 @@
 
 
 using System;
+using System.Diagnostics;
 
 namespace ClassicUO.Game
 {
@@ -28,7 +29,7 @@ namespace ClassicUO.Game
     {
         public LinkedObject Previous, Next, Items;
         public bool IsEmpty => Items == null;
-
+        
         ~LinkedObject()
         {
             Clear();
@@ -63,6 +64,9 @@ namespace ClassicUO.Game
                 }
 
                 current.Next = item;
+
+                Debug.Assert(item.Next == null, "[Append to last-next] item must be unlinked before.");
+                item.Next = null;
                 item.Previous = current;
             }
         }

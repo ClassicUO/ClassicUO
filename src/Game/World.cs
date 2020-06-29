@@ -371,24 +371,55 @@ namespace ClassicUO.Game
             return mob;
         }
 
+        public static void RemoveItemFromContainer(uint serial)
+        {
+            Item it = Items.Get(serial);
+
+            if (it != null)
+            {
+                RemoveItemFromContainer(it);
+            }
+        }
+
+        public static void RemoveItemFromContainer(Item obj)
+        {
+            uint containerSerial = obj.Container;
+
+            if (SerialHelper.IsValid(containerSerial))
+            {
+                if (SerialHelper.IsMobile(containerSerial))
+                {
+                    UIManager.GetGump<PaperDollGump>(containerSerial)?.RequestUpdateContents();
+                }
+                else if (SerialHelper.IsItem(containerSerial))
+                {
+                    UIManager.GetGump<ContainerGump>(containerSerial)?.RequestUpdateContents();
+                }
+
+                Entity container = World.Get(containerSerial);
+
+                if (container != null)
+                {
+                    container.Remove(obj);
+                }
+
+                obj.Next = null;
+                obj.Previous = null;
+                obj.Container = 0xFFFF_FFFF;
+            }
+
+            obj.RemoveFromTile();
+        }
+
         public static bool RemoveItem(uint serial, bool forceRemove = false)
         {
             Item item = Items.Get(serial);
 
-            if (item == null)
+            if (item == null || item.IsDestroyed)
                 return false;
 
-            if (SerialHelper.IsValid(item.Container))
-            {
-                Entity ent = Get(item.Container);
-
-                if (ent != null)
-                {
-                    ent.Remove(item);
-                }
-            }
-
             var first = item.Items;
+            RemoveItemFromContainer(item);
 
             while (first != null)
             {
@@ -412,7 +443,7 @@ namespace ClassicUO.Game
         {
             Mobile mobile = Mobiles.Get(serial);
 
-            if (mobile == null)
+            if (mobile == null || mobile.IsDestroyed)
                 return false;
 
             var first = mobile.Items;

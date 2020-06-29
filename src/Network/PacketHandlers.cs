@@ -1230,7 +1230,7 @@ namespace ClassicUO.Network
                             {
                                 Console.WriteLine("=== DENY === ADD TO PAPERDOLL");
 
-                                RemoveItemFromContainer(item);
+                                World.RemoveItemFromContainer(item);
                                 container.PushToBack(item);
                                 item.Container = container.Serial;
                                 UIManager.GetGump<PaperDollGump>(item.Container)?.RequestUpdateContents();
@@ -1239,7 +1239,6 @@ namespace ClassicUO.Network
                             {
                                 Console.WriteLine("=== DENY === SOMETHING WRONG");
 
-                                RemoveItemFromContainer(item);
                                 World.RemoveItem(item, true);
                             }
                         }
@@ -1247,7 +1246,7 @@ namespace ClassicUO.Network
                         {
                             Console.WriteLine("=== DENY === ADD TO TERRAIN");
 
-                            RemoveItemFromContainer(item);
+                            World.RemoveItemFromContainer(item);
                             item.AddToTile();
                             item.UpdateScreenPosition();
                         }
@@ -1354,7 +1353,7 @@ namespace ClassicUO.Network
             if (item.Graphic != 0 && item.Layer != Layer.Backpack)
             {
                 //ClearContainerAndRemoveItems(item);
-                RemoveItemFromContainer(item);
+                World.RemoveItemFromContainer(item);
             }
 
             if (SerialHelper.IsValid(item.Container))
@@ -2342,7 +2341,7 @@ namespace ClassicUO.Network
                 item.Graphic = itemGraphic;
                 item.FixHue(item_hue);
                 item.Amount = 1;
-                RemoveItemFromContainer(item);
+                World.RemoveItemFromContainer(item);
                 item.Container = serial;
 
                 //{
@@ -2528,12 +2527,12 @@ namespace ClassicUO.Network
 
                 if (layer - 1 != Layer.Backpack)
                 {
-                Item item = World.GetOrCreateItem(item_serial);
+                    Item item = World.GetOrCreateItem(item_serial);
 
-                RemoveItemFromContainer(item);
-                item.Container = serial;
-                item.Layer = layer - 1;
-                corpse.PushToBack(item);
+                    World.RemoveItemFromContainer(item);
+                    item.Container = serial;
+                    item.Layer = layer - 1;
+                    corpse.PushToBack(item);
                 }
 
                 layer = (Layer) p.ReadByte();
@@ -4668,13 +4667,12 @@ namespace ClassicUO.Network
 
             if (item != null && (container.Graphic != 0x2006 || item.Layer == Layer.Invalid))
             {
-                RemoveItemFromContainer(item);
-                World.Items.Remove(item);
-                item.Destroy();
+                World.RemoveItem(item, true);
             }
 
             item = World.GetOrCreateItem(serial);
             item.Graphic = graphic;
+            item.CheckGraphicChange();
             item.Amount = amount;
             item.FixHue(hue);
             item.X = x;
@@ -4683,8 +4681,9 @@ namespace ClassicUO.Network
 
             if (SerialHelper.IsValid(item.Container))
             {
-                RemoveItemFromContainer(item);
+                World.RemoveItemFromContainer(item);
             }
+
             item.Container = containerSerial;
 
             container.PushToBack(item);
@@ -4726,11 +4725,11 @@ namespace ClassicUO.Network
                         
                         if (ProfileManager.Current.GridLootType > 0)
                         {
-                            var tradingGump = UIManager.GetGump<GridLootGump>(containerSerial);
+                            var grid_gump = UIManager.GetGump<GridLootGump>(containerSerial);
 
-                            if (tradingGump != null)
+                            if (grid_gump != null)
                             {
-                                tradingGump.RequestUpdateContents();
+                                grid_gump.RequestUpdateContents();
                             }
                             else if (SerialHelper.IsValid(_requestedGridLoot) && _requestedGridLoot == containerSerial)
                             {
@@ -4828,7 +4827,7 @@ namespace ClassicUO.Network
 
                     if (SerialHelper.IsValid(item.Container))
                     {
-                        RemoveItemFromContainer(item);
+                        World.RemoveItemFromContainer(item);
                     }
                 }
                 else
@@ -5026,35 +5025,7 @@ namespace ClassicUO.Network
             }
         }
 
-        private static void RemoveItemFromContainer(Item obj)
-        {
-            uint containerSerial = obj.Container;
-
-            if (SerialHelper.IsValid(containerSerial))
-            {
-                if (SerialHelper.IsMobile(containerSerial))
-                {
-                    UIManager.GetGump<PaperDollGump>(containerSerial)?.RequestUpdateContents();
-                }
-                else if (SerialHelper.IsItem(containerSerial))
-                {
-                    UIManager.GetGump<ContainerGump>(containerSerial)?.RequestUpdateContents();
-                }
-
-                Entity container = World.Get(containerSerial);
-
-                if (container != null)
-                {
-                    container.Remove(obj);
-                }
-
-                obj.Next = null;
-                obj.Previous = null;
-                obj.Container = 0xFFFF_FFFF;
-            }
-
-            obj.RemoveFromTile();
-        }
+        
 
         private static void ClearContainerAndRemoveItems(Entity container, bool remove_unequipped = false)
         {
@@ -5078,9 +5049,7 @@ namespace ClassicUO.Network
                 }
                 else
                 {
-                    RemoveItemFromContainer(it);
-                    World.Items.Remove(it);
-                    it.Destroy();
+                    World.RemoveItem(it, true);
                 }
 
                 first = next;
