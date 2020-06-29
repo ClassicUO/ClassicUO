@@ -394,7 +394,10 @@ namespace ClassicUO.Game.UI.Gumps
             _background = null;
             _hpLineRed = _manaLineRed = _stamLineRed = null;
 
-            _textBox.MouseUp -= TextBoxOnMouseUp;
+            if (_textBox != null)
+            {
+                _textBox.MouseUp -= TextBoxOnMouseUp;
+            }
             _textBox = null;
 
             BuildGump();
@@ -905,7 +908,10 @@ namespace ClassicUO.Game.UI.Gumps
             _background = _hpLineRed = _manaLineRed = _stamLineRed = null;
             _buttonHeal1 = _buttonHeal2 = null;
 
-            _textBox.MouseUp -= TextBoxOnMouseUp;
+            if (_textBox != null)
+            {
+                _textBox.MouseUp -= TextBoxOnMouseUp;
+            } 
             _textBox = null;
 
             BuildGump();
@@ -1135,7 +1141,7 @@ namespace ClassicUO.Game.UI.Gumps
                 if (!(mobile != null && mobile.IsDead) && _isDead)
                     _isDead = false;
 
-                if (!string.IsNullOrEmpty(entity.Name) && _name != entity.Name)
+                if (!string.IsNullOrEmpty(entity.Name) && !(inparty && LocalSerial == World.Player.Serial) && _name != entity.Name)
                 {
                     _name = entity.Name;
                     if (_textBox != null)
