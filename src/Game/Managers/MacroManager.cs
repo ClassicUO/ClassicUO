@@ -852,7 +852,12 @@ namespace ClassicUO.Game.Managers
                             spell += spellType * 100;
 
                             if (spellType > 2)
+                            {
                                 spell += 100;
+
+                                if (spellType == 6)
+                                    spell -= 16;
+                            }
 
                             GameActions.CastSpell(spell);
                         }
