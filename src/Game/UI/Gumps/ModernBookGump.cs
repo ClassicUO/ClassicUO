@@ -69,7 +69,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             }
             _bookPage._ServerUpdate = true;
-            _bookPage.SetText(sb.ToString(), updae_caret: false);
+            _bookPage.SetText(sb.ToString());
             _bookPage.CaretIndex = 0;
             _bookPage.UpdatePageCoords();
             _bookPage._ServerUpdate = false;
