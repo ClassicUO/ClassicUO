@@ -623,7 +623,7 @@ namespace ClassicUO.Game
                     && !selectedItem.ItemData.IsContainer ||
                     ItemHold.Enabled && !ItemHold.IsFixedPosition)
                 {
-                    if (!_tooltip.IsEmpty && (!UIManager.IsMouseOverAControl || UIManager.IsMouseOverWorld))
+                    if (!_tooltip.IsEmpty && (UIManager.MouseOverControl == null || UIManager.IsMouseOverWorld))
                     {
                         _tooltip.Clear();
                     }
@@ -642,7 +642,7 @@ namespace ClassicUO.Game
                         return;
                     }
 
-                    if (UIManager.IsMouseOverAControl && UIManager.MouseOverControl.Tooltip is uint serial)
+                    if (UIManager.MouseOverControl != null && UIManager.MouseOverControl.Tooltip is uint serial)
                     {
                         if (SerialHelper.IsValid(serial) && World.OPL.Contains(serial))
                         {
@@ -659,7 +659,7 @@ namespace ClassicUO.Game
                 }
             }
 
-            if (UIManager.IsMouseOverAControl && UIManager.MouseOverControl != null && UIManager.MouseOverControl.HasTooltip && !Mouse.IsDragging)
+            if (UIManager.MouseOverControl != null && UIManager.MouseOverControl.HasTooltip && !Mouse.IsDragging)
             {
                 if (UIManager.MouseOverControl.Tooltip is string text)
                 {
