@@ -43,7 +43,7 @@ namespace ClassicUO.Game.Managers
         {
             if (_itemsProperties.TryGetValue(serial, out var p))
             {
-                return p.Revision != 0;
+                return true; //p.Revision != 0;  <-- revision == 0 can contain the name.
             }
 
             // if we don't have the OPL of this item, let's request it to the server.
