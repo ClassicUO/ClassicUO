@@ -525,7 +525,7 @@ namespace ClassicUO.Game.UI.Controls
             base.OnKeyDown(key, mod);
         }
 
-        public void SetText(string text, int index = 0, bool updae_caret = true)
+        public void SetText(string text)
         {
             if (string.IsNullOrEmpty(text))
             {

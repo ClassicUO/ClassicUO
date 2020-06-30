@@ -689,7 +689,17 @@ namespace ClassicUO.Network
             ushort hue = p.ReadUShort();
             ushort font = p.ReadUShort();
             string name = p.ReadASCII(30);
-            string text = p.ReadASCII();
+            string text;
+
+            if (p.Length > 44)
+            {
+                p.Seek(44);
+                text = p.ReadASCII();
+            }
+            else
+            {
+                text = string.Empty;
+            }
 
             if (serial == 0 && graphic == 0 && type == MessageType.Regular && font == 0xFFFF && hue == 0xFFFF && name.StartsWith("SYSTEM"))
             {
@@ -703,7 +713,9 @@ namespace ClassicUO.Network
                 if (entity != null)
                 {
                     if (string.IsNullOrEmpty(entity.Name))
-                        entity.Name = name;
+                    {
+                        entity.Name = string.IsNullOrEmpty(name) ? text : name;
+                    }
                 }
             }
 
@@ -2929,7 +2941,7 @@ namespace ClassicUO.Network
                 if (entity != null)
                 {
                     if (string.IsNullOrEmpty(entity.Name))
-                        entity.Name = name;
+                        entity.Name = string.IsNullOrEmpty(name) ? text : name;
                 }           
             }
 
@@ -3818,7 +3830,11 @@ namespace ClassicUO.Network
                   (!string.IsNullOrEmpty(name) && name.ToLower() == "system")) && entity != null)
             {
                 //entity.Graphic = graphic;
-                entity.Name = name;
+
+                if (string.IsNullOrEmpty(entity.Name))
+                {
+                    entity.Name = name;
+                }
             }
 
             MessageManager.HandleMessage(entity, text, name, hue, type, (byte) font, true);
