@@ -395,6 +395,11 @@ namespace ClassicUO.Game.UI.Controls
                             TargetManager.Target(equipment.Serial);
                             Mouse.CancelDoubleClick = true;
                             Mouse.LastLeftButtonClickTime = 0;
+
+                            if (TargetManager.TargetingState == CursorTarget.SetTargetClientSide)
+                            {
+                                UIManager.Add(new InspectorGump(equipment));
+                            }
                         }
                         else
                         {
