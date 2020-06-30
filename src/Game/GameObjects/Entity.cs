@@ -22,6 +22,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
@@ -242,6 +243,7 @@ namespace ClassicUO.Game.GameObjects
             return null;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Item FindItemByLayer(Layer layer)
         {
             for (var i = Items; i != null; i = i.Next)
