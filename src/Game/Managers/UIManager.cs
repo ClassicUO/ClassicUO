@@ -53,8 +53,6 @@ namespace ClassicUO.Game.Managers
 
         public static Control MouseOverControl { get; private set; }
 
-        public static bool IsMouseOverAControl => MouseOverControl != null;
-
         public static bool IsModalOpen { get; private set; }
 
         public static bool IsMouseOverWorld
