@@ -175,10 +175,10 @@ namespace ClassicUO.IO.Resources
             //    }
             //}
 
-            int index;
-            while (true)
+            int index, pos = 0;
+            while (pos < baseCliloc.Length)
             {
-                int pos = baseCliloc.IndexOf('~');
+                pos = baseCliloc.IndexOf('~', pos);
 
                 if (pos == -1)
                     break;
@@ -214,6 +214,8 @@ namespace ClassicUO.IO.Resources
                 }
 
                 baseCliloc = baseCliloc.Remove(pos, pos2 - pos + 1).Insert(pos, index >= arguments.Count ? string.Empty : arguments[index]);
+                if (index >= 0 && index < arguments.Count)
+                    pos += arguments[index].Length;
             }
 
             //for (int i = 0; i < arguments.Count; i++)
