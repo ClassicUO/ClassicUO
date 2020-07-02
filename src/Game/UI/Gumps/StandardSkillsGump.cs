@@ -345,12 +345,14 @@ namespace ClassicUO.Game.UI.Gumps
                         case 1:
                             _gumpPic.IsVisible = true;
                             _textbox.IsEditable = false;
+                            _textbox.AllowSelection = false;
                             UIManager.KeyboardFocusControl = null;
                             UIManager.SystemChat.SetFocus();
                             break;
                         case 2:
                             _gumpPic.IsVisible = false;
                             _textbox.IsEditable = true;
+                            _textbox.AllowSelection = true;
                             UIManager.KeyboardFocusControl = _textbox;
                             _textbox.SetKeyboardFocus();
                             break;
@@ -363,6 +365,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _status = 0;
                     _gumpPic.IsVisible = true;
                     _textbox.IsEditable = false;
+                    _textbox.AllowSelection = false;
                     UIManager.KeyboardFocusControl = null;
                     UIManager.SystemChat.SetFocus();
                 };

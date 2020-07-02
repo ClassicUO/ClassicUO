@@ -129,14 +129,24 @@ namespace ClassicUO.Game.UI.Controls
         public int SelectionStart
         {
             get => _stb.SelectStart;
-            set => _stb.SelectStart = value;
+            set
+            {
+                if (AllowSelection)
+                    _stb.SelectStart = value;
+            } 
         }
 
         public int SelectionEnd
         {
             get => _stb.SelectEnd;
-            set => _stb.SelectEnd = value;
+            set
+            {
+                if (AllowSelection)
+                    _stb.SelectEnd = value;
+            }
         }
+
+        public bool AllowSelection { get; set; } = true;
 
         public bool IsUnicode => _rendererText.IsUnicode;
 
@@ -187,8 +197,11 @@ namespace ClassicUO.Game.UI.Controls
 
         public void SelectAll()
         {
-            _stb.SelectStart = 0;
-            _stb.SelectEnd = Length;
+            if (AllowSelection)
+            {
+                _stb.SelectStart = 0;
+                _stb.SelectEnd = Length;
+            }
         }
 
         protected void UpdateCaretScreenPosition()
@@ -330,6 +343,8 @@ namespace ClassicUO.Game.UI.Controls
         {
             if (_stb != null)
                 _stb.SelectStart = _stb.SelectEnd = 0;
+
+            base.OnFocusLost();
         }
 
         protected override void OnKeyDown(SDL.SDL_Keycode key, SDL.SDL_Keymod mod)
@@ -662,6 +677,9 @@ namespace ClassicUO.Game.UI.Controls
 
         private protected void DrawSelection(UltimaBatcher2D batcher, int x, int y)
         {
+            if (!AllowSelection)
+                return;
+
             ResetHueVector();
 
             int selectStart = Math.Min(_stb.SelectStart, _stb.SelectEnd);
