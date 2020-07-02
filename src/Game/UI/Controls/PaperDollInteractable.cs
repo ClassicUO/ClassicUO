@@ -405,9 +405,10 @@ namespace ClassicUO.Game.UI.Controls
                         {
                             if (!DelayedObjectClickManager.IsEnabled)
                             {
+                                var off = Mouse.LDroppedOffset;
                                 DelayedObjectClickManager.Set(LocalSerial,
-                                                              Mouse.Position.X - ScreenCoordinateX,
-                                                              Mouse.Position.Y - ScreenCoordinateY,
+                                                              (Mouse.Position.X - off.X) - ScreenCoordinateX,
+                                                              (Mouse.Position.Y - off.Y) - ScreenCoordinateY,
                                                               Time.Ticks + Mouse.MOUSE_DELAY_DOUBLE_CLICK);
                             }
                         }

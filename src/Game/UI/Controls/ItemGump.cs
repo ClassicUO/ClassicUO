@@ -225,11 +225,15 @@ namespace ClassicUO.Game.UI.Controls
                                     if (!DelayedObjectClickManager.IsEnabled)
                                     {
                                         var p = RootParent;
+
                                         if (p != null)
+                                        {
+                                            var off = Mouse.LDroppedOffset;
                                             DelayedObjectClickManager.Set(LocalSerial,
-                                                                         Mouse.Position.X - p.ScreenCoordinateX,
-                                                                         Mouse.Position.Y - p.ScreenCoordinateY,
-                                                                         Time.Ticks + Mouse.MOUSE_DELAY_DOUBLE_CLICK);
+                                                                          (Mouse.Position.X - off.X) - p.ScreenCoordinateX,
+                                                                          (Mouse.Position.Y - off.Y) - p.ScreenCoordinateY,
+                                                                          Time.Ticks + Mouse.MOUSE_DELAY_DOUBLE_CLICK);
+                                        }
 
                                         return;
                                     }
@@ -257,7 +261,7 @@ namespace ClassicUO.Game.UI.Controls
             else
                 base.OnMouseUp(x, y, button);
         }
-
+        
         protected override void OnMouseOver(int x, int y)
         {
         }
