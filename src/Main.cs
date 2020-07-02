@@ -228,8 +228,17 @@ namespace ClassicUO
             }
             else
             {
-                if (Settings.GlobalSettings.UseOpenGL)
-                    Environment.SetEnvironmentVariable("FNA3D_FORCE_DRIVER", "OpenGL");
+                switch (Settings.GlobalSettings.ForceDriver)
+                {
+                    case 1: // OpenGL
+                        Environment.SetEnvironmentVariable("FNA3D_FORCE_DRIVER", "OpenGL");
+
+                        break;
+                    case 2: // Vulkan
+                        Environment.SetEnvironmentVariable("FNA3D_FORCE_DRIVER", "Vulkan");
+
+                        break;
+                }
 
                 Client.Run();
             }
@@ -413,8 +422,26 @@ namespace ClassicUO
                         Settings.GlobalSettings.Encryption = byte.Parse(value);
                         break;
 
-                    case "use_opengl":
-                        Settings.GlobalSettings.UseOpenGL = bool.Parse(value);
+                    case "force_driver":
+                        if (byte.TryParse(value, out var res))
+                        {
+                            switch (res)
+                            {
+                                case 1: // OpenGL
+                                    Settings.GlobalSettings.ForceDriver = 1;
+                                    break;
+                                case 2: // Vulkan
+                                    Settings.GlobalSettings.ForceDriver = 2;
+                                    break;
+                                default: // use default
+                                    Settings.GlobalSettings.ForceDriver = 0;
+                                    break;
+                            }
+                        }
+                        else
+                        {
+                            Settings.GlobalSettings.ForceDriver = 0;
+                        }
                         break;
 
                 }

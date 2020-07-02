@@ -96,8 +96,8 @@ namespace ClassicUO.Configuration
         [JsonProperty("run_mouse_in_separate_thread")]
         public bool RunMouseInASeparateThread { get; set; } = true;
 
-        [JsonProperty("use_opengl")]
-        public bool UseOpenGL { get; set; }
+        [JsonProperty("force_driver")]
+        public byte ForceDriver { get; set; }
 
         [JsonProperty("use_verdata")]
         public bool UseVerdata { get; set; }
