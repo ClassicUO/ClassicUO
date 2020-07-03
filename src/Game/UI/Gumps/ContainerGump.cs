@@ -76,8 +76,6 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override GUMP_TYPE GumpType => GUMP_TYPE.GT_CONTAINER;
 
-        public TextContainer TextContainer { get; } = new TextContainer();
-
         public bool IsMinimized
         {
             get => _isMinimized;
@@ -455,8 +453,6 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override void Dispose()
         {
-            TextContainer.Clear();
-
             Item item = World.Items.Get(LocalSerial);
 
             if (item != null)
