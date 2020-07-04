@@ -564,7 +564,7 @@ namespace ClassicUO.Game.Managers
             if (!gump.IsDisposed)
             {
                 Gumps.AddFirst(gump);
-                _needSort = true;
+                _needSort = Gumps.Count > 1;
             }
         }
 
@@ -694,7 +694,7 @@ namespace ClassicUO.Game.Managers
                 {
                     Gumps.Remove(first);
                     Gumps.AddFirst(first);
-                    _needSort = true;
+                    _needSort = Gumps.Count > 1;
                 }
             }
         }
@@ -716,8 +716,11 @@ namespace ClassicUO.Game.Managers
                         {
                             if (first.Value == c)
                             {
-                                Gumps.Remove(first);
-                                Gumps.AddAfter(Gumps.Last, c);
+                                if (Gumps.Last != null)
+                                {
+                                    Gumps.Remove(first);
+                                    Gumps.AddAfter(Gumps.Last, c);
+                                }
                             }
                         }
                     }
