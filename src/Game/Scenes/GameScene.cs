@@ -274,7 +274,7 @@ namespace ClassicUO.Game.Scenes
                     break;
             }
             if (!string.IsNullOrEmpty(text))
-                World.Journal.Add(text, hue, name, e.IsUnicode);
+                World.Journal.Add(text, hue, name, e.TextType, e.IsUnicode);
         }
 
         public override void Unload()
@@ -899,7 +899,8 @@ namespace ClassicUO.Game.Scenes
                 _followingMode = false;
                 _followingTarget = 0;
                 Pathfinder.StopAutoWalk();
-                World.Player.AddMessage(MessageType.Regular, "Stopped following.", 3, 1001, false);
+
+                MessageManager.HandleMessage(World.Player, "Stopped following.", String.Empty, 1001, MessageType.Regular, 3, TEXT_TYPE.CLIENT, false);
             }
         }
 

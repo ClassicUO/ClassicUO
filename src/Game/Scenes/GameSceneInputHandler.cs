@@ -488,6 +488,8 @@ namespace ClassicUO.Game.Scenes
                         string name = st.Name;
                         if (string.IsNullOrEmpty(name))
                             name = ClilocLoader.Instance.GetString(1020000 + st.Graphic, st.ItemData.Name);
+
+                        MessageManager.HandleMessage(null, name, String.Empty, 1001, MessageType.Label, 3, TEXT_TYPE.CLIENT, false);
                         obj.AddMessage(MessageType.Label, name, 3, 1001, false);
 
 
@@ -500,6 +502,8 @@ namespace ClassicUO.Game.Scenes
 
                         if (string.IsNullOrEmpty(name))
                             name = ClilocLoader.Instance.GetString(1020000 + multi.Graphic, multi.ItemData.Name);
+
+                        MessageManager.HandleMessage(null, name, String.Empty, 1001, MessageType.Label, 3, TEXT_TYPE.CLIENT, false);
                         obj.AddMessage(MessageType.Label, name, 3, 1001, false);
 
                         if (obj.TextContainer != null && obj.TextContainer.MaxSize == 5)
@@ -510,7 +514,7 @@ namespace ClassicUO.Game.Scenes
 
                         if (Keyboard.Alt && ent is Mobile)
                         {
-                            World.Player.AddMessage(MessageType.Regular, "Now following.", 3, 1001, false);
+                            MessageManager.HandleMessage(World.Player, "Now following.", String.Empty, 1001, MessageType.Regular, 3, TEXT_TYPE.CLIENT, false);
                             _followingMode = true;
                             _followingTarget = ent;
                         }

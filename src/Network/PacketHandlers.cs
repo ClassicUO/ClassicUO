@@ -708,18 +708,24 @@ namespace ClassicUO.Network
                 return;
             }
 
-            if (!(type == MessageType.System || serial == 0xFFFF_FFFF || serial == 0 || (name.ToLower() == "system" && entity == null)))
+            TEXT_TYPE text_type = TEXT_TYPE.SYSTEM;
+
+            if (type == MessageType.System || serial == 0xFFFF_FFFF || serial == 0 || (name.ToLower() == "system" && entity == null))
             {
-                if (entity != null)
+                // do nothing
+            }
+            else if (entity != null)
+            {
+                text_type = TEXT_TYPE.OBJECT;
+
+                if (string.IsNullOrEmpty(entity.Name))
                 {
-                    if (string.IsNullOrEmpty(entity.Name))
-                    {
-                        entity.Name = string.IsNullOrEmpty(name) ? text : name;
-                    }
+                    entity.Name = string.IsNullOrEmpty(name) ? text : name;
                 }
             }
 
-            MessageManager.HandleMessage(entity, text, name, hue, type, (byte) font);
+
+            MessageManager.HandleMessage(entity, text, name, hue, type, (byte) font, text_type);
         }
 
         private static void DeleteObject(Packet p)
@@ -1281,7 +1287,7 @@ namespace ClassicUO.Network
             byte code = p.ReadByte();
 
             if (code < 5)
-                MessageManager.HandleMessage(null, ServerErrorMessages.GetError(p.ID, code), string.Empty, 1001, MessageType.System, 3);
+                MessageManager.HandleMessage(null, ServerErrorMessages.GetError(p.ID, code), string.Empty, 1001, MessageType.System, 3, TEXT_TYPE.SYSTEM);
         }
 
         private static void EndDraggingItem(Packet p)
@@ -2936,16 +2942,21 @@ namespace ClassicUO.Network
                 text = p.ReadUnicode();
             }
 
-            if (!(type == MessageType.System || serial == 0xFFFF_FFFF || serial == 0 || (name.ToLower() == "system" && entity == null)))
+            TEXT_TYPE text_type = TEXT_TYPE.SYSTEM;
+
+            if (type == MessageType.System || serial == 0xFFFF_FFFF || serial == 0 || (name.ToLower() == "system" && entity == null))
             {
-                if (entity != null)
-                {
-                    if (string.IsNullOrEmpty(entity.Name))
-                        entity.Name = string.IsNullOrEmpty(name) ? text : name;
-                }           
+                // do nothing
+            }
+            else if (entity != null)
+            {
+                text_type = TEXT_TYPE.OBJECT;
+
+                if (string.IsNullOrEmpty(entity.Name))
+                    entity.Name = string.IsNullOrEmpty(name) ? text : name;
             }
 
-            MessageManager.HandleMessage(entity, text, name, hue, type, ProfileManager.Current.ChatFont, true, lang);
+            MessageManager.HandleMessage(entity, text, name, hue, type, ProfileManager.Current.ChatFont, text_type, true, lang);
         }
 
         private static void DisplayDeath(Packet p)
@@ -3342,7 +3353,7 @@ namespace ClassicUO.Network
                         if (!string.IsNullOrEmpty(str))
                             item.Name = str;
 
-                        MessageManager.HandleMessage(item, str, item.Name, 0x3B2, MessageType.Regular, 3, true);
+                        MessageManager.HandleMessage(item, str, item.Name, 0x3B2, MessageType.Regular, 3, TEXT_TYPE.OBJECT, true);
                     }
 
                     str = string.Empty;
@@ -3400,7 +3411,7 @@ namespace ClassicUO.Network
                     if (count < 20 && count > 0 || next == 0xFFFFFFFC && count == 0)
                         strBuffer.Append(']');
 
-                    if (strBuffer.Length != 0) MessageManager.HandleMessage(item, strBuffer.ToString(), item.Name, 0x3B2, MessageType.Regular, 3, true);
+                    if (strBuffer.Length != 0) MessageManager.HandleMessage(item, strBuffer.ToString(), item.Name, 0x3B2, MessageType.Regular, 3, TEXT_TYPE.OBJECT, true);
 
                     NetClient.Socket.Send(new PMegaClilocRequestOld(item));
 
@@ -3825,11 +3836,18 @@ namespace ClassicUO.Network
             if (!FontsLoader.Instance.UnicodeFontExists((byte) font))
                 font = 0;
 
-            if (!(serial == 0xFFFF_FFFF || 
-                  serial == 0 || 
-                  (!string.IsNullOrEmpty(name) && name.ToLower() == "system")) && entity != null)
+            TEXT_TYPE text_type = TEXT_TYPE.SYSTEM;
+
+            if (serial == 0xFFFF_FFFF ||
+                serial == 0 ||
+                (!string.IsNullOrEmpty(name) && name.ToLower() == "system"))
+            {
+                // do nothing
+            }
+            else if (entity != null)
             {
                 //entity.Graphic = graphic;
+                text_type = TEXT_TYPE.OBJECT;
 
                 if (string.IsNullOrEmpty(entity.Name))
                 {
@@ -3837,7 +3855,7 @@ namespace ClassicUO.Network
                 }
             }
 
-            MessageManager.HandleMessage(entity, text, name, hue, type, (byte) font, true);
+            MessageManager.HandleMessage(entity, text, name, hue, type, (byte) font, text_type, true);
         }
 
         private static void UnicodePrompt(Packet p)

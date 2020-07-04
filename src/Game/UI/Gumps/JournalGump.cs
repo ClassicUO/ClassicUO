@@ -24,6 +24,7 @@ using System.IO;
 using System.Xml;
 
 using ClassicUO.Configuration;
+using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
@@ -42,6 +43,7 @@ namespace ClassicUO.Game.UI.Gumps
         private bool _isMinimized;
         private HitBox _hitBox;
         private GumpPic _gumpPic;
+        private Checkbox[] _filters_chekboxes = new Checkbox[3];
 
         public JournalGump() : base(Constants.JOURNAL_LOCALSERIAL, 0)
         {
@@ -84,6 +86,52 @@ namespace ClassicUO.Game.UI.Gumps
             _hitBox.MouseUp += _hitBox_MouseUp;
             _gumpPic.MouseDoubleClick += _gumpPic_MouseDoubleClick;
 
+
+            _filters_chekboxes[0] = new Checkbox(0x00D2, 0x00D3, "System", 1, 0x0386, false)
+            {
+                X = 63,
+                LocalSerial = 1,
+                IsChecked = ProfileManager.Current.ShowJournalSystem
+            };
+            _filters_chekboxes[1] = new Checkbox(0x00D2, 0x00D3, "Objects", 1, 0x0386, false)
+            {
+                X = 149,
+                LocalSerial = 2,
+                IsChecked = ProfileManager.Current.ShowJournalObjects
+            };
+            _filters_chekboxes[2] = new Checkbox(0x00D2, 0x00D3, "Client", 1, 0x0386, false)
+            {
+                X = 233,
+                LocalSerial = 0,
+                IsChecked = ProfileManager.Current.ShowJournalClient
+            };
+
+            void on_check_box(object sender, EventArgs e)
+            {
+                Checkbox c = (Checkbox) sender;
+
+                if (c != null)
+                {
+                    switch ((TEXT_TYPE) c.LocalSerial)
+                    {
+                        case TEXT_TYPE.CLIENT:
+                            ProfileManager.Current.ShowJournalClient = c.IsChecked;
+                            break;
+                        case TEXT_TYPE.SYSTEM:
+                            ProfileManager.Current.ShowJournalSystem = c.IsChecked;
+                            break;
+                        case TEXT_TYPE.OBJECT:
+                            ProfileManager.Current.ShowJournalObjects = c.IsChecked;
+                            break;
+                    }
+                }
+            }
+
+            for (int i = 0; i < 3; i++)
+            {
+                _filters_chekboxes[i].ValueChanged += on_check_box;
+                Add(_filters_chekboxes[i]);
+            }
 
             InitializeJournalEntries();
             World.Journal.EntryAdded += AddJournalEntry;
@@ -142,16 +190,22 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override void Update(double totalMS, double frameMS)
         {
+            base.Update(totalMS, frameMS);
+
             WantUpdateSize = true;
             _journalEntries.Height = Height - (98 + _diffY);
-            base.Update(totalMS, frameMS);
+
+            for (int i = 0; i < 3; i++)
+            {
+                _filters_chekboxes[i].Y = _background.Height - _filters_chekboxes[i].Height - _diffY + 10;
+            }
         }
 
         private void AddJournalEntry(object sender, JournalEntry entry)
         {
             string text = $"{(entry.Name != string.Empty ? $"{entry.Name}: " : string.Empty)}{entry.Text}";
             
-            _journalEntries.AddEntry(text, entry.Font, entry.Hue, entry.IsUnicode, entry.Time);
+            _journalEntries.AddEntry(text, entry.Font, entry.Hue, entry.IsUnicode, entry.Time, entry.TextType);
         }
 
         public override void Save(BinaryWriter writer)
@@ -217,9 +271,11 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
+
         private class RenderedTextList : Control
         {
             private readonly Deque<RenderedText> _entries, _hours;
+            private readonly Deque<TEXT_TYPE> _text_types;
             private readonly ScrollBarBase _scrollBar;
 
             public RenderedTextList(int x, int y, int width, int height, ScrollBarBase scrollBarControl)
@@ -232,8 +288,10 @@ namespace ClassicUO.Game.UI.Gumps
                 Y = y;
                 Width = width;
                 Height = height;
+
                 _entries = new Deque<RenderedText>();
                 _hours = new Deque<RenderedText>();
+                _text_types = new Deque<TEXT_TYPE>();
 
                 WantUpdateSize = false;
             }
@@ -252,6 +310,23 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     var t = _entries[i];
                     var hour = _hours[i];
+                    var type = _text_types[i];
+
+                    if (type == TEXT_TYPE.CLIENT && !ProfileManager.Current.ShowJournalClient)
+                    {
+                        continue;
+                    }
+
+                    if (type == TEXT_TYPE.SYSTEM && !ProfileManager.Current.ShowJournalSystem)
+                    {
+                        continue;
+                    }
+
+                    if (type == TEXT_TYPE.OBJECT && !ProfileManager.Current.ShowJournalObjects)
+                    {
+                        continue;
+                    }
+
 
                     if (height + t.Height <= _scrollBar.Value)
                     {
@@ -310,8 +385,27 @@ namespace ClassicUO.Game.UI.Gumps
                 bool maxValue = _scrollBar.Value == _scrollBar.MaxValue;
                 int height = 0;
 
-                foreach (RenderedText t in _entries)
-                    height += t.Height;
+                for (int i = 0; i < _entries.Count; i++)
+                {
+                    var type = _text_types[i];
+
+                    if (type == TEXT_TYPE.CLIENT && !ProfileManager.Current.ShowJournalClient)
+                    {
+                        continue;
+                    }
+
+                    if (type == TEXT_TYPE.SYSTEM && !ProfileManager.Current.ShowJournalSystem)
+                    {
+                        continue;
+                    }
+
+                    if (type == TEXT_TYPE.OBJECT && !ProfileManager.Current.ShowJournalObjects)
+                    {
+                        continue;
+                    }
+
+                    height += _entries[i].Height;
+                }
 
                 height -= _scrollBar.Height;
 
@@ -329,7 +423,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             }
 
-            public void AddEntry(string text, int font, ushort hue, bool isUnicode, DateTime time)
+            public void AddEntry(string text, int font, ushort hue, bool isUnicode, DateTime time, TEXT_TYPE text_type)
             {
                 bool maxScroll = _scrollBar.Value == _scrollBar.MaxValue;
 
@@ -337,6 +431,7 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     _entries.RemoveFromFront().Destroy();
                     _hours.RemoveFromFront().Destroy();
+                    _text_types.RemoveFromFront();
                 }
 
                 RenderedText h = RenderedText.Create($"{time:t} ", 1150, 1, true, FontStyle.BlackBorder);
@@ -344,6 +439,8 @@ namespace ClassicUO.Game.UI.Gumps
 
                 RenderedText rtext = RenderedText.Create(text, hue, (byte) font, isUnicode, FontStyle.Indention | FontStyle.BlackBorder, maxWidth: Width - (18 + h.Width));
                 _entries.AddToBack(rtext);
+
+                _text_types.AddToBack(text_type);
 
                 _scrollBar.MaxValue += rtext.Height;
                 if (maxScroll) 
