@@ -40,11 +40,9 @@ namespace ClassicUO.IO.Audio
         private string m_Name;
         private float m_volume = 1.0f;
         private float m_volumeFactor = 0.0f;
-        protected DynamicSoundEffectInstance m_ThisInstance;
+        protected DynamicSoundEffectInstance _sound_instance;
         private uint _lastPlayedTime;
         protected uint Delay = 250;
-
-        public bool IsDisposed { get; private set; }
 
         static Sound()
         {
@@ -86,8 +84,8 @@ namespace ClassicUO.IO.Audio
 
                 float instanceVolume = Math.Max(value - VolumeFactor, 0.0f);
 
-                if (m_ThisInstance != null && !m_ThisInstance.IsDisposed)
-                    m_ThisInstance.Volume = instanceVolume;
+                if (_sound_instance != null && !_sound_instance.IsDisposed)
+                    _sound_instance.Volume = instanceVolume;
             }
         }
 
@@ -101,6 +99,8 @@ namespace ClassicUO.IO.Audio
             }
         }
 
+        public bool IsPlaying => _sound_instance != null && _sound_instance.State == SoundState.Playing;
+
         public int CompareTo(Sound other)
         {
             return other == null ? -1 : Index.CompareTo(other.Index);
@@ -108,27 +108,25 @@ namespace ClassicUO.IO.Audio
 
         public void Dispose()
         {
-            if (m_ThisInstance != null)
+            if (_sound_instance != null)
             {
-                m_ThisInstance.BufferNeeded -= OnBufferNeeded;
+                _sound_instance.BufferNeeded -= OnBufferNeeded;
 
-                if (!m_ThisInstance.IsDisposed)
+                if (!_sound_instance.IsDisposed)
                 {
-                    m_ThisInstance.Stop();
-                    m_ThisInstance.Dispose();
+                    _sound_instance.Stop();
+                    _sound_instance.Dispose();
                 }
 
-                m_ThisInstance = null;
+                _sound_instance = null;
             }
-
-            IsDisposed = true;
         }
 
         public void Mute()
         {
-            if (m_ThisInstance != null)
+            if (_sound_instance != null)
             {
-                m_ThisInstance.Volume = 0.0f;
+                _sound_instance.Volume = 0.0f;
             }
         }
 
@@ -161,9 +159,9 @@ namespace ClassicUO.IO.Audio
                 return false;
 
             BeforePlay();
-            m_ThisInstance = GetNewInstance(asEffect);
+            _sound_instance = GetNewInstance(asEffect);
 
-            if (m_ThisInstance == null)
+            if (_sound_instance == null)
             {
                 Dispose();
 
@@ -174,7 +172,7 @@ namespace ClassicUO.IO.Audio
             {
                 case AudioEffects.PitchVariation:
                     float pitch = RandomHelper.GetValue(-5, 5) * .025f;
-                    m_ThisInstance.Pitch = pitch;
+                    _sound_instance.Pitch = pitch;
 
                     break;
             }
@@ -185,14 +183,14 @@ namespace ClassicUO.IO.Audio
 
             if (buffer != null && buffer.Length > 0)
             {
-                m_ThisInstance.BufferNeeded += OnBufferNeeded;
-                m_ThisInstance.SubmitBuffer(buffer);
+                _sound_instance.BufferNeeded += OnBufferNeeded;
+                _sound_instance.SubmitBuffer(buffer);
                 VolumeFactor = volumeFactor;
                 Volume = volume;
-                m_ThisInstance.Play();
+                _sound_instance.Play();
                 List<Tuple<DynamicSoundEffectInstance, double>> list = asEffect ? m_EffectInstances : m_MusicInstances;
-                double ms = m_ThisInstance.GetSampleDuration(buffer.Length).TotalMilliseconds;
-                list.Add(new Tuple<DynamicSoundEffectInstance, double>(m_ThisInstance, now + ms));
+                double ms = _sound_instance.GetSampleDuration(buffer.Length).TotalMilliseconds;
+                list.Add(new Tuple<DynamicSoundEffectInstance, double>(_sound_instance, now + ms));
             }
 
             return true;

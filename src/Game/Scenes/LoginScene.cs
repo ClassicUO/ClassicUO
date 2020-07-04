@@ -100,7 +100,7 @@ namespace ClassicUO.Game.Scenes
             //Engine.FpsLimit = Settings.GlobalSettings.MaxLoginFPS;
 
             UIManager.Add(new LoginBackground());
-            UIManager.Add(_currentGump = new LoginGump());
+            UIManager.Add(_currentGump = new LoginGump(this));
 
             // Registering Packet Events
             NetClient.PacketReceived += NetClient_PacketReceived;
@@ -110,7 +110,7 @@ namespace ClassicUO.Game.Scenes
 
             int music = Client.Version >= ClientVersion.CV_7000 ? 78 : Client.Version > ClientVersion.CV_308Z ? 0 : 8;
 
-            Audio.PlayMusic(music);
+            Audio.PlayMusic(music, false, true);
 
             if (((Settings.GlobalSettings.AutoLogin || Reconnect) && (CurrentLoginStep != LoginSteps.Main)) || CUOEnviroment.SkipLoginScreen)
             {
@@ -212,7 +212,7 @@ namespace ClassicUO.Game.Scenes
                 case LoginSteps.Main:
                     PopupMessage = null;
 
-                    return new LoginGump();
+                    return new LoginGump(this);
 
                 case LoginSteps.Connecting:
                 case LoginSteps.VerifyingAccount:

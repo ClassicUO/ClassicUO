@@ -95,14 +95,14 @@ namespace ClassicUO.IO.Audio
         {
             if (m_Playing)
             {
-                while (m_ThisInstance.PendingBufferCount < 3)
+                while (_sound_instance.PendingBufferCount < 3)
                 {
                     byte[] buffer = GetBuffer();
 
-                    if (m_ThisInstance.IsDisposed)
-                        return;
+                    if (_sound_instance.IsDisposed)
+                        break;
 
-                    m_ThisInstance.SubmitBuffer(buffer);
+                    _sound_instance.SubmitBuffer(buffer);
                 }
             }
         }

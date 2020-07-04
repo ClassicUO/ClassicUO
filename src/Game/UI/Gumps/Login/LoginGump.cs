@@ -46,13 +46,15 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
         private float _time;
 
-        public LoginGump() : base(0, 0)
+        public LoginGump(LoginScene scene) : base(0, 0)
         {
             CanCloseWithRightClick = false;
 
             AcceptKeyboardInput = false;
 
             int offsetX, offsetY, offtextY;
+            byte font;
+            ushort hue;
 
             if (Client.Version < ClientVersion.CV_706400)
             {
@@ -63,17 +65,17 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 if (Client.Version >= ClientVersion.CV_500A)
                     Add(new GumpPic(0, 0, 0x2329, 0));
 
-                // UO Flag
+                //UO Flag
                 Add(new GumpPic(0, 4, 0x15A0, 0) { AcceptKeyboardInput = false });
-                //// Quit Button
-                Add(new Button((int) Buttons.Quit, 0x1589, 0x158B, 0x158A)
+                // Quit Button
+                Add(new Button((int)Buttons.Quit, 0x1589, 0x158B, 0x158A)
                 {
                     X = 555,
                     Y = 4,
                     ButtonAction = ButtonAction.Activate
                 });
 
-                // Login Panel
+                //Login Panel
                 Add(new ResizePic(0x13BE)
                 {
                     X = 128,
@@ -131,7 +133,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
                 Add(_checkboxAutologin = new Checkbox(0x00D2, 0x00D3, "Autologin", 1, 0x0386, false)
                 {
-                    X = 200,
+                    X = 150,
                     Y = 417
                 });
 
@@ -140,6 +142,9 @@ namespace ClassicUO.Game.UI.Gumps.Login
                     X = _checkboxAutologin.X + _checkboxAutologin.Width + 10,
                     Y = 417
                 });
+
+                font = 1;
+                hue = 0x0386;
             }
             else
             {
@@ -184,7 +189,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
                 Add(_checkboxAutologin = new Checkbox(0x00D2, 0x00D3, "Autologin", 9, 0x0481, false)
                 {
-                    X = 200,
+                    X = 150,
                     Y = 417
                 });
 
@@ -193,6 +198,9 @@ namespace ClassicUO.Game.UI.Gumps.Login
                     X = _checkboxAutologin.X + _checkboxAutologin.Width + 10,
                     Y = 417
                 });
+
+                font = 9;
+                hue = 0x0481;
             }
 
 
@@ -247,20 +255,53 @@ namespace ClassicUO.Game.UI.Gumps.Login
             Add(new HtmlControl(htmlX, htmlY, 150, 15,
                                 false, false,
                                 false,
-                                text: "<body link=\"#ad9413\" vlink=\"#00FF00\" ><a href=\"https://www.paypal.me/muskara\">> Support ClassicUO",
+                                text: "<body link=\"#ad9413\" vlink=\"#00FF00\" ><a href=\"https://www.paypal.me/muskara\">Click to donate PayPal",
                                 0x32, true, isunicode: true, style: FontStyle.BlackBorder));
             Add(new HtmlControl(htmlX, htmlY + 20, 150, 15,
                                 false, false,
                                 false,
-                                text: "<body link=\"#ad9413\" vlink=\"#00FF00\" ><a href=\"https://www.patreon.com/classicuo\">> Become a Patreon!",
+                                text: "<body link=\"#ad9413\" vlink=\"#00FF00\" ><a href=\"https://www.patreon.com/classicuo\">Become a Patreon!",
                                 0x32, true, isunicode: true, style: FontStyle.BlackBorder));
 
 
             Add(new HtmlControl(505, htmlY + 19, 100, 15,
+                                false, false,
+                                false,
+                                text: "<body link=\"#ad9413\" vlink=\"#00FF00\" ><a href=\"https://discord.gg/VdyCpjQ\">Join Discord",
+                                0x32, true, isunicode: true, style: FontStyle.Cropped));
+
+            Add(new HtmlControl(505, htmlY + 19, 100, 15,
                                            false, false,
                                            false,
-                                           text: "<body link=\"#6a6a62\" vlink=\"#00FF00\" ><a href=\"https://discord.gg/VdyCpjQ\">CUO Discord",
+                                           text: "<body link=\"#ad9413\" vlink=\"#00FF00\" ><a href=\"https://discord.gg/VdyCpjQ\">Join Discord",
                                            0x32, true, isunicode: true, style: FontStyle.Cropped));
+
+
+
+            var loginmusic_checkbox = new Checkbox(0x00D2, 0x00D3, "Music", font, hue, false)
+            {
+                X = _checkboxSaveAccount.X + _checkboxSaveAccount.Width + 10,
+                Y = 417,
+                IsChecked = Settings.GlobalSettings.LoginMusic,
+            };
+            Add(loginmusic_checkbox);
+
+            var login_music = new HSliderBar(loginmusic_checkbox.X + loginmusic_checkbox.Width + 10, loginmusic_checkbox.Y + 4, 80, 0, 100, Settings.GlobalSettings.LoginMusicVolume, HSliderBarStyle.MetalWidgetRecessedBar, true, font, hue, unicode: false);
+            Add(login_music);
+            login_music.IsVisible = Settings.GlobalSettings.LoginMusic;
+
+            loginmusic_checkbox.ValueChanged += (sender, e) =>
+            {
+                Settings.GlobalSettings.LoginMusic = loginmusic_checkbox.IsChecked;
+                scene.Audio.UpdateCurrentMusicVolume(true);
+
+                login_music.IsVisible = Settings.GlobalSettings.LoginMusic;
+            };
+            login_music.ValueChanged += (sender, e) =>
+            {
+                Settings.GlobalSettings.LoginMusicVolume = login_music.Value;
+                scene.Audio.UpdateCurrentMusicVolume(true);
+            };
 
 
             if (!string.IsNullOrEmpty(_textboxAccount.Text))
