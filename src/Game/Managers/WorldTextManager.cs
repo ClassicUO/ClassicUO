@@ -294,6 +294,8 @@ namespace ClassicUO.Game.Managers
             }
            
             _firstNode = this;
+            _firstNode.DLeft = null;
+            _firstNode.DRight = null;
             _drawPointer = null;
         }
     }
