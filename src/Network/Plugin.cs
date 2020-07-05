@@ -31,6 +31,7 @@ using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
+using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
 using ClassicUO.Utility.Platforms;
 
@@ -73,14 +74,26 @@ namespace ClassicUO.Network
         [MarshalAs(UnmanagedType.FunctionPtr)] private OnPacketSendRecv_new_intptr _recv_new, _send_new;
         [MarshalAs(UnmanagedType.FunctionPtr)] private OnDrawCmdList _draw_cmd_list;
         [MarshalAs(UnmanagedType.FunctionPtr)] private OnWndProc _on_wnd_proc;
+        [MarshalAs(UnmanagedType.FunctionPtr)] private OnGetStaticData _get_static_data;
+        [MarshalAs(UnmanagedType.FunctionPtr)] private OnGetTileData _get_tile_data;
 
 
         private delegate void OnInstall(void* header);
         private delegate bool OnPacketSendRecv_new(byte[] data, ref int length);
         private delegate bool OnPacketSendRecv_new_intptr(IntPtr data, ref int length);
         private delegate int OnDrawCmdList([Out] out IntPtr cmdlist, ref int size);
-
         private delegate int OnWndProc(SDL.SDL_Event* ev);
+        private delegate bool OnGetStaticData(int index, ref ulong flags,
+                                              ref byte weight,
+                                              ref byte layer,
+                                              ref int count,
+                                              ref ushort animid,
+                                              ref ushort lightidx,
+                                              ref byte height,
+                                              ref string name);
+        private delegate bool OnGetTileData(int index, ref ulong flags,
+                                            ref ushort textid,
+                                            ref string name);
 
 
         [DllImport("kernel32", CharSet = CharSet.Unicode, SetLastError = true)]
@@ -118,6 +131,8 @@ namespace ClassicUO.Network
             public IntPtr OnDrawCmdList;
             public IntPtr SDL_Window;
             public IntPtr OnWndProc;
+            public IntPtr GetStaticData;
+            public IntPtr GetTileData;
         }
 
         private readonly Dictionary<IntPtr, GraphicsResource> _resources = new Dictionary<IntPtr, GraphicsResource>();
@@ -173,6 +188,8 @@ namespace ClassicUO.Network
             _getUoFilePath = GetUOFilePath;
             _requestMove = RequestMove;
             _setTitle = SetWindowTitle;
+            _get_static_data = GetStaticData;
+            _get_tile_data = GetTileData;
 
             SDL.SDL_SysWMinfo info = new SDL.SDL_SysWMinfo();
             SDL.SDL_VERSION(out info.version);
@@ -199,7 +216,10 @@ namespace ClassicUO.Network
                 Recv_new = Marshal.GetFunctionPointerForDelegate(_recv_new),
                 Send_new = Marshal.GetFunctionPointerForDelegate(_send_new),
 
-                SDL_Window = Client.Game.Window.Handle
+                SDL_Window = Client.Game.Window.Handle,
+                GetStaticData = Marshal.GetFunctionPointerForDelegate(_get_static_data),
+                GetTileData =  Marshal.GetFunctionPointerForDelegate(_get_tile_data),
+                
             };
 
             void* func = &header;
@@ -330,6 +350,54 @@ namespace ClassicUO.Network
 #else
             Client.Game.Window.Title = $"ClassicUO - {CUOEnviroment.Version} - {str}";
 #endif
+        }
+
+        private static bool GetStaticData(int index,
+                                                 ref ulong flags, 
+                                                 ref byte weight, 
+                                                 ref byte layer, 
+                                                 ref int count,
+                                                 ref ushort animid,
+                                                 ref ushort lightidx, 
+                                                 ref byte height,
+                                                 ref string name)
+        {
+            if (index >= 0 && index < Constants.MAX_STATIC_DATA_INDEX_COUNT)
+            {
+                ref var st = ref TileDataLoader.Instance.StaticData[index];
+
+                flags = (ulong) st.Flags;
+                weight = st.Weight;
+                layer = st.Layer;
+                count = st.Count;
+                animid = st.AnimID;
+                lightidx = st.LightIndex;
+                height = st.Height;
+                name = st.Name;
+               
+                return true;
+            }
+
+            return false;
+        }
+
+        private static bool GetTileData(int index, 
+                                        ref ulong flags,
+                                        ref ushort textid,
+                                        ref string name)
+        {
+            if (index >= 0 && index < Constants.MAX_STATIC_DATA_INDEX_COUNT)
+            {
+                ref var st = ref TileDataLoader.Instance.LandData[index];
+
+                flags = (ulong) st.Flags;
+                textid = st.TexID;
+                name = st.Name;
+
+                return true;
+            }
+
+            return false;
         }
 
         private static void GetStaticImage(ushort g, ref ArtInfo info)
