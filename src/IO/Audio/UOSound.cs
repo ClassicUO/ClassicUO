@@ -38,11 +38,12 @@ namespace ClassicUO.IO.Audio
         }
 
         public int X, Y;
+        public bool CalculateByDistance { get; set; }
 
         protected override void OnBufferNeeded(object sender, EventArgs e)
         {
             // not needed.
-            if (World.InGame)
+            if (World.InGame && X >= 0 && Y >= 0 && CalculateByDistance)
             {
                 int distX = Math.Abs(X - World.Player.X);
                 int distY = Math.Abs(Y - World.Player.Y);

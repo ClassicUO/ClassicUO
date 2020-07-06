@@ -102,6 +102,9 @@ namespace ClassicUO.Game.Managers
             if (sound != null)
             {
                 sound.Play(true, AudioEffects.None, volume);
+                sound.X = -1;
+                sound.Y = -1;
+                sound.CalculateByDistance = false;
 
                 _current_sounds.AddLast(sound);
             }
@@ -143,6 +146,7 @@ namespace ClassicUO.Game.Managers
                 sound.Play(true, AudioEffects.None, volume, distanceFactor);
                 sound.X = x;
                 sound.Y = y;
+                sound.CalculateByDistance = true;
 
                 _current_sounds.AddLast(sound);
             }
