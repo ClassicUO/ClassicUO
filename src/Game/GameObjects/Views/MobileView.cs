@@ -151,136 +151,155 @@ namespace ClassicUO.Game.GameObjects
             AnimationsLoader.Instance.AnimGroup = animGroup;
 
             Item mount = FindItemByLayer(Layer.Mount);
+            ushort hh = _viewHue;
 
-            if (isHuman && mount != null)
+
+
+            for (int k = 0; k < 2; k++)
             {
-                AnimationsLoader.Instance.SittingValue = 0;
-
-                ushort mountGraphic = mount.GetGraphicForAnimation();
-
-                if (mountGraphic != 0xFFFF) 
+                int offset = k == 0 ? 3 : 0;
+                if (k == 0)
                 {
-                    if (hasShadow)
-                    {
-                        DrawInternal(batcher, this, null, drawX, drawY + 10, IsFlipped, animIndex, true, graphic, isHuman, alpha: HueVector.Z);
-                        AnimationsLoader.Instance.AnimGroup = GetGroupForAnimation(this, mountGraphic);
-                        DrawInternal(batcher, this, mount, drawX, drawY, IsFlipped, animIndex, true, mountGraphic, isHuman, alpha: HueVector.Z);
-                    }
-                    else
-                        AnimationsLoader.Instance.AnimGroup = GetGroupForAnimation(this, mountGraphic);
-
-                    drawY += DrawInternal(batcher, this, mount, drawX, drawY, IsFlipped, animIndex, false, mountGraphic, isHuman, isMount: true, alpha: HueVector.Z);
+                    _viewHue = 0x20;
                 }
-            }
-            else
-            {
-                if ((AnimationsLoader.Instance.SittingValue = IsSitting()) != 0)
+                else
                 {
-                    animGroup = (byte) PEOPLE_ANIMATION_GROUP.PAG_STAND;
-                    animIndex = 0;
+                    _viewHue = hh;
+                   
+                }
 
-                    ProcessSteps(out dir);
-                    AnimationsLoader.Instance.Direction = dir;
-                    AnimationsLoader.Instance.FixSittingDirection(ref dir, ref IsFlipped, ref drawX, ref drawY);
+                if (isHuman && mount != null)
+                {
+                    ushort mountGraphic = mount.GetGraphicForAnimation();
 
-                    if (AnimationsLoader.Instance.Direction == 3)
+                    AnimationsLoader.Instance.SittingValue = 0;
+
+                    if (mountGraphic != 0xFFFF)
                     {
-                        if (IsGargoyle)
+                        if (hasShadow && k != 0)
                         {
-                            drawY -= 30;
+                            DrawInternal(batcher, this, null, drawX, drawY + 10, IsFlipped, animIndex, true, graphic, isHuman, alpha: HueVector.Z);
+                            AnimationsLoader.Instance.AnimGroup = GetGroupForAnimation(this, mountGraphic);
+                            DrawInternal(batcher, this, mount, drawX, drawY, IsFlipped, animIndex, true, mountGraphic, isHuman, alpha: HueVector.Z);
+                        }
+                        else
+                            AnimationsLoader.Instance.AnimGroup = GetGroupForAnimation(this, mountGraphic);
+
+                        drawY += DrawInternal(batcher, this, mount, drawX, drawY, IsFlipped, animIndex, false, mountGraphic, isHuman, isMount: true, alpha: HueVector.Z, offset: offset);
+                    }
+                }
+                else
+                {
+                    if ((AnimationsLoader.Instance.SittingValue = IsSitting()) != 0)
+                    {
+                        animGroup = (byte) PEOPLE_ANIMATION_GROUP.PAG_STAND;
+                        animIndex = 0;
+
+                        ProcessSteps(out dir);
+                        AnimationsLoader.Instance.Direction = dir;
+                        AnimationsLoader.Instance.FixSittingDirection(ref dir, ref IsFlipped, ref drawX, ref drawY);
+
+                        if (AnimationsLoader.Instance.Direction == 3)
+                        {
+                            if (IsGargoyle)
+                            {
+                                drawY -= 30;
+                                animGroup = 42;
+                            }
+                            else
+                                animGroup = 25;
+                        }
+                        else if (IsGargoyle)
+                        {
                             animGroup = 42;
                         }
                         else
-                            animGroup = 25;
+                            _transform = true;
                     }
-                    else if (IsGargoyle)
-                    {
-                        animGroup = 42;
-                    }
-                    else
-                        _transform = true;
+                    else if (hasShadow)
+                        DrawInternal(batcher, this, null, drawX, drawY, IsFlipped, animIndex, true, graphic, isHuman, alpha: HueVector.Z);
                 }
-                else if (hasShadow)
-                    DrawInternal(batcher, this, null, drawX, drawY, IsFlipped, animIndex, true, graphic, isHuman, alpha: HueVector.Z);
-            }
 
-            AnimationsLoader.Instance.AnimGroup = animGroup;
+                AnimationsLoader.Instance.AnimGroup = animGroup;
 
 
-            DrawInternal(batcher, this, null, drawX, drawY, IsFlipped, animIndex, false, graphic, isHuman, alpha: HueVector.Z);
+                DrawInternal(batcher, this, null, drawX, drawY, IsFlipped, animIndex, false, graphic, isHuman, alpha: HueVector.Z, offset: offset);
 
-            for (int i = 0; i < Constants.USED_LAYER_COUNT; i++)
-            {
-                Layer layer = LayerOrder.UsedLayers[layerDir, i];
-
-                Item item = FindItemByLayer(layer);
-
-                if (item == null)
-                    continue;
-
-                if (IsDead && (layer == Layer.Hair || layer == Layer.Beard))
-                    continue;
-
-                if (isHuman)
+                for (int i = 0; i < Constants.USED_LAYER_COUNT; i++)
                 {
-                    if (IsCovered(this, layer))
+                    Layer layer = LayerOrder.UsedLayers[layerDir, i];
+
+                    Item item = FindItemByLayer(layer);
+
+                    if (item == null)
                         continue;
 
-                    if (item.ItemData.AnimID != 0)
+                    if (IsDead && (layer == Layer.Hair || layer == Layer.Beard))
+                        continue;
+
+                    if (isHuman)
                     {
-                        graphic = item.ItemData.AnimID;
+                        if (IsCovered(this, layer))
+                            continue;
 
-                        if (isGargoyle)
+                        if (item.ItemData.AnimID != 0)
                         {
-                            if (graphic == 469)
-                            {
-                                // gargoyle robe
-                                graphic = 342;
-                            }
-                            else if (graphic == 0x03CA)
-                            {
-                                // gargoyle dead shroud
-                                graphic = 0x0223;
-                            }
-                        }
+                            graphic = item.ItemData.AnimID;
 
-                        if (AnimationsLoader.Instance.EquipConversions.TryGetValue(Graphic, out Dictionary<ushort, EquipConvData> map))
-                        {
-                            if (map.TryGetValue(item.ItemData.AnimID, out EquipConvData data))
+                            if (isGargoyle)
                             {
-                                _equipConvData = data;
-                                graphic = data.Graphic;
+                                if (graphic == 469)
+                                {
+                                    // gargoyle robe
+                                    graphic = 342;
+                                }
+                                else if (graphic == 0x03CA)
+                                {
+                                    // gargoyle dead shroud
+                                    graphic = 0x0223;
+                                }
                             }
-                        }
 
-                        if (AnimationsLoader.Instance.SittingValue == 0 && IsGargoyle && item.ItemData.IsWeapon)
-                        {
-                            AnimationsLoader.Instance.AnimGroup = GetGroupForAnimation(this, graphic);
-                            DrawInternal(batcher, this, item, drawX, drawY, IsFlipped, animIndex, false, graphic, isHuman, false, alpha: HueVector.Z);
-                            AnimationsLoader.Instance.AnimGroup = animGroup;
+                            if (AnimationsLoader.Instance.EquipConversions.TryGetValue(Graphic, out Dictionary<ushort, EquipConvData> map))
+                            {
+                                if (map.TryGetValue(item.ItemData.AnimID, out EquipConvData data))
+                                {
+                                    _equipConvData = data;
+                                    graphic = data.Graphic;
+                                }
+                            }
+
+                            if (AnimationsLoader.Instance.SittingValue == 0 && IsGargoyle && item.ItemData.IsWeapon)
+                            {
+                                AnimationsLoader.Instance.AnimGroup = GetGroupForAnimation(this, graphic);
+                                DrawInternal(batcher, this, item, drawX, drawY, IsFlipped, animIndex, false, graphic, isHuman, false, alpha: HueVector.Z, offset: offset);
+                                AnimationsLoader.Instance.AnimGroup = animGroup;
+                            }
+                            else
+                            {
+                                DrawInternal(batcher, this, item, drawX, drawY, IsFlipped, animIndex, false, graphic, isHuman, false, alpha: HueVector.Z, offset: offset);
+                            }
                         }
                         else
                         {
-                            DrawInternal(batcher, this, item, drawX, drawY, IsFlipped, animIndex, false, graphic, isHuman, false, alpha: HueVector.Z);
+                            if (item.ItemData.IsLight)
+                                Client.Game.GetScene<GameScene>().AddLight(this, this, drawX, drawY);
                         }
+
+                        _equipConvData = null;
                     }
                     else
                     {
                         if (item.ItemData.IsLight)
+                        {
                             Client.Game.GetScene<GameScene>().AddLight(this, this, drawX, drawY);
-                    }
-
-                    _equipConvData = null;
-                }
-                else
-                {
-                    if (item.ItemData.IsLight)
-                    {
-                        Client.Game.GetScene<GameScene>().AddLight(this, this, drawX, drawY);
-                        break;
+                            break;
+                        }
                     }
                 }
             }
+
+           
 
             //if (FileManager.Animations.SittingValue != 0)
             //{
@@ -314,7 +333,8 @@ namespace ClassicUO.Game.GameObjects
                                            bool isHuman,
                                            bool isParent = true,
                                            bool isMount = false,
-                                           float alpha = 0)
+                                           float alpha = 0,
+                                           int offset = 0)
         {
             if (id >= Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT || owner == null)
                 return 0;
@@ -483,7 +503,18 @@ namespace ClassicUO.Game.GameObjects
                     }
                     else if (frame != null)
                     {
-                        batcher.DrawSprite(frame, x, y, mirror, ref HueVector);
+                        if (offset != 0)
+                        {
+                            HueVector.Y = 1;
+                            HueVector.Z = 0;
+                        }
+
+                        batcher.DrawSprite(frame, 
+                            x - offset, 
+                            y - offset, 
+                            frame.Width + offset * 2, 
+                            frame.Height + offset * 2,
+                            mirror, ref HueVector);
 
                         int yy = -(frame.Height + frame.CenterY + 3);
                         int xx = -frame.CenterX;

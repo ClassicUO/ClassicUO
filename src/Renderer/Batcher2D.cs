@@ -299,6 +299,108 @@ namespace ClassicUO.Renderer
         }
 
         [MethodImpl(256)]
+        public bool DrawSprite(Texture2D texture, int x, int y, int w, int h, bool mirror, ref Vector3 hue)
+        {
+            EnsureSize();
+
+            ref var vertex = ref _vertexInfo[_numSprites];
+
+            if (mirror)
+            {
+                vertex.Position0.X = x + w;
+                vertex.Position0.Y = y + h;
+                vertex.Position0.Z = 0;
+                vertex.Normal0.X = 0;
+                vertex.Normal0.Y = 0;
+                vertex.Normal0.Z = 1;
+                vertex.TextureCoordinate0.X = 0;
+                vertex.TextureCoordinate0.Y = 1;
+                vertex.TextureCoordinate0.Z = 0;
+
+                vertex.Position1.X = x;
+                vertex.Position1.Y = y + h;
+                vertex.Position0.Z = 0;
+                vertex.Normal1.X = 0;
+                vertex.Normal1.Y = 0;
+                vertex.Normal1.Z = 1;
+                vertex.TextureCoordinate1.X = 1;
+                vertex.TextureCoordinate1.Y = 1;
+                vertex.TextureCoordinate1.Z = 0;
+
+                vertex.Position2.X = x + w;
+                vertex.Position2.Y = y;
+                vertex.Position2.Z = 0;
+                vertex.Normal2.X = 0;
+                vertex.Normal2.Y = 0;
+                vertex.Normal2.Z = 1;
+                vertex.TextureCoordinate2.X = 0;
+                vertex.TextureCoordinate2.Y = 0;
+                vertex.TextureCoordinate2.Z = 0;
+
+                vertex.Position3.X = x;
+                vertex.Position3.Y = y;
+                vertex.Position3.Z = 0;
+                vertex.Normal3.X = 0;
+                vertex.Normal3.Y = 0;
+                vertex.Normal3.Z = 1;
+                vertex.TextureCoordinate3.X = 1;
+                vertex.TextureCoordinate3.Y = 0;
+                vertex.TextureCoordinate3.Z = 0;
+            }
+            else
+            {
+                vertex.Position0.X = x;
+                vertex.Position0.Y = y + h;
+                vertex.Position0.Z = 0;
+                vertex.Normal0.X = 0;
+                vertex.Normal0.Y = 0;
+                vertex.Normal0.Z = 1;
+                vertex.TextureCoordinate0.X = 0;
+                vertex.TextureCoordinate0.Y = 1;
+                vertex.TextureCoordinate0.Z = 0;
+
+                vertex.Position1.X = x + w;
+                vertex.Position1.Y = y + h;
+                vertex.Position1.Z = 0;
+                vertex.Normal1.X = 0;
+                vertex.Normal1.Y = 0;
+                vertex.Normal1.Z = 1;
+                vertex.TextureCoordinate1.X = 1;
+                vertex.TextureCoordinate1.Y = 1;
+                vertex.TextureCoordinate1.Z = 0;
+
+                vertex.Position2.X = x;
+                vertex.Position2.Y = y;
+                vertex.Position2.Z = 0;
+                vertex.Normal2.X = 0;
+                vertex.Normal2.Y = 0;
+                vertex.Normal2.Z = 1;
+                vertex.TextureCoordinate2.X = 0;
+                vertex.TextureCoordinate2.Y = 0;
+                vertex.TextureCoordinate2.Z = 0;
+
+                vertex.Position3.X = x + w;
+                vertex.Position3.Y = y;
+                vertex.Position3.Z = 0;
+                vertex.Normal3.X = 0;
+                vertex.Normal3.Y = 0;
+                vertex.Normal3.Z = 1;
+                vertex.TextureCoordinate3.X = 1;
+                vertex.TextureCoordinate3.Y = 0;
+                vertex.TextureCoordinate3.Z = 0;
+            }
+
+            vertex.Hue0 =
+            vertex.Hue1 =
+            vertex.Hue2 =
+            vertex.Hue3 = hue;
+
+            PushSprite(texture);
+
+            return true;
+        }
+
+        [MethodImpl(256)]
         public bool DrawSpriteLand(Texture2D texture, 
                                    int x, int y,
                                    ref Rectangle rect,
