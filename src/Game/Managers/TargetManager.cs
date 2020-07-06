@@ -135,9 +135,13 @@ namespace ClassicUO.Game.Managers
 
         public static readonly LastTargetInfo LastTargetInfo = new LastTargetInfo();
 
-        public static void ClearTargetingWithoutTargetCancelPacket()
+        private static void ClearTargetingWithoutTargetCancelPacket()
         {
-            if (TargetingState == CursorTarget.MultiPlacement) World.HouseManager.Remove(0);
+            if (TargetingState == CursorTarget.MultiPlacement)
+            {
+                World.HouseManager.Remove(0);
+            }
+
             IsTargeting = false;
         }
 
@@ -190,8 +194,11 @@ namespace ClassicUO.Game.Managers
                     UIManager.GetGump<HouseCustomizationGump>()?.Update();
                 }
             }
+
             NetClient.Socket.Send(new PTargetCancel(TargetingState, _targetCursorId, (byte) TargetingType));
             IsTargeting = false;
+
+            Reset();
         }
 
         public static void SetTargetingMulti(uint deedSerial, ushort model, ushort x, ushort y, ushort z, ushort hue)
