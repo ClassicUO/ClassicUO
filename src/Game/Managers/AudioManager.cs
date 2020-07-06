@@ -19,6 +19,7 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
 
+using System;
 using System.Collections.Generic;
 
 using ClassicUO.Configuration;
@@ -90,13 +91,44 @@ namespace ClassicUO.Game.Managers
             else if (!ProfileManager.Current.ReproduceSoundsInBackground)
                 volume = 0;
 
-            PlaySoundWithDistance(index, volume);
+            if (volume < -1 || volume > 1f)
+                return;
+
+            if (ProfileManager.Current == null || !ProfileManager.Current.EnableSound || !Client.Game.IsActive && !ProfileManager.Current.ReproduceSoundsInBackground)
+                volume = 0;
+
+            UOSound sound = (UOSound)SoundsLoader.Instance.GetSound(index);
+
+            if (sound != null)
+            {
+                sound.Play(true, AudioEffects.None, volume);
+
+                _current_sounds.AddLast(sound);
+            }
         }
 
-        public void PlaySoundWithDistance(int index, float volume, float distanceFactor = 0.0f)
+        public void PlaySoundWithDistance(int index, int x, int y)
         {
-            if (!_canReproduceAudio)
+            if (!_canReproduceAudio || !World.InGame)
                 return;
+
+            int distX = Math.Abs(x - World.Player.X);
+            int distY = Math.Abs(y - World.Player.Y);
+            int distance = Math.Max(distX, distY);
+
+            float volume = ProfileManager.Current.SoundVolume / Constants.SOUND_DELTA;
+            float distanceFactor = 0.0f;
+
+            if (distance >= 1)
+            {
+                float volumeByDist = volume / (World.ClientViewRange + 1);
+                distanceFactor = volumeByDist * distance;
+            }
+
+            if (distance > World.ClientViewRange)
+            {
+                volume = 0;
+            }
 
             if (volume < -1 || volume > 1f)
                 return;
@@ -108,8 +140,9 @@ namespace ClassicUO.Game.Managers
 
             if (sound != null)
             {
-                
                 sound.Play(true, AudioEffects.None, volume, distanceFactor);
+                sound.X = x;
+                sound.Y = y;
 
                 _current_sounds.AddLast(sound);
             }

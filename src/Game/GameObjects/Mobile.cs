@@ -486,13 +486,14 @@ namespace ClassicUO.Game.GameObjects
 
                 if (Steps.Count != 0 && LastStepSoundTime < ticks)
                 {
+                    ref Step step = ref Steps.Back();
+
                     int incID = StepSoundOffset;
                     int soundID = 0x012B;
                     int delaySound = 400;
 
                     if (IsMounted)
                     {
-                        ref Step step = ref Steps.Back();
                         if (step.Run)
                         {
                             soundID = 0x0129;
@@ -511,18 +512,7 @@ namespace ClassicUO.Game.GameObjects
 
                     StepSoundOffset = (incID + 1) % 2;
 
-
-                    int distance = Distance;
-
-                    float volume = ProfileManager.Current.SoundVolume / Constants.SOUND_DELTA;
-
-                    if (distance <= World.ClientViewRange && distance >= 1)
-                    {
-                        float volumeByDist = volume / World.ClientViewRange;
-                        volume -= volumeByDist * distance;
-                    }
-
-                    Client.Game.Scene.Audio.PlaySoundWithDistance(soundID, volume);
+                    Client.Game.Scene.Audio.PlaySoundWithDistance(soundID, step.X, step.Y);
                     LastStepSoundTime = ticks + delaySound;
                 }
             }
