@@ -255,8 +255,6 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
             //Add(new NiceButton(){ });
 
-            UIManager.Add(new DonateGump());
-
             Add(new HtmlControl(htmlX, htmlY, 150, 15,
                                 false, false,
                                 false,
