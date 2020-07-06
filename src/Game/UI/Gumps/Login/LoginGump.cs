@@ -23,6 +23,7 @@ using System;
 using System.IO;
 using ClassicUO.Configuration;
 using ClassicUO.Data;
+using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.IO.Resources;
@@ -252,6 +253,10 @@ namespace ClassicUO.Game.UI.Gumps.Login
             int htmlX = 130;
             int htmlY = 442;
 
+            //Add(new NiceButton(){ });
+
+            UIManager.Add(new DonateGump());
+
             Add(new HtmlControl(htmlX, htmlY, 150, 15,
                                 false, false,
                                 false,
@@ -264,17 +269,17 @@ namespace ClassicUO.Game.UI.Gumps.Login
                                 0x32, true, isunicode: true, style: FontStyle.BlackBorder));
 
 
-            Add(new HtmlControl(505, htmlY + 19, 100, 15,
+            Add(new HtmlControl(505, htmlY, 100, 15,
                                 false, false,
                                 false,
-                                text: "<body link=\"#ad9413\" vlink=\"#00FF00\" ><a href=\"https://discord.gg/VdyCpjQ\">Join Discord",
-                                0x32, true, isunicode: true, style: FontStyle.Cropped));
+                                text: "<body link=\"#ad9413\" vlink=\"#00FF00\" ><a href=\"https://www.classicuo.eu\">Website",
+                                0x32, true, isunicode: true, style: FontStyle.BlackBorder));
 
             Add(new HtmlControl(505, htmlY + 19, 100, 15,
                                            false, false,
                                            false,
                                            text: "<body link=\"#ad9413\" vlink=\"#00FF00\" ><a href=\"https://discord.gg/VdyCpjQ\">Join Discord",
-                                           0x32, true, isunicode: true, style: FontStyle.Cropped));
+                                           0x32, true, isunicode: true, style: FontStyle.BlackBorder));
 
 
 
