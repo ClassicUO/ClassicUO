@@ -99,7 +99,7 @@ namespace ClassicUO.IO.Audio
             }
         }
 
-        public bool IsPlaying => _sound_instance != null && _sound_instance.State == SoundState.Playing;
+        public bool IsPlaying => _sound_instance != null && (_sound_instance.State == SoundState.Playing || _sound_instance.PendingBufferCount > 0);
 
         public int CompareTo(Sound other)
         {
@@ -159,6 +159,7 @@ namespace ClassicUO.IO.Audio
                 return false;
 
             BeforePlay();
+
             _sound_instance = GetNewInstance(asEffect);
 
             if (_sound_instance == null)
@@ -201,19 +202,23 @@ namespace ClassicUO.IO.Audio
             //m_ThisInstance?.Stop();
             //m_ThisInstance?.Dispose();
 
-            //CullExpiredEffects(Time.Ticks);
+            CullExpiredEffects(Time.Ticks);
 
-            foreach (Tuple<DynamicSoundEffectInstance, double> sound in m_EffectInstances)
-            {
-                sound.Item1.Stop();
-                sound.Item1.Dispose();
-            }
+            _sound_instance?.Stop();
+            _sound_instance?.Dispose();
 
-            foreach (Tuple<DynamicSoundEffectInstance, double> music in m_MusicInstances)
-            {
-                music.Item1.Stop();
-                music.Item1.Dispose();
-            }
+
+            //foreach (Tuple<DynamicSoundEffectInstance, double> sound in m_EffectInstances)
+            //{
+            //    sound.Item1.Stop();
+            //    sound.Item1.Dispose();
+            //}
+
+            //foreach (Tuple<DynamicSoundEffectInstance, double> music in m_MusicInstances)
+            //{
+            //    music.Item1.Stop();
+            //    music.Item1.Dispose();
+            //}
 
             AfterStop();
         }

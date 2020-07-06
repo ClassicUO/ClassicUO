@@ -108,6 +108,7 @@ namespace ClassicUO.Game.Managers
 
             if (sound != null)
             {
+                
                 sound.Play(true, AudioEffects.None, volume, distanceFactor);
 
                 _current_sounds.AddLast(sound);
