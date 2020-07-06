@@ -289,7 +289,7 @@ namespace ClassicUO.Game.Scenes
             {
             }
 
-            TargetManager.ClearTargetingWithoutTargetCancelPacket();
+            TargetManager.Reset();
 
             // special case for wmap. this allow us to save settings
             UIManager.GetGump<WorldMapGump>()?.SaveSettings();
