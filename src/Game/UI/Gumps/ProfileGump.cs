@@ -69,6 +69,10 @@ namespace ClassicUO.Game.UI.Gumps
             };
             _originalText = body;
             _textBox.SetText(body);
+
+            if (_textBox.Height < 50)
+                _textBox.Height = 50;
+
             _textBox.TextChanged += _textBox_TextChanged;
             _scrollArea.Add(_textBox);
             AddHorizontalBar(_scrollArea, 95, 35, 220);
