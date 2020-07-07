@@ -158,7 +158,7 @@ namespace ClassicUO.Game.Managers
                     {
                         if (Members[i] != null && Members[i].Serial == ser)
                         {
-                            MessageManager.HandleMessage(null, name, Members[i].Name, ProfileManager.Current.PartyMessageHue, MessageType.Party, 3, TEXT_TYPE.OBJECT);
+                            MessageManager.HandleMessage(null, name, Members[i].Name, ProfileManager.Current.PartyMessageHue, MessageType.Party, 3, TEXT_TYPE.SYSTEM);
 
                             break;
                         }

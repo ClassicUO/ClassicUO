@@ -2931,7 +2931,7 @@ namespace ClassicUO.Network
 
             TEXT_TYPE text_type = TEXT_TYPE.SYSTEM;
 
-            if (type == MessageType.System || serial == 0xFFFF_FFFF || serial == 0 || (name.ToLower() == "system" && entity == null))
+            if ( (type == MessageType.System || type == MessageType.Alliance || type == MessageType.Guild) || serial == 0xFFFF_FFFF || serial == 0 || (name.ToLower() == "system" && entity == null))
             {
                 // do nothing
             }
