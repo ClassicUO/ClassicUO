@@ -34,7 +34,9 @@ namespace ClassicUO.IO.Resources
     {
         private static readonly char[] _mConfigFileDelimiters = {' ', ',', '\t'};
         private static readonly Dictionary<int, Tuple<string, bool>> _mMusicData = new Dictionary<int, Tuple<string, bool>>();
-        private readonly Dictionary<int, Sound> _sounds = new Dictionary<int, Sound>(), _musics = new Dictionary<int, Sound>();
+        private readonly Sound[] _sounds = new Sound[Constants.MAX_SOUND_DATA_INDEX_COUNT];
+        private readonly Sound[] _musics = new Sound[Constants.MAX_SOUND_DATA_INDEX_COUNT];
+
         private UOFile _file;
 
         private SoundsLoader()
@@ -286,41 +288,54 @@ namespace ClassicUO.IO.Resources
 
         public Sound GetSound(int index)
         {
-            if (!_sounds.TryGetValue(index, out Sound sound) && TryGetSound(index, out byte[] data, out string name))
+            if (index >= 0 && index < Constants.MAX_SOUND_DATA_INDEX_COUNT)
             {
-                sound = new UOSound(name, index, data);
-                _sounds.Add(index, sound);
+                ref var sound = ref _sounds[index];
+
+                if (sound == null && TryGetSound(index, out byte[] data, out string name))
+                {
+                    sound = new UOSound(name, index, data);
+                }
+
+                return sound;
             }
 
-            return sound;
+            return null;
         }
 
         public Sound GetMusic(int index)
         {
-            if (!_musics.TryGetValue(index, out Sound music) && TryGetMusicData(index, out string name, out bool loop))
+            if (index >= 0 && index < Constants.MAX_SOUND_DATA_INDEX_COUNT)
             {
-                music = new UOMusic(index, name, loop);
-                _musics.Add(index, music);
+                ref var music = ref _musics[index];
+
+                if (music == null && TryGetMusicData(index, out string name, out bool loop))
+                {
+                    music = new UOMusic(index, name, loop);
+                }
+
+                return music;
             }
 
-            return music;
+            return null;
         }
 
         public override void ClearResources()
         {
-            foreach (var m in _musics)
+            for (int i = 0; i < Constants.SOUND_DELTA; i++)
             {
-                m.Value.Dispose();
+                if (_sounds[i] != null)
+                {
+                    _sounds[i].Dispose();
+                    _sounds[i] = null;
+                }
+
+                if (_musics[i] != null)
+                {
+                    _musics[i].Dispose();
+                    _musics[i] = null;
+                }
             }
-
-            _musics.Clear();
-
-            foreach (var s in _sounds)
-            {
-                s.Value.Dispose();
-            }
-
-            _sounds.Clear();
 
             _mMusicData.Clear();
         }

@@ -1673,7 +1673,7 @@ namespace ClassicUO.Network
             ushort audio = p.ReadUShort();
             ushort x = p.ReadUShort();
             ushort y = p.ReadUShort();
-            ushort z = p.ReadUShort();
+            short z = (short) p.ReadUShort();
 
             Client.Game.Scene.Audio.PlaySoundWithDistance(index, x, y);
         }

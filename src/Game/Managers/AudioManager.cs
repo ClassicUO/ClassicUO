@@ -132,7 +132,7 @@ namespace ClassicUO.Game.Managers
             if (ProfileManager.Current == null || !ProfileManager.Current.EnableSound || !Client.Game.IsActive && !ProfileManager.Current.ReproduceSoundsInBackground)
                 volume = 0;
 
-            UOSound sound = (UOSound)SoundsLoader.Instance.GetSound(index);
+            UOSound sound = (UOSound) SoundsLoader.Instance.GetSound(index);
 
             if (sound != null && sound.Play(volume, distanceFactor))
             {
