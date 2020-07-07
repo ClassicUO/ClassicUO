@@ -573,9 +573,11 @@ namespace ClassicUO.Game.Scenes
                 {
                     ref var step = ref mob.Steps.Back();
 
-                    if ((step.Direction & 7) == 2)
+                    if ((step.Direction & 7) == 2 || (step.Direction & 7) == 6)
                         dropMaxZIndex = 0;
                 }       
+                else if (mob.Direction == Direction.East || mob.Direction == Direction.West)
+                        dropMaxZIndex = 0;
             }
             
             for (int i = 0; i < 8; i++)
