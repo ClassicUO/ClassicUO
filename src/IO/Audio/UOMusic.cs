@@ -37,7 +37,7 @@ namespace ClassicUO.IO.Audio
         private readonly byte[] m_WaveBuffer = new byte[NUMBER_OF_PCM_BYTES_TO_READ_PER_CHUNK];
         private bool m_Playing;
         private MP3Stream m_Stream;
-
+        private string _path;
 
         public UOMusic(int index, string name, bool loop)
             : base(name, index)
@@ -46,9 +46,10 @@ namespace ClassicUO.IO.Audio
             m_Playing = false;
             Channels = AudioChannels.Stereo;
             Delay = 0;
+            _path = System.IO.Path.Combine(Settings.GlobalSettings.UltimaOnlineDirectory, Client.Version > ClientVersion.CV_5090 ? $"Music/Digital/{Name}.mp3" : $"music/{Name}.mp3"); 
         }
 
-        private string Path => System.IO.Path.Combine(Settings.GlobalSettings.UltimaOnlineDirectory, Client.Version > ClientVersion.CV_5090 ? $"Music/Digital/{Name}.mp3" : $"music/{Name}.mp3");
+        private string Path => _path;
 
         public void Update()
         {
@@ -113,6 +114,12 @@ namespace ClassicUO.IO.Audio
 
             try
             {
+                if (m_Stream != null)
+                {
+                    m_Stream.Close();
+                    m_Stream = null;
+                }
+
                 m_Stream = new MP3Stream(Path, NUMBER_OF_PCM_BYTES_TO_READ_PER_CHUNK);
                 Frequency = m_Stream.Frequency;
 

@@ -23,6 +23,7 @@ using System;
 
 using ClassicUO.Configuration;
 using ClassicUO.Game;
+using Microsoft.Xna.Framework.Audio;
 
 namespace ClassicUO.IO.Audio
 {
