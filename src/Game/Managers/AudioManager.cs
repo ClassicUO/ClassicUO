@@ -35,7 +35,6 @@ namespace ClassicUO.Game.Managers
     {
         private UOMusic[] _currentMusic = { null, null };
         private LinkedList<UOSound> _current_sounds = new LinkedList<UOSound>();
-        private LinkedList<UOMusic> _current_musics = new LinkedList<UOMusic>();
         private bool _canReproduceAudio = true;
         private int[] _currentMusicIndices = { 0, 0 };
 
@@ -309,21 +308,6 @@ namespace ClassicUO.Game.Managers
                 }
 
                 first = next;
-            }
-
-            var firstm = _current_musics.First;
-
-            while (firstm != null)
-            {
-                var next = firstm.Next;
-
-                if (!firstm.Value.IsPlaying)
-                {
-                    firstm.Value.Stop();
-                    _current_musics.Remove(firstm);
-                }
-
-                firstm = next;
             }
         }
     }
