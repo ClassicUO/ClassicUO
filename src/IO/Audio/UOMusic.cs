@@ -106,7 +106,7 @@ namespace ClassicUO.IO.Audio
                 {
                     byte[] buffer = GetBuffer();
 
-                    if (_sound_instance.IsDisposed)
+                    if (_sound_instance.IsDisposed || buffer == null)
                         break;
 
                     _sound_instance.SubmitBuffer(buffer);
