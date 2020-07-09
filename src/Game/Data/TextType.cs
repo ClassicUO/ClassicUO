@@ -10,6 +10,7 @@ namespace ClassicUO.Game.Data
     {
         CLIENT,
         SYSTEM,
-        OBJECT
+        OBJECT,
+        GUILD_ALLY,
     }
 }

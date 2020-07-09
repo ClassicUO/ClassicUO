@@ -43,7 +43,7 @@ namespace ClassicUO.Game.UI.Gumps
         private bool _isMinimized;
         private HitBox _hitBox;
         private GumpPic _gumpPic;
-        private Checkbox[] _filters_chekboxes = new Checkbox[3];
+        private Checkbox[] _filters_chekboxes = new Checkbox[4];
 
         public JournalGump() : base(Constants.JOURNAL_LOCALSERIAL, 0)
         {
@@ -86,24 +86,33 @@ namespace ClassicUO.Game.UI.Gumps
             _hitBox.MouseUp += _hitBox_MouseUp;
             _gumpPic.MouseDoubleClick += _gumpPic_MouseDoubleClick;
 
+            int cx = 43; // 63
+            int dist = 75; // 85
+            byte font = 6; // 1
 
-            _filters_chekboxes[0] = new Checkbox(0x00D2, 0x00D3, "System", 1, 0x0386, false)
+            _filters_chekboxes[0] = new Checkbox(0x00D2, 0x00D3, "System", font, 0x0386, false)
             {
-                X = 63,
+                X = cx,
                 LocalSerial = 1,
                 IsChecked = ProfileManager.Current.ShowJournalSystem
             };
-            _filters_chekboxes[1] = new Checkbox(0x00D2, 0x00D3, "Objects", 1, 0x0386, false)
+            _filters_chekboxes[1] = new Checkbox(0x00D2, 0x00D3, "Objects", font, 0x0386, false)
             {
-                X = 149,
+                X = cx + dist,
                 LocalSerial = 2,
                 IsChecked = ProfileManager.Current.ShowJournalObjects
             };
-            _filters_chekboxes[2] = new Checkbox(0x00D2, 0x00D3, "Client", 1, 0x0386, false)
+            _filters_chekboxes[2] = new Checkbox(0x00D2, 0x00D3, "Client", font, 0x0386, false)
             {
-                X = 233,
+                X = cx + dist * 2,
                 LocalSerial = 0,
                 IsChecked = ProfileManager.Current.ShowJournalClient
+            };
+            _filters_chekboxes[3] = new Checkbox(0x00D2, 0x00D3, "Guild", font, 0x0386, false)
+            {
+                X = cx + dist * 3,
+                LocalSerial = 3,
+                IsChecked = ProfileManager.Current.ShowJournalGuildAlly
             };
 
             void on_check_box(object sender, EventArgs e)
@@ -123,11 +132,14 @@ namespace ClassicUO.Game.UI.Gumps
                         case TEXT_TYPE.OBJECT:
                             ProfileManager.Current.ShowJournalObjects = c.IsChecked;
                             break;
+                        case TEXT_TYPE.GUILD_ALLY:
+                            ProfileManager.Current.ShowJournalGuildAlly = c.IsChecked;
+                            break;
                     }
                 }
             }
 
-            for (int i = 0; i < 3; i++)
+            for (int i = 0; i < _filters_chekboxes.Length; i++)
             {
                 _filters_chekboxes[i].ValueChanged += on_check_box;
                 Add(_filters_chekboxes[i]);
@@ -195,7 +207,7 @@ namespace ClassicUO.Game.UI.Gumps
             WantUpdateSize = true;
             _journalEntries.Height = Height - (98 + _diffY);
 
-            for (int i = 0; i < 3; i++)
+            for (int i = 0; i < _filters_chekboxes.Length; i++)
             {
                 _filters_chekboxes[i].Y = _background.Height - _filters_chekboxes[i].Height - _diffY + 10;
             }
@@ -312,20 +324,9 @@ namespace ClassicUO.Game.UI.Gumps
                     var hour = _hours[i];
                     var type = _text_types[i];
 
-                    if (type == TEXT_TYPE.CLIENT && !ProfileManager.Current.ShowJournalClient)
-                    {
-                        continue;
-                    }
 
-                    if (type == TEXT_TYPE.SYSTEM && !ProfileManager.Current.ShowJournalSystem)
-                    {
+                    if (!CanBeDrawn(type))
                         continue;
-                    }
-
-                    if (type == TEXT_TYPE.OBJECT && !ProfileManager.Current.ShowJournalObjects)
-                    {
-                        continue;
-                    }
 
 
                     if (height + t.Height <= _scrollBar.Value)
@@ -387,24 +388,8 @@ namespace ClassicUO.Game.UI.Gumps
 
                 for (int i = 0; i < _entries.Count; i++)
                 {
-                    var type = _text_types[i];
-
-                    if (type == TEXT_TYPE.CLIENT && !ProfileManager.Current.ShowJournalClient)
-                    {
-                        continue;
-                    }
-
-                    if (type == TEXT_TYPE.SYSTEM && !ProfileManager.Current.ShowJournalSystem)
-                    {
-                        continue;
-                    }
-
-                    if (type == TEXT_TYPE.OBJECT && !ProfileManager.Current.ShowJournalObjects)
-                    {
-                        continue;
-                    }
-
-                    height += _entries[i].Height;
+                    if (CanBeDrawn(_text_types[i]))
+                        height += _entries[i].Height;
                 }
 
                 height -= _scrollBar.Height;
@@ -447,6 +432,30 @@ namespace ClassicUO.Game.UI.Gumps
                     _scrollBar.Value = _scrollBar.MaxValue;
             }
 
+            private static bool CanBeDrawn(TEXT_TYPE type)
+            {
+                if (type == TEXT_TYPE.CLIENT && !ProfileManager.Current.ShowJournalClient)
+                {
+                    return false;
+                }
+
+                if (type == TEXT_TYPE.SYSTEM && !ProfileManager.Current.ShowJournalSystem)
+                {
+                    return false;
+                }
+
+                if (type == TEXT_TYPE.OBJECT && !ProfileManager.Current.ShowJournalObjects)
+                {
+                    return false;
+                }
+
+                if (type == TEXT_TYPE.GUILD_ALLY && !ProfileManager.Current.ShowJournalGuildAlly)
+                {
+                    return false;
+                }
+
+                return true;
+            }
 
             public override void Dispose()
             {

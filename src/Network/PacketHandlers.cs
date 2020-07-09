@@ -2931,7 +2931,11 @@ namespace ClassicUO.Network
 
             TEXT_TYPE text_type = TEXT_TYPE.SYSTEM;
 
-            if ( (type == MessageType.System || type == MessageType.Alliance || type == MessageType.Guild) || serial == 0xFFFF_FFFF || serial == 0 || (name.ToLower() == "system" && entity == null))
+            if (type == MessageType.Alliance || type == MessageType.Guild)
+            {
+                text_type = TEXT_TYPE.GUILD_ALLY;
+            }
+            else if ( type == MessageType.System || serial == 0xFFFF_FFFF || serial == 0 || (name.ToLower() == "system" && entity == null))
             {
                 // do nothing
             }
@@ -5479,7 +5483,7 @@ namespace ClassicUO.Network
                     var cc = gump.Children[i];
 
                     if (cc is CheckerTrans)
-                    {
+                    {                    
                         trans = applyTrans(i + 1, cc.Page);
                         alpha = trans ? 0.5f : 0;
                     }
