@@ -388,8 +388,8 @@ namespace ClassicUO.Game.UI.Gumps
                         itemControl.Height = (int) (itemControl.Height * scale);
                     }
 
-                    itemControl.X = (int) (item.X * scale);
-                    itemControl.Y = (int) ((item.Y - (is_chessboard ? 20 : 0)) * scale);
+                    itemControl.X = (int) ( (short) item.X * scale);
+                    itemControl.Y = (int) (( (short) item.Y - (is_chessboard ? 20 : 0)) * scale);
 
                     //if ((_hideIfEmpty && !IsVisible))
                     //    IsVisible = true;
@@ -405,28 +405,28 @@ namespace ClassicUO.Game.UI.Gumps
             var bounds = _data.Bounds;
             bool is_chessboard = Graphic == 0x091A || Graphic == 0x092E;
 
-            ushort boundX = (ushort) (bounds.X);
-            ushort boundY = (ushort) (bounds.Y);
-            ushort boundWidth = (ushort) (bounds.Width);
-            ushort boundHeight = (ushort) (bounds.Height + (is_chessboard ? 20 : 0));
+            int boundX = bounds.X;
+            int boundY = bounds.Y;
+            int boundWidth = bounds.Width;
+            int boundHeight = bounds.Height + (is_chessboard ? 20 : 0);
 
             ArtTexture texture = ArtLoader.Instance.GetTexture(item.DisplayedGraphic);
 
             if (texture != null)
             {
-                boundWidth -= (ushort)  (texture.Width  / UIManager.ContainerScale);
-                boundHeight -= (ushort) (texture.Height / UIManager.ContainerScale);
+                boundWidth  -= (int) (texture.Width  / UIManager.ContainerScale);
+                boundHeight -= (int) (texture.Height / UIManager.ContainerScale);
             }
 
             if (item.X < boundX)
-                item.X = boundX;
+                item.X = (ushort) boundX;
             else if (item.X > boundWidth)
-                item.X = boundWidth;
+                item.X = (ushort) boundWidth;
 
             if (item.Y < boundY)
-                item.Y = boundY;
+                item.Y = (ushort) boundY;
             else if (item.Y > boundHeight)
-                item.Y = boundHeight;
+                item.Y = (ushort) boundHeight;
         }
 
 

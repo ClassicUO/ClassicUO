@@ -40,8 +40,8 @@ namespace ClassicUO.Game.UI.Controls
         public ItemGump(uint serial, ushort graphic, ushort hue, int x, int y) : base(graphic, hue)
         {
             AcceptMouseInput = true;
-            X = x;
-            Y = y;
+            X = (short) x;
+            Y = (short) y;
             HighlightOnMouseOver = true;
             CanPickUp = true;
             LocalSerial = serial;
