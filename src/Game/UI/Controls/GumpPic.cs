@@ -45,7 +45,7 @@ namespace ClassicUO.Game.UI.Controls
             get => _graphic;
             set
             {
-                if (_graphic != value)
+                //if (_graphic != value)
                 {
                     _graphic = value;
 
