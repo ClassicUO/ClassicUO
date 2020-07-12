@@ -78,7 +78,11 @@ namespace ClassicUO.Game.GameObjects
             if (AlphaHue != 255)
                 HueVector.Z = 1f - AlphaHue / 255f;
 
-            if (ProfileManager.Current.HighlightGameObjects && SelectedObject.LastObject == this)
+            if (SelectedObject.HealthbarObject == this)
+            {
+                _viewHue = Notoriety.GetHue(NotorietyFlag);
+            }         
+            else if (ProfileManager.Current.HighlightGameObjects && SelectedObject.LastObject == this)
             {
                 _viewHue = 0x0023;
                 HueVector.Y = 1;
@@ -95,8 +99,6 @@ namespace ClassicUO.Game.GameObjects
             }
             else if (IsHidden)
                 _viewHue = 0x038E;
-            else if (SelectedObject.HealthbarObject == this)
-                _viewHue = Notoriety.GetHue(NotorietyFlag);
             else
             {
                 _viewHue = 0;
