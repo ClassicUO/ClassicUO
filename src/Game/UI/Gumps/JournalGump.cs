@@ -467,6 +467,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 _entries.Clear();
                 _hours.Clear();
+                _text_types.Clear();
 
                 base.Dispose();
             }
