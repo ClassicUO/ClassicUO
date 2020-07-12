@@ -74,6 +74,9 @@ namespace ClassicUO.Game.Managers
 
         public static void HandleMessage(Entity parent, string text, string name, ushort hue, MessageType type, byte font, TEXT_TYPE text_type, bool unicode = false, string lang = null)
         {
+            if (string.IsNullOrEmpty(text))
+                return;
+
             if (ProfileManager.Current != null && ProfileManager.Current.OverrideAllFonts)
             {
                 font = ProfileManager.Current.ChatFont;

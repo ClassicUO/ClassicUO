@@ -53,7 +53,9 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override void Dispose()
         {
-            TextRenderer.Clear();
+            TextRenderer.UnlinkD();
+
+            //TextRenderer.Clear();
             base.Dispose();
         }
 
