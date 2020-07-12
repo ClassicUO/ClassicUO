@@ -1034,21 +1034,14 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 if (World.Player.IsPoisoned)
                     gumpId = 0x0808;
-                else if (World.Player.IsYellowHits) gumpId = 0x0809;
+                else if (World.Player.IsYellowHits) 
+                    gumpId = 0x0809;
             }
 
             if (max > 0)
             {
-                //int percent = (current * 100) / max;
-                //percent = (int) Math.Ceiling(100.0);
-
-                //if (percent > 1)
-                //{
-                //    // Adjust to actual width of fill bar (109)
-                //    percent = (109 * percent) / 100;
-                //}
-
-                _fillBars[(int)id].Percent = CalculatePercents(max, current, 109);
+                _fillBars[(int) id].Graphic = gumpId;
+                _fillBars[(int) id].Percent = CalculatePercents(max, current, 109);
             }
         }
 

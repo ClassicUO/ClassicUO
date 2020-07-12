@@ -45,18 +45,21 @@ namespace ClassicUO.Game.UI.Controls
             get => _graphic;
             set
             {
-                _graphic = value;
-
-                var texture = GumpsLoader.Instance.GetTexture(_graphic);
-
-                if (texture == null)
+                if (_graphic != value)
                 {
-                    Dispose();
-                    return;
-                }
+                    _graphic = value;
 
-                Width = texture.Width;
-                Height = texture.Height;
+                    var texture = GumpsLoader.Instance.GetTexture(_graphic);
+
+                    if (texture == null)
+                    {
+                        Dispose();
+                        return;
+                    }
+
+                    Width = texture.Width;
+                    Height = texture.Height;
+                }              
             }
         }
 
