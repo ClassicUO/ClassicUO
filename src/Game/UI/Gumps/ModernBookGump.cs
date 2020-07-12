@@ -473,6 +473,7 @@ namespace ClassicUO.Game.UI.Gumps
             internal void DrawSelection(UltimaBatcher2D batcher, int x, int y, int starty, int endy)
             {
                 ResetHueVector();
+                _hueVector.Z = 0.5f;
 
                 int selectStart = Math.Min(Stb.SelectStart, Stb.SelectEnd);
                 int selectEnd = Math.Max(Stb.SelectStart, Stb.SelectEnd);
