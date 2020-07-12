@@ -52,7 +52,7 @@ namespace ClassicUO.Game.UI.Controls
             }
 
             // stb_textedit will handle part of these tag
-            style &= ~(FontStyle.Fixed | FontStyle.Cropped | FontStyle.CropTexture);
+            //style &= ~(FontStyle.Fixed | FontStyle.Cropped | FontStyle.CropTexture);
 
             _rendererText = RenderedText.Create(string.Empty, hue, font, isunicode, style, align, maxWidth, 30, false, false, false);
             _rendererCaret = RenderedText.Create("_", hue, font, isunicode, (style & FontStyle.BlackBorder) != 0 ? FontStyle.BlackBorder : FontStyle.None, align: align);
@@ -766,7 +766,7 @@ namespace ClassicUO.Game.UI.Controls
 
         protected override void OnMouseDown(int x, int y, MouseButtonType button)
         {
-            if (button == MouseButtonType.Left)
+            if (button == MouseButtonType.Left && IsEditable)
             {
                 if (!NoSelection)
                     _leftWasDown = true;
