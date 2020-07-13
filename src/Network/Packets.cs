@@ -327,8 +327,10 @@ namespace ClassicUO.Network
     {
         public PHelpRequest() : base(0x9B)
         {
-            byte[] empty = new byte[257];
-            foreach (byte emptyByte in empty) WriteByte(emptyByte);
+            for (int i = 0; i < 257; i++)
+            {
+                WriteByte(0x00);
+            }
         }
     }
 

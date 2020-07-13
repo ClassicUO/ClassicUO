@@ -1,6 +1,62 @@
 #!/bin/bash
 cd "$(cd -P -- "$(dirname -- "$0")" && pwd -P)"
 
+
+######################################################################################################
+##################################### === FIX macOS lib path === #####################################
+######################################################################################################
+if [[ "$OSTYPE" == "darwin"* ]]; then
+	UNAME=`uname`
+	if [ "$UNAME" == "Darwin" ]; then
+		LIPO=lipo
+		OTOOL=otool
+		INSTALL_NAME_TOOL=install_name_tool
+	else
+		LIPO=x86_64-apple-darwin18-lipo
+		OTOOL=x86_64-apple-darwin18-otool
+		INSTALL_NAME_TOOL=x86_64-apple-darwin18-install_name_tool
+	fi
+
+	FOLDERS=(osx Data/Plugins)
+
+
+	for FOLDER in "${FOLDERS[@]}"
+	do
+	FILES=`ls $FOLDER`
+	for f in $FILES
+	do
+		# Rip out i386, you should never hit 32-bit anymore
+		if $LIPO -archs $FOLDER/$f | grep i386; then
+			cp $FOLDER/$f $FOLDER/$f.temp
+			$LIPO $FOLDER/$f.temp -remove i386 -output $FOLDER/$f
+			rm $FOLDER/$f.temp
+			echo $f 32-bit code stripped
+		else
+			echo $f has no 32-bit code
+		fi
+
+		# OS X's Dynamic Linker looks for an "install path" inside of
+		# a given dynamic library. It will then try to find the library
+		# at that location. This usually defaults to somewhere in the
+		# system folders (e.g. /Library/Frameworks/... or /usr/lib/...)
+		#
+		# Instead, we want to set @rpath in the executable, then fix the paths in
+		# the libraries to use @rpath for their link paths.
+		$INSTALL_NAME_TOOL -id @rpath/`basename $f` $FOLDER/$f
+		$INSTALL_NAME_TOOL -change /usr/local/lib/libSDL2-2.0.0.dylib @rpath/libSDL2-2.0.0.dylib $FOLDER/$f
+		$INSTALL_NAME_TOOL -change /usr/local/lib/libogg.0.dylib @rpath/libogg.0.dylib $FOLDER/$f
+		$INSTALL_NAME_TOOL -change /usr/local/lib/libvorbis.0.dylib @rpath/libvorbis.0.dylib $FOLDER/$f
+		$INSTALL_NAME_TOOL -change @loader_path/libsteam_api.dylib @rpath/libsteam_api.dylib $FOLDER/$f
+
+		# You should see @rpath/LIBNAME here
+		$OTOOL -L $FOLDER/$f
+	done
+	done
+fi
+######################################################################################################
+######################################################################################################
+######################################################################################################
+
 if [[ "$OSTYPE" == "darwin"* ]]; then
     which -s brew
     if [[ $? != 0 ]] ; then
