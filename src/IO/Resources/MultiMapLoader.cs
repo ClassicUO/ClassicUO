@@ -23,7 +23,7 @@ using System;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
-
+using ClassicUO.Game;
 using ClassicUO.Renderer;
 using ClassicUO.Utility.Logging;
 
@@ -183,7 +183,7 @@ namespace ClassicUO.IO.Resources
                 for (int i = 0; i < maxPixelValue; i++)
                 {
                     colorOffset -= 31;
-                    colorTable[i] = Utility.HuesHelper.Color16To32(huesData[colorOffset / maxPixelValue]);              
+                    colorTable[i] = Utility.HuesHelper.Color16To32(huesData[colorOffset / maxPixelValue]) | 0xFF_00_00_00;
                 }
 
                 uint[] worldMap = new uint[mapSize];
@@ -208,7 +208,7 @@ namespace ClassicUO.IO.Resources
 
         public UOTexture32 LoadFacet(int facet, int width, int height, int startx, int starty, int endx, int endy)
         {
-            if (_file == null || facet < 0 || facet > 5 || _facets[facet] == null)
+            if (_file == null || facet < 0 || facet > Constants.MAPS_COUNT || _facets[facet] == null)
                 return null;
 
             _facets[facet].Seek(0);
@@ -219,10 +219,10 @@ namespace ClassicUO.IO.Resources
             if (w < 1 || h < 1) return null;
 
             int startX = startx;
-            int endX = endx;
+            int endX = endx <= 0 ? width : endx;
 
             int startY = starty;
-            int endY = endy;
+            int endY = endy <= 0 ? height : endy;
 
             int pwidth = endX - startX;
             int pheight = endY - startY;
