@@ -138,6 +138,8 @@ namespace ClassicUO.Game.Managers
         {
             if (TargetingState == CursorTarget.MultiPlacement)
             {
+                MultiTargetInfo = null;
+                TargetingState = 0;
                 World.HouseManager.Remove(0);
             }
 
