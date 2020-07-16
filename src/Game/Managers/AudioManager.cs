@@ -159,13 +159,18 @@ namespace ClassicUO.Game.Managers
             }
             else
             {
-                if (ProfileManager.Current == null || !ProfileManager.Current.EnableMusic || (!ProfileManager.Current.EnableCombatMusic && iswarmode))
+                if (ProfileManager.Current == null || !ProfileManager.Current.EnableMusic)
                 {
                     volume = 0;
                 }
                 else
                 {
                     volume = ProfileManager.Current.MusicVolume / Constants.SOUND_DELTA;
+                }
+
+                if (!ProfileManager.Current.EnableCombatMusic && iswarmode)
+                {
+                    return;
                 }
             }
 
