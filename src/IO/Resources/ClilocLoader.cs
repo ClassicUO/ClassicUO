@@ -196,18 +196,19 @@ namespace ClassicUO.IO.Resources
                     index = pos2; //there is no underscore inside the bounds, so we use all the part to get the number of argument
 
                 int start = pos + 1;
-                int max = index - start;             
-                for (int i = 0; i < max; i++)
+                int max = index - start;
+                int count = 0;
+                for (; count < max; count++)
                 {
-                    if (!char.IsNumber(baseCliloc[start + i]))
+                    if (!char.IsNumber(baseCliloc[start + count]))
                     {
-                        if (!int.TryParse(baseCliloc.Substring(start, i), out index))
-                        {
-                            return $"MegaCliloc: error for {clilocNum}";
-                        }
-                        
                         break;
                     }
+                }
+
+                if (!int.TryParse(baseCliloc.Substring(start, count), out index))
+                {
+                    return $"MegaCliloc: error for {clilocNum}";
                 }
 
                 --index;
