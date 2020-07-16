@@ -22,9 +22,10 @@
 using System.Linq;
 
 using ClassicUO.Game.UI.Controls;
+using ClassicUO.IO.Resources;
 using ClassicUO.Network;
 using ClassicUO.Renderer;
-
+using ClassicUO.Utility.Logging;
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Gumps
@@ -111,13 +112,25 @@ namespace ClassicUO.Game.UI.Gumps
 
         public void AddItem(ushort graphic, ushort hue, string name, int x, int y, int index)
         {
-            StaticPic pic = new StaticPic(graphic, hue)
+            var texture = ArtLoader.Instance.GetTexture(graphic);
+            if (texture == null)
             {
+                Log.Error($"invalid texture 0x{graphic:X4}");
+                return;
+            }
+
+            TextureControl pic = new TextureControl()
+            {
+                Texture = texture,
+                IsPartial = TileDataLoader.Instance.StaticData[graphic].IsPartialHue,
+                Hue = hue,
+                AcceptMouseInput = true,
                 X = x,
                 Y = y,
-                //LocalSerial = (uint) index,
-                AcceptMouseInput = true
+                Width = texture.Width,
+                Height = texture.Height
             };
+
 
             pic.MouseDoubleClick += (sender, e) =>
             {
