@@ -76,6 +76,8 @@ namespace ClassicUO.Network
         [MarshalAs(UnmanagedType.FunctionPtr)] private OnWndProc _on_wnd_proc;
         [MarshalAs(UnmanagedType.FunctionPtr)] private OnGetStaticData _get_static_data;
         [MarshalAs(UnmanagedType.FunctionPtr)] private OnGetTileData _get_tile_data;
+        [MarshalAs(UnmanagedType.FunctionPtr)] private OnGetCliloc _get_cliloc;
+
 
 
         private delegate void OnInstall(void* header);
@@ -94,6 +96,7 @@ namespace ClassicUO.Network
         private delegate bool OnGetTileData(int index, ref ulong flags,
                                             ref ushort textid,
                                             ref string name);
+        private delegate bool OnGetCliloc(int cliloc, [MarshalAs(UnmanagedType.LPStr)] string args, bool capitalize, [Out] [MarshalAs(UnmanagedType.LPStr)] out string buffer);
 
 
         [DllImport("kernel32", CharSet = CharSet.Unicode, SetLastError = true)]
@@ -133,6 +136,7 @@ namespace ClassicUO.Network
             public IntPtr OnWndProc;
             public IntPtr GetStaticData;
             public IntPtr GetTileData;
+            public IntPtr GetCliloc;
         }
 
         private readonly Dictionary<IntPtr, GraphicsResource> _resources = new Dictionary<IntPtr, GraphicsResource>();
@@ -190,6 +194,7 @@ namespace ClassicUO.Network
             _setTitle = SetWindowTitle;
             _get_static_data = GetStaticData;
             _get_tile_data = GetTileData;
+            _get_cliloc = GetCliloc;
 
             SDL.SDL_SysWMinfo info = new SDL.SDL_SysWMinfo();
             SDL.SDL_VERSION(out info.version);
@@ -218,8 +223,8 @@ namespace ClassicUO.Network
 
                 SDL_Window = Client.Game.Window.Handle,
                 GetStaticData = Marshal.GetFunctionPointerForDelegate(_get_static_data),
-                GetTileData =  Marshal.GetFunctionPointerForDelegate(_get_tile_data),
-                
+                GetTileData = Marshal.GetFunctionPointerForDelegate(_get_tile_data),
+                GetCliloc = Marshal.GetFunctionPointerForDelegate(_get_cliloc),
             };
 
             void* func = &header;
@@ -398,6 +403,13 @@ namespace ClassicUO.Network
             }
 
             return false;
+        }
+
+        private static bool GetCliloc(int cliloc, string args, bool capitalize, out string buffer)
+        {
+            buffer = ClilocLoader.Instance.Translate(cliloc, args, capitalize);
+
+            return buffer != null;
         }
 
         private static void GetStaticImage(ushort g, ref ArtInfo info)

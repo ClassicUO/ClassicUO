@@ -2025,7 +2025,7 @@ namespace ClassicUO.Network
                             string poster = len > 0 ? p.ReadASCII(len) : string.Empty;
 
                             len = p.ReadByte();
-                            string subject = len > 0 ? p.ReadUTF8StringSafe() : string.Empty;
+                            string subject = len > 0 ? p.ReadUTF8StringSafe(len) : string.Empty;
 
                             len = p.ReadByte();
                             string dataTime = len > 0 ? p.ReadASCII(len) : string.Empty;
@@ -2046,7 +2046,7 @@ namespace ClassicUO.Network
 
                                 if (lineLen > 0)
                                 {
-                                    string putta = p.ReadUTF8StringSafe();
+                                    string putta = p.ReadUTF8StringSafe(len);
                                     sb.Append(putta);
                                     sb.Append('\n');
                                 }
@@ -3247,10 +3247,7 @@ namespace ClassicUO.Network
         private static void ExtendedCommand(Packet p)
         {
             ushort cmd = p.ReadUShort();
-            if(cmd == 0x11)
-            {
 
-            }
             switch (cmd)
             {
                 case 0:

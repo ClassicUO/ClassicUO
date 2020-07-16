@@ -419,8 +419,6 @@ namespace ClassicUO.Game.Scenes
                         var obj = SelectedObject.Object;
                         if (obj is TextObject ov)
                             obj = ov.Owner;
-                        else if (obj is GameEffect eff && eff.Source != null)
-                            obj = eff.Source;
 
                         switch (obj)
                         {

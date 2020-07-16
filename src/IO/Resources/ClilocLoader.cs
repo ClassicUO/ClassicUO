@@ -138,11 +138,15 @@ namespace ClassicUO.IO.Resources
             if (baseCliloc == null)
                 return null;
 
-            while (arg.Length != 0 && arg[0] == '\t')
-                arg = arg.Remove(0, 1);
-
             List<string> arguments = new List<string>();
 
+            if (arg == null)
+            {
+                arg = "";
+            }
+
+            while (arg.Length != 0 && arg[0] == '\t')
+                arg = arg.Remove(0, 1);
 
             for (int i = 0; i < arg.Length; i++)
             {
@@ -184,15 +188,28 @@ namespace ClassicUO.IO.Resources
                     break;
 
                 int pos2 = baseCliloc.IndexOf('~', pos + 1);
-                if (pos2 == -1)//non valid arg
+                if (pos2 == -1) //non valid arg
                     break;
 
                 index = baseCliloc.IndexOf('_', pos + 1, pos2 - (pos + 1));
                 if (index <= pos)
-                    index = pos2;//there is no underscore inside the bounds, so we use all the part to get the number of argument
+                    index = pos2; //there is no underscore inside the bounds, so we use all the part to get the number of argument
 
-                if (!int.TryParse(baseCliloc.Substring(pos + 1, index - (pos + 1)), out index))
-                    return $"MegaCliloc: error for {clilocNum}";
+                int start = pos + 1;
+                int max = index - start;             
+                for (int i = 0; i < max; i++)
+                {
+                    if (!char.IsNumber(baseCliloc[start + i]))
+                    {
+                        if (!int.TryParse(baseCliloc.Substring(start, i), out index))
+                        {
+                            return $"MegaCliloc: error for {clilocNum}";
+                        }
+                        
+                        break;
+                    }
+                }
+
                 --index;
 
                 string a = index < 0 || index >= arguments.Count ? string.Empty : arguments[index];
