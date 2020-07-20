@@ -4701,13 +4701,8 @@ namespace ClassicUO.Network
             item.Y = y;
             item.Z = 0;
 
-            if (SerialHelper.IsValid(item.Container))
-            {
-                World.RemoveItemFromContainer(item);
-            }
-
+            World.RemoveItemFromContainer(item);
             item.Container = containerSerial;
-
             container.PushToBack(item);
 
             if (SerialHelper.IsMobile(containerSerial))

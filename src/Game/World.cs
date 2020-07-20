@@ -190,6 +190,7 @@ namespace ClassicUO.Game
             Client.Game.Scene.Audio.PlayMusic(music, true);
         }
 
+        private static uint _time_to_delete;
 
         public static void Update(double totalMS, double frameMS)
         {
@@ -218,11 +219,18 @@ namespace ClassicUO.Game
                     }
                 }
 
+                bool do_delete = _time_to_delete < Time.Ticks;
+
+                if (do_delete)
+                {
+                    _time_to_delete = Time.Ticks + 50;
+                }
+
                 foreach (Mobile mob in Mobiles)
                 {
                     mob.Update(totalMS, frameMS);
 
-                    if (mob.Distance > ClientViewRange)
+                    if (do_delete && mob.Distance > ClientViewRange)
                         RemoveMobile(mob);
 
                     if (mob.IsDestroyed)
@@ -266,7 +274,7 @@ namespace ClassicUO.Game
                 {
                     item.Update(totalMS, frameMS);
 
-                    if (item.OnGround && item.Distance > ClientViewRange)
+                    if (do_delete && item.OnGround && item.Distance > ClientViewRange)
                     {
                         if (item.IsMulti)
                         {
@@ -403,11 +411,11 @@ namespace ClassicUO.Game
                     container.Remove(obj);
                 }
 
-                obj.Next = null;
-                obj.Previous = null;
                 obj.Container = 0xFFFF_FFFF;
             }
 
+            obj.Next = null;
+            obj.Previous = null;
             obj.RemoveFromTile();
         }
 
@@ -430,7 +438,6 @@ namespace ClassicUO.Game
                 first = next;
             }
 
-            item.Clear();
             item.Destroy();
 
             if (forceRemove)
@@ -457,7 +464,6 @@ namespace ClassicUO.Game
                 first = next;
             }
 
-            mobile.Clear();
             mobile.Destroy();
 
             if (forceRemove)
