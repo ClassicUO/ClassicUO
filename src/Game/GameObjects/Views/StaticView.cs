@@ -150,11 +150,7 @@ namespace ClassicUO.Game.GameObjects
             {
                 if (DrawTransparent)
                 {
-                    int d = Distance;
-                    int maxD = ProfileManager.Current.CircleOfTransparencyRadius + 1;
-
-                    if (d <= maxD && d <= 3)
-                        return true;
+                    return true;
                 }
 
                 ref var index = ref ArtLoader.Instance.GetValidRefEntry(graphic + 0x4000);

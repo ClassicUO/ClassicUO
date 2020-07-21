@@ -36,15 +36,15 @@ namespace ClassicUO.Game.GameObjects
     internal abstract partial class GameObject
     {
         protected static Vector3 HueVector;
+        public static bool DrawTransparent;
+
+
         public Rectangle FrameInfo;
-
         protected bool IsFlipped;
-
         public bool UseObjectHandles { get; set; }
         public bool ClosedObjectHandles { get; set; }
         public bool ObjectHandlesOpened { get; set; }
         public byte AlphaHue { get; set; }
-        public bool DrawTransparent { get; set; }
         public bool AllowedToDraw { get; set; } = true;
 
 

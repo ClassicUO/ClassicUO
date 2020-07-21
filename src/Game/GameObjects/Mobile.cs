@@ -103,7 +103,6 @@ namespace ClassicUO.Game.GameObjects
             mobile.ClosedObjectHandles = false;
             mobile.ObjectHandlesOpened = false;
             mobile.AlphaHue = 0;
-            mobile.DrawTransparent = false;
             mobile.AllowedToDraw = true;
             mobile.IsClicked = false;
             mobile.RemoveFromTile();

@@ -108,7 +108,6 @@ namespace ClassicUO.Game.GameObjects
             posX += (int) Offset.X;
             posY += (int) (Offset.Y + Offset.Z);
 
-
             if (DrawTransparent)
             {
                 int maxDist = ProfileManager.Current.CircleOfTransparencyRadius + 44;
@@ -179,11 +178,7 @@ namespace ClassicUO.Game.GameObjects
                  
                 if (DrawTransparent)
                 {
-                    int d = Distance;
-                    int maxD = ProfileManager.Current.CircleOfTransparencyRadius + 1;
-
-                    if (d <= maxD && d <= 3)
-                        return true;
+                    return true;
                 }
 
                 ref var index = ref ArtLoader.Instance.GetValidRefEntry(graphic + 0x4000);

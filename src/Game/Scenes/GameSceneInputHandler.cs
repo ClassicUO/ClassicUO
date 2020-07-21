@@ -357,7 +357,7 @@ namespace ClassicUO.Game.Scenes
 
             if (ItemHold.Enabled)
             {
-                if (SelectedObject.Object is GameObject obj && obj.Distance < Constants.DRAG_ITEMS_DISTANCE)
+                if (SelectedObject.Object is GameObject obj && obj.Distance <= Constants.DRAG_ITEMS_DISTANCE)
                 {
                     switch (obj)
                     {

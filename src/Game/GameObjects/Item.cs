@@ -87,7 +87,6 @@ namespace ClassicUO.Game.GameObjects
             i.ClosedObjectHandles = false;
             i.ObjectHandlesOpened = false;
             i.AlphaHue = 0;
-            i.DrawTransparent = false;
             i.AllowedToDraw = true;
         });
 

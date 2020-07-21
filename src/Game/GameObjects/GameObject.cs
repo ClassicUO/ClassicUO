@@ -263,7 +263,6 @@ namespace ClassicUO.Game.GameObjects
             Graphic = 0;
             UseObjectHandles = ClosedObjectHandles = ObjectHandlesOpened = false;
             FrameInfo = Rectangle.Empty;
-            DrawTransparent = false;
         }
     }
 }
