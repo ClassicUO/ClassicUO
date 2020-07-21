@@ -36,7 +36,6 @@ namespace ClassicUO.IO.Resources
 {
     internal class ArtLoader : UOFileLoader<ArtTexture>
     {
-        private static readonly uint[] _empty = { };
         private UOFile _file;
         private ushort _graphicMask;
         private readonly UOTexture32[] _land_resources;
@@ -99,7 +98,10 @@ namespace ClassicUO.IO.Resources
             if (texture == null || texture.IsDisposed)
             {
                 ReadStaticArt(ref texture, (ushort) g);
-                SaveID(g);
+                if (texture != null)
+                {
+                    SaveID(g);
+                }
             }
             else
             {
@@ -119,7 +121,11 @@ namespace ClassicUO.IO.Resources
             if (texture == null || texture.IsDisposed)
             {
                 ReadLandArt(ref texture, (ushort) g);
-                _used_land_textures_ids.AddLast(g);
+
+                if (texture != null)
+                {
+                    _used_land_textures_ids.AddLast(g);
+                }
             }
             else
             {
@@ -191,7 +197,7 @@ namespace ClassicUO.IO.Resources
             {
                 width = height = 0;
 
-                return _empty;
+                return null;
             }
 
             _file.Seek(entry.Offset);
@@ -200,7 +206,7 @@ namespace ClassicUO.IO.Resources
             height = _file.ReadShort();
 
             if (width == 0 || height == 0)
-                return _empty;
+                return null;
 
             uint[] pixels = new uint[width * height];
             ushort* ptr = (ushort*) _file.PositionAddress;

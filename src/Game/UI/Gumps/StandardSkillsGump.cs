@@ -342,12 +342,18 @@ namespace ClassicUO.Game.UI.Gumps
                     {
                         default:
                         case 0:
+                            _gumpPic.IsVisible = true;
+                            _textbox.IsEditable = false;
+                            _textbox.AllowSelection = false;
+                            UIManager.KeyboardFocusControl = this;
+                            UIManager.SystemChat.SetFocus();
+                            break;
                         case 1:
                             _gumpPic.IsVisible = true;
                             _textbox.IsEditable = false;
                             _textbox.AllowSelection = false;
-                            UIManager.KeyboardFocusControl = null;
-                            UIManager.SystemChat.SetFocus();
+                            UIManager.KeyboardFocusControl = this;
+                            //UIManager.SystemChat.SetFocus();
                             break;
                         case 2:
                             _gumpPic.IsVisible = false;
