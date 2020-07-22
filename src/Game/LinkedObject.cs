@@ -214,12 +214,12 @@ namespace ClassicUO.Game
 
             int unitsize = 1; //size of the components we are merging; 1 for first iteration, multiplied by 2 after each iteration
             T p = null, q = null, e = null, head = (T) Items, tail = null;
+            int nmerges = 0; //number of merges done this pass
+            int psize, qsize; //lengths of the components we are merging
 
             while (true)
             {
                 p = head;
-                int nmerges = 0; //number of merges done this pass
-                int psize, qsize; //lengths of the components we are merging
                 head = null;
                 tail = null;
 
@@ -272,6 +272,7 @@ namespace ClassicUO.Game
                         {
                             head = e;
                         }
+
                         e.Previous = tail;
                         tail = e;
                     }

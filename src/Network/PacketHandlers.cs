@@ -2268,25 +2268,23 @@ namespace ClassicUO.Network
             if (obj == null)
                 return;
 
-            //if (!obj.IsEmpty)
-            //{
-            //    var o = obj.Items;
+            if (!obj.IsEmpty)
+            {
+                var o = obj.Items;
 
-            //    while (o != null)
-            //    {
-            //        var next = o.Next;
-            //        Item it = (Item) o;
+                while (o != null)
+                {
+                    var next = o.Next;
+                    Item it = (Item) o;
 
-            //        if (!it.Opened && it.Layer != Layer.Backpack)
-            //        {
-            //            RemoveItemFromContainer(it);
-            //            World.Items.Remove(it.Serial);
-            //            it.Destroy();
-            //        }
+                    if (!it.Opened && it.Layer != Layer.Backpack)
+                    {
+                        World.RemoveItem(it.Serial, true);
+                    }
 
-            //        o = next;
-            //    }
-            //}
+                    o = next;
+                }
+            }
 
             if (SerialHelper.IsMobile(serial) && obj is Mobile mob)
             {
@@ -2321,41 +2319,14 @@ namespace ClassicUO.Network
                     item_hue = p.ReadUShort();
                 }
 
-                //if (Client.Version >= Data.ClientVersion.CV_70331)
-                //    itemGraphic &= 0xFFFF;
-                //else if (Client.Version >= Data.ClientVersion.CV_7090)
-                //    itemGraphic &= 0x7FFF;
-                //else
-                //    itemGraphic &= 0x3FFF;
-
-                //if (layer > 0x1D)
-                //{
-                //    layer = (byte) ((layer & 0x1D) + 1);
-                //}
 
                 Item item = World.GetOrCreateItem(itemSerial);
-
-                //if (alreadyExists)
-                //{
-                //    if (layer > 0x1D)
-                //    {
-
-                //    }
-                //}
-
                 item.Graphic = itemGraphic;
                 item.FixHue(item_hue);
                 item.Amount = 1;
                 World.RemoveItemFromContainer(item);
                 item.Container = serial;
-
-                //{
-                    item.Layer = (Layer) layer;
-               // }
-                //else
-                //{
-                //    Log.Warn($"Invalid layer in UpdateObject(). Layer: {layer}. Already exists? {alreadyExists}");
-                //}
+                item.Layer = (Layer) layer;
 
                 item.CheckGraphicChange();
 
@@ -3587,10 +3558,11 @@ namespace ClassicUO.Network
                             {
                                 ushort cc = (ushort) ((j * 32) + i + 1);
                                 // FIXME: should i call Item.Create ?
-                                Item spellItem = new Item()
-                                {
-                                   Serial = cc, Graphic = 0x1F2E, Amount = cc, Container = spellbook
-                                };
+                                Item spellItem = Item.Create(cc); // new Item()
+                                spellItem.Serial = cc;
+                                spellItem.Graphic = 0x1F2E;
+                                spellItem.Amount = cc;
+                                spellItem.Container = spellbook;
                                 spellbook.PushToBack(spellItem);
                             }
                         }

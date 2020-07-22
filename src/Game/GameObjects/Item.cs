@@ -42,7 +42,7 @@ namespace ClassicUO.Game.GameObjects
         private bool _isMulti;
 
 
-        private static readonly QueuedPool<Item> _pool = new QueuedPool<Item>(Constants.PREDICTABLE_TILE_COUNT, i =>
+        private static readonly QueuedPool<Item> _pool = new QueuedPool<Item>(Constants.PREDICTABLE_CHUNKS * 3, i =>
         {
             i.IsDestroyed = false;
             i.Graphic = 0;
