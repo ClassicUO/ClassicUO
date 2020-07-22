@@ -211,7 +211,7 @@ namespace ClassicUO.Utility.Collections
 #else
             Debug.Assert(comparer != null);
 #endif
-            Array.Sort(_items, comparer);
+            Array.Sort(_items, 0, (int) Count, comparer);
         }
 
         public void TransformAll(Func<T, T> transformation)

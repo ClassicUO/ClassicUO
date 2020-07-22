@@ -198,7 +198,7 @@ namespace ClassicUO.Network
 
             SDL.SDL_SysWMinfo info = new SDL.SDL_SysWMinfo();
             SDL.SDL_VERSION(out info.version);
-            SDL.SDL_GetWindowWMInfo(SDL.SDL_GL_GetCurrentWindow(), ref info);
+            SDL.SDL_GetWindowWMInfo(Client.Game.Window.Handle, ref info);
 
             IntPtr hwnd = IntPtr.Zero;
 
@@ -619,9 +619,8 @@ namespace ClassicUO.Network
         {
             byte[] data = new byte[length];
             Marshal.Copy(buffer, data, 0, length);
-            NetClient.EnqueuePacketFromPlugin(data, length);
-
-            return true;
+            
+            return OnPluginRecv(ref data, ref length);
         }
 
         private static bool OnPluginSend_new(IntPtr buffer, ref int length)
@@ -629,12 +628,7 @@ namespace ClassicUO.Network
             byte[] data = new byte[length];
             Marshal.Copy(buffer, data, 0, length);
 
-            if (NetClient.LoginSocket.IsDisposed && NetClient.Socket.IsConnected)
-                NetClient.Socket.Send(data, length, true);
-            else if (NetClient.Socket.IsDisposed && NetClient.LoginSocket.IsConnected)
-                NetClient.LoginSocket.Send(data, length, true);
-
-            return true;
+            return OnPluginSend(ref data, ref length);
         }
 
         
