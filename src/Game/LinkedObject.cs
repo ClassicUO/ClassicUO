@@ -57,17 +57,12 @@ namespace ClassicUO.Game
             }
             else
             {
-                var current = Items;
-                while (current.Next != null)
-                {
-                    current = current.Next;
-                }
-
-                current.Next = item;
+                var last = GetLast();
+                last.Next = item;
 
                 Debug.Assert(item.Next == null, "[Append to last-next] item must be unlinked before.");
                 item.Next = null;
-                item.Previous = current;
+                item.Previous = last;
             }
         }
 

@@ -607,6 +607,20 @@ namespace ClassicUO.Network
 
         private static bool OnPluginSend(ref byte[] data, ref int length)
         {
+            if (data != null && data.Length != 0)
+            {
+                // horrible workaround to avoid ghosting item when a plugin sends drop/equip item
+                switch (data[0])
+                {
+                    case 0x08:
+                    case 0x13:
+                        ItemHold.Enabled = false;
+                        ItemHold.Dropped = true;
+                        break;
+                }
+            }
+
+
             if (NetClient.LoginSocket.IsDisposed && NetClient.Socket.IsConnected)
                 NetClient.Socket.Send(data, length, true);
             else if (NetClient.Socket.IsDisposed && NetClient.LoginSocket.IsConnected)

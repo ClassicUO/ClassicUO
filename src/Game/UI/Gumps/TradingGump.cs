@@ -527,9 +527,6 @@ namespace ClassicUO.Game.UI.Gumps
                         y = 0;
 
                     GameActions.DropItem(ItemHold.Serial, x, y, 0, ID1);
-                    ItemHold.Dropped = true;
-                    ItemHold.Enabled = false;
-                    //Mouse.CancelDoubleClick = true;
                 }
             };
         }

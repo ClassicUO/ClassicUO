@@ -230,11 +230,16 @@ namespace ClassicUO.Game
                 Socket.Send(new PDropRequestNew(serial, (ushort) x, (ushort) y, (sbyte) z, 0, container));
             else
                 Socket.Send(new PDropRequestOld(serial, (ushort) x, (ushort) y, (sbyte) z, container));
+
+            ItemHold.Enabled = false;
+            ItemHold.Dropped = true;
         }
 
         public static void Equip(uint serial, Layer layer, uint target)
         {
             Socket.Send(new PEquipRequest(serial, layer, target));
+            ItemHold.Enabled = false;
+            ItemHold.Dropped = true;
         }
 
         public static void ReplyGump(uint local, uint server, int button, uint[] switches = null, Tuple<ushort, string>[] entries = null)
@@ -429,6 +434,7 @@ namespace ClassicUO.Game
                 ProfileManager.Current.GrabBagSerial = 0;
                 bag = backpack.Serial;
             }
+
             DropItem(serial, 0xFFFF, 0xFFFF, 0, bag);
         }
     }
