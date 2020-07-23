@@ -65,7 +65,8 @@ namespace ClassicUO.Game.Managers
             if (file == null)
                 return;
 
-            uint delay = Constants.ITEM_EFFECT_ANIMATION_DELAY;
+            // fix static animations time to reflect the standard client
+            uint delay = Constants.ITEM_EFFECT_ANIMATION_DELAY * 2;
             uint next_time = Time.Ticks + 250;
             bool no_animated_field = ProfileManager.Current != null && ProfileManager.Current.FieldsType != 0;
             var startAddr = file.StartAddress.ToInt64();
@@ -90,7 +91,7 @@ namespace ClassicUO.Game.Managers
 
                     if (info->FrameInterval > 0)
                     {
-                        o.time = Time.Ticks + (info->FrameInterval * delay);
+                        o.time = Time.Ticks + (info->FrameInterval * delay) + 1;
                     }
                     else
                     {
