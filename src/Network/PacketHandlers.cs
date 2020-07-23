@@ -4927,14 +4927,10 @@ namespace ClassicUO.Network
             }
             else
             {
-                if (ItemHold.Serial == serial)
+                if (ItemHold.Serial == serial && ItemHold.Dropped)
                 {
-                    Console.WriteLine("ITEM FOUND TO CLEAR");
-                    if (ItemHold.Dropped)
-                    {
-                        Console.WriteLine("....AND IT IS DROPPED!");
-                    }
-
+                    // we want maintain the item data due to the denymoveitem packet
+                    //ItemHold.Clear();
                     ItemHold.Enabled = false;
                     ItemHold.Dropped = false;
                 }
