@@ -66,6 +66,7 @@ namespace ClassicUO.Game.UI.Controls
             Y = int.Parse(parts[2]);
             IsChecked = parts[5] == "1";
             LocalSerial = SerialHelper.Parse(parts[6]);
+            IsFromServer = true;
         }
 
         public bool IsChecked

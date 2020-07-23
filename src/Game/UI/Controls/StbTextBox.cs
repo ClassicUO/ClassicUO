@@ -72,6 +72,8 @@ namespace ClassicUO.Game.UI.Controls
             Multiline = false;
             _fromServer = true;
             LocalSerial = SerialHelper.Parse(parts[6]);
+            IsFromServer = true;
+
             int index = int.Parse(parts[7]);
 
             if (index >= 0 && index < lines.Length)

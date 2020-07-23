@@ -73,6 +73,7 @@ namespace ClassicUO.Game.UI.Controls
             Width = int.Parse(parts[3]);
             Height = int.Parse(parts[4]);
             AcceptMouseInput = false;
+            IsFromServer = true;
         }
 
 

@@ -50,6 +50,7 @@ namespace ClassicUO.Game.UI.Controls
             UseFlagScrollbar = HasScrollbar && parts[7] == "2";
             _gameText.IsHTML = true;
             _gameText.MaxWidth = Width - (HasScrollbar ? 16 : 0) - (HasBackground ? 8 : 0);
+            IsFromServer = true;
 
             if (textIndex >= 0 && textIndex < lines.Length)
                 InternalBuild(lines[textIndex], 0);

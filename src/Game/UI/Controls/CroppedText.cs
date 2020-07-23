@@ -43,6 +43,7 @@ namespace ClassicUO.Game.UI.Controls
             Y = int.Parse(parts[2]);
             Width = int.Parse(parts[3]);
             Height = int.Parse(parts[4]);
+            IsFromServer = true;
         }
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)

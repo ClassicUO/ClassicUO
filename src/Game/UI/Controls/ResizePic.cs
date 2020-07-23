@@ -64,6 +64,7 @@ namespace ClassicUO.Game.UI.Controls
             Y = int.Parse(parts[2]);
             Width = int.Parse(parts[4]);
             Height = int.Parse(parts[5]);
+            IsFromServer = true;
         }
 
         public ushort Graphic { get; }

@@ -23,7 +23,7 @@ namespace ClassicUO.Game.UI.Controls
             _tileX = int.Parse(gparams[10]);
             _tileY = int.Parse(gparams[11]);
             ContainsByBounds = true;
-
+            IsFromServer = true;
             _texture = ArtLoader.Instance.GetTexture(graphic);
 
             if (_texture == null)

@@ -85,6 +85,8 @@ namespace ClassicUO.Game.UI.Controls
 
         public uint LocalSerial { get; set; }
 
+        public bool IsFromServer { get; set; }
+
         public int Page { get; set; }
 
         public Point Location

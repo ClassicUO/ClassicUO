@@ -52,6 +52,7 @@ namespace ClassicUO.Game.UI.Controls
             Y = int.Parse(parts[2]);
             Width = int.Parse(parts[3]);
             Height = int.Parse(parts[4]);
+            IsFromServer = true;
         }
 
         internal GumpPicTiled(int x, int y, int width, int heigth, UOTexture32 texture)
