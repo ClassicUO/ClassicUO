@@ -74,8 +74,16 @@ namespace ClassicUO.Game.UI.Controls
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
-            if (IsDisposed || ((ItemHold.Enabled || ItemHold.Dropped) && ItemHold.Serial == LocalSerial))
+            if (IsDisposed)
                 return false;
+
+            //if ((ItemHold.Enabled && !ItemHold.Dropped) && ItemHold.Serial == LocalSerial)
+            //{
+            //    if (!ItemHold.IsStackable || ItemHold.Amount < ItemHold.TotalAmount)
+            //    {
+            //        return false;
+            //    }
+            //}
 
             base.Draw(batcher, x, y);
 
