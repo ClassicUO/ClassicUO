@@ -41,6 +41,7 @@ namespace ClassicUO.Game.UI.Gumps
             CanMove = true;
             AcceptMouseInput = true;
             CanCloseWithRightClick = true;
+            IsFromServer = true;
 
             Add(new GumpPic(0, 0, 0x0910, 0));
 
@@ -239,6 +240,7 @@ namespace ClassicUO.Game.UI.Gumps
             CanMove = true;
             AcceptMouseInput = true;
             CanCloseWithRightClick = false;
+            IsFromServer = true;
 
             Add(_resizePic = new ResizePic(0x13EC)
             {
