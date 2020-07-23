@@ -1887,12 +1887,12 @@ namespace ClassicUO.Network
             if (mobile == null) return;
 
             ushort action = p.ReadUShort();
-            ushort frameCount = p.ReadUShort();
-            ushort repeatMode = p.ReadUShort();
-            bool frameDirection = !p.ReadBool();
+            ushort frame_count = p.ReadUShort();
+            ushort repeat_count = p.ReadUShort();
+            bool forward = !p.ReadBool();
             bool repeat = p.ReadBool();
             byte delay = p.ReadByte();
-            mobile.SetAnimation(Mobile.GetReplacedObjectAnimation(mobile.Graphic, action), delay, (byte) frameCount, (byte) repeatMode, repeat, frameDirection);
+            mobile.SetAnimation(Mobile.GetReplacedObjectAnimation(mobile.Graphic, action), delay, (byte) frame_count, (byte) repeat_count, repeat, forward);
             mobile.AnimationFromServer = true;
         }
 
@@ -3712,7 +3712,7 @@ namespace ClassicUO.Network
                     //       // byte group = Mobile.GetObjectNewAnimation(m, animID, action, mode);
                     //        m.SetAnimation(animID);
                     //        //m.AnimationRepeatMode = 1;
-                    //        //m.AnimationDirection = true;
+                    //        //m.AnimationForwardDirection = true;
                     //        //if ((type == 1 || type == 2) && mobile.Graphic == 0x0015)
                     //        //    mobile.AnimationRepeat = true;
                     //        //mobile.AnimationFromServer = true;
@@ -4332,7 +4332,7 @@ namespace ClassicUO.Network
             byte group = Mobile.GetObjectNewAnimation(mobile, type, action, mode);
             mobile.SetAnimation(group);
             mobile.AnimationRepeatMode = 1;
-            mobile.AnimationDirection = true;
+            mobile.AnimationForwardDirection = true;
             if ((type == 1 || type == 2) && mobile.Graphic == 0x0015) mobile.AnimationRepeat = true;
             mobile.AnimationFromServer = true;
         }

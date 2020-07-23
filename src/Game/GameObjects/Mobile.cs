@@ -80,7 +80,7 @@ namespace ClassicUO.Game.GameObjects
             mobile.AnimationRepeatMode = 1;
             mobile.AnimationRepeat = false;
             mobile.AnimationFromServer = false;
-            mobile.AnimationDirection = false;
+            mobile.AnimationForwardDirection = false;
             mobile.LastStepSoundTime = 0;
             mobile.StepSoundOffset = 0;
             mobile.Title = string.Empty;
@@ -192,7 +192,7 @@ namespace ClassicUO.Game.GameObjects
         public byte AnimationRepeatMode = 1;
         public bool AnimationRepeat;
         public bool AnimationFromServer;
-        public bool AnimationDirection;
+        public bool AnimationForwardDirection;
         public byte AnimationGroup = 0xFF;
         public long LastStepSoundTime;
         public int StepSoundOffset;
@@ -318,15 +318,15 @@ namespace ClassicUO.Game.GameObjects
         }
 
 
-        public void SetAnimation(byte id, byte interval = 0, byte frameCount = 0, byte repeatCount = 0, bool repeat = false, bool frameDirection = false)
+        public void SetAnimation(byte id, byte interval = 0, byte frameCount = 0, byte repeatCount = 0, bool repeat = false, bool forward = false)
         {
             AnimationGroup = id;
-            AnimIndex = (sbyte) (frameDirection ? 0 : frameCount);
+            AnimIndex = (sbyte) (forward ? 0 : frameCount);
             AnimationInterval = interval;
             AnimationFrameCount = frameCount;
             AnimationRepeatMode = repeatCount;
             AnimationRepeat = repeat;
-            AnimationDirection = frameDirection;
+            AnimationForwardDirection = forward;
             AnimationFromServer = false;
             LastAnimationChangeTime = Time.Ticks;
 
@@ -344,7 +344,7 @@ namespace ClassicUO.Game.GameObjects
                 AnimationFrameCount = 0;
                 AnimationInterval = 1;
                 AnimationRepeatMode = 1;
-                AnimationDirection = true;
+                AnimationForwardDirection = true;
                 AnimationRepeat = false;
                 AnimationFromServer = true;
 
@@ -527,10 +527,11 @@ namespace ClassicUO.Game.GameObjects
             {
                 sbyte frameIndex = AnimIndex;
 
-                if (AnimationFromServer && !AnimationDirection)
+                if (AnimationFromServer && !AnimationForwardDirection)
                     frameIndex--;
                 else
                     frameIndex++;
+
                 ushort id = GetGraphicForAnimation();
                 byte animGroup = GetGroupForAnimation(this, id, true);
 
@@ -582,11 +583,18 @@ namespace ClassicUO.Game.GameObjects
                             currentDelay += currentDelay * (AnimationInterval + 1);
 
                             if (AnimationFrameCount == 0)
+                            {
                                 AnimationFrameCount = (byte) fc;
+                            }
                             else
-                                fc = AnimationFrameCount;
+                            {
+                                fc -= AnimationFrameCount;
 
-                            if (AnimationDirection)
+                                if (fc < 0)
+                                    fc = direction.FrameCount;
+                            }
+                                
+                            if (AnimationForwardDirection)
                             {
                                 if (frameIndex >= fc)
                                 {

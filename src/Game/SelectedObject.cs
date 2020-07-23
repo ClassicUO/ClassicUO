@@ -92,7 +92,7 @@ namespace ClassicUO.Game
                 byte animGroup = Mobile.GetGroupForAnimation(mobile, graphic, layer == Layer.Invalid);
 
                 ushort hue = 0;
-                AnimationDirection direction = AnimationsLoader.Instance.GetBodyAnimationGroup(ref graphic, ref animGroup, ref hue, true).Direction[dir];
+                AnimationForwardDirection direction = AnimationsLoader.Instance.GetBodyAnimationGroup(ref graphic, ref animGroup, ref hue, true).Direction[dir];
 
                 AnimationsLoader.Instance.AnimID = graphic;
                 AnimationsLoader.Instance.AnimGroup = animGroup;
@@ -196,7 +196,7 @@ namespace ClassicUO.Game
                                         ? AnimationsLoader.Instance.GetCorpseAnimationGroup(ref graphic, ref animGroup, ref color)
                                         : AnimationsLoader.Instance.GetBodyAnimationGroup(ref graphic, ref animGroup, ref color);
 
-                AnimationDirection direction = gr.Direction[AnimationsLoader.Instance.Direction];
+                AnimationForwardDirection direction = gr.Direction[AnimationsLoader.Instance.Direction];
 
                 if (direction == null || ((direction.FrameCount == 0 || direction.Frames == null) && !AnimationsLoader.Instance.LoadDirectionGroup(ref direction)))
                     continue;
