@@ -590,8 +590,8 @@ namespace ClassicUO.Game.GameObjects
                             {
                                 fc -= AnimationFrameCount;
 
-                                if (fc < 0)
-                                    fc = direction.FrameCount;
+                                if (fc <= 0)
+                                    fc = AnimationFrameCount;
                             }
                                 
                             if (AnimationForwardDirection)
