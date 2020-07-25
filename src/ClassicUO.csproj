@@ -61,9 +61,6 @@
     <Reference Include="FNA">
       <HintPath>..\external\FNA\FNA.dll</HintPath>
     </Reference>
-    <Reference Include="Newtonsoft.Json">
-      <HintPath>..\external\newtonsoft.json\Newtonsoft.Json.dll</HintPath>
-    </Reference>
     <Reference Include="System.IO.Compression" />
   </ItemGroup>
 
