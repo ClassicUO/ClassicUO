@@ -51,13 +51,13 @@ namespace ClassicUO.Game.UI.Controls
         {
             if (DoScissor)
             {
-                ScissorStack.PushScissors(new Rectangle(x, y, Width, Height));
+                ScissorStack.PushScissors(batcher.GraphicsDevice, new Rectangle(x, y, Width, Height));
                 batcher.EnableScissorTest(true);
             }
             else
             {
                 batcher.EnableScissorTest(false);
-                ScissorStack.PopScissors();
+                ScissorStack.PopScissors(batcher.GraphicsDevice);
             }
 
             return true;

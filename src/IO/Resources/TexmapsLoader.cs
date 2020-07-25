@@ -29,10 +29,10 @@ using ClassicUO.Utility;
 
 namespace ClassicUO.IO.Resources
 {
-    internal class TexmapsLoader : UOFileLoader<UOTexture>
+    internal class TexmapsLoader : UOFileLoader<UOTexture32>
     {
-        private readonly ushort[] _textmapPixels128 = new ushort[128 * 128];
-        private readonly ushort[] _textmapPixels64 = new ushort[64 * 64];
+        private readonly uint[] _textmapPixels128 = new uint[128 * 128];
+        private readonly uint[] _textmapPixels64 = new uint[64 * 64];
         private UOFile _file;
 
         private TexmapsLoader(int count) : base(count) 
@@ -142,7 +142,7 @@ namespace ClassicUO.IO.Resources
 
         }
 
-        public override UOTexture GetTexture(uint g)
+        public override UOTexture32 GetTexture(uint g)
         {
             if (g >= Resources.Length)
                 return null;
@@ -151,28 +151,27 @@ namespace ClassicUO.IO.Resources
 
             if (texture == null || texture.IsDisposed)
             {
-                ushort[] pixels = GetTextmapTexture((ushort) g, out int size);
+                uint[] pixels = GetTextmapTexture((ushort) g, out int size);
 
                 if (pixels == null || pixels.Length == 0)
                     return null;
 
-                texture = new UOTexture16(size, size);
+                texture = new UOTexture32(size, size);
                 texture.SetData(pixels);
 
                 SaveID(g);
             }
- 
+            else
+            {
+                texture.Ticks = Time.Ticks;
+            }
+
             return texture;
         }
 
-        public override void CleanResources()
+        private uint[] GetTextmapTexture(ushort index, out int size)
         {
-            
-        }
-
-        private ushort[] GetTextmapTexture(ushort index, out int size)
-        {
-            ref readonly var entry = ref GetValidRefEntry(index);
+            ref var entry = ref GetValidRefEntry(index);
 
             if (entry.Length <= 0)
             {
@@ -181,7 +180,7 @@ namespace ClassicUO.IO.Resources
                 return null;
             }
 
-            ushort[] pixels;
+            uint[] pixels;
 
             if (entry.Width == 0 && entry.Height == 0)
             {
@@ -201,7 +200,9 @@ namespace ClassicUO.IO.Resources
                 int pos = i * size;
 
                 for (int j = 0; j < size; j++)
-                    pixels[pos + j] = (ushort) (0x8000 | _file.ReadUShort());
+                {
+                    pixels[pos + j] = Utility.HuesHelper.Color16To32(_file.ReadUShort()) | 0xFF_00_00_00;
+                } 
             }
 
             return pixels;

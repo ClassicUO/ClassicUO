@@ -63,7 +63,7 @@ namespace ClassicUO.Game
         private readonly Tooltip _tooltip;
         private Vector3 _auraVector = new Vector3(0, 13, 0);
         private readonly RenderedText _targetDistanceText = RenderedText.Create(String.Empty, 0x0481, style: FontStyle.BlackBorder);
-        private UOTexture _draggedItemTexture;
+        private UOTexture32 _draggedItemTexture;
         private ushort _graphic = 0x2073;
         private bool _needGraphicUpdate = true;
         private Point _offset;
@@ -103,7 +103,7 @@ namespace ClassicUO.Game
                 {
                     ushort id = _cursorData[i, j];
 
-                    ushort[] pixels = ArtLoader.Instance.ReadStaticArt(id, out short w, out short h, out _);
+                    uint[] pixels = ArtLoader.Instance.ReadStaticArt(id, out short w, out short h, out _);
 
                     if (i == 0)
                     {
@@ -230,25 +230,27 @@ namespace ClassicUO.Game
                     {
                         unsafe
                         {
-                            fixed (ushort* ptr = pixels)
+                            fixed (uint* ptr = pixels)
                             {
-                                SDL.SDL_Surface* surface = (SDL.SDL_Surface*) SDL.SDL_CreateRGBSurfaceWithFormatFrom((IntPtr) ptr, w, h, 16, 2 * w, SDL.SDL_PIXELFORMAT_ARGB1555);
+                                SDL.SDL_Surface* surface = (SDL.SDL_Surface*) SDL.SDL_CreateRGBSurfaceWithFormatFrom((IntPtr) ptr, w, h, 32, 4 * w, SDL.SDL_PIXELFORMAT_ABGR8888);
                                 
                                 if (i == 2)
                                 {
-                                    int stride = surface->pitch >> 1;
-                                    ushort* pixels_ptr = (ushort*) surface->pixels;
-                                    ushort* p_line_end = pixels_ptr + w;
-                                    ushort* p_img_end = pixels_ptr + (stride * h);
+                                    int stride = surface->pitch >> 2;
+                                    uint* pixels_ptr = (uint*) surface->pixels;
+                                    uint* p_line_end = pixels_ptr + w;
+                                    uint* p_img_end = pixels_ptr + (stride * h);
                                     int delta = stride - w;
+                                    Color c = default;
 
                                     while (pixels_ptr < p_img_end)
                                     {
                                         while (pixels_ptr < p_line_end)
                                         {
-                                            if (*pixels_ptr != 0)
+                                            if (*pixels_ptr != 0 && *pixels_ptr != 0xFF_00_00_00)
                                             {
-                                                *pixels_ptr = (ushort) (HuesLoader.Instance.GetColor16(*pixels_ptr, 0x0033) | 0x8000);
+                                                c.PackedValue = *pixels_ptr;
+                                                * pixels_ptr = HuesHelper.Color16To32(HuesLoader.Instance.GetColor16(HuesHelper.ColorToHue(c), 0x0033)) | 0xFF_00_00_00;
                                             }
 
                                             ++pixels_ptr;
@@ -285,6 +287,7 @@ namespace ClassicUO.Game
 
         public bool IsLoading { get; set; }
         public bool IsDraggingCursorForced { get; set; }
+        public bool AllowDrawSDLCursor { get; set; } = true;
 
 
         public void SetDraggedItem(Point? offset)
@@ -314,7 +317,7 @@ namespace ClassicUO.Game
             {
                 _needGraphicUpdate = false;
 
-                if (Settings.GlobalSettings.RunMouseInASeparateThread)
+                if (AllowDrawSDLCursor && Settings.GlobalSettings.RunMouseInASeparateThread)
                 {
                     ushort id = Graphic;
 
@@ -512,9 +515,9 @@ namespace ClassicUO.Game
                 int offX = _cursorOffset[0, graphic];
                 int offY = _cursorOffset[1, graphic];
 
-                if (World.InGame && World.MapIndex != 0)
+                if (World.InGame && World.MapIndex != 0 && !World.Player.InWarMode)
                 {
-                    _vec.X = 0x0033;
+                    _vec.X = 0x0034;
                     _vec.Y = 1;
                     _vec.Z = 0;
                 }
@@ -597,7 +600,7 @@ namespace ClassicUO.Game
             if (IsLoading)
                 return _cursorData[war, 13];
 
-            if (UIManager.MouseOverControl is AbstractTextBox t && t.IsEditable)
+            if (UIManager.MouseOverControl != null && UIManager.MouseOverControl.AcceptKeyboardInput && UIManager.MouseOverControl.IsEditable)
                 return _cursorData[war, 14];
 
             ushort result = _cursorData[war, 9];

@@ -83,7 +83,7 @@ namespace ClassicUO.Game.UI.Gumps
       
         public int PlotState { get; private set; }
 
-        public void SetMapTexture(UOTexture texture)
+        public void SetMapTexture(UOTexture32 texture)
         {
             _textureControl.Texture?.Dispose();
             _textureControl.WantUpdateSize = true;

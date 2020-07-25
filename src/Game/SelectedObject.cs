@@ -92,7 +92,7 @@ namespace ClassicUO.Game
                 byte animGroup = Mobile.GetGroupForAnimation(mobile, graphic, layer == Layer.Invalid);
 
                 ushort hue = 0;
-                AnimationDirection direction = AnimationsLoader.Instance.GetBodyAnimationGroup(ref graphic, ref animGroup, ref hue, true).Direction[dir];
+                AnimationForwardDirection direction = AnimationsLoader.Instance.GetBodyAnimationGroup(ref graphic, ref animGroup, ref hue, true).Direction[dir];
 
                 AnimationsLoader.Instance.AnimID = graphic;
                 AnimationsLoader.Instance.AnimGroup = animGroup;
@@ -196,7 +196,7 @@ namespace ClassicUO.Game
                                         ? AnimationsLoader.Instance.GetCorpseAnimationGroup(ref graphic, ref animGroup, ref color)
                                         : AnimationsLoader.Instance.GetBodyAnimationGroup(ref graphic, ref animGroup, ref color);
 
-                AnimationDirection direction = gr.Direction[AnimationsLoader.Instance.Direction];
+                AnimationForwardDirection direction = gr.Direction[AnimationsLoader.Instance.Direction];
 
                 if (direction == null || ((direction.FrameCount == 0 || direction.Frames == null) && !AnimationsLoader.Instance.LoadDirectionGroup(ref direction)))
                     continue;
@@ -238,17 +238,17 @@ namespace ClassicUO.Game
 
 
         [MethodImpl(256)]
-        public static bool IsPointInStatic(UOTexture texture, int x, int y)
+        public static bool IsPointInStatic(UOTexture32 texture, int x, int y)
         {
             return texture != null && texture.Contains(TranslatedMousePositionByViewport.X - x, TranslatedMousePositionByViewport.Y - y);
         }
 
         [MethodImpl(256)]
-        public static bool IsPointInLand(UOTexture texture, int x, int y)
+        public static bool IsPointInLand(int x, int y)
         {
             x = TranslatedMousePositionByViewport.X - x;
             y = TranslatedMousePositionByViewport.Y - y;
-            return texture != null && x >= 0 && x < 44 && y >= 0 && y < 44 && _InternalArea[x, y];
+            return x >= 0 && x < 44 && y >= 0 && y < 44 && _InternalArea[x, y];
         }
 
         public static bool IsPointInStretchedLand(ref Rectangle rect, int x, int y)

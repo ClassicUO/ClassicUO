@@ -128,8 +128,9 @@ namespace ClassicUO.Game
 
         public static void DoubleClick(uint serial)
         {
-            if (SerialHelper.IsMobile(serial) && World.Player.InWarMode)
+            if (serial != World.Player && SerialHelper.IsMobile(serial) && World.Player.InWarMode)
             {
+                RequestMobileStatus(serial);
                 Attack(serial);
             }
             else
@@ -173,7 +174,7 @@ namespace ClassicUO.Game
 
         public static void Print(Entity entity, string message, ushort hue = 946, MessageType type = MessageType.Regular, byte font = 3, bool unicode = true)
         {
-            MessageManager.HandleMessage(entity, message, entity != null ? entity.Name : "System", hue, type, font, unicode, "ENU");
+            MessageManager.HandleMessage(entity, message, entity != null ? entity.Name : "System", hue, type, font, entity == null ? TEXT_TYPE.SYSTEM : TEXT_TYPE.OBJECT, unicode, "ENU");
         }
 
         public static void SayParty(string message, uint serial = 0)
@@ -229,11 +230,16 @@ namespace ClassicUO.Game
                 Socket.Send(new PDropRequestNew(serial, (ushort) x, (ushort) y, (sbyte) z, 0, container));
             else
                 Socket.Send(new PDropRequestOld(serial, (ushort) x, (ushort) y, (sbyte) z, container));
+
+            ItemHold.Enabled = false;
+            ItemHold.Dropped = true;
         }
 
         public static void Equip(uint serial, Layer layer, uint target)
         {
             Socket.Send(new PEquipRequest(serial, layer, target));
+            ItemHold.Enabled = false;
+            ItemHold.Dropped = true;
         }
 
         public static void ReplyGump(uint local, uint server, int button, uint[] switches = null, Tuple<ushort, string>[] entries = null)
@@ -428,6 +434,7 @@ namespace ClassicUO.Game
                 ProfileManager.Current.GrabBagSerial = 0;
                 bag = backpack.Serial;
             }
+
             DropItem(serial, 0xFFFF, 0xFFFF, 0, bag);
         }
     }

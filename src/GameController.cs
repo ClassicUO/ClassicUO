@@ -21,8 +21,10 @@
 
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Threading;
 
 using ClassicUO.Configuration;
@@ -47,7 +49,7 @@ using static SDL2.SDL;
 
 namespace ClassicUO
 {
-    class GameController : Microsoft.Xna.Framework.Game
+    unsafe class GameController : Microsoft.Xna.Framework.Game
     {
         private Scene _scene;
         private bool _dragStarted;
@@ -56,16 +58,26 @@ namespace ClassicUO
         private UltimaBatcher2D _uoSpriteBatch;
         private readonly float[] _intervalFixedUpdate = new float[2];
         private double _statisticsTimer;
-        private RenderTarget2D _buffer;
         private double _totalElapsed, _currentFpsTime;
         private uint _totalFrames;
-        private Vector3 _hueVector;
-
 
 
         public GameController()
         {
             _graphicDeviceManager = new GraphicsDeviceManager(this);
+            _graphicDeviceManager.PreparingDeviceSettings += (sender, e) => e.GraphicsDeviceInformation.PresentationParameters.RenderTargetUsage = RenderTargetUsage.DiscardContents;
+           
+            _graphicDeviceManager.PreferredDepthStencilFormat = DepthFormat.Depth24Stencil8;
+            _graphicDeviceManager.SynchronizeWithVerticalRetrace = false; // TODO: V-Sync option
+
+            Window.ClientSizeChanged += WindowOnClientSizeChanged;
+            Window.AllowUserResizing = true;
+            Window.Title = $"ClassicUO - {CUOEnviroment.Version}";
+            IsMouseVisible = Settings.GlobalSettings.RunMouseInASeparateThread;
+
+            IsFixedTimeStep = false; // Settings.GlobalSettings.FixedTimeStep;
+            TargetElapsedTime = TimeSpan.FromMilliseconds(1000.0 / 250.0);
+            InactiveSleepTime = TimeSpan.Zero;
         }
 
         public Scene Scene => _scene;
@@ -75,24 +87,9 @@ namespace ClassicUO
 
         protected override void Initialize()
         {
-            Log.Trace("Setup GraphicDeviceManager");
-
-            _graphicDeviceManager.PreparingDeviceSettings += (sender, e) => e.GraphicsDeviceInformation.PresentationParameters.RenderTargetUsage = RenderTargetUsage.DiscardContents;
             if (_graphicDeviceManager.GraphicsDevice.Adapter.IsProfileSupported(GraphicsProfile.HiDef))
                 _graphicDeviceManager.GraphicsProfile = GraphicsProfile.HiDef;
-
-            _graphicDeviceManager.PreferredDepthStencilFormat = DepthFormat.Depth24Stencil8;
-            _graphicDeviceManager.SynchronizeWithVerticalRetrace = false; // TODO: V-Sync option
             _graphicDeviceManager.ApplyChanges();
-
-
-            Window.ClientSizeChanged += WindowOnClientSizeChanged;
-            Window.AllowUserResizing = true;
-            Window.Title = $"ClassicUO - {CUOEnviroment.Version}";
-            IsMouseVisible = Settings.GlobalSettings.RunMouseInASeparateThread;
-
-            IsFixedTimeStep = false; // Settings.GlobalSettings.FixedTimeStep;
-            TargetElapsedTime = TimeSpan.FromMilliseconds(1000.0f / 250);
 
             SetRefreshRate(Settings.GlobalSettings.FPS);
             _uoSpriteBatch = new UltimaBatcher2D(GraphicsDevice);
@@ -123,8 +120,8 @@ namespace ClassicUO
                                           TEXTURE_WIDHT,
                                           TEXTURE_HEIGHT);
             _hues_sampler[0].SetData(buffer, 0, TEXTURE_WIDHT * TEXTURE_HEIGHT);
-           
-           
+
+
 
 
             _hues_sampler[1] = new Texture2D(
@@ -141,19 +138,42 @@ namespace ClassicUO
 
             AuraManager.CreateAuraTexture();
             UIManager.InitializeGameCursor();
+            AnimatedStaticsManager.Initialize();
 
             SetScene(new LoginScene());
             SetWindowPositionBySettings();
         }
 
+
         protected override void UnloadContent()
         {
             SDL.SDL_GetWindowBordersSize(Window.Handle, out int top, out int left, out int bottom, out int right);
             Settings.GlobalSettings.WindowPosition = new Point(Math.Max(0, Window.ClientBounds.X - left), Math.Max(0, Window.ClientBounds.Y - top));
-            
+
             _scene?.Unload();
             Settings.GlobalSettings.Save();
             Plugin.OnClosing();
+
+            ArtLoader.Instance.Dispose();
+            GumpsLoader.Instance.Dispose();
+            TexmapsLoader.Instance.Dispose();
+            AnimationsLoader.Instance.Dispose();
+            LightsLoader.Instance.Dispose();
+            TileDataLoader.Instance.Dispose();
+            AnimDataLoader.Instance.Dispose();
+            ClilocLoader.Instance.Dispose();
+            FontsLoader.Instance.Dispose();
+            HuesLoader.Instance.Dispose();
+            MapLoader.Instance.Dispose();
+            MultiLoader.Instance.Dispose();
+            MultiMapLoader.Instance.Dispose();
+            ProfessionLoader.Instance.Dispose();
+            SkillsLoader.Instance.Dispose();
+            SoundsLoader.Instance.Dispose();
+            SpeechesLoader.Instance.Dispose();
+            Verdata.File?.Dispose();
+            World.Map?.Destroy();
+
             base.UnloadContent();
         }
 
@@ -207,21 +227,6 @@ namespace ClassicUO
             _graphicDeviceManager.PreferredBackBufferWidth = width;
             _graphicDeviceManager.PreferredBackBufferHeight = height;
             _graphicDeviceManager.ApplyChanges();
-
-
-            if (CUOEnviroment.IsHighDPI)
-            {
-                width *= 2;
-                height *= 2;
-            }
-
-            _buffer?.Dispose();
-            _buffer = new RenderTarget2D(GraphicsDevice,
-                                         width,
-                                         height,
-                                         false, 
-                                         SurfaceFormat.Color,
-                                         DepthFormat.Depth24Stencil8);
         }
 
         public void SetWindowBorderless(bool borderless)
@@ -237,7 +242,7 @@ namespace ClassicUO
             {
                 return;
             }
-            
+
             SDL_SetWindowBordered(Window.Handle, borderless ? SDL_bool.SDL_FALSE : SDL_bool.SDL_TRUE);
 
             SDL_GetCurrentDisplayMode(0, out SDL_DisplayMode displayMode);
@@ -371,7 +376,6 @@ namespace ClassicUO
             if (_scene != null && _scene.IsLoaded && !_scene.IsDestroyed)
                 _scene.Draw(_uoSpriteBatch);
 
-            GraphicsDevice.SetRenderTarget(_buffer);
             UIManager.Draw(_uoSpriteBatch);
 
             if (World.InGame && SelectedObject.LastObject is TextObject t)
@@ -387,34 +391,9 @@ namespace ClassicUO
             Profiler.ExitContext("RenderFrame");
             Profiler.EnterContext("OutOfContext");
 
-            GraphicsDevice.SetRenderTarget(null);
-            _uoSpriteBatch.Begin();
-            _uoSpriteBatch.Draw2D(_buffer, 0, 0, ref _hueVector);
-            _uoSpriteBatch.End();
-
-            UpdateWindowCaption(gameTime);
+            Plugin.ProcessDrawCmdList(GraphicsDevice);
         }
 
-
-        private void UpdateWindowCaption(GameTime gameTime)
-        {
-            if (!Settings.GlobalSettings.Profiler || CUOEnviroment.DisableUpdateWindowCaption)
-                return;
-
-            double timeDraw = Profiler.GetContext("RenderFrame").TimeInContext;
-            double timeUpdate = Profiler.GetContext("Update").TimeInContext;
-            double timeFixedUpdate = Profiler.GetContext("FixedUpdate").TimeInContext;
-            double timeOutOfContext = Profiler.GetContext("OutOfContext").TimeInContext;
-            //double timeTotalCheck = timeOutOfContext + timeDraw + timeUpdate;
-            double timeTotal = Profiler.TrackedTime;
-            double avgDrawMs = Profiler.GetContext("RenderFrame").AverageTime;
-
-#if DEV_BUILD
-            Window.Title = string.Format("ClassicUO [dev] {5} - Draw:{0:0.0}% Update:{1:0.0}% FixedUpd:{6:0.0} AvgDraw:{2:0.0}ms {3} - FPS: {4}", 100d * (timeDraw / timeTotal), 100d * (timeUpdate / timeTotal), avgDrawMs, gameTime.IsRunningSlowly ? "*" : string.Empty, CUOEnviroment.CurrentRefreshRate, CUOEnviroment.Version, 100d * (timeFixedUpdate / timeTotal));
-#else
-            Window.Title = string.Format("ClassicUO {5} - Draw:{0:0.0}% Update:{1:0.0}% FixedUpd:{6:0.0} AvgDraw:{2:0.0}ms {3} - FPS: {4}", 100d * (timeDraw / timeTotal), 100d * (timeUpdate / timeTotal), avgDrawMs, gameTime.IsRunningSlowly ? "*" : string.Empty, CUOEnviroment.CurrentRefreshRate, CUOEnviroment.Version, 100d * (timeFixedUpdate / timeTotal));
-#endif
-        }
 
         private void OnNetworkUpdate(double totalMS, double frameMS)
         {
@@ -472,6 +451,18 @@ namespace ClassicUO
         private unsafe int HandleSDLEvent(IntPtr userdata, IntPtr ptr)
         {
             SDL_Event* e = (SDL_Event*) ptr;
+
+            if (Plugin.ProcessWndProc(e) != 0)
+            {
+                if (e->type == SDL_EventType.SDL_MOUSEMOTION)
+                {
+                    if (UIManager.GameCursor != null)
+                    {
+                        UIManager.GameCursor.AllowDrawSDLCursor = false;
+                    }
+                }
+                return 0;
+            }
 
             switch (e->type)
             {
@@ -540,12 +531,20 @@ namespace ClassicUO
                     {
                         string path = Path.Combine(FileSystemHelper.CreateFolderIfNotExists(CUOEnviroment.ExecutablePath, "Data", "Client", "Screenshots"), $"screenshot_{DateTime.Now:yyyy-MM-dd_hh-mm-ss}.png");
 
-                        using (Stream stream = File.Create(path))
+                        Color[] colors = new Color[_graphicDeviceManager.PreferredBackBufferWidth * _graphicDeviceManager.PreferredBackBufferHeight];
+                        GraphicsDevice.GetBackBufferData(colors);
+                        using (Texture2D texture = new Texture2D(GraphicsDevice, _graphicDeviceManager.PreferredBackBufferWidth, _graphicDeviceManager.PreferredBackBufferHeight, false, SurfaceFormat.Color))
                         {
-                            _buffer.SaveAsPng(stream, _buffer.Width, _buffer.Height);
+                            texture.SetData(colors);
 
-                            GameActions.Print($"Screenshot stored in: {path}", 0x44, MessageType.System);
+                            using (Stream stream = File.Create(path))
+                            {
+                                texture.SaveAsPng(stream, texture.Width, texture.Height);
+
+                                GameActions.Print($"Screenshot stored in: {path}", 0x44, MessageType.System);
+                            }
                         }
+                       
                     }
 
                     break;
@@ -565,6 +564,13 @@ namespace ClassicUO
                     break;
 
                 case SDL.SDL_EventType.SDL_MOUSEMOTION:
+
+                    if (UIManager.GameCursor != null && !UIManager.GameCursor.AllowDrawSDLCursor)
+                    {
+                        UIManager.GameCursor.AllowDrawSDLCursor = true;
+                        UIManager.GameCursor.Graphic = 0xFFFF;
+                    }
+
                     Mouse.Update();
 
                     if (Mouse.IsDragging)

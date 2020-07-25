@@ -22,6 +22,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
@@ -42,9 +43,9 @@ namespace ClassicUO.Game.GameObjects
             Serial = serial;
         }
 
-
-        public uint LastStepTime;
         protected long LastAnimationChangeTime;
+        public sbyte AnimIndex;
+        public uint LastStepTime;
         public uint Serial;
         public bool IsClicked;
         public ushort Hits;
@@ -155,6 +156,8 @@ namespace ClassicUO.Game.GameObjects
         {
             base.Destroy();
 
+            AnimIndex = 0;
+            LastAnimationChangeTime = 0;
             HitsTexture?.Destroy();
             HitsTexture = null;
         }
@@ -240,13 +243,14 @@ namespace ClassicUO.Game.GameObjects
             return null;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Item FindItemByLayer(Layer layer)
         {
             for (var i = Items; i != null; i = i.Next)
             {
                 Item it = (Item) i;
 
-                if (it.Layer == layer)
+                if (!it.IsDestroyed && it.Layer == layer)
                     return it;
             }
 
@@ -264,7 +268,7 @@ namespace ClassicUO.Game.GameObjects
         //            var next = obj.Next;
         //            Item it = (Item) obj;
 
-        //            it.Container = 0;
+        //            it.Container = 0xFFFF_FFFF;
         //            World.Items.Remove(it);
 
         //            Remove(obj);
@@ -296,7 +300,7 @@ namespace ClassicUO.Game.GameObjects
                     }
                     else
                     {
-                        it.Container = 0;
+                        it.Container = 0xFFFF_FFFF;
                         World.Items.Remove(it);
                         it.Destroy();
                         Remove(obj);

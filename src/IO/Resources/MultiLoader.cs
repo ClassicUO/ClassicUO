@@ -62,7 +62,7 @@ namespace ClassicUO.IO.Resources
         public int Offset => _itemOffset;
 
 
-        public override Task Load()
+        public override unsafe Task Load()
         {
             return Task.Run(() =>
             {
@@ -84,7 +84,7 @@ namespace ClassicUO.IO.Resources
                     if (System.IO.File.Exists(path) && System.IO.File.Exists(pathidx))
                     {
                         _file = new UOFileMul(path, pathidx, Constants.MAX_MULTI_DATA_INDEX_COUNT, 14);
-                        Count = _itemOffset = Client.Version >= ClientVersion.CV_7090 ? UnsafeMemoryManager.SizeOf<MultiBlockNew>() + 2 : UnsafeMemoryManager.SizeOf<MultiBlock>();
+                        Count = _itemOffset = Client.Version >= ClientVersion.CV_7090 ? sizeof(MultiBlockNew) + 2 : sizeof(MultiBlock);
                     }
                 }
 
@@ -92,31 +92,26 @@ namespace ClassicUO.IO.Resources
 
             });
         }
-
-        public override void CleanResources()
-        {
-            // do nothing
-        }
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    readonly struct MultiBlock
+    ref struct MultiBlock
     {
-        public readonly ushort ID;
-        public readonly short X;
-        public readonly short Y;
-        public readonly short Z;
-        public readonly uint Flags;
+        public ushort ID;
+        public short X;
+        public short Y;
+        public short Z;
+        public uint Flags;
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    readonly struct MultiBlockNew
+    ref struct MultiBlockNew
     {
-        public readonly ushort ID;
-        public readonly short X;
-        public readonly short Y;
-        public readonly short Z;
-        public readonly ushort Flags;
-        public readonly uint Unknown;
+        public ushort ID;
+        public short X;
+        public short Y;
+        public short Z;
+        public ushort Flags;
+        public uint Unknown;
     }
 }

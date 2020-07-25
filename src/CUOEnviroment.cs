@@ -34,6 +34,7 @@ namespace ClassicUO
         public static string[] Args;
         public static string[] Plugins;
         public static bool Debug;
+        public static bool Profiler;
         public static bool IsHighDPI;
         public static uint CurrentRefreshRate;
         public static bool SkipLoginScreen;
@@ -46,7 +47,5 @@ namespace ClassicUO
 
         public static readonly Version Version = Assembly.GetExecutingAssembly().GetName().Version;
         public static readonly string ExecutablePath = Path.GetDirectoryName(Assembly.GetEntryAssembly()?.Location);
-
-        public static bool DisableUpdateWindowCaption;
     }
 }

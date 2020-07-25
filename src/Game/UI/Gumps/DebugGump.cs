@@ -28,6 +28,7 @@ using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.Renderer;
+using ClassicUO.Utility;
 
 using Microsoft.Xna.Framework;
 
@@ -105,6 +106,24 @@ namespace ClassicUO.Game.UI.Gumps
                     //_sb.AppendFormat(DEBUG_STRING_1, Engine.DebugInfo.MobilesRendered, Engine.DebugInfo.ItemsRendered, Engine.DebugInfo.StaticsRendered, Engine.DebugInfo.MultiRendered, Engine.DebugInfo.LandsRendered, Engine.DebugInfo.EffectsRendered);
                     _sb.AppendFormat(DEBUG_STRING_2, World.InGame ? $"{World.Player.X}, {World.Player.Y}, {World.Player.Z}" : "0xFFFF, 0xFFFF, 0", Mouse.Position, SelectedObject.Object is GameObject gobj ? $"{gobj.X}, {gobj.Y}, {gobj.Z}" : "0xFFFF, 0xFFFF, 0");
                     _sb.AppendFormat(DEBUG_STRING_3, ReadObject(SelectedObject.Object));
+
+                    if (CUOEnviroment.Profiler)
+                    {
+                        double timeDraw = Profiler.GetContext("RenderFrame").TimeInContext;
+                        double timeUpdate = Profiler.GetContext("Update").TimeInContext;
+                        double timeFixedUpdate = Profiler.GetContext("FixedUpdate").TimeInContext;
+                        double timeOutOfContext = Profiler.GetContext("OutOfContext").TimeInContext;
+                        //double timeTotalCheck = timeOutOfContext + timeDraw + timeUpdate;
+                        double timeTotal = Profiler.TrackedTime;
+                        double avgDrawMs = Profiler.GetContext("RenderFrame").AverageTime;
+                        _sb.AppendLine("- Profiling");
+                        _sb.AppendLine(string.Format("    Draw:{0:0.0}% Update:{1:0.0}% FixedUpd:{2:0.0} AvgDraw:{3:0.0}ms {4}",
+                                                     100d * (timeDraw / timeTotal), 
+                                                     100d * (timeUpdate / timeTotal),
+                                                     100d * (timeFixedUpdate / timeTotal),
+                                                     avgDrawMs, 
+                                                     CUOEnviroment.CurrentRefreshRate));
+                    }
                 }
                 else if (scene != null && scene.ScalePos != 5)
                 {

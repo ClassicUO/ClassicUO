@@ -31,7 +31,7 @@ namespace ClassicUO.Game.UI.Controls
 {
     internal class ResizePic : Control
     {
-        private readonly UOTexture[] _gumpTexture = new UOTexture[9];
+        private readonly UOTexture32[] _gumpTexture = new UOTexture32[9];
 
         public ResizePic(ushort graphic)
         {
@@ -40,7 +40,7 @@ namespace ClassicUO.Game.UI.Controls
 
             for (int i = 0; i < _gumpTexture.Length; i++)
             {
-                UOTexture t = GumpsLoader.Instance.GetTexture((ushort) (graphic + i));
+                UOTexture32 t = GumpsLoader.Instance.GetTexture((ushort) (graphic + i));
 
                 if (t == null)
                 {
@@ -64,6 +64,7 @@ namespace ClassicUO.Game.UI.Controls
             Y = int.Parse(parts[2]);
             Width = int.Parse(parts[4]);
             Height = int.Parse(parts[5]);
+            IsFromServer = true;
         }
 
         public ushort Graphic { get; }
@@ -103,7 +104,7 @@ namespace ClassicUO.Game.UI.Controls
 
             int offsetTop = Math.Max(th_0_height, th_2_height) - th_1_height;
             int offsetBottom = Math.Max(th_5_height, th_7_height) - th_6_height;
-            int offsetLeft = Math.Max(th_0_width, th_5_width) - th_3_width;
+            int offsetLeft = Math.Max(th_0_width, th_5_width) - th_2_width;
             int offsetRight = Math.Max(th_2_width, th_7_width) - th_4_width;
 
 
@@ -199,7 +200,7 @@ namespace ClassicUO.Game.UI.Controls
         }
 
 
-        private static bool PixelsInXY(UOTexture texture, int x, int y, int width = 0, int height = 0)
+        private static bool PixelsInXY(UOTexture32 texture, int x, int y, int width = 0, int height = 0)
         {
             if (x < 0 || y < 0 || (width > 0 && x >= width) || (height > 0 && y >= height))
                 return false;
@@ -214,7 +215,7 @@ namespace ClassicUO.Game.UI.Controls
                 height = textureHeight;
 
 
-            while (x > textureWidth && width > textureWidth)
+            while (x >= textureWidth && width >= textureWidth)
             {
                 x -= textureWidth;
                 width -= textureWidth;
@@ -223,7 +224,7 @@ namespace ClassicUO.Game.UI.Controls
             if (x < 0 || x > width)
                 return false;
 
-            while (y > textureHeight && height > textureHeight)
+            while (y >= textureHeight && height >= textureHeight)
             {
                 y -= textureHeight;
                 height -= textureHeight;
@@ -241,7 +242,7 @@ namespace ClassicUO.Game.UI.Controls
 
             var rect = ScissorStack.CalculateScissors(Matrix.Identity, x, y, Width, Height);
 
-            if (ScissorStack.PushScissors(rect))
+            if (ScissorStack.PushScissors(batcher.GraphicsDevice, rect))
             {
                 ShaderHuesTraslator.GetHueVector(ref _hueVector, 0, false, Alpha, true);
 
@@ -251,7 +252,7 @@ namespace ClassicUO.Game.UI.Controls
                 base.Draw(batcher, x, y);
 
                 batcher.EnableScissorTest(false);
-                ScissorStack.PopScissors();
+                ScissorStack.PopScissors(batcher.GraphicsDevice);
 
                 return true;
             }
@@ -283,13 +284,13 @@ namespace ClassicUO.Game.UI.Controls
 
             int offsetTop = Math.Max(th_0_height, th_2_height) - th_1_height;
             int offsetBottom = Math.Max(th_5_height, th_7_height) - th_6_height;
-            int offsetLeft = Math.Max(th_0_width, th_5_width) - th_3_width;
+            int offsetLeft = Math.Max(th_0_width, th_5_width) - th_2_width;
             int offsetRight = Math.Max(th_2_width, th_7_width) - th_4_width;
 
 
             for (int i = 0; i < 9; i++)
             {
-                UOTexture t = _gumpTexture[i];
+                UOTexture32 t = _gumpTexture[i];
                 if (t == null)
                     continue;
 
@@ -316,7 +317,6 @@ namespace ClassicUO.Game.UI.Controls
                         drawX += Width - drawWidth;
                         drawY += offsetTop;
                         batcher.Draw2D(t, drawX, drawY, drawWidth, drawHeight, ref color);
-
                         break;
 
                     case 3:
@@ -361,7 +361,6 @@ namespace ClassicUO.Game.UI.Controls
                         drawY += th_0_height;
                         drawWidth = Width - th_0_width - th_2_width;
                         drawHeight = Height - th_2_height - th_7_height;
-
                         batcher.Draw2DTiled(t, drawX, drawY, drawWidth, drawHeight, ref color);
 
                         break;

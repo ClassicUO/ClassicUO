@@ -25,6 +25,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
@@ -35,12 +36,18 @@ using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
+using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Network;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
+using ClassicUO.Utility.Logging;
+
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+
+using SDL2;
+
 using SpriteFont = ClassicUO.Renderer.SpriteFont;
 
 
@@ -48,7 +55,7 @@ namespace ClassicUO.Game.UI.Gumps
 {
     internal class WorldMapGump : ResizableGump
     {
-        private UOTexture _mapTexture;
+        private UOTexture32 _mapTexture;
 
         private readonly float[] _zooms = new float[10] { 0.125f, 0.25f, 0.5f, 0.75f, 1f, 1.5f, 2f, 4f, 6f, 8f };
         private int _zoomIndex = 4;
@@ -82,6 +89,7 @@ namespace ClassicUO.Game.UI.Gumps
         private bool _showMarkers = true;
         private bool _showMarkerNames = true;
         private bool _showMarkerIcons = true;
+        private List<string> _hiddenMarkerFiles;
 
         private SpriteFont _markerFont = Fonts.Map1;
         private int _markerFontIndex = 1;
@@ -181,6 +189,11 @@ namespace ClassicUO.Game.UI.Gumps
             _showMarkers = ProfileManager.Current.WorldMapShowMarkers;
             _showMultis = ProfileManager.Current.WorldMapShowMultis;
             _showMarkerNames = ProfileManager.Current.WorldMapShowMarkersNames;
+
+
+            _hiddenMarkerFiles = string.IsNullOrEmpty(ProfileManager.Current.WorldMapHiddenMarkerFiles)
+                ? new List<string>()
+                : ProfileManager.Current.WorldMapHiddenMarkerFiles.Split(',').ToList();
         }
 
         public void SaveSettings()
@@ -209,6 +222,8 @@ namespace ClassicUO.Game.UI.Gumps
             ProfileManager.Current.WorldMapShowMarkers = _showMarkers;
             ProfileManager.Current.WorldMapShowMultis = _showMultis;
             ProfileManager.Current.WorldMapShowMarkersNames = _showMarkerNames;
+
+            ProfileManager.Current.WorldMapHiddenMarkerFiles = string.Join(",", _hiddenMarkerFiles);
         }
 
         private bool ParseBool(string boolStr)
@@ -258,7 +273,8 @@ namespace ClassicUO.Game.UI.Gumps
         private void BuildContextMenu()
         {
             BuildOptionDictionary();
-
+            
+            ContextMenu?.Dispose();
             ContextMenu = new ContextMenuControl();
 
             ContextMenuItemEntry markerFontEntry = new ContextMenuItemEntry("Font Style");
@@ -284,7 +300,26 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 foreach (WMapMarkerFile markerFile in _markerFiles)
                 {
-                    var entry = new ContextMenuItemEntry($"Show/Hide '{markerFile.Name}'", () => { markerFile.Hidden = !markerFile.Hidden; }, true, !markerFile.Hidden);
+                    var entry = new ContextMenuItemEntry($"Show/Hide '{markerFile.Name}'", () =>
+                    {
+                        markerFile.Hidden = !markerFile.Hidden;
+                        
+                        if (!markerFile.Hidden)
+                        {
+                            string hiddenFile = _hiddenMarkerFiles.SingleOrDefault(x => x.Equals(markerFile.Name));
+
+                            if (!string.IsNullOrEmpty(hiddenFile))
+                            {
+                                _hiddenMarkerFiles.Remove(hiddenFile);
+                            }
+                        }
+                        else
+                        {
+                            _hiddenMarkerFiles.Add(markerFile.Name);
+                        }
+
+                    }, true, !markerFile.Hidden);
+
                     _options[$"show_marker_{markerFile.Name}"] = entry;
                     markersEntry.Add(entry);
                 }
@@ -333,158 +368,169 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 if (World.InGame)
                 {
-                    const int OFFSET_PIX = 2;
-                    const int OFFSET_PIX_HALF = OFFSET_PIX / 2;
-
-                    int realWidth = MapLoader.Instance.MapsDefaultSize[World.MapIndex, 0];
-                    int realHeight = MapLoader.Instance.MapsDefaultSize[World.MapIndex, 1];
-
-                    int fixedWidth = MapLoader.Instance.MapBlocksSize[World.MapIndex, 0];
-                    int fixedHeight = MapLoader.Instance.MapBlocksSize[World.MapIndex, 1];
-
-                    int size = (realWidth + OFFSET_PIX) * (realHeight + OFFSET_PIX);
-                    Color[] buffer = new Color[size];
-                    sbyte[] allZ = new sbyte[size];
-
-                    int bx, by, mapX, mapY, x, y;
-
-
-                    for (bx = 0; bx < fixedWidth; bx++)
+                    try
                     {
-                        mapX = bx << 3;
+                        const int OFFSET_PIX = 2;
+                        const int OFFSET_PIX_HALF = OFFSET_PIX / 2;
 
-                        for (by = 0; by < fixedHeight; by++)
+                        int realWidth = MapLoader.Instance.MapsDefaultSize[World.MapIndex, 0];
+                        int realHeight = MapLoader.Instance.MapsDefaultSize[World.MapIndex, 1];
+
+                        int fixedWidth = MapLoader.Instance.MapBlocksSize[World.MapIndex, 0];
+                        int fixedHeight = MapLoader.Instance.MapBlocksSize[World.MapIndex, 1];
+
+                        int size = (realWidth + OFFSET_PIX) * (realHeight + OFFSET_PIX);
+                        Color[] buffer = new Color[size];
+                        sbyte[] allZ = new sbyte[size];
+
+                        int bx, by, mapX, mapY, x, y;
+
+
+                        for (bx = 0; bx < fixedWidth; bx++)
                         {
-                            ref IndexMap indexMap = ref World.Map.GetIndex(bx, by);
+                            mapX = bx << 3;
 
-                            if (indexMap.MapAddress == 0)
-                                continue;
-
-                            MapBlock* mapBlock = (MapBlock*) indexMap.MapAddress;
-                            MapCells* cells = (MapCells*) &mapBlock->Cells;
-
-                            int pos = 0;
-                            mapY = by << 3;
-
-                            for (y = 0; y < 8; y++)
+                            for (by = 0; by < fixedHeight; by++)
                             {
-                                int block = (mapY + y + OFFSET_PIX_HALF) * (realWidth + OFFSET_PIX) + mapX + OFFSET_PIX_HALF;
+                                ref IndexMap indexMap = ref World.Map.GetIndex(bx, by);
 
-                                for (x = 0; x < 8; x++)
+                                if (indexMap.MapAddress == 0)
+                                    continue;
+
+                                MapBlock* mapBlock = (MapBlock*) indexMap.MapAddress;
+                                MapCells* cells = (MapCells*) &mapBlock->Cells;
+
+                                int pos = 0;
+                                mapY = by << 3;
+
+                                for (y = 0; y < 8; y++)
                                 {
-                                    ref MapCells cell = ref cells[pos];
+                                    int block = (mapY + y + OFFSET_PIX_HALF) * (realWidth + OFFSET_PIX) + mapX + OFFSET_PIX_HALF;
 
-                                    ushort color = (ushort) (0x8000 | HuesLoader.Instance.GetRadarColorData(cell.TileID));
-
-                                    ref var cc = ref buffer[block];
-                                    cc.PackedValue = HuesHelper.Color16To32(color) | 0xFF_00_00_00;
-
-                                    allZ[block] = cell.Z;
-
-                                    block++;
-                                    pos++;
-                                }
-                            }
-
-
-                            StaticsBlock* sb = (StaticsBlock*) indexMap.StaticAddress;
-                            if (sb != null)
-                            {
-                                int count = (int) indexMap.StaticCount;
-
-                                for (int c = 0; c < count; c++)
-                                {
-                                    ref readonly StaticsBlock staticBlock = ref sb[c];
-
-                                    if (staticBlock.Color != 0 && staticBlock.Color != 0xFFFF && !GameObjectHelper.IsNoDrawable(staticBlock.Color))
+                                    for (x = 0; x < 8; x++)
                                     {
-                                        pos = (staticBlock.Y << 3) + staticBlock.X;
                                         ref MapCells cell = ref cells[pos];
 
-                                        if (cell.Z <= staticBlock.Z)
+                                        ushort color = (ushort) (0x8000 | HuesLoader.Instance.GetRadarColorData(cell.TileID));
+
+                                        ref var cc = ref buffer[block];
+                                        cc.PackedValue = HuesHelper.Color16To32(color) | 0xFF_00_00_00;
+
+                                        allZ[block] = cell.Z;
+
+                                        block++;
+                                        pos++;
+                                    }
+                                }
+
+
+                                StaticsBlock* sb = (StaticsBlock*) indexMap.StaticAddress;
+                                if (sb != null)
+                                {
+                                    int count = (int) indexMap.StaticCount;
+
+                                    for (int c = 0; c < count; c++)
+                                    {
+                                        ref readonly StaticsBlock staticBlock = ref sb[c];
+
+                                        if (staticBlock.Color != 0 && staticBlock.Color != 0xFFFF && !GameObjectHelper.IsNoDrawable(staticBlock.Color))
                                         {
-                                            ushort color = (ushort) (0x8000 | (staticBlock.Hue > 0
-                                                                                  ? HuesLoader.Instance.GetColor16(16384,
-                                                                                                                   staticBlock.Hue)
-                                                                                  : HuesLoader.Instance.GetRadarColorData(
-                                                                                                                          staticBlock.Color + 0x4000)));
+                                            pos = (staticBlock.Y << 3) + staticBlock.X;
+                                            ref MapCells cell = ref cells[pos];
 
-                                            int block = (mapY + staticBlock.Y + OFFSET_PIX_HALF) *
-                                                        (realWidth + OFFSET_PIX) + (mapX + staticBlock.X) +
-                                                        OFFSET_PIX_HALF;
+                                            if (cell.Z <= staticBlock.Z)
+                                            {
+                                                ushort color = (ushort) (0x8000 | (staticBlock.Hue > 0
+                                                                                      ? HuesLoader.Instance.GetColor16(16384,
+                                                                                                                       staticBlock.Hue)
+                                                                                      : HuesLoader.Instance.GetRadarColorData(
+                                                                                                                              staticBlock.Color + 0x4000)));
 
-                                            ref var cc = ref buffer[block];
-                                            cc.PackedValue = HuesHelper.Color16To32(color) | 0xFF_00_00_00;
+                                                int block = (mapY + staticBlock.Y + OFFSET_PIX_HALF) *
+                                                            (realWidth + OFFSET_PIX) + (mapX + staticBlock.X) +
+                                                            OFFSET_PIX_HALF;
 
-                                            allZ[block] = staticBlock.Z;
+                                                ref var cc = ref buffer[block];
+                                                cc.PackedValue = HuesHelper.Color16To32(color) | 0xFF_00_00_00;
+
+                                                allZ[block] = staticBlock.Z;
+                                            }
                                         }
                                     }
                                 }
                             }
                         }
-                    }
 
-                    int real_width_less_one = realHeight - 1;
-                    int real_height_less_one = realHeight - 1;
-                    const float MAG_0 = 80f / 100f;
-                    const float MAG_1 = 100f / 80f;
+                        int real_width_less_one = realWidth - 1;
+                        int real_height_less_one = realHeight - 1;
+                        const float MAG_0 = 80f / 100f;
+                        const float MAG_1 = 100f / 80f;
 
-                    int mapY_plus_one;
-                    int r, g, b;
+                        int mapY_plus_one;
+                        int r, g, b;
 
-                    for (mapY = 1; mapY < real_height_less_one; mapY++)
-                    {
-                        mapY_plus_one = mapY + 1;
-
-                        for (mapX = 1; mapX < real_width_less_one; mapX++)
+                        for (mapY = 1; mapY < real_height_less_one; mapY++)
                         {
-                            int blockCurrent = (mapY + OFFSET_PIX_HALF) * (realWidth + OFFSET_PIX) + mapX + OFFSET_PIX_HALF;
-                            int blockNext = (mapY_plus_one + OFFSET_PIX_HALF) * (realWidth + OFFSET_PIX) + (mapX - 1) + OFFSET_PIX_HALF;
+                            mapY_plus_one = mapY + 1;
 
-                            ref sbyte z0 = ref allZ[blockCurrent];
-                            ref sbyte z1 = ref allZ[blockNext];
-
-                            if (z0 == z1)
-                                continue;
-
-                            ref Color cc = ref buffer[blockCurrent];
-
-                            if (z0 < z1)
+                            for (mapX = 1; mapX < real_width_less_one; mapX++)
                             {
-                                r = (int) (cc.R * MAG_0);
-                                g = (int) (cc.G * MAG_0);
-                                b = (int) (cc.B * MAG_0);
+                                int blockCurrent = (mapY + OFFSET_PIX_HALF) * (realWidth + OFFSET_PIX) + mapX + OFFSET_PIX_HALF;
+                                int blockNext = (mapY_plus_one + OFFSET_PIX_HALF) * (realWidth + OFFSET_PIX) + (mapX - 1) + OFFSET_PIX_HALF;
+
+                                ref sbyte z0 = ref allZ[blockCurrent];
+                                ref sbyte z1 = ref allZ[blockNext];
+
+                                if (z0 == z1)
+                                    continue;
+
+                                ref Color cc = ref buffer[blockCurrent];
+
+                                if (cc.R != 0 || cc.G != 0 || cc.B != 0)
+                                {
+                                    if (z0 < z1)
+                                    {
+                                        r = (int) (cc.R * MAG_0);
+                                        g = (int) (cc.G * MAG_0);
+                                        b = (int) (cc.B * MAG_0);
+                                    }
+                                    else
+                                    {
+                                        r = (int) (cc.R * MAG_1);
+                                        g = (int) (cc.G * MAG_1);
+                                        b = (int) (cc.B * MAG_1);
+                                    }
+
+                                    if (r > 255)
+                                        r = 255;
+
+                                    if (g > 255)
+                                        g = 255;
+
+                                    if (b > 255)
+                                        b = 255;
+
+                                    cc.R = (byte) (r);
+                                    cc.G = (byte) (g);
+                                    cc.B = (byte) (b);
+                                }
                             }
-                            else
-                            {
-                                r = (int) (cc.R * MAG_1);
-                                g = (int) (cc.G * MAG_1);
-                                b = (int) (cc.B * MAG_1);
-                            }
-
-                            if (r > 255)
-                                r = 255;
-
-                            if (g > 255)
-                                g = 255;
-
-                            if (b > 255)
-                                b = 255;
-
-                            cc.R = (byte) (r);
-                            cc.G = (byte) (g);
-                            cc.B = (byte) (b);
                         }
-                    }
 
-                    if (OFFSET_PIX > 0)
+                        if (OFFSET_PIX > 0)
+                        {
+                            realWidth += OFFSET_PIX;
+                            realHeight += OFFSET_PIX;
+                        }
+
+                        _mapTexture = new UOTexture32(realWidth, realHeight);
+                        _mapTexture.SetData(buffer);
+                    }
+                    catch (Exception ex)
                     {
-                        realWidth += OFFSET_PIX;
-                        realHeight += OFFSET_PIX;
-                    }
 
-                    _mapTexture = new UOTexture32(realWidth, realHeight);
-                    _mapTexture.SetData(buffer);
+                    }
+                   
 
                     GameActions.Print("WorldMap loaded!", 0x48);
                 }
@@ -492,9 +538,12 @@ namespace ClassicUO.Game.UI.Gumps
             );
         }
 
-        private unsafe Task LoadMarkers()
+
+
+
+        private unsafe void LoadMarkers()
         {
-            return Task.Run(() =>
+            //return Task.Run(() =>
             {
                 if (World.InGame)
                 {
@@ -502,25 +551,68 @@ namespace ClassicUO.Game.UI.Gumps
 
                     GameActions.Print("Loading WorldMap markers..", 0x2A);
 
+                    foreach (var t in _markerIcons.Values)
+                    {
+                        if (t != null && !t.IsDisposed)
+                            t.Dispose();
+                    }
+
                     _markerIcons.Clear();
 
                     if (!Directory.Exists(_mapIconsPath))
                         Directory.CreateDirectory(_mapIconsPath);
 
                     foreach (string icon in Directory.GetFiles(_mapIconsPath, "*.cur")
-                        .Union(Directory.GetFiles(_mapIconsPath, "*.png"))
-                        .Union(Directory.GetFiles(_mapIconsPath, "*.jpg"))
-                        .Union(Directory.GetFiles(_mapIconsPath, "*.ico")))
+                                            .Union(Directory.GetFiles(_mapIconsPath, "*.ico")))
                     {
                         FileStream fs = new FileStream(icon, FileMode.Open, FileAccess.Read);
                         MemoryStream ms = new MemoryStream();
-
                         fs.CopyTo(ms);
+                        ms.Seek(0, SeekOrigin.Begin);
 
-                        _markerIcons.Add(Path.GetFileNameWithoutExtension(icon).ToLower(), Texture2D.FromStream(Client.Game.GraphicsDevice, ms));
+                        try
+                        {
 
-                        ms.Dispose();
-                        fs.Dispose();
+                            var texture = CurLoader.CreateTextureFromICO_Cur(ms);
+                            _markerIcons.Add(Path.GetFileNameWithoutExtension(icon).ToLower(), texture);
+
+                        }
+                        catch (Exception ee)
+                        {
+                            Log.Error($"{ee}");
+                        }
+                        finally
+                        {
+                            ms.Dispose();
+                            fs.Dispose();
+                        }
+
+                    }
+
+                    foreach (string icon in Directory.GetFiles(_mapIconsPath, "*.png")
+                        .Union(Directory.GetFiles(_mapIconsPath, "*.jpg"))
+                        )
+                    {
+                        FileStream fs = new FileStream(icon, FileMode.Open, FileAccess.Read);
+                        MemoryStream ms = new MemoryStream();
+                        fs.CopyTo(ms);
+                        ms.Seek(0, SeekOrigin.Begin);
+
+                        try
+                        {                           
+                            var texture = Texture2D.FromStream(Client.Game.GraphicsDevice, ms);
+                            _markerIcons.Add(Path.GetFileNameWithoutExtension(icon).ToLower(), texture);
+
+                        }
+                        catch (Exception ee)
+                        {
+                            Log.Error($"{ee}");
+                        }
+                        finally
+                        {
+                            ms.Dispose();
+                            fs.Dispose();
+                        }
                     }
 
                     string[] mapFiles = Directory.GetFiles(_mapFilesPath, "*.map").Union(Directory.GetFiles(_mapFilesPath, "*.csv"))
@@ -539,6 +631,11 @@ namespace ClassicUO.Game.UI.Gumps
                                 FullPath = mapFile,
                                 Markers = new List<WMapMarker>()
                             };
+
+                            string hiddenFile = _hiddenMarkerFiles.FirstOrDefault(x => x.Contains(markerFile.Name));
+
+                            if (!string.IsNullOrEmpty(hiddenFile))
+                                markerFile.Hidden = true;
 
                             if (mapFile != null && Path.GetExtension(mapFile).ToLower().Equals(".xml")) // Ultima Mapper
                             {
@@ -668,7 +765,8 @@ namespace ClassicUO.Game.UI.Gumps
 
                     GameActions.Print($"WorldMap markers loaded ({count})", 0x2A);
                 }
-            });
+            }
+            //);
         }
 
         #endregion
@@ -731,7 +829,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 var rect = ScissorStack.CalculateScissors(Matrix.Identity, gX, gY, gWidth, gHeight);
 
-                if (ScissorStack.PushScissors(rect))
+                if (ScissorStack.PushScissors(batcher.GraphicsDevice, rect))
                 {
                     batcher.EnableScissorTest(true);
 
@@ -748,7 +846,7 @@ namespace ClassicUO.Game.UI.Gumps
                     DrawAll(batcher, gX, gY, halfWidth, halfHeight);
 
                     batcher.EnableScissorTest(false);
-                    ScissorStack.PopScissors();
+                    ScissorStack.PopScissors(batcher.GraphicsDevice);
                 }
             }
 
@@ -1499,6 +1597,288 @@ namespace ClassicUO.Game.UI.Gumps
             public string FullPath { get; set; }
             public List<WMapMarker> Markers { get; set; }
             public bool Hidden { get; set; }
+        }
+
+        private class CurLoader
+        {
+            public unsafe static Texture2D CreateTextureFromICO_Cur(Stream stream)
+            {
+                byte[] buffer = new byte[stream.Length];
+                stream.Read(buffer, 0, buffer.Length);
+
+                DataReader reader = new DataReader();
+                reader.SetData(buffer, stream.Length);
+
+                bool was_error;
+                long fp_offset;
+                int bmp_pitch;
+                int i, pad;
+                SDL.SDL_Surface* surface;
+                uint r_mask, g_mask, b_mask;
+                byte* bits;
+                int expand_bmp;
+                int max_col = 0;
+                uint ico_of_s = 0;
+                uint* palette = stackalloc uint[256];
+
+                ushort bf_reserved, bf_type, bf_count;
+                uint bi_size, bi_width, bi_height;
+                ushort bi_planes, bi_bit_count;
+                uint bi_compression, bi_size_image, bi_x_perls_per_meter, bi_y_perls_per_meter, bi_clr_used, bi_clr_important;
+
+                bf_reserved = reader.ReadUShort();
+                bf_type = reader.ReadUShort();
+                bf_count = reader.ReadUShort();
+
+                for (i = 0; i < bf_count; i++)
+                {
+                    int b_width = reader.ReadByte();
+                    int b_height = reader.ReadByte();
+                    int b_color_count = reader.ReadByte();
+                    byte b_reserver = reader.ReadByte();
+                    ushort w_planes = reader.ReadUShort();
+                    ushort w_bit_count = reader.ReadUShort();
+                    uint dw_bytes_in_res = reader.ReadUInt();
+                    uint dw_image_offse = reader.ReadUInt();
+
+                    if (b_width == 0)
+                        b_width = 256;
+                    if (b_height == 0)
+                        b_height = 256;
+                    if (b_color_count == 0)
+                        b_color_count = 256;
+
+                    if (b_color_count > max_col)
+                    {
+                        max_col = b_color_count;
+                        ico_of_s = dw_image_offse;
+                    }
+                }
+
+                reader.Seek(ico_of_s);
+
+                bi_size = reader.ReadUInt();
+
+                if (bi_size == 40)
+                {
+                    bi_width = reader.ReadUInt();
+                    bi_height = reader.ReadUInt();
+                    bi_planes = reader.ReadUShort();
+                    bi_bit_count = reader.ReadUShort();
+                    bi_compression = reader.ReadUInt();
+                    bi_size_image = reader.ReadUInt();
+                    bi_x_perls_per_meter = reader.ReadUInt();
+                    bi_y_perls_per_meter = reader.ReadUInt();
+                    bi_clr_used = reader.ReadUInt();
+                    bi_clr_important = reader.ReadUInt();
+                }
+                else
+                {
+                    return null;
+                }
+
+                const int BI_RGB = 0;
+                const int BI_RLE = 1;
+                const int BI_RLE4 = 2;
+                const int BI_BITFIELDS = 3;
+
+                switch (bi_compression)
+                {
+                    case BI_RGB:
+
+                        switch (bi_bit_count)
+                        {
+                            case 1:
+                            case 4:
+                                expand_bmp = bi_bit_count;
+                                bi_bit_count = 8;
+                                break;
+                            case 8:
+                                expand_bmp = 8;
+                                break;
+                            case 32:
+                                r_mask = 0x00FF0000;
+                                g_mask = 0x0000FF00;
+                                b_mask = 0x000000FF;
+                                expand_bmp = 0;
+                                break;
+                            default:
+                                return null;
+                        }
+
+                        break;
+
+                    default:
+                        return null;
+
+                }
+
+
+                bi_height >>= 1;
+
+                surface = (SDL.SDL_Surface*) SDL.SDL_CreateRGBSurface(0, (int) bi_width, (int) bi_height, 32, 0x00FF0000,
+                                 0x0000FF00, 0x000000FF, 0xFF000000);
+
+                if (bi_bit_count <= 8)
+                {
+                    if (bi_clr_used == 0)
+                    {
+                        bi_clr_used = (uint) (1 << bi_bit_count);
+                    }
+
+                    for (i = 0; i < bi_clr_used; i++)
+                    {
+                        palette[i] = reader.ReadUInt();
+                    }
+                }
+
+                bits = (byte*) (surface->pixels + (surface->h * surface->pitch));
+
+                switch (expand_bmp)
+                {
+                    case 1:
+                        bmp_pitch = (int) (bi_width + 7) >> 3;
+                        pad = (((bmp_pitch) % 4) != 0 ? (4 - ((bmp_pitch) % 4)) : 0);
+                        break;
+                    case 4:
+                        bmp_pitch = (int) (bi_width + 1) >> 1;
+                        pad = (((bmp_pitch) % 4) != 0 ? (4 - ((bmp_pitch) % 4)) : 0);
+                        break;
+                    case 8:
+                        bmp_pitch = (int) bi_width;
+                        pad = (((bmp_pitch) % 4) != 0 ? (4 - ((bmp_pitch) % 4)) : 0);
+                        break;
+                    default:
+                        bmp_pitch = (int) bi_width * 4;
+                        pad = 0;
+                        break;
+                }
+
+
+                while (bits > (byte*) surface->pixels)
+                {
+                    bits -= surface->pitch;
+
+                    switch (expand_bmp)
+                    {
+                        case 1:
+                        case 4:
+                        case 8:
+                        {
+                            byte pixel = 0;
+                            int shift = (8 - expand_bmp);
+
+                            for (i = 0; i < surface->w; i++)
+                            {
+                                if (i % (8 / expand_bmp) == 0)
+                                {
+                                    pixel = reader.ReadByte();
+                                }
+
+                                *((uint*) bits + i) = (palette[pixel >> shift]);
+                                pixel <<= expand_bmp;
+                            }
+                        }
+                        break;
+
+                        default:
+
+                            for (int k = 0; k < surface->pitch; k++)
+                            {
+                                bits[k] = reader.ReadByte();
+                            }
+
+                            break;
+                    }
+
+                    if (pad != 0)
+                    {
+                        for (i = 0; i < pad; i++)
+                        {
+                            reader.ReadByte();
+                        }
+                    }
+
+                }
+
+
+
+                bits = (byte*) (surface->pixels + (surface->h * surface->pitch));
+                expand_bmp = 1;
+                bmp_pitch = (int) (bi_width + 7) >> 3;
+                pad = (((bmp_pitch) % 4) != 0 ? (4 - ((bmp_pitch) % 4)) : 0);
+
+                while (bits > (byte*) surface->pixels)
+                {
+                    byte pixel = 0;
+                    int shift = (8 - expand_bmp);
+
+                    bits -= surface->pitch;
+
+                    for (i = 0; i < surface->w; i++)
+                    {
+                        if (i % (8 / expand_bmp) == 0)
+                        {
+                            pixel = reader.ReadByte();
+                        }
+
+                        *((uint*) bits + i) |= ((pixel >> shift) != 0 ? 0 : 0xFF000000);
+
+                        pixel <<= expand_bmp;
+                    }
+
+                    if (pad != 0)
+                    {
+                        for (i = 0; i < pad; i++)
+                        {
+                            reader.ReadByte();
+                        }
+                    }
+                }
+
+                surface = (SDL.SDL_Surface*) INTERNAL_convertSurfaceFormat((IntPtr) surface);
+
+                int len = surface->w * surface->h * 4;
+                byte* pixels = (byte*) surface->pixels;
+
+                for (i = 0; i < len; i += 4, pixels += 4)
+                {
+                    if (pixels[3] == 0)
+                    {
+                        pixels[0] = 0;
+                        pixels[1] = 0;
+                        pixels[2] = 0;
+                    }
+                }
+
+                Texture2D texture = new Texture2D(Client.Game.GraphicsDevice, surface->w, surface->h);
+                texture.SetDataPointerEXT(0, new Microsoft.Xna.Framework.Rectangle(0, 0, surface->w, surface->h), surface->pixels, len);
+
+                SDL.SDL_FreeSurface((IntPtr) surface);
+
+                reader.ReleaseData();
+
+                return texture;
+            }
+
+            private static unsafe IntPtr INTERNAL_convertSurfaceFormat(IntPtr surface)
+            {
+                IntPtr result = surface;
+                unsafe
+                {
+                    SDL.SDL_Surface* surPtr = (SDL.SDL_Surface*) surface;
+                    SDL.SDL_PixelFormat* pixelFormatPtr = (SDL.SDL_PixelFormat*) surPtr->format;
+
+                    // SurfaceFormat.Color is SDL_PIXELFORMAT_ABGR8888
+                    if (pixelFormatPtr->format != SDL.SDL_PIXELFORMAT_ABGR8888)
+                    {
+                        // Create a properly formatted copy, free the old surface
+                        result = SDL.SDL_ConvertSurfaceFormat(surface, SDL.SDL_PIXELFORMAT_ABGR8888, 0);
+                        SDL.SDL_FreeSurface(surface);
+                    }
+                }
+                return result;
+            }
         }
 
     }

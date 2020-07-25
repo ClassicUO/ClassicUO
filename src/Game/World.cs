@@ -65,7 +65,7 @@ namespace ClassicUO.Game
 
         public static EntityCollection<Mobile> Mobiles { get; } = new EntityCollection<Mobile>();
 
-        public static PlayerMobile Player { get; set; }
+        public static PlayerMobile Player;
 
         public static Map.Map Map { get; private set; }
 
@@ -190,6 +190,7 @@ namespace ClassicUO.Game
             Client.Game.Scene.Audio.PlayMusic(music, true);
         }
 
+        private static uint _time_to_delete;
 
         public static void Update(double totalMS, double frameMS)
         {
@@ -218,11 +219,18 @@ namespace ClassicUO.Game
                     }
                 }
 
+                bool do_delete = _time_to_delete < Time.Ticks;
+
+                if (do_delete)
+                {
+                    _time_to_delete = Time.Ticks + 50;
+                }
+
                 foreach (Mobile mob in Mobiles)
                 {
                     mob.Update(totalMS, frameMS);
 
-                    if (mob.Distance > ClientViewRange)
+                    if (do_delete && mob.Distance > ClientViewRange)
                         RemoveMobile(mob);
 
                     if (mob.IsDestroyed)
@@ -266,7 +274,7 @@ namespace ClassicUO.Game
                 {
                     item.Update(totalMS, frameMS);
 
-                    if (item.OnGround && item.Distance > ClientViewRange)
+                    if (do_delete && item.OnGround && item.Distance > ClientViewRange)
                     {
                         if (item.IsMulti)
                         {
@@ -306,15 +314,42 @@ namespace ClassicUO.Game
 
         public static Entity Get(uint serial)
         {
-            if (SerialHelper.IsItem(serial))
-                return Items.Get(serial);
+            Entity ent;
 
-            return SerialHelper.IsMobile(serial) ? Mobiles.Get(serial) : null;
+            if (SerialHelper.IsMobile(serial))
+            {
+                ent = Mobiles.Get(serial);
+
+                if (ent == null)
+                {
+                    ent = Items.Get(serial);
+                }
+            }
+            else
+            {
+                ent = Items.Get(serial);
+
+                if (ent == null)
+                {
+                    ent = Mobiles.Get(serial);
+                }
+            }
+
+            if (ent != null && ent.IsDestroyed)
+                ent = null;
+
+            return ent;
         }
 
         public static Item GetOrCreateItem(uint serial)
         {
             Item item = Items.Get(serial);
+
+            if (item != null && item.IsDestroyed)
+            {
+                Items.Remove(serial);
+                item = null;
+            }
 
             if (item == null /*|| item.IsDestroyed*/)
             {
@@ -329,6 +364,12 @@ namespace ClassicUO.Game
         {
             Mobile mob = Mobiles.Get(serial);
 
+            if (mob != null && mob.IsDestroyed)
+            {
+                Mobiles.Remove(serial);
+                mob = null;
+            }
+
             if (mob == null /*|| mob.IsDestroyed*/)
             {
                 mob = Mobile.Create(serial);
@@ -338,24 +379,55 @@ namespace ClassicUO.Game
             return mob;
         }
 
+        public static void RemoveItemFromContainer(uint serial)
+        {
+            Item it = Items.Get(serial);
+
+            if (it != null)
+            {
+                RemoveItemFromContainer(it);
+            }
+        }
+
+        public static void RemoveItemFromContainer(Item obj)
+        {
+            uint containerSerial = obj.Container;
+
+            if (SerialHelper.IsValid(containerSerial))
+            {
+                if (SerialHelper.IsMobile(containerSerial))
+                {
+                    UIManager.GetGump<PaperDollGump>(containerSerial)?.RequestUpdateContents();
+                }
+                else if (SerialHelper.IsItem(containerSerial))
+                {
+                    UIManager.GetGump<ContainerGump>(containerSerial)?.RequestUpdateContents();
+                }
+
+                Entity container = World.Get(containerSerial);
+
+                if (container != null)
+                {
+                    container.Remove(obj);
+                }
+
+                obj.Container = 0xFFFF_FFFF;
+            }
+
+            obj.Next = null;
+            obj.Previous = null;
+            obj.RemoveFromTile();
+        }
+
         public static bool RemoveItem(uint serial, bool forceRemove = false)
         {
             Item item = Items.Get(serial);
 
-            if (item == null)
+            if (item == null || item.IsDestroyed)
                 return false;
 
-            if (SerialHelper.IsValid(item.Container))
-            {
-                Entity ent = Get(item.Container);
-
-                if (ent != null)
-                {
-                    ent.Remove(item);
-                }
-            }
-
             var first = item.Items;
+            RemoveItemFromContainer(item);
 
             while (first != null)
             {
@@ -366,7 +438,6 @@ namespace ClassicUO.Game
                 first = next;
             }
 
-            item.Clear();
             item.Destroy();
 
             if (forceRemove)
@@ -379,7 +450,7 @@ namespace ClassicUO.Game
         {
             Mobile mobile = Mobiles.Get(serial);
 
-            if (mobile == null)
+            if (mobile == null || mobile.IsDestroyed)
                 return false;
 
             var first = mobile.Items;
@@ -393,7 +464,6 @@ namespace ClassicUO.Game
                 first = next;
             }
 
-            mobile.Clear();
             mobile.Destroy();
 
             if (forceRemove)
@@ -405,6 +475,11 @@ namespace ClassicUO.Game
         internal static void AddEffect(GameEffect effect)
         {
             _effectManager.Add(effect);
+        }
+
+        internal static void RemoveEffect(GameEffect effect)
+        {
+            _effectManager.RemoveEffect(effect);
         }
 
         public static void AddEffect(GraphicEffectType type, uint source, uint target,

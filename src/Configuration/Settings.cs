@@ -23,7 +23,7 @@ using System.IO;
 
 using Microsoft.Xna.Framework;
 
-using Newtonsoft.Json;
+using TinyJson;
 
 namespace ClassicUO.Configuration
 {
@@ -31,85 +31,82 @@ namespace ClassicUO.Configuration
     {
         public static Settings GlobalSettings = new Settings();
 
-        [JsonConstructor]
         public Settings()
         {
         }
 
 
-        [JsonProperty(PropertyName = "username")]
+        [JsonProperty("username")]
         public string Username { get; set; } = string.Empty;
 
-        [JsonProperty(PropertyName = "password")]
+        [JsonProperty("password")]
         public string Password { get; set; } = string.Empty;
 
-        [JsonProperty(PropertyName = "ip")] public string IP { get; set; } = "127.0.0.1";
+        [JsonProperty("ip")] public string IP { get; set; } = "127.0.0.1";
 
-        [JsonProperty(PropertyName = "port")] public ushort Port { get; set; } = 2593;
+        [JsonProperty("port")] public ushort Port { get; set; } = 2593;
 
-        [JsonProperty(PropertyName = "ultimaonlinedirectory")]
+        [JsonProperty("ultimaonlinedirectory")]
         public string UltimaOnlineDirectory { get; set; } = "";
 
-        [JsonProperty(PropertyName = "clientversion")]
+        [JsonProperty("clientversion")]
         public string ClientVersion { get; set; } = string.Empty;
 
-        [JsonProperty(PropertyName = "lastcharactername")]
+        [JsonProperty("lastcharactername")]
         public string LastCharacterName { get; set; } = string.Empty;
 
-        [JsonProperty(PropertyName = "cliloc")]
+        [JsonProperty("cliloc")]
         public string ClilocFile { get; set; } = "Cliloc.enu";
 
-        [JsonProperty(PropertyName = "lastservernum")]
+        [JsonProperty("lastservernum")]
         public ushort LastServerNum { get; set; } = 1;
 
-        [JsonProperty(PropertyName = "fps")]
+        [JsonProperty("fps")]
         public int FPS { get; set; } = 60;
-        [JsonProperty(PropertyName = "window_position")] public Point? WindowPosition { get; set; }
-        [JsonProperty(PropertyName = "window_size")] public Point? WindowSize { get; set; }
+        [JsonProperty("window_position")] public Point? WindowPosition { get; set; }
+        [JsonProperty("window_size")] public Point? WindowSize { get; set; }
 
-        [JsonProperty(PropertyName = "is_win_maximized")]
+        [JsonProperty("is_win_maximized")]
         public bool IsWindowMaximized { get; set; } = true;
 
-        [JsonProperty(PropertyName = "profiler")]
-        public bool Profiler { get; set; } = true;
-
-        [JsonProperty(PropertyName = "saveaccount")]
+        [JsonProperty("saveaccount")]
         public bool SaveAccount { get; set; }
 
-        [JsonProperty(PropertyName = "autologin")]
+        [JsonProperty("autologin")]
         public bool AutoLogin { get; set; }
 
-        [JsonProperty(PropertyName = "reconnect")]
+        [JsonProperty("reconnect")]
         public bool Reconnect { get; set; }
 
-        [JsonProperty(PropertyName = "reconnect_time")]
+        [JsonProperty("reconnect_time")]
         public int ReconnectTime { get; set; }
 
-        [JsonProperty(PropertyName = "login_music")]
+        [JsonProperty("login_music")]
         public bool LoginMusic { get; set; } = true;
 
-        [JsonProperty(PropertyName = "login_music_volume")]
+        [JsonProperty("login_music_volume")]
         public int LoginMusicVolume { get; set; } = 70;
 
-        [JsonProperty(PropertyName = "shard_type")]
+        [JsonProperty("shard_type")]
         public int ShardType { get; set; } // 0 = normal (no customization), 1 = old, 2 = outlands??
 
-        [JsonProperty(PropertyName = "fixed_time_step")]
+        [JsonProperty("fixed_time_step")]
         public bool FixedTimeStep { get; set; } = true;
 
-        [JsonProperty(propertyName: "run_mouse_in_separate_thread")]
+        [JsonProperty("run_mouse_in_separate_thread")]
         public bool RunMouseInASeparateThread { get; set; } = true;
 
-        [JsonProperty(propertyName: "use_verdata")]
+        [JsonProperty("force_driver")]
+        public byte ForceDriver { get; set; }
+
+        [JsonProperty("use_verdata")]
         public bool UseVerdata { get; set; }
 
-        [JsonProperty(propertyName: "encryption")]
+        [JsonProperty("encryption")]
         public byte Encryption { get; set; }
 
-        [JsonProperty(PropertyName = "plugins")]
-        public string[] Plugins { get; set; } = {@"./Assistant/Razor.dll"};
-
-
+        [JsonProperty("plugins")]
+        public string[] Plugins { get; set; } = { @"./Assistant/Razor.dll" };
 
 
         public const string SETTINGS_FILENAME = "settings.json";
@@ -133,7 +130,8 @@ namespace ClassicUO.Configuration
         public void Save()
         {
             // Make a copy of the settings object that we will use in the saving process
-            Settings settingsToSave = JsonConvert.DeserializeObject<Settings>(JsonConvert.SerializeObject(this));
+            string json = this.Encode(true);
+            Settings settingsToSave = json.Decode<Settings>();  // JsonConvert.DeserializeObject<Settings>(JsonConvert.SerializeObject(this));
 
             // Make sure we don't save username and password if `saveaccount` flag is not set
             // NOTE: Even if we pass username and password via command-line arguments they won't be saved

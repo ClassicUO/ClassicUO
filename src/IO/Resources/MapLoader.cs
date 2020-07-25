@@ -109,7 +109,7 @@ namespace ClassicUO.IO.Resources
             return null;
         }
 
-        public override Task Load()
+        public override unsafe Task Load()
         {
             return Task.Run(() =>
             {
@@ -158,7 +158,7 @@ namespace ClassicUO.IO.Resources
                 if (!foundOneMap)
                     throw new FileNotFoundException("No maps found.");
 
-                int mapblocksize = UnsafeMemoryManager.SizeOf<MapBlock>();
+                int mapblocksize = sizeof(MapBlock);
 
                 if (_filesMap[0].Length / mapblocksize == 393216 || Client.Version < ClientVersion.CV_4011D)
                     MapsDefaultSize[0, 0] = MapsDefaultSize[1, 0] = 6144;
@@ -183,12 +183,6 @@ namespace ClassicUO.IO.Resources
             });
         }
 
-        public override void CleanResources()
-        {
-           
-        }
-
-
         internal unsafe void LoadMap(int i)
         {
             if (i < 0 || i + 1 > Constants.MAPS_COUNT || _filesMap[i] == null)
@@ -197,9 +191,9 @@ namespace ClassicUO.IO.Resources
             if (BlockData[i] != null || _filesMap[i] == null)
                 return;
 
-            int mapblocksize = UnsafeMemoryManager.SizeOf<MapBlock>();
-            int staticidxblocksize = UnsafeMemoryManager.SizeOf<StaidxBlock>();
-            int staticblocksize = UnsafeMemoryManager.SizeOf<StaticsBlock>();
+            int mapblocksize = sizeof(MapBlock);
+            int staticidxblocksize = sizeof(StaidxBlock);
+            int staticblocksize = sizeof(StaticsBlock);
             int width = MapBlocksSize[i, 0];
             int height = MapBlocksSize[i, 1];
             int maxblockcount = width * height;
@@ -274,7 +268,6 @@ namespace ClassicUO.IO.Resources
                 data.OriginalStaticCount = realstaticcount;
             }
         }
-
 
         public void PatchMapBlock(ulong block, ulong address)
         {
@@ -353,7 +346,7 @@ namespace ClassicUO.IO.Resources
                             result = true;
                         }
 
-                        dif.Skip(UnsafeMemoryManager.SizeOf<MapBlock>());
+                        dif.Skip(sizeof(MapBlock));
                     }
                 }
 
@@ -372,7 +365,7 @@ namespace ClassicUO.IO.Resources
                     difl.Seek(0);
                     difi.Seek(0);
 
-                    int sizeOfStaicsBlock = UnsafeMemoryManager.SizeOf<StaticsBlock>();
+                    int sizeOfStaicsBlock = sizeof(StaticsBlock);
 
                     for (int j = 0; j < staticPatchesCount; j++)
                     {
@@ -519,25 +512,25 @@ namespace ClassicUO.IO.Resources
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    internal readonly struct StaticsBlock
+    internal ref struct StaticsBlock
     {
-        public readonly ushort Color;
-        public readonly byte X;
-        public readonly byte Y;
-        public readonly sbyte Z;
-        public readonly ushort Hue;
+        public ushort Color;
+        public byte X;
+        public byte Y;
+        public sbyte Z;
+        public ushort Hue;
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    internal readonly struct StaidxBlock
+    internal ref struct StaidxBlock
     {
-        public readonly uint Position;
-        public readonly uint Size;
-        public readonly uint Unknown;
+        public uint Position;
+        public uint Size;
+        public uint Unknown;
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    internal struct MapCells
+    internal ref struct MapCells
     {
         public ushort TileID;
         public sbyte Z;
@@ -552,7 +545,7 @@ namespace ClassicUO.IO.Resources
     //}
 
     [StructLayout(LayoutKind.Sequential, Pack = 1, Size = 4 + 64 * 3)]
-    internal struct MapBlock
+    internal ref struct MapBlock
     {
         public uint Header;
         public unsafe MapCells* Cells;

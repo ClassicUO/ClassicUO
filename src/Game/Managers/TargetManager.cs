@@ -119,7 +119,6 @@ namespace ClassicUO.Game.Managers
     internal static class TargetManager
     {
         private static uint _targetCursorId;
-
         private static byte[] _lastDataBuffer = new byte[19];
 
 
@@ -135,9 +134,15 @@ namespace ClassicUO.Game.Managers
 
         public static readonly LastTargetInfo LastTargetInfo = new LastTargetInfo();
 
-        public static void ClearTargetingWithoutTargetCancelPacket()
+        private static void ClearTargetingWithoutTargetCancelPacket()
         {
-            if (TargetingState == CursorTarget.MultiPlacement) World.HouseManager.Remove(0);
+            if (TargetingState == CursorTarget.MultiPlacement)
+            {
+                MultiTargetInfo = null;
+                TargetingState = 0;
+                World.HouseManager.Remove(0);
+            }
+
             IsTargeting = false;
         }
 
@@ -190,8 +195,11 @@ namespace ClassicUO.Game.Managers
                     UIManager.GetGump<HouseCustomizationGump>()?.Update();
                 }
             }
+
             NetClient.Socket.Send(new PTargetCancel(TargetingState, _targetCursorId, (byte) TargetingType));
             IsTargeting = false;
+
+            Reset();
         }
 
         public static void SetTargetingMulti(uint deedSerial, ushort model, ushort x, ushort y, ushort z, ushort hue)
@@ -231,32 +239,37 @@ namespace ClassicUO.Game.Managers
                             (World.Player.NotorietyFlag == NotorietyFlag.Innocent || World.Player.NotorietyFlag == NotorietyFlag.Ally))
                         {
                             Mobile mobile = entity as Mobile;
-                            bool showCriminalQuery = false;
 
-                            if (TargetingType == TargetType.Harmful && ProfileManager.Current.EnabledCriminalActionQuery && mobile.NotorietyFlag == NotorietyFlag.Innocent)
+                            if (mobile != null)
                             {
-                                showCriminalQuery = true;
-                            }
-                            else if (TargetingType == TargetType.Beneficial && ProfileManager.Current.EnabledBeneficialCriminalActionQuery &&
-                                    (mobile.NotorietyFlag == NotorietyFlag.Criminal || mobile.NotorietyFlag == NotorietyFlag.Murderer || mobile.NotorietyFlag == NotorietyFlag.Gray))
-                            {
-                                showCriminalQuery = true;
-                            }
+                                bool showCriminalQuery = false;
 
-                            if (showCriminalQuery) {
-                                QuestionGump messageBox = new QuestionGump("This may flag\nyou criminal!",
-                                                                           s =>
-                                                                           {
-                                                                               if (s)
+                                if (TargetingType == TargetType.Harmful && ProfileManager.Current.EnabledCriminalActionQuery && mobile.NotorietyFlag == NotorietyFlag.Innocent)
+                                {
+                                    showCriminalQuery = true;
+                                }
+                                else if (TargetingType == TargetType.Beneficial && ProfileManager.Current.EnabledBeneficialCriminalActionQuery &&
+                                         (mobile.NotorietyFlag == NotorietyFlag.Criminal || mobile.NotorietyFlag == NotorietyFlag.Murderer || mobile.NotorietyFlag == NotorietyFlag.Gray))
+                                {
+                                    showCriminalQuery = true;
+                                }
+
+                                if (showCriminalQuery && UIManager.GetGump<QuestionGump>() == null)
+                                {
+                                    QuestionGump messageBox = new QuestionGump("This may flag\nyou criminal!",
+                                                                               s =>
                                                                                {
-                                                                                   NetClient.Socket.Send(new PTargetObject(entity, entity.Graphic, entity.X, entity.Y, entity.Z, _targetCursorId, (byte) TargetingType));
-                                                                                   ClearTargetingWithoutTargetCancelPacket();
-                                                                               }
-                                                                           });
+                                                                                   if (s)
+                                                                                   {
+                                                                                       NetClient.Socket.Send(new PTargetObject(entity, entity.Graphic, entity.X, entity.Y, entity.Z, _targetCursorId, (byte) TargetingType));
+                                                                                       ClearTargetingWithoutTargetCancelPacket();
+                                                                                   }
+                                                                               });
 
-                                UIManager.Add(messageBox);
+                                    UIManager.Add(messageBox);
 
-                                return;
+                                    return;
+                                }
                             }
                         }
 
@@ -316,7 +329,7 @@ namespace ClassicUO.Game.Managers
                 if (graphic >= TileDataLoader.Instance.StaticData.Length)
                     return;
 
-                ref readonly var itemData = ref TileDataLoader.Instance.StaticData[graphic];
+                ref var itemData = ref TileDataLoader.Instance.StaticData[graphic];
 
                 if (Client.Version >= ClientVersion.CV_7090 && itemData.IsSurface)
                 {
@@ -348,7 +361,7 @@ namespace ClassicUO.Game.Managers
             _lastDataBuffer[5] = (byte) _targetCursorId;
             _lastDataBuffer[6] = (byte) TargetingType;
 
-            NetClient.Socket.Send(_lastDataBuffer);
+            NetClient.Socket.Send(_lastDataBuffer, _lastDataBuffer.Length);
             Mouse.CancelDoubleClick = true;
             ClearTargetingWithoutTargetCancelPacket();
         }

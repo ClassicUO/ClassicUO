@@ -33,7 +33,7 @@ namespace ClassicUO.Renderer
 
         public static bool HasScissors => _scissors.Count - 1 > 0;
 
-        public static bool PushScissors(Rectangle scissor)
+        public static bool PushScissors(GraphicsDevice device, Rectangle scissor)
         {
             if (_scissors.Count > 0)
             {
@@ -56,21 +56,41 @@ namespace ClassicUO.Renderer
                 scissor.Height = Math.Max(1, maxY - minY);
             }
 
+            // fix to avoid crash on macOS
+            /*if (scissor.X + scissor.Width > device.Viewport.Width)
+                scissor.Width = device.Viewport.Width - scissor.X;
+            if (scissor.Y + scissor.Height > device.Viewport.Height)
+                scissor.Height = device.Viewport.Height - scissor.Y;
+
+            if (scissor.X < device.Viewport.X)
+            {
+                scissor.Width += scissor.X;
+                scissor.X = device.Viewport.X;
+            }
+
+            if (scissor.Y < device.Viewport.Y)
+            {
+                scissor.Height += scissor.Y;
+                scissor.Y = device.Viewport.Y;
+            }
+            */
+
+
             _scissors.Push(scissor);
-            Client.Game.GraphicsDevice.ScissorRectangle = scissor;
+            
+            device.ScissorRectangle = scissor;
 
             return true;
         }
 
-        public static Rectangle PopScissors()
+        public static Rectangle PopScissors(GraphicsDevice device)
         {
             Rectangle scissors = _scissors.Pop();
-            GraphicsDevice gd = Client.Game.GraphicsDevice;
 
             if (_scissors.Count == 0)
-                gd.ScissorRectangle = gd.Viewport.Bounds;
+                device.ScissorRectangle = device.Viewport.Bounds;
             else
-                gd.ScissorRectangle = _scissors.Peek();
+                device.ScissorRectangle = _scissors.Peek();
 
             return scissors;
         }

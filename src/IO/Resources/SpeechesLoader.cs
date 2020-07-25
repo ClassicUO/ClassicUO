@@ -85,10 +85,6 @@ namespace ClassicUO.IO.Resources
             });
         }
 
-        public override void CleanResources()
-        {
-        }
-
         public bool IsMatch(string input, in SpeechEntry entry)
         {
             string[] split = entry.Keywords;
@@ -129,7 +125,8 @@ namespace ClassicUO.IO.Resources
             {
                 SpeechEntry entry = _speech[i];
 
-                if (IsMatch(text, in entry)) list.Add(entry);
+                if (IsMatch(text, in entry))
+                    list.Add(entry);
             }
 
             list.Sort();

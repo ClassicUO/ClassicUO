@@ -12,8 +12,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClassicUO", "src\ClassicUO.
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "scripts", "scripts", "{FD7202D2-B96B-4425-8C61-F0D5254A06F7}"
 	ProjectSection(SolutionItems) = preProject
-		build.cmd = build.cmd
-		build.sh = build.sh
+		scripts\build.cmd = scripts\build.cmd
+		scripts\build.sh = scripts\build.sh
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tools", "tools", "{D5E764E7-2719-4937-AC10-0D2D789A1134}"
@@ -22,21 +22,30 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ManifestCreator", "tools\Ma
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "monokickstart", "monokickstart", "{D7DD340F-1EE2-4F8A-AA3E-A8FC76098AD6}"
 	ProjectSection(SolutionItems) = preProject
+		tools\monokickstart\Accessibility.dll = tools\monokickstart\Accessibility.dll
 		tools\monokickstart\ClassicUO = tools\monokickstart\ClassicUO
-		tools\monokickstart\ClassicUO-mono.sh = tools\monokickstart\ClassicUO-mono.sh
 		tools\monokickstart\ClassicUO.bin.osx = tools\monokickstart\ClassicUO.bin.osx
 		tools\monokickstart\ClassicUO.bin.x86_64 = tools\monokickstart\ClassicUO.bin.x86_64
+		tools\monokickstart\Microsoft.CSharp.dll = tools\monokickstart\Microsoft.CSharp.dll
 		tools\monokickstart\Mono.Posix.dll = tools\monokickstart\Mono.Posix.dll
 		tools\monokickstart\Mono.Security.dll = tools\monokickstart\Mono.Security.dll
 		tools\monokickstart\monoconfig = tools\monokickstart\monoconfig
 		tools\monokickstart\monomachineconfig = tools\monokickstart\monomachineconfig
 		tools\monokickstart\mscorlib.dll = tools\monokickstart\mscorlib.dll
 		tools\monokickstart\Newtonsoft.Json.dll = tools\monokickstart\Newtonsoft.Json.dll
+		tools\monokickstart\System.Configuration.dll = tools\monokickstart\System.Configuration.dll
 		tools\monokickstart\System.Core.dll = tools\monokickstart\System.Core.dll
+		tools\monokickstart\System.Data.dll = tools\monokickstart\System.Data.dll
 		tools\monokickstart\System.dll = tools\monokickstart\System.dll
+		tools\monokickstart\System.Drawing.dll = tools\monokickstart\System.Drawing.dll
 		tools\monokickstart\System.IO.Compression.dll = tools\monokickstart\System.IO.Compression.dll
 		tools\monokickstart\System.IO.Compression.FileSystem.dll = tools\monokickstart\System.IO.Compression.FileSystem.dll
+		tools\monokickstart\System.Numerics.dll = tools\monokickstart\System.Numerics.dll
+		tools\monokickstart\System.Runtime.Serialization.dll = tools\monokickstart\System.Runtime.Serialization.dll
+		tools\monokickstart\System.Security.dll = tools\monokickstart\System.Security.dll
+		tools\monokickstart\System.Windows.Forms.dll = tools\monokickstart\System.Windows.Forms.dll
 		tools\monokickstart\System.Xml.dll = tools\monokickstart\System.Xml.dll
+		tools\monokickstart\System.Xml.Linq.dll = tools\monokickstart\System.Xml.Linq.dll
 	EndProjectSection
 EndProject
 Global
@@ -51,14 +60,14 @@ Global
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{71F289FA-0EF8-4F72-A26E-A8280C0931C5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{71F289FA-0EF8-4F72-A26E-A8280C0931C5}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{71F289FA-0EF8-4F72-A26E-A8280C0931C5}.Debug|x64.ActiveCfg = Debug|x64
-		{71F289FA-0EF8-4F72-A26E-A8280C0931C5}.Debug|x64.Build.0 = Debug|x64
+		{71F289FA-0EF8-4F72-A26E-A8280C0931C5}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{71F289FA-0EF8-4F72-A26E-A8280C0931C5}.Debug|x64.Build.0 = Debug|Any CPU
 		{71F289FA-0EF8-4F72-A26E-A8280C0931C5}.Debug|x86.ActiveCfg = Debug|Any CPU
 		{71F289FA-0EF8-4F72-A26E-A8280C0931C5}.Debug|x86.Build.0 = Debug|Any CPU
 		{71F289FA-0EF8-4F72-A26E-A8280C0931C5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{71F289FA-0EF8-4F72-A26E-A8280C0931C5}.Release|Any CPU.Build.0 = Release|Any CPU
-		{71F289FA-0EF8-4F72-A26E-A8280C0931C5}.Release|x64.ActiveCfg = Release|x64
-		{71F289FA-0EF8-4F72-A26E-A8280C0931C5}.Release|x64.Build.0 = Release|x64
+		{71F289FA-0EF8-4F72-A26E-A8280C0931C5}.Release|x64.ActiveCfg = Release|Any CPU
+		{71F289FA-0EF8-4F72-A26E-A8280C0931C5}.Release|x64.Build.0 = Release|Any CPU
 		{71F289FA-0EF8-4F72-A26E-A8280C0931C5}.Release|x86.ActiveCfg = Release|Any CPU
 		{71F289FA-0EF8-4F72-A26E-A8280C0931C5}.Release|x86.Build.0 = Release|Any CPU
 		{71196848-ED41-4A9A-944C-F5776A9EFA07}.Debug|Any CPU.ActiveCfg = Debug|Any CPU

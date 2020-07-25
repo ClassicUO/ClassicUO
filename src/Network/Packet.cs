@@ -120,6 +120,14 @@ namespace ClassicUO.Network
             return (uint) ((ReadByte() << 24) | (ReadByte() << 16) | (ReadByte() << 8) | ReadByte());
         }
 
+        public ulong ReadULong()
+        {
+            if (EnsureSize(8))
+                return 0;
+
+            return (ulong)((ReadByte() << 56) | (ReadByte() << 48) | (ReadByte() << 40) | (ReadByte() << 32) | (ReadByte() << 24) | (ReadByte() << 16) | (ReadByte() << 8) | ReadByte());
+        }
+
         public string ReadASCII()
         {
             if (EnsureSize(1))

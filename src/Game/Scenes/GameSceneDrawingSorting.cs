@@ -36,7 +36,7 @@ namespace ClassicUO.Game.Scenes
 {
     internal partial class GameScene
     {
-        private readonly struct TreeUnion
+        private struct TreeUnion
         {
             public TreeUnion(ushort start, ushort end)
             {
@@ -44,7 +44,7 @@ namespace ClassicUO.Game.Scenes
                 End = end;
             }
 
-            public readonly ushort Start, End;
+            public ushort Start, End;
         }
 
 
@@ -62,7 +62,7 @@ namespace ClassicUO.Game.Scenes
         private int _renderListCount, _foliageCount;
         private StaticTiles _empty;
         private sbyte _foliageIndex;
-        private static readonly TreeUnion[] _treeInfos =
+        private static TreeUnion[] _treeInfos =
         {
             new TreeUnion(0x0D45, 0x0D4C),
             new TreeUnion(0x0D5C, 0x0D62),
@@ -140,7 +140,7 @@ namespace ClassicUO.Game.Scenes
 
                     if (tileZ > pz14 && _maxZ > tileZ)
                     {
-                        ref readonly var itemdata = ref TileDataLoader.Instance.StaticData[obj.Graphic];
+                        ref var itemdata = ref TileDataLoader.Instance.StaticData[obj.Graphic];
 
                         //if (GameObjectHelper.TryGetStaticData(obj, out var itemdata) && ((ulong) itemdata.Flags & 0x20004) == 0 && (!itemdata.IsRoof || itemdata.IsSurface))
                         if (((ulong) itemdata.Flags & 0x20004) == 0 && (!itemdata.IsRoof || itemdata.IsSurface))
@@ -178,7 +178,7 @@ namespace ClassicUO.Game.Scenes
                         {
                             if (!(obj2 is Land))
                             {
-                                ref readonly var itemdata = ref TileDataLoader.Instance.StaticData[obj2.Graphic];
+                                ref var itemdata = ref TileDataLoader.Instance.StaticData[obj2.Graphic];
 
                                 if (((ulong) itemdata.Flags & 0x204) == 0 && itemdata.IsRoof)
                                 {
@@ -218,7 +218,7 @@ namespace ClassicUO.Game.Scenes
         {
             for (int i = 0; i < _treeInfos.Length; i++)
             {
-                ref readonly var info = ref _treeInfos[i];
+                ref var info = ref _treeInfos[i];
 
                 if (info.Start <= graphic && graphic <= info.End)
                 {
@@ -272,6 +272,8 @@ namespace ClassicUO.Game.Scenes
                 }
             }*/
 
+            var loader = TileDataLoader.Instance;
+
             for (; obj != null; obj = obj.TNext)
             {
                 if (obj.CurrentRenderIndex == _renderIndex || !obj.AllowedToDraw)
@@ -298,7 +300,7 @@ namespace ClassicUO.Game.Scenes
                 bool ismobile = false;
                 bool push_with_priority = false;
 
-                ushort graphic = obj.Graphic;
+                ref ushort graphic = ref obj.Graphic;
 
                 switch (obj)
                 {
@@ -349,7 +351,7 @@ namespace ClassicUO.Game.Scenes
 
                     default:
 
-                        itemData = ref TileDataLoader.Instance.StaticData[graphic];
+                        itemData = ref loader.StaticData[graphic];
 
                         //if (GameObjectHelper.TryGetStaticData(obj, out itemData))
                         {
@@ -401,17 +403,20 @@ namespace ClassicUO.Game.Scenes
                         _objectHandles[index] = obj;
                         obj.UseObjectHandles = true;
                         _objectHandlesCount++;
+                        obj.UpdateTextCoordsV();
                     }
                 }
                 else if (obj.ClosedObjectHandles)
                 {
                     obj.ClosedObjectHandles = false;
                     obj.ObjectHandlesOpened = false;
+                    obj.UpdateTextCoordsV();
                 }
                 else if (obj.UseObjectHandles)
                 {
                     obj.ObjectHandlesOpened = false;
                     obj.UseObjectHandles = false;
+                    obj.UpdateTextCoordsV();
                 }
 
 
@@ -501,17 +506,21 @@ namespace ClassicUO.Game.Scenes
 
                         if (check)
                         {
-                            _rectangleObj.X = drawX - obj.FrameInfo.X;
-                            _rectangleObj.Y = drawY - obj.FrameInfo.Y;
-                            _rectangleObj.Width = obj.FrameInfo.Width;
-                            _rectangleObj.Height = obj.FrameInfo.Height;
-
-                            check = Exstentions.InRect(ref _rectangleObj, ref _rectanglePlayer);
-
-                            if (check)
+                            var texture = ArtLoader.Instance.GetTexture(graphic);
+                            if (texture != null)
                             {
-                                index = _foliageIndex;
-                                IsFoliageUnion(obj.Graphic, obj.X, obj.Y, z);
+                                _rectangleObj.X = drawX - (texture.Width >> 1) + texture.ImageRectangle.X;
+                                _rectangleObj.Y = drawY - texture.Height + texture.ImageRectangle.Y;
+                                _rectangleObj.Width = texture.ImageRectangle.Width;
+                                _rectangleObj.Height = texture.ImageRectangle.Height;
+
+                                check = Exstentions.InRect(ref _rectangleObj, ref _rectanglePlayer);
+
+                                if (check)
+                                {
+                                    index = _foliageIndex;
+                                    IsFoliageUnion(obj.Graphic, obj.X, obj.Y, z);
+                                }
                             }
                         }
 
@@ -564,9 +573,11 @@ namespace ClassicUO.Game.Scenes
                 {
                     ref var step = ref mob.Steps.Back();
 
-                    if ((step.Direction & 7) == 2)
+                    if ((step.Direction & 7) == 2 || (step.Direction & 7) == 6)
                         dropMaxZIndex = 0;
                 }       
+                else if (mob.Direction == Direction.East || mob.Direction == Direction.West)
+                        dropMaxZIndex = 0;
             }
             
             for (int i = 0; i < 8; i++)

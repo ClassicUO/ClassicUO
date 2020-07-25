@@ -22,6 +22,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.Serialization;
 using System.Text;
 using System.Xml;
 
@@ -33,254 +34,255 @@ using ClassicUO.Utility.Logging;
 
 using Microsoft.Xna.Framework;
 
-using Newtonsoft.Json;
+using TinyJson;
 
 namespace ClassicUO.Configuration
 {
+    [MatchSnakeCase]
     internal sealed class Profile
     {
-        [JsonConstructor]
-        public Profile(string username, string servername, string charactername)
+        public Profile()
         {
-            Username = username;
-            ServerName = servername;
-            CharacterName = charactername;
+
         }
 
         [JsonIgnore] public string Username { get; set; }
-        [JsonIgnore] public string ServerName { get; set;  }
-        [JsonIgnore] public string CharacterName { get; set;  }
+        [JsonIgnore] public string ServerName { get; set; }
+        [JsonIgnore] public string CharacterName { get; set; }
 
         // sounds
-        [JsonProperty] public bool EnableSound { get; set; } = true;
-        [JsonProperty] public int SoundVolume { get; set; } = 100;
-        [JsonProperty] public bool EnableMusic { get; set; } = true;
-        [JsonProperty] public int MusicVolume { get; set; } = 100;
-        [JsonProperty] public bool EnableFootstepsSound { get; set; } = true;
-        [JsonProperty] public bool EnableCombatMusic { get; set; } = true;
-        [JsonProperty] public bool ReproduceSoundsInBackground { get; set; }
+        public bool EnableSound { get; set; } = true;
+        public int SoundVolume { get; set; } = 100;
+        public bool EnableMusic { get; set; } = true;
+        public int MusicVolume { get; set; } = 100;
+        public bool EnableFootstepsSound { get; set; } = true;
+        public bool EnableCombatMusic { get; set; } = true;
+        public bool ReproduceSoundsInBackground { get; set; }
 
         // fonts and speech
-        [JsonProperty] public byte ChatFont { get; set; } = 1;
-        [JsonProperty] public int SpeechDelay { get; set; } = 100;
-        [JsonProperty] public bool ScaleSpeechDelay { get; set; } = true;
-        [JsonProperty] public bool SaveJournalToFile { get; set; }
-        [JsonProperty] public bool ForceUnicodeJournal { get; set; }
+        public byte ChatFont { get; set; } = 1;
+        public int SpeechDelay { get; set; } = 100;
+        public bool ScaleSpeechDelay { get; set; } = true;
+        public bool SaveJournalToFile { get; set; }
+        public bool ForceUnicodeJournal { get; set; }
 
         // hues
-        [JsonProperty] public ushort SpeechHue { get; set; } = 0x02B2;
-        [JsonProperty] public ushort WhisperHue { get; set; } = 0x0033;
-        [JsonProperty] public ushort EmoteHue { get; set; } = 0x0021;
-        [JsonProperty] public ushort YellHue { get; set; } = 0x0021;
-        [JsonProperty] public ushort PartyMessageHue { get; set; } = 0x0044;
-        [JsonProperty] public ushort GuildMessageHue { get; set; } = 0x0044;
-        [JsonProperty] public ushort AllyMessageHue { get; set; } = 0x0057;
-        [JsonProperty] public ushort ChatMessageHue { get; set; } = 0x0256;
-        [JsonProperty] public ushort InnocentHue { get; set; } = 0x005A;
-        [JsonProperty] public ushort PartyAuraHue { get; set; } = 0x0044;
-        [JsonProperty] public ushort FriendHue { get; set; } = 0x0044;
-        [JsonProperty] public ushort CriminalHue { get; set; } = 0x03B2;
-        [JsonProperty] public ushort AnimalHue { get; set; } = 0x03B2;
-        [JsonProperty] public ushort EnemyHue { get; set; } = 0x0031;
-        [JsonProperty] public ushort MurdererHue { get; set; } = 0x0023;
-        [JsonProperty] public ushort BeneficHue { get; set; } = 0x0059;
-        [JsonProperty] public ushort HarmfulHue { get; set; } = 0x0020;
-        [JsonProperty] public ushort NeutralHue { get; set; } = 0x03B1;
-        [JsonProperty] public bool EnabledSpellHue { get; set; }
-        [JsonProperty] public bool EnabledSpellFormat { get; set; }
-        [JsonProperty] public string SpellDisplayFormat { get; set; } = "{power} [{spell}]";
-        [JsonProperty] public ushort PoisonHue { get; set; } = 0x0044;
-        [JsonProperty] public ushort ParalyzedHue { get; set; } = 0x014C;
-        [JsonProperty] public ushort InvulnerableHue { get; set; } = 0x0030;
+        public ushort SpeechHue { get; set; } = 0x02B2;
+        public ushort WhisperHue { get; set; } = 0x0033;
+        public ushort EmoteHue { get; set; } = 0x0021;
+        public ushort YellHue { get; set; } = 0x0021;
+        public ushort PartyMessageHue { get; set; } = 0x0044;
+        public ushort GuildMessageHue { get; set; } = 0x0044;
+        public ushort AllyMessageHue { get; set; } = 0x0057;
+        public ushort ChatMessageHue { get; set; } = 0x0256;
+        public ushort InnocentHue { get; set; } = 0x005A;
+        public ushort PartyAuraHue { get; set; } = 0x0044;
+        public ushort FriendHue { get; set; } = 0x0044;
+        public ushort CriminalHue { get; set; } = 0x03B2;
+        public ushort AnimalHue { get; set; } = 0x03B2;
+        public ushort EnemyHue { get; set; } = 0x0031;
+        public ushort MurdererHue { get; set; } = 0x0023;
+        public ushort BeneficHue { get; set; } = 0x0059;
+        public ushort HarmfulHue { get; set; } = 0x0020;
+        public ushort NeutralHue { get; set; } = 0x03B1;
+        public bool EnabledSpellHue { get; set; }
+        public bool EnabledSpellFormat { get; set; }
+        public string SpellDisplayFormat { get; set; } = "{power} [{spell}]";
+        public ushort PoisonHue { get; set; } = 0x0044;
+        public ushort ParalyzedHue { get; set; } = 0x014C;
+        public ushort InvulnerableHue { get; set; } = 0x0030;
 
         // visual
-        [JsonProperty] public bool EnabledCriminalActionQuery { get; set; } = true;
-        [JsonProperty] public bool EnabledBeneficialCriminalActionQuery { get; set; } = false;
-        [JsonProperty] public bool EnableStatReport { get; set; } = true;
-        [JsonProperty] public bool EnableSkillReport { get; set; } = true;
-        [JsonProperty] public bool UseOldStatusGump { get; set; }
-        [JsonProperty] public int BackpackStyle { get; set; }
-        [JsonProperty] public bool HighlightGameObjects { get; set; }
-        [JsonProperty] public bool HighlightMobilesByFlags { get; set; } = true;
-        [JsonProperty] public bool ShowMobilesHP { get; set; }
-        [JsonProperty] public int MobileHPType { get; set; } // 0 = %, 1 = line, 2 = both
-        [JsonProperty] public int MobileHPShowWhen { get; set; } // 0 = Always, 1 - <100%
-        [JsonProperty] public bool DrawRoofs { get; set; } = true;
-        [JsonProperty] public bool TreeToStumps { get; set; }
-        [JsonProperty] public bool EnableCaveBorder { get; set; }
-        [JsonProperty] public bool HideVegetation { get; set; }
-        [JsonProperty] public int FieldsType { get; set; } // 0 = normal, 1 = static, 2 = tile
-        [JsonProperty] public bool NoColorObjectsOutOfRange { get; set; }
-        [JsonProperty] public bool UseCircleOfTransparency { get; set; }
-        [JsonProperty] public int CircleOfTransparencyRadius { get; set; } = Constants.MAX_CIRCLE_OF_TRANSPARENCY_RADIUS / 2;
-        [JsonProperty] public int CircleOfTransparencyType { get; set; } // 0 = normal, 1 = like original client
-        [JsonProperty] public int VendorGumpHeight { get; set; } = 60; //original vendor gump size
-        [JsonProperty] public float DefaultScale { get; set; } = 1.0f;
-        [JsonProperty] public bool EnableMousewheelScaleZoom { get; set; }
-        [JsonProperty] public bool SaveScaleAfterClose { get; set; }
-        [JsonProperty] public bool RestoreScaleAfterUnpressCtrl { get; set; }
-        [JsonProperty] public bool BandageSelfOld { get; set; } = true;
-        [JsonProperty] public bool EnableDeathScreen { get; set; } = true;
-        [JsonProperty] public bool EnableBlackWhiteEffect { get; set; } = true;
+        public bool EnabledCriminalActionQuery { get; set; } = true;
+        public bool EnabledBeneficialCriminalActionQuery { get; set; } = false;
+        public bool EnableStatReport { get; set; } = true;
+        public bool EnableSkillReport { get; set; } = true;
+        public bool UseOldStatusGump { get; set; }
+        public int BackpackStyle { get; set; }
+        public bool HighlightGameObjects { get; set; }
+        public bool HighlightMobilesByFlags { get; set; } = true;
+        public bool ShowMobilesHP { get; set; }
+        public int MobileHPType { get; set; } // 0 = %, 1 = line, 2 = both
+        public int MobileHPShowWhen { get; set; } // 0 = Always, 1 - <100%
+        public bool DrawRoofs { get; set; } = true;
+        public bool TreeToStumps { get; set; }
+        public bool EnableCaveBorder { get; set; }
+        public bool HideVegetation { get; set; }
+        public int FieldsType { get; set; } // 0 = normal, 1 = static, 2 = tile
+        public bool NoColorObjectsOutOfRange { get; set; }
+        public bool UseCircleOfTransparency { get; set; }
+        public int CircleOfTransparencyRadius { get; set; } = Constants.MAX_CIRCLE_OF_TRANSPARENCY_RADIUS / 2;
+        public int CircleOfTransparencyType { get; set; } // 0 = normal, 1 = like original client
+        public int VendorGumpHeight { get; set; } = 60; //original vendor gump size
+        public float DefaultScale { get; set; } = 1.0f;
+        public bool EnableMousewheelScaleZoom { get; set; }
+        public bool SaveScaleAfterClose { get; set; }
+        public bool RestoreScaleAfterUnpressCtrl { get; set; }
+        public bool BandageSelfOld { get; set; } = true;
+        public bool EnableDeathScreen { get; set; } = true;
+        public bool EnableBlackWhiteEffect { get; set; } = true;
 
         // tooltip
-        [JsonProperty] public bool UseTooltip { get; set; } = true;
-        [JsonProperty] public ushort TooltipTextHue { get; set; } = 0xFFFF;
-        [JsonProperty] public int TooltipDelayBeforeDisplay { get; set; } = 250;
-        [JsonProperty] public int TooltipDisplayZoom { get; set; } = 100;
-        [JsonProperty] public int TooltipBackgroundOpacity { get; set; } = 70;
-        [JsonProperty] public byte TooltipFont { get; set; } = 1;
+        public bool UseTooltip { get; set; } = true;
+        public ushort TooltipTextHue { get; set; } = 0xFFFF;
+        public int TooltipDelayBeforeDisplay { get; set; } = 250;
+        public int TooltipDisplayZoom { get; set; } = 100;
+        public int TooltipBackgroundOpacity { get; set; } = 70;
+        public byte TooltipFont { get; set; } = 1;
 
         // movements
-        [JsonProperty] public bool EnablePathfind { get; set; }
-        [JsonProperty] public bool UseShiftToPathfind { get; set; }
-        [JsonProperty] public bool AlwaysRun { get; set; }
-        [JsonProperty] public bool AlwaysRunUnlessHidden { get; set; }
-        [JsonProperty] public bool SmoothMovements { get; set; } = true;
-        [JsonProperty] public bool HoldDownKeyTab { get; set; } = true;
-        [JsonProperty] public bool HoldShiftForContext { get; set; } = false;
-        [JsonProperty] public bool HoldShiftToSplitStack { get; set; } = false;
+        public bool EnablePathfind { get; set; }
+        public bool UseShiftToPathfind { get; set; }
+        public bool AlwaysRun { get; set; }
+        public bool AlwaysRunUnlessHidden { get; set; }
+        public bool SmoothMovements { get; set; } = true;
+        public bool HoldDownKeyTab { get; set; } = true;
+        public bool HoldShiftForContext { get; set; } = false;
+        public bool HoldShiftToSplitStack { get; set; } = false;
 
         // general
-        [JsonProperty] public Point WindowClientBounds { get; set; } = new Point(600, 480);
-        [JsonProperty] public Point ContainerDefaultPosition { get; set; } = new Point(24, 24);
-        [JsonProperty] public Point GameWindowPosition { get; set; } = new Point(10, 10);
-        [JsonProperty] public bool GameWindowLock { get; set; }
-        [JsonProperty] public bool GameWindowFullSize { get; set; }
-        [JsonProperty] public bool WindowBorderless { get; set; } = false;
-        [JsonProperty] public Point GameWindowSize { get; set; } = new Point(600, 480);
-        [JsonProperty] public Point TopbarGumpPosition { get; set; } = new Point(0, 0);
-        [JsonProperty] public bool TopbarGumpIsMinimized { get; set; }
-        [JsonProperty] public bool TopbarGumpIsDisabled { get; set; }
-        [JsonProperty] public bool UseAlternativeLights { get; set; }
-        [JsonProperty] public bool UseCustomLightLevel { get; set; }
-        [JsonProperty] public byte LightLevel { get; set; }
-        [JsonProperty] public bool UseColoredLights { get; set; } = true;
-        [JsonProperty] public bool UseDarkNights { get; set; }
-        [JsonProperty] public int CloseHealthBarType { get; set; } // 0 = none, 1 == not exists, 2 == is dead
-        [JsonProperty] public bool ActivateChatAfterEnter { get; set; }
-        [JsonProperty] public bool ActivateChatAdditionalButtons { get; set; } = true;
-        [JsonProperty] public bool ActivateChatShiftEnterSupport { get; set; } = true;
-        [JsonProperty] public bool UseObjectsFading { get; set; } = true;
-        [JsonProperty] public bool HoldDownKeyAltToCloseAnchored { get; set; } = true;
-        [JsonProperty] public bool CloseAllAnchoredGumpsInGroupWithRightClick { get; set; } = false;
-        [JsonProperty] public bool HoldAltToMoveGumps { get; set; }
+        public Point WindowClientBounds { get; set; } = new Point(600, 480);
+        public Point ContainerDefaultPosition { get; set; } = new Point(24, 24);
+        public Point GameWindowPosition { get; set; } = new Point(10, 10);
+        public bool GameWindowLock { get; set; }
+        public bool GameWindowFullSize { get; set; }
+        public bool WindowBorderless { get; set; } = false;
+        public Point GameWindowSize { get; set; } = new Point(600, 480);
+        public Point TopbarGumpPosition { get; set; } = new Point(0, 0);
+        public bool TopbarGumpIsMinimized { get; set; }
+        public bool TopbarGumpIsDisabled { get; set; }
+        public bool UseAlternativeLights { get; set; }
+        public bool UseCustomLightLevel { get; set; }
+        public byte LightLevel { get; set; }
+        public bool UseColoredLights { get; set; } = true;
+        public bool UseDarkNights { get; set; }
+        public int CloseHealthBarType { get; set; } // 0 = none, 1 == not exists, 2 == is dead
+        public bool ActivateChatAfterEnter { get; set; }
+        public bool ActivateChatAdditionalButtons { get; set; } = true;
+        public bool ActivateChatShiftEnterSupport { get; set; } = true;
+        public bool UseObjectsFading { get; set; } = true;
+        public bool HoldDownKeyAltToCloseAnchored { get; set; } = true;
+        public bool CloseAllAnchoredGumpsInGroupWithRightClick { get; set; } = false;
+        public bool HoldAltToMoveGumps { get; set; }
 
         // Experimental
-        [JsonProperty] public bool CastSpellsByOneClick { get; set; }
-        [JsonProperty] public bool BuffBarTime { get; set; }
-        [JsonProperty] public bool AutoOpenDoors { get; set; }
-        [JsonProperty] public bool SmoothDoors { get; set; }
-        [JsonProperty] public bool AutoOpenCorpses { get; set; }
-        [JsonProperty] public int AutoOpenCorpseRange { get; set; } = 2;
-        [JsonProperty] public int CorpseOpenOptions { get; set; } = 3;
-        [JsonProperty] public bool SkipEmptyCorpse { get; set; }
-        [JsonProperty] public bool DisableDefaultHotkeys { get; set; }
-        [JsonProperty] public bool DisableArrowBtn { get; set; }
-        [JsonProperty] public bool DisableTabBtn { get; set; }
-        [JsonProperty] public bool DisableCtrlQWBtn { get; set; }
-        [JsonProperty] public bool DisableAutoMove { get; set; }
-        [JsonProperty] public bool EnableDragSelect { get; set; }
-        [JsonProperty] public int DragSelectModifierKey { get; set; } // 0 = none, 1 = control, 2 = shift
-        [JsonProperty] public bool OverrideContainerLocation { get; set; }
-        [JsonProperty] public int OverrideContainerLocationSetting { get; set; } // 0 = container position, 1 = top right of screen, 2 = last dragged position, 3 = remember every container
-        [JsonProperty] public Point OverrideContainerLocationPosition { get; set; } = new Point(200, 200);
-        [JsonProperty] public bool DragSelectHumanoidsOnly { get; set; }
-        [JsonProperty] public NameOverheadTypeAllowed NameOverheadTypeAllowed { get; set; } = NameOverheadTypeAllowed.All;
-        [JsonProperty] public bool NameOverheadToggled { get; set; } = false;
-        [JsonProperty] public bool ShowTargetRangeIndicator { get; set; }
-        [JsonProperty] public bool PartyInviteGump { get; set; }
-        [JsonProperty] public bool CustomBarsToggled { get; set; }
-        [JsonProperty] public bool CBBlackBGToggled { get; set; }
+         public bool CastSpellsByOneClick { get; set; }
+         public bool BuffBarTime { get; set; }
+         public bool AutoOpenDoors { get; set; }
+         public bool SmoothDoors { get; set; }
+         public bool AutoOpenCorpses { get; set; }
+         public int AutoOpenCorpseRange { get; set; } = 2;
+         public int CorpseOpenOptions { get; set; } = 3;
+         public bool SkipEmptyCorpse { get; set; }
+         public bool DisableDefaultHotkeys { get; set; }
+         public bool DisableArrowBtn { get; set; }
+         public bool DisableTabBtn { get; set; }
+         public bool DisableCtrlQWBtn { get; set; }
+         public bool DisableAutoMove { get; set; }
+         public bool EnableDragSelect { get; set; }
+         public int DragSelectModifierKey { get; set; } // 0 = none, 1 = control, 2 = shift
+         public bool OverrideContainerLocation { get; set; }
+         public int OverrideContainerLocationSetting { get; set; } // 0 = container position, 1 = top right of screen, 2 = last dragged position, 3 = remember every container
+         public Point OverrideContainerLocationPosition { get; set; } = new Point(200, 200);
+         public bool DragSelectHumanoidsOnly { get; set; }
+         public NameOverheadTypeAllowed NameOverheadTypeAllowed { get; set; } = NameOverheadTypeAllowed.All;
+         public bool NameOverheadToggled { get; set; } = false;
+         public bool ShowTargetRangeIndicator { get; set; }
+         public bool PartyInviteGump { get; set; }
+         public bool CustomBarsToggled { get; set; }
+         public bool CBBlackBGToggled { get; set; }
 
-        [JsonProperty] public bool ShowInfoBar { get; set; }
-        [JsonProperty] public int InfoBarHighlightType { get; set; } // 0 = text colour changes, 1 = underline
+         public bool ShowInfoBar { get; set; }
+         public int InfoBarHighlightType { get; set; } // 0 = text colour changes, 1 = underline
       
 
-        [JsonProperty]
+        
         public InfoBarItem[] InfoBarItems { get; set; }// [FILE_FIX] TODO: REMOVE IT
-        [JsonProperty]
         public Macro[] Macros { get; set; } // [FILE_FIX] TODO: REMOVE IT
 
 
-        [JsonProperty] public bool CounterBarEnabled { get; set; }
-        [JsonProperty] public bool CounterBarHighlightOnUse { get; set; }
-        [JsonProperty] public bool CounterBarHighlightOnAmount { get; set; }
-        [JsonProperty] public bool CounterBarDisplayAbbreviatedAmount { get; set; }
-        [JsonProperty] public int CounterBarAbbreviatedAmount { get; set; } = 1000;
-        [JsonProperty] public int CounterBarHighlightAmount { get; set; } = 5;
-        [JsonProperty] public int CounterBarCellSize { get; set; } = 40;
-        [JsonProperty] public int CounterBarRows { get; set; } = 1;
-        [JsonProperty] public int CounterBarColumns { get; set; } = 1;
+        public bool CounterBarEnabled { get; set; }
+        public bool CounterBarHighlightOnUse { get; set; }
+        public bool CounterBarHighlightOnAmount { get; set; }
+        public bool CounterBarDisplayAbbreviatedAmount { get; set; }
+        public int CounterBarAbbreviatedAmount { get; set; } = 1000;
+        public int CounterBarHighlightAmount { get; set; } = 5;
+        public int CounterBarCellSize { get; set; } = 40;
+        public int CounterBarRows { get; set; } = 1;
+        public int CounterBarColumns { get; set; } = 1;
 
 
-        [JsonProperty] public bool ShadowsEnabled { get; set; } = true;
-        [JsonProperty] public int AuraUnderFeetType { get; set; } // 0 = NO, 1 = in warmode, 2 = ctrl+shift, 3 = always
-        [JsonProperty] public bool AuraOnMouse { get; set; } = true;
+        public bool ShadowsEnabled { get; set; } = true;
+        public int AuraUnderFeetType { get; set; } // 0 = NO, 1 = in warmode, 2 = ctrl+shift, 3 = always
+        public bool AuraOnMouse { get; set; } = true;
 
-        [JsonProperty] public bool PartyAura { get; set; }
+        public bool PartyAura { get; set; }
 
-        [JsonProperty] public bool UseXBR { get; set; } = true;
+        public bool UseXBR { get; set; } = true;
 
-        [JsonProperty] public bool HideChatGradient { get; set; } = false;
+        public bool HideChatGradient { get; set; } = false;
 
-        [JsonProperty] public bool StandardSkillsGump { get; set; } = true;
+        public bool StandardSkillsGump { get; set; } = true;
 
-        [JsonProperty] public bool ShowNewMobileNameIncoming { get; set; } = true;
-        [JsonProperty] public bool ShowNewCorpseNameIncoming { get; set; } = true;
+        public bool ShowNewMobileNameIncoming { get; set; } = true;
+        public bool ShowNewCorpseNameIncoming { get; set; } = true;
 
-        [JsonProperty] public uint GrabBagSerial { get; set; }
+        public uint GrabBagSerial { get; set; }
 
-        [JsonProperty] public int GridLootType { get; set; } // 0 = none, 1 = only grid, 2 = both
+        public int GridLootType { get; set; } // 0 = none, 1 = only grid, 2 = both
 
-        [JsonProperty] public bool ReduceFPSWhenInactive { get; set; }
+        public bool ReduceFPSWhenInactive { get; set; } = true;
 
-        [JsonProperty] public bool OverrideAllFonts { get; set; }
-        [JsonProperty] public bool OverrideAllFontsIsUnicode { get; set; } = true;
+        public bool OverrideAllFonts { get; set; }
+        public bool OverrideAllFontsIsUnicode { get; set; } = true;
 
-        [JsonProperty] public bool SallosEasyGrab { get; set; }
+        public bool SallosEasyGrab { get; set; }
 
-        [JsonProperty] public float Brighlight { get; set; }
+        public float Brighlight { get; set; }
 
-        [JsonProperty] public bool JournalDarkMode { get; set; }
+        public bool JournalDarkMode { get; set; }
 
-        [JsonProperty] public byte ContainersScale { get; set; } = 100;
+        public byte ContainersScale { get; set; } = 100;
 
-        [JsonProperty] public bool ScaleItemsInsideContainers { get; set; }
+        public bool ScaleItemsInsideContainers { get; set; }
 
-        [JsonProperty] public bool DoubleClickToLootInsideContainers { get; set; }
+        public bool DoubleClickToLootInsideContainers { get; set; }
 
-        [JsonProperty] public bool UseLargeContainerGumps { get; set; } = false;
+        public bool UseLargeContainerGumps { get; set; } = false;
 
-        [JsonProperty] public bool RelativeDragAndDropItems { get; set; }
+        public bool RelativeDragAndDropItems { get; set; }
 
-        [JsonProperty] public bool ShowHouseContent { get; set; }
-        [JsonProperty] public bool SaveHealthbars { get; set; }
-        [JsonProperty] public bool TextFading { get; set; } = true;
+        public bool ShowHouseContent { get; set; }
+        public bool SaveHealthbars { get; set; }
+        public bool TextFading { get; set; } = true;
 
-        [JsonProperty] public bool UseSmoothBoatMovement { get; set; } = false;
+        public bool UseSmoothBoatMovement { get; set; } = false;
 
-        [JsonProperty] public bool IgnoreStaminaCheck { get; set; } = false;
+        public bool IgnoreStaminaCheck { get; set; } = false;
 
-        [JsonProperty] public int WorldMapWidth { get; set; } = 400;
-        [JsonProperty] public int WorldMapHeight { get; set; } = 400;
-        [JsonProperty] public int WorldMapFont { get; set; } = 3;
-        [JsonProperty] public bool WorldMapFlipMap { get; set; } = true;
-        [JsonProperty] public bool WorldMapTopMost { get; set; }
-        [JsonProperty] public bool WorldMapFreeView { get; set; }
-        [JsonProperty] public bool WorldMapShowParty { get; set; } = true;
-        [JsonProperty] public int WorldMapZoomIndex { get; set; } = 4;
-        [JsonProperty] public bool WorldMapShowCoordinates { get; set; } = true;
-        [JsonProperty] public bool WorldMapShowMobiles { get; set; } = true;
-        [JsonProperty] public bool WorldMapShowPlayerName { get; set; } = true;
-        [JsonProperty] public bool WorldMapShowPlayerBar { get; set; } = true;
-        [JsonProperty] public bool WorldMapShowGroupName { get; set; } = true;
-        [JsonProperty] public bool WorldMapShowGroupBar { get; set; } = true;
-        [JsonProperty] public bool WorldMapShowMarkers { get; set; } = true;
-        [JsonProperty] public bool WorldMapShowMarkersNames { get; set; } = true;
-        [JsonProperty] public bool WorldMapShowMultis { get; set; } = true;
+        public bool ShowJournalClient { get; set; } = true;
+        public bool ShowJournalObjects { get; set; } = true;
+        public bool ShowJournalSystem { get; set; } = true;
+        public bool ShowJournalGuildAlly { get; set; } = true;
 
-
+        public int WorldMapWidth { get; set; } = 400;
+        public int WorldMapHeight { get; set; } = 400;
+        public int WorldMapFont { get; set; } = 3;
+        public bool WorldMapFlipMap { get; set; } = true;
+        public bool WorldMapTopMost { get; set; }
+        public bool WorldMapFreeView { get; set; }
+        public bool WorldMapShowParty { get; set; } = true;
+        public int WorldMapZoomIndex { get; set; } = 4;
+        public bool WorldMapShowCoordinates { get; set; } = true;
+        public bool WorldMapShowMobiles { get; set; } = true;
+        public bool WorldMapShowPlayerName { get; set; } = true;
+        public bool WorldMapShowPlayerBar { get; set; } = true;
+        public bool WorldMapShowGroupName { get; set; } = true;
+        public bool WorldMapShowGroupBar { get; set; } = true;
+        public bool WorldMapShowMarkers { get; set; } = true;
+        public bool WorldMapShowMarkersNames { get; set; } = true;
+        public bool WorldMapShowMultis { get; set; } = true;
+        public string WorldMapHiddenMarkerFiles { get; set; } = string.Empty;
 
 
         internal static string ProfilePath { get; } = Path.Combine(CUOEnviroment.ExecutablePath, "Data", "Profiles");
@@ -302,11 +304,7 @@ namespace ClassicUO.Configuration
             Log.Trace( $"Saving path:\t\t{path}");
 
             // Save profile settings
-            ConfigurationResolver.Save(this, Path.Combine(path, "profile.json"), new JsonSerializerSettings
-            {
-                TypeNameHandling = TypeNameHandling.All,
-                MetadataPropertyHandling = MetadataPropertyHandling.ReadAhead
-            });
+            ConfigurationResolver.Save(this, Path.Combine(path, "profile.json"));
 
             // Save opened gumps
             SaveGumps(path, gumps);

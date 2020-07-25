@@ -40,8 +40,8 @@ namespace ClassicUO.Game.UI.Controls
         public ItemGump(uint serial, ushort graphic, ushort hue, int x, int y) : base(graphic, hue)
         {
             AcceptMouseInput = true;
-            X = x;
-            Y = y;
+            X = (short) x;
+            Y = (short) y;
             HighlightOnMouseOver = true;
             CanPickUp = true;
             LocalSerial = serial;
@@ -74,21 +74,34 @@ namespace ClassicUO.Game.UI.Controls
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
-            if (IsDisposed || ((ItemHold.Enabled || ItemHold.Dropped) && ItemHold.Serial == LocalSerial))
+            if (IsDisposed)
                 return false;
+
+            //if ((ItemHold.Enabled && !ItemHold.Dropped) && ItemHold.Serial == LocalSerial)
+            //{
+            //    if (!ItemHold.IsStackable || ItemHold.Amount < ItemHold.TotalAmount)
+            //    {
+            //        return false;
+            //    }
+            //}
 
             base.Draw(batcher, x, y);
 
             ResetHueVector();
             ShaderHuesTraslator.GetHueVector(ref _hueVector, HighlightOnMouseOver && MouseIsOver ? 0x0035 : Hue, IsPartialHue, 0, false);
+          
+            var texture = ArtLoader.Instance.GetTexture(Graphic);
 
-            batcher.Draw2D(Texture, x, y, Width, Height, ref _hueVector);
-
-            Item item = World.Items.Get(LocalSerial);
-
-            if (item != null && !item.IsMulti && !item.IsCoin && item.Amount > 1 && item.ItemData.IsStackable)
+            if (texture != null)
             {
-                batcher.Draw2D(Texture, x + 5, y + 5, Width, Height, ref _hueVector);
+                batcher.Draw2D(texture, x, y, Width, Height, ref _hueVector);
+
+                Item item = World.Items.Get(LocalSerial);
+
+                if (item != null && !item.IsMulti && !item.IsCoin && item.Amount > 1 && item.ItemData.IsStackable)
+                {
+                    batcher.Draw2D(texture, x + 5, y + 5, Width, Height, ref _hueVector);
+                }
             }
 
             return true;
@@ -96,6 +109,13 @@ namespace ClassicUO.Game.UI.Controls
 
         public override bool Contains(int x, int y)
         {
+            var texture = ArtLoader.Instance.GetTexture(Graphic);
+
+            if (texture == null)
+            {
+                return false;
+            }
+
             if (ProfileManager.Current != null && ProfileManager.Current.ScaleItemsInsideContainers)
             {
                 float scale = UIManager.ContainerScale;
@@ -104,7 +124,7 @@ namespace ClassicUO.Game.UI.Controls
                 y = (int)(y / scale);
             }
 
-            if (Texture.Contains(x, y))
+            if (texture.Contains(x, y))
             {
                 return true;
             }
@@ -113,7 +133,7 @@ namespace ClassicUO.Game.UI.Controls
 
             if (item != null && !item.IsCoin && item.Amount > 1 && item.ItemData.IsStackable)
             {
-                if (Texture.Contains(x - 5, y - 5))
+                if (texture.Contains(x - 5, y - 5))
                 {
                     return true;
                 }
@@ -213,11 +233,15 @@ namespace ClassicUO.Game.UI.Controls
                                     if (!DelayedObjectClickManager.IsEnabled)
                                     {
                                         var p = RootParent;
+
                                         if (p != null)
+                                        {
+                                            var off = Mouse.LDroppedOffset;
                                             DelayedObjectClickManager.Set(LocalSerial,
-                                                                         Mouse.Position.X - p.ScreenCoordinateX,
-                                                                         Mouse.Position.Y - p.ScreenCoordinateY,
-                                                                         Time.Ticks + Mouse.MOUSE_DELAY_DOUBLE_CLICK);
+                                                                          (Mouse.Position.X - off.X) - p.ScreenCoordinateX,
+                                                                          (Mouse.Position.Y - off.Y) - p.ScreenCoordinateY,
+                                                                          Time.Ticks + Mouse.MOUSE_DELAY_DOUBLE_CLICK);
+                                        }
 
                                         return;
                                     }
@@ -245,7 +269,7 @@ namespace ClassicUO.Game.UI.Controls
             else
                 base.OnMouseUp(x, y, button);
         }
-
+        
         protected override void OnMouseOver(int x, int y)
         {
         }

@@ -46,7 +46,7 @@ namespace ClassicUO.Game.UI.Gumps
         protected bool _isDead;
         protected string _name;
         protected bool _canChangeName;
-        protected TextBox _textBox;
+        protected StbTextBox _textBox;
         protected bool _outOfRange;
 
         protected BaseHealthBarGump(Entity entity) : this(0, 0)
@@ -56,6 +56,8 @@ namespace ClassicUO.Game.UI.Gumps
                 Dispose();
                 return;
             }
+
+            GameActions.RequestMobileStatus(entity.Serial);
 
             LocalSerial = entity.Serial;
             CanCloseWithRightClick = true;
@@ -97,7 +99,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             var entity = World.Get(LocalSerial);
 
-            if (Client.Version >= ClientVersion.CV_200 && World.InGame && entity != null)
+            if (Client.Version >= ClientVersion.CV_200 && World.InGame && entity != null && TargetManager.LastTargetInfo.Serial != LocalSerial && TargetManager.LastAttack != LocalSerial && TargetManager.SelectedTarget != LocalSerial)
                 NetClient.Socket.Send(new PCloseStatusBarGump(entity));
 
             if (SelectedObject.HealthbarObject == entity && entity != null)
@@ -163,6 +165,11 @@ namespace ClassicUO.Game.UI.Gumps
             if (e.Button != MouseButtonType.Left)
                 return;
 
+            if (World.Get(LocalSerial) == null)
+            {
+                return;
+            }
+
             Point p = Mouse.LDroppedOffset;
 
             if (Math.Max(Math.Abs(p.X), Math.Abs(p.Y)) >= 1)
@@ -213,6 +220,8 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 if (_textBox != null)
                     _textBox.IsEditable = false;
+
+                UIManager.KeyboardFocusControl = null;
                 UIManager.SystemChat?.SetFocus();
             }
 
@@ -223,6 +232,15 @@ namespace ClassicUO.Game.UI.Gumps
         {
             if (button != MouseButtonType.Left)
                 return false;
+
+            if (_canChangeName)
+            {
+                if (_textBox != null)
+                    _textBox.IsEditable = false;
+
+                UIManager.KeyboardFocusControl = null;
+                UIManager.SystemChat?.SetFocus();
+            }
 
             var entity = World.Get(LocalSerial);
 
@@ -255,6 +273,7 @@ namespace ClassicUO.Game.UI.Gumps
             if ((key == SDL.SDL_Keycode.SDLK_RETURN || key == SDL.SDL_Keycode.SDLK_KP_ENTER) && _textBox != null && _textBox.IsEditable)
             {
                 GameActions.Rename(entity, _textBox.Text);
+                UIManager.KeyboardFocusControl = null;
                 UIManager.SystemChat?.SetFocus();
                 _textBox.IsEditable = false;
             }
@@ -355,7 +374,6 @@ namespace ClassicUO.Game.UI.Gumps
 
         public HealthBarGumpCustom(Entity entity) : base(entity)
         {
-
         }
 
         public HealthBarGumpCustom(uint serial) : base(serial)
@@ -376,6 +394,10 @@ namespace ClassicUO.Game.UI.Gumps
             _background = null;
             _hpLineRed = _manaLineRed = _stamLineRed = null;
 
+            if (_textBox != null)
+            {
+                _textBox.MouseUp -= TextBoxOnMouseUp;
+            }
             _textBox = null;
 
             BuildGump();
@@ -436,8 +458,6 @@ namespace ClassicUO.Game.UI.Gumps
                             if (_textBox.Hue != textColor)
                                 _textBox.Hue = textColor;
 
-                            if (_canChangeName)
-                                _textBox.MouseUp -= TextBoxOnMouseUp;
                             _textBox.IsEditable = false;
                         }
                     }
@@ -460,7 +480,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (entity != null && !entity.IsDestroyed)
             {
-                Mobile mobile = SerialHelper.IsMobile(entity.Serial) ? (Mobile) entity : null;
+                Mobile mobile = entity as Mobile;
 
                 if (!_isDead && entity != World.Player && (mobile != null && mobile.IsDead) && ProfileManager.Current.CloseHealthBarType == 2) // is dead
                 {
@@ -476,13 +496,9 @@ namespace ClassicUO.Game.UI.Gumps
 
                     if (_textBox != null)
                     {
-                        _textBox.MouseUp -= TextBoxOnMouseUp;
-
-                        if (_canChangeName)
-                        {
-                            _textBox.MouseUp += TextBoxOnMouseUp;
-                        }
-                        else
+                        _textBox.AcceptMouseInput = _canChangeName;
+                        _textBox.AcceptKeyboardInput = _canChangeName;
+                        if (!_canChangeName)
                             _textBox.IsEditable = false;
                     }
                 }
@@ -493,8 +509,11 @@ namespace ClassicUO.Game.UI.Gumps
                 if (!string.IsNullOrEmpty(entity.Name) && _name != entity.Name)
                 {
                     _name = entity.Name;
+
                     if (_textBox != null)
-                        _textBox.Text = _name;
+                    {
+                        _textBox.SetText(_name);
+                    }
                 }
 
                 if (_outOfRange)
@@ -510,8 +529,6 @@ namespace ClassicUO.Game.UI.Gumps
                     if (_canChangeName)
                     {
                         textColor = 0x000E;
-                        if (_textBox != null)
-                            _textBox.MouseUp += TextBoxOnMouseUp;
                     }
 
                     if (inparty && _bars.Length >= 2 && _bars[1] != null)
@@ -685,26 +702,25 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (LocalSerial == World.Player)
                 {
-                    Add(_textBox = new TextBoxCHB(1, 32, width: HPB_BAR_WIDTH, isunicode: true, style: FontStyle.Cropped | FontStyle.BlackBorder, hue: Notoriety.GetHue(World.Player.NotorietyFlag))
+                    Add(_textBox = new StbTextBox(1, 32, maxWidth: HPB_WIDTH, isunicode: true, style: FontStyle.Cropped | FontStyle.BlackBorder, hue: Notoriety.GetHue(World.Player.NotorietyFlag), align: TEXT_ALIGN_TYPE.TS_CENTER)
                     {
-                        X = 8,
+                        X = 0,
                         Y = 3,
+                        Width = HPB_BAR_WIDTH,
                         IsEditable = false,
                         CanMove = true,
-                        Text = _name
                     });
                 }
                 else
                 {
-                    Add(_textBox = new TextBoxCHB(1, 32, width: HPB_BAR_WIDTH, isunicode: true, style: FontStyle.Cropped | FontStyle.BlackBorder, hue: Notoriety.GetHue((entity as Mobile)?.NotorietyFlag ?? NotorietyFlag.Gray))
+                    Add(_textBox = new StbTextBox(1, 32, maxWidth: HPB_WIDTH, isunicode: true, style: FontStyle.Cropped | FontStyle.BlackBorder, hue: Notoriety.GetHue((entity as Mobile)?.NotorietyFlag ?? NotorietyFlag.Gray), align: TEXT_ALIGN_TYPE.TS_CENTER)
                     {
-                        X = 8,
+                        X = 0,
                         Y = 3,
+                        Width = HPB_BAR_WIDTH,
                         IsEditable = false,
                         CanMove = true,
-                        Text = _name
                     });
-
                 }
 
                 Add(_outline = new LineCHB(HPB_BAR_SPACELEFT - HPB_OUTLINESIZE, 27 - HPB_OUTLINESIZE, HPB_BAR_WIDTH + (HPB_OUTLINESIZE * 2), (HPB_BAR_HEIGHT * 3) + 2 + (HPB_OUTLINESIZE * 2), HPB_COLOR_DRAW_BLACK.PackedValue));
@@ -730,13 +746,13 @@ namespace ClassicUO.Game.UI.Gumps
                     Width = HPB_WIDTH;
                     Add(_background = new AlphaBlendControl(0.3f) { Width = Width, Height = Height, AcceptMouseInput = true, CanMove = true });
 
-                    Add(_textBox = new TextBoxCHB(1, 32, width: HPB_BAR_WIDTH, isunicode: true, style: FontStyle.Cropped | FontStyle.BlackBorder, hue: Notoriety.GetHue((entity as Mobile)?.NotorietyFlag ?? NotorietyFlag.Gray), maxWidth: Width)
+                    Add(_textBox = new StbTextBox(1, 32, isunicode: true, style: FontStyle.Cropped | FontStyle.BlackBorder, hue: Notoriety.GetHue((entity as Mobile)?.NotorietyFlag ?? NotorietyFlag.Gray), maxWidth: Width, align: TEXT_ALIGN_TYPE.TS_CENTER)
                     {
-                        X = 8,
+                        X = 0,
                         Y = 3,
+                        Width = HPB_BAR_WIDTH,
                         IsEditable = false,
                         CanMove = true,
-                        Text = _name
                     });
 
                     Add(_outline = new LineCHB(HPB_BAR_SPACELEFT - HPB_OUTLINESIZE, 27 - HPB_OUTLINESIZE, HPB_BAR_WIDTH + (HPB_OUTLINESIZE * 2), (HPB_BAR_HEIGHT * 3) + 2 + (HPB_OUTLINESIZE * 2), HPB_COLOR_DRAW_BLACK.PackedValue));
@@ -757,7 +773,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }
                 else
                 {
-                    Mobile mobile = entity != null && SerialHelper.IsMobile(entity.Serial) ? (Mobile) entity : null;
+                    Mobile mobile = entity as Mobile;
 
                     if (entity != null)
                     {
@@ -779,25 +795,23 @@ namespace ClassicUO.Game.UI.Gumps
                     Add(_border[3] = new LineCHB(HPB_WIDTH - HPB_BORDERSIZE, 0, HPB_BORDERSIZE, HPB_HEIGHT_SINGLELINE, HPB_COLOR_DRAW_BLACK.PackedValue));
 
 
-                    Add(_textBox = new TextBoxCHB(1, 32, width: HPB_BAR_WIDTH, isunicode: true, hue: Notoriety.GetHue((entity as Mobile)?.NotorietyFlag ?? NotorietyFlag.Gray), style: FontStyle.Cropped | FontStyle.BlackBorder)
+                    Add(_textBox = new StbTextBox(1, 32, maxWidth: HPB_WIDTH, isunicode: true, hue: Notoriety.GetHue((entity as Mobile)?.NotorietyFlag ?? NotorietyFlag.Gray), style: FontStyle.Cropped | FontStyle.BlackBorder, align: TEXT_ALIGN_TYPE.TS_CENTER)
                     {
-                        X = 8,
+                        X = 0,
                         Y = 0,
                         Width = HPB_WIDTH,
                         Height = 15,
                         IsEditable = false,
                         AcceptMouseInput = _canChangeName,
                         AcceptKeyboardInput = _canChangeName,
-                        SafeCharactersOnly = true,
                         WantUpdateSize = false,
                         CanMove = true,
-                        Text = _name
                     });
-                    if (_canChangeName)
-                        _textBox.MouseUp += TextBoxOnMouseUp;
                 }
             }
 
+            _textBox.MouseUp += TextBoxOnMouseUp;
+            _textBox.SetText(_name);
 
             if (entity == null)
             {
@@ -838,23 +852,6 @@ namespace ClassicUO.Game.UI.Gumps
                 return batcher.Draw2D(LineColor, x, y, LineWidth, Height, ref _hueVector);
             }
         }
-
-        private class TextBoxCHB : TextBox
-        {
-            public TextBoxCHB(byte font, int maxcharlength = -1, int maxWidth = 0, int width = 0, bool isunicode = true, FontStyle style = FontStyle.None, ushort hue = 0) : base(font, maxcharlength, maxWidth, width, isunicode, style, hue, TEXT_ALIGN_TYPE.TS_CENTER)
-            {
-            }
-            public override bool Draw(UltimaBatcher2D batcher, int x, int y)
-            {
-                TxEntry.RenderText.Draw(batcher, x + TxEntry.Offset, y);
-
-                if (IsEditable && HasKeyboardFocus)
-                    TxEntry.RenderCaret.Draw(batcher, x + TxEntry.Offset + TxEntry.CaretPosition.X, y + TxEntry.CaretPosition.Y);
-
-                return base.Draw(batcher, x, y);
-            }
-        }
-
     }
 
     internal class HealthBarGump : BaseHealthBarGump
@@ -878,18 +875,8 @@ namespace ClassicUO.Game.UI.Gumps
         private bool _oldWarMode, _normalHits, _poisoned, _yellowHits;
 
 
-        public HealthBarGump(Entity entity) : this()
+        public HealthBarGump(Entity entity) : base(entity)
         {
-            if (entity == null && CheckIfAnchoredElseDispose())
-            {
-                return;
-            }
-
-            _name = entity.Name;
-            _isDead = SerialHelper.IsMobile(entity.Serial) && ((Mobile) entity).IsDead;
-            LocalSerial = entity.Serial;
-
-            BuildGump();
         }
 
         public HealthBarGump(uint serial) : base(serial)
@@ -921,6 +908,10 @@ namespace ClassicUO.Game.UI.Gumps
             _background = _hpLineRed = _manaLineRed = _stamLineRed = null;
             _buttonHeal1 = _buttonHeal2 = null;
 
+            if (_textBox != null)
+            {
+                _textBox.MouseUp -= TextBoxOnMouseUp;
+            } 
             _textBox = null;
 
             BuildGump();
@@ -944,24 +935,28 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (LocalSerial == World.Player)
                 {
-                    Add(_textBox = new TextBox(3, 32, width: 120, isunicode: false, style: FontStyle.Fixed, hue: Notoriety.GetHue(World.Player.NotorietyFlag))
+                    Add(_textBox = new StbTextBox(3, 32, maxWidth: 120, isunicode: false, style: FontStyle.Fixed, hue: Notoriety.GetHue(World.Player.NotorietyFlag))
                     {
                         X = 0,
                         Y = -2,
+                        Width = 120,
+                        Height = 50,
                         IsEditable = false,
                         CanMove = true,
-                        Text = "[* SELF *]"
                     });
+
+                    _name = "[* SELF *]";
                 }
                 else
                 {
-                    Add(_textBox = new TextBox(3, 32, width: 109, isunicode: false, style: FontStyle.Fixed | FontStyle.BlackBorder, hue: Notoriety.GetHue((entity as Mobile)?.NotorietyFlag ?? NotorietyFlag.Gray))
+                    Add(_textBox = new StbTextBox(3, 32, maxWidth: 109, isunicode: false, style: FontStyle.Fixed | FontStyle.BlackBorder, hue: Notoriety.GetHue((entity as Mobile)?.NotorietyFlag ?? NotorietyFlag.Gray))
                     {
                         X = 0,
                         Y = -2,
+                        Width = 109,
+                        Height = 50,
                         IsEditable = false,
                         CanMove = true,
-                        Text = _name
                     });
                 }
 
@@ -983,8 +978,8 @@ namespace ClassicUO.Game.UI.Gumps
                     _oldWarMode = World.Player.InWarMode;
                     Add(_background = new GumpPic(0, 0, _oldWarMode ? BACKGROUND_WAR : BACKGROUND_NORMAL, 0) { ContainsByBounds = true });
 
-                    Width = _background.Texture.Width;
-                    Height = _background.Texture.Height;
+                    Width = _background.Width;
+                    Height = _background.Height;
 
                     // add backgrounds
                     Add(_hpLineRed = new GumpPic(34, 12, LINE_RED, 0));
@@ -1001,7 +996,7 @@ namespace ClassicUO.Game.UI.Gumps
                     ushort textColor = 0x0386;
                     ushort hitsColor = 0x0386;
 
-                    Mobile mobile = entity != null && SerialHelper.IsMobile(entity.Serial) ? (Mobile) entity : null;
+                    Mobile mobile = entity as Mobile;
 
                     if (entity != null)
                     {
@@ -1018,10 +1013,10 @@ namespace ClassicUO.Game.UI.Gumps
                     Add(_hpLineRed = new GumpPic(34, 38, LINE_RED, hitsColor));
                     Add(_bars[0] = new GumpPicWithWidth(34, 38, LINE_BLUE, 0, 0));
 
-                    Width = _background.Texture.Width;
-                    Height = _background.Texture.Height;
+                    Width = _background.Width;
+                    Height = _background.Height;
 
-                    Add(_textBox = new TextBox(1, 32, width: 120, isunicode: false, hue: textColor, style: FontStyle.Fixed)
+                    Add(_textBox = new StbTextBox(1, 32, 120, isunicode: false, hue: textColor, style: FontStyle.Fixed)
                     {
                         X = 16,
                         Y = 14,
@@ -1030,14 +1025,17 @@ namespace ClassicUO.Game.UI.Gumps
                         IsEditable = false,
                         AcceptMouseInput = _canChangeName,
                         AcceptKeyboardInput = _canChangeName,
-                        SafeCharactersOnly = true,
                         WantUpdateSize = false,
                         CanMove = true,
-                        Text = _name
                     });
-                    if (_canChangeName)
-                        _textBox.MouseUp += TextBoxOnMouseUp;
                 }
+            }
+
+
+            if (_textBox != null)
+            {
+                _textBox.MouseUp += TextBoxOnMouseUp;
+                _textBox.SetText(_name);
             }
         }
 
@@ -1098,9 +1096,6 @@ namespace ClassicUO.Game.UI.Gumps
                         {
                             if (_textBox.Hue != textColor)
                                 _textBox.Hue = textColor;
-
-                            if (_canChangeName)
-                                _textBox.MouseUp -= TextBoxOnMouseUp;
                             _textBox.IsEditable = false;
                         }
                     }
@@ -1122,7 +1117,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (entity != null && !entity.IsDestroyed)
             {
-                Mobile mobile = SerialHelper.IsMobile(entity.Serial) ? (Mobile) entity : null;
+                Mobile mobile = entity as Mobile;
 
                 if (!_isDead && entity != World.Player && (mobile != null && mobile.IsDead) && ProfileManager.Current.CloseHealthBarType == 2) // is dead
                 {
@@ -1136,13 +1131,9 @@ namespace ClassicUO.Game.UI.Gumps
 
                     if (_textBox != null)
                     {
-                        _textBox.MouseUp -= TextBoxOnMouseUp;
-
-                        if (_canChangeName)
-                        {
-                            _textBox.MouseUp += TextBoxOnMouseUp;
-                        }
-                        else
+                        _textBox.AcceptMouseInput = _canChangeName;
+                        _textBox.AcceptKeyboardInput = _canChangeName;
+                        if (!_canChangeName)
                             _textBox.IsEditable = false;
                     }
                 }
@@ -1150,11 +1141,11 @@ namespace ClassicUO.Game.UI.Gumps
                 if (!(mobile != null && mobile.IsDead) && _isDead)
                     _isDead = false;
 
-                if (!string.IsNullOrEmpty(entity.Name) && _name != entity.Name)
+                if (!string.IsNullOrEmpty(entity.Name) && !(inparty && LocalSerial == World.Player.Serial) && _name != entity.Name)
                 {
                     _name = entity.Name;
                     if (_textBox != null)
-                        _textBox.Text = _name;
+                        _textBox.SetText(_name);
                 }
 
                 if (_outOfRange)
@@ -1165,15 +1156,6 @@ namespace ClassicUO.Game.UI.Gumps
                     _outOfRange = false;
 
                     _canChangeName = !inparty && mobile != null && mobile.IsRenamable;
-
-                    if (_canChangeName)
-                    {
-                        if (_textBox != null)
-                        {
-                            _textBox.MouseUp -= TextBoxOnMouseUp;
-                            _textBox.MouseUp += TextBoxOnMouseUp;
-                        }
-                    }
 
                     hitsColor = 0;
 
@@ -1304,7 +1286,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             var entity = World.Get(LocalSerial);
 
-            if (Client.Version >= ClientVersion.CV_200 && World.InGame && entity != null)
+            if (Client.Version >= ClientVersion.CV_200 && World.InGame && entity != null && TargetManager.LastTargetInfo.Serial != LocalSerial && TargetManager.LastAttack != LocalSerial && TargetManager.SelectedTarget != LocalSerial)
                 NetClient.Socket.Send(new PCloseStatusBarGump(entity));
 
             if (SelectedObject.HealthbarObject == entity && entity != null)

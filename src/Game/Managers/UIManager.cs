@@ -95,12 +95,13 @@ namespace ClassicUO.Game.Managers
             {
                 if (_keyboardFocusControl != value)
                 {
-                    _keyboardFocusControl?.OnFocusLeft();
+                    _keyboardFocusControl?.OnFocusLost();
                     _keyboardFocusControl = value;
 
                     if (value != null && value.AcceptKeyboardInput)
                     {
-                        value.OnFocusEnter();
+                        if (!value.IsFocused)
+                            value.OnFocusEnter();
                     }
                 }
             }
@@ -149,22 +150,22 @@ namespace ClassicUO.Game.Managers
             _validForDClick = null;
             if (MouseOverControl != null)
             {
-                MakeTopMostGump(MouseOverControl);
-                MouseOverControl.InvokeMouseDown(Mouse.Position, MouseButtonType.Left);
-
-                if (MouseOverControl.AcceptKeyboardInput)
-                    _keyboardFocusControl = MouseOverControl;
-
                 if (MouseOverControl.IsEnabled && MouseOverControl.IsVisible)
                 {
                     if (_lastFocus != MouseOverControl)
                     {
-                        _lastFocus?.OnFocusLeft();
+                        _lastFocus?.OnFocusLost();
                         MouseOverControl.OnFocusEnter();
                         _lastFocus = MouseOverControl;
                     }
                 }
 
+                MakeTopMostGump(MouseOverControl);
+                MouseOverControl.InvokeMouseDown(Mouse.Position, MouseButtonType.Left);
+
+                if (MouseOverControl.AcceptKeyboardInput)
+                    _keyboardFocusControl = MouseOverControl;
+                
                 _mouseDownControls[(int) MouseButtonType.Left] = MouseOverControl;
             }
             else
@@ -302,7 +303,7 @@ namespace ClassicUO.Game.Managers
                 {
                     if (_lastFocus != MouseOverControl)
                     {
-                        _lastFocus?.OnFocusLeft();
+                        _lastFocus?.OnFocusLost();
                         MouseOverControl.OnFocusEnter();
                         _lastFocus = MouseOverControl;
                     }
@@ -367,7 +368,7 @@ namespace ClassicUO.Game.Managers
                 {
                     if (_lastFocus != MouseOverControl)
                     {
-                        _lastFocus?.OnFocusLeft();
+                        _lastFocus?.OnFocusLost();
                         MouseOverControl.OnFocusEnter();
                         _lastFocus = MouseOverControl;
                     }
@@ -563,7 +564,7 @@ namespace ClassicUO.Game.Managers
             if (!gump.IsDisposed)
             {
                 Gumps.AddFirst(gump);
-                _needSort = true;
+                _needSort = Gumps.Count > 1;
             }
         }
 
@@ -693,7 +694,7 @@ namespace ClassicUO.Game.Managers
                 {
                     Gumps.Remove(first);
                     Gumps.AddFirst(first);
-                    _needSort = true;
+                    _needSort = Gumps.Count > 1;
                 }
             }
         }
@@ -715,8 +716,11 @@ namespace ClassicUO.Game.Managers
                         {
                             if (first.Value == c)
                             {
-                                Gumps.Remove(first);
-                                Gumps.AddAfter(Gumps.Last, c);
+                                if (Gumps.Last != null)
+                                {
+                                    Gumps.Remove(first);
+                                    Gumps.AddAfter(Gumps.Last, c);
+                                }
                             }
                         }
                     }

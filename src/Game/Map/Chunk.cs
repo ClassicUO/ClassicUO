@@ -25,61 +25,36 @@ using System.Runtime.CompilerServices;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
 using ClassicUO.IO.Resources;
+using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
 
 namespace ClassicUO.Game.Map
 {
     internal sealed class Chunk
     {
-        private static readonly Queue<Chunk> _pool = new Queue<Chunk>();
-
-        static Chunk()
+        private static readonly QueuedPool<Chunk> _pool = new QueuedPool<Chunk>(Constants.PREDICTABLE_CHUNKS, c =>
         {
-            for (int i = 0; i < Constants.PREDICTABLE_CHUNKS; i++)
-                _pool.Enqueue(new Chunk(0xFFFF, 0xFFFF));
-        }
+            c.LastAccessTime = Time.Ticks + Constants.CLEAR_TEXTURES_DELAY;
+            c.IsDestroyed = false;
+        });
 
-        public static Chunk Create(ushort x, ushort y)
+
+        public static Chunk Create(int x, int y)
         {
-            Chunk c;
-
-            if (_pool.Count != 0)
-            {
-                c = _pool.Dequeue();
-                c.X = x;
-                c.Y = y;
-                c.LastAccessTime = Time.Ticks + Constants.CLEAR_TEXTURES_DELAY;
-                c.IsDestroyed = false;
-            }
-            else
-            {
-                Log.Debug(string.Intern("Created new Chunk"));
-
-                c = new Chunk(x, y);
-            }
+            Chunk c = _pool.GetOne();
+            c.X = x;
+            c.Y = y;
 
             return c;
         }
 
 
-
-        private Chunk(ushort x, ushort y)
-        {
-            X = x;
-            Y = y;
-            Tiles = new GameObject[8, 8];
-            LastAccessTime = Time.Ticks + Constants.CLEAR_TEXTURES_DELAY;
-        }
-
-        public ushort X { get; set; }
-        public ushort Y { get; set; }
-
+        public int X;
+        public int Y;
         public bool IsDestroyed;
+        public long LastAccessTime;
 
-        public GameObject[,] Tiles { get; }
-
-        public long LastAccessTime { get; set; }
-
+        public GameObject[,] Tiles { get; } = new GameObject[8, 8];
         public LinkedListNode<int> Node;
 
 
@@ -97,11 +72,11 @@ namespace ClassicUO.Game.Map
                 int bx = X << 3;
                 int by = Y << 3;
 
-                for (int x = 0; x < 8; x++)
+                for (int x = 0; x < 8; ++x)
                 {
                     ushort tileX = (ushort) (bx + x);
 
-                    for (int y = 0; y < 8; y++)
+                    for (int y = 0; y < 8; ++y)
                     {
                         int pos = (y << 3) + x;
                         ushort tileID = (ushort) (cells[pos].TileID & 0x3FFF);
@@ -131,7 +106,7 @@ namespace ClassicUO.Game.Map
                     {
                         int count = (int) im.StaticCount;
 
-                        for (int i = 0; i < count; i++, sb++)
+                        for (int i = 0; i < count; ++i, ++sb)
                         {
                             if (sb->Color != 0 && sb->Color != 0xFFFF)
                             {
@@ -169,6 +144,7 @@ namespace ClassicUO.Game.Map
             return ref MapLoader.Instance.GetIndex(map, X, Y);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public GameObject GetHeadObject(int x, int y)
         {
             var obj = Tiles[x, y];
@@ -375,7 +351,7 @@ namespace ClassicUO.Game.Map
             if (Node.Next != null || Node.Previous != null)
                 Node.List?.Remove(Node);
             IsDestroyed = true;
-            _pool.Enqueue(this);
+            _pool.ReturnOne(this);
         }
 
         public void Clear()

@@ -20,9 +20,11 @@
 #endregion
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
+using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading;
@@ -30,8 +32,8 @@ using System.Threading;
 using ClassicUO.Utility.Logging;
 using ClassicUO.Utility;
 
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
+using TinyJson;
+
 
 namespace ClassicUO.Network
 {
@@ -138,18 +140,22 @@ namespace ClassicUO.Network
 
             string json = _client.DownloadString(string.Format(API_RELEASES_LINK, REPO_USER, REPO_NAME));
 
-            JArray data = JsonConvert.DeserializeObject<JArray>(json);
+            object[] data = json.Decode<object[]>();
 
 #if DEV_BUILD
             FileInfo fileLastCommit = new FileInfo(Path.Combine(CUOEnviroment.ExecutablePath, "version.txt"));
 #endif
-            
 
-            foreach (JToken releaseToken in data.Children())
+
+            foreach (var entry in data)
             {
+                var releaseToken = entry as Dictionary<string, object>;
+                if (releaseToken == null)
+                    continue;
+
                 string tagName = releaseToken["tag_name"].ToString();
 
-                Log.Trace( "Fetching: " + tagName);
+                Log.Trace("Fetching: " + tagName);
 
 #if DEV_BUILD
                 if (tagName == "ClassicUO-dev-preview")
@@ -172,22 +178,24 @@ namespace ClassicUO.Network
 #else
                 if (Version.TryParse(tagName, out Version version) && version > CUOEnviroment.Version)
                 {
-                    Log.Trace( "Found new version available: " + version);
+                   Log.Trace("Found new version available: " + version);
 
 #endif
                     string name = releaseToken["name"].ToString();
                     string body = releaseToken["body"].ToString();
 
-                    JToken asset = releaseToken["assets"];
+                    var asset_list = releaseToken["assets"] as List<object>;
 
-                    if (!asset.HasValues)
+                    if (asset_list == null || asset_list.Count == 0)
                     {
-                        Log.Error( "No zip found for: " + name);
+                        Log.Error("No zip found for: " + name);
 
                         continue;
                     }
 
-                    asset = asset.First;
+                    var asset = asset_list[0] as Dictionary<string, object>;
+                    if (asset == null)
+                        continue;
 
                     string assetName = asset["name"].ToString();
                     string downloadUrl = asset["browser_download_url"].ToString();
@@ -200,7 +208,7 @@ namespace ClassicUO.Network
                     }
                     catch
                     {
-                        Log.Warn( "Impossible to retrive OS temp path. CUO will use current path");
+                        Log.Warn("Impossible to retrive OS temp path. CUO will use current path");
                         temp = CUOEnviroment.ExecutablePath;
                     }
 
@@ -210,13 +218,13 @@ namespace ClassicUO.Network
                     if (!Directory.Exists(tempPath))
                         Directory.CreateDirectory(tempPath);
 
-                    Log.Trace( "Downloading: " + assetName);
+                    Log.Trace("Downloading: " + assetName);
 
                     _client.DownloadProgressChanged += ClientOnDownloadProgressChanged;
 
                     _client.DownloadFile(downloadUrl, zipFile);
 
-                    Log.Trace( assetName + "..... done");
+                    Log.Trace(assetName + "..... done");
 
                     _client.DownloadProgressChanged -= ClientOnDownloadProgressChanged;
 
@@ -231,7 +239,7 @@ namespace ClassicUO.Network
                     }
                     catch (Exception ex)
                     {
-                        Log.Error( "[UPDATER ERROR]: impossible to update.\n" + ex);
+                        Log.Error("[UPDATER ERROR]: impossible to update.\n" + ex);
                     }
 
                     ProcessStartInfo processStartInfo = new ProcessStartInfo()
@@ -239,7 +247,7 @@ namespace ClassicUO.Network
                         WorkingDirectory = tempPath,
                         UseShellExecute = false,
                     };
-                    
+
                     if (CUOEnviroment.IsUnix)
                     {
                         processStartInfo.FileName = "mono";

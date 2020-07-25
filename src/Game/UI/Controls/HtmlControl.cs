@@ -50,6 +50,7 @@ namespace ClassicUO.Game.UI.Controls
             UseFlagScrollbar = HasScrollbar && parts[7] == "2";
             _gameText.IsHTML = true;
             _gameText.MaxWidth = Width - (HasScrollbar ? 16 : 0) - (HasBackground ? 8 : 0);
+            IsFromServer = true;
 
             if (textIndex >= 0 && textIndex < lines.Length)
                 InternalBuild(lines[textIndex], 0);
@@ -221,7 +222,7 @@ namespace ClassicUO.Game.UI.Controls
 
             Rectangle scissor = ScissorStack.CalculateScissors(Matrix.Identity, x, y, Width, Height);
 
-            if (ScissorStack.PushScissors(scissor))
+            if (ScissorStack.PushScissors(batcher.GraphicsDevice, scissor))
             {
                 batcher.EnableScissorTest(true);
                 base.Draw(batcher, x, y);
@@ -236,7 +237,7 @@ namespace ClassicUO.Game.UI.Controls
                     ScrollY);
 
                 batcher.EnableScissorTest(false);
-                ScissorStack.PopScissors();
+                ScissorStack.PopScissors(batcher.GraphicsDevice);
             }
 
             return true;

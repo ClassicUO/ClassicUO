@@ -74,7 +74,7 @@ namespace ClassicUO.Game.Map
                     return null;
 
                 var node =_usedIndices.AddLast(block);
-                chunk = Chunk.Create((ushort) cellX, (ushort) cellY);
+                chunk = Chunk.Create(cellX, cellY);
                 chunk.Load(Index);
                 chunk.Node = node;
             }
@@ -87,8 +87,8 @@ namespace ClassicUO.Game.Map
                 }
 
                 var node = _usedIndices.AddLast(block);
-                chunk.X = (ushort) cellX;
-                chunk.Y = (ushort) cellY;
+                chunk.X = cellX;
+                chunk.Y = cellY;
                 chunk.Load(Index);
                 chunk.Node = node;
             }
@@ -98,14 +98,10 @@ namespace ClassicUO.Game.Map
             return chunk;
         }
 
-        public GameObject GetTile(short x, short y, bool load = true)
-        {
-            return GetChunk(x, y, load)?.GetHeadObject(x % 8, y % 8);
-        }
 
         public GameObject GetTile(int x, int y, bool load = true)
         {
-            return GetTile((short) x, (short) y, load);
+            return GetChunk(x, y, load)?.GetHeadObject(x % 8, y % 8);
         }
 
         public sbyte GetTileZ(int x, int y)

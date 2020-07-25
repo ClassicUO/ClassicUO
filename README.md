@@ -1,5 +1,5 @@
 <p align="center">
-    <img src="https://i.imgur.com/CgpwyIQ.png" width="200" height="200" >
+    <img src="https://i.imgur.com/CgpwyIQ.png" width="190" height="200" >
 </p>
 
 An open source implementation of the Ultima Online Classic Client.
@@ -23,14 +23,20 @@ ClassicUO is an open source implementation of the Ultima Online Classic Client. 
 The client is currently under heavy development but is functional. The code is based on the [FNA-XNA](https://fna-xna.github.io/) framework. C# is chosen because there is a large community of developers working on Ultima Online server emulators in C#, because FNA-XNA exists and seems reasonably suitable for creating this type of game.
 
 ClassicUO is natively cross platform and supports:
-* Windows
-* Linux
-* MacOS
+* Windows [DirectX 11 or OpenGL]
+* Linux   [OpenGL]
+* macOS   [Metal or OpenGL]
 
 # Download & Play!
-Follow the [Wiki](https://github.com/andreakarasho/ClassicUO/wiki) to setup correctly ClassicUO
+| Platform | Link |
+| --- | --- |
+| Windows x64 | [Download](https://www.classicuo.eu/launcher/win-x64/ClassicUOLauncher-win-x64-release.zip) |
+| Linux x64 | [Download](https://www.classicuo.eu/launcher/linux-x64/ClassicUOLauncher-linux-x64-release.zip) |
+| macOS | [Download](https://www.classicuo.eu/launcher/osx/ClassicUOLauncher-osx-x64-release.zip) |
 
-# Code building
+Or visit the [ClassicUO Website](https://www.classicuo.eu/)
+
+# How to build the project
 ### Windows
 The binary produced will work on all supported platforms.
 
@@ -54,7 +60,7 @@ Open a terminal instance and put the following commands:
 
 4. Hit F5 to build. The output will be in the "bin/Release" or "bin/Debug" directory.
 
-### MacOS
+### macOS
 All the commands should be executed in terminal. All global package installs should be done only if not yet installed.
 
 1. Install Homebrew, a package manager for macOS (if not yet installed):
@@ -63,30 +69,28 @@ Follow instructions on https://brew.sh/
 2. Install Mono (https://www.mono-project.com/):
 `brew install mono`
 
-3. Install Paket, a dependency manager for .NET and mono projects (https://fsprojects.github.io/Paket/):
-`brew install paket`
+3. Install NuGet, a package manager for .NET (https://docs.microsoft.com/en-us/nuget/):
+`brew install nuget`
 
 4. Navigate to ClassicUO root folder:
 `cd /your/path/to/ClassicUO`
 
-5. Initialize Paket environment:
-`paket init`
+5. Restore packages (https://docs.microsoft.com/en-us/nuget/reference/cli-reference/cli-ref-restore):
+`nuget restore`
 
-6. Install required/missing dependencies:
-`paket add Newtonsoft.Json --version 12.0.2`
-
-7. Build:
-  - Debug version: `msbuild /t:Rebuild`
+6. Build:
+  - Debug version: `msbuild /t:Rebuild /p:Configuration=Debug`
   - Release version: `msbuild /t:Rebuild /p:Configuration=Release`
 
-8. Start ClassicUO via Mono (to properly set up all required constants use provided bash script):
-  - Debug version: `./bin/Debug/ClassicUO-mono.sh`
-  - Release version: `./bin/Release/ClassicUO-mono.sh`
+7. Run ClassicUO via Mono:
+  - Debug version: `DYLD_LIBRARY_PATH=./bin/Debug/osx/ mono ./bin/Debug/ClassicUO.exe`
+  - Release version: `DYLD_LIBRARY_PATH=./bin/Release/osx/ mono ./bin/Release/ClassicUO.exe`
+
+After the first run, ignore the error message and a new file called `settings.json` will be automatically created in the directory that contains ClassicUO.exe.
 
 Other useful commands:
-- `msbuild /t:Clean`
+- `msbuild /t:Clean /p:Configuration=Debug`
 - `msbuild /t:Clean /p:Configuration=Release`
-- `msbuild /t:RestorePackages`
 
 # Contribute
 Everyone is welcome to contribute! The GitHub issues and project tracker are kept up to date with tasks that need work.

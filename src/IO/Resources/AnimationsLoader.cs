@@ -275,7 +275,7 @@ namespace ClassicUO.IO.Resources
         };
 
 
-        public override Task Load()
+        public override unsafe Task Load()
         {
             return Task.Run(() =>
             {
@@ -311,7 +311,7 @@ namespace ClassicUO.IO.Resources
                     LoadUop();
                 }
 
-                int animIdxBlockSize = UnsafeMemoryManager.SizeOf<AnimIdxBlock>();
+                int animIdxBlockSize = sizeof(AnimIdxBlock);
                 UOFile idxfile0 = _files[0]?.IdxFile;
                 long? maxAddress0 = (long?)idxfile0?.StartAddress + idxfile0?.Length;
                 UOFile idxfile2 = _files[1]?.IdxFile;
@@ -1014,8 +1014,39 @@ namespace ClassicUO.IO.Resources
             return _animationSequenceReplacing.TryGetValue(graphic, out type);
         }
 
-        public override void CleanResources()
+        public override void ClearResources()
         {
+            var first = _usedTextures.First;
+
+            while (first != null)
+            {
+                var next = first.Next;
+
+                if (first.Value.LastAccessTime != 0)
+                {
+                    for (int j = 0; j < first.Value.FrameCount; j++)
+                    {
+                        ref var texture = ref first.Value.Frames[j];
+
+                        if (texture != null)
+                        {
+                            texture.Dispose();
+                            texture = null;
+                        }
+                    }
+
+                    first.Value.FrameCount = 0;
+                    first.Value.Frames = null;
+                    first.Value.LastAccessTime = 0;
+
+                    _usedTextures.Remove(first);
+                }
+
+                first = next;
+            }
+
+            if (_usedTextures.Count != 0)
+                _usedTextures.Clear();
         }
 
         public void UpdateAnimationTable(uint flags)
@@ -1109,7 +1140,7 @@ namespace ClassicUO.IO.Resources
         [MethodImpl(256)]
         public void FixSittingDirection(ref byte layerDirection, ref bool mirror, ref int x, ref int y)
         {
-            ref readonly var data = ref SittingInfos[SittingValue - 1];
+            ref var data = ref SittingInfos[SittingValue - 1];
 
             switch (Direction)
             {
@@ -1309,6 +1340,9 @@ namespace ClassicUO.IO.Resources
             if (animDir.FileIndex == -1 && animDir.Address == -1)
                 return false;
 
+            if (animDir.FileIndex >= _files.Length || AnimID >= Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT)
+                return false;
+
             if (animDir.IsUOP || (animDir.Address == 0 && animDir.Size == 0))
             {
                 var animData = DataIndex[AnimID].GetUopGroup(AnimGroup);
@@ -1336,6 +1370,11 @@ namespace ClassicUO.IO.Resources
         private unsafe bool ReadUOPAnimationFrame(ref AnimationDirection animDirection)
         {
             var animData = DataIndex[AnimID].GetUopGroup(AnimGroup);
+
+            if (animData.FileIndex < 0 || animData.FileIndex >= _filesUop.Length)
+            {
+                return false;
+            }
 
             if (animData.FileIndex == 0 && animData.CompressedLength == 0 && animData.DecompressedLength == 0 && animData.Offset == 0)
             {
@@ -1431,7 +1470,7 @@ namespace ClassicUO.IO.Resources
                         continue;
                     }
 
-                    ushort[] data = new ushort[imageWidth * imageHeight];
+                    uint[] data = new uint[imageWidth * imageHeight];
 
                     uint header = _reader.ReadUInt();
 
@@ -1462,9 +1501,10 @@ namespace ClassicUO.IO.Resources
 
                             // FIXME: same of MUL ? Keep it as original for the moment
                             if (val != 0)
-                                data[block] = (ushort) (0x8000 | val);
-                            else
-                                data[block] = 0;
+                            {
+                                data[block] = Utility.HuesHelper.Color16To32(val) | 0xFF_00_00_00;
+                            }
+
                             block++;
                         }
 
@@ -1526,7 +1566,7 @@ namespace ClassicUO.IO.Resources
                 if (imageWidth == 0 || imageHeight == 0)
                     continue;
 
-                ushort[] data = new ushort[imageWidth * imageHeight];
+                uint[] data = new uint[imageWidth * imageHeight];
 
                 uint header = reader.ReadUInt();
 
@@ -1551,7 +1591,7 @@ namespace ClassicUO.IO.Resources
 
                     for (int k = 0; k < runLength; k++)
                     {
-                        data[block++] = (ushort) (0x8000 | palette[reader.ReadByte()]);
+                        data[block++] = Utility.HuesHelper.Color16To32(palette[reader.ReadByte()]) | 0xFF_00_00_00;
                     }
 
                     header = reader.ReadUInt();
@@ -1749,42 +1789,7 @@ namespace ClassicUO.IO.Resources
             }
         }
 
-        //public void Clear()
-        //{
-        //    var first = _usedTextures.First;
-
-        //    while (first != null)
-        //    {
-        //        var next = first.Next;
-
-        //        if (first.Value.LastAccessTime != 0)
-        //        {
-        //            for (int j = 0; j < first.Value.FrameCount; j++)
-        //            {
-        //                ref var texture = ref first.Value.Frames[j];
-
-        //                if (texture != null)
-        //                {
-        //                    texture.Dispose();
-        //                    texture = null;
-        //                }
-        //            }
-
-        //            first.Value.FrameCount = 0;
-        //            first.Value.Frames = null;
-        //            first.Value.LastAccessTime = 0;
-
-        //            _usedTextures.Remove(first);
-        //        }
-
-        //        first = next;
-        //    }
-
-        //    if (_usedTextures.Count != 0)
-        //        _usedTextures.Clear();
-        //}
-
-        public readonly struct SittingInfoData
+        public struct SittingInfoData
         {
             public SittingInfoData(ushort graphic, sbyte d1,
                                    sbyte d2, sbyte d3, sbyte d4,
@@ -1816,11 +1821,11 @@ namespace ClassicUO.IO.Resources
         }
 
         [StructLayout(LayoutKind.Sequential, Pack = 1)]
-        private readonly struct AnimIdxBlock
+        private ref struct AnimIdxBlock
         {
-            public readonly uint Position;
-            public readonly uint Size;
-            public readonly uint Unknown;
+            public uint Position;
+            public uint Size;
+            public uint Unknown;
         }
     }
 
@@ -2105,7 +2110,7 @@ namespace ClassicUO.IO.Resources
         public uint Size;
     }
 
-    internal readonly struct EquipConvData : IEquatable<EquipConvData>
+    internal struct EquipConvData : IEquatable<EquipConvData>
     {
         public EquipConvData(ushort graphic, ushort gump, ushort color)
         {
@@ -2114,9 +2119,9 @@ namespace ClassicUO.IO.Resources
             Color = color;
         }
 
-        public readonly ushort Graphic;
-        public readonly ushort Gump;
-        public readonly ushort Color;
+        public ushort Graphic;
+        public ushort Gump;
+        public ushort Color;
 
 
         public override int GetHashCode()

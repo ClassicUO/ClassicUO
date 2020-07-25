@@ -491,6 +491,7 @@ namespace ClassicUO.Game.GameObjects
 
                                 goto done;
 
+                            case 0x13B6:
                             case 0x13B7:
                             case 0x13B8: // Scimitars
                                 Abilities[0] = Ability.DoubleStrike;

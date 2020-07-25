@@ -309,11 +309,6 @@ namespace ClassicUO.IO.Resources
                 tiledata.Dispose();
             });
         }
-
-        public override void CleanResources()
-        {
-            // nothing
-        }
     }
 
     internal struct LandTiles

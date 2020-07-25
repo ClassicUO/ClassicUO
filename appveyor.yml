@@ -8,12 +8,15 @@ image: Visual Studio 2019
 configuration: Release
 platform: x64
 clone_folder: c:\projects\classicuo
-assembly_info:
+dotnet_csproj:
   patch: true
-  file: '**\AssemblyInfo.*'
+  file: '**\*.csproj'
+  version: '{version}'
+  version_prefix: '{version}'
+  package_version: '{version}'
   assembly_version: '{version}'
-  assembly_file_version: '{version}'
-  assembly_informational_version: '{version}-dev'
+  file_version: '{version}'
+  informational_version: '{version}-dev'
 environment:
   DEV_BUILD: true
 build_script:

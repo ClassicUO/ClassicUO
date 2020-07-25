@@ -292,7 +292,7 @@ namespace ClassicUO.Game.Managers
             }
             else
             {
-                UOTexture texture = GumpsLoader.Instance.GetTexture(g);
+                UOTexture32 texture = GumpsLoader.Instance.GetTexture(g);
 
                 if (texture != null)
                 {

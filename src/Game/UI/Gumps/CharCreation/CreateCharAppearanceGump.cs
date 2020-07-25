@@ -40,7 +40,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
         private readonly RadioButton _gargoyleRadio;
         private readonly RadioButton _humanRadio;
         private readonly RadioButton _maleRadio;
-        private readonly TextBox _nameTextBox;
+        private readonly StbTextBox _nameTextBox;
         private readonly Dictionary<Layer, Tuple<int, ushort>> CurrentColorOption = new Dictionary<Layer, Tuple<int, ushort>>();
         private readonly Dictionary<Layer, int> CurrentOption = new Dictionary<Layer, int>
         {
@@ -96,12 +96,11 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                 X = 445, Y = 455, ButtonAction = ButtonAction.Activate
             }, 1);
 
-            Add(_nameTextBox = new TextBox(5, 16, 0, 200, false, hue: 1, style: FontStyle.Fixed)
+            Add(_nameTextBox = new StbTextBox(5, 16, 200, false, hue: 1, style: FontStyle.Fixed)
             {
                 X = 257, Y = 65, Width = 200, Height = 20,
-                ValidationRules = (uint) (TEXT_ENTRY_RULES.LETTER | TEXT_ENTRY_RULES.SPACE)
+                //ValidationRules = (uint) (TEXT_ENTRY_RULES.LETTER | TEXT_ENTRY_RULES.SPACE)
             }, 1);
-            _nameTextBox.SetText(string.Empty);
 
             // Races
             Add(_humanRadio = new RadioButton(1, 0x0768, 0x0767)
@@ -490,10 +489,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
         }
 
         private Item CreateItem(int id, ushort hue, Layer layer)
-        {
-            if (id == 0)
-                return null;
-
+        {         
             Item existsItem = _character.FindItemByLayer(layer);
 
             if (existsItem != null)
@@ -501,6 +497,9 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                 World.RemoveItem(existsItem, true);
                 _character.Remove(existsItem);
             }
+
+            if (id == 0)
+                return null;
 
             // This is a workaround to avoid to see naked guy
             // We are simulating server objects into World.Items map.

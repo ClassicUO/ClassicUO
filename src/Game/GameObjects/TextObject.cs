@@ -24,45 +24,39 @@ using System.Collections.Generic;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
 using ClassicUO.Renderer;
+using ClassicUO.Utility;
+
+using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.GameObjects
 {
     internal class TextObject : BaseGameObject
     {
-        private static readonly Queue<TextObject> _queue = new Queue<TextObject>();
-
-        static TextObject()
+        private static readonly QueuedPool<TextObject> _queue = new QueuedPool<TextObject>(1000, o =>
         {
-            for (int i = 0; i < 1000; i++)
-                _queue.Enqueue(new TextObject());
-        }
+            o.IsDestroyed = false;
+            o.Alpha = 0;
+            o.Hue = 0;
+            o.Time = 0;
+            o.IsTransparent = false;
+            o.SecondTime = 0;
+            o.Type = 0;
+            o.X = 0;
+            o.Y = 0;
+            o.RealScreenPosition = Point.Zero;
+            o.OffsetY = 0;
+            o.Owner = null;
+            o.UnlinkD();
+            o.IsTextGump = false;
+            o.RenderedText?.Destroy();
+            o.RenderedText = null;
+            o.Clear();
+        });
 
 
         public static TextObject Create()
         {
-            if (_queue.Count != 0)
-            {
-                TextObject o = _queue.Dequeue();
-                o.IsDestroyed = false;
-
-                o.Alpha = 0;
-                o.Hue = 0;
-                o.Time = 0;
-                o.SecondTime = 0;
-                o.Type = 0;
-                o.X = 0;
-                o.Y = 0;
-                o.OffsetY = 0;
-                o.Owner = null;
-                o.UnlinkD();
-                o.IsTextGump = false;
-                o.RenderedText?.Destroy();
-                o.RenderedText = null;
-
-                o.Clear();
-            }
-
-            return new TextObject();
+            return _queue.GetOne();
         }
 
         public byte Alpha;
@@ -78,15 +72,6 @@ namespace ClassicUO.Game.GameObjects
         public bool IsDestroyed;
         public bool IsTextGump;
 
-        protected TextObject()
-        {
-
-        }
-
-        ~TextObject()
-        {
-           //Destroy();
-        }
 
         public virtual void Destroy()
         {
@@ -95,12 +80,13 @@ namespace ClassicUO.Game.GameObjects
 
             UnlinkD();
 
+            RealScreenPosition = Point.Zero;
             IsDestroyed = true;
             RenderedText?.Destroy();
             RenderedText = null;
             Owner = null;
 
-            _queue.Enqueue(this);
+            _queue.ReturnOne(this);
         }
 
         public void UnlinkD()

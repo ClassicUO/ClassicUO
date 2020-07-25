@@ -98,8 +98,9 @@ namespace ClassicUO.IO.Resources
           
         }
 
-        public override void CleanResources()
+        public override void ClearResources()
         {
+            _entries.Clear();
         }
 
         public string GetString(int number)
@@ -131,22 +132,21 @@ namespace ClassicUO.IO.Resources
             return s;
         }
 
-        public string Translate(int baseCliloc, string arg = "", bool capitalize = false)
+        public string Translate(int clilocNum, string arg = "", bool capitalize = false)
         {
-            return Translate(GetString(baseCliloc), arg, capitalize);
-        }
-
-        public string Translate(string baseCliloc, string arg = "", bool capitalize = false)
-        {
+            string baseCliloc = GetString(clilocNum);
             if (baseCliloc == null)
                 return null;
 
+            List<string> arguments = new List<string>();
+
+            if (arg == null)
+            {
+                arg = "";
+            }
 
             while (arg.Length != 0 && arg[0] == '\t')
                 arg = arg.Remove(0, 1);
-
-            List<string> arguments = new List<string>();
-
 
             for (int i = 0; i < arg.Length; i++)
             {
@@ -179,20 +179,41 @@ namespace ClassicUO.IO.Resources
             //    }
             //}
 
-            int index = 0;
-            while (true)
+            int index, pos = 0;
+            while (pos < baseCliloc.Length)
             {
-                int pos = baseCliloc.IndexOf('~');
+                pos = baseCliloc.IndexOf('~', pos);
 
                 if (pos == -1)
                     break;
 
                 int pos2 = baseCliloc.IndexOf('~', pos + 1);
-
-                if (pos2 == -1)
+                if (pos2 == -1) //non valid arg
                     break;
 
-                string a = index >= arguments.Count ? string.Empty : arguments[index];
+                index = baseCliloc.IndexOf('_', pos + 1, pos2 - (pos + 1));
+                if (index <= pos)
+                    index = pos2; //there is no underscore inside the bounds, so we use all the part to get the number of argument
+
+                int start = pos + 1;
+                int max = index - start;
+                int count = 0;
+                for (; count < max; count++)
+                {
+                    if (!char.IsNumber(baseCliloc[start + count]))
+                    {
+                        break;
+                    }
+                }
+
+                if (!int.TryParse(baseCliloc.Substring(start, count), out index))
+                {
+                    return $"MegaCliloc: error for {clilocNum}";
+                }
+
+                --index;
+
+                string a = index < 0 || index >= arguments.Count ? string.Empty : arguments[index];
 
                 if (a.Length > 1)
                 {
@@ -211,7 +232,8 @@ namespace ClassicUO.IO.Resources
                 }
 
                 baseCliloc = baseCliloc.Remove(pos, pos2 - pos + 1).Insert(pos, index >= arguments.Count ? string.Empty : arguments[index]);
-                index++;
+                if (index >= 0 && index < arguments.Count)
+                    pos += arguments[index].Length;
             }
 
             //for (int i = 0; i < arguments.Count; i++)

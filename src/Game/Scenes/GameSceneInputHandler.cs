@@ -342,6 +342,7 @@ namespace ClassicUO.Game.Scenes
 
             if (UIManager.SystemChat != null && !UIManager.SystemChat.IsFocused)
             {
+                UIManager.KeyboardFocusControl = null;
                 UIManager.SystemChat.SetFocus();
             }
 
@@ -356,7 +357,7 @@ namespace ClassicUO.Game.Scenes
 
             if (ItemHold.Enabled)
             {
-                if (SelectedObject.Object is GameObject obj && obj.Distance < Constants.DRAG_ITEMS_DISTANCE)
+                if (SelectedObject.Object is GameObject obj && obj.Distance <= Constants.DRAG_ITEMS_DISTANCE)
                 {
                     switch (obj)
                     {
@@ -418,8 +419,6 @@ namespace ClassicUO.Game.Scenes
                         var obj = SelectedObject.Object;
                         if (obj is TextObject ov)
                             obj = ov.Owner;
-                        else if (obj is GameEffect eff && eff.Source != null)
-                            obj = eff.Source;
 
                         switch (obj)
                         {
@@ -487,6 +486,8 @@ namespace ClassicUO.Game.Scenes
                         string name = st.Name;
                         if (string.IsNullOrEmpty(name))
                             name = ClilocLoader.Instance.GetString(1020000 + st.Graphic, st.ItemData.Name);
+
+                        MessageManager.HandleMessage(null, name, String.Empty, 1001, MessageType.Label, 3, TEXT_TYPE.CLIENT, false);
                         obj.AddMessage(MessageType.Label, name, 3, 1001, false);
 
 
@@ -499,6 +500,8 @@ namespace ClassicUO.Game.Scenes
 
                         if (string.IsNullOrEmpty(name))
                             name = ClilocLoader.Instance.GetString(1020000 + multi.Graphic, multi.ItemData.Name);
+
+                        MessageManager.HandleMessage(null, name, String.Empty, 1001, MessageType.Label, 3, TEXT_TYPE.CLIENT, false);
                         obj.AddMessage(MessageType.Label, name, 3, 1001, false);
 
                         if (obj.TextContainer != null && obj.TextContainer.MaxSize == 5)
@@ -509,7 +512,7 @@ namespace ClassicUO.Game.Scenes
 
                         if (Keyboard.Alt && ent is Mobile)
                         {
-                            World.Player.AddMessage(MessageType.Regular, "Now following.", 3, 1001, false);
+                            MessageManager.HandleMessage(World.Player, "Now following.", String.Empty, 1001, MessageType.Regular, 3, TEXT_TYPE.CLIENT, false);
                             _followingMode = true;
                             _followingTarget = ent;
                         }
@@ -629,7 +632,7 @@ namespace ClassicUO.Game.Scenes
                 {
                     if (obj is Static || obj is Multi || obj is Item)
                     {
-                        ref readonly var itemdata = ref TileDataLoader.Instance.StaticData[obj.Graphic];
+                        ref var itemdata = ref TileDataLoader.Instance.StaticData[obj.Graphic];
 
                         if (itemdata.IsSurface && Pathfinder.WalkTo(obj.X, obj.Y, obj.Z, 0))
                         {
@@ -707,7 +710,6 @@ namespace ClassicUO.Game.Scenes
                     {
                         if (SerialHelper.IsMobile(obj.Serial) || obj is Item it && it.IsDamageable)
                         {
-                            GameActions.RequestMobileStatus(obj);
                             var customgump = UIManager.GetGump<BaseHealthBarGump>(obj);
                             customgump?.Dispose();
 
@@ -783,8 +785,8 @@ namespace ClassicUO.Game.Scenes
 
                 // chat system activation
 
-                case SDL.SDL_Keycode.SDLK_1 when Keyboard.IsModPressed(e.keysym.mod, SDL.SDL_Keymod.KMOD_SHIFT): // !
-                case SDL.SDL_Keycode.SDLK_BACKSLASH when Keyboard.IsModPressed(e.keysym.mod, SDL.SDL_Keymod.KMOD_SHIFT): // \
+                case SDL.SDL_Keycode.SDLK_1 when Keyboard.Shift: // !
+                case SDL.SDL_Keycode.SDLK_BACKSLASH when Keyboard.Shift: // \
 
                     if (ProfileManager.Current.ActivateChatAfterEnter && ProfileManager.Current.ActivateChatAdditionalButtons && !UIManager.SystemChat.IsActive)
                         UIManager.SystemChat.IsActive = true;
@@ -805,9 +807,9 @@ namespace ClassicUO.Game.Scenes
                     if (ProfileManager.Current.ActivateChatAfterEnter &&
                         ProfileManager.Current.ActivateChatAdditionalButtons && !UIManager.SystemChat.IsActive)
                     {
-                        if (Keyboard.IsModPressed(e.keysym.mod, SDL.SDL_Keymod.KMOD_NONE))
+                        if (!Keyboard.Shift && !Keyboard.Alt && !Keyboard.Ctrl)
                             UIManager.SystemChat.IsActive = true;
-                        else if (Keyboard.IsModPressed(e.keysym.mod, SDL.SDL_Keymod.KMOD_SHIFT) && e.keysym.sym == SDL.SDL_Keycode.SDLK_SEMICOLON)
+                        else if (Keyboard.Shift && e.keysym.sym == SDL.SDL_Keycode.SDLK_SEMICOLON)
                             UIManager.SystemChat.IsActive = true;
                     }
                     break;
@@ -820,7 +822,7 @@ namespace ClassicUO.Game.Scenes
                         {
                             UIManager.SystemChat.Mode = ChatMode.Default;
 
-                            if (!(Keyboard.IsModPressed(e.keysym.mod, SDL.SDL_Keymod.KMOD_SHIFT) && ProfileManager.Current.ActivateChatShiftEnterSupport))
+                            if (!(Keyboard.Shift && ProfileManager.Current.ActivateChatShiftEnterSupport))
                                 UIManager.SystemChat.ToggleChatVisibility();
                         }
 

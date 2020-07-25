@@ -19,6 +19,7 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
 
+using System;
 using System.Collections.Generic;
 
 using ClassicUO.Input;
@@ -44,41 +45,35 @@ namespace ClassicUO.Game.UI.Controls
             get => _graphic;
             set
             {
-                _graphic = value;
-
-                Texture = GumpsLoader.Instance.GetTexture(_graphic);
-
-                if (Texture == null)
+                //if (_graphic != value)
                 {
-                    Dispose();
-                    return;
-                }
+                    _graphic = value;
 
-                Width = Texture.Width;
-                Height = Texture.Height;
+                    var texture = GumpsLoader.Instance.GetTexture(_graphic);
+
+                    if (texture == null)
+                    {
+                        Dispose();
+                        return;
+                    }
+
+                    Width = texture.Width;
+                    Height = texture.Height;
+                }              
             }
         }
 
         public ushort Hue { get; set; }
 
 
-        public override void Update(double totalMS, double frameMS)
-        {
-            if (Texture == null)
-            {
-                Dispose();
-
-                return;
-            }
-
-            Texture.Ticks = (long) totalMS;
-
-            base.Update(totalMS, frameMS);
-        }
-
         public override bool Contains(int x, int y)
         {
-            if (Texture.Contains(x, y))
+            var texture = GumpsLoader.Instance.GetTexture(Graphic);
+
+            if (texture == null)
+                return false;
+
+            if (texture.Contains(x, y))
                 return true;
 
             for (int i = 0; i < Children.Count; i++)
@@ -102,37 +97,11 @@ namespace ClassicUO.Game.UI.Controls
             Y = y;
             Graphic = graphic;
             Hue = hue;
-
-            if (Texture == null)
-                Dispose();
-            else
-            {
-                Width = Texture.Width;
-                Height = Texture.Height;
-            }
+            IsFromServer = true;
         }
 
         public GumpPic(List<string> parts) : this(int.Parse(parts[1]), int.Parse(parts[2]), UInt16Converter.Parse(parts[3]), (ushort) (parts.Count > 4 ? TransformHue((ushort) (UInt16Converter.Parse(parts[4].Substring(parts[4].IndexOf('=') + 1)) + 1)) : 0))
         {
-        }
-
-        public GumpPic(int x, int y, UOTexture texture, ushort hue)
-        {
-            X = x;
-            Y = y;
-
-            Hue = hue;
-
-            Texture = texture;
-
-            if (Texture == null)
-                Dispose();
-            else
-            {
-                Width = Texture.Width;
-                Height = Texture.Height;
-            }
-            WantUpdateSize = false;
         }
 
         public bool IsPartialHue { get; set; }
@@ -174,7 +143,12 @@ namespace ClassicUO.Game.UI.Controls
             ResetHueVector();
             ShaderHuesTraslator.GetHueVector(ref _hueVector, Hue, IsPartialHue, Alpha, true);
 
-            batcher.Draw2D(Texture, x, y, Width, Height, ref _hueVector);
+            var texture = GumpsLoader.Instance.GetTexture(Graphic);
+
+            if (texture != null)
+            {
+                batcher.Draw2D(texture, x, y, Width, Height, ref _hueVector);
+            }
 
             return base.Draw(batcher, x, y);
         }

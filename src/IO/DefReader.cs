@@ -158,20 +158,7 @@ namespace ClassicUO.IO
 
             return p[index];
         }
-
-        //public byte ReadByte()
-        //{
-        //    Advance();
-        //    return ReadByte(Line, Position++);
-        //}
-
-        //public ushort ReadUShort()
-        //{
-        //    Advance();
-
-        //    return ReadUShort(Line, Position++);
-        //}
-
+        
         public int ReadInt()
         {
             return ReadInt(Line, Position++);
@@ -179,7 +166,8 @@ namespace ClassicUO.IO
 
         public int ReadGroupInt(int index = 0)
         {
-            if (!TryReadGroup(TokenAt(Line, Position++), out string[] group)) throw new Exception("It's not a group");
+            if (!TryReadGroup(TokenAt(Line, Position++), out string[] group)) 
+                throw new Exception("It's not a group");
 
             if (index >= group.Length)
                 throw new IndexOutOfRangeException();
@@ -197,9 +185,29 @@ namespace ClassicUO.IO
                 {
                     if (s[s.Length - 1] == '}')
                     {
-                        return s.Split(_tokensGroup, StringSplitOptions.RemoveEmptyEntries)
-                                .Select(int.Parse)
-                                .ToArray();
+                        List<int> results = new List<int>();
+
+                        var split_res = s.Split(_tokensGroup, StringSplitOptions.RemoveEmptyEntries);
+
+                        for (int i = 0; i < split_res.Length; i++)
+                        {
+                            if (!string.IsNullOrEmpty(split_res[i]) && char.IsNumber(split_res[i][0]))
+                            {
+                                NumberStyles style = NumberStyles.Any;
+
+                                if (split_res[i].Length > 1 && split_res[i][0] == '0' && split_res[i][1] == 'x')
+                                {
+                                    style = NumberStyles.HexNumber;
+                                }
+
+                                if (int.TryParse(split_res[i], style, null, out int res))
+                                {
+                                    results.Add(res);
+                                }
+                            }
+                        }
+
+                        return results.ToArray();
                     }
 
                     Log.Error( $"Missing }} at line {Line + 1}, in '{_file}'");
@@ -221,35 +229,12 @@ namespace ClassicUO.IO
 
                         return true;
                     }
-
-                    //throw new Exception("Wrong def file");
-
                 }
             }
 
             group = null;
 
             return false;
-        }
-
-        private byte ReadByte(int line, int index)
-        {
-            return byte.Parse(TokenAt(line, index));
-        }
-
-        private sbyte ReadSByte(int line, int index)
-        {
-            return sbyte.Parse(TokenAt(line, index));
-        }
-
-        private short ReadShort(int line, int index)
-        {
-            return short.Parse(TokenAt(line, index));
-        }
-
-        private ushort ReadUShort(int line, int index)
-        {
-            return ushort.Parse(TokenAt(line, index));
         }
 
         private int ReadInt(int line, int index)
@@ -261,19 +246,10 @@ namespace ClassicUO.IO
                 if (token.StartsWith("0x"))
                     return int.Parse(token.Remove(0, 2), NumberStyles.HexNumber);
 
-                if (token.Length > 1 && token[0] == '-')
-                    return int.Parse(token);
-
                 return int.Parse(token);
-
             }
 
             return -1;
-        }
-
-        private uint ReadUInt(int line, int index)
-        {
-            return uint.Parse(TokenAt(line, index));
         }
     }
 }

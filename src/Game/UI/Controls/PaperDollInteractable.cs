@@ -154,9 +154,31 @@ namespace ClassicUO.Game.UI.Controls
             Item equipItem = mobile.FindItemByLayer(Layer.Cloak);
             Item arms = mobile.FindItemByLayer(Layer.Arms);
 
-            Layer[] layers = equipItem != null && equipItem.ItemData.IsContainer ? _layerOrder_quiver_fix : _layerOrder;
-            bool switch_arms_with_torso = arms != null && arms.Graphic == 0x1410;
+            bool switch_arms_with_torso = false;
 
+            if (arms != null)
+            {
+                switch_arms_with_torso = arms.Graphic == 0x1410 || arms.Graphic == 0x1417;
+            }
+            else if (HasFakeItem && ItemHold.Enabled && (byte) Layer.Arms == ItemHold.ItemData.Layer)
+            {
+                switch_arms_with_torso = ItemHold.Graphic == 0x1410 || ItemHold.Graphic == 0x1417;
+            }
+
+            Layer[] layers;
+            if (equipItem != null)
+            {
+                layers = equipItem.ItemData.IsContainer ? _layerOrder_quiver_fix : _layerOrder;
+            }
+            else if (HasFakeItem && ItemHold.Enabled && (byte) Layer.Cloak == ItemHold.ItemData.Layer)
+            {
+                layers = ItemHold.ItemData.IsContainer ? _layerOrder_quiver_fix : _layerOrder;
+            }
+            else
+            {
+                layers = _layerOrder;
+            }
+           
 
             for (int i = 0; i < layers.Length; i++)
             {
@@ -373,14 +395,20 @@ namespace ClassicUO.Game.UI.Controls
                             TargetManager.Target(equipment.Serial);
                             Mouse.CancelDoubleClick = true;
                             Mouse.LastLeftButtonClickTime = 0;
+
+                            if (TargetManager.TargetingState == CursorTarget.SetTargetClientSide)
+                            {
+                                UIManager.Add(new InspectorGump(equipment));
+                            }
                         }
                         else
                         {
                             if (!DelayedObjectClickManager.IsEnabled)
                             {
+                                var off = Mouse.LDroppedOffset;
                                 DelayedObjectClickManager.Set(LocalSerial,
-                                                              Mouse.Position.X - ScreenCoordinateX,
-                                                              Mouse.Position.Y - ScreenCoordinateY,
+                                                              (Mouse.Position.X - off.X) - ScreenCoordinateX,
+                                                              (Mouse.Position.Y - off.Y) - ScreenCoordinateY,
                                                               Time.Ticks + Mouse.MOUSE_DELAY_DOUBLE_CLICK);
                             }
                         }
@@ -402,10 +430,7 @@ namespace ClassicUO.Game.UI.Controls
                           Mouse.LastLeftButtonClickTime + Mouse.MOUSE_DELAY_DOUBLE_CLICK < Time.Ticks) ||
                          Mouse.LDroppedOffset != Point.Zero))
                     {
-                        Rectangle bounds = ArtLoader.Instance.GetTexture(Graphic)?.Bounds ?? Rectangle.Empty;
-                        int centerX = bounds.Width >> 1;
-                        int centerY = bounds.Height >> 1;
-                        GameActions.PickUp(LocalSerial, centerX, centerY);
+                        GameActions.PickUp(LocalSerial, 0, 0);
                         Mouse.LDropPosition = Mouse.Position;
 
                         if (_layer == Layer.OneHanded || _layer == Layer.TwoHanded)

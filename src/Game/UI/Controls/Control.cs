@@ -46,7 +46,7 @@ namespace ClassicUO.Game.UI.Controls
         Low
     }
 
-    internal abstract class Control : IDrawableUI, IUpdateable
+    internal abstract class Control
     {
         internal static int _StepsDone = 1;
         internal static int _StepChanger = 1;
@@ -84,6 +84,8 @@ namespace ClassicUO.Game.UI.Controls
         public uint ServerSerial { get; set; }
 
         public uint LocalSerial { get; set; }
+
+        public bool IsFromServer { get; set; }
 
         public int Page { get; set; }
 
@@ -249,14 +251,10 @@ namespace ClassicUO.Game.UI.Controls
 
         public int TooltipMaxLength { get; private set; }
 
-        public UOTexture Texture { get; set; }
-
         public virtual bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
-            if (IsDisposed) return false;
-
-            if (Texture != null && !Texture.IsDisposed)
-                Texture.Ticks = Time.Ticks;
+            if (IsDisposed) 
+                return false;
 
             foreach (Control c in Children)
             {
@@ -367,8 +365,10 @@ namespace ClassicUO.Game.UI.Controls
 
         public void SetKeyboardFocus()
         {
-            if (AcceptKeyboardInput && !HasKeyboardFocus) 
+            if (AcceptKeyboardInput && !HasKeyboardFocus)
+            {
                 UIManager.KeyboardFocusControl = this;
+            }
         }
 
         internal event EventHandler<MouseEventArgs> MouseDown, MouseUp, MouseOver, MouseEnter, MouseExit, DragBegin, DragEnd;
@@ -378,6 +378,8 @@ namespace ClassicUO.Game.UI.Controls
         internal event EventHandler<MouseDoubleClickEventArgs> MouseDoubleClick;
 
         internal event EventHandler FocusEnter, FocusLost;
+
+        internal event EventHandler<KeyboardEventArgs> KeyDown, KeyUp;
 
 
         public void HitTest(int x, int y, ref Control res)
@@ -395,7 +397,10 @@ namespace ClassicUO.Game.UI.Controls
                     if (AcceptMouseInput)
                     {
                         if (res == null || res.Priority >= this.Priority)
+                        {
                             res = this;
+                            OnHitTestSuccess(x, y, ref res);
+                        }
                     }
 
                     foreach (Control c in Children)
@@ -414,6 +419,9 @@ namespace ClassicUO.Game.UI.Controls
             HitTest(position.X, position.Y, ref res);
         }
 
+        public virtual void OnHitTestSuccess(int x, int y, ref Control res)
+        {
+        }
        
         public Control GetFirstControlAcceptKeyboardInput()
         {
@@ -550,11 +558,15 @@ namespace ClassicUO.Game.UI.Controls
         public void InvokeKeyDown(SDL.SDL_Keycode key, SDL.SDL_Keymod mod)
         {
             OnKeyDown(key, mod);
+            KeyboardEventArgs arg = new KeyboardEventArgs(key, mod, KeyboardEventType.Down);
+            KeyDown?.Raise(arg);
         }
 
         public void InvokeKeyUp(SDL.SDL_Keycode key, SDL.SDL_Keymod mod)
         {
             OnKeyUp(key, mod);
+            KeyboardEventArgs arg = new KeyboardEventArgs(key, mod, KeyboardEventType.Up);
+            KeyUp?.Raise(arg);
         }
 
         public void InvokeMouseWheel(MouseEventType delta)
@@ -681,16 +693,22 @@ namespace ClassicUO.Game.UI.Controls
         
         internal virtual void OnFocusEnter()
         {
-            IsFocused = true;
-            FocusEnter.Raise(this);
-            //Parent?.OnFocusEnter();
+            if (!IsFocused)
+            {
+                IsFocused = true;
+                FocusEnter.Raise(this);
+                //Parent?.OnFocusEnter();
+            }
         }
 
-        internal virtual void OnFocusLeft()
+        internal virtual void OnFocusLost()
         {
-            IsFocused = false;
-            FocusLost.Raise(this);
-            //Parent?.OnFocusLeft();
+            if (IsFocused)
+            {
+                IsFocused = false;
+                FocusLost.Raise(this);
+                //Parent?.OnFocusLeft();
+            }
         }
 
         protected virtual void OnChildAdded()

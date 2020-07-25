@@ -23,7 +23,7 @@ using System;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
-
+using ClassicUO.Game;
 using ClassicUO.Renderer;
 using ClassicUO.Utility.Logging;
 
@@ -73,12 +73,13 @@ namespace ClassicUO.IO.Resources
                 {
                     path = UOFileManager.GetUOFilePath($"facet0{i}.mul");
 
-                    if (File.Exists(path)) _facets[i] = new UOFileMul(path);
+                    if (File.Exists(path)) 
+                        _facets[i] = new UOFileMul(path);
                 }
             });
         }
 
-        public unsafe UOTexture LoadMap(int width, int height, int startx, int starty, int endx, int endy)
+        public unsafe UOTexture32 LoadMap(int width, int height, int startx, int starty, int endx, int endy)
         {
             if (_file == null || _file.Length == 0)
             {
@@ -175,28 +176,28 @@ namespace ClassicUO.IO.Resources
 
                 ushort* huesData = (ushort*) (byte*) (ptr + 30800);
 
-                ushort[] colorTable = new ushort[maxPixelValue];
+                uint[] colorTable = new uint[maxPixelValue];
 
                 int colorOffset = 31 * maxPixelValue;
 
                 for (int i = 0; i < maxPixelValue; i++)
                 {
                     colorOffset -= 31;
-                    colorTable[i] = (ushort) (0x8000 | huesData[colorOffset / maxPixelValue]);
+                    colorTable[i] = Utility.HuesHelper.Color16To32(huesData[colorOffset / maxPixelValue]) | 0xFF_00_00_00;
                 }
 
-                ushort[] worldMap = new ushort[mapSize];
+                uint[] worldMap = new uint[mapSize];
 
                 for (int i = 0; i < mapSize; i++)
                 {
                     byte bytepic = data[i];
 
-                    worldMap[i] = (ushort) (bytepic != 0 ? colorTable[bytepic - 1] : 0);
+                    worldMap[i] = (bytepic != 0 ? colorTable[bytepic - 1] : 0);
                 }
 
                 Marshal.FreeHGlobal(ptr);
 
-                UOTexture16 texture = new UOTexture16(width, height);
+                UOTexture32 texture = new UOTexture32(width, height);
                 texture.PushData(worldMap);
 
                 return texture;
@@ -205,9 +206,9 @@ namespace ClassicUO.IO.Resources
             return null;
         }
 
-        public UOTexture16 LoadFacet(int facet, int width, int height, int startx, int starty, int endx, int endy)
+        public UOTexture32 LoadFacet(int facet, int width, int height, int startx, int starty, int endx, int endy)
         {
-            if (_file == null || facet < 0 || facet > 5 || _facets[facet] == null)
+            if (_file == null || facet < 0 || facet > Constants.MAPS_COUNT || _facets[facet] == null)
                 return null;
 
             _facets[facet].Seek(0);
@@ -218,15 +219,15 @@ namespace ClassicUO.IO.Resources
             if (w < 1 || h < 1) return null;
 
             int startX = startx;
-            int endX = endx;
+            int endX = endx <= 0 ? width : endx;
 
             int startY = starty;
-            int endY = endy;
+            int endY = endy <= 0 ? height : endy;
 
             int pwidth = endX - startX;
             int pheight = endY - startY;
 
-            ushort[] map = new ushort[pwidth * pheight];
+            uint[] map = new uint[pwidth * pheight];
 
             for (int y = 0; y < h; y++)
             {
@@ -237,8 +238,7 @@ namespace ClassicUO.IO.Resources
                 {
                     int size = _facets[facet].ReadByte();
 
-                    ushort color = (ushort) (0x8000 | _facets[facet].ReadUShort());
-
+                    uint color = Utility.HuesHelper.Color16To32(_facets[facet].ReadUShort()) | 0xFF_00_00_00;
                     for (int j = 0; j < size; j++)
                     {
                         if (x >= startX && x < endX && y >= startY && y < endY)
@@ -248,16 +248,10 @@ namespace ClassicUO.IO.Resources
                 }
             }
 
-            UOTexture16 texture = new UOTexture16(pwidth, pheight);
+            UOTexture32 texture = new UOTexture32(pwidth, pheight);
             texture.PushData(map);
 
             return texture;
-        }
-
-
-        public override void CleanResources()
-        {
-            // do nothing
         }
     }
 }

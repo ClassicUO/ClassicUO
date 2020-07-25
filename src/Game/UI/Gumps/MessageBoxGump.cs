@@ -103,7 +103,7 @@ namespace ClassicUO.Game.UI.Gumps
     internal class EntryDialog : Gump
     {
         private readonly Action<string> _action;
-        private readonly TextBox _textBox;
+        private readonly StbTextBox _textBox;
 
         public EntryDialog(int w, int h, string message, Action<string> action) : base(0, 0)
         {
@@ -144,7 +144,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             int ww = w - 94;
 
-            _textBox = new TextBox(0xFF, ww, ww, ww, true, FontStyle.BlackBorder | FontStyle.Fixed)
+            _textBox = new StbTextBox(0xFF, -1, ww, true, FontStyle.BlackBorder | FontStyle.Fixed)
             {
                 X = 42,
                 Y = 45 + l.Height + 7,

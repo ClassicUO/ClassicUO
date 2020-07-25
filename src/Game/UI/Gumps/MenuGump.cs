@@ -22,9 +22,10 @@
 using System.Linq;
 
 using ClassicUO.Game.UI.Controls;
+using ClassicUO.IO.Resources;
 using ClassicUO.Network;
 using ClassicUO.Renderer;
-
+using ClassicUO.Utility.Logging;
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Gumps
@@ -40,6 +41,7 @@ namespace ClassicUO.Game.UI.Gumps
             CanMove = true;
             AcceptMouseInput = true;
             CanCloseWithRightClick = true;
+            IsFromServer = true;
 
             Add(new GumpPic(0, 0, 0x0910, 0));
 
@@ -111,13 +113,25 @@ namespace ClassicUO.Game.UI.Gumps
 
         public void AddItem(ushort graphic, ushort hue, string name, int x, int y, int index)
         {
-            StaticPic pic = new StaticPic(graphic, hue)
+            var texture = ArtLoader.Instance.GetTexture(graphic);
+            if (texture == null)
             {
+                Log.Error($"invalid texture 0x{graphic:X4}");
+                return;
+            }
+
+            TextureControl pic = new TextureControl()
+            {
+                Texture = texture,
+                IsPartial = TileDataLoader.Instance.StaticData[graphic].IsPartialHue,
+                Hue = hue,
+                AcceptMouseInput = true,
                 X = x,
                 Y = y,
-                //LocalSerial = (uint) index,
-                AcceptMouseInput = true
+                Width = texture.Width,
+                Height = texture.Height
             };
+
 
             pic.MouseDoubleClick += (sender, e) =>
             {
@@ -167,7 +181,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 Rectangle scissor = ScissorStack.CalculateScissors(Matrix.Identity, x, y, Width, Height);
 
-                if (ScissorStack.PushScissors(scissor))
+                if (ScissorStack.PushScissors(batcher.GraphicsDevice, scissor))
                 {
                     batcher.EnableScissorTest(true);
 
@@ -201,7 +215,7 @@ namespace ClassicUO.Game.UI.Gumps
 
 
                     batcher.EnableScissorTest(false);
-                    ScissorStack.PopScissors();
+                    ScissorStack.PopScissors(batcher.GraphicsDevice);
                 }
 
                 return true; // base.Draw(batcher,position, hue);
@@ -226,6 +240,7 @@ namespace ClassicUO.Game.UI.Gumps
             CanMove = true;
             AcceptMouseInput = true;
             CanCloseWithRightClick = false;
+            IsFromServer = true;
 
             Add(_resizePic = new ResizePic(0x13EC)
             {

@@ -75,6 +75,12 @@ namespace ClassicUO.Game.UI.Controls
                 }
             );
         }
+
+        public void Dispose()
+        {
+            UIManager.ShowContextMenu(null);
+            _items.Clear();
+        }
     }
 
     sealed class ContextMenuItemEntry

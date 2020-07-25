@@ -21,6 +21,7 @@
 
 using System;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
@@ -99,7 +100,7 @@ namespace ClassicUO.Game.Scenes
             //Engine.FpsLimit = Settings.GlobalSettings.MaxLoginFPS;
 
             UIManager.Add(new LoginBackground());
-            UIManager.Add(_currentGump = new LoginGump());
+            UIManager.Add(_currentGump = new LoginGump(this));
 
             // Registering Packet Events
             NetClient.PacketReceived += NetClient_PacketReceived;
@@ -109,7 +110,7 @@ namespace ClassicUO.Game.Scenes
 
             int music = Client.Version >= ClientVersion.CV_7000 ? 78 : Client.Version > ClientVersion.CV_308Z ? 0 : 8;
 
-            Audio.PlayMusic(music);
+            Audio.PlayMusic(music, false, true);
 
             if (((Settings.GlobalSettings.AutoLogin || Reconnect) && (CurrentLoginStep != LoginSteps.Main)) || CUOEnviroment.SkipLoginScreen)
             {
@@ -211,7 +212,7 @@ namespace ClassicUO.Game.Scenes
                 case LoginSteps.Main:
                     PopupMessage = null;
 
-                    return new LoginGump();
+                    return new LoginGump(this);
 
                 case LoginSteps.Connecting:
                 case LoginSteps.VerifyingAccount:
@@ -308,7 +309,8 @@ namespace ClassicUO.Game.Scenes
 
             Log.Trace( $"Start login to: {Settings.GlobalSettings.IP},{Settings.GlobalSettings.Port}");
 
-            EncryptionHelper.Initialize(true, NetClient.LoginSocket.ClientAddress, (ENCRYPTION_TYPE) Settings.GlobalSettings.Encryption);
+
+            EncryptionHelper.Initialize(true, NetClient.ClientAddress, (ENCRYPTION_TYPE) Settings.GlobalSettings.Encryption);
 
             if (!NetClient.LoginSocket.Connect(Settings.GlobalSettings.IP, Settings.GlobalSettings.Port))
             {
@@ -349,7 +351,7 @@ namespace ClassicUO.Game.Scenes
                 Settings.GlobalSettings.LastCharacterName = Characters[index];
                 Settings.GlobalSettings.Save();
                 CurrentLoginStep = LoginSteps.EnteringBritania;
-                NetClient.Socket.Send(new PSelectCharacter(index, Characters[index], NetClient.Socket.ClientAddress));
+                NetClient.Socket.Send(new PSelectCharacter(index, Characters[index], NetClient.ClientAddress));
             }
         }
 
@@ -370,13 +372,13 @@ namespace ClassicUO.Game.Scenes
             }
 
             Settings.GlobalSettings.LastCharacterName = character.Name;
-            NetClient.Socket.Send(new PCreateCharacter(character, cityIndex, NetClient.Socket.ClientAddress, ServerIndex, (uint) i, profession));
+            NetClient.Socket.Send(new PCreateCharacter(character, cityIndex, NetClient.ClientAddress, ServerIndex, (uint) i, profession));
             CurrentLoginStep = LoginSteps.CharacterCreationDone;
         }
 
         public void DeleteCharacter(uint index)
         {
-            if (CurrentLoginStep == LoginSteps.CharacterSelection) NetClient.Socket.Send(new PDeleteCharacter((byte) index, NetClient.Socket.ClientAddress));
+            if (CurrentLoginStep == LoginSteps.CharacterSelection) NetClient.Socket.Send(new PDeleteCharacter((byte) index, NetClient.ClientAddress));
         }
 
         public void StepBack()
@@ -445,12 +447,22 @@ namespace ClassicUO.Game.Scenes
                 byte minor = (byte) (clientVersion >> 16);
                 byte build = (byte) (clientVersion >> 8);
                 byte extra = (byte) clientVersion;
-                
-                NetClient.LoginSocket.Send(new PSeed(NetClient.LoginSocket.ClientAddress, major, minor, build, extra).ToArray(), true, true);
+
+                PSeed packet = new PSeed(NetClient.ClientAddress, major, minor, build, extra);
+
+                NetClient.LoginSocket.Send(packet.ToArray(), packet.Length, true, true);
             }
             else
             {
-                NetClient.LoginSocket.Send(BitConverter.GetBytes(NetClient.LoginSocket.ClientAddress), true, true);
+                uint address = NetClient.ClientAddress;
+
+                byte[] packet = new byte[4];
+                packet[0] = (byte)(address >> 24);
+                packet[1] = (byte) (address >> 16);
+                packet[2] = (byte) (address >> 8);
+                packet[3] = (byte)address;
+
+                NetClient.LoginSocket.Send(packet, packet.Length, true, true);
             }
 
             NetClient.LoginSocket.Send(new PFirstLogin(Account, Password));
@@ -612,13 +624,12 @@ namespace ClassicUO.Game.Scenes
             ushort port = p.ReadUShort();
             uint seed = p.ReadUInt();
             NetClient.LoginSocket.Disconnect();
-
             EncryptionHelper.Initialize(false, seed, (ENCRYPTION_TYPE) Settings.GlobalSettings.Encryption);
 
             NetClient.Socket.Connect(new IPAddress(ip), port);
             NetClient.Socket.EnableCompression();
             byte[] ss = new byte[4] {(byte) (seed >> 24), (byte) (seed >> 16), (byte) (seed >> 8), (byte) seed};
-            NetClient.Socket.Send(ss, true, true);
+            NetClient.Socket.Send(ss, 4, true, true);
             NetClient.Socket.Send(new PSecondLogin(Account, Password, seed));
         }
 

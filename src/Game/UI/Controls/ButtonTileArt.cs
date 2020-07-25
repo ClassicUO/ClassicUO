@@ -10,7 +10,7 @@ namespace ClassicUO.Game.UI.Controls
     {
         private readonly int _tileX, _tileY;
         private readonly ushort _hue;
-        private readonly UOTexture16 _texture;
+        private readonly UOTexture32 _texture;
         private readonly bool _isPartial;
 
         public ButtonTileArt(List<string> gparams) : 
@@ -23,7 +23,7 @@ namespace ClassicUO.Game.UI.Controls
             _tileX = int.Parse(gparams[10]);
             _tileY = int.Parse(gparams[11]);
             ContainsByBounds = true;
-
+            IsFromServer = true;
             _texture = ArtLoader.Instance.GetTexture(graphic);
 
             if (_texture == null)

@@ -48,7 +48,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             for (int i = 0; i < data.Items.Length; i++)
             {
-                ref readonly var item = ref data.Items[i];
+                ref var item = ref data.Items[i];
 
                 string text = ClilocLoader.Instance.GetString(item.Cliloc);
 

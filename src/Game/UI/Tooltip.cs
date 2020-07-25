@@ -65,8 +65,9 @@ namespace ClassicUO.Game.UI
 
             byte font = 1;
             float alpha = 0.3f;
-            ushort hue = 0;
+            ushort hue = 0xFFFF;
             float zoom = 1;
+
             if (ProfileManager.Current != null)
             {
                 font = ProfileManager.Current.TooltipFont;
@@ -79,17 +80,18 @@ namespace ClassicUO.Game.UI
                 zoom = ProfileManager.Current.TooltipDisplayZoom / 100f;
             }
 
+            FontsLoader.Instance.SetUseHTML(true);
+            FontsLoader.Instance.RecalculateWidthByInfo = true;
+
             if (_renderedText == null)
             {
-                _renderedText = RenderedText.Create(string.Empty, font: font, isunicode: true, style: FontStyle.BlackBorder, cell: 5, isHTML: true, align: TEXT_ALIGN_TYPE.TS_CENTER, recalculateWidthByInfo: true, hue: hue);
+                _renderedText = RenderedText.Create(null, font: font, isunicode: true, style: FontStyle.BlackBorder, cell: 5, isHTML: true, align: TEXT_ALIGN_TYPE.TS_CENTER, recalculateWidthByInfo: true, hue: hue);
             }
-            else if (_renderedText.Text != Text)
+
+            if (_renderedText.Text != Text)
             {
                 if (_maxWidth == 0)
                 {
-                    FontsLoader.Instance.SetUseHTML(true);
-                    FontsLoader.Instance.RecalculateWidthByInfo = true;
-
                     int width = FontsLoader.Instance.GetWidthUnicode(font, Text);
 
                     if (width > 600)
@@ -101,17 +103,19 @@ namespace ClassicUO.Game.UI
                         width = 600;
 
                     _renderedText.MaxWidth = width;
-
-                    FontsLoader.Instance.RecalculateWidthByInfo = false;
-                    FontsLoader.Instance.SetUseHTML(false);
                 }
                 else
+                {
                     _renderedText.MaxWidth = _maxWidth;
+                }
 
                 _renderedText.Font = font;
                 _renderedText.Hue = hue;
                 _renderedText.Text = _textHTML;
             }
+
+            FontsLoader.Instance.RecalculateWidthByInfo = false;
+            FontsLoader.Instance.SetUseHTML(false);
 
             if (_renderedText.Texture == null)
                 return false;

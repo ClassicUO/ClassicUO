@@ -906,7 +906,7 @@ namespace ClassicUO.Game.UI.Gumps
                                 Y = offsetY,
                                 CanMove = false,
                                 LocalSerial = (uint) (ID_GUMP_CUSTOM_HOUSE.ID_GCH_ITEM_IN_LIST + index),
-                                Height = 120
+                                //Height = 120
                             };
                             pic.MouseUp += (sender, e) =>
                             {

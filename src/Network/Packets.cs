@@ -28,6 +28,7 @@ using ClassicUO.Game;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
+using ClassicUO.Game.UI.Gumps;
 using ClassicUO.IO.Resources;
 
 namespace ClassicUO.Network
@@ -326,8 +327,10 @@ namespace ClassicUO.Network
     {
         public PHelpRequest() : base(0x9B)
         {
-            byte[] empty = new byte[257];
-            foreach (byte emptyByte in empty) WriteByte(emptyByte);
+            for (int i = 0; i < 257; i++)
+            {
+                WriteByte(0x00);
+            }
         }
     }
 
@@ -684,8 +687,7 @@ namespace ClassicUO.Network
             WriteUInt(entity);
             WriteUShort(x);
             WriteUShort(y);
-            WriteByte(0xFF);
-            WriteSByte(z);
+            WriteUShort((ushort) z);
             WriteUShort(graphic);
         }
     }
@@ -1170,6 +1172,83 @@ namespace ClassicUO.Network
             WriteUShort(0x1A);
             WriteByte(stat);
             WriteByte((byte) state);
+        }
+    }
+
+    internal sealed class PBookHeaderChangedOld : PacketWriter
+    {
+        public PBookHeaderChangedOld(uint serial, string title, string author) : base(0x93)
+        {
+            WriteUInt(serial);
+            WriteByte(0);
+            WriteByte(1);
+            WriteUShort(0);
+            WriteASCII(title, 60);
+            WriteASCII(author, 30);
+        }
+    }
+
+    internal sealed class PBookHeaderChanged : PacketWriter
+    {
+        public PBookHeaderChanged(uint serial, string title, string author) : base(0xD4)
+        {
+            WriteUInt(serial);
+            WriteByte(0);
+            WriteByte(0);
+            WriteUShort(0);
+            WriteUShort((ushort) (title.Length + 1));
+            WriteASCII(title);
+            WriteUShort((ushort) (author.Length + 1));
+            WriteASCII(author);
+        }
+    }
+
+
+    internal sealed class PBookPageData : PacketWriter
+    {
+        public PBookPageData(uint serial, string text, int page, List<int> chars) : base(0x66)
+        {
+            if (text == null)
+                text = string.Empty;
+
+            WriteUInt(serial);
+            WriteUShort(0x0001);
+            WriteUShort((ushort)page);
+            WriteUShort((ushort)chars.Count);
+            for(int i = 0, x = 0; i < chars.Count; i++)
+            {
+                if (chars[i] > 0)
+                {
+                    WriteBytes(Encoding.UTF8.GetBytes(text.Substring(x, chars[i])));
+                    x += chars[i];
+                }
+                WriteByte(0);
+            }
+            WriteByte(0);
+        }
+
+        public PBookPageData(uint serial, string[] text, int page) : base(0x66)
+        {
+            if (text == null)
+            {
+                text = new string[ModernBookGump.MAX_BOOK_LINES];
+                for (int i = 0; i < text.Length; i++)
+                    text[i] = string.Empty;
+            }
+
+            WriteUInt(serial);
+            WriteUShort(0x0001);
+            WriteUShort((ushort)page);
+            WriteUShort((ushort)text.Length);
+            for (int i = 0; i < text.Length; i++)
+            {
+                if (text[i] != null && text[i].Length > 0)
+                {
+                    WriteBytes(Encoding.UTF8.GetBytes(text[i]));
+                }
+                WriteByte(0);
+            }
+            WriteByte(0);
         }
     }
 

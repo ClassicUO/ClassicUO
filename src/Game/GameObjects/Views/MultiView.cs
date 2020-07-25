@@ -82,43 +82,6 @@ namespace ClassicUO.Game.GameObjects
 
             ushort graphic = Graphic;
 
-            if (ItemData.IsAnimated && _lastAnimationFrameTime < Time.Ticks)
-            {
-                IntPtr ptr = AnimDataLoader.Instance.GetAddressToAnim(Graphic);
-
-                if (ptr != IntPtr.Zero)
-                {
-                    unsafe
-                    {
-                        AnimDataFrame2* animData = (AnimDataFrame2*)ptr;
-
-                        if (animData->FrameCount != 0)
-                        {
-                            graphic = (ushort) (Graphic + animData->FrameData[AnimIndex++]);
-
-                            if (AnimIndex >= animData->FrameCount)
-                                AnimIndex = 0;
-
-                            _lastAnimationFrameTime = Time.Ticks + (uint)(animData->FrameInterval * Constants.ITEM_EFFECT_ANIMATION_DELAY);
-                        }
-                    }
-                }
-            }
-
-
-            if (Texture == null || Texture.IsDisposed || Graphic != graphic)
-            {
-                ArtTexture texture = ArtLoader.Instance.GetTexture(graphic);
-                Texture = texture;
-                Bounds = new Rectangle((Texture.Width >> 1) - 22, Texture.Height - 44, Texture.Width, Texture.Height);
-
-                FrameInfo.Width = texture.ImageRectangle.Width;
-                FrameInfo.Height = texture.ImageRectangle.Height;
-
-                FrameInfo.X = (Texture.Width >> 1) - 22 - texture.ImageRectangle.X;
-                FrameInfo.Y = Texture.Height - 44 - texture.ImageRectangle.Y;
-            }
-
             if (ProfileManager.Current.HighlightGameObjects && SelectedObject.LastObject == this)
             {
                 HueVector.X = 0x0023;
@@ -145,7 +108,56 @@ namespace ClassicUO.Game.GameObjects
             posX += (int) Offset.X;
             posY += (int) (Offset.Y + Offset.Z);
 
-            base.Draw(batcher, posX, posY);
+            if (DrawTransparent)
+            {
+                int maxDist = ProfileManager.Current.CircleOfTransparencyRadius + 44;
+                int fx = (int) (World.Player.RealScreenPosition.X + World.Player.Offset.X);
+                int fy = (int) (World.Player.RealScreenPosition.Y + (World.Player.Offset.Y - World.Player.Offset.Z));
+
+                fx -= posX;
+                fy -= posY;
+
+                int dist = (int) Math.Sqrt(fx * fx + fy * fy);
+
+                if (dist <= maxDist)
+                {
+                    switch (ProfileManager.Current.CircleOfTransparencyType)
+                    {
+                        default:
+                        case 0:
+                            HueVector.Z = 0.75f;
+                            break;
+                        case 1:
+                            HueVector.Z = MathHelper.Lerp(1f, 0f, (dist / (float) maxDist));
+                            break;
+                    }
+
+                    DrawStaticAnimated(batcher, graphic, posX, posY, ref HueVector);
+
+                    if (AlphaHue != 255)
+                        HueVector.Z = 1f - AlphaHue / 255f;
+                    else
+                        HueVector.Z = 0;
+
+                    batcher.SetStencil(StaticTransparentStencil.Value);
+                    DrawStaticAnimated(batcher, graphic, posX, posY, ref HueVector);
+                    batcher.SetStencil(null);
+                }
+                else
+                {
+                    if (AlphaHue != 255)
+                        HueVector.Z = 1f - AlphaHue / 255f;
+
+                    DrawStaticAnimated(batcher, graphic, posX, posY, ref HueVector);
+                }
+            }
+            else
+            {
+                if (AlphaHue != 255)
+                    HueVector.Z = 1f - AlphaHue / 255f;
+
+                DrawStaticAnimated(batcher, graphic, posX, posY, ref HueVector);
+            }
 
             if (ItemData.IsLight)
             {
@@ -153,32 +165,32 @@ namespace ClassicUO.Game.GameObjects
                       .AddLight(this, this, posX + 22, posY + 22);
             }
 
+            if (!(SelectedObject.Object == this || IsFromTarget ||
+                  (FoliageIndex != -1 &&
+                   Client.Game.GetScene<GameScene>().FoliageIndex == FoliageIndex)))
+            {
+                if (State != 0)
+                {
+                    if ((State & (CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_IGNORE_IN_RENDER |
+                                  CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_PREVIEW)) != 0)
+                        return true;
+                }
+                 
+                if (DrawTransparent)
+                {
+                    return true;
+                }
+
+                ref var index = ref ArtLoader.Instance.GetValidRefEntry(graphic + 0x4000);
+
+                posX -= index.Width;
+                posY -= index.Height;
+
+                if (SelectedObject.IsPointInStatic(ArtLoader.Instance.GetTexture(graphic), posX, posY))
+                    SelectedObject.Object = this;
+            }
+
             return true;
-        }
-
-        public override void Select(int x, int y)
-        {
-            if (SelectedObject.Object == this || IsFromTarget || (FoliageIndex != -1 && Client.Game.GetScene<GameScene>().FoliageIndex == FoliageIndex))
-                return;
-
-            if (State != 0)
-            {
-                if ((State & (CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_IGNORE_IN_RENDER | 
-                              CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_PREVIEW)) != 0)
-                    return;
-            }
-
-            if (DrawTransparent)
-            {
-                int d = Distance;
-                int maxD = ProfileManager.Current.CircleOfTransparencyRadius + 1;
-
-                if (d <= maxD && d <= 3)
-                    return;
-            }
-
-            if (SelectedObject.IsPointInStatic(Texture, x - Bounds.X, y - Bounds.Y))
-                SelectedObject.Object = this;
         }
     }
 }

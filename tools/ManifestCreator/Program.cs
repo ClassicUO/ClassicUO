@@ -32,33 +32,26 @@ namespace ManifestCreator
 
 
             // libs
-            "libs/api/cuoapi.dll",
 
-            "libs/lib64/libFAudio.so.0",
-            "libs/lib64/libbdiplus.so",
-            "libs/lib64/libmojoshader.so",
-            "libs/lib64/libMonoPosixHelper.so",
-            "libs/lib64/libMonoSupportW.so",
-            "libs/lib64/libSDL2-2.0.so.0",
-            "libs/lib64/libSDL2_image-2.0.so.0",
-            "libs/lib64/libtheorafile.so",
-            "libs/lib64/libz.so",
+            // linux
+            "lib64/libFAudio.so.0",
+            "lib64/libFNA3D.so.0",
+            "lib64/libSDL2-2.0.so.0",
+            "lib64/libtheorafile.so",
 
-            "libs/osx/libFAudio.0.dylib",
-            "libs/osx/libmojoshader.dylib",
-            "libs/osx/libMonoPosixHelper.dylib",
-            "libs/osx/libMonoSupportW.dylib",
-            "libs/osx/lib/libSDL2-2.0.0.dylib",
-            "libs/osx/libSDL2_image-2.0.0.dylib",
-            "libs/osx/libtheorafile.dylib",
+            // osx
+            "osx/libFAudio.0.dylib",
+            "osx/libFNA3D.0.dylib",
+            "osx/libSDL2-2.0.0.dylib",
+            "osx/libtheorafile.dylib",
 
-            "libs/x64/FAudio.dll",
-            "libs/x64/MojoShader.dll",
-            "libs/x64/SDL2.dll",
-            "libs/x64/SDL2_image.dll",
-            "libs/x64/zlib.dll",
-            "libs/x64/libtheorafile.dll",
-            "libs/x64/vcruntime140.dll",
+            // windows
+            "x64/FAudio.dll",
+            "x64/FNA3D.dll",
+            "x64/SDL2.dll",
+            "x64/zlib.dll",
+            "x64/libtheorafile.dll",
+            "x64/vcruntime140.dll",
 
             // dlls
             "Accessibility.dll",
@@ -66,7 +59,6 @@ namespace ManifestCreator
             "Mono.Posix.dll",
             "Mono.Security.dll",
             "mscorlib.dll",
-            "Newtonsoft.Json.dll",
             "System.Configuration.dll",
             "System.Core.dll",
             "System.Data.dll",
@@ -77,7 +69,9 @@ namespace ManifestCreator
             "System.Numerics.dll",
             "System.Runtime.Serialization.dll",
             "System.Windows.Forms.dll",
-            "System.Xml.dll"
+            "System.Xml.dll",
+            "System.Xml.Linq.dll",
+            "Newtonsoft.Json.dll"
         };
 
 

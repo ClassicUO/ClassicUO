@@ -45,9 +45,6 @@ namespace ClassicUO.Game.Scenes
                     GameActions.DropItem(ItemHold.Serial, 0xFFFF, 0xFFFF, 0, container.Serial);
                 else if (SerialHelper.IsItem(container.Serial))
                     GameActions.DropItem(ItemHold.Serial, container.X, container.Y, container.Z, container.Serial);
-
-                ItemHold.Enabled = false;
-                ItemHold.Dropped = true;
             }
         }
 
@@ -129,31 +126,6 @@ namespace ClassicUO.Game.Scenes
             return true;
         }
 
-        private void CloseItemGumps(Item item)
-        {
-            if (item != null)
-            {
-                var gump = UIManager.GetGump<Gump>(item);
-           
-                if (gump != null)
-                {
-                    if (gump.GumpType == GUMP_TYPE.GT_SPELLBUTTON)
-                        return;
-
-                    gump.Dispose();
-                }
-
-                if (SerialHelper.IsValid(item.Container))
-                {
-                    for (var i = item.Items; i != null; i = i.Next)
-                    {
-                        Item it = (Item) i;
-                        CloseItemGumps(it);
-                    }
-                }
-            }
-        }
-
         public void DropHeldItemToWorld(int x, int y, sbyte z)
         {
             GameObject obj = SelectedObject.Object as GameObject;
@@ -166,13 +138,13 @@ namespace ClassicUO.Game.Scenes
                 z = 0;
             }
             else
+            {
                 serial = 0xFFFF_FFFF;
+            }
 
             if (ItemHold.Enabled && ItemHold.Serial != serial)
             {
                 GameActions.DropItem(ItemHold.Serial, x, y, z, serial);
-                ItemHold.Enabled = false;
-                ItemHold.Dropped = true;
             }
         }
 
@@ -181,8 +153,6 @@ namespace ClassicUO.Game.Scenes
             if (ItemHold.Enabled && ItemHold.Serial != container)
             {
                 GameActions.DropItem(ItemHold.Serial, x, y, 0, container);
-                ItemHold.Enabled = false;
-                ItemHold.Dropped = true;
             }
         }
 
@@ -250,8 +220,6 @@ namespace ClassicUO.Game.Scenes
 
 
                 GameActions.DropItem(ItemHold.Serial, x, y, 0, container);
-                ItemHold.Enabled = false;
-                ItemHold.Dropped = true;
             }
         }
 
@@ -263,8 +231,6 @@ namespace ClassicUO.Game.Scenes
                     serial = World.Player;
 
                 GameActions.Equip(ItemHold.Serial, (Layer) ItemHold.ItemData.Layer, serial);
-                ItemHold.Enabled = false;
-                ItemHold.Dropped = true;
             }
         }
     }

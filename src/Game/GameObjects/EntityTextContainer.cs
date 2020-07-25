@@ -100,7 +100,7 @@ namespace ClassicUO.Game.GameObjects
             _messages.AddToFront(text_obj);
 
             if (_messages.Count > 10)
-                _messages.RemoveFromBack()?.RenderedText?.Destroy();
+                _messages.RemoveFromBack()?.Destroy();
         }
 
         public void Update()
@@ -124,13 +124,13 @@ namespace ClassicUO.Game.GameObjects
 
                 if (delta <= 0)
                 {
-                    c.RenderedText.Destroy();
-                    _rectangle.Height -= c.RenderedText.Height;
+                    _rectangle.Height -= c.RenderedText?.Height ?? 0;
+                    c.Destroy();
                     _messages.RemoveAt(i--);
                 }
                 //else if (delta < 250)
                 //    c.Alpha = 1f - delta / 250;
-                else
+                else if (c.RenderedText != null)
                 {
                     if (_rectangle.Width < c.RenderedText.Width)
                         _rectangle.Width = c.RenderedText.Width;
@@ -181,27 +181,27 @@ namespace ClassicUO.Game.GameObjects
                     x += 22;
                     y += (int) (m.Offset.Y - m.Offset.Z - (height + centerY + 8));
                 }
-                else if (Parent.Texture != null)
+                else
                 {
-                    x += 22;
-                    int yValue = Parent.Texture.Height >> 1;
+                    ArtTexture texture = ArtLoader.Instance.GetTexture(Parent.Graphic);
 
-                    if (Parent is Item it)
+                    if (texture != null)
                     {
-                        if (it.IsCorpse)
-                            offY = -22;
-                        else if (it.ItemData.IsAnimated)
+                        x += 22;
+                        int yValue = texture.Height >> 1;
+
+                        if (Parent is Item it)
                         {
-                            ArtTexture texture = ArtLoader.Instance.GetTexture(it.Graphic);
-
-                            if (texture != null)
-                                yValue = texture.Height >> 1;
+                            if (it.IsCorpse)
+                                offY = -22;
                         }
-                    }
-                    else if (Parent is Static || Parent is Multi)
-                        offY = -44;
+                        else if (Parent is Static || Parent is Multi)
+                            offY = -44;
 
-                    y -= yValue;
+                        y -= yValue;
+                    }
+
+                   
                 }
             }
 
@@ -219,6 +219,9 @@ namespace ClassicUO.Game.GameObjects
             foreach (var item in _messages)
             {
                 ushort hue = 0;
+
+                if (item.IsDestroyed || item.RenderedText == null || item.RenderedText.IsDestroyed)
+                    continue;
 
                 //if (ProfileManager.Current.HighlightGameObjects)
                 //{
@@ -245,7 +248,7 @@ namespace ClassicUO.Game.GameObjects
             IsDestroyed = true;
 
             foreach (var item in _messages)
-                item.RenderedText.Destroy();
+                item.Destroy();
 
             _messages.Clear();
         }

@@ -44,7 +44,7 @@ namespace ClassicUO.Game.UI.Gumps
         private Checkbox _myCheckbox;
         private readonly Label[] _myCoins = new Label[2];
         private readonly Label[] _hisCoins = new Label[2];
-        private readonly TextBox[] _myCoinsEntries = new TextBox[2];
+        private readonly StbTextBox[] _myCoinsEntries = new StbTextBox[2];
 
         public TradingGump(uint local, string name, uint id1, uint id2) : base(local, 0)
         {
@@ -157,6 +157,8 @@ namespace ClassicUO.Game.UI.Gumps
             foreach (var v in _myBox.Children)
                 v.Dispose();
 
+            var loader = ArtLoader.Instance;
+
             for (var i = container.Items; i != null; i = i.Next)
             {
                 Item it = (Item) i;
@@ -169,11 +171,16 @@ namespace ClassicUO.Game.UI.Gumps
                 int x = g.X;
                 int y = g.Y;
 
-                if (x + g.Texture.Width > 110)
-                    x = 110 - g.Texture.Width;
+                var texture = loader.GetTexture(it.DisplayedGraphic);
 
-                if (y + g.Texture.Height > 80)
-                    y = 80 - g.Texture.Height;
+                if (texture != null)
+                {
+                    if (x + texture.Width > 110)
+                        x = 110 - texture.Width;
+
+                    if (y + texture.Height > 80)
+                        y = 80 - texture.Height;
+                }
 
                 if (x < 0)
                     x = 0;
@@ -208,11 +215,16 @@ namespace ClassicUO.Game.UI.Gumps
                 int x = g.X;
                 int y = g.Y;
 
-                if (x + g.Texture.Width > 110)
-                    x = 110 - g.Texture.Width;
+                var texture = loader.GetTexture(it.DisplayedGraphic);
 
-                if (y + g.Texture.Height > 80)
-                    y = 80 - g.Texture.Height;
+                if (texture != null)
+                {
+                    if (x + texture.Width > 110)
+                        x = 110 - texture.Width;
+
+                    if (y + texture.Height > 80)
+                        y = 80 - texture.Height;
+                }
 
                 if (x < 0)
                     x = 0;
@@ -332,35 +344,35 @@ namespace ClassicUO.Game.UI.Gumps
                 };
                 Add(_hisCoins[1]);
 
-                _myCoinsEntries[0] = new TextBox(9, -1, 100, 100, false, FontStyle.None, 0, IO.Resources.TEXT_ALIGN_TYPE.TS_LEFT)
+                _myCoinsEntries[0] = new StbTextBox(9, -1, 100, false, FontStyle.None, 0, IO.Resources.TEXT_ALIGN_TYPE.TS_LEFT)
                 {
                     X = 43,
                     Y = 190,
                     Width = 100,
                     Height = 20,
-                    NumericOnly = true,
-                    Tag = 0
+                    NumbersOnly = true,
+                    Tag = 0,
                 };
-                Add(_myCoinsEntries[0]);
                 _myCoinsEntries[0].SetText("0");
+                Add(_myCoinsEntries[0]);
 
-                _myCoinsEntries[1] = new TextBox(9, -1, 100, 100, false, FontStyle.None, 0, IO.Resources.TEXT_ALIGN_TYPE.TS_LEFT)
+                _myCoinsEntries[1] = new StbTextBox(9, -1, 100, false, FontStyle.None, 0, IO.Resources.TEXT_ALIGN_TYPE.TS_LEFT)
                 {
                     X = 43,
                     Y = 210,
                     Width = 100,
                     Height = 20,
-                    NumericOnly = true,
-                    Tag = 1
+                    NumbersOnly = true,
+                    Tag = 1,
                 };
-                Add(_myCoinsEntries[1]);
                 _myCoinsEntries[1].SetText("0");
+                Add(_myCoinsEntries[1]);
 
                 uint my_gold_entry = 0, my_plat_entry = 0;
 
                 void OnTextChanged(object sender, EventArgs e)
                 {
-                    TextBox entry = (TextBox) sender;
+                    StbTextBox entry = (StbTextBox) sender;
                     bool send = false;
 
                     if (entry != null)
@@ -417,8 +429,6 @@ namespace ClassicUO.Game.UI.Gumps
                                 entry.SetText(value.ToString());
                             }
                         }
-
-                        entry.IsChanged = false;
 
                         if (send)
                             NetClient.Socket.Send(new PTradeUpdateGold(ID1, my_gold_entry, my_plat_entry));
@@ -517,9 +527,6 @@ namespace ClassicUO.Game.UI.Gumps
                         y = 0;
 
                     GameActions.DropItem(ItemHold.Serial, x, y, 0, ID1);
-                    ItemHold.Dropped = true;
-                    ItemHold.Enabled = false;
-                    //Mouse.CancelDoubleClick = true;
                 }
             };
         }

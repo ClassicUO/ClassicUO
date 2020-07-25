@@ -19,6 +19,7 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
 
+
 using System;
 using System.Diagnostics;
 using System.Globalization;
@@ -81,6 +82,9 @@ namespace ClassicUO
                 sb.AppendLine($"Thread: {Thread.CurrentThread.Name}");
                 sb.AppendLine();
 
+                sb.AppendLine($"Protocol: {Client.Protocol}");
+                sb.AppendLine($"ClientFeatures: {World.ClientFeatures.Flags}");
+                sb.AppendLine($"ClientLockedFeatures: {World.ClientLockedFeatures.Flags}");
                 sb.AppendLine($"ClientVersion: {Client.Version}");
 
                 sb.AppendLine();
@@ -116,14 +120,13 @@ namespace ClassicUO
                 if (CheckUpdate(args))
                     return;
             
-            //Environment.SetEnvironmentVariable("FNA_GRAPHICS_FORCE_GLDEVICE", "ModernGLDevice");
             if (CUOEnviroment.IsHighDPI)
             {
                 Log.Trace("HIGH DPI - ENABLED");
                 Environment.SetEnvironmentVariable("FNA_GRAPHICS_ENABLE_HIGHDPI", "1");
             }
-            Environment.SetEnvironmentVariable("FNA_OPENGL_BACKBUFFER_SCALE_NEAREST", "1");
-            Environment.SetEnvironmentVariable("FNA_OPENGL_FORCE_COMPATIBILITY_PROFILE", "1");
+            Environment.SetEnvironmentVariable("FNA3D_BACKBUFFER_SCALE_NEAREST", "1");
+            Environment.SetEnvironmentVariable("FNA3D_OPENGL_FORCE_COMPATIBILITY_PROFILE", "1");
             Environment.SetEnvironmentVariable(SDL.SDL_HINT_MOUSE_FOCUS_CLICKTHROUGH, "1");
             Environment.SetEnvironmentVariable("PATH", Environment.GetEnvironmentVariable("PATH") + ";" + Path.Combine(CUOEnviroment.ExecutablePath, "Data", "Plugins"));
 
@@ -156,13 +159,20 @@ namespace ClassicUO
 
             if (!CUOEnviroment.IsUnix)
             {
-                string libsPath = Path.Combine(CUOEnviroment.ExecutablePath, "libs", Environment.Is64BitProcess ? "x64" : "x86");
+                string libsPath = Path.Combine(CUOEnviroment.ExecutablePath, Environment.Is64BitProcess ? "x64" : "x86");
                 SetDllDirectory(libsPath);
             }
 
+            // FIXME: force to use OpenGL in osx and linux contexts. Metal wants texture converted in .Color instead of BGRA5551.
+            //        Check the branch "fna3d-macos-fix"
+            /*if (CUOEnviroment.IsUnix)
+            {
+                Environment.SetEnvironmentVariable("FNA3D_FORCE_DRIVER", "OpenGL");
+            }
+            */
+
             if (string.IsNullOrWhiteSpace(Settings.GlobalSettings.UltimaOnlineDirectory))
                 Settings.GlobalSettings.UltimaOnlineDirectory = CUOEnviroment.ExecutablePath;
-
 
 
             const uint INVALID_UO_DIRECTORY = 0x100;
@@ -218,6 +228,18 @@ namespace ClassicUO
             }
             else
             {
+                switch (Settings.GlobalSettings.ForceDriver)
+                {
+                    case 1: // OpenGL
+                        Environment.SetEnvironmentVariable("FNA3D_FORCE_DRIVER", "OpenGL");
+
+                        break;
+                    case 2: // Vulkan
+                        Environment.SetEnvironmentVariable("FNA3D_FORCE_DRIVER", "Vulkan");
+
+                        break;
+                }
+
                 Client.Run();
             }
             
@@ -330,7 +352,7 @@ namespace ClassicUO
                         break;
 
                     case "profiler":
-                        Settings.GlobalSettings.Profiler = bool.Parse(value);
+                        CUOEnviroment.Profiler = bool.Parse(value);
 
                         break;
 
@@ -398,6 +420,28 @@ namespace ClassicUO
 
                     case "encryption":
                         Settings.GlobalSettings.Encryption = byte.Parse(value);
+                        break;
+
+                    case "force_driver":
+                        if (byte.TryParse(value, out var res))
+                        {
+                            switch (res)
+                            {
+                                case 1: // OpenGL
+                                    Settings.GlobalSettings.ForceDriver = 1;
+                                    break;
+                                case 2: // Vulkan
+                                    Settings.GlobalSettings.ForceDriver = 2;
+                                    break;
+                                default: // use default
+                                    Settings.GlobalSettings.ForceDriver = 0;
+                                    break;
+                            }
+                        }
+                        else
+                        {
+                            Settings.GlobalSettings.ForceDriver = 0;
+                        }
                         break;
 
                 }

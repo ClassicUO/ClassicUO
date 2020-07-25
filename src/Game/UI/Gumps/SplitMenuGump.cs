@@ -32,10 +32,12 @@ namespace ClassicUO.Game.UI.Gumps
         private readonly Point _offsert;
         private readonly Button _okButton;
         private readonly HSliderBar _slider;
-        private readonly TextBox _textBox;
+        private readonly StbTextBox _textBox;
 
         private bool _firstChange;
         private int _lastValue;
+        private bool _updating;
+
 
         public SplitMenuGump(uint serial, Point offset) : base(serial, 0)
         {
@@ -66,14 +68,14 @@ namespace ClassicUO.Game.UI.Gumps
 
             _okButton.MouseUp += OkButtonOnMouseClick;
 
-            Add(_textBox = new TextBox(1, isunicode: false, hue: 0x0386, width: 60, maxWidth: 1000)
+            Add(_textBox = new StbTextBox(1, isunicode: false, hue: 0x0386, maxWidth: 60)
             {
                 X = 29, Y = 42,
                 Width = 60,
-                NumericOnly = true
+                Height = 20,
+                NumbersOnly = true,
             });
             _textBox.SetText(item.Amount.ToString());
-
             _textBox.TextChanged += (sender, args) => { UpdateText(); };
             _textBox.SetKeyboardFocus();
             _slider.ValueChanged += (sender, args) => { UpdateText(); };
@@ -81,14 +83,23 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void UpdateText()
         {
+            if (_updating)
+                return;
+
+            _updating = true;
+
             if (_slider.Value != _lastValue)
+            {
                 _textBox.SetText(_slider.Value.ToString());
+            }
             else
             {
                 if (_textBox.Text.Length == 0)
                     _slider.Value = _slider.MinValue;
                 else if (!int.TryParse(_textBox.Text, out int textValue))
+                {
                     _textBox.SetText(_slider.Value.ToString());
+                }
                 else
                 {
                     if (textValue != _slider.Value)
@@ -111,11 +122,11 @@ namespace ClassicUO.Game.UI.Gumps
                     }
                 }
             }
-
             _lastValue = _slider.Value;
+
+            _updating = false;
         }
 
-     
         private void OkButtonOnMouseClick(object sender, MouseEventArgs e)
         {
             if (_slider.Value > 0) GameActions.PickUp(LocalSerial, _offsert, _slider.Value);

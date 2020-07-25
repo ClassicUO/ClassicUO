@@ -21,6 +21,7 @@
 
 
 using System;
+using System.Diagnostics;
 
 namespace ClassicUO.Game
 {
@@ -28,7 +29,7 @@ namespace ClassicUO.Game
     {
         public LinkedObject Previous, Next, Items;
         public bool IsEmpty => Items == null;
-
+        
         ~LinkedObject()
         {
             Clear();
@@ -56,14 +57,12 @@ namespace ClassicUO.Game
             }
             else
             {
-                var current = Items;
-                while (current.Next != null)
-                {
-                    current = current.Next;
-                }
+                var last = GetLast();
+                last.Next = item;
 
-                current.Next = item;
-                item.Previous = current;
+                Debug.Assert(item.Next == null, "[Append to last-next] item must be unlinked before.");
+                item.Next = null;
+                item.Previous = last;
             }
         }
 
@@ -210,12 +209,12 @@ namespace ClassicUO.Game
 
             int unitsize = 1; //size of the components we are merging; 1 for first iteration, multiplied by 2 after each iteration
             T p = null, q = null, e = null, head = (T) Items, tail = null;
+            int nmerges = 0; //number of merges done this pass
+            int psize, qsize; //lengths of the components we are merging
 
             while (true)
             {
                 p = head;
-                int nmerges = 0; //number of merges done this pass
-                int psize, qsize; //lengths of the components we are merging
                 head = null;
                 tail = null;
 
@@ -268,6 +267,7 @@ namespace ClassicUO.Game
                         {
                             head = e;
                         }
+
                         e.Previous = tail;
                         tail = e;
                     }

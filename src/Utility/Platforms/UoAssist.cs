@@ -143,7 +143,7 @@ namespace ClassicUO.Utility.Platforms
             {
                 SDL.SDL_SysWMinfo info = new SDL.SDL_SysWMinfo();
                 SDL.SDL_VERSION(out info.version);
-                SDL.SDL_GetWindowWMInfo(SDL.SDL_GL_GetCurrentWindow(), ref info);
+                SDL.SDL_GetWindowWMInfo(Client.Game.Window.Handle, ref info);
 
                 IntPtr hwnd = IntPtr.Zero;
 
@@ -331,7 +331,7 @@ namespace ClassicUO.Utility.Platforms
                                 return 0;
 
                             if ((wParam & 0x00010000) != 0)
-                                MessageManager.HandleMessage(null, sb.ToString(), "System", hue, MessageType.Regular, 3, true);
+                                MessageManager.HandleMessage(null, sb.ToString(), "System", hue, MessageType.Regular, 3, TEXT_TYPE.SYSTEM, true);
                             else
                                 World.Player.AddMessage(MessageType.Regular, sb.ToString(), 3, hue, true);
 

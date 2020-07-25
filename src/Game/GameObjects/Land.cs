@@ -24,6 +24,7 @@ using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using ClassicUO.Game.Managers;
 using ClassicUO.IO.Resources;
+using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
 
 using Microsoft.Xna.Framework;
@@ -33,71 +34,32 @@ namespace ClassicUO.Game.GameObjects
     internal sealed partial class Land : GameObject
     {
         private static Vector3[,,] _vectCache = new Vector3[3, 3, 4];
-        private static readonly Queue<Land> _pool = new Queue<Land>();
-
-        static Land()
+        private static readonly QueuedPool<Land> _pool = new QueuedPool<Land>(Constants.PREDICTABLE_TILE_COUNT, l =>
         {
-            for (int i = 0; i < Constants.PREDICTABLE_TILE_COUNT; i++)
-                _pool.Enqueue(new Land());
-        }
+            l.IsDestroyed = false;
+            l.AlphaHue = 255;
+            l.Normal0 = l.Normal1 = l.Normal2 = l.Normal3 = Vector3.Zero;
+            l.Rectangle = Rectangle.Empty;
+            l.MinZ = l.AverageZ = 0;
+        });
+
 
         public static Land Create(ushort graphic)
         {
-            if (_pool.Count != 0)
-            {
-                var l = _pool.Dequeue();
-                l.Graphic = graphic;
-                l.OriginalGraphic = graphic;
-                l.IsDestroyed = false;
-                l.AlphaHue = 255;
-                l.IsStretched = l.TileData.TexID == 0 && l.TileData.IsWet;
-                l.AllowedToDraw = l.Graphic > 2;
-                l.Normal0 = l.Normal1 = l.Normal2 = l.Normal3 = Vector3.Zero;
-                l.Rectangle = Rectangle.Empty;
-                l.MinZ = l.AverageZ = 0;
-                l.Texture = null;
-                l.Bounds = Rectangle.Empty;
-                return l;
-            }
+            Land land = _pool.GetOne();
+            land.Graphic = graphic;
+            land.OriginalGraphic = graphic;
+            land.IsStretched = land.TileData.TexID == 0 && land.TileData.IsWet;
+            land.AllowedToDraw = graphic > 2;
 
-            Log.Debug(string.Intern("Created new Land"));
-
-            return new Land(graphic);
+            return land;
         }
 
 
-
-
-        private Land()
-        {
-
-        }
-
-        public ushort OriginalGraphic;
-
-        private Land(ushort graphic)
-        {
-            OriginalGraphic = Graphic = graphic;
-            IsStretched = TileData.TexID == 0 && TileData.IsWet;
-
-            AllowedToDraw = Graphic > 2;
-
-            AlphaHue = 255;
-        }
-
-       
-
-        public override void Destroy()
-        {
-            if (IsDestroyed)
-                return;
-
-            base.Destroy();
-            _pool.Enqueue(this);
-        }
 
         public Vector3 Normal0, Normal1, Normal2, Normal3;
         public Rectangle Rectangle;
+        public ushort OriginalGraphic;
 
         public ref LandTiles TileData => ref TileDataLoader.Instance.LandData[Graphic];
 
@@ -105,6 +67,14 @@ namespace ClassicUO.Game.GameObjects
         public sbyte AverageZ;
         public bool IsStretched;
 
+        public override void Destroy()
+        {
+            if (IsDestroyed)
+                return;
+
+            base.Destroy();
+            _pool.ReturnOne(this);
+        }
 
         public override void UpdateGraphicBySeason()
         {

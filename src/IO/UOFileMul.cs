@@ -59,7 +59,7 @@ namespace ClassicUO.IO
 
                 int size = file.ReadInt();
 
-                if (size != 0)
+                if (size > 0)
                 {
                     e.Width = (short) (size >> 16);
                     e.Height = (short) (size & 0xFFFF);

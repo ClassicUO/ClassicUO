@@ -70,20 +70,22 @@ namespace ClassicUO.Renderer
                 type = SHADER_SPECTRAL;
             else if (hue != 0)
             {
+                hue -= 1;
+
                 if (partial)
                     type = SHADER_PARTIAL_HUED;
                 else
                     type = SHADER_HUED;
+
+                if (gump)
+                {
+                    type |= 20;
+                }
             }
             else
                 type = SHADER_NONE;
 
-            if (gump && hue != 0)
-            {
-                type |= 20;
-            }
-
-            hueVector.X = hue - 1;
+            hueVector.X = hue;
             hueVector.Y = type;
             hueVector.Z = alpha;
         }

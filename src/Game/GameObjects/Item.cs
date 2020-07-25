@@ -38,87 +38,70 @@ namespace ClassicUO.Game.GameObjects
 {
     internal partial class Item : Entity
     {
-        private int _animSpeed;
         private ushort? _displayedGraphic;
         private bool _isMulti;
 
 
-        private static readonly Queue<Item> _pool = new Queue<Item>();
-
-        static Item()
+        private static readonly QueuedPool<Item> _pool = new QueuedPool<Item>(Constants.PREDICTABLE_CHUNKS * 3, i =>
         {
-            for (int i = 0; i < Constants.PREDICTABLE_TILE_COUNT; i++)
-                _pool.Enqueue(new Item(0));
-        }
+            i.IsDestroyed = false;
+            i.Graphic = 0;
+            i.Amount = 0;
+            i.Container = 0xFFFF_FFFF;
+            i._isMulti = false;
+            i.Layer = 0;
+            i.Price = 0;
+            i.UsedLayer = false;
+            i._displayedGraphic = null;
+            i.X = 0;
+            i.Y = 0;
+            i.Z = 0;
 
-        public Item(uint serial) : base(serial)
+            i.LightID = 0;
+            i.MultiDistanceBonus = 0;
+            i.Flags = 0;
+            i.WantUpdateMulti = true;
+            i.MultiInfo = null;
+            i.MultiGraphic = 0;
+
+            i.AlphaHue = 0;
+            i.Name = null;
+            i.Direction = 0;
+            i.AnimIndex = 0;
+            i.Hits = 0;
+            i.HitsMax = 0;
+            i.LastStepTime = 0;
+            i.LastAnimationChangeTime = 0;
+
+            i.Clear();
+
+            i.IsClicked = false;
+            i.IsDamageable = false;
+            i.Offset = Vector3.Zero;
+
+            i.Opened = false;
+            i.TextContainer?.Clear();
+            i.IsFlipped = false;
+            i.FrameInfo = Rectangle.Empty;
+            i.UseObjectHandles = false;
+            i.ClosedObjectHandles = false;
+            i.ObjectHandlesOpened = false;
+            i.AlphaHue = 0;
+            i.AllowedToDraw = true;
+        });
+
+
+        public Item() : base(0)
         {
         }
 
 
         public static Item Create(uint serial)
         {
-            if (_pool.Count != 0)
-            {
-                var i = _pool.Dequeue();
-                i.IsDestroyed = false;
-                i.Graphic = 0;
-                i.Serial = serial;
-                i.Amount = 0;
-                i._animSpeed = 0;
-                i.Container = 0;
-                i._isMulti = false;
-                i.Layer = 0;
-                i.Price = 0;
-                i.UsedLayer = false;
-                i._originalGraphic = 0;
-                i._displayedGraphic = null;
-                i.X = 0;
-                i.Y = 0;
-                i.Z = 0;
+            Item i = _pool.GetOne();
+            i.Serial = serial;
 
-                i.LightID = 0;
-                i.MultiDistanceBonus = 0;
-                i.Flags = 0;
-                i.WantUpdateMulti = true;
-                i._force = false;
-                i.MultiInfo = null;
-                i.MultiGraphic = 0;
-                
-                i.AlphaHue = 0;
-                i.Name = null;
-                i.Direction = 0;
-                i.AnimIndex = 0;
-                i.Hits = 0;
-                i.HitsMax = 0;
-                i.LastStepTime = 0;
-                i.LastAnimationChangeTime = 0;
-
-                i.Clear();
-
-                i.IsClicked = false;
-                i.IsDamageable = false;
-                i.Offset = Vector3.Zero;
-
-                i.Opened = false;
-                i.TextContainer?.Clear();
-                i.IsFlipped = false;
-                i.Bounds = Rectangle.Empty;
-                i.FrameInfo = Rectangle.Empty;
-                i.UseObjectHandles = false;
-                i.ClosedObjectHandles = false;
-                i.ObjectHandlesOpened = false;
-                i.AlphaHue = 0;
-                i.DrawTransparent = false;
-                i.AllowedToDraw = true;
-                i.Texture = null;
-
-                return i;
-            }
-
-            Log.Debug(string.Intern("Created new Item"));
-
-            return new Item(serial);
+            return i;
         }
 
         public override void Destroy()
@@ -143,12 +126,12 @@ namespace ClassicUO.Game.GameObjects
 
             base.Destroy();
 
-            _pool.Enqueue(this);
+            _pool.ReturnOne(this);
         }
 
         public uint Price;
         public ushort Amount;
-        public uint Container;
+        public uint Container = 0xFFFF_FFFF;
         public Layer Layer;
         public bool UsedLayer;
         public bool Opened;
@@ -231,7 +214,8 @@ namespace ClassicUO.Game.GameObjects
         public bool IsLootable =>
             ItemData.Layer != (int) Layer.Hair &&
             ItemData.Layer != (int) Layer.Beard &&
-            ItemData.Layer != (int) Layer.Face;
+            ItemData.Layer != (int) Layer.Face &&
+            Graphic != 0;
 
         private static readonly DataReader _reader = new DataReader();
 
@@ -256,7 +240,7 @@ namespace ClassicUO.Game.GameObjects
             }
 
 
-            ref readonly var entry = ref MultiLoader.Instance.GetValidRefEntry(Graphic);
+            ref var entry = ref MultiLoader.Instance.GetValidRefEntry(Graphic);
             MultiLoader.Instance.File.SetData(entry.Address, entry.FileSize);
 
             if (MultiLoader.Instance.IsUOP)
@@ -390,31 +374,6 @@ namespace ClassicUO.Game.GameObjects
                 if (!IsCorpse)
                 {
                     AllowedToDraw = !GameObjectHelper.IsNoDrawable(Graphic);
-
-                    if (OnGround && ItemData.IsAnimated)
-                    {
-                        AnimIndex = animIndex;
-
-                        IntPtr ptr = AnimDataLoader.Instance.GetAddressToAnim(Graphic);
-
-                        if (ptr != IntPtr.Zero)
-                        {
-                            unsafe
-                            {
-                                AnimDataFrame2* animData = (AnimDataFrame2*) ptr;
-
-                                if (animData->FrameCount != 0)
-                                {
-                                    _animSpeed = animData->FrameInterval * Constants.ITEM_EFFECT_ANIMATION_DELAY;
-                                }
-                            }
-                        }
-
-                        LastAnimationChangeTime = Time.Ticks;
-                    }
-
-                    _originalGraphic = DisplayedGraphic;
-                    _force = true;
                 }
                 else
                 {
@@ -440,8 +399,6 @@ namespace ClassicUO.Game.GameObjects
                 {
                     LoadMulti();
                     AllowedToDraw = MultiGraphic > 2;
-                    _originalGraphic = MultiGraphic;
-                    _force = true;
                 }
             }
         }
@@ -919,8 +876,11 @@ namespace ClassicUO.Game.GameObjects
                 var scene = Client.Game.GetScene<GameScene>();
                 float scale = scene?.Scale ?? 1;
 
-                if (Texture != null)
-                    y -= Texture is ArtTexture t ? (t.ImageRectangle.Height >> 1) : (Texture.Height >> 1);
+                var texture = ArtLoader.Instance.GetTexture(Graphic);
+
+                if (texture != null)
+                    y -= (texture.ImageRectangle.Height >> 1);
+
                 x += 22;
                 y += 22;
 
@@ -1019,30 +979,6 @@ namespace ClassicUO.Game.GameObjects
                     }
 
                     LastAnimationChangeTime = Time.Ticks + Constants.CHARACTER_ANIMATION_DELAY;
-                }
-            }
-            else if (OnGround && ItemData.IsAnimated && LastAnimationChangeTime < Time.Ticks)
-            {
-                IntPtr ptr = AnimDataLoader.Instance.GetAddressToAnim(Graphic);
-
-                if (ptr != IntPtr.Zero)
-                {
-                    unsafe
-                    {
-                        AnimDataFrame2* animData = (AnimDataFrame2*) ptr;
-
-                        if (animData->FrameCount != 0)
-                        {
-                            _originalGraphic = (ushort) (DisplayedGraphic + animData->FrameData[AnimIndex++]);
-
-                            if (AnimIndex >= animData->FrameCount)
-                                AnimIndex = 0;
-
-                            _force = _originalGraphic == DisplayedGraphic;
-
-                            LastAnimationChangeTime = Time.Ticks + _animSpeed;
-                        }
-                    }
                 }
             }
         }

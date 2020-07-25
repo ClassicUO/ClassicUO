@@ -65,7 +65,7 @@ namespace ClassicUO.Game.UI.Gumps
         private readonly Deque<ChatLineTime> _textEntries;
         private readonly AlphaBlendControl _trans;
 
-        public readonly TextBox TextBoxControl;
+        public readonly StbTextBox TextBoxControl;
 
         private bool _isActive;
         private ChatMode _mode = ChatMode.Default;
@@ -85,12 +85,12 @@ namespace ClassicUO.Game.UI.Gumps
 
             int height = FontsLoader.Instance.GetHeightUnicode(ProfileManager.Current.ChatFont, "123ABC", Width, 0, (ushort) (FontStyle.BlackBorder | FontStyle.Fixed));
 
-            TextBoxControl = new TextBox(ProfileManager.Current.ChatFont, MAX_MESSAGE_LENGHT, Width, Width, true, FontStyle.BlackBorder | FontStyle.Fixed, 33)
+            TextBoxControl = new StbTextBox(ProfileManager.Current.ChatFont, MAX_MESSAGE_LENGHT, Width, true, FontStyle.BlackBorder | FontStyle.Fixed, 33)
             {
                 X = 0,
-                Y = Height - height - 3,
+                Y = Height - height,
                 Width = Width,
-                Height = height - 3
+                Height = height
             };
 
             float gradientTransparency = (ProfileManager.Current != null && ProfileManager.Current.HideChatGradient) ? 1.0f : 0.5f;
@@ -135,7 +135,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _trans.IsVisible = true;
                     _trans.Y = TextBoxControl.Y;
                     TextBoxControl.Width = _trans.Width;
-                    TextBoxControl.SetText(string.Empty);
+                    TextBoxControl.ClearText();
                     TextBoxControl.SetKeyboardFocus();
                 }
                 else
@@ -162,7 +162,7 @@ namespace ClassicUO.Game.UI.Gumps
                         case ChatMode.Default:
                             DisposeChatModePrefix();
                             TextBoxControl.Hue = ProfileManager.Current.SpeechHue;
-                            TextBoxControl.SetText(string.Empty);
+                            TextBoxControl.ClearText();
 
                             break;
 
@@ -229,6 +229,9 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void ChatOnMessageReceived(object sender, UOMessageEventArgs e)
         {
+            if (e.TextType == TEXT_TYPE.CLIENT)
+                return;
+
             switch (e.Type)
             {
                 case MessageType.Regular when e.Parent == null || !SerialHelper.IsValid(e.Parent.Serial):
@@ -314,7 +317,7 @@ namespace ClassicUO.Game.UI.Gumps
                 int height = FontsLoader.Instance.GetHeightUnicode(ProfileManager.Current.ChatFont, "123ABC", Width, 0, (ushort) (FontStyle.BlackBorder | FontStyle.Fixed));
                 TextBoxControl.Y = Height - height - 3;
                 TextBoxControl.Width = IsActive ? Width : 1;
-                TextBoxControl.Height = height - 3;
+                TextBoxControl.Height = height + 3;
                 _trans.Location = TextBoxControl.Location;
                 _trans.Width = Width;
                 _trans.Height = height + 5;
@@ -358,7 +361,7 @@ namespace ClassicUO.Game.UI.Gumps
                                 }
 
                                 Mode = ChatMode.Party;
-                                TextBoxControl.Text = $"{index} ";
+                                TextBoxControl.SetText($"{index} ");
                             }
                             else
                                 Mode = ChatMode.Party;
@@ -424,7 +427,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             switch (key)
             {
-                case SDL.SDL_Keycode.SDLK_q when Keyboard.IsModPressed(mod, SDL.SDL_Keymod.KMOD_CTRL) && _messageHistoryIndex > -1 && !ProfileManager.Current.DisableCtrlQWBtn:
+                case SDL.SDL_Keycode.SDLK_q when Keyboard.Ctrl && _messageHistoryIndex > -1 && !ProfileManager.Current.DisableCtrlQWBtn:
 
                     var scene = Client.Game.GetScene<GameScene>();
                     if (scene == null)
@@ -444,7 +447,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                     break;
 
-                case SDL.SDL_Keycode.SDLK_w when Keyboard.IsModPressed(mod, SDL.SDL_Keymod.KMOD_CTRL) && !ProfileManager.Current.DisableCtrlQWBtn:
+                case SDL.SDL_Keycode.SDLK_w when Keyboard.Ctrl && !ProfileManager.Current.DisableCtrlQWBtn:
 
                     scene = Client.Game.GetScene<GameScene>();
                     if (scene == null)
@@ -463,11 +466,11 @@ namespace ClassicUO.Game.UI.Gumps
                         TextBoxControl.SetText(_messageHistory[_messageHistoryIndex].Item2);
                     }
                     else
-                        TextBoxControl.SetText(string.Empty);
+                        TextBoxControl.ClearText();
 
                     break;
 
-                case SDL.SDL_Keycode.SDLK_BACKSPACE when Keyboard.IsModPressed(mod, SDL.SDL_Keymod.KMOD_NONE) && string.IsNullOrEmpty(TextBoxControl.Text):
+                case SDL.SDL_Keycode.SDLK_BACKSPACE when !Keyboard.Ctrl && !Keyboard.Alt && !Keyboard.Shift && string.IsNullOrEmpty(TextBoxControl.Text):
                     Mode = ChatMode.Default;
 
                     break;
@@ -488,7 +491,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             if ((!IsActive && ProfileManager.Current.ActivateChatAfterEnter) || (Mode != ChatMode.Default && string.IsNullOrEmpty(text)))
             {
-                TextBoxControl.SetText(string.Empty);
+                TextBoxControl.ClearText();
                 text = string.Empty;
                 Mode = ChatMode.Default;
             }
@@ -500,7 +503,7 @@ namespace ClassicUO.Game.UI.Gumps
 
 
             ChatMode sentMode = Mode;
-            TextBoxControl.SetText(string.Empty);
+            TextBoxControl.ClearText();
             _messageHistory.Add(new Tuple<ChatMode, string>(Mode, text));
             _messageHistoryIndex = _messageHistory.Count;
             Mode = ChatMode.Default;
@@ -543,7 +546,7 @@ namespace ClassicUO.Game.UI.Gumps
                                 if (World.Party.Leader == 0 || World.Party.Leader == World.Player)
                                     GameActions.RequestPartyInviteByTarget();
                                 else
-                                    MessageManager.HandleMessage(null, "You are not party leader.", "System", 0xFFFF, MessageType.Regular, 3);
+                                    MessageManager.HandleMessage(null, "You are not party leader.", "System", 0xFFFF, MessageType.Regular, 3, TEXT_TYPE.SYSTEM);
 
                                 break;
 
@@ -552,7 +555,7 @@ namespace ClassicUO.Game.UI.Gumps
                                 if (World.Party.Leader != 0)
                                     World.Party.CanLoot = !World.Party.CanLoot;
                                 else
-                                    MessageManager.HandleMessage(null, "You are not in a party.", "System", 0xFFFF, MessageType.Regular, 3);
+                                    MessageManager.HandleMessage(null, "You are not in a party.", "System", 0xFFFF, MessageType.Regular, 3, TEXT_TYPE.SYSTEM);
 
 
                                 break;
@@ -560,7 +563,7 @@ namespace ClassicUO.Game.UI.Gumps
                             case "quit":
 
                                 if (World.Party.Leader == 0)
-                                    MessageManager.HandleMessage(null, "You are not in a party.", "System", 0xFFFF, MessageType.Regular, 3);
+                                    MessageManager.HandleMessage(null, "You are not in a party.", "System", 0xFFFF, MessageType.Regular, 3, TEXT_TYPE.SYSTEM);
                                 else
                                 {
                                     GameActions.RequestPartyQuit();
@@ -583,7 +586,7 @@ namespace ClassicUO.Game.UI.Gumps
                                     World.Party.Inviter = 0;
                                 }
                                 else
-                                    MessageManager.HandleMessage(null, "No one has invited you to be in a party.", "System", 0xFFFF, MessageType.Regular, 3);
+                                    MessageManager.HandleMessage(null, "No one has invited you to be in a party.", "System", 0xFFFF, MessageType.Regular, 3, TEXT_TYPE.SYSTEM);
 
                                 break;
 
@@ -596,7 +599,7 @@ namespace ClassicUO.Game.UI.Gumps
                                     World.Party.Inviter = 0;
                                 }
                                 else
-                                    MessageManager.HandleMessage(null, "No one has invited you to be in a party.", "System", 0xFFFF, MessageType.Regular, 3);
+                                    MessageManager.HandleMessage(null, "No one has invited you to be in a party.", "System", 0xFFFF, MessageType.Regular, 3, TEXT_TYPE.SYSTEM);
 
 
                                 break;
