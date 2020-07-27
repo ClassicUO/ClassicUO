@@ -588,10 +588,12 @@ namespace ClassicUO.Game.GameObjects
                             }
                             else
                             {
-                                fc -= AnimationFrameCount;
+                                /*fc -= AnimationFrameCount;
 
                                 if (fc <= 0)
-                                    fc = AnimationFrameCount;
+                                    fc = AnimationFrameCount;*/
+
+                                fc = AnimationFrameCount;
                             }
                                 
                             if (AnimationForwardDirection)
