@@ -609,13 +609,11 @@ namespace ClassicUO.Network
         {
             if (data != null && data.Length != 0)
             {
-                // horrible workaround to avoid ghosting item when a plugin sends drop/equip item
+                // horrible workaround to avoid ghosting item when a plugin sends drag request item
                 switch (data[0])
                 {
-                    case 0x08:
-                    case 0x13:
-                        ItemHold.Enabled = false;
-                        ItemHold.Dropped = true;
+                    case 0x07:
+                        ItemHold.Clear();
                         break;
                 }
             }
