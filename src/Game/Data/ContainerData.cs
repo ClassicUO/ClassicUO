@@ -23,7 +23,7 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.Data
 {
-    internal readonly struct ContainerData
+    internal struct ContainerData
     {
         public ContainerData(ushort graphic, ushort sound, ushort closed, int x, int y, int w, int h, ushort iconizedgraphic = 0, int minimizerX = 0, int minimizerY = 0)
         {
@@ -35,11 +35,11 @@ namespace ClassicUO.Game.Data
             IconizedGraphic = iconizedgraphic;
         }
 
-        public readonly ushort Graphic;
-        public readonly Rectangle Bounds;
-        public readonly ushort OpenSound;
-        public readonly ushort ClosedSound;
-        public readonly Rectangle MinimizerArea;
-        public readonly ushort IconizedGraphic;
+        public ushort Graphic;
+        public Rectangle Bounds;
+        public ushort OpenSound;
+        public ushort ClosedSound;
+        public Rectangle MinimizerArea;
+        public ushort IconizedGraphic;
     }
 }

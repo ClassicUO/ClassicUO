@@ -89,9 +89,9 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             Add(_attributeSliders[2] = new HSliderBar(164, 356, 93, 10, 60, ProfessionInfo._VoidStats[2], HSliderBarStyle.MetalWidgetRecessedBar, true));
 
             string[] skillList = SkillsLoader.Instance.SortedSkills.Select(s => ( 
-                                                                                    (s.Index == 52 || 
-                                                                                     s.Index == 53 && (World.ClientFeatures.Flags & CharacterListFlags.CLF_SAMURAI_NINJA) == 0)) ||
-                                                                                s.Index == 54 ? "" : s.Name).ToArray();
+                                                                            (s.Index == 52 || s.Index == 47 || 
+                                                                             s.Index == 53 && (World.ClientFeatures.Flags & CharacterListFlags.CLF_SAMURAI_NINJA) == 0)) ||
+                                                                             s.Index == 54 ? "" : s.Name).ToArray();
 
             int y = 172;
             _skillSliders = new HSliderBar[CharCreationGump._skillsCount];
