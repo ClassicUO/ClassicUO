@@ -374,7 +374,9 @@ namespace ClassicUO
             _totalFrames++;
 
             if (_scene != null && _scene.IsLoaded && !_scene.IsDestroyed)
+            {
                 _scene.Draw(_uoSpriteBatch);
+            }
 
             UIManager.Draw(_uoSpriteBatch);
 
@@ -385,6 +387,9 @@ namespace ClassicUO
                 else
                     World.WorldTextManager?.MoveToTop(t);
             }
+
+            SelectedObject.HealthbarObject = null;
+
 
             base.Draw(gameTime);
 

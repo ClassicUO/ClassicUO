@@ -102,8 +102,6 @@ namespace ClassicUO.Game.UI.Gumps
             if (Client.Version >= ClientVersion.CV_200 && World.InGame && entity != null && TargetManager.LastTargetInfo.Serial != LocalSerial && TargetManager.LastAttack != LocalSerial && TargetManager.SelectedTarget != LocalSerial)
                 NetClient.Socket.Send(new PCloseStatusBarGump(entity));
 
-            if (SelectedObject.HealthbarObject == entity && entity != null)
-                SelectedObject.HealthbarObject = null;
             _textBox?.Dispose();
             _textBox = null;
             base.Dispose();
@@ -292,16 +290,6 @@ namespace ClassicUO.Game.UI.Gumps
             base.OnMouseOver(x, y);
         }
 
-        protected override void OnMouseExit(int x, int y)
-        {
-            var entity = World.Get(LocalSerial);
-
-            if (entity != null && SelectedObject.HealthbarObject == entity)
-            {
-                SelectedObject.HealthbarObject = null;
-                SelectedObject.Object = null;
-            }
-        }
 
         protected bool CheckIfAnchoredElseDispose()
         {
@@ -654,7 +642,6 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     SelectedObject.HealthbarObject = entity;
                     SelectedObject.Object = entity;
-                    SelectedObject.LastObject = entity;
                 }
             }
 
@@ -1260,13 +1247,10 @@ namespace ClassicUO.Game.UI.Gumps
                     }
                 }
 
-
-                if ( /*!Mobile.IsSelected &&*/ UIManager.MouseOverControl != null && UIManager.MouseOverControl.RootParent == this)
+                if (UIManager.MouseOverControl != null && UIManager.MouseOverControl.RootParent == this)
                 {
-                    //Mobile.IsSelected = true;
                     SelectedObject.HealthbarObject = entity;
                     SelectedObject.Object = entity;
-                    SelectedObject.LastObject = entity;
                 }
             }
 
@@ -1289,8 +1273,6 @@ namespace ClassicUO.Game.UI.Gumps
             if (Client.Version >= ClientVersion.CV_200 && World.InGame && entity != null && TargetManager.LastTargetInfo.Serial != LocalSerial && TargetManager.LastAttack != LocalSerial && TargetManager.SelectedTarget != LocalSerial)
                 NetClient.Socket.Send(new PCloseStatusBarGump(entity));
 
-            if (SelectedObject.HealthbarObject == entity && entity != null)
-                SelectedObject.HealthbarObject = null;
             base.Dispose();
         }
 

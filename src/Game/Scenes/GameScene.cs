@@ -754,6 +754,7 @@ namespace ClassicUO.Game.Scenes
         private void DrawWorld(UltimaBatcher2D batcher)
         {
             SelectedObject.Object = null;
+
             bool usecircle = ProfileManager.Current.UseCircleOfTransparency;
 
             batcher.GraphicsDevice.Clear(Color.Black);

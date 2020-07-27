@@ -78,14 +78,14 @@ namespace ClassicUO.Game.GameObjects
             if (AlphaHue != 255)
                 HueVector.Z = 1f - AlphaHue / 255f;
 
-            if (SelectedObject.HealthbarObject == this)
-            {
-                _viewHue = Notoriety.GetHue(NotorietyFlag);
-            }         
-            else if (ProfileManager.Current.HighlightGameObjects && SelectedObject.LastObject == this)
+            if (ProfileManager.Current.HighlightGameObjects && SelectedObject.LastObject == this)
             {
                 _viewHue = 0x0023;
                 HueVector.Y = 1;
+            }
+            else if (SelectedObject.HealthbarObject == this)
+            {
+                _viewHue = Notoriety.GetHue(NotorietyFlag);
             }
             else if (ProfileManager.Current.NoColorObjectsOutOfRange && Distance > World.ClientViewRange)
             {
