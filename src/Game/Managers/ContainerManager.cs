@@ -47,7 +47,7 @@ namespace ClassicUO.Game.Managers
                 0x0009, new ContainerData(0x0009, 0x0000, 0x0000, 20, 85, 124, 196)
             },
             {
-                0x003C, new ContainerData(0x003C, 0x0048, 0x0058, 44, 65, 186, 159)
+                0x003C, new ContainerData(0x003C, 0x0048, 0x0058, 44, 65, 186, 159,0x0050, 105, 162)
             },
             {
                 0x003D, new ContainerData(0x003D, 0x0048, 0x0058, 29, 34, 137, 128)
