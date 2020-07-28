@@ -1328,22 +1328,25 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override void OnMouseDown(int x, int y, MouseButtonType button)
         {
-            if ((button == MouseButtonType.Left && (Keyboard.Alt || _freeView)) || (button == MouseButtonType.Middle))
+            if (!ItemHold.Enabled)
             {
-                if (x > 4 && x < Width - 8 && y > 4 && y < Height - 8)
+                if ((button == MouseButtonType.Left && (Keyboard.Alt || _freeView)) || (button == MouseButtonType.Middle))
                 {
-                    if (button == MouseButtonType.Middle)
-                        FreeView = true;
+                    if (x > 4 && x < Width - 8 && y > 4 && y < Height - 8)
+                    {
+                        if (button == MouseButtonType.Middle)
+                            FreeView = true;
 
-                    _lastScroll.X = x;
-                    _lastScroll.Y = y;
-                    _isScrolling = true;
-                    CanMove = false;
+                        _lastScroll.X = x;
+                        _lastScroll.Y = y;
+                        _isScrolling = true;
+                        CanMove = false;
 
-                    UIManager.GameCursor.IsDraggingCursorForced = true;
+                        UIManager.GameCursor.IsDraggingCursorForced = true;
+                    }
                 }
             }
-
+            
             base.OnMouseDown(x, y, button);
         }
 
