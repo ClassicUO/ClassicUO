@@ -217,7 +217,7 @@ namespace ClassicUO.Game.Map
                         priorityZ++;
                     }
 
-                    if (m.IsMovable)
+                    if (m.ItemData.IsMultiMovable)
                         priorityZ++;
 
                     goto default;

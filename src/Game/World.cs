@@ -788,7 +788,6 @@ namespace ClassicUO.Game
 
             ObjectToRemove = 0;
             LastObject = 0;
-            HouseManager?.Clear();
             Items.Clear();
             Mobiles.Clear();
             Player?.Destroy();
@@ -799,7 +798,6 @@ namespace ClassicUO.Game
             Light.Personal = Light.RealPersonal = 0;
             ClientFeatures.SetFlags(0);
             ClientLockedFeatures.SetFlags(0);
-            HouseManager?.Clear();
             Party?.Clear();
             TargetManager.LastAttack = 0;
             MessageManager.PromptData = default;
@@ -808,6 +806,7 @@ namespace ClassicUO.Game
             CorpseManager.Clear();
             OPL.Clear();
             WMapManager.Clear();
+            HouseManager?.Clear();
 
             Season = Seasons.Summer;
             OldSeason = Seasons.Summer;
@@ -835,6 +834,11 @@ namespace ClassicUO.Game
                 {
                     if (item.RootContainer == Player)
                         continue;
+                }
+
+                if (item.OnGround && item.IsMulti)
+                {
+                    HouseManager.Remove(item.Serial);
                 }
 
                 _toRemove.Add(item);

@@ -37,8 +37,6 @@ namespace ClassicUO.Game.GameObjects
     internal sealed partial class Multi : GameObject
     {
         private ushort _originalGraphic;
-        private uint _lastAnimationFrameTime;
-
 
         private static readonly QueuedPool<Multi> _pool = new QueuedPool<Multi>(Constants.PREDICTABLE_MULTIS, m =>
         {
@@ -46,7 +44,6 @@ namespace ClassicUO.Game.GameObjects
             m.AlphaHue = 0;
             m.FoliageIndex = 0;
             m.IsFromTarget = false;
-            m.IsMovable = false;
             m.MultiOffsetX = m.MultiOffsetY = m.MultiOffsetZ = 0;
             m.IsCustom = false;
             m.State = 0;
@@ -82,7 +79,6 @@ namespace ClassicUO.Game.GameObjects
         public CUSTOM_HOUSE_MULTI_OBJECT_FLAGS State = 0;
         public bool IsCustom;
         public bool IsVegetation;
-        public bool IsMovable;
 
         public ref StaticTiles ItemData => ref TileDataLoader.Instance.StaticData[Graphic];
 

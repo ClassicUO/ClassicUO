@@ -337,8 +337,6 @@ namespace ClassicUO.Game.GameObjects
                         m.State = CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_DONT_REMOVE;
                         m.AddToTile();
                         house.Components.Add(m);
-
-                        m.IsMovable = ItemData.IsMultiMovable;
                     }
                     else if (i == 0)
                     {
