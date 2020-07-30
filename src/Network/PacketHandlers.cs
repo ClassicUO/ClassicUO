@@ -3893,7 +3893,7 @@ namespace ClassicUO.Network
                 int cliloc = (int) p.ReadUInt();
                 if (cliloc == 0)
                     break;
-
+                
                 ushort length = p.ReadUShort();
 
                 string argument = string.Empty;
@@ -3904,6 +3904,15 @@ namespace ClassicUO.Network
                 }
 
                 string str = ClilocLoader.Instance.Translate(cliloc, argument, true);
+
+
+                // horrible fix for (Imbued) hue
+                if (Client.Version >= Data.ClientVersion.CV_60143 && cliloc == 1080418)
+                {
+                    str = str.Insert(0,"<basefont color=#42a5ff>");
+                    str += "</basefont>";
+                }
+
 
                 for (int i = 0; i < list.Count; i++)
                 {
