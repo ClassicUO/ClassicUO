@@ -3519,7 +3519,8 @@ namespace ClassicUO.Network
                                     if (mobile != null)
                                     {
                                         // TODO: animation for statues
-                                        //mobile.SetAnimation();
+                                        //mobile.SetAnimation(Mobile.GetReplacedObjectAnimation(mobile.Graphic, animation), 0, (byte) frame, 0, false, false);
+                                        //mobile.AnimationFromServer = true;
                                     }
                                 }
                             }
