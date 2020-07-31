@@ -2625,15 +2625,21 @@ namespace ClassicUO.Network
             uint serial = p.ReadUInt();
             string name = p.ReadASCII();
 
-            Entity entity = World.Get(serial);
-            if (entity == null)
-                return;
-            entity.Name = name;
+            WMapEntity wme = World.WMapManager.GetEntity(serial);
+        
+            if (wme != null)
+            {
+                wme.Name = name;
+            }
 
-            NameOverheadGump gump = UIManager.GetGump<NameOverheadGump>(serial);
-            if (gump == null)
-                return;
-            gump.SetName();
+
+            Entity entity = World.Get(serial);
+
+            if (entity != null)
+            {
+                entity.Name = name;
+                UIManager.GetGump<NameOverheadGump>(serial)?.SetName();
+            }
         }
 
         private static void MultiPlacement(Packet p)
