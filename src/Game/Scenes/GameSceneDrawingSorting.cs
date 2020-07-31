@@ -378,7 +378,7 @@ namespace ClassicUO.Game.Scenes
 
                             //if (HeightChecks <= 0 && (!itemData.IsBridge || ((itemData.Flags & TileFlag.StairBack | TileFlag.StairRight) != 0) || itemData.IsWall))
                             {
-                                maxObjectZ += itemData.Height;
+                                maxObjectZ += itemData.Height == 0xFF ? 0 : itemData.Height;
                             }
                         }
 
