@@ -607,16 +607,16 @@ namespace ClassicUO.Network
 
         private static bool OnPluginSend(ref byte[] data, ref int length)
         {
-            if (data != null && data.Length != 0)
-            {
-                // horrible workaround to avoid ghosting item when a plugin sends drag request item
-                switch (data[0])
-                {
-                    case 0x07:
-                        ItemHold.Clear();
-                        break;
-                }
-            }
+            //if (data != null && data.Length != 0)
+            //{
+            //    // horrible workaround to avoid ghosting item when a plugin sends drag request item
+            //    switch (data[0])
+            //    {
+            //        case 0x07:
+            //            ItemHold.Clear();
+            //            break;
+            //    }
+            //}
 
 
             if (NetClient.LoginSocket.IsDisposed && NetClient.Socket.IsConnected)
