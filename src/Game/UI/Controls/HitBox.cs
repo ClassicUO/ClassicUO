@@ -30,11 +30,11 @@ namespace ClassicUO.Game.UI.Controls
     {
         protected readonly Texture2D _texture;
 
-        public HitBox(int x, int y, int w, int h)
+        public HitBox(int x, int y, int w, int h, string tooltip = null, float alpha = 0.75f)
         {
             CanMove = false;
             AcceptMouseInput = true;
-            Alpha = 0.75f;
+            Alpha = alpha;
             _texture = Texture2DCache.GetTexture(Color.White);
 
             X = x;
@@ -42,6 +42,8 @@ namespace ClassicUO.Game.UI.Controls
             Width = w;
             Height = h;
             WantUpdateSize = false;
+
+            SetTooltip(tooltip);
         }
 
 
