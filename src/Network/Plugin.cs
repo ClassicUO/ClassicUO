@@ -351,9 +351,9 @@ namespace ClassicUO.Network
         private static void SetWindowTitle(string str)
         {
 #if DEV_BUILD
-            Client.Game.Window.Title = $"ClassicUO [dev] - {CUOEnviroment.Version} - {str}";
+            Client.Game.Window.Title = $"{str} - ClassicUO [dev] - {CUOEnviroment.Version}";
 #else
-            Client.Game.Window.Title = $"ClassicUO - {CUOEnviroment.Version} - {str}";
+            Client.Game.Window.Title = $"{str} - ClassicUO - { CUOEnviroment.Version}";
 #endif
         }
 
