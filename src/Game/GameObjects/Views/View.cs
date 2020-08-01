@@ -180,7 +180,7 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
-        protected static void DrawStaticAnimated(UltimaBatcher2D batcher, ushort graphic, int x, int y, ref Vector3 hue)
+        protected static void DrawStaticAnimated(UltimaBatcher2D batcher, ushort graphic, int x, int y, ref Vector3 hue, ref bool transparent) 
         {
             ref var index = ref ArtLoader.Instance.GetValidRefEntry(graphic + 0x4000);
 
@@ -192,7 +192,50 @@ namespace ClassicUO.Game.GameObjects
                 texture.Ticks = Time.Ticks;
                 index = ref ArtLoader.Instance.GetValidRefEntry(graphic + 0x4000);
 
-                batcher.DrawSprite(texture, x - index.Width, y - index.Height, false, ref hue);
+                if (transparent)
+                {
+                    int maxDist = ProfileManager.Current.CircleOfTransparencyRadius + 22;
+                    int fx = (int) (World.Player.RealScreenPosition.X + World.Player.Offset.X);
+                    int fy = (int) (World.Player.RealScreenPosition.Y + (World.Player.Offset.Y - World.Player.Offset.Z));
+
+                    fx -= x;
+                    fy -= y;
+
+                    float dist = (float) Math.Floor(Math.Sqrt(fx * fx + fy * fy));
+
+                    if (dist <= maxDist)
+                    {
+                        float alpha = hue.Z;
+                        switch (ProfileManager.Current.CircleOfTransparencyType)
+                        {
+                            default:
+                            case 0:
+                                hue.Z = 0.75f;
+                                break;
+                            case 1:
+                                hue.Z = MathHelper.Lerp(1f, 0f, (dist / (float) maxDist));
+                                break;
+                        }
+
+                        x -= index.Width;
+                        y -= index.Height;
+
+                        batcher.DrawSprite(texture, x, y, false, ref hue);
+                        batcher.SetStencil(StaticTransparentStencil.Value);
+                        hue.Z = alpha;
+                        batcher.DrawSprite(texture, x, y, false, ref hue);
+                        batcher.SetStencil(null);
+
+                        return;
+                    }
+                }
+
+                transparent = false;
+                x -= index.Width;
+                y -= index.Height;
+
+
+                batcher.DrawSprite(texture, x, y, false, ref hue);
             }
         }
 

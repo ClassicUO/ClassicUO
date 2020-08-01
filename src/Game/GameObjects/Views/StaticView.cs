@@ -86,57 +86,11 @@ namespace ClassicUO.Game.GameObjects
                 graphic = Constants.TREE_REPLACE_GRAPHIC;
             }
 
-            if (DrawTransparent)
-            {
-                int maxDist = ProfileManager.Current.CircleOfTransparencyRadius + 44;
-                int fx = (int) (World.Player.RealScreenPosition.X + World.Player.Offset.X);
-                int fy = (int) (World.Player.RealScreenPosition.Y + (World.Player.Offset.Y - World.Player.Offset.Z));
 
-                fx -= posX;
-                fy -= posY;
+            if (AlphaHue != 255)
+                HueVector.Z = 1f - AlphaHue / 255f;
 
-                int dist = (int) Math.Sqrt(fx * fx + fy * fy);
-
-                if (dist <= maxDist)
-                {
-                    switch (ProfileManager.Current.CircleOfTransparencyType)
-                    {
-                        default:
-                        case 0:
-                            HueVector.Z = 0.75f;
-                            break;
-                        case 1:
-                            HueVector.Z = MathHelper.Lerp(1f, 0f, (dist / (float) maxDist));
-                            break;
-                    }
-
-                    DrawStaticAnimated(batcher, graphic, posX, posY, ref HueVector);
-
-                    if (AlphaHue != 255)
-                        HueVector.Z = 1f - AlphaHue / 255f;
-                    else
-                        HueVector.Z = 0;
-
-                    batcher.SetStencil(StaticTransparentStencil.Value);
-                    DrawStaticAnimated(batcher, graphic, posX, posY, ref HueVector);
-                    batcher.SetStencil(null);
-                }
-                else
-                {
-                    if (AlphaHue != 255)
-                        HueVector.Z = 1f - AlphaHue / 255f;
-
-                    DrawStaticAnimated(batcher, graphic, posX, posY, ref HueVector);
-                }
-            }
-            else
-            {
-                if (AlphaHue != 255)
-                    HueVector.Z = 1f - AlphaHue / 255f;
-
-                DrawStaticAnimated(batcher, graphic, posX, posY, ref HueVector);
-            }
-
+            DrawStaticAnimated(batcher, graphic, posX, posY, ref HueVector, ref DrawTransparent);
 
             if (ItemData.IsLight)
             {

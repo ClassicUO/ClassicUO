@@ -42,7 +42,7 @@ namespace ClassicUO.Game.GameObjects
             //Engine.DebugInfo.ItemsRendered++;
 
             ResetHueVector();
-
+            DrawTransparent = false;
 
             posX += (int) Offset.X;
             posY += (int) (Offset.Y + Offset.Z);
@@ -128,7 +128,7 @@ namespace ClassicUO.Game.GameObjects
 
             if (!IsMulti && !IsCoin && Amount > 1 && ItemData.IsStackable)
             {
-                DrawStaticAnimated(batcher, graphic, posX - 5, posY - 5, ref HueVector);
+                DrawStaticAnimated(batcher, graphic, posX - 5, posY - 5, ref HueVector, ref DrawTransparent);
             }
 
             if (ItemData.IsLight)
@@ -140,7 +140,7 @@ namespace ClassicUO.Game.GameObjects
             if (!SerialHelper.IsValid(Serial) && IsMulti && TargetManager.TargetingState == CursorTarget.MultiPlacement)
                 HueVector.Z = 0.5f;
 
-            DrawStaticAnimated(batcher, graphic, posX, posY, ref HueVector);
+            DrawStaticAnimated(batcher, graphic, posX, posY, ref HueVector, ref DrawTransparent);
 
             if (SelectedObject.Object == this || TargetManager.TargetingState == CursorTarget.MultiPlacement)
                 return false;
