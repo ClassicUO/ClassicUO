@@ -66,12 +66,20 @@ namespace ClassicUO.IO.Resources
                 FileSystemHelper.EnsureFileExists(path);
 
                 UOFileMul tiledata = new UOFileMul(path);
+
+
                 bool isold = Client.Version < ClientVersion.CV_7090;
-                int staticscount = !isold ? (int) (tiledata.Length - 512 * UnsafeMemoryManager.SizeOf<LandGroupNew>()) / UnsafeMemoryManager.SizeOf<StaticGroupNew>() : (int) (tiledata.Length - 512 * UnsafeMemoryManager.SizeOf<LandGroupOld>()) / UnsafeMemoryManager.SizeOf<StaticGroupOld>();
+                const int LAND_SIZE = 512;
+
+                int land_group = isold ? Marshal.SizeOf<LandGroupOld>() : Marshal.SizeOf<LandGroupNew>();
+                int static_group = isold ? Marshal.SizeOf<StaticGroupOld>() : Marshal.SizeOf<StaticGroupNew>();
+                int staticscount = (int) (((tiledata.Length - (LAND_SIZE * land_group))) / static_group);
 
                 if (staticscount > 2048)
                     staticscount = 2048;
+
                 tiledata.Seek(0);
+
                 _landData = new LandTiles[Constants.MAX_LAND_DATA_INDEX_COUNT];
                 _staticData = new StaticTiles[staticscount * 32];
                 byte[] bufferString = new byte[20];
@@ -90,6 +98,7 @@ namespace ClassicUO.IO.Resources
                         ushort textId = tiledata.ReadUShort();
                         tiledata.Fill(ref bufferString, 20);
                         string name = string.Intern(Encoding.UTF8.GetString(bufferString).TrimEnd('\0'));
+                    
                         LandData[idx] = new LandTiles(flags, textId, name);
                     }
                 }

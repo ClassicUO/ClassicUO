@@ -32,11 +32,17 @@ namespace ClassicUO.Utility
         [MethodImpl(256)]
         public static bool IsNoDrawable(ushort g)
         {
+            if (g == 0xf65)
+            {
+
+            }
+
             switch (g)
             {
                 case 0x0001:
                 case 0x21BC:
                 //case 0x5690:
+                case 0x0F65: // easel fix
                     return true;
 
                 case 0x9E4C:
