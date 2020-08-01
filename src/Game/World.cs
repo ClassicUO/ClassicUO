@@ -194,7 +194,7 @@ namespace ClassicUO.Game
         }
 
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        /*[MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static bool CheckToRemove(Entity obj, int distance)
         {
             if (Player == null || obj.Serial == Player.Serial)
@@ -202,6 +202,7 @@ namespace ClassicUO.Game
 
             return Math.Max(Math.Abs(obj.X - RangeSize.X), Math.Abs(obj.Y - RangeSize.Y)) > distance;
         }
+        */
 
         public static void Update(double totalMS, double frameMS)
         {
@@ -241,7 +242,7 @@ namespace ClassicUO.Game
                 {
                     mob.Update(totalMS, frameMS);
 
-                    if (do_delete && CheckToRemove(mob, ClientViewRange))
+                    if (do_delete && mob.Distance > ClientViewRange /*CheckToRemove(mob, ClientViewRange)*/)
                         RemoveMobile(mob);
 
                     if (mob.IsDestroyed)
@@ -285,7 +286,7 @@ namespace ClassicUO.Game
                 {
                     item.Update(totalMS, frameMS);
 
-                    if (do_delete && item.OnGround && CheckToRemove(item, ClientViewRange))
+                    if (do_delete && item.OnGround && item.Distance > ClientViewRange /*CheckToRemove(item, ClientViewRange)*/)
                     {
                         if (item.IsMulti)
                         {
