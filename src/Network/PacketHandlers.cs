@@ -1210,65 +1210,72 @@ namespace ClassicUO.Network
                     World.ObjectToRemove = 0;
                 }
 
-                if (!ItemHold.UpdatedInWorld)
+                if (SerialHelper.IsValid(ItemHold.Serial) && ItemHold.Graphic != 0xFFFF)
                 {
-                    if (ItemHold.Layer == Layer.Invalid && SerialHelper.IsValid(ItemHold.Container))
+                    if (!ItemHold.UpdatedInWorld)
                     {
-                        // Server should send an UpdateContainedItem after this packet.
-                        Console.WriteLine("=== DENY === ADD TO CONTAINER");
-                        AddItemToContainer(ItemHold.Serial,
-                                           ItemHold.Graphic,
-                                           ItemHold.TotalAmount,
-                                           ItemHold.X,
-                                           ItemHold.Y,
-                                           ItemHold.Hue,
-                                           ItemHold.Container);
-
-                        UIManager.GetGump<ContainerGump>(ItemHold.Container)?.RequestUpdateContents();
-                    }
-                    else
-                    {
-                        Item item = World.GetOrCreateItem(ItemHold.Serial);
-
-                        item.Graphic = ItemHold.Graphic;
-                        item.Hue = ItemHold.Hue;
-                        item.Amount = ItemHold.TotalAmount;
-                        item.Flags = ItemHold.Flags;
-                        item.Layer = ItemHold.Layer;
-                        item.X = ItemHold.X;
-                        item.Y = ItemHold.Y;
-                        item.Z = ItemHold.Z;
-                        item.CheckGraphicChange();
-
-                        Entity container = World.Get(ItemHold.Container);
-
-                        if (container != null)
+                        if (ItemHold.Layer == Layer.Invalid && SerialHelper.IsValid(ItemHold.Container))
                         {
-                            if (SerialHelper.IsMobile(container.Serial))
-                            {
-                                Console.WriteLine("=== DENY === ADD TO PAPERDOLL");
+                            // Server should send an UpdateContainedItem after this packet.
+                            Console.WriteLine("=== DENY === ADD TO CONTAINER");
+                            AddItemToContainer(ItemHold.Serial,
+                                               ItemHold.Graphic,
+                                               ItemHold.TotalAmount,
+                                               ItemHold.X,
+                                               ItemHold.Y,
+                                               ItemHold.Hue,
+                                               ItemHold.Container);
 
-                                World.RemoveItemFromContainer(item);
-                                container.PushToBack(item);
-                                item.Container = container.Serial;
-                                UIManager.GetGump<PaperDollGump>(item.Container)?.RequestUpdateContents();
-                            }
-                            else
-                            {
-                                Console.WriteLine("=== DENY === SOMETHING WRONG");
-
-                                World.RemoveItem(item, true);
-                            }
+                            UIManager.GetGump<ContainerGump>(ItemHold.Container)?.RequestUpdateContents();
                         }
                         else
                         {
-                            Console.WriteLine("=== DENY === ADD TO TERRAIN");
+                            Item item = World.GetOrCreateItem(ItemHold.Serial);
 
-                            World.RemoveItemFromContainer(item);
-                            item.AddToTile();
-                            item.UpdateScreenPosition();
+                            item.Graphic = ItemHold.Graphic;
+                            item.Hue = ItemHold.Hue;
+                            item.Amount = ItemHold.TotalAmount;
+                            item.Flags = ItemHold.Flags;
+                            item.Layer = ItemHold.Layer;
+                            item.X = ItemHold.X;
+                            item.Y = ItemHold.Y;
+                            item.Z = ItemHold.Z;
+                            item.CheckGraphicChange();
+
+                            Entity container = World.Get(ItemHold.Container);
+
+                            if (container != null)
+                            {
+                                if (SerialHelper.IsMobile(container.Serial))
+                                {
+                                    Console.WriteLine("=== DENY === ADD TO PAPERDOLL");
+
+                                    World.RemoveItemFromContainer(item);
+                                    container.PushToBack(item);
+                                    item.Container = container.Serial;
+                                    UIManager.GetGump<PaperDollGump>(item.Container)?.RequestUpdateContents();
+                                }
+                                else
+                                {
+                                    Console.WriteLine("=== DENY === SOMETHING WRONG");
+
+                                    World.RemoveItem(item, true);
+                                }
+                            }
+                            else
+                            {
+                                Console.WriteLine("=== DENY === ADD TO TERRAIN");
+
+                                World.RemoveItemFromContainer(item);
+                                item.AddToTile();
+                                item.UpdateScreenPosition();
+                            }
                         }
                     }
+                }
+                else
+                {
+                    Log.Error($"Wrong data: serial = {ItemHold.Serial:X8}  -  graphic = {ItemHold.Graphic:X4}");
                 }
 
                 UIManager.GetGump<SplitMenuGump>(ItemHold.Serial)?.Dispose();
