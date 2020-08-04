@@ -117,7 +117,6 @@ namespace ClassicUO.Game.Managers
 
                         if (gump != null)
                         {
-                            GameActions.RequestMobileStatus(serial);
                             gump.RequestUpdateContents();
                         }
                         else

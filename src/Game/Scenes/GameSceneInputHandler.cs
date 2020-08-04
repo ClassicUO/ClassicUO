@@ -190,9 +190,6 @@ namespace ClassicUO.Game.Scenes
                             continue;
                         }
 
-                        //Instead of destroying existing HP bar, continue if already opened.
-                        GameActions.RequestMobileStatus(mobile);
-
                         BaseHealthBarGump hbgc;
 
                         if (useCHB)

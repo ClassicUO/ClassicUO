@@ -805,12 +805,12 @@ namespace ClassicUO.Network
                 }
                 // else
                 {
-                    BaseHealthBarGump bar = UIManager.GetGump<BaseHealthBarGump>(serial);
+                    //BaseHealthBarGump bar = UIManager.GetGump<BaseHealthBarGump>(serial);
 
-                    if (bar == null)
-                    {
-                        NetClient.Socket.Send(new PCloseStatusBarGump(serial));
-                    }
+                    //if (bar == null)
+                    //{
+                    //    NetClient.Socket.Send(new PCloseStatusBarGump(serial));
+                    //}
 
                     World.RemoveMobile(serial, true);
                 }
@@ -1700,7 +1700,7 @@ namespace ClassicUO.Network
                 Client.Game.SetScene(scene);
 
                 //GameActions.OpenPaperdoll(World.Player);
-                NetClient.Socket.Send(new PStatusRequest(World.Player));
+                GameActions.RequestMobileStatus(World.Player);
                 NetClient.Socket.Send(new POpenChat(""));
 
 
@@ -2242,7 +2242,7 @@ namespace ClassicUO.Network
             Flags flags = (Flags) p.ReadByte();
             NotorietyFlag notoriety = (NotorietyFlag) p.ReadByte();
             bool oldDead = false;
-            bool alreadyExists = World.Get(serial) != null;
+            //bool alreadyExists = World.Get(serial) != null;
 
             if (serial == World.Player)
             {
@@ -2297,9 +2297,6 @@ namespace ClassicUO.Network
             {
                 mob.NotorietyFlag = notoriety;
                 UIManager.GetGump<PaperDollGump>(serial)?.RequestUpdateContents();
-
-                if (!alreadyExists)
-                    GameActions.RequestMobileStatus(serial);
             }
 
             if (p.ID != 0x78)
@@ -2813,14 +2810,12 @@ namespace ClassicUO.Network
 
         private static void AttackCharacter(Packet p)
         {
-            TargetManager.LastAttack = p.ReadUInt();
+            var serial = p.ReadUInt();
 
-            if (TargetManager.LastAttack != 0 && World.InGame)
+            if (TargetManager.LastAttack != serial && World.InGame)
             {
-                Mobile mob = World.Mobiles.Get(TargetManager.LastAttack);
-
-                if (mob != null && mob.HitsMax == 0)
-                    NetClient.Socket.Send(new PStatusRequest(TargetManager.LastAttack));
+                TargetManager.LastAttack = serial;
+                GameActions.RequestMobileStatus(TargetManager.LastAttack);
             }
         }
 
@@ -4945,6 +4940,11 @@ namespace ClassicUO.Network
 
             if (mobile != null)
             {
+                if (created /*|| mobile.HitsMax == 0*/)
+                {
+                    GameActions.RequestMobileStatus(serial);
+                }
+
                 mobile.AddToTile();
                 mobile.UpdateScreenPosition();
             }

@@ -1020,13 +1020,6 @@ namespace ClassicUO.Game.Managers
 
                     if (SerialHelper.IsValid(sel_obj))
                     {
-                        Entity ent = World.Get(sel_obj);
-
-                        if (ent != null && SerialHelper.IsMobile(sel_obj) && ent.HitsMax == 0)
-                        {
-                            NetClient.Socket.Send(new PStatusRequest(sel_obj));
-                        }
-
                         TargetManager.LastTargetInfo.SetEntity(sel_obj);
                         TargetManager.LastAttack = sel_obj;
                     }

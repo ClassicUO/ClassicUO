@@ -263,6 +263,12 @@ namespace ClassicUO.Game.Managers
                                                                                    {
                                                                                        NetClient.Socket.Send(new PTargetObject(entity, entity.Graphic, entity.X, entity.Y, entity.Z, _targetCursorId, (byte) TargetingType));
                                                                                        ClearTargetingWithoutTargetCancelPacket();
+
+                                                                                       if (LastTargetInfo.Serial !=  serial)
+                                                                                       {
+                                                                                           GameActions.RequestMobileStatus(serial);
+                                                                                       }
+                                                                                      
                                                                                    }
                                                                                });
 
@@ -283,6 +289,11 @@ namespace ClassicUO.Game.Managers
                             }
 
                             NetClient.Socket.Send(packet);
+
+                            if (SerialHelper.IsMobile(serial) && LastTargetInfo.Serial != serial)
+                            {
+                                GameActions.RequestMobileStatus(serial);
+                            }
                         }
                       
                         ClearTargetingWithoutTargetCancelPacket();

@@ -56,9 +56,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Dispose();
                 return;
             }
-
             GameActions.RequestMobileStatus(entity.Serial);
-
             LocalSerial = entity.Serial;
             CanCloseWithRightClick = true;
             _name = entity.Name;
@@ -99,8 +97,10 @@ namespace ClassicUO.Game.UI.Gumps
         {
             var entity = World.Get(LocalSerial);
 
-            if (Client.Version >= ClientVersion.CV_200 && World.InGame && entity != null && TargetManager.LastTargetInfo.Serial != LocalSerial && TargetManager.LastAttack != LocalSerial && TargetManager.SelectedTarget != LocalSerial)
+            if (Client.Version >= ClientVersion.CV_200 && World.InGame)
+            {
                 NetClient.Socket.Send(new PCloseStatusBarGump(entity));
+            }
 
             _textBox?.Dispose();
             _textBox = null;
@@ -405,6 +405,11 @@ namespace ClassicUO.Game.UI.Gumps
             ushort textColor = 0x0386;
 
             Entity entity = World.Get(LocalSerial);
+
+            if (entity is Item it && it.Layer == 0 && it.Container == World.Player)
+            {
+                entity = null;
+            }
 
             if (entity == null || entity.IsDestroyed)
             {
@@ -1042,6 +1047,11 @@ namespace ClassicUO.Game.UI.Gumps
 
             Entity entity = World.Get(LocalSerial);
 
+            if (entity is Item it && it.Layer == 0 && it.Container == World.Player)
+            {
+                entity = null;
+            }
+
             if (entity == null || entity.IsDestroyed)
             {
                 if (LocalSerial != World.Player && (ProfileManager.Current.CloseHealthBarType == 1 ||
@@ -1265,17 +1275,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             }
         }
-
-        public override void Dispose()
-        {
-            var entity = World.Get(LocalSerial);
-
-            if (Client.Version >= ClientVersion.CV_200 && World.InGame && entity != null && TargetManager.LastTargetInfo.Serial != LocalSerial && TargetManager.LastAttack != LocalSerial && TargetManager.SelectedTarget != LocalSerial)
-                NetClient.Socket.Send(new PCloseStatusBarGump(entity));
-
-            base.Dispose();
-        }
-
+        
         public override void OnButtonClick(int buttonID)
         {
             switch ((ButtonParty) buttonID)
