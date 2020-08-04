@@ -273,7 +273,7 @@ namespace ClassicUO.Game.GameObjects
                         if (block->Y > maxY)
                             maxY = block->Y;
 
-                        if (block->Flags == 0)
+                        if (block->Flags == 0 || block->Flags == 0x100)
                         {
                             Multi m = Multi.Create(block->ID);
                             m.X = (ushort) (X + block->X);
