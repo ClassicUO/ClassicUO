@@ -647,7 +647,10 @@ namespace ClassicUO.Game.UI.Gumps
 
                     case ChatMode.ClientCommand:
                         string[] tt = text.Split(new[] {' '}, StringSplitOptions.RemoveEmptyEntries);
-                        CommandManager.Execute(tt[0], tt);
+                        if (tt.Length != 0)
+                        {
+                            CommandManager.Execute(tt[0], tt);
+                        }
 
                         break;
 
