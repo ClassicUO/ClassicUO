@@ -95,11 +95,9 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override void Dispose()
         {
-            var entity = World.Get(LocalSerial);
-
             if (Client.Version >= ClientVersion.CV_200 && World.InGame)
             {
-                NetClient.Socket.Send(new PCloseStatusBarGump(entity));
+                NetClient.Socket.Send(new PCloseStatusBarGump(LocalSerial));
             }
 
             _textBox?.Dispose();
