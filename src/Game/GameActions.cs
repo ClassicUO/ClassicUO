@@ -269,13 +269,12 @@ namespace ClassicUO.Game
 
         public static void RequestMobileStatus(uint serial)
         {
-            Mobile mob = World.Mobiles.Get(serial);
-            if (mob != null)
-            {
-                mob.AddMessage(MessageType.Regular, "[PACKET REQUESTED]");
-            }
+            //Mobile mob = World.Mobiles.Get(serial);
+            //if (mob != null)
+            //{
+            //    mob.AddMessage(MessageType.Regular, "[PACKET REQUESTED]");
+            //}
             Socket.Send(new PStatusRequest(serial));
-
         }
 
         public static void CastSpellFromBook(int index, uint bookSerial)
