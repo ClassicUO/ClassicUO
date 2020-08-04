@@ -17,7 +17,7 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <OutputPath>$(SolutionDir)bin\Debug\</OutputPath>
   </PropertyGroup>
-  
+
   <PropertyGroup>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
@@ -96,16 +96,17 @@
       if ! [ -d "$(OutputPath)osx/" ]; then
       mkdir -p "$(OutputPath)osx/"
       fi
- 
+
       if ! [ -d "$(OutputPath)x64/" ]; then
       mkdir -p "$(OutputPath)x64/"
       fi
 
-      cp -Rf "$(SolutionDir)external/lib64/*.*"  "$(OutputPath)lib64/"
-      cp -Rf "$(SolutionDir)external/osx/*.*"    "$(OutputPath)osx/"
-      cp -Rf "$(SolutionDir)external/x64/*.*"    "$(OutputPath)x64/"
+      cd "$(SolutionDir)"
+      cp -Rf external/lib64/*.*  "$(OutputPath)lib64/"
+      cp -Rf external/osx/*.*  "$(OutputPath)osx/"
+      cp -Rf external/x64/*.*  "$(OutputPath)x64/"
     </PostBuildEvent>
-   
+
   </PropertyGroup>
 
 </Project>
