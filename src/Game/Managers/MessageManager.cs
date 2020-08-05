@@ -85,6 +85,16 @@ namespace ClassicUO.Game.Managers
 
             switch (type)
             {
+                case MessageType.Command:
+                case MessageType.Encoded:
+                case MessageType.System:
+                case MessageType.Party:
+                case MessageType.Guild:
+                case MessageType.Alliance:
+
+                    break;
+
+
                 case MessageType.Spell:
 
                 {
@@ -114,6 +124,7 @@ namespace ClassicUO.Game.Managers
                     goto case MessageType.Label;
                 }
 
+                default:
                 case MessageType.Focus:
                 case MessageType.Whisper:
                 case MessageType.Yell:
@@ -169,22 +180,14 @@ namespace ClassicUO.Game.Managers
                     break;
       
 
-                case MessageType.Command:
-                case MessageType.Encoded:
-                case MessageType.System:
-                case MessageType.Party:
-                case MessageType.Guild:
-                case MessageType.Alliance:
+            
+                //default:
+                //    if (parent == null)
+                //        break;
 
-                    break;
+                //    parent.AddMessage(type, text, font, hue, unicode);
 
-                default:
-                    if (parent == null)
-                        break;
-
-                    parent.AddMessage(type, text, font, hue, unicode);
-
-                    break;
+                //    break;
             }
 
             MessageReceived.Raise(new UOMessageEventArgs(parent, text, name, hue, type, font, text_type, unicode, lang), parent);
