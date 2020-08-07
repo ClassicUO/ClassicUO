@@ -78,7 +78,6 @@ namespace ClassicUO.Renderer
             r.SaveHitMap = saveHitmap;
             r.HTMLColor = 0xFFFF_FFFF;
             r.HasBackgroundColor = false;
-            r.IsPartialHue = false;
 
             if (r.Text != text)
                 r.Text = text; // here makes the texture
@@ -136,7 +135,6 @@ namespace ClassicUO.Renderer
                     {
                         Width = 0;
                         Height = 0;
-                        IsPartialHue = false;
 
                         if (IsHTML)
                             FontsLoader.Instance.SetUseHTML(false);
@@ -167,8 +165,6 @@ namespace ClassicUO.Renderer
         }
 
         public int LinesCount => Texture == null || Texture.IsDisposed ? 0 : Texture.LinesCount;
-
-        public bool IsPartialHue { get; private set; }
 
         public bool SaveHitMap { get; private set; }
 
@@ -347,14 +343,22 @@ namespace ClassicUO.Renderer
                 dheight = srcHeight;
             }
 
+            if (!IsUnicode && SaveHitMap && hue == 0)
+            {
+                hue = Hue;
+            }
+
+            if (hue > 0)
+            {
+                --hue;
+            }
+
             _hueVector.X = hue;
 
             if (hue != 0)
             {
                 if (IsUnicode)
                     _hueVector.Y = ShaderHuesTraslator.SHADER_TEXT_HUE_NO_BLACK;
-                else if (Font == 3)
-                    _hueVector.Y = 5;
                 else if (Font != 5 && Font != 8)
                     _hueVector.Y = ShaderHuesTraslator.SHADER_PARTIAL_HUED;
                 else
@@ -376,7 +380,17 @@ namespace ClassicUO.Renderer
             if (sx > Texture.Width || sy > Texture.Height)
                 return false;
 
-            if(hue != -1)
+            if (!IsUnicode && SaveHitMap && hue == -1)
+            {
+                hue = Hue;
+            }
+
+            if (hue > 0)
+            {
+                --hue;
+            }
+
+            if (hue != -1)
             {
                 _hueVector.X = hue;
 
@@ -384,8 +398,6 @@ namespace ClassicUO.Renderer
                 {
                     if (IsUnicode)
                         _hueVector.Y = ShaderHuesTraslator.SHADER_TEXT_HUE_NO_BLACK;
-                    else if (Font == 3)
-                        _hueVector.Y = 5;
                     else if (Font != 5 && Font != 8)
                         _hueVector.Y = ShaderHuesTraslator.SHADER_PARTIAL_HUED;
                     else
@@ -404,14 +416,23 @@ namespace ClassicUO.Renderer
             if (string.IsNullOrEmpty(Text) || Texture == null)
                 return false;
 
+            if (!IsUnicode && SaveHitMap && hue == 0)
+            {
+                hue = Hue;
+            }
+
+            if (hue > 0)
+            {
+                --hue;
+            }
+
             _hueVector.X = hue;
+
 
             if (hue != 0)
             {
                 if (IsUnicode)
                     _hueVector.Y = ShaderHuesTraslator.SHADER_TEXT_HUE_NO_BLACK;
-                else if (Font == 3)
-                    _hueVector.Y = 5;
                 else if (Font != 5 && Font != 8)
                     _hueVector.Y = ShaderHuesTraslator.SHADER_PARTIAL_HUED;
                 else
@@ -438,14 +459,15 @@ namespace ClassicUO.Renderer
 
             FontsLoader.Instance.RecalculateWidthByInfo = RecalculateWidthByInfo;
 
-            bool ispartial = false;
 
             if (IsUnicode)
+            {
                 FontsLoader.Instance.GenerateUnicode(ref _texture, Font, Text, Hue, Cell, MaxWidth, Align, (ushort)FontStyle, SaveHitMap, MaxHeight);
+            }
             else
-                FontsLoader.Instance.GenerateASCII(ref _texture, Font, Text, Hue, MaxWidth, Align, (ushort)FontStyle, out ispartial, SaveHitMap, MaxHeight);
-
-            IsPartialHue = ispartial;
+            {
+                FontsLoader.Instance.GenerateASCII(ref _texture, Font, Text, Hue, MaxWidth, Align, (ushort)FontStyle, SaveHitMap, MaxHeight);
+            }
 
             if (Texture != null)
             {

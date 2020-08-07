@@ -43,7 +43,7 @@ namespace ClassicUO.Game.GameObjects
 
             if (ProfileManager.Current.HighlightGameObjects && SelectedObject.LastObject == this)
             {
-                HueVector.X = 0x0023;
+                HueVector.X = Constants.HIGHLIGHT_CURRENT_OBJECT_HUE;
                 HueVector.Y = 1;
             }
             else if (ProfileManager.Current.NoColorObjectsOutOfRange && Distance > World.ClientViewRange)

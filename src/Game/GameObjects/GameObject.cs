@@ -149,9 +149,9 @@ namespace ClassicUO.Game.GameObjects
         }
 
 
-        public void AddMessage(MessageType type, string message)
+        public void AddMessage(MessageType type, string message, TEXT_TYPE text_type)
         {
-            AddMessage(type, message, ProfileManager.Current.ChatFont, ProfileManager.Current.SpeechHue, true);
+            AddMessage(type, message, ProfileManager.Current.ChatFont, ProfileManager.Current.SpeechHue, true, text_type);
         }
 
         public virtual void UpdateTextCoordsV()
@@ -201,12 +201,12 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
-        public void AddMessage(MessageType type, string text, byte font, ushort hue, bool isunicode)
+        public void AddMessage(MessageType type, string text, byte font, ushort hue, bool isunicode, TEXT_TYPE text_type)
         {
             if (string.IsNullOrEmpty(text))
                 return;
 
-            var msg = MessageManager.CreateMessage(text, hue, font, isunicode, type);
+            var msg = MessageManager.CreateMessage(text, hue, font, isunicode, type, text_type);
             AddMessage(msg);
         }
 

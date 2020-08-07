@@ -439,7 +439,7 @@ namespace ClassicUO.Game
                     switch (TargetManager.TargetingType)
                     {
                         case TargetType.Neutral:
-                            _auraVector.X = 0x03B2;
+                            _auraVector.X = 0x03b2;
 
                             break;
 

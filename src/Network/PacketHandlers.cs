@@ -1294,7 +1294,7 @@ namespace ClassicUO.Network
             byte code = p.ReadByte();
 
             if (code < 5)
-                MessageManager.HandleMessage(null, ServerErrorMessages.GetError(p.ID, code), string.Empty, 1001, MessageType.System, 3, TEXT_TYPE.SYSTEM);
+                MessageManager.HandleMessage(null, ServerErrorMessages.GetError(p.ID, code), string.Empty, 0x03b2, MessageType.System, 3, TEXT_TYPE.SYSTEM);
         }
 
         private static void EndDraggingItem(Packet p)

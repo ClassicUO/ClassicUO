@@ -1092,10 +1092,10 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 if (e.Button != MouseButtonType.Left)
                     return;
-                var speechHue = (ushort)RandomHelper.GetValue(2, 1001); //this seems to be the acceptable hue range for chat messages,
-                var emoteHue = (ushort)RandomHelper.GetValue(2, 1001); //taken from POL source code.
-                var yellHue = (ushort)RandomHelper.GetValue(2, 1001);
-                var whisperHue = (ushort)RandomHelper.GetValue(2, 1001);
+                var speechHue = (ushort)RandomHelper.GetValue(2, 0x03b2); //this seems to be the acceptable hue range for chat messages,
+                var emoteHue = (ushort)RandomHelper.GetValue(2, 0x03b2); //taken from POL source code.
+                var yellHue = (ushort)RandomHelper.GetValue(2, 0x03b2);
+                var whisperHue = (ushort)RandomHelper.GetValue(2, 0x03b2);
                 ProfileManager.Current.SpeechHue = speechHue;
                 _speechColorPickerBox.SetColor(speechHue, HuesLoader.Instance.GetPolygoneColor(12, speechHue));
                 ProfileManager.Current.EmoteHue = emoteHue;
@@ -1612,8 +1612,8 @@ namespace ClassicUO.Game.UI.Gumps
                 case 8: // combat
                     _innocentColorPickerBox.SetColor(0x005A, HuesLoader.Instance.GetPolygoneColor(12, 0x005A));
                     _friendColorPickerBox.SetColor(0x0044, HuesLoader.Instance.GetPolygoneColor(12, 0x0044));
-                    _crimialColorPickerBox.SetColor(0x03B2, HuesLoader.Instance.GetPolygoneColor(12, 0x03B2));
-                    _genericColorPickerBox.SetColor(0x03B2, HuesLoader.Instance.GetPolygoneColor(12, 0x03B2));
+                    _crimialColorPickerBox.SetColor(0x03b2, HuesLoader.Instance.GetPolygoneColor(12, 0x03b2));
+                    _genericColorPickerBox.SetColor(0x03b2, HuesLoader.Instance.GetPolygoneColor(12, 0x03b2));
                     _murdererColorPickerBox.SetColor(0x0023, HuesLoader.Instance.GetPolygoneColor(12, 0x0023));
                     _enemyColorPickerBox.SetColor(0x0031, HuesLoader.Instance.GetPolygoneColor(12, 0x0031));
                     _queryBeforAttackCheckbox.IsChecked = true;
@@ -1622,7 +1622,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _buffBarTime.IsChecked = false;
                     _beneficColorPickerBox.SetColor(0x0059, HuesLoader.Instance.GetPolygoneColor(12, 0x0059));
                     _harmfulColorPickerBox.SetColor(0x0020, HuesLoader.Instance.GetPolygoneColor(12, 0x0020));
-                    _neutralColorPickerBox.SetColor(0x03B1, HuesLoader.Instance.GetPolygoneColor(12, 0x03B1));
+                    _neutralColorPickerBox.SetColor(0x03b2, HuesLoader.Instance.GetPolygoneColor(12, 0x03b2));
                     _spellFormatBox.SetText("{power} [{spell}]");
                     _spellColoringCheckbox.IsChecked = false;
                     _spellFormatCheckbox.IsChecked = false;

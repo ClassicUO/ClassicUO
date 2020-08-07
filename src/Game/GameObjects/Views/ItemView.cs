@@ -94,26 +94,20 @@ namespace ClassicUO.Game.GameObjects
                 }
             }
 
-
             if (ProfileManager.Current.HighlightGameObjects && SelectedObject.LastObject == this)
             {
-                HueVector.X = 0x0023;
-                HueVector.Y = 1;
+                hue = Constants.HIGHLIGHT_CURRENT_OBJECT_HUE;
             }
             else if (ProfileManager.Current.NoColorObjectsOutOfRange && Distance > World.ClientViewRange)
             {
-                HueVector.X = Constants.OUT_RANGE_COLOR;
-                HueVector.Y = 1;
+                hue = Constants.OUT_RANGE_COLOR;
             }
             else if (World.Player.IsDead && ProfileManager.Current.EnableBlackWhiteEffect)
             {
-                HueVector.X = Constants.DEAD_RANGE_COLOR;
-                HueVector.Y = 1;
+                hue = Constants.DEAD_RANGE_COLOR;
             }
             else
             {
-                bool isPartial = ItemData.IsPartialHue;
-
                 if (!IsLocked && !IsMulti && SelectedObject.LastObject == this)
                 {
                     // TODO: check why i put this.
@@ -122,9 +116,9 @@ namespace ClassicUO.Game.GameObjects
                 }
                 else if (IsHidden)
                     hue = 0x038E;
-
-                ShaderHuesTraslator.GetHueVector(ref HueVector, hue, isPartial, HueVector.Z);
             }
+
+            ShaderHuesTraslator.GetHueVector(ref HueVector, hue, ItemData.IsPartialHue, HueVector.Z);
 
             if (!IsMulti && !IsCoin && Amount > 1 && ItemData.IsStackable)
             {
@@ -309,7 +303,7 @@ namespace ClassicUO.Game.GameObjects
                     if (ProfileManager.Current.GridLootType > 0 && SelectedObject.CorpseObject == owner)
                         color = 0x0034;
                     else if (ProfileManager.Current.HighlightGameObjects && SelectedObject.LastObject == owner)
-                        color = 0x0023;
+                        color = Constants.HIGHLIGHT_CURRENT_OBJECT_HUE;
 
                     ShaderHuesTraslator.GetHueVector(ref HueVector, color, ispartialhue, alpha);
                 }

@@ -57,7 +57,7 @@ namespace ClassicUO.Game.GameObjects
             ResetHueVector();
 
             ushort hue = Hue;
-            float alpha = 0;
+
             if (State != 0)
             {
                 if ((State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_IGNORE_IN_RENDER) != 0)
@@ -72,7 +72,6 @@ namespace ClassicUO.Game.GameObjects
                 {
                     if (AlphaHue >= 192)
                     {
-                        alpha = 0.25f;
                         AlphaHue = 0xFF;
                     }
                     else
@@ -82,23 +81,22 @@ namespace ClassicUO.Game.GameObjects
 
             ushort graphic = Graphic;
 
+            ResetHueVector();
+
             if (ProfileManager.Current.HighlightGameObjects && SelectedObject.LastObject == this)
             {
-                HueVector.X = 0x0023;
-                HueVector.Y = 1;
+                hue = Constants.HIGHLIGHT_CURRENT_OBJECT_HUE;
             }
             else if (ProfileManager.Current.NoColorObjectsOutOfRange && Distance > World.ClientViewRange)
             {
-                HueVector.X = Constants.OUT_RANGE_COLOR;
-                HueVector.Y = 1;
+                hue = Constants.OUT_RANGE_COLOR;
             }
             else if (World.Player.IsDead && ProfileManager.Current.EnableBlackWhiteEffect)
             {
-                HueVector.X = Constants.DEAD_RANGE_COLOR;
-                HueVector.Y = 1;
+                hue = Constants.DEAD_RANGE_COLOR;
             }
-            else
-                ShaderHuesTraslator.GetHueVector(ref HueVector, hue, ItemData.IsPartialHue, alpha);
+
+            ShaderHuesTraslator.GetHueVector(ref HueVector, hue, ItemData.IsPartialHue, 0);
 
             //Engine.DebugInfo.MultiRendered++;
 

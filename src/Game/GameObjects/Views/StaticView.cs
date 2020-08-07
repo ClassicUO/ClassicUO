@@ -53,26 +53,24 @@ namespace ClassicUO.Game.GameObjects
                 return false;
 
             ushort graphic = Graphic;
+            ushort hue = Hue;
 
             ResetHueVector();
 
             if (ProfileManager.Current.HighlightGameObjects && SelectedObject.LastObject == this)
             {
-                HueVector.X = 0x0023;
-                HueVector.Y = 1;
+                hue = Constants.HIGHLIGHT_CURRENT_OBJECT_HUE;
             }
             else if (ProfileManager.Current.NoColorObjectsOutOfRange && Distance > World.ClientViewRange)
             {
-                HueVector.X = Constants.OUT_RANGE_COLOR;
-                HueVector.Y = 1;
+                hue = Constants.OUT_RANGE_COLOR;
             }
             else if (World.Player.IsDead && ProfileManager.Current.EnableBlackWhiteEffect)
             {
-                HueVector.X = Constants.DEAD_RANGE_COLOR;
-                HueVector.Y = 1;
+                hue = Constants.DEAD_RANGE_COLOR;
             }
-            else
-                ShaderHuesTraslator.GetHueVector(ref HueVector, Hue, ItemData.IsPartialHue, 0);
+
+            ShaderHuesTraslator.GetHueVector(ref HueVector, hue, ItemData.IsPartialHue, 0);
 
             //Engine.DebugInfo.StaticsRendered++;
 

@@ -80,7 +80,7 @@ namespace ClassicUO.Game.GameObjects
 
             if (ProfileManager.Current.HighlightGameObjects && SelectedObject.LastObject == this)
             {
-                _viewHue = 0x0023;
+                _viewHue = Constants.HIGHLIGHT_CURRENT_OBJECT_HUE;
                 HueVector.Y = 1;
             }
             else if (SelectedObject.HealthbarObject == this)

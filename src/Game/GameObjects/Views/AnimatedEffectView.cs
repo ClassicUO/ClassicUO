@@ -97,24 +97,18 @@ namespace ClassicUO.Game.GameObjects
             posX += (int) Offset.X;
             posY -= (int) (Offset.Z - Offset.Y);
 
+            ushort hue = Hue;
 
-            if (ProfileManager.Current.HighlightGameObjects && SelectedObject.LastObject == this)
+            if (ProfileManager.Current.NoColorObjectsOutOfRange && Distance > World.ClientViewRange)
             {
-                HueVector.X = 0x0023;
-                HueVector.Y = 1;
-            }
-            else if (ProfileManager.Current.NoColorObjectsOutOfRange && Distance > World.ClientViewRange)
-            {
-                HueVector.X = Constants.OUT_RANGE_COLOR;
-                HueVector.Y = 1;
+                hue = Constants.OUT_RANGE_COLOR;
             }
             else if (World.Player.IsDead && ProfileManager.Current.EnableBlackWhiteEffect)
             {
-                HueVector.X = Constants.DEAD_RANGE_COLOR;
-                HueVector.Y = 1;
+                hue = Constants.DEAD_RANGE_COLOR;
             }
-            else
-                ShaderHuesTraslator.GetHueVector(ref HueVector, Hue, data.IsPartialHue, data.IsTranslucent ? .5f : 0);
+
+            ShaderHuesTraslator.GetHueVector(ref HueVector, hue, data.IsPartialHue, data.IsTranslucent ? .5f : 0);
 
             switch (Blend)
             {

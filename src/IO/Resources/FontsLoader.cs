@@ -23,6 +23,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
@@ -229,6 +230,7 @@ namespace ClassicUO.IO.Resources
         }
 
         /// <summary> Get the index in ASCII fonts of a character. </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private int GetASCIIIndex(char c)
         {
             byte ch = (byte) c; // ASCII fonts cover only 256 characters
@@ -328,10 +330,8 @@ namespace ClassicUO.IO.Resources
             return textHeight;
         }
 
-        public void GenerateASCII(ref FontTexture texture, byte font, string str, ushort color, int width, TEXT_ALIGN_TYPE align, ushort flags, out bool isPartial, bool saveHitmap, int height)
+        public void GenerateASCII(ref FontTexture texture, byte font, string str, ushort color, int width, TEXT_ALIGN_TYPE align, ushort flags, bool saveHitmap, int height)
         {
-            isPartial = false;
-
             if (string.IsNullOrEmpty(str))
                 return;
 
@@ -357,13 +357,13 @@ namespace ClassicUO.IO.Resources
                                 break;
                         }
                     }
-                    GeneratePixelsASCII(ref texture, font, newstr, color, width, align, flags, out isPartial, saveHitmap);
+                    GeneratePixelsASCII(ref texture, font, newstr, color, width, align, flags, saveHitmap);
 
                     return;
                 }
             }
 
-            GeneratePixelsASCII(ref texture, font, str, color, width, align, flags, out isPartial, saveHitmap);
+            GeneratePixelsASCII(ref texture, font, str, color, width, align, flags, saveHitmap);
         }
 
         public string GetTextByWidthASCII(byte font, string str, int width, bool isCropped, TEXT_ALIGN_TYPE align, ushort flags)
@@ -411,10 +411,8 @@ namespace ClassicUO.IO.Resources
             return sb.ToString();
         }
 
-        private void GeneratePixelsASCII(ref FontTexture texture, byte font, string str, ushort color, int width, TEXT_ALIGN_TYPE align, ushort flags, out bool isPartial, bool saveHitmap)
+        private void GeneratePixelsASCII(ref FontTexture texture, byte font, string str, ushort color, int width, TEXT_ALIGN_TYPE align, ushort flags, bool saveHitmap)
         {
-            isPartial = false;
-
             if (font >= FontCount)
                 return;
 
@@ -458,7 +456,7 @@ namespace ClassicUO.IO.Resources
             uint[] pData = new uint[blocksize];
             int lineOffsY = 0;
             MultilinesFontInfo ptr = info;
-            isPartial = font != 5 && font != 8 && !UnusePartialHue;
+            bool isPartial = font != 5 && font != 8 && !UnusePartialHue;
             int font6OffsetY = font == 6 ? 7 : 0;
             int linesCount = 0; // this value should be added to TextTexture.LinesCount += linesCount
 
@@ -511,9 +509,9 @@ namespace ClassicUO.IO.Resources
 
                     for (int y = 0; y < dh; y++)
                     {
-                        int testrY = y + lineOffsY + offsY;
+                        int testY = y + lineOffsY + offsY;
 
-                        if (testrY >= height)
+                        if (testY >= height)
                             break;
 
                         for (int x = 0; x < dw; x++)
@@ -525,14 +523,18 @@ namespace ClassicUO.IO.Resources
 
                             if (pic != 0)
                             {
-                                uint pcl = 0;
+                                uint pcl;
 
                                 if (isPartial)
-                                    pcl = HuesLoader.Instance.GetPartialHueColor(pic, charColor) | 0xFF000000;
+                                    pcl = HuesLoader.Instance.GetPartialHueColor(pic, charColor);
                                 else
-                                    pcl = HuesLoader.Instance.GetColor(pic, charColor) | 0xFF000000;
-                                int block = testrY * width + x + w;
-                                pData[block] = pcl; //HuesHelper.RgbaToArgb((pcl << 8) | 0xFF);
+                                    pcl = HuesLoader.Instance.GetColor(pic, charColor);
+
+                                int block = testY * width + x + w;
+                                if (block >= 0)
+                                {
+                                    pData[block] = pcl | 0xFF_00_00_00;
+                                }
                             }
                         }
                     }

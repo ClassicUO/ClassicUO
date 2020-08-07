@@ -235,7 +235,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             BuildContextMenu();
             _coords?.Dispose();
-            Add(_coords = new Label("", true, 1001, font: 1, style: FontStyle.BlackBorder)
+            Add(_coords = new Label("", true, 0x03b2, font: 1, style: FontStyle.BlackBorder)
             {
                 X = 10,
                 Y = 5

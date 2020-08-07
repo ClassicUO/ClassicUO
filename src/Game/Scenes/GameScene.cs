@@ -901,7 +901,7 @@ namespace ClassicUO.Game.Scenes
                 _followingTarget = 0;
                 Pathfinder.StopAutoWalk();
 
-                MessageManager.HandleMessage(World.Player, "Stopped following.", String.Empty, 1001, MessageType.Regular, 3, TEXT_TYPE.CLIENT, false);
+                MessageManager.HandleMessage(World.Player, "Stopped following.", String.Empty, 0, MessageType.Regular, 3, TEXT_TYPE.CLIENT, false);
             }
         }
 

@@ -333,7 +333,7 @@ namespace ClassicUO.Utility.Platforms
                             if ((wParam & 0x00010000) != 0)
                                 MessageManager.HandleMessage(null, sb.ToString(), "System", hue, MessageType.Regular, 3, TEXT_TYPE.SYSTEM, true);
                             else
-                                World.Player.AddMessage(MessageType.Regular, sb.ToString(), 3, hue, true);
+                                World.Player.AddMessage(MessageType.Regular, sb.ToString(), 3, hue, true, TEXT_TYPE.OBJECT);
 
                             return 1;
                         }

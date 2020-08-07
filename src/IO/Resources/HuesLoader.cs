@@ -26,6 +26,7 @@ using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 
 using ClassicUO.Utility;
+using Microsoft.Xna.Framework;
 
 namespace ClassicUO.IO.Resources
 {
@@ -242,12 +243,15 @@ namespace ClassicUO.IO.Resources
                 int g = color >> 3;
                 int e = color % 8;
                 uint cl = HuesHelper.Color16To32(c);
-                (byte B, byte G, byte R, byte A) = HuesHelper.GetBGRA(cl);
-                //(byte R, byte G, byte B, byte A) = HuesHelper.GetBGRA(cl);
 
-                if (R == G && B == G)
-                    return HuesHelper.Color16To32(HuesRange[g].Entries[e].ColorTable[(c >> 10) & 0x1F]);
+                byte R = (byte) (cl & 0xFF);
+                byte G = (byte) ((cl >> 8) & 0xFF);
+                byte B = (byte) ((cl >> 16) & 0xFF);
 
+                if (R == G && R == B)
+                {
+                    cl = HuesHelper.Color16To32(HuesRange[g].Entries[e].ColorTable[(c >> 10) & 0x1F]);
+                }
                 return cl;
             }
 

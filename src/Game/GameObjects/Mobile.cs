@@ -796,7 +796,7 @@ namespace ClassicUO.Game.GameObjects
                             if (Z - step.Z >= 22)
                             {
                                 // oUCH!!!!
-                                AddMessage(MessageType.Label, "Ouch!");
+                                AddMessage(MessageType.Label, "Ouch!", TEXT_TYPE.CLIENT);
                             }
 
                             if (World.Player.Walker.StepInfos[World.Player.Walker.CurrentWalkSequence].Accepted)

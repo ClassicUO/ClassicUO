@@ -35,18 +35,18 @@ namespace ClassicUO.Game.GameObjects
 
             ResetHueVector();
 
+            ushort hue = Hue;
+
             if (ProfileManager.Current.NoColorObjectsOutOfRange && Distance > World.ClientViewRange)
             {
-                HueVector.X = Constants.OUT_RANGE_COLOR;
-                HueVector.Y = 1;
+                hue = Constants.OUT_RANGE_COLOR;
             }
             else if (World.Player.IsDead && ProfileManager.Current.EnableBlackWhiteEffect)
             {
-                HueVector.X = Constants.DEAD_RANGE_COLOR;
-                HueVector.Y = 1;
+                hue = Constants.DEAD_RANGE_COLOR;
             }
-            else
-                ShaderHuesTraslator.GetHueVector(ref HueVector, Hue);
+
+            ShaderHuesTraslator.GetHueVector(ref HueVector, hue);
 
             //Engine.DebugInfo.EffectsRendered++;
 

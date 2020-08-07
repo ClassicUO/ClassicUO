@@ -484,8 +484,8 @@ namespace ClassicUO.Game.Scenes
                         if (string.IsNullOrEmpty(name))
                             name = ClilocLoader.Instance.GetString(1020000 + st.Graphic, st.ItemData.Name);
 
-                        MessageManager.HandleMessage(null, name, String.Empty, 1001, MessageType.Label, 3, TEXT_TYPE.CLIENT, false);
-                        obj.AddMessage(MessageType.Label, name, 3, 1001, false);
+                        MessageManager.HandleMessage(null, name, String.Empty, 0x03b2, MessageType.Label, 3, TEXT_TYPE.CLIENT, false);
+                        obj.AddMessage(MessageType.Label, name, 3, 0x03b2, false, TEXT_TYPE.CLIENT);
 
 
                         if (obj.TextContainer != null && obj.TextContainer.MaxSize != 1)
@@ -498,8 +498,8 @@ namespace ClassicUO.Game.Scenes
                         if (string.IsNullOrEmpty(name))
                             name = ClilocLoader.Instance.GetString(1020000 + multi.Graphic, multi.ItemData.Name);
 
-                        MessageManager.HandleMessage(null, name, String.Empty, 1001, MessageType.Label, 3, TEXT_TYPE.CLIENT, false);
-                        obj.AddMessage(MessageType.Label, name, 3, 1001, false);
+                        MessageManager.HandleMessage(null, name, String.Empty, 0x03b2, MessageType.Label, 3, TEXT_TYPE.CLIENT, false);
+                        obj.AddMessage(MessageType.Label, name, 3, 0x03b2, false, TEXT_TYPE.CLIENT);
 
                         if (obj.TextContainer != null && obj.TextContainer.MaxSize == 5)
                             obj.TextContainer.MaxSize = 1;
@@ -509,7 +509,7 @@ namespace ClassicUO.Game.Scenes
 
                         if (Keyboard.Alt && ent is Mobile)
                         {
-                            MessageManager.HandleMessage(World.Player, "Now following.", String.Empty, 1001, MessageType.Regular, 3, TEXT_TYPE.CLIENT, false);
+                            MessageManager.HandleMessage(World.Player, "Now following.", String.Empty, 0, MessageType.Regular, 3, TEXT_TYPE.CLIENT, false);
                             _followingMode = true;
                             _followingTarget = ent;
                         }
@@ -633,13 +633,13 @@ namespace ClassicUO.Game.Scenes
 
                         if (itemdata.IsSurface && Pathfinder.WalkTo(obj.X, obj.Y, obj.Z, 0))
                         {
-                            World.Player.AddMessage(MessageType.Label, "Pathfinding!", 3, 1001, false);
+                            World.Player.AddMessage(MessageType.Label, "Pathfinding!", 3, 0, false, TEXT_TYPE.CLIENT);
                             return true;
                         }
                     }
                     else if (obj is Land && Pathfinder.WalkTo(obj.X, obj.Y, obj.Z, 0))
                     {
-                        World.Player.AddMessage(MessageType.Label, "Pathfinding!", 3, 1001, false);
+                        World.Player.AddMessage(MessageType.Label, "Pathfinding!", 3, 0, false, TEXT_TYPE.CLIENT);
                         return true;
                     }
                 }
