@@ -73,7 +73,9 @@ namespace ManifestCreator
             "System.Windows.Forms.dll",
             "System.Xml.dll",
             "System.Xml.Linq.dll",
-            "Newtonsoft.Json.dll"
+
+            // removed.
+            //"Newtonsoft.Json.dll"
         };
 
 
