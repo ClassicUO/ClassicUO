@@ -61,6 +61,7 @@ namespace ClassicUO.Game.GameObjects
 
             ushort hue = Hue;
             ushort graphic = DisplayedGraphic;
+            bool partial = ItemData.IsPartialHue;
 
             if (OnGround && ItemData.IsAnimated)
             {
@@ -97,6 +98,7 @@ namespace ClassicUO.Game.GameObjects
             if (ProfileManager.Current.HighlightGameObjects && SelectedObject.LastObject == this)
             {
                 hue = Constants.HIGHLIGHT_CURRENT_OBJECT_HUE;
+                partial = false;
             }
             else if (ProfileManager.Current.NoColorObjectsOutOfRange && Distance > World.ClientViewRange)
             {
@@ -118,7 +120,7 @@ namespace ClassicUO.Game.GameObjects
                     hue = 0x038E;
             }
 
-            ShaderHuesTraslator.GetHueVector(ref HueVector, hue, ItemData.IsPartialHue, HueVector.Z);
+            ShaderHuesTraslator.GetHueVector(ref HueVector, hue, partial, HueVector.Z);
 
             if (!IsMulti && !IsCoin && Amount > 1 && ItemData.IsStackable)
             {

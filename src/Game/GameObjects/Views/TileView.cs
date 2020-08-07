@@ -40,30 +40,30 @@ namespace ClassicUO.Game.GameObjects
 
             ResetHueVector();
 
+            ushort hue = Hue;
 
             if (ProfileManager.Current.HighlightGameObjects && SelectedObject.LastObject == this)
             {
-                HueVector.X = Constants.HIGHLIGHT_CURRENT_OBJECT_HUE;
-                HueVector.Y = 1;
+                hue = Constants.HIGHLIGHT_CURRENT_OBJECT_HUE;
             }
             else if (ProfileManager.Current.NoColorObjectsOutOfRange && Distance > World.ClientViewRange)
             {
-                HueVector.X = Constants.OUT_RANGE_COLOR;
-                HueVector.Y = 1;
+                hue = Constants.OUT_RANGE_COLOR;
             }
             else if (World.Player.IsDead && ProfileManager.Current.EnableBlackWhiteEffect)
             {
-                HueVector.X = Constants.DEAD_RANGE_COLOR;
-                HueVector.Y = 1;
+                hue = Constants.DEAD_RANGE_COLOR;
+            }
+
+
+            if (hue != 0)
+            {
+                HueVector.X = hue - 1;
+                HueVector.Y = IsStretched ? ShaderHuesTraslator.SHADER_LAND_HUED : ShaderHuesTraslator.SHADER_HUED;
             }
             else
             {
-                HueVector.X = Hue;
-
-                if (Hue != 0)
-                    HueVector.Y = IsStretched ? ShaderHuesTraslator.SHADER_LAND_HUED : ShaderHuesTraslator.SHADER_HUED;
-                else
-                    HueVector.Y = IsStretched ? ShaderHuesTraslator.SHADER_LAND : ShaderHuesTraslator.SHADER_NONE;
+                HueVector.Y = IsStretched ? ShaderHuesTraslator.SHADER_LAND : ShaderHuesTraslator.SHADER_NONE;
             }
 
             if (IsStretched)
