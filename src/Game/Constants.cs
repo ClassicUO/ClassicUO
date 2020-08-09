@@ -28,7 +28,7 @@ namespace ClassicUO.Game
     {
         public const string WIKI_LINK = "https://github.com/andreakarasho/ClassicUO/wiki";
 
-        public const int MIN_FPS = 15;
+        public const int MIN_FPS = 12;
         public const int MAX_FPS = 250;
         public const int LOGIN_SCREEN_FPS = 60;
 
