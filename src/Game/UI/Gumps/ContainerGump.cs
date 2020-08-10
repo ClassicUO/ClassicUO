@@ -358,20 +358,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (container == null)
                 return;
-
             
-            if (Graphic == 0x0009)
-            {
-                if (World.Player.ManualOpenedCorpses.Contains(LocalSerial))
-                    World.Player.ManualOpenedCorpses.Remove(LocalSerial);
-                else if (World.Player.AutoOpenedCorpses.Contains(LocalSerial) &&
-                         ProfileManager.Current != null && ProfileManager.Current.SkipEmptyCorpse)
-                {
-                    IsVisible = false;
-                    _hideIfEmpty = true;
-                }
-            }
-
             bool is_chessboard = Graphic == 0x091A || Graphic == 0x092E;
             const ushort CHESSBOARD_OFFSET = 11369;
             bool is_corpse = container.Graphic == 0x2006;
