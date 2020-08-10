@@ -45,7 +45,6 @@ namespace ClassicUO.Game.UI.Gumps
         private ContainerData _data;
         private int _eyeCorspeOffset;
         private GumpPic _eyeGumpPic;
-        private bool _isCorspeContainer;
         private bool _isMinimized;
         private GumpPicContainer _gumpPicContainer;
         private HitBox _hitBox;
@@ -67,6 +66,18 @@ namespace ClassicUO.Game.UI.Gumps
             Graphic = gumpid;
 
             BuildGump();
+
+            if (Graphic == 0x0009)
+            {
+                if (World.Player.ManualOpenedCorpses.Contains(LocalSerial))
+                    World.Player.ManualOpenedCorpses.Remove(LocalSerial);
+                else if (World.Player.AutoOpenedCorpses.Contains(LocalSerial) &&
+                         ProfileManager.Current != null && ProfileManager.Current.SkipEmptyCorpse)
+                {
+                    IsVisible = false;
+                    _hideIfEmpty = true;
+                }
+            }
 
             if (_data.OpenSound != 0 && playsound)
                 Client.Game.Scene.Audio.PlaySound(_data.OpenSound);
@@ -107,8 +118,6 @@ namespace ClassicUO.Game.UI.Gumps
             CanMove = true;
             CanCloseWithRightClick = true;
             WantUpdateSize = false;
-            _isCorspeContainer = Graphic == 0x0009;
-
           
             Item item = World.Items.Get(LocalSerial);
 
@@ -133,17 +142,9 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add(_gumpPicContainer = new GumpPicContainer(0, 0, g, 0));
             _gumpPicContainer.MouseDoubleClick += GumpPicContainerOnMouseDoubleClick;
-            if (_isCorspeContainer)
-            {
-                //if (World.Player.ManualOpenedCorpses.Contains(LocalSerial))
-                //    World.Player.ManualOpenedCorpses.Remove(LocalSerial);
-                //else if(World.Player.AutoOpenedCorpses.Contains(LocalSerial) &&
-                //ProfileManager.Current != null && ProfileManager.Current.SkipEmptyCorpse)
-                //{
-                //    IsVisible = false;
-                //    _hideIfEmpty = true;
-                //}
 
+            if (Graphic == 0x0009)
+            {
                 _eyeGumpPic?.Dispose();
                 Add(_eyeGumpPic = new GumpPic((int) (45 * scale), (int) (30 * scale), 0x0045, 0));
 
@@ -283,7 +284,7 @@ namespace ClassicUO.Game.UI.Gumps
                 return;
             }
 
-            if (_isCorspeContainer && _corpseEyeTicks < totalMS)
+            if (Graphic == 0x0009 && _corpseEyeTicks < totalMS)
             {
                 _eyeCorspeOffset = _eyeCorspeOffset == 0 ? 1 : 0;
                 _corpseEyeTicks = (long) totalMS + 750;
@@ -358,9 +359,28 @@ namespace ClassicUO.Game.UI.Gumps
             if (container == null)
                 return;
 
+            
+            if (Graphic == 0x0009)
+            {
+                if (World.Player.ManualOpenedCorpses.Contains(LocalSerial))
+                    World.Player.ManualOpenedCorpses.Remove(LocalSerial);
+                else if (World.Player.AutoOpenedCorpses.Contains(LocalSerial) &&
+                         ProfileManager.Current != null && ProfileManager.Current.SkipEmptyCorpse)
+                {
+                    IsVisible = false;
+                    _hideIfEmpty = true;
+                }
+            }
+
             bool is_chessboard = Graphic == 0x091A || Graphic == 0x092E;
             const ushort CHESSBOARD_OFFSET = 11369;
             bool is_corpse = container.Graphic == 0x2006;
+
+
+            if (!container.IsEmpty && _hideIfEmpty && !IsVisible)
+            {
+                IsVisible = true;
+            }
 
             for (var i = container.Items; i != null; i = i.Next)
             {

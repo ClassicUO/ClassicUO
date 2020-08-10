@@ -1274,10 +1274,13 @@ namespace ClassicUO.Game.GameObjects
                 if ((ProfileManager.Current.CorpseOpenOptions == 2 || ProfileManager.Current.CorpseOpenOptions == 3) && IsHidden)
                     return;
 
-                foreach (var c in World.Items.Where(t => t.Graphic == 0x2006 && !AutoOpenedCorpses.Contains(t.Serial) && t.Distance <= ProfileManager.Current.AutoOpenCorpseRange))
+                foreach (Item item in World.Items)
                 {
-                    AutoOpenedCorpses.Add(c.Serial);
-                    GameActions.DoubleClickQueued(c.Serial);
+                    if (!item.IsDestroyed && item.IsCorpse && item.Distance <= ProfileManager.Current.AutoOpenCorpseRange && !AutoOpenedCorpses.Contains(item.Serial))
+                    {
+                        AutoOpenedCorpses.Add(item.Serial);
+                        GameActions.DoubleClickQueued(item.Serial);
+                    }
                 }
             }
         }
