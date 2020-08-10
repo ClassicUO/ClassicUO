@@ -28,9 +28,7 @@ namespace ClassicUO.Game.GameObjects
 {
     class DragEffect : GameEffect
     {
-        private ushort _displayedGraphic = 0xFFFF;
         private uint _lastMoveTime;
-
 
         public DragEffect(uint src, uint trg, int xSource, int ySource, int zSource, int xTarget, int yTarget, int zTarget, ushort graphic, ushort hue)
         {
@@ -93,7 +91,7 @@ namespace ClassicUO.Game.GameObjects
 
             DrawStatic(batcher, AnimationGraphic, posX - ((int) Offset.X + 22), posY - ((int) -Offset.Y + 22), ref HueVector);
 
-            ref StaticTiles data = ref TileDataLoader.Instance.StaticData[_displayedGraphic];
+            ref StaticTiles data = ref TileDataLoader.Instance.StaticData[Graphic];
 
             if (data.IsLight && Source != null)
             {
