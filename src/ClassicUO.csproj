@@ -65,6 +65,10 @@
     <Folder Include="Properties\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\external\FNA\FNA.csproj" />
+  </ItemGroup>
+
 
 
    <PropertyGroup>
