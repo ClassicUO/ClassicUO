@@ -108,14 +108,14 @@ namespace ClassicUO.Game.UI.Controls
             }
         }
 
-        protected float GetSliderYPosition()
+        protected int GetSliderYPosition()
         {
             if (MaxValue == MinValue)
-                return 0f;
+                return 0;
 
-            return GetScrollableArea() * ((Value - MinValue) / (float) (MaxValue - MinValue));
+            return (int) Math.Round(GetScrollableArea() * ((Value - MinValue) / (float) (MaxValue - MinValue)));
         }
 
-        protected abstract float GetScrollableArea();
+        protected abstract int GetScrollableArea();
     }
 }

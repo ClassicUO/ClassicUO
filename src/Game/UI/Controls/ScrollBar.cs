@@ -35,7 +35,7 @@ namespace ClassicUO.Game.UI.Controls
         private bool _btUpClicked, _btDownClicked, _btSliderClicked;
         private Point _clickPosition;
         private Rectangle _rectDownButton, _rectUpButton, _rectSlider, _emptySpace;
-        private float _sliderPosition;
+        private int _sliderPosition;
         private UOTexture32 _textureSlider;
         private UOTexture32[] _textureUpButton, _textureDownButton, _textureBackground;
         private uint _timeUntilNextClick;
@@ -77,6 +77,7 @@ namespace ClassicUO.Game.UI.Controls
 
             if (MaxValue <= MinValue)
                 Value = MaxValue = MinValue;
+
             _sliderPosition = GetSliderYPosition();
             _rectSlider.Y = _textureUpButton[0].Height + (int) _sliderPosition;
 
@@ -148,7 +149,7 @@ namespace ClassicUO.Game.UI.Controls
             return base.Draw(batcher, x, y);
         }
 
-        protected override float GetScrollableArea()
+        protected override int GetScrollableArea()
         {
             return Height - _textureUpButton[0].Height - _textureDownButton[0].Height - _textureSlider.Height;
         }
@@ -186,11 +187,11 @@ namespace ClassicUO.Game.UI.Controls
 
                 _sliderPosition = y;
 
-                float scrollableArea = GetScrollableArea();
+                int scrollableArea = GetScrollableArea();
                 if (_sliderPosition > scrollableArea)
                     _sliderPosition = scrollableArea;
 
-                _value = (int)  Math.Round (_sliderPosition / GetScrollableArea() * (MaxValue - MinValue) + MinValue);
+                _value = (int)  Math.Round( _sliderPosition / (float) GetScrollableArea() * (MaxValue - MinValue) + MinValue);
                 _clickPosition.Y = y;
                 _clickPosition.X = x;
             }
@@ -217,11 +218,11 @@ namespace ClassicUO.Game.UI.Controls
         {
             if (y != _clickPosition.Y)
             {
-                float sliderY = _sliderPosition + (y - _clickPosition.Y);
+                int sliderY = _sliderPosition + (y - _clickPosition.Y);
                 if (sliderY < 0)
                     sliderY = 0;
 
-                float scrollableArea = GetScrollableArea();
+                int scrollableArea = GetScrollableArea();
                 if (sliderY > scrollableArea)
                     sliderY = scrollableArea;
 
@@ -233,7 +234,7 @@ namespace ClassicUO.Game.UI.Controls
                 else if (sliderY == scrollableArea && _clickPosition.Y > Height - _textureDownButton[0].Height - (_textureSlider.Height >> 1))
                     _clickPosition.Y = Height - _textureDownButton[0].Height - (_textureSlider.Height >> 1);
                
-                _value = (int) Math.Round (sliderY / scrollableArea * (MaxValue - MinValue) + MinValue);
+                _value = (int) Math.Round (sliderY / (float) scrollableArea * (MaxValue - MinValue) + MinValue);
                 _sliderPosition = sliderY;
             }
         }

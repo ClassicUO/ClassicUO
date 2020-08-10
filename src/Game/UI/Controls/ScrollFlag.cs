@@ -131,7 +131,7 @@ namespace ClassicUO.Game.UI.Controls
             return base.Draw(batcher, x, y);
         }
 
-        protected override float GetScrollableArea()
+        protected override int GetScrollableArea()
         {
             var texture = GumpsLoader.Instance.GetTexture(0x0828);
 
