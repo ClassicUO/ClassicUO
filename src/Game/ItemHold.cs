@@ -55,7 +55,7 @@ namespace ClassicUO.Game
         public static bool UpdatedInWorld { get; set; }
         public static ref StaticTiles ItemData => ref TileDataLoader.Instance.StaticData[Graphic];
 
-
+        public static Point MouseOffset;
 
         public static void Set(Item item, ushort amount, Point? offset = null)
         {
@@ -77,6 +77,7 @@ namespace ClassicUO.Game
             IsWearable = item.ItemData.IsWearable;
             Layer = item.Layer;
             Flags = item.Flags;
+            MouseOffset = offset ?? Point.Zero;
         }
 
         public static void Clear()
@@ -93,7 +94,8 @@ namespace ClassicUO.Game
             IsWearable = IsStackable = IsPartialHue = HasAlpha = false;
             Layer = Layer.Invalid;
             Flags = Flags.None;
-
+            MouseOffset = Point.Zero;
+            
             Dropped = false;
             Enabled = false;
             UpdatedInWorld = false;

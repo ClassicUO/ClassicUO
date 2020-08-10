@@ -93,7 +93,7 @@ namespace ClassicUO.Game.Scenes
                 amount = item.Amount;
 
             ItemHold.Clear();
-            ItemHold.Set(item, (ushort) amount);
+            ItemHold.Set(item, (ushort) amount, offset);
             NetClient.Socket.Send(new PPickUpRequest(item, (ushort) amount));
             UIManager.GameCursor.SetDraggedItem(offset);
 
@@ -191,6 +191,12 @@ namespace ClassicUO.Game.Scenes
                         {
                             textureW = texture.Width;
                             textureH = texture.Height;
+                        }
+
+                        if (ProfileManager.Current != null && ProfileManager.Current.RelativeDragAndDropItems)
+                        {
+                            x += ItemHold.MouseOffset.X;
+                            y += ItemHold.MouseOffset.Y;
                         }
 
                         x -= textureW >> 1;
