@@ -10,13 +10,10 @@ platform: x64
 clone_folder: c:\projects\classicuo
 clone_script:
 - cmd: >-
-    echo %APPVEYOR_REPO_BRANCH%
-    
+
     git --version
     
-    git clone -q --branch %APPVEYOR_REPO_BRANCH%
-    
-    https://github.com/%APPVEYOR_REPO_NAME%.git %APPVEYOR_BUILD_FOLDER% && cd %APPVEYOR_BUILD_FOLDER% && git checkout -qf %APPVEYOR_REPO_COMMIT% && git submodule update --init --recursive
+    git clone -q --branch %APPVEYOR_REPO_BRANCH% https://github.com/%APPVEYOR_REPO_NAME%.git %APPVEYOR_BUILD_FOLDER% && cd %APPVEYOR_BUILD_FOLDER% && git checkout -qf %APPVEYOR_REPO_COMMIT% && git submodule update --init --recursive
     
 dotnet_csproj:
   patch: true
