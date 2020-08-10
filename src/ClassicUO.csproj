@@ -4,6 +4,7 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net47</TargetFramework>
+    <ApplicationIcon>cuoicon.ico</ApplicationIcon>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(IS_DEV_BUILD)' == 'true'">
@@ -14,7 +15,7 @@
     <PlatformTarget>x64</PlatformTarget>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <OutputPath>$(SolutionDir)bin\Release\</OutputPath>
-	<Optimize>true</Optimize>
+	  <Optimize>true</Optimize>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -71,44 +72,41 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\external\FNA\FNA.csproj" />
+    <ProjectReference Include="..\external\FNA\FNA.Core.csproj" />
   </ItemGroup>
 
 
+  <Target Name="CopyExternalDeps_x64" AfterTargets="Build">
+    <ItemGroup>
+      <DataFiles_x64 Include="$(ProjectDir)..\external\x64\*.*" />
+    </ItemGroup>
 
-   <PropertyGroup>
-    <PostBuildEvent Condition="'$(OS)' != 'UNIX'">
-      if not exist "$(TargetDir)lib64\" mkdir  "$(OutputPath)lib64\"
-      if not exist "$(TargetDir)osx\"   mkdir  "$(OutputPath)osx\"
-      if not exist "$(TargetDir)x64\"   mkdir  "$(OutputPath)x64\"
+    <Copy
+      SourceFiles="@(DataFiles_x64)"
+      DestinationFolder="$(TargetDir)\x64\"
+      SkipUnchangedFiles="true" />
+  </Target>
 
-      xcopy "$(SolutionDir)external\lib64\*.*"    "$(OutputPath)lib64\"   /Y
-      xcopy "$(SolutionDir)external\osx\*.*"      "$(OutputPath)osx\"     /Y
-      xcopy "$(SolutionDir)external\x64\*.*"      "$(OutputPath)x64\"     /Y
-    </PostBuildEvent>
-    <ApplicationIcon>cuoicon.ico</ApplicationIcon>
-  </PropertyGroup>
+  <Target Name="CopyExternalDeps_lib64" AfterTargets="Build">
+    <ItemGroup>
+      <DataFiles_lib64 Include="$(ProjectDir)..\external\lib64\*.*" />
+    </ItemGroup>
 
-  <PropertyGroup>
-    <PostBuildEvent Condition="'$(OS)' == 'UNIX'">
+    <Copy
+      SourceFiles="@(DataFiles_lib64)"
+      DestinationFolder="$(TargetDir)\lib64\"
+      SkipUnchangedFiles="true" />
+  </Target>
 
-      if ! [ -d "$(OutputPath)lib64/" ]; then
-      mkdir -p "$(OutputPath)lib64/"
-      fi
+  <Target Name="CopyExternalDeps_osx" AfterTargets="Build">
+    <ItemGroup>
+      <DataFiles_osx Include="$(ProjectDir)..\external\osx\*.*" />
+    </ItemGroup>
 
-      if ! [ -d "$(OutputPath)osx/" ]; then
-      mkdir -p "$(OutputPath)osx/"
-      fi
- 
-      if ! [ -d "$(OutputPath)x64/" ]; then
-      mkdir -p "$(OutputPath)x64/"
-      fi
-
-      cp -Rf $(SolutionDir)external/lib64/*.*  $(OutputPath)lib64/
-      cp -Rf $(SolutionDir)external/osx/*.*    $(OutputPath)osx/
-      cp -Rf $(SolutionDir)external/x64/*.*    $(OutputPath)x64/
-    </PostBuildEvent>
-   
-  </PropertyGroup>
-
+    <Copy
+      SourceFiles="@(DataFiles_osx)"
+      DestinationFolder="$(TargetDir)\osx\"
+      SkipUnchangedFiles="true" />
+  </Target>
+  
 </Project>
