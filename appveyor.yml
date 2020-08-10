@@ -30,7 +30,7 @@ build_script:
 - cmd: >-
     nuget restore
 
-    dotnet build "%APPVEYOR_BUILD_FOLDER%\ClassicUO.sln" -c release /p:DefineConstants="DEV_BUILD"
+    dotnet build "%APPVEYOR_BUILD_FOLDER%" -c release /p:DefineConstants="DEV_BUILD" -p:IS_DEV_BUILD=true
 
 
     xcopy "%APPVEYOR_BUILD_FOLDER%\tools\monokickstart\*.*" "%APPVEYOR_BUILD_FOLDER%\bin\Release" /Y
