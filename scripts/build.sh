@@ -1,1 +1,1 @@
-dotnet build "../src/ClassicUO.csproj" -c release
+msbuild "../src/ClassicUO.csproj" /p:Configuration=Release
