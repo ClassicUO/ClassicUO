@@ -30,17 +30,17 @@ build_script:
 - cmd: >-
     nuget restore
 
-
-    msbuild "c:\projects\classicuo\ClassicUO.sln" /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll" /p:Configuration=Release /p:Platform=x64 /p:DefineConstants="DEV_BUILD" /p:OutputType=WinExe
-
-
-    xcopy "c:\projects\classicuo\tools\monokickstart\*.*" "c:\projects\classicuo\bin\Release" /Y
+    dotnet build -c release 
+    msbuild "%APPVEYOR_BUILD_FOLDER%\ClassicUO.sln" /p:DefineConstants="DEV_BUILD"
 
 
-    7z a ClassicUO-dev-preview-release.zip "c:\projects\classicuo\bin\Release\*"
+    xcopy "%APPVEYOR_BUILD_FOLDER%\tools\monokickstart\*.*" "%APPVEYOR_BUILD_FOLDER%\bin\Release" /Y
 
 
-    dotnet run --project "c:\projects\classicuo\tools\ManifestCreator\ManifestCreator.csproj" "c:\projects\classicuo\bin\Release" "dev-preview" "ClassicUO-dev-preview-release.zip"
+    7z a ClassicUO-dev-preview-release.zip "%APPVEYOR_BUILD_FOLDER%\bin\Release\*"
+
+
+    dotnet run --project "%APPVEYOR_BUILD_FOLDER%\tools\ManifestCreator\ManifestCreator.csproj" "%APPVEYOR_BUILD_FOLDER%\bin\Release" "dev-preview" "ClassicUO-dev-preview-release.zip"
 artifacts:
 - path: ClassicUO-dev-preview-release.zip
   name: ClassicUO
