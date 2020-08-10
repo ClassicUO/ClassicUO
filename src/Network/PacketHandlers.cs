@@ -1072,8 +1072,8 @@ namespace ClassicUO.Network
                 {
                     if (item.IsCorpse && (ProfileManager.Current.GridLootType == 1 || ProfileManager.Current.GridLootType == 2))
                     {
-                        UIManager.GetGump<GridLootGump>(serial)?.Dispose();
-                        UIManager.Add(new GridLootGump(serial));
+                        //UIManager.GetGump<GridLootGump>(serial)?.Dispose();
+                        //UIManager.Add(new GridLootGump(serial));
                         _requestedGridLoot = serial;
 
                         if (ProfileManager.Current.GridLootType == 1)
@@ -4734,15 +4734,14 @@ namespace ClassicUO.Network
                         {
                             var grid_gump = UIManager.GetGump<GridLootGump>(containerSerial);
 
-                            if (grid_gump != null)
+                            if (grid_gump == null && SerialHelper.IsValid(_requestedGridLoot) && _requestedGridLoot == containerSerial)
                             {
-                                grid_gump.RequestUpdateContents();
-                            }
-                            else if (SerialHelper.IsValid(_requestedGridLoot) && _requestedGridLoot == containerSerial)
-                            {
-                                UIManager.Add(new GridLootGump(_requestedGridLoot));
+                                grid_gump = new GridLootGump(_requestedGridLoot);
+                                UIManager.Add(grid_gump);
                                 _requestedGridLoot = 0;
                             }
+
+                            grid_gump?.RequestUpdateContents();
                         }
                     }
 
