@@ -58,14 +58,15 @@
     <Reference Include="cuoapi">
       <HintPath>..\external\api\cuoapi.dll</HintPath>
     </Reference>
-    <Reference Include="FNA">
-      <HintPath>..\external\FNA\FNA.dll</HintPath>
-    </Reference>
     <Reference Include="System.IO.Compression" />
   </ItemGroup>
 
   <ItemGroup>
     <Folder Include="Properties\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\external\FNA\FNA.csproj" />
   </ItemGroup>
 
 
