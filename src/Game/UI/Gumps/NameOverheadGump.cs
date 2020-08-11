@@ -295,7 +295,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }
                 else
                 {
-                    if (ItemHold.Enabled)
+                    if (ItemHold.Enabled && !ItemHold.IsFixedPosition)
                     {
                         Entity entity = World.Get(LocalSerial);
 

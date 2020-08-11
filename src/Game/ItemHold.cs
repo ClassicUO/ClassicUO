@@ -26,13 +26,15 @@ using System.Linq;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.IO.Resources;
-
+using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game
 {
     internal static class ItemHold
     {
+        private static bool _enabled;
+
         public static bool OnGround { get; private set; }
         public static ushort X { get; private set; }
         public static ushort Y { get; private set; }
@@ -50,12 +52,31 @@ namespace ClassicUO.Game
         public static bool HasAlpha { get; private set; }
         public static Layer Layer { get; private set; }
         public static Flags Flags { get; private set; }
-        public static bool Enabled { get; set; }
+        public static bool Enabled
+        {
+            get => _enabled;
+            set
+            {
+                _enabled = value;
+
+                if (!value)
+                {
+                    IsFixedPosition = false;
+                    FixedX = 0;
+                    FixedY = 0;
+                    IgnoreFixedPosition = false;
+                }
+            }
+        }
         public static bool Dropped { get; set; }
         public static bool UpdatedInWorld { get; set; }
         public static ref StaticTiles ItemData => ref TileDataLoader.Instance.StaticData[Graphic];
 
         public static Point MouseOffset;
+
+        public static bool IsFixedPosition;
+        public static bool IgnoreFixedPosition;
+        public static int FixedX, FixedY;
 
         public static void Set(Item item, ushort amount, Point? offset = null)
         {
@@ -78,6 +99,10 @@ namespace ClassicUO.Game
             Layer = item.Layer;
             Flags = item.Flags;
             MouseOffset = offset ?? Point.Zero;
+            IsFixedPosition = false;
+            FixedX = 0;
+            FixedY = 0;
+            IgnoreFixedPosition = false;
         }
 
         public static void Clear()
@@ -99,6 +124,10 @@ namespace ClassicUO.Game
             Dropped = false;
             Enabled = false;
             UpdatedInWorld = false;
+            IsFixedPosition = false;
+            FixedX = 0;
+            FixedY = 0;
+            IgnoreFixedPosition = false;
         }
     }
 }

@@ -327,7 +327,7 @@ namespace ClassicUO.Game.Scenes
 
             if (!IsMouseOverViewport)
             {
-                if (ItemHold.Enabled)
+                if (ItemHold.Enabled && !ItemHold.IsFixedPosition)
                 {
                     UIManager.MouseOverControl?.InvokeMouseUp(Mouse.Position, MouseButtonType.Left);
 
@@ -352,7 +352,7 @@ namespace ClassicUO.Game.Scenes
             if (UIManager.IsDragging)
                 return false;
 
-            if (ItemHold.Enabled)
+            if (ItemHold.Enabled && !ItemHold.IsFixedPosition)
             {
                 if (SelectedObject.Object is GameObject obj && obj.Distance <= Constants.DRAG_ITEMS_DISTANCE)
                 {
@@ -660,6 +660,14 @@ namespace ClassicUO.Game.Scenes
 
         internal override bool OnMouseWheel(bool up)
         {
+            if (Keyboard.Ctrl && !up && ItemHold.Enabled && !ItemHold.IsFixedPosition)
+            {
+                ItemHold.IsFixedPosition = true;
+                ItemHold.IgnoreFixedPosition = true;
+                ItemHold.FixedX = Mouse.Position.X;
+                ItemHold.FixedY = Mouse.Position.Y;
+            }
+
             if (!IsMouseOverViewport)
                 return false;
 

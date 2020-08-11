@@ -39,7 +39,7 @@ namespace ClassicUO.Game.Scenes
 
         public void MergeHeldItem(Entity container)
         {
-            if (ItemHold.Enabled && ItemHold.Serial != container)
+            if (ItemHold.Enabled && ItemHold.Serial != container && !ItemHold.IsFixedPosition)
             {
                 if (SerialHelper.IsMobile(container.Serial))
                     GameActions.DropItem(ItemHold.Serial, 0xFFFF, 0xFFFF, 0, container.Serial);
@@ -142,7 +142,7 @@ namespace ClassicUO.Game.Scenes
                 serial = 0xFFFF_FFFF;
             }
 
-            if (ItemHold.Enabled && ItemHold.Serial != serial)
+            if (ItemHold.Enabled && ItemHold.Serial != serial && !ItemHold.IsFixedPosition)
             {
                 GameActions.DropItem(ItemHold.Serial, x, y, z, serial);
             }
@@ -150,7 +150,7 @@ namespace ClassicUO.Game.Scenes
 
         public void DropHeldItemToContainer(uint container, int x = 0xFFFF, int y = 0xFFFF)
         {
-            if (ItemHold.Enabled && ItemHold.Serial != container)
+            if (ItemHold.Enabled && ItemHold.Serial != container && !ItemHold.IsFixedPosition)
             {
                 GameActions.DropItem(ItemHold.Serial, x, y, 0, container);
             }
@@ -158,7 +158,7 @@ namespace ClassicUO.Game.Scenes
 
         public void DropHeldItemToContainer(Item container, int x = 0xFFFF, int y = 0xFFFF)
         {
-            if (ItemHold.Enabled && container != null && ItemHold.Serial != container.Serial)
+            if (ItemHold.Enabled && container != null && ItemHold.Serial != container.Serial && !ItemHold.IsFixedPosition)
             {
                 ContainerGump gump = UIManager.GetGump<ContainerGump>(container);
 
@@ -231,7 +231,7 @@ namespace ClassicUO.Game.Scenes
 
         public void WearHeldItem(uint serial = 0)
         {
-            if (ItemHold.Enabled && ItemHold.IsWearable)
+            if (ItemHold.Enabled && ItemHold.IsWearable && !ItemHold.IsFixedPosition)
             {
                 if (!SerialHelper.IsValid(serial))
                     serial = World.Player;

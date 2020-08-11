@@ -158,7 +158,7 @@ namespace ClassicUO.Game.UI.Controls
                             {
                                 if (Mouse.IsDragging && CanPickup())
                                 {
-                                    if (ItemHold.Enabled && gs.IsMouseOverUI)
+                                    if (ItemHold.Enabled && !ItemHold.IsFixedPosition && gs.IsMouseOverUI)
                                     {
                                         if (item.ItemData.IsContainer)
                                             gs.DropHeldItemToContainer(item);

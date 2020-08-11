@@ -207,7 +207,7 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     candrop = false;
 
-                    if (ItemHold.Enabled)
+                    if (ItemHold.Enabled && !ItemHold.IsFixedPosition)
                     {
                         candrop = true;
 
@@ -245,12 +245,12 @@ namespace ClassicUO.Game.UI.Gumps
                     }
                 }
 
-                if (!candrop && ItemHold.Enabled)
+                if (!candrop && ItemHold.Enabled && !ItemHold.IsFixedPosition)
                 {
                     Client.Game.Scene.Audio.PlaySound(0x0051);
                 }
 
-                if (candrop && ItemHold.Enabled)
+                if (candrop && ItemHold.Enabled && !ItemHold.IsFixedPosition)
                 {
                     ((GameScene) Client.Game.Scene).DropHeldItemToContainer(World.Items.Get(dropcontainer), x, y);
                     Mouse.CancelDoubleClick = true;

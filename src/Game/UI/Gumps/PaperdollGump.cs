@@ -364,7 +364,7 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     _paperDollInteractable?.SetFakeItem(false);
                 }
-                else if (!_paperDollInteractable.HasFakeItem && ItemHold.Enabled && UIManager.MouseOverControl?.RootParent == this)
+                else if (!_paperDollInteractable.HasFakeItem && ItemHold.Enabled && !ItemHold.IsFixedPosition && UIManager.MouseOverControl?.RootParent == this)
                 {
                     if (ItemHold.ItemData.AnimID != 0)
                     {
@@ -389,7 +389,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 Mobile container = World.Mobiles.Get(LocalSerial);
 
-                if (ItemHold.Enabled && SerialHelper.IsValid(LocalSerial))
+                if (ItemHold.Enabled && !ItemHold.IsFixedPosition && SerialHelper.IsValid(LocalSerial))
                 {
                     if (ItemHold.ItemData.IsWearable)
                     {
@@ -482,7 +482,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override void OnButtonClick(int buttonID)
         {
-            if (ItemHold.Enabled)
+            if (ItemHold.Enabled && !ItemHold.IsFixedPosition)
             {
                 OnMouseUp(0, 0, MouseButtonType.Left);
                 return;
