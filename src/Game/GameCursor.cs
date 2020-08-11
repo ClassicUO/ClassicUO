@@ -612,9 +612,8 @@ namespace ClassicUO.Game
             int war = World.InGame && World.Player.InWarMode ? 1 : 0;
 
             if (TargetManager.IsTargeting)
-            {
-                if (!ItemHold.Enabled)
-                    return _cursorData[war, 12];
+            { 
+                return _cursorData[war, 12];
             }
 
             if (UIManager.IsDragging || IsDraggingCursorForced)
