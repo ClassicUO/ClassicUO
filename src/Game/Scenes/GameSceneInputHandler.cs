@@ -660,26 +660,31 @@ namespace ClassicUO.Game.Scenes
 
         internal override bool OnMouseWheel(bool up)
         {
-            if (Keyboard.Ctrl && !up && ItemHold.Enabled && !ItemHold.IsFixedPosition)
+            if (Keyboard.Ctrl && ItemHold.Enabled)
             {
-                ItemHold.IsFixedPosition = true;
-                ItemHold.IgnoreFixedPosition = true;
-                ItemHold.FixedX = Mouse.Position.X;
-                ItemHold.FixedY = Mouse.Position.Y;
+                if (!up && !ItemHold.IsFixedPosition)
+                {
+                    ItemHold.IsFixedPosition = true;
+                    ItemHold.IgnoreFixedPosition = true;
+                    ItemHold.FixedX = Mouse.Position.X;
+                    ItemHold.FixedY = Mouse.Position.Y;
+                }
+
+                if (ItemHold.IgnoreFixedPosition)
+                {
+                    return true;
+                }
             }
 
             if (!IsMouseOverViewport)
                 return false;
 
-            if (ProfileManager.Current.EnableMousewheelScaleZoom)
+            if (Keyboard.Ctrl && ProfileManager.Current.EnableMousewheelScaleZoom)
             {
-                if (!Keyboard.Ctrl)
-                    return false;
-
-                if (!up)
-                    ZoomOut();
-                else
+                if (up)
                     ZoomIn();
+                else
+                    ZoomOut();
 
                 return true;
             }
