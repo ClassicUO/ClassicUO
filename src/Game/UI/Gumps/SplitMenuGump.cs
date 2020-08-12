@@ -29,7 +29,7 @@ namespace ClassicUO.Game.UI.Gumps
 {
     internal class SplitMenuGump : Gump
     {
-        private readonly Point _offsert;
+        private readonly Point _offset;
         private readonly Button _okButton;
         private readonly HSliderBar _slider;
         private readonly StbTextBox _textBox;
@@ -49,7 +49,7 @@ namespace ClassicUO.Game.UI.Gumps
                 return;
             }
 
-            _offsert = offset;
+            _offset = offset;
 
             CanMove = true;
             AcceptMouseInput = false;
@@ -129,13 +129,21 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void OkButtonOnMouseClick(object sender, MouseEventArgs e)
         {
-            if (_slider.Value > 0) GameActions.PickUp(LocalSerial, _offsert, _slider.Value);
-            Dispose();
+            PickUp();
         }
 
         public override void OnKeyboardReturn(int textID, string text)
         {
-            if (_slider.Value > 0) GameActions.PickUp(LocalSerial, _offsert, _slider.Value);
+            PickUp();
+        }
+
+        private void PickUp()
+        {
+            if (_slider.Value > 0)
+            {
+                GameActions.PickUp(LocalSerial, _offset.X, _offset.Y, _slider.Value);
+            }
+
             Dispose();
         }
 

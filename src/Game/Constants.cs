@@ -122,6 +122,9 @@ namespace ClassicUO.Game
         public const byte MIN_CONTAINER_SIZE_PERC = 50;
         public const byte MAX_CONTAINER_SIZE_PERC = 200;
 
+        public const int MALE_GUMP_OFFSET = 50000;
+        public const int FEMALE_GUMP_OFFSET = 60000;
+
         public const int WEATHER_TIMER = 6 * 60 * 1000;
 
         public const int PREDICTABLE_CHUNKS = 300;

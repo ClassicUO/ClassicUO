@@ -358,11 +358,13 @@ namespace ClassicUO.Game.UI.Gumps
             base.Update(totalMS, frameMS);
 
 
-            if (_paperDollInteractable != null)
+            if (_paperDollInteractable != null && CanLift)
             {
-                if (_paperDollInteractable.HasFakeItem && !ItemHold.Enabled)
+                bool force_false = SelectedObject.Object is Item item && (item.Layer == Layer.Backpack || item.ItemData.IsContainer);
+
+                if ((_paperDollInteractable.HasFakeItem && !ItemHold.Enabled) || force_false)
                 {
-                    _paperDollInteractable?.SetFakeItem(false);
+                    _paperDollInteractable.SetFakeItem(false);
                 }
                 else if (!_paperDollInteractable.HasFakeItem && ItemHold.Enabled && UIManager.MouseOverControl?.RootParent == this)
                 {
@@ -385,22 +387,57 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override void OnMouseUp(int x, int y, MouseButtonType button)
         {
-            if (button == MouseButtonType.Left)
+            if (button == MouseButtonType.Left && World.InGame)
             {
                 Mobile container = World.Mobiles.Get(LocalSerial);
 
-                if (ItemHold.Enabled && SerialHelper.IsValid(LocalSerial))
+                if (ItemHold.Enabled )
                 {
-                    if (ItemHold.ItemData.IsWearable)
+                    if (CanLift)
                     {
-                        Item equipment = container.FindItemByLayer((Layer) ItemHold.ItemData.Layer);
-
-                        if (equipment == null)
+                        if (SelectedObject.Object is Item item && (item.Layer == Layer.Backpack || item.ItemData.IsContainer))
                         {
-                            ((GameScene) Client.Game.Scene).WearHeldItem(LocalSerial != World.Player ? container : World.Player);
+                            GameActions.DropItem(ItemHold.Serial, 0xFFFF, 0xFFFF, 0, item.Serial);
                             Mouse.CancelDoubleClick = true;
                             Mouse.LDropPosition = Mouse.Position;
                         }
+                        else
+                        {
+                            if (ItemHold.ItemData.IsWearable)
+                            {
+                                Item equipment = container.FindItemByLayer((Layer) ItemHold.ItemData.Layer);
+
+                                if (equipment == null)
+                                {
+                                    GameActions.Equip(LocalSerial != World.Player ? container : World.Player);
+                                    Mouse.CancelDoubleClick = true;
+                                    Mouse.LDropPosition = Mouse.Position;
+                                }
+                            }
+                        }
+                    }
+                }
+                else if (SelectedObject.Object is Item item)
+                {
+                    if (TargetManager.IsTargeting)
+                    {
+                        TargetManager.Target(item.Serial);
+                        Mouse.CancelDoubleClick = true;
+                        Mouse.LastLeftButtonClickTime = 0;
+
+                        if (TargetManager.TargetingState == CursorTarget.SetTargetClientSide)
+                        {
+                            UIManager.Add(new InspectorGump(item));
+                        }
+                    }
+                    else if (!DelayedObjectClickManager.IsEnabled)
+                    {
+                        var off = Mouse.LDroppedOffset;
+                        DelayedObjectClickManager.Set(
+                            item.Serial,
+                          (Mouse.Position.X - off.X) - ScreenCoordinateX,
+                          (Mouse.Position.Y - off.Y) - ScreenCoordinateY,
+                          Time.Ticks + Mouse.MOUSE_DELAY_DOUBLE_CLICK);
                     }
                 }
             }

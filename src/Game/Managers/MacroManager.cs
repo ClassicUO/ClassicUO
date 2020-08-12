@@ -975,8 +975,8 @@ namespace ClassicUO.Game.Managers
 
                     if (_itemsInHand[handIndex] != 0)
                     {
-                        GameActions.PickUp(_itemsInHand[handIndex], 1);
-                        gs.WearHeldItem(World.Player);
+                        GameActions.PickUp(_itemsInHand[handIndex], 0, 0, 1);
+                        GameActions.Equip();
 
                         _itemsInHand[handIndex] = 0;
                         _nextTimer = Time.Ticks + 1000;
@@ -994,8 +994,8 @@ namespace ClassicUO.Game.Managers
                         {
                             _itemsInHand[handIndex] = item.Serial;
 
-                            GameActions.PickUp(item, 1);
-                            gs.MergeHeldItem(backpack);
+                            GameActions.PickUp(item, 0, 0, 1);
+                            GameActions.DropItem(ItemHold.Serial, 0xFFFF, 0xFFFF, 0, backpack.Serial);
                             _nextTimer = Time.Ticks + 1000;
                         }
                     }
