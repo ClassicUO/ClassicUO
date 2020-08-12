@@ -2814,6 +2814,11 @@ namespace ClassicUO.Network
 
             if (TargetManager.LastAttack != serial && World.InGame)
             {
+                if (SerialHelper.IsValid(TargetManager.LastAttack))
+                {
+                    NetClient.Socket.Send(new PCloseStatusBarGump(TargetManager.LastAttack));
+                }
+
                 TargetManager.LastAttack = serial;
                 GameActions.RequestMobileStatus(TargetManager.LastAttack);
             }
