@@ -816,12 +816,10 @@ namespace ClassicUO.Game.Scenes
                 return;
 
             batcher.GraphicsDevice.SetRenderTarget(_lightRenderTarget);
+            batcher.GraphicsDevice.Clear(ClearOptions.Target, Color.Black, 0, 0);
 
-            if (UseAltLights)
-            {
-                batcher.GraphicsDevice.Clear(ClearOptions.Target, Color.Black, 0, 0);
-            }
-            else
+
+            if (!UseAltLights)
             {
                 var lightColor = World.Light.IsometricLevel;
 
@@ -830,7 +828,6 @@ namespace ClassicUO.Game.Scenes
 
                 _vectorClear.X = _vectorClear.Y = _vectorClear.Z = lightColor;
 
-                batcher.GraphicsDevice.Clear(ClearOptions.Target, Color.Black, 0, 0);
                 batcher.GraphicsDevice.Clear(ClearOptions.Target, _vectorClear, 0, 0);
             }
 

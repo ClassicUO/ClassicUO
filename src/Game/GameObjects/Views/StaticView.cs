@@ -66,10 +66,12 @@ namespace ClassicUO.Game.GameObjects
             else if (ProfileManager.Current.NoColorObjectsOutOfRange && Distance > World.ClientViewRange)
             {
                 hue = Constants.OUT_RANGE_COLOR;
+                partial = false;
             }
             else if (World.Player.IsDead && ProfileManager.Current.EnableBlackWhiteEffect)
             {
                 hue = Constants.DEAD_RANGE_COLOR;
+                partial = false;
             }
 
             ShaderHuesTraslator.GetHueVector(ref HueVector, hue, partial, 0);
