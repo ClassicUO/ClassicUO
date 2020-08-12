@@ -24,14 +24,12 @@ using System.Collections.Generic;
 
 namespace ClassicUO.Utility
 {
-    delegate void ActionRef1<T>(ref T arg);
-
     internal class QueuedPool<T> where T : class, new()
     {
         private readonly Stack<T> _pool;
-        private Action<T> _on_pickup;
+        private readonly Action<T> _on_pickup;
+        private readonly int _maxSize;
 
-        private int _maxSize;
 
         public QueuedPool(int size, Action<T> onpickup = null)
         {
@@ -42,6 +40,10 @@ namespace ClassicUO.Utility
             for (int i = 0; i < size; i++)
                 _pool.Push(new T());
         }
+
+
+        public int MaxSize => _maxSize;
+        public int Remains => _maxSize - _pool.Count;
 
         public T GetOne()
         {
