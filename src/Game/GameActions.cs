@@ -281,6 +281,7 @@ namespace ClassicUO.Game
                 }
 
                 Socket.Send(new PEquipRequest(ItemHold.Serial, (Layer) ItemHold.ItemData.Layer, container));
+               
                 ItemHold.Enabled = false;
                 ItemHold.Dropped = true;
             }
