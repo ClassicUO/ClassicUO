@@ -259,7 +259,7 @@ namespace ClassicUO.Game
 
         public static void DropItem(uint serial, int x, int y, int z, uint container)
         {
-            if (ItemHold.Enabled && ItemHold.Serial != container)
+            if (ItemHold.Enabled && !ItemHold.IsFixedPosition && ItemHold.Serial != container)
             {
                 if (Client.Version >= ClientVersion.CV_6017)
                     Socket.Send(new PDropRequestNew(serial, (ushort) x, (ushort) y, (sbyte) z, 0, container));
@@ -273,7 +273,7 @@ namespace ClassicUO.Game
 
         public static void Equip(uint container = 0)
         {
-            if (ItemHold.Enabled && ItemHold.ItemData.IsWearable)
+            if (ItemHold.Enabled && !ItemHold.IsFixedPosition && ItemHold.ItemData.IsWearable)
             {
                 if (!SerialHelper.IsValid(container))
                 {

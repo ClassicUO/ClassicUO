@@ -563,7 +563,7 @@ namespace ClassicUO.Game
                      selectedItem.IsLocked && 
                      selectedItem.ItemData.Weight == 255
                      && !selectedItem.ItemData.IsContainer) || 
-                    ItemHold.Enabled)
+                    (ItemHold.Enabled && !ItemHold.IsFixedPosition))
                 {
                     if (!_tooltip.IsEmpty && (!UIManager.IsMouseOverAControl || UIManager.IsMouseOverWorld))
                         _tooltip.Clear();
