@@ -303,13 +303,12 @@ namespace ClassicUO.Game.UI.Gumps
                         {
                             if (entity.Distance < Constants.DRAG_ITEMS_DISTANCE)
                             {
-                                if (SerialHelper.IsItem(LocalSerial))
-                                    scene.DropHeldItemToContainer(World.Items.Get(LocalSerial));
-                                else if (SerialHelper.IsMobile(LocalSerial))
-                                    scene.MergeHeldItem(World.Mobiles.Get(LocalSerial));
+                                GameActions.DropItem(ItemHold.Serial, 0xFFFF, 0xFFFF, 0, LocalSerial);
                             }
                             else
+                            {
                                 scene.Audio.PlaySound(0x0051);
+                            }
                         }
                         
                         return;

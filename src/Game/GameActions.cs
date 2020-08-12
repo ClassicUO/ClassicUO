@@ -28,6 +28,7 @@ using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Gumps;
+using ClassicUO.Input;
 using ClassicUO.Network;
 using ClassicUO.Utility;
 
@@ -39,15 +40,9 @@ namespace ClassicUO.Game
 {
     internal static class GameActions
     {
-        private static Func<uint, int, int, int?, Point?, bool> _pickUpAction;
-
         public static int LastSpellIndex { get; set; } = 1;
         public static int LastSkillIndex { get; set; } = 1;
 
-        internal static void Initialize(Func<uint, int, int, int?, Point?, bool> onPickUpAction)
-        {
-            _pickUpAction = onPickUpAction;
-        }
 
         public static void ChangeWarMode(byte status = 0xFF)
         {
@@ -209,37 +204,86 @@ namespace ClassicUO.Game
             Socket.Send(new PPartyChangeLootTypeRequest(isLootable));
         }
 
-        public static void PickUp(uint serial, Point point, int? amount = null)
+        public static bool PickUp(uint serial, int x, int y, int amount = -1, Point? offset = null)
         {
-            PickUp(serial, point.X, point.Y, amount);
-        }
+            if (World.Player.IsDead || ItemHold.Enabled)
+                return false;
 
-        public static void PickUp(uint serial, int x, int y, int? amount = null, Point? offset = null)
-        {
-            _pickUpAction(serial, x, y, amount, offset);
-        }
+            Item item = World.Items.Get(serial);
 
-        public static void PickUp(uint serial, int? amount = null, Point? offset = null)
-        {
-            _pickUpAction(serial, 0, 0, amount, offset);
+            if (item == null || item.IsDestroyed || item.IsMulti || item.OnGround && (item.IsLocked || item.Distance > Constants.DRAG_ITEMS_DISTANCE))
+                return false;
+
+            if (amount <= -1 && item.Amount > 1 && item.ItemData.IsStackable)
+            {
+                if (ProfileManager.Current.HoldShiftToSplitStack == Keyboard.Shift)
+                {
+                    SplitMenuGump gump = UIManager.GetGump<SplitMenuGump>(item);
+
+                    if (gump != null)
+                    {
+                        return false;
+                    }
+
+                    gump = new SplitMenuGump(item, new Point(x, y))
+                    {
+                        X = Mouse.LDropPosition.X - 80,
+                        Y = Mouse.LDropPosition.Y - 40
+                    };
+                    UIManager.Add(gump);
+                    UIManager.AttemptDragControl(gump, Mouse.Position, true);
+
+                    return true;
+                }
+            }
+            
+            if (amount <= 0)
+                amount = item.Amount;
+
+            ItemHold.Clear();
+            ItemHold.Set(item, (ushort) amount, offset);
+            Socket.Send(new PPickUpRequest(item, (ushort) amount));
+            UIManager.GameCursor.SetDraggedItem(offset);
+
+            if (item.OnGround)
+            {
+                item.RemoveFromTile();
+            }
+
+            item.TextContainer?.Clear();
+
+            World.ObjectToRemove = item.Serial;
+
+            return true;
         }
 
         public static void DropItem(uint serial, int x, int y, int z, uint container)
         {
-            if (Client.Version >= ClientVersion.CV_6017)
-                Socket.Send(new PDropRequestNew(serial, (ushort) x, (ushort) y, (sbyte) z, 0, container));
-            else
-                Socket.Send(new PDropRequestOld(serial, (ushort) x, (ushort) y, (sbyte) z, container));
+            if (ItemHold.Enabled && ItemHold.Serial != container)
+            {
+                if (Client.Version >= ClientVersion.CV_6017)
+                    Socket.Send(new PDropRequestNew(serial, (ushort) x, (ushort) y, (sbyte) z, 0, container));
+                else
+                    Socket.Send(new PDropRequestOld(serial, (ushort) x, (ushort) y, (sbyte) z, container));
 
-            ItemHold.Enabled = false;
-            ItemHold.Dropped = true;
+                ItemHold.Enabled = false;
+                ItemHold.Dropped = true;
+            }
         }
 
-        public static void Equip(uint serial, Layer layer, uint target)
+        public static void Equip(uint container = 0)
         {
-            Socket.Send(new PEquipRequest(serial, layer, target));
-            ItemHold.Enabled = false;
-            ItemHold.Dropped = true;
+            if (ItemHold.Enabled && ItemHold.ItemData.IsWearable)
+            {
+                if (!SerialHelper.IsValid(container))
+                {
+                    container = World.Player.Serial;
+                }
+
+                Socket.Send(new PEquipRequest(ItemHold.Serial, (Layer) ItemHold.ItemData.Layer, container));
+                ItemHold.Enabled = false;
+                ItemHold.Dropped = true;
+            }
         }
 
         public static void ReplyGump(uint local, uint server, int button, uint[] switches = null, Tuple<ushort, string>[] entries = null)

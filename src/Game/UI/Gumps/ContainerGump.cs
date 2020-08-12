@@ -190,6 +190,11 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 TargetManager.Target(serial);
                 Mouse.CancelDoubleClick = true;
+
+                if (TargetManager.TargetingState == CursorTarget.SetTargetClientSide)
+                {
+                    UIManager.Add(new InspectorGump(World.Get(serial)));
+                }
             }
             else
             {
@@ -252,7 +257,71 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (candrop && ItemHold.Enabled && !ItemHold.IsFixedPosition)
                 {
-                    ((GameScene) Client.Game.Scene).DropHeldItemToContainer(World.Items.Get(dropcontainer), x, y);
+                    ContainerGump gump = UIManager.GetGump<ContainerGump>(dropcontainer);
+
+                    if (gump != null)
+                    {
+                        bool is_chessboard = gump.Graphic == 0x091A || gump.Graphic == 0x092E;
+
+                        if (is_chessboard)
+                            y += 20;
+
+                        Rectangle bounds = ContainerManager.Get(gump.Graphic).Bounds;
+                        ArtTexture texture = ArtLoader.Instance.GetTexture(ItemHold.DisplayedGraphic);
+                        float scale = UIManager.ContainerScale;
+
+                        bounds.X = (int) (bounds.X * scale);
+                        bounds.Y = (int) (bounds.Y * scale);
+                        bounds.Width = (int) (bounds.Width * scale);
+                        bounds.Height = (int) ((bounds.Height + (is_chessboard ? 20 : 0)) * scale);
+
+                        if (texture != null && !texture.IsDisposed)
+                        {
+                            int textureW, textureH;
+
+                            if (ProfileManager.Current != null && ProfileManager.Current.ScaleItemsInsideContainers)
+                            {
+                                textureW = (int) (texture.Width * scale);
+                                textureH = (int) (texture.Height * scale);
+                            }
+                            else
+                            {
+                                textureW = texture.Width;
+                                textureH = texture.Height;
+                            }
+
+                            if (ProfileManager.Current != null && ProfileManager.Current.RelativeDragAndDropItems)
+                            {
+                                x += ItemHold.MouseOffset.X;
+                                y += ItemHold.MouseOffset.Y;
+                            }
+
+                            x -= textureW >> 1;
+                            y -= textureH >> 1;
+
+                            if (x + textureW > bounds.Width)
+                                x = bounds.Width - textureW;
+
+                            if (y + textureH > bounds.Height)
+                                y = bounds.Height - textureH;
+                        }
+
+                        if (x < bounds.X)
+                            x = bounds.X;
+
+                        if (y < bounds.Y)
+                            y = bounds.Y;
+
+                        x = (int) (x / scale);
+                        y = (int) (y / scale);
+                    }
+                    else
+                    {
+                        x = 0xFFFF;
+                        y = 0xFFFF;
+                    }
+
+                    GameActions.DropItem(ItemHold.Serial, x, y, 0, dropcontainer);
                     Mouse.CancelDoubleClick = true;
                 }
                 else if (!ItemHold.Enabled && SerialHelper.IsValid(serial))
@@ -260,7 +329,7 @@ namespace ClassicUO.Game.UI.Gumps
                     if (!DelayedObjectClickManager.IsEnabled)
                     {
                         var off = Mouse.LDroppedOffset;
-                        DelayedObjectClickManager.Set(LocalSerial,
+                        DelayedObjectClickManager.Set(serial,
                                                       (Mouse.Position.X - off.X) - ScreenCoordinateX,
                                                       (Mouse.Position.Y - off.Y) - ScreenCoordinateY,
                                                       Time.Ticks + Mouse.MOUSE_DELAY_DOUBLE_CLICK);
