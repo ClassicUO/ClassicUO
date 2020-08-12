@@ -215,18 +215,28 @@ namespace ClassicUO.Game
 
                     if (rem != null)
                     {
+                        Entity container = Get(rem.Container);
+
                         RemoveItem(rem, true);
 
                         if (rem.Layer == Layer.OneHanded || rem.Layer == Layer.TwoHanded)
                             Player.UpdateAbilities();
+                    
+                        if (container != null)
+                        {
+                            if (SerialHelper.IsMobile(container.Serial))
+                            {
+                                UIManager.GetGump<PaperDollGump>(container.Serial)?.RequestUpdateContents();
+                            }
+                            else if (SerialHelper.IsItem(container.Serial))
+                            {
+                                UIManager.GetGump<ContainerGump>(container.Serial)?.RequestUpdateContents();
 
-                        if (SerialHelper.IsMobile(rem.Container))
-                        {
-                            UIManager.GetGump<PaperDollGump>(rem.Container)?.RequestUpdateContents();
-                        }
-                        else if (SerialHelper.IsItem(rem.Container))
-                        {
-                            UIManager.GetGump<ContainerGump>(rem.Container)?.RequestUpdateContents();
+                                if (container.Graphic == 0x2006)
+                                {
+                                    UIManager.GetGump<GridLootGump>(container)?.RequestUpdateContents();
+                                }
+                            }
                         }
                     }
                 }

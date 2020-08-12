@@ -466,7 +466,7 @@ namespace ClassicUO.Game
 
         public static void GrabItem(uint serial, ushort amount, uint bag = 0)
         {
-            Socket.Send(new PPickUpRequest(serial, amount));
+            //Socket.Send(new PPickUpRequest(serial, amount));
 
             Item backpack = World.Player.FindItemByLayer(Layer.Backpack);
 
@@ -485,6 +485,7 @@ namespace ClassicUO.Game
                 bag = backpack.Serial;
             }
 
+            PickUp(serial, 0, 0, amount);
             DropItem(serial, 0xFFFF, 0xFFFF, 0, bag);
         }
     }
