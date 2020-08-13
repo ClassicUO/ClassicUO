@@ -346,26 +346,73 @@ namespace ClassicUO.Game.Scenes
 
             if (ItemHold.Enabled && !ItemHold.IsFixedPosition)
             {
-                if (SelectedObject.LastObject is GameObject obj && obj.Distance <= Constants.DRAG_ITEMS_DISTANCE)
-                {
-                    if (obj is Mobile || obj.Graphic == 0x2006 || (obj.Graphic == ItemHold.Graphic && ItemHold.IsStackable))
-                    {
-                        GameActions.DropItem(ItemHold.Serial, 0xFFFF, 0xFFFF, 0, ((Entity) obj).Serial);
-                    }
-                    else if (obj.Graphic < ushort.MaxValue)
-                    {
-                        bool is_land = obj is Land;
-                        bool drop_to_terrain = is_land || !(obj is Entity) || !TileDataLoader.Instance.StaticData[obj.Graphic].IsContainer;
+                uint drop_container = 0xFFFF_FFFF;
+                bool can_drop = false; 
+                ushort dropX = 0;
+                ushort dropY = 0;
+                sbyte dropZ = 0;
 
-                        GameActions.DropItem(ItemHold.Serial, 
-                            obj.X, 
-                            obj.Y,
-                            (sbyte) (obj.Z + (!is_land ? TileDataLoader.Instance.StaticData[obj.Graphic].Height : 0)),
-                            drop_to_terrain ? 0xFFFF_FFFF :  ((Entity) obj).Serial);
+                GameObject gobj = SelectedObject.LastObject as GameObject;
+
+                if (gobj is Entity obj)
+                {
+                    can_drop = obj.Distance <= Constants.DRAG_ITEMS_DISTANCE;
+
+                    if (can_drop)
+                    {
+                        if ((obj is Item it && it.ItemData.IsContainer) || obj is Mobile)
+                        {
+                            dropX = 0xFFFF;
+                            dropY = 0xFFFF;
+                            dropZ = 0;
+                            drop_container = obj.Serial;
+                        }
+                        else if (obj is Item it2 && (it2.ItemData.IsSurface || (it2.ItemData.IsStackable && obj.Graphic == ItemHold.Graphic)))
+                        {
+                            if (!it2.ItemData.IsSurface)
+                            {
+                                drop_container = obj.Serial;
+                            }
+
+                            dropX = obj.X;
+                            dropY = obj.Y;
+                            dropZ = obj.Z;
+                        }
+                    }
+                    else
+                    {
+                        Client.Game.Scene.Audio.PlaySound(0x0051);
                     }
                 }
-                else
-                    Client.Game.Scene.Audio.PlaySound(0x0051);
+                else if (gobj is Land || gobj is Static || gobj is Multi)
+                {
+                    can_drop = gobj.Distance <= Constants.DRAG_ITEMS_DISTANCE;
+
+                    if (can_drop)
+                    {
+                        dropX = gobj.X;
+                        dropY = gobj.Y;
+                        dropZ = gobj.Z;
+                    }
+                    else
+                    {
+                        Client.Game.Scene.Audio.PlaySound(0x0051);
+                    }
+                }
+
+
+                if (can_drop)
+                {
+                    if (drop_container == 0xFFFF_FFFF && dropX == 0 && dropY == 0)
+                    {
+                        can_drop = false;
+                    }
+
+                    if (can_drop)
+                    {
+                        GameActions.DropItem(ItemHold.Serial, dropX, dropY, dropZ, drop_container);
+                    }
+                }
             }
             else if (TargetManager.IsTargeting)
             {
