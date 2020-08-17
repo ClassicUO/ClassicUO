@@ -735,6 +735,8 @@ namespace ClassicUO.Game.Scenes
             if (!World.InGame)
                 return false;
 
+            SelectedObject.Object = null;
+
             int posX = ProfileManager.Current.GameWindowPosition.X + 5;
             int posY = ProfileManager.Current.GameWindowPosition.Y + 5;
             int width = ProfileManager.Current.GameWindowSize.X;
@@ -828,13 +830,13 @@ namespace ClassicUO.Game.Scenes
             batcher.EnableScissorTest(false);
             ScissorStack.PopScissors(batcher.GraphicsDevice);
 
+            SelectedObject.LastObject = SelectedObject.Object;
+
             return true;
         }
 
         private void DrawWorld(UltimaBatcher2D batcher, int masterX, int masterY, ref Matrix matrix)
         {
-            SelectedObject.Object = null;
-
             batcher.GraphicsDevice.Clear(Color.Black);
             batcher.SetBrightlight(ProfileManager.Current.Brighlight);
             batcher.Begin(null, matrix);
@@ -851,7 +853,7 @@ namespace ClassicUO.Game.Scenes
                 fx += 22;
                 //fy -= 22;
 
-                CircleOfTransparency.Draw(batcher, fx + masterX, fy + masterY);
+                CircleOfTransparency.Draw(batcher, fx, fy);
             }
 
             if (!_deathScreenActive)
@@ -889,7 +891,6 @@ namespace ClassicUO.Game.Scenes
                 return false;
 
             batcher.GraphicsDevice.SetRenderTarget(_lightRenderTarget);
-            //batcher.GraphicsDevice.Clear(ClearOptions.DepthBuffer, Color.Black, 0, 0);
             batcher.GraphicsDevice.Clear(ClearOptions.Target, Color.Black, 0f, 0);
 
             if (!UseAltLights)
@@ -948,8 +949,6 @@ namespace ClassicUO.Game.Scenes
 
             World.WorldTextManager.ProcessWorldText(true);
             World.WorldTextManager.Draw(batcher, x, y, renderIndex);
-
-            SelectedObject.LastObject = SelectedObject.Object;
         }
 
         public void DrawSelection(UltimaBatcher2D batcher, int x, int y)
