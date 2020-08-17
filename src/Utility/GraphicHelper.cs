@@ -41,7 +41,7 @@ namespace ClassicUO.Utility
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void WorldToScreenCoordinates(Viewport viewport, ref Point in_point, ref Matrix transform, out Point result)
+        public static void WorldToScreenCoordinates(Rectangle viewport, ref Point in_point, ref Matrix transform, out Point result)
         {
             float x = (((in_point.X - viewport.X) / ((float) viewport.Width)) * 2f) - 1f;
             float y = -((((in_point.Y - viewport.Y) / ((float) viewport.Height)) * 2f) - 1f);
