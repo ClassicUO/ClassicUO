@@ -332,7 +332,7 @@ namespace ClassicUO.Game.Managers
         {
             float scale = Client.Game.GetScene<GameScene>().Scale;
 
-            base.Draw(batcher, 0, 0, renderIndex, isGump);
+            base.Draw(batcher, startX, startY, renderIndex, isGump);
 
             foreach (KeyValuePair<uint, OverheadDamage> overheadDamage in _damages)
             {

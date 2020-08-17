@@ -740,20 +740,18 @@ namespace ClassicUO.Game.Scenes
             left = (left * Scale) - (new_right - right);
             top  = (top * Scale) - (new_bottom - bottom);
 
-            Matrix.CreateTranslation(-posX, -posY, 0, out _matrix);
+            _matrix = Matrix.Identity;
+            //Matrix.CreateTranslation(-posX, -posY, 0, out _matrix);
             Matrix.CreateOrthographicOffCenter(left, new_right, new_bottom, top, 0, 1, out _projection);
             Matrix.Multiply(ref _matrix, ref _projection, out _matrix);
 
-            Matrix matrix = Matrix.Invert(_matrix);
-
-            Vector2 mouse_pos = new Vector2
+            GraphicHelper.ScreenToWorldCoordinates
             (
-                (((Mouse.Position.X - posX) / ((float) width)) * 2f) - 1f,
-                -((((Mouse.Position.Y - posY) / ((float) height)) * 2f) - 1f)
+                batcher.GraphicsDevice.Viewport,
+                ref Mouse.Position,
+                ref _matrix,
+                out SelectedObject.TranslatedMousePositionByViewport
             );
-
-            SelectedObject.TranslatedMousePositionByViewport.X = (int) ((mouse_pos.X * matrix.M11) + (mouse_pos.Y * matrix.M21) + matrix.M41);
-            SelectedObject.TranslatedMousePositionByViewport.Y = (int) ((mouse_pos.X * matrix.M12) + (mouse_pos.Y * matrix.M22) + matrix.M42);
 
             //var rectangle = ScissorStack.CalculateScissors(
             //    Matrix.Identity,
@@ -788,16 +786,19 @@ namespace ClassicUO.Game.Scenes
 
             DrawWorld(batcher, posX, posY, _matrix);
 
-
+            _matrix = Matrix.Identity;
             Matrix.CreateTranslation(-posX, -posY, 0, out _matrix);
             Matrix.CreateOrthographicOffCenter(0, right, bottom, 0, 0, 1, out _projection);
             Matrix.Multiply(ref _matrix, ref _projection, out _matrix);
 
+            posX = 0;
+            posY = 0;
+
             //float scale = Scale;
             //Scale = 1f;
             batcher.Begin(null, _matrix);
-            DrawOverheads(batcher, 0, 0);
-            DrawSelection(batcher, 0, 0);
+            DrawOverheads(batcher, posX, posY);
+            DrawSelection(batcher, posX, posY);
             batcher.End();
 
             //Scale = scale;

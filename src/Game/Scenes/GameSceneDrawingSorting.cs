@@ -50,10 +50,10 @@ namespace ClassicUO.Game.Scenes
 
         private sbyte _maxGroundZ;
         private int _maxZ;
-        private Vector2 _minPixel, _maxPixel, _wnd_scale_offset;
+        private Vector2 _minPixel, _maxPixel;
         private bool _noDrawRoofs;
         private int _objectHandlesCount;
-        private Point _offset, _maxTile, _minTile;
+        private Point _offset, _maxTile, _minTile, _last_scaled_offset;
         private int _oldPlayerX, _oldPlayerY, _oldPlayerZ;
         private int _renderIndex = 1;
         private static GameObject[] _renderList = new GameObject[10000];
@@ -725,8 +725,10 @@ namespace ClassicUO.Game.Scenes
         {
             int oldDrawOffsetX = _offset.X;
             int oldDrawOffsetY = _offset.Y;
-            int winGamePosX = ProfileManager.Current.GameWindowPosition.X;
-            int winGamePosY = ProfileManager.Current.GameWindowPosition.Y;
+            var old_scaled_offset = _last_scaled_offset;
+
+            int winGamePosX = 0; //ProfileManager.Current.GameWindowPosition.X;
+            int winGamePosY = 0; //ProfileManager.Current.GameWindowPosition.Y;
             int winGameWidth = ProfileManager.Current.GameWindowSize.X;
             int winGameHeight = ProfileManager.Current.GameWindowSize.Y;
             int winGameCenterX = winGamePosX + (winGameWidth >> 1);
@@ -836,18 +838,9 @@ namespace ClassicUO.Game.Scenes
             int minPixelsY = (int) (((winGamePosY - drawOffset) * Scale) - (newMaxY - maxY));
             int maxPixlesY = (int) newMaxY;
 
-            if (UpdateDrawPosition || oldDrawOffsetX != winDrawOffsetX || oldDrawOffsetY != winDrawOffsetY)
+            if (UpdateDrawPosition || oldDrawOffsetX != winDrawOffsetX || oldDrawOffsetY != winDrawOffsetY || old_scaled_offset.X != winGameScaledOffsetX || old_scaled_offset.Y != winGameScaledOffsetY)
             {
                 UpdateDrawPosition = true;
-
-                //if (_viewportRenderTarget == null || _viewportRenderTarget.Width != (int) (winGameWidth * Scale) || _viewportRenderTarget.Height != (int) (winGameHeight * Scale))
-                //{
-                //    _viewportRenderTarget?.Dispose();
-                //    _lightRenderTarget?.Dispose();
-
-                //    _viewportRenderTarget = new RenderTarget2D(Client.Game.GraphicsDevice, (int) (winGameWidth * Scale), (int) (winGameHeight * Scale), false, SurfaceFormat.Color, DepthFormat.Depth24Stencil8, 0, RenderTargetUsage.DiscardContents);
-                //    _lightRenderTarget = new RenderTarget2D(Client.Game.GraphicsDevice, (int) (winGameWidth * Scale), (int) (winGameHeight * Scale), false, SurfaceFormat.Color, DepthFormat.Depth24Stencil8, 0, RenderTargetUsage.DiscardContents);
-                //}
 
                 if (_lightRenderTarget == null || _lightRenderTarget.Width != (int) (winGameWidth * Scale) || _lightRenderTarget.Height != (int) (winGameHeight * Scale))
                 {
@@ -880,8 +873,8 @@ namespace ClassicUO.Game.Scenes
             _offset.X = winDrawOffsetX;
             _offset.Y = winDrawOffsetY;
 
-            _wnd_scale_offset.X = winGameScaledOffsetX;
-            _wnd_scale_offset.Y = winGameScaledOffsetY;
+            _last_scaled_offset.X = winGameScaledOffsetX;
+            _last_scaled_offset.Y = winGameScaledOffsetY;
 
             UpdateMaxDrawZ();
         }

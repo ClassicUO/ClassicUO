@@ -862,6 +862,9 @@ namespace ClassicUO.Game.GameObjects
 
             int offY = 0;
 
+            int startX = ProfileManager.Current.GameWindowPosition.X;
+            int startY = ProfileManager.Current.GameWindowPosition.Y;
+
             int x = RealScreenPosition.X;
             int y = RealScreenPosition.Y;
 
@@ -896,8 +899,8 @@ namespace ClassicUO.Game.GameObjects
                         last.OffsetY = offY;
                         offY += last.RenderedText.Height;
 
-                        last.RealScreenPosition.X = (x - (last.RenderedText.Width >> 1));
-                        last.RealScreenPosition.Y = (y - offY);
+                        last.RealScreenPosition.X = startX + (x - (last.RenderedText.Width >> 1));
+                        last.RealScreenPosition.Y = startY +  (y - offY);
                     }
                 }
 
