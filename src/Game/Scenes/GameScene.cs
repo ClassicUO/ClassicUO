@@ -756,16 +756,6 @@ namespace ClassicUO.Game.Scenes
 
             Matrix.CreateOrthographicOffCenter(left, new_right, new_bottom, top, 0, 1, out _matrix);
 
-            //var rectangle = ScissorStack.CalculateScissors(
-            //    Matrix.Identity,
-            //    posX,
-            //    posY,
-            //    width,
-            //    height);
-
-            //ScissorStack.PushScissors(batcher.GraphicsDevice, rectangle);
-            //batcher.EnableScissorTest(true);
-
             if (ProfileManager.Current.EnableDeathScreen)
             {
                 if (_deathScreenLabel == null || _deathScreenLabel.IsDisposed)
@@ -802,8 +792,6 @@ namespace ClassicUO.Game.Scenes
             DrawWorld(batcher, posX, posY, ref _matrix);
 
 
-            //Matrix.CreateOrthographicOffCenter(posX, posX + right, posY + bottom, posY, 0, 1, out _matrix);
-
             if (can_draw_lights)
             {
                 Vector3 hue = Vector3.Zero;
@@ -817,6 +805,16 @@ namespace ClassicUO.Game.Scenes
             batcher.GraphicsDevice.Viewport = r_viewport;
 
 
+            var rectangle = ScissorStack.CalculateScissors(
+                Matrix.Identity,
+                posX,
+                posY,
+                width,
+                height);
+
+            ScissorStack.PushScissors(batcher.GraphicsDevice, rectangle);
+            batcher.EnableScissorTest(true);
+
             // ==============
             // FIXME: OVERHEAD NOT WORKING WHEN ZOOMING :(
             batcher.Begin();
@@ -827,10 +825,8 @@ namespace ClassicUO.Game.Scenes
 
             base.Draw(batcher);
 
-            
-
-            //batcher.EnableScissorTest(false);
-            //ScissorStack.PopScissors(batcher.GraphicsDevice);
+            batcher.EnableScissorTest(false);
+            ScissorStack.PopScissors(batcher.GraphicsDevice);
 
             return true;
         }
