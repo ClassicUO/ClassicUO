@@ -65,7 +65,10 @@ namespace ClassicUO
         public GameController()
         {
             _graphicDeviceManager = new GraphicsDeviceManager(this);
-            _graphicDeviceManager.PreparingDeviceSettings += (sender, e) => e.GraphicsDeviceInformation.PresentationParameters.RenderTargetUsage = RenderTargetUsage.DiscardContents;
+            _graphicDeviceManager.PreparingDeviceSettings += (sender, e) =>
+            {
+                e.GraphicsDeviceInformation.PresentationParameters.RenderTargetUsage = RenderTargetUsage.DiscardContents;
+            };
            
             _graphicDeviceManager.PreferredDepthStencilFormat = DepthFormat.Depth24Stencil8;
             _graphicDeviceManager.SynchronizeWithVerticalRetrace = false; // TODO: V-Sync option

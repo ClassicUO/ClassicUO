@@ -29,7 +29,7 @@ namespace ClassicUO.Utility
     internal class GraphicHelper
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void ScreenToWorldCoordinates(Viewport viewport, ref Point in_point, ref Matrix transform, out Point result)
+        public static void ScreenToWorldCoordinates(Rectangle viewport, ref Point in_point, ref Matrix transform, out Point result)
         {
             Matrix matrix = Matrix.Invert(transform);
 
