@@ -714,7 +714,6 @@ namespace ClassicUO.Game.Scenes
 
 
         private Matrix _matrix = Matrix.Identity;
-        private Matrix _projection = Matrix.Identity;
 
         public override bool Draw(UltimaBatcher2D batcher)
         {
@@ -740,9 +739,7 @@ namespace ClassicUO.Game.Scenes
             left = (left * Scale) - (new_right - right);
             top  = (top * Scale) - (new_bottom - bottom);
 
-            _matrix = Matrix.Identity;
-            Matrix.CreateOrthographicOffCenter(left, new_right, new_bottom, top, 0, 1, out _projection);
-            Matrix.Multiply(ref _matrix, ref _projection, out _matrix);
+            Matrix.CreateOrthographicOffCenter(left, new_right, new_bottom, top, 0, 1, out _matrix);
 
             //var rectangle = ScissorStack.CalculateScissors(
             //    Matrix.Identity,
@@ -790,11 +787,7 @@ namespace ClassicUO.Game.Scenes
             DrawWorld(batcher, posX, posY, ref _matrix);
 
 
-            _matrix = Matrix.Identity;
-            _projection = Matrix.Identity;
-
-            Matrix.CreateOrthographicOffCenter(posX, posX + right, posY + bottom, posY, 0, 1, out _projection);
-            Matrix.Multiply(ref _matrix, ref _projection, out _matrix);
+            Matrix.CreateOrthographicOffCenter(posX, posX + right, posY + bottom, posY, 0, 1, out _matrix);
 
             if (can_draw_lights)
             {
@@ -934,7 +927,7 @@ namespace ClassicUO.Game.Scenes
 
                 hue.X = l.Color;
                 
-                batcher.DrawSprite(texture, (l.DrawX - (texture.Width >> 1)),  (l.DrawY - (texture.Height >> 1)), false, ref hue);
+                batcher.DrawSprite(texture, (l.DrawX - (texture.Width >> 1)), (l.DrawY - (texture.Height >> 1)), false, ref hue);
             }
 
             _lightCount = 0;
