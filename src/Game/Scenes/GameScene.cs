@@ -68,6 +68,24 @@ namespace ClassicUO.Game.Scenes
         private Item _multi;
         private Vector3 _selectionLines = Vector3.Zero;
 
+        private static readonly Lazy<BlendState> _darknessBlend = new Lazy<BlendState>(() =>
+        {
+            BlendState state = new BlendState();
+            state.ColorSourceBlend = Blend.Zero;
+            state.ColorDestinationBlend = Blend.SourceColor;
+            state.ColorBlendFunction = BlendFunction.Add;
+            return state;
+        });
+
+        private static readonly Lazy<BlendState> _altLightsBlend = new Lazy<BlendState>(() =>
+        {
+            BlendState state = new BlendState();
+            state.ColorSourceBlend = Blend.DestinationColor;
+            state.ColorDestinationBlend = Blend.One;
+            state.ColorBlendFunction = BlendFunction.Add;
+            return state;
+        });
+
 
 
         public GameScene() : base((int) SceneType.Game,
@@ -869,25 +887,6 @@ namespace ClassicUO.Game.Scenes
             _weather.Draw(batcher, masterX, masterY);
             batcher.End();
         }
-
-        private readonly Lazy<BlendState> _darknessBlend = new Lazy<BlendState>(() =>
-        {
-            BlendState state = new BlendState();
-            state.ColorSourceBlend = Blend.Zero;
-            state.ColorDestinationBlend = Blend.SourceColor;
-            state.ColorBlendFunction = BlendFunction.Add;
-            return state;
-        });
-
-        private readonly Lazy<BlendState> _altLightsBlend = new Lazy<BlendState>(() =>
-        {
-            BlendState state = new BlendState();
-            state.ColorSourceBlend = Blend.DestinationColor;
-            state.ColorDestinationBlend = Blend.One;
-            state.ColorBlendFunction = BlendFunction.Add;
-            return state;
-        });
-
 
         private bool PrepareLightsRendering(UltimaBatcher2D batcher, ref Matrix matrix)
         {
