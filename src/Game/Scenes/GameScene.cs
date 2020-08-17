@@ -820,7 +820,7 @@ namespace ClassicUO.Game.Scenes
             // ==============
             // FIXME: OVERHEAD NOT WORKING WHEN ZOOMING :(
             batcher.Begin();
-            DrawOverheads(batcher, 0, 0);
+            DrawOverheads(batcher, posX, posY);
             DrawSelection(batcher, 0, 0);
             batcher.End();
             // ==============
