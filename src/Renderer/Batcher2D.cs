@@ -1459,13 +1459,15 @@ namespace ClassicUO.Renderer
         [MethodImpl(256)]
         public void Begin()
         {
-            Begin(null, Matrix.Identity);
+            SetMatrixToDefault();
+            Begin(null, _transformMatrix);
         }
 
         [MethodImpl(256)]
         public void Begin(Effect effect)
         {
-            Begin(effect, Matrix.Identity);
+            SetMatrixToDefault();
+            Begin(effect, _transformMatrix);
         }
 
         [MethodImpl(256)]
@@ -1492,7 +1494,6 @@ namespace ClassicUO.Renderer
             Flush();
             _started = false;
             _customEffect = null;
-            _transformMatrix = Matrix.Identity;
         }
 
 
@@ -1503,6 +1504,17 @@ namespace ClassicUO.Renderer
 
             if (_numSprites >= MAX_SPRITES)
                 Flush();
+        }
+
+        private void SetMatrixToDefault()
+        {
+            var viewport = GraphicsDevice.Viewport;
+            Matrix.CreateOrthographicOffCenter(
+                viewport.X,
+                viewport.X + viewport.Width,
+                viewport.Y + viewport.Height, 
+                viewport.Y, 
+                0, 1, out _transformMatrix);
         }
 
         [MethodImpl(256)]

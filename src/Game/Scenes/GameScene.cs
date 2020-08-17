@@ -802,12 +802,12 @@ namespace ClassicUO.Game.Scenes
             DrawWorld(batcher, posX, posY, ref _matrix);
 
 
-            Matrix.CreateOrthographicOffCenter(posX, posX + right, posY + bottom, posY, 0, 1, out _matrix);
+            //Matrix.CreateOrthographicOffCenter(posX, posX + right, posY + bottom, posY, 0, 1, out _matrix);
 
             if (can_draw_lights)
             {
                 Vector3 hue = Vector3.Zero;
-                batcher.Begin(null, _matrix);
+                batcher.Begin();
                 batcher.SetBlendState(UseAltLights ? _altLightsBlend.Value : _darknessBlend.Value);
                 batcher.Draw2D(_lightRenderTarget, posX, posY, width, height, ref hue);
                 batcher.SetBlendState(null);
@@ -817,7 +817,7 @@ namespace ClassicUO.Game.Scenes
 
             // ==============
             // FIXME: OVERHEAD NOT WORKING WHEN ZOOMING :(
-            batcher.Begin(null, _matrix);
+            batcher.Begin();
             DrawOverheads(batcher, 0, 0);
             DrawSelection(batcher, 0, 0);
             batcher.End();
