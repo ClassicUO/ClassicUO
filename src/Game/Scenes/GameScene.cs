@@ -814,6 +814,8 @@ namespace ClassicUO.Game.Scenes
                 batcher.End();
             }
 
+            batcher.GraphicsDevice.Viewport = r_viewport;
+
 
             // ==============
             // FIXME: OVERHEAD NOT WORKING WHEN ZOOMING :(
@@ -825,7 +827,7 @@ namespace ClassicUO.Game.Scenes
 
             base.Draw(batcher);
 
-            batcher.GraphicsDevice.Viewport = r_viewport;
+            
 
             //batcher.EnableScissorTest(false);
             //ScissorStack.PopScissors(batcher.GraphicsDevice);
