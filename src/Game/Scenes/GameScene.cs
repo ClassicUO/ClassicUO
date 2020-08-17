@@ -623,10 +623,7 @@ namespace ClassicUO.Game.Scenes
 
             if (!IsMouseOverViewport)
                 SelectedObject.Object = SelectedObject.LastObject = null;
-            else
-            {
-                
-            }
+
 
             if (TargetManager.IsTargeting && TargetManager.TargetingState == CursorTarget.MultiPlacement && World.CustomHouseManager == null && TargetManager.MultiTargetInfo != null)
             {
