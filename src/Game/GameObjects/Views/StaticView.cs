@@ -24,6 +24,7 @@ using System;
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Scenes;
+using ClassicUO.Input;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 
@@ -115,7 +116,9 @@ namespace ClassicUO.Game.GameObjects
                 posY -= index.Height;
 
                 if (SelectedObject.IsPointInStatic(ArtLoader.Instance.GetTexture(graphic), posX, posY))
+                {
                     SelectedObject.Object = this;
+                }
             }
 
             return true;

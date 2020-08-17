@@ -50,7 +50,7 @@ namespace ClassicUO.Game.Scenes
 
         private sbyte _maxGroundZ;
         private int _maxZ;
-        private Vector2 _minPixel, _maxPixel;
+        private Vector2 _minPixel, _maxPixel, _wnd_scale_offset;
         private bool _noDrawRoofs;
         private int _objectHandlesCount;
         private Point _offset, _maxTile, _minTile;
@@ -725,8 +725,8 @@ namespace ClassicUO.Game.Scenes
         {
             int oldDrawOffsetX = _offset.X;
             int oldDrawOffsetY = _offset.Y;
-            int winGamePosX = 0;
-            int winGamePosY = 0;
+            int winGamePosX = ProfileManager.Current.GameWindowPosition.X;
+            int winGamePosY = ProfileManager.Current.GameWindowPosition.Y;
             int winGameWidth = ProfileManager.Current.GameWindowSize.X;
             int winGameHeight = ProfileManager.Current.GameWindowSize.Y;
             int winGameCenterX = winGamePosX + (winGameWidth >> 1);
@@ -741,7 +741,7 @@ namespace ClassicUO.Game.Scenes
             int winGameScaledWidth;
             int winGameScaledHeight;
 
-            if (ProfileManager.Current != null /*&& ProfileManager.Current.EnableScaleZoom*/)
+            if (ProfileManager.Current != null && ProfileManager.Current.EnableMousewheelScaleZoom)
             {
                 float left = winGamePosX;
                 float right = winGameWidth + left;
@@ -750,8 +750,8 @@ namespace ClassicUO.Game.Scenes
                 float newRight = right * Scale;
                 float newBottom = bottom * Scale;
 
-                winGameScaledOffsetX = (int)(left * Scale - (newRight - right));
-                winGameScaledOffsetY = (int)(top * Scale - (newBottom - bottom));
+                winGameScaledOffsetX = (int)((left * Scale) - (newRight - right));
+                winGameScaledOffsetY = (int)((top * Scale) - (newBottom - bottom));
                 winGameScaledWidth = (int)(newRight - winGameScaledOffsetX);
                 winGameScaledHeight = (int)(newBottom - winGameScaledOffsetY);
             }
@@ -767,35 +767,44 @@ namespace ClassicUO.Game.Scenes
             int width = (int) ((winGameWidth / 44 + 1) * Scale);
             int height = (int) ((winGameHeight / 44 + 1) * Scale);
 
-            winDrawOffsetX += winGameScaledOffsetX >> 1;
-            winDrawOffsetY += winGameScaledOffsetY >> 1;
+            if (width < height)
+            {
+                width = height;
+            }
+            else
+            {
+                height = width;
+            }
 
-            const int MAX = 70;
+            //winDrawOffsetX += winGameScaledOffsetX >> 1;
+            //winDrawOffsetY += winGameScaledOffsetY >> 1;
 
-            if (width > MAX)
-                width = MAX;
+            //const int MAX = 70;
 
-            if (height > MAX)
-                height = MAX;
+            //if (width > MAX)
+            //    width = MAX;
 
-            int size = Math.Max(width, height);
+            //if (height > MAX)
+            //    height = MAX;
 
-            if (size < World.ClientViewRange)
-                size = World.ClientViewRange;
+            //int size = Math.Max(width, height);
 
-            int realMinRangeX = World.Player.X - size;
+            //if (size < World.ClientViewRange)
+            //    size = World.ClientViewRange;
+
+            int realMinRangeX = World.Player.X - width;
 
             if (realMinRangeX < 0)
                 realMinRangeX = 0;
-            int realMaxRangeX = World.Player.X + size;
+            int realMaxRangeX = World.Player.X + width;
 
             //if (realMaxRangeX >= FileManager.Map.MapsDefaultSize[World.Map.Index][0])
             //    realMaxRangeX = FileManager.Map.MapsDefaultSize[World.Map.Index][0];
-            int realMinRangeY = World.Player.Y - size;
+            int realMinRangeY = World.Player.Y - height;
 
             if (realMinRangeY < 0)
                 realMinRangeY = 0;
-            int realMaxRangeY = World.Player.Y + size;
+            int realMaxRangeY = World.Player.Y + height;
 
             //if (realMaxRangeY >= FileManager.Map.MapsDefaultSize[World.Map.Index][1])
             //    realMaxRangeY = FileManager.Map.MapsDefaultSize[World.Map.Index][1];
@@ -817,27 +826,44 @@ namespace ClassicUO.Game.Scenes
                 maxBlockY = MapLoader.Instance.MapsDefaultSize[World.Map.Index, 1] - 1;
 
             int drawOffset = (int) (Scale * 40.0);
-            float maxX = winGamePosX + winGameWidth ;
-            float maxY = winGamePosY + winGameHeight;
-            float newMaxX = maxX * Scale + drawOffset;
-            float newMaxY = maxY * Scale + drawOffset;
-            
-            int minPixelsX = (int) ((winGamePosX) * Scale /*- (newMaxX - maxX)*/ ) - drawOffset * 2;
+            float maxX = winGamePosX + winGameWidth + drawOffset;
+            float maxY = winGamePosY + winGameHeight + drawOffset;
+            float newMaxX = maxX * Scale;
+            float newMaxY = maxY * Scale;
+
+            int minPixelsX = (int) (((winGamePosX - drawOffset) * Scale) - (newMaxX - maxX));
             int maxPixelsX = (int) newMaxX;
-            int minPixelsY = (int) ((winGamePosY) * Scale /*- (newMaxY - maxY)*/) - drawOffset * 2;
+            int minPixelsY = (int) (((winGamePosY - drawOffset) * Scale) - (newMaxY - maxY));
             int maxPixlesY = (int) newMaxY;
 
             if (UpdateDrawPosition || oldDrawOffsetX != winDrawOffsetX || oldDrawOffsetY != winDrawOffsetY)
             {
                 UpdateDrawPosition = true;
 
-                if (_viewportRenderTarget == null || _viewportRenderTarget.Width != (int)(winGameWidth * Scale) || _viewportRenderTarget.Height != (int)(winGameHeight * Scale))
+                //if (_viewportRenderTarget == null || _viewportRenderTarget.Width != (int) (winGameWidth * Scale) || _viewportRenderTarget.Height != (int) (winGameHeight * Scale))
+                //{
+                //    _viewportRenderTarget?.Dispose();
+                //    _lightRenderTarget?.Dispose();
+
+                //    _viewportRenderTarget = new RenderTarget2D(Client.Game.GraphicsDevice, (int) (winGameWidth * Scale), (int) (winGameHeight * Scale), false, SurfaceFormat.Color, DepthFormat.Depth24Stencil8, 0, RenderTargetUsage.DiscardContents);
+                //    _lightRenderTarget = new RenderTarget2D(Client.Game.GraphicsDevice, (int) (winGameWidth * Scale), (int) (winGameHeight * Scale), false, SurfaceFormat.Color, DepthFormat.Depth24Stencil8, 0, RenderTargetUsage.DiscardContents);
+                //}
+
+                if (_lightRenderTarget == null || _lightRenderTarget.Width != (int) (winGameWidth * Scale) || _lightRenderTarget.Height != (int) (winGameHeight * Scale))
                 {
-                    _viewportRenderTarget?.Dispose();
                     _lightRenderTarget?.Dispose();
 
-                    _viewportRenderTarget = new RenderTarget2D(Client.Game.GraphicsDevice, (int)(winGameWidth * Scale), (int)(winGameHeight * Scale), false, SurfaceFormat.Color, DepthFormat.Depth24Stencil8, 0, RenderTargetUsage.DiscardContents);
-                    _lightRenderTarget = new RenderTarget2D(Client.Game.GraphicsDevice, (int)(winGameWidth * Scale), (int)(winGameHeight * Scale), false, SurfaceFormat.Color, DepthFormat.Depth24Stencil8, 0, RenderTargetUsage.DiscardContents);
+                    PresentationParameters pp = Client.Game.GraphicsDevice.PresentationParameters;
+
+
+                    _lightRenderTarget = new RenderTarget2D(Client.Game.GraphicsDevice, 
+                        (int) (winGameWidth * Scale),
+                        (int) (winGameHeight * Scale), 
+                        false,
+                        pp.BackBufferFormat,
+                        pp.DepthStencilFormat,
+                        pp.MultiSampleCount,
+                        pp.RenderTargetUsage);
                 }
             }
 
@@ -854,6 +880,8 @@ namespace ClassicUO.Game.Scenes
             _offset.X = winDrawOffsetX;
             _offset.Y = winDrawOffsetY;
 
+            _wnd_scale_offset.X = winGameScaledOffsetX;
+            _wnd_scale_offset.Y = winGameScaledOffsetY;
 
             UpdateMaxDrawZ();
         }

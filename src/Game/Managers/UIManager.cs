@@ -37,6 +37,7 @@ using ClassicUO.Utility.Collections;
 using ClassicUO.Utility.Logging;
 
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.Game.Managers
 {
@@ -540,13 +541,31 @@ namespace ClassicUO.Game.Managers
             HandleMouseInput();
         }
 
+        private static Matrix _projectionMatrix = new Matrix(0f, //(float)( 2.0 / (double)viewport.Width ) is the actual value we will use
+            0.0f, 0.0f, 0.0f, 0.0f, 0f, //(float)( -2.0 / (double)viewport.Height ) is the actual value we will use
+            0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, -1.0f, 1.0f, 0.0f, 1.0f);
+
+
+
         public static void Draw(UltimaBatcher2D batcher)
         {
             SortControlsByInfo();
 
-            batcher.GraphicsDevice.Clear(Color.Black);
+            //batcher.GraphicsDevice.Clear(Color.Black);
 
-            batcher.Begin();
+            Viewport viewport = batcher.GraphicsDevice.Viewport;
+
+            Matrix matrix = Matrix.CreateOrthographicOffCenter(
+                0,
+                viewport.Width,
+                viewport.Height,
+                0,
+                0, -1);
+
+            matrix.M11 = (float) (2.0 / viewport.Width);
+            matrix.M22 = (float) (-2.0 / viewport.Height);
+
+            batcher.Begin(null, matrix);
 
             for (var last = Gumps.Last; last != null; last = last.Previous)
             {

@@ -400,6 +400,7 @@ namespace ClassicUO.Game.GameObjects
                             partialHue = false;
                         }
                     }
+
                     ResetHueVector();
                     ShaderHuesTraslator.GetHueVector(ref HueVector, hue, partialHue, alpha);
 

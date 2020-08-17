@@ -19,6 +19,7 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
 
+using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
@@ -48,18 +49,18 @@ namespace ClassicUO.Renderer
 
 
 
-        public virtual void ApplyStates()
+        public virtual void ApplyStates(ref Matrix matrix)
         {
-            Viewport viewport = GraphicsDevice.Viewport;
-            _projectionMatrix.M11 = (float) (2.0 / viewport.Width);
-            _projectionMatrix.M22 = (float) (-2.0 / viewport.Height);
+            //Viewport viewport = GraphicsDevice.Viewport;
+            //_projectionMatrix.M11 = (float) (2.0 / viewport.Width);
+            //_projectionMatrix.M22 = (float) (-2.0 / viewport.Height);
 
-            Matrix idendity = Matrix.Identity;
-            Matrix.Multiply(ref idendity, ref _projectionMatrix, out var matrixTransform);
+            //Matrix.Multiply(ref _projectionMatrix, ref matrix, out matrix);
 
-            MatrixTransform.SetValue(matrixTransform);
+            MatrixTransform.SetValue(matrix);
 
-            foreach (EffectPass pa in CurrentTechnique.Passes) pa.Apply();
+            foreach (EffectPass pa in CurrentTechnique.Passes) 
+                pa.Apply();
         }
     }
 }

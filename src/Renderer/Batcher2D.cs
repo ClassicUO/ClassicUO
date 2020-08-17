@@ -50,6 +50,8 @@ namespace ClassicUO.Renderer
         private bool _useScissor;
         private BoundingBox _drawingArea;
         private int _numSprites;
+        private Matrix _transformMatrix;
+
 
         public UltimaBatcher2D(GraphicsDevice device)
         {
@@ -1467,7 +1469,7 @@ namespace ClassicUO.Renderer
         }
 
         [MethodImpl(256)]
-        public void Begin(Effect customEffect, Matrix projection)
+        public void Begin(Effect customEffect, Matrix transform_matrix)
         {
             EnsureNotStarted();
             _started = true;
@@ -1480,6 +1482,7 @@ namespace ClassicUO.Renderer
             _drawingArea.Max.Z = 150;
 
             _customEffect = customEffect;
+            _transformMatrix = transform_matrix;
         }
 
         [MethodImpl(256)]
@@ -1489,6 +1492,7 @@ namespace ClassicUO.Renderer
             Flush();
             _started = false;
             _customEffect = null;
+            _transformMatrix = Matrix.Identity;
         }
 
 
@@ -1541,7 +1545,7 @@ namespace ClassicUO.Renderer
             GraphicsDevice.Indices = _indexBuffer;
             GraphicsDevice.SetVertexBuffer(_vertexBuffer);
 
-            DefaultEffect.ApplyStates();
+            DefaultEffect.ApplyStates(ref _transformMatrix);
         }
 
         private unsafe void Flush()
@@ -1570,7 +1574,7 @@ namespace ClassicUO.Renderer
             if (_customEffect != null)
             {
                 if (_customEffect is MatrixEffect eff)
-                    eff.ApplyStates();
+                    eff.ApplyStates(ref _transformMatrix);
                 else
                     _customEffect.CurrentTechnique.Passes[0].Apply();
             }
@@ -1694,7 +1698,6 @@ namespace ClassicUO.Renderer
         private class IsometricEffect : MatrixEffect
         {
             private Vector2 _viewPort;
-            private Matrix _matrix = Matrix.Identity;
 
             public IsometricEffect(GraphicsDevice graphicsDevice) : base(graphicsDevice, Resources.IsometricEffect)
             {
@@ -1711,15 +1714,15 @@ namespace ClassicUO.Renderer
             public EffectParameter Brighlight { get; }
 
 
-            public override void ApplyStates()
+            public override void ApplyStates(ref Matrix matrix)
             {
-                WorldMatrix.SetValue(_matrix);
+                WorldMatrix.SetValue(Matrix.Identity);
 
                 _viewPort.X = GraphicsDevice.Viewport.Width;
                 _viewPort.Y = GraphicsDevice.Viewport.Height;
                 Viewport.SetValue(_viewPort);
 
-                base.ApplyStates();
+                base.ApplyStates(ref matrix);
             }
         }
 

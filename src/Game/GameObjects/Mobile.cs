@@ -1058,8 +1058,6 @@ namespace ClassicUO.Game.GameObjects
             int alwaysHP = ProfileManager.Current.MobileHPShowWhen;
             int mode = ProfileManager.Current.MobileHPType;
 
-            int startX = ProfileManager.Current.GameWindowPosition.X + 6;
-            int startY = ProfileManager.Current.GameWindowPosition.Y + 6;
             var scene = Client.Game.GetScene<GameScene>();
             float scale = scene?.Scale ?? 1;
 
@@ -1095,6 +1093,9 @@ namespace ClassicUO.Game.GameObjects
             x = (int) (x / scale);
             y = (int) (y / scale);
 
+            int startX = ProfileManager.Current.GameWindowPosition.X;
+            int startY = ProfileManager.Current.GameWindowPosition.Y;
+
             for (; last != null; last = (TextObject) last.Previous)
             {
                 if (last.RenderedText != null && !last.RenderedText.IsDestroyed)
@@ -1102,12 +1103,11 @@ namespace ClassicUO.Game.GameObjects
                     if (offY == 0 && last.Time < Time.Ticks)
                         continue;
 
-
                     last.OffsetY = offY;
                     offY += last.RenderedText.Height;
 
-                    last.RealScreenPosition.X = startX + (x - (last.RenderedText.Width >> 1));
-                    last.RealScreenPosition.Y = startY + (y - offY);
+                    last.RealScreenPosition.X = (x - (last.RenderedText.Width >> 1));
+                    last.RealScreenPosition.Y = (y - offY);
                 }
             }
 
