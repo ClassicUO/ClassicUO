@@ -826,15 +826,9 @@ namespace ClassicUO.Game.UI.Controls
         {
             if (!NoSelection && CaretIndex < Text.Length && CaretIndex >= 0 && !char.IsWhiteSpace(Text[CaretIndex]))
             {
-                int idx = CaretIndex - 1;
-                if (idx >= 0 && char.IsWhiteSpace(Text[idx]))
-                {
+                int idx = CaretIndex;
+                if (idx - 1 >= 0 && char.IsWhiteSpace(Text[idx - 1]))
                     idx = CaretIndex + 1;
-                    if (idx >= Text.Length || char.IsWhiteSpace(Text[idx]))
-                        SelectionStart = SelectionEnd = CaretIndex;
-                }
-                else
-                    idx = CaretIndex;
                 SelectionStart = _stb.MoveToPreviousWord(idx);
                 SelectionEnd = _stb.MoveToNextWord(idx);
                 if (SelectionEnd < Text.Length)
