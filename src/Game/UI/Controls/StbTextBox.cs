@@ -382,7 +382,7 @@ namespace ClassicUO.Game.UI.Controls
                     int selectStart = Math.Min(_stb.SelectStart, _stb.SelectEnd);
                     int selectEnd = Math.Max(_stb.SelectStart, _stb.SelectEnd);
 
-                    if (selectStart < selectEnd && selectStart >= 0 && selectEnd - selectStart < Text.Length)
+                    if (selectStart < selectEnd && selectStart >= 0 && selectEnd - selectStart <= Text.Length)
                     {
                         SDL.SDL_SetClipboardText(Text.Substring(selectStart, selectEnd - selectStart));
                     }
@@ -392,7 +392,7 @@ namespace ClassicUO.Game.UI.Controls
                     selectStart = Math.Min(_stb.SelectStart, _stb.SelectEnd);
                     selectEnd = Math.Max(_stb.SelectStart, _stb.SelectEnd);
 
-                    if (selectStart < selectEnd && selectStart >= 0 && selectEnd - selectStart < Text.Length)
+                    if (selectStart < selectEnd && selectStart >= 0 && selectEnd - selectStart <= Text.Length)
                     {
                         SDL.SDL_SetClipboardText(Text.Substring(selectStart, selectEnd - selectStart));
                         if (IsEditable)
