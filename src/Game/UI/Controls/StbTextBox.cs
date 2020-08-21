@@ -524,6 +524,16 @@ namespace ClassicUO.Game.UI.Controls
                         else
                         {
                             Parent?.OnKeyboardReturn(0, Text);
+                            if (Managers.UIManager.SystemChat.TextBoxControl != null && IsFocused)
+                            {
+                                if(!IsFromServer || !Managers.UIManager.SystemChat.TextBoxControl.IsVisible)
+                                {
+                                    OnFocusLost();
+                                    OnFocusEnter();
+                                }
+                                else if (Managers.UIManager.KeyboardFocusControl == null || Managers.UIManager.KeyboardFocusControl != Managers.UIManager.SystemChat.TextBoxControl)
+                                    Managers.UIManager.SystemChat.TextBoxControl.SetKeyboardFocus();
+                            }
                         }
                     }
                     break;
@@ -828,7 +838,7 @@ namespace ClassicUO.Game.UI.Controls
             {
                 int idx = CaretIndex;
                 if (idx - 1 >= 0 && char.IsWhiteSpace(Text[idx - 1]))
-                    idx = CaretIndex + 1;
+                    ++idx;
                 SelectionStart = _stb.MoveToPreviousWord(idx);
                 SelectionEnd = _stb.MoveToNextWord(idx);
                 if (SelectionEnd < Text.Length)
