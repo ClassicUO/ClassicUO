@@ -524,7 +524,7 @@ namespace ClassicUO.Game.UI.Controls
                         else
                         {
                             Parent?.OnKeyboardReturn(0, Text);
-                            if (Managers.UIManager.SystemChat.TextBoxControl != null && IsFocused)
+                            if (Managers.UIManager.SystemChat != null && Managers.UIManager.SystemChat.TextBoxControl != null && IsFocused)
                             {
                                 if(!IsFromServer || !Managers.UIManager.SystemChat.TextBoxControl.IsVisible)
                                 {
