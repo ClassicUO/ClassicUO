@@ -183,7 +183,8 @@ namespace ClassicUO.Game.UI.Gumps
             if (button != MouseButtonType.Left || UIManager.IsMouseOverWorld)
                 return;
 
-            uint serial = SelectedObject.Object is Entity it ? it.Serial : 0;
+            Entity it = SelectedObject.Object as Entity;
+            uint serial = it != null ? it.Serial : 0;
             uint dropcontainer = LocalSerial;
 
             if (TargetManager.IsTargeting && !ItemHold.Enabled && SerialHelper.IsValid(serial))
@@ -259,7 +260,7 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     ContainerGump gump = UIManager.GetGump<ContainerGump>(dropcontainer);
 
-                    if (gump != null)
+                    if (gump != null && (it == null || (it.Serial != dropcontainer && it is Item item && !item.ItemData.IsContainer)))
                     {
                         bool is_chessboard = gump.Graphic == 0x091A || gump.Graphic == 0x092E;
 
