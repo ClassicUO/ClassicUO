@@ -50,6 +50,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "monokickstart", "monokickst
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FNA.Core", "external\FNA\FNA.Core.csproj", "{CA14C095-7F5A-4C7F-AC9F-A6F454E11533}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "settings", "settings", "{21AF20E5-1A3A-414D-9B1F-AB8F3800E567}"
+ProjectSection(SolutionItems) = preProject
+	ClassicUO.licenseheader = ClassicUO.licenseheader
+	ClassicUO.sln.DotSettings = ClassicUO.sln.DotSettings
+EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
