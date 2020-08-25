@@ -113,7 +113,7 @@ namespace ClassicUO.Game.UI.Gumps
         private NiceButton _randomizeColorsButton;
 
         // general
-        private HSliderBar _sliderFPS, _circleOfTranspRadius;
+        private HSliderBar _sliderFps, _circleOfTranspRadius;
         private HSliderBar _sliderSpeechDelay;
         private HSliderBar _soundsVolume, _musicVolume, _loginMusicVolume;
         private ColorBox _speechColorPickerBox, _emoteColorPickerBox, _yellColorPickerBox, _whisperColorPickerBox, _partyMessageColorPickerBox, _guildMessageColorPickerBox, _allyMessageColorPickerBox, _chatMessageColorPickerBox, _partyAuraColorPickerBox;
@@ -204,7 +204,7 @@ namespace ClassicUO.Game.UI.Gumps
             CanMove = true;
             CanCloseWithRightClick = true;
 
-            BuildGeneral();
+            BuildInterface();
             BuildSounds();
             BuildVideo();
             BuildCommands();
@@ -234,23 +234,13 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
-        private void BuildGeneral()
+        private void BuildInterface()
         {
             const int PAGE = 1;
 
             ScrollArea rightArea = new ScrollArea(190, 20, WIDTH - 210, 420, true);
 
-            ScrollAreaItem fpsItem = new ScrollAreaItem();
-            Label text = new Label(ResGumps.FPS, true, HUE_FONT);
-            fpsItem.Add(text);
-            _sliderFPS = new HSliderBar(text.X + 90, 5, 250, Constants.MIN_FPS, Constants.MAX_FPS, Settings.GlobalSettings.FPS, HSliderBarStyle.MetalWidgetRecessedBar, true, FONT, HUE_FONT);
-            fpsItem.Add(_sliderFPS);
-            rightArea.Add(fpsItem);
-
-
-            _reduceFPSWhenInactive = CreateCheckBox(rightArea, ResGumps.FPSInactive, ProfileManager.Current.ReduceFPSWhenInactive, 0, SPACE_Y);
-
-            _highlightObjects = CreateCheckBox(rightArea, ResGumps.HighlightObjects, ProfileManager.Current.HighlightGameObjects, 0, 20 + SPACE_Y);
+            _highlightObjects = CreateCheckBox(rightArea, ResGumps.HighlightObjects, ProfileManager.Current.HighlightGameObjects, 0, SPACE_Y);
             _enablePathfind = CreateCheckBox(rightArea, ResGumps.EnablePathfinding, ProfileManager.Current.EnablePathfind, 0, SPACE_Y);
             _useShiftPathfind = CreateCheckBox(rightArea, ResGumps.ShiftPathfinding, ProfileManager.Current.UseShiftToPathfind, 0, SPACE_Y);
 
@@ -303,7 +293,7 @@ namespace ClassicUO.Game.UI.Gumps
             _showTargetRangeIndicator = CreateCheckBox(rightArea, ResGumps.ShowTarRangeIndic, ProfileManager.Current.ShowTargetRangeIndicator, 0, SPACE_Y);
             _enableDragSelect = CreateCheckBox(rightArea, ResGumps.EnableDragHPBars, ProfileManager.Current.EnableDragSelect, 0, SPACE_Y);
             _dragSelectArea = new ScrollAreaItem();
-            text = new Label(ResGumps.DragKey, true, HUE_FONT)
+            Label text = new Label(ResGumps.DragKey, true, HUE_FONT)
             {
                 X = 20
             };
@@ -400,7 +390,7 @@ namespace ClassicUO.Game.UI.Gumps
             rightArea.Add(item);
             _circleOfTranspRadius.IsVisible = _useCircleOfTransparency.IsChecked;
 
-            fpsItem = new ScrollAreaItem();
+            ScrollAreaItem scrollAreaItem = new ScrollAreaItem();
 
             text = new Label(ResGumps.GridLoot, true, HUE_FONT)
             {
@@ -408,10 +398,10 @@ namespace ClassicUO.Game.UI.Gumps
             };
             _gridLoot = new Combobox(text.X + text.Width + 10, text.Y, 200, new[] {ResGumps.GridLoot_None, ResGumps.GridLoot_GridOnly, ResGumps.GridLoot_Both}, ProfileManager.Current.GridLootType);
 
-            fpsItem.Add(text);
-            fpsItem.Add(_gridLoot);
+            scrollAreaItem.Add(text);
+            scrollAreaItem.Add(_gridLoot);
 
-            rightArea.Add(fpsItem);
+            rightArea.Add(scrollAreaItem);
 
             _autoOpenCorpseArea.IsVisible = _autoOpenCorpse.IsChecked;
             _dragSelectArea.IsVisible = _enableDragSelect.IsChecked;
@@ -555,12 +545,98 @@ namespace ClassicUO.Game.UI.Gumps
             Add(rightArea, PAGE);
         }
 
+        private void SetVideoProfile(object sender, int option)
+        {
+            if (option == 0)
+            {
+                return;
+            }
+
+            // Common options
+            _reduceFPSWhenInactive.IsChecked = true;
+            _windowBorderless.IsChecked = false;
+            _gameWindowFullsize.IsChecked = false;
+            _altLights.IsChecked = false;
+            _darkNights.IsChecked = false;
+            _runMouseInSeparateThread.IsChecked = true;
+
+            switch (option)
+            {
+                case 0:
+                    break;
+                case 1: // High
+                    _sliderFps.Value = Constants.MAX_FPS;
+                    _zoomCheckbox.IsChecked = true;
+                    _useColoredLights.IsChecked = true;
+                    _enableDeathScreen.IsChecked = true;
+                    _enableBlackWhiteEffect.IsChecked = true;
+                    _enableShadows.IsChecked = true;
+                    _auraType.SelectedIndex = 3;
+                    _auraMouse.IsChecked = true;
+                    _filterType.SelectedIndex = 1;
+                    _hideChatGradient.IsChecked = false;
+                    break;
+                case 2: // Medium
+                    _sliderFps.Value = 25;
+                    _zoomCheckbox.IsChecked = false;
+                    _useColoredLights.IsChecked = true;
+                    _enableDeathScreen.IsChecked = true;
+                    _enableBlackWhiteEffect.IsChecked = true;
+                    _enableShadows.IsChecked = false;
+                    _auraType.SelectedIndex = 1;
+                    _auraMouse.IsChecked = false;
+                    _filterType.SelectedIndex = 1;
+                    _hideChatGradient.IsChecked = false;
+                    break;
+                case 3: // Low
+                    _sliderFps.Value = Constants.MIN_FPS;
+                    _gameWindowWidth.SetText("800");
+                    _gameWindowHeight.SetText("600");
+                    _zoomCheckbox.IsChecked = false;
+                    _useColoredLights.IsChecked = false;
+                    _enableDeathScreen.IsChecked = false;
+                    _enableBlackWhiteEffect.IsChecked = false;
+                    _enableShadows.IsChecked = false;
+                    _auraType.SelectedIndex = 0;
+                    _auraMouse.IsChecked = false;
+                    _filterType.SelectedIndex = 0;
+                    _hideChatGradient.IsChecked = true;
+                    break;
+            }
+        }
+
         private void BuildVideo()
         {
             const int PAGE = 3;
 
-            ScrollArea rightArea = new ScrollArea(190, 20, WIDTH - 210, 420, true);
+            ScrollArea rightArea = new ScrollArea(190, 20, WIDTH - 210, 80, true);
             Label text;
+
+            ScrollAreaItem profileItem = new ScrollAreaItem();
+            text = new Label("Performance Profile", true, HUE_FONT)
+            {
+                Y = _showCorpseNameIncoming.Bounds.Bottom + 5 + SPACE_Y
+            };
+            Combobox performanceProfile = new Combobox(text.X + text.Width + 10, text.Y, 200, new[] { "Custom", "High", "Medium", "Low" });
+            performanceProfile.OnOptionSelected += SetVideoProfile;
+            profileItem.Add(text);
+            profileItem.Add(performanceProfile);
+            rightArea.Add(profileItem);
+
+            Add(rightArea, PAGE);
+
+            Add(new Line(190, rightArea.Height + 10, WIDTH - 210, 1, Color.Gray.PackedValue), PAGE);
+
+            rightArea = new ScrollArea(190, rightArea.Height + 20, WIDTH - 210, 340, true);
+
+            ScrollAreaItem fpsItem = new ScrollAreaItem();
+            text = new Label("- FPS:", true, HUE_FONT);
+            fpsItem.Add(text);
+            _sliderFps = new HSliderBar(text.X + 90, 5, 250, Constants.MIN_FPS, Constants.MAX_FPS, Settings.GlobalSettings.FPS, HSliderBarStyle.MetalWidgetRecessedBar, true, FONT, HUE_FONT);
+            fpsItem.Add(_sliderFps);
+            rightArea.Add(fpsItem);
+
+            _reduceFPSWhenInactive = CreateCheckBox(rightArea, ResGumps.FPSInactive, ProfileManager.Current.ReduceFPSWhenInactive, 0, SPACE_Y);
 
             _windowBorderless = CreateCheckBox(rightArea, ResGumps.BorderlessWindow, ProfileManager.Current.WindowBorderless, 0, SPACE_Y);
 
@@ -1498,7 +1574,7 @@ namespace ClassicUO.Game.UI.Gumps
             switch (ActivePage)
             {
                 case 1: // general
-                    _sliderFPS.Value = 60;
+                    _sliderFps.Value = 60;
                     _reduceFPSWhenInactive.IsChecked = false;
                     _highlightObjects.IsChecked = true;
                     _enableTopbar.IsChecked = false;
@@ -1707,9 +1783,9 @@ namespace ClassicUO.Game.UI.Gumps
             WorldViewportGump vp = UIManager.GetGump<WorldViewportGump>();
 
             // general
-            if (Settings.GlobalSettings.FPS != _sliderFPS.Value)
+            if (Settings.GlobalSettings.FPS != _sliderFps.Value)
             {
-                Client.Game.SetRefreshRate(_sliderFPS.Value);
+                Client.Game.SetRefreshRate(_sliderFps.Value);
             }
             ProfileManager.Current.HighlightGameObjects = _highlightObjects.IsChecked;
             ProfileManager.Current.ReduceFPSWhenInactive = _reduceFPSWhenInactive.IsChecked;
