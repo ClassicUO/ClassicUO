@@ -358,11 +358,11 @@ namespace ClassicUO.Renderer
             if (hue != 0)
             {
                 if (IsUnicode)
-                    _hueVector.Y = ShaderHuesTraslator.SHADER_TEXT_HUE_NO_BLACK;
+                    _hueVector.Y = ShaderHueTranslator.SHADER_TEXT_HUE_NO_BLACK;
                 else if (Font != 5 && Font != 8)
-                    _hueVector.Y = ShaderHuesTraslator.SHADER_PARTIAL_HUED;
+                    _hueVector.Y = ShaderHueTranslator.SHADER_PARTIAL_HUED;
                 else
-                    _hueVector.Y = ShaderHuesTraslator.SHADER_HUED;
+                    _hueVector.Y = ShaderHueTranslator.SHADER_HUED;
             }
             else
                 _hueVector.Y = 0;
@@ -397,11 +397,11 @@ namespace ClassicUO.Renderer
                 if (hue != 0)
                 {
                     if (IsUnicode)
-                        _hueVector.Y = ShaderHuesTraslator.SHADER_TEXT_HUE_NO_BLACK;
+                        _hueVector.Y = ShaderHueTranslator.SHADER_TEXT_HUE_NO_BLACK;
                     else if (Font != 5 && Font != 8)
-                        _hueVector.Y = ShaderHuesTraslator.SHADER_PARTIAL_HUED;
+                        _hueVector.Y = ShaderHueTranslator.SHADER_PARTIAL_HUED;
                     else
-                        _hueVector.Y = ShaderHuesTraslator.SHADER_HUED;
+                        _hueVector.Y = ShaderHueTranslator.SHADER_HUED;
                 }
                 else
                     _hueVector.Y = 0;
@@ -432,11 +432,11 @@ namespace ClassicUO.Renderer
             if (hue != 0)
             {
                 if (IsUnicode)
-                    _hueVector.Y = ShaderHuesTraslator.SHADER_TEXT_HUE_NO_BLACK;
+                    _hueVector.Y = ShaderHueTranslator.SHADER_TEXT_HUE_NO_BLACK;
                 else if (Font != 5 && Font != 8)
-                    _hueVector.Y = ShaderHuesTraslator.SHADER_PARTIAL_HUED;
+                    _hueVector.Y = ShaderHueTranslator.SHADER_PARTIAL_HUED;
                 else
-                    _hueVector.Y = ShaderHuesTraslator.SHADER_HUED;
+                    _hueVector.Y = ShaderHueTranslator.SHADER_HUED;
             }
             else
                 _hueVector.Y = 0;

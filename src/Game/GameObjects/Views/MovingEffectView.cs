@@ -46,7 +46,7 @@ namespace ClassicUO.Game.GameObjects
                 hue = Constants.DEAD_RANGE_COLOR;
             }
 
-            ShaderHuesTraslator.GetHueVector(ref HueVector, hue);
+            ShaderHueTranslator.GetHueVector(ref HueVector, hue);
 
             //Engine.DebugInfo.EffectsRendered++;
 

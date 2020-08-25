@@ -54,6 +54,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{30A6A241
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClassicUO.UnitTests", "tests\ClassicUO.UnitTests\ClassicUO.UnitTests.csproj", "{5D3F6335-8F79-4F18-988B-7212040B21EF}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "settings", "settings", "{21AF20E5-1A3A-414D-9B1F-AB8F3800E567}"
+ProjectSection(SolutionItems) = preProject
+	ClassicUO.licenseheader = ClassicUO.licenseheader
+	ClassicUO.sln.DotSettings = ClassicUO.sln.DotSettings
+EndProjectSection
+EndProject
+
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
