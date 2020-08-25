@@ -100,7 +100,7 @@ namespace ClassicUO.Game.GameObjects
                 partial = false;
             }
 
-            ShaderHuesTraslator.GetHueVector(ref HueVector, hue, partial, 0);
+            ShaderHueTranslator.GetHueVector(ref HueVector, hue, partial, 0);
 
             //Engine.DebugInfo.MultiRendered++;
 

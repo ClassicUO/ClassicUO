@@ -401,7 +401,7 @@ namespace ClassicUO.Game.GameObjects
                         }
                     }
                     ResetHueVector();
-                    ShaderHuesTraslator.GetHueVector(ref HueVector, hue, partialHue, alpha);
+                    ShaderHueTranslator.GetHueVector(ref HueVector, hue, partialHue, alpha);
 
                     if (_transform)
                     {

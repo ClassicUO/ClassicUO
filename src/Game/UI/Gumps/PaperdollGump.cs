@@ -766,7 +766,7 @@ namespace ClassicUO.Game.UI.Gumps
                         return false;
 
                     ResetHueVector();
-                    ShaderHuesTraslator.GetHueVector(ref _hueVector, MouseIsOver && HighlightOnMouseOver ? 0x0035 : item.Hue, item.ItemData.IsPartialHue, 0, true);
+                    ShaderHueTranslator.GetHueVector(ref _hueVector, MouseIsOver && HighlightOnMouseOver ? 0x0035 : item.Hue, item.ItemData.IsPartialHue, 0, true);
                  
                     ArtTexture texture = ArtLoader.Instance.GetTexture(item.DisplayedGraphic);
 
