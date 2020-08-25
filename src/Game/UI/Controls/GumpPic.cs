@@ -141,7 +141,7 @@ namespace ClassicUO.Game.UI.Controls
                 return false;
 
             ResetHueVector();
-            ShaderHuesTraslator.GetHueVector(ref _hueVector, Hue, IsPartialHue, Alpha, true);
+            ShaderHueTranslator.GetHueVector(ref _hueVector, Hue, IsPartialHue, Alpha, true);
 
             var texture = GumpsLoader.Instance.GetTexture(Graphic);
 

@@ -120,7 +120,7 @@ namespace ClassicUO.Game.GameObjects
                     hue = 0x038E;
             }
 
-            ShaderHuesTraslator.GetHueVector(ref HueVector, hue, partial, HueVector.Z);
+            ShaderHueTranslator.GetHueVector(ref HueVector, hue, partial, HueVector.Z);
 
             if (!IsMulti && !IsCoin && Amount > 1 && ItemData.IsStackable)
             {
@@ -307,7 +307,7 @@ namespace ClassicUO.Game.GameObjects
                     else if (ProfileManager.Current.HighlightGameObjects && SelectedObject.LastObject == owner)
                         color = Constants.HIGHLIGHT_CURRENT_OBJECT_HUE;
 
-                    ShaderHuesTraslator.GetHueVector(ref HueVector, color, ispartialhue, alpha);
+                    ShaderHueTranslator.GetHueVector(ref HueVector, color, ispartialhue, alpha);
                 }
 
                 batcher.DrawSprite(frame, posX, posY, flipped, ref HueVector);

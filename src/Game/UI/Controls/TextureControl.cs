@@ -52,7 +52,7 @@ namespace ClassicUO.Game.UI.Controls
                 return false;
 
             ResetHueVector();
-            ShaderHuesTraslator.GetHueVector(ref _hueVector, Hue, IsPartial, Alpha);
+            ShaderHueTranslator.GetHueVector(ref _hueVector, Hue, IsPartial, Alpha);
 
             if (ScaleTexture)
             {

@@ -59,11 +59,11 @@ namespace ClassicUO.Game.GameObjects
             if (hue != 0)
             {
                 HueVector.X = hue - 1;
-                HueVector.Y = IsStretched ? ShaderHuesTraslator.SHADER_LAND_HUED : ShaderHuesTraslator.SHADER_HUED;
+                HueVector.Y = IsStretched ? ShaderHueTranslator.SHADER_LAND_HUED : ShaderHueTranslator.SHADER_HUED;
             }
             else
             {
-                HueVector.Y = IsStretched ? ShaderHuesTraslator.SHADER_LAND : ShaderHuesTraslator.SHADER_NONE;
+                HueVector.Y = IsStretched ? ShaderHueTranslator.SHADER_LAND : ShaderHueTranslator.SHADER_NONE;
             }
 
             if (IsStretched)
