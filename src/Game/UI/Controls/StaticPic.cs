@@ -64,7 +64,7 @@ namespace ClassicUO.Game.UI.Controls
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
             ResetHueVector();
-            ShaderHuesTraslator.GetHueVector(ref _hueVector, Hue, IsPartialHue, 0);
+            ShaderHueTranslator.GetHueVector(ref _hueVector, Hue, IsPartialHue, 0);
 
             var texture = ArtLoader.Instance.GetTexture(Graphic);
 
