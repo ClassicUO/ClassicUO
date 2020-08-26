@@ -243,34 +243,37 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override void OnMouseUp(int x, int y, MouseButtonType button)
         {
-            if (button == MouseButtonType.Left && _myBox != null && _myBox.Bounds.Contains(x, y))
+            if (button == MouseButtonType.Left)
             {
                 if (ItemHold.Enabled && !ItemHold.IsFixedPosition)
                 {
-                    ArtTexture texture = ArtLoader.Instance.GetTexture(ItemHold.DisplayedGraphic);
-
-                    x -= _myBox.X;
-                    y -= _myBox.Y;
-
-                    if (texture != null)
+                    if (_myBox != null && _myBox.Bounds.Contains(x, y))
                     {
-                        x -= texture.Width >> 1;
-                        y -= texture.Height >> 1;
+                        ArtTexture texture = ArtLoader.Instance.GetTexture(ItemHold.DisplayedGraphic);
 
-                        if (x + texture.Width > _myBox.Width)
-                            x = _myBox.Width - texture.Width;
+                        x -= _myBox.X;
+                        y -= _myBox.Y;
 
-                        if (y + texture.Height > _myBox.Height)
-                            y = _myBox.Height - texture.Height;
+                        if (texture != null)
+                        {
+                            x -= texture.Width >> 1;
+                            y -= texture.Height >> 1;
+
+                            if (x + texture.Width > _myBox.Width)
+                                x = _myBox.Width - texture.Width;
+
+                            if (y + texture.Height > _myBox.Height)
+                                y = _myBox.Height - texture.Height;
+                        }
+
+                        if (x < 0)
+                            x = 0;
+
+                        if (y < 0)
+                            y = 0;
+
+                        GameActions.DropItem(ItemHold.Serial, x, y, 0, ID1);
                     }
-
-                    if (x < 0)
-                        x = 0;
-
-                    if (y < 0)
-                        y = 0;
-
-                    GameActions.DropItem(ItemHold.Serial, x, y, 0, ID1);
                 }
                 else if (SelectedObject.Object is Item it)
                 {
