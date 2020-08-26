@@ -845,13 +845,27 @@ namespace ClassicUO.Game.Scenes
                 if (_lightRenderTarget == null || _lightRenderTarget.Width != winGameWidth || _lightRenderTarget.Height != winGameHeight)
                 {
                     _lightRenderTarget?.Dispose();
+                    _world_render_target?.Dispose();
 
                     PresentationParameters pp = Client.Game.GraphicsDevice.PresentationParameters;
 
 
+                    if (_use_render_target)
+                    {
+
+                        _world_render_target = new RenderTarget2D(Client.Game.GraphicsDevice,
+                            winGameWidth,
+                            winGameHeight,
+                            false,
+                            pp.BackBufferFormat,
+                            pp.DepthStencilFormat,
+                            pp.MultiSampleCount,
+                            pp.RenderTargetUsage);
+                    }
+
                     _lightRenderTarget = new RenderTarget2D(Client.Game.GraphicsDevice,
                         winGameWidth,
-                        winGameHeight, 
+                        winGameHeight,
                         false,
                         pp.BackBufferFormat,
                         pp.DepthStencilFormat,

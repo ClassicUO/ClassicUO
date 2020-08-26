@@ -40,6 +40,7 @@ using ClassicUO.Utility.Logging;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using SDL2;
 
 namespace ClassicUO.Game.Scenes
 {
@@ -55,7 +56,7 @@ namespace ClassicUO.Game.Scenes
         private HealthLinesManager _healthLinesManager;
         private int _lightCount;
         private Rectangle _rectangleObj = Rectangle.Empty, _rectanglePlayer;
-        private RenderTarget2D _lightRenderTarget;
+        private RenderTarget2D _world_render_target, _lightRenderTarget;
         private int _scale = 5; // 1.0
         private bool _useObjectHandles;
 
@@ -124,8 +125,6 @@ namespace ClassicUO.Game.Scenes
 
         public InfoBarManager InfoBars { get; private set; }
 
-        public Texture2D LightRenderTarget => _lightRenderTarget;
-
         public Weather Weather => _weather;
 
         public bool UseLights => ProfileManager.Current != null && ProfileManager.Current.UseCustomLightLevel ? World.Light.Personal < World.Light.Overall : World.Light.RealPersonal < World.Light.RealOverall;
@@ -182,6 +181,8 @@ namespace ClassicUO.Game.Scenes
 
             UIManager.ContainerScale = ProfileManager.Current.ContainersScale / 100f;
 
+            SDL.SDL_SetWindowMinimumSize(Client.Game.Window.Handle, 640, 480);
+
             if (ProfileManager.Current.WindowBorderless)
             {
                 Client.Game.SetWindowBorderless(true);
@@ -201,6 +202,8 @@ namespace ClassicUO.Game.Scenes
                 Client.Game.SetWindowSize(w, h);
             }
             
+            
+
             CircleOfTransparency.Create(ProfileManager.Current.CircleOfTransparencyRadius);
             Plugin.OnConnected();
 
@@ -321,6 +324,7 @@ namespace ClassicUO.Game.Scenes
             NetClient.Socket.Disconnected -= SocketOnDisconnected;
             NetClient.Socket.Disconnect();
             _lightRenderTarget?.Dispose();
+            _world_render_target?.Dispose();
 
             CommandManager.UnRegisterAll();
             _weather.Reset();
@@ -342,7 +346,7 @@ namespace ClassicUO.Game.Scenes
 
             base.Unload();
         }
-
+        
         private void SocketOnDisconnected(object sender, SocketError e)
         {
             if (Settings.GlobalSettings.Reconnect)
@@ -729,11 +733,14 @@ namespace ClassicUO.Game.Scenes
 
 
         private Matrix _matrix = Matrix.Identity;
+        private static XBREffect _xbr_effect;
+        private bool _use_render_target = false;
 
         public override bool Draw(UltimaBatcher2D batcher)
         {
             if (!World.InGame)
                 return false;
+    
 
             int posX = ProfileManager.Current.GameWindowPosition.X + 5;
             int posY = ProfileManager.Current.GameWindowPosition.Y + 5;
@@ -756,15 +763,6 @@ namespace ClassicUO.Game.Scenes
 
             Matrix.CreateOrthographicOffCenter(left, new_right, new_bottom, top, 0, 1, out _matrix);
 
-            //var rectangle = ScissorStack.CalculateScissors(
-            //    Matrix.Identity,
-            //    posX,
-            //    posY,
-            //    width,
-            //    height);
-
-            //ScissorStack.PushScissors(batcher.GraphicsDevice, rectangle);
-            //batcher.EnableScissorTest(true);
 
             if (ProfileManager.Current.EnableDeathScreen)
             {
@@ -787,26 +785,54 @@ namespace ClassicUO.Game.Scenes
                 }
             }
 
-            bool can_draw_lights = PrepareLightsRendering(batcher, ref _matrix);
-           
-            batcher.GraphicsDevice.Viewport = new Viewport(posX, posY, width, height);
+
+            Viewport world_viewport = new Viewport(posX, posY, width, height);
 
             GraphicHelper.ScreenToWorldCoordinates
             (
-                batcher.GraphicsDevice.Viewport.Bounds,
+                world_viewport.Bounds,
                 ref Mouse.Position,
                 ref _matrix,
                 out SelectedObject.TranslatedMousePositionByViewport
             );
 
-            DrawWorld(batcher, posX, posY, ref _matrix);
+
+            bool can_draw_lights = false;
+
+            if (!_use_render_target)
+            {
+                can_draw_lights = PrepareLightsRendering(batcher, ref _matrix);
+                batcher.GraphicsDevice.Viewport = world_viewport;
+            }
+
+            DrawWorld(batcher, posX, posY, ref _matrix, _use_render_target);
+
+            if (_use_render_target)
+            {
+                can_draw_lights = PrepareLightsRendering(batcher, ref _matrix);
+            }
+            
+            // draw world rt
+            Vector3 hue = Vector3.Zero;
 
 
-            //Matrix.CreateOrthographicOffCenter(posX, posX + right, posY + bottom, posY, 0, 1, out _matrix);
+            if (_use_render_target)
+            {
+                if (_xbr_effect == null)
+                {
+                    _xbr_effect = new XBREffect(batcher.GraphicsDevice);
+                }
 
+                _xbr_effect.SetSize(width, height);
+
+                batcher.Begin(ProfileManager.Current.UseXBR ? _xbr_effect : null);
+                batcher.Draw2D(_world_render_target, posX, posY, width, height, ref hue);
+                batcher.End();
+            }
+
+            // draw lights
             if (can_draw_lights)
             {
-                Vector3 hue = Vector3.Zero;
                 batcher.Begin();
                 batcher.SetBlendState(UseAltLights ? _altLightsBlend.Value : _darknessBlend.Value);
                 batcher.Draw2D(_lightRenderTarget, posX, posY, width, height, ref hue);
@@ -814,7 +840,21 @@ namespace ClassicUO.Game.Scenes
                 batcher.End();
             }
 
-            batcher.GraphicsDevice.Viewport = r_viewport;
+
+            // reset viewport
+            if (_use_render_target)
+            {
+                var rectangle = ScissorStack.CalculateScissors(
+                    Matrix.Identity,
+                    posX,
+                    posY,
+                    width,
+                    height);
+
+                ScissorStack.PushScissors(batcher.GraphicsDevice, rectangle);
+                batcher.EnableScissorTest(true);
+            }
+
 
 
             // ==============
@@ -825,21 +865,31 @@ namespace ClassicUO.Game.Scenes
             batcher.End();
             // ==============
 
-            base.Draw(batcher);
 
-            
+            if (_use_render_target)
+            {
+                batcher.EnableScissorTest(false);
+                ScissorStack.PopScissors(batcher.GraphicsDevice);
+            }
+            else
+            {
+                batcher.GraphicsDevice.Viewport = r_viewport;
+            }
 
-            //batcher.EnableScissorTest(false);
-            //ScissorStack.PopScissors(batcher.GraphicsDevice);
-
-            return true;
+            return base.Draw(batcher);
         }
 
-        private void DrawWorld(UltimaBatcher2D batcher, int masterX, int masterY, ref Matrix matrix)
+        private void DrawWorld(UltimaBatcher2D batcher, int masterX, int masterY, ref Matrix matrix, bool use_render_target)
         {
             SelectedObject.Object = null;
 
-            batcher.GraphicsDevice.Clear(Color.Black);
+            if (use_render_target)
+            {
+                batcher.GraphicsDevice.SetRenderTarget(_world_render_target);
+                batcher.GraphicsDevice.Clear(Color.Black);
+            }
+            
+
             batcher.SetBrightlight(ProfileManager.Current.Brighlight);
             batcher.Begin(null, matrix);
 
@@ -885,6 +935,11 @@ namespace ClassicUO.Game.Scenes
             // draw weather
             _weather.Draw(batcher, masterX, masterY);
             batcher.End();
+
+            if (use_render_target)
+            {
+                batcher.GraphicsDevice.SetRenderTarget(null);
+            }
         }
 
         private bool PrepareLightsRendering(UltimaBatcher2D batcher, ref Matrix matrix)
@@ -893,7 +948,6 @@ namespace ClassicUO.Game.Scenes
                 return false;
 
             batcher.GraphicsDevice.SetRenderTarget(_lightRenderTarget);
-            //batcher.GraphicsDevice.Clear(ClearOptions.DepthBuffer, Color.Black, 0, 0);
             batcher.GraphicsDevice.Clear(ClearOptions.Target, Color.Black, 0f, 0);
 
             if (!UseAltLights)

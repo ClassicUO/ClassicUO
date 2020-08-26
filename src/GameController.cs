@@ -376,6 +376,8 @@ namespace ClassicUO
 
             _totalFrames++;
 
+            GraphicsDevice.Clear(Color.Black);
+
             if (_scene != null && _scene.IsLoaded && !_scene.IsDestroyed)
             {
                 _scene.Draw(_uoSpriteBatch);
