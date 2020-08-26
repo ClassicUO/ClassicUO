@@ -225,7 +225,7 @@ namespace ClassicUO.Game.UI.Gumps
                             {
                                 dropcontainer = target.Serial;
                             }
-                            else if (target.ItemData.IsStackable && target.Graphic == ItemHold.Graphic)
+                            else if (target.ItemData.IsStackable && target.DisplayedGraphic == ItemHold.DisplayedGraphic)
                             {
                                 dropcontainer = target.Serial;
                             }

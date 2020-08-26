@@ -367,7 +367,7 @@ namespace ClassicUO.Game.Scenes
                             dropZ = 0;
                             drop_container = obj.Serial;
                         }
-                        else if (obj is Item it2 && (it2.ItemData.IsSurface || (it2.ItemData.IsStackable && obj.Graphic == ItemHold.Graphic)))
+                        else if (obj is Item it2 && (it2.ItemData.IsSurface || (it2.ItemData.IsStackable && it2.DisplayedGraphic == ItemHold.DisplayedGraphic)))
                         {
                             if (!it2.ItemData.IsSurface)
                             {
