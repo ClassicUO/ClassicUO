@@ -58,7 +58,7 @@ namespace ClassicUO.Game.UI.Controls
             if (MouseIsOver)
             {
                 ResetHueVector();
-                ShaderHuesTraslator.GetHueVector(ref _hueVector, 0, false, Alpha, true);
+                ShaderHueTranslator.GetHueVector(ref _hueVector, 0, false, Alpha, true);
 
                 batcher.Draw2D(_texture, x, y, 0, 0, Width, Height, ref _hueVector);
             }

@@ -205,13 +205,23 @@ namespace ClassicUO
             else if (rate > Constants.MAX_FPS)
                 rate = Constants.MAX_FPS;
 
-            FrameDelay[0] = FrameDelay[1] = (uint) (1000 / rate);
+            float frameDelay;
+            if (rate == 12)
+            {
+                // The "real" UO framerate is 12.5. Treat "12" as "12.5" to match.
+                frameDelay = 80;
+            }
+            else
+            {
+                frameDelay = 1000.0f / rate;
+            }
+
+            FrameDelay[0] = FrameDelay[1] = (uint)frameDelay;
             FrameDelay[1] = FrameDelay[1] >> 1;
 
             Settings.GlobalSettings.FPS = rate;
-            //TargetElapsedTime = TimeSpan.FromMilliseconds(1000.0f / 250);
 
-            _intervalFixedUpdate[0] = 1000.0f / rate;
+            _intervalFixedUpdate[0] = frameDelay;
             _intervalFixedUpdate[1] = 217;  // 5 FPS
         }
 

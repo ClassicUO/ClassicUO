@@ -966,7 +966,7 @@ namespace ClassicUO.Game.Scenes
             batcher.SetBlendState(BlendState.Additive);
 
             Vector3 hue = Vector3.Zero;
-            hue.Y = ShaderHuesTraslator.SHADER_LIGHTS;
+            hue.Y = ShaderHueTranslator.SHADER_LIGHTS;
             hue.Z = 0;
 
             for (int i = 0; i < _lightCount; i++)

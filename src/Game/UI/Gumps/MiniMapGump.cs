@@ -173,7 +173,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                     _hueVector.Z = 0;
 
-                    ShaderHuesTraslator.GetHueVector(ref _hueVector, Notoriety.GetHue(mob.NotorietyFlag));
+                    ShaderHueTranslator.GetHueVector(ref _hueVector, Notoriety.GetHue(mob.NotorietyFlag));
 
                     batcher.Draw2D(_mobilesIndicator, x + w + gx, y + h + gy, 2, 2, ref _hueVector);
                 }

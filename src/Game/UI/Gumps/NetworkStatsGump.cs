@@ -129,11 +129,11 @@ namespace ClassicUO.Game.UI.Gumps
 
             ResetHueVector();
 
-            if (_ping < 100)
+            if (_ping < 150)
                 _hueVector.X = 0x44; // green
-            else if (_ping < 150)
-                _hueVector.X = 0x34; // yellow
             else if (_ping < 200)
+                _hueVector.X = 0x34; // yellow
+            else if (_ping < 300)
                 _hueVector.X = 0x31; // orange
             else
                 _hueVector.X = 0x20; // red
