@@ -852,7 +852,6 @@ namespace ClassicUO.Game.Scenes
 
                     if (_use_render_target)
                     {
-
                         _world_render_target = new RenderTarget2D(Client.Game.GraphicsDevice,
                             winGameWidth,
                             winGameHeight,
