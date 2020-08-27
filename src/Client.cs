@@ -39,7 +39,7 @@ using ClassicUO.Game;
 
 namespace ClassicUO
 {
-    static class Client
+    internal static class Client
     {
         public static ClientVersion Version { get; private set; } 
         public static ClientFlags Protocol { get; set; }

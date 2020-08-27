@@ -44,7 +44,7 @@ using static SDL2.SDL;
 
 namespace ClassicUO
 {
-    unsafe class GameController : Microsoft.Xna.Framework.Game
+    internal unsafe class GameController : Microsoft.Xna.Framework.Game
     {
         private Scene _scene;
         private bool _dragStarted;
