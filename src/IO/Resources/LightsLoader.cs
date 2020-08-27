@@ -31,24 +31,13 @@ namespace ClassicUO.IO.Resources
     {
         private UOFileMul _file;
 
-        protected LightsLoader(int count) : base(count)
+        private LightsLoader(int count)
+            : base(count)
         {
-
         }
 
         private static LightsLoader _instance;
-        public static LightsLoader Instance
-        {
-            get
-            {
-                if (_instance == null)
-                {
-                    _instance = new LightsLoader(Constants.MAX_LIGHTS_DATA_INDEX_COUNT);
-                }
-
-                return _instance;
-            }
-        }
+        public static LightsLoader Instance => _instance ?? (_instance = new LightsLoader(Constants.MAX_LIGHTS_DATA_INDEX_COUNT));
 
         public override Task Load()
         {
@@ -82,7 +71,7 @@ namespace ClassicUO.IO.Resources
                 texture = new UOTexture32(w, h);
                 texture.PushData(pixels);
 
-                SaveID(id);
+                SaveId(id);
             }
             else
             {

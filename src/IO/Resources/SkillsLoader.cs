@@ -32,36 +32,23 @@ namespace ClassicUO.IO.Resources
 
         private SkillsLoader()
         {
-
         }
 
         private static SkillsLoader _instance;
-        public static SkillsLoader Instance
-        {
-            get
-            {
-                if (_instance == null)
-                {
-                    _instance = new SkillsLoader();
-                }
-
-                return _instance;
-            }
-        }
-
-
+        public static SkillsLoader Instance => _instance ?? (_instance = new SkillsLoader());
 
         public int SkillsCount => Skills.Count;
         public readonly List<SkillEntry> Skills = new List<SkillEntry>();
         public readonly List<SkillEntry> SortedSkills = new List<SkillEntry>();
-
 
         public override Task Load()
         {
             return Task.Run(() =>
             {
                 if (SkillsCount > 0)
+                {
                     return;
+                }
 
                 string path = UOFileManager.GetUOFilePath("skills.mul");
                 string pathidx = UOFileManager.GetUOFilePath("Skills.idx");

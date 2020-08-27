@@ -59,22 +59,10 @@ namespace ClassicUO.IO.Resources
 
         private AnimationsLoader()
         {
-            
         }
 
         private static AnimationsLoader _instance;
-        public static AnimationsLoader Instance
-        {
-            get
-            {
-                if (_instance == null)
-                {
-                    _instance = new AnimationsLoader();
-                }
-
-                return _instance;
-            }
-        }
+        public static AnimationsLoader Instance => _instance ?? (_instance = new AnimationsLoader());
 
 
         public ushort Color;
