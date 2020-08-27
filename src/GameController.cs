@@ -1,4 +1,4 @@
-﻿#region license
+#region license
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -76,6 +76,7 @@ namespace ClassicUO
         }
 
         public Scene Scene => _scene;
+
         public readonly uint[] FrameDelay = new uint[2];
 
         private SDL_EventFilter _filter;
@@ -83,7 +84,9 @@ namespace ClassicUO
         protected override void Initialize()
         {
             if (_graphicDeviceManager.GraphicsDevice.Adapter.IsProfileSupported(GraphicsProfile.HiDef))
+            {
                 _graphicDeviceManager.GraphicsProfile = GraphicsProfile.HiDef;
+            }
             _graphicDeviceManager.ApplyChanges();
 
             SetRefreshRate(Settings.GlobalSettings.FPS);
@@ -193,9 +196,13 @@ namespace ClassicUO
         public void SetRefreshRate(int rate)
         {
             if (rate < Constants.MIN_FPS)
+            {
                 rate = Constants.MIN_FPS;
+            }
             else if (rate > Constants.MAX_FPS)
+            {
                 rate = Constants.MAX_FPS;
+            }
 
             float frameDelay;
             if (rate == 12)
@@ -269,7 +276,6 @@ namespace ClassicUO
             }
 
             var viewport = UIManager.GetGump<WorldViewportGump>();
-
             if (viewport != null && ProfileManager.Current.GameWindowFullSize)
             {
                 viewport.ResizeGameWindow(new Point(width, height));
@@ -312,7 +318,9 @@ namespace ClassicUO
         protected override void Update(GameTime gameTime)
         {
             if (Profiler.InContext("OutOfContext"))
+            {
                 Profiler.ExitContext("OutOfContext");
+            }
 
             Time.Ticks = (uint) gameTime.TotalGameTime.TotalMilliseconds;
 
@@ -366,14 +374,15 @@ namespace ClassicUO
             base.Update(gameTime);
         }
 
-
         protected override void Draw(GameTime gameTime)
         {
             Profiler.EndFrame();
             Profiler.BeginFrame();
 
             if (Profiler.InContext("OutOfContext"))
+            {
                 Profiler.ExitContext("OutOfContext");
+            }
             Profiler.EnterContext("RenderFrame");
 
             _totalFrames++;
@@ -388,9 +397,13 @@ namespace ClassicUO
             if (World.InGame && SelectedObject.LastObject is TextObject t)
             {
                 if (t.IsTextGump)
+                {
                     t.ToTopD();
+                }
                 else
+                {
                     World.WorldTextManager?.MoveToTop(t);
+                }
             }
 
             SelectedObject.HealthbarObject = null;
@@ -408,7 +421,9 @@ namespace ClassicUO
         private void OnNetworkUpdate(double totalMS, double frameMS)
         {
             if (NetClient.LoginSocket.IsDisposed && NetClient.LoginSocket.IsConnected)
+            {
                 NetClient.LoginSocket.Disconnect();
+            }
             else if (!NetClient.Socket.IsConnected)
             {
                 NetClient.LoginSocket.Update();
@@ -449,7 +464,6 @@ namespace ClassicUO
             SetWindowSize(width, height);
 
             var viewport = UIManager.GetGump<WorldViewportGump>();
-
             if (viewport != null && ProfileManager.Current.GameWindowFullSize)
             {
                 viewport.ResizeGameWindow(new Point(width, height));
@@ -485,7 +499,6 @@ namespace ClassicUO
                     Console.WriteLine("AUDIO REMOVED: {0}", e->adevice.which);
 
                     break;
-
 
                 case SDL_EventType.SDL_WINDOWEVENT:
 
@@ -526,7 +539,9 @@ namespace ClassicUO
                         _scene.OnKeyDown(e->key);
                     }
                     else
+                    {
                         _ignoreNextTextInput = true;
+                    }
 
                     break;
 
@@ -562,7 +577,9 @@ namespace ClassicUO
                 case SDL_EventType.SDL_TEXTINPUT:
 
                     if (_ignoreNextTextInput)
+                    {
                         break;
+                    }
 
                     string s = StringHelper.ReadUTF8(e->text.text);
 
@@ -586,7 +603,9 @@ namespace ClassicUO
                     if (Mouse.IsDragging)
                     {
                         if (!_scene.OnMouseDragging())
+                        {
                             UIManager.OnMouseDragging();
+                        }
                     }
 
                     if (Mouse.IsDragging && !_dragStarted)
@@ -634,13 +653,14 @@ namespace ClassicUO
                                 if (Mouse.LastLeftButtonClickTime + Mouse.MOUSE_DELAY_DOUBLE_CLICK >= ticks)
                                 {
                                     Mouse.LastLeftButtonClickTime = 0;
-                                 
-                                    bool res = _scene.OnLeftMouseDoubleClick() || UIManager.OnLeftMouseDoubleClick();
 
+                                    var res = _scene.OnLeftMouseDoubleClick() || UIManager.OnLeftMouseDoubleClick();
                                     if (!res)
                                     {
                                         if (!_scene.OnLeftMouseDown())
+                                        {
                                             UIManager.OnLeftMouseButtonDown();
+                                        }
                                     }
                                     else
                                     {
@@ -650,8 +670,10 @@ namespace ClassicUO
                                     break;
                                 }
 
-                                if (!_scene.OnLeftMouseDown()) 
+                                if (!_scene.OnLeftMouseDown())
+                                {
                                     UIManager.OnLeftMouseButtonDown();
+                                }
 
                                 Mouse.LastLeftButtonClickTime = Mouse.CancelDoubleClick ? 0 : ticks;
                             }
@@ -660,7 +682,9 @@ namespace ClassicUO
                                 if (Mouse.LastLeftButtonClickTime != 0xFFFF_FFFF)
                                 {
                                     if (!_scene.OnLeftMouseUp() || UIManager.LastControlMouseDown(MouseButtonType.Left) != null)
+                                    {
                                         UIManager.OnLeftMouseButtonUp();
+                                    }
                                 }
                                 Mouse.LButtonPressed = false;
                                 Mouse.End();
@@ -687,7 +711,9 @@ namespace ClassicUO
                                     if (!res)
                                     {
                                         if (!_scene.OnMiddleMouseDown())
+                                        {
                                             UIManager.OnMiddleMouseButtonDown();
+                                        }
                                     }
                                     else
                                     {
@@ -700,7 +726,9 @@ namespace ClassicUO
                                 Plugin.ProcessMouse(e->button.button, 0);
 
                                 if (!_scene.OnMiddleMouseDown())
+                                {
                                     UIManager.OnMiddleMouseButtonDown();
+                                }
 
                                 Mouse.LastMidButtonClickTime = Mouse.CancelDoubleClick ? 0 : ticks;
                             }
@@ -709,7 +737,9 @@ namespace ClassicUO
                                 if (Mouse.LastMidButtonClickTime != 0xFFFF_FFFF)
                                 {
                                     if (!_scene.OnMiddleMouseUp())
+                                    {
                                         UIManager.OnMiddleMouseButtonUp();
+                                    }
                                 }
 
                                 Mouse.MButtonPressed = false;
@@ -737,7 +767,9 @@ namespace ClassicUO
                                     if (!res)
                                     {
                                         if (!_scene.OnRightMouseDown())
+                                        {
                                             UIManager.OnRightMouseButtonDown();
+                                        }
                                     }
                                     else
                                     {
@@ -748,7 +780,9 @@ namespace ClassicUO
                                 }
 
                                 if (!_scene.OnRightMouseDown())
+                                {
                                     UIManager.OnRightMouseButtonDown();
+                                }
 
                                 Mouse.LastRightButtonClickTime = Mouse.CancelDoubleClick ? 0 : ticks;
                             }
@@ -757,7 +791,9 @@ namespace ClassicUO
                                 if (Mouse.LastRightButtonClickTime != 0xFFFF_FFFF)
                                 {
                                     if (!_scene.OnRightMouseUp())
+                                    {
                                         UIManager.OnRightMouseButtonUp();
+                                    }
                                 }
                                 Mouse.RButtonPressed = false;
                                 Mouse.End();
@@ -774,14 +810,18 @@ namespace ClassicUO
                                 Mouse.CancelDoubleClick = false;
                                 Plugin.ProcessMouse(e->button.button, 0);
                                 if (!_scene.OnExtraMouseDown(mouse.button - 1))
+                                {
                                     UIManager.OnExtraMouseButtonDown(mouse.button - 1);
+                                }
 
                                 // TODO: doubleclick?
                             }
                             else
                             {
                                 if (!_scene.OnExtraMouseUp(mouse.button - 1))
+                                {
                                     UIManager.OnExtraMouseButtonUp(mouse.button - 1);
+                                }
 
                                 Mouse.XButtonPressed = false;
                                 Mouse.End();

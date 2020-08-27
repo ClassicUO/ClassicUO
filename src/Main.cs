@@ -25,14 +25,12 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Runtime.InteropServices;
-using System.Text;
 using System.Threading;
 
 using ClassicUO.Configuration;
 using ClassicUO.Data;
 using ClassicUO.Game;
 using ClassicUO.IO;
-using ClassicUO.Network;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
 
@@ -47,7 +45,6 @@ namespace ClassicUO
         private static extern bool SetDllDirectory(string lpPathName);
 
         private static bool _skipUpdates;
-
 
         [STAThread]
         static void Main(string[] args)
@@ -64,7 +61,6 @@ namespace ClassicUO
 
             CUOEnviroment.GameThread = Thread.CurrentThread;
             CUOEnviroment.GameThread.Name = "CUO_MAIN_THREAD";
-
 
 #if !DEBUG
             AppDomain.CurrentDomain.UnhandledException += (s, e) =>
@@ -117,8 +113,12 @@ namespace ClassicUO
 #endif
 
             if (!_skipUpdates)
+            {
                 if (CheckUpdate(args))
+                {
                     return;
+                }
+            }
             
             if (CUOEnviroment.IsHighDPI)
             {
@@ -140,8 +140,6 @@ namespace ClassicUO
                 {
                     // TODO: 
                     Settings.GlobalSettings.Save();
-
-                    
                 }
             }
 
@@ -172,17 +170,20 @@ namespace ClassicUO
             */
 
             if (string.IsNullOrWhiteSpace(Settings.GlobalSettings.UltimaOnlineDirectory))
+            {
                 Settings.GlobalSettings.UltimaOnlineDirectory = CUOEnviroment.ExecutablePath;
-
+            }
 
             const uint INVALID_UO_DIRECTORY = 0x100;
             const uint INVALID_UO_VERSION = 0x200;
 
             uint flags = 0;
 
-
-            if (!Directory.Exists(Settings.GlobalSettings.UltimaOnlineDirectory) || !File.Exists(UOFileManager.GetUOFilePath("tiledata.mul")))
+            if (!Directory.Exists(Settings.GlobalSettings.UltimaOnlineDirectory) ||
+                !File.Exists(UOFileManager.GetUOFilePath("tiledata.mul")))
+            {
                 flags |= INVALID_UO_DIRECTORY;
+            }
 
 
             string clientVersionText = Settings.GlobalSettings.ClientVersion;
@@ -207,7 +208,6 @@ namespace ClassicUO
                     Settings.GlobalSettings.ClientVersion = clientVersionText;
                 }
             }
-
 
             if (flags != 0)
             {
@@ -242,11 +242,9 @@ namespace ClassicUO
 
                 Client.Run();
             }
-            
 
             Log.Trace("Closing...");
         }
-
 
         private static void ReadSettingsFromArgs(string[] args)
         {
@@ -264,7 +262,9 @@ namespace ClassicUO
                 if (i < args.Length - 1)
                 {
                     if (!string.IsNullOrWhiteSpace(args[i + 1]) && !args[i + 1].StartsWith("-"))
+                    {
                         value = args[++i];
+                    }
                 }
 
                 Log.Trace($"ARG: {cmd}, VALUE: {value}");
@@ -338,9 +338,13 @@ namespace ClassicUO
                         int v = int.Parse(value);
 
                         if (v < Constants.MIN_FPS)
+                        {
                             v = Constants.MIN_FPS;
+                        }
                         else if (v > Constants.MAX_FPS)
+                        {
                             v = Constants.MAX_FPS;
+                        }
 
                         Settings.GlobalSettings.FPS = v;
                         
@@ -387,7 +391,6 @@ namespace ClassicUO
                         Settings.GlobalSettings.LoginMusicVolume = int.Parse(value);
 
                         break;
-
 
                     // ======= [SHARD_TYPE_FIX] =======
                     // TODO old. maintain it for retrocompatibility
@@ -459,9 +462,13 @@ namespace ClassicUO
             for (int i = 0; i < args.Length; i++)
             {
                 if (args[i] == "--source" && i < args.Length - 1)
+                {
                     path = args[i + 1];
+                }
                 else if (args[i] == "--action" && i < args.Length - 1)
+                {
                     action = args[i + 1];
+                }
                 else if (args[i] == "--pid" && i < args.Length - 1)
                     pid = int.Parse(args[i + 1]);
             }
