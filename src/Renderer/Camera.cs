@@ -100,6 +100,8 @@ namespace ClassicUO.Renderer
 
                 _updateProjection = true;
                 _updateMatrixes = true;
+
+                UpdateMatrixes();
             }
         }
 
@@ -116,6 +118,8 @@ namespace ClassicUO.Renderer
                 Position.Y = y;
 
                 _updateMatrixes = true;
+
+                UpdateMatrixes();
             }
         }
 
@@ -160,8 +164,8 @@ namespace ClassicUO.Renderer
             float x = (((point.X - Bounds.X) / ((float) Bounds.Width)) * 2f) - 1f;
             float y = -((((point.Y - Bounds.Y) / ((float) Bounds.Height)) * 2f) - 1f);
 
-            point.X = (int) ((x * _inverseTransform.M11) + (y * _inverseTransform.M21) + _inverseTransform.M41);
-            point.Y = (int) ((x * _inverseTransform.M12) + (y * _inverseTransform.M22) + _inverseTransform.M42);
+            point.X = (int) Math.Round((x * _inverseTransform.M11) + (y * _inverseTransform.M21) + _inverseTransform.M41);
+            point.Y = (int) Math.Round((x * _inverseTransform.M12) + (y * _inverseTransform.M22) + _inverseTransform.M42);
 
             return point;
         }
@@ -177,8 +181,8 @@ namespace ClassicUO.Renderer
             float x = ((point.X * _transform.M11) + (point.Y * _transform.M21) + _transform.M41);
             float y = ((point.X * _transform.M12) + (point.Y * _transform.M22) + _transform.M42);
 
-            point.X = (int) ((((x + 1f) * 0.5f) * Bounds.Width) + Bounds.X);
-            point.Y = (int) ((((-y + 1f) * 0.5f) * Bounds.Height) + Bounds.Y);
+            point.X = (int) Math.Round((((x + 1f) * 0.5f) * Bounds.Width) + Bounds.X);
+            point.Y = (int) Math.Round((((-y + 1f) * 0.5f) * Bounds.Height) + Bounds.Y);
 
             return point;
         }

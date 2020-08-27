@@ -802,7 +802,6 @@ namespace ClassicUO.Game.Scenes
             //    out _matrix
             //);
 
-            
             Matrix matrix = Camera.ViewProjectionMatrix;
 
             if (ProfileManager.Current.EnableDeathScreen)
@@ -901,7 +900,7 @@ namespace ClassicUO.Game.Scenes
             // FIXME: OVERHEAD NOT WORKING WHEN ZOOMING :(
             batcher.Begin();
             DrawOverheads(batcher, posX, posY);
-            DrawSelection(batcher, 0, 0);
+            DrawSelection(batcher, posX, posY);
             batcher.End();
             // ==============
 
@@ -1034,7 +1033,7 @@ namespace ClassicUO.Game.Scenes
 
         public void DrawOverheads(UltimaBatcher2D batcher, int x, int y)
         {
-            _healthLinesManager.Draw(batcher, Scale);
+            _healthLinesManager.Draw(batcher);
 
             int renderIndex = _renderIndex - 1;
 
