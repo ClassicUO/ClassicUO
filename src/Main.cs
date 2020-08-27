@@ -65,7 +65,7 @@ namespace ClassicUO
 #if !DEBUG
             AppDomain.CurrentDomain.UnhandledException += (s, e) =>
             {
-                StringBuilder sb = new StringBuilder();
+                System.Text.StringBuilder sb = new System.Text.StringBuilder();
                 sb.AppendLine("######################## [START LOG] ########################");
 
 #if DEV_BUILD
@@ -106,7 +106,7 @@ namespace ClassicUO
 #if DEV_BUILD
             if (!_skipUpdates)
             {
-                Updater updater = new Updater();
+                Network.Updater updater = new Network.Updater();
                 if (updater.Check())
                     return;
             }
