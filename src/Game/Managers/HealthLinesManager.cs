@@ -109,18 +109,12 @@ namespace ClassicUO.Game.Managers
                 p = mobile.RealScreenPosition;
                 p.X += (int) mobile.Offset.X + 22 + 5;
                 p.Y += (int) (mobile.Offset.Y - mobile.Offset.Z) + 22 + 5;
-                
+
 
                 if (mode != 1 && !mobile.IsDead)
                 {
                     if ((showWhen == 2 && current != max) || showWhen <= 1)
                     {
-                        if (mobile.IsGargoyle && mobile.IsFlying)
-                            p.Y -= 22;
-                        else if (!mobile.IsMounted)
-                            p.Y += 22;
-
-
                         AnimationsLoader.Instance.GetAnimationDimensions(mobile.AnimIndex,
                                                                       mobile.GetGraphicForAnimation(),
                                                                       /*(byte) m.GetDirectionForAnimation()*/ 0,
@@ -133,18 +127,24 @@ namespace ClassicUO.Game.Managers
                                                                       out int height);
 
                        
-                       
                         
                         if (mobile.HitsPercentage != 0)
                         {
                             Point p1 = p;
                             p1.Y -= (height + centerY + 28);
 
+                            if (mobile.ObjectHandlesOpened)
+                                p1.Y -= 22;
+
                             p1 = Client.Game.Scene.Camera.WorldToScreen(p1);
                             p1.X -= (mobile.HitsTexture.Width >> 1) + 3;
                             p1.Y -= mobile.HitsTexture.Height / 1;
-                            if (mobile.ObjectHandlesOpened)
+
+                            if (mobile.IsGargoyle && mobile.IsFlying)
                                 p1.Y -= 22;
+                            else if (!mobile.IsMounted)
+                                p1.Y += 22;
+
 
                             if (!(p1.X < screenX || p1.X > screenX + screenW - mobile.HitsTexture.Width || p1.Y < screenY || p1.Y > screenY + screenH))
                             {
@@ -156,6 +156,12 @@ namespace ClassicUO.Game.Managers
 
                 p.X -= BAR_WIDTH_HALF;
                 p.Y -= BAR_HEIGHT_HALF;
+                p = Client.Game.Scene.Camera.WorldToScreen(p);
+
+                if (mobile.IsGargoyle && mobile.IsFlying)
+                    p.Y -= 22;
+                else if (!mobile.IsMounted)
+                    p.Y += 22;
 
                 if (p.X < screenX || p.X > screenX + screenW - BAR_WIDTH)
                     continue;
@@ -171,7 +177,6 @@ namespace ClassicUO.Game.Managers
                         mobile == TargetManager.LastAttack)
                         continue;
 
-                    p = Client.Game.Scene.Camera.WorldToScreen(p);
                     DrawHealthLine(batcher, mobile, p.X, p.Y, mobile != World.Player);
                 }
             }
@@ -188,6 +193,7 @@ namespace ClassicUO.Game.Managers
             p.Y += (int) (entity.Offset.Y - entity.Offset.Z) + 22 + 5;
             p.X -= BAR_WIDTH_HALF;
             p.Y -= BAR_HEIGHT_HALF;
+            p = Client.Game.Scene.Camera.WorldToScreen(p);
 
             if (p.X < screenX || p.X > screenX + screenW - BAR_WIDTH)
                 return;
@@ -195,7 +201,6 @@ namespace ClassicUO.Game.Managers
             if (p.Y < screenY || p.Y > screenY + screenH - BAR_HEIGHT)
                 return;
 
-            p = Client.Game.Scene.Camera.WorldToScreen(p);
             DrawHealthLine(batcher, entity, p.X, p.Y, false);
         }
 

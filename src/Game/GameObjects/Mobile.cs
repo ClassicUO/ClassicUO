@@ -1063,13 +1063,10 @@ namespace ClassicUO.Game.GameObjects
 
             Point p = RealScreenPosition;
 
-            if (health && mode != 1 && ((alwaysHP >= 1 && Hits != HitsMax) || alwaysHP == 0))
+            if (ObjectHandlesOpened)
             {
                 p.Y -= 22;
             }
-
-            if (ObjectHandlesOpened)
-                p.Y -= 22;
 
             if (IsGargoyle && IsFlying)
                 p.Y -= 22;
@@ -1091,7 +1088,12 @@ namespace ClassicUO.Game.GameObjects
             p.Y += (int) (Offset.Y - Offset.Z - (height + centerY + 8));
             p = Client.Game.Scene.Camera.WorldToScreen(p);
 
+            if (health && mode != 1 && ((alwaysHP >= 1 && Hits != HitsMax) || alwaysHP == 0))
+            {
+                p.Y -= 22;
+            }
 
+            
             for (; last != null; last = (TextObject) last.Previous)
             {
                 if (last.RenderedText != null && !last.RenderedText.IsDestroyed)
