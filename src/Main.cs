@@ -130,11 +130,9 @@ namespace ClassicUO
             Environment.SetEnvironmentVariable(SDL.SDL_HINT_MOUSE_FOCUS_CLICKTHROUGH, "1");
             Environment.SetEnvironmentVariable("PATH", Environment.GetEnvironmentVariable("PATH") + ";" + Path.Combine(CUOEnviroment.ExecutablePath, "Data", "Plugins"));
 
-          
-            string globalSettingsPath = Settings.GetSettingsFilepath();
+            var globalSettingsPath = Settings.GetSettingsFilepath();
 
-            if ((!Directory.Exists(Path.GetDirectoryName(globalSettingsPath)) ||
-                                                       !File.Exists(globalSettingsPath)))
+            if (!Directory.Exists(Path.GetDirectoryName(globalSettingsPath)) || !File.Exists(globalSettingsPath))
             {
                 // settings specified in path does not exists, make new one
                 {
@@ -157,7 +155,7 @@ namespace ClassicUO
 
             if (!CUOEnviroment.IsUnix)
             {
-                string libsPath = Path.Combine(CUOEnviroment.ExecutablePath, Environment.Is64BitProcess ? "x64" : "x86");
+                var libsPath = Path.Combine(CUOEnviroment.ExecutablePath, Environment.Is64BitProcess ? "x64" : "x86");
                 SetDllDirectory(libsPath);
             }
 
@@ -185,8 +183,7 @@ namespace ClassicUO
                 flags |= INVALID_UO_DIRECTORY;
             }
 
-
-            string clientVersionText = Settings.GlobalSettings.ClientVersion;
+            var clientVersionText = Settings.GlobalSettings.ClientVersion;
 
             if (!ClientVersionHelper.IsClientVersionValid(Settings.GlobalSettings.ClientVersion, out var clientVersion))
             {
@@ -248,16 +245,18 @@ namespace ClassicUO
 
         private static void ReadSettingsFromArgs(string[] args)
         {
-            for (int i = 0; i <= args.Length - 1; i++)
+            for (var i = 0; i <= args.Length - 1; i++)
             {
-                string cmd = args[i].ToLower();
+                var cmd = args[i].ToLower();
 
                 // NOTE: Command-line option name should start with "-" character
                 if (cmd.Length == 0 || cmd[0] != '-')
+                {
                     continue;
+                }
 
                 cmd = cmd.Remove(0, 1);
-                string value = string.Empty;
+                var value = string.Empty;
 
                 if (i < args.Length - 1)
                 {
@@ -335,8 +334,7 @@ namespace ClassicUO
                         break;
 
                     case "fps":
-                        int v = int.Parse(value);
-
+                        var v = int.Parse(value);
                         if (v < Constants.MIN_FPS)
                         {
                             v = Constants.MIN_FPS;
@@ -453,13 +451,13 @@ namespace ClassicUO
 
         private static bool CheckUpdate(string[] args)
         {
-            string currentPath = CUOEnviroment.ExecutablePath;
+            var currentPath = CUOEnviroment.ExecutablePath;
 
-            string path = string.Empty;
-            string action = string.Empty;
-            int pid = -1;
+            var path = string.Empty;
+            var action = string.Empty;
+            var processId = -1;
 
-            for (int i = 0; i < args.Length; i++)
+            for (var i = 0; i < args.Length; i++)
             {
                 if (args[i] == "--source" && i < args.Length - 1)
                 {
@@ -470,13 +468,15 @@ namespace ClassicUO
                     action = args[i + 1];
                 }
                 else if (args[i] == "--pid" && i < args.Length - 1)
-                    pid = int.Parse(args[i + 1]);
+                {
+                    processId = int.Parse(args[i + 1]);
+                }
             }
 
             if (action != string.Empty)
             {
                 Console.WriteLine("[CheckUpdate] CURRENT PATH: {0}", currentPath);
-                Console.WriteLine("[CheckUpdate] Args: \tpath={0}\taction={1}\tpid={2}", path, action, pid);
+                Console.WriteLine("[CheckUpdate] Args: \tpath={0}\taction={1}\tpid={2}", path, action, processId);
             }
 
             if (action == "update")
@@ -503,11 +503,10 @@ namespace ClassicUO
                 //    File.Copy(file, sub, true);
                 //}
 
-                DirectoryInfo dd = new DirectoryInfo(currentPath);
+                var dd = new DirectoryInfo(currentPath);
                 dd.CopyAllTo(new DirectoryInfo(path));
 
-
-                ProcessStartInfo processStartInfo = new ProcessStartInfo()
+                var processStartInfo = new ProcessStartInfo
                 {
                     WorkingDirectory = path,
                     UseShellExecute = false,

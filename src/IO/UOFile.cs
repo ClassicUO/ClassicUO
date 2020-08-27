@@ -33,23 +33,23 @@ namespace ClassicUO.IO
         private protected MemoryMappedViewAccessor _accessor;
         private protected MemoryMappedFile _file;
 
-        public UOFile(string filepath, bool loadfile = false)
+        public UOFile(string filepath, bool loadFile = false)
         {
             FilePath = filepath;
 
-            if (loadfile)
+            if (loadFile)
+            {
                 Load();
+            }
         }
 
-        public string FilePath { get; private protected set; }
-
+        public string FilePath { get; private set; }
 
         protected virtual void Load()
         {
             Log.Trace( $"Loading file:\t\t{FilePath}");
 
-            FileInfo fileInfo = new FileInfo(FilePath);
-
+            var fileInfo = new FileInfo(FilePath);
             if (!fileInfo.Exists)
             {
                 Log.Error( $"{FilePath}  not exists.");
@@ -57,8 +57,7 @@ namespace ClassicUO.IO
                 return;
             }
 
-            long size = fileInfo.Length;
-
+            var size = fileInfo.Length;
             if (size > 0)
             {
                 _file = MemoryMappedFile.CreateFromFile(File.Open(fileInfo.FullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite), null, 0, MemoryMappedFileAccess.Read, HandleInheritability.None, false);
@@ -79,7 +78,9 @@ namespace ClassicUO.IO
                 }
             }
             else
+            {
                 Log.Error( $"{FilePath}  size must be > 0");
+            }
         }
 
         public virtual void FillEntries(ref UOFileIndex[] entries)
@@ -99,8 +100,8 @@ namespace ClassicUO.IO
         [MethodImpl(256)]
         internal void Fill(ref byte[] buffer, int count)
         {
-            byte* ptr = (byte*) PositionAddress;
-            for (int i = 0; i < count; i++)
+            var ptr = (byte*) PositionAddress;
+            for (var i = 0; i < count; i++)
             {
                 buffer[i] = ptr[i];
             }
@@ -111,16 +112,16 @@ namespace ClassicUO.IO
         [MethodImpl(256)]
         internal T[] ReadArray<T>(int count) where T : struct
         {
-            T[] t = ReadArray<T>(Position, count);
+            var t = ReadArray<T>(Position, count);
             Position += UnsafeMemoryManager.SizeOf<T>() * count;
 
             return t;
         }
 
         [MethodImpl(256)]
-        internal T[] ReadArray<T>(long position, int count) where T : struct
+        private T[] ReadArray<T>(long position, int count) where T : struct
         {
-            T[] array = new T[count];
+            var array = new T[count];
             _accessor.ReadArray(position, array, 0, count);
 
             return array;
