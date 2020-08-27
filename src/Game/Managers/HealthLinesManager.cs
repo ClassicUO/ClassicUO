@@ -189,7 +189,7 @@ namespace ClassicUO.Game.Managers
 
         private void DrawHealthLineWithMath(UltimaBatcher2D batcher, uint serial, int screenX, int screenY, int screenW, int screenH, float scale)
         {
-            var entity = World.Get(serial);
+            Entity entity = World.Get(serial);
             if (entity == null)
                 return;
 

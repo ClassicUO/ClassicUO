@@ -238,7 +238,7 @@ namespace ClassicUO.Game.UI.Gumps
                 UIManager.SystemChat?.SetFocus();
             }
 
-            var entity = World.Get(LocalSerial);
+            Entity entity = World.Get(LocalSerial);
 
             if (entity != null)
             {
@@ -261,7 +261,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override void OnKeyDown(SDL.SDL_Keycode key, SDL.SDL_Keymod mod)
         {
-            var entity = World.Get(LocalSerial);
+            Entity entity = World.Get(LocalSerial);
 
             if (entity == null || SerialHelper.IsItem(entity.Serial))
                 return;
@@ -277,7 +277,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override void OnMouseOver(int x, int y)
         {
-            var entity = World.Get(LocalSerial);
+            Entity entity = World.Get(LocalSerial);
 
             if (entity != null)
             {
@@ -680,7 +680,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             WantUpdateSize = false;
 
-            var entity = World.Get(LocalSerial);
+            Entity entity = World.Get(LocalSerial);
 
 
             if (World.Party.Contains(LocalSerial))
@@ -911,7 +911,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             WantUpdateSize = false;
 
-            var entity = World.Get(LocalSerial);
+            Entity entity = World.Get(LocalSerial);
 
             if (World.Party.Contains(LocalSerial))
             {

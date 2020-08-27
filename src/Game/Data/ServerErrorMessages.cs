@@ -82,7 +82,7 @@ namespace ClassicUO.Game.Data
                 case 0x53:
                     if (code >= 10)
                         code = 9;
-                    var t = _loginErrors[code];
+                    Tuple<int, string> t = _loginErrors[code];
                     return cliloc.GetString(t.Item1, t.Item2);
                 case 0x85:
                     if (code >= 6)

@@ -36,7 +36,7 @@ namespace ClassicUO.Game.Managers
         {
             for (int i = 0; i < _corpses.Count; i++)
             {
-                ref var c = ref _corpses.GetAt(i);
+                ref CorpseInfo c = ref _corpses.GetAt(i);
 
                 if (c.CorpseSerial == corpse)
                 {
@@ -51,7 +51,7 @@ namespace ClassicUO.Game.Managers
         {
             for (int i = 0; i < _corpses.Count;)
             {
-                ref var c = ref _corpses.GetAt(i);
+                ref CorpseInfo c = ref _corpses.GetAt(i);
 
                 if (c.CorpseSerial == corpse || c.ObjectSerial == obj)
                 {
@@ -75,7 +75,7 @@ namespace ClassicUO.Game.Managers
         {
             for (int i = 0; i < _corpses.Count; i++)
             {
-                ref var c = ref _corpses.GetAt(i);
+                ref CorpseInfo c = ref _corpses.GetAt(i);
 
                 if (c.CorpseSerial == corpse || c.ObjectSerial == obj)
                 {
@@ -90,7 +90,7 @@ namespace ClassicUO.Game.Managers
         {
             for (int i = 0; i < _corpses.Count; i++)
             {
-                ref var c = ref _corpses.GetAt(i);
+                ref CorpseInfo c = ref _corpses.GetAt(i);
 
                 if (c.ObjectSerial == serial)
                 {

@@ -147,9 +147,9 @@ namespace ClassicUO.Network
 #endif
 
 
-            foreach (var entry in data)
+            foreach (object entry in data)
             {
-                var releaseToken = entry as Dictionary<string, object>;
+                Dictionary<string, object> releaseToken = entry as Dictionary<string, object>;
                 if (releaseToken == null)
                     continue;
 
@@ -184,7 +184,7 @@ namespace ClassicUO.Network
                     string name = releaseToken["name"].ToString();
                     string body = releaseToken["body"].ToString();
 
-                    var asset_list = releaseToken["assets"] as List<object>;
+                    List<object> asset_list = releaseToken["assets"] as List<object>;
 
                     if (asset_list == null || asset_list.Count == 0)
                     {
@@ -193,7 +193,7 @@ namespace ClassicUO.Network
                         continue;
                     }
 
-                    var asset = asset_list[0] as Dictionary<string, object>;
+                    Dictionary<string, object> asset = asset_list[0] as Dictionary<string, object>;
                     if (asset == null)
                         continue;
 

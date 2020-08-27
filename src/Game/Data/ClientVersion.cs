@@ -75,7 +75,7 @@ namespace ClassicUO.Data
                 DirectoryInfo dirInfo = new DirectoryInfo(fileInfo.DirectoryName);
                 if (dirInfo.Exists)
                 {
-                    foreach (var clientInfo in dirInfo.GetFiles("client.exe", SearchOption.TopDirectoryOnly))
+                    foreach (FileInfo clientInfo in dirInfo.GetFiles("client.exe", SearchOption.TopDirectoryOnly))
                     {
                         FileVersionInfo versInfo = FileVersionInfo.GetVersionInfo(clientInfo.FullName);
                         if (versInfo != null && !string.IsNullOrEmpty(versInfo.FileVersion))
@@ -105,11 +105,11 @@ namespace ClassicUO.Data
                 if (buff.Length <= 2 || buff.Length > 4)
                     return false;
 
-                if (int.TryParse(buff[0], out var major) && major >= byte.MinValue && major <= byte.MaxValue)
+                if (int.TryParse(buff[0], out int major) && major >= byte.MinValue && major <= byte.MaxValue)
                 {
                     int extra = 0;
 
-                    if (int.TryParse(buff[1], out var minor) && minor >= byte.MinValue && minor <= byte.MaxValue)
+                    if (int.TryParse(buff[1], out int minor) && minor >= byte.MinValue && minor <= byte.MaxValue)
                     {
                         int extra_index = 2;
                         int build = 0;

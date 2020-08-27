@@ -130,7 +130,7 @@ namespace TinyJson {
 						if (type.IsArray) {
 							Type elementType = type.GetElementType();
 							bool nullable = elementType.IsNullable();
-							var array = Array.CreateInstance(elementType, jsonList.Count);
+							Array array = Array.CreateInstance(elementType, jsonList.Count);
 							for (int i = 0; i < jsonList.Count; i++) {
 								object value = JsonMapper.DecodeValue(jsonList[i], elementType);
 								if (value != null || nullable) array.SetValue(value, i);
@@ -159,7 +159,7 @@ namespace TinyJson {
 							Type genericListType = typeof(List<>).MakeGenericType(genericType);
 							instance = Activator.CreateInstance(genericListType) as IList;
 						}
-						foreach (var item in jsonList) {
+						foreach (object item in jsonList) {
 							object value = JsonMapper.DecodeValue(item, genericType);
 							if (value != null || nullable) instance.Add(value);
 						}
@@ -177,13 +177,13 @@ namespace TinyJson {
 					Type genericType = type.GetGenericArguments()[0];
 					if (jsonObj is IList) {
 						IList jsonList = (IList)jsonObj;
-						var listType = type.IsInstanceOfGenericType(typeof(HashSet<>)) ? typeof(HashSet<>) : typeof(List<>);
-						var constructedListType = listType.MakeGenericType(genericType);
-						var instance = Activator.CreateInstance(constructedListType, true);
+						Type listType = type.IsInstanceOfGenericType(typeof(HashSet<>)) ? typeof(HashSet<>) : typeof(List<>);
+						Type constructedListType = listType.MakeGenericType(genericType);
+						object instance = Activator.CreateInstance(constructedListType, true);
 						bool nullable = genericType.IsNullable();
 						MethodInfo addMethodInfo = type.GetMethod("Add");
 						if (addMethodInfo != null) {
-							foreach (var item in jsonList) {
+							foreach (object item in jsonList) {
 								object value = JsonMapper.DecodeValue(item, genericType);
 								if (value != null || nullable) addMethodInfo.Invoke(instance, new object[] { value });
 							}

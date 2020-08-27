@@ -131,7 +131,7 @@ namespace ClassicUO.IO.Resources
 
                 if (File.Exists(path))
                 {
-                    using (var reader = new StreamReader(path))
+                    using (StreamReader reader = new StreamReader(path))
                     {
                         string line;
 
@@ -226,7 +226,7 @@ namespace ClassicUO.IO.Resources
             if (sound < 0)
                 return false;
 
-            ref var entry = ref GetValidRefEntry(sound);
+            ref UOFileIndex entry = ref GetValidRefEntry(sound);
 
             _file.Seek(entry.Offset);
 
@@ -291,7 +291,7 @@ namespace ClassicUO.IO.Resources
         {
             if (index >= 0 && index < Constants.MAX_SOUND_DATA_INDEX_COUNT)
             {
-                ref var sound = ref _sounds[index];
+                ref Sound sound = ref _sounds[index];
 
                 if (sound == null && TryGetSound(index, out byte[] data, out string name))
                 {
@@ -308,7 +308,7 @@ namespace ClassicUO.IO.Resources
         {
             if (index >= 0 && index < Constants.MAX_SOUND_DATA_INDEX_COUNT)
             {
-                ref var music = ref _musics[index];
+                ref Sound music = ref _musics[index];
 
                 if (music == null && TryGetMusicData(index, out string name, out bool loop))
                 {

@@ -34,11 +34,11 @@ namespace ClassicUO.Game.Managers
 
         public void Update(double totalMS, double frameMS)
         {
-            var f = _root;
+            GameEffect f = _root;
 
             while (f != null)
             {
-                var n = f.Next;
+                LinkedObject n = f.Next;
 
                 f.Update(totalMS, frameMS);
 
@@ -166,7 +166,7 @@ namespace ClassicUO.Game.Managers
         {
             while (_root != null)
             {
-                var n = _root.Next;
+                LinkedObject n = _root.Next;
 
                 foreach (GameEffect child in _root.Children)
                 {

@@ -70,7 +70,7 @@ namespace ClassicUO.Network
 
         private void OnPacket(object sender, Packet p)
         {
-            var handler = _handlers[p.ID];
+            Action<Packet> handler = _handlers[p.ID];
 
             if (handler != null)
             {
@@ -1022,7 +1022,7 @@ namespace ClassicUO.Network
                 {
                     Item item = vendor.FindItemByLayer(layer);
 
-                    var first = item.Items;
+                    LinkedObject first = item.Items;
 
                     if (first == null)
                     {
@@ -1763,11 +1763,11 @@ namespace ClassicUO.Network
 
         private static void SetWeather(Packet p)
         {
-            var scene = Client.Game.GetScene<GameScene>();
+            GameScene scene = Client.Game.GetScene<GameScene>();
             if (scene == null)
                 return;
 
-            var weather = scene.Weather;
+            Weather weather = scene.Weather;
             byte type = p.ReadByte();
 
             if (weather.CurrentWeather != type) 
@@ -1834,16 +1834,16 @@ namespace ClassicUO.Network
             if (!World.InGame)
                 return;
             
-            var serial = p.ReadUInt();
-            var pageCnt = p.ReadUShort();
+            uint serial = p.ReadUInt();
+            ushort pageCnt = p.ReadUShort();
 
-            var gump = UIManager.GetGump<ModernBookGump>(serial);
+            ModernBookGump gump = UIManager.GetGump<ModernBookGump>(serial);
 
             if (gump == null || gump.IsDisposed)
                 return;
             for (int i = 0; i < pageCnt; i++)
             {
-                var pageNum = p.ReadUShort() - 1;
+                int pageNum = p.ReadUShort() - 1;
 
                 if (!gump.IsEditable)//other pages are blank
                 {
@@ -1867,7 +1867,7 @@ namespace ClassicUO.Network
                 }
                 if (pageNum < pageCnt && pageNum >= 0)
                 {
-                    var lineCnt = p.ReadUShort();
+                    ushort lineCnt = p.ReadUShort();
 
                     for (int line = 0; line < lineCnt; line++)
                     {
@@ -2059,7 +2059,7 @@ namespace ClassicUO.Network
                                 }
                             }
 
-                            var msg = sb.ToString();
+                            string msg = sb.ToString();
                             byte variant = (byte) (1 + (poster == World.Player.Name ? 1 : 0));
                             UIManager.Add(new BulletinBoardItem(boardSerial, serial, poster, subject, dataTime, msg.TrimStart(), variant)
                             { X = 40, Y = 40 });
@@ -2117,7 +2117,7 @@ namespace ClassicUO.Network
             {
                 byte count = p.ReadByte();
 
-                var first = container.Items;
+                LinkedObject first = container.Items;
                 if (first == null)
                     return;
 
@@ -2277,11 +2277,11 @@ namespace ClassicUO.Network
 
             if (!obj.IsEmpty)
             {
-                var o = obj.Items;
+                LinkedObject o = obj.Items;
 
                 while (o != null)
                 {
-                    var next = o.Next;
+                    LinkedObject next = o.Next;
                     Item it = (Item) o;
 
                     if (!it.Opened && it.Layer != Layer.Backpack)
@@ -2464,7 +2464,7 @@ namespace ClassicUO.Network
 
             mobile.Title = text;
 
-            var paperdoll = UIManager.GetGump<PaperDollGump>(mobile);
+            PaperDollGump paperdoll = UIManager.GetGump<PaperDollGump>(mobile);
 
             if (paperdoll == null)
             {
@@ -2474,7 +2474,7 @@ namespace ClassicUO.Network
             }
             else
             {
-                var old = paperdoll.CanLift;
+                bool old = paperdoll.CanLift;
                 bool newLift = (flags & 0x02) != 0;
 
                 paperdoll.CanLift = newLift;
@@ -2651,14 +2651,14 @@ namespace ClassicUO.Network
             if (World.Player == null)
                 return;
 
-            var allowGround = p.ReadBool();
-            var targID = p.ReadUInt();
-            var flags = p.ReadByte();
+            bool allowGround = p.ReadBool();
+            uint targID = p.ReadUInt();
+            byte flags = p.ReadByte();
             p.Seek(18);
-            var multiID = p.ReadUShort();
-            var xOff = p.ReadUShort();
-            var yOff = p.ReadUShort();
-            var zOff = p.ReadUShort();
+            ushort multiID = p.ReadUShort();
+            ushort xOff = p.ReadUShort();
+            ushort yOff = p.ReadUShort();
+            ushort zOff = p.ReadUShort();
             ushort hue = p.ReadUShort();
             TargetManager.SetTargetingMulti(targID, multiID, xOff, yOff, zOff, hue);
         }
@@ -2810,7 +2810,7 @@ namespace ClassicUO.Network
 
         private static void AttackCharacter(Packet p)
         {
-            var serial = p.ReadUInt();
+            uint serial = p.ReadUInt();
 
             if (TargetManager.LastAttack != serial && World.InGame)
             {
@@ -2981,7 +2981,7 @@ namespace ClassicUO.Network
 
             string[] lines = new string[textLinesCount];
 
-            ref var buffer = ref p.ToArray();
+            ref byte[] buffer = ref p.ToArray();
 
             for (int i = 0, index = p.Position; i < textLinesCount; i++)
             {
@@ -3158,16 +3158,16 @@ namespace ClassicUO.Network
 
         private static void DisplayQuestArrow(Packet p)
         {
-            var display = p.ReadBool();
-            var mx = p.ReadUShort();
-            var my = p.ReadUShort();
+            bool display = p.ReadBool();
+            ushort mx = p.ReadUShort();
+            ushort my = p.ReadUShort();
 
             uint serial = 0;
 
             if (Client.Version >= Data.ClientVersion.CV_7090)
                 serial = p.ReadUInt();
 
-            var arrow = UIManager.GetGump<QuestArrowGump>(serial);
+            QuestArrowGump arrow = UIManager.GetGump<QuestArrowGump>(serial);
 
             if (display)
             {
@@ -3259,11 +3259,11 @@ namespace ClassicUO.Network
                     int button = (int) p.ReadUInt();
 
 
-                    var first = UIManager.Gumps.First;
+                    LinkedListNode<Control> first = UIManager.Gumps.First;
 
                     while (first != null)
                     {
-                        var nextGump = first.Next;
+                        LinkedListNode<Control> nextGump = first.Next;
 
                         if (first.Value.ServerSerial == ser && first.Value.IsFromServer)
                         {
@@ -3679,7 +3679,7 @@ namespace ClassicUO.Network
                     ushort spell = p.ReadUShort();
                     bool active = p.ReadBool();
 
-                    var g = UIManager.GetGump<UseSpellButtonGump>(spell);
+                    UseSpellButtonGump g = UIManager.GetGump<UseSpellButtonGump>(spell);
 
                     if (g != null)
                     {
@@ -3770,7 +3770,7 @@ namespace ClassicUO.Network
             
             if (cliloc == 1008092 || cliloc == 1005445) // value for "You notify them you don't want to join the party" || "You have been added to the party"
             {
-                for (var g = UIManager.Gumps.Last; g != null; g = g.Previous)
+                for (LinkedListNode<Control> g = UIManager.Gumps.Last; g != null; g = g.Previous)
                 {
                     if (g.Value is PartyInviteGump pg)
                     {
@@ -3929,7 +3929,7 @@ namespace ClassicUO.Network
 
                 for (int i = 0; i < list.Count; i++)
                 {
-                    var tempstr = list[i];
+                    string tempstr = list[i];
 
                     if (tempstr == str)
                     {
@@ -4113,7 +4113,7 @@ namespace ClassicUO.Network
             if (foundation == null)
                 return;
 
-            var multi = foundation.MultiInfo;
+            Rectangle? multi = foundation.MultiInfo;
 
             if (!foundation.IsMulti || multi == null)
                 return;
@@ -4208,7 +4208,7 @@ namespace ClassicUO.Network
             byte[] decData = new byte[dlen];
             string layout;
 
-            ref var buffer = ref p.ToArray();
+            ref byte[] buffer = ref p.ToArray();
 
             unsafe
             {
@@ -4549,7 +4549,7 @@ namespace ClassicUO.Network
                 multi.Z = (sbyte) z;
                 multi.AddToTile();
                 multi.UpdateScreenPosition();
-                if (World.HouseManager.TryGetHouse(serial, out var house))
+                if (World.HouseManager.TryGetHouse(serial, out House house))
                 {
                     house.Generate(true, true, true);
                 }
@@ -4745,7 +4745,7 @@ namespace ClassicUO.Network
                         
                         if (ProfileManager.Current.GridLootType > 0)
                         {
-                            var grid_gump = UIManager.GetGump<GridLootGump>(containerSerial);
+                            GridLootGump grid_gump = UIManager.GetGump<GridLootGump>(containerSerial);
 
                             if (grid_gump == null && SerialHelper.IsValid(_requestedGridLoot) && _requestedGridLoot == containerSerial)
                             {
@@ -5052,12 +5052,12 @@ namespace ClassicUO.Network
             if (container == null || container.IsEmpty)
                 return;
 
-            var first = container.Items;
+            LinkedObject first = container.Items;
             LinkedObject new_first = null;
 
             while (first != null)
             {
-                var next = first.Next;
+                LinkedObject next = first.Next;
                 Item it = (Item) first;
 
                 if (remove_unequipped && it.Layer != 0)
@@ -5097,9 +5097,9 @@ namespace ClassicUO.Network
                 x = pos.X;
                 y = pos.Y;
 
-                for (var last = UIManager.Gumps.Last; last != null; last = last.Previous)
+                for (LinkedListNode<Control> last = UIManager.Gumps.Last; last != null; last = last.Previous)
                 {
-                    var g = last.Value;
+                    Control g = last.Value;
 
                     if (!g.IsDisposed && g.LocalSerial == sender && g.ServerSerial == gumpID)
                     {
@@ -5397,7 +5397,7 @@ namespace ClassicUO.Network
                             else
                                  text = ClilocLoader.Instance.GetString(int.Parse(gparams[1]));
 
-                            var last = gump.Children.Count != 0 ? gump.Children[gump.Children.Count - 1] : null;
+                            Control last = gump.Children.Count != 0 ? gump.Children[gump.Children.Count - 1] : null;
 
                             if (last != null)
                             {
@@ -5451,7 +5451,7 @@ namespace ClassicUO.Network
                     bool transparent = false;
                     for (; ii < gump.Children.Count; ii++)
                     {
-                        var child = gump.Children[ii];
+                        Control child = gump.Children[ii];
 
                         if (current_page == 0)
                             current_page = child.Page;
@@ -5476,7 +5476,7 @@ namespace ClassicUO.Network
                 float alpha = trans ? 0.5f : 0;
                 for (int i = 0; i < gump.Children.Count; i++)
                 {
-                    var cc = gump.Children[i];
+                    Control cc = gump.Children[i];
 
                     if (cc is CheckerTrans)
                     {                    

@@ -74,7 +74,7 @@ namespace ClassicUO.Game.UI.Controls
                     else
                         list = p.FindControls<NiceButton>();
 
-                    foreach (var b in list)
+                    foreach (NiceButton b in list)
                         if (b != this && b._groupnumber == _groupnumber)
                             b.IsSelected = false;
                 }
@@ -85,7 +85,7 @@ namespace ClassicUO.Game.UI.Controls
         {
             IEnumerable<NiceButton> list = p is ScrollArea ? p.FindControls<ScrollAreaItem>().SelectMany(s => s.Children.OfType<NiceButton>()) : p.FindControls<NiceButton>();
 
-            foreach (var b in list)
+            foreach (NiceButton b in list)
                 if (b._groupnumber == group && b.IsSelected)
                     return b;
 

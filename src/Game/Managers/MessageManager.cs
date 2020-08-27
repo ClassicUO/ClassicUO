@@ -20,6 +20,7 @@
 #endregion
 
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Text;
@@ -27,6 +28,7 @@ using System.Text;
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
+using ClassicUO.Game.UI.Controls;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Input;
 using ClassicUO.IO.Resources;
@@ -145,9 +147,9 @@ namespace ClassicUO.Game.Managers
                         msg.IsTextGump = true;
                         bool found = false;
 
-                        for (var gump = UIManager.Gumps.Last; gump != null; gump = gump.Previous)
+                        for (LinkedListNode<Control> gump = UIManager.Gumps.Last; gump != null; gump = gump.Previous)
                         {
-                            var g = gump.Value;
+                            Control g = gump.Value;
 
                             if (!g.IsDisposed)
                             {

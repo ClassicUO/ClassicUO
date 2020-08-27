@@ -106,7 +106,7 @@ namespace ClassicUO.Game.Managers
             {
                 MinHouseZ = foundation.Z + 7;
 
-                var multi = foundation.MultiInfo;
+                Rectangle? multi = foundation.MultiInfo;
 
                 if (multi != null)
                 {
@@ -140,7 +140,7 @@ namespace ClassicUO.Game.Managers
         {
             Item foundationItem = World.Items.Get(Serial);
 
-            if (foundationItem != null && World.HouseManager.TryGetHouse(Serial, out var house))
+            if (foundationItem != null && World.HouseManager.TryGetHouse(Serial, out House house))
             {
                 house.ClearCustomHouseComponents(CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_GENERIC_INTERNAL);
 
@@ -177,7 +177,7 @@ namespace ClassicUO.Game.Managers
 
                     (int floorCheck1, int floorCheck2) = SeekGraphicInCustomHouseObjectList(Floors, item.Graphic);
 
-                    var state = item.State;
+                    CUSTOM_HOUSE_MULTI_OBJECT_FLAGS state = item.State;
 
                     if (floorCheck1 != -1 && floorCheck2 != -1)
                     {
@@ -260,7 +260,7 @@ namespace ClassicUO.Game.Managers
                 {
                     for (int y = StartPos.Y + 1; y < EndPos.Y; y++)
                     {
-                        var multi = house.Components.Where(s => s.X == x && s.Y == y);
+                        IEnumerable<Multi> multi = house.Components.Where(s => s.X == x && s.Y == y);
 
                         if (multi == null)
                             continue;
@@ -287,7 +287,7 @@ namespace ClassicUO.Game.Managers
 
                         if (floorMulti != null && floorCustomMulti == null)
                         {
-                            var mo = house.Add(floorMulti.Graphic, 0, x - foundationItem.X, y - foundationItem.Y, (sbyte) z, true);
+                            Multi mo = house.Add(floorMulti.Graphic, 0, x - foundationItem.X, y - foundationItem.Y, (sbyte) z, true);
                             mo.AlphaHue = 0xFF;
 
                             CUSTOM_HOUSE_MULTI_OBJECT_FLAGS state = CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FLOOR;
@@ -320,7 +320,7 @@ namespace ClassicUO.Game.Managers
                         {
                             for (int y = StartPos.Y; y < EndPos.Y + 1; y++)
                             {
-                                var multi = house.GetMultiAt(x, y);
+                                IEnumerable<Multi> multi = house.GetMultiAt(x, y);
 
                                 if (multi == null)
                                     continue;
@@ -369,7 +369,7 @@ namespace ClassicUO.Game.Managers
                         {
                             foreach (Point point in validatedFloors)
                             {
-                                var multi = house.GetMultiAt(point.X, point.Y);
+                                IEnumerable<Multi> multi = house.GetMultiAt(point.X, point.Y);
 
                                 if (multi == null)
                                     continue;
@@ -389,7 +389,7 @@ namespace ClassicUO.Game.Managers
 
                                 for (int y = StartPos.Y; y < EndPos.Y + 1; y++)
                                 {
-                                    var multi = house.GetMultiAt(x, y);
+                                    IEnumerable<Multi> multi = house.GetMultiAt(x, y);
 
                                     if (multi == null)
                                         continue;
@@ -414,7 +414,7 @@ namespace ClassicUO.Game.Managers
 
                                 for (int y = EndPos.Y; y >= StartPos.Y; y--)
                                 {
-                                    var multi = house.GetMultiAt(x, y);
+                                    IEnumerable<Multi> multi = house.GetMultiAt(x, y);
                                     if (multi == null)
                                         continue;
 
@@ -438,7 +438,7 @@ namespace ClassicUO.Game.Managers
 
                                 for (int y = minY; y < maxY; y++)
                                 {
-                                    var multi = house.GetMultiAt(x, y);
+                                    IEnumerable<Multi> multi = house.GetMultiAt(x, y);
                                     if (multi == null)
                                         continue;
 
@@ -461,7 +461,7 @@ namespace ClassicUO.Game.Managers
 
                                 for (int x = StartPos.X; x < EndPos.X + 1; x++)
                                 {
-                                    var multi = house.GetMultiAt(x, y);
+                                    IEnumerable<Multi> multi = house.GetMultiAt(x, y);
                                     if (multi == null)
                                         continue;
 
@@ -485,7 +485,7 @@ namespace ClassicUO.Game.Managers
 
                                 for (int x = EndPos.X; x >= StartPos.X; x--)
                                 {
-                                    var multi = house.GetMultiAt(x, y);
+                                    IEnumerable<Multi> multi = house.GetMultiAt(x, y);
                                     if (multi == null)
                                         continue;
 
@@ -509,7 +509,7 @@ namespace ClassicUO.Game.Managers
 
                                 for (int x = minX; x < maxX; x++)
                                 {
-                                    var multi = house.GetMultiAt(x, y);
+                                    IEnumerable<Multi> multi = house.GetMultiAt(x, y);
                                     if (multi == null)
                                         continue;
 
@@ -545,7 +545,7 @@ namespace ClassicUO.Game.Managers
                                 tempColor++;
                             }
 
-                            var mo = house.Add(0x0496, tempColor, x - foundationItem.X, y - foundationItem.Y, (sbyte) z, true);
+                            Multi mo = house.Add(0x0496, tempColor, x - foundationItem.X, y - foundationItem.Y, (sbyte) z, true);
 
                             mo.AlphaHue = 0xFF;
                             mo.State = CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_GENERIC_INTERNAL | CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_TRANSPARENT;
@@ -565,7 +565,7 @@ namespace ClassicUO.Game.Managers
             {
                 int zOffset = 0;
 
-                var gump = UIManager.GetGump<HouseCustomizationGump>(Serial);
+                HouseCustomizationGump gump = UIManager.GetGump<HouseCustomizationGump>(Serial);
 
                 if (CurrentFloor == 1)
                 {
@@ -581,7 +581,7 @@ namespace ClassicUO.Game.Managers
                 {
                     Item foundationItem = World.Items.Get(Serial);
 
-                    if (foundationItem == null || !World.HouseManager.TryGetHouse(Serial, out var house))
+                    if (foundationItem == null || !World.HouseManager.TryGetHouse(Serial, out House house))
                         return;
 
                     if (Erasing)
@@ -589,9 +589,9 @@ namespace ClassicUO.Game.Managers
                         if (!(place is Multi))
                             return;
 
-                        if (CanEraseHere(place, out var type))
+                        if (CanEraseHere(place, out CUSTOM_HOUSE_BUILD_TYPE type))
                         {
-                            var multi = house.GetMultiAt(place.X, place.Y);
+                            IEnumerable<Multi> multi = house.GetMultiAt(place.X, place.Y);
 
                             if (multi == null || !multi.Any())
                                 return;
@@ -619,7 +619,7 @@ namespace ClassicUO.Game.Managers
                     {
                         CustomBuildObject[] list = new CustomBuildObject[10];
 
-                        if (CanBuildHere(list, out var type) && list.Length != 0)
+                        if (CanBuildHere(list, out CUSTOM_HOUSE_BUILD_TYPE type) && list.Length != 0)
                         {
                             //if (type != CUSTOM_HOUSE_BUILD_TYPE.CHBT_STAIR && !(place is Multi))
                             //    return;
@@ -631,7 +631,7 @@ namespace ClassicUO.Game.Managers
                             {
                                 if (gump.Page >= 0 && gump.Page < Stairs.Count)
                                 {
-                                    var stair = Stairs[gump.Page];
+                                    CustomHouseStair stair = Stairs[gump.Page];
 
                                     ushort graphic = 0;
 
@@ -660,11 +660,11 @@ namespace ClassicUO.Game.Managers
                             }
                             else
                             {
-                                var item = list[0];
+                                CustomBuildObject item = list[0];
 
                                 int x = placeX - foundationItem.X + item.X;
                                 int y = placeY - foundationItem.Y + item.Y;
-                                var multi = house.GetMultiAt(placeX + item.X, placeY + item.Y);
+                                IEnumerable<Multi> multi = house.GetMultiAt(placeX + item.X, placeY + item.Y);
 
                                 if (multi.Any() || type == CUSTOM_HOUSE_BUILD_TYPE.CHBT_STAIR)
                                 {
@@ -774,7 +774,7 @@ namespace ClassicUO.Game.Managers
             if (res1 != -1 && res2 != -1)
             {
                 State = state;
-                var gump = UIManager.GetGump<HouseCustomizationGump>(Serial);
+                HouseCustomizationGump gump = UIManager.GetGump<HouseCustomizationGump>(Serial);
 
                 if (State == CUSTOM_HOUSE_GUMP_STATE.CHGS_WALL ||
                     State == CUSTOM_HOUSE_GUMP_STATE.CHGS_ROOF ||
@@ -833,7 +833,7 @@ namespace ClassicUO.Game.Managers
                     return false;
                 }
 
-                var item = Stairs[res1];
+                CustomHouseStair item = Stairs[res1];
 
                 //if (StairMultis.Count == 0)
                 {
@@ -1159,7 +1159,7 @@ namespace ClassicUO.Game.Managers
                 Rectangle rect = new Rectangle(StartPos.X + boundsOffset, StartPos.Y + boundsOffset, EndPos.X, EndPos.Y);
 
 
-                foreach (var item in list)
+                foreach (CustomBuildObject item in list)
                 {
                     if (type == CUSTOM_HOUSE_BUILD_TYPE.CHBT_STAIR)
                     {
@@ -1198,7 +1198,7 @@ namespace ClassicUO.Game.Managers
                         return false;
                     }
 
-                    if (type != CUSTOM_HOUSE_BUILD_TYPE.CHBT_FLOOR && foundationItem != null && World.HouseManager.TryGetHouse(Serial, out var house))
+                    if (type != CUSTOM_HOUSE_BUILD_TYPE.CHBT_FLOOR && foundationItem != null && World.HouseManager.TryGetHouse(Serial, out House house))
                     {
                         //var multi = house.GetMultiAt(gobj.X + item.X, gobj.Y + item.Y);
 
@@ -1356,7 +1356,7 @@ namespace ClassicUO.Game.Managers
 
             if (infoCheck1 != -1 && infoCheck2 != -1)
             {
-                var info = ObjectsInfo[infoCheck1];
+                CustomHousePlaceInfo info = ObjectsInfo[infoCheck1];
 
                 if (info.CanGoW == 0 && x == StartPos.X)
                     return false;
@@ -1373,7 +1373,7 @@ namespace ClassicUO.Game.Managers
 
         public bool ValidateItemPlace(Item foundationItem, Multi item, int minZ, int maxZ, List<Point> validatedFloors)
         {
-            if (item == null || !World.HouseManager.TryGetHouse(foundationItem, out var house) || !item.IsCustom)
+            if (item == null || !World.HouseManager.TryGetHouse(foundationItem, out House house) || !item.IsCustom)
                 return true;
 
             if ((item.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FLOOR) != 0)
@@ -1467,7 +1467,7 @@ namespace ClassicUO.Game.Managers
 
             if (infoCheck1 != -1 && infoCheck2 != -1)
             {
-                var info = ObjectsInfo[infoCheck1];
+                CustomHousePlaceInfo info = ObjectsInfo[infoCheck1];
 
                 if (info.CanGoW == 0 && item.X == StartPos.X)
                     return false;
@@ -1580,7 +1580,7 @@ namespace ClassicUO.Game.Managers
 
                     if (info1 != -1 && info2 != -1)
                     {
-                        var info = ObjectsInfo[info1];
+                        CustomHousePlaceInfo info = ObjectsInfo[info1];
 
                         if ((flags & (int) CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_DIRECT_SUPPORT) != 0)
                         {
@@ -1725,7 +1725,7 @@ namespace ClassicUO.Game.Managers
 
                         bool found = false;
 
-                        foreach (var c in list)
+                        foreach (U c in list)
                         {
                             if (c.Index == item.Category)
                             {

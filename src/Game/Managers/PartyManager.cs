@@ -23,6 +23,7 @@ using System;
 
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
+using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Network;
 
@@ -180,7 +181,7 @@ namespace ClassicUO.Game.Managers
         {
             for (int i = 0; i < PARTY_SIZE; i++)
             {
-                var mem = Members[i];
+                PartyMember mem = Members[i];
                 if (mem != null && mem.Serial == serial)
                     return true;
             }
@@ -212,7 +213,7 @@ namespace ClassicUO.Game.Managers
         {
             get
             {
-                var mobile = World.Mobiles.Get(Serial);
+                Mobile mobile = World.Mobiles.Get(Serial);
 
                 if (mobile != null)
                 {

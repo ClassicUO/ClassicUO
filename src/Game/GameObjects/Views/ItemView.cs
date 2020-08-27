@@ -26,6 +26,7 @@ using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
+using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
@@ -141,11 +142,11 @@ namespace ClassicUO.Game.GameObjects
             if (SelectedObject.Object == this || TargetManager.TargetingState == CursorTarget.MultiPlacement)
                 return false;
 
-            var texture = ArtLoader.Instance.GetTexture(graphic);
+            ArtTexture texture = ArtLoader.Instance.GetTexture(graphic);
 
             if (texture != null)
             {
-                ref var index = ref ArtLoader.Instance.GetValidRefEntry(graphic + 0x4000);
+                ref UOFileIndex index = ref ArtLoader.Instance.GetValidRefEntry(graphic + 0x4000);
 
                 posX -= index.Width;
                 posY -= index.Height;
@@ -242,7 +243,7 @@ namespace ClassicUO.Game.GameObjects
             if (color == 0)
                 color = newHue;
 
-            var direction = gr.Direction[AnimationsLoader.Instance.Direction];
+            AnimationDirection direction = gr.Direction[AnimationsLoader.Instance.Direction];
 
             if (direction == null)
                 return;

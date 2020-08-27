@@ -168,7 +168,7 @@ namespace ClassicUO.Game.UI.Gumps
             int line = 1;
             int row = 0;
 
-            for (var i = _corpse.Items; i != null; i = i.Next)
+            for (LinkedObject i = _corpse.Items; i != null; i = i.Next)
             {
                 Item it = (Item) i;
 

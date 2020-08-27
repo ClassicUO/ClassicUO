@@ -347,7 +347,7 @@ namespace ClassicUO.Utility.Platforms
                     case UOAMessage.ADD_CMD:
 
                     {
-                        var sb = new StringBuilder(256);
+                        StringBuilder sb = new StringBuilder(256);
 
                         if (GlobalGetAtomName((ushort) lParam, sb, 256) == 0)
                             return 0;

@@ -90,7 +90,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                     _picBase.Graphic = value ? (ushort) 0x7EE : (ushort) (0x07d0 + (LocalSerial == World.Player ? 0 : 1)) ;
 
-                    foreach (var c in Children)
+                    foreach (Control c in Children)
                     {
                         c.IsVisible = !value;
                     }
@@ -318,7 +318,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             if (args.Button == MouseButtonType.Left)
             {
-                var party = UIManager.GetGump<PartyGump>();
+                PartyGump party = UIManager.GetGump<PartyGump>();
 
                 if (party == null)
                 {
@@ -432,7 +432,7 @@ namespace ClassicUO.Game.UI.Gumps
                     }
                     else if (!DelayedObjectClickManager.IsEnabled)
                     {
-                        var off = Mouse.LDroppedOffset;
+                        Point off = Mouse.LDroppedOffset;
                         DelayedObjectClickManager.Set(
                             item.Serial,
                           (Mouse.Position.X - off.X) - ScreenCoordinateX,

@@ -117,23 +117,23 @@ namespace ClassicUO.IO
                     continue;
                 }
 
-                var comment = line.IndexOf('#');
+                int comment = line.IndexOf('#');
 
                 if (comment >= 0)
                 {
                     line = line.Substring(0, comment);
                 }
 
-                var groupStart = line.IndexOf('{');
-                var groupEnd = line.IndexOf('}');
+                int groupStart = line.IndexOf('{');
+                int groupEnd = line.IndexOf('}');
 
                 string[] p;
 
                 if (groupStart >= 0 && groupEnd >= 0)
                 {
-                    var firstPart = line.Substring(0, groupStart).Split(_tokens, StringSplitOptions.RemoveEmptyEntries);
-                    var group = line.Substring(groupStart, groupEnd - groupStart + 1);
-                    var lastPart = line.Substring(groupEnd + 1, line.Length - groupEnd - 1).Split(_tokens, StringSplitOptions.RemoveEmptyEntries);
+                    string[] firstPart = line.Substring(0, groupStart).Split(_tokens, StringSplitOptions.RemoveEmptyEntries);
+                    string group = line.Substring(groupStart, groupEnd - groupStart + 1);
+                    string[] lastPart = line.Substring(groupEnd + 1, line.Length - groupEnd - 1).Split(_tokens, StringSplitOptions.RemoveEmptyEntries);
 
                     p = firstPart.Concat(new[] {group}).Concat(lastPart).ToArray();
                 }
@@ -163,7 +163,7 @@ namespace ClassicUO.IO
 
         private string TokenAt(int line, int index)
         {
-            var p = GetTokensAtLine(line);
+            string[] p = GetTokensAtLine(line);
 
             if (index >= p.Length || index < 0)
             {
@@ -181,7 +181,7 @@ namespace ClassicUO.IO
 
         public int ReadGroupInt(int index = 0)
         {
-            if (!TryReadGroup(TokenAt(Line, Position++), out var group))
+            if (!TryReadGroup(TokenAt(Line, Position++), out string[] group))
             {
                 throw new Exception("It's not a group");
             }
@@ -196,7 +196,7 @@ namespace ClassicUO.IO
 
         public int[] ReadGroup()
         {
-            var s = TokenAt(Line, Position++);
+            string s = TokenAt(Line, Position++);
 
             if (s.Length > 0)
             {
@@ -204,22 +204,22 @@ namespace ClassicUO.IO
                 {
                     if (s[s.Length - 1] == '}')
                     {
-                        var results = new List<int>();
+                        List<int> results = new List<int>();
 
-                        var splitRes = s.Split(_tokensGroup, StringSplitOptions.RemoveEmptyEntries);
+                        string[] splitRes = s.Split(_tokensGroup, StringSplitOptions.RemoveEmptyEntries);
 
-                        for (var i = 0; i < splitRes.Length; i++)
+                        for (int i = 0; i < splitRes.Length; i++)
                         {
                             if (!string.IsNullOrEmpty(splitRes[i]) && char.IsNumber(splitRes[i][0]))
                             {
-                                var style = NumberStyles.Any;
+                                NumberStyles style = NumberStyles.Any;
 
                                 if (splitRes[i].Length > 1 && splitRes[i][0] == '0' && splitRes[i][1] == 'x')
                                 {
                                     style = NumberStyles.HexNumber;
                                 }
 
-                                if (int.TryParse(splitRes[i], style, null, out var res))
+                                if (int.TryParse(splitRes[i], style, null, out int res))
                                 {
                                     results.Add(res);
                                 }
@@ -258,7 +258,7 @@ namespace ClassicUO.IO
 
         private int ReadInt(int line, int index)
         {
-            var token = TokenAt(line, index);
+            string token = TokenAt(line, index);
 
             if (!string.IsNullOrEmpty(token))
             {

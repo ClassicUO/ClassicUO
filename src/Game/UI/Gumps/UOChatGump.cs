@@ -68,7 +68,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             int BORDER_SIZE = 4;
 
-            var border = new BorderControl(0, text.Y + text.Height, Width, 27, BORDER_SIZE);
+            BorderControl border = new BorderControl(0, text.Y + text.Height, Width, 27, BORDER_SIZE);
             Add(border);
 
             text = new Label("Name:", true, 0x033, 0, 3)
@@ -167,9 +167,9 @@ namespace ClassicUO.Game.UI.Gumps
                 ScrollbarBehaviour = ScrollbarBehaviour.ShowAlways
             };
 
-            foreach (var k in UOChatManager.Channels)
+            foreach (KeyValuePair<string, UOChatChannel> k in UOChatManager.Channels)
             {
-                var chan = new ChannelListItemControl(k.Key, 195);
+                ChannelListItemControl chan = new ChannelListItemControl(k.Key, 195);
                 _area.Add(chan);
                 _channelList.Add(chan);
             }
@@ -277,9 +277,9 @@ namespace ClassicUO.Game.UI.Gumps
 
             _channelList.Clear();
 
-            foreach (var k in UOChatManager.Channels)
+            foreach (KeyValuePair<string, UOChatChannel> k in UOChatManager.Channels)
             {
-                var c = new ChannelListItemControl(k.Key, 195);
+                ChannelListItemControl c = new ChannelListItemControl(k.Key, 195);
                 _area.Add(c);
                 _channelList.Add(c);
             }

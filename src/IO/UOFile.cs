@@ -49,7 +49,7 @@ namespace ClassicUO.IO
         {
             Log.Trace( $"Loading file:\t\t{FilePath}");
 
-            var fileInfo = new FileInfo(FilePath);
+            FileInfo fileInfo = new FileInfo(FilePath);
             if (!fileInfo.Exists)
             {
                 Log.Error( $"{FilePath}  not exists.");
@@ -57,7 +57,7 @@ namespace ClassicUO.IO
                 return;
             }
 
-            var size = fileInfo.Length;
+            long size = fileInfo.Length;
             if (size > 0)
             {
                 _file = MemoryMappedFile.CreateFromFile(File.Open(fileInfo.FullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite), null, 0, MemoryMappedFileAccess.Read, HandleInheritability.None, false);
@@ -100,8 +100,8 @@ namespace ClassicUO.IO
         [MethodImpl(256)]
         internal void Fill(ref byte[] buffer, int count)
         {
-            var ptr = (byte*) PositionAddress;
-            for (var i = 0; i < count; i++)
+            byte* ptr = (byte*) PositionAddress;
+            for (int i = 0; i < count; i++)
             {
                 buffer[i] = ptr[i];
             }
@@ -112,7 +112,7 @@ namespace ClassicUO.IO
         [MethodImpl(256)]
         internal T[] ReadArray<T>(int count) where T : struct
         {
-            var t = ReadArray<T>(Position, count);
+            T[] t = ReadArray<T>(Position, count);
             Position += UnsafeMemoryManager.SizeOf<T>() * count;
 
             return t;
@@ -121,7 +121,7 @@ namespace ClassicUO.IO
         [MethodImpl(256)]
         private T[] ReadArray<T>(long position, int count) where T : struct
         {
-            var array = new T[count];
+            T[] array = new T[count];
             _accessor.ReadArray(position, array, 0, count);
 
             return array;

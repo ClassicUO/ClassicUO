@@ -72,7 +72,7 @@ namespace ClassicUO.Game.UI.Gumps
             Hue = (ushort)(ProfileManager.Current.JournalDarkMode ? DARK_MODE_JOURNAL_HUE : 0);
             darkMode.ValueChanged += (sender, e) =>
             {
-                var ok = ProfileManager.Current.JournalDarkMode = !ProfileManager.Current.JournalDarkMode;
+                bool ok = ProfileManager.Current.JournalDarkMode = !ProfileManager.Current.JournalDarkMode;
                 Hue = (ushort) (ok ? DARK_MODE_JOURNAL_HUE : 0);
             };
 
@@ -177,7 +177,7 @@ namespace ClassicUO.Game.UI.Gumps
                         _gumpPic.X = 160;
                     }
 
-                    foreach (var c in Children)
+                    foreach (Control c in Children)
                     {
                         c.IsVisible = !value;
                     }
@@ -320,9 +320,9 @@ namespace ClassicUO.Game.UI.Gumps
 
                 for (int i = 0; i < _entries.Count; i++)
                 {
-                    var t = _entries[i];
-                    var hour = _hours[i];
-                    var type = _text_types[i];
+                    RenderedText t = _entries[i];
+                    RenderedText hour = _hours[i];
+                    TEXT_TYPE type = _text_types[i];
 
 
                     if (!CanBeDrawn(type))

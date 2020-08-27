@@ -168,9 +168,9 @@ namespace ClassicUO.Network
             WriteByte((byte) character.Dexterity);
             WriteByte((byte) character.Intelligence);
 
-            var skills = character.Skills.OrderByDescending(o => o.Value).Take(skillcount).ToList();
+            List<Skill> skills = character.Skills.OrderByDescending(o => o.Value).Take(skillcount).ToList();
 
-            foreach (var skill in skills)
+            foreach (Skill skill in skills)
             {
                 WriteByte((byte) skill.Index);
                 WriteByte((byte) skill.ValueFixed);
@@ -415,7 +415,7 @@ namespace ClassicUO.Network
     {
         public PUnicodeSpeechRequest(string text, MessageType type, byte font, ushort hue, string lang) : base(0xAD)
         {
-            var entries = SpeechesLoader.Instance.GetKeywords(text);
+            List<SpeechEntry> entries = SpeechesLoader.Instance.GetKeywords(text);
 
             bool encoded = entries != null && entries.Count != 0;
             if(encoded)
@@ -903,15 +903,15 @@ namespace ClassicUO.Network
             WriteUInt(serial);
             WriteUInt(msgserial);
             WriteByte((byte)(subject.Length + 1));
-            var titolo = Encoding.UTF8.GetBytes(subject); 
+            byte[] titolo = Encoding.UTF8.GetBytes(subject); 
             WriteBytes(titolo, 0, titolo.Length);
             WriteByte(0);
-            var splits = _textBox.Split('\n');
-            var numlinee = splits.Length;
+            string[] splits = _textBox.Split('\n');
+            int numlinee = splits.Length;
             WriteByte((byte)numlinee);
-            for (var L = 0; L < numlinee; L++)
+            for (int L = 0; L < numlinee; L++)
             {
-                var buf = Encoding.UTF8.GetBytes(splits[L].Trim());
+                byte[] buf = Encoding.UTF8.GetBytes(splits[L].Trim());
                 WriteByte((byte)(buf.Length + 1));
                 WriteBytes(buf, 0, buf.Length);
                 WriteByte(0);

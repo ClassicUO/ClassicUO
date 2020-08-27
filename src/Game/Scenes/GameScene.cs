@@ -362,7 +362,7 @@ namespace ClassicUO.Game.Scenes
             int testX = obj.X + 1;
             int testY = obj.Y + 1;
 
-            var tile = World.Map.GetTile(testX, testY);
+            GameObject tile = World.Map.GetTile(testX, testY);
 
             if (tile != null)
             {
@@ -386,7 +386,7 @@ namespace ClassicUO.Game.Scenes
 
             if (canBeAdded)
             {
-                ref var light = ref _lights[_lightCount];
+                ref LightData light = ref _lights[_lightCount];
 
                 ushort graphic = lightObject.Graphic;
 
@@ -404,7 +404,7 @@ namespace ClassicUO.Game.Scenes
                         light.ID = 1;
                     else
                     {
-                        ref var data = ref TileDataLoader.Instance.StaticData[obj.Graphic];
+                        ref StaticTiles data = ref TileDataLoader.Instance.StaticData[obj.Graphic];
                         light.ID = data.Layer;
                     }
                 }
@@ -459,8 +459,8 @@ namespace ClassicUO.Game.Scenes
             int minY = _minTile.Y;
             int maxX = _maxTile.X;
             int maxY = _maxTile.Y;
-            var map = World.Map;
-            var use_handles = _useObjectHandles;
+            Map.Map map = World.Map;
+            bool use_handles = _useObjectHandles;
 
             for (int i = 0; i < 2; ++i)
             {
@@ -498,7 +498,7 @@ namespace ClassicUO.Game.Scenes
             {
                 for (int i = 0; i < _foliageCount; i++)
                 {
-                    var f = _foliages[i];
+                    GameObject f = _foliages[i];
 
                     if (f.FoliageIndex == _foliageIndex)
                     {
@@ -542,7 +542,7 @@ namespace ClassicUO.Game.Scenes
 
             if (_forceStopScene)
             {
-                var loginScene = new LoginScene();
+                LoginScene loginScene = new LoginScene();
                 Client.Game.SetScene(loginScene);
                 loginScene.Reconnect = true;
 
@@ -630,7 +630,7 @@ namespace ClassicUO.Game.Scenes
                     int cellX = gobj.X % 8;
                     int cellY = gobj.Y % 8;
 
-                    var o = World.Map.GetChunk(gobj.X, gobj.Y)?.Tiles[cellX, cellY];
+                    GameObject o = World.Map.GetChunk(gobj.X, gobj.Y)?.Tiles[cellX, cellY];
                     if (o != null)
                     {
                         x = o.X;
@@ -659,7 +659,7 @@ namespace ClassicUO.Game.Scenes
                     _multi.UpdateScreenPosition();
                     _multi.CheckGraphicChange();
                     _multi.AddToTile();
-                    World.HouseManager.TryGetHouse(_multi.Serial, out var house);
+                    World.HouseManager.TryGetHouse(_multi.Serial, out House house);
 
                     foreach (Multi s in house.Components)
                     {
@@ -821,7 +821,7 @@ namespace ClassicUO.Game.Scenes
 
             if (!UseAltLights)
             {
-                var lightColor = World.Light.IsometricLevel;
+                float lightColor = World.Light.IsometricLevel;
 
                 if (ProfileManager.Current.UseDarkNights)
                     lightColor -= 0.04f;
@@ -840,7 +840,7 @@ namespace ClassicUO.Game.Scenes
 
             for (int i = 0; i < _lightCount; i++)
             {
-                ref var l = ref _lights[i];
+                ref LightData l = ref _lights[i];
 
                 UOTexture32 texture = LightsLoader.Instance.GetTexture(l.ID);
                 if (texture == null)

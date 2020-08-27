@@ -213,7 +213,7 @@ namespace ClassicUO.Game.Managers
                     writer.WriteLine();
                     writer.WriteLine();
 
-                    foreach (var e in _data)
+                    foreach (KeyValuePair<ushort, ContainerData> e in _data)
                     {
                         writer.WriteLine($"{e.Value.Graphic} {e.Value.OpenSound} {e.Value.ClosedSound} {e.Value.Bounds.X} {e.Value.Bounds.Y} {e.Value.Bounds.Width} {e.Value.Bounds.Height} {e.Value.IconizedGraphic} {e.Value.MinimizerArea.X} {e.Value.MinimizerArea.Y}");
                     }
@@ -226,7 +226,7 @@ namespace ClassicUO.Game.Managers
 
             while (!containersParser.IsEOF())
             {
-                var ss = containersParser.ReadTokens();
+                List<string> ss = containersParser.ReadTokens();
                 if (ss != null && ss.Count != 0)
                 {
                     if (ushort.TryParse(ss[0], out ushort graphic) &&

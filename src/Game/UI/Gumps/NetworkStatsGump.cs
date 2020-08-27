@@ -114,7 +114,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _sb.Append($"Ping: {_ping} ms\n{"In:"} {NetStatistics.GetSizeAdaptive(_deltaBytesReceived),-6} {"Out:"} {NetStatistics.GetSizeAdaptive(_deltaBytesSent),-6}");
 
 
-                var size = Fonts.Bold.MeasureString(_sb.ToString());
+                Vector2 size = Fonts.Bold.MeasureString(_sb.ToString());
 
                 _trans.Width = Width = (int) (size.X + 20);
                 _trans.Height = Height = (int) (size.Y + 20);

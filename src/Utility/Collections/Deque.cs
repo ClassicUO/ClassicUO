@@ -73,8 +73,8 @@ namespace ClassicUO.Utility.Collections
             if (collection == null)
                 throw new ArgumentNullException(nameof(collection));
 
-            var source = CollectionHelper.ReifyCollection(collection);
-            var count = source.Count;
+            IReadOnlyCollection<T> source = CollectionHelper.ReifyCollection(collection);
+            int count = source.Count;
 
             if (count > 0)
             {
@@ -320,7 +320,7 @@ namespace ClassicUO.Utility.Collections
         /// </param>
         private void DoInsertRange(int index, IReadOnlyCollection<T> collection)
         {
-            var collectionCount = collection.Count;
+            int collectionCount = collection.Count;
 
             // Make room in the existing list
             if (index < Count >> 1)
@@ -462,7 +462,7 @@ namespace ClassicUO.Utility.Collections
         public void InsertRange(int index, IEnumerable<T> collection)
         {
             CheckNewIndexArgument(Count, index);
-            var source = CollectionHelper.ReifyCollection(collection);
+            IReadOnlyCollection<T> source = CollectionHelper.ReifyCollection(collection);
             int collectionCount = source.Count;
 
             // Overflow-safe check for "Count + collectionCount > Capacity"
@@ -526,7 +526,7 @@ namespace ClassicUO.Utility.Collections
         /// </summary>
         public T[] ToArray()
         {
-            var result = new T[Count];
+            T[] result = new T[Count];
             ((ICollection<T>) this).CopyTo(result, 0);
 
             return result;
@@ -628,10 +628,10 @@ namespace ClassicUO.Utility.Collections
         /// <returns>The index of <paramref name="item" /> if found in this list; otherwise, -1.</returns>
         public int IndexOf(T item)
         {
-            var comparer = EqualityComparer<T>.Default;
+            EqualityComparer<T> comparer = EqualityComparer<T>.Default;
             int ret = 0;
 
-            foreach (var sourceItem in this)
+            foreach (T sourceItem in this)
             {
                 if (comparer.Equals(item, sourceItem))
                     return ret;
@@ -663,9 +663,9 @@ namespace ClassicUO.Utility.Collections
         /// </returns>
         bool ICollection<T>.Contains(T item)
         {
-            var comparer = EqualityComparer<T>.Default;
+            EqualityComparer<T> comparer = EqualityComparer<T>.Default;
 
-            foreach (var entry in this)
+            foreach (T entry in this)
             {
                 if (comparer.Equals(item, entry))
                     return true;

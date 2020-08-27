@@ -49,7 +49,7 @@ namespace ClassicUO.IO
                 return ref UOFileIndex.Invalid;
             }
 
-            ref var entry = ref Entries[index];
+            ref UOFileIndex entry = ref Entries[index];
 
             if (entry.Offset < 0 || entry.Length <= 0)
             {
@@ -93,15 +93,15 @@ namespace ClassicUO.IO
 
         public override void ClearResources()
         {
-            var first = _usedTextures.First;
+            LinkedListNode<uint> first = _usedTextures.First;
 
             while (first != null)
             {
-                var next = first.Next;
-                var idx = first.Value;
+                LinkedListNode<uint> next = first.Next;
+                uint idx = first.Value;
                 if (idx < Resources.Length)
                 {
-                    ref var texture = ref Resources[idx];
+                    ref T texture = ref Resources[idx];
                     texture?.Dispose();
                     texture = null;
                 }
@@ -120,14 +120,14 @@ namespace ClassicUO.IO
             }
 
             long ticks = Time.Ticks - Constants.CLEAR_TEXTURES_DELAY;
-            var count = 0;
+            int count = 0;
 
-            var first = _usedTextures.First;
+            LinkedListNode<uint> first = _usedTextures.First;
 
             while (first != null)
             {
-                var next = first.Next;
-                var idx = first.Value;
+                LinkedListNode<uint> next = first.Next;
+                uint idx = first.Value;
 
                 if (idx < resourceCache.Length && resourceCache[idx] != null)
                 {
