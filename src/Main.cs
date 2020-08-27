@@ -1,4 +1,4 @@
-﻿#region license
+#region license
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -40,7 +40,7 @@ using SDL2;
 
 namespace ClassicUO
 {
-    static class Bootstrap
+    internal static class Bootstrap
     {
         [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
