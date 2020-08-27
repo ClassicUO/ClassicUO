@@ -330,7 +330,7 @@ namespace ClassicUO.Configuration
 
                 for (int i = 0; i < gumps.Count; i++)
                 {
-                    var gump = gumps[i];
+                    Gump gump = gumps[i];
 
                     if (gump.IsDisposed)
                         continue;

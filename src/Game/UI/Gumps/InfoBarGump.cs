@@ -68,7 +68,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             for (int i = 0; i < infoBarItems.Count; i++)
             {
-                var info = new InfoBarControl(infoBarItems[i].label, infoBarItems[i].var, infoBarItems[i].hue);
+                InfoBarControl info = new InfoBarControl(infoBarItems[i].label, infoBarItems[i].var, infoBarItems[i].hue);
                 _infobarControls.Add(info);
                 Add(info);
             }

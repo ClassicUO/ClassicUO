@@ -119,11 +119,11 @@ namespace ClassicUO.IO.Resources
             if (g >= Resources.Length)
                 return null;
 
-            ref var texture = ref Resources[g];
+            ref UOTexture32 texture = ref Resources[g];
 
             if (texture == null || texture.IsDisposed)
             {
-                var pixels = GetGumpPixels(g, out int w, out int h);
+                uint[] pixels = GetGumpPixels(g, out int w, out int h);
 
                 if (pixels == null || pixels.Length == 0)
                     return null;
@@ -143,7 +143,7 @@ namespace ClassicUO.IO.Resources
 
         public unsafe uint[] GetGumpPixels(uint index, out int width, out int height)
         {
-            ref var entry = ref GetValidRefEntry((int) index);
+            ref UOFileIndex entry = ref GetValidRefEntry((int) index);
 
             if (entry.Width <= 0 && entry.Height <= 0)
             {

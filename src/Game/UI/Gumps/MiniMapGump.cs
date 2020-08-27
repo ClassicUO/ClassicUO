@@ -240,7 +240,7 @@ namespace ClassicUO.Game.UI.Gumps
                 minBlockY = 0;
             int maxBlockIndex = World.Map.BlocksCount;
             int mapBlockHeight = MapLoader.Instance.MapBlocksSize[World.MapIndex, 1];
-            var data = GumpsLoader.Instance.GetGumpPixels(_useLargeMap ? (uint) 5011 : 5010, out _, out _);
+            uint[] data = GumpsLoader.Instance.GetGumpPixels(_useLargeMap ? (uint) 5011 : 5010, out _, out _);
 
             Point[] table = new Point[2]
             {

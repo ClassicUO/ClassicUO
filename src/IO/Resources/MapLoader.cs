@@ -253,7 +253,7 @@ namespace ClassicUO.IO.Resources
                     }
                 }
 
-                ref var data = ref BlockData[i][block];
+                ref IndexMap data = ref BlockData[i][block];
                 data.MapAddress = realmapaddress;
                 data.StaticAddress = realstaticaddress;
                 data.StaticCount = realstaticcount;
@@ -319,8 +319,8 @@ namespace ClassicUO.IO.Resources
 
                 if (mapPatchesCount != 0)
                 {
-                    var difl = _mapDifl[i];
-                    var dif = _mapDif[i];
+                    UOFileMul difl = _mapDifl[i];
+                    UOFileMul dif = _mapDif[i];
 
                     if (difl == null || dif == null || difl.Length == 0 || dif.Length == 0)
                         continue;
@@ -346,8 +346,8 @@ namespace ClassicUO.IO.Resources
 
                 if (staticPatchesCount != 0)
                 {
-                    var difl = _staDifl[i];
-                    var difi = _staDifi[i];
+                    UOFileMul difl = _staDifl[i];
+                    UOFileMul difi = _staDifi[i];
 
                     if (difl == null || difi == null || _staDif[i] == null || difl.Length == 0 || difi.Length == 0 || _staDif[i].Length == 0)
                         continue;
@@ -402,7 +402,7 @@ namespace ClassicUO.IO.Resources
         {
             for (int i = 0; i < Constants.MAPS_COUNT; i++)
             {
-                var list = BlockData[i];
+                IndexMap[] list = BlockData[i];
 
                 if (list == null)
                     continue;

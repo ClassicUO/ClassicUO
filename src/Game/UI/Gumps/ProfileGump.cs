@@ -24,6 +24,7 @@ using System;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.IO.Resources;
 using ClassicUO.Network;
+using ClassicUO.Renderer;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -119,7 +120,7 @@ namespace ClassicUO.Game.UI.Gumps
                         _gumpPic.X = 143;
                     }
 
-                    foreach (var c in Children)
+                    foreach (Control c in Children)
                     {
                         c.IsVisible = !value;
                     }
@@ -176,9 +177,9 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void AddHorizontalBar(ScrollArea area, ushort start, int x, int width)
         {
-            var startBounds = GumpsLoader.Instance.GetTexture(start);
-            var middleBounds = GumpsLoader.Instance.GetTexture((ushort) (start + 1));
-            var endBounds = GumpsLoader.Instance.GetTexture((ushort) (start + 2));
+            UOTexture32 startBounds = GumpsLoader.Instance.GetTexture(start);
+            UOTexture32 middleBounds = GumpsLoader.Instance.GetTexture((ushort) (start + 1));
+            UOTexture32 endBounds = GumpsLoader.Instance.GetTexture((ushort) (start + 2));
 
             PrivateContainer container = new PrivateContainer();
 

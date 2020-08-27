@@ -59,7 +59,7 @@ namespace ClassicUO.IO.Resources
             if (id >= Resources.Length)
                 return null;
 
-            ref var texture = ref Resources[id];
+            ref UOTexture32 texture = ref Resources[id];
 
             if (texture == null || texture.IsDisposed)
             {
@@ -84,7 +84,7 @@ namespace ClassicUO.IO.Resources
 
         private uint[] GetLight(uint idx, out int width, out int height)
         {
-            ref var entry = ref GetValidRefEntry((int) idx);
+            ref UOFileIndex entry = ref GetValidRefEntry((int) idx);
 
             width = entry.Width;
             height = entry.Height;

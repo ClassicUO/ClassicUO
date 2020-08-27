@@ -23,11 +23,11 @@ namespace StbTextEditSharp
 			{
 				if (undo_rec[0].char_storage >= 0)
 				{
-					var n = undo_rec[0].insert_length;
+					int n = undo_rec[0].insert_length;
 					undo_char_point -= n;
 
 					Array.Copy(undo_char, n, undo_char, 0, undo_char_point);
-					for (var i = 0; i < undo_point; ++i)
+					for (int i = 0; i < undo_point; ++i)
 						if (undo_rec[i].char_storage >= 0)
 							undo_rec[i].char_storage -= n;
 				}
@@ -41,12 +41,12 @@ namespace StbTextEditSharp
 		public void DiscardRedo()
 		{
 			int num;
-			var k = 99 - 1;
+			int k = 99 - 1;
 			if (redo_point <= k)
 			{
 				if (undo_rec[k].char_storage >= 0)
 				{
-					var n = undo_rec[k].insert_length;
+					int n = undo_rec[k].insert_length;
 					int i;
 					redo_char_point += n;
 					num = 999 - redo_char_point;
@@ -81,11 +81,11 @@ namespace StbTextEditSharp
 
 		public int? CreateUndo(int pos, int insert_len, int delete_len)
 		{
-			var rpos = CreateUndoRecord(insert_len);
+			int? rpos = CreateUndoRecord(insert_len);
 			if (rpos == null)
 				return null;
 
-			var rposv = rpos.Value;
+			int rposv = rpos.Value;
 
 			undo_rec[rposv].where = pos;
 			undo_rec[rposv].insert_length = (short)insert_len;

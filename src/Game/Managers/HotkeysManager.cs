@@ -220,7 +220,7 @@ namespace ClassicUO.Game.Managers
         {
             for (int i = 0; i < _hotkeys.Count; i++)
             {
-                var h = _hotkeys[i];
+                HotKeyCombination h = _hotkeys[i];
 
                 if (h.KeyAction == action)
                 {
@@ -235,7 +235,7 @@ namespace ClassicUO.Game.Managers
         {
             for (int i = 0; i < _hotkeys.Count; i++)
             {
-                var h = _hotkeys[i];
+                HotKeyCombination h = _hotkeys[i];
 
                 if (h.Key == key && h.Mod == mod)
                 {

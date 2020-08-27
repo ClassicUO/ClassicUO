@@ -16,11 +16,11 @@ namespace TinyJson
                 bool matchSnakeCase = type.GetCustomAttribute<MatchSnakeCaseAttribute>(true) != null;
 				bool first = true;
 
-                var properties = type.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);
+                PropertyInfo[] properties = type.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);
 
                 if (properties.Length == 0)
                 {
-                    var fields = type.GetFields(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);
+                    FieldInfo[] fields = type.GetFields(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);
 
 					foreach (FieldInfo fieldinfo in fields)
                     {
@@ -28,7 +28,7 @@ namespace TinyJson
                         {
                             if (first) first = false; else builder.AppendSeperator();
 
-                            var fieldName = fieldinfo.UnwrappedFieldName();
+                            string fieldName = fieldinfo.UnwrappedFieldName();
                             if (matchSnakeCase)
                             {
                                 fieldName = fieldName.CamelCaseToSnakeCase();
@@ -46,7 +46,7 @@ namespace TinyJson
                         {
                             if (first) first = false; else builder.AppendSeperator();
 
-                            var fieldName = property.UnwrappedPropertyName();
+                            string fieldName = property.UnwrappedPropertyName();
                             if (matchSnakeCase)
                             {
                                 fieldName = fieldName.CamelCaseToSnakeCase();
@@ -67,7 +67,7 @@ namespace TinyJson
 				builder.AppendBeginObject();
 				bool first = true;
 				IDictionary dict = (IDictionary)obj;
-				foreach (var key in dict.Keys) {
+				foreach (object key in dict.Keys) {
 					if (first) first = false; else builder.AppendSeperator();
 					JsonMapper.EncodeNameValue(key.ToString(), dict[key], builder);
 				}
@@ -79,7 +79,7 @@ namespace TinyJson
 			return (obj, builder) => {
 				builder.AppendBeginArray();
 				bool first = true;
-				foreach (var item in (IEnumerable)obj) {
+				foreach (object item in (IEnumerable)obj) {
 					if (first) first = false; else builder.AppendSeperator();
 					JsonMapper.EncodeValue(item, builder);
 				}

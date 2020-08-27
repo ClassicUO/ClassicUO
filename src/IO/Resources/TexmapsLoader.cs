@@ -145,7 +145,7 @@ namespace ClassicUO.IO.Resources
                 return null;
             }
 
-            ref var texture = ref Resources[g];
+            ref UOTexture32 texture = ref Resources[g];
 
             if (texture == null || texture.IsDisposed)
             {
@@ -171,7 +171,7 @@ namespace ClassicUO.IO.Resources
 
         private uint[] GetTexMapTexture(ushort index, out int size)
         {
-            ref var entry = ref GetValidRefEntry(index);
+            ref UOFileIndex entry = ref GetValidRefEntry(index);
 
             if (entry.Length <= 0)
             {

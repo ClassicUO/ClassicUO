@@ -40,7 +40,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
         {
             _character = character;
 
-            foreach (var skill in _character.Skills)
+            foreach (Skill skill in _character.Skills)
             {
                 skill.ValueFixed = 0;
                 skill.BaseFixed = 0;
@@ -97,7 +97,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             _skillSliders = new HSliderBar[CharCreationGump._skillsCount];
             _skills = new Combobox[CharCreationGump._skillsCount];
 
-            for (var i = 0; i < CharCreationGump._skillsCount; i++)
+            for (int i = 0; i < CharCreationGump._skillsCount; i++)
             {
                 Add(_skills[i] = new Combobox(344, y, 182, skillList, -1, 200, false, "Click here"));
                 Add(_skillSliders[i] = new HSliderBar(344, y + 32, 93, 0, 50, ProfessionInfo._VoidSkills[i, 1], HSliderBarStyle.MetalWidgetRecessedBar, true));
@@ -135,7 +135,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
         public override void OnButtonClick(int buttonID)
         {
-            var charCreationGump = UIManager.GetGump<CharCreationGump>();
+            CharCreationGump charCreationGump = UIManager.GetGump<CharCreationGump>();
 
             switch ((Buttons) buttonID)
             {
@@ -152,7 +152,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                         {
                             if (_skills[i].SelectedIndex != -1)
                             {
-                                var skill = _character.Skills[SkillsLoader.Instance.SortedSkills[_skills[i].SelectedIndex].Index];
+                                Skill skill = _character.Skills[SkillsLoader.Instance.SortedSkills[_skills[i].SelectedIndex].Index];
                                 skill.ValueFixed = (ushort) _skillSliders[i].Value;
                                 skill.BaseFixed = 0;
                                 skill.CapFixed = 0;

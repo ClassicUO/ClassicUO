@@ -53,7 +53,7 @@ namespace ClassicUO.Utility
 
             if (fields != null)
             {
-                foreach (var prop in fields)
+                foreach (FieldInfo prop in fields)
                 {
                     if (prop.FieldType.IsByRef)
                     {

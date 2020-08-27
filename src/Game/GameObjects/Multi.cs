@@ -93,7 +93,7 @@ namespace ClassicUO.Game.GameObjects
             if (TextContainer == null)
                 return;
 
-            var last = (TextObject) TextContainer.Items;
+            TextObject last = (TextObject) TextContainer.Items;
 
             while (last?.Next != null)
                 last = (TextObject) last.Next;
@@ -105,7 +105,7 @@ namespace ClassicUO.Game.GameObjects
 
             int startX = ProfileManager.Current.GameWindowPosition.X + 6;
             int startY = ProfileManager.Current.GameWindowPosition.Y + 6;
-            var scene = Client.Game.GetScene<GameScene>();
+            GameScene scene = Client.Game.GetScene<GameScene>();
             float scale = scene?.Scale ?? 1;
             int x = RealScreenPosition.X;
             int y = RealScreenPosition.Y;
@@ -113,7 +113,7 @@ namespace ClassicUO.Game.GameObjects
             x += 22;
             y += 44;
 
-            var texture = ArtLoader.Instance.GetTexture(Graphic);
+            ArtTexture texture = ArtLoader.Instance.GetTexture(Graphic);
 
             if (texture != null)
                 y -= (texture.ImageRectangle.Height >> 1);

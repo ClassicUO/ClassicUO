@@ -165,7 +165,7 @@ namespace ClassicUO
 
             Log.Trace("Loading plugins...");
 
-            foreach (var p in Settings.GlobalSettings.Plugins)
+            foreach (string p in Settings.GlobalSettings.Plugins)
                 Plugin.Create(p);
             Log.Trace("Done!");
 

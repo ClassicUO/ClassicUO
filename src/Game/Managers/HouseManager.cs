@@ -46,7 +46,7 @@ namespace ClassicUO.Game.Managers
         {
             if (!IsHouseInRange(serial, distance))
             {
-                if (_houses.TryGetValue(serial, out var house))
+                if (_houses.TryGetValue(serial, out House house))
                 {
                     house.ClearComponents();
                     _houses.Remove(serial);
@@ -130,7 +130,7 @@ namespace ClassicUO.Game.Managers
 
         public void RemoveMultiTargetHouse()
         {
-            if (_houses.TryGetValue(0, out var house))
+            if (_houses.TryGetValue(0, out House house))
             {
                 house.ClearComponents();
                 _houses.Remove(0);

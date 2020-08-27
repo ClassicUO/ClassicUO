@@ -133,7 +133,7 @@ namespace ClassicUO.Game.UI.Controls
 
             for (int i = 0; i < list.Count; i++)
             {
-                var item = new ContextMenuItem(this, list[i]);
+                ContextMenuItem item = new ContextMenuItem(this, list[i]);
                 if (i > 0)
                 {
                     item.Y = y;
@@ -152,7 +152,7 @@ namespace ClassicUO.Game.UI.Controls
             }
 
 
-            foreach (var mitem in FindControls<ContextMenuItem>())
+            foreach (ContextMenuItem mitem in FindControls<ContextMenuItem>())
             {
                 if (mitem.Width < _background.Width)
                     mitem.Width = _background.Width;
@@ -273,7 +273,7 @@ namespace ClassicUO.Game.UI.Controls
                     }
                     else
                     {
-                        var p = UIManager.MouseOverControl?.Parent;
+                        Control p = UIManager.MouseOverControl?.Parent;
 
                         while (p != null)
                         {

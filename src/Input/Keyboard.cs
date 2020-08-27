@@ -50,7 +50,7 @@ namespace ClassicUO.Input
 
         public static void OnKeyUp(SDL.SDL_KeyboardEvent e)
         {
-            var mod = e.keysym.mod & ~IgnoreKeyMod;
+            SDL.SDL_Keymod mod = e.keysym.mod & ~IgnoreKeyMod;
 
             if ((mod & (SDL.SDL_Keymod.KMOD_RALT | SDL.SDL_Keymod.KMOD_LCTRL)) == (SDL.SDL_Keymod.KMOD_RALT | SDL.SDL_Keymod.KMOD_LCTRL))
             {
@@ -67,7 +67,7 @@ namespace ClassicUO.Input
 
         public static void OnKeyDown(SDL.SDL_KeyboardEvent e)
         {
-            var mod = e.keysym.mod & ~IgnoreKeyMod;
+            SDL.SDL_Keymod mod = e.keysym.mod & ~IgnoreKeyMod;
 
             if ((mod & (SDL.SDL_Keymod.KMOD_RALT | SDL.SDL_Keymod.KMOD_LCTRL)) == (SDL.SDL_Keymod.KMOD_RALT | SDL.SDL_Keymod.KMOD_LCTRL))
             {

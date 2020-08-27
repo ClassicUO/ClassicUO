@@ -1395,7 +1395,7 @@ namespace ClassicUO.Game.GameObjects
 
                     if (mob.Steps.Count != 0)
                     {
-                        ref var s = ref mob.Steps.Front();
+                        ref Step s = ref mob.Steps.Front();
 
                         if (s.X != mob.X || s.Y != mob.Y)
                             return true;

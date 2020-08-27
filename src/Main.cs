@@ -130,7 +130,7 @@ namespace ClassicUO
             Environment.SetEnvironmentVariable(SDL.SDL_HINT_MOUSE_FOCUS_CLICKTHROUGH, "1");
             Environment.SetEnvironmentVariable("PATH", Environment.GetEnvironmentVariable("PATH") + ";" + Path.Combine(CUOEnviroment.ExecutablePath, "Data", "Plugins"));
 
-            var globalSettingsPath = Settings.GetSettingsFilepath();
+            string globalSettingsPath = Settings.GetSettingsFilepath();
 
             if (!Directory.Exists(Path.GetDirectoryName(globalSettingsPath)) || !File.Exists(globalSettingsPath))
             {
@@ -155,7 +155,7 @@ namespace ClassicUO
 
             if (!CUOEnviroment.IsUnix)
             {
-                var libsPath = Path.Combine(CUOEnviroment.ExecutablePath, Environment.Is64BitProcess ? "x64" : "x86");
+                string libsPath = Path.Combine(CUOEnviroment.ExecutablePath, Environment.Is64BitProcess ? "x64" : "x86");
                 SetDllDirectory(libsPath);
             }
 
@@ -183,9 +183,9 @@ namespace ClassicUO
                 flags |= INVALID_UO_DIRECTORY;
             }
 
-            var clientVersionText = Settings.GlobalSettings.ClientVersion;
+            string clientVersionText = Settings.GlobalSettings.ClientVersion;
 
-            if (!ClientVersionHelper.IsClientVersionValid(Settings.GlobalSettings.ClientVersion, out var clientVersion))
+            if (!ClientVersionHelper.IsClientVersionValid(Settings.GlobalSettings.ClientVersion, out ClientVersion clientVersion))
             {
                 Log.Warn($"Client version [{clientVersionText}] is invalid, let's try to read the client.exe");
 
@@ -245,9 +245,9 @@ namespace ClassicUO
 
         private static void ReadSettingsFromArgs(string[] args)
         {
-            for (var i = 0; i <= args.Length - 1; i++)
+            for (int i = 0; i <= args.Length - 1; i++)
             {
-                var cmd = args[i].ToLower();
+                string cmd = args[i].ToLower();
 
                 // NOTE: Command-line option name should start with "-" character
                 if (cmd.Length == 0 || cmd[0] != '-')
@@ -256,7 +256,7 @@ namespace ClassicUO
                 }
 
                 cmd = cmd.Remove(0, 1);
-                var value = string.Empty;
+                string value = string.Empty;
 
                 if (i < args.Length - 1)
                 {
@@ -334,7 +334,7 @@ namespace ClassicUO
                         break;
 
                     case "fps":
-                        var v = int.Parse(value);
+                        int v = int.Parse(value);
                         if (v < Constants.MIN_FPS)
                         {
                             v = Constants.MIN_FPS;
@@ -424,7 +424,7 @@ namespace ClassicUO
                         break;
 
                     case "force_driver":
-                        if (byte.TryParse(value, out var res))
+                        if (byte.TryParse(value, out byte res))
                         {
                             switch (res)
                             {
@@ -451,13 +451,13 @@ namespace ClassicUO
 
         private static bool CheckUpdate(string[] args)
         {
-            var currentPath = CUOEnviroment.ExecutablePath;
+            string currentPath = CUOEnviroment.ExecutablePath;
 
-            var path = string.Empty;
-            var action = string.Empty;
-            var processId = -1;
+            string path = string.Empty;
+            string action = string.Empty;
+            int processId = -1;
 
-            for (var i = 0; i < args.Length; i++)
+            for (int i = 0; i < args.Length; i++)
             {
                 if (args[i] == "--source" && i < args.Length - 1)
                 {
@@ -485,7 +485,7 @@ namespace ClassicUO
 
                 try
                 {
-                    var processToBeKilled = Process.GetProcessById(processId);
+                    Process processToBeKilled = Process.GetProcessById(processId);
                     processToBeKilled.Kill();
                     processToBeKilled.WaitForExit(5000);
                 }
@@ -502,10 +502,10 @@ namespace ClassicUO
                 //    File.Copy(file, sub, true);
                 //}
 
-                var dd = new DirectoryInfo(currentPath);
+                DirectoryInfo dd = new DirectoryInfo(currentPath);
                 dd.CopyAllTo(new DirectoryInfo(path));
 
-                var processStartInfo = new ProcessStartInfo
+                ProcessStartInfo processStartInfo = new ProcessStartInfo
                 {
                     WorkingDirectory = path,
                     UseShellExecute = false

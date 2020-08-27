@@ -117,7 +117,7 @@ namespace ClassicUO.Game.UI.Controls
             {
                 if (_value != value)
                 {
-                    var oldValue = _value;
+                    int oldValue = _value;
                     _value = /*_newValue =*/ value;
                     //if (IsInitialized)
                     //    RecalculateSliderX();

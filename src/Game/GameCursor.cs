@@ -375,7 +375,7 @@ namespace ClassicUO.Game
                         
                         Array.Clear(_componentsList, 0, 10);
 
-                        if (!World.CustomHouseManager.CanBuildHere(_componentsList, out var type))
+                        if (!World.CustomHouseManager.CanBuildHere(_componentsList, out CUSTOM_HOUSE_BUILD_TYPE type))
                         {
                             hue = 0x0021;
                         }

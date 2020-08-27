@@ -98,7 +98,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (World.Player != null)
             {
-                foreach (var g in SkillsGroupManager.Groups)
+                foreach (SkillsGroup g in SkillsGroupManager.Groups)
                 {
                     SkillsGroupControl control = new SkillsGroupControl(g, 3, 3)
                     {
@@ -149,7 +149,7 @@ namespace ClassicUO.Game.UI.Gumps
                         _gumpPic.X = 160;
                     }
 
-                    foreach (var c in Children)
+                    foreach (Control c in Children)
                     {
                         c.IsVisible = !value;
                     }
@@ -188,7 +188,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 SkillsGroupManager.Add(g);
 
-                var control = new SkillsGroupControl(g, 3, 3);
+                SkillsGroupControl control = new SkillsGroupControl(g, 3, 3);
                 _skillsControl.Add(control);
                 control.IsMinimized = !g.IsMaximized;
                 _container.Add(control);
@@ -213,7 +213,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         public void Update(int skillIndex)
         {
-            foreach (var c in _skillsControl)
+            foreach (SkillsGroupControl c in _skillsControl)
             {
                 if (c.UpdateSkillValue(skillIndex, _checkReal.IsChecked, _checkCaps.IsChecked))
                 {
@@ -236,7 +236,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _checkReal.IsChecked = false;
             }
 
-            foreach (var c in _skillsControl)
+            foreach (SkillsGroupControl c in _skillsControl)
             {
                 c.UpdateAllSkillsValues(_checkReal.IsChecked, _checkCaps.IsChecked);
             }
@@ -407,7 +407,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             public void AddSkill(int index, int x, int y)
             {
-                var c = new SkillItemControl(index, x, y);
+                SkillItemControl c = new SkillItemControl(index, x, y);
                 _skills.Add(c);
                 _box.Add(c);
                 _box.WantUpdateSize = true;
@@ -427,7 +427,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             public bool UpdateSkillValue(int index, bool showReal, bool showCaps)
             {
-                foreach (var c in _skills)
+                foreach (SkillItemControl c in _skills)
                 {
                     if (c.Index == index && index >= 0 && index < World.Player.Skills.Length)
                     {
@@ -540,7 +540,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                         while (_box.Children.Count != 0)
                         {
-                            var skillControl = (SkillItemControl) _box.Children[0];
+                            SkillItemControl skillControl = (SkillItemControl) _box.Children[0];
 
                             int itemCount = first._group.Count;
                             for (int i = 0; i < itemCount; i++)
@@ -578,7 +578,7 @@ namespace ClassicUO.Game.UI.Gumps
             private void UpdateSkillsPosition()
             {
                 int currY = 17;
-                foreach (var c in _skills)
+                foreach (SkillItemControl c in _skills)
                 {
                     c.Y = currY;
                     currY += 17;
@@ -624,7 +624,7 @@ namespace ClassicUO.Game.UI.Gumps
                     return;
                 }
 
-                var skill = World.Player.Skills[Index];
+                Skill skill = World.Player.Skills[Index];
 
                 if (skill != null)
                 {
@@ -723,7 +723,7 @@ namespace ClassicUO.Game.UI.Gumps
                 if (World.Player == null || Index < 0 || Index >= World.Player.Skills.Length)
                     return;
 
-                var skill = World.Player.Skills[Index];
+                Skill skill = World.Player.Skills[Index];
 
                 if (skill != null)
                 {
@@ -780,7 +780,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             private static SkillButtonGump GetSpellFloatingButton(int id)
             {
-                for (var i = UIManager.Gumps.Last; i != null; i = i.Previous)
+                for (LinkedListNode<Control> i = UIManager.Gumps.Last; i != null; i = i.Previous)
                 {
                     if (i.Value is SkillButtonGump g && g.SkillID == id)
                         return g;

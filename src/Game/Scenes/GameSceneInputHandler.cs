@@ -216,7 +216,7 @@ namespace ClassicUO.Game.Scenes
                         hbgc.Y = finalY;
 
 
-                        foreach (var bar in UIManager.Gumps
+                        foreach (BaseHealthBarGump bar in UIManager.Gumps
                                                 .OfType<BaseHealthBarGump>()
                                                   //.OrderBy(s => mobile.NotorietyFlag)
                                                   //.OrderBy(s => s.ScreenCoordinateX) ///testing placement SYRUPZ SYRUPZ SYRUPZ
@@ -424,7 +424,7 @@ namespace ClassicUO.Game.Scenes
                     case CursorTarget.Object:
                     case CursorTarget.MultiPlacement when World.CustomHouseManager == null:
                     {
-                        var obj = SelectedObject.Object;
+                        BaseGameObject obj = SelectedObject.Object;
                         if (obj is TextObject ov)
                             obj = ov.Owner;
 
@@ -447,7 +447,7 @@ namespace ClassicUO.Game.Scenes
 
                     case CursorTarget.SetTargetClientSide:
                     {
-                        var obj = SelectedObject.Object;
+                        BaseGameObject obj = SelectedObject.Object;
                         if (obj is TextObject ov)
                             obj = ov.Owner;
                         else if (obj is GameEffect eff && eff.Source != null)
@@ -640,7 +640,7 @@ namespace ClassicUO.Game.Scenes
                 {
                     if (obj is Static || obj is Multi || obj is Item)
                     {
-                        ref var itemdata = ref TileDataLoader.Instance.StaticData[obj.Graphic];
+                        ref StaticTiles itemdata = ref TileDataLoader.Instance.StaticData[obj.Graphic];
 
                         if (itemdata.IsSurface && Pathfinder.WalkTo(obj.X, obj.Y, obj.Z, 0))
                         {
@@ -731,7 +731,7 @@ namespace ClassicUO.Game.Scenes
                     {
                         if (SerialHelper.IsMobile(obj.Serial) || obj is Item it && it.IsDamageable)
                         {
-                            var customgump = UIManager.GetGump<BaseHealthBarGump>(obj);
+                            BaseHealthBarGump customgump = UIManager.GetGump<BaseHealthBarGump>(obj);
                             customgump?.Dispose();
 
                             if (obj == World.Player)

@@ -143,7 +143,7 @@ namespace ClassicUO.IO
         {
             EnsureSize(2);
 
-            var v = *(ushort*) (_data + Position);
+            ushort v = *(ushort*) (_data + Position);
             Position += 2;
 
             return v;
@@ -154,7 +154,7 @@ namespace ClassicUO.IO
         {
             EnsureSize(4);
 
-            var v = *(int*) (_data + Position);
+            int v = *(int*) (_data + Position);
 
             Position += 4;
 
@@ -166,7 +166,7 @@ namespace ClassicUO.IO
         {
             EnsureSize(4);
 
-            var v = *(uint*) (_data + Position);
+            uint v = *(uint*) (_data + Position);
             Position += 4;
 
             return v;
@@ -177,7 +177,7 @@ namespace ClassicUO.IO
         {
             EnsureSize(8);
 
-            var v = *(long*) (_data + Position);
+            long v = *(long*) (_data + Position);
             Position += 8;
 
             return v;
@@ -188,7 +188,7 @@ namespace ClassicUO.IO
         {
             EnsureSize(8);
 
-            var v = *(ulong*) (_data + Position);
+            ulong v = *(ulong*) (_data + Position);
             Position += 8;
 
             return v;
@@ -199,7 +199,7 @@ namespace ClassicUO.IO
         {
             EnsureSize(count);
 
-            var data = new byte[count];
+            byte[] data = new byte[count];
 
             fixed (byte* ptr = data)
             {
@@ -215,11 +215,11 @@ namespace ClassicUO.IO
         {
             EnsureSize(size);
 
-            var sb = new StringBuilder(size);
+            StringBuilder sb = new StringBuilder(size);
 
-            for (var i = 0; i < size; i++)
+            for (int i = 0; i < size; i++)
             {
-                var c = (char) ReadByte();
+                char c = (char) ReadByte();
                 if (c != 0)
                 {
                     sb.Append(c);

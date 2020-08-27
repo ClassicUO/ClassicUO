@@ -37,10 +37,8 @@ namespace ClassicUO.IO.Resources
 
         }
 
-
         private static SpeechesLoader _instance;
         public static SpeechesLoader Instance => _instance ?? (_instance = new SpeechesLoader());
-
 
         public override unsafe Task Load()
         {

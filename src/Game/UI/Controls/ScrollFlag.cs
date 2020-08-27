@@ -55,7 +55,7 @@ namespace ClassicUO.Game.UI.Controls
         {
             AcceptMouseInput = true;
 
-            var texture_flag = GumpsLoader.Instance.GetTexture(0x0828);
+            UOTexture32 texture_flag = GumpsLoader.Instance.GetTexture(0x0828);
 
             if (texture_flag == null)
             {
@@ -66,8 +66,8 @@ namespace ClassicUO.Game.UI.Controls
             Width = texture_flag.Width;
             Height = texture_flag.Height;
 
-            var texture_button_up = GumpsLoader.Instance.GetTexture(0x0824);
-            var texture_button_down = GumpsLoader.Instance.GetTexture(0x0825);
+            UOTexture32 texture_button_up = GumpsLoader.Instance.GetTexture(0x0824);
+            UOTexture32 texture_button_down = GumpsLoader.Instance.GetTexture(0x0825);
 
             _rectUpButton = new Rectangle(0, 0, texture_button_up.Width, texture_button_up.Height);
             _rectDownButton = new Rectangle(0, Height, texture_button_down.Width, texture_button_down.Height);
@@ -110,9 +110,9 @@ namespace ClassicUO.Game.UI.Controls
         {
             ResetHueVector();
 
-            var texture_flag = GumpsLoader.Instance.GetTexture(0x0828);
-            var texture_button_up = GumpsLoader.Instance.GetTexture(0x0824);
-            var texture_button_down = GumpsLoader.Instance.GetTexture(0x0825);
+            UOTexture32 texture_flag = GumpsLoader.Instance.GetTexture(0x0828);
+            UOTexture32 texture_button_up = GumpsLoader.Instance.GetTexture(0x0824);
+            UOTexture32 texture_button_down = GumpsLoader.Instance.GetTexture(0x0825);
 
 
 
@@ -133,7 +133,7 @@ namespace ClassicUO.Game.UI.Controls
 
         protected override int GetScrollableArea()
         {
-            var texture = GumpsLoader.Instance.GetTexture(0x0828);
+            UOTexture32 texture = GumpsLoader.Instance.GetTexture(0x0828);
 
             return Height - texture?.Height ?? 0;
         }
@@ -184,7 +184,7 @@ namespace ClassicUO.Game.UI.Controls
 
                     _clickPosition = new Point(x, y);
 
-                    var texture = GumpsLoader.Instance.GetTexture(0x0828);
+                    UOTexture32 texture = GumpsLoader.Instance.GetTexture(0x0828);
                     int height = texture?.Height ?? 0;
 
 
@@ -202,7 +202,7 @@ namespace ClassicUO.Game.UI.Controls
 
         public override bool Contains(int x, int y)
         {
-            var texture_flag = GumpsLoader.Instance.GetTexture(0x0828);
+            UOTexture32 texture_flag = GumpsLoader.Instance.GetTexture(0x0828);
 
             if (texture_flag == null)
             {

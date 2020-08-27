@@ -34,7 +34,7 @@ namespace ClassicUO.Game.UI.Controls
         //TODO(deccer): should be moved into Renderer namespace
         private static readonly Lazy<DepthStencilState> _checkerStencil = new Lazy<DepthStencilState>(() =>
         {
-            var depthStencilState = new DepthStencilState
+            DepthStencilState depthStencilState = new DepthStencilState
             {
                 DepthBufferEnable = false,
                 StencilEnable = true,
@@ -54,7 +54,7 @@ namespace ClassicUO.Game.UI.Controls
         //TODO(deccer): should be moved into Renderer namespace
         private static readonly Lazy<BlendState> _checkerBlend = new Lazy<BlendState>(() =>
         {
-            var blendState = new BlendState
+            BlendState blendState = new BlendState
             {
                 ColorWriteChannels = ColorWriteChannels.None
             };

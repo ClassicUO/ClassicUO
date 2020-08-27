@@ -135,7 +135,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }
 
 
-                var size = Fonts.Bold.MeasureString(_sb.ToString());
+                Vector2 size = Fonts.Bold.MeasureString(_sb.ToString());
 
                 _trans.Width = Width = (int) (size.X + 20);
                 _trans.Height = Height = (int) (size.Y + 20);
