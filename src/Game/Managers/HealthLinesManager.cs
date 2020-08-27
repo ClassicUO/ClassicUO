@@ -135,17 +135,15 @@ namespace ClassicUO.Game.Managers
 
                             if (mobile.ObjectHandlesOpened)
                                 p1.Y -= 22;
-
-                            p1 = Client.Game.Scene.Camera.WorldToScreen(p1);
-                            p1.X -= (mobile.HitsTexture.Width >> 1) + 3;
-                            p1.Y -= mobile.HitsTexture.Height / 1;
-
                             if (mobile.IsGargoyle && mobile.IsFlying)
                                 p1.Y -= 22;
                             else if (!mobile.IsMounted)
                                 p1.Y += 22;
 
-
+                            p1 = Client.Game.Scene.Camera.WorldToScreen(p1);
+                            p1.X -= (mobile.HitsTexture.Width >> 1) + 3;
+                            p1.Y -= mobile.HitsTexture.Height / 1;
+                            
                             if (!(p1.X < screenX || p1.X > screenX + screenW - mobile.HitsTexture.Width || p1.Y < screenY || p1.Y > screenY + screenH))
                             {
                                 mobile.HitsTexture.Draw(batcher, p1.X, p1.Y);
@@ -156,13 +154,13 @@ namespace ClassicUO.Game.Managers
 
                 p.X -= BAR_WIDTH_HALF;
                 p.Y -= BAR_HEIGHT_HALF;
+                //if (mobile.IsGargoyle && mobile.IsFlying)
+                //    p.Y -= 22;
+                //else if (!mobile.IsMounted)
+                //    p.Y += 22;
+
                 p = Client.Game.Scene.Camera.WorldToScreen(p);
-
-                if (mobile.IsGargoyle && mobile.IsFlying)
-                    p.Y -= 22;
-                else if (!mobile.IsMounted)
-                    p.Y += 22;
-
+                
                 if (p.X < screenX || p.X > screenX + screenW - BAR_WIDTH)
                     continue;
 
