@@ -73,22 +73,10 @@ namespace ClassicUO.IO.Resources
 
         private FontsLoader()
         {
-
         }
 
         private static FontsLoader _instance;
-        public static FontsLoader Instance
-        {
-            get
-            {
-                if (_instance == null)
-                {
-                    _instance = new FontsLoader();
-                }
-
-                return _instance;
-            }
-        }
+        public static FontsLoader Instance => _instance ?? (_instance = new FontsLoader());
 
         public int FontCount { get; private set; }
 
@@ -97,8 +85,6 @@ namespace ClassicUO.IO.Resources
         public bool RecalculateWidthByInfo { get; set; } = false;
 
         public bool IsUsingHTML { get; set; }
-
-
 
         public override unsafe Task Load()
         {
@@ -134,7 +120,9 @@ namespace ClassicUO.IO.Resources
                             FontHeader* fh = (FontHeader*) fonts.PositionAddress;
 
                             if (fonts.Position + fontHeaderSize >= fonts.Length)
+                            {
                                 continue;
+                            }
 
                             fonts.Skip(fontHeaderSize);
                             int bcount = fh->Width * fh->Height * 2;
@@ -175,7 +163,9 @@ namespace ClassicUO.IO.Resources
                     for (int j = 0; j < 224; j++)
                     {
                         if (fonts.Position + 3 >= fonts.Length)
+                        {
                             continue;
+                        }
 
                         byte w = fonts.ReadByte();
                         byte h = fonts.ReadByte();
@@ -196,12 +186,10 @@ namespace ClassicUO.IO.Resources
             });
         }
 
-
         public bool UnicodeFontExists(byte font)
         {
             return font < 20 && _unicodeFontAddress[font] != IntPtr.Zero;
         }
-
 
         public (int, int) MeasureText(string text, byte font, bool isunicode, TEXT_ALIGN_TYPE align, ushort flags, int maxWidth = 200)
         {
@@ -371,7 +359,7 @@ namespace ClassicUO.IO.Resources
             if (font >= FontCount || string.IsNullOrEmpty(str))
                 return string.Empty;
 
-            ref var fd = ref _font[font];
+            ref FontCharacterData[] fd = ref _font[font];
 
             StringBuilder sb = new StringBuilder();
 
@@ -421,7 +409,7 @@ namespace ClassicUO.IO.Resources
             if (len == 0)
                 return;
 
-            ref var fd = ref _font[font];
+            ref FontCharacterData[] fd = ref _font[font];
 
             if (width <= 0)
                 width = GetWidthASCII(font, str);
@@ -585,7 +573,7 @@ namespace ClassicUO.IO.Resources
             if (font >= FontCount)
                 return null;
 
-            ref var fd = ref _font[font];
+            ref FontCharacterData[] fd = ref _font[font];
             MultilinesFontInfo info = new MultilinesFontInfo();
             info.Reset();
             info.Align = align;
@@ -1835,7 +1823,7 @@ namespace ClassicUO.IO.Resources
             if (len < 1)
                 return _emptyHTML;
 
-            var data = new HTMLChar[len];
+            HTMLChar[] data = new HTMLChar[len];
             int newlen = 0;
 
             HTMLDataInfo info = new HTMLDataInfo
@@ -2927,7 +2915,7 @@ namespace ClassicUO.IO.Resources
                 }
             }
 
-            ref var fd = ref _font[font];
+            ref FontCharacterData[] fd = ref _font[font];
 
             if (width <= 0)
                 width = GetWidthASCII(font, str);
@@ -2998,7 +2986,7 @@ namespace ClassicUO.IO.Resources
                     }
                 }
 
-                var ptr = info;
+                MultilinesFontInfo ptr = info;
                 info = info.Next;
                 ptr.Data.Clear();
                 ptr = null;
@@ -3028,7 +3016,7 @@ namespace ClassicUO.IO.Resources
             if (font >= FontCount || string.IsNullOrEmpty(str))
                 return (x, y);
 
-            ref var fd = ref _font[font];
+            ref FontCharacterData[] fd = ref _font[font];
 
             if (width == 0)
                 width = GetWidthASCII(font, str);

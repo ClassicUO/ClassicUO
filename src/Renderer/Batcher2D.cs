@@ -200,7 +200,7 @@ namespace ClassicUO.Renderer
         {
             EnsureSize();
 
-            ref var vertex = ref _vertexInfo[_numSprites];
+            ref PositionNormalTextureColor4 vertex = ref _vertexInfo[_numSprites];
 
             int w = texture.Width;
             int h = texture.Height;
@@ -313,7 +313,7 @@ namespace ClassicUO.Renderer
         {
             EnsureSize();
 
-            ref var vertex = ref _vertexInfo[_numSprites];
+            ref PositionNormalTextureColor4 vertex = ref _vertexInfo[_numSprites];
 
             vertex.TextureCoordinate0.X = 0;
             vertex.TextureCoordinate0.Y = 0;
@@ -365,7 +365,7 @@ namespace ClassicUO.Renderer
         {
             EnsureSize();
 
-            ref var vertex = ref _vertexInfo[_numSprites];
+            ref PositionNormalTextureColor4 vertex = ref _vertexInfo[_numSprites];
 
             float ww = texture.Width * 0.5f;
             float hh = texture.Height * 0.5f;
@@ -443,7 +443,7 @@ namespace ClassicUO.Renderer
         {
             EnsureSize();
 
-            ref var vertex = ref _vertexInfo[_numSprites];
+            ref PositionNormalTextureColor4 vertex = ref _vertexInfo[_numSprites];
 
             float width = texture.Width;
             float height = texture.Height * 0.5f;
@@ -571,7 +571,7 @@ namespace ClassicUO.Renderer
                 if (h3mod != 0.0f)
                 {
                     EnsureSize();
-                    ref var vertex = ref _vertexInfo[_numSprites];
+                    ref PositionNormalTextureColor4 vertex = ref _vertexInfo[_numSprites];
 
                     vertex.Position0.X = x + width;
                     vertex.Position0.Y = y;
@@ -656,7 +656,7 @@ namespace ClassicUO.Renderer
                     //}
 
                     EnsureSize();
-                    ref var vertex = ref _vertexInfo[_numSprites];
+                    ref PositionNormalTextureColor4 vertex = ref _vertexInfo[_numSprites];
 
 
                     vertex.Position0.X = x + width;
@@ -775,7 +775,7 @@ namespace ClassicUO.Renderer
                     //}
 
                     EnsureSize();
-                    ref var vertex = ref _vertexInfo[_numSprites];
+                    ref PositionNormalTextureColor4 vertex = ref _vertexInfo[_numSprites];
 
                     vertex.Position0.X = x + widthOffset;
                     vertex.Position0.Y = y + h06;
@@ -855,7 +855,7 @@ namespace ClassicUO.Renderer
                     //}
 
                     EnsureSize();
-                    ref var vertex = ref _vertexInfo[_numSprites];
+                    ref PositionNormalTextureColor4 vertex = ref _vertexInfo[_numSprites];
 
                     vertex.Position0.X = x + SITTING_OFFSET;
                     vertex.Position0.Y = y;
@@ -916,7 +916,7 @@ namespace ClassicUO.Renderer
                     //}
 
                     EnsureSize();
-                    ref var vertex = ref _vertexInfo[_numSprites];
+                    ref PositionNormalTextureColor4 vertex = ref _vertexInfo[_numSprites];
 
                     vertex.Position0.X = x + SITTING_OFFSET;
                     vertex.Position0.Y = y + h03;
@@ -977,7 +977,7 @@ namespace ClassicUO.Renderer
                     //}
 
                     EnsureSize();
-                    ref var vertex = ref _vertexInfo[_numSprites];
+                    ref PositionNormalTextureColor4 vertex = ref _vertexInfo[_numSprites];
 
                     vertex.Position0.X = x;
                     vertex.Position0.Y = y + h06;
@@ -1034,7 +1034,7 @@ namespace ClassicUO.Renderer
         {
             EnsureSize();
 
-            ref var vertex = ref _vertexInfo[_numSprites];
+            ref PositionNormalTextureColor4 vertex = ref _vertexInfo[_numSprites];
 
             vertex.Position0.X = x;
             vertex.Position0.Y = y;
@@ -1093,7 +1093,7 @@ namespace ClassicUO.Renderer
             float minY = sy / (float) texture.Height;
             float maxY = (sy + sheight) / texture.Height;
 
-            ref var vertex = ref _vertexInfo[_numSprites];
+            ref PositionNormalTextureColor4 vertex = ref _vertexInfo[_numSprites];
 
             vertex.Position0.X = x;
             vertex.Position0.Y = y;
@@ -1146,7 +1146,7 @@ namespace ClassicUO.Renderer
             float minX = sx / (float) texture.Width, maxX = (sx + swidth) / texture.Width;
             float minY = sy / (float) texture.Height, maxY = (sy + sheight) / texture.Height;
 
-            ref var vertex = ref _vertexInfo[_numSprites];
+            ref PositionNormalTextureColor4 vertex = ref _vertexInfo[_numSprites];
 
             float x = dx;
             float y = dy;
@@ -1281,7 +1281,7 @@ namespace ClassicUO.Renderer
         {
             EnsureSize();
 
-            ref var vertex = ref _vertexInfo[_numSprites];
+            ref PositionNormalTextureColor4 vertex = ref _vertexInfo[_numSprites];
 
             vertex.Position0.X = x;
             vertex.Position0.Y = y;
@@ -1376,7 +1376,7 @@ namespace ClassicUO.Renderer
         {
             EnsureSize();
 
-            ref var vertex = ref _vertexInfo[_numSprites];
+            ref PositionNormalTextureColor4 vertex = ref _vertexInfo[_numSprites];
 
             const int WIDTH = 1;
             Vector2 begin = new Vector2(startX, startY);

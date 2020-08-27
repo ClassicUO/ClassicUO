@@ -421,7 +421,7 @@ namespace ClassicUO.Game.Managers
 
         public static bool HadMouseDownOnGump(MouseButtonType button)
         {
-            var c = LastControlMouseDown(button);
+            Control c = LastControlMouseDown(button);
             return c != null && !c.IsDisposed && !(c is WorldViewport) && !ItemHold.Enabled;
         }
 
@@ -469,9 +469,9 @@ namespace ClassicUO.Game.Managers
         {
             if (serial.HasValue)
             {
-                for (var last = Gumps.Last; last != null; last = last.Previous)
+                for (LinkedListNode<Control> last = Gumps.Last; last != null; last = last.Previous)
                 {
-                    var c = last.Value;
+                    Control c = last.Value;
 
                     if (!c.IsDisposed && c.LocalSerial == serial.Value && c is T t)
                         return t;
@@ -479,9 +479,9 @@ namespace ClassicUO.Game.Managers
             }
             else
             {
-                for (var first = Gumps.First; first != null; first = first.Next)
+                for (LinkedListNode<Control> first = Gumps.First; first != null; first = first.Next)
                 {
-                    var c = first.Value;
+                    Control c = first.Value;
 
                     if (!c.IsDisposed && c is T t)
                         return t;
@@ -492,9 +492,9 @@ namespace ClassicUO.Game.Managers
 
         public static Gump GetGump(uint serial)
         {
-            for (var last = Gumps.Last; last != null; last = last.Previous)
+            for (LinkedListNode<Control> last = Gumps.Last; last != null; last = last.Previous)
             {
-                var c = last.Value;
+                Control c = last.Value;
 
                 if (!c.IsDisposed && c.LocalSerial == serial)
                     return c as Gump;
@@ -505,7 +505,7 @@ namespace ClassicUO.Game.Managers
 
         public static TradingGump GetTradingGump(uint serial)
         {
-            for (var g = Gumps.Last; g != null; g = g.Previous)
+            for (LinkedListNode<Control> g = Gumps.Last; g != null; g = g.Previous)
             {
                 if (g.Value != null && !g.Value.IsDisposed && g.Value is TradingGump trading && (trading.ID1 == serial || trading.ID2 == serial || trading.LocalSerial == serial))
                 {
@@ -520,11 +520,11 @@ namespace ClassicUO.Game.Managers
         {
             SortControlsByInfo();
 
-            var first = Gumps.First;
+            LinkedListNode<Control> first = Gumps.First;
 
             while (first != null)
             {
-                var next = first.Next;
+                LinkedListNode<Control> next = first.Next;
 
                 Control g = first.Value;
 
@@ -547,9 +547,9 @@ namespace ClassicUO.Game.Managers
 
             batcher.Begin();
 
-            for (var last = Gumps.Last; last != null; last = last.Previous)
+            for (LinkedListNode<Control> last = Gumps.Last; last != null; last = last.Previous)
             {
-                var g = last.Value;
+                Control g = last.Value;
                 g.Draw(batcher, g.X, g.Y);
             }
 
@@ -590,9 +590,9 @@ namespace ClassicUO.Game.Managers
                 }
                 else
                 {
-                    for (var first = Gumps.First; first != null; first = first.Next)
+                    for (LinkedListNode<Control> first = Gumps.First; first != null; first = first.Next)
                     {
-                        var c = first.Value;
+                        Control c = first.Value;
 
                         if (!c.IsDisposed && c.IsVisible && c.IsEnabled)
                         {
@@ -658,9 +658,9 @@ namespace ClassicUO.Game.Managers
 
             bool ismodal = IsModalControlOpen();
 
-            for (var first = Gumps.First; first != null; first = first.Next)
+            for (LinkedListNode<Control> first = Gumps.First; first != null; first = first.Next)
             {
-                var c = first.Value;
+                Control c = first.Value;
 
                 if ((ismodal && !c.ControlInfo.IsModal) || !c.IsVisible || !c.IsEnabled)
                 {
@@ -685,7 +685,7 @@ namespace ClassicUO.Game.Managers
             while (c.Parent != null)
                 c = c.Parent;
 
-            var first = Gumps.First?.Next; // skip game window
+            LinkedListNode<Control> first = Gumps.First?.Next; // skip game window
 
             for (; first != null; first = first.Next)
             {
@@ -702,16 +702,16 @@ namespace ClassicUO.Game.Managers
         {
             if (_needSort)
             {
-                for (var el = Gumps.First; el != null; el = el.Next)
+                for (LinkedListNode<Control> el = Gumps.First; el != null; el = el.Next)
                 {
-                    var c = el.Value;
+                    Control c = el.Value;
 
                     if (c.ControlInfo.Layer == UILayer.Default)
                         continue;
 
                     if (c.ControlInfo.Layer == UILayer.Under)
                     {
-                        for (var first = Gumps.First; first != null; first = first.Next)
+                        for (LinkedListNode<Control> first = Gumps.First; first != null; first = first.Next)
                         {
                             if (first.Value == c)
                             {
@@ -725,7 +725,7 @@ namespace ClassicUO.Game.Managers
                     }
                     else if (c.ControlInfo.Layer == UILayer.Over)
                     {
-                        for (var first = Gumps.First; first != null; first = first.Next)
+                        for (LinkedListNode<Control> first = Gumps.First; first != null; first = first.Next)
                         {
                             if (first.Value == c)
                             {

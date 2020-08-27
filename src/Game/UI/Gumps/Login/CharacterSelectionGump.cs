@@ -24,6 +24,7 @@ using System.Linq;
 
 using ClassicUO.Configuration;
 using ClassicUO.Data;
+using ClassicUO.Game.Data;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
@@ -49,10 +50,10 @@ namespace ClassicUO.Game.UI.Gumps.Login
             int listTitleY = 106;
 
             LoginScene loginScene = Client.Game.GetScene<LoginScene>();
-            var lastSelected = loginScene.Characters.FirstOrDefault(o => o == Settings.GlobalSettings.LastCharacterName);
+            string lastSelected = loginScene.Characters.FirstOrDefault(o => o == Settings.GlobalSettings.LastCharacterName);
 
-            var f = World.ClientLockedFeatures.Flags;
-            var ff = World.ClientFeatures.Flags;
+            LockedFeatureFlags f = World.ClientLockedFeatures.Flags;
+            CharacterListFlags ff = World.ClientFeatures.Flags;
 
             if ((Client.Version >= ClientVersion.CV_6040) ||
                 (Client.Version >= ClientVersion.CV_5020 && loginScene.Characters.Length > 5))
@@ -182,11 +183,11 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
         private void DeleteCharacter(LoginScene loginScene)
         {
-            var charName = loginScene.Characters[_selectedCharacter];
+            string charName = loginScene.Characters[_selectedCharacter];
 
             if (!string.IsNullOrEmpty(charName))
             {
-                var existing = Children.OfType<LoadingGump>().FirstOrDefault();
+                LoadingGump existing = Children.OfType<LoadingGump>().FirstOrDefault();
 
                 if (existing != null)
                     Remove(existing);

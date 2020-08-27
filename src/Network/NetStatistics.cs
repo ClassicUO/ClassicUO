@@ -119,7 +119,7 @@ namespace ClassicUO.Network
         public static string GetSizeAdaptive(long bytes)
         {
             decimal num = bytes;
-            var arg = "B";
+            string arg = "B";
 
             if (!(num < 1024m))
             {

@@ -139,7 +139,7 @@ namespace ClassicUO.Game.UI.Controls
         {
             if (!UIManager.IsMouseOverWorld && UIManager.MouseOverControl != null)
             {
-                var p = UIManager.MouseOverControl.GetFirstControlAcceptKeyboardInput();
+                Control p = UIManager.MouseOverControl.GetFirstControlAcceptKeyboardInput();
                 p?.SetKeyboardFocus();
             }
             else

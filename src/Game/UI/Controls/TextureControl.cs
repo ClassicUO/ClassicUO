@@ -20,6 +20,7 @@
 #endregion
 
 using ClassicUO.Renderer;
+using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Controls
 {
@@ -60,7 +61,7 @@ namespace ClassicUO.Game.UI.Controls
                 {
                     int w = Width;
                     int h = Height;
-                    var r = artTexture.ImageRectangle;
+                    Rectangle r = artTexture.ImageRectangle;
 
                     if (r.Width < Width)
                     {

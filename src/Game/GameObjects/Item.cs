@@ -240,7 +240,7 @@ namespace ClassicUO.Game.GameObjects
             }
 
 
-            ref var entry = ref MultiLoader.Instance.GetValidRefEntry(Graphic);
+            ref UOFileIndex entry = ref MultiLoader.Instance.GetValidRefEntry(Graphic);
             MultiLoader.Instance.File.SetData(entry.Address, entry.FileSize);
 
             if (MultiLoader.Instance.IsUOP)
@@ -249,7 +249,7 @@ namespace ClassicUO.Game.GameObjects
                 {
                     MultiLoader.Instance.File.Seek(entry.Offset);
 
-                    var data = stackalloc byte[entry.DecompressedLength];
+                    byte* data = stackalloc byte[entry.DecompressedLength];
                     ZLib.Decompress(MultiLoader.Instance.File.PositionAddress, entry.Length, 0, (IntPtr) data, entry.DecompressedLength);
                     _reader.SetData(data, entry.DecompressedLength);
                     _reader.Skip(4);
@@ -917,7 +917,7 @@ namespace ClassicUO.Game.GameObjects
                         byte animGroup = AnimationsLoader.Instance.GetDieGroupIndex(id, UsedLayer);
 
                         ushort hue = 0;
-                        var direction = AnimationsLoader.Instance.GetCorpseAnimationGroup(ref id, ref animGroup, ref hue).Direction[dir];
+                        AnimationDirection direction = AnimationsLoader.Instance.GetCorpseAnimationGroup(ref id, ref animGroup, ref hue).Direction[dir];
                         AnimationsLoader.Instance.AnimID = id;
                         AnimationsLoader.Instance.AnimGroup = animGroup;
                         AnimationsLoader.Instance.Direction = dir;

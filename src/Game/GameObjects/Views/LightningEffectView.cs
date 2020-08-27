@@ -22,6 +22,7 @@
 using System;
 
 using ClassicUO.Configuration;
+using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 
@@ -56,7 +57,7 @@ namespace ClassicUO.Game.GameObjects
 
             //Engine.DebugInfo.EffectsRendered++;
 
-            ref var index = ref GumpsLoader.Instance.GetValidRefEntry(AnimationGraphic);
+            ref UOFileIndex index = ref GumpsLoader.Instance.GetValidRefEntry(AnimationGraphic);
 
             posX -= (index.Width >> 1);
             posY -= index.Height;

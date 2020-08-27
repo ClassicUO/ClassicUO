@@ -20,7 +20,6 @@
 #endregion
 
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
@@ -35,23 +34,10 @@ namespace ClassicUO.IO.Resources
 
         private AnimDataLoader()
         {
-
         }
 
         private static AnimDataLoader _instance;
-        public static AnimDataLoader Instance
-        {
-            get
-            {
-                if (_instance == null)
-                {
-                    _instance = new AnimDataLoader();
-                }
-
-                return _instance;
-            }
-        }
-
+        public static AnimDataLoader Instance => _instance ?? (_instance = new AnimDataLoader());
 
         public override Task Load()
         {
@@ -67,8 +53,6 @@ namespace ClassicUO.IO.Resources
         }
 
         public UOFile AnimDataFile => _file;
-
-      
 
         public AnimDataFrame2 CalculateCurrentGraphic(ushort graphic)
         {

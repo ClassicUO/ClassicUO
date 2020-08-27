@@ -168,9 +168,9 @@ namespace ClassicUO.Game.GameObjects
 
             if (hue == 0xFFFF)
             {
-                var minColor = 0xFFFF;
+                int minColor = 0xFFFF;
 
-                for (var i = Items; i != null; i = i.Next)
+                for (LinkedObject i = Items; i != null; i = i.Next)
                 {
                     Item it = (Item) i;
 
@@ -197,7 +197,7 @@ namespace ClassicUO.Game.GameObjects
             }
             else
             {
-                for (var i = Items; i != null; i = i.Next)
+                for (LinkedObject i = Items; i != null; i = i.Next)
                 {
                     Item it = (Item) i;
 
@@ -219,7 +219,7 @@ namespace ClassicUO.Game.GameObjects
 
         public Item GetItemByGraphic(ushort graphic, bool deepsearch = false)
         {
-            for (var i = Items; i != null; i = i.Next)
+            for (LinkedObject i = Items; i != null; i = i.Next)
             {
                 Item item = (Item) i;
 
@@ -228,7 +228,7 @@ namespace ClassicUO.Game.GameObjects
 
                 if (deepsearch && !item.IsEmpty)
                 {
-                    for (var ic = Items; ic != null; ic = ic.Next)
+                    for (LinkedObject ic = Items; ic != null; ic = ic.Next)
                     {
                         Item childItem = (Item) ic;
 
@@ -246,7 +246,7 @@ namespace ClassicUO.Game.GameObjects
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Item FindItemByLayer(Layer layer)
         {
-            for (var i = Items; i != null; i = i.Next)
+            for (LinkedObject i = Items; i != null; i = i.Next)
             {
                 Item it = (Item) i;
 
@@ -283,11 +283,11 @@ namespace ClassicUO.Game.GameObjects
             if (!IsEmpty)
             {
                 LinkedObject new_first = null;
-                var obj = Items;
+                LinkedObject obj = Items;
 
                 while (obj != null)
                 {
-                    var next = obj.Next;
+                    LinkedObject next = obj.Next;
 
                     Item it = (Item) obj;
 

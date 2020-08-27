@@ -32,7 +32,7 @@ namespace ClassicUO.Renderer
 
         public static Texture2D GetTexture(Color color)
         {
-            if (!_textures.TryGetValue(color, out var t))
+            if (!_textures.TryGetValue(color, out Texture2D t))
             {
                 t = new Texture2D(Client.Game.GraphicsDevice, 1, 1, false, SurfaceFormat.Color);
                 t.SetData(new[] {color});

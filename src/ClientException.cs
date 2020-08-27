@@ -23,19 +23,19 @@ using System;
 
 namespace ClassicUO
 {
-    class InvalidClientVersion : Exception
+    internal class InvalidClientVersion : Exception
     {
-        public InvalidClientVersion(string msg) : base(msg)
+        public InvalidClientVersion(string msg)
+            : base(msg)
         {
-
         }
     }
 
-    class InvalidClientDirectory : Exception
+    internal class InvalidClientDirectory : Exception
     {
-        public InvalidClientDirectory(string msg) : base(msg)
+        public InvalidClientDirectory(string msg)
+            : base(msg)
         {
-
         }
     }
 }

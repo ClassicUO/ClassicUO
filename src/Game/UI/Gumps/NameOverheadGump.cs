@@ -464,7 +464,7 @@ namespace ClassicUO.Game.UI.Gumps
                     return false;
                 }
 
-                var texture = ArtLoader.Instance.GetTexture(item.Graphic);
+                ArtTexture texture = ArtLoader.Instance.GetTexture(item.Graphic);
 
                 if (texture != null)
                 {

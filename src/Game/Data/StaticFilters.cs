@@ -26,6 +26,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.CompilerServices;
+using ClassicUO.Renderer;
 
 namespace ClassicUO.Game.Data
 {
@@ -167,7 +168,7 @@ namespace ClassicUO.Game.Data
             
             while (!caveParser.IsEOF())
             {
-                var ss = caveParser.ReadTokens();
+                List<string> ss = caveParser.ReadTokens();
                 if (ss != null && ss.Count != 0)
                 {
                     if (ushort.TryParse(ss[0], out ushort graphic))
@@ -183,7 +184,7 @@ namespace ClassicUO.Game.Data
 
             while (!stumpsParser.IsEOF())
             {
-                var ss = stumpsParser.ReadTokens();
+                List<string> ss = stumpsParser.ReadTokens();
                 if (ss != null && ss.Count >= 2)
                 {
                     STATIC_TILES_FILTER_FLAGS flag = STATIC_TILES_FILTER_FLAGS.STFF_STUMP;
@@ -206,7 +207,7 @@ namespace ClassicUO.Game.Data
             
             while (!vegetationParser.IsEOF())
             {
-                var ss = vegetationParser.ReadTokens();
+                List<string> ss = vegetationParser.ReadTokens();
                 if (ss != null && ss.Count != 0)
                 {
                     if (ushort.TryParse(ss[0], out ushort graphic))
@@ -221,7 +222,7 @@ namespace ClassicUO.Game.Data
         {
             foreach (ushort graphic in CaveTiles)
             {
-                var texture = ArtLoader.Instance.GetTexture(graphic);
+                ArtTexture texture = ArtLoader.Instance.GetTexture(graphic);
                 if (texture != null)
                     texture.Ticks = 0;
             }
@@ -233,7 +234,7 @@ namespace ClassicUO.Game.Data
         {
             foreach (ushort graphic in TreeTiles)
             {
-                var texture = ArtLoader.Instance.GetTexture(graphic);
+                ArtTexture texture = ArtLoader.Instance.GetTexture(graphic);
                 if (texture != null)
                     texture.Ticks = 0;
             }

@@ -351,7 +351,7 @@ namespace ClassicUO.Game.GameObjects
 
             if (frameIndex < direction.FrameCount)
             {
-                var frame = direction.Frames[frameIndex];
+                AnimationFrameTexture frame = direction.Frames[frameIndex];
 
                 if (frame == null || frame.IsDisposed)
                 {

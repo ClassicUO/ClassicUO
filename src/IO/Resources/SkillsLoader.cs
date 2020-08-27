@@ -32,36 +32,23 @@ namespace ClassicUO.IO.Resources
 
         private SkillsLoader()
         {
-
         }
 
         private static SkillsLoader _instance;
-        public static SkillsLoader Instance
-        {
-            get
-            {
-                if (_instance == null)
-                {
-                    _instance = new SkillsLoader();
-                }
-
-                return _instance;
-            }
-        }
-
-
+        public static SkillsLoader Instance => _instance ?? (_instance = new SkillsLoader());
 
         public int SkillsCount => Skills.Count;
         public readonly List<SkillEntry> Skills = new List<SkillEntry>();
         public readonly List<SkillEntry> SortedSkills = new List<SkillEntry>();
-
 
         public override Task Load()
         {
             return Task.Run(() =>
             {
                 if (SkillsCount > 0)
+                {
                     return;
+                }
 
                 string path = UOFileManager.GetUOFilePath("skills.mul");
                 string pathidx = UOFileManager.GetUOFilePath("Skills.idx");
@@ -74,14 +61,14 @@ namespace ClassicUO.IO.Resources
 
                 for (int i = 0, count = 0; i < Entries.Length; i++)
                 { 
-                    ref var entry = ref GetValidRefEntry(i);
+                    ref UOFileIndex entry = ref GetValidRefEntry(i);
 
                     if (entry.Length > 0)
                     {
                         _file.Seek(entry.Offset);
-                        var hasAction = _file.ReadBool();
-                        var name = Encoding.UTF8.GetString(_file.ReadArray<byte>(entry.Length - 1)).TrimEnd('\0');
-                        var skill = new SkillEntry(count++, name, hasAction);
+                        bool hasAction = _file.ReadBool();
+                        string name = Encoding.UTF8.GetString(_file.ReadArray<byte>(entry.Length - 1)).TrimEnd('\0');
+                        SkillEntry skill = new SkillEntry(count++, name, hasAction);
 
                         Skills.Add(skill);
                     }

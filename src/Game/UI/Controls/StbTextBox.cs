@@ -822,7 +822,7 @@ namespace ClassicUO.Game.UI.Controls
             get
             {
                 int h = 20;
-                var info = GetInfo();
+                MultilinesFontInfo info = GetInfo();
                 while (info != null)
                 {
                     h += info.MaxHeight;

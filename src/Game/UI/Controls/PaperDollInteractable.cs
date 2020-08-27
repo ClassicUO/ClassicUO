@@ -20,7 +20,7 @@
 #endregion
 
 using System;
-
+using System.Collections.Generic;
 using ClassicUO.Data;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
@@ -259,7 +259,7 @@ namespace ClassicUO.Game.UI.Controls
 
             AnimationsLoader.Instance.ConvertBodyIfNeeded(ref graphic);
 
-            if (AnimationsLoader.Instance.EquipConversions.TryGetValue(graphic, out var dict))
+            if (AnimationsLoader.Instance.EquipConversions.TryGetValue(graphic, out Dictionary<ushort, EquipConvData> dict))
             {
                 if (dict.TryGetValue(animID, out EquipConvData data))
                 {

@@ -204,7 +204,7 @@ namespace ClassicUO.Game.GameObjects
 
         public Item GetSecureTradeBox()
         {
-            for (var i = Items; i != null; i = i.Next)
+            for (LinkedObject i = Items; i != null; i = i.Next)
             {
                 Item it = (Item) i;
 
@@ -445,7 +445,7 @@ namespace ClassicUO.Game.GameObjects
 
                 int first_value = RandomHelper.GetValue(0, 2);
 
-                var original_value = AnimationGroup;
+                byte original_value = AnimationGroup;
 
                 AnimationGroup = _animationIdle[(byte)animGroup - 1, first_value];
 
@@ -583,7 +583,7 @@ namespace ClassicUO.Game.GameObjects
                 if (id < Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT && dir < 5)
                 {
                     ushort hue = 0;
-                    var direction = AnimationsLoader.Instance.GetBodyAnimationGroup(ref id, ref animGroup, ref hue, true).Direction[dir];
+                    AnimationDirection direction = AnimationsLoader.Instance.GetBodyAnimationGroup(ref id, ref animGroup, ref hue, true).Direction[dir];
                     AnimationsLoader.Instance.AnimID = id;
                     AnimationsLoader.Instance.AnimGroup = animGroup;
                     AnimationsLoader.Instance.Direction = dir;
@@ -1044,7 +1044,7 @@ namespace ClassicUO.Game.GameObjects
             if (TextContainer == null)
                 return;
 
-            var last = (TextObject) TextContainer.Items;
+            TextObject last = (TextObject) TextContainer.Items;
 
             while (last?.Next != null)
                 last = (TextObject) last.Next;

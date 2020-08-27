@@ -178,7 +178,7 @@ namespace ClassicUO.Game.GameObjects
                         {
                             for (int k = 0; k < 4; k++)
                             {
-                                ref var v = ref _vectCache[curI, curJ, k];
+                                ref Vector3 v = ref _vectCache[curI, curJ, k];
                                 v.X = 0;
                                 v.Y = 0;
                                 v.Z = 1;
@@ -191,26 +191,26 @@ namespace ClassicUO.Game.GameObjects
                             int half_2 = (rightZ - bottomZ) << 2;
                             int half_3 = (bottomZ - leftZ) << 2;
 
-                            ref var v0 = ref _vectCache[curI, curJ, 0];
+                            ref Vector3 v0 = ref _vectCache[curI, curJ, 0];
                             v0.X = -22;
                             v0.Y = 22;
                             v0.Z = half_0;
                             MergeAndNormalize(ref v0, -22.0f, -22.0f, half_1);
 
 
-                            ref var v1 = ref _vectCache[curI, curJ, 1];
+                            ref Vector3 v1 = ref _vectCache[curI, curJ, 1];
                             v1.X = 22;
                             v1.Y = 22;
                             v1.Z = half_2;
                             MergeAndNormalize(ref v1, -22.0f, 22.0f, half_0);
 
-                            ref var v2 = ref _vectCache[curI, curJ, 2];
+                            ref Vector3 v2 = ref _vectCache[curI, curJ, 2];
                             v2.X = 22;
                             v2.Y = -22;
                             v2.Z = half_3;
                             MergeAndNormalize(ref v2, 22.0f, 22.0f, half_2);
 
-                            ref var v3 = ref _vectCache[curI, curJ, 3];
+                            ref Vector3 v3 = ref _vectCache[curI, curJ, 3];
                             v3.X = -22;
                             v3.Y = -22;
                             v3.Z = half_1;
@@ -270,8 +270,8 @@ namespace ClassicUO.Game.GameObjects
             int index3_x, int index3_y, int index3_z,
             out Vector3 result)
         {
-            Vector3.Add(ref vec[index0_x, index0_y, index0_z], ref vec[index1_x, index1_y, index1_z], out var v0Result);
-            Vector3.Add(ref vec[index2_x, index2_y, index2_z], ref vec[index3_x, index3_y, index3_z], out var v1Result);
+            Vector3.Add(ref vec[index0_x, index0_y, index0_z], ref vec[index1_x, index1_y, index1_z], out Vector3 v0Result);
+            Vector3.Add(ref vec[index2_x, index2_y, index2_z], ref vec[index3_x, index3_y, index3_z], out Vector3 v1Result);
             Vector3.Add(ref v0Result, ref v1Result, out result);
             Vector3.Normalize(ref result, out result);
         }

@@ -74,7 +74,7 @@ namespace ClassicUO.Game.GameObjects
 
                 if (this is Mobile mobile && mobile.Steps.Count != 0)
                 {
-                    ref var step = ref mobile.Steps.Back();
+                    ref Mobile.Step step = ref mobile.Steps.Back();
                     x = step.X;
                     y = step.Y;
                 }
@@ -215,7 +215,7 @@ namespace ClassicUO.Game.GameObjects
             int minY = ProfileManager.Current.GameWindowPosition.Y;
             //int maxY = minY + ProfileManager.Current.GameWindowSize.Y - 6;
 
-            for (var item = (TextObject) TextContainer.Items; item != null; item = (TextObject) item.Next)
+            for (TextObject item = (TextObject) TextContainer.Items; item != null; item = (TextObject) item.Next)
             {
                 if (item.RenderedText == null || item.RenderedText.IsDestroyed || item.RenderedText.Texture == null || item.Time < Time.Ticks)
                     continue;
@@ -250,7 +250,7 @@ namespace ClassicUO.Game.GameObjects
             if (string.IsNullOrEmpty(text))
                 return;
 
-            var msg = MessageManager.CreateMessage(text, hue, font, isunicode, type, text_type);
+            TextObject msg = MessageManager.CreateMessage(text, hue, font, isunicode, type, text_type);
             AddMessage(msg);
         }
 

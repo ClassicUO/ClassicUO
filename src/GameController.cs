@@ -21,10 +21,8 @@
 
 
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 using System.Threading;
 
 using ClassicUO.Configuration;
@@ -39,17 +37,14 @@ using ClassicUO.IO.Resources;
 using ClassicUO.Network;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
-using ClassicUO.Utility.Logging;
-
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
-using SDL2;
 using static SDL2.SDL;
 
 namespace ClassicUO
 {
-    unsafe class GameController : Microsoft.Xna.Framework.Game
+    internal unsafe class GameController : Microsoft.Xna.Framework.Game
     {
         private Scene _scene;
         private bool _dragStarted;
@@ -60,7 +55,6 @@ namespace ClassicUO
         private double _statisticsTimer;
         private double _totalElapsed, _currentFpsTime;
         private uint _totalFrames;
-
 
         public GameController()
         {
@@ -84,6 +78,7 @@ namespace ClassicUO
         }
 
         public Scene Scene => _scene;
+
         public readonly uint[] FrameDelay = new uint[2];
 
         private SDL_EventFilter _filter;
@@ -91,19 +86,21 @@ namespace ClassicUO
         protected override void Initialize()
         {
             if (_graphicDeviceManager.GraphicsDevice.Adapter.IsProfileSupported(GraphicsProfile.HiDef))
+            {
                 _graphicDeviceManager.GraphicsProfile = GraphicsProfile.HiDef;
+            }
             _graphicDeviceManager.ApplyChanges();
 
             SetRefreshRate(Settings.GlobalSettings.FPS);
             _uoSpriteBatch = new UltimaBatcher2D(GraphicsDevice);
 
-            _filter = new SDL_EventFilter(HandleSDLEvent);
-            SDL.SDL_AddEventWatch(_filter, IntPtr.Zero);
+            _filter = HandleSdlEvent;
+            SDL_AddEventWatch(_filter, IntPtr.Zero);
 
             base.Initialize();
         }
 
-        private readonly Texture2D[] _hues_sampler = new Texture2D[2];
+        private readonly Texture2D[] _hueSamplers = new Texture2D[2];
 
         protected override void LoadContent()
         {
@@ -111,33 +108,19 @@ namespace ClassicUO
 
             Client.Load();
 
-            const int TEXTURE_WIDHT = 32;
+            const int TEXTURE_WIDTH = 32;
             const int TEXTURE_HEIGHT = 2048 * 1;
 
-            uint[] buffer = new uint[TEXTURE_WIDHT * TEXTURE_HEIGHT * 2];
+            uint[] buffer = new uint[TEXTURE_WIDTH * TEXTURE_HEIGHT * 2];
             HuesLoader.Instance.CreateShaderColors(buffer);
 
+            _hueSamplers[0] = new Texture2D(GraphicsDevice, TEXTURE_WIDTH, TEXTURE_HEIGHT);
+            _hueSamplers[0].SetData(buffer, 0, TEXTURE_WIDTH * TEXTURE_HEIGHT);
+            _hueSamplers[1] = new Texture2D(GraphicsDevice, TEXTURE_WIDTH, TEXTURE_HEIGHT);
+            _hueSamplers[1].SetData(buffer, TEXTURE_WIDTH * TEXTURE_HEIGHT, TEXTURE_WIDTH * TEXTURE_HEIGHT);
 
-            _hues_sampler[0] = new Texture2D(
-                                          GraphicsDevice,
-                                          TEXTURE_WIDHT,
-                                          TEXTURE_HEIGHT);
-            _hues_sampler[0].SetData(buffer, 0, TEXTURE_WIDHT * TEXTURE_HEIGHT);
-
-
-
-
-            _hues_sampler[1] = new Texture2D(
-                                          GraphicsDevice,
-                                          TEXTURE_WIDHT,
-                                          TEXTURE_HEIGHT);
-            _hues_sampler[1].SetData(buffer, TEXTURE_WIDHT * TEXTURE_HEIGHT, TEXTURE_WIDHT * TEXTURE_HEIGHT);
-
-
-
-
-            GraphicsDevice.Textures[1] = _hues_sampler[0];
-            GraphicsDevice.Textures[2] = _hues_sampler[1];
+            GraphicsDevice.Textures[1] = _hueSamplers[0];
+            GraphicsDevice.Textures[2] = _hueSamplers[1];
 
             AuraManager.CreateAuraTexture();
             UIManager.InitializeGameCursor();
@@ -147,10 +130,9 @@ namespace ClassicUO
             SetWindowPositionBySettings();
         }
 
-
         protected override void UnloadContent()
         {
-            SDL.SDL_GetWindowBordersSize(Window.Handle, out int top, out int left, out int bottom, out int right);
+            SDL_GetWindowBordersSize(Window.Handle, out int top, out int left, out _, out _);
             Settings.GlobalSettings.WindowPosition = new Point(Math.Max(0, Window.ClientBounds.X - left), Math.Max(0, Window.ClientBounds.Y - top));
 
             _scene?.Unload();
@@ -201,9 +183,13 @@ namespace ClassicUO
         public void SetRefreshRate(int rate)
         {
             if (rate < Constants.MIN_FPS)
+            {
                 rate = Constants.MIN_FPS;
+            }
             else if (rate > Constants.MAX_FPS)
+            {
                 rate = Constants.MAX_FPS;
+            }
 
             float frameDelay;
             if (rate == 12)
@@ -225,9 +211,9 @@ namespace ClassicUO
             _intervalFixedUpdate[1] = 217;  // 5 FPS
         }
 
-        public void SetWindowPosition(int x, int y)
+        private void SetWindowPosition(int x, int y)
         {
-            SDL.SDL_SetWindowPosition(Window.Handle, x, y);
+            SDL_SetWindowPosition(Window.Handle, x, y);
         }
 
         public GraphicsDeviceManager GraphicManager => _graphicDeviceManager;
@@ -244,8 +230,7 @@ namespace ClassicUO
 
         public void SetWindowBorderless(bool borderless)
         {
-            SDL_WindowFlags flags = (SDL_WindowFlags) SDL.SDL_GetWindowFlags(Window.Handle);
-
+            SDL_WindowFlags flags = (SDL_WindowFlags)SDL_GetWindowFlags(Window.Handle);
             if ((flags & SDL_WindowFlags.SDL_WINDOW_BORDERLESS) != 0 && borderless)
             {
                 return;
@@ -257,7 +242,6 @@ namespace ClassicUO
             }
 
             SDL_SetWindowBordered(Window.Handle, borderless ? SDL_bool.SDL_FALSE : SDL_bool.SDL_TRUE);
-
             SDL_GetCurrentDisplayMode(0, out SDL_DisplayMode displayMode);
 
             int width = displayMode.w;
@@ -270,14 +254,12 @@ namespace ClassicUO
             }
             else
             {
-                int top, left, bottom, right;
-                SDL_GetWindowBordersSize(Window.Handle, out top, out left, out bottom, out right);
+                SDL_GetWindowBordersSize(Window.Handle, out int top, out _, out int bottom, out _);
                 SetWindowSize(width, height - (top - bottom));
                 SetWindowPositionBySettings();
             }
 
-            var viewport = UIManager.GetGump<WorldViewportGump>();
-
+            WorldViewportGump viewport = UIManager.GetGump<WorldViewportGump>();
             if (viewport != null && ProfileManager.Current.GameWindowFullSize)
             {
                 viewport.ResizeGameWindow(new Point(width, height));
@@ -288,24 +270,24 @@ namespace ClassicUO
 
         public void MaximizeWindow()
         {
-            SDL.SDL_MaximizeWindow(Window.Handle);
+            SDL_MaximizeWindow(Window.Handle);
         }
 
         public bool IsWindowMaximized()
         {
-            SDL.SDL_WindowFlags flags = (SDL.SDL_WindowFlags) SDL.SDL_GetWindowFlags(Window.Handle);
+            SDL_WindowFlags flags = (SDL_WindowFlags) SDL_GetWindowFlags(Window.Handle);
 
             return (flags & SDL_WindowFlags.SDL_WINDOW_MAXIMIZED) != 0;
         }
 
         public void RestoreWindow()
         {
-            SDL.SDL_RestoreWindow(Window.Handle);
+            SDL_RestoreWindow(Window.Handle);
         }
 
         public void SetWindowPositionBySettings()
         {
-            SDL_GetWindowBordersSize(Window.Handle, out int top, out int left, out int bottom, out int right);
+            SDL_GetWindowBordersSize(Window.Handle, out int top, out int left, out _, out _);
             if (Settings.GlobalSettings.WindowPosition.HasValue)
             {
                 int x = left + Settings.GlobalSettings.WindowPosition.Value.X;
@@ -320,7 +302,9 @@ namespace ClassicUO
         protected override void Update(GameTime gameTime)
         {
             if (Profiler.InContext("OutOfContext"))
+            {
                 Profiler.ExitContext("OutOfContext");
+            }
 
             Time.Ticks = (uint) gameTime.TotalGameTime.TotalMilliseconds;
 
@@ -374,14 +358,15 @@ namespace ClassicUO
             base.Update(gameTime);
         }
 
-
         protected override void Draw(GameTime gameTime)
         {
             Profiler.EndFrame();
             Profiler.BeginFrame();
 
             if (Profiler.InContext("OutOfContext"))
+            {
                 Profiler.ExitContext("OutOfContext");
+            }
             Profiler.EnterContext("RenderFrame");
 
             _totalFrames++;
@@ -398,13 +383,16 @@ namespace ClassicUO
             if (World.InGame && SelectedObject.LastObject is TextObject t)
             {
                 if (t.IsTextGump)
+                {
                     t.ToTopD();
+                }
                 else
+                {
                     World.WorldTextManager?.MoveToTop(t);
+                }
             }
 
             SelectedObject.HealthbarObject = null;
-
 
             base.Draw(gameTime);
 
@@ -414,29 +402,30 @@ namespace ClassicUO
             Plugin.ProcessDrawCmdList(GraphicsDevice);
         }
 
-
-        private void OnNetworkUpdate(double totalMS, double frameMS)
+        private void OnNetworkUpdate(double totalMilliseconds, double frameMilliseconds)
         {
             if (NetClient.LoginSocket.IsDisposed && NetClient.LoginSocket.IsConnected)
+            {
                 NetClient.LoginSocket.Disconnect();
+            }
             else if (!NetClient.Socket.IsConnected)
             {
                 NetClient.LoginSocket.Update();
-                UpdateSockeStats(NetClient.LoginSocket, totalMS);
+                UpdateSocketStats(NetClient.LoginSocket, totalMilliseconds);
             }
             else if (!NetClient.Socket.IsDisposed)
             {
                 NetClient.Socket.Update();
-                UpdateSockeStats(NetClient.Socket, totalMS);
+                UpdateSocketStats(NetClient.Socket, totalMilliseconds);
             }
         }
 
-        private void UpdateSockeStats(NetClient socket, double totalMS)
+        private void UpdateSocketStats(NetClient socket, double totalMilliseconds)
         {
-            if (_statisticsTimer < totalMS)
+            if (_statisticsTimer < totalMilliseconds)
             {
                 socket.Statistics.Update();
-                _statisticsTimer = totalMS + 500;
+                _statisticsTimer = totalMilliseconds + 500;
             }
         }
 
@@ -452,8 +441,7 @@ namespace ClassicUO
 
             SetWindowSize(width, height);
 
-            var viewport = UIManager.GetGump<WorldViewportGump>();
-
+            WorldViewportGump viewport = UIManager.GetGump<WorldViewportGump>();
             if (viewport != null && ProfileManager.Current.GameWindowFullSize)
             {
                 viewport.ResizeGameWindow(new Point(width, height));
@@ -462,13 +450,13 @@ namespace ClassicUO
             }
         }
 
-        private unsafe int HandleSDLEvent(IntPtr userdata, IntPtr ptr)
+        private unsafe int HandleSdlEvent(IntPtr userData, IntPtr ptr)
         {
-            SDL_Event* e = (SDL_Event*) ptr;
+            SDL_Event* sdlEvent = (SDL_Event*)ptr;
 
-            if (Plugin.ProcessWndProc(e) != 0)
+            if (Plugin.ProcessWndProc(sdlEvent) != 0)
             {
-                if (e->type == SDL_EventType.SDL_MOUSEMOTION)
+                if (sdlEvent->type == SDL_EventType.SDL_MOUSEMOTION)
                 {
                     if (UIManager.GameCursor != null)
                     {
@@ -478,97 +466,96 @@ namespace ClassicUO
                 return 0;
             }
 
-            switch (e->type)
+            switch (sdlEvent->type)
             {
-                case SDL.SDL_EventType.SDL_AUDIODEVICEADDED:
-                    Console.WriteLine("AUDIO ADDED: {0}", e->adevice.which);
+                case SDL_EventType.SDL_AUDIODEVICEADDED:
+                    Console.WriteLine("AUDIO ADDED: {0}", sdlEvent->adevice.which);
 
                     break;
 
-                case SDL.SDL_EventType.SDL_AUDIODEVICEREMOVED:
-                    Console.WriteLine("AUDIO REMOVED: {0}", e->adevice.which);
+                case SDL_EventType.SDL_AUDIODEVICEREMOVED:
+                    Console.WriteLine("AUDIO REMOVED: {0}", sdlEvent->adevice.which);
 
                     break;
 
+                case SDL_EventType.SDL_WINDOWEVENT:
 
-                case SDL.SDL_EventType.SDL_WINDOWEVENT:
-
-                    switch (e->window.windowEvent)
+                    switch (sdlEvent->window.windowEvent)
                     {
-                        case SDL.SDL_WindowEventID.SDL_WINDOWEVENT_ENTER:
+                        case SDL_WindowEventID.SDL_WINDOWEVENT_ENTER:
                             Mouse.MouseInWindow = true;
 
                             break;
 
-                        case SDL.SDL_WindowEventID.SDL_WINDOWEVENT_LEAVE:
+                        case SDL_WindowEventID.SDL_WINDOWEVENT_LEAVE:
                             Mouse.MouseInWindow = false;
 
                             break;
 
-                        case SDL.SDL_WindowEventID.SDL_WINDOWEVENT_FOCUS_GAINED:
+                        case SDL_WindowEventID.SDL_WINDOWEVENT_FOCUS_GAINED:
                             Plugin.OnFocusGained();
 
                             break;
 
-                        case SDL.SDL_WindowEventID.SDL_WINDOWEVENT_FOCUS_LOST:
+                        case SDL_WindowEventID.SDL_WINDOWEVENT_FOCUS_LOST:
                             Plugin.OnFocusLost();
 
                             break;
                     }
 
                     break;
-                
-                case SDL.SDL_EventType.SDL_KEYDOWN:
-                    
-                    Keyboard.OnKeyDown(e->key);
 
-                    if (Plugin.ProcessHotkeys((int) e->key.keysym.sym, (int) e->key.keysym.mod, true))
+                case SDL_EventType.SDL_KEYDOWN:
+
+                    Keyboard.OnKeyDown(sdlEvent->key);
+
+                    if (Plugin.ProcessHotkeys((int) sdlEvent->key.keysym.sym, (int) sdlEvent->key.keysym.mod, true))
                     {
                         _ignoreNextTextInput = false;
-                        UIManager.KeyboardFocusControl?.InvokeKeyDown(e->key.keysym.sym, e->key.keysym.mod);
+                        UIManager.KeyboardFocusControl?.InvokeKeyDown(sdlEvent->key.keysym.sym, sdlEvent->key.keysym.mod);
 
-                        _scene.OnKeyDown(e->key);
+                        _scene.OnKeyDown(sdlEvent->key);
                     }
                     else
+                    {
                         _ignoreNextTextInput = true;
+                    }
 
                     break;
 
-                case SDL.SDL_EventType.SDL_KEYUP:
-                    
-                    Keyboard.OnKeyUp(e->key);
-                    UIManager.KeyboardFocusControl?.InvokeKeyUp(e->key.keysym.sym, e->key.keysym.mod);
-                    _scene.OnKeyUp(e->key);
+                case SDL_EventType.SDL_KEYUP:
+
+                    Keyboard.OnKeyUp(sdlEvent->key);
+                    UIManager.KeyboardFocusControl?.InvokeKeyUp(sdlEvent->key.keysym.sym, sdlEvent->key.keysym.mod);
+                    _scene.OnKeyUp(sdlEvent->key);
                     Plugin.ProcessHotkeys(0, 0, false);
 
-                    if (e->key.keysym.sym == SDL_Keycode.SDLK_PRINTSCREEN)
+                    if (sdlEvent->key.keysym.sym == SDL_Keycode.SDLK_PRINTSCREEN)
                     {
                         string path = Path.Combine(FileSystemHelper.CreateFolderIfNotExists(CUOEnviroment.ExecutablePath, "Data", "Client", "Screenshots"), $"screenshot_{DateTime.Now:yyyy-MM-dd_hh-mm-ss}.png");
 
                         Color[] colors = new Color[_graphicDeviceManager.PreferredBackBufferWidth * _graphicDeviceManager.PreferredBackBufferHeight];
                         GraphicsDevice.GetBackBufferData(colors);
+
                         using (Texture2D texture = new Texture2D(GraphicsDevice, _graphicDeviceManager.PreferredBackBufferWidth, _graphicDeviceManager.PreferredBackBufferHeight, false, SurfaceFormat.Color))
+                        using (FileStream fileStream = File.Create(path))
                         {
                             texture.SetData(colors);
-
-                            using (Stream stream = File.Create(path))
-                            {
-                                texture.SaveAsPng(stream, texture.Width, texture.Height);
-
-                                GameActions.Print($"Screenshot stored in: {path}", 0x44, MessageType.System);
-                            }
+                            texture.SaveAsPng(fileStream, texture.Width, texture.Height);
+                            GameActions.Print($"Screenshot stored in: {path}", 0x44, MessageType.System);
                         }
-                       
                     }
 
                     break;
 
-                case SDL.SDL_EventType.SDL_TEXTINPUT:
+                case SDL_EventType.SDL_TEXTINPUT:
 
                     if (_ignoreNextTextInput)
+                    {
                         break;
+                    }
 
-                    string s = StringHelper.ReadUTF8(e->text.text);
+                    string s = StringHelper.ReadUTF8(sdlEvent->text.text);
 
                     if (!string.IsNullOrEmpty(s))
                     {
@@ -577,7 +564,7 @@ namespace ClassicUO
                     }
                     break;
 
-                case SDL.SDL_EventType.SDL_MOUSEMOTION:
+                case SDL_EventType.SDL_MOUSEMOTION:
 
                     if (UIManager.GameCursor != null && !UIManager.GameCursor.AllowDrawSDLCursor)
                     {
@@ -590,7 +577,9 @@ namespace ClassicUO
                     if (Mouse.IsDragging)
                     {
                         if (!_scene.OnMouseDragging())
+                        {
                             UIManager.OnMouseDragging();
+                        }
                     }
 
                     if (Mouse.IsDragging && !_dragStarted)
@@ -600,28 +589,30 @@ namespace ClassicUO
 
                     break;
 
-                case SDL.SDL_EventType.SDL_MOUSEWHEEL:
+                case SDL_EventType.SDL_MOUSEWHEEL:
                     Mouse.Update();
-                    bool isup = e->wheel.y > 0;
+                    bool isScrolledUp = sdlEvent->wheel.y > 0;
 
-                    Plugin.ProcessMouse(0, e->wheel.y);
+                    Plugin.ProcessMouse(0, sdlEvent->wheel.y);
 
-                    if (!_scene.OnMouseWheel(isup))
-                        UIManager.OnMouseWheel(isup);
+                    if (!_scene.OnMouseWheel(isScrolledUp))
+                    {
+                        UIManager.OnMouseWheel(isScrolledUp);
+                    }
 
                     break;
 
-                case SDL.SDL_EventType.SDL_MOUSEBUTTONUP:
-                case SDL.SDL_EventType.SDL_MOUSEBUTTONDOWN:
+                case SDL_EventType.SDL_MOUSEBUTTONUP:
+                case SDL_EventType.SDL_MOUSEBUTTONDOWN:
                     Mouse.Update();
-                    bool isDown = e->type == SDL.SDL_EventType.SDL_MOUSEBUTTONDOWN;
+                    bool isDown = sdlEvent->type == SDL_EventType.SDL_MOUSEBUTTONDOWN;
 
                     if (_dragStarted && !isDown)
                     {
                         _dragStarted = false;
                     }
 
-                    SDL.SDL_MouseButtonEvent mouse = e->button;
+                    SDL_MouseButtonEvent mouse = sdlEvent->button;
 
                     switch ((uint) mouse.button)
                     {
@@ -638,13 +629,14 @@ namespace ClassicUO
                                 if (Mouse.LastLeftButtonClickTime + Mouse.MOUSE_DELAY_DOUBLE_CLICK >= ticks)
                                 {
                                     Mouse.LastLeftButtonClickTime = 0;
-                                 
-                                    bool res = _scene.OnLeftMouseDoubleClick() || UIManager.OnLeftMouseDoubleClick();
 
+                                    bool res = _scene.OnLeftMouseDoubleClick() || UIManager.OnLeftMouseDoubleClick();
                                     if (!res)
                                     {
                                         if (!_scene.OnLeftMouseDown())
+                                        {
                                             UIManager.OnLeftMouseButtonDown();
+                                        }
                                     }
                                     else
                                     {
@@ -654,8 +646,10 @@ namespace ClassicUO
                                     break;
                                 }
 
-                                if (!_scene.OnLeftMouseDown()) 
+                                if (!_scene.OnLeftMouseDown())
+                                {
                                     UIManager.OnLeftMouseButtonDown();
+                                }
 
                                 Mouse.LastLeftButtonClickTime = Mouse.CancelDoubleClick ? 0 : ticks;
                             }
@@ -664,7 +658,9 @@ namespace ClassicUO
                                 if (Mouse.LastLeftButtonClickTime != 0xFFFF_FFFF)
                                 {
                                     if (!_scene.OnLeftMouseUp() || UIManager.LastControlMouseDown(MouseButtonType.Left) != null)
+                                    {
                                         UIManager.OnLeftMouseButtonUp();
+                                    }
                                 }
                                 Mouse.LButtonPressed = false;
                                 Mouse.End();
@@ -687,11 +683,12 @@ namespace ClassicUO
                                     Mouse.LastMidButtonClickTime = 0;
 
                                     bool res = _scene.OnMiddleMouseDoubleClick() || UIManager.OnMiddleMouseDoubleClick();
-
                                     if (!res)
                                     {
                                         if (!_scene.OnMiddleMouseDown())
+                                        {
                                             UIManager.OnMiddleMouseButtonDown();
+                                        }
                                     }
                                     else
                                     {
@@ -701,10 +698,12 @@ namespace ClassicUO
                                     break;
                                 }
 
-                                Plugin.ProcessMouse(e->button.button, 0);
+                                Plugin.ProcessMouse(sdlEvent->button.button, 0);
 
                                 if (!_scene.OnMiddleMouseDown())
+                                {
                                     UIManager.OnMiddleMouseButtonDown();
+                                }
 
                                 Mouse.LastMidButtonClickTime = Mouse.CancelDoubleClick ? 0 : ticks;
                             }
@@ -713,7 +712,9 @@ namespace ClassicUO
                                 if (Mouse.LastMidButtonClickTime != 0xFFFF_FFFF)
                                 {
                                     if (!_scene.OnMiddleMouseUp())
+                                    {
                                         UIManager.OnMiddleMouseButtonUp();
+                                    }
                                 }
 
                                 Mouse.MButtonPressed = false;
@@ -737,11 +738,12 @@ namespace ClassicUO
                                     Mouse.LastRightButtonClickTime = 0;
 
                                     bool res = _scene.OnRightMouseDoubleClick() || UIManager.OnRightMouseDoubleClick();
-
                                     if (!res)
                                     {
                                         if (!_scene.OnRightMouseDown())
+                                        {
                                             UIManager.OnRightMouseButtonDown();
+                                        }
                                     }
                                     else
                                     {
@@ -752,7 +754,9 @@ namespace ClassicUO
                                 }
 
                                 if (!_scene.OnRightMouseDown())
+                                {
                                     UIManager.OnRightMouseButtonDown();
+                                }
 
                                 Mouse.LastRightButtonClickTime = Mouse.CancelDoubleClick ? 0 : ticks;
                             }
@@ -761,7 +765,9 @@ namespace ClassicUO
                                 if (Mouse.LastRightButtonClickTime != 0xFFFF_FFFF)
                                 {
                                     if (!_scene.OnRightMouseUp())
+                                    {
                                         UIManager.OnRightMouseButtonUp();
+                                    }
                                 }
                                 Mouse.RButtonPressed = false;
                                 Mouse.End();
@@ -776,16 +782,20 @@ namespace ClassicUO
                                 Mouse.Begin();
                                 Mouse.XButtonPressed = true;
                                 Mouse.CancelDoubleClick = false;
-                                Plugin.ProcessMouse(e->button.button, 0);
+                                Plugin.ProcessMouse(sdlEvent->button.button, 0);
                                 if (!_scene.OnExtraMouseDown(mouse.button - 1))
+                                {
                                     UIManager.OnExtraMouseButtonDown(mouse.button - 1);
+                                }
 
                                 // TODO: doubleclick?
                             }
                             else
                             {
                                 if (!_scene.OnExtraMouseUp(mouse.button - 1))
+                                {
                                     UIManager.OnExtraMouseButtonUp(mouse.button - 1);
+                                }
 
                                 Mouse.XButtonPressed = false;
                                 Mouse.End();

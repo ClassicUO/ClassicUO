@@ -48,12 +48,12 @@ namespace ClassicUO.Game.GameObjects
 
         public new void Clear()
         {
-            var item = (TextObject) Items;
+            TextObject item = (TextObject) Items;
             Items = null;
 
             while (item != null)
             {
-                var next = (TextObject) item.Next;
+                TextObject next = (TextObject) item.Next;
                 item.Next = null;
                 item.Destroy();
                 Remove(item);
@@ -112,7 +112,7 @@ namespace ClassicUO.Game.GameObjects
 
             for (int i = 0; i < _messages.Count; i++)
             {
-                var c = _messages[i];
+                TextObject c = _messages[i];
 
                 float delta = c.Time - Time.Ticks;
 
@@ -216,7 +216,7 @@ namespace ClassicUO.Game.GameObjects
             y += screenY;
 
 
-            foreach (var item in _messages)
+            foreach (TextObject item in _messages)
             {
                 ushort hue = 0;
 
@@ -247,7 +247,7 @@ namespace ClassicUO.Game.GameObjects
 
             IsDestroyed = true;
 
-            foreach (var item in _messages)
+            foreach (TextObject item in _messages)
                 item.Destroy();
 
             _messages.Clear();

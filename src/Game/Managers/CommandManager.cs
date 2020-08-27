@@ -95,7 +95,7 @@ namespace ClassicUO.Game.Managers
         {
             name = name.ToLower();
 
-            if (_commands.TryGetValue(name, out var action))
+            if (_commands.TryGetValue(name, out Action<string[]> action))
                 action.Invoke(args);
             else
                 Log.Warn( $"Commad: '{name}' not exists");

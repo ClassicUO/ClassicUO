@@ -137,7 +137,7 @@ namespace ClassicUO.Game.Managers
                 {
                     if (this[host] == null || this[host].IsEmptyDirection(draggedControl, host, relativePosition.Value))
                     {
-                        var offset = relativePosition.Value * new Point(g.GroupMatrixWidth, g.GroupMatrixHeight);
+                        Point offset = relativePosition.Value * new Point(g.GroupMatrixWidth, g.GroupMatrixHeight);
 
                         return new Point(host.X + offset.X, host.Y + offset.Y);
                     }
@@ -156,11 +156,11 @@ namespace ClassicUO.Game.Managers
         {
             if (this[control] != null)
             {
-                var group = reverseMap.Where(o => o.Value == this[control]).Select(o => o.Key).ToList();
+                List<AnchorableGump> group = reverseMap.Where(o => o.Value == this[control]).Select(o => o.Key).ToList();
 
                 if (group.Count == 2) // if detach 1+1 - need destroy all group
                 {
-                    foreach (var ctrl in group)
+                    foreach (AnchorableGump ctrl in group)
                     {
                         this[ctrl].DetachControl(ctrl);
                         this[ctrl] = null;
@@ -178,7 +178,7 @@ namespace ClassicUO.Game.Managers
         {
             if (this[control] != null)
             {
-                foreach (var ctrl in reverseMap.Where(o => o.Value == this[control]).Select(o => o.Key).ToList())
+                foreach (AnchorableGump ctrl in reverseMap.Where(o => o.Value == this[control]).Select(o => o.Key).ToList())
                 {
                     this[ctrl] = null;
                     ctrl.Dispose();
@@ -229,7 +229,7 @@ namespace ClassicUO.Game.Managers
             AnchorableGump closestControl = null;
             int closestDistance = 99999;
 
-            foreach (var c in UIManager.Gumps)
+            foreach (Control c in UIManager.Gumps)
             {
                 if (!c.IsDisposed && c is AnchorableGump host && host.AnchorType == control.AnchorType)
                 {
@@ -298,7 +298,7 @@ namespace ClassicUO.Game.Managers
                 {
                     for (int x = 0; x < controlMatrix.GetLength(0); x++)
                     {
-                        var gump = controlMatrix[x, y];
+                        AnchorableGump gump = controlMatrix[x, y];
 
                         if (gump != null)
                         {
@@ -378,8 +378,8 @@ namespace ClassicUO.Game.Managers
 
                 if (hostPosition.HasValue)
                 {
-                    var targetX = hostPosition.Value.X + relativePosition.X;
-                    var targetY = hostPosition.Value.Y + relativePosition.Y;
+                    int targetX = hostPosition.Value.X + relativePosition.X;
+                    int targetY = hostPosition.Value.Y + relativePosition.Y;
 
                     if (IsEmptyDirection(targetX, targetY))
                     {
@@ -415,7 +415,7 @@ namespace ClassicUO.Game.Managers
 
                 if (hostPosition.HasValue)
                 {
-                    var targetInitPosition = hostPosition.Value + relativePosition;
+                    Point targetInitPosition = hostPosition.Value + relativePosition;
 
                     for (int xOffset = 0; xOffset < draggedControl.WidthMultiplier; xOffset++)
                     {

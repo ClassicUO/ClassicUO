@@ -122,7 +122,7 @@ namespace ClassicUO.IO
                 string file = string.Format(_pattern, i);
                 ulong hash = CreateHash(file);
 
-                if (_hashes.TryGetValue(hash, out var data))
+                if (_hashes.TryGetValue(hash, out UOFileIndex data))
                 {
                     entries[i] = data;
                 }

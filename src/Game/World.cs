@@ -448,12 +448,12 @@ namespace ClassicUO.Game
             if (item == null || item.IsDestroyed)
                 return false;
 
-            var first = item.Items;
+            LinkedObject first = item.Items;
             RemoveItemFromContainer(item);
 
             while (first != null)
             {
-                var next = first.Next;
+                LinkedObject next = first.Next;
 
                 RemoveItem(first as Item, forceRemove);
 
@@ -475,11 +475,11 @@ namespace ClassicUO.Game
             if (mobile == null || mobile.IsDestroyed)
                 return false;
 
-            var first = mobile.Items;
+            LinkedObject first = mobile.Items;
 
             while (first != null)
             {
-                var next = first.Next;
+                LinkedObject next = first.Next;
 
                 RemoveItem(first as Item, forceRemove);
 
@@ -528,7 +528,7 @@ namespace ClassicUO.Game
                         if (item.IsMulti || item.IsDestroyed || !item.OnGround)
                             continue;
 
-                        var dist = item.Distance;
+                        int dist = item.Distance;
 
                         if (dist < distance)
                             distance = dist;
@@ -632,7 +632,7 @@ namespace ClassicUO.Game
                             }
                         }
 
-                        var dist = mobile.Distance;
+                        int dist = mobile.Distance;
 
                         if (dist < distance)
                             distance = dist;
@@ -855,7 +855,7 @@ namespace ClassicUO.Game
                 _toRemove.Add(item);
             }
 
-            foreach (var serial in _toRemove)
+            foreach (uint serial in _toRemove)
             {
                 RemoveItem(serial, true);
             }
@@ -873,7 +873,7 @@ namespace ClassicUO.Game
                 _toRemove.Add(mob);
             }
 
-            foreach (var serial in _toRemove)
+            foreach (uint serial in _toRemove)
             {
                 RemoveMobile(serial, true);
             }

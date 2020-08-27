@@ -281,7 +281,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
 
 
-            var loginmusic_checkbox = new Checkbox(0x00D2, 0x00D3, "Music", font, hue, false)
+            Checkbox loginmusic_checkbox = new Checkbox(0x00D2, 0x00D3, "Music", font, hue, false)
             {
                 X = _checkboxSaveAccount.X + _checkboxSaveAccount.Width + 10,
                 Y = 417,
@@ -289,7 +289,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
             };
             Add(loginmusic_checkbox);
 
-            var login_music = new HSliderBar(loginmusic_checkbox.X + loginmusic_checkbox.Width + 10, loginmusic_checkbox.Y + 4, 80, 0, 100, Settings.GlobalSettings.LoginMusicVolume, HSliderBarStyle.MetalWidgetRecessedBar, true, font, hue, unicode: false);
+            HSliderBar login_music = new HSliderBar(loginmusic_checkbox.X + loginmusic_checkbox.Width + 10, loginmusic_checkbox.Y + 4, 80, 0, 100, Settings.GlobalSettings.LoginMusicVolume, HSliderBarStyle.MetalWidgetRecessedBar, true, font, hue, unicode: false);
             Add(login_music);
             login_music.IsVisible = Settings.GlobalSettings.LoginMusic;
 

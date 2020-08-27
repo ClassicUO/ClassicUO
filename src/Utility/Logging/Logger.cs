@@ -119,7 +119,7 @@ namespace ClassicUO.Utility.Logging
                 else
                 {
                     Console.Write($"{DateTime.Now:T} |");
-                    var temp = Console.ForegroundColor;
+                    ConsoleColor temp = Console.ForegroundColor;
                     Console.ForegroundColor = _logTypesInfo[type].Item1;
                     Console.Write(_logTypesInfo[type].Item2);
                     Console.ForegroundColor = temp;

@@ -200,8 +200,8 @@ namespace ClassicUO.Game.UI.Gumps
                 if (i + 1 >= _container.Count)
                     break;
 
-                var c0 = _container[i];
-                var c1 = _container[i + 1];
+                Control c0 = _container[i];
+                Control c1 = _container[i + 1];
 
                 batcher.DrawLine(Texture2DCache.GetTexture(Color.White), 
                                       c0.ScreenCoordinateX, c0.ScreenCoordinateY, 
