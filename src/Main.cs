@@ -1,4 +1,4 @@
-#region license
+﻿#region license
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -47,7 +47,7 @@ namespace ClassicUO
         private static bool _skipUpdates;
 
         [STAThread]
-        static void Main(string[] args)
+        public static void Main(string[] args)
         {
             // - check for update
             // - launcher & user setup
@@ -485,14 +485,13 @@ namespace ClassicUO
 
                 try
                 {
-                    Process proc = Process.GetProcessById(pid);
-                    proc.Kill();
-                    proc.WaitForExit(5000);
+                    var processToBeKilled = Process.GetProcessById(processId);
+                    processToBeKilled.Kill();
+                    processToBeKilled.WaitForExit(5000);
                 }
                 catch
                 {
                 }
-
 
                 //File.SetAttributes(Path.GetDirectoryName(path), FileAttributes.Normal);
 
@@ -509,7 +508,7 @@ namespace ClassicUO
                 var processStartInfo = new ProcessStartInfo
                 {
                     WorkingDirectory = path,
-                    UseShellExecute = false,
+                    UseShellExecute = false
                 };
 
                 if (CUOEnviroment.IsUnix)
@@ -532,9 +531,9 @@ namespace ClassicUO
             {
                 try
                 {
-                    Process.GetProcessById(pid);
+                    Process.GetProcessById(processId);
                     Thread.Sleep(1000);
-                    Process.GetProcessById(pid).Kill();
+                    Process.GetProcessById(processId).Kill();
                 }
                 catch
                 {

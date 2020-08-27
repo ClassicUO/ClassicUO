@@ -33,24 +33,13 @@ namespace ClassicUO.IO.Resources
     {
         private UOFile _file;
 
-        private GumpsLoader(int count) : base(count)
+        private GumpsLoader(int count)
+            : base(count)
         {
-
         }
 
         private static GumpsLoader _instance;
-        public static GumpsLoader Instance
-        {
-            get
-            {
-                if (_instance == null)
-                {
-                    _instance = new GumpsLoader(Constants.MAX_GUMP_DATA_INDEX_COUNT);
-                }
-
-                return _instance;
-            }
-        }
+        public static GumpsLoader Instance => _instance ?? (_instance = new GumpsLoader(Constants.MAX_GUMP_DATA_INDEX_COUNT));
 
         public override Task Load()
         {
@@ -142,7 +131,7 @@ namespace ClassicUO.IO.Resources
                 texture = new UOTexture32(w, h);
                 texture.PushData(pixels);
 
-                SaveID(g);
+                SaveId(g);
             }
             else
             {
@@ -169,7 +158,9 @@ namespace ClassicUO.IO.Resources
             ushort color = entry.Hue;
 
             if (width == 0 || height == 0)
+            {
                 return null;
+            }
 
             _file.SetData(entry.Address, entry.FileSize);
 

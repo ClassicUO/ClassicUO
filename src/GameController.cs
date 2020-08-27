@@ -1,4 +1,4 @@
-#region license
+﻿#region license
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -91,13 +91,13 @@ namespace ClassicUO
             SetRefreshRate(Settings.GlobalSettings.FPS);
             _uoSpriteBatch = new UltimaBatcher2D(GraphicsDevice);
 
-            _filter = new SDL_EventFilter(HandleSDLEvent);
+            _filter = HandleSdlEvent;
             SDL_AddEventWatch(_filter, IntPtr.Zero);
 
             base.Initialize();
         }
 
-        private readonly Texture2D[] _hues_sampler = new Texture2D[2];
+        private readonly Texture2D[] _hueSamplers = new Texture2D[2];
 
         protected override void LoadContent()
         {
@@ -105,33 +105,19 @@ namespace ClassicUO
 
             Client.Load();
 
-            const int TEXTURE_WIDHT = 32;
+            const int TEXTURE_WIDTH = 32;
             const int TEXTURE_HEIGHT = 2048 * 1;
 
             var buffer = new uint[TEXTURE_WIDTH * TEXTURE_HEIGHT * 2];
             HuesLoader.Instance.CreateShaderColors(buffer);
 
+            _hueSamplers[0] = new Texture2D(GraphicsDevice, TEXTURE_WIDTH, TEXTURE_HEIGHT);
+            _hueSamplers[0].SetData(buffer, 0, TEXTURE_WIDTH * TEXTURE_HEIGHT);
+            _hueSamplers[1] = new Texture2D(GraphicsDevice, TEXTURE_WIDTH, TEXTURE_HEIGHT);
+            _hueSamplers[1].SetData(buffer, TEXTURE_WIDTH * TEXTURE_HEIGHT, TEXTURE_WIDTH * TEXTURE_HEIGHT);
 
-            _hues_sampler[0] = new Texture2D(
-                                          GraphicsDevice,
-                                          TEXTURE_WIDHT,
-                                          TEXTURE_HEIGHT);
-            _hues_sampler[0].SetData(buffer, 0, TEXTURE_WIDHT * TEXTURE_HEIGHT);
-
-
-
-
-            _hues_sampler[1] = new Texture2D(
-                                          GraphicsDevice,
-                                          TEXTURE_WIDHT,
-                                          TEXTURE_HEIGHT);
-            _hues_sampler[1].SetData(buffer, TEXTURE_WIDHT * TEXTURE_HEIGHT, TEXTURE_WIDHT * TEXTURE_HEIGHT);
-
-
-
-
-            GraphicsDevice.Textures[1] = _hues_sampler[0];
-            GraphicsDevice.Textures[2] = _hues_sampler[1];
+            GraphicsDevice.Textures[1] = _hueSamplers[0];
+            GraphicsDevice.Textures[2] = _hueSamplers[1];
 
             AuraManager.CreateAuraTexture();
             UIManager.InitializeGameCursor();
@@ -140,7 +126,6 @@ namespace ClassicUO
             SetScene(new LoginScene());
             SetWindowPositionBySettings();
         }
-
 
         protected override void UnloadContent()
         {
@@ -223,7 +208,7 @@ namespace ClassicUO
             _intervalFixedUpdate[1] = 217;  // 5 FPS
         }
 
-        public void SetWindowPosition(int x, int y)
+        private void SetWindowPosition(int x, int y)
         {
             SDL_SetWindowPosition(Window.Handle, x, y);
         }
@@ -412,8 +397,7 @@ namespace ClassicUO
             Plugin.ProcessDrawCmdList(GraphicsDevice);
         }
 
-
-        private void OnNetworkUpdate(double totalMS, double frameMS)
+        private void OnNetworkUpdate(double totalMilliseconds, double frameMilliseconds)
         {
             if (NetClient.LoginSocket.IsDisposed && NetClient.LoginSocket.IsConnected)
             {
@@ -422,27 +406,27 @@ namespace ClassicUO
             else if (!NetClient.Socket.IsConnected)
             {
                 NetClient.LoginSocket.Update();
-                UpdateSockeStats(NetClient.LoginSocket, totalMS);
+                UpdateSocketStats(NetClient.LoginSocket, totalMilliseconds);
             }
             else if (!NetClient.Socket.IsDisposed)
             {
                 NetClient.Socket.Update();
-                UpdateSockeStats(NetClient.Socket, totalMS);
+                UpdateSocketStats(NetClient.Socket, totalMilliseconds);
             }
         }
 
-        private void UpdateSockeStats(NetClient socket, double totalMS)
+        private void UpdateSocketStats(NetClient socket, double totalMilliseconds)
         {
-            if (_statisticsTimer < totalMS)
+            if (_statisticsTimer < totalMilliseconds)
             {
                 socket.Statistics.Update();
-                _statisticsTimer = totalMS + 500;
+                _statisticsTimer = totalMilliseconds + 500;
             }
         }
 
         //public override void OnSDLEvent(ref SDL_Event ev)
         //{
-        //    HandleSDLEvent(ref ev);
+        //    HandleSdlEvent(ref ev);
         //    base.OnSDLEvent(ref ev);
         //}
 
@@ -467,7 +451,7 @@ namespace ClassicUO
             }
         }
 
-        private unsafe int HandleSDLEvent(IntPtr userdata, IntPtr ptr)
+        private unsafe int HandleSdlEvent(IntPtr userData, IntPtr ptr)
         {
             var sdlEvent = (SDL_Event*)ptr;
 

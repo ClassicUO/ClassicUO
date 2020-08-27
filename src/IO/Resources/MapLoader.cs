@@ -42,23 +42,14 @@ namespace ClassicUO.IO.Resources
         private readonly UOFileMul[] _staDifi = new UOFileMul[Constants.MAPS_COUNT];
         private readonly UOFileMul[] _staDifl = new UOFileMul[Constants.MAPS_COUNT];
 
-        public MapLoader()
+        private protected MapLoader()
         {
-
         }
 
         private static MapLoader _instance;
         public static MapLoader Instance
         {
-            get
-            {
-                if (_instance == null)
-                {
-                    _instance = new MapLoader();
-                }
-
-                return _instance;
-            }
+            get => _instance ?? (_instance = new MapLoader());
             set
             {
                 _instance?.Dispose();
@@ -66,16 +57,16 @@ namespace ClassicUO.IO.Resources
             }
         }
 
-
-
         public new UOFileIndex[][] Entries = new UOFileIndex[Constants.MAPS_COUNT][]; 
 
         public IndexMap[][] BlockData { get; private set; } = new IndexMap[Constants.MAPS_COUNT][];
 
         public int[,] MapBlocksSize { get; private set; } = new int[Constants.MAPS_COUNT, 2];
 
+        // ReSharper disable RedundantExplicitArraySize
         public int[,] MapsDefaultSize { get; private protected set; } = new int[6, 2]
-        {
+            // ReSharper restore RedundantExplicitArraySize
+            {
             {
                 7168, 4096
             },
@@ -103,10 +94,7 @@ namespace ClassicUO.IO.Resources
 
         protected static UOFile GetMapFile(int map)
         {
-            if (map < MapLoader.Instance._filesMap.Length)
-                return MapLoader.Instance._filesMap[map];
-
-            return null;
+            return map < Instance._filesMap.Length ? Instance._filesMap[map] : null;
         }
 
         public override unsafe Task Load()
@@ -150,9 +138,15 @@ namespace ClassicUO.IO.Resources
                     }
                     
                     path = UOFileManager.GetUOFilePath($"statics{i}.mul");
-                    if (File.Exists(path)) _filesStatics[i] = new UOFileMul(path);
+                    if (File.Exists(path))
+                    {
+                        _filesStatics[i] = new UOFileMul(path);
+                    }
                     path = UOFileManager.GetUOFilePath($"staidx{i}.mul");
-                    if (File.Exists(path)) _filesIdxStatics[i] = new UOFileMul(path);
+                    if (File.Exists(path))
+                    {
+                        _filesIdxStatics[i] = new UOFileMul(path);
+                    }
                 }
 
                 if (!foundOneMap)

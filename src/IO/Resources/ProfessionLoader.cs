@@ -38,27 +38,12 @@ namespace ClassicUO.IO.Resources
 
         private ProfessionLoader()
         {
-
         }
 
         private static ProfessionLoader _instance;
-        public static ProfessionLoader Instance
-        {
-            get
-            {
-                if (_instance == null)
-                {
-                    _instance = new ProfessionLoader();
-                }
-
-                return _instance;
-            }
-        }
-
+        public static ProfessionLoader Instance => _instance ?? (_instance = new ProfessionLoader());
 
         public Dictionary<ProfessionInfo, List<ProfessionInfo>> Professions { get; } = new Dictionary<ProfessionInfo, List<ProfessionInfo>>();
-
-
 
         public override Task Load()
         {
