@@ -66,10 +66,14 @@ namespace ClassicUO.Game.Scenes
         private uint _pingTime;
 
 
-        public LoginScene() : base((int) SceneType.Login,
-            false,
-            false,
-            true)
+        public LoginScene() 
+            : base
+            (
+                (int) SceneType.Login,
+                false,
+                false,
+                true
+            )
         {
 
         }

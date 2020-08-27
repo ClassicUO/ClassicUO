@@ -752,10 +752,15 @@ namespace ClassicUO.Game.Scenes
                 float newRight = right * Scale;
                 float newBottom = bottom * Scale;
 
-                winGameScaledOffsetX = (int)((left * Scale) - (newRight - right));
-                winGameScaledOffsetY = (int)((top * Scale) - (newBottom - bottom));
-                winGameScaledWidth = (int)(newRight - winGameScaledOffsetX);
-                winGameScaledHeight = (int)(newBottom - winGameScaledOffsetY);
+                winGameScaledOffsetX = (int) ((left * Scale) - (newRight - right));
+                winGameScaledOffsetY = (int) ((top * Scale) - (newBottom - bottom));
+                winGameScaledWidth = (int) (newRight - winGameScaledOffsetX);
+                winGameScaledHeight = (int) (newBottom - winGameScaledOffsetY);
+
+                //winGameScaledOffsetX = 0;
+                //winGameScaledOffsetY = 0;
+                //winGameScaledWidth = (int) (winGameWidth * Scale);
+                //winGameScaledHeight = (int) (winGameHeight * Scale);
             }
             else
             {
@@ -888,6 +893,7 @@ namespace ClassicUO.Game.Scenes
 
             _last_scaled_offset.X = winGameScaledOffsetX;
             _last_scaled_offset.Y = winGameScaledOffsetY;
+
 
             UpdateMaxDrawZ();
         }

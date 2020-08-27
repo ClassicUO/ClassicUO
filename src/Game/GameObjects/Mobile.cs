@@ -1052,35 +1052,29 @@ namespace ClassicUO.Game.GameObjects
             if (last == null)
                 return;
 
+            if (last.Time < Time.Ticks)
+                return;
+
             int offY = 0;
 
             bool health = ProfileManager.Current.ShowMobilesHP;
             int alwaysHP = ProfileManager.Current.MobileHPShowWhen;
             int mode = ProfileManager.Current.MobileHPType;
 
-            var scene = Client.Game.GetScene<GameScene>();
-            float scale = scene?.Scale ?? 1;
-            //scale = 1;
-
-            int startX = ProfileManager.Current.GameWindowPosition.X;
-            int startY = ProfileManager.Current.GameWindowPosition.Y;
-
-            int x = RealScreenPosition.X;
-            int y = RealScreenPosition.Y;
-
+            Point p = RealScreenPosition;
 
             if (health && mode != 1 && ((alwaysHP >= 1 && Hits != HitsMax) || alwaysHP == 0))
             {
-                y -= 22;
+                p.Y -= 22;
             }
 
             if (ObjectHandlesOpened)
-                y -= 22;
+                p.Y -= 22;
 
             if (IsGargoyle && IsFlying)
-                y -= 22;
+                p.Y -= 22;
             else if (!IsMounted)
-                y += 22;
+                p.Y += 22;
 
             AnimationsLoader.Instance.GetAnimationDimensions(AnimIndex,
                                                           GetGraphicForAnimation(),
@@ -1092,12 +1086,12 @@ namespace ClassicUO.Game.GameObjects
                                                           out int centerY,
                                                           out _,
                                                           out int height);
-            x += (int)Offset.X + 22;
-            y += (int)(Offset.Y - Offset.Z - (height + centerY + 8));
-            x = (int) (x / scale);
-            y = (int) (y / scale);
 
-           
+            p.X += (int) Offset.X + 22;
+            p.Y += (int) (Offset.Y - Offset.Z - (height + centerY + 8));
+            p = Client.Game.Scene.Camera.WorldToScreen(p);
+
+
             for (; last != null; last = (TextObject) last.Previous)
             {
                 if (last.RenderedText != null && !last.RenderedText.IsDestroyed)
@@ -1108,8 +1102,8 @@ namespace ClassicUO.Game.GameObjects
                     last.OffsetY = offY;
                     offY += last.RenderedText.Height;
 
-                    last.RealScreenPosition.X = startX + (x - (last.RenderedText.Width >> 1));
-                    last.RealScreenPosition.Y = startY + (y - offY);
+                    last.RealScreenPosition.X = (p.X - (last.RenderedText.Width >> 1));
+                    last.RealScreenPosition.Y = (p.Y - offY);
                 }
             }
 

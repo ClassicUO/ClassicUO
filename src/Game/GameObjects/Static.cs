@@ -86,57 +86,6 @@ namespace ClassicUO.Game.GameObjects
             IsVegetation = StaticFilters.IsVegetation(Graphic);
         }
 
-        public override void UpdateTextCoordsV()
-        {
-            if (TextContainer == null)
-                return;
-
-            var last = (TextObject) TextContainer.Items;
-
-            while (last?.Next != null)
-                last = (TextObject) last.Next;
-
-            if (last == null)
-                return;
-
-            int offY = 0;
-
-            int startX = ProfileManager.Current.GameWindowPosition.X + 6;
-            int startY = ProfileManager.Current.GameWindowPosition.Y + 6;
-            var scene = Client.Game.GetScene<GameScene>();
-            float scale = scene?.Scale ?? 1;
-            int x = RealScreenPosition.X;
-            int y = RealScreenPosition.Y;
-
-            x += 22;
-            y += 44;
-
-            var texture = ArtLoader.Instance.GetTexture(Graphic);
-
-            if (texture != null)
-                y -= (texture.ImageRectangle.Height >> 1);
-
-            x = (int)(x / scale);
-            y = (int)(y / scale);
-
-            for (; last != null; last = (TextObject) last.Previous)
-            {
-                if (last.RenderedText != null && !last.RenderedText.IsDestroyed)
-                {
-                    if (offY == 0 && last.Time < Time.Ticks)
-                        continue;
-
-                    last.OffsetY = offY;
-                    offY += last.RenderedText.Height;
-
-                    last.RealScreenPosition.X = startX + (x - (last.RenderedText.Width >> 1));
-                    last.RealScreenPosition.Y = startY + (y - offY);
-                }
-            }
-
-            FixTextCoordinatesInScreen();
-        }
-
         public override void Destroy()
         {
             if (IsDestroyed)

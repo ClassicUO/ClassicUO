@@ -327,7 +327,7 @@ namespace ClassicUO
             Mouse.Update();
             OnNetworkUpdate(gameTime.TotalGameTime.TotalMilliseconds, gameTime.ElapsedGameTime.TotalMilliseconds);
             Plugin.Tick();
-
+            
             if (_scene != null && _scene.IsLoaded && !_scene.IsDestroyed)
             {
                 Profiler.EnterContext("Update");
@@ -439,12 +439,6 @@ namespace ClassicUO
                 _statisticsTimer = totalMS + 500;
             }
         }
-
-        //public override void OnSDLEvent(ref SDL_Event ev)
-        //{
-        //    HandleSDLEvent(ref ev);
-        //    base.OnSDLEvent(ref ev);
-        //}
 
         private void WindowOnClientSizeChanged(object sender, EventArgs e)
         {

@@ -861,8 +861,7 @@ namespace ClassicUO.Game.Scenes
 
             bool canExecuteMacro = UIManager.KeyboardFocusControl == UIManager.SystemChat.TextBoxControl &&
                                    UIManager.SystemChat.Mode >= ChatMode.Default;
-
-
+            
             if (canExecuteMacro)
             {
                 Macro macro = Macros.FindMacro(e.keysym.sym, Keyboard.Alt, Keyboard.Ctrl, Keyboard.Shift);

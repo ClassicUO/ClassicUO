@@ -849,65 +849,26 @@ namespace ClassicUO.Game.GameObjects
 
         public override void UpdateTextCoordsV()
         {
-            if (TextContainer == null)
-                return;
-
-            TextObject last = (TextObject) TextContainer.Items;
-
-            while (last?.Next != null)
-                last = (TextObject) last.Next;
-
-            if (last == null)
-                return;
-
-            int offY = 0;
-
-            int startX = ProfileManager.Current.GameWindowPosition.X;
-            int startY = ProfileManager.Current.GameWindowPosition.Y;
-
-            int x = RealScreenPosition.X;
-            int y = RealScreenPosition.Y;
-
-
             if (OnGround)
             {
-                var scene = Client.Game.GetScene<GameScene>();
-                float scale = scene?.Scale ?? 1;
-
-                var texture = ArtLoader.Instance.GetTexture(Graphic);
-
-                if (texture != null)
-                    y -= (texture.ImageRectangle.Height >> 1);
-
-                x += 22;
-                y += 22;
-
-                x = (int) (x / scale);
-                y = (int) (y / scale);
-
-                x += (int) Offset.X;
-                y += (int) (Offset.Y - Offset.Z);
-
-                for (; last != null; last = (TextObject) last.Previous)
-                {
-                    if (last.RenderedText != null && !last.RenderedText.IsDestroyed)
-                    {
-                        if (offY == 0 && last.Time < Time.Ticks)
-                            continue;
-
-
-                        last.OffsetY = offY;
-                        offY += last.RenderedText.Height;
-
-                        last.RealScreenPosition.X = startX + (x - (last.RenderedText.Width >> 1));
-                        last.RealScreenPosition.Y = startY +  (y - offY);
-                    }
-                }
-
-                FixTextCoordinatesInScreen();
+                base.UpdateTextCoordsV();
             }
             else
             {
+                if (TextContainer == null)
+                    return;
+
+                TextObject last = (TextObject) TextContainer.Items;
+
+                while (last?.Next != null)
+                    last = (TextObject) last.Next;
+
+                if (last == null)
+                    return;
+
+                int offY = 0;
+                Point p = RealScreenPosition;
+
                 for (; last != null; last = (TextObject) last.Previous)
                 {
                     if (last.RenderedText != null && !last.RenderedText.IsDestroyed)
@@ -915,19 +876,18 @@ namespace ClassicUO.Game.GameObjects
                         if (offY == 0 && last.Time < Time.Ticks)
                             continue;
 
-                        x = last.X;
-                        y = last.Y;
+                        p.X = last.X;
+                        p.Y = last.Y;
 
                         last.OffsetY = offY;
                         offY += last.RenderedText.Height;
 
-                        last.RealScreenPosition.X = ((x - (last.RenderedText.Width >> 1)));
-                        last.RealScreenPosition.Y = ((y - offY));
+                        last.RealScreenPosition.X = ((p.X - (last.RenderedText.Width >> 1)));
+                        last.RealScreenPosition.Y = ((p.Y - offY));
                     }
                 }
             }
         }
-
 
         public override void ProcessAnimation(out byte dir, bool evalutate = false)
         {

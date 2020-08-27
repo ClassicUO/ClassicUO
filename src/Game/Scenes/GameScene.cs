@@ -89,10 +89,14 @@ namespace ClassicUO.Game.Scenes
 
 
 
-        public GameScene() : base((int) SceneType.Game,
-            true,
-            true,
-            true)
+        public GameScene() 
+            : base
+            (
+                (int) SceneType.Game,
+                true,
+                true,
+                true
+            )
         {
 
         }
@@ -110,6 +114,8 @@ namespace ClassicUO.Game.Scenes
                     value = _scaleArray.Length - 1;
 
                 _scale = value;
+
+                Camera.Zoom = _scaleArray[_scale];
             }
         }
 
@@ -557,6 +563,29 @@ namespace ClassicUO.Game.Scenes
 
         public override void Update(double totalMS, double frameMS)
         {
+            int posX = ProfileManager.Current.GameWindowPosition.X + 5;
+            int posY = ProfileManager.Current.GameWindowPosition.Y + 5;
+            int width = ProfileManager.Current.GameWindowSize.X;
+            int height = ProfileManager.Current.GameWindowSize.Y;
+
+            Camera.SetPosition
+            (
+                World.Player.RealScreenPosition.X + 22,
+                World.Player.RealScreenPosition.Y + 22
+            );
+
+            Camera.SetGameWindowBounds
+            (
+                posX, 
+                posY, 
+                width,
+                height
+            );
+
+
+            SelectedObject.TranslatedMousePositionByViewport = Camera.MouseToWorldPosition();
+
+
             base.Update(totalMS, frameMS);
 
             PacketHandlers.SendMegaClilocRequests();
@@ -572,7 +601,7 @@ namespace ClassicUO.Game.Scenes
 
             if (!World.InGame)
                 return;
-
+            
             _healthLinesManager.Update();
             World.Update(totalMS, frameMS);
             AnimatedStaticsManager.Process();
@@ -732,7 +761,7 @@ namespace ClassicUO.Game.Scenes
         }
 
 
-        private Matrix _matrix = Matrix.Identity;
+        //public static Matrix _matrix = Matrix.Identity;
         private static XBREffect _xbr_effect;
         private bool _use_render_target = false;
 
@@ -740,7 +769,8 @@ namespace ClassicUO.Game.Scenes
         {
             if (!World.InGame)
                 return false;
-    
+
+            //float scale = Scale;
 
             int posX = ProfileManager.Current.GameWindowPosition.X + 5;
             int posY = ProfileManager.Current.GameWindowPosition.Y + 5;
@@ -750,19 +780,30 @@ namespace ClassicUO.Game.Scenes
             var r_viewport = batcher.GraphicsDevice.Viewport;
 
 
-            float left = 0;
-            float right = width + left;
-            float top = 0;
-            float bottom = height + top;
+            //float left = 0;
+            //float right = width + left;
+            //float top = 0;
+            //float bottom = height + top;
 
-            float new_right = right * Scale;
-            float new_bottom = bottom * Scale;
+            //int new_right = (int) (right * scale);
+            //int new_bottom = (int) (bottom * scale);
 
-            left = (left * Scale) - (new_right - right);
-            top  = (top * Scale) - (new_bottom - bottom);
+            //left = -(new_right - right);
+            //top = -(new_bottom - bottom);
 
-            Matrix.CreateOrthographicOffCenter(left, new_right, new_bottom, top, 0, 1, out _matrix);
+            //Matrix.CreateOrthographicOffCenter
+            //(
+            //    left, 
+            //    new_right, 
+            //    new_bottom, 
+            //    top, 
+            //    0, 
+            //    1, 
+            //    out _matrix
+            //);
 
+            
+            Matrix matrix = Camera.ViewProjectionMatrix;
 
             if (ProfileManager.Current.EnableDeathScreen)
             {
@@ -786,30 +827,29 @@ namespace ClassicUO.Game.Scenes
             }
 
 
-            Viewport world_viewport = new Viewport(posX, posY, width, height);
+            //Viewport world_viewport = new Viewport(posX, posY, width, height);
 
-            GraphicHelper.ScreenToWorldCoordinates
-            (
-                world_viewport.Bounds,
-                ref Mouse.Position,
-                ref _matrix,
-                out SelectedObject.TranslatedMousePositionByViewport
-            );
-
+            //GraphicHelper.ScreenToWorldCoordinates
+            //(
+            //    world_viewport.Bounds,
+            //    ref Mouse.Position,
+            //    ref _matrix,
+            //    out SelectedObject.TranslatedMousePositionByViewport
+            //);
 
             bool can_draw_lights = false;
 
             if (!_use_render_target)
             {
-                can_draw_lights = PrepareLightsRendering(batcher, ref _matrix);
-                batcher.GraphicsDevice.Viewport = world_viewport;
+                can_draw_lights = PrepareLightsRendering(batcher, ref matrix);
+                batcher.GraphicsDevice.Viewport = Camera.GetViewport();
             }
 
-            DrawWorld(batcher, posX, posY, ref _matrix, _use_render_target);
+            DrawWorld(batcher, posX, posY, ref matrix, _use_render_target);
 
             if (_use_render_target)
             {
-                can_draw_lights = PrepareLightsRendering(batcher, ref _matrix);
+                can_draw_lights = PrepareLightsRendering(batcher, ref matrix);
             }
             
             // draw world rt
@@ -860,7 +900,7 @@ namespace ClassicUO.Game.Scenes
             // ==============
             // FIXME: OVERHEAD NOT WORKING WHEN ZOOMING :(
             batcher.Begin();
-            DrawOverheads(batcher, 0, 0);
+            DrawOverheads(batcher, posX, posY);
             DrawSelection(batcher, 0, 0);
             batcher.End();
             // ==============
