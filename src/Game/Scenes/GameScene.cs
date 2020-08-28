@@ -450,8 +450,11 @@ namespace ClassicUO.Game.Scenes
             }
         }
 
+        private bool _isListReady;
+
         private void FillGameObjectList()
         {
+            _isListReady = false;
             _alphaChanged = _alphaTimer < Time.Ticks;
 
             if (_alphaChanged)
@@ -547,6 +550,7 @@ namespace ClassicUO.Game.Scenes
             if (_renderIndex >= 100)
                 _renderIndex = 1;
             UpdateDrawPosition = false;
+            _isListReady = true;
         }
 
         private void UpdateTextServerEntities<T>(IEnumerable<T> entities, bool force) where T : Entity
@@ -761,46 +765,20 @@ namespace ClassicUO.Game.Scenes
         }
 
 
-        //public static Matrix _matrix = Matrix.Identity;
         private static XBREffect _xbr_effect;
-        private bool _use_render_target = false;
+        private bool _use_render_target = true;
 
         public override bool Draw(UltimaBatcher2D batcher)
         {
-            if (!World.InGame)
+            if (!World.InGame || !_isListReady)
                 return false;
-
-            //float scale = Scale;
 
             int posX = ProfileManager.Current.GameWindowPosition.X + 5;
             int posY = ProfileManager.Current.GameWindowPosition.Y + 5;
             int width = ProfileManager.Current.GameWindowSize.X;
             int height = ProfileManager.Current.GameWindowSize.Y;
 
-            var r_viewport = batcher.GraphicsDevice.Viewport;
-
-
-            //float left = 0;
-            //float right = width + left;
-            //float top = 0;
-            //float bottom = height + top;
-
-            //int new_right = (int) (right * scale);
-            //int new_bottom = (int) (bottom * scale);
-
-            //left = -(new_right - right);
-            //top = -(new_bottom - bottom);
-
-            //Matrix.CreateOrthographicOffCenter
-            //(
-            //    left, 
-            //    new_right, 
-            //    new_bottom, 
-            //    top, 
-            //    0, 
-            //    1, 
-            //    out _matrix
-            //);
+            Viewport r_viewport = batcher.GraphicsDevice.Viewport;
 
             Matrix matrix = Camera.ViewProjectionMatrix;
 
@@ -825,17 +803,7 @@ namespace ClassicUO.Game.Scenes
                 }
             }
 
-
-            //Viewport world_viewport = new Viewport(posX, posY, width, height);
-
-            //GraphicHelper.ScreenToWorldCoordinates
-            //(
-            //    world_viewport.Bounds,
-            //    ref Mouse.Position,
-            //    ref _matrix,
-            //    out SelectedObject.TranslatedMousePositionByViewport
-            //);
-
+            
             bool can_draw_lights = false;
 
             if (!_use_render_target)
@@ -865,6 +833,47 @@ namespace ClassicUO.Game.Scenes
                 _xbr_effect.SetSize(width, height);
 
                 batcher.Begin(ProfileManager.Current.UseXBR ? _xbr_effect : null);
+
+                //float size_zoom_width = (width * Scale);
+                //float size_zoom_height = (height * Scale);
+
+                //float size_zoom_width_half = size_zoom_width * 0.5f;
+                //float size_zoom_height_half = size_zoom_height * 0.5f;
+
+                //float halfWidth = width * 0.5f;
+                //float halfHeight = height * 0.5f;
+
+
+                //float left = 0;
+                //float right = width + left;
+                //float top = 0;
+                //float bottom = height + top;
+
+                //float new_right = (right * Scale);
+                //float new_bottom = (bottom * Scale);
+
+                //left = (left * Scale) - (new_right - right);
+                //top = (top * Scale) - (new_bottom - bottom);
+
+                //batcher.Draw2D(_world_render_target,
+                //    posX /*- offset_x + halfWidth*/,
+                //    posY /*- offset_y + halfHeight*/,
+                //    width,
+                //    height,
+
+                //    //halfWidth - size_zoom_width_half,
+                //    //halfHeight - size_zoom_height_half,
+                //    //size_zoom_width,
+                //    //size_zoom_height,
+
+                //    left,
+                //    top,
+                //    new_right - left,
+                //    new_bottom - top,
+
+                //    ref hue);
+
+
                 batcher.Draw2D(_world_render_target, posX, posY, width, height, ref hue);
                 batcher.End();
             }
@@ -880,7 +889,6 @@ namespace ClassicUO.Game.Scenes
             }
 
 
-            // reset viewport
             if (_use_render_target)
             {
                 var rectangle = ScissorStack.CalculateScissors(
@@ -895,14 +903,10 @@ namespace ClassicUO.Game.Scenes
             }
 
 
-
-            // ==============
-            // FIXME: OVERHEAD NOT WORKING WHEN ZOOMING :(
             batcher.Begin();
             DrawOverheads(batcher, posX, posY);
             DrawSelection(batcher, posX, posY);
             batcher.End();
-            // ==============
 
 
             if (_use_render_target)
@@ -925,7 +929,7 @@ namespace ClassicUO.Game.Scenes
             if (use_render_target)
             {
                 batcher.GraphicsDevice.SetRenderTarget(_world_render_target);
-                batcher.GraphicsDevice.Clear(Color.Black);
+                batcher.GraphicsDevice.Clear(ClearOptions.Target, Color.Black, 0f, 0);
             }
             
 

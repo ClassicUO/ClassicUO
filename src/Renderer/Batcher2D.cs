@@ -1139,12 +1139,12 @@ namespace ClassicUO.Renderer
         }
         
         [MethodImpl(256)]
-        public bool Draw2D(Texture2D texture, float dx, float dy, float dwidth, float dheight, int sx, int sy, float swidth, float sheight, ref Vector3 hue, float angle = 0.0f)
+        public bool Draw2D(Texture2D texture, float dx, float dy, float dwidth, float dheight, float sx, float sy, float swidth, float sheight, ref Vector3 hue, float angle = 0.0f)
         {
             EnsureSize();
 
-            float minX = sx / (float) texture.Width, maxX = (sx + swidth) / texture.Width;
-            float minY = sy / (float) texture.Height, maxY = (sy + sheight) / texture.Height;
+            float minX = sx / texture.Width, maxX = (sx + swidth) / texture.Width;
+            float minY = sy / texture.Height, maxY = (sy + sheight) / texture.Height;
 
             ref PositionNormalTextureColor4 vertex = ref _vertexInfo[_numSprites];
 
@@ -1163,14 +1163,7 @@ namespace ClassicUO.Renderer
 
                 float sin = (float)Math.Sin(angle);
                 float cos = (float)Math.Cos(angle);
-
-                //float sinx = sin * ww;
-                //float cosx = cos * ww;
-                //float siny = sin * hh;
-                //float cosy = cos * hh;
-
-
-
+                
                 float tempX = -ww;
                 float tempY = -hh;
                 float rotX = tempX * cos - tempY * sin;

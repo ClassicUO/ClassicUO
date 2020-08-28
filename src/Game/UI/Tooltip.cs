@@ -120,8 +120,8 @@ namespace ClassicUO.Game.UI
             if (_renderedText.Texture == null)
                 return false;
 
-            int z_width = (_renderedText.Width + 8) * 1;
-            int z_height = (_renderedText.Height + 8) * 1;
+            int z_width = (_renderedText.Width + 8);
+            int z_height = (_renderedText.Height + 8);
 
             if (x < 0)
                 x = 0;
