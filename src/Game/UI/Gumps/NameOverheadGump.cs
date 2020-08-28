@@ -479,18 +479,17 @@ namespace ClassicUO.Game.UI.Gumps
             }
 
 
-           
-            if (x < gx || x + Width > gx + w)
-                return false;
-
-            if (y < gy || y + Height > gy + h)
-                return false;
-
             ResetHueVector();
 
             Point p = Client.Game.Scene.Camera.WorldToScreen(new Point(x, y));
             x = p.X - (Width >> 1);
             y = p.Y - (Height >> 1);
+
+            if (x < gx || x + Width > gx + w)
+                return false;
+
+            if (y < gy || y + Height > gy + h)
+                return false;
 
             X = x;
             Y = y;
