@@ -766,7 +766,7 @@ namespace ClassicUO.Game.Scenes
 
 
         private static XBREffect _xbr_effect;
-        private bool _use_render_target = true;
+        private bool _use_render_target = false;
 
         public override bool Draw(UltimaBatcher2D batcher)
         {
