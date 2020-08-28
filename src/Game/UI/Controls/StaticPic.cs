@@ -34,7 +34,7 @@ namespace ClassicUO.Game.UI.Controls
             IsPartialHue = TileDataLoader.Instance.StaticData[graphic].IsPartialHue;
             CanMove = true;
 
-            var texture = ArtLoader.Instance.GetTexture(graphic);
+            ArtTexture texture = ArtLoader.Instance.GetTexture(graphic);
 
             if (texture == null)
             {
@@ -64,9 +64,9 @@ namespace ClassicUO.Game.UI.Controls
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
             ResetHueVector();
-            ShaderHuesTraslator.GetHueVector(ref _hueVector, Hue, IsPartialHue, 0);
+            ShaderHueTranslator.GetHueVector(ref _hueVector, Hue, IsPartialHue, 0);
 
-            var texture = ArtLoader.Instance.GetTexture(Graphic);
+            ArtTexture texture = ArtLoader.Instance.GetTexture(Graphic);
 
             if (texture != null)
             {
@@ -78,7 +78,7 @@ namespace ClassicUO.Game.UI.Controls
 
         public override bool Contains(int x, int y)
         {
-            var texture = ArtLoader.Instance.GetTexture(Graphic);
+            ArtTexture texture = ArtLoader.Instance.GetTexture(Graphic);
 
             return texture != null && texture.Contains(x, y);
         }

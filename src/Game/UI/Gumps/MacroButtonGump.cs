@@ -69,7 +69,7 @@ namespace ClassicUO.Game.UI.Gumps
             Width = 88;
             Height = 44;
 
-            label = new Label(_macro.Name, true, 1001, Width, 255, FontStyle.BlackBorder, TEXT_ALIGN_TYPE.TS_CENTER)
+            label = new Label(_macro.Name, true, 0x03b2, Width, 255, FontStyle.BlackBorder, TEXT_ALIGN_TYPE.TS_CENTER)
             {
                 X = 0,
                 Width = Width - 10,
@@ -89,7 +89,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override void OnMouseExit(int x, int y)
         {
-            label.Hue = 1001;
+            label.Hue = 0x03b2;
             backgroundTexture = Texture2DCache.GetTexture(new Color(30, 30, 30));
             base.OnMouseExit(x, y);
         }

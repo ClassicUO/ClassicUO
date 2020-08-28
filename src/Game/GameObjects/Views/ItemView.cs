@@ -26,6 +26,7 @@ using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
+using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
@@ -42,7 +43,7 @@ namespace ClassicUO.Game.GameObjects
             //Engine.DebugInfo.ItemsRendered++;
 
             ResetHueVector();
-
+            DrawTransparent = false;
 
             posX += (int) Offset.X;
             posY += (int) (Offset.Y + Offset.Z);
@@ -61,6 +62,7 @@ namespace ClassicUO.Game.GameObjects
 
             ushort hue = Hue;
             ushort graphic = DisplayedGraphic;
+            bool partial = ItemData.IsPartialHue;
 
             if (OnGround && ItemData.IsAnimated)
             {
@@ -94,26 +96,21 @@ namespace ClassicUO.Game.GameObjects
                 }
             }
 
-
             if (ProfileManager.Current.HighlightGameObjects && SelectedObject.LastObject == this)
             {
-                HueVector.X = 0x0023;
-                HueVector.Y = 1;
+                hue = Constants.HIGHLIGHT_CURRENT_OBJECT_HUE;
+                partial = false;
             }
             else if (ProfileManager.Current.NoColorObjectsOutOfRange && Distance > World.ClientViewRange)
             {
-                HueVector.X = Constants.OUT_RANGE_COLOR;
-                HueVector.Y = 1;
+                hue = Constants.OUT_RANGE_COLOR;
             }
             else if (World.Player.IsDead && ProfileManager.Current.EnableBlackWhiteEffect)
             {
-                HueVector.X = Constants.DEAD_RANGE_COLOR;
-                HueVector.Y = 1;
+                hue = Constants.DEAD_RANGE_COLOR;
             }
             else
             {
-                bool isPartial = ItemData.IsPartialHue;
-
                 if (!IsLocked && !IsMulti && SelectedObject.LastObject == this)
                 {
                     // TODO: check why i put this.
@@ -122,13 +119,13 @@ namespace ClassicUO.Game.GameObjects
                 }
                 else if (IsHidden)
                     hue = 0x038E;
-
-                ShaderHuesTraslator.GetHueVector(ref HueVector, hue, isPartial, HueVector.Z);
             }
+
+            ShaderHueTranslator.GetHueVector(ref HueVector, hue, partial, HueVector.Z);
 
             if (!IsMulti && !IsCoin && Amount > 1 && ItemData.IsStackable)
             {
-                DrawStaticAnimated(batcher, graphic, posX - 5, posY - 5, ref HueVector);
+                DrawStaticAnimated(batcher, graphic, posX - 5, posY - 5, ref HueVector, ref DrawTransparent);
             }
 
             if (ItemData.IsLight)
@@ -140,16 +137,16 @@ namespace ClassicUO.Game.GameObjects
             if (!SerialHelper.IsValid(Serial) && IsMulti && TargetManager.TargetingState == CursorTarget.MultiPlacement)
                 HueVector.Z = 0.5f;
 
-            DrawStaticAnimated(batcher, graphic, posX, posY, ref HueVector);
+            DrawStaticAnimated(batcher, graphic, posX, posY, ref HueVector, ref DrawTransparent);
 
             if (SelectedObject.Object == this || TargetManager.TargetingState == CursorTarget.MultiPlacement)
                 return false;
 
-            var texture = ArtLoader.Instance.GetTexture(graphic);
+            ArtTexture texture = ArtLoader.Instance.GetTexture(graphic);
 
             if (texture != null)
             {
-                ref var index = ref ArtLoader.Instance.GetValidRefEntry(graphic + 0x4000);
+                ref UOFileIndex index = ref ArtLoader.Instance.GetValidRefEntry(graphic + 0x4000);
 
                 posX -= index.Width;
                 posY -= index.Height;
@@ -246,7 +243,7 @@ namespace ClassicUO.Game.GameObjects
             if (color == 0)
                 color = newHue;
 
-            var direction = gr.Direction[AnimationsLoader.Instance.Direction];
+            AnimationDirection direction = gr.Direction[AnimationsLoader.Instance.Direction];
 
             if (direction == null)
                 return;
@@ -309,9 +306,9 @@ namespace ClassicUO.Game.GameObjects
                     if (ProfileManager.Current.GridLootType > 0 && SelectedObject.CorpseObject == owner)
                         color = 0x0034;
                     else if (ProfileManager.Current.HighlightGameObjects && SelectedObject.LastObject == owner)
-                        color = 0x0023;
+                        color = Constants.HIGHLIGHT_CURRENT_OBJECT_HUE;
 
-                    ShaderHuesTraslator.GetHueVector(ref HueVector, color, ispartialhue, alpha);
+                    ShaderHueTranslator.GetHueVector(ref HueVector, color, ispartialhue, alpha);
                 }
 
                 batcher.DrawSprite(frame, posX, posY, flipped, ref HueVector);

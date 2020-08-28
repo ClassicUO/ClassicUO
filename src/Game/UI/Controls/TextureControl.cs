@@ -20,6 +20,7 @@
 #endregion
 
 using ClassicUO.Renderer;
+using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Controls
 {
@@ -52,7 +53,7 @@ namespace ClassicUO.Game.UI.Controls
                 return false;
 
             ResetHueVector();
-            ShaderHuesTraslator.GetHueVector(ref _hueVector, Hue, IsPartial, Alpha);
+            ShaderHueTranslator.GetHueVector(ref _hueVector, Hue, IsPartial, Alpha);
 
             if (ScaleTexture)
             {
@@ -60,7 +61,7 @@ namespace ClassicUO.Game.UI.Controls
                 {
                     int w = Width;
                     int h = Height;
-                    var r = artTexture.ImageRectangle;
+                    Rectangle r = artTexture.ImageRectangle;
 
                     if (r.Width < Width)
                     {

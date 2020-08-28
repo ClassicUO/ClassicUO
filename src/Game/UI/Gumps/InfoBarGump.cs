@@ -68,7 +68,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             for (int i = 0; i < infoBarItems.Count; i++)
             {
-                var info = new InfoBarControl(infoBarItems[i].label, infoBarItems[i].var, infoBarItems[i].hue);
+                InfoBarControl info = new InfoBarControl(infoBarItems[i].label, infoBarItems[i].var, infoBarItems[i].hue);
                 _infobarControls.Add(info);
                 Add(info);
             }
@@ -206,7 +206,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (_var != InfoBarVars.NameNotoriety && ProfileManager.Current.InfoBarHighlightType == 1 && _warningLinesHue != 0x0481)
             {
-                ShaderHuesTraslator.GetHueVector(ref _hueVector, _warningLinesHue);
+                ShaderHueTranslator.GetHueVector(ref _hueVector, _warningLinesHue);
                 batcher.Draw2D(Texture2DCache.GetTexture(Color.White), _data.ScreenCoordinateX, _data.ScreenCoordinateY, _data.Width, 2, ref _hueVector);
                 batcher.Draw2D(Texture2DCache.GetTexture(Color.White), _data.ScreenCoordinateX, _data.ScreenCoordinateY + Parent.Height - 2, _data.Width, 2, ref _hueVector);
             }

@@ -543,7 +543,7 @@ namespace ClassicUO.Game.UI.Controls
             int y = position.Y - Y - ParentY;
             bool result = OnMouseDoubleClick(x, y, button);
 
-            var arg = new MouseDoubleClickEventArgs(x, y, button);
+            MouseDoubleClickEventArgs arg = new MouseDoubleClickEventArgs(x, y, button);
             MouseDoubleClick.Raise(arg, this);
             result |= arg.Result;
 

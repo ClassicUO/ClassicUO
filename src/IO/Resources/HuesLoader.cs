@@ -20,7 +20,6 @@
 #endregion
 
 using System;
-using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
@@ -33,23 +32,10 @@ namespace ClassicUO.IO.Resources
     {
         private HuesLoader()
         {
-
         }
 
         private static HuesLoader _instance;
-        public static HuesLoader Instance
-        {
-            get
-            {
-                if (_instance == null)
-                {
-                    _instance = new HuesLoader();
-                }
-
-                return _instance;
-            }
-        }
-
+        public static HuesLoader Instance => _instance ?? (_instance = new HuesLoader());
 
         public HuesGroup[] HuesRange { get; private set; }
 
@@ -242,12 +228,15 @@ namespace ClassicUO.IO.Resources
                 int g = color >> 3;
                 int e = color % 8;
                 uint cl = HuesHelper.Color16To32(c);
-                (byte B, byte G, byte R, byte A) = HuesHelper.GetBGRA(cl);
-                //(byte R, byte G, byte B, byte A) = HuesHelper.GetBGRA(cl);
 
-                if (R == G && B == G)
-                    return HuesHelper.Color16To32(HuesRange[g].Entries[e].ColorTable[(c >> 10) & 0x1F]);
+                byte R = (byte) (cl & 0xFF);
+                byte G = (byte) ((cl >> 8) & 0xFF);
+                byte B = (byte) ((cl >> 16) & 0xFF);
 
+                if (R == G && R == B)
+                {
+                    cl = HuesHelper.Color16To32(HuesRange[g].Entries[e].ColorTable[(c >> 10) & 0x1F]);
+                }
                 return cl;
             }
 

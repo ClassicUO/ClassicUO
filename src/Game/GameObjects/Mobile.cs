@@ -204,7 +204,7 @@ namespace ClassicUO.Game.GameObjects
 
         public Item GetSecureTradeBox()
         {
-            for (var i = Items; i != null; i = i.Next)
+            for (LinkedObject i = Items; i != null; i = i.Next)
             {
                 Item it = (Item) i;
 
@@ -443,7 +443,11 @@ namespace ClassicUO.Game.GameObjects
                     }
                 }
 
-                AnimationGroup = _animationIdle[(byte)animGroup - 1, RandomHelper.GetValue(0, 2)];
+                int first_value = RandomHelper.GetValue(0, 2);
+
+                byte original_value = AnimationGroup;
+
+                AnimationGroup = _animationIdle[(byte)animGroup - 1, first_value];
 
                 if (isLowExtended && AnimationGroup == 18)
                 {
@@ -454,6 +458,21 @@ namespace ClassicUO.Game.GameObjects
                     else
                     {
                         AnimationGroup = 1;
+                    }
+                }
+
+                if (!AnimationsLoader.Instance.AnimationExists(graphic, AnimationGroup))
+                {
+                    if (first_value == 0)
+                        first_value = 1;
+                    else
+                        first_value = 0;
+
+                    AnimationGroup = _animationIdle[(byte) animGroup - 1, first_value];
+
+                    if (!AnimationsLoader.Instance.AnimationExists(graphic, AnimationGroup))
+                    {
+                        SetAnimation(original_value);
                     }
                 }
             }
@@ -564,7 +583,7 @@ namespace ClassicUO.Game.GameObjects
                 if (id < Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT && dir < 5)
                 {
                     ushort hue = 0;
-                    var direction = AnimationsLoader.Instance.GetBodyAnimationGroup(ref id, ref animGroup, ref hue, true).Direction[dir];
+                    AnimationDirection direction = AnimationsLoader.Instance.GetBodyAnimationGroup(ref id, ref animGroup, ref hue, true).Direction[dir];
                     AnimationsLoader.Instance.AnimID = id;
                     AnimationsLoader.Instance.AnimGroup = animGroup;
                     AnimationsLoader.Instance.Direction = dir;
@@ -588,10 +607,12 @@ namespace ClassicUO.Game.GameObjects
                             }
                             else
                             {
-                                fc -= AnimationFrameCount;
+                                /*fc -= AnimationFrameCount;
 
                                 if (fc <= 0)
-                                    fc = AnimationFrameCount;
+                                    fc = AnimationFrameCount;*/
+
+                                fc = AnimationFrameCount;
                             }
                                 
                             if (AnimationForwardDirection)
@@ -775,7 +796,7 @@ namespace ClassicUO.Game.GameObjects
                             if (Z - step.Z >= 22)
                             {
                                 // oUCH!!!!
-                                AddMessage(MessageType.Label, "Ouch!");
+                                AddMessage(MessageType.Label, "Ouch!", TEXT_TYPE.CLIENT);
                             }
 
                             if (World.Player.Walker.StepInfos[World.Player.Walker.CurrentWalkSequence].Accepted)
@@ -1023,7 +1044,7 @@ namespace ClassicUO.Game.GameObjects
             if (TextContainer == null)
                 return;
 
-            var last = (TextObject) TextContainer.Items;
+            TextObject last = (TextObject) TextContainer.Items;
 
             while (last?.Next != null)
                 last = (TextObject) last.Next;
@@ -1039,7 +1060,7 @@ namespace ClassicUO.Game.GameObjects
 
             int startX = ProfileManager.Current.GameWindowPosition.X + 6;
             int startY = ProfileManager.Current.GameWindowPosition.Y + 6;
-            var scene = Client.Game.GetScene<GameScene>();
+            GameScene scene = Client.Game.GetScene<GameScene>();
             float scale = scene?.Scale ?? 1;
 
             int x = RealScreenPosition.X;

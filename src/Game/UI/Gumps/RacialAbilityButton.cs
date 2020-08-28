@@ -54,7 +54,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void BuildGump()
         {
-            var pic = new GumpPic(0, 0, Graphic, 0);
+            GumpPic pic = new GumpPic(0, 0, Graphic, 0);
             Add(pic);
             pic.SetTooltip(ClilocLoader.Instance.GetString(1112198 + (Graphic - 0x5DD0)), 200);
         }

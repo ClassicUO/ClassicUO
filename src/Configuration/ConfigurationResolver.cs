@@ -19,6 +19,8 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
 
+using System;
+using System.Diagnostics;
 using System.IO;
 using System.Text.RegularExpressions;
 
@@ -53,7 +55,16 @@ namespace ClassicUO.Configuration
 
         public static void Save<T>(T obj, string file) where T : class
         {
-            File.WriteAllText(file, obj.Encode(true));
+            // this try catch is necessary when multiples cuo instances points to this file.
+            try
+            {
+                File.WriteAllText(file, obj.Encode(true));
+
+            }
+            catch (IOException e)
+            {
+                Log.Error(e.ToString());
+            }
         }
     }
 }

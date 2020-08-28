@@ -263,6 +263,12 @@ namespace ClassicUO.Game.Managers
                                                                                    {
                                                                                        NetClient.Socket.Send(new PTargetObject(entity, entity.Graphic, entity.X, entity.Y, entity.Z, _targetCursorId, (byte) TargetingType));
                                                                                        ClearTargetingWithoutTargetCancelPacket();
+
+                                                                                       if (LastTargetInfo.Serial !=  serial)
+                                                                                       {
+                                                                                           GameActions.RequestMobileStatus(serial);
+                                                                                       }
+                                                                                      
                                                                                    }
                                                                                });
 
@@ -275,7 +281,7 @@ namespace ClassicUO.Game.Managers
 
                         if (TargetingState != CursorTarget.SetTargetClientSide)
                         {
-                            var packet = new PTargetObject(entity, entity.Graphic, entity.X, entity.Y, entity.Z, _targetCursorId, (byte) TargetingType);
+                            PTargetObject packet = new PTargetObject(entity, entity.Graphic, entity.X, entity.Y, entity.Z, _targetCursorId, (byte) TargetingType);
 
                             for (int i = 0; i < _lastDataBuffer.Length; i++)
                             {
@@ -283,6 +289,11 @@ namespace ClassicUO.Game.Managers
                             }
 
                             NetClient.Socket.Send(packet);
+
+                            if (SerialHelper.IsMobile(serial) && LastTargetInfo.Serial != serial)
+                            {
+                                GameActions.RequestMobileStatus(serial);
+                            }
                         }
                       
                         ClearTargetingWithoutTargetCancelPacket();
@@ -329,7 +340,7 @@ namespace ClassicUO.Game.Managers
                 if (graphic >= TileDataLoader.Instance.StaticData.Length)
                     return;
 
-                ref var itemData = ref TileDataLoader.Instance.StaticData[graphic];
+                ref StaticTiles itemData = ref TileDataLoader.Instance.StaticData[graphic];
 
                 if (Client.Version >= ClientVersion.CV_7090 && itemData.IsSurface)
                 {
@@ -371,7 +382,7 @@ namespace ClassicUO.Game.Managers
             if (!IsTargeting)
                 return;
 
-            var packet = new PTargetXYZ(x, y, z, graphic, _targetCursorId, (byte) TargetingType);       
+            PTargetXYZ packet = new PTargetXYZ(x, y, z, graphic, _targetCursorId, (byte) TargetingType);       
             NetClient.Socket.Send(packet);
             for (int i = 0; i < _lastDataBuffer.Length; i++)
             {

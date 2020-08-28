@@ -22,7 +22,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
 
 using ClassicUO.Configuration;
@@ -37,50 +36,39 @@ namespace ClassicUO.IO.Resources
     internal class ArtLoader : UOFileLoader<ArtTexture>
     {
         private UOFile _file;
-        private ushort _graphicMask;
-        private readonly UOTexture32[] _land_resources;
-        private readonly LinkedList<uint> _used_land_textures_ids = new LinkedList<uint>();
+        private readonly ushort _graphicMask;
+        private readonly UOTexture32[] _landResources;
+        private readonly LinkedList<uint> _usedLandTextureIds = new LinkedList<uint>();
 
-        private ArtLoader(int static_count, int land_count) : base(static_count)
+        private ArtLoader(int staticCount, int landCount) : base(staticCount)
         {
             _graphicMask = Client.IsUOPInstallation ? (ushort) 0xFFFF : (ushort) 0x3FFF;
-            _land_resources = new UOTexture32[land_count];
+            _landResources = new UOTexture32[landCount];
         }
 
         private static ArtLoader _instance;
-        public static ArtLoader Instance
-        {
-            get
-            {
-                if (_instance == null)
-                {
-                    _instance = new ArtLoader(Constants.MAX_STATIC_DATA_INDEX_COUNT, Constants.MAX_LAND_DATA_INDEX_COUNT);
-                }
-
-                return _instance;
-            }
-        }
+        public static ArtLoader Instance => _instance ?? (_instance = new ArtLoader(Constants.MAX_STATIC_DATA_INDEX_COUNT, Constants.MAX_LAND_DATA_INDEX_COUNT));
 
 
         public override Task Load()
         {
             return Task.Run(() =>
             {
-                string filepath = UOFileManager.GetUOFilePath("artLegacyMUL.uop");
+                string filePath = UOFileManager.GetUOFilePath("artLegacyMUL.uop");
 
-                if (Client.IsUOPInstallation && File.Exists(filepath))
+                if (Client.IsUOPInstallation && File.Exists(filePath))
                 {
-                    _file = new UOFileUop(filepath, "build/artlegacymul/{0:D8}.tga");
+                    _file = new UOFileUop(filePath, "build/artlegacymul/{0:D8}.tga");
                     Entries = new UOFileIndex[Constants.MAX_STATIC_DATA_INDEX_COUNT];
                 }
                 else
                 {
-                    filepath = UOFileManager.GetUOFilePath("art.mul");
-                    string idxpath = UOFileManager.GetUOFilePath("artidx.mul");
+                    filePath = UOFileManager.GetUOFilePath("art.mul");
+                    string idxPath = UOFileManager.GetUOFilePath("artidx.mul");
 
-                    if (File.Exists(filepath) && File.Exists(idxpath))
+                    if (File.Exists(filePath) && File.Exists(idxPath))
                     {
-                        _file = new UOFileMul(filepath, idxpath, Constants.MAX_STATIC_DATA_INDEX_COUNT);
+                        _file = new UOFileMul(filePath, idxPath, Constants.MAX_STATIC_DATA_INDEX_COUNT);
                     }
                 }
 
@@ -91,16 +79,18 @@ namespace ClassicUO.IO.Resources
         public override ArtTexture GetTexture(uint g)
         {
             if (g >= Resources.Length)
+            {
                 return null;
+            }
 
-            ref var texture = ref Resources[g];
+            ref ArtTexture texture = ref Resources[g];
 
             if (texture == null || texture.IsDisposed)
             {
                 ReadStaticArt(ref texture, (ushort) g);
                 if (texture != null)
                 {
-                    SaveID(g);
+                    SaveId(g);
                 }
             }
             else
@@ -113,10 +103,12 @@ namespace ClassicUO.IO.Resources
 
         public UOTexture32 GetLandTexture(uint g)
         {
-            if (g >= _land_resources.Length)
+            if (g >= _landResources.Length)
+            {
                 return null;
+            }
 
-            ref var texture = ref _land_resources[g];
+            ref UOTexture32 texture = ref _landResources[g];
 
             if (texture == null || texture.IsDisposed)
             {
@@ -124,7 +116,7 @@ namespace ClassicUO.IO.Resources
 
                 if (texture != null)
                 {
-                    _used_land_textures_ids.AddLast(g);
+                    _usedLandTextureIds.AddLast(g);
                 }
             }
             else
@@ -135,7 +127,7 @@ namespace ClassicUO.IO.Resources
             return texture;
         }
 
-        public override bool TryGetEntryInfo(int entry, out long address, out long size, out long compressedsize)
+        public override bool TryGetEntryInfo(int entry, out long address, out long size, out long compressedSize)
         {
             entry += 0x4000;
 
@@ -145,34 +137,32 @@ namespace ClassicUO.IO.Resources
 
                 address = _file.StartAddress.ToInt64() + e.Offset;
                 size = e.DecompressedLength == 0 ? e.Length : e.DecompressedLength;
-                compressedsize = e.Length;
+                compressedSize = e.Length;
 
                 return true;
             }
 
-            return base.TryGetEntryInfo(entry, out address, out size, out compressedsize);
+            return base.TryGetEntryInfo(entry, out address, out size, out compressedSize);
         }
 
         public override void ClearResources()
         {
             base.ClearResources();
 
-            var first = _used_land_textures_ids.First;
+            LinkedListNode<uint> first = _usedLandTextureIds.First;
 
             while (first != null)
             {
-                var next = first.Next;
-
+                LinkedListNode<uint> next = first.Next;
                 uint idx = first.Value;
-
-                if (idx < _land_resources.Length)
+                if (idx < _landResources.Length)
                 {
-                    ref var texture = ref _land_resources[idx];
+                    ref UOTexture32 texture = ref _landResources[idx];
                     texture?.Dispose();
                     texture = null;
                 }
 
-                _used_land_textures_ids.Remove(first);
+                _usedLandTextureIds.Remove(first);
 
                 first = next;
             }
@@ -181,7 +171,7 @@ namespace ClassicUO.IO.Resources
         public override void CleaUnusedResources(int count)
         {
             base.CleaUnusedResources(count);
-            ClearUnusedResources(_land_resources, count);
+            ClearUnusedResources(_landResources, count);
         }
 
         public unsafe uint[] ReadStaticArt(ushort graphic, out short width, out short height, out Rectangle imageRectangle)
@@ -191,7 +181,7 @@ namespace ClassicUO.IO.Resources
             imageRectangle.Width = 0;
             imageRectangle.Height = 0;
 
-            ref var entry = ref GetValidRefEntry(graphic + 0x4000);
+            ref UOFileIndex entry = ref GetValidRefEntry(graphic + 0x4000);
 
             if (entry.Length == 0)
             {
@@ -234,9 +224,9 @@ namespace ClassicUO.IO.Resources
 
                     for (int j = 0; j < run; j++)
                     {
-                        var val = *ptr++;
+                        ushort val = *ptr++;
 
-                        pixels[pos++] = val == 0 && run == 1 ? 0x01 : (Utility.HuesHelper.Color16To32(val) | 0xFF_00_00_00);
+                        pixels[pos++] = val == 0 && run == 1 ? 0x01 : Utility.HuesHelper.Color16To32(val) | 0xFF_00_00_00;
                     }
 
                     x += run;
@@ -272,10 +262,12 @@ namespace ClassicUO.IO.Resources
 
                     for (int xx = 0; xx < width; xx++)
                     {
-                        ref var pixel = ref pixels[yy * width + xx];
+                        ref uint pixel = ref pixels[yy * width + xx];
 
                         if (pixel == 0)
+                        {
                             continue;
+                        }
 
                         int startX = xx != 0 ? -1 : 0;
                         int endX = xx + 1 < width ? 2 : 1;
@@ -288,7 +280,7 @@ namespace ClassicUO.IO.Resources
                             {
                                 int currentX = xx + j;
 
-                                ref var currentPixel = ref pixels[currentY * width + currentX];
+                                ref uint currentPixel = ref pixels[currentY * width + currentX];
 
                                 if (currentPixel == 0u) 
                                     pixel = 0xFF_00_00_00;
@@ -327,7 +319,7 @@ namespace ClassicUO.IO.Resources
         {
             Rectangle imageRectangle = new Rectangle();
 
-            ref var entry = ref GetValidRefEntry(graphic + 0x4000);
+            ref UOFileIndex entry = ref GetValidRefEntry(graphic + 0x4000);
 
             if (entry.Length == 0)
             {
@@ -412,10 +404,12 @@ namespace ClassicUO.IO.Resources
 
                     for (int xx = 0; xx < width; xx++)
                     {
-                        ref var pixel = ref pixels[yy * width + xx];
+                        ref uint pixel = ref pixels[yy * width + xx];
 
                         if (pixel == 0)
+                        {
                             continue;
+                        }
 
                         int startX = xx != 0 ? -1 : 0;
                         int endX = xx + 1 < width ? 2 : 1;
@@ -428,10 +422,12 @@ namespace ClassicUO.IO.Resources
                             {
                                 int currentX = xx + j;
 
-                                ref var currentPixel = ref pixels[currentY * width + currentX];
+                                ref uint currentPixel = ref pixels[currentY * width + currentX];
 
-                                if (currentPixel == 0u) 
-                                    pixel = 0xFF_00_00_00;;
+                                if (currentPixel == 0u)
+                                {
+                                    pixel = 0xFF_00_00_00;
+                                }
                             }
                         }
                     }
@@ -471,7 +467,7 @@ namespace ClassicUO.IO.Resources
             const int SIZE = 44 * 44;
 
             graphic &= _graphicMask;
-            ref var entry = ref GetValidRefEntry(graphic);
+            ref UOFileIndex entry = ref GetValidRefEntry(graphic);
 
             if (entry.Length == 0)
             {

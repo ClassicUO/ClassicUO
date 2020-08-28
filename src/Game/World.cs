@@ -19,7 +19,9 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
 
+using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
@@ -50,6 +52,7 @@ namespace ClassicUO.Game
     {
         private static readonly EffectManager _effectManager = new EffectManager();
         private static readonly List<uint> _toRemove = new List<uint>();
+        private static uint _time_to_delete;
 
         public static Point RangeSize;
 
@@ -190,7 +193,16 @@ namespace ClassicUO.Game
             Client.Game.Scene.Audio.PlayMusic(music, true);
         }
 
-        private static uint _time_to_delete;
+
+        /*[MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static bool CheckToRemove(Entity obj, int distance)
+        {
+            if (Player == null || obj.Serial == Player.Serial)
+                return false;
+
+            return Math.Max(Math.Abs(obj.X - RangeSize.X), Math.Abs(obj.Y - RangeSize.Y)) > distance;
+        }
+        */
 
         public static void Update(double totalMS, double frameMS)
         {
@@ -203,18 +215,28 @@ namespace ClassicUO.Game
 
                     if (rem != null)
                     {
+                        Entity container = Get(rem.Container);
+
                         RemoveItem(rem, true);
 
                         if (rem.Layer == Layer.OneHanded || rem.Layer == Layer.TwoHanded)
                             Player.UpdateAbilities();
+                    
+                        if (container != null)
+                        {
+                            if (SerialHelper.IsMobile(container.Serial))
+                            {
+                                UIManager.GetGump<PaperDollGump>(container.Serial)?.RequestUpdateContents();
+                            }
+                            else if (SerialHelper.IsItem(container.Serial))
+                            {
+                                UIManager.GetGump<ContainerGump>(container.Serial)?.RequestUpdateContents();
 
-                        if (SerialHelper.IsMobile(rem.Container))
-                        {
-                            UIManager.GetGump<PaperDollGump>(rem.Container)?.RequestUpdateContents();
-                        }
-                        else if (SerialHelper.IsItem(rem.Container))
-                        {
-                            UIManager.GetGump<ContainerGump>(rem.Container)?.RequestUpdateContents();
+                                if (container.Graphic == 0x2006)
+                                {
+                                    UIManager.GetGump<GridLootGump>(container)?.RequestUpdateContents();
+                                }
+                            }
                         }
                     }
                 }
@@ -230,7 +252,7 @@ namespace ClassicUO.Game
                 {
                     mob.Update(totalMS, frameMS);
 
-                    if (do_delete && mob.Distance > ClientViewRange)
+                    if (do_delete && mob.Distance > ClientViewRange /*CheckToRemove(mob, ClientViewRange)*/)
                         RemoveMobile(mob);
 
                     if (mob.IsDestroyed)
@@ -274,7 +296,7 @@ namespace ClassicUO.Game
                 {
                     item.Update(totalMS, frameMS);
 
-                    if (do_delete && item.OnGround && item.Distance > ClientViewRange)
+                    if (do_delete && item.OnGround && item.Distance > ClientViewRange /*CheckToRemove(item, ClientViewRange)*/)
                     {
                         if (item.IsMulti)
                         {
@@ -426,12 +448,12 @@ namespace ClassicUO.Game
             if (item == null || item.IsDestroyed)
                 return false;
 
-            var first = item.Items;
+            LinkedObject first = item.Items;
             RemoveItemFromContainer(item);
 
             while (first != null)
             {
-                var next = first.Next;
+                LinkedObject next = first.Next;
 
                 RemoveItem(first as Item, forceRemove);
 
@@ -453,11 +475,11 @@ namespace ClassicUO.Game
             if (mobile == null || mobile.IsDestroyed)
                 return false;
 
-            var first = mobile.Items;
+            LinkedObject first = mobile.Items;
 
             while (first != null)
             {
-                var next = first.Next;
+                LinkedObject next = first.Next;
 
                 RemoveItem(first as Item, forceRemove);
 
@@ -506,7 +528,7 @@ namespace ClassicUO.Game
                         if (item.IsMulti || item.IsDestroyed || !item.OnGround)
                             continue;
 
-                        var dist = item.Distance;
+                        int dist = item.Distance;
 
                         if (dist < distance)
                             distance = dist;
@@ -610,7 +632,7 @@ namespace ClassicUO.Game
                             }
                         }
 
-                        var dist = mobile.Distance;
+                        int dist = mobile.Distance;
 
                         if (dist < distance)
                             distance = dist;
@@ -777,7 +799,6 @@ namespace ClassicUO.Game
 
             ObjectToRemove = 0;
             LastObject = 0;
-            HouseManager?.Clear();
             Items.Clear();
             Mobiles.Clear();
             Player?.Destroy();
@@ -788,7 +809,6 @@ namespace ClassicUO.Game
             Light.Personal = Light.RealPersonal = 0;
             ClientFeatures.SetFlags(0);
             ClientLockedFeatures.SetFlags(0);
-            HouseManager?.Clear();
             Party?.Clear();
             TargetManager.LastAttack = 0;
             MessageManager.PromptData = default;
@@ -797,6 +817,7 @@ namespace ClassicUO.Game
             CorpseManager.Clear();
             OPL.Clear();
             WMapManager.Clear();
+            HouseManager?.Clear();
 
             Season = Seasons.Summer;
             OldSeason = Seasons.Summer;
@@ -826,10 +847,15 @@ namespace ClassicUO.Game
                         continue;
                 }
 
+                if (item.OnGround && item.IsMulti)
+                {
+                    HouseManager.Remove(item.Serial);
+                }
+
                 _toRemove.Add(item);
             }
 
-            foreach (var serial in _toRemove)
+            foreach (uint serial in _toRemove)
             {
                 RemoveItem(serial, true);
             }
@@ -847,7 +873,7 @@ namespace ClassicUO.Game
                 _toRemove.Add(mob);
             }
 
-            foreach (var serial in _toRemove)
+            foreach (uint serial in _toRemove)
             {
                 RemoveMobile(serial, true);
             }

@@ -1,15 +1,21 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
+
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <TargetFramework>net47</TargetFramework>
+    <ApplicationIcon>cuoicon.ico</ApplicationIcon>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(IS_DEV_BUILD)' == 'true'">
+    <OutputType>WinExe</OutputType>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <PlatformTarget>x64</PlatformTarget>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <OutputPath>$(SolutionDir)bin\Release\</OutputPath>
-	<Optimize>true</Optimize>
+	  <Optimize>true</Optimize>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -17,7 +23,7 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <OutputPath>$(SolutionDir)bin\Debug\</OutputPath>
   </PropertyGroup>
-  
+
   <PropertyGroup>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
@@ -30,8 +36,8 @@
   <PropertyGroup>
     <Company>ClassicUO</Company>
     <Authors>KaRaShO'</Authors>
-    <AssemblyVersion>0.1.4.000</AssemblyVersion>
-    <FileVersion>0.1.4.000</FileVersion>
+    <AssemblyVersion>0.1.4.100</AssemblyVersion>
+    <FileVersion>0.1.4.100</FileVersion>
     <Copyright>ClassicUO</Copyright>
     <PackageProjectUrl>https://www.classicuo.eu/</PackageProjectUrl>
     <Description>An open source implementation of the Ultima Online Classic Client.</Description>
@@ -68,41 +74,42 @@
     <Folder Include="Properties\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\external\FNA\FNA.Core.csproj" />
+  </ItemGroup>
 
 
-   <PropertyGroup>
-    <PostBuildEvent Condition="'$(OS)' != 'UNIX'">
-      if not exist "$(TargetDir)lib64\" mkdir  "$(OutputPath)lib64\"
-      if not exist "$(TargetDir)osx\"   mkdir  "$(OutputPath)osx\"
-      if not exist "$(TargetDir)x64\"   mkdir  "$(OutputPath)x64\"
+  <Target Name="CopyExternalDeps_x64" AfterTargets="Build">
+    <ItemGroup>
+      <DataFiles_x64 Include="$(ProjectDir)..\external\x64\*.*" />
+    </ItemGroup>
 
-      xcopy "$(SolutionDir)external\lib64\*.*"    "$(OutputPath)lib64\"   /Y
-      xcopy "$(SolutionDir)external\osx\*.*"      "$(OutputPath)osx\"     /Y
-      xcopy "$(SolutionDir)external\x64\*.*"      "$(OutputPath)x64\"     /Y
-    </PostBuildEvent>
-    <ApplicationIcon>cuoicon.ico</ApplicationIcon>
-  </PropertyGroup>
+    <Copy
+      SourceFiles="@(DataFiles_x64)"
+      DestinationFolder="$(TargetDir)\x64\"
+      SkipUnchangedFiles="true" />
+  </Target>
 
-  <PropertyGroup>
-    <PostBuildEvent Condition="'$(OS)' == 'UNIX'">
+  <Target Name="CopyExternalDeps_lib64" AfterTargets="Build">
+    <ItemGroup>
+      <DataFiles_lib64 Include="$(ProjectDir)..\external\lib64\*.*" />
+    </ItemGroup>
 
-      if ! [ -d "$(OutputPath)lib64/" ]; then
-      mkdir -p "$(OutputPath)lib64/"
-      fi
+    <Copy
+      SourceFiles="@(DataFiles_lib64)"
+      DestinationFolder="$(TargetDir)\lib64\"
+      SkipUnchangedFiles="true" />
+  </Target>
 
-      if ! [ -d "$(OutputPath)osx/" ]; then
-      mkdir -p "$(OutputPath)osx/"
-      fi
- 
-      if ! [ -d "$(OutputPath)x64/" ]; then
-      mkdir -p "$(OutputPath)x64/"
-      fi
+  <Target Name="CopyExternalDeps_osx" AfterTargets="Build">
+    <ItemGroup>
+      <DataFiles_osx Include="$(ProjectDir)..\external\osx\*.*" />
+    </ItemGroup>
 
-      cp -Rf "$(SolutionDir)external/lib64/*.*"  "$(OutputPath)lib64/"
-      cp -Rf "$(SolutionDir)external/osx/*.*"    "$(OutputPath)osx/"
-      cp -Rf "$(SolutionDir)external/x64/*.*"    "$(OutputPath)x64/"
-    </PostBuildEvent>
-   
-  </PropertyGroup>
+    <Copy
+      SourceFiles="@(DataFiles_osx)"
+      DestinationFolder="$(TargetDir)\osx\"
+      SkipUnchangedFiles="true" />
+  </Target>
 
 </Project>

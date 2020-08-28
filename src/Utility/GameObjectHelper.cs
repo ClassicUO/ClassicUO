@@ -20,7 +20,7 @@
 #endregion
 
 using System.Runtime.CompilerServices;
-
+using ClassicUO.Data;
 using ClassicUO.Game;
 using ClassicUO.Game.Data;
 using ClassicUO.IO.Resources;
@@ -52,6 +52,13 @@ namespace ClassicUO.Utility
             {
                 if (g >= 0x2198 && g <= 0x21A4) 
                     return true;
+
+                // Easel fix.
+                // In older clients the tiledata flag for this 
+                // item contains NoDiagonal for some reason.
+                // So the next check will make the item invisible.
+                if (g == 0x0F65 && Client.Version < ClientVersion.CV_60144)
+                    return false;
 
                 ref StaticTiles data = ref TileDataLoader.Instance.StaticData[g];
                 if (!data.IsNoDiagonal || (data.IsAnimated && World.Player != null && World.Player.Race == RaceType.GARGOYLE))

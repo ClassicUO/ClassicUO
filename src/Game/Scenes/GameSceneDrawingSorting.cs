@@ -27,6 +27,7 @@ using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Map;
 using ClassicUO.IO.Resources;
+using ClassicUO.Renderer;
 using ClassicUO.Utility;
 
 using Microsoft.Xna.Framework;
@@ -100,7 +101,7 @@ namespace ClassicUO.Game.Scenes
             _noDrawRoofs = !ProfileManager.Current.DrawRoofs;
             int bx = playerX;
             int by = playerY;
-            var chunk = World.Map.GetChunk(bx, by, false);
+            Chunk chunk = World.Map.GetChunk(bx, by, false);
 
             if (chunk != null)
             {
@@ -140,7 +141,7 @@ namespace ClassicUO.Game.Scenes
 
                     if (tileZ > pz14 && _maxZ > tileZ)
                     {
-                        ref var itemdata = ref TileDataLoader.Instance.StaticData[obj.Graphic];
+                        ref StaticTiles itemdata = ref TileDataLoader.Instance.StaticData[obj.Graphic];
 
                         //if (GameObjectHelper.TryGetStaticData(obj, out var itemdata) && ((ulong) itemdata.Flags & 0x20004) == 0 && (!itemdata.IsRoof || itemdata.IsSurface))
                         if (((ulong) itemdata.Flags & 0x20004) == 0 && (!itemdata.IsRoof || itemdata.IsSurface))
@@ -178,7 +179,7 @@ namespace ClassicUO.Game.Scenes
                         {
                             if (!(obj2 is Land))
                             {
-                                ref var itemdata = ref TileDataLoader.Instance.StaticData[obj2.Graphic];
+                                ref StaticTiles itemdata = ref TileDataLoader.Instance.StaticData[obj2.Graphic];
 
                                 if (((ulong) itemdata.Flags & 0x204) == 0 && itemdata.IsRoof)
                                 {
@@ -218,7 +219,7 @@ namespace ClassicUO.Game.Scenes
         {
             for (int i = 0; i < _treeInfos.Length; i++)
             {
-                ref var info = ref _treeInfos[i];
+                ref TreeUnion info = ref _treeInfos[i];
 
                 if (info.Start <= graphic && graphic <= info.End)
                 {
@@ -241,7 +242,7 @@ namespace ClassicUO.Game.Scenes
 
         private void ApplyFoliageTransparency(ushort graphic, int x, int y, int z)
         {
-            var tile = World.Map.GetTile(x, y);
+            GameObject tile = World.Map.GetTile(x, y);
 
             if (tile != null)
             {
@@ -272,7 +273,7 @@ namespace ClassicUO.Game.Scenes
                 }
             }*/
 
-            var loader = TileDataLoader.Instance;
+            TileDataLoader loader = TileDataLoader.Instance;
 
             for (; obj != null; obj = obj.TNext)
             {
@@ -378,7 +379,7 @@ namespace ClassicUO.Game.Scenes
 
                             //if (HeightChecks <= 0 && (!itemData.IsBridge || ((itemData.Flags & TileFlag.StairBack | TileFlag.StairRight) != 0) || itemData.IsWall))
                             {
-                                maxObjectZ += itemData.Height;
+                                maxObjectZ += itemData.Height == 0xFF ? 0 : itemData.Height;
                             }
                         }
 
@@ -506,7 +507,7 @@ namespace ClassicUO.Game.Scenes
 
                         if (check)
                         {
-                            var texture = ArtLoader.Instance.GetTexture(graphic);
+                            ArtTexture texture = ArtLoader.Instance.GetTexture(graphic);
                             if (texture != null)
                             {
                                 _rectangleObj.X = drawX - (texture.Width >> 1) + texture.ImageRectangle.X;
@@ -571,7 +572,7 @@ namespace ClassicUO.Game.Scenes
             {
                 if (mob.Steps.Count != 0)
                 {
-                    ref var step = ref mob.Steps.Back();
+                    ref Mobile.Step step = ref mob.Steps.Back();
 
                     if ((step.Direction & 7) == 2 || (step.Direction & 7) == 6)
                         dropMaxZIndex = 0;
@@ -630,7 +631,7 @@ namespace ClassicUO.Game.Scenes
                 if (i == dropMaxZIndex)
                     currentMaxZ += 20;
 
-                var tile = World.Map.GetTile(x, y);
+                GameObject tile = World.Map.GetTile(x, y);
 
                 if (tile != null)
                     AddTileToRenderList(tile, x, y, useObjectHandles, currentMaxZ);

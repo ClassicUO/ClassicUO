@@ -34,11 +34,11 @@ namespace ClassicUO.Game
         {
             Clear();
 
-            var item = Next;
+            LinkedObject item = Next;
 
             while (item != null && item != this)
             {
-                var next = item.Next;
+                LinkedObject next = item.Next;
                 item.Next = null;
                 item = next;
             }
@@ -57,7 +57,7 @@ namespace ClassicUO.Game
             }
             else
             {
-                var last = GetLast();
+                LinkedObject last = GetLast();
                 last.Next = item;
 
                 Debug.Assert(item.Next == null, "[Append to last-next] item must be unlinked before.");
@@ -118,7 +118,7 @@ namespace ClassicUO.Game
             }
             else
             {
-                var next = first.Next;
+                LinkedObject next = first.Next;
                 item.Next = next;
                 item.Previous = first;
                 first.Next = item;
@@ -152,7 +152,7 @@ namespace ClassicUO.Game
             if (item != null)
             {
                 Unlink(item);
-                var last = GetLast();
+                LinkedObject last = GetLast();
 
                 if (last == null)
                 {
@@ -170,7 +170,7 @@ namespace ClassicUO.Game
 
         public LinkedObject GetLast()
         {
-            var last = Items;
+            LinkedObject last = Items;
 
             while (last != null && last.Next != null)
             {
@@ -184,12 +184,12 @@ namespace ClassicUO.Game
         {
             if (Items != null)
             {
-                var item = Items;
+                LinkedObject item = Items;
                 Items = null;
 
                 while (item != null)
                 {
-                    var next = item.Next;
+                    LinkedObject next = item.Next;
                     item.Next = null;
                     item = next;
                 }
@@ -209,12 +209,12 @@ namespace ClassicUO.Game
 
             int unitsize = 1; //size of the components we are merging; 1 for first iteration, multiplied by 2 after each iteration
             T p = null, q = null, e = null, head = (T) Items, tail = null;
-            int nmerges = 0; //number of merges done this pass
-            int psize, qsize; //lengths of the components we are merging
 
             while (true)
             {
                 p = head;
+                int nmerges = 0; //number of merges done this pass
+                int psize, qsize; //lengths of the components we are merging
                 head = null;
                 tail = null;
 
@@ -249,7 +249,7 @@ namespace ClassicUO.Game
                         else if (comparison(p, q) <= 0)
                         {
                             e = p;
-                            p = (T)p.Next;
+                            p = (T) p.Next;
                             psize--;
                         }
                         else
@@ -267,7 +267,6 @@ namespace ClassicUO.Game
                         {
                             head = e;
                         }
-
                         e.Previous = tail;
                         tail = e;
                     }
@@ -283,6 +282,5 @@ namespace ClassicUO.Game
                     unitsize *= 2;
             }
         }
-
     }
 }

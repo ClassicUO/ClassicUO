@@ -22,12 +22,14 @@
 using System;
 using ClassicUO.Data;
 using ClassicUO.Game.GameObjects;
+using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.IO.Resources;
 using ClassicUO.Network;
 using ClassicUO.Renderer;
+using Microsoft.Xna.Framework;
 
 
 namespace ClassicUO.Game.UI.Gumps
@@ -154,12 +156,12 @@ namespace ClassicUO.Game.UI.Gumps
             if (container == null)
                 return;
 
-            foreach (var v in _myBox.Children)
+            foreach (Control v in _myBox.Children)
                 v.Dispose();
 
-            var loader = ArtLoader.Instance;
+            ArtLoader loader = ArtLoader.Instance;
 
-            for (var i = container.Items; i != null; i = i.Next)
+            for (LinkedObject i = container.Items; i != null; i = i.Next)
             {
                 Item it = (Item) i;
 
@@ -171,15 +173,15 @@ namespace ClassicUO.Game.UI.Gumps
                 int x = g.X;
                 int y = g.Y;
 
-                var texture = loader.GetTexture(it.DisplayedGraphic);
+                ArtTexture texture = loader.GetTexture(it.DisplayedGraphic);
 
                 if (texture != null)
                 {
-                    if (x + texture.Width > 110)
-                        x = 110 - texture.Width;
+                    if (x + texture.Width > _myBox.Width)
+                        x = _myBox.Width - texture.Width;
 
-                    if (y + texture.Height > 80)
-                        y = 80 - texture.Height;
+                    if (y + texture.Height > _myBox.Height)
+                        y = _myBox.Height - texture.Height;
                 }
 
                 if (x < 0)
@@ -200,10 +202,10 @@ namespace ClassicUO.Game.UI.Gumps
             if (container == null)
                 return;
 
-            foreach (var v in _hisBox.Children)
+            foreach (Control v in _hisBox.Children)
                 v.Dispose();
 
-            for (var i = container.Items; i != null; i = i.Next)
+            for (LinkedObject i = container.Items; i != null; i = i.Next)
             {
                 Item it = (Item) i;
 
@@ -215,15 +217,15 @@ namespace ClassicUO.Game.UI.Gumps
                 int x = g.X;
                 int y = g.Y;
 
-                var texture = loader.GetTexture(it.DisplayedGraphic);
+                ArtTexture texture = loader.GetTexture(it.DisplayedGraphic);
 
                 if (texture != null)
                 {
-                    if (x + texture.Width > 110)
-                        x = 110 - texture.Width;
+                    if (x + texture.Width > _myBox.Width)
+                        x = _myBox.Width - texture.Width;
 
-                    if (y + texture.Height > 80)
-                        y = 80 - texture.Height;
+                    if (y + texture.Height > _myBox.Height)
+                        y = _myBox.Height - texture.Height;
                 }
 
                 if (x < 0)
@@ -240,6 +242,63 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
+        protected override void OnMouseUp(int x, int y, MouseButtonType button)
+        {
+            if (button == MouseButtonType.Left)
+            {
+                if (ItemHold.Enabled && !ItemHold.IsFixedPosition)
+                {
+                    if (_myBox != null && _myBox.Bounds.Contains(x, y))
+                    {
+                        ArtTexture texture = ArtLoader.Instance.GetTexture(ItemHold.DisplayedGraphic);
+
+                        x -= _myBox.X;
+                        y -= _myBox.Y;
+
+                        if (texture != null)
+                        {
+                            x -= texture.Width >> 1;
+                            y -= texture.Height >> 1;
+
+                            if (x + texture.Width > _myBox.Width)
+                                x = _myBox.Width - texture.Width;
+
+                            if (y + texture.Height > _myBox.Height)
+                                y = _myBox.Height - texture.Height;
+                        }
+
+                        if (x < 0)
+                            x = 0;
+
+                        if (y < 0)
+                            y = 0;
+
+                        GameActions.DropItem(ItemHold.Serial, x, y, 0, ID1);
+                    }
+                }
+                else if (SelectedObject.Object is Item it)
+                {
+                    if (TargetManager.IsTargeting)
+                    {
+                        TargetManager.Target(it.Serial);
+                        Mouse.CancelDoubleClick = true;
+
+                        if (TargetManager.TargetingState == CursorTarget.SetTargetClientSide)
+                        {
+                            UIManager.Add(new InspectorGump(it));
+                        }
+                    }
+                    else if (!DelayedObjectClickManager.IsEnabled)
+                    {
+                        Point off = Mouse.LDroppedOffset;
+                        DelayedObjectClickManager.Set(it.Serial,
+                            (Mouse.Position.X - off.X) - ScreenCoordinateX,
+                            (Mouse.Position.Y - off.Y) - ScreenCoordinateY,
+                            Time.Ticks + Mouse.MOUSE_DELAY_DOUBLE_CLICK);
+                    }
+                }
+            }
+        }
 
         public override void Dispose()
         {
@@ -493,42 +552,6 @@ namespace ClassicUO.Game.UI.Gumps
             SetCheckboxes();
 
             RequestUpdateContents();
-
-            _myBox.MouseUp += (sender, e) =>
-            {
-                if (e.Button == MouseButtonType.Left)
-                {
-                    GameScene gs = Client.Game.GetScene<GameScene>();
-
-                    if (!ItemHold.Enabled || !gs.IsMouseOverUI)
-                        return;
-
-                    ArtTexture texture = ArtLoader.Instance.GetTexture(ItemHold.DisplayedGraphic);
-
-                    int x = e.X;
-                    int y = e.Y;
-
-                    if (texture != null)
-                    {
-                        x -= texture.Width >> 1;
-                        y -= texture.Height >> 1;
-
-                        if (x + texture.Width > 110)
-                            x = 110 - texture.Width;
-
-                        if (y + texture.Height > 80)
-                            y = 80 - texture.Height;
-                    }
-
-                    if (x < 0)
-                        x = 0;
-
-                    if (y < 0)
-                        y = 0;
-
-                    GameActions.DropItem(ItemHold.Serial, x, y, 0, ID1);
-                }
-            };
         }
 
         private void MyCheckboxOnValueChanged(object sender, EventArgs e)

@@ -24,6 +24,7 @@ using System;
 using ClassicUO.Configuration;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
+using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 
@@ -57,7 +58,7 @@ namespace ClassicUO.Game.GameObjects
             ResetHueVector();
 
             ushort hue = Hue;
-            float alpha = 0;
+
             if (State != 0)
             {
                 if ((State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_IGNORE_IN_RENDER) != 0)
@@ -72,7 +73,6 @@ namespace ClassicUO.Game.GameObjects
                 {
                     if (AlphaHue >= 192)
                     {
-                        alpha = 0.25f;
                         AlphaHue = 0xFF;
                     }
                     else
@@ -80,25 +80,28 @@ namespace ClassicUO.Game.GameObjects
                 }
             }
 
+            ResetHueVector();
+
             ushort graphic = Graphic;
+            bool partial = ItemData.IsPartialHue;
 
             if (ProfileManager.Current.HighlightGameObjects && SelectedObject.LastObject == this)
             {
-                HueVector.X = 0x0023;
-                HueVector.Y = 1;
+                hue = Constants.HIGHLIGHT_CURRENT_OBJECT_HUE;
+                partial = false;
             }
             else if (ProfileManager.Current.NoColorObjectsOutOfRange && Distance > World.ClientViewRange)
             {
-                HueVector.X = Constants.OUT_RANGE_COLOR;
-                HueVector.Y = 1;
+                hue = Constants.OUT_RANGE_COLOR;
+                partial = false;
             }
             else if (World.Player.IsDead && ProfileManager.Current.EnableBlackWhiteEffect)
             {
-                HueVector.X = Constants.DEAD_RANGE_COLOR;
-                HueVector.Y = 1;
+                hue = Constants.DEAD_RANGE_COLOR;
+                partial = false;
             }
-            else
-                ShaderHuesTraslator.GetHueVector(ref HueVector, hue, ItemData.IsPartialHue, alpha);
+
+            ShaderHueTranslator.GetHueVector(ref HueVector, hue, partial, 0);
 
             //Engine.DebugInfo.MultiRendered++;
 
@@ -108,56 +111,10 @@ namespace ClassicUO.Game.GameObjects
             posX += (int) Offset.X;
             posY += (int) (Offset.Y + Offset.Z);
 
-            if (DrawTransparent)
-            {
-                int maxDist = ProfileManager.Current.CircleOfTransparencyRadius + 44;
-                int fx = (int) (World.Player.RealScreenPosition.X + World.Player.Offset.X);
-                int fy = (int) (World.Player.RealScreenPosition.Y + (World.Player.Offset.Y - World.Player.Offset.Z));
+            if (AlphaHue != 255)
+                HueVector.Z = 1f - AlphaHue / 255f;
 
-                fx -= posX;
-                fy -= posY;
-
-                int dist = (int) Math.Sqrt(fx * fx + fy * fy);
-
-                if (dist <= maxDist)
-                {
-                    switch (ProfileManager.Current.CircleOfTransparencyType)
-                    {
-                        default:
-                        case 0:
-                            HueVector.Z = 0.75f;
-                            break;
-                        case 1:
-                            HueVector.Z = MathHelper.Lerp(1f, 0f, (dist / (float) maxDist));
-                            break;
-                    }
-
-                    DrawStaticAnimated(batcher, graphic, posX, posY, ref HueVector);
-
-                    if (AlphaHue != 255)
-                        HueVector.Z = 1f - AlphaHue / 255f;
-                    else
-                        HueVector.Z = 0;
-
-                    batcher.SetStencil(StaticTransparentStencil.Value);
-                    DrawStaticAnimated(batcher, graphic, posX, posY, ref HueVector);
-                    batcher.SetStencil(null);
-                }
-                else
-                {
-                    if (AlphaHue != 255)
-                        HueVector.Z = 1f - AlphaHue / 255f;
-
-                    DrawStaticAnimated(batcher, graphic, posX, posY, ref HueVector);
-                }
-            }
-            else
-            {
-                if (AlphaHue != 255)
-                    HueVector.Z = 1f - AlphaHue / 255f;
-
-                DrawStaticAnimated(batcher, graphic, posX, posY, ref HueVector);
-            }
+            DrawStaticAnimated(batcher, graphic, posX, posY, ref HueVector, ref DrawTransparent);
 
             if (ItemData.IsLight)
             {
@@ -181,7 +138,7 @@ namespace ClassicUO.Game.GameObjects
                     return true;
                 }
 
-                ref var index = ref ArtLoader.Instance.GetValidRefEntry(graphic + 0x4000);
+                ref UOFileIndex index = ref ArtLoader.Instance.GetValidRefEntry(graphic + 0x4000);
 
                 posX -= index.Width;
                 posY -= index.Height;

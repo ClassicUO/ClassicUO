@@ -79,7 +79,7 @@ namespace ClassicUO.Game.GameObjects
             if (AlphaHue != 255)
                 HueVector.Z = 1f - AlphaHue / 255f;
 
-            if (SelectedObject.HealthbarObject == this)
+            if (ProfileManager.Current.HighlightGameObjects && SelectedObject.LastObject == this)
             {
                 _viewHue = Notoriety.GetHue(NotorietyFlag);
             }
@@ -94,6 +94,10 @@ namespace ClassicUO.Game.GameObjects
                 }
                 else
                     _viewHue = Notoriety.GetHue(NotorietyFlag);
+            }
+            else if (SelectedObject.HealthbarObject == this)
+            {
+                _viewHue = Notoriety.GetHue(NotorietyFlag);
             }
             else if (ProfileManager.Current.NoColorObjectsOutOfRange && Distance > World.ClientViewRange)
             {
@@ -359,7 +363,7 @@ namespace ClassicUO.Game.GameObjects
 
             if (frameIndex < direction.FrameCount)
             {
-                var frame = direction.Frames[frameIndex];
+                AnimationFrameTexture frame = direction.Frames[frameIndex];
 
                 if (frame == null || frame.IsDisposed)
                 {
@@ -409,7 +413,7 @@ namespace ClassicUO.Game.GameObjects
                         }
                     }
                     ResetHueVector();
-                    ShaderHuesTraslator.GetHueVector(ref HueVector, hue, partialHue, alpha);
+                    ShaderHueTranslator.GetHueVector(ref HueVector, hue, partialHue, alpha);
 
                     if (_transform)
                     {

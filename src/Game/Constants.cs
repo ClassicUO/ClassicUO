@@ -20,13 +20,15 @@
 #endregion
 
 
+using ClassicUO.Utility;
+
 namespace ClassicUO.Game
 {
     internal static class Constants
     {
         public const string WIKI_LINK = "https://github.com/andreakarasho/ClassicUO/wiki";
 
-        public const int MIN_FPS = 15;
+        public const int MIN_FPS = 12;
         public const int MAX_FPS = 250;
         public const int LOGIN_SCREEN_FPS = 60;
 
@@ -106,10 +108,10 @@ namespace ClassicUO.Game
 
         public const int OUT_RANGE_COLOR = 0x038B;
         public const int DEAD_RANGE_COLOR = 0x038E;
-
         public const int DEATH_SCREEN_TIMER = 1500;
-
         public const float SOUND_DELTA = 250;
+
+        public const ushort HIGHLIGHT_CURRENT_OBJECT_HUE = 0x014;
 
         public const int MAX_JOURNAL_HISTORY_COUNT = 100;
 
@@ -119,6 +121,9 @@ namespace ClassicUO.Game
 
         public const byte MIN_CONTAINER_SIZE_PERC = 50;
         public const byte MAX_CONTAINER_SIZE_PERC = 200;
+
+        public const int MALE_GUMP_OFFSET = 50000;
+        public const int FEMALE_GUMP_OFFSET = 60000;
 
         public const int WEATHER_TIMER = 6 * 60 * 1000;
 

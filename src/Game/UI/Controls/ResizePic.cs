@@ -240,11 +240,11 @@ namespace ClassicUO.Game.UI.Controls
         {
             ResetHueVector();
 
-            var rect = ScissorStack.CalculateScissors(Matrix.Identity, x, y, Width, Height);
+            Rectangle rect = ScissorStack.CalculateScissors(Matrix.Identity, x, y, Width, Height);
 
             if (ScissorStack.PushScissors(batcher.GraphicsDevice, rect))
             {
-                ShaderHuesTraslator.GetHueVector(ref _hueVector, 0, false, Alpha, true);
+                ShaderHueTranslator.GetHueVector(ref _hueVector, 0, false, Alpha, true);
 
                 batcher.EnableScissorTest(true);
 

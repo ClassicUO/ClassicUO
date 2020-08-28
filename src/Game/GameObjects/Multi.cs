@@ -37,8 +37,6 @@ namespace ClassicUO.Game.GameObjects
     internal sealed partial class Multi : GameObject
     {
         private ushort _originalGraphic;
-        private uint _lastAnimationFrameTime;
-
 
         private static readonly QueuedPool<Multi> _pool = new QueuedPool<Multi>(Constants.PREDICTABLE_MULTIS, m =>
         {
@@ -46,7 +44,6 @@ namespace ClassicUO.Game.GameObjects
             m.AlphaHue = 0;
             m.FoliageIndex = 0;
             m.IsFromTarget = false;
-            m.IsMovable = false;
             m.MultiOffsetX = m.MultiOffsetY = m.MultiOffsetZ = 0;
             m.IsCustom = false;
             m.State = 0;
@@ -82,7 +79,6 @@ namespace ClassicUO.Game.GameObjects
         public CUSTOM_HOUSE_MULTI_OBJECT_FLAGS State = 0;
         public bool IsCustom;
         public bool IsVegetation;
-        public bool IsMovable;
 
         public ref StaticTiles ItemData => ref TileDataLoader.Instance.StaticData[Graphic];
 
@@ -97,7 +93,7 @@ namespace ClassicUO.Game.GameObjects
             if (TextContainer == null)
                 return;
 
-            var last = (TextObject) TextContainer.Items;
+            TextObject last = (TextObject) TextContainer.Items;
 
             while (last?.Next != null)
                 last = (TextObject) last.Next;
@@ -109,7 +105,7 @@ namespace ClassicUO.Game.GameObjects
 
             int startX = ProfileManager.Current.GameWindowPosition.X + 6;
             int startY = ProfileManager.Current.GameWindowPosition.Y + 6;
-            var scene = Client.Game.GetScene<GameScene>();
+            GameScene scene = Client.Game.GetScene<GameScene>();
             float scale = scene?.Scale ?? 1;
             int x = RealScreenPosition.X;
             int y = RealScreenPosition.Y;
@@ -117,7 +113,7 @@ namespace ClassicUO.Game.GameObjects
             x += 22;
             y += 44;
 
-            var texture = ArtLoader.Instance.GetTexture(Graphic);
+            ArtTexture texture = ArtLoader.Instance.GetTexture(Graphic);
 
             if (texture != null)
                 y -= (texture.ImageRectangle.Height >> 1);

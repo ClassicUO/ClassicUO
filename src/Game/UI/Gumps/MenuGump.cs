@@ -113,7 +113,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         public void AddItem(ushort graphic, ushort hue, string name, int x, int y, int index)
         {
-            var texture = ArtLoader.Instance.GetTexture(graphic);
+            ArtTexture texture = ArtLoader.Instance.GetTexture(graphic);
             if (texture == null)
             {
                 Log.Error($"invalid texture 0x{graphic:X4}");

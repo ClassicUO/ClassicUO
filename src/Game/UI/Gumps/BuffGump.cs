@@ -165,14 +165,14 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void UpdateElements()
         {
-            var list = FindControls<BuffControlEntry>();
+            IEnumerable<BuffControlEntry> list = FindControls<BuffControlEntry>();
             int offset = 0;
 
             int maxWidth = 0;
             int maxHeight = 0;
 
             int i = 0;
-            foreach (var e in list)
+            foreach (BuffControlEntry e in list)
             {
                 maxWidth += e.Width;
                 maxHeight += e.Height;
@@ -211,7 +211,7 @@ namespace ClassicUO.Game.UI.Gumps
                             _button.Y -= e.Y;
 
                             int j = 0;
-                            foreach (var ee in list)
+                            foreach (BuffControlEntry ee in list)
                             {
                                 if (j >= i)
                                     break;
@@ -238,7 +238,7 @@ namespace ClassicUO.Game.UI.Gumps
                             _button.X -= e.X;
 
                             int j = 0;
-                            foreach (var ee in list)
+                            foreach (BuffControlEntry ee in list)
                             {
                                 if (j >= i)
                                     break;
@@ -411,9 +411,9 @@ namespace ClassicUO.Game.UI.Gumps
             public override bool Draw(UltimaBatcher2D batcher, int x, int y)
             {
                 ResetHueVector();
-                ShaderHuesTraslator.GetHueVector(ref _hueVector, 0, false, 1.0f - _alpha / 255f, true);
+                ShaderHueTranslator.GetHueVector(ref _hueVector, 0, false, 1.0f - _alpha / 255f, true);
 
-                var texture = GumpsLoader.Instance.GetTexture(Graphic);
+                UOTexture32 texture = GumpsLoader.Instance.GetTexture(Graphic);
 
                 if (texture != null)
                 {

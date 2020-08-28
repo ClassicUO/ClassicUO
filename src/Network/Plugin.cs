@@ -80,11 +80,25 @@ namespace ClassicUO.Network
 
 
 
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)] 
         private delegate void OnInstall(void* header);
+
+        [return: MarshalAs(UnmanagedType.I1)] 
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         private delegate bool OnPacketSendRecv_new(byte[] data, ref int length);
+
+        [return: MarshalAs(UnmanagedType.I1)] 
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)] 
         private delegate bool OnPacketSendRecv_new_intptr(IntPtr data, ref int length);
+
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)] 
         private delegate int OnDrawCmdList([Out] out IntPtr cmdlist, ref int size);
+
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)] 
         private delegate int OnWndProc(SDL.SDL_Event* ev);
+
+        [return: MarshalAs(UnmanagedType.I1)]
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         private delegate bool OnGetStaticData(int index, ref ulong flags,
                                               ref byte weight,
                                               ref byte layer,
@@ -93,15 +107,23 @@ namespace ClassicUO.Network
                                               ref ushort lightidx,
                                               ref byte height,
                                               ref string name);
+
+        [return: MarshalAs(UnmanagedType.I1)]
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         private delegate bool OnGetTileData(int index, ref ulong flags,
                                             ref ushort textid,
                                             ref string name);
+
+        [return: MarshalAs(UnmanagedType.I1)] 
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)] 
         private delegate bool OnGetCliloc(int cliloc, [MarshalAs(UnmanagedType.LPStr)] string args, bool capitalize, [Out] [MarshalAs(UnmanagedType.LPStr)] out string buffer);
 
 
         [DllImport("kernel32", CharSet = CharSet.Unicode, SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
         public static extern bool DeleteFile(string name);
+
+
 
         struct PluginHeader
         {
@@ -258,8 +280,8 @@ namespace ClassicUO.Network
             {
                 try
                 {
-                    var asm = Assembly.LoadFile(_path);
-                    var type = asm.GetType("Assistant.Engine");
+                    Assembly asm = Assembly.LoadFile(_path);
+                    Type type = asm.GetType("Assistant.Engine");
 
                     if (type == null)
                     {
@@ -269,7 +291,7 @@ namespace ClassicUO.Network
                         return;
                     }
 
-                    var meth = type.GetMethod("Install", BindingFlags.Public | BindingFlags.Static);
+                    MethodInfo meth = type.GetMethod("Install", BindingFlags.Public | BindingFlags.Static);
 
                     if (meth == null)
                     {
@@ -351,9 +373,9 @@ namespace ClassicUO.Network
         private static void SetWindowTitle(string str)
         {
 #if DEV_BUILD
-            Client.Game.Window.Title = $"ClassicUO [dev] - {CUOEnviroment.Version} - {str}";
+            Client.Game.Window.Title = $"{str} - ClassicUO [dev] - {CUOEnviroment.Version}";
 #else
-            Client.Game.Window.Title = $"ClassicUO - {CUOEnviroment.Version} - {str}";
+            Client.Game.Window.Title = $"{str} - ClassicUO - { CUOEnviroment.Version}";
 #endif
         }
 
@@ -369,7 +391,7 @@ namespace ClassicUO.Network
         {
             if (index >= 0 && index < Constants.MAX_STATIC_DATA_INDEX_COUNT)
             {
-                ref var st = ref TileDataLoader.Instance.StaticData[index];
+                ref StaticTiles st = ref TileDataLoader.Instance.StaticData[index];
 
                 flags = (ulong) st.Flags;
                 weight = st.Weight;
@@ -393,7 +415,7 @@ namespace ClassicUO.Network
         {
             if (index >= 0 && index < Constants.MAX_STATIC_DATA_INDEX_COUNT)
             {
-                ref var st = ref TileDataLoader.Instance.LandData[index];
+                ref LandTiles st = ref TileDataLoader.Instance.LandData[index];
 
                 flags = (ulong) st.Flags;
                 textid = st.TexID;
@@ -607,18 +629,16 @@ namespace ClassicUO.Network
 
         private static bool OnPluginSend(ref byte[] data, ref int length)
         {
-            if (data != null && data.Length != 0)
-            {
-                // horrible workaround to avoid ghosting item when a plugin sends drop/equip item
-                switch (data[0])
-                {
-                    case 0x08:
-                    case 0x13:
-                        ItemHold.Enabled = false;
-                        ItemHold.Dropped = true;
-                        break;
-                }
-            }
+            //if (data != null && data.Length != 0)
+            //{
+            //    // horrible workaround to avoid ghosting item when a plugin sends drag request item
+            //    switch (data[0])
+            //    {
+            //        case 0x07:
+            //            ItemHold.Clear();
+            //            break;
+            //    }
+            //}
 
 
             if (NetClient.LoginSocket.IsDisposed && NetClient.Socket.IsConnected)
@@ -702,14 +722,14 @@ namespace ClassicUO.Network
             Effect current_effect = null;
 
 
-            var lastViewport = device.Viewport;
-            var lastScissorBox = device.ScissorRectangle;
+            Viewport lastViewport = device.Viewport;
+            Rectangle lastScissorBox = device.ScissorRectangle;
 
-            var lastBlendFactor = device.BlendFactor;
-            var lastBlendState = device.BlendState;
-            var lastRasterizeState = device.RasterizerState;
-            var lastDepthStencilState = device.DepthStencilState;
-            var lastsampler = device.SamplerStates[0];
+            Color lastBlendFactor = device.BlendFactor;
+            BlendState lastBlendState = device.BlendState;
+            RasterizerState lastRasterizeState = device.RasterizerState;
+            DepthStencilState lastDepthStencilState = device.DepthStencilState;
+            SamplerState lastsampler = device.SamplerStates[0];
 
 
             //var blend_snap_AlphaBlendFunction = device.BlendState.AlphaBlendFunction;
@@ -758,7 +778,7 @@ namespace ClassicUO.Network
                 switch (cmd.type)
                 {
                     case CMD_VIEWPORT:
-                        ref var viewport = ref cmd.viewport;
+                        ref cmd_viewport viewport = ref cmd.viewport;
 
                         device.Viewport = new Viewport(
                                                        viewport.x,
@@ -769,7 +789,7 @@ namespace ClassicUO.Network
                         break;
 
                     case CMD_SCISSOR:
-                        ref var scissor = ref cmd.scissor;
+                        ref cmd_scissor scissor = ref cmd.scissor;
 
                         device.ScissorRectangle = new Rectangle(
                                                                 scissor.x,
@@ -781,14 +801,14 @@ namespace ClassicUO.Network
 
                     case CMD_BLEND_FACTOR:
 
-                        ref var blend_factor = ref cmd.new_blend_factor;
+                        ref cmd_blend_factor blend_factor = ref cmd.new_blend_factor;
 
                         device.BlendFactor = blend_factor.color;
 
                         break;
 
                     case CMD_NEW_BLEND_STATE:
-                        ref var blend = ref cmd.new_blend_state;
+                        ref cmd_new_blend_state blend = ref cmd.new_blend_state;
 
                         resources[blend.id] = new BlendState()
                         {
@@ -810,7 +830,7 @@ namespace ClassicUO.Network
 
                     case CMD_NEW_RASTERIZE_STATE:
 
-                        ref var rasterize = ref cmd.new_rasterize_state;
+                        ref cmd_new_rasterize_state rasterize = ref cmd.new_rasterize_state;
 
                         resources[rasterize.id] = new RasterizerState()
                         {
@@ -826,7 +846,7 @@ namespace ClassicUO.Network
 
                     case CMD_NEW_STENCIL_STATE:
 
-                        ref var stencil = ref cmd.new_stencil_state;
+                        ref cmd_new_stencil_state stencil = ref cmd.new_stencil_state;
 
                         resources[stencil.id] = new DepthStencilState()
                         {
@@ -853,7 +873,7 @@ namespace ClassicUO.Network
 
                     case CMD_NEW_SAMPLER_STATE:
 
-                        ref var sampler = ref cmd.new_sampler_state;
+                        ref cmd_new_sampler_state sampler = ref cmd.new_sampler_state;
 
                         resources[sampler.id] = new SamplerState()
                         {
@@ -894,9 +914,9 @@ namespace ClassicUO.Network
 
                     case CMD_SET_VERTEX_DATA:
 
-                        ref var set_vertex_data = ref cmd.set_vertex_data;
+                        ref cmd_set_vertex_data set_vertex_data = ref cmd.set_vertex_data;
 
-                        var vertex_buffer = resources[set_vertex_data.id] as VertexBuffer;
+                        VertexBuffer vertex_buffer = resources[set_vertex_data.id] as VertexBuffer;
 
                         vertex_buffer?.SetDataPointerEXT(0,
                                                          set_vertex_data.vertex_buffer_ptr,
@@ -907,9 +927,9 @@ namespace ClassicUO.Network
 
                     case CMD_SET_INDEX_DATA:
 
-                        ref var set_index_data = ref cmd.set_index_data;
+                        ref cmd_set_index_data set_index_data = ref cmd.set_index_data;
 
-                        var index_buffer = resources[set_index_data.id] as IndexBuffer;
+                        IndexBuffer index_buffer = resources[set_index_data.id] as IndexBuffer;
 
                         index_buffer?.SetDataPointerEXT(0,
                                                         set_index_data.indices_buffer_ptr,
@@ -920,7 +940,7 @@ namespace ClassicUO.Network
 
                     case CMD_CREATE_VERTEX_BUFFER:
 
-                        ref var create_vertex_buffer = ref cmd.create_vertex_buffer;
+                        ref cmd_create_vertex_buffer create_vertex_buffer = ref cmd.create_vertex_buffer;
 
                         VertexElement[] elements = new VertexElement[create_vertex_buffer.decl_count];
 
@@ -946,7 +966,7 @@ namespace ClassicUO.Network
 
                     case CMD_CREATE_INDEX_BUFFER:
 
-                        ref var create_index_buffer = ref cmd.create_index_buffer;
+                        ref cmd_create_index_buffer create_index_buffer = ref cmd.create_index_buffer;
 
                         IndexBuffer ib = create_index_buffer.is_dynamic ?
                                              new DynamicIndexBuffer(device, create_index_buffer.index_element_size, create_index_buffer.index_count, create_index_buffer.buffer_usage)
@@ -959,7 +979,7 @@ namespace ClassicUO.Network
 
                     case CMD_SET_VERTEX_BUFFER:
 
-                        ref var set_vertex_buffer = ref cmd.set_vertex_buffer;
+                        ref cmd_set_vertex_buffer set_vertex_buffer = ref cmd.set_vertex_buffer;
 
                         vb = resources[set_vertex_buffer.id] as VertexBuffer;
 
@@ -969,7 +989,7 @@ namespace ClassicUO.Network
 
                     case CMD_SET_INDEX_BUFFER:
 
-                        ref var set_index_buffer = ref cmd.set_index_buffer;
+                        ref cmd_set_index_buffer set_index_buffer = ref cmd.set_index_buffer;
 
                         ib = resources[set_index_buffer.id] as IndexBuffer;
 
@@ -979,13 +999,13 @@ namespace ClassicUO.Network
 
                     case CMD_CREATE_EFFECT:
 
-                        ref var create_effect = ref cmd.create_effect;
+                        ref cmd_create_effect create_effect = ref cmd.create_effect;
 
                         break;
 
                     case CMD_CREATE_BASIC_EFFECT:
 
-                        ref var create_basic_effect = ref cmd.create_basic_effect;
+                        ref cmd_create_basic_effect create_basic_effect = ref cmd.create_basic_effect;
 
                         if (!resources.TryGetValue(create_basic_effect.id, out GraphicsResource res))
                         {
@@ -1009,7 +1029,7 @@ namespace ClassicUO.Network
 
                     case CMD_CREATE_TEXTURE_2D:
 
-                        ref var create_texture_2d = ref cmd.create_texture_2d;
+                        ref cmd_create_texture_2d create_texture_2d = ref cmd.create_texture_2d;
 
                         Texture2D texture;
                         if (create_texture_2d.is_render_target)
@@ -1037,7 +1057,7 @@ namespace ClassicUO.Network
 
                     case CMD_SET_TEXTURE_DATA_2D:
 
-                        ref var set_texture_data_2d = ref cmd.set_texture_data_2d;
+                        ref cmd_set_texture_data_2d set_texture_data_2d = ref cmd.set_texture_data_2d;
 
                         texture = resources[set_texture_data_2d.id] as Texture2D;
 
@@ -1054,13 +1074,13 @@ namespace ClassicUO.Network
 
                     case CMD_INDEXED_PRIMITIVE_DATA:
 
-                        ref var indexed_primitive_data = ref cmd.indexed_primitive_data;
+                        ref cmd_indexed_primitive_data indexed_primitive_data = ref cmd.indexed_primitive_data;
 
                         //device.Textures[0] = resources[indexed_primitive_data.texture_id] as Texture;
 
                         if (current_effect != null)
                         {
-                            foreach (var pass in current_effect.CurrentTechnique.Passes)
+                            foreach (EffectPass pass in current_effect.CurrentTechnique.Passes)
                             {
                                 pass.Apply();
 
@@ -1088,7 +1108,7 @@ namespace ClassicUO.Network
 
                     case CMD_DESTROY_RESOURCE:
 
-                        ref var destroy_resource = ref cmd.destroy_resource;
+                        ref cmd_destroy_resource destroy_resource = ref cmd.destroy_resource;
 
                         resources[destroy_resource.id]?.Dispose();
                         resources.Remove(destroy_resource.id);

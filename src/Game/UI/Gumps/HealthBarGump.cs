@@ -56,9 +56,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Dispose();
                 return;
             }
-
             GameActions.RequestMobileStatus(entity.Serial);
-
             LocalSerial = entity.Serial;
             CanCloseWithRightClick = true;
             _name = entity.Name;
@@ -97,13 +95,11 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override void Dispose()
         {
-            var entity = World.Get(LocalSerial);
+            if (Client.Version >= ClientVersion.CV_200 && World.InGame)
+            {
+                NetClient.Socket.Send(new PCloseStatusBarGump(LocalSerial));
+            }
 
-            if (Client.Version >= ClientVersion.CV_200 && World.InGame && entity != null && TargetManager.LastTargetInfo.Serial != LocalSerial && TargetManager.LastAttack != LocalSerial && TargetManager.SelectedTarget != LocalSerial)
-                NetClient.Socket.Send(new PCloseStatusBarGump(entity));
-
-            if (SelectedObject.HealthbarObject == entity && entity != null)
-                SelectedObject.HealthbarObject = null;
             _textBox?.Dispose();
             _textBox = null;
             base.Dispose();
@@ -242,7 +238,7 @@ namespace ClassicUO.Game.UI.Gumps
                 UIManager.SystemChat?.SetFocus();
             }
 
-            var entity = World.Get(LocalSerial);
+            Entity entity = World.Get(LocalSerial);
 
             if (entity != null)
             {
@@ -265,7 +261,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override void OnKeyDown(SDL.SDL_Keycode key, SDL.SDL_Keymod mod)
         {
-            var entity = World.Get(LocalSerial);
+            Entity entity = World.Get(LocalSerial);
 
             if (entity == null || SerialHelper.IsItem(entity.Serial))
                 return;
@@ -281,7 +277,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override void OnMouseOver(int x, int y)
         {
-            var entity = World.Get(LocalSerial);
+            Entity entity = World.Get(LocalSerial);
 
             if (entity != null)
             {
@@ -292,16 +288,6 @@ namespace ClassicUO.Game.UI.Gumps
             base.OnMouseOver(x, y);
         }
 
-        protected override void OnMouseExit(int x, int y)
-        {
-            var entity = World.Get(LocalSerial);
-
-            if (entity != null && SelectedObject.HealthbarObject == entity)
-            {
-                SelectedObject.HealthbarObject = null;
-                SelectedObject.Object = null;
-            }
-        }
 
         protected bool CheckIfAnchoredElseDispose()
         {
@@ -417,6 +403,11 @@ namespace ClassicUO.Game.UI.Gumps
             ushort textColor = 0x0386;
 
             Entity entity = World.Get(LocalSerial);
+
+            if (entity is Item it && it.Layer == 0 && it.Container == World.Player)
+            {
+                entity = null;
+            }
 
             if (entity == null || entity.IsDestroyed)
             {
@@ -654,7 +645,6 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     SelectedObject.HealthbarObject = entity;
                     SelectedObject.Object = entity;
-                    SelectedObject.LastObject = entity;
                 }
             }
 
@@ -690,7 +680,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             WantUpdateSize = false;
 
-            var entity = World.Get(LocalSerial);
+            Entity entity = World.Get(LocalSerial);
 
 
             if (World.Party.Contains(LocalSerial))
@@ -847,7 +837,7 @@ namespace ClassicUO.Game.UI.Gumps
             public override bool Draw(UltimaBatcher2D batcher, int x, int y)
             {
                 ResetHueVector();
-                ShaderHuesTraslator.GetHueVector(ref _hueVector, 0, false, Alpha);
+                ShaderHueTranslator.GetHueVector(ref _hueVector, 0, false, Alpha);
 
                 return batcher.Draw2D(LineColor, x, y, LineWidth, Height, ref _hueVector);
             }
@@ -921,7 +911,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             WantUpdateSize = false;
 
-            var entity = World.Get(LocalSerial);
+            Entity entity = World.Get(LocalSerial);
 
             if (World.Party.Contains(LocalSerial))
             {
@@ -1054,6 +1044,11 @@ namespace ClassicUO.Game.UI.Gumps
             ushort hitsColor = 0x0386;
 
             Entity entity = World.Get(LocalSerial);
+
+            if (entity is Item it && it.Layer == 0 && it.Container == World.Player)
+            {
+                entity = null;
+            }
 
             if (entity == null || entity.IsDestroyed)
             {
@@ -1260,13 +1255,10 @@ namespace ClassicUO.Game.UI.Gumps
                     }
                 }
 
-
-                if ( /*!Mobile.IsSelected &&*/ UIManager.MouseOverControl != null && UIManager.MouseOverControl.RootParent == this)
+                if (UIManager.MouseOverControl != null && UIManager.MouseOverControl.RootParent == this)
                 {
-                    //Mobile.IsSelected = true;
                     SelectedObject.HealthbarObject = entity;
                     SelectedObject.Object = entity;
-                    SelectedObject.LastObject = entity;
                 }
             }
 
@@ -1281,19 +1273,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             }
         }
-
-        public override void Dispose()
-        {
-            var entity = World.Get(LocalSerial);
-
-            if (Client.Version >= ClientVersion.CV_200 && World.InGame && entity != null && TargetManager.LastTargetInfo.Serial != LocalSerial && TargetManager.LastAttack != LocalSerial && TargetManager.SelectedTarget != LocalSerial)
-                NetClient.Socket.Send(new PCloseStatusBarGump(entity));
-
-            if (SelectedObject.HealthbarObject == entity && entity != null)
-                SelectedObject.HealthbarObject = null;
-            base.Dispose();
-        }
-
+        
         public override void OnButtonClick(int buttonID)
         {
             switch ((ButtonParty) buttonID)

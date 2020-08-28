@@ -251,7 +251,7 @@ namespace ClassicUO.Game.UI.Controls
                 {
                     for (int i = 0; i < _gameText.Links.Count; i++)
                     {
-                        ref var link = ref _gameText.Links[i];
+                        ref WebLinkRect link = ref _gameText.Links[i];
 
                         bool inbounds = link.Bounds.Contains(x, (_scrollBar == null ? 0 : _scrollBar.Value) + y);
 

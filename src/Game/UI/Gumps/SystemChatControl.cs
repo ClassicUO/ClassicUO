@@ -429,7 +429,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 case SDL.SDL_Keycode.SDLK_q when Keyboard.Ctrl && _messageHistoryIndex > -1 && !ProfileManager.Current.DisableCtrlQWBtn:
 
-                    var scene = Client.Game.GetScene<GameScene>();
+                    GameScene scene = Client.Game.GetScene<GameScene>();
                     if (scene == null)
                         return;
 
@@ -647,7 +647,10 @@ namespace ClassicUO.Game.UI.Gumps
 
                     case ChatMode.ClientCommand:
                         string[] tt = text.Split(new[] {' '}, StringSplitOptions.RemoveEmptyEntries);
-                        CommandManager.Execute(tt[0], tt);
+                        if (tt.Length != 0)
+                        {
+                            CommandManager.Execute(tt[0], tt);
+                        }
 
                         break;
 
@@ -699,7 +702,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             public bool Draw(UltimaBatcher2D batcher, int x, int y)
             {
-                return _renderedText.Draw(batcher, x, y /*, ShaderHuesTraslator.GetHueVector(0, false, _alpha, true)*/);
+                return _renderedText.Draw(batcher, x, y /*, ShaderHueTranslator.GetHueVector(0, false, _alpha, true)*/);
             }
 
             public override string ToString()

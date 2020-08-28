@@ -254,8 +254,6 @@ namespace ClassicUO.Game.UI.Gumps
         {
             if (button == MouseButtonType.Left)
             {
-                GameScene scene = Client.Game.GetScene<GameScene>();
-
                 if (!ItemHold.Enabled)
                 {
                     if (UIManager.IsDragging || Math.Max(Math.Abs(Mouse.LDroppedOffset.X), Math.Abs(Mouse.LDroppedOffset.Y)) >= 1)
@@ -295,27 +293,61 @@ namespace ClassicUO.Game.UI.Gumps
                 }
                 else
                 {
-                    if (ItemHold.Enabled)
+                    if (ItemHold.Enabled && !ItemHold.IsFixedPosition)
                     {
-                        Entity entity = World.Get(LocalSerial);
+                        uint drop_container = 0xFFFF_FFFF;
+                        bool can_drop = false;
+                        ushort dropX = 0;
+                        ushort dropY = 0;
+                        sbyte dropZ = 0;
 
-                        if (entity != null)
+                        Entity obj = World.Get(LocalSerial);
+
+                        if (obj != null)
                         {
-                            if (entity.Distance < Constants.DRAG_ITEMS_DISTANCE)
+                            can_drop = obj.Distance <= Constants.DRAG_ITEMS_DISTANCE;
+
+                            if (can_drop)
                             {
-                                if (SerialHelper.IsItem(LocalSerial))
-                                    scene.DropHeldItemToContainer(World.Items.Get(LocalSerial));
-                                else if (SerialHelper.IsMobile(LocalSerial))
-                                    scene.MergeHeldItem(World.Mobiles.Get(LocalSerial));
+                                if ((obj is Item it && it.ItemData.IsContainer) || obj is Mobile)
+                                {
+                                    dropX = 0xFFFF;
+                                    dropY = 0xFFFF;
+                                    dropZ = 0;
+                                    drop_container = obj.Serial;
+                                }
+                                else if (obj is Item it2 && (it2.ItemData.IsSurface || (it2.ItemData.IsStackable && it2.DisplayedGraphic == ItemHold.DisplayedGraphic)))
+                                {
+                                    if (!it2.ItemData.IsSurface)
+                                    {
+                                        drop_container = obj.Serial;
+                                    }
+
+                                    dropX = obj.X;
+                                    dropY = obj.Y;
+                                    dropZ = obj.Z;
+                                }
                             }
                             else
-                                scene.Audio.PlaySound(0x0051);
-                        }
-                        
-                        return;
-                    }
+                            {
+                                Client.Game.Scene.Audio.PlaySound(0x0051);
+                            }
 
-                    if (!DelayedObjectClickManager.IsEnabled)
+                            if (can_drop)
+                            {
+                                if (drop_container == 0xFFFF_FFFF && dropX == 0 && dropY == 0)
+                                {
+                                    can_drop = false;
+                                }
+
+                                if (can_drop)
+                                {
+                                    GameActions.DropItem(ItemHold.Serial, dropX, dropY, dropZ, drop_container);
+                                }
+                            }
+                        }
+                    }
+                    else if (!DelayedObjectClickManager.IsEnabled)
                     {
                         DelayedObjectClickManager.Set(LocalSerial, Mouse.Position.X, Mouse.Position.Y, Time.Ticks + Mouse.MOUSE_DELAY_DOUBLE_CLICK);
                     }
@@ -436,7 +468,7 @@ namespace ClassicUO.Game.UI.Gumps
                     return false;
                 }
 
-                var texture = ArtLoader.Instance.GetTexture(item.Graphic);
+                ArtTexture texture = ArtLoader.Instance.GetTexture(item.Graphic);
 
                 if (texture != null)
                 {

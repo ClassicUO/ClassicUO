@@ -173,7 +173,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                     _hueVector.Z = 0;
 
-                    ShaderHuesTraslator.GetHueVector(ref _hueVector, Notoriety.GetHue(mob.NotorietyFlag));
+                    ShaderHueTranslator.GetHueVector(ref _hueVector, Notoriety.GetHue(mob.NotorietyFlag));
 
                     batcher.Draw2D(_mobilesIndicator, x + w + gx, y + h + gy, 2, 2, ref _hueVector);
                 }
@@ -240,7 +240,7 @@ namespace ClassicUO.Game.UI.Gumps
                 minBlockY = 0;
             int maxBlockIndex = World.Map.BlocksCount;
             int mapBlockHeight = MapLoader.Instance.MapBlocksSize[World.MapIndex, 1];
-            var data = GumpsLoader.Instance.GetGumpPixels(_useLargeMap ? (uint) 5011 : 5010, out _, out _);
+            uint[] data = GumpsLoader.Instance.GetGumpPixels(_useLargeMap ? (uint) 5011 : 5010, out _, out _);
 
             Point[] table = new Point[2]
             {

@@ -49,6 +49,7 @@ namespace ClassicUO.Data
         CV_6040 =   (6 << 24) |   (0 << 16) |   (4 << 8)   | 0,                 // Increased number of player slots
         CV_6060 =   (6 << 24) |   (0 << 16) |   (6 << 8)   | 0,                 //
         CV_60142 =  (6 << 24) |   (0 << 16) |   (14 << 8)  | 2,                 //
+        CV_60143 =  (6 << 24) |   (0 << 16) |   (14 << 8)  | 3,                 // Stygian Abyss
         CV_60144 =  (6 << 24) |   (0 << 16) |   (14 << 8)  | 4,                 // Adds gargoyle race.
         CV_7000 =   (7 << 24) |   (0 << 16) |   (0 << 8)   | 0,                 //
         CV_7090 =   (7 << 24) |   (0 << 16) |   (9 << 8)   | 0,                 // high seas
@@ -74,7 +75,7 @@ namespace ClassicUO.Data
                 DirectoryInfo dirInfo = new DirectoryInfo(fileInfo.DirectoryName);
                 if (dirInfo.Exists)
                 {
-                    foreach (var clientInfo in dirInfo.GetFiles("client.exe", SearchOption.TopDirectoryOnly))
+                    foreach (FileInfo clientInfo in dirInfo.GetFiles("client.exe", SearchOption.TopDirectoryOnly))
                     {
                         FileVersionInfo versInfo = FileVersionInfo.GetVersionInfo(clientInfo.FullName);
                         if (versInfo != null && !string.IsNullOrEmpty(versInfo.FileVersion))
@@ -104,11 +105,11 @@ namespace ClassicUO.Data
                 if (buff.Length <= 2 || buff.Length > 4)
                     return false;
 
-                if (int.TryParse(buff[0], out var major) && major >= byte.MinValue && major <= byte.MaxValue)
+                if (int.TryParse(buff[0], out int major) && major >= byte.MinValue && major <= byte.MaxValue)
                 {
                     int extra = 0;
 
-                    if (int.TryParse(buff[1], out var minor) && minor >= byte.MinValue && minor <= byte.MaxValue)
+                    if (int.TryParse(buff[1], out int minor) && minor >= byte.MinValue && minor <= byte.MaxValue)
                     {
                         int extra_index = 2;
                         int build = 0;

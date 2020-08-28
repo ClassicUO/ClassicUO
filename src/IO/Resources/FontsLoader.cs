@@ -23,6 +23,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
@@ -72,22 +73,10 @@ namespace ClassicUO.IO.Resources
 
         private FontsLoader()
         {
-
         }
 
         private static FontsLoader _instance;
-        public static FontsLoader Instance
-        {
-            get
-            {
-                if (_instance == null)
-                {
-                    _instance = new FontsLoader();
-                }
-
-                return _instance;
-            }
-        }
+        public static FontsLoader Instance => _instance ?? (_instance = new FontsLoader());
 
         public int FontCount { get; private set; }
 
@@ -96,8 +85,6 @@ namespace ClassicUO.IO.Resources
         public bool RecalculateWidthByInfo { get; set; } = false;
 
         public bool IsUsingHTML { get; set; }
-
-
 
         public override unsafe Task Load()
         {
@@ -133,7 +120,9 @@ namespace ClassicUO.IO.Resources
                             FontHeader* fh = (FontHeader*) fonts.PositionAddress;
 
                             if (fonts.Position + fontHeaderSize >= fonts.Length)
+                            {
                                 continue;
+                            }
 
                             fonts.Skip(fontHeaderSize);
                             int bcount = fh->Width * fh->Height * 2;
@@ -174,7 +163,9 @@ namespace ClassicUO.IO.Resources
                     for (int j = 0; j < 224; j++)
                     {
                         if (fonts.Position + 3 >= fonts.Length)
+                        {
                             continue;
+                        }
 
                         byte w = fonts.ReadByte();
                         byte h = fonts.ReadByte();
@@ -195,12 +186,10 @@ namespace ClassicUO.IO.Resources
             });
         }
 
-
         public bool UnicodeFontExists(byte font)
         {
             return font < 20 && _unicodeFontAddress[font] != IntPtr.Zero;
         }
-
 
         public (int, int) MeasureText(string text, byte font, bool isunicode, TEXT_ALIGN_TYPE align, ushort flags, int maxWidth = 200)
         {
@@ -229,6 +218,7 @@ namespace ClassicUO.IO.Resources
         }
 
         /// <summary> Get the index in ASCII fonts of a character. </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private int GetASCIIIndex(char c)
         {
             byte ch = (byte) c; // ASCII fonts cover only 256 characters
@@ -328,10 +318,8 @@ namespace ClassicUO.IO.Resources
             return textHeight;
         }
 
-        public void GenerateASCII(ref FontTexture texture, byte font, string str, ushort color, int width, TEXT_ALIGN_TYPE align, ushort flags, out bool isPartial, bool saveHitmap, int height)
+        public void GenerateASCII(ref FontTexture texture, byte font, string str, ushort color, int width, TEXT_ALIGN_TYPE align, ushort flags, bool saveHitmap, int height)
         {
-            isPartial = false;
-
             if (string.IsNullOrEmpty(str))
                 return;
 
@@ -357,13 +345,13 @@ namespace ClassicUO.IO.Resources
                                 break;
                         }
                     }
-                    GeneratePixelsASCII(ref texture, font, newstr, color, width, align, flags, out isPartial, saveHitmap);
+                    GeneratePixelsASCII(ref texture, font, newstr, color, width, align, flags, saveHitmap);
 
                     return;
                 }
             }
 
-            GeneratePixelsASCII(ref texture, font, str, color, width, align, flags, out isPartial, saveHitmap);
+            GeneratePixelsASCII(ref texture, font, str, color, width, align, flags, saveHitmap);
         }
 
         public string GetTextByWidthASCII(byte font, string str, int width, bool isCropped, TEXT_ALIGN_TYPE align, ushort flags)
@@ -371,7 +359,7 @@ namespace ClassicUO.IO.Resources
             if (font >= FontCount || string.IsNullOrEmpty(str))
                 return string.Empty;
 
-            ref var fd = ref _font[font];
+            ref FontCharacterData[] fd = ref _font[font];
 
             StringBuilder sb = new StringBuilder();
 
@@ -411,10 +399,8 @@ namespace ClassicUO.IO.Resources
             return sb.ToString();
         }
 
-        private void GeneratePixelsASCII(ref FontTexture texture, byte font, string str, ushort color, int width, TEXT_ALIGN_TYPE align, ushort flags, out bool isPartial, bool saveHitmap)
+        private void GeneratePixelsASCII(ref FontTexture texture, byte font, string str, ushort color, int width, TEXT_ALIGN_TYPE align, ushort flags, bool saveHitmap)
         {
-            isPartial = false;
-
             if (font >= FontCount)
                 return;
 
@@ -423,7 +409,7 @@ namespace ClassicUO.IO.Resources
             if (len == 0)
                 return;
 
-            ref var fd = ref _font[font];
+            ref FontCharacterData[] fd = ref _font[font];
 
             if (width <= 0)
                 width = GetWidthASCII(font, str);
@@ -458,7 +444,7 @@ namespace ClassicUO.IO.Resources
             uint[] pData = new uint[blocksize];
             int lineOffsY = 0;
             MultilinesFontInfo ptr = info;
-            isPartial = font != 5 && font != 8 && !UnusePartialHue;
+            bool isPartial = font != 5 && font != 8 && !UnusePartialHue;
             int font6OffsetY = font == 6 ? 7 : 0;
             int linesCount = 0; // this value should be added to TextTexture.LinesCount += linesCount
 
@@ -511,9 +497,9 @@ namespace ClassicUO.IO.Resources
 
                     for (int y = 0; y < dh; y++)
                     {
-                        int testrY = y + lineOffsY + offsY;
+                        int testY = y + lineOffsY + offsY;
 
-                        if (testrY >= height)
+                        if (testY >= height)
                             break;
 
                         for (int x = 0; x < dw; x++)
@@ -525,14 +511,18 @@ namespace ClassicUO.IO.Resources
 
                             if (pic != 0)
                             {
-                                uint pcl = 0;
+                                uint pcl;
 
                                 if (isPartial)
-                                    pcl = HuesLoader.Instance.GetPartialHueColor(pic, charColor) | 0xFF000000;
+                                    pcl = HuesLoader.Instance.GetPartialHueColor(pic, charColor);
                                 else
-                                    pcl = HuesLoader.Instance.GetColor(pic, charColor) | 0xFF000000;
-                                int block = testrY * width + x + w;
-                                pData[block] = pcl; //HuesHelper.RgbaToArgb((pcl << 8) | 0xFF);
+                                    pcl = HuesLoader.Instance.GetColor(pic, charColor);
+
+                                int block = testY * width + x + w;
+                                if (block >= 0)
+                                {
+                                    pData[block] = pcl | 0xFF_00_00_00;
+                                }
                             }
                         }
                     }
@@ -583,7 +573,7 @@ namespace ClassicUO.IO.Resources
             if (font >= FontCount)
                 return null;
 
-            ref var fd = ref _font[font];
+            ref FontCharacterData[] fd = ref _font[font];
             MultilinesFontInfo info = new MultilinesFontInfo();
             info.Reset();
             info.Align = align;
@@ -1833,7 +1823,7 @@ namespace ClassicUO.IO.Resources
             if (len < 1)
                 return _emptyHTML;
 
-            var data = new HTMLChar[len];
+            HTMLChar[] data = new HTMLChar[len];
             int newlen = 0;
 
             HTMLDataInfo info = new HTMLDataInfo
@@ -2925,7 +2915,7 @@ namespace ClassicUO.IO.Resources
                 }
             }
 
-            ref var fd = ref _font[font];
+            ref FontCharacterData[] fd = ref _font[font];
 
             if (width <= 0)
                 width = GetWidthASCII(font, str);
@@ -2996,7 +2986,7 @@ namespace ClassicUO.IO.Resources
                     }
                 }
 
-                var ptr = info;
+                MultilinesFontInfo ptr = info;
                 info = info.Next;
                 ptr.Data.Clear();
                 ptr = null;
@@ -3026,7 +3016,7 @@ namespace ClassicUO.IO.Resources
             if (font >= FontCount || string.IsNullOrEmpty(str))
                 return (x, y);
 
-            ref var fd = ref _font[font];
+            ref FontCharacterData[] fd = ref _font[font];
 
             if (width == 0)
                 width = GetWidthASCII(font, str);

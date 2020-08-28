@@ -240,7 +240,7 @@ namespace ClassicUO.Game.GameObjects
             }
 
 
-            ref var entry = ref MultiLoader.Instance.GetValidRefEntry(Graphic);
+            ref UOFileIndex entry = ref MultiLoader.Instance.GetValidRefEntry(Graphic);
             MultiLoader.Instance.File.SetData(entry.Address, entry.FileSize);
 
             if (MultiLoader.Instance.IsUOP)
@@ -249,7 +249,7 @@ namespace ClassicUO.Game.GameObjects
                 {
                     MultiLoader.Instance.File.Seek(entry.Offset);
 
-                    var data = stackalloc byte[entry.DecompressedLength];
+                    byte* data = stackalloc byte[entry.DecompressedLength];
                     ZLib.Decompress(MultiLoader.Instance.File.PositionAddress, entry.Length, 0, (IntPtr) data, entry.DecompressedLength);
                     _reader.SetData(data, entry.DecompressedLength);
                     _reader.Skip(4);
@@ -273,7 +273,7 @@ namespace ClassicUO.Game.GameObjects
                         if (block->Y > maxY)
                             maxY = block->Y;
 
-                        if (block->Flags == 0)
+                        if (block->Flags == 0 || block->Flags == 0x100)
                         {
                             Multi m = Multi.Create(block->ID);
                             m.X = (ushort) (X + block->X);
@@ -337,8 +337,6 @@ namespace ClassicUO.Game.GameObjects
                         m.State = CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_DONT_REMOVE;
                         m.AddToTile();
                         house.Components.Add(m);
-
-                        m.IsMovable = ItemData.IsMultiMovable;
                     }
                     else if (i == 0)
                     {
@@ -873,10 +871,10 @@ namespace ClassicUO.Game.GameObjects
 
             if (OnGround)
             {
-                var scene = Client.Game.GetScene<GameScene>();
+                GameScene scene = Client.Game.GetScene<GameScene>();
                 float scale = scene?.Scale ?? 1;
 
-                var texture = ArtLoader.Instance.GetTexture(Graphic);
+                ArtTexture texture = ArtLoader.Instance.GetTexture(Graphic);
 
                 if (texture != null)
                     y -= (texture.ImageRectangle.Height >> 1);
@@ -959,7 +957,7 @@ namespace ClassicUO.Game.GameObjects
                         byte animGroup = AnimationsLoader.Instance.GetDieGroupIndex(id, UsedLayer);
 
                         ushort hue = 0;
-                        var direction = AnimationsLoader.Instance.GetCorpseAnimationGroup(ref id, ref animGroup, ref hue).Direction[dir];
+                        AnimationDirection direction = AnimationsLoader.Instance.GetCorpseAnimationGroup(ref id, ref animGroup, ref hue).Direction[dir];
                         AnimationsLoader.Instance.AnimID = id;
                         AnimationsLoader.Instance.AnimGroup = animGroup;
                         AnimationsLoader.Instance.Direction = dir;

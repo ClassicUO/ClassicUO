@@ -86,7 +86,7 @@ namespace ClassicUO.Game.UI.Gumps
             };
             Add(_middleGumpLeft);
 
-            var left_down = new GumpPicTexture(0, _middleGumpLeft.Height + _middleGumpLeft.Y, _shopGumpParts[2 + add]);
+            GumpPicTexture left_down = new GumpPicTexture(0, _middleGumpLeft.Height + _middleGumpLeft.Y, _shopGumpParts[2 + add]);
             Add(left_down);
 
             _shopScrollArea = new ScrollArea(30, 60, 225, _middleGumpLeft.Height + _middleGumpLeft.Y + 50, false, _middleGumpLeft.Height + _middleGumpLeft.Y);
@@ -101,7 +101,7 @@ namespace ClassicUO.Game.UI.Gumps
             Add(_middleGumpRight);
 
 
-            var right_down = new GumpPicTexture(250, _middleGumpRight.Height + _middleGumpRight.Y, _shopGumpParts[5 + add]);
+            GumpPicTexture right_down = new GumpPicTexture(250, _middleGumpRight.Height + _middleGumpRight.Y, _shopGumpParts[5 + add]);
             Add(right_down);
 
 
@@ -255,7 +255,7 @@ namespace ClassicUO.Game.UI.Gumps
         private void GenerateVirtualTextures()
         {
             _shopGumpParts = new UOTexture32[12];
-            var t = GumpsLoader.Instance.GetTexture(0x0870);
+            UOTexture32 t = GumpsLoader.Instance.GetTexture(0x0870);
             UOTexture32[][] splits = new UOTexture32[4][];
 
             splits[0] = Utility.GraphicHelper.SplitTexture16(t,
@@ -373,7 +373,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 int sum = 0;
 
-                foreach (var t in _transactionItems.Values)
+                foreach (TransactionItem t in _transactionItems.Values)
                 {
                     sum += t.Amount * t.Price;
                 }
@@ -394,7 +394,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void ShopItem_MouseDoubleClick(object sender, MouseDoubleClickEventArgs e)
         {
-            var shopItem = (ShopItem) sender;
+            ShopItem shopItem = (ShopItem) sender;
 
             if (shopItem.Amount <= 0)
                 return;
@@ -419,7 +419,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void TransactionItem_OnDecreaseButtomClicked(object sender, EventArgs e)
         {
-            var transactionItem = (TransactionItem) sender;
+            TransactionItem transactionItem = (TransactionItem) sender;
 
             int total = _shiftPressed ? transactionItem.Amount : 1;
 
@@ -446,7 +446,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void TransactionItem_OnIncreaseButtomClicked(object sender, EventArgs e)
         {
-            var transactionItem = (TransactionItem) sender;
+            TransactionItem transactionItem = (TransactionItem) sender;
 
             if (_shopItems[transactionItem.LocalSerial].Amount > 0)
             {
@@ -459,7 +459,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void ShopItem_MouseClick(object sender, MouseEventArgs e)
         {
-            foreach (var shopItem in _shopScrollArea.Children.SelectMany(o => o.Children).OfType<ShopItem>()) 
+            foreach (ShopItem shopItem in _shopScrollArea.Children.SelectMany(o => o.Children).OfType<ShopItem>()) 
                 shopItem.IsSelected = shopItem == sender;
         }
 
@@ -468,7 +468,7 @@ namespace ClassicUO.Game.UI.Gumps
             switch ((Buttons) buttonID)
             {
                 case Buttons.Accept:
-                    var items = _transactionItems.Select(t => new Tuple<uint, ushort>(t.Key, (ushort) t.Value.Amount)).ToArray();
+                    Tuple<uint, ushort>[] items = _transactionItems.Select(t => new Tuple<uint, ushort>(t.Key, (ushort) t.Value.Amount)).ToArray();
 
                     if (IsBuyGump)
                         NetClient.Socket.Send(new PBuyRequest(LocalSerial, items));
@@ -481,7 +481,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 case Buttons.Clear:
 
-                    foreach (var t in _transactionItems.Values.ToList())
+                    foreach (TransactionItem t in _transactionItems.Values.ToList())
                         RemoveTransactionItem(t);
 
                     break;
@@ -523,7 +523,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }
 
                 byte group = GetAnimGroup(graphic);
-                var index = AnimationsLoader.Instance.DataIndex[graphic];
+                IndexAnimation index = AnimationsLoader.Instance.DataIndex[graphic];
 
                 AnimationDirection direction = index.Groups[group].Direction[dirIndex];
                 AnimationsLoader.Instance.AnimID = graphic;
@@ -595,7 +595,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }
                 else if (SerialHelper.IsItem(LocalSerial))
                 {
-                    var texture = ArtLoader.Instance.GetTexture(Graphic);
+                    ArtTexture texture = ArtLoader.Instance.GetTexture(Graphic);
 
                     Add(control = new TextureControl
                     {
@@ -654,7 +654,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 set
                 {
-                    foreach (var label in Children.OfType<Label>())
+                    foreach (Label label in Children.OfType<Label>())
                         label.Hue = (ushort) (value ? 0x0021 : 0x0219);
                 }
             }
@@ -684,7 +684,7 @@ namespace ClassicUO.Game.UI.Gumps
                 if (SerialHelper.IsMobile(LocalSerial))
                 {
                     ushort hue = Hue;
-                    var dir = GetMobileAnimationDirection(Graphic, ref hue, 1);
+                    AnimationDirection dir = GetMobileAnimationDirection(Graphic, ref hue, 1);
                     if (dir != null)
                         dir.LastAccessTime = Time.Ticks;
                 }
@@ -889,7 +889,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 ResetHueVector();
 
-                ShaderHuesTraslator.GetHueVector(ref _hueVector, 0, false, Alpha, true);
+                ShaderHueTranslator.GetHueVector(ref _hueVector, 0, false, Alpha, true);
 
                 int middleWidth = Width - _gumpTexture[0].Width - _gumpTexture[2].Width;
                 batcher.Draw2D(_gumpTexture[0], x, y, ref _hueVector);

@@ -203,7 +203,7 @@ namespace ClassicUO.Game.GameObjects
             Item found = null;
             if (container != null)
             {
-                for (var i = container.Items; i != null; i = i.Next)
+                for (LinkedObject i = container.Items; i != null; i = i.Next)
                 {
                     Item item = (Item) i;
 
@@ -1274,10 +1274,13 @@ namespace ClassicUO.Game.GameObjects
                 if ((ProfileManager.Current.CorpseOpenOptions == 2 || ProfileManager.Current.CorpseOpenOptions == 3) && IsHidden)
                     return;
 
-                foreach (var c in World.Items.Where(t => t.Graphic == 0x2006 && !AutoOpenedCorpses.Contains(t.Serial) && t.Distance <= ProfileManager.Current.AutoOpenCorpseRange))
+                foreach (Item item in World.Items)
                 {
-                    AutoOpenedCorpses.Add(c.Serial);
-                    GameActions.DoubleClickQueued(c.Serial);
+                    if (!item.IsDestroyed && item.IsCorpse && item.Distance <= ProfileManager.Current.AutoOpenCorpseRange && !AutoOpenedCorpses.Contains(item.Serial))
+                    {
+                        AutoOpenedCorpses.Add(item.Serial);
+                        GameActions.DoubleClickQueued(item.Serial);
+                    }
                 }
             }
         }
@@ -1320,11 +1323,11 @@ namespace ClassicUO.Game.GameObjects
             {
                 if (!bank.IsEmpty)
                 {
-                    var first = (Item) bank.Items;
+                    Item first = (Item) bank.Items;
 
                     while (first != null)
                     {
-                        var next = (Item) first.Next;
+                        Item next = (Item) first.Next;
 
                         World.RemoveItem(first, true);
 
@@ -1341,7 +1344,7 @@ namespace ClassicUO.Game.GameObjects
 
         public void CloseRangedGumps()
         {
-            foreach (var gump in UIManager.Gumps)
+            foreach (Control gump in UIManager.Gumps)
             {
                 switch (gump)
                 {
@@ -1362,7 +1365,7 @@ namespace ClassicUO.Game.GameObjects
                         {
                             if (SerialHelper.IsItem(ent.Serial))
                             {
-                                var top = World.Get(((Item)ent).RootContainer);
+                                Entity top = World.Get(((Item)ent).RootContainer);
 
                                 if (top != null)
                                     distance = top.Distance;
@@ -1384,7 +1387,7 @@ namespace ClassicUO.Game.GameObjects
                         {
                             if (SerialHelper.IsItem(ent.Serial))
                             {
-                                var top = World.Get(((Item) ent).RootContainer);
+                                Entity top = World.Get(((Item) ent).RootContainer);
 
                                 if (top != null)
                                     distance = top.Distance;
@@ -1530,7 +1533,7 @@ namespace ClassicUO.Game.GameObjects
                 LastStepTime = Time.Ticks;
             }
 
-            ref var step = ref Walker.StepInfos[Walker.StepsCount];
+            ref StepInfo step = ref Walker.StepInfos[Walker.StepsCount];
             step.Sequence = Walker.WalkSequence;
             step.Accepted = false;
             step.Running = run;

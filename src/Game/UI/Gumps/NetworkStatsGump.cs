@@ -114,7 +114,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _sb.Append($"Ping: {_ping} ms\n{"In:"} {NetStatistics.GetSizeAdaptive(_deltaBytesReceived),-6} {"Out:"} {NetStatistics.GetSizeAdaptive(_deltaBytesSent),-6}");
 
 
-                var size = Fonts.Bold.MeasureString(_sb.ToString());
+                Vector2 size = Fonts.Bold.MeasureString(_sb.ToString());
 
                 _trans.Width = Width = (int) (size.X + 20);
                 _trans.Height = Height = (int) (size.Y + 20);
@@ -129,11 +129,11 @@ namespace ClassicUO.Game.UI.Gumps
 
             ResetHueVector();
 
-            if (_ping < 100)
+            if (_ping < 150)
                 _hueVector.X = 0x44; // green
-            else if (_ping < 150)
-                _hueVector.X = 0x34; // yellow
             else if (_ping < 200)
+                _hueVector.X = 0x34; // yellow
+            else if (_ping < 300)
                 _hueVector.X = 0x31; // orange
             else
                 _hueVector.X = 0x20; // red

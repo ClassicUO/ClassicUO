@@ -39,7 +39,7 @@ using ClassicUO.Game;
 
 namespace ClassicUO
 {
-    static class Client
+    internal static class Client
     {
         public static ClientVersion Version { get; private set; } 
         public static ClientFlags Protocol { get; set; }
@@ -165,7 +165,7 @@ namespace ClassicUO
 
             Log.Trace("Loading plugins...");
 
-            foreach (var p in Settings.GlobalSettings.Plugins)
+            foreach (string p in Settings.GlobalSettings.Plugins)
                 Plugin.Create(p);
             Log.Trace("Done!");
 

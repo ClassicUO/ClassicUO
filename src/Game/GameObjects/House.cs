@@ -76,7 +76,7 @@ namespace ClassicUO.Game.GameObjects
 
                 for (int i = 0; i < Components.Count; i++)
                 {
-                    var component = Components[i];
+                    Multi component = Components[i];
 
                     component.State = component.State & ~(CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_TRANSPARENT |
                                                           CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_IGNORE_IN_RENDER |
@@ -123,7 +123,7 @@ namespace ClassicUO.Game.GameObjects
 
             for (int i = 0; i < list.Count; i++)
             {
-                ref var b = ref list[i];
+                ref CustomBuildObject b = ref list[i];
                 Add(b.Graphic, 0, b.X, b.Y, (sbyte) (item.Z + b.Z), true);
             }
         }
@@ -175,7 +175,7 @@ namespace ClassicUO.Game.GameObjects
 
             for (int i = 0; i < Components.Count; i++)
             {
-                var s = Components[i];
+                Multi s = Components[i];
 
                 if (!s.IsCustom && removeCustomOnly)
                     continue;

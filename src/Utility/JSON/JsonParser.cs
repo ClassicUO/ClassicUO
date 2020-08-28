@@ -17,7 +17,7 @@ namespace TinyJson
 		StringBuilder sb = new StringBuilder();
 
 		public static object ParseValue(string jsonString) {
-			using (var parser = new JsonParser(jsonString)) {
+			using (JsonParser parser = new JsonParser(jsonString)) {
 				return parser.ParseValue();
 			}
 		}
@@ -181,7 +181,7 @@ namespace TinyJson
 									sb.Append('\t');
 									break;
 								case 'u':
-									var hex = String.Concat(ReadChar(), ReadChar(), ReadChar(), ReadChar());
+									string hex = String.Concat(ReadChar(), ReadChar(), ReadChar(), ReadChar());
 									sb.Append((char) Convert.ToInt32(hex, 16));
 									break;
 							}

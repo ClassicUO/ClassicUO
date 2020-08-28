@@ -28,12 +28,10 @@ using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI;
-using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
-using ClassicUO.Utility.Collections;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -63,7 +61,7 @@ namespace ClassicUO.Game
         private readonly Tooltip _tooltip;
         private Vector3 _auraVector = new Vector3(0, 13, 0);
         private readonly RenderedText _targetDistanceText = RenderedText.Create(String.Empty, 0x0481, style: FontStyle.BlackBorder);
-        private UOTexture32 _draggedItemTexture;
+        private ArtTexture _draggedItemTexture;
         private ushort _graphic = 0x2073;
         private bool _needGraphicUpdate = true;
         private Point _offset;
@@ -337,7 +335,30 @@ namespace ClassicUO.Game
             }
 
             if (ItemHold.Enabled)
+            {
                 _draggedItemTexture.Ticks = (long) totalMS;
+
+                if (ItemHold.IsFixedPosition && !UIManager.IsDragging)
+                {
+                    int x = ItemHold.FixedX - _offset.X;
+                    int y = ItemHold.FixedY - _offset.Y;
+
+                    if (Mouse.Position.X >= x && Mouse.Position.X < x + _draggedItemTexture.Width &&
+                        Mouse.Position.Y >= y && Mouse.Position.Y < y + _draggedItemTexture.Height)
+                    {
+                        if (!ItemHold.IgnoreFixedPosition)
+                        {
+                            ItemHold.IsFixedPosition = false;
+                            ItemHold.FixedX = 0;
+                            ItemHold.FixedY = 0;
+                        }
+                    }
+                    else if (ItemHold.IgnoreFixedPosition)
+                    {
+                        ItemHold.IgnoreFixedPosition = false;
+                    }
+                }
+            }
         }
 
         private readonly CustomBuildObject[] _componentsList = new CustomBuildObject[10];
@@ -354,7 +375,7 @@ namespace ClassicUO.Game
                         
                         Array.Clear(_componentsList, 0, 10);
 
-                        if (!World.CustomHouseManager.CanBuildHere(_componentsList, out var type))
+                        if (!World.CustomHouseManager.CanBuildHere(_componentsList, out CUSTOM_HOUSE_BUILD_TYPE type))
                         {
                             hue = 0x0021;
                         }
@@ -439,7 +460,7 @@ namespace ClassicUO.Game
                     switch (TargetManager.TargetingType)
                     {
                         case TargetType.Neutral:
-                            _auraVector.X = 0x03B2;
+                            _auraVector.X = 0x03b2;
 
                             break;
 
@@ -485,11 +506,11 @@ namespace ClassicUO.Game
                 if (ProfileManager.Current != null && ProfileManager.Current.ScaleItemsInsideContainers)
                     scale = UIManager.ContainerScale;
 
-                int x = Mouse.Position.X - _offset.X;
-                int y = Mouse.Position.Y - _offset.Y;
+                int x = (ItemHold.IsFixedPosition ? ItemHold.FixedX : Mouse.Position.X) - _offset.X;
+                int y = (ItemHold.IsFixedPosition ? ItemHold.FixedY : Mouse.Position.Y) - _offset.Y;
 
                 Vector3 hue = Vector3.Zero;
-                ShaderHuesTraslator.GetHueVector(ref hue, ItemHold.Hue, ItemHold.IsPartialHue, ItemHold.HasAlpha ? .5f : 0);
+                ShaderHueTranslator.GetHueVector(ref hue, ItemHold.Hue, ItemHold.IsPartialHue, ItemHold.HasAlpha ? .5f : 0);
 
                 sb.Draw2D(_draggedItemTexture, x, y, _draggedItemTexture.Width * scale, _draggedItemTexture.Height * scale, ref hue);
 
@@ -540,7 +561,7 @@ namespace ClassicUO.Game
                      selectedItem.IsLocked && 
                      selectedItem.ItemData.Weight == 255
                      && !selectedItem.ItemData.IsContainer) || 
-                    ItemHold.Enabled)
+                    (ItemHold.Enabled && !ItemHold.IsFixedPosition))
                 {
                     if (!_tooltip.IsEmpty && (!UIManager.IsMouseOverAControl || UIManager.IsMouseOverWorld))
                         _tooltip.Clear();
@@ -589,9 +610,8 @@ namespace ClassicUO.Game
             int war = World.InGame && World.Player.InWarMode ? 1 : 0;
 
             if (TargetManager.IsTargeting)
-            {
-                if (!ItemHold.Enabled)
-                    return _cursorData[war, 12];
+            { 
+                return _cursorData[war, 12];
             }
 
             if (UIManager.IsDragging || IsDraggingCursorForced)

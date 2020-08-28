@@ -26,7 +26,7 @@ using System.Threading;
 
 namespace ClassicUO
 {
-    static class CUOEnviroment
+    internal static class CUOEnviroment
     {
         public static Thread GameThread;
         public static float DPIScaleFactor = 1.0f;

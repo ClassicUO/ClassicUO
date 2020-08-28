@@ -53,7 +53,7 @@ namespace TinyJson
 			if (decoders.ContainsKey(type)) {
 				return decoders[type];
 			} 
-			foreach (var entry in decoders) {
+			foreach (KeyValuePair<Type, Decoder> entry in decoders) {
 				Type baseType = entry.Key;
 				if (baseType.IsAssignableFrom(type)) {
 					return entry.Value;
@@ -69,7 +69,7 @@ namespace TinyJson
 			if (encoders.ContainsKey(type)) {
 				return encoders[type];
 			} 
-			foreach (var entry in encoders) {
+			foreach (KeyValuePair<Type, Encoder> entry in encoders) {
 				Type baseType = entry.Key;
 				if (baseType.IsAssignableFrom(type)) {
 					return entry.Value;
@@ -109,7 +109,7 @@ namespace TinyJson
 				Type safeType = Nullable.GetUnderlyingType(type) ?? type;
                 if (!type.IsEnum)
                 {
-                    var converter = TypeDescriptor.GetConverter(safeType);
+                    TypeConverter converter = TypeDescriptor.GetConverter(safeType);
 
                     if (converter.CanConvertFrom(value.GetType()))
                     {
@@ -155,7 +155,7 @@ namespace TinyJson
 
 		public static bool DecodeValue(object target, string name, object value, PropertyInfo[] properties, bool matchSnakeCase) 
         {
-            foreach (var property in properties)
+            foreach (PropertyInfo property in properties)
             {
                 if (property.GetCustomAttribute<JsonIgnore>(true) == null)
                 {
@@ -199,7 +199,7 @@ namespace TinyJson
 
         public static bool DecodeValue(object target, string name, object value, FieldInfo[] fields, bool matchSnakeCase)
         {
-            foreach (var field in fields)
+            foreach (FieldInfo field in fields)
             {
                 if (field.GetCustomAttribute<JsonIgnore>(true) == null)
                 {

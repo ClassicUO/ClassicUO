@@ -49,7 +49,7 @@ namespace ClassicUO.Game.UI.Controls
                 {
                     _graphic = value;
 
-                    var texture = GumpsLoader.Instance.GetTexture(_graphic);
+                    UOTexture32 texture = GumpsLoader.Instance.GetTexture(_graphic);
 
                     if (texture == null)
                     {
@@ -68,7 +68,7 @@ namespace ClassicUO.Game.UI.Controls
 
         public override bool Contains(int x, int y)
         {
-            var texture = GumpsLoader.Instance.GetTexture(Graphic);
+            UOTexture32 texture = GumpsLoader.Instance.GetTexture(Graphic);
 
             if (texture == null)
                 return false;
@@ -78,7 +78,7 @@ namespace ClassicUO.Game.UI.Controls
 
             for (int i = 0; i < Children.Count; i++)
             {
-                var c = Children[i];
+                Control c = Children[i];
 
                 // might be wrong x, y. They should be calculated by position
                 if (c.Contains(x, y))
@@ -141,9 +141,9 @@ namespace ClassicUO.Game.UI.Controls
                 return false;
 
             ResetHueVector();
-            ShaderHuesTraslator.GetHueVector(ref _hueVector, Hue, IsPartialHue, Alpha, true);
+            ShaderHueTranslator.GetHueVector(ref _hueVector, Hue, IsPartialHue, Alpha, true);
 
-            var texture = GumpsLoader.Instance.GetTexture(Graphic);
+            UOTexture32 texture = GumpsLoader.Instance.GetTexture(Graphic);
 
             if (texture != null)
             {

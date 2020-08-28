@@ -23,6 +23,7 @@ using ClassicUO.Network;
 using System.Collections.Generic;
 
 using ClassicUO.Game.Data;
+using ClassicUO.Game.GameObjects;
 using ClassicUO.Utility.Logging;
 
 namespace ClassicUO.Game.Managers
@@ -109,7 +110,7 @@ namespace ClassicUO.Game.Managers
             if (!Enabled)
                 return;
         
-            if (!Entities.TryGetValue(serial, out var entity) || entity == null)
+            if (!Entities.TryGetValue(serial, out WMapEntity entity) || entity == null)
             {
                 entity = new WMapEntity(serial)
                 {
@@ -171,7 +172,7 @@ namespace ClassicUO.Game.Managers
 
         public WMapEntity GetEntity(uint serial)
         {
-            Entities.TryGetValue(serial, out var entity);
+            Entities.TryGetValue(serial, out WMapEntity entity);
 
             return entity;
         }
@@ -196,11 +197,11 @@ namespace ClassicUO.Game.Managers
 
                 if (World.Party != null && World.Party.Leader != 0)
                 {
-                    foreach (var e in World.Party.Members)
+                    foreach (PartyMember e in World.Party.Members)
                     {
                         if (e != null && SerialHelper.IsValid(e.Serial))
                         {
-                            var mob = World.Mobiles.Get(e.Serial);
+                            Mobile mob = World.Mobiles.Get(e.Serial);
 
                             if (mob == null || mob.Distance > World.ClientViewRange)
                             {

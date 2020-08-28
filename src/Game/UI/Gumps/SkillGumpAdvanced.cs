@@ -21,7 +21,7 @@
 
 using System.Collections.Generic;
 using System.Linq;
-
+using System.Reflection;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
@@ -132,7 +132,7 @@ namespace ClassicUO.Game.UI.Gumps
             if (FindControls<NiceButton>().Any(s => s.ButtonParameter == buttonID))
             {
                 NiceButton btn = FindControls<NiceButton>().First(s => s.ButtonParameter == buttonID);
-                var g = (ushort) (_sortAsc ? 0x985 : 0x983);
+                ushort g = (ushort) (_sortAsc ? 0x985 : 0x983);
 
                 _sortOrderIndicator.Graphic = g;
                 _sortOrderIndicator.X = btn.X + btn.Width - 15;
@@ -156,7 +156,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             _skillListEntries.Clear();
 
-            var pi = typeof(Skill).GetProperty(_sortField);
+            PropertyInfo pi = typeof(Skill).GetProperty(_sortField);
             List<Skill> sortSkills = new List<Skill>(World.Player.Skills.OrderBy(x => pi.GetValue(x, null)));
 
             if (_sortAsc)
@@ -191,7 +191,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (_updateSkillsNeeded)
             {
-                foreach (var label in Children.OfType<Label>())
+                foreach (Label label in Children.OfType<Label>())
                     label.Dispose();
 
                 BuildGump();
@@ -302,7 +302,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         private static SkillButtonGump GetSpellFloatingButton(int id)
         {
-            for (var i = UIManager.Gumps.Last; i != null; i = i.Previous)
+            for (LinkedListNode<Control> i = UIManager.Gumps.Last; i != null; i = i.Previous)
             {
                 if (i.Value is SkillButtonGump g && g.SkillID == id)
                     return g;

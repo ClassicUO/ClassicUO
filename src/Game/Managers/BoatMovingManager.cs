@@ -71,7 +71,7 @@ namespace ClassicUO.Game.Managers
                 return;
             }
 
-            if (!_steps.TryGetValue(serial, out var deque))
+            if (!_steps.TryGetValue(serial, out Deque<BoatStep> deque))
             {
                 deque = new Deque<BoatStep>();
                 _steps[serial] = deque;
@@ -125,7 +125,7 @@ namespace ClassicUO.Game.Managers
 
         public static void ClearSteps(uint serial)
         {
-            if (_steps.TryGetValue(serial, out var deque) && deque.Count != 0)
+            if (_steps.TryGetValue(serial, out Deque<BoatStep> deque) && deque.Count != 0)
             {
                 Item multiItem = World.Items.Get(serial);
 
@@ -136,11 +136,11 @@ namespace ClassicUO.Game.Managers
                     multiItem.Offset.Z = 0;
                 }
 
-                if (_items.TryGetValue(serial, out var list))
+                if (_items.TryGetValue(serial, out RawList<ItemInside> list))
                 {
                     for (int i = 0; i < list.Count; i++)
                     {
-                        ref var it = ref list[i];
+                        ref ItemInside it = ref list[i];
 
                         Entity ent = World.Get(it.Serial);
 
@@ -172,7 +172,7 @@ namespace ClassicUO.Game.Managers
 
         public static void PushItemToList(uint serial, uint objSerial, int x, int y, int z)
         {
-            if (!_items.TryGetValue(serial, out var list))
+            if (!_items.TryGetValue(serial, out RawList<ItemInside> list))
             {
                 list = new RawList<ItemInside>();
 
@@ -181,7 +181,7 @@ namespace ClassicUO.Game.Managers
 
             for (int i = 0; i < list.Count; i++)
             {
-                ref var item = ref list[i];
+                ref ItemInside item = ref list[i];
 
                 if(!SerialHelper.IsValid(item.Serial))
                     break;
@@ -210,7 +210,7 @@ namespace ClassicUO.Game.Managers
             {
                 while (deques.Count != 0)
                 {
-                    ref var step = ref deques.Front();
+                    ref BoatStep step = ref deques.Front();
 
                     Item item = World.Items.Get(step.Serial);
 
@@ -221,7 +221,7 @@ namespace ClassicUO.Game.Managers
                     }
 
                     bool drift = step.MovingDir != step.FacingDir;
-                    var maxDelay = step.TimeDiff /*- (int) Client.Game.FrameDelay[1]*/;
+                    int maxDelay = step.TimeDiff /*- (int) Client.Game.FrameDelay[1]*/;
                     
                     int delay = (int) Time.Ticks - (int) item.LastStepTime;
                     bool removeStep = delay >= maxDelay;
@@ -287,7 +287,7 @@ namespace ClassicUO.Game.Managers
                                            step.MovingDir != Direction.North;
                             //preview = false;
 
-                            foreach (var c in house.Components)
+                            foreach (Multi c in house.Components)
                             {
                                 c.Offset = item.Offset;
 
@@ -319,13 +319,13 @@ namespace ClassicUO.Game.Managers
 
         private static void UpdateEntitiesInside(uint serial, bool removeStep, int x, int y, int z, Direction direction)
         {
-            if (_items.TryGetValue(serial, out var list))
+            if (_items.TryGetValue(serial, out RawList<ItemInside> list))
             {
                 Item item = World.Items.Get(serial);
 
                 for (int i = 0; i < list.Count; i++)
                 {
-                    ref var it = ref list[i];
+                    ref ItemInside it = ref list[i];
 
                     //if (!SerialHelper.IsValid(it.Serial))
                     //    break;
@@ -376,7 +376,7 @@ namespace ClassicUO.Game.Managers
             }
             else
             {
-                ref var s = ref deque.Back();
+                ref BoatStep s = ref deque.Back();
                 x = s.X;
                 y = s.Y;
                 z = s.Z;

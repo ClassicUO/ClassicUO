@@ -1,0 +1,1 @@
+msbuild "../src/ClassicUO.csproj" /p:Configuration=Release
