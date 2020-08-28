@@ -164,23 +164,23 @@ namespace ClassicUO.Game.GameObjects
             while (last?.Next != null)
                 last = (TextObject) last.Next;
 
-            if (last == null)
+            if (last == null || last.Time < Time.Ticks)
                 return;
 
             int offY = 0;
 
             Point p = RealScreenPosition;
 
-            p.X += 22;
-            p.Y += 44;
-
-            var texture = ArtLoader.Instance.GetTexture(Graphic);
+            ArtTexture texture = ArtLoader.Instance.GetTexture(Graphic);
 
             if (texture != null)
+            {
                 p.Y -= (texture.ImageRectangle.Height >> 1);
+                p.Y += ArtLoader.Instance.GetValidRefEntry(Graphic + 0x4000).Height;
+            }
 
-            p.X += (int) Offset.X;
-            p.Y += (int) (Offset.Y - Offset.Z);
+            p.X += (int) Offset.X + 22;
+            p.Y += (int) (Offset.Y - Offset.Z) + 22;
 
             p = Client.Game.Scene.Camera.WorldToScreen(p);
 
@@ -190,7 +190,6 @@ namespace ClassicUO.Game.GameObjects
                 {
                     if (offY == 0 && last.Time < Time.Ticks)
                         continue;
-
 
                     last.OffsetY = offY;
                     offY += last.RenderedText.Height;
