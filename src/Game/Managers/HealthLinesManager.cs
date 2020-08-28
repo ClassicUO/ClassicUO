@@ -82,7 +82,6 @@ namespace ClassicUO.Game.Managers
                 return;
             }
 
-
             int mode = ProfileManager.Current.MobileHPType;
 
             if (mode < 0)
@@ -94,9 +93,6 @@ namespace ClassicUO.Game.Managers
 
             foreach (Mobile mobile in World.Mobiles)
             {
-                //if (World.Party.Contains(mobile) && mobile.Tile == null)
-                //    continue;
-
                 if (mobile.IsDestroyed)
                     continue;
 
@@ -115,21 +111,19 @@ namespace ClassicUO.Game.Managers
                 {
                     if ((showWhen == 2 && current != max) || showWhen <= 1)
                     {
-                        AnimationsLoader.Instance.GetAnimationDimensions(mobile.AnimIndex,
-                                                                      mobile.GetGraphicForAnimation(),
-                                                                      /*(byte) m.GetDirectionForAnimation()*/ 0,
-                                                                      /*Mobile.GetGroupForAnimation(m, isParent:true)*/ 0,
-                                                                      mobile.IsMounted,
-                                                                      /*(byte) m.AnimIndex*/ 0,
-                                                                      out int centerX,
-                                                                      out int centerY,
-                                                                      out int width,
-                                                                      out int height);
-
-                       
-                        
                         if (mobile.HitsPercentage != 0)
                         {
+                            AnimationsLoader.Instance.GetAnimationDimensions(mobile.AnimIndex,
+                                mobile.GetGraphicForAnimation(),
+                                /*(byte) m.GetDirectionForAnimation()*/ 0,
+                                /*Mobile.GetGroupForAnimation(m, isParent:true)*/ 0,
+                                mobile.IsMounted,
+                                /*(byte) m.AnimIndex*/ 0,
+                                out int centerX,
+                                out int centerY,
+                                out int width,
+                                out int height);
+
                             Point p1 = p;
                             p1.Y -= (height + centerY + 28);
 
@@ -152,15 +146,16 @@ namespace ClassicUO.Game.Managers
                     }
                 }
 
-                p.X -= BAR_WIDTH_HALF;
-                p.Y -= BAR_HEIGHT_HALF;
+                
                 //if (mobile.IsGargoyle && mobile.IsFlying)
                 //    p.Y -= 22;
                 //else if (!mobile.IsMounted)
                 //    p.Y += 22;
 
                 p = Client.Game.Scene.Camera.WorldToScreen(p);
-                
+                p.X -= BAR_WIDTH_HALF;
+                p.Y -= BAR_HEIGHT_HALF;
+
                 if (p.X < screenX || p.X > screenX + screenW - BAR_WIDTH)
                     continue;
 
@@ -189,9 +184,9 @@ namespace ClassicUO.Game.Managers
             Point p = entity.RealScreenPosition;
             p.X += (int) entity.Offset.X + 22 + 5;
             p.Y += (int) (entity.Offset.Y - entity.Offset.Z) + 22 + 5;
+            p = Client.Game.Scene.Camera.WorldToScreen(p);
             p.X -= BAR_WIDTH_HALF;
             p.Y -= BAR_HEIGHT_HALF;
-            p = Client.Game.Scene.Camera.WorldToScreen(p);
 
             if (p.X < screenX || p.X > screenX + screenW - BAR_WIDTH)
                 return;

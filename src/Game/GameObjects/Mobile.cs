@@ -1090,7 +1090,7 @@ namespace ClassicUO.Game.GameObjects
 
             if (health && mode != 1 && ((alwaysHP >= 1 && Hits != HitsMax) || alwaysHP == 0))
             {
-                p.Y -= 22;
+                p.Y -= 12;
             }
 
             
