@@ -1,26 +1,27 @@
 #region license
 // Copyright (C) 2020 ClassicUO Development Community on Github
-// 
+//
 // This project is an alternative client for the game Ultima Online.
 // The goal of this is to develop a lightweight client considering
 // new technologies.
-// 
+//
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
 //  the Free Software Foundation, either version 3 of the License, or
 //  (at your option) any later version.
-// 
+//
 //  This program is distributed in the hope that it will be useful,
 //  but WITHOUT ANY WARRANTY; without even the implied warranty of
 //  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 //  GNU General Public License for more details.
-// 
+//
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 using ClassicUO.Configuration;
 using ClassicUO.Data;
@@ -44,7 +45,7 @@ namespace ClassicUO.Game.GameObjects
         private static int _characterFrameHeight;
 
 
-       
+
 
         public override bool Draw(UltimaBatcher2D batcher, int posX, int posY)
         {
@@ -81,11 +82,18 @@ namespace ClassicUO.Game.GameObjects
             if (SelectedObject.HealthbarObject == this)
             {
                 _viewHue = Notoriety.GetHue(NotorietyFlag);
-            }         
+            }
             else if (ProfileManager.Current.HighlightGameObjects && SelectedObject.LastObject == this)
             {
-                _viewHue = 0x0023;
-                HueVector.Y = 1;
+                Item item = World.Items.Get(Serial);
+
+                if (this == item)
+                {
+                    _viewHue = 0x0023;
+                    HueVector.Y = 1;
+                }
+                else
+                    _viewHue = Notoriety.GetHue(NotorietyFlag);
             }
             else if (ProfileManager.Current.NoColorObjectsOutOfRange && Distance > World.ClientViewRange)
             {
@@ -160,7 +168,7 @@ namespace ClassicUO.Game.GameObjects
 
                 ushort mountGraphic = mount.GetGraphicForAnimation();
 
-                if (mountGraphic != 0xFFFF) 
+                if (mountGraphic != 0xFFFF)
                 {
                     if (hasShadow)
                     {
@@ -294,7 +302,7 @@ namespace ClassicUO.Game.GameObjects
 
             //    }
             //}
-            // 
+            //
 
             FrameInfo.X = Math.Abs(FrameInfo.X);
             FrameInfo.Y = Math.Abs(FrameInfo.Y);
