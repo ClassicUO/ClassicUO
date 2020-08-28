@@ -32,23 +32,10 @@ namespace ClassicUO.IO.Resources
     {
         private HuesLoader()
         {
-
         }
 
         private static HuesLoader _instance;
-        public static HuesLoader Instance
-        {
-            get
-            {
-                if (_instance == null)
-                {
-                    _instance = new HuesLoader();
-                }
-
-                return _instance;
-            }
-        }
-
+        public static HuesLoader Instance => _instance ?? (_instance = new HuesLoader());
 
         public HuesGroup[] HuesRange { get; private set; }
 
@@ -87,39 +74,44 @@ namespace ClassicUO.IO.Resources
             });
         }
 
+        //public float[] CreateHuesPalette()
+        //{
+        //    float[] p = new float[32 * 3 * HuesCount];
 
-        public override void CleanResources()
+        //    Palette = new FloatHues[HuesCount];
+        //    int entrycount = HuesCount >> 3;
+        //    int iddd = 0;
+        //    for (int i = 0; i < entrycount; i++)
+        //    {
+        //        for (int j = 0; j < 8; j++)
+        //        {
+        //            int idx = i * 8 + j;
+        //            Palette[idx].Palette = new float[32 * 3];
+
+        //            for (int h = 0; h < 32; h++)
+        //            {
+        //                int idx1 = h * 3;
+        //                ushort c = HuesRange[i].Entries[j].ColorTable[h];
+        //                Palette[idx].Palette[idx1] = ((c >> 10) & 0x1F) / 31.0f;
+        //                Palette[idx].Palette[idx1 + 1] = ((c >> 5) & 0x1F) / 31.0f;
+        //                Palette[idx].Palette[idx1 + 2] = (c & 0x1F) / 31.0f;
+
+        //                p[(idx * 96) + idx1 + 0] = Palette[idx].Palette[idx1];
+        //                p[(idx * 96) + idx1 + 1] = Palette[idx].Palette[idx1 + 1];
+        //                p[(idx * 96) + idx1 + 2] = Palette[idx].Palette[idx1 + 2];
+
+        //                //p[iddd++] = Palette[idx].Palette[idx1];
+        //                //p[iddd++] = Palette[idx].Palette[idx1 + 1];
+        //                //p[iddd++] = Palette[idx].Palette[idx1 + 2];
+        //            }
+        //        }
+        //    }
+
+        //    return p;
+        //}
+
+        public void CreateShaderColors(uint[] buffer)
         {
-            // nothing to clear
-        }
-
-        public void CreateHuesPalette()
-        {
-            Palette = new FloatHues[HuesCount];
-            int entrycount = HuesCount >> 3;
-
-            for (int i = 0; i < entrycount; i++)
-            {
-                for (int j = 0; j < 8; j++)
-                {
-                    int idx = i * 8 + j;
-                    Palette[idx].Palette = new float[32 * 3];
-
-                    for (int h = 0; h < 32; h++)
-                    {
-                        int idx1 = h * 3;
-                        ushort c = HuesRange[i].Entries[j].ColorTable[h];
-                        Palette[idx].Palette[idx1] = ((c >> 10) & 0x1F) / 31.0f;
-                        Palette[idx].Palette[idx1 + 1] = ((c >> 5) & 0x1F) / 31.0f;
-                        Palette[idx].Palette[idx1 + 2] = (c & 0x1F) / 31.0f;
-                    }
-                }
-            }
-        }
-
-        public uint[] CreateShaderColors()
-        {
-            uint[] hues = new uint[32 * 2 * HuesCount];
             int len = HuesRange.Length;
 
             int idx = 0;
@@ -128,25 +120,15 @@ namespace ClassicUO.IO.Resources
             {
                 for (int y = 0; y < 8; y++)
                 {
-                    for (int x = 0; x < 32; x++) hues[idx++] = HuesHelper.Color16To32(HuesRange[r].Entries[y].ColorTable[x]);
-                }
-            }
-
-            for (int r = 0; r < len; r++)
-            {
-                for (int y = 0; y < 8; y++)
-                {
                     for (int x = 0; x < 32; x++)
                     {
-                        if (x == 0)
-                            hues[idx++] = HuesHelper.Color16To32(HuesRange[0].Entries[0].ColorTable[0]);
-                        else
-                            hues[idx++] = HuesHelper.Color16To32(HuesRange[r].Entries[y].ColorTable[x]);
+                        buffer[idx++] = HuesHelper.Color16To32(HuesRange[r].Entries[y].ColorTable[x]) | 0xFF_00_00_00;
+
+                        if (idx >= buffer.Length)
+                            return;
                     }
                 }
             }
-
-            return hues;
         }
 
         //public float[] GetColorForShader(ushort color)
@@ -246,12 +228,15 @@ namespace ClassicUO.IO.Resources
                 int g = color >> 3;
                 int e = color % 8;
                 uint cl = HuesHelper.Color16To32(c);
-                (byte B, byte G, byte R, byte A) = HuesHelper.GetBGRA(cl);
-                //(byte R, byte G, byte B, byte A) = HuesHelper.GetBGRA(cl);
 
-                if (R == G && B == G)
-                    return HuesHelper.Color16To32(HuesRange[g].Entries[e].ColorTable[(c >> 10) & 0x1F]);
+                byte R = (byte) (cl & 0xFF);
+                byte G = (byte) ((cl >> 8) & 0xFF);
+                byte B = (byte) ((cl >> 16) & 0xFF);
 
+                if (R == G && R == B)
+                {
+                    cl = HuesHelper.Color16To32(HuesRange[g].Entries[e].ColorTable[(c >> 10) & 0x1F]);
+                }
                 return cl;
             }
 

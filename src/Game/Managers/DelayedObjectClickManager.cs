@@ -20,6 +20,7 @@
 #endregion
 
 using ClassicUO.Game.GameObjects;
+using ClassicUO.Input;
 
 
 namespace ClassicUO.Game.Managers
@@ -29,9 +30,10 @@ namespace ClassicUO.Game.Managers
         public static uint Serial { get; private set; }
         public static bool IsEnabled { get; private set; }
         public static uint Timer { get; private set; }
-        public static int X { get; private set; }
-        public static int Y { get; private set; }
-
+        public static int X { get; set; }
+        public static int Y { get; set; }
+        public static int LastMouseX { get; set; }
+        public static int LastMouseY { get; set; }
 
 
         public static void Update()
@@ -43,7 +45,7 @@ namespace ClassicUO.Game.Managers
 
             if (entity != null)
             {
-                if (!World.ClientFeatures.TooltipsEnabled || 
+                if (!World.ClientFeatures.TooltipsEnabled ||
                     (SerialHelper.IsItem(Serial) &&
                     ((Item) entity).IsLocked &&
                     ((Item) entity).ItemData.Weight == 255 &&
@@ -64,19 +66,32 @@ namespace ClassicUO.Game.Managers
         public static void Set(uint serial, int x, int y, uint timer)
         {
             Serial = serial;
+            LastMouseX = Mouse.Position.X;
+            LastMouseY = Mouse.Position.Y;
             X = x;
             Y = y;
             Timer = timer;
             IsEnabled = true;
         }
 
-        public static void Clear(uint serial = 0)
+        public static void Clear()
         {
-            if (Serial == serial || serial == 0)
+            IsEnabled = false;
+            Serial = 0xFFFF_FFFF;
+            Timer = 0;
+        }
+
+        public static void Clear(uint serial)
+        {
+            if (Serial == serial)
             {
                 Timer = 0;
                 Serial = 0;
                 IsEnabled = false;
+                X = 0;
+                Y = 0;
+                LastMouseX = 0;
+                LastMouseY = 0;
             }
         }
     }

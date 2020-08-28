@@ -19,18 +19,20 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
 
+using System;
+using System.Diagnostics;
 using System.IO;
 using System.Text.RegularExpressions;
 
 using ClassicUO.Utility.Logging;
 
-using Newtonsoft.Json;
+using TinyJson;
 
 namespace ClassicUO.Configuration
 {
     internal static class ConfigurationResolver
     {
-        public static T Load<T>(string file, JsonSerializerSettings jsonsettings = null) where T : class
+        public static T Load<T>(string file) where T : class
         {
             if (!File.Exists(file))
             {
@@ -46,15 +48,23 @@ namespace ClassicUO.Configuration
                                                 (?!\\)     # lookahead: Check that the following character isn't a \",
                                     @"\\", RegexOptions.IgnorePatternWhitespace);
 
-            T settings = JsonConvert.DeserializeObject<T>(text, jsonsettings);
+            T settings = text.Decode<T>();
 
             return settings;
         }
 
-        public static void Save<T>(T obj, string file, JsonSerializerSettings jsonsettings = null) where T : class
+        public static void Save<T>(T obj, string file) where T : class
         {
-            string t = JsonConvert.SerializeObject(obj, Formatting.Indented, jsonsettings);
-            File.WriteAllText(file, t);
+            // this try catch is necessary when multiples cuo instances points to this file.
+            try
+            {
+                File.WriteAllText(file, obj.Encode(true));
+
+            }
+            catch (IOException e)
+            {
+                Log.Error(e.ToString());
+            }
         }
     }
 }

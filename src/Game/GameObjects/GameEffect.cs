@@ -61,6 +61,7 @@ namespace ClassicUO.Game.GameObjects
         public GraphicEffectBlendMode Blend;
 
         public long Duration = -1;
+        public byte AnimIndex;
 
         public void Load()
         {
@@ -85,7 +86,7 @@ namespace ClassicUO.Game.GameObjects
 
             if (Source != null && Source.IsDestroyed)
             {
-                Destroy();
+                World.RemoveEffect(this);
 
                 return;
             }
@@ -96,7 +97,7 @@ namespace ClassicUO.Game.GameObjects
             if (IsEnabled)
             {
                 if (Duration < totalMS && Duration >= 0)
-                    Destroy();
+                    World.RemoveEffect(this);
                 //else
                 //{
                 //    unsafe
@@ -189,6 +190,7 @@ namespace ClassicUO.Game.GameObjects
 
         public override void Destroy()
         {
+            AnimIndex = 0;
             Source = null;
             Target = null;
             base.Destroy();

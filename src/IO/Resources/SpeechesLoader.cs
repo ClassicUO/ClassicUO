@@ -37,21 +37,8 @@ namespace ClassicUO.IO.Resources
 
         }
 
-
         private static SpeechesLoader _instance;
-        public static SpeechesLoader Instance
-        {
-            get
-            {
-                if (_instance == null)
-                {
-                    _instance = new SpeechesLoader();
-                }
-
-                return _instance;
-            }
-        }
-
+        public static SpeechesLoader Instance => _instance ?? (_instance = new SpeechesLoader());
 
         public override unsafe Task Load()
         {
@@ -83,10 +70,6 @@ namespace ClassicUO.IO.Resources
                 _speech = entries.ToArray();
                 file.Dispose();
             });
-        }
-
-        public override void CleanResources()
-        {
         }
 
         public bool IsMatch(string input, in SpeechEntry entry)
@@ -129,7 +112,8 @@ namespace ClassicUO.IO.Resources
             {
                 SpeechEntry entry = _speech[i];
 
-                if (IsMatch(text, in entry)) list.Add(entry);
+                if (IsMatch(text, in entry))
+                    list.Add(entry);
             }
 
             list.Sort();

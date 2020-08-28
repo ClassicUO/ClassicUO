@@ -19,8 +19,11 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
 
+using ClassicUO.Configuration;
 using ClassicUO.Data;
+using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
+using ClassicUO.Renderer;
 
 namespace ClassicUO.Game.UI.Gumps.Login
 {
@@ -61,6 +64,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
             ControlInfo.Layer = UILayer.Under;
         }
+
 
         public override void OnButtonClick(int buttonID)
         {

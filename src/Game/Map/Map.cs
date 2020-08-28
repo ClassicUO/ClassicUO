@@ -33,7 +33,13 @@ namespace ClassicUO.Game.Map
     internal sealed class Map
     {
         private readonly bool[] _blockAccessList = new bool[0x1000];
-        private readonly List<int> _usedIndices = new List<int>();
+        private readonly LinkedList<int> _usedIndices = new LinkedList<int>();
+
+        private const int CELL_NUM = 16;
+        private const int CELL_SPAN = CELL_NUM * 2;
+
+        //private static readonly Chunk[] _chunks = new Chunk[CELL_SPAN * CELL_SPAN];
+
 
         public Map(int index)
         {
@@ -47,8 +53,8 @@ namespace ClassicUO.Game.Map
         public readonly int BlocksCount;
         public Point Center;
 
-        
-        public Tile GetTile(short x, short y, bool load = true)
+
+        public Chunk GetChunk(int x, int y, bool load = true)
         {
             if (x < 0 || y < 0)
                 return null;
@@ -57,31 +63,45 @@ namespace ClassicUO.Game.Map
             int cellY = y >> 3;
             int block = GetBlock(cellX, cellY);
 
-            if (block >= Chunks.Length)
+            if (block >= BlocksCount)
                 return null;
 
             ref Chunk chunk = ref Chunks[block];
 
             if (chunk == null)
             {
-                if (load)
-                {
-                    _usedIndices.Add(block);
-                    chunk = Chunk.Create((ushort) cellX, (ushort) cellY);
-                    chunk.Load(Index);
-                }
-                else
+                if (!load)
                     return null;
+
+                LinkedListNode<int> node =_usedIndices.AddLast(block);
+                chunk = Chunk.Create(cellX, cellY);
+                chunk.Load(Index);
+                chunk.Node = node;
+            }
+            else if (chunk.IsDestroyed)
+            {
+                // make sure node is clear
+                if (chunk.Node != null && (chunk.Node.Previous != null || chunk.Node.Next != null))
+                {
+                    chunk.Node.List?.Remove(chunk.Node);
+                }
+
+                LinkedListNode<int> node = _usedIndices.AddLast(block);
+                chunk.X = cellX;
+                chunk.Y = cellY;
+                chunk.Load(Index);
+                chunk.Node = node;
             }
 
             chunk.LastAccessTime = Time.Ticks;
 
-            return chunk.Tiles[x % 8, y % 8];
+            return chunk;
         }
 
-        public Tile GetTile(int x, int y, bool load = true)
+
+        public GameObject GetTile(int x, int y, bool load = true)
         {
-            return GetTile((short) x, (short) y, load);
+            return GetChunk(x, y, load)?.GetHeadObject(x % 8, y % 8);
         }
 
         public sbyte GetTileZ(int x, int y)
@@ -108,15 +128,16 @@ namespace ClassicUO.Game.Map
 
         public void GetMapZ(int x, int y, out sbyte groundZ, out sbyte staticZ)
         {
-            var tile = GetTile(x, y);
+            Chunk chunk = GetChunk(x, y);
+            //var obj = GetTile(x, y);
             groundZ = staticZ = 0;
 
-            if (tile == null)
+            if (chunk == null)
             {
                 return;
             }
-            
-            var obj = tile.FirstNode;
+
+            GameObject obj = chunk.Tiles[x % 8, y % 8];
 
             while (obj != null)
             {
@@ -124,7 +145,7 @@ namespace ClassicUO.Game.Map
                     groundZ = obj.Z;
                 else if (staticZ < obj.Z)
                     staticZ = obj.Z;
-                obj = obj.Right;
+                obj = obj.TNext;
             }
         }
 
@@ -141,16 +162,13 @@ namespace ClassicUO.Game.Map
                 return defaultZ;
 
             access = true;
-            var tile = GetTile(x, y, false);
+            Chunk chunk = GetChunk(x, y, false);
 
-            if (tile != null)
+            if (chunk != null)
             {
-                GameObject obj = tile.FirstNode;
+                GameObject obj = chunk.Tiles[x % 8, y % 8];
 
-                while (obj.Left != null)
-                    obj = obj.Left;
-
-                for (; obj != null; obj = obj.Right)
+                for (; obj != null; obj = obj.TNext)
                 {
                     if (!(obj is Static) && !(obj is Multi))
                         continue;
@@ -210,37 +228,47 @@ namespace ClassicUO.Game.Map
             int count = 0;
             long ticks = Time.Ticks - Constants.CLEAR_TEXTURES_DELAY;
 
-            for (int i = 0; i < _usedIndices.Count; i++)
-            {
-                ref Chunk block = ref Chunks[_usedIndices[i]];
+            LinkedListNode<int> first = _usedIndices.First;
 
-                if (block.LastAccessTime < ticks && block.HasNoExternalData())
+            while (first != null)
+            {
+                LinkedListNode<int> next = first.Next;
+
+                ref Chunk block = ref Chunks[first.Value];
+
+                if (block != null && block.LastAccessTime < ticks && block.HasNoExternalData())
                 {
                     block.Destroy();
                     block = null;
-                    _usedIndices.RemoveAt(i--);
 
                     if (++count >= Constants.MAX_MAP_OBJECT_REMOVED_BY_GARBAGE_COLLECTOR)
                         break;
                 }
+
+                first = next;
             }
         }
 
         public void Destroy()
         {
-            for (int i = 0; i < _usedIndices.Count; i++)
+            LinkedListNode<int> first = _usedIndices.First;
+
+            while (first != null)
             {
-                ref Chunk block = ref Chunks[_usedIndices[i]];
-                block.Destroy();
-                block = null;
+                LinkedListNode<int> next = first.Next;
+                ref Chunk c = ref Chunks[first.Value];
+                c?.Destroy();
+                c = null;
+                first = next;
             }
 
             _usedIndices.Clear();
-            Chunks = null;
         }
 
         public void Initialize()
         {
+            return;
+
             const int XY_OFFSET = 30;
 
             int minBlockX = ((Center.X - XY_OFFSET) >> 3) - 1;
@@ -276,7 +304,7 @@ namespace ClassicUO.Game.Map
                         if (Time.Ticks - tick >= maxDelay)
                             return;
 
-                        _usedIndices.Add(cellindex);
+                        _usedIndices.AddLast(cellindex);
                         chunk = Chunk.Create((ushort) i, (ushort) j);
                         chunk.Load(Index);
                     }

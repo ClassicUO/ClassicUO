@@ -67,28 +67,25 @@ namespace ClassicUO.Game
         public static bool BlockMoving { get; set; }
 
         public static bool FastRotation { get; set; }
-
-        public static bool IgnoreStaminaCheck { get; set; }
-
-
+        
 
 
         private static bool CreateItemList(List<PathObject> list, int x, int y, int stepState)
         {
-            Tile tile = World.Map.GetTile(x, y, false);
+            GameObject tile = World.Map.GetTile(x, y, false);
 
             if (tile == null)
                 return false;
 
-            bool ignoreGameCharacters = IgnoreStaminaCheck || stepState == (int) PATH_STEP_STATE.PSS_DEAD_OR_GM || World.Player.IgnoreCharacters || !(World.Player.Stamina < World.Player.StaminaMax && World.Map.Index == 0);
+            bool ignoreGameCharacters = ProfileManager.Current.IgnoreStaminaCheck || stepState == (int) PATH_STEP_STATE.PSS_DEAD_OR_GM || World.Player.IgnoreCharacters || !(World.Player.Stamina < World.Player.StaminaMax && World.Map.Index == 0);
             bool isGM = World.Player.Graphic == 0x03DB;
 
-            GameObject obj = tile.FirstNode;
+            GameObject obj = tile;
 
-            while (obj.Left != null)
-                obj = obj.Left;
+            while (obj.TPrevious != null)
+                obj = obj.TPrevious;
 
-            for (; obj != null; obj = obj.Right)
+            for (; obj != null; obj = obj.TNext)
             {
                 if (World.CustomHouseManager != null && obj.Z < World.Player.Z)
                     continue;
@@ -123,6 +120,9 @@ namespace ClassicUO.Game
                             list.Add(new PathObject(flags, landMinZ, landAverageZ, landHeight, obj));
                         }
 
+                        break;
+
+                    case GameEffect _:
                         break;
 
                     default:
@@ -177,7 +177,7 @@ namespace ClassicUO.Game
 
                             if (!(obj is Mobile))
                             {
-                                ref readonly StaticTiles itemdata = ref TileDataLoader.Instance.StaticData[obj.Graphic];
+                                ref StaticTiles itemdata = ref TileDataLoader.Instance.StaticData[obj.Graphic];
 
                                 if (stepState == (int) PATH_STEP_STATE.PSS_ON_SEA_HORSE)
                                 {
@@ -300,7 +300,7 @@ namespace ClassicUO.Game
                     stepState = (int) PATH_STEP_STATE.PSS_FLYING;
                 else
                 {
-                    Item mount = World.Player.Equipment[(int) Layer.Mount];
+                    Item mount = World.Player.FindItemByLayer(Layer.Mount);
 
                     if (mount != null && mount.Graphic == 0x3EB3) // sea horse
                         stepState = (int) PATH_STEP_STATE.PSS_ON_SEA_HORSE;

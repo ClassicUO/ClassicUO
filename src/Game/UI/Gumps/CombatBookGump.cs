@@ -166,7 +166,7 @@ namespace ClassicUO.Game.UI.Gumps
                 if (i >= AbilityData.Abilities.Length)
                     break;
 
-                var icon = new GumpPic(62, 40, (ushort) (0x5200 + i), 0);
+                GumpPic icon = new GumpPic(62, 40, (ushort) (0x5200 + i), 0);
                 Add(icon, pageW);
                 icon.SetTooltip(ClilocLoader.Instance.GetString(1061693 + i), 150);
 
@@ -186,7 +186,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }, pageW);
 
 
-                var list = GetItemsList((byte) i);
+                List<ushort> list = GetItemsList((byte) i);
                 int maxStaticCount = TileDataLoader.Instance.StaticData.Length;
 
                 int textX = 62;
@@ -227,10 +227,12 @@ namespace ClassicUO.Game.UI.Gumps
 
             ref readonly AbilityDefinition def = ref AbilityData.Abilities[((byte) World.Player.PrimaryAbility & 0x7F) - 1];
 
-            UseAbilityButtonGump gump = new UseAbilityButtonGump(def, true)
+            GetSpellFloatingButton(def.Index)?.Dispose();
+
+            UseAbilityButtonGump gump = new UseAbilityButtonGump(def.Index, true)
             {
-                X = Mouse.Position.X - 22,
-                Y = Mouse.Position.Y - 22
+                X = Mouse.LDropPosition.X - 22,
+                Y = Mouse.LDropPosition.Y - 22
             };
             UIManager.Add(gump);
             UIManager.AttemptDragControl(gump, Mouse.Position, true);
@@ -242,14 +244,27 @@ namespace ClassicUO.Game.UI.Gumps
                 return;
 
             ref readonly AbilityDefinition def = ref AbilityData.Abilities[((byte) World.Player.SecondaryAbility & 0x7F) - 1];
+          
+            GetSpellFloatingButton(def.Index)?.Dispose();
 
-            UseAbilityButtonGump gump = new UseAbilityButtonGump(def, false)
+            UseAbilityButtonGump gump = new UseAbilityButtonGump(def.Index, false)
             {
-                X = Mouse.Position.X - 22,
-                Y = Mouse.Position.Y - 22
+                X = Mouse.LDropPosition.X - 22,
+                Y = Mouse.LDropPosition.Y - 22
             };
             UIManager.Add(gump);
             UIManager.AttemptDragControl(gump, Mouse.Position, true);
+        }
+
+        private static UseAbilityButtonGump GetSpellFloatingButton(int id)
+        {
+            for (LinkedListNode<Control> i = UIManager.Gumps.Last; i != null; i = i.Previous)
+            {
+                if (i.Value is UseAbilityButtonGump g && g.Index == id)
+                    return g;
+            }
+
+            return null;
         }
 
         public override void Update(double totalMS, double frameMS)

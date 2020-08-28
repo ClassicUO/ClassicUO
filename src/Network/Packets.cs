@@ -28,6 +28,7 @@ using ClassicUO.Game;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
+using ClassicUO.Game.UI.Gumps;
 using ClassicUO.IO.Resources;
 
 namespace ClassicUO.Network
@@ -167,19 +168,21 @@ namespace ClassicUO.Network
             WriteByte((byte) character.Dexterity);
             WriteByte((byte) character.Intelligence);
 
-            var skills = character.Skills.OrderByDescending(o => o.Value).Take(skillcount).ToList();
+            List<Skill> skills = character.Skills.OrderByDescending(o => o.Value).Take(skillcount).ToList();
 
-            foreach (var skill in skills)
+            foreach (Skill skill in skills)
             {
                 WriteByte((byte) skill.Index);
                 WriteByte((byte) skill.ValueFixed);
             }
 
             WriteUShort(character.Hue);
-            if (character.Equipment[(int)Layer.Hair] != null)
+            Item hair = character.FindItemByLayer(Layer.Hair);
+
+            if (hair != null)
             {
-                WriteUShort(character.Equipment[(int)Layer.Hair].Graphic);
-                WriteUShort(character.Equipment[(int)Layer.Hair].Hue);
+                WriteUShort(hair.Graphic);
+                WriteUShort(hair.Hue);
             }
             else
             {
@@ -187,10 +190,12 @@ namespace ClassicUO.Network
                 WriteUShort(0x00);
             }
 
-            if (character.Equipment[(int) Layer.Beard] != null)
+            Item beard = character.FindItemByLayer(Layer.Beard);
+
+            if (beard != null)
             {
-                WriteUShort(character.Equipment[(int) Layer.Beard].Graphic);
-                WriteUShort(character.Equipment[(int) Layer.Beard].Hue);
+                WriteUShort(beard.Graphic);
+                WriteUShort(beard.Hue);
             }
             else
             {
@@ -220,17 +225,21 @@ namespace ClassicUO.Network
 
             WriteUInt(clientIP);
 
-            if (character.Equipment[(int) Layer.Shirt] != null)
+            Item shirt = character.FindItemByLayer(Layer.Shirt);
+
+            if (shirt != null)
             {
-                WriteUShort(character.Equipment[(int) Layer.Shirt].Hue);
+                WriteUShort(shirt.Hue);
             }
             else
             {
                 WriteUShort(0);
             }
 
-            if (character.Equipment[(int) Layer.Pants] != null)
-                WriteUShort(character.Equipment[(int) Layer.Pants].Hue);
+            Item pants = character.FindItemByLayer(Layer.Pants);
+
+            if (pants != null)
+                WriteUShort(pants.Hue);
             else
                 WriteUShort(0x00);
         }
@@ -318,8 +327,10 @@ namespace ClassicUO.Network
     {
         public PHelpRequest() : base(0x9B)
         {
-            byte[] empty = new byte[257];
-            foreach (byte emptyByte in empty) WriteByte(emptyByte);
+            for (int i = 0; i < 257; i++)
+            {
+                WriteByte(0x00);
+            }
         }
     }
 
@@ -404,7 +415,7 @@ namespace ClassicUO.Network
     {
         public PUnicodeSpeechRequest(string text, MessageType type, byte font, ushort hue, string lang) : base(0xAD)
         {
-            var entries = SpeechesLoader.Instance.GetKeywords(text);
+            List<SpeechEntry> entries = SpeechesLoader.Instance.GetKeywords(text);
 
             bool encoded = entries != null && entries.Count != 0;
             if(encoded)
@@ -503,6 +514,7 @@ namespace ClassicUO.Network
         public POpenDoor() : base(0x12)
         {
             WriteByte(0x58);
+            WriteByte(0x00);
         }
     }
 
@@ -534,12 +546,14 @@ namespace ClassicUO.Network
 
             WriteUInt((uint) switches.Length);
 
-            for (int i = switches.Length - 1; i >= 0; i--)
+            //for (int i = switches.Length - 1; i >= 0; i--)
+            for (int i = 0; i < switches.Length; i++)
                 WriteUInt(switches[i]);
 
             WriteUInt((uint) entries.Length);
 
-            for (int i = entries.Length - 1; i >= 0; i--)
+            //for (int i = entries.Length - 1; i >= 0; i--)
+            for (int i = 0; i < entries.Length; i++)
             {
                 int length = Math.Min(239, entries[i].Item2.Length);
                 WriteUShort(entries[i].Item1);
@@ -673,8 +687,7 @@ namespace ClassicUO.Network
             WriteUInt(entity);
             WriteUShort(x);
             WriteUShort(y);
-            WriteByte(0xFF);
-            WriteSByte(z);
+            WriteUShort((ushort) z);
             WriteUShort(graphic);
         }
     }
@@ -890,15 +903,15 @@ namespace ClassicUO.Network
             WriteUInt(serial);
             WriteUInt(msgserial);
             WriteByte((byte)(subject.Length + 1));
-            var titolo = Encoding.UTF8.GetBytes(subject); 
+            byte[] titolo = Encoding.UTF8.GetBytes(subject); 
             WriteBytes(titolo, 0, titolo.Length);
             WriteByte(0);
-            var splits = _textBox.Split('\n');
-            var numlinee = splits.Length;
+            string[] splits = _textBox.Split('\n');
+            int numlinee = splits.Length;
             WriteByte((byte)numlinee);
-            for (var L = 0; L < numlinee; L++)
+            for (int L = 0; L < numlinee; L++)
             {
-                var buf = Encoding.UTF8.GetBytes(splits[L].Trim());
+                byte[] buf = Encoding.UTF8.GetBytes(splits[L].Trim());
                 WriteByte((byte)(buf.Length + 1));
                 WriteBytes(buf, 0, buf.Length);
                 WriteByte(0);
@@ -1061,6 +1074,7 @@ namespace ClassicUO.Network
         public POpenChat(string name) : base(0xB5)
         {
             int len = name.Length;
+            WriteByte(0);
 
             if (len > 0)
             {
@@ -1135,11 +1149,14 @@ namespace ClassicUO.Network
     {
         public PMegaClilocRequest(ref List<uint> list) : base(0xD6)
         {
-            for (int i = 0; i < list.Count && i < 50; i++)
+            int count = Math.Min(15, list.Count);
+
+            for (int i = 0; i < count; i++)
             {
                 WriteUInt(list[i]);
-                list.RemoveAt(i--);
             }
+
+            list.RemoveRange(0, count);
         }
 
         public PMegaClilocRequest(uint serial) : base(0xD6)
@@ -1155,6 +1172,83 @@ namespace ClassicUO.Network
             WriteUShort(0x1A);
             WriteByte(stat);
             WriteByte((byte) state);
+        }
+    }
+
+    internal sealed class PBookHeaderChangedOld : PacketWriter
+    {
+        public PBookHeaderChangedOld(uint serial, string title, string author) : base(0x93)
+        {
+            WriteUInt(serial);
+            WriteByte(0);
+            WriteByte(1);
+            WriteUShort(0);
+            WriteASCII(title, 60);
+            WriteASCII(author, 30);
+        }
+    }
+
+    internal sealed class PBookHeaderChanged : PacketWriter
+    {
+        public PBookHeaderChanged(uint serial, string title, string author) : base(0xD4)
+        {
+            WriteUInt(serial);
+            WriteByte(0);
+            WriteByte(0);
+            WriteUShort(0);
+            WriteUShort((ushort) (title.Length + 1));
+            WriteASCII(title);
+            WriteUShort((ushort) (author.Length + 1));
+            WriteASCII(author);
+        }
+    }
+
+
+    internal sealed class PBookPageData : PacketWriter
+    {
+        public PBookPageData(uint serial, string text, int page, List<int> chars) : base(0x66)
+        {
+            if (text == null)
+                text = string.Empty;
+
+            WriteUInt(serial);
+            WriteUShort(0x0001);
+            WriteUShort((ushort)page);
+            WriteUShort((ushort)chars.Count);
+            for(int i = 0, x = 0; i < chars.Count; i++)
+            {
+                if (chars[i] > 0)
+                {
+                    WriteBytes(Encoding.UTF8.GetBytes(text.Substring(x, chars[i])));
+                    x += chars[i];
+                }
+                WriteByte(0);
+            }
+            WriteByte(0);
+        }
+
+        public PBookPageData(uint serial, string[] text, int page) : base(0x66)
+        {
+            if (text == null)
+            {
+                text = new string[ModernBookGump.MAX_BOOK_LINES];
+                for (int i = 0; i < text.Length; i++)
+                    text[i] = string.Empty;
+            }
+
+            WriteUInt(serial);
+            WriteUShort(0x0001);
+            WriteUShort((ushort)page);
+            WriteUShort((ushort)text.Length);
+            for (int i = 0; i < text.Length; i++)
+            {
+                if (text[i] != null && text[i].Length > 0)
+                {
+                    WriteBytes(Encoding.UTF8.GetBytes(text[i]));
+                }
+                WriteByte(0);
+            }
+            WriteByte(0);
         }
     }
 
@@ -1260,6 +1354,18 @@ namespace ClassicUO.Network
         public PDisarmRequest() : base(0xBF)
         {
             WriteUShort(0x0A);
+        }
+    }
+
+    internal sealed class PChangeRaceRequest : PacketWriter
+    {
+        public PChangeRaceRequest(ushort skin_hue, ushort hair_style, ushort hair_color, ushort beard_style, ushort beard_color) : base(0xBF)
+        {
+            WriteUShort(skin_hue);
+            WriteUShort(hair_style);
+            WriteUShort(hair_color);
+            WriteUShort(beard_style);
+            WriteUShort(beard_color);
         }
     }
 

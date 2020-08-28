@@ -21,7 +21,7 @@
 
 using System.Collections.Generic;
 using System.Linq;
-
+using System.Reflection;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
@@ -132,10 +132,9 @@ namespace ClassicUO.Game.UI.Gumps
             if (FindControls<NiceButton>().Any(s => s.ButtonParameter == buttonID))
             {
                 NiceButton btn = FindControls<NiceButton>().First(s => s.ButtonParameter == buttonID);
-                var g = (ushort) (_sortAsc ? 0x985 : 0x983);
+                ushort g = (ushort) (_sortAsc ? 0x985 : 0x983);
 
                 _sortOrderIndicator.Graphic = g;
-                _sortOrderIndicator.Texture = GumpsLoader.Instance.GetTexture(g);
                 _sortOrderIndicator.X = btn.X + btn.Width - 15;
                 _sortOrderIndicator.Y = btn.Y + 5;
             }
@@ -157,7 +156,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             _skillListEntries.Clear();
 
-            var pi = typeof(Skill).GetProperty(_sortField);
+            PropertyInfo pi = typeof(Skill).GetProperty(_sortField);
             List<Skill> sortSkills = new List<Skill>(World.Player.Skills.OrderBy(x => pi.GetValue(x, null)));
 
             if (_sortAsc)
@@ -192,7 +191,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (_updateSkillsNeeded)
             {
-                foreach (var label in Children.OfType<Label>())
+                foreach (Label label in Children.OfType<Label>())
                     label.Dispose();
 
                 BuildGump();
@@ -268,7 +267,6 @@ namespace ClassicUO.Game.UI.Gumps
                         _skill.Lock = Lock.Down;
                         GameActions.ChangeSkillLockStatus((ushort) _skill.Index, (byte) Lock.Down);
                         loc.Graphic = 0x985;
-                        loc.Texture = GumpsLoader.Instance.GetTexture(0x985);
 
                         break;
 
@@ -276,7 +274,6 @@ namespace ClassicUO.Game.UI.Gumps
                         _skill.Lock = Lock.Locked;
                         GameActions.ChangeSkillLockStatus((ushort) _skill.Index, (byte) Lock.Locked);
                         loc.Graphic = 0x82C;
-                        loc.Texture = GumpsLoader.Instance.GetTexture(0x82C);
 
                         break;
 
@@ -284,7 +281,6 @@ namespace ClassicUO.Game.UI.Gumps
                         _skill.Lock = Lock.Up;
                         GameActions.ChangeSkillLockStatus((ushort) _skill.Index, (byte) Lock.Up);
                         loc.Graphic = 0x983;
-                        loc.Texture = GumpsLoader.Instance.GetTexture(0x983);
 
                         break;
                 }
@@ -295,15 +291,24 @@ namespace ClassicUO.Game.UI.Gumps
         {
             if (_skill.IsClickable && Mouse.LButtonPressed)
             {
-                uint serial = (uint) (World.Player + _skill.Index + 1);
+                GetSpellFloatingButton(_skill.Index)?.Dispose();
 
-                UIManager.GetGump<SkillButtonGump>(serial)?.Dispose();
-
-                SkillButtonGump skillButtonGump = new SkillButtonGump(_skill, Mouse.Position.X, Mouse.Position.Y);
+                SkillButtonGump skillButtonGump = new SkillButtonGump(_skill, Mouse.LDropPosition.X, Mouse.LDropPosition.Y);
                 UIManager.Add(skillButtonGump);
                 Rectangle rect = GumpsLoader.Instance.GetTexture(0x24B8).Bounds;
                 UIManager.AttemptDragControl(skillButtonGump, new Point(Mouse.Position.X + (rect.Width >> 1), Mouse.Position.Y + (rect.Height >> 1)), true);
             }
+        }
+
+        private static SkillButtonGump GetSpellFloatingButton(int id)
+        {
+            for (LinkedListNode<Control> i = UIManager.Gumps.Last; i != null; i = i.Previous)
+            {
+                if (i.Value is SkillButtonGump g && g.SkillID == id)
+                    return g;
+            }
+
+            return null;
         }
 
         public override void OnButtonClick(int buttonID)

@@ -19,6 +19,7 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
 
+using ClassicUO.Network;
 using System.Collections.Generic;
 
 namespace ClassicUO.Game.Managers
@@ -40,17 +41,22 @@ namespace ClassicUO.Game.Managers
 
         public bool Contains(uint serial)
         {
-            if (_itemsProperties.TryGetValue(serial, out var p))
+            if (_itemsProperties.TryGetValue(serial, out ItemProperty p))
             {
-                return p.Revision != 0;
+                return true; //p.Revision != 0;  <-- revision == 0 can contain the name.
             }
+
+            // if we don't have the OPL of this item, let's request it to the server.
+            // Original client seems asking for OPL when character is not running. 
+            // We'll ask OPL when mouse is over an object.
+            PacketHandlers.AddMegaClilocRequest(serial);
 
             return false;
         }
 
         public bool IsRevisionEqual(uint serial, uint revision)
         {
-            if (_itemsProperties.TryGetValue(serial, out var prop))
+            if (_itemsProperties.TryGetValue(serial, out ItemProperty prop))
             {
                 return prop.Revision == revision;
             }
@@ -60,7 +66,7 @@ namespace ClassicUO.Game.Managers
 
         public bool TryGetRevision(uint serial, out uint revision)
         {
-            if (_itemsProperties.TryGetValue(serial, out var p))
+            if (_itemsProperties.TryGetValue(serial, out ItemProperty p))
             {
                 revision = p.Revision;
 
@@ -73,7 +79,7 @@ namespace ClassicUO.Game.Managers
 
         public bool TryGetNameAndData(uint serial, out string name, out string data)
         {
-            if (_itemsProperties.TryGetValue(serial, out var p))
+            if (_itemsProperties.TryGetValue(serial, out ItemProperty p))
             {
                 name = p.Name;
                 data = p.Data;

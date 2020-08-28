@@ -172,7 +172,7 @@ namespace ClassicUO.Game
 
             for (int i = 0; i < _effects.Count; i++)
             {
-                var effect = _effects[i];
+                WeatherEffect effect = _effects[i];
 
                 if (effect.X < x || effect.X > x + winsize.X ||
                     effect.Y < y || effect.Y > y + winsize.Y)
@@ -233,7 +233,7 @@ namespace ClassicUO.Game
 
                         speed_angle += SinOscillate(0.4f, 20, Time.Ticks + effect.ID);
 
-                        var rad = MathHelper.ToRadians(speed_angle);
+                        float rad = MathHelper.ToRadians(speed_angle);
                         effect.SpeedX = speed_magnitude * (float)Math.Sin(rad);
                         effect.SpeedY = speed_magnitude * (float)Math.Cos(rad);
 

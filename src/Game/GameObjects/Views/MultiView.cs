@@ -24,6 +24,7 @@ using System;
 using ClassicUO.Configuration;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
+using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 
@@ -57,7 +58,7 @@ namespace ClassicUO.Game.GameObjects
             ResetHueVector();
 
             ushort hue = Hue;
-            float alpha = 0;
+
             if (State != 0)
             {
                 if ((State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_IGNORE_IN_RENDER) != 0)
@@ -72,7 +73,6 @@ namespace ClassicUO.Game.GameObjects
                 {
                     if (AlphaHue >= 192)
                     {
-                        alpha = 0.25f;
                         AlphaHue = 0xFF;
                     }
                     else
@@ -80,62 +80,28 @@ namespace ClassicUO.Game.GameObjects
                 }
             }
 
+            ResetHueVector();
+
             ushort graphic = Graphic;
-
-            if (ItemData.IsAnimated && _lastAnimationFrameTime < Time.Ticks)
-            {
-                IntPtr ptr = AnimDataLoader.Instance.GetAddressToAnim(Graphic);
-
-                if (ptr != IntPtr.Zero)
-                {
-                    unsafe
-                    {
-                        AnimDataFrame2* animData = (AnimDataFrame2*)ptr;
-
-                        if (animData->FrameCount != 0)
-                        {
-                            graphic = (ushort) (Graphic + animData->FrameData[AnimIndex++]);
-
-                            if (AnimIndex >= animData->FrameCount)
-                                AnimIndex = 0;
-
-                            _lastAnimationFrameTime = Time.Ticks + (uint)(animData->FrameInterval * Constants.ITEM_EFFECT_ANIMATION_DELAY);
-                        }
-                    }
-                }
-            }
-
-
-            if (Texture == null || Texture.IsDisposed || Graphic != graphic)
-            {
-                ArtTexture texture = ArtLoader.Instance.GetTexture(graphic);
-                Texture = texture;
-                Bounds = new Rectangle((Texture.Width >> 1) - 22, Texture.Height - 44, Texture.Width, Texture.Height);
-
-                FrameInfo.Width = texture.ImageRectangle.Width;
-                FrameInfo.Height = texture.ImageRectangle.Height;
-
-                FrameInfo.X = (Texture.Width >> 1) - 22 - texture.ImageRectangle.X;
-                FrameInfo.Y = Texture.Height - 44 - texture.ImageRectangle.Y;
-            }
+            bool partial = ItemData.IsPartialHue;
 
             if (ProfileManager.Current.HighlightGameObjects && SelectedObject.LastObject == this)
             {
-                HueVector.X = 0x0023;
-                HueVector.Y = 1;
+                hue = Constants.HIGHLIGHT_CURRENT_OBJECT_HUE;
+                partial = false;
             }
             else if (ProfileManager.Current.NoColorObjectsOutOfRange && Distance > World.ClientViewRange)
             {
-                HueVector.X = Constants.OUT_RANGE_COLOR;
-                HueVector.Y = 1;
+                hue = Constants.OUT_RANGE_COLOR;
+                partial = false;
             }
             else if (World.Player.IsDead && ProfileManager.Current.EnableBlackWhiteEffect)
             {
-                HueVector.X = Constants.DEAD_RANGE_COLOR;
-                HueVector.Y = 1;
+                hue = Constants.DEAD_RANGE_COLOR;
+                partial = false;
             }
-            else
-                ShaderHuesTraslator.GetHueVector(ref HueVector, hue, ItemData.IsPartialHue, alpha);
+
+            ShaderHueTranslator.GetHueVector(ref HueVector, hue, partial, 0);
 
             //Engine.DebugInfo.MultiRendered++;
 
@@ -145,7 +111,10 @@ namespace ClassicUO.Game.GameObjects
             posX += (int) Offset.X;
             posY += (int) (Offset.Y + Offset.Z);
 
-            base.Draw(batcher, posX, posY);
+            if (AlphaHue != 255)
+                HueVector.Z = 1f - AlphaHue / 255f;
+
+            DrawStaticAnimated(batcher, graphic, posX, posY, ref HueVector, ref DrawTransparent);
 
             if (ItemData.IsLight)
             {
@@ -153,32 +122,32 @@ namespace ClassicUO.Game.GameObjects
                       .AddLight(this, this, posX + 22, posY + 22);
             }
 
+            if (!(SelectedObject.Object == this || IsFromTarget ||
+                  (FoliageIndex != -1 &&
+                   Client.Game.GetScene<GameScene>().FoliageIndex == FoliageIndex)))
+            {
+                if (State != 0)
+                {
+                    if ((State & (CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_IGNORE_IN_RENDER |
+                                  CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_PREVIEW)) != 0)
+                        return true;
+                }
+                 
+                if (DrawTransparent)
+                {
+                    return true;
+                }
+
+                ref UOFileIndex index = ref ArtLoader.Instance.GetValidRefEntry(graphic + 0x4000);
+
+                posX -= index.Width;
+                posY -= index.Height;
+
+                if (SelectedObject.IsPointInStatic(ArtLoader.Instance.GetTexture(graphic), posX, posY))
+                    SelectedObject.Object = this;
+            }
+
             return true;
-        }
-
-        public override void Select(int x, int y)
-        {
-            if (SelectedObject.Object == this || IsFromTarget || (FoliageIndex != -1 && Client.Game.GetScene<GameScene>().FoliageIndex == FoliageIndex))
-                return;
-
-            if (State != 0)
-            {
-                if ((State & (CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_IGNORE_IN_RENDER | 
-                              CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_PREVIEW)) != 0)
-                    return;
-            }
-
-            if (DrawTransparent)
-            {
-                int d = Distance;
-                int maxD = ProfileManager.Current.CircleOfTransparencyRadius + 1;
-
-                if (d <= maxD && d <= 3)
-                    return;
-            }
-
-            if (SelectedObject.IsPointInStatic(Texture, x - Bounds.X, y - Bounds.Y))
-                SelectedObject.Object = this;
         }
     }
 }

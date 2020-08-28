@@ -24,7 +24,7 @@ using System.Runtime.CompilerServices;
 
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
-using ClassicUO.Game.Map;
+using ClassicUO.Game.Managers;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 
@@ -34,7 +34,7 @@ using IUpdateable = ClassicUO.Interfaces.IUpdateable;
 
 namespace ClassicUO.Game.GameObjects
 {
-    internal abstract class BaseGameObject
+    internal abstract class BaseGameObject : LinkedObject
     {
         public Point RealScreenPosition;
     }
@@ -47,12 +47,11 @@ namespace ClassicUO.Game.GameObjects
         public sbyte Z;
         public ushort Hue;
         public ushort Graphic;
-        public sbyte AnimIndex;
         public int CurrentRenderIndex;
         public byte UseInRender;
         public short PriorityZ;
-        public GameObject Left;
-        public GameObject Right;
+        public GameObject TPrevious;
+        public GameObject TNext;
         public Vector3 Offset;
         // FIXME: remove it
         public sbyte FoliageIndex = -1;
@@ -65,24 +64,19 @@ namespace ClassicUO.Game.GameObjects
             [MethodImpl(256)]
             get
             {
-                if (World.Player == null)
+                if (World.Player == null /*|| IsDestroyed*/)
                     return ushort.MaxValue;
 
                 if (this == World.Player)
                     return 0;
 
-                int x, y;
+                int x = X, y = Y;
 
-                if (this is Mobile m && m.Steps.Count != 0)
+                if (this is Mobile mobile && mobile.Steps.Count != 0)
                 {
-                    ref var step = ref m.Steps.Back();
+                    ref Mobile.Step step = ref mobile.Steps.Back();
                     x = step.X;
                     y = step.Y;
-                }
-                else
-                {
-                    x = X;
-                    y = Y;
                 }
 
                 int fx = World.RangeSize.X;
@@ -91,8 +85,6 @@ namespace ClassicUO.Game.GameObjects
                 return Math.Max(Math.Abs(x - fx), Math.Abs(y - fy));
             }
         }
-        public Tile Tile { get; private set; }
-    
 
         public virtual void Update(double totalMS, double frameMS)
         {
@@ -103,12 +95,11 @@ namespace ClassicUO.Game.GameObjects
         {
             if (World.Map != null)
             {
-                Tile?.RemoveGameObject(this);
+                RemoveFromTile();
 
                 if (!IsDestroyed)
                 {
-                    Tile = World.Map.GetTile(x, y);
-                    Tile?.AddGameObject(this);
+                    World.Map.GetChunk(x, y)?.AddGameObject(this, x % 8, y % 8);
                 }
             }
         }
@@ -119,29 +110,18 @@ namespace ClassicUO.Game.GameObjects
             AddToTile(X, Y);
         }
 
-        [MethodImpl(256)]
-        public void AddToTile(Tile tile)
-        {
-            if (World.Map != null)
-            {
-                Tile?.RemoveGameObject(this);
-
-                if (!IsDestroyed)
-                {
-                    Tile = tile;
-                    Tile?.AddGameObject(this);
-                }
-            }
-        }
 
         [MethodImpl(256)]
         public void RemoveFromTile()
         {
-            if (World.Map != null && Tile != null)
-            {
-                Tile.RemoveGameObject(this);
-                Tile = null;
-            }
+            if (TPrevious != null)
+                TPrevious.TNext = TNext;
+
+            if (TNext != null)
+                TNext.TPrevious = TPrevious;
+
+            TNext = null;
+            TPrevious = null;
         }
 
         public virtual void UpdateGraphicBySeason()
@@ -169,9 +149,9 @@ namespace ClassicUO.Game.GameObjects
         }
 
 
-        public void AddMessage(MessageType type, string message)
+        public void AddMessage(MessageType type, string message, TEXT_TYPE text_type)
         {
-            AddMessage(type, message, ProfileManager.Current.ChatFont, ProfileManager.Current.SpeechHue, true);
+            AddMessage(type, message, ProfileManager.Current.ChatFont, ProfileManager.Current.SpeechHue, true, text_type);
         }
 
         public virtual void UpdateTextCoordsV()
@@ -191,7 +171,7 @@ namespace ClassicUO.Game.GameObjects
             int minY = ProfileManager.Current.GameWindowPosition.Y;
             //int maxY = minY + ProfileManager.Current.GameWindowSize.Y - 6;
 
-            for (var item = TextContainer.Items; item != null; item = item.ListRight)
+            for (TextObject item = (TextObject) TextContainer.Items; item != null; item = (TextObject) item.Next)
             {
                 if (item.RenderedText == null || item.RenderedText.IsDestroyed || item.RenderedText.Texture == null || item.Time < Time.Ticks)
                     continue;
@@ -221,16 +201,16 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
-        public void AddMessage(MessageType type, string text, byte font, ushort hue, bool isunicode)
+        public void AddMessage(MessageType type, string text, byte font, ushort hue, bool isunicode, TEXT_TYPE text_type)
         {
             if (string.IsNullOrEmpty(text))
                 return;
 
-            var msg = CreateMessage(text, hue, font, isunicode, type);
+            TextObject msg = MessageManager.CreateMessage(text, hue, font, isunicode, type, text_type);
             AddMessage(msg);
         }
 
-        public void AddMessage(TextOverhead msg)
+        public void AddMessage(TextObject msg)
         {
             if (TextContainer == null)
                 TextContainer = new TextContainer();
@@ -248,57 +228,6 @@ namespace ClassicUO.Game.GameObjects
                 World.WorldTextManager.AddMessage(msg);
             }
         }
-        private static TextOverhead CreateMessage(string msg, ushort hue, byte font, bool isunicode, MessageType type)
-        {
-            if (ProfileManager.Current != null && ProfileManager.Current.OverrideAllFonts)
-            {
-                font = ProfileManager.Current.ChatFont;
-                isunicode = ProfileManager.Current.OverrideAllFontsIsUnicode;
-            }
-
-            int width = isunicode ? FontsLoader.Instance.GetWidthUnicode(font, msg) : FontsLoader.Instance.GetWidthASCII(font, msg);
-
-            if (width > 200)
-                width = isunicode ? FontsLoader.Instance.GetWidthExUnicode(font, msg, 200, TEXT_ALIGN_TYPE.TS_LEFT, (ushort)FontStyle.BlackBorder) : FontsLoader.Instance.GetWidthExASCII(font, msg, 200, TEXT_ALIGN_TYPE.TS_LEFT, (ushort)FontStyle.BlackBorder);
-            else
-                width = 0;
-
-            RenderedText rtext = RenderedText.Create(msg, hue, font, isunicode, FontStyle.BlackBorder, TEXT_ALIGN_TYPE.TS_LEFT, width, 30, false, false, true);
-
-            return new TextOverhead
-            {
-                Alpha = 255,
-                RenderedText = rtext,
-                Time = CalculateTimeToLive(rtext),
-                Type = type,
-                Hue = hue,
-            };
-        }
-
-        private static long CalculateTimeToLive(RenderedText rtext)
-        {
-            long timeToLive;
-
-            if (ProfileManager.Current.ScaleSpeechDelay)
-            {
-                int delay = ProfileManager.Current.SpeechDelay;
-
-                if (delay < 10)
-                    delay = 10;
-
-                timeToLive = (long)(4000 * rtext.LinesCount * delay / 100.0f);
-            }
-            else
-            {
-                long delay = (5497558140000 * ProfileManager.Current.SpeechDelay) >> 32 >> 5;
-
-                timeToLive = (delay >> 31) + delay;
-            }
-
-            timeToLive += Time.Ticks;
-
-            return timeToLive;
-        }
 
 
         protected virtual void OnPositionChanged()
@@ -314,16 +243,17 @@ namespace ClassicUO.Game.GameObjects
             if (IsDestroyed)
                 return;
 
-            Tile?.RemoveGameObject(this);
-            Tile = null;
+            Next = null;
+            Previous = null;
 
+            Clear();
+            RemoveFromTile();
             TextContainer?.Clear();
 
             IsDestroyed = true;
             PriorityZ = 0;
             IsPositionChanged = false;
             Hue = 0;
-            AnimIndex = 0;
             Offset = Vector3.Zero;
             CurrentRenderIndex = 0;
             UseInRender = 0;
@@ -332,11 +262,7 @@ namespace ClassicUO.Game.GameObjects
             IsFlipped = false;
             Graphic = 0;
             UseObjectHandles = ClosedObjectHandles = ObjectHandlesOpened = false;
-            Bounds = Rectangle.Empty;
             FrameInfo = Rectangle.Empty;
-            DrawTransparent = false;
-            
-            Texture = null;
         }
     }
 }

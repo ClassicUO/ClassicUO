@@ -83,7 +83,7 @@ namespace ClassicUO.Utility.Platforms
 
         private class CustomWindow : IDisposable
         {
-            enum UOAMessage
+            enum UOAMessage : uint
             {
                 First = REGISTER,
 
@@ -126,7 +126,7 @@ namespace ClassicUO.Utility.Platforms
             }
 
             private const int ERROR_CLASS_ALREADY_EXISTS = 1410;
-            public const int WM_USER = 0x400;
+            public const uint WM_USER = 0x400;
 
             private readonly Dictionary<int, WndRegEnt> _wndRegs = new Dictionary<int, WndRegEnt>();
 
@@ -143,7 +143,7 @@ namespace ClassicUO.Utility.Platforms
             {
                 SDL.SDL_SysWMinfo info = new SDL.SDL_SysWMinfo();
                 SDL.SDL_VERSION(out info.version);
-                SDL.SDL_GetWindowWMInfo(SDL.SDL_GL_GetCurrentWindow(), ref info);
+                SDL.SDL_GetWindowWMInfo(Client.Game.Window.Handle, ref info);
 
                 IntPtr hwnd = IntPtr.Zero;
 
@@ -331,9 +331,9 @@ namespace ClassicUO.Utility.Platforms
                                 return 0;
 
                             if ((wParam & 0x00010000) != 0)
-                                MessageManager.HandleMessage(null, sb.ToString(), "System", hue, MessageType.Regular, 3, true);
+                                MessageManager.HandleMessage(null, sb.ToString(), "System", hue, MessageType.Regular, 3, TEXT_TYPE.SYSTEM, true);
                             else
-                                World.Player.AddMessage(MessageType.Regular, sb.ToString(), 3, hue, true);
+                                World.Player.AddMessage(MessageType.Regular, sb.ToString(), 3, hue, true, TEXT_TYPE.OBJECT);
 
                             return 1;
                         }
@@ -347,7 +347,7 @@ namespace ClassicUO.Utility.Platforms
                     case UOAMessage.ADD_CMD:
 
                     {
-                        var sb = new StringBuilder(256);
+                        StringBuilder sb = new StringBuilder(256);
 
                         if (GlobalGetAtomName((ushort) lParam, sb, 256) == 0)
                             return 0;

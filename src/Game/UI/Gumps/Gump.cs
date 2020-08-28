@@ -24,6 +24,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Xml;
 
+using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Renderer;
@@ -55,6 +56,9 @@ namespace ClassicUO.Game.UI.Gumps
         GT_SKILLBUTTON,
         GT_RACIALBUTTON,
         GT_WORLDMAP,
+
+        GT_DEBUG,
+        GT_NETSTATS,
     }
 
     internal class Gump : Control
@@ -69,11 +73,12 @@ namespace ClassicUO.Game.UI.Gumps
 
         public bool BlockMovement { get; set; }
 
-        public bool CloseIfClickOutside { get; set; }
-
         public bool CanBeSaved => GumpType != GUMP_TYPE.NONE;
 
         public virtual GUMP_TYPE GumpType { get; }
+
+        public bool InvalidateContents { get; set; }
+
 
         public override bool CanMove
         {
@@ -83,9 +88,26 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override void Update(double totalMS, double frameMS)
         {
+            if (InvalidateContents)
+            {
+                UpdateContents();
+                InvalidateContents = false;
+            }
+
             if (ActivePage == 0)
                 ActivePage = 1;
+
             base.Update(totalMS, frameMS);
+        }
+
+        public override void Dispose()
+        {
+            Item it = World.Items.Get(LocalSerial);
+
+            if (it != null && it.Opened)
+                it.Opened = false;
+
+            base.Dispose();
         }
 
         public virtual void Save(BinaryWriter writer)
@@ -109,10 +131,11 @@ namespace ClassicUO.Game.UI.Gumps
 
         public void SetInScreen()
         {
-            Rectangle rect = new Rectangle(0, 0, Client.Game.Window.ClientBounds.Width, Client.Game.Window.ClientBounds.Height);
-
-            if (rect.Intersects(Bounds))
+            if (Bounds.Width >= 0 && Bounds.X <= Client.Game.Window.ClientBounds.Width &&
+                Bounds.Height >= 0 && Bounds.Y <= Client.Game.Window.ClientBounds.Height)
+            {
                 return;
+            }
 
             X = 0;
             Y = 0;
@@ -123,6 +146,14 @@ namespace ClassicUO.Game.UI.Gumps
         }
 
         public virtual void Restore(XmlElement xml)
+        {
+
+        }
+
+        public void RequestUpdateContents()
+            => InvalidateContents = true;
+
+        protected virtual void UpdateContents()
         {
 
         }
@@ -168,7 +199,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                             break;
 
-                        case TextBox textBox:
+                        case StbTextBox textBox:
                             entries.Add(new Tuple<ushort, string>((ushort) textBox.LocalSerial, textBox.Text));
 
                             break;
@@ -177,7 +208,11 @@ namespace ClassicUO.Game.UI.Gumps
 
                 GameActions.ReplyGump(LocalSerial, ServerSerial, buttonID, switches.ToArray(), entries.ToArray());
 
-                UIManager.SavePosition(ServerSerial, Location);
+                if (CanMove)
+                    UIManager.SavePosition(ServerSerial, Location);
+                else
+                    UIManager.RemovePosition(ServerSerial);
+
                 Dispose();
             }
         }
@@ -189,6 +224,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (ServerSerial != 0)
                 OnButtonClick(0);
+
             base.CloseWithRightClick();
         }
 

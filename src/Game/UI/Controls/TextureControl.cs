@@ -20,6 +20,7 @@
 #endregion
 
 using ClassicUO.Renderer;
+using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Controls
 {
@@ -36,6 +37,7 @@ namespace ClassicUO.Game.UI.Controls
 
         public ushort Hue { get; set; }
         public bool IsPartial { get; set; }
+        public UOTexture32 Texture { get; set; }
 
         public override void Update(double totalMS, double frameMS)
         {
@@ -51,7 +53,7 @@ namespace ClassicUO.Game.UI.Controls
                 return false;
 
             ResetHueVector();
-            ShaderHuesTraslator.GetHueVector(ref _hueVector, Hue, IsPartial, Alpha);
+            ShaderHueTranslator.GetHueVector(ref _hueVector, Hue, IsPartial, Alpha);
 
             if (ScaleTexture)
             {
@@ -59,7 +61,7 @@ namespace ClassicUO.Game.UI.Controls
                 {
                     int w = Width;
                     int h = Height;
-                    var r = artTexture.ImageRectangle;
+                    Rectangle r = artTexture.ImageRectangle;
 
                     if (r.Width < Width)
                     {
@@ -80,6 +82,12 @@ namespace ClassicUO.Game.UI.Controls
             }
 
             return batcher.Draw2D(Texture, x, y, ref _hueVector);
+        }
+
+        public override void Dispose()
+        {
+            Texture = null;
+            base.Dispose();
         }
     }
 }

@@ -28,6 +28,9 @@ namespace ClassicUO.Utility
     {
         public static string Encrypt(string source)
         {
+            if (string.IsNullOrEmpty(source))
+                return string.Empty;
+
             byte[] buff = Encoding.ASCII.GetBytes(source);
             int kidx = 0;
             string key = CalculateKey();
@@ -51,6 +54,9 @@ namespace ClassicUO.Utility
 
         public static string Decrypt(string source)
         {
+            if (string.IsNullOrEmpty(source))
+                return string.Empty;
+
             byte[] buff = null;
 
             if (source.Length > 2 && source[0] == '1' && source[1] == '+')

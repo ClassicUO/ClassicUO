@@ -19,6 +19,7 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
 
+using System.Collections.Generic;
 using System.IO;
 using System.Xml;
 
@@ -246,7 +247,7 @@ namespace ClassicUO.Game.UI.Gumps
             writer.WriteAttributeString("columns", _columns.ToString());
             writer.WriteAttributeString("rectsize", _rectSize.ToString());
 
-            var controls = FindControls<CounterItem>();
+            IEnumerable<CounterItem> controls = FindControls<CounterItem>();
 
             writer.WriteStartElement("controls");
             foreach (CounterItem control in controls)
@@ -273,7 +274,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (controlsXml != null)
             {
-                var items = GetControls<CounterItem>();
+                CounterItem[] items = GetControls<CounterItem>();
                 int index = 0;
 
                 foreach (XmlElement controlXml in controlsXml.GetElementsByTagName("control"))
@@ -348,7 +349,10 @@ namespace ClassicUO.Game.UI.Gumps
                 if (_graphic == 0)
                     return;
 
-                Item backpack = World.Player.Equipment[(int) Layer.Backpack];
+                Item backpack = World.Player.FindItemByLayer(Layer.Backpack);
+                if (backpack == null)
+                    return;
+
                 Item item = backpack.FindItem(_graphic, _hue);
 
                 if (item != null)
@@ -359,19 +363,11 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 if (button == MouseButtonType.Left)
                 {
-                    GameScene gs = Client.Game.GetScene<GameScene>();
-
-                    if (!ItemHold.Enabled || !gs.IsMouseOverUI)
-                        return;
-
-                    Item item = World.Items.Get(ItemHold.Container);
-
-                    if (item == null)
-                        return;
-
-                    SetGraphic(ItemHold.Graphic, ItemHold.Hue);
-
-                    gs.DropHeldItemToContainer(item, ItemHold.X, ItemHold.Y);
+                    if (ItemHold.Enabled)
+                    {
+                        SetGraphic(ItemHold.Graphic, ItemHold.Hue);
+                        GameActions.DropItem(ItemHold.Serial, ItemHold.X, ItemHold.Y, 0, ItemHold.Container);
+                    }
                 }
                 else if (button == MouseButtonType.Right && Keyboard.Alt && _graphic != 0)
                 {
@@ -406,7 +402,8 @@ namespace ClassicUO.Game.UI.Gumps
                     else
                     {
                         _amount = 0;
-                        GetAmount(World.Player.Equipment[(int)Layer.Backpack], _graphic, _hue, ref _amount);
+                        GetAmount(World.Player.FindItemByLayer(Layer.Backpack), _graphic, _hue, ref _amount);
+                        GetAmount(World.Player.FindItemByLayer(Layer.Cloak), _graphic, _hue, ref _amount);
 
                         if (ProfileManager.Current.CounterBarDisplayAbbreviatedAmount)
                         {
@@ -426,8 +423,10 @@ namespace ClassicUO.Game.UI.Gumps
                 if (parent == null)
                     return;
 
-                foreach (Item item in parent.Items)
+                for (LinkedObject i = parent.Items; i != null; i = i.Next)
                 {
+                    Item item = (Item) i;
+
                     GetAmount(item, graphic, hue, ref amount);
 
                     if (item.Graphic == graphic && item.Hue == hue && item.Exists)

@@ -35,30 +35,19 @@ namespace ClassicUO.IO.Resources
 
         private ClilocLoader()
         {
-
         }
 
         private static ClilocLoader _instance;
-        public static ClilocLoader Instance
-        {
-            get
-            {
-                if (_instance == null)
-                {
-                    _instance = new ClilocLoader();
-                }
-
-                return _instance;
-            }
-        }
-
+        public static ClilocLoader Instance => _instance ?? (_instance = new ClilocLoader());
 
         public Task Load(string cliloc)
         {
             _cliloc = cliloc;
 
             if (!File.Exists(UOFileManager.GetUOFilePath(cliloc)))
+            {
                 _cliloc = "Cliloc.enu";
+            }
 
             return Load();
         }
@@ -67,12 +56,16 @@ namespace ClassicUO.IO.Resources
         {
             return Task.Run(() => {
                 if (string.IsNullOrEmpty(_cliloc))
+                {
                     _cliloc = "Cliloc.enu";
+                }
 
                 string path = UOFileManager.GetUOFilePath(_cliloc);
 
                 if (!File.Exists(path))
+                {
                     return;
+                }
 
                 using (BinaryReader reader = new BinaryReader(new FileStream(path, FileMode.Open, FileAccess.Read)))
                 {
@@ -87,7 +80,9 @@ namespace ClassicUO.IO.Resources
                         int length = reader.ReadInt16();
 
                         if (length > buffer.Length)
+                        {
                             buffer = new byte[(length + 1023) & ~1023];
+                        }
                         reader.Read(buffer, 0, length);
                         string text = string.Intern(Encoding.UTF8.GetString(buffer, 0, length));
 
@@ -98,8 +93,9 @@ namespace ClassicUO.IO.Resources
           
         }
 
-        public override void CleanResources()
+        public override void ClearResources()
         {
+            _entries.Clear();
         }
 
         public string GetString(int number)
@@ -108,64 +104,156 @@ namespace ClassicUO.IO.Resources
             return text;
         }
 
-        public string Translate(int baseCliloc, string arg = "", bool capitalize = false)
+        public string GetString(int number, string replace)
         {
-            return Translate(GetString(baseCliloc), arg, capitalize);
+            string s = GetString(number);
+
+            if (string.IsNullOrEmpty(s))
+            {
+                s = replace;
+            }
+
+            return s;
         }
 
-        public string Translate(string baseCliloc, string arg = "", bool capitalize = false)
+        public string GetString(int number, bool camelcase, string replace = "")
         {
+            string s = GetString(number);
+
+            if (string.IsNullOrEmpty(s) && !string.IsNullOrEmpty(replace))
+            {
+                s = replace;
+            }
+
+            if (camelcase && !string.IsNullOrEmpty(s))
+            {
+                s = StringHelper.CapitalizeAllWords(s);
+            }
+
+            return s;
+        }
+
+        public string Translate(int clilocNum, string arg = "", bool capitalize = false)
+        {
+            string baseCliloc = GetString(clilocNum);
             if (baseCliloc == null)
+            {
                 return null;
-
-
-            while (arg.Length != 0 && arg[0] == '\t')
-                arg = arg.Remove(0, 1);
+            }
 
             List<string> arguments = new List<string>();
 
-            while (true)
+            if (arg == null)
             {
-                int pos = arg.IndexOf('\t');
+                arg = "";
+            }
 
-                if (pos != -1)
-                {
-                    arguments.Add(arg.Substring(0, pos));
-                    arg = arg.Substring(pos + 1);
-                }
-                else
-                {
-                    arguments.Add(arg);
+            while (arg.Length != 0 && arg[0] == '\t')
+            {
+                arg = arg.Remove(0, 1);
+            }
 
-                    break;
+            for (int i = 0; i < arg.Length; i++)
+            {
+                if (arg[i] == '\t')
+                {
+                    arguments.Add(arg.Substring(0, i));
+                    arg = arg.Substring(i + 1);
+                    i = 0;
                 }
             }
 
-            int index = 0;
-            while (true)
+            bool has_arguments = arguments.Count != 0;
+
+            arguments.Add(arg);
+
+            //while (true)
+            //{
+            //    int pos = arg.IndexOf('\t');
+
+            //    if (pos != -1)
+            //    {
+            //        arguments.Add(arg.Substring(0, pos));
+            //        arg = arg.Substring(pos + 1);
+            //    }
+            //    else
+            //    {
+            //        arguments.Add(arg);
+
+            //        break;
+            //    }
+            //}
+
+            int index, pos = 0;
+            while (pos < baseCliloc.Length)
             {
-                int pos = baseCliloc.IndexOf('~');
+                pos = baseCliloc.IndexOf('~', pos);
 
                 if (pos == -1)
+                {
                     break;
+                }
 
                 int pos2 = baseCliloc.IndexOf('~', pos + 1);
-
-                if (pos2 == -1)
-                    break;
-
-                string a = index >= arguments.Count ? string.Empty : arguments[index];
-
-                if (a.Length > 1 && a[0] == '#')
+                if (pos2 == -1) //non valid arg
                 {
-                    if (int.TryParse(a.Substring(1), out int id1))
-                        arguments[index] = GetString(id1) ?? string.Empty;
-                    else
-                        arguments[index] = a;
+                    break;
+                }
+
+                index = baseCliloc.IndexOf('_', pos + 1, pos2 - (pos + 1));
+                if (index <= pos)
+                {
+                    //there is no underscore inside the bounds, so we use all the part to get the number of argument
+                    index = pos2;
+                }
+
+                int start = pos + 1;
+                int max = index - start;
+                int count = 0;
+                for (; count < max; count++)
+                {
+                    if (!char.IsNumber(baseCliloc[start + count]))
+                    {
+                        break;
+                    }
+                }
+
+                if (!int.TryParse(baseCliloc.Substring(start, count), out index))
+                {
+                    return $"MegaCliloc: error for {clilocNum}";
+                }
+
+                --index;
+
+                string a = index < 0 || index >= arguments.Count ? string.Empty : arguments[index];
+
+                if (a.Length > 1)
+                {
+                    if (a[0] == '#')
+                    {
+                        if (int.TryParse(a.Substring(1), out int id1))
+                        {
+                            arguments[index] = GetString(id1) ?? string.Empty;
+                        }
+                        else
+                        {
+                            arguments[index] = a;
+                        }
+                    }
+                    else if (has_arguments && int.TryParse(a, out int clil))
+                    {
+                        if (_entries.TryGetValue(clil, out string value) && !string.IsNullOrEmpty(value))
+                        {
+                            arguments[index] = value;
+                        }
+                    }
                 }
 
                 baseCliloc = baseCliloc.Remove(pos, pos2 - pos + 1).Insert(pos, index >= arguments.Count ? string.Empty : arguments[index]);
-                index++;
+                if (index >= 0 && index < arguments.Count)
+                {
+                    pos += arguments[index].Length;
+                }
             }
 
             //for (int i = 0; i < arguments.Count; i++)
@@ -194,7 +282,9 @@ namespace ClassicUO.IO.Resources
             //}
 
             if (capitalize)
+            {
                 baseCliloc = StringHelper.CapitalizeAllWords(baseCliloc);
+            }
 
             return baseCliloc;
         }

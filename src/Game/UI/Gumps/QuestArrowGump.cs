@@ -59,7 +59,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (!World.InGame) Dispose();
 
-            var scene = Client.Game.GetScene<GameScene>();
+            GameScene scene = Client.Game.GetScene<GameScene>();
 
             if (IsDisposed || ProfileManager.Current == null || scene == null)
                 return;
@@ -80,7 +80,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Height = _arrow.Height;
             }
 
-            var scale = scene.Scale;
+            float scale = scene.Scale;
 
 
             int gox = _mx - World.Player.X;
@@ -120,8 +120,8 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override void OnMouseUp(int x, int y, MouseButtonType button)
         {
-            var leftClick = button == MouseButtonType.Left;
-            var rightClick = button == MouseButtonType.Right;
+            bool leftClick = button == MouseButtonType.Left;
+            bool rightClick = button == MouseButtonType.Right;
 
             if (leftClick || rightClick)
                 GameActions.QuestArrow(rightClick);
@@ -132,7 +132,7 @@ namespace ClassicUO.Game.UI.Gumps
             if (_arrow == null)
                 return true;
 
-            return _arrow.Texture.Contains(x, y);
+            return _arrow.Contains(x, y);
         }
     }
 }

@@ -31,10 +31,15 @@ using ClassicUO.Network;
 using ClassicUO.Utility.Platforms;
 
 using SDL2;
+using ClassicUO.Renderer;
+using ClassicUO.IO.Resources;
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using ClassicUO.Game;
 
 namespace ClassicUO
 {
-    static class Client
+    internal static class Client
     {
         public static ClientVersion Version { get; private set; } 
         public static ClientFlags Protocol { get; set; }
@@ -50,16 +55,18 @@ namespace ClassicUO
 
             Log.Trace("Running game...");
             using (Game = new GameController())
+            //Game = new GameController();
             {
-                Game.Run();
+                // https://github.com/FNA-XNA/FNA/wiki/7:-FNA-Environment-Variables#fna_graphics_enable_highdpi
+                CUOEnviroment.IsHighDPI = Environment.GetEnvironmentVariable("FNA_GRAPHICS_ENABLE_HIGHDPI") == "1";
+                Game.Run();           
             }
             Log.Trace("Exiting game...");
         }
 
         public static void ShowErrorMessage(string msg)
         {
-            if (Game != null && Game.Window.Handle != IntPtr.Zero)
-                SDL.SDL_ShowSimpleMessageBox(SDL.SDL_MessageBoxFlags.SDL_MESSAGEBOX_ERROR, "ERROR", msg, Game.Window.Handle);
+            SDL.SDL_ShowSimpleMessageBox(SDL.SDL_MessageBoxFlags.SDL_MESSAGEBOX_ERROR, "ERROR", msg, IntPtr.Zero);
         }
 
 
@@ -89,13 +96,13 @@ namespace ClassicUO
             }
 
             // try to load the client version
-            if (!ClientVersionHelper.TryParse(clientVersionText, out ClientVersion clientVersion))
+            if (!ClientVersionHelper.IsClientVersionValid(clientVersionText, out ClientVersion clientVersion))
             {
                 Log.Warn($"Client version [{clientVersionText}] is invalid, let's try to read the client.exe");
 
                 // mmm something bad happened, try to load from client.exe
                 if (!ClientVersionHelper.TryParseFromFile(Path.Combine(clientPath, "client.exe"), out clientVersionText) ||
-                    !ClientVersionHelper.TryParse(clientVersionText, out clientVersion))
+                    !ClientVersionHelper.IsClientVersionValid(clientVersionText, out clientVersion))
                 {
                     Log.Error("Invalid client version: " + clientVersionText);
                     ShowErrorMessage($"Impossible to define the client version.\nClient version: '{clientVersionText}'");
@@ -110,7 +117,7 @@ namespace ClassicUO
 
             Version = clientVersion;
             ClientPath = clientPath;
-            IsUOPInstallation = Version >= ClientVersion.CV_70240;
+            IsUOPInstallation = Version >= ClientVersion.CV_7000 && File.Exists(UOFileManager.GetUOFilePath("MainMisc.uop"));
             Protocol = ClientFlags.CF_T2A;
 
             if (Version >= ClientVersion.CV_200)
@@ -140,11 +147,25 @@ namespace ClassicUO
             //ATTENTION: you will need to enable ALSO ultimalive server-side, or this code will have absolutely no effect!
             UltimaLive.Enable();
             PacketsTable.AdjustPacketSizeByVersion(Version);
+
+            if (Settings.GlobalSettings.Encryption != 0)
+            {
+                Log.Trace("Calculating encryption by client version...");
+                EncryptionHelper.CalculateEncryption(Version);
+                Log.Trace($"encryption: {EncryptionHelper.Type}");
+
+                if (EncryptionHelper.Type != (ENCRYPTION_TYPE) Settings.GlobalSettings.Encryption)
+                {
+                    Log.Warn($"Encryption found: {EncryptionHelper.Type}");
+                    Settings.GlobalSettings.Encryption = (byte) EncryptionHelper.Type;
+                }
+            }
+
             Log.Trace("Done!");
 
             Log.Trace("Loading plugins...");
 
-            foreach (var p in Settings.GlobalSettings.Plugins)
+            foreach (string p in Settings.GlobalSettings.Plugins)
                 Plugin.Create(p);
             Log.Trace("Done!");
 

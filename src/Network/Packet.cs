@@ -47,7 +47,8 @@ namespace ClassicUO.Network
             [MethodImpl(256)]
             get
             {
-                if (index < 0 || index >= Length) throw new ArgumentOutOfRangeException("index");
+                if (index < 0 || index >= Length) 
+                    throw new ArgumentOutOfRangeException("index");
 
                 return _data[index];
             }
@@ -119,6 +120,14 @@ namespace ClassicUO.Network
             return (uint) ((ReadByte() << 24) | (ReadByte() << 16) | (ReadByte() << 8) | ReadByte());
         }
 
+        public ulong ReadULong()
+        {
+            if (EnsureSize(8))
+                return 0;
+
+            return (ulong)((ReadByte() << 56) | (ReadByte() << 48) | (ReadByte() << 40) | (ReadByte() << 32) | (ReadByte() << 24) | (ReadByte() << 16) | (ReadByte() << 8) | ReadByte());
+        }
+
         public string ReadASCII()
         {
             if (EnsureSize(1))
@@ -136,7 +145,7 @@ namespace ClassicUO.Network
             return _sb.ToString();
         }
 
-        public string ReadASCII(int length, bool exitIfNull = false)
+        public string ReadASCII(int length)
         {
             if (EnsureSize(length))
                 return Empty;
@@ -168,35 +177,90 @@ namespace ClassicUO.Network
 
         public string ReadUTF8StringSafe()
         {
-            if (Position >= Length) return Empty;
+            _sb.Clear();
 
-            int count = 0;
+            if (Position >= Length)
+                return Empty;
+
             int index = Position;
 
-            while (index < Length && _data[index++] != 0) ++count;
+            while (index < Length)
+            {
+                byte b = _data[index++];
+
+                if (b == 0)
+                    break;
+            }
+
+            string s = Encoding.UTF8.GetString(_data, Position, index - Position - 1);
+
+            Seek(index);
 
             index = 0;
 
-            var buffer = new byte[count];
-            int val = 0;
+            for (int i = 0; i < s.Length && StringHelper.IsSafeChar(s[i]); i++, index++)
+            {
 
-            while (Position < Length && (val = _data[Position++]) != 0) buffer[index++] = (byte) val;
+            }
 
-            string s = Encoding.UTF8.GetString(buffer);
+            if (index == s.Length)
+                return s;
 
-            bool isSafe = true;
-
-            for (int i = 0; isSafe && i < s.Length; ++i) isSafe = StringHelper.IsSafeChar(s[i]);
-
-            if (isSafe) return s;
-
-            StringBuilder sb = new StringBuilder(s.Length);
-
-            for (int i = 0; i < s.Length; ++i)
+            for (int i = 0; i < s.Length; i++)
+            {
                 if (StringHelper.IsSafeChar(s[i]))
-                    sb.Append(s[i]);
+                    _sb.Append(s[i]);
+            }
 
-            return sb.ToString();
+            return _sb.ToString();
+        }
+
+        public string ReadUTF8StringSafe(int length)
+        {
+            _sb.Clear();
+
+            if (length <= 0 || EnsureSize(length))
+            {
+                return Empty;
+            }
+
+            if (Position + length > Length)
+            {
+                length = Length - Position - 1;
+            }
+
+            int index = Position;
+            int toread = Position + length;
+
+            while (index < toread)
+            {
+                byte b = _data[index++];
+
+                if (b == 0)
+                    break;
+            }
+
+            string s = Encoding.UTF8.GetString(_data, Position, length - 1);
+
+            Skip(length);
+
+            index = 0;
+
+            for (int i = 0; i < s.Length && StringHelper.IsSafeChar(s[i]); i++, index++)
+            {
+
+            }
+
+            if (index == s.Length)
+                return s;
+
+            for (int i = 0; i < s.Length; i++)
+            {
+                if (StringHelper.IsSafeChar(s[i]))
+                    _sb.Append(s[i]);
+            }
+
+            return _sb.ToString();
         }
 
         public string ReadUnicode()
@@ -243,7 +307,7 @@ namespace ClassicUO.Network
             return array;
         }
 
-        public string ReadUnicodeReversed(int length)
+        public string ReadUnicodeReversed(int length, bool safe = true)
         {
             if (EnsureSize(length))
                 return Empty;
@@ -252,10 +316,21 @@ namespace ClassicUO.Network
             {
                 length = Length - Position - 2;
             }
-            int start = Position;
-            Position += length;
 
-            return length <= 0 ? Empty : Encoding.Unicode.GetString(_data, start, length);
+            int start = Position;
+            int i = 0;
+
+            for (; i < length; i += 2)
+            {
+                if (ReadUShortReversed() == 0)
+                {
+                    break;
+                }
+            }
+
+            Seek(start + length);
+
+            return i <= 0 ? Empty : Encoding.Unicode.GetString(_data, start, i);
         }
 
         public string ReadUnicodeReversed()

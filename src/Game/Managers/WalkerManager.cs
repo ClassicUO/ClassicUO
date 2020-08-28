@@ -114,7 +114,6 @@ namespace ClassicUO.Game.Managers
                 World.RangeSize.Y = y;
 
                 World.Player.AddToTile();
-                World.Player.ProcessDelta();
             }
         }
 

@@ -30,7 +30,7 @@ namespace ClassicUO.Utility.Platforms
 
         static Native()
         {
-            if (Environment.OSVersion.Platform == PlatformID.Unix || Environment.OSVersion.Platform == PlatformID.MacOSX)
+            if (SDL2.SDL.SDL_GetPlatform() != "Windows")
                 _loader = new UnixNativeLoader();
             else
                 _loader = new WinNativeLoader();

@@ -29,31 +29,19 @@ using ClassicUO.Utility;
 
 namespace ClassicUO.IO.Resources
 {
-    internal class TexmapsLoader : UOFileLoader<UOTexture>
+    internal class TexmapsLoader : UOFileLoader<UOTexture32>
     {
-        private readonly ushort[] _textmapPixels128 = new ushort[128 * 128];
-        private readonly ushort[] _textmapPixels64 = new ushort[64 * 64];
+        private readonly uint[] _textmapPixels128 = new uint[128 * 128];
+        private readonly uint[] _textmapPixels64 = new uint[64 * 64];
         private UOFile _file;
 
-        private TexmapsLoader()
+        private TexmapsLoader(int count)
+            : base(count)
         {
-
         }
 
         private static TexmapsLoader _instance;
-        public static TexmapsLoader Instance
-        {
-            get
-            {
-                if (_instance == null)
-                {
-                    _instance = new TexmapsLoader();
-                }
-
-                return _instance;
-            }
-        }
-
+        public static TexmapsLoader Instance => _instance ?? (_instance = new TexmapsLoader(Constants.MAX_LAND_TEXTURES_DATA_INDEX_COUNT));
 
         public override Task Load()
         {
@@ -70,7 +58,9 @@ namespace ClassicUO.IO.Resources
                 string pathdef = UOFileManager.GetUOFilePath("TexTerr.def");
 
                 if (!File.Exists(pathdef))
+                {
                     return;
+                }
 
                 using (DefReader defReader = new DefReader(pathdef))
                 {
@@ -79,16 +69,25 @@ namespace ClassicUO.IO.Resources
                         int index = defReader.ReadInt();
 
                         if (index < 0 || index >= Constants.MAX_LAND_TEXTURES_DATA_INDEX_COUNT)
+                        {
                             continue;
+                        }
 
                         int[] group = defReader.ReadGroup();
+
+                        if (group == null)
+                        {
+                            continue;
+                        }
 
                         for (int i = 0; i < group.Length; i++)
                         {
                             int checkindex = group[i];
 
                             if (checkindex < 0 || checkindex >= Constants.MAX_LAND_TEXTURES_DATA_INDEX_COUNT)
+                            {
                                 continue;
+                            }
 
                             Entries[index] = Entries[checkindex];
                         }
@@ -139,68 +138,40 @@ namespace ClassicUO.IO.Resources
 
         }
 
-        public override UOTexture GetTexture(uint g)
+        public override UOTexture32 GetTexture(uint g)
         {
-            if (!ResourceDictionary.TryGetValue(g, out UOTexture texture) || texture.IsDisposed)
+            if (g >= Resources.Length)
             {
-                ushort[] pixels = GetTextmapTexture((ushort) g, out int size);
+                return null;
+            }
+
+            ref UOTexture32 texture = ref Resources[g];
+
+            if (texture == null || texture.IsDisposed)
+            {
+                uint[] pixels = GetTexMapTexture((ushort) g, out int size);
 
                 if (pixels == null || pixels.Length == 0)
+                {
                     return null;
+                }
 
-                texture = new UOTexture16(size, size);
+                texture = new UOTexture32(size, size);
                 texture.SetData(pixels);
-                //_usedIndex.Add(g);
-                ResourceDictionary.Add(g, texture);
+
+                SaveId(g);
             }
-            //else
-            //    texture.Ticks = Time.Ticks + 3000;
+            else
+            {
+                texture.Ticks = Time.Ticks;
+            }
 
             return texture;
         }
 
-        public override void CleanResources()
+        private uint[] GetTexMapTexture(ushort index, out int size)
         {
-            throw new NotImplementedException();
-        }
-
-        //public void ClearUnusedTextures()
-        //{
-        //    int count = 0;
-        //    long ticks = Time.Ticks - 3000;
-
-        //    for (int i = 0; i < _usedIndex.Count; i++)
-        //    {
-        //        uint g = _usedIndex[i];
-        //        UOTexture texture = ResourceDictionary[g];
-
-        //        if (texture.Ticks < ticks)
-        //        {
-        //            texture.Dispose();
-        //            _usedIndex.RemoveAt(i--);
-        //            ResourceDictionary.Remove(g);
-
-        //            if (++count >= 20)
-        //                break;
-        //        }
-        //    }
-        //}
-
-        //public void Clear()
-        //{
-        //    for (int i = 0; i < _usedIndex.Count; i++)
-        //    {
-        //        uint g = _usedIndex[i];
-        //        UOTexture texture = ResourceDictionary[g];
-        //        texture.Dispose();
-        //        _usedIndex.RemoveAt(i--);
-        //        ResourceDictionary.Remove(g);
-        //    }
-        //}
-
-        private ushort[] GetTextmapTexture(ushort index, out int size)
-        {
-            ref readonly var entry = ref GetValidRefEntry(index);
+            ref UOFileIndex entry = ref GetValidRefEntry(index);
 
             if (entry.Length <= 0)
             {
@@ -209,9 +180,9 @@ namespace ClassicUO.IO.Resources
                 return null;
             }
 
-            ushort[] pixels;
+            uint[] pixels;
 
-            if (entry.Extra == 0)
+            if (entry.Width == 0 && entry.Height == 0)
             {
                 size = 64;
                 pixels = _textmapPixels64;
@@ -229,7 +200,9 @@ namespace ClassicUO.IO.Resources
                 int pos = i * size;
 
                 for (int j = 0; j < size; j++)
-                    pixels[pos + j] = (ushort) (0x8000 | _file.ReadUShort());
+                {
+                    pixels[pos + j] = HuesHelper.Color16To32(_file.ReadUShort()) | 0xFF_00_00_00;
+                } 
             }
 
             return pixels;

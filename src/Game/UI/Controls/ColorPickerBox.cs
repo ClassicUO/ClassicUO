@@ -132,7 +132,8 @@ namespace ClassicUO.Game.UI.Controls
 
             for (int y = 0; y < _rows; y++)
             {
-                for (int x = 0; x < _columns; x++) _colorBoxes[y, x].Update(totalMS, frameMS);
+                for (int x = 0; x < _columns; x++) 
+                    _colorBoxes?[y, x].Update(totalMS, frameMS);
             }
         }
 
@@ -153,7 +154,8 @@ namespace ClassicUO.Game.UI.Controls
 
             for (int i = 0; i < _rows; i++)
             {
-                for (int j = 0; j < _columns; j++) _colorBoxes[i, j].Draw(batcher, x + j * _cellWidth, y + i * _cellHeight);
+                for (int j = 0; j < _columns; j++) 
+                    _colorBoxes?[i, j].Draw(batcher, x + j * _cellWidth, y + i * _cellHeight);
             }
 
             if (_hues.Length > 1)

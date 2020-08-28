@@ -29,6 +29,7 @@ namespace ClassicUO.Game.UI.Controls
         public RadioButton(int group, List<string> parts, string[] lines) : base(parts, lines)
         {
             GroupIndex = group;
+            IsFromServer = true;
         }
 
         public RadioButton(int group, ushort inactive, ushort active, string text = "", byte font = 0, ushort color = 0, bool isunicode = true, int maxWidth = 0) : base(inactive, active, text, font, color, isunicode, maxWidth)

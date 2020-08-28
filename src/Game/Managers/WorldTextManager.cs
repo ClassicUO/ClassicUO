@@ -33,29 +33,37 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.Managers
 {
-    internal class TextRenderer
+    internal class TextRenderer : TextObject
     {
         private readonly List<Rectangle> _bounds = new List<Rectangle>();
-        protected TextOverhead _firstNode = new TextOverhead(), _drawPointer;
+        protected TextObject _firstNode, _drawPointer;
+
+        public TextRenderer()
+        {
+            _firstNode = this;
+        }
+
+        public override void Destroy()
+        {
+            //Clear();
+        }
 
         public virtual void Update(double totalMS, double frameMS)
         {
             ProcessWorldText(false);
         }
 
-        public void Select(int startX, int startY, int renderIndex)
+        public void Select(int startX, int startY, int renderIndex, bool isGump = false)
         {
-            ProcessWorldText(false);
-
             int mouseX = Mouse.Position.X;
             int mouseY = Mouse.Position.Y;
 
-            for (var item = _drawPointer; item != null; item = item.Left)
+            for (TextObject item = _drawPointer; item != null; item = item.DLeft)
             {
                 if (item.RenderedText == null || item.RenderedText.IsDestroyed || item.RenderedText.Texture == null)
                     continue;
 
-                if (item.Time >= Time.Ticks)
+                if (item.Time >= ClassicUO.Time.Ticks)
                 {
                     if (item.Owner == null || item.Owner.UseInRender != renderIndex)
                         continue;
@@ -66,6 +74,17 @@ namespace ClassicUO.Game.Managers
                     SelectedObject.LastObject = item;
                 }
             }
+
+            if (SelectedObject.LastObject is TextObject t)
+            {
+                if (isGump)
+                {
+                    if (t.IsTextGump)
+                        t.ToTopD();
+                }
+                else
+                    MoveToTop(t);
+            }
         }
 
         public virtual void Draw(UltimaBatcher2D batcher, int startX, int startY, int renderIndex, bool isGump = false)
@@ -75,11 +94,11 @@ namespace ClassicUO.Game.Managers
             int mouseX = Mouse.Position.X;
             int mouseY = Mouse.Position.Y;
 
-            TextOverhead last = null;
+            BaseGameObject last = SelectedObject.LastObject;
 
-            for (var o = _drawPointer; o != null; o = o.Left)
+            for (TextObject o = _drawPointer; o != null; o = o.DLeft)
             {
-                if (o.RenderedText == null || o.RenderedText.IsDestroyed || o.RenderedText.Texture == null || o.Time < Time.Ticks || (o.Owner.UseInRender != renderIndex && !isGump))
+                if (o.IsDestroyed || o.RenderedText == null || o.RenderedText.IsDestroyed || o.RenderedText.Texture == null || o.Time < ClassicUO.Time.Ticks || (o.Owner.UseInRender != renderIndex && !isGump))
                     continue;
 
                 ushort hue = 0;
@@ -92,39 +111,37 @@ namespace ClassicUO.Game.Managers
                         alpha = 1f - 0x7F / 255f;
                 }
 
-                if (o.RenderedText.Texture.Contains( mouseX - startX - o.RealScreenPosition.X, mouseY - startY - o.RealScreenPosition.Y))
+                if (o.RenderedText.Texture.Contains(mouseX - startX - o.RealScreenPosition.X, mouseY - startY - o.RealScreenPosition.Y))
                 {
-                    SelectedObject.Object = o;
-                    last = o;
+                    if (isGump)
+                        SelectedObject.LastObject = o;
+                    else
+                        SelectedObject.Object = o;
                 }
 
-                if (!isGump && SelectedObject.LastObject == o)
+                if (!isGump && o.Owner is Entity && last == o)
                 {
-                    hue = 0x35;
+                    hue = 0x0035;
                 }
 
                 o.RenderedText.Draw(batcher, startX + o.RealScreenPosition.X, startY + o.RealScreenPosition.Y, alpha, hue);
             }
+        }
 
-            if (last != null)
-            {
-                if (last.Right != null)
-                    last.Right.Left = last.Left;
+        public void MoveToTop(TextObject obj)
+        {
+            if (obj == null)
+                return;
 
-                if (last.Left != null)
-                    last.Left.Right = last.Right;
+            obj.UnlinkD();
 
-                last.Left = last.Right = null;
+            TextObject next = _firstNode.DRight;
+            _firstNode.DRight = obj;
+            obj.DLeft = _firstNode;
+            obj.DRight = next;
 
-
-                var next = _firstNode.Right;
-                _firstNode.Right = last;
-                last.Left = _firstNode;
-                last.Right = next;
-
-                if (next != null)
-                    next.Left = last;
-            }
+            if (next != null)
+                next.DLeft = obj;
         }
 
         public void ProcessWorldText(bool doit)
@@ -135,13 +152,13 @@ namespace ClassicUO.Game.Managers
                     _bounds.Clear();
             }
 
-            for (_drawPointer = _firstNode; _drawPointer != null; _drawPointer = _drawPointer.Right)
+            for (_drawPointer = _firstNode; _drawPointer != null; _drawPointer = _drawPointer.DRight)
             {
-                var t = _drawPointer;
-
                 if (doit)
                 {
-                    if (t.Time >= Time.Ticks && !t.RenderedText.IsDestroyed)
+                    TextObject t = _drawPointer;
+
+                    if (t.Time >= ClassicUO.Time.Ticks && t.RenderedText != null && !t.RenderedText.IsDestroyed)
                     {
                         if (t.Owner != null)
                         {
@@ -151,16 +168,16 @@ namespace ClassicUO.Game.Managers
                     }
                 }
 
-                if (_drawPointer.Right == null)
+                if (_drawPointer.DRight == null)
                     break;
             }
         }
 
-        private void CalculateAlpha(TextOverhead msg)
+        private void CalculateAlpha(TextObject msg)
         {
             if (ProfileManager.Current != null && ProfileManager.Current.TextFading)
             {
-                int delta = (int) (msg.Time - Time.Ticks);
+                int delta = (int) (msg.Time - ClassicUO.Time.Ticks);
 
                 if (delta >= 0 && delta <= 1000)
                 {
@@ -183,7 +200,7 @@ namespace ClassicUO.Game.Managers
             }
         }
 
-        private bool Collides(TextOverhead msg)
+        private bool Collides(TextObject msg)
         {
             bool result = false;
 
@@ -208,37 +225,77 @@ namespace ClassicUO.Game.Managers
             return result;
         }
 
-        public void AddMessage(TextOverhead obj)
+        public void AddMessage(TextObject obj)
         {
             if (obj == null)
                 return;
+            
+            obj.UnlinkD();
 
-            var item = _firstNode;
+            TextObject item = _firstNode;
 
             if (item != null)
             {
-                if (item.Right != null)
+                if (item.DRight != null)
                 {
-                    var next = item.Right;
+                    TextObject next = item.DRight;
 
-                    item.Right = obj;
-                    obj.Left = item;
-                    obj.Right = next;
-                    next.Left = obj;
+                    item.DRight = obj;
+                    obj.DLeft = item;
+                    obj.DRight = next;
+                    next.DLeft = obj;
                 }
                 else
                 {
-                    item.Right = obj;
-                    obj.Left = item;
-                    obj.Right = null;
+                    item.DRight = obj;
+                    obj.DLeft = item;
+                    obj.DRight = null;
                 }
             }
         }
 
 
-        public virtual void Clear()
+        public new virtual void Clear()
         {
-            _firstNode = new TextOverhead();
+            if (_firstNode != null)
+            {
+                TextObject first = _firstNode;
+
+                while (first?.DLeft != null)
+                    first = first.DLeft;
+
+                while (first != null)
+                {
+                    TextObject next = first.DRight;
+
+                    first.Destroy();
+                    first.Clear();
+
+                    first = next;
+                }
+            }
+
+            if (_drawPointer != null)
+            {
+                TextObject first = _drawPointer;
+
+                while (first?.DLeft != null)
+                    first = first.DLeft;
+
+                while (first != null)
+                {
+                    TextObject next = first.DRight;
+
+                    first.Destroy();
+                    first.Clear();
+
+                    first = next;
+                }
+            }
+           
+            _firstNode = this;
+            _firstNode.DLeft = null;
+            _firstNode.DRight = null;
             _drawPointer = null;
         }
     }
@@ -312,10 +369,10 @@ namespace ClassicUO.Game.Managers
             {
                 foreach (Tuple<uint, uint> tuple in _subst)
                 {
-                    if (_damages.TryGetValue(tuple.Item1, out var dmg))
+                    if (_damages.TryGetValue(tuple.Item1, out OverheadDamage dmg))
                     {
                         _damages.Remove(tuple.Item1);
-                        _damages.Add(tuple.Item2, dmg);
+                        _damages[tuple.Item2] = dmg;
                     }
                 }
 
@@ -333,7 +390,7 @@ namespace ClassicUO.Game.Managers
 
         internal void AddDamage(uint obj, int dmg)
         {
-            if (!_damages.TryGetValue(obj, out var dm) || dm == null)
+            if (!_damages.TryGetValue(obj, out OverheadDamage dm) || dm == null)
             {
                 dm = new OverheadDamage(World.Get(obj));
                 _damages[obj] = dm;

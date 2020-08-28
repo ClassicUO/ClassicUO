@@ -46,7 +46,7 @@ namespace ClassicUO.Game.UI.Controls
         Low
     }
 
-    internal abstract class Control : IDrawableUI, IUpdateable
+    internal abstract class Control
     {
         internal static int _StepsDone = 1;
         internal static int _StepChanger = 1;
@@ -84,6 +84,8 @@ namespace ClassicUO.Game.UI.Controls
         public uint ServerSerial { get; set; }
 
         public uint LocalSerial { get; set; }
+
+        public bool IsFromServer { get; set; }
 
         public int Page { get; set; }
 
@@ -240,32 +242,6 @@ namespace ClassicUO.Game.UI.Controls
                 _activePage = value;
 
                 OnPageChanged();
-
-                //if (UIManager.KeyboardFocusControl != null)
-                //{
-                //    if (Children.Contains(UIManager.KeyboardFocusControl))
-                //    {
-                //        if (UIManager.KeyboardFocusControl.Page != 0)
-                //            UIManager.KeyboardFocusControl = null;
-                //    }
-                //}
-
-                // When ActivePage changes, check to see if there are new text input boxes
-                // that we should redirect text input to.
-                
-                //if (UIManager.KeyboardFocusControl == null)
-                //{
-                //    foreach (Control c in Children)
-                //    {
-                //        if (c.HandlesKeyboardFocus && c.Page == _activePage)
-                //        {
-                //            UIManager.KeyboardFocusControl = c;
-
-                //            break;
-                //        }
-                //    }
-                //}
-
             }
         }
 
@@ -275,14 +251,10 @@ namespace ClassicUO.Game.UI.Controls
 
         public int TooltipMaxLength { get; private set; }
 
-        public UOTexture Texture { get; set; }
-
         public virtual bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
-            if (IsDisposed) return false;
-
-            if (Texture != null && !Texture.IsDisposed)
-                Texture.Ticks = Time.Ticks;
+            if (IsDisposed) 
+                return false;
 
             foreach (Control c in Children)
             {
@@ -393,8 +365,10 @@ namespace ClassicUO.Game.UI.Controls
 
         public void SetKeyboardFocus()
         {
-            if (AcceptKeyboardInput && !HasKeyboardFocus) 
+            if (AcceptKeyboardInput && !HasKeyboardFocus)
+            {
                 UIManager.KeyboardFocusControl = this;
+            }
         }
 
         internal event EventHandler<MouseEventArgs> MouseDown, MouseUp, MouseOver, MouseEnter, MouseExit, DragBegin, DragEnd;
@@ -404,6 +378,8 @@ namespace ClassicUO.Game.UI.Controls
         internal event EventHandler<MouseDoubleClickEventArgs> MouseDoubleClick;
 
         internal event EventHandler FocusEnter, FocusLost;
+
+        internal event EventHandler<KeyboardEventArgs> KeyDown, KeyUp;
 
 
         public void HitTest(int x, int y, ref Control res)
@@ -421,7 +397,10 @@ namespace ClassicUO.Game.UI.Controls
                     if (AcceptMouseInput)
                     {
                         if (res == null || res.Priority >= this.Priority)
+                        {
                             res = this;
+                            OnHitTestSuccess(x, y, ref res);
+                        }
                     }
 
                     foreach (Control c in Children)
@@ -440,6 +419,9 @@ namespace ClassicUO.Game.UI.Controls
             HitTest(position.X, position.Y, ref res);
         }
 
+        public virtual void OnHitTestSuccess(int x, int y, ref Control res)
+        {
+        }
        
         public Control GetFirstControlAcceptKeyboardInput()
         {
@@ -492,7 +474,10 @@ namespace ClassicUO.Game.UI.Controls
 
         public virtual void Clear()
         {
-            Children.ForEach(s => s.Dispose());
+            foreach (Control c in Children)
+            {
+                c.Dispose();
+            }
         }
 
         public T[] GetControls<T>() where T : Control
@@ -558,7 +543,7 @@ namespace ClassicUO.Game.UI.Controls
             int y = position.Y - Y - ParentY;
             bool result = OnMouseDoubleClick(x, y, button);
 
-            var arg = new MouseDoubleClickEventArgs(x, y, button);
+            MouseDoubleClickEventArgs arg = new MouseDoubleClickEventArgs(x, y, button);
             MouseDoubleClick.Raise(arg, this);
             result |= arg.Result;
 
@@ -573,11 +558,15 @@ namespace ClassicUO.Game.UI.Controls
         public void InvokeKeyDown(SDL.SDL_Keycode key, SDL.SDL_Keymod mod)
         {
             OnKeyDown(key, mod);
+            KeyboardEventArgs arg = new KeyboardEventArgs(key, mod, KeyboardEventType.Down);
+            KeyDown?.Raise(arg);
         }
 
         public void InvokeKeyUp(SDL.SDL_Keycode key, SDL.SDL_Keymod mod)
         {
             OnKeyUp(key, mod);
+            KeyboardEventArgs arg = new KeyboardEventArgs(key, mod, KeyboardEventType.Up);
+            KeyUp?.Raise(arg);
         }
 
         public void InvokeMouseWheel(MouseEventType delta)
@@ -627,9 +616,9 @@ namespace ClassicUO.Game.UI.Controls
 
             Parent?.OnMouseUp(X + x, Y + y, button);
 
-            if (button == MouseButtonType.Right && !IsDisposed && !CanCloseWithRightClick && !Keyboard.Alt && !Keyboard.Shift && !Keyboard.Ctrl && ContextMenu != null && !ContextMenu.IsDisposed)
+            if (button == MouseButtonType.Right && !IsDisposed && !CanCloseWithRightClick && !Keyboard.Alt && !Keyboard.Shift && !Keyboard.Ctrl)
             {
-                ContextMenu.Show();
+                ContextMenu?.Show();
             }
         }
 
@@ -642,7 +631,7 @@ namespace ClassicUO.Game.UI.Controls
         {
             if (_mouseIsDown && !_attempToDrag)
             {
-                Point offset = Mouse.LDroppedOffset;
+                Point offset = Mouse.LButtonPressed ? Mouse.LDroppedOffset : Mouse.MButtonPressed ? Mouse.MDroppedOffset : Point.Zero;
 
                 if (Math.Abs(offset.X) > Constants.MIN_GUMP_DRAG_DISTANCE
                     || Math.Abs(offset.Y) > Constants.MIN_GUMP_DRAG_DISTANCE)
@@ -701,23 +690,25 @@ namespace ClassicUO.Game.UI.Controls
         protected virtual void OnMove(int x, int y)
         {
         }
-
-        protected virtual void OnClosing()
-        {
-        }
-
+        
         internal virtual void OnFocusEnter()
         {
-            IsFocused = true;
-            FocusEnter.Raise(this);
-            //Parent?.OnFocusEnter();
+            if (!IsFocused)
+            {
+                IsFocused = true;
+                FocusEnter.Raise(this);
+                //Parent?.OnFocusEnter();
+            }
         }
 
-        internal virtual void OnFocusLeft()
+        internal virtual void OnFocusLost()
         {
-            IsFocused = false;
-            FocusLost.Raise(this);
-            //Parent?.OnFocusLeft();
+            if (IsFocused)
+            {
+                IsFocused = false;
+                FocusLost.Raise(this);
+                //Parent?.OnFocusLeft();
+            }
         }
 
         protected virtual void OnChildAdded()
@@ -800,8 +791,6 @@ namespace ClassicUO.Game.UI.Controls
             }
 
             Children.Clear();
-
-            ContextMenu?.Dispose();
 
             IsDisposed = true;
         }

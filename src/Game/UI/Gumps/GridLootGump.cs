@@ -36,7 +36,7 @@ namespace ClassicUO.Game.UI.Gumps
     internal class GridLootGump : Gump
     {
         private readonly AlphaBlendControl _background;
-        private readonly NiceButton _buttonPrev, _buttonNext;
+        private readonly NiceButton _buttonPrev, _buttonNext, _setlootbag;
         private readonly Item _corpse;
         private readonly Label _currentPageLabel;
         private readonly bool _hideIfEmpty;
@@ -75,18 +75,18 @@ namespace ClassicUO.Game.UI.Gumps
 
             CanMove = true;
             AcceptMouseInput = true;
-            WantUpdateSize = false;
+            WantUpdateSize = true;
             CanCloseWithRightClick = true;
             _background = new AlphaBlendControl();
-            _background.Width = 300;
-            _background.Height = 400;
+            //_background.Width = MAX_WIDTH;
+            //_background.Height = MAX_HEIGHT;
             Add(_background);
 
             Width = _background.Width;
             Height = _background.Height;
 
-            NiceButton setLootBag = new NiceButton(3, Height - 23, 100, 20, ButtonAction.Activate, "Set loot bag") { ButtonParameter = 2, IsSelectable = false };
-            Add(setLootBag);
+            _setlootbag = new NiceButton(3, Height - 23, 100, 20, ButtonAction.Activate, "Set loot bag") { ButtonParameter = 2, IsSelectable = false };
+            Add(_setlootbag);
 
             _buttonPrev = new NiceButton(Width - 80, Height - 20, 40, 20, ButtonAction.Activate, "<<") {ButtonParameter = 0, IsSelectable = false};
             _buttonNext = new NiceButton(Width - 40, Height - 20, 40, 20, ButtonAction.Activate, ">>") {ButtonParameter = 1, IsSelectable = false};
@@ -101,21 +101,9 @@ namespace ClassicUO.Game.UI.Gumps
                 X = Width / 2 - 5,
                 Y = Height - 20,
             });
-
-            _corpse.Items.Added += Items_Added;
-            _corpse.Items.Removed += Items_Removed;      
         }
 
-        private void Items_Removed(object sender, CollectionChangedEventArgs<uint> e)
-        {
-            RedrawItems();
-        }
-
-        private void Items_Added(object sender, CollectionChangedEventArgs<uint> e)
-        {
-            RedrawItems();
-        }
-
+      
         public override void OnButtonClick(int buttonID)
         {
             if (buttonID == 0)
@@ -159,40 +147,70 @@ namespace ClassicUO.Game.UI.Gumps
                 base.OnButtonClick(buttonID);
         }
 
-        public void RedrawItems()
+
+
+        protected override void UpdateContents()
         {
+            const int GRID_ITEM_SIZE = 50;
+
             int x = 20;
             int y = 20;
 
-            foreach (GridLootItem gridLootItem in Children.OfType<GridLootItem>()) gridLootItem.Dispose();
+            foreach (GridLootItem gridLootItem in Children.OfType<GridLootItem>())
+                gridLootItem.Dispose();
 
             int count = 0;
             _pagesCount = 1;
 
-            foreach (Item item in _corpse.Items.Where(s => s != null && s.IsLootable))
+            _background.Width = x;
+            _background.Height = y;
+
+            int line = 1;
+            int row = 0;
+
+            for (LinkedObject i = _corpse.Items; i != null; i = i.Next)
             {
-                GridLootItem gridItem = new GridLootItem(item);
+                Item it = (Item) i;
 
-                if (x >= _background.Width - 20)
+                if (it.IsLootable)
                 {
-                    x = 20;
-                    y += gridItem.Height + 20;
+                    GridLootItem gridItem = new GridLootItem(it, GRID_ITEM_SIZE);
 
-                    if (y >= _background.Height - 40)
+                    if (x >= MAX_WIDTH - 20)
                     {
-                        _pagesCount++;
-                        y = 20;
+                        x = 20;
+                        ++line;
+
+                        y += gridItem.Height + 20;
+                        
+                        if (y >= MAX_HEIGHT - 40)
+                        {
+                            _pagesCount++;
+                            y = 20;
+                            //line = 1;
+                        }
                     }
-                }             
 
-                gridItem.X = x;
-                gridItem.Y = y;
-                Add(gridItem, _pagesCount);
+                    gridItem.X = x;
+                    gridItem.Y = y;
+                    Add(gridItem, _pagesCount);
 
-                x += gridItem.Width + 20;
-
-                count++;
+                    x += gridItem.Width + 20;
+                    ++row;
+                    ++count;
+                }
             }
+
+            _background.Width = (GRID_ITEM_SIZE + 20) * row + 20;
+            _background.Height = 20 + 40 + (GRID_ITEM_SIZE + 20) * line + 20;
+
+
+            if (_background.Height >= MAX_HEIGHT - 40)
+            {
+                _background.Height = MAX_HEIGHT;
+            }
+
+            _background.Width = MAX_WIDTH;
 
             if (ActivePage <= 1)
             {
@@ -229,9 +247,6 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 if (_corpse == SelectedObject.CorpseObject)
                     SelectedObject.CorpseObject = null;
-
-                _corpse.Items.Added -= Items_Added;
-                _corpse.Items.Removed -= Items_Removed;
             }
 
             _lastX = X;
@@ -268,6 +283,25 @@ namespace ClassicUO.Game.UI.Gumps
             if (IsDisposed)
                 return;
 
+            if (_background.Width < 100)
+                _background.Width = 100;
+            if (_background.Height < 100)
+                _background.Height = 100;
+
+            Width = _background.Width;
+            Height = _background.Height;
+
+            _buttonPrev.X = Width - 80;
+            _buttonPrev.Y = Height - 23;
+            _buttonNext.X = Width - 40;
+            _buttonNext.Y = Height - 20;
+            _setlootbag.X = 3;
+            _setlootbag.Y = Height - 23;
+            _currentPageLabel.X = Width / 2 - 5;
+            _currentPageLabel.Y = Height - 20;
+
+            WantUpdateSize = true;
+
             if (_corpse != null && !_corpse.IsDestroyed && UIManager.MouseOverControl != null && (UIManager.MouseOverControl == this || UIManager.MouseOverControl.RootParent == this))
             {
                 SelectedObject.Object = _corpse;
@@ -286,7 +320,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             private readonly TextureControl _texture;
 
-            public GridLootItem(uint serial)
+            public GridLootItem(uint serial, int size)
             {
                 LocalSerial = serial;
 
@@ -299,11 +333,9 @@ namespace ClassicUO.Game.UI.Gumps
                     return;
                 }
 
-                const int SIZE = 50;
-
                 CanMove = false;
 
-                HSliderBar amount = new HSliderBar(0, 0, SIZE, 1, item.Amount, item.Amount, HSliderBarStyle.MetalWidgetRecessedBar, true, color: 0xFFFF, drawUp: true);
+                HSliderBar amount = new HSliderBar(0, 0, size, 1, item.Amount, item.Amount, HSliderBarStyle.MetalWidgetRecessedBar, true, color: 0xFFFF, drawUp: true);
                 Add(amount);
 
                 amount.IsVisible = amount.IsEnabled = amount.MaxValue > 1;
@@ -311,8 +343,8 @@ namespace ClassicUO.Game.UI.Gumps
 
                 AlphaBlendControl background = new AlphaBlendControl();
                 background.Y = 15;
-                background.Width = SIZE;
-                background.Height = SIZE;
+                background.Width = size;
+                background.Height = size;
                 Add(background);
 
 
@@ -322,8 +354,8 @@ namespace ClassicUO.Game.UI.Gumps
                 _texture.Hue = item.Hue;
                 _texture.Texture = ArtLoader.Instance.GetTexture(item.DisplayedGraphic);
                 _texture.Y = 15;
-                _texture.Width = SIZE;
-                _texture.Height = SIZE;
+                _texture.Width = size;
+                _texture.Height = size;
                 _texture.CanMove = false;
 
                 if (World.ClientFeatures.TooltipsEnabled) _texture.SetTooltip(item);

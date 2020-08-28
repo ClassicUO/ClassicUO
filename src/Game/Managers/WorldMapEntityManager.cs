@@ -22,6 +22,10 @@
 using ClassicUO.Network;
 using System.Collections.Generic;
 
+using ClassicUO.Game.Data;
+using ClassicUO.Game.GameObjects;
+using ClassicUO.Utility.Logging;
+
 namespace ClassicUO.Game.Managers
 {
     class WMapEntity
@@ -62,16 +66,29 @@ namespace ClassicUO.Game.Managers
         private readonly List<WMapEntity> _toRemove = new List<WMapEntity>();
 
         private uint _lastUpdate, _lastPacketSend, _lastPacketRecv;
+        private bool _ack_received;
 
         /// <summary>
         /// If WorldMapGump is not visible, disable it
         /// </summary>
         public bool Enabled { get; private set; }
 
-
+        public void SetACKReceived()
+            => _ack_received = true;
 
         public void SetEnable(bool v)
         {
+            if ((World.ClientFeatures.Flags & CharacterListFlags.CLF_NEW_MOVEMENT_SYSTEM) != 0 && !_ack_received)
+            {
+                Log.Warn("Server support new movement system. Can't use the 0xF0 packet to query guild/party position");
+                v = false;
+            }
+            else if (EncryptionHelper.Type != 0 && !_ack_received)
+            {
+                Log.Warn("Server has encryption. Can't use the 0xF0 packet to query guild/party position");
+                v = false;
+            }
+
             Enabled = v;
 
             if (v)
@@ -82,6 +99,7 @@ namespace ClassicUO.Game.Managers
         {
             if (from_packet)
             {
+                _can_send = true;
                 _lastPacketRecv = Time.Ticks + 10000;
             }
             else if (_lastPacketRecv < Time.Ticks)
@@ -92,7 +110,7 @@ namespace ClassicUO.Game.Managers
             if (!Enabled)
                 return;
         
-            if (!Entities.TryGetValue(serial, out var entity) || entity == null)
+            if (!Entities.TryGetValue(serial, out WMapEntity entity) || entity == null)
             {
                 entity = new WMapEntity(serial)
                 {
@@ -154,11 +172,12 @@ namespace ClassicUO.Game.Managers
 
         public WMapEntity GetEntity(uint serial)
         {
-            Entities.TryGetValue(serial, out var entity);
+            Entities.TryGetValue(serial, out WMapEntity entity);
 
             return entity;
         }
 
+        private bool _can_send;
 
         public void RequestServerPartyGuildInfo(bool force = false)
         {
@@ -167,17 +186,22 @@ namespace ClassicUO.Game.Managers
 
             if (World.InGame && _lastPacketSend < Time.Ticks)
             {
-                _lastPacketSend = Time.Ticks + (uint) (_lastPacketRecv < Time.Ticks ? 2000 : 250);
+                _lastPacketSend = Time.Ticks + 250;
+
+                //if (!force && !_can_send)
+                //{
+                //    return;
+                //}
 
                 NetClient.Socket.Send(new PQueryGuildPosition());
 
                 if (World.Party != null && World.Party.Leader != 0)
                 {
-                    foreach (var e in World.Party.Members)
+                    foreach (PartyMember e in World.Party.Members)
                     {
                         if (e != null && SerialHelper.IsValid(e.Serial))
                         {
-                            var mob = World.Mobiles.Get(e.Serial);
+                            Mobile mob = World.Mobiles.Get(e.Serial);
 
                             if (mob == null || mob.Distance > World.ClientViewRange)
                             {
@@ -193,6 +217,8 @@ namespace ClassicUO.Game.Managers
         public void Clear()
         {
             Entities.Clear();
+            _ack_received = false;
+            SetEnable(false);
         }
     }
 }

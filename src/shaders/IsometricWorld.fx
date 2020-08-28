@@ -8,14 +8,16 @@
 #define SPECTRAL 10
 #define SHADOW 12
 #define LIGHTS 13
-#define COLOR_SWAP 32
+#define GUMP 20
+
 
 float4x4 MatrixTransform;
 float4x4 WorldMatrix;
 float2 Viewport;
 float Brightlight;
+const float HuesPerTexture = 2048;
 
-const static int HUES_DELTA = 3000;
+
 const static float3 LIGHT_DIRECTION = float3(-1.0f, -1.0f, .5f);
 const static float3 VEC3_ZERO = float3(0, 0, 0);
 
@@ -39,6 +41,32 @@ struct PS_INPUT
 	float3 Hue		: TEXCOORD2;
 };
 
+
+float3 get_rgb(float red, float hue)
+{
+	//float p = floor((hue / Hues_count_double) * 1000000.0f) / 1000000.0f;
+	if (hue < HuesPerTexture)
+	{
+		float2 texcoord = float2(red % 32, hue / HuesPerTexture);
+
+		return tex2D(HueSampler0, texcoord).rgb;
+	}
+	else
+	{
+		float2 texcoord = float2(red % 32, (hue - HuesPerTexture) / HuesPerTexture);
+
+		return tex2D(HueSampler1, texcoord).rgb;
+	}
+}
+
+float3 get_light(float3 norm)
+{
+	float3 light = normalize(LIGHT_DIRECTION);
+	float3 normal = normalize(norm);
+	return max((dot(normal, light) + 0.5f), 0.0f);
+}
+
+
 PS_INPUT VertexShaderFunction(VS_INPUT IN)
 {
 	PS_INPUT OUT;
@@ -52,24 +80,6 @@ PS_INPUT VertexShaderFunction(VS_INPUT IN)
     return OUT;
 }
 
-float3 get_rgb(float red, float hue, bool swap)
-{
-	if (hue < HUES_DELTA)
-	{
-		if (swap)
-			hue += HUES_DELTA;
-		return tex2D(HueSampler0, float2(red, hue / 6000.0f)).rgb;
-	}
-	return tex2D(HueSampler1, float2(red, (hue - 3000.0f) / 3000.0f)).rgb;
-}
-
-float3 get_light(float3 norm)
-{
-	float3 light = normalize(LIGHT_DIRECTION);
-	float3 normal = normalize(norm);
-	return max((dot(normal, light) + 0.5f), 0.0f);
-}
-
 float4 PixelShader_Hue(PS_INPUT IN) : COLOR0
 {	
 	float4 color = tex2D(DrawSampler, IN.TexCoord);
@@ -79,26 +89,30 @@ float4 PixelShader_Hue(PS_INPUT IN) : COLOR0
 
 	int mode = int(IN.Hue.y);
 	float alpha = 1 - IN.Hue.z;
+	float red = color.r;
 
 	if (mode > NOCOLOR)
 	{
-		bool swap = false;
-		if (mode >= COLOR_SWAP)
+		float hue = IN.Hue.x;
+
+		if (mode >= GUMP)
 		{
-			mode -= COLOR_SWAP;
-			swap = true;
+			mode -= GUMP;
+
+			if (color.r < 0.02f)
+			{
+				hue = 0;
+			}
 		}
 
 		if (mode == COLOR || (mode == PARTIAL_COLOR && color.r == color.g && color.r == color.b))
 		{
-			color.rgb = get_rgb(color.r, IN.Hue.x, swap);
+			color.rgb = get_rgb(red, hue);
 		}
 		else if (mode > 5)
 		{
 			if (mode > 9)
 			{
-				float red = color.r;
-
 				if (mode > 10)
 				{
 					if (mode > 11)
@@ -107,7 +121,7 @@ float4 PixelShader_Hue(PS_INPUT IN) : COLOR0
 						{
 							if (IN.Hue.x != 0.0f)
 							{
-								color.rgb *= get_rgb(color.r, IN.Hue.x, swap);
+								color.rgb *= get_rgb(color.r, hue);
 							}
 							return color * alpha;
 						}
@@ -133,7 +147,7 @@ float4 PixelShader_Hue(PS_INPUT IN) : COLOR0
 
 				if (mode > 6)
 				{
-					color.rgb = get_rgb(color.r, IN.Hue.x, swap) * norm;
+					color.rgb = get_rgb(red, hue) * norm;
 				}
 				else
 				{
@@ -141,9 +155,9 @@ float4 PixelShader_Hue(PS_INPUT IN) : COLOR0
 				}
 			}
 		}
-		else if (mode == 4 || (mode == 3 && (color.r > 0.08 || color.g > 0.08 || color.b > 0.08)) || (mode == 5 && color.r > 0.08))
+		else if (mode == 4 || (mode == 3 && (color.r > 0.04f || color.g > 0.04f || color.b > 0.04f)) /*|| (mode == 5 && color.r >= 0.08f)*/)
 		{
-			color.rgb = get_rgb(color.r + 90, IN.Hue.x, swap);
+			color.rgb = get_rgb(31, hue);
 		}
 	}
 

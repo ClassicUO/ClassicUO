@@ -98,12 +98,12 @@ namespace ClassicUO.Game.UI.Controls
         {
             Rectangle scissor = ScissorStack.CalculateScissors(Matrix.Identity, x, y, Width, Height);
 
-            if (ScissorStack.PushScissors(scissor))
+            if (ScissorStack.PushScissors(batcher.GraphicsDevice, scissor))
             {
                 batcher.EnableScissorTest(true);
                 base.Draw(batcher, x, y);
                 batcher.EnableScissorTest(false);
-                ScissorStack.PopScissors();
+                ScissorStack.PopScissors(batcher.GraphicsDevice);
             }
 
             return true; 
@@ -112,9 +112,12 @@ namespace ClassicUO.Game.UI.Controls
 
         protected override void OnMouseUp(int x, int y, MouseButtonType button)
         {
+            if (button != MouseButtonType.Left)
+                return;
+
             OnBeforeContextMenu?.Invoke(this, null);
 
-            var contextMenu = new ComboboxContextMenu(this, _items, Width, _maxHeight)
+            ComboboxContextMenu contextMenu = new ComboboxContextMenu(this, _items, Width, _maxHeight)
             {
                 X = ScreenCoordinateX,
                 Y = ScreenCoordinateY
@@ -134,7 +137,7 @@ namespace ClassicUO.Game.UI.Controls
                 ResizePic background;
                 Add(background = new ResizePic(0x0BB8));
                 HoveredLabel[] labels = new HoveredLabel[items.Length];
-                var index = 0;
+                int index = 0;
 
                 for (int i = 0; i < items.Length; i++)
                 {
@@ -143,7 +146,7 @@ namespace ClassicUO.Game.UI.Controls
                     if (item == null)
                         item = string.Empty;
 
-                    var label = new HoveredLabel(item, false, 0x0453, 0x0453, 0x0453, font: _box._font)
+                    HoveredLabel label = new HoveredLabel(item, false, 0x0453, 0x0453, 0x0453, font: _box._font)
                     {
                         X = 2,
                         Y = index * 15,
@@ -155,13 +158,13 @@ namespace ClassicUO.Game.UI.Controls
                     labels[index++] = label;
                 }
 
-                var totalHeight = labels.Max(o => o.Y + o.Height);
-                var maxWidth = Math.Max(minWidth, labels.Max(o => o.X + o.Width));
+                int totalHeight = labels.Max(o => o.Y + o.Height);
+                int maxWidth = Math.Max(minWidth, labels.Max(o => o.X + o.Width));
 
                 if (maxHeight != 0 && totalHeight > maxHeight)
                 {
-                    var scrollArea = new ScrollArea(0, 0, maxWidth + 15, maxHeight, true);
-                    foreach (var label in labels)
+                    ScrollArea scrollArea = new ScrollArea(0, 0, maxWidth + 15, maxHeight, true);
+                    foreach (HoveredLabel label in labels)
                     {
                         label.Y = 0;
                         label.Width = maxWidth;
@@ -173,7 +176,7 @@ namespace ClassicUO.Game.UI.Controls
                 }
                 else
                 {
-                    foreach (var label in labels)
+                    foreach (HoveredLabel label in labels)
                     {
                         label.Width = maxWidth;
                         Add(label);

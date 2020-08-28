@@ -34,62 +34,31 @@ namespace ClassicUO.Game.GameObjects
 {
     internal sealed partial class Static : GameObject
     {
-        private static readonly Queue<Static> _pool = new Queue<Static>();
-        static Static()
+        private static readonly QueuedPool<Static> _pool = new QueuedPool<Static>(Constants.PREDICTABLE_STATICS, s =>
         {
-            for (int i = 0; i < Constants.PREDICTABLE_TILE_COUNT; i++)
-                _pool.Enqueue(new Static());
-        }
+            s.IsDestroyed = false;
+            s.AlphaHue = 0;
+            s.FoliageIndex = 0;
+        });
 
-        private Static()
-        {
-
-        }
-
-        public Static(ushort graphic, ushort hue, int index)
-        {
-            Graphic = OriginalGraphic = graphic;
-            Hue = hue;
-
-            UpdateGraphicBySeason();
-
-            if (ItemData.Height > 5)
-                _canBeTransparent = 1;
-            else if (ItemData.IsRoof || ItemData.IsSurface && ItemData.IsBackground || ItemData.IsWall)
-                _canBeTransparent = 1;
-            else if (ItemData.Height == 5 && ItemData.IsSurface && !ItemData.IsBackground)
-                _canBeTransparent = 1;
-            else
-                _canBeTransparent = 0;
-        }
 
         public static Static Create(ushort graphic, ushort hue, int index)
         {
-            if (_pool.Count != 0)
-            {
-                var s = _pool.Dequeue();
-                s.Graphic = s.OriginalGraphic = graphic;
-                s.Hue = hue;
-                s.IsDestroyed = false;
-                s.AlphaHue = 0;
-                s.FoliageIndex = 0;
-                s.UpdateGraphicBySeason();
+            Static s = _pool.GetOne();
+            s.Graphic = s.OriginalGraphic = graphic;
+            s.Hue = hue;
+            s.UpdateGraphicBySeason();
 
-                if (s.ItemData.Height > 5)
-                    s._canBeTransparent = 1;
-                else if (s.ItemData.IsRoof || s.ItemData.IsSurface && s.ItemData.IsBackground || s.ItemData.IsWall)
-                    s._canBeTransparent = 1;
-                else if (s.ItemData.Height == 5 && s.ItemData.IsSurface && !s.ItemData.IsBackground)
-                    s._canBeTransparent = 1;
-                else
-                    s._canBeTransparent = 0;
+            if (s.ItemData.Height > 5)
+                s._canBeTransparent = 1;
+            else if (s.ItemData.IsRoof || s.ItemData.IsSurface && s.ItemData.IsBackground || s.ItemData.IsWall)
+                s._canBeTransparent = 1;
+            else if (s.ItemData.Height == 5 && s.ItemData.IsSurface && !s.ItemData.IsBackground)
+                s._canBeTransparent = 1;
+            else
+                s._canBeTransparent = 0;
 
-                return s;
-            }
-
-            Log.Trace(string.Intern("Created new Static"));
-
-            return new Static(graphic, hue, index);
+            return s;
         }
 
         public string Name => ItemData.Name;
@@ -98,25 +67,22 @@ namespace ClassicUO.Game.GameObjects
 
         public bool IsVegetation;
 
-        public ref readonly StaticTiles ItemData => ref TileDataLoader.Instance.StaticData[Graphic];
+        public ref StaticTiles ItemData => ref TileDataLoader.Instance.StaticData[Graphic];
 
         public void SetGraphic(ushort g)
         {
             Graphic = g;
-            SetTextureByGraphic(g);
         }
 
         public void RestoreOriginalGraphic()
         {
             Graphic = OriginalGraphic;
-            SetTextureByGraphic(Graphic);
         }
 
         public override void UpdateGraphicBySeason()
         {
             SetGraphic(SeasonManager.GetSeasonGraphic(World.Season, OriginalGraphic));
             AllowedToDraw = !GameObjectHelper.IsNoDrawable(Graphic);
-            SetTextureByGraphic(Graphic);
             IsVegetation = StaticFilters.IsVegetation(Graphic);
         }
 
@@ -125,10 +91,10 @@ namespace ClassicUO.Game.GameObjects
             if (TextContainer == null)
                 return;
 
-            var last = TextContainer.Items;
+            TextObject last = (TextObject) TextContainer.Items;
 
-            while (last?.ListRight != null)
-                last = last.ListRight;
+            while (last?.Next != null)
+                last = (TextObject) last.Next;
 
             if (last == null)
                 return;
@@ -137,7 +103,7 @@ namespace ClassicUO.Game.GameObjects
 
             int startX = ProfileManager.Current.GameWindowPosition.X + 6;
             int startY = ProfileManager.Current.GameWindowPosition.Y + 6;
-            var scene = Client.Game.GetScene<GameScene>();
+            GameScene scene = Client.Game.GetScene<GameScene>();
             float scale = scene?.Scale ?? 1;
             int x = RealScreenPosition.X;
             int y = RealScreenPosition.Y;
@@ -145,13 +111,15 @@ namespace ClassicUO.Game.GameObjects
             x += 22;
             y += 44;
 
-            if (Texture != null)
-                y -= Texture is ArtTexture t ? (t.ImageRectangle.Height >> 1) : (Texture.Height >> 1);
+            ArtTexture texture = ArtLoader.Instance.GetTexture(Graphic);
+
+            if (texture != null)
+                y -= (texture.ImageRectangle.Height >> 1);
 
             x = (int)(x / scale);
             y = (int)(y / scale);
 
-            for (; last != null; last = last.ListLeft)
+            for (; last != null; last = (TextObject) last.Previous)
             {
                 if (last.RenderedText != null && !last.RenderedText.IsDestroyed)
                 {
@@ -174,7 +142,7 @@ namespace ClassicUO.Game.GameObjects
             if (IsDestroyed)
                 return;
             base.Destroy();
-            _pool.Enqueue(this);
+            _pool.ReturnOne(this);
         }
     }
 }

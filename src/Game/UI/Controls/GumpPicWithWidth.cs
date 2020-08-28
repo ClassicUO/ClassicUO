@@ -19,6 +19,7 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
 
+using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 
 namespace ClassicUO.Game.UI.Controls
@@ -37,9 +38,13 @@ namespace ClassicUO.Game.UI.Controls
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
             ResetHueVector();
-            ShaderHuesTraslator.GetHueVector(ref _hueVector, Hue);
+            ShaderHueTranslator.GetHueVector(ref _hueVector, Hue);
 
-            return batcher.Draw2DTiled(Texture, x, y, Percent, Height, ref _hueVector);
+            UOTexture32 texture = GumpsLoader.Instance.GetTexture(Graphic);
+            if (texture != null)
+                return batcher.Draw2DTiled(texture, x, y, Percent, Height, ref _hueVector);
+
+            return false;
         }
     }
 }

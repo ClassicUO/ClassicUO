@@ -28,59 +28,42 @@ namespace ClassicUO.Game.GameObjects
 {
     internal sealed partial class MovingEffect
     {
-        private ushort _displayedGraphic = 0xFFFF;
-
-
         public override bool Draw(UltimaBatcher2D batcher, int posX, int posY)
         {
-            if (IsDestroyed)
+            if (IsDestroyed || !AllowedToDraw)
                 return false;
 
             ResetHueVector();
 
-            if (AnimationGraphic != _displayedGraphic || Texture == null || Texture.IsDisposed)
-            {
-                _displayedGraphic = AnimationGraphic;
-                Texture = ArtLoader.Instance.GetTexture(AnimationGraphic);
-                Bounds.X = -((Texture.Width >> 1) - 22);
-                Bounds.Y = -(Texture.Height - 44);
-                Bounds.Width = Texture.Width;
-                Bounds.Height = Texture.Height;
-            }
-
-
-            posX += (int) Offset.X;
-            posY += (int) (Offset.Y + Offset.Z);
-
-            //posX += 22;
-            //posY += 22;
-
-
+            ushort hue = Hue;
 
             if (ProfileManager.Current.NoColorObjectsOutOfRange && Distance > World.ClientViewRange)
             {
-                HueVector.X = Constants.OUT_RANGE_COLOR;
-                HueVector.Y = 1;
+                hue = Constants.OUT_RANGE_COLOR;
             }
             else if (World.Player.IsDead && ProfileManager.Current.EnableBlackWhiteEffect)
             {
-                HueVector.X = Constants.DEAD_RANGE_COLOR;
-                HueVector.Y = 1;
+                hue = Constants.DEAD_RANGE_COLOR;
             }
-            else
-                ShaderHuesTraslator.GetHueVector(ref HueVector, Hue);
+
+            ShaderHueTranslator.GetHueVector(ref HueVector, hue);
 
             //Engine.DebugInfo.EffectsRendered++;
 
             if (FixedDir)
-                batcher.DrawSprite(Texture, posX, posY, false, ref HueVector);
+            {
+                DrawStatic(batcher, AnimationGraphic, posX, posY, ref HueVector);
+            }
             else
-                batcher.DrawSpriteRotated(Texture, posX, posY, Bounds.X, Bounds.Y, ref HueVector, AngleToTarget);
+            {
+                posX += (int) Offset.X;
+                posY += (int) (Offset.Y + Offset.Z);
 
-            //Select(posX, posY);
-            Texture.Ticks = Time.Ticks;
+                DrawStaticRotated(batcher, AnimationGraphic, posX, posY, 0, 0, AngleToTarget, ref HueVector);
+            }
 
-            ref readonly StaticTiles data = ref TileDataLoader.Instance.StaticData[_displayedGraphic];
+
+            ref StaticTiles data = ref TileDataLoader.Instance.StaticData[AnimationGraphic];
 
             if (data.IsLight && Source != null)
             {

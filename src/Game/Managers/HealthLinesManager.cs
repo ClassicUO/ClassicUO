@@ -19,7 +19,11 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
 
+using System;
+using System.Text.RegularExpressions;
+
 using ClassicUO.Configuration;
+using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
@@ -31,38 +35,53 @@ namespace ClassicUO.Game.Managers
 {
     internal class HealthLinesManager
     {
+        const int BAR_WIDTH = 34; //28;
+        const int BAR_HEIGHT = 8;
+        const int BAR_WIDTH_HALF = BAR_WIDTH >> 1;
+        const int BAR_HEIGHT_HALF = BAR_HEIGHT >> 1;
+
         public bool IsEnabled => ProfileManager.Current != null && ProfileManager.Current.ShowMobilesHP;
-
-
         private Vector3 _vectorHue = Vector3.Zero;
 
 
-        private static readonly Texture2D _edge, _back; 
-        static HealthLinesManager()
+
+        private readonly UOTexture32 _background_texture, _hp_texture;
+
+        public HealthLinesManager()
         {
-            _edge = Texture2DCache.GetTexture(Color.Black);
-            _back = Texture2DCache.GetTexture(Color.Red);
+            _background_texture = GumpsLoader.Instance.GetTexture(0x1068);
+            _hp_texture = GumpsLoader.Instance.GetTexture(0x1069);
         }
 
 
+        public void Update()
+        {
+            if (_background_texture != null)
+                _background_texture.Ticks = Time.Ticks;
+
+            if (_hp_texture != null)
+                _hp_texture.Ticks = Time.Ticks;
+        }
+
         public void Draw(UltimaBatcher2D batcher, float scale)
         {
-            if (!IsEnabled)
-                return;
-
-            const int BAR_WIDTH = 28;
-            const int BAR_HEIGHT = 3;
-            const int BAR_WIDTH_HALF = BAR_WIDTH >> 1;
-            const int BAR_HEIGHT_HALF = BAR_HEIGHT >> 1;
-
             int screenX = ProfileManager.Current.GameWindowPosition.X;
             int screenY = ProfileManager.Current.GameWindowPosition.Y;
             int screenW = ProfileManager.Current.GameWindowSize.X;
             int screenH = ProfileManager.Current.GameWindowSize.Y;
 
-            
+            if (SerialHelper.IsMobile(TargetManager.LastTargetInfo.Serial))
+                DrawHealthLineWithMath(batcher, TargetManager.LastTargetInfo.Serial, screenX, screenY, screenW, screenH, scale);
+            if (SerialHelper.IsMobile(TargetManager.SelectedTarget))
+                DrawHealthLineWithMath(batcher, TargetManager.SelectedTarget, screenX, screenY, screenW, screenH, scale);
+            if (SerialHelper.IsMobile(TargetManager.LastAttack))
+                DrawHealthLineWithMath(batcher, TargetManager.LastAttack, screenX, screenY, screenW, screenH, scale);
 
-            Color color;
+            if (!IsEnabled)
+            {
+                return;
+            }
+
 
             int mode = ProfileManager.Current.MobileHPType;
 
@@ -75,6 +94,9 @@ namespace ClassicUO.Game.Managers
             {
                 //if (World.Party.Contains(mobile) && mobile.Tile == null)
                 //    continue;
+
+                if (mobile.IsDestroyed)
+                    continue;
 
                 int current = mobile.Hits;
                 int max = mobile.HitsMax;
@@ -129,19 +151,7 @@ namespace ClassicUO.Game.Managers
                         yy -= (int) ((height + centerY + 28) / scale);
 
 
-                        int ww = mobile.HitsMax;
-
-                        if (ww > 0)
-                        {
-                            ww = mobile.Hits * 100 / ww;
-
-                            if (ww > 100)
-                                ww = 100;
-                            else if (ww < 1)
-                                ww = 0;
-
-                            mobile.UpdateHits((byte) ww);
-                        }
+                       
 
                         if (mobile.HitsPercentage != 0)
                         {
@@ -163,36 +173,131 @@ namespace ClassicUO.Game.Managers
                 if (y < screenY || y > screenY + screenH - BAR_HEIGHT)
                     continue;
 
-                if (mode >= 1 && TargetManager.LastTarget != mobile)
+                if (mode >= 1 && TargetManager.LastTargetInfo.Serial != mobile)
                 {
-                    if (max > 0)
-                    {
-                        max = current * 100 / max;
+                    // already done
+                    if (mobile == TargetManager.LastTargetInfo.Serial || 
+                        mobile == TargetManager.SelectedTarget ||
+                        mobile == TargetManager.LastAttack)
+                        continue;
 
-                        if (max > 100)
-                            max = 100;
 
-                        if (max > 1)
-                            max = BAR_WIDTH * max / 100;
-                    }
+                    DrawHealthLine(batcher, mobile, x, y, mobile != World.Player);
+                }
+            }
+        }
 
-                    batcher.Draw2D(_edge, x - 1, y - 1, BAR_WIDTH + 2, BAR_HEIGHT + 2, ref _vectorHue);
-                    batcher.Draw2D(_back, x, y, BAR_WIDTH, BAR_HEIGHT, ref _vectorHue);
+        private void DrawHealthLineWithMath(UltimaBatcher2D batcher, uint serial, int screenX, int screenY, int screenW, int screenH, float scale)
+        {
+            Entity entity = World.Get(serial);
+            if (entity == null)
+                return;
 
-                    if (mobile.IsParalyzed)
-                        color = Color.AliceBlue;
-                    else if (mobile.IsYellowHits)
-                        color = Color.Orange;
-                    else if (mobile.IsPoisoned)
-                        color = Color.LimeGreen;
-                    else
-                        color = Color.CornflowerBlue;
+            int x = screenX + entity.RealScreenPosition.X;
+            int y = screenY + entity.RealScreenPosition.Y;
 
-                    batcher.Draw2D(Texture2DCache.GetTexture(color), x, y, max, BAR_HEIGHT, ref _vectorHue);
+            x += (int) entity.Offset.X + 22;
+            y += (int) (entity.Offset.Y - entity.Offset.Z) + 22;
+
+            x = (int) (x / scale);
+            y = (int) (y / scale);
+            x -= (int) (screenX / scale);
+            y -= (int) (screenY / scale);
+            x += screenX;
+            y += screenY;
+
+            x += 5;
+            y += 5;
+
+            x -= BAR_WIDTH_HALF;
+            y -= BAR_HEIGHT_HALF;
+
+            if (x < screenX || x > screenX + screenW - BAR_WIDTH)
+                return;
+
+            if (y < screenY || y > screenY + screenH - BAR_HEIGHT)
+                return;
+
+            DrawHealthLine(batcher, entity, x, y, false);
+        }
+
+        private void DrawHealthLine(UltimaBatcher2D batcher, Entity entity, int x, int y, bool passive)
+        {
+            if (entity == null)
+                return;
+
+            int per = BAR_WIDTH * entity.HitsPercentage / 100;
+
+            Mobile mobile = entity as Mobile;
+            
+
+            float alpha = passive ? 0.5f : 0.0f;
+
+            _vectorHue.X = mobile != null ? Notoriety.GetHue(mobile.NotorietyFlag) : Notoriety.GetHue(NotorietyFlag.Gray);
+            _vectorHue.Y = 1;
+            _vectorHue.Z = alpha;
+
+            if (mobile == null)
+            {
+                y += 22;
+            }
+
+
+            const int MULTIPLER = 1;
+
+            batcher.Draw2D(_background_texture,
+                           x, y,
+                           _background_texture.Width * MULTIPLER,
+                           _background_texture.Height * MULTIPLER,
+                           ref _vectorHue);
+
+
+            _vectorHue.X = 0x21;
+
+
+
+            if (entity.Hits != entity.HitsMax || entity.HitsMax == 0)
+            {
+                int offset = 2;
+
+                if (per >> 2 == 0)
+                {
+                    offset = per;
                 }
 
-               
+                batcher.Draw2DTiled(_hp_texture,
+                                    x + per * MULTIPLER - offset, y,
+                                    (BAR_WIDTH - per) * MULTIPLER - offset / 2,
+                                    _hp_texture.Height * MULTIPLER,
+                                    ref _vectorHue);
             }
+            
+            ushort hue = 90;
+
+            if (per > 0)
+            {
+                if (mobile != null)
+                {
+                    if (mobile.IsPoisoned)
+                    {
+                        hue = 63;
+                    }
+                    else if (mobile.IsYellowHits)
+                    {
+                        hue = 53;
+                    }
+                }
+                
+                _vectorHue.X = hue;
+
+
+                batcher.Draw2DTiled(_hp_texture,
+                               x, y,
+                               per * MULTIPLER,
+                               _hp_texture.Height * MULTIPLER,
+                               ref _vectorHue);
+            }
+           
         }
     }
 }

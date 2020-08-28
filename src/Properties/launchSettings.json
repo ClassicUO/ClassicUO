@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "ClassicUO": {
+      "commandName": "Project",
+      "commandLineArgs": "-skiploginscreen1"
+    }
+  }
+}

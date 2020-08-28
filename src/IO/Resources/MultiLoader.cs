@@ -19,13 +19,10 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
 
-using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using ClassicUO.Data;
 using ClassicUO.Game;
-using ClassicUO.Utility;
-using ClassicUO.Utility.Logging;
 
 namespace ClassicUO.IO.Resources
 {
@@ -37,49 +34,40 @@ namespace ClassicUO.IO.Resources
 
         private MultiLoader()
         {
-
         }
 
         private static MultiLoader _instance;
-        public static MultiLoader Instance
-        {
-            get
-            {
-                if (_instance == null)
-                {
-                    _instance = new MultiLoader();
-                }
-
-                return _instance;
-            }
-        }
-
-
+        public static MultiLoader Instance => _instance ?? (_instance = new MultiLoader());
 
         public int Count { get; private set; }
+        public UOFile File => _file;
+        public bool IsUOP { get; private set; }
+        public int Offset => _itemOffset;
 
-        public override Task Load()
+
+        public override unsafe Task Load()
         {
             return Task.Run(() =>
             {
                 string uopPath = UOFileManager.GetUOFilePath("MultiCollection.uop");
 
-                if (File.Exists(uopPath))
+                if (Client.IsUOPInstallation && System.IO.File.Exists(uopPath))
                 {
                     Count = Constants.MAX_MULTI_DATA_INDEX_COUNT;
                     _file = new UOFileUop(uopPath, "build/multicollection/{0:D6}.bin");
                     Entries = new UOFileIndex[Count];
                     _reader = new DataReader();
+                    IsUOP = true;
                 }
                 else
                 {
                     string path = UOFileManager.GetUOFilePath("multi.mul");
                     string pathidx = UOFileManager.GetUOFilePath("multi.idx");
 
-                    if (File.Exists(path) && File.Exists(pathidx))
+                    if (System.IO.File.Exists(path) && System.IO.File.Exists(pathidx))
                     {
                         _file = new UOFileMul(path, pathidx, Constants.MAX_MULTI_DATA_INDEX_COUNT, 14);
-                        Count = _itemOffset = Client.Version >= ClientVersion.CV_7090 ? UnsafeMemoryManager.SizeOf<MultiBlockNew>() : UnsafeMemoryManager.SizeOf<MultiBlock>();
+                        Count = _itemOffset = Client.Version >= ClientVersion.CV_7090 ? sizeof(MultiBlockNew) + 2 : sizeof(MultiBlock);
                     }
                 }
 
@@ -87,113 +75,26 @@ namespace ClassicUO.IO.Resources
 
             });
         }
+    }
 
-        public override void CleanResources()
-        {
-            // do nothing
-        }
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    ref struct MultiBlock
+    {
+        public ushort ID;
+        public short X;
+        public short Y;
+        public short Z;
+        public uint Flags;
+    }
 
-        public unsafe void GetMultiData(int index, ushort g, bool uopValid, out ushort graphic, out short x, out short y, out short z, out bool add)
-        {
-            if (_file is UOFileUop)
-            {
-                graphic = _reader.ReadUShort();
-
-                x = _reader.ReadShort();
-                y = _reader.ReadShort();
-                z = _reader.ReadShort();
-                ushort flags = _reader.ReadUShort();
-
-                uint clilocsCount = _reader.ReadUInt();
-
-                if (clilocsCount != 0)
-                    _reader.Skip((int) (clilocsCount * 4));
-
-                add = flags == 0;
-            }
-            else
-            {
-                MultiBlock* block = (MultiBlock*) (_file.PositionAddress + index * _itemOffset);
-
-                graphic = block->ID;
-                x = block->X;
-                y = block->Y;
-                z = block->Z;
-                uint flags = block->Flags;
-
-                add = flags != 0;
-            }
-        }
-
-        public void ReleaseLastMultiDataRead()
-        {
-            _reader?.ReleaseData();
-        }
-
-
-        public int GetCount(int graphic, out bool uopValid)
-        {
-            int count;
-            ref readonly var entry = ref GetValidRefEntry(graphic);
-            _file.SetData(entry.Address, entry.FileSize);
-
-            if (_file is UOFileUop uop)
-            {
-                long offset = entry.Offset;
-                int csize = entry.Length;
-                int dsize = entry.DecompressedLength;
-
-                if (csize > 0 && dsize > 0)
-                {
-                    uopValid = true;
-
-                    _file.Seek(offset);
-
-                    byte[] ddata = uop.GetData(csize, dsize);
-
-                    _reader.SetData(ddata, dsize);
-                    _reader.Skip(4);
-                    count = (int) _reader.ReadUInt();
-
-                }
-                else
-                {
-                    uopValid = false;
-                    count = 0;
-
-                    Log.Warn( $"[MultiCollection.uop] invalid entry (0x{graphic:X4})");
-                }
-
-                return count;
-            }
-
-            uopValid = false;
-
-            count = entry.Length / _itemOffset;
-            _file.Seek(entry.Offset);
-
-            return count;
-        }
-
-        [StructLayout(LayoutKind.Sequential, Pack = 1)]
-        readonly struct MultiBlock
-        {
-            public readonly ushort ID;
-            public readonly short X;
-            public readonly short Y;
-            public readonly short Z;
-            public readonly uint Flags;
-        }
-
-        [StructLayout(LayoutKind.Sequential, Pack = 1)]
-        readonly struct MultiBlockNew
-        {
-            public readonly ushort ID;
-            public readonly short X;
-            public readonly short Y;
-            public readonly short Z;
-            public readonly uint Flags;
-            public readonly int Unknown;
-        }
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    ref struct MultiBlockNew
+    {
+        public ushort ID;
+        public short X;
+        public short Y;
+        public short Z;
+        public ushort Flags;
+        public uint Unknown;
     }
 }

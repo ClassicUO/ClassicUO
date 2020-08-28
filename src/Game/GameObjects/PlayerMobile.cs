@@ -26,6 +26,7 @@ using ClassicUO.Configuration;
 using ClassicUO.Data;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
+using ClassicUO.Game.UI.Controls;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.IO.Resources;
 using ClassicUO.Network;
@@ -176,7 +177,7 @@ namespace ClassicUO.Game.GameObjects
 
         public Item FindBandage()
         {
-            Item backpack = Equipment[(int) Layer.Backpack];
+            Item backpack = FindItemByLayer(Layer.Backpack);
             Item item = null;
 
             if (backpack != null)
@@ -187,7 +188,7 @@ namespace ClassicUO.Game.GameObjects
 
         public Item FindItemByGraphic(ushort graphic)
         {
-            Item backpack = Equipment[(int)Layer.Backpack];
+            Item backpack = FindItemByLayer(Layer.Backpack);
 
             if (backpack != null)
             {
@@ -202,12 +203,14 @@ namespace ClassicUO.Game.GameObjects
             Item found = null;
             if (container != null)
             {
-                foreach (var item in container.Items)
+                for (LinkedObject i = container.Items; i != null; i = i.Next)
                 {
+                    Item item = (Item) i;
+
                     if (item.Graphic == graphic)
                         return item;
 
-                    if (item.Items.Count != 0)
+                    if (!item.IsEmpty)
                     {
                         found = FindItemInContainerRecursive(item, graphic);
 
@@ -240,13 +243,13 @@ namespace ClassicUO.Game.GameObjects
         {
             ushort equippedGraphic = 0;
 
-            Item layerObject = Equipment[(int) Layer.OneHanded];
+            Item layerObject = FindItemByLayer(Layer.OneHanded);
 
             if (layerObject != null)
                 equippedGraphic = layerObject.Graphic;
             else
             {
-                layerObject = Equipment[(int) Layer.TwoHanded];
+                layerObject = FindItemByLayer(Layer.TwoHanded);
 
                 if (layerObject != null)
                     equippedGraphic = layerObject.Graphic;
@@ -488,6 +491,7 @@ namespace ClassicUO.Game.GameObjects
 
                                 goto done;
 
+                            case 0x13B6:
                             case 0x13B7:
                             case 0x13B8: // Scimitars
                                 Abilities[0] = Ability.DoubleStrike;
@@ -1194,6 +1198,31 @@ namespace ClassicUO.Game.GameObjects
                                 Abilities[1] = Ability.DoubleStrike;
 
                                 goto done;
+
+                            // TODO: these are the new whips. More info here: https://uo.com/wiki/ultima-online-wiki/publish-notes/publish-103/  . They needed a version check?
+                            case 0xA289: // Barbed Whip
+                                Abilities[0] = Ability.ConcussionBlow;
+                                Abilities[1] = Ability.WhirlwindAttack;
+                                goto done;
+
+                            case 0xA28A: // Spiked Whip
+                                Abilities[0] = Ability.ArmorPierce;
+                                Abilities[1] = Ability.WhirlwindAttack;
+                                goto done;
+
+                            case 0xA28B: // Bladed Whip
+                                Abilities[0] = Ability.BleedAttack;
+                                Abilities[1] = Ability.WhirlwindAttack;
+                                goto done;
+
+                            case 0x08FF: // Boomerang
+                                Abilities[0] = Ability.MysticArc;
+                                Abilities[1] = Ability.ConcussionBlow;
+                                break;
+                            case 0x090A: // Soul Glaive
+                                Abilities[0] = Ability.ArmorIgnore;
+                                Abilities[1] = Ability.MortalStrike;
+                                break;
                         }
                     }
                 }
@@ -1206,6 +1235,19 @@ namespace ClassicUO.Game.GameObjects
             {
                 Abilities[0] = Ability.Disarm;
                 Abilities[1] = Ability.ParalyzingBlow;
+            }
+
+            int max = 0;
+            foreach (Control control in UIManager.Gumps)
+            {
+                if (control is UseAbilityButtonGump s)
+                {
+                    s.RequestUpdateContents();
+                    max++;
+                }
+
+                if (max >= 2)
+                    break;
             }
         }
 
@@ -1232,10 +1274,13 @@ namespace ClassicUO.Game.GameObjects
                 if ((ProfileManager.Current.CorpseOpenOptions == 2 || ProfileManager.Current.CorpseOpenOptions == 3) && IsHidden)
                     return;
 
-                foreach (var c in World.Items.Where(t => t.Graphic == 0x2006 && !AutoOpenedCorpses.Contains(t.Serial) && t.Distance <= ProfileManager.Current.AutoOpenCorpseRange))
+                foreach (Item item in World.Items)
                 {
-                    AutoOpenedCorpses.Add(c.Serial);
-                    GameActions.DoubleClickQueued(c.Serial);
+                    if (!item.IsDestroyed && item.IsCorpse && item.Distance <= ProfileManager.Current.AutoOpenCorpseRange && !AutoOpenedCorpses.Contains(item.Serial))
+                    {
+                        AutoOpenedCorpses.Add(item.Serial);
+                        GameActions.DoubleClickQueued(item.Serial);
+                    }
                 }
             }
         }
@@ -1263,23 +1308,43 @@ namespace ClassicUO.Game.GameObjects
 
         public override void Destroy()
         {
+            if (IsDestroyed)
+                return;
+
             Log.Warn( "PlayerMobile disposed!");
             base.Destroy();
         }
 
         public void CloseBank()
         {
-            var bank = Equipment[(int) Layer.Bank];
+            Item bank = FindItemByLayer(Layer.Bank);
 
-            if (bank != null)
+            if (bank != null && bank.Opened)
             {
-                UIManager.GetGump<ContainerGump>(bank)?.Dispose();
+                if (!bank.IsEmpty)
+                {
+                    Item first = (Item) bank.Items;
+
+                    while (first != null)
+                    {
+                        Item next = (Item) first.Next;
+
+                        World.RemoveItem(first, true);
+
+                        first = next;
+                    }
+
+                    bank.Items = null;
+                }
+
+                UIManager.GetGump<ContainerGump>(bank.Serial)?.Dispose();
+                bank.Opened = false;
             }
         }
 
         public void CloseRangedGumps()
         {
-            foreach (var gump in UIManager.Gumps)
+            foreach (Control gump in UIManager.Gumps)
             {
                 switch (gump)
                 {
@@ -1300,7 +1365,7 @@ namespace ClassicUO.Game.GameObjects
                         {
                             if (SerialHelper.IsItem(ent.Serial))
                             {
-                                var top = World.Get(((Item)ent).RootContainer);
+                                Entity top = World.Get(((Item)ent).RootContainer);
 
                                 if (top != null)
                                     distance = top.Distance;
@@ -1309,19 +1374,20 @@ namespace ClassicUO.Game.GameObjects
                                 distance = ent.Distance;
                         }
 
-                        if (distance > 18)
+                        if (distance > Constants.MIN_VIEW_RANGE)
                             gump.Dispose();
 
                         break;
                     case ContainerGump _:
+                        distance = int.MaxValue;
 
                         ent = World.Get(gump.LocalSerial);
-                        distance = int.MaxValue;
+
                         if (ent != null)
                         {
                             if (SerialHelper.IsItem(ent.Serial))
                             {
-                                var top = World.Get(((Item) ent).RootContainer);
+                                Entity top = World.Get(((Item) ent).RootContainer);
 
                                 if (top != null)
                                     distance = top.Distance;
@@ -1330,7 +1396,7 @@ namespace ClassicUO.Game.GameObjects
                                 distance = ent.Distance;
                         }
 
-                        if (distance > 3)
+                        if (distance > Constants.MAX_CONTAINER_OPENED_ON_GROUND_RANGE)
                             gump.Dispose();
                         break;
                 }
@@ -1422,7 +1488,12 @@ namespace ClassicUO.Game.GameObjects
                     x = newX;
                     y = newY;
                     z = newZ;
-                    walkTime = (ushort) MovementSpeed.TimeToCompleteMovement(this, run);
+                    walkTime = (ushort) MovementSpeed.TimeToCompleteMovement(run,
+                                                                             IsMounted || 
+                                                                             SpeedMode == CharacterSpeedType.FastUnmount || 
+                                                                             SpeedMode == CharacterSpeedType.FastUnmountAndCantRun || 
+                                                                             IsFlying
+                                                                             );
                 }
             }
             else
@@ -1443,7 +1514,11 @@ namespace ClassicUO.Game.GameObjects
                     x = newX;
                     y = newY;
                     z = newZ;
-                    walkTime = (ushort) MovementSpeed.TimeToCompleteMovement(this, run);
+                    walkTime = (ushort) MovementSpeed.TimeToCompleteMovement(run,
+                                                                             IsMounted ||
+                                                                             SpeedMode == CharacterSpeedType.FastUnmount ||
+                                                                             SpeedMode == CharacterSpeedType.FastUnmountAndCantRun ||
+                                                                             IsFlying);
                 }
 
                 direction = newDir;
@@ -1458,7 +1533,7 @@ namespace ClassicUO.Game.GameObjects
                 LastStepTime = Time.Ticks;
             }
 
-            ref var step = ref Walker.StepInfos[Walker.StepsCount];
+            ref StepInfo step = ref Walker.StepInfos[Walker.StepsCount];
             step.Sequence = Walker.WalkSequence;
             step.Accepted = false;
             step.Running = run;

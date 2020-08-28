@@ -20,15 +20,16 @@
 #endregion
 
 using System;
-using System.Linq;
 using ClassicUO.Data;
 using ClassicUO.Game.GameObjects;
+using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.IO.Resources;
 using ClassicUO.Network;
 using ClassicUO.Renderer;
+using Microsoft.Xna.Framework;
 
 
 namespace ClassicUO.Game.UI.Gumps
@@ -45,7 +46,7 @@ namespace ClassicUO.Game.UI.Gumps
         private Checkbox _myCheckbox;
         private readonly Label[] _myCoins = new Label[2];
         private readonly Label[] _hisCoins = new Label[2];
-        private readonly TextBox[] _myCoinsEntries = new TextBox[2];
+        private readonly StbTextBox[] _myCoinsEntries = new StbTextBox[2];
 
         public TradingGump(uint local, string name, uint id1, uint id2) : base(local, 0)
         {
@@ -148,19 +149,23 @@ namespace ClassicUO.Game.UI.Gumps
         }
 
 
-        public void UpdateContent()
+        protected override void UpdateContents()
         {
             Entity container = World.Get(ID1);
 
             if (container == null)
                 return;
 
-            foreach (ItemGump v in _myBox.Children.OfType<ItemGump>().Where(s => container.Items.Contains(s.LocalSerial)))
+            foreach (Control v in _myBox.Children)
                 v.Dispose();
 
-            foreach (Item item in container.Items)
+            ArtLoader loader = ArtLoader.Instance;
+
+            for (LinkedObject i = container.Items; i != null; i = i.Next)
             {
-                ItemGump g = new ItemGump(item)
+                Item it = (Item) i;
+
+                ItemGump g = new ItemGump(it.Serial, it.DisplayedGraphic, it.Hue, it.X, it.Y)
                 {
                     HighlightOnMouseOver = true
                 };
@@ -168,11 +173,16 @@ namespace ClassicUO.Game.UI.Gumps
                 int x = g.X;
                 int y = g.Y;
 
-                if (x + g.Texture.Width > 110)
-                    x = 110 - g.Texture.Width;
+                ArtTexture texture = loader.GetTexture(it.DisplayedGraphic);
 
-                if (y + g.Texture.Height > 80)
-                    y = 80 - g.Texture.Height;
+                if (texture != null)
+                {
+                    if (x + texture.Width > _myBox.Width)
+                        x = _myBox.Width - texture.Width;
+
+                    if (y + texture.Height > _myBox.Height)
+                        y = _myBox.Height - texture.Height;
+                }
 
                 if (x < 0)
                     x = 0;
@@ -187,18 +197,19 @@ namespace ClassicUO.Game.UI.Gumps
                 _myBox.Add(g);
             }
 
-
             container = World.Get(ID2);
 
             if (container == null)
                 return;
 
-            foreach (ItemGump v in _hisBox.Children.OfType<ItemGump>().Where(s => container.Items.Contains(s.LocalSerial)))
+            foreach (Control v in _hisBox.Children)
                 v.Dispose();
 
-            foreach (Item item in container.Items)
+            for (LinkedObject i = container.Items; i != null; i = i.Next)
             {
-                ItemGump g = new ItemGump(item)
+                Item it = (Item) i;
+
+                ItemGump g = new ItemGump(it.Serial, it.DisplayedGraphic, it.Hue, it.X, it.Y)
                 {
                     HighlightOnMouseOver = true
                 };
@@ -206,11 +217,16 @@ namespace ClassicUO.Game.UI.Gumps
                 int x = g.X;
                 int y = g.Y;
 
-                if (x + g.Texture.Width > 110)
-                    x = 110 - g.Texture.Width;
+                ArtTexture texture = loader.GetTexture(it.DisplayedGraphic);
 
-                if (y + g.Texture.Height > 80)
-                    y = 80 - g.Texture.Height;
+                if (texture != null)
+                {
+                    if (x + texture.Width > _myBox.Width)
+                        x = _myBox.Width - texture.Width;
+
+                    if (y + texture.Height > _myBox.Height)
+                        y = _myBox.Height - texture.Height;
+                }
 
                 if (x < 0)
                     x = 0;
@@ -226,6 +242,63 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
+        protected override void OnMouseUp(int x, int y, MouseButtonType button)
+        {
+            if (button == MouseButtonType.Left)
+            {
+                if (ItemHold.Enabled && !ItemHold.IsFixedPosition)
+                {
+                    if (_myBox != null && _myBox.Bounds.Contains(x, y))
+                    {
+                        ArtTexture texture = ArtLoader.Instance.GetTexture(ItemHold.DisplayedGraphic);
+
+                        x -= _myBox.X;
+                        y -= _myBox.Y;
+
+                        if (texture != null)
+                        {
+                            x -= texture.Width >> 1;
+                            y -= texture.Height >> 1;
+
+                            if (x + texture.Width > _myBox.Width)
+                                x = _myBox.Width - texture.Width;
+
+                            if (y + texture.Height > _myBox.Height)
+                                y = _myBox.Height - texture.Height;
+                        }
+
+                        if (x < 0)
+                            x = 0;
+
+                        if (y < 0)
+                            y = 0;
+
+                        GameActions.DropItem(ItemHold.Serial, x, y, 0, ID1);
+                    }
+                }
+                else if (SelectedObject.Object is Item it)
+                {
+                    if (TargetManager.IsTargeting)
+                    {
+                        TargetManager.Target(it.Serial);
+                        Mouse.CancelDoubleClick = true;
+
+                        if (TargetManager.TargetingState == CursorTarget.SetTargetClientSide)
+                        {
+                            UIManager.Add(new InspectorGump(it));
+                        }
+                    }
+                    else if (!DelayedObjectClickManager.IsEnabled)
+                    {
+                        Point off = Mouse.LDroppedOffset;
+                        DelayedObjectClickManager.Set(it.Serial,
+                            (Mouse.Position.X - off.X) - ScreenCoordinateX,
+                            (Mouse.Position.Y - off.Y) - ScreenCoordinateY,
+                            Time.Ticks + Mouse.MOUSE_DELAY_DOUBLE_CLICK);
+                    }
+                }
+            }
+        }
 
         public override void Dispose()
         {
@@ -330,40 +403,56 @@ namespace ClassicUO.Game.UI.Gumps
                 };
                 Add(_hisCoins[1]);
 
-                _myCoinsEntries[0] = new TextBox(9, -1, 100, 100, false, FontStyle.None, 0, IO.Resources.TEXT_ALIGN_TYPE.TS_LEFT)
+                _myCoinsEntries[0] = new StbTextBox(9, -1, 100, false, FontStyle.None, 0, IO.Resources.TEXT_ALIGN_TYPE.TS_LEFT)
                 {
                     X = 43,
                     Y = 190,
                     Width = 100,
                     Height = 20,
-                    NumericOnly = true,
-                    Tag = 0
+                    NumbersOnly = true,
+                    Tag = 0,
                 };
-                Add(_myCoinsEntries[0]);
                 _myCoinsEntries[0].SetText("0");
+                Add(_myCoinsEntries[0]);
 
-                _myCoinsEntries[1] = new TextBox(9, -1, 100, 100, false, FontStyle.None, 0, IO.Resources.TEXT_ALIGN_TYPE.TS_LEFT)
+                _myCoinsEntries[1] = new StbTextBox(9, -1, 100, false, FontStyle.None, 0, IO.Resources.TEXT_ALIGN_TYPE.TS_LEFT)
                 {
                     X = 43,
                     Y = 210,
                     Width = 100,
                     Height = 20,
-                    NumericOnly = true,
-                    Tag = 1
+                    NumbersOnly = true,
+                    Tag = 1,
                 };
-                Add(_myCoinsEntries[1]);
                 _myCoinsEntries[1].SetText("0");
+                Add(_myCoinsEntries[1]);
 
+                uint my_gold_entry = 0, my_plat_entry = 0;
 
                 void OnTextChanged(object sender, EventArgs e)
                 {
-                    TextBox entry = (TextBox) sender;
+                    StbTextBox entry = (StbTextBox) sender;
+                    bool send = false;
 
                     if (entry != null)
                     {
                         if (string.IsNullOrEmpty(entry.Text))
                         {
                             entry.SetText("0");
+
+                            if ((int) entry.Tag == 0)
+                            {
+                                if (my_gold_entry != 0)
+                                {
+                                    my_gold_entry = 0;
+                                    send = true;
+                                }
+                            }
+                            else if (my_plat_entry != 0)
+                            {
+                                my_plat_entry = 0;
+                                send = true;
+                            }
                         }
                         else if (uint.TryParse(entry.Text, out uint value))
                         {
@@ -372,20 +461,36 @@ namespace ClassicUO.Game.UI.Gumps
                                 if (value > Gold)
                                 {
                                     value = Gold;
+                                    send = true;
                                 }
+
+                                if (my_gold_entry != value)
+                                    send = true;
+
+                                my_gold_entry = value;
                             }
                             else // platinum
                             {
                                 if (value > Platinum)
                                 {
                                     value = Platinum;
+                                    send = true;
                                 }
+
+                                if (my_plat_entry != value)
+                                    send = true;
+
+                                my_plat_entry = value;
                             }
 
-                            entry.SetText(value.ToString());
+                            if (send)
+                            {
+                                entry.SetText(value.ToString());
+                            }
                         }
 
-                        NetClient.Socket.Send(new PTradeUpdateGold(ID1, uint.Parse(_myCoinsEntries[0].Text), uint.Parse(_myCoinsEntries[1].Text)));
+                        if (send)
+                            NetClient.Socket.Send(new PTradeUpdateGold(ID1, my_gold_entry, my_plat_entry));
                     }
                 }
 
@@ -446,46 +551,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             SetCheckboxes();
 
-            UpdateContent();
-
-            _myBox.MouseUp += (sender, e) =>
-            {
-                if (e.Button == MouseButtonType.Left)
-                {
-                    GameScene gs = Client.Game.GetScene<GameScene>();
-
-                    if (!ItemHold.Enabled || !gs.IsMouseOverUI)
-                        return;
-
-                    ArtTexture texture = ArtLoader.Instance.GetTexture(ItemHold.DisplayedGraphic);
-
-                    int x = e.X;
-                    int y = e.Y;
-
-                    if (texture != null)
-                    {
-                        x -= texture.Width >> 1;
-                        y -= texture.Height >> 1;
-
-                        if (x + texture.Width > 110)
-                            x = 110 - texture.Width;
-
-                        if (y + texture.Height > 80)
-                            y = 80 - texture.Height;
-                    }
-
-                    if (x < 0)
-                        x = 0;
-
-                    if (y < 0)
-                        y = 0;
-
-                    GameActions.DropItem(ItemHold.Serial, x, y, 0, ID1);
-                    ItemHold.Dropped = true;
-                    ItemHold.Enabled = false;
-                    //Mouse.CancelDoubleClick = true;
-                }
-            };
+            RequestUpdateContents();
         }
 
         private void MyCheckboxOnValueChanged(object sender, EventArgs e)

@@ -34,28 +34,16 @@ namespace ClassicUO.IO.Resources
     {
         private TileDataLoader()
         {
-
         }
 
         private static TileDataLoader _instance;
-        public static TileDataLoader Instance
-        {
-            get
-            {
-                if (_instance == null)
-                {
-                    _instance = new TileDataLoader();
-                }
-
-                return _instance;
-            }
-        }
+        public static TileDataLoader Instance => _instance ?? (_instance = new TileDataLoader());
 
         private static StaticTiles[] _staticData;
         private static LandTiles[] _landData;
 
-        public ref readonly LandTiles[] LandData => ref _landData;
-        public ref readonly StaticTiles[] StaticData => ref _staticData;
+        public ref LandTiles[] LandData => ref _landData;
+        public ref StaticTiles[] StaticData => ref _staticData;
 
         public override Task Load()
         {
@@ -65,31 +53,42 @@ namespace ClassicUO.IO.Resources
 
                 FileSystemHelper.EnsureFileExists(path);
 
-                UOFileMul tiledata = new UOFileMul(path);
+                UOFileMul tileData = new UOFileMul(path);
+
+
                 bool isold = Client.Version < ClientVersion.CV_7090;
-                int staticscount = !isold ? (int) (tiledata.Length - 512 * UnsafeMemoryManager.SizeOf<LandGroupNew>()) / UnsafeMemoryManager.SizeOf<StaticGroupNew>() : (int) (tiledata.Length - 512 * UnsafeMemoryManager.SizeOf<LandGroupOld>()) / UnsafeMemoryManager.SizeOf<StaticGroupOld>();
+                const int LAND_SIZE = 512;
+
+                int land_group = isold ? Marshal.SizeOf<LandGroupOld>() : Marshal.SizeOf<LandGroupNew>();
+                int static_group = isold ? Marshal.SizeOf<StaticGroupOld>() : Marshal.SizeOf<StaticGroupNew>();
+                int staticscount = (int) (((tileData.Length - (LAND_SIZE * land_group))) / static_group);
 
                 if (staticscount > 2048)
+                {
                     staticscount = 2048;
-                tiledata.Seek(0);
+                }
+
+                tileData.Seek(0);
+
                 _landData = new LandTiles[Constants.MAX_LAND_DATA_INDEX_COUNT];
                 _staticData = new StaticTiles[staticscount * 32];
                 byte[] bufferString = new byte[20];
 
                 for (int i = 0; i < 512; i++)
                 {
-                    tiledata.Skip(4);
+                    tileData.Skip(4);
 
                     for (int j = 0; j < 32; j++)
                     {
-                        if (tiledata.Position + (isold ? 4 : 8) + 2 + 20 > tiledata.Length)
+                        if (tileData.Position + (isold ? 4 : 8) + 2 + 20 > tileData.Length)
                             goto END;
 
                         int idx = i * 32 + j;
-                        ulong flags = isold ? tiledata.ReadUInt() : tiledata.ReadULong();
-                        ushort textId = tiledata.ReadUShort();
-                        tiledata.Fill(ref bufferString, 20);
+                        ulong flags = isold ? tileData.ReadUInt() : tileData.ReadULong();
+                        ushort textId = tileData.ReadUShort();
+                        tileData.Fill(ref bufferString, 20);
                         string name = string.Intern(Encoding.UTF8.GetString(bufferString).TrimEnd('\0'));
+
                         LandData[idx] = new LandTiles(flags, textId, name);
                     }
                 }
@@ -98,27 +97,27 @@ namespace ClassicUO.IO.Resources
 
                 for (int i = 0; i < staticscount; i++)
                 {
-                    if (tiledata.Position >= tiledata.Length)
+                    if (tileData.Position >= tileData.Length)
                         break;
 
-                    tiledata.Skip(4);
+                    tileData.Skip(4);
 
                     for (int j = 0; j < 32; j++)
                     {
-                        if (tiledata.Position + (isold ? 4 : 8) + 13 + 20 > tiledata.Length)
+                        if (tileData.Position + (isold ? 4 : 8) + 13 + 20 > tileData.Length)
                             goto END_2;
 
                         int idx = i * 32 + j;
 
-                        ulong flags = isold ? tiledata.ReadUInt() : tiledata.ReadULong();
-                        byte weight = tiledata.ReadByte();
-                        byte layer = tiledata.ReadByte();
-                        int count = tiledata.ReadInt();
-                        ushort animId = tiledata.ReadUShort();
-                        ushort hue = tiledata.ReadUShort();
-                        ushort lightIndex = tiledata.ReadUShort();
-                        byte height = tiledata.ReadByte();
-                        tiledata.Fill(ref bufferString, 20);
+                        ulong flags = isold ? tileData.ReadUInt() : tileData.ReadULong();
+                        byte weight = tileData.ReadByte();
+                        byte layer = tileData.ReadByte();
+                        int count = tileData.ReadInt();
+                        ushort animId = tileData.ReadUShort();
+                        ushort hue = tileData.ReadUShort();
+                        ushort lightIndex = tileData.ReadUShort();
+                        byte height = tileData.ReadByte();
+                        tileData.Fill(ref bufferString, 20);
                         string name = string.Intern(Encoding.UTF8.GetString(bufferString).TrimEnd('\0'));
 
                         StaticData[idx] = new StaticTiles(flags, weight, layer, count, animId, hue, lightIndex, height, name);
@@ -270,6 +269,9 @@ namespace ClassicUO.IO.Resources
 
                             int[] group = reader.ReadGroup();
 
+                            if (group == null)
+                                continue;
+
                             for (int i = 0; i < group.Length; i++)
                             {
                                 int checkIndex = group[i];
@@ -303,17 +305,12 @@ namespace ClassicUO.IO.Resources
                 }
 
                 END_2:
-                tiledata.Dispose();
+                tileData.Dispose();
             });
-        }
-
-        public override void CleanResources()
-        {
-            // nothing
         }
     }
 
-    internal readonly struct LandTiles
+    internal struct LandTiles
     {
         public LandTiles(ulong flags, ushort textId, string name)
         {
@@ -326,24 +323,24 @@ namespace ClassicUO.IO.Resources
             IsNoDiagonal = (Flags & TileFlag.NoDiagonal) != 0;
         }
 
-        public readonly TileFlag Flags;
-        public readonly ushort TexID;
-        public readonly string Name;
+        public TileFlag Flags;
+        public ushort TexID;
+        public string Name;
 
-        public readonly bool IsWet;
-        public readonly bool IsImpassable;
-        public readonly bool IsNoDiagonal;
+        public bool IsWet;
+        public bool IsImpassable;
+        public bool IsNoDiagonal;
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    internal readonly struct LandGroup
+    internal struct LandGroup
     {
-        public readonly uint Unknown;
+        public uint Unknown;
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 32)]
-        public readonly LandTiles[] Tiles;
+        public LandTiles[] Tiles;
     }
 
-    internal readonly struct StaticTiles
+    internal struct StaticTiles
     {
         public StaticTiles(ulong flags, byte weight, byte layer, int count, ushort animId, ushort hue, ushort lightIndex, byte height, string name)
         {
@@ -377,122 +374,126 @@ namespace ClassicUO.IO.Resources
             IsWall = (Flags & TileFlag.Wall) != 0;
             IsLight = (Flags & TileFlag.LightSource) != 0;
             IsNoShoot = (Flags & TileFlag.NoShoot) != 0;
+            IsWeapon = (Flags & TileFlag.Weapon) != 0;
+            IsMultiMovable = (Flags & TileFlag.MultiMovable) != 0;
         }
 
-        public readonly TileFlag Flags;
-        public readonly byte Weight;
-        public readonly byte Layer;
-        public readonly int Count;
-        public readonly ushort AnimID;
-        public readonly ushort Hue;
-        public readonly ushort LightIndex;
-        public readonly byte Height;
-        public readonly string Name;
+        public TileFlag Flags;
+        public byte Weight;
+        public byte Layer;
+        public int Count;
+        public ushort AnimID;
+        public ushort Hue;
+        public ushort LightIndex;
+        public byte Height;
+        public string Name;
 
-        public readonly bool IsAnimated;
-        public readonly bool IsBridge;
-        public readonly bool IsImpassable;
-        public readonly bool IsSurface;
-        public readonly bool IsWearable;
-        public readonly bool IsInternal;
-        public readonly bool IsBackground;
-        public readonly bool IsNoDiagonal;
-        public readonly bool IsWet;
-        public readonly bool IsFoliage;
-        public readonly bool IsRoof;
-        public readonly bool IsTranslucent;
-        public readonly bool IsPartialHue;
-        public readonly bool IsStackable;
-        public readonly bool IsTransparent;
-        public readonly bool IsContainer;
-        public readonly bool IsDoor;
-        public readonly bool IsWall;
-        public readonly bool IsLight;
-        public readonly bool IsNoShoot;
+        public bool IsAnimated;
+        public bool IsBridge;
+        public bool IsImpassable;
+        public bool IsSurface;
+        public bool IsWearable;
+        public bool IsInternal;
+        public bool IsBackground;
+        public bool IsNoDiagonal;
+        public bool IsWet;
+        public bool IsFoliage;
+        public bool IsRoof;
+        public bool IsTranslucent;
+        public bool IsPartialHue;
+        public bool IsStackable;
+        public bool IsTransparent;
+        public bool IsContainer;
+        public bool IsDoor;
+        public bool IsWall;
+        public bool IsLight;
+        public bool IsNoShoot;
+        public bool IsWeapon;
+        public bool IsMultiMovable;
     }
 
     // old
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    internal readonly struct LandGroupOld
+    internal struct LandGroupOld
     {
-        public readonly uint Unknown;
+        public uint Unknown;
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 32)]
-        public readonly LandTilesOld[] Tiles;
+        public LandTilesOld[] Tiles;
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    internal readonly struct LandTilesOld
+    internal struct LandTilesOld
     {
-        public readonly uint Flags;
-        public readonly ushort TexID;
+        public uint Flags;
+        public ushort TexID;
         [MarshalAs(UnmanagedType.LPStr, SizeConst = 20)]
-        public readonly string Name;
+        public string Name;
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    internal readonly struct StaticGroupOld
+    internal struct StaticGroupOld
     {
-        public readonly uint Unk;
+        public uint Unk;
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 32)]
-        public readonly StaticTilesOld[] Tiles;
+        public StaticTilesOld[] Tiles;
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    internal readonly struct StaticTilesOld
+    internal struct StaticTilesOld
     {
-        public readonly uint Flags;
-        public readonly byte Weight;
-        public readonly byte Layer;
-        public readonly int Count;
-        public readonly ushort AnimID;
-        public readonly ushort Hue;
-        public readonly ushort LightIndex;
-        public readonly byte Height;
+        public uint Flags;
+        public byte Weight;
+        public byte Layer;
+        public int Count;
+        public ushort AnimID;
+        public ushort Hue;
+        public ushort LightIndex;
+        public byte Height;
         [MarshalAs(UnmanagedType.LPStr, SizeConst = 20)]
-        public readonly string Name;
+        public string Name;
     }
 
     // new 
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    internal readonly struct LandGroupNew
+    internal struct LandGroupNew
     {
-        public readonly uint Unknown;
+        public uint Unknown;
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 32)]
-        public readonly LandTilesNew[] Tiles;
+        public LandTilesNew[] Tiles;
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    internal readonly struct LandTilesNew
+    internal struct LandTilesNew
     {
-        public readonly TileFlag Flags;
-        public readonly ushort TexID;
+        public TileFlag Flags;
+        public ushort TexID;
         [MarshalAs(UnmanagedType.LPStr, SizeConst = 20)]
-        public readonly string Name;
+        public string Name;
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    internal readonly struct StaticGroupNew
+    internal struct StaticGroupNew
     {
-        public readonly uint Unk;
+        public uint Unk;
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 32)]
-        public readonly StaticTilesNew[] Tiles;
+        public StaticTilesNew[] Tiles;
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    internal readonly struct StaticTilesNew
+    internal struct StaticTilesNew
     {
-        public readonly TileFlag Flags;
-        public readonly byte Weight;
-        public readonly byte Layer;
-        public readonly int Count;
-        public readonly ushort AnimID;
-        public readonly ushort Hue;
-        public readonly ushort LightIndex;
-        public readonly byte Height;
+        public TileFlag Flags;
+        public byte Weight;
+        public byte Layer;
+        public int Count;
+        public ushort AnimID;
+        public ushort Hue;
+        public ushort LightIndex;
+        public byte Height;
         [MarshalAs(UnmanagedType.LPStr, SizeConst = 20)]
-        public readonly string Name;
+        public string Name;
     }
 
     [Flags]

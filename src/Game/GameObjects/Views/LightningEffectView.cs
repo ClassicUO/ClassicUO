@@ -22,6 +22,7 @@
 using System;
 
 using ClassicUO.Configuration;
+using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 
@@ -32,68 +33,37 @@ namespace ClassicUO.Game.GameObjects
 {
     internal sealed partial class LightningEffect
     {
-        private static readonly Point[] _offsets =
-        {
-            new Point(48, 0), new Point(68, 0), new Point(92, 0), new Point(72, 0), new Point(48, 0), new Point(56, 0), new Point(76, 0), new Point(76, 0), new Point(92, 0), new Point(80, 0)
-        };
-        private ushort _displayed = 0xFFFF;
-
-
-        private static readonly Lazy<BlendState> _multiplyBlendState = new Lazy<BlendState>(() =>
-        {
-            BlendState state = new BlendState
-            {
-                ColorSourceBlend = Microsoft.Xna.Framework.Graphics.Blend.Zero,
-                ColorDestinationBlend = Microsoft.Xna.Framework.Graphics.Blend.SourceColor
-            };
-
-            return state;
-        });
         public override bool Draw(UltimaBatcher2D batcher, int posX, int posY)
         {
             ResetHueVector();
 
-            if (AnimationGraphic != _displayed || Texture == null || Texture.IsDisposed)
-            {
-                _displayed = AnimationGraphic;
-
-                if (_displayed > 0x4E29)
-                    return false;
-
-                Texture = GumpsLoader.Instance.GetTexture(_displayed);
-                ref Point offset = ref _offsets[ Utility.RandomHelper.GetValue(0, _offsets.Length - 1)];
-
-                Bounds.X = offset.X;
-                Bounds.Y = Texture.Height - 33 + offset.Y;
-                Bounds.Width = Texture.Width;
-                Bounds.Height = Texture.Height;
-            }
+            ushort hue = Hue;
 
             if (ProfileManager.Current.NoColorObjectsOutOfRange && Distance > World.ClientViewRange)
             {
-                HueVector.X = Constants.OUT_RANGE_COLOR;
-                HueVector.Y = 1;
+                hue = Constants.OUT_RANGE_COLOR;
             }
             else if (World.Player.IsDead && ProfileManager.Current.EnableBlackWhiteEffect)
             {
-                HueVector.X = Constants.DEAD_RANGE_COLOR;
-                HueVector.Y = 1;
+                hue = Constants.DEAD_RANGE_COLOR;
             }
             else
             {
-                //ShaderHuesTraslator.GetHueVector(ref HueVector, 1150);
-
-                ResetHueVector();
-                HueVector.X = 1150;
-                HueVector.Y = ShaderHuesTraslator.SHADER_LIGHTS;
-                HueVector.Z = 0;
+                hue = 1150;
             }
+
+            ShaderHueTranslator.GetHueVector(ref HueVector, hue, false, 0);
+            HueVector.Y = ShaderHueTranslator.SHADER_LIGHTS;
 
             //Engine.DebugInfo.EffectsRendered++;
 
+            ref UOFileIndex index = ref GumpsLoader.Instance.GetValidRefEntry(AnimationGraphic);
+
+            posX -= (index.Width >> 1);
+            posY -= index.Height;
 
             batcher.SetBlendState(BlendState.Additive);
-            base.Draw(batcher, posX, posY);
+            DrawGump(batcher, AnimationGraphic, posX, posY, ref HueVector);
             batcher.SetBlendState(null);
 
             return true;

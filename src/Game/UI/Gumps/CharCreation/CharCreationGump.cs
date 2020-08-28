@@ -20,11 +20,14 @@
 #endregion
 
 using System.Linq;
+
+using ClassicUO.Configuration;
 using ClassicUO.Data;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
+using ClassicUO.Game.UI.Controls;
 using ClassicUO.Game.UI.Gumps.Login;
 using ClassicUO.IO.Resources;
 
@@ -83,12 +86,12 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                 if (skillIndex >= _character.Skills.Length)
                     continue;
 
-                if ((World.ClientFeatures.Flags & CharacterListFlags.CLF_SAMURAI_NINJA) == 0 && (skillIndex == 52 || skillIndex == 53))
+                if (!CUOEnviroment.IsOutlands && (World.ClientFeatures.Flags & CharacterListFlags.CLF_SAMURAI_NINJA) == 0 && (skillIndex == 52 || skillIndex == 53))
                 {
                     // reset skills if needed
                     for (int k = 0; k < i; k++)
                     {
-                        var skill = _character.Skills[info.SkillDefVal[k, 0]];
+                        Skill skill = _character.Skills[info.SkillDefVal[k, 0]];
                         skill.ValueFixed = 0;
                         skill.BaseFixed = 0;
                         skill.CapFixed = 0;
@@ -105,7 +108,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                     return;
                 }
 
-                var skill2 = _character.Skills[skillIndex];
+                Skill skill2 = _character.Skills[skillIndex];
                 skill2.ValueFixed = (ushort) info.SkillDefVal[i, 1];
                 skill2.BaseFixed = 0;
                 skill2.CapFixed = 0;
@@ -137,7 +140,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
         public void ShowMessage(string message)
         {
-            var currentPage = ActivePage;
+            int currentPage = ActivePage;
 
             if (_loadingGump != null)
                 Remove(_loadingGump);
@@ -158,7 +161,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                     break;
 
                 case CharCreationStep.ChooseProfession:
-                    var existing = Children.FirstOrDefault(page => page.Page == 2);
+                    Control existing = Children.FirstOrDefault(page => page.Page == 2);
 
                     if (existing != null)
                         Remove(existing);

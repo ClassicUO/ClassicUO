@@ -18,12 +18,14 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
+#define VALIDATE
 
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+
 
 namespace ClassicUO.Utility.Collections
 {
@@ -209,7 +211,7 @@ namespace ClassicUO.Utility.Collections
 #else
             Debug.Assert(comparer != null);
 #endif
-            Array.Sort(_items, comparer);
+            Array.Sort(_items, 0, (int) Count, comparer);
         }
 
         public void TransformAll(Func<T, T> transformation)

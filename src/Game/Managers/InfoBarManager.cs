@@ -28,9 +28,6 @@ using System.Xml;
 using ClassicUO.Configuration;
 using ClassicUO.Utility.Logging;
 
-using Newtonsoft.Json;
-
-
 
 namespace ClassicUO.Game.Managers
 {
@@ -56,9 +53,9 @@ namespace ClassicUO.Game.Managers
             return infoBarItems;
         }
 
-        public static string[] GetVars(int shardtype)
+        public static string[] GetVars()
         {
-            if (shardtype != 2)
+            if (!CUOEnviroment.IsOutlands)
                 return Enum.GetNames(typeof(InfoBarVars));
             else
                 return Enum.GetNames(typeof(InfoBarVarsOutlands));
@@ -176,7 +173,8 @@ namespace ClassicUO.Game.Managers
         DamageChanceInc,
         SwingSpeedInc,
         StatsCap,
-        NameNotoriety
+        NameNotoriety,
+        TithingPoints
     }
 
     internal enum InfoBarVarsOutlands
@@ -204,13 +202,12 @@ namespace ClassicUO.Game.Managers
         DamageChanceInc,
         SwingSpeedInc,
         MurderCount,
-        NameNotoriety
+        NameNotoriety,
+        TithingPoints
     }
 
-    [JsonObject]
     internal class InfoBarItem
     {
-        [JsonConstructor]
         public InfoBarItem(string label, InfoBarVars var, ushort labelColor)
         {
             this.label = label;
@@ -228,9 +225,9 @@ namespace ClassicUO.Game.Managers
             hue = ushort.Parse(xml.GetAttribute("hue"));
         }
 
-        [JsonProperty] public string label;
-        [JsonProperty] public InfoBarVars var;
-        [JsonProperty] public ushort hue;
+        public string label;
+        public InfoBarVars var;
+        public ushort hue;
 
         public void Save(XmlTextWriter writer)
         {

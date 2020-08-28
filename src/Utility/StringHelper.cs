@@ -21,6 +21,7 @@
 
 using System.Text;
 using System.Runtime.CompilerServices;
+using SDL2;
 
 namespace ClassicUO.Utility
 {
@@ -168,6 +169,21 @@ namespace ClassicUO.Utility
             {
                 return num.ToString();
             }
+        }
+
+        public static string GetClipboardText(bool multiline)
+        {
+            if (SDL.SDL_HasClipboardText() != SDL.SDL_bool.SDL_FALSE)
+            {
+                string s = multiline ? SDL.SDL_GetClipboardText() : (SDL.SDL_GetClipboardText()?.Replace('\n', ' ') ?? null );
+                if(!string.IsNullOrEmpty(s))
+                {
+                    if (s.IndexOf('\t') >= 0)
+                        return s.Replace("\t", "   ");
+                    return s;
+                }
+            }
+            return null;
         }
     }
 }

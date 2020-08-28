@@ -35,7 +35,6 @@ namespace ClassicUO.Game.UI.Gumps
     internal class UseAbilityButtonGump : AnchorableGump
     {
         private GumpPic _button;
-        private AbilityDefinition _definition;
         private bool _isPrimary;
 
         public UseAbilityButtonGump() : base(0, 0)
@@ -45,38 +44,45 @@ namespace ClassicUO.Game.UI.Gumps
             CanCloseWithRightClick = true;
         }
 
-        public UseAbilityButtonGump(AbilityDefinition def, bool primary) : this()
+        public UseAbilityButtonGump(int index, bool primary) : this()
         {
             _isPrimary = primary;
-            UIManager.GetGump<UseAbilityButtonGump>(2000 + (uint) def.Index)?.Dispose();
-            _definition = def;
+            Index = index;
             BuildGump();
         }
 
         public override GUMP_TYPE GumpType => GUMP_TYPE.GT_ABILITYBUTTON;
 
+        public int Index { get; private set; }
+        public bool IsPrimary => _isPrimary;
+
         private void BuildGump()
         {
-            LocalSerial = 2000 + (uint) _definition.Index;
+            Clear();
 
-            _button = new GumpPic(0, 0, _definition.Icon, 0)
+            int index = ((byte) World.Player.Abilities[_isPrimary ? 0 : 1] & 0x7F) - 1;
+
+            ref readonly AbilityDefinition def = ref AbilityData.Abilities[index];
+
+            _button = new GumpPic(0, 0, def.Icon, 0)
             {
                 AcceptMouseInput = false
             };
             Add(_button);
 
-            SetTooltip();
+            SetTooltip(ClilocLoader.Instance.GetString(1028838 + index), 80);
 
             WantUpdateSize = true;
             AcceptMouseInput = true;
-            AnchorGroupName = "spell";
             GroupMatrixWidth = 44;
             GroupMatrixHeight = 44;
+            AnchorType = ANCHOR_TYPE.SPELL;
         }
 
-        private void SetTooltip()
+
+        protected override void UpdateContents()
         {
-            SetTooltip(ClilocLoader.Instance.GetString(1028838 + (byte) (((byte) (_isPrimary ? World.Player.PrimaryAbility : World.Player.SecondaryAbility) & 0x7F) - 1)), 80);
+            BuildGump();
         }
 
         protected override bool OnMouseDoubleClick(int x, int y, MouseButtonType button)
@@ -87,31 +93,13 @@ namespace ClassicUO.Game.UI.Gumps
                     GameActions.UsePrimaryAbility();
                 else
                     GameActions.UseSecondaryAbility();
+
+                return true;
             }
 
-            return true;
+            return false;
         }
 
-
-        public override void Update(double totalMS, double frameMS)
-        {
-            base.Update(totalMS, frameMS);
-
-            if (IsDisposed)
-                return;
-
-            int index = ((byte) World.Player.Abilities[_isPrimary ? 0 : 1] & 0x7F) - 1;
-
-            ref readonly AbilityDefinition def = ref AbilityData.Abilities[index];
-
-            if (_definition.Index != def.Index)
-            {
-                _definition = def;
-                _button.Graphic = def.Icon;
-
-                SetTooltip();
-            }
-        }
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
@@ -129,47 +117,15 @@ namespace ClassicUO.Game.UI.Gumps
             return base.Draw(batcher, x, y);
         }
 
-        public override void Save(BinaryWriter writer)
-        {
-            base.Save(writer);
-
-            writer.Write(_definition.Index);
-            writer.Write(_definition.Name.Length);
-            writer.WriteUTF8String(_definition.Name);
-            writer.Write((int) _definition.Icon);
-            writer.Write(_isPrimary);
-        }
-
-        public override void Restore(BinaryReader reader)
-        {
-            base.Restore(reader);
-
-            int index = reader.ReadInt32();
-            string name = reader.ReadUTF8String(reader.ReadInt32());
-            int graphic = reader.ReadInt32();
-
-            _definition = new AbilityDefinition(index, name, (ushort) graphic);
-            _isPrimary = reader.ReadBoolean();
-
-            BuildGump();
-        }
-
         public override void Save(XmlTextWriter writer)
         {
             base.Save(writer);
-            writer.WriteAttributeString("id", _definition.Index.ToString());
-            writer.WriteAttributeString("name", _definition.Name);
-            writer.WriteAttributeString("graphic", _definition.Icon.ToString());
             writer.WriteAttributeString("isprimary", _isPrimary.ToString());
         }
 
         public override void Restore(XmlElement xml)
         {
             base.Restore(xml);
-
-            _definition = new AbilityDefinition(int.Parse(xml.GetAttribute("id")),
-                                                xml.GetAttribute("name"),
-                                                ushort.Parse(xml.GetAttribute("graphic")));
             _isPrimary = bool.Parse(xml.GetAttribute("isprimary"));
             BuildGump();
         }

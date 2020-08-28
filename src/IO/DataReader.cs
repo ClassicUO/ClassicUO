@@ -20,6 +20,7 @@
 #endregion
 
 using System;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -34,18 +35,21 @@ namespace ClassicUO.IO
         private byte* _data;
         private GCHandle _handle;
 
-
         internal long Position { get; set; }
-        internal long Length { get; private set; }
-        internal IntPtr StartAddress => (IntPtr) _data;
-        internal IntPtr PositionAddress => (IntPtr) (_data + Position);
 
+        internal long Length { get; private set; }
+
+        internal IntPtr StartAddress => (IntPtr) _data;
+
+        internal IntPtr PositionAddress => (IntPtr) (_data + Position);
 
         [MethodImpl(256)]
         public void ReleaseData()
         {
             if (_handle.IsAllocated)
+            {
                 _handle.Free();
+            }
         }
 
         [MethodImpl(256)]
@@ -163,7 +167,6 @@ namespace ClassicUO.IO
             EnsureSize(4);
 
             uint v = *(uint*) (_data + Position);
-
             Position += 4;
 
             return v;
@@ -175,7 +178,6 @@ namespace ClassicUO.IO
             EnsureSize(8);
 
             long v = *(long*) (_data + Position);
-
             Position += 8;
 
             return v;
@@ -187,7 +189,6 @@ namespace ClassicUO.IO
             EnsureSize(8);
 
             ulong v = *(ulong*) (_data + Position);
-
             Position += 8;
 
             return v;
@@ -201,7 +202,9 @@ namespace ClassicUO.IO
             byte[] data = new byte[count];
 
             fixed (byte* ptr = data)
+            {
                 Buffer.MemoryCopy(&_data[Position], ptr, count, count);
+            }
 
             Position += count;
 
@@ -217,7 +220,6 @@ namespace ClassicUO.IO
             for (int i = 0; i < size; i++)
             {
                 char c = (char) ReadByte();
-
                 if (c != 0)
                 {
                     sb.Append(c);
@@ -227,11 +229,14 @@ namespace ClassicUO.IO
             return sb.ToString();
         }
 
+        [Conditional("DEBUG")]
         [MethodImpl(256)]
         private void EnsureSize(int size)
         {
             if (Position + size > Length)
+            {
                 throw new IndexOutOfRangeException();
+            }
         }
 
 

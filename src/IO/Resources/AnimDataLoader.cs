@@ -20,7 +20,6 @@
 #endregion
 
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
@@ -32,27 +31,13 @@ namespace ClassicUO.IO.Resources
     internal class AnimDataLoader : UOFileLoader
     {
         private UOFileMul _file;
-        private readonly Dictionary<ushort, IntPtr> _anims = new Dictionary<ushort, IntPtr>();
 
         private AnimDataLoader()
         {
-
         }
 
         private static AnimDataLoader _instance;
-        public static AnimDataLoader Instance
-        {
-            get
-            {
-                if (_instance == null)
-                {
-                    _instance = new AnimDataLoader();
-                }
-
-                return _instance;
-            }
-        }
-
+        public static AnimDataLoader Instance => _instance ?? (_instance = new AnimDataLoader());
 
         public override Task Load()
         {
@@ -67,28 +52,7 @@ namespace ClassicUO.IO.Resources
             });
         }
 
-        public override void CleanResources()
-        {
-            //
-        }
-
-
-
-        public IntPtr GetAddressToAnim(ushort graphic)
-        {
-            if (!_anims.TryGetValue(graphic, out IntPtr address))
-            {
-                address = _file.StartAddress;
-
-                if (address != IntPtr.Zero)
-                {
-                    address += (graphic * 68 + 4 * ((graphic >> 3) + 1));
-
-                    _anims[graphic] = address;
-                }
-            }
-            return address;
-        }
+        public UOFile AnimDataFile => _file;
 
         public AnimDataFrame2 CalculateCurrentGraphic(ushort graphic)
         {

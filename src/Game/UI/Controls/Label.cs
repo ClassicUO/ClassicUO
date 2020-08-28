@@ -44,6 +44,7 @@ namespace ClassicUO.Game.UI.Controls
         {
             X = int.Parse(parts[1]);
             Y = int.Parse(parts[2]);
+            IsFromServer = true;
         }
 
         public string Text

@@ -27,6 +27,7 @@ using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Map;
 using ClassicUO.IO.Resources;
+using ClassicUO.Renderer;
 using ClassicUO.Utility;
 
 using Microsoft.Xna.Framework;
@@ -36,7 +37,7 @@ namespace ClassicUO.Game.Scenes
 {
     internal partial class GameScene
     {
-        private readonly struct TreeUnion
+        private struct TreeUnion
         {
             public TreeUnion(ushort start, ushort end)
             {
@@ -44,7 +45,7 @@ namespace ClassicUO.Game.Scenes
                 End = end;
             }
 
-            public readonly ushort Start, End;
+            public ushort Start, End;
         }
 
 
@@ -60,9 +61,9 @@ namespace ClassicUO.Game.Scenes
         private static GameObject[] _foliages = new GameObject[100];
         private static readonly GameObject[] _objectHandles = new GameObject[Constants.MAX_OBJECT_HANDLES];
         private int _renderListCount, _foliageCount;
-        private readonly StaticTiles _empty;
+        private StaticTiles _empty;
         private sbyte _foliageIndex;
-        private static readonly TreeUnion[] _treeInfos =
+        private static TreeUnion[] _treeInfos =
         {
             new TreeUnion(0x0D45, 0x0D4C),
             new TreeUnion(0x0D5C, 0x0D62),
@@ -100,24 +101,25 @@ namespace ClassicUO.Game.Scenes
             _noDrawRoofs = !ProfileManager.Current.DrawRoofs;
             int bx = playerX;
             int by = playerY;
-            Tile tile = World.Map.GetTile(bx, by, false);
+            Chunk chunk = World.Map.GetChunk(bx, by, false);
 
-            if (tile != null)
+            if (chunk != null)
             {
+                int x = playerX % 8;
+                int y = playerY % 8;
+
                 int pz14 = playerZ + 14;
                 int pz16 = playerZ + 16;
 
-                GameObject obj = tile.FirstNode;
-
-                while (obj.Left != null)
-                    obj = obj.Left;
-
-                for (; obj != null; obj = obj.Right)
+                for (GameObject obj = chunk.GetHeadObject(x, y); obj != null; obj = obj.TNext)
                 {
                     sbyte tileZ = obj.Z;
 
-                    if (obj is Land)
+                    if (obj is Land l)
                     {
+                        if (l.IsStretched)
+                            tileZ = l.AverageZ;
+
                         if (pz16 <= tileZ)
                         {
                             maxGroundZ = (sbyte) pz16;
@@ -139,7 +141,7 @@ namespace ClassicUO.Game.Scenes
 
                     if (tileZ > pz14 && _maxZ > tileZ)
                     {
-                        ref readonly var itemdata = ref TileDataLoader.Instance.StaticData[obj.Graphic];
+                        ref StaticTiles itemdata = ref TileDataLoader.Instance.StaticData[obj.Graphic];
 
                         //if (GameObjectHelper.TryGetStaticData(obj, out var itemdata) && ((ulong) itemdata.Flags & 0x20004) == 0 && (!itemdata.IsRoof || itemdata.IsSurface))
                         if (((ulong) itemdata.Flags & 0x20004) == 0 && (!itemdata.IsRoof || itemdata.IsSurface))
@@ -156,16 +158,14 @@ namespace ClassicUO.Game.Scenes
                 playerY++;
                 bx = playerX;
                 by = playerY;
-                tile = World.Map.GetTile(bx, by, false);
+                chunk = World.Map.GetChunk(bx, by, false);
 
-                if (tile != null)
+                if (chunk != null)
                 {
-                    GameObject obj2 = tile.FirstNode;
+                    x = playerX % 8;
+                    y = playerY % 8;
 
-                    while (obj2.Left != null)
-                        obj2 = obj2.Left;
-
-                    for (; obj2 != null; obj2 = obj2.Right)
+                    for (GameObject obj2 = chunk.GetHeadObject(x, y); obj2 != null; obj2 = obj2.TNext)
                     {
                         //if (obj is Item it && !it.ItemData.IsRoof || !(obj is Static) && !(obj is Multi))
                         //    continue;
@@ -179,7 +179,7 @@ namespace ClassicUO.Game.Scenes
                         {
                             if (!(obj2 is Land))
                             {
-                                ref readonly var itemdata = ref TileDataLoader.Instance.StaticData[obj2.Graphic];
+                                ref StaticTiles itemdata = ref TileDataLoader.Instance.StaticData[obj2.Graphic];
 
                                 if (((ulong) itemdata.Flags & 0x204) == 0 && itemdata.IsRoof)
                                 {
@@ -219,7 +219,7 @@ namespace ClassicUO.Game.Scenes
         {
             for (int i = 0; i < _treeInfos.Length; i++)
             {
-                ref readonly var info = ref _treeInfos[i];
+                ref TreeUnion info = ref _treeInfos[i];
 
                 if (info.Start <= graphic && graphic <= info.End)
                 {
@@ -242,11 +242,11 @@ namespace ClassicUO.Game.Scenes
 
         private void ApplyFoliageTransparency(ushort graphic, int x, int y, int z)
         {
-            Tile tile = World.Map.GetTile(x, y);
+            GameObject tile = World.Map.GetTile(x, y);
 
             if (tile != null)
             {
-                for (GameObject obj = tile.FirstNode; obj != null; obj = obj.Right)
+                for (GameObject obj = tile; obj != null; obj = obj.TNext)
                 {
                     ushort testGraphic = obj.Graphic;
 
@@ -273,7 +273,9 @@ namespace ClassicUO.Game.Scenes
                 }
             }*/
 
-            for (; obj != null; obj = obj.Right)
+            TileDataLoader loader = TileDataLoader.Instance;
+
+            for (; obj != null; obj = obj.TNext)
             {
                 if (obj.CurrentRenderIndex == _renderIndex || !obj.AllowedToDraw)
                     continue;
@@ -291,14 +293,15 @@ namespace ClassicUO.Game.Scenes
 
                 int maxObjectZ = obj.PriorityZ;
 
-                ref readonly StaticTiles itemData = ref _empty;
+                ref StaticTiles itemData = ref _empty;
 
                 bool changinAlpha = false;
                 bool island = false;
                 bool iscorpse = false;
                 bool ismobile = false;
-
                 bool push_with_priority = false;
+
+                ref ushort graphic = ref obj.Graphic;
 
                 switch (obj)
                 {
@@ -318,11 +321,21 @@ namespace ClassicUO.Game.Scenes
                         {
                             iscorpse = true;
                             push_with_priority = true;
+                            goto default;
                         }
-                        else if (it.Offset != Vector3.Zero)
+                        else if (it.IsMulti)
                         {
-                            push_with_priority = true;
+                            graphic = it.MultiGraphic;
                         }
+
+                        push_with_priority = it.Offset != Vector3.Zero;
+
+                        //goto default;
+
+                        //push_with_priority = it.Offset != Vector3.Zero && ((
+                        //                                                       it.BoatDirection != Direction.West &&
+                        //                                                       it.BoatDirection != Direction.Up &&
+                        //                                                       it.BoatDirection != Direction.North));
                         goto default;
 
                     case MovingEffect moveEff:
@@ -333,15 +346,17 @@ namespace ClassicUO.Game.Scenes
                         push_with_priority = (multi.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_PREVIEW) != 0 &&
                                                 multi.Offset != Vector3.Zero;
 
+                        //push_with_priority = multi.IsMovable;
+
                         goto default;
 
                     default:
 
-                        itemData = ref TileDataLoader.Instance.StaticData[obj.Graphic];
+                        itemData = ref loader.StaticData[graphic];
 
                         //if (GameObjectHelper.TryGetStaticData(obj, out itemData))
                         {
-                            if (itemData.IsFoliage && World.Season >= Seasons.Winter)
+                            if (itemData.IsFoliage && !itemData.IsMultiMovable && World.Season >= Seasons.Winter)
                             {
                                 continue;
                             }
@@ -358,13 +373,13 @@ namespace ClassicUO.Game.Scenes
                             }
 
                             //we avoid to hide impassable foliage or bushes, if present...
-                            if ((ProfileManager.Current.TreeToStumps && itemData.IsFoliage) || 
+                            if ((ProfileManager.Current.TreeToStumps && itemData.IsFoliage && !itemData.IsMultiMovable && !(obj is Multi)) || 
                                 (ProfileManager.Current.HideVegetation && ((obj is Multi mm && mm.IsVegetation) || (obj is Static st && st.IsVegetation))))
                                 continue;
 
                             //if (HeightChecks <= 0 && (!itemData.IsBridge || ((itemData.Flags & TileFlag.StairBack | TileFlag.StairRight) != 0) || itemData.IsWall))
                             {
-                                maxObjectZ += itemData.Height;
+                                maxObjectZ += itemData.Height == 0xFF ? 0 : itemData.Height;
                             }
                         }
 
@@ -389,17 +404,20 @@ namespace ClassicUO.Game.Scenes
                         _objectHandles[index] = obj;
                         obj.UseObjectHandles = true;
                         _objectHandlesCount++;
+                        obj.UpdateTextCoordsV();
                     }
                 }
                 else if (obj.ClosedObjectHandles)
                 {
                     obj.ClosedObjectHandles = false;
                     obj.ObjectHandlesOpened = false;
+                    obj.UpdateTextCoordsV();
                 }
                 else if (obj.UseObjectHandles)
                 {
                     obj.ObjectHandlesOpened = false;
                     obj.UseObjectHandles = false;
+                    obj.UpdateTextCoordsV();
                 }
 
 
@@ -414,7 +432,7 @@ namespace ClassicUO.Game.Scenes
 
                 if (!island)
                 {
-                    obj.UpdateTextCoordsV();
+                    //obj.UpdateTextCoordsV();
                 }
                 else
                     goto SKIP_INTERNAL_CHECK;
@@ -489,17 +507,21 @@ namespace ClassicUO.Game.Scenes
 
                         if (check)
                         {
-                            _rectangleObj.X = drawX - obj.FrameInfo.X;
-                            _rectangleObj.Y = drawY - obj.FrameInfo.Y;
-                            _rectangleObj.Width = obj.FrameInfo.Width;
-                            _rectangleObj.Height = obj.FrameInfo.Height;
-
-                            check = Exstentions.InRect(ref _rectangleObj, ref _rectanglePlayer);
-
-                            if (check)
+                            ArtTexture texture = ArtLoader.Instance.GetTexture(graphic);
+                            if (texture != null)
                             {
-                                index = _foliageIndex;
-                                IsFoliageUnion(obj.Graphic, obj.X, obj.Y, z);
+                                _rectangleObj.X = drawX - (texture.Width >> 1) + texture.ImageRectangle.X;
+                                _rectangleObj.Y = drawY - texture.Height + texture.ImageRectangle.Y;
+                                _rectangleObj.Width = texture.ImageRectangle.Width;
+                                _rectangleObj.Height = texture.ImageRectangle.Height;
+
+                                check = Exstentions.InRect(ref _rectangleObj, ref _rectanglePlayer);
+
+                                if (check)
+                                {
+                                    index = _foliageIndex;
+                                    IsFoliageUnion(obj.Graphic, obj.X, obj.Y, z);
+                                }
                             }
                         }
 
@@ -550,11 +572,13 @@ namespace ClassicUO.Game.Scenes
             {
                 if (mob.Steps.Count != 0)
                 {
-                    ref var step = ref mob.Steps.Back();
+                    ref Mobile.Step step = ref mob.Steps.Back();
 
-                    if ((step.Direction & 7) == 2)
+                    if ((step.Direction & 7) == 2 || (step.Direction & 7) == 6)
                         dropMaxZIndex = 0;
                 }       
+                else if (mob.Direction == Direction.East || mob.Direction == Direction.West)
+                        dropMaxZIndex = 0;
             }
             
             for (int i = 0; i < 8; i++)
@@ -607,10 +631,10 @@ namespace ClassicUO.Game.Scenes
                 if (i == dropMaxZIndex)
                     currentMaxZ += 20;
 
-                var tile = World.Map.GetTile(x, y);
+                GameObject tile = World.Map.GetTile(x, y);
 
                 if (tile != null)
-                    AddTileToRenderList(tile.FirstNode, x, y, useObjectHandles, currentMaxZ);
+                    AddTileToRenderList(tile, x, y, useObjectHandles, currentMaxZ);
             }
 
             /*int area = 2;

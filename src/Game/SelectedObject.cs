@@ -38,12 +38,14 @@ namespace ClassicUO.Game
         public static Point TranslatedMousePositionByViewport;
         public static BaseGameObject Object;
         public static BaseGameObject LastObject;
+        public static BaseGameObject LastLeftDownObject;
         public static GameObject HealthbarObject;
         public static GameObject CorpseObject;
 
 
         public static bool IsPointInMobile(Mobile mobile, int xx, int yy)
         {
+            /*
             bool mirror = false;
             byte dir = (byte) mobile.GetDirectionForAnimation();
             AnimationsLoader.Instance.GetAnimDirection(ref dir, ref mirror);
@@ -61,7 +63,7 @@ namespace ClassicUO.Game
                     graphic = mobile.GetGraphicForAnimation();
                 else if (mobile.HasEquipment)
                 {
-                    Item item = mobile.Equipment[(int) layer];
+                    Item item = mobile.FindItemByLayer( layer];
 
                     if (item == null)
                         continue;
@@ -91,7 +93,7 @@ namespace ClassicUO.Game
                 byte animGroup = Mobile.GetGroupForAnimation(mobile, graphic, layer == Layer.Invalid);
 
                 ushort hue = 0;
-                AnimationDirection direction = AnimationsLoader.Instance.GetBodyAnimationGroup(ref graphic, ref animGroup, ref hue, true).Direction[dir];
+                AnimationForwardDirection direction = AnimationsLoader.Instance.GetBodyAnimationGroup(ref graphic, ref animGroup, ref hue, true).Direction[dir];
 
                 AnimationsLoader.Instance.AnimID = graphic;
                 AnimationsLoader.Instance.AnimGroup = animGroup;
@@ -138,13 +140,13 @@ namespace ClassicUO.Game
                 }
             }
 
-
+            */
             return false;
         }
 
         public static bool IsPointInCorpse(Item corpse, int xx, int yy)
         {
-            if (corpse == null || World.CorpseManager.Exists(corpse.Serial, 0))
+            /*if (corpse == null || World.CorpseManager.Exists(corpse.Serial, 0))
                 return false;
 
             byte dir = (byte) ((byte) corpse.Layer & 0x7F & 7);
@@ -172,7 +174,7 @@ namespace ClassicUO.Game
                          MathHelper.InRange(corpse.Amount, 0x02B6, 0x02B7) ||
                          corpse.Amount == 0x03DB || corpse.Amount == 0x03DF || corpse.Amount == 0x03E2 || corpse.Amount == 0x02E8 || corpse.Amount == 0x02E9)
                 {
-                    Item itemEquip = corpse.Equipment[(int) layer];
+                    Item itemEquip = corpse.FindItemByLayer( layer];
 
                     if (itemEquip == null)
                         continue;
@@ -195,7 +197,7 @@ namespace ClassicUO.Game
                                         ? AnimationsLoader.Instance.GetCorpseAnimationGroup(ref graphic, ref animGroup, ref color)
                                         : AnimationsLoader.Instance.GetBodyAnimationGroup(ref graphic, ref animGroup, ref color);
 
-                AnimationDirection direction = gr.Direction[AnimationsLoader.Instance.Direction];
+                AnimationForwardDirection direction = gr.Direction[AnimationsLoader.Instance.Direction];
 
                 if (direction == null || ((direction.FrameCount == 0 || direction.Frames == null) && !AnimationsLoader.Instance.LoadDirectionGroup(ref direction)))
                     continue;
@@ -229,24 +231,25 @@ namespace ClassicUO.Game
                     if (frame.Contains(x, y))
                         return true;
                 }
-            }
+            }            
+            */
 
             return false;
         }
 
 
         [MethodImpl(256)]
-        public static bool IsPointInStatic(UOTexture texture, int x, int y)
+        public static bool IsPointInStatic(UOTexture32 texture, int x, int y)
         {
             return texture != null && texture.Contains(TranslatedMousePositionByViewport.X - x, TranslatedMousePositionByViewport.Y - y);
         }
 
         [MethodImpl(256)]
-        public static bool IsPointInLand(UOTexture texture, int x, int y)
+        public static bool IsPointInLand(int x, int y)
         {
             x = TranslatedMousePositionByViewport.X - x;
             y = TranslatedMousePositionByViewport.Y - y;
-            return texture != null && x >= 0 && x < 44 && y >= 0 && y < 44 && _InternalArea[x, y];
+            return x >= 0 && x < 44 && y >= 0 && y < 44 && _InternalArea[x, y];
         }
 
         public static bool IsPointInStretchedLand(ref Rectangle rect, int x, int y)

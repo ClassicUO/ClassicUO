@@ -34,6 +34,8 @@ using ClassicUO.Input;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 
+using Microsoft.Xna.Framework;
+
 namespace ClassicUO.Game.UI.Gumps
 {
     internal class SpellbookGump : Gump
@@ -71,7 +73,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                     _picBase.Graphic = value ? minimizedGraphic : bookGraphic;
 
-                    foreach (var c in Children)
+                    foreach (Control c in Children)
                     {
                         c.IsVisible = !value;
                     }
@@ -141,10 +143,6 @@ namespace ClassicUO.Game.UI.Gumps
                 return;
             }
 
-         
-            item.Items.Added += ItemsOnAdded;
-            item.Items.Removed += ItemsOnRemoved;
-
             AssignGraphic(item);
             GetBookInfo(_spellBookType, out ushort bookGraphic, out ushort minimizedGraphic, out ushort iconStartGraphic, out int maxSpellsCount, out int spellsOnPage, out int dictionaryPagesCount);
             Add(_picBase = new GumpPic(0, 0, bookGraphic, 0));
@@ -174,10 +172,8 @@ namespace ClassicUO.Game.UI.Gumps
             _pageCornerRight.MouseUp += PageCornerOnMouseClick;
             _pageCornerRight.MouseDoubleClick += PageCornerOnMouseDoubleClick;
 
-            
 
-
-            Update();
+            RequestUpdateContents();
 
             Client.Game.Scene.Audio.PlaySound(0x0055);
         }
@@ -202,29 +198,12 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override void Dispose()
         {
-            Item item = World.Items.Get(LocalSerial);
-
-            if (item != null)
-            {
-                item.Items.Added -= ItemsOnAdded;
-                item.Items.Removed -= ItemsOnRemoved;
-            }
-
             Client.Game.Scene.Audio.PlaySound(0x0055);
             UIManager.SavePosition(LocalSerial, Location);
             base.Dispose();
         }
 
-        private void ItemsOnRemoved(object sender, CollectionChangedEventArgs<uint> e)
-        {
-            Update();
-        }
-
-        private void ItemsOnAdded(object sender, CollectionChangedEventArgs<uint> e)
-        {
-            Update();
-        }
-
+      
         private void CreateBook()
         {
             _dataBox.Clear();
@@ -243,8 +222,9 @@ namespace ClassicUO.Game.UI.Gumps
             }
 
 
-            foreach (Item spell in item.Items)
+            for (LinkedObject i = item.Items; i != null; i = i.Next)
             {
+                Item spell = (Item) i;
                 int currentCount = spell.Amount;
 
                 if (currentCount > 0 && currentCount <= maxSpellsCount)
@@ -368,7 +348,7 @@ namespace ClassicUO.Game.UI.Gumps
                                         {
                                             int id = activedSpells[k];
 
-                                            var spell = SpellsMastery.GetSpell(id);
+                                            SpellDefinition spell = SpellsMastery.GetSpell(id);
 
                                             if (spell != null)
                                             {
@@ -453,7 +433,8 @@ namespace ClassicUO.Game.UI.Gumps
                                     Y = 52 + y,
                                     LocalSerial = (uint) (pagesToFill + (currentSpellIndex / 2) + 1),
                                     AcceptMouseInput = true,
-                                    Tag = currentSpellIndex + 1
+                                    Tag = currentSpellIndex + 1,
+                                    CanMove = true
                                 };
                                 text.MouseUp += OnClicked;
                                 text.MouseDoubleClick += OnDoubleClicked;
@@ -482,7 +463,8 @@ namespace ClassicUO.Game.UI.Gumps
                                     Y = 52 + y,
                                     LocalSerial = (uint) topage,
                                     AcceptMouseInput = true,
-                                    Tag = currentSpellIndex + 1
+                                    Tag = currentSpellIndex + 1,
+                                    CanMove = true
                                 };
                                 text.MouseUp += OnClicked;
                                 text.MouseDoubleClick += OnDoubleClicked;
@@ -685,6 +667,20 @@ namespace ClassicUO.Game.UI.Gumps
             SetActivePage(1);
         }
 
+        protected override void UpdateContents()
+        {
+            Item item = World.Items.Get(LocalSerial);
+
+            if (item == null)
+            {
+                Dispose();
+                return;
+            }
+
+            AssignGraphic(item);
+
+            CreateBook();
+        }
 
         private void OnIconDoubleClick(object sender, MouseDoubleClickEventArgs e)
         {
@@ -707,16 +703,28 @@ namespace ClassicUO.Game.UI.Gumps
             if (def == null)
                 return;
 
+            GetSpellFloatingButton(def.ID)?.Dispose();
+
             UseSpellButtonGump gump = new UseSpellButtonGump(def)
             {
-                X = Mouse.Position.X - 22,
-                Y = Mouse.Position.Y - 22
+                X = Mouse.LDropPosition.X - 22,
+                Y = Mouse.LDropPosition.Y - 22
             };
 
             UIManager.Add(gump);
             UIManager.AttemptDragControl(gump, Mouse.Position, true);
         }
 
+        private static UseSpellButtonGump GetSpellFloatingButton(int id)
+        {
+            for (LinkedListNode<Control> i = UIManager.Gumps.Last; i != null; i = i.Previous)
+            {
+                if (i.Value is UseSpellButtonGump g && g.SpellID == id)
+                    return g;
+            }
+            
+            return null;
+        }
 
         private SpellDefinition GetSpellDefinition(uint serial)
         {
@@ -1048,7 +1056,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void OnClicked(object sender, MouseEventArgs e)
         {
-            if (sender is HoveredLabel l && e.Button == MouseButtonType.Left)
+            if (e.Button == MouseButtonType.Left && Mouse.LDroppedOffset == Point.Zero && sender is HoveredLabel l)
             {
                 _clickTiming += Mouse.MOUSE_DELAY_DOUBLE_CLICK;
 
@@ -1062,7 +1070,7 @@ namespace ClassicUO.Game.UI.Gumps
             if (_lastPressed != null && e.Button == MouseButtonType.Left)
             {
                 _clickTiming = -Mouse.MOUSE_DELAY_DOUBLE_CLICK;
-                var def = GetSpellDefinition((int) _lastPressed.Tag);
+                SpellDefinition def = GetSpellDefinition((int) _lastPressed.Tag);
 
                 if (def != null) GameActions.CastSpell(def.ID);
 
@@ -1098,22 +1106,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             }
         }
-
-        public void Update()
-        {
-            Item item = World.Items.Get(LocalSerial);
-
-            if (item == null)
-            {
-                Dispose();
-                return;
-            }
-
-            AssignGraphic(item);
-
-            CreateBook();
-        }
-
+        
         private void AssignGraphic(Item item)
         {
             switch (item.Graphic)
@@ -1172,7 +1165,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void PageCornerOnMouseClick(object sender, MouseEventArgs e)
         {
-            if (e.Button == MouseButtonType.Left && sender is Control ctrl) SetActivePage(ctrl.LocalSerial == 0 ? _dataBox.ActivePage - 1 : _dataBox.ActivePage + 1);
+            if (e.Button == MouseButtonType.Left && Mouse.LDroppedOffset == Point.Zero && sender is Control ctrl) SetActivePage(ctrl.LocalSerial == 0 ? _dataBox.ActivePage - 1 : _dataBox.ActivePage + 1);
         }
 
         private void PageCornerOnMouseDoubleClick(object sender, MouseDoubleClickEventArgs e)

@@ -28,80 +28,37 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.GameObjects
 {
-    class TextContainer
+    class TextContainer : LinkedObject
     {
-        public TextOverhead Items;
-
         public int Size, MaxSize = 5;
 
-        public void Add(TextOverhead obj)
+        public void Add(TextObject obj)
         {
-            if (obj != null)
-            {
-                if (Items == null)
-                    Items = obj;
-                else
-                {
-                    var curr = Items;
-
-                    while (curr.ListRight != null)
-                    {
-                        curr = curr.ListRight;
-                    }
-
-                    curr.ListRight = obj;
-                    obj.ListLeft = curr;
-                }
-            }
+            PushToBack(obj);
 
             if (Size >= MaxSize)
             {
-                if (Items != null)
-                {
-                    var items = Items;
-
-                    Items = Items.ListRight;
-
-                    if (Items != null)
-                        Items.ListLeft = null;
-
-                    items.ListRight = null;
-                    items.ListLeft = null;
-                    items.RenderedText?.Destroy();
-
-                    if (items.Right != null)
-                        items.Right.Left = items.Left;
-
-                    if (items.Left != null)
-                        items.Left.Right = items.Right;
-                    items.Left = null;
-                    items.Right = null;
-                }
+                ((TextObject) Items)?.Destroy();
+                Remove(Items);
             }
             else
                 Size++;
         }
 
 
-        public void Clear()
+        public new void Clear()
         {
-            var item = Items;
+            TextObject item = (TextObject) Items;
             Items = null;
 
             while (item != null)
             {
-                if (item.Right != null)
-                    item.Right.Left = item.Left;
+                TextObject next = (TextObject) item.Next;
+                item.Next = null;
+                item.Destroy();
+                Remove(item);
 
-                if (item.Left != null)
-                    item.Left.Right = item.Right;
-
-                item.Left = item.Right = null;
-                
-                var next = item.ListRight;
-                item.ListRight = null;
-                item.RenderedText?.Destroy();
-                item = next;
+                item =  next;
             }
 
             Size = 0;
@@ -113,7 +70,7 @@ namespace ClassicUO.Game.GameObjects
     {
         private const int DAMAGE_Y_MOVING_TIME = 25;
 
-        private readonly Deque<TextOverhead> _messages;
+        private readonly Deque<TextObject> _messages;
 
         private Rectangle _rectangle;
 
@@ -121,7 +78,7 @@ namespace ClassicUO.Game.GameObjects
         public OverheadDamage(GameObject parent)
         {
             Parent = parent;
-            _messages = new Deque<TextOverhead>();
+            _messages = new Deque<TextObject>();
         }
 
 
@@ -136,15 +93,14 @@ namespace ClassicUO.Game.GameObjects
 
         public void Add(int damage)
         {
-            _messages.AddToFront(new TextOverhead
-            {
-                RenderedText = RenderedText.Create(damage.ToString(), (ushort) (Parent == World.Player ? 0x0034 : 0x0021), 3, false),
-                Time = Time.Ticks + 1500
-            });
+            TextObject text_obj = TextObject.Create();
+            text_obj.RenderedText = RenderedText.Create(damage.ToString(), (ushort) (Parent == World.Player ? 0x0034 : 0x0021), 3, false);
+            text_obj.Time = Time.Ticks + 1500;
 
+            _messages.AddToFront(text_obj);
 
             if (_messages.Count > 10)
-                _messages.RemoveFromBack()?.RenderedText?.Destroy();
+                _messages.RemoveFromBack()?.Destroy();
         }
 
         public void Update()
@@ -156,7 +112,7 @@ namespace ClassicUO.Game.GameObjects
 
             for (int i = 0; i < _messages.Count; i++)
             {
-                var c = _messages[i];
+                TextObject c = _messages[i];
 
                 float delta = c.Time - Time.Ticks;
 
@@ -168,13 +124,13 @@ namespace ClassicUO.Game.GameObjects
 
                 if (delta <= 0)
                 {
-                    c.RenderedText.Destroy();
-                    _rectangle.Height -= c.RenderedText.Height;
+                    _rectangle.Height -= c.RenderedText?.Height ?? 0;
+                    c.Destroy();
                     _messages.RemoveAt(i--);
                 }
                 //else if (delta < 250)
                 //    c.Alpha = 1f - delta / 250;
-                else
+                else if (c.RenderedText != null)
                 {
                     if (_rectangle.Width < c.RenderedText.Width)
                         _rectangle.Width = c.RenderedText.Width;
@@ -225,27 +181,27 @@ namespace ClassicUO.Game.GameObjects
                     x += 22;
                     y += (int) (m.Offset.Y - m.Offset.Z - (height + centerY + 8));
                 }
-                else if (Parent.Texture != null)
+                else
                 {
-                    x += 22;
-                    int yValue = Parent.Texture.Height >> 1;
+                    ArtTexture texture = ArtLoader.Instance.GetTexture(Parent.Graphic);
 
-                    if (Parent is Item it)
+                    if (texture != null)
                     {
-                        if (it.IsCorpse)
-                            offY = -22;
-                        else if (it.ItemData.IsAnimated)
+                        x += 22;
+                        int yValue = texture.Height >> 1;
+
+                        if (Parent is Item it)
                         {
-                            ArtTexture texture = ArtLoader.Instance.GetTexture(it.Graphic);
-
-                            if (texture != null)
-                                yValue = texture.Height >> 1;
+                            if (it.IsCorpse)
+                                offY = -22;
                         }
-                    }
-                    else if (Parent is Static || Parent is Multi)
-                        offY = -44;
+                        else if (Parent is Static || Parent is Multi)
+                            offY = -44;
 
-                    y -= yValue;
+                        y -= yValue;
+                    }
+
+                   
                 }
             }
 
@@ -260,9 +216,12 @@ namespace ClassicUO.Game.GameObjects
             y += screenY;
 
 
-            foreach (var item in _messages)
+            foreach (TextObject item in _messages)
             {
                 ushort hue = 0;
+
+                if (item.IsDestroyed || item.RenderedText == null || item.RenderedText.IsDestroyed)
+                    continue;
 
                 //if (ProfileManager.Current.HighlightGameObjects)
                 //{
@@ -288,8 +247,8 @@ namespace ClassicUO.Game.GameObjects
 
             IsDestroyed = true;
 
-            foreach (var item in _messages)
-                item.RenderedText.Destroy();
+            foreach (TextObject item in _messages)
+                item.Destroy();
 
             _messages.Clear();
         }

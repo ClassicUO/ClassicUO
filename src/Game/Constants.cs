@@ -20,18 +20,23 @@
 #endregion
 
 
+using ClassicUO.Utility;
+
 namespace ClassicUO.Game
 {
     internal static class Constants
     {
         public const string WIKI_LINK = "https://github.com/andreakarasho/ClassicUO/wiki";
 
-        public const int MIN_FPS = 15;
+        public const int MIN_FPS = 12;
         public const int MAX_FPS = 250;
         public const int LOGIN_SCREEN_FPS = 60;
 
         public const int CHARACTER_ANIMATION_DELAY = 80;
         public const int ITEM_EFFECT_ANIMATION_DELAY = 50;
+
+        // cannot be a const, due to UOLive implementation
+        public static int MAPS_COUNT = 6;
 
         public const int MAX_STEP_COUNT = 5;
         public const int TURN_DELAY = 100; // original client 12.5 fps = 80ms delay. FIXME: this patch causes a packet throttle. Reverted back to 100ms
@@ -99,13 +104,14 @@ namespace ClassicUO.Game
 
         public const int MIN_VIEW_RANGE = 5;
         public const int MAX_VIEW_RANGE = 24;
+        public const int MAX_CONTAINER_OPENED_ON_GROUND_RANGE = 3;
 
         public const int OUT_RANGE_COLOR = 0x038B;
         public const int DEAD_RANGE_COLOR = 0x038E;
-
         public const int DEATH_SCREEN_TIMER = 1500;
-
         public const float SOUND_DELTA = 250;
+
+        public const ushort HIGHLIGHT_CURRENT_OBJECT_HUE = 0x014;
 
         public const int MAX_JOURNAL_HISTORY_COUNT = 100;
 
@@ -116,9 +122,24 @@ namespace ClassicUO.Game
         public const byte MIN_CONTAINER_SIZE_PERC = 50;
         public const byte MAX_CONTAINER_SIZE_PERC = 200;
 
+        public const int MALE_GUMP_OFFSET = 50000;
+        public const int FEMALE_GUMP_OFFSET = 60000;
+
         public const int WEATHER_TIMER = 6 * 60 * 1000;
 
-        public const int PREDICTABLE_CHUNKS = 500;
+        public const int PREDICTABLE_CHUNKS = 300;
         public const int PREDICTABLE_TILE_COUNT = 64 * PREDICTABLE_CHUNKS;
+        public const int PREDICTABLE_STATICS = PREDICTABLE_TILE_COUNT * 2;
+        public const int PREDICTABLE_MULTIS = PREDICTABLE_TILE_COUNT * 4;
+
+        public static readonly bool[] BAD_CONTAINER_LAYERS =
+        {
+            false, // invalid [body]
+            true, true, true, true, true, true, true, true,
+            true, true, false, true, true, true, false, false,
+            true, true, true, true,
+            false, // backpack
+            true, true, true, false, false, false, false, false
+        };
     }
 }
