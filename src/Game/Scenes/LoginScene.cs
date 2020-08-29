@@ -513,10 +513,7 @@ namespace ClassicUO.Game.Scenes
                     ParseServerList(e);
 
                     CurrentLoginStep = LoginSteps.ServerSelection;
-                    if (Settings.GlobalSettings.SaveAccount)
-                    {
-                        AccountManager.SaveAccount(Settings.GlobalSettings.IP, Settings.GlobalSettings.Username, Settings.GlobalSettings.Password);
-                    }
+                    AccountManager.SaveAccount(Settings.GlobalSettings.IP, Settings.GlobalSettings.Username, Settings.GlobalSettings.Password, Settings.GlobalSettings.SaveAccount);
                     if (Settings.GlobalSettings.AutoLogin || Reconnect)
                     {
                         if (Servers.Length != 0)

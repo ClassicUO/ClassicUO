@@ -38,21 +38,28 @@ namespace ClassicUO.Configuration
             }
         }
 
-        public static void SaveAccount(string serverName, string userName, string password)
+        public static void SaveAccount(string serverName, string userName, string password, bool saveAccount)
         {
             try
             {
                 Load(serverName);
                 var existingRecord = Accounts.FirstOrDefault(x => x.Server == serverName && x.UserName == userName);
-                if (existingRecord == null)
+                //There is an existing record and the user has opted to not save that account, remove from list.
+                if(existingRecord != null && !saveAccount)
                 {
-                    Accounts.Add(new Account() { UserName = userName, Server = serverName, Password = password });
+                    Accounts.Remove(existingRecord);
                 }
-                else if (existingRecord.Password != password)
+                //There is an existing record and they have updated their password.  save the udpated password.
+                else if (existingRecord != null && existingRecord.Password != password)
                 {
                     existingRecord.Password = password;
                 }
-                ConfigurationResolver.Save<List<Account>>(Accounts, PathToAccountFile());
+                //Otherwise if there is no existing record, the user has opted to save the account, and that account has a username save the record.
+                else if (existingRecord == null && saveAccount && !string.IsNullOrWhiteSpace(userName))
+                {
+                    Accounts.Add(new Account() { UserName = userName, Server = serverName, Password = password });
+                }
+                ConfigurationResolver.Save(Accounts, PathToAccountFile());
             }
             catch(Exception ex)
             {
