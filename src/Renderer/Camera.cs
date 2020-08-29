@@ -14,15 +14,16 @@ namespace ClassicUO.Renderer
     internal class Camera
     {
         private bool _updateMatrixes = true;
-        private float _zoom = 1f;
         private Matrix _transform, _inverseTransform;
+        private float[] _cameraZoomValues = new float[1] { 1f };
+        private int _zoomIndex;
 
 
         public Point Position;
         public Point Origin;
         public Rectangle Bounds;
 
-
+        
        
         public Matrix TransformMatrix
         {
@@ -44,18 +45,42 @@ namespace ClassicUO.Renderer
 
         public float Zoom
         {
-            get => _zoom;
+            get => _cameraZoomValues[_zoomIndex];
             set
             {
-                if (_zoom != value)
+                if (_cameraZoomValues[_zoomIndex] != value)
                 {
-                    _zoom = 1f / value;
-                    _updateMatrixes = true;
+                    ZoomIndex = (int) (value * _cameraZoomValues.Length) - _cameraZoomValues.Length / 2 - 1;
                 }
             }
         }
 
+        public int ZoomIndex
+        {
+            get => _zoomIndex;
+            set
+            {
+                _updateMatrixes = true;
+                _zoomIndex = value;
 
+                if (_zoomIndex < 0)
+                {
+                    _zoomIndex = 0;
+                }
+                else if (_zoomIndex >= _cameraZoomValues.Length)
+                {
+                    _zoomIndex = _cameraZoomValues.Length - 1;
+                }
+            }
+        }
+
+        public int ZoomValuesCount => _cameraZoomValues.Length;
+
+        public void SetZoomValues(float[] values)
+        {
+            _cameraZoomValues = values;
+        }
+        
         public void SetGameWindowBounds(int x, int y, int width, int height)
         {
             if (Bounds.X != x || Bounds.Y != y || Bounds.Width != width || Bounds.Height != height)
@@ -149,8 +174,8 @@ namespace ClassicUO.Renderer
             float top = 0;
             float bottom = Bounds.Height + top;
 
-            float new_right = (right / _zoom);
-            float new_bottom = (bottom / _zoom);
+            float new_right = (right * Zoom);
+            float new_bottom = (bottom * Zoom);
 
             left = -(new_right - right);
             top = -(new_bottom - bottom);

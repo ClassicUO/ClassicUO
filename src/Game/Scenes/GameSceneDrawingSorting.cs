@@ -755,11 +755,11 @@ namespace ClassicUO.Game.Scenes
                 float right = winGameWidth + left;
                 float top = winGamePosY;
                 float bottom = winGameHeight + top;
-                float newRight = right * Scale;
-                float newBottom = bottom * Scale;
+                float newRight = right * Camera.Zoom;
+                float newBottom = bottom * Camera.Zoom;
 
-                winGameScaledOffsetX = (int) ((left * Scale) - (newRight - right));
-                winGameScaledOffsetY = (int) ((top * Scale) - (newBottom - bottom));
+                winGameScaledOffsetX = (int) ((left * Camera.Zoom) - (newRight - right));
+                winGameScaledOffsetY = (int) ((top * Camera.Zoom) - (newBottom - bottom));
                 winGameScaledWidth = (int) (newRight - winGameScaledOffsetX);
                 winGameScaledHeight = (int) (newBottom - winGameScaledOffsetY);
             }
@@ -772,8 +772,8 @@ namespace ClassicUO.Game.Scenes
             }
 
 
-            int width = (int) ((winGameWidth / 44 + 1) * Scale);
-            int height = (int) ((winGameHeight / 44 + 1) * Scale);
+            int width = (int) ((winGameWidth / 44 + 1) * Camera.Zoom);
+            int height = (int) ((winGameHeight / 44 + 1) * Camera.Zoom);
 
             if (width < height)
             {
@@ -817,15 +817,15 @@ namespace ClassicUO.Game.Scenes
             if (maxBlockY >= MapLoader.Instance.MapsDefaultSize[World.Map.Index, 1])
                 maxBlockY = MapLoader.Instance.MapsDefaultSize[World.Map.Index, 1] - 1;
 
-            int drawOffset = (int) (Scale * 40.0);
+            int drawOffset = (int) (Camera.Zoom * 40.0);
             float maxX = winGamePosX + winGameWidth + drawOffset;
             float maxY = winGamePosY + winGameHeight + drawOffset;
-            float newMaxX = maxX * Scale;
-            float newMaxY = maxY * Scale;
+            float newMaxX = maxX * Camera.Zoom;
+            float newMaxY = maxY * Camera.Zoom;
 
-            int minPixelsX = (int) (((winGamePosX - drawOffset) * Scale) - (newMaxX - maxX));
+            int minPixelsX = (int) (((winGamePosX - drawOffset) * Camera.Zoom) - (newMaxX - maxX));
             int maxPixelsX = (int) newMaxX;
-            int minPixelsY = (int) (((winGamePosY - drawOffset) * Scale) - (newMaxY - maxY));
+            int minPixelsY = (int) (((winGamePosY - drawOffset) * Camera.Zoom) - (newMaxY - maxY));
             int maxPixelsY = (int) newMaxY;
 
             if (UpdateDrawPosition || oldDrawOffsetX != winDrawOffsetX || oldDrawOffsetY != winDrawOffsetY || old_scaled_offset.X != winGameScaledOffsetX || old_scaled_offset.Y != winGameScaledOffsetY)

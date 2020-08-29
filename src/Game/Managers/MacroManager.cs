@@ -1305,15 +1305,15 @@ namespace ClassicUO.Game.Managers
                     {
                         case MacroSubType.MSC_NONE:
                         case MacroSubType.DefaultZoom:
-                            Client.Game.GetScene<GameScene>().Scale = ProfileManager.Current.DefaultScale;
+                            Client.Game.Scene.Camera.Zoom = ProfileManager.Current.DefaultScale;
                             break;
 
                         case MacroSubType.ZoomIn:
-                            Client.Game.GetScene<GameScene>().ZoomIn();
+                            --Client.Game.Scene.Camera.ZoomIndex;
                             break;
 
                         case MacroSubType.ZoomOut:
-                            Client.Game.GetScene<GameScene>().ZoomOut();
+                            ++Client.Game.Scene.Camera.ZoomIndex;
                             break;
                     }
 

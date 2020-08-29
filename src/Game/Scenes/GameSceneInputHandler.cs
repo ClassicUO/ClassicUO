@@ -173,8 +173,8 @@ namespace ClassicUO.Game.Scenes
                 int w = mobile.FrameInfo.Width;
                 int h = mobile.FrameInfo.Height;
 
-                x = (int) (x * (1 / Scale));
-                y = (int) (y * (1 / Scale));
+                x = (int) (x * (1 / Camera.Zoom));
+                y = (int) (y * (1 / Camera.Zoom));
 
                 _rectanglePlayer.X = x;
                 _rectanglePlayer.Y = y;
@@ -692,10 +692,7 @@ namespace ClassicUO.Game.Scenes
 
             if (Keyboard.Ctrl && ProfileManager.Current.EnableMousewheelScaleZoom)
             {
-                if (up)
-                    ZoomIn();
-                else
-                    ZoomOut();
+                Camera.ZoomIndex += up ? -1 : 1;
 
                 return true;
             }
@@ -964,7 +961,9 @@ namespace ClassicUO.Game.Scenes
         internal override void OnKeyUp(SDL.SDL_KeyboardEvent e)
         {
             if (ProfileManager.Current.EnableMousewheelScaleZoom && ProfileManager.Current.RestoreScaleAfterUnpressCtrl && !Keyboard.Ctrl)
-                Scale = ProfileManager.Current.DefaultScale;
+            {
+                Camera.Zoom = ProfileManager.Current.DefaultScale;
+            }
 
             if (_flags[4])
             {

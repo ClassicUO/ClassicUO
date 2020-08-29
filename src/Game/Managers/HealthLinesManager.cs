@@ -136,7 +136,7 @@ namespace ClassicUO.Game.Managers
 
                             p1 = Client.Game.Scene.Camera.WorldToScreen(p1);
                             p1.X -= (mobile.HitsTexture.Width >> 1) + 3;
-                            p1.Y -= mobile.HitsTexture.Height / 1;
+                            p1.Y -= mobile.HitsTexture.Height;
                             
                             if (!(p1.X < screenX || p1.X > screenX + screenW - mobile.HitsTexture.Width || p1.Y < screenY || p1.Y > screenY + screenH))
                             {

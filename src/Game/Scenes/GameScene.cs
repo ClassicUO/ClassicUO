@@ -47,7 +47,6 @@ namespace ClassicUO.Game.Scenes
     internal partial class GameScene : Scene
     {
         private readonly LightData[] _lights = new LightData[Constants.MAX_LIGHTS_DATA_INDEX_COUNT];
-        private readonly float[] _scaleArray = {.6f, .7f, .8f, 0.9f, 1f, 1.1f, 1.2f, 1.3f, 1.5f };
         private bool _alphaChanged;
         private long _alphaTimer;
         private bool _deathScreenActive;
@@ -102,33 +101,6 @@ namespace ClassicUO.Game.Scenes
         }
 
         public bool UpdateDrawPosition { get; set; }
-
-        public int ScalePos
-        {
-            get => _scale;
-            set
-            {
-                if (value < 0)
-                    value = 0;
-                else if (value >= _scaleArray.Length - 1)
-                    value = _scaleArray.Length - 1;
-
-                _scale = value;
-
-                Camera.Zoom = _scaleArray[_scale];
-            }
-        }
-
-        public float Scale
-        {
-            get => _scaleArray[_scale];
-            set
-            {
-                int index = (int) (value * _scaleArray.Length) - _scaleArray.Length / 2;
-
-                ScalePos = index - 1;
-            }
-        }
 
         public HotkeysManager Hotkeys { get; private set; }
 
@@ -188,8 +160,6 @@ namespace ClassicUO.Game.Scenes
 
             MessageManager.MessageReceived += ChatOnMessageReceived;
 
-            Scale = ProfileManager.Current.DefaultScale;
-
             UIManager.ContainerScale = ProfileManager.Current.ContainersScale / 100f;
 
             SDL.SDL_SetWindowMinimumSize(Client.Game.Window.Handle, 640, 480);
@@ -218,8 +188,9 @@ namespace ClassicUO.Game.Scenes
             CircleOfTransparency.Create(ProfileManager.Current.CircleOfTransparencyRadius);
             Plugin.OnConnected();
 
-           // UIManager.Add(new Hues_gump());
 
+            Camera.SetZoomValues(new [] { .6f, .7f, .8f, 0.9f, 1f, 1.1f, 1.2f, 1.3f, 1.5f });
+            Camera.Zoom = ProfileManager.Current.DefaultScale;
         }
 
         private void ChatOnMessageReceived(object sender, UOMessageEventArgs e)
@@ -572,6 +543,21 @@ namespace ClassicUO.Game.Scenes
 
         public override void Update(double totalMS, double frameMS)
         {
+            int posX = ProfileManager.Current.GameWindowPosition.X + 5;
+            int posY = ProfileManager.Current.GameWindowPosition.Y + 5;
+            int width = ProfileManager.Current.GameWindowSize.X;
+            int height = ProfileManager.Current.GameWindowSize.Y;
+
+            Camera.SetGameWindowBounds
+            (
+                posX,
+                posY,
+                width,
+                height
+            );
+
+            SelectedObject.TranslatedMousePositionByViewport = Camera.MouseToWorldPosition();
+
             base.Update(totalMS, frameMS);
 
             PacketHandlers.SendMegaClilocRequests();
@@ -744,30 +730,6 @@ namespace ClassicUO.Game.Scenes
         public override void FixedUpdate(double totalMS, double frameMS)
         {
             FillGameObjectList();
-
-            int posX = ProfileManager.Current.GameWindowPosition.X + 5;
-            int posY = ProfileManager.Current.GameWindowPosition.Y + 5;
-            int width = ProfileManager.Current.GameWindowSize.X;
-            int height = ProfileManager.Current.GameWindowSize.Y;
-
-
-
-            //Camera.SetPosition
-            //(
-            //    World.Player.RealScreenPosition.X + (int) World.Player.Offset.X + 22,
-            //    World.Player.RealScreenPosition.Y + (int) (World.Player.Offset.Y - World.Player.Offset.Z) + 22
-            //);
-
-            Camera.SetGameWindowBounds
-            (
-                posX,
-                posY,
-                width,
-                height
-            );
-
-
-            SelectedObject.TranslatedMousePositionByViewport = Camera.MouseToWorldPosition();
         }
 
 
@@ -1081,17 +1043,7 @@ namespace ClassicUO.Game.Scenes
                 MessageManager.HandleMessage(World.Player, "Stopped following.", String.Empty, 0, MessageType.Regular, 3, TEXT_TYPE.CLIENT, false);
             }
         }
-
-        public void ZoomIn()
-        {
-            ScalePos--;
-        }
-
-        public void ZoomOut()
-        {
-            ScalePos++;
-        }
-
+        
         private struct LightData
         {
             public byte ID;

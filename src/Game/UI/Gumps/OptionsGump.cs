@@ -638,9 +638,9 @@ namespace ClassicUO.Game.UI.Gumps
 
                 ScrollAreaItem scaleSlider = new ScrollAreaItem();
                 scaleSlider.Y = SPACE_Y;
-                Label zoomSliderText = new Label("Default zoom (5 for standard zoom):", true, HUE_FONT);
+                Label zoomSliderText = new Label("Default zoom:", true, HUE_FONT);
                 scaleSlider.Add(zoomSliderText);
-                _sliderZoom = new HSliderBar(zoomSliderText.X, zoomSliderText.Height + 5, 250, 0, 20, Client.Game.GetScene<GameScene>().ScalePos, HSliderBarStyle.MetalWidgetRecessedBar, true, FONT, HUE_FONT);
+                _sliderZoom = new HSliderBar(zoomSliderText.X, zoomSliderText.Height + 5, 250, 0, Client.Game.Scene.Camera.ZoomValuesCount, Client.Game.Scene.Camera.ZoomIndex, HSliderBarStyle.MetalWidgetRecessedBar, true, FONT, HUE_FONT);
                 scaleSlider.Add(_sliderZoom);
                 rightArea.Add(scaleSlider);
 
@@ -1555,7 +1555,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _gameWindowFullsize.IsChecked = false;
                     _enableDeathScreen.IsChecked = true;
                     _enableBlackWhiteEffect.IsChecked = true;
-                    Client.Game.GetScene<GameScene>().Scale = 1;
+                    Client.Game.Scene.Camera.Zoom = 1f;
                     ProfileManager.Current.DefaultScale = 1f;
                     _lightBar.Value = 0;
                     _enableLight.IsChecked = false;
@@ -1832,8 +1832,8 @@ namespace ClassicUO.Game.UI.Gumps
             ProfileManager.Current.EnableDeathScreen = _enableDeathScreen.IsChecked;
             ProfileManager.Current.EnableBlackWhiteEffect = _enableBlackWhiteEffect.IsChecked;
 
-            Client.Game.GetScene<GameScene>().ScalePos = _sliderZoom.Value;
-            ProfileManager.Current.DefaultScale = Client.Game.GetScene<GameScene>().Scale;
+            Client.Game.Scene.Camera.ZoomIndex = _sliderZoom.Value;
+            ProfileManager.Current.DefaultScale = Client.Game.Scene.Camera.Zoom;
             ProfileManager.Current.EnableMousewheelScaleZoom = _zoomCheckbox.IsChecked;
             ProfileManager.Current.RestoreScaleAfterUnpressCtrl = _restorezoomCheckbox.IsChecked;
 
