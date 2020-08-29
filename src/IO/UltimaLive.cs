@@ -378,10 +378,15 @@ namespace ClassicUO.IO
                     string name = ValidatePath(p.ReadASCII());
 
                     if (string.IsNullOrWhiteSpace(name))
+                    {
                         _UL = null;
+                        return;
+                    }
 
                     if (_UL != null && _UL.ShardName == name)
+                    {
                         return;
+                    }
 
                     string[] split = name.Split(_pathSeparatorChars, StringSplitOptions.RemoveEmptyEntries);
                     _UL = new UltimaLive
@@ -539,13 +544,15 @@ namespace ClassicUO.IO
         {
             try
             {
-                string folderPath = Environment.GetFolderPath(CUOEnviroment.IsUnix ? Environment.SpecialFolder.LocalApplicationData : Environment.SpecialFolder.CommonApplicationData);
-                string fullPath = Path.GetFullPath(Path.Combine(folderPath, "UltimaLive", shardName));
-
                 //we cannot allow directory separator inside our name
-                if (shardName.IndexOfAny(_pathSeparatorChars) == -1 && !string.IsNullOrEmpty(fullPath))
+                if (!string.IsNullOrEmpty(shardName) && shardName.IndexOfAny(_pathSeparatorChars) == -1)
                 {
-                    return fullPath;
+                    string folderPath = Environment.GetFolderPath(CUOEnviroment.IsUnix ? Environment.SpecialFolder.LocalApplicationData : Environment.SpecialFolder.CommonApplicationData);
+                    string fullPath = Path.GetFullPath(Path.Combine(folderPath, shardName));
+                    if (!string.IsNullOrEmpty(fullPath))
+                    {
+                        return fullPath;
+                    }
                 }
             }
             catch
