@@ -23,7 +23,9 @@ namespace ClassicUO.Game.UI.Controls
                 string item = items[i];
 
                 if (item == null)
+                {
                     item = string.Empty;
+                }
 
                 HoveredLabel label = new HoveredLabel(item, false, 0x0453, 0x0453, 0x0453, font: _font)
                 {
@@ -74,7 +76,9 @@ namespace ClassicUO.Game.UI.Controls
         private void Label_MouseUp(object sender, MouseEventArgs e)
         {
             if (e.Button == MouseButtonType.Left)
+            {
                 OnItemSelected?.Invoke(this, (int)((Label)sender).Tag);
+            }
         }
     }
 }
