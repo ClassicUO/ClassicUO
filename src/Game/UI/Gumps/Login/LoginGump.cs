@@ -236,11 +236,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 Height = 25,
             });
 
-            _textboxAccount.OnOptionSelected += (sender, e) =>
-            {
-                var savedPassword = AccountManager.GetAccountPassword(Settings.GlobalSettings.IP, _textboxAccount.Text);
-                _passwordFake.RealText = string.IsNullOrWhiteSpace(savedPassword) ? string.Empty: Crypter.Decrypt(savedPassword);
-            };
+            _textboxAccount.OnOptionSelected += AccountSelectionChangeHandler;
 
             _textboxAccount.SetText(Settings.GlobalSettings.Username);
 
@@ -321,6 +317,12 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 _textboxAccount.SetKeyboardFocus();
         }
 
+        private void AccountSelectionChangeHandler(object sender, int index)
+        {
+            var savedPassword = AccountManager.GetAccountPassword(Settings.GlobalSettings.IP, _textboxAccount.Text);
+            _passwordFake.RealText = string.IsNullOrWhiteSpace(savedPassword) ? string.Empty : Crypter.Decrypt(savedPassword);
+        }
+
         public override void OnKeyboardReturn(int textID, string text)
         {
             SaveCheckboxStatus();
@@ -382,6 +384,12 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
                     break;
             }
+        }
+
+        public override void Dispose()
+        {
+            _textboxAccount.OnOptionSelected -= AccountSelectionChangeHandler;
+            base.Dispose();
         }
 
         private class PasswordStbTextBox : StbTextBox
