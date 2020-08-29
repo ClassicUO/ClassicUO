@@ -54,10 +54,56 @@ namespace ClassicUO.Game.UI.Controls
         internal void SetItems(string[] items)
         {
             _items = items;
-            if (_items != null && _items.Length > 0 && _arrow == null)
+            SetupArrowButton();
+        }
+
+        private void SetupArrowButton()
+        {
+            if(_items == null || _items.Length == 0 || _arrow != null)
             {
-                Add(_arrow = new GumpPic(_maxWidth - 6, 4, ARROW_UP, 0));
+                return;
             }
+
+            _arrow = new GumpPic(_maxWidth - 6, 4, ARROW_UP, 0);
+            _arrow.MouseDown += ArrowMouseDownHandler;
+            _arrow.MouseUp += ArrowMouseUpHandler;
+            Add(_arrow);
+        }
+
+        private void DestoryArrowButton()
+        {
+            _arrow.MouseDown -= ArrowMouseDownHandler;
+            _arrow.MouseUp -= ArrowMouseUpHandler;
+            _arrow = null;
+        }
+
+        public override void Dispose()
+        {
+            DestoryArrowButton();
+            base.Dispose();
+        }
+
+        private void ArrowMouseDownHandler(object sender, EventArgs args)
+        {
+            _arrow.Graphic = ARROW_DOWN;
+        }
+
+        private void ArrowMouseUpHandler(object sender, EventArgs args)
+        {
+            _arrow.Graphic = ARROW_UP;
+            OnBeforeContextMenu?.Invoke(this, null);
+            _contextMenu = new ComboboxContextMenu(_items, Width - 9, _maxComboHeight, _font, 20)
+            {
+                X = ScreenCoordinateX - 6,
+                Y = ScreenCoordinateY + Height + 5
+            };
+            _contextMenu.OnItemSelected += ItemSelectedHandler;
+            if (_contextMenu.Height + ScreenCoordinateY > Client.Game.Window.ClientBounds.Height)
+            {
+                _contextMenu.Y -= _contextMenu.Height + ScreenCoordinateY - Client.Game.Window.ClientBounds.Height;
+            }
+
+            UIManager.Add(_contextMenu);
         }
 
         public int SelectedIndex
@@ -88,51 +134,6 @@ namespace ClassicUO.Game.UI.Controls
         private void ItemSelectedHandler(object sender, int value)
         {
             SelectedIndex = value;
-        }
-
-        protected override void OnMouseUp(int x, int y, MouseButtonType button)
-        {
-            if (button != MouseButtonType.Left)
-            {
-                return;
-            }
-
-            if (_arrow != null)
-            {
-                _arrow.Graphic = ARROW_UP;
-                if (x > _arrow.X && x < _arrow.X + _arrow.Width && y > _arrow.Y && y < _arrow.Y + _arrow.Height)
-                {
-                    OnBeforeContextMenu?.Invoke(this, null);
-                    _contextMenu = new ComboboxContextMenu(_items, Width - 9, _maxComboHeight, _font, 20)
-                    {
-                        X = ScreenCoordinateX - 6,
-                        Y = ScreenCoordinateY + Height + 5
-                    };
-                    _contextMenu.OnItemSelected += ItemSelectedHandler;
-                    if (_contextMenu.Height + ScreenCoordinateY > Client.Game.Window.ClientBounds.Height)
-                    {
-                        _contextMenu.Y -= _contextMenu.Height + ScreenCoordinateY - Client.Game.Window.ClientBounds.Height;
-                    }
-
-                    UIManager.Add(_contextMenu);
-                }
-            }
-
-            base.OnMouseUp(x, y, button);
-        }
-        protected override void OnMouseDown(int x, int y, MouseButtonType button)
-        {
-            if (button != MouseButtonType.Left)
-            {
-                return;
-            }
-
-            if (_arrow != null && x > _arrow.X && x < _arrow.X + _arrow.Width && y > _arrow.Y && y < _arrow.Y + _arrow.Height)
-            {
-                _arrow.Graphic = ARROW_DOWN;
-            }
-
-            base.OnMouseDown(x, y, button);
         }
 
         internal string GetSelectedItem => Text;
