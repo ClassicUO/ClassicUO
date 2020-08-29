@@ -225,8 +225,6 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
             offsetX += 7;
 
-            Add(new Combobox(10, 10, 100, new string[] { "hello", "world" }));
-
             // Text Inputs
             var savedAccounts = AccountManager.GetAccountNames(Settings.GlobalSettings.IP);
             Add(_textboxAccount = new StbTextBoxCombo(savedAccounts, 5, 16, 190, false, hue: 0x034F, maxComboHeight : 100)
