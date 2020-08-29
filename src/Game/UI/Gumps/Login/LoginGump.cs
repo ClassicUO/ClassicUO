@@ -226,8 +226,8 @@ namespace ClassicUO.Game.UI.Gumps.Login
             offsetX += 7;
 
             // Text Inputs
-            // var savedAccounts = ProfileManager.GetAccounts(World.ServerName);
-            var savedAccounts = new string[] { "Hello World", "hello", "hello", "hello", "hello", "hello", "hello", "hello" };
+            var savedAccounts = AccountManager.GetAccountNames(Settings.GlobalSettings.IP);
+            //var savedAccounts = new string[] { "Hello World", "hello", "hello", "hello", "hello", "hello", "hello", "hello" };
             Add(_textboxAccount = new StbTextBoxCombo(savedAccounts, 5, 16, 190, false, hue: 0x034F)
             {
                 X = offsetX,
@@ -238,8 +238,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
             _textboxAccount.OnOptionSelected += (sender, e) =>
             {
-                // var savedPassword = ProfileManager.GetSavedPassword(World.ServerName, _textboxAccount.Text);
-                var savedPassword = "HelloWorld";
+                var savedPassword = AccountManager.GetAccountPassword(World.ServerName, _textboxAccount.Text);
                 _passwordFake.RealText = string.IsNullOrWhiteSpace(savedPassword) ? string.Empty: Crypter.Decrypt(savedPassword);
             };
 

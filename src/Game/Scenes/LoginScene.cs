@@ -513,7 +513,10 @@ namespace ClassicUO.Game.Scenes
                     ParseServerList(e);
 
                     CurrentLoginStep = LoginSteps.ServerSelection;
-
+                    if (Settings.GlobalSettings.SaveAccount)
+                    {
+                        AccountManager.SaveAccount(Settings.GlobalSettings.IP, Settings.GlobalSettings.Username, Settings.GlobalSettings.Password);
+                    }
                     if (Settings.GlobalSettings.AutoLogin || Reconnect)
                     {
                         if (Servers.Length != 0)
@@ -528,11 +531,6 @@ namespace ClassicUO.Game.Scenes
 
                             SelectServer((byte)Servers[index - 1].Index);
                         }
-                    }
-
-                    if (Settings.GlobalSettings.SaveAccount)
-                    {
-
                     }
 
                     break;
