@@ -66,7 +66,6 @@ namespace ClassicUO.Game.UI.Controls
             set
             {
                 _selectedIndex = value;
-
                 if (_items != null)
                 {
                     CleanupContextMenu();

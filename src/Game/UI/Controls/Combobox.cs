@@ -62,7 +62,9 @@ namespace ClassicUO.Game.UI.Controls
             });
 
             if (showArrow)
+            {
                 Add(new GumpPic(width - 18, 2, 0x00FC, 0));
+            }
         }
 
         public bool IsOpen { get; set; }
@@ -73,18 +75,21 @@ namespace ClassicUO.Game.UI.Controls
             set
             {
                 _selectedIndex = value;
-
                 if (_items != null)
                 {
-                    //Cleanup Context Menu
-                    _contextMenu.OnItemSelected -= ItemSelectedHandler;
-                    UIManager.GetGump<ComboboxContextMenu>()?.Dispose();
-                    _contextMenu = null;
-
+                    CleanupContextMenu();
                     _label.Text = _items[value];
                     OnOptionSelected?.Invoke(this, value);
                 }
             }
+        }
+
+        private void CleanupContextMenu()
+        {
+            //Cleanup Context Menu
+            _contextMenu.OnItemSelected -= ItemSelectedHandler;
+            UIManager.GetGump<ComboboxContextMenu>()?.Dispose();
+            _contextMenu = null;
         }
 
         internal string GetSelectedItem => _label.Text;
@@ -133,7 +138,10 @@ namespace ClassicUO.Game.UI.Controls
             };
             _contextMenu.OnItemSelected += ItemSelectedHandler;
 
-            if (_contextMenu.Height + ScreenCoordinateY > Client.Game.Window.ClientBounds.Height) _contextMenu.Y -= _contextMenu.Height + ScreenCoordinateY - Client.Game.Window.ClientBounds.Height;
+            if (_contextMenu.Height + ScreenCoordinateY > Client.Game.Window.ClientBounds.Height)
+            {
+                _contextMenu.Y -= _contextMenu.Height + ScreenCoordinateY - Client.Game.Window.ClientBounds.Height;
+            }
             UIManager.Add(_contextMenu);
             base.OnMouseUp(x, y, button);
         }
