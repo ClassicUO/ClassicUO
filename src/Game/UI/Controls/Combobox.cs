@@ -76,10 +76,12 @@ namespace ClassicUO.Game.UI.Controls
 
                 if (_items != null)
                 {
-                    _label.Text = _items[value];
-                    _contextMenu.OnItemSelected -= OnItemSelected;
+                    //Cleanup Context Menu
+                    _contextMenu.OnItemSelected -= ItemSelectedHandler;
                     UIManager.GetGump<ComboboxContextMenu>()?.Dispose();
                     _contextMenu = null;
+
+                    _label.Text = _items[value];
                     OnOptionSelected?.Invoke(this, value);
                 }
             }
@@ -112,7 +114,7 @@ namespace ClassicUO.Game.UI.Controls
             return true; 
         }
 
-        protected void OnItemSelected(object sender, int selected)
+        protected void ItemSelectedHandler(object sender, int selected)
         {
             SelectedIndex = selected;
         }
@@ -129,7 +131,7 @@ namespace ClassicUO.Game.UI.Controls
                 X = ScreenCoordinateX,
                 Y = ScreenCoordinateY
             };
-            _contextMenu.OnItemSelected += OnItemSelected;
+            _contextMenu.OnItemSelected += ItemSelectedHandler;
 
             if (_contextMenu.Height + ScreenCoordinateY > Client.Game.Window.ClientBounds.Height) _contextMenu.Y -= _contextMenu.Height + ScreenCoordinateY - Client.Game.Window.ClientBounds.Height;
             UIManager.Add(_contextMenu);
