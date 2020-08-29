@@ -897,8 +897,6 @@ namespace ClassicUO.Game.GameObjects
             }
             else
             {
-                Point p = RealScreenPosition;
-
                 for (; last != null; last = (TextObject) last.Previous)
                 {
                     if (last.RenderedText != null && !last.RenderedText.IsDestroyed)
@@ -906,14 +904,11 @@ namespace ClassicUO.Game.GameObjects
                         if (offY == 0 && last.Time < Time.Ticks)
                             continue;
 
-                        p.X = last.X;
-                        p.Y = last.Y;
-
                         last.OffsetY = offY;
                         offY += last.RenderedText.Height;
 
-                        last.RealScreenPosition.X = ((p.X - (last.RenderedText.Width >> 1)));
-                        last.RealScreenPosition.Y = ((p.Y - offY));
+                        last.RealScreenPosition.X = ((last.X - (last.RenderedText.Width >> 1)));
+                        last.RealScreenPosition.Y = ((last.Y - offY));
                     }
                 }
             }
