@@ -32,6 +32,7 @@ namespace ClassicUO.Game.UI.Controls
 {
     internal class Combobox : Control
     {
+        private ComboboxContextMenu _contextMenu;
         private readonly byte _font;
         private readonly Label _label;
         private readonly int _maxHeight;
@@ -76,7 +77,9 @@ namespace ClassicUO.Game.UI.Controls
                 if (_items != null)
                 {
                     _label.Text = _items[value];
+                    _contextMenu.OnItemSelected -= OnItemSelected;
                     UIManager.GetGump<ComboboxContextMenu>()?.Dispose();
+                    _contextMenu = null;
                     OnOptionSelected?.Invoke(this, value);
                 }
             }
@@ -109,6 +112,10 @@ namespace ClassicUO.Game.UI.Controls
             return true; 
         }
 
+        protected void OnItemSelected(object sender, int selected)
+        {
+            SelectedIndex = selected;
+        }
 
         protected override void OnMouseUp(int x, int y, MouseButtonType button)
         {
@@ -117,13 +124,15 @@ namespace ClassicUO.Game.UI.Controls
 
             OnBeforeContextMenu?.Invoke(this, null);
 
-            ComboboxContextMenu contextMenu = new ComboboxContextMenu(this, _items, Width, _maxHeight, _font)
+            _contextMenu = new ComboboxContextMenu(_items, Width, _maxHeight, _font)
             {
                 X = ScreenCoordinateX,
                 Y = ScreenCoordinateY
             };
-            if (contextMenu.Height + ScreenCoordinateY > Client.Game.Window.ClientBounds.Height) contextMenu.Y -= contextMenu.Height + ScreenCoordinateY - Client.Game.Window.ClientBounds.Height;
-            UIManager.Add(contextMenu);
+            _contextMenu.OnItemSelected += OnItemSelected;
+
+            if (_contextMenu.Height + ScreenCoordinateY > Client.Game.Window.ClientBounds.Height) _contextMenu.Y -= _contextMenu.Height + ScreenCoordinateY - Client.Game.Window.ClientBounds.Height;
+            UIManager.Add(_contextMenu);
             base.OnMouseUp(x, y, button);
         }
     }

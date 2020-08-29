@@ -6,11 +6,12 @@ namespace ClassicUO.Game.UI.Controls
 {
     internal class ComboboxContextMenu : Control
     {
-        private readonly Combobox _box;
         private readonly byte _font;
-        public ComboboxContextMenu(Combobox box, string[] items, int minWidth, int maxHeight, byte font)
+
+        public event EventHandler<int> OnItemSelected;
+
+        public ComboboxContextMenu(string[] items, int minWidth, int maxHeight, byte font)
         {
-            _box = box;
             _font = font;
             ResizePic background;
             Add(background = new ResizePic(0x0BB8));
@@ -73,7 +74,7 @@ namespace ClassicUO.Game.UI.Controls
         private void Label_MouseUp(object sender, MouseEventArgs e)
         {
             if (e.Button == MouseButtonType.Left)
-                _box.SelectedIndex = (int)((Label)sender).Tag;
+                OnItemSelected?.Invoke(this, (int)((Label)sender).Tag);
         }
     }
 }
