@@ -905,7 +905,7 @@ namespace ClassicUO.Game.Scenes
 
             batcher.Begin();
             DrawOverheads(batcher, posX, posY);
-            DrawSelection(batcher, posX, posY);
+            DrawSelection(batcher);
             batcher.End();
 
 
@@ -1053,7 +1053,7 @@ namespace ClassicUO.Game.Scenes
             SelectedObject.LastObject = SelectedObject.Object;
         }
 
-        public void DrawSelection(UltimaBatcher2D batcher, int x, int y)
+        public void DrawSelection(UltimaBatcher2D batcher)
         {
             if (_isSelectionActive)
             {

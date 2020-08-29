@@ -138,14 +138,14 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
-        public void Draw(UltimaBatcher2D batcher, int x, int y)
+        public void Draw(UltimaBatcher2D batcher)
         {
             if (IsDestroyed || _messages.Count == 0)
                 return;
 
             int offY = 0;
 
-            Point p = new Point(x, y);
+            Point p = new Point();
 
             if (Parent != null)
             {

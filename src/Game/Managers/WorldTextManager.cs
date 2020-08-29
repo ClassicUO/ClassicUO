@@ -354,7 +354,7 @@ namespace ClassicUO.Game.Managers
                         continue;
                 }
 
-                overheadDamage.Value.Draw(batcher, 0, 0);
+                overheadDamage.Value.Draw(batcher);
             }
         }
 
