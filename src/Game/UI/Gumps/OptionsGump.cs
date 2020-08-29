@@ -755,6 +755,11 @@ namespace ClassicUO.Game.UI.Gumps
             _runMouseInSeparateThread = CreateCheckBox(rightArea, "Run mouse in a separate thread", Settings.GlobalSettings.RunMouseInASeparateThread, 0, SPACE_Y);
             _auraMouse = CreateCheckBox(rightArea, "Aura on mouse target", ProfileManager.Current.AuraOnMouse, 0, SPACE_Y);
             _xBR = CreateCheckBox(rightArea, "Use xBR effect [BETA]", ProfileManager.Current.UseXBR, 0, SPACE_Y);
+
+            // TODO: due to the new rendering engine, xBR cannot be applied directly to the World render target
+            //       we need a PostProcessing system
+            _xBR.IsVisible = false;
+
             _hideChatGradient = CreateCheckBox(rightArea, "Hide Chat Gradient", ProfileManager.Current.HideChatGradient, 0, SPACE_Y);
 
             Add(rightArea, PAGE);
