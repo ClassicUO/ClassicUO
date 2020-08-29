@@ -33,7 +33,6 @@ namespace ClassicUO.Game.UI.Controls
     internal class StbTextBoxCombo : StbTextBox
     {
         private string[] _items;
-        private int _selectedIndex;
         private GumpPic _arrow;
         private readonly byte _font;
         private readonly int _maxWidth;
@@ -106,24 +105,6 @@ namespace ClassicUO.Game.UI.Controls
             UIManager.Add(_contextMenu);
         }
 
-        public int SelectedIndex
-        {
-            get => _selectedIndex;
-            set
-            {
-                _selectedIndex = value;
-                if (_items != null)
-                {
-                    CleanupContextMenu();
-
-                    Text = _items[_selectedIndex];
-                    CaretIndex = Text.Length;
-                    SetKeyboardFocus();
-                    OnOptionSelected?.Invoke(this, value);
-                }
-            }
-        }
-
         private void CleanupContextMenu()
         {
             _contextMenu.OnItemSelected -= ItemSelectedHandler;
@@ -133,12 +114,12 @@ namespace ClassicUO.Game.UI.Controls
 
         private void ItemSelectedHandler(object sender, int value)
         {
-            SelectedIndex = value;
+            Text = _items == null ? string.Empty : _items[value];
+            CaretIndex = Text.Length;
+            SetKeyboardFocus();
+            OnOptionSelected?.Invoke(this, value);
+            CleanupContextMenu();
         }
-
-        internal string GetSelectedItem => Text;
-
-        internal uint GetItemsLength => (uint)_items.Length;
 
         public event EventHandler<int> OnOptionSelected;
         public event EventHandler OnBeforeContextMenu;
