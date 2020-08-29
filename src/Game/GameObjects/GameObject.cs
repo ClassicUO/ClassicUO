@@ -176,11 +176,10 @@ namespace ClassicUO.Game.GameObjects
             if (texture != null)
             {
                 p.Y -= (texture.ImageRectangle.Height >> 1);
-                p.Y += ArtLoader.Instance.GetValidRefEntry(Graphic + 0x4000).Height;
             }
 
             p.X += (int) Offset.X + 22;
-            p.Y += (int) (Offset.Y - Offset.Z) + 22;
+            p.Y += (int) (Offset.Y - Offset.Z) + 44;
 
             p = Client.Game.Scene.Camera.WorldToScreen(p);
 
