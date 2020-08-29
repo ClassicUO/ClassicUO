@@ -728,17 +728,14 @@ namespace ClassicUO.Game.Scenes
             int oldDrawOffsetY = _offset.Y;
             var old_scaled_offset = _last_scaled_offset;
 
-            int winGamePosX = 0; //ProfileManager.Current.GameWindowPosition.X;
-            int winGamePosY = 0; //ProfileManager.Current.GameWindowPosition.Y;
+            int winGamePosX = 0;
+            int winGamePosY = 0;
             int winGameWidth = ProfileManager.Current.GameWindowSize.X;
             int winGameHeight = ProfileManager.Current.GameWindowSize.Y;
             int winGameCenterX = winGamePosX + (winGameWidth >> 1);
             int winGameCenterY = winGamePosY + (winGameHeight >> 1) + (World.Player.Z << 2);
             winGameCenterX -= (int) World.Player.Offset.X;
             winGameCenterY -= (int) (World.Player.Offset.Y - World.Player.Offset.Z);
-
-            //winGameCenterX -= Camera.Position.X;
-            //winGameCenterY -= Camera.Position.Y;
 
             int tileOffX = World.Player.X + Camera.Position.X / 44;
             int tileOffY = World.Player.Y + Camera.Position.Y / 44;

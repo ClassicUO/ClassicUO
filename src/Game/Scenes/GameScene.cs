@@ -786,7 +786,7 @@ namespace ClassicUO.Game.Scenes
 
             Viewport r_viewport = batcher.GraphicsDevice.Viewport;
 
-            Matrix matrix = Camera.ViewProjectionMatrix;
+            Matrix matrix = Camera.TransformMatrix;
 
             if (ProfileManager.Current.EnableDeathScreen)
             {
