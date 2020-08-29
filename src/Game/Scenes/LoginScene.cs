@@ -510,15 +510,20 @@ namespace ClassicUO.Game.Scenes
             switch (e.ID)
             {
                 case 0xA8: // ServerListReceived
-                    ParseServerList(e);
-
-                    CurrentLoginStep = LoginSteps.ServerSelection;
-                    AccountManager.SaveAccount(Settings.GlobalSettings.IP, Settings.GlobalSettings.Username, Settings.GlobalSettings.Password, Settings.GlobalSettings.SaveAccount);
-                    if (!Settings.GlobalSettings.SaveAccount)
+                    //Save account information if current login step is Verifying account.
+                    //Otherwise, we are backing from character selection and we dont want to resave.
+                    if(CurrentLoginStep == LoginSteps.VerifyingAccount)
                     {
-                        Settings.GlobalSettings.Username = string.Empty;
-                        Settings.GlobalSettings.Password = string.Empty;
+                        AccountManager.SaveAccount(Settings.GlobalSettings.IP, Settings.GlobalSettings.Username, Settings.GlobalSettings.Password, Settings.GlobalSettings.SaveAccount);
+                        if (!Settings.GlobalSettings.SaveAccount)
+                        {
+                            Settings.GlobalSettings.Username = string.Empty;
+                            Settings.GlobalSettings.Password = string.Empty;
+                        }
                     }
+                    ParseServerList(e);
+                    CurrentLoginStep = LoginSteps.ServerSelection;
+
                     if (Settings.GlobalSettings.AutoLogin || Reconnect)
                     {
                         if (Servers.Length != 0)
