@@ -12,7 +12,7 @@ namespace ClassicUO.Configuration
     {
         private static List<Account> _accounts;
 
-        public static IReadOnlyCollection<Account> GetAccountNames(string serverName)
+        public static IReadOnlyCollection<Account> GetAccounts(string serverName)
         {
             LoadAccounts(serverName);
             var accounts = _accounts?
@@ -41,16 +41,12 @@ namespace ClassicUO.Configuration
             //There is an existing record and they have updated their password.  save the udpated password.
             else if (existingRecord != null && existingRecord.Password != password)
             {
-                existingRecord.Password = password;
+                existingRecord.UpdatePassword(password);
             }
             //Otherwise if there is no existing record, the user has opted to save the account, and that account has a username save the record.
             else if (existingRecord == null && saveAccount && !string.IsNullOrWhiteSpace(userName))
             {
-                _accounts.Add(new Account() { 
-                    UserName = userName,
-                    Server = serverName, 
-                    Password = password 
-                });
+                _accounts.Add(new Account(serverName, userName, password));
             }
             SaveAccountsToFile();
         }

@@ -32,6 +32,7 @@ using ClassicUO.Utility;
 using ClassicUO.Input;
 using Microsoft.Xna.Framework;
 using SDL2;
+using System.Linq;
 
 namespace ClassicUO.Game.UI.Gumps.Login
 {
@@ -226,8 +227,8 @@ namespace ClassicUO.Game.UI.Gumps.Login
             offsetX += 7;
 
             // Text Inputs
-            var savedAccounts = AccountManager.GetAccountNames(Settings.GlobalSettings.IP);
-            Add(_textboxAccount = new StbTextBoxCombo(savedAccounts, 5, 16, 190, false, hue: 0x034F, maxComboHeight : 100)
+            var savedAccounts = AccountManager.GetAccounts(Settings.GlobalSettings.IP);
+            Add(_textboxAccount = new StbTextBoxCombo(savedAccounts.Select(account => account.UserName).ToArray(), 5, 16, 190, false, hue: 0x034F, maxComboHeight : 100)
             {
                 X = offsetX,
                 Y = offsetY,
