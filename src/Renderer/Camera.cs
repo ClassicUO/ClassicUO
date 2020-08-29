@@ -87,6 +87,7 @@ namespace ClassicUO.Renderer
         {
             SetPosition(Position.X + x, Position.Y + y);
         }
+
         public Viewport GetViewport()
         {
             return new Viewport
