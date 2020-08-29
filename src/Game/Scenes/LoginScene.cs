@@ -522,18 +522,18 @@ namespace ClassicUO.Game.Scenes
 
                             if (index <= 0 || index > Servers.Length)
                             {
-                                Log.Warn( $"Wrong server index: {index}");
+                                Log.Warn($"Wrong server index: {index}");
                                 index = 1;
                             }
 
-                            SelectServer((byte) Servers[index - 1].Index);
+                            SelectServer((byte)Servers[index - 1].Index);
                         }
                     }
 
-					if (Settings.GlobalSettings.SaveAccount)
-					{
+                    if (Settings.GlobalSettings.SaveAccount)
+                    {
 
-					}
+                    }
 
                     break;
 
