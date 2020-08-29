@@ -61,7 +61,6 @@ namespace ClassicUO.Game.GameObjects
             mobile.Steps.Clear();
             mobile.Offset = Vector3.Zero;
             mobile.SpeedMode = CharacterSpeedType.Normal;
-            mobile.DeathScreenTimer = 0;
             mobile.Race = 0;
             mobile.Hits = 0;
             mobile.HitsMax = 0;
@@ -127,7 +126,6 @@ namespace ClassicUO.Game.GameObjects
 
         public Deque<Step> Steps { get; } = new Deque<Step>(Constants.MAX_STEP_COUNT);
         public CharacterSpeedType SpeedMode = CharacterSpeedType.Normal;
-        public long DeathScreenTimer;
         public bool IsFemale;
         public RaceType Race;
         public ushort Mana;
