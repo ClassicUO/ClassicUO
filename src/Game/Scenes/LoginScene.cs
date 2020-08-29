@@ -514,6 +514,11 @@ namespace ClassicUO.Game.Scenes
 
                     CurrentLoginStep = LoginSteps.ServerSelection;
                     AccountManager.SaveAccount(Settings.GlobalSettings.IP, Settings.GlobalSettings.Username, Settings.GlobalSettings.Password, Settings.GlobalSettings.SaveAccount);
+                    if (!Settings.GlobalSettings.SaveAccount)
+                    {
+                        Settings.GlobalSettings.Username = string.Empty;
+                        Settings.GlobalSettings.Password = string.Empty;
+                    }
                     if (Settings.GlobalSettings.AutoLogin || Reconnect)
                     {
                         if (Servers.Length != 0)
