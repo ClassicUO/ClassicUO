@@ -530,6 +530,11 @@ namespace ClassicUO.Game.Scenes
                         }
                     }
 
+					if (Settings.GlobalSettings.SaveAccount)
+					{
+
+					}
+
                     break;
 
                 case 0x8C: // ReceiveServerRelay
