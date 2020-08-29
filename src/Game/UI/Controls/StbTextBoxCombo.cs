@@ -23,6 +23,7 @@ using ClassicUO.Game.Managers;
 using ClassicUO.Input;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
+using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -33,27 +34,32 @@ namespace ClassicUO.Game.UI.Controls
 	{
 		private string[] _items;
 		private int _selectedIndex;
-		private readonly GumpPic _arrow;
-		private readonly bool _showArrow;
+		private GumpPic _arrow;
 		private readonly byte _font;
+		private readonly int _maxWidth;
+		private const ushort ARROW_UP = 253;
+		private const ushort ARROW_DOWN = 252;
 
 		public StbTextBoxCombo(string[] items, byte font, int max_char_count = -1, int maxWidth = 0, bool isunicode = true, FontStyle style = FontStyle.None, ushort hue = 0, TEXT_ALIGN_TYPE align = TEXT_ALIGN_TYPE.TS_LEFT) : 
 			base(font, max_char_count, maxWidth, isunicode, style, hue, align)
 		{
-			_showArrow = true;
-			if (_showArrow)
-			{
-				Add(_arrow = new GumpPic(maxWidth - 6, 4, 0x00FC, 0));
-			}
-			_items = items;
+			_maxWidth = maxWidth;
 			_font = font;
+			SetItems(items);
 		}
 
 		public StbTextBoxCombo(List<string> parts, string[] lines) : base(parts, lines)
 		{
 		}
 
-		public bool IsOpen { get; set; }
+		internal void SetItems(string[] items)
+		{
+			_items = items;
+			if(_items.Length > 0 && _arrow == null)
+			{
+				Add(_arrow = new GumpPic(_maxWidth - 6, 4, ARROW_UP, 0));
+			}
+		}
 
 		public int SelectedIndex
 		{
@@ -68,6 +74,7 @@ namespace ClassicUO.Game.UI.Controls
 					OnOptionSelected?.Invoke(this, value);
 					Text = _items[_selectedIndex];
 					CaretIndex = Text.Length;
+					SetKeyboardFocus();
 				}
 			}
 		}
@@ -80,18 +87,27 @@ namespace ClassicUO.Game.UI.Controls
 				return;
 			}
 
-			
-			if (x > _arrow.X && x < _arrow.X + _arrow.Width && y > _arrow.Y && y < _arrow.Y + _arrow.Height)
+			if (_arrow != null)
 			{
-				_arrow.Hue = 0;
-				TextboxComboContextMenu contextMenu = new TextboxComboContextMenu(_items, Width, 100, _font, selectedIndex => SelectedIndex = selectedIndex)
+				_arrow.Graphic = ARROW_UP;
+				if (x > _arrow.X && x < _arrow.X + _arrow.Width && y > _arrow.Y && y < _arrow.Y + _arrow.Height)
 				{
-					X = ScreenCoordinateX,
-					Y = ScreenCoordinateY + Height
-				};
-				if (contextMenu.Height + ScreenCoordinateY > Client.Game.Window.ClientBounds.Height) contextMenu.Y -= contextMenu.Height + ScreenCoordinateY - Client.Game.Window.ClientBounds.Height;
-				UIManager.Add(contextMenu);
+					OnBeforeContextMenu?.Invoke(this, null);
+					TextboxComboContextMenu contextMenu = new TextboxComboContextMenu(_items, Width - 9, 100, _font, selectedIndex => SelectedIndex = selectedIndex)
+					{
+						X = ScreenCoordinateX - 6,
+						Y = ScreenCoordinateY + Height + 5
+					};
+					if (contextMenu.Height + ScreenCoordinateY > Client.Game.Window.ClientBounds.Height)
+					{
+						contextMenu.Y -= contextMenu.Height + ScreenCoordinateY - Client.Game.Window.ClientBounds.Height;
+					}
+
+					UIManager.Add(contextMenu);
+				}
 			}
+
+			base.OnMouseUp(x, y, button);
 		}
 		protected override void OnMouseDown(int x, int y, MouseButtonType button)
 		{
@@ -100,22 +116,17 @@ namespace ClassicUO.Game.UI.Controls
 				return;
 			}
 
-			if (x > _arrow.X && x < _arrow.X + _arrow.Width && y > _arrow.Y && y < _arrow.Y + _arrow.Height)
+			if (_arrow != null && x > _arrow.X && x < _arrow.X + _arrow.Width && y > _arrow.Y && y < _arrow.Y + _arrow.Height)
 			{
-				_arrow.Hue = 5;
+				_arrow.Graphic = ARROW_DOWN;
 			}
 
-			base.OnMouseUp(x, y, button);
+			base.OnMouseDown(x, y, button);
 		}
 
 		internal string GetSelectedItem => Text;
 
 		internal uint GetItemsLength => (uint)_items.Length;
-
-		internal void SetItemsValue(string[] items)
-		{
-			_items = items;
-		}
 
 		public event EventHandler<int> OnOptionSelected;
 		public event EventHandler OnBeforeContextMenu;
@@ -141,7 +152,7 @@ namespace ClassicUO.Game.UI.Controls
 
 				HoveredLabel label = new HoveredLabel(item, false, 0x0453, 0x0453, 0x0453, font: font)
 				{
-					X = 2,
+					X = 0,
 					Y = index * 20,
 					Height = 25,
 					Tag = index,

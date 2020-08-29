@@ -42,7 +42,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
         private readonly Checkbox _checkboxAutologin;
         private readonly Checkbox _checkboxSaveAccount;
         private readonly Button _nextArrow0;
-        private readonly StbTextBox _textboxAccount;
+        private readonly StbTextBoxCombo _textboxAccount;
         private readonly PasswordStbTextBox _passwordFake;
 
         private float _time;
@@ -226,13 +226,22 @@ namespace ClassicUO.Game.UI.Gumps.Login
             offsetX += 7;
 
             // Text Inputs
-            Add(_textboxAccount = new StbTextBox(5, 16, 190, false, hue: 0x034F)
+            // var savedAccounts = ProfileManager.GetAccounts(World.ServerName);
+            var savedAccounts = new string[] { "Hello World", "hello", "hello", "hello", "hello", "hello", "hello", "hello" };
+            Add(_textboxAccount = new StbTextBoxCombo(savedAccounts, 5, 16, 190, false, hue: 0x034F)
             {
                 X = offsetX,
                 Y = offsetY,
                 Width = 190,
                 Height = 25,
             });
+
+            _textboxAccount.OnOptionSelected += (sender, e) =>
+            {
+                // var savedPassword = ProfileManager.GetSavedPassword(World.ServerName, _textboxAccount.Text);
+                var savedPassword = "HelloWorld";
+                _passwordFake.RealText = string.IsNullOrWhiteSpace(savedPassword) ? string.Empty: Crypter.Decrypt(savedPassword);
+            };
 
             _textboxAccount.SetText(Settings.GlobalSettings.Username);
 
