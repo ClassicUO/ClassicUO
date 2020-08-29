@@ -69,10 +69,7 @@ namespace ClassicUO.Game.UI.Controls
 
                 if (_items != null)
                 {
-                    //Cleanup Context Menu
-                    _contextMenu.OnItemSelected -= ItemSelectedHandler;
-                    UIManager.GetGump<ComboboxContextMenu>()?.Dispose();
-                    _contextMenu = null;
+                    CleanupContextMenu();
 
                     Text = _items[_selectedIndex];
                     CaretIndex = Text.Length;
@@ -80,6 +77,13 @@ namespace ClassicUO.Game.UI.Controls
                     OnOptionSelected?.Invoke(this, value);
                 }
             }
+        }
+
+        private void CleanupContextMenu()
+        {
+            _contextMenu.OnItemSelected -= ItemSelectedHandler;
+            UIManager.GetGump<ComboboxContextMenu>()?.Dispose();
+            _contextMenu = null;
         }
 
         private void ItemSelectedHandler(object sender, int value)
