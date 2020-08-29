@@ -54,7 +54,7 @@ namespace ClassicUO.Game.UI.Controls
         internal void SetItems(string[] items)
         {
             _items = items;
-            if (_items.Length > 0 && _arrow == null)
+            if (_items != null && _items.Length > 0 && _arrow == null)
             {
                 Add(_arrow = new GumpPic(_maxWidth - 6, 4, ARROW_UP, 0));
             }
