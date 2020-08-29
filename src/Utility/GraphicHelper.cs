@@ -19,12 +19,38 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
 
+using System.Runtime.CompilerServices;
 using ClassicUO.Renderer;
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.Utility
 {
     internal class GraphicHelper
     {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void ScreenToWorldCoordinates(Rectangle viewport, ref Point in_point, ref Matrix transform, out Point result)
+        {
+            Matrix matrix = Matrix.Invert(transform);
+
+            float x =   (((in_point.X - viewport.X) / ((float) viewport.Width))  * 2f) - 1f;
+            float y = -((((in_point.Y - viewport.Y) / ((float) viewport.Height)) * 2f) - 1f);
+
+            result.X = (int) ((x * matrix.M11) + (y * matrix.M21) + matrix.M41);
+            result.Y = (int) ((x * matrix.M12) + (y * matrix.M22) + matrix.M42);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void WorldToScreenCoordinates(Rectangle viewport, ref Point in_point, ref Matrix transform, out Point result)
+        {
+            float x = ((in_point.X * transform.M11) + (in_point.Y * transform.M21) + transform.M41);
+            float y = ((in_point.X * transform.M12) + (in_point.Y * transform.M22) + transform.M42);
+
+            result.X = (int) ((((x + 1f) * 0.5f) * viewport.Width) + viewport.X);
+            result.Y = (int) ((((-y + 1f) * 0.5f) * viewport.Height) + viewport.Y);
+        }
+
+
         /// <summary>
         ///     Splits a texture into an array of smaller textures of the specified size.
         /// </summary>

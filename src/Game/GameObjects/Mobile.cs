@@ -61,7 +61,6 @@ namespace ClassicUO.Game.GameObjects
             mobile.Steps.Clear();
             mobile.Offset = Vector3.Zero;
             mobile.SpeedMode = CharacterSpeedType.Normal;
-            mobile.DeathScreenTimer = 0;
             mobile.Race = 0;
             mobile.Hits = 0;
             mobile.HitsMax = 0;
@@ -127,7 +126,6 @@ namespace ClassicUO.Game.GameObjects
 
         public Deque<Step> Steps { get; } = new Deque<Step>(Constants.MAX_STEP_COUNT);
         public CharacterSpeedType SpeedMode = CharacterSpeedType.Normal;
-        public long DeathScreenTimer;
         public bool IsFemale;
         public RaceType Race;
         public ushort Mana;
@@ -1049,7 +1047,7 @@ namespace ClassicUO.Game.GameObjects
             while (last?.Next != null)
                 last = (TextObject) last.Next;
 
-            if (last == null)
+            if (last == null || last.Time < Time.Ticks)
                 return;
 
             int offY = 0;
@@ -1058,27 +1056,17 @@ namespace ClassicUO.Game.GameObjects
             int alwaysHP = ProfileManager.Current.MobileHPShowWhen;
             int mode = ProfileManager.Current.MobileHPType;
 
-            int startX = ProfileManager.Current.GameWindowPosition.X + 6;
-            int startY = ProfileManager.Current.GameWindowPosition.Y + 6;
-            GameScene scene = Client.Game.GetScene<GameScene>();
-            float scale = scene?.Scale ?? 1;
-
-            int x = RealScreenPosition.X;
-            int y = RealScreenPosition.Y;
-
-
-            if (health && mode != 1 && ((alwaysHP >= 1 && Hits != HitsMax) || alwaysHP == 0))
-            {
-                y -= 22;
-            }
+            Point p = RealScreenPosition;
 
             if (ObjectHandlesOpened)
-                y -= 22;
+            {
+                p.Y -= 22;
+            }
 
             if (IsGargoyle && IsFlying)
-                y -= 22;
+                p.Y -= 22;
             else if (!IsMounted)
-                y += 22;
+                p.Y += 22;
 
             AnimationsLoader.Instance.GetAnimationDimensions(AnimIndex,
                                                           GetGraphicForAnimation(),
@@ -1090,11 +1078,17 @@ namespace ClassicUO.Game.GameObjects
                                                           out int centerY,
                                                           out _,
                                                           out int height);
-            x += (int)Offset.X + 22;
-            y += (int)(Offset.Y - Offset.Z - (height + centerY + 8));
-            x = (int) (x / scale);
-            y = (int) (y / scale);
 
+            p.X += (int) Offset.X + 22;
+            p.Y += (int) (Offset.Y - Offset.Z - (height + centerY + 8));
+            p = Client.Game.Scene.Camera.WorldToScreen(p);
+
+            if (health && mode != 1 && ((alwaysHP >= 1 && Hits != HitsMax) || alwaysHP == 0))
+            {
+                p.Y -= 12;
+            }
+
+            
             for (; last != null; last = (TextObject) last.Previous)
             {
                 if (last.RenderedText != null && !last.RenderedText.IsDestroyed)
@@ -1102,12 +1096,11 @@ namespace ClassicUO.Game.GameObjects
                     if (offY == 0 && last.Time < Time.Ticks)
                         continue;
 
-
                     last.OffsetY = offY;
                     offY += last.RenderedText.Height;
 
-                    last.RealScreenPosition.X = startX + (x - (last.RenderedText.Width >> 1));
-                    last.RealScreenPosition.Y = startY + (y - offY);
+                    last.RealScreenPosition.X = (p.X - (last.RenderedText.Width >> 1));
+                    last.RealScreenPosition.Y = (p.Y - offY);
                 }
             }
 

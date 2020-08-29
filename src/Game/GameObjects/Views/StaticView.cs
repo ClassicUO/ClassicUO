@@ -116,7 +116,9 @@ namespace ClassicUO.Game.GameObjects
                 posY -= index.Height;
 
                 if (SelectedObject.IsPointInStatic(ArtLoader.Instance.GetTexture(graphic), posX, posY))
+                {
                     SelectedObject.Object = this;
+                }
             }
 
             return true;

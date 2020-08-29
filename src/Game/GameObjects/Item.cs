@@ -852,41 +852,31 @@ namespace ClassicUO.Game.GameObjects
             if (TextContainer == null)
                 return;
 
-            TextObject last = (TextObject) TextContainer.Items;
+            var last = (TextObject) TextContainer.Items;
 
             while (last?.Next != null)
                 last = (TextObject) last.Next;
 
-            if (last == null)
+            if (last == null || last.Time < Time.Ticks)
                 return;
 
             int offY = 0;
 
-            int startX = ProfileManager.Current.GameWindowPosition.X + 6;
-            int startY = ProfileManager.Current.GameWindowPosition.Y + 6;
-
-            int x = RealScreenPosition.X;
-            int y = RealScreenPosition.Y;
-
-
             if (OnGround)
             {
-                GameScene scene = Client.Game.GetScene<GameScene>();
-                float scale = scene?.Scale ?? 1;
+                Point p = RealScreenPosition;
 
                 ArtTexture texture = ArtLoader.Instance.GetTexture(Graphic);
 
                 if (texture != null)
-                    y -= (texture.ImageRectangle.Height >> 1);
+                {
+                    p.Y -= (texture.ImageRectangle.Height >> 1);
+                }
 
-                x += 22;
-                y += 22;
+                p.X += (int) Offset.X + 22;
+                p.Y += (int) (Offset.Y - Offset.Z) + 22;
 
-                x = (int) (x / scale);
-                y = (int) (y / scale);
-
-                x += (int) Offset.X;
-                y += (int) (Offset.Y - Offset.Z);
+                p = Client.Game.Scene.Camera.WorldToScreen(p);
 
                 for (; last != null; last = (TextObject) last.Previous)
                 {
@@ -895,12 +885,11 @@ namespace ClassicUO.Game.GameObjects
                         if (offY == 0 && last.Time < Time.Ticks)
                             continue;
 
-
                         last.OffsetY = offY;
                         offY += last.RenderedText.Height;
 
-                        last.RealScreenPosition.X = startX + (x - (last.RenderedText.Width >> 1));
-                        last.RealScreenPosition.Y = startY + (y - offY);
+                        last.RealScreenPosition.X = (p.X - (last.RenderedText.Width >> 1));
+                        last.RealScreenPosition.Y = (p.Y - offY);
                     }
                 }
 
@@ -915,19 +904,15 @@ namespace ClassicUO.Game.GameObjects
                         if (offY == 0 && last.Time < Time.Ticks)
                             continue;
 
-                        x = last.X - startX;
-                        y = last.Y - startY;
-
                         last.OffsetY = offY;
                         offY += last.RenderedText.Height;
 
-                        last.RealScreenPosition.X = startX + ((x - (last.RenderedText.Width >> 1)));
-                        last.RealScreenPosition.Y = startY + ((y - offY));
+                        last.RealScreenPosition.X = ((last.X - (last.RenderedText.Width >> 1)));
+                        last.RealScreenPosition.Y = ((last.Y - offY));
                     }
                 }
             }
         }
-
 
         public override void ProcessAnimation(out byte dir, bool evalutate = false)
         {

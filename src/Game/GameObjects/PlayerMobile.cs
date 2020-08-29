@@ -150,6 +150,9 @@ namespace ClassicUO.Game.GameObjects
 
         public short MaxManaIncrease;
 
+        public long DeathScreenTimer;
+
+
         public Ability PrimaryAbility
         {
             get => Abilities[0];
@@ -1255,9 +1258,6 @@ namespace ClassicUO.Game.GameObjects
         {
             base.OnPositionChanged();
 
-            if (World.Map != null && World.Map.Index >= 0)
-                World.Map.Center = new Point(X, Y);
-
             Plugin.UpdatePlayerPosition(X, Y, Z);
 
             TryOpenDoors();
@@ -1310,6 +1310,8 @@ namespace ClassicUO.Game.GameObjects
         {
             if (IsDestroyed)
                 return;
+
+            DeathScreenTimer = 0;
 
             Log.Warn( "PlayerMobile disposed!");
             base.Destroy();

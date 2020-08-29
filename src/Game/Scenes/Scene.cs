@@ -33,11 +33,12 @@ namespace ClassicUO.Game.Scenes
     {
         private uint _time_cleanup = Time.Ticks + 5000;
 
-        protected Scene(int sceneID,  bool canresize, bool maximized, bool loadaudio)
+        protected Scene(int sceneID, bool canresize, bool maximized, bool loadaudio)
         {
             CanResize = canresize;
             CanBeMaximized = maximized;
             CanLoadAudio = loadaudio;
+            Camera = new Camera();
         }
 
         public readonly bool CanResize, CanBeMaximized, CanLoadAudio;
@@ -51,9 +52,12 @@ namespace ClassicUO.Game.Scenes
 
         public AudioManager Audio { get; private set; }
 
+        public Camera Camera { get; }
+
         public virtual void Update(double totalMS, double frameMS)
         {
             Audio?.Update();
+            Camera.Update();
 
             if (_time_cleanup < Time.Ticks)
             {

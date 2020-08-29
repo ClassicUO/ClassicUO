@@ -330,15 +330,10 @@ namespace ClassicUO.Game.Managers
 
         public override void Draw(UltimaBatcher2D batcher, int startX, int startY, int renderIndex, bool isGump = false)
         {
-            float scale = Client.Game.GetScene<GameScene>().Scale;
-
             base.Draw(batcher, 0, 0, renderIndex, isGump);
 
             foreach (KeyValuePair<uint, OverheadDamage> overheadDamage in _damages)
             {
-                int x = startX;
-                int y = startY;
-
                 Entity mob = World.Get(overheadDamage.Key);
 
                 if (mob == null || mob.IsDestroyed)
@@ -359,7 +354,7 @@ namespace ClassicUO.Game.Managers
                         continue;
                 }
 
-                overheadDamage.Value.Draw(batcher, x, y, scale);
+                overheadDamage.Value.Draw(batcher);
             }
         }
 

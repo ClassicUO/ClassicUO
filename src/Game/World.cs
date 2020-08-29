@@ -125,10 +125,7 @@ namespace ClassicUO.Game
                         if (value >= Constants.MAPS_COUNT)
                             value = 0;
 
-                        Map = new Map.Map(value)
-                        {
-                            Center = new Point(x, y)
-                        };
+                        Map = new Map.Map(value);
                         Map.Initialize();
 
                         Player.X = x;
@@ -142,9 +139,6 @@ namespace ClassicUO.Game
                     else
                     {
                         Map = new Map.Map(value);
-
-                        if (Player != null)
-                            Map.Center = new Point(Player.X, Player.Y);
                         Map.Initialize();
                     }
 
