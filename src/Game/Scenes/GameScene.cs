@@ -430,6 +430,14 @@ namespace ClassicUO.Game.Scenes
 
         private void FillGameObjectList()
         {
+            _renderListCount = 0;
+            _foliageCount = 0;
+
+            if (!World.InGame)
+            {
+                return;
+            }
+
             _isListReady = false;
             _alphaChanged = _alphaTimer < Time.Ticks;
 
@@ -441,13 +449,10 @@ namespace ClassicUO.Game.Scenes
             {
                 _foliageIndex = 1;
             }
-            _foliageCount = 0;
 
             GetViewPort();
 
-            _renderListCount = 0;
             _objectHandlesCount = 0;
-
             _useObjectHandles = NameOverHeadManager.IsToggled || (Keyboard.Ctrl && Keyboard.Shift);
 
             if (_useObjectHandles)
