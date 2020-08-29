@@ -237,7 +237,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
             _textboxAccount.OnOptionSelected += (sender, e) =>
             {
-                var savedPassword = AccountManager.GetAccountPassword(World.ServerName, _textboxAccount.Text);
+                var savedPassword = AccountManager.GetAccountPassword(Settings.GlobalSettings.IP, _textboxAccount.Text);
                 _passwordFake.RealText = string.IsNullOrWhiteSpace(savedPassword) ? string.Empty: Crypter.Decrypt(savedPassword);
             };
 
