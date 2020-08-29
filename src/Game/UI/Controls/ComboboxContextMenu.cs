@@ -10,7 +10,7 @@ namespace ClassicUO.Game.UI.Controls
 
         public event EventHandler<int> OnItemSelected;
 
-        public ComboboxContextMenu(string[] items, int minWidth, int maxHeight, byte font)
+        public ComboboxContextMenu(string[] items, int minWidth, int maxHeight, byte font, int verticalSpacing = 15)
         {
             _font = font;
             ResizePic background;
@@ -28,7 +28,7 @@ namespace ClassicUO.Game.UI.Controls
                 HoveredLabel label = new HoveredLabel(item, false, 0x0453, 0x0453, 0x0453, font: _font)
                 {
                     X = 2,
-                    Y = index * 15,
+                    Y = index * verticalSpacing,
                     Tag = index,
                     DrawBackgroundCurrentIndex = true,
                     IsVisible = item.Length != 0

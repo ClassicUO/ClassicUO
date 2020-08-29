@@ -102,7 +102,7 @@ namespace ClassicUO.Game.UI.Controls
                 if (x > _arrow.X && x < _arrow.X + _arrow.Width && y > _arrow.Y && y < _arrow.Y + _arrow.Height)
                 {
                     OnBeforeContextMenu?.Invoke(this, null);
-                    _contextMenu = new ComboboxContextMenu(_items, Width - 9, 100, _font)
+                    _contextMenu = new ComboboxContextMenu(_items, Width - 9, 100, _font, 20)
                     {
                         X = ScreenCoordinateX - 6,
                         Y = ScreenCoordinateY + Height + 5
