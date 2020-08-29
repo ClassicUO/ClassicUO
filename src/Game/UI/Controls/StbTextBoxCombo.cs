@@ -71,10 +71,10 @@ namespace ClassicUO.Game.UI.Controls
 				if (_items != null)
 				{
 					UIManager.GetGump<TextboxComboContextMenu>()?.Dispose();
-					OnOptionSelected?.Invoke(this, value);
 					Text = _items[_selectedIndex];
 					CaretIndex = Text.Length;
 					SetKeyboardFocus();
+					OnOptionSelected?.Invoke(this, value);
 				}
 			}
 		}
