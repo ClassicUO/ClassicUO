@@ -37,14 +37,16 @@ namespace ClassicUO.Game.UI.Controls
         private GumpPic _arrow;
         private readonly byte _font;
         private readonly int _maxWidth;
+        private readonly int _maxComboHeight;
         private ComboboxContextMenu _contextMenu;
         private const ushort ARROW_UP = 253;
         private const ushort ARROW_DOWN = 252;
 
-        public StbTextBoxCombo(string[] items, byte font, int max_char_count = -1, int maxWidth = 0, bool isunicode = true, FontStyle style = FontStyle.None, ushort hue = 0, TEXT_ALIGN_TYPE align = TEXT_ALIGN_TYPE.TS_LEFT) :
+        public StbTextBoxCombo(string[] items, byte font, int max_char_count = -1, int maxWidth = 0, bool isunicode = true, FontStyle style = FontStyle.None, ushort hue = 0, TEXT_ALIGN_TYPE align = TEXT_ALIGN_TYPE.TS_LEFT, int maxComboHeight = 100) :
             base(font, max_char_count, maxWidth, isunicode, style, hue, align)
         {
             _maxWidth = maxWidth;
+            _maxComboHeight = maxComboHeight;
             _font = font;
             SetItems(items);
         }
@@ -102,7 +104,7 @@ namespace ClassicUO.Game.UI.Controls
                 if (x > _arrow.X && x < _arrow.X + _arrow.Width && y > _arrow.Y && y < _arrow.Y + _arrow.Height)
                 {
                     OnBeforeContextMenu?.Invoke(this, null);
-                    _contextMenu = new ComboboxContextMenu(_items, Width - 9, 100, _font, 20)
+                    _contextMenu = new ComboboxContextMenu(_items, Width - 9, _maxComboHeight, _font, 20)
                     {
                         X = ScreenCoordinateX - 6,
                         Y = ScreenCoordinateY + Height + 5
