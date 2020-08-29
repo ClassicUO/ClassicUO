@@ -51,10 +51,6 @@ namespace ClassicUO.Game.UI.Controls
             SetItems(items);
         }
 
-        public StbTextBoxCombo(List<string> parts, string[] lines) : base(parts, lines)
-        {
-        }
-
         internal void SetItems(string[] items)
         {
             _items = items;
