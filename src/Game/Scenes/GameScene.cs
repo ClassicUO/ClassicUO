@@ -47,7 +47,7 @@ namespace ClassicUO.Game.Scenes
     internal partial class GameScene : Scene
     {
         private readonly LightData[] _lights = new LightData[Constants.MAX_LIGHTS_DATA_INDEX_COUNT];
-        private readonly float[] _scaleArray = Enumerable.Range(5, 21).Select(i => i / 10.0f).ToArray(); // 0.5 => 2.5
+        private readonly float[] _scaleArray = {.6f, .7f, .8f, 0.9f, 1f, 1.1f, 1.2f, 1.3f, 1.5f };
         private bool _alphaChanged;
         private long _alphaTimer;
         private bool _deathScreenActive;
@@ -122,7 +122,12 @@ namespace ClassicUO.Game.Scenes
         public float Scale
         {
             get => _scaleArray[_scale];
-            set => ScalePos = (int) (value * 10) - 5;
+            set
+            {
+                int index = (int) (value * _scaleArray.Length) - _scaleArray.Length / 2;
+
+                ScalePos = index - 1;
+            }
         }
 
         public HotkeysManager Hotkeys { get; private set; }
