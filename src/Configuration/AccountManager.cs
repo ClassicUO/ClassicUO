@@ -15,7 +15,7 @@ namespace ClassicUO.Configuration
             try
             {
                 Load(serverName);
-                return Accounts?.Where(x => x.Server == serverName).Select(x => x.UserName).ToArray() ?? new string[] { };
+                return Accounts?.Where(x => x.Server == serverName).Select(x => x.UserName).OrderBy(x => x).ToArray() ?? new string[] { };
             }
             catch(Exception ex)
             {
