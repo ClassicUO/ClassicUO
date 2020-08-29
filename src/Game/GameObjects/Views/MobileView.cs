@@ -43,7 +43,7 @@ namespace ClassicUO.Game.GameObjects
         private static int _startCharacterFeetY;
         private static int _characterFrameHeight;
 
-
+        private const int SIT_OFFSET_Y = 4;
        
 
         public override bool Draw(UltimaBatcher2D batcher, int posX, int posY)
@@ -184,16 +184,19 @@ namespace ClassicUO.Game.GameObjects
                     ProcessSteps(out dir);
                     AnimationsLoader.Instance.Direction = dir;
                     AnimationsLoader.Instance.FixSittingDirection(ref dir, ref IsFlipped, ref drawX, ref drawY);
+                    drawY += SIT_OFFSET_Y;
 
                     if (AnimationsLoader.Instance.Direction == 3)
                     {
                         if (IsGargoyle)
                         {
-                            drawY -= 30;
+                            drawY -= 30 - SIT_OFFSET_Y;
                             animGroup = 42;
                         }
                         else
+                        {
                             animGroup = 25;
+                        }
                     }
                     else if (IsGargoyle)
                     {
@@ -413,7 +416,7 @@ namespace ClassicUO.Game.GameObjects
                         if (entity == null && isHuman)
                         {
                             int frameHeight = frame?.Height ?? 61;
-                            _characterFrameStartY = y - (frame != null ? 0 : (frameHeight - 4));
+                            _characterFrameStartY = y - (frame != null ? 0 : frameHeight - SIT_OFFSET_Y);
                             _characterFrameHeight = frameHeight;
                             _startCharacterWaistY = (int) (frameHeight * UPPER_BODY_RATIO) + _characterFrameStartY;
                             _startCharacterKneesY = (int) (frameHeight * MID_BODY_RATIO) + _characterFrameStartY;
