@@ -857,7 +857,28 @@ namespace ClassicUO.Game.Scenes
             {
                 return;
             }
+
             
+            /*const int MOVE_STEP = 44;
+
+            int step = MOVE_STEP * (Keyboard.Ctrl ? 2 : 1);
+
+            switch (e.keysym.sym)
+            {
+                case SDL.SDL_Keycode.SDLK_UP:
+                    Camera.SetPositionOffset(-step, -step);
+                    return;
+                case SDL.SDL_Keycode.SDLK_DOWN:
+                    Camera.SetPositionOffset(step, step);
+                    return;
+                case SDL.SDL_Keycode.SDLK_LEFT:
+                    Camera.SetPositionOffset(-step, step);
+                    return;
+                case SDL.SDL_Keycode.SDLK_RIGHT:
+                    Camera.SetPositionOffset(step, -step);
+                    return;
+            }
+            */
 
             bool canExecuteMacro = UIManager.KeyboardFocusControl == UIManager.SystemChat.TextBoxControl &&
                                    UIManager.SystemChat.Mode >= ChatMode.Default;

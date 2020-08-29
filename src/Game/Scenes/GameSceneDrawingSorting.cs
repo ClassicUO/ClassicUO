@@ -736,8 +736,16 @@ namespace ClassicUO.Game.Scenes
             int winGameCenterY = winGamePosY + (winGameHeight >> 1) + (World.Player.Z << 2);
             winGameCenterX -= (int) World.Player.Offset.X;
             winGameCenterY -= (int) (World.Player.Offset.Y - World.Player.Offset.Z);
-            int winDrawOffsetX = (World.Player.X - World.Player.Y) * 22 - winGameCenterX;
-            int winDrawOffsetY = (World.Player.X + World.Player.Y) * 22 - winGameCenterY;
+
+            //winGameCenterX -= Camera.Position.X;
+            //winGameCenterY -= Camera.Position.Y;
+
+            int tileOffX = World.Player.X + Camera.Position.X / 44;
+            int tileOffY = World.Player.Y + Camera.Position.Y / 44;
+
+            int winDrawOffsetX = (tileOffX - tileOffY) * 22 - winGameCenterX;
+            int winDrawOffsetY = (tileOffX + tileOffY) * 22 - winGameCenterY;
+
 
             int winGameScaledOffsetX;
             int winGameScaledOffsetY;
@@ -779,38 +787,22 @@ namespace ClassicUO.Game.Scenes
                 height = width;
             }
 
-            //winDrawOffsetX += winGameScaledOffsetX >> 1;
-            //winDrawOffsetY += winGameScaledOffsetY >> 1;
-
-            //const int MAX = 70;
-
-            //if (width > MAX)
-            //    width = MAX;
-
-            //if (height > MAX)
-            //    height = MAX;
-
-            //int size = Math.Max(width, height);
-
-            //if (size < World.ClientViewRange)
-            //    size = World.ClientViewRange;
-
-            int realMinRangeX = World.Player.X - width;
-
+            int realMinRangeX = tileOffX - width;
             if (realMinRangeX < 0)
                 realMinRangeX = 0;
-            int realMaxRangeX = World.Player.X + width;
 
+            int realMaxRangeX = tileOffX + width;
             //if (realMaxRangeX >= FileManager.Map.MapsDefaultSize[World.Map.Index][0])
             //    realMaxRangeX = FileManager.Map.MapsDefaultSize[World.Map.Index][0];
-            int realMinRangeY = World.Player.Y - height;
 
+            int realMinRangeY = tileOffY - height;
             if (realMinRangeY < 0)
                 realMinRangeY = 0;
-            int realMaxRangeY = World.Player.Y + height;
 
+            int realMaxRangeY = tileOffY + height;
             //if (realMaxRangeY >= FileManager.Map.MapsDefaultSize[World.Map.Index][1])
             //    realMaxRangeY = FileManager.Map.MapsDefaultSize[World.Map.Index][1];
+
             int minBlockX = (realMinRangeX >> 3) - 1;
             int minBlockY = (realMinRangeY >> 3) - 1;
             int maxBlockX = (realMaxRangeX >> 3) + 1;

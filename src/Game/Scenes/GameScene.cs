@@ -572,29 +572,6 @@ namespace ClassicUO.Game.Scenes
 
         public override void Update(double totalMS, double frameMS)
         {
-            int posX = ProfileManager.Current.GameWindowPosition.X + 5;
-            int posY = ProfileManager.Current.GameWindowPosition.Y + 5;
-            int width = ProfileManager.Current.GameWindowSize.X;
-            int height = ProfileManager.Current.GameWindowSize.Y;
-
-            Camera.SetPosition
-            (
-                World.Player.RealScreenPosition.X + 22,
-                World.Player.RealScreenPosition.Y + 22
-            );
-
-            Camera.SetGameWindowBounds
-            (
-                posX, 
-                posY, 
-                width,
-                height
-            );
-
-
-            SelectedObject.TranslatedMousePositionByViewport = Camera.MouseToWorldPosition();
-
-
             base.Update(totalMS, frameMS);
 
             PacketHandlers.SendMegaClilocRequests();
@@ -767,6 +744,30 @@ namespace ClassicUO.Game.Scenes
         public override void FixedUpdate(double totalMS, double frameMS)
         {
             FillGameObjectList();
+
+            int posX = ProfileManager.Current.GameWindowPosition.X + 5;
+            int posY = ProfileManager.Current.GameWindowPosition.Y + 5;
+            int width = ProfileManager.Current.GameWindowSize.X;
+            int height = ProfileManager.Current.GameWindowSize.Y;
+
+
+
+            //Camera.SetPosition
+            //(
+            //    World.Player.RealScreenPosition.X + (int) World.Player.Offset.X + 22,
+            //    World.Player.RealScreenPosition.Y + (int) (World.Player.Offset.Y - World.Player.Offset.Z) + 22
+            //);
+
+            Camera.SetGameWindowBounds
+            (
+                posX,
+                posY,
+                width,
+                height
+            );
+
+
+            SelectedObject.TranslatedMousePositionByViewport = Camera.MouseToWorldPosition();
         }
 
 

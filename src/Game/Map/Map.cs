@@ -51,7 +51,6 @@ namespace ClassicUO.Game.Map
         public readonly int Index;
         public Chunk[] Chunks;
         public readonly int BlocksCount;
-        public Point Center;
 
 
         public Chunk GetChunk(int x, int y, bool load = true)
@@ -267,9 +266,11 @@ namespace ClassicUO.Game.Map
 
         public void Initialize()
         {
-            return;
+            // do nothing
 
-            const int XY_OFFSET = 30;
+            /*
+
+             const int XY_OFFSET = 30;
 
             int minBlockX = ((Center.X - XY_OFFSET) >> 3) - 1;
             int minBlockY = ((Center.Y - XY_OFFSET) >> 3) - 1;
@@ -288,7 +289,7 @@ namespace ClassicUO.Game.Map
             if (maxBlockY >= MapLoader.Instance.MapBlocksSize[Index, 1])
                 maxBlockY = MapLoader.Instance.MapBlocksSize[Index, 1] - 1;
             long tick = Time.Ticks;
-            long maxDelay = 100; /*Engine.FrameDelay[1] >> 1*/;
+            long maxDelay = Engine.FrameDelay[1] >> 1;
 
             for (int i = minBlockX; i <= maxBlockX; i++)
             {
@@ -312,6 +313,8 @@ namespace ClassicUO.Game.Map
                     chunk.LastAccessTime = Time.Ticks;
                 }
             }
+
+             */
         }
     }
 }

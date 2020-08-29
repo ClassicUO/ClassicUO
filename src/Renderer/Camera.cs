@@ -79,7 +79,6 @@ namespace ClassicUO.Renderer
                 {
                     _zoom = 1f / value;
                     _updateMatrixes = true;
-                    UpdateMatrixes();
                 }
             }
         }
@@ -100,8 +99,6 @@ namespace ClassicUO.Renderer
 
                 _updateProjection = true;
                 _updateMatrixes = true;
-
-                UpdateMatrixes();
             }
         }
 
@@ -118,8 +115,6 @@ namespace ClassicUO.Renderer
                 Position.Y = y;
 
                 _updateMatrixes = true;
-
-                UpdateMatrixes();
             }
         }
 

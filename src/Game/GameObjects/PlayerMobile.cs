@@ -1255,9 +1255,6 @@ namespace ClassicUO.Game.GameObjects
         {
             base.OnPositionChanged();
 
-            if (World.Map != null && World.Map.Index >= 0)
-                World.Map.Center = new Point(X, Y);
-
             Plugin.UpdatePlayerPosition(X, Y, Z);
 
             TryOpenDoors();
