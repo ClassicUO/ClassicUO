@@ -19,4 +19,9 @@
       <ProjectReference Include="..\..\src\ClassicUO.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="Game" />
+      <Folder Include="Utility" />
+    </ItemGroup>
+
 </Project>

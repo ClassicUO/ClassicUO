@@ -1,7 +1,7 @@
 ﻿using FluentAssertions;
 using Xunit;
 
-namespace ClassicUO.UnitTests.QueuedPool
+namespace ClassicUO.UnitTests.Utility.QueuedPool
 {
     public class Constructor
     {
@@ -12,7 +12,7 @@ namespace ClassicUO.UnitTests.QueuedPool
         [InlineData(32)]
         public void Constructor_MaxSize_Should_Populate_Items(int input)
         {
-            var objectPool = new Utility.QueuedPool<DummyItem>(input);
+            var objectPool = new ClassicUO.Utility.QueuedPool<DummyItem>(input);
             objectPool.MaxSize.Should().Be(input);
         }
     }

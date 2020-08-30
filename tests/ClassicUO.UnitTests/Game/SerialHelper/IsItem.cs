@@ -1,7 +1,7 @@
 ﻿using FluentAssertions;
 using Xunit;
 
-namespace ClassicUO.UnitTests.SerialHelper
+namespace ClassicUO.UnitTests.Game.SerialHelper
 {
     public class IsItem
     {
@@ -10,7 +10,7 @@ namespace ClassicUO.UnitTests.SerialHelper
         [InlineData(0x7FFFFFFF)]
         public void IsItem_Serial_Should_Be_Legal(uint serial)
         {
-            Game.SerialHelper.IsItem(serial)
+            ClassicUO.Game.SerialHelper.IsItem(serial)
                 .Should()
                 .BeTrue();
         }
@@ -21,7 +21,7 @@ namespace ClassicUO.UnitTests.SerialHelper
         [InlineData(0x80000000)]
         public void IsItem_Serial_Should_Not_Be_Legal(uint serial)
         {
-            Game.SerialHelper.IsItem(serial)
+            ClassicUO.Game.SerialHelper.IsItem(serial)
                 .Should()
                 .BeFalse();
         }

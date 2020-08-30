@@ -2,7 +2,7 @@
 using FluentAssertions;
 using Xunit;
 
-namespace ClassicUO.UnitTests.SerialHelper
+namespace ClassicUO.UnitTests.Game.SerialHelper
 {
     public class Parse
     {
@@ -12,7 +12,7 @@ namespace ClassicUO.UnitTests.SerialHelper
         [InlineData("-23")]
         public void Parse_Should_Return_Legal_Number(string input)
         {
-            Game.SerialHelper.Parse(input)
+            ClassicUO.Game.SerialHelper.Parse(input)
                 .Should().BePositive();
         }
 
@@ -22,7 +22,7 @@ namespace ClassicUO.UnitTests.SerialHelper
         [InlineData("1F")]
         public void Parse_Should_Not_Return_Legal_Number(string input)
         {
-            Action act = () => Game.SerialHelper.Parse(input);
+            Action act = () => ClassicUO.Game.SerialHelper.Parse(input);
 
             act.Should().Throw<FormatException>();
         }

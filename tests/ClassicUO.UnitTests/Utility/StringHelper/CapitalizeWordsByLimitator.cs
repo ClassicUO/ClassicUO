@@ -1,7 +1,7 @@
 ﻿using FluentAssertions;
 using Xunit;
 
-namespace ClassicUO.UnitTests.StringHelper
+namespace ClassicUO.UnitTests.Utility.StringHelper
 {
     public class CapitalizeWordsByLimitator
     {
@@ -10,7 +10,7 @@ namespace ClassicUO.UnitTests.StringHelper
         [InlineData(null)]
         public void CapitalizeWordsByLimitator_Empty_Input_Should_Return_Empty_String(string input)
         {
-            Utility.StringHelper.CapitalizeWordsByLimitator(input)
+            ClassicUO.Utility.StringHelper.CapitalizeWordsByLimitator(input)
                 .Should()
                 .Be(string.Empty);
         }
@@ -26,7 +26,7 @@ namespace ClassicUO.UnitTests.StringHelper
 
             var expectedResult = $"Hello{deliminator} Fans of ultima online. Time to play";
 
-            var result = Utility.StringHelper.CapitalizeWordsByLimitator(input);
+            var result = ClassicUO.Utility.StringHelper.CapitalizeWordsByLimitator(input);
 
             result
                 .Should()
@@ -45,7 +45,7 @@ namespace ClassicUO.UnitTests.StringHelper
 
             var expectedResult = $"Hello{deliminator} fans of ultima online. Time to play";
 
-            var result = Utility.StringHelper.CapitalizeWordsByLimitator(input);
+            var result = ClassicUO.Utility.StringHelper.CapitalizeWordsByLimitator(input);
 
             result
                 .Should()

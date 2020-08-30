@@ -1,7 +1,7 @@
 ﻿using FluentAssertions;
 using Xunit;
 
-namespace ClassicUO.UnitTests.StringHelper
+namespace ClassicUO.UnitTests.Utility.StringHelper
 {
     public class CapitalizeFirstCharacter
     {
@@ -11,7 +11,7 @@ namespace ClassicUO.UnitTests.StringHelper
             const string UNCAPITALIZED_WORDS = "hello fans of ultima online";
             const string EXPECTED_RESULT = "Hello fans of ultima online";
 
-            var result = Utility.StringHelper.CapitalizeFirstCharacter(UNCAPITALIZED_WORDS);
+            var result = ClassicUO.Utility.StringHelper.CapitalizeFirstCharacter(UNCAPITALIZED_WORDS);
 
             result
                 .Should()
@@ -24,7 +24,7 @@ namespace ClassicUO.UnitTests.StringHelper
             const string UNCAPITALIZED_WORDS = "h";
             const string EXPECTED_RESULT = "H";
 
-            var result = Utility.StringHelper.CapitalizeFirstCharacter(UNCAPITALIZED_WORDS);
+            var result = ClassicUO.Utility.StringHelper.CapitalizeFirstCharacter(UNCAPITALIZED_WORDS);
 
             result
                 .Should()
@@ -36,7 +36,7 @@ namespace ClassicUO.UnitTests.StringHelper
         [InlineData(null)]
         public void CapitalizeFirstCharacter_No_Input_Should_Return_EmptyString(string input)
         {
-            var result = Utility.StringHelper.CapitalizeFirstCharacter(input);
+            var result = ClassicUO.Utility.StringHelper.CapitalizeFirstCharacter(input);
 
             result
                 .Should()

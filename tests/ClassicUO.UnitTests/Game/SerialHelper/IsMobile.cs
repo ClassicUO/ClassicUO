@@ -1,7 +1,7 @@
 ﻿using FluentAssertions;
 using Xunit;
 
-namespace ClassicUO.UnitTests.SerialHelper
+namespace ClassicUO.UnitTests.Game.SerialHelper
 {
     public class IsMobile
     {
@@ -11,7 +11,7 @@ namespace ClassicUO.UnitTests.SerialHelper
         [InlineData(0x3FFFFFFF)]
         public void IsValid_Serial_Should_Be_Legal(uint serial)
         {
-            Game.SerialHelper.IsMobile(serial)
+            ClassicUO.Game.SerialHelper.IsMobile(serial)
                 .Should()
                 .BeTrue();
         }
@@ -22,7 +22,7 @@ namespace ClassicUO.UnitTests.SerialHelper
         [InlineData(0x80000000)]
         public void IsValid_Serial_Should_Not_Be_Legal(uint serial)
         {
-            Game.SerialHelper.IsMobile(serial)
+            ClassicUO.Game.SerialHelper.IsMobile(serial)
                 .Should()
                 .BeFalse();
         }
