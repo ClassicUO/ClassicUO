@@ -57,6 +57,7 @@ namespace ClassicUO.Utility
         }
 
 
+        //TODO: create Extensions/DirectoryInfoExtensions.cs
         public static void CopyAllTo(this DirectoryInfo source, DirectoryInfo target)
         {
             Directory.CreateDirectory(target.FullName);
