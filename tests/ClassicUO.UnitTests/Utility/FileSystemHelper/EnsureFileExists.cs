@@ -14,5 +14,17 @@ namespace ClassicUO.UnitTests.Utility.FileSystemHelper
 
             act.Should().Throw<FileNotFoundException>();
         }
+
+        [Fact]
+        public void EnsureFileExists_ValidPath_Should_Not_ThrowException()
+        {
+            var validFileName = Path.GetTempFileName();
+
+            Action act = () => ClassicUO.Utility.FileSystemHelper.EnsureFileExists(validFileName);
+
+            act.Should().NotThrow<FileNotFoundException>();
+
+            File.Delete(validFileName);
+        }
     }
 }
