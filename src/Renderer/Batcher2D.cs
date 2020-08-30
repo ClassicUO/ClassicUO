@@ -541,7 +541,7 @@ namespace ClassicUO.Renderer
             vertex.Hue0.Y =
             vertex.Hue1.Y =
             vertex.Hue2.Y =
-            vertex.Hue3.Y = ShaderHuesTraslator.SHADER_SHADOW;
+            vertex.Hue3.Y = ShaderHueTranslator.SHADER_SHADOW;
 
             PushSprite(texture);
 
