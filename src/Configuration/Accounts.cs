@@ -4,7 +4,6 @@
     {
         public Account()
         {
-
         }
 
         public Account(string server, string userName, string password)

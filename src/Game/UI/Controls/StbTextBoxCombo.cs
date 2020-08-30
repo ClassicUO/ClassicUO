@@ -50,6 +50,9 @@ namespace ClassicUO.Game.UI.Controls
             SetItems(items);
         }
 
+        public event EventHandler<int> OnOptionSelected;
+        public event EventHandler OnBeforeContextMenu;
+
         internal void SetItems(string[] items)
         {
             _items = items;
@@ -73,7 +76,7 @@ namespace ClassicUO.Game.UI.Controls
         {
             _arrow.MouseDown -= ArrowMouseDownHandler;
             _arrow.MouseUp -= ArrowMouseUpHandler;
-            _arrow = null;
+            _arrow.Dispose();
         }
 
         public override void Dispose()
@@ -108,8 +111,7 @@ namespace ClassicUO.Game.UI.Controls
         private void CleanupContextMenu()
         {
             _contextMenu.OnItemSelected -= ItemSelectedHandler;
-            UIManager.GetGump<ComboboxContextMenu>()?.Dispose();
-            _contextMenu = null;
+            _contextMenu.Dispose();
         }
 
         private void ItemSelectedHandler(object sender, int value)
@@ -120,8 +122,5 @@ namespace ClassicUO.Game.UI.Controls
             OnOptionSelected?.Invoke(this, value);
             CleanupContextMenu();
         }
-
-        public event EventHandler<int> OnOptionSelected;
-        public event EventHandler OnBeforeContextMenu;
     }
 }

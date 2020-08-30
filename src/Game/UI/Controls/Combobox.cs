@@ -60,13 +60,12 @@ namespace ClassicUO.Game.UI.Controls
             {
                 X = 2, Y = 5
             });
-
             if (showArrow)
             {
                 Add(new GumpPic(width - 18, 2, 0x00FC, 0));
             }
         }
-
+        
         public bool IsOpen { get; set; }
 
         public int SelectedIndex
@@ -84,12 +83,12 @@ namespace ClassicUO.Game.UI.Controls
             }
         }
 
+
+
         private void CleanupContextMenu()
         {
-            //Cleanup Context Menu
             _contextMenu.OnItemSelected -= ItemSelectedHandler;
-            UIManager.GetGump<ComboboxContextMenu>()?.Dispose();
-            _contextMenu = null;
+            _contextMenu.Dispose();
         }
 
         internal string GetSelectedItem => _label.Text;
