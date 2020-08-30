@@ -785,7 +785,7 @@ namespace ClassicUO.Game.Scenes
                 batcher.GraphicsDevice.Viewport = Camera.GetViewport();
             }
 
-            DrawWorld(batcher, posX, posY, ref matrix, _use_render_target);
+            DrawWorld(batcher, ref matrix, _use_render_target);
 
             if (_use_render_target)
             {
@@ -895,7 +895,7 @@ namespace ClassicUO.Game.Scenes
             return base.Draw(batcher);
         }
 
-        private void DrawWorld(UltimaBatcher2D batcher, int masterX, int masterY, ref Matrix matrix, bool use_render_target)
+        private void DrawWorld(UltimaBatcher2D batcher, ref Matrix matrix, bool use_render_target)
         {
             SelectedObject.Object = null;
 
@@ -921,7 +921,7 @@ namespace ClassicUO.Game.Scenes
                 fx += 22;
                 //fy -= 22;
 
-                CircleOfTransparency.Draw(batcher, fx + masterX, fy + masterY);
+                CircleOfTransparency.Draw(batcher, fx, fy);
             }
 
             if (!_deathScreenActive)
@@ -944,12 +944,12 @@ namespace ClassicUO.Game.Scenes
                 }
 
                 if (_multi != null && TargetManager.IsTargeting && TargetManager.TargetingState == CursorTarget.MultiPlacement)
-                    _multi.Draw(batcher, _multi.RealScreenPosition.X,  _multi.RealScreenPosition.Y);
+                    _multi.Draw(batcher, _multi.RealScreenPosition.X, _multi.RealScreenPosition.Y);
             }
 
 
             // draw weather
-            _weather.Draw(batcher, masterX, masterY);
+            _weather.Draw(batcher, 0, 0);
             batcher.End();
 
             if (use_render_target)
