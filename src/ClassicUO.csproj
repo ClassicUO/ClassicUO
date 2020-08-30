@@ -43,7 +43,11 @@
     <Description>An open source implementation of the Ultima Online Classic Client.</Description>
   </PropertyGroup>
 
-
+  <ItemGroup>
+    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
+      <_Parameter1>ClassicUO.UnitTests</_Parameter1>
+    </AssemblyAttribute>
+  </ItemGroup>
 
   <ItemGroup>
     <EmbeddedResource Include="cuologo.png" />

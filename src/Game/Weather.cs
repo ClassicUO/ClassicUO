@@ -31,7 +31,10 @@ namespace ClassicUO.Game
 {
     class Weather
     {
-        private class WeatherEffect
+        private const int MAX_WEATHER_EFFECT = 70;
+
+
+        private struct WeatherEffect
         {
             public float SpeedX, SpeedY, X, Y, ScaleRatio, SpeedAngle, SpeedMagnitude;
             public uint ID;
@@ -51,7 +54,7 @@ namespace ClassicUO.Game
         public uint Timer, WindTimer, LastTick;
         public float SimulationRation = 37.0f;
 
-        private readonly List<WeatherEffect> _effects = new List<WeatherEffect>();
+        private readonly WeatherEffect[] _effects = new WeatherEffect[MAX_WEATHER_EFFECT];
         private Vector3 _hueVector;
         public sbyte? CurrentWeather { get; set; }
 
@@ -67,8 +70,6 @@ namespace ClassicUO.Game
             Wind = 0;
             WindTimer = Timer = 0;
             CurrentWeather = null;
-
-            _effects.Clear();
         }
 
         public void Generate()
@@ -78,25 +79,16 @@ namespace ClassicUO.Game
             if (Type == 0xFF || Type == 0xFE)
                 return;
 
-            //int drawX = ProfileManager.Current.GameWindowPosition.X;
-            //int drawY = ProfileManager.Current.GameWindowPosition.Y;
-
-            if (Count > 70)
-                Count = 70;
+            if (Count > MAX_WEATHER_EFFECT)
+                Count = MAX_WEATHER_EFFECT;
 
             WindTimer = 0;
 
             while (CurrentCount < Count)
             {
-                WeatherEffect effect = new WeatherEffect()
-                {
-                    X = RandomHelper.GetValue( 0, ProfileManager.Current.GameWindowSize.X),
-                    Y = RandomHelper.GetValue(0, ProfileManager.Current.GameWindowSize.Y)
-                };
-
-                _effects.Add(effect);
-
-                CurrentCount++;
+                ref WeatherEffect effect = ref _effects[CurrentCount++];
+                effect.X = RandomHelper.GetValue(0, ProfileManager.Current.GameWindowSize.X);
+                effect.Y = RandomHelper.GetValue(0, ProfileManager.Current.GameWindowSize.Y);
             }
         }
 
@@ -170,17 +162,15 @@ namespace ClassicUO.Game
             //Point winpos = ProfileManager.Current.GameWindowPosition;
             Point winsize = ProfileManager.Current.GameWindowSize;
 
-            for (int i = 0; i < _effects.Count; i++)
+            for (int i = 0; i < CurrentCount; i++)
             {
-                WeatherEffect effect = _effects[i];
+                ref WeatherEffect effect = ref _effects[i];
 
                 if (effect.X < x || effect.X > x + winsize.X ||
                     effect.Y < y || effect.Y > y + winsize.Y)
                 {
                     if (removeEffects)
                     {
-                        _effects.RemoveAt(i--);
-
                         if (CurrentCount > 0)
                             CurrentCount--;
                         else

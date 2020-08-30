@@ -76,7 +76,7 @@ namespace ClassicUO.Network
                 }
 
 
-                else if (version < ClientVersion.CV_200)
+                else if (version <= ClientVersion.CV_200)
                 {
                     Type = ENCRYPTION_TYPE.BLOWFISH;
                 }
