@@ -317,8 +317,6 @@ namespace ClassicUO.IO.Resources
 
         private unsafe void ReadStaticArt(ref ArtTexture texture, ushort graphic)
         {
-            Rectangle imageRectangle = new Rectangle();
-
             ref UOFileIndex entry = ref GetValidRefEntry(graphic + 0x4000);
 
             if (entry.Length == 0)
@@ -352,7 +350,7 @@ namespace ClassicUO.IO.Resources
 
                 if (xoffs + run >= 2048)
                 {
-                    texture = new ArtTexture(imageRectangle, 0, 0);
+                    texture = new ArtTexture(0, 0);
                     return;
                 }
 
@@ -450,19 +448,19 @@ namespace ClassicUO.IO.Resources
                 }
             }
 
-            imageRectangle.X = minX;
-            imageRectangle.Y = minY;
-            imageRectangle.Width = maxX - minX;
-            imageRectangle.Height = maxY - minY;
-
+ 
             entry.Width = (short) ((width >> 1) - 22);
             entry.Height = (short) (height - 44);
 
-            texture = new ArtTexture(imageRectangle, width, height);
+            texture = new ArtTexture(width, height);
+            texture.ImageRectangle.X = minX;
+            texture.ImageRectangle.Y = minY;
+            texture.ImageRectangle.Width = maxX - minX;
+            texture.ImageRectangle.Height = maxY - minY;
             texture.PushData(pixels);
         }
         
-        private void ReadLandArt(ref UOTexture32 texture, ushort graphic)
+        private unsafe void ReadLandArt(ref UOTexture32 texture, ushort graphic)
         {
             const int SIZE = 44 * 44;
 
@@ -477,7 +475,7 @@ namespace ClassicUO.IO.Resources
 
             _file.Seek(entry.Offset);
 
-            uint[] data = new uint[SIZE];
+            uint* data = stackalloc uint[SIZE];
 
             for (int i = 0; i < 22; i++)
             {
@@ -505,7 +503,7 @@ namespace ClassicUO.IO.Resources
             texture = new UOTexture32(44, 44);
             // we don't need to store the data[] pointer because
             // land is always hoverable
-            texture.SetData(data);
+            texture.SetDataPointerEXT(0, null, (IntPtr) data, SIZE * sizeof(uint));
         }
     }
 }
