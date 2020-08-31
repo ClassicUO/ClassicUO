@@ -122,6 +122,7 @@ namespace ClassicUO.Game.UI.Gumps
         private Checkbox _useStandardSkillsGump, _showMobileNameIncoming, _showCorpseNameIncoming;
         private Checkbox _holdShiftForContext, _holdShiftToSplitStack, _reduceFPSWhenInactive, _sallosEasyGrab, _partyInviteGump, _objectsFading, _textFading, _holdAltToMoveGumps;
         private Checkbox _showHouseContent;
+        private Checkbox _hideScreenshotStoredInMessage;
         private Combobox _cotType;
 
 
@@ -279,6 +280,7 @@ namespace ClassicUO.Game.UI.Gumps
             _holdDownKeyAlt = CreateCheckBox(rightArea, ResGumps.AltCloseGumps, ProfileManager.Current.HoldDownKeyAltToCloseAnchored, 0, SPACE_Y);
             _closeAllAnchoredGumpsWithRClick = CreateCheckBox(rightArea, ResGumps.ClickCloseAllGumps, ProfileManager.Current.CloseAllAnchoredGumpsInGroupWithRightClick, 0, SPACE_Y);
             _holdAltToMoveGumps = CreateCheckBox(rightArea, ResGumps.AltMoveGumps, ProfileManager.Current.HoldAltToMoveGumps, 0, SPACE_Y);
+            _hideScreenshotStoredInMessage = CreateCheckBox(rightArea, ResGumps.HideScreenshotStoredInMessage, ProfileManager.Current.HideScreenshotStoredInMessage, 0, SPACE_Y);
             _holdShiftForContext = CreateCheckBox(rightArea, ResGumps.ShiftContext, ProfileManager.Current.HoldShiftForContext, 0, SPACE_Y);
             _holdShiftToSplitStack = CreateCheckBox(rightArea, ResGumps.ShiftStack, ProfileManager.Current.HoldShiftToSplitStack, 0, SPACE_Y);
             _highlightByState = CreateCheckBox(rightArea, ResGumps.HighlighState, ProfileManager.Current.HighlightMobilesByFlags, 0, SPACE_Y);
@@ -1526,6 +1528,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _skipEmptyCorpse.IsChecked = false;
                     _saveHealthbars.IsChecked = false;
                     _use_smooth_boat_movement.IsChecked = false;
+                    _hideScreenshotStoredInMessage.IsChecked = false;
 
                     break;
 
@@ -1707,6 +1710,7 @@ namespace ClassicUO.Game.UI.Gumps
             ProfileManager.Current.HoldAltToMoveGumps = _holdAltToMoveGumps.IsChecked;
             ProfileManager.Current.HoldShiftToSplitStack = _holdShiftToSplitStack.IsChecked;
             ProfileManager.Current.CloseHealthBarType = _healtbarType.SelectedIndex;
+            ProfileManager.Current.HideScreenshotStoredInMessage = _hideScreenshotStoredInMessage.IsChecked;
 
             if (ProfileManager.Current.DrawRoofs == _drawRoofs.IsChecked)
             {

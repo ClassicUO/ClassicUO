@@ -38,6 +38,7 @@ using ClassicUO.Network;
 using ClassicUO.Renderer;
 using ClassicUO.Resources;
 using ClassicUO.Utility;
+using ClassicUO.Utility.Logging;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
@@ -533,18 +534,7 @@ namespace ClassicUO
 
                     if (sdlEvent->key.keysym.sym == SDL_Keycode.SDLK_PRINTSCREEN)
                     {
-                        string path = Path.Combine(FileSystemHelper.CreateFolderIfNotExists(CUOEnviroment.ExecutablePath, "Data", "Client", "Screenshots"), $"screenshot_{DateTime.Now:yyyy-MM-dd_hh-mm-ss}.png");
-
-                        Color[] colors = new Color[_graphicDeviceManager.PreferredBackBufferWidth * _graphicDeviceManager.PreferredBackBufferHeight];
-                        GraphicsDevice.GetBackBufferData(colors);
-
-                        using (Texture2D texture = new Texture2D(GraphicsDevice, _graphicDeviceManager.PreferredBackBufferWidth, _graphicDeviceManager.PreferredBackBufferHeight, false, SurfaceFormat.Color))
-                        using (FileStream fileStream = File.Create(path))
-                        {
-                            texture.SetData(colors);
-                            texture.SaveAsPng(fileStream, texture.Width, texture.Height);
-                            GameActions.Print(string.Format(ResGeneral.ScreenshotStoredIn0, path), 0x44, MessageType.System);
-                        }
+                        TakeScreenshot();
                     }
 
                     break;
@@ -809,6 +799,31 @@ namespace ClassicUO
             }
 
             return 0;
+        }
+
+        private void TakeScreenshot()
+        {
+            string screenshotsFolder = FileSystemHelper.CreateFolderIfNotExists(CUOEnviroment.ExecutablePath, "Data", "Client", "Screenshots");
+            string path = Path.Combine(screenshotsFolder, $"screenshot_{DateTime.Now:yyyy-MM-dd_hh-mm-ss}.png");
+
+            Color[] colors = new Color[_graphicDeviceManager.PreferredBackBufferWidth * _graphicDeviceManager.PreferredBackBufferHeight];
+            GraphicsDevice.GetBackBufferData(colors);
+
+            using (Texture2D texture = new Texture2D(GraphicsDevice, _graphicDeviceManager.PreferredBackBufferWidth, _graphicDeviceManager.PreferredBackBufferHeight, false, SurfaceFormat.Color))
+            using (FileStream fileStream = File.Create(path))
+            {
+                texture.SetData(colors);
+                texture.SaveAsPng(fileStream, texture.Width, texture.Height);
+                var message = string.Format(ResGeneral.ScreenshotStoredIn0, path);
+                if (ProfileManager.Current.HideScreenshotStoredInMessage)
+                {
+                    Log.Info(message);
+                }
+                else
+                {
+                    GameActions.Print(message, 0x44, MessageType.System);
+                }
+            }
         }
     }
 }
