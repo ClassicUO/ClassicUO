@@ -46,6 +46,7 @@ namespace ManifestCreator
             "osx/libtheorafile.dylib",
             "osx/libMoltenVK.dylib",
             "osx/libvulkan.1.dylib",
+            "vulkan/icd.d/MoltenVK_icd.json",
 
             // windows
             "x64/FAudio.dll",

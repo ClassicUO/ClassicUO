@@ -80,36 +80,29 @@
   </ItemGroup>
 
 
-  <Target Name="CopyExternalDeps_x64" AfterTargets="Build">
+  <Target Name="CopyExternalDeps" AfterTargets="Build">
     <ItemGroup>
       <DataFiles_x64 Include="$(ProjectDir)..\external\x64\*.*" />
+      <DataFiles_lib64 Include="$(ProjectDir)..\external\lib64\*.*" />
+      <DataFiles_osx Include="$(ProjectDir)..\external\osx\*.*" />
+      <DataFiles_vulkan Include="$(ProjectDir)..\external\vulkan\**" />
     </ItemGroup>
 
     <Copy
       SourceFiles="@(DataFiles_x64)"
       DestinationFolder="$(TargetDir)\x64\"
       SkipUnchangedFiles="true" />
-  </Target>
-
-  <Target Name="CopyExternalDeps_lib64" AfterTargets="Build">
-    <ItemGroup>
-      <DataFiles_lib64 Include="$(ProjectDir)..\external\lib64\*.*" />
-    </ItemGroup>
-
     <Copy
       SourceFiles="@(DataFiles_lib64)"
       DestinationFolder="$(TargetDir)\lib64\"
       SkipUnchangedFiles="true" />
-  </Target>
-
-  <Target Name="CopyExternalDeps_osx" AfterTargets="Build">
-    <ItemGroup>
-      <DataFiles_osx Include="$(ProjectDir)..\external\osx\*.*" />
-    </ItemGroup>
-
     <Copy
       SourceFiles="@(DataFiles_osx)"
       DestinationFolder="$(TargetDir)\osx\"
+      SkipUnchangedFiles="true" />
+    <Copy
+      SourceFiles="@(DataFiles_vulkan)"
+      DestinationFolder="$(TargetDir)\vulkan\"
       SkipUnchangedFiles="true" />
   </Target>
   
