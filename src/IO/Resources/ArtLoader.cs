@@ -174,13 +174,8 @@ namespace ClassicUO.IO.Resources
             ClearUnusedResources(_landResources, count);
         }
 
-        public unsafe uint[] ReadStaticArt(ushort graphic, out short width, out short height, out Rectangle imageRectangle)
+        public unsafe uint[] ReadStaticArt(ushort graphic, out short width, out short height)
         {
-            imageRectangle.X = 0;
-            imageRectangle.Y = 0;
-            imageRectangle.Width = 0;
-            imageRectangle.Height = 0;
-
             ref UOFileIndex entry = ref GetValidRefEntry(graphic + 0x4000);
 
             if (entry.Length == 0)
@@ -290,26 +285,6 @@ namespace ClassicUO.IO.Resources
                 }
             }
 
-            int pos1 = 0;
-
-            for (y = 0; y < height; y++)
-            {
-                for (x = 0; x < width; x++)
-                {
-                    if (pixels[pos1++] != 0)
-                    {
-                        minX = Math.Min(minX, x);
-                        maxX = Math.Max(maxX, x);
-                        minY = Math.Min(minY, y);
-                        maxY = Math.Max(maxY, y);
-                    }
-                }
-            }
-
-            imageRectangle.X = minX;
-            imageRectangle.Y = minY;
-            imageRectangle.Width = maxX - minX;
-            imageRectangle.Height = maxY - minY;
 
             return pixels;
         }
