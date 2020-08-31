@@ -19,7 +19,7 @@ namespace ClassicUO.Resources {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "15.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "16.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     public class ResGumps {
@@ -934,7 +934,7 @@ namespace ClassicUO.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Default zoom (5 for standard zoom):.
+        ///   Looks up a localized string similar to Default zoom:.
         /// </summary>
         public static string DefaultZoom {
             get {
@@ -1542,6 +1542,15 @@ namespace ClassicUO.Resources {
         public static string HideRoofTiles {
             get {
                 return ResourceManager.GetString("HideRoofTiles", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Hide &quot;Screenshot stored in&quot; message.
+        /// </summary>
+        public static string HideScreenshotStoredInMessage {
+            get {
+                return ResourceManager.GetString("HideScreenshotStoredInMessage", resourceCulture);
             }
         }
         
@@ -2467,7 +2476,7 @@ namespace ClassicUO.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Permanently delete {0}.
+        ///   Looks up a localized string similar to Permanently delete character &quot;{0}&quot;?.
         /// </summary>
         public static string PermanentlyDelete0 {
             get {

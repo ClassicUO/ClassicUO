@@ -165,6 +165,8 @@ namespace ClassicUO.Configuration
         public bool CloseAllAnchoredGumpsInGroupWithRightClick { get; set; } = false;
         public bool HoldAltToMoveGumps { get; set; }
 
+        public bool HideScreenshotStoredInMessage { get; set; }
+
         // Experimental
          public bool CastSpellsByOneClick { get; set; }
          public bool BuffBarTime { get; set; }
