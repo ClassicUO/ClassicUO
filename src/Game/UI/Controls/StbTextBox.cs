@@ -107,6 +107,22 @@ namespace ClassicUO.Game.UI.Controls
 
         public int Length => Text?.Length ?? 0;
 
+        public byte Font
+        {
+            get => _rendererText.Font;
+            set
+            {
+                if (_rendererText.Font != value)
+                {
+                    _rendererText.Font = value;
+                    _rendererText.CreateTexture();
+                    _rendererCaret.Font = value;
+                    _rendererCaret.CreateTexture();
+
+                    UpdateCaretScreenPosition();
+                }
+            } 
+        }
         public bool AllowTAB { get; set; }
         public bool NoSelection { get; set; }
 

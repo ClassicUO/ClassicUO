@@ -1958,8 +1958,7 @@ namespace ClassicUO.Game.UI.Gumps
             if (ProfileManager.Current.ChatFont != _fontValue)
             {
                 ProfileManager.Current.ChatFont = _fontValue;
-                WorldViewportGump viewport = UIManager.GetGump<WorldViewportGump>();
-                viewport?.ReloadChatControl(new SystemChatControl(5, 5, ProfileManager.Current.GameWindowSize.X, ProfileManager.Current.GameWindowSize.Y));
+                UIManager.SystemChat.TextBoxControl.Font = _fontValue;
             }
 
             // combat

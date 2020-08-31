@@ -58,6 +58,9 @@ namespace ClassicUO.Game.UI.Gumps
     internal class SystemChatControl : Control
     {
         private const int MAX_MESSAGE_LENGHT = 100;
+        private const int CHAT_X_OFFSET = 3;
+        private const int CHAT_HEIGHT = 15;
+
         private readonly Label _currentChatModeLabel;
         private static readonly List<Tuple<ChatMode, string>> _messageHistory = new List<Tuple<ChatMode, string>>();
         private static int _messageHistoryIndex = -1;
@@ -83,14 +86,12 @@ namespace ClassicUO.Game.UI.Gumps
             AcceptMouseInput = false;
             AcceptKeyboardInput = false;
 
-            int height = FontsLoader.Instance.GetHeightUnicode(ProfileManager.Current.ChatFont, "123ABC", Width, 0, (ushort) (FontStyle.BlackBorder | FontStyle.Fixed));
-
             TextBoxControl = new StbTextBox(ProfileManager.Current.ChatFont, MAX_MESSAGE_LENGHT, Width, true, FontStyle.BlackBorder | FontStyle.Fixed, 33)
             {
-                X = 0,
-                Y = Height - height,
-                Width = Width,
-                Height = height
+                X = CHAT_X_OFFSET,
+                Y = Height - CHAT_HEIGHT,
+                Width = Width - CHAT_X_OFFSET,
+                Height = CHAT_HEIGHT
             };
 
             float gradientTransparency = (ProfileManager.Current != null && ProfileManager.Current.HideChatGradient) ? 1.0f : 0.5f;
@@ -100,7 +101,7 @@ namespace ClassicUO.Game.UI.Gumps
                 X = TextBoxControl.X,
                 Y = TextBoxControl.Y,
                 Width = Width,
-                Height = height + 5,
+                Height = CHAT_HEIGHT + 5,
                 IsVisible = !ProfileManager.Current.ActivateChatAfterEnter,
                 AcceptMouseInput = true
             });
@@ -132,18 +133,11 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (_isActive)
                 {
-                    _trans.IsVisible = true;
-                    _trans.Y = TextBoxControl.Y;
-                    TextBoxControl.Width = _trans.Width;
+                    TextBoxControl.Width = _trans.Width - CHAT_X_OFFSET;
                     TextBoxControl.ClearText();
-                    TextBoxControl.SetKeyboardFocus();
                 }
-                else
-                {
-                    int height = FontsLoader.Instance.GetHeightUnicode(ProfileManager.Current.ChatFont, "123ABC", Width, 0, (ushort) (FontStyle.BlackBorder | FontStyle.Fixed));
-                    TextBoxControl.Width = 1;
-                    _trans.Y = TextBoxControl.Y + height + 3;
-                }
+
+                SetFocus();
             }
         }
 
@@ -220,6 +214,7 @@ namespace ClassicUO.Game.UI.Gumps
             TextBoxControl.IsEditable = true;
             TextBoxControl.SetKeyboardFocus();
             TextBoxControl.IsEditable = _isActive;
+            _trans.IsVisible = _isActive;
         }
 
         public void ToggleChatVisibility()
@@ -314,13 +309,14 @@ namespace ClassicUO.Game.UI.Gumps
         {
             if (TextBoxControl != null)
             {
-                int height = FontsLoader.Instance.GetHeightUnicode(ProfileManager.Current.ChatFont, "123ABC", Width, 0, (ushort) (FontStyle.BlackBorder | FontStyle.Fixed));
-                TextBoxControl.Y = Height - height - 3;
-                TextBoxControl.Width = IsActive ? Width : 1;
-                TextBoxControl.Height = height + 3;
-                _trans.Location = TextBoxControl.Location;
+                TextBoxControl.X = CHAT_X_OFFSET;
+                TextBoxControl.Y = Height - CHAT_HEIGHT - CHAT_X_OFFSET;
+                TextBoxControl.Width = Width - CHAT_X_OFFSET;
+                TextBoxControl.Height = CHAT_HEIGHT + CHAT_X_OFFSET;
+                _trans.X = TextBoxControl.X - CHAT_X_OFFSET;
+                _trans.Y = TextBoxControl.Y;
                 _trans.Width = Width;
-                _trans.Height = height + 5;
+                _trans.Height = CHAT_HEIGHT + 5;
             }
         }
 

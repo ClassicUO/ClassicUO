@@ -36,10 +36,8 @@ namespace ClassicUO.Game.UI.Gumps
     internal class WorldViewportGump : Gump
     {
         private const int BORDER_WIDTH = 5;
-        private const int BORDER_HEIGHT = 5;
         private BorderControl _borderControl;
         private Button _button;
-        private WorldViewport _viewport;
         private bool _clicked;
         private Point _lastSize, _savedSize;
         private SystemChatControl _systemChatControl;
@@ -86,19 +84,17 @@ namespace ClassicUO.Game.UI.Gumps
 
             _button.SetTooltip("Resize game window");
             Width = _worldWidth + BORDER_WIDTH * 2;
-            Height = _worldHeight + BORDER_HEIGHT * 2;
+            Height = _worldHeight + BORDER_WIDTH * 2;
             _borderControl = new BorderControl(0, 0, Width, Height, 4);
             _borderControl.DragEnd += (sender, e) =>
             {
                 UIManager.GetGump<OptionsGump>()?.UpdateVideo();
             };
-            _viewport = new WorldViewport(_scene, BORDER_WIDTH, BORDER_HEIGHT, _worldWidth, _worldHeight);
 
-            UIManager.SystemChat = _systemChatControl = new SystemChatControl(BORDER_WIDTH, BORDER_HEIGHT, _worldWidth, _worldHeight);
+            UIManager.SystemChat = _systemChatControl = new SystemChatControl(BORDER_WIDTH, BORDER_WIDTH, _worldWidth, _worldHeight);
 
             Add(_borderControl);
             Add(_button);
-            Add(_viewport);
             Add(_systemChatControl);
             Resize();
         }
@@ -131,8 +127,8 @@ namespace ClassicUO.Game.UI.Gumps
                     if (w > Client.Game.Window.ClientBounds.Width - BORDER_WIDTH)
                         w = Client.Game.Window.ClientBounds.Width - BORDER_WIDTH;
 
-                    if (h > Client.Game.Window.ClientBounds.Height - BORDER_HEIGHT)
-                        h = Client.Game.Window.ClientBounds.Height - BORDER_HEIGHT;
+                    if (h > Client.Game.Window.ClientBounds.Height - BORDER_WIDTH)
+                        h = Client.Game.Window.ClientBounds.Height - BORDER_WIDTH;
 
                     _lastSize.X = w;
                     _lastSize.Y = h;
@@ -143,7 +139,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _worldWidth = _lastSize.X;
                     _worldHeight = _lastSize.Y;
                     Width = _worldWidth + BORDER_WIDTH * 2;
-                    Height = _worldHeight + BORDER_HEIGHT * 2;
+                    Height = _worldHeight + BORDER_WIDTH * 2;
                     ProfileManager.Current.GameWindowSize = _lastSize;
                     Resize();
                 }
@@ -162,11 +158,11 @@ namespace ClassicUO.Game.UI.Gumps
             if (position.X < -BORDER_WIDTH)
                 position.X = -BORDER_WIDTH;
 
-            if (position.Y + Height - BORDER_HEIGHT > Client.Game.Window.ClientBounds.Height)
-                position.Y = Client.Game.Window.ClientBounds.Height - (Height - BORDER_HEIGHT);
+            if (position.Y + Height - BORDER_WIDTH > Client.Game.Window.ClientBounds.Height)
+                position.Y = Client.Game.Window.ClientBounds.Height - (Height - BORDER_WIDTH);
 
-            if (position.Y < -BORDER_HEIGHT)
-                position.Y = -BORDER_HEIGHT;
+            if (position.Y < -BORDER_WIDTH)
+                position.Y = -BORDER_WIDTH;
 
             Location = position;
 
@@ -202,8 +198,6 @@ namespace ClassicUO.Game.UI.Gumps
             _button.Y = Height - (_button.Height >> 1);
             _worldWidth = Width - BORDER_WIDTH * 2;
             _worldHeight = Height - BORDER_WIDTH * 2;
-            _viewport.Width = _worldWidth;
-            _viewport.Height = _worldHeight;
             _systemChatControl.Width = _worldWidth;
             _systemChatControl.Height = _worldHeight;
             _systemChatControl.Resize();
@@ -227,19 +221,25 @@ namespace ClassicUO.Game.UI.Gumps
                 _worldWidth = _lastSize.X;
                 _worldHeight = _lastSize.Y;
                 Width = _worldWidth + BORDER_WIDTH * 2;
-                Height = _worldHeight + BORDER_HEIGHT * 2;
+                Height = _worldHeight + BORDER_WIDTH * 2;
                 ProfileManager.Current.GameWindowSize = _lastSize;
                 Resize();
             }
             return newSize;
         }
 
-        public void ReloadChatControl(SystemChatControl chat)
+        public override bool Contains(int x, int y)
         {
-            _systemChatControl.Dispose();
-            UIManager.SystemChat = _systemChatControl = chat;
-            Add(_systemChatControl);
-            Resize();
+            if (x >= BORDER_WIDTH &&
+                x < Width - BORDER_WIDTH * 2 &&
+                y >= BORDER_WIDTH &&
+                y < Height - BORDER_WIDTH * 2 - (_systemChatControl?.TextBoxControl != null && 
+                                                 _systemChatControl.IsActive ? _systemChatControl.TextBoxControl.Height : 0))
+            {
+                return false;
+            }
+
+            return base.Contains(x, y);
         }
     }
 

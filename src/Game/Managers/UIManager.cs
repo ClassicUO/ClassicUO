@@ -65,7 +65,22 @@ namespace ClassicUO.Game.Managers
 
         public static bool IsMouseOverAControl => MouseOverControl != null;
 
-        public static bool IsMouseOverWorld => MouseOverControl is WorldViewport;
+        public static bool IsMouseOverWorld
+        {
+            get
+            {
+                Point mouse = Mouse.Position;
+                Profile profile = ProfileManager.Current;
+
+                return profile != null && 
+                       DraggingControl == null &&
+                       MouseOverControl == null &&
+                       mouse.X >= profile.GameWindowPosition.X + 5 &&
+                       mouse.X < profile.GameWindowPosition.X + 5 + profile.GameWindowSize.X &&
+                       mouse.Y >= profile.GameWindowPosition.Y + 5 &&
+                       mouse.Y < profile.GameWindowPosition.Y + 5 + profile.GameWindowSize.Y;
+            }
+        }
 
         public static Control DraggingControl { get; private set; }
 
@@ -121,9 +136,6 @@ namespace ClassicUO.Game.Managers
         }
 
         public static bool IsDragging => _isDraggingControl && DraggingControl != null;
-
-        public static bool ValidForDClick() => !(_validForDClick is WorldViewport);
-
 
 
         public static void OnMouseDragging()
@@ -422,7 +434,7 @@ namespace ClassicUO.Game.Managers
         public static bool HadMouseDownOnGump(MouseButtonType button)
         {
             Control c = LastControlMouseDown(button);
-            return c != null && !c.IsDisposed && !(c is WorldViewport) && !ItemHold.Enabled;
+            return c != null && !c.IsDisposed && !IsMouseOverWorld && !ItemHold.Enabled;
         }
 
         public static Control LastControlMouseDown(MouseButtonType button)

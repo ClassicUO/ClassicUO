@@ -631,7 +631,7 @@ namespace ClassicUO.Game.Scenes
 
             _useItemQueue.Update(totalMS, frameMS);
 
-            if (!IsMouseOverViewport)
+            if (!UIManager.IsMouseOverWorld)
                 SelectedObject.Object = SelectedObject.LastObject = null;
 
 
@@ -1017,7 +1017,7 @@ namespace ClassicUO.Game.Scenes
             if (renderIndex < 1)
                 renderIndex = 99;
 
-            if (!IsMouseOverViewport)
+            if (!UIManager.IsMouseOverWorld)
                 SelectedObject.Object = null;
 
             World.WorldTextManager.ProcessWorldText(true);

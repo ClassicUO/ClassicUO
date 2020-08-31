@@ -52,13 +52,9 @@ namespace ClassicUO.Game.Scenes
         private (int, int) _selectionStart, _selectionEnd;
         private uint _holdMouse2secOverItemTime;
         private bool _isMouseLeftDown;
-
-
-        public bool IsMouseOverUI => UIManager.IsMouseOverAControl && !(UIManager.MouseOverControl is WorldViewport);
-        public bool IsMouseOverViewport => UIManager.MouseOverControl is WorldViewport;
-
         private Direction _lastBoatDirection;
         private bool _boatRun, _boatIsMoving;
+
 
         private bool MoveCharacterByMouseInput()
         {
@@ -262,7 +258,7 @@ namespace ClassicUO.Game.Scenes
             if (UIManager.PopupMenu != null && !UIManager.PopupMenu.Bounds.Contains(Mouse.Position.X, Mouse.Position.Y))
                 UIManager.ShowGamePopup(null);
 
-            if (!IsMouseOverViewport)
+            if (!UIManager.IsMouseOverWorld)
                 return false;
 
             if (World.CustomHouseManager != null)
@@ -325,7 +321,7 @@ namespace ClassicUO.Game.Scenes
                 return true;
             }
 
-            if (!IsMouseOverViewport)
+            if (!UIManager.IsMouseOverWorld)
             {
                 return false;
             }
@@ -540,7 +536,7 @@ namespace ClassicUO.Game.Scenes
         {
             bool result = false;
 
-            if (!IsMouseOverViewport)
+            if (!UIManager.IsMouseOverWorld)
             {
                 result = DelayedObjectClickManager.IsEnabled;
 
@@ -598,7 +594,7 @@ namespace ClassicUO.Game.Scenes
             if (UIManager.PopupMenu != null && !UIManager.PopupMenu.Bounds.Contains(Mouse.Position.X, Mouse.Position.Y))
                 UIManager.ShowGamePopup(null);
 
-            if (!IsMouseOverViewport)
+            if (!UIManager.IsMouseOverWorld)
                 return false;
 
             _rightMousePressed = true;
@@ -622,13 +618,13 @@ namespace ClassicUO.Game.Scenes
                 BoatMovingManager.MoveRequest(World.Player.Direction, 0);
             }
 
-            return !IsMouseOverUI;
+            return UIManager.IsMouseOverWorld;
         }
 
 
         internal override bool OnRightMouseDoubleClick()
         {
-            if (!IsMouseOverViewport)
+            if (!UIManager.IsMouseOverWorld)
                 return false;
 
             if (ProfileManager.Current.EnablePathfind && !Pathfinder.AutoWalking)
@@ -687,7 +683,7 @@ namespace ClassicUO.Game.Scenes
                 }
             }
 
-            if (!IsMouseOverViewport)
+            if (!UIManager.IsMouseOverWorld)
                 return false;
 
             if (Keyboard.Ctrl && ProfileManager.Current.EnableMousewheelScaleZoom)
@@ -703,7 +699,7 @@ namespace ClassicUO.Game.Scenes
 
         internal override bool OnMouseDragging()
         {
-            if (!IsMouseOverViewport)
+            if (!UIManager.IsMouseOverWorld)
                 return false;
 
             bool ok = true;

@@ -480,9 +480,7 @@ namespace ClassicUO.Game
 
                 if (ProfileManager.Current.ShowTargetRangeIndicator)
                 {
-                    GameScene gs = Client.Game.GetScene<GameScene>();
-
-                    if (gs != null && gs.IsMouseOverViewport)
+                    if (UIManager.IsMouseOverWorld)
                     {
                         if (SelectedObject.Object is GameObject obj)
                         {
@@ -568,7 +566,7 @@ namespace ClassicUO.Game
                 }
                 else
                 {
-                    if (gs.IsMouseOverViewport && SelectedObject.Object is Entity item && World.OPL.Contains(item))
+                    if (UIManager.IsMouseOverWorld && SelectedObject.Object is Entity item && World.OPL.Contains(item))
                     {
                         if (_tooltip.IsEmpty || item != _tooltip.Serial)
                             _tooltip.SetGameObject(item);
