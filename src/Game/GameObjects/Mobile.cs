@@ -1083,9 +1083,9 @@ namespace ClassicUO.Game.GameObjects
             p.Y += (int) (Offset.Y - Offset.Z - (height + centerY + 8));
             p = Client.Game.Scene.Camera.WorldToScreen(p);
 
-            if (health && mode != 1 && ((alwaysHP >= 1 && Hits != HitsMax) || alwaysHP == 0))
+            if (health && HitsTexture != null && mode != 1 && ((alwaysHP >= 1 && Hits != HitsMax) || alwaysHP == 0))
             {
-                p.Y -= 12;
+                p.Y -= HitsTexture.Height >> 1;
             }
 
             
