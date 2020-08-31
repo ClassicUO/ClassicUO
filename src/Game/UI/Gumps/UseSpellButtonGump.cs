@@ -82,7 +82,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         private static int GetSpellTooltip(int id)
         {
-            if (id >= 1 && id < 64) // Magery
+            if (id >= 1 && id <= 64) // Magery
                 return 3002011 + (id - 1);
 
             if (id >= 101 && id <= 117) // necro
