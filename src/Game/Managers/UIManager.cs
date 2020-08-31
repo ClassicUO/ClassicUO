@@ -72,7 +72,8 @@ namespace ClassicUO.Game.Managers
                 Point mouse = Mouse.Position;
                 Profile profile = ProfileManager.Current;
 
-                return profile != null && 
+                return profile != null &&
+                       GameCursor.AllowDrawSDLCursor &&
                        DraggingControl == null &&
                        MouseOverControl == null &&
                        mouse.X >= profile.GameWindowPosition.X + 5 &&
