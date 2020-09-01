@@ -999,7 +999,7 @@ Time left: {1:00}:{2:00}:{3:00}</value>
     <value>Passive</value>
   </data>
   <data name="Item0Price1" xml:space="preserve">
-    <value>{0} at {0}gp</value>
+    <value>{0} at {1}gp</value>
   </data>
   <data name="Name" xml:space="preserve">
     <value>Name:</value>
@@ -1378,5 +1378,8 @@ Client version: '{0}'</value>
   </data>
   <data name="Minimize" xml:space="preserve">
     <value>Minimize</value>
+  </data>
+  <data name="HideScreenshotStoredInMessage" xml:space="preserve">
+    <value>Hide "Screenshot stored in" message</value>
   </data>
 </root>
