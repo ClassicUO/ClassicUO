@@ -208,9 +208,9 @@ namespace ClassicUO.Game.GameObjects
 
             int offsetY = 0;
 
-            int minX = ProfileManager.Current.GameWindowPosition.X + 6;
+            int minX = 6;
             int maxX = minX + ProfileManager.Current.GameWindowSize.X;
-            int minY = ProfileManager.Current.GameWindowPosition.Y;
+            int minY = 0;
             //int maxY = minY + ProfileManager.Current.GameWindowSize.Y - 6;
 
             for (TextObject item = (TextObject) TextContainer.Items; item != null; item = (TextObject) item.Next)

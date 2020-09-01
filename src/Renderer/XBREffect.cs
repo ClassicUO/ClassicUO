@@ -19,7 +19,7 @@ namespace ClassicUO.Renderer
             _textureSizeParam = Parameters["textureSize"];
         }
 
-        public void SetSize(int w, int h)
+        public void SetSize(float w, float h)
         {
             _vectorSize.X = w;
             _vectorSize.Y = h;

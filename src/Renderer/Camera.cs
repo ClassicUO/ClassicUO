@@ -13,8 +13,9 @@ namespace ClassicUO.Renderer
 {
     internal class Camera
     {
-        private bool _updateMatrixes = true;
-        private Matrix _transform, _inverseTransform;
+        private bool _updateMatrixes = true, _updateProjection = true;
+        private Matrix _transform = Matrix.Identity, _inverseTransform = Matrix.Identity;
+        private Matrix _projection;
         private float[] _cameraZoomValues = new float[1] { 1f };
         private int _zoomIndex;
 
@@ -23,8 +24,33 @@ namespace ClassicUO.Renderer
         public Point Origin;
         public Rectangle Bounds;
 
-        
-       
+
+        public Matrix ViewTransformMatrix => TransformMatrix * ProjectionMatrix;
+
+        public Matrix ProjectionMatrix
+        {
+            get
+            {
+                if (_updateProjection)
+                {
+                    Matrix.CreateOrthographicOffCenter
+                    (
+                        0,
+                        Bounds.Width,
+                        Bounds.Height,
+                        0,
+                        0,
+                        -1,
+                        out _projection
+                    );
+
+                    _updateProjection = false;
+                }
+
+                return _projection;
+            }
+        }
+
         public Matrix TransformMatrix
         {
             get
@@ -93,7 +119,10 @@ namespace ClassicUO.Renderer
                 Origin.X = width / 2;
                 Origin.Y = height / 2;
 
+                //Position = Origin;
+
                 _updateMatrixes = true;
+                _updateProjection = true;
             }
         }
 
@@ -133,28 +162,31 @@ namespace ClassicUO.Renderer
         {
             UpdateMatrices();
 
-            float x = (((point.X - Bounds.X) / ((float) Bounds.Width)) * 2f) - 1f;
-            float y = -((((point.Y - Bounds.Y) / ((float) Bounds.Height)) * 2f) - 1f);
+            point.X -= Bounds.X;
+            point.Y -= Bounds.Y;
 
-            point.X = (int) Math.Round((x * _inverseTransform.M11) + (y * _inverseTransform.M21) + _inverseTransform.M41);
-            point.Y = (int) Math.Round((x * _inverseTransform.M12) + (y * _inverseTransform.M22) + _inverseTransform.M42);
+            Transform(ref point, ref _inverseTransform, out point);
 
             return point;
         }
-
-
+        
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Point WorldToScreen(Point point)
         {
             UpdateMatrices();
 
-            float x = ((point.X * _transform.M11) + (point.Y * _transform.M21) + _transform.M41);
-            float y = ((point.X * _transform.M12) + (point.Y * _transform.M22) + _transform.M42);
-
-            point.X = (int) Math.Round((((x + 1f) * 0.5f) * Bounds.Width) + Bounds.X);
-            point.Y = (int) Math.Round((((-y + 1f) * 0.5f) * Bounds.Height) + Bounds.Y);
+            Transform(ref point, ref _transform, out point);
 
             return point;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static void Transform(ref Point position, ref Matrix matrix, out Point result)
+        {
+            float x = (position.X * matrix.M11) + (position.Y * matrix.M21) + matrix.M41;
+            float y = (position.X * matrix.M12) + (position.Y * matrix.M22) + matrix.M42;
+            result.X = (int) x;
+            result.Y = (int) y;
         }
 
         public Point MouseToWorldPosition()
@@ -169,31 +201,25 @@ namespace ClassicUO.Renderer
                 return;
             }
 
-            float left = 0;
-            float right = Bounds.Width + left;
-            float top = 0;
-            float bottom = Bounds.Height + top;
 
-            float new_right = (right * Zoom);
-            float new_bottom = (bottom * Zoom);
+            Matrix temp;
 
-            left = -(new_right - right);
-            top = -(new_bottom - bottom);
+            Matrix.CreateTranslation(-Origin.X, -Origin.Y, 0f, out _transform);
 
-            Matrix.CreateOrthographicOffCenter
-            (
-                left,
-                new_right,
-                new_bottom,
-                top,
-                0,
-                1,
-                out _transform
-            );
+            float zoom = 1f / Zoom;
+
+            if (zoom != 1f)
+            {
+                Matrix.CreateScale(zoom, zoom, 1f, out temp);
+                Matrix.Multiply(ref _transform, ref temp, out _transform);
+            }
+
+            Matrix.CreateTranslation(Origin.X, Origin.Y, 0f, out temp);
+            Matrix.Multiply(ref _transform, ref temp, out _transform);
 
 
             Matrix.Invert(ref _transform, out _inverseTransform);
-           
+
             _updateMatrixes = false;
         }
     }
