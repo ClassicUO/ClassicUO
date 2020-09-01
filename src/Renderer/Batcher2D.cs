@@ -39,18 +39,21 @@ namespace ClassicUO.Renderer
 
 
         private readonly IndexBuffer _indexBuffer;
-        private readonly RasterizerState _rasterizerState;
         private readonly DynamicVertexBuffer _vertexBuffer;
         private readonly Texture2D[] _textureInfo;
         private PositionNormalTextureColor4* _vertexInfo;
         private BlendState _blendState;
+        private DepthStencilState _stencil;
+        private SamplerState _sampler;
+        private RasterizerState _rasterizerState;
+
         private Effect _customEffect;
         private bool _started;
-        private DepthStencilState _stencil;
         private bool _useScissor;
         private BoundingBox _drawingArea;
         private int _numSprites;
         private Matrix _transformMatrix;
+        private int _currentBufferPosition;
 
 
         public UltimaBatcher2D(GraphicsDevice device)
@@ -63,6 +66,7 @@ namespace ClassicUO.Renderer
             _indexBuffer.SetData(GenerateIndexArray());
             _blendState = BlendState.AlphaBlend;
             _rasterizerState = RasterizerState.CullNone;
+            _sampler = SamplerState.PointClamp;
 
             _rasterizerState = new RasterizerState
             {
@@ -1543,7 +1547,7 @@ namespace ClassicUO.Renderer
             GraphicsDevice.BlendState = _blendState;
             GraphicsDevice.DepthStencilState = _stencil;
             GraphicsDevice.RasterizerState = _useScissor ? _rasterizerState : RasterizerState.CullNone;
-            GraphicsDevice.SamplerStates[0] = SamplerState.PointClamp;
+            GraphicsDevice.SamplerStates[0] = _sampler;
             GraphicsDevice.SamplerStates[1] = SamplerState.PointClamp;
             GraphicsDevice.SamplerStates[2] = SamplerState.PointClamp;
 
@@ -1611,7 +1615,6 @@ namespace ClassicUO.Renderer
                                                  batchSize << 1);
         }
 
-        [MethodImpl(256)]
         public void EnableScissorTest(bool enable)
         {
             if (enable == _useScissor)
@@ -1625,7 +1628,6 @@ namespace ClassicUO.Renderer
             _useScissor = enable;
         }
 
-        [MethodImpl(256)]
         public void SetBlendState(BlendState blend)
         {
             Flush();
@@ -1633,7 +1635,6 @@ namespace ClassicUO.Renderer
             _blendState = blend ?? BlendState.AlphaBlend;
         }
 
-        [MethodImpl(256)]
         public void SetStencil(DepthStencilState stencil)
         {
             Flush();
@@ -1641,7 +1642,12 @@ namespace ClassicUO.Renderer
             _stencil = stencil ?? Stencil;
         }
 
-        private int _currentBufferPosition;
+        public void SetSampler(SamplerState sampler)
+        {
+            Flush();
+
+            _sampler = sampler ?? SamplerState.PointClamp;
+        }
 
         private unsafe int UpdateVertexBuffer(int len)
         {

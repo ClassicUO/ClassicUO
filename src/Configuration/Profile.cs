@@ -214,6 +214,7 @@ namespace ClassicUO.Configuration
         public int CounterBarColumns { get; set; } = 1;
 
 
+        public int FilterType { get; set; } = 0;
         public bool ShadowsEnabled { get; set; } = true;
         public int AuraUnderFeetType { get; set; } // 0 = NO, 1 = in warmode, 2 = ctrl+shift, 3 = always
         public bool AuraOnMouse { get; set; } = true;

@@ -61,7 +61,7 @@ namespace ClassicUO.Game.UI.Gumps
         private ScrollAreaItem _defaultHotkeysArea, _autoOpenCorpseArea, _dragSelectArea;
         private Combobox _dragSelectModifierKey;
         private HSliderBar _brighlight, _sliderZoom;
-        private Combobox _auraType;
+        private Combobox _auraType, _filterType;
 
 
         //counters
@@ -757,13 +757,32 @@ namespace ClassicUO.Game.UI.Gumps
             _partyAuraColorPickerBox = CreateClickableColorBox(rightArea, 20, SPACE_Y, ProfileManager.Current.PartyAuraHue, ResGumps.PartyAuraColor, 40, SPACE_Y);
             _runMouseInSeparateThread = CreateCheckBox(rightArea, ResGumps.RunMouseInASeparateThread, Settings.GlobalSettings.RunMouseInASeparateThread, 0, SPACE_Y);
             _auraMouse = CreateCheckBox(rightArea, ResGumps.AuraOnMouseTarget, ProfileManager.Current.AuraOnMouse, 0, SPACE_Y);
-            _xBR = CreateCheckBox(rightArea, ResGumps.UseXBREffectBETA, ProfileManager.Current.UseXBR, 0, SPACE_Y);
+            _hideChatGradient = CreateCheckBox(rightArea, ResGumps.HideChatGradient, ProfileManager.Current.HideChatGradient, 0, SPACE_Y);
 
+            _xBR = CreateCheckBox(rightArea, ResGumps.UseXBREffectBETA, ProfileManager.Current.UseXBR, 0, SPACE_Y);
             // TODO: due to the new rendering engine, xBR cannot be applied directly to the World render target
             //       we need a PostProcessing system
             _xBR.IsVisible = false;
 
-            _hideChatGradient = CreateCheckBox(rightArea, ResGumps.HideChatGradient, ProfileManager.Current.HideChatGradient, 0, SPACE_Y);
+
+
+            item = new ScrollAreaItem();
+            item.Y = SPACE_Y;
+            text = new Label("Filter Type [TEST]:", true, HUE_FONT);
+            text.Y = SPACE_Y + 30;
+            item.Add(text);
+            _filterType = new Combobox(text.Width + 20, text.Y, 200, new[]
+            {
+                "Point Clamp", "Anisotropic Clamp", "Linear Clamp"
+            })
+            {
+                SelectedIndex = ProfileManager.Current.FilterType
+            };
+            item.Add(_filterType);
+            rightArea.Add(item);
+
+          
+
 
             Add(rightArea, PAGE);
         }
@@ -1570,6 +1589,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _brighlight.Value = 0;
                     _enableShadows.IsChecked = true;
                     _auraType.SelectedIndex = 0;
+                    _fieldsType.SelectedIndex = 0;
                     _runMouseInSeparateThread.IsChecked = true;
                     _auraMouse.IsChecked = true;
                     _xBR.IsChecked = true;
@@ -1950,6 +1970,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             ProfileManager.Current.ShadowsEnabled = _enableShadows.IsChecked;
             ProfileManager.Current.AuraUnderFeetType = _auraType.SelectedIndex;
+            ProfileManager.Current.FilterType = _filterType.SelectedIndex;
             Client.Game.IsMouseVisible = Settings.GlobalSettings.RunMouseInASeparateThread = _runMouseInSeparateThread.IsChecked;
             ProfileManager.Current.AuraOnMouse = _auraMouse.IsChecked;
             ProfileManager.Current.UseXBR = _xBR.IsChecked;

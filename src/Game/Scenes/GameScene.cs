@@ -917,6 +917,25 @@ namespace ClassicUO.Game.Scenes
             batcher.SetBrightlight(ProfileManager.Current.Brighlight);
             batcher.Begin(null, matrix);
 
+            //if (ProfileManager.Current.UseXBR)
+            //{
+            //    batcher.SetSampler(SamplerState.AnisotropicWrap);
+            //}
+
+            switch (ProfileManager.Current.FilterType)
+            {
+                default:
+                case 0:
+                    batcher.SetSampler(SamplerState.PointClamp);
+                    break;
+                case 1:
+                    batcher.SetSampler(SamplerState.AnisotropicClamp);
+                    break;
+                case 2:
+                    batcher.SetSampler(SamplerState.LinearClamp);
+                    break;
+            }
+
 
             bool usecircle = ProfileManager.Current.UseCircleOfTransparency;
 
@@ -959,6 +978,7 @@ namespace ClassicUO.Game.Scenes
             // draw weather
             _weather.Draw(batcher, 0, 0);
             batcher.End();
+            batcher.SetSampler(null);
 
             if (use_render_target)
             {
