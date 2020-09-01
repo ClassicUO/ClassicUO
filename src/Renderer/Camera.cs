@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
-using ClassicUO.Game.GameObjects;
+﻿using System.Runtime.CompilerServices;
 using ClassicUO.Input;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -21,7 +15,7 @@ namespace ClassicUO.Renderer
 
 
         public Point Position;
-        public Point Origin;
+        public Vector2 Origin;
         public Rectangle Bounds;
 
 
@@ -76,7 +70,23 @@ namespace ClassicUO.Renderer
             {
                 if (_cameraZoomValues[_zoomIndex] != value)
                 {
-                    ZoomIndex = (int) (value * _cameraZoomValues.Length) - _cameraZoomValues.Length / 2 - 1;
+                    //float zoom = MathHelper.Clamp(value, _cameraZoomValues[0], _cameraZoomValues[_cameraZoomValues.Length - 1]);
+
+                    //if (zoom == 0)
+                    //{
+
+                    //}
+
+                    for (_zoomIndex = 0; _zoomIndex < _cameraZoomValues.Length; ++_zoomIndex)
+                    {
+                        if (_cameraZoomValues[_zoomIndex] == value)
+                        {
+                            _updateMatrixes = true;
+                            break;
+                        }
+                    }
+
+                    //ZoomIndex = (int) (value * _cameraZoomValues.Length) - _cameraZoomValues.Length / 2 - 1;
                 }
             }
         }
@@ -116,8 +126,8 @@ namespace ClassicUO.Renderer
                 Bounds.Width = width;
                 Bounds.Height = height;
 
-                Origin.X = width / 2;
-                Origin.Y = height / 2;
+                Origin.X = width / 2f;
+                Origin.Y = height / 2f;
 
                 //Position = Origin;
 
