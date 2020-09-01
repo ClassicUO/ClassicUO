@@ -728,6 +728,8 @@ namespace ClassicUO.Game.Scenes
             int oldDrawOffsetY = _offset.Y;
             var old_scaled_offset = _last_scaled_offset;
 
+            float zoom = Camera.Zoom;
+
             int winGamePosX = 0;
             int winGamePosY = 0;
             int winGameWidth = ProfileManager.Current.GameWindowSize.X;
@@ -743,7 +745,6 @@ namespace ClassicUO.Game.Scenes
             int winDrawOffsetX = (tileOffX - tileOffY) * 22 - winGameCenterX;
             int winDrawOffsetY = (tileOffX + tileOffY) * 22 - winGameCenterY;
 
-
             int winGameScaledOffsetX;
             int winGameScaledOffsetY;
             int winGameScaledWidth;
@@ -755,11 +756,11 @@ namespace ClassicUO.Game.Scenes
                 float right = winGameWidth + left;
                 float top = winGamePosY;
                 float bottom = winGameHeight + top;
-                float newRight = right * Camera.Zoom;
-                float newBottom = bottom * Camera.Zoom;
+                float newRight = right * zoom;
+                float newBottom = bottom * zoom;
 
-                winGameScaledOffsetX = (int) ((left * Camera.Zoom) - (newRight - right));
-                winGameScaledOffsetY = (int) ((top * Camera.Zoom) - (newBottom - bottom));
+                winGameScaledOffsetX = (int) ((left * zoom) - (newRight - right));
+                winGameScaledOffsetY = (int) ((top * zoom) - (newBottom - bottom));
                 winGameScaledWidth = (int) (newRight - winGameScaledOffsetX);
                 winGameScaledHeight = (int) (newBottom - winGameScaledOffsetY);
             }
@@ -772,8 +773,8 @@ namespace ClassicUO.Game.Scenes
             }
 
 
-            int width = (int) ((winGameWidth / 44 + 1) * Camera.Zoom);
-            int height = (int) ((winGameHeight / 44 + 1) * Camera.Zoom);
+            int width = (int) ((winGameWidth / 44 + 1) * zoom);
+            int height = (int) ((winGameHeight / 44 + 1) * zoom);
 
             if (width < height)
             {
@@ -817,16 +818,21 @@ namespace ClassicUO.Game.Scenes
             if (maxBlockY >= MapLoader.Instance.MapsDefaultSize[World.Map.Index, 1])
                 maxBlockY = MapLoader.Instance.MapsDefaultSize[World.Map.Index, 1] - 1;
 
-            int drawOffset = (int) (Camera.Zoom * 40.0);
-            float maxX = winGamePosX + winGameWidth + drawOffset;
-            float maxY = winGamePosY + winGameHeight + drawOffset;
-            float newMaxX = maxX * Camera.Zoom;
-            float newMaxY = maxY * Camera.Zoom;
+            int drawOffset = (int) (44 / zoom);
 
-            int minPixelsX = (int) (((winGamePosX - drawOffset) * Camera.Zoom) - (newMaxX - maxX));
-            int maxPixelsX = (int) newMaxX;
-            int minPixelsY = (int) (((winGamePosY - drawOffset) * Camera.Zoom) - (newMaxY - maxY));
-            int maxPixelsY = (int) newMaxY;
+            Point p = Camera.Bounds.Location;
+            p.X -= drawOffset;
+            p.Y -= drawOffset;
+            p = Camera.ScreenToWorld(p);
+            int minPixelsX = p.X;
+            int minPixelsY = p.Y;
+
+            p.X = Camera.Bounds.Right + drawOffset;
+            p.Y = Camera.Bounds.Bottom + drawOffset;
+            p = Camera.ScreenToWorld(p);
+            int maxPixelsX = p.X;
+            int maxPixelsY = p.Y;
+
 
             if (UpdateDrawPosition || oldDrawOffsetX != winDrawOffsetX || oldDrawOffsetY != winDrawOffsetY || old_scaled_offset.X != winGameScaledOffsetX || old_scaled_offset.Y != winGameScaledOffsetY)
             {
@@ -867,8 +873,8 @@ namespace ClassicUO.Game.Scenes
             _maxTile.X = realMaxRangeX;
             _maxTile.Y = realMaxRangeY;
 
-            _minPixel.X = minPixelsX - 44;
-            _minPixel.Y = minPixelsY - 44;
+            _minPixel.X = minPixelsX;
+            _minPixel.Y = minPixelsY;
             _maxPixel.X = maxPixelsX;
             _maxPixel.Y = maxPixelsY;
 

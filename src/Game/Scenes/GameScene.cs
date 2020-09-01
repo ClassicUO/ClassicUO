@@ -754,7 +754,7 @@ namespace ClassicUO.Game.Scenes
 
             Viewport r_viewport = batcher.GraphicsDevice.Viewport;
 
-            Matrix matrix = Camera.TransformMatrix;
+            Matrix matrix = Camera.ViewTransformMatrix;
 
             if (ProfileManager.Current.EnableDeathScreen)
             {
@@ -804,52 +804,59 @@ namespace ClassicUO.Game.Scenes
                     _xbr_effect = new XBREffect(batcher.GraphicsDevice);
                 }
 
+                float zoom = Camera.Zoom;
+                //Camera.Zoom = 1f;
+                Camera.SetGameWindowBounds(0, 0, batcher.GraphicsDevice.Viewport.Width, batcher.GraphicsDevice.Viewport.Height);
+                //matrix = Camera.ViewTransformMatrix;
+                //batcher.GraphicsDevice.Viewport = Camera.GetViewport();
+                matrix = Camera.ProjectionMatrix;
+
                 _xbr_effect.SetSize(width, height);
 
-                batcher.Begin(ProfileManager.Current.UseXBR ? _xbr_effect : null);
-
-                //float size_zoom_width = (width * Scale);
-                //float size_zoom_height = (height * Scale);
-
-                //float size_zoom_width_half = size_zoom_width * 0.5f;
-                //float size_zoom_height_half = size_zoom_height * 0.5f;
-
-                //float halfWidth = width * 0.5f;
-                //float halfHeight = height * 0.5f;
+                batcher.Begin(ProfileManager.Current.UseXBR ? _xbr_effect : null, matrix);
 
 
-                //float left = 0;
-                //float right = width + left;
-                //float top = 0;
-                //float bottom = height + top;
 
-                //float new_right = (right * Scale);
-                //float new_bottom = (bottom * Scale);
+                int drawOffset = 0; //(int) (44 / Camera.Zoom);
 
-                //left = (left * Scale) - (new_right - right);
-                //top = (top * Scale) - (new_bottom - bottom);
+                Point p = Camera.Bounds.Location;
+                p.X -= drawOffset;
+                p.Y -= drawOffset;
+                p = Camera.ScreenToWorld(p);
+                int minPixelsX = p.X;
+                int minPixelsY = p.Y;
+
+                p.X = Camera.Bounds.Right + drawOffset;
+                p.Y = Camera.Bounds.Bottom + drawOffset;
+                p = Camera.ScreenToWorld(p);
+                int maxPixelsX = p.X;
+                int maxPixelsY = p.Y;
+
 
                 //batcher.Draw2D(_world_render_target,
-                //    posX /*- offset_x + halfWidth*/,
-                //    posY /*- offset_y + halfHeight*/,
+                //    posX,
+                //    posY,
                 //    width,
                 //    height,
 
-                //    //halfWidth - size_zoom_width_half,
-                //    //halfHeight - size_zoom_height_half,
-                //    //size_zoom_width,
-                //    //size_zoom_height,
 
-                //    left,
-                //    top,
-                //    new_right - left,
-                //    new_bottom - top,
+                //    minPixelsX,
+                //    minPixelsY,
+                //    maxPixelsX,
+                //    maxPixelsY,
+
+                //    //minPixelsX + (minPixelsX - maxPixelsX / 2),
+                //    //minPixelsY + (minPixelsY - maxPixelsY / 2),
+                //    //maxPixelsX - 0,
+                //    //maxPixelsY - 0,
 
                 //    ref hue);
 
-
                 batcher.Draw2D(_world_render_target, posX, posY, width, height, ref hue);
                 batcher.End();
+
+
+                //Camera.Zoom = zoom;
             }
 
             // draw lights

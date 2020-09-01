@@ -136,6 +136,8 @@ namespace ClassicUO.Game.Managers
                                 p1.Y += 22;
 
                             p1 = Client.Game.Scene.Camera.WorldToScreen(p1);
+                            p1.X += screenX;
+                            p1.Y += screenY;
                             p1.X -= (mobile.HitsTexture.Width >> 1) + 3;
                             p1.Y -= mobile.HitsTexture.Height;
                             
@@ -154,6 +156,8 @@ namespace ClassicUO.Game.Managers
                 //    p.Y += 22;
 
                 p = Client.Game.Scene.Camera.WorldToScreen(p);
+                p.X += screenX;
+                p.Y += screenY;
                 p.X -= BAR_WIDTH_HALF;
                 p.Y -= BAR_HEIGHT_HALF;
 
@@ -186,6 +190,8 @@ namespace ClassicUO.Game.Managers
             p.X += (int) entity.Offset.X + 22 + 5;
             p.Y += (int) (entity.Offset.Y - entity.Offset.Z) + 22 + 5;
             p = Client.Game.Scene.Camera.WorldToScreen(p);
+            p.X += screenX;
+            p.Y += screenY;
             p.X -= BAR_WIDTH_HALF;
             p.Y -= BAR_HEIGHT_HALF;
 
@@ -195,7 +201,7 @@ namespace ClassicUO.Game.Managers
             if (p.Y < screenY || p.Y > screenY + screenH - BAR_HEIGHT)
                 return;
 
-            DrawHealthLine(batcher, entity, p.X, p.Y, false);
+            DrawHealthLine(batcher, entity, screenX + p.X, screenY + p.Y, false);
         }
 
         private void DrawHealthLine(UltimaBatcher2D batcher, Entity entity, int x, int y, bool passive)

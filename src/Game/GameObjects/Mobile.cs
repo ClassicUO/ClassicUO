@@ -1086,10 +1086,9 @@ namespace ClassicUO.Game.GameObjects
 
             if (health && HitsTexture != null && mode != 1 && ((alwaysHP >= 1 && Hits != HitsMax) || alwaysHP == 0))
             {
-                p.Y -= HitsTexture.Height >> 1;
+                p.Y -= HitsTexture.Height;
             }
 
-            
             for (; last != null; last = (TextObject) last.Previous)
             {
                 if (last.RenderedText != null && !last.RenderedText.IsDestroyed)

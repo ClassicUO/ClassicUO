@@ -330,7 +330,7 @@ namespace ClassicUO.Game.Managers
 
         public override void Draw(UltimaBatcher2D batcher, int startX, int startY, int renderIndex, bool isGump = false)
         {
-            base.Draw(batcher, 0, 0, renderIndex, isGump);
+            base.Draw(batcher, startX, startY, renderIndex, isGump);
 
             foreach (KeyValuePair<uint, OverheadDamage> overheadDamage in _damages)
             {

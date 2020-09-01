@@ -484,6 +484,8 @@ namespace ClassicUO.Game.UI.Gumps
             Point p = Client.Game.Scene.Camera.WorldToScreen(new Point(x, y));
             x = p.X - (Width >> 1);
             y = p.Y - (Height >> 1);
+            x += gx;
+            y += gy;
 
             if (x < gx || x + Width > gx + w)
                 return false;
@@ -491,6 +493,7 @@ namespace ClassicUO.Game.UI.Gumps
             if (y < gy || y + Height > gy + h)
                 return false;
 
+            
             X = x;
             Y = y;
 

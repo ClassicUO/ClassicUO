@@ -130,9 +130,9 @@ namespace ClassicUO.Game.UI.Gumps
             Point p = new Point(x, y);
             p = Client.Game.Scene.Camera.WorldToScreen(p);
 
-            x = p.X;
-            y = p.Y;
-         
+            x = p.X + ProfileManager.Current.GameWindowPosition.X;
+            y = p.Y + ProfileManager.Current.GameWindowPosition.Y;
+
             if (x < ProfileManager.Current.GameWindowPosition.X)
                 x = ProfileManager.Current.GameWindowPosition.X;
             else if (x > ProfileManager.Current.GameWindowPosition.X + ProfileManager.Current.GameWindowSize.X - _arrow.Width)
