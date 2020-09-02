@@ -197,7 +197,7 @@ namespace ClassicUO.Game.GameObjects
                 {
                     int maxDist = ProfileManager.Current.CircleOfTransparencyRadius + 22;
                     int fx = (int) (World.Player.RealScreenPosition.X + World.Player.Offset.X);
-                    int fy = (int) (World.Player.RealScreenPosition.Y + (World.Player.Offset.Y - World.Player.Offset.Z));
+                    int fy = (int) (World.Player.RealScreenPosition.Y + (World.Player.Offset.Y - World.Player.Offset.Z)) + 44;
 
                     fx -= x;
                     fy -= y;
@@ -214,13 +214,14 @@ namespace ClassicUO.Game.GameObjects
                                 hue.Z = 0.75f;
                                 break;
                             case 1:
-                                hue.Z = MathHelper.Lerp(1f, 0f, (dist / (float) maxDist));
+                                hue.Z = MathHelper.Lerp(1f, 0f, ((dist - 44) / (float) maxDist));
                                 break;
                         }
 
                         x -= index.Width;
                         y -= index.Height;
 
+                     
                         batcher.DrawSprite(texture, x, y, false, ref hue);
                         batcher.SetStencil(StaticTransparentStencil.Value);
                         hue.Z = alpha;

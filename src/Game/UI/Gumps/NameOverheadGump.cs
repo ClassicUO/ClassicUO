@@ -118,7 +118,7 @@ namespace ClassicUO.Game.UI.Gumps
                 FontsLoader.Instance.SetUseHTML(false);
 
                 Width = _background.Width = _renderedText.Width + 4;
-                Height = _background.Height = _renderedText.Height + 4;
+                Height = _background.Height = Constants.OBJECT_HANDLES_GUMP_HEIGHT + 4;
 
                 WantUpdateSize = false;
 
@@ -152,7 +152,7 @@ namespace ClassicUO.Game.UI.Gumps
                 _renderedText.Text = t;
 
                 Width = _background.Width = Math.Max(_renderedText.Width + 4, MIN_WIDTH);
-                Height = _background.Height = _renderedText.Height + 4;
+                Height = _background.Height = Constants.OBJECT_HANDLES_GUMP_HEIGHT + 4;
 
                 WantUpdateSize = false;
 
@@ -449,7 +449,7 @@ namespace ClassicUO.Game.UI.Gumps
                                                                   out int width,
                                                                   out int height);
 
-                    x = (int)(m.RealScreenPosition.X + m.Offset.X + 22);
+                    x = (int)(m.RealScreenPosition.X + m.Offset.X + 22 + 5);
                     y = (int)((m.RealScreenPosition.Y + (m.Offset.Y - m.Offset.Z) - (height + centerY + 8) + (m.IsGargoyle && m.IsFlying ? -22 : !m.IsMounted ? 22 : 0)));
                 }
             }
@@ -469,7 +469,7 @@ namespace ClassicUO.Game.UI.Gumps
                 if (texture != null)
                 {
                     x = (int) ((item.RealScreenPosition.X + (int) item.Offset.X + 22));
-                    y = (int) ((item.RealScreenPosition.Y + (int) (item.Offset.Y - item.Offset.Z) - (texture.ImageRectangle.Height >> 1)));
+                    y = (int) ((item.RealScreenPosition.Y + (int) (item.Offset.Y - item.Offset.Z) + (texture.ImageRectangle.Height >> 1)));
                 }
                 else
                 {
@@ -484,6 +484,7 @@ namespace ClassicUO.Game.UI.Gumps
             Point p = Client.Game.Scene.Camera.WorldToScreen(new Point(x, y));
             x = p.X - (Width >> 1);
             y = p.Y - (Height >> 1);
+
             x += gx;
             y += gy;
 
@@ -493,7 +494,6 @@ namespace ClassicUO.Game.UI.Gumps
             if (y < gy || y + Height > gy + h)
                 return false;
 
-            
             X = x;
             Y = y;
 

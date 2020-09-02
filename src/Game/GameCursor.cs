@@ -101,7 +101,7 @@ namespace ClassicUO.Game
                 {
                     ushort id = _cursorData[i, j];
 
-                    uint[] pixels = ArtLoader.Instance.ReadStaticArt(id, out short w, out short h);
+                    uint[] pixels = ArtLoader.Instance.ReadStaticArt(id, out short w, out short h, out _);
 
                     if (i == 0)
                     {

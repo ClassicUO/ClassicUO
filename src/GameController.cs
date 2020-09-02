@@ -111,7 +111,7 @@ namespace ClassicUO
             Client.Load();
 
             const int TEXTURE_WIDTH = 32;
-            const int TEXTURE_HEIGHT = 2048 * 1;
+            const int TEXTURE_HEIGHT = 2048;
 
             uint[] buffer = new uint[TEXTURE_WIDTH * TEXTURE_HEIGHT * 2];
             HuesLoader.Instance.CreateShaderColors(buffer);

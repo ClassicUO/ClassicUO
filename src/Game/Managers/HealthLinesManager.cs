@@ -63,10 +63,8 @@ namespace ClassicUO.Game.Managers
                 _hp_texture.Ticks = Time.Ticks;
         }
 
-        public void Draw(UltimaBatcher2D batcher)
+        public void Draw(UltimaBatcher2D batcher, int screenX, int screenY)
         {
-            int screenX = ProfileManager.Current.GameWindowPosition.X;
-            int screenY = ProfileManager.Current.GameWindowPosition.Y;
             int screenW = ProfileManager.Current.GameWindowSize.X;
             int screenH = ProfileManager.Current.GameWindowSize.Y;
 
@@ -127,20 +125,20 @@ namespace ClassicUO.Game.Managers
                             Point p1 = p;
                             p1.Y -= (height + centerY + 8) + 22;
 
-                            if (mobile.ObjectHandlesOpened)
-                                p1.Y -= 22;
-
                             if (mobile.IsGargoyle && mobile.IsFlying)
                                 p1.Y -= 22;
                             else if (!mobile.IsMounted)
                                 p1.Y += 22;
 
                             p1 = Client.Game.Scene.Camera.WorldToScreen(p1);
-                            p1.X += screenX;
-                            p1.Y += screenY;
-                            p1.X -= (mobile.HitsTexture.Width >> 1) + 3;
+                            p1.X -= (mobile.HitsTexture.Width >> 1) + 5;
                             p1.Y -= mobile.HitsTexture.Height;
-                            
+
+                            if (mobile.ObjectHandlesOpened)
+                            {
+                                p1.Y -= Constants.OBJECT_HANDLES_GUMP_HEIGHT + 5;
+                            }
+
                             if (!(p1.X < screenX || p1.X > screenX + screenW - mobile.HitsTexture.Width || p1.Y < screenY || p1.Y > screenY + screenH))
                             {
                                 mobile.HitsTexture.Draw(batcher, p1.X, p1.Y);
@@ -156,8 +154,6 @@ namespace ClassicUO.Game.Managers
                 //    p.Y += 22;
 
                 p = Client.Game.Scene.Camera.WorldToScreen(p);
-                p.X += screenX;
-                p.Y += screenY;
                 p.X -= BAR_WIDTH_HALF;
                 p.Y -= BAR_HEIGHT_HALF;
 
@@ -190,8 +186,6 @@ namespace ClassicUO.Game.Managers
             p.X += (int) entity.Offset.X + 22 + 5;
             p.Y += (int) (entity.Offset.Y - entity.Offset.Z) + 22 + 5;
             p = Client.Game.Scene.Camera.WorldToScreen(p);
-            p.X += screenX;
-            p.Y += screenY;
             p.X -= BAR_WIDTH_HALF;
             p.Y -= BAR_HEIGHT_HALF;
 
@@ -201,7 +195,7 @@ namespace ClassicUO.Game.Managers
             if (p.Y < screenY || p.Y > screenY + screenH - BAR_HEIGHT)
                 return;
 
-            DrawHealthLine(batcher, entity, screenX + p.X, screenY + p.Y, false);
+            DrawHealthLine(batcher, entity, p.X, p.Y, false);
         }
 
         private void DrawHealthLine(UltimaBatcher2D batcher, Entity entity, int x, int y, bool passive)

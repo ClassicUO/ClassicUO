@@ -1059,10 +1059,6 @@ namespace ClassicUO.Game.GameObjects
 
             Point p = RealScreenPosition;
 
-            if (ObjectHandlesOpened)
-            {
-                p.Y -= 22;
-            }
 
             if (IsGargoyle && IsFlying)
                 p.Y -= 22;
@@ -1083,6 +1079,11 @@ namespace ClassicUO.Game.GameObjects
             p.X += (int) Offset.X + 22;
             p.Y += (int) (Offset.Y - Offset.Z - (height + centerY + 8));
             p = Client.Game.Scene.Camera.WorldToScreen(p);
+
+            if (ObjectHandlesOpened)
+            {
+                p.Y -= Constants.OBJECT_HANDLES_GUMP_HEIGHT;
+            }
 
             if (health && HitsTexture != null && mode != 1 && ((alwaysHP >= 1 && Hits != HitsMax) || alwaysHP == 0))
             {

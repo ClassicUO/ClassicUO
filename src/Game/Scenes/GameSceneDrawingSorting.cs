@@ -739,8 +739,8 @@ namespace ClassicUO.Game.Scenes
             winGameCenterX -= (int) World.Player.Offset.X;
             winGameCenterY -= (int) (World.Player.Offset.Y - World.Player.Offset.Z);
 
-            int tileOffX = World.Player.X + Camera.Position.X / 44;
-            int tileOffY = World.Player.Y + Camera.Position.Y / 44;
+            int tileOffX = World.Player.X;
+            int tileOffY = World.Player.Y;
 
             int winDrawOffsetX = (tileOffX - tileOffY) * 22 - winGameCenterX;
             int winDrawOffsetY = (tileOffX + tileOffY) * 22 - winGameCenterY;
@@ -773,8 +773,15 @@ namespace ClassicUO.Game.Scenes
             }
 
 
+            if (_use_render_target)
+            {
+                winDrawOffsetX += winGameScaledOffsetX >> 1;
+                winDrawOffsetY += winGameScaledOffsetY >> 1;
+            }
+
             int width = (int) ((winGameWidth / 44 + 1) * zoom);
             int height = (int) ((winGameHeight / 44 + 1) * zoom);
+         
 
             if (width < height)
             {
@@ -820,15 +827,15 @@ namespace ClassicUO.Game.Scenes
 
             int drawOffset = (int) (44 / zoom);
 
-            Point p = Camera.Bounds.Location;
+            Point p = Point.Zero;
             p.X -= drawOffset;
             p.Y -= drawOffset;
             p = Camera.ScreenToWorld(p);
             int minPixelsX = p.X;
             int minPixelsY = p.Y;
 
-            p.X = Camera.Bounds.Right + drawOffset;
-            p.Y = Camera.Bounds.Bottom + drawOffset;
+            p.X = Camera.Bounds.Width + drawOffset;
+            p.Y = Camera.Bounds.Height + drawOffset;
             p = Camera.ScreenToWorld(p);
             int maxPixelsX = p.X;
             int maxPixelsY = p.Y;
@@ -838,24 +845,32 @@ namespace ClassicUO.Game.Scenes
             {
                 UpdateDrawPosition = true;
 
-                if (_lightRenderTarget == null || _lightRenderTarget.Width != winGameWidth || _lightRenderTarget.Height != winGameHeight)
+
+                if (_use_render_target && (_world_render_target == null ||
+                    _world_render_target.Width != (int) (winGameWidth * zoom) || 
+                    _world_render_target.Height != (int) (winGameHeight * zoom)))
                 {
-                    _lightRenderTarget?.Dispose();
                     _world_render_target?.Dispose();
 
                     PresentationParameters pp = Client.Game.GraphicsDevice.PresentationParameters;
 
-                    if (_use_render_target)
-                    {
-                        _world_render_target = new RenderTarget2D(Client.Game.GraphicsDevice,
-                            winGameWidth,
-                            winGameHeight,
-                            false,
-                            pp.BackBufferFormat,
-                            pp.DepthStencilFormat,
-                            pp.MultiSampleCount,
-                            pp.RenderTargetUsage);
-                    }
+                    _world_render_target = new RenderTarget2D(Client.Game.GraphicsDevice,
+                                                              (int) (winGameWidth * zoom),
+                                                              (int) (winGameHeight * zoom),
+                                                              false,
+                                                              pp.BackBufferFormat,
+                                                              pp.DepthStencilFormat,
+                                                              pp.MultiSampleCount,
+                                                              pp.RenderTargetUsage);
+                }
+
+                if (_lightRenderTarget == null || _lightRenderTarget.Width != winGameWidth || _lightRenderTarget.Height != winGameHeight)
+                {
+                    _lightRenderTarget?.Dispose();
+
+                    PresentationParameters pp = Client.Game.GraphicsDevice.PresentationParameters;
+
+                    
 
                     _lightRenderTarget = new RenderTarget2D(Client.Game.GraphicsDevice,
                         winGameWidth,

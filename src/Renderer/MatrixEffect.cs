@@ -27,11 +27,6 @@ namespace ClassicUO.Renderer
 {
     internal class MatrixEffect : Effect
     {
-        private Matrix _projectionMatrix = new Matrix(0f, //(float)( 2.0 / (double)viewport.Width ) is the actual value we will use
-                                                      0.0f, 0.0f, 0.0f, 0.0f, 0f, //(float)( -2.0 / (double)viewport.Height ) is the actual value we will use
-                                                      0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, -1.0f, 1.0f, 0.0f, 1.0f);
-
-
         public MatrixEffect(GraphicsDevice graphicsDevice, byte[] effectCode) : base(graphicsDevice, effectCode)
         {
             MatrixTransform = Parameters["MatrixTransform"];
@@ -49,14 +44,8 @@ namespace ClassicUO.Renderer
 
 
 
-        public virtual void ApplyStates(ref Matrix matrix)
+        public virtual void ApplyStates(Matrix matrix)
         {
-            //Viewport viewport = GraphicsDevice.Viewport;
-            //_projectionMatrix.M11 = (float) (2.0 / viewport.Width);
-            //_projectionMatrix.M22 = (float) (-2.0 / viewport.Height);
-
-            //Matrix.Multiply(ref _projectionMatrix, ref matrix, out matrix);
-
             MatrixTransform.SetValue(matrix);
 
             foreach (EffectPass pa in CurrentTechnique.Passes) 

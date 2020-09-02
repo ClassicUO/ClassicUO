@@ -74,41 +74,41 @@ namespace ClassicUO.IO.Resources
             });
         }
 
-        //public float[] CreateHuesPalette()
-        //{
-        //    float[] p = new float[32 * 3 * HuesCount];
+        public float[] CreateHuesPalette()
+        {
+            float[] p = new float[32 * 3 * HuesCount];
 
-        //    Palette = new FloatHues[HuesCount];
-        //    int entrycount = HuesCount >> 3;
-        //    int iddd = 0;
-        //    for (int i = 0; i < entrycount; i++)
-        //    {
-        //        for (int j = 0; j < 8; j++)
-        //        {
-        //            int idx = i * 8 + j;
-        //            Palette[idx].Palette = new float[32 * 3];
+            Palette = new FloatHues[HuesCount];
+            int entrycount = HuesCount >> 3;
+            int iddd = 0;
+            for (int i = 0; i < entrycount; i++)
+            {
+                for (int j = 0; j < 8; j++)
+                {
+                    int idx = i * 8 + j;
+                    Palette[idx].Palette = new float[32 * 3];
 
-        //            for (int h = 0; h < 32; h++)
-        //            {
-        //                int idx1 = h * 3;
-        //                ushort c = HuesRange[i].Entries[j].ColorTable[h];
-        //                Palette[idx].Palette[idx1] = ((c >> 10) & 0x1F) / 31.0f;
-        //                Palette[idx].Palette[idx1 + 1] = ((c >> 5) & 0x1F) / 31.0f;
-        //                Palette[idx].Palette[idx1 + 2] = (c & 0x1F) / 31.0f;
+                    for (int h = 0; h < 32; h++)
+                    {
+                        int idx1 = h * 3;
+                        ushort c = HuesRange[i].Entries[j].ColorTable[h];
+                        Palette[idx].Palette[idx1] = ((c >> 10) & 0x1F) / 31.0f;
+                        Palette[idx].Palette[idx1 + 1] = ((c >> 5) & 0x1F) / 31.0f;
+                        Palette[idx].Palette[idx1 + 2] = (c & 0x1F) / 31.0f;
 
-        //                p[(idx * 96) + idx1 + 0] = Palette[idx].Palette[idx1];
-        //                p[(idx * 96) + idx1 + 1] = Palette[idx].Palette[idx1 + 1];
-        //                p[(idx * 96) + idx1 + 2] = Palette[idx].Palette[idx1 + 2];
+                        p[(idx * 96) + idx1 + 0] = Palette[idx].Palette[idx1];
+                        p[(idx * 96) + idx1 + 1] = Palette[idx].Palette[idx1 + 1];
+                        p[(idx * 96) + idx1 + 2] = Palette[idx].Palette[idx1 + 2];
 
-        //                //p[iddd++] = Palette[idx].Palette[idx1];
-        //                //p[iddd++] = Palette[idx].Palette[idx1 + 1];
-        //                //p[iddd++] = Palette[idx].Palette[idx1 + 2];
-        //            }
-        //        }
-        //    }
+                        //p[iddd++] = Palette[idx].Palette[idx1];
+                        //p[iddd++] = Palette[idx].Palette[idx1 + 1];
+                        //p[iddd++] = Palette[idx].Palette[idx1 + 2];
+                    }
+                }
+            }
 
-        //    return p;
-        //}
+            return p;
+        }
 
         public void CreateShaderColors(uint[] buffer)
         {

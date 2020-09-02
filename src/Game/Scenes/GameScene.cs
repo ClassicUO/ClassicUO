@@ -549,18 +549,27 @@ namespace ClassicUO.Game.Scenes
 
         public override void Update(double totalMS, double frameMS)
         {
-            int posX = ProfileManager.Current.GameWindowPosition.X + 5;
-            int posY = ProfileManager.Current.GameWindowPosition.Y + 5;
-            int width = ProfileManager.Current.GameWindowSize.X;
-            int height = ProfileManager.Current.GameWindowSize.Y;
-
-            Camera.SetGameWindowBounds
-            (
-                posX,
-                posY,
-                width,
-                height
-            );
+            if (_use_render_target)
+            {
+                Camera.SetGameWindowBounds
+                (
+                    0,
+                    0,
+                    Client.Game.GraphicManager.PreferredBackBufferWidth,
+                    Client.Game.GraphicManager.PreferredBackBufferHeight
+                );
+            }
+            else
+            {
+                Camera.SetGameWindowBounds
+                (
+                    ProfileManager.Current.GameWindowPosition.X + 5,
+                    ProfileManager.Current.GameWindowPosition.Y + 5,
+                    ProfileManager.Current.GameWindowSize.X,
+                    ProfileManager.Current.GameWindowSize.Y
+                );
+            }
+            
 
             SelectedObject.TranslatedMousePositionByViewport = Camera.MouseToWorldPosition();
 
@@ -739,43 +748,31 @@ namespace ClassicUO.Game.Scenes
         }
 
 
-        private static XBREffect _xbr_effect;
+        private static XBREffect _xbr;
         private bool _use_render_target = false;
+
 
         public override bool Draw(UltimaBatcher2D batcher)
         {
             if (!World.InGame || !_isListReady)
                 return false;
 
+            CheckDeathScreen();
+
+
+
             int posX = ProfileManager.Current.GameWindowPosition.X + 5;
             int posY = ProfileManager.Current.GameWindowPosition.Y + 5;
             int width = ProfileManager.Current.GameWindowSize.X;
             int height = ProfileManager.Current.GameWindowSize.Y;
 
+
             Viewport r_viewport = batcher.GraphicsDevice.Viewport;
+            Viewport camera_viewport = Camera.GetViewport();
 
-            Matrix matrix = Camera.ViewTransformMatrix;
+            Matrix matrix = _use_render_target ? Matrix.Identity : Camera.ViewTransformMatrix;
 
-            if (ProfileManager.Current.EnableDeathScreen)
-            {
-                if (_deathScreenLabel == null || _deathScreenLabel.IsDisposed)
-                {
-                    if (World.Player.IsDead && World.Player.DeathScreenTimer > Time.Ticks)
-                    {
-                        UIManager.Add(_deathScreenLabel = new Label(ResGeneral.YouAreDead, false, 999, 200, 3)
-                        {
-                            X = (Client.Game.Window.ClientBounds.Width >> 1) - 50,
-                            Y = (Client.Game.Window.ClientBounds.Height >> 1) - 50
-                        });
-                        _deathScreenActive = true;
-                    }
-                }
-                else if (World.Player.DeathScreenTimer < Time.Ticks)
-                {
-                    _deathScreenActive = false;
-                    _deathScreenLabel.Dispose();
-                }
-            }
+
 
             
             bool can_draw_lights = false;
@@ -783,7 +780,7 @@ namespace ClassicUO.Game.Scenes
             if (!_use_render_target)
             {
                 can_draw_lights = PrepareLightsRendering(batcher, ref matrix);
-                batcher.GraphicsDevice.Viewport = Camera.GetViewport();
+                batcher.GraphicsDevice.Viewport = camera_viewport;
             }
 
             DrawWorld(batcher, ref matrix, _use_render_target);
@@ -791,72 +788,41 @@ namespace ClassicUO.Game.Scenes
             if (_use_render_target)
             {
                 can_draw_lights = PrepareLightsRendering(batcher, ref matrix);
+                batcher.GraphicsDevice.Viewport = camera_viewport;
             }
-            
+
             // draw world rt
             Vector3 hue = Vector3.Zero;
 
 
             if (_use_render_target)
             {
-                if (_xbr_effect == null)
+                //switch (ProfileManager.Current.FilterType)
+                //{
+                //    default:
+                //    case 0:
+                //        batcher.SetSampler(SamplerState.PointClamp);
+                //        break;
+                //    case 1:
+                //        batcher.SetSampler(SamplerState.AnisotropicClamp);
+                //        break;
+                //    case 2:
+                //        batcher.SetSampler(SamplerState.LinearClamp);
+                //        break;
+                //}
+
+                if (_xbr == null)
                 {
-                    _xbr_effect = new XBREffect(batcher.GraphicsDevice);
+                    _xbr = new XBREffect(batcher.GraphicsDevice);
                 }
 
-                float zoom = Camera.Zoom;
-                //Camera.Zoom = 1f;
-                Camera.SetGameWindowBounds(0, 0, batcher.GraphicsDevice.Viewport.Width, batcher.GraphicsDevice.Viewport.Height);
-                //matrix = Camera.ViewTransformMatrix;
-                //batcher.GraphicsDevice.Viewport = Camera.GetViewport();
-                matrix = Camera.ProjectionMatrix;
+                _xbr.SetSize(width, height);
 
-                _xbr_effect.SetSize(width, height);
-
-                batcher.Begin(ProfileManager.Current.UseXBR ? _xbr_effect : null, matrix);
-
-
-
-                int drawOffset = 0; //(int) (44 / Camera.Zoom);
-
-                Point p = Camera.Bounds.Location;
-                p.X -= drawOffset;
-                p.Y -= drawOffset;
-                p = Camera.ScreenToWorld(p);
-                int minPixelsX = p.X;
-                int minPixelsY = p.Y;
-
-                p.X = Camera.Bounds.Right + drawOffset;
-                p.Y = Camera.Bounds.Bottom + drawOffset;
-                p = Camera.ScreenToWorld(p);
-                int maxPixelsX = p.X;
-                int maxPixelsY = p.Y;
-
-
-                //batcher.Draw2D(_world_render_target,
-                //    posX,
-                //    posY,
-                //    width,
-                //    height,
-
-
-                //    minPixelsX,
-                //    minPixelsY,
-                //    maxPixelsX,
-                //    maxPixelsY,
-
-                //    //minPixelsX + (minPixelsX - maxPixelsX / 2),
-                //    //minPixelsY + (minPixelsY - maxPixelsY / 2),
-                //    //maxPixelsX - 0,
-                //    //maxPixelsY - 0,
-
-                //    ref hue);
-
+                batcher.Begin(_xbr);
                 batcher.Draw2D(_world_render_target, posX, posY, width, height, ref hue);
                 batcher.End();
 
-
-                //Camera.Zoom = zoom;
+                //batcher.SetSampler(null);
             }
 
             // draw lights
@@ -870,35 +836,14 @@ namespace ClassicUO.Game.Scenes
             }
 
 
-            if (_use_render_target)
-            {
-                var rectangle = ScissorStack.CalculateScissors(
-                    Matrix.Identity,
-                    posX,
-                    posY,
-                    width,
-                    height);
-
-                ScissorStack.PushScissors(batcher.GraphicsDevice, rectangle);
-                batcher.EnableScissorTest(true);
-            }
-
 
             batcher.Begin();
-            DrawOverheads(batcher, posX, posY);
+            DrawOverheads(batcher, 0, 0);
             DrawSelection(batcher);
             batcher.End();
 
 
-            if (_use_render_target)
-            {
-                batcher.EnableScissorTest(false);
-                ScissorStack.PopScissors(batcher.GraphicsDevice);
-            }
-            else
-            {
-                batcher.GraphicsDevice.Viewport = r_viewport;
-            }
+            batcher.GraphicsDevice.Viewport = r_viewport;
 
             return base.Draw(batcher);
         }
@@ -912,29 +857,26 @@ namespace ClassicUO.Game.Scenes
                 batcher.GraphicsDevice.SetRenderTarget(_world_render_target);
                 batcher.GraphicsDevice.Clear(ClearOptions.Target, Color.Black, 0f, 0);
             }
-            
+            else
+            {
+                switch (ProfileManager.Current.FilterType)
+                {
+                    default:
+                    case 0:
+                        batcher.SetSampler(SamplerState.PointClamp);
+                        break;
+                    case 1:
+                        batcher.SetSampler(SamplerState.AnisotropicClamp);
+                        break;
+                    case 2:
+                        batcher.SetSampler(SamplerState.LinearClamp);
+                        break;
+                }
+            }
+           
 
             batcher.SetBrightlight(ProfileManager.Current.Brighlight);
             batcher.Begin(null, matrix);
-
-            //if (ProfileManager.Current.UseXBR)
-            //{
-            //    batcher.SetSampler(SamplerState.AnisotropicWrap);
-            //}
-
-            switch (ProfileManager.Current.FilterType)
-            {
-                default:
-                case 0:
-                    batcher.SetSampler(SamplerState.PointClamp);
-                    break;
-                case 1:
-                    batcher.SetSampler(SamplerState.AnisotropicClamp);
-                    break;
-                case 2:
-                    batcher.SetSampler(SamplerState.LinearClamp);
-                    break;
-            }
 
 
             bool usecircle = ProfileManager.Current.UseCircleOfTransparency;
@@ -1038,7 +980,7 @@ namespace ClassicUO.Game.Scenes
 
         public void DrawOverheads(UltimaBatcher2D batcher, int x, int y)
         {
-            _healthLinesManager.Draw(batcher);
+            _healthLinesManager.Draw(batcher, x, y);
 
             int renderIndex = _renderIndex - 1;
 
@@ -1062,6 +1004,30 @@ namespace ClassicUO.Game.Scenes
                 batcher.Draw2D(Texture2DCache.GetTexture(Color.Black), _selectionStart.Item1, _selectionStart.Item2, Mouse.Position.X - _selectionStart.Item1, Mouse.Position.Y - _selectionStart.Item2, ref _selectionLines);
                 _selectionLines.Z = 0.7f;
                 batcher.DrawRectangle(Texture2DCache.GetTexture(Color.DeepSkyBlue), _selectionStart.Item1, _selectionStart.Item2, Mouse.Position.X - _selectionStart.Item1, Mouse.Position.Y - _selectionStart.Item2, ref _selectionLines);
+            }
+        }
+
+        private void CheckDeathScreen()
+        {
+            if (ProfileManager.Current.EnableDeathScreen)
+            {
+                if (_deathScreenLabel == null || _deathScreenLabel.IsDisposed)
+                {
+                    if (World.Player.IsDead && World.Player.DeathScreenTimer > Time.Ticks)
+                    {
+                        UIManager.Add(_deathScreenLabel = new Label(ResGeneral.YouAreDead, false, 999, 200, 3)
+                        {
+                            X = (Client.Game.Window.ClientBounds.Width >> 1) - 50,
+                            Y = (Client.Game.Window.ClientBounds.Height >> 1) - 50
+                        });
+                        _deathScreenActive = true;
+                    }
+                }
+                else if (World.Player.DeathScreenTimer < Time.Ticks)
+                {
+                    _deathScreenActive = false;
+                    _deathScreenLabel.Dispose();
+                }
             }
         }
 

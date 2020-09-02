@@ -1,4 +1,5 @@
-﻿using System.Runtime.CompilerServices;
+﻿using System;
+using System.Runtime.CompilerServices;
 using ClassicUO.Input;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -19,7 +20,7 @@ namespace ClassicUO.Renderer
         public Rectangle Bounds;
 
 
-        public Matrix ViewTransformMatrix => TransformMatrix * ProjectionMatrix;
+        public Matrix ViewTransformMatrix => TransformMatrix /** ProjectionMatrix*/;
 
         public Matrix ProjectionMatrix
         {
@@ -166,9 +167,6 @@ namespace ClassicUO.Renderer
         {
             UpdateMatrices();
 
-            point.X -= Bounds.X;
-            point.Y -= Bounds.Y;
-
             Transform(ref point, ref _inverseTransform, out point);
 
             return point;
@@ -178,7 +176,7 @@ namespace ClassicUO.Renderer
         public Point WorldToScreen(Point point)
         {
             UpdateMatrices();
-
+            
             Transform(ref point, ref _transform, out point);
 
             return point;
@@ -195,7 +193,12 @@ namespace ClassicUO.Renderer
 
         public Point MouseToWorldPosition()
         {
-            return ScreenToWorld(Mouse.Position);
+            Point mouse = Mouse.Position;
+
+            mouse.X -= Bounds.X;
+            mouse.Y -= Bounds.Y;
+
+            return ScreenToWorld(mouse);
         }
 
         private void UpdateMatrices()

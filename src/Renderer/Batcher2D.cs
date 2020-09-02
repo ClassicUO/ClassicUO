@@ -53,7 +53,11 @@ namespace ClassicUO.Renderer
         private BoundingBox _drawingArea;
         private int _numSprites;
         private Matrix _transformMatrix;
+        private Matrix _projectionMatrix = new Matrix(0f,                         //(float)( 2.0 / (double)viewport.Width ) is the actual value we will use
+                                                      0.0f, 0.0f, 0.0f, 0.0f, 0f, //(float)( -2.0 / (double)viewport.Height ) is the actual value we will use
+                                                      0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, -1.0f, 1.0f, 0.0f, 1.0f);
         private int _currentBufferPosition;
+
 
 
         public UltimaBatcher2D(GraphicsDevice device)
@@ -1274,7 +1278,7 @@ namespace ClassicUO.Renderer
         }
 
         [MethodImpl(256)]
-        public bool Draw2D(Texture2D texture, int x, int y, float width, float height, ref Vector3 hue)
+        public bool Draw2D(Texture2D texture, float x, float y, float width, float height, ref Vector3 hue)
         {
             EnsureSize();
 
@@ -1452,19 +1456,17 @@ namespace ClassicUO.Renderer
             PushSprite(texture);
             return true;
         }
-
+        
         [MethodImpl(256)]
         public void Begin()
         {
-            SetMatrixToDefault();
-            Begin(null, _transformMatrix);
+            Begin(null, Matrix.Identity);
         }
 
         [MethodImpl(256)]
         public void Begin(Effect effect)
         {
-            SetMatrixToDefault();
-            Begin(effect, _transformMatrix);
+            Begin(effect, Matrix.Identity);
         }
 
         [MethodImpl(256)]
@@ -1501,17 +1503,6 @@ namespace ClassicUO.Renderer
 
             if (_numSprites >= MAX_SPRITES)
                 Flush();
-        }
-
-        private void SetMatrixToDefault()
-        {
-            var viewport = GraphicsDevice.Viewport;
-            Matrix.CreateOrthographicOffCenter(
-                viewport.X,
-                viewport.X + viewport.Width,
-                viewport.Y + viewport.Height, 
-                viewport.Y, 
-                0, 1, out _transformMatrix);
         }
 
         [MethodImpl(256)]
@@ -1554,7 +1545,7 @@ namespace ClassicUO.Renderer
             GraphicsDevice.Indices = _indexBuffer;
             GraphicsDevice.SetVertexBuffer(_vertexBuffer);
 
-            DefaultEffect.ApplyStates(ref _transformMatrix);
+            SetMatrixForEffect(DefaultEffect);
         }
 
         private unsafe void Flush()
@@ -1583,9 +1574,13 @@ namespace ClassicUO.Renderer
             if (_customEffect != null)
             {
                 if (_customEffect is MatrixEffect eff)
-                    eff.ApplyStates(ref _transformMatrix);
+                {
+                    SetMatrixForEffect(eff);
+                }
                 else
+                {
                     _customEffect.CurrentTechnique.Passes[0].Apply();
+                }
             }
 
             for (int i = 1; i < _numSprites; i++)
@@ -1601,6 +1596,18 @@ namespace ClassicUO.Renderer
             InternalDraw(current, start + offset, _numSprites - offset);
 
             _numSprites = 0;
+        }
+
+        private void SetMatrixForEffect(MatrixEffect effect)
+        {
+            _projectionMatrix.M11 = (float) (2.0 / GraphicsDevice.Viewport.Width);
+            _projectionMatrix.M22 = (float) (-2.0 / GraphicsDevice.Viewport.Height);
+
+            Matrix.Multiply(ref _transformMatrix,
+                            ref _projectionMatrix,
+                            out Matrix matrix);
+
+            effect.ApplyStates(matrix);
         }
 
         [MethodImpl(256)]
@@ -1709,6 +1716,7 @@ namespace ClassicUO.Renderer
         private class IsometricEffect : MatrixEffect
         {
             private Vector2 _viewPort;
+            private Matrix _matrix = Matrix.Identity;
 
             public IsometricEffect(GraphicsDevice graphicsDevice) : base(graphicsDevice, Resources.IsometricEffect)
             {
@@ -1725,15 +1733,15 @@ namespace ClassicUO.Renderer
             public EffectParameter Brighlight { get; }
 
 
-            public override void ApplyStates(ref Matrix matrix)
+            public override void ApplyStates(Matrix matrix)
             {
-                WorldMatrix.SetValue(Matrix.Identity);
+                WorldMatrix.SetValue(_matrix);
 
                 _viewPort.X = GraphicsDevice.Viewport.Width;
                 _viewPort.Y = GraphicsDevice.Viewport.Height;
                 Viewport.SetValue(_viewPort);
 
-                base.ApplyStates(ref matrix);
+                base.ApplyStates(matrix);
             }
         }
 
