@@ -549,27 +549,13 @@ namespace ClassicUO.Game.Scenes
 
         public override void Update(double totalMS, double frameMS)
         {
-            if (_use_render_target)
-            {
-                Camera.SetGameWindowBounds
-                (
-                    0,
-                    0,
-                    Client.Game.GraphicManager.PreferredBackBufferWidth,
-                    Client.Game.GraphicManager.PreferredBackBufferHeight
-                );
-            }
-            else
-            {
-                Camera.SetGameWindowBounds
-                (
-                    ProfileManager.Current.GameWindowPosition.X + 5,
-                    ProfileManager.Current.GameWindowPosition.Y + 5,
-                    ProfileManager.Current.GameWindowSize.X,
-                    ProfileManager.Current.GameWindowSize.Y
-                );
-            }
-            
+            Camera.SetGameWindowBounds
+            (
+                ProfileManager.Current.GameWindowPosition.X + 5,
+                ProfileManager.Current.GameWindowPosition.Y + 5,
+                ProfileManager.Current.GameWindowSize.X,
+                ProfileManager.Current.GameWindowSize.Y
+            );
 
             SelectedObject.TranslatedMousePositionByViewport = Camera.MouseToWorldPosition();
 

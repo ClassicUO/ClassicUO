@@ -386,7 +386,7 @@ namespace ClassicUO.Game.UI.Gumps
                                                               out int width,
                                                               out int height);
 
-                _lockedPosition.X = (int)((m.RealScreenPosition.X + m.Offset.X + 22));
+                _lockedPosition.X = (int)((m.RealScreenPosition.X + m.Offset.X + 22 + 5));
                 _lockedPosition.Y = (int)((m.RealScreenPosition.Y + (m.Offset.Y - m.Offset.Z) - (height + centerY + 8) + (m.IsGargoyle && m.IsFlying ? -22 : !m.IsMounted ? 22 : 0)));
             }
 
@@ -468,12 +468,12 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (texture != null)
                 {
-                    x = (int) ((item.RealScreenPosition.X + (int) item.Offset.X + 22));
+                    x = (int) ((item.RealScreenPosition.X + (int) item.Offset.X + 22) + 5);
                     y = (int) ((item.RealScreenPosition.Y + (int) (item.Offset.Y - item.Offset.Z) + (texture.ImageRectangle.Height >> 1)));
                 }
                 else
                 {
-                    x = (int) ((item.RealScreenPosition.X + (int) item.Offset.X + 22));
+                    x = (int) ((item.RealScreenPosition.X + (int) item.Offset.X + 22) + 5);
                     y = (int) ((item.RealScreenPosition.Y + (int) (item.Offset.Y - item.Offset.Z) + 22));
                 }
             }
