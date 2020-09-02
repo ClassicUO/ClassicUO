@@ -804,8 +804,21 @@ namespace ClassicUO.Game.Scenes
 
                 _xbr.SetSize(width, height);
 
-                batcher.Begin(_xbr);
-                batcher.Draw2D(_world_render_target, posX, posY, width, height, ref hue);
+
+                //Point p = Point.Zero;
+               
+                //p = Camera.ScreenToWorld(p);
+                //int minPixelsX = p.X;
+                //int minPixelsY = p.Y;
+
+                //p.X = Camera.Bounds.Width;
+                //p.Y = Camera.Bounds.Height;
+                //p = Camera.ScreenToWorld(p);
+                //int maxPixelsX = p.X;
+                //int maxPixelsY = p.Y;
+
+                batcher.Begin(null, Camera.ViewTransformMatrix);
+                batcher.Draw2D(_world_render_target, 0, 0, width, height, ref hue);
                 batcher.End();
 
                 //batcher.SetSampler(null);

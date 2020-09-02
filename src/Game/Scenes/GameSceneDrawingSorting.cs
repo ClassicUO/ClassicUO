@@ -773,11 +773,11 @@ namespace ClassicUO.Game.Scenes
             }
 
 
-            if (_use_render_target)
-            {
-                winDrawOffsetX += winGameScaledOffsetX >> 1;
-                winDrawOffsetY += winGameScaledOffsetY >> 1;
-            }
+            //if (_use_render_target)
+            //{
+            //    winDrawOffsetX += winGameScaledOffsetX >> 1;
+            //    winDrawOffsetY += winGameScaledOffsetY >> 1;
+            //}
 
             int width = (int) ((winGameWidth / 44 + 1) * zoom);
             int height = (int) ((winGameHeight / 44 + 1) * zoom);
@@ -855,8 +855,8 @@ namespace ClassicUO.Game.Scenes
                     PresentationParameters pp = Client.Game.GraphicsDevice.PresentationParameters;
 
                     _world_render_target = new RenderTarget2D(Client.Game.GraphicsDevice,
-                                                              (int) (winGameWidth * zoom),
-                                                              (int) (winGameHeight * zoom),
+                                                              (int) (winGameWidth * 1),
+                                                              (int) (winGameHeight * 1),
                                                               false,
                                                               pp.BackBufferFormat,
                                                               pp.DepthStencilFormat,
