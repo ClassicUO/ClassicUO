@@ -65,6 +65,8 @@ namespace ClassicUO.Game.Managers
 
         public static bool IsMouseOverAControl => MouseOverControl != null;
 
+        public static bool IsModalOpen { get; private set; }
+
         public static bool IsMouseOverWorld
         {
             get
@@ -76,6 +78,7 @@ namespace ClassicUO.Game.Managers
                        GameCursor.AllowDrawSDLCursor &&
                        DraggingControl == null &&
                        MouseOverControl == null &&
+                       !IsModalOpen &&
                        mouse.X >= profile.GameWindowPosition.X + 5 &&
                        mouse.X < profile.GameWindowPosition.X + 5 + profile.GameWindowSize.X &&
                        mouse.Y >= profile.GameWindowPosition.Y + 5 &&
@@ -669,13 +672,13 @@ namespace ClassicUO.Game.Managers
 
             Control control = null;
 
-            bool ismodal = IsModalControlOpen();
+            IsModalOpen = IsModalControlOpen();
 
             for (LinkedListNode<Control> first = Gumps.First; first != null; first = first.Next)
             {
                 Control c = first.Value;
 
-                if ((ismodal && !c.ControlInfo.IsModal) || !c.IsVisible || !c.IsEnabled)
+                if ((IsModalOpen && !c.ControlInfo.IsModal) || !c.IsVisible || !c.IsEnabled)
                 {
                     continue;
                 }
