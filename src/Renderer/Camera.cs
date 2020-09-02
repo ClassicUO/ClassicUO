@@ -70,23 +70,17 @@ namespace ClassicUO.Renderer
             {
                 if (_cameraZoomValues[_zoomIndex] != value)
                 {
-                    //float zoom = MathHelper.Clamp(value, _cameraZoomValues[0], _cameraZoomValues[_cameraZoomValues.Length - 1]);
-
-                    //if (zoom == 0)
-                    //{
-
-                    //}
-
+                    // TODO: coding a better way to set zoom
                     for (_zoomIndex = 0; _zoomIndex < _cameraZoomValues.Length; ++_zoomIndex)
                     {
                         if (_cameraZoomValues[_zoomIndex] == value)
                         {
-                            _updateMatrixes = true;
                             break;
                         }
                     }
 
-                    //ZoomIndex = (int) (value * _cameraZoomValues.Length) - _cameraZoomValues.Length / 2 - 1;
+                    // hack to trigger the bounds check and update matrices
+                    ZoomIndex = _zoomIndex;
                 }
             }
         }
