@@ -1382,4 +1382,22 @@ Client version: '{0}'</value>
   <data name="HideScreenshotStoredInMessage" xml:space="preserve">
     <value>Hide "Screenshot stored in" message</value>
   </data>
+  <data name="AnisotropicClamp" xml:space="preserve">
+    <value>Anisotropic Clamp</value>
+  </data>
+  <data name="FilterType" xml:space="preserve">
+    <value>Filter type [TEST]:</value>
+  </data>
+  <data name="FilterTypeFormatON" xml:space="preserve">
+    <value>{0} [{1}]</value>
+  </data>
+  <data name="LinearClamp" xml:space="preserve">
+    <value>Linear Clamp</value>
+  </data>
+  <data name="OFF" xml:space="preserve">
+    <value>OFF</value>
+  </data>
+  <data name="ON" xml:space="preserve">
+    <value>ON</value>
+  </data>
 </root>

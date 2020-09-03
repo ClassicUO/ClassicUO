@@ -232,6 +232,15 @@ namespace ClassicUO.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Anisotropic Clamp.
+        /// </summary>
+        public static string AnisotropicClamp {
+            get {
+                return ResourceManager.GetString("AnisotropicClamp", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Armor.
         /// </summary>
         public static string Armor {
@@ -1276,6 +1285,24 @@ namespace ClassicUO.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Filter type [TEST]:.
+        /// </summary>
+        public static string FilterType {
+            get {
+                return ResourceManager.GetString("FilterType", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} [{1}].
+        /// </summary>
+        public static string FilterTypeFormatON {
+            get {
+                return ResourceManager.GetString("FilterTypeFormatON", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Fire Resistance.
         /// </summary>
         public static string FireResistance {
@@ -1826,7 +1853,7 @@ namespace ClassicUO.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to {0} at {0}gp.
+        ///   Looks up a localized string similar to {0} at {1}gp.
         /// </summary>
         public static string Item0Price1 {
             get {
@@ -1957,6 +1984,15 @@ namespace ClassicUO.Resources {
         public static string LightLevel {
             get {
                 return ResourceManager.GetString("LightLevel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Linear Clamp.
+        /// </summary>
+        public static string LinearClamp {
+            get {
+                return ResourceManager.GetString("LinearClamp", resourceCulture);
             }
         }
         
@@ -2319,6 +2355,24 @@ namespace ClassicUO.Resources {
         public static string ObjectInformation {
             get {
                 return ResourceManager.GetString("ObjectInformation", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to OFF.
+        /// </summary>
+        public static string OFF {
+            get {
+                return ResourceManager.GetString("OFF", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to ON.
+        /// </summary>
+        public static string ON {
+            get {
+                return ResourceManager.GetString("ON", resourceCulture);
             }
         }
         

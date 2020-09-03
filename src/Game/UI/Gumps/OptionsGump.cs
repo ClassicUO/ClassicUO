@@ -101,7 +101,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         // macro
         private MacroControl _macroControl;
-        private Checkbox _restorezoomCheckbox, _savezoomCheckbox, _zoomCheckbox;
+        private Checkbox _restorezoomCheckbox, _zoomCheckbox;
 
         // infobar
         private List<InfoBarBuilderControl> _infoBarBuilderControls;
@@ -768,12 +768,14 @@ namespace ClassicUO.Game.UI.Gumps
 
             item = new ScrollAreaItem();
             item.Y = SPACE_Y;
-            text = new Label("Filter Type [TEST]:", true, HUE_FONT);
+            text = new Label(ResGumps.FilterType, true, HUE_FONT);
             text.Y = SPACE_Y + 30;
             item.Add(text);
             _filterType = new Combobox(text.Width + 20, text.Y, 200, new[]
             {
-                "Point Clamp", "Anisotropic Clamp", "Linear Clamp"
+                ResGumps.OFF, 
+                string.Format(ResGumps.FilterTypeFormatON, ResGumps.ON, ResGumps.AnisotropicClamp), 
+                string.Format(ResGumps.FilterTypeFormatON, ResGumps.ON, ResGumps.LinearClamp)
             })
             {
                 SelectedIndex = ProfileManager.Current.FilterType
@@ -1569,7 +1571,6 @@ namespace ClassicUO.Game.UI.Gumps
                 case 3: // video
                     _windowBorderless.IsChecked = false;
                     _zoomCheckbox.IsChecked = false;
-                    _savezoomCheckbox.IsChecked = false;
                     _restorezoomCheckbox.IsChecked = false;
                     _use_old_status_gump.IsChecked = false;
                     _gameWindowWidth.SetText("600");
