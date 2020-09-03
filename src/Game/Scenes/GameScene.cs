@@ -829,7 +829,7 @@ namespace ClassicUO.Game.Scenes
             {
                 batcher.Begin();
                 batcher.SetBlendState(UseAltLights ? _altLightsBlend.Value : _darknessBlend.Value);
-                batcher.Draw2D(_lightRenderTarget, posX, posY, width, height, ref hue);
+                batcher.Draw2D(_lightRenderTarget, 0, 0, width, height, ref hue);
                 batcher.SetBlendState(null);
                 batcher.End();
             }
