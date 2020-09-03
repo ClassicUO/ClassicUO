@@ -712,7 +712,10 @@ namespace ClassicUO.Game.Scenes
             {
                 Point offset = Mouse.LDroppedOffset;
 
-                if (Math.Abs(offset.X) > Constants.MIN_PICKUP_DRAG_DISTANCE_PIXELS || Math.Abs(offset.Y) > Constants.MIN_PICKUP_DRAG_DISTANCE_PIXELS)
+                if (!UIManager.GameCursor.IsDraggingCursorForced &&  // don't trigger "sallos ez grab" when dragging wmap or skill
+                    !_isSelectionActive &&                           // and ofc when selection is enabled
+                    (Math.Abs(offset.X) > Constants.MIN_PICKUP_DRAG_DISTANCE_PIXELS || 
+                    Math.Abs(offset.Y) > Constants.MIN_PICKUP_DRAG_DISTANCE_PIXELS))
                 {
                     Entity obj;
                     if (ProfileManager.Current.SallosEasyGrab && SelectedObject.LastObject is Entity ent && SelectedObject.LastLeftDownObject == null)
