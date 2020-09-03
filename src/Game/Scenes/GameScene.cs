@@ -1000,9 +1000,18 @@ namespace ClassicUO.Game.Scenes
             if (_isSelectionActive)
             {
                 _selectionLines.Z = 0.3F;
-                batcher.Draw2D(Texture2DCache.GetTexture(Color.Black), _selectionStart.Item1, _selectionStart.Item2, Mouse.Position.X - _selectionStart.Item1, Mouse.Position.Y - _selectionStart.Item2, ref _selectionLines);
+                batcher.Draw2D(Texture2DCache.GetTexture(Color.Black), 
+                               _selectionStart.X - Camera.Bounds.X, _selectionStart.Y - Camera.Bounds.Y, 
+                               Mouse.Position.X - _selectionStart.X, 
+                               Mouse.Position.Y - _selectionStart.Y, 
+                               ref _selectionLines);
+
                 _selectionLines.Z = 0.7f;
-                batcher.DrawRectangle(Texture2DCache.GetTexture(Color.DeepSkyBlue), _selectionStart.Item1, _selectionStart.Item2, Mouse.Position.X - _selectionStart.Item1, Mouse.Position.Y - _selectionStart.Item2, ref _selectionLines);
+                batcher.DrawRectangle(Texture2DCache.GetTexture(Color.DeepSkyBlue),
+                                      _selectionStart.X - Camera.Bounds.X, _selectionStart.Y - Camera.Bounds.Y,
+                                      Mouse.Position.X - _selectionStart.X,
+                                      Mouse.Position.Y - _selectionStart.Y,
+                                      ref _selectionLines);
             }
         }
 

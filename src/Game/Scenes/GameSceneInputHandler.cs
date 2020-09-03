@@ -50,7 +50,7 @@ namespace ClassicUO.Game.Scenes
         private readonly bool[] _flags = new bool[5];
         private bool _requestedWarMode;
         private bool _rightMousePressed, _continueRunning;
-        private (int, int) _selectionStart, _selectionEnd;
+        private Point _selectionStart, _selectionEnd;
         private uint _holdMouse2secOverItemTime;
         private bool _isMouseLeftDown;
         private Direction _lastBoatDirection;
@@ -102,24 +102,6 @@ namespace ClassicUO.Game.Scenes
             return obj is null || obj is Static || obj is Land || obj is Multi || obj is Item tmpitem && tmpitem.IsLocked;
         }
 
-        private void SetDragSelectionStartEnd(ref (int, int) start, ref (int, int) end)
-        {
-            if (start.Item1 > Mouse.Position.X)
-            {
-                end.Item1 = start.Item1;
-                start.Item1 = Mouse.Position.X;
-            }
-            else
-                end.Item1 = Mouse.Position.X;
-
-            if (start.Item2 > Mouse.Position.Y)
-            {
-                _selectionEnd.Item2 = start.Item2;
-                start.Item2 = Mouse.Position.Y;
-            }
-            else
-                end.Item2 = Mouse.Position.Y;
-        }
 
         private bool DragSelectModifierActive()
         {
@@ -143,12 +125,31 @@ namespace ClassicUO.Game.Scenes
 
         private void DoDragSelect()
         {
-            SetDragSelectionStartEnd(ref _selectionStart, ref _selectionEnd);
+            if (_selectionStart.X > Mouse.Position.X)
+            {
+                _selectionEnd.X = _selectionStart.X;
+                _selectionStart.X = Mouse.Position.X;
+            }
+            else
+            {
+                _selectionEnd.X = Mouse.Position.X;
+            }
 
-            _rectangleObj.X = _selectionStart.Item1;
-            _rectangleObj.Y = _selectionStart.Item2;
-            _rectangleObj.Width = _selectionEnd.Item1 - _selectionStart.Item1;
-            _rectangleObj.Height = _selectionEnd.Item2 - _selectionStart.Item2;
+            if (_selectionStart.Y > Mouse.Position.Y)
+            {
+                _selectionEnd.Y = _selectionStart.Y;
+                _selectionStart.Y = Mouse.Position.Y;
+            }
+            else
+            {
+                _selectionEnd.Y = Mouse.Position.Y;
+            }
+
+            
+            _rectangleObj.X = _selectionStart.X - Camera.Bounds.X;
+            _rectangleObj.Y = _selectionStart.Y - Camera.Bounds.Y;
+            _rectangleObj.Width = _selectionEnd.X - Camera.Bounds.X - _rectangleObj.X;
+            _rectangleObj.Height = _selectionEnd.Y - Camera.Bounds.Y - _rectangleObj.Y;
 
             int finalX = 100;
             int finalY = 100;
@@ -162,21 +163,23 @@ namespace ClassicUO.Game.Scenes
                 if (ProfileManager.Current.DragSelectHumanoidsOnly && !mobile.IsHuman)
                     continue;
 
-                int x = ProfileManager.Current.GameWindowPosition.X + mobile.RealScreenPosition.X + (int) mobile.Offset.X + 22 + 5;
-                int y = ProfileManager.Current.GameWindowPosition.Y + (mobile.RealScreenPosition.Y - (int) mobile.Offset.Z) + 22 + 5;
+                Point p = mobile.RealScreenPosition;
 
-                x -= mobile.FrameInfo.X;
-                y -= mobile.FrameInfo.Y;
-                int w = mobile.FrameInfo.Width;
-                int h = mobile.FrameInfo.Height;
+                p.X += (int) mobile.Offset.X + 22 + 5;
+                p.Y += (int) (mobile.Offset.Y - mobile.Offset.Z) + 22 + 5;
+                p.X -= mobile.FrameInfo.X;
+                p.Y -= mobile.FrameInfo.Y;
 
-                x = (int) (x * (1 / Camera.Zoom));
-                y = (int) (y * (1 / Camera.Zoom));
+                Point size = new Point( p.X + mobile.FrameInfo.Width, p.Y + mobile.FrameInfo.Height);
 
-                _rectanglePlayer.X = x;
-                _rectanglePlayer.Y = y;
-                _rectanglePlayer.Width = w;
-                _rectanglePlayer.Height = h;
+                p = Camera.WorldToScreen(p);
+                _rectanglePlayer.X = p.X;
+                _rectanglePlayer.Y = p.Y;
+
+
+                size = Camera.WorldToScreen(size);
+                _rectanglePlayer.Width = size.X - p.X;
+                _rectanglePlayer.Height = size.Y - p.Y;
 
                 if (_rectangleObj.Intersects(_rectanglePlayer))
                 {
@@ -286,7 +289,7 @@ namespace ClassicUO.Game.Scenes
                 {
                     if (CanDragSelectOnObject(SelectedObject.Object as GameObject))
                     {
-                        _selectionStart = (Mouse.Position.X, Mouse.Position.Y);
+                        _selectionStart = Mouse.Position;
                         _isSelectionActive = true;
                     }
                 }
@@ -312,7 +315,7 @@ namespace ClassicUO.Game.Scenes
             }
 
             //  drag-select code comes first to allow selection finish on mouseup outside of viewport
-            if (_selectionStart.Item1 == Mouse.Position.X && _selectionStart.Item2 == Mouse.Position.Y)
+            if (_selectionStart.X == Mouse.Position.X && _selectionStart.Y == Mouse.Position.Y)
                 _isSelectionActive = false;
 
             if (_isSelectionActive)
