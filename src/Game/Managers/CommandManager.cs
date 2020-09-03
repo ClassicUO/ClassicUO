@@ -33,16 +33,17 @@ namespace ClassicUO.Game.Managers
     {
         private static readonly Dictionary<string, Action<string[]>> _commands = new Dictionary<string, Action<string[]>>();
 
-        public static byte GROUP = 0;
 
         public static void Initialize()
         {
             Register("info", s =>
             {
-                if (!TargetManager.IsTargeting)
-                    TargetManager.SetTargeting(CursorTarget.SetTargetClientSide, CursorType.Target, TargetType.Neutral);
-                else
+                if (TargetManager.IsTargeting)
+                {
                     TargetManager.CancelTarget();
+                }
+
+                TargetManager.SetTargeting(CursorTarget.SetTargetClientSide, CursorType.Target, TargetType.Neutral);
             });
 
             Register("datetime", s =>
@@ -54,17 +55,12 @@ namespace ClassicUO.Game.Managers
             });
             Register("hue", s =>
             {
-                if (!TargetManager.IsTargeting)
-                    TargetManager.SetTargeting(CursorTarget.HueCommandTarget, CursorType.Target, TargetType.Neutral);
-                else
-                    TargetManager.CancelTarget();
-            });
-            Register("change_anim", s =>
-            {
-                if (s.Length > 1 && byte.TryParse(s[1], out GROUP))
+                if (TargetManager.IsTargeting)
                 {
-
+                    TargetManager.CancelTarget();
                 }
+
+                TargetManager.SetTargeting(CursorTarget.HueCommandTarget, CursorType.Target, TargetType.Neutral);
             });
         }
 

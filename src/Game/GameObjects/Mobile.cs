@@ -1048,7 +1048,7 @@ namespace ClassicUO.Game.GameObjects
             while (last?.Next != null)
                 last = (TextObject) last.Next;
 
-            if (last == null || last.Time < Time.Ticks)
+            if (last == null)
                 return;
 
             int offY = 0;
