@@ -126,7 +126,7 @@ namespace ClassicUO.Game.UI.Gumps
                                                      CUOEnviroment.CurrentRefreshRate));
                     }
                 }
-                else if (scene != null && scene.Camera.ZoomIndex != scene.Camera.ZoomValuesCount / 2)
+                else if (scene != null && scene.Camera.Zoom != 1f)
                 {
                     _sb.AppendFormat(DEBUG_STRING_SMALL, CUOEnviroment.CurrentRefreshRate, !World.InGame ? 1f : scene.Camera.Zoom);
                 }
