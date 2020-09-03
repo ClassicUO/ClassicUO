@@ -57,7 +57,6 @@ namespace ClassicUO.Game.Scenes
         private int _lightCount;
         private Rectangle _rectangleObj = Rectangle.Empty, _rectanglePlayer;
         private RenderTarget2D _world_render_target, _lightRenderTarget;
-        private int _scale = 5; // 1.0
         private bool _useObjectHandles;
 
         private uint _timeToPlaceMultiInHouseCustomization;
@@ -828,10 +827,22 @@ namespace ClassicUO.Game.Scenes
             if (can_draw_lights)
             {
                 batcher.Begin();
-                batcher.SetBlendState(UseAltLights ? _altLightsBlend.Value : _darknessBlend.Value);
+
+                if (UseAltLights)
+                {
+                    hue.Z = .5f;
+                    batcher.SetBlendState(_altLightsBlend.Value);
+                }
+                else
+                {
+                    batcher.SetBlendState( _darknessBlend.Value);
+                }
+                
                 batcher.Draw2D(_lightRenderTarget, 0, 0, width, height, ref hue);
                 batcher.SetBlendState(null);
                 batcher.End();
+
+                hue.Z = 0f;
             }
 
 
