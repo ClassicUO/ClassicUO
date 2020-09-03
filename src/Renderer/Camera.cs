@@ -157,12 +157,12 @@ namespace ClassicUO.Renderer
                 Bounds.Height
             );
         }
+
         public void Update()
         {
             UpdateMatrices();
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Point ScreenToWorld(Point point)
         {
             UpdateMatrices();
@@ -172,7 +172,6 @@ namespace ClassicUO.Renderer
             return point;
         }
         
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Point WorldToScreen(Point point)
         {
             UpdateMatrices();

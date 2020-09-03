@@ -111,7 +111,10 @@ namespace ClassicUO.Game.Managers
                         alpha = 1f - 0x7F / 255f;
                 }
 
-                if (o.RenderedText.Texture.Contains(mouseX - startX - o.RealScreenPosition.X, mouseY - startY - o.RealScreenPosition.Y))
+                int x = o.RealScreenPosition.X;
+                int y = o.RealScreenPosition.Y;
+
+                if (o.RenderedText.Texture.Contains(mouseX - x - startX, mouseY - y - startY))
                 {
                     if (isGump)
                         SelectedObject.LastObject = o;
@@ -119,12 +122,20 @@ namespace ClassicUO.Game.Managers
                         SelectedObject.Object = o;
                 }
 
-                if (!isGump && o.Owner is Entity && last == o)
+                if (!isGump)
                 {
-                    hue = 0x0035;
+                    if (o.Owner is Entity && last == o)
+                    {
+                        hue = 0x0035;
+                    }
+                }
+                else
+                {
+                    x += startX;
+                    y += startY;
                 }
 
-                o.RenderedText.Draw(batcher, startX + o.RealScreenPosition.X, startY + o.RealScreenPosition.Y, alpha, hue);
+                o.RenderedText.Draw(batcher, x, y, alpha, hue);
             }
         }
 

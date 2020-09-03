@@ -848,7 +848,7 @@ namespace ClassicUO.Game.Scenes
 
 
             batcher.Begin();
-            DrawOverheads(batcher, 0, 0);
+            DrawOverheads(batcher, posX, posY);
             DrawSelection(batcher);
             batcher.End();
 
