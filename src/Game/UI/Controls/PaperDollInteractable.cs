@@ -106,6 +106,7 @@ namespace ClassicUO.Game.UI.Controls
 
             // Add the base gump - the semi-naked paper doll.
             ushort body;
+            ushort hue = mobile.Hue;
 
             if (mobile.Graphic == 0x0191 || mobile.Graphic == 0x0193)
                 body = 0x000D;
@@ -122,33 +123,32 @@ namespace ClassicUO.Game.UI.Controls
             else if (mobile.Graphic == 0x03DB)
             {
                 body = 0x000C;
-                Add(new GumpPic(0, 0, body, 0x03EA)
-                {
-                    AcceptMouseInput = true,
-                    IsPartialHue = true
-                });
-
-                Add(new GumpPic(0, 0, 0xC72B, 0)
-                {
-                    AcceptMouseInput = true,
-                    IsPartialHue = true
-                });
+                hue = 0x03EA;
             }
             else if (mobile.IsFemale)
             {
                 body = 0x000D;
             }
             else
+            {
                 body = 0x000C;
-
+            }
 
             // body
-            Add(new GumpPic(0, 0, body, mobile.Hue)
+            Add(new GumpPic(0, 0, body, hue)
             {
                 IsPartialHue = true
             });
 
-             
+
+            if (mobile.Graphic == 0x03DB)
+            {
+                Add(new GumpPic(0, 0, 0xC72B, mobile.Hue)
+                {
+                    AcceptMouseInput = true,
+                    IsPartialHue = true
+                });
+            }
             
             // equipment
             Item equipItem = mobile.FindItemByLayer(Layer.Cloak);
