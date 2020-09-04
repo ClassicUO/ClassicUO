@@ -28,23 +28,13 @@ namespace ClassicUO.Game.UI.Controls
 {
     internal class StaticPic : Control
     {
+        private ushort _graphic;
+
         public StaticPic(ushort graphic, ushort hue)
         {
             Hue = hue;
-            IsPartialHue = TileDataLoader.Instance.StaticData[graphic].IsPartialHue;
-            CanMove = true;
-
-            ArtTexture texture = ArtLoader.Instance.GetTexture(graphic);
-
-            if (texture == null)
-            {
-                Dispose();
-                return;
-            }
-
-            Width = texture.Width;
-            Height = texture.Height;
             Graphic = graphic;
+            CanMove = true;
             WantUpdateSize = false;
         }
 
@@ -58,7 +48,27 @@ namespace ClassicUO.Game.UI.Controls
 
         public ushort Hue { get; set; }
         public bool IsPartialHue { get; set; }
-        public ushort Graphic { get; }
+
+        public ushort Graphic
+        {
+            get => _graphic;
+            set
+            {
+                _graphic = value;
+
+                ArtTexture texture = ArtLoader.Instance.GetTexture(value);
+
+                if (texture == null)
+                {
+                    Dispose();
+                    return;
+                }
+
+                Width = texture.Width;
+                Height = texture.Height;
+                IsPartialHue = TileDataLoader.Instance.StaticData[value].IsPartialHue;
+            }
+        }
 
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)

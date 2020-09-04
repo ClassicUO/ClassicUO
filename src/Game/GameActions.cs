@@ -205,7 +205,7 @@ namespace ClassicUO.Game
             Socket.Send(new PPartyChangeLootTypeRequest(isLootable));
         }
 
-        public static bool PickUp(uint serial, int x, int y, int amount = -1, Point? offset = null)
+        public static bool PickUp(uint serial, int x, int y, int amount = -1, Point? offset = null, bool is_gump = false)
         {
             if (World.Player.IsDead || ItemHold.Enabled)
                 return false;
@@ -243,6 +243,7 @@ namespace ClassicUO.Game
 
             ItemHold.Clear();
             ItemHold.Set(item, (ushort) amount, offset);
+            ItemHold.IsGumpTexture = is_gump;
             Socket.Send(new PPickUpRequest(item, (ushort) amount));
             UIManager.GameCursor.SetDraggedItem(offset);
 

@@ -80,6 +80,7 @@ namespace ClassicUO.Game
         public const int CONTAINER_RECT_STEP = 20;
         public const int CONTAINER_RECT_DEFAULT_POSITION = 40;
         public const int CONTAINER_RECT_LINESTEP = 800;
+        public const int ITEM_GUMP_TEXTURE_OFFSET = 11369;
 
         public const int MAX_LAND_DATA_INDEX_COUNT = 0x4000;
         public const int MAX_STATIC_DATA_INDEX_COUNT = 0x10000;

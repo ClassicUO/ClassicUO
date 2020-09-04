@@ -43,6 +43,7 @@ namespace ClassicUO.Game
         public static uint Serial { get; private set; }
         public static ushort Graphic { get; private set; }
         public static ushort DisplayedGraphic { get; private set; }
+        public static bool IsGumpTexture { get; set; }
         public static ushort Hue { get; private set; }
         public static ushort Amount { get; private set; }
         public static ushort TotalAmount { get; private set; }
@@ -103,6 +104,7 @@ namespace ClassicUO.Game
             FixedX = 0;
             FixedY = 0;
             IgnoreFixedPosition = false;
+            IsGumpTexture = false;
         }
 
         public static void Clear()
@@ -128,6 +130,7 @@ namespace ClassicUO.Game
             FixedX = 0;
             FixedY = 0;
             IgnoreFixedPosition = false;
+            IsGumpTexture = false;
         }
     }
 }

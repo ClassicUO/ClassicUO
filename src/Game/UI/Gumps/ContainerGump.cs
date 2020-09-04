@@ -113,6 +113,10 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
+        public bool IsChessboard => Graphic == 0x091A || Graphic == 0x092E;
+
+
+
         private void BuildGump()
         {
             CanMove = true;
@@ -262,19 +266,22 @@ namespace ClassicUO.Game.UI.Gumps
 
                     if (gump != null && (it == null || (it.Serial != dropcontainer && it is Item item && !item.ItemData.IsContainer)))
                     {
-                        bool is_chessboard = gump.Graphic == 0x091A || gump.Graphic == 0x092E;
-
-                        if (is_chessboard)
+                        if (gump.IsChessboard)
                             y += 20;
 
                         Rectangle bounds = ContainerManager.Get(gump.Graphic).Bounds;
-                        ArtTexture texture = ArtLoader.Instance.GetTexture(ItemHold.DisplayedGraphic);
+
+                        UOTexture32 texture = gump.IsChessboard ?
+                            GumpsLoader.Instance.GetTexture((ushort) (ItemHold.DisplayedGraphic - Constants.ITEM_GUMP_TEXTURE_OFFSET))
+                            :
+                            ArtLoader.Instance.GetTexture(ItemHold.DisplayedGraphic);
+
                         float scale = UIManager.ContainerScale;
 
                         bounds.X = (int) (bounds.X * scale);
                         bounds.Y = (int) (bounds.Y * scale);
                         bounds.Width = (int) (bounds.Width * scale);
-                        bounds.Height = (int) ((bounds.Height + (is_chessboard ? 20 : 0)) * scale);
+                        bounds.Height = (int) ((bounds.Height + (gump.IsChessboard ? 20 : 0)) * scale);
 
                         if (texture != null && !texture.IsDisposed)
                         {
@@ -429,8 +436,6 @@ namespace ClassicUO.Game.UI.Gumps
             if (container == null)
                 return;
             
-            bool is_chessboard = Graphic == 0x091A || Graphic == 0x092E;
-            const ushort CHESSBOARD_OFFSET = 11369;
             bool is_corpse = container.Graphic == 0x2006;
 
 
@@ -446,14 +451,11 @@ namespace ClassicUO.Game.UI.Gumps
                 if (item.Layer == 0 || (is_corpse && Constants.BAD_CONTAINER_LAYERS[(int) item.Layer] && item.Amount > 0))
                 {
                     ItemGump itemControl = new ItemGump(item.Serial,
-                                                   item.DisplayedGraphic,
-                                                   //(ushort) (item.DisplayedGraphic - (is_chessboard ? 0 : 0)), 
-                                                   item.Hue,
-                                                   item.X,
-                                                   item.Y);
-
-                    if (is_chessboard)
-                        itemControl.IsPartialHue = false;
+                                                        (ushort) (item.DisplayedGraphic - (IsChessboard ? Constants.ITEM_GUMP_TEXTURE_OFFSET : 0)),
+                                                        item.Hue,
+                                                        item.X,
+                                                        item.Y,
+                                                        IsChessboard);
 
                     itemControl.IsVisible = !IsMinimized;
 
@@ -466,10 +468,8 @@ namespace ClassicUO.Game.UI.Gumps
                     }
 
                     itemControl.X = (int) ( (short) item.X * scale);
-                    itemControl.Y = (int) (( (short) item.Y - (is_chessboard ? 20 : 0)) * scale);
+                    itemControl.Y = (int) (( (short) item.Y - (IsChessboard ? 20 : 0)) * scale);
 
-                    //if ((_hideIfEmpty && !IsVisible))
-                    //    IsVisible = true;
 
                     Add(itemControl);
                 }
@@ -480,14 +480,15 @@ namespace ClassicUO.Game.UI.Gumps
         public void CheckItemControlPosition(Item item)
         {
             Rectangle bounds = _data.Bounds;
-            bool is_chessboard = Graphic == 0x091A || Graphic == 0x092E;
 
             int boundX = bounds.X;
             int boundY = bounds.Y;
             int boundWidth = bounds.Width;
-            int boundHeight = bounds.Height + (is_chessboard ? 20 : 0);
+            int boundHeight = bounds.Height + (IsChessboard ? 20 : 0);
 
-            ArtTexture texture = ArtLoader.Instance.GetTexture(item.DisplayedGraphic);
+            UOTexture32 texture = IsChessboard ?
+                GumpsLoader.Instance.GetTexture((ushort) (item.DisplayedGraphic - (IsChessboard ? Constants.ITEM_GUMP_TEXTURE_OFFSET : 0))) :
+                ArtLoader.Instance.GetTexture(item.DisplayedGraphic);
 
             if (texture != null)
             {
@@ -573,27 +574,6 @@ namespace ClassicUO.Game.UI.Gumps
             public GumpPicContainer(int x, int y, ushort graphic, ushort hue) : base(x, y, graphic, hue)
             {
             }
-
-            //protected override void OnMouseUp(int x, int y, MouseButtonType button)
-            //{
-            //    base.OnMouseUp(x, y, button);
-
-            //    //if (button != MouseButtonType.Left)
-            //    //    return;
-
-            //    //GameScene gs = Client.Game.GetScene<GameScene>();
-
-            //    //if (!ItemHold.Enabled || !gs.IsMouseOverUI)
-            //    //    return;
-
-            //    //if (Item.Layer == Layer.Backpack || !Item.OnGround || Item.Distance < Constants.DRAG_ITEMS_DISTANCE)
-            //    //{
-            //    //    SelectedObject.Object = Item;
-            //    //    gs.DropHeldItemToContainer(Item, x, y);
-            //    //}
-            //    //else
-            //    //    gs.Audio.PlaySound(0x0051);
-            //}
 
             public override bool Contains(int x, int y)
             {

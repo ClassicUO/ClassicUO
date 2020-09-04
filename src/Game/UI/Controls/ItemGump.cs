@@ -35,10 +35,15 @@ using ClassicUO.IO.Resources;
 
 namespace ClassicUO.Game.UI.Controls
 {
-    internal class ItemGump : StaticPic
+    internal class ItemGump : Control
     {
-        public ItemGump(uint serial, ushort graphic, ushort hue, int x, int y) : base(graphic, hue)
+        private readonly bool _is_gump;
+        private ushort _graphic;
+
+        public ItemGump(uint serial, ushort graphic, ushort hue, int x, int y, bool is_gump = false)
         {
+            _is_gump = is_gump;
+
             AcceptMouseInput = true;
             X = (short) x;
             Y = (short) y;
@@ -48,10 +53,37 @@ namespace ClassicUO.Game.UI.Controls
             WantUpdateSize = false;
             CanMove = false;
 
+
+            Graphic = graphic;
+            Hue = hue;
+
             SetTooltip(serial);
         }
 
 
+        public ushort Graphic
+        {
+            get => _graphic;
+            set
+            {
+                _graphic = value;
+
+                UOTexture32 texture = _is_gump ? GumpsLoader.Instance.GetTexture(value) : ArtLoader.Instance.GetTexture(value);
+
+                if (texture == null)
+                {
+                    Dispose();
+                    return;
+                }
+
+                Width = texture.Width;
+                Height = texture.Height;
+                IsPartialHue = !_is_gump && TileDataLoader.Instance.StaticData[value].IsPartialHue;
+            }
+        }
+
+        public ushort Hue { get; set; }
+        public bool IsPartialHue { get; set; }
         public bool HighlightOnMouseOver { get; set; }
         public bool CanPickUp { get; set; }
 
@@ -67,10 +99,11 @@ namespace ClassicUO.Game.UI.Controls
             {
                 if (CanPickUp && !ItemHold.Enabled && Mouse.LButtonPressed &&
                     UIManager.LastControlMouseDown(MouseButtonType.Left) == this &&
-                    ((Mouse.LastLeftButtonClickTime != 0xFFFF_FFFF && Mouse.LastLeftButtonClickTime != 0 && Mouse.LastLeftButtonClickTime + Mouse.MOUSE_DELAY_DOUBLE_CLICK < Time.Ticks) ||
+                    ((Mouse.LastLeftButtonClickTime != 0xFFFF_FFFF && Mouse.LastLeftButtonClickTime != 0 && 
+                      Mouse.LastLeftButtonClickTime + Mouse.MOUSE_DELAY_DOUBLE_CLICK < Time.Ticks) ||
                      CanPickup()))
                 {
-                    AttempPickUp();
+                    AttemptPickUp();
                 }
                 else if (MouseIsOver)
                 {
@@ -88,8 +121,8 @@ namespace ClassicUO.Game.UI.Controls
 
             ResetHueVector();
             ShaderHueTranslator.GetHueVector(ref _hueVector, HighlightOnMouseOver && MouseIsOver ? 0x0035 : Hue, IsPartialHue, 0, false);
-          
-            ArtTexture texture = ArtLoader.Instance.GetTexture(Graphic);
+
+            UOTexture32 texture = _is_gump ? GumpsLoader.Instance.GetTexture(Graphic) : ArtLoader.Instance.GetTexture(Graphic);
 
             if (texture != null)
             {
@@ -108,7 +141,7 @@ namespace ClassicUO.Game.UI.Controls
 
         public override bool Contains(int x, int y)
         {
-            ArtTexture texture = ArtLoader.Instance.GetTexture(Graphic);
+            UOTexture32 texture = _is_gump ? GumpsLoader.Instance.GetTexture(Graphic) : ArtLoader.Instance.GetTexture(Graphic);
 
             if (texture == null)
             {
@@ -199,11 +232,13 @@ namespace ClassicUO.Game.UI.Controls
         }
 
 
-        private void AttempPickUp()
+        private void AttemptPickUp()
         {
             if (CanPickUp)
             {
-                Rectangle bounds = ArtLoader.Instance.GetTexture(Graphic).Bounds;
+                UOTexture32 texture = _is_gump ? GumpsLoader.Instance.GetTexture(Graphic) : ArtLoader.Instance.GetTexture(Graphic);
+
+                Rectangle bounds = texture.Bounds;
                 int centerX = bounds.Width >> 1;
                 int centerY = bounds.Height >> 1;
 
@@ -217,11 +252,11 @@ namespace ClassicUO.Game.UI.Controls
                 if (ProfileManager.Current != null && ProfileManager.Current.RelativeDragAndDropItems)
                 {
                     Point p = new Point(centerX - (Mouse.Position.X - ScreenCoordinateX), centerY - (Mouse.Position.Y - ScreenCoordinateY));
-                    GameActions.PickUp(LocalSerial, centerX, centerY, offset: p);
+                    GameActions.PickUp(LocalSerial, centerX, centerY, offset: p, is_gump: _is_gump);
                 }
                 else
                 {
-                    GameActions.PickUp(LocalSerial, centerX, centerY);
+                    GameActions.PickUp(LocalSerial, centerX, centerY, is_gump: _is_gump);
                 }
             }
         }

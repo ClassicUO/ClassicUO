@@ -61,7 +61,7 @@ namespace ClassicUO.Game
         private readonly Tooltip _tooltip;
         private Vector3 _auraVector = new Vector3(0, 13, 0);
         private readonly RenderedText _targetDistanceText = RenderedText.Create(String.Empty, 0x0481, style: FontStyle.BlackBorder);
-        private ArtTexture _draggedItemTexture;
+        private UOTexture32 _draggedItemTexture;
         private ushort _graphic = 0x2073;
         private bool _needGraphicUpdate = true;
         private Point _offset;
@@ -290,7 +290,10 @@ namespace ClassicUO.Game
 
         public void SetDraggedItem(Point? offset)
         {
-            _draggedItemTexture = ArtLoader.Instance.GetTexture(ItemHold.DisplayedGraphic);
+            _draggedItemTexture = ItemHold.IsGumpTexture ?
+                GumpsLoader.Instance.GetTexture((ushort) (ItemHold.DisplayedGraphic - Constants.ITEM_GUMP_TEXTURE_OFFSET)) 
+                :
+                ArtLoader.Instance.GetTexture(ItemHold.DisplayedGraphic);
             if (_draggedItemTexture == null)
                 return;
 
