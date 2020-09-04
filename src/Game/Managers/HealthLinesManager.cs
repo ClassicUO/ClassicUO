@@ -63,17 +63,17 @@ namespace ClassicUO.Game.Managers
                 _hp_texture.Ticks = Time.Ticks;
         }
 
-        public void Draw(UltimaBatcher2D batcher, int screenX, int screenY)
+        public void Draw(UltimaBatcher2D batcher)
         {
             int screenW = ProfileManager.Current.GameWindowSize.X;
             int screenH = ProfileManager.Current.GameWindowSize.Y;
 
             if (SerialHelper.IsMobile(TargetManager.LastTargetInfo.Serial))
-                DrawHealthLineWithMath(batcher, TargetManager.LastTargetInfo.Serial, screenX, screenY, screenW, screenH);
+                DrawHealthLineWithMath(batcher, TargetManager.LastTargetInfo.Serial, screenW, screenH);
             if (SerialHelper.IsMobile(TargetManager.SelectedTarget))
-                DrawHealthLineWithMath(batcher, TargetManager.SelectedTarget, screenX, screenY, screenW, screenH);
+                DrawHealthLineWithMath(batcher, TargetManager.SelectedTarget, screenW, screenH);
             if (SerialHelper.IsMobile(TargetManager.LastAttack))
-                DrawHealthLineWithMath(batcher, TargetManager.LastAttack, screenX, screenY, screenW, screenH);
+                DrawHealthLineWithMath(batcher, TargetManager.LastAttack, screenW, screenH);
 
             if (!IsEnabled)
             {
@@ -144,7 +144,7 @@ namespace ClassicUO.Game.Managers
                                 p1.Y -= Constants.OBJECT_HANDLES_GUMP_HEIGHT + 5;
                             }
 
-                            if (!(p1.X < screenX || p1.X > screenX + screenW - mobile.HitsTexture.Width || p1.Y < screenY || p1.Y > screenY + screenH))
+                            if (!(p1.X < 0 || p1.X > screenW - mobile.HitsTexture.Width || p1.Y < 0 || p1.Y > screenH))
                             {
                                 mobile.HitsTexture.Draw(batcher, p1.X, p1.Y);
                             }
@@ -157,10 +157,10 @@ namespace ClassicUO.Game.Managers
                 p.X -= BAR_WIDTH_HALF;
                 p.Y -= BAR_HEIGHT_HALF;
 
-                if (p.X < screenX || p.X > screenX + screenW - BAR_WIDTH)
+                if (p.X < 0 || p.X > screenW - BAR_WIDTH)
                     continue;
 
-                if (p.Y < screenY || p.Y > screenY + screenH - BAR_HEIGHT)
+                if (p.Y < 0 || p.Y > screenH - BAR_HEIGHT)
                     continue;
 
                 if (mode >= 1)
@@ -170,7 +170,7 @@ namespace ClassicUO.Game.Managers
             }
         }
 
-        private void DrawHealthLineWithMath(UltimaBatcher2D batcher, uint serial, int screenX, int screenY, int screenW, int screenH)
+        private void DrawHealthLineWithMath(UltimaBatcher2D batcher, uint serial, int screenW, int screenH)
         {
             Entity entity = World.Get(serial);
             if (entity == null)
@@ -183,10 +183,10 @@ namespace ClassicUO.Game.Managers
             p.X -= BAR_WIDTH_HALF;
             p.Y -= BAR_HEIGHT_HALF;
 
-            if (p.X < screenX || p.X > screenX + screenW - BAR_WIDTH)
+            if (p.X < 0 || p.X > screenW - BAR_WIDTH)
                 return;
 
-            if (p.Y < screenY || p.Y > screenY + screenH - BAR_HEIGHT)
+            if (p.Y < 0 || p.Y > screenH - BAR_HEIGHT)
                 return;
 
             DrawHealthLine(batcher, entity, p.X, p.Y, false);

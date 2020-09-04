@@ -111,7 +111,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Height = _background.Height = Constants.OBJECT_HANDLES_GUMP_HEIGHT + 4;
 
                 WantUpdateSize = false;
-
+                
                 return true;
             }
 

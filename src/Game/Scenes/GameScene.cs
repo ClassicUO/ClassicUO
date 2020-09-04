@@ -990,7 +990,7 @@ namespace ClassicUO.Game.Scenes
 
         public void DrawOverheads(UltimaBatcher2D batcher, int x, int y)
         {
-            _healthLinesManager.Draw(batcher, x, y);
+            _healthLinesManager.Draw(batcher);
 
             int renderIndex = _renderIndex - 1;
 
