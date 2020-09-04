@@ -353,24 +353,24 @@ namespace ClassicUO.IO.Resources
 
             uint* data = stackalloc uint[SIZE];
 
-            for (int i = 0; i < 22; i++)
+            for (int i = 0; i < 22; ++i)
             {
                 int start = 22 - (i + 1);
                 int pos = i * 44 + start;
                 int end = start + ((i + 1) << 1);
 
-                for (int j = start; j < end; j++)
+                for (int j = start; j < end; ++j)
                 {
                     data[pos++] = Utility.HuesHelper.Color16To32(_file.ReadUShort()) | 0xFF_00_00_00;
                 }
             }
 
-            for (int i = 0; i < 22; i++)
+            for (int i = 0; i < 22; ++i)
             {
                 int pos = (i + 22) * 44 + i;
                 int end = i + ((22 - i) << 1);
 
-                for (int j = i; j < end; j++)
+                for (int j = i; j < end; ++j)
                 {
                     data[pos++] = Utility.HuesHelper.Color16To32(_file.ReadUShort()) | 0xFF_00_00_00;
                 }

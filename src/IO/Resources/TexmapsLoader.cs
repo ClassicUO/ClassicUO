@@ -20,6 +20,7 @@
 #endregion
 
 using System;
+using System.Drawing;
 using System.IO;
 using System.Threading.Tasks;
 
@@ -31,8 +32,6 @@ namespace ClassicUO.IO.Resources
 {
     internal class TexmapsLoader : UOFileLoader<UOTexture32>
     {
-        private readonly uint[] _textmapPixels128 = new uint[128 * 128];
-        private readonly uint[] _textmapPixels64 = new uint[64 * 64];
         private UOFile _file;
 
         private TexmapsLoader(int count)
@@ -149,17 +148,12 @@ namespace ClassicUO.IO.Resources
 
             if (texture == null || texture.IsDisposed)
             {
-                uint[] pixels = GetTexMapTexture((ushort) g, out int size);
+                ReadTexmapTexture(ref texture, (ushort) g);
 
-                if (pixels == null || pixels.Length == 0)
+                if (texture != null)
                 {
-                    return null;
+                    SaveId(g);
                 }
-
-                texture = new UOTexture32(size, size);
-                texture.SetData(pixels);
-
-                SaveId(g);
             }
             else
             {
@@ -169,43 +163,37 @@ namespace ClassicUO.IO.Resources
             return texture;
         }
 
-        private uint[] GetTexMapTexture(ushort index, out int size)
+        private unsafe void ReadTexmapTexture(ref UOTexture32 texture, ushort index)
         {
             ref UOFileIndex entry = ref GetValidRefEntry(index);
 
             if (entry.Length <= 0)
             {
-                size = 0;
-
-                return null;
+                texture = null;
+                return;
             }
 
-            uint[] pixels;
+            int size = entry.Width == 0 && entry.Height == 0 ? 64 : 128;
+            int size_pot = size * size;
 
-            if (entry.Width == 0 && entry.Height == 0)
-            {
-                size = 64;
-                pixels = _textmapPixels64;
-            }
-            else
-            {
-                size = 128;
-                pixels = _textmapPixels128;
-            }
+            uint* data = stackalloc uint[size_pot];
 
             _file.Seek(entry.Offset);
 
-            for (int i = 0; i < size; i++)
+            for (int i = 0; i < size; ++i)
             {
                 int pos = i * size;
 
-                for (int j = 0; j < size; j++)
+                for (int j = 0; j < size; ++j)
                 {
-                    pixels[pos + j] = HuesHelper.Color16To32(_file.ReadUShort()) | 0xFF_00_00_00;
+                    data[pos + j] = HuesHelper.Color16To32(_file.ReadUShort()) | 0xFF_00_00_00;
                 } 
             }
 
-            return pixels;
+            texture = new UOTexture32(size, size);
+            // we don't need to store the data[] pointer because
+            // land is always hoverable
+            texture.SetDataPointerEXT(0, null, (IntPtr) data, size_pot * sizeof(uint));
         }
     }
 }
