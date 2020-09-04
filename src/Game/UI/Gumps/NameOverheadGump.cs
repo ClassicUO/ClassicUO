@@ -41,7 +41,6 @@ namespace ClassicUO.Game.UI.Gumps
         private AlphaBlendControl _background;
 
         private readonly RenderedText _renderedText;
-        private const int MIN_WIDTH = 60;
         private bool _positionLocked;
         private Point _lockedPosition;
 
@@ -96,28 +95,19 @@ namespace ClassicUO.Game.UI.Gumps
 
                 int width = FontsLoader.Instance.GetWidthUnicode(_renderedText.Font, t);
 
-                if (width > 100)
+                if (width > Constants.OBJECT_HANDLES_GUMP_WIDTH)
                 {
-                    t = FontsLoader.Instance.GetTextByWidthUnicode(_renderedText.Font, t, 100, true, TEXT_ALIGN_TYPE.TS_CENTER, (ushort)FontStyle.BlackBorder);
-                    width = 100;
+                    t = FontsLoader.Instance.GetTextByWidthUnicode(_renderedText.Font, t, Constants.OBJECT_HANDLES_GUMP_WIDTH, true, TEXT_ALIGN_TYPE.TS_CENTER, (ushort)FontStyle.BlackBorder);
+                    width = Constants.OBJECT_HANDLES_GUMP_WIDTH;
                 }
-
-                //if (width > 100)
-                //    width = 100;
-
-                //width = FileManager.Fonts.GetWidthExUnicode(_renderedText.Font, t, width, TEXT_ALIGN_TYPE.TS_CENTER, (ushort) (FontStyle.BlackBorder /*| FontStyle.Cropped*/));
-
-                //if (width > 100)
-                //    width = 100;
-
+                
                 _renderedText.MaxWidth = width;
-
                 _renderedText.Text = t;
 
                 FontsLoader.Instance.RecalculateWidthByInfo = false;
                 FontsLoader.Instance.SetUseHTML(false);
 
-                Width = _background.Width = _renderedText.Width + 4;
+                Width = _background.Width = Math.Max(60, _renderedText.Width) + 4;
                 Height = _background.Height = Constants.OBJECT_HANDLES_GUMP_HEIGHT + 4;
 
                 WantUpdateSize = false;
@@ -131,27 +121,17 @@ namespace ClassicUO.Game.UI.Gumps
 
                 int width = FontsLoader.Instance.GetWidthUnicode(_renderedText.Font, t);
 
-                if (width > 100)
+                if (width > Constants.OBJECT_HANDLES_GUMP_WIDTH)
                 {
-                    t = FontsLoader.Instance.GetTextByWidthUnicode(_renderedText.Font, t, 100, true, TEXT_ALIGN_TYPE.TS_CENTER, (ushort)FontStyle.BlackBorder);
-                    width = 100;
+                    t = FontsLoader.Instance.GetTextByWidthUnicode(_renderedText.Font, t, Constants.OBJECT_HANDLES_GUMP_WIDTH, true, TEXT_ALIGN_TYPE.TS_CENTER, (ushort)FontStyle.BlackBorder);
+                    width = Constants.OBJECT_HANDLES_GUMP_WIDTH;
                 }
-
-                //int width = FileManager.Fonts.GetWidthUnicode(_renderedText.Font, Entity.Name);
-
-                //if (width > 200)
-                //    width = 200;
-
-                //width = FileManager.Fonts.GetWidthExUnicode(_renderedText.Font, Entity.Name, width, TEXT_ALIGN_TYPE.TS_CENTER, (ushort)(FontStyle.BlackBorder));
-
-                //if (width > 200)
-                //    width = 200;
-
+                
                 _renderedText.MaxWidth = width;
 
                 _renderedText.Text = t;
 
-                Width = _background.Width = Math.Max(_renderedText.Width + 4, MIN_WIDTH);
+                Width = _background.Width = Math.Max(60, _renderedText.Width) + 4;
                 Height = _background.Height = Constants.OBJECT_HANDLES_GUMP_HEIGHT + 4;
 
                 WantUpdateSize = false;
