@@ -87,12 +87,17 @@ namespace ClassicUO.Game.Managers
 
             int showWhen = ProfileManager.Current.MobileHPShowWhen;
 
-            Point p = Point.Zero;
-
             foreach (Mobile mobile in World.Mobiles)
             {
                 if (mobile.IsDestroyed)
                     continue;
+
+                if (mobile.Serial == TargetManager.LastTargetInfo.Serial ||
+                    mobile.Serial == TargetManager.SelectedTarget ||
+                    mobile.Serial == TargetManager.LastAttack)
+                {
+                    continue;
+                }
 
                 int current = mobile.Hits;
                 int max = mobile.HitsMax;
@@ -100,7 +105,7 @@ namespace ClassicUO.Game.Managers
                 if (showWhen == 1 && current == max)
                     continue;
 
-                p = mobile.RealScreenPosition;
+                Point p = mobile.RealScreenPosition;
                 p.X += (int) mobile.Offset.X + 22 + 5;
                 p.Y += (int) (mobile.Offset.Y - mobile.Offset.Z) + 22 + 5;
 
@@ -148,11 +153,6 @@ namespace ClassicUO.Game.Managers
                 }
 
                 
-                //if (mobile.IsGargoyle && mobile.IsFlying)
-                //    p.Y -= 22;
-                //else if (!mobile.IsMounted)
-                //    p.Y += 22;
-
                 p = Client.Game.Scene.Camera.WorldToScreen(p);
                 p.X -= BAR_WIDTH_HALF;
                 p.Y -= BAR_HEIGHT_HALF;
@@ -163,15 +163,9 @@ namespace ClassicUO.Game.Managers
                 if (p.Y < screenY || p.Y > screenY + screenH - BAR_HEIGHT)
                     continue;
 
-                if (mode >= 1 && TargetManager.LastTargetInfo.Serial != mobile)
+                if (mode >= 1)
                 {
-                    // already done
-                    if (mobile == TargetManager.LastTargetInfo.Serial || 
-                        mobile == TargetManager.SelectedTarget ||
-                        mobile == TargetManager.LastAttack)
-                        continue;
-
-                    DrawHealthLine(batcher, mobile, p.X, p.Y, mobile != World.Player);
+                    DrawHealthLine(batcher, mobile, p.X, p.Y, mobile.Serial != World.Player.Serial);
                 }
             }
         }
@@ -274,7 +268,6 @@ namespace ClassicUO.Game.Managers
                                _hp_texture.Height * MULTIPLER,
                                ref _vectorHue);
             }
-           
         }
     }
 }
