@@ -132,7 +132,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         // containers
         private HSliderBar _containersScale;
-        private Checkbox _containerScaleItems, _containerDoubleClickToLoot, _relativeDragAnDropItems, _useLargeContianersGumps;
+        private Checkbox _containerScaleItems, _containerDoubleClickToLoot, _relativeDragAnDropItems, _useLargeContianersGumps, _highlightContainersWhenMouseIsOver;
 
         public OptionsGump() : base(0, 0)
         {
@@ -1419,6 +1419,7 @@ namespace ClassicUO.Game.UI.Gumps
             _useLargeContianersGumps.IsVisible = Client.Version >= ClientVersion.CV_706000;
              _containerDoubleClickToLoot = CreateCheckBox(rightArea, ResGumps.DoubleClickLootContainers, ProfileManager.Current.DoubleClickToLootInsideContainers, 0, SPACE_Y);
             _relativeDragAnDropItems = CreateCheckBox(rightArea, ResGumps.RelativeDragAndDropContainers, ProfileManager.Current.RelativeDragAndDropItems, 0, SPACE_Y);
+            _highlightContainersWhenMouseIsOver = CreateCheckBox(rightArea, ResGumps.HighlightContainerWhenSelected, ProfileManager.Current.HighlightContainerWhenSelected, 0, SPACE_Y);
 
             item = new ScrollAreaItem();
             _overrideContainerLocation = new Checkbox(0x00D2, 0x00D3, ResGumps.OverrideContainerGumpLocation, FONT, HUE_FONT, true)
@@ -1685,6 +1686,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _useLargeContianersGumps.IsChecked = false;
                     _containerDoubleClickToLoot.IsChecked = false;
                     _relativeDragAnDropItems.IsChecked = false;
+                    _highlightContainersWhenMouseIsOver.IsChecked = false;
                     _overrideContainerLocation.IsChecked = false;
                     _overrideContainerLocationSetting.SelectedIndex = 0;
 
@@ -2165,7 +2167,7 @@ namespace ClassicUO.Game.UI.Gumps
             ProfileManager.Current.UseLargeContainerGumps = _useLargeContianersGumps.IsChecked;
             ProfileManager.Current.DoubleClickToLootInsideContainers = _containerDoubleClickToLoot.IsChecked;
             ProfileManager.Current.RelativeDragAndDropItems = _relativeDragAnDropItems.IsChecked;
-
+            ProfileManager.Current.HighlightContainerWhenSelected = _highlightContainersWhenMouseIsOver.IsChecked;
 
 
             // tooltip

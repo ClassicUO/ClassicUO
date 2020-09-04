@@ -395,6 +395,7 @@ namespace ClassicUO
             }
 
             SelectedObject.HealthbarObject = null;
+            SelectedObject.SelectedContainer = null;
 
             base.Draw(gameTime);
 

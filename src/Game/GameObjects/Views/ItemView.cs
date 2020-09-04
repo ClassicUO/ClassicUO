@@ -64,35 +64,44 @@ namespace ClassicUO.Game.GameObjects
             ushort graphic = DisplayedGraphic;
             bool partial = ItemData.IsPartialHue;
 
-            if (OnGround && ItemData.IsAnimated)
+            if (OnGround)
             {
-                if (ProfileManager.Current.FieldsType == 2)
+                if (ItemData.IsAnimated)
                 {
-                    if (StaticFilters.IsFireField(Graphic))
+                    if (ProfileManager.Current.FieldsType == 2)
                     {
-                        graphic = Constants.FIELD_REPLACE_GRAPHIC;
-                        hue = 0x0020;
+                        if (StaticFilters.IsFireField(Graphic))
+                        {
+                            graphic = Constants.FIELD_REPLACE_GRAPHIC;
+                            hue = 0x0020;
+                        }
+                        else if (StaticFilters.IsParalyzeField(Graphic))
+                        {
+                            graphic = Constants.FIELD_REPLACE_GRAPHIC;
+                            hue = 0x0058;
+                        }
+                        else if (StaticFilters.IsEnergyField(Graphic))
+                        {
+                            graphic = Constants.FIELD_REPLACE_GRAPHIC;
+                            hue = 0x0070;
+                        }
+                        else if (StaticFilters.IsPoisonField(Graphic))
+                        {
+                            graphic = Constants.FIELD_REPLACE_GRAPHIC;
+                            hue = 0x0044;
+                        }
+                        else if (StaticFilters.IsWallOfStone(Graphic))
+                        {
+                            graphic = Constants.FIELD_REPLACE_GRAPHIC;
+                            hue = 0x038A;
+                        }
                     }
-                    else if (StaticFilters.IsParalyzeField(Graphic))
-                    {
-                        graphic = Constants.FIELD_REPLACE_GRAPHIC;
-                        hue = 0x0058;
-                    }
-                    else if (StaticFilters.IsEnergyField(Graphic))
-                    {
-                        graphic = Constants.FIELD_REPLACE_GRAPHIC;
-                        hue = 0x0070;
-                    }
-                    else if (StaticFilters.IsPoisonField(Graphic))
-                    {
-                        graphic = Constants.FIELD_REPLACE_GRAPHIC;
-                        hue = 0x0044;
-                    }
-                    else if (StaticFilters.IsWallOfStone(Graphic))
-                    {
-                        graphic = Constants.FIELD_REPLACE_GRAPHIC;
-                        hue = 0x038A;
-                    }
+                }
+
+                if (ItemData.IsContainer && SelectedObject.SelectedContainer == this)
+                {
+                    hue = 0x0035;
+                    partial = false;
                 }
             }
 
@@ -118,7 +127,9 @@ namespace ClassicUO.Game.GameObjects
                     hue = 0x0035;
                 }
                 else if (IsHidden)
+                {
                     hue = 0x038E;
+                }
             }
 
             ShaderHueTranslator.GetHueVector(ref HueVector, hue, partial, HueVector.Z);

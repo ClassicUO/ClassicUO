@@ -361,6 +361,11 @@ namespace ClassicUO.Game.UI.Gumps
                 return;
             }
 
+            if (UIManager.MouseOverControl != null && UIManager.MouseOverControl.RootParent == this && ProfileManager.Current != null && ProfileManager.Current.HighlightContainerWhenSelected)
+            {
+                SelectedObject.SelectedContainer = item;
+            }
+
             if (Graphic == 0x0009 && _corpseEyeTicks < totalMS)
             {
                 _eyeCorspeOffset = _eyeCorspeOffset == 0 ? 1 : 0;

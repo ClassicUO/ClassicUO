@@ -1400,4 +1400,7 @@ Client version: '{0}'</value>
   <data name="ON" xml:space="preserve">
     <value>ON</value>
   </data>
+  <data name="HighlightContainerWhenSelected" xml:space="preserve">
+    <value>Highlight container on ground when mouse is over a container gump</value>
+  </data>
 </root>

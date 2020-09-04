@@ -1600,6 +1600,15 @@ namespace ClassicUO.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Highlight container on ground when mouse is over a container gump.
+        /// </summary>
+        public static string HighlightContainerWhenSelected {
+            get {
+                return ResourceManager.GetString("HighlightContainerWhenSelected", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Highlight game objects.
         /// </summary>
         public static string HighlightObjects {

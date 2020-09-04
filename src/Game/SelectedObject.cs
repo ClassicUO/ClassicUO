@@ -40,6 +40,7 @@ namespace ClassicUO.Game
         public static BaseGameObject LastObject;
         public static BaseGameObject LastLeftDownObject;
         public static GameObject HealthbarObject;
+        public static Item SelectedContainer;
         public static GameObject CorpseObject;
 
 
