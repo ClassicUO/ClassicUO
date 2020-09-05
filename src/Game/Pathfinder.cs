@@ -160,7 +160,7 @@ namespace ClassicUO.Game
                             }
 
                             case Item item2:
-                                if (stepState == (int) PATH_STEP_STATE.PSS_DEAD_OR_GM && (item2.ItemData.IsDoor || item2.ItemData.Weight <= 0x5A || isGM))
+                                if (stepState == (int) PATH_STEP_STATE.PSS_DEAD_OR_GM && (item2.ItemData.IsDoor || item2.ItemData.Weight <= 0x5A || (isGM && !item2.IsLocked)))
                                 {
                                     dropFlags = true;
                                 }
@@ -342,7 +342,7 @@ namespace ClassicUO.Game
         {
             int stepState = (int) PATH_STEP_STATE.PSS_NORMAL;
 
-            if (World.Player.IsDead || World.Player.Graphic == 0x03D8)
+            if (World.Player.IsDead || World.Player.Graphic == 0x03DB)
             {
                 stepState = (int) PATH_STEP_STATE.PSS_DEAD_OR_GM;
             }
