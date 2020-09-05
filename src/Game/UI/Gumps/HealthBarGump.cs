@@ -215,6 +215,18 @@ namespace ClassicUO.Game.UI.Gumps
             return max;
         }
 
+        protected override void OnDragEnd(int x, int y)
+        {
+            // when dragging an healthbar with target on, we have to reset the dclick timer 
+            if (TargetManager.IsTargeting)
+            {
+                Mouse.LastLeftButtonClickTime = 0;
+                Mouse.CancelDoubleClick = true;
+            }
+
+            base.OnDragEnd(x, y);
+        }
+
         protected override void OnMouseDown(int x, int y, MouseButtonType button)
         {
             if (button != MouseButtonType.Left)
