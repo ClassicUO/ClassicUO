@@ -1140,7 +1140,7 @@ namespace ClassicUO.Game.Scenes
 
         private void CheckDeathScreen()
         {
-            if (ProfileManager.Current.EnableDeathScreen)
+            if (ProfileManager.Current != null && ProfileManager.Current.EnableDeathScreen)
             {
                 if (_deathScreenLabel == null || _deathScreenLabel.IsDisposed)
                 {
@@ -1161,7 +1161,8 @@ namespace ClassicUO.Game.Scenes
                 else if (World.Player.DeathScreenTimer < Time.Ticks)
                 {
                     _deathScreenActive = false;
-                    _deathScreenLabel.Dispose();
+                    _deathScreenLabel?.Dispose();
+                    _deathScreenLabel = null;
                 }
             }
         }
