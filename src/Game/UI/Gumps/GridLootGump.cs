@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,10 +18,10 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System.Linq;
-
 using ClassicUO.Configuration;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
@@ -35,20 +36,19 @@ namespace ClassicUO.Game.UI.Gumps
 {
     internal class GridLootGump : Gump
     {
-        private readonly AlphaBlendControl _background;
-        private readonly NiceButton _buttonPrev, _buttonNext, _setlootbag;
-        private readonly Item _corpse;
-        private readonly Label _currentPageLabel;
-        private readonly bool _hideIfEmpty;
-
-        private int _currentPage = 1;
-        private int _pagesCount;
+        private const int MAX_WIDTH = 300;
+        private const int MAX_HEIGHT = 400;
 
         private static int _lastX = ProfileManager.Current.GridLootType == 2 ? 200 : 100;
         private static int _lastY = 100;
+        private readonly AlphaBlendControl _background;
+        private readonly NiceButton _buttonPrev, _buttonNext, _setlootbag;
+        private readonly Item _corpse;
 
-        private const int MAX_WIDTH = 300;
-        private const int MAX_HEIGHT = 400;
+        private int _currentPage = 1;
+        private readonly Label _currentPageLabel;
+        private readonly bool _hideIfEmpty;
+        private int _pagesCount;
 
         public GridLootGump(uint local) : base(local, 0)
         {
@@ -62,7 +62,9 @@ namespace ClassicUO.Game.UI.Gumps
             }
 
             if (World.Player.ManualOpenedCorpses.Contains(LocalSerial))
+            {
                 World.Player.ManualOpenedCorpses.Remove(LocalSerial);
+            }
             else if (World.Player.AutoOpenedCorpses.Contains(LocalSerial) &&
                      ProfileManager.Current != null && ProfileManager.Current.SkipEmptyCorpse)
             {
@@ -85,7 +87,7 @@ namespace ClassicUO.Game.UI.Gumps
             Width = _background.Width;
             Height = _background.Height;
 
-            _setlootbag = new NiceButton(3, Height - 23, 100, 20, ButtonAction.Activate, ResGumps.SetLootBag) { ButtonParameter = 2, IsSelectable = false };
+            _setlootbag = new NiceButton(3, Height - 23, 100, 20, ButtonAction.Activate, ResGumps.SetLootBag) {ButtonParameter = 2, IsSelectable = false};
             Add(_setlootbag);
 
             _buttonPrev = new NiceButton(Width - 80, Height - 20, 40, 20, ButtonAction.Activate, ResGumps.Prev) {ButtonParameter = 0, IsSelectable = false};
@@ -96,14 +98,18 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add(_buttonPrev);
             Add(_buttonNext);
-            Add(_currentPageLabel = new Label("1", true, 999, align: IO.Resources.TEXT_ALIGN_TYPE.TS_CENTER)
-            {
-                X = Width / 2 - 5,
-                Y = Height - 20,
-            });
+
+            Add
+            (
+                _currentPageLabel = new Label("1", true, 999, align: TEXT_ALIGN_TYPE.TS_CENTER)
+                {
+                    X = Width / 2 - 5,
+                    Y = Height - 20
+                }
+            );
         }
 
-      
+
         public override void OnButtonClick(int buttonID)
         {
             if (buttonID == 0)
@@ -115,6 +121,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _currentPage = 1;
                     _buttonPrev.IsVisible = false;
                 }
+
                 _buttonNext.IsVisible = true;
                 ChangePage(_currentPage);
 
@@ -144,9 +151,10 @@ namespace ClassicUO.Game.UI.Gumps
                 TargetManager.SetTargeting(CursorTarget.SetGrabBag, 0, TargetType.Neutral);
             }
             else
+            {
                 base.OnButtonClick(buttonID);
+            }
         }
-
 
 
         protected override void UpdateContents()
@@ -157,7 +165,9 @@ namespace ClassicUO.Game.UI.Gumps
             int y = 20;
 
             foreach (GridLootItem gridLootItem in Children.OfType<GridLootItem>())
+            {
                 gridLootItem.Dispose();
+            }
 
             int count = 0;
             _pagesCount = 1;
@@ -182,7 +192,7 @@ namespace ClassicUO.Game.UI.Gumps
                         ++line;
 
                         y += gridItem.Height + 20;
-                        
+
                         if (y >= MAX_HEIGHT - 40)
                         {
                             _pagesCount++;
@@ -235,7 +245,7 @@ namespace ClassicUO.Game.UI.Gumps
                 GameActions.Print(ResGumps.CorpseIsEmpty);
                 Dispose();
             }
-            else if ((_hideIfEmpty && !IsVisible))
+            else if (_hideIfEmpty && !IsVisible)
             {
                 IsVisible = true;
             }
@@ -246,7 +256,9 @@ namespace ClassicUO.Game.UI.Gumps
             if (_corpse != null)
             {
                 if (_corpse == SelectedObject.CorpseObject)
+                {
                     SelectedObject.CorpseObject = null;
+                }
             }
 
             _lastX = X;
@@ -258,7 +270,9 @@ namespace ClassicUO.Game.UI.Gumps
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
             if (!IsVisible || IsDisposed)
+            {
                 return false;
+            }
 
             ResetHueVector();
             base.Draw(batcher, x, y);
@@ -281,12 +295,19 @@ namespace ClassicUO.Game.UI.Gumps
             base.Update(totalMS, frameMS);
 
             if (IsDisposed)
+            {
                 return;
+            }
 
             if (_background.Width < 100)
+            {
                 _background.Width = 100;
+            }
+
             if (_background.Height < 100)
+            {
                 _background.Height = 100;
+            }
 
             Width = _background.Width;
             Height = _background.Height;
@@ -312,7 +333,10 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override void OnMouseExit(int x, int y)
         {
-            if (_corpse != null && !_corpse.IsDestroyed) SelectedObject.CorpseObject = null;
+            if (_corpse != null && !_corpse.IsDestroyed)
+            {
+                SelectedObject.CorpseObject = null;
+            }
         }
 
 
@@ -358,7 +382,10 @@ namespace ClassicUO.Game.UI.Gumps
                 _texture.Height = size;
                 _texture.CanMove = false;
 
-                if (World.ClientFeatures.TooltipsEnabled) _texture.SetTooltip(item);
+                if (World.ClientFeatures.TooltipsEnabled)
+                {
+                    _texture.SetTooltip(item);
+                }
 
                 Add(_texture);
 
@@ -367,7 +394,7 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     if (e.Button == MouseButtonType.Left)
                     {
-                        GameActions.GrabItem(item, (ushort)amount.Value);
+                        GameActions.GrabItem(item, (ushort) amount.Value);
                     }
                 };
 

@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,34 +18,31 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
 using System.Collections.Generic;
 using System.Linq;
-
 using ClassicUO.Input;
 using ClassicUO.IO.Resources;
-using ClassicUO.Renderer;
-using ClassicUO.Utility;
 
 namespace ClassicUO.Game.UI.Controls
 {
     internal class MultiSelectionShrinkbox : Control
     {
+        private readonly GumpPic _arrow;
         private readonly int _buttongroup;
         private readonly ushort _buttonimg, _pressedbuttonimg;
+        private NiceButton[] _buttons;
+        private string[] _items;
         private readonly Label _label;
         //this particular list will be used when inside a scroll area or similar situations where you want to nest a multi selection shrinkbox inside another one,
         //so that when the parent is deactivated, all the child will be made non visible
         private readonly List<MultiSelectionShrinkbox> _nestedBoxes = new List<MultiSelectionShrinkbox>();
-        private readonly GumpPic _arrow;
-        private NiceButton[] _buttons;
-        private readonly bool _useArrow2;
-        private string[] _items;
         private bool _opened;
         private Button[] _pics;
-        private int _selectedIndex;
+        private readonly bool _useArrow2;
 
         public MultiSelectionShrinkbox(int x, int y, int width, string indextext, string[] items, ushort hue = 0x0453, bool unicode = false, byte font = 9, int group = 0, ushort button = 0, ushort pressedbutton = 0, bool useArrow2 = false) : this(x, y, width, indextext, hue, unicode, font, group, button, pressedbutton, useArrow2)
         {
@@ -56,29 +54,43 @@ namespace ClassicUO.Game.UI.Controls
             WantUpdateSize = false;
             X = x;
             Y = y;
+
             if (button > 0)
             {
                 _buttonimg = button;
+
                 if (pressedbutton > 0)
+                {
                     _pressedbuttonimg = pressedbutton;
+                }
                 else
+                {
                     _pressedbuttonimg = button;
+                }
             }
+
             _buttongroup = group;
             Width = width;
             _useArrow2 = userArrow2;
 
-            Add(_label = new Label(indextext, unicode, hue, font: font, align: TEXT_ALIGN_TYPE.TS_LEFT)
-            {
-                X = 18
-            });
+            Add
+            (
+                _label = new Label(indextext, unicode, hue, font: font, align: TEXT_ALIGN_TYPE.TS_LEFT)
+                {
+                    X = 18
+                }
+            );
+
             Height = _label.Height;
 
-            Add(_arrow = new GumpPic(1, 1, (ushort)(userArrow2 ? 0x0827 : 0x15E1), 0));
+            Add(_arrow = new GumpPic(1, 1, (ushort) (userArrow2 ? 0x0827 : 0x15E1), 0));
 
             _arrow.MouseUp += (sender, state) =>
             {
-                if (state.Button == MouseButtonType.Left) Opened = !_opened;
+                if (state.Button == MouseButtonType.Left)
+                {
+                    Opened = !_opened;
+                }
             };
         }
 
@@ -122,19 +134,22 @@ namespace ClassicUO.Game.UI.Controls
             }
         }
 
-        public int SelectedIndex => _selectedIndex;
+        public int SelectedIndex { get; private set; }
 
         public string SelectedName
         {
             get
             {
-                if (_items != null && _selectedIndex >= 0 && _selectedIndex < _items.Length)
-                    return _items[_selectedIndex];
+                if (_items != null && SelectedIndex >= 0 && SelectedIndex < _items.Length)
+                {
+                    return _items[SelectedIndex];
+                }
+
                 return null;
             }
         }
 
-        internal uint GetItemsLength => (uint)_items.Length;
+        internal uint GetItemsLength => (uint) _items.Length;
 
         public string Name => _label == null ? null : _label.Text;
 
@@ -143,7 +158,9 @@ namespace ClassicUO.Game.UI.Controls
         internal bool NestBox(MultiSelectionShrinkbox box)
         {
             if (_nestedBoxes.Contains(box))
+            {
                 return false;
+            }
 
             Control c = Parent;
 
@@ -155,7 +172,12 @@ namespace ClassicUO.Game.UI.Controls
                     _nestedBoxes.Add(box);
                     box.Width = Width - box.X;
                     area.Add(box);
-                    if (!_opened) box.IsVisible = false;
+
+                    if (!_opened)
+                    {
+                        box.IsVisible = false;
+                    }
+
                     box.OnPageChanged();
                     box.ParentBox = this;
 
@@ -171,16 +193,25 @@ namespace ClassicUO.Game.UI.Controls
         internal void SetItemsValue(string[] items)
         {
             _items = items;
+
             if (_opened)
+            {
                 GenerateButtons();
+            }
+
             _arrow.IsVisible = items.Length > 0 || _nestedBoxes.Count > 0;
         }
 
         internal void SetItemsValue(Dictionary<int, string> items)
         {
-            _items = items.Select(o => o.Value).ToArray();
+            _items = items.Select(o => o.Value)
+                          .ToArray();
+
             if (_opened)
+            {
                 GenerateButtons();
+            }
+
             _arrow.IsVisible = items.Count > 0 || _nestedBoxes.Count > 0;
         }
 
@@ -190,7 +221,9 @@ namespace ClassicUO.Game.UI.Controls
             _buttons = new NiceButton[_items.Length];
 
             if (_buttonimg > 0)
+            {
                 _pics = new Button[_items.Length];
+            }
 
             int index = 0;
             int width = 0;
@@ -202,16 +235,25 @@ namespace ClassicUO.Game.UI.Controls
                 int w, h;
 
                 if (_label.Unicode)
+                {
                     w = FontsLoader.Instance.GetWidthUnicode(_label.Font, item);
+                }
                 else
+                {
                     w = FontsLoader.Instance.GetWidthASCII(_label.Font, item);
+                }
 
                 if (w > width)
                 {
                     if (_label.Unicode)
+                    {
                         h = FontsLoader.Instance.GetHeightUnicode(_label.Font, item, w, TEXT_ALIGN_TYPE.TS_LEFT, 0x0);
+                    }
                     else
+                    {
                         h = FontsLoader.Instance.GetHeightASCII(_label.Font, item, w, TEXT_ALIGN_TYPE.TS_LEFT, 0x0);
+                    }
+
                     width = w;
                     height = h + 2;
                 }
@@ -219,12 +261,16 @@ namespace ClassicUO.Game.UI.Controls
 
             foreach (string item in _items)
             {
-                NiceButton but = new NiceButton(20, index * height + lh, width, height, ButtonAction.Activate, item, _buttongroup, TEXT_ALIGN_TYPE.TS_LEFT) { Tag = index };
+                NiceButton but = new NiceButton(20, index * height + lh, width, height, ButtonAction.Activate, item, _buttongroup, TEXT_ALIGN_TYPE.TS_LEFT) {Tag = index};
+
                 if (_buttonimg > 0)
                 {
-                    Add(_pics[index] = new Button(index, _buttonimg, _pressedbuttonimg) { X = 6, Y = index * height + lh + 2, ButtonAction = (ButtonAction)0xBEEF, Tag = index });
-                    _pics[index].MouseUp += Selection_MouseClick;
+                    Add(_pics[index] = new Button(index, _buttonimg, _pressedbuttonimg) {X = 6, Y = index * height + lh + 2, ButtonAction = (ButtonAction) 0xBEEF, Tag = index});
+
+                    _pics[index]
+                        .MouseUp += Selection_MouseClick;
                 }
+
                 but.MouseUp += Selection_MouseClick;
                 _buttons[index] = but;
                 Add(but);
@@ -244,7 +290,9 @@ namespace ClassicUO.Game.UI.Controls
             {
                 for (int i = _buttons.Length - 1; i >= 0; --i)
                 {
-                    _buttons[i]?.Dispose();
+                    _buttons[i]
+                        ?.Dispose();
+
                     _buttons[i] = null;
                 }
             }
@@ -253,7 +301,9 @@ namespace ClassicUO.Game.UI.Controls
             {
                 for (int i = _pics.Length - 1; i >= 0; --i)
                 {
-                    _pics[i]?.Dispose();
+                    _pics[i]
+                        ?.Dispose();
+
                     _pics[i] = null;
                 }
             }
@@ -263,12 +313,23 @@ namespace ClassicUO.Game.UI.Controls
         {
             if (sender is Control c)
             {
-                _selectedIndex = (int)c.Tag;
+                SelectedIndex = (int) c.Tag;
+
                 if (sender is Button)
-                    _buttons[SelectedIndex].IsSelected = true;
+                {
+                    _buttons[SelectedIndex]
+                        .IsSelected = true;
+                }
+
                 if (_buttongroup > 0)
+                {
                     OnGroupSelection();
-                if (_items != null && _selectedIndex >= 0 && _selectedIndex < _items.Length) OnOptionSelected?.Invoke(this, c);
+                }
+
+                if (_items != null && SelectedIndex >= 0 && SelectedIndex < _items.Length)
+                {
+                    OnOptionSelected?.Invoke(this, c);
+                }
             }
         }
 
@@ -286,8 +347,10 @@ namespace ClassicUO.Game.UI.Controls
                             {
                                 foreach (NiceButton button in msb._buttons)
                                 {
-                                    if(button != null)
+                                    if (button != null)
+                                    {
                                         button.IsSelected = false;
+                                    }
                                 }
                             }
                         }
@@ -303,7 +366,9 @@ namespace ClassicUO.Game.UI.Controls
         protected override bool OnMouseDoubleClick(int x, int y, MouseButtonType button)
         {
             if (_label.Bounds.Contains(Mouse.Position.X - ScreenCoordinateX, Mouse.Position.Y - ScreenCoordinateY) && button == MouseButtonType.Left)
+            {
                 Opened = !_opened;
+            }
 
             return base.OnMouseDoubleClick(x, y, button);
         }

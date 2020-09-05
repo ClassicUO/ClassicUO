@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,12 +18,11 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
-using System.IO;
 using System.Xml;
-
 using ClassicUO.Configuration;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
@@ -37,7 +37,6 @@ namespace ClassicUO.Game.UI.Gumps
 {
     internal class MacroButtonGump : AnchorableGump
     {
-        public Macro _macro;
         private Texture2D backgroundTexture;
         private Label label;
 
@@ -63,6 +62,7 @@ namespace ClassicUO.Game.UI.Gumps
         }
 
         public override GUMP_TYPE GumpType => GUMP_TYPE.GT_MACROBUTTON;
+        public Macro _macro;
 
         private void BuildGump()
         {
@@ -72,8 +72,9 @@ namespace ClassicUO.Game.UI.Gumps
             label = new Label(_macro.Name, true, 0x03b2, Width, 255, FontStyle.BlackBorder, TEXT_ALIGN_TYPE.TS_CENTER)
             {
                 X = 0,
-                Width = Width - 10,
+                Width = Width - 10
             };
+
             label.Y = (Height >> 1) - (label.Height >> 1);
             Add(label);
 
@@ -110,10 +111,12 @@ namespace ClassicUO.Game.UI.Gumps
         protected override bool OnMouseDoubleClick(int x, int y, MouseButtonType button)
         {
             if (ProfileManager.Current.CastSpellsByOneClick || button != MouseButtonType.Left)
+            {
                 return false;
+            }
 
             RunMacro();
-            
+
             return true;
         }
 
@@ -139,6 +142,7 @@ namespace ClassicUO.Game.UI.Gumps
             batcher.DrawRectangle(Texture2DCache.GetTexture(Color.Gray), x, y, Width, Height, ref _hueVector);
 
             base.Draw(batcher, x, y);
+
             return true;
         }
 
@@ -147,7 +151,9 @@ namespace ClassicUO.Game.UI.Gumps
             if (_macro != null)
             {
                 // hack to give macro buttons a unique id for use in anchor groups
-                int macroid = Client.Game.GetScene<GameScene>().Macros.GetAllMacros().IndexOf(_macro);
+                int macroid = Client.Game.GetScene<GameScene>()
+                                    .Macros.GetAllMacros()
+                                    .IndexOf(_macro);
 
                 LocalSerial = (uint) macroid + 1000;
 
@@ -162,8 +168,8 @@ namespace ClassicUO.Game.UI.Gumps
             base.Restore(xml);
 
             Macro macro = Client.Game.GetScene<GameScene>()
-                                       .Macros
-                                       .FindMacro(xml.GetAttribute("name"));
+                                .Macros
+                                .FindMacro(xml.GetAttribute("name"));
 
             if (macro != null)
             {

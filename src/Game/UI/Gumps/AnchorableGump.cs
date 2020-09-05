@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,11 +18,11 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using ClassicUO.Configuration;
 using ClassicUO.Game.Managers;
-using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
@@ -30,18 +31,18 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.Game.UI.Gumps
 {
-    enum ANCHOR_TYPE
+    internal enum ANCHOR_TYPE
     {
         NONE,
         SPELL,
         HEALTHBAR
     }
 
-    abstract class AnchorableGump : Gump
+    internal abstract class AnchorableGump : Gump
     {
+        private AnchorableGump _anchorCandidate;
         //private GumpPic _lockGumpPic;
         private int _prevX, _prevY;
-        private AnchorableGump _anchorCandidate;
 
         protected AnchorableGump(uint local, uint server) : base(local, server)
         {
@@ -63,8 +64,10 @@ namespace ClassicUO.Game.UI.Gumps
             }
             else
             {
-                UIManager.AnchorManager[this]?.UpdateLocation(this, X - _prevX, Y - _prevY);
+                UIManager.AnchorManager[this]
+                         ?.UpdateLocation(this, X - _prevX, Y - _prevY);
             }
+
             _prevX = X;
             _prevY = Y;
 
@@ -73,7 +76,8 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override void OnMouseDown(int x, int y, MouseButtonType button)
         {
-            UIManager.AnchorManager[this]?.MakeTopMost();
+            UIManager.AnchorManager[this]
+                     ?.MakeTopMost();
 
             _prevX = X;
             _prevY = Y;
@@ -84,7 +88,9 @@ namespace ClassicUO.Game.UI.Gumps
         protected override void OnMouseOver(int x, int y)
         {
             if (!IsDisposed && UIManager.IsDragging && UIManager.DraggingControl == this)
+            {
                 _anchorCandidate = UIManager.AnchorManager.GetAnchorableControlUnder(this);
+            }
 
             base.OnMouseOver(x, y);
         }
@@ -109,12 +115,13 @@ namespace ClassicUO.Game.UI.Gumps
                 Texture2D lock_texture = GumpsLoader.Instance.GetTexture(0x082C);
 
                 if (lock_texture != null)
+                {
                     if (x >= Width - lock_texture.Width && x < Width &&
                         y >= 0 && y <= lock_texture.Height)
                     {
                         UIManager.AnchorManager.DetachControl(this);
-
                     }
+                }
             }
 
             base.OnMouseUp(x, y, button);
@@ -173,7 +180,10 @@ namespace ClassicUO.Game.UI.Gumps
             if (UIManager.AnchorManager[this] == null || Keyboard.Alt || !ProfileManager.Current.HoldDownKeyAltToCloseAnchored)
             {
                 if (ProfileManager.Current.CloseAllAnchoredGumpsInGroupWithRightClick)
+                {
                     UIManager.AnchorManager.DisposeAllControls(this);
+                }
+
                 base.CloseWithRightClick();
             }
         }

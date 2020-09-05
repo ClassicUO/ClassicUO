@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,9 +18,9 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
-using System;
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Scenes;
@@ -59,12 +60,17 @@ namespace ClassicUO.Game.UI.Gumps
         {
             base.Update(totalMS, frameMS);
 
-            if (!World.InGame) Dispose();
+            if (!World.InGame)
+            {
+                Dispose();
+            }
 
             GameScene scene = Client.Game.GetScene<GameScene>();
 
             if (IsDisposed || ProfileManager.Current == null || scene == null)
+            {
                 return;
+            }
 
             Direction dir = (Direction) GameCursor.GetMouseDirection(World.Player.X, World.Player.Y, _mx, _my, 0);
             ushort gumpID = (ushort) (0x1194 + ((int) dir + 1) % 8);
@@ -74,9 +80,13 @@ namespace ClassicUO.Game.UI.Gumps
                 _direction = dir;
 
                 if (_arrow == null)
+                {
                     Add(_arrow = new GumpPic(0, 0, gumpID, 0));
+                }
                 else
+                {
                     _arrow.Graphic = gumpID;
+                }
 
                 Width = _arrow.Width;
                 Height = _arrow.Height;
@@ -89,40 +99,54 @@ namespace ClassicUO.Game.UI.Gumps
             int x = (ProfileManager.Current.GameWindowSize.X >> 1) - (gox - goy) * 22;
             int y = (ProfileManager.Current.GameWindowSize.Y >> 1) - (gox + goy) * 22;
 
-            x -= (int) (World.Player.Offset.X);
-            y -= (int) (((World.Player.Offset.Y - World.Player.Offset.Z)));
-            y += (World.Player.Z << 2);
+            x -= (int) World.Player.Offset.X;
+            y -= (int) (World.Player.Offset.Y - World.Player.Offset.Z);
+            y += World.Player.Z << 2;
 
 
             switch (dir)
             {
                 case Direction.North:
                     x -= _arrow.Width;
+
                     break;
+
                 case Direction.South:
                     y -= _arrow.Height;
+
                     break;
+
                 case Direction.East:
                     x -= _arrow.Width;
                     y -= _arrow.Height;
+
                     break;
+
                 case Direction.West:
                     break;
+
                 case Direction.Right:
                     x -= _arrow.Width;
                     y -= _arrow.Height / 2;
+
                     break;
+
                 case Direction.Left:
                     x += _arrow.Width / 2;
                     y -= _arrow.Height / 2;
+
                     break;
+
                 case Direction.Up:
                     x -= _arrow.Width / 2;
                     y += _arrow.Height / 2;
+
                     break;
+
                 case Direction.Down:
                     x -= _arrow.Width / 2;
                     y -= _arrow.Height;
+
                     break;
             }
 
@@ -135,15 +159,23 @@ namespace ClassicUO.Game.UI.Gumps
             y = p.Y;
 
             if (x < ProfileManager.Current.GameWindowPosition.X)
+            {
                 x = ProfileManager.Current.GameWindowPosition.X;
+            }
             else if (x > ProfileManager.Current.GameWindowPosition.X + ProfileManager.Current.GameWindowSize.X - _arrow.Width)
+            {
                 x = ProfileManager.Current.GameWindowPosition.X + ProfileManager.Current.GameWindowSize.X - _arrow.Width;
+            }
 
 
             if (y < ProfileManager.Current.GameWindowPosition.Y)
+            {
                 y = ProfileManager.Current.GameWindowPosition.Y;
+            }
             else if (y > ProfileManager.Current.GameWindowPosition.Y + ProfileManager.Current.GameWindowSize.Y - _arrow.Height)
+            {
                 y = ProfileManager.Current.GameWindowPosition.Y + ProfileManager.Current.GameWindowSize.Y - _arrow.Height;
+            }
 
             X = x;
             Y = y;
@@ -164,13 +196,17 @@ namespace ClassicUO.Game.UI.Gumps
             bool rightClick = button == MouseButtonType.Right;
 
             if (leftClick || rightClick)
+            {
                 GameActions.QuestArrow(rightClick);
+            }
         }
 
         public override bool Contains(int x, int y)
         {
             if (_arrow == null)
+            {
                 return true;
+            }
 
             return _arrow.Contains(x, y);
         }

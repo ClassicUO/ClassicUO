@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,6 +18,7 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using ClassicUO.Configuration;
@@ -36,14 +38,14 @@ namespace ClassicUO.Game.UI.Gumps
     internal class WorldViewportGump : Gump
     {
         private const int BORDER_WIDTH = 5;
-        private BorderControl _borderControl;
-        private Button _button;
+        private readonly BorderControl _borderControl;
+        private readonly Button _button;
         private bool _clicked;
         private Point _lastSize, _savedSize;
-        private SystemChatControl _systemChatControl;
+        private readonly GameScene _scene;
+        private readonly SystemChatControl _systemChatControl;
         private int _worldHeight;
         private int _worldWidth;
-        private GameScene _scene;
 
         public WorldViewportGump(GameScene scene) : base(0, 0)
         {
@@ -64,7 +66,9 @@ namespace ClassicUO.Game.UI.Gumps
             _button.MouseDown += (sender, e) =>
             {
                 if (!ProfileManager.Current.GameWindowLock)
+                {
                     _clicked = true;
+                }
             };
 
             _button.MouseUp += (sender, e) =>
@@ -73,10 +77,13 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     Point n = ResizeGameWindow(_lastSize);
 
-                    UIManager.GetGump<OptionsGump>()?.UpdateVideo();
+                    UIManager.GetGump<OptionsGump>()
+                             ?.UpdateVideo();
 
                     if (Client.Version >= ClientVersion.CV_200)
+                    {
                         NetClient.Socket.Send(new PGameWindowSize((uint) n.X, (uint) n.Y));
+                    }
 
                     _clicked = false;
                 }
@@ -86,9 +93,11 @@ namespace ClassicUO.Game.UI.Gumps
             Width = _worldWidth + BORDER_WIDTH * 2;
             Height = _worldHeight + BORDER_WIDTH * 2;
             _borderControl = new BorderControl(0, 0, Width, Height, 4);
+
             _borderControl.DragEnd += (sender, e) =>
             {
-                UIManager.GetGump<OptionsGump>()?.UpdateVideo();
+                UIManager.GetGump<OptionsGump>()
+                         ?.UpdateVideo();
             };
 
             UIManager.SystemChat = _systemChatControl = new SystemChatControl(BORDER_WIDTH, BORDER_WIDTH, _worldWidth, _worldHeight);
@@ -105,7 +114,9 @@ namespace ClassicUO.Game.UI.Gumps
             base.Update(totalMS, frameMS);
 
             if (IsDisposed)
+            {
                 return;
+            }
 
             if (Mouse.IsDragging)
             {
@@ -119,16 +130,24 @@ namespace ClassicUO.Game.UI.Gumps
                     int h = _lastSize.Y + offset.Y;
 
                     if (w < 640)
+                    {
                         w = 640;
+                    }
 
                     if (h < 480)
+                    {
                         h = 480;
+                    }
 
                     if (w > Client.Game.Window.ClientBounds.Width - BORDER_WIDTH)
+                    {
                         w = Client.Game.Window.ClientBounds.Width - BORDER_WIDTH;
+                    }
 
                     if (h > Client.Game.Window.ClientBounds.Height - BORDER_WIDTH)
+                    {
                         h = Client.Game.Window.ClientBounds.Height - BORDER_WIDTH;
+                    }
 
                     _lastSize.X = w;
                     _lastSize.Y = h;
@@ -153,21 +172,31 @@ namespace ClassicUO.Game.UI.Gumps
             Point position = Location;
 
             if (position.X + Width - BORDER_WIDTH > Client.Game.Window.ClientBounds.Width)
+            {
                 position.X = Client.Game.Window.ClientBounds.Width - (Width - BORDER_WIDTH);
+            }
 
             if (position.X < -BORDER_WIDTH)
+            {
                 position.X = -BORDER_WIDTH;
+            }
 
             if (position.Y + Height - BORDER_WIDTH > Client.Game.Window.ClientBounds.Height)
+            {
                 position.Y = Client.Game.Window.ClientBounds.Height - (Height - BORDER_WIDTH);
+            }
 
             if (position.Y < -BORDER_WIDTH)
+            {
                 position.Y = -BORDER_WIDTH;
+            }
 
             Location = position;
 
             ProfileManager.Current.GameWindowPosition = position;
-            UIManager.GetGump<OptionsGump>()?.UpdateVideo();
+
+            UIManager.GetGump<OptionsGump>()
+                     ?.UpdateVideo();
 
             UpdateGameWindowPos();
         }
@@ -209,13 +238,18 @@ namespace ClassicUO.Game.UI.Gumps
         public Point ResizeGameWindow(Point newSize)
         {
             if (newSize.X < 640)
+            {
                 newSize.X = 640;
+            }
 
             if (newSize.Y < 480)
+            {
                 newSize.Y = 480;
+            }
 
             //Resize();
             _lastSize = _savedSize = ProfileManager.Current.GameWindowSize = newSize;
+
             if (_worldWidth != _lastSize.X || _worldHeight != _lastSize.Y)
             {
                 _worldWidth = _lastSize.X;
@@ -225,6 +259,7 @@ namespace ClassicUO.Game.UI.Gumps
                 ProfileManager.Current.GameWindowSize = _lastSize;
                 Resize();
             }
+
             return newSize;
         }
 
@@ -233,8 +268,10 @@ namespace ClassicUO.Game.UI.Gumps
             if (x >= BORDER_WIDTH &&
                 x < Width - BORDER_WIDTH * 2 &&
                 y >= BORDER_WIDTH &&
-                y < Height - BORDER_WIDTH * 2 - (_systemChatControl?.TextBoxControl != null && 
-                                                 _systemChatControl.IsActive ? _systemChatControl.TextBoxControl.Height : 0))
+                y < Height - BORDER_WIDTH * 2 - (_systemChatControl?.TextBoxControl != null &&
+                                                 _systemChatControl.IsActive
+                    ? _systemChatControl.TextBoxControl.Height
+                    : 0))
             {
                 return false;
             }
@@ -268,7 +305,9 @@ namespace ClassicUO.Game.UI.Gumps
             base.Update(totalMS, frameMS);
 
             foreach (UOTexture32 t in _borders)
+            {
                 t.Ticks = (long) totalMS;
+            }
         }
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
@@ -287,8 +326,13 @@ namespace ClassicUO.Game.UI.Gumps
             batcher.Draw2DTiled(_borders[0], x, y + Height - _borderSize, Width, _borderSize, ref _hueVector);
             //sx
             batcher.Draw2DTiled(_borders[1], x, y, _borderSize, Height, ref _hueVector);
+
             //dx
-            batcher.Draw2DTiled(_borders[1], x + Width - _borderSize, y + (_borders[1].Width >> 1), _borderSize, Height - _borderSize, ref _hueVector);
+            batcher.Draw2DTiled
+            (
+                _borders[1], x + Width - _borderSize, y + (_borders[1]
+                    .Width >> 1), _borderSize, Height - _borderSize, ref _hueVector
+            );
 
             return base.Draw(batcher, x, y);
         }

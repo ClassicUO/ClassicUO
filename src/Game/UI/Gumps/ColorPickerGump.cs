@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,10 +18,10 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
-
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Network;
 
@@ -46,20 +47,28 @@ namespace ClassicUO.Game.UI.Gumps
             Y = y;
             Add(new GumpPic(0, 0, 0x0906, 0));
 
-            Add(new Button(0, 0x0907, 0x0908, 0x909)
-            {
-                X = 208, Y = 138, ButtonAction = ButtonAction.Activate
-            });
+            Add
+            (
+                new Button(0, 0x0907, 0x0908, 0x909)
+                {
+                    X = 208, Y = 138, ButtonAction = ButtonAction.Activate
+                }
+            );
+
             HSliderBar slider;
             Add(slider = new HSliderBar(39, 142, 145, SLIDER_MIN, SLIDER_MAX, 1, HSliderBarStyle.BlueWidgetNoBar));
             slider.ValueChanged += (sender, e) => { _box.Graduation = slider.Value; };
             Add(_box = new ColorPickerBox(34, 34));
             _box.ColorSelectedIndex += (sender, e) => { _dyeTybeImage.Hue = (ushort) (_box.SelectedHue + 1); };
 
-            Add(_dyeTybeImage = new StaticPic(0x0FAB, 0)
-            {
-                X = 200, Y = 58
-            });
+            Add
+            (
+                _dyeTybeImage = new StaticPic(0x0FAB, 0)
+                {
+                    X = 200, Y = 58
+                }
+            );
+
             _okClicked = okClicked;
         }
 
@@ -71,7 +80,10 @@ namespace ClassicUO.Game.UI.Gumps
                     ushort hue = (ushort) (_box.SelectedHue + 1);
 
                     if (LocalSerial != 0)
+                    {
                         NetClient.Socket.Send(new PDyeDataResponse(LocalSerial, _graphic, hue));
+                    }
+
                     _okClicked?.Invoke(hue);
                     Dispose();
 

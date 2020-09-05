@@ -1,4 +1,5 @@
 #region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,6 +18,7 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
@@ -83,7 +85,11 @@ namespace ClassicUO.Network
         {
             const uint SEED = 0x1337BEEF;
             WriteUInt(SEED);
-            for (int i = 0; i < 4; i++) WriteUInt(version[i]);
+
+            for (int i = 0; i < 4; i++)
+            {
+                WriteUInt(version[i]);
+            }
         }
 
         public PSeed(uint v, byte major, byte minor, byte build, byte extra) : base(0xEF)
@@ -153,13 +159,18 @@ namespace ClassicUO.Network
             byte val;
 
             if (Client.Version < ClientVersion.CV_4011D)
+            {
                 val = Convert.ToByte(character.Flags.HasFlag(Flags.Female));
+            }
             else
             {
                 val = (byte) character.Race;
 
                 if (Client.Version < ClientVersion.CV_7000)
+                {
                     val--;
+                }
+
                 val = (byte) (val * 2 + Convert.ToByte(character.Flags.HasFlag(Flags.Female)));
             }
 
@@ -168,7 +179,9 @@ namespace ClassicUO.Network
             WriteByte((byte) character.Dexterity);
             WriteByte((byte) character.Intelligence);
 
-            List<Skill> skills = character.Skills.OrderByDescending(o => o.Value).Take(skillcount).ToList();
+            List<Skill> skills = character.Skills.OrderByDescending(o => o.Value)
+                                          .Take(skillcount)
+                                          .ToList();
 
             foreach (Skill skill in skills)
             {
@@ -239,9 +252,13 @@ namespace ClassicUO.Network
             Item pants = character.FindItemByLayer(Layer.Pants);
 
             if (pants != null)
+            {
                 WriteUShort(pants.Hue);
+            }
             else
+            {
                 WriteUShort(0x00);
+            }
         }
     }
 
@@ -418,10 +435,13 @@ namespace ClassicUO.Network
             List<SpeechEntry> entries = SpeechesLoader.Instance.GetKeywords(text);
 
             bool encoded = entries != null && entries.Count != 0;
-            if(encoded)
-                type |= MessageType.Encoded;
 
-            WriteByte((byte)type);
+            if (encoded)
+            {
+                type |= MessageType.Encoded;
+            }
+
+            WriteByte((byte) type);
             WriteUShort(hue);
             WriteUShort(font);
             WriteASCII(lang, 4);
@@ -438,7 +458,8 @@ namespace ClassicUO.Network
 
                 while (index < length)
                 {
-                    int keywordID = entries[index].KeywordID;
+                    int keywordID = entries[index]
+                        .KeywordID;
 
                     if (flag)
                     {
@@ -455,10 +476,15 @@ namespace ClassicUO.Network
                     flag = !flag;
                 }
 
-                if (!flag) codeBytes.Add((byte) (num3 << 4));
+                if (!flag)
+                {
+                    codeBytes.Add((byte) (num3 << 4));
+                }
 
                 for (int i = 0; i < codeBytes.Count; i++)
+                {
                     WriteByte(codeBytes[i]);
+                }
 
                 WriteBytes(utf8, 0, utf8.Length);
                 WriteByte(0);
@@ -548,17 +574,34 @@ namespace ClassicUO.Network
 
             //for (int i = switches.Length - 1; i >= 0; i--)
             for (int i = 0; i < switches.Length; i++)
+            {
                 WriteUInt(switches[i]);
+            }
 
             WriteUInt((uint) entries.Length);
 
             //for (int i = entries.Length - 1; i >= 0; i--)
             for (int i = 0; i < entries.Length; i++)
             {
-                int length = Math.Min(239, entries[i].Item2.Length);
-                WriteUShort(entries[i].Item1);
+                int length = Math.Min
+                (
+                    239, entries[i]
+                         .Item2.Length
+                );
+
+                WriteUShort
+                (
+                    entries[i]
+                        .Item1
+                );
+
                 WriteUShort((ushort) length);
-                WriteUnicode(entries[i].Item2, length);
+
+                WriteUnicode
+                (
+                    entries[i]
+                        .Item2, length
+                );
             }
         }
     }
@@ -858,7 +901,9 @@ namespace ClassicUO.Network
                 WriteUInt(serial);
             }
             else
+            {
                 WriteByte(0x04);
+            }
 
             WriteUnicode(text);
         }
@@ -902,17 +947,23 @@ namespace ClassicUO.Network
             WriteByte(0x05);
             WriteUInt(serial);
             WriteUInt(msgserial);
-            WriteByte((byte)(subject.Length + 1));
-            byte[] titolo = Encoding.UTF8.GetBytes(subject); 
+            WriteByte((byte) (subject.Length + 1));
+            byte[] titolo = Encoding.UTF8.GetBytes(subject);
             WriteBytes(titolo, 0, titolo.Length);
             WriteByte(0);
             string[] splits = _textBox.Split('\n');
             int numlinee = splits.Length;
-            WriteByte((byte)numlinee);
+            WriteByte((byte) numlinee);
+
             for (int L = 0; L < numlinee; L++)
             {
-                byte[] buf = Encoding.UTF8.GetBytes(splits[L].Trim());
-                WriteByte((byte)(buf.Length + 1));
+                byte[] buf = Encoding.UTF8.GetBytes
+                (
+                    splits[L]
+                        .Trim()
+                );
+
+                WriteByte((byte) (buf.Length + 1));
                 WriteBytes(buf, 0, buf.Length);
                 WriteByte(0);
             }
@@ -987,8 +1038,11 @@ namespace ClassicUO.Network
 
             // other packets sends Client.Protocol directly without doing this. Why not here?
             uint clientFlag = 0;
+
             for (int i = 0; i < (uint) Client.Protocol; i++)
+            {
                 clientFlag |= (uint) (1 << i);
+            }
 
             WriteUInt(clientFlag);
         }
@@ -1079,12 +1133,15 @@ namespace ClassicUO.Network
             if (len > 0)
             {
                 if (len > 30)
+                {
                     len = 30;
+                }
+
                 WriteUnicode(name, len);
             }
         }
     }
-    
+
     internal sealed class PMapMessage : PacketWriter
     {
         public PMapMessage(uint serial, byte action, byte pin, ushort x, ushort y) : base(0x56)
@@ -1209,21 +1266,26 @@ namespace ClassicUO.Network
         public PBookPageData(uint serial, string text, int page, List<int> chars) : base(0x66)
         {
             if (text == null)
+            {
                 text = string.Empty;
+            }
 
             WriteUInt(serial);
             WriteUShort(0x0001);
-            WriteUShort((ushort)page);
-            WriteUShort((ushort)chars.Count);
-            for(int i = 0, x = 0; i < chars.Count; i++)
+            WriteUShort((ushort) page);
+            WriteUShort((ushort) chars.Count);
+
+            for (int i = 0, x = 0; i < chars.Count; i++)
             {
                 if (chars[i] > 0)
                 {
                     WriteBytes(Encoding.UTF8.GetBytes(text.Substring(x, chars[i])));
                     x += chars[i];
                 }
+
                 WriteByte(0);
             }
+
             WriteByte(0);
         }
 
@@ -1232,22 +1294,29 @@ namespace ClassicUO.Network
             if (text == null)
             {
                 text = new string[ModernBookGump.MAX_BOOK_LINES];
+
                 for (int i = 0; i < text.Length; i++)
+                {
                     text[i] = string.Empty;
+                }
             }
 
             WriteUInt(serial);
             WriteUShort(0x0001);
-            WriteUShort((ushort)page);
-            WriteUShort((ushort)text.Length);
+            WriteUShort((ushort) page);
+            WriteUShort((ushort) text.Length);
+
             for (int i = 0; i < text.Length; i++)
             {
-                if (text[i] != null && text[i].Length > 0)
+                if (text[i] != null && text[i]
+                    .Length > 0)
                 {
                     WriteBytes(Encoding.UTF8.GetBytes(text[i]));
                 }
+
                 WriteByte(0);
             }
+
             WriteByte(0);
         }
     }
@@ -1276,12 +1345,24 @@ namespace ClassicUO.Network
                 for (int i = 0; i < items.Length; i++)
                 {
                     WriteByte(0x1A); // layer?
-                    WriteUInt(items[i].Item1);
-                    WriteUShort(items[i].Item2);
+
+                    WriteUInt
+                    (
+                        items[i]
+                            .Item1
+                    );
+
+                    WriteUShort
+                    (
+                        items[i]
+                            .Item2
+                    );
                 }
             }
             else
+            {
                 WriteByte(0x00);
+            }
         }
     }
 
@@ -1294,8 +1375,17 @@ namespace ClassicUO.Network
 
             for (int i = 0; i < items.Length; i++)
             {
-                WriteUInt(items[i].Item1);
-                WriteUShort(items[i].Item2);
+                WriteUInt
+                (
+                    items[i]
+                        .Item1
+                );
+
+                WriteUShort
+                (
+                    items[i]
+                        .Item2
+                );
             }
         }
     }
@@ -1375,8 +1465,8 @@ namespace ClassicUO.Network
         {
             WriteUShort(0x33);
             WriteUInt(playerSerial);
-            WriteByte((byte)dir);
-            WriteByte((byte)dir);
+            WriteByte((byte) dir);
+            WriteByte((byte) dir);
             WriteByte(speed);
         }
     }
@@ -1393,7 +1483,10 @@ namespace ClassicUO.Network
         public PWalkRequest(Direction direction, byte seq, bool run, uint fastwalk) : base(0x02)
         {
             if (run)
+            {
                 direction |= Direction.Running;
+            }
+
             WriteByte((byte) direction);
             WriteByte(seq);
             WriteUInt(fastwalk);
@@ -1591,9 +1684,14 @@ namespace ClassicUO.Network
         public PClientViewRange(byte range) : base(0xC8)
         {
             if (range < Constants.MIN_VIEW_RANGE)
+            {
                 range = Constants.MIN_VIEW_RANGE;
+            }
             else if (range > Constants.MAX_VIEW_RANGE)
+            {
                 range = Constants.MAX_VIEW_RANGE;
+            }
+
             WriteByte(range);
         }
     }

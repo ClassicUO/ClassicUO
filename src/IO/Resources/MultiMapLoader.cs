@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,6 +18,7 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
@@ -25,12 +27,14 @@ using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using ClassicUO.Game;
 using ClassicUO.Renderer;
+using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
 
 namespace ClassicUO.IO.Resources
 {
     internal class MultiMapLoader : UOFileLoader
     {
+        private static MultiMapLoader _instance;
         private readonly UOFileMul[] _facets = new UOFileMul[6];
         private UOFile _file;
 
@@ -38,7 +42,6 @@ namespace ClassicUO.IO.Resources
         {
         }
 
-        private static MultiMapLoader _instance;
         public static MultiMapLoader Instance => _instance ?? (_instance = new MultiMapLoader());
 
         internal bool HasFacet(int map)
@@ -48,32 +51,35 @@ namespace ClassicUO.IO.Resources
 
         public override Task Load()
         {
-            return Task.Run(() =>
-            {
-                string path = UOFileManager.GetUOFilePath("Multimap.rle");
-
-                if (File.Exists(path))
+            return Task.Run
+            (
+                () =>
                 {
-                    _file = new UOFile(path, true);
-                }
-
-                for (int i = 0; i < 6; i++)
-                {
-                    path = UOFileManager.GetUOFilePath($"facet0{i}.mul");
+                    string path = UOFileManager.GetUOFilePath("Multimap.rle");
 
                     if (File.Exists(path))
                     {
-                        _facets[i] = new UOFileMul(path);
+                        _file = new UOFile(path, true);
+                    }
+
+                    for (int i = 0; i < 6; i++)
+                    {
+                        path = UOFileManager.GetUOFilePath($"facet0{i}.mul");
+
+                        if (File.Exists(path))
+                        {
+                            _facets[i] = new UOFileMul(path);
+                        }
                     }
                 }
-            });
+            );
         }
 
         public unsafe UOTexture32 LoadMap(int width, int height, int startx, int starty, int endx, int endy)
         {
             if (_file == null || _file.Length == 0)
             {
-                Log.Warn( "MultiMap.rle is not loaded!");
+                Log.Warn("MultiMap.rle is not loaded!");
 
                 return null;
             }
@@ -85,7 +91,7 @@ namespace ClassicUO.IO.Resources
 
             if (w < 1 || h < 1)
             {
-                Log.Warn( "Failed to load bounds from MultiMap.rle");
+                Log.Warn("Failed to load bounds from MultiMap.rle");
 
                 return null;
             }
@@ -98,7 +104,9 @@ namespace ClassicUO.IO.Resources
             int widthDivisor = endx - startx;
 
             if (widthDivisor == 0)
+            {
                 widthDivisor++;
+            }
 
             starty = starty >> 1;
             endy = endy >> 1;
@@ -106,7 +114,9 @@ namespace ClassicUO.IO.Resources
             int heightDivisor = endy - starty;
 
             if (heightDivisor == 0)
+            {
                 heightDivisor++;
+            }
 
             int pwidth = (width << 8) / widthDivisor;
             int pheight = (height << 8) / heightDivisor;
@@ -138,7 +148,9 @@ namespace ClassicUO.IO.Resources
                         if (pixel < 0xFF)
                         {
                             if (pixel == maxPixelValue)
+                            {
                                 maxPixelValue++;
+                            }
 
                             pixel++;
                         }
@@ -162,7 +174,9 @@ namespace ClassicUO.IO.Resources
                 IntPtr ptr = Marshal.AllocHGlobal(s * HuesLoader.Instance.HuesRange.Length);
 
                 for (int i = 0; i < HuesLoader.Instance.HuesRange.Length; i++)
+                {
                     Marshal.StructureToPtr(HuesLoader.Instance.HuesRange[i], ptr + i * s, false);
+                }
 
                 ushort* huesData = (ushort*) (byte*) (ptr + 30800);
 
@@ -173,7 +187,7 @@ namespace ClassicUO.IO.Resources
                 for (int i = 0; i < maxPixelValue; i++)
                 {
                     colorOffset -= 31;
-                    colorTable[i] = Utility.HuesHelper.Color16To32(huesData[colorOffset / maxPixelValue]) | 0xFF_00_00_00;
+                    colorTable[i] = HuesHelper.Color16To32(huesData[colorOffset / maxPixelValue]) | 0xFF_00_00_00;
                 }
 
                 uint[] worldMap = new uint[mapSize];
@@ -182,7 +196,7 @@ namespace ClassicUO.IO.Resources
                 {
                     byte bytepic = data[i];
 
-                    worldMap[i] = (bytepic != 0 ? colorTable[bytepic - 1] : 0);
+                    worldMap[i] = bytepic != 0 ? colorTable[bytepic - 1] : 0;
                 }
 
                 Marshal.FreeHGlobal(ptr);
@@ -199,14 +213,23 @@ namespace ClassicUO.IO.Resources
         public UOTexture32 LoadFacet(int facet, int width, int height, int startx, int starty, int endx, int endy)
         {
             if (_file == null || facet < 0 || facet > Constants.MAPS_COUNT || _facets[facet] == null)
+            {
                 return null;
+            }
 
-            _facets[facet].Seek(0);
+            _facets[facet]
+                .Seek(0);
 
-            int w = _facets[facet].ReadShort();
-            int h = _facets[facet].ReadShort();
+            int w = _facets[facet]
+                .ReadShort();
 
-            if (w < 1 || h < 1) return null;
+            int h = _facets[facet]
+                .ReadShort();
+
+            if (w < 1 || h < 1)
+            {
+                return null;
+            }
 
             int startX = startx;
             int endX = endx <= 0 ? width : endx;
@@ -222,17 +245,28 @@ namespace ClassicUO.IO.Resources
             for (int y = 0; y < h; y++)
             {
                 int x = 0;
-                int colorCount = _facets[facet].ReadInt() / 3;
+
+                int colorCount = _facets[facet]
+                    .ReadInt() / 3;
 
                 for (int i = 0; i < colorCount; i++)
                 {
-                    int size = _facets[facet].ReadByte();
+                    int size = _facets[facet]
+                        .ReadByte();
 
-                    uint color = Utility.HuesHelper.Color16To32(_facets[facet].ReadUShort()) | 0xFF_00_00_00;
+                    uint color = HuesHelper.Color16To32
+                    (
+                        _facets[facet]
+                            .ReadUShort()
+                    ) | 0xFF_00_00_00;
+
                     for (int j = 0; j < size; j++)
                     {
                         if (x >= startX && x < endX && y >= startY && y < endY)
+                        {
                             map[(y - startY) * pwidth + (x - startX)] = color;
+                        }
+
                         x++;
                     }
                 }

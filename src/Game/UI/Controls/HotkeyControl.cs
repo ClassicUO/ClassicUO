@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,10 +18,10 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System.Collections.Generic;
-
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Gumps;
@@ -57,13 +58,17 @@ namespace ClassicUO.Game.UI.Controls
                 GameScene gs = Client.Game.GetScene<GameScene>();
 
                 if (gs == null)
+                {
                     return;
+                }
 
                 if (gs.Hotkeys.Bind(_key, box.Key, box.Mod))
                 {
                 }
                 else // show a popup
+                {
                     UIManager.Add(new MessageBoxGump(400, 200, ResGumps.KeyCombinationAlreadyExists, null));
+                }
             };
 
             box.HotkeyCancelled += (sender, e) =>
@@ -71,12 +76,18 @@ namespace ClassicUO.Game.UI.Controls
                 GameScene gs = Client.Game.GetScene<GameScene>();
 
                 if (gs == null)
+                {
                     return;
+                }
 
                 gs.Hotkeys.UnBind(_key);
             };
 
-            if (_hotkesBoxes.Count != 0) box.Y = _hotkesBoxes[_hotkesBoxes.Count - 1].Bounds.Bottom;
+            if (_hotkesBoxes.Count != 0)
+            {
+                box.Y = _hotkesBoxes[_hotkesBoxes.Count - 1]
+                        .Bounds.Bottom;
+            }
 
 
             _hotkesBoxes.Add(box);

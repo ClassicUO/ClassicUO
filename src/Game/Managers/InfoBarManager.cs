@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,6 +18,7 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
@@ -24,17 +26,15 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Xml;
-
 using ClassicUO.Configuration;
 using ClassicUO.Resources;
 using ClassicUO.Utility.Logging;
-
 
 namespace ClassicUO.Game.Managers
 {
     internal class InfoBarManager
     {
-        private List<InfoBarItem> infoBarItems;
+        private readonly List<InfoBarItem> infoBarItems;
 
         public InfoBarManager()
         {
@@ -57,9 +57,11 @@ namespace ClassicUO.Game.Managers
         public static string[] GetVars()
         {
             if (!CUOEnviroment.IsOutlands)
+            {
                 return Enum.GetNames(typeof(InfoBarVars));
-            else
-                return Enum.GetNames(typeof(InfoBarVarsOutlands));
+            }
+
+            return Enum.GetNames(typeof(InfoBarVarsOutlands));
         }
 
         public void AddItem(InfoBarItem ibi)
@@ -80,10 +82,10 @@ namespace ClassicUO.Game.Managers
         public void Save()
         {
             string path = Path.Combine(CUOEnviroment.ExecutablePath, "Data", "Profiles", ProfileManager.Current.Username, ProfileManager.Current.ServerName, ProfileManager.Current.CharacterName, "infobar.xml");
-            
+
             using (XmlTextWriter xml = new XmlTextWriter(path, Encoding.UTF8)
             {
-                Formatting = System.Xml.Formatting.Indented,
+                Formatting = Formatting.Indented,
                 IndentChar = '\t',
                 Indentation = 1
             })
@@ -109,10 +111,12 @@ namespace ClassicUO.Game.Managers
             {
                 CreateDefault();
                 Save();
+
                 return;
             }
 
             XmlDocument doc = new XmlDocument();
+
             try
             {
                 doc.Load(path);
@@ -120,6 +124,7 @@ namespace ClassicUO.Game.Managers
             catch (Exception ex)
             {
                 Log.Error(ex.ToString());
+
                 return;
             }
 
@@ -131,8 +136,8 @@ namespace ClassicUO.Game.Managers
             {
                 foreach (XmlElement xml in root.GetElementsByTagName("info"))
                 {
-                   InfoBarItem item = new InfoBarItem(xml);
-                   infoBarItems.Add(item);
+                    InfoBarItem item = new InfoBarItem(xml);
+                    infoBarItems.Add(item);
                 }
             }
         }
@@ -216,19 +221,23 @@ namespace ClassicUO.Game.Managers
             hue = labelColor;
         }
 
-        
+
         public InfoBarItem(XmlElement xml)
         {
             if (xml == null)
+            {
                 return;
+            }
+
             label = xml.GetAttribute("text");
             var = (InfoBarVars) int.Parse(xml.GetAttribute("var"));
             hue = ushort.Parse(xml.GetAttribute("hue"));
         }
 
+        public ushort hue;
+
         public string label;
         public InfoBarVars var;
-        public ushort hue;
 
         public void Save(XmlTextWriter writer)
         {

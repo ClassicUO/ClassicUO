@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,10 +18,8 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-#endregion
 
-using System.Collections.Generic;
-using System.Linq;
+#endregion
 
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
@@ -58,8 +57,11 @@ namespace ClassicUO.Game.Managers
                     if (corpse != 0)
                     {
                         Item item = World.Items.Get(corpse);
+
                         if (item != null)
+                        {
                             item.Layer = (Layer) ((c.Direction & Direction.Mask) | (c.IsRunning ? Direction.Running : 0));
+                        }
                     }
 
                     _corpses.RemoveAt(i);
@@ -107,7 +109,7 @@ namespace ClassicUO.Game.Managers
         }
     }
 
-    struct CorpseInfo
+    internal struct CorpseInfo
     {
         public CorpseInfo(uint corpseSerial, uint objectSerial, Direction direction, bool isRunning)
         {

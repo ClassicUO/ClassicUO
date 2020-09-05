@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,17 +18,17 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
-using System.Collections.Generic;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.IO;
 using System.IO.MemoryMappedFiles;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
-
 using ClassicUO.Game;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
@@ -44,17 +45,17 @@ namespace ClassicUO.IO
         private const int STATICS_MEMORY_SIZE = 200000000;
         private const int CRC_LENGTH = 25;
         private const int LAND_BLOCK_LENGTH = 192;
-        private uint _SentWarning = 0;
-        private List<int> _ValidMaps = new List<int>();
 
         private static UltimaLive _UL;
 
-        private static readonly char[] _pathSeparatorChars = { Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar };
+        private static readonly char[] _pathSeparatorChars = {Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar};
         private uint[] _EOF;
         private ULFileMul[] _filesIdxStatics;
         private ULFileMul[] _filesMap;
         private ULFileMul[] _filesStatics;
+        private uint _SentWarning;
         private ULMapLoader _ULMap;
+        private List<int> _ValidMaps = new List<int>();
         private ConcurrentQueue<(int, long, byte[])> _writequeue;
         private ushort[][] MapCRCs; //caching, to avoid excessive cpu & memory use
         //WrapMapSize includes 2 different kind of values at each side of the array:
@@ -62,9 +63,9 @@ namespace ClassicUO.IO
         //right- we have the size of the map, values in index 0 and 1 are map REAL size x and y
         //       values in index 2 and 3 is for the wrap size of map (virtual size), x and y
         private ushort[,] MapSizeWrapSize;
-        protected string ShardName;
-        protected string RealShardName;
         internal static bool UltimaLiveActive => _UL != null && !string.IsNullOrEmpty(_UL.ShardName);
+        protected string RealShardName;
+        protected string ShardName;
 
         internal static void Enable()
         {
@@ -83,12 +84,16 @@ namespace ClassicUO.IO
             {
                 case 0xFF: //hash query, for the blocks around us
                 {
-                    if (_UL == null || p.Length < 15) return;
+                    if (_UL == null || p.Length < 15)
+                    {
+                        return;
+                    }
 
                     p.Seek(3);
-                    int block = (int)p.ReadUInt();
+                    int block = (int) p.ReadUInt();
                     p.Seek(14);
                     int mapId = p.ReadByte();
+
                     if (mapId >= _UL._filesMap.Length)
                     {
                         if (Time.Ticks >= _UL._SentWarning)
@@ -96,6 +101,7 @@ namespace ClassicUO.IO
                             Log.Trace($"The server is requesting access to MAP: {mapId} but we only have {_UL._filesMap.Length} maps!");
                             _UL._SentWarning = Time.Ticks + 100000;
                         }
+
                         return;
                     }
 
@@ -108,12 +114,19 @@ namespace ClassicUO.IO
                     int mapHeightInBlocks = MapLoader.Instance.MapBlocksSize[mapId, 1];
                     int blocks = mapWidthInBlocks * mapHeightInBlocks;
 
-                    if (block < 0 || block >= blocks) return;
+                    if (block < 0 || block >= blocks)
+                    {
+                        return;
+                    }
 
                     if (_UL.MapCRCs[mapId] == null)
                     {
                         _UL.MapCRCs[mapId] = new ushort[blocks];
-                        for (int j = 0; j < blocks; j++) _UL.MapCRCs[mapId][j] = ushort.MaxValue;
+
+                        for (int j = 0; j < blocks; j++)
+                        {
+                            _UL.MapCRCs[mapId][j] = ushort.MaxValue;
+                        }
                     }
 
                     int blockX = block / mapHeightInBlocks;
@@ -126,6 +139,7 @@ namespace ClassicUO.IO
                     for (int x = -2; x <= 2; x++)
                     {
                         int xBlockItr = (blockX + x) % mapWidthInBlocks;
+
                         if (xBlockItr < 0 && xBlockItr > -3)
                         {
                             xBlockItr += mapWidthInBlocks;
@@ -134,16 +148,18 @@ namespace ClassicUO.IO
                         for (int y = -2; y <= 2; y++)
                         {
                             int yBlockItr = (blockY + y) % mapHeightInBlocks;
+
                             if (yBlockItr < 0)
                             {
                                 yBlockItr += mapHeightInBlocks;
                             }
 
-                            uint blockNumber = (uint)(xBlockItr * mapHeightInBlocks + yBlockItr);
+                            uint blockNumber = (uint) (xBlockItr * mapHeightInBlocks + yBlockItr);
 
                             if (blockNumber < blocks)
                             {
                                 ushort crc = _UL.MapCRCs[mapId][blockNumber];
+
                                 if (crc == ushort.MaxValue)
                                 {
                                     if (xBlockItr >= mapWidthInBlocks || yBlockItr >= mapHeightInBlocks)
@@ -154,27 +170,34 @@ namespace ClassicUO.IO
                                     {
                                         crc = GetBlockCrc(blockNumber);
                                     }
+
                                     _UL.MapCRCs[mapId][blockNumber] = crc;
                                 }
 
                                 checkSumsToBeSent[(x + 2) * 5 + y + 2] = crc;
                             }
                             else
+                            {
                                 checkSumsToBeSent[(x + 2) * 5 + y + 2] = 0;
+                            }
                         }
                     }
 
-                    NetClient.Socket.Send(new UltimaLiveHashResponse((uint)block, (byte)mapId, checkSumsToBeSent));
+                    NetClient.Socket.Send(new UltimaLiveHashResponse((uint) block, (byte) mapId, checkSumsToBeSent));
 
                     break;
                 }
+
                 case 0x00: //statics update
                 {
-                    if (_UL == null || p.Length < 15) return;
+                    if (_UL == null || p.Length < 15)
+                    {
+                        return;
+                    }
 
                     p.Seek(3);
-                    int block = (int)p.ReadUInt();
-                    int length = (int)p.ReadUInt();
+                    int block = (int) p.ReadUInt();
+                    int length = (int) p.ReadUInt();
                     int totalLength = length * 7;
 
                     if (p.Length < totalLength + 15)
@@ -184,6 +207,7 @@ namespace ClassicUO.IO
 
                     p.Seek(14);
                     int mapId = p.ReadByte();
+
                     if (mapId >= _UL._filesMap.Length)
                     {
                         if (Time.Ticks >= _UL._SentWarning)
@@ -191,6 +215,7 @@ namespace ClassicUO.IO
                             Log.Trace($"The server is requesting access to MAP: {mapId} but we only have {_UL._filesMap.Length} maps!");
                             _UL._SentWarning = Time.Ticks + 100000;
                         }
+
                         return;
                     }
 
@@ -208,14 +233,21 @@ namespace ClassicUO.IO
                         if (totalLength <= 0)
                         {
                             //update index lookup AND static size on disk (first 4 bytes lookup, next 4 is statics size)
-                            _UL._filesIdxStatics[mapId].WriteArray(index, new byte[8] { 0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00 });
+                            _UL._filesIdxStatics[mapId]
+                               .WriteArray(index, new byte[8] {0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00});
+
                             Log.Trace($"writing zero length statics to index at 0x{index:X8}");
                         }
                         else
                         {
-                            _UL._filesIdxStatics[mapId].Seek(index);
-                            uint lookup = _UL._filesIdxStatics[mapId].ReadUInt();
-                            uint existingStaticsLength = _UL._filesIdxStatics[mapId].ReadUInt();
+                            _UL._filesIdxStatics[mapId]
+                               .Seek(index);
+
+                            uint lookup = _UL._filesIdxStatics[mapId]
+                                             .ReadUInt();
+
+                            uint existingStaticsLength = _UL._filesIdxStatics[mapId]
+                                                            .ReadUInt();
 
                             //Do we have enough room to write the statics into the existing location?
                             if (existingStaticsLength >= totalLength && lookup != 0xFFFFFFFF)
@@ -225,26 +257,31 @@ namespace ClassicUO.IO
                             else
                             {
                                 lookup = _UL._EOF[mapId];
-                                _UL._EOF[mapId] += (uint)totalLength;
+                                _UL._EOF[mapId] += (uint) totalLength;
                                 Log.Trace($"writing statics to end of file at 0x{lookup:X8}, length:{totalLength}");
                             }
 
-                            _UL._filesStatics[mapId].WriteArray(lookup, staticsData);
+                            _UL._filesStatics[mapId]
+                               .WriteArray(lookup, staticsData);
+
                             _UL._writequeue.Enqueue((mapId, lookup, staticsData));
                             //update lookup AND index length on disk
                             byte[] idxData = new byte[8];
-                            idxData[0] = (byte)lookup;
-                            idxData[1] = (byte)(lookup >> 8);
-                            idxData[2] = (byte)(lookup >> 16);
-                            idxData[3] = (byte)(lookup >> 24);
-                            idxData[4] = (byte)totalLength;
-                            idxData[5] = (byte)(totalLength >> 8);
-                            idxData[6] = (byte)(totalLength >> 16);
-                            idxData[7] = (byte)(totalLength >> 24);
+                            idxData[0] = (byte) lookup;
+                            idxData[1] = (byte) (lookup >> 8);
+                            idxData[2] = (byte) (lookup >> 16);
+                            idxData[3] = (byte) (lookup >> 24);
+                            idxData[4] = (byte) totalLength;
+                            idxData[5] = (byte) (totalLength >> 8);
+                            idxData[6] = (byte) (totalLength >> 16);
+                            idxData[7] = (byte) (totalLength >> 24);
+
                             //update lookup AND index length on disk
-                            _UL._filesIdxStatics[mapId].WriteArray(block * 12, idxData);
+                            _UL._filesIdxStatics[mapId]
+                               .WriteArray(block * 12, idxData);
 
                             Chunk mapChunk = World.Map.Chunks[block];
+
                             if (mapChunk == null)
                             {
                                 return;
@@ -252,15 +289,18 @@ namespace ClassicUO.IO
 
                             LinkedList<int> linkedList = mapChunk.Node?.List;
                             List<GameObject> gameObjects = new List<GameObject>();
+
                             for (int x = 0; x < 8; x++)
                             {
                                 for (int y = 0; y < 8; y++)
                                 {
                                     GameObject gameObject = mapChunk.GetHeadObject(x, y);
+
                                     while (gameObject != null)
                                     {
                                         GameObject currentGameObject = gameObject;
                                         gameObject = gameObject.TNext;
+
                                         if (!(currentGameObject is Land) && !(currentGameObject is Static))
                                         {
                                             gameObjects.Add(currentGameObject);
@@ -283,8 +323,9 @@ namespace ClassicUO.IO
                         }
 
 
+                        UIManager.GetGump<MiniMapGump>()
+                                 ?.RequestUpdateContents();
 
-                        UIManager.GetGump<MiniMapGump>()?.RequestUpdateContents();
                         //UIManager.GetGump<WorldMapGump>()?.UpdateMap();
                         //instead of recalculating the CRC block 2 times, in case of terrain + statics update, we only set the actual block to ushort maxvalue, so it will be recalculated on next hash query
                         //also the server should always send FIRST the landdata packet, and only AFTER land the statics packet
@@ -293,10 +334,13 @@ namespace ClassicUO.IO
 
                     break;
                 }
+
                 case 0x01: //map definition update
                 {
                     if (_UL == null)
+                    {
                         return;
+                    }
 
                     if (string.IsNullOrEmpty(_UL.ShardName) || p.Length < 15)
                     {
@@ -320,36 +364,44 @@ namespace ClassicUO.IO
                     uint maps = p.ReadUInt() * 7 / 9;
 
                     if (p.Length < maps * 9 + 15) //the packet has padding inside, so it's usually larger or equal than what we expect
+                    {
                         return;
+                    }
 
                     /*if (_UL.MapCRCs != null)
                         oldlen = _UL.MapCRCs.Length;
                     if (_UL.MapCRCs == null || _UL.MapCRCs.Length < maps)*/
                     _UL.MapCRCs = new ushort[sbyte.MaxValue][];
                     _UL.MapSizeWrapSize = new ushort[sbyte.MaxValue, 4]; //we always need to reinitialize this, as it could change from login to login even on the same server, in case of map changes (a change could happen on the fly with a client kick or on reboot)
-                    p.Seek(15); //byte 15 to end of packet, the map definitions
+                    p.Seek(15);                                          //byte 15 to end of packet, the map definitions
                     List<int> validMaps = new List<int>();
+
                     for (int i = 0; i < maps; i++)
                     {
                         int mapNumber = p.ReadByte();
                         validMaps.Add(mapNumber);
-                        _UL.MapSizeWrapSize[mapNumber, 0] = Math.Min((ushort)MapLoader.Instance.MapsDefaultSize[0, 0], p.ReadUShort());
-                        _UL.MapSizeWrapSize[mapNumber, 1] = Math.Min((ushort)MapLoader.Instance.MapsDefaultSize[0, 1], p.ReadUShort());
+                        _UL.MapSizeWrapSize[mapNumber, 0] = Math.Min((ushort) MapLoader.Instance.MapsDefaultSize[0, 0], p.ReadUShort());
+                        _UL.MapSizeWrapSize[mapNumber, 1] = Math.Min((ushort) MapLoader.Instance.MapsDefaultSize[0, 1], p.ReadUShort());
                         _UL.MapSizeWrapSize[mapNumber, 2] = Math.Min(p.ReadUShort(), _UL.MapSizeWrapSize[mapNumber, 0]);
                         _UL.MapSizeWrapSize[mapNumber, 3] = Math.Min(p.ReadUShort(), _UL.MapSizeWrapSize[mapNumber, 1]);
                     }
+
                     //previously there were a minor amount of maps
                     if (_UL._ValidMaps.Count == 0 || validMaps.Count > _UL._ValidMaps.Count || !validMaps.TrueForAll(i => _UL._ValidMaps.Contains(i)))
                     {
                         _UL._ValidMaps = validMaps;
                         Constants.MAPS_COUNT = sbyte.MaxValue;
-                        ULMapLoader mapLoader = new ULMapLoader((uint)Constants.MAPS_COUNT);
+                        ULMapLoader mapLoader = new ULMapLoader((uint) Constants.MAPS_COUNT);
+
                         //for (int i = 0; i < maps; i++)
                         for (int i = 0; i < validMaps.Count; i++)
                         {
                             mapLoader.CheckForShardMapFile(validMaps[i]);
                         }
-                        mapLoader.Load().Wait();
+
+                        mapLoader.Load()
+                                 .Wait();
+
                         _UL._ULMap = mapLoader;
                         _UL._filesMap = new ULFileMul[Constants.MAPS_COUNT];
                         _UL._filesIdxStatics = new ULFileMul[Constants.MAPS_COUNT];
@@ -368,10 +420,13 @@ namespace ClassicUO.IO
 
                     break;
                 }
+
                 case 0x02: //Live login confirmation
                 {
                     if (p.Length < 43) //fixed size
+                    {
                         return;
+                    }
 
                     //from byte 0x03 to 0x14 data is unused
                     p.Seek(15);
@@ -380,6 +435,7 @@ namespace ClassicUO.IO
                     if (string.IsNullOrWhiteSpace(name))
                     {
                         _UL = null;
+
                         return;
                     }
 
@@ -389,6 +445,7 @@ namespace ClassicUO.IO
                     }
 
                     string[] split = name.Split(_pathSeparatorChars, StringSplitOptions.RemoveEmptyEntries);
+
                     _UL = new UltimaLive
                     {
                         ShardName = name,
@@ -398,6 +455,7 @@ namespace ClassicUO.IO
                     //TODO: create shard directory, copy map and statics to that directory, use that files instead of the original ones
                     break;
                 }
+
                 /*case 0x03://Refresh client VIEW - after an update the server will usually send this packet to refresh the client view, this packet has been discontinued after ultimalive 0.96 and isn't necessary anymore
                     {
                         break;
@@ -408,12 +466,14 @@ namespace ClassicUO.IO
         [MethodImpl(256)]
         private static void OnUpdateTerrainPacket(Packet p)
         {
-            int block = (int)p.ReadUInt();
+            int block = (int) p.ReadUInt();
             byte[] landData = new byte[LAND_BLOCK_LENGTH];
+
             for (int i = 0; i < LAND_BLOCK_LENGTH; i++)
             {
                 landData[i] = p.ReadByte();
             }
+
             p.Seek(200);
             byte mapId = p.ReadByte();
 
@@ -422,23 +482,27 @@ namespace ClassicUO.IO
                 return;
             }
 
-            ushort mapWidthInBlocks = (ushort)MapLoader.Instance.MapBlocksSize[mapId, 0];
-            ushort mapHeightInBlocks = (ushort)MapLoader.Instance.MapBlocksSize[mapId, 1];
+            ushort mapWidthInBlocks = (ushort) MapLoader.Instance.MapBlocksSize[mapId, 0];
+            ushort mapHeightInBlocks = (ushort) MapLoader.Instance.MapBlocksSize[mapId, 1];
 
             if (block >= 0 && block < mapWidthInBlocks * mapHeightInBlocks)
             {
-                _UL._filesMap[mapId].WriteArray((block * 196) + 4, landData);
+                _UL._filesMap[mapId]
+                   .WriteArray(block * 196 + 4, landData);
+
                 //instead of recalculating the CRC block 2 times, in case of terrain + statics update, we only set the actual block to ushort maxvalue, so it will be recalculated on next hash query
                 _UL.MapCRCs[mapId][block] = ushort.MaxValue;
                 int blockX = block / mapHeightInBlocks, blockY = block % mapHeightInBlocks;
                 int minx = Math.Max(0, blockX - 1), miny = Math.Max(0, blockY - 1);
                 blockX = Math.Min(mapWidthInBlocks, blockX + 1);
                 blockY = Math.Min(mapHeightInBlocks, blockY + 1);
+
                 for (; blockX >= minx; --blockX)
                 {
                     for (int by = blockY; by >= miny; --by)
                     {
-                        Chunk mapChunk = World.Map.Chunks[(blockX * mapHeightInBlocks) + by];
+                        Chunk mapChunk = World.Map.Chunks[blockX * mapHeightInBlocks + by];
+
                         if (mapChunk == null)
                         {
                             continue;
@@ -447,15 +511,18 @@ namespace ClassicUO.IO
                         LinkedList<int> linkedList = mapChunk.Node?.List;
 
                         List<GameObject> gameObjects = new List<GameObject>();
+
                         for (int x = 0; x < 8; x++)
                         {
                             for (int y = 0; y < 8; y++)
                             {
                                 GameObject gameObject = mapChunk.GetHeadObject(x, y);
+
                                 while (gameObject != null)
                                 {
                                     GameObject currentGameObject = gameObject;
                                     gameObject = gameObject.TNext;
+
                                     if (!(currentGameObject is Land) && !(currentGameObject is Static))
                                     {
                                         gameObjects.Add(currentGameObject);
@@ -477,7 +544,9 @@ namespace ClassicUO.IO
                     }
                 }
 
-                UIManager.GetGump<MiniMapGump>()?.RequestUpdateContents();
+                UIManager.GetGump<MiniMapGump>()
+                         ?.RequestUpdateContents();
+
                 //UIManager.GetGump<WorldMapGump>()?.UpdateMap();
             }
         }
@@ -485,43 +554,63 @@ namespace ClassicUO.IO
         internal static ushort GetBlockCrc(uint block)
         {
             int mapId = World.Map.Index;
-            _UL._filesIdxStatics[mapId].Seek(block * 12);
-            uint lookup = _UL._filesIdxStatics[mapId].ReadUInt();
-            int byteCount = Math.Max(0, _UL._filesIdxStatics[mapId].ReadInt());
+
+            _UL._filesIdxStatics[mapId]
+               .Seek(block * 12);
+
+            uint lookup = _UL._filesIdxStatics[mapId]
+                             .ReadUInt();
+
+            int byteCount = Math.Max
+            (
+                0, _UL._filesIdxStatics[mapId]
+                      .ReadInt()
+            );
+
             byte[] blockData = new byte[LAND_BLOCK_LENGTH + byteCount];
 
             //we prevent the system from reading beyond the end of file, causing an exception, if the data isn't there, we don't read it and leave the array blank, simple...
-            _UL._filesMap[mapId].Seek(block * 196 + 4);
+            _UL._filesMap[mapId]
+               .Seek(block * 196 + 4);
 
             for (int x = 0; x < 192; x++)
             {
-                if (_UL._filesMap[mapId].Position + 1 >= _UL._filesMap[mapId].Length)
+                if (_UL._filesMap[mapId]
+                       .Position + 1 >= _UL._filesMap[mapId]
+                                           .Length)
                 {
                     break;
                 }
 
-                blockData[x] = _UL._filesMap[mapId].ReadByte();
+                blockData[x] = _UL._filesMap[mapId]
+                                  .ReadByte();
             }
 
             if (lookup != 0xFFFFFFFF && byteCount > 0)
             {
-                if (lookup < _UL._filesStatics[mapId].Length)
+                if (lookup < _UL._filesStatics[mapId]
+                                .Length)
                 {
-                    _UL._filesStatics[mapId].Seek(lookup);
+                    _UL._filesStatics[mapId]
+                       .Seek(lookup);
 
                     for (int x = LAND_BLOCK_LENGTH; x < blockData.Length; x++)
                     {
-                        if (_UL._filesStatics[mapId].Position + 1 >= _UL._filesStatics[mapId].Length)
+                        if (_UL._filesStatics[mapId]
+                               .Position + 1 >= _UL._filesStatics[mapId]
+                                                   .Length)
                         {
                             break;
                         }
 
-                        blockData[x] = _UL._filesStatics[mapId].ReadByte();
+                        blockData[x] = _UL._filesStatics[mapId]
+                                          .ReadByte();
                     }
                 }
             }
 
             ushort crc = Fletcher16(blockData);
+
             return crc;
         }
 
@@ -549,6 +638,7 @@ namespace ClassicUO.IO
                 {
                     string folderPath = Environment.GetFolderPath(CUOEnviroment.IsUnix ? Environment.SpecialFolder.LocalApplicationData : Environment.SpecialFolder.CommonApplicationData);
                     string fullPath = Path.GetFullPath(Path.Combine(folderPath, shardName));
+
                     if (!string.IsNullOrEmpty(fullPath))
                     {
                         return fullPath;
@@ -596,17 +686,19 @@ namespace ClassicUO.IO
             private unsafe void LoadFile(bool isStaticMul)
             {
                 FileInfo fileInfo = new FileInfo(FilePath);
+
                 if (!fileInfo.Exists)
                 {
                     throw new FileNotFoundException(fileInfo.FullName);
                 }
 
                 uint size = (uint) fileInfo.Length;
-                Log.Trace( $"UltimaLive -> ReLoading file:\t{FilePath}");
+                Log.Trace($"UltimaLive -> ReLoading file:\t{FilePath}");
 
                 if (size > 0 || isStaticMul) //if new map is generated automatically, staticX.mul size is equal to ZERO, other files should always be major than zero!
                 {
                     MemoryMappedFile mmf;
+
                     if (isStaticMul)
                     {
                         try
@@ -616,12 +708,14 @@ namespace ClassicUO.IO
                         catch
                         {
                             mmf = MemoryMappedFile.CreateNew(_UL.RealShardName + fileInfo.Name, STATICS_MEMORY_SIZE, MemoryMappedFileAccess.ReadWrite);
+
                             using (FileStream stream = File.Open(fileInfo.FullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
                             using (Stream s = mmf.CreateViewStream(0, stream.Length, MemoryMappedFileAccess.Write))
                             {
                                 stream.CopyTo(s);
                             }
                         }
+
                         _file = mmf;
                     }
                     else
@@ -634,6 +728,7 @@ namespace ClassicUO.IO
                         {
                             mmf = MemoryMappedFile.CreateFromFile(File.Open(FilePath, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite), _UL.RealShardName + fileInfo.Name, size, MemoryMappedFileAccess.ReadWrite, HandleInheritability.None, false);
                         }
+
                         _file = mmf;
                     }
 
@@ -655,7 +750,9 @@ namespace ClassicUO.IO
                     }
                 }
                 else
+                {
                     throw new Exception($"{FilePath} size must be > 0");
+                }
             }
 
             public override void Dispose()
@@ -678,9 +775,10 @@ namespace ClassicUO.IO
         internal class ULMapLoader : MapLoader
         {
             private readonly CancellationTokenSource _feedCancel;
-            private readonly Task _writerTask;
             private FileStream[] _filesStaticsStream;
-            internal readonly AsyncWriterTasked _writer;
+            private readonly Task _writerTask;
+
+            private new UOFileIndex[][] Entries;
 
             public ULMapLoader(uint maps)
             {
@@ -698,14 +796,13 @@ namespace ClassicUO.IO
                 }
 
                 _writer = new AsyncWriterTasked(this, _feedCancel);
-                _writerTask = Task.Run(_writer.Loop);// new Thread(_writer.Loop) {Name = "UL_File_Writer", IsBackground = true};
+                _writerTask = Task.Run(_writer.Loop); // new Thread(_writer.Loop) {Name = "UL_File_Writer", IsBackground = true};
             }
 
             internal (UOFile[], UOFileMul[], UOFileMul[]) GetFilesReference => (_filesMap, _filesIdxStatics, _filesStatics);
 
             private uint NumMaps { get; }
-
-            private new UOFileIndex[][] Entries;
+            internal readonly AsyncWriterTasked _writer;
 
             public override void ClearResources()
             {
@@ -725,76 +822,81 @@ namespace ClassicUO.IO
                 {
                     for (int i = _filesStaticsStream.Length - 1; i >= 0; --i)
                     {
-                        _filesStaticsStream[i]?.Dispose();
+                        _filesStaticsStream[i]
+                            ?.Dispose();
                     }
+
                     _filesStaticsStream = null;
                 }
             }
 
             public override Task Load()
             {
-                return Task.Run(() =>
-                {
-                    if (Instance is ULMapLoader)
+                return Task.Run
+                (
+                    () =>
                     {
-                        return;
-                    }
-
-                    UOFileManager.MapLoaderReLoad(this);
-                    _UL._EOF = new uint[NumMaps];
-                    _filesStaticsStream = new FileStream[NumMaps];
-                    bool foundOneMap = false;
-
-                    for (int x = 0; x < _UL._ValidMaps.Count; x++)
-                    {
-                        int i = _UL._ValidMaps[x];
-                        string path = Path.Combine(_UL.ShardName, $"map{i}.mul");
-
-                        if (File.Exists(path))
+                        if (Instance is ULMapLoader)
                         {
-                            _filesMap[i] = new ULFileMul(path, false);
-                            foundOneMap = true;
+                            return;
                         }
 
-                        path = Path.Combine(_UL.ShardName, $"statics{i}.mul");
+                        UOFileManager.MapLoaderReLoad(this);
+                        _UL._EOF = new uint[NumMaps];
+                        _filesStaticsStream = new FileStream[NumMaps];
+                        bool foundOneMap = false;
 
-                        if (!File.Exists(path))
+                        for (int x = 0; x < _UL._ValidMaps.Count; x++)
                         {
-                            foundOneMap = false;
+                            int i = _UL._ValidMaps[x];
+                            string path = Path.Combine(_UL.ShardName, $"map{i}.mul");
 
-                            break;
+                            if (File.Exists(path))
+                            {
+                                _filesMap[i] = new ULFileMul(path, false);
+                                foundOneMap = true;
+                            }
+
+                            path = Path.Combine(_UL.ShardName, $"statics{i}.mul");
+
+                            if (!File.Exists(path))
+                            {
+                                foundOneMap = false;
+
+                                break;
+                            }
+
+                            _filesStatics[i] = new ULFileMul(path, true);
+                            _filesStaticsStream[i] = File.Open(path, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite);
+                            _UL._EOF[i] = (uint) new FileInfo(path).Length;
+
+                            path = Path.Combine(_UL.ShardName, $"staidx{i}.mul");
+
+                            if (!File.Exists(path))
+                            {
+                                foundOneMap = false;
+
+                                break;
+                            }
+
+                            _filesIdxStatics[i] = new ULFileMul(path, false);
                         }
 
-                        _filesStatics[i] = new ULFileMul(path, true);
-                        _filesStaticsStream[i] = File.Open(path, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite);
-                        _UL._EOF[i] = (uint) new FileInfo(path).Length;
-
-                        path = Path.Combine(_UL.ShardName, $"staidx{i}.mul");
-
-                        if (!File.Exists(path))
+                        if (!foundOneMap)
                         {
-                            foundOneMap = false;
-
-                            break;
+                            throw new FileNotFoundException($"No maps, staidx or statics found on {_UL.ShardName}.");
                         }
 
-                        _filesIdxStatics[i] = new ULFileMul(path, false);
+                        for (int x = 0; x < _UL._ValidMaps.Count; x++)
+                        {
+                            int i = _UL._ValidMaps[x];
+                            MapBlocksSize[i, 0] = MapsDefaultSize[i, 0] >> 3;
+                            MapBlocksSize[i, 1] = MapsDefaultSize[i, 1] >> 3;
+                            //on ultimalive map always preload
+                            LoadMap(i);
+                        }
                     }
-
-                    if (!foundOneMap)
-                    {
-                        throw new FileNotFoundException($"No maps, staidx or statics found on {_UL.ShardName}.");
-                    }
-
-                    for (int x = 0; x < _UL._ValidMaps.Count; x++)
-                    {
-                        int i = _UL._ValidMaps[x];
-                        MapBlocksSize[i, 0] = MapsDefaultSize[i, 0] >> 3;
-                        MapBlocksSize[i, 1] = MapsDefaultSize[i, 1] >> 3;
-                        //on ultimalive map always preload
-                        LoadMap(i);
-                    }
-                });
+                );
             }
 
             internal void CheckForShardMapFile(int mapId)
@@ -803,6 +905,7 @@ namespace ClassicUO.IO
                 {
                     Entries = new UOFileIndex[Constants.MAPS_COUNT][];
                 }
+
                 string oldMap = UOFileManager.GetUOFilePath($"map{mapId}.mul");
                 string oldStaIdx = UOFileManager.GetUOFilePath($"staidx{mapId}.mul");
                 string oldStatics = UOFileManager.GetUOFilePath($"statics{mapId}.mul");
@@ -831,10 +934,26 @@ namespace ClassicUO.IO
 
                             using (FileStream stream = File.Create(mapPath))
                             {
-                                for (int x = 0; x < Entries[mapId].Length; x++)
+                                for (int x = 0;
+                                     x < Entries[mapId]
+                                         .Length;
+                                     x++)
                                 {
-                                    uop.Seek(Entries[mapId][x].Offset);
-                                    stream.Write(uop.ReadArray(Entries[mapId][x].Length), 0, Entries[mapId][x].Length);
+                                    uop.Seek
+                                    (
+                                        Entries[mapId][x]
+                                            .Offset
+                                    );
+
+                                    stream.Write
+                                    (
+                                        uop.ReadArray
+                                        (
+                                            Entries[mapId][x]
+                                                .Length
+                                        ), 0, Entries[mapId][x]
+                                            .Length
+                                    );
                                 }
 
                                 stream.Flush();
@@ -860,7 +979,7 @@ namespace ClassicUO.IO
 
             private static void CreateNewPersistentMap(int mapId, string mapPath, string staIdxPath, string staticsPath)
             {
-                int mapWidthInBlocks = Instance.MapBlocksSize[Instance.MapBlocksSize.GetLength(0) > mapId ? mapId : 0, 0]; //horizontal
+                int mapWidthInBlocks = Instance.MapBlocksSize[Instance.MapBlocksSize.GetLength(0) > mapId ? mapId : 0, 0];  //horizontal
                 int mapHeightInBlocks = Instance.MapBlocksSize[Instance.MapBlocksSize.GetLength(0) > mapId ? mapId : 0, 1]; //vertical
                 int numberOfBytesInStrip = 196 * mapHeightInBlocks;
                 byte[] pVerticalBlockStrip = new byte[numberOfBytesInStrip];
@@ -878,6 +997,7 @@ namespace ClassicUO.IO
                     0x44, 0x02, 0x00, 0x44, 0x02, 0x00, 0x44, 0x02, 0x00, 0x44, 0x02, 0x00, 0x44, 0x02, 0x00, 0x44, 0x02, 0x00, 0x44, 0x02, 0x00, 0x44, 0x02, 0x00,
                     0x44, 0x02, 0x00, 0x44, 0x02, 0x00, 0x44, 0x02, 0x00, 0x44, 0x02, 0x00, 0x44, 0x02, 0x00, 0x44, 0x02, 0x00, 0x44, 0x02, 0x00, 0x44, 0x02, 0x00
                 };
+
                 for (int y = 0; y < mapHeightInBlocks; y++)
                 {
                     Array.Copy(block, 0, pVerticalBlockStrip, 196 * y, 196);
@@ -888,10 +1008,12 @@ namespace ClassicUO.IO
                 {
                     Log.Trace($"UltimaLive -> creating new blank map:\t{mapPath}");
                     Log.Trace($"Writing {mapWidthInBlocks} blocks by {mapHeightInBlocks} blocks");
+
                     for (int x = 0; x < mapWidthInBlocks; x++)
                     {
                         stream.Write(pVerticalBlockStrip, 0, numberOfBytesInStrip);
                     }
+
                     stream.Flush();
                 }
 
@@ -899,7 +1021,8 @@ namespace ClassicUO.IO
                 pVerticalBlockStrip = new byte[numberOfBytesInStrip];
 
                 // ReSharper disable once RedundantExplicitArraySize
-                block = new byte[12] { 0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+                block = new byte[12] {0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+
                 for (int y = 0; y < mapHeightInBlocks; y++)
                 {
                     Array.Copy(block, 0, pVerticalBlockStrip, 12 * y, 12);
@@ -909,10 +1032,12 @@ namespace ClassicUO.IO
                 using (FileStream stream = File.Create(staIdxPath))
                 {
                     Log.Trace("UltimaLive -> creating new index file");
+
                     for (int x = 0; x < mapWidthInBlocks; x++)
                     {
                         stream.Write(pVerticalBlockStrip, 0, numberOfBytesInStrip);
                     }
+
                     stream.Flush();
                 }
 
@@ -965,16 +1090,19 @@ namespace ClassicUO.IO
 
                         if (shifted < Entries.Length)
                         {
-                            uopOffset = (ulong) Entries[map][shifted].Offset;
+                            uopOffset = (ulong) Entries[map][shifted]
+                                .Offset;
                         }
                     }
                 }
 
                 ulong address = mapAddress + uopOffset + (ulong) (blockNumber * mapBlockSize);
+
                 if (address < endMapAddress)
                 {
                     realMapAddress = address;
                 }
+
                 ulong stidxaddress = staticIdxAddress + (ulong) (block * staticIdxBlockSize);
                 StaidxBlock* bb = (StaidxBlock*) stidxaddress;
 
@@ -988,7 +1116,9 @@ namespace ClassicUO.IO
                         realStaticCount = (uint) (bb->Size / staticblockSize);
 
                         if (realStaticCount > 1024)
+                        {
                             realStaticCount = 1024;
+                        }
                     }
                 }
 
@@ -1004,9 +1134,8 @@ namespace ClassicUO.IO
             internal class AsyncWriterTasked
             {
                 private readonly ULMapLoader _Map;
-                private readonly AutoResetEvent m_Signal = new AutoResetEvent(false);
-                internal readonly ConcurrentQueue<(int, long, byte[])> _toWrite = new ConcurrentQueue<(int, long, byte[])>();
                 private readonly CancellationTokenSource _token;
+                private readonly AutoResetEvent m_Signal = new AutoResetEvent(false);
 
                 public AsyncWriterTasked(ULMapLoader map, CancellationTokenSource token)
                 {
@@ -1014,24 +1143,33 @@ namespace ClassicUO.IO
                     _token = token;
                 }
 
+                internal readonly ConcurrentQueue<(int, long, byte[])> _toWrite = new ConcurrentQueue<(int, long, byte[])>();
+
                 public void Loop()
                 {
                     while (_UL != null && !_Map.IsDisposed && !_token.IsCancellationRequested)
                     {
                         while (_toWrite.TryDequeue(out (int, long, byte[]) deq))
+                        {
                             WriteArray(deq.Item1, deq.Item2, deq.Item3);
+                        }
+
                         m_Signal.WaitOne(10, false);
                     }
                 }
 
                 internal void WriteArray(int map, long position, byte[] array)
                 {
-                    _Map._filesStaticsStream[map].Seek(position, SeekOrigin.Begin);
-                    _Map._filesStaticsStream[map].Write(array, 0, array.Length);
-                    _Map._filesStaticsStream[map].Flush();
+                    _Map._filesStaticsStream[map]
+                        .Seek(position, SeekOrigin.Begin);
+
+                    _Map._filesStaticsStream[map]
+                        .Write(array, 0, array.Length);
+
+                    _Map._filesStaticsStream[map]
+                        .Flush();
                 }
             }
         }
-
     }
 }

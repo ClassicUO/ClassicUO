@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,16 +18,12 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-#endregion
 
-using System;
-using System.Diagnostics;
-using System.Linq;
+#endregion
 
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.IO.Resources;
-using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game
@@ -34,6 +31,12 @@ namespace ClassicUO.Game
     internal static class ItemHold
     {
         private static bool _enabled;
+
+        public static Point MouseOffset;
+
+        public static bool IsFixedPosition;
+        public static bool IgnoreFixedPosition;
+        public static int FixedX, FixedY;
 
         public static bool OnGround { get; private set; }
         public static ushort X { get; private set; }
@@ -53,6 +56,7 @@ namespace ClassicUO.Game
         public static bool HasAlpha { get; private set; }
         public static Layer Layer { get; private set; }
         public static Flags Flags { get; private set; }
+
         public static bool Enabled
         {
             get => _enabled;
@@ -69,15 +73,10 @@ namespace ClassicUO.Game
                 }
             }
         }
+
         public static bool Dropped { get; set; }
         public static bool UpdatedInWorld { get; set; }
         public static ref StaticTiles ItemData => ref TileDataLoader.Instance.StaticData[Graphic];
-
-        public static Point MouseOffset;
-
-        public static bool IsFixedPosition;
-        public static bool IgnoreFixedPosition;
-        public static int FixedX, FixedY;
 
         public static void Set(Item item, ushort amount, Point? offset = null)
         {
@@ -122,7 +121,7 @@ namespace ClassicUO.Game
             Layer = Layer.Invalid;
             Flags = Flags.None;
             MouseOffset = Point.Zero;
-            
+
             Dropped = false;
             Enabled = false;
             UpdatedInWorld = false;

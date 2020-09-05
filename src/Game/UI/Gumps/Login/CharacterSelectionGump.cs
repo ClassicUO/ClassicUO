@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,11 +18,11 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
 using System.Linq;
-
 using ClassicUO.Configuration;
 using ClassicUO.Data;
 using ClassicUO.Game.Data;
@@ -55,8 +56,8 @@ namespace ClassicUO.Game.UI.Gumps.Login
             LockedFeatureFlags f = World.ClientLockedFeatures.Flags;
             CharacterListFlags ff = World.ClientFeatures.Flags;
 
-            if ((Client.Version >= ClientVersion.CV_6040) ||
-                (Client.Version >= ClientVersion.CV_5020 && loginScene.Characters.Length > 5))
+            if (Client.Version >= ClientVersion.CV_6040 ||
+                Client.Version >= ClientVersion.CV_5020 && loginScene.Characters.Length > 5)
             {
                 listTitleY = 96;
                 yOffset = 125;
@@ -64,71 +65,101 @@ namespace ClassicUO.Game.UI.Gumps.Login
             }
 
             if (!string.IsNullOrEmpty(lastSelected))
+            {
                 _selectedCharacter = (uint) Array.IndexOf(loginScene.Characters, lastSelected);
+            }
             else if (loginScene.Characters.Length > 0)
+            {
                 _selectedCharacter = 0;
+            }
 
-            Add(new ResizePic(0x0A28)
-            {
-                X = 160, Y = 70, Width = 408, Height = 343 + yBonus
-            }, 1);
+            Add
+            (
+                new ResizePic(0x0A28)
+                {
+                    X = 160, Y = 70, Width = 408, Height = 343 + yBonus
+                }, 1
+            );
 
-            Add(new Label(ClilocLoader.Instance.GetString(3000050, "Character Selection"), false, 0x0386, font: 2)
-            {
-                X = 267, Y = listTitleY
-            }, 1);
+            Add
+            (
+                new Label(ClilocLoader.Instance.GetString(3000050, "Character Selection"), false, 0x0386, font: 2)
+                {
+                    X = 267, Y = listTitleY
+                }, 1
+            );
 
             for (int i = 0, valid = 0; i < loginScene.Characters.Length; i++)
             {
                 string character = loginScene.Characters[i];
-              
+
                 if (!string.IsNullOrEmpty(character))
                 {
                     valid++;
 
                     if (valid > World.ClientFeatures.MaxChars)
-                        break;
-
-                    if(World.ClientLockedFeatures.Flags != 0 && !World.ClientLockedFeatures.CharSlots7)
                     {
-                        if (valid == 6 && !World.ClientLockedFeatures.CharSlots6)
-                            break;
+                        break;
                     }
 
-                    Add(new CharacterEntryGump((uint) i, character, SelectCharacter, LoginCharacter)
+                    if (World.ClientLockedFeatures.Flags != 0 && !World.ClientLockedFeatures.CharSlots7)
                     {
-                        X = 224,
-                        Y = yOffset + posInList * 40,
-                        Hue = posInList == _selectedCharacter ? SELECTED_COLOR : NORMAL_COLOR
-                    }, 1);
+                        if (valid == 6 && !World.ClientLockedFeatures.CharSlots6)
+                        {
+                            break;
+                        }
+                    }
+
+                    Add
+                    (
+                        new CharacterEntryGump((uint) i, character, SelectCharacter, LoginCharacter)
+                        {
+                            X = 224,
+                            Y = yOffset + posInList * 40,
+                            Hue = posInList == _selectedCharacter ? SELECTED_COLOR : NORMAL_COLOR
+                        }, 1
+                    );
+
                     posInList++;
                 }
             }
 
-            if(CanCreateChar(loginScene))
+            if (CanCreateChar(loginScene))
             {
-                Add(new Button((int) Buttons.New, 0x159D, 0x159F, 0x159E)
-                {
-                    X = 224, Y = 350 + yBonus, ButtonAction = ButtonAction.Activate
-                }, 1);
+                Add
+                (
+                    new Button((int) Buttons.New, 0x159D, 0x159F, 0x159E)
+                    {
+                        X = 224, Y = 350 + yBonus, ButtonAction = ButtonAction.Activate
+                    }, 1
+                );
             }
 
-            Add(new Button((int)Buttons.Delete, 0x159A, 0x159C, 0x159B)
-            {
-                X = 442,
-                Y = 350 + yBonus,
-                ButtonAction = ButtonAction.Activate
-            }, 1);
+            Add
+            (
+                new Button((int) Buttons.Delete, 0x159A, 0x159C, 0x159B)
+                {
+                    X = 442,
+                    Y = 350 + yBonus,
+                    ButtonAction = ButtonAction.Activate
+                }, 1
+            );
 
-            Add(new Button((int) Buttons.Prev, 0x15A1, 0x15A3, 0x15A2)
-            {
-                X = 586, Y = 445, ButtonAction = ButtonAction.Activate
-            }, 1);
+            Add
+            (
+                new Button((int) Buttons.Prev, 0x15A1, 0x15A3, 0x15A2)
+                {
+                    X = 586, Y = 445, ButtonAction = ButtonAction.Activate
+                }, 1
+            );
 
-            Add(new Button((int) Buttons.Next, 0x15A4, 0x15A6, 0x15A5)
-            {
-                X = 610, Y = 445, ButtonAction = ButtonAction.Activate
-            }, 1);
+            Add
+            (
+                new Button((int) Buttons.Next, 0x15A4, 0x15A6, 0x15A5)
+                {
+                    X = 610, Y = 445, ButtonAction = ButtonAction.Activate
+                }, 1
+            );
 
             AcceptKeyboardInput = true;
             ChangePage(1);
@@ -139,16 +170,22 @@ namespace ClassicUO.Game.UI.Gumps.Login
             if (scene.Characters != null)
             {
                 int empty = scene.Characters.Count(string.IsNullOrEmpty);
-                if (empty > 0 && (scene.Characters.Length - empty) < World.ClientFeatures.MaxChars)
+
+                if (empty > 0 && scene.Characters.Length - empty < World.ClientFeatures.MaxChars)
+                {
                     return true;
+                }
             }
+
             return false;
         }
 
         protected override void OnKeyDown(SDL.SDL_Keycode key, SDL.SDL_Keymod mod)
         {
             if (key == SDL.SDL_Keycode.SDLK_RETURN || key == SDL.SDL_Keycode.SDLK_KP_ENTER)
+            {
                 LoginCharacter(_selectedCharacter);
+            }
         }
 
         public override void OnButtonClick(int buttonID)
@@ -187,18 +224,32 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
             if (!string.IsNullOrEmpty(charName))
             {
-                LoadingGump existing = Children.OfType<LoadingGump>().FirstOrDefault();
+                LoadingGump existing = Children.OfType<LoadingGump>()
+                                               .FirstOrDefault();
 
                 if (existing != null)
-                    Remove(existing);
-
-                Add(new LoadingGump(string.Format(ResGumps.PermanentlyDelete0, charName), LoginButtons.OK | LoginButtons.Cancel, buttonID =>
                 {
-                    if (buttonID == (int) LoginButtons.OK)
-                        loginScene.DeleteCharacter(_selectedCharacter);
-                    else
-                        ChangePage(1);
-                }), 2);
+                    Remove(existing);
+                }
+
+                Add
+                (
+                    new LoadingGump
+                    (
+                        string.Format(ResGumps.PermanentlyDelete0, charName), LoginButtons.OK | LoginButtons.Cancel, buttonID =>
+                        {
+                            if (buttonID == (int) LoginButtons.OK)
+                            {
+                                loginScene.DeleteCharacter(_selectedCharacter);
+                            }
+                            else
+                            {
+                                ChangePage(1);
+                            }
+                        }
+                    ), 2
+                );
+
                 ChangePage(2);
             }
         }
@@ -207,7 +258,10 @@ namespace ClassicUO.Game.UI.Gumps.Login
         {
             _selectedCharacter = index;
 
-            foreach (CharacterEntryGump characterGump in FindControls<CharacterEntryGump>()) characterGump.Hue = characterGump.CharacterIndex == index ? SELECTED_COLOR : NORMAL_COLOR;
+            foreach (CharacterEntryGump characterGump in FindControls<CharacterEntryGump>())
+            {
+                characterGump.Hue = characterGump.CharacterIndex == index ? SELECTED_COLOR : NORMAL_COLOR;
+            }
         }
 
         private void LoginCharacter(uint index)
@@ -215,7 +269,9 @@ namespace ClassicUO.Game.UI.Gumps.Login
             LoginScene loginScene = Client.Game.GetScene<LoginScene>();
 
             if (loginScene.Characters.Length > index && !string.IsNullOrEmpty(loginScene.Characters[index]))
+            {
                 loginScene.SelectCharacter(index);
+            }
         }
 
         private enum Buttons
@@ -239,16 +295,23 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 _loginFn = loginFn;
 
                 // Bg
-                Add(new ResizePic(0x0BB8)
-                {
-                    X = 0, Y = 0, Width = 280, Height = 30
-                });
+                Add
+                (
+                    new ResizePic(0x0BB8)
+                    {
+                        X = 0, Y = 0, Width = 280, Height = 30
+                    }
+                );
 
                 // Char Name
-                Add(_label = new Label(character, false, NORMAL_COLOR, 270, 5, align: TEXT_ALIGN_TYPE.TS_CENTER)
-                {
-                    X = 0
-                });
+                Add
+                (
+                    _label = new Label(character, false, NORMAL_COLOR, 270, 5, align: TEXT_ALIGN_TYPE.TS_CENTER)
+                    {
+                        X = 0
+                    }
+                );
+
                 AcceptMouseInput = true;
             }
 
@@ -275,7 +338,10 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
             protected override void OnMouseUp(int x, int y, MouseButtonType button)
             {
-                if (button == MouseButtonType.Left) _selectedFn(CharacterIndex);
+                if (button == MouseButtonType.Left)
+                {
+                    _selectedFn(CharacterIndex);
+                }
             }
         }
     }

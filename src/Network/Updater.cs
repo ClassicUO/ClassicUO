@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,6 +18,7 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
@@ -24,16 +26,12 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
-using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading;
-
-using ClassicUO.Utility.Logging;
 using ClassicUO.Utility;
-
+using ClassicUO.Utility.Logging;
 using TinyJson;
-
 
 namespace ClassicUO.Network
 {
@@ -42,9 +40,9 @@ namespace ClassicUO.Network
         private const string REPO_USER = "andreakarasho";
         private const string REPO_NAME = "ClassicUO";
         private const string API_RELEASES_LINK = "https://api.github.com/repos/{0}/{1}/releases";
+        private int _animIndex;
 
         private readonly WebClient _client;
-        private int _animIndex;
         private int _countDownload;
         private string _currentText = string.Empty;
         private double _progress;
@@ -61,6 +59,7 @@ namespace ClassicUO.Network
             {
                 Proxy = null
             };
+
             _client.Headers.Add("User-Agent: Other");
 
             _client.DownloadFileCompleted += (s, e) =>
@@ -68,7 +67,7 @@ namespace ClassicUO.Network
                 if (IsDownloading)
                 {
                     Console.WriteLine();
-                    Log.Trace( "Download finished!");
+                    Log.Trace("Download finished!");
                 }
             };
         }
@@ -92,7 +91,9 @@ namespace ClassicUO.Network
                 int commonLength = Math.Min(_currentText.Length, text.Length);
 
                 while (commonPrefixLength < commonLength && text[commonPrefixLength] == _currentText[commonPrefixLength])
+                {
                     commonPrefixLength++;
+                }
 
                 StringBuilder outputBuilder = new StringBuilder();
                 outputBuilder.Append('\b', _currentText.Length - commonPrefixLength);
@@ -119,7 +120,7 @@ namespace ClassicUO.Network
             }
             catch (Exception e)
             {
-                Log.Error( "UPDATER EXCEPTION: " + e);
+                Log.Error("UPDATER EXCEPTION: " + e);
 
                 _client.DownloadProgressChanged -= ClientOnDownloadProgressChanged;
             }
@@ -130,11 +131,13 @@ namespace ClassicUO.Network
         private bool Download()
         {
             if (IsDownloading)
+            {
                 return false;
+            }
 
             Interlocked.Increment(ref _countDownload);
 
-            Log.Trace( "Checking update...");
+            Log.Trace("Checking update...");
 
             Reset();
 
@@ -150,10 +153,14 @@ namespace ClassicUO.Network
             foreach (object entry in data)
             {
                 Dictionary<string, object> releaseToken = entry as Dictionary<string, object>;
-                if (releaseToken == null)
-                    continue;
 
-                string tagName = releaseToken["tag_name"].ToString();
+                if (releaseToken == null)
+                {
+                    continue;
+                }
+
+                string tagName = releaseToken["tag_name"]
+                    .ToString();
 
                 Log.Trace("Fetching: " + tagName);
 
@@ -178,11 +185,14 @@ namespace ClassicUO.Network
 #else
                 if (Version.TryParse(tagName, out Version version) && version > CUOEnviroment.Version)
                 {
-                   Log.Trace("Found new version available: " + version);
+                    Log.Trace("Found new version available: " + version);
 
 #endif
-                    string name = releaseToken["name"].ToString();
-                    string body = releaseToken["body"].ToString();
+                    string name = releaseToken["name"]
+                        .ToString();
+
+                    string body = releaseToken["body"]
+                        .ToString();
 
                     List<object> asset_list = releaseToken["assets"] as List<object>;
 
@@ -194,11 +204,17 @@ namespace ClassicUO.Network
                     }
 
                     Dictionary<string, object> asset = asset_list[0] as Dictionary<string, object>;
-                    if (asset == null)
-                        continue;
 
-                    string assetName = asset["name"].ToString();
-                    string downloadUrl = asset["browser_download_url"].ToString();
+                    if (asset == null)
+                    {
+                        continue;
+                    }
+
+                    string assetName = asset["name"]
+                        .ToString();
+
+                    string downloadUrl = asset["browser_download_url"]
+                        .ToString();
 
                     string temp;
 
@@ -216,7 +232,9 @@ namespace ClassicUO.Network
                     string zipFile = Path.Combine(tempPath, assetName);
 
                     if (!Directory.Exists(tempPath))
+                    {
                         Directory.CreateDirectory(tempPath);
+                    }
 
                     Log.Trace("Downloading: " + assetName);
 
@@ -233,7 +251,9 @@ namespace ClassicUO.Network
                     try
                     {
                         using (ZipArchive zip = new ZipArchive(File.OpenRead(zipFile)))
+                        {
                             zip.ExtractToDirectory(tempPath, true);
+                        }
 
                         File.Delete(zipFile);
                     }
@@ -242,10 +262,10 @@ namespace ClassicUO.Network
                         Log.Error("[UPDATER ERROR]: impossible to update.\n" + ex);
                     }
 
-                    ProcessStartInfo processStartInfo = new ProcessStartInfo()
+                    ProcessStartInfo processStartInfo = new ProcessStartInfo
                     {
                         WorkingDirectory = tempPath,
-                        UseShellExecute = false,
+                        UseShellExecute = false
                     };
 
                     if (CUOEnviroment.IsUnix)

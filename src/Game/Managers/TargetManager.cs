@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,6 +18,7 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using ClassicUO.Configuration;
@@ -31,7 +33,7 @@ using ClassicUO.Resources;
 
 namespace ClassicUO.Game.Managers
 {
-    enum CursorTarget
+    internal enum CursorTarget
     {
         Invalid = -1,
         Object = 0,
@@ -48,7 +50,7 @@ namespace ClassicUO.Game.Managers
         public static readonly uint Target = 6983686;
     }
 
-    enum TargetType
+    internal enum TargetType
     {
         Neutral,
         Harmful,
@@ -58,8 +60,6 @@ namespace ClassicUO.Game.Managers
 
     internal class MultiTargetInfo
     {
-        public readonly ushort XOff, YOff, ZOff, Model, Hue;
-
         public MultiTargetInfo(ushort model, ushort x, ushort y, ushort z, ushort hue)
         {
             Model = model;
@@ -68,18 +68,19 @@ namespace ClassicUO.Game.Managers
             ZOff = z;
             Hue = hue;
         }
+
+        public readonly ushort XOff, YOff, ZOff, Model, Hue;
     }
 
-    class LastTargetInfo
+    internal class LastTargetInfo
     {
-        public uint Serial;
-        public ushort Graphic;
-        public ushort X, Y;
-        public sbyte Z;
-
         public bool IsEntity => SerialHelper.IsValid(Serial);
         public bool IsStatic => !IsEntity && Graphic != 0 && Graphic != 0xFFFF;
         public bool IsLand => !IsStatic;
+        public ushort Graphic;
+        public uint Serial;
+        public ushort X, Y;
+        public sbyte Z;
 
 
         public void SetEntity(uint serial)
@@ -120,20 +121,20 @@ namespace ClassicUO.Game.Managers
     internal static class TargetManager
     {
         private static uint _targetCursorId;
-        private static byte[] _lastDataBuffer = new byte[19];
+        private static readonly byte[] _lastDataBuffer = new byte[19];
+
+        public static uint LastAttack, SelectedTarget;
+
+        public static readonly LastTargetInfo LastTargetInfo = new LastTargetInfo();
 
 
         public static MultiTargetInfo MultiTargetInfo { get; private set; }
 
         public static CursorTarget TargetingState { get; private set; } = CursorTarget.Invalid;
 
-        public static uint LastAttack, SelectedTarget;
-
         public static bool IsTargeting { get; private set; }
 
         public static TargetType TargetingType { get; private set; }
-
-        public static readonly LastTargetInfo LastTargetInfo = new LastTargetInfo();
 
         private static void ClearTargetingWithoutTargetCancelPacket()
         {
@@ -160,7 +161,9 @@ namespace ClassicUO.Game.Managers
         public static void SetTargeting(CursorTarget targeting, uint cursorID, TargetType cursorType)
         {
             if (targeting == CursorTarget.Invalid)
+            {
                 return;
+            }
 
             TargetingState = targeting;
             _targetCursorId = cursorID;
@@ -193,7 +196,8 @@ namespace ClassicUO.Game.Managers
                     World.CustomHouseManager.SelectedGraphic = 0;
                     World.CustomHouseManager.CombinedStair = false;
 
-                    UIManager.GetGump<HouseCustomizationGump>()?.Update();
+                    UIManager.GetGump<HouseCustomizationGump>()
+                             ?.Update();
                 }
             }
 
@@ -208,14 +212,16 @@ namespace ClassicUO.Game.Managers
             SetTargeting(CursorTarget.MultiPlacement, deedSerial, TargetType.Neutral);
 
             //if (model != 0)
-                MultiTargetInfo = new MultiTargetInfo(model, x, y, z, hue);
+            MultiTargetInfo = new MultiTargetInfo(model, x, y, z, hue);
         }
 
 
         public static void Target(uint serial)
         {
             if (!IsTargeting)
+            {
                 return;
+            }
 
             Entity entity = World.InGame ? World.Get(serial) : null;
 
@@ -223,8 +229,9 @@ namespace ClassicUO.Game.Managers
             {
                 switch (TargetingState)
                 {
-                    case CursorTarget.Invalid:                     
+                    case CursorTarget.Invalid:
                         return;
+
                     case CursorTarget.MultiPlacement:
                     case CursorTarget.Position:
                     case CursorTarget.Object:
@@ -257,21 +264,23 @@ namespace ClassicUO.Game.Managers
 
                                 if (showCriminalQuery && UIManager.GetGump<QuestionGump>() == null)
                                 {
-                                    QuestionGump messageBox = new QuestionGump("This may flag\nyou criminal!",
-                                                                               s =>
-                                                                               {
-                                                                                   if (s)
-                                                                                   {
-                                                                                       NetClient.Socket.Send(new PTargetObject(entity, entity.Graphic, entity.X, entity.Y, entity.Z, _targetCursorId, (byte) TargetingType));
-                                                                                       ClearTargetingWithoutTargetCancelPacket();
+                                    QuestionGump messageBox = new QuestionGump
+                                    (
+                                        "This may flag\nyou criminal!",
+                                        s =>
+                                        {
+                                            if (s)
+                                            {
+                                                NetClient.Socket.Send(new PTargetObject(entity, entity.Graphic, entity.X, entity.Y, entity.Z, _targetCursorId, (byte) TargetingType));
+                                                ClearTargetingWithoutTargetCancelPacket();
 
-                                                                                       if (LastTargetInfo.Serial !=  serial)
-                                                                                       {
-                                                                                           GameActions.RequestMobileStatus(serial);
-                                                                                       }
-                                                                                      
-                                                                                   }
-                                                                               });
+                                                if (LastTargetInfo.Serial != serial)
+                                                {
+                                                    GameActions.RequestMobileStatus(serial);
+                                                }
+                                            }
+                                        }
+                                    );
 
                                     UIManager.Add(messageBox);
 
@@ -296,11 +305,13 @@ namespace ClassicUO.Game.Managers
                                 GameActions.RequestMobileStatus(serial);
                             }
                         }
-                      
+
                         ClearTargetingWithoutTargetCancelPacket();
 
                         Mouse.CancelDoubleClick = true;
+
                         break;
+
                     case CursorTarget.Grab:
 
                         if (SerialHelper.IsItem(serial))
@@ -311,6 +322,7 @@ namespace ClassicUO.Game.Managers
                         ClearTargetingWithoutTargetCancelPacket();
 
                         return;
+
                     case CursorTarget.SetGrabBag:
 
                         if (SerialHelper.IsItem(serial))
@@ -329,17 +341,23 @@ namespace ClassicUO.Game.Managers
         public static void Target(ushort graphic, ushort x, ushort y, short z, bool wet = false)
         {
             if (!IsTargeting)
+            {
                 return;
+            }
 
             if (graphic == 0)
             {
                 if (TargetingState == CursorTarget.Object)
+                {
                     return;
+                }
             }
             else
             {
                 if (graphic >= TileDataLoader.Instance.StaticData.Length)
+                {
                     return;
+                }
 
                 ref StaticTiles itemData = ref TileDataLoader.Instance.StaticData[graphic];
 
@@ -363,7 +381,9 @@ namespace ClassicUO.Game.Managers
         public static void TargetLast()
         {
             if (!IsTargeting)
+            {
                 return;
+            }
 
             _lastDataBuffer[0] = 0x6C;
             _lastDataBuffer[1] = (byte) TargetingState;
@@ -381,10 +401,13 @@ namespace ClassicUO.Game.Managers
         private static void TargetPacket(ushort graphic, ushort x, ushort y, sbyte z)
         {
             if (!IsTargeting)
+            {
                 return;
+            }
 
-            PTargetXYZ packet = new PTargetXYZ(x, y, z, graphic, _targetCursorId, (byte) TargetingType);       
+            PTargetXYZ packet = new PTargetXYZ(x, y, z, graphic, _targetCursorId, (byte) TargetingType);
             NetClient.Socket.Send(packet);
+
             for (int i = 0; i < _lastDataBuffer.Length; i++)
             {
                 _lastDataBuffer[i] = packet[i];

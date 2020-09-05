@@ -1,4 +1,5 @@
 #region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,6 +18,7 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
@@ -37,9 +39,9 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
     {
         private readonly int m_BackBufferSize;
         private readonly CircularByteBuffer m_CircularByteBuffer;
+        private int m_NumForwardBytesInBuffer;
         private readonly Stream m_Stream;
         private readonly byte[] m_TemporaryBuffer;
-        private int m_NumForwardBytesInBuffer;
 
         public PushbackStream(Stream s, int backBufferSize)
         {
@@ -88,7 +90,10 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
         {
             m_NumForwardBytesInBuffer += length;
 
-            if (m_NumForwardBytesInBuffer > m_BackBufferSize) throw new Exception("The backstream cannot unread the requested number of bytes.");
+            if (m_NumForwardBytesInBuffer > m_BackBufferSize)
+            {
+                throw new Exception("The backstream cannot unread the requested number of bytes.");
+            }
         }
 
         public void Close()

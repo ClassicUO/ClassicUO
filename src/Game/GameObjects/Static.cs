@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,29 +18,35 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
-using System.Collections.Generic;
-
-using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
-using ClassicUO.Game.Scenes;
 using ClassicUO.IO.Resources;
-using ClassicUO.Renderer;
 using ClassicUO.Utility;
-using ClassicUO.Utility.Logging;
 
 namespace ClassicUO.Game.GameObjects
 {
     internal sealed partial class Static : GameObject
     {
-        private static readonly QueuedPool<Static> _pool = new QueuedPool<Static>(Constants.PREDICTABLE_STATICS, s =>
-        {
-            s.IsDestroyed = false;
-            s.AlphaHue = 0;
-            s.FoliageIndex = 0;
-        });
+        private static readonly QueuedPool<Static> _pool = new QueuedPool<Static>
+        (
+            Constants.PREDICTABLE_STATICS, s =>
+            {
+                s.IsDestroyed = false;
+                s.AlphaHue = 0;
+                s.FoliageIndex = 0;
+            }
+        );
+
+        public string Name => ItemData.Name;
+
+        public ushort OriginalGraphic { get; private set; }
+
+        public ref StaticTiles ItemData => ref TileDataLoader.Instance.StaticData[Graphic];
+
+        public bool IsVegetation;
 
 
         public static Static Create(ushort graphic, ushort hue, int index)
@@ -50,24 +57,24 @@ namespace ClassicUO.Game.GameObjects
             s.UpdateGraphicBySeason();
 
             if (s.ItemData.Height > 5)
+            {
                 s._canBeTransparent = 1;
+            }
             else if (s.ItemData.IsRoof || s.ItemData.IsSurface && s.ItemData.IsBackground || s.ItemData.IsWall)
+            {
                 s._canBeTransparent = 1;
+            }
             else if (s.ItemData.Height == 5 && s.ItemData.IsSurface && !s.ItemData.IsBackground)
+            {
                 s._canBeTransparent = 1;
+            }
             else
+            {
                 s._canBeTransparent = 0;
+            }
 
             return s;
         }
-
-        public string Name => ItemData.Name;
-
-        public ushort OriginalGraphic { get; private set; }
-
-        public bool IsVegetation;
-
-        public ref StaticTiles ItemData => ref TileDataLoader.Instance.StaticData[Graphic];
 
         public void SetGraphic(ushort g)
         {
@@ -89,7 +96,10 @@ namespace ClassicUO.Game.GameObjects
         public override void Destroy()
         {
             if (IsDestroyed)
+            {
                 return;
+            }
+
             base.Destroy();
             _pool.ReturnOne(this);
         }

@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,16 +18,13 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-#endregion
 
-using System;
+#endregion
 
 using ClassicUO.Configuration;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
-
-using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.Game.GameObjects
@@ -59,7 +57,7 @@ namespace ClassicUO.Game.GameObjects
 
             ref UOFileIndex index = ref GumpsLoader.Instance.GetValidRefEntry(AnimationGraphic);
 
-            posX -= (index.Width >> 1);
+            posX -= index.Width >> 1;
             posY -= index.Height;
 
             batcher.SetBlendState(BlendState.Additive);

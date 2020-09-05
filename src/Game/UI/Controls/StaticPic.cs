@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,6 +18,7 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System.Collections.Generic;
@@ -61,12 +63,15 @@ namespace ClassicUO.Game.UI.Controls
                 if (texture == null)
                 {
                     Dispose();
+
                     return;
                 }
 
                 Width = texture.Width;
                 Height = texture.Height;
-                IsPartialHue = TileDataLoader.Instance.StaticData[value].IsPartialHue;
+
+                IsPartialHue = TileDataLoader.Instance.StaticData[value]
+                                             .IsPartialHue;
             }
         }
 

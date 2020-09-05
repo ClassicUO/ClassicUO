@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,6 +18,7 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 
@@ -26,7 +28,6 @@ using System.Globalization;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading;
-
 using ClassicUO.Configuration;
 using ClassicUO.Data;
 using ClassicUO.Game;
@@ -34,28 +35,21 @@ using ClassicUO.IO;
 using ClassicUO.Resources;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
-
 using SDL2;
 
 namespace ClassicUO
 {
     internal static class Bootstrap
     {
+        private static bool _skipUpdates;
+
         [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
         private static extern bool SetDllDirectory(string lpPathName);
 
-        private static bool _skipUpdates;
-
         [STAThread]
         public static void Main(string[] args)
         {
-            // - check for update
-            // - launcher & user setup
-            // - game setup 
-            // - game launch
-            // - enjoy
-
             CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
 
             Log.Start(LogTypes.All);
@@ -70,21 +64,22 @@ namespace ClassicUO
                 sb.AppendLine("######################## [START LOG] ########################");
 
 #if DEV_BUILD
-                sb.AppendLine($"ClassicUO [DEV_BUILD] - {CUOEnviroment.Version}");
+                sb.AppendLine($"ClassicUO [DEV_BUILD] - {CUOEnviroment.Version} - {DateTime.Now}");
 #else
-                sb.AppendLine($"ClassicUO [STANDARD_BUILD] - {CUOEnviroment.Version}");
+                sb.AppendLine($"ClassicUO [STANDARD_BUILD] - {CUOEnviroment.Version} - {DateTime.Now}");
 #endif
 
-                sb.AppendLine($"OS: {Environment.OSVersion.Platform} x{(Environment.Is64BitOperatingSystem ? "64" : "86")}");
+                sb.AppendLine($"OS: {Environment.OSVersion.Platform} {(Environment.Is64BitOperatingSystem ? "x64" : "x86")}");
                 sb.AppendLine($"Thread: {Thread.CurrentThread.Name}");
                 sb.AppendLine();
 
-                sb.AppendLine($"Protocol: {Client.Protocol}");
-                sb.AppendLine($"ClientFeatures: {World.ClientFeatures.Flags}");
-                sb.AppendLine($"ClientLockedFeatures: {World.ClientLockedFeatures.Flags}");
-                sb.AppendLine($"ClientVersion: {Client.Version}");
+                if (Settings.GlobalSettings != null)
+                {
+                    sb.AppendLine($"Shard: {Settings.GlobalSettings.IP}");
+                    sb.AppendLine($"ClientVersion: {Settings.GlobalSettings.ClientVersion}");
+                    sb.AppendLine();
+                }
 
-                sb.AppendLine();
                 sb.AppendFormat("Exception:\n{0}\n", e.ExceptionObject);
                 sb.AppendLine("######################## [END LOG] ########################");
                 sb.AppendLine();
@@ -120,12 +115,13 @@ namespace ClassicUO
                     return;
                 }
             }
-            
+
             if (CUOEnviroment.IsHighDPI)
             {
                 Log.Trace("HIGH DPI - ENABLED");
                 Environment.SetEnvironmentVariable("FNA_GRAPHICS_ENABLE_HIGHDPI", "1");
             }
+
             Environment.SetEnvironmentVariable("FNA3D_BACKBUFFER_SCALE_NEAREST", "1");
             Environment.SetEnvironmentVariable("FNA3D_OPENGL_FORCE_COMPATIBILITY_PROFILE", "1");
             Environment.SetEnvironmentVariable(SDL.SDL_HINT_MOUSE_FOCUS_CLICKTHROUGH, "1");
@@ -160,13 +156,6 @@ namespace ClassicUO
                 SetDllDirectory(libsPath);
             }
 
-            // FIXME: force to use OpenGL in osx and linux contexts. Metal wants texture converted in .Color instead of BGRA5551.
-            //        Check the branch "fna3d-macos-fix"
-            /*if (CUOEnviroment.IsUnix)
-            {
-                Environment.SetEnvironmentVariable("FNA3D_FORCE_DRIVER", "OpenGL");
-            }
-            */
 
             if (string.IsNullOrWhiteSpace(Settings.GlobalSettings.UltimaOnlineDirectory))
             {
@@ -222,7 +211,9 @@ namespace ClassicUO
                 {
                     Process.Start(ResGeneral.ClassicUOLink);
                 }
-                catch { }
+                catch
+                {
+                }
             }
             else
             {
@@ -232,6 +223,7 @@ namespace ClassicUO
                         Environment.SetEnvironmentVariable("FNA3D_FORCE_DRIVER", "OpenGL");
 
                         break;
+
                     case 2: // Vulkan
                         Environment.SetEnvironmentVariable("FNA3D_FORCE_DRIVER", "Vulkan");
 
@@ -248,7 +240,8 @@ namespace ClassicUO
         {
             for (int i = 0; i <= args.Length - 1; i++)
             {
-                string cmd = args[i].ToLower();
+                string cmd = args[i]
+                    .ToLower();
 
                 // NOTE: Command-line option name should start with "-" character
                 if (cmd.Length == 0 || cmd[0] != '-')
@@ -261,7 +254,8 @@ namespace ClassicUO
 
                 if (i < args.Length - 1)
                 {
-                    if (!string.IsNullOrWhiteSpace(args[i + 1]) && !args[i + 1].StartsWith("-"))
+                    if (!string.IsNullOrWhiteSpace(args[i + 1]) && !args[i + 1]
+                        .StartsWith("-"))
                     {
                         value = args[++i];
                     }
@@ -277,14 +271,17 @@ namespace ClassicUO
                     // will override and overwrite those in the settings file because they have higher priority
                     case "settings":
                         Settings.CustomSettingsFilepath = value;
+
                         break;
 
                     case "skipupdate":
                         _skipUpdates = true;
+
                         break;
 
                     case "highdpi":
                         CUOEnviroment.IsHighDPI = true;
+
                         break;
 
                     case "username":
@@ -336,6 +333,7 @@ namespace ClassicUO
 
                     case "fps":
                         int v = int.Parse(value);
+
                         if (v < Constants.MIN_FPS)
                         {
                             v = Constants.MIN_FPS;
@@ -346,12 +344,12 @@ namespace ClassicUO
                         }
 
                         Settings.GlobalSettings.FPS = v;
-                        
+
                         break;
 
                     case "debug":
                         CUOEnviroment.Debug = true;
-                        
+
                         break;
 
                     case "profiler":
@@ -396,11 +394,13 @@ namespace ClassicUO
                     case "shard_type":
                     case "shard":
                         Settings.GlobalSettings.ShardType = int.Parse(value);
+
                         break;
                     // ================================
 
                     case "outlands":
                         CUOEnviroment.IsOutlands = true;
+
                         break;
 
                     case "fixed_time_step":
@@ -410,18 +410,22 @@ namespace ClassicUO
 
                     case "skiploginscreen":
                         CUOEnviroment.SkipLoginScreen = true;
+
                         break;
 
                     case "plugins":
-                        Settings.GlobalSettings.Plugins = string.IsNullOrEmpty(value) ? new string[0] : value.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+                        Settings.GlobalSettings.Plugins = string.IsNullOrEmpty(value) ? new string[0] : value.Split(new[] {','}, StringSplitOptions.RemoveEmptyEntries);
+
                         break;
 
                     case "use_verdata":
                         Settings.GlobalSettings.UseVerdata = bool.Parse(value);
+
                         break;
 
                     case "encryption":
                         Settings.GlobalSettings.Encryption = byte.Parse(value);
+
                         break;
 
                     case "force_driver":
@@ -431,12 +435,17 @@ namespace ClassicUO
                             {
                                 case 1: // OpenGL
                                     Settings.GlobalSettings.ForceDriver = 1;
+
                                     break;
+
                                 case 2: // Vulkan
                                     Settings.GlobalSettings.ForceDriver = 2;
+
                                     break;
+
                                 default: // use default
                                     Settings.GlobalSettings.ForceDriver = 0;
+
                                     break;
                             }
                         }
@@ -444,8 +453,8 @@ namespace ClassicUO
                         {
                             Settings.GlobalSettings.ForceDriver = 0;
                         }
-                        break;
 
+                        break;
                 }
             }
         }
@@ -482,7 +491,7 @@ namespace ClassicUO
 
             if (action == "update")
             {
-                Log.Trace( "ClassicUO Updating...");
+                Log.Trace("ClassicUO Updating...");
 
                 try
                 {
@@ -534,7 +543,9 @@ namespace ClassicUO
                 {
                     Process.GetProcessById(processId);
                     Thread.Sleep(1000);
-                    Process.GetProcessById(processId).Kill();
+
+                    Process.GetProcessById(processId)
+                           .Kill();
                 }
                 catch
                 {
@@ -548,7 +559,7 @@ namespace ClassicUO
                 {
                 }
 
-                Log.Trace( "ClassicUO updated successfully!");
+                Log.Trace("ClassicUO updated successfully!");
             }
 
             return false;

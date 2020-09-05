@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,6 +18,7 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
@@ -28,9 +30,9 @@ namespace ClassicUO.IO
     internal class UOFileUop : UOFile
     {
         private const uint UOP_MAGIC_NUMBER = 0x50594D;
-        private readonly string _pattern;
         private readonly bool _hasExtra;
         private readonly Dictionary<ulong, UOFileIndex> _hashes = new Dictionary<ulong, UOFileIndex>();
+        private readonly string _pattern;
 
         public UOFileUop(string path, string pattern, bool hasextra = false) : base(path)
         {
@@ -39,10 +41,12 @@ namespace ClassicUO.IO
             Load();
         }
 
-        public bool TryGetUOPData(ulong hash, out UOFileIndex data)
-            => _hashes.TryGetValue(hash, out data);
-
         public int TotalEntriesCount { get; private set; }
+
+        public bool TryGetUOPData(ulong hash, out UOFileIndex data)
+        {
+            return _hashes.TryGetValue(hash, out data);
+        }
 
         protected override void Load()
         {
@@ -51,7 +55,9 @@ namespace ClassicUO.IO
             Seek(0);
 
             if (ReadUInt() != UOP_MAGIC_NUMBER)
+            {
                 throw new ArgumentException("Bad uop file");
+            }
 
             uint version = ReadUInt();
             uint format_timestamp = ReadUInt();
@@ -63,6 +69,7 @@ namespace ClassicUO.IO
             Seek(nextBlock);
             int total = 0;
             int real_total = 0;
+
             do
             {
                 int filesCount = ReadInt();
@@ -81,10 +88,13 @@ namespace ClassicUO.IO
                     int length = flag == 1 ? compressedLength : decompressedLength;
 
                     if (offset == 0)
+                    {
                         continue;
+                    }
 
                     real_total++;
                     offset += headerLength;
+
                     if (_hasExtra)
                     {
                         long curpos = Position;
@@ -97,7 +107,9 @@ namespace ClassicUO.IO
                         Seek(curpos);
                     }
                     else
+                    {
                         _hashes.Add(hash, new UOFileIndex(StartAddress, (uint) Length, offset, compressedLength, decompressedLength));
+                    }
                 }
 
                 Seek(nextBlock);
@@ -107,7 +119,9 @@ namespace ClassicUO.IO
         }
 
         public void ClearHashes()
-            => _hashes.Clear();
+        {
+            _hashes.Clear();
+        }
 
         public override void Dispose()
         {
@@ -134,7 +148,9 @@ namespace ClassicUO.IO
             FillEntries(ref entries);
 
             if (clearHashes)
+            {
                 ClearHashes();
+            }
         }
 
         //public unsafe T[] GetData<T>(int compressedSize, int uncompressedSize) where T : struct
@@ -146,12 +162,14 @@ namespace ClassicUO.IO
         //    return data;
         //}
 
-        public unsafe byte[] GetData(int compressedSize, int uncompressedSize) 
+        public unsafe byte[] GetData(int compressedSize, int uncompressedSize)
         {
             byte[] data = new byte[uncompressedSize];
 
             fixed (byte* destPtr = data)
+            {
                 ZLib.Decompress(PositionAddress, compressedSize, 0, (IntPtr) destPtr, uncompressedSize);
+            }
 
 
             return data;

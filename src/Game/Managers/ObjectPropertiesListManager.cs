@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,26 +18,29 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
-using ClassicUO.Network;
 using System.Collections.Generic;
+using ClassicUO.Network;
 
 namespace ClassicUO.Game.Managers
 {
-    sealed class ObjectPropertiesListManager
+    internal sealed class ObjectPropertiesListManager
     {
         private readonly Dictionary<uint, ItemProperty> _itemsProperties = new Dictionary<uint, ItemProperty>();
 
 
         public void Add(uint serial, uint revision, string name, string data)
-            => _itemsProperties[serial] = new ItemProperty()
+        {
+            _itemsProperties[serial] = new ItemProperty
             {
                 Serial = serial,
                 Revision = revision,
                 Name = name,
                 Data = data
             };
+        }
 
 
         public bool Contains(uint serial)
@@ -74,6 +78,7 @@ namespace ClassicUO.Game.Managers
             }
 
             revision = 0;
+
             return false;
         }
 
@@ -88,6 +93,7 @@ namespace ClassicUO.Game.Managers
             }
 
             name = data = null;
+
             return false;
         }
 
@@ -97,20 +103,17 @@ namespace ClassicUO.Game.Managers
         }
     }
 
-    class ItemProperty
+    internal class ItemProperty
     {
-        public uint Serial;
-        public uint Revision;
-        public string Name;
-        public string Data;
-
-
         public bool IsEmpty => string.IsNullOrEmpty(Name) && string.IsNullOrEmpty(Data);
+        public string Data;
+        public string Name;
+        public uint Revision;
+        public uint Serial;
 
         public string CreateData(bool extended)
         {
             return string.Empty;
         }
     }
-
 }

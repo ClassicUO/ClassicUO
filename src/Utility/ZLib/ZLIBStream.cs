@@ -6,33 +6,37 @@ namespace ZLibNative
 {
     public sealed class ZLIBStream : Stream
     {
-        private CompressionMode _CompressionMode = CompressionMode.Compress;
-        private CompressionLevel _CompressionLevel = CompressionLevel.NoCompression;
-        private bool _LeaveOpen = false;
-        private Adler32 _Adler32 = new Adler32();
+        private readonly Adler32 _Adler32 = new Adler32();
+        private bool _Closed;
+        private readonly CompressionLevel _CompressionLevel = CompressionLevel.NoCompression;
+        private readonly CompressionMode _CompressionMode = CompressionMode.Compress;
+        private byte[] _CRC;
         private DeflateStream _DeflateStream;
-        private Stream _RawStream;
-        private bool _Closed = false;
-        private byte[] _CRC = null;
+        private readonly bool _LeaveOpen;
+        private readonly Stream _RawStream;
 
         /// <summary>
-        /// Initializes new instance of ZLIBStream using specified stream and compression level, closing the stream at the end.
+        ///     Initializes new instance of ZLIBStream using specified stream and compression level, closing the stream at the end.
         /// </summary>
         /// <param name="stream">Stream to compress</param>
         /// <param name="compressionLevel">Compression level</param>
         public ZLIBStream(Stream stream, CompressionLevel compressionLevel) : this(stream, compressionLevel, false)
         {
         }
+
         /// <summary>
-        /// Initializes new instance of ZLIBStream using specified stream with compress or decompress mode, closing the stream at the end.
+        ///     Initializes new instance of ZLIBStream using specified stream with compress or decompress mode, closing the stream
+        ///     at the end.
         /// </summary>
         /// <param name="stream">Stream to compress or decompress</param>
         /// <param name="compressionMode">Compression Mode</param>
         public ZLIBStream(Stream stream, CompressionMode compressionMode) : this(stream, compressionMode, false)
         {
         }
+
         /// <summary>
-        /// Initializes new instance of ZLIBStream using specified stream and compression level, optionally leaves the stream open.
+        ///     Initializes new instance of ZLIBStream using specified stream and compression level, optionally leaves the stream
+        ///     open.
         /// </summary>
         /// <param name="stream">Stream to compress</param>
         /// <param name="compressionLevel">Compression Level</param>
@@ -45,8 +49,10 @@ namespace ZLibNative
             _RawStream = stream;
             InitStream();
         }
+
         /// <summary>
-        /// Initializes new instance of ZLIBStream using the specified stream with compress or decompress mode, optionally leaves the stream open.
+        ///     Initializes new instance of ZLIBStream using the specified stream with compress or decompress mode, optionally
+        ///     leaves the stream open.
         /// </summary>
         /// <param name="stream">Stream to compress or decompress</param>
         /// <param name="compressionMode">Compression Mode</param>
@@ -60,49 +66,24 @@ namespace ZLibNative
             InitStream();
         }
 
-        public override bool CanRead
-        {
-            get
-            {
-                return (_CompressionMode == CompressionMode.Decompress) && !_Closed;
-            }
-        }
-        public override bool CanWrite
-        {
-            get
-            {
-                return (_CompressionMode == CompressionMode.Compress) && !_Closed;
-            }
-        }
-        public override bool CanSeek
-        {
-            get
-            {
-                return false;
-            }
-        }
-        public override long Length
-        {
-            get
-            {
-                throw new NotImplementedException();
-            }
-        }
+        public override bool CanRead => _CompressionMode == CompressionMode.Decompress && !_Closed;
+
+        public override bool CanWrite => _CompressionMode == CompressionMode.Compress && !_Closed;
+
+        public override bool CanSeek => false;
+
+        public override long Length => throw new NotImplementedException();
+
         public override long Position
         {
-            get
-            {
-                throw new NotImplementedException();
-            }
-            set
-            {
-                throw new NotImplementedException();
-            }
+            get => throw new NotImplementedException();
+            set => throw new NotImplementedException();
         }
 
         public override int ReadByte()
         {
             int result;
+
             if (CanRead)
             {
                 result = _DeflateStream.ReadByte();
@@ -127,12 +108,13 @@ namespace ZLibNative
         public override int Read(byte[] buffer, int offset, int count)
         {
             int result;
+
             if (CanRead)
             {
                 result = _DeflateStream.Read(buffer, offset, count);
 
                 //check for end of stream
-                if ((result < 1) && (count > 0))
+                if (result < 1 && count > 0)
                 {
                     ReadCRC();
                 }
@@ -180,6 +162,7 @@ namespace ZLibNative
             if (!_Closed)
             {
                 _Closed = true;
+
                 if (_CompressionMode == CompressionMode.Compress)
                 {
                     Flush();
@@ -197,6 +180,7 @@ namespace ZLibNative
                 else
                 {
                     _DeflateStream.Close();
+
                     if (_CRC == null)
                     {
                         ReadCRC();
@@ -229,7 +213,7 @@ namespace ZLibNative
         }
 
         /// <summary>
-        /// Check if the stream is in ZLib format
+        ///     Check if the stream is in ZLib format
         /// </summary>
         /// <param name="stream">Stream to check</param>
         /// <returns>Returns true if stream is zlib format</returns>
@@ -255,13 +239,15 @@ namespace ZLibNative
 
             return bResult;
         }
+
         /// <summary>
-        /// Read last 4 bytes of stream for CRC
+        ///     Read last 4 bytes of stream for CRC
         /// </summary>
         private void ReadCRC()
         {
             _CRC = new byte[4];
             _RawStream.Seek(-4, SeekOrigin.End);
+
             if (_RawStream.Read(_CRC, 0, 4) < 4)
             {
                 throw new EndOfStreamException();
@@ -282,7 +268,7 @@ namespace ZLibNative
         }
 
         /// <summary>
-        /// Initialize the stream
+        ///     Initialize the stream
         /// </summary>
         private void InitStream()
         {
@@ -292,21 +278,26 @@ namespace ZLibNative
                 {
                     InitZLibHeader();
                     _DeflateStream = new DeflateStream(_RawStream, _CompressionLevel, true);
+
                     break;
                 }
+
                 case CompressionMode.Decompress:
                 {
                     if (!IsZLibStream(_RawStream))
                     {
                         throw new InvalidDataException();
                     }
+
                     _DeflateStream = new DeflateStream(_RawStream, CompressionMode.Decompress, true);
+
                     break;
                 }
             }
         }
+
         /// <summary>
-        /// Initialize stream header in ZLib format
+        ///     Initialize stream header in ZLib format
         /// </summary>
         private void InitZLibHeader()
         {
@@ -319,21 +310,27 @@ namespace ZLibNative
                 CompressionInfo = 7,
                 FDict = false //No dictionary
             };
+
             switch (_CompressionLevel)
             {
                 case CompressionLevel.NoCompression:
                 {
                     header.FLevel = FLevel.Faster;
+
                     break;
                 }
+
                 case CompressionLevel.Fastest:
                 {
                     header.FLevel = FLevel.Default;
+
                     break;
                 }
+
                 case CompressionLevel.Optimal:
                 {
                     header.FLevel = FLevel.Optimal;
+
                     break;
                 }
             }

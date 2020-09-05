@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,22 +18,19 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System.Collections.Generic;
-using ClassicUO.Renderer;
-using ClassicUO.Game.Data;
 using System.IO;
-
 using ClassicUO.Configuration;
+using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
-using ClassicUO.Game.Scenes;
-using ClassicUO.Utility;
-using ClassicUO.IO.Resources;
-
-using Microsoft.Xna.Framework;
 using ClassicUO.Game.UI.Gumps;
-using System.Linq;
+using ClassicUO.IO.Resources;
+using ClassicUO.Renderer;
+using ClassicUO.Utility;
+using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.Managers
 {
@@ -56,7 +54,10 @@ namespace ClassicUO.Game.Managers
         {
             //if the server requests for a non present gump in container data dictionary, create it, but without any particular sound.
             if (!_data.TryGetValue(graphic, out ContainerData value))
+            {
                 _data[graphic] = value = new ContainerData(graphic, 0, 0, 44, 65, 186, 159);
+            }
+
             return value;
         }
 
@@ -85,24 +86,29 @@ namespace ClassicUO.Game.Managers
                         {
                             case 0:
                                 SetPositionNearGameObject(g, serial, width, height);
+
                                 break;
+
                             case 1:
                                 X = Client.Game.Window.ClientBounds.Width - width;
                                 Y = 0;
+
                                 break;
+
                             case 2:
                             case 3:
                                 X = ProfileManager.Current.OverrideContainerLocationPosition.X - (width >> 1);
                                 Y = ProfileManager.Current.OverrideContainerLocationPosition.Y - (height >> 1);
+
                                 break;
                         }
 
-                        if ((X + width) > Client.Game.Window.ClientBounds.Width)
+                        if (X + width > Client.Game.Window.ClientBounds.Width)
                         {
                             X -= width;
                         }
 
-                        if ((Y + height) > Client.Game.Window.ClientBounds.Height)
+                        if (Y + height > Client.Game.Window.ClientBounds.Height)
                         {
                             Y -= height;
                         }
@@ -118,21 +124,31 @@ namespace ClassicUO.Game.Managers
                                 X = Constants.CONTAINER_RECT_DEFAULT_POSITION;
 
                                 if (Y + texture.Height + Constants.CONTAINER_RECT_LINESTEP > Client.Game.Window.ClientBounds.Height)
+                                {
                                     Y = Constants.CONTAINER_RECT_DEFAULT_POSITION;
+                                }
                                 else
+                                {
                                     Y += Constants.CONTAINER_RECT_LINESTEP;
+                                }
                             }
                             else if (Y + texture.Height + Constants.CONTAINER_RECT_STEP > Client.Game.Window.ClientBounds.Height)
                             {
                                 if (X + texture.Width + Constants.CONTAINER_RECT_LINESTEP > Client.Game.Window.ClientBounds.Width)
+                                {
                                     X = Constants.CONTAINER_RECT_DEFAULT_POSITION;
+                                }
                                 else
+                                {
                                     X += Constants.CONTAINER_RECT_LINESTEP;
+                                }
 
                                 Y = Constants.CONTAINER_RECT_DEFAULT_POSITION;
                             }
                             else
+                            {
                                 passed = i + 1;
+                            }
                         }
 
                         if (passed == 0)
@@ -153,8 +169,11 @@ namespace ClassicUO.Game.Managers
         private static void SetPositionNearGameObject(ushort g, uint serial, int width, int height)
         {
             Item item = World.Items.Get(serial);
+
             if (item == null)
+            {
                 return;
+            }
 
             Item bank = World.Player.FindItemByLayer(Layer.Bank);
 
@@ -174,6 +193,7 @@ namespace ClassicUO.Game.Managers
             {
                 // pack animal, snooped player, npc vendor
                 Mobile mobile = World.Mobiles.Get(item.Container);
+
                 if (mobile != null)
                 {
                     X = mobile.RealScreenPosition.X + ProfileManager.Current.GameWindowPosition.X + 40;
@@ -184,6 +204,7 @@ namespace ClassicUO.Game.Managers
             {
                 // in a container, open near the container
                 ContainerGump parentContainer = UIManager.GetGump<ContainerGump>(item.Container);
+
                 if (parentContainer != null)
                 {
                     X = parentContainer.X + (width >> 1);
@@ -197,7 +218,9 @@ namespace ClassicUO.Game.Managers
             string path = Path.Combine(CUOEnviroment.ExecutablePath, "Data", "Client");
 
             if (!Directory.Exists(path))
+            {
                 Directory.CreateDirectory(path);
+            }
 
             path = Path.Combine(path, "containers.txt");
 
@@ -222,11 +245,12 @@ namespace ClassicUO.Game.Managers
 
             _data.Clear();
 
-            TextFileParser containersParser = new TextFileParser(File.ReadAllText(path), new[] { ' ', '\t', ',' }, new[] { '#', ';' }, new[] { '"', '"' });
+            TextFileParser containersParser = new TextFileParser(File.ReadAllText(path), new[] {' ', '\t', ','}, new[] {'#', ';'}, new[] {'"', '"'});
 
             while (!containersParser.IsEOF())
             {
                 List<string> ss = containersParser.ReadTokens();
+
                 if (ss != null && ss.Count != 0)
                 {
                     if (ushort.TryParse(ss[0], out ushort graphic) &&

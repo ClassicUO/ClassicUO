@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,25 +18,21 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
-using System.IO;
 using System.Xml;
-
 using ClassicUO.Game.Data;
-using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
-using ClassicUO.Utility;
 
 namespace ClassicUO.Game.UI.Gumps
 {
     internal class UseAbilityButtonGump : AnchorableGump
     {
         private GumpPic _button;
-        private bool _isPrimary;
 
         public UseAbilityButtonGump() : base(0, 0)
         {
@@ -46,21 +43,21 @@ namespace ClassicUO.Game.UI.Gumps
 
         public UseAbilityButtonGump(int index, bool primary) : this()
         {
-            _isPrimary = primary;
+            IsPrimary = primary;
             Index = index;
             BuildGump();
         }
 
         public override GUMP_TYPE GumpType => GUMP_TYPE.GT_ABILITYBUTTON;
 
-        public int Index { get; private set; }
-        public bool IsPrimary => _isPrimary;
+        public int Index { get; }
+        public bool IsPrimary { get; private set; }
 
         private void BuildGump()
         {
             Clear();
 
-            int index = ((byte) World.Player.Abilities[_isPrimary ? 0 : 1] & 0x7F) - 1;
+            int index = ((byte) World.Player.Abilities[IsPrimary ? 0 : 1] & 0x7F) - 1;
 
             ref readonly AbilityDefinition def = ref AbilityData.Abilities[index];
 
@@ -68,6 +65,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 AcceptMouseInput = false
             };
+
             Add(_button);
 
             SetTooltip(ClilocLoader.Instance.GetString(1028838 + index), 80);
@@ -89,10 +87,14 @@ namespace ClassicUO.Game.UI.Gumps
         {
             if (button == MouseButtonType.Left)
             {
-                if (_isPrimary)
+                if (IsPrimary)
+                {
                     GameActions.UsePrimaryAbility();
+                }
                 else
+                {
                     GameActions.UseSecondaryAbility();
+                }
 
                 return true;
             }
@@ -104,14 +106,20 @@ namespace ClassicUO.Game.UI.Gumps
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
             if (IsDisposed)
+            {
                 return false;
+            }
 
-            byte index = (byte) World.Player.Abilities[_isPrimary ? 0 : 1];
+            byte index = (byte) World.Player.Abilities[IsPrimary ? 0 : 1];
 
             if ((index & 0x80) != 0)
+            {
                 _button.Hue = 38;
+            }
             else if (_button.Hue != 0)
+            {
                 _button.Hue = 0;
+            }
 
 
             return base.Draw(batcher, x, y);
@@ -120,13 +128,13 @@ namespace ClassicUO.Game.UI.Gumps
         public override void Save(XmlTextWriter writer)
         {
             base.Save(writer);
-            writer.WriteAttributeString("isprimary", _isPrimary.ToString());
+            writer.WriteAttributeString("isprimary", IsPrimary.ToString());
         }
 
         public override void Restore(XmlElement xml)
         {
             base.Restore(xml);
-            _isPrimary = bool.Parse(xml.GetAttribute("isprimary"));
+            IsPrimary = bool.Parse(xml.GetAttribute("isprimary"));
             BuildGump();
         }
     }

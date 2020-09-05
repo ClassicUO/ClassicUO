@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,10 +18,10 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System.Linq;
-
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.IO.Resources;
 using ClassicUO.Network;
@@ -33,8 +34,8 @@ namespace ClassicUO.Game.UI.Gumps
     internal class MenuGump : Gump
     {
         private readonly ContainerHorizontal _container;
-        private readonly HSliderBar _slider;
         private bool _isDown, _isLeft;
+        private readonly HSliderBar _slider;
 
         public MenuGump(uint serial, uint serv, string name) : base(serial, serv)
         {
@@ -45,11 +46,14 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add(new GumpPic(0, 0, 0x0910, 0));
 
-            Add(new ColorBox(217, 49, 0, 0xFF000001)
-            {
-                X = 40,
-                Y = 42
-            });
+            Add
+            (
+                new ColorBox(217, 49, 0, 0xFF000001)
+                {
+                    X = 40,
+                    Y = 42
+                }
+            );
 
             Label label = new Label(name, false, 0x0386, 200, 1, FontStyle.Fixed)
             {
@@ -107,23 +111,29 @@ namespace ClassicUO.Game.UI.Gumps
         {
             base.Update(totalMS, frameMS);
 
-            if (_isDown) _container.Value += _isLeft ? -1 : 1;
+            if (_isDown)
+            {
+                _container.Value += _isLeft ? -1 : 1;
+            }
         }
 
 
         public void AddItem(ushort graphic, ushort hue, string name, int x, int y, int index)
         {
             ArtTexture texture = ArtLoader.Instance.GetTexture(graphic);
+
             if (texture == null)
             {
                 Log.Error($"invalid texture 0x{graphic:X4}");
+
                 return;
             }
 
-            TextureControl pic = new TextureControl()
+            TextureControl pic = new TextureControl
             {
                 Texture = texture,
-                IsPartial = TileDataLoader.Instance.StaticData[graphic].IsPartialHue,
+                IsPartial = TileDataLoader.Instance.StaticData[graphic]
+                                          .IsPartialHue,
                 Hue = hue,
                 AcceptMouseInput = true,
                 X = x,
@@ -139,6 +149,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Dispose();
                 e.Result = true;
             };
+
             pic.SetTooltip(name);
 
 
@@ -166,9 +177,13 @@ namespace ClassicUO.Game.UI.Gumps
                 set
                 {
                     if (value < 0)
+                    {
                         value = 0;
+                    }
                     else if (value > MaxValue)
+                    {
                         value = MaxValue;
+                    }
 
                     _value = value;
                 }
@@ -192,7 +207,9 @@ namespace ClassicUO.Game.UI.Gumps
                     foreach (Control child in Children)
                     {
                         if (!child.IsVisible)
+                        {
                             continue;
+                        }
 
                         child.X = width - Value;
 
@@ -200,7 +217,9 @@ namespace ClassicUO.Game.UI.Gumps
                         {
                         }
                         else if (width + child.Width <= maxWidth)
+                        {
                             child.Draw(batcher, child.X + x, y);
+                        }
                         else
                         {
                             if (drawOnly1)
@@ -226,7 +245,9 @@ namespace ClassicUO.Game.UI.Gumps
                 MaxValue = Children.Sum(s => s.Width) - Width;
 
                 if (MaxValue < 0)
+                {
                     MaxValue = 0;
+                }
             }
         }
     }
@@ -242,19 +263,25 @@ namespace ClassicUO.Game.UI.Gumps
             CanCloseWithRightClick = false;
             IsFromServer = true;
 
-            Add(_resizePic = new ResizePic(0x13EC)
-            {
-                Width = 400,
-                Height = 111111
-            });
+            Add
+            (
+                _resizePic = new ResizePic(0x13EC)
+                {
+                    Width = 400,
+                    Height = 111111
+                }
+            );
 
             Label l;
 
-            Add(l = new Label(name, false, 0x0386, 370, 1)
-            {
-                X = 20,
-                Y = 16
-            });
+            Add
+            (
+                l = new Label(name, false, 0x0386, 370, 1)
+                {
+                    X = 20,
+                    Y = 16
+                }
+            );
 
             Width = _resizePic.Width;
             Height = l.Height;

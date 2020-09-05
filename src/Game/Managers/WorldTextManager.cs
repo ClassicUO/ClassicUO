@@ -1,4 +1,5 @@
 #region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,31 +18,29 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
 using System.Collections.Generic;
-
 using ClassicUO.Configuration;
 using ClassicUO.Game.GameObjects;
-using ClassicUO.Game.Scenes;
 using ClassicUO.Input;
 using ClassicUO.Renderer;
-
 using Microsoft.Xna.Framework;
-
 
 namespace ClassicUO.Game.Managers
 {
     internal class TextRenderer : TextObject
     {
         private readonly List<Rectangle> _bounds = new List<Rectangle>();
-        protected TextObject _firstNode, _drawPointer;
 
         public TextRenderer()
         {
             _firstNode = this;
         }
+
+        protected TextObject _firstNode, _drawPointer;
 
         public override void Destroy()
         {
@@ -61,12 +60,16 @@ namespace ClassicUO.Game.Managers
             for (TextObject item = _drawPointer; item != null; item = item.DLeft)
             {
                 if (item.RenderedText == null || item.RenderedText.IsDestroyed || item.RenderedText.Texture == null)
+                {
                     continue;
+                }
 
                 if (item.Time >= ClassicUO.Time.Ticks)
                 {
                     if (item.Owner == null || item.Owner.UseInRender != renderIndex)
+                    {
                         continue;
+                    }
                 }
 
                 if (item.RenderedText.Texture.Contains(mouseX - startX - item.RealScreenPosition.X, mouseY - startY - item.RealScreenPosition.Y))
@@ -80,10 +83,14 @@ namespace ClassicUO.Game.Managers
                 if (isGump)
                 {
                     if (t.IsTextGump)
+                    {
                         t.ToTopD();
+                    }
                 }
                 else
+                {
                     MoveToTop(t);
+                }
             }
         }
 
@@ -98,8 +105,10 @@ namespace ClassicUO.Game.Managers
 
             for (TextObject o = _drawPointer; o != null; o = o.DLeft)
             {
-                if (o.IsDestroyed || o.RenderedText == null || o.RenderedText.IsDestroyed || o.RenderedText.Texture == null || o.Time < ClassicUO.Time.Ticks || (o.Owner.UseInRender != renderIndex && !isGump))
+                if (o.IsDestroyed || o.RenderedText == null || o.RenderedText.IsDestroyed || o.RenderedText.Texture == null || o.Time < ClassicUO.Time.Ticks || o.Owner.UseInRender != renderIndex && !isGump)
+                {
                     continue;
+                }
 
                 ushort hue = 0;
 
@@ -108,7 +117,9 @@ namespace ClassicUO.Game.Managers
                 if (o.IsTransparent)
                 {
                     if (o.Alpha == 0xFF)
+                    {
                         alpha = 1f - 0x7F / 255f;
+                    }
                 }
 
                 int x = o.RealScreenPosition.X;
@@ -117,9 +128,13 @@ namespace ClassicUO.Game.Managers
                 if (o.RenderedText.Texture.Contains(mouseX - x - startX, mouseY - y - startY))
                 {
                     if (isGump)
+                    {
                         SelectedObject.LastObject = o;
+                    }
                     else
+                    {
                         SelectedObject.Object = o;
+                    }
                 }
 
                 if (!isGump)
@@ -142,7 +157,9 @@ namespace ClassicUO.Game.Managers
         public void MoveToTop(TextObject obj)
         {
             if (obj == null)
+            {
                 return;
+            }
 
             obj.UnlinkD();
 
@@ -152,7 +169,9 @@ namespace ClassicUO.Game.Managers
             obj.DRight = next;
 
             if (next != null)
+            {
                 next.DLeft = obj;
+            }
         }
 
         public void ProcessWorldText(bool doit)
@@ -160,7 +179,9 @@ namespace ClassicUO.Game.Managers
             if (doit)
             {
                 if (_bounds.Count != 0)
+                {
                     _bounds.Clear();
+                }
             }
 
             for (_drawPointer = _firstNode; _drawPointer != null; _drawPointer = _drawPointer.DRight)
@@ -180,7 +201,9 @@ namespace ClassicUO.Game.Managers
                 }
 
                 if (_drawPointer.DRight == null)
+                {
                     break;
+                }
             }
         }
 
@@ -195,11 +218,15 @@ namespace ClassicUO.Game.Managers
                     delta /= 10;
 
                     if (delta > 100)
+                    {
                         delta = 100;
+                    }
                     else if (delta < 1)
+                    {
                         delta = 0;
+                    }
 
-                    delta = (255 * delta) / 100;
+                    delta = 255 * delta / 100;
 
                     if (!msg.IsTransparent || delta <= 0x7F)
                     {
@@ -215,7 +242,7 @@ namespace ClassicUO.Game.Managers
         {
             bool result = false;
 
-            Rectangle rect = new Rectangle()
+            Rectangle rect = new Rectangle
             {
                 X = msg.RealScreenPosition.X,
                 Y = msg.RealScreenPosition.Y,
@@ -225,22 +252,27 @@ namespace ClassicUO.Game.Managers
 
             for (int i = 0; i < _bounds.Count; i++)
             {
-                if (_bounds[i].Intersects(rect))
+                if (_bounds[i]
+                    .Intersects(rect))
                 {
                     result = true;
+
                     break;
                 }
             }
 
             _bounds.Add(rect);
+
             return result;
         }
 
         public void AddMessage(TextObject obj)
         {
             if (obj == null)
+            {
                 return;
-            
+            }
+
             obj.UnlinkD();
 
             TextObject item = _firstNode;
@@ -273,7 +305,9 @@ namespace ClassicUO.Game.Managers
                 TextObject first = _firstNode;
 
                 while (first?.DLeft != null)
+                {
                     first = first.DLeft;
+                }
 
                 while (first != null)
                 {
@@ -291,7 +325,9 @@ namespace ClassicUO.Game.Managers
                 TextObject first = _drawPointer;
 
                 while (first?.DLeft != null)
+                {
                     first = first.DLeft;
+                }
 
                 while (first != null)
                 {
@@ -303,7 +339,7 @@ namespace ClassicUO.Game.Managers
                     first = next;
                 }
             }
-           
+
             _firstNode = this;
             _firstNode.DLeft = null;
             _firstNode.DRight = null;
@@ -327,7 +363,7 @@ namespace ClassicUO.Game.Managers
 
             if (_toRemoveDamages.Count > 0)
             {
-                foreach ( uint s in _toRemoveDamages)
+                foreach (uint s in _toRemoveDamages)
                 {
                     _damages.Remove(s);
                 }
@@ -335,8 +371,6 @@ namespace ClassicUO.Game.Managers
                 _toRemoveDamages.Clear();
             }
         }
-
-
 
 
         public override void Draw(UltimaBatcher2D batcher, int startX, int startY, int renderIndex, bool isGump = false)
@@ -362,7 +396,9 @@ namespace ClassicUO.Game.Managers
                         }
                     }
                     else
+                    {
                         continue;
+                    }
                 }
 
                 overheadDamage.Value.Draw(batcher);
@@ -389,7 +425,10 @@ namespace ClassicUO.Game.Managers
             {
                 overheadDamage.Value.Update();
 
-                if (overheadDamage.Value.IsEmpty) _toRemoveDamages.Add(overheadDamage.Key);
+                if (overheadDamage.Value.IsEmpty)
+                {
+                    _toRemoveDamages.Add(overheadDamage.Key);
+                }
             }
         }
 

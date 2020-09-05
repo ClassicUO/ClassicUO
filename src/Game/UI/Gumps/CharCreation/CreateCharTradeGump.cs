@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,10 +18,10 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System.Linq;
-
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
@@ -48,10 +49,13 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                 skill.Lock = Lock.Locked;
             }
 
-            Add(new ResizePic(2600)
-            {
-                X = 100, Y = 80, Width = 470, Height = 372
-            });
+            Add
+            (
+                new ResizePic(2600)
+                {
+                    X = 100, Y = 80, Width = 470, Height = 372
+                }
+            );
 
             // center menu with fancy top
             // public GumpPic(AControl parent, int x, int y, int gumpID, int hue)
@@ -61,26 +65,38 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
             // title text
             //TextLabelAscii(AControl parent, int x, int y, int font, int hue, string text, int width = 400)
-            Add(new Label(ClilocLoader.Instance.GetString(3000326), false, 0x0386, font: 2)
-            {
-                X = 148, Y = 132
-            });
+            Add
+            (
+                new Label(ClilocLoader.Instance.GetString(3000326), false, 0x0386, font: 2)
+                {
+                    X = 148, Y = 132
+                }
+            );
 
             // strength, dexterity, intelligence
-            Add(new Label(ClilocLoader.Instance.GetString(3000111), false, 1, font: 1)
-            {
-                X = 158, Y = 170
-            });
+            Add
+            (
+                new Label(ClilocLoader.Instance.GetString(3000111), false, 1, font: 1)
+                {
+                    X = 158, Y = 170
+                }
+            );
 
-            Add(new Label(ClilocLoader.Instance.GetString(3000112), false, 1, font: 1)
-            {
-                X = 158, Y = 250
-            });
+            Add
+            (
+                new Label(ClilocLoader.Instance.GetString(3000112), false, 1, font: 1)
+                {
+                    X = 158, Y = 250
+                }
+            );
 
-            Add(new Label(ClilocLoader.Instance.GetString(3000113), false, 1, font: 1)
-            {
-                X = 158, Y = 330
-            });
+            Add
+            (
+                new Label(ClilocLoader.Instance.GetString(3000113), false, 1, font: 1)
+                {
+                    X = 158, Y = 330
+                }
+            );
 
             // sliders for attributes
             _attributeSliders = new HSliderBar[3];
@@ -88,10 +104,15 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             Add(_attributeSliders[1] = new HSliderBar(164, 276, 93, 10, 60, ProfessionInfo._VoidStats[1], HSliderBarStyle.MetalWidgetRecessedBar, true));
             Add(_attributeSliders[2] = new HSliderBar(164, 356, 93, 10, 60, ProfessionInfo._VoidStats[2], HSliderBarStyle.MetalWidgetRecessedBar, true));
 
-            string[] skillList = SkillsLoader.Instance.SortedSkills.Select(s => ( 
-                                                                            (s.Index == 52 || s.Index == 47 || 
-                                                                             s.Index == 53 && (World.ClientFeatures.Flags & CharacterListFlags.CLF_SAMURAI_NINJA) == 0)) ||
-                                                                             s.Index == 54 ? "" : s.Name).ToArray();
+            string[] skillList = SkillsLoader.Instance.SortedSkills.Select
+                                             (
+                                                 s => s.Index == 52 || s.Index == 47 ||
+                                                      s.Index == 53 && (World.ClientFeatures.Flags & CharacterListFlags.CLF_SAMURAI_NINJA) == 0 ||
+                                                      s.Index == 54
+                                                     ? ""
+                                                     : s.Name
+                                             )
+                                             .ToArray();
 
             int y = 172;
             _skillSliders = new HSliderBar[CharCreationGump._skillsCount];
@@ -104,22 +125,31 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                 y += 70;
             }
 
-            Add(new Button((int) Buttons.Prev, 0x15A1, 0x15A3, 0x15A2)
-            {
-                X = 586, Y = 445, ButtonAction = ButtonAction.Activate
-            });
+            Add
+            (
+                new Button((int) Buttons.Prev, 0x15A1, 0x15A3, 0x15A2)
+                {
+                    X = 586, Y = 445, ButtonAction = ButtonAction.Activate
+                }
+            );
 
-            Add(new Button((int) Buttons.Next, 0x15A4, 0x15A6, 0x15A5)
-            {
-                X = 610, Y = 445, ButtonAction = ButtonAction.Activate
-            });
+            Add
+            (
+                new Button((int) Buttons.Next, 0x15A4, 0x15A6, 0x15A5)
+                {
+                    X = 610, Y = 445, ButtonAction = ButtonAction.Activate
+                }
+            );
 
             for (int i = 0; i < _attributeSliders.Length; i++)
             {
                 for (int j = 0; j < _attributeSliders.Length; j++)
                 {
                     if (i != j)
-                        _attributeSliders[i].AddParisSlider(_attributeSliders[j]);
+                    {
+                        _attributeSliders[i]
+                            .AddParisSlider(_attributeSliders[j]);
+                    }
                 }
             }
 
@@ -128,7 +158,10 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                 for (int j = 0; j < _skillSliders.Length; j++)
                 {
                     if (i != j)
-                        _skillSliders[i].AddParisSlider(_skillSliders[j]);
+                    {
+                        _skillSliders[i]
+                            .AddParisSlider(_skillSliders[j]);
+                    }
                 }
             }
         }
@@ -150,19 +183,30 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                     {
                         for (int i = 0; i < _skills.Length; i++)
                         {
-                            if (_skills[i].SelectedIndex != -1)
+                            if (_skills[i]
+                                .SelectedIndex != -1)
                             {
-                                Skill skill = _character.Skills[SkillsLoader.Instance.SortedSkills[_skills[i].SelectedIndex].Index];
-                                skill.ValueFixed = (ushort) _skillSliders[i].Value;
+                                Skill skill = _character.Skills[SkillsLoader.Instance.SortedSkills[_skills[i]
+                                                                                                       .SelectedIndex]
+                                                                            .Index];
+
+                                skill.ValueFixed = (ushort) _skillSliders[i]
+                                    .Value;
+
                                 skill.BaseFixed = 0;
                                 skill.CapFixed = 0;
                                 skill.Lock = Lock.Locked;
                             }
                         }
 
-                        _character.Strength = (ushort) _attributeSliders[0].Value;
-                        _character.Intelligence = (ushort) _attributeSliders[1].Value;
-                        _character.Dexterity = (ushort) _attributeSliders[2].Value;
+                        _character.Strength = (ushort) _attributeSliders[0]
+                            .Value;
+
+                        _character.Intelligence = (ushort) _attributeSliders[1]
+                            .Value;
+
+                        _character.Dexterity = (ushort) _attributeSliders[2]
+                            .Value;
 
                         charCreationGump.SetAttributes(true);
                     }
@@ -177,18 +221,21 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
         {
             if (_skills.All(s => s.SelectedIndex >= 0))
             {
-                int duplicated = _skills.GroupBy(o => o.SelectedIndex).Count(o => o.Count() > 1);
+                int duplicated = _skills.GroupBy(o => o.SelectedIndex)
+                                        .Count(o => o.Count() > 1);
 
                 if (duplicated > 0)
                 {
-                    UIManager.GetGump<CharCreationGump>()?.ShowMessage(ClilocLoader.Instance.GetString(1080032));
+                    UIManager.GetGump<CharCreationGump>()
+                             ?.ShowMessage(ClilocLoader.Instance.GetString(1080032));
 
                     return false;
                 }
             }
             else
             {
-                UIManager.GetGump<CharCreationGump>()?.ShowMessage(ClilocLoader.Instance.GetString(1080032));
+                UIManager.GetGump<CharCreationGump>()
+                         ?.ShowMessage(ClilocLoader.Instance.GetString(1080032));
 
                 return false;
             }

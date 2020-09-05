@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,15 +18,14 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
 using System.Linq;
-
 using ClassicUO.Game.Managers;
 using ClassicUO.Input;
 using ClassicUO.Renderer;
-
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Controls
@@ -33,9 +33,9 @@ namespace ClassicUO.Game.UI.Controls
     internal class Combobox : Control
     {
         private readonly byte _font;
+        private string[] _items;
         private readonly Label _label;
         private readonly int _maxHeight;
-        private string[] _items;
         private int _selectedIndex;
 
         public Combobox(int x, int y, int width, string[] items, int selected = -1, int maxHeight = 0, bool showArrow = true, string emptyString = "", byte font = 9)
@@ -49,19 +49,28 @@ namespace ClassicUO.Game.UI.Controls
             _maxHeight = maxHeight;
             _font = font;
 
-            Add(new ResizePic(0x0BB8)
-            {
-                Width = width, Height = Height
-            });
+            Add
+            (
+                new ResizePic(0x0BB8)
+                {
+                    Width = width, Height = Height
+                }
+            );
+
             string initialText = selected > -1 ? items[selected] : emptyString;
 
-            Add(_label = new Label(initialText, false, 0x0453, font: _font)
-            {
-                X = 2, Y = 5
-            });
+            Add
+            (
+                _label = new Label(initialText, false, 0x0453, font: _font)
+                {
+                    X = 2, Y = 5
+                }
+            );
 
             if (showArrow)
+            {
                 Add(new GumpPic(width - 18, 2, 0x00FC, 0));
+            }
         }
 
         public bool IsOpen { get; set; }
@@ -76,7 +85,10 @@ namespace ClassicUO.Game.UI.Controls
                 if (_items != null)
                 {
                     _label.Text = _items[value];
-                    UIManager.GetGump<ComboboxContextMenu>()?.Dispose();
+
+                    UIManager.GetGump<ComboboxContextMenu>()
+                             ?.Dispose();
+
                     OnOptionSelected?.Invoke(this, value);
                 }
             }
@@ -106,14 +118,16 @@ namespace ClassicUO.Game.UI.Controls
                 ScissorStack.PopScissors(batcher.GraphicsDevice);
             }
 
-            return true; 
+            return true;
         }
 
 
         protected override void OnMouseUp(int x, int y, MouseButtonType button)
         {
             if (button != MouseButtonType.Left)
+            {
                 return;
+            }
 
             OnBeforeContextMenu?.Invoke(this, null);
 
@@ -122,7 +136,12 @@ namespace ClassicUO.Game.UI.Controls
                 X = ScreenCoordinateX,
                 Y = ScreenCoordinateY
             };
-            if (contextMenu.Height + ScreenCoordinateY > Client.Game.Window.ClientBounds.Height) contextMenu.Y -= contextMenu.Height + ScreenCoordinateY - Client.Game.Window.ClientBounds.Height;
+
+            if (contextMenu.Height + ScreenCoordinateY > Client.Game.Window.ClientBounds.Height)
+            {
+                contextMenu.Y -= contextMenu.Height + ScreenCoordinateY - Client.Game.Window.ClientBounds.Height;
+            }
+
             UIManager.Add(contextMenu);
             base.OnMouseUp(x, y, button);
         }
@@ -144,7 +163,9 @@ namespace ClassicUO.Game.UI.Controls
                     string item = items[i];
 
                     if (item == null)
+                    {
                         item = string.Empty;
+                    }
 
                     HoveredLabel label = new HoveredLabel(item, false, 0x0453, 0x0453, 0x0453, font: _box._font)
                     {
@@ -154,6 +175,7 @@ namespace ClassicUO.Game.UI.Controls
                         DrawBackgroundCurrentIndex = true,
                         IsVisible = item.Length != 0
                     };
+
                     label.MouseUp += Label_MouseUp;
                     labels[index++] = label;
                 }
@@ -164,6 +186,7 @@ namespace ClassicUO.Game.UI.Controls
                 if (maxHeight != 0 && totalHeight > maxHeight)
                 {
                     ScrollArea scrollArea = new ScrollArea(0, 0, maxWidth + 15, maxHeight, true);
+
                     foreach (HoveredLabel label in labels)
                     {
                         label.Y = 0;
@@ -195,7 +218,9 @@ namespace ClassicUO.Game.UI.Controls
             private void Label_MouseUp(object sender, MouseEventArgs e)
             {
                 if (e.Button == MouseButtonType.Left)
+                {
                     _box.SelectedIndex = (int) ((Label) sender).Tag;
+                }
             }
         }
     }

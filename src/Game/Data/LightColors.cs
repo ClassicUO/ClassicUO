@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,6 +18,7 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 namespace ClassicUO.Game.Data
@@ -69,6 +71,7 @@ namespace ClassicUO.Game.Data
 
                 case 0x9F66:
                     color = 0;
+
                     break;
             }
 
@@ -95,40 +98,64 @@ namespace ClassicUO.Game.Data
                                                 {
                                                     if (id >= 0x1ECD && id <= 0x1ECF ||
                                                         id >= 0x1ED0 && id <= 0x1ED2)
+                                                    {
                                                         color = 62;
+                                                    }
                                                 }
                                                 else
+                                                {
                                                     color = 30;
+                                                }
                                             }
                                             else
+                                            {
                                                 color = 51;
+                                            }
                                         }
                                         else
+                                        {
                                             color = 61;
+                                        }
                                     }
                                     else
+                                    {
                                         color = 61;
+                                    }
                                 }
                                 else
+                                {
                                     color = 41;
+                                }
                             }
                             else
+                            {
                                 color = 0;
+                            }
                         }
                         else
+                        {
                             color = 0;
+                        }
                     }
                     else
+                    {
                         color = 0;
+                    }
                 }
                 else
+                {
                     color = 0;
+                }
             }
             else
+            {
                 color = 40;
+            }
 
             if (id == 0x1FD4 || id == 0x0F6C)
+            {
                 color = 2;
+            }
 
             if (id < 0x0E2D || id > 0x0E30)
             {
@@ -183,49 +210,77 @@ namespace ClassicUO.Game.Data
                                                                         if (id >= 0x983B &&
                                                                             id <= 0x983D ||
                                                                             id >= 0x983F && id <= 0x9841)
+                                                                        {
                                                                             color = 30;
+                                                                        }
 
                                                                         break;
                                                                 }
                                                             }
                                                             else
+                                                            {
                                                                 color = 31;
+                                                            }
                                                         }
                                                         else
+                                                        {
                                                             color = 1;
+                                                        }
                                                     }
                                                     else
+                                                    {
                                                         color = 31;
+                                                    }
                                                 }
                                                 else
+                                                {
                                                     color = 6;
+                                                }
                                             }
                                             else
+                                            {
                                                 color = 6;
+                                            }
                                         }
                                         else
+                                        {
                                             color = 1;
+                                        }
                                     }
                                     else
+                                    {
                                         color = 31;
+                                    }
                                 }
                                 else
+                                {
                                     color = 31;
+                                }
                             }
                             else
+                            {
                                 color = 31;
+                            }
                         }
                         else
+                        {
                             color = 40;
+                        }
                     }
                     else
+                    {
                         color = 6;
+                    }
                 }
                 else
+                {
                     color = 40;
+                }
             }
             else
+            {
                 color = 0;
+            }
 
             return color;
         }

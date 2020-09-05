@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,12 +18,12 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System.Runtime.CompilerServices;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.Utility
 {
@@ -33,21 +34,21 @@ namespace ClassicUO.Utility
         {
             Matrix matrix = Matrix.Invert(transform);
 
-            float x =   (((in_point.X - viewport.X) / ((float) viewport.Width))  * 2f) - 1f;
-            float y = -((((in_point.Y - viewport.Y) / ((float) viewport.Height)) * 2f) - 1f);
+            float x = (in_point.X - viewport.X) / (float) viewport.Width * 2f - 1f;
+            float y = -((in_point.Y - viewport.Y) / (float) viewport.Height * 2f - 1f);
 
-            result.X = (int) ((x * matrix.M11) + (y * matrix.M21) + matrix.M41);
-            result.Y = (int) ((x * matrix.M12) + (y * matrix.M22) + matrix.M42);
+            result.X = (int) (x * matrix.M11 + y * matrix.M21 + matrix.M41);
+            result.Y = (int) (x * matrix.M12 + y * matrix.M22 + matrix.M42);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void WorldToScreenCoordinates(Rectangle viewport, ref Point in_point, ref Matrix transform, out Point result)
         {
-            float x = ((in_point.X * transform.M11) + (in_point.Y * transform.M21) + transform.M41);
-            float y = ((in_point.X * transform.M12) + (in_point.Y * transform.M22) + transform.M42);
+            float x = in_point.X * transform.M11 + in_point.Y * transform.M21 + transform.M41;
+            float y = in_point.X * transform.M12 + in_point.Y * transform.M22 + transform.M42;
 
-            result.X = (int) ((((x + 1f) * 0.5f) * viewport.Width) + viewport.X);
-            result.Y = (int) ((((-y + 1f) * 0.5f) * viewport.Height) + viewport.Y);
+            result.X = (int) ((x + 1f) * 0.5f * viewport.Width + viewport.X);
+            result.Y = (int) ((-y + 1f) * 0.5f * viewport.Height + viewport.Y);
         }
 
 
@@ -63,10 +64,12 @@ namespace ClassicUO.Utility
         internal static UOTexture32[] SplitTexture16(UOTexture32 original, int[,] partXYplusWidthHeight)
         {
             if (partXYplusWidthHeight.GetLength(0) == 0 || partXYplusWidthHeight.GetLength(1) < 4)
+            {
                 return null;
+            }
 
             UOTexture32[] r = new UOTexture32[partXYplusWidthHeight.GetLength(0)];
-            int pwidth = original.Width; //((original.Width + 1) >> 1) << 1;
+            int pwidth = original.Width;   //((original.Width + 1) >> 1) << 1;
             int pheight = original.Height; //((original.Height + 1) >> 1) << 1;
             uint[] originalData = original.Data;
 
@@ -86,9 +89,13 @@ namespace ClassicUO.Utility
 
                         //If a part goes outside of the source texture, then fill the overlapping part with transparent
                         if (y + py >= pheight || x + px >= pwidth)
+                        {
                             partData[partIndex] = 0;
+                        }
                         else
+                        {
                             partData[partIndex] = originalData[x + px + (y + py) * pwidth];
+                        }
                     }
                 }
 

@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,6 +18,7 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using ClassicUO.Game.GameObjects;
@@ -25,11 +27,10 @@ using ClassicUO.Renderer;
 
 namespace ClassicUO.Game.UI.Gumps
 {
-    abstract class TextContainerGump : Gump
+    internal abstract class TextContainerGump : Gump
     {
         protected TextContainerGump(uint local, uint server) : base(local, server)
         {
-
         }
 
         public TextRenderer TextRenderer { get; } = new TextRenderer();
@@ -38,10 +39,12 @@ namespace ClassicUO.Game.UI.Gumps
         public void AddText(TextObject msg)
         {
             if (msg == null)
+            {
                 return;
+            }
 
             msg.Time = Time.Ticks + 4000;
-           
+
             TextRenderer.AddMessage(msg);
         }
 
@@ -67,6 +70,7 @@ namespace ClassicUO.Game.UI.Gumps
             //TextRenderer.MoveToTopIfSelected();
             TextRenderer.ProcessWorldText(true);
             TextRenderer.Draw(batcher, x, y, -1, true);
+
             return true;
         }
     }

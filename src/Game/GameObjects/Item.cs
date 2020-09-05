@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,11 +18,10 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
-using System.Collections.Generic;
-using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
@@ -38,103 +38,65 @@ namespace ClassicUO.Game.GameObjects
 {
     internal partial class Item : Entity
     {
+        private static readonly QueuedPool<Item> _pool = new QueuedPool<Item>
+        (
+            Constants.PREDICTABLE_CHUNKS * 3, i =>
+            {
+                i.IsDestroyed = false;
+                i.Graphic = 0;
+                i.Amount = 0;
+                i.Container = 0xFFFF_FFFF;
+                i._isMulti = false;
+                i.Layer = 0;
+                i.Price = 0;
+                i.UsedLayer = false;
+                i._displayedGraphic = null;
+                i.X = 0;
+                i.Y = 0;
+                i.Z = 0;
+
+                i.LightID = 0;
+                i.MultiDistanceBonus = 0;
+                i.Flags = 0;
+                i.WantUpdateMulti = true;
+                i.MultiInfo = null;
+                i.MultiGraphic = 0;
+
+                i.AlphaHue = 0;
+                i.Name = null;
+                i.Direction = 0;
+                i.AnimIndex = 0;
+                i.Hits = 0;
+                i.HitsMax = 0;
+                i.LastStepTime = 0;
+                i.LastAnimationChangeTime = 0;
+
+                i.Clear();
+
+                i.IsClicked = false;
+                i.IsDamageable = false;
+                i.Offset = Vector3.Zero;
+
+                i.Opened = false;
+                i.TextContainer?.Clear();
+                i.IsFlipped = false;
+                i.FrameInfo = Rectangle.Empty;
+                i.UseObjectHandles = false;
+                i.ClosedObjectHandles = false;
+                i.ObjectHandlesOpened = false;
+                i.AlphaHue = 0;
+                i.AllowedToDraw = true;
+            }
+        );
+
+        private static readonly DataReader _reader = new DataReader();
         private ushort? _displayedGraphic;
         private bool _isMulti;
-
-
-        private static readonly QueuedPool<Item> _pool = new QueuedPool<Item>(Constants.PREDICTABLE_CHUNKS * 3, i =>
-        {
-            i.IsDestroyed = false;
-            i.Graphic = 0;
-            i.Amount = 0;
-            i.Container = 0xFFFF_FFFF;
-            i._isMulti = false;
-            i.Layer = 0;
-            i.Price = 0;
-            i.UsedLayer = false;
-            i._displayedGraphic = null;
-            i.X = 0;
-            i.Y = 0;
-            i.Z = 0;
-
-            i.LightID = 0;
-            i.MultiDistanceBonus = 0;
-            i.Flags = 0;
-            i.WantUpdateMulti = true;
-            i.MultiInfo = null;
-            i.MultiGraphic = 0;
-
-            i.AlphaHue = 0;
-            i.Name = null;
-            i.Direction = 0;
-            i.AnimIndex = 0;
-            i.Hits = 0;
-            i.HitsMax = 0;
-            i.LastStepTime = 0;
-            i.LastAnimationChangeTime = 0;
-
-            i.Clear();
-
-            i.IsClicked = false;
-            i.IsDamageable = false;
-            i.Offset = Vector3.Zero;
-
-            i.Opened = false;
-            i.TextContainer?.Clear();
-            i.IsFlipped = false;
-            i.FrameInfo = Rectangle.Empty;
-            i.UseObjectHandles = false;
-            i.ClosedObjectHandles = false;
-            i.ObjectHandlesOpened = false;
-            i.AlphaHue = 0;
-            i.AllowedToDraw = true;
-        });
 
 
         public Item() : base(0)
         {
         }
-
-
-        public static Item Create(uint serial)
-        {
-            Item i = _pool.GetOne();
-            i.Serial = serial;
-
-            return i;
-        }
-
-        public override void Destroy()
-        {
-            if (IsDestroyed)
-                return;
-
-            if (Opened)
-            {
-                UIManager.GetGump<ContainerGump>(Serial)?.Dispose();
-                UIManager.GetGump<SpellbookGump>(Serial)?.Dispose();
-                UIManager.GetGump<MapGump>(Serial)?.Dispose();
-
-                if (IsCorpse)
-                    UIManager.GetGump<GridLootGump>(Serial)?.Dispose();
-
-                UIManager.GetGump<BulletinBoardGump>(Serial)?.Dispose();
-                UIManager.GetGump<SplitMenuGump>(Serial)?.Dispose();
-
-                Opened = false;
-            }
-
-            base.Destroy();
-
-            _pool.ReturnOne(this);
-        }
-
-        public uint Price;
-        public ushort Amount;
-        public uint Container = 0xFFFF_FFFF;
-        public Layer Layer;
-        public bool UsedLayer;
-        public bool Opened;
 
         public bool IsCoin => Graphic >= 0x0EEA && Graphic <= 0x0EF2;
 
@@ -143,17 +105,26 @@ namespace ClassicUO.Game.GameObjects
             get
             {
                 if (_displayedGraphic.HasValue)
+                {
                     return _displayedGraphic.Value;
+                }
 
                 if (IsCoin)
                 {
                     if (Amount > 5)
+                    {
                         return (ushort) (Graphic + 2);
+                    }
+
                     if (Amount > 1)
+                    {
                         return (ushort) (Graphic + 1);
+                    }
                 }
                 else if (IsMulti)
+                {
                     return MultiGraphic;
+                }
 
                 return Graphic;
             }
@@ -179,12 +150,6 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
-        public bool IsDamageable;
-        public byte LightID;
-        public bool WantUpdateMulti = true;
-
-        public Rectangle? MultiInfo;
-
         public int MultiDistanceBonus { get; private set; }
 
         public bool IsCorpse => /*MathHelper.InRange(Graphic, 0x0ECA, 0x0ED2) ||*/ Graphic == 0x2006;
@@ -202,7 +167,9 @@ namespace ClassicUO.Game.GameObjects
                     item = World.Items.Get(item.Container);
 
                     if (item == null)
+                    {
                         return 0;
+                    }
                 }
 
                 return SerialHelper.IsMobile(item.Container) ? item.Container : item;
@@ -217,7 +184,66 @@ namespace ClassicUO.Game.GameObjects
             ItemData.Layer != (int) Layer.Face &&
             Graphic != 0;
 
-        private static readonly DataReader _reader = new DataReader();
+        public ushort Amount;
+        public uint Container = 0xFFFF_FFFF;
+
+        public bool IsDamageable;
+        public Layer Layer;
+        public byte LightID;
+
+        public Rectangle? MultiInfo;
+        public bool Opened;
+
+        public uint Price;
+        public bool UsedLayer;
+        public bool WantUpdateMulti = true;
+
+
+        public static Item Create(uint serial)
+        {
+            Item i = _pool.GetOne();
+            i.Serial = serial;
+
+            return i;
+        }
+
+        public override void Destroy()
+        {
+            if (IsDestroyed)
+            {
+                return;
+            }
+
+            if (Opened)
+            {
+                UIManager.GetGump<ContainerGump>(Serial)
+                         ?.Dispose();
+
+                UIManager.GetGump<SpellbookGump>(Serial)
+                         ?.Dispose();
+
+                UIManager.GetGump<MapGump>(Serial)
+                         ?.Dispose();
+
+                if (IsCorpse)
+                {
+                    UIManager.GetGump<GridLootGump>(Serial)
+                             ?.Dispose();
+                }
+
+                UIManager.GetGump<BulletinBoardGump>(Serial)
+                         ?.Dispose();
+
+                UIManager.GetGump<SplitMenuGump>(Serial)
+                         ?.Dispose();
+
+                Opened = false;
+            }
+
+            base.Destroy();
+
+            _pool.ReturnOne(this);
+        }
 
         private unsafe void LoadMulti()
         {
@@ -262,16 +288,29 @@ namespace ClassicUO.Game.GameObjects
                         MultiBlockNew* block = (MultiBlockNew*) (_reader.PositionAddress + i * sizeOf);
 
                         if (block->Unknown != 0)
+                        {
                             _reader.Skip((int) (block->Unknown * 4));
+                        }
 
                         if (block->X < minX)
+                        {
                             minX = block->X;
+                        }
+
                         if (block->X > maxX)
+                        {
                             maxX = block->X;
+                        }
+
                         if (block->Y < minY)
+                        {
                             minY = block->Y;
+                        }
+
                         if (block->Y > maxY)
+                        {
                             maxY = block->Y;
+                        }
 
                         if (block->Flags == 0 || block->Flags == 0x100)
                         {
@@ -313,13 +352,24 @@ namespace ClassicUO.Game.GameObjects
                     MultiBlock* block = (MultiBlock*) (MultiLoader.Instance.File.PositionAddress + i * MultiLoader.Instance.Offset);
 
                     if (block->X < minX)
+                    {
                         minX = block->X;
+                    }
+
                     if (block->X > maxX)
+                    {
                         maxX = block->X;
+                    }
+
                     if (block->Y < minY)
+                    {
                         minY = block->Y;
+                    }
+
                     if (block->Y > maxY)
+                    {
                         maxY = block->Y;
+                    }
 
                     if (block->Flags != 0)
                     {
@@ -345,7 +395,7 @@ namespace ClassicUO.Game.GameObjects
                 }
             }
 
-            MultiInfo = new Rectangle()
+            MultiInfo = new Rectangle
             {
                 X = minX,
                 Y = minY,
@@ -357,10 +407,14 @@ namespace ClassicUO.Game.GameObjects
 
             //house.Generate();
 
-            UIManager.GetGump<MiniMapGump>()?.RequestUpdateContents();
+            UIManager.GetGump<MiniMapGump>()
+                     ?.RequestUpdateContents();
 
             if (World.HouseManager.EntityIntoHouse(Serial, World.Player))
-                Client.Game.GetScene<GameScene>()?.UpdateMaxDrawZ(true);
+            {
+                Client.Game.GetScene<GameScene>()
+                      ?.UpdateMaxDrawZ(true);
+            }
 
             BoatMovingManager.ClearSteps(Serial);
         }
@@ -383,7 +437,9 @@ namespace ClassicUO.Game.GameObjects
                         Direction &= (Direction) 0x7F;
                     }
                     else
+                    {
                         UsedLayer = false;
+                    }
 
                     Layer = (Layer) Direction;
                     AllowedToDraw = true;
@@ -404,12 +460,15 @@ namespace ClassicUO.Game.GameObjects
         public override void Update(double totalMS, double frameMS)
         {
             if (IsDestroyed)
+            {
                 return;
+            }
 
             base.Update(totalMS, frameMS);
 
             ProcessAnimation(out _);
         }
+
         public override ushort GetGraphicForAnimation()
         {
             ushort graphic = Graphic;
@@ -744,9 +803,11 @@ namespace ClassicUO.Game.GameObjects
 
                         break;
                     }
+
                     case 0x3ECE: // serpentine dragon
                     {
                         graphic = 0x059A;
+
                         break;
                     }
 
@@ -763,6 +824,7 @@ namespace ClassicUO.Game.GameObjects
 
                     {
                         graphic = 0x01B0;
+
                         break;
                     }
 
@@ -770,6 +832,7 @@ namespace ClassicUO.Game.GameObjects
 
                     {
                         graphic = 0x04E6;
+
                         break;
                     }
 
@@ -777,6 +840,7 @@ namespace ClassicUO.Game.GameObjects
 
                     {
                         graphic = 0x04E7;
+
                         break;
                     }
 
@@ -784,6 +848,7 @@ namespace ClassicUO.Game.GameObjects
 
                     {
                         graphic = 0x042D;
+
                         break;
                     }
 
@@ -791,58 +856,72 @@ namespace ClassicUO.Game.GameObjects
 
                     {
                         graphic = 0x0579;
+
                         break;
                     }
 
                     case 0x3ECC:
                     {
                         graphic = 0x0582;
+
                         break;
                     }
 
                     case 0x3ED1: // CoconutCrab
                     {
                         graphic = 0x05E6;
+
                         break;
                     }
 
                     case 0x3ECB: // Lasher
                     {
                         graphic = 0x057F;
+
                         break;
                     }
 
                     case 0x3ED0: //SkeletalCat
                     {
                         graphic = 0x05A1;
+
                         break;
                     }
 
                     case 0x3ED2: // war boar
                     {
                         graphic = 0x05F6;
+
                         break;
                     }
 
                     case 0x3ECD: //Palomino
                     {
                         graphic = 0x0580;
+
                         break;
                     }
+
                     case 0x3ECF: //Eowmu
                     {
                         graphic = 0x05A0;
+
                         break;
                     }
                 }
 
                 if (ItemData.AnimID != 0)
+                {
                     graphic = ItemData.AnimID;
+                }
+
                 //else
                 //    graphic = 0xFFFF;
             }
             else if (IsCorpse)
+            {
                 return Amount;
+            }
 
             return graphic;
         }
@@ -850,15 +929,21 @@ namespace ClassicUO.Game.GameObjects
         public override void UpdateTextCoordsV()
         {
             if (TextContainer == null)
+            {
                 return;
+            }
 
-            var last = (TextObject) TextContainer.Items;
+            TextObject last = (TextObject) TextContainer.Items;
 
             while (last?.Next != null)
+            {
                 last = (TextObject) last.Next;
+            }
 
             if (last == null)
+            {
                 return;
+            }
 
             int offY = 0;
 
@@ -870,7 +955,7 @@ namespace ClassicUO.Game.GameObjects
 
                 if (texture != null)
                 {
-                    p.Y -= (texture.ImageRectangle.Height >> 1);
+                    p.Y -= texture.ImageRectangle.Height >> 1;
                 }
 
                 p.X += (int) Offset.X + 22;
@@ -883,13 +968,15 @@ namespace ClassicUO.Game.GameObjects
                     if (last.RenderedText != null && !last.RenderedText.IsDestroyed)
                     {
                         if (offY == 0 && last.Time < Time.Ticks)
+                        {
                             continue;
+                        }
 
                         last.OffsetY = offY;
                         offY += last.RenderedText.Height;
 
-                        last.RealScreenPosition.X = (p.X - (last.RenderedText.Width >> 1));
-                        last.RealScreenPosition.Y = (p.Y - offY);
+                        last.RealScreenPosition.X = p.X - (last.RenderedText.Width >> 1);
+                        last.RealScreenPosition.Y = p.Y - offY;
                     }
                 }
 
@@ -902,13 +989,15 @@ namespace ClassicUO.Game.GameObjects
                     if (last.RenderedText != null && !last.RenderedText.IsDestroyed)
                     {
                         if (offY == 0 && last.Time < Time.Ticks)
+                        {
                             continue;
+                        }
 
                         last.OffsetY = offY;
                         offY += last.RenderedText.Height;
 
-                        last.RealScreenPosition.X = ((last.X - (last.RenderedText.Width >> 1)));
-                        last.RealScreenPosition.Y = ((last.Y - offY));
+                        last.RealScreenPosition.X = last.X - (last.RenderedText.Width >> 1);
+                        last.RealScreenPosition.Y = last.Y - offY;
                     }
                 }
             }
@@ -942,13 +1031,18 @@ namespace ClassicUO.Game.GameObjects
                         byte animGroup = AnimationsLoader.Instance.GetDieGroupIndex(id, UsedLayer);
 
                         ushort hue = 0;
-                        AnimationDirection direction = AnimationsLoader.Instance.GetCorpseAnimationGroup(ref id, ref animGroup, ref hue).Direction[dir];
+
+                        AnimationDirection direction = AnimationsLoader.Instance.GetCorpseAnimationGroup(ref id, ref animGroup, ref hue)
+                                                                       .Direction[dir];
+
                         AnimationsLoader.Instance.AnimID = id;
                         AnimationsLoader.Instance.AnimGroup = animGroup;
                         AnimationsLoader.Instance.Direction = dir;
 
                         if (direction.FrameCount == 0 || direction.Frames == null)
+                        {
                             AnimationsLoader.Instance.LoadDirectionGroup(ref direction);
+                        }
 
                         if (direction.Address != 0 && direction.Size != 0 || direction.IsUOP)
                         {
@@ -956,7 +1050,10 @@ namespace ClassicUO.Game.GameObjects
                             int fc = direction.FrameCount;
 
                             if (frameIndex >= fc)
+                            {
                                 frameIndex = (sbyte) (fc - 1);
+                            }
+
                             AnimIndex = frameIndex;
                         }
                     }

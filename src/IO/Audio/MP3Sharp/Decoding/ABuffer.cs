@@ -1,4 +1,5 @@
 #region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,6 +18,7 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
@@ -27,7 +29,7 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
     internal abstract class ABuffer
     {
         public const int OBUFFERSIZE = 2 * 1152; // max. 2 * 1152 samples per frame
-        public const int MAXCHANNELS = 2; // max. number of channels
+        public const int MAXCHANNELS = 2;        // max. number of channels
 
         /// <summary>
         ///     Takes a 16 Bit PCM sample.
@@ -39,7 +41,10 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
         /// </summary>
         public virtual void AppendSamples(int channel, float[] f)
         {
-            for (int i = 0; i < 32; i++) Append(channel, Clip(f[i]));
+            for (int i = 0; i < 32; i++)
+            {
+                Append(channel, Clip(f[i]));
+            }
         }
 
         /// <summary>

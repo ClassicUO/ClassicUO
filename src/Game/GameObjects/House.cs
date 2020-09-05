@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,6 +18,7 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
@@ -38,9 +40,15 @@ namespace ClassicUO.Game.GameObjects
         }
 
         public uint Serial { get; }
-        public uint Revision;
         public List<Multi> Components { get; } = new List<Multi>();
+
+        public bool Equals(uint other)
+        {
+            return Serial == other;
+        }
+
         public bool IsCustom;
+        public uint Revision;
 
         public IEnumerable<Multi> GetMultiAt(int x, int y)
         {
@@ -89,10 +97,12 @@ namespace ClassicUO.Game.GameObjects
                         if (component.Z <= item.Z)
                         {
                             if ((component.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_STAIR) == 0)
+                            {
                                 component.State |= CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_DONT_REMOVE;
+                            }
                         }
 
-                        if (((state == 0) || (component.State & state) != 0))
+                        if (state == 0 || (component.State & state) != 0)
                         {
                             component.Destroy();
                         }
@@ -108,11 +118,6 @@ namespace ClassicUO.Game.GameObjects
                     }
                 }
             }
-        }
-
-        public bool Equals(uint other)
-        {
-            return Serial == other;
         }
 
         public void Fill(RawList<CustomBuildObject> list)
@@ -160,7 +165,9 @@ namespace ClassicUO.Game.GameObjects
                 }
 
                 if (pushtotile)
+                {
                     s.AddToTile();
+                }
             }
 
             World.CustomHouseManager?.GenerateFloorPlace();
@@ -171,14 +178,19 @@ namespace ClassicUO.Game.GameObjects
             Item item = World.Items.Get(Serial);
 
             if (item != null && !item.IsDestroyed)
+            {
                 item.WantUpdateMulti = true;
+            }
 
             for (int i = 0; i < Components.Count; i++)
             {
                 Multi s = Components[i];
 
                 if (!s.IsCustom && removeCustomOnly)
+                {
                     continue;
+                }
+
                 s.Destroy();
                 Components.RemoveAt(i--);
             }

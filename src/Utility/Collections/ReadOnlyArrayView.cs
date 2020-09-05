@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,6 +18,7 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System.Collections;
@@ -63,21 +65,30 @@ namespace ClassicUO.Utility.Collections
             }
         }
 
-        public Enumerator GetEnumerator() => new Enumerator(this);
+        public Enumerator GetEnumerator()
+        {
+            return new Enumerator(this);
+        }
 
-        IEnumerator<T> IEnumerable<T>.GetEnumerator() => GetEnumerator();
+        IEnumerator<T> IEnumerable<T>.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
 
-        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
 
         public struct Enumerator : IEnumerator<T>
         {
-            private ReadOnlyArrayView<T> _view;
+            private readonly ReadOnlyArrayView<T> _view;
             private int _currentIndex;
 
             public Enumerator(ReadOnlyArrayView<T> view)
             {
                 _view = view;
-                _currentIndex = (int)view._start;
+                _currentIndex = (int) view._start;
             }
 
             public T Current => _view._items[_currentIndex];
@@ -85,9 +96,10 @@ namespace ClassicUO.Utility.Collections
 
             public bool MoveNext()
             {
-                if (_currentIndex != (_view._start + _view.Count) - 1)
+                if (_currentIndex != _view._start + _view.Count - 1)
                 {
                     _currentIndex += 1;
+
                     return true;
                 }
 
@@ -96,10 +108,12 @@ namespace ClassicUO.Utility.Collections
 
             public void Reset()
             {
-                _currentIndex = (int)_view._start;
+                _currentIndex = (int) _view._start;
             }
 
-            public void Dispose() { }
+            public void Dispose()
+            {
+            }
         }
     }
 }

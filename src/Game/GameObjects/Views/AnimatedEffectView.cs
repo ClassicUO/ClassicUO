@@ -1,4 +1,5 @@
 #region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,10 +18,10 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
-
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Scenes;
@@ -32,63 +33,82 @@ namespace ClassicUO.Game.GameObjects
 {
     internal sealed partial class AnimatedItemEffect
     {
-        private static readonly Lazy<BlendState> _multiplyBlendState = new Lazy<BlendState>(() =>
-        {
-            BlendState state = new BlendState
+        private static readonly Lazy<BlendState> _multiplyBlendState = new Lazy<BlendState>
+        (
+            () =>
             {
-                ColorSourceBlend = Microsoft.Xna.Framework.Graphics.Blend.Zero, ColorDestinationBlend = Microsoft.Xna.Framework.Graphics.Blend.SourceColor
-            };
+                BlendState state = new BlendState
+                {
+                    ColorSourceBlend = Microsoft.Xna.Framework.Graphics.Blend.Zero, ColorDestinationBlend = Microsoft.Xna.Framework.Graphics.Blend.SourceColor
+                };
 
-            return state;
-        });
+                return state;
+            }
+        );
 
-        private static readonly Lazy<BlendState> _screenBlendState = new Lazy<BlendState>(() =>
-        {
-            BlendState state = new BlendState
+        private static readonly Lazy<BlendState> _screenBlendState = new Lazy<BlendState>
+        (
+            () =>
             {
-                ColorSourceBlend = Microsoft.Xna.Framework.Graphics.Blend.One, ColorDestinationBlend = Microsoft.Xna.Framework.Graphics.Blend.One
-            };
+                BlendState state = new BlendState
+                {
+                    ColorSourceBlend = Microsoft.Xna.Framework.Graphics.Blend.One, ColorDestinationBlend = Microsoft.Xna.Framework.Graphics.Blend.One
+                };
 
-            return state;
-        });
+                return state;
+            }
+        );
 
-        private static readonly Lazy<BlendState> _screenLessBlendState = new Lazy<BlendState>(() =>
-        {
-            BlendState state = new BlendState
+        private static readonly Lazy<BlendState> _screenLessBlendState = new Lazy<BlendState>
+        (
+            () =>
             {
-                ColorSourceBlend = Microsoft.Xna.Framework.Graphics.Blend.DestinationColor, ColorDestinationBlend = Microsoft.Xna.Framework.Graphics.Blend.InverseSourceAlpha
-            };
+                BlendState state = new BlendState
+                {
+                    ColorSourceBlend = Microsoft.Xna.Framework.Graphics.Blend.DestinationColor, ColorDestinationBlend = Microsoft.Xna.Framework.Graphics.Blend.InverseSourceAlpha
+                };
 
-            return state;
-        });
+                return state;
+            }
+        );
 
-        private static readonly Lazy<BlendState> _normalHalfBlendState = new Lazy<BlendState>(() =>
-        {
-            BlendState state = new BlendState
+        private static readonly Lazy<BlendState> _normalHalfBlendState = new Lazy<BlendState>
+        (
+            () =>
             {
-                ColorSourceBlend = Microsoft.Xna.Framework.Graphics.Blend.DestinationColor, ColorDestinationBlend = Microsoft.Xna.Framework.Graphics.Blend.SourceColor
-            };
+                BlendState state = new BlendState
+                {
+                    ColorSourceBlend = Microsoft.Xna.Framework.Graphics.Blend.DestinationColor, ColorDestinationBlend = Microsoft.Xna.Framework.Graphics.Blend.SourceColor
+                };
 
-            return state;
-        });
+                return state;
+            }
+        );
 
-        private static readonly Lazy<BlendState> _shadowBlueBlendState = new Lazy<BlendState>(() =>
-        {
-            BlendState state = new BlendState
+        private static readonly Lazy<BlendState> _shadowBlueBlendState = new Lazy<BlendState>
+        (
+            () =>
             {
-                ColorSourceBlend = Microsoft.Xna.Framework.Graphics.Blend.SourceColor, ColorDestinationBlend = Microsoft.Xna.Framework.Graphics.Blend.InverseSourceColor, ColorBlendFunction = BlendFunction.ReverseSubtract
-            };
+                BlendState state = new BlendState
+                {
+                    ColorSourceBlend = Microsoft.Xna.Framework.Graphics.Blend.SourceColor, ColorDestinationBlend = Microsoft.Xna.Framework.Graphics.Blend.InverseSourceColor, ColorBlendFunction = BlendFunction.ReverseSubtract
+                };
 
-            return state;
-        });
+                return state;
+            }
+        );
 
         public override bool Draw(UltimaBatcher2D batcher, int posX, int posY)
         {
             if (IsDestroyed || !AllowedToDraw)
+            {
                 return false;
+            }
 
             if (AnimationGraphic == 0xFFFF)
+            {
                 return false;
+            }
 
             ResetHueVector();
 

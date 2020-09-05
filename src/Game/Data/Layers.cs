@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,11 +18,12 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 namespace ClassicUO.Game.Data
 {
-    enum Layer : byte
+    internal enum Layer : byte
     {
         Invalid = 0x00,
         OneHanded = 0x01,

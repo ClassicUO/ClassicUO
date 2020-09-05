@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,6 +18,7 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
@@ -30,7 +32,9 @@ namespace ClassicUO.Utility
         public static string CreateFolderIfNotExists(string path, params string[] parts)
         {
             if (!Directory.Exists(path))
+            {
                 Directory.CreateDirectory(path);
+            }
 
             StringBuilder sb = new StringBuilder();
 
@@ -41,7 +45,9 @@ namespace ClassicUO.Utility
                 string r = sb.ToString();
 
                 if (!Directory.Exists(r))
+                {
                     Directory.CreateDirectory(r);
+                }
 
                 path = r;
                 sb.Clear();
@@ -53,7 +59,9 @@ namespace ClassicUO.Utility
         public static void EnsureFileExists(string path)
         {
             if (!File.Exists(path))
+            {
                 throw new FileNotFoundException(path);
+            }
         }
 
 
@@ -73,6 +81,7 @@ namespace ClassicUO.Utility
             {
                 DirectoryInfo nextTargetSubDir =
                     target.CreateSubdirectory(diSourceSubDir.Name);
+
                 diSourceSubDir.CopyAllTo(nextTargetSubDir);
             }
         }

@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,12 +18,12 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
 using System.IO;
 using System.Xml;
-
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
@@ -37,14 +38,14 @@ namespace ClassicUO.Game.UI.Gumps
 {
     internal class JournalGump : Gump
     {
+        private const int _diffY = 22;
         private readonly ExpandableScroll _background;
+        private readonly Checkbox[] _filters_chekboxes = new Checkbox[4];
+        private readonly GumpPic _gumpPic;
+        private readonly HitBox _hitBox;
+        private bool _isMinimized;
         private readonly RenderedTextList _journalEntries;
         private readonly ScrollFlag _scrollBar;
-        private const int _diffY = 22;
-        private bool _isMinimized;
-        private HitBox _hitBox;
-        private GumpPic _gumpPic;
-        private Checkbox[] _filters_chekboxes = new Checkbox[4];
 
         public JournalGump() : base(Constants.JOURNAL_LOCALSERIAL, 0)
         {
@@ -52,10 +53,14 @@ namespace ClassicUO.Game.UI.Gumps
             CanMove = true;
             CanCloseWithRightClick = true;
             Add(_gumpPic = new GumpPic(160, 0, 0x82D, 0));
-            Add(_background = new ExpandableScroll(0, _diffY, Height - _diffY, 0x1F40)
-            {
-                TitleGumpID = 0x82A
-            });
+
+            Add
+            (
+                _background = new ExpandableScroll(0, _diffY, Height - _diffY, 0x1F40)
+                {
+                    TitleGumpID = 0x82A
+                }
+            );
 
             const ushort DARK_MODE_JOURNAL_HUE = 903;
 
@@ -63,14 +68,19 @@ namespace ClassicUO.Game.UI.Gumps
             int width = FontsLoader.Instance.GetWidthASCII(6, str);
 
             Checkbox darkMode;
-            Add(darkMode = new Checkbox(0x00D2, 0x00D3, str, 6, 0x0288, false)
-            {
-                X = _background.Width - width -2, 
-                Y = _diffY + 7,
-                IsChecked = ProfileManager.Current.JournalDarkMode
-            });
 
-            Hue = (ushort)(ProfileManager.Current.JournalDarkMode ? DARK_MODE_JOURNAL_HUE : 0);
+            Add
+            (
+                darkMode = new Checkbox(0x00D2, 0x00D3, str, 6, 0x0288, false)
+                {
+                    X = _background.Width - width - 2,
+                    Y = _diffY + 7,
+                    IsChecked = ProfileManager.Current.JournalDarkMode
+                }
+            );
+
+            Hue = (ushort) (ProfileManager.Current.JournalDarkMode ? DARK_MODE_JOURNAL_HUE : 0);
+
             darkMode.ValueChanged += (sender, e) =>
             {
                 bool ok = ProfileManager.Current.JournalDarkMode = !ProfileManager.Current.JournalDarkMode;
@@ -87,7 +97,7 @@ namespace ClassicUO.Game.UI.Gumps
             _hitBox.MouseUp += _hitBox_MouseUp;
             _gumpPic.MouseDoubleClick += _gumpPic_MouseDoubleClick;
 
-            int cx = 43; // 63
+            int cx = 43;   // 63
             int dist = 75; // 85
             byte font = 6; // 1
 
@@ -97,18 +107,21 @@ namespace ClassicUO.Game.UI.Gumps
                 LocalSerial = 1,
                 IsChecked = ProfileManager.Current.ShowJournalSystem
             };
+
             _filters_chekboxes[1] = new Checkbox(0x00D2, 0x00D3, "Objects", font, 0x0386, false)
             {
                 X = cx + dist,
                 LocalSerial = 2,
                 IsChecked = ProfileManager.Current.ShowJournalObjects
             };
+
             _filters_chekboxes[2] = new Checkbox(0x00D2, 0x00D3, "Client", font, 0x0386, false)
             {
                 X = cx + dist * 2,
                 LocalSerial = 0,
                 IsChecked = ProfileManager.Current.ShowJournalClient
             };
+
             _filters_chekboxes[3] = new Checkbox(0x00D2, 0x00D3, "Guild", font, 0x0386, false)
             {
                 X = cx + dist * 3,
@@ -126,15 +139,22 @@ namespace ClassicUO.Game.UI.Gumps
                     {
                         case TEXT_TYPE.CLIENT:
                             ProfileManager.Current.ShowJournalClient = c.IsChecked;
+
                             break;
+
                         case TEXT_TYPE.SYSTEM:
                             ProfileManager.Current.ShowJournalSystem = c.IsChecked;
+
                             break;
+
                         case TEXT_TYPE.OBJECT:
                             ProfileManager.Current.ShowJournalObjects = c.IsChecked;
+
                             break;
+
                         case TEXT_TYPE.GUILD_ALLY:
                             ProfileManager.Current.ShowJournalGuildAlly = c.IsChecked;
+
                             break;
                     }
                 }
@@ -142,7 +162,9 @@ namespace ClassicUO.Game.UI.Gumps
 
             for (int i = 0; i < _filters_chekboxes.Length; i++)
             {
-                _filters_chekboxes[i].ValueChanged += on_check_box;
+                _filters_chekboxes[i]
+                    .ValueChanged += on_check_box;
+
                 Add(_filters_chekboxes[i]);
             }
 
@@ -210,14 +232,16 @@ namespace ClassicUO.Game.UI.Gumps
 
             for (int i = 0; i < _filters_chekboxes.Length; i++)
             {
-                _filters_chekboxes[i].Y = _background.Height - _filters_chekboxes[i].Height - _diffY + 10;
+                _filters_chekboxes[i]
+                    .Y = _background.Height - _filters_chekboxes[i]
+                    .Height - _diffY + 10;
             }
         }
 
         private void AddJournalEntry(object sender, JournalEntry entry)
         {
             string text = $"{(entry.Name != string.Empty ? $"{entry.Name}: " : string.Empty)}{entry.Text}";
-            
+
             _journalEntries.AddEntry(text, entry.Font, entry.Hue, entry.IsUnicode, entry.Time, entry.TextType);
         }
 
@@ -231,11 +255,13 @@ namespace ClassicUO.Game.UI.Gumps
         public override void Restore(BinaryReader reader)
         {
             base.Restore(reader);
-            if (Configuration.Profile.GumpsVersion == 2)
+
+            if (Profile.GumpsVersion == 2)
             {
                 reader.ReadUInt32();
                 _isMinimized = reader.ReadBoolean();
             }
+
             _background.Height = _background.SpecialHeight = reader.ReadInt32();
 
             if (Profile.GumpsVersion >= 3)
@@ -262,7 +288,9 @@ namespace ClassicUO.Game.UI.Gumps
         private void InitializeJournalEntries()
         {
             foreach (JournalEntry t in JournalManager.Entries)
+            {
                 AddJournalEntry(null, t);
+            }
 
             _scrollBar.MinValue = 0;
         }
@@ -288,8 +316,8 @@ namespace ClassicUO.Game.UI.Gumps
         private class RenderedTextList : Control
         {
             private readonly Deque<RenderedText> _entries, _hours;
-            private readonly Deque<TEXT_TYPE> _text_types;
             private readonly ScrollBarBase _scrollBar;
+            private readonly Deque<TEXT_TYPE> _text_types;
 
             public RenderedTextList(int x, int y, int width, int height, ScrollBarBase scrollBarControl)
             {
@@ -327,7 +355,9 @@ namespace ClassicUO.Game.UI.Gumps
 
 
                     if (!CanBeDrawn(type))
+                    {
                         continue;
+                    }
 
 
                     if (height + t.Height <= _scrollBar.Value)
@@ -373,8 +403,11 @@ namespace ClassicUO.Game.UI.Gumps
             public override void Update(double totalMS, double frameMS)
             {
                 base.Update(totalMS, frameMS);
+
                 if (!IsVisible)
+                {
                     return;
+                }
 
                 _scrollBar.X = X + Width - (_scrollBar.Width >> 1) + 5;
                 _scrollBar.Height = Height;
@@ -390,7 +423,10 @@ namespace ClassicUO.Game.UI.Gumps
                 for (int i = 0; i < _entries.Count; i++)
                 {
                     if (CanBeDrawn(_text_types[i]))
-                        height += _entries[i].Height;
+                    {
+                        height += _entries[i]
+                            .Height;
+                    }
                 }
 
                 height -= _scrollBar.Height;
@@ -400,7 +436,9 @@ namespace ClassicUO.Game.UI.Gumps
                     _scrollBar.MaxValue = height;
 
                     if (maxValue)
+                    {
                         _scrollBar.Value = _scrollBar.MaxValue;
+                    }
                 }
                 else
                 {
@@ -415,8 +453,12 @@ namespace ClassicUO.Game.UI.Gumps
 
                 while (_entries.Count > 199)
                 {
-                    _entries.RemoveFromFront().Destroy();
-                    _hours.RemoveFromFront().Destroy();
+                    _entries.RemoveFromFront()
+                            .Destroy();
+
+                    _hours.RemoveFromFront()
+                          .Destroy();
+
                     _text_types.RemoveFromFront();
                 }
 
@@ -429,8 +471,11 @@ namespace ClassicUO.Game.UI.Gumps
                 _text_types.AddToBack(text_type);
 
                 _scrollBar.MaxValue += rtext.Height;
-                if (maxScroll) 
+
+                if (maxScroll)
+                {
                     _scrollBar.Value = _scrollBar.MaxValue;
+                }
             }
 
             private static bool CanBeDrawn(TEXT_TYPE type)
@@ -462,8 +507,11 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 for (int i = 0; i < _entries.Count; i++)
                 {
-                    _entries[i].Destroy();
-                    _hours[i].Destroy();
+                    _entries[i]
+                        .Destroy();
+
+                    _hours[i]
+                        .Destroy();
                 }
 
                 _entries.Clear();
@@ -473,6 +521,5 @@ namespace ClassicUO.Game.UI.Gumps
                 base.Dispose();
             }
         }
-
     }
 }

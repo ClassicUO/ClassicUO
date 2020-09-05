@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,23 +18,21 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
 using System.Runtime.CompilerServices;
 using System.Text;
-
 using ClassicUO.Utility;
-
 using static System.String;
 
 namespace ClassicUO.Network
 {
     internal sealed class Packet : PacketBase
     {
-        private byte[] _data;
-
         private static readonly StringBuilder _sb = new StringBuilder();
+        private byte[] _data;
 
         public Packet(byte[] data, int length)
         {
@@ -47,15 +46,20 @@ namespace ClassicUO.Network
             [MethodImpl(256)]
             get
             {
-                if (index < 0 || index >= Length) 
+                if (index < 0 || index >= Length)
+                {
                     throw new ArgumentOutOfRangeException("index");
+                }
 
                 return _data[index];
             }
             [MethodImpl(256)]
             set
             {
-                if (index < 0 || index >= Length) throw new ArgumentOutOfRangeException("index");
+                if (index < 0 || index >= Length)
+                {
+                    throw new ArgumentOutOfRangeException("index");
+                }
 
                 _data[index] = value;
                 IsChanged = true;
@@ -89,7 +93,9 @@ namespace ClassicUO.Network
         public byte ReadByte()
         {
             if (EnsureSize(1))
+            {
                 return 0;
+            }
 
             return _data[Position++];
         }
@@ -107,7 +113,9 @@ namespace ClassicUO.Network
         public ushort ReadUShort()
         {
             if (EnsureSize(2))
+            {
                 return 0;
+            }
 
             return (ushort) ((ReadByte() << 8) | ReadByte());
         }
@@ -115,7 +123,9 @@ namespace ClassicUO.Network
         public uint ReadUInt()
         {
             if (EnsureSize(4))
+            {
                 return 0;
+            }
 
             return (uint) ((ReadByte() << 24) | (ReadByte() << 16) | (ReadByte() << 8) | ReadByte());
         }
@@ -123,15 +133,19 @@ namespace ClassicUO.Network
         public ulong ReadULong()
         {
             if (EnsureSize(8))
+            {
                 return 0;
+            }
 
-            return (ulong)((ReadByte() << 56) | (ReadByte() << 48) | (ReadByte() << 40) | (ReadByte() << 32) | (ReadByte() << 24) | (ReadByte() << 16) | (ReadByte() << 8) | ReadByte());
+            return (ulong) ((ReadByte() << 56) | (ReadByte() << 48) | (ReadByte() << 40) | (ReadByte() << 32) | (ReadByte() << 24) | (ReadByte() << 16) | (ReadByte() << 8) | ReadByte());
         }
 
         public string ReadASCII()
         {
             if (EnsureSize(1))
+            {
                 return Empty;
+            }
 
             _sb.Clear();
 
@@ -148,7 +162,9 @@ namespace ClassicUO.Network
         public string ReadASCII(int length)
         {
             if (EnsureSize(length))
+            {
                 return Empty;
+            }
 
             if (Position + length > Length)
             {
@@ -159,16 +175,21 @@ namespace ClassicUO.Network
             _sb.Clear();
 
             if (length <= 0)
-                return string.Empty;
+            {
+                return Empty;
+            }
 
             for (int i = 0; i < length; i++)
             {
                 char c = (char) ReadByte();
+
                 if (c == '\0')
                 {
                     Skip(length - i - 1);
+
                     break;
                 }
+
                 _sb.Append(c);
             }
 
@@ -180,7 +201,9 @@ namespace ClassicUO.Network
             _sb.Clear();
 
             if (Position >= Length)
+            {
                 return Empty;
+            }
 
             int index = Position;
 
@@ -189,7 +212,9 @@ namespace ClassicUO.Network
                 byte b = _data[index++];
 
                 if (b == 0)
+                {
                     break;
+                }
             }
 
             string s = Encoding.UTF8.GetString(_data, Position, index - Position - 1);
@@ -200,16 +225,19 @@ namespace ClassicUO.Network
 
             for (int i = 0; i < s.Length && StringHelper.IsSafeChar(s[i]); i++, index++)
             {
-
             }
 
             if (index == s.Length)
+            {
                 return s;
+            }
 
             for (int i = 0; i < s.Length; i++)
             {
                 if (StringHelper.IsSafeChar(s[i]))
+                {
                     _sb.Append(s[i]);
+                }
             }
 
             return _sb.ToString();
@@ -237,7 +265,9 @@ namespace ClassicUO.Network
                 byte b = _data[index++];
 
                 if (b == 0)
+                {
                     break;
+                }
             }
 
             string s = Encoding.UTF8.GetString(_data, Position, length - 1);
@@ -248,16 +278,19 @@ namespace ClassicUO.Network
 
             for (int i = 0; i < s.Length && StringHelper.IsSafeChar(s[i]); i++, index++)
             {
-
             }
 
             if (index == s.Length)
+            {
                 return s;
+            }
 
             for (int i = 0; i < s.Length; i++)
             {
                 if (StringHelper.IsSafeChar(s[i]))
+                {
                     _sb.Append(s[i]);
+                }
             }
 
             return _sb.ToString();
@@ -266,14 +299,20 @@ namespace ClassicUO.Network
         public string ReadUnicode()
         {
             if (EnsureSize(2))
+            {
                 return Empty;
+            }
 
             int start = Position;
             int end = 0;
+
             while (Position < Length)
             {
                 if (ReadUShort() == 0)
+                {
                     break;
+                }
+
                 end += 2;
             }
 
@@ -283,12 +322,15 @@ namespace ClassicUO.Network
         public string ReadUnicode(int length)
         {
             if (EnsureSize(length))
+            {
                 return Empty;
+            }
 
             if (Position + length >= Length)
             {
                 length = Length - Position - 2;
             }
+
             int start = Position;
             Position += length;
 
@@ -298,7 +340,9 @@ namespace ClassicUO.Network
         public byte[] ReadArray(int count)
         {
             if (EnsureSize(count))
+            {
                 return null;
+            }
 
             byte[] array = new byte[count];
             Buffer.BlockCopy(_data, Position, array, 0, count);
@@ -310,7 +354,9 @@ namespace ClassicUO.Network
         public string ReadUnicodeReversed(int length, bool safe = true)
         {
             if (EnsureSize(length))
+            {
                 return Empty;
+            }
 
             if (Position + length >= Length)
             {
@@ -336,14 +382,20 @@ namespace ClassicUO.Network
         public string ReadUnicodeReversed()
         {
             if (EnsureSize(2))
+            {
                 return Empty;
+            }
 
             int start = Position;
             int end = 0;
+
             while (Position < Length)
             {
                 if (ReadUShortReversed() == 0)
+                {
                     break;
+                }
+
                 end += 2;
             }
 
@@ -353,7 +405,9 @@ namespace ClassicUO.Network
         public ushort ReadUShortReversed()
         {
             if (EnsureSize(2))
+            {
                 return 0;
+            }
 
             return (ushort) (ReadByte() | (ReadByte() << 8));
         }

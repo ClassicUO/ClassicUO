@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,6 +18,7 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
@@ -24,7 +26,7 @@ using System.Collections.Generic;
 
 namespace ClassicUO.Game.Data
 {
-    abstract class CustomHouseObject
+    internal abstract class CustomHouseObject
     {
         public int Category;
         public int FeatureMask;
@@ -37,15 +39,16 @@ namespace ClassicUO.Game.Data
         public abstract int Contains(ushort graphic);
     }
 
-    abstract class CustomHouseObjectCategory<T> where T : CustomHouseObject
+    internal abstract class CustomHouseObjectCategory<T> where T : CustomHouseObject
     {
         public int Index;
         public List<T> Items = new List<T>();
     }
 
-    class CustomHouseWall : CustomHouseObject
+    internal class CustomHouseWall : CustomHouseObject
     {
         public const int GRAPHICS_COUNT = 8;
+        public ushort[] Graphics = new ushort[GRAPHICS_COUNT];
 
 
         public int Style,
@@ -64,7 +67,6 @@ namespace ClassicUO.Game.Data
                    AltWindowE,
                    SecondAltWindowS,
                    SecondAltWindowE;
-        public ushort[] Graphics = new ushort[GRAPHICS_COUNT];
         public ushort[] WindowGraphics = new ushort[GRAPHICS_COUNT];
 
         public override int Contains(ushort graphic)
@@ -72,7 +74,9 @@ namespace ClassicUO.Game.Data
             for (int i = 0; i < GRAPHICS_COUNT; i++)
             {
                 if (Graphics[i] == graphic || WindowGraphics[i] == graphic)
+                {
                     return i;
+                }
             }
 
             return -1;
@@ -91,12 +95,12 @@ namespace ClassicUO.Game.Data
                          int.TryParse(scanf[2], out TID) &&
                          int.TryParse(scanf[3], out South1) &&
                          int.TryParse(scanf[4], out South2) &&
-                         int.TryParse(scanf[5], out South3) && 
+                         int.TryParse(scanf[5], out South3) &&
                          int.TryParse(scanf[6], out Corner) &&
                          int.TryParse(scanf[7], out East1) &&
                          int.TryParse(scanf[8], out East2) &&
                          int.TryParse(scanf[9], out East3) &&
-                         int.TryParse(scanf[10], out Post) && 
+                         int.TryParse(scanf[10], out Post) &&
                          int.TryParse(scanf[11], out WindowS) &&
                          int.TryParse(scanf[12], out AltWindowS) &&
                          int.TryParse(scanf[13], out WindowE) &&
@@ -118,7 +122,7 @@ namespace ClassicUO.Game.Data
                 WindowGraphics[7] = Graphics[7] = (ushort) Post;
             }
 
-            if ((AltWindowE == 0) && (WindowE != 0))
+            if (AltWindowE == 0 && WindowE != 0)
             {
                 AltWindowE = WindowE;
                 WindowE = 0;
@@ -157,13 +161,12 @@ namespace ClassicUO.Game.Data
             return result;
         }
     }
-   
-    class CustomHouseWallCategory : CustomHouseObjectCategory<CustomHouseWall>
-    {
 
+    internal class CustomHouseWallCategory : CustomHouseObjectCategory<CustomHouseWall>
+    {
     }
 
-    class CustomHouseFloor : CustomHouseObject
+    internal class CustomHouseFloor : CustomHouseObject
     {
         public const int GRAPHICS_COUNT = 16;
 
@@ -235,9 +238,10 @@ namespace ClassicUO.Game.Data
         }
     }
 
-    class CustomHouseRoof : CustomHouseObject
+    internal class CustomHouseRoof : CustomHouseObject
     {
         public const int GRAPHICS_COUNT = 16;
+        public ushort[] Graphics = new ushort[GRAPHICS_COUNT];
 
         public int Style,
                    TID,
@@ -257,7 +261,6 @@ namespace ClassicUO.Game.Data
                    XPiece,
                    Extra,
                    Piece;
-        public ushort[] Graphics = new ushort[GRAPHICS_COUNT];
 
         public override bool Parse(string text)
         {
@@ -317,24 +320,25 @@ namespace ClassicUO.Game.Data
             for (int i = 0; i < GRAPHICS_COUNT; i++)
             {
                 if (Graphics[i] == graphic)
+                {
                     return i;
+                }
             }
 
             return -1;
         }
     }
-   
-    class CustomHouseRoofCategory : CustomHouseObjectCategory<CustomHouseRoof>
-    {
 
+    internal class CustomHouseRoofCategory : CustomHouseObjectCategory<CustomHouseRoof>
+    {
     }
 
-    class CustomHouseMisc : CustomHouseObject
+    internal class CustomHouseMisc : CustomHouseObject
     {
         public const int GRAPHICS_COUNT = 8;
-
-        public int Style, TID, Piece1, Piece2, Piece3, Piece4, Piece5, Piece6, Piece7, Piece8;  
         public ushort[] Graphics = new ushort[GRAPHICS_COUNT];
+
+        public int Style, TID, Piece1, Piece2, Piece3, Piece4, Piece5, Piece6, Piece7, Piece8;
 
         public override bool Parse(string text)
         {
@@ -378,21 +382,23 @@ namespace ClassicUO.Game.Data
             for (int i = 0; i < GRAPHICS_COUNT; i++)
             {
                 if (Graphics[i] == graphic)
+                {
                     return i;
+                }
             }
 
             return -1;
         }
     }
 
-    class CustomHouseMiscCategory : CustomHouseObjectCategory<CustomHouseMisc>
+    internal class CustomHouseMiscCategory : CustomHouseObjectCategory<CustomHouseMisc>
     {
-
     }
 
-    class CustomHouseDoor : CustomHouseObject
+    internal class CustomHouseDoor : CustomHouseObject
     {
         public const int GRAPHICS_COUNT = 8;
+        public ushort[] Graphics = new ushort[GRAPHICS_COUNT];
 
         public int Piece1,
                    Piece2,
@@ -402,7 +408,6 @@ namespace ClassicUO.Game.Data
                    Piece6,
                    Piece7,
                    Piece8;
-        public ushort[] Graphics = new ushort[GRAPHICS_COUNT];
 
         public override bool Parse(string text)
         {
@@ -444,14 +449,16 @@ namespace ClassicUO.Game.Data
             for (int i = 0; i < GRAPHICS_COUNT; i++)
             {
                 if (Graphics[i] == graphic)
+                {
                     return i;
+                }
             }
 
             return -1;
         }
     }
 
-    class CustomHouseTeleport : CustomHouseObject
+    internal class CustomHouseTeleport : CustomHouseObject
     {
         public const int GRAPHICS_COUNT = 16;
 
@@ -523,7 +530,7 @@ namespace ClassicUO.Game.Data
         }
     }
 
-    class CustomHouseStair : CustomHouseObject
+    internal class CustomHouseStair : CustomHouseObject
     {
         public const int GRAPHICS_COUNT = 9;
 
@@ -553,7 +560,7 @@ namespace ClassicUO.Game.Data
                 result = int.TryParse(scanf[0], out Category) &&
                          int.TryParse(scanf[1], out Block) &&
                          int.TryParse(scanf[2], out North) &&
-                         int.TryParse(scanf[3], out East ) &&
+                         int.TryParse(scanf[3], out East) &&
                          int.TryParse(scanf[4], out South) &&
                          int.TryParse(scanf[5], out West) &&
                          int.TryParse(scanf[6], out Squared1) &&
@@ -561,7 +568,7 @@ namespace ClassicUO.Game.Data
                          int.TryParse(scanf[8], out Rounded1) &&
                          int.TryParse(scanf[9], out Rounded2) &&
                          int.TryParse(scanf[10], out MultiNorth) &&
-                         int.TryParse(scanf[11], out MultiEast ) &&
+                         int.TryParse(scanf[11], out MultiEast) &&
                          int.TryParse(scanf[12], out MultiSouth) &&
                          int.TryParse(scanf[13], out MultiWest) &&
                          int.TryParse(scanf[14], out FeatureMask);
@@ -588,14 +595,16 @@ namespace ClassicUO.Game.Data
             for (int i = 0; i < GRAPHICS_COUNT; i++)
             {
                 if (Graphics[i] == graphic)
+                {
                     return i;
+                }
             }
 
             return -1;
         }
     }
 
-    class CustomHousePlaceInfo : CustomHouseObject
+    internal class CustomHousePlaceInfo : CustomHouseObject
     {
         public const int GRAPHICS_COUNT = 1;
         public int Graphic,
@@ -654,7 +663,9 @@ namespace ClassicUO.Game.Data
             for (int i = 0; i < GRAPHICS_COUNT; i++)
             {
                 if (Graphics[i] == graphic)
+                {
                     return i;
+                }
             }
 
             return -1;

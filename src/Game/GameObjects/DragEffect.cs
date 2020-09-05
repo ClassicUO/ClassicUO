@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,6 +18,7 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using ClassicUO.Configuration;
@@ -26,7 +28,7 @@ using ClassicUO.Renderer;
 
 namespace ClassicUO.Game.GameObjects
 {
-    class DragEffect : GameEffect
+    internal class DragEffect : GameEffect
     {
         private uint _lastMoveTime;
 
@@ -35,17 +37,25 @@ namespace ClassicUO.Game.GameObjects
             Entity source = World.Get(src);
 
             if (SerialHelper.IsValid(src) && source != null)
+            {
                 SetSource(source);
+            }
             else
+            {
                 SetSource(xSource, ySource, zSource);
+            }
 
 
             Entity target = World.Get(trg);
 
             if (SerialHelper.IsValid(trg) && target != null)
+            {
                 SetTarget(target);
+            }
             else
+            {
                 SetTarget(xTarget, yTarget, zTarget);
+            }
 
             AlphaHue = 255;
             Hue = hue;
@@ -56,8 +66,10 @@ namespace ClassicUO.Game.GameObjects
         public override void Update(double totalMS, double frameMS)
         {
             if (_lastMoveTime > Time.Ticks)
+            {
                 return;
-            
+            }
+
             Offset.X += 8;
             Offset.Y += 8;
 
@@ -69,7 +81,9 @@ namespace ClassicUO.Game.GameObjects
         public override bool Draw(UltimaBatcher2D batcher, int posX, int posY)
         {
             if (IsDestroyed)
+            {
                 return false;
+            }
 
             ResetHueVector();
 
@@ -85,7 +99,9 @@ namespace ClassicUO.Game.GameObjects
                 HueVector.Y = 1;
             }
             else
+            {
                 ShaderHueTranslator.GetHueVector(ref HueVector, Hue);
+            }
 
             //Engine.DebugInfo.EffectsRendered++;
 

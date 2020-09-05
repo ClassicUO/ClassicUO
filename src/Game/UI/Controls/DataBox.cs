@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,6 +18,7 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 
@@ -41,7 +43,9 @@ namespace ClassicUO.Game.UI.Controls
         public override bool Contains(int x, int y)
         {
             if (ContainsByBounds)
+            {
                 return true;
+            }
 
             Control t = null;
             x += ScreenCoordinateX;
@@ -52,7 +56,9 @@ namespace ClassicUO.Game.UI.Controls
                 child.HitTest(x, y, ref t);
 
                 if (t != null)
+                {
                     return true;
+                }
             }
 
             return false;

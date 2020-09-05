@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,11 +18,10 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
-
-using ClassicUO.Game.GameObjects;
 
 namespace ClassicUO.Game.Data
 {
@@ -34,7 +34,10 @@ namespace ClassicUO.Game.Data
 
         public static int TimeToCompleteMovement(bool run, bool mounted)
         {
-            if (mounted) return run ? STEP_DELAY_MOUNT_RUN : STEP_DELAY_MOUNT_WALK;
+            if (mounted)
+            {
+                return run ? STEP_DELAY_MOUNT_RUN : STEP_DELAY_MOUNT_WALK;
+            }
 
             return run ? STEP_DELAY_RUN : STEP_DELAY_WALK;
         }
@@ -122,9 +125,13 @@ namespace ClassicUO.Game.Data
             if (Math.Abs(valueX) > checkX)
             {
                 if (valueX < 0)
+                {
                     x = -checkX;
+                }
                 else
+                {
                     x = checkX;
+                }
             }
 
             int valueY = (int) y;
@@ -132,9 +139,13 @@ namespace ClassicUO.Game.Data
             if (Math.Abs(valueY) > checkY)
             {
                 if (valueY < 0)
+                {
                     y = -checkY;
+                }
                 else
+                {
                     y = checkY;
+                }
             }
         }
     }

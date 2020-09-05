@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,9 +18,9 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
-using ClassicUO.Configuration;
 using ClassicUO.Game.Managers;
 using ClassicUO.IO.Resources;
 using ClassicUO.Resources;
@@ -28,17 +29,13 @@ namespace ClassicUO.Game.UI.Controls
 {
     internal class InfoBarBuilderControl : Control
     {
-        public string LabelText { get { return infoLabel.Text; } }
-        public InfoBarVars Var { get { return (InfoBarVars) varStat.SelectedIndex; } }
-        public ushort Hue { get { return labelColor.Hue; } }
-
-        private StbTextBox infoLabel;
-        private Combobox varStat;
-        private ClickableColorBox labelColor;
+        private readonly StbTextBox infoLabel;
+        private readonly ClickableColorBox labelColor;
+        private readonly Combobox varStat;
 
         public InfoBarBuilderControl(InfoBarItem item)
         {
-            infoLabel = new StbTextBox(0xFF, 10, 80) { X = 5, Y = 0, Width = 130, Height = 30};
+            infoLabel = new StbTextBox(0xFF, 10, 80) {X = 5, Y = 0, Width = 130, Height = 30};
             infoLabel.SetText(item.label);
 
             string[] dataVars = InfoBarManager.GetVars();
@@ -47,23 +44,24 @@ namespace ClassicUO.Game.UI.Controls
             uint color = 0xFF7F7F7F;
 
             if (item.hue != 0xFFFF)
+            {
                 color = HuesLoader.Instance.GetPolygoneColor(12, item.hue);
+            }
 
             labelColor = new ClickableColorBox(150, 0, 13, 14, item.hue, color);
 
-            NiceButton deleteButton = new NiceButton(390, 0, 60, 25, ButtonAction.Activate, ResGumps.Delete) { ButtonParameter = 999 };
-            deleteButton.MouseUp += (sender, e) =>
-            {
-                Dispose();
-            };
+            NiceButton deleteButton = new NiceButton(390, 0, 60, 25, ButtonAction.Activate, ResGumps.Delete) {ButtonParameter = 999};
+            deleteButton.MouseUp += (sender, e) => { Dispose(); };
 
-            Add(new ResizePic(0x0BB8) { X = infoLabel.X - 5, Y = 0, Width = infoLabel.Width + 10, Height = infoLabel.Height - 6 });
+            Add(new ResizePic(0x0BB8) {X = infoLabel.X - 5, Y = 0, Width = infoLabel.Width + 10, Height = infoLabel.Height - 6});
             Add(infoLabel);
             Add(varStat);
             Add(labelColor);
             Add(deleteButton);
         }
 
+        public string LabelText => infoLabel.Text;
+        public InfoBarVars Var => (InfoBarVars) varStat.SelectedIndex;
+        public ushort Hue => labelColor.Hue;
     }
-
 }

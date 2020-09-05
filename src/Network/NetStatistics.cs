@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,6 +18,7 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
@@ -26,12 +28,11 @@ namespace ClassicUO.Network
 {
     internal class NetStatistics
     {
-        private readonly Stopwatch _pingStopwatch = new Stopwatch();
-
         private uint _lastTotalBytesReceived, _lastTotalBytesSent, _lastTotalPacketsReceived, _lastTotalPacketsSent;
+        private byte _pingIdx;
 
-        private uint[] _pings = new uint[5];
-        private byte _pingIdx = 0;
+        private readonly uint[] _pings = new uint[5];
+        private readonly Stopwatch _pingStopwatch = new Stopwatch();
 
         public DateTime ConnectedFrom { get; set; }
 
@@ -51,11 +52,13 @@ namespace ClassicUO.Network
 
         public uint DeltaPacketsSent { get; private set; }
 
-        public uint Ping {
+        public uint Ping
+        {
             get
             {
                 byte count = 0;
                 uint sum = 0;
+
                 for (byte i = 0; i < 5; i++)
                 {
                     if (_pings[i] != 0)
@@ -66,7 +69,9 @@ namespace ClassicUO.Network
                 }
 
                 if (count == 0)
+                {
                     return 0;
+                }
 
                 return sum / count;
             }
@@ -74,10 +79,12 @@ namespace ClassicUO.Network
 
         public void PingReceived()
         {
-            _pings[_pingIdx++] = (uint)_pingStopwatch.ElapsedMilliseconds;
+            _pings[_pingIdx++] = (uint) _pingStopwatch.ElapsedMilliseconds;
 
             if (_pingIdx >= _pings.Length)
+            {
                 _pingIdx = 0;
+            }
 
             _pingStopwatch.Stop();
         }
@@ -85,7 +92,9 @@ namespace ClassicUO.Network
         public void SendPing()
         {
             if (!NetClient.Socket.IsConnected || NetClient.Socket.IsDisposed)
+            {
                 return;
+            }
 
             _pingStopwatch.Restart();
             NetClient.Socket.Send(new PPing());

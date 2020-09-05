@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,6 +18,7 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
@@ -220,6 +222,7 @@ namespace ClassicUO.IO
             for (int i = 0; i < size; i++)
             {
                 char c = (char) ReadByte();
+
                 if (c != 0)
                 {
                     sb.Append(c);
@@ -245,7 +248,7 @@ namespace ClassicUO.IO
         {
             EnsureSize(2);
 
-            return (ushort)((ReadByte() << 8) | ReadByte());
+            return (ushort) ((ReadByte() << 8) | ReadByte());
         }
 
         [MethodImpl(256)]
@@ -253,7 +256,7 @@ namespace ClassicUO.IO
         {
             EnsureSize(4);
 
-            return (uint)((ReadByte() << 24) | (ReadByte() << 16) | (ReadByte() << 8) | ReadByte());
+            return (uint) ((ReadByte() << 24) | (ReadByte() << 16) | (ReadByte() << 8) | ReadByte());
         }
     }
 }

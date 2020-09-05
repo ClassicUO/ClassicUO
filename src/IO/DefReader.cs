@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,6 +18,7 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
@@ -24,7 +26,6 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-
 using ClassicUO.Utility.Logging;
 
 namespace ClassicUO.IO
@@ -43,9 +44,9 @@ namespace ClassicUO.IO
             ',', ' ', '{', '}'
         };
         private readonly string _file;
+        private List<string[]> _groups = new List<string[]>();
 
         private readonly int _minSize;
-        private List<string[]> _groups = new List<string[]>();
         private List<string[]> _parts = new List<string[]>();
 
         private StreamReader _reader;
@@ -63,7 +64,9 @@ namespace ClassicUO.IO
         public int Line { get; private set; }
         public int Position { get; private set; }
         public int LinesCount => _parts.Count;
-        public int PartsCount => _parts[Line].Length;
+
+        public int PartsCount => _parts[Line]
+            .Length;
 
         private bool IsEOF => Line + 1 >= LinesCount;
 
@@ -131,11 +134,17 @@ namespace ClassicUO.IO
 
                 if (groupStart >= 0 && groupEnd >= 0)
                 {
-                    string[] firstPart = line.Substring(0, groupStart).Split(_tokens, StringSplitOptions.RemoveEmptyEntries);
-                    string group = line.Substring(groupStart, groupEnd - groupStart + 1);
-                    string[] lastPart = line.Substring(groupEnd + 1, line.Length - groupEnd - 1).Split(_tokens, StringSplitOptions.RemoveEmptyEntries);
+                    string[] firstPart = line.Substring(0, groupStart)
+                                             .Split(_tokens, StringSplitOptions.RemoveEmptyEntries);
 
-                    p = firstPart.Concat(new[] {group}).Concat(lastPart).ToArray();
+                    string group = line.Substring(groupStart, groupEnd - groupStart + 1);
+
+                    string[] lastPart = line.Substring(groupEnd + 1, line.Length - groupEnd - 1)
+                                            .Split(_tokens, StringSplitOptions.RemoveEmptyEntries);
+
+                    p = firstPart.Concat(new[] {group})
+                                 .Concat(lastPart)
+                                 .ToArray();
                 }
                 else
                 {
@@ -153,8 +162,9 @@ namespace ClassicUO.IO
         {
             if (line >= _parts.Count || line < 0)
             {
-                Log.Error( $"Index out of range [Line: {line}]. Returned '0'");
-                return new [] {"0"};
+                Log.Error($"Index out of range [Line: {line}]. Returned '0'");
+
+                return new[] {"0"};
             }
 
             return _parts[line];
@@ -167,13 +177,14 @@ namespace ClassicUO.IO
 
             if (index >= p.Length || index < 0)
             {
-                Log.Error( $"Index out of range [Line: {line}]. Returned '0'");
+                Log.Error($"Index out of range [Line: {line}]. Returned '0'");
+
                 return "0";
             }
 
             return p[index];
         }
-        
+
         public int ReadInt()
         {
             return ReadInt(Line, Position++);
@@ -214,7 +225,8 @@ namespace ClassicUO.IO
                             {
                                 NumberStyles style = NumberStyles.Any;
 
-                                if (splitRes[i].Length > 1 && splitRes[i][0] == '0' && splitRes[i][1] == 'x')
+                                if (splitRes[i]
+                                    .Length > 1 && splitRes[i][0] == '0' && splitRes[i][1] == 'x')
                                 {
                                     style = NumberStyles.HexNumber;
                                 }
@@ -229,7 +241,7 @@ namespace ClassicUO.IO
                         return results.ToArray();
                     }
 
-                    Log.Error( $"Missing }} at line {Line + 1}, in '{_file}'");
+                    Log.Error($"Missing }} at line {Line + 1}, in '{_file}'");
                 }
             }
 

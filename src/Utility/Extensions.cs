@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,6 +18,7 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
@@ -27,9 +29,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
-
 using ClassicUO.Utility.Logging;
-
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Utility
@@ -49,40 +49,52 @@ namespace ClassicUO.Utility
         public static void RaiseAsync(this EventHandler handler, object sender = null)
         {
             if (handler != null)
-                Task.Run(() => handler(sender, EventArgs.Empty)).Catch();
+            {
+                Task.Run(() => handler(sender, EventArgs.Empty))
+                    .Catch();
+            }
         }
 
         public static void RaiseAsync<T>(this EventHandler<T> handler, T e, object sender = null)
         {
             if (handler != null)
-                Task.Run(() => handler(sender, e)).Catch();
+            {
+                Task.Run(() => handler(sender, e))
+                    .Catch();
+            }
         }
 
         public static Task Catch(this Task task)
         {
-            return task.ContinueWith(t =>
-            {
-                t.Exception?.Handle(e =>
+            return task.ContinueWith
+            (
+                t =>
                 {
-                    Log.Panic(e.ToString());
-                    //try
-                    //{
-                    //    using (StreamWriter txt = new StreamWriter("crash.log", true))
-                    //    {
-                    //        txt.AutoFlush = true;
-                    //        txt.WriteLine("Exception @ {0}", Engine.CurrDateTime.ToString("MM-dd-yy HH:mm:ss.ffff"));
-                    //        txt.WriteLine(e.ToString());
-                    //        txt.WriteLine("");
-                    //        txt.WriteLine("");
-                    //    }
-                    //}
-                    //catch
-                    //{
-                    //}
+                    t.Exception?.Handle
+                    (
+                        e =>
+                        {
+                            Log.Panic(e.ToString());
+                            //try
+                            //{
+                            //    using (StreamWriter txt = new StreamWriter("crash.log", true))
+                            //    {
+                            //        txt.AutoFlush = true;
+                            //        txt.WriteLine("Exception @ {0}", Engine.CurrDateTime.ToString("MM-dd-yy HH:mm:ss.ffff"));
+                            //        txt.WriteLine(e.ToString());
+                            //        txt.WriteLine("");
+                            //        txt.WriteLine("");
+                            //    }
+                            //}
+                            //catch
+                            //{
+                            //}
 
-                    return true;
-                });
-            }, TaskContinuationOptions.OnlyOnFaulted);
+                            return true;
+                        }
+                    );
+                }, TaskContinuationOptions.OnlyOnFaulted
+            );
         }
 
         public static void Resize<T>(this List<T> list, int size, T element = default)
@@ -90,18 +102,26 @@ namespace ClassicUO.Utility
             int count = list.Count;
 
             if (size < count)
+            {
                 list.RemoveRange(size, count - size);
+            }
             else if (size > count)
             {
                 if (size > list.Capacity) // Optimization
+                {
                     list.Capacity = size;
+                }
+
                 list.AddRange(Enumerable.Repeat(element, size - count));
             }
         }
 
         public static void ForEach<T>(this T[] array, Action<T> func)
         {
-            foreach (T c in array) func(c);
+            foreach (T c in array)
+            {
+                func(c);
+            }
         }
 
         [MethodImpl(256)]
@@ -112,20 +132,28 @@ namespace ClassicUO.Utility
             if (rect.X < r.X)
             {
                 if (r.X < rect.Right)
+                {
                     inrect = true;
+                }
             }
             else
             {
                 if (rect.X < r.Right)
+                {
                     inrect = true;
+                }
             }
 
             if (inrect)
             {
                 if (rect.Y < r.Y)
+                {
                     inrect = r.Y < rect.Bottom;
+                }
                 else
+                {
                     inrect = rect.Y < r.Bottom;
+                }
             }
 
             return inrect;
@@ -138,7 +166,9 @@ namespace ClassicUO.Utility
             for (int i = 0; i < s.Length; i++)
             {
                 if (StringHelper.IsSafeChar(s[i]))
+                {
                     sb.Append(s[i]);
+                }
             }
 
             return sb.ToString();
@@ -162,6 +192,7 @@ namespace ClassicUO.Utility
             if (!overwrite)
             {
                 archive.ExtractToDirectory(destinationDirectoryName);
+
                 return;
             }
 
@@ -181,8 +212,10 @@ namespace ClassicUO.Utility
                 if (file.Name == "")
                 {
                     Directory.CreateDirectory(Path.GetDirectoryName(completeFileName));
+
                     continue;
                 }
+
                 file.ExtractToFile(completeFileName, true);
             }
         }

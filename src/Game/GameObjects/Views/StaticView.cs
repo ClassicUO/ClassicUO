@@ -1,4 +1,5 @@
 #region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,9 +18,8 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-#endregion
 
-using System;
+#endregion
 
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
@@ -27,8 +27,6 @@ using ClassicUO.Game.Scenes;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
-
-using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.GameObjects
 {
@@ -41,9 +39,13 @@ namespace ClassicUO.Game.GameObjects
             bool r = true;
 
             if (Z <= z - ItemData.Height)
+            {
                 r = false;
+            }
             else if (z < Z && (_canBeTransparent & 0xFF) == 0)
+            {
                 r = false;
+            }
 
             return r;
         }
@@ -51,7 +53,9 @@ namespace ClassicUO.Game.GameObjects
         public override bool Draw(UltimaBatcher2D batcher, int posX, int posY)
         {
             if (!AllowedToDraw || IsDestroyed)
+            {
                 return false;
+            }
 
             ushort graphic = Graphic;
             ushort hue = Hue;
@@ -91,7 +95,9 @@ namespace ClassicUO.Game.GameObjects
 
 
             if (AlphaHue != 255)
+            {
                 HueVector.Z = 1f - AlphaHue / 255f;
+            }
 
             DrawStaticAnimated(batcher, graphic, posX, posY, ref HueVector, ref DrawTransparent);
 
@@ -101,9 +107,10 @@ namespace ClassicUO.Game.GameObjects
                       .AddLight(this, this, posX + 22, posY + 22);
             }
 
-            if (! (SelectedObject.Object == this || 
-                (FoliageIndex != -1 && 
-                 Client.Game.GetScene<GameScene>().FoliageIndex == FoliageIndex)))
+            if (!(SelectedObject.Object == this ||
+                  FoliageIndex != -1 &&
+                  Client.Game.GetScene<GameScene>()
+                        .FoliageIndex == FoliageIndex))
             {
                 if (DrawTransparent)
                 {

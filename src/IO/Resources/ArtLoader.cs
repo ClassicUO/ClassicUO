@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,24 +18,25 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
-
 using ClassicUO.Configuration;
 using ClassicUO.Game;
 using ClassicUO.Game.Data;
 using ClassicUO.Renderer;
-
+using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.IO.Resources
 {
     internal class ArtLoader : UOFileLoader<ArtTexture>
     {
+        private static ArtLoader _instance;
         private UOFile _file;
         private readonly ushort _graphicMask;
         private readonly UOTexture32[] _landResources;
@@ -46,34 +48,36 @@ namespace ClassicUO.IO.Resources
             _landResources = new UOTexture32[landCount];
         }
 
-        private static ArtLoader _instance;
         public static ArtLoader Instance => _instance ?? (_instance = new ArtLoader(Constants.MAX_STATIC_DATA_INDEX_COUNT, Constants.MAX_LAND_DATA_INDEX_COUNT));
 
 
         public override Task Load()
         {
-            return Task.Run(() =>
-            {
-                string filePath = UOFileManager.GetUOFilePath("artLegacyMUL.uop");
-
-                if (Client.IsUOPInstallation && File.Exists(filePath))
+            return Task.Run
+            (
+                () =>
                 {
-                    _file = new UOFileUop(filePath, "build/artlegacymul/{0:D8}.tga");
-                    Entries = new UOFileIndex[Constants.MAX_STATIC_DATA_INDEX_COUNT];
-                }
-                else
-                {
-                    filePath = UOFileManager.GetUOFilePath("art.mul");
-                    string idxPath = UOFileManager.GetUOFilePath("artidx.mul");
+                    string filePath = UOFileManager.GetUOFilePath("artLegacyMUL.uop");
 
-                    if (File.Exists(filePath) && File.Exists(idxPath))
+                    if (Client.IsUOPInstallation && File.Exists(filePath))
                     {
-                        _file = new UOFileMul(filePath, idxPath, Constants.MAX_STATIC_DATA_INDEX_COUNT);
+                        _file = new UOFileUop(filePath, "build/artlegacymul/{0:D8}.tga");
+                        Entries = new UOFileIndex[Constants.MAX_STATIC_DATA_INDEX_COUNT];
                     }
-                }
+                    else
+                    {
+                        filePath = UOFileManager.GetUOFilePath("art.mul");
+                        string idxPath = UOFileManager.GetUOFilePath("artidx.mul");
 
-                _file.FillEntries(ref Entries);
-            });
+                        if (File.Exists(filePath) && File.Exists(idxPath))
+                        {
+                            _file = new UOFileMul(filePath, idxPath, Constants.MAX_STATIC_DATA_INDEX_COUNT);
+                        }
+                    }
+
+                    _file.FillEntries(ref Entries);
+                }
+            );
         }
 
         public override ArtTexture GetTexture(uint g)
@@ -88,6 +92,7 @@ namespace ClassicUO.IO.Resources
             if (texture == null || texture.IsDisposed)
             {
                 ReadStaticArt(ref texture, (ushort) g);
+
                 if (texture != null)
                 {
                     SaveId(g);
@@ -155,6 +160,7 @@ namespace ClassicUO.IO.Resources
             {
                 LinkedListNode<uint> next = first.Next;
                 uint idx = first.Value;
+
                 if (idx < _landResources.Length)
                 {
                     ref UOTexture32 texture = ref _landResources[idx];
@@ -184,7 +190,7 @@ namespace ClassicUO.IO.Resources
             {
                 width = 0;
                 height = 0;
-                
+
                 return null;
             }
 
@@ -228,7 +234,7 @@ namespace ClassicUO.IO.Resources
 
                         if (val != 0)
                         {
-                            pixels[pos] = Utility.HuesHelper.Color16To32(val) | 0xFF_00_00_00;
+                            pixels[pos] = HuesHelper.Color16To32(val) | 0xFF_00_00_00;
                         }
                     }
 
@@ -335,7 +341,7 @@ namespace ClassicUO.IO.Resources
                 texture.PushData(pixels);
             }
         }
-        
+
         private unsafe void ReadLandArt(ref UOTexture32 texture, ushort graphic)
         {
             const int SIZE = 44 * 44;
@@ -346,6 +352,7 @@ namespace ClassicUO.IO.Resources
             if (entry.Length == 0)
             {
                 texture = null;
+
                 return;
             }
 
@@ -361,7 +368,7 @@ namespace ClassicUO.IO.Resources
 
                 for (int j = start; j < end; ++j)
                 {
-                    data[pos++] = Utility.HuesHelper.Color16To32(_file.ReadUShort()) | 0xFF_00_00_00;
+                    data[pos++] = HuesHelper.Color16To32(_file.ReadUShort()) | 0xFF_00_00_00;
                 }
             }
 
@@ -372,7 +379,7 @@ namespace ClassicUO.IO.Resources
 
                 for (int j = i; j < end; ++j)
                 {
-                    data[pos++] = Utility.HuesHelper.Color16To32(_file.ReadUShort()) | 0xFF_00_00_00;
+                    data[pos++] = HuesHelper.Color16To32(_file.ReadUShort()) | 0xFF_00_00_00;
                 }
             }
 

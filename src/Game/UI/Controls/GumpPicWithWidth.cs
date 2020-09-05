@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,6 +18,7 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using ClassicUO.IO.Resources;
@@ -41,8 +43,11 @@ namespace ClassicUO.Game.UI.Controls
             ShaderHueTranslator.GetHueVector(ref _hueVector, Hue);
 
             UOTexture32 texture = GumpsLoader.Instance.GetTexture(Graphic);
+
             if (texture != null)
+            {
                 return batcher.Draw2DTiled(texture, x, y, Percent, Height, ref _hueVector);
+            }
 
             return false;
         }

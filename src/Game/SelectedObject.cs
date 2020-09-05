@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,19 +18,13 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
-using System.Collections.Generic;
 using System.Runtime.CompilerServices;
-
-using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
-using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
-
 using Microsoft.Xna.Framework;
-
-using MathHelper = ClassicUO.Utility.MathHelper;
 
 namespace ClassicUO.Game
 {
@@ -42,6 +37,24 @@ namespace ClassicUO.Game
         public static GameObject HealthbarObject;
         public static Item SelectedContainer;
         public static GameObject CorpseObject;
+
+        private static readonly bool[,] _InternalArea = new bool[44, 44];
+
+        static SelectedObject()
+        {
+            for (int y = 21, i = 0; y >= 0; --y, i++)
+            {
+                for (int x = 0; x < 22; x++)
+                {
+                    if (x < i)
+                    {
+                        continue;
+                    }
+
+                    _InternalArea[x, y] = _InternalArea[43 - x, 43 - y] = _InternalArea[43 - x, y] = _InternalArea[x, 43 - y] = true;
+                }
+            }
+        }
 
 
         public static bool IsPointInMobile(Mobile mobile, int xx, int yy)
@@ -250,6 +263,7 @@ namespace ClassicUO.Game
         {
             x = TranslatedMousePositionByViewport.X - x;
             y = TranslatedMousePositionByViewport.Y - y;
+
             return x >= 0 && x < 44 && y >= 0 && y < 44 && _InternalArea[x, y];
         }
 
@@ -270,20 +284,6 @@ namespace ClassicUO.Game
             return testY >= testX * (y1 - y0) / -22 + y + y0 &&
                    testY >= testX * (y3 - y0) / 22 + y + y0 && testY <= testX * (y3 - y2) / 22 + y + y2 &&
                    testY <= testX * (y1 - y2) / -22 + y + y2;
-        }
-
-        private static readonly bool[,] _InternalArea = new bool[44, 44];
-        static SelectedObject()
-        {
-            for (int y = 21, i = 0; y >= 0; --y, i++)
-            {
-                for (int x = 0; x < 22; x++)
-                {
-                    if (x < i)
-                        continue;
-                    _InternalArea[x, y] = _InternalArea[43 - x, 43 - y] = _InternalArea[43 - x, y] = _InternalArea[x, 43 - y] = true;
-                }
-            }
         }
     }
 }

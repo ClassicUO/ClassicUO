@@ -1,4 +1,5 @@
 #region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,11 +18,11 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
 using System.IO;
-
 using ClassicUO.IO.Audio.MP3Sharp.Decoding;
 
 namespace ClassicUO.IO.Audio.MP3Sharp
@@ -38,7 +39,6 @@ namespace ClassicUO.IO.Audio.MP3Sharp
         private readonly Buffer16BitStereo m_Buffer;
         private readonly Decoder m_Decoder = new Decoder(Decoder.DefaultParams);
         private readonly Stream m_SourceStream;
-        protected SoundFormat FormatRep;
 
         /// <summary>
         ///     Creates a new stream instance using the provided filename, and the default chunk size of 4096 bytes.
@@ -81,7 +81,9 @@ namespace ClassicUO.IO.Audio.MP3Sharp
 
             // read the first frame. This will fill the initial buffer with data, and get our frequency!
             if (!ReadFrame())
+            {
                 IsEOF = true;
+            }
         }
 
         public bool IsEOF { get; protected set; }
@@ -121,10 +123,15 @@ namespace ClassicUO.IO.Audio.MP3Sharp
             set
             {
                 if (value < 0)
+                {
                     value = 0;
+                }
 
                 if (value > m_SourceStream.Length)
+                {
                     value = m_SourceStream.Length;
+                }
+
                 m_SourceStream.Position = value;
                 IsEOF = m_SourceStream.Position >= m_SourceStream.Length;
             }
@@ -146,6 +153,8 @@ namespace ClassicUO.IO.Audio.MP3Sharp
         ///     Gets the PCM output format of this stream.
         /// </summary>
         public SoundFormat Format => FormatRep;
+
+        protected SoundFormat FormatRep;
 
         /// <summary>
         ///     Clears all buffers for this stream and causes any buffered data to be written to the underlying device.
@@ -192,7 +201,11 @@ namespace ClassicUO.IO.Audio.MP3Sharp
             while (framesDecoded < frameCount && aFrameWasRead)
             {
                 aFrameWasRead = ReadFrame();
-                if (aFrameWasRead) framesDecoded++;
+
+                if (aFrameWasRead)
+                {
+                    framesDecoded++;
+                }
             }
 
             return framesDecoded;
@@ -207,7 +220,9 @@ namespace ClassicUO.IO.Audio.MP3Sharp
             // Copy from queue buffers, reading new ones as necessary,
             // until we can't read more or we have read "count" bytes
             if (IsEOF)
+            {
                 return 0;
+            }
 
             int bytesRead = 0;
 
@@ -224,12 +239,17 @@ namespace ClassicUO.IO.Audio.MP3Sharp
                 }
 
                 // Copy as much as we can from the current buffer:
-                bytesRead += m_Buffer.Read(buffer,
-                                           offset + bytesRead,
-                                           count - bytesRead);
+                bytesRead += m_Buffer.Read
+                (
+                    buffer,
+                    offset + bytesRead,
+                    count - bytesRead
+                );
 
                 if (bytesRead >= count)
+                {
                     break;
+                }
             }
 
             return bytesRead;
@@ -254,15 +274,21 @@ namespace ClassicUO.IO.Audio.MP3Sharp
             Header header = m_BitStream.readFrame();
 
             if (header == null)
+            {
                 return false;
+            }
 
             try
             {
                 // Set the channel count and frequency values for the stream.
                 if (header.mode() == Header.SINGLE_CHANNEL)
+                {
                     ChannelCount = 1;
+                }
                 else
+                {
                     ChannelCount = 2;
+                }
 
                 Frequency = header.frequency();
 
@@ -273,7 +299,9 @@ namespace ClassicUO.IO.Audio.MP3Sharp
                 // on the decoder is a bit dodgy. Even though
                 // this exception should never happen, we test to be sure.
                 if (decoderOutput != m_Buffer)
+                {
                     throw new ApplicationException("Output buffers are different.");
+                }
 
                 // And we're done.
             }

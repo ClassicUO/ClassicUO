@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,11 +18,11 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System.Collections.Generic;
 using System.Reflection;
-
 using ClassicUO.Game.GameObjects;
 
 namespace ClassicUO.Utility
@@ -30,8 +31,11 @@ namespace ClassicUO.Utility
     {
         public static Dictionary<string, string> GetGameObjectProperties<T>(T obj) where T : GameObject
         {
-            PropertyInfo[] props = obj?.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance);
-            FieldInfo[] fields = obj?.GetType().GetFields(BindingFlags.Public | BindingFlags.Instance);
+            PropertyInfo[] props = obj?.GetType()
+                                      .GetProperties(BindingFlags.Public | BindingFlags.Instance);
+
+            FieldInfo[] fields = obj?.GetType()
+                                    .GetFields(BindingFlags.Public | BindingFlags.Instance);
 
             Dictionary<string, string> dict = new Dictionary<string, string>();
 

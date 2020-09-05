@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,18 +18,17 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
-using ClassicUO.Configuration;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 using ClassicUO.Utility.Collections;
-
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.GameObjects
 {
-    class TextContainer : LinkedObject
+    internal class TextContainer : LinkedObject
     {
         public int Size, MaxSize = 5;
 
@@ -42,7 +42,9 @@ namespace ClassicUO.Game.GameObjects
                 Remove(Items);
             }
             else
+            {
                 Size++;
+            }
         }
 
 
@@ -58,14 +60,14 @@ namespace ClassicUO.Game.GameObjects
                 item.Destroy();
                 Remove(item);
 
-                item =  next;
+                item = next;
             }
 
             Size = 0;
         }
     }
 
-    
+
     internal class OverheadDamage
     {
         private const int DAMAGE_Y_MOVING_TIME = 25;
@@ -100,13 +102,18 @@ namespace ClassicUO.Game.GameObjects
             _messages.AddToFront(text_obj);
 
             if (_messages.Count > 10)
-                _messages.RemoveFromBack()?.Destroy();
+            {
+                _messages.RemoveFromBack()
+                         ?.Destroy();
+            }
         }
 
         public void Update()
         {
             if (IsDestroyed)
+            {
                 return;
+            }
 
             _rectangle.Width = 0;
 
@@ -133,7 +140,9 @@ namespace ClassicUO.Game.GameObjects
                 else if (c.RenderedText != null)
                 {
                     if (_rectangle.Width < c.RenderedText.Width)
+                    {
                         _rectangle.Width = c.RenderedText.Width;
+                    }
                 }
             }
         }
@@ -141,7 +150,9 @@ namespace ClassicUO.Game.GameObjects
         public void Draw(UltimaBatcher2D batcher)
         {
             if (IsDestroyed || _messages.Count == 0)
+            {
                 return;
+            }
 
             int offY = 0;
 
@@ -158,21 +169,29 @@ namespace ClassicUO.Game.GameObjects
                 if (Parent is Mobile m)
                 {
                     if (m.IsGargoyle && m.IsFlying)
+                    {
                         offY += 22;
+                    }
                     else if (!m.IsMounted)
+                    {
                         offY = -22;
+                    }
 
 
-                    AnimationsLoader.Instance.GetAnimationDimensions(m.AnimIndex,
-                                                                  m.GetGraphicForAnimation(),
-                                                                  /*(byte) m.GetDirectionForAnimation()*/ 0,
-                                                                  /*Mobile.GetGroupForAnimation(m, isParent:true)*/ 0,
-                                                                  m.IsMounted,
-                                                                  /*(byte) m.AnimIndex*/ 0,
-                                                                  out int centerX,
-                                                                  out int centerY,
-                                                                  out int width,
-                                                                  out int height);
+                    AnimationsLoader.Instance.GetAnimationDimensions
+                    (
+                        m.AnimIndex,
+                        m.GetGraphicForAnimation(),
+                        /*(byte) m.GetDirectionForAnimation()*/ 0,
+                        /*Mobile.GetGroupForAnimation(m, isParent:true)*/ 0,
+                        m.IsMounted,
+                        /*(byte) m.AnimIndex*/ 0,
+                        out int centerX,
+                        out int centerY,
+                        out int width,
+                        out int height
+                    );
+
                     p.X += (int) m.Offset.X + 22;
                     p.Y += (int) (m.Offset.Y - m.Offset.Z - (height + centerY + 8));
                 }
@@ -188,10 +207,14 @@ namespace ClassicUO.Game.GameObjects
                         if (Parent is Item it)
                         {
                             if (it.IsCorpse)
+                            {
                                 offY = -22;
+                            }
                         }
                         else if (Parent is Static || Parent is Multi)
+                        {
                             offY = -44;
+                        }
 
                         p.Y -= yValue;
                     }
@@ -203,7 +226,9 @@ namespace ClassicUO.Game.GameObjects
             foreach (TextObject item in _messages)
             {
                 if (item.IsDestroyed || item.RenderedText == null || item.RenderedText.IsDestroyed)
+                {
                     continue;
+                }
 
                 item.X = p.X - (item.RenderedText.Width >> 1);
                 item.Y = p.Y - offY - item.RenderedText.Height - item.OffsetY;
@@ -217,12 +242,16 @@ namespace ClassicUO.Game.GameObjects
         public void Destroy()
         {
             if (IsDestroyed)
+            {
                 return;
+            }
 
             IsDestroyed = true;
 
             foreach (TextObject item in _messages)
+            {
                 item.Destroy();
+            }
 
             _messages.Clear();
         }

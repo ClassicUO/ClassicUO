@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,20 +18,17 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
 using System.Collections.Generic;
-
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.Network;
 using ClassicUO.Renderer;
-
 using Microsoft.Xna.Framework;
-
-using Mouse = ClassicUO.Input.Mouse;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -38,11 +36,11 @@ namespace ClassicUO.Game.UI.Gumps
     {
         private readonly Button[] _buttons = new Button[3];
         private readonly List<Control> _container = new List<Control>();
-        private readonly TextureControl _textureControl;
-
-        private uint _pinTimer;
         private PinControl _currentPin;
         private Point _lastPoint;
+
+        private uint _pinTimer;
+        private readonly TextureControl _textureControl;
 
 
         public MapGump(uint serial, ushort gumpid, int width, int height) : base(serial, 0)
@@ -53,34 +51,48 @@ namespace ClassicUO.Game.UI.Gumps
             Width = width;
             Height = height;
 
-            Add(new ResizePic(0x1432)
-            {
-                Width = width + 44, Height = height + 61,
-            });
+            Add
+            (
+                new ResizePic(0x1432)
+                {
+                    Width = width + 44, Height = height + 61
+                }
+            );
 
 
             Add(_buttons[0] = new Button((int) ButtonType.PlotCourse, 0x1398, 0x1398) {X = (width - 100) >> 1, Y = 5, ButtonAction = ButtonAction.Activate});
             Add(_buttons[1] = new Button((int) ButtonType.StopPlotting, 0x1399, 0x1399) {X = (width - 70) >> 1, Y = 5, ButtonAction = ButtonAction.Activate});
             Add(_buttons[2] = new Button((int) ButtonType.ClearCourse, 0x139A, 0x139A) {X = (width - 66) >> 1, Y = height + 37, ButtonAction = ButtonAction.Activate});
 
-            _buttons[0].IsVisible = _buttons[0].IsEnabled = PlotState == 0;
-            _buttons[1].IsVisible = _buttons[1].IsEnabled = PlotState == 1;
-            _buttons[2].IsVisible = _buttons[2].IsEnabled = PlotState == 1;
+            _buttons[0]
+                .IsVisible = _buttons[0]
+                .IsEnabled = PlotState == 0;
 
-            Add(_textureControl = new TextureControl
-            {
-                X = 24, Y = 31,
-                Width = width,
-                Height = height,
-                CanMove = true
-            });
+            _buttons[1]
+                .IsVisible = _buttons[1]
+                .IsEnabled = PlotState == 1;
+
+            _buttons[2]
+                .IsVisible = _buttons[2]
+                .IsEnabled = PlotState == 1;
+
+            Add
+            (
+                _textureControl = new TextureControl
+                {
+                    X = 24, Y = 31,
+                    Width = width,
+                    Height = height,
+                    CanMove = true
+                }
+            );
 
             _textureControl.MouseUp += TextureControlOnMouseUp;
 
             Add(new GumpPic(width - 20, height - 20, 0x0139D, 0));
         }
 
-      
+
         public int PlotState { get; private set; }
 
         public void SetMapTexture(UOTexture32 texture)
@@ -116,9 +128,17 @@ namespace ClassicUO.Game.UI.Gumps
         {
             PlotState = s;
 
-            _buttons[0].IsVisible = _buttons[0].IsEnabled = PlotState == 0;
-            _buttons[1].IsVisible = _buttons[1].IsEnabled = PlotState == 1;
-            _buttons[2].IsVisible = _buttons[2].IsEnabled = PlotState == 1;
+            _buttons[0]
+                .IsVisible = _buttons[0]
+                .IsEnabled = PlotState == 0;
+
+            _buttons[1]
+                .IsVisible = _buttons[1]
+                .IsEnabled = PlotState == 1;
+
+            _buttons[2]
+                .IsVisible = _buttons[2]
+                .IsEnabled = PlotState == 1;
         }
 
         public override void OnButtonClick(int buttonID)
@@ -129,16 +149,18 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 case ButtonType.PlotCourse:
                 case ButtonType.StopPlotting:
-                    NetClient.Socket.Send(new PMapMessage(LocalSerial, 6, (byte) PlotState, unchecked((ushort)(-24)), unchecked((ushort)(-31))));
+                    NetClient.Socket.Send(new PMapMessage(LocalSerial, 6, (byte) PlotState, unchecked((ushort) -24), unchecked((ushort) -31)));
                     SetPlotState(PlotState == 0 ? 1 : 0);
+
                     break;
+
                 case ButtonType.ClearCourse:
-                    NetClient.Socket.Send(new PMapMessage(LocalSerial, 5, 0, unchecked((ushort)(-24)), unchecked((ushort)(-31))));
+                    NetClient.Socket.Send(new PMapMessage(LocalSerial, 5, 0, unchecked((ushort) -24), unchecked((ushort) -31)));
                     ClearContainer();
+
                     break;
             }
         }
-
 
 
         public override void Update(double totalMS, double frameMS)
@@ -152,14 +174,22 @@ namespace ClassicUO.Game.UI.Gumps
                     _currentPin.Location += Mouse.LDroppedOffset - _lastPoint;
 
                     if (_currentPin.X < _textureControl.X)
+                    {
                         _currentPin.X = _textureControl.X;
+                    }
                     else if (_currentPin.X >= _textureControl.Width)
+                    {
                         _currentPin.X = _textureControl.Width;
+                    }
 
                     if (_currentPin.Y < _textureControl.Y)
+                    {
                         _currentPin.Y = _textureControl.Y;
+                    }
                     else if (_currentPin.Y >= _textureControl.Height)
+                    {
                         _currentPin.Y = _textureControl.Height;
+                    }
 
 
                     _lastPoint = Mouse.LDroppedOffset;
@@ -177,7 +207,7 @@ namespace ClassicUO.Game.UI.Gumps
                 if (PlotState != 0 && _currentPin == null && _pinTimer > Time.Ticks)
                 {
                     ushort x = (ushort) (e.X + 5);
-                    ushort y = (ushort) (e.Y);
+                    ushort y = (ushort) e.Y;
 
                     NetClient.Socket.Send(new PMapMessage(LocalSerial, 1, 0, x, y));
 
@@ -198,16 +228,20 @@ namespace ClassicUO.Game.UI.Gumps
             for (int i = 0; i < _container.Count; i++)
             {
                 if (i + 1 >= _container.Count)
+                {
                     break;
+                }
 
                 Control c0 = _container[i];
                 Control c1 = _container[i + 1];
 
-                batcher.DrawLine(Texture2DCache.GetTexture(Color.White), 
-                                      c0.ScreenCoordinateX, c0.ScreenCoordinateY, 
-                                      c1.ScreenCoordinateX, c1.ScreenCoordinateY,
-                                      c0.ScreenCoordinateX + (c1.ScreenCoordinateX - c0.ScreenCoordinateX) / 2, c0.ScreenCoordinateY + (c1.ScreenCoordinateY - c0.ScreenCoordinateY) / 2);
-
+                batcher.DrawLine
+                (
+                    Texture2DCache.GetTexture(Color.White),
+                    c0.ScreenCoordinateX, c0.ScreenCoordinateY,
+                    c1.ScreenCoordinateX, c1.ScreenCoordinateY,
+                    c0.ScreenCoordinateX + (c1.ScreenCoordinateX - c0.ScreenCoordinateX) / 2, c0.ScreenCoordinateY + (c1.ScreenCoordinateY - c0.ScreenCoordinateY) / 2
+                );
             }
 
             return true;
@@ -240,7 +274,9 @@ namespace ClassicUO.Game.UI.Gumps
             float testOfsX = tempX;
 
             if (testOfsX == 0.0f)
+            {
                 testOfsX = 1.0f;
+            }
 
             float pi = (float) Math.PI;
 
@@ -249,15 +285,19 @@ namespace ClassicUO.Game.UI.Gumps
             bool inverseCheck = false;
 
             if (x1 >= x2 && y1 <= y2)
+            {
                 inverseCheck = true;
+            }
             else if (x1 >= x2 && y1 >= y2)
+            {
                 inverseCheck = true;
+            }
 
             float sinA = (float) Math.Sin(a * pi / 180f);
             float cosA = (float) Math.Sin(a * pi / 180f);
 
-            int offsetX = (int) ((tempX * cosA) - (tempY * sinA));
-            int offsetY = (int) ((tempX * sinA) + (tempY * cosA));
+            int offsetX = (int) (tempX * cosA - tempY * sinA);
+            int offsetY = (int) (tempX * sinA + tempY * cosA);
 
             int endX2 = x1 + offsetX;
             int endY2 = y1 + offsetY;
@@ -265,8 +305,8 @@ namespace ClassicUO.Game.UI.Gumps
             tempX = Mouse.Position.X - x1; // TODO: must be position relative to the gump
             tempY = Mouse.Position.Y - y1;
 
-            offsetX = (int)((tempX * cosA) - (tempY * sinA));
-            offsetY = (int)((tempX * sinA) + (tempY * cosA));
+            offsetX = (int) (tempX * cosA - tempY * sinA);
+            offsetY = (int) (tempX * sinA + tempY * cosA);
 
             Point mousePoint = new Point(x1 + offsetX, y1 + offsetY);
 
@@ -277,7 +317,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (!inverseCheck)
             {
-                Rectangle rect = new Rectangle()
+                Rectangle rect = new Rectangle
                 {
                     X = x1 - POLY_OFFSET,
                     Y = y1 - POLY_OFFSET,
@@ -287,14 +327,14 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (rect.Contains(mousePoint))
                 {
-                    x1 = x1 + ((x2 - x1) / 2);
-                    y1 = y1 + ((y2 - y1) / 2);
+                    x1 = x1 + (x2 - x1) / 2;
+                    y1 = y1 + (y2 - y1) / 2;
                     result = 1;
                 }
             }
             else
             {
-                Rectangle rect = new Rectangle()
+                Rectangle rect = new Rectangle
                 {
                     X = endX2 - POLY_OFFSET,
                     Y = endY2 - POLY_OFFSET,
@@ -304,20 +344,13 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (rect.Contains(mousePoint))
                 {
-                    x1 = x2 + ((x1 - x2) / 2);
-                    y1 = y2 + ((y1 - y2) / 2);
+                    x1 = x2 + (x1 - x2) / 2;
+                    y1 = y2 + (y1 - y2) / 2;
                     result = 2;
                 }
             }
 
             return result;
-        }
-
-        private enum ButtonType
-        {
-            PlotCourse,
-            StopPlotting,
-            ClearCourse
         }
 
         public override void Dispose()
@@ -327,10 +360,17 @@ namespace ClassicUO.Game.UI.Gumps
             base.Dispose();
         }
 
-        class PinControl : Control
+        private enum ButtonType
         {
-            private readonly RenderedText _text;
+            PlotCourse,
+            StopPlotting,
+            ClearCourse
+        }
+
+        private class PinControl : Control
+        {
             private readonly GumpPic _pic;
+            private readonly RenderedText _text;
 
             public PinControl(int x, int y)
             {
@@ -338,7 +378,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Y = y;
 
 
-                _text = RenderedText.Create(String.Empty, font: 0, isunicode: false);
+                _text = RenderedText.Create(string.Empty, font: 0, isunicode: false);
 
                 _pic = new GumpPic(0, 0, 0x139B, 0);
                 Add(_pic);
@@ -376,10 +416,13 @@ namespace ClassicUO.Game.UI.Gumps
                     _pic.Hue = 0x35;
                 }
                 else if (_pic.Hue != 0)
+                {
                     _pic.Hue = 0;
+                }
 
                 base.Draw(batcher, x, y);
                 _text.Draw(batcher, x - _text.Width - 1, y);
+
                 return true;
             }
 

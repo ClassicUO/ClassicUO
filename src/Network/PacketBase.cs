@@ -1,4 +1,5 @@
 #region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,8 +18,11 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
+
+using System.Text;
 
 namespace ClassicUO.Network
 {
@@ -67,11 +71,14 @@ namespace ClassicUO.Network
             if (buffer == null)
             {
                 this[Position++] = 0;
+
                 return;
             }
 
             for (int i = offset; i < length; i++)
+            {
                 this[Position++] = buffer[i];
+            }
         }
 
         public void WriteSByte(sbyte v)
@@ -120,7 +127,7 @@ namespace ClassicUO.Network
         public void WriteASCII(string value, int length)
         {
             EnsureSize(length);
-            
+
             for (int i = 0; i < length && i < value.Length; i++)
             {
                 char c = value[i];
@@ -181,28 +188,41 @@ namespace ClassicUO.Network
         public void WriteUTF8(string value)
         {
             if (value == null)
+            {
                 value = string.Empty;
+            }
 
-            byte[] buffer = System.Text.Encoding.UTF8.GetBytes(value);
+            byte[] buffer = Encoding.UTF8.GetBytes(value);
             EnsureSize(buffer.Length + 2);
+
             for (int i = 0; i < buffer.Length; i++)
+            {
                 WriteByte(buffer[i]);
+            }
+
             WriteUShort(0);
         }
 
         public void WriteUTF8(string value, int length)
         {
             if (value == null)
+            {
                 value = string.Empty;
+            }
 
-            byte[] buffer = System.Text.Encoding.UTF8.GetBytes(value);
+            byte[] buffer = Encoding.UTF8.GetBytes(value);
             EnsureSize(length);
+
             for (int i = 0; i < length; i++)
             {
-                if(i < buffer.Length)
+                if (i < buffer.Length)
+                {
                     WriteByte(buffer[i]);
+                }
                 else
-                    WriteByte(0);//padding with zero
+                {
+                    WriteByte(0); //padding with zero
+                }
             }
         }
     }

@@ -1,4 +1,5 @@
 #region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,9 +18,8 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-#endregion
 
-using System.Collections.Generic;
+#endregion
 
 using ClassicUO.IO.Resources;
 using ClassicUO.Utility.Collections;
@@ -30,33 +30,35 @@ namespace ClassicUO.Renderer
 {
     internal class UOTexture32 : Texture2D
     {
-        private uint[] _data;
-
         public UOTexture32(int width, int height) : base(Client.Game.GraphicsDevice, width, height, false, SurfaceFormat.Color)
         {
             Ticks = Time.Ticks + 3000;
         }
 
         public long Ticks { get; set; }
-        public uint[] Data => _data;
+        public uint[] Data { get; private set; }
 
         public void PushData(uint[] data)
         {
-            _data = data;
+            Data = data;
             SetData(data);
         }
 
         public bool Contains(int x, int y, bool pixelCheck = true)
         {
-            if (_data != null && x >= 0 && y >= 0 && x < Width && y < Height)
+            if (Data != null && x >= 0 && y >= 0 && x < Width && y < Height)
             {
                 if (!pixelCheck)
+                {
                     return true;
+                }
 
                 int pos = y * Width + x;
 
-                if (pos < _data.Length)
-                    return _data[pos] != 0;
+                if (pos < Data.Length)
+                {
+                    return Data[pos] != 0;
+                }
             }
 
             return false;

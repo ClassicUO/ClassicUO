@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,11 +18,11 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
 using System.Collections.Generic;
-
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
@@ -42,13 +43,17 @@ namespace ClassicUO.Renderer
                 int maxX = Math.Min(parent.X + parent.Width, scissor.X + scissor.Width);
 
                 if (maxX - minX < 1)
+                {
                     return false;
+                }
 
                 int minY = Math.Max(parent.Y, scissor.Y);
                 int maxY = Math.Min(parent.Y + parent.Height, scissor.Y + scissor.Height);
 
                 if (maxY - minY < 1)
+                {
                     return false;
+                }
 
                 scissor.X = minX;
                 scissor.Y = minY;
@@ -77,7 +82,7 @@ namespace ClassicUO.Renderer
 
 
             _scissors.Push(scissor);
-            
+
             device.ScissorRectangle = scissor;
 
             return true;
@@ -88,9 +93,13 @@ namespace ClassicUO.Renderer
             Rectangle scissors = _scissors.Pop();
 
             if (_scissors.Count == 0)
+            {
                 device.ScissorRectangle = device.Viewport.Bounds;
+            }
             else
+            {
                 device.ScissorRectangle = _scissors.Peek();
+            }
 
             return scissors;
         }
@@ -104,6 +113,7 @@ namespace ClassicUO.Renderer
             {
                 X = (int) tmp.X, Y = (int) tmp.Y
             };
+
             tmp.X = sx + sw;
             tmp.Y = sy + sh;
             Vector2.Transform(ref tmp, ref batchTransform, out tmp);

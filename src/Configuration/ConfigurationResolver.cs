@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,15 +18,12 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
-using System;
-using System.Diagnostics;
 using System.IO;
 using System.Text.RegularExpressions;
-
 using ClassicUO.Utility.Logging;
-
 using TinyJson;
 
 namespace ClassicUO.Configuration
@@ -36,17 +34,21 @@ namespace ClassicUO.Configuration
         {
             if (!File.Exists(file))
             {
-                Log.Warn( file + " not found.");
+                Log.Warn(file + " not found.");
 
                 return null;
             }
 
             string text = File.ReadAllText(file);
-            text = Regex.Replace(text,
-                                         @"(?<!\\)  # lookbehind: Check that previous character isn't a \
+
+            text = Regex.Replace
+            (
+                text,
+                @"(?<!\\)  # lookbehind: Check that previous character isn't a \
                                                 \\         # match a \
                                                 (?!\\)     # lookahead: Check that the following character isn't a \",
-                                    @"\\", RegexOptions.IgnorePatternWhitespace);
+                @"\\", RegexOptions.IgnorePatternWhitespace
+            );
 
             T settings = text.Decode<T>();
 
@@ -59,7 +61,6 @@ namespace ClassicUO.Configuration
             try
             {
                 File.WriteAllText(file, obj.Encode(true));
-
             }
             catch (IOException e)
             {

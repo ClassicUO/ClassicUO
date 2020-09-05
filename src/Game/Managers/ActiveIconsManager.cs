@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,26 +18,31 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System.Collections.Generic;
 
 namespace ClassicUO.Game.Managers
 {
-    class ActiveSpellIconsManager
+    internal class ActiveSpellIconsManager
     {
         private readonly HashSet<ushort> _activeIcons = new HashSet<ushort>();
 
         public void Add(ushort id)
         {
             if (!IsActive(id))
+            {
                 _activeIcons.Add(id);
+            }
         }
 
         public void Remove(ushort id)
         {
             if (IsActive(id))
+            {
                 _activeIcons.Remove(id);
+            }
         }
 
         public bool IsActive(ushort id)

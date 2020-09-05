@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,16 +18,15 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
 using System.Runtime.InteropServices;
-
 using ClassicUO.Input;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
-
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
@@ -36,17 +36,16 @@ namespace ClassicUO.Game.UI.Controls
     {
         private readonly int _cellHeight;
         private readonly int _cellWidth;
+        private ColorBox[,] _colorBoxes;
         private readonly int _columns;
         private readonly ushort[] _customPallete;
-        private readonly int _rows;
-        private ColorBox[,] _colorBoxes;
         private int _graduation, _selectedIndex;
         private ushort[] _hues;
         private bool _needToFileeBoxes = true;
         private Texture2D _pointer;
+        private readonly int _rows;
 
         private bool _selected;
-        public EventHandler ColorSelectedIndex;
 
         public ColorPickerBox(int x, int y, int rows = 10, int columns = 20, int cellW = 8, int cellH = 8, ushort[] customPallete = null)
         {
@@ -102,7 +101,9 @@ namespace ClassicUO.Game.UI.Controls
             set
             {
                 if (value < 0 || value >= _hues.Length)
+                {
                     return;
+                }
 
                 if (_selectedIndex != value)
                 {
@@ -113,6 +114,7 @@ namespace ClassicUO.Game.UI.Controls
         }
 
         public ushort SelectedHue => SelectedIndex < 0 || SelectedIndex >= _hues.Length ? (ushort) 0 : _hues[SelectedIndex];
+        public EventHandler ColorSelectedIndex;
 
         public void SetHue(ushort hue)
         {
@@ -123,17 +125,24 @@ namespace ClassicUO.Game.UI.Controls
         public override void Update(double totalMS, double frameMS)
         {
             if (IsDisposed)
+            {
                 return;
+            }
 
             if (_needToFileeBoxes)
+            {
                 CreateTexture();
+            }
 
             base.Update(totalMS, frameMS);
 
             for (int y = 0; y < _rows; y++)
             {
-                for (int x = 0; x < _columns; x++) 
-                    _colorBoxes?[y, x].Update(totalMS, frameMS);
+                for (int x = 0; x < _columns; x++)
+                {
+                    _colorBoxes?[y, x]
+                        .Update(totalMS, frameMS);
+                }
             }
         }
 
@@ -143,19 +152,27 @@ namespace ClassicUO.Game.UI.Controls
             {
                 _pointer = new Texture2D(batcher.GraphicsDevice, 1, 1);
 
-                _pointer.SetData(new Color[1]
-                {
-                    Color.White
-                });
+                _pointer.SetData
+                (
+                    new Color[1]
+                    {
+                        Color.White
+                    }
+                );
 
                 if (SelectedIndex != 0)
+                {
                     SelectedIndex = 0;
+                }
             }
 
             for (int i = 0; i < _rows; i++)
             {
-                for (int j = 0; j < _columns; j++) 
-                    _colorBoxes?[i, j].Draw(batcher, x + j * _cellWidth, y + i * _cellHeight);
+                for (int j = 0; j < _columns; j++)
+                {
+                    _colorBoxes?[i, j]
+                        .Draw(batcher, x + j * _cellWidth, y + i * _cellHeight);
+                }
             }
 
             if (_hues.Length > 1)
@@ -183,7 +200,9 @@ namespace ClassicUO.Game.UI.Controls
         private unsafe void CreateTexture()
         {
             if (!_needToFileeBoxes || IsDisposed)
+            {
                 return;
+            }
 
             _needToFileeBoxes = false;
 
@@ -203,7 +222,10 @@ namespace ClassicUO.Game.UI.Controls
             IntPtr ptr = Marshal.AllocHGlobal(size * HuesLoader.Instance.HuesRange.Length);
 
             for (int i = 0; i < HuesLoader.Instance.HuesRange.Length; i++)
+            {
                 Marshal.StructureToPtr(HuesLoader.Instance.HuesRange[i], ptr + i * size, false);
+            }
+
             byte* huesData = (byte*) (ptr + (32 + 4));
 
             for (int y = 0; y < _rows; y++)
@@ -233,7 +255,10 @@ namespace ClassicUO.Game.UI.Controls
             IntPtr ptr = Marshal.AllocHGlobal(size * HuesLoader.Instance.HuesRange.Length);
 
             for (int i = 0; i < HuesLoader.Instance.HuesRange.Length; i++)
+            {
                 Marshal.StructureToPtr(HuesLoader.Instance.HuesRange[i], ptr + i * size, false);
+            }
+
             byte* huesData = (byte*) (ptr + (32 + 4));
 
             _hues = new ushort[_rows * _columns];
@@ -264,7 +289,10 @@ namespace ClassicUO.Game.UI.Controls
                 for (int y = 0; y < _rows; y++)
                 {
                     for (int x = 0; x < _columns; x++)
-                        _colorBoxes[y, x]?.Dispose();
+                    {
+                        _colorBoxes[y, x]
+                            ?.Dispose();
+                    }
                 }
             }
 

@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,28 +18,26 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
-
 using ClassicUO.Configuration;
+using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
-using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Input;
-using ClassicUO.Renderer;
-using ClassicUO.Game.Data;
-
-using Microsoft.Xna.Framework;
 using ClassicUO.IO.Resources;
+using ClassicUO.Renderer;
+using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Controls
 {
     internal class ItemGump : Control
     {
-        private readonly bool _is_gump;
         private ushort _graphic;
+        private readonly bool _is_gump;
 
         public ItemGump(uint serial, ushort graphic, ushort hue, int x, int y, bool is_gump = false)
         {
@@ -73,12 +72,15 @@ namespace ClassicUO.Game.UI.Controls
                 if (texture == null)
                 {
                     Dispose();
+
                     return;
                 }
 
                 Width = texture.Width;
                 Height = texture.Height;
-                IsPartialHue = !_is_gump && TileDataLoader.Instance.StaticData[value].IsPartialHue;
+
+                IsPartialHue = !_is_gump && TileDataLoader.Instance.StaticData[value]
+                                                          .IsPartialHue;
             }
         }
 
@@ -91,7 +93,9 @@ namespace ClassicUO.Game.UI.Controls
         public override void Update(double totalMS, double frameMS)
         {
             if (IsDisposed)
+            {
                 return;
+            }
 
             base.Update(totalMS, frameMS);
 
@@ -99,8 +103,8 @@ namespace ClassicUO.Game.UI.Controls
             {
                 if (CanPickUp && !ItemHold.Enabled && Mouse.LButtonPressed &&
                     UIManager.LastControlMouseDown(MouseButtonType.Left) == this &&
-                    ((Mouse.LastLeftButtonClickTime != 0xFFFF_FFFF && Mouse.LastLeftButtonClickTime != 0 && 
-                      Mouse.LastLeftButtonClickTime + Mouse.MOUSE_DELAY_DOUBLE_CLICK < Time.Ticks) ||
+                    (Mouse.LastLeftButtonClickTime != 0xFFFF_FFFF && Mouse.LastLeftButtonClickTime != 0 &&
+                     Mouse.LastLeftButtonClickTime + Mouse.MOUSE_DELAY_DOUBLE_CLICK < Time.Ticks ||
                      CanPickup()))
                 {
                     AttemptPickUp();
@@ -115,12 +119,14 @@ namespace ClassicUO.Game.UI.Controls
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
             if (IsDisposed)
+            {
                 return false;
+            }
 
             base.Draw(batcher, x, y);
 
             ResetHueVector();
-            ShaderHueTranslator.GetHueVector(ref _hueVector, HighlightOnMouseOver && MouseIsOver ? 0x0035 : Hue, IsPartialHue, 0, false);
+            ShaderHueTranslator.GetHueVector(ref _hueVector, HighlightOnMouseOver && MouseIsOver ? 0x0035 : Hue, IsPartialHue, 0);
 
             UOTexture32 texture = _is_gump ? GumpsLoader.Instance.GetTexture(Graphic) : ArtLoader.Instance.GetTexture(Graphic);
 
@@ -152,8 +158,8 @@ namespace ClassicUO.Game.UI.Controls
             {
                 float scale = UIManager.ContainerScale;
 
-                x = (int)(x / scale);
-                y = (int)(y / scale);
+                x = (int) (x / scale);
+                y = (int) (y / scale);
             }
 
             if (texture.Contains(x, y))
@@ -188,13 +194,19 @@ namespace ClassicUO.Game.UI.Controls
         private bool CanPickup()
         {
             Point offset = Mouse.LDroppedOffset;
+
             if (Math.Abs(offset.X) < Constants.MIN_PICKUP_DRAG_DISTANCE_PIXELS &&
                 Math.Abs(offset.Y) < Constants.MIN_PICKUP_DRAG_DISTANCE_PIXELS)
+            {
                 return false;
+            }
 
             SplitMenuGump split = UIManager.GetGump<SplitMenuGump>(LocalSerial);
+
             if (split == null)
+            {
                 return true;
+            }
 
             split.X = Mouse.Position.X - 80;
             split.Y = Mouse.Position.Y - 40;
@@ -208,12 +220,14 @@ namespace ClassicUO.Game.UI.Controls
         protected override bool OnMouseDoubleClick(int x, int y, MouseButtonType button)
         {
             if (button != MouseButtonType.Left || TargetManager.IsTargeting)
+            {
                 return false;
+            }
 
             Item item = World.Items.Get(LocalSerial);
             Item container;
 
-            if ( !Input.Keyboard.Ctrl &&
+            if (!Keyboard.Ctrl &&
                 ProfileManager.Current.DoubleClickToLootInsideContainers &&
                 item != null && !item.IsDestroyed &&
                 !item.ItemData.IsContainer && item.IsEmpty &&
@@ -227,7 +241,7 @@ namespace ClassicUO.Game.UI.Controls
             {
                 GameActions.DoubleClick(LocalSerial);
             }
-            
+
             return true;
         }
 

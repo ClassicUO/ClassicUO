@@ -1,4 +1,5 @@
 #region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,10 +18,10 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
-
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
@@ -42,20 +43,30 @@ namespace ClassicUO.Game.UI.Gumps
             Height = t.Height;
 
 
-            Add(new Label(message, false, 0x0386, 165)
-            {
-                X = 33, Y = 30
-            });
+            Add
+            (
+                new Label(message, false, 0x0386, 165)
+                {
+                    X = 33, Y = 30
+                }
+            );
 
-            Add(new Button((int) Buttons.Cancel, 0x817, 0x818, 0x0819)
-            {
-                X = 37, Y = 75, ButtonAction = ButtonAction.Activate
-            });
+            Add
+            (
+                new Button((int) Buttons.Cancel, 0x817, 0x818, 0x0819)
+                {
+                    X = 37, Y = 75, ButtonAction = ButtonAction.Activate
+                }
+            );
 
-            Add(new Button((int) Buttons.Ok, 0x81A, 0x81B, 0x081C)
-            {
-                X = 100, Y = 75, ButtonAction = ButtonAction.Activate
-            });
+            Add
+            (
+                new Button((int) Buttons.Ok, 0x81A, 0x81B, 0x081C)
+                {
+                    X = 100, Y = 75, ButtonAction = ButtonAction.Activate
+                }
+            );
+
             CanMove = false;
             ControlInfo.IsModal = true;
 

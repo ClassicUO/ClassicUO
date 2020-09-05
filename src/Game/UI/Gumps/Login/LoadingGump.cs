@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,28 +18,26 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
-
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.IO.Resources;
-
 using SDL2;
 
 namespace ClassicUO.Game.UI.Gumps.Login
 {
     [Flags]
-    enum LoginButtons
+    internal enum LoginButtons
     {
         None = 1,
         OK = 2,
         Cancel = 4
     }
 
-    class LoadingGump : Gump
-    {  
-
+    internal class LoadingGump : Gump
+    {
         private readonly Action<int> _buttonClick;
         private readonly Label _label;
 
@@ -54,40 +53,55 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 Y = 178
             };
 
-            Add(new ResizePic(0x0A28)
-            {
-                X = 142, Y = 134, Width = 366, Height = 212
-            });
+            Add
+            (
+                new ResizePic(0x0A28)
+                {
+                    X = 142, Y = 134, Width = 366, Height = 212
+                }
+            );
 
             Add(_label);
 
             if (showButtons == LoginButtons.OK)
             {
-                Add(new Button((int) LoginButtons.OK, 0x0481, 0x0483, 0x0482)
-                {
-                    X = 306, Y = 304, ButtonAction = ButtonAction.Activate
-                });
+                Add
+                (
+                    new Button((int) LoginButtons.OK, 0x0481, 0x0483, 0x0482)
+                    {
+                        X = 306, Y = 304, ButtonAction = ButtonAction.Activate
+                    }
+                );
             }
             else if (showButtons == LoginButtons.Cancel)
             {
-                Add(new Button((int) LoginButtons.Cancel, 0x047E, 0x0480, 0x047F)
-                {
-                    X = 306,
-                    Y = 304,
-                    ButtonAction = ButtonAction.Activate
-                });
+                Add
+                (
+                    new Button((int) LoginButtons.Cancel, 0x047E, 0x0480, 0x047F)
+                    {
+                        X = 306,
+                        Y = 304,
+                        ButtonAction = ButtonAction.Activate
+                    }
+                );
             }
             else if (showButtons == (LoginButtons.OK | LoginButtons.Cancel))
             {
-                Add(new Button((int) LoginButtons.OK, 0x0481, 0x0483, 0x0482)
-                {
-                    X = 264, Y = 304, ButtonAction = ButtonAction.Activate
-                });
+                Add
+                (
+                    new Button((int) LoginButtons.OK, 0x0481, 0x0483, 0x0482)
+                    {
+                        X = 264, Y = 304, ButtonAction = ButtonAction.Activate
+                    }
+                );
 
-                Add(new Button((int) LoginButtons.Cancel, 0x047E, 0x0480, 0x047F)
-                {
-                    X = 348, Y = 304, ButtonAction = ButtonAction.Activate
-                });
+                Add
+                (
+                    new Button((int) LoginButtons.Cancel, 0x047E, 0x0480, 0x047F)
+                    {
+                        X = 348, Y = 304, ButtonAction = ButtonAction.Activate
+                    }
+                );
             }
         }
 
@@ -95,10 +109,13 @@ namespace ClassicUO.Game.UI.Gumps.Login
         {
             _label.Text = text;
         }
+
         protected override void OnKeyDown(SDL.SDL_Keycode key, SDL.SDL_Keymod mod)
         {
             if (key == SDL.SDL_Keycode.SDLK_KP_ENTER || key == SDL.SDL_Keycode.SDLK_RETURN)
+            {
                 OnButtonClick((int) LoginButtons.OK);
+            }
         }
 
 

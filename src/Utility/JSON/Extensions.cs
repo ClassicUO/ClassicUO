@@ -1,18 +1,15 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.InteropServices;
 using System.Text;
 
 namespace TinyJson
 {
-    public static class StringExtensions 
+    public static class StringExtensions
     {
-		private static readonly StringBuilder _sb = new StringBuilder(256);
+        private static readonly StringBuilder _sb = new StringBuilder(256);
 
-		public static string SnakeCaseToCamelCase(this string snakeCaseName)
+        public static string SnakeCaseToCamelCase(this string snakeCaseName)
         {
             _sb.Clear();
 
@@ -20,7 +17,7 @@ namespace TinyJson
 
             for (int i = 0; i < snakeCaseName.Length; i++)
             {
-				if(snakeCaseName[i] == '_')
+                if (snakeCaseName[i] == '_')
                 {
                     next_upper = true;
                 }
@@ -30,7 +27,7 @@ namespace TinyJson
                     {
                         _sb.Append(char.ToUpperInvariant(snakeCaseName[i]));
                         next_upper = false;
-					}
+                    }
                     else
                     {
                         _sb.Append(snakeCaseName[i]);
@@ -41,23 +38,23 @@ namespace TinyJson
             return _sb.ToString();
         }
 
-		public static string CamelCaseToSnakeCase(this string camelCaseName) 
+        public static string CamelCaseToSnakeCase(this string camelCaseName)
         {
             _sb.Clear();
 
-			if (char.IsUpper(camelCaseName[0]))
+            if (char.IsUpper(camelCaseName[0]))
             {
                 _sb.Append(char.ToLowerInvariant(camelCaseName[0]));
             }
 
-			for (int i = 1; i < camelCaseName.Length; i++)
+            for (int i = 1; i < camelCaseName.Length; i++)
             {
                 if (char.IsUpper(camelCaseName[i]))
                 {
                     _sb.Append("_");
                     _sb.Append(char.ToLowerInvariant(camelCaseName[i]));
                 }
-				else
+                else
                 {
                     _sb.Append(camelCaseName[i]);
                 }
@@ -65,24 +62,40 @@ namespace TinyJson
 
             return _sb.ToString();
         }
-	}
+    }
 
-	public static class TypeExtensions {
-		public static bool IsInstanceOfGenericType(this Type type, Type genericType) {
-			while (type != null) {
-				if (type.IsGenericType && type.GetGenericTypeDefinition() == genericType) return true;
-				type = type.BaseType;
-			}
-			return false;
-		}
+    public static class TypeExtensions
+    {
+        public static bool IsInstanceOfGenericType(this Type type, Type genericType)
+        {
+            while (type != null)
+            {
+                if (type.IsGenericType && type.GetGenericTypeDefinition() == genericType)
+                {
+                    return true;
+                }
 
-		public static bool HasGenericInterface(this Type type, Type genericInterface) {
-			if (genericInterface == null) throw new ArgumentNullException();
-			Predicate<Type> interfaceTest = new Predicate<Type>(i => i.IsGenericType && i.GetGenericTypeDefinition().IsAssignableFrom(genericInterface));
-			return interfaceTest(type) || type.GetInterfaces().Any(i => interfaceTest(i));
-		}
+                type = type.BaseType;
+            }
 
-        static string UnwrapFieldName(string name)
+            return false;
+        }
+
+        public static bool HasGenericInterface(this Type type, Type genericInterface)
+        {
+            if (genericInterface == null)
+            {
+                throw new ArgumentNullException();
+            }
+
+            Predicate<Type> interfaceTest = i => i.IsGenericType && i.GetGenericTypeDefinition()
+                                                                     .IsAssignableFrom(genericInterface);
+
+            return interfaceTest(type) || type.GetInterfaces()
+                                              .Any(i => interfaceTest(i));
+        }
+
+        private static string UnwrapFieldName(string name)
         {
             if (!string.IsNullOrEmpty(name))
             {
@@ -91,10 +104,13 @@ namespace TinyJson
                     for (int i = 1; i < name.Length; i++)
                     {
                         if (name[i] == '>')
+                        {
                             return name.Substring(1, i - 1);
+                        }
                     }
                 }
             }
+
             return name;
         }
 
@@ -107,8 +123,8 @@ namespace TinyJson
                 return attr.Name;
             }
 
-			return property.Name;
-		}
+            return property.Name;
+        }
 
         public static string UnwrappedFieldName(this FieldInfo field)
         {
@@ -123,47 +139,67 @@ namespace TinyJson
         }
     }
 
-	public static class JsonExtensions {
-		public static bool IsNullable(this Type type) {
-			return Nullable.GetUnderlyingType(type) != null || !type.IsPrimitive;
-		}
+    public static class JsonExtensions
+    {
+        public static bool IsNullable(this Type type)
+        {
+            return Nullable.GetUnderlyingType(type) != null || !type.IsPrimitive;
+        }
 
-		public static bool IsNumeric(this Type type) {
-			if (type.IsEnum) return false;
-			switch (Type.GetTypeCode(type)) {
-				case TypeCode.Byte:
-				case TypeCode.SByte:
-				case TypeCode.UInt16:
-				case TypeCode.UInt32:
-				case TypeCode.UInt64:
-				case TypeCode.Int16:
-				case TypeCode.Int32:
-				case TypeCode.Int64:
-				case TypeCode.Decimal:
-				case TypeCode.Double:
-				case TypeCode.Single:
-					return true;
-				case TypeCode.Object:
-					Type underlyingType = Nullable.GetUnderlyingType(type);
-					return underlyingType != null && underlyingType.IsNumeric();
-				default:
-					return false;
-			}
-		}
+        public static bool IsNumeric(this Type type)
+        {
+            if (type.IsEnum)
+            {
+                return false;
+            }
 
-		public static bool IsFloatingPoint(this Type type) {
-			if (type.IsEnum) return false;
-			switch (Type.GetTypeCode(type)) {
-				case TypeCode.Decimal:
-				case TypeCode.Double:
-				case TypeCode.Single:
-					return true;
-				case TypeCode.Object:
-					Type underlyingType = Nullable.GetUnderlyingType(type);
-					return underlyingType != null && underlyingType.IsFloatingPoint();
-				default:
-					return false;
-			}
-		}
-	}
+            switch (Type.GetTypeCode(type))
+            {
+                case TypeCode.Byte:
+                case TypeCode.SByte:
+                case TypeCode.UInt16:
+                case TypeCode.UInt32:
+                case TypeCode.UInt64:
+                case TypeCode.Int16:
+                case TypeCode.Int32:
+                case TypeCode.Int64:
+                case TypeCode.Decimal:
+                case TypeCode.Double:
+                case TypeCode.Single:
+                    return true;
+
+                case TypeCode.Object:
+                    Type underlyingType = Nullable.GetUnderlyingType(type);
+
+                    return underlyingType != null && underlyingType.IsNumeric();
+
+                default:
+                    return false;
+            }
+        }
+
+        public static bool IsFloatingPoint(this Type type)
+        {
+            if (type.IsEnum)
+            {
+                return false;
+            }
+
+            switch (Type.GetTypeCode(type))
+            {
+                case TypeCode.Decimal:
+                case TypeCode.Double:
+                case TypeCode.Single:
+                    return true;
+
+                case TypeCode.Object:
+                    Type underlyingType = Nullable.GetUnderlyingType(type);
+
+                    return underlyingType != null && underlyingType.IsFloatingPoint();
+
+                default:
+                    return false;
+            }
+        }
+    }
 }

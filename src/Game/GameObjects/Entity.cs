@@ -1,4 +1,5 @@
 #region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,19 +18,16 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
 using System.Runtime.CompilerServices;
-
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Network;
 using ClassicUO.Renderer;
-using ClassicUO.Utility.Logging;
 using static ClassicUO.Network.NetClient;
 
 namespace ClassicUO.Game.GameObjects
@@ -42,15 +40,6 @@ namespace ClassicUO.Game.GameObjects
         {
             Serial = serial;
         }
-
-        protected long LastAnimationChangeTime;
-        public sbyte AnimIndex;
-        public uint LastStepTime;
-        public uint Serial;
-        public bool IsClicked;
-        public ushort Hits;
-        public ushort HitsMax;
-        public string Name;
 
         public bool IsHidden => (Flags & Flags.Hidden) != 0;
 
@@ -67,9 +56,28 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
-        public Flags Flags;
-
         public bool Exists => World.Contains(Serial);
+
+        public bool Equals(Entity e)
+        {
+            return e != null && Serial == e.Serial;
+        }
+
+        public sbyte AnimIndex;
+
+        public Flags Flags;
+        public ushort Hits;
+        public ushort HitsMax;
+
+
+        public byte HitsPercentage;
+        public RenderedText HitsTexture;
+        public bool IsClicked;
+        public uint LastStepTime;
+        public string Name;
+        public uint Serial;
+
+        protected long LastAnimationChangeTime;
 
 
         public void FixHue(ushort hue)
@@ -79,33 +87,40 @@ namespace ClassicUO.Game.GameObjects
             if (fixedColor != 0)
             {
                 if (fixedColor >= 0x0BB8)
+                {
                     fixedColor = 1;
+                }
+
                 fixedColor |= (ushort) (hue & 0xC000);
             }
             else
+            {
                 fixedColor = (ushort) (hue & 0x8000);
+            }
 
             Hue = fixedColor;
         }
 
-
-        public byte HitsPercentage;
-        public RenderedText HitsTexture;
-
         public void UpdateHits(byte perc)
         {
-            if (perc != HitsPercentage || (HitsTexture == null || HitsTexture.IsDestroyed))
+            if (perc != HitsPercentage || HitsTexture == null || HitsTexture.IsDestroyed)
             {
                 HitsPercentage = perc;
 
                 ushort color = 0x0044;
 
                 if (perc < 30)
+                {
                     color = 0x0021;
+                }
                 else if (perc < 50)
+                {
                     color = 0x0030;
+                }
                 else if (perc < 80)
+                {
                     color = 0x0058;
+                }
 
                 HitsTexture?.Destroy();
                 HitsTexture = RenderedText.Create($"[{perc}%]", color, 3, false);
@@ -114,7 +129,6 @@ namespace ClassicUO.Game.GameObjects
 
         public virtual void CheckGraphicChange(sbyte animIndex = 0)
         {
-            
         }
 
         public override void Update(double totalMS, double frameMS)
@@ -136,7 +150,6 @@ namespace ClassicUO.Game.GameObjects
             }
 
 
-
             if (HitsMax > 0)
             {
                 int hits_max = HitsMax;
@@ -144,9 +157,13 @@ namespace ClassicUO.Game.GameObjects
                 hits_max = Hits * 100 / hits_max;
 
                 if (hits_max > 100)
+                {
                     hits_max = 100;
+                }
                 else if (hits_max < 1)
+                {
                     hits_max = 0;
+                }
 
                 UpdateHits((byte) hits_max);
             }
@@ -202,14 +219,18 @@ namespace ClassicUO.Game.GameObjects
                     Item it = (Item) i;
 
                     if (it.Graphic == graphic && it.Hue == hue)
+                    {
                         item = it;
+                    }
 
                     if (SerialHelper.IsValid(it.Container))
                     {
                         Item found = it.FindItem(graphic, hue);
 
                         if (found != null)
+                        {
                             item = found;
+                        }
                     }
                 }
             }
@@ -224,7 +245,9 @@ namespace ClassicUO.Game.GameObjects
                 Item item = (Item) i;
 
                 if (item.Graphic == graphic)
+                {
                     return item;
+                }
 
                 if (deepsearch && !item.IsEmpty)
                 {
@@ -235,7 +258,9 @@ namespace ClassicUO.Game.GameObjects
                         Item res = childItem.GetItemByGraphic(graphic, deepsearch);
 
                         if (res != null)
+                        {
                             return res;
+                        }
                     }
                 }
             }
@@ -251,7 +276,9 @@ namespace ClassicUO.Game.GameObjects
                 Item it = (Item) i;
 
                 if (!it.IsDestroyed && it.Layer == layer)
+                {
                     return it;
+                }
             }
 
             return null;
@@ -305,13 +332,12 @@ namespace ClassicUO.Game.GameObjects
                         it.Destroy();
                         Remove(obj);
                     }
-                    
+
                     obj = next;
                 }
 
 
                 Items = new_first;
-
             }
         }
 
@@ -329,11 +355,6 @@ namespace ClassicUO.Game.GameObjects
         public static bool operator !=(Entity e, Entity s)
         {
             return !Equals(e, s);
-        }
-
-        public bool Equals(Entity e)
-        {
-            return e != null && Serial == e.Serial;
         }
 
         public override bool Equals(object obj)

@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,14 +18,15 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
-using ClassicUO.Resources;
 using System.Collections.Generic;
+using ClassicUO.Resources;
 
 namespace ClassicUO.Game.Managers
 {
-    sealed class UOChatChannel
+    internal sealed class UOChatChannel
     {
         public UOChatChannel(string name, bool haspassword)
         {
@@ -32,18 +34,19 @@ namespace ClassicUO.Game.Managers
             HasPassword = haspassword;
         }
 
-        public readonly string Name;
         public readonly bool HasPassword;
+
+        public readonly string Name;
     }
 
-    enum CHAT_STATUS : byte
+    internal enum CHAT_STATUS : byte
     {
         DISABLED,
         ENABLED,
         ENABLED_USER_REQUEST
     }
 
-    static class UOChatManager
+    internal static class UOChatManager
     {
         public static readonly Dictionary<string, UOChatChannel> Channels = new Dictionary<string, UOChatChannel>();
         public static CHAT_STATUS ChatIsEnabled;
@@ -91,14 +94,16 @@ namespace ClassicUO.Game.Managers
             ResGeneral.TheConferenceNamed1IsFull,
             ResGeneral.YouAreBanning1FromThisConference,
             ResGeneral.BannedYouFromTheConference,
-            ResGeneral.YouHaveBeenBanned,
+            ResGeneral.YouHaveBeenBanned
         };
 
 
         public static string GetMessage(int index)
         {
             if (index < _messages.Length)
+            {
                 return _messages[index];
+            }
 
             return string.Empty;
         }

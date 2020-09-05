@@ -1,4 +1,5 @@
 #region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,12 +18,12 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
 using System.IO;
 using System.Xml;
-
 using ClassicUO.Configuration;
 using ClassicUO.Data;
 using ClassicUO.Game.Data;
@@ -34,7 +35,6 @@ using ClassicUO.Input;
 using ClassicUO.IO.Resources;
 using ClassicUO.Network;
 using ClassicUO.Renderer;
-
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Gumps
@@ -50,18 +50,18 @@ namespace ClassicUO.Game.UI.Gumps
             0x07e8, 0x07e9, 0x07ea
         };
         private GumpPic _combatBook, _racialAbilitiesBook;
+        private HitBox _hitBox;
         private bool _isWarMode, _isMinimized;
 
         private PaperDollInteractable _paperDollInteractable;
         private GumpPic _partyManifestPic;
-        private GumpPic _profilePic;
-        private GumpPic _virtueMenuPic;
-        private Button _warModeBtn;
 
         private GumpPic _picBase;
-        private HitBox _hitBox;
-        private Label _titleLabel;
+        private GumpPic _profilePic;
         private readonly EquipmentSlot[] _slots = new EquipmentSlot[6];
+        private Label _titleLabel;
+        private GumpPic _virtueMenuPic;
+        private Button _warModeBtn;
 
 
         public PaperDollGump() : base(0, 0)
@@ -88,7 +88,7 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     _isMinimized = value;
 
-                    _picBase.Graphic = value ? (ushort) 0x7EE : (ushort) (0x07d0 + (LocalSerial == World.Player ? 0 : 1)) ;
+                    _picBase.Graphic = value ? (ushort) 0x7EE : (ushort) (0x07d0 + (LocalSerial == World.Player ? 0 : 1));
 
                     foreach (Control c in Children)
                     {
@@ -110,10 +110,14 @@ namespace ClassicUO.Game.UI.Gumps
             if (LocalSerial == World.Player)
             {
                 if (_virtueMenuPic != null)
+                {
                     _virtueMenuPic.MouseDoubleClick -= VirtueMenu_MouseDoubleClickEvent;
+                }
 
                 if (_partyManifestPic != null)
+                {
                     _partyManifestPic.MouseDoubleClick -= PartyManifest_MouseDoubleClickEvent;
+                }
             }
 
             Clear();
@@ -139,65 +143,88 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 Add(_picBase = new GumpPic(0, 0, 0x07d0, 0));
                 _picBase.MouseDoubleClick += _picBase_MouseDoubleClick;
+
                 //HELP BUTTON
-                Add(new Button((int)Buttons.Help, 0x07ef, 0x07f0, 0x07f1)
-                {
-                    X = 185,
-                    Y = 44 + 27 * 0,
-                    ButtonAction = ButtonAction.Activate
-                });
+                Add
+                (
+                    new Button((int) Buttons.Help, 0x07ef, 0x07f0, 0x07f1)
+                    {
+                        X = 185,
+                        Y = 44 + 27 * 0,
+                        ButtonAction = ButtonAction.Activate
+                    }
+                );
 
                 //OPTIONS BUTTON
-                Add(new Button((int)Buttons.Options, 0x07d6, 0x07d7, 0x07d8)
-                {
-                    X = 185,
-                    Y = 44 + 27 * 1,
-                    ButtonAction = ButtonAction.Activate
-                });
+                Add
+                (
+                    new Button((int) Buttons.Options, 0x07d6, 0x07d7, 0x07d8)
+                    {
+                        X = 185,
+                        Y = 44 + 27 * 1,
+                        ButtonAction = ButtonAction.Activate
+                    }
+                );
 
                 // LOG OUT BUTTON
-                Add(new Button((int)Buttons.LogOut, 0x07d9, 0x07da, 0x07db)
-                {
-                    X = 185,
-                    Y = 44 + 27 * 2,
-                    ButtonAction = ButtonAction.Activate
-                });
+                Add
+                (
+                    new Button((int) Buttons.LogOut, 0x07d9, 0x07da, 0x07db)
+                    {
+                        X = 185,
+                        Y = 44 + 27 * 2,
+                        ButtonAction = ButtonAction.Activate
+                    }
+                );
 
                 // QUESTS BUTTON
-                Add(new Button((int)Buttons.Quests, 0x57b5, 0x57b7, 0x57b6)
-                {
-                    X = 185,
-                    Y = 44 + 27 * 3,
-                    ButtonAction = ButtonAction.Activate
-                });
+                Add
+                (
+                    new Button((int) Buttons.Quests, 0x57b5, 0x57b7, 0x57b6)
+                    {
+                        X = 185,
+                        Y = 44 + 27 * 3,
+                        ButtonAction = ButtonAction.Activate
+                    }
+                );
 
                 // SKILLS BUTTON
-                Add(new Button((int)Buttons.Skills, 0x07df, 0x07e0, 0x07e1)
-                {
-                    X = 185,
-                    Y = 44 + 27 * 4,
-                    ButtonAction = ButtonAction.Activate
-                });
+                Add
+                (
+                    new Button((int) Buttons.Skills, 0x07df, 0x07e0, 0x07e1)
+                    {
+                        X = 185,
+                        Y = 44 + 27 * 4,
+                        ButtonAction = ButtonAction.Activate
+                    }
+                );
 
                 // GUILD BUTTON
-                Add(new Button((int)Buttons.Guild, 0x57b2, 0x57b4, 0x57b3)
-                {
-                    X = 185,
-                    Y = 44 + 27 * 5,
-                    ButtonAction = ButtonAction.Activate
-                });
+                Add
+                (
+                    new Button((int) Buttons.Guild, 0x57b2, 0x57b4, 0x57b3)
+                    {
+                        X = 185,
+                        Y = 44 + 27 * 5,
+                        ButtonAction = ButtonAction.Activate
+                    }
+                );
+
                 // TOGGLE PEACE/WAR BUTTON
                 Mobile mobile = World.Mobiles.Get(LocalSerial);
 
                 _isWarMode = mobile?.InWarMode ?? false;
                 ushort[] btngumps = _isWarMode ? WarModeBtnGumps : PeaceModeBtnGumps;
 
-                Add(_warModeBtn = new Button((int)Buttons.PeaceWarToggle, btngumps[0], btngumps[1], btngumps[2])
-                {
-                    X = 185,
-                    Y = 44 + 27 * 6,
-                    ButtonAction = ButtonAction.Activate
-                });
+                Add
+                (
+                    _warModeBtn = new Button((int) Buttons.PeaceWarToggle, btngumps[0], btngumps[1], btngumps[2])
+                    {
+                        X = 185,
+                        Y = 44 + 27 * 6,
+                        ButtonAction = ButtonAction.Activate
+                    }
+                );
 
 
                 int profileX = 25;
@@ -214,8 +241,12 @@ namespace ClassicUO.Game.UI.Gumps
 
                         _racialAbilitiesBook.MouseDoubleClick += (sender, e) =>
                         {
-                            if (UIManager.GetGump<RacialAbilitiesBookGump>() == null) UIManager.Add(new RacialAbilitiesBookGump(100, 100));
+                            if (UIManager.GetGump<RacialAbilitiesBookGump>() == null)
+                            {
+                                UIManager.Add(new RacialAbilitiesBookGump(100, 100));
+                            }
                         };
+
                         profileX += SCROLLS_STEP;
                     }
                 }
@@ -242,12 +273,15 @@ namespace ClassicUO.Game.UI.Gumps
             }
 
             // STATUS BUTTON
-            Add(new Button((int)Buttons.Status, 0x07eb, 0x07ec, 0x07ed)
-            {
-                X = 185,
-                Y = 44 + 27 * 7,
-                ButtonAction = ButtonAction.Activate
-            });
+            Add
+            (
+                new Button((int) Buttons.Status, 0x07eb, 0x07ec, 0x07ed)
+                {
+                    X = 185,
+                    Y = 44 + 27 * 7,
+                    ButtonAction = ButtonAction.Activate
+                }
+            );
 
             // Virtue menu
             Add(_virtueMenuPic = new GumpPic(80, 4, 0x0071, 0));
@@ -275,6 +309,7 @@ namespace ClassicUO.Game.UI.Gumps
                 X = 39,
                 Y = 262
             };
+
             Add(_titleLabel);
 
             RequestUpdateContents();
@@ -293,25 +328,30 @@ namespace ClassicUO.Game.UI.Gumps
             _titleLabel.Text = text;
         }
 
-     
+
         private void VirtueMenu_MouseDoubleClickEvent(object sender, MouseDoubleClickEventArgs args)
         {
             if (args.Button == MouseButtonType.Left)
             {
-                GameActions.ReplyGump(World.Player,
-                                      0x000001CD,
-                                      0x00000001,
-                                      new[]
-                                      {
-                                          LocalSerial
-                                      }, new Tuple<ushort, string>[0]);
+                GameActions.ReplyGump
+                (
+                    World.Player,
+                    0x000001CD,
+                    0x00000001,
+                    new[]
+                    {
+                        LocalSerial
+                    }, new Tuple<ushort, string>[0]
+                );
             }
         }
 
         private void Profile_MouseDoubleClickEvent(object o, MouseDoubleClickEventArgs args)
         {
-            if (args.Button == MouseButtonType.Left) 
+            if (args.Button == MouseButtonType.Left)
+            {
                 GameActions.RequestProfile(LocalSerial);
+            }
         }
 
         private void PartyManifest_MouseDoubleClickEvent(object sender, MouseDoubleClickEventArgs args)
@@ -327,14 +367,18 @@ namespace ClassicUO.Game.UI.Gumps
                     UIManager.Add(new PartyGump(x, y, World.Party.CanLoot));
                 }
                 else
+                {
                     party.BringOnTop();
+                }
             }
         }
 
         public override void Update(double totalMS, double frameMS)
         {
             if (IsDisposed)
+            {
                 return;
+            }
 
             Mobile mobile = World.Mobiles.Get(LocalSerial);
 
@@ -362,7 +406,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 bool force_false = SelectedObject.Object is Item item && (item.Layer == Layer.Backpack || item.ItemData.IsContainer);
 
-                if ((_paperDollInteractable.HasFakeItem && !ItemHold.Enabled) || force_false)
+                if (_paperDollInteractable.HasFakeItem && !ItemHold.Enabled || force_false)
                 {
                     _paperDollInteractable.SetFakeItem(false);
                 }
@@ -379,7 +423,7 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
-   
+
         protected override void OnMouseExit(int x, int y)
         {
             _paperDollInteractable?.SetFakeItem(false);
@@ -391,7 +435,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 Mobile container = World.Mobiles.Get(LocalSerial);
 
-                if (ItemHold.Enabled )
+                if (ItemHold.Enabled)
                 {
                     if (CanLift)
                     {
@@ -433,16 +477,21 @@ namespace ClassicUO.Game.UI.Gumps
                     else if (!DelayedObjectClickManager.IsEnabled)
                     {
                         Point off = Mouse.LDroppedOffset;
-                        DelayedObjectClickManager.Set(
+
+                        DelayedObjectClickManager.Set
+                        (
                             item.Serial,
-                          (Mouse.Position.X - off.X) - ScreenCoordinateX,
-                          (Mouse.Position.Y - off.Y) - ScreenCoordinateY,
-                          Time.Ticks + Mouse.MOUSE_DELAY_DOUBLE_CLICK);
+                            Mouse.Position.X - off.X - ScreenCoordinateX,
+                            Mouse.Position.Y - off.Y - ScreenCoordinateY,
+                            Time.Ticks + Mouse.MOUSE_DELAY_DOUBLE_CLICK
+                        );
                     }
                 }
             }
             else
+            {
                 base.OnMouseUp(x, y, button);
+            }
         }
 
         public override void Save(BinaryWriter writer)
@@ -455,17 +504,23 @@ namespace ClassicUO.Game.UI.Gumps
         public override void Restore(BinaryReader reader)
         {
             base.Restore(reader);
-            if (Configuration.Profile.GumpsVersion == 2)
+
+            if (Profile.GumpsVersion == 2)
             {
                 reader.ReadUInt32();
                 _isMinimized = reader.ReadBoolean();
             }
+
             LocalSerial = reader.ReadUInt32();
-            Client.Game.GetScene<GameScene>().DoubleClickDelayed(LocalSerial);
+
+            Client.Game.GetScene<GameScene>()
+                  .DoubleClickDelayed(LocalSerial);
+
             if (Profile.GumpsVersion >= 3)
             {
                 _isMinimized = reader.ReadBoolean();
             }
+
             Dispose();
         }
 
@@ -485,14 +540,18 @@ namespace ClassicUO.Game.UI.Gumps
                 LocalSerial = World.Player;
                 BuildGump();
 
-                Client.Game.GetScene<GameScene>()?.DoubleClickDelayed(LocalSerial);
+                Client.Game.GetScene<GameScene>()
+                      ?.DoubleClickDelayed(LocalSerial);
+
                 //GameActions.OpenPaperdoll(World.Player);
                 IsMinimized = bool.Parse(xml.GetAttribute("isminimized"));
 
                 Dispose();
             }
-            else 
+            else
+            {
                 Dispose();
+            }
         }
 
 
@@ -511,8 +570,12 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 for (int i = 0; i < _slots.Length; i++)
                 {
-                    int idx = (int) _slots[i].Layer;
-                    _slots[i].LocalSerial = mobile.FindItemByLayer((Layer) idx)?.Serial ?? 0;
+                    int idx = (int) _slots[i]
+                        .Layer;
+
+                    _slots[i]
+                        .LocalSerial = mobile.FindItemByLayer((Layer) idx)
+                                             ?.Serial ?? 0;
                 }
             }
         }
@@ -522,10 +585,11 @@ namespace ClassicUO.Game.UI.Gumps
             if (ItemHold.Enabled && !ItemHold.IsFixedPosition)
             {
                 OnMouseUp(0, 0, MouseButtonType.Left);
+
                 return;
             }
 
-            switch ((Buttons)buttonID)
+            switch ((Buttons) buttonID)
             {
                 case Buttons.Help:
                     GameActions.RequestHelp();
@@ -538,11 +602,14 @@ namespace ClassicUO.Game.UI.Gumps
 
                     if (gump == null)
                     {
-                        UIManager.Add(new OptionsGump
-                        {
-                            X = (Client.Game.Window.ClientBounds.Width >> 1) - 300,
-                            Y = (Client.Game.Window.ClientBounds.Height >> 1) - 250
-                        });
+                        UIManager.Add
+                        (
+                            new OptionsGump
+                            {
+                                X = (Client.Game.Window.ClientBounds.Width >> 1) - 300,
+                                Y = (Client.Game.Window.ClientBounds.Height >> 1) - 250
+                            }
+                        );
                     }
                     else
                     {
@@ -554,7 +621,8 @@ namespace ClassicUO.Game.UI.Gumps
                     break;
 
                 case Buttons.LogOut:
-                    Client.Game.GetScene<GameScene>()?.RequestQuitGame();
+                    Client.Game.GetScene<GameScene>()
+                          ?.RequestQuitGame();
 
                     break;
 
@@ -584,39 +652,53 @@ namespace ClassicUO.Game.UI.Gumps
 
                     if (LocalSerial == World.Player)
                     {
-                        UIManager.GetGump<BaseHealthBarGump>(LocalSerial)?.Dispose();
+                        UIManager.GetGump<BaseHealthBarGump>(LocalSerial)
+                                 ?.Dispose();
 
                         StatusGumpBase status = StatusGumpBase.GetStatusGump();
 
                         if (status == null)
+                        {
                             UIManager.Add(StatusGumpBase.AddStatusGump(Mouse.Position.X - 100, Mouse.Position.Y - 25));
+                        }
                         else
+                        {
                             status.BringOnTop();
+                        }
                     }
                     else
                     {
                         if (UIManager.GetGump<BaseHealthBarGump>(LocalSerial) != null)
+                        {
                             break;
+                        }
 
                         if (ProfileManager.Current.CustomBarsToggled)
                         {
                             Rectangle bounds = new Rectangle(0, 0, HealthBarGumpCustom.HPB_WIDTH, HealthBarGumpCustom.HPB_HEIGHT_SINGLELINE);
 
-                            UIManager.Add(new HealthBarGumpCustom(LocalSerial)
-                            {
-                                X = Mouse.Position.X - (bounds.Width >> 1),
-                                Y = Mouse.Position.Y - 5
-                            });
+                            UIManager.Add
+                            (
+                                new HealthBarGumpCustom(LocalSerial)
+                                {
+                                    X = Mouse.Position.X - (bounds.Width >> 1),
+                                    Y = Mouse.Position.Y - 5
+                                }
+                            );
                         }
                         else
                         {
-                            Rectangle bounds = GumpsLoader.Instance.GetTexture(0x0804).Bounds;
+                            Rectangle bounds = GumpsLoader.Instance.GetTexture(0x0804)
+                                                          .Bounds;
 
-                            UIManager.Add(new HealthBarGump(LocalSerial)
-                            {
-                                X = Mouse.Position.X - (bounds.Width >> 1),
-                                Y = Mouse.Position.Y - 5
-                            });
+                            UIManager.Add
+                            (
+                                new HealthBarGump(LocalSerial)
+                                {
+                                    X = Mouse.Position.X - (bounds.Width >> 1),
+                                    Y = Mouse.Position.Y - 5
+                                }
+                            );
                         }
                     }
 
@@ -637,10 +719,8 @@ namespace ClassicUO.Game.UI.Gumps
         }
 
 
-
         private class EquipmentSlot : Control
         {
-            private readonly Layer _layer;
             private ItemGumpFixed _itemGump;
             private readonly PaperDollGump _paperDollGump;
             private readonly uint _parentSerial;
@@ -654,24 +734,31 @@ namespace ClassicUO.Game.UI.Gumps
                 Width = 19;
                 Height = 20;
                 _paperDollGump = paperDollGump;
-                _layer = layer;
+                Layer = layer;
 
-                Add(new GumpPicTiled(0, 0, 19, 20, 0x243A)
-                {
-                    AcceptMouseInput = false
-                });
+                Add
+                (
+                    new GumpPicTiled(0, 0, 19, 20, 0x243A)
+                    {
+                        AcceptMouseInput = false
+                    }
+                );
 
-                Add(new GumpPic(0, 0, 0x2344, 0)
-                {
-                    AcceptMouseInput = false
-                });
+                Add
+                (
+                    new GumpPic(0, 0, 0x2344, 0)
+                    {
+                        AcceptMouseInput = false
+                    }
+                );
+
                 AcceptMouseInput = true;
 
                 WantUpdateSize = false;
             }
 
-            public Layer Layer => _layer;
-            
+            public Layer Layer { get; }
+
             public override void Update(double totalMS, double frameMS)
             {
                 Item item = World.Items.Get(LocalSerial);
@@ -686,7 +773,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (mobile != null)
                 {
-                    Item it_at_layer = mobile.FindItemByLayer(_layer);
+                    Item it_at_layer = mobile.FindItemByLayer(Layer);
 
                     if (item != it_at_layer || _itemGump == null)
                     {
@@ -702,15 +789,18 @@ namespace ClassicUO.Game.UI.Gumps
                         {
                             LocalSerial = it_at_layer.Serial;
 
-                            Add(_itemGump = new ItemGumpFixed(item, 18, 18)
-                            {
-                                X = 0,
-                                Y = 0,
-                                Width = 18,
-                                Height = 18,
-                                HighlightOnMouseOver = false,
-                                CanPickUp = World.InGame && (World.Player == _parentSerial || _paperDollGump.CanLift),
-                            });
+                            Add
+                            (
+                                _itemGump = new ItemGumpFixed(item, 18, 18)
+                                {
+                                    X = 0,
+                                    Y = 0,
+                                    Width = 18,
+                                    Height = 18,
+                                    HighlightOnMouseOver = false,
+                                    CanPickUp = World.InGame && (World.Player == _parentSerial || _paperDollGump.CanLift)
+                                }
+                            );
                         }
                     }
                 }
@@ -731,6 +821,7 @@ namespace ClassicUO.Game.UI.Gumps
                     WantUpdateSize = false;
 
                     ArtTexture texture = ArtLoader.Instance.GetTexture(item.DisplayedGraphic);
+
                     if (texture != null)
                     {
                         _rect = texture.ImageRectangle;
@@ -763,20 +854,25 @@ namespace ClassicUO.Game.UI.Gumps
                     }
 
                     if (IsDisposed)
+                    {
                         return false;
+                    }
 
                     ResetHueVector();
                     ShaderHueTranslator.GetHueVector(ref _hueVector, MouseIsOver && HighlightOnMouseOver ? 0x0035 : item.Hue, item.ItemData.IsPartialHue, 0, true);
-                 
+
                     ArtTexture texture = ArtLoader.Instance.GetTexture(item.DisplayedGraphic);
 
                     if (texture != null)
                     {
-                        return batcher.Draw2D(texture, x + _point.X, y + _point.Y,
-                                              _originalSize.X, _originalSize.Y,
-                                              _rect.X, _rect.Y,
-                                              _rect.Width, _rect.Height,
-                                              ref _hueVector);
+                        return batcher.Draw2D
+                        (
+                            texture, x + _point.X, y + _point.Y,
+                            _originalSize.X, _originalSize.Y,
+                            _rect.X, _rect.Y,
+                            _rect.Width, _rect.Height,
+                            ref _hueVector
+                        );
                     }
 
                     return false;

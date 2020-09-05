@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,13 +18,14 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using ClassicUO.Configuration;
 
 namespace ClassicUO.Game.Data
 {
-    enum NotorietyFlag : byte
+    internal enum NotorietyFlag : byte
     {
         Unknown = 0x00,
         Innocent = 0x01,
@@ -32,7 +34,7 @@ namespace ClassicUO.Game.Data
         Criminal = 0x04,
         Enemy = 0x05,
         Murderer = 0x06,
-        Invulnerable = 0x07,
+        Invulnerable = 0x07
     }
 
     internal static class Notoriety

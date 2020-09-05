@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,6 +18,7 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
@@ -30,9 +32,6 @@ namespace ClassicUO.IO
 {
     internal unsafe class UOFile : DataReader
     {
-        private protected MemoryMappedViewAccessor _accessor;
-        private protected MemoryMappedFile _file;
-
         public UOFile(string filepath, bool loadFile = false)
         {
             FilePath = filepath;
@@ -43,21 +42,25 @@ namespace ClassicUO.IO
             }
         }
 
-        public string FilePath { get; private set; }
+        public string FilePath { get; }
+        private protected MemoryMappedViewAccessor _accessor;
+        private protected MemoryMappedFile _file;
 
         protected virtual void Load()
         {
-            Log.Trace( $"Loading file:\t\t{FilePath}");
+            Log.Trace($"Loading file:\t\t{FilePath}");
 
             FileInfo fileInfo = new FileInfo(FilePath);
+
             if (!fileInfo.Exists)
             {
-                Log.Error( $"{FilePath}  not exists.");
+                Log.Error($"{FilePath}  not exists.");
 
                 return;
             }
 
             long size = fileInfo.Length;
+
             if (size > 0)
             {
                 _file = MemoryMappedFile.CreateFromFile(File.Open(fileInfo.FullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite), null, 0, MemoryMappedFileAccess.Read, HandleInheritability.None, false);
@@ -79,13 +82,12 @@ namespace ClassicUO.IO
             }
             else
             {
-                Log.Error( $"{FilePath}  size must be > 0");
+                Log.Error($"{FilePath}  size must be > 0");
             }
         }
 
         public virtual void FillEntries(ref UOFileIndex[] entries)
         {
-
         }
 
         public virtual void Dispose()
@@ -93,7 +95,7 @@ namespace ClassicUO.IO
             _accessor.SafeMemoryMappedViewHandle.ReleasePointer();
             _accessor.Dispose();
             _file.Dispose();
-            Log.Trace( $"Unloaded:\t\t{FilePath}");
+            Log.Trace($"Unloaded:\t\t{FilePath}");
         }
 
 
@@ -101,6 +103,7 @@ namespace ClassicUO.IO
         internal void Fill(ref byte[] buffer, int count)
         {
             byte* ptr = (byte*) PositionAddress;
+
             for (int i = 0; i < count; i++)
             {
                 buffer[i] = ptr[i];

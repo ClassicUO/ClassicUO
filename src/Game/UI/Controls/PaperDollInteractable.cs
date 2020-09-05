@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,21 +18,18 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
-using System;
 using System.Collections.Generic;
 using ClassicUO.Data;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
-using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Input;
 using ClassicUO.IO.Resources;
-using ClassicUO.Renderer;
 using ClassicUO.Utility.Logging;
-
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Controls
@@ -48,11 +46,13 @@ namespace ClassicUO.Game.UI.Controls
         private static readonly Layer[] _layerOrder_quiver_fix =
         {
             Layer.Shirt, Layer.Pants, Layer.Shoes, Layer.Legs, Layer.Arms, Layer.Torso, Layer.Tunic,
-            Layer.Ring, Layer.Bracelet, Layer.Face, Layer.Gloves, Layer.Skirt, Layer.Robe, Layer.Cloak,  Layer.Waist, Layer.Necklace,
+            Layer.Ring, Layer.Bracelet, Layer.Face, Layer.Gloves, Layer.Skirt, Layer.Robe, Layer.Cloak, Layer.Waist, Layer.Necklace,
             Layer.Hair, Layer.Beard, Layer.Earrings, Layer.Helmet, Layer.OneHanded, Layer.TwoHanded, Layer.Talisman
         };
 
         private readonly PaperDollGump _paperDollGump;
+
+
         private bool _updateUI;
 
         public PaperDollInteractable(int x, int y, uint serial, PaperDollGump paperDollGump)
@@ -64,6 +64,8 @@ namespace ClassicUO.Game.UI.Controls
             LocalSerial = serial;
             _updateUI = true;
         }
+
+        public bool HasFakeItem { get; private set; }
 
 
         public override void Update(double totalMS, double frameMS)
@@ -78,20 +80,18 @@ namespace ClassicUO.Game.UI.Controls
             }
         }
 
-
-        private bool _hasFakeItem;
         public void SetFakeItem(bool value)
         {
-            _updateUI = (_hasFakeItem && !value) || (!_hasFakeItem && value);
-            _hasFakeItem = value;
+            _updateUI = HasFakeItem && !value || !HasFakeItem && value;
+            HasFakeItem = value;
         }
-
-        public bool HasFakeItem => _hasFakeItem;
 
         private void UpdateUI()
         {
             if (IsDisposed)
+            {
                 return;
+            }
 
             Mobile mobile = World.Mobiles.Get(LocalSerial);
 
@@ -109,17 +109,29 @@ namespace ClassicUO.Game.UI.Controls
             ushort hue = mobile.Hue;
 
             if (mobile.Graphic == 0x0191 || mobile.Graphic == 0x0193)
+            {
                 body = 0x000D;
+            }
             else if (mobile.Graphic == 0x025D)
+            {
                 body = 0x000E;
+            }
             else if (mobile.Graphic == 0x025E)
+            {
                 body = 0x000F;
+            }
             else if (mobile.Graphic == 0x029A || mobile.Graphic == 0x02B6)
+            {
                 body = 0x029A;
+            }
             else if (mobile.Graphic == 0x029B || mobile.Graphic == 0x02B7)
+            {
                 body = 0x0299;
+            }
             else if (mobile.Graphic == 0x04E5)
+            {
                 body = 0xC835;
+            }
             else if (mobile.Graphic == 0x03DB)
             {
                 body = 0x000C;
@@ -135,21 +147,27 @@ namespace ClassicUO.Game.UI.Controls
             }
 
             // body
-            Add(new GumpPic(0, 0, body, hue)
-            {
-                IsPartialHue = true
-            });
+            Add
+            (
+                new GumpPic(0, 0, body, hue)
+                {
+                    IsPartialHue = true
+                }
+            );
 
 
             if (mobile.Graphic == 0x03DB)
             {
-                Add(new GumpPic(0, 0, 0xC72B, mobile.Hue)
-                {
-                    AcceptMouseInput = true,
-                    IsPartialHue = true
-                });
+                Add
+                (
+                    new GumpPic(0, 0, 0xC72B, mobile.Hue)
+                    {
+                        AcceptMouseInput = true,
+                        IsPartialHue = true
+                    }
+                );
             }
-            
+
             // equipment
             Item equipItem = mobile.FindItemByLayer(Layer.Cloak);
             Item arms = mobile.FindItemByLayer(Layer.Arms);
@@ -166,6 +184,7 @@ namespace ClassicUO.Game.UI.Controls
             }
 
             Layer[] layers;
+
             if (equipItem != null)
             {
                 layers = equipItem.ItemData.IsContainer ? _layerOrder_quiver_fix : _layerOrder;
@@ -178,7 +197,7 @@ namespace ClassicUO.Game.UI.Controls
             {
                 layers = _layerOrder;
             }
-           
+
 
             for (int i = 0; i < layers.Length; i++)
             {
@@ -187,9 +206,13 @@ namespace ClassicUO.Game.UI.Controls
                 if (switch_arms_with_torso)
                 {
                     if (layer == Layer.Arms)
+                    {
                         layer = Layer.Torso;
+                    }
                     else if (layer == Layer.Torso)
+                    {
                         layer = Layer.Arms;
+                    }
                 }
 
                 equipItem = mobile.FindItemByLayer(layer);
@@ -197,28 +220,37 @@ namespace ClassicUO.Game.UI.Controls
                 if (equipItem != null)
                 {
                     if (Mobile.IsCovered(mobile, layer))
+                    {
                         continue;
+                    }
 
                     ushort id = GetAnimID(mobile.Graphic, equipItem.ItemData.AnimID, mobile.IsFemale);
 
-                    Add(new GumpPicEquipment(equipItem.Serial, 0, 0, id, (ushort) (equipItem.Hue & 0x3FFF), layer)
-                    {
-                        AcceptMouseInput = true,
-                        IsPartialHue = equipItem.ItemData.IsPartialHue,
-                        CanLift = World.InGame && 
-                                  !World.Player.IsDead && layer != Layer.Beard && layer != Layer.Hair && 
-                                  (_paperDollGump.CanLift || LocalSerial == World.Player)
-                    });
+                    Add
+                    (
+                        new GumpPicEquipment(equipItem.Serial, 0, 0, id, (ushort) (equipItem.Hue & 0x3FFF), layer)
+                        {
+                            AcceptMouseInput = true,
+                            IsPartialHue = equipItem.ItemData.IsPartialHue,
+                            CanLift = World.InGame &&
+                                      !World.Player.IsDead && layer != Layer.Beard && layer != Layer.Hair &&
+                                      (_paperDollGump.CanLift || LocalSerial == World.Player)
+                        }
+                    );
                 }
                 else if (HasFakeItem && ItemHold.Enabled && !ItemHold.IsFixedPosition && (byte) layer == ItemHold.ItemData.Layer && ItemHold.ItemData.AnimID != 0)
                 {
                     ushort id = GetAnimID(mobile.Graphic, ItemHold.ItemData.AnimID, mobile.IsFemale);
-                    Add(new GumpPicEquipment(0, 0, 0, id, (ushort) (ItemHold.Hue & 0x3FFF), ItemHold.Layer)
-                    {
-                        AcceptMouseInput = true,
-                        IsPartialHue = ItemHold.IsPartialHue,
-                        Alpha = 0.5f
-                    });
+
+                    Add
+                    (
+                        new GumpPicEquipment(0, 0, 0, id, (ushort) (ItemHold.Hue & 0x3FFF), ItemHold.Layer)
+                        {
+                            AcceptMouseInput = true,
+                            IsPartialHue = ItemHold.IsPartialHue,
+                            Alpha = 0.5f
+                        }
+                    );
                 }
             }
 
@@ -236,14 +268,20 @@ namespace ClassicUO.Game.UI.Controls
                     bx = 6;
                 }
 
-                Add(new GumpPicEquipment(equipItem.Serial ,- bx, 0, backpackGraphic, (ushort) (equipItem.Hue & 0x3FFF), Layer.Backpack)
-                {
-                    AcceptMouseInput = true,
-                });
+                Add
+                (
+                    new GumpPicEquipment(equipItem.Serial, -bx, 0, backpackGraphic, (ushort) (equipItem.Hue & 0x3FFF), Layer.Backpack)
+                    {
+                        AcceptMouseInput = true
+                    }
+                );
             }
         }
 
-        public void Update() => _updateUI = true;
+        public void Update()
+        {
+            _updateUI = true;
+        }
 
 
         private static ushort GetAnimID(ushort graphic, ushort animID, bool isfemale)
@@ -251,7 +289,7 @@ namespace ClassicUO.Game.UI.Controls
             int offset = isfemale ? Constants.FEMALE_GUMP_OFFSET : Constants.MALE_GUMP_OFFSET;
 
             if (Client.Version >= ClientVersion.CV_7000 &&
-                animID == 0x03CA       // graphic for dead shroud
+                animID == 0x03CA                             // graphic for dead shroud
                 && (graphic == 0x02B7 || graphic == 0x02B6)) // dead gargoyle graphics
             {
                 animID = 0x0223;
@@ -264,9 +302,13 @@ namespace ClassicUO.Game.UI.Controls
                 if (dict.TryGetValue(animID, out EquipConvData data))
                 {
                     if (data.Gump > Constants.MALE_GUMP_OFFSET)
+                    {
                         animID = (ushort) (data.Gump >= Constants.FEMALE_GUMP_OFFSET ? data.Gump - Constants.FEMALE_GUMP_OFFSET : data.Gump - Constants.MALE_GUMP_OFFSET);
+                    }
                     else
+                    {
                         animID = data.Gump;
+                    }
                 }
             }
 
@@ -294,7 +336,9 @@ namespace ClassicUO.Game.UI.Controls
                 _layer = layer;
 
                 if (SerialHelper.IsValid(serial) && World.InGame)
+                {
                     SetTooltip(serial);
+                }
             }
 
             public bool CanLift { get; set; }
@@ -302,11 +346,15 @@ namespace ClassicUO.Game.UI.Controls
             protected override bool OnMouseDoubleClick(int x, int y, MouseButtonType button)
             {
                 if (button != MouseButtonType.Left)
+                {
                     return false;
+                }
 
                 // this check is necessary to avoid crashes during character creation
                 if (World.InGame)
+                {
                     GameActions.DoubleClick(LocalSerial);
+                }
 
                 return true;
             }
@@ -326,9 +374,9 @@ namespace ClassicUO.Game.UI.Controls
                     if (CanLift && !ItemHold.Enabled &&
                         Mouse.LButtonPressed &&
                         UIManager.LastControlMouseDown(MouseButtonType.Left) == this &&
-                        ((Mouse.LastLeftButtonClickTime != 0xFFFF_FFFF &&
-                          Mouse.LastLeftButtonClickTime != 0 &&
-                          Mouse.LastLeftButtonClickTime + Mouse.MOUSE_DELAY_DOUBLE_CLICK < Time.Ticks) ||
+                        (Mouse.LastLeftButtonClickTime != 0xFFFF_FFFF &&
+                         Mouse.LastLeftButtonClickTime != 0 &&
+                         Mouse.LastLeftButtonClickTime + Mouse.MOUSE_DELAY_DOUBLE_CLICK < Time.Ticks ||
                          Mouse.LDroppedOffset != Point.Zero))
                     {
                         GameActions.PickUp(LocalSerial, 0, 0);

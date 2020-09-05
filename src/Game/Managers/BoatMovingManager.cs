@@ -1,43 +1,22 @@
-﻿using ClassicUO.Game.Data;
-using ClassicUO.Game.GameObjects;
-using ClassicUO.Utility.Collections;
-using Microsoft.Xna.Framework;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
+using ClassicUO.Game.Data;
+using ClassicUO.Game.GameObjects;
 using ClassicUO.Network;
+using ClassicUO.Utility.Collections;
 
 namespace ClassicUO.Game.Managers
 {
-    static class BoatMovingManager
-    {   
-        struct BoatStep
-        {
-            public uint Serial;
-            public int TimeDiff;
-            public ushort X, Y;
-            public sbyte Z;
-            public byte Speed;
-            public Direction MovingDir, FacingDir;
-        }
-
-        struct ItemInside
-        {
-            public uint Serial;
-            public int X, Y, Z;
-        }
+    internal static class BoatMovingManager
+    {
+        private const int SLOW_INTERVAL = 1000;
+        private const int NORMAL_INTERVAL = 500;
+        private const int FAST_INTERVAL = 250;
 
 
         private static readonly Dictionary<uint, Deque<BoatStep>> _steps = new Dictionary<uint, Deque<BoatStep>>();
         private static readonly List<uint> _toRemove = new List<uint>();
         private static readonly Dictionary<uint, RawList<ItemInside>> _items = new Dictionary<uint, RawList<ItemInside>>();
-
-        private const int SLOW_INTERVAL = 1000;
-        private const int NORMAL_INTERVAL = 500;
-        private const int FAST_INTERVAL = 250;
 
         private static uint _timePacket;
 
@@ -48,9 +27,11 @@ namespace ClassicUO.Game.Managers
             {
                 case 0x02:
                     return SLOW_INTERVAL;
+
                 default:
                 case 0x03:
                     return NORMAL_INTERVAL;
+
                 case 0x04:
                     return FAST_INTERVAL;
             }
@@ -66,7 +47,8 @@ namespace ClassicUO.Game.Managers
         public static void AddStep(uint serial, byte speed, Direction movingDir, Direction facingDir, ushort x, ushort y, sbyte z)
         {
             Item item = World.Items.Get(serial);
-            if (item == null || item.IsDestroyed) 
+
+            if (item == null || item.IsDestroyed)
             {
                 return;
             }
@@ -110,7 +92,7 @@ namespace ClassicUO.Game.Managers
             BoatStep step = new BoatStep();
             step.Serial = serial;
             step.TimeDiff = _timePacket == 0 || empty ? GetVelocity(speed) : (int) (Time.Ticks - _timePacket);
-            
+
             step.Speed = speed;
             step.X = x;
             step.Y = y;
@@ -145,7 +127,9 @@ namespace ClassicUO.Game.Managers
                         Entity ent = World.Get(it.Serial);
 
                         if (ent == null)
+                        {
                             continue;
+                        }
 
                         ent.Offset.X = 0;
                         ent.Offset.Y = 0;
@@ -183,25 +167,31 @@ namespace ClassicUO.Game.Managers
             {
                 ref ItemInside item = ref list[i];
 
-                if(!SerialHelper.IsValid(item.Serial))
+                if (!SerialHelper.IsValid(item.Serial))
+                {
                     break;
+                }
 
                 if (item.Serial == objSerial)
                 {
                     item.X = x;
                     item.Y = y;
                     item.Z = z;
+
                     return;
                 }
             }
 
-            list.Add(new ItemInside()
-            {
-                Serial = objSerial,
-                X = x,
-                Y = y,
-                Z = z
-            });
+            list.Add
+            (
+                new ItemInside
+                {
+                    Serial = objSerial,
+                    X = x,
+                    Y = y,
+                    Z = z
+                }
+            );
         }
 
         public static void Update()
@@ -217,19 +207,20 @@ namespace ClassicUO.Game.Managers
                     if (item == null || item.IsDestroyed)
                     {
                         _toRemove.Add(step.Serial);
+
                         break;
                     }
 
                     bool drift = step.MovingDir != step.FacingDir;
                     int maxDelay = step.TimeDiff /*- (int) Client.Game.FrameDelay[1]*/;
-                    
+
                     int delay = (int) Time.Ticks - (int) item.LastStepTime;
                     bool removeStep = delay >= maxDelay;
                     bool directionChange = false;
 
 
-                    if (/*step.FacingDir == step.MovingDir &&*/
-                        (item.X != step.X || item.Y != step.Y))
+                    if ( /*step.FacingDir == step.MovingDir &&*/
+                        item.X != step.X || item.Y != step.Y)
                     {
                         if (maxDelay != 0)
                         {
@@ -240,10 +231,6 @@ namespace ClassicUO.Game.Managers
                             MovementSpeed.GetPixelOffset((byte) step.MovingDir, ref x, ref y, steps);
                             item.Offset.X = (sbyte) x;
                             item.Offset.Y = (sbyte) y;
-                        }
-                        else
-                        {
-                            //removeStep = true;
                         }
                     }
                     else
@@ -271,8 +258,10 @@ namespace ClassicUO.Game.Managers
 
 
                         if (item.TNext != null || item.TPrevious != null)
+                        {
                             item.AddToTile();
-                
+                        }
+
                         house?.Generate(true, true, true);
                         UpdateEntitiesInside(item, removeStep, step.X, step.Y, step.Z, step.MovingDir);
 
@@ -292,15 +281,19 @@ namespace ClassicUO.Game.Managers
                                 c.Offset = item.Offset;
 
                                 if (preview)
+                                {
                                     c.State |= CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_PREVIEW;
+                                }
                             }
-                        }                      
+                        }
 
                         UpdateEntitiesInside(item, removeStep, item.X, item.Y, item.Z, step.MovingDir);
                     }
 
                     if (!directionChange)
+                    {
                         break;
+                    }
                 }
             }
 
@@ -331,6 +324,7 @@ namespace ClassicUO.Game.Managers
                     //    break;
 
                     Entity entity = World.Get(it.Serial);
+
                     if (entity == null || entity.IsDestroyed)
                     {
                         continue;
@@ -339,10 +333,10 @@ namespace ClassicUO.Game.Managers
                     //entity.BoatDirection = direction;
 
                     if (removeStep)
-                    {                    
+                    {
                         entity.X = (ushort) (x - it.X);
                         entity.Y = (ushort) (y - it.Y);
-                        entity.Z = (sbyte) (z - it.Z);                       
+                        entity.Z = (sbyte) (z - it.Z);
                         entity.UpdateScreenPosition();
 
                         entity.Offset.X = 0;
@@ -350,7 +344,9 @@ namespace ClassicUO.Game.Managers
                         entity.Offset.Z = 0;
 
                         if (entity.TPrevious != null || entity.TNext != null)
-                            entity.AddToTile();             
+                        {
+                            entity.AddToTile();
+                        }
                     }
                     else
                     {
@@ -359,7 +355,6 @@ namespace ClassicUO.Game.Managers
                             entity.Offset = item.Offset;
                         }
                     }
-
                 }
             }
         }
@@ -382,6 +377,22 @@ namespace ClassicUO.Game.Managers
                 z = s.Z;
                 dir = s.MovingDir;
             }
+        }
+
+        private struct BoatStep
+        {
+            public uint Serial;
+            public int TimeDiff;
+            public ushort X, Y;
+            public sbyte Z;
+            public byte Speed;
+            public Direction MovingDir, FacingDir;
+        }
+
+        private struct ItemInside
+        {
+            public uint Serial;
+            public int X, Y, Z;
         }
     }
 }

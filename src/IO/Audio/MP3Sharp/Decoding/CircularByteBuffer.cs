@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,6 +18,7 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
@@ -48,7 +50,11 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
                 m_NumValid = cdb.m_NumValid;
                 m_Index = cdb.m_Index;
                 m_DataArray = new byte[m_Length];
-                for (int c = 0; c < m_Length; c++) m_DataArray[c] = cdb.m_DataArray[c];
+
+                for (int c = 0; c < m_Length; c++)
+                {
+                    m_DataArray[c] = cdb.m_DataArray[c];
+                }
             }
         }
 
@@ -63,7 +69,12 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
                 byte[] newDataArray = new byte[value];
 
                 int minLength = m_Length > value ? value : m_Length;
-                for (int i = 0; i < minLength; i++) newDataArray[i] = InternalGet(i - m_Length + 1);
+
+                for (int i = 0; i < minLength; i++)
+                {
+                    newDataArray[i] = InternalGet(i - m_Length + 1);
+                }
+
                 m_DataArray = newDataArray;
                 m_Index = minLength - 1;
                 m_Length = value;
@@ -89,8 +100,11 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
             {
                 if (value > m_NumValid)
                 {
-                    throw new Exception("Can't set NumValid to " + value +
-                                        " which is greater than the current numValid value of " + m_NumValid);
+                    throw new Exception
+                    (
+                        "Can't set NumValid to " + value +
+                        " which is greater than the current numValid value of " + m_NumValid
+                    );
                 }
 
                 m_NumValid = value;
@@ -120,7 +134,12 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
                 ret = InternalGet(m_Length);
                 m_DataArray[m_Index] = newValue;
                 m_NumValid++;
-                if (m_NumValid > m_Length) m_NumValid = m_Length;
+
+                if (m_NumValid > m_Length)
+                {
+                    m_NumValid = m_Length;
+                }
+
                 m_Index++;
                 m_Index %= m_Length;
             }
@@ -135,7 +154,10 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
         {
             lock (this)
             {
-                if (m_NumValid == 0) throw new Exception("Can't pop off an empty CircularByteBuffer");
+                if (m_NumValid == 0)
+                {
+                    throw new Exception("Can't pop off an empty CircularByteBuffer");
+                }
 
                 m_NumValid--;
 
@@ -148,7 +170,10 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
         /// </summary>
         public byte Peek()
         {
-            lock (this) return InternalGet(m_Length);
+            lock (this)
+            {
+                return InternalGet(m_Length);
+            }
         }
 
         private byte InternalGet(int offset)
@@ -193,7 +218,10 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
         {
             byte[] outByte = new byte[str - stp + 1];
 
-            for (int i = str, j = 0; i >= stp; i--, j++) outByte[j] = this[i];
+            for (int i = str, j = 0; i >= stp; i--, j++)
+            {
+                outByte[j] = this[i];
+            }
 
             return outByte;
         }
@@ -201,7 +229,12 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
         public override string ToString()
         {
             string ret = "";
-            for (int i = 0; i < m_DataArray.Length; i++) ret += m_DataArray[i] + " ";
+
+            for (int i = 0; i < m_DataArray.Length; i++)
+            {
+                ret += m_DataArray[i] + " ";
+            }
+
             ret += "\n index = " + m_Index + " numValid = " + NumValid;
 
             return ret;

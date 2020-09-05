@@ -1,5 +1,4 @@
-﻿using System;
-using System.Runtime.CompilerServices;
+﻿using System.Runtime.CompilerServices;
 using ClassicUO.Input;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -8,16 +7,11 @@ namespace ClassicUO.Renderer
 {
     internal class Camera
     {
-        private bool _updateMatrixes = true, _updateProjection = true;
-        private Matrix _transform = Matrix.Identity, _inverseTransform = Matrix.Identity;
+        private float[] _cameraZoomValues = new float[1] {1f};
         private Matrix _projection;
-        private float[] _cameraZoomValues = new float[1] { 1f };
+        private Matrix _transform = Matrix.Identity, _inverseTransform = Matrix.Identity;
+        private bool _updateMatrixes = true, _updateProjection = true;
         private int _zoomIndex;
-
-
-        public Point Position;
-        public Vector2 Origin;
-        public Rectangle Bounds;
 
 
         public Matrix ViewTransformMatrix => TransformMatrix /** ProjectionMatrix*/;
@@ -51,6 +45,7 @@ namespace ClassicUO.Renderer
             get
             {
                 UpdateMatrices();
+
                 return _transform;
             }
         }
@@ -60,6 +55,7 @@ namespace ClassicUO.Renderer
             get
             {
                 UpdateMatrices();
+
                 return _inverseTransform;
             }
         }
@@ -106,12 +102,17 @@ namespace ClassicUO.Renderer
         }
 
         public int ZoomValuesCount => _cameraZoomValues.Length;
+        public Rectangle Bounds;
+        public Vector2 Origin;
+
+
+        public Point Position;
 
         public void SetZoomValues(float[] values)
         {
             _cameraZoomValues = values;
         }
-        
+
         public void SetGameWindowBounds(int x, int y, int width, int height)
         {
             if (Bounds.X != x || Bounds.Y != y || Bounds.Width != width || Bounds.Height != height)
@@ -171,11 +172,11 @@ namespace ClassicUO.Renderer
 
             return point;
         }
-        
+
         public Point WorldToScreen(Point point)
         {
             UpdateMatrices();
-            
+
             Transform(ref point, ref _transform, out point);
 
             return point;
@@ -184,8 +185,8 @@ namespace ClassicUO.Renderer
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static void Transform(ref Point position, ref Matrix matrix, out Point result)
         {
-            float x = (position.X * matrix.M11) + (position.Y * matrix.M21) + matrix.M41;
-            float y = (position.X * matrix.M12) + (position.Y * matrix.M22) + matrix.M42;
+            float x = position.X * matrix.M11 + position.Y * matrix.M21 + matrix.M41;
+            float y = position.X * matrix.M12 + position.Y * matrix.M22 + matrix.M42;
             result.X = (int) x;
             result.Y = (int) y;
         }

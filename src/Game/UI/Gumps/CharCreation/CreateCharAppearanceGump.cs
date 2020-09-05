@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,6 +18,7 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
@@ -35,12 +37,16 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 {
     internal class CreateCharAppearanceGump : Gump
     {
+        private PlayerMobile _character;
         private readonly RadioButton _elfRadio;
         private readonly RadioButton _femaleRadio;
         private readonly RadioButton _gargoyleRadio;
+        private Combobox _hairCombobox, _facialCombobox;
+        private Label _hairLabel, _facialLabel;
         private readonly RadioButton _humanRadio;
         private readonly RadioButton _maleRadio;
         private readonly StbTextBox _nameTextBox;
+        private PaperDollInteractable _paperDoll;
         private readonly Dictionary<Layer, Tuple<int, ushort>> CurrentColorOption = new Dictionary<Layer, Tuple<int, ushort>>();
         private readonly Dictionary<Layer, int> CurrentOption = new Dictionary<Layer, int>
         {
@@ -51,104 +57,152 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                 Layer.Beard, 0
             }
         };
-        private PlayerMobile _character;
-        private Combobox _hairCombobox, _facialCombobox;
-        private Label _hairLabel, _facialLabel;
-        private PaperDollInteractable _paperDoll;
 
         public CreateCharAppearanceGump() : base(0, 0)
         {
-            Add(new ResizePic(0x0E10)
-            {
-                X = 82, Y = 125, Width = 151, Height = 310
-            }, 1);
+            Add
+            (
+                new ResizePic(0x0E10)
+                {
+                    X = 82, Y = 125, Width = 151, Height = 310
+                }, 1
+            );
+
             Add(new GumpPic(280, 53, 0x0709, 0), 1);
             Add(new GumpPic(240, 73, 0x070A, 0), 1);
             Add(new GumpPicTiled(248, 73, 215, 16, 0x070B), 1);
             Add(new GumpPic(463, 73, 0x070C, 0), 1);
             Add(new GumpPic(238, 98, 0x0708, 0), 1);
 
-            Add(new ResizePic(0x0E10)
-            {
-                X = 475, Y = 125, Width = 151, Height = 310
-            }, 1);
+            Add
+            (
+                new ResizePic(0x0E10)
+                {
+                    X = 475, Y = 125, Width = 151, Height = 310
+                }, 1
+            );
 
             // Male/Female Radios
-            Add(_maleRadio = new RadioButton(0, 0x0768, 0x0767)
-            {
-                X = 425, Y = 435
-            }, 1);
+            Add
+            (
+                _maleRadio = new RadioButton(0, 0x0768, 0x0767)
+                {
+                    X = 425, Y = 435
+                }, 1
+            );
+
             _maleRadio.ValueChanged += Genre_ValueChanged;
 
-            Add(_femaleRadio = new RadioButton(0, 0x0768, 0x0767)
-            {
-                X = 425, Y = 455
-            }, 1);
+            Add
+            (
+                _femaleRadio = new RadioButton(0, 0x0768, 0x0767)
+                {
+                    X = 425, Y = 455
+                }, 1
+            );
+
             _femaleRadio.ValueChanged += Genre_ValueChanged;
 
-            Add(new Button((int) Buttons.MaleButton, 0x0710, 0x0712, 0x0711)
-            {
-                X = 445, Y = 435, ButtonAction = ButtonAction.Activate
-            }, 1);
+            Add
+            (
+                new Button((int) Buttons.MaleButton, 0x0710, 0x0712, 0x0711)
+                {
+                    X = 445, Y = 435, ButtonAction = ButtonAction.Activate
+                }, 1
+            );
 
-            Add(new Button((int) Buttons.FemaleButton, 0x070D, 0x070F, 0x070E)
-            {
-                X = 445, Y = 455, ButtonAction = ButtonAction.Activate
-            }, 1);
+            Add
+            (
+                new Button((int) Buttons.FemaleButton, 0x070D, 0x070F, 0x070E)
+                {
+                    X = 445, Y = 455, ButtonAction = ButtonAction.Activate
+                }, 1
+            );
 
-            Add(_nameTextBox = new StbTextBox(5, 16, 200, false, hue: 1, style: FontStyle.Fixed)
-            {
-                X = 257, Y = 65, Width = 200, Height = 20,
-                //ValidationRules = (uint) (TEXT_ENTRY_RULES.LETTER | TEXT_ENTRY_RULES.SPACE)
-            }, 1);
+            Add
+            (
+                _nameTextBox = new StbTextBox(5, 16, 200, false, hue: 1, style: FontStyle.Fixed)
+                {
+                    X = 257, Y = 65, Width = 200, Height = 20
+                    //ValidationRules = (uint) (TEXT_ENTRY_RULES.LETTER | TEXT_ENTRY_RULES.SPACE)
+                }, 1
+            );
 
             // Races
-            Add(_humanRadio = new RadioButton(1, 0x0768, 0x0767)
-            {
-                X = 180, Y = 435
-            }, 1);
+            Add
+            (
+                _humanRadio = new RadioButton(1, 0x0768, 0x0767)
+                {
+                    X = 180, Y = 435
+                }, 1
+            );
 
-            Add(new Button((int) Buttons.HumanButton, 0x0702, 0x0704, 0x0703)
-            {
-                X = 200, Y = 435, ButtonAction = ButtonAction.Activate
-            }, 1);
+            Add
+            (
+                new Button((int) Buttons.HumanButton, 0x0702, 0x0704, 0x0703)
+                {
+                    X = 200, Y = 435, ButtonAction = ButtonAction.Activate
+                }, 1
+            );
+
             _humanRadio.ValueChanged += Race_ValueChanged;
 
-            Add(_elfRadio = new RadioButton(1, 0x0768, 0x0767)
-            {
-                X = 180, Y = 455
-            }, 1);
+            Add
+            (
+                _elfRadio = new RadioButton(1, 0x0768, 0x0767)
+                {
+                    X = 180, Y = 455
+                }, 1
+            );
 
-            Add(new Button((int) Buttons.ElfButton, 0x0705, 0x0707, 0x0706)
-            {
-                X = 200, Y = 455, ButtonAction = ButtonAction.Activate
-            }, 1);
+            Add
+            (
+                new Button((int) Buttons.ElfButton, 0x0705, 0x0707, 0x0706)
+                {
+                    X = 200, Y = 455, ButtonAction = ButtonAction.Activate
+                }, 1
+            );
+
             _elfRadio.ValueChanged += Race_ValueChanged;
 
             if (Client.Version >= ClientVersion.CV_60144)
             {
-                Add(_gargoyleRadio = new RadioButton(1, 0x0768, 0x0767)
-                {
-                    X = 60, Y = 435
-                }, 1);
+                Add
+                (
+                    _gargoyleRadio = new RadioButton(1, 0x0768, 0x0767)
+                    {
+                        X = 60, Y = 435
+                    }, 1
+                );
 
-                Add(new Button((int) Buttons.GargoyleButton, 0x07D3, 0x07D5, 0x07D4)
-                {
-                    X = 80, Y = 435, ButtonAction = ButtonAction.Activate
-                }, 1);
+                Add
+                (
+                    new Button((int) Buttons.GargoyleButton, 0x07D3, 0x07D5, 0x07D4)
+                    {
+                        X = 80, Y = 435, ButtonAction = ButtonAction.Activate
+                    }, 1
+                );
+
                 _gargoyleRadio.ValueChanged += Race_ValueChanged;
             }
 
             // Prev/Next
-            Add(new Button((int) Buttons.Prev, 0x15A1, 0x15A3, 0x15A2)
-            {
-                X = 586, Y = 445, ButtonAction = ButtonAction.Activate
-            }, 1);
+            Add
+            (
+                new Button((int) Buttons.Prev, 0x15A1, 0x15A3, 0x15A2)
+                {
+                    X = 586, Y = 445, ButtonAction = ButtonAction.Activate
+                }, 1
+            );
 
-            Add(new Button((int) Buttons.Next, 0x15A4, 0x15A6, 0x15A5)
-            {
-                X = 610, Y = 445, ButtonAction = ButtonAction.Activate
-            }, 1);
+            Add
+            (
+                new Button((int) Buttons.Next, 0x15A4, 0x15A6, 0x15A5)
+                {
+                    X = 610, Y = 445, ButtonAction = ButtonAction.Activate
+                }, 1
+            );
+
             _maleRadio.IsChecked = true;
             _humanRadio.IsChecked = true;
         }
@@ -177,14 +231,21 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             _character.IsFemale = isFemale;
 
             if (isFemale)
+            {
                 _character.Flags |= Flags.Female;
+            }
 
             switch (race)
             {
                 case RaceType.GARGOYLE:
                     _character.Graphic = isFemale ? (ushort) 0x029B : (ushort) 0x029A;
 
-                    Item it  = CreateItem(0x4001, CurrentColorOption[Layer.Shirt].Item2, Layer.Robe);
+                    Item it = CreateItem
+                    (
+                        0x4001, CurrentColorOption[Layer.Shirt]
+                            .Item2, Layer.Robe
+                    );
+
                     _character.PushToBack(it);
 
                     break;
@@ -193,19 +254,44 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                     _character.Graphic = 0x025E;
                     it = CreateItem(0x1710, 0x0384, Layer.Shoes);
                     _character.PushToBack(it);
-                    it = CreateItem(0x1531, CurrentColorOption[Layer.Pants].Item2, Layer.Skirt);
+
+                    it = CreateItem
+                    (
+                        0x1531, CurrentColorOption[Layer.Pants]
+                            .Item2, Layer.Skirt
+                    );
+
                     _character.PushToBack(it);
-                    it = CreateItem(0x1518, CurrentColorOption[Layer.Shirt].Item2, Layer.Shirt);
+
+                    it = CreateItem
+                    (
+                        0x1518, CurrentColorOption[Layer.Shirt]
+                            .Item2, Layer.Shirt
+                    );
+
                     _character.PushToBack(it);
+
                     break;
 
                 case RaceType.ELF:
                     _character.Graphic = 0x025D;
                     it = CreateItem(0x1710, 0x0384, Layer.Shoes);
                     _character.PushToBack(it);
-                    it = CreateItem(0x152F, CurrentColorOption[Layer.Pants].Item2, Layer.Pants);
+
+                    it = CreateItem
+                    (
+                        0x152F, CurrentColorOption[Layer.Pants]
+                            .Item2, Layer.Pants
+                    );
+
                     _character.PushToBack(it);
-                    it = CreateItem(0x1518, CurrentColorOption[Layer.Shirt].Item2, Layer.Shirt);
+
+                    it = CreateItem
+                    (
+                        0x1518, CurrentColorOption[Layer.Shirt]
+                            .Item2, Layer.Shirt
+                    );
+
                     _character.PushToBack(it);
 
                     break;
@@ -218,9 +304,21 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                         _character.Graphic = 0x0191;
                         it = CreateItem(0x1710, 0x0384, Layer.Shoes);
                         _character.PushToBack(it);
-                        it = CreateItem(0x1531, CurrentColorOption[Layer.Pants].Item2, Layer.Skirt);
+
+                        it = CreateItem
+                        (
+                            0x1531, CurrentColorOption[Layer.Pants]
+                                .Item2, Layer.Skirt
+                        );
+
                         _character.PushToBack(it);
-                        it = CreateItem(0x1518, CurrentColorOption[Layer.Shirt].Item2, Layer.Shirt);
+
+                        it = CreateItem
+                        (
+                            0x1518, CurrentColorOption[Layer.Shirt]
+                                .Item2, Layer.Shirt
+                        );
+
                         _character.PushToBack(it);
                     }
                     else
@@ -228,9 +326,21 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                         _character.Graphic = 0x0190;
                         it = CreateItem(0x1710, 0x0384, Layer.Shoes);
                         _character.PushToBack(it);
-                        it = CreateItem(0x152F, CurrentColorOption[Layer.Pants].Item2, Layer.Pants);
+
+                        it = CreateItem
+                        (
+                            0x152F, CurrentColorOption[Layer.Pants]
+                                .Item2, Layer.Pants
+                        );
+
                         _character.PushToBack(it);
-                        it = CreateItem(0x1518, CurrentColorOption[Layer.Shirt].Item2, Layer.Shirt);
+
+                        it = CreateItem
+                        (
+                            0x1518, CurrentColorOption[Layer.Shirt]
+                                .Item2, Layer.Shirt
+                        );
+
                         _character.PushToBack(it);
                     }
 
@@ -245,19 +355,33 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             RaceType race = GetSelectedRace();
             Layer layer;
             CharacterCreationValues.ComboContent content;
-            _character.Hue = CurrentColorOption[Layer.Invalid].Item2;
+
+            _character.Hue = CurrentColorOption[Layer.Invalid]
+                .Item2;
 
             if (!isFemale && race != RaceType.ELF)
             {
                 layer = Layer.Beard;
                 content = CharacterCreationValues.GetFacialHairComboContent(race);
-                Item iti = CreateItem(content.GetGraphic(CurrentOption[layer]), CurrentColorOption[layer].Item2, layer);
+
+                Item iti = CreateItem
+                (
+                    content.GetGraphic(CurrentOption[layer]), CurrentColorOption[layer]
+                        .Item2, layer
+                );
+
                 _character.PushToBack(iti);
             }
 
             layer = Layer.Hair;
             content = CharacterCreationValues.GetHairComboContent(isFemale, race);
-            Item it = CreateItem(content.GetGraphic(CurrentOption[layer]), CurrentColorOption[layer].Item2, layer);
+
+            Item it = CreateItem
+            (
+                content.GetGraphic(CurrentOption[layer]), CurrentColorOption[layer]
+                    .Item2, layer
+            );
+
             _character.PushToBack(it);
         }
 
@@ -280,7 +404,9 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             CurrentOption[Layer.Hair] = 1;
 
             if (_paperDoll != null)
+            {
                 Remove(_paperDoll);
+            }
 
             if (_hairCombobox != null)
             {
@@ -294,16 +420,23 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                 Remove(_facialLabel);
             }
 
-            foreach (CustomColorPicker customPicker in Children.OfType<CustomColorPicker>().ToList())
+            foreach (CustomColorPicker customPicker in Children.OfType<CustomColorPicker>()
+                                                               .ToList())
+            {
                 Remove(customPicker);
+            }
 
             // Hair
             CharacterCreationValues.ComboContent content = CharacterCreationValues.GetHairComboContent(isFemale, race);
 
-            Add(_hairLabel = new Label(ClilocLoader.Instance.GetString(race == RaceType.GARGOYLE ? 1112309 : 3000121), false, 0, font: 9)
-            {
-                X = 98, Y = 142
-            }, 1);
+            Add
+            (
+                _hairLabel = new Label(ClilocLoader.Instance.GetString(race == RaceType.GARGOYLE ? 1112309 : 3000121), false, 0, font: 9)
+                {
+                    X = 98, Y = 142
+                }, 1
+            );
+
             Add(_hairCombobox = new Combobox(97, 155, 120, content.Labels, CurrentOption[Layer.Hair]), 1);
             _hairCombobox.OnOptionSelected += Hair_OnOptionSelected;
 
@@ -312,10 +445,14 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             {
                 content = CharacterCreationValues.GetFacialHairComboContent(race);
 
-                Add(_facialLabel = new Label(ClilocLoader.Instance.GetString(race == RaceType.GARGOYLE ? 1112511 : 3000122), false, 0, font: 9)
-                {
-                    X = 98, Y = 186
-                }, 1);
+                Add
+                (
+                    _facialLabel = new Label(ClilocLoader.Instance.GetString(race == RaceType.GARGOYLE ? 1112511 : 3000122), false, 0, font: 9)
+                    {
+                        X = 98, Y = 186
+                    }, 1
+                );
+
                 Add(_facialCombobox = new Combobox(97, 199, 120, content.Labels, CurrentOption[Layer.Beard]), 1);
                 _facialCombobox.OnOptionSelected += Facial_OnOptionSelected;
             }
@@ -334,7 +471,9 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
             // Pants Color
             if (race != RaceType.GARGOYLE)
+            {
                 AddCustomColorPicker(489, 225, null, Layer.Pants, 3000441, 10, 20);
+            }
 
             // Hair
             pallet = CharacterCreationValues.GetHairPallet(race);
@@ -351,10 +490,13 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
             UpdateEquipments();
 
-            Add(_paperDoll = new PaperDollInteractable(262, 135, _character, null)
-            {
-                AcceptMouseInput = false
-            }, 1);
+            Add
+            (
+                _paperDoll = new PaperDollInteractable(262, 135, _character, null)
+                {
+                    AcceptMouseInput = false
+                }, 1
+            );
 
             _paperDoll.Update();
         }
@@ -363,22 +505,36 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
         {
             CustomColorPicker colorPicker;
 
-            Add(colorPicker = new CustomColorPicker(layer, clilocLabel, pallet, rows, columns)
-            {
-                X = x, Y = y
-            }, 1);
+            Add
+            (
+                colorPicker = new CustomColorPicker(layer, clilocLabel, pallet, rows, columns)
+                {
+                    X = x, Y = y
+                }, 1
+            );
 
             if (!CurrentColorOption.ContainsKey(layer))
+            {
                 CurrentColorOption[layer] = new Tuple<int, ushort>(0, colorPicker.HueSelected);
+            }
             else
-                colorPicker.SetSelectedIndex(CurrentColorOption[layer].Item1);
+            {
+                colorPicker.SetSelectedIndex
+                (
+                    CurrentColorOption[layer]
+                        .Item1
+                );
+            }
+
             colorPicker.ColorSelected += ColorPicker_ColorSelected;
         }
 
         private void ColorPicker_ColorSelected(object sender, ColorSelectedEventArgs e)
         {
             if (e.SelectedIndex == 0xFFFF)
+            {
                 return;
+            }
 
             CurrentColorOption[e.Layer] = new Tuple<int, ushort>(e.SelectedIndex, e.SelectedHue);
 
@@ -387,15 +543,23 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                 Item item;
 
                 if (_character.Race == RaceType.GARGOYLE && e.Layer == Layer.Shirt)
+                {
                     item = _character.FindItemByLayer(Layer.Robe);
+                }
                 else
+                {
                     item = _character.FindItemByLayer(e.Layer);
+                }
 
                 if (item != null)
+                {
                     item.Hue = e.SelectedHue;
+                }
             }
             else
+            {
                 _character.Hue = e.SelectedHue;
+            }
 
             _paperDoll.Update();
         }
@@ -449,7 +613,9 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                     _character.Name = _nameTextBox.Text;
 
                     if (ValidateCharacter(_character))
+                    {
                         charCreationGump.SetCharacter(_character);
+                    }
 
                     break;
 
@@ -466,7 +632,8 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
         {
             if (string.IsNullOrEmpty(character.Name))
             {
-                UIManager.GetGump<CharCreationGump>()?.ShowMessage(ClilocLoader.Instance.GetString(3000612));
+                UIManager.GetGump<CharCreationGump>()
+                         ?.ShowMessage(ClilocLoader.Instance.GetString(3000612));
 
                 return false;
             }
@@ -477,19 +644,25 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
         private RaceType GetSelectedRace()
         {
             if (_humanRadio.IsChecked)
+            {
                 return RaceType.HUMAN;
+            }
 
             if (_elfRadio != null && _elfRadio.IsChecked)
+            {
                 return RaceType.ELF;
+            }
 
             if (_gargoyleRadio != null && _gargoyleRadio.IsChecked)
+            {
                 return RaceType.GARGOYLE;
+            }
 
             return RaceType.HUMAN;
         }
 
         private Item CreateItem(int id, ushort hue, Layer layer)
-        {         
+        {
             Item existsItem = _character.FindItemByLayer(layer);
 
             if (existsItem != null)
@@ -499,13 +672,15 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             }
 
             if (id == 0)
+            {
                 return null;
+            }
 
             // This is a workaround to avoid to see naked guy
             // We are simulating server objects into World.Items map.
-            Item item = World.GetOrCreateItem(0x4000_0000 + (uint)layer); // use layer as unique Serial
+            Item item = World.GetOrCreateItem(0x4000_0000 + (uint) layer); // use layer as unique Serial
             _character.Remove(item);
-            item.Graphic = (ushort)id;
+            item.Graphic = (ushort) id;
             item.Hue = hue;
             item.Layer = layer;
             item.Container = _character;
@@ -549,10 +724,10 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             private readonly int _cellH;
             private readonly int _cellW;
             private readonly ColorPickerBox _colorPicker;
+            private ColorPickerBox _colorPickerBox;
             private readonly int _columns, _rows;
             private readonly Layer _layer;
             private readonly ushort[] _pallet;
-            private ColorPickerBox _colorPickerBox;
 
             public CustomColorPicker(Layer layer, int label, ushort[] pallet, int rows, int columns)
             {
@@ -565,11 +740,14 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                 _layer = layer;
                 _pallet = pallet;
 
-                Add(new Label(ClilocLoader.Instance.GetString(label), false, 0, font: 9)
-                {
-                    X = 0,
-                    Y = 0
-                });
+                Add
+                (
+                    new Label(ClilocLoader.Instance.GetString(label), false, 0, font: 9)
+                    {
+                        X = 0,
+                        Y = 0
+                    }
+                );
 
                 Add(_colorPicker = new ColorPickerBox(1, 15, 1, 1, 121, 23, pallet));
 
@@ -584,6 +762,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                         ModalClickOutsideAreaClosesThisControl = true
                     }
                 };
+
                 _colorPickerBox.MouseUp += ColorPickerBoxOnMouseUp;
             }
 
@@ -596,7 +775,9 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                 int selectedIndex = row * _columns + column;
 
                 if (selectedIndex >= 0 && selectedIndex < _colorPickerBox.Hues.Length)
+                {
                     ColorSelected?.Invoke(this, new ColorSelectedEventArgs(_layer, _colorPickerBox.Hues, selectedIndex));
+                }
             }
 
             public event EventHandler<ColorSelectedEventArgs> ColorSelected;
@@ -631,6 +812,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                             ModalClickOutsideAreaClosesThisControl = true
                         }
                     };
+
                     _colorPickerBox.MouseUp += ColorPickerBoxOnMouseUp;
                     _colorPickerBox.ColorSelectedIndex += ColorPickerBox_Selected;
 

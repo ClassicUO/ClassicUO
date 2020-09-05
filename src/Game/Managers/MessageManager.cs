@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,29 +18,23 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
 using System.Text;
-
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Game.UI.Gumps;
-using ClassicUO.Input;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
-using ClassicUO.Utility.Logging;
 
 namespace ClassicUO.Game.Managers
 {
-
-
     //enum MessageFont : byte
     //{
     //    INVALID = 0xFF,
@@ -55,14 +50,13 @@ namespace ClassicUO.Game.Managers
     //    SmallLight = 9
     //}
 
-    enum AffixType : byte
+    internal enum AffixType : byte
     {
         Append = 0x00,
         Prepend = 0x01,
         System = 0x02,
         None = 0xFF
     }
-
 
 
     internal static class MessageManager
@@ -77,7 +71,9 @@ namespace ClassicUO.Game.Managers
         public static void HandleMessage(Entity parent, string text, string name, ushort hue, MessageType type, byte font, TEXT_TYPE text_type, bool unicode = false, string lang = null)
         {
             if (string.IsNullOrEmpty(text))
+            {
                 return;
+            }
 
             if (ProfileManager.Current != null && ProfileManager.Current.OverrideAllFonts)
             {
@@ -108,18 +104,26 @@ namespace ClassicUO.Game.Managers
                             StringBuilder sb = new StringBuilder(ProfileManager.Current.SpellDisplayFormat);
                             sb.Replace("{power}", spell.PowerWords);
                             sb.Replace("{spell}", spell.Name);
-                            text = sb.ToString().Trim();
+
+                            text = sb.ToString()
+                                     .Trim();
                         }
 
                         //server hue color per default if not enabled
                         if (ProfileManager.Current != null && ProfileManager.Current.EnabledSpellHue)
                         {
                             if (spell.TargetType == TargetType.Beneficial)
+                            {
                                 hue = ProfileManager.Current.BeneficHue;
+                            }
                             else if (spell.TargetType == TargetType.Harmful)
+                            {
                                 hue = ProfileManager.Current.HarmfulHue;
+                            }
                             else
+                            {
                                 hue = ProfileManager.Current.NeutralHue;
+                            }
                         }
                     }
 
@@ -135,7 +139,9 @@ namespace ClassicUO.Game.Managers
                 case MessageType.Limit3Spell:
 
                     if (parent == null)
+                    {
                         break;
+                    }
 
                     TextObject msg = CreateMessage(text, hue, font, unicode, type, text_type);
                     msg.Owner = parent;
@@ -158,14 +164,19 @@ namespace ClassicUO.Game.Managers
                                     case PaperDollGump paperDoll when g.LocalSerial == it.Container:
                                         paperDoll.AddText(msg);
                                         found = true;
+
                                         break;
+
                                     case ContainerGump container when g.LocalSerial == it.Container:
                                         container.AddText(msg);
                                         found = true;
+
                                         break;
+
                                     case TradingGump trade when g.LocalSerial == it.Container || trade.ID1 == it.Container || trade.ID2 == it.Container:
                                         trade.AddText(msg);
                                         found = true;
+
                                         break;
                                 }
                             }
@@ -180,9 +191,8 @@ namespace ClassicUO.Game.Managers
                     parent.AddMessage(msg);
 
                     break;
-      
 
-            
+
                 //default:
                 //    if (parent == null)
                 //        break;
@@ -212,9 +222,13 @@ namespace ClassicUO.Game.Managers
             int width = isunicode ? FontsLoader.Instance.GetWidthUnicode(font, msg) : FontsLoader.Instance.GetWidthASCII(font, msg);
 
             if (width > 200)
-                width = isunicode ? FontsLoader.Instance.GetWidthExUnicode(font, msg, 200, TEXT_ALIGN_TYPE.TS_LEFT, (ushort)FontStyle.BlackBorder) : FontsLoader.Instance.GetWidthExASCII(font, msg, 200, TEXT_ALIGN_TYPE.TS_LEFT, (ushort)FontStyle.BlackBorder);
+            {
+                width = isunicode ? FontsLoader.Instance.GetWidthExUnicode(font, msg, 200, TEXT_ALIGN_TYPE.TS_LEFT, (ushort) FontStyle.BlackBorder) : FontsLoader.Instance.GetWidthExASCII(font, msg, 200, TEXT_ALIGN_TYPE.TS_LEFT, (ushort) FontStyle.BlackBorder);
+            }
             else
+            {
                 width = 0;
+            }
 
             TextObject text_obj = TextObject.Create();
             text_obj.Alpha = 0xFF;
@@ -242,9 +256,11 @@ namespace ClassicUO.Game.Managers
                 int delay = ProfileManager.Current.SpeechDelay;
 
                 if (delay < 10)
+                {
                     delay = 10;
+                }
 
-                timeToLive = (long)(4000 * rtext.LinesCount * delay / 100.0f);
+                timeToLive = (long) (4000 * rtext.LinesCount * delay / 100.0f);
             }
             else
             {
@@ -257,8 +273,6 @@ namespace ClassicUO.Game.Managers
 
             return timeToLive;
         }
-
-
     }
 
     internal class UOMessageEventArgs : EventArgs

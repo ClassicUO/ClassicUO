@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,28 +18,29 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
-using ClassicUO.Configuration;
-using ClassicUO.IO.Resources;
-using ClassicUO.Utility;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.CompilerServices;
+using ClassicUO.Configuration;
+using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
+using ClassicUO.Utility;
 
 namespace ClassicUO.Game.Data
 {
     [Flags]
-    enum STATIC_TILES_FILTER_FLAGS : byte
+    internal enum STATIC_TILES_FILTER_FLAGS : byte
     {
         STFF_CAVE = 0x01,
         STFF_STUMP = 0x02,
         STFF_STUMP_HATCHED = 0x04,
         STFF_VEGETATION = 0x08,
         STFF_WATER = 0x10
-    };
+    }
 
     internal static class StaticFilters
     {
@@ -52,7 +54,9 @@ namespace ClassicUO.Game.Data
             string path = Path.Combine(CUOEnviroment.ExecutablePath, "Data", "Client");
 
             if (!Directory.Exists(path))
+            {
                 Directory.CreateDirectory(path);
+            }
 
             string cave = Path.Combine(path, "cave.txt");
             string vegetation = Path.Combine(path, "vegetation.txt");
@@ -77,8 +81,8 @@ namespace ClassicUO.Game.Data
             {
                 using (StreamWriter writer = new StreamWriter(vegetation))
                 {
-                    ushort[] vegetationTiles = 
-                        {
+                    ushort[] vegetationTiles =
+                    {
                         0x0D45, 0x0D46, 0x0D47, 0x0D48, 0x0D49, 0x0D4A, 0x0D4B, 0x0D4C, 0x0D4D, 0x0D4E, 0x0D4F,
                         0x0D50, 0x0D51, 0x0D52, 0x0D53, 0x0D54, 0x0D5C, 0x0D5D, 0x0D5E, 0x0D5F, 0x0D60, 0x0D61,
                         0x0D62, 0x0D63, 0x0D64, 0x0D65, 0x0D66, 0x0D67, 0x0D68, 0x0D69, 0x0D6D, 0x0D73, 0x0D74,
@@ -102,7 +106,8 @@ namespace ClassicUO.Game.Data
                     {
                         ushort g = vegetationTiles[i];
 
-                        if ((TileDataLoader.Instance.StaticData[g].IsImpassable))
+                        if (TileDataLoader.Instance.StaticData[g]
+                                          .IsImpassable)
                         {
                             continue;
                         }
@@ -117,7 +122,8 @@ namespace ClassicUO.Game.Data
                 using (StreamWriter writer = new StreamWriter(trees))
                 using (StreamWriter writerveg = new StreamWriter(vegetation, true))
                 {
-                    ushort[] treeTiles = {
+                    ushort[] treeTiles =
+                    {
                         0x0CCA, 0x0CCB, 0x0CCC, 0x0CCD, 0x0CD0, 0x0CD3, 0x0CD6, 0x0CD8, 0x0CDA, 0x0CDD, 0x0CE0,
                         0x0CE3, 0x0CE6, 0x0D41, 0x0D42, 0x0D43, 0x0D44, 0x0D57, 0x0D58, 0x0D59, 0x0D5A, 0x0D5B,
                         0x0D6E, 0x0D6F, 0x0D70, 0x0D71, 0x0D72, 0x0D84, 0x0D85, 0x0D86, 0x0D94, 0x0D98, 0x0D9C,
@@ -148,10 +154,12 @@ namespace ClassicUO.Game.Data
                             case 0x12BA:
                             case 0x12BB:
                                 flag = 0;
+
                                 break;
                         }
 
-                        if ((!TileDataLoader.Instance.StaticData[graphic].IsImpassable))
+                        if (!TileDataLoader.Instance.StaticData[graphic]
+                                           .IsImpassable)
                         {
                             writerveg.WriteLine(graphic);
                         }
@@ -164,11 +172,12 @@ namespace ClassicUO.Game.Data
             }
 
 
-            TextFileParser caveParser = new TextFileParser(File.ReadAllText(cave), new[] { ' ', '\t', ',' }, new[] { '#', ';' }, new[] { '"', '"' });
-            
+            TextFileParser caveParser = new TextFileParser(File.ReadAllText(cave), new[] {' ', '\t', ','}, new[] {'#', ';'}, new[] {'"', '"'});
+
             while (!caveParser.IsEOF())
             {
                 List<string> ss = caveParser.ReadTokens();
+
                 if (ss != null && ss.Count != 0)
                 {
                     if (ushort.TryParse(ss[0], out ushort graphic))
@@ -180,11 +189,12 @@ namespace ClassicUO.Game.Data
             }
 
 
-            TextFileParser stumpsParser = new TextFileParser(File.ReadAllText(trees), new[] { ' ', '\t', ',', '=' }, new[] { '#', ';' }, new[] { '"', '"' });
+            TextFileParser stumpsParser = new TextFileParser(File.ReadAllText(trees), new[] {' ', '\t', ',', '='}, new[] {'#', ';'}, new[] {'"', '"'});
 
             while (!stumpsParser.IsEOF())
             {
                 List<string> ss = stumpsParser.ReadTokens();
+
                 if (ss != null && ss.Count >= 2)
                 {
                     STATIC_TILES_FILTER_FLAGS flag = STATIC_TILES_FILTER_FLAGS.STFF_STUMP;
@@ -203,11 +213,12 @@ namespace ClassicUO.Game.Data
             }
 
 
-            TextFileParser vegetationParser = new TextFileParser(File.ReadAllText(vegetation), new[] { ' ', '\t', ',' }, new[] { '#', ';' }, new[] { '"', '"' });
-            
+            TextFileParser vegetationParser = new TextFileParser(File.ReadAllText(vegetation), new[] {' ', '\t', ','}, new[] {'#', ';'}, new[] {'"', '"'});
+
             while (!vegetationParser.IsEOF())
             {
                 List<string> ss = vegetationParser.ReadTokens();
+
                 if (ss != null && ss.Count != 0)
                 {
                     if (ushort.TryParse(ss[0], out ushort graphic))
@@ -223,8 +234,11 @@ namespace ClassicUO.Game.Data
             foreach (ushort graphic in CaveTiles)
             {
                 ArtTexture texture = ArtLoader.Instance.GetTexture(graphic);
+
                 if (texture != null)
+                {
                     texture.Ticks = 0;
+                }
             }
 
             ArtLoader.Instance.CleaUnusedResources(short.MaxValue);
@@ -235,8 +249,11 @@ namespace ClassicUO.Game.Data
             foreach (ushort graphic in TreeTiles)
             {
                 ArtTexture texture = ArtLoader.Instance.GetTexture(graphic);
+
                 if (texture != null)
+                {
                     texture.Ticks = 0;
+                }
             }
 
             ArtLoader.Instance.CleaUnusedResources(short.MaxValue);
@@ -248,6 +265,7 @@ namespace ClassicUO.Game.Data
             if (ProfileManager.Current != null && !ProfileManager.Current.TreeToStumps)
             {
                 index = 0;
+
                 return false;
             }
 
@@ -268,6 +286,7 @@ namespace ClassicUO.Game.Data
             }
 
             index = 0;
+
             return false;
         }
 
@@ -298,6 +317,7 @@ namespace ClassicUO.Game.Data
                 case 4960:
                 case 4962:
                     return true;
+
                 default:
                     return g >= 6001 && g <= 6012;
             }

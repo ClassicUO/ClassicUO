@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,6 +18,7 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 
@@ -1100,7 +1102,10 @@ namespace ClassicUO.Network
 
                 // check to see if the current codeword has no end
                 // if not, make it an incomplete byte
-                if (srcOffset == srcLength) return false;
+                if (srcOffset == srcLength)
+                {
+                    return false;
+                }
             }
 
             destLength = destPos - destOffset;

@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,13 +18,12 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
-
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
-
 using static SDL2.SDL;
 
 namespace ClassicUO.Input
@@ -72,7 +72,9 @@ namespace ClassicUO.Input
         public MouseWheelEventArgs(MouseEventType direction)
         {
             if (direction != MouseEventType.WheelScroll && direction != MouseEventType.WheelScrollDown && direction != MouseEventType.WheelScrollUp)
+            {
                 throw new Exception("Wrong scroll direction: " + direction);
+            }
 
             Direction = direction;
         }

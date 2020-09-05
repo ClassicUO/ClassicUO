@@ -1,4 +1,5 @@
 #region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,11 +18,11 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System.Collections.Generic;
 using System.Linq;
-
 using ClassicUO.Configuration;
 using ClassicUO.Data;
 using ClassicUO.Game.Data;
@@ -31,8 +32,6 @@ using ClassicUO.Game.UI.Gumps;
 using ClassicUO.IO.Resources;
 using ClassicUO.Network;
 using ClassicUO.Utility.Logging;
-
-using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.GameObjects
 {
@@ -57,101 +56,6 @@ namespace ClassicUO.Game.GameObjects
 
         public IReadOnlyDictionary<BuffIconType, BuffIcon> BuffIcons => _buffIcons;
 
-        public ushort Strength;
-
-        public ushort Intelligence;
-
-        public ushort Dexterity;
-
-        public ushort Weight;
-
-        public ushort WeightMax;
-
-        public uint Gold;
-
-        public short PhysicalResistance;
-
-        public short FireResistance;
-
-        public short ColdResistance;
-
-        public short PoisonResistance;
-
-        public short EnergyResistance;
-
-        public byte Followers;
-
-        public byte FollowersMax;
-
-        public ushort Luck;
-
-        public uint TithingPoints;
-
-        public short DamageMin;
-
-        public short DamageMax;
-
-        public short StatsCap;
-
-        public short HitChanceIncrease;
-
-        public short SwingSpeedIncrease;
-
-        public short DamageIncrease;
-
-        public short LowerReagentCost;
-
-        public short HitPointsRegeneration;
-
-        public short StaminaRegeneration;
-
-        public short ManaRegeneration;
-
-        public short MaxPhysicResistence;
-
-        public short MaxFireResistence;
-
-        public short MaxColdResistence;
-
-        public short MaxPoisonResistence;
-
-        public short MaxEnergyResistence;
-
-        public short MaxDefenseChanceIncrease;
-
-        public short ReflectPhysicalDamage;
-
-        public short EnhancePotions;
-
-        public short DefenseChanceIncrease;
-        public short SpellDamageIncrease;
-
-        public short FasterCastRecovery;
-
-        public short FasterCasting;
-
-        public short LowerManaCost;
-
-        public short StrengthIncrease;
-
-        public short DexterityIncrease;
-
-        public short IntelligenceIncrease;
-
-        public short HitPointsIncrease;
-
-        public short StaminaIncrease;
-
-        public short ManaIncrease;
-
-        public short MaxHitPointsIncrease;
-
-        public short MaxStaminaIncrease;
-
-        public short MaxManaIncrease;
-
-        public long DeathScreenTimer;
-
 
         public Ability PrimaryAbility
         {
@@ -165,18 +69,121 @@ namespace ClassicUO.Game.GameObjects
             set => Abilities[1] = value;
         }
 
+        protected override bool IsWalking => LastStepTime > Time.Ticks - Constants.PLAYER_WALKING_DELAY;
+
+
+        internal WalkerManager Walker { get; } = new WalkerManager();
         public Ability[] Abilities = new Ability[2]
         {
             Ability.Invalid, Ability.Invalid
         };
+        //private bool _lastRun, _lastMount;
+        //private int _lastDir = -1, _lastDelta, _lastStepTime;
 
-        public Lock StrLock;
+
+        public readonly HashSet<uint> AutoOpenedCorpses = new HashSet<uint>();
+
+        public short ColdResistance;
+
+        public short DamageIncrease;
+
+        public short DamageMax;
+
+        public short DamageMin;
+
+        public long DeathScreenTimer;
+
+        public short DefenseChanceIncrease;
 
         public Lock DexLock;
 
+        public ushort Dexterity;
+
+        public short DexterityIncrease;
+
+        public short EnergyResistance;
+
+        public short EnhancePotions;
+
+        public short FasterCasting;
+
+        public short FasterCastRecovery;
+
+        public short FireResistance;
+
+        public byte Followers;
+
+        public byte FollowersMax;
+
+        public uint Gold;
+
+        public short HitChanceIncrease;
+
+        public short HitPointsIncrease;
+
+        public short HitPointsRegeneration;
+
+        public ushort Intelligence;
+
+        public short IntelligenceIncrease;
+
         public Lock IntLock;
 
-        protected override bool IsWalking => LastStepTime > Time.Ticks - Constants.PLAYER_WALKING_DELAY;
+        public short LowerManaCost;
+
+        public short LowerReagentCost;
+
+        public ushort Luck;
+
+        public short ManaIncrease;
+
+        public short ManaRegeneration;
+        public readonly HashSet<uint> ManualOpenedCorpses = new HashSet<uint>();
+
+        public short MaxColdResistence;
+
+        public short MaxDefenseChanceIncrease;
+
+        public short MaxEnergyResistence;
+
+        public short MaxFireResistence;
+
+        public short MaxHitPointsIncrease;
+
+        public short MaxManaIncrease;
+
+        public short MaxPhysicResistence;
+
+        public short MaxPoisonResistence;
+
+        public short MaxStaminaIncrease;
+
+        public short PhysicalResistance;
+
+        public short PoisonResistance;
+
+        public short ReflectPhysicalDamage;
+        public short SpellDamageIncrease;
+
+        public short StaminaIncrease;
+
+        public short StaminaRegeneration;
+
+        public short StatsCap;
+
+        public ushort Strength;
+
+        public short StrengthIncrease;
+
+        public Lock StrLock;
+
+        public short SwingSpeedIncrease;
+
+        public uint TithingPoints;
+
+        public ushort Weight;
+
+        public ushort WeightMax;
 
         public Item FindBandage()
         {
@@ -184,7 +191,9 @@ namespace ClassicUO.Game.GameObjects
             Item item = null;
 
             if (backpack != null)
+            {
                 item = backpack.FindItem(0x0E21);
+            }
 
             return item;
         }
@@ -204,6 +213,7 @@ namespace ClassicUO.Game.GameObjects
         private Item FindItemInContainerRecursive(Item container, ushort graphic)
         {
             Item found = null;
+
             if (container != null)
             {
                 for (LinkedObject i = container.Items; i != null; i = i.Next)
@@ -211,14 +221,18 @@ namespace ClassicUO.Game.GameObjects
                     Item item = (Item) i;
 
                     if (item.Graphic == graphic)
+                    {
                         return item;
+                    }
 
                     if (!item.IsEmpty)
                     {
                         found = FindItemInContainerRecursive(item, graphic);
 
                         if (found != null && found.Graphic == graphic)
+                        {
                             return found;
+                        }
                     }
                 }
             }
@@ -249,13 +263,17 @@ namespace ClassicUO.Game.GameObjects
             Item layerObject = FindItemByLayer(Layer.OneHanded);
 
             if (layerObject != null)
+            {
                 equippedGraphic = layerObject.Graphic;
+            }
             else
             {
                 layerObject = FindItemByLayer(Layer.TwoHanded);
 
                 if (layerObject != null)
+                {
                     equippedGraphic = layerObject.Graphic;
+                }
             }
 
             Abilities[0] = Ability.Invalid;
@@ -273,7 +291,8 @@ namespace ClassicUO.Game.GameObjects
 
                     ushort testGraphic = (ushort) (equippedGraphic - 1);
 
-                    if (TileDataLoader.Instance.StaticData[testGraphic].AnimID == imageID)
+                    if (TileDataLoader.Instance.StaticData[testGraphic]
+                                      .AnimID == imageID)
                     {
                         graphics[1] = testGraphic;
                         count = 2;
@@ -282,7 +301,8 @@ namespace ClassicUO.Game.GameObjects
                     {
                         testGraphic = (ushort) (equippedGraphic + 1);
 
-                        if (TileDataLoader.Instance.StaticData[testGraphic].AnimID == imageID)
+                        if (TileDataLoader.Instance.StaticData[testGraphic]
+                                          .AnimID == imageID)
                         {
                             graphics[1] = testGraphic;
                             count = 2;
@@ -1206,25 +1226,31 @@ namespace ClassicUO.Game.GameObjects
                             case 0xA289: // Barbed Whip
                                 Abilities[0] = Ability.ConcussionBlow;
                                 Abilities[1] = Ability.WhirlwindAttack;
+
                                 goto done;
 
                             case 0xA28A: // Spiked Whip
                                 Abilities[0] = Ability.ArmorPierce;
                                 Abilities[1] = Ability.WhirlwindAttack;
+
                                 goto done;
 
                             case 0xA28B: // Bladed Whip
                                 Abilities[0] = Ability.BleedAttack;
                                 Abilities[1] = Ability.WhirlwindAttack;
+
                                 goto done;
 
                             case 0x08FF: // Boomerang
                                 Abilities[0] = Ability.MysticArc;
                                 Abilities[1] = Ability.ConcussionBlow;
+
                                 break;
+
                             case 0x090A: // Soul Glaive
                                 Abilities[0] = Ability.ArmorIgnore;
                                 Abilities[1] = Ability.MortalStrike;
+
                                 break;
                         }
                     }
@@ -1241,6 +1267,7 @@ namespace ClassicUO.Game.GameObjects
             }
 
             int max = 0;
+
             foreach (Control control in UIManager.Gumps)
             {
                 if (control is UseAbilityButtonGump s)
@@ -1250,7 +1277,9 @@ namespace ClassicUO.Game.GameObjects
                 }
 
                 if (max >= 2)
+                {
                     break;
+                }
             }
         }
 
@@ -1269,10 +1298,14 @@ namespace ClassicUO.Game.GameObjects
             if (ProfileManager.Current.AutoOpenCorpses)
             {
                 if ((ProfileManager.Current.CorpseOpenOptions == 1 || ProfileManager.Current.CorpseOpenOptions == 3) && TargetManager.IsTargeting)
+                {
                     return;
+                }
 
                 if ((ProfileManager.Current.CorpseOpenOptions == 2 || ProfileManager.Current.CorpseOpenOptions == 3) && IsHidden)
+                {
                     return;
+                }
 
                 foreach (Item item in World.Items)
                 {
@@ -1299,21 +1332,28 @@ namespace ClassicUO.Game.GameObjects
                 int x = X, y = Y, z = Z;
                 Pathfinder.GetNewXY((byte) Direction, ref x, ref y);
 
-                if (World.Items.Any(s =>
-                                        s.ItemData.IsDoor && s.X == x && s.Y == y && s.Z - 15 <= z &&
-                                        s.Z + 15 >= z))
+                if (World.Items.Any
+                (
+                    s =>
+                        s.ItemData.IsDoor && s.X == x && s.Y == y && s.Z - 15 <= z &&
+                        s.Z + 15 >= z
+                ))
+                {
                     GameActions.OpenDoor();
+                }
             }
         }
 
         public override void Destroy()
         {
             if (IsDestroyed)
+            {
                 return;
+            }
 
             DeathScreenTimer = 0;
 
-            Log.Warn( "PlayerMobile disposed!");
+            Log.Warn("PlayerMobile disposed!");
             base.Destroy();
         }
 
@@ -1339,7 +1379,9 @@ namespace ClassicUO.Game.GameObjects
                     bank.Items = null;
                 }
 
-                UIManager.GetGump<ContainerGump>(bank.Serial)?.Dispose();
+                UIManager.GetGump<ContainerGump>(bank.Serial)
+                         ?.Dispose();
+
                 bank.Opened = false;
             }
         }
@@ -1355,31 +1397,42 @@ namespace ClassicUO.Game.GameObjects
                     case SpellbookGump _:
 
                         if (World.Get(gump.LocalSerial) == null)
+                        {
                             gump.Dispose();
+                        }
 
                         break;
+
                     case TradingGump _:
                     case ShopGump _:
 
                         Entity ent = World.Get(gump.LocalSerial);
                         int distance = int.MaxValue;
+
                         if (ent != null)
                         {
                             if (SerialHelper.IsItem(ent.Serial))
                             {
-                                Entity top = World.Get(((Item)ent).RootContainer);
+                                Entity top = World.Get(((Item) ent).RootContainer);
 
                                 if (top != null)
+                                {
                                     distance = top.Distance;
+                                }
                             }
                             else
+                            {
                                 distance = ent.Distance;
+                            }
                         }
 
                         if (distance > Constants.MIN_VIEW_RANGE)
+                        {
                             gump.Dispose();
+                        }
 
                         break;
+
                     case ContainerGump _:
                         distance = int.MaxValue;
 
@@ -1392,22 +1445,25 @@ namespace ClassicUO.Game.GameObjects
                                 Entity top = World.Get(((Item) ent).RootContainer);
 
                                 if (top != null)
+                                {
                                     distance = top.Distance;
+                                }
                             }
                             else
+                            {
                                 distance = ent.Distance;
+                            }
                         }
 
                         if (distance > Constants.MAX_CONTAINER_OPENED_ON_GROUND_RANGE)
+                        {
                             gump.Dispose();
+                        }
+
                         break;
                 }
             }
-
         }
-
-
-        internal WalkerManager Walker { get; } = new WalkerManager();
 
 
         public override void Update(double totalMS, double frameMS)
@@ -1445,13 +1501,17 @@ namespace ClassicUO.Game.GameObjects
         public bool Walk(Direction direction, bool run)
         {
             if (Walker.WalkingFailed || Walker.LastStepRequestTime > Time.Ticks || Walker.StepsCount >= Constants.MAX_STEP_COUNT ||
-                (Client.Version >= ClientVersion.CV_60142 && IsParalyzed))
+                Client.Version >= ClientVersion.CV_60142 && IsParalyzed)
+            {
                 return false;
+            }
 
             run |= ProfileManager.Current.AlwaysRun;
 
             if (SpeedMode >= CharacterSpeedType.CantRun || Stamina <= 1 && !IsDead || IsHidden && ProfileManager.Current.AlwaysRunUnlessHidden)
+            {
                 run = false;
+            }
 
             int x = X;
             int y = Y;
@@ -1480,22 +1540,29 @@ namespace ClassicUO.Game.GameObjects
                 sbyte newZ = z;
 
                 if (!Pathfinder.CanWalk(ref newDir, ref newX, ref newY, ref newZ))
+                {
                     return false;
+                }
 
                 if ((direction & Direction.Mask) != newDir)
+                {
                     direction = newDir;
+                }
                 else
                 {
                     direction = newDir;
                     x = newX;
                     y = newY;
                     z = newZ;
-                    walkTime = (ushort) MovementSpeed.TimeToCompleteMovement(run,
-                                                                             IsMounted || 
-                                                                             SpeedMode == CharacterSpeedType.FastUnmount || 
-                                                                             SpeedMode == CharacterSpeedType.FastUnmountAndCantRun || 
-                                                                             IsFlying
-                                                                             );
+
+                    walkTime = (ushort) MovementSpeed.TimeToCompleteMovement
+                    (
+                        run,
+                        IsMounted ||
+                        SpeedMode == CharacterSpeedType.FastUnmount ||
+                        SpeedMode == CharacterSpeedType.FastUnmountAndCantRun ||
+                        IsFlying
+                    );
                 }
             }
             else
@@ -1508,7 +1575,9 @@ namespace ClassicUO.Game.GameObjects
                 if (!Pathfinder.CanWalk(ref newDir, ref newX, ref newY, ref newZ))
                 {
                     if ((oldDirection & Direction.Mask) == newDir)
+                    {
                         return false;
+                    }
                 }
 
                 if ((oldDirection & Direction.Mask) == newDir)
@@ -1516,11 +1585,15 @@ namespace ClassicUO.Game.GameObjects
                     x = newX;
                     y = newY;
                     z = newZ;
-                    walkTime = (ushort) MovementSpeed.TimeToCompleteMovement(run,
-                                                                             IsMounted ||
-                                                                             SpeedMode == CharacterSpeedType.FastUnmount ||
-                                                                             SpeedMode == CharacterSpeedType.FastUnmountAndCantRun ||
-                                                                             IsFlying);
+
+                    walkTime = (ushort) MovementSpeed.TimeToCompleteMovement
+                    (
+                        run,
+                        IsMounted ||
+                        SpeedMode == CharacterSpeedType.FastUnmount ||
+                        SpeedMode == CharacterSpeedType.FastUnmountAndCantRun ||
+                        IsFlying
+                    );
                 }
 
                 direction = newDir;
@@ -1531,7 +1604,10 @@ namespace ClassicUO.Game.GameObjects
             if (emptyStack)
             {
                 if (!IsWalking)
+                {
                     SetAnimation(0xFF);
+                }
+
                 LastStepTime = Time.Ticks;
             }
 
@@ -1549,23 +1625,30 @@ namespace ClassicUO.Game.GameObjects
 
             Walker.StepsCount++;
 
-            Steps.AddToBack(new Step
-            {
-                X = x,
-                Y = y,
-                Z = z,
-                Direction = (byte) direction,
-                Run = run
-            });
+            Steps.AddToBack
+            (
+                new Step
+                {
+                    X = x,
+                    Y = y,
+                    Z = z,
+                    Direction = (byte) direction,
+                    Run = run
+                }
+            );
 
 
             NetClient.Socket.Send(new PWalkRequest(direction, Walker.WalkSequence, run, Walker.FastWalkStack.GetValue()));
 
 
             if (Walker.WalkSequence == 0xFF)
+            {
                 Walker.WalkSequence = 1;
+            }
             else
+            {
                 Walker.WalkSequence++;
+            }
 
             Walker.UnacceptedPacketsCount++;
 
@@ -1595,12 +1678,5 @@ namespace ClassicUO.Game.GameObjects
 
             return true;
         }
-
-        //private bool _lastRun, _lastMount;
-        //private int _lastDir = -1, _lastDelta, _lastStepTime;
-
-        
-        public readonly HashSet<uint> AutoOpenedCorpses = new HashSet<uint>();
-        public readonly HashSet<uint> ManualOpenedCorpses = new HashSet<uint>();
     }
 }

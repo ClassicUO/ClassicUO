@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,12 +18,12 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml;
-
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
@@ -36,9 +37,9 @@ namespace ClassicUO.Game.UI.Gumps
     internal class InfoBarGump : Gump
     {
         private readonly AlphaBlendControl _background;
-        private long _refreshTime;
 
         private readonly List<InfoBarControl> _infobarControls = new List<InfoBarControl>();
+        private long _refreshTime;
 
         public InfoBarGump() : base(0, 0)
         {
@@ -48,7 +49,7 @@ namespace ClassicUO.Game.UI.Gumps
             CanCloseWithRightClick = false;
             Height = 20;
 
-            Add(_background = new AlphaBlendControl(0.3f) { Width = Width, Height = Height });
+            Add(_background = new AlphaBlendControl(0.3f) {Width = Width, Height = Height});
 
             ResetItems();
         }
@@ -64,11 +65,19 @@ namespace ClassicUO.Game.UI.Gumps
 
             _infobarControls.Clear();
 
-            List<InfoBarItem> infoBarItems = Client.Game.GetScene<GameScene>().InfoBars.GetInfoBars();
+            List<InfoBarItem> infoBarItems = Client.Game.GetScene<GameScene>()
+                                                   .InfoBars.GetInfoBars();
 
             for (int i = 0; i < infoBarItems.Count; i++)
             {
-                InfoBarControl info = new InfoBarControl(infoBarItems[i].label, infoBarItems[i].var, infoBarItems[i].hue);
+                InfoBarControl info = new InfoBarControl
+                (
+                    infoBarItems[i]
+                        .label, infoBarItems[i]
+                        .var, infoBarItems[i]
+                        .hue
+                );
+
                 _infobarControls.Add(info);
                 Add(info);
             }
@@ -114,7 +123,9 @@ namespace ClassicUO.Game.UI.Gumps
         public override void Update(double totalMS, double frameMS)
         {
             if (IsDisposed)
+            {
                 return;
+            }
 
             if (_refreshTime < totalMS)
             {
@@ -143,13 +154,11 @@ namespace ClassicUO.Game.UI.Gumps
     }
 
 
-    class InfoBarControl : Control
+    internal class InfoBarControl : Control
     {
-        private Label _label;
-        private Label _data;
-        private InfoBarVars _var;
+        private readonly Label _data;
+        private readonly Label _label;
         private ushort _warningLinesHue;
-        protected long _refreshTime;
 
         public InfoBarControl(string label, InfoBarVars var, ushort hue)
         {
@@ -157,39 +166,43 @@ namespace ClassicUO.Game.UI.Gumps
             WantUpdateSize = true;
             CanMove = false;
 
-            _label = new Label(label, true, 999) { Height = 20, Hue = hue };
-            _var = var;
+            _label = new Label(label, true, 999) {Height = 20, Hue = hue};
+            Var = var;
 
-            _data = new Label("", true, 999) { Height = 20, X = _label.Width, Hue = 0x0481 };
+            _data = new Label("", true, 999) {Height = 20, X = _label.Width, Hue = 0x0481};
             Add(_label);
             Add(_data);
         }
 
         public string Text => _label.Text;
-        public InfoBarVars Var => _var;
+        public InfoBarVars Var { get; }
+
         public ushort Hue => _label.Hue;
+        protected long _refreshTime;
 
         public override void Update(double totalMS, double frameMS)
         {
             if (IsDisposed)
+            {
                 return;
+            }
 
             if (_refreshTime < totalMS)
             {
                 _refreshTime = (long) totalMS + 125;
 
-                _data.Text = GetVarData(_var);
-                
-                if (ProfileManager.Current.InfoBarHighlightType == 0 || _var == InfoBarVars.NameNotoriety)
+                _data.Text = GetVarData(Var);
+
+                if (ProfileManager.Current.InfoBarHighlightType == 0 || Var == InfoBarVars.NameNotoriety)
                 {
-                    _data.Hue = GetVarHue(_var);
+                    _data.Hue = GetVarHue(Var);
                 }
                 else
                 {
-                    _data.Hue =  0x0481;
-                    _warningLinesHue = GetVarHue(_var);
+                    _data.Hue = 0x0481;
+                    _warningLinesHue = GetVarHue(Var);
                 }
-                
+
                 _data.WantUpdateSize = true;
             }
 
@@ -204,7 +217,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             ResetHueVector();
 
-            if (_var != InfoBarVars.NameNotoriety && ProfileManager.Current.InfoBarHighlightType == 1 && _warningLinesHue != 0x0481)
+            if (Var != InfoBarVars.NameNotoriety && ProfileManager.Current.InfoBarHighlightType == 1 && _warningLinesHue != 0x0481)
             {
                 ShaderHueTranslator.GetHueVector(ref _hueVector, _warningLinesHue);
                 batcher.Draw2D(Texture2DCache.GetTexture(Color.White), _data.ScreenCoordinateX, _data.ScreenCoordinateY, _data.Width, 2, ref _hueVector);
@@ -220,54 +233,79 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 case InfoBarVars.HP:
                     return $"{World.Player.Hits}/{World.Player.HitsMax}";
+
                 case InfoBarVars.Mana:
                     return $"{World.Player.Mana}/{World.Player.ManaMax}";
+
                 case InfoBarVars.Stamina:
                     return $"{World.Player.Stamina}/{World.Player.StaminaMax}";
+
                 case InfoBarVars.Weight:
                     return $"{World.Player.Weight}/{World.Player.WeightMax}";
+
                 case InfoBarVars.Followers:
                     return $"{World.Player.Followers}/{World.Player.FollowersMax}";
+
                 case InfoBarVars.Gold:
                     return World.Player.Gold.ToString();
+
                 case InfoBarVars.Damage:
                     return $"{World.Player.DamageMin}-{World.Player.DamageMax}";
+
                 case InfoBarVars.Armor:
                     return World.Player.PhysicalResistance.ToString();
+
                 case InfoBarVars.Luck:
                     return World.Player.Luck.ToString();
+
                 case InfoBarVars.FireResist:
                     return World.Player.FireResistance.ToString();
+
                 case InfoBarVars.ColdResist:
                     return World.Player.ColdResistance.ToString();
+
                 case InfoBarVars.PoisonResist:
                     return World.Player.PoisonResistance.ToString();
+
                 case InfoBarVars.EnergyResist:
                     return World.Player.EnergyResistance.ToString();
+
                 case InfoBarVars.LowerReagentCost:
                     return World.Player.LowerReagentCost.ToString();
+
                 case InfoBarVars.SpellDamageInc:
                     return World.Player.SpellDamageIncrease.ToString();
+
                 case InfoBarVars.FasterCasting:
                     return World.Player.FasterCasting.ToString();
+
                 case InfoBarVars.FasterCastRecovery:
                     return World.Player.FasterCastRecovery.ToString();
+
                 case InfoBarVars.HitChanceInc:
                     return World.Player.HitChanceIncrease.ToString();
+
                 case InfoBarVars.DefenseChanceInc:
                     return World.Player.DefenseChanceIncrease.ToString();
+
                 case InfoBarVars.LowerManaCost:
                     return World.Player.LowerManaCost.ToString();
+
                 case InfoBarVars.DamageChanceInc:
                     return World.Player.DamageIncrease.ToString();
+
                 case InfoBarVars.SwingSpeedInc:
                     return World.Player.SwingSpeedIncrease.ToString();
+
                 case InfoBarVars.StatsCap:
                     return World.Player.StatsCap.ToString();
+
                 case InfoBarVars.NameNotoriety:
                     return World.Player.Name;
+
                 case InfoBarVars.TithingPoints:
                     return World.Player.TithingPoints.ToString();
+
                 default:
                     return "";
             }
@@ -276,54 +314,95 @@ namespace ClassicUO.Game.UI.Gumps
         private ushort GetVarHue(InfoBarVars var)
         {
             float percent;
+
             switch (var)
             {
                 case InfoBarVars.HP:
                     percent = World.Player.Hits / (float) World.Player.HitsMax;
+
                     if (percent <= 0.25)
+                    {
                         return 0x0021;
+                    }
                     else if (percent <= 0.5)
+                    {
                         return 0x0030;
+                    }
                     else if (percent <= 0.75)
+                    {
                         return 0x0035;
+                    }
                     else
+                    {
                         return 0x0481;
+                    }
+
                 case InfoBarVars.Mana:
                     percent = World.Player.Mana / (float) World.Player.ManaMax;
+
                     if (percent <= 0.25)
+                    {
                         return 0x0021;
+                    }
                     else if (percent <= 0.5)
+                    {
                         return 0x0030;
+                    }
                     else if (percent <= 0.75)
+                    {
                         return 0x0035;
+                    }
                     else
+                    {
                         return 0x0481;
+                    }
+
                 case InfoBarVars.Stamina:
                     percent = World.Player.Stamina / (float) World.Player.StaminaMax;
+
                     if (percent <= 0.25)
+                    {
                         return 0x0021;
+                    }
                     else if (percent <= 0.5)
+                    {
                         return 0x0030;
+                    }
                     else if (percent <= 0.75)
+                    {
                         return 0x0035;
+                    }
                     else
+                    {
                         return 0x0481;
+                    }
+
                 case InfoBarVars.Weight:
                     percent = World.Player.Weight / (float) World.Player.WeightMax;
+
                     if (percent >= 1)
+                    {
                         return 0x0021;
+                    }
                     else if (percent >= 0.75)
+                    {
                         return 0x0030;
+                    }
                     else if (percent >= 0.5)
+                    {
                         return 0x0035;
+                    }
                     else
+                    {
                         return 0x0481;
+                    }
+
                 case InfoBarVars.NameNotoriety:
                     return Notoriety.GetHue(World.Player.NotorietyFlag);
+
                 default:
                     return 0x0481;
             }
         }
-
     }
 }

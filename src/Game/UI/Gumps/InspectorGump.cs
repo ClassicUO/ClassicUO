@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,23 +18,19 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Text;
-
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Renderer;
 using ClassicUO.Resources;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
-
 using Microsoft.Xna.Framework;
-
 using SDL2;
 
 namespace ClassicUO.Game.UI.Gumps
@@ -42,8 +39,8 @@ namespace ClassicUO.Game.UI.Gumps
     {
         private const int WIDTH = 500;
         private const int HEIGHT = 400;
+        private readonly GameObject _obj;
         private readonly ScrollArea _scrollArea;
-        private GameObject _obj;
 
         public InspectorGump(GameObject obj) : base(0, 0)
         {
@@ -55,26 +52,38 @@ namespace ClassicUO.Game.UI.Gumps
             CanCloseWithRightClick = true;
             Add(new BorderControl(0, 0, WIDTH, HEIGHT, 4));
 
-            Add(new GumpPicTiled(4, 4, WIDTH - 8, HEIGHT - 8, 0x0A40)
-            {
-                Alpha = 0.5f
-            });
+            Add
+            (
+                new GumpPicTiled(4, 4, WIDTH - 8, HEIGHT - 8, 0x0A40)
+                {
+                    Alpha = 0.5f
+                }
+            );
 
-            Add(new GumpPicTiled(4, 4, WIDTH - 8, HEIGHT - 8, 0x0A40)
-            {
-                Alpha = 0.5f
-            });
+            Add
+            (
+                new GumpPicTiled(4, 4, WIDTH - 8, HEIGHT - 8, 0x0A40)
+                {
+                    Alpha = 0.5f
+                }
+            );
+
             Add(new Label(ResGumps.ObjectInformation, true, 1153, font: 3) {X = 20, Y = 10});
             Add(new Line(20, 30, WIDTH - 50, 1, 0xFFFFFFFF));
-            Add(new NiceButton(WIDTH - 115, 5, 100, 25, ButtonAction.Activate, ResGumps.Dump)
-            {
-                ButtonParameter = 0
-            });
+
+            Add
+            (
+                new NiceButton(WIDTH - 115, 5, 100, 25, ButtonAction.Activate, ResGumps.Dump)
+                {
+                    ButtonParameter = 0
+                }
+            );
 
             _scrollArea = new ScrollArea(20, 35, WIDTH - 40, HEIGHT - 45, true)
             {
                 AcceptMouseInput = true
             };
+
             Add(_scrollArea);
 
             Dictionary<string, string> dict = ReflectionHolder.GetGameObjectProperties(obj);
@@ -89,6 +98,7 @@ namespace ClassicUO.Game.UI.Gumps
                     {
                         X = 2
                     };
+
                     areaItem.Add(label);
 
                     int height = label.Height;
@@ -98,10 +108,13 @@ namespace ClassicUO.Game.UI.Gumps
                         X = 200,
                         AcceptMouseInput = true
                     };
+
                     label.MouseUp += OnLabelClick;
 
                     if (label.Height > 0)
+                    {
                         height = label.Height;
+                    }
 
                     areaItem.Add(label);
                     areaItem.Add(new Line(0, height + 2, WIDTH - 65, 1, Color.Gray.PackedValue));
@@ -124,14 +137,15 @@ namespace ClassicUO.Game.UI.Gumps
                         writer.Write("###################################################");
                         writer.Write($"CUO version: {CUOEnviroment.Version}");
                         writer.Write($"OBJECT TYPE: {_obj.GetType()}");
+
                         foreach (KeyValuePair<string, string> item in dict.OrderBy(s => s.Key))
                         {
                             writer.Write($"{item.Key} = {item.Value}");
                         }
+
                         writer.Write("###################################################");
                         writer.Write("");
                     }
-
                 }
             }
         }

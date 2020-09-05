@@ -1,4 +1,5 @@
 #region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,19 +18,17 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
 using System.Runtime.CompilerServices;
-
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
-
 using Microsoft.Xna.Framework;
-
 using IUpdateable = ClassicUO.Interfaces.IUpdateable;
 
 namespace ClassicUO.Game.GameObjects
@@ -43,32 +42,24 @@ namespace ClassicUO.Game.GameObjects
     {
         private Point _screenPosition;
 
-        public ushort X, Y;
-        public sbyte Z;
-        public ushort Hue;
-        public ushort Graphic;
-        public int CurrentRenderIndex;
-        public byte UseInRender;
-        public short PriorityZ;
-        public GameObject TPrevious;
-        public GameObject TNext;
-        public Vector3 Offset;
-        // FIXME: remove it
-        public sbyte FoliageIndex = -1;
-
         public bool IsDestroyed { get; protected set; }
         public bool IsPositionChanged { get; protected set; }
         public TextContainer TextContainer { get; private set; }
+
         public int Distance
         {
             [MethodImpl(256)]
             get
             {
                 if (World.Player == null /*|| IsDestroyed*/)
+                {
                     return ushort.MaxValue;
+                }
 
                 if (this == World.Player)
+                {
                     return 0;
+                }
 
                 int x = X, y = Y;
 
@@ -90,6 +81,20 @@ namespace ClassicUO.Game.GameObjects
         {
         }
 
+        public int CurrentRenderIndex;
+        // FIXME: remove it
+        public sbyte FoliageIndex = -1;
+        public ushort Graphic;
+        public ushort Hue;
+        public Vector3 Offset;
+        public short PriorityZ;
+        public GameObject TNext;
+        public GameObject TPrevious;
+        public byte UseInRender;
+
+        public ushort X, Y;
+        public sbyte Z;
+
         [MethodImpl(256)]
         public void AddToTile(int x, int y)
         {
@@ -99,7 +104,8 @@ namespace ClassicUO.Game.GameObjects
 
                 if (!IsDestroyed)
                 {
-                    World.Map.GetChunk(x, y)?.AddGameObject(this, x % 8, y % 8);
+                    World.Map.GetChunk(x, y)
+                         ?.AddGameObject(this, x % 8, y % 8);
                 }
             }
         }
@@ -115,10 +121,14 @@ namespace ClassicUO.Game.GameObjects
         public void RemoveFromTile()
         {
             if (TPrevious != null)
+            {
                 TPrevious.TNext = TNext;
+            }
 
             if (TNext != null)
+            {
                 TNext.TPrevious = TPrevious;
+            }
 
             TNext = null;
             TPrevious = null;
@@ -126,7 +136,6 @@ namespace ClassicUO.Game.GameObjects
 
         public virtual void UpdateGraphicBySeason()
         {
-
         }
 
         [MethodImpl(256)]
@@ -157,15 +166,21 @@ namespace ClassicUO.Game.GameObjects
         public virtual void UpdateTextCoordsV()
         {
             if (TextContainer == null)
+            {
                 return;
+            }
 
-            var last = (TextObject) TextContainer.Items;
+            TextObject last = (TextObject) TextContainer.Items;
 
             while (last?.Next != null)
+            {
                 last = (TextObject) last.Next;
+            }
 
             if (last == null)
+            {
                 return;
+            }
 
             int offY = 0;
 
@@ -175,7 +190,7 @@ namespace ClassicUO.Game.GameObjects
 
             if (texture != null)
             {
-                p.Y -= (texture.ImageRectangle.Height >> 1);
+                p.Y -= texture.ImageRectangle.Height >> 1;
             }
 
             p.X += (int) Offset.X + 22;
@@ -188,13 +203,15 @@ namespace ClassicUO.Game.GameObjects
                 if (last.RenderedText != null && !last.RenderedText.IsDestroyed)
                 {
                     if (offY == 0 && last.Time < Time.Ticks)
+                    {
                         continue;
+                    }
 
                     last.OffsetY = offY;
                     offY += last.RenderedText.Height;
 
-                    last.RealScreenPosition.X = (p.X - (last.RenderedText.Width >> 1));
-                    last.RealScreenPosition.Y = (p.Y - offY);
+                    last.RealScreenPosition.X = p.X - (last.RenderedText.Width >> 1);
+                    last.RealScreenPosition.Y = p.Y - offY;
                 }
             }
 
@@ -204,7 +221,9 @@ namespace ClassicUO.Game.GameObjects
         protected void FixTextCoordinatesInScreen()
         {
             if (this is Item it && SerialHelper.IsValid(it.Container))
+            {
                 return;
+            }
 
             int offsetY = 0;
 
@@ -216,21 +235,29 @@ namespace ClassicUO.Game.GameObjects
             for (TextObject item = (TextObject) TextContainer.Items; item != null; item = (TextObject) item.Next)
             {
                 if (item.RenderedText == null || item.RenderedText.IsDestroyed || item.RenderedText.Texture == null || item.Time < Time.Ticks)
+                {
                     continue;
+                }
 
                 int startX = item.RealScreenPosition.X;
                 int endX = startX + item.RenderedText.Width;
 
                 if (startX < minX)
+                {
                     item.RealScreenPosition.X += minX - startX;
+                }
 
                 if (endX > maxX)
+                {
                     item.RealScreenPosition.X -= endX - maxX;
+                }
 
                 int startY = item.RealScreenPosition.Y;
 
                 if (startY < minY && offsetY == 0)
+                {
                     offsetY = minY - startY;
+                }
 
                 //int endY = startY + item.RenderedText.Height;
 
@@ -239,14 +266,18 @@ namespace ClassicUO.Game.GameObjects
                 //    //item.RealScreenPosition.Y -= endY - maxY;
 
                 if (offsetY != 0)
+                {
                     item.RealScreenPosition.Y += offsetY;
+                }
             }
         }
 
         public void AddMessage(MessageType type, string text, byte font, ushort hue, bool isunicode, TEXT_TYPE text_type)
         {
             if (string.IsNullOrEmpty(text))
+            {
                 return;
+            }
 
             TextObject msg = MessageManager.CreateMessage(text, hue, font, isunicode, type, text_type);
             AddMessage(msg);
@@ -255,7 +286,9 @@ namespace ClassicUO.Game.GameObjects
         public void AddMessage(TextObject msg)
         {
             if (TextContainer == null)
+            {
                 TextContainer = new TextContainer();
+            }
 
             msg.Owner = this;
             TextContainer.Add(msg);
@@ -283,7 +316,9 @@ namespace ClassicUO.Game.GameObjects
         public virtual void Destroy()
         {
             if (IsDestroyed)
+            {
                 return;
+            }
 
             Next = null;
             Previous = null;

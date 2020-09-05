@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,10 +18,9 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
-
-using ClassicUO.Utility;
 
 namespace ClassicUO.Game
 {
@@ -34,9 +34,6 @@ namespace ClassicUO.Game
 
         public const int CHARACTER_ANIMATION_DELAY = 80;
         public const int ITEM_EFFECT_ANIMATION_DELAY = 50;
-
-        // cannot be a const, due to UOLive implementation
-        public static int MAPS_COUNT = 6;
 
         public const int MAX_STEP_COUNT = 5;
         public const int TURN_DELAY = 100; // original client 12.5 fps = 80ms delay. FIXME: this patch causes a packet throttle. Reverted back to 100ms
@@ -134,6 +131,9 @@ namespace ClassicUO.Game
         public const int PREDICTABLE_TILE_COUNT = 64 * PREDICTABLE_CHUNKS;
         public const int PREDICTABLE_STATICS = PREDICTABLE_TILE_COUNT * 2;
         public const int PREDICTABLE_MULTIS = PREDICTABLE_TILE_COUNT * 4;
+
+        // cannot be a const, due to UOLive implementation
+        public static int MAPS_COUNT = 6;
 
         public static readonly bool[] BAD_CONTAINER_LAYERS =
         {

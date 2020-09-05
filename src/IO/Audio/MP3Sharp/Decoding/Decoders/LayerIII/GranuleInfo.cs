@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,12 +18,22 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 namespace ClassicUO.IO.Audio.MP3Sharp.Decoding.Decoders.LayerIII
 {
     internal class GranuleInfo
     {
+        /// <summary>
+        ///     Dummy Constructor
+        /// </summary>
+        public GranuleInfo()
+        {
+            TableSelect = new int[3];
+            SubblockGain = new int[3];
+        }
+
         public int BigValues;
         public int BlockType;
         public int Count1TableSelect;
@@ -37,14 +48,5 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding.Decoders.LayerIII
         public int[] SubblockGain;
         public int[] TableSelect;
         public int WindowSwitchingFlag;
-
-        /// <summary>
-        ///     Dummy Constructor
-        /// </summary>
-        public GranuleInfo()
-        {
-            TableSelect = new int[3];
-            SubblockGain = new int[3];
-        }
     }
 }

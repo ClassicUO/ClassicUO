@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,9 +18,9 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
-using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
@@ -37,19 +38,19 @@ namespace ClassicUO.Renderer
         }
 
 
-
         public EffectParameter MatrixTransform { get; }
 
         public EffectPass this[int index] => CurrentTechnique.Passes[index];
-
 
 
         public virtual void ApplyStates(Matrix matrix)
         {
             MatrixTransform.SetValue(matrix);
 
-            foreach (EffectPass pa in CurrentTechnique.Passes) 
+            foreach (EffectPass pa in CurrentTechnique.Passes)
+            {
                 pa.Apply();
+            }
         }
     }
 }

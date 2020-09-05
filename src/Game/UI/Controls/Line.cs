@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,13 +18,12 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
-
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Renderer;
-
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
@@ -39,12 +39,18 @@ namespace ClassicUO.Game.UI.Controls
             Y = y;
             Width = w;
             Height = h;
-            _texture = Texture2DCache.GetTexture(new Color() { PackedValue = color });
+
+            _texture = Texture2DCache.GetTexture
+            (
+                new Color
+                    {PackedValue = color}
+            );
         }
 
         internal static Line[] CreateRectangleArea(Gump g, int startx, int starty, int width, int height, int topage = 0, uint linecolor = 0xAFAFAF, int linewidth = 1, string toplabel = null, ushort textcolor = 999, byte textfont = 0xFF)
         {
             Line[] lines = new Line[3];
+
             if (!string.IsNullOrEmpty(toplabel))
             {
                 Label l = new Label(toplabel, true, textcolor, font: textfont);
@@ -60,7 +66,9 @@ namespace ClassicUO.Game.UI.Controls
                 }
             }
             else
+            {
                 g.Add(new Line(startx, starty, width, linewidth, linecolor), topage);
+            }
 
             g.Add(lines[0] = new Line(startx, starty, linewidth, height, linecolor), topage);
             g.Add(lines[1] = new Line(startx + width - 1, starty, linewidth, height, linecolor), topage);

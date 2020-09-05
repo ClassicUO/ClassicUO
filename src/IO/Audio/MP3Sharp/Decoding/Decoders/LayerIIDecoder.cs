@@ -1,4 +1,5 @@
 #region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,6 +18,7 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using ClassicUO.IO.Audio.MP3Sharp.Decoding.Decoders.LayerII;
@@ -35,27 +37,37 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding.Decoders
             if (mode == Header.SINGLE_CHANNEL)
             {
                 for (i = 0; i < num_subbands; ++i)
+                {
                     subbands[i] = new SubbandLayer2(i);
+                }
             }
             else if (mode == Header.JOINT_STEREO)
             {
                 for (i = 0; i < header.intensity_stereo_bound(); ++i)
+                {
                     subbands[i] = new SubbandLayer2Stereo(i);
+                }
 
                 for (; i < num_subbands; ++i)
+                {
                     subbands[i] = new SubbandLayer2IntensityStereo(i);
+                }
             }
             else
             {
                 for (i = 0; i < num_subbands; ++i)
+                {
                     subbands[i] = new SubbandLayer2Stereo(i);
+                }
             }
         }
 
         protected internal override void ReadScaleFactorSelection()
         {
             for (int i = 0; i < num_subbands; ++i)
+            {
                 ((SubbandLayer2) subbands[i]).read_scalefactor_selection(stream, crc);
+            }
         }
     }
 }

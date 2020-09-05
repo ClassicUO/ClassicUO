@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,11 +18,11 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
 using System.Collections.Generic;
-
 using SDL2;
 
 namespace ClassicUO.Game.Managers
@@ -203,15 +204,22 @@ namespace ClassicUO.Game.Managers
         public bool Bind(HotkeyAction action, SDL.SDL_Keycode key, SDL.SDL_Keymod mod)
         {
             foreach (HotKeyCombination h in _hotkeys)
-                if (h.Key == key && h.Mod == mod)
-                    return false;
-
-            _hotkeys.Add(new HotKeyCombination
             {
-                Key = key,
-                Mod = mod,
-                KeyAction = action
-            });
+                if (h.Key == key && h.Mod == mod)
+                {
+                    return false;
+                }
+            }
+
+            _hotkeys.Add
+            (
+                new HotKeyCombination
+                {
+                    Key = key,
+                    Mod = mod,
+                    KeyAction = action
+                }
+            );
 
             return true;
         }
@@ -240,7 +248,9 @@ namespace ClassicUO.Game.Managers
                 if (h.Key == key && h.Mod == mod)
                 {
                     if (_actions.TryGetValue(h.KeyAction, out action))
+                    {
                         return true;
+                    }
 
                     break;
                 }

@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,10 +18,12 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
 using System.Runtime.InteropServices;
+using SDL2;
 
 namespace ClassicUO.Utility.Platforms
 {
@@ -30,10 +33,14 @@ namespace ClassicUO.Utility.Platforms
 
         static Native()
         {
-            if (SDL2.SDL.SDL_GetPlatform() != "Windows")
+            if (SDL.SDL_GetPlatform() != "Windows")
+            {
                 _loader = new UnixNativeLoader();
+            }
             else
+            {
                 _loader = new WinNativeLoader();
+            }
         }
 
         public static IntPtr LoadLibrary(string name)

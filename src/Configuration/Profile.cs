@@ -1,4 +1,5 @@
 #region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,23 +18,20 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Runtime.Serialization;
 using System.Text;
 using System.Xml;
-
 using ClassicUO.Game;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
-
 using Microsoft.Xna.Framework;
-
 using TinyJson;
 
 namespace ClassicUO.Configuration
@@ -41,11 +39,6 @@ namespace ClassicUO.Configuration
     [MatchSnakeCase]
     internal sealed class Profile
     {
-        public Profile()
-        {
-
-        }
-
         [JsonIgnore] public string Username { get; set; }
         [JsonIgnore] public string ServerName { get; set; }
         [JsonIgnore] public string CharacterName { get; set; }
@@ -102,7 +95,7 @@ namespace ClassicUO.Configuration
         public bool HighlightGameObjects { get; set; }
         public bool HighlightMobilesByFlags { get; set; } = true;
         public bool ShowMobilesHP { get; set; }
-        public int MobileHPType { get; set; } // 0 = %, 1 = line, 2 = both
+        public int MobileHPType { get; set; }     // 0 = %, 1 = line, 2 = both
         public int MobileHPShowWhen { get; set; } // 0 = Always, 1 - <100%
         public bool DrawRoofs { get; set; } = true;
         public bool TreeToStumps { get; set; }
@@ -113,7 +106,7 @@ namespace ClassicUO.Configuration
         public bool UseCircleOfTransparency { get; set; }
         public int CircleOfTransparencyRadius { get; set; } = Constants.MAX_CIRCLE_OF_TRANSPARENCY_RADIUS / 2;
         public int CircleOfTransparencyType { get; set; } // 0 = normal, 1 = like original client
-        public int VendorGumpHeight { get; set; } = 60; //original vendor gump size
+        public int VendorGumpHeight { get; set; } = 60;   //original vendor gump size
         public float DefaultScale { get; set; } = 1.0f;
         public bool EnableMousewheelScaleZoom { get; set; }
         public bool SaveScaleAfterClose { get; set; }
@@ -168,39 +161,38 @@ namespace ClassicUO.Configuration
         public bool HideScreenshotStoredInMessage { get; set; }
 
         // Experimental
-         public bool CastSpellsByOneClick { get; set; }
-         public bool BuffBarTime { get; set; }
-         public bool AutoOpenDoors { get; set; }
-         public bool SmoothDoors { get; set; }
-         public bool AutoOpenCorpses { get; set; }
-         public int AutoOpenCorpseRange { get; set; } = 2;
-         public int CorpseOpenOptions { get; set; } = 3;
-         public bool SkipEmptyCorpse { get; set; }
-         public bool DisableDefaultHotkeys { get; set; }
-         public bool DisableArrowBtn { get; set; }
-         public bool DisableTabBtn { get; set; }
-         public bool DisableCtrlQWBtn { get; set; }
-         public bool DisableAutoMove { get; set; }
-         public bool EnableDragSelect { get; set; }
-         public int DragSelectModifierKey { get; set; } // 0 = none, 1 = control, 2 = shift
-         public bool OverrideContainerLocation { get; set; }
-         public int OverrideContainerLocationSetting { get; set; } // 0 = container position, 1 = top right of screen, 2 = last dragged position, 3 = remember every container
-         public Point OverrideContainerLocationPosition { get; set; } = new Point(200, 200);
-         public bool DragSelectHumanoidsOnly { get; set; }
-         public NameOverheadTypeAllowed NameOverheadTypeAllowed { get; set; } = NameOverheadTypeAllowed.All;
-         public bool NameOverheadToggled { get; set; } = false;
-         public bool ShowTargetRangeIndicator { get; set; }
-         public bool PartyInviteGump { get; set; }
-         public bool CustomBarsToggled { get; set; }
-         public bool CBBlackBGToggled { get; set; }
+        public bool CastSpellsByOneClick { get; set; }
+        public bool BuffBarTime { get; set; }
+        public bool AutoOpenDoors { get; set; }
+        public bool SmoothDoors { get; set; }
+        public bool AutoOpenCorpses { get; set; }
+        public int AutoOpenCorpseRange { get; set; } = 2;
+        public int CorpseOpenOptions { get; set; } = 3;
+        public bool SkipEmptyCorpse { get; set; }
+        public bool DisableDefaultHotkeys { get; set; }
+        public bool DisableArrowBtn { get; set; }
+        public bool DisableTabBtn { get; set; }
+        public bool DisableCtrlQWBtn { get; set; }
+        public bool DisableAutoMove { get; set; }
+        public bool EnableDragSelect { get; set; }
+        public int DragSelectModifierKey { get; set; } // 0 = none, 1 = control, 2 = shift
+        public bool OverrideContainerLocation { get; set; }
+        public int OverrideContainerLocationSetting { get; set; } // 0 = container position, 1 = top right of screen, 2 = last dragged position, 3 = remember every container
+        public Point OverrideContainerLocationPosition { get; set; } = new Point(200, 200);
+        public bool DragSelectHumanoidsOnly { get; set; }
+        public NameOverheadTypeAllowed NameOverheadTypeAllowed { get; set; } = NameOverheadTypeAllowed.All;
+        public bool NameOverheadToggled { get; set; } = false;
+        public bool ShowTargetRangeIndicator { get; set; }
+        public bool PartyInviteGump { get; set; }
+        public bool CustomBarsToggled { get; set; }
+        public bool CBBlackBGToggled { get; set; }
 
-         public bool ShowInfoBar { get; set; }
-         public int InfoBarHighlightType { get; set; } // 0 = text colour changes, 1 = underline
-      
+        public bool ShowInfoBar { get; set; }
+        public int InfoBarHighlightType { get; set; } // 0 = text colour changes, 1 = underline
 
-        
-        public InfoBarItem[] InfoBarItems { get; set; }// [FILE_FIX] TODO: REMOVE IT
-        public Macro[] Macros { get; set; } // [FILE_FIX] TODO: REMOVE IT
+
+        public InfoBarItem[] InfoBarItems { get; set; } // [FILE_FIX] TODO: REMOVE IT
+        public Macro[] Macros { get; set; }             // [FILE_FIX] TODO: REMOVE IT
 
 
         public bool CounterBarEnabled { get; set; }
@@ -293,20 +285,28 @@ namespace ClassicUO.Configuration
         internal static string ProfilePath { get; } = Path.Combine(CUOEnviroment.ExecutablePath, "Data", "Profiles");
         internal static string DataPath { get; } = Path.Combine(CUOEnviroment.ExecutablePath, "Data");
 
+        public static uint GumpsVersion { get; private set; }
+
         public void Save(List<Gump> gumps = null)
         {
             if (string.IsNullOrEmpty(ServerName))
+            {
                 throw new InvalidDataException();
+            }
 
             if (string.IsNullOrEmpty(Username))
+            {
                 throw new InvalidDataException();
+            }
 
             if (string.IsNullOrEmpty(CharacterName))
+            {
                 throw new InvalidDataException();
+            }
 
             string path = FileSystemHelper.CreateFolderIfNotExists(ProfilePath, Username.Trim(), ServerName.Trim(), CharacterName.Trim());
 
-            Log.Trace( $"Saving path:\t\t{path}");
+            Log.Trace($"Saving path:\t\t{path}");
 
             // Save profile settings
             ConfigurationResolver.Save(this, Path.Combine(path, "profile.json"));
@@ -314,7 +314,7 @@ namespace ClassicUO.Configuration
             // Save opened gumps
             SaveGumps(path, gumps);
 
-            Log.Trace( "Saving done!");
+            Log.Trace("Saving done!");
         }
 
         private void SaveGumps(string path, List<Gump> gumps)
@@ -323,7 +323,7 @@ namespace ClassicUO.Configuration
 
             using (XmlTextWriter xml = new XmlTextWriter(gumpsXmlPath, Encoding.UTF8)
             {
-                Formatting = System.Xml.Formatting.Indented,
+                Formatting = Formatting.Indented,
                 IndentChar = '\t',
                 Indentation = 1
             })
@@ -338,7 +338,9 @@ namespace ClassicUO.Configuration
                     Gump gump = gumps[i];
 
                     if (gump.IsDisposed)
+                    {
                         continue;
+                    }
 
                     if (gump is AnchorableGump anchored && UIManager.AnchorManager[anchored] != null)
                     {
@@ -356,18 +358,14 @@ namespace ClassicUO.Configuration
                 xml.WriteEndDocument();
             }
 
-           
 
             SkillsGroupManager.Save();
         }
-
-        public static uint GumpsVersion { get; private set; }
 
         public List<Gump> ReadGumps()
         {
             string path = FileSystemHelper.CreateFolderIfNotExists(ProfilePath, Username.Trim(), ServerName.Trim(), CharacterName.Trim());
             List<Gump> gumps = new List<Gump>();
-
 
 
             // #########################################################
@@ -404,22 +402,23 @@ namespace ClassicUO.Configuration
                             SkillsGroupManager.Add(g);
                         }
                     }
-
                 }
                 catch (Exception e)
                 {
                     SkillsGroupManager.MakeDefault();
-                    Log.Error( e.StackTrace);
+                    Log.Error(e.StackTrace);
                 }
 
-               
+
                 SkillsGroupManager.Save();
 
                 try
                 {
                     File.Delete(skillsGroupsPath);
                 }
-                catch { }
+                catch
+                {
+                }
             }
 
             string binpath = Path.Combine(path, "gumps.bin");
@@ -453,10 +452,14 @@ namespace ClassicUO.Configuration
                                 //gump.SetInScreen();
 
                                 if (gump.LocalSerial != 0)
+                                {
                                     UIManager.SavePosition(gump.LocalSerial, new Point(x, y));
+                                }
 
                                 if (!gump.IsDisposed)
+                                {
                                     gumps.Add(gump);
+                                }
                             }
                             catch (Exception e)
                             {
@@ -476,11 +479,9 @@ namespace ClassicUO.Configuration
                 }
                 catch
                 {
-
                 }
             }
             // #########################################################
-
 
 
             // load skillsgroup
@@ -493,6 +494,7 @@ namespace ClassicUO.Configuration
             if (File.Exists(gumpsXmlPath))
             {
                 XmlDocument doc = new XmlDocument();
+
                 try
                 {
                     doc.Load(gumpsXmlPath);
@@ -508,10 +510,13 @@ namespace ClassicUO.Configuration
 
                 if (root != null)
                 {
-                    foreach (XmlElement xml in root.ChildNodes/*.GetElementsByTagName("gump")*/)
+                    foreach (XmlElement xml in root.ChildNodes /*.GetElementsByTagName("gump")*/)
                     {
                         if (xml.Name != "gump")
+                        {
                             continue;
+                        }
+
                         try
                         {
                             GUMP_TYPE type = (GUMP_TYPE) int.Parse(xml.GetAttribute("type"));
@@ -520,78 +525,126 @@ namespace ClassicUO.Configuration
                             uint serial = uint.Parse(xml.GetAttribute("serial"));
 
                             Gump gump = null;
+
                             switch (type)
                             {
                                 case GUMP_TYPE.GT_BUFF:
                                     gump = new BuffGump();
+
                                     break;
+
                                 case GUMP_TYPE.GT_CONTAINER:
                                     gump = new ContainerGump();
+
                                     break;
+
                                 case GUMP_TYPE.GT_COUNTERBAR:
                                     gump = new CounterBarGump();
+
                                     break;
+
                                 case GUMP_TYPE.GT_HEALTHBAR:
                                     if (CustomBarsToggled)
+                                    {
                                         gump = new HealthBarGumpCustom();
+                                    }
                                     else
+                                    {
                                         gump = new HealthBarGump();
+                                    }
+
                                     break;
+
                                 case GUMP_TYPE.GT_INFOBAR:
                                     gump = new InfoBarGump();
+
                                     break;
+
                                 case GUMP_TYPE.GT_JOURNAL:
                                     gump = new JournalGump();
+
                                     break;
+
                                 case GUMP_TYPE.GT_MACROBUTTON:
                                     gump = new MacroButtonGump();
+
                                     break;
+
                                 case GUMP_TYPE.GT_MINIMAP:
                                     gump = new MiniMapGump();
+
                                     break;
+
                                 case GUMP_TYPE.GT_PAPERDOLL:
                                     gump = new PaperDollGump();
+
                                     break;
+
                                 case GUMP_TYPE.GT_SKILLMENU:
                                     if (StandardSkillsGump)
+                                    {
                                         gump = new StandardSkillsGump();
+                                    }
                                     else
+                                    {
                                         gump = new SkillGumpAdvanced();
+                                    }
+
                                     break;
+
                                 case GUMP_TYPE.GT_SPELLBOOK:
                                     gump = new SpellbookGump();
+
                                     break;
+
                                 case GUMP_TYPE.GT_STATUSGUMP:
                                     gump = StatusGumpBase.AddStatusGump(0, 0);
+
                                     break;
+
                                 //case GUMP_TYPE.GT_TIPNOTICE: 
                                 //    gump = new TipNoticeGump();
                                 //    break;
                                 case GUMP_TYPE.GT_ABILITYBUTTON:
                                     gump = new UseAbilityButtonGump();
+
                                     break;
+
                                 case GUMP_TYPE.GT_SPELLBUTTON:
                                     gump = new UseSpellButtonGump();
+
                                     break;
+
                                 case GUMP_TYPE.GT_SKILLBUTTON:
                                     gump = new SkillButtonGump();
+
                                     break;
+
                                 case GUMP_TYPE.GT_RACIALBUTTON:
                                     gump = new RacialAbilityButton();
+
                                     break;
+
                                 case GUMP_TYPE.GT_WORLDMAP:
                                     gump = new WorldMapGump();
+
                                     break;
+
                                 case GUMP_TYPE.GT_DEBUG:
                                     gump = new DebugGump(100, 100);
+
                                     break;
+
                                 case GUMP_TYPE.GT_NETSTATS:
                                     gump = new NetworkStatsGump(100, 100);
+
                                     break;
                             }
 
                             if (gump == null)
+                            {
                                 continue;
+                            }
 
                             gump.LocalSerial = serial;
                             gump.Restore(xml);
@@ -607,7 +660,6 @@ namespace ClassicUO.Configuration
                             {
                                 gumps.Add(gump);
                             }
-
                         }
                         catch (Exception ex)
                         {
@@ -641,21 +693,34 @@ namespace ClassicUO.Configuration
                                 {
                                     case GUMP_TYPE.GT_SPELLBUTTON:
                                         gump = new UseSpellButtonGump();
+
                                         break;
+
                                     case GUMP_TYPE.GT_SKILLBUTTON:
                                         gump = new SkillButtonGump();
+
                                         break;
+
                                     case GUMP_TYPE.GT_HEALTHBAR:
                                         if (CustomBarsToggled)
+                                        {
                                             gump = new HealthBarGumpCustom();
+                                        }
                                         else
+                                        {
                                             gump = new HealthBarGump();
+                                        }
+
                                         break;
+
                                     case GUMP_TYPE.GT_ABILITYBUTTON:
                                         gump = new UseAbilityButtonGump();
+
                                         break;
+
                                     case GUMP_TYPE.GT_MACROBUTTON:
                                         gump = new MacroButtonGump();
+
                                         break;
                                 }
 
@@ -674,8 +739,10 @@ namespace ClassicUO.Configuration
                                             UIManager.AnchorManager[gump] = ancoGroup;
                                             ancoGroup.AddControlToMatrix(matrix_x, matrix_y, gump);
                                         }
-                                        else 
+                                        else
+                                        {
                                             gump.Dispose();
+                                        }
                                     }
                                 }
                             }

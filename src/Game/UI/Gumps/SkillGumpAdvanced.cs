@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,6 +18,7 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System.Collections.Generic;
@@ -48,11 +50,11 @@ namespace ClassicUO.Game.UI.Gumps
 
         private readonly ScrollArea _scrollArea;
         private readonly List<SkillListEntry> _skillListEntries = new List<SkillListEntry>();
-        private readonly GumpPic _sortOrderIndicator;
 
 
         private bool _sortAsc;
         private string _sortField;
+        private readonly GumpPic _sortOrderIndicator;
         private double _totalReal, _totalValue;
         private bool _updateSkillsNeeded;
 
@@ -67,48 +69,64 @@ namespace ClassicUO.Game.UI.Gumps
             Width = WIDTH;
             Height = HEIGHT;
 
-            Add(new AlphaBlendControl(0.05f)
-            {
-                X = 1,
-                Y = 1,
-                Width = WIDTH - 2,
-                Height = HEIGHT - 2
-            });
+            Add
+            (
+                new AlphaBlendControl(0.05f)
+                {
+                    X = 1,
+                    Y = 1,
+                    Width = WIDTH - 2,
+                    Height = HEIGHT - 2
+                }
+            );
 
             _scrollArea = new ScrollArea(20, 60, WIDTH - 40, 250, true)
             {
                 AcceptMouseInput = true
             };
+
             Add(_scrollArea);
 
-            Add(new NiceButton(10, 10, 180, 25, ButtonAction.Activate, ResGumps.Name)
-            {
-                ButtonParameter = (int) Buttons.SortName,
-                IsSelected = true,
-                X = 40,
-                Y = 25
-            });
+            Add
+            (
+                new NiceButton(10, 10, 180, 25, ButtonAction.Activate, ResGumps.Name)
+                {
+                    ButtonParameter = (int) Buttons.SortName,
+                    IsSelected = true,
+                    X = 40,
+                    Y = 25
+                }
+            );
 
-            Add(new NiceButton(10, 10, 80, 25, ButtonAction.Activate, ResGumps.Real)
-            {
-                ButtonParameter = (int) Buttons.SortReal,
-                X = 220,
-                Y = 25
-            });
+            Add
+            (
+                new NiceButton(10, 10, 80, 25, ButtonAction.Activate, ResGumps.Real)
+                {
+                    ButtonParameter = (int) Buttons.SortReal,
+                    X = 220,
+                    Y = 25
+                }
+            );
 
-            Add(new NiceButton(10, 10, 80, 25, ButtonAction.Activate, ResGumps.Base)
-            {
-                ButtonParameter = (int) Buttons.SortBase,
-                X = 300,
-                Y = 25
-            });
+            Add
+            (
+                new NiceButton(10, 10, 80, 25, ButtonAction.Activate, ResGumps.Base)
+                {
+                    ButtonParameter = (int) Buttons.SortBase,
+                    X = 300,
+                    Y = 25
+                }
+            );
 
-            Add(new NiceButton(10, 10, 80, 25, ButtonAction.Activate, ResGumps.Cap)
-            {
-                ButtonParameter = (int) Buttons.SortCap,
-                X = 380,
-                Y = 25
-            });
+            Add
+            (
+                new NiceButton(10, 10, 80, 25, ButtonAction.Activate, ResGumps.Cap)
+                {
+                    ButtonParameter = (int) Buttons.SortCap,
+                    X = 380,
+                    Y = 25
+                }
+            );
 
             Add(new Line(20, 60, 435, 1, 0xFFFFFFFF));
             Add(new Line(20, 310, 435, 1, 0xFFFFFFFF));
@@ -124,14 +142,19 @@ namespace ClassicUO.Game.UI.Gumps
             if (_buttonsToSkillsValues.TryGetValue((Buttons) buttonID, out string fieldValue))
             {
                 if (_sortField == fieldValue)
+                {
                     _sortAsc = !_sortAsc;
+                }
 
                 _sortField = fieldValue;
             }
 
-            if (FindControls<NiceButton>().Any(s => s.ButtonParameter == buttonID))
+            if (FindControls<NiceButton>()
+                .Any(s => s.ButtonParameter == buttonID))
             {
-                NiceButton btn = FindControls<NiceButton>().First(s => s.ButtonParameter == buttonID);
+                NiceButton btn = FindControls<NiceButton>()
+                    .First(s => s.ButtonParameter == buttonID);
+
                 ushort g = (ushort) (_sortAsc ? 0x985 : 0x983);
 
                 _sortOrderIndicator.Graphic = g;
@@ -160,7 +183,9 @@ namespace ClassicUO.Game.UI.Gumps
             List<Skill> sortSkills = new List<Skill>(World.Player.Skills.OrderBy(x => pi.GetValue(x, null)));
 
             if (_sortAsc)
+            {
                 sortSkills.Reverse();
+            }
 
             foreach (Skill skill in sortSkills)
             {
@@ -176,13 +201,14 @@ namespace ClassicUO.Game.UI.Gumps
             }
 
             foreach (SkillListEntry t in _skillListEntries)
+            {
                 _scrollArea.Add(t);
+            }
 
-            Add(new Label(ResGumps.Total, true, 1153) { X = 40, Y = 320 });
-            Add(new Label(_totalReal.ToString("F1"), true, 1153) { X = 220, Y = 320 });
-            Add(new Label(_totalValue.ToString("F1"), true, 1153) { X = 300, Y = 320 });
+            Add(new Label(ResGumps.Total, true, 1153) {X = 40, Y = 320});
+            Add(new Label(_totalReal.ToString("F1"), true, 1153) {X = 220, Y = 320});
+            Add(new Label(_totalValue.ToString("F1"), true, 1153) {X = 300, Y = 320});
         }
-
 
 
         public override void Update(double totalMS, double frameMS)
@@ -192,7 +218,9 @@ namespace ClassicUO.Game.UI.Gumps
             if (_updateSkillsNeeded)
             {
                 foreach (Label label in Children.OfType<Label>())
+                {
                     label.Dispose();
+                }
 
                 BuildGump();
 
@@ -210,7 +238,10 @@ namespace ClassicUO.Game.UI.Gumps
         }
 
 
-        public void ForceUpdate() => _updateSkillsNeeded = true;
+        public void ForceUpdate()
+        {
+            _updateSkillsNeeded = true;
+        }
 
         private enum Buttons
         {
@@ -239,10 +270,13 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (skill.IsClickable)
             {
-                Add(_activeUse = new Button((int) Buttons.ActiveSkillUse, 0x837, 0x838)
-                {
-                    X = 0, Y = 4, ButtonAction = ButtonAction.Activate
-                });
+                Add
+                (
+                    _activeUse = new Button((int) Buttons.ActiveSkillUse, 0x837, 0x838)
+                    {
+                        X = 0, Y = 4, ButtonAction = ButtonAction.Activate
+                    }
+                );
             }
 
             Add(skillName);
@@ -291,11 +325,15 @@ namespace ClassicUO.Game.UI.Gumps
         {
             if (_skill.IsClickable && Mouse.LButtonPressed)
             {
-                GetSpellFloatingButton(_skill.Index)?.Dispose();
+                GetSpellFloatingButton(_skill.Index)
+                    ?.Dispose();
 
                 SkillButtonGump skillButtonGump = new SkillButtonGump(_skill, Mouse.LDropPosition.X, Mouse.LDropPosition.Y);
                 UIManager.Add(skillButtonGump);
-                Rectangle rect = GumpsLoader.Instance.GetTexture(0x24B8).Bounds;
+
+                Rectangle rect = GumpsLoader.Instance.GetTexture(0x24B8)
+                                            .Bounds;
+
                 UIManager.AttemptDragControl(skillButtonGump, new Point(Mouse.Position.X + (rect.Width >> 1), Mouse.Position.Y + (rect.Height >> 1)), true);
             }
         }
@@ -305,7 +343,9 @@ namespace ClassicUO.Game.UI.Gumps
             for (LinkedListNode<Control> i = UIManager.Gumps.Last; i != null; i = i.Previous)
             {
                 if (i.Value is SkillButtonGump g && g.SkillID == id)
+                {
                     return g;
+                }
             }
 
             return null;

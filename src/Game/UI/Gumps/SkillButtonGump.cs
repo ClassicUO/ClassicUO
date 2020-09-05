@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,11 +18,11 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System.IO;
 using System.Xml;
-
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.UI.Controls;
@@ -67,24 +68,31 @@ namespace ClassicUO.Game.UI.Gumps
             Width = 88;
             Height = 44;
 
-            Add(new ResizePic(0x24B8)
-            {
-                Width = Width,
-                Height = Height,
-                AcceptMouseInput = true,
-                CanMove = true
-            });
+            Add
+            (
+                new ResizePic(0x24B8)
+                {
+                    Width = Width,
+                    Height = Height,
+                    AcceptMouseInput = true,
+                    CanMove = true
+                }
+            );
 
             Label label;
 
-            Add(label = new Label(_skill.Name, true, 0, Width - 8, 1, FontStyle.None, TEXT_ALIGN_TYPE.TS_CENTER)
-            {
-                X = 4,
-                Y = 0,
-                Width = Width - 8,
-                AcceptMouseInput = true,
-                CanMove = true
-            });
+            Add
+            (
+                label = new Label(_skill.Name, true, 0, Width - 8, 1, FontStyle.None, TEXT_ALIGN_TYPE.TS_CENTER)
+                {
+                    X = 4,
+                    Y = 0,
+                    Width = Width - 8,
+                    AcceptMouseInput = true,
+                    CanMove = true
+                }
+            );
+
             label.Y = (Height >> 1) - (label.Height >> 1);
         }
 
@@ -94,7 +102,9 @@ namespace ClassicUO.Game.UI.Gumps
             base.OnMouseUp(x, y, button);
 
             if (ProfileManager.Current.CastSpellsByOneClick && button == MouseButtonType.Left && !Keyboard.Alt)
+            {
                 GameActions.UseSkill(_skill.Index);
+            }
         }
 
         protected override bool OnMouseDoubleClick(int x, int y, MouseButtonType button)
@@ -105,7 +115,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 return true;
             }
-            
+
             return false;
         }
 
@@ -145,8 +155,10 @@ namespace ClassicUO.Game.UI.Gumps
                 _skill = World.Player.Skills[index];
                 BuildGump();
             }
-            else 
+            else
+            {
                 Dispose();
+            }
         }
     }
 }

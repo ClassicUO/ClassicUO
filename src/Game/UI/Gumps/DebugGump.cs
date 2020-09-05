@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,11 +18,11 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System.Text;
 using System.Xml;
-
 using ClassicUO.Configuration;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Scenes;
@@ -29,8 +30,6 @@ using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
-
-using ClassicUO.Resources;
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Gumps
@@ -44,11 +43,11 @@ namespace ClassicUO.Game.UI.Gumps
 
         private const string DEBUG_STRING_SMALL = "FPS: {0}\nZoom: {1}";
         private const string DEBUG_STRING_SMALL_NO_ZOOM = "FPS: {0}";
+        private static Point _last_position = new Point(-1, -1);
 
         private readonly StringBuilder _sb = new StringBuilder();
-        private readonly AlphaBlendControl _trans;
         private uint _time_to_update;
-        private static Point _last_position = new Point(-1, - 1);
+        private readonly AlphaBlendControl _trans;
 
         public DebugGump(int x, int y) : base(0, 0)
         {
@@ -63,11 +62,14 @@ namespace ClassicUO.Game.UI.Gumps
             X = _last_position.X <= 0 ? x : _last_position.X;
             Y = _last_position.Y <= 0 ? y : _last_position.Y;
 
-            Add(_trans = new AlphaBlendControl(.3f)
-            {
-                Width = Width, Height = Height
-            });
-            
+            Add
+            (
+                _trans = new AlphaBlendControl(.3f)
+                {
+                    Width = Width, Height = Height
+                }
+            );
+
             ControlInfo.Layer = UILayer.Over;
 
             WantUpdateSize = true;
@@ -110,20 +112,38 @@ namespace ClassicUO.Game.UI.Gumps
 
                     if (CUOEnviroment.Profiler)
                     {
-                        double timeDraw = Profiler.GetContext("RenderFrame").TimeInContext;
-                        double timeUpdate = Profiler.GetContext("Update").TimeInContext;
-                        double timeFixedUpdate = Profiler.GetContext("FixedUpdate").TimeInContext;
-                        double timeOutOfContext = Profiler.GetContext("OutOfContext").TimeInContext;
+                        double timeDraw = Profiler.GetContext("RenderFrame")
+                                                  .TimeInContext;
+
+                        double timeUpdate = Profiler.GetContext("Update")
+                                                    .TimeInContext;
+
+                        double timeFixedUpdate = Profiler.GetContext("FixedUpdate")
+                                                         .TimeInContext;
+
+                        double timeOutOfContext = Profiler.GetContext("OutOfContext")
+                                                          .TimeInContext;
+
                         //double timeTotalCheck = timeOutOfContext + timeDraw + timeUpdate;
                         double timeTotal = Profiler.TrackedTime;
-                        double avgDrawMs = Profiler.GetContext("RenderFrame").AverageTime;
+
+                        double avgDrawMs = Profiler.GetContext("RenderFrame")
+                                                   .AverageTime;
+
                         _sb.AppendLine("- Profiling");
-                        _sb.AppendLine(string.Format("    Draw:{0:0.0}% Update:{1:0.0}% FixedUpd:{2:0.0} AvgDraw:{3:0.0}ms {4}",
-                                                     100d * (timeDraw / timeTotal), 
-                                                     100d * (timeUpdate / timeTotal),
-                                                     100d * (timeFixedUpdate / timeTotal),
-                                                     avgDrawMs, 
-                                                     CUOEnviroment.CurrentRefreshRate));
+
+                        _sb.AppendLine
+                        (
+                            string.Format
+                            (
+                                "    Draw:{0:0.0}% Update:{1:0.0}% FixedUpd:{2:0.0} AvgDraw:{3:0.0}ms {4}",
+                                100d * (timeDraw / timeTotal),
+                                100d * (timeUpdate / timeTotal),
+                                100d * (timeFixedUpdate / timeTotal),
+                                avgDrawMs,
+                                CUOEnviroment.CurrentRefreshRate
+                            )
+                        );
                     }
                 }
                 else if (scene != null && scene.Camera.Zoom != 1f)
@@ -148,7 +168,9 @@ namespace ClassicUO.Game.UI.Gumps
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
             if (!base.Draw(batcher, x, y))
+            {
                 return false;
+            }
 
             ResetHueVector();
             batcher.DrawString(Fonts.Bold, _sb.ToString(), x + 10, y + 10, ref _hueVector);

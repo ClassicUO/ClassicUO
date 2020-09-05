@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,6 +18,7 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
@@ -30,22 +32,30 @@ namespace ClassicUO.Utility.Collections
         public static IReadOnlyCollection<T> ReifyCollection<T>(IEnumerable<T> source)
         {
             if (source == null)
+            {
                 throw new ArgumentNullException(nameof(source));
+            }
 
             IReadOnlyCollection<T> result = source as IReadOnlyCollection<T>;
 
             if (result != null)
+            {
                 return result;
+            }
 
             ICollection<T> collection = source as ICollection<T>;
 
             if (collection != null)
+            {
                 return new CollectionWrapper<T>(collection);
+            }
 
             ICollection nongenericCollection = source as ICollection;
 
             if (nongenericCollection != null)
+            {
                 return new NongenericCollectionWrapper<T>(nongenericCollection);
+            }
 
             return new List<T>(source);
         }
@@ -57,7 +67,9 @@ namespace ClassicUO.Utility.Collections
             public NongenericCollectionWrapper(ICollection collection)
             {
                 if (collection == null)
+                {
                     throw new ArgumentNullException(nameof(collection));
+                }
 
                 _collection = collection;
             }
@@ -67,7 +79,9 @@ namespace ClassicUO.Utility.Collections
             public IEnumerator<T> GetEnumerator()
             {
                 foreach (T item in _collection)
+                {
                     yield return item;
+                }
             }
 
             IEnumerator IEnumerable.GetEnumerator()
@@ -83,7 +97,9 @@ namespace ClassicUO.Utility.Collections
             public CollectionWrapper(ICollection<T> collection)
             {
                 if (collection == null)
+                {
                     throw new ArgumentNullException(nameof(collection));
+                }
 
                 _collection = collection;
             }

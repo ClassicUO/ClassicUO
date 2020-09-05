@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,10 +18,10 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System.Collections.Generic;
-
 using ClassicUO.Game.Data;
 using ClassicUO.IO.Resources;
 
@@ -28,8 +29,6 @@ namespace ClassicUO.Game.GameObjects
 {
     internal abstract class GameEffect : GameObject
     {
-        public AnimDataFrame2 AnimDataFrame;
-
         protected GameEffect()
         {
             Children = new List<GameEffect>();
@@ -37,6 +36,21 @@ namespace ClassicUO.Game.GameObjects
         }
 
         public List<GameEffect> Children { get; }
+
+        public bool IsMoving => Target != null || TargetX != 0 && TargetY != 0;
+        public ushort AnimationGraphic = 0xFFFF;
+        public AnimDataFrame2 AnimDataFrame;
+        public byte AnimIndex;
+
+        public GraphicEffectBlendMode Blend;
+
+        public long Duration = -1;
+
+        public int IntervalInMs;
+
+        public bool IsEnabled;
+
+        public long NextChangeFrameTime;
 
         public GameObject Source;
 
@@ -47,21 +61,6 @@ namespace ClassicUO.Game.GameObjects
         protected int TargetY;
 
         protected int TargetZ;
-
-        public int IntervalInMs;
-
-        public long NextChangeFrameTime;
-
-        public bool IsEnabled;
-
-        public ushort AnimationGraphic = 0xFFFF;
-
-        public bool IsMoving => Target != null || TargetX != 0 && TargetY != 0;
-
-        public GraphicEffectBlendMode Blend;
-
-        public long Duration = -1;
-        public byte AnimIndex;
 
         public void Load()
         {
@@ -92,12 +91,16 @@ namespace ClassicUO.Game.GameObjects
             }
 
             if (IsDestroyed)
+            {
                 return;
+            }
 
             if (IsEnabled)
             {
                 if (Duration < totalMS && Duration >= 0)
+                {
                     World.RemoveEffect(this);
+                }
                 //else
                 //{
                 //    unsafe
@@ -114,7 +117,6 @@ namespace ClassicUO.Game.GameObjects
 
                 else if (NextChangeFrameTime < totalMS)
                 {
-
                     if (AnimDataFrame.FrameCount != 0)
                     {
                         unsafe
@@ -125,19 +127,25 @@ namespace ClassicUO.Game.GameObjects
                         AnimIndex++;
 
                         if (AnimIndex >= AnimDataFrame.FrameCount)
+                        {
                             AnimIndex = 0;
+                        }
                     }
                     else
                     {
                         if (Graphic != AnimationGraphic)
+                        {
                             AnimationGraphic = Graphic;
+                        }
                     }
 
                     NextChangeFrameTime = (long) totalMS + IntervalInMs;
                 }
             }
             else if (Graphic != AnimationGraphic)
+            {
                 AnimationGraphic = Graphic;
+            }
         }
 
         public void AddChildEffect(GameEffect effect)

@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,6 +18,7 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 namespace ClassicUO.IO.Audio.MP3Sharp.Decoding.Decoders.LayerII
@@ -441,6 +443,15 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding.Decoders.LayerII
             0.00024414063f, 0.00012207031f, 0.00006103516f
         };
 
+        /// <summary>
+        ///     Constructor
+        /// </summary>
+        public SubbandLayer2(int subbandnumber)
+        {
+            this.subbandnumber = subbandnumber;
+            groupnumber = samplenumber = 0;
+        }
+
         protected internal int allocation;
         protected internal float[] c = {0};
         protected internal int[] codelength = {0};
@@ -454,15 +465,6 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding.Decoders.LayerII
         protected internal float scalefactor1, scalefactor2, scalefactor3;
         protected internal int scfsi;
         protected internal int subbandnumber;
-
-        /// <summary>
-        ///     Constructor
-        /// </summary>
-        public SubbandLayer2(int subbandnumber)
-        {
-            this.subbandnumber = subbandnumber;
-            groupnumber = samplenumber = 0;
-        }
 
         private void InitBlock()
         {
@@ -483,26 +485,36 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding.Decoders.LayerII
                 if (header.mode() != Header.SINGLE_CHANNEL)
                 {
                     if (channel_bitrate == 4)
+                    {
                         channel_bitrate = 1;
+                    }
                     else
+                    {
                         channel_bitrate -= 4;
+                    }
                 }
 
                 if (channel_bitrate == 1 || channel_bitrate == 2)
                     // table 3-B.2c or 3-B.2d
                 {
                     if (subbandnumber <= 1)
+                    {
                         return 4;
+                    }
 
                     return 3;
                 }
 
                 // tables 3-B.2a or 3-B.2b
                 if (subbandnumber <= 10)
+                {
                     return 4;
+                }
 
                 if (subbandnumber <= 22)
+                {
                     return 3;
+                }
 
                 return 2;
             }
@@ -510,10 +522,14 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding.Decoders.LayerII
 
             // table B.1 of ISO/IEC 13818-3
             if (subbandnumber <= 3)
+            {
                 return 4;
+            }
 
             if (subbandnumber <= 10)
+            {
                 return 3;
+            }
 
             return 2;
         }
@@ -521,8 +537,11 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding.Decoders.LayerII
         /// <summary>
         ///     *
         /// </summary>
-        protected internal virtual void prepare_sample_reading(Header header, int allocation, int channel,
-                                                               float[] factor, int[] codelength, float[] c, float[] d)
+        protected internal virtual void prepare_sample_reading
+        (
+            Header header, int allocation, int channel,
+            float[] factor, int[] codelength, float[] c, float[] d
+        )
         {
             int channel_bitrate = header.bitrate_index();
 
@@ -530,9 +549,13 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding.Decoders.LayerII
             if (header.mode() != Header.SINGLE_CHANNEL)
             {
                 if (channel_bitrate == 4)
+                {
                     channel_bitrate = 1;
+                }
                 else
+                {
                     channel_bitrate -= 4;
+                }
             }
 
             if (channel_bitrate == 1 || channel_bitrate == 2)
@@ -593,7 +616,9 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding.Decoders.LayerII
             allocation = stream.GetBitsFromBuffer(length);
 
             if (crc != null)
+            {
                 crc.add_bits(allocation, length);
+            }
         }
 
         /// <summary>
@@ -606,7 +631,9 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding.Decoders.LayerII
                 scfsi = stream.GetBitsFromBuffer(2);
 
                 if (crc != null)
+                {
                     crc.add_bits(scfsi, 2);
+                }
             }
         }
 
@@ -676,7 +703,9 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding.Decoders.LayerII
                     int temp = samplecode;
 
                     if (temp > source.Length - 3)
+                    {
                         temp = source.Length - 3;
+                    }
 
                     target[tmp] = source[temp];
                     temp++;
@@ -699,7 +728,9 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding.Decoders.LayerII
             samplenumber = 0;
 
             if (++groupnumber == 12)
+            {
                 return true;
+            }
 
             return false;
         }
@@ -714,19 +745,30 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding.Decoders.LayerII
                 float sample = samples[samplenumber];
 
                 if (groupingtable[0] == null)
+                {
                     sample = (sample + d[0]) * c[0];
+                }
 
                 if (groupnumber <= 4)
+                {
                     sample *= scalefactor1;
+                }
                 else if (groupnumber <= 8)
+                {
                     sample *= scalefactor2;
+                }
                 else
+                {
                     sample *= scalefactor3;
+                }
+
                 filter1.input_sample(sample, subbandnumber);
             }
 
             if (++samplenumber == 3)
+            {
                 return true;
+            }
 
             return false;
         }
