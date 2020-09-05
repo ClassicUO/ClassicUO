@@ -104,13 +104,6 @@ namespace ClassicUO.Game.Managers
                     continue;
                 }
 
-                if (mobile.Serial == TargetManager.LastTargetInfo.Serial ||
-                    mobile.Serial == TargetManager.SelectedTarget ||
-                    mobile.Serial == TargetManager.LastAttack)
-                {
-                    continue;
-                }
-
                 int current = mobile.Hits;
                 int max = mobile.HitsMax;
 
@@ -171,6 +164,13 @@ namespace ClassicUO.Game.Managers
                             }
                         }
                     }
+                }
+
+                if (mobile.Serial == TargetManager.LastTargetInfo.Serial ||
+                    mobile.Serial == TargetManager.SelectedTarget ||
+                    mobile.Serial == TargetManager.LastAttack)
+                {
+                    continue;
                 }
 
 
