@@ -418,7 +418,7 @@ namespace ClassicUO.Game.UI.Controls
 
         public void HitTest(int x, int y, ref Control res)
         {
-            if (!IsVisible || !IsEnabled)
+            if (!IsVisible || !IsEnabled || IsDisposed)
             {
                 return;
             }

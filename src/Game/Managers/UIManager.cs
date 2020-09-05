@@ -203,10 +203,10 @@ namespace ClassicUO.Game.Managers
 
         public static void OnLeftMouseButtonUp()
         {
+            EndDragControl(Mouse.Position);
             HandleMouseInput();
 
             const int btn = (int) MouseButtonType.Left;
-            EndDragControl(Mouse.Position);
 
             if (MouseOverControl != null)
             {
@@ -280,10 +280,10 @@ namespace ClassicUO.Game.Managers
 
         public static void OnRightMouseButtonUp()
         {
+            EndDragControl(Mouse.Position);
             HandleMouseInput();
 
             const int btn = (int) MouseButtonType.Right;
-            EndDragControl(Mouse.Position);
 
             if (MouseOverControl != null)
             {
@@ -365,10 +365,10 @@ namespace ClassicUO.Game.Managers
 
         public static void OnMiddleMouseButtonUp()
         {
+            EndDragControl(Mouse.Position);
             HandleMouseInput();
 
             const int btn = (int) MouseButtonType.Middle;
-            EndDragControl(Mouse.Position);
 
             if (MouseOverControl != null)
             {
@@ -441,8 +441,8 @@ namespace ClassicUO.Game.Managers
 
         public static void OnExtraMouseButtonUp(int btn)
         {
-            HandleMouseInput();
             EndDragControl(Mouse.Position);
+            HandleMouseInput();
 
             if (MouseOverControl != null)
             {
