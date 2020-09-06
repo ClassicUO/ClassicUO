@@ -288,12 +288,12 @@ namespace ClassicUO.Game.UI.Gumps
             _virtueMenuPic.MouseDoubleClick += VirtueMenu_MouseDoubleClickEvent;
 
             // Equipment slots for hat/earrings/neck/ring/bracelet
-            Add(_slots[0] = new EquipmentSlot(0, 2, 75, LocalSerial, Layer.Helmet, this));
-            Add(_slots[1] = new EquipmentSlot(0, 2, 75 + 21, LocalSerial, Layer.Earrings, this));
-            Add(_slots[2] = new EquipmentSlot(0, 2, 75 + 21 * 2, LocalSerial, Layer.Necklace, this));
-            Add(_slots[3] = new EquipmentSlot(0, 2, 75 + 21 * 3, LocalSerial, Layer.Ring, this));
-            Add(_slots[4] = new EquipmentSlot(0, 2, 75 + 21 * 4, LocalSerial, Layer.Bracelet, this));
-            Add(_slots[5] = new EquipmentSlot(0, 2, 75 + 21 * 5, LocalSerial, Layer.Tunic, this));
+            Add(_slots[0] = new EquipmentSlot(0, 2, 75, Layer.Helmet, this));
+            Add(_slots[1] = new EquipmentSlot(0, 2, 75 + 21, Layer.Earrings, this));
+            Add(_slots[2] = new EquipmentSlot(0, 2, 75 + 21 * 2, Layer.Necklace, this));
+            Add(_slots[3] = new EquipmentSlot(0, 2, 75 + 21 * 3, Layer.Ring, this));
+            Add(_slots[4] = new EquipmentSlot(0, 2, 75 + 21 * 4, Layer.Bracelet, this));
+            Add(_slots[5] = new EquipmentSlot(0, 2, 75 + 21 * 5, Layer.Tunic, this));
 
             // Paperdoll control!
             _paperDollInteractable = new PaperDollInteractable(8, 19, LocalSerial, this);
@@ -402,7 +402,7 @@ namespace ClassicUO.Game.UI.Gumps
             base.Update(totalMS, frameMS);
 
 
-            if (_paperDollInteractable != null && CanLift)
+            if (_paperDollInteractable != null && (CanLift || LocalSerial == World.Player.Serial))
             {
                 bool force_false = SelectedObject.Object is Item item && (item.Layer == Layer.Backpack || item.ItemData.IsContainer);
 
@@ -437,7 +437,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (ItemHold.Enabled)
                 {
-                    if (CanLift)
+                    if (CanLift || LocalSerial == World.Player.Serial)
                     {
                         if (SelectedObject.Object is Item item && (item.Layer == Layer.Backpack || item.ItemData.IsContainer))
                         {
@@ -723,14 +723,12 @@ namespace ClassicUO.Game.UI.Gumps
         {
             private ItemGumpFixed _itemGump;
             private readonly PaperDollGump _paperDollGump;
-            private readonly uint _parentSerial;
 
-            public EquipmentSlot(uint serial, int x, int y, uint parent, Layer layer, PaperDollGump paperDollGump)
+            public EquipmentSlot(uint serial, int x, int y, Layer layer, PaperDollGump paperDollGump)
             {
                 X = x;
                 Y = y;
                 LocalSerial = serial;
-                _parentSerial = parent;
                 Width = 19;
                 Height = 20;
                 _paperDollGump = paperDollGump;
@@ -769,7 +767,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _itemGump = null;
                 }
 
-                Mobile mobile = World.Mobiles.Get(_parentSerial);
+                Mobile mobile = World.Mobiles.Get(_paperDollGump.LocalSerial);
 
                 if (mobile != null)
                 {
@@ -798,7 +796,7 @@ namespace ClassicUO.Game.UI.Gumps
                                     Width = 18,
                                     Height = 18,
                                     HighlightOnMouseOver = false,
-                                    CanPickUp = World.InGame && (World.Player == _parentSerial || _paperDollGump.CanLift)
+                                    CanPickUp = World.InGame && (World.Player.Serial == _paperDollGump.LocalSerial || _paperDollGump.CanLift)
                                 }
                             );
                         }
