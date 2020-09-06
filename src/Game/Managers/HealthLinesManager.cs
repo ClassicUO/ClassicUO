@@ -173,7 +173,7 @@ namespace ClassicUO.Game.Managers
                     continue;
                 }
 
-
+                p.X -= 5;
                 p = Client.Game.Scene.Camera.WorldToScreen(p);
                 p.X -= BAR_WIDTH_HALF;
                 p.Y -= BAR_HEIGHT_HALF;
@@ -205,8 +205,9 @@ namespace ClassicUO.Game.Managers
             }
 
             Point p = entity.RealScreenPosition;
-            p.X += (int) entity.Offset.X + 22 + 5;
+            p.X += (int) entity.Offset.X + 22;
             p.Y += (int) (entity.Offset.Y - entity.Offset.Z) + 22 + 5;
+
             p = Client.Game.Scene.Camera.WorldToScreen(p);
             p.X -= BAR_WIDTH_HALF;
             p.Y -= BAR_HEIGHT_HALF;
