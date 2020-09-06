@@ -173,7 +173,7 @@ namespace ClassicUO.Game.Managers
 
                                         break;
 
-                                    case TradingGump trade when g.LocalSerial == it.Container || trade.ID1 == it.Container || trade.ID2 == it.Container:
+                                    case TradingGump trade when trade.ID1 == it.Container || trade.ID2 == it.Container:
                                         trade.AddText(msg);
                                         found = true;
 
