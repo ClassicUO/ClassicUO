@@ -651,10 +651,10 @@ namespace ClassicUO.Game.UI.Gumps
                         control = new TextureControl
                         {
                             Texture = texture,
-                            X = 10 - texture.ImageRectangle.X,
-                            Y = 10 + texture.ImageRectangle.Y,
-                            Width = texture.ImageRectangle.Width,
-                            Height = texture.ImageRectangle.Height,
+                            X = 10 - texture?.ImageRectangle.X ?? 0,
+                            Y = 10 + texture?.ImageRectangle.Y ?? 0,
+                            Width = texture?.ImageRectangle.Width ?? 0,
+                            Height = texture?.ImageRectangle.Height ?? 0,
                             AcceptMouseInput = false,
                             ScaleTexture = false,
                             Hue = Hue,
