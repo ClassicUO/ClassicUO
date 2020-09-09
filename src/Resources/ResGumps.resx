@@ -457,7 +457,7 @@
     <value>Shadows</value>
   </data>
   <data name="AuraUnderFeet" xml:space="preserve">
-    <value>- Aura under feet:</value>
+    <value>Aura under feet</value>
   </data>
   <data name="AuraType_None" xml:space="preserve">
     <value>None</value>

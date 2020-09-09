@@ -304,7 +304,7 @@ namespace ClassicUO.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to - Aura under feet:.
+        ///   Looks up a localized string similar to Aura under feet.
         /// </summary>
         public static string AuraUnderFeet {
             get {

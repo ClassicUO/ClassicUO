@@ -48,7 +48,7 @@ namespace ClassicUO.Game.UI.Gumps
             {Buttons.SortCap, "Cap"}
         };
 
-        private readonly ScrollArea _scrollArea;
+        private readonly DataBox _databox;
         private readonly List<SkillListEntry> _skillListEntries = new List<SkillListEntry>();
 
 
@@ -80,12 +80,17 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             );
 
-            _scrollArea = new ScrollArea(20, 60, WIDTH - 40, 250, true)
+            ScrollArea area = new ScrollArea(20, 60, WIDTH - 40, 250, true)
             {
                 AcceptMouseInput = true
             };
 
-            Add(_scrollArea);
+            Add(area);
+
+            _databox = new DataBox(0, 0, 1, 1);
+            _databox.WantUpdateSize = true;
+
+            area.Add(_databox);
 
             Add
             (
@@ -169,7 +174,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             _totalReal = 0;
             _totalValue = 0;
-            _scrollArea.Clear();
+            _databox.Clear();
 
             foreach (SkillListEntry entry in _skillListEntries)
             {
@@ -202,8 +207,11 @@ namespace ClassicUO.Game.UI.Gumps
 
             foreach (SkillListEntry t in _skillListEntries)
             {
-                _scrollArea.Add(t);
+                _databox.Add(t);
             }
+
+            _databox.WantUpdateSize = true;
+            _databox.ReArrangeChildren();
 
             Add(new Label(ResGumps.Total, true, 1153) {X = 40, Y = 320});
             Add(new Label(_totalReal.ToString("F1"), true, 1153) {X = 220, Y = 320});

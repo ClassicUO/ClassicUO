@@ -70,19 +70,7 @@ namespace ClassicUO.Game.UI.Controls
                         return;
                     }
 
-                    IEnumerable<NiceButton> list;
-
-                    if (p is ScrollAreaItem)
-                    {
-                        p = p.Parent;
-
-                        list = p.FindControls<ScrollAreaItem>()
-                                .SelectMany(s => s.Children.OfType<NiceButton>());
-                    }
-                    else
-                    {
-                        list = p.FindControls<NiceButton>();
-                    }
+                    IEnumerable<NiceButton> list = p.FindControls<NiceButton>();
 
                     foreach (NiceButton b in list)
                     {
@@ -97,10 +85,7 @@ namespace ClassicUO.Game.UI.Controls
 
         internal static NiceButton GetSelected(Control p, int group)
         {
-            IEnumerable<NiceButton> list = p is ScrollArea
-                ? p.FindControls<ScrollAreaItem>()
-                   .SelectMany(s => s.Children.OfType<NiceButton>())
-                : p.FindControls<NiceButton>();
+            IEnumerable<NiceButton> list = p.FindControls<NiceButton>();
 
             foreach (NiceButton b in list)
             {

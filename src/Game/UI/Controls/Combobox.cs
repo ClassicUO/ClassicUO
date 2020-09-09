@@ -37,8 +37,9 @@ namespace ClassicUO.Game.UI.Controls
         private readonly Label _label;
         private readonly int _maxHeight;
         private int _selectedIndex;
+        private bool _showContext;
 
-        public Combobox(int x, int y, int width, string[] items, int selected = -1, int maxHeight = 0, bool showArrow = true, string emptyString = "", byte font = 9)
+        public Combobox(int x, int y, int width, string[] items, int selected = -1, int maxHeight = 200, bool showArrow = true, string emptyString = "", byte font = 9)
         {
             X = x;
             Y = y;
@@ -73,7 +74,6 @@ namespace ClassicUO.Game.UI.Controls
             }
         }
 
-        public bool IsOpen { get; set; }
 
         public int SelectedIndex
         {
@@ -131,16 +131,30 @@ namespace ClassicUO.Game.UI.Controls
 
             OnBeforeContextMenu?.Invoke(this, null);
 
+            int mouseY = Mouse.Position.Y;
+            int contextY = ScreenCoordinateY + y;
+
+            
+
+            Control parent = Parent;
+
+            if (Y > parent.Bounds.Height)
+            {
+
+            }
+
+            int offY = ScreenCoordinateY - Y - parent.Bounds.Bottom;
+
             ComboboxContextMenu contextMenu = new ComboboxContextMenu(this, _items, Width, _maxHeight)
             {
                 X = ScreenCoordinateX,
-                Y = ScreenCoordinateY
+                Y = contextY
             };
 
-            if (contextMenu.Height + ScreenCoordinateY > Client.Game.Window.ClientBounds.Height)
-            {
-                contextMenu.Y -= contextMenu.Height + ScreenCoordinateY - Client.Game.Window.ClientBounds.Height;
-            }
+            //if (contextMenu.Height + ScreenCoordinateY > Client.Game.Window.ClientBounds.Height)
+            //{
+            //    contextMenu.Y -= contextMenu.Height + ScreenCoordinateY - Client.Game.Window.ClientBounds.Height;
+            //}
 
             UIManager.Add(contextMenu);
             base.OnMouseUp(x, y, button);
@@ -180,35 +194,21 @@ namespace ClassicUO.Game.UI.Controls
                     labels[index++] = label;
                 }
 
-                int totalHeight = labels.Max(o => o.Y + o.Height);
+                int totalHeight = Math.Min(maxHeight, labels.Max(o => o.Y + o.Height));
                 int maxWidth = Math.Max(minWidth, labels.Max(o => o.X + o.Width));
 
-                if (maxHeight != 0 && totalHeight > maxHeight)
+                ScrollArea scrollArea = new ScrollArea(0, 0, maxWidth + 15, totalHeight, true);
+             
+                foreach (HoveredLabel label in labels)
                 {
-                    ScrollArea scrollArea = new ScrollArea(0, 0, maxWidth + 15, maxHeight, true);
-
-                    foreach (HoveredLabel label in labels)
-                    {
-                        label.Y = 0;
-                        label.Width = maxWidth;
-                        scrollArea.Add(label);
-                    }
-
-                    Add(scrollArea);
-                    background.Height = maxHeight;
-                }
-                else
-                {
-                    foreach (HoveredLabel label in labels)
-                    {
-                        label.Width = maxWidth;
-                        Add(label);
-                    }
-
-                    background.Height = totalHeight;
+                    label.Width = maxWidth;
+                    scrollArea.Add(label);
                 }
 
+                Add(scrollArea);
+                
                 background.Width = maxWidth;
+                background.Height = totalHeight;
                 Height = background.Height;
                 ControlInfo.IsModal = true;
                 ControlInfo.Layer = UILayer.Over;

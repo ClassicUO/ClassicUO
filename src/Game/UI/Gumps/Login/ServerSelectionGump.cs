@@ -179,17 +179,22 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
             // Sever Scroll Area
             ScrollArea scrollArea = new ScrollArea(150, 90, 393, 271, true);
+            DataBox databox = new DataBox(0, 0, 1, 1);
+            databox.WantUpdateSize = true;
             LoginScene loginScene = Client.Game.GetScene<LoginScene>();
 
             scrollArea.ScissorRectangle.Y = 16;
-            scrollArea.ScissorRectangle.Height = -(scrollArea.ScissorRectangle.Y + 32);
+            scrollArea.ScissorRectangle.Height = -32;
 
             foreach (ServerListEntry server in loginScene.Servers)
             {
-                scrollArea.Add(new ServerEntryGump(server, 5, NORMAL_COLOR, SELECTED_COLOR));
+                databox.Add(new ServerEntryGump(server, 5, NORMAL_COLOR, SELECTED_COLOR));
             }
 
+            databox.ReArrangeChildren();
+
             Add(scrollArea);
+            scrollArea.Add(databox);
 
             if (loginScene.Servers.Length != 0)
             {
@@ -299,7 +304,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
             Server = 99
         }
 
-        private class ServerEntryGump : ScrollAreaItem
+        private class ServerEntryGump : Control
         {
             private readonly int _buttonId;
             private readonly ServerListEntry _entry;

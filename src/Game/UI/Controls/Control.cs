@@ -439,11 +439,15 @@ namespace ClassicUO.Game.UI.Controls
                         }
                     }
 
-                    foreach (Control c in Children)
+                    int offY = this is ScrollArea scroll ? ((ScrollBarBase) scroll.Children[0]).Value - scroll.ScissorRectangle.Y : 0;
+
+                    for (int i = 0; i < Children.Count; ++i)
                     {
+                        Control c = Children[i];
+
                         if (c.Page == 0 || c.Page == ActivePage)
                         {
-                            c.HitTest(x, y, ref res);
+                            c.HitTest(x, y + (offY != 0 && i > 0 ? offY : 0), ref res);
                         }
                     }
                 }
@@ -458,7 +462,7 @@ namespace ClassicUO.Game.UI.Controls
         public virtual void OnHitTestSuccess(int x, int y, ref Control res)
         {
         }
-
+        
         public Control GetFirstControlAcceptKeyboardInput()
         {
             if (_acceptKeyboardInput)

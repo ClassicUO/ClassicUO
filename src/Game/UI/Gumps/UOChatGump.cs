@@ -143,9 +143,8 @@ namespace ClassicUO.Game.UI.Gumps
 
     internal class UOChatGump : Gump
     {
-        private readonly ScrollArea _area;
         private ChannelCreationBox _channelCreationBox;
-
+        private readonly DataBox _databox;
 
         private readonly List<ChannelListItemControl> _channelList = new List<ChannelListItemControl>();
         private readonly Label _currentChannelLabel;
@@ -183,19 +182,25 @@ namespace ClassicUO.Game.UI.Gumps
             Add(new BorderControl(61, startY - 3, 220 + 8, 200 + 6, 3));
             Add(new AlphaBlendControl(0) {X = 64, Y = startY, Width = 220, Height = 200});
 
-            _area = new ScrollArea(64, startY, 220, 200, true)
+            ScrollArea area = new ScrollArea(64, startY, 220, 200, true)
             {
                 ScrollbarBehaviour = ScrollbarBehaviour.ShowAlways
             };
 
+            Add(area);
+
+            _databox = new DataBox(0, 0, 1, 1);
+            _databox.WantUpdateSize = true;
+            area.Add(_databox);
+
             foreach (KeyValuePair<string, UOChatChannel> k in UOChatManager.Channels)
             {
                 ChannelListItemControl chan = new ChannelListItemControl(k.Key, 195);
-                _area.Add(chan);
+                _databox.Add(chan);
                 _channelList.Add(chan);
             }
 
-            Add(_area);
+            _databox.ReArrangeChildren();
 
             startY = 275;
 
@@ -318,9 +323,12 @@ namespace ClassicUO.Game.UI.Gumps
             foreach (KeyValuePair<string, UOChatChannel> k in UOChatManager.Channels)
             {
                 ChannelListItemControl c = new ChannelListItemControl(k.Key, 195);
-                _area.Add(c);
+                _databox.Add(c);
                 _channelList.Add(c);
             }
+
+            _databox.WantUpdateSize = true;
+            _databox.ReArrangeChildren();
         }
 
         private void OnChannelSelected(string text)
@@ -441,6 +449,8 @@ namespace ClassicUO.Game.UI.Gumps
                         X = 3
                     }
                 );
+
+                Height = _label.Height;
             }
 
             public bool IsSelected

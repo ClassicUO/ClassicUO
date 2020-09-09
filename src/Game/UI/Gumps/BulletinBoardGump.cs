@@ -36,7 +36,7 @@ namespace ClassicUO.Game.UI.Gumps
 {
     internal class BulletinBoardGump : Gump
     {
-        private readonly ScrollArea _area;
+        private readonly DataBox _databox;
 
         public BulletinBoardGump(uint serial, int x, int y, string name) : base(serial, 0)
         {
@@ -78,8 +78,14 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add(hitbox);
 
-            _area = new ScrollArea(127, 159, 241, 195, false);
-            Add(_area);
+            ScrollArea area = new ScrollArea(127, 159, 241, 195, false);
+            Add(area);
+
+            _databox = new DataBox(0, 0, 1, 1);
+            _databox.WantUpdateSize = true;
+            
+            area.Add(_databox);
+
 
             // TODO: buuttons
         }
@@ -100,12 +106,13 @@ namespace ClassicUO.Game.UI.Gumps
 
         public void RemoveBulletinObject(uint serial)
         {
-            foreach (Control child in _area.Children)
+            foreach (Control child in _databox.Children)
             {
                 if (child.LocalSerial == serial)
                 {
                     child.Dispose();
-
+                    _databox.WantUpdateSize = true;
+                    _databox.ReArrangeChildren();
                     return;
                 }
             }
@@ -114,7 +121,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         public void AddBulletinObject(uint serial, string msg)
         {
-            foreach (Control c in _area.Children)
+            foreach (Control c in _databox.Children)
             {
                 if (c.LocalSerial == serial)
                 {
@@ -125,7 +132,10 @@ namespace ClassicUO.Game.UI.Gumps
             }
 
             BulletinBoardObject obj = new BulletinBoardObject(serial, msg);
-            _area.Add(obj);
+            _databox.Add(obj);
+
+            _databox.WantUpdateSize = true;
+            _databox.ReArrangeChildren();
         }
     }
 
@@ -137,7 +147,7 @@ namespace ClassicUO.Game.UI.Gumps
         private readonly Button _buttonReply;
         private readonly string _datatime;
         private readonly uint _msgSerial;
-        private readonly ScrollArea _scrollArea;
+        private readonly DataBox _databox;
         private readonly StbTextBox _subjectTextbox;
         private readonly StbTextBox _textBox;
 
@@ -154,11 +164,13 @@ namespace ClassicUO.Game.UI.Gumps
                 TitleGumpID = 0x0820,
                 AcceptMouseInput = true
             };
-
             Add(_articleContainer);
-            _scrollArea = new ScrollArea(0, 120, 272, 224, false);
 
-            AddHorizontalBar(_scrollArea, 92, 35, 220);
+            ScrollArea area = new ScrollArea(0, 120, 272, 224, false);
+            Add(area);
+
+            _databox = new DataBox(0, 0, 1, 1);
+            area.Add(_databox);
 
             bool useUnicode = Client.Version >= ClientVersion.CV_305D;
             byte unicodeFontIndex = 1;
@@ -235,7 +247,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add(new GumpPicTiled(30, 106, 235, 4, 0x0835));
 
-            _scrollArea.Add
+            _databox.Add
             (
                 _textBox = new StbTextBox(useUnicode ? unicodeFontIndex : (byte) 9, -1, 220, hue: textColor, isunicode: useUnicode)
                 {
@@ -250,7 +262,6 @@ namespace ClassicUO.Game.UI.Gumps
 
             _textBox.SetText(data);
             _textBox.TextChanged += _textBox_TextChanged;
-            Add(_scrollArea);
 
             switch (variant)
             {
@@ -300,15 +311,18 @@ namespace ClassicUO.Game.UI.Gumps
 
                     break;
             }
+
+            _databox.WantUpdateSize = true;
+            _databox.ReArrangeChildren();
         }
 
         private void _textBox_TextChanged(object sender, EventArgs e)
         {
             _textBox.Height = Math.Max(FontsLoader.Instance.GetHeightUnicode(1, _textBox.Text, 220, TEXT_ALIGN_TYPE.TS_LEFT, 0x0) + 5, 20);
 
-            foreach (Control c in _scrollArea.Children)
+            foreach (Control c in _databox.Children)
             {
-                if (c is ScrollAreaItem)
+                if (c is BulletinBoardItem)
                 {
                     c.OnPageChanged();
                 }
@@ -346,12 +360,7 @@ namespace ClassicUO.Game.UI.Gumps
             base.Update(totalMS, frameMS);
         }
 
-        private void AddHorizontalBar(ScrollArea area, ushort start, int x, int width)
-        {
-            PrivateContainer container = new PrivateContainer();
-            area.Add(container);
-        }
-
+    
         public override void OnButtonClick(int buttonID)
         {
             // necessary to avoid closing
@@ -394,19 +403,15 @@ namespace ClassicUO.Game.UI.Gumps
         public override void OnPageChanged()
         {
             Height = _articleContainer.SpecialHeight;
-            _scrollArea.Height = _articleContainer.SpecialHeight - 184;
+            _databox.Parent.Height = _databox.Height = _articleContainer.SpecialHeight - 184;
 
-            foreach (Control c in _scrollArea.Children)
+            foreach (Control c in _databox.Children)
             {
-                if (c is ScrollAreaItem)
+                if (c is BulletinBoardItem)
                 {
                     c.OnPageChanged();
                 }
             }
-        }
-
-        private class PrivateContainer : Control
-        {
         }
 
         //public override void OnKeyboardReturn(int textID, string text)
@@ -424,7 +429,7 @@ namespace ClassicUO.Game.UI.Gumps
         }
     }
 
-    internal class BulletinBoardObject : ScrollAreaItem
+    internal class BulletinBoardObject : Control
     {
         public BulletinBoardObject(uint serial, string text)
         {
