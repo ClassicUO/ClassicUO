@@ -553,6 +553,8 @@ namespace ClassicUO.Game.UI.Gumps
             _gameWindowPositionX.SetText(ProfileManager.Current.GameWindowPosition.X.ToString());
 
             startX += _gameWindowPositionX.Width + 5;
+            startX += 5;
+
             _gameWindowPositionY = AddInputField
             (
                 rightArea,
@@ -569,6 +571,8 @@ namespace ClassicUO.Game.UI.Gumps
 
             startX = text.X;
             startY += _gameWindowPositionY.Height + 2;
+
+            startY += 5;
 
             text = AddLabel(rightArea, ResGumps.GamePlayWindowSize, startX, startY);
             startX += text.Width + 5;
@@ -588,6 +592,7 @@ namespace ClassicUO.Game.UI.Gumps
             _gameWindowWidth.SetText(ProfileManager.Current.GameWindowSize.X.ToString());
 
             startX += _gameWindowWidth.Width + 5;
+            startX += 5;
             _gameWindowHeight = AddInputField
             (
                 rightArea,
@@ -605,10 +610,11 @@ namespace ClassicUO.Game.UI.Gumps
             startX = 5;
             startY += _gameWindowHeight.Height + 2;
 
+            startY += 20;
 
             text = AddLabel(rightArea, ResGumps.DefaultZoom, startX, startY);
             startX += text.Width + 5;
-            _sliderZoom = AddHSlider(rightArea, 0, Client.Game.Scene.Camera.ZoomValuesCount, Client.Game.Scene.Camera.ZoomIndex, startX, startY, 250);
+            _sliderZoom = AddHSlider(rightArea, 0, Client.Game.Scene.Camera.ZoomValuesCount, Client.Game.Scene.Camera.ZoomIndex, startX, startY, 100);
             startX = 40;
             startY += text.Height + 2;
             _zoomCheckbox = AddCheckBox(rightArea, ResGumps.EnableMouseWheelForZoom, ProfileManager.Current.EnableMousewheelScaleZoom, startX, startY);
@@ -628,7 +634,10 @@ namespace ClassicUO.Game.UI.Gumps
             _use_old_status_gump = AddCheckBox(rightArea, ResGumps.UseOldStatusGump, ProfileManager.Current.UseOldStatusGump, startX, startY);
             _use_old_status_gump.IsVisible = !CUOEnviroment.IsOutlands;
 
-            startY += _use_old_status_gump.Height + 2;
+            if (_use_old_status_gump.IsVisible)
+            {
+                startY += _use_old_status_gump.Height + 2;
+            }
 
             _altLights = AddCheckBox(rightArea, ResGumps.AlternativeLights, ProfileManager.Current.UseAlternativeLights, startX, startY);
             startY += _altLights.Height + 2;

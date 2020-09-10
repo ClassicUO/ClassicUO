@@ -1132,7 +1132,8 @@ namespace ClassicUO.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Enable abbreviated amount values when amount is or exceeds.
+        ///   Looks up a localized string similar to Enable abbreviated amount values
+        ///when amount is or exceeds.
         /// </summary>
         public static string EnableAbbreviatedAmountCountrs {
             get {
@@ -2620,7 +2621,8 @@ namespace ClassicUO.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Query before performing beneficial acts on Murderers, Criminals, Grays (Monsters/Animals).
+        ///   Looks up a localized string similar to Query before performing beneficial acts on
+        ///Murderers, Criminals, Grays (Monsters/Animals).
         /// </summary>
         public static string QueryBeneficialActs {
             get {

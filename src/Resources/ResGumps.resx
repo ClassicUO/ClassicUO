@@ -587,7 +587,8 @@ delete it?</value>
     <value>Query before beneficial criminal action</value>
   </data>
   <data name="QueryBeneficialActs" xml:space="preserve">
-    <value>Query before performing beneficial acts on Murderers, Criminals, Grays (Monsters/Animals)</value>
+    <value>Query before performing beneficial acts on
+Murderers, Criminals, Grays (Monsters/Animals)</value>
   </data>
   <data name="EnableOverheadSpellFormat" xml:space="preserve">
     <value>Enable Overhead Spell Format</value>
@@ -638,7 +639,8 @@ delete it?</value>
     <value>Highlight On Use</value>
   </data>
   <data name="EnableAbbreviatedAmountCountrs" xml:space="preserve">
-    <value>Enable abbreviated amount values when amount is or exceeds</value>
+    <value>Enable abbreviated amount values
+when amount is or exceeds</value>
   </data>
   <data name="HighlightRedWhenBelow" xml:space="preserve">
     <value>Highlight red when amount is below</value>
