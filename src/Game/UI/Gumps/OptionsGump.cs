@@ -365,7 +365,7 @@ namespace ClassicUO.Game.UI.Gumps
             _autoOpenCorpse = AddCheckBox(rightArea, ResGumps.AutoOpenCorpses, ProfileManager.Current.AutoOpenCorpses, startX, startY);
             startX += 40;
             startY += _autoOpenCorpse.Height + 2;
-            _autoOpenCorpseRange = CreateInputField
+            _autoOpenCorpseRange = AddInputField
             (
                 rightArea,
                 startX,
@@ -538,7 +538,7 @@ namespace ClassicUO.Game.UI.Gumps
             Label text = AddLabel(rightArea, ResGumps.GamePlayWindowPosition, startX, startY);
             startX += text.Width + 5;
 
-            _gameWindowPositionX = CreateInputField
+            _gameWindowPositionX = AddInputField
             (
                 rightArea,
                 startX, startY,
@@ -553,7 +553,7 @@ namespace ClassicUO.Game.UI.Gumps
             _gameWindowPositionX.SetText(ProfileManager.Current.GameWindowPosition.X.ToString());
 
             startX += _gameWindowPositionX.Width + 5;
-            _gameWindowPositionY = CreateInputField
+            _gameWindowPositionY = AddInputField
             (
                 rightArea,
                 startX, startY,
@@ -573,7 +573,7 @@ namespace ClassicUO.Game.UI.Gumps
             text = AddLabel(rightArea, ResGumps.GamePlayWindowSize, startX, startY);
             startX += text.Width + 5;
 
-            _gameWindowWidth = CreateInputField
+            _gameWindowWidth = AddInputField
             (
                 rightArea,
                 startX, startY,
@@ -588,7 +588,7 @@ namespace ClassicUO.Game.UI.Gumps
             _gameWindowWidth.SetText(ProfileManager.Current.GameWindowSize.X.ToString());
 
             startX += _gameWindowWidth.Width + 5;
-            _gameWindowHeight = CreateInputField
+            _gameWindowHeight = AddInputField
             (
                 rightArea,
                 startX, startY,
@@ -1139,7 +1139,7 @@ namespace ClassicUO.Game.UI.Gumps
             startX = 5;
             startY += (_neutralColorPickerBox.Height + 2 + 3) * 4;
 
-            _spellFormatBox = CreateInputField
+            _spellFormatBox = AddInputField
             (
                 rightArea,  
                 startX, startY,
@@ -1175,7 +1175,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             startX += _enableAbbreviatedAmount.Width + 5;
 
-            _abbreviatedAmount = CreateInputField
+            _abbreviatedAmount = AddInputField
             (
                 rightArea,
                 startX, startY,
@@ -1196,7 +1196,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             startX += _highlightOnAmount.Width + 5;
 
-            _highlightAmount = CreateInputField
+            _highlightAmount = AddInputField
             (
                 rightArea,
                 startX, startY,
@@ -1230,7 +1230,7 @@ namespace ClassicUO.Game.UI.Gumps
             startX = initialX;
             startY += text.Height + 2 + 15;
             
-            _rows = CreateInputField
+            _rows = AddInputField
             (
                 rightArea,
                 startX, startY, 
@@ -1247,7 +1247,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             startX += _rows.Width + 5 + 100;
 
-            _columns = CreateInputField
+            _columns = AddInputField
             (
                 rightArea,
                 startX, startY, 
@@ -2230,7 +2230,7 @@ namespace ClassicUO.Game.UI.Gumps
             return base.Draw(batcher, x, y);
         }
 
-        private StbTextBox CreateInputField(ScrollArea area, int x, int y, int width, int height, string label = null, int maxWidth = 0, bool set_down = false, bool numbersOnly = false, int maxCharCount = -1)
+        private StbTextBox AddInputField(ScrollArea area, int x, int y, int width, int height, string label = null, int maxWidth = 0, bool set_down = false, bool numbersOnly = false, int maxCharCount = -1)
         {
             StbTextBox elem = new StbTextBox(FONT, maxCharCount, maxWidth)
             {
