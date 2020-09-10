@@ -78,8 +78,8 @@ namespace ClassicUO.Game.UI.Gumps
                 Multiline = true
             };
             _originalText = body;
-            _textBox.SetText(body);
             _textBox.TextChanged += _textBox_TextChanged;
+            _textBox.SetText(body);
             _scrollArea.Add(_textBox);
 
 
