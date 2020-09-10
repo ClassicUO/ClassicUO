@@ -66,8 +66,6 @@ namespace ClassicUO.Game.UI.Controls
 
             _scrollBar.MinValue = 0;
             _scrollBar.MaxValue = scroll_max_height >= 0 ? scroll_max_height : Height;
-            //Add((Control)_scrollBar);
-
             _scrollBar.Parent = this;
 
             AcceptMouseInput = true;
@@ -214,44 +212,28 @@ namespace ClassicUO.Game.UI.Controls
 
             int width = Math.Abs(startX) + Math.Abs(endX);
             int height = Math.Abs(startY) + Math.Abs(endY) - _scrollBar.Height;
+            height = Math.Max(0, height - (-ScissorRectangle.Y + ScissorRectangle.Height));
 
-            _scrollBar.MaxValue = Math.Max(0, height - (-ScissorRectangle.Y + ScissorRectangle.Height));
-
-            if (maxValue)
+            if (height > 0)
             {
-                _scrollBar.Value = _scrollBar.MaxValue;
+                _scrollBar.MaxValue = height;
+
+                if (maxValue)
+                {
+                    _scrollBar.Value = _scrollBar.MaxValue;
+                }
             }
-
-
-            //UpdateOffset(-0, -_scrollBar.Value);
+            else
+            {
+                _scrollBar.Value = _scrollBar.MaxValue = 0;
+            }
+            
             _scrollBar.UpdateOffset(0, Offset.Y);
 
             for (int i = 1; i < Children.Count; i++)
             {
-                Children[i].UpdateOffset(0, -_scrollBar.Value);
+                Children[i].UpdateOffset(0, -_scrollBar.Value + ScissorRectangle.Y);
             }
-
-            //height -= _scrollBar.Height;
-
-                //height -= ScissorRectangle.Y + ScissorRectangle.Height;
-
-                //if (_isNormalScroll)
-                //    height += 40;
-
-                //if (height > 0)
-                //{
-                //    _scrollBar.MaxValue = height;
-
-                //    if (maxValue)
-                //    {
-                //        _scrollBar.Value = _scrollBar.MaxValue;
-                //    }
-                //}
-                //else
-                //{
-                //    _scrollBar.MaxValue = 0;
-                //    _scrollBar.Value = 0;
-                //}
         }
     }
 }
