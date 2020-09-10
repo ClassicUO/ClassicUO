@@ -349,7 +349,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _textbox = new StbTextBox(6, -1, 200, false, FontStyle.Fixed)
                     {
                         X = 16,
-                        Y = 0,
+                        Y = -3,
                         Width = 200,
                         Height = 17,
                         IsEditable = false
