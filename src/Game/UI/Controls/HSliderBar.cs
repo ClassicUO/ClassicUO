@@ -40,14 +40,10 @@ namespace ClassicUO.Game.UI.Controls
     internal class HSliderBar : Control
     {
         private bool _clicked;
-        private Point _clickPosition;
         private readonly bool _drawUp;
         private readonly UOTexture32[] _gumpSpliderBackground;
         private readonly UOTexture32 _gumpWidget;
         private readonly List<HSliderBar> _pairedSliders = new List<HSliderBar>();
-        private Rectangle _rect;
-
-        //private int _newValue;
         private int _sliderX;
         private readonly HSliderBarStyle _style;
         private readonly RenderedText _text;
@@ -99,7 +95,6 @@ namespace ClassicUO.Game.UI.Controls
                     Height = _gumpWidget.Height;
                 }
 
-                //RecalculateSliderX();
                 CalculateOffset();
             }
 
@@ -164,11 +159,8 @@ namespace ClassicUO.Game.UI.Controls
                 }
             }
 
-            //ModifyPairedValues(_newValue - Value);
             _gumpWidget.Ticks = (long) totalMS;
 
-            // if (_value != _newValue)
-            //_value = _newValue;
             base.Update(totalMS, frameMS);
         }
 
@@ -232,8 +224,6 @@ namespace ClassicUO.Game.UI.Controls
             }
 
             _clicked = true;
-            _clickPosition.X = x;
-            _clickPosition.Y = y;
         }
 
         protected override void OnMouseUp(int x, int y, MouseButtonType button)
@@ -315,21 +305,6 @@ namespace ClassicUO.Game.UI.Controls
             {
                 _sliderX = 0;
             }
-        }
-
-        public override bool Contains(int x, int y)
-        {
-            _rect.X = 0;
-            _rect.Y = 0;
-            _rect.Width = BarWidth;
-            _rect.Height = _gumpWidget.Height;
-
-            return _rect.Contains(x, y);
-        }
-
-        private void RecalculateSliderX()
-        {
-            _sliderX = (BarWidth - _gumpWidget.Width) * ((Value - MinValue) / (MaxValue - MinValue));
         }
 
         public void AddParisSlider(HSliderBar s)

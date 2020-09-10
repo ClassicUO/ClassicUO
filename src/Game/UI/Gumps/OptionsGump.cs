@@ -48,6 +48,7 @@ namespace ClassicUO.Game.UI.Gumps
         private const ushort HUE_FONT = 999;
         private const int WIDTH = 700;
         private const int HEIGHT = 500;
+        private const int TEXTBOX_HEIGHT = 25;
 
         private static Texture2D _logoTexture2D;
         private Combobox _auraType, _filterType;
@@ -367,15 +368,14 @@ namespace ClassicUO.Game.UI.Gumps
             _autoOpenCorpseRange = CreateInputField
             (
                 rightArea,
-                new StbTextBox(FONT, 2, 80)
-                {
-                    Width = 50,
-                    Height = 30,
-                    NumbersOnly = true
-                },
                 startX,
                 startY,
-                ResGumps.CorpseOpenRange
+                50, TEXTBOX_HEIGHT,
+                ResGumps.CorpseOpenRange,
+                80,
+                false,
+                true,
+                2
             );
             _autoOpenCorpseRange.SetText(ProfileManager.Current.AutoOpenCorpseRange.ToString());
             startY += _autoOpenCorpseRange.Height + 2;
@@ -541,13 +541,14 @@ namespace ClassicUO.Game.UI.Gumps
             _gameWindowPositionX = CreateInputField
             (
                 rightArea,
-                new StbTextBox(FONT, 5, 80)
-                {
-                    Width = 50,
-                    Height = 30,
-                    NumbersOnly = true
-                },
-                startX, startY
+                startX, startY,
+                50,
+                TEXTBOX_HEIGHT,
+                null,
+                80,
+                false,
+                true,
+                5
             );
             _gameWindowPositionX.SetText(ProfileManager.Current.GameWindowPosition.X.ToString());
 
@@ -555,13 +556,14 @@ namespace ClassicUO.Game.UI.Gumps
             _gameWindowPositionY = CreateInputField
             (
                 rightArea,
-                new StbTextBox(FONT, 5, 80)
-                {
-                    Width = 50,
-                    Height = 30,
-                    NumbersOnly = true
-                },
-                startX, startY
+                startX, startY,
+                50,
+                TEXTBOX_HEIGHT,
+                null,
+                80,
+                false,
+                true,
+                5
             );
             _gameWindowPositionY.SetText(ProfileManager.Current.GameWindowPosition.Y.ToString());
 
@@ -574,13 +576,14 @@ namespace ClassicUO.Game.UI.Gumps
             _gameWindowWidth = CreateInputField
             (
                 rightArea,
-                new StbTextBox(FONT, 5, 80)
-                {
-                    Width = 50,
-                    Height = 30,
-                    NumbersOnly = true
-                },
-                startX, startY
+                startX, startY,
+                50,
+                TEXTBOX_HEIGHT,
+                null,
+                80,
+                false,
+                true,
+                5
             );
             _gameWindowWidth.SetText(ProfileManager.Current.GameWindowSize.X.ToString());
 
@@ -588,13 +591,14 @@ namespace ClassicUO.Game.UI.Gumps
             _gameWindowHeight = CreateInputField
             (
                 rightArea,
-                new StbTextBox(FONT, 5, 80)
-                {
-                    Width = 50,
-                    Height = 30,
-                    NumbersOnly = true
-                },
-                startX, startY
+                startX, startY,
+                50,
+                TEXTBOX_HEIGHT,
+                null,
+                80,
+                false,
+                true,
+                5
             );
             _gameWindowHeight.SetText(ProfileManager.Current.GameWindowSize.Y.ToString());
 
@@ -1137,11 +1141,15 @@ namespace ClassicUO.Game.UI.Gumps
 
             _spellFormatBox = CreateInputField
             (
-                rightArea, new StbTextBox(FONT, 30, 200)
-                {
-                    Width = 200,
-                    Height = 30
-                }, startX, startY, ResGumps.SpellOverheadFormat, 0, true
+                rightArea,  
+                startX, startY,
+                200,
+                TEXTBOX_HEIGHT,
+                ResGumps.SpellOverheadFormat, 
+                0, 
+                true,
+                false,
+                30
             );
 
             _spellFormatBox.SetText(ProfileManager.Current.SpellDisplayFormat);
@@ -1166,15 +1174,17 @@ namespace ClassicUO.Game.UI.Gumps
             _enableAbbreviatedAmount = AddCheckBox(rightArea, ResGumps.EnableAbbreviatedAmountCountrs, ProfileManager.Current.CounterBarDisplayAbbreviatedAmount, startX, startY);
 
             startX += _enableAbbreviatedAmount.Width + 5;
+
             _abbreviatedAmount = CreateInputField
             (
-                rightArea, new StbTextBox(FONT, -1, 80)
-                {
-                    Width = 50,
-                    Height = 30,
-                    NumbersOnly = true
-                },
-                startX, startY
+                rightArea,
+                startX, startY,
+                50,
+                TEXTBOX_HEIGHT,
+                null,
+                80,
+                false,
+                true
             );
             _abbreviatedAmount.SetText(ProfileManager.Current.CounterBarAbbreviatedAmount.ToString());
         
@@ -1185,15 +1195,18 @@ namespace ClassicUO.Game.UI.Gumps
             _highlightOnAmount = AddCheckBox(rightArea, ResGumps.HighlightRedWhenBelow, ProfileManager.Current.CounterBarHighlightOnAmount, startX, startY);
 
             startX += _highlightOnAmount.Width + 5;
+
             _highlightAmount = CreateInputField
             (
-                rightArea, new StbTextBox(FONT, 2, 80)
-                {
-                    Width = 50,
-                    Height = 30,
-                    NumbersOnly = true
-                },
-                startX, startY
+                rightArea,
+                startX, startY,
+                50,
+                TEXTBOX_HEIGHT,
+                null,
+                80,
+                false,
+                true,
+                2
             );
             _highlightAmount.SetText(ProfileManager.Current.CounterBarHighlightAmount.ToString());
 
@@ -1216,16 +1229,18 @@ namespace ClassicUO.Game.UI.Gumps
 
             startX = initialX;
             startY += text.Height + 2 + 15;
-
+            
             _rows = CreateInputField
             (
-                rightArea, new StbTextBox(FONT, 5, 80)
-                {
-                    Width = 50,
-                    Height = 30,
-                    NumbersOnly = true
-                },
-                startX, startY, ResGumps.Counter_Rows
+                rightArea,
+                startX, startY, 
+                50,
+                30,
+                ResGumps.Counter_Rows,
+                80,
+                false,
+                true,
+                5
             );
             _rows.SetText(ProfileManager.Current.CounterBarRows.ToString());
 
@@ -1234,13 +1249,15 @@ namespace ClassicUO.Game.UI.Gumps
 
             _columns = CreateInputField
             (
-                rightArea, new StbTextBox(FONT, 5, 80)
-                {
-                    Width = 50,
-                    Height = 30,
-                    NumbersOnly = true
-                },
-                startX, startY, ResGumps.Counter_Columns
+                rightArea,
+                startX, startY, 
+                50,
+                30,
+                ResGumps.Counter_Columns,
+                80,
+                false,
+                true,
+                5
             );
             _columns.SetText(ProfileManager.Current.CounterBarColumns.ToString());
 
@@ -2213,11 +2230,18 @@ namespace ClassicUO.Game.UI.Gumps
             return base.Draw(batcher, x, y);
         }
 
-        private StbTextBox CreateInputField(ScrollArea area, StbTextBox elem, int x, int y, string label = null, int maxWidth = 0, bool set_down = false)
+        private StbTextBox CreateInputField(ScrollArea area, int x, int y, int width, int height, string label = null, int maxWidth = 0, bool set_down = false, bool numbersOnly = false, int maxCharCount = -1)
         {
+            StbTextBox elem = new StbTextBox(FONT, maxCharCount, maxWidth)
+            {
+                Width = width,
+                Height = height,
+                NumbersOnly = numbersOnly,
+            };
+
             if (label != null)
             {
-                Label text = new Label(label, true, HUE_FONT, maxWidth)
+                Label text = new Label(label, true, HUE_FONT)
                 {
                     X = x,
                     Y = y
@@ -2230,7 +2254,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }
                 else
                 {
-                    elem.X += text.Bounds.Right + 10;
+                    elem.X = text.Bounds.Right + 10;
                     elem.Y = y;
                 }
                 
@@ -2242,12 +2266,6 @@ namespace ClassicUO.Game.UI.Gumps
                 elem.Y = y;
             }
 
-            elem.X += 4;
-            elem.Y += 4;
-            elem.Width -= 4;
-            elem.Height -= 4;
-
-
             area.Add
             (
                 new ResizePic(0x0BB8)
@@ -2258,6 +2276,12 @@ namespace ClassicUO.Game.UI.Gumps
                     Height = elem.Height
                 }
             );
+
+
+            elem.X += 4;
+            elem.Y += 4;
+            elem.Width -= 8;
+            elem.Height -= 8;
 
             area.Add(elem);
 
