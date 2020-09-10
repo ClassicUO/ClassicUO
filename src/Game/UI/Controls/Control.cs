@@ -53,6 +53,7 @@ namespace ClassicUO.Game.UI.Controls
         private int _activePage;
         private bool _attempToDrag;
         private Rectangle _bounds;
+        private Point _offset;
         private GumpControlInfo _controlInfo;
         private bool _handlesKeyboardFocus;
         private Control _parent;
@@ -91,6 +92,8 @@ namespace ClassicUO.Game.UI.Controls
         }
 
         public ref Rectangle Bounds => ref _bounds;
+
+        public Point Offset => _offset;
 
         public bool IsDisposed { get; private set; }
 
@@ -262,6 +265,20 @@ namespace ClassicUO.Game.UI.Controls
 
         public int TooltipMaxLength { get; private set; }
 
+        public void UpdateOffset(int x, int y)
+        {
+            if (_offset.X != x || _offset.Y != y)
+            {
+                _offset.X = x;
+                _offset.Y = y;
+
+                foreach (Control c in Children)
+                {
+                    c.UpdateOffset(x, y);
+                }
+            }
+        }
+
         protected static void ResetHueVector()
         {
             _hueVector.X = 0;
@@ -426,7 +443,7 @@ namespace ClassicUO.Game.UI.Controls
             int parentX = ParentX;
             int parentY = ParentY;
 
-            if (Bounds.Contains(x - parentX, y - parentY))
+            if (Bounds.Contains(x - parentX - _offset.X, y - parentY - _offset.Y))
             {
                 if (Contains(x - X - parentX, y - Y - parentY))
                 {
@@ -438,16 +455,14 @@ namespace ClassicUO.Game.UI.Controls
                             OnHitTestSuccess(x, y, ref res);
                         }
                     }
-
-                    int offY = this is ScrollArea scroll ? ((ScrollBarBase) scroll.Children[0]).Value - scroll.ScissorRectangle.Y : 0;
-
+                    
                     for (int i = 0; i < Children.Count; ++i)
                     {
                         Control c = Children[i];
 
                         if (c.Page == 0 || c.Page == ActivePage)
                         {
-                            c.HitTest(x, y + (offY != 0 && i > 0 ? offY : 0), ref res);
+                            c.HitTest(x, y, ref res);
                         }
                     }
                 }

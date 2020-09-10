@@ -103,6 +103,7 @@ namespace ClassicUO.Game.UI.Controls
             Macro.PushToBack(obj);
 
             _databox.Add(new MacroEntry(this, obj, _allHotkeysNames));
+            _databox.WantUpdateSize = true;
             _databox.ReArrangeChildren();
         }
 
@@ -153,7 +154,7 @@ namespace ClassicUO.Game.UI.Controls
                 obj = (MacroObject) obj.Next;
             }
 
-            
+            _databox.WantUpdateSize = true;
             _databox.ReArrangeChildren();
         }
 
