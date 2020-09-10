@@ -243,12 +243,12 @@ namespace ClassicUO.Game.UI.Controls
             switch (delta)
             {
                 case MouseEventType.WheelScrollUp:
-                    Value--;
+                    Value++;
 
                     break;
 
                 case MouseEventType.WheelScrollDown:
-                    Value++;
+                    Value--;
 
                     break;
             }
