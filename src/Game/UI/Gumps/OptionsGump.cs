@@ -292,11 +292,11 @@ namespace ClassicUO.Game.UI.Gumps
             _highlightByState = AddCheckBox(rightArea, ResGumps.HighlighState, ProfileManager.Current.HighlightMobilesByFlags, startX, startY);
             startY += _highlightByState.Height + 2;
             startX += 40;
-            _poisonColorPickerBox = CreateClickableColorBox(rightArea, startX, startY, ProfileManager.Current.PoisonHue, ResGumps.PoisonedColor);
+            _poisonColorPickerBox = AddColorBox(rightArea, startX, startY, ProfileManager.Current.PoisonHue, ResGumps.PoisonedColor);
             startY += _poisonColorPickerBox.Height + 2 + 3;
-            _paralyzedColorPickerBox = CreateClickableColorBox(rightArea, startX, startY, ProfileManager.Current.ParalyzedHue, ResGumps.ParalyzedColor);
+            _paralyzedColorPickerBox = AddColorBox(rightArea, startX, startY, ProfileManager.Current.ParalyzedHue, ResGumps.ParalyzedColor);
             startY += _paralyzedColorPickerBox.Height + 2 + 3;
-            _invulnerableColorPickerBox = CreateClickableColorBox(rightArea, startX, startY, ProfileManager.Current.InvulnerableHue, ResGumps.InvulColor);
+            _invulnerableColorPickerBox = AddColorBox(rightArea, startX, startY, ProfileManager.Current.InvulnerableHue, ResGumps.InvulColor);
             startY += _invulnerableColorPickerBox.Height + 2 + 3;
 
 
@@ -655,7 +655,7 @@ namespace ClassicUO.Game.UI.Gumps
             startX = 40;
             _partyAura = AddCheckBox(rightArea, ResGumps.CustomColorAuraForPartyMembers, ProfileManager.Current.PartyAura, startX, startY);
             startX += _partyAura.Width + 10;
-            _partyAuraColorPickerBox = CreateClickableColorBox(rightArea, startX, startY, ProfileManager.Current.PartyAuraHue, ResGumps.PartyAuraColor);
+            _partyAuraColorPickerBox = AddColorBox(rightArea, startX, startY, ProfileManager.Current.PartyAuraHue, ResGumps.PartyAuraColor);
 
             startX = 5;
             startY += _partyAura.Height + 2;
@@ -948,7 +948,7 @@ namespace ClassicUO.Game.UI.Gumps
             startX = 5 + 40;
             startY += text.Height + 2;
 
-            _tooltip_font_hue = CreateClickableColorBox(rightArea, startX, startY, ProfileManager.Current.TooltipTextHue, ResGumps.TooltipFontHue);
+            _tooltip_font_hue = AddColorBox(rightArea, startX, startY, ProfileManager.Current.TooltipTextHue, ResGumps.TooltipFontHue);
             startY += _tooltip_font_hue.Height + 2;
 
             startY += 15;
@@ -1062,26 +1062,26 @@ namespace ClassicUO.Game.UI.Gumps
             startY += _randomizeColorsButton.Height + 2 + 20;
 
 
-            _speechColorPickerBox = CreateClickableColorBox(rightArea, startX, startY, ProfileManager.Current.SpeechHue, ResGumps.SpeechColor);
+            _speechColorPickerBox = AddColorBox(rightArea, startX, startY, ProfileManager.Current.SpeechHue, ResGumps.SpeechColor);
             startX += 200;
-            _emoteColorPickerBox = CreateClickableColorBox(rightArea, startX, startY, ProfileManager.Current.EmoteHue, ResGumps.EmoteColor);
+            _emoteColorPickerBox = AddColorBox(rightArea, startX, startY, ProfileManager.Current.EmoteHue, ResGumps.EmoteColor);
             startY += _emoteColorPickerBox.Height + 2 + 3;
             startX = 5;
-            _yellColorPickerBox = CreateClickableColorBox(rightArea, startX, startY, ProfileManager.Current.YellHue, ResGumps.YellColor);
+            _yellColorPickerBox = AddColorBox(rightArea, startX, startY, ProfileManager.Current.YellHue, ResGumps.YellColor);
             startX += 200;
-            _whisperColorPickerBox = CreateClickableColorBox(rightArea, startX, startY, ProfileManager.Current.WhisperHue, ResGumps.WhisperColor);
+            _whisperColorPickerBox = AddColorBox(rightArea, startX, startY, ProfileManager.Current.WhisperHue, ResGumps.WhisperColor);
             
             startY += _whisperColorPickerBox.Height + 2 + 3;
             startX = 5;
 
-            _partyMessageColorPickerBox = CreateClickableColorBox(rightArea, startX, startY, ProfileManager.Current.PartyMessageHue, ResGumps.PartyMessageColor);
+            _partyMessageColorPickerBox = AddColorBox(rightArea, startX, startY, ProfileManager.Current.PartyMessageHue, ResGumps.PartyMessageColor);
             startX += 200;
-            _guildMessageColorPickerBox = CreateClickableColorBox(rightArea, startX, startY, ProfileManager.Current.GuildMessageHue, ResGumps.GuildMessageColor);
+            _guildMessageColorPickerBox = AddColorBox(rightArea, startX, startY, ProfileManager.Current.GuildMessageHue, ResGumps.GuildMessageColor);
             startY += _guildMessageColorPickerBox.Height + 2 + 3;
             startX = 5;
-            _allyMessageColorPickerBox = CreateClickableColorBox(rightArea, startX, startY, ProfileManager.Current.AllyMessageHue, ResGumps.AllianceMessageColor);
+            _allyMessageColorPickerBox = AddColorBox(rightArea, startX, startY, ProfileManager.Current.AllyMessageHue, ResGumps.AllianceMessageColor);
             startX += 200;
-            _chatMessageColorPickerBox = CreateClickableColorBox(rightArea, startX, startY, ProfileManager.Current.ChatMessageHue, ResGumps.ChatMessageColor);
+            _chatMessageColorPickerBox = AddColorBox(rightArea, startX, startY, ProfileManager.Current.ChatMessageHue, ResGumps.ChatMessageColor);
             startY += _chatMessageColorPickerBox.Height + 2 + 3;
             startX = 5;
 
@@ -1114,26 +1114,26 @@ namespace ClassicUO.Game.UI.Gumps
 
             int initialY = startY;
 
-            _innocentColorPickerBox = CreateClickableColorBox(rightArea, startX, startY, ProfileManager.Current.InnocentHue, ResGumps.InnocentColor);
+            _innocentColorPickerBox = AddColorBox(rightArea, startX, startY, ProfileManager.Current.InnocentHue, ResGumps.InnocentColor);
             startY += _innocentColorPickerBox.Height + 2 + 3;
-            _friendColorPickerBox = CreateClickableColorBox(rightArea, startX, startY, ProfileManager.Current.FriendHue, ResGumps.FriendColor);
+            _friendColorPickerBox = AddColorBox(rightArea, startX, startY, ProfileManager.Current.FriendHue, ResGumps.FriendColor);
             startY += _innocentColorPickerBox.Height + 2 + 3;
-            _crimialColorPickerBox = CreateClickableColorBox(rightArea, startX, startY, ProfileManager.Current.CriminalHue, ResGumps.CriminalColor);
+            _crimialColorPickerBox = AddColorBox(rightArea, startX, startY, ProfileManager.Current.CriminalHue, ResGumps.CriminalColor);
             startY += _innocentColorPickerBox.Height + 2 + 3;
-            _genericColorPickerBox = CreateClickableColorBox(rightArea, startX, startY, ProfileManager.Current.AnimalHue, ResGumps.AnimalColor);
+            _genericColorPickerBox = AddColorBox(rightArea, startX, startY, ProfileManager.Current.AnimalHue, ResGumps.AnimalColor);
             startY += _innocentColorPickerBox.Height + 2 + 3;
-            _murdererColorPickerBox = CreateClickableColorBox(rightArea, startX, startY, ProfileManager.Current.MurdererHue, ResGumps.MurdererColor);
+            _murdererColorPickerBox = AddColorBox(rightArea, startX, startY, ProfileManager.Current.MurdererHue, ResGumps.MurdererColor);
             startY += _innocentColorPickerBox.Height + 2 + 3;
-            _enemyColorPickerBox = CreateClickableColorBox(rightArea, startX, startY, ProfileManager.Current.EnemyHue, ResGumps.EnemyColor);
+            _enemyColorPickerBox = AddColorBox(rightArea, startX, startY, ProfileManager.Current.EnemyHue, ResGumps.EnemyColor);
             startY += _innocentColorPickerBox.Height + 2 + 3;
 
             startY = initialY;
             startX += 200;
-            _beneficColorPickerBox = CreateClickableColorBox(rightArea, startX, startY, ProfileManager.Current.BeneficHue, ResGumps.BeneficSpellHue);
+            _beneficColorPickerBox = AddColorBox(rightArea, startX, startY, ProfileManager.Current.BeneficHue, ResGumps.BeneficSpellHue);
             startY += _beneficColorPickerBox.Height + 2 + 3;
-            _harmfulColorPickerBox = CreateClickableColorBox(rightArea, startX, startY, ProfileManager.Current.HarmfulHue, ResGumps.HarmfulSpellHue);
+            _harmfulColorPickerBox = AddColorBox(rightArea, startX, startY, ProfileManager.Current.HarmfulHue, ResGumps.HarmfulSpellHue);
             startY += _harmfulColorPickerBox.Height + 2 + 3;
-            _neutralColorPickerBox = CreateClickableColorBox(rightArea, startX, startY, ProfileManager.Current.NeutralHue, ResGumps.NeutralSpellHue);
+            _neutralColorPickerBox = AddColorBox(rightArea, startX, startY, ProfileManager.Current.NeutralHue, ResGumps.NeutralSpellHue);
             startY += _neutralColorPickerBox.Height + 2 + 3;
 
             startX = 5;
@@ -2337,7 +2337,7 @@ namespace ClassicUO.Game.UI.Gumps
             return slider;
         }
 
-        private ClickableColorBox CreateClickableColorBox(ScrollArea area, int x, int y, ushort hue, string text, int labelX = 0, int labelY = 0)
+        private ClickableColorBox AddColorBox(ScrollArea area, int x, int y, ushort hue, string text)
         {
             uint color = 0xFF7F7F7F;
 
