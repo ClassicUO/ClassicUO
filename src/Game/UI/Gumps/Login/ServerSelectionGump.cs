@@ -348,7 +348,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
 
                 AcceptMouseInput = true;
-                Width = 393;
+                Width = 370;
                 Height = 25;
 
                 WantUpdateSize = false;
