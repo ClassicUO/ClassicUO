@@ -267,7 +267,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _shopScrollArea.ScrollMaxHeight = left_down.Y;
                     _button_expander.Y = left_down.Y + left_down.Height;
                     downButton.Y = 130 + _middleGumpLeft.Height;
-                    downButtonT.Y = 70 + _middleGumpRight.Height;
+                    downButtonT.Y = 270 + _middleGumpRight.Height;
                     name.Y = 308 + _middleGumpRight.Height;
                     _totalLabel.Y = 281 + _middleGumpRight.Height;
 
