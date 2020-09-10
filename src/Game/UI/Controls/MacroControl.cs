@@ -274,7 +274,6 @@ namespace ClassicUO.Game.UI.Controls
                 Width = mainBox.Width;
                 Height = mainBox.Height;
 
-
                 AddSubMacro(obj);
 
                 WantUpdateSize = true;
@@ -302,7 +301,7 @@ namespace ClassicUO.Game.UI.Controls
                             names[i] = _allSubHotkeysNames[i + offset];
                         }
 
-                        Combobox sub = new Combobox(20, Height, 180, names, 0, 300);
+                        Combobox sub = new Combobox(20, Height, 180, names, (int) obj.SubCode - offset, 300);
                         sub.OnOptionSelected += (senderr, ee) =>
                         {
                             Macro.GetBoundByCode(obj.Code, ref count, ref offset);
