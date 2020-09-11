@@ -482,6 +482,37 @@ namespace ClassicUO.Game.UI.Gumps
             _fieldsType = AddCombobox(rightArea, new[] { ResGumps.HPFields_Normal, ResGumps.HPFields_Static, ResGumps.HPFields_Tile }, mode, startX, startY, 150);
             startY += _fieldsType.Height + 5;
 
+            startX = 5;
+
+            SettingsSection section = new SettingsSection("An option set title", rightArea.Width - 15);
+            section.X = startX;
+            section.Y = startY;
+
+            section.Add(new Checkbox(0x00D2, 0x00D3, "text", FONT, HUE_FONT));
+            section.Add(new Checkbox(0x00D2, 0x00D3, "text", FONT, HUE_FONT));
+            section.Add(new Checkbox(0x00D2, 0x00D3, "text", FONT, HUE_FONT));
+            section.Add(new Checkbox(0x00D2, 0x00D3, "text", FONT, HUE_FONT));
+            section.Add(new Checkbox(0x00D2, 0x00D3, "text", FONT, HUE_FONT));
+            section.Add(new Checkbox(0x00D2, 0x00D3, "text", FONT, HUE_FONT));
+
+
+            startY += section.Height + 5;
+
+            SettingsSection section2 = new SettingsSection("An option set title 2", rightArea.Width - 15);
+            section2.X = startX;
+            section2.Y = startY;
+
+            section2.Add(new Checkbox(0x00D2, 0x00D3, "text", FONT, HUE_FONT));
+            section2.Add(new Checkbox(0x00D2, 0x00D3, "text", FONT, HUE_FONT));
+            section2.Add(new Checkbox(0x00D2, 0x00D3, "text", FONT, HUE_FONT));
+            section2.Add(new Checkbox(0x00D2, 0x00D3, "text", FONT, HUE_FONT));
+            section2.Add(new Checkbox(0x00D2, 0x00D3, "text", FONT, HUE_FONT));
+            section2.Add(new Checkbox(0x00D2, 0x00D3, "text", FONT, HUE_FONT));
+
+
+            rightArea.Add(section);
+            rightArea.Add(section2);
+
             Add(rightArea, PAGE);
         }
 
@@ -2392,6 +2423,54 @@ namespace ClassicUO.Game.UI.Gumps
             DeleteMacro,
 
             Last = DeleteMacro
+        }
+
+
+        private class SettingsSection : Control
+        {
+            private readonly DataBox _databox;
+
+            public SettingsSection(string title, int width)
+            {
+                CanMove = true;
+                AcceptMouseInput = true;
+                WantUpdateSize = false;
+
+                
+
+                Label label = new Label(title, true, HUE_FONT, font: FONT);
+                label.X = 5;
+                base.Add(label);
+
+                base.Add(new Line(0, label.Height, width - 30, 1, 0xFFbabdc2));
+
+                Width = width;
+                Height = label.Height + 1;
+
+                _databox = new DataBox(label.X + 10, label.Height + 4, 0, 0);
+
+                base.Add(_databox);
+            }
+
+
+
+            public void AddRight(Control c)
+            {
+
+            }
+
+            public override void Add(Control c, int page = 0)
+            {
+                c.Y = _databox.Children.Count != 0
+                    ? _databox.Children[_databox.Children.Count - 1]
+                              .Bounds.Bottom + 2
+                    : 0;
+
+                _databox.Add(c, page);
+                _databox.WantUpdateSize = true;
+
+                Height += c.Height + 2;
+            }
         }
 
         private class FontSelector : Control
