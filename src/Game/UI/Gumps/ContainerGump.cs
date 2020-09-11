@@ -242,10 +242,14 @@ namespace ClassicUO.Game.UI.Gumps
                             if (target.ItemData.IsContainer)
                             {
                                 dropcontainer = target.Serial;
+                                x = 0xFFFF;
+                                y = 0xFFFF;
                             }
                             else if (target.ItemData.IsStackable && target.DisplayedGraphic == ItemHold.DisplayedGraphic)
                             {
                                 dropcontainer = target.Serial;
+                                x = target.X;
+                                y = target.Y;
                             }
                             else
                             {
@@ -259,6 +263,8 @@ namespace ClassicUO.Game.UI.Gumps
                                     case 0x2D50:
                                     {
                                         dropcontainer = target.Serial;
+                                        x = target.X;
+                                        y = target.Y;
 
                                         break;
                                     }
@@ -345,11 +351,6 @@ namespace ClassicUO.Game.UI.Gumps
 
                         x = (int) (x / scale);
                         y = (int) (y / scale);
-                    }
-                    else
-                    {
-                        x = 0xFFFF;
-                        y = 0xFFFF;
                     }
 
                     GameActions.DropItem(ItemHold.Serial, x, y, 0, dropcontainer);
