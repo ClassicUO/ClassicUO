@@ -836,7 +836,7 @@ namespace ClassicUO
                 texture.SaveAsPng(fileStream, texture.Width, texture.Height);
                 string message = string.Format(ResGeneral.ScreenshotStoredIn0, path);
 
-                if (ProfileManager.Current.HideScreenshotStoredInMessage)
+                if (ProfileManager.Current == null || ProfileManager.Current.HideScreenshotStoredInMessage)
                 {
                     Log.Info(message);
                 }
