@@ -184,6 +184,8 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override void OnDragBegin(int x, int y)
         {
+            _positionLocked = false;
+
             Entity entity = World.Get(LocalSerial);
 
             if (entity is Mobile || entity is Item it && it.IsDamageable)
