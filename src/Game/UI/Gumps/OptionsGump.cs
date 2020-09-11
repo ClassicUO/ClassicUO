@@ -484,9 +484,14 @@ namespace ClassicUO.Game.UI.Gumps
 
             startX = 5;
 
-            SettingsSection section = new SettingsSection("An option set title", rightArea.Width - 15);
-            section.X = startX;
-            section.Y = startY;
+            DataBox box = new DataBox(startX, startY, 1, 1);
+            rightArea.Add(box);
+
+            SettingsSection section = AddSettingsSection(box, "General");
+
+            //SettingsSection section = new SettingsSection("An option set title", rightArea.Width - 15);
+            //section.X = startX;
+            //section.Y = startY;
 
             section.Add(new Checkbox(0x00D2, 0x00D3, "text", FONT, HUE_FONT));
             section.Add(new Checkbox(0x00D2, 0x00D3, "text", FONT, HUE_FONT));
@@ -496,11 +501,11 @@ namespace ClassicUO.Game.UI.Gumps
             section.Add(new Checkbox(0x00D2, 0x00D3, "text", FONT, HUE_FONT));
 
 
-            startY += section.Height + 5;
+            //startY += section.Height + 5;
 
-            SettingsSection section2 = new SettingsSection("An option set title 2", rightArea.Width - 15);
-            section2.X = startX;
-            section2.Y = startY;
+            SettingsSection section2 = AddSettingsSection(box, "General");
+            //section2.X = startX;
+            //section2.Y = startY;
 
             section2.Add(new Checkbox(0x00D2, 0x00D3, "text", FONT, HUE_FONT));
             section2.Add(new Checkbox(0x00D2, 0x00D3, "text", FONT, HUE_FONT));
@@ -510,8 +515,8 @@ namespace ClassicUO.Game.UI.Gumps
             section2.Add(new Checkbox(0x00D2, 0x00D3, "text", FONT, HUE_FONT));
 
 
-            rightArea.Add(section);
-            rightArea.Add(section2);
+            //rightArea.Add(section);
+            //rightArea.Add(section2);
 
             Add(rightArea, PAGE);
         }
@@ -2399,6 +2404,16 @@ namespace ClassicUO.Game.UI.Gumps
             );
 
             return box;
+        }
+
+        private SettingsSection AddSettingsSection(DataBox area, string label)
+        {
+            SettingsSection section = new SettingsSection(label, WIDTH - 15);
+            area.Add(section);
+            area.WantUpdateSize = true;
+            area.ReArrangeChildren();
+
+            return section;
         }
 
         private enum Buttons
