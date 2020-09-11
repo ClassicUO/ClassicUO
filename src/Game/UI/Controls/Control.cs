@@ -54,7 +54,6 @@ namespace ClassicUO.Game.UI.Controls
         private bool _attempToDrag;
         private Rectangle _bounds;
         private Point _offset;
-        private GumpControlInfo _controlInfo;
         private bool _handlesKeyboardFocus;
         private Control _parent;
 
@@ -214,7 +213,10 @@ namespace ClassicUO.Game.UI.Controls
             }
         }
 
-        public GumpControlInfo ControlInfo => _controlInfo ?? (_controlInfo = new GumpControlInfo(this));
+        public UILayer LayerOrder { get; set; } = UILayer.Default;
+        public bool IsModal { get; set; }
+        public bool ModalClickOutsideAreaClosesThisControl { get; set; }
+
 
         public virtual bool HandlesKeyboardFocus
         {

@@ -68,7 +68,7 @@ namespace ClassicUO.Game.UI.Gumps
             );
 
             CanMove = false;
-            ControlInfo.IsModal = true;
+            IsModal = true;
 
             X = (Client.Game.Window.ClientBounds.Width - Width) >> 1;
             Y = (Client.Game.Window.ClientBounds.Height - Height) >> 1;

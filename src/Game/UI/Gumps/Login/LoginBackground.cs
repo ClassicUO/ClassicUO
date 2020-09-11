@@ -64,7 +64,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
             CanCloseWithRightClick = false;
             AcceptKeyboardInput = false;
 
-            ControlInfo.Layer = UILayer.Under;
+            LayerOrder = UILayer.Under;
         }
 
 

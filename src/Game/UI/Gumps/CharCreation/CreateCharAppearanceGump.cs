@@ -755,12 +755,9 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
                 _colorPickerBox = new ColorPickerBox(489, 141, _rows, _columns, _cellW, _cellH, _pallet)
                 {
-                    ControlInfo =
-                    {
-                        IsModal = true,
-                        Layer = UILayer.Over,
-                        ModalClickOutsideAreaClosesThisControl = true
-                    }
+                    IsModal = true,
+                    LayerOrder = UILayer.Over,
+                    ModalClickOutsideAreaClosesThisControl = true
                 };
 
                 _colorPickerBox.MouseUp += ColorPickerBoxOnMouseUp;
@@ -805,12 +802,9 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
                     _colorPickerBox = new ColorPickerBox(489, 141, _rows, _columns, _cellW, _cellH, _pallet)
                     {
-                        ControlInfo =
-                        {
-                            IsModal = true,
-                            Layer = UILayer.Over,
-                            ModalClickOutsideAreaClosesThisControl = true
-                        }
+                        IsModal = true,
+                        LayerOrder = UILayer.Over,
+                        ModalClickOutsideAreaClosesThisControl = true
                     };
 
                     _colorPickerBox.MouseUp += ColorPickerBoxOnMouseUp;

@@ -137,9 +137,9 @@ namespace ClassicUO.Game.UI.Controls
                 X = x;
                 Y = y;
 
-                ControlInfo.IsModal = true;
-                ControlInfo.Layer = UILayer.Over;
-                ControlInfo.ModalClickOutsideAreaClosesThisControl = true;
+                IsModal = true;
+                LayerOrder = UILayer.Over;
+                ModalClickOutsideAreaClosesThisControl = true;
 
                 _combobox = combobox;
 

@@ -41,7 +41,7 @@ namespace ClassicUO.Game.UI.Gumps
             Y = _lastY;
             WantUpdateSize = false;
 
-            ControlInfo.Layer = UILayer.Over;
+            LayerOrder = UILayer.Over;
 
             RadioButton all, mobiles, items, mobilesCorpses;
             AlphaBlendControl alpha;

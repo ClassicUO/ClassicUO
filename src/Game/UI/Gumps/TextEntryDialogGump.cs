@@ -35,7 +35,7 @@ namespace ClassicUO.Game.UI.Gumps
             CanMove = false;
             IsFromServer = true;
 
-            ControlInfo.IsModal = true;
+            IsModal = true;
 
             X = x;
             Y = y;
