@@ -62,11 +62,14 @@ Open a terminal instance and put the following commands:
 
 1. `sudo apt-get install mono-complete`
 
-2. `sudo apt-get install monodevelop`
+2. Navigate to ClassicUO scripts folder:
+`cd /your/path/to/ClassicUO/scripts`
 
-3. Select "Debug" or "Release" at the top.
+3. Execute `build.sh` script. If you want build a debug version of ClassicUO just pass "debug" as argument like: `./build.sh debug`.
+   Probably you have to set the `build.sh` file executable with with the command `chmod -x build.sh`
 
-4. Hit F5 to build. The output will be in the "bin/Release" or "bin/Debug" directory.
+6. Navigate to `/your/path/to/ClassicUO/bin/[Debug or Release]`
+
 
 ### macOS
 All the commands should be executed in terminal. All global package installs should be done only if not yet installed.
