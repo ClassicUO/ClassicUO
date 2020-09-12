@@ -45,7 +45,7 @@ namespace ClassicUO.Game.UI.Gumps
     internal class OptionsGump : Gump
     {
         private const byte FONT = 0xFF;
-        private const ushort HUE_FONT = 999;
+        private const ushort HUE_FONT = 0xFFFF;
         private const int WIDTH = 700;
         private const int HEIGHT = 500;
         private const int TEXTBOX_HEIGHT = 25;
@@ -484,15 +484,11 @@ namespace ClassicUO.Game.UI.Gumps
 
             startX = 5;
 
-            DataBox box = new DataBox(startX, startY, 1, 1);
+            DataBox box = new DataBox(startX, startY, rightArea.Width - 15, 1);
+            box.WantUpdateSize = true;
             rightArea.Add(box);
 
             SettingsSection section = AddSettingsSection(box, "General");
-
-            //SettingsSection section = new SettingsSection("An option set title", rightArea.Width - 15);
-            //section.X = startX;
-            //section.Y = startY;
-
             section.Add(new Checkbox(0x00D2, 0x00D3, "text", FONT, HUE_FONT));
             section.Add(new Checkbox(0x00D2, 0x00D3, "text", FONT, HUE_FONT));
             section.Add(new Checkbox(0x00D2, 0x00D3, "text", FONT, HUE_FONT));
@@ -501,12 +497,7 @@ namespace ClassicUO.Game.UI.Gumps
             section.Add(new Checkbox(0x00D2, 0x00D3, "text", FONT, HUE_FONT));
 
 
-            //startY += section.Height + 5;
-
-            SettingsSection section2 = AddSettingsSection(box, "General");
-            //section2.X = startX;
-            //section2.Y = startY;
-
+            SettingsSection section2 = AddSettingsSection(box, "Gameplay");
             section2.Add(new Checkbox(0x00D2, 0x00D3, "text", FONT, HUE_FONT));
             section2.Add(new Checkbox(0x00D2, 0x00D3, "text", FONT, HUE_FONT));
             section2.Add(new Checkbox(0x00D2, 0x00D3, "text", FONT, HUE_FONT));
@@ -515,8 +506,31 @@ namespace ClassicUO.Game.UI.Gumps
             section2.Add(new Checkbox(0x00D2, 0x00D3, "text", FONT, HUE_FONT));
 
 
-            //rightArea.Add(section);
-            //rightArea.Add(section2);
+            SettingsSection section3 = AddSettingsSection(box, "Gump behaviour");
+            section3.Add(_enableTopbar = AddCheckBox(null, ResGumps.DisableMenu, ProfileManager.Current.TopbarGumpIsDisabled, 0, 0));
+            section3.Add(_holdDownKeyAlt = AddCheckBox(null, ResGumps.AltCloseGumps, ProfileManager.Current.HoldDownKeyAltToCloseAnchored, 0, 0));
+            section3.Add(_holdAltToMoveGumps = AddCheckBox(null, ResGumps.AltMoveGumps, ProfileManager.Current.HoldAltToMoveGumps, 0, 0));
+            section3.Add(_closeAllAnchoredGumpsWithRClick = AddCheckBox(null, ResGumps.ClickCloseAllGumps, ProfileManager.Current.CloseAllAnchoredGumpsInGroupWithRightClick, 0, 0));
+            section3.Add(_useStandardSkillsGump = AddCheckBox(null, ResGumps.StandardSkillGump, ProfileManager.Current.StandardSkillsGump, 0, 0));
+            section3.Add(_partyInviteGump = AddCheckBox(null, ResGumps.ShowGumpPartyInv, ProfileManager.Current.PartyInviteGump, 0, 0));
+            section3.Add(_customBars = AddCheckBox(null, ResGumps.UseCustomHPBars, ProfileManager.Current.CustomBarsToggled, 0, 0));
+            section3.AddRight(_customBarsBBG = AddCheckBox(null, ResGumps.UseBlackBackgr, ProfileManager.Current.CBBlackBGToggled, 0, 0));
+            section3.Add(_saveHealthbars = AddCheckBox(null, ResGumps.SaveHPBarsOnLogout, ProfileManager.Current.SaveHealthbars, 0, 0));
+            section3.Add(AddLabel(null, ResGumps.CloseHPGumpWhen, 0, 0));
+
+            //text = AddLabel(rightArea, ResGumps.CloseHPGumpWhen, startX, startY);
+            //startX += text.Width + 5;
+
+            mode = ProfileManager.Current.CloseHealthBarType;
+
+            if (mode < 0 || mode > 2)
+            {
+                mode = 0;
+            }
+
+            _healtbarType = AddCombobox(null, new[] { ResGumps.HPType_None, ResGumps.HPType_MobileOOR, ResGumps.HPType_MobileDead }, mode, startX, startY, 150);
+            section3.AddRight(_healtbarType);
+
 
             Add(rightArea, PAGE);
         }
@@ -2303,7 +2317,7 @@ namespace ClassicUO.Game.UI.Gumps
                     elem.Y = y;
                 }
                 
-                area.Add(text);
+                area?.Add(text);
             }
             else
             {
@@ -2311,7 +2325,7 @@ namespace ClassicUO.Game.UI.Gumps
                 elem.Y = y;
             }
 
-            area.Add
+            area?.Add
             (
                 new ResizePic(0x0BB8)
                 {
@@ -2328,7 +2342,7 @@ namespace ClassicUO.Game.UI.Gumps
             elem.Width -= 8;
             elem.Height -= 8;
 
-            area.Add(elem);
+            area?.Add(elem);
 
             return elem;
         }
@@ -2341,7 +2355,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Y = y,
             };
 
-            area.Add(label);
+            area?.Add(label);
 
             return label;
         }
@@ -2355,8 +2369,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Y = y
             };
 
-
-            area.Add(box);
+            area?.Add(box);
 
             return box;
         }
@@ -2368,7 +2381,7 @@ namespace ClassicUO.Game.UI.Gumps
                 SelectedIndex = currentIndex
             };
 
-            area.Add(combobox);
+            area?.Add(combobox);
 
             return combobox;
         }
@@ -2377,7 +2390,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             HSliderBar slider = new HSliderBar(x, y, width, min, max, value, HSliderBarStyle.MetalWidgetRecessedBar, true, FONT, HUE_FONT);
 
-            area.Add(slider);
+            area?.Add(slider);
 
             return slider;
         }
@@ -2392,9 +2405,9 @@ namespace ClassicUO.Game.UI.Gumps
             }
 
             ClickableColorBox box = new ClickableColorBox(x, y, 13, 14, hue, color);
-            area.Add(box);
+            area?.Add(box);
 
-            area.Add
+            area?.Add
             (
                 new Label(text, true, HUE_FONT)
                 {
@@ -2408,7 +2421,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         private SettingsSection AddSettingsSection(DataBox area, string label)
         {
-            SettingsSection section = new SettingsSection(label, WIDTH - 15);
+            SettingsSection section = new SettingsSection(label, area.Width);
             area.Add(section);
             area.WantUpdateSize = true;
             area.ReArrangeChildren();
@@ -2449,7 +2462,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 CanMove = true;
                 AcceptMouseInput = true;
-                WantUpdateSize = false;
+                WantUpdateSize = true;
 
                 
 
@@ -2471,11 +2484,27 @@ namespace ClassicUO.Game.UI.Gumps
 
             public void AddRight(Control c)
             {
+                if (_databox.Children.Count != 0)
+                {
+                    c.X = _databox.Children[_databox.Children.Count - 1]
+                                  .Bounds.Right + 15;
 
+                    c.Y = _databox.Children[_databox.Children.Count - 1]
+                                  .Bounds.Top;
+                }
+                else
+                {
+                    c.X = 0;
+                    c.Y = 0;
+                }
+
+                _databox.Add(c);
+                _databox.WantUpdateSize = true;
             }
 
             public override void Add(Control c, int page = 0)
             {
+                c.X = 0;
                 c.Y = _databox.Children.Count != 0
                     ? _databox.Children[_databox.Children.Count - 1]
                               .Bounds.Bottom + 2

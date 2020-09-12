@@ -35,10 +35,10 @@ namespace ClassicUO.Game.UI.Controls
         private readonly int _groupnumber;
         private bool _isSelected;
 
-        public NiceButton(int x, int y, int w, int h, ButtonAction action, string text, int groupnumber = 0, TEXT_ALIGN_TYPE align = TEXT_ALIGN_TYPE.TS_CENTER) : base(x, y, w, h)
+        public NiceButton(int x, int y, int w, int h, ButtonAction action, string text, int groupnumber = 0, TEXT_ALIGN_TYPE align = TEXT_ALIGN_TYPE.TS_CENTER, ushort hue = 0xFFFF) : base(x, y, w, h)
         {
             _action = action;
-            Add(TextLabel = new Label(text, true, 999, w, 0xFF, FontStyle.BlackBorder | FontStyle.Cropped, align));
+            Add(TextLabel = new Label(text, true, hue, w, 0xFF, FontStyle.BlackBorder | FontStyle.Cropped, align));
             TextLabel.Y = (h - TextLabel.Height) >> 1;
             _groupnumber = groupnumber;
         }

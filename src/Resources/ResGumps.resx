@@ -349,10 +349,10 @@
     <value>Trees to stumps</value>
   </data>
   <data name="UseBlackBackgr" xml:space="preserve">
-    <value>Use All Black Backgrounds</value>
+    <value>Opaque background</value>
   </data>
   <data name="UseCustomHPBars" xml:space="preserve">
-    <value>Use Custom Health Bars</value>
+    <value>Use custom healthbars gump</value>
   </data>
   <data name="CircleTransType" xml:space="preserve">
     <value>Transparency type:</value>
@@ -630,7 +630,7 @@ Murderers, Criminals, Grays (Monsters/Animals)</value>
     <value>Neutral Spell Hue</value>
   </data>
   <data name="SpellOverheadFormat" xml:space="preserve">
-    <value> Spell Overhead format: ({power} for powerword - {spell} for spell name)</value>
+    <value>Spell Overhead format: ({power} for powerword - {spell} for spell name)</value>
   </data>
   <data name="EnableCounters" xml:space="preserve">
     <value>Enable Counters</value>

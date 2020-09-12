@@ -3297,7 +3297,7 @@ namespace ClassicUO.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to  Spell Overhead format: ({power} for powerword - {spell} for spell name).
+        ///   Looks up a localized string similar to Spell Overhead format: ({power} for powerword - {spell} for spell name).
         /// </summary>
         public static string SpellOverheadFormat {
             get {
@@ -3689,7 +3689,7 @@ namespace ClassicUO.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Use All Black Backgrounds.
+        ///   Looks up a localized string similar to Opaque background.
         /// </summary>
         public static string UseBlackBackgr {
             get {
@@ -3707,7 +3707,7 @@ namespace ClassicUO.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Use Custom Health Bars.
+        ///   Looks up a localized string similar to Use custom healthbars gump.
         /// </summary>
         public static string UseCustomHPBars {
             get {
