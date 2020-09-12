@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,16 +18,14 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
-using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using ClassicUO.Game.Managers;
 using ClassicUO.IO.Resources;
 using ClassicUO.Utility;
-using ClassicUO.Utility.Logging;
-
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.GameObjects
@@ -34,14 +33,28 @@ namespace ClassicUO.Game.GameObjects
     internal sealed partial class Land : GameObject
     {
         private static Vector3[,,] _vectCache = new Vector3[3, 3, 4];
-        private static readonly QueuedPool<Land> _pool = new QueuedPool<Land>(Constants.PREDICTABLE_TILE_COUNT, l =>
-        {
-            l.IsDestroyed = false;
-            l.AlphaHue = 255;
-            l.Normal0 = l.Normal1 = l.Normal2 = l.Normal3 = Vector3.Zero;
-            l.Rectangle = Rectangle.Empty;
-            l.MinZ = l.AverageZ = 0;
-        });
+        private static readonly QueuedPool<Land> _pool = new QueuedPool<Land>
+        (
+            Constants.PREDICTABLE_TILE_COUNT, l =>
+            {
+                l.IsDestroyed = false;
+                l.AlphaHue = 255;
+                l.Normal0 = l.Normal1 = l.Normal2 = l.Normal3 = Vector3.Zero;
+                l.Rectangle = Rectangle.Empty;
+                l.MinZ = l.AverageZ = 0;
+            }
+        );
+
+        public ref LandTiles TileData => ref TileDataLoader.Instance.LandData[Graphic];
+        public sbyte AverageZ;
+        public bool IsStretched;
+
+        public sbyte MinZ;
+
+
+        public Vector3 Normal0, Normal1, Normal2, Normal3;
+        public ushort OriginalGraphic;
+        public Rectangle Rectangle;
 
 
         public static Land Create(ushort graphic)
@@ -55,22 +68,12 @@ namespace ClassicUO.Game.GameObjects
             return land;
         }
 
-
-
-        public Vector3 Normal0, Normal1, Normal2, Normal3;
-        public Rectangle Rectangle;
-        public ushort OriginalGraphic;
-
-        public ref LandTiles TileData => ref TileDataLoader.Instance.LandData[Graphic];
-
-        public sbyte MinZ;
-        public sbyte AverageZ;
-        public bool IsStretched;
-
         public override void Destroy()
         {
             if (IsDestroyed)
+            {
                 return;
+            }
 
             base.Destroy();
             _pool.ReturnOne(this);
@@ -87,7 +90,7 @@ namespace ClassicUO.Game.GameObjects
             if (IsStretched)
             {
                 int x = (currentZ << 2) + 1;
-                int y = (zTop << 2);
+                int y = zTop << 2;
                 int w = (zRight << 2) - x;
                 int h = (zBottom << 2) + 1 - y;
 
@@ -97,20 +100,30 @@ namespace ClassicUO.Game.GameObjects
                 Rectangle.Height = h;
 
                 if (Math.Abs(currentZ - zRight) <= Math.Abs(zBottom - zTop))
+                {
                     AverageZ = (sbyte) ((currentZ + zRight) >> 1);
+                }
                 else
+                {
                     AverageZ = (sbyte) ((zBottom + zTop) >> 1);
+                }
 
                 MinZ = currentZ;
 
                 if (zTop < MinZ)
+                {
                     MinZ = (sbyte) zTop;
+                }
 
                 if (zRight < MinZ)
+                {
                     MinZ = (sbyte) zRight;
+                }
 
                 if (zBottom < MinZ)
+                {
                     MinZ = (sbyte) zBottom;
+                }
             }
         }
 
@@ -119,7 +132,9 @@ namespace ClassicUO.Game.GameObjects
             int result = GetDirectionZ(((byte) (direction >> 1) + 1) & 3);
 
             if ((direction & 1) != 0)
+            {
                 return result;
+            }
 
             return (result + GetDirectionZ(direction >> 1)) >> 1;
         }
@@ -149,11 +164,14 @@ namespace ClassicUO.Game.GameObjects
             else
             {
                 IsStretched = true;
-                UpdateZ(
+
+                UpdateZ
+                (
                     map.GetTileZ(x, y + 1),
                     map.GetTileZ(x + 1, y + 1),
                     map.GetTileZ(x + 1, y),
-                    z);
+                    z
+                );
 
                 //Vector3[,,] vec = new Vector3[3, 3, 4];
 
@@ -178,7 +196,7 @@ namespace ClassicUO.Game.GameObjects
                         {
                             for (int k = 0; k < 4; k++)
                             {
-                                ref var v = ref _vectCache[curI, curJ, k];
+                                ref Vector3 v = ref _vectCache[curI, curJ, k];
                                 v.X = 0;
                                 v.Y = 0;
                                 v.Z = 1;
@@ -191,26 +209,26 @@ namespace ClassicUO.Game.GameObjects
                             int half_2 = (rightZ - bottomZ) << 2;
                             int half_3 = (bottomZ - leftZ) << 2;
 
-                            ref var v0 = ref _vectCache[curI, curJ, 0];
+                            ref Vector3 v0 = ref _vectCache[curI, curJ, 0];
                             v0.X = -22;
                             v0.Y = 22;
                             v0.Z = half_0;
                             MergeAndNormalize(ref v0, -22.0f, -22.0f, half_1);
 
 
-                            ref var v1 = ref _vectCache[curI, curJ, 1];
+                            ref Vector3 v1 = ref _vectCache[curI, curJ, 1];
                             v1.X = 22;
                             v1.Y = 22;
                             v1.Z = half_2;
                             MergeAndNormalize(ref v1, -22.0f, 22.0f, half_0);
 
-                            ref var v2 = ref _vectCache[curI, curJ, 2];
+                            ref Vector3 v2 = ref _vectCache[curI, curJ, 2];
                             v2.X = 22;
                             v2.Y = -22;
                             v2.Z = half_3;
                             MergeAndNormalize(ref v2, 22.0f, 22.0f, half_2);
 
-                            ref var v3 = ref _vectCache[curI, curJ, 3];
+                            ref Vector3 v3 = ref _vectCache[curI, curJ, 3];
                             v3.X = -22;
                             v3.Y = -22;
                             v3.Z = half_1;
@@ -223,55 +241,65 @@ namespace ClassicUO.Game.GameObjects
                 j = 1;
 
                 // 0
-                SumAndNormalize(
-                     ref _vectCache,
-                     i - 1, j - 1, 2,
-                     i - 1, j, 1,
-                     i, j - 1, 3,
-                     i, j, 0,
-                     out Normal0);
+                SumAndNormalize
+                (
+                    ref _vectCache,
+                    i - 1, j - 1, 2,
+                    i - 1, j, 1,
+                    i, j - 1, 3,
+                    i, j, 0,
+                    out Normal0
+                );
 
                 // 1
-                SumAndNormalize(
+                SumAndNormalize
+                (
                     ref _vectCache,
                     i, j - 1, 2,
                     i, j, 1,
                     i + 1, j - 1, 3,
                     i + 1, j, 0,
-                    out Normal1);
+                    out Normal1
+                );
 
                 // 2
-                SumAndNormalize(
+                SumAndNormalize
+                (
                     ref _vectCache,
                     i, j, 2,
                     i, j + 1, 1,
                     i + 1, j, 3,
                     i + 1, j + 1, 0,
-                    out Normal2);
+                    out Normal2
+                );
 
                 // 3
-                SumAndNormalize(
+                SumAndNormalize
+                (
                     ref _vectCache,
                     i - 1, j, 2,
                     i - 1, j + 1, 1,
                     i, j, 3,
                     i, j + 1, 0,
-                    out Normal3);
+                    out Normal3
+                );
             }
         }
 
 
         [MethodImpl(256)]
-        private static void SumAndNormalize(
+        private static void SumAndNormalize
+        (
             ref Vector3[,,] vec,
             int index0_x, int index0_y, int index0_z,
             int index1_x, int index1_y, int index1_z,
             int index2_x, int index2_y, int index2_z,
             int index3_x, int index3_y, int index3_z,
-            out Vector3 result)
+            out Vector3 result
+        )
         {
-            Vector3.Add(ref vec[index0_x, index0_y, index0_z], ref vec[index1_x, index1_y, index1_z], out var v0Result);
-            Vector3.Add(ref vec[index2_x, index2_y, index2_z], ref vec[index3_x, index3_y, index3_z], out var v1Result);
+            Vector3.Add(ref vec[index0_x, index0_y, index0_z], ref vec[index1_x, index1_y, index1_z], out Vector3 v0Result);
+            Vector3.Add(ref vec[index2_x, index2_y, index2_z], ref vec[index3_x, index3_y, index3_z], out Vector3 v1Result);
             Vector3.Add(ref v0Result, ref v1Result, out result);
             Vector3.Normalize(ref result, out result);
         }
@@ -285,7 +313,9 @@ namespace ClassicUO.Game.GameObjects
                 for (int j = -1; j < 2 && !result; j++)
                 {
                     if (recurse)
+                    {
                         result = TestStretched(x + i, y + j, z, false);
+                    }
                     else
                     {
                         sbyte testZ = World.Map.GetTileZ(x + i, y + j);

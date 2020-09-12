@@ -1,4 +1,5 @@
 #region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,18 +18,17 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-
 using ClassicUO.Input;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
-
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Controls
@@ -53,7 +53,9 @@ namespace ClassicUO.Game.UI.Controls
             IsFromServer = true;
 
             if (textIndex >= 0 && textIndex < lines.Length)
+            {
                 InternalBuild(lines[textIndex], 0);
+            }
         }
 
         public HtmlControl(int x, int y, int w, int h, bool hasbackground, bool hasscrollbar, bool useflagscrollbar = false, string text = "", int hue = 0, bool ishtml = false, byte font = 1, bool isunicode = true, FontStyle style = FontStyle.None, TEXT_ALIGN_TYPE align = TEXT_ALIGN_TYPE.TS_LEFT) : this()
@@ -114,16 +116,22 @@ namespace ClassicUO.Game.UI.Controls
                     if (hue > 0)
                     {
                         if (hue == 0x00FFFFFF || hue == 0xFFFF || hue == 0xFF)
+                        {
                             htmlColor = 0xFFFFFFFE;
+                        }
                         else
+                        {
                             htmlColor = (HuesHelper.Color16To32((ushort) hue) << 8) | 0xFF;
+                        }
                     }
                     else if (!HasBackground)
                     {
                         color = 0xFFFF;
 
                         if (!HasScrollbar)
+                        {
                             htmlColor = 0x010101FF;
+                        }
                     }
                     else
                     {
@@ -145,10 +153,13 @@ namespace ClassicUO.Game.UI.Controls
 
             if (HasBackground)
             {
-                Add(new ResizePic(0x2486)
-                {
-                    Width = Width - (HasScrollbar ? 16 : 0), Height = Height, AcceptMouseInput = false
-                });
+                Add
+                (
+                    new ResizePic(0x2486)
+                    {
+                        Width = Width - (HasScrollbar ? 16 : 0), Height = Height, AcceptMouseInput = false
+                    }
+                );
             }
 
             if (HasScrollbar)
@@ -161,7 +172,9 @@ namespace ClassicUO.Game.UI.Controls
                     };
                 }
                 else
+                {
                     _scrollBar = new ScrollBar(Width - 14, 0, Height);
+                }
 
                 _scrollBar.Height = Height;
                 _scrollBar.MinValue = 0;
@@ -178,7 +191,9 @@ namespace ClassicUO.Game.UI.Controls
         protected override void OnMouseWheel(MouseEventType delta)
         {
             if (!HasScrollbar)
+            {
                 return;
+            }
 
             switch (delta)
             {
@@ -216,7 +231,9 @@ namespace ClassicUO.Game.UI.Controls
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
             if (IsDisposed)
+            {
                 return false;
+            }
 
             ResetHueVector();
 
@@ -227,14 +244,17 @@ namespace ClassicUO.Game.UI.Controls
                 batcher.EnableScissorTest(true);
                 base.Draw(batcher, x, y);
 
-                _gameText.Draw(batcher,
+                _gameText.Draw
+                (
+                    batcher,
                     Width + ScrollX, Height + ScrollY,
                     x + (HasBackground ? 4 : 0),
                     y + (HasBackground ? 4 : 0),
                     Width - (HasBackground ? 8 : 0),
                     Height - (HasBackground ? 8 : 0),
                     ScrollX,
-                    ScrollY);
+                    ScrollY
+                );
 
                 batcher.EnableScissorTest(false);
                 ScissorStack.PopScissors(batcher.GraphicsDevice);
@@ -251,7 +271,7 @@ namespace ClassicUO.Game.UI.Controls
                 {
                     for (int i = 0; i < _gameText.Links.Count; i++)
                     {
-                        ref var link = ref _gameText.Links[i];
+                        ref WebLinkRect link = ref _gameText.Links[i];
 
                         bool inbounds = link.Bounds.Contains(x, (_scrollBar == null ? 0 : _scrollBar.Value) + y);
 

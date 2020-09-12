@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,15 +18,15 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Input;
 
-
 namespace ClassicUO.Game.Managers
 {
-    static class DelayedObjectClickManager
+    internal static class DelayedObjectClickManager
     {
         public static uint Serial { get; private set; }
         public static bool IsEnabled { get; private set; }
@@ -39,17 +40,19 @@ namespace ClassicUO.Game.Managers
         public static void Update()
         {
             if (!IsEnabled || Timer > Time.Ticks)
+            {
                 return;
+            }
 
             Entity entity = World.Get(Serial);
 
             if (entity != null)
             {
                 if (!World.ClientFeatures.TooltipsEnabled ||
-                    (SerialHelper.IsItem(Serial) &&
+                    SerialHelper.IsItem(Serial) &&
                     ((Item) entity).IsLocked &&
                     ((Item) entity).ItemData.Weight == 255 &&
-                    !((Item) entity).ItemData.IsContainer))
+                    !((Item) entity).ItemData.IsContainer)
                 {
                     GameActions.SingleClick(Serial);
                 }

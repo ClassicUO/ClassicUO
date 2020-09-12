@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,6 +18,7 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using ClassicUO.Network;
@@ -64,17 +66,25 @@ namespace ClassicUO.Game.Data
                     flags = p.ReadUShort();
 
                     if ((flags & 0x84) != 0)
+                    {
                         p.Skip(2);
+                    }
 
                     if ((flags & 0x40) != 0)
+                    {
                         p.Skip(2);
+                    }
 
                     if ((flags & 0x20) != 0)
+                    {
                         replaced = (ushort) (p.ReadUShort() & 0x3FFF);
+                    }
                 }
 
                 if ((flags & 0x01) != 0)
+                {
                     hue = 0x0386;
+                }
 
                 items[i] = new PopupMenuItem(cliloc, index, hue, replaced, flags);
             }

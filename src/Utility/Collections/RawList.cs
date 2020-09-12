@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,27 +18,28 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 #define VALIDATE
 
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Runtime.CompilerServices;
-
 
 namespace ClassicUO.Utility.Collections
 {
     public class RawList<T> : IEnumerable<T>
     {
-        private T[] _items;
-        private uint _count;
-
         public const uint DefaultCapacity = 4;
         private const float GrowthFactor = 2f;
+        private uint _count;
+        private T[] _items;
 
-        public RawList() : this(DefaultCapacity) { }
+        public RawList() : this(DefaultCapacity)
+        {
+        }
 
         public RawList(uint capacity)
         {
@@ -55,22 +57,20 @@ namespace ClassicUO.Utility.Collections
         public uint Count
         {
             get => _count;
-            set
-            {
-                Resize(value);
-            }
+            set => Resize(value);
         }
 
 
         public T[] Items => _items;
 
-        public ArraySegment<T> ArraySegment => new ArraySegment<T>(_items, 0, (int)_count);
+        public ArraySegment<T> ArraySegment => new ArraySegment<T>(_items, 0, (int) _count);
 
         public ref T this[uint index]
         {
             get
             {
                 ValidateIndex(index);
+
                 return ref _items[index];
             }
         }
@@ -80,15 +80,26 @@ namespace ClassicUO.Utility.Collections
             get
             {
                 ValidateIndex(index);
+
                 return ref _items[index];
             }
+        }
+
+        IEnumerator<T> IEnumerable<T>.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
         }
 
         public void Add(ref T item)
         {
             if (_count == _items.Length)
             {
-                Array.Resize(ref _items, (int)(_items.Length * GrowthFactor));
+                Array.Resize(ref _items, (int) (_items.Length * GrowthFactor));
             }
 
             _items[_count] = item;
@@ -99,7 +110,7 @@ namespace ClassicUO.Utility.Collections
         {
             if (_count == _items.Length)
             {
-                Array.Resize(ref _items, (int)(_items.Length * GrowthFactor));
+                Array.Resize(ref _items, (int) (_items.Length * GrowthFactor));
             }
 
             _items[_count] = item;
@@ -117,14 +128,15 @@ namespace ClassicUO.Utility.Collections
             Debug.Assert(items != null);
 #endif
 
-            int requiredSize = (int)(_count + items.Length);
+            int requiredSize = (int) (_count + items.Length);
+
             if (requiredSize > _items.Length)
             {
-                Array.Resize(ref _items, (int)(requiredSize * GrowthFactor));
+                Array.Resize(ref _items, (int) (requiredSize * GrowthFactor));
             }
 
-            Array.Copy(items, 0, _items, (int)_count, items.Length);
-            _count += (uint)items.Length;
+            Array.Copy(items, 0, _items, (int) _count, items.Length);
+            _count += (uint) items.Length;
         }
 
         public void AddRange(IEnumerable<T> items)
@@ -152,15 +164,19 @@ namespace ClassicUO.Utility.Collections
 
         public void Resize(uint count)
         {
-            Array.Resize(ref _items, (int)count);
+            Array.Resize(ref _items, (int) count);
             _count = count;
         }
 
-        public void Replace(uint index, T item) => Replace(index, ref item);
+        public void Replace(uint index, T item)
+        {
+            Replace(index, ref item);
+        }
 
         public bool Remove(ref T item)
         {
             bool contained = GetIndex(item, out uint index);
+
             if (contained)
             {
                 CoreRemoveAt(index);
@@ -173,6 +189,7 @@ namespace ClassicUO.Utility.Collections
         public bool Remove(T item)
         {
             bool contained = GetIndex(item, out uint index);
+
             if (contained)
             {
                 CoreRemoveAt(index);
@@ -195,11 +212,15 @@ namespace ClassicUO.Utility.Collections
         public bool GetIndex(T item, out uint index)
         {
             int signedIndex = Array.IndexOf(_items, item);
-            index = (uint)signedIndex;
+            index = (uint) signedIndex;
+
             return signedIndex != -1;
         }
 
-        public void Sort() => Sort(null);
+        public void Sort()
+        {
+            Sort(null);
+        }
 
         public void Sort(IComparer<T> comparer)
         {
@@ -231,7 +252,10 @@ namespace ClassicUO.Utility.Collections
             }
         }
 
-        public ReadOnlyArrayView<T> GetReadOnlyView() => new ReadOnlyArrayView<T>(_items, 0, _count);
+        public ReadOnlyArrayView<T> GetReadOnlyView()
+        {
+            return new ReadOnlyArrayView<T>(_items, 0, _count);
+        }
 
         public ReadOnlyArrayView<T> GetReadOnlyView(uint start, uint count)
         {
@@ -250,8 +274,8 @@ namespace ClassicUO.Utility.Collections
         private void CoreRemoveAt(uint index)
         {
             _count -= 1;
-            Array.Copy(_items, (int)index + 1, _items, (int)index, (int)(_count - index));
-            _items[_count] = default(T);
+            Array.Copy(_items, (int) index + 1, _items, (int) index, (int) (_count - index));
+            _items[_count] = default;
         }
 
         [MethodImpl(256)]
@@ -280,15 +304,14 @@ namespace ClassicUO.Utility.Collections
 #endif
         }
 
-        public Enumerator GetEnumerator() => new Enumerator(this);
-
-        IEnumerator<T> IEnumerable<T>.GetEnumerator() => GetEnumerator();
-
-        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+        public Enumerator GetEnumerator()
+        {
+            return new Enumerator(this);
+        }
 
         public struct Enumerator : IEnumerator<T>
         {
-            private RawList<T> _list;
+            private readonly RawList<T> _list;
             private uint _currentIndex;
 
             public Enumerator(RawList<T> list)
@@ -303,6 +326,7 @@ namespace ClassicUO.Utility.Collections
             public bool MoveNext()
             {
                 _currentIndex += 1;
+
                 return _currentIndex < _list._count;
             }
 
@@ -311,7 +335,9 @@ namespace ClassicUO.Utility.Collections
                 _currentIndex = 0;
             }
 
-            public void Dispose() { }
+            public void Dispose()
+            {
+            }
         }
     }
 }

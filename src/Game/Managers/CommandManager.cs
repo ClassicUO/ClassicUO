@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,13 +18,14 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
 using System.Collections.Generic;
-
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Input;
+using ClassicUO.Resources;
 using ClassicUO.Utility.Logging;
 
 namespace ClassicUO.Game.Managers
@@ -32,39 +34,45 @@ namespace ClassicUO.Game.Managers
     {
         private static readonly Dictionary<string, Action<string[]>> _commands = new Dictionary<string, Action<string[]>>();
 
-        public static byte GROUP = 0;
 
         public static void Initialize()
         {
-            Register("info", s =>
-            {
-                if (!TargetManager.IsTargeting)
+            Register
+            (
+                "info", s =>
+                {
+                    if (TargetManager.IsTargeting)
+                    {
+                        TargetManager.CancelTarget();
+                    }
+
                     TargetManager.SetTargeting(CursorTarget.SetTargetClientSide, CursorType.Target, TargetType.Neutral);
-                else
-                    TargetManager.CancelTarget();
-            });
-
-            Register("datetime", s =>
-            {
-                if(World.Player != null)
-                {
-                    GameActions.Print($"Current DateTime.Now is {DateTime.Now}");
                 }
-            });
-            Register("hue", s =>
-            {
-                if (!TargetManager.IsTargeting)
+            );
+
+            Register
+            (
+                "datetime", s =>
+                {
+                    if (World.Player != null)
+                    {
+                        GameActions.Print(string.Format(ResGeneral.CurrentDateTimeNowIs0, DateTime.Now));
+                    }
+                }
+            );
+
+            Register
+            (
+                "hue", s =>
+                {
+                    if (TargetManager.IsTargeting)
+                    {
+                        TargetManager.CancelTarget();
+                    }
+
                     TargetManager.SetTargeting(CursorTarget.HueCommandTarget, CursorType.Target, TargetType.Neutral);
-                else
-                    TargetManager.CancelTarget();
-            });
-            Register("change_anim", s =>
-            {
-                if (s.Length > 1 && byte.TryParse(s[1], out GROUP))
-                {
-
                 }
-            });
+            );
         }
 
 
@@ -73,9 +81,13 @@ namespace ClassicUO.Game.Managers
             name = name.ToLower();
 
             if (!_commands.ContainsKey(name))
+            {
                 _commands.Add(name, callback);
+            }
             else
-                Log.Error( string.Format($"Attempted to register command: '{0}' twice.", name));
+            {
+                Log.Error(string.Format($"Attempted to register command: '{0}' twice.", name));
+            }
         }
 
         public static void UnRegister(string name)
@@ -83,7 +95,9 @@ namespace ClassicUO.Game.Managers
             name = name.ToLower();
 
             if (_commands.ContainsKey(name))
+            {
                 _commands.Remove(name);
+            }
         }
 
         public static void UnRegisterAll()
@@ -95,18 +109,25 @@ namespace ClassicUO.Game.Managers
         {
             name = name.ToLower();
 
-            if (_commands.TryGetValue(name, out var action))
+            if (_commands.TryGetValue(name, out Action<string[]> action))
+            {
                 action.Invoke(args);
+            }
             else
-                Log.Warn( $"Commad: '{name}' not exists");
+            {
+                Log.Warn($"Commad: '{name}' not exists");
+            }
         }
 
         public static void OnHueTarget(Entity entity)
         {
             if (entity != null)
+            {
                 TargetManager.Target(entity);
+            }
+
             Mouse.LastLeftButtonClickTime = 0;
-            GameActions.Print($"Item ID: {entity.Graphic}\nHue: {entity.Hue}");
+            GameActions.Print(string.Format(ResGeneral.ItemID0Hue1, entity.Graphic, entity.Hue));
         }
     }
 }

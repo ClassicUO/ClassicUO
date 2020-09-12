@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,25 +18,23 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
-
 using ClassicUO.Input;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
-
 using SDL2;
 
 namespace ClassicUO.Game.UI.Controls
 {
     internal class HotkeyBox : Control
     {
+        private bool _actived;
         private readonly Button _buttonOK, _buttonCancel;
         private readonly HoveredLabel _label;
-
-        private bool _actived;
 
         public HotkeyBox()
         {
@@ -49,34 +48,46 @@ namespace ClassicUO.Game.UI.Controls
 
             ResizePic pic;
 
-            Add(pic = new ResizePic(0x0BB8)
-            {
-                Width = 150,
-                Height = Height,
-                AcceptKeyboardInput = true
-            });
+            Add
+            (
+                pic = new ResizePic(0x0BB8)
+                {
+                    Width = 150,
+                    Height = Height,
+                    AcceptKeyboardInput = true
+                }
+            );
 
             pic.MouseUp += LabelOnMouseUp;
 
-            Add(_label = new HoveredLabel(string.Empty, false, 1, 0x0021, 0x0021,150, 1, FontStyle.Italic, TEXT_ALIGN_TYPE.TS_CENTER)
-            {
-                Y = 5
-            });
+            Add
+            (
+                _label = new HoveredLabel(string.Empty, false, 1, 0x0021, 0x0021, 150, 1, FontStyle.Italic, TEXT_ALIGN_TYPE.TS_CENTER)
+                {
+                    Y = 5
+                }
+            );
 
             _label.MouseUp += LabelOnMouseUp;
 
-            Add(_buttonOK = new Button((int) ButtonState.Ok, 0x0481, 0x0483, 0x0482)
-            {
-                X = 152,
-                ButtonAction = ButtonAction.Activate
-            });
+            Add
+            (
+                _buttonOK = new Button((int) ButtonState.Ok, 0x0481, 0x0483, 0x0482)
+                {
+                    X = 152,
+                    ButtonAction = ButtonAction.Activate
+                }
+            );
 
 
-            Add(_buttonCancel = new Button((int) ButtonState.Cancel, 0x047E, 0x0480, 0x047F)
-            {
-                X = 182,
-                ButtonAction = ButtonAction.Activate
-            });
+            Add
+            (
+                _buttonCancel = new Button((int) ButtonState.Cancel, 0x047E, 0x0480, 0x047F)
+                {
+                    X = 182,
+                    ButtonAction = ButtonAction.Activate
+                }
+            );
 
             WantUpdateSize = false;
             IsActive = false;
@@ -110,7 +121,10 @@ namespace ClassicUO.Game.UI.Controls
 
         protected override void OnKeyDown(SDL.SDL_Keycode key, SDL.SDL_Keymod mod)
         {
-            if (IsActive) SetKey(key, mod);
+            if (IsActive)
+            {
+                SetKey(key, mod);
+            }
         }
 
         public void SetKey(SDL.SDL_Keycode key, SDL.SDL_Keymod mod)

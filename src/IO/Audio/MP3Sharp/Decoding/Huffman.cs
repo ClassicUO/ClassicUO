@@ -1,4 +1,5 @@
 #region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,6 +18,7 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using ClassicUO.IO.Audio.MP3Sharp.Support;
@@ -689,19 +691,19 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
             new[] {0, 12}, new[] {0, 13}, new[] {2, 1}, new[] {0, 14}, new[] {0, 15}
         };
 
-        public static Huffman[] ht; //Simulate extern struct
-        private readonly int linbits; //number of linbits
+        public static Huffman[] ht;             //Simulate extern struct
+        private int[] hlen;                     //pointer to array[xlen][ylen]
+        private readonly int linbits;           //number of linbits
+        private int linmax;                     //max number to be stored in linbits
+        private int ref_Renamed;                //a positive value indicates a reference
+        private int[] table;                    //pointer to array[xlen][ylen]
         private readonly char tablename0 = ' '; //string, containing table_description
         private readonly char tablename1 = ' '; //string, containing table_description
-        private readonly int treelen; //length of decoder tree
-        private readonly int[][] val; //decoder tree
-        private readonly int xlen; //max. x-index+
-        private readonly int ylen; //max. y-index+
-        private int[] hlen; //pointer to array[xlen][ylen]
-        private int linmax; //max number to be stored in linbits
-        private int ref_Renamed; //a positive value indicates a reference
-        private int[] table; //pointer to array[xlen][ylen]
-        private char tablename2 = ' '; //string, containing table_description
+        private char tablename2 = ' ';          //string, containing table_description
+        private readonly int treelen;           //length of decoder tree
+        private readonly int[][] val;           //decoder tree
+        private readonly int xlen;              //max. x-index+
+        private readonly int ylen;              //max. y-index+
 
         static Huffman()
         {
@@ -710,8 +712,11 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
         /// <summary>
         ///     Big Constructor : Computes all Huffman Tables.
         /// </summary>
-        private Huffman(string S, int XLEN, int YLEN, int LINBITS, int LINMAX, int REF, int[] TABLE, int[] HLEN,
-                        int[][] VAL, int TREELEN)
+        private Huffman
+        (
+            string S, int XLEN, int YLEN, int LINBITS, int LINMAX, int REF, int[] TABLE, int[] HLEN,
+            int[][] VAL, int TREELEN
+        )
         {
             tablename0 = S[0];
             tablename1 = S[1];
@@ -743,7 +748,9 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
             int level = dmask;
 
             if (h.val == null)
+            {
                 return 2;
+            }
 
             /* table 0 needs no bits */
             if (h.treelen == 0)
@@ -784,13 +791,19 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
                 if (br.ReadOneBit() != 0)
                 {
                     while (h.val[point][1] >= MXOFF)
+                    {
                         point += h.val[point][1];
+                    }
+
                     point += h.val[point][1];
                 }
                 else
                 {
                     while (h.val[point][0] >= MXOFF)
+                    {
                         point += h.val[point][0];
+                    }
+
                     point += h.val[point][0];
                 }
 
@@ -819,25 +832,33 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
                 if (v[0] != 0)
                 {
                     if (br.ReadOneBit() != 0)
+                    {
                         v[0] = -v[0];
+                    }
                 }
 
                 if (w[0] != 0)
                 {
                     if (br.ReadOneBit() != 0)
+                    {
                         w[0] = -w[0];
+                    }
                 }
 
                 if (x[0] != 0)
                 {
                     if (br.ReadOneBit() != 0)
+                    {
                         x[0] = -x[0];
+                    }
                 }
 
                 if (y[0] != 0)
                 {
                     if (br.ReadOneBit() != 0)
+                    {
                         y[0] = -y[0];
+                    }
                 }
             }
             else
@@ -849,25 +870,33 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
                 if (h.linbits != 0)
                 {
                     if (h.xlen - 1 == x[0])
+                    {
                         x[0] += br.ReadBits(h.linbits);
+                    }
                 }
 
                 if (x[0] != 0)
                 {
                     if (br.ReadOneBit() != 0)
+                    {
                         x[0] = -x[0];
+                    }
                 }
 
                 if (h.linbits != 0)
                 {
                     if (h.ylen - 1 == y[0])
+                    {
                         y[0] += br.ReadBits(h.linbits);
+                    }
                 }
 
                 if (y[0] != 0)
                 {
                     if (br.ReadOneBit() != 0)
+                    {
                         y[0] = -y[0];
+                    }
                 }
             }
 
@@ -877,7 +906,9 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
         public static void Initialize()
         {
             if (ht != null)
+            {
                 return;
+            }
 
             ht = new Huffman[HTN];
             ht[0] = new Huffman("0  ", 0, 0, 0, 0, -1, null, null, ValTab0, 0);

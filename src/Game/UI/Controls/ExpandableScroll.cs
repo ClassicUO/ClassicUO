@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,6 +18,7 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using ClassicUO.Input;
@@ -31,7 +33,7 @@ namespace ClassicUO.Game.UI.Controls
         private const int c_ExpandableScrollHeight_Max = 1000;
         private const int c_GumplingExpanderY_Offset = 2; // this is the gap between the pixels of the btm Control texture and the height of the btm Control texture.
         private const int c_GumplingExpander_ButtonID = 0x7FBEEF;
-        private readonly bool _isResizable = true;
+        private readonly GumpPic _gumpBottom;
         private Button _gumpExpander;
         private GumpPic _gumplingTitle;
         private int _gumplingTitleGumpID;
@@ -39,9 +41,9 @@ namespace ClassicUO.Game.UI.Controls
         private readonly GumpPicTiled _gumpMiddle;
         private readonly GumpPicTiled _gumpRight;
         private readonly GumpPic _gumpTop;
-        private readonly GumpPic _gumpBottom;
         private bool _isExpanding;
         private int _isExpanding_InitialX, _isExpanding_InitialY, _isExpanding_InitialHeight;
+        private readonly bool _isResizable = true;
 
         private readonly int _maxWidth;
 
@@ -54,11 +56,11 @@ namespace ClassicUO.Game.UI.Controls
             CanMove = true;
             AcceptMouseInput = true;
 
-            var textures = new UOTexture32[4];
+            UOTexture32[] textures = new UOTexture32[4];
 
             for (int i = 0; i < 4; i++)
             {
-                var t = GumpsLoader.Instance.GetTexture((ushort) (graphic + i));
+                UOTexture32 t = GumpsLoader.Instance.GetTexture((ushort) (graphic + i));
 
                 if (t == null)
                 {
@@ -68,7 +70,9 @@ namespace ClassicUO.Game.UI.Controls
                 }
 
                 if (t.Width > _maxWidth)
+                {
                     _maxWidth = t.Width;
+                }
 
                 textures[i] = t;
             }
@@ -81,19 +85,27 @@ namespace ClassicUO.Game.UI.Controls
 
             if (_isResizable)
             {
-                Add(_gumpExpander = new Button(c_GumplingExpander_ButtonID, 0x082E, 0x82F)
-                {
-                    ButtonAction = ButtonAction.Activate,
-                    X = 0,
-                    Y = 0
-                });
+                Add
+                (
+                    _gumpExpander = new Button(c_GumplingExpander_ButtonID, 0x082E, 0x82F)
+                    {
+                        ButtonAction = ButtonAction.Activate,
+                        X = 0,
+                        Y = 0
+                    }
+                );
+
                 _gumpExpander.MouseDown += expander_OnMouseDown;
                 _gumpExpander.MouseUp += expander_OnMouseUp;
                 _gumpExpander.MouseOver += expander_OnMouseOver;
             }
 
-            int off = textures[0].Width - textures[3].Width;
-            _maxWidth = textures[1].Width;
+            int off = textures[0]
+                .Width - textures[3]
+                .Width;
+
+            _maxWidth = textures[1]
+                .Width;
 
             _gumpRight.X = _gumpMiddle.X = 17;
             _gumpRight.X = _gumpMiddle.Y = _gumplingMidY;
@@ -157,24 +169,39 @@ namespace ClassicUO.Game.UI.Controls
 
 
             _gumpTop.HitTest(x, y, ref c);
+
             if (c != null)
+            {
                 return true;
+            }
 
             _gumpMiddle.HitTest(x, y, ref c);
+
             if (c != null)
+            {
                 return true;
+            }
 
             _gumpRight.HitTest(x, y, ref c);
+
             if (c != null)
+            {
                 return true;
+            }
 
             _gumpBottom.HitTest(x, y, ref c);
+
             if (c != null)
+            {
                 return true;
+            }
 
             _gumpExpander.HitTest(x, y, ref c);
+
             if (c != null)
+            {
                 return true;
+            }
 
             return false;
         }
@@ -182,10 +209,14 @@ namespace ClassicUO.Game.UI.Controls
         public override void Update(double totalMS, double frameMS)
         {
             if (SpecialHeight < c_ExpandableScrollHeight_Min)
+            {
                 SpecialHeight = c_ExpandableScrollHeight_Min;
+            }
 
             if (SpecialHeight > c_ExpandableScrollHeight_Max)
+            {
                 SpecialHeight = c_ExpandableScrollHeight_Max;
+            }
 
             if (_gumplingTitleGumpIDDelta)
             {
@@ -195,7 +226,7 @@ namespace ClassicUO.Game.UI.Controls
                 Add(_gumplingTitle = new GumpPic(0, 0, (ushort) _gumplingTitleGumpID, 0));
             }
 
-            
+
             {
                 //if (!IsVisible)
                 //    IsVisible = true;
@@ -268,7 +299,11 @@ namespace ClassicUO.Game.UI.Controls
         {
             int y = args.Y;
             y += _gumpExpander.Y + ScreenCoordinateY - Y;
-            if (_isExpanding && y != _isExpanding_InitialY) SpecialHeight = _isExpanding_InitialHeight + (y - _isExpanding_InitialY);
+
+            if (_isExpanding && y != _isExpanding_InitialY)
+            {
+                SpecialHeight = _isExpanding_InitialHeight + (y - _isExpanding_InitialY);
+            }
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,11 +18,14 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
+using ClassicUO.Resources;
 
 namespace ClassicUO.Game.Data
 {
-    enum Lock : byte
+    internal enum Lock : byte
     {
         Up = 0,
         Down = 1,
@@ -59,7 +63,7 @@ namespace ClassicUO.Game.Data
 
         public override string ToString()
         {
-            return $"Name: {Name} - {Value:F1}";
+            return string.Format(ResGeneral.Name0Val1, Name, Value);
         }
     }
 }

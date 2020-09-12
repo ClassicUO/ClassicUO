@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,11 +18,10 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
-using System;
 using System.Collections.Generic;
-
 using ClassicUO.Input;
 using ClassicUO.IO.Resources;
 using ClassicUO.Network;
@@ -49,17 +49,18 @@ namespace ClassicUO.Game.UI.Controls
                 {
                     _graphic = value;
 
-                    var texture = GumpsLoader.Instance.GetTexture(_graphic);
+                    UOTexture32 texture = GumpsLoader.Instance.GetTexture(_graphic);
 
                     if (texture == null)
                     {
                         Dispose();
+
                         return;
                     }
 
                     Width = texture.Width;
                     Height = texture.Height;
-                }              
+                }
             }
         }
 
@@ -68,21 +69,27 @@ namespace ClassicUO.Game.UI.Controls
 
         public override bool Contains(int x, int y)
         {
-            var texture = GumpsLoader.Instance.GetTexture(Graphic);
+            UOTexture32 texture = GumpsLoader.Instance.GetTexture(Graphic);
 
             if (texture == null)
+            {
                 return false;
+            }
 
             if (texture.Contains(x, y))
+            {
                 return true;
+            }
 
             for (int i = 0; i < Children.Count; i++)
             {
-                var c = Children[i];
+                Control c = Children[i];
 
                 // might be wrong x, y. They should be calculated by position
                 if (c.Contains(x, y))
+                {
                     return true;
+                }
             }
 
             return false;
@@ -100,7 +107,23 @@ namespace ClassicUO.Game.UI.Controls
             IsFromServer = true;
         }
 
-        public GumpPic(List<string> parts) : this(int.Parse(parts[1]), int.Parse(parts[2]), UInt16Converter.Parse(parts[3]), (ushort) (parts.Count > 4 ? TransformHue((ushort) (UInt16Converter.Parse(parts[4].Substring(parts[4].IndexOf('=') + 1)) + 1)) : 0))
+        public GumpPic(List<string> parts) : this
+        (
+            int.Parse(parts[1]), int.Parse(parts[2]), UInt16Converter.Parse(parts[3]), (ushort) (parts.Count > 4
+                ? TransformHue
+                (
+                    (ushort) (UInt16Converter.Parse
+                    (
+                        parts[4]
+                            .Substring
+                            (
+                                parts[4]
+                                    .IndexOf('=') + 1
+                            )
+                    ) + 1)
+                )
+                : 0)
+        )
         {
         }
 
@@ -128,7 +151,9 @@ namespace ClassicUO.Game.UI.Controls
         private static ushort TransformHue(ushort hue)
         {
             if (hue <= 2)
+            {
                 hue = 0;
+            }
 
             //if (hue < 2)
             //    hue = 1;
@@ -138,12 +163,14 @@ namespace ClassicUO.Game.UI.Controls
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
             if (IsDisposed)
+            {
                 return false;
+            }
 
             ResetHueVector();
-            ShaderHuesTraslator.GetHueVector(ref _hueVector, Hue, IsPartialHue, Alpha, true);
+            ShaderHueTranslator.GetHueVector(ref _hueVector, Hue, IsPartialHue, Alpha, true);
 
-            var texture = GumpsLoader.Instance.GetTexture(Graphic);
+            UOTexture32 texture = GumpsLoader.Instance.GetTexture(Graphic);
 
             if (texture != null)
             {

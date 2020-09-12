@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,23 +18,23 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
-
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Gumps
 {
-    abstract class ResizableGump : Gump
+    internal abstract class ResizableGump : Gump
     {
-        private readonly Button _button;
         private readonly BorderControl _borderControl;
-        private Point _lastSize, _savedSize;
+        private readonly Button _button;
         private bool _clicked;
-        private int _minW, _minH;
-
+        private Point _lastSize, _savedSize;
+        private readonly int _minH;
+        private readonly int _minW;
 
 
         protected ResizableGump(int width, int height, int minW, int minH, uint local, uint server, ushort borderHue = 0) : base(local, server)
@@ -42,11 +43,13 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 Hue = borderHue
             };
+
             Add(_borderControl);
             _button = new Button(0, 0x837, 0x838, 0x838);
             Add(_button);
 
-            _button.MouseDown += (sender, e) => { _clicked = true;};
+            _button.MouseDown += (sender, e) => { _clicked = true; };
+
             _button.MouseUp += (sender, e) =>
             {
                 ResizeWindow(_lastSize);
@@ -72,16 +75,17 @@ namespace ClassicUO.Game.UI.Gumps
         }
 
 
-       
-
-
         public Point ResizeWindow(Point newSize)
         {
             if (newSize.X < _minW)
+            {
                 newSize.X = _minW;
+            }
 
             if (newSize.Y < _minH)
+            {
                 newSize.Y = _minH;
+            }
 
             //Resize();
             _savedSize = newSize;
@@ -90,11 +94,12 @@ namespace ClassicUO.Game.UI.Gumps
         }
 
 
-
         public override void Update(double totalMS, double frameMS)
         {
             if (IsDisposed)
+            {
                 return;
+            }
 
             Point offset = Mouse.LDroppedOffset;
 
@@ -106,10 +111,14 @@ namespace ClassicUO.Game.UI.Gumps
                 int h = _lastSize.Y + offset.Y;
 
                 if (w < _minW)
+                {
                     w = _minW;
+                }
 
                 if (h < _minH)
+                {
                     h = _minH;
+                }
 
                 _lastSize.X = w;
                 _lastSize.Y = h;
@@ -133,6 +142,5 @@ namespace ClassicUO.Game.UI.Gumps
             _button.X = Width - (_button.Width >> 0) + 2;
             _button.Y = Height - (_button.Height >> 0) + 2;
         }
-        
     }
 }

@@ -23,9 +23,9 @@ ClassicUO is an open source implementation of the Ultima Online Classic Client. 
 The client is currently under heavy development but is functional. The code is based on the [FNA-XNA](https://fna-xna.github.io/) framework. C# is chosen because there is a large community of developers working on Ultima Online server emulators in C#, because FNA-XNA exists and seems reasonably suitable for creating this type of game.
 
 ClassicUO is natively cross platform and supports:
-* Windows [DirectX 11 or OpenGL]
-* Linux   [OpenGL]
-* macOS   [Metal or OpenGL]
+* Windows [DirectX 11, OpenGL, Vulkan]
+* Linux   [OpenGL, Vulkan]
+* macOS   [Metal, OpenGL, MoltenVK]
 
 # Download & Play!
 | Platform | Link |
@@ -37,6 +37,14 @@ ClassicUO is natively cross platform and supports:
 Or visit the [ClassicUO Website](https://www.classicuo.eu/)
 
 # How to build the project
+
+Clone repository with:
+```
+git clone https://github.com/andreakarasho/ClassicUO.git
+cd ClassicUO
+git submodule update --init --recursive
+```
+
 ### Windows
 The binary produced will work on all supported platforms.
 
@@ -54,11 +62,14 @@ Open a terminal instance and put the following commands:
 
 1. `sudo apt-get install mono-complete`
 
-2. `sudo apt-get install monodevelop`
+2. Navigate to ClassicUO scripts folder:
+`cd /your/path/to/ClassicUO/scripts`
 
-3. Select "Debug" or "Release" at the top.
+3. Execute `build.sh` script. If you want build a debug version of ClassicUO just pass "debug" as argument like: `./build.sh debug`.
+   Probably you have to set the `build.sh` file executable with with the command `chmod -x build.sh`
 
-4. Hit F5 to build. The output will be in the "bin/Release" or "bin/Debug" directory.
+6. Navigate to `/your/path/to/ClassicUO/bin/[Debug or Release]`
+
 
 ### macOS
 All the commands should be executed in terminal. All global package installs should be done only if not yet installed.

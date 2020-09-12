@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,6 +18,7 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 namespace ClassicUO.IO.Audio.MP3Sharp.Decoding.Decoders.LayerII
@@ -26,9 +28,6 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding.Decoders.LayerII
     /// </summary>
     internal class SubbandLayer2IntensityStereo : SubbandLayer2
     {
-        protected internal float channel2_scalefactor1, channel2_scalefactor2, channel2_scalefactor3;
-        protected internal int channel2_scfsi;
-
         /// <summary>
         ///     Constructor
         /// </summary>
@@ -36,6 +35,9 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding.Decoders.LayerII
             : base(subbandnumber)
         {
         }
+
+        protected internal float channel2_scalefactor1, channel2_scalefactor2, channel2_scalefactor3;
+        protected internal int channel2_scfsi;
 
         /// <summary>
         ///     *
@@ -121,7 +123,9 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding.Decoders.LayerII
                 float sample = samples[samplenumber];
 
                 if (groupingtable[0] == null)
+                {
                     sample = (sample + d[0]) * c[0];
+                }
 
                 if (channels == OutputChannels.BOTH_CHANNELS)
                 {
@@ -149,27 +153,43 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding.Decoders.LayerII
                 else if (channels == OutputChannels.LEFT_CHANNEL)
                 {
                     if (groupnumber <= 4)
+                    {
                         sample *= scalefactor1;
+                    }
                     else if (groupnumber <= 8)
+                    {
                         sample *= scalefactor2;
+                    }
                     else
+                    {
                         sample *= scalefactor3;
+                    }
+
                     filter1.input_sample(sample, subbandnumber);
                 }
                 else
                 {
                     if (groupnumber <= 4)
+                    {
                         sample *= channel2_scalefactor1;
+                    }
                     else if (groupnumber <= 8)
+                    {
                         sample *= channel2_scalefactor2;
+                    }
                     else
+                    {
                         sample *= channel2_scalefactor3;
+                    }
+
                     filter1.input_sample(sample, subbandnumber);
                 }
             }
 
             if (++samplenumber == 3)
+            {
                 return true;
+            }
 
             return false;
         }

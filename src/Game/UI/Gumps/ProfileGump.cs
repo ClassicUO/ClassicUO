@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,26 +18,28 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
-
 using ClassicUO.Game.UI.Controls;
+using ClassicUO.Input;
 using ClassicUO.IO.Resources;
 using ClassicUO.Network;
+using ClassicUO.Renderer;
 
 namespace ClassicUO.Game.UI.Gumps
 {
     internal class ProfileGump : Gump
     {
+        private const int _diffY = 22;
+        private readonly GumpPic _gumpPic;
+        private readonly HitBox _hitBox;
+        private bool _isMinimized;
         private readonly string _originalText;
         private readonly ScrollArea _scrollArea;
         private readonly ExpandableScroll _scrollExp;
         private readonly StbTextBox _textBox;
-        private readonly GumpPic _gumpPic;
-        private readonly HitBox _hitBox;
-        private bool _isMinimized;
-        private const int _diffY = 22;
 
         public ProfileGump(uint serial, string header, string footer, string body, bool canEdit) : base(serial == World.Player.Serial ? serial = Constants.PROFILE_LOCALSERIAL : serial, serial)
         {
@@ -55,10 +58,11 @@ namespace ClassicUO.Game.UI.Gumps
                 X = 85,
                 Y = 0
             };
+
             _scrollArea.Add(c);
             AddHorizontalBar(_scrollArea, 92, 35, 220);
 
-            _textBox = new StbTextBox(1, -1, 220, true, hue: 0)
+            _textBox = new StbTextBox(1, -1, 220)
             {
                 Height = FontsLoader.Instance.GetHeightUnicode(1, body, 220, TEXT_ALIGN_TYPE.TS_LEFT, 0x0),
                 Width = 220,
@@ -67,36 +71,32 @@ namespace ClassicUO.Game.UI.Gumps
                 IsEditable = canEdit,
                 Multiline = true
             };
+
             _originalText = body;
             _textBox.SetText(body);
 
             if (_textBox.Height < 50)
+            {
                 _textBox.Height = 50;
+            }
 
             _textBox.TextChanged += _textBox_TextChanged;
             _scrollArea.Add(_textBox);
             AddHorizontalBar(_scrollArea, 95, 35, 220);
 
-            _scrollArea.Add(new Label(footer, true, 0, font: 1, maxwidth: 220)
-            {
-                X = 35,
-                Y = 0
-            });
+            _scrollArea.Add
+            (
+                new Label(footer, true, 0, font: 1, maxwidth: 220)
+                {
+                    X = 35,
+                    Y = 0
+                }
+            );
+
             Add(_scrollArea);
 
             Add(_hitBox = new HitBox(143, 0, 23, 24));
             _hitBox.MouseUp += _hitBox_MouseUp;
-        }
-
-        private void _textBox_TextChanged(object sender, EventArgs e)
-        {
-            _textBox.Height = Math.Max(FontsLoader.Instance.GetHeightUnicode(1, _textBox.Text, 220, TEXT_ALIGN_TYPE.TS_LEFT, 0x0) + 5, 20);
-
-            foreach (Control c in _scrollArea.Children)
-            {
-                if (c is ScrollAreaItem)
-                    c.OnPageChanged();
-            }
         }
 
         public bool IsMinimized
@@ -119,7 +119,7 @@ namespace ClassicUO.Game.UI.Gumps
                         _gumpPic.X = 143;
                     }
 
-                    foreach (var c in Children)
+                    foreach (Control c in Children)
                     {
                         c.IsVisible = !value;
                     }
@@ -130,18 +130,31 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
-
-        private void _hitBox_MouseUp(object sender, Input.MouseEventArgs e)
+        private void _textBox_TextChanged(object sender, EventArgs e)
         {
-            if (e.Button == Input.MouseButtonType.Left && !IsMinimized)
+            _textBox.Height = Math.Max(FontsLoader.Instance.GetHeightUnicode(1, _textBox.Text, 220, TEXT_ALIGN_TYPE.TS_LEFT, 0x0) + 5, 20);
+
+            foreach (Control c in _scrollArea.Children)
+            {
+                if (c is ScrollAreaItem)
+                {
+                    c.OnPageChanged();
+                }
+            }
+        }
+
+
+        private void _hitBox_MouseUp(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtonType.Left && !IsMinimized)
             {
                 IsMinimized = true;
             }
         }
 
-        private void _picBase_MouseDoubleClick(object sender, Input.MouseDoubleClickEventArgs e)
+        private void _picBase_MouseDoubleClick(object sender, MouseDoubleClickEventArgs e)
         {
-            if (e.Button == Input.MouseButtonType.Left && IsMinimized)
+            if (e.Button == MouseButtonType.Left && IsMinimized)
             {
                 IsMinimized = false;
             }
@@ -154,7 +167,11 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override void Dispose()
         {
-            if (_originalText != _textBox.Text && World.Player != null && !World.Player.IsDestroyed && !NetClient.Socket.IsDisposed && NetClient.Socket.IsConnected) NetClient.Socket.Send(new PProfileUpdate(World.Player.Serial, _textBox.Text));
+            if (_originalText != _textBox.Text && World.Player != null && !World.Player.IsDestroyed && !NetClient.Socket.IsDisposed && NetClient.Socket.IsConnected)
+            {
+                NetClient.Socket.Send(new PProfileUpdate(World.Player.Serial, _textBox.Text));
+            }
+
             base.Dispose();
         }
 
@@ -176,24 +193,19 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void AddHorizontalBar(ScrollArea area, ushort start, int x, int width)
         {
-            var startBounds = GumpsLoader.Instance.GetTexture(start);
-            var middleBounds = GumpsLoader.Instance.GetTexture((ushort) (start + 1));
-            var endBounds = GumpsLoader.Instance.GetTexture((ushort) (start + 2));
+            UOTexture32 startBounds = GumpsLoader.Instance.GetTexture(start);
+            UOTexture32 middleBounds = GumpsLoader.Instance.GetTexture((ushort) (start + 1));
+            UOTexture32 endBounds = GumpsLoader.Instance.GetTexture((ushort) (start + 2));
 
             PrivateContainer container = new PrivateContainer();
 
             Control c = new GumpPic(x, 0, start, 0);
-            
+
             container.Add(c);
             container.Add(new GumpPicWithWidth(x + startBounds.Width, (startBounds.Height - middleBounds.Height) >> 1, (ushort) (start + 1), 0, width - startBounds.Width - endBounds.Width));
             container.Add(new GumpPic(x + width - endBounds.Width, 0, (ushort) (start + 2), 0));
 
             area.Add(container);
-        }
-
-        class PrivateContainer : Control
-        {
-
         }
 
         public override void OnPageChanged()
@@ -204,8 +216,14 @@ namespace ClassicUO.Game.UI.Gumps
             foreach (Control c in _scrollArea.Children)
             {
                 if (c is ScrollAreaItem)
+                {
                     c.OnPageChanged();
+                }
             }
+        }
+
+        private class PrivateContainer : Control
+        {
         }
 
         //public override void OnKeyboardReturn(int textID, string text)

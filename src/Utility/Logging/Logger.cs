@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,6 +18,7 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
@@ -54,6 +56,7 @@ namespace ClassicUO.Utility.Logging
         private int _indent;
 
         private bool _isLogging;
+        private readonly object _syncObject = new object();
 
         // No volatile support for properties, let's use a private backing field.
         public LogTypes LogTypes { get; set; }
@@ -71,13 +74,17 @@ namespace ClassicUO.Utility.Logging
         public void Message(LogTypes logType, string text)
         {
             lock (_syncObject)
+            {
                 SetLogger(logType, text);
+            }
         }
 
         public void NewLine()
         {
             lock (_syncObject)
+            {
                 SetLogger(LogTypes.None, string.Empty);
+            }
         }
 
         public void Clear()
@@ -95,14 +102,17 @@ namespace ClassicUO.Utility.Logging
             _indent--;
 
             if (_indent < 0)
+            {
                 _indent = 0;
+            }
         }
-        private readonly object _syncObject = new object();
 
         private void SetLogger(LogTypes type, string text)
         {
             if (!_isLogging)
+            {
                 return;
+            }
 
             if ((LogTypes & type) == type)
             {
@@ -114,14 +124,24 @@ namespace ClassicUO.Utility.Logging
                         Console.WriteLine(text);
                     }
                     else
+                    {
                         Console.WriteLine(text);
+                    }
                 }
                 else
                 {
                     Console.Write($"{DateTime.Now:T} |");
-                    var temp = Console.ForegroundColor;
-                    Console.ForegroundColor = _logTypesInfo[type].Item1;
-                    Console.Write(_logTypesInfo[type].Item2);
+                    ConsoleColor temp = Console.ForegroundColor;
+
+                    Console.ForegroundColor = _logTypesInfo[type]
+                        .Item1;
+
+                    Console.Write
+                    (
+                        _logTypesInfo[type]
+                            .Item2
+                    );
+
                     Console.ForegroundColor = temp;
 
                     if (_indent > 0)
@@ -131,7 +151,9 @@ namespace ClassicUO.Utility.Logging
                         Console.WriteLine(text);
                     }
                     else
+                    {
                         Console.WriteLine($"| {text}");
+                    }
                 }
             }
         }

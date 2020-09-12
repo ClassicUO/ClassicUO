@@ -1,4 +1,5 @@
 #region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,6 +18,7 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
@@ -24,22 +26,17 @@ using System.Collections.Generic;
 using System.Linq;
 using ClassicUO.Game.Managers;
 using ClassicUO.Input;
-using ClassicUO.Interfaces;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
-
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
-
 using SDL2;
-
-using IUpdateable = ClassicUO.Interfaces.IUpdateable;
 using Keyboard = ClassicUO.Input.Keyboard;
 using Mouse = ClassicUO.Input.Mouse;
 
 namespace ClassicUO.Game.UI.Controls
 {
-    enum ClickPriority
+    internal enum ClickPriority
     {
         High,
         Default,
@@ -50,6 +47,8 @@ namespace ClassicUO.Game.UI.Controls
     {
         internal static int _StepsDone = 1;
         internal static int _StepChanger = 1;
+
+        protected static Vector3 _hueVector = Vector3.Zero;
         private bool _acceptKeyboardInput, _acceptMouseInput, _mouseIsDown;
         private int _activePage;
         private bool _attempToDrag;
@@ -57,15 +56,6 @@ namespace ClassicUO.Game.UI.Controls
         private GumpControlInfo _controlInfo;
         private bool _handlesKeyboardFocus;
         private Control _parent;
-
-        protected static Vector3 _hueVector = Vector3.Zero;
-
-        protected static void ResetHueVector()
-        {
-            _hueVector.X = 0;
-            _hueVector.Y = 0;
-            _hueVector.Z = 0;
-        }
 
         protected Control(Control parent = null)
         {
@@ -101,7 +91,7 @@ namespace ClassicUO.Game.UI.Controls
         }
 
         public ref Rectangle Bounds => ref _bounds;
-        
+
         public bool IsDisposed { get; private set; }
 
         public bool IsVisible { get; set; } = true;
@@ -149,7 +139,10 @@ namespace ClassicUO.Game.UI.Controls
             get => _bounds.Width;
             set
             {
-                if (_bounds.Width != value) _bounds.Width = value;
+                if (_bounds.Width != value)
+                {
+                    _bounds.Width = value;
+                }
             }
         }
 
@@ -158,7 +151,10 @@ namespace ClassicUO.Game.UI.Controls
             get => _bounds.Height;
             set
             {
-                if (_bounds.Height != value) _bounds.Height = value;
+                if (_bounds.Height != value)
+                {
+                    _bounds.Height = value;
+                }
             }
         }
 
@@ -182,12 +178,15 @@ namespace ClassicUO.Game.UI.Controls
             internal set
             {
                 if (value == null)
+                {
                     _parent?.Children.Remove(this);
+                }
                 else
                 {
                     _parent?.Children.Remove(this);
                     value.Children.Add(this);
                 }
+
                 _parent = value;
             }
         }
@@ -197,12 +196,16 @@ namespace ClassicUO.Game.UI.Controls
             get
             {
                 if (Parent == null)
+                {
                     return null;
+                }
 
                 Control p = Parent;
 
                 while (p.Parent != null)
+                {
                     p = p.Parent;
+                }
 
                 return p;
             }
@@ -215,18 +218,26 @@ namespace ClassicUO.Game.UI.Controls
             get
             {
                 if (!IsEnabled || IsDisposed || !IsVisible)
+                {
                     return false;
+                }
 
                 if (_handlesKeyboardFocus)
+                {
                     return true;
+                }
 
                 if (Children == null)
+                {
                     return false;
+                }
 
                 foreach (Control c in Children)
                 {
                     if (c.HandlesKeyboardFocus)
+                    {
                         return true;
+                    }
                 }
 
                 return false;
@@ -251,10 +262,19 @@ namespace ClassicUO.Game.UI.Controls
 
         public int TooltipMaxLength { get; private set; }
 
+        protected static void ResetHueVector()
+        {
+            _hueVector.X = 0;
+            _hueVector.Y = 0;
+            _hueVector.Z = 0;
+        }
+
         public virtual bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
-            if (IsDisposed) 
+            if (IsDisposed)
+            {
                 return false;
+            }
 
             foreach (Control c in Children)
             {
@@ -274,7 +294,10 @@ namespace ClassicUO.Game.UI.Controls
 
         public virtual void Update(double totalMS, double frameMS)
         {
-            if (IsDisposed) return;
+            if (IsDisposed)
+            {
+                return;
+            }
 
             if (Children.Count != 0)
             {
@@ -300,10 +323,14 @@ namespace ClassicUO.Game.UI.Controls
                         if ((c.Page == 0 || c.Page == ActivePage) && c.IsVisible)
                         {
                             if (w < c.Bounds.Right)
+                            {
                                 w = c.Bounds.Right;
+                            }
 
                             if (h < c.Bounds.Bottom)
+                            {
                                 h = c.Bounds.Bottom;
+                            }
                         }
                     }
                 }
@@ -311,10 +338,15 @@ namespace ClassicUO.Game.UI.Controls
                 if (WantUpdateSize && IsVisible)
                 {
                     if (w != Width)
+                    {
                         Width = w;
+                    }
 
                     if (h != Height)
+                    {
                         Height = h;
+                    }
+
                     WantUpdateSize = false;
                 }
             }
@@ -324,7 +356,9 @@ namespace ClassicUO.Game.UI.Controls
         {
             //Update size as pages may vary in size.
             if (ServerSerial != 0)
+            {
                 WantUpdateSize = true;
+            }
         }
 
         private void DrawDebug(UltimaBatcher2D batcher, int x, int y)
@@ -384,8 +418,10 @@ namespace ClassicUO.Game.UI.Controls
 
         public void HitTest(int x, int y, ref Control res)
         {
-            if (!IsVisible || !IsEnabled)
+            if (!IsVisible || !IsEnabled || IsDisposed)
+            {
                 return;
+            }
 
             int parentX = ParentX;
             int parentY = ParentY;
@@ -396,7 +432,7 @@ namespace ClassicUO.Game.UI.Controls
                 {
                     if (AcceptMouseInput)
                     {
-                        if (res == null || res.Priority >= this.Priority)
+                        if (res == null || res.Priority >= Priority)
                         {
                             res = this;
                             OnHitTestSuccess(x, y, ref res);
@@ -422,21 +458,27 @@ namespace ClassicUO.Game.UI.Controls
         public virtual void OnHitTestSuccess(int x, int y, ref Control res)
         {
         }
-       
+
         public Control GetFirstControlAcceptKeyboardInput()
         {
             if (_acceptKeyboardInput)
+            {
                 return this;
+            }
 
             if (Children == null || Children.Count == 0)
+            {
                 return null;
+            }
 
             foreach (Control c in Children)
             {
                 Control a = c.GetFirstControlAcceptKeyboardInput();
 
                 if (a != null)
+                {
                     return a;
+                }
             }
 
             return null;
@@ -458,14 +500,16 @@ namespace ClassicUO.Game.UI.Controls
             c._parent = this;
 
             Children.Insert(index, c);
-            
+
             OnChildAdded();
         }
 
         public virtual void Remove(Control c)
         {
             if (c == null)
+            {
                 return;
+            }
 
             c.Parent = null;
             Children.Remove(c);
@@ -482,12 +526,15 @@ namespace ClassicUO.Game.UI.Controls
 
         public T[] GetControls<T>() where T : Control
         {
-            return Children.OfType<T>().Where(s => !s.IsDisposed).ToArray();
+            return Children.OfType<T>()
+                           .Where(s => !s.IsDisposed)
+                           .ToArray();
         }
 
         public IEnumerable<T> FindControls<T>() where T : Control
         {
-            return Children.OfType<T>().Where(s => !s.IsDisposed);
+            return Children.OfType<T>()
+                           .Where(s => !s.IsDisposed);
         }
 
 
@@ -510,7 +557,9 @@ namespace ClassicUO.Game.UI.Controls
         public void InvokeMouseCloseGumpWithRClick()
         {
             if (CanCloseWithRightClick)
+            {
                 CloseWithRightClick();
+            }
         }
 
         public void InvokeMouseOver(Point position)
@@ -543,7 +592,7 @@ namespace ClassicUO.Game.UI.Controls
             int y = position.Y - Y - ParentY;
             bool result = OnMouseDoubleClick(x, y, button);
 
-            var arg = new MouseDoubleClickEventArgs(x, y, button);
+            MouseDoubleClickEventArgs arg = new MouseDoubleClickEventArgs(x, y, button);
             MouseDoubleClick.Raise(arg, this);
             result |= arg.Result;
 
@@ -641,8 +690,10 @@ namespace ClassicUO.Game.UI.Controls
                     _attempToDrag = true;
                 }
             }
-            else 
+            else
+            {
                 Parent?.OnMouseOver(X + x, Y + y);
+            }
         }
 
         protected virtual void OnMouseEnter(int x, int y)
@@ -690,7 +741,7 @@ namespace ClassicUO.Game.UI.Controls
         protected virtual void OnMove(int x, int y)
         {
         }
-        
+
         internal virtual void OnFocusEnter()
         {
             if (!IsFocused)
@@ -722,22 +773,30 @@ namespace ClassicUO.Game.UI.Controls
         protected virtual void CloseWithRightClick()
         {
             if (!CanCloseWithRightClick)
+            {
                 return;
+            }
 
             Control parent = Parent;
 
             while (parent != null)
             {
                 if (!parent.CanCloseWithRightClick)
+                {
                     return;
+                }
 
                 parent = parent.Parent;
             }
 
             if (Parent == null)
+            {
                 Dispose();
+            }
             else
+            {
                 Parent.CloseWithRightClick();
+            }
         }
 
         public void KeyboardTabToNextFocus(Control c)
@@ -746,9 +805,11 @@ namespace ClassicUO.Game.UI.Controls
 
             for (int i = startIndex + 1; i < Children.Count; i++)
             {
-                if (Children[i].AcceptKeyboardInput)
+                if (Children[i]
+                    .AcceptKeyboardInput)
                 {
-                    Children[i].SetKeyboardFocus();
+                    Children[i]
+                        .SetKeyboardFocus();
 
                     return;
                 }
@@ -756,9 +817,11 @@ namespace ClassicUO.Game.UI.Controls
 
             for (int i = 0; i < startIndex; i++)
             {
-                if (Children[i].AcceptKeyboardInput)
+                if (Children[i]
+                    .AcceptKeyboardInput)
                 {
-                    Children[i].SetKeyboardFocus();
+                    Children[i]
+                        .SetKeyboardFocus();
 
                     return;
                 }
@@ -783,7 +846,9 @@ namespace ClassicUO.Game.UI.Controls
         public virtual void Dispose()
         {
             if (IsDisposed)
+            {
                 return;
+            }
 
             foreach (Control c in Children)
             {

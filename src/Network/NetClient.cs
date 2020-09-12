@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,12 +18,11 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
@@ -41,7 +41,7 @@ namespace ClassicUO.Network
         private Socket _socket;
         private CircularBuffer _circularBuffer;
         private ConcurrentQueue<Packet> _recvQueue = new ConcurrentQueue<Packet>();
-        private bool _connectAsync;
+        private readonly bool _connectAsync;
         private readonly bool _is_login_socket;
 
         private NetClient(bool connectAsync, bool is_login_socket)
@@ -144,16 +144,18 @@ namespace ClassicUO.Network
         {
             if (LoginSocket.IsDisposed && Socket.IsConnected)
             {
-                Socket._recvQueue.Enqueue(new Packet(data, length) { Filter = true });
+                Socket._recvQueue.Enqueue(new Packet(data, length) {Filter = true});
                 Socket.Statistics.TotalPacketsReceived++;
             }
             else if (Socket.IsDisposed && LoginSocket.IsConnected)
             {
-                Socket._recvQueue.Enqueue(new Packet(data, length) { Filter = true });
+                Socket._recvQueue.Enqueue(new Packet(data, length) {Filter = true});
                 LoginSocket.Statistics.TotalPacketsReceived++;
             }
             else
-                Log.Error( "Attempt to write into a dead socket");
+            {
+                Log.Error("Attempt to write into a dead socket");
+            }
         }
 
         public bool Connect(string ip, ushort port)
@@ -162,7 +164,9 @@ namespace ClassicUO.Network
             IPAddress address = ResolveIP(ip);
 
             if (address == null)
+            {
                 return false;
+            }
 
             IPEndPoint endpoint = new IPEndPoint(address, port);
             Connect(endpoint);
@@ -179,7 +183,7 @@ namespace ClassicUO.Network
 
         private void Connect(IPEndPoint endpoint)
         {
-            _socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp) { ReceiveBufferSize = BUFF_SIZE, SendBufferSize = BUFF_SIZE};
+            _socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp) {ReceiveBufferSize = BUFF_SIZE, SendBufferSize = BUFF_SIZE};
             _socket.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.NoDelay, 1);
             _recvBuffer = new byte[BUFF_SIZE];
             _incompletePacketBuffer = new byte[BUFF_SIZE];
@@ -193,10 +197,7 @@ namespace ClassicUO.Network
 
             if (_connectAsync)
             {
-                Task.Run(() =>
-                {
-                    InternalConnect(endpoint);
-                });
+                Task.Run(() => { InternalConnect(endpoint); });
             }
             else
             {
@@ -216,8 +217,10 @@ namespace ClassicUO.Network
                     Statistics.ConnectedFrom = DateTime.Now;
                     StartRecv();
                 }
-                else 
+                else
+                {
                     Log.Error("socket not connected");
+                }
             }
             catch (SocketException e)
             {
@@ -234,12 +237,16 @@ namespace ClassicUO.Network
         private void Disconnect(SocketError error)
         {
             if (IsDisposed)
+            {
                 return;
+            }
 
             IsDisposed = true;
 
             if (_socket == null)
+            {
                 return;
+            }
 
             try
             {
@@ -267,7 +274,9 @@ namespace ClassicUO.Network
             _circularBuffer = null;
 
             if (error != 0)
+            {
                 Disconnected.Raise(error);
+            }
 
             Statistics.Reset();
         }
@@ -293,9 +302,9 @@ namespace ClassicUO.Network
         {
             if (!ignorePlugin && !Plugin.ProcessSendPacket(ref data, ref length))
             {
-               return;
+                return;
             }
-            
+
             PacketSent.Raise(new PacketWriter(data, length));
             Send(data, length, skip_encryption);
         }
@@ -303,15 +312,22 @@ namespace ClassicUO.Network
         private void Send(byte[] data, int length, bool skip_encryption)
         {
             if (_socket == null || IsDisposed)
+            {
                 return;
+            }
 
             if (data != null && data.Length != 0 && length > 0)
             {
                 if (!skip_encryption)
-                    EncryptionHelper.Encrypt(_is_login_socket,
-                                             ref data,
-                                             ref data,
-                                             length);
+                {
+                    EncryptionHelper.Encrypt
+                    (
+                        _is_login_socket,
+                        ref data,
+                        ref data,
+                        length
+                    );
+                }
 
 #if !DEBUG
                     //LogPacket(data, true);
@@ -355,7 +371,10 @@ namespace ClassicUO.Network
 
         private void ExtractPackets()
         {
-            if (!IsConnected || _circularBuffer == null || _circularBuffer.Length <= 0) return;
+            if (!IsConnected || _circularBuffer == null || _circularBuffer.Length <= 0)
+            {
+                return;
+            }
 
             lock (_circularBuffer)
             {
@@ -364,21 +383,30 @@ namespace ClassicUO.Network
                 while (length > 0 && IsConnected)
                 {
                     byte id = _circularBuffer.GetID();
+
                     if (id == 0xFF)
+                    {
                         break;
+                    }
 
                     int packetlength = PacketsTable.GetPacketLength(id);
 
                     if (packetlength == -1)
                     {
                         if (length >= 3)
+                        {
                             packetlength = _circularBuffer.GetLength();
+                        }
                         else
+                        {
                             break;
+                        }
                     }
 
                     if (length < packetlength)
+                    {
                         break;
+                    }
 
 
                     if (packetlength > 0)
@@ -392,7 +420,7 @@ namespace ClassicUO.Network
                         _recvQueue.Enqueue(new Packet(data, packetlength));
                         Statistics.TotalPacketsReceived++;
                     }
-                    
+
                     length = _circularBuffer.Length;
                 }
             }
@@ -521,18 +549,23 @@ namespace ClassicUO.Network
         private void StartRecv()
         {
             if (IsConnected && !IsDisposed)
+            {
                 _socket.BeginReceive(_recvBuffer, 0, BUFF_SIZE, SocketFlags.None, ProcessRecv, null);
+            }
         }
 
 
         private void ProcessRecv(IAsyncResult e)
         {
             if (IsDisposed)
+            {
                 return;
+            }
 
             if (!IsConnected && !IsDisposed)
             {
                 Disconnect();
+
                 return;
             }
 
@@ -557,7 +590,9 @@ namespace ClassicUO.Network
                     }
 
                     lock (_circularBuffer)
+                    {
                         _circularBuffer.Enqueue(buffer, 0, bytesLen);
+                    }
 
                     ExtractPackets();
 
@@ -579,7 +614,6 @@ namespace ClassicUO.Network
                 Log.Error("fatal error when receiving:\n" + ex);
                 Disconnect();
             }
-           
         }
 
         private void DecompressBuffer(ref byte[] buffer, ref int length)
@@ -620,7 +654,10 @@ namespace ClassicUO.Network
         {
             IPAddress result = IPAddress.None;
 
-            if (string.IsNullOrEmpty(addr)) return result;
+            if (string.IsNullOrEmpty(addr))
+            {
+                return result;
+            }
 
             if (!IPAddress.TryParse(addr, out result))
             {
@@ -629,7 +666,9 @@ namespace ClassicUO.Network
                     IPHostEntry hostEntry = Dns.GetHostEntry(addr);
 
                     if (hostEntry.AddressList.Length != 0)
+                    {
                         result = hostEntry.AddressList[hostEntry.AddressList.Length - 1];
+                    }
                 }
                 catch
                 {

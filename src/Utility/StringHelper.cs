@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,10 +18,11 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
-using System.Text;
 using System.Runtime.CompilerServices;
+using System.Text;
 using SDL2;
 
 namespace ClassicUO.Utility
@@ -33,10 +35,15 @@ namespace ClassicUO.Utility
         public static string CapitalizeFirstCharacter(string str)
         {
             if (string.IsNullOrEmpty(str))
+            {
                 return string.Empty;
+            }
 
             if (str.Length == 1)
-                return char.ToUpper(str[0]).ToString();
+            {
+                return char.ToUpper(str[0])
+                           .ToString();
+            }
 
             return char.ToUpper(str[0]) + str.Substring(1);
         }
@@ -45,10 +52,15 @@ namespace ClassicUO.Utility
         public static string CapitalizeAllWords(string str)
         {
             if (string.IsNullOrEmpty(str))
+            {
                 return string.Empty;
+            }
 
             if (str.Length == 1)
-                return char.ToUpper(str[0]).ToString();
+            {
+                return char.ToUpper(str[0])
+                           .ToString();
+            }
 
             _sb.Clear();
 
@@ -57,8 +69,11 @@ namespace ClassicUO.Utility
             for (int i = 0; i < str.Length; i++)
             {
                 _sb.Append(capitalizeNext ? char.ToUpper(str[i]) : str[i]);
+
                 if (!char.IsWhiteSpace(str[i]))
+                {
                     capitalizeNext = i + 1 < str.Length && char.IsWhiteSpace(str[i + 1]);
+                }
             }
 
             return _sb.ToString();
@@ -67,10 +82,15 @@ namespace ClassicUO.Utility
         public static string CapitalizeWordsByLimitator(string str)
         {
             if (string.IsNullOrEmpty(str))
+            {
                 return string.Empty;
+            }
 
             if (str.Length == 1)
-                return char.ToUpper(str[0]).ToString();
+            {
+                return char.ToUpper(str[0])
+                           .ToString();
+            }
 
             _sb.Clear();
 
@@ -100,7 +120,9 @@ namespace ClassicUO.Utility
             byte* ptr = data;
 
             while (*ptr != 0)
+            {
                 ptr++;
+            }
 
             return Encoding.UTF8.GetString(data, (int) (ptr - data));
         }
@@ -113,13 +135,18 @@ namespace ClassicUO.Utility
 
         public static void AddSpaceBeforeCapital(string[] str, bool checkAcronyms = true)
         {
-            for (int i = 0; i < str.Length; i++) str[i] = AddSpaceBeforeCapital(str[i], checkAcronyms);
+            for (int i = 0; i < str.Length; i++)
+            {
+                str[i] = AddSpaceBeforeCapital(str[i], checkAcronyms);
+            }
         }
 
         public static string AddSpaceBeforeCapital(string str, bool checkAcronyms = true)
         {
             if (string.IsNullOrWhiteSpace(str))
+            {
                 return "";
+            }
 
             _sb.Clear();
             _sb.Append(str[0]);
@@ -130,7 +157,9 @@ namespace ClassicUO.Utility
                 {
                     if (str[i - 1] != ' ' && !char.IsUpper(str[i - 1]) ||
                         checkAcronyms && char.IsUpper(str[i - 1]) && i < len && !char.IsUpper(str[i + 1]))
+                    {
                         _sb.Append(' ');
+                    }
                 }
 
                 _sb.Append(str[i]);
@@ -142,14 +171,18 @@ namespace ClassicUO.Utility
         public static string RemoveUpperLowerChars(string str, bool removelower = true)
         {
             if (string.IsNullOrWhiteSpace(str))
+            {
                 return "";
+            }
 
             _sb.Clear();
 
             for (int i = 0; i < str.Length; i++)
             {
                 if (char.IsUpper(str[i]) == removelower || str[i] == ' ')
+                {
                     _sb.Append(str[i]);
+                }
             }
 
             return _sb.ToString();
@@ -161,28 +194,35 @@ namespace ClassicUO.Utility
             {
                 return string.Format("{0}M+", num / 1000000);
             }
-            else if (num > 999)
+
+            if (num > 999)
             {
                 return string.Format("{0}K+", num / 1000);
             }
-            else
-            {
-                return num.ToString();
-            }
+
+            return num.ToString();
         }
 
         public static string GetClipboardText(bool multiline)
         {
             if (SDL.SDL_HasClipboardText() != SDL.SDL_bool.SDL_FALSE)
             {
-                string s = multiline ? SDL.SDL_GetClipboardText() : (SDL.SDL_GetClipboardText()?.Replace('\n', ' ') ?? null );
-                if(!string.IsNullOrEmpty(s))
+                string s = multiline
+                    ? SDL.SDL_GetClipboardText()
+                    : SDL.SDL_GetClipboardText()
+                         ?.Replace('\n', ' ') ?? null;
+
+                if (!string.IsNullOrEmpty(s))
                 {
                     if (s.IndexOf('\t') >= 0)
+                    {
                         return s.Replace("\t", "   ");
+                    }
+
                     return s;
                 }
             }
+
             return null;
         }
     }

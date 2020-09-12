@@ -1,4 +1,5 @@
 #region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,6 +18,7 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
@@ -145,7 +147,9 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
             buf_byte_idx -= bitCount;
 
             if (buf_byte_idx < 0)
+            {
                 buf_byte_idx += BUFSIZE;
+            }
         }
 
         /// <summary>
@@ -158,7 +162,9 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
             buf_byte_idx -= bits;
 
             if (buf_byte_idx < 0)
+            {
                 buf_byte_idx += BUFSIZE;
+            }
         }
     }
 }

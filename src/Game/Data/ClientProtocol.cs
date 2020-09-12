@@ -3,7 +3,7 @@
 namespace ClassicUO.Game.Data
 {
     [Flags]
-    enum ClientFlags : uint
+    internal enum ClientFlags : uint
     {
         CF_T2A = 0x00,
         CF_RE = 0x01,
@@ -15,6 +15,6 @@ namespace ClassicUO.Game.Data
         CF_UO3D = 0x40,
         CF_RESERVED = 0x80,
         CF_3D = 0x100,
-        CF_UNDEFINED = 0xFFFF,
+        CF_UNDEFINED = 0xFFFF
     }
 }

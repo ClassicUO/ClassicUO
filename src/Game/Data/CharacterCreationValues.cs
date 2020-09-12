@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,6 +18,7 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System.Linq;
@@ -166,30 +168,45 @@ namespace ClassicUO.Game.Data
                 case RaceType.HUMAN:
 
                     if (isFemale)
+                    {
                         return new ComboContent(HumanFemaleHairLabels, HumanFemaleHairGraphics);
+                    }
                     else
+                    {
                         return new ComboContent(HumanHairLabels, HumanHairGraphics);
+                    }
 
                 case RaceType.ELF:
 
                     if (isFemale)
+                    {
                         return new ComboContent(ElfFemaleHairLabels, ElfFemaleHairGraphics);
+                    }
                     else
+                    {
                         return new ComboContent(ElfHairLabels, ElfHairGraphics);
+                    }
 
                 case RaceType.GARGOYLE:
 
                     if (isFemale)
+                    {
                         return new ComboContent(GargoyleFemaleHairLabels, GargoyleFemaleHairGraphics);
+                    }
                     else
+                    {
                         return new ComboContent(GargoyleHairLabels, GargoyleHairGraphics);
+                    }
             }
 
-            return new ComboContent(new int[]
-            {
-            }, new int[]
-            {
-            });
+            return new ComboContent
+            (
+                new int[]
+                {
+                }, new int[]
+                {
+                }
+            );
         }
 
         public static ComboContent GetFacialHairComboContent(RaceType race)
@@ -205,20 +222,26 @@ namespace ClassicUO.Game.Data
                     return new ComboContent(GargoyleFacialLabels, GargoyleFacialGraphics);
             }
 
-            return new ComboContent(new int[]
-            {
-            }, new int[]
-            {
-            });
+            return new ComboContent
+            (
+                new int[]
+                {
+                }, new int[]
+                {
+                }
+            );
         }
 
         internal class ComboContent
         {
             private readonly int[] _ids;
+
             public ComboContent(int[] labels, int[] ids)
             {
                 _ids = ids;
-                Labels = labels.Select(o => ClilocLoader.Instance.GetString(o)).ToArray();
+
+                Labels = labels.Select(o => ClilocLoader.Instance.GetString(o))
+                               .ToArray();
             }
 
             public string[] Labels { get; }

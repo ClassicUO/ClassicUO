@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,6 +18,7 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
@@ -28,7 +30,7 @@ namespace ClassicUO.Utility
         private static readonly Random _random = new Random();
 
         /// <summary>
-        /// Returns a random number between low and high, inclusive of both low and high.
+        ///     Returns a random number between low and high, inclusive of both low and high.
         /// </summary>
         public static int GetValue(int low, int high)
         {
@@ -36,7 +38,7 @@ namespace ClassicUO.Utility
         }
 
         /// <summary>
-        /// Returns a non-negative random integer.
+        ///     Returns a non-negative random integer.
         /// </summary>
         public static int GetValue()
         {

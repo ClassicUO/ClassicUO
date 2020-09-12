@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,10 +18,10 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System.Xml;
-
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
@@ -30,12 +31,14 @@ using ClassicUO.Network;
 
 namespace ClassicUO.Game.UI.Gumps
 {
-    class RacialAbilityButton : Gump
+    internal class RacialAbilityButton : Gump
     {
         public RacialAbilityButton(ushort graphic) : this()
         {
             LocalSerial = (uint) (7000 + graphic);
-            UIManager.GetGump<RacialAbilityButton>(LocalSerial)?.Dispose();
+
+            UIManager.GetGump<RacialAbilityButton>(LocalSerial)
+                     ?.Dispose();
 
             Graphic = graphic;
             BuildGump();
@@ -47,14 +50,13 @@ namespace ClassicUO.Game.UI.Gumps
             CanCloseWithRightClick = true;
         }
 
-        public ushort Graphic;
-
         public override GUMP_TYPE GumpType => GUMP_TYPE.GT_RACIALBUTTON;
+        public ushort Graphic;
 
 
         private void BuildGump()
         {
-            var pic = new GumpPic(0, 0, Graphic, 0);
+            GumpPic pic = new GumpPic(0, 0, Graphic, 0);
             Add(pic);
             pic.SetTooltip(ClilocLoader.Instance.GetString(1112198 + (Graphic - 0x5DD0)), 200);
         }
@@ -67,6 +69,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 return true;
             }
+
             return base.OnMouseDoubleClick(x, y, button);
         }
 
@@ -82,6 +85,5 @@ namespace ClassicUO.Game.UI.Gumps
             Graphic = ushort.Parse(xml.GetAttribute("graphic"));
             BuildGump();
         }
-
     }
 }

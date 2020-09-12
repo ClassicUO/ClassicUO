@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,9 +18,8 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-#endregion
 
-using System.Collections.Generic;
+#endregion
 
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
@@ -34,16 +34,18 @@ namespace ClassicUO.Game.Managers
 
         public void Update(double totalMS, double frameMS)
         {
-            var f = _root;
+            GameEffect f = _root;
 
             while (f != null)
             {
-                var n = f.Next;
+                LinkedObject n = f.Next;
 
                 f.Update(totalMS, frameMS);
 
                 if (!f.IsDestroyed && f.Distance > World.ClientViewRange)
+                {
                     RemoveEffect(f);
+                }
 
                 if (f.IsDestroyed)
                 {
@@ -52,7 +54,9 @@ namespace ClassicUO.Game.Managers
                         foreach (GameEffect child in f.Children)
                         {
                             if (!child.IsDestroyed)
+                            {
                                 Add(child);
+                            }
                         }
 
                         f.Children.Clear();
@@ -63,19 +67,28 @@ namespace ClassicUO.Game.Managers
             }
         }
 
-        public void Add(GraphicEffectType type, 
-                        uint source, uint target, 
-                        ushort graphic, 
-                        ushort hue, 
-                        ushort srcX, ushort srcY, sbyte srcZ,
-                        ushort targetX, ushort targetY, sbyte targetZ,
-                        byte speed, int duration, bool fixedDir, bool doesExplode, bool hasparticles, GraphicEffectBlendMode blendmode)
+        public void Add
+        (
+            GraphicEffectType type,
+            uint source, uint target,
+            ushort graphic,
+            ushort hue,
+            ushort srcX, ushort srcY, sbyte srcZ,
+            ushort targetX, ushort targetY, sbyte targetZ,
+            byte speed, int duration, bool fixedDir, bool doesExplode, bool hasparticles, GraphicEffectBlendMode blendmode
+        )
         {
-            if (hasparticles) Log.Warn( "Unhandled particles in an effects packet.");
+            if (hasparticles)
+            {
+                Log.Warn("Unhandled particles in an effects packet.");
+            }
+
             GameEffect effect = null;
 
             if (hue != 0)
+            {
                 hue++;
+            }
 
             duration *= Constants.ITEM_EFFECT_ANIMATION_DELAY;
 
@@ -83,18 +96,24 @@ namespace ClassicUO.Game.Managers
             {
                 case GraphicEffectType.Moving:
                     if (graphic <= 0)
+                    {
                         return;
+                    }
 
                     if (speed == 0)
+                    {
                         speed++;
-                    
+                    }
+
                     effect = new MovingEffect(source, target, srcX, srcY, srcZ, targetX, targetY, targetZ, graphic, hue, fixedDir, speed)
                     {
-                        Blend = blendmode,
+                        Blend = blendmode
                     };
 
                     if (doesExplode)
+                    {
                         effect.AddChildEffect(new AnimatedItemEffect(target, targetX, targetY, targetZ, 0x36Cb, hue, 9, speed));
+                    }
 
                     break;
 
@@ -106,7 +125,9 @@ namespace ClassicUO.Game.Managers
                 case GraphicEffectType.FixedXYZ:
 
                     if (graphic <= 0)
+                    {
                         return;
+                    }
 
                     effect = new AnimatedItemEffect(srcX, srcY, srcZ, graphic, hue, duration, speed)
                     {
@@ -118,22 +139,24 @@ namespace ClassicUO.Game.Managers
                 case GraphicEffectType.FixedFrom:
 
                     if (graphic <= 0)
+                    {
                         return;
+                    }
 
                     effect = new AnimatedItemEffect(source, srcX, srcY, srcZ, graphic, hue, duration, speed)
                     {
-                        Blend = blendmode,
+                        Blend = blendmode
                     };
 
                     break;
 
                 case GraphicEffectType.ScreenFade:
-                    Log.Warn( "Unhandled 'Screen Fade' effect.");
+                    Log.Warn("Unhandled 'Screen Fade' effect.");
 
                     break;
 
                 default:
-                    Log.Warn( "Unhandled effect.");
+                    Log.Warn("Unhandled effect.");
 
                     return;
             }
@@ -166,13 +189,13 @@ namespace ClassicUO.Game.Managers
         {
             while (_root != null)
             {
-                var n = _root.Next;
+                LinkedObject n = _root.Next;
 
                 foreach (GameEffect child in _root.Children)
                 {
                     RemoveEffect(child);
                 }
-                
+
                 _root.Children.Clear();
 
                 RemoveEffect(_root);
@@ -185,7 +208,9 @@ namespace ClassicUO.Game.Managers
         public void RemoveEffect(GameEffect effect)
         {
             if (effect == null || effect.IsDestroyed)
+            {
                 return;
+            }
 
             if (effect.Previous == null)
             {

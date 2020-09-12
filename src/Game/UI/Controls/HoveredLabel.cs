@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,11 +18,11 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
-
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Controls
@@ -46,16 +47,22 @@ namespace ClassicUO.Game.UI.Controls
             if (IsSelected)
             {
                 if (Hue != _selectedHue)
+                {
                     Hue = _selectedHue;
+                }
             }
             else if (MouseIsOver || ForceHover)
             {
                 if (Hue != _overHue)
+                {
                     Hue = _overHue;
+                }
             }
             else if (Hue != _normalHue)
-                    Hue = _normalHue;
-            
+            {
+                Hue = _normalHue;
+            }
+
 
             base.Update(totalMS, frameMS);
         }

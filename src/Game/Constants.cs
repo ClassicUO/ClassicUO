@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,6 +18,7 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 
@@ -26,15 +28,12 @@ namespace ClassicUO.Game
     {
         public const string WIKI_LINK = "https://github.com/andreakarasho/ClassicUO/wiki";
 
-        public const int MIN_FPS = 15;
+        public const int MIN_FPS = 12;
         public const int MAX_FPS = 250;
         public const int LOGIN_SCREEN_FPS = 60;
 
         public const int CHARACTER_ANIMATION_DELAY = 80;
         public const int ITEM_EFFECT_ANIMATION_DELAY = 50;
-
-        // cannot be a const, due to UOLive implementation
-        public static int MAPS_COUNT = 6;
 
         public const int MAX_STEP_COUNT = 5;
         public const int TURN_DELAY = 100; // original client 12.5 fps = 80ms delay. FIXME: this patch causes a packet throttle. Reverted back to 100ms
@@ -62,6 +61,8 @@ namespace ClassicUO.Game
         public const byte ALPHA_TIME = 20;
 
         public const int MAX_OBJECT_HANDLES = 200;
+        public const int OBJECT_HANDLES_GUMP_WIDTH = 100;
+        public const int OBJECT_HANDLES_GUMP_HEIGHT = 18;
 
         public const int SPELLBOOK_1_SPELLS_COUNT = 64;
         public const int SPELLBOOK_2_SPELLS_COUNT = 17;
@@ -77,6 +78,7 @@ namespace ClassicUO.Game
         public const int CONTAINER_RECT_STEP = 20;
         public const int CONTAINER_RECT_DEFAULT_POSITION = 40;
         public const int CONTAINER_RECT_LINESTEP = 800;
+        public const int ITEM_GUMP_TEXTURE_OFFSET = 11369;
 
         public const int MAX_LAND_DATA_INDEX_COUNT = 0x4000;
         public const int MAX_STATIC_DATA_INDEX_COUNT = 0x10000;
@@ -106,10 +108,10 @@ namespace ClassicUO.Game
 
         public const int OUT_RANGE_COLOR = 0x038B;
         public const int DEAD_RANGE_COLOR = 0x038E;
-
         public const int DEATH_SCREEN_TIMER = 1500;
-
         public const float SOUND_DELTA = 250;
+
+        public const ushort HIGHLIGHT_CURRENT_OBJECT_HUE = 0x014;
 
         public const int MAX_JOURNAL_HISTORY_COUNT = 100;
 
@@ -120,12 +122,18 @@ namespace ClassicUO.Game
         public const byte MIN_CONTAINER_SIZE_PERC = 50;
         public const byte MAX_CONTAINER_SIZE_PERC = 200;
 
+        public const int MALE_GUMP_OFFSET = 50000;
+        public const int FEMALE_GUMP_OFFSET = 60000;
+
         public const int WEATHER_TIMER = 6 * 60 * 1000;
 
         public const int PREDICTABLE_CHUNKS = 300;
         public const int PREDICTABLE_TILE_COUNT = 64 * PREDICTABLE_CHUNKS;
         public const int PREDICTABLE_STATICS = PREDICTABLE_TILE_COUNT * 2;
         public const int PREDICTABLE_MULTIS = PREDICTABLE_TILE_COUNT * 4;
+
+        // cannot be a const, due to UOLive implementation
+        public static int MAPS_COUNT = 6;
 
         public static readonly bool[] BAD_CONTAINER_LAYERS =
         {

@@ -1,4 +1,5 @@
 #region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,6 +18,7 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
@@ -42,7 +44,9 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
             SampleFrequency = sample_frequency;
 
             for (int i = 0; i < number_of_channels; ++i)
+            {
                 bufferp[i] = (short) i;
+            }
         }
 
         public virtual int ChannelCount => channels;
@@ -102,7 +106,9 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
         public override void ClearBuffer()
         {
             for (int i = 0; i < channels; ++i)
+            {
                 bufferp[i] = (short) i;
+            }
         }
 
         /// <summary>

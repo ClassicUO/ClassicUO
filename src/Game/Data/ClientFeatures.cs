@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,15 +18,16 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
-using ClassicUO.Data;
 using System;
+using ClassicUO.Data;
 
 namespace ClassicUO.Game.Data
 {
     [Flags]
-    enum CharacterListFlags
+    internal enum CharacterListFlags
     {
         CLF_UNKNOWN = 0x01,
         CLF_OWERWRITE_CONFIGURATION_BUTTON = 0x02,
@@ -59,11 +61,18 @@ namespace ClassicUO.Game.Data
             Flags = flags;
 
             if ((flags & CharacterListFlags.CLF_ONE_CHARACTER_SLOT) != 0)
+            {
                 MaxChars = 1;
+            }
             else if ((flags & CharacterListFlags.CLF_7_CHARACTER_SLOT) != 0)
+            {
                 MaxChars = 7;
+            }
             else if ((flags & CharacterListFlags.CLF_6_CHARACTER_SLOT) != 0)
+            {
                 MaxChars = 6;
+            }
+
             PopupEnabled = (flags & CharacterListFlags.CLF_CONTEXT_MENU) != 0;
             TooltipsEnabled = (flags & CharacterListFlags.CLF_PALADIN_NECROMANCER_TOOLTIPS) != 0 && Client.Version >= ClientVersion.CV_308Z;
             PaperdollBooks = (flags & CharacterListFlags.CLF_PALADIN_NECROMANCER_TOOLTIPS) != 0;

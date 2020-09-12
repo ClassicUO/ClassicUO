@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,6 +18,7 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
@@ -24,7 +26,6 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Text;
-
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
@@ -48,7 +49,6 @@ namespace ClassicUO.Renderer
         }
 
 
-
         public ReadOnlyCollection<char> Characters { get; }
         public char? DefaultCharacter { get; }
         public int LineSpacing { get; }
@@ -62,9 +62,15 @@ namespace ClassicUO.Renderer
 
         public Vector2 MeasureString(string text)
         {
-            if (text == null) throw new ArgumentNullException("text");
+            if (text == null)
+            {
+                throw new ArgumentNullException("text");
+            }
 
-            if (text.Length == 0) return Vector2.Zero;
+            if (text.Length == 0)
+            {
+                return Vector2.Zero;
+            }
 
             Vector2 result = Vector2.Zero;
             float curLineWidth = 0.0f;
@@ -74,7 +80,10 @@ namespace ClassicUO.Renderer
             foreach (char c in text)
             {
                 // Special characters
-                if (c == '\r') continue;
+                if (c == '\r')
+                {
+                    continue;
+                }
 
                 if (c == '\n')
                 {
@@ -121,7 +130,9 @@ namespace ClassicUO.Renderer
                     firstInLine = false;
                 }
                 else
+                {
                     curLineWidth += Spacing + cKern.X;
+                }
 
                 /* Add the character width and right-side bearing to the line
 				 * width.
@@ -131,8 +142,13 @@ namespace ClassicUO.Renderer
                 /* If a character is taller than the default line height,
 				 * increase the height to that of the line's tallest character.
 				 */
-                int cCropHeight = CroppingData[index].Height;
-                if (cCropHeight > finalLineHeight) finalLineHeight = cCropHeight;
+                int cCropHeight = CroppingData[index]
+                    .Height;
+
+                if (cCropHeight > finalLineHeight)
+                {
+                    finalLineHeight = cCropHeight;
+                }
             }
 
             // Calculate the final width/height of the text box
@@ -159,7 +175,10 @@ namespace ClassicUO.Renderer
                 byte flags = reader.ReadByte();
                 bool compressed = (flags & 0x80) != 0;
 
-                if (version != 5 && version != 4) throw new ContentLoadException("Invalid XNB version");
+                if (version != 5 && version != 4)
+                {
+                    throw new ContentLoadException("Invalid XNB version");
+                }
 
                 int xnbLength = reader.ReadInt32();
 
@@ -229,7 +248,9 @@ namespace ClassicUO.Renderer
                 List<char> charMap = new List<char>(charCount);
 
                 for (int i = 0; i < charCount; i++)
+                {
                     charMap.Add(reader.ReadChar());
+                }
 
                 int lineSpacing = reader.ReadInt32();
                 float spacing = reader.ReadSingle();
@@ -250,7 +271,9 @@ namespace ClassicUO.Renderer
                 char? defaultChar = null;
 
                 if (reader.ReadBoolean())
+                {
                     defaultChar = reader.ReadChar();
+                }
 
 
                 return new SpriteFont(texture, glyphs, croppings, charMap, lineSpacing, spacing, kernings, defaultChar);
@@ -259,7 +282,10 @@ namespace ClassicUO.Renderer
 
         private static byte[] DecompressDxt3(byte[] imageData, int width, int height)
         {
-            using (MemoryStream imageStream = new MemoryStream(imageData)) return DecompressDxt3(imageStream, width, height);
+            using (MemoryStream imageStream = new MemoryStream(imageData))
+            {
+                return DecompressDxt3(imageStream, width, height);
+            }
         }
 
         internal static byte[] DecompressDxt3(Stream imageStream, int width, int height)
@@ -273,7 +299,10 @@ namespace ClassicUO.Renderer
 
                 for (int y = 0; y < blockCountY; y++)
                 {
-                    for (int x = 0; x < blockCountX; x++) DecompressDxt3Block(imageReader, x, y, blockCountX, width, height, imageData);
+                    for (int x = 0; x < blockCountX; x++)
+                    {
+                        DecompressDxt3Block(imageReader, x, y, blockCountX, width, height, imageData);
+                    }
                 }
             }
 

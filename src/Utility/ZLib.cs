@@ -1,4 +1,5 @@
 #region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,10 +18,12 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
 using System.Runtime.InteropServices;
+using SDL2;
 
 namespace ClassicUO.Utility
 {
@@ -32,20 +35,29 @@ namespace ClassicUO.Utility
 
         static ZLib()
         {
-            switch(SDL2.SDL.SDL_GetPlatform())
+            switch (SDL.SDL_GetPlatform())
             {
                 case "Mac OS X":
                 case "Linux":
                     if (Environment.Is64BitProcess)
+                    {
                         _compressor = new CompressorUnix64();
+                    }
                     else
+                    {
                         goto default;
+                    }
+
                     break;
+
                 case "Windows" when Environment.Is64BitProcess:
                     _compressor = new Compressor64();
+
                     break;
+
                 default:
                     _compressor = new ManagedUniversal();
+
                     break;
             }
         }
@@ -96,9 +108,7 @@ namespace ClassicUO.Utility
 
             ZLibError Decompress(byte[] dest, ref int destLength, byte[] source, int sourceLength);
             ZLibError Decompress(IntPtr dest, ref int destLength, IntPtr source, int sourceLength);
-
         }
-
 
 
         private sealed class Compressor64 : ICompressor
@@ -125,7 +135,7 @@ namespace ClassicUO.Utility
                 return SafeNativeMethods.uncompress(dest, ref destLength, source, sourceLength);
             }
 
-            class SafeNativeMethods
+            private class SafeNativeMethods
             {
                 [DllImport("zlib")]
                 internal static extern string zlibVersion();
@@ -134,8 +144,7 @@ namespace ClassicUO.Utility
                 internal static extern ZLibError compress(byte[] dest, ref int destLength, byte[] source, int sourceLength);
 
                 [DllImport("zlib")]
-                internal static extern ZLibError compress2(
-                    byte[] dest, ref int destLength, byte[] source, int sourceLength, ZLibQuality quality);
+                internal static extern ZLibError compress2(byte[] dest, ref int destLength, byte[] source, int sourceLength, ZLibQuality quality);
 
                 [DllImport("zlib")]
                 internal static extern ZLibError uncompress(byte[] dest, ref int destLen, byte[] source, int sourceLen);
@@ -175,12 +184,13 @@ namespace ClassicUO.Utility
 
                 return z;
             }
+
             public ZLibError Decompress(IntPtr dest, ref int destLength, IntPtr source, int sourceLength)
             {
                 return SafeNativeMethods.uncompress(dest, ref destLength, source, sourceLength);
             }
 
-            class SafeNativeMethods
+            private class SafeNativeMethods
             {
                 [DllImport("libz")]
                 internal static extern string zlibVersion();

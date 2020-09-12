@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,17 +18,18 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
-using ClassicUO.Network;
 using System.Collections.Generic;
-
 using ClassicUO.Game.Data;
+using ClassicUO.Game.GameObjects;
+using ClassicUO.Network;
 using ClassicUO.Utility.Logging;
 
 namespace ClassicUO.Game.Managers
 {
-    class WMapEntity
+    internal class WMapEntity
     {
         public WMapEntity(uint serial)
         {
@@ -37,13 +39,13 @@ namespace ClassicUO.Game.Managers
 
             //if (mob != null)
             //    GetName();
-        } 
+        }
 
+        public bool IsGuild;
+        public uint LastUpdate;
+        public string Name;
         public readonly uint Serial;
         public int X, Y, HP, Map;
-        public uint LastUpdate;
-        public bool IsGuild;
-        public string Name;
 
         //public string GetName()
         //{
@@ -58,22 +60,27 @@ namespace ClassicUO.Game.Managers
         //}
     }
 
-    class WorldMapEntityManager
+    internal class WorldMapEntityManager
     {
-        public readonly Dictionary<uint, WMapEntity> Entities = new Dictionary<uint, WMapEntity>();
+        private bool _ack_received;
+
+        private bool _can_send;
+
+        private uint _lastUpdate, _lastPacketSend, _lastPacketRecv;
 
         private readonly List<WMapEntity> _toRemove = new List<WMapEntity>();
 
-        private uint _lastUpdate, _lastPacketSend, _lastPacketRecv;
-        private bool _ack_received;
-
         /// <summary>
-        /// If WorldMapGump is not visible, disable it
+        ///     If WorldMapGump is not visible, disable it
         /// </summary>
         public bool Enabled { get; private set; }
 
+        public readonly Dictionary<uint, WMapEntity> Entities = new Dictionary<uint, WMapEntity>();
+
         public void SetACKReceived()
-            => _ack_received = true;
+        {
+            _ack_received = true;
+        }
 
         public void SetEnable(bool v)
         {
@@ -91,9 +98,11 @@ namespace ClassicUO.Game.Managers
             Enabled = v;
 
             if (v)
+            {
                 RequestServerPartyGuildInfo(true);
+            }
         }
- 
+
         public void AddOrUpdate(uint serial, int x, int y, int hp, int map, bool isguild, string name = null, bool from_packet = false)
         {
             if (from_packet)
@@ -107,9 +116,11 @@ namespace ClassicUO.Game.Managers
             }
 
             if (!Enabled)
+            {
                 return;
-        
-            if (!Entities.TryGetValue(serial, out var entity) || entity == null)
+            }
+
+            if (!Entities.TryGetValue(serial, out WMapEntity entity) || entity == null)
             {
                 entity = new WMapEntity(serial)
                 {
@@ -131,7 +142,9 @@ namespace ClassicUO.Game.Managers
                 entity.LastUpdate = Time.Ticks + 1000;
 
                 if (name != null)
+                {
                     entity.Name = name;
+                }
             }
         }
 
@@ -146,7 +159,9 @@ namespace ClassicUO.Game.Managers
         public void RemoveUnupdatedWEntity()
         {
             if (_lastUpdate > Time.Ticks)
+            {
                 return;
+            }
 
             _lastUpdate = Time.Ticks + 1000;
 
@@ -155,7 +170,9 @@ namespace ClassicUO.Game.Managers
             foreach (WMapEntity entity in Entities.Values)
             {
                 if (entity.LastUpdate < ticks)
+                {
                     _toRemove.Add(entity);
+                }
             }
 
             if (_toRemove.Count != 0)
@@ -171,17 +188,17 @@ namespace ClassicUO.Game.Managers
 
         public WMapEntity GetEntity(uint serial)
         {
-            Entities.TryGetValue(serial, out var entity);
+            Entities.TryGetValue(serial, out WMapEntity entity);
 
             return entity;
         }
 
-        private bool _can_send;
-
         public void RequestServerPartyGuildInfo(bool force = false)
         {
             if (!force && !Enabled)
+            {
                 return;
+            }
 
             if (World.InGame && _lastPacketSend < Time.Ticks)
             {
@@ -196,15 +213,16 @@ namespace ClassicUO.Game.Managers
 
                 if (World.Party != null && World.Party.Leader != 0)
                 {
-                    foreach (var e in World.Party.Members)
+                    foreach (PartyMember e in World.Party.Members)
                     {
                         if (e != null && SerialHelper.IsValid(e.Serial))
                         {
-                            var mob = World.Mobiles.Get(e.Serial);
+                            Mobile mob = World.Mobiles.Get(e.Serial);
 
                             if (mob == null || mob.Distance > World.ClientViewRange)
                             {
                                 NetClient.Socket.Send(new PQueryPartyPosition());
+
                                 break;
                             }
                         }

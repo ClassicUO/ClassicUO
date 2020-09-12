@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,6 +18,7 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using ClassicUO.Game.UI.Controls;
@@ -44,6 +46,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 X = 60, Y = 50
             };
+
             Add(label);
 
             label = new Label(description, false, 0x0386, font: 2)
@@ -51,6 +54,7 @@ namespace ClassicUO.Game.UI.Gumps
                 X = 60,
                 Y = 108
             };
+
             Add(label);
 
             Add(new GumpPic(60, 130, 0x0477, 0));
@@ -61,21 +65,28 @@ namespace ClassicUO.Game.UI.Gumps
                 Width = 250,
                 NumbersOnly = variant == 2
             };
+
             Add(_textBox);
 
-            Add(new Button((int) ButtonType.Ok, 0x047B, 0x047C, 0x047D)
-            {
-                X = 117,
-                Y = 190,
-                ButtonAction = ButtonAction.Activate
-            });
+            Add
+            (
+                new Button((int) ButtonType.Ok, 0x047B, 0x047C, 0x047D)
+                {
+                    X = 117,
+                    Y = 190,
+                    ButtonAction = ButtonAction.Activate
+                }
+            );
 
-            Add(new Button((int) ButtonType.Cancel, 0x0478, 0x0478, 0x047A)
-            {
-                X = 204,
-                Y = 190,
-                ButtonAction = ButtonAction.Activate
-            });
+            Add
+            (
+                new Button((int) ButtonType.Cancel, 0x0478, 0x0478, 0x047A)
+                {
+                    X = 204,
+                    Y = 190,
+                    ButtonAction = ButtonAction.Activate
+                }
+            );
 
             ButtonID = buttonid;
             ParentID = parentid;

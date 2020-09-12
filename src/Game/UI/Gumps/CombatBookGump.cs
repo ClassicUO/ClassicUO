@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,27 +18,29 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
+using System;
+using System.Collections.Generic;
 using ClassicUO.Data;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.IO.Resources;
+using ClassicUO.Resources;
 using ClassicUO.Utility;
-using System;
-using System.Collections.Generic;
 
 namespace ClassicUO.Game.UI.Gumps
 {
     internal class CombatBookGump : Gump
     {
         private readonly int _abilityCount = Constants.MAX_ABILITIES_COUNT;
-        private int _dictionaryPagesCount = 3;
-        private GumpPic _pageCornerLeft, _pageCornerRight, _primAbility, _secAbility;
         private float _clickTiming;
+        private int _dictionaryPagesCount = 3;
         private Control _lastPressed;
+        private GumpPic _pageCornerLeft, _pageCornerRight, _primAbility, _secAbility;
 
 
         public CombatBookGump(int x, int y) : base(0, 0)
@@ -51,7 +54,9 @@ namespace ClassicUO.Game.UI.Gumps
             if (Client.Version < ClientVersion.CV_7000)
             {
                 if (Client.Version < ClientVersion.CV_500A)
+                {
                     _abilityCount = 29;
+                }
                 else
                 {
                     _abilityCount = 13;
@@ -98,18 +103,24 @@ namespace ClassicUO.Game.UI.Gumps
                         spellsOnPage = 4;
                     }
 
-                    Label text = new Label("INDEX", false, 0x0288, font: 6) {X = indexX, Y = 6};
+                    Label text = new Label(ResGumps.Index, false, 0x0288, font: 6) {X = indexX, Y = 6};
                     Add(text, page);
 
                     for (int i = 0; i < spellsOnPage; i++)
                     {
                         if (offs >= _abilityCount)
+                        {
                             break;
+                        }
 
-                        text = new HoveredLabel(AbilityData.Abilities[offs].Name, false, 0x0288, 0x33, 0x0288, font: 9)
+                        text = new HoveredLabel
+                        (
+                            AbilityData.Abilities[offs]
+                                       .Name, false, 0x0288, 0x33, 0x0288, font: 9
+                        )
                         {
                             X = dataX, Y = 42 + y, AcceptMouseInput = true,
-                            LocalSerial = (uint) (maxPages++),
+                            LocalSerial = (uint) maxPages++,
                             Tag = offs
                         };
 
@@ -120,7 +131,9 @@ namespace ClassicUO.Game.UI.Gumps
                                 _clickTiming += Mouse.MOUSE_DELAY_DOUBLE_CLICK;
 
                                 if (_clickTiming > 0)
+                                {
                                     _lastPressed = l;
+                                }
                             }
                         };
 
@@ -136,18 +149,17 @@ namespace ClassicUO.Game.UI.Gumps
                         byte bab1 = (byte) (((byte) World.Player.PrimaryAbility & 0x7F) - 1);
 
                         _primAbility = new GumpPic(215, 105, (ushort) (0x5200 + bab1), 0);
-                        text = new Label("Primary Ability Icon", false, 0x0288, 80, 6) {X = 265, Y = 105};
+                        text = new Label(ResGumps.PrimaryAbilityIcon, false, 0x0288, 80, 6) {X = 265, Y = 105};
                         Add(_primAbility, page);
                         Add(text, page);
                         _primAbility.SetTooltip(ClilocLoader.Instance.GetString(1028838 + bab1));
                         _primAbility.DragBegin += OnGumpicDragBeginPrimary;
 
 
-
                         byte bab2 = (byte) (((byte) World.Player.SecondaryAbility & 0x7F) - 1);
 
                         _secAbility = new GumpPic(215, 150, (ushort) (0x5200 + bab2), 0);
-                        text = new Label("Secondary Ability Icon", false, 0x0288, 80, 6) {X = 265, Y = 150};
+                        text = new Label(ResGumps.SecondaryAbilityIcon, false, 0x0288, 80, 6) {X = 265, Y = 150};
                         Add(_secAbility, page);
                         Add(text, page);
                         _secAbility.SetTooltip(ClilocLoader.Instance.GetString(1028838 + bab2));
@@ -164,13 +176,22 @@ namespace ClassicUO.Game.UI.Gumps
             for (int i = 0; i < _abilityCount; i++, pageW++)
             {
                 if (i >= AbilityData.Abilities.Length)
+                {
                     break;
+                }
 
-                var icon = new GumpPic(62, 40, (ushort) (0x5200 + i), 0);
+                GumpPic icon = new GumpPic(62, 40, (ushort) (0x5200 + i), 0);
                 Add(icon, pageW);
                 icon.SetTooltip(ClilocLoader.Instance.GetString(1061693 + i), 150);
 
-                Label text = new Label(StringHelper.CapitalizeAllWords(AbilityData.Abilities[i].Name), false, 0x0288, 80, 6)
+                Label text = new Label
+                (
+                    StringHelper.CapitalizeAllWords
+                    (
+                        AbilityData.Abilities[i]
+                                   .Name
+                    ), false, 0x0288, 80, 6
+                )
                 {
                     X = 110,
                     Y = 34
@@ -178,15 +199,18 @@ namespace ClassicUO.Game.UI.Gumps
 
                 Add(text, pageW);
 
-                Add(new GumpPicTiled(0x0835)
-                {
-                    X = 62,
-                    Y = 88,
-                    Width = 128
-                }, pageW);
+                Add
+                (
+                    new GumpPicTiled(0x0835)
+                    {
+                        X = 62,
+                        Y = 88,
+                        Width = 128
+                    }, pageW
+                );
 
 
-                var list = GetItemsList((byte) i);
+                List<ushort> list = GetItemsList((byte) i);
                 int maxStaticCount = TileDataLoader.Instance.StaticData.Length;
 
                 int textX = 62;
@@ -204,9 +228,18 @@ namespace ClassicUO.Game.UI.Gumps
                     ushort id = list[j];
 
                     if (id >= maxStaticCount)
+                    {
                         continue;
+                    }
 
-                    text = new Label(StringHelper.CapitalizeAllWords(TileDataLoader.Instance.StaticData[id].Name), false, 0x0288, font: 9)
+                    text = new Label
+                    (
+                        StringHelper.CapitalizeAllWords
+                        (
+                            TileDataLoader.Instance.StaticData[id]
+                                          .Name
+                        ), false, 0x0288, font: 9
+                    )
                     {
                         X = textX,
                         Y = textY
@@ -223,17 +256,21 @@ namespace ClassicUO.Game.UI.Gumps
         private void OnGumpicDragBeginPrimary(object sender, EventArgs e)
         {
             if (UIManager.IsDragging)
+            {
                 return;
+            }
 
             ref readonly AbilityDefinition def = ref AbilityData.Abilities[((byte) World.Player.PrimaryAbility & 0x7F) - 1];
 
-            GetSpellFloatingButton(def.Index)?.Dispose();
+            GetSpellFloatingButton(def.Index)
+                ?.Dispose();
 
             UseAbilityButtonGump gump = new UseAbilityButtonGump(def.Index, true)
             {
                 X = Mouse.LDropPosition.X - 22,
                 Y = Mouse.LDropPosition.Y - 22
             };
+
             UIManager.Add(gump);
             UIManager.AttemptDragControl(gump, Mouse.Position, true);
         }
@@ -241,27 +278,33 @@ namespace ClassicUO.Game.UI.Gumps
         private void OnGumpicDragBeginSecondary(object sender, EventArgs e)
         {
             if (UIManager.IsDragging)
+            {
                 return;
+            }
 
             ref readonly AbilityDefinition def = ref AbilityData.Abilities[((byte) World.Player.SecondaryAbility & 0x7F) - 1];
-          
-            GetSpellFloatingButton(def.Index)?.Dispose();
+
+            GetSpellFloatingButton(def.Index)
+                ?.Dispose();
 
             UseAbilityButtonGump gump = new UseAbilityButtonGump(def.Index, false)
             {
                 X = Mouse.LDropPosition.X - 22,
                 Y = Mouse.LDropPosition.Y - 22
             };
+
             UIManager.Add(gump);
             UIManager.AttemptDragControl(gump, Mouse.Position, true);
         }
 
         private static UseAbilityButtonGump GetSpellFloatingButton(int id)
         {
-            for (var i = UIManager.Gumps.Last; i != null; i = i.Previous)
+            for (LinkedListNode<Control> i = UIManager.Gumps.Last; i != null; i = i.Previous)
             {
                 if (i.Value is UseAbilityButtonGump g && g.Index == id)
+                {
                     return g;
+                }
             }
 
             return null;
@@ -272,7 +315,9 @@ namespace ClassicUO.Game.UI.Gumps
             base.Update(totalMS, frameMS);
 
             if (IsDisposed)
+            {
                 return;
+            }
 
             for (int i = 0; i < 2; i++)
             {
@@ -283,17 +328,23 @@ namespace ClassicUO.Game.UI.Gumps
                 if (i == 0)
                 {
                     if (_primAbility.Graphic != def.Icon)
+                    {
                         _primAbility.Graphic = def.Icon;
+                    }
                 }
                 else
                 {
                     if (_secAbility.Graphic != def.Icon)
+                    {
                         _secAbility.Graphic = def.Icon;
+                    }
                 }
             }
 
             if (IsDisposed)
+            {
                 return;
+            }
 
             if (_lastPressed != null)
             {
@@ -310,21 +361,32 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void PageCornerOnMouseClick(object sender, MouseEventArgs e)
         {
-            if (e.Button == MouseButtonType.Left && sender is Control ctrl) SetActivePage(ctrl.LocalSerial == 0 ? ActivePage - 1 : ActivePage + 1);
+            if (e.Button == MouseButtonType.Left && sender is Control ctrl)
+            {
+                SetActivePage(ctrl.LocalSerial == 0 ? ActivePage - 1 : ActivePage + 1);
+            }
         }
 
         private void PageCornerOnMouseDoubleClick(object sender, MouseDoubleClickEventArgs e)
         {
-            if (e.Button == MouseButtonType.Left && sender is Control ctrl) SetActivePage(ctrl.LocalSerial == 0 ? 1 : _dictionaryPagesCount);
+            if (e.Button == MouseButtonType.Left && sender is Control ctrl)
+            {
+                SetActivePage(ctrl.LocalSerial == 0 ? 1 : _dictionaryPagesCount);
+            }
         }
 
 
         private void SetActivePage(int page)
         {
             if (page < 1)
+            {
                 page = 1;
+            }
             else if (page > _dictionaryPagesCount)
+            {
                 page = _dictionaryPagesCount;
+            }
+
             ActivePage = page;
             _pageCornerLeft.Page = ActivePage != 1 ? 0 : int.MaxValue;
             _pageCornerRight.Page = ActivePage != _dictionaryPagesCount ? 0 : int.MaxValue;
@@ -357,8 +419,10 @@ namespace ClassicUO.Game.UI.Gumps
                     list.Add(16502);
                     list.Add(16494);
                     list.Add(16491);
+
                     break;
                 }
+
                 case 1:
                 {
                     list.Add(3779);
@@ -374,8 +438,10 @@ namespace ClassicUO.Game.UI.Gumps
                     list.Add(11552);
                     list.Add(16499);
                     list.Add(16498);
+
                     break;
                 }
+
                 case 2:
                 {
                     list.Add(5048);
@@ -390,8 +456,10 @@ namespace ClassicUO.Game.UI.Gumps
                     list.Add(11556);
                     list.Add(16487);
                     list.Add(16500);
+
                     break;
                 }
+
                 case 3:
                 {
                     list.Add(5050);
@@ -410,8 +478,10 @@ namespace ClassicUO.Game.UI.Gumps
                     list.Add(5109);
                     list.Add(16500);
                     list.Add(16495);
+
                     break;
                 }
+
                 case 4:
                 {
                     list.Add(5111);
@@ -428,8 +498,10 @@ namespace ClassicUO.Game.UI.Gumps
                     list.Add(9934);
                     list.Add(16493);
                     list.Add(16494);
+
                     break;
                 }
+
                 case 5:
                 {
                     list.Add(3918);
@@ -442,8 +514,10 @@ namespace ClassicUO.Game.UI.Gumps
                     list.Add(5117);
                     list.Add(16501);
                     list.Add(16495);
+
                     break;
                 }
+
                 case 6:
                 {
                     list.Add(3718);
@@ -460,8 +534,10 @@ namespace ClassicUO.Game.UI.Gumps
                     list.Add(16488);
                     list.Add(16493);
                     list.Add(16496);
+
                     break;
                 }
+
                 case 7:
                 {
                     list.Add(5111);
@@ -473,8 +549,10 @@ namespace ClassicUO.Game.UI.Gumps
                     list.Add(11553);
                     list.Add(16490);
                     list.Add(16488);
+
                     break;
                 }
+
                 case 8:
                 {
                     list.Add(3910);
@@ -489,16 +567,20 @@ namespace ClassicUO.Game.UI.Gumps
                     list.Add(16502);
                     list.Add(16496);
                     list.Add(16491);
+
                     break;
                 }
+
                 case 9:
                 {
                     list.Add(5117);
                     list.Add(9932);
                     list.Add(9933);
                     list.Add(16492);
+
                     break;
                 }
+
                 case 10:
                 {
                     list.Add(5050);
@@ -513,8 +595,10 @@ namespace ClassicUO.Game.UI.Gumps
                     list.Add(5042);
                     list.Add(16497);
                     list.Add(16498);
+
                     break;
                 }
+
                 case 11:
                 {
                     list.Add(3781);
@@ -527,8 +611,10 @@ namespace ClassicUO.Game.UI.Gumps
                     list.Add(4021);
                     list.Add(11553);
                     list.Add(16490);
+
                     break;
                 }
+
                 case 12:
                 {
                     list.Add(5115);
@@ -540,103 +626,136 @@ namespace ClassicUO.Game.UI.Gumps
                     list.Add(11559);
                     list.Add(9934);
                     list.Add(16501);
+
                     break;
                 }
+
                 case 13:
                 {
                     list.Add(10146);
+
                     break;
                 }
+
                 case 14:
                 {
                     list.Add(10148);
                     list.Add(10150);
                     list.Add(10151);
+
                     break;
                 }
+
                 case 15:
                 {
                     list.Add(10147);
                     list.Add(10158);
                     list.Add(10159);
                     list.Add(11557);
+
                     break;
                 }
+
                 case 16:
                 {
                     list.Add(10151);
                     list.Add(10157);
                     list.Add(11561);
+
                     break;
                 }
+
                 case 17:
                 {
                     list.Add(10152);
+
                     break;
                 }
+
                 case 18:
                 case 20:
                 {
                     list.Add(10155);
+
                     break;
                 }
+
                 case 19:
                 {
                     list.Add(10152);
                     list.Add(10153);
                     list.Add(10158);
                     list.Add(11554);
+
                     break;
                 }
+
                 case 21:
                 {
                     list.Add(10149);
+
                     break;
                 }
+
                 case 22:
                 {
                     list.Add(10149);
                     list.Add(10159);
+
                     break;
                 }
+
                 case 23:
                 {
                     list.Add(11555);
                     list.Add(11558);
                     list.Add(11559);
                     list.Add(11561);
+
                     break;
                 }
+
                 case 24:
                 case 27:
                 {
                     list.Add(11550);
+
                     break;
                 }
+
                 case 25:
                 {
                     list.Add(11551);
+
                     break;
                 }
+
                 case 26:
                 {
                     list.Add(11551);
                     list.Add(11552);
+
                     break;
                 }
+
                 case 28:
                 {
                     list.Add(11557);
+
                     break;
                 }
+
                 case 29:
                 {
                     list.Add(16492);
+
                     break;
                 }
+
                 case 30:
                 {
                     list.Add(16487);
+
                     break;
                 }
             }

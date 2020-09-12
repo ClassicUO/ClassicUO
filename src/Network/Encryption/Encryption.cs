@@ -1,18 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Cryptography;
-using System.Text;
-using System.Threading.Tasks;
-
-using ClassicUO.Configuration;
-using ClassicUO.Data;
+﻿using ClassicUO.Data;
 using ClassicUO.Network.Encryption;
-using ClassicUO.Utility;
 
 namespace ClassicUO.Network
 {
-    enum ENCRYPTION_TYPE
+    internal enum ENCRYPTION_TYPE
     {
         NONE,
         OLD_BFISH,
@@ -22,7 +13,7 @@ namespace ClassicUO.Network
         TWOFISH_MD5
     }
 
-    static class EncryptionHelper
+    internal static class EncryptionHelper
     {
         private static readonly LoginCryptBehaviour _loginCrypt = new LoginCryptBehaviour();
         private static readonly BlowfishEncryption _blowfishEncryption = new BlowfishEncryption();
@@ -31,7 +22,6 @@ namespace ClassicUO.Network
 
         public static uint KEY_1, KEY_2, KEY_3;
         public static ENCRYPTION_TYPE Type;
-
 
 
         public static void CalculateEncryption(ClientVersion version)
@@ -50,10 +40,10 @@ namespace ClassicUO.Network
                 int b = ((int) version >> 16) & 0xFF;
                 int c = ((int) version >> 8) & 0xFF;
 
-                int temp = ((a << 9 | b) << 10 | c) ^ ((c * c) << 5);
+                int temp = ((((a << 9) | b) << 10) | c) ^ ((c * c) << 5);
 
                 KEY_2 = (uint) ((temp << 4) ^ (b * b) ^ (b * 0x0B000000) ^ (c * 0x380000) ^ 0x2C13A5FD);
-                temp = (((a << 9 | c) << 10 | b) * 8) ^ (c * c * 0x0c00);
+                temp = (((((a << 9) | c) << 10) | b) * 8) ^ (c * c * 0x0c00);
                 KEY_3 = (uint) (temp ^ (b * b) ^ (b * 0x6800000) ^ (c * 0x1c0000) ^ 0x0A31D527F);
                 KEY_1 = KEY_2 - 1;
 
@@ -76,7 +66,7 @@ namespace ClassicUO.Network
                 }
 
 
-                else if (version < ClientVersion.CV_200)
+                else if (version <= ClientVersion.CV_200)
                 {
                     Type = ENCRYPTION_TYPE.BLOWFISH;
                 }
@@ -89,15 +79,19 @@ namespace ClassicUO.Network
                     Type = ENCRYPTION_TYPE.BLOWFISH__2_0_3;
                 }
                 else
+                {
                     Type = ENCRYPTION_TYPE.TWOFISH_MD5;
+                }
             }
         }
 
-        
+
         public static void Initialize(bool is_login, uint seed, ENCRYPTION_TYPE encryption)
         {
             if (encryption == ENCRYPTION_TYPE.NONE)
+            {
                 return;
+            }
 
             if (is_login)
             {
@@ -117,7 +111,7 @@ namespace ClassicUO.Network
             }
         }
 
-        
+
         public static void Encrypt(bool is_login, ref byte[] src, ref byte[] dst, int size)
         {
             if (Type == ENCRYPTION_TYPE.NONE)

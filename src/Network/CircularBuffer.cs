@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,6 +18,7 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
@@ -62,7 +64,9 @@ namespace ClassicUO.Network
             if (Length > 0)
             {
                 if (_head < _tail)
+                {
                     Buffer.BlockCopy(_buffer, _head, newBuffer, 0, Length);
+                }
                 else
                 {
                     Buffer.BlockCopy(_buffer, _head, newBuffer, 0, _buffer.Length - _head);
@@ -83,14 +87,19 @@ namespace ClassicUO.Network
         /// <param name="size">The number of bytes to enqueue</param>
         internal void Enqueue(byte[] buffer, int offset, int size)
         {
-            if (Length + size > _buffer.Length) SetCapacity((Length + size + 2047) & ~2047);
+            if (Length + size > _buffer.Length)
+            {
+                SetCapacity((Length + size + 2047) & ~2047);
+            }
 
             if (_head < _tail)
             {
                 int rightLength = _buffer.Length - _tail;
 
                 if (rightLength >= size)
+                {
                     Buffer.BlockCopy(buffer, offset, _buffer, _tail, size);
+                }
                 else
                 {
                     Buffer.BlockCopy(buffer, offset, _buffer, _tail, rightLength);
@@ -98,7 +107,9 @@ namespace ClassicUO.Network
                 }
             }
             else
+            {
                 Buffer.BlockCopy(buffer, offset, _buffer, _tail, size);
+            }
 
             _tail = (_tail + size) % _buffer.Length;
             Length += size;
@@ -113,18 +124,28 @@ namespace ClassicUO.Network
         /// <returns>Number of bytes dequeued</returns>
         internal int Dequeue(byte[] buffer, int offset, int size)
         {
-            if (size > Length) size = Length;
+            if (size > Length)
+            {
+                size = Length;
+            }
 
-            if (size == 0) return 0;
+            if (size == 0)
+            {
+                return 0;
+            }
 
             if (_head < _tail)
+            {
                 Buffer.BlockCopy(_buffer, _head, buffer, offset, size);
+            }
             else
             {
                 int rightLength = _buffer.Length - _head;
 
                 if (rightLength >= size)
+                {
                     Buffer.BlockCopy(_buffer, _head, buffer, offset, size);
+                }
                 else
                 {
                     Buffer.BlockCopy(_buffer, _head, buffer, offset, rightLength);
@@ -146,7 +167,10 @@ namespace ClassicUO.Network
 
         public byte GetID()
         {
-            if (Length >= 1) return _buffer[_head];
+            if (Length >= 1)
+            {
+                return _buffer[_head];
+            }
 
             return 0xFF;
         }
@@ -154,7 +178,9 @@ namespace ClassicUO.Network
         public int GetLength()
         {
             if (Length >= 3)
+            {
                 return _buffer[(_head + 2) % _buffer.Length] | (_buffer[(_head + 1) % _buffer.Length] << 8);
+            }
 
             // return (_buffer[(_head + 1) % _buffer.Length] << 8) | _buffer[(_head + 2) % _buffer.Length];
             return 0;

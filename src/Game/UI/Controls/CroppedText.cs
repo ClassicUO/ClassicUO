@@ -1,4 +1,5 @@
 #region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,6 +18,7 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System.Collections.Generic;
@@ -32,8 +34,12 @@ namespace ClassicUO.Game.UI.Controls
 
         public CroppedText(string text, ushort hue, int maxWidth = 0)
         {
-            _gameText = RenderedText.Create(text, hue, (byte)(Client.Version >= ClientVersion.CV_305D ? 1 : 0), true, maxWidth > 0 ? FontStyle.BlackBorder | FontStyle.Cropped : FontStyle.BlackBorder,
-                                            maxWidth: maxWidth);
+            _gameText = RenderedText.Create
+            (
+                text, hue, (byte) (Client.Version >= ClientVersion.CV_305D ? 1 : 0), true, maxWidth > 0 ? FontStyle.BlackBorder | FontStyle.Cropped : FontStyle.BlackBorder,
+                maxWidth: maxWidth
+            );
+
             AcceptMouseInput = false;
         }
 

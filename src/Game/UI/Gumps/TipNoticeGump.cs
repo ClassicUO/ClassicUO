@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,13 +18,11 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-#endregion
 
-using System;
+#endregion
 
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
-using ClassicUO.IO.Resources;
 using ClassicUO.Utility.Collections;
 
 namespace ClassicUO.Game.UI.Gumps
@@ -32,11 +31,11 @@ namespace ClassicUO.Game.UI.Gumps
     {
         internal static TipNoticeGump _tips;
         private readonly ExpandableScroll _background;
+        private int _idx;
         private readonly OrderedDictionary<uint, string> _pages;
         private readonly Button _prev, _next;
         private readonly ScrollArea _scrollArea;
         private readonly StbTextBox _textBox;
-        private int _idx;
 
         public TipNoticeGump(byte type, string page) : base(0, 0)
         {
@@ -45,14 +44,15 @@ namespace ClassicUO.Game.UI.Gumps
             CanCloseWithRightClick = true;
             _scrollArea = new ScrollArea(0, 32, 272, Height - 96, false);
 
-            _textBox = new StbTextBox(1, -1,220, true, hue: 0)
+            _textBox = new StbTextBox(1, -1, 220)
             {
                 Height = 20,
                 X = 35,
                 Y = 0,
                 Width = 220,
-                IsEditable = false,
+                IsEditable = false
             };
+
             _textBox.SetText(page);
             Add(_background = new ExpandableScroll(0, 0, Height, 0x0820));
             _scrollArea.Add(_textBox);
@@ -69,18 +69,25 @@ namespace ClassicUO.Game.UI.Gumps
                 _prev.MouseUp += (o, e) =>
                 {
                     if (e.Button == MouseButtonType.Left)
+                    {
                         SetPage(_idx - 1);
+                    }
                 };
+
                 Add(_next = new Button(0, 0x9cd, 0x9cd) {X = 240, ContainsByBounds = true});
 
                 _next.MouseUp += (o, e) =>
                 {
                     if (e.Button == MouseButtonType.Left)
+                    {
                         SetPage(_idx + 1);
+                    }
                 };
             }
             else
+            {
                 _background.TitleGumpID = 0x9D2;
+            }
         }
 
         //public override GUMP_TYPE GumpType => GUMP_TYPE.GT_TIPNOTICE;
@@ -120,10 +127,15 @@ namespace ClassicUO.Game.UI.Gumps
             foreach (Control c in _scrollArea.Children)
             {
                 if (c is ScrollAreaItem)
+                {
                     c.OnPageChanged();
+                }
             }
 
-            if (_prev != null && _next != null) _prev.Y = _next.Y = _background.SpecialHeight - 53;
+            if (_prev != null && _next != null)
+            {
+                _prev.Y = _next.Y = _background.SpecialHeight - 53;
+            }
         }
 
         internal void AddTip(uint tipnum, string entry)

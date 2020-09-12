@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,11 +18,11 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System.Collections.Generic;
 using System.Linq;
-
 using ClassicUO.Game.Managers;
 using ClassicUO.Utility;
 
@@ -261,9 +262,13 @@ namespace ClassicUO.Game.Data
                     for (int i = _spRegsChars.Length; i > 0; --i)
                     {
                         if (_spellsDict.TryGetValue(i, out SpellDefinition sd))
+                        {
                             _spRegsChars[i - 1] = StringHelper.RemoveUpperLowerChars(sd.PowerWords);
+                        }
                         else
+                        {
                             _spRegsChars[i - 1] = string.Empty;
+                        }
                     }
                 }
 

@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,19 +18,20 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 namespace ClassicUO.Game.Data
 {
-    enum GraphicEffectBlendMode
+    internal enum GraphicEffectBlendMode
     {
-        Normal = 0x00, // normal, black is transparent
-        Multiply = 0x01, // darken
-        Screen = 0x02, // lighten
-        ScreenMore = 0x03, // lighten more (slightly)
-        ScreenLess = 0x04, // lighten less
+        Normal = 0x00,                // normal, black is transparent
+        Multiply = 0x01,              // darken
+        Screen = 0x02,                // lighten
+        ScreenMore = 0x03,            // lighten more (slightly)
+        ScreenLess = 0x04,            // lighten less
         NormalHalfTransparent = 0x05, // transparent but with black edges - 50% transparency?
-        ShadowBlue = 0x06, // complete shadow with blue edges
-        ScreenRed = 0x07 // transparent more red
+        ShadowBlue = 0x06,            // complete shadow with blue edges
+        ScreenRed = 0x07              // transparent more red
     }
 }

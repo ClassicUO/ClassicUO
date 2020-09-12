@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,12 +18,10 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
-using System;
-
 using Microsoft.Xna.Framework;
-
 using SDL2;
 
 namespace ClassicUO.Input
@@ -30,6 +29,16 @@ namespace ClassicUO.Input
     internal static class Mouse
     {
         public const int MOUSE_DELAY_DOUBLE_CLICK = 350;
+
+        public static Point Position;
+
+        public static Point RealPosition;
+
+        public static Point LDropPosition;
+
+        public static Point RDropPosition;
+
+        public static Point MDropPosition;
 
         public static uint LastLeftButtonClickTime { get; set; }
 
@@ -49,16 +58,6 @@ namespace ClassicUO.Input
 
         public static bool IsDragging { get; set; }
 
-        public static Point Position;
-
-        public static Point RealPosition;
-
-        public static Point LDropPosition;
-
-        public static Point RDropPosition;
-
-        public static Point MDropPosition;
-
         public static Point LDroppedOffset => LButtonPressed ? RealPosition - LDropPosition : Point.Zero;
 
         public static Point RDroppedOffset => RButtonPressed ? RealPosition - RDropPosition : Point.Zero;
@@ -75,7 +74,9 @@ namespace ClassicUO.Input
         public static void End()
         {
             if (!(LButtonPressed || RButtonPressed || MButtonPressed))
+            {
                 SDL.SDL_CaptureMouse(SDL.SDL_bool.SDL_FALSE);
+            }
         }
 
         public static void Update()
@@ -93,7 +94,9 @@ namespace ClassicUO.Input
             //    SDL.SDL_GetRelativeMouseState(out Position.X, out Position.Y);
             //}
             else
+            {
                 SDL.SDL_GetMouseState(out Position.X, out Position.Y);
+            }
 
             // Scale the mouse coordinates for the faux-backbuffer
             Position.X = (int) ((double) Position.X * Client.Game.GraphicManager.PreferredBackBufferWidth / Client.Game.Window.ClientBounds.Width);

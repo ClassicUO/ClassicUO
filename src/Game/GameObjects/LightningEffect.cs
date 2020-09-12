@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,6 +18,7 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 namespace ClassicUO.Game.GameObjects
@@ -47,9 +49,13 @@ namespace ClassicUO.Game.GameObjects
             Entity source = World.Get(src);
 
             if (SerialHelper.IsValid(src) && source != null)
+            {
                 SetSource(source);
+            }
             else
+            {
                 SetSource(x, y, z);
+            }
         }
 
         public override void Update(double totalMS, double frameMS)
@@ -57,7 +63,9 @@ namespace ClassicUO.Game.GameObjects
             if (!IsDestroyed)
             {
                 if (AnimIndex >= 10) //TODO: fix time
+                {
                     World.RemoveEffect(this);
+                }
                 else
                 {
                     AnimationGraphic = (ushort) (Graphic + AnimIndex);

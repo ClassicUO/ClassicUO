@@ -1,4 +1,5 @@
 #region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,10 +18,10 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
-using System.Collections.Generic;
 using ClassicUO.Data;
 using ClassicUO.IO.Resources;
 using ClassicUO.Utility;
@@ -31,7 +32,7 @@ using StbTextEditSharp;
 namespace ClassicUO.Renderer
 {
     [Flags]
-    enum FontStyle : ushort
+    internal enum FontStyle : ushort
     {
         None = 0x0000,
         Solid = 0x0001,
@@ -48,45 +49,22 @@ namespace ClassicUO.Renderer
 
     internal sealed class RenderedText
     {
+        private static readonly QueuedPool<RenderedText> _pool = new QueuedPool<RenderedText>
+        (
+            3000, r =>
+            {
+                r.IsDestroyed = false;
+                r.Links.Count = 0;
+            }
+        );
+
+
+        private static Vector3 _hueVector = Vector3.Zero;
         private byte _font;
+
+        private MultilinesFontInfo _info;
         private string _text;
         private FontTexture _texture;
-
-        private static readonly QueuedPool<RenderedText> _pool = new QueuedPool<RenderedText>(3000, r =>
-        {
-            r.IsDestroyed = false;
-            r.Links.Count = 0;
-        });
-
-
-        public static RenderedText Create(string text, ushort hue = 0xFFFF, byte font = 0xFF, bool isunicode = true, FontStyle style = 0, TEXT_ALIGN_TYPE align = 0, 
-                                          int maxWidth = 0, byte cell = 30, bool isHTML = false, 
-                                          bool recalculateWidthByInfo = false, bool saveHitmap = false)
-        {
-            RenderedText r = _pool.GetOne();
-            r.Hue = hue;
-            r.Font = font;
-            r.IsUnicode = isunicode;
-            r.FontStyle = style;
-            r.Cell = cell;
-            r.Align = align;
-            r.MaxWidth = maxWidth;
-            r.IsHTML = isHTML;
-            r.RecalculateWidthByInfo = recalculateWidthByInfo;
-            r.Width = 0;
-            r.Height = 0;
-            r.SaveHitMap = saveHitmap;
-            r.HTMLColor = 0xFFFF_FFFF;
-            r.HasBackgroundColor = false;
-            r.IsPartialHue = false;
-
-            if (r.Text != text)
-                r.Text = text; // here makes the texture
-            else 
-                r.CreateTexture();
-
-            return r;
-        }
 
         public bool IsUnicode { get; set; }
 
@@ -96,7 +74,10 @@ namespace ClassicUO.Renderer
             set
             {
                 if (value == 0xFF)
+                {
                     value = (byte) (Client.Version >= ClientVersion.CV_305D ? 1 : 0);
+                }
+
                 _font = value;
             }
         }
@@ -136,10 +117,12 @@ namespace ClassicUO.Renderer
                     {
                         Width = 0;
                         Height = 0;
-                        IsPartialHue = false;
 
                         if (IsHTML)
+                        {
                             FontsLoader.Instance.SetUseHTML(false);
+                        }
+
                         Links.Clear();
                         _texture?.Dispose();
                         _texture = null;
@@ -151,15 +134,21 @@ namespace ClassicUO.Renderer
 
                         if (IsUnicode)
                         {
-                            _info = FontsLoader.Instance.GetInfoUnicode(Font,
-                                                                        Text, Text.Length, Align, (ushort) FontStyle,
-                                                                        MaxWidth > 0 ? MaxWidth : Width, true, true);
+                            _info = FontsLoader.Instance.GetInfoUnicode
+                            (
+                                Font,
+                                Text, Text.Length, Align, (ushort) FontStyle,
+                                MaxWidth > 0 ? MaxWidth : Width, true, true
+                            );
                         }
                         else
                         {
-                            _info = FontsLoader.Instance.GetInfoASCII(Font,
-                                                                      Text, Text.Length, Align, (ushort) FontStyle,
-                                                                      MaxWidth > 0 ? MaxWidth : Width, true, true);
+                            _info = FontsLoader.Instance.GetInfoASCII
+                            (
+                                Font,
+                                Text, Text.Length, Align, (ushort) FontStyle,
+                                MaxWidth > 0 ? MaxWidth : Width, true, true
+                            );
                         }
                     }
                 }
@@ -167,8 +156,6 @@ namespace ClassicUO.Renderer
         }
 
         public int LinesCount => Texture == null || Texture.IsDisposed ? 0 : Texture.LinesCount;
-
-        public bool IsPartialHue { get; private set; }
 
         public bool SaveHitMap { get; private set; }
 
@@ -181,7 +168,40 @@ namespace ClassicUO.Renderer
         public FontTexture Texture => _texture;
 
 
-        private static Vector3 _hueVector = Vector3.Zero;
+        public static RenderedText Create
+        (
+            string text, ushort hue = 0xFFFF, byte font = 0xFF, bool isunicode = true, FontStyle style = 0, TEXT_ALIGN_TYPE align = 0,
+            int maxWidth = 0, byte cell = 30, bool isHTML = false,
+            bool recalculateWidthByInfo = false, bool saveHitmap = false
+        )
+        {
+            RenderedText r = _pool.GetOne();
+            r.Hue = hue;
+            r.Font = font;
+            r.IsUnicode = isunicode;
+            r.FontStyle = style;
+            r.Cell = cell;
+            r.Align = align;
+            r.MaxWidth = maxWidth;
+            r.IsHTML = isHTML;
+            r.RecalculateWidthByInfo = recalculateWidthByInfo;
+            r.Width = 0;
+            r.Height = 0;
+            r.SaveHitMap = saveHitmap;
+            r.HTMLColor = 0xFFFF_FFFF;
+            r.HasBackgroundColor = false;
+
+            if (r.Text != text)
+            {
+                r.Text = text; // here makes the texture
+            }
+            else
+            {
+                r.CreateTexture();
+            }
+
+            return r;
+        }
 
         public Point GetCaretPosition(int caret_index)
         {
@@ -189,29 +209,31 @@ namespace ClassicUO.Renderer
 
             if (IsUnicode)
             {
-                (p.X, p.Y) = FontsLoader.Instance.GetCaretPosUnicode(
-                    Font,
-                    Text,
-                    caret_index,
-                    MaxWidth,
-                    Align, 
-                    (ushort) FontStyle);
-            }
-            else
-            {
-                (p.X, p.Y) = FontsLoader.Instance.GetCaretPosASCII(
+                (p.X, p.Y) = FontsLoader.Instance.GetCaretPosUnicode
+                (
                     Font,
                     Text,
                     caret_index,
                     MaxWidth,
                     Align,
-                    (ushort) FontStyle);
+                    (ushort) FontStyle
+                );
+            }
+            else
+            {
+                (p.X, p.Y) = FontsLoader.Instance.GetCaretPosASCII
+                (
+                    Font,
+                    Text,
+                    caret_index,
+                    MaxWidth,
+                    Align,
+                    (ushort) FontStyle
+                );
             }
 
             return p;
         }
-
-        private MultilinesFontInfo _info;
 
         public MultilinesFontInfo GetInfo()
         {
@@ -223,35 +245,46 @@ namespace ClassicUO.Renderer
             TextEditRow r = new TextEditRow();
 
             if (string.IsNullOrEmpty(Text))
+            {
                 return r;
+            }
 
             MultilinesFontInfo info = _info;
 
             if (info == null)
+            {
                 return r;
+            }
 
             switch (Align)
             {
                 case TEXT_ALIGN_TYPE.TS_LEFT:
                     r.x0 = 0;
                     r.x1 = Width;
+
                     break;
+
                 case TEXT_ALIGN_TYPE.TS_CENTER:
                     r.x0 = (Width - info.Width) >> 1;
 
                     if (r.x0 < 0)
+                    {
                         r.x0 = 0;
+                    }
 
                     r.x1 = r.x0;
 
                     break;
+
                 case TEXT_ALIGN_TYPE.TS_RIGHT:
                     r.x0 = Width;
+
                     // TODO: r.x1 ???  i don't know atm :D
                     break;
             }
 
             int start = 0;
+
             while (info != null)
             {
                 if (startIndex >= start && startIndex < start + info.CharCount)
@@ -259,6 +292,7 @@ namespace ClassicUO.Renderer
                     r.num_chars = info.CharCount;
                     r.ymax = info.MaxHeight;
                     r.baseline_y_delta = info.MaxHeight;
+
                     break;
                 }
 
@@ -272,11 +306,14 @@ namespace ClassicUO.Renderer
         public int GetCharWidthAtIndex(int index)
         {
             if (string.IsNullOrEmpty(Text))
+            {
                 return 0;
+            }
 
             MultilinesFontInfo info = _info;
 
             int start = 0;
+
             while (info != null)
             {
                 if (index >= start && index < start + info.CharCount)
@@ -285,10 +322,15 @@ namespace ClassicUO.Renderer
 
                     if (x >= 0)
                     {
-                        char c = x >= info.Data.Count ? '\n' : info.Data[x].Item;
+                        char c = x >= info.Data.Count
+                            ? '\n'
+                            : info.Data[x]
+                                  .Item;
 
                         if (IsUnicode)
+                        {
                             return FontsLoader.Instance.GetCharWidthUnicode(Font, c);
+                        }
 
                         return FontsLoader.Instance.GetCharWidthASCII(Font, c);
                     }
@@ -304,23 +346,32 @@ namespace ClassicUO.Renderer
         public int GetCharWidth(char c)
         {
             if (IsUnicode)
+            {
                 return FontsLoader.Instance.GetCharWidthUnicode(Font, c);
+            }
 
             return FontsLoader.Instance.GetCharWidthASCII(Font, c);
         }
 
 
-        public bool Draw(UltimaBatcher2D batcher, 
+        public bool Draw
+        (
+            UltimaBatcher2D batcher,
             int swidth, int sheight,
-            int dx, int dy, int dwidth, int dheight, 
-            int offsetX, int offsetY, float alpha = 0, ushort hue = 0)
+            int dx, int dy, int dwidth, int dheight,
+            int offsetX, int offsetY, float alpha = 0, ushort hue = 0
+        )
         {
             if (string.IsNullOrEmpty(Text) || Texture == null)
+            {
                 return false;
+            }
 
 
             if (offsetX > swidth || offsetX < -swidth || offsetY > sheight || offsetY < -sheight)
+            {
                 return false;
+            }
 
             int srcX = offsetX;
             int srcY = offsetY;
@@ -330,7 +381,9 @@ namespace ClassicUO.Renderer
             int srcHeight;
 
             if (maxX <= swidth)
+            {
                 srcWidth = dwidth;
+            }
             else
             {
                 srcWidth = swidth - srcX;
@@ -340,11 +393,23 @@ namespace ClassicUO.Renderer
             int maxY = srcY + dheight;
 
             if (maxY <= sheight)
+            {
                 srcHeight = dheight;
+            }
             else
             {
                 srcHeight = sheight - srcY;
                 dheight = srcHeight;
+            }
+
+            if (!IsUnicode && SaveHitMap && hue == 0)
+            {
+                hue = Hue;
+            }
+
+            if (hue > 0)
+            {
+                --hue;
             }
 
             _hueVector.X = hue;
@@ -352,16 +417,22 @@ namespace ClassicUO.Renderer
             if (hue != 0)
             {
                 if (IsUnicode)
-                    _hueVector.Y = ShaderHuesTraslator.SHADER_TEXT_HUE_NO_BLACK;
-                else if (Font == 3)
-                    _hueVector.Y = 5;
+                {
+                    _hueVector.Y = ShaderHueTranslator.SHADER_TEXT_HUE_NO_BLACK;
+                }
                 else if (Font != 5 && Font != 8)
-                    _hueVector.Y = ShaderHuesTraslator.SHADER_PARTIAL_HUED;
+                {
+                    _hueVector.Y = ShaderHueTranslator.SHADER_PARTIAL_HUED;
+                }
                 else
-                    _hueVector.Y = ShaderHuesTraslator.SHADER_HUED;
+                {
+                    _hueVector.Y = ShaderHueTranslator.SHADER_HUED;
+                }
             }
             else
+            {
                 _hueVector.Y = 0;
+            }
 
             _hueVector.Z = alpha;
 
@@ -371,29 +442,50 @@ namespace ClassicUO.Renderer
         public bool Draw(UltimaBatcher2D batcher, int dx, int dy, int sx, int sy, int swidth, int sheight, int hue = -1)
         {
             if (string.IsNullOrEmpty(Text) || Texture == null)
+            {
                 return false;
+            }
 
             if (sx > Texture.Width || sy > Texture.Height)
+            {
                 return false;
+            }
 
-            if(hue != -1)
+            if (!IsUnicode && SaveHitMap && hue == -1)
+            {
+                hue = Hue;
+            }
+
+            if (hue > 0)
+            {
+                --hue;
+            }
+
+            if (hue != -1)
             {
                 _hueVector.X = hue;
 
                 if (hue != 0)
                 {
                     if (IsUnicode)
-                        _hueVector.Y = ShaderHuesTraslator.SHADER_TEXT_HUE_NO_BLACK;
-                    else if (Font == 3)
-                        _hueVector.Y = 5;
+                    {
+                        _hueVector.Y = ShaderHueTranslator.SHADER_TEXT_HUE_NO_BLACK;
+                    }
                     else if (Font != 5 && Font != 8)
-                        _hueVector.Y = ShaderHuesTraslator.SHADER_PARTIAL_HUED;
+                    {
+                        _hueVector.Y = ShaderHueTranslator.SHADER_PARTIAL_HUED;
+                    }
                     else
-                        _hueVector.Y = ShaderHuesTraslator.SHADER_HUED;
+                    {
+                        _hueVector.Y = ShaderHueTranslator.SHADER_HUED;
+                    }
                 }
                 else
+                {
                     _hueVector.Y = 0;
+                }
             }
+
             _hueVector.Z = 0;
 
             return batcher.Draw2D(Texture, dx, dy, sx, sy, swidth, sheight, ref _hueVector);
@@ -402,23 +494,42 @@ namespace ClassicUO.Renderer
         public bool Draw(UltimaBatcher2D batcher, int x, int y, float alpha = 0, ushort hue = 0)
         {
             if (string.IsNullOrEmpty(Text) || Texture == null)
+            {
                 return false;
+            }
+
+            if (!IsUnicode && SaveHitMap && hue == 0)
+            {
+                hue = Hue;
+            }
+
+            if (hue > 0)
+            {
+                --hue;
+            }
 
             _hueVector.X = hue;
+
 
             if (hue != 0)
             {
                 if (IsUnicode)
-                    _hueVector.Y = ShaderHuesTraslator.SHADER_TEXT_HUE_NO_BLACK;
-                else if (Font == 3)
-                    _hueVector.Y = 5;
+                {
+                    _hueVector.Y = ShaderHueTranslator.SHADER_TEXT_HUE_NO_BLACK;
+                }
                 else if (Font != 5 && Font != 8)
-                    _hueVector.Y = ShaderHuesTraslator.SHADER_PARTIAL_HUED;
+                {
+                    _hueVector.Y = ShaderHueTranslator.SHADER_PARTIAL_HUED;
+                }
                 else
-                    _hueVector.Y = ShaderHuesTraslator.SHADER_HUED;
+                {
+                    _hueVector.Y = ShaderHueTranslator.SHADER_HUED;
+                }
             }
             else
+            {
                 _hueVector.Y = 0;
+            }
 
             _hueVector.Z = alpha;
 
@@ -434,18 +545,21 @@ namespace ClassicUO.Renderer
             }
 
             if (IsHTML)
+            {
                 FontsLoader.Instance.SetUseHTML(true, HTMLColor, HasBackgroundColor);
+            }
 
             FontsLoader.Instance.RecalculateWidthByInfo = RecalculateWidthByInfo;
 
-            bool ispartial = false;
 
             if (IsUnicode)
-                FontsLoader.Instance.GenerateUnicode(ref _texture, Font, Text, Hue, Cell, MaxWidth, Align, (ushort)FontStyle, SaveHitMap, MaxHeight);
+            {
+                FontsLoader.Instance.GenerateUnicode(ref _texture, Font, Text, Hue, Cell, MaxWidth, Align, (ushort) FontStyle, SaveHitMap, MaxHeight);
+            }
             else
-                FontsLoader.Instance.GenerateASCII(ref _texture, Font, Text, Hue, MaxWidth, Align, (ushort)FontStyle, out ispartial, SaveHitMap, MaxHeight);
-
-            IsPartialHue = ispartial;
+            {
+                FontsLoader.Instance.GenerateASCII(ref _texture, Font, Text, Hue, MaxWidth, Align, (ushort) FontStyle, SaveHitMap, MaxHeight);
+            }
 
             if (Texture != null)
             {
@@ -455,19 +569,26 @@ namespace ClassicUO.Renderer
             }
 
             if (IsHTML)
+            {
                 FontsLoader.Instance.SetUseHTML(false);
+            }
+
             FontsLoader.Instance.RecalculateWidthByInfo = false;
         }
 
         public void Destroy()
         {
             if (IsDestroyed)
+            {
                 return;
+            }
 
             IsDestroyed = true;
 
             if (Texture != null && !Texture.IsDisposed)
+            {
                 Texture.Dispose();
+            }
 
             _pool.ReturnOne(this);
         }

@@ -1,22 +1,17 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
-
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.Renderer
 {
     [StructLayout(LayoutKind.Explicit, Size = 216)]
-    unsafe struct batch_cmd
+    internal unsafe struct batch_cmd
     {
         [FieldOffset(0)] public int type;
 
 
-		[FieldOffset(0)] public cmd_viewport viewport;
+        [FieldOffset(0)] public cmd_viewport viewport;
         [FieldOffset(0)] public cmd_scissor scissor;
 
         [FieldOffset(0)] public cmd_blend_factor new_blend_factor;
@@ -54,9 +49,8 @@ namespace ClassicUO.Renderer
     }
 
 
-
     [StructLayout(LayoutKind.Sequential)]
-    struct cmd_viewport
+    internal struct cmd_viewport
     {
         public int type;
 
@@ -64,21 +58,21 @@ namespace ClassicUO.Renderer
         public int y;
         public int w;
         public int h;
-	}
+    }
 
     [StructLayout(LayoutKind.Sequential)]
-    struct cmd_scissor
+    internal struct cmd_scissor
     {
         public int type;
 
-		public int x;
+        public int x;
         public int y;
         public int w;
         public int h;
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    struct cmd_blend_factor
+    internal struct cmd_blend_factor
     {
         public int type;
 
@@ -86,12 +80,12 @@ namespace ClassicUO.Renderer
     }
 
     [StructLayout(LayoutKind.Sequential)]
-	struct cmd_new_blend_state
+    internal struct cmd_new_blend_state
     {
         public int type;
 
         public IntPtr id;
-		public BlendFunction alpha_blend_func;
+        public BlendFunction alpha_blend_func;
         public Blend alpha_dest_blend;
         public Blend alpha_src_blend;
         public BlendFunction color_blend_func;
@@ -103,10 +97,10 @@ namespace ClassicUO.Renderer
         public ColorWriteChannels color_write_channels_3;
         public Color blend_factor;
         public int multiple_sample_mask;
-	}
+    }
 
     [StructLayout(LayoutKind.Sequential)]
-	struct cmd_new_rasterize_state
+    internal struct cmd_new_rasterize_state
     {
         public int type;
 
@@ -117,10 +111,10 @@ namespace ClassicUO.Renderer
         public bool multi_sample_aa;
         public bool scissor_test_enabled;
         public float slope_scale_depth_bias;
-	}
+    }
 
-	[StructLayout(LayoutKind.Sequential)]
-	struct cmd_new_stencil_state
+    [StructLayout(LayoutKind.Sequential)]
+    internal struct cmd_new_stencil_state
     {
         public int type;
 
@@ -141,26 +135,26 @@ namespace ClassicUO.Renderer
         public int stencil_mask;
         public int stencil_write_mask;
         public int reference_stencil;
-	}
+    }
 
     [StructLayout(LayoutKind.Sequential)]
-    struct cmd_new_sampler_state
-	{
+    internal struct cmd_new_sampler_state
+    {
         public int type;
 
         public IntPtr id;
         public int index;
-		public TextureFilter filter;
+        public TextureFilter filter;
         public TextureAddressMode address_u;
         public TextureAddressMode address_v;
         public TextureAddressMode address_w;
         public int max_anisotropy;
         public int max_mip_level;
         public float mip_map_level_of_detail_bias;
-	}
+    }
 
     [StructLayout(LayoutKind.Sequential)]
-    struct cmd_set_blend_state
+    internal struct cmd_set_blend_state
     {
         public int type;
 
@@ -168,7 +162,7 @@ namespace ClassicUO.Renderer
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    struct cmd_set_rasterize_state
+    internal struct cmd_set_rasterize_state
     {
         public int type;
 
@@ -176,7 +170,7 @@ namespace ClassicUO.Renderer
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    struct cmd_set_stencil_state
+    internal struct cmd_set_stencil_state
     {
         public int type;
 
@@ -184,7 +178,7 @@ namespace ClassicUO.Renderer
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    struct cmd_set_sampler_state
+    internal struct cmd_set_sampler_state
     {
         public int type;
 
@@ -193,8 +187,8 @@ namespace ClassicUO.Renderer
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    struct cmd_set_vertex_data
-	{
+    internal struct cmd_set_vertex_data
+    {
         public int type;
 
         public IntPtr id;
@@ -203,7 +197,7 @@ namespace ClassicUO.Renderer
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    struct cmd_set_index_data
+    internal struct cmd_set_index_data
     {
         public int type;
 
@@ -213,7 +207,7 @@ namespace ClassicUO.Renderer
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    struct cmd_set_vertex_buffer
+    internal struct cmd_set_vertex_buffer
     {
         public int type;
 
@@ -221,7 +215,7 @@ namespace ClassicUO.Renderer
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    struct cmd_set_index_buffer
+    internal struct cmd_set_index_buffer
     {
         public int type;
 
@@ -229,7 +223,7 @@ namespace ClassicUO.Renderer
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    struct cmd_create_vertex_buffer
+    internal struct cmd_create_vertex_buffer
     {
         public int type;
 
@@ -243,16 +237,16 @@ namespace ClassicUO.Renderer
     }
 
     [StructLayout(LayoutKind.Sequential)]
-	struct vertex_declaration
+    internal struct vertex_declaration
     {
-		public int offset;
+        public int offset;
         public VertexElementFormat format;
         public VertexElementUsage usage;
         public int usage_index;
-	}
+    }
 
     [StructLayout(LayoutKind.Sequential)]
-    struct cmd_create_index_buffer
+    internal struct cmd_create_index_buffer
     {
         public int type;
 
@@ -263,8 +257,8 @@ namespace ClassicUO.Renderer
         public bool is_dynamic;
     }
 
-	[StructLayout(LayoutKind.Sequential)]
-    struct cmd_create_effect
+    [StructLayout(LayoutKind.Sequential)]
+    internal struct cmd_create_effect
     {
         public int type;
 
@@ -274,7 +268,7 @@ namespace ClassicUO.Renderer
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    struct cmd_create_texture_2d
+    internal struct cmd_create_texture_2d
     {
         public int type;
 
@@ -287,15 +281,15 @@ namespace ClassicUO.Renderer
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    struct cmd_set_texture_data_2d
-	{
+    internal struct cmd_set_texture_data_2d
+    {
         public int type;
 
         public IntPtr id;
         public SurfaceFormat format;
         public int x;
         public int y;
-		public int width;
+        public int width;
         public int height;
         public int level;
         public IntPtr data;
@@ -304,7 +298,7 @@ namespace ClassicUO.Renderer
 
 
     [StructLayout(LayoutKind.Sequential)]
-    struct cmd_indexed_primitive_data
+    internal struct cmd_indexed_primitive_data
     {
         public int type;
 
@@ -318,7 +312,7 @@ namespace ClassicUO.Renderer
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    struct cmd_create_basic_effect
+    internal struct cmd_create_basic_effect
     {
         public int type;
 
@@ -332,7 +326,7 @@ namespace ClassicUO.Renderer
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    struct cmd_set_basic_effect
+    internal struct cmd_set_basic_effect
     {
         public int type;
 
@@ -340,7 +334,7 @@ namespace ClassicUO.Renderer
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    struct cmd_destroy_resource
+    internal struct cmd_destroy_resource
     {
         public int type;
 

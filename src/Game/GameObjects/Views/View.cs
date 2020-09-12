@@ -1,4 +1,5 @@
 #region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,19 +18,17 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
 using System.Runtime.CompilerServices;
-
 using ClassicUO.Configuration;
+using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
-
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-
-using IDrawable = ClassicUO.Interfaces.IDrawable;
 
 namespace ClassicUO.Game.GameObjects
 {
@@ -38,14 +37,33 @@ namespace ClassicUO.Game.GameObjects
         protected static Vector3 HueVector;
         public static bool DrawTransparent;
 
+        protected static readonly Lazy<DepthStencilState> StaticTransparentStencil = new Lazy<DepthStencilState>
+        (
+            () =>
+            {
+                DepthStencilState state = new DepthStencilState
+                {
+                    StencilEnable = true,
+                    StencilFunction = CompareFunction.GreaterEqual,
+                    StencilPass = StencilOperation.Keep,
+                    ReferenceStencil = 0
+                    //DepthBufferEnable = true,
+                    //DepthBufferWriteEnable = true,
+                };
 
-        public Rectangle FrameInfo;
-        protected bool IsFlipped;
+
+                return state;
+            }
+        );
         public bool UseObjectHandles { get; set; }
         public bool ClosedObjectHandles { get; set; }
         public bool ObjectHandlesOpened { get; set; }
         public byte AlphaHue { get; set; }
         public bool AllowedToDraw { get; set; } = true;
+
+
+        public Rectangle FrameInfo;
+        protected bool IsFlipped;
 
 
         public abstract bool Draw(UltimaBatcher2D batcher, int posX, int posY);
@@ -95,7 +113,9 @@ namespace ClassicUO.Game.GameObjects
                 alpha -= 25;
 
                 if (alpha < max)
+                {
                     alpha = max;
+                }
 
                 result = true;
             }
@@ -104,7 +124,9 @@ namespace ClassicUO.Game.GameObjects
                 alpha += 25;
 
                 if (alpha > max)
+                {
                     alpha = max;
+                }
 
                 result = true;
             }
@@ -117,7 +139,8 @@ namespace ClassicUO.Game.GameObjects
 
         protected static void DrawLand(UltimaBatcher2D batcher, ushort graphic, int x, int y, ref Vector3 hue)
         {
-            var texture = ArtLoader.Instance.GetLandTexture(graphic);
+            UOTexture32 texture = ArtLoader.Instance.GetLandTexture(graphic);
+
             if (texture != null)
             {
                 texture.Ticks = Time.Ticks;
@@ -126,14 +149,21 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
-        protected static void DrawLand(
+        protected static void DrawLand
+        (
             UltimaBatcher2D batcher,
             ushort graphic, int x, int y,
             ref Rectangle rectangle,
             ref Vector3 n0, ref Vector3 n1, ref Vector3 n2, ref Vector3 n3,
-            ref Vector3 hue)
+            ref Vector3 hue
+        )
         {
-            var texture = TexmapsLoader.Instance.GetTexture(TileDataLoader.Instance.LandData[graphic].TexID);
+            UOTexture32 texture = TexmapsLoader.Instance.GetTexture
+            (
+                TileDataLoader.Instance.LandData[graphic]
+                              .TexID
+            );
+
             if (texture != null)
             {
                 texture.Ticks = Time.Ticks;
@@ -148,11 +178,12 @@ namespace ClassicUO.Game.GameObjects
 
         protected static void DrawStatic(UltimaBatcher2D batcher, ushort graphic, int x, int y, ref Vector3 hue)
         {
-            var texture = ArtLoader.Instance.GetTexture(graphic);
+            ArtTexture texture = ArtLoader.Instance.GetTexture(graphic);
+
             if (texture != null)
             {
                 texture.Ticks = Time.Ticks;
-                ref var index = ref ArtLoader.Instance.GetValidRefEntry(graphic + 0x4000);
+                ref UOFileIndex index = ref ArtLoader.Instance.GetValidRefEntry(graphic + 0x4000);
 
                 batcher.DrawSprite(texture, x - index.Width, y - index.Height, false, ref hue);
             }
@@ -160,7 +191,8 @@ namespace ClassicUO.Game.GameObjects
 
         protected static void DrawGump(UltimaBatcher2D batcher, ushort graphic, int x, int y, ref Vector3 hue)
         {
-            var texture = GumpsLoader.Instance.GetTexture(graphic);
+            UOTexture32 texture = GumpsLoader.Instance.GetTexture(graphic);
+
             if (texture != null)
             {
                 texture.Ticks = Time.Ticks;
@@ -171,7 +203,8 @@ namespace ClassicUO.Game.GameObjects
 
         protected static void DrawStaticRotated(UltimaBatcher2D batcher, ushort graphic, int x, int y, int destX, int destY, float angle, ref Vector3 hue)
         {
-            var texture = ArtLoader.Instance.GetTexture(graphic);
+            ArtTexture texture = ArtLoader.Instance.GetTexture(graphic);
+
             if (texture != null)
             {
                 texture.Ticks = Time.Ticks;
@@ -180,36 +213,69 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
-        protected static void DrawStaticAnimated(UltimaBatcher2D batcher, ushort graphic, int x, int y, ref Vector3 hue)
+        protected static void DrawStaticAnimated(UltimaBatcher2D batcher, ushort graphic, int x, int y, ref Vector3 hue, ref bool transparent)
         {
-            ref var index = ref ArtLoader.Instance.GetValidRefEntry(graphic + 0x4000);
+            ref UOFileIndex index = ref ArtLoader.Instance.GetValidRefEntry(graphic + 0x4000);
 
             graphic = (ushort) (graphic + index.AnimOffset);
 
-            var texture = ArtLoader.Instance.GetTexture(graphic);
+            ArtTexture texture = ArtLoader.Instance.GetTexture(graphic);
+
             if (texture != null)
             {
                 texture.Ticks = Time.Ticks;
                 index = ref ArtLoader.Instance.GetValidRefEntry(graphic + 0x4000);
 
-                batcher.DrawSprite(texture, x - index.Width, y - index.Height, false, ref hue);
+                if (transparent)
+                {
+                    int maxDist = ProfileManager.Current.CircleOfTransparencyRadius + 22;
+                    int fx = (int) (World.Player.RealScreenPosition.X + World.Player.Offset.X);
+                    int fy = (int) (World.Player.RealScreenPosition.Y + (World.Player.Offset.Y - World.Player.Offset.Z)) + 44;
+
+                    fx -= x;
+                    fy -= y;
+
+                    float dist = (float) Math.Floor(Math.Sqrt(fx * fx + fy * fy));
+
+                    if (dist <= maxDist)
+                    {
+                        float alpha = hue.Z;
+
+                        switch (ProfileManager.Current.CircleOfTransparencyType)
+                        {
+                            default:
+                            case 0:
+                                hue.Z = 0.75f;
+
+                                break;
+
+                            case 1:
+                                hue.Z = MathHelper.Lerp(1f, 0f, (dist - 44) / maxDist);
+
+                                break;
+                        }
+
+                        x -= index.Width;
+                        y -= index.Height;
+
+
+                        batcher.DrawSprite(texture, x, y, false, ref hue);
+                        batcher.SetStencil(StaticTransparentStencil.Value);
+                        hue.Z = alpha;
+                        batcher.DrawSprite(texture, x, y, false, ref hue);
+                        batcher.SetStencil(null);
+
+                        return;
+                    }
+                }
+
+                transparent = false;
+                x -= index.Width;
+                y -= index.Height;
+
+
+                batcher.DrawSprite(texture, x, y, false, ref hue);
             }
         }
-
-        protected static readonly Lazy<DepthStencilState> StaticTransparentStencil = new Lazy<DepthStencilState>(() =>
-        {
-            DepthStencilState state = new DepthStencilState
-            {
-                StencilEnable = true,
-                StencilFunction = CompareFunction.GreaterEqual,
-                StencilPass = StencilOperation.Keep,
-                ReferenceStencil = 0,
-                //DepthBufferEnable = true,
-                //DepthBufferWriteEnable = true,
-            };
-
-
-            return state;
-        });
     }
 }

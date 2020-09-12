@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,16 +18,16 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
-
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.Data
 {
     [Flags]
-    enum Direction : byte
+    internal enum Direction : byte
     {
         North = 0x00,
         Right = 0x01,
@@ -51,8 +52,12 @@ namespace ClassicUO.Game.Data
         public static Direction DirectionFromVectors(Vector2 fromPosition, Vector2 toPosition)
         {
             double Angle = Math.Atan2(toPosition.Y - fromPosition.Y, toPosition.X - fromPosition.X);
+
             if (Angle < 0)
+            {
                 Angle = Math.PI + (Math.PI + Angle);
+            }
+
             double piPerSegment = Math.PI * 2f / 8f;
             double segmentValue = Math.PI * 2f / 16f;
             int direction = int.MaxValue;
@@ -70,7 +75,10 @@ namespace ClassicUO.Game.Data
             }
 
             if (direction == int.MaxValue)
+            {
                 direction = 0;
+            }
+
             direction = direction >= 7 ? direction - 7 : direction + 1;
 
             return (Direction) direction;
@@ -89,18 +97,30 @@ namespace ClassicUO.Game.Data
 
             Direction ret;
 
-            if (((ay >> 1) - ax) >= 0)
-                ret = (ry > 0) ? Direction.Up : Direction.Down;
-            else if (((ax >> 1) - ay) >= 0)
-                ret = (rx > 0) ? Direction.Left : Direction.Right;
+            if ((ay >> 1) - ax >= 0)
+            {
+                ret = ry > 0 ? Direction.Up : Direction.Down;
+            }
+            else if ((ax >> 1) - ay >= 0)
+            {
+                ret = rx > 0 ? Direction.Left : Direction.Right;
+            }
             else if (rx >= 0 && ry >= 0)
+            {
                 ret = Direction.West;
+            }
             else if (rx >= 0 && ry < 0)
+            {
                 ret = Direction.South;
+            }
             else if (rx < 0 && ry < 0)
+            {
                 ret = Direction.East;
+            }
             else
+            {
                 ret = Direction.North;
+            }
 
             return ret;
         }
@@ -113,7 +133,9 @@ namespace ClassicUO.Game.Data
             if (deltaX > 0)
             {
                 if (deltaY > 0)
+                {
                     return Direction.Down;
+                }
 
                 return deltaY == 0 ? Direction.East : Direction.Right;
             }
@@ -121,13 +143,17 @@ namespace ClassicUO.Game.Data
             if (deltaX == 0)
             {
                 if (deltaY > 0)
+                {
                     return Direction.South;
+                }
 
                 return deltaY == 0 ? Direction.NONE : Direction.North;
             }
 
             if (deltaY > 0)
+            {
                 return Direction.Left;
+            }
 
             return deltaY == 0 ? Direction.West : Direction.Up;
         }
@@ -139,25 +165,41 @@ namespace ClassicUO.Game.Data
             if (upPressed)
             {
                 if (leftPressed)
+                {
                     direction = 6;
+                }
                 else if (rightPressed)
+                {
                     direction = 0;
+                }
                 else
+                {
                     direction = 7;
+                }
             }
             else if (downPressed)
             {
                 if (leftPressed)
+                {
                     direction = 4;
+                }
                 else if (rightPressed)
+                {
                     direction = 2;
+                }
                 else
+                {
                     direction = 3;
+                }
             }
             else if (leftPressed)
+            {
                 direction = 5;
+            }
             else if (rightPressed)
+            {
                 direction = 1;
+            }
 
             return (Direction) direction;
         }

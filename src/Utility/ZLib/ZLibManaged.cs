@@ -1,4 +1,5 @@
 #region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,12 +18,12 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
 using System.IO;
 using System.IO.Compression;
-
 using ZLibNative;
 
 namespace ClassicUO.Utility
@@ -37,7 +38,7 @@ namespace ClassicUO.Utility
                 {
                     for (int i = 0, b = ds.ReadByte(); i < length && b >= 0; i++, b = ds.ReadByte())
                     {
-                        dest[i] = (byte)b;
+                        dest[i] = (byte) b;
                     }
                 }
             }
@@ -45,14 +46,15 @@ namespace ClassicUO.Utility
 
         public static unsafe void Decompress(IntPtr source, int sourceLength, int offset, IntPtr dest, int length)
         {
-            using (UnmanagedMemoryStream stream = new UnmanagedMemoryStream((byte*)source.ToPointer(), sourceLength - offset))
+            using (UnmanagedMemoryStream stream = new UnmanagedMemoryStream((byte*) source.ToPointer(), sourceLength - offset))
             {
                 using (ZLIBStream ds = new ZLIBStream(stream, CompressionMode.Decompress))
                 {
-                    byte* dstPtr = (byte*)dest.ToPointer();
+                    byte* dstPtr = (byte*) dest.ToPointer();
+
                     for (int i = 0, b = ds.ReadByte(); i < length && b >= 0; i++, b = ds.ReadByte())
                     {
-                        dstPtr[i] = (byte)b;
+                        dstPtr[i] = (byte) b;
                     }
                 }
             }
@@ -67,7 +69,8 @@ namespace ClassicUO.Utility
                     ds.Write(source, 0, source.Length);
                     ds.Flush();
                 }
-                destLength = (int)stream.Position;
+
+                destLength = (int) stream.Position;
             }
         }
     }

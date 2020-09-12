@@ -1,4 +1,5 @@
 #region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,6 +18,7 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
@@ -206,20 +208,20 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
             0.007919312f, -0.003326416f, 0.000473022f, 0.000015259f
         };
 
-        private readonly int channel;
-        private readonly float[] samples; // 32 new subband samples
-        private readonly float scalefactor;
-        private readonly float[] v1;
-        private readonly float[] v2;
-
         /// <summary>
         ///     Compute PCM Samples.
         /// </summary>
         private float[] _tmpOut;
 
-        private float[] actual_v; // v1 or v2
+        private float[] actual_v;     // v1 or v2
         private int actual_write_pos; // 0-15
+
+        private readonly int channel;
         private float[] eq;
+        private readonly float[] samples; // 32 new subband samples
+        private readonly float scalefactor;
+        private readonly float[] v1;
+        private readonly float[] v2;
 
         /// <summary>
         ///     Quality value for controlling CPU usage/quality tradeoff.
@@ -260,10 +262,15 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
                     eq = new float[32];
 
                     for (int i = 0; i < 32; i++)
+                    {
                         eq[i] = 1.0f;
+                    }
                 }
 
-                if (eq.Length < 32) throw new ArgumentException("eq0");
+                if (eq.Length < 32)
+                {
+                    throw new ArgumentException("eq0");
+                }
             }
         }
 
@@ -279,11 +286,15 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
         {
             // initialize v1[] and v2[]:
             for (int p = 0; p < 512; p++)
+            {
                 v1[p] = v2[p] = 0.0f;
+            }
 
             // initialize samples[]:
             for (int p2 = 0; p2 < 32; p2++)
+            {
                 samples[p2] = 0.0f;
+            }
 
             actual_v = v1;
             actual_write_pos = 15;
@@ -299,7 +310,10 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
 
         public void input_samples(float[] s)
         {
-            for (int i = 31; i >= 0; i--) samples[i] = s[i] * eq[i];
+            for (int i = 31; i >= 0; i--)
+            {
+                samples[i] = s[i] * eq[i];
+            }
         }
 
         /// <summary>
@@ -644,7 +658,10 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
             float[] p = new float[16];
             float[] pp = new float[16];
 
-            for (int i = 31; i >= 0; i--) new_v[i] = 0.0f;
+            for (int i = 31; i >= 0; i--)
+            {
+                new_v[i] = 0.0f;
+            }
 
             // float[] new_v = new float[32]; // new V[0-15] and V[33-48] of Figure 3-A.2 in ISO DIS 11172-3
             // float[] p = new float[16];
@@ -1421,7 +1438,10 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
                     break;
             }
 
-            if (buffer != null) buffer.AppendSamples(channel, _tmpOut);
+            if (buffer != null)
+            {
+                buffer.AppendSamples(channel, _tmpOut);
+            }
         }
 
         /// <summary>
@@ -1442,7 +1462,9 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
             // MDM: this may not be necessary. The Layer III decoder always
             // outputs 32 subband samples, but I haven't checked layer I & II.
             for (int p = 0; p < 32; p++)
+            {
                 samples[p] = 0.0f;
+            }
         }
 
         /// <summary>
@@ -1479,20 +1501,33 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
         {
             int size = array.Length / blockSize;
             float[][] split = new float[size][];
-            for (int i = 0; i < size; i++) split[i] = subArray(array, i * blockSize, blockSize);
+
+            for (int i = 0; i < size; i++)
+            {
+                split[i] = subArray(array, i * blockSize, blockSize);
+            }
 
             return split;
         }
 
         private static float[] subArray(float[] array, int offs, int len)
         {
-            if (offs + len > array.Length) len = array.Length - offs;
+            if (offs + len > array.Length)
+            {
+                len = array.Length - offs;
+            }
 
             if (len < 0)
+            {
                 len = 0;
+            }
 
             float[] subarray = new float[len];
-            for (int i = 0; i < len; i++) subarray[i] = array[offs + i];
+
+            for (int i = 0; i < len; i++)
+            {
+                subarray[i] = array[offs + i];
+            }
 
             return subarray;
         }

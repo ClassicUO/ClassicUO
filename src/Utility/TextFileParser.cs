@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,6 +18,7 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System.Collections.Generic;
@@ -26,10 +28,10 @@ namespace ClassicUO.Utility
 {
     internal class TextFileParser
     {
-        private StringBuilder _sb = new StringBuilder();
         private readonly char[] _delimiters, _comments, _quotes;
         private int _eol;
         private int _pos;
+        private readonly StringBuilder _sb = new StringBuilder();
         private int _Size;
         private string _string;
         private bool _trim;
@@ -53,7 +55,9 @@ namespace ClassicUO.Utility
             bool result = false;
 
             for (int i = 0; i < _delimiters.Length && !result; i++)
+            {
                 result = _string[_pos] == _delimiters[i];
+            }
 
             return result;
         }
@@ -79,7 +83,9 @@ namespace ClassicUO.Utility
         private void SkipToData()
         {
             while (_pos < _eol && IsDelimiter())
+            {
                 _pos++;
+            }
         }
 
         private bool IsComment()
@@ -139,7 +145,9 @@ namespace ClassicUO.Utility
             while (_pos < _Size && _string[_pos] != '\n')
             {
                 if (IsDelimiter())
+                {
                     break;
+                }
 
                 if (IsComment())
                 {
@@ -196,12 +204,21 @@ namespace ClassicUO.Utility
 
                     if (size > 0)
                     {
-                        if(save)
-                            _sb.Append(_string.Substring(start, size).TrimEnd('\r', '\n'));
+                        if (save)
+                        {
+                            _sb.Append
+                            (
+                                _string.Substring(start, size)
+                                       .TrimEnd('\r', '\n')
+                            );
+                        }
+
                         _pos = pos;
 
                         if (_pos < _eol && _string[_pos] == endQuote)
+                        {
                             _pos++;
+                        }
                     }
 
                     break;
@@ -228,7 +245,9 @@ namespace ClassicUO.Utility
                     SkipToData();
 
                     if (IsComment())
+                    {
                         break;
+                    }
 
                     ObtainQuotedData();
 
@@ -238,7 +257,9 @@ namespace ClassicUO.Utility
                         _sb.Clear();
                     }
                     else if (IsSecondQuote())
+                    {
                         _pos++;
+                    }
                 }
 
                 _pos = _eol + 1;
@@ -262,9 +283,12 @@ namespace ClassicUO.Utility
                 SkipToData();
 
                 if (IsComment())
+                {
                     break;
+                }
 
                 ObtainQuotedData();
+
                 if (_sb.Length > 0)
                 {
                     result.Add(_sb.ToString());

@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,6 +18,7 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using ClassicUO.Network;
@@ -43,7 +45,9 @@ namespace ClassicUO.Game.Managers
         public void SetValue(int index, uint value)
         {
             if (index >= 0 && index < Constants.MAX_FAST_WALK_STACK_SIZE)
+            {
                 _keys[index] = value;
+            }
         }
 
         public void AddValue(uint value)
@@ -79,6 +83,7 @@ namespace ClassicUO.Game.Managers
 
     internal class WalkerManager
     {
+        public FastWalkStack FastWalkStack { get; } = new FastWalkStack();
         public ushort CurrentPlayerZ;
         public byte CurrentWalkSequence;
         public long LastStepRequestTime;
@@ -94,8 +99,6 @@ namespace ClassicUO.Game.Managers
         public bool WalkingFailed;
         public byte WalkSequence;
         public bool WantChangeCoordinates;
-
-        public FastWalkStack FastWalkStack { get; } = new FastWalkStack();
 
         public void DenyWalk(byte sequence, int x, int y, sbyte z)
         {
@@ -120,14 +123,19 @@ namespace ClassicUO.Game.Managers
         public void ConfirmWalk(byte sequence)
         {
             if (UnacceptedPacketsCount != 0)
+            {
                 UnacceptedPacketsCount--;
+            }
 
             int stepIndex = 0;
 
             for (int i = 0; i < StepsCount; i++)
             {
-                if (StepInfos[i].Sequence == sequence)
+                if (StepInfos[i]
+                    .Sequence == sequence)
+                {
                     break;
+                }
 
                 stepIndex++;
             }
@@ -139,23 +147,35 @@ namespace ClassicUO.Game.Managers
             {
                 if (stepIndex >= CurrentWalkSequence)
                 {
-                    StepInfos[stepIndex].Accepted = true;
-                    World.RangeSize.X = StepInfos[stepIndex].X;
-                    World.RangeSize.Y = StepInfos[stepIndex].Y;
+                    StepInfos[stepIndex]
+                        .Accepted = true;
+
+                    World.RangeSize.X = StepInfos[stepIndex]
+                        .X;
+
+                    World.RangeSize.Y = StepInfos[stepIndex]
+                        .Y;
                 }
                 else if (stepIndex == 0)
                 {
-                    World.RangeSize.X = StepInfos[0].X;
-                    World.RangeSize.Y = StepInfos[0].Y;
+                    World.RangeSize.X = StepInfos[0]
+                        .X;
+
+                    World.RangeSize.Y = StepInfos[0]
+                        .Y;
 
                     for (int i = 1; i < StepsCount; i++)
+                    {
                         StepInfos[i - 1] = StepInfos[i];
+                    }
 
                     StepsCount--;
                     CurrentWalkSequence--;
                 }
                 else
+                {
                     isBadStep = true;
+                }
             }
 
             if (isBadStep)

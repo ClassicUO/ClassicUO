@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,42 +18,45 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
-using System.Collections.Generic;
-
-using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
-using ClassicUO.Game.Scenes;
 using ClassicUO.IO.Resources;
-using ClassicUO.Renderer;
 using ClassicUO.Utility;
-using ClassicUO.Utility.Logging;
-
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.GameObjects
 {
     internal sealed partial class Multi : GameObject
     {
+        private static readonly QueuedPool<Multi> _pool = new QueuedPool<Multi>
+        (
+            Constants.PREDICTABLE_MULTIS, m =>
+            {
+                m.IsDestroyed = false;
+                m.AlphaHue = 0;
+                m.FoliageIndex = 0;
+                m.IsFromTarget = false;
+                m.MultiOffsetX = m.MultiOffsetY = m.MultiOffsetZ = 0;
+                m.IsCustom = false;
+                m.State = 0;
+                m.Offset = Vector3.Zero;
+            }
+        );
         private ushort _originalGraphic;
-        private uint _lastAnimationFrameTime;
 
 
-        private static readonly QueuedPool<Multi> _pool = new QueuedPool<Multi>(Constants.PREDICTABLE_MULTIS, m =>
-        {
-            m.IsDestroyed = false;
-            m.AlphaHue = 0;
-            m.FoliageIndex = 0;
-            m.IsFromTarget = false;
-            m.IsMovable = false;
-            m.MultiOffsetX = m.MultiOffsetY = m.MultiOffsetZ = 0;
-            m.IsCustom = false;
-            m.State = 0;
-            m.Offset = Vector3.Zero;
-        });
+        public string Name => ItemData.Name;
 
+        public ref StaticTiles ItemData => ref TileDataLoader.Instance.StaticData[Graphic];
+        public bool IsCustom;
+        public bool IsVegetation;
+        public int MultiOffsetX;
+        public int MultiOffsetY;
+        public int MultiOffsetZ;
+        public CUSTOM_HOUSE_MULTI_OBJECT_FLAGS State = 0;
 
 
         public static Multi Create(ushort graphic)
@@ -63,28 +67,24 @@ namespace ClassicUO.Game.GameObjects
             m.AllowedToDraw = !GameObjectHelper.IsNoDrawable(m.Graphic);
 
             if (m.ItemData.Height > 5)
+            {
                 m._canBeTransparent = 1;
+            }
             else if (m.ItemData.IsRoof || m.ItemData.IsSurface && m.ItemData.IsBackground || m.ItemData.IsWall)
+            {
                 m._canBeTransparent = 1;
+            }
             else if (m.ItemData.Height == 5 && m.ItemData.IsSurface && !m.ItemData.IsBackground)
+            {
                 m._canBeTransparent = 1;
+            }
             else
+            {
                 m._canBeTransparent = 0;
+            }
 
             return m;
         }
-
-
-        public string Name => ItemData.Name;
-        public int MultiOffsetX;
-        public int MultiOffsetY;
-        public int MultiOffsetZ;
-        public CUSTOM_HOUSE_MULTI_OBJECT_FLAGS State = 0;
-        public bool IsCustom;
-        public bool IsVegetation;
-        public bool IsMovable;
-
-        public ref StaticTiles ItemData => ref TileDataLoader.Instance.StaticData[Graphic];
 
         public override void UpdateGraphicBySeason()
         {
@@ -92,65 +92,13 @@ namespace ClassicUO.Game.GameObjects
             IsVegetation = StaticFilters.IsVegetation(Graphic);
         }
 
-        public override void UpdateTextCoordsV()
-        {
-            if (TextContainer == null)
-                return;
-
-            var last = (TextObject) TextContainer.Items;
-
-            while (last?.Next != null)
-                last = (TextObject) last.Next;
-
-            if (last == null)
-                return;
-
-            int offY = 0;
-
-            int startX = ProfileManager.Current.GameWindowPosition.X + 6;
-            int startY = ProfileManager.Current.GameWindowPosition.Y + 6;
-            var scene = Client.Game.GetScene<GameScene>();
-            float scale = scene?.Scale ?? 1;
-            int x = RealScreenPosition.X;
-            int y = RealScreenPosition.Y;
-
-            x += 22;
-            y += 44;
-
-            var texture = ArtLoader.Instance.GetTexture(Graphic);
-
-            if (texture != null)
-                y -= (texture.ImageRectangle.Height >> 1);
-
-            x = (int)(x / scale);
-            y = (int)(y / scale);
-
-            x += (int) Offset.X;
-            y += (int) (Offset.Y - Offset.Z);
-
-            for (; last != null; last = (TextObject) last.Previous)
-            {
-                if (last.RenderedText != null && !last.RenderedText.IsDestroyed)
-                {
-                    if (offY == 0 && last.Time < Time.Ticks)
-                        continue;
-
-
-                    last.OffsetY = offY;
-                    offY += last.RenderedText.Height;
-
-                    last.RealScreenPosition.X = startX + (x - (last.RenderedText.Width >> 1));
-                    last.RealScreenPosition.Y = startY + (y - offY);
-                }
-            }
-
-            FixTextCoordinatesInScreen();
-        }
-
         public override void Destroy()
         {
             if (IsDestroyed)
+            {
                 return;
+            }
+
             base.Destroy();
             _pool.ReturnOne(this);
         }

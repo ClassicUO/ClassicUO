@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,11 +18,11 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System.Collections.Generic;
 using System.Text;
-
 using SDL2;
 
 namespace ClassicUO.Utility
@@ -293,13 +294,19 @@ namespace ClassicUO.Utility
 
 
                 if (isshift)
+                {
                     sb.Append("Shift ");
+                }
 
                 if (isctrl)
+                {
                     sb.Append("Ctrl ");
+                }
 
                 if (isalt)
+                {
                     sb.Append("Alt ");
+                }
 
 
                 sb.Append(value);

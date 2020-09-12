@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,6 +18,7 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
@@ -73,15 +75,18 @@ namespace ClassicUO.Utility.Collections
         /// <param name="index">The index of the value to get or set.</param>
         public TValue this[int index]
         {
-            get => GetItem(index).Value;
+            get => GetItem(index)
+                .Value;
             set => SetItem(index, value);
         }
 
         public int Count => _keyedCollection.Count;
 
-        public ICollection<TKey> Keys => _keyedCollection.Select(x => x.Key).ToList();
+        public ICollection<TKey> Keys => _keyedCollection.Select(x => x.Key)
+                                                         .ToList();
 
-        public ICollection<TValue> Values => _keyedCollection.Select(x => x.Value).ToList();
+        public ICollection<TValue> Values => _keyedCollection.Select(x => x.Value)
+                                                             .ToList();
 
         public IEqualityComparer<TKey> Comparer { get; private set; }
 
@@ -102,13 +107,21 @@ namespace ClassicUO.Utility.Collections
         public OrderedDictionary(IOrderedDictionary<TKey, TValue> dictionary)
         {
             Initialize();
-            foreach (KeyValuePair<TKey, TValue> pair in dictionary) _keyedCollection.Add(pair);
+
+            foreach (KeyValuePair<TKey, TValue> pair in dictionary)
+            {
+                _keyedCollection.Add(pair);
+            }
         }
 
         public OrderedDictionary(IOrderedDictionary<TKey, TValue> dictionary, IEqualityComparer<TKey> comparer)
         {
             Initialize(comparer);
-            foreach (KeyValuePair<TKey, TValue> pair in dictionary) _keyedCollection.Add(pair);
+
+            foreach (KeyValuePair<TKey, TValue> pair in dictionary)
+            {
+                _keyedCollection.Add(pair);
+            }
         }
 
         #endregion
@@ -120,9 +133,13 @@ namespace ClassicUO.Utility.Collections
             Comparer = comparer;
 
             if (comparer != null)
+            {
                 _keyedCollection = new KeyedCollection2<TKey, KeyValuePair<TKey, TValue>>(x => x.Key, comparer);
+            }
             else
+            {
                 _keyedCollection = new KeyedCollection2<TKey, KeyValuePair<TKey, TValue>>(x => x.Key);
+            }
         }
 
         public void Add(TKey key, TValue value)
@@ -143,7 +160,9 @@ namespace ClassicUO.Utility.Collections
         public int IndexOf(TKey key)
         {
             if (_keyedCollection.Contains(key))
+            {
                 return _keyedCollection.IndexOf(_keyedCollection[key]);
+            }
 
             return -1;
         }
@@ -165,7 +184,10 @@ namespace ClassicUO.Utility.Collections
 
         public KeyValuePair<TKey, TValue> GetItem(int index)
         {
-            if (index < 0 || index >= _keyedCollection.Count) throw new ArgumentException(string.Format("The index was outside the bounds of the dictionary: {0}", index));
+            if (index < 0 || index >= _keyedCollection.Count)
+            {
+                throw new ArgumentException(string.Format("The index was outside the bounds of the dictionary: {0}", index));
+            }
 
             return _keyedCollection[index];
         }
@@ -180,9 +202,17 @@ namespace ClassicUO.Utility.Collections
         /// </exception>
         public void SetItem(int index, TValue value)
         {
-            if (index < 0 || index >= _keyedCollection.Count) throw new ArgumentException($"The index is outside the bounds of the dictionary: {index}");
+            if (index < 0 || index >= _keyedCollection.Count)
+            {
+                throw new ArgumentException($"The index is outside the bounds of the dictionary: {index}");
+            }
 
-            KeyValuePair<TKey, TValue> kvp = new KeyValuePair<TKey, TValue>(_keyedCollection[index].Key, value);
+            KeyValuePair<TKey, TValue> kvp = new KeyValuePair<TKey, TValue>
+            (
+                _keyedCollection[index]
+                    .Key, value
+            );
+
             _keyedCollection[index] = kvp;
         }
 
@@ -198,7 +228,10 @@ namespace ClassicUO.Utility.Collections
 
         public void RemoveAt(int index)
         {
-            if (index < 0 || index >= _keyedCollection.Count) throw new ArgumentException($"The index was outside the bounds of the dictionary: {index}");
+            if (index < 0 || index >= _keyedCollection.Count)
+            {
+                throw new ArgumentException($"The index was outside the bounds of the dictionary: {index}");
+            }
 
             _keyedCollection.RemoveAt(index);
         }
@@ -209,7 +242,10 @@ namespace ClassicUO.Utility.Collections
         /// <param name="key">The key associated with the value to get.</param>
         public TValue GetValue(TKey key)
         {
-            if (_keyedCollection.Contains(key) == false) throw new ArgumentException($"The given key is not present in the dictionary: {key}");
+            if (_keyedCollection.Contains(key) == false)
+            {
+                throw new ArgumentException($"The given key is not present in the dictionary: {key}");
+            }
 
             KeyValuePair<TKey, TValue> kvp = _keyedCollection[key];
 
@@ -227,16 +263,21 @@ namespace ClassicUO.Utility.Collections
             int idx = IndexOf(key);
 
             if (idx > -1)
+            {
                 _keyedCollection[idx] = kvp;
+            }
             else
+            {
                 _keyedCollection.Add(kvp);
+            }
         }
 
         public bool TryGetValue(TKey key, out TValue value)
         {
             if (_keyedCollection.Contains(key))
             {
-                value = _keyedCollection[key].Value;
+                value = _keyedCollection[key]
+                    .Value;
 
                 return true;
             }
@@ -488,7 +529,11 @@ namespace ClassicUO.Utility.Collections
         public void Sort(IComparer<TItem> comparer)
         {
             List<TItem> list = Items as List<TItem>;
-            if (list != null) list.Sort(comparer);
+
+            if (list != null)
+            {
+                list.Sort(comparer);
+            }
         }
     }
 

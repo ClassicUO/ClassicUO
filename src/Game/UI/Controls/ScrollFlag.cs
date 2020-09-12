@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,14 +18,13 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
-
 using ClassicUO.Input;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
-
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Controls
@@ -32,12 +32,12 @@ namespace ClassicUO.Game.UI.Controls
     internal class ScrollFlag : ScrollBarBase
     {
         private const int TIME_BETWEEN_CLICKS = 2;
-        private readonly bool _showButtons;
         private bool _btUpClicked, _btDownClicked, _btnSliderClicked;
 
         private Point _clickPosition;
 
         private Rectangle _rectUpButton, _rectDownButton;
+        private readonly bool _showButtons;
         private float _sliderPosition;
         private float _timeUntilNextClick;
 
@@ -55,19 +55,20 @@ namespace ClassicUO.Game.UI.Controls
         {
             AcceptMouseInput = true;
 
-            var texture_flag = GumpsLoader.Instance.GetTexture(0x0828);
+            UOTexture32 texture_flag = GumpsLoader.Instance.GetTexture(0x0828);
 
             if (texture_flag == null)
             {
                 Dispose();
+
                 return;
             }
 
             Width = texture_flag.Width;
             Height = texture_flag.Height;
 
-            var texture_button_up = GumpsLoader.Instance.GetTexture(0x0824);
-            var texture_button_down = GumpsLoader.Instance.GetTexture(0x0825);
+            UOTexture32 texture_button_up = GumpsLoader.Instance.GetTexture(0x0824);
+            UOTexture32 texture_button_down = GumpsLoader.Instance.GetTexture(0x0825);
 
             _rectUpButton = new Rectangle(0, 0, texture_button_up.Width, texture_button_up.Height);
             _rectDownButton = new Rectangle(0, Height, texture_button_down.Width, texture_button_down.Height);
@@ -83,7 +84,9 @@ namespace ClassicUO.Game.UI.Controls
             base.Update(totalMS, frameMS);
 
             if (MaxValue <= MinValue)
+            {
                 Value = MaxValue = MinValue;
+            }
 
             _sliderPosition = GetSliderYPosition();
 
@@ -94,14 +97,20 @@ namespace ClassicUO.Game.UI.Controls
                     _timeUntilNextClick = Time.Ticks + TIME_BETWEEN_CLICKS;
 
                     if (_btUpClicked)
+                    {
                         Value -= 1 + _StepChanger;
+                    }
                     else if (_btDownClicked)
+                    {
                         Value += 1 + _StepChanger;
+                    }
 
                     _StepsDone++;
 
                     if (_StepsDone % 8 == 0)
+                    {
                         _StepChanger++;
+                    }
                 }
             }
         }
@@ -110,30 +119,35 @@ namespace ClassicUO.Game.UI.Controls
         {
             ResetHueVector();
 
-            var texture_flag = GumpsLoader.Instance.GetTexture(0x0828);
-            var texture_button_up = GumpsLoader.Instance.GetTexture(0x0824);
-            var texture_button_down = GumpsLoader.Instance.GetTexture(0x0825);
-
+            UOTexture32 texture_flag = GumpsLoader.Instance.GetTexture(0x0828);
+            UOTexture32 texture_button_up = GumpsLoader.Instance.GetTexture(0x0824);
+            UOTexture32 texture_button_down = GumpsLoader.Instance.GetTexture(0x0825);
 
 
             if (MaxValue != MinValue && texture_flag != null)
+            {
                 batcher.Draw2D(texture_flag, x, (int) (y + _sliderPosition), ref _hueVector);
+            }
 
             if (_showButtons)
             {
                 if (texture_button_up != null)
+                {
                     batcher.Draw2D(texture_button_up, x, y, ref _hueVector);
+                }
 
                 if (texture_button_down != null)
+                {
                     batcher.Draw2D(texture_button_down, x, y + Height, ref _hueVector);
+                }
             }
 
             return base.Draw(batcher, x, y);
         }
 
-        protected override float GetScrollableArea()
+        protected override int GetScrollableArea()
         {
-            var texture = GumpsLoader.Instance.GetTexture(0x0828);
+            UOTexture32 texture = GumpsLoader.Instance.GetTexture(0x0828);
 
             return Height - texture?.Height ?? 0;
         }
@@ -141,14 +155,20 @@ namespace ClassicUO.Game.UI.Controls
         protected override void OnMouseDown(int x, int y, MouseButtonType button)
         {
             if (button != MouseButtonType.Left)
+            {
                 return;
+            }
 
             _timeUntilNextClick = 0f;
 
             if (_showButtons && _rectDownButton.Contains(x, y))
+            {
                 _btDownClicked = true;
+            }
             else if (_showButtons && _rectUpButton.Contains(x, y))
+            {
                 _btUpClicked = true;
+            }
             else if (Contains(x, y))
             {
                 _btnSliderClicked = true;
@@ -159,7 +179,9 @@ namespace ClassicUO.Game.UI.Controls
         protected override void OnMouseUp(int x, int y, MouseButtonType button)
         {
             if (button != MouseButtonType.Left)
+            {
                 return;
+            }
 
             _btDownClicked = false;
             _btUpClicked = false;
@@ -176,22 +198,31 @@ namespace ClassicUO.Game.UI.Controls
                     float sliderY = _sliderPosition + (y - _clickPosition.Y);
 
                     if (sliderY < 0)
+                    {
                         sliderY = 0;
+                    }
+
                     float scrollableArea = GetScrollableArea();
 
                     if (sliderY > scrollableArea)
+                    {
                         sliderY = scrollableArea;
+                    }
 
                     _clickPosition = new Point(x, y);
 
-                    var texture = GumpsLoader.Instance.GetTexture(0x0828);
+                    UOTexture32 texture = GumpsLoader.Instance.GetTexture(0x0828);
                     int height = texture?.Height ?? 0;
 
 
-                    if (sliderY == 0 && _clickPosition.Y < (height >> 1))
-                        _clickPosition.Y = (height >> 1);
+                    if (sliderY == 0 && _clickPosition.Y < height >> 1)
+                    {
+                        _clickPosition.Y = height >> 1;
+                    }
                     else if (sliderY == scrollableArea && _clickPosition.Y > Height - (height >> 1))
+                    {
                         _clickPosition.Y = Height - (height >> 1);
+                    }
 
                     _value = (int) Math.Round(sliderY / scrollableArea * (MaxValue - MinValue) + MinValue);
                     _sliderPosition = sliderY;
@@ -202,7 +233,7 @@ namespace ClassicUO.Game.UI.Controls
 
         public override bool Contains(int x, int y)
         {
-            var texture_flag = GumpsLoader.Instance.GetTexture(0x0828);
+            UOTexture32 texture_flag = GumpsLoader.Instance.GetTexture(0x0828);
 
             if (texture_flag == null)
             {

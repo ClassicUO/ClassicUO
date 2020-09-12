@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,6 +18,7 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
@@ -26,7 +28,7 @@ using System.Threading;
 
 namespace ClassicUO
 {
-    static class CUOEnviroment
+    internal static class CUOEnviroment
     {
         public static Thread GameThread;
         public static float DPIScaleFactor = 1.0f;
@@ -45,7 +47,13 @@ namespace ClassicUO
                                              Environment.OSVersion.Platform != PlatformID.Win32S &&
                                              Environment.OSVersion.Platform != PlatformID.WinCE;
 
-        public static readonly Version Version = Assembly.GetExecutingAssembly().GetName().Version;
-        public static readonly string ExecutablePath = Path.GetDirectoryName(Assembly.GetEntryAssembly()?.Location);
+        public static readonly Version Version = Assembly.GetExecutingAssembly()
+                                                         .GetName()
+                                                         .Version;
+        public static readonly string ExecutablePath = Path.GetDirectoryName
+        (
+            Assembly.GetEntryAssembly()
+                    ?.Location
+        );
     }
 }

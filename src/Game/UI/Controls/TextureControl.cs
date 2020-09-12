@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,9 +18,11 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using ClassicUO.Renderer;
+using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Controls
 {
@@ -43,16 +46,20 @@ namespace ClassicUO.Game.UI.Controls
             base.Update(totalMS, frameMS);
 
             if (Texture != null)
+            {
                 Texture.Ticks = Time.Ticks;
+            }
         }
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
             if (Texture == null)
+            {
                 return false;
+            }
 
             ResetHueVector();
-            ShaderHuesTraslator.GetHueVector(ref _hueVector, Hue, IsPartial, Alpha);
+            ShaderHueTranslator.GetHueVector(ref _hueVector, Hue, IsPartial, Alpha);
 
             if (ScaleTexture)
             {
@@ -60,7 +67,7 @@ namespace ClassicUO.Game.UI.Controls
                 {
                     int w = Width;
                     int h = Height;
-                    var r = artTexture.ImageRectangle;
+                    Rectangle r = artTexture.ImageRectangle;
 
                     if (r.Width < Width)
                     {

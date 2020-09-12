@@ -1,4 +1,5 @@
 #region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,11 +18,11 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
 using System.IO;
-
 using ClassicUO.IO.Audio.MP3Sharp.Decoding;
 
 namespace ClassicUO.IO.Audio.MP3Sharp.IO
@@ -37,14 +38,18 @@ namespace ClassicUO.IO.Audio.MP3Sharp.IO
         public WaveFileBuffer(int numberOfChannels, int freq, string fileName)
         {
             if (fileName == null)
+            {
                 throw new NullReferenceException("FileName");
+            }
 
             m_Buffer = new short[OBUFFERSIZE];
             m_Bufferp = new short[MAXCHANNELS];
             m_Channels = numberOfChannels;
 
             for (int i = 0; i < numberOfChannels; ++i)
+            {
                 m_Bufferp[i] = (short) i;
+            }
 
             m_OutWave = new WaveFile();
 
@@ -58,7 +63,9 @@ namespace ClassicUO.IO.Audio.MP3Sharp.IO
             m_Channels = numberOfChannels;
 
             for (int i = 0; i < numberOfChannels; ++i)
+            {
                 m_Bufferp[i] = (short) i;
+            }
 
             m_OutWave = new WaveFile();
 
@@ -79,7 +86,9 @@ namespace ClassicUO.IO.Audio.MP3Sharp.IO
             int rc = m_OutWave.WriteData(m_Buffer, m_Bufferp[0]);
 
             for (int i = 0; i < m_Channels; ++i)
+            {
                 m_Bufferp[i] = (short) i;
+            }
         }
 
         public void close(bool justWriteLengthBytes)

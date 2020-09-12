@@ -1,0 +1,1406 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="CombatSpells" xml:space="preserve">
+    <value>Combat-Spells</value>
+  </data>
+  <data name="Containers" xml:space="preserve">
+    <value>Containers</value>
+  </data>
+  <data name="Counters" xml:space="preserve">
+    <value>Counters</value>
+  </data>
+  <data name="Experimental" xml:space="preserve">
+    <value>Experimental</value>
+  </data>
+  <data name="Fonts" xml:space="preserve">
+    <value>Fonts</value>
+  </data>
+  <data name="General" xml:space="preserve">
+    <value>General</value>
+  </data>
+  <data name="InfoBar" xml:space="preserve">
+    <value>Info Bar</value>
+  </data>
+  <data name="Macros" xml:space="preserve">
+    <value>Macros</value>
+  </data>
+  <data name="Sound" xml:space="preserve">
+    <value>Sound</value>
+  </data>
+  <data name="Speech" xml:space="preserve">
+    <value>Speech</value>
+  </data>
+  <data name="Tooltip" xml:space="preserve">
+    <value>Tooltip</value>
+  </data>
+  <data name="Video" xml:space="preserve">
+    <value>Video</value>
+  </data>
+  <data name="AltCloseGumps" xml:space="preserve">
+    <value>Hold ALT key + right click to close Anchored gumps</value>
+  </data>
+  <data name="AltMoveGumps" xml:space="preserve">
+    <value>Hold ALT key to move gumps</value>
+  </data>
+  <data name="AlwaysRun" xml:space="preserve">
+    <value>Always run</value>
+  </data>
+  <data name="AlwaysRunHidden" xml:space="preserve">
+    <value>Unless hidden</value>
+  </data>
+  <data name="AutoOpenCorpses" xml:space="preserve">
+    <value>Auto Open Corpses</value>
+  </data>
+  <data name="AutoOpenDoors" xml:space="preserve">
+    <value>Auto Open Doors</value>
+  </data>
+  <data name="CircleTransType_Full" xml:space="preserve">
+    <value>Full</value>
+  </data>
+  <data name="CircleTransType_Gradient" xml:space="preserve">
+    <value>Gradient</value>
+  </data>
+  <data name="ClickCloseAllGumps" xml:space="preserve">
+    <value>Close all Anchored gumps when right click on a group</value>
+  </data>
+  <data name="CorpseOpt_Both" xml:space="preserve">
+    <value>Both</value>
+  </data>
+  <data name="CorpseOpt_None" xml:space="preserve">
+    <value>None</value>
+  </data>
+  <data name="CorpseOpt_NotHid" xml:space="preserve">
+    <value>Not Hiding</value>
+  </data>
+  <data name="CorpseOpt_NotTar" xml:space="preserve">
+    <value>Not Targeting</value>
+  </data>
+  <data name="DisableMenu" xml:space="preserve">
+    <value>Disable the Menu Bar</value>
+  </data>
+  <data name="DragHumanoidsOnly" xml:space="preserve">
+    <value>Select humanoids only</value>
+  </data>
+  <data name="EnableCircleTrans" xml:space="preserve">
+    <value>Enable circle of transparency</value>
+  </data>
+  <data name="EnableDragHPBars" xml:space="preserve">
+    <value>Enable drag-select to open health bars</value>
+  </data>
+  <data name="EnablePathfinding" xml:space="preserve">
+    <value>Enable pathfinding</value>
+  </data>
+  <data name="FPSInactive" xml:space="preserve">
+    <value>Reduce FPS when game is inactive</value>
+  </data>
+  <data name="GridLoot_Both" xml:space="preserve">
+    <value>Both</value>
+  </data>
+  <data name="GridLoot_GridOnly" xml:space="preserve">
+    <value>Grid loot only</value>
+  </data>
+  <data name="GridLoot_None" xml:space="preserve">
+    <value>None</value>
+  </data>
+  <data name="HideRoofTiles" xml:space="preserve">
+    <value>Hide roof tiles</value>
+  </data>
+  <data name="HideVegetation" xml:space="preserve">
+    <value>Hide vegetation</value>
+  </data>
+  <data name="HighlighState" xml:space="preserve">
+    <value>Highlight by state (poisoned, yellow hits, paralyzed)</value>
+  </data>
+  <data name="HighlightObjects" xml:space="preserve">
+    <value>Highlight game objects</value>
+  </data>
+  <data name="HPFields_Normal" xml:space="preserve">
+    <value>Normal fields</value>
+  </data>
+  <data name="HPFields_Static" xml:space="preserve">
+    <value>Static fields</value>
+  </data>
+  <data name="HPFields_Tile" xml:space="preserve">
+    <value>Tile fields</value>
+  </data>
+  <data name="HPShow_Always" xml:space="preserve">
+    <value>Always</value>
+  </data>
+  <data name="HPShow_Less" xml:space="preserve">
+    <value>Less than 100 %</value>
+  </data>
+  <data name="HPShow_Smart" xml:space="preserve">
+    <value>Smart</value>
+  </data>
+  <data name="HPType_MobileDead" xml:space="preserve">
+    <value>Mobile is dead</value>
+  </data>
+  <data name="HPType_MobileOOR" xml:space="preserve">
+    <value>Mobile out of range</value>
+  </data>
+  <data name="HPType_None" xml:space="preserve">
+    <value>None</value>
+  </data>
+  <data name="HP_Both" xml:space="preserve">
+    <value>Both</value>
+  </data>
+  <data name="HP_Line" xml:space="preserve">
+    <value>Line</value>
+  </data>
+  <data name="HP_Percentage" xml:space="preserve">
+    <value>Percentage</value>
+  </data>
+  <data name="InvulColor" xml:space="preserve">
+    <value>Invulnerable Color</value>
+  </data>
+  <data name="KeyMod_Ctrl" xml:space="preserve">
+    <value>Ctrl</value>
+  </data>
+  <data name="KeyMod_None" xml:space="preserve">
+    <value>None</value>
+  </data>
+  <data name="KeyMod_Shift" xml:space="preserve">
+    <value>Shift</value>
+  </data>
+  <data name="MarkCaveTiles" xml:space="preserve">
+    <value>Mark cave tiles</value>
+  </data>
+  <data name="ObjAlphaFading" xml:space="preserve">
+    <value>Objects alpha fading</value>
+  </data>
+  <data name="OutOfRangeColor" xml:space="preserve">
+    <value>No color for object out of range</value>
+  </data>
+  <data name="ParalyzedColor" xml:space="preserve">
+    <value>Paralyzed Color</value>
+  </data>
+  <data name="PoisonedColor" xml:space="preserve">
+    <value>Poisoned Color</value>
+  </data>
+  <data name="SallosEasyGrab" xml:space="preserve">
+    <value>Sallos easy grab</value>
+  </data>
+  <data name="SaveHPBarsOnLogout" xml:space="preserve">
+    <value>Save healthbars on logout</value>
+  </data>
+  <data name="ShiftContext" xml:space="preserve">
+    <value>Hold Shift for Context Menus</value>
+  </data>
+  <data name="ShiftPathfinding" xml:space="preserve">
+    <value>Use SHIFT for pathfinding</value>
+  </data>
+  <data name="ShiftStack" xml:space="preserve">
+    <value>Hold Shift to split stack of items</value>
+  </data>
+  <data name="ShowGumpPartyInv" xml:space="preserve">
+    <value>Show gump for party invites</value>
+  </data>
+  <data name="ShowHousesContent" xml:space="preserve">
+    <value>Show houses content</value>
+  </data>
+  <data name="ShowHP" xml:space="preserve">
+    <value>Show HP</value>
+  </data>
+  <data name="ShowIncCorpses" xml:space="preserve">
+    <value>Show incoming new corpses</value>
+  </data>
+  <data name="ShowIncMobiles" xml:space="preserve">
+    <value>Show incoming new mobiles</value>
+  </data>
+  <data name="ShowTarRangeIndic" xml:space="preserve">
+    <value>Show target range indicator</value>
+  </data>
+  <data name="SkipEmptyCorpses" xml:space="preserve">
+    <value>Skip empty corpses</value>
+  </data>
+  <data name="SmoothBoat" xml:space="preserve">
+    <value>Smooth boat movements</value>
+  </data>
+  <data name="SmoothDoors" xml:space="preserve">
+    <value>Smooth doors</value>
+  </data>
+  <data name="StandardSkillGump" xml:space="preserve">
+    <value>Use standard skills gump</value>
+  </data>
+  <data name="TabCombat" xml:space="preserve">
+    <value>Hold TAB key for combat</value>
+  </data>
+  <data name="TextAlphaFading" xml:space="preserve">
+    <value>Text alpha fading</value>
+  </data>
+  <data name="TreesStumps" xml:space="preserve">
+    <value>Trees to stumps</value>
+  </data>
+  <data name="UseBlackBackgr" xml:space="preserve">
+    <value>Use All Black Backgrounds</value>
+  </data>
+  <data name="UseCustomHPBars" xml:space="preserve">
+    <value>Use Custom Health Bars</value>
+  </data>
+  <data name="CircleTransType" xml:space="preserve">
+    <value>Transparency type:</value>
+  </data>
+  <data name="CloseHPGumpWhen" xml:space="preserve">
+    <value>Close healthbar gump when:</value>
+  </data>
+  <data name="CorpseOpenOptions" xml:space="preserve">
+    <value>Corpse Open Options:</value>
+  </data>
+  <data name="CorpseOpenRange" xml:space="preserve">
+    <value>Corpse Open Range:</value>
+  </data>
+  <data name="DragKey" xml:space="preserve">
+    <value>Drag-select modifier key</value>
+  </data>
+  <data name="FPS" xml:space="preserve">
+    <value>- FPS:</value>
+  </data>
+  <data name="GridLoot" xml:space="preserve">
+    <value>Grid loot</value>
+  </data>
+  <data name="HPFields" xml:space="preserve">
+    <value>Fields: </value>
+  </data>
+  <data name="HP_Mode" xml:space="preserve">
+    <value>mode:</value>
+  </data>
+  <data name="ShopGumpSize" xml:space="preserve">
+    <value>Shop Gump Size (multiple of 60):</value>
+  </data>
+  <data name="Sounds" xml:space="preserve">
+    <value>Sounds</value>
+  </data>
+  <data name="Music" xml:space="preserve">
+    <value>Music</value>
+  </data>
+  <data name="LoginMusic" xml:space="preserve">
+    <value>Login music</value>
+  </data>
+  <data name="PlayFootsteps" xml:space="preserve">
+    <value>Play Footsteps</value>
+  </data>
+  <data name="CombatMusic" xml:space="preserve">
+    <value>Combat music</value>
+  </data>
+  <data name="ReproduceSoundsAndMusic" xml:space="preserve">
+    <value>Reproduce sounds and music when ClassicUO is not focused</value>
+  </data>
+  <data name="BorderlessWindow" xml:space="preserve">
+    <value>Borderless window</value>
+  </data>
+  <data name="AlwaysUseFullsizeGameWindow" xml:space="preserve">
+    <value>Always use fullsize game window</value>
+  </data>
+  <data name="LockGameWindowMovingResizing" xml:space="preserve">
+    <value>Lock game window moving/resizing</value>
+  </data>
+  <data name="GamePlayWindowSize" xml:space="preserve">
+    <value>Game Play Window Size: </value>
+  </data>
+  <data name="GamePlayWindowPosition" xml:space="preserve">
+    <value>Game Play Window Position: </value>
+  </data>
+  <data name="DefaultZoom" xml:space="preserve">
+    <value>Default zoom:</value>
+  </data>
+  <data name="EnableMouseWheelForZoom" xml:space="preserve">
+    <value>Enable mousewheel for in game zoom scaling (Ctrl + Scroll)</value>
+  </data>
+  <data name="ReleasingCtrlRestoresScale" xml:space="preserve">
+    <value>Releasing Ctrl Restores Scale</value>
+  </data>
+  <data name="EnableDeathScreen" xml:space="preserve">
+    <value>Enable Death Screen</value>
+  </data>
+  <data name="BlackWhiteModeForDeadPlayer" xml:space="preserve">
+    <value>Black &amp; White mode for dead player</value>
+  </data>
+  <data name="UseOldStatusGump" xml:space="preserve">
+    <value>Use old status gump</value>
+  </data>
+  <data name="Brighlight" xml:space="preserve">
+    <value>- Brighlight:</value>
+  </data>
+  <data name="AlternativeLights" xml:space="preserve">
+    <value>Alternative lights</value>
+  </data>
+  <data name="SetsLightLevelToMax" xml:space="preserve">
+    <value>Sets light level to max but still renders lights</value>
+  </data>
+  <data name="LightLevel" xml:space="preserve">
+    <value>Light level</value>
+  </data>
+  <data name="DarkNights" xml:space="preserve">
+    <value>Dark nights</value>
+  </data>
+  <data name="UseColoredLights" xml:space="preserve">
+    <value>Use colored lights</value>
+  </data>
+  <data name="Shadows" xml:space="preserve">
+    <value>Shadows</value>
+  </data>
+  <data name="AuraUnderFeet" xml:space="preserve">
+    <value>- Aura under feet:</value>
+  </data>
+  <data name="AuraType_None" xml:space="preserve">
+    <value>None</value>
+  </data>
+  <data name="AuraType_Warmode" xml:space="preserve">
+    <value>Warmode</value>
+  </data>
+  <data name="AuraType_CtrlShift" xml:space="preserve">
+    <value>Ctrl+Shift</value>
+  </data>
+  <data name="AuraType_Always" xml:space="preserve">
+    <value>Always</value>
+  </data>
+  <data name="CustomColorAuraForPartyMembers" xml:space="preserve">
+    <value>Custom color aura for party members</value>
+  </data>
+  <data name="RunMouseInASeparateThread" xml:space="preserve">
+    <value>Run mouse in a separate thread</value>
+  </data>
+  <data name="AuraOnMouseTarget" xml:space="preserve">
+    <value>Aura on mouse target</value>
+  </data>
+  <data name="UseXBREffectBETA" xml:space="preserve">
+    <value>Use xBR effect [BETA]</value>
+  </data>
+  <data name="HideChatGradient" xml:space="preserve">
+    <value>Hide Chat Gradient</value>
+  </data>
+  <data name="NewMacro" xml:space="preserve">
+    <value>New macro</value>
+  </data>
+  <data name="MacroName" xml:space="preserve">
+    <value>Macro name:</value>
+  </data>
+  <data name="DeleteMacro" xml:space="preserve">
+    <value>Delete macro</value>
+  </data>
+  <data name="MacroDeleteConfirmation" xml:space="preserve">
+    <value>Do you want
+delete it?</value>
+  </data>
+  <data name="UseTooltip" xml:space="preserve">
+    <value>Use tooltip</value>
+  </data>
+  <data name="DelayBeforeDisplay" xml:space="preserve">
+    <value>Delay before display:</value>
+  </data>
+  <data name="TooltipZoom" xml:space="preserve">
+    <value>Tooltip zoom:</value>
+  </data>
+  <data name="TooltipBackgroundOpacity" xml:space="preserve">
+    <value>Tooltip background opacity:</value>
+  </data>
+  <data name="TooltipFont" xml:space="preserve">
+    <value>Tooltip font:</value>
+  </data>
+  <data name="TooltipFontHue" xml:space="preserve">
+    <value>Tooltip font hue</value>
+  </data>
+  <data name="TooltipFontSelect" xml:space="preserve">
+    <value>Tooltip font!</value>
+  </data>
+  <data name="OverrideGameFont" xml:space="preserve">
+    <value>Override game font</value>
+  </data>
+  <data name="ASCII" xml:space="preserve">
+    <value>ASCII</value>
+  </data>
+  <data name="Unicode" xml:space="preserve">
+    <value>Unicode</value>
+  </data>
+  <data name="ForceUnicodeInJournal" xml:space="preserve">
+    <value>Force Unicode in journal</value>
+  </data>
+  <data name="SpeechFont" xml:space="preserve">
+    <value>Speech font:</value>
+  </data>
+  <data name="ThatSClassicUO" xml:space="preserve">
+    <value>That's ClassicUO!</value>
+  </data>
+  <data name="ScaleSpeechDelay" xml:space="preserve">
+    <value>Scale speech delay</value>
+  </data>
+  <data name="SaveJournalToFileInGameFolder" xml:space="preserve">
+    <value>Save Journal to file in game folder</value>
+  </data>
+  <data name="ActiveChatWhenPressingEnter" xml:space="preserve">
+    <value>Active chat when pressing ENTER</value>
+  </data>
+  <data name="UseAdditionalButtonsToActivateChat" xml:space="preserve">
+    <value>Use additional buttons to activate chat: ! ; : / \\ , . [ | -</value>
+  </data>
+  <data name="UseShiftEnterToSendMessage" xml:space="preserve">
+    <value>Use `Shift+Enter` to send message without closing chat</value>
+  </data>
+  <data name="RandomizeSpeechHues" xml:space="preserve">
+    <value>Randomize speech hues</value>
+  </data>
+  <data name="SpeechColor" xml:space="preserve">
+    <value>Speech Color</value>
+  </data>
+  <data name="EmoteColor" xml:space="preserve">
+    <value>Emote Color</value>
+  </data>
+  <data name="YellColor" xml:space="preserve">
+    <value>Yell Color</value>
+  </data>
+  <data name="WhisperColor" xml:space="preserve">
+    <value>Whisper Color</value>
+  </data>
+  <data name="PartyMessageColor" xml:space="preserve">
+    <value>Party Message Color</value>
+  </data>
+  <data name="GuildMessageColor" xml:space="preserve">
+    <value>Guild Message Color</value>
+  </data>
+  <data name="AllianceMessageColor" xml:space="preserve">
+    <value>Alliance Message Color</value>
+  </data>
+  <data name="ChatMessageColor" xml:space="preserve">
+    <value>Chat Message Color</value>
+  </data>
+  <data name="QueryAttack" xml:space="preserve">
+    <value>Query before attack</value>
+  </data>
+  <data name="QueryBeneficialActs_Tooltip" xml:space="preserve">
+    <value>Query before beneficial criminal action</value>
+  </data>
+  <data name="QueryBeneficialActs" xml:space="preserve">
+    <value>Query before performing beneficial acts on Murderers, Criminals, Grays (Monsters/Animals)</value>
+  </data>
+  <data name="EnableOverheadSpellFormat" xml:space="preserve">
+    <value>Enable Overhead Spell Format</value>
+  </data>
+  <data name="EnableOverheadSpellHue" xml:space="preserve">
+    <value>Enable Overhead Spell Hue</value>
+  </data>
+  <data name="CastSpellsByOneClick" xml:space="preserve">
+    <value>Cast spells by one click</value>
+  </data>
+  <data name="ShowBuffDuration" xml:space="preserve">
+    <value>Show buff duration</value>
+  </data>
+  <data name="InnocentColor" xml:space="preserve">
+    <value>Innocent Color</value>
+  </data>
+  <data name="FriendColor" xml:space="preserve">
+    <value>Friend Color</value>
+  </data>
+  <data name="CriminalColor" xml:space="preserve">
+    <value>Criminal Color</value>
+  </data>
+  <data name="AnimalColor" xml:space="preserve">
+    <value>Animal Color</value>
+  </data>
+  <data name="MurdererColor" xml:space="preserve">
+    <value>Murderer Color</value>
+  </data>
+  <data name="EnemyColor" xml:space="preserve">
+    <value>Enemy Color</value>
+  </data>
+  <data name="BeneficSpellHue" xml:space="preserve">
+    <value>Benefic Spell Hue</value>
+  </data>
+  <data name="HarmfulSpellHue" xml:space="preserve">
+    <value>Harmful Spell Hue</value>
+  </data>
+  <data name="NeutralSpellHue" xml:space="preserve">
+    <value>Neutral Spell Hue</value>
+  </data>
+  <data name="SpellOverheadFormat" xml:space="preserve">
+    <value> Spell Overhead format: ({power} for powerword - {spell} for spell name)</value>
+  </data>
+  <data name="EnableCounters" xml:space="preserve">
+    <value>Enable Counters</value>
+  </data>
+  <data name="HighlightOnUse" xml:space="preserve">
+    <value>Highlight On Use</value>
+  </data>
+  <data name="EnableAbbreviatedAmountCountrs" xml:space="preserve">
+    <value>Enable abbreviated amount values when amount is or exceeds</value>
+  </data>
+  <data name="HighlightRedWhenBelow" xml:space="preserve">
+    <value>Highlight red when amount is below</value>
+  </data>
+  <data name="CounterLayout" xml:space="preserve">
+    <value>Counter Layout:</value>
+  </data>
+  <data name="CellSize" xml:space="preserve">
+    <value>Cell size:</value>
+  </data>
+  <data name="DisableDefaultUOHotkeys" xml:space="preserve">
+    <value>Disable default UO hotkeys</value>
+  </data>
+  <data name="DisableArrowsPlayerMovement" xml:space="preserve">
+    <value>Disable arrows &amp; numlock arrows (player moving)</value>
+  </data>
+  <data name="DisableTab" xml:space="preserve">
+    <value>Disable TAB (toggle warmode)</value>
+  </data>
+  <data name="DisableMessageHistory" xml:space="preserve">
+    <value>Disable Ctrl + Q/W (messageHistory)</value>
+  </data>
+  <data name="DisableClickAutomove" xml:space="preserve">
+    <value>Disable Right+Left Click Automove</value>
+  </data>
+  <data name="ShowInfoBar" xml:space="preserve">
+    <value>Show Info Bar</value>
+  </data>
+  <data name="DataHighlightType" xml:space="preserve">
+    <value>Data highlight type:</value>
+  </data>
+  <data name="TextColor" xml:space="preserve">
+    <value>Text color</value>
+  </data>
+  <data name="ColoredBars" xml:space="preserve">
+    <value>Colored bars</value>
+  </data>
+  <data name="AddItem" xml:space="preserve">
+    <value>+ Add item</value>
+  </data>
+  <data name="Label" xml:space="preserve">
+    <value>Label</value>
+  </data>
+  <data name="Color" xml:space="preserve">
+    <value>Color</value>
+  </data>
+  <data name="Data" xml:space="preserve">
+    <value>Data</value>
+  </data>
+  <data name="ContainerScale" xml:space="preserve">
+    <value>- Container scale:</value>
+  </data>
+  <data name="ScaleItemsInsideContainers" xml:space="preserve">
+    <value>Scale items inside containers</value>
+  </data>
+  <data name="UseLargeContainersGump" xml:space="preserve">
+    <value>Use large containers gump</value>
+  </data>
+  <data name="DoubleClickLootContainers" xml:space="preserve">
+    <value>Double click to loot items inside containers</value>
+  </data>
+  <data name="RelativeDragAndDropContainers" xml:space="preserve">
+    <value>Relative drag and drop items in containers</value>
+  </data>
+  <data name="OverrideContainerGumpLocation" xml:space="preserve">
+    <value>Override container gump location</value>
+  </data>
+  <data name="ContLoc_NearContainerPosition" xml:space="preserve">
+    <value>Near container position</value>
+  </data>
+  <data name="ContLoc_TopRight" xml:space="preserve">
+    <value>Top right</value>
+  </data>
+  <data name="ContLoc_LastDraggedPosition" xml:space="preserve">
+    <value>Last dragged position</value>
+  </data>
+  <data name="ContLoc_RememberEveryContainer" xml:space="preserve">
+    <value>Remember every container</value>
+  </data>
+  <data name="RebuildContainers" xml:space="preserve">
+    <value>Rebuild containers.txt</value>
+  </data>
+  <data name="SpellFormat_Default" xml:space="preserve">
+    <value>{power} [{spell}]</value>
+  </data>
+  <data name="PartyAuraColor" xml:space="preserve">
+    <value>Party Aura Color</value>
+  </data>
+  <data name="Counter_Rows" xml:space="preserve">
+    <value>Rows:</value>
+  </data>
+  <data name="Counter_Columns" xml:space="preserve">
+    <value>Columns:</value>
+  </data>
+  <data name="NoCityFound" xml:space="preserve">
+    <value>No city found. Something wrong with the received cities.</value>
+  </data>
+  <data name="PermanentlyDelete0" xml:space="preserve">
+    <value>Permanently delete character "{0}"?</value>
+  </data>
+  <data name="Password" xml:space="preserve">
+    <value>Password</value>
+  </data>
+  <data name="Account" xml:space="preserve">
+    <value>Account Name</value>
+  </data>
+  <data name="LoginToUO" xml:space="preserve">
+    <value>Log in to Ultima Online</value>
+  </data>
+  <data name="CUOVersion0" xml:space="preserve">
+    <value>ClassicUO Version {0}</value>
+  </data>
+  <data name="Autologin" xml:space="preserve">
+    <value>Autologin</value>
+  </data>
+  <data name="SaveAccount" xml:space="preserve">
+    <value>Save Account</value>
+  </data>
+  <data name="By" xml:space="preserve">
+    <value>by</value>
+  </data>
+  <data name="BookPage0TooManyLines1Lost" xml:space="preserve">
+    <value>Book page {0} split into too many lines: {1} Additional lines will be lost</value>
+  </data>
+  <data name="BookPage0LineTooLong1" xml:space="preserve">
+    <value>Book page {0} single line too LONG, total lenght -&gt; {1} vs MAX 79 bytes allowed, some content might get lost</value>
+  </data>
+  <data name="TimeLeft" xml:space="preserve">
+    <value>{0}
+Time left: {1:00}:{2:00}:{3:00}</value>
+  </data>
+  <data name="Span0Hours" xml:space="preserve">
+    <value>+{0}hr</value>
+  </data>
+  <data name="DateTime" xml:space="preserve">
+    <value>Date/Time</value>
+  </data>
+  <data name="Author" xml:space="preserve">
+    <value>Author:</value>
+  </data>
+  <data name="Date" xml:space="preserve">
+    <value>Date:</value>
+  </data>
+  <data name="RE" xml:space="preserve">
+    <value>RE: </value>
+  </data>
+  <data name="Index" xml:space="preserve">
+    <value>INDEX</value>
+  </data>
+  <data name="PrimaryAbilityIcon" xml:space="preserve">
+    <value>Primary Ability Icon</value>
+  </data>
+  <data name="SecondaryAbilityIcon" xml:space="preserve">
+    <value>Secondary Ability Icon</value>
+  </data>
+  <data name="IndexOutOfbounds" xml:space="preserve">
+    <value>Index outbounds when parsing counter bar items</value>
+  </data>
+  <data name="Title" xml:space="preserve">
+    <value>Title:</value>
+  </data>
+  <data name="UseObject" xml:space="preserve">
+    <value>Use object (Double click)</value>
+  </data>
+  <data name="Remove" xml:space="preserve">
+    <value>Remove</value>
+  </data>
+  <data name="Selected0" xml:space="preserve">
+    <value>- Selected: {0}</value>
+  </data>
+  <data name="Static0Height1Flags2Alpha3" xml:space="preserve">
+    <value>Static (0x{0:X4})  height: {1}  flags: {2}  Alpha: {3}</value>
+  </data>
+  <data name="GameEffect" xml:space="preserve">
+    <value>GameEffect</value>
+  </data>
+  <data name="TextOverheadType0Hue1" xml:space="preserve">
+    <value>TextOverhead type: {0}  hue: 0x{1:X4}</value>
+  </data>
+  <data name="Land0Flags1" xml:space="preserve">
+    <value>Land (0x{0:X4})  flags: {1}</value>
+  </data>
+  <data name="SetLootBag" xml:space="preserve">
+    <value>Set loot bag</value>
+  </data>
+  <data name="Prev" xml:space="preserve">
+    <value>&lt;&lt;</value>
+  </data>
+  <data name="Next" xml:space="preserve">
+    <value>&gt;&gt;</value>
+  </data>
+  <data name="TargetContainerToGrabItemsInto" xml:space="preserve">
+    <value>Target the container to Grab items into.</value>
+  </data>
+  <data name="CorpseIsEmpty" xml:space="preserve">
+    <value>[GridLoot]: Corpse is empty!</value>
+  </data>
+  <data name="Self" xml:space="preserve">
+    <value>[* SELF *]</value>
+  </data>
+  <data name="Walls" xml:space="preserve">
+    <value>Walls</value>
+  </data>
+  <data name="Doors" xml:space="preserve">
+    <value>Doors</value>
+  </data>
+  <data name="Floors" xml:space="preserve">
+    <value>Floors</value>
+  </data>
+  <data name="Stairs" xml:space="preserve">
+    <value>Stairs</value>
+  </data>
+  <data name="Roofs" xml:space="preserve">
+    <value>Roofs</value>
+  </data>
+  <data name="Miscellaneous" xml:space="preserve">
+    <value>Miscellaneous</value>
+  </data>
+  <data name="SystemMenu" xml:space="preserve">
+    <value>System Menu</value>
+  </data>
+  <data name="Cost" xml:space="preserve">
+    <value>Cost</value>
+  </data>
+  <data name="Erase" xml:space="preserve">
+    <value>Erase</value>
+  </data>
+  <data name="EyedropperTool" xml:space="preserve">
+    <value>Eyedropper Tool</value>
+  </data>
+  <data name="Store0Visibility" xml:space="preserve">
+    <value>Story {0} Visibility</value>
+  </data>
+  <data name="GoToStory0" xml:space="preserve">
+    <value>Go To Story {0}</value>
+  </data>
+  <data name="PreviousPage" xml:space="preserve">
+    <value>PreviousPage</value>
+  </data>
+  <data name="NextPage" xml:space="preserve">
+    <value>Next Page</value>
+  </data>
+  <data name="ToCustomHouseManagerCategory" xml:space="preserve">
+    <value>To _customHouseManager.Category</value>
+  </data>
+  <data name="WindowToggle" xml:space="preserve">
+    <value>Window Toggle</value>
+  </data>
+  <data name="LowerRoofPlacementLevel" xml:space="preserve">
+    <value>Lower Roof Placement Level</value>
+  </data>
+  <data name="RaiseRoofPlacementLevel" xml:space="preserve">
+    <value>Raise Roof Placement Level</value>
+  </data>
+  <data name="Backup" xml:space="preserve">
+    <value>Backup</value>
+  </data>
+  <data name="StoreDesignInProgress" xml:space="preserve">
+    <value>Store design in progress in a back up buffer, but do not finalize design.</value>
+  </data>
+  <data name="RestoreYourDesign" xml:space="preserve">
+    <value>Restore your design in progress to a design you have previously backed up.</value>
+  </data>
+  <data name="Restore" xml:space="preserve">
+    <value>Restore</value>
+  </data>
+  <data name="Sync" xml:space="preserve">
+    <value>Sync</value>
+  </data>
+  <data name="SynchronizeDesignStateWithServer" xml:space="preserve">
+    <value>Synchronize design state with server.</value>
+  </data>
+  <data name="Clear" xml:space="preserve">
+    <value>Clear</value>
+  </data>
+  <data name="ClearAllChanges" xml:space="preserve">
+    <value>Clear all changes, returning your design in progress to a blank foundation.</value>
+  </data>
+  <data name="Commit" xml:space="preserve">
+    <value>Commit</value>
+  </data>
+  <data name="SaveExistingChanges" xml:space="preserve">
+    <value>Save existing changes and finalize design.</value>
+  </data>
+  <data name="Revert" xml:space="preserve">
+    <value>Revert</value>
+  </data>
+  <data name="RevertYourDesign" xml:space="preserve">
+    <value>Revert your design in progress to match your currently visible, finalized design.</value>
+  </data>
+  <data name="ObjectInformation" xml:space="preserve">
+    <value>Object Information</value>
+  </data>
+  <data name="Dump" xml:space="preserve">
+    <value>Dump</value>
+  </data>
+  <data name="DarkMode" xml:space="preserve">
+    <value>Dark mode</value>
+  </data>
+  <data name="All" xml:space="preserve">
+    <value>All</value>
+  </data>
+  <data name="MobilesOnly" xml:space="preserve">
+    <value>Mobiles only</value>
+  </data>
+  <data name="ItemsOnly" xml:space="preserve">
+    <value>Items only</value>
+  </data>
+  <data name="MobilesAndCorpsesOnly" xml:space="preserve">
+    <value>Mobiles and Corpses only</value>
+  </data>
+  <data name="Tell" xml:space="preserve">
+    <value>Tell</value>
+  </data>
+  <data name="Kick" xml:space="preserve">
+    <value>Kick</value>
+  </data>
+  <data name="PartyManifest" xml:space="preserve">
+    <value>Party Manifest</value>
+  </data>
+  <data name="SendThePartyAMessage" xml:space="preserve">
+    <value>Send the party a message</value>
+  </data>
+  <data name="PartyCanLootMe" xml:space="preserve">
+    <value>Party can loot me</value>
+  </data>
+  <data name="PartyCannotLootMe" xml:space="preserve">
+    <value>Party CANNOT loot me</value>
+  </data>
+  <data name="LeaveTheParty" xml:space="preserve">
+    <value>Leave the party</value>
+  </data>
+  <data name="DisbandTheParty" xml:space="preserve">
+    <value>Disband the party</value>
+  </data>
+  <data name="AddNewMember" xml:space="preserve">
+    <value>Add New Member</value>
+  </data>
+  <data name="YouAreNotInAParty" xml:space="preserve">
+    <value>You are not in a party.</value>
+  </data>
+  <data name="ThereIsNoOneInThatPartySlot" xml:space="preserve">
+    <value>There is no one in that party slot.</value>
+  </data>
+  <data name="Accept" xml:space="preserve">
+    <value>Accept</value>
+  </data>
+  <data name="Decline" xml:space="preserve">
+    <value>Decline</value>
+  </data>
+  <data name="P0HasInvitedYouToParty" xml:space="preserve">
+    <value>{0}has invited you to join a party.</value>
+  </data>
+  <data name="NoName" xml:space="preserve">
+    <value>No Name</value>
+  </data>
+  <data name="Passive" xml:space="preserve">
+    <value>Passive</value>
+  </data>
+  <data name="Item0Price1" xml:space="preserve">
+    <value>{0} at {1}gp</value>
+  </data>
+  <data name="Name" xml:space="preserve">
+    <value>Name:</value>
+  </data>
+  <data name="Real" xml:space="preserve">
+    <value>Real</value>
+  </data>
+  <data name="Base" xml:space="preserve">
+    <value>Base</value>
+  </data>
+  <data name="Cap" xml:space="preserve">
+    <value>Cap</value>
+  </data>
+  <data name="Total" xml:space="preserve">
+    <value>Total: </value>
+  </data>
+  <data name="TithingPointsAvailable" xml:space="preserve">
+    <value>Tithing points
+Available: </value>
+  </data>
+  <data name="Abilities" xml:space="preserve">
+    <value>Abilities</value>
+  </data>
+  <data name="Activated" xml:space="preserve">
+    <value>Activated</value>
+  </data>
+  <data name="Reagents" xml:space="preserve">
+    <value>Reagents:</value>
+  </data>
+  <data name="Upkeep0Mana1MinSkill2" xml:space="preserve">
+    <value>Upkeep Cost: {0}
+Mana cost: {0}
+Min. Skill: {0}</value>
+  </data>
+  <data name="ManaCost0MinSkill1" xml:space="preserve">
+    <value>Mana cost: {0}
+Min. Skill: {1}</value>
+  </data>
+  <data name="ShowReal" xml:space="preserve">
+    <value> - Show Real</value>
+  </data>
+  <data name="ShowCaps" xml:space="preserve">
+    <value> - Show Caps</value>
+  </data>
+  <data name="NewGroup" xml:space="preserve">
+    <value>New Group</value>
+  </data>
+  <data name="Female" xml:space="preserve">
+    <value>F</value>
+  </data>
+  <data name="Male" xml:space="preserve">
+    <value>M</value>
+  </data>
+  <data name="Buffs" xml:space="preserve">
+    <value>Buffs</value>
+  </data>
+  <data name="Whisper" xml:space="preserve">
+    <value>[Whisper]: </value>
+  </data>
+  <data name="Emote" xml:space="preserve">
+    <value>[Emote]: </value>
+  </data>
+  <data name="Yell" xml:space="preserve">
+    <value>[Yell]: </value>
+  </data>
+  <data name="Party" xml:space="preserve">
+    <value>[Party]: </value>
+  </data>
+  <data name="Guild" xml:space="preserve">
+    <value>[Guild]: </value>
+  </data>
+  <data name="Alliance" xml:space="preserve">
+    <value>[Alliance]: </value>
+  </data>
+  <data name="Command" xml:space="preserve">
+    <value>[Command]: </value>
+  </data>
+  <data name="UOAM" xml:space="preserve">
+    <value>[UOAM]: </value>
+  </data>
+  <data name="Chat" xml:space="preserve">
+    <value>Chat</value>
+  </data>
+  <data name="PartyName0Text1" xml:space="preserve">
+    <value>[Party][{0}]: {1}</value>
+  </data>
+  <data name="GuildName0Text1" xml:space="preserve">
+    <value>[Guild][{0}]: {1}</value>
+  </data>
+  <data name="AllianceName0Text1" xml:space="preserve">
+    <value>[Alliance][{0}]: {1}</value>
+  </data>
+  <data name="Tell0" xml:space="preserve">
+    <value>[Tell] [{0}]: </value>
+  </data>
+  <data name="TellEmpty" xml:space="preserve">
+    <value>[Tell] []: </value>
+  </data>
+  <data name="YouAreNotPartyLeader" xml:space="preserve">
+    <value>You are not party leader.</value>
+  </data>
+  <data name="NoOneHasInvitedYouToBeInAParty" xml:space="preserve">
+    <value>No one has invited you to be in a party.</value>
+  </data>
+  <data name="NoteToSelf0" xml:space="preserve">
+    <value>Note to self: {0}</value>
+  </data>
+  <data name="Map" xml:space="preserve">
+    <value>Map</value>
+  </data>
+  <data name="Paperdoll" xml:space="preserve">
+    <value>Paperdoll</value>
+  </data>
+  <data name="Inventory" xml:space="preserve">
+    <value>Inventory</value>
+  </data>
+  <data name="Journal" xml:space="preserve">
+    <value>Journal</value>
+  </data>
+  <data name="Help" xml:space="preserve">
+    <value>Help</value>
+  </data>
+  <data name="WorldMap" xml:space="preserve">
+    <value>World Map</value>
+  </data>
+  <data name="Debug" xml:space="preserve">
+    <value>Debug</value>
+  </data>
+  <data name="NetStats" xml:space="preserve">
+    <value>NetStats</value>
+  </data>
+  <data name="UOStore" xml:space="preserve">
+    <value>UOStore</value>
+  </data>
+  <data name="GlobalChat" xml:space="preserve">
+    <value>Global Chat</value>
+  </data>
+  <data name="Info" xml:space="preserve">
+    <value>&lt; ? &gt;</value>
+  </data>
+  <data name="TopBarGumpAlreadyExists" xml:space="preserve">
+    <value>TopBarGump already exists!!</value>
+  </data>
+  <data name="ChatButtonPushedNotImplementedYet" xml:space="preserve">
+    <value>Chat button pushed! Not implemented yet!</value>
+  </data>
+  <data name="GlobalChatNotImplementedYet" xml:space="preserve">
+    <value>GlobalChat not implemented yet.</value>
+  </data>
+  <data name="ChooseName" xml:space="preserve">
+    <value>You are about to choose your name for the Ultima Online chat system. This name will be PERMANENT and unique on this shard. It will apply to all characters using this account. Do not use your Ultima Online account name for this name as the name you choose will be public. Enter your chat name here:</value>
+  </data>
+  <data name="Channels" xml:space="preserve">
+    <value>Channels</value>
+  </data>
+  <data name="YourCurrentChannel" xml:space="preserve">
+    <value>Your current channel:</value>
+  </data>
+  <data name="Join" xml:space="preserve">
+    <value>Join</value>
+  </data>
+  <data name="Leave" xml:space="preserve">
+    <value>Leave</value>
+  </data>
+  <data name="Create" xml:space="preserve">
+    <value>Create</value>
+  </data>
+  <data name="CreateAChannel" xml:space="preserve">
+    <value>Create a channel:</value>
+  </data>
+  <data name="WorldMapLoading" xml:space="preserve">
+    <value>WorldMap loading...</value>
+  </data>
+  <data name="ShowAllMarkers" xml:space="preserve">
+    <value>Show all markers</value>
+  </data>
+  <data name="ShowMarkerNames" xml:space="preserve">
+    <value>Show marker names</value>
+  </data>
+  <data name="ShowMarkerIcons" xml:space="preserve">
+    <value>Show marker icons</value>
+  </data>
+  <data name="FlipMap" xml:space="preserve">
+    <value>Flip map</value>
+  </data>
+  <data name="TopMost" xml:space="preserve">
+    <value>TopMost</value>
+  </data>
+  <data name="FreeView" xml:space="preserve">
+    <value>Free view</value>
+  </data>
+  <data name="ShowPartyMembers" xml:space="preserve">
+    <value>Show party members</value>
+  </data>
+  <data name="ShowMobiles" xml:space="preserve">
+    <value>Show mobiles</value>
+  </data>
+  <data name="ShowHousesBoats" xml:space="preserve">
+    <value>Show houses/boats</value>
+  </data>
+  <data name="ShowYourName" xml:space="preserve">
+    <value>Show your name</value>
+  </data>
+  <data name="ShowYourHealthbar" xml:space="preserve">
+    <value>Show your healthbar</value>
+  </data>
+  <data name="ShowGroupName" xml:space="preserve">
+    <value>Show group name</value>
+  </data>
+  <data name="ShowGroupHealthbar" xml:space="preserve">
+    <value>Show group healthbar</value>
+  </data>
+  <data name="ShowYourCoordinates" xml:space="preserve">
+    <value>Show your coordinates</value>
+  </data>
+  <data name="SaveClose" xml:space="preserve">
+    <value>Save &amp; Close</value>
+  </data>
+  <data name="FontStyle" xml:space="preserve">
+    <value>Font Style</value>
+  </data>
+  <data name="Style0" xml:space="preserve">
+    <value>Style {0}</value>
+  </data>
+  <data name="MapMarkerOptions" xml:space="preserve">
+    <value>Map Marker Options</value>
+  </data>
+  <data name="ReloadMarkers" xml:space="preserve">
+    <value>Reload markers</value>
+  </data>
+  <data name="ShowHide0" xml:space="preserve">
+    <value>Show/Hide '{0}'</value>
+  </data>
+  <data name="NoMapFiles" xml:space="preserve">
+    <value>No map files</value>
+  </data>
+  <data name="NamesHealthbars" xml:space="preserve">
+    <value>Names &amp; Healthbars</value>
+  </data>
+  <data name="WorldMapLoaded" xml:space="preserve">
+    <value>WorldMap loaded!</value>
+  </data>
+  <data name="LoadingWorldMapMarkers" xml:space="preserve">
+    <value>Loading WorldMap markers..</value>
+  </data>
+  <data name="WorldMapMarkersLoaded0" xml:space="preserve">
+    <value>WorldMap markers loaded ({0})</value>
+  </data>
+  <data name="OutOfRange" xml:space="preserve">
+    <value>&lt;out of range&gt;</value>
+  </data>
+  <data name="ResizeGameWindow" xml:space="preserve">
+    <value>Resize game window</value>
+  </data>
+  <data name="KeyCombinationAlreadyExists" xml:space="preserve">
+    <value>Key combination already exists.</value>
+  </data>
+  <data name="Delete" xml:space="preserve">
+    <value>Delete</value>
+  </data>
+  <data name="CreateMacroButton" xml:space="preserve">
+    <value>+ Create macro button</value>
+  </data>
+  <data name="Add" xml:space="preserve">
+    <value>Add</value>
+  </data>
+  <data name="ThisKeyCombinationAlreadyExists" xml:space="preserve">
+    <value>This key combination
+already exists.</value>
+  </data>
+  <data name="ImpossibleToDefineTheClientVersion0" xml:space="preserve">
+    <value>Impossible to define the client version.
+Client version: '{0}'</value>
+  </data>
+  <data name="SelectWhichShardToPlayOn" xml:space="preserve">
+    <value>Select which shard to play on:</value>
+  </data>
+  <data name="Latency" xml:space="preserve">
+    <value>Latency:</value>
+  </data>
+  <data name="PacketLoss" xml:space="preserve">
+    <value>Packet Loss:</value>
+  </data>
+  <data name="SortBy" xml:space="preserve">
+    <value>Sort by:</value>
+  </data>
+  <data name="Localisation" xml:space="preserve">
+    <value>Localisation</value>
+  </data>
+  <data name="ChangingLanguageNeedsRestartToTakeEffect" xml:space="preserve">
+    <value>Changing language needs restart to take effect</value>
+  </data>
+  <data name="Strength" xml:space="preserve">
+    <value>Strength</value>
+  </data>
+  <data name="Dex" xml:space="preserve">
+    <value>Dex</value>
+  </data>
+  <data name="Intelligence" xml:space="preserve">
+    <value>Intelligence</value>
+  </data>
+  <data name="Sex" xml:space="preserve">
+    <value>Sex</value>
+  </data>
+  <data name="Armor" xml:space="preserve">
+    <value>Armor</value>
+  </data>
+  <data name="Stamina" xml:space="preserve">
+    <value>Stamina</value>
+  </data>
+  <data name="Gold" xml:space="preserve">
+    <value>Gold</value>
+  </data>
+  <data name="HitChanceIncrease" xml:space="preserve">
+    <value>Hit Chance Increase</value>
+  </data>
+  <data name="Dexterity" xml:space="preserve">
+    <value>Dexterity</value>
+  </data>
+  <data name="DefenseChanceIncrease" xml:space="preserve">
+    <value>Defense Chance Increase</value>
+  </data>
+  <data name="HitPoints" xml:space="preserve">
+    <value>Hit Points</value>
+  </data>
+  <data name="LowerManaCost" xml:space="preserve">
+    <value>Lower Mana Cost</value>
+  </data>
+  <data name="MaximumStats" xml:space="preserve">
+    <value>Maximum Stats</value>
+  </data>
+  <data name="Luck" xml:space="preserve">
+    <value>Luck</value>
+  </data>
+  <data name="WeaponDamageIncrease" xml:space="preserve">
+    <value>Weapon Damage Increase</value>
+  </data>
+  <data name="SwingSpeedIncrease" xml:space="preserve">
+    <value>Swing Speed Increase</value>
+  </data>
+  <data name="Damage" xml:space="preserve">
+    <value>Damage</value>
+  </data>
+  <data name="Followers" xml:space="preserve">
+    <value>Followers</value>
+  </data>
+  <data name="LowerReagentCost" xml:space="preserve">
+    <value>Lower Reagent Cost</value>
+  </data>
+  <data name="SpellDamageIncrease" xml:space="preserve">
+    <value>Spell Damage Increase</value>
+  </data>
+  <data name="FasterCasting" xml:space="preserve">
+    <value>Faster Casting</value>
+  </data>
+  <data name="FasterCastRecovery" xml:space="preserve">
+    <value>Faster Cast Recovery</value>
+  </data>
+  <data name="PhysicalResistance" xml:space="preserve">
+    <value>Physical Resistance</value>
+  </data>
+  <data name="FireResistance" xml:space="preserve">
+    <value>Fire Resistance</value>
+  </data>
+  <data name="ColdResistance" xml:space="preserve">
+    <value>Cold Resistance</value>
+  </data>
+  <data name="PoisonResistance" xml:space="preserve">
+    <value>Poison Resistance</value>
+  </data>
+  <data name="EnergyResistance" xml:space="preserve">
+    <value>Energy Resistance</value>
+  </data>
+  <data name="MaxStats" xml:space="preserve">
+    <value>Max Stats</value>
+  </data>
+  <data name="Minimize" xml:space="preserve">
+    <value>Minimize</value>
+  </data>
+  <data name="HideScreenshotStoredInMessage" xml:space="preserve">
+    <value>Hide "Screenshot stored in" message</value>
+  </data>
+  <data name="AnisotropicClamp" xml:space="preserve">
+    <value>Anisotropic Clamp</value>
+  </data>
+  <data name="FilterType" xml:space="preserve">
+    <value>Filter type [TEST]:</value>
+  </data>
+  <data name="FilterTypeFormatON" xml:space="preserve">
+    <value>{0} [{1}]</value>
+  </data>
+  <data name="LinearClamp" xml:space="preserve">
+    <value>Linear Clamp</value>
+  </data>
+  <data name="OFF" xml:space="preserve">
+    <value>OFF</value>
+  </data>
+  <data name="ON" xml:space="preserve">
+    <value>ON</value>
+  </data>
+  <data name="HighlightContainerWhenSelected" xml:space="preserve">
+    <value>Highlight container on ground when mouse is over a container gump</value>
+  </data>
+</root>

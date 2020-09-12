@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,86 +18,81 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
-using ClassicUO.Utility;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
+using ClassicUO.Utility;
 
 namespace ClassicUO.IO.Resources
 {
     internal class SkillsLoader : UOFileLoader
-    {    
+    {
+        private static SkillsLoader _instance;
         private UOFileMul _file;
 
         private SkillsLoader()
         {
-
         }
 
-        private static SkillsLoader _instance;
-        public static SkillsLoader Instance
-        {
-            get
-            {
-                if (_instance == null)
-                {
-                    _instance = new SkillsLoader();
-                }
-
-                return _instance;
-            }
-        }
-
-
+        public static SkillsLoader Instance => _instance ?? (_instance = new SkillsLoader());
 
         public int SkillsCount => Skills.Count;
         public readonly List<SkillEntry> Skills = new List<SkillEntry>();
         public readonly List<SkillEntry> SortedSkills = new List<SkillEntry>();
 
-
         public override Task Load()
         {
-            return Task.Run(() =>
-            {
-                if (SkillsCount > 0)
-                    return;
-
-                string path = UOFileManager.GetUOFilePath("skills.mul");
-                string pathidx = UOFileManager.GetUOFilePath("Skills.idx");
-
-                FileSystemHelper.EnsureFileExists(path);
-                FileSystemHelper.EnsureFileExists(pathidx);
-
-                _file = new UOFileMul(path, pathidx, 0, 16);
-                _file.FillEntries(ref Entries);
-
-                for (int i = 0, count = 0; i < Entries.Length; i++)
-                { 
-                    ref var entry = ref GetValidRefEntry(i);
-
-                    if (entry.Length > 0)
+            return Task.Run
+            (
+                () =>
+                {
+                    if (SkillsCount > 0)
                     {
-                        _file.Seek(entry.Offset);
-                        var hasAction = _file.ReadBool();
-                        var name = Encoding.UTF8.GetString(_file.ReadArray<byte>(entry.Length - 1)).TrimEnd('\0');
-                        var skill = new SkillEntry(count++, name, hasAction);
-
-                        Skills.Add(skill);
+                        return;
                     }
-                }
 
-                SortedSkills.AddRange(Skills);
-                SortedSkills.Sort((a, b) => a.Name.CompareTo(b.Name));
-            });
+                    string path = UOFileManager.GetUOFilePath("skills.mul");
+                    string pathidx = UOFileManager.GetUOFilePath("Skills.idx");
+
+                    FileSystemHelper.EnsureFileExists(path);
+                    FileSystemHelper.EnsureFileExists(pathidx);
+
+                    _file = new UOFileMul(path, pathidx, 0, 16);
+                    _file.FillEntries(ref Entries);
+
+                    for (int i = 0, count = 0; i < Entries.Length; i++)
+                    {
+                        ref UOFileIndex entry = ref GetValidRefEntry(i);
+
+                        if (entry.Length > 0)
+                        {
+                            _file.Seek(entry.Offset);
+                            bool hasAction = _file.ReadBool();
+
+                            string name = Encoding.UTF8.GetString(_file.ReadArray<byte>(entry.Length - 1))
+                                                  .TrimEnd('\0');
+
+                            SkillEntry skill = new SkillEntry(count++, name, hasAction);
+
+                            Skills.Add(skill);
+                        }
+                    }
+
+                    SortedSkills.AddRange(Skills);
+                    SortedSkills.Sort((a, b) => a.Name.CompareTo(b.Name));
+                }
+            );
         }
 
         public int GetSortedIndex(int index)
         {
             if (index < SkillsCount)
             {
-                return SortedSkills[index].Index;
+                return SortedSkills[index]
+                    .Index;
             }
 
             return -1;
@@ -105,6 +101,22 @@ namespace ClassicUO.IO.Resources
 
     internal class SkillEntry
     {
+        public SkillEntry(int index, string name, bool hasAction)
+        {
+            Index = index;
+            Name = name;
+            HasAction = hasAction;
+        }
+
+        public bool HasAction;
+        public readonly int Index;
+        public string Name;
+
+        public override string ToString()
+        {
+            return Name;
+        }
+
         internal enum HardCodedName
         {
             Alchemy,
@@ -162,22 +174,6 @@ namespace ClassicUO.IO.Resources
             Bushido,
             Ninjitsu,
             Spellweaving
-        }
-
-        public SkillEntry(int index, string name, bool hasAction)
-        {
-            Index = index;
-            Name = name;
-            HasAction = hasAction;
-        }
-
-        public readonly int Index;
-        public string Name;
-        public bool HasAction;
-
-        public override string ToString()
-        {
-            return Name;
         }
     }
 }

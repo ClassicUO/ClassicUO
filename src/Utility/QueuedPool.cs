@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,6 +18,7 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
@@ -24,24 +26,28 @@ using System.Collections.Generic;
 
 namespace ClassicUO.Utility
 {
-    delegate void ActionRef1<T>(ref T arg);
-
     internal class QueuedPool<T> where T : class, new()
     {
+        private readonly Action<T> _on_pickup;
         private readonly Stack<T> _pool;
-        private Action<T> _on_pickup;
 
-        private int _maxSize;
 
         public QueuedPool(int size, Action<T> onpickup = null)
         {
-            _maxSize = size;
+            MaxSize = size;
             _pool = new Stack<T>(size);
             _on_pickup = onpickup;
 
             for (int i = 0; i < size; i++)
+            {
                 _pool.Push(new T());
+            }
         }
+
+
+        public int MaxSize { get; }
+
+        public int Remains => MaxSize - _pool.Count;
 
         public T GetOne()
         {

@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,31 +18,27 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
+using System;
+using System.Diagnostics;
+using System.IO;
 using ClassicUO.Configuration;
 using ClassicUO.Data;
 using ClassicUO.Game.Data;
 using ClassicUO.IO;
-using ClassicUO.Utility.Logging;
-using System;
-using System.Diagnostics;
-using System.IO;
 using ClassicUO.Network;
+using ClassicUO.Resources;
+using ClassicUO.Utility.Logging;
 using ClassicUO.Utility.Platforms;
-
 using SDL2;
-using ClassicUO.Renderer;
-using ClassicUO.IO.Resources;
-using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
-using ClassicUO.Game;
 
 namespace ClassicUO
 {
-    static class Client
+    internal static class Client
     {
-        public static ClientVersion Version { get; private set; } 
+        public static ClientVersion Version { get; private set; }
         public static ClientFlags Protocol { get; set; }
         public static string ClientPath { get; private set; }
         public static bool IsUOPInstallation { get; private set; }
@@ -54,13 +51,15 @@ namespace ClassicUO
             Debug.Assert(Game == null);
 
             Log.Trace("Running game...");
+
             using (Game = new GameController())
-            //Game = new GameController();
+                //Game = new GameController();
             {
                 // https://github.com/FNA-XNA/FNA/wiki/7:-FNA-Environment-Variables#fna_graphics_enable_highdpi
                 CUOEnviroment.IsHighDPI = Environment.GetEnvironmentVariable("FNA_GRAPHICS_ENABLE_HIGHDPI") == "1";
-                Game.Run();           
+                Game.Run();
             }
+
             Log.Trace("Exiting game...");
         }
 
@@ -82,7 +81,9 @@ namespace ClassicUO
             if (!string.IsNullOrWhiteSpace(Settings.GlobalSettings.ClientVersion))
             {
                 // sanitize client version
-                Settings.GlobalSettings.ClientVersion = Settings.GlobalSettings.ClientVersion.Replace(",", ".").Replace(" ", "").ToLower();
+                Settings.GlobalSettings.ClientVersion = Settings.GlobalSettings.ClientVersion.Replace(",", ".")
+                                                                .Replace(" ", "")
+                                                                .ToLower();
             }
 
             string clientVersionText = Settings.GlobalSettings.ClientVersion;
@@ -91,7 +92,8 @@ namespace ClassicUO
             if (!Directory.Exists(clientPath))
             {
                 Log.Error("Invalid client directory: " + clientPath);
-                ShowErrorMessage($"'{clientPath}' is not a valid UO directory");
+                ShowErrorMessage(string.Format(ResErrorMessages.ClientPathIsNotAValidUODirectory, clientPath));
+
                 throw new InvalidClientDirectory($"'{clientPath}' is not a valid directory");
             }
 
@@ -105,7 +107,8 @@ namespace ClassicUO
                     !ClientVersionHelper.IsClientVersionValid(clientVersionText, out clientVersion))
                 {
                     Log.Error("Invalid client version: " + clientVersionText);
-                    ShowErrorMessage($"Impossible to define the client version.\nClient version: '{clientVersionText}'");
+                    ShowErrorMessage(string.Format(ResGumps.ImpossibleToDefineTheClientVersion0, clientVersionText));
+
                     throw new InvalidClientVersion($"Invalid client version: '{clientVersionText}'");
                 }
 
@@ -121,17 +124,34 @@ namespace ClassicUO
             Protocol = ClientFlags.CF_T2A;
 
             if (Version >= ClientVersion.CV_200)
+            {
                 Protocol |= ClientFlags.CF_RE;
+            }
+
             if (Version >= ClientVersion.CV_300)
+            {
                 Protocol |= ClientFlags.CF_TD;
+            }
+
             if (Version >= ClientVersion.CV_308)
+            {
                 Protocol |= ClientFlags.CF_LBR;
+            }
+
             if (Version >= ClientVersion.CV_308Z)
+            {
                 Protocol |= ClientFlags.CF_AOS;
+            }
+
             if (Version >= ClientVersion.CV_405A)
+            {
                 Protocol |= ClientFlags.CF_SE;
+            }
+
             if (Version >= ClientVersion.CV_60144)
+            {
                 Protocol |= ClientFlags.CF_SA;
+            }
 
             Log.Trace($"Client path: '{clientPath}'");
             Log.Trace($"Client version: {clientVersion}");
@@ -165,8 +185,11 @@ namespace ClassicUO
 
             Log.Trace("Loading plugins...");
 
-            foreach (var p in Settings.GlobalSettings.Plugins)
+            foreach (string p in Settings.GlobalSettings.Plugins)
+            {
                 Plugin.Create(p);
+            }
+
             Log.Trace("Done!");
 
             UoAssist.Start();

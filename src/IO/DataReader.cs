@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,6 +18,7 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
@@ -35,18 +37,21 @@ namespace ClassicUO.IO
         private byte* _data;
         private GCHandle _handle;
 
-
         internal long Position { get; set; }
-        internal long Length { get; private set; }
-        internal IntPtr StartAddress => (IntPtr) _data;
-        internal IntPtr PositionAddress => (IntPtr) (_data + Position);
 
+        internal long Length { get; private set; }
+
+        internal IntPtr StartAddress => (IntPtr) _data;
+
+        internal IntPtr PositionAddress => (IntPtr) (_data + Position);
 
         [MethodImpl(256)]
         public void ReleaseData()
         {
             if (_handle.IsAllocated)
+            {
                 _handle.Free();
+            }
         }
 
         [MethodImpl(256)]
@@ -164,7 +169,6 @@ namespace ClassicUO.IO
             EnsureSize(4);
 
             uint v = *(uint*) (_data + Position);
-
             Position += 4;
 
             return v;
@@ -176,7 +180,6 @@ namespace ClassicUO.IO
             EnsureSize(8);
 
             long v = *(long*) (_data + Position);
-
             Position += 8;
 
             return v;
@@ -188,7 +191,6 @@ namespace ClassicUO.IO
             EnsureSize(8);
 
             ulong v = *(ulong*) (_data + Position);
-
             Position += 8;
 
             return v;
@@ -202,7 +204,9 @@ namespace ClassicUO.IO
             byte[] data = new byte[count];
 
             fixed (byte* ptr = data)
+            {
                 Buffer.MemoryCopy(&_data[Position], ptr, count, count);
+            }
 
             Position += count;
 
@@ -233,7 +237,9 @@ namespace ClassicUO.IO
         private void EnsureSize(int size)
         {
             if (Position + size > Length)
+            {
                 throw new IndexOutOfRangeException();
+            }
         }
 
 
@@ -242,7 +248,7 @@ namespace ClassicUO.IO
         {
             EnsureSize(2);
 
-            return (ushort)((ReadByte() << 8) | ReadByte());
+            return (ushort) ((ReadByte() << 8) | ReadByte());
         }
 
         [MethodImpl(256)]
@@ -250,7 +256,7 @@ namespace ClassicUO.IO
         {
             EnsureSize(4);
 
-            return (uint)((ReadByte() << 24) | (ReadByte() << 16) | (ReadByte() << 8) | ReadByte());
+            return (uint) ((ReadByte() << 24) | (ReadByte() << 16) | (ReadByte() << 8) | ReadByte());
         }
     }
 }

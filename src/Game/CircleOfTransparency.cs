@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,42 +18,46 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
-
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
-
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.Game
 {
-    static class CircleOfTransparency
+    internal static class CircleOfTransparency
     {
-        private static readonly Lazy<DepthStencilState> _stencil = new Lazy<DepthStencilState>(() =>
-        {
-            DepthStencilState state = new DepthStencilState
+        private static readonly Lazy<DepthStencilState> _stencil = new Lazy<DepthStencilState>
+        (
+            () =>
             {
-                StencilEnable = true,
-                StencilFunction = CompareFunction.Always,
-                StencilPass = StencilOperation.Replace,
-                ReferenceStencil = 1,
-                //DepthBufferEnable = true,
-                //DepthBufferWriteEnable = true,
-            };
+                DepthStencilState state = new DepthStencilState
+                {
+                    StencilEnable = true,
+                    StencilFunction = CompareFunction.Always,
+                    StencilPass = StencilOperation.Replace,
+                    ReferenceStencil = 1
+                    //DepthBufferEnable = true,
+                    //DepthBufferWriteEnable = true,
+                };
 
 
-            return state;
-        });
+                return state;
+            }
+        );
 
 
         private static Texture2D _texture;
         private static short _width, _height;
         private static int _radius;
 
-        
+        private static Vector3 _hueVector;
+
+
         public static uint[] CreateCircleTexture(int radius, ref short width, ref short height)
         {
             int fixRadius = radius + 1;
@@ -83,14 +88,12 @@ namespace ClassicUO.Game
             return pixels;
         }
 
-        private static Vector3 _hueVector;
-
         public static void Draw(UltimaBatcher2D batcher, int x, int y)
         {
             if (_texture != null)
             {
-                x -= (_width >> 1);
-                y -= (_height >> 1);
+                x -= _width >> 1;
+                y -= _height >> 1;
 
                 //batcher.Begin();
                 batcher.SetStencil(_stencil.Value);
@@ -103,12 +106,18 @@ namespace ClassicUO.Game
         public static void Create(int radius)
         {
             if (radius < Constants.MIN_CIRCLE_OF_TRANSPARENCY_RADIUS)
+            {
                 radius = Constants.MIN_CIRCLE_OF_TRANSPARENCY_RADIUS;
+            }
             else if (radius > Constants.MAX_CIRCLE_OF_TRANSPARENCY_RADIUS)
+            {
                 radius = Constants.MAX_CIRCLE_OF_TRANSPARENCY_RADIUS;
+            }
 
             if (_radius == radius && _texture != null && !_texture.IsDisposed)
+            {
                 return;
+            }
 
             _radius = radius;
             _texture?.Dispose();
