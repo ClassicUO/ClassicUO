@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,6 +18,7 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 namespace ClassicUO.IO.Audio.MP3Sharp.Decoding.Decoders.LayerI
@@ -49,14 +51,6 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding.Decoders.LayerI
             (1.0f / 8192.0f - 1.0f) * (16384.0f / 16383.0f), (1.0f / 16384.0f - 1.0f) * (32768.0f / 32767.0f)
         };
 
-        protected int allocation;
-        protected float factor, offset;
-        protected float sample;
-        protected int samplelength;
-        protected int samplenumber;
-        protected float scalefactor;
-        protected int subbandnumber;
-
         /// <summary>
         ///     Construtor.
         /// </summary>
@@ -65,6 +59,14 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding.Decoders.LayerI
             this.subbandnumber = subbandnumber;
             samplenumber = 0;
         }
+
+        protected int allocation;
+        protected float factor, offset;
+        protected float sample;
+        protected int samplelength;
+        protected int samplenumber;
+        protected float scalefactor;
+        protected int subbandnumber;
 
         /// <summary>
         ///     *
@@ -78,7 +80,9 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding.Decoders.LayerI
             // cerr << "WARNING: stream contains an illegal allocation!\n";
             // MPEG-stream is corrupted!
             if (crc != null)
+            {
                 crc.add_bits(allocation, 4);
+            }
 
             if (allocation != 0)
             {
@@ -94,7 +98,9 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding.Decoders.LayerI
         public override void read_scalefactor(Bitstream stream, Header header)
         {
             if (allocation != 0)
+            {
                 scalefactor = ScaleFactors[stream.GetBitsFromBuffer(6)];
+            }
         }
 
         /// <summary>
@@ -102,7 +108,10 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding.Decoders.LayerI
         /// </summary>
         public override bool read_sampledata(Bitstream stream)
         {
-            if (allocation != 0) sample = stream.GetBitsFromBuffer(samplelength);
+            if (allocation != 0)
+            {
+                sample = stream.GetBitsFromBuffer(samplelength);
+            }
 
             if (++samplenumber == 12)
             {

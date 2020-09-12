@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,10 +18,10 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
-
 using ClassicUO.Configuration;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.UI.Gumps;
@@ -40,34 +41,46 @@ namespace ClassicUO.Game.Managers
     internal static class NameOverHeadManager
     {
         private static NameOverHeadHandlerGump _gump;
+
         public static NameOverheadTypeAllowed TypeAllowed
         {
-            get { return ProfileManager.Current.NameOverheadTypeAllowed; }
-            set { ProfileManager.Current.NameOverheadTypeAllowed = value; }
+            get => ProfileManager.Current.NameOverheadTypeAllowed;
+            set => ProfileManager.Current.NameOverheadTypeAllowed = value;
         }
 
         public static bool IsToggled
         {
-            get { return ProfileManager.Current.NameOverheadToggled; }
-            set { ProfileManager.Current.NameOverheadToggled = value; }
+            get => ProfileManager.Current.NameOverheadToggled;
+            set => ProfileManager.Current.NameOverheadToggled = value;
         }
 
         public static bool IsAllowed(Entity serial)
         {
             if (serial == null)
+            {
                 return false;
+            }
 
             if (TypeAllowed == NameOverheadTypeAllowed.All)
+            {
                 return true;
+            }
 
             if (SerialHelper.IsItem(serial.Serial) && TypeAllowed == NameOverheadTypeAllowed.Items)
+            {
                 return true;
+            }
 
             if (SerialHelper.IsMobile(serial.Serial) && TypeAllowed.HasFlag(NameOverheadTypeAllowed.Mobiles))
+            {
                 return true;
+            }
 
-            if (TypeAllowed.HasFlag(NameOverheadTypeAllowed.Corpses) && SerialHelper.IsItem(serial.Serial) && World.Items.Get(serial)?.IsCorpse == true)
+            if (TypeAllowed.HasFlag(NameOverheadTypeAllowed.Corpses) && SerialHelper.IsItem(serial.Serial) && World.Items.Get(serial)
+                                                                                                                   ?.IsCorpse == true)
+            {
                 return true;
+            }
 
             return false;
         }
@@ -75,7 +88,9 @@ namespace ClassicUO.Game.Managers
         public static void Open()
         {
             if (_gump != null)
+            {
                 return;
+            }
 
             _gump = new NameOverHeadHandlerGump();
             UIManager.Add(_gump);

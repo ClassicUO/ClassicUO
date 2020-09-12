@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,15 +18,14 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
-
 using ClassicUO.Configuration;
 using ClassicUO.Data;
 using ClassicUO.IO.Audio.MP3Sharp;
 using ClassicUO.Utility.Logging;
-
 using Microsoft.Xna.Framework.Audio;
 
 namespace ClassicUO.IO.Audio
@@ -33,11 +33,10 @@ namespace ClassicUO.IO.Audio
     internal class UOMusic : Sound
     {
         private const int NUMBER_OF_PCM_BYTES_TO_READ_PER_CHUNK = 0x8000; // 32768 bytes, about 0.9 seconds
-        private readonly bool m_Repeat;
-        private readonly byte[] m_WaveBuffer = new byte[NUMBER_OF_PCM_BYTES_TO_READ_PER_CHUNK];
         private bool m_Playing;
+        private readonly bool m_Repeat;
         private MP3Stream m_Stream;
-        private string _path;
+        private readonly byte[] m_WaveBuffer = new byte[NUMBER_OF_PCM_BYTES_TO_READ_PER_CHUNK];
 
         public UOMusic(int index, string name, bool loop)
             : base(name, index)
@@ -46,10 +45,10 @@ namespace ClassicUO.IO.Audio
             m_Playing = false;
             Channels = AudioChannels.Stereo;
             Delay = 0;
-            _path = System.IO.Path.Combine(Settings.GlobalSettings.UltimaOnlineDirectory, Client.Version > ClientVersion.CV_5090 ? $"Music/Digital/{Name}.mp3" : $"music/{Name}.mp3"); 
+            Path = System.IO.Path.Combine(Settings.GlobalSettings.UltimaOnlineDirectory, Client.Version > ClientVersion.CV_5090 ? $"Music/Digital/{Name}.mp3" : $"music/{Name}.mp3");
         }
 
-        private string Path => _path;
+        private string Path { get; }
 
         public void Update()
         {
@@ -75,7 +74,9 @@ namespace ClassicUO.IO.Audio
                         else
                         {
                             if (bytesReturned == 0)
+                            {
                                 Stop();
+                            }
                         }
                     }
 
@@ -86,7 +87,7 @@ namespace ClassicUO.IO.Audio
             {
                 Log.Error(ex.ToString());
             }
-            
+
             Stop();
 
             return null;
@@ -99,6 +100,7 @@ namespace ClassicUO.IO.Audio
                 if (_sound_instance == null)
                 {
                     Stop();
+
                     return;
                 }
 
@@ -107,7 +109,9 @@ namespace ClassicUO.IO.Audio
                     byte[] buffer = GetBuffer();
 
                     if (_sound_instance.IsDisposed || buffer == null)
+                    {
                         break;
+                    }
 
                     _sound_instance.SubmitBuffer(buffer);
                 }
@@ -116,7 +120,10 @@ namespace ClassicUO.IO.Audio
 
         protected override void BeforePlay()
         {
-            if (m_Playing) Stop();
+            if (m_Playing)
+            {
+                Stop();
+            }
 
             try
             {

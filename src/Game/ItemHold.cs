@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,22 +18,26 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-#endregion
 
-using System;
-using System.Diagnostics;
-using System.Linq;
+#endregion
 
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.IO.Resources;
-
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game
 {
     internal static class ItemHold
     {
+        private static bool _enabled;
+
+        public static Point MouseOffset;
+
+        public static bool IsFixedPosition;
+        public static bool IgnoreFixedPosition;
+        public static int FixedX, FixedY;
+
         public static bool OnGround { get; private set; }
         public static ushort X { get; private set; }
         public static ushort Y { get; private set; }
@@ -41,6 +46,7 @@ namespace ClassicUO.Game
         public static uint Serial { get; private set; }
         public static ushort Graphic { get; private set; }
         public static ushort DisplayedGraphic { get; private set; }
+        public static bool IsGumpTexture { get; set; }
         public static ushort Hue { get; private set; }
         public static ushort Amount { get; private set; }
         public static ushort TotalAmount { get; private set; }
@@ -50,12 +56,27 @@ namespace ClassicUO.Game
         public static bool HasAlpha { get; private set; }
         public static Layer Layer { get; private set; }
         public static Flags Flags { get; private set; }
-        public static bool Enabled { get; set; }
+
+        public static bool Enabled
+        {
+            get => _enabled;
+            set
+            {
+                _enabled = value;
+
+                if (!value)
+                {
+                    IsFixedPosition = false;
+                    FixedX = 0;
+                    FixedY = 0;
+                    IgnoreFixedPosition = false;
+                }
+            }
+        }
+
         public static bool Dropped { get; set; }
         public static bool UpdatedInWorld { get; set; }
         public static ref StaticTiles ItemData => ref TileDataLoader.Instance.StaticData[Graphic];
-
-
 
         public static void Set(Item item, ushort amount, Point? offset = null)
         {
@@ -77,6 +98,12 @@ namespace ClassicUO.Game
             IsWearable = item.ItemData.IsWearable;
             Layer = item.Layer;
             Flags = item.Flags;
+            MouseOffset = offset ?? Point.Zero;
+            IsFixedPosition = false;
+            FixedX = 0;
+            FixedY = 0;
+            IgnoreFixedPosition = false;
+            IsGumpTexture = false;
         }
 
         public static void Clear()
@@ -93,10 +120,16 @@ namespace ClassicUO.Game
             IsWearable = IsStackable = IsPartialHue = HasAlpha = false;
             Layer = Layer.Invalid;
             Flags = Flags.None;
+            MouseOffset = Point.Zero;
 
             Dropped = false;
             Enabled = false;
             UpdatedInWorld = false;
+            IsFixedPosition = false;
+            FixedX = 0;
+            FixedY = 0;
+            IgnoreFixedPosition = false;
+            IsGumpTexture = false;
         }
     }
 }

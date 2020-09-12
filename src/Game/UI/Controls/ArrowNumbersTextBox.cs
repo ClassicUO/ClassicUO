@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,10 +18,10 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
-
 using ClassicUO.Renderer;
 
 namespace ClassicUO.Game.UI.Controls
@@ -30,8 +31,8 @@ namespace ClassicUO.Game.UI.Controls
         private const int TIME_BETWEEN_CLICKS = 250;
         private readonly int _Min, _Max;
         private readonly StbTextBox _textBox;
-        private readonly Button _up, _down;
         private float _timeUntilNextClick;
+        private readonly Button _up, _down;
 
         public ArrowNumbersTextBox(int x, int y, int width, int raiseamount, int minvalue, int maxvalue, byte font = 0, int maxcharlength = -1, bool isunicode = true, FontStyle style = FontStyle.None, ushort hue = 0)
         {
@@ -43,11 +44,14 @@ namespace ClassicUO.Game.UI.Controls
             _Min = minvalue;
             _Max = maxvalue;
 
-            Add(new ResizePic(0x0BB8)
-            {
-                Width = width,
-                Height = height + 4
-            });
+            Add
+            (
+                new ResizePic(0x0BB8)
+                {
+                    Width = width,
+                    Height = height + 4
+                }
+            );
 
             _up = new Button(raiseamount, 0x983, 0x984)
             {
@@ -63,6 +67,7 @@ namespace ClassicUO.Game.UI.Controls
                     _timeUntilNextClick = TIME_BETWEEN_CLICKS * 2;
                 }
             };
+
             Add(_up);
 
             _down = new Button(-raiseamount, 0x985, 0x986)
@@ -80,27 +85,26 @@ namespace ClassicUO.Game.UI.Controls
                     _timeUntilNextClick = TIME_BETWEEN_CLICKS * 2;
                 }
             };
+
             Add(_down);
-            Add(_textBox = new StbTextBox(font, maxcharlength, width, isunicode, style, hue)
-            {
-                X = 2, 
-                Y = 2, 
-                Height = height, 
-                Width = width - 17,
-                NumbersOnly = true
-            });
+
+            Add
+            (
+                _textBox = new StbTextBox(font, maxcharlength, width, isunicode, style, hue)
+                {
+                    X = 2,
+                    Y = 2,
+                    Height = height,
+                    Width = width - 17,
+                    NumbersOnly = true
+                }
+            );
         }
 
         internal string Text
         {
-            get
-            {
-                return _textBox?.Text ?? string.Empty;
-            }
-            set
-            {
-                _textBox?.SetText(value);
-            }
+            get => _textBox?.Text ?? string.Empty;
+            set => _textBox?.SetText(value);
         }
 
         private void UpdateValue()
@@ -108,16 +112,23 @@ namespace ClassicUO.Game.UI.Controls
             int.TryParse(_textBox.Text, out int i);
 
             if (_up.IsClicked)
+            {
                 i += _up.ButtonID;
+            }
             else
+            {
                 i += _down.ButtonID;
+            }
+
             ValidateValue(i);
         }
 
         internal override void OnFocusLost()
         {
             if (IsDisposed)
+            {
                 return;
+            }
 
             int.TryParse(_textBox.Text, out int i);
             ValidateValue(i);
@@ -132,7 +143,9 @@ namespace ClassicUO.Game.UI.Controls
         public override void Update(double totalMS, double frameMS)
         {
             if (IsDisposed)
+            {
                 return;
+            }
 
             if (_up.IsClicked || _down.IsClicked)
             {

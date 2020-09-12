@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,15 +18,13 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 namespace ClassicUO.IO.Audio.MP3Sharp.Decoding.Decoders.LayerIII
 {
     internal class ScaleFactorTable
     {
-        public int[] l;
-        public int[] s;
-
         public ScaleFactorTable(LayerIIIDecoder enclosingInstance)
         {
             InitBlock(enclosingInstance);
@@ -41,6 +40,8 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding.Decoders.LayerIII
         }
 
         public LayerIIIDecoder Enclosing_Instance { get; private set; }
+        public int[] l;
+        public int[] s;
 
         private void InitBlock(LayerIIIDecoder enclosingInstance)
         {

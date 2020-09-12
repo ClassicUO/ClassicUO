@@ -3,7 +3,7 @@
 namespace ClassicUO.Game.Data
 {
     [Flags]
-    enum MessageType : byte
+    internal enum MessageType : byte
     {
         Regular = 0,
         System = 1,

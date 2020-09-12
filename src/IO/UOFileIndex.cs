@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,10 +18,10 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
-using System.Runtime.InteropServices;
 
 namespace ClassicUO.IO
 {
@@ -50,7 +51,7 @@ namespace ClassicUO.IO
         public ushort Hue;
         public sbyte AnimOffset;
 
-        public static UOFileIndex Invalid = new UOFileIndex(IntPtr.Zero, 0, 0, 0, 0, 0, 0);
+        public static UOFileIndex Invalid = new UOFileIndex(IntPtr.Zero, 0, 0, 0, 0);
     }
 
     internal struct UOFileIndex5D

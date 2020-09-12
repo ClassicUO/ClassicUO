@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,13 +18,12 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-
-using ClassicUO.Configuration;
 using ClassicUO.Utility.Logging;
 
 namespace ClassicUO.Utility
@@ -54,7 +54,9 @@ namespace ClassicUO.Utility
         public static void BeginFrame()
         {
             if (!CUOEnviroment.Profiler)
+            {
                 return;
+            }
 
             if (m_ThisFrameData.Count > 0)
             {
@@ -73,7 +75,10 @@ namespace ClassicUO.Utility
                         }
                     }
 
-                    if (!added) m_AllFrameData.Add(new ProfileData(t.Item1, t.Item2));
+                    if (!added)
+                    {
+                        m_AllFrameData.Add(new ProfileData(t.Item1, t.Item2));
+                    }
                 }
 
                 m_ThisFrameData.Clear();
@@ -85,7 +90,9 @@ namespace ClassicUO.Utility
         public static void EndFrame()
         {
             if (!CUOEnviroment.Profiler)
+            {
                 return;
+            }
 
             LastFrameTimeMS = (_timer.ElapsedTicks - m_BeginFrameTicks) * 1000d / Stopwatch.Frequency;
             m_TotalTimeData.AddNewHitLength(LastFrameTimeMS);
@@ -94,7 +101,9 @@ namespace ClassicUO.Utility
         public static void EnterContext(string context_name)
         {
             if (!CUOEnviroment.Profiler)
+            {
                 return;
+            }
 
             m_Context.Add(new ContextAndTick(context_name, _timer.ElapsedTicks));
         }
@@ -102,15 +111,27 @@ namespace ClassicUO.Utility
         public static void ExitContext(string context_name)
         {
             if (!CUOEnviroment.Profiler)
+            {
                 return;
+            }
 
-            if (m_Context[m_Context.Count - 1].Name != context_name)
-                Log.Error( "Profiler.ExitProfiledContext: context_name does not match current context.");
+            if (m_Context[m_Context.Count - 1]
+                .Name != context_name)
+            {
+                Log.Error("Profiler.ExitProfiledContext: context_name does not match current context.");
+            }
+
             string[] context = new string[m_Context.Count];
 
             for (int i = 0; i < m_Context.Count; i++)
-                context[i] = m_Context[i].Name;
-            double ms = (_timer.ElapsedTicks - m_Context[m_Context.Count - 1].Tick) * 1000d / Stopwatch.Frequency;
+            {
+                context[i] = m_Context[i]
+                    .Name;
+            }
+
+            double ms = (_timer.ElapsedTicks - m_Context[m_Context.Count - 1]
+                .Tick) * 1000d / Stopwatch.Frequency;
+
             m_ThisFrameData.Add(new Tuple<string[], double>(context, ms));
             m_Context.RemoveAt(m_Context.Count - 1);
         }
@@ -118,23 +139,34 @@ namespace ClassicUO.Utility
         public static bool InContext(string context_name)
         {
             if (!CUOEnviroment.Profiler)
+            {
                 return false;
+            }
 
             if (m_Context.Count == 0)
+            {
                 return false;
+            }
 
-            return m_Context[m_Context.Count - 1].Name == context_name;
+            return m_Context[m_Context.Count - 1]
+                .Name == context_name;
         }
 
         public static ProfileData GetContext(string context_name)
         {
             if (!CUOEnviroment.Profiler)
+            {
                 return ProfileData.Empty;
+            }
 
             for (int i = 0; i < m_AllFrameData.Count; i++)
             {
-                if (m_AllFrameData[i].Context[m_AllFrameData[i].Context.Length - 1] == context_name)
+                if (m_AllFrameData[i]
+                    .Context[m_AllFrameData[i]
+                             .Context.Length - 1] == context_name)
+                {
                     return m_AllFrameData[i];
+                }
             }
 
             return ProfileData.Empty;
@@ -143,9 +175,8 @@ namespace ClassicUO.Utility
         internal class ProfileData
         {
             public static ProfileData Empty = new ProfileData(null, 0d);
-            private readonly double[] m_LastTimes = new double[ProfileTimeCount];
-            public string[] Context;
             private uint m_LastIndex;
+            private readonly double[] m_LastTimes = new double[ProfileTimeCount];
 
             public ProfileData(string[] context, double time)
             {
@@ -161,23 +192,32 @@ namespace ClassicUO.Utility
                 get
                 {
                     double time = 0;
-                    for (int i = 0; i < ProfileTimeCount; i++) time += m_LastTimes[i];
+
+                    for (int i = 0; i < ProfileTimeCount; i++)
+                    {
+                        time += m_LastTimes[i];
+                    }
 
                     return time;
                 }
             }
 
             public double AverageTime => TimeInContext / ProfileTimeCount;
+            public string[] Context;
 
             public bool MatchesContext(string[] context)
             {
                 if (Context.Length != context.Length)
+                {
                     return false;
+                }
 
                 for (int i = 0; i < Context.Length; i++)
                 {
                     if (Context[i] != context[i])
+                    {
                         return false;
+                    }
                 }
 
                 return true;
@@ -196,7 +236,10 @@ namespace ClassicUO.Utility
                 for (int i = 0; i < Context.Length; i++)
                 {
                     if (name != string.Empty)
+                    {
                         name += ":";
+                    }
+
                     name += Context[i];
                 }
 

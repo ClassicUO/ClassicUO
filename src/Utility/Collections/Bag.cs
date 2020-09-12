@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,6 +18,7 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
@@ -50,7 +52,10 @@ namespace ClassicUO.Utility.Collections
                 EnsureCapacity(index + 1);
 
                 if (index >= Count)
+                {
                     Count = index + 1;
+                }
+
                 _items[index] = value;
             }
         }
@@ -75,19 +80,25 @@ namespace ClassicUO.Utility.Collections
         public void AddRange(Bag<T> range)
         {
             for (int index = 0, j = range.Count; j > index; ++index)
+            {
                 Add(range[index]);
+            }
         }
 
         public void Clear()
         {
             if (Count == 0)
+            {
                 return;
+            }
 
             Count = 0;
 
             // non-primitive types are cleared so the garbage collector can release them
             if (!_isPrimitive)
+            {
                 Array.Clear(_items, 0, Count);
+            }
         }
 
         public bool Contains(T element)
@@ -95,7 +106,9 @@ namespace ClassicUO.Utility.Collections
             for (int index = Count - 1; index >= 0; --index)
             {
                 if (element.Equals(_items[index]))
+                {
                     return true;
+                }
             }
 
             return false;
@@ -135,7 +148,9 @@ namespace ClassicUO.Utility.Collections
             for (int index = bag.Count - 1; index >= 0; --index)
             {
                 if (Remove(bag[index]))
+                {
                     isResult = true;
+                }
             }
 
             return isResult;
@@ -144,7 +159,9 @@ namespace ClassicUO.Utility.Collections
         private void EnsureCapacity(int capacity)
         {
             if (capacity < _items.Length)
+            {
                 return;
+            }
 
             int newCapacity = Math.Max((int) (_items.Length * 1.5), capacity);
             T[] oldElements = _items;

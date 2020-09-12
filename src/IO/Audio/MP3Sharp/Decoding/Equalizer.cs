@@ -1,4 +1,5 @@
 #region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,6 +18,7 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
@@ -77,7 +79,10 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
                 reset();
                 int max = value.Length > BANDS ? BANDS : value.Length;
 
-                for (int i = 0; i < max; i++) settings[i] = limit(value[i]);
+                for (int i = 0; i < max; i++)
+                {
+                    settings[i] = limit(value[i]);
+                }
             }
         }
 
@@ -90,7 +95,10 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
         {
             set
             {
-                if (value != this) FromFloatArray = value.settings;
+                if (value != this)
+                {
+                    FromFloatArray = value.settings;
+                }
             }
         }
 
@@ -102,7 +110,10 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
                 reset();
                 int max = BANDS;
 
-                for (int i = 0; i < max; i++) settings[i] = limit(value.getBand(i));
+                for (int i = 0; i < max; i++)
+                {
+                    settings[i] = limit(value.getBand(i));
+                }
             }
         }
 
@@ -126,7 +137,11 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
             get
             {
                 float[] factors = new float[BANDS];
-                for (int i = 0, maxCount = BANDS; i < maxCount; i++) factors[i] = getBandFactor(settings[i]);
+
+                for (int i = 0, maxCount = BANDS; i < maxCount; i++)
+                {
+                    factors[i] = getBandFactor(settings[i]);
+                }
 
                 return factors;
             }
@@ -142,7 +157,10 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
         /// </summary>
         public void reset()
         {
-            for (int i = 0; i < BANDS; i++) settings[i] = 0.0f;
+            for (int i = 0; i < BANDS; i++)
+            {
+                settings[i] = 0.0f;
+            }
         }
 
         public float setBand(int band, float neweq)
@@ -165,7 +183,10 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
         {
             float eq = 0.0f;
 
-            if (band >= 0 && band < BANDS) eq = settings[band];
+            if (band >= 0 && band < BANDS)
+            {
+                eq = settings[band];
+            }
 
             return eq;
         }
@@ -173,13 +194,19 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
         private float limit(float eq)
         {
             if (eq == BAND_NOT_PRESENT)
+            {
                 return eq;
+            }
 
             if (eq > 1.0f)
+            {
                 return 1.0f;
+            }
 
             if (eq < -1.0f)
+            {
                 return -1.0f;
+            }
 
             return eq;
         }
@@ -192,7 +219,9 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
         internal float getBandFactor(float eq)
         {
             if (eq == BAND_NOT_PRESENT)
+            {
                 return 0.0f;
+            }
 
             float f = (float) Math.Pow(2.0, eq);
 

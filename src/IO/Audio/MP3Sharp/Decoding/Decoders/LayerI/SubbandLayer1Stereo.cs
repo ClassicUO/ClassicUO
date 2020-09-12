@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,6 +18,7 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 namespace ClassicUO.IO.Audio.MP3Sharp.Decoding.Decoders.LayerI
@@ -26,12 +28,6 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding.Decoders.LayerI
     /// </summary>
     internal class SubbandLayer1Stereo : SubbandLayer1
     {
-        protected internal int channel2_allocation;
-        protected internal float channel2_factor, channel2_offset;
-        protected internal float channel2_sample;
-        protected internal int channel2_samplelength;
-        protected internal float channel2_scalefactor;
-
         /// <summary>
         ///     Constructor
         /// </summary>
@@ -39,6 +35,12 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding.Decoders.LayerI
             : base(subbandnumber)
         {
         }
+
+        protected internal int channel2_allocation;
+        protected internal float channel2_factor, channel2_offset;
+        protected internal float channel2_sample;
+        protected internal int channel2_samplelength;
+        protected internal float channel2_scalefactor;
 
         /// <summary>
         ///     *
@@ -75,10 +77,14 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding.Decoders.LayerI
         public override void read_scalefactor(Bitstream stream, Header header)
         {
             if (allocation != 0)
+            {
                 scalefactor = ScaleFactors[stream.GetBitsFromBuffer(6)];
+            }
 
             if (channel2_allocation != 0)
+            {
                 channel2_scalefactor = ScaleFactors[stream.GetBitsFromBuffer(6)];
+            }
         }
 
         /// <summary>
@@ -87,7 +93,11 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding.Decoders.LayerI
         public override bool read_sampledata(Bitstream stream)
         {
             bool returnvalue = base.read_sampledata(stream);
-            if (channel2_allocation != 0) channel2_sample = stream.GetBitsFromBuffer(channel2_samplelength);
+
+            if (channel2_allocation != 0)
+            {
+                channel2_sample = stream.GetBitsFromBuffer(channel2_samplelength);
+            }
 
             return returnvalue;
         }
@@ -104,9 +114,13 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding.Decoders.LayerI
                 float sample2 = (channel2_sample * channel2_factor + channel2_offset) * channel2_scalefactor;
 
                 if (channels == OutputChannels.BOTH_CHANNELS)
+                {
                     filter2.input_sample(sample2, subbandnumber);
+                }
                 else
+                {
                     filter1.input_sample(sample2, subbandnumber);
+                }
             }
 
             return true;

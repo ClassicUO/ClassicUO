@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,12 +18,12 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using ClassicUO.Configuration;
 using ClassicUO.Input;
 using ClassicUO.Renderer;
-
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
@@ -44,12 +45,15 @@ namespace ClassicUO.Game.Managers
             get
             {
                 if (ProfileManager.Current == null)
+                {
                     return false;
+                }
 
                 switch (ProfileManager.Current.AuraUnderFeetType)
                 {
                     default:
                     case 0: return false;
+
                     case 1 when World.Player != null && World.Player.InWarMode: return true;
                     case 2 when Keyboard.Ctrl && Keyboard.Shift: return true;
                     case 3: return true;
@@ -67,7 +71,9 @@ namespace ClassicUO.Game.Managers
                 ProfileManager.Current.AuraUnderFeetType = 3;
             }
             else
+            {
                 ProfileManager.Current.AuraUnderFeetType = _saveAuraUnderFeetType;
+            }
         }
 
         public static void CreateAuraTexture(int radius = 30)
@@ -87,7 +93,9 @@ namespace ClassicUO.Game.Managers
                     ushort value = (ushort) (pixel << 3);
 
                     if (value > 0xFF)
+                    {
                         value = 0xFF;
+                    }
 
                     pixel = (uint) ((value << 24) | (value << 16) | (value << 8) | value);
                 }

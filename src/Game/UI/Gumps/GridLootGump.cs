@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,10 +18,10 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System.Linq;
-
 using ClassicUO.Configuration;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
@@ -28,27 +29,26 @@ using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
-
+using ClassicUO.Resources;
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Gumps
 {
     internal class GridLootGump : Gump
     {
-        private readonly AlphaBlendControl _background;
-        private readonly NiceButton _buttonPrev, _buttonNext;
-        private readonly Item _corpse;
-        private readonly Label _currentPageLabel;
-        private readonly bool _hideIfEmpty;
-
-        private int _currentPage = 1;
-        private int _pagesCount;
+        private const int MAX_WIDTH = 300;
+        private const int MAX_HEIGHT = 400;
 
         private static int _lastX = ProfileManager.Current.GridLootType == 2 ? 200 : 100;
         private static int _lastY = 100;
+        private readonly AlphaBlendControl _background;
+        private readonly NiceButton _buttonPrev, _buttonNext, _setlootbag;
+        private readonly Item _corpse;
 
-        private const int MAX_WIDTH = 300;
-        private const int MAX_HEIGHT = 400;
+        private int _currentPage = 1;
+        private readonly Label _currentPageLabel;
+        private readonly bool _hideIfEmpty;
+        private int _pagesCount;
 
         public GridLootGump(uint local) : base(local, 0)
         {
@@ -62,7 +62,9 @@ namespace ClassicUO.Game.UI.Gumps
             }
 
             if (World.Player.ManualOpenedCorpses.Contains(LocalSerial))
+            {
                 World.Player.ManualOpenedCorpses.Remove(LocalSerial);
+            }
             else if (World.Player.AutoOpenedCorpses.Contains(LocalSerial) &&
                      ProfileManager.Current != null && ProfileManager.Current.SkipEmptyCorpse)
             {
@@ -75,35 +77,39 @@ namespace ClassicUO.Game.UI.Gumps
 
             CanMove = true;
             AcceptMouseInput = true;
-            WantUpdateSize = false;
+            WantUpdateSize = true;
             CanCloseWithRightClick = true;
             _background = new AlphaBlendControl();
-            _background.Width = 300;
-            _background.Height = 400;
+            //_background.Width = MAX_WIDTH;
+            //_background.Height = MAX_HEIGHT;
             Add(_background);
 
             Width = _background.Width;
             Height = _background.Height;
 
-            NiceButton setLootBag = new NiceButton(3, Height - 23, 100, 20, ButtonAction.Activate, "Set loot bag") { ButtonParameter = 2, IsSelectable = false };
-            Add(setLootBag);
+            _setlootbag = new NiceButton(3, Height - 23, 100, 20, ButtonAction.Activate, ResGumps.SetLootBag) {ButtonParameter = 2, IsSelectable = false};
+            Add(_setlootbag);
 
-            _buttonPrev = new NiceButton(Width - 80, Height - 20, 40, 20, ButtonAction.Activate, "<<") {ButtonParameter = 0, IsSelectable = false};
-            _buttonNext = new NiceButton(Width - 40, Height - 20, 40, 20, ButtonAction.Activate, ">>") {ButtonParameter = 1, IsSelectable = false};
+            _buttonPrev = new NiceButton(Width - 80, Height - 20, 40, 20, ButtonAction.Activate, ResGumps.Prev) {ButtonParameter = 0, IsSelectable = false};
+            _buttonNext = new NiceButton(Width - 40, Height - 20, 40, 20, ButtonAction.Activate, ResGumps.Next) {ButtonParameter = 1, IsSelectable = false};
 
             _buttonNext.IsVisible = _buttonPrev.IsVisible = false;
 
 
             Add(_buttonPrev);
             Add(_buttonNext);
-            Add(_currentPageLabel = new Label("1", true, 999, align: IO.Resources.TEXT_ALIGN_TYPE.TS_CENTER)
-            {
-                X = Width / 2 - 5,
-                Y = Height - 20,
-            });
+
+            Add
+            (
+                _currentPageLabel = new Label("1", true, 999, align: TEXT_ALIGN_TYPE.TS_CENTER)
+                {
+                    X = Width / 2 - 5,
+                    Y = Height - 20
+                }
+            );
         }
 
-      
+
         public override void OnButtonClick(int buttonID)
         {
             if (buttonID == 0)
@@ -115,6 +121,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _currentPage = 1;
                     _buttonPrev.IsVisible = false;
                 }
+
                 _buttonNext.IsVisible = true;
                 ChangePage(_currentPage);
 
@@ -140,43 +147,57 @@ namespace ClassicUO.Game.UI.Gumps
             }
             else if (buttonID == 2)
             {
-                GameActions.Print("Target the container to Grab items into.");
+                GameActions.Print(ResGumps.TargetContainerToGrabItemsInto);
                 TargetManager.SetTargeting(CursorTarget.SetGrabBag, 0, TargetType.Neutral);
             }
             else
+            {
                 base.OnButtonClick(buttonID);
+            }
         }
-
 
 
         protected override void UpdateContents()
         {
+            const int GRID_ITEM_SIZE = 50;
+
             int x = 20;
             int y = 20;
 
             foreach (GridLootItem gridLootItem in Children.OfType<GridLootItem>())
+            {
                 gridLootItem.Dispose();
+            }
 
             int count = 0;
             _pagesCount = 1;
 
-            for (var i = _corpse.Items; i != null; i = i.Next)
+            _background.Width = x;
+            _background.Height = y;
+
+            int line = 1;
+            int row = 0;
+
+            for (LinkedObject i = _corpse.Items; i != null; i = i.Next)
             {
                 Item it = (Item) i;
 
                 if (it.IsLootable)
                 {
-                    GridLootItem gridItem = new GridLootItem(it);
+                    GridLootItem gridItem = new GridLootItem(it, GRID_ITEM_SIZE);
 
-                    if (x >= _background.Width - 20)
+                    if (x >= MAX_WIDTH - 20)
                     {
                         x = 20;
+                        ++line;
+
                         y += gridItem.Height + 20;
 
-                        if (y >= _background.Height - 40)
+                        if (y >= MAX_HEIGHT - 40)
                         {
                             _pagesCount++;
                             y = 20;
+                            //line = 1;
                         }
                     }
 
@@ -185,10 +206,21 @@ namespace ClassicUO.Game.UI.Gumps
                     Add(gridItem, _pagesCount);
 
                     x += gridItem.Width + 20;
-
-                    count++;
+                    ++row;
+                    ++count;
                 }
             }
+
+            _background.Width = (GRID_ITEM_SIZE + 20) * row + 20;
+            _background.Height = 20 + 40 + (GRID_ITEM_SIZE + 20) * line + 20;
+
+
+            if (_background.Height >= MAX_HEIGHT - 40)
+            {
+                _background.Height = MAX_HEIGHT;
+            }
+
+            _background.Width = MAX_WIDTH;
 
             if (ActivePage <= 1)
             {
@@ -210,10 +242,10 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (count == 0)
             {
-                GameActions.Print("[GridLoot]: Corpse is empty!");
+                GameActions.Print(ResGumps.CorpseIsEmpty);
                 Dispose();
             }
-            else if ((_hideIfEmpty && !IsVisible))
+            else if (_hideIfEmpty && !IsVisible)
             {
                 IsVisible = true;
             }
@@ -224,7 +256,9 @@ namespace ClassicUO.Game.UI.Gumps
             if (_corpse != null)
             {
                 if (_corpse == SelectedObject.CorpseObject)
+                {
                     SelectedObject.CorpseObject = null;
+                }
             }
 
             _lastX = X;
@@ -236,7 +270,9 @@ namespace ClassicUO.Game.UI.Gumps
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
             if (!IsVisible || IsDisposed)
+            {
                 return false;
+            }
 
             ResetHueVector();
             base.Draw(batcher, x, y);
@@ -259,7 +295,33 @@ namespace ClassicUO.Game.UI.Gumps
             base.Update(totalMS, frameMS);
 
             if (IsDisposed)
+            {
                 return;
+            }
+
+            if (_background.Width < 100)
+            {
+                _background.Width = 100;
+            }
+
+            if (_background.Height < 100)
+            {
+                _background.Height = 100;
+            }
+
+            Width = _background.Width;
+            Height = _background.Height;
+
+            _buttonPrev.X = Width - 80;
+            _buttonPrev.Y = Height - 23;
+            _buttonNext.X = Width - 40;
+            _buttonNext.Y = Height - 20;
+            _setlootbag.X = 3;
+            _setlootbag.Y = Height - 23;
+            _currentPageLabel.X = Width / 2 - 5;
+            _currentPageLabel.Y = Height - 20;
+
+            WantUpdateSize = true;
 
             if (_corpse != null && !_corpse.IsDestroyed && UIManager.MouseOverControl != null && (UIManager.MouseOverControl == this || UIManager.MouseOverControl.RootParent == this))
             {
@@ -271,7 +333,10 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override void OnMouseExit(int x, int y)
         {
-            if (_corpse != null && !_corpse.IsDestroyed) SelectedObject.CorpseObject = null;
+            if (_corpse != null && !_corpse.IsDestroyed)
+            {
+                SelectedObject.CorpseObject = null;
+            }
         }
 
 
@@ -279,7 +344,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             private readonly TextureControl _texture;
 
-            public GridLootItem(uint serial)
+            public GridLootItem(uint serial, int size)
             {
                 LocalSerial = serial;
 
@@ -292,11 +357,9 @@ namespace ClassicUO.Game.UI.Gumps
                     return;
                 }
 
-                const int SIZE = 50;
-
                 CanMove = false;
 
-                HSliderBar amount = new HSliderBar(0, 0, SIZE, 1, item.Amount, item.Amount, HSliderBarStyle.MetalWidgetRecessedBar, true, color: 0xFFFF, drawUp: true);
+                HSliderBar amount = new HSliderBar(0, 0, size, 1, item.Amount, item.Amount, HSliderBarStyle.MetalWidgetRecessedBar, true, color: 0xFFFF, drawUp: true);
                 Add(amount);
 
                 amount.IsVisible = amount.IsEnabled = amount.MaxValue > 1;
@@ -304,8 +367,8 @@ namespace ClassicUO.Game.UI.Gumps
 
                 AlphaBlendControl background = new AlphaBlendControl();
                 background.Y = 15;
-                background.Width = SIZE;
-                background.Height = SIZE;
+                background.Width = size;
+                background.Height = size;
                 Add(background);
 
 
@@ -315,11 +378,14 @@ namespace ClassicUO.Game.UI.Gumps
                 _texture.Hue = item.Hue;
                 _texture.Texture = ArtLoader.Instance.GetTexture(item.DisplayedGraphic);
                 _texture.Y = 15;
-                _texture.Width = SIZE;
-                _texture.Height = SIZE;
+                _texture.Width = size;
+                _texture.Height = size;
                 _texture.CanMove = false;
 
-                if (World.ClientFeatures.TooltipsEnabled) _texture.SetTooltip(item);
+                if (World.ClientFeatures.TooltipsEnabled)
+                {
+                    _texture.SetTooltip(item);
+                }
 
                 Add(_texture);
 
@@ -328,7 +394,7 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     if (e.Button == MouseButtonType.Left)
                     {
-                        GameActions.GrabItem(item, (ushort)amount.Value);
+                        GameActions.GrabItem(item, (ushort) amount.Value);
                     }
                 };
 

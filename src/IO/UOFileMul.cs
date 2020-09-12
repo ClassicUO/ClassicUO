@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,6 +18,7 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 namespace ClassicUO.IO
@@ -43,19 +45,19 @@ namespace ClassicUO.IO
 
         public override void FillEntries(ref UOFileIndex[] entries)
         {
-            UOFile file = _idxFile ?? (UOFile)this;
+            UOFile file = _idxFile ?? (UOFile) this;
 
-            int count = (int)file.Length / 12;
+            int count = (int) file.Length / 12;
             entries = new UOFileIndex[count];
 
             for (int i = 0; i < count; i++)
             {
-                ref var e = ref entries[i];
-                e.Address = StartAddress;       // .mul mmf address
-                e.FileSize = (uint) Length;     // .mul mmf length
-                e.Offset = file.ReadUInt();     // .idx offset
-                e.Length = file.ReadInt();      // .idx length
-                e.DecompressedLength = 0;       // UNUSED HERE --> .UOP
+                ref UOFileIndex e = ref entries[i];
+                e.Address = StartAddress;   // .mul mmf address
+                e.FileSize = (uint) Length; // .mul mmf length
+                e.Offset = file.ReadUInt(); // .idx offset
+                e.Length = file.ReadInt();  // .idx length
+                e.DecompressedLength = 0;   // UNUSED HERE --> .UOP
 
                 int size = file.ReadInt();
 

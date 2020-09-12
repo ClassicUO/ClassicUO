@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,6 +18,7 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using ClassicUO.Game.Data;
@@ -25,6 +27,7 @@ using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.IO.Resources;
 using ClassicUO.Network;
+using ClassicUO.Resources;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -39,12 +42,12 @@ namespace ClassicUO.Game.UI.Gumps
         };
         private static readonly string[] _gargoyleNames = {"Flying", "Berserk", "Master Artisan", "Deadly Aim", "Mystic Insight"};
         private int _abilityCount = 4;
+        private float _clickTiming;
         private int _dictionaryPagesCount = 1;
+        private Control _lastPressed;
         private GumpPic _pageCornerLeft, _pageCornerRight;
         private int _pagesCount = 3;
         private int _tooltipOffset = 1112198;
-        private float _clickTiming;
-        private Control _lastPressed;
 
         public RacialAbilitiesBookGump(int x, int y) : base(0, 0)
         {
@@ -95,16 +98,20 @@ namespace ClassicUO.Game.UI.Gumps
                     }
 
 
-                    Label text = new Label("INDEX", false, 0x0288, font: 6) {X = indexX, Y = 10};
+                    Label text = new Label(ResGumps.Index, false, 0x0288, font: 6) {X = indexX, Y = 10};
                     Add(text, page);
 
                     for (int i = 0; i < abilityOnPage; i++)
                     {
                         if (offs >= _abilityCount)
+                        {
                             break;
+                        }
 
                         if (offs % 2 == 0)
+                        {
                             topage++;
+                        }
 
                         bool passive = true;
 
@@ -113,8 +120,9 @@ namespace ClassicUO.Game.UI.Gumps
                             X = dataX,
                             Y = 52 + y,
                             AcceptMouseInput = true,
-                            LocalSerial = (uint) (topage)
+                            LocalSerial = (uint) topage
                         };
+
                         text.MouseUp += OnClicked;
                         Add(text, page);
 
@@ -137,7 +145,9 @@ namespace ClassicUO.Game.UI.Gumps
                     iconTextX = 275;
                 }
                 else
+                {
                     page1++;
+                }
 
 
                 bool passive = true;
@@ -145,19 +155,22 @@ namespace ClassicUO.Game.UI.Gumps
 
                 Label text = new Label(spellName, false, 0x0288, 100, 6)
                     {X = iconTextX, Y = 34};
+
                 Add(text, page1);
 
                 if (passive)
                 {
-                    text = new Label("(Passive)", false, 0x0288, font: 6)
+                    text = new Label(ResGumps.Passive, false, 0x0288, font: 6)
                     {
                         X = iconTextX,
                         Y = 64
                     };
+
                     Add(text, page1);
                 }
 
                 ushort graphic = (ushort) (iconStartGraphic + i);
+
                 GumpPic pic = new GumpPic(iconX, 40, graphic, 0)
                 {
                     LocalSerial = graphic
@@ -168,7 +181,9 @@ namespace ClassicUO.Game.UI.Gumps
                     pic.DragBegin += (sender, e) =>
                     {
                         if (UIManager.IsDragging)
+                        {
                             return;
+                        }
 
                         RacialAbilityButton gump = new RacialAbilityButton((ushort) ((GumpPic) sender).LocalSerial)
                         {
@@ -239,7 +254,9 @@ namespace ClassicUO.Game.UI.Gumps
                 case RaceType.GARGOYLE:
 
                     if (offset == 0)
+                    {
                         passive = false;
+                    }
 
                     return _gargoyleNames[offset];
 
@@ -256,28 +273,41 @@ namespace ClassicUO.Game.UI.Gumps
                 _clickTiming += Mouse.MOUSE_DELAY_DOUBLE_CLICK;
 
                 if (_clickTiming > 0)
+                {
                     _lastPressed = l;
+                }
             }
         }
 
 
         private void PageCornerOnMouseClick(object sender, MouseEventArgs e)
         {
-            if (e.Button == MouseButtonType.Left && sender is Control ctrl) SetActivePage(ctrl.LocalSerial == 0 ? ActivePage - 1 : ActivePage + 1);
+            if (e.Button == MouseButtonType.Left && sender is Control ctrl)
+            {
+                SetActivePage(ctrl.LocalSerial == 0 ? ActivePage - 1 : ActivePage + 1);
+            }
         }
 
         private void PageCornerOnMouseDoubleClick(object sender, MouseDoubleClickEventArgs e)
         {
-            if (e.Button == MouseButtonType.Left && sender is Control ctrl) SetActivePage(ctrl.LocalSerial == 0 ? 1 : _pagesCount);
+            if (e.Button == MouseButtonType.Left && sender is Control ctrl)
+            {
+                SetActivePage(ctrl.LocalSerial == 0 ? 1 : _pagesCount);
+            }
         }
 
 
         private void SetActivePage(int page)
         {
             if (page < 1)
+            {
                 page = 1;
+            }
             else if (page > _pagesCount)
+            {
                 page = _pagesCount;
+            }
+
             ActivePage = page;
             _pageCornerLeft.Page = ActivePage != 1 ? 0 : int.MaxValue;
             _pageCornerRight.Page = ActivePage != _pagesCount ? 0 : int.MaxValue;
@@ -290,7 +320,9 @@ namespace ClassicUO.Game.UI.Gumps
             base.Update(totalMS, frameMS);
 
             if (IsDisposed)
+            {
                 return;
+            }
 
             if (_lastPressed != null)
             {

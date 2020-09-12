@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,11 +18,11 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
 using System.Collections.Generic;
-
 using ClassicUO.Game.GameObjects;
 
 namespace ClassicUO.Game.Managers
@@ -46,16 +47,12 @@ namespace ClassicUO.Game.Managers
         {
             if (!IsHouseInRange(serial, distance))
             {
-                if (_houses.TryGetValue(serial, out var house))
+                if (_houses.TryGetValue(serial, out House house))
                 {
                     house.ClearComponents();
                     _houses.Remove(serial);
                 }
-                else
-                {
 
-                }
-            
 
                 return true;
             }
@@ -86,7 +83,9 @@ namespace ClassicUO.Game.Managers
                 Item found = World.Items.Get(serial);
 
                 if (found == null)
+                {
                     return true;
+                }
 
                 distance += found.MultiDistanceBonus;
 
@@ -103,7 +102,9 @@ namespace ClassicUO.Game.Managers
                 Item found = World.Items.Get(house);
 
                 if (found == null || !found.MultiInfo.HasValue)
+                {
                     return true;
+                }
 
                 int minX = found.X + found.MultiInfo.Value.X;
                 int maxX = found.X + found.MultiInfo.Value.Y;
@@ -130,7 +131,7 @@ namespace ClassicUO.Game.Managers
 
         public void RemoveMultiTargetHouse()
         {
-            if (_houses.TryGetValue(0, out var house))
+            if (_houses.TryGetValue(0, out House house))
             {
                 house.ClearComponents();
                 _houses.Remove(0);
@@ -144,7 +145,11 @@ namespace ClassicUO.Game.Managers
 
         public void Clear()
         {
-            foreach (KeyValuePair<uint, House> house in _houses) house.Value.ClearComponents();
+            foreach (KeyValuePair<uint, House> house in _houses)
+            {
+                house.Value.ClearComponents();
+            }
+
             _houses.Clear();
         }
     }

@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,10 +18,10 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System.Threading.Tasks;
-
 using ClassicUO.Game;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
@@ -29,60 +30,56 @@ namespace ClassicUO.IO.Resources
 {
     internal class LightsLoader : UOFileLoader<UOTexture32>
     {
+        private static LightsLoader _instance;
         private UOFileMul _file;
 
-        protected LightsLoader(int count) : base(count)
+        private LightsLoader(int count)
+            : base(count)
         {
-
         }
 
-        private static LightsLoader _instance;
-        public static LightsLoader Instance
-        {
-            get
-            {
-                if (_instance == null)
-                {
-                    _instance = new LightsLoader(Constants.MAX_LIGHTS_DATA_INDEX_COUNT);
-                }
-
-                return _instance;
-            }
-        }
+        public static LightsLoader Instance => _instance ?? (_instance = new LightsLoader(Constants.MAX_LIGHTS_DATA_INDEX_COUNT));
 
         public override Task Load()
         {
-            return Task.Run(() => {
-                string path = UOFileManager.GetUOFilePath("light.mul");
-                string pathidx = UOFileManager.GetUOFilePath("lightidx.mul");
+            return Task.Run
+            (
+                () =>
+                {
+                    string path = UOFileManager.GetUOFilePath("light.mul");
+                    string pathidx = UOFileManager.GetUOFilePath("lightidx.mul");
 
-                FileSystemHelper.EnsureFileExists(path);
-                FileSystemHelper.EnsureFileExists(pathidx);
+                    FileSystemHelper.EnsureFileExists(path);
+                    FileSystemHelper.EnsureFileExists(pathidx);
 
-                _file = new UOFileMul(path, pathidx, Constants.MAX_LIGHTS_DATA_INDEX_COUNT);
-                _file.FillEntries(ref Entries);
-
-            });
+                    _file = new UOFileMul(path, pathidx, Constants.MAX_LIGHTS_DATA_INDEX_COUNT);
+                    _file.FillEntries(ref Entries);
+                }
+            );
         }
 
         public override UOTexture32 GetTexture(uint id)
         {
             if (id >= Resources.Length)
+            {
                 return null;
+            }
 
-            ref var texture = ref Resources[id];
+            ref UOTexture32 texture = ref Resources[id];
 
             if (texture == null || texture.IsDisposed)
             {
                 uint[] pixels = GetLight(id, out int w, out int h);
 
                 if (w == 0 && h == 0)
+                {
                     return null;
+                }
 
                 texture = new UOTexture32(w, h);
                 texture.PushData(pixels);
 
-                SaveID(id);
+                SaveId(id);
             }
             else
             {
@@ -95,7 +92,7 @@ namespace ClassicUO.IO.Resources
 
         private uint[] GetLight(uint idx, out int width, out int height)
         {
-            ref var entry = ref GetValidRefEntry((int) idx);
+            ref UOFileIndex entry = ref GetValidRefEntry((int) idx);
 
             width = entry.Width;
             height = entry.Height;
@@ -117,9 +114,11 @@ namespace ClassicUO.IO.Resources
                 {
                     ushort val = _file.ReadByte();
                     val = (ushort) ((val << 10) | (val << 5) | val);
+
                     if (val != 0)
                     {
-                        pixels[pos + j] = Utility.HuesHelper.Color16To32(val) | 0xFF_00_00_00;;
+                        pixels[pos + j] = HuesHelper.Color16To32(val) | 0xFF_00_00_00;
+                        ;
                     }
                 }
             }

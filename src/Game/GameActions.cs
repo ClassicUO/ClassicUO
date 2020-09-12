@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,10 +18,10 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
-
 using ClassicUO.Configuration;
 using ClassicUO.Data;
 using ClassicUO.Game.Data;
@@ -28,26 +29,20 @@ using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Gumps;
+using ClassicUO.Input;
 using ClassicUO.Network;
+using ClassicUO.Resources;
 using ClassicUO.Utility;
-
 using Microsoft.Xna.Framework;
-
 using static ClassicUO.Network.NetClient;
 
 namespace ClassicUO.Game
 {
     internal static class GameActions
     {
-        private static Func<uint, int, int, int?, Point?, bool> _pickUpAction;
-
         public static int LastSpellIndex { get; set; } = 1;
         public static int LastSkillIndex { get; set; } = 1;
 
-        internal static void Initialize(Func<uint, int, int, int?, Point?, bool> onPickUpAction)
-        {
-            _pickUpAction = onPickUpAction;
-        }
 
         public static void ChangeWarMode(byte status = 0xFF)
         {
@@ -58,7 +53,9 @@ namespace ClassicUO.Game
                 bool ok = status != 0;
 
                 if (World.Player.InWarMode == ok)
+                {
                     return;
+                }
 
                 newStatus = ok;
             }
@@ -67,14 +64,14 @@ namespace ClassicUO.Game
             {
                 if (newStatus && ProfileManager.Current != null && ProfileManager.Current.EnableMusic)
                 {
-                    Client.Game.Scene.Audio.PlayMusic((RandomHelper.GetValue(0, 3) % 3) + 38, true);
+                    Client.Game.Scene.Audio.PlayMusic(RandomHelper.GetValue(0, 3) % 3 + 38, true);
                 }
                 else if (!newStatus)
                 {
                     Client.Game.Scene.Audio.StopWarMusic();
                 }
             }
-            
+
             Socket.Send(new PChangeWarMode(newStatus));
         }
 
@@ -85,10 +82,17 @@ namespace ClassicUO.Game
 
         public static bool OpenCorpse(uint serial)
         {
-            if (!SerialHelper.IsItem(serial)) return false;
+            if (!SerialHelper.IsItem(serial))
+            {
+                return false;
+            }
 
             Item item = World.Items.Get(serial);
-            if (item == null || !item.IsCorpse || item.IsDestroyed) return false;
+
+            if (item == null || !item.IsCorpse || item.IsDestroyed)
+            {
+                return false;
+            }
 
             World.Player.ManualOpenedCorpses.Add(serial);
             DoubleClick(serial);
@@ -104,12 +108,17 @@ namespace ClassicUO.Game
 
                 if (m != null && (World.Player.NotorietyFlag == NotorietyFlag.Innocent || World.Player.NotorietyFlag == NotorietyFlag.Ally) && m.NotorietyFlag == NotorietyFlag.Innocent && m != World.Player)
                 {
-                    QuestionGump messageBox = new QuestionGump("This may flag\nyou criminal!",
-                                                               s =>
-                                                               {
-                                                                   if (s)
-                                                                       Socket.Send(new PAttackRequest(serial));
-                                                               });
+                    QuestionGump messageBox = new QuestionGump
+                    (
+                        ResGeneral.ThisMayFlagYouCriminal,
+                        s =>
+                        {
+                            if (s)
+                            {
+                                Socket.Send(new PAttackRequest(serial));
+                            }
+                        }
+                    );
 
                     UIManager.Add(messageBox);
 
@@ -123,7 +132,8 @@ namespace ClassicUO.Game
 
         public static void DoubleClickQueued(uint serial)
         {
-            Client.Game.GetScene<GameScene>()?.DoubleClickDelayed(serial);
+            Client.Game.GetScene<GameScene>()
+                  ?.DoubleClickDelayed(serial);
         }
 
         public static void DoubleClick(uint serial)
@@ -139,9 +149,13 @@ namespace ClassicUO.Game
             }
 
             if (SerialHelper.IsItem(serial))
+            {
                 World.LastObject = serial;
+            }
             else
+            {
                 World.LastObject = 0;
+            }
         }
 
         public static void SingleClick(uint serial)
@@ -152,18 +166,26 @@ namespace ClassicUO.Game
             Entity entity = World.Get(serial);
 
             if (entity != null)
+            {
                 entity.IsClicked = true;
+            }
         }
 
         public static void Say(string message, ushort hue = 0xFFFF, MessageType type = MessageType.Regular, byte font = 3)
         {
             if (hue == 0xFFFF)
+            {
                 hue = ProfileManager.Current.SpeechHue;
+            }
 
             if (Client.Version >= ClientVersion.CV_500A)
+            {
                 Socket.Send(new PUnicodeSpeechRequest(message, type, font, hue, "ENU"));
+            }
             else
+            {
                 Socket.Send(new PASCIISpeechRequest(message, type, font, hue));
+            }
         }
 
 
@@ -186,7 +208,8 @@ namespace ClassicUO.Game
         {
             Socket.Send(new PPartyAccept(serial));
 
-            UIManager.GetGump<PartyInviteGump>()?.Dispose();
+            UIManager.GetGump<PartyInviteGump>()
+                     ?.Dispose();
         }
 
         public static void RequestPartyRemoveMember(uint serial)
@@ -209,37 +232,99 @@ namespace ClassicUO.Game
             Socket.Send(new PPartyChangeLootTypeRequest(isLootable));
         }
 
-        public static void PickUp(uint serial, Point point, int? amount = null)
+        public static bool PickUp(uint serial, int x, int y, int amount = -1, Point? offset = null, bool is_gump = false)
         {
-            PickUp(serial, point.X, point.Y, amount);
-        }
+            if (World.Player.IsDead || ItemHold.Enabled)
+            {
+                return false;
+            }
 
-        public static void PickUp(uint serial, int x, int y, int? amount = null, Point? offset = null)
-        {
-            _pickUpAction(serial, x, y, amount, offset);
-        }
+            Item item = World.Items.Get(serial);
 
-        public static void PickUp(uint serial, int? amount = null, Point? offset = null)
-        {
-            _pickUpAction(serial, 0, 0, amount, offset);
+            if (item == null || item.IsDestroyed || item.IsMulti || item.OnGround && (item.IsLocked || item.Distance > Constants.DRAG_ITEMS_DISTANCE))
+            {
+                return false;
+            }
+
+            if (amount <= -1 && item.Amount > 1 && item.ItemData.IsStackable)
+            {
+                if (ProfileManager.Current.HoldShiftToSplitStack == Keyboard.Shift)
+                {
+                    SplitMenuGump gump = UIManager.GetGump<SplitMenuGump>(item);
+
+                    if (gump != null)
+                    {
+                        return false;
+                    }
+
+                    gump = new SplitMenuGump(item, new Point(x, y))
+                    {
+                        X = Mouse.LDropPosition.X - 80,
+                        Y = Mouse.LDropPosition.Y - 40
+                    };
+
+                    UIManager.Add(gump);
+                    UIManager.AttemptDragControl(gump, Mouse.Position, true);
+
+                    return true;
+                }
+            }
+
+            if (amount <= 0)
+            {
+                amount = item.Amount;
+            }
+
+            ItemHold.Clear();
+            ItemHold.Set(item, (ushort) amount, offset);
+            ItemHold.IsGumpTexture = is_gump;
+            Socket.Send(new PPickUpRequest(item, (ushort) amount));
+            UIManager.GameCursor.SetDraggedItem(offset);
+
+            if (item.OnGround)
+            {
+                item.RemoveFromTile();
+            }
+
+            item.TextContainer?.Clear();
+
+            World.ObjectToRemove = item.Serial;
+
+            return true;
         }
 
         public static void DropItem(uint serial, int x, int y, int z, uint container)
         {
-            if (Client.Version >= ClientVersion.CV_6017)
-                Socket.Send(new PDropRequestNew(serial, (ushort) x, (ushort) y, (sbyte) z, 0, container));
-            else
-                Socket.Send(new PDropRequestOld(serial, (ushort) x, (ushort) y, (sbyte) z, container));
+            if (ItemHold.Enabled && !ItemHold.IsFixedPosition && (ItemHold.Serial != container || ItemHold.ItemData.IsStackable))
+            {
+                if (Client.Version >= ClientVersion.CV_6017)
+                {
+                    Socket.Send(new PDropRequestNew(serial, (ushort) x, (ushort) y, (sbyte) z, 0, container));
+                }
+                else
+                {
+                    Socket.Send(new PDropRequestOld(serial, (ushort) x, (ushort) y, (sbyte) z, container));
+                }
 
-            ItemHold.Enabled = false;
-            ItemHold.Dropped = true;
+                ItemHold.Enabled = false;
+                ItemHold.Dropped = true;
+            }
         }
 
-        public static void Equip(uint serial, Layer layer, uint target)
+        public static void Equip(uint container = 0)
         {
-            Socket.Send(new PEquipRequest(serial, layer, target));
-            ItemHold.Enabled = false;
-            ItemHold.Dropped = true;
+            if (ItemHold.Enabled && !ItemHold.IsFixedPosition && ItemHold.ItemData.IsWearable)
+            {
+                if (!SerialHelper.IsValid(container))
+                {
+                    container = World.Player.Serial;
+                }
+
+                Socket.Send(new PEquipRequest(ItemHold.Serial, (Layer) ItemHold.ItemData.Layer, container));
+
+                ItemHold.Enabled = false;
+                ItemHold.Dropped = true;
+            }
         }
 
         public static void ReplyGump(uint local, uint server, int button, uint[] switches = null, Tuple<ushort, string>[] entries = null)
@@ -269,6 +354,11 @@ namespace ClassicUO.Game
 
         public static void RequestMobileStatus(uint serial)
         {
+            //Mobile mob = World.Mobiles.Get(serial);
+            //if (mob != null)
+            //{
+            //    mob.AddMessage(MessageType.Regular, "[PACKET REQUESTED]");
+            //}
             Socket.Send(new PStatusRequest(serial));
         }
 
@@ -316,10 +406,12 @@ namespace ClassicUO.Game
 
         public static void OpenPopupMenu(uint serial, bool shift = false)
         {
-            shift = shift || Input.Keyboard.Shift;
+            shift = shift || Keyboard.Shift;
 
             if (ProfileManager.Current.HoldShiftForContext && !shift)
+            {
                 return;
+            }
 
             Socket.Send(new PRequestPopupMenu(serial));
         }
@@ -352,13 +444,19 @@ namespace ClassicUO.Game
         public static void AllNames()
         {
             foreach (Mobile mobile in World.Mobiles)
+            {
                 if (mobile != World.Player)
+                {
                     Socket.Send(new PClickRequest(mobile));
+                }
+            }
 
             foreach (Item item in World.Items)
             {
                 if (item.IsCorpse)
+                {
                     Socket.Send(new PClickRequest(item));
+                }
             }
         }
 
@@ -374,7 +472,10 @@ namespace ClassicUO.Game
 
         public static void OpenAbilitiesBook()
         {
-            if (UIManager.GetGump<CombatBookGump>() == null) UIManager.Add(new CombatBookGump(100, 100));
+            if (UIManager.GetGump<CombatBookGump>() == null)
+            {
+                UIManager.Add(new CombatBookGump(100, 100));
+            }
         }
 
         public static void UsePrimaryAbility()
@@ -384,11 +485,16 @@ namespace ClassicUO.Game
             if (((byte) ability & 0x80) == 0)
             {
                 for (int i = 0; i < 2; i++)
+                {
                     World.Player.Abilities[i] &= (Ability) 0x7F;
+                }
+
                 Socket.Send(new PUseCombatAbility((byte) ability));
             }
             else
+            {
                 Socket.Send(new PUseCombatAbility(0));
+            }
 
             ability ^= (Ability) 0x80;
         }
@@ -400,11 +506,16 @@ namespace ClassicUO.Game
             if (((byte) ability & 0x80) == 0)
             {
                 for (int i = 0; i < 2; i++)
+                {
                     World.Player.Abilities[i] &= (Ability) 0x7F;
+                }
+
                 Socket.Send(new PUseCombatAbility((byte) ability));
             }
             else
+            {
                 Socket.Send(new PUseCombatAbility(0));
+            }
 
             ability ^= (Ability) 0x80;
         }
@@ -416,25 +527,30 @@ namespace ClassicUO.Game
 
         public static void GrabItem(uint serial, ushort amount, uint bag = 0)
         {
-            Socket.Send(new PPickUpRequest(serial, amount));
+            //Socket.Send(new PPickUpRequest(serial, amount));
 
             Item backpack = World.Player.FindItemByLayer(Layer.Backpack);
 
             if (backpack == null)
+            {
                 return;
+            }
 
-            if(bag == 0)
+            if (bag == 0)
+            {
                 bag = ProfileManager.Current.GrabBagSerial == 0
                     ? backpack.Serial
                     : ProfileManager.Current.GrabBagSerial;
+            }
 
             if (!World.Items.Contains(bag))
             {
-                Print("Grab Bag not found, setting to Backpack.");
+                Print(ResGeneral.GrabBagNotFound);
                 ProfileManager.Current.GrabBagSerial = 0;
                 bag = backpack.Serial;
             }
 
+            PickUp(serial, 0, 0, amount);
             DropItem(serial, 0xFFFF, 0xFFFF, 0, bag);
         }
     }

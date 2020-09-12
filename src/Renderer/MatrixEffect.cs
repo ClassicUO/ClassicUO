@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,6 +18,7 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using Microsoft.Xna.Framework;
@@ -26,11 +28,6 @@ namespace ClassicUO.Renderer
 {
     internal class MatrixEffect : Effect
     {
-        private Matrix _projectionMatrix = new Matrix(0f, //(float)( 2.0 / (double)viewport.Width ) is the actual value we will use
-                                                      0.0f, 0.0f, 0.0f, 0.0f, 0f, //(float)( -2.0 / (double)viewport.Height ) is the actual value we will use
-                                                      0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, -1.0f, 1.0f, 0.0f, 1.0f);
-
-
         public MatrixEffect(GraphicsDevice graphicsDevice, byte[] effectCode) : base(graphicsDevice, effectCode)
         {
             MatrixTransform = Parameters["MatrixTransform"];
@@ -41,25 +38,19 @@ namespace ClassicUO.Renderer
         }
 
 
-
         public EffectParameter MatrixTransform { get; }
 
         public EffectPass this[int index] => CurrentTechnique.Passes[index];
 
 
-
-        public virtual void ApplyStates()
+        public virtual void ApplyStates(Matrix matrix)
         {
-            Viewport viewport = GraphicsDevice.Viewport;
-            _projectionMatrix.M11 = (float) (2.0 / viewport.Width);
-            _projectionMatrix.M22 = (float) (-2.0 / viewport.Height);
+            MatrixTransform.SetValue(matrix);
 
-            Matrix idendity = Matrix.Identity;
-            Matrix.Multiply(ref idendity, ref _projectionMatrix, out var matrixTransform);
-
-            MatrixTransform.SetValue(matrixTransform);
-
-            foreach (EffectPass pa in CurrentTechnique.Passes) pa.Apply();
+            foreach (EffectPass pa in CurrentTechnique.Passes)
+            {
+                pa.Apply();
+            }
         }
     }
 }

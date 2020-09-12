@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,6 +18,7 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 
@@ -25,20 +27,20 @@ using System.Diagnostics;
 
 namespace ClassicUO.Game
 {
-    abstract class LinkedObject
+    internal abstract class LinkedObject
     {
-        public LinkedObject Previous, Next, Items;
         public bool IsEmpty => Items == null;
-        
+        public LinkedObject Previous, Next, Items;
+
         ~LinkedObject()
         {
             Clear();
 
-            var item = Next;
+            LinkedObject item = Next;
 
             while (item != null && item != this)
             {
-                var next = item.Next;
+                LinkedObject next = item.Next;
                 item.Next = null;
                 item = next;
             }
@@ -47,7 +49,9 @@ namespace ClassicUO.Game
         public void PushToBack(LinkedObject item)
         {
             if (item == null)
+            {
                 return;
+            }
 
             Remove(item);
 
@@ -57,7 +61,7 @@ namespace ClassicUO.Game
             }
             else
             {
-                var last = GetLast();
+                LinkedObject last = GetLast();
                 last.Next = item;
 
                 Debug.Assert(item.Next == null, "[Append to last-next] item must be unlinked before.");
@@ -69,7 +73,9 @@ namespace ClassicUO.Game
         public void Remove(LinkedObject item)
         {
             if (item == null)
+            {
                 return;
+            }
 
             Unlink(item);
             item.Next = null;
@@ -79,11 +85,14 @@ namespace ClassicUO.Game
         public void Unlink(LinkedObject item)
         {
             if (item == null)
+            {
                 return;
+            }
 
             if (item == Items)
             {
                 Items = Items.Next;
+
                 if (Items != null)
                 {
                     Items.Previous = null;
@@ -114,11 +123,12 @@ namespace ClassicUO.Game
                 {
                     Items.Previous = item;
                 }
+
                 Items = item;
             }
             else
             {
-                var next = first.Next;
+                LinkedObject next = first.Next;
                 item.Next = next;
                 item.Previous = first;
                 first.Next = item;
@@ -152,7 +162,7 @@ namespace ClassicUO.Game
             if (item != null)
             {
                 Unlink(item);
-                var last = GetLast();
+                LinkedObject last = GetLast();
 
                 if (last == null)
                 {
@@ -170,7 +180,7 @@ namespace ClassicUO.Game
 
         public LinkedObject GetLast()
         {
-            var last = Items;
+            LinkedObject last = Items;
 
             while (last != null && last.Next != null)
             {
@@ -184,12 +194,12 @@ namespace ClassicUO.Game
         {
             if (Items != null)
             {
-                var item = Items;
+                LinkedObject item = Items;
                 Items = null;
 
                 while (item != null)
                 {
-                    var next = item.Next;
+                    LinkedObject next = item.Next;
                     item.Next = null;
                     item = next;
                 }
@@ -197,24 +207,26 @@ namespace ClassicUO.Game
         }
 
         /// <summary>
-        /// Sort the contents of this LinkedObject using merge sort.
-        /// Adapted from Simon Tatham's C implementation: https://www.chiark.greenend.org.uk/~sgtatham/algorithms/listsort.html
+        ///     Sort the contents of this LinkedObject using merge sort.
+        ///     Adapted from Simon Tatham's C implementation: https://www.chiark.greenend.org.uk/~sgtatham/algorithms/listsort.html
         /// </summary>
         /// <typeparam name="T">Type of the objects being compared.</typeparam>
         /// <param name="comparison">Comparison function to use when sorting.</param>
         public LinkedObject SortContents<T>(Comparison<T> comparison) where T : LinkedObject
         {
             if (Items == null)
+            {
                 return null;
+            }
 
             int unitsize = 1; //size of the components we are merging; 1 for first iteration, multiplied by 2 after each iteration
             T p = null, q = null, e = null, head = (T) Items, tail = null;
-            int nmerges = 0; //number of merges done this pass
-            int psize, qsize; //lengths of the components we are merging
 
             while (true)
             {
                 p = head;
+                int nmerges = 0;  //number of merges done this pass
+                int psize, qsize; //lengths of the components we are merging
                 head = null;
                 tail = null;
 
@@ -223,16 +235,21 @@ namespace ClassicUO.Game
                     nmerges++;
                     q = p;
                     psize = 0;
+
                     for (int i = 0; i < unitsize; i++)
                     {
                         psize++;
                         q = (T) q.Next;
+
                         if (q == null)
+                        {
                             break;
+                        }
                     }
 
                     qsize = unitsize;
-                    while (psize > 0 || (qsize > 0 && q != null))
+
+                    while (psize > 0 || qsize > 0 && q != null)
                     {
                         if (psize == 0)
                         {
@@ -249,7 +266,7 @@ namespace ClassicUO.Game
                         else if (comparison(p, q) <= 0)
                         {
                             e = p;
-                            p = (T)p.Next;
+                            p = (T) p.Next;
                             psize--;
                         }
                         else
@@ -271,18 +288,21 @@ namespace ClassicUO.Game
                         e.Previous = tail;
                         tail = e;
                     }
+
                     p = q;
                 }
+
                 tail.Next = null;
+
                 if (nmerges <= 1)
                 {
                     Items = head;
+
                     return head;
                 }
-                else
-                    unitsize *= 2;
+
+                unitsize *= 2;
             }
         }
-
     }
 }

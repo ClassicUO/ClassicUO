@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,85 +18,70 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
-using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using ClassicUO.Data;
 using ClassicUO.Game;
-using ClassicUO.Utility;
-using ClassicUO.Utility.Logging;
 
 namespace ClassicUO.IO.Resources
 {
     internal class MultiLoader : UOFileLoader
     {
-        private UOFile _file;
-        private int _itemOffset;
+        private static MultiLoader _instance;
         private DataReader _reader;
 
         private MultiLoader()
         {
-
         }
 
-        private static MultiLoader _instance;
-        public static MultiLoader Instance
-        {
-            get
-            {
-                if (_instance == null)
-                {
-                    _instance = new MultiLoader();
-                }
-
-                return _instance;
-            }
-        }
-
-
+        public static MultiLoader Instance => _instance ?? (_instance = new MultiLoader());
 
         public int Count { get; private set; }
-        public UOFile File => _file;
+        public UOFile File { get; private set; }
+
         public bool IsUOP { get; private set; }
-        public int Offset => _itemOffset;
+        public int Offset { get; private set; }
 
 
         public override unsafe Task Load()
         {
-            return Task.Run(() =>
-            {
-                string uopPath = UOFileManager.GetUOFilePath("MultiCollection.uop");
-
-                if (Client.IsUOPInstallation && System.IO.File.Exists(uopPath))
+            return Task.Run
+            (
+                () =>
                 {
-                    Count = Constants.MAX_MULTI_DATA_INDEX_COUNT;
-                    _file = new UOFileUop(uopPath, "build/multicollection/{0:D6}.bin");
-                    Entries = new UOFileIndex[Count];
-                    _reader = new DataReader();
-                    IsUOP = true;
-                }
-                else
-                {
-                    string path = UOFileManager.GetUOFilePath("multi.mul");
-                    string pathidx = UOFileManager.GetUOFilePath("multi.idx");
+                    string uopPath = UOFileManager.GetUOFilePath("MultiCollection.uop");
 
-                    if (System.IO.File.Exists(path) && System.IO.File.Exists(pathidx))
+                    if (Client.IsUOPInstallation && System.IO.File.Exists(uopPath))
                     {
-                        _file = new UOFileMul(path, pathidx, Constants.MAX_MULTI_DATA_INDEX_COUNT, 14);
-                        Count = _itemOffset = Client.Version >= ClientVersion.CV_7090 ? sizeof(MultiBlockNew) + 2 : sizeof(MultiBlock);
+                        Count = Constants.MAX_MULTI_DATA_INDEX_COUNT;
+                        File = new UOFileUop(uopPath, "build/multicollection/{0:D6}.bin");
+                        Entries = new UOFileIndex[Count];
+                        _reader = new DataReader();
+                        IsUOP = true;
                     }
+                    else
+                    {
+                        string path = UOFileManager.GetUOFilePath("multi.mul");
+                        string pathidx = UOFileManager.GetUOFilePath("multi.idx");
+
+                        if (System.IO.File.Exists(path) && System.IO.File.Exists(pathidx))
+                        {
+                            File = new UOFileMul(path, pathidx, Constants.MAX_MULTI_DATA_INDEX_COUNT, 14);
+                            Count = Offset = Client.Version >= ClientVersion.CV_7090 ? sizeof(MultiBlockNew) + 2 : sizeof(MultiBlock);
+                        }
+                    }
+
+                    File.FillEntries(ref Entries);
                 }
-
-                _file.FillEntries(ref Entries);
-
-            });
+            );
         }
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    ref struct MultiBlock
+    internal ref struct MultiBlock
     {
         public ushort ID;
         public short X;
@@ -105,7 +91,7 @@ namespace ClassicUO.IO.Resources
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    ref struct MultiBlockNew
+    internal ref struct MultiBlockNew
     {
         public ushort ID;
         public short X;

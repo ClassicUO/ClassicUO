@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,11 +18,11 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System.Collections.Generic;
 using System.Linq;
-
 using ClassicUO.Input;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
@@ -33,7 +34,6 @@ namespace ClassicUO.Game.UI.Controls
         private readonly ButtonAction _action;
         private readonly int _groupnumber;
         private bool _isSelected;
-        internal Label TextLabel { get; }
 
         public NiceButton(int x, int y, int w, int h, ButtonAction action, string text, int groupnumber = 0, TEXT_ALIGN_TYPE align = TEXT_ALIGN_TYPE.TS_CENTER) : base(x, y, w, h)
         {
@@ -42,6 +42,8 @@ namespace ClassicUO.Game.UI.Controls
             TextLabel.Y = (h - TextLabel.Height) >> 1;
             _groupnumber = groupnumber;
         }
+
+        internal Label TextLabel { get; }
 
         public int ButtonParameter { get; set; }
 
@@ -53,7 +55,9 @@ namespace ClassicUO.Game.UI.Controls
             set
             {
                 if (!IsSelectable)
+                {
                     return;
+                }
 
                 _isSelected = value;
 
@@ -62,32 +66,49 @@ namespace ClassicUO.Game.UI.Controls
                     Control p = Parent;
 
                     if (p == null)
+                    {
                         return;
+                    }
 
                     IEnumerable<NiceButton> list;
 
                     if (p is ScrollAreaItem)
                     {
                         p = p.Parent;
-                        list = p.FindControls<ScrollAreaItem>().SelectMany(s => s.Children.OfType<NiceButton>());
+
+                        list = p.FindControls<ScrollAreaItem>()
+                                .SelectMany(s => s.Children.OfType<NiceButton>());
                     }
                     else
+                    {
                         list = p.FindControls<NiceButton>();
+                    }
 
-                    foreach (var b in list)
+                    foreach (NiceButton b in list)
+                    {
                         if (b != this && b._groupnumber == _groupnumber)
+                        {
                             b.IsSelected = false;
+                        }
+                    }
                 }
             }
         }
 
         internal static NiceButton GetSelected(Control p, int group)
         {
-            IEnumerable<NiceButton> list = p is ScrollArea ? p.FindControls<ScrollAreaItem>().SelectMany(s => s.Children.OfType<NiceButton>()) : p.FindControls<NiceButton>();
+            IEnumerable<NiceButton> list = p is ScrollArea
+                ? p.FindControls<ScrollAreaItem>()
+                   .SelectMany(s => s.Children.OfType<NiceButton>())
+                : p.FindControls<NiceButton>();
 
-            foreach (var b in list)
+            foreach (NiceButton b in list)
+            {
                 if (b._groupnumber == group && b.IsSelected)
+                {
                     return b;
+                }
+            }
 
             return null;
         }
@@ -99,9 +120,13 @@ namespace ClassicUO.Game.UI.Controls
                 IsSelected = true;
 
                 if (_action == ButtonAction.SwitchPage)
+                {
                     ChangePage(ButtonParameter);
+                }
                 else
+                {
                     OnButtonClick(ButtonParameter);
+                }
             }
         }
 
@@ -110,7 +135,7 @@ namespace ClassicUO.Game.UI.Controls
             if (IsSelected)
             {
                 ResetHueVector();
-                ShaderHuesTraslator.GetHueVector(ref _hueVector, 0, false, Alpha);
+                ShaderHueTranslator.GetHueVector(ref _hueVector, 0, false, Alpha);
                 batcher.Draw2D(_texture, x, y, 0, 0, Width, Height, ref _hueVector);
             }
 

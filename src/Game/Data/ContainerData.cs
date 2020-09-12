@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,13 +18,14 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.Data
 {
-    internal readonly struct ContainerData
+    internal struct ContainerData
     {
         public ContainerData(ushort graphic, ushort sound, ushort closed, int x, int y, int w, int h, ushort iconizedgraphic = 0, int minimizerX = 0, int minimizerY = 0)
         {
@@ -31,15 +33,15 @@ namespace ClassicUO.Game.Data
             Bounds = new Rectangle(x, y, w, h);
             OpenSound = sound;
             ClosedSound = closed;
-            MinimizerArea = (minimizerX == 0 && minimizerY == 0 ? Rectangle.Empty : new Rectangle(minimizerX, minimizerY, 16, 16));
+            MinimizerArea = minimizerX == 0 && minimizerY == 0 ? Rectangle.Empty : new Rectangle(minimizerX, minimizerY, 16, 16);
             IconizedGraphic = iconizedgraphic;
         }
 
-        public readonly ushort Graphic;
-        public readonly Rectangle Bounds;
-        public readonly ushort OpenSound;
-        public readonly ushort ClosedSound;
-        public readonly Rectangle MinimizerArea;
-        public readonly ushort IconizedGraphic;
+        public ushort Graphic;
+        public Rectangle Bounds;
+        public ushort OpenSound;
+        public ushort ClosedSound;
+        public Rectangle MinimizerArea;
+        public ushort IconizedGraphic;
     }
 }

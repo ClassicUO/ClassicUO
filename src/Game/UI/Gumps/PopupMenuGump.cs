@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,6 +18,7 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using ClassicUO.Game.Data;
@@ -24,7 +26,6 @@ using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.IO.Resources;
 using ClassicUO.Utility;
-
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Gumps
@@ -41,6 +42,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 Alpha = 0.25f
             };
+
             Add(pic);
             int offsetY = 10;
             bool arrowAdded = false;
@@ -48,7 +50,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             for (int i = 0; i < data.Items.Length; i++)
             {
-                ref var item = ref data.Items[i];
+                ref PopupMenuItem item = ref data.Items[i];
 
                 string text = ClilocLoader.Instance.GetString(item.Cliloc);
 
@@ -62,7 +64,9 @@ namespace ClassicUO.Game.UI.Gumps
                     Color c = new Color(r, g, b, a);
 
                     if (c.A == 0)
+                    {
                         c.A = 0xFF;
+                    }
 
                     FontsLoader.Instance.SetUseHTML(true, HuesHelper.RgbaToArgb(c.PackedValue));
                 }
@@ -72,6 +76,7 @@ namespace ClassicUO.Game.UI.Gumps
                     X = 10,
                     Y = offsetY
                 };
+
                 FontsLoader.Instance.SetUseHTML(false);
 
                 HitBox box = new HitBox(10, offsetY, label.Width, label.Height)
@@ -88,6 +93,7 @@ namespace ClassicUO.Game.UI.Gumps
                         Dispose();
                     }
                 };
+
                 Add(box);
                 Add(label);
 
@@ -96,11 +102,15 @@ namespace ClassicUO.Game.UI.Gumps
                     arrowAdded = true;
 
                     // TODO: wat?
-                    Add(new Button(0, 0x15E6, 0x15E2, 0x15E2)
-                    {
-                        X = 20,
-                        Y = offsetY
-                    });
+                    Add
+                    (
+                        new Button(0, 0x15E6, 0x15E2, 0x15E2)
+                        {
+                            X = 20,
+                            Y = offsetY
+                        }
+                    );
+
                     height += 20;
                 }
 
@@ -111,23 +121,28 @@ namespace ClassicUO.Game.UI.Gumps
                     height += label.Height;
 
                     if (width < label.Width)
+                    {
                         width = label.Width;
+                    }
                 }
             }
 
             width += 20;
 
             if (height <= 10 || width <= 20)
+            {
                 Dispose();
+            }
             else
             {
                 pic.Width = width;
                 pic.Height = height;
+
                 foreach (HitBox box in FindControls<HitBox>())
+                {
                     box.Width = width - 20;
+                }
             }
         }
-
-
     }
 }

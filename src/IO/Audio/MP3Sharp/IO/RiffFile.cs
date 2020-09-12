@@ -1,4 +1,5 @@
 #region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,10 +18,10 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System.IO;
-
 using ClassicUO.IO.Audio.MP3Sharp.Support;
 
 namespace ClassicUO.IO.Audio.MP3Sharp.IO
@@ -30,19 +31,18 @@ namespace ClassicUO.IO.Audio.MP3Sharp.IO
     /// </summary>
     internal class RiffFile
     {
-        protected const int DDC_SUCCESS = 0; // The operation succeded
-        protected const int DDC_FAILURE = 1; // The operation failed for unspecified reasons
-        protected const int DDC_OUT_OF_MEMORY = 2; // Operation failed due to running out of memory
-        protected const int DDC_FILE_ERROR = 3; // Operation encountered file I/O error
-        protected const int DDC_INVALID_CALL = 4; // Operation was called with invalid parameters
-        protected const int DDC_USER_ABORT = 5; // Operation was aborted by the user
-        protected const int DDC_INVALID_FILE = 6; // File format does not match
-        protected const int RFM_UNKNOWN = 0; // undefined type (can use to mean "N/A" or "not open")
-        protected const int RFM_WRITE = 1; // open for write
-        protected const int RFM_READ = 2; // open for read
+        protected const int DDC_SUCCESS = 0;           // The operation succeded
+        protected const int DDC_FAILURE = 1;           // The operation failed for unspecified reasons
+        protected const int DDC_OUT_OF_MEMORY = 2;     // Operation failed due to running out of memory
+        protected const int DDC_FILE_ERROR = 3;        // Operation encountered file I/O error
+        protected const int DDC_INVALID_CALL = 4;      // Operation was called with invalid parameters
+        protected const int DDC_USER_ABORT = 5;        // Operation was aborted by the user
+        protected const int DDC_INVALID_FILE = 6;      // File format does not match
+        protected const int RFM_UNKNOWN = 0;           // undefined type (can use to mean "N/A" or "not open")
+        protected const int RFM_WRITE = 1;             // open for write
+        protected const int RFM_READ = 2;              // open for read
+        private Stream m_File;                         // I/O stream to use
         private readonly RiffChunkHeader m_RiffHeader; // header for whole file
-        protected int Fmode; // current file I/O mode
-        private Stream m_File; // I/O stream to use
 
         /// <summary>
         ///     Dummy Constructor
@@ -56,6 +56,8 @@ namespace ClassicUO.IO.Audio.MP3Sharp.IO
             m_RiffHeader.CkId = FourCC("RIFF");
             m_RiffHeader.CkSize = 0;
         }
+
+        protected int Fmode; // current file I/O mode
 
         /// <summary>
         ///     Return File Mode.
@@ -72,7 +74,10 @@ namespace ClassicUO.IO.Audio.MP3Sharp.IO
         {
             int retcode = DDC_SUCCESS;
 
-            if (Fmode != RFM_UNKNOWN) retcode = Close();
+            if (Fmode != RFM_UNKNOWN)
+            {
+                retcode = Close();
+            }
 
             if (retcode == DDC_SUCCESS)
             {
@@ -173,7 +178,10 @@ namespace ClassicUO.IO.Audio.MP3Sharp.IO
         {
             int retcode = DDC_SUCCESS;
 
-            if (Fmode != RFM_UNKNOWN) retcode = Close();
+            if (Fmode != RFM_UNKNOWN)
+            {
+                retcode = Close();
+            }
 
             if (retcode == DDC_SUCCESS)
             {
@@ -274,7 +282,10 @@ namespace ClassicUO.IO.Audio.MP3Sharp.IO
         /// </summary>
         public virtual int Write(sbyte[] data, int numBytes)
         {
-            if (Fmode != RFM_WRITE) return DDC_INVALID_CALL;
+            if (Fmode != RFM_WRITE)
+            {
+                return DDC_INVALID_CALL;
+            }
 
             try
             {
@@ -305,7 +316,10 @@ namespace ClassicUO.IO.Audio.MP3Sharp.IO
                 theData[y + 1] = (sbyte) (SupportClass.URShift(data[yc++], 8) & 0x00FF);
             }
 
-            if (Fmode != RFM_WRITE) return DDC_INVALID_CALL;
+            if (Fmode != RFM_WRITE)
+            {
+                return DDC_INVALID_CALL;
+            }
 
             try
             {
@@ -343,7 +357,10 @@ namespace ClassicUO.IO.Audio.MP3Sharp.IO
             br[6] = br5;
             br[7] = br4;
 
-            if (Fmode != RFM_WRITE) return DDC_INVALID_CALL;
+            if (Fmode != RFM_WRITE)
+            {
+                return DDC_INVALID_CALL;
+            }
 
             try
             {
@@ -367,7 +384,10 @@ namespace ClassicUO.IO.Audio.MP3Sharp.IO
         {
             short theData = data; //(short) (((SupportClass.URShift(data, 8)) & 0x00FF) | ((Data << 8) & 0xFF00));
 
-            if (Fmode != RFM_WRITE) return DDC_INVALID_CALL;
+            if (Fmode != RFM_WRITE)
+            {
+                return DDC_INVALID_CALL;
+            }
 
             try
             {
@@ -392,7 +412,10 @@ namespace ClassicUO.IO.Audio.MP3Sharp.IO
         {
             int theData = data;
 
-            if (Fmode != RFM_WRITE) return DDC_INVALID_CALL;
+            if (Fmode != RFM_WRITE)
+            {
+                return DDC_INVALID_CALL;
+            }
 
             try
             {
@@ -443,7 +466,9 @@ namespace ClassicUO.IO.Audio.MP3Sharp.IO
                     sbyte target = (sbyte) m_File.ReadByte();
 
                     if (target != data[cnt++])
+                    {
                         return DDC_FILE_ERROR;
+                    }
                 }
             }
             catch
@@ -541,7 +566,10 @@ namespace ClassicUO.IO.Audio.MP3Sharp.IO
         /// </summary>
         public virtual int Backpatch(long fileOffset, RiffChunkHeader data, int numBytes)
         {
-            if (m_File == null) return DDC_INVALID_CALL;
+            if (m_File == null)
+            {
+                return DDC_INVALID_CALL;
+            }
 
             try
             {
@@ -557,7 +585,10 @@ namespace ClassicUO.IO.Audio.MP3Sharp.IO
 
         public virtual int Backpatch(long fileOffset, sbyte[] data, int numBytes)
         {
-            if (m_File == null) return DDC_INVALID_CALL;
+            if (m_File == null)
+            {
+                return DDC_INVALID_CALL;
+            }
 
             try
             {
@@ -646,9 +677,6 @@ namespace ClassicUO.IO.Audio.MP3Sharp.IO
 
         internal class RiffChunkHeader
         {
-            public int CkId; // Four-character chunk ID
-            public int CkSize;
-
             // Length of data in chunk
             public RiffChunkHeader(RiffFile enclosingInstance)
             {
@@ -656,6 +684,8 @@ namespace ClassicUO.IO.Audio.MP3Sharp.IO
             }
 
             public RiffFile EnclosingInstance { get; private set; }
+            public int CkId; // Four-character chunk ID
+            public int CkSize;
 
             private void InitBlock(RiffFile enclosingInstance)
             {

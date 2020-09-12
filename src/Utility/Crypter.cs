@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,6 +18,7 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
@@ -29,14 +31,18 @@ namespace ClassicUO.Utility
         public static string Encrypt(string source)
         {
             if (string.IsNullOrEmpty(source))
+            {
                 return string.Empty;
+            }
 
             byte[] buff = Encoding.ASCII.GetBytes(source);
             int kidx = 0;
             string key = CalculateKey();
 
             if (key == string.Empty)
+            {
                 return string.Empty;
+            }
 
             StringBuilder sb = new StringBuilder(source.Length * 2 + 2);
             sb.Append("1+");
@@ -46,7 +52,9 @@ namespace ClassicUO.Utility
                 sb.AppendFormat("{0:X2}", (byte) (buff[i] ^ (byte) key[kidx++]));
 
                 if (kidx >= key.Length)
+                {
                     kidx = 0;
+                }
             }
 
             return sb.ToString();
@@ -55,7 +63,9 @@ namespace ClassicUO.Utility
         public static string Decrypt(string source)
         {
             if (string.IsNullOrEmpty(source))
+            {
                 return string.Empty;
+            }
 
             byte[] buff = null;
 
@@ -65,7 +75,9 @@ namespace ClassicUO.Utility
                 string key = CalculateKey();
 
                 if (key == string.Empty)
+                {
                     return string.Empty;
+                }
 
                 int kidx = 0;
 
@@ -85,7 +97,9 @@ namespace ClassicUO.Utility
                     buff[(i - 2) >> 1] = (byte) (c ^ (byte) key[kidx++]);
 
                     if (kidx >= key.Length)
+                    {
                         kidx = 0;
+                    }
                 }
             }
             else

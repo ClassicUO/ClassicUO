@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,6 +18,7 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System.Collections.Generic;
@@ -26,12 +28,12 @@ using ClassicUO.Game.Managers;
 using ClassicUO.Game.Map;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Utility.Platforms;
-
 using Microsoft.Xna.Framework;
+using MathHelper = ClassicUO.Utility.MathHelper;
 
 namespace ClassicUO.Game
 {
-    enum SCAN_TYPE_OBJECT
+    internal enum SCAN_TYPE_OBJECT
     {
         STO_HOSTILE = 0,
         STO_PARTY,
@@ -39,7 +41,8 @@ namespace ClassicUO.Game
         STO_OBJECTS,
         STO_MOBILES
     }
-    enum SCAN_MODE_OBJECT
+
+    internal enum SCAN_MODE_OBJECT
     {
         SMO_NEXT = 0,
         SMO_PREV,
@@ -50,8 +53,19 @@ namespace ClassicUO.Game
     {
         private static readonly EffectManager _effectManager = new EffectManager();
         private static readonly List<uint> _toRemove = new List<uint>();
+        private static uint _time_to_delete;
 
         public static Point RangeSize;
+
+        public static PlayerMobile Player;
+
+        public static HouseCustomizationManager CustomHouseManager;
+
+        public static WorldMapEntityManager WMapManager = new WorldMapEntityManager();
+
+        public static ActiveSpellIconsManager ActiveSpellIcons = new ActiveSpellIconsManager();
+
+        public static uint LastObject, ObjectToRemove;
 
         public static ObjectPropertiesListManager OPL { get; } = new ObjectPropertiesListManager();
 
@@ -64,8 +78,6 @@ namespace ClassicUO.Game
         public static EntityCollection<Item> Items { get; } = new EntityCollection<Item>();
 
         public static EntityCollection<Mobile> Mobiles { get; } = new EntityCollection<Mobile>();
-
-        public static PlayerMobile Player;
 
         public static Map.Map Map { get; private set; }
 
@@ -81,14 +93,6 @@ namespace ClassicUO.Game
         public static WorldTextManager WorldTextManager { get; } = new WorldTextManager();
 
         public static JournalManager Journal { get; } = new JournalManager();
-
-        public static HouseCustomizationManager CustomHouseManager;
-
-        public static WorldMapEntityManager WMapManager = new WorldMapEntityManager();
-
-        public static ActiveSpellIconsManager ActiveSpellIcons = new ActiveSpellIconsManager();
-
-        public static uint LastObject, ObjectToRemove;
 
 
         public static int MapIndex
@@ -111,7 +115,9 @@ namespace ClassicUO.Game
                     if (Map != null)
                     {
                         if (MapIndex >= 0)
+                        {
                             Map.Destroy();
+                        }
 
                         ushort x = Player.X;
                         ushort y = Player.Y;
@@ -120,12 +126,11 @@ namespace ClassicUO.Game
                         Map = null;
 
                         if (value >= Constants.MAPS_COUNT)
-                            value = 0;
-
-                        Map = new Map.Map(value)
                         {
-                            Center = new Point(x, y)
-                        };
+                            value = 0;
+                        }
+
+                        Map = new Map.Map(value);
                         Map.Initialize();
 
                         Player.X = x;
@@ -139,9 +144,6 @@ namespace ClassicUO.Game
                     else
                     {
                         Map = new Map.Map(value);
-
-                        if (Player != null)
-                            Map.Center = new Point(Player.X, Player.Y);
                         Map.Initialize();
                     }
 
@@ -190,7 +192,16 @@ namespace ClassicUO.Game
             Client.Game.Scene.Audio.PlayMusic(music, true);
         }
 
-        private static uint _time_to_delete;
+
+        /*[MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static bool CheckToRemove(Entity obj, int distance)
+        {
+            if (Player == null || obj.Serial == Player.Serial)
+                return false;
+
+            return Math.Max(Math.Abs(obj.X - RangeSize.X), Math.Abs(obj.Y - RangeSize.Y)) > distance;
+        }
+        */
 
         public static void Update(double totalMS, double frameMS)
         {
@@ -203,18 +214,33 @@ namespace ClassicUO.Game
 
                     if (rem != null)
                     {
+                        Entity container = Get(rem.Container);
+
                         RemoveItem(rem, true);
 
                         if (rem.Layer == Layer.OneHanded || rem.Layer == Layer.TwoHanded)
+                        {
                             Player.UpdateAbilities();
-
-                        if (SerialHelper.IsMobile(rem.Container))
-                        {
-                            UIManager.GetGump<PaperDollGump>(rem.Container)?.RequestUpdateContents();
                         }
-                        else if (SerialHelper.IsItem(rem.Container))
+
+                        if (container != null)
                         {
-                            UIManager.GetGump<ContainerGump>(rem.Container)?.RequestUpdateContents();
+                            if (SerialHelper.IsMobile(container.Serial))
+                            {
+                                UIManager.GetGump<PaperDollGump>(container.Serial)
+                                         ?.RequestUpdateContents();
+                            }
+                            else if (SerialHelper.IsItem(container.Serial))
+                            {
+                                UIManager.GetGump<ContainerGump>(container.Serial)
+                                         ?.RequestUpdateContents();
+
+                                if (container.Graphic == 0x2006)
+                                {
+                                    UIManager.GetGump<GridLootGump>(container)
+                                             ?.RequestUpdateContents();
+                                }
+                            }
                         }
                     }
                 }
@@ -230,34 +256,42 @@ namespace ClassicUO.Game
                 {
                     mob.Update(totalMS, frameMS);
 
-                    if (do_delete && mob.Distance > ClientViewRange)
+                    if (do_delete && mob.Distance > ClientViewRange /*CheckToRemove(mob, ClientViewRange)*/)
+                    {
                         RemoveMobile(mob);
+                    }
 
                     if (mob.IsDestroyed)
+                    {
                         _toRemove.Add(mob);
+                    }
                     else
                     {
                         if (mob.NotorietyFlag == NotorietyFlag.Ally)
                         {
-                            WMapManager.AddOrUpdate(
-                                                    mob.Serial,
-                                                    mob.X,
-                                                    mob.Y,
-                                                    Utility.MathHelper.PercetangeOf(mob.Hits, mob.HitsMax),
-                                                    MapIndex,
-                                                    true,
-                                                    mob.Name);
+                            WMapManager.AddOrUpdate
+                            (
+                                mob.Serial,
+                                mob.X,
+                                mob.Y,
+                                MathHelper.PercetangeOf(mob.Hits, mob.HitsMax),
+                                MapIndex,
+                                true,
+                                mob.Name
+                            );
                         }
                         else if (Party.Leader != 0 && Party.Contains(mob))
                         {
-                            WMapManager.AddOrUpdate(
-                                                    mob.Serial,
-                                                    mob.X,
-                                                    mob.Y,
-                                                    Utility.MathHelper.PercetangeOf(mob.Hits, mob.HitsMax),
-                                                    MapIndex,
-                                                    false,
-                                                    mob.Name);
+                            WMapManager.AddOrUpdate
+                            (
+                                mob.Serial,
+                                mob.X,
+                                mob.Y,
+                                MathHelper.PercetangeOf(mob.Hits, mob.HitsMax),
+                                MapIndex,
+                                false,
+                                mob.Name
+                            );
                         }
                     }
                 }
@@ -265,7 +299,9 @@ namespace ClassicUO.Game
                 if (_toRemove.Count != 0)
                 {
                     for (int i = 0; i < _toRemove.Count; i++)
+                    {
                         Mobiles.Remove(_toRemove[i]);
+                    }
 
                     _toRemove.Clear();
                 }
@@ -274,25 +310,33 @@ namespace ClassicUO.Game
                 {
                     item.Update(totalMS, frameMS);
 
-                    if (do_delete && item.OnGround && item.Distance > ClientViewRange)
+                    if (do_delete && item.OnGround && item.Distance > ClientViewRange /*CheckToRemove(item, ClientViewRange)*/)
                     {
                         if (item.IsMulti)
                         {
                             if (HouseManager.TryToRemove(item, ClientViewRange))
+                            {
                                 RemoveItem(item);
+                            }
                         }
                         else
+                        {
                             RemoveItem(item);
+                        }
                     }
 
                     if (item.IsDestroyed)
+                    {
                         _toRemove.Add(item);
+                    }
                 }
 
                 if (_toRemove.Count != 0)
                 {
                     for (int i = 0; i < _toRemove.Count; i++)
+                    {
                         Items.Remove(_toRemove[i]);
+                    }
 
                     _toRemove.Clear();
                 }
@@ -307,7 +351,9 @@ namespace ClassicUO.Game
         public static bool Contains(uint serial)
         {
             if (SerialHelper.IsItem(serial))
+            {
                 return Items.Contains(serial);
+            }
 
             return SerialHelper.IsMobile(serial) && Mobiles.Contains(serial);
         }
@@ -336,7 +382,9 @@ namespace ClassicUO.Game
             }
 
             if (ent != null && ent.IsDestroyed)
+            {
                 ent = null;
+            }
 
             return ent;
         }
@@ -397,14 +445,16 @@ namespace ClassicUO.Game
             {
                 if (SerialHelper.IsMobile(containerSerial))
                 {
-                    UIManager.GetGump<PaperDollGump>(containerSerial)?.RequestUpdateContents();
+                    UIManager.GetGump<PaperDollGump>(containerSerial)
+                             ?.RequestUpdateContents();
                 }
                 else if (SerialHelper.IsItem(containerSerial))
                 {
-                    UIManager.GetGump<ContainerGump>(containerSerial)?.RequestUpdateContents();
+                    UIManager.GetGump<ContainerGump>(containerSerial)
+                             ?.RequestUpdateContents();
                 }
 
-                Entity container = World.Get(containerSerial);
+                Entity container = Get(containerSerial);
 
                 if (container != null)
                 {
@@ -424,14 +474,16 @@ namespace ClassicUO.Game
             Item item = Items.Get(serial);
 
             if (item == null || item.IsDestroyed)
+            {
                 return false;
+            }
 
-            var first = item.Items;
+            LinkedObject first = item.Items;
             RemoveItemFromContainer(item);
 
             while (first != null)
             {
-                var next = first.Next;
+                LinkedObject next = first.Next;
 
                 RemoveItem(first as Item, forceRemove);
 
@@ -441,7 +493,9 @@ namespace ClassicUO.Game
             item.Destroy();
 
             if (forceRemove)
+            {
                 Items.Remove(serial);
+            }
 
             return true;
         }
@@ -451,13 +505,15 @@ namespace ClassicUO.Game
             Mobile mobile = Mobiles.Get(serial);
 
             if (mobile == null || mobile.IsDestroyed)
+            {
                 return false;
+            }
 
-            var first = mobile.Items;
+            LinkedObject first = mobile.Items;
 
             while (first != null)
             {
-                var next = first.Next;
+                LinkedObject next = first.Next;
 
                 RemoveItem(first as Item, forceRemove);
 
@@ -467,7 +523,9 @@ namespace ClassicUO.Game
             mobile.Destroy();
 
             if (forceRemove)
+            {
                 Mobiles.Remove(serial);
+            }
 
             return true;
         }
@@ -482,11 +540,14 @@ namespace ClassicUO.Game
             _effectManager.RemoveEffect(effect);
         }
 
-        public static void AddEffect(GraphicEffectType type, uint source, uint target,
-                                     ushort graphic, ushort hue,
-                                     ushort srcX, ushort srcY, sbyte srcZ,
-                                     ushort targetX, ushort targetY, sbyte targetZ,
-                                     byte speed, int duration, bool fixedDir, bool doesExplode, bool hasparticles, GraphicEffectBlendMode blendmode)
+        public static void AddEffect
+        (
+            GraphicEffectType type, uint source, uint target,
+            ushort graphic, ushort hue,
+            ushort srcX, ushort srcY, sbyte srcZ,
+            ushort targetX, ushort targetY, sbyte targetZ,
+            byte speed, int duration, bool fixedDir, bool doesExplode, bool hasparticles, GraphicEffectBlendMode blendmode
+        )
         {
             _effectManager.Add(type, source, target, graphic, hue, srcX, srcY, srcZ, targetX, targetY, targetZ, speed, duration, fixedDir, doesExplode, hasparticles, blendmode);
         }
@@ -504,48 +565,63 @@ namespace ClassicUO.Game
                     foreach (Item item in Items)
                     {
                         if (item.IsMulti || item.IsDestroyed || !item.OnGround)
+                        {
                             continue;
+                        }
 
-                        var dist = item.Distance;
+                        int dist = item.Distance;
 
                         if (dist < distance)
+                        {
                             distance = dist;
+                        }
                     }
                 }
 
                 foreach (Item item in Items)
                 {
                     if (item.IsMulti || item.IsDestroyed || !item.OnGround)
+                    {
                         continue;
+                    }
 
                     if (!SerialHelper.IsValid(serial))
+                    {
                         return item;
+                    }
 
                     if (scanMode == SCAN_MODE_OBJECT.SMO_NEXT)
                     {
                         if (serial == item)
                         {
                             currentTargetFound = true;
+
                             continue;
                         }
 
                         if (first == null)
+                        {
                             first = item;
+                        }
 
                         if (currentTargetFound)
                         {
                             selected = item;
+
                             break;
                         }
                     }
                     else if (scanMode == SCAN_MODE_OBJECT.SMO_PREV)
                     {
                         if (!currentTargetFound && first != null)
+                        {
                             selected = first;
+                        }
 
                         if (serial == item)
                         {
                             currentTargetFound = true;
+
                             continue;
                         }
 
@@ -554,25 +630,33 @@ namespace ClassicUO.Game
                     else if (scanMode == SCAN_MODE_OBJECT.SMO_NEAREST)
                     {
                         if (item.Distance > distance)
+                        {
                             continue;
+                        }
 
                         if (serial == item.Serial)
                         {
                             currentTargetFound = true;
+
                             continue;
                         }
 
                         if (first == null)
+                        {
                             first = item;
+                        }
 
                         if (currentTargetFound)
                         {
                             selected = item;
+
                             break;
                         }
                     }
                     else
+                    {
                         break;
+                    }
                 }
             }
             else
@@ -582,7 +666,9 @@ namespace ClassicUO.Game
                     foreach (Mobile mobile in Mobiles)
                     {
                         if (mobile.IsDestroyed || mobile == Player)
+                        {
                             continue;
+                        }
 
                         if (scanType == SCAN_TYPE_OBJECT.STO_PARTY)
                         {
@@ -610,17 +696,21 @@ namespace ClassicUO.Game
                             }
                         }
 
-                        var dist = mobile.Distance;
+                        int dist = mobile.Distance;
 
                         if (dist < distance)
+                        {
                             distance = dist;
+                        }
                     }
                 }
 
                 foreach (Mobile mobile in Mobiles)
                 {
                     if (mobile.IsDestroyed || mobile == Player)
+                    {
                         continue;
+                    }
 
                     if (scanMode == SCAN_MODE_OBJECT.SMO_NEXT)
                     {
@@ -634,8 +724,8 @@ namespace ClassicUO.Game
                         else if (scanType == SCAN_TYPE_OBJECT.STO_FOLLOWERS)
                         {
                             if (!(mobile.IsRenamable &&
-                                mobile.NotorietyFlag != NotorietyFlag.Invulnerable &&
-                                mobile.NotorietyFlag != NotorietyFlag.Enemy))
+                                  mobile.NotorietyFlag != NotorietyFlag.Invulnerable &&
+                                  mobile.NotorietyFlag != NotorietyFlag.Enemy))
                             {
                                 continue;
                             }
@@ -653,15 +743,19 @@ namespace ClassicUO.Game
                         if (serial == mobile)
                         {
                             currentTargetFound = true;
+
                             continue;
                         }
 
                         if (first == null)
+                        {
                             first = mobile;
+                        }
 
                         if (currentTargetFound)
                         {
                             selected = mobile;
+
                             break;
                         }
                     }
@@ -694,11 +788,14 @@ namespace ClassicUO.Game
                         }
 
                         if (!currentTargetFound && first != null)
+                        {
                             selected = first;
+                        }
 
                         if (serial == mobile)
                         {
                             currentTargetFound = true;
+
                             continue;
                         }
 
@@ -733,25 +830,33 @@ namespace ClassicUO.Game
                         }
 
                         if (mobile.Distance > distance)
+                        {
                             continue;
+                        }
 
                         if (serial == mobile.Serial)
                         {
                             currentTargetFound = true;
+
                             continue;
                         }
 
                         if (first == null)
+                        {
                             first = mobile;
+                        }
 
                         if (currentTargetFound)
                         {
                             selected = mobile;
+
                             break;
                         }
                     }
                     else
+                    {
                         break;
+                    }
                 }
             }
 
@@ -777,7 +882,6 @@ namespace ClassicUO.Game
 
             ObjectToRemove = 0;
             LastObject = 0;
-            HouseManager?.Clear();
             Items.Clear();
             Mobiles.Clear();
             Player?.Destroy();
@@ -788,7 +892,6 @@ namespace ClassicUO.Game
             Light.Personal = Light.RealPersonal = 0;
             ClientFeatures.SetFlags(0);
             ClientLockedFeatures.SetFlags(0);
-            HouseManager?.Clear();
             Party?.Clear();
             TargetManager.LastAttack = 0;
             MessageManager.PromptData = default;
@@ -797,6 +900,7 @@ namespace ClassicUO.Game
             CorpseManager.Clear();
             OPL.Clear();
             WMapManager.Clear();
+            HouseManager?.Clear();
 
             Season = Seasons.Summer;
             OldSeason = Seasons.Summer;
@@ -823,13 +927,20 @@ namespace ClassicUO.Game
                 if (noplayer && Player != null && !Player.IsDestroyed)
                 {
                     if (item.RootContainer == Player)
+                    {
                         continue;
+                    }
+                }
+
+                if (item.OnGround && item.IsMulti)
+                {
+                    HouseManager.Remove(item.Serial);
                 }
 
                 _toRemove.Add(item);
             }
 
-            foreach (var serial in _toRemove)
+            foreach (uint serial in _toRemove)
             {
                 RemoveItem(serial, true);
             }
@@ -841,13 +952,15 @@ namespace ClassicUO.Game
                 if (noplayer && Player != null && !Player.IsDestroyed)
                 {
                     if (mob == Player)
+                    {
                         continue;
+                    }
                 }
 
                 _toRemove.Add(mob);
             }
 
-            foreach (var serial in _toRemove)
+            foreach (uint serial in _toRemove)
             {
                 RemoveMobile(serial, true);
             }

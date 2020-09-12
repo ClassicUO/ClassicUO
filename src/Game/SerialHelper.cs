@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,6 +18,7 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System.Globalization;
@@ -24,27 +26,43 @@ using System.Runtime.CompilerServices;
 
 namespace ClassicUO.Game
 {
-    static class SerialHelper
+    internal static class SerialHelper
     {
         [MethodImpl(256)]
-        public static bool IsValid(uint serial) => serial > 0 && serial < 0x80000000;
+        public static bool IsValid(uint serial)
+        {
+            return serial > 0 && serial < 0x80000000;
+        }
 
         [MethodImpl(256)]
-        public static bool IsMobile(uint serial) => serial > 0 && serial < 0x40000000;
+        public static bool IsMobile(uint serial)
+        {
+            return serial > 0 && serial < 0x40000000;
+        }
 
         [MethodImpl(256)]
-        public static bool IsItem(uint serial) => serial >= 0x40000000 && serial < 0x80000000;
+        public static bool IsItem(uint serial)
+        {
+            return serial >= 0x40000000 && serial < 0x80000000;
+        }
 
         [MethodImpl(256)]
-        public static bool IsValidLocalGumpSerial(uint serial) => serial >= Constants.JOURNAL_LOCALSERIAL && serial < 0xFFFF_FFFF;
+        public static bool IsValidLocalGumpSerial(uint serial)
+        {
+            return serial >= Constants.JOURNAL_LOCALSERIAL && serial < 0xFFFF_FFFF;
+        }
 
         public static uint Parse(string str)
         {
             if (str.StartsWith("0x"))
+            {
                 return uint.Parse(str.Remove(0, 2), NumberStyles.HexNumber);
+            }
 
             if (str.Length > 1 && str[0] == '-')
+            {
                 return (uint) int.Parse(str);
+            }
 
             return uint.Parse(str);
         }

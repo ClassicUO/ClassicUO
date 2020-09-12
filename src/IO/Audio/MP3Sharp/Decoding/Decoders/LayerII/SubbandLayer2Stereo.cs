@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,6 +18,7 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 namespace ClassicUO.IO.Audio.MP3Sharp.Decoding.Decoders.LayerII
@@ -26,6 +28,15 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding.Decoders.LayerII
     /// </summary>
     internal class SubbandLayer2Stereo : SubbandLayer2
     {
+        /// <summary>
+        ///     Constructor
+        /// </summary>
+        public SubbandLayer2Stereo(int subbandnumber)
+            : base(subbandnumber)
+        {
+            channel2_samples = new float[3];
+        }
+
         protected internal int channel2_allocation;
         protected internal float[] channel2_c = {0};
         //protected boolean channel2_grouping;  ???? Never used!
@@ -36,15 +47,6 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding.Decoders.LayerII
         protected internal float[] channel2_samples;
         protected internal float channel2_scalefactor1, channel2_scalefactor2, channel2_scalefactor3;
         protected internal int channel2_scfsi;
-
-        /// <summary>
-        ///     Constructor
-        /// </summary>
-        public SubbandLayer2Stereo(int subbandnumber)
-            : base(subbandnumber)
-        {
-            channel2_samples = new float[3];
-        }
 
         /// <summary>
         ///     *
@@ -72,7 +74,9 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding.Decoders.LayerII
                 scfsi = stream.GetBitsFromBuffer(2);
 
                 if (crc != null)
+                {
                     crc.add_bits(scfsi, 2);
+                }
             }
 
             if (channel2_allocation != 0)
@@ -80,7 +84,9 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding.Decoders.LayerII
                 channel2_scfsi = stream.GetBitsFromBuffer(2);
 
                 if (crc != null)
+                {
                     crc.add_bits(channel2_scfsi, 2);
+                }
             }
         }
 
@@ -122,8 +128,11 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding.Decoders.LayerII
                         break;
                 }
 
-                prepare_sample_reading(header, channel2_allocation, 1, channel2_factor, channel2_codelength,
-                                       channel2_c, channel2_d);
+                prepare_sample_reading
+                (
+                    header, channel2_allocation, 1, channel2_factor, channel2_codelength,
+                    channel2_c, channel2_d
+                );
             }
         }
 
@@ -193,19 +202,31 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding.Decoders.LayerII
                 float sample = channel2_samples[samplenumber - 1];
 
                 if (groupingtable[1] == null)
+                {
                     sample = (sample + channel2_d[0]) * channel2_c[0];
+                }
 
                 if (groupnumber <= 4)
+                {
                     sample *= channel2_scalefactor1;
+                }
                 else if (groupnumber <= 8)
+                {
                     sample *= channel2_scalefactor2;
+                }
                 else
+                {
                     sample *= channel2_scalefactor3;
+                }
 
                 if (channels == OutputChannels.BOTH_CHANNELS)
+                {
                     filter2.input_sample(sample, subbandnumber);
+                }
                 else
+                {
                     filter1.input_sample(sample, subbandnumber);
+                }
             }
 
             return returnvalue;

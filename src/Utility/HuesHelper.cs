@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,10 +18,10 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System.Runtime.CompilerServices;
-
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Utility
@@ -35,11 +36,11 @@ namespace ClassicUO.Utility
         [MethodImpl(256)]
         public static (byte, byte, byte, byte) GetBGRA(uint cl)
         {
-            return ((byte) (cl & 0xFF), // B
-                    (byte) ((cl >> 8) & 0xFF), // G
+            return ((byte) (cl & 0xFF),         // B
+                    (byte) ((cl >> 8) & 0xFF),  // G
                     (byte) ((cl >> 16) & 0xFF), // R
-                    (byte) ((cl >> 24) & 0xFF) // A
-                   );
+                    (byte) ((cl >> 24) & 0xFF)  // A
+                );
         }
 
         [MethodImpl(256)]
@@ -73,20 +74,28 @@ namespace ClassicUO.Utility
             ushort origgreen = c.G;
             ushort origblue = c.B;
             const double scale = 31.0 / 255;
-            ushort newred = (ushort)(origred * scale);
+            ushort newred = (ushort) (origred * scale);
 
             if (newred == 0 && origred != 0)
+            {
                 newred = 1;
-            ushort newgreen = (ushort)(origgreen * scale);
+            }
+
+            ushort newgreen = (ushort) (origgreen * scale);
 
             if (newgreen == 0 && origgreen != 0)
+            {
                 newgreen = 1;
-            ushort newblue = (ushort)(origblue * scale);
+            }
+
+            ushort newblue = (ushort) (origblue * scale);
 
             if (newblue == 0 && origblue != 0)
+            {
                 newblue = 1;
+            }
 
-            ushort v = (ushort)((newred << 10) | (newgreen << 5) | (newblue));
+            ushort v = (ushort) ((newred << 10) | (newgreen << 5) | newblue);
 
             return v;
         }

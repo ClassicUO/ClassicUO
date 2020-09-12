@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,11 +18,11 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
 using System.Runtime.CompilerServices;
-
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Utility
@@ -40,7 +41,9 @@ namespace ClassicUO.Utility
             int disty = Math.Abs(target.Y - current.Y);
 
             if (disty > distx)
+            {
                 distx = disty;
+            }
 
             return distx;
         }
@@ -62,9 +65,11 @@ namespace ClassicUO.Utility
         public static int PercetangeOf(int current, int max)
         {
             if (current <= 0 || max <= 0)
+            {
                 return 0;
+            }
 
-            return (current * 100) / max;
+            return current * 100 / max;
         }
 
         [MethodImpl(256)]
@@ -72,13 +77,17 @@ namespace ClassicUO.Utility
         {
             if (max > 0)
             {
-                max = (current * 100) / max;
+                max = current * 100 / max;
 
                 if (max > 100)
+                {
                     max = 100;
+                }
 
                 if (max > 1)
-                    max = (maxValue * max) / 100;
+                {
+                    max = maxValue * max / 100;
+                }
             }
 
             return max;

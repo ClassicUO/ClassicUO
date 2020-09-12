@@ -1,4 +1,5 @@
 #region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,21 +18,22 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
+using System.Collections.Generic;
 using System.IO;
 using System.Xml;
-
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
-using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
+using ClassicUO.Resources;
+using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
-
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
@@ -54,15 +56,23 @@ namespace ClassicUO.Game.UI.Gumps
             Y = y;
 
             if (rectSize < 30)
+            {
                 rectSize = 30;
+            }
             else if (rectSize > 80)
+            {
                 rectSize = 80;
+            }
 
             if (rows < 1)
+            {
                 rows = 1;
+            }
 
             if (columns < 1)
+            {
                 columns = 1;
+            }
 
             _rows = rows;
             _columns = columns;
@@ -85,11 +95,14 @@ namespace ClassicUO.Game.UI.Gumps
             Width = _rectSize * _columns + 1;
             Height = _rectSize * _rows + 1;
 
-            Add(_background = new AlphaBlendControl(0.3f) { Width = Width, Height = Height });
+            Add(_background = new AlphaBlendControl(0.3f) {Width = Width, Height = Height});
 
             for (int row = 0; row < _rows; row++)
             {
-                for (int col = 0; col < _columns; col++) Add(new CounterItem(col * _rectSize + 2, row * _rectSize + 2, _rectSize - 4, _rectSize - 4));
+                for (int col = 0; col < _columns; col++)
+                {
+                    Add(new CounterItem(col * _rectSize + 2, row * _rectSize + 2, _rectSize - 4, _rectSize - 4));
+                }
             }
         }
 
@@ -107,15 +120,23 @@ namespace ClassicUO.Game.UI.Gumps
             //}
 
             if (rows > 30)
+            {
                 rows = 30;
+            }
 
             if (columns > 30)
+            {
                 columns = 30;
+            }
 
             if (size < 30)
+            {
                 size = 30;
+            }
             else if (size > 80)
+            {
                 size = 80;
+            }
 
             if (_rectSize != size)
             {
@@ -124,7 +145,9 @@ namespace ClassicUO.Game.UI.Gumps
             }
 
             if (rows < 1)
+            {
                 rows = 1;
+            }
 
             if (_rows != rows)
             {
@@ -133,7 +156,9 @@ namespace ClassicUO.Game.UI.Gumps
             }
 
             if (columns < 1)
+            {
                 columns = 1;
+            }
 
             if (_columns != columns)
             {
@@ -141,7 +166,10 @@ namespace ClassicUO.Game.UI.Gumps
                 _columns = columns;
             }
 
-            if (ok) ApplyLayout();
+            if (ok)
+            {
+                ApplyLayout();
+            }
         }
 
         private void ApplyLayout()
@@ -151,8 +179,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             _background.Width = Width;
             _background.Height = Height;
-            
-            
+
 
             CounterItem[] items = GetControls<CounterItem>();
 
@@ -172,13 +199,15 @@ namespace ClassicUO.Game.UI.Gumps
                         c.Y = row * _rectSize + 2;
                         c.Width = _rectSize - 4;
                         c.Height = _rectSize - 4;
-                        
+
                         c.SetGraphic(c.Graphic, c.Hue);
 
                         indices[index] = -1;
                     }
                     else
+                    {
                         Add(new CounterItem(col * _rectSize + 2, row * _rectSize + 2, _rectSize - 4, _rectSize - 4));
+                    }
                 }
             }
 
@@ -188,8 +217,11 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (index >= 0 && index < items.Length)
                 {
-                    items[i].Parent = null;
-                    items[i].Dispose();
+                    items[i]
+                        .Parent = null;
+
+                    items[i]
+                        .Dispose();
                 }
             }
 
@@ -200,7 +232,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             base.Save(writer);
 
-            writer.Write((byte)2);
+            writer.Write((byte) 2);
             writer.Write(_rows);
             writer.Write(_columns);
             writer.Write(_rectSize);
@@ -232,7 +264,10 @@ namespace ClassicUO.Game.UI.Gumps
             CounterItem[] items = GetControls<CounterItem>();
 
             for (int i = 0; i < count; i++)
-                items[i].SetGraphic(reader.ReadUInt16(), version > 1 ? reader.ReadUInt16() : (ushort)0);
+            {
+                items[i]
+                    .SetGraphic(reader.ReadUInt16(), version > 1 ? reader.ReadUInt16() : (ushort) 0);
+            }
 
             IsEnabled = IsVisible = ProfileManager.Current.CounterBarEnabled;
         }
@@ -246,9 +281,10 @@ namespace ClassicUO.Game.UI.Gumps
             writer.WriteAttributeString("columns", _columns.ToString());
             writer.WriteAttributeString("rectsize", _rectSize.ToString());
 
-            var controls = FindControls<CounterItem>();
+            IEnumerable<CounterItem> controls = FindControls<CounterItem>();
 
             writer.WriteStartElement("controls");
+
             foreach (CounterItem control in controls)
             {
                 writer.WriteStartElement("control");
@@ -256,6 +292,7 @@ namespace ClassicUO.Game.UI.Gumps
                 writer.WriteAttributeString("hue", control.Hue.ToString());
                 writer.WriteEndElement();
             }
+
             writer.WriteEndElement();
         }
 
@@ -273,18 +310,19 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (controlsXml != null)
             {
-                var items = GetControls<CounterItem>();
+                CounterItem[] items = GetControls<CounterItem>();
                 int index = 0;
 
                 foreach (XmlElement controlXml in controlsXml.GetElementsByTagName("control"))
                 {
                     if (index < items.Length)
                     {
-                        items[index++]?.SetGraphic(ushort.Parse(controlXml.GetAttribute("graphic")), ushort.Parse(controlXml.GetAttribute("hue")));
+                        items[index++]
+                            ?.SetGraphic(ushort.Parse(controlXml.GetAttribute("graphic")), ushort.Parse(controlXml.GetAttribute("hue")));
                     }
                     else
                     {
-                        Log.Error("Index outbounds when parsing counter bar items");
+                        Log.Error(ResGumps.IndexOutOfbounds);
                     }
                 }
             }
@@ -296,11 +334,9 @@ namespace ClassicUO.Game.UI.Gumps
         private class CounterItem : Control
         {
             private int _amount;
-            private ushort _graphic;
-            private ushort _hue;
-            private uint _time;
 
-            private ImageWithText _image;
+            private readonly ImageWithText _image;
+            private uint _time;
 
             public CounterItem(int x, int y, int w, int h)
             {
@@ -318,70 +354,74 @@ namespace ClassicUO.Game.UI.Gumps
                 Add(_image);
 
                 ContextMenu = new ContextMenuControl();
-                ContextMenu.Add("Use object (Double click)", Use);
-                ContextMenu.Add("Remove (ALT + Right click)", RemoveItem);
+                ContextMenu.Add(ResGumps.UseObject, Use);
+                ContextMenu.Add(ResGumps.Remove, RemoveItem);
             }
 
-            public ushort Graphic => _graphic;
-            public ushort Hue => _hue;
+            public ushort Graphic { get; private set; }
+
+            public ushort Hue { get; private set; }
 
             public void SetGraphic(ushort graphic, ushort hue)
             {
                 _image.ChangeGraphic(graphic, hue);
 
                 if (graphic == 0)
+                {
                     return;
+                }
 
-                _graphic = graphic;
-                _hue = hue;
+                Graphic = graphic;
+                Hue = hue;
             }
 
             public void RemoveItem()
             {
                 _image?.ChangeGraphic(0, 0);
                 _amount = 0;
-                _graphic = 0;
+                Graphic = 0;
             }
 
             public void Use()
             {
-                if (_graphic == 0)
+                if (Graphic == 0)
+                {
                     return;
+                }
 
                 Item backpack = World.Player.FindItemByLayer(Layer.Backpack);
-                if (backpack == null)
-                    return;
 
-                Item item = backpack.FindItem(_graphic, _hue);
+                if (backpack == null)
+                {
+                    return;
+                }
+
+                Item item = backpack.FindItem(Graphic, Hue);
 
                 if (item != null)
+                {
                     GameActions.DoubleClick(item);
+                }
             }
 
             protected override void OnMouseUp(int x, int y, MouseButtonType button)
             {
                 if (button == MouseButtonType.Left)
                 {
-                    GameScene gs = Client.Game.GetScene<GameScene>();
-
-                    if (!ItemHold.Enabled || !gs.IsMouseOverUI)
-                        return;
-
-                    Item item = World.Items.Get(ItemHold.Container);
-
-                    if (item == null)
-                        return;
-
-                    SetGraphic(ItemHold.Graphic, ItemHold.Hue);
-
-                    gs.DropHeldItemToContainer(item, ItemHold.X, ItemHold.Y);
+                    if (ItemHold.Enabled)
+                    {
+                        SetGraphic(ItemHold.Graphic, ItemHold.Hue);
+                        GameActions.DropItem(ItemHold.Serial, ItemHold.X, ItemHold.Y, 0, ItemHold.Container);
+                    }
                 }
-                else if (button == MouseButtonType.Right && Keyboard.Alt && _graphic != 0)
+                else if (button == MouseButtonType.Right && Keyboard.Alt && Graphic != 0)
                 {
                     RemoveItem();
                 }
-                else if (_graphic != 0)
+                else if (Graphic != 0)
+                {
                     base.OnMouseUp(x, y, button);
+                }
             }
 
             protected override bool OnMouseDoubleClick(int x, int y, MouseButtonType button)
@@ -402,24 +442,26 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     _time = Time.Ticks + 100;
 
-                    if (_graphic == 0)
+                    if (Graphic == 0)
                     {
                         _image.SetAmount(string.Empty);
                     }
                     else
                     {
                         _amount = 0;
-                        GetAmount(World.Player.FindItemByLayer(Layer.Backpack), _graphic, _hue, ref _amount);
-                        GetAmount(World.Player.FindItemByLayer(Layer.Cloak), _graphic, _hue, ref _amount);
+                        GetAmount(World.Player.FindItemByLayer(Layer.Backpack), Graphic, Hue, ref _amount);
+                        GetAmount(World.Player.FindItemByLayer(Layer.Cloak), Graphic, Hue, ref _amount);
 
                         if (ProfileManager.Current.CounterBarDisplayAbbreviatedAmount)
                         {
                             if (_amount >= ProfileManager.Current.CounterBarAbbreviatedAmount)
                             {
-                                _image.SetAmount(Utility.StringHelper.IntToAbbreviatedString(_amount));
+                                _image.SetAmount(StringHelper.IntToAbbreviatedString(_amount));
+
                                 return;
                             }
                         }
+
                         _image.SetAmount(_amount.ToString());
                     }
                 }
@@ -428,16 +470,20 @@ namespace ClassicUO.Game.UI.Gumps
             private static void GetAmount(Item parent, ushort graphic, ushort hue, ref int amount)
             {
                 if (parent == null)
+                {
                     return;
+                }
 
-                for (var i = parent.Items; i != null; i = i.Next)
+                for (LinkedObject i = parent.Items; i != null; i = i.Next)
                 {
                     Item item = (Item) i;
 
                     GetAmount(item, graphic, hue, ref amount);
 
                     if (item.Graphic == graphic && item.Hue == hue && item.Exists)
+                    {
                         amount += item.Amount;
+                    }
                 }
             }
 
@@ -446,9 +492,13 @@ namespace ClassicUO.Game.UI.Gumps
                 base.Draw(batcher, x, y);
 
 
-                Texture2D color = Texture2DCache.GetTexture(MouseIsOver ? Color.Yellow : ProfileManager.Current.CounterBarHighlightOnAmount &&
-                                                      _amount < ProfileManager.Current.CounterBarHighlightAmount && _graphic != 0 ? Color.Red : Color.Gray);
-                                                      
+                Texture2D color = Texture2DCache.GetTexture
+                (
+                    MouseIsOver ? Color.Yellow :
+                    ProfileManager.Current.CounterBarHighlightOnAmount &&
+                    _amount < ProfileManager.Current.CounterBarHighlightAmount && Graphic != 0 ? Color.Red : Color.Gray
+                );
+
                 ResetHueVector();
                 batcher.DrawRectangle(color, x, y, Width, Height, ref _hueVector);
 
@@ -458,27 +508,30 @@ namespace ClassicUO.Game.UI.Gumps
 
             private class ImageWithText : Control
             {
-                private readonly TextureControl _textureControl;
                 private readonly Label _label;
+                private readonly TextureControl _textureControl;
 
                 public ImageWithText()
                 {
                     CanMove = true;
                     WantUpdateSize = true;
                     AcceptMouseInput = false;
-                    _textureControl = new TextureControl()
+
+                    _textureControl = new TextureControl
                     {
                         ScaleTexture = true,
                         AcceptMouseInput = false
                     };
+
                     Add(_textureControl);
 
 
                     _label = new Label("", true, 0x35, 0, 1, FontStyle.BlackBorder)
                     {
                         X = 2,
-                        Y = Height - 15,
+                        Y = Height - 15
                     };
+
                     Add(_label);
                 }
 
@@ -489,20 +542,25 @@ namespace ClassicUO.Game.UI.Gumps
                     {
                         _textureControl.Texture = ArtLoader.Instance.GetTexture(graphic);
                         _textureControl.Hue = hue;
-                        _textureControl.IsPartial = TileDataLoader.Instance.StaticData[graphic].IsPartialHue;
+
+                        _textureControl.IsPartial = TileDataLoader.Instance.StaticData[graphic]
+                                                                  .IsPartialHue;
+
                         _textureControl.Width = Parent.Width;
                         _textureControl.Height = Parent.Height;
                         _label.Y = Parent.Height - 15;
                     }
                     else
+                    {
                         _textureControl.Texture = null;
+                    }
                 }
 
 
-
                 public void SetAmount(string amount)
-                    => _label.Text = amount;
-
+                {
+                    _label.Text = amount;
+                }
             }
         }
     }

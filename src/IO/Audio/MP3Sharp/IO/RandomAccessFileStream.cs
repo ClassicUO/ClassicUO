@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,6 +18,7 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
@@ -32,13 +34,20 @@ namespace ClassicUO.IO.Audio.MP3Sharp.IO
 
             if (mode.CompareTo("rw") == 0)
             {
-                newFile = new FileStream(fileName, FileMode.OpenOrCreate,
-                                         FileAccess.ReadWrite);
+                newFile = new FileStream
+                (
+                    fileName, FileMode.OpenOrCreate,
+                    FileAccess.ReadWrite
+                );
             }
             else if (mode.CompareTo("r") == 0)
+            {
                 newFile = new FileStream(fileName, FileMode.Open, FileAccess.Read);
+            }
             else
+            {
                 throw new ArgumentException();
+            }
 
             return newFile;
         }

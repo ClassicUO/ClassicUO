@@ -8,6 +8,13 @@ image: Visual Studio 2019
 configuration: Release
 platform: x64
 clone_folder: c:\projects\classicuo
+clone_script:
+- cmd: >-
+
+    git --version
+    
+    git clone -q --branch %APPVEYOR_REPO_BRANCH% https://github.com/%APPVEYOR_REPO_NAME%.git %APPVEYOR_BUILD_FOLDER% && cd %APPVEYOR_BUILD_FOLDER% && git checkout -qf %APPVEYOR_REPO_COMMIT% && git submodule update --init --recursive
+    
 dotnet_csproj:
   patch: true
   file: '**\*.csproj'
@@ -23,17 +30,16 @@ build_script:
 - cmd: >-
     nuget restore
 
-
-    msbuild "c:\projects\classicuo\ClassicUO.sln" /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll" /p:Configuration=Release /p:Platform=x64 /p:DefineConstants="DEV_BUILD" /p:OutputType=WinExe
-
-
-    xcopy "c:\projects\classicuo\tools\monokickstart\*.*" "c:\projects\classicuo\bin\Release" /Y
+    dotnet build "%APPVEYOR_BUILD_FOLDER%" -c release /p:DefineConstants="DEV_BUILD" -p:IS_DEV_BUILD=true
 
 
-    7z a ClassicUO-dev-preview-release.zip "c:\projects\classicuo\bin\Release\*"
+    xcopy "%APPVEYOR_BUILD_FOLDER%\tools\monokickstart\*.*" "%APPVEYOR_BUILD_FOLDER%\bin\Release" /Y
 
 
-    dotnet run --project "c:\projects\classicuo\tools\ManifestCreator\ManifestCreator.csproj" "c:\projects\classicuo\bin\Release" "dev-preview" "ClassicUO-dev-preview-release.zip"
+    7z a ClassicUO-dev-preview-release.zip "%APPVEYOR_BUILD_FOLDER%\bin\Release\*"
+
+
+    dotnet run --project "%APPVEYOR_BUILD_FOLDER%\tools\ManifestCreator\ManifestCreator.csproj" "%APPVEYOR_BUILD_FOLDER%\bin\Release" "dev-preview" "ClassicUO-dev-preview-release.zip"
 artifacts:
 - path: ClassicUO-dev-preview-release.zip
   name: ClassicUO
@@ -58,7 +64,7 @@ deploy:
   username:
     secure: JaSH/LFfqcrUBZ5USwkYozDFFZUmyRZJyxsB/LSNOlI=
   password:
-    secure: 4MpoM3vP2gdRcg6YktGA9g==
+    secure: yGvEu0Hl4Ep7aZZq5+dP/A==
   folder: /www.classicuo.eu/dev/deploy
   artifact: ClassicUO-dev-preview-release.zip, manifest
   active_mode: false

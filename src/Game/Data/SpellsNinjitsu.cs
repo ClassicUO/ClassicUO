@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,10 +18,10 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System.Collections.Generic;
-
 using ClassicUO.Game.Managers;
 
 namespace ClassicUO.Game.Data
@@ -69,7 +70,9 @@ namespace ClassicUO.Game.Data
         public static SpellDefinition GetSpell(int spellIndex)
         {
             if (_spellsDict.TryGetValue(spellIndex, out SpellDefinition spell))
+            {
                 return spell;
+            }
 
             return SpellDefinition.EmptySpell;
         }

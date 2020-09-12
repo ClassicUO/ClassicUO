@@ -1,4 +1,5 @@
 #region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,10 +18,10 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System.Collections.Generic;
-
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
@@ -71,7 +72,7 @@ namespace ClassicUO.Game.UI.Controls
                 }
             }
         }
-   
+
 
         public byte Font => _gText.Font;
 
@@ -79,7 +80,10 @@ namespace ClassicUO.Game.UI.Controls
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
-            if (IsDisposed) return false;
+            if (IsDisposed)
+            {
+                return false;
+            }
 
             _gText.Draw(batcher, x, y, Alpha);
 

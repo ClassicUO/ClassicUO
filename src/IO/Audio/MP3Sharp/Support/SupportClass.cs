@@ -1,4 +1,5 @@
 #region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,6 +18,7 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
@@ -29,7 +31,9 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Support
         public static int URShift(int number, int bits)
         {
             if (number >= 0)
+            {
                 return number >> bits;
+            }
 
             return (number >> bits) + (2 << ~bits);
         }
@@ -42,7 +46,9 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Support
         public static long URShift(long number, int bits)
         {
             if (number >= 0)
+            {
                 return number >> bits;
+            }
 
             return (number >> bits) + (2L << ~bits);
         }
@@ -122,7 +128,9 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Support
             int bytesRead = sourceStream.Read(receiver, start, count);
 
             for (int i = start; i < start + bytesRead; i++)
+            {
                 target[i] = (sbyte) receiver[i];
+            }
 
             return bytesRead;
         }
@@ -139,7 +147,9 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Support
             byte[] byteArray = new byte[sbyteArray.Length];
 
             for (int index = 0; index < sbyteArray.Length; index++)
+            {
                 byteArray[index] = (byte) sbyteArray[index];
+            }
 
             return byteArray;
         }
@@ -154,7 +164,9 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Support
             byte[] byteArray = new byte[sourceString.Length];
 
             for (int index = 0; index < sourceString.Length; index++)
+            {
                 byteArray[index] = (byte) sourceString[index];
+            }
 
             return byteArray;
         }
@@ -168,8 +180,11 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Support
         /// <param name="destinationArray">Array to store the bytes.</param>
         /// <param name="destinationStart">Position in the destination array to start storing the sbytes.</param>
         /// <returns>An array of sbytes</returns>
-        public static void GetSBytesFromString(string sourceString, int sourceStart, int sourceEnd,
-                                               ref sbyte[] destinationArray, int destinationStart)
+        public static void GetSBytesFromString
+        (
+            string sourceString, int sourceStart, int sourceEnd,
+            ref sbyte[] destinationArray, int destinationStart
+        )
         {
             int sourceCounter;
             int destinationCounter;

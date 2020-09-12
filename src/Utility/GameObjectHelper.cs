@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,10 +18,11 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System.Runtime.CompilerServices;
-
+using ClassicUO.Data;
 using ClassicUO.Game;
 using ClassicUO.Game.Data;
 using ClassicUO.IO.Resources;
@@ -36,7 +38,7 @@ namespace ClassicUO.Utility
             {
                 case 0x0001:
                 case 0x21BC:
-                //case 0x5690:
+                    //case 0x5690:
                     return true;
 
                 case 0x9E4C:
@@ -50,12 +52,26 @@ namespace ClassicUO.Utility
 
             if (g != 0x63D3)
             {
-                if (g >= 0x2198 && g <= 0x21A4) 
+                if (g >= 0x2198 && g <= 0x21A4)
+                {
                     return true;
+                }
+
+                // Easel fix.
+                // In older clients the tiledata flag for this 
+                // item contains NoDiagonal for some reason.
+                // So the next check will make the item invisible.
+                if (g == 0x0F65 && Client.Version < ClientVersion.CV_60144)
+                {
+                    return false;
+                }
 
                 ref StaticTiles data = ref TileDataLoader.Instance.StaticData[g];
-                if (!data.IsNoDiagonal || (data.IsAnimated && World.Player != null && World.Player.Race == RaceType.GARGOYLE))
+
+                if (!data.IsNoDiagonal || data.IsAnimated && World.Player != null && World.Player.Race == RaceType.GARGOYLE)
+                {
                     return false;
+                }
             }
 
             return true;

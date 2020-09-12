@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,30 +18,32 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System.Collections.Generic;
-
-using ClassicUO.Configuration;
 using ClassicUO.Data;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
+using ClassicUO.Resources;
 using ClassicUO.Utility.Logging;
-
 using Microsoft.Xna.Framework;
+using MathHelper = ClassicUO.Utility.MathHelper;
 
 namespace ClassicUO.Game.UI.Gumps.CharCreation
 {
-    class CreateCharSelectionCityGump : Gump
+    internal class CreateCharSelectionCityGump : Gump
     {
-        private enum Buttons
-        {
-            PreviousScreen,
-            Finish,
-        }
+        private readonly List<CityControl> _cityControls = new List<CityControl>();
+        private readonly string[] _cityNames = {"Felucca", "Trammel", "Ilshenar", "Malas", "Tokuno", "Ter Mur"};
+        private readonly Label _facetName;
+        private readonly HtmlControl _htmlControl;
+        private readonly LoginScene _scene;
+        private CityInfo _selectedCity;
+        private readonly byte _selectedProfession;
 
         private readonly Point[] _townButtonsText =
         {
@@ -52,15 +55,8 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             new Point(335, 250),
             new Point(160, 395),
             new Point(100, 250),
-            new Point(270, 130),
+            new Point(270, 130)
         };
-        private readonly string[] _cityNames = { "Felucca", "Trammel", "Ilshenar", "Malas", "Tokuno", "Ter Mur" };
-        private readonly Label _facetName;
-        private readonly HtmlControl _htmlControl;
-        private readonly LoginScene _scene;
-        private readonly byte _selectedProfession;
-        private CityInfo _selectedCity;
-        private readonly List<CityControl> _cityControls = new List<CityControl>();
 
         public CreateCharSelectionCityGump(byte profession, LoginScene scene) : base(0, 0)
         {
@@ -89,8 +85,9 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
             if (city == null)
             {
-                Log.Error("No city found. Something wrong with the received cities.");
+                Log.Error(ResGumps.NoCityFound);
                 Dispose();
+
                 return;
             }
 
@@ -121,38 +118,50 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             }
 
             if (CUOEnviroment.IsOutlands)
+            {
                 _facetName.IsVisible = false;
+            }
 
             Add(_facetName);
 
 
-            Add(new Button((int) Buttons.PreviousScreen, 0x15A1, 0x15A3, 0x15A2)
-            {
-                X = 586,
-                Y = 445,
-                ButtonAction = ButtonAction.Activate
-            });
+            Add
+            (
+                new Button((int) Buttons.PreviousScreen, 0x15A1, 0x15A3, 0x15A2)
+                {
+                    X = 586,
+                    Y = 445,
+                    ButtonAction = ButtonAction.Activate
+                }
+            );
 
-            Add(new Button((int) Buttons.Finish, 0x15A4, 0x15A6, 0x15A5)
-            {
-                X = 610,
-                Y = 445,
-                ButtonAction = ButtonAction.Activate
-            });
+            Add
+            (
+                new Button((int) Buttons.Finish, 0x15A4, 0x15A6, 0x15A5)
+                {
+                    X = 610,
+                    Y = 445,
+                    ButtonAction = ButtonAction.Activate
+                }
+            );
 
 
             _htmlControl = new HtmlControl(452, 60, 175, 367, true, true, ishtml: true, text: city.Description);
             Add(_htmlControl);
 
             if (CUOEnviroment.IsOutlands)
+            {
                 _htmlControl.IsVisible = false;
+            }
 
             for (int i = 0; i < scene.Cities.Length; i++)
             {
                 CityInfo c = scene.GetCity(i);
 
                 if (c == null)
+                {
                     continue;
+                }
 
                 int x = 0;
                 int y = 0;
@@ -162,15 +171,20 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                     uint cityFacet = c.Map;
 
                     if (cityFacet > 5)
+                    {
                         cityFacet = 5;
+                    }
 
-                    x = 62 + Utility.MathHelper.PercetangeOf(MapLoader.Instance.MapsDefaultSize[cityFacet, 0] - 2048, c.X, 383);
-                    y = 54 + Utility.MathHelper.PercetangeOf(MapLoader.Instance.MapsDefaultSize[cityFacet, 1], c.Y, 384);
+                    x = 62 + MathHelper.PercetangeOf(MapLoader.Instance.MapsDefaultSize[cityFacet, 0] - 2048, c.X, 383);
+                    y = 54 + MathHelper.PercetangeOf(MapLoader.Instance.MapsDefaultSize[cityFacet, 1], c.Y, 384);
                 }
-                else if ( i < _townButtonsText.Length)
+                else if (i < _townButtonsText.Length)
                 {
-                    x = _townButtonsText[i].X;
-                    y = _townButtonsText[i].Y;
+                    x = _townButtonsText[i]
+                        .X;
+
+                    y = _townButtonsText[i]
+                        .Y;
                 }
 
                 CityControl control = new CityControl(c, x, y, i);
@@ -178,7 +192,9 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                 _cityControls.Add(control);
 
                 if (CUOEnviroment.IsOutlands)
+                {
                     control.IsVisible = false;
+                }
             }
 
             SetCity(city);
@@ -193,7 +209,9 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
         private void SetCity(CityInfo city)
         {
             if (city == null)
+            {
                 return;
+            }
 
             _selectedCity = city;
             _htmlControl.Text = city.Description;
@@ -203,10 +221,14 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
         private void SetFacet(uint index)
         {
             if (Client.Version < ClientVersion.CV_70130)
+            {
                 return;
+            }
 
             if (index >= _cityNames.Length)
+            {
                 index = (uint) (_cityNames.Length - 1);
+            }
 
             _facetName.Text = _cityNames[index];
         }
@@ -214,19 +236,26 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
         public override void OnButtonClick(int buttonID)
         {
-            var charCreationGump = UIManager.GetGump<CharCreationGump>();
+            CharCreationGump charCreationGump = UIManager.GetGump<CharCreationGump>();
+
             if (charCreationGump == null)
+            {
                 return;
+            }
 
             switch ((Buttons) buttonID)
             {
                 case Buttons.PreviousScreen:
                     charCreationGump.StepBack(_selectedProfession > 0 ? 2 : 1);
+
                     return;
+
                 case Buttons.Finish:
-                    
+
                     if (_selectedCity != null)
+                    {
                         charCreationGump.SetCity(_selectedCity.Index);
+                    }
 
                     charCreationGump.CreateCharacter(_selectedProfession);
                     charCreationGump.IsVisible = false;
@@ -246,27 +275,37 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
         {
             for (int i = 0; i < _cityControls.Count; i++)
             {
-                _cityControls[i].IsSelected = index == i;
+                _cityControls[i]
+                    .IsSelected = index == i;
             }
+        }
+
+        private enum Buttons
+        {
+            PreviousScreen,
+            Finish
         }
 
         private class CityControl : Control
         {
-            private readonly HoveredLabel _label;
             private readonly Button _button;
             private bool _isSelected;
+            private readonly HoveredLabel _label;
 
             public CityControl(CityInfo c, int x, int y, int index)
             {
                 CanMove = false;
 
 
-                Add(_button = new Button(2 + index, 0x04B9, 0x04BA, 0x04BA)
-                {
-                    ButtonAction = ButtonAction.Activate,
-                    X = x,
-                    Y = y
-                });
+                Add
+                (
+                    _button = new Button(2 + index, 0x04B9, 0x04BA, 0x04BA)
+                    {
+                        ButtonAction = ButtonAction.Activate,
+                        X = x,
+                        Y = y
+                    }
+                );
 
                 y -= 20;
 
@@ -288,6 +327,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                     int idx = (int) _label.Tag;
                     OnButtonClick(idx + 2);
                 };
+
                 Add(_label);
             }
 
@@ -305,7 +345,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                     }
                 }
             }
-            
+
 
             public override void Update(double totalMS, double frameMS)
             {
@@ -324,7 +364,9 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                 _label.HitTest(x, y, ref c);
 
                 if (c != null)
+                {
                     return true;
+                }
 
                 _button.HitTest(x, y, ref c);
 

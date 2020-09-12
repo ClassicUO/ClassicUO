@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,15 +18,12 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System.IO;
-
 using ClassicUO.Utility;
-
 using Microsoft.Xna.Framework;
-
-using TinyJson;
 
 namespace ClassicUO.Configuration
 {
@@ -51,13 +49,19 @@ namespace ClassicUO.Configuration
         private static void ValidateFields(Profile profile)
         {
             if (profile == null)
+            {
                 return;
+            }
 
             if (profile.WindowClientBounds.X < 600)
+            {
                 profile.WindowClientBounds = new Point(600, profile.WindowClientBounds.Y);
+            }
+
             if (profile.WindowClientBounds.Y < 480)
+            {
                 profile.WindowClientBounds = new Point(profile.WindowClientBounds.X, 480);
-            
+            }
         }
 
         public static void UnLoadProfile()

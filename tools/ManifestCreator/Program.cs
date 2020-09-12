@@ -44,6 +44,9 @@ namespace ManifestCreator
             "osx/libFNA3D.0.dylib",
             "osx/libSDL2-2.0.0.dylib",
             "osx/libtheorafile.dylib",
+            "osx/libMoltenVK.dylib",
+            "osx/libvulkan.1.dylib",
+            "vulkan/icd.d/MoltenVK_icd.json",
 
             // windows
             "x64/FAudio.dll",
@@ -71,7 +74,9 @@ namespace ManifestCreator
             "System.Windows.Forms.dll",
             "System.Xml.dll",
             "System.Xml.Linq.dll",
-            "Newtonsoft.Json.dll"
+
+            // removed.
+            //"Newtonsoft.Json.dll"
         };
 
 

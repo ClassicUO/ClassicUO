@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,25 +18,26 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
 
 namespace ClassicUO
 {
-    class InvalidClientVersion : Exception
+    internal class InvalidClientVersion : Exception
     {
-        public InvalidClientVersion(string msg) : base(msg)
+        public InvalidClientVersion(string msg)
+            : base(msg)
         {
-
         }
     }
 
-    class InvalidClientDirectory : Exception
+    internal class InvalidClientDirectory : Exception
     {
-        public InvalidClientDirectory(string msg) : base(msg)
+        public InvalidClientDirectory(string msg)
+            : base(msg)
         {
-
         }
     }
 }

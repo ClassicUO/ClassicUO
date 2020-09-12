@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,28 +18,31 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
-
 using ClassicUO.Configuration;
+using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
-using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Input;
-using ClassicUO.Renderer;
-using ClassicUO.Game.Data;
-
-using Microsoft.Xna.Framework;
 using ClassicUO.IO.Resources;
+using ClassicUO.Renderer;
+using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Controls
 {
-    internal class ItemGump : StaticPic
+    internal class ItemGump : Control
     {
-        public ItemGump(uint serial, ushort graphic, ushort hue, int x, int y) : base(graphic, hue)
+        private ushort _graphic;
+        private readonly bool _is_gump;
+
+        public ItemGump(uint serial, ushort graphic, ushort hue, int x, int y, bool is_gump = false)
         {
+            _is_gump = is_gump;
+
             AcceptMouseInput = true;
             X = (short) x;
             Y = (short) y;
@@ -48,10 +52,40 @@ namespace ClassicUO.Game.UI.Controls
             WantUpdateSize = false;
             CanMove = false;
 
+
+            Graphic = graphic;
+            Hue = hue;
+
             SetTooltip(serial);
         }
 
 
+        public ushort Graphic
+        {
+            get => _graphic;
+            set
+            {
+                _graphic = value;
+
+                UOTexture32 texture = _is_gump ? GumpsLoader.Instance.GetTexture(value) : ArtLoader.Instance.GetTexture(value);
+
+                if (texture == null)
+                {
+                    Dispose();
+
+                    return;
+                }
+
+                Width = texture.Width;
+                Height = texture.Height;
+
+                IsPartialHue = !_is_gump && TileDataLoader.Instance.StaticData[value]
+                                                          .IsPartialHue;
+            }
+        }
+
+        public ushort Hue { get; set; }
+        public bool IsPartialHue { get; set; }
         public bool HighlightOnMouseOver { get; set; }
         public bool CanPickUp { get; set; }
 
@@ -59,38 +93,42 @@ namespace ClassicUO.Game.UI.Controls
         public override void Update(double totalMS, double frameMS)
         {
             if (IsDisposed)
+            {
                 return;
+            }
 
             base.Update(totalMS, frameMS);
 
-            if (CanPickUp && !ItemHold.Enabled && Mouse.LButtonPressed &&
-                UIManager.LastControlMouseDown(MouseButtonType.Left) == this &&
-                ((Mouse.LastLeftButtonClickTime != 0xFFFF_FFFF && Mouse.LastLeftButtonClickTime != 0 && Mouse.LastLeftButtonClickTime + Mouse.MOUSE_DELAY_DOUBLE_CLICK < Time.Ticks) ||
-                CanPickup()))
+            if (World.InGame)
             {
-                AttempPickUp();
+                if (CanPickUp && !ItemHold.Enabled && Mouse.LButtonPressed &&
+                    UIManager.LastControlMouseDown(MouseButtonType.Left) == this &&
+                    (Mouse.LastLeftButtonClickTime != 0xFFFF_FFFF && Mouse.LastLeftButtonClickTime != 0 &&
+                     Mouse.LastLeftButtonClickTime + Mouse.MOUSE_DELAY_DOUBLE_CLICK < Time.Ticks ||
+                     CanPickup()))
+                {
+                    AttemptPickUp();
+                }
+                else if (MouseIsOver)
+                {
+                    SelectedObject.Object = World.Get(LocalSerial);
+                }
             }
         }
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
             if (IsDisposed)
+            {
                 return false;
-
-            //if ((ItemHold.Enabled && !ItemHold.Dropped) && ItemHold.Serial == LocalSerial)
-            //{
-            //    if (!ItemHold.IsStackable || ItemHold.Amount < ItemHold.TotalAmount)
-            //    {
-            //        return false;
-            //    }
-            //}
+            }
 
             base.Draw(batcher, x, y);
 
             ResetHueVector();
-            ShaderHuesTraslator.GetHueVector(ref _hueVector, HighlightOnMouseOver && MouseIsOver ? 0x0035 : Hue, IsPartialHue, 0, false);
-          
-            var texture = ArtLoader.Instance.GetTexture(Graphic);
+            ShaderHueTranslator.GetHueVector(ref _hueVector, HighlightOnMouseOver && MouseIsOver ? 0x0035 : Hue, IsPartialHue, 0);
+
+            UOTexture32 texture = _is_gump ? GumpsLoader.Instance.GetTexture(Graphic) : ArtLoader.Instance.GetTexture(Graphic);
 
             if (texture != null)
             {
@@ -109,7 +147,7 @@ namespace ClassicUO.Game.UI.Controls
 
         public override bool Contains(int x, int y)
         {
-            var texture = ArtLoader.Instance.GetTexture(Graphic);
+            UOTexture32 texture = _is_gump ? GumpsLoader.Instance.GetTexture(Graphic) : ArtLoader.Instance.GetTexture(Graphic);
 
             if (texture == null)
             {
@@ -120,8 +158,8 @@ namespace ClassicUO.Game.UI.Controls
             {
                 float scale = UIManager.ContainerScale;
 
-                x = (int)(x / scale);
-                y = (int)(y / scale);
+                x = (int) (x / scale);
+                y = (int) (y / scale);
             }
 
             if (texture.Contains(x, y))
@@ -144,146 +182,31 @@ namespace ClassicUO.Game.UI.Controls
 
         protected override void OnMouseUp(int x, int y, MouseButtonType button)
         {
-            if (button == MouseButtonType.Left)
-            {
-                if (UIManager.MouseOverControl?.RootParent == RootParent)
-                {
-                    GameScene gs = Client.Game.GetScene<GameScene>();
-                    if (gs != null)
-                    {
-                        Item item = World.Items.Get(LocalSerial);
-                        if (item != null)
-                        {
-                            if (TargetManager.IsTargeting)
-                            {
-                                if (Mouse.IsDragging && CanPickup())
-                                {
-                                    if (ItemHold.Enabled && gs.IsMouseOverUI)
-                                    {
-                                        if (item.ItemData.IsContainer)
-                                            gs.DropHeldItemToContainer(item);
-                                        else if (ItemHold.Graphic == item.Graphic && ItemHold.IsStackable)
-                                            gs.MergeHeldItem(item);
-                                        else
-                                        {
-                                            if (SerialHelper.IsItem(item.Container))
-                                                gs.DropHeldItemToContainer(World.Items.Get(item.Container), X + (Mouse.Position.X - ScreenCoordinateX), Y + (Mouse.Position.Y - ScreenCoordinateY));
-                                        }
-
-                                        Mouse.CancelDoubleClick = true;
-
-                                        return;
-                                    }                              
-                                }
-
-                                switch (TargetManager.TargetingState)
-                                {
-                                    case CursorTarget.Position:
-                                    case CursorTarget.Object:
-                                    case CursorTarget.Grab:
-                                    case CursorTarget.SetGrabBag:
-
-                                        if (item != null)
-                                        {
-                                            var p = RootParent;
-
-                                            if (p != null)
-                                            {
-                                                DelayedObjectClickManager.X = Mouse.Position.X - p.ScreenCoordinateX;
-                                                DelayedObjectClickManager.Y = Mouse.Position.Y - p.ScreenCoordinateY;
-                                            }
-
-                                            TargetManager.Target(item);
-                                            Mouse.LastLeftButtonClickTime = 0;
-                                        }
-
-                                        break;
-
-                                    case CursorTarget.SetTargetClientSide:
-
-                                        if (item != null)
-                                        {
-                                            TargetManager.Target(item);
-                                            Mouse.LastLeftButtonClickTime = 0;
-                                            UIManager.Add(new InspectorGump(item));
-                                        }
-
-                                        break;
-
-                                    case CursorTarget.HueCommandTarget:
-
-                                        if (item != null)
-                                        {
-                                            CommandManager.OnHueTarget(item);
-                                        }
-
-                                        break;
-                                }
-
-                                return;
-                            }
-                            else
-                            {
-                                Point offset = Mouse.LDroppedOffset;
-
-                                if ((Math.Abs(offset.X) < Constants.MIN_PICKUP_DRAG_DISTANCE_PIXELS &&
-                                     Math.Abs(offset.Y) < Constants.MIN_PICKUP_DRAG_DISTANCE_PIXELS) && 
-                                    (!ItemHold.Enabled || !gs.IsMouseOverUI))
-                                {
-                                    if (!DelayedObjectClickManager.IsEnabled)
-                                    {
-                                        var p = RootParent;
-
-                                        if (p != null)
-                                        {
-                                            var off = Mouse.LDroppedOffset;
-                                            DelayedObjectClickManager.Set(LocalSerial,
-                                                                          (Mouse.Position.X - off.X) - p.ScreenCoordinateX,
-                                                                          (Mouse.Position.Y - off.Y) - p.ScreenCoordinateY,
-                                                                          Time.Ticks + Mouse.MOUSE_DELAY_DOUBLE_CLICK);
-                                        }
-
-                                        return;
-                                    }
-                                }
-                                else if (item != null)
-                                {
-                                    if (item.ItemData.IsContainer)
-                                        gs.DropHeldItemToContainer(item);
-                                    else if (ItemHold.Graphic == item.Graphic && ItemHold.IsStackable)
-                                        gs.MergeHeldItem(item);
-                                    else if (SerialHelper.IsItem(item.Container))
-                                        gs.DropHeldItemToContainer(World.Items.Get(item.Container), X + (Mouse.Position.X - ScreenCoordinateX), Y + (Mouse.Position.Y - ScreenCoordinateY));
-                                    else
-                                        base.OnMouseUp(x, y, button);
-
-                                    Mouse.CancelDoubleClick = true;
-
-                                    return;
-                                }
-                            }
-                        }    
-                    }
-                }
-            }
-            else
-                base.OnMouseUp(x, y, button);
+            SelectedObject.Object = World.Get(LocalSerial);
+            base.OnMouseUp(x, y, button);
         }
-        
+
         protected override void OnMouseOver(int x, int y)
         {
+            SelectedObject.Object = World.Get(LocalSerial);
         }
 
         private bool CanPickup()
         {
             Point offset = Mouse.LDroppedOffset;
+
             if (Math.Abs(offset.X) < Constants.MIN_PICKUP_DRAG_DISTANCE_PIXELS &&
                 Math.Abs(offset.Y) < Constants.MIN_PICKUP_DRAG_DISTANCE_PIXELS)
+            {
                 return false;
+            }
 
-            var split = UIManager.GetGump<SplitMenuGump>(LocalSerial);
+            SplitMenuGump split = UIManager.GetGump<SplitMenuGump>(LocalSerial);
+
             if (split == null)
+            {
                 return true;
+            }
 
             split.X = Mouse.Position.X - 80;
             split.Y = Mouse.Position.Y - 40;
@@ -297,12 +220,14 @@ namespace ClassicUO.Game.UI.Controls
         protected override bool OnMouseDoubleClick(int x, int y, MouseButtonType button)
         {
             if (button != MouseButtonType.Left || TargetManager.IsTargeting)
+            {
                 return false;
+            }
 
             Item item = World.Items.Get(LocalSerial);
             Item container;
 
-            if ( !Input.Keyboard.Ctrl &&
+            if (!Keyboard.Ctrl &&
                 ProfileManager.Current.DoubleClickToLootInsideContainers &&
                 item != null && !item.IsDestroyed &&
                 !item.ItemData.IsContainer && item.IsEmpty &&
@@ -313,17 +238,21 @@ namespace ClassicUO.Game.UI.Controls
                 GameActions.GrabItem(LocalSerial, item.Amount);
             }
             else
+            {
                 GameActions.DoubleClick(LocalSerial);
-            
+            }
+
             return true;
         }
 
 
-        private void AttempPickUp()
+        private void AttemptPickUp()
         {
             if (CanPickUp)
             {
-                Rectangle bounds = ArtLoader.Instance.GetTexture(Graphic).Bounds;
+                UOTexture32 texture = _is_gump ? GumpsLoader.Instance.GetTexture(Graphic) : ArtLoader.Instance.GetTexture(Graphic);
+
+                Rectangle bounds = texture.Bounds;
                 int centerX = bounds.Width >> 1;
                 int centerY = bounds.Height >> 1;
 
@@ -337,11 +266,11 @@ namespace ClassicUO.Game.UI.Controls
                 if (ProfileManager.Current != null && ProfileManager.Current.RelativeDragAndDropItems)
                 {
                     Point p = new Point(centerX - (Mouse.Position.X - ScreenCoordinateX), centerY - (Mouse.Position.Y - ScreenCoordinateY));
-                    GameActions.PickUp(LocalSerial, centerX, centerY, offset: p);
+                    GameActions.PickUp(LocalSerial, centerX, centerY, offset: p, is_gump: _is_gump);
                 }
                 else
                 {
-                    GameActions.PickUp(LocalSerial, centerX, centerY);
+                    GameActions.PickUp(LocalSerial, centerX, centerY, is_gump: _is_gump);
                 }
             }
         }

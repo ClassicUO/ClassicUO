@@ -1,4 +1,5 @@
 #region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,10 +18,10 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
-
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Scenes;
@@ -32,63 +33,82 @@ namespace ClassicUO.Game.GameObjects
 {
     internal sealed partial class AnimatedItemEffect
     {
-        private static readonly Lazy<BlendState> _multiplyBlendState = new Lazy<BlendState>(() =>
-        {
-            BlendState state = new BlendState
+        private static readonly Lazy<BlendState> _multiplyBlendState = new Lazy<BlendState>
+        (
+            () =>
             {
-                ColorSourceBlend = Microsoft.Xna.Framework.Graphics.Blend.Zero, ColorDestinationBlend = Microsoft.Xna.Framework.Graphics.Blend.SourceColor
-            };
+                BlendState state = new BlendState
+                {
+                    ColorSourceBlend = Microsoft.Xna.Framework.Graphics.Blend.Zero, ColorDestinationBlend = Microsoft.Xna.Framework.Graphics.Blend.SourceColor
+                };
 
-            return state;
-        });
+                return state;
+            }
+        );
 
-        private static readonly Lazy<BlendState> _screenBlendState = new Lazy<BlendState>(() =>
-        {
-            BlendState state = new BlendState
+        private static readonly Lazy<BlendState> _screenBlendState = new Lazy<BlendState>
+        (
+            () =>
             {
-                ColorSourceBlend = Microsoft.Xna.Framework.Graphics.Blend.One, ColorDestinationBlend = Microsoft.Xna.Framework.Graphics.Blend.One
-            };
+                BlendState state = new BlendState
+                {
+                    ColorSourceBlend = Microsoft.Xna.Framework.Graphics.Blend.One, ColorDestinationBlend = Microsoft.Xna.Framework.Graphics.Blend.One
+                };
 
-            return state;
-        });
+                return state;
+            }
+        );
 
-        private static readonly Lazy<BlendState> _screenLessBlendState = new Lazy<BlendState>(() =>
-        {
-            BlendState state = new BlendState
+        private static readonly Lazy<BlendState> _screenLessBlendState = new Lazy<BlendState>
+        (
+            () =>
             {
-                ColorSourceBlend = Microsoft.Xna.Framework.Graphics.Blend.DestinationColor, ColorDestinationBlend = Microsoft.Xna.Framework.Graphics.Blend.InverseSourceAlpha
-            };
+                BlendState state = new BlendState
+                {
+                    ColorSourceBlend = Microsoft.Xna.Framework.Graphics.Blend.DestinationColor, ColorDestinationBlend = Microsoft.Xna.Framework.Graphics.Blend.InverseSourceAlpha
+                };
 
-            return state;
-        });
+                return state;
+            }
+        );
 
-        private static readonly Lazy<BlendState> _normalHalfBlendState = new Lazy<BlendState>(() =>
-        {
-            BlendState state = new BlendState
+        private static readonly Lazy<BlendState> _normalHalfBlendState = new Lazy<BlendState>
+        (
+            () =>
             {
-                ColorSourceBlend = Microsoft.Xna.Framework.Graphics.Blend.DestinationColor, ColorDestinationBlend = Microsoft.Xna.Framework.Graphics.Blend.SourceColor
-            };
+                BlendState state = new BlendState
+                {
+                    ColorSourceBlend = Microsoft.Xna.Framework.Graphics.Blend.DestinationColor, ColorDestinationBlend = Microsoft.Xna.Framework.Graphics.Blend.SourceColor
+                };
 
-            return state;
-        });
+                return state;
+            }
+        );
 
-        private static readonly Lazy<BlendState> _shadowBlueBlendState = new Lazy<BlendState>(() =>
-        {
-            BlendState state = new BlendState
+        private static readonly Lazy<BlendState> _shadowBlueBlendState = new Lazy<BlendState>
+        (
+            () =>
             {
-                ColorSourceBlend = Microsoft.Xna.Framework.Graphics.Blend.SourceColor, ColorDestinationBlend = Microsoft.Xna.Framework.Graphics.Blend.InverseSourceColor, ColorBlendFunction = BlendFunction.ReverseSubtract
-            };
+                BlendState state = new BlendState
+                {
+                    ColorSourceBlend = Microsoft.Xna.Framework.Graphics.Blend.SourceColor, ColorDestinationBlend = Microsoft.Xna.Framework.Graphics.Blend.InverseSourceColor, ColorBlendFunction = BlendFunction.ReverseSubtract
+                };
 
-            return state;
-        });
+                return state;
+            }
+        );
 
         public override bool Draw(UltimaBatcher2D batcher, int posX, int posY)
         {
             if (IsDestroyed || !AllowedToDraw)
+            {
                 return false;
+            }
 
             if (AnimationGraphic == 0xFFFF)
+            {
                 return false;
+            }
 
             ResetHueVector();
 
@@ -97,24 +117,18 @@ namespace ClassicUO.Game.GameObjects
             posX += (int) Offset.X;
             posY -= (int) (Offset.Z - Offset.Y);
 
+            ushort hue = Hue;
 
-            if (ProfileManager.Current.HighlightGameObjects && SelectedObject.LastObject == this)
+            if (ProfileManager.Current.NoColorObjectsOutOfRange && Distance > World.ClientViewRange)
             {
-                HueVector.X = 0x0023;
-                HueVector.Y = 1;
-            }
-            else if (ProfileManager.Current.NoColorObjectsOutOfRange && Distance > World.ClientViewRange)
-            {
-                HueVector.X = Constants.OUT_RANGE_COLOR;
-                HueVector.Y = 1;
+                hue = Constants.OUT_RANGE_COLOR;
             }
             else if (World.Player.IsDead && ProfileManager.Current.EnableBlackWhiteEffect)
             {
-                HueVector.X = Constants.DEAD_RANGE_COLOR;
-                HueVector.Y = 1;
+                hue = Constants.DEAD_RANGE_COLOR;
             }
-            else
-                ShaderHuesTraslator.GetHueVector(ref HueVector, Hue, data.IsPartialHue, data.IsTranslucent ? .5f : 0);
+
+            ShaderHueTranslator.GetHueVector(ref HueVector, hue, data.IsPartialHue, data.IsTranslucent ? .5f : 0);
 
             switch (Blend)
             {
@@ -159,7 +173,7 @@ namespace ClassicUO.Game.GameObjects
                     //{
                     //    ResetHueVector();
                     //    HueVector.X = 0;
-                    //    HueVector.Y = ShaderHuesTraslator.SHADER_LIGHTS;
+                    //    HueVector.Y = ShaderHueTranslator.SHADER_LIGHTS;
                     //    HueVector.Z = 0;
                     //    batcher.SetBlendState(BlendState.Additive);
                     //    base.Draw(batcher, posX, posY);

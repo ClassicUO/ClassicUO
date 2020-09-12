@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,30 +18,27 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
-using System.IO;
 using System.Text;
 using System.Xml;
-
-using ClassicUO.Configuration;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.Network;
 using ClassicUO.Renderer;
-
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Gumps
 {
     internal class NetworkStatsGump : Gump
     {
-        private readonly AlphaBlendControl _trans;
+        private static Point _last_position = new Point(-1, -1);
 
         private uint _ping, _deltaBytesReceived, _deltaBytesSent;
+        private readonly StringBuilder _sb = new StringBuilder();
         private uint _time_to_update;
-        private static Point _last_position = new Point(-1, -1);
-        private StringBuilder _sb = new StringBuilder();
+        private readonly AlphaBlendControl _trans;
 
         public NetworkStatsGump(int x, int y) : base(0, 0)
         {
@@ -57,11 +55,14 @@ namespace ClassicUO.Game.UI.Gumps
             Width = 100;
             Height = 30;
 
-            Add(_trans = new AlphaBlendControl(.3f)
-            {
-                Width = Width,
-                Height = Height
-            });
+            Add
+            (
+                _trans = new AlphaBlendControl(.3f)
+                {
+                    Width = Width,
+                    Height = Height
+                }
+            );
 
 
             ControlInfo.Layer = UILayer.Over;
@@ -109,12 +110,16 @@ namespace ClassicUO.Game.UI.Gumps
                 }
 
                 if (IsMinimized)
+                {
                     _sb.Append($"Ping: {_ping} ms");
+                }
                 else
+                {
                     _sb.Append($"Ping: {_ping} ms\n{"In:"} {NetStatistics.GetSizeAdaptive(_deltaBytesReceived),-6} {"Out:"} {NetStatistics.GetSizeAdaptive(_deltaBytesSent),-6}");
+                }
 
 
-                var size = Fonts.Bold.MeasureString(_sb.ToString());
+                Vector2 size = Fonts.Bold.MeasureString(_sb.ToString());
 
                 _trans.Width = Width = (int) (size.X + 20);
                 _trans.Height = Height = (int) (size.Y + 20);
@@ -125,18 +130,29 @@ namespace ClassicUO.Game.UI.Gumps
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
             if (!base.Draw(batcher, x, y))
+            {
                 return false;
+            }
 
             ResetHueVector();
 
-            if (_ping < 100)
+            if (_ping < 150)
+            {
                 _hueVector.X = 0x44; // green
-            else if (_ping < 150)
-                _hueVector.X = 0x34; // yellow
+            }
             else if (_ping < 200)
+            {
+                _hueVector.X = 0x34; // yellow
+            }
+            else if (_ping < 300)
+            {
                 _hueVector.X = 0x31; // orange
+            }
             else
+            {
                 _hueVector.X = 0x20; // red
+            }
+
             _hueVector.Y = 1;
 
             batcher.DrawString(Fonts.Bold, _sb.ToString(), x + 10, y + 10, ref _hueVector);

@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,10 +18,10 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
-
 using ClassicUO.IO.Audio.MP3Sharp.Decoding;
 
 namespace ClassicUO.IO.Audio.MP3Sharp
@@ -35,7 +36,7 @@ namespace ClassicUO.IO.Audio.MP3Sharp
         private static readonly int CHANNELS = 2;
         // Write offset used in append_bytes
         private readonly byte[] m_Buffer = new byte[OBUFFERSIZE * 2]; // all channels interleaved
-        private readonly int[] m_Bufferp = new int[MAXCHANNELS]; // offset in each channel not same!
+        private readonly int[] m_Bufferp = new int[MAXCHANNELS];      // offset in each channel not same!
         // end marker, one past end of array. Same as bufferp[0], but
         // without the array bounds check.
         private int m_End;
@@ -64,15 +65,23 @@ namespace ClassicUO.IO.Audio.MP3Sharp
         /// </returns>
         public int Read(byte[] bufferOut, int offset, int count)
         {
-            if (bufferOut == null) throw new ArgumentNullException(nameof(bufferOut));
+            if (bufferOut == null)
+            {
+                throw new ArgumentNullException(nameof(bufferOut));
+            }
 
-            if (count + offset > bufferOut.Length) throw new ArgumentException("The sum of offset and count is larger than the buffer length");
+            if (count + offset > bufferOut.Length)
+            {
+                throw new ArgumentException("The sum of offset and count is larger than the buffer length");
+            }
 
             int remaining = BytesLeft;
             int copySize;
 
             if (count > remaining)
+            {
                 copySize = remaining;
+            }
             else
             {
                 // Copy an even number of sample frames
@@ -117,7 +126,10 @@ namespace ClassicUO.IO.Audio.MP3Sharp
                 throw new ArgumentNullException(nameof(samples));
             }
 
-            if (samples.Length < 32) throw new ArgumentException("samples must have 32 values");
+            if (samples.Length < 32)
+            {
+                throw new ArgumentException("samples must have 32 values");
+            }
 
             // Always, 32 samples are appended
             int pos = m_Bufferp[channel];
@@ -127,9 +139,13 @@ namespace ClassicUO.IO.Audio.MP3Sharp
                 float fs = samples[i];
 
                 if (fs > 32767.0f) // can this happen?
+                {
                     fs = 32767.0f;
+                }
                 else if (fs < -32767.0f)
+                {
                     fs = -32767.0f;
+                }
 
                 int sample = (int) fs;
                 m_Buffer[pos] = (byte) (sample & 0xff);
@@ -150,7 +166,9 @@ namespace ClassicUO.IO.Audio.MP3Sharp
             m_End = 0;
 
             for (int i = 0; i < CHANNELS; i++)
+            {
                 m_Bufferp[i] = i * 2; // two bytes per channel
+            }
         }
 
         public override void SetStopFlag()

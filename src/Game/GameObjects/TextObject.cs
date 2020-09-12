@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,41 +18,55 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-#endregion
 
-using System.Collections.Generic;
+#endregion
 
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
-
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.GameObjects
 {
     internal class TextObject : BaseGameObject
     {
-        private static readonly QueuedPool<TextObject> _queue = new QueuedPool<TextObject>(1000, o =>
-        {
-            o.IsDestroyed = false;
-            o.Alpha = 0;
-            o.Hue = 0;
-            o.Time = 0;
-            o.IsTransparent = false;
-            o.SecondTime = 0;
-            o.Type = 0;
-            o.X = 0;
-            o.Y = 0;
-            o.RealScreenPosition = Point.Zero;
-            o.OffsetY = 0;
-            o.Owner = null;
-            o.UnlinkD();
-            o.IsTextGump = false;
-            o.RenderedText?.Destroy();
-            o.RenderedText = null;
-            o.Clear();
-        });
+        private static readonly QueuedPool<TextObject> _queue = new QueuedPool<TextObject>
+        (
+            1000, o =>
+            {
+                o.IsDestroyed = false;
+                o.Alpha = 0;
+                o.Hue = 0;
+                o.Time = 0;
+                o.IsTransparent = false;
+                o.SecondTime = 0;
+                o.Type = 0;
+                o.X = 0;
+                o.Y = 0;
+                o.RealScreenPosition = Point.Zero;
+                o.OffsetY = 0;
+                o.Owner = null;
+                o.UnlinkD();
+                o.IsTextGump = false;
+                o.RenderedText?.Destroy();
+                o.RenderedText = null;
+                o.Clear();
+            }
+        );
+
+        public byte Alpha;
+        public TextObject DLeft, DRight;
+        public ushort Hue;
+        public bool IsDestroyed;
+        public bool IsTextGump;
+        public bool IsTransparent;
+        public GameObject Owner;
+
+        public RenderedText RenderedText;
+        public long Time, SecondTime;
+        public MessageType Type;
+        public int X, Y, OffsetY;
 
 
         public static TextObject Create()
@@ -59,24 +74,13 @@ namespace ClassicUO.Game.GameObjects
             return _queue.GetOne();
         }
 
-        public byte Alpha;
-        public ushort Hue;
-        public bool IsTransparent;
-
-        public RenderedText RenderedText;
-        public long Time, SecondTime;
-        public MessageType Type;
-        public int X, Y, OffsetY;
-        public GameObject Owner;
-        public TextObject DLeft, DRight;
-        public bool IsDestroyed;
-        public bool IsTextGump;
-
 
         public virtual void Destroy()
         {
             if (IsDestroyed)
+            {
                 return;
+            }
 
             UnlinkD();
 
@@ -92,10 +96,14 @@ namespace ClassicUO.Game.GameObjects
         public void UnlinkD()
         {
             if (DRight != null)
+            {
                 DRight.DLeft = DLeft;
+            }
 
             if (DLeft != null)
+            {
                 DLeft.DRight = DRight;
+            }
 
             DRight = null;
             DLeft = null;
@@ -103,17 +111,19 @@ namespace ClassicUO.Game.GameObjects
 
         public void ToTopD()
         {
-            var obj = this;
+            TextObject obj = this;
 
             while (obj != null)
             {
                 if (obj.DLeft == null)
+                {
                     break;
+                }
 
                 obj = obj.DLeft;
             }
 
-            var next = (TextRenderer) obj;
+            TextRenderer next = (TextRenderer) obj;
             next.MoveToTop(this);
         }
     }

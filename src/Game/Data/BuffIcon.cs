@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,6 +18,7 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
@@ -33,17 +35,17 @@ namespace ClassicUO.Game.Data
             Text = text;
         }
 
-        public readonly BuffIconType Type;
-
-        public readonly ushort Graphic;
-
-        public readonly long Timer;
-
-        public readonly string Text;
-
         public bool Equals(BuffIcon other)
         {
             return other != null && Type == other.Type;
         }
+
+        public readonly ushort Graphic;
+
+        public readonly string Text;
+
+        public readonly long Timer;
+
+        public readonly BuffIconType Type;
     }
 }

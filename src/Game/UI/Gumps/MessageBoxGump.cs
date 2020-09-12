@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,10 +18,10 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
-
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Renderer;
 
@@ -45,10 +46,13 @@ namespace ClassicUO.Game.UI.Gumps
             Height = h;
             _action = action;
 
-            Add(new ResizePic(0x0A28)
-            {
-                Width = w, Height = h
-            });
+            Add
+            (
+                new ResizePic(0x0A28)
+                {
+                    Width = w, Height = h
+                }
+            );
 
             if (hasBackground)
             {
@@ -63,11 +67,14 @@ namespace ClassicUO.Game.UI.Gumps
                 Add(background);
             }
 
-            Add(new Label(message, false, 0x0386, Width - 90, 1)
-            {
-                X = 40,
-                Y = 45
-            });
+            Add
+            (
+                new Label(message, false, 0x0386, Width - 90, 1)
+                {
+                    X = 40,
+                    Y = 45
+                }
+            );
 
             X = (Client.Game.Window.ClientBounds.Width - Width) >> 1;
             Y = (Client.Game.Window.ClientBounds.Height - Height) >> 1;
@@ -75,11 +82,14 @@ namespace ClassicUO.Game.UI.Gumps
             // OK
             Button b;
 
-            Add(b = new Button(0, 0x0481, 0x0483, 0x0482)
-            {
-                Y = Height - 45,
-                ButtonAction = ButtonAction.Activate
-            });
+            Add
+            (
+                b = new Button(0, 0x0481, 0x0483, 0x0482)
+                {
+                    Y = Height - 45,
+                    ButtonAction = ButtonAction.Activate
+                }
+            );
 
             b.X = (Width - b.Width) >> 1;
 
@@ -120,27 +130,36 @@ namespace ClassicUO.Game.UI.Gumps
             Height = h;
             _action = action;
 
-            Add(new ResizePic(0x0A28)
-            {
-                Width = w,
-                Height = h
-            });
+            Add
+            (
+                new ResizePic(0x0A28)
+                {
+                    Width = w,
+                    Height = h
+                }
+            );
 
             Label l;
 
-            Add(l = new Label(message, false, 0x0386, Width - 90, 1)
-            {
-                X = 40,
-                Y = 45
-            });
+            Add
+            (
+                l = new Label(message, false, 0x0386, Width - 90, 1)
+                {
+                    X = 40,
+                    Y = 45
+                }
+            );
 
-            Add(new ResizePic(0x0BB8)
-            {
-                X = 40,
-                Y = 45 + l.Height + 5,
-                Width = w - 90,
-                Height = 25
-            });
+            Add
+            (
+                new ResizePic(0x0BB8)
+                {
+                    X = 40,
+                    Y = 45 + l.Height + 5,
+                    Width = w - 90,
+                    Height = 25
+                }
+            );
 
             int ww = w - 94;
 
@@ -161,11 +180,14 @@ namespace ClassicUO.Game.UI.Gumps
             // OK
             Button b;
 
-            Add(b = new Button(0, 0x0481, 0x0482, 0x0483)
-            {
-                Y = Height - 45,
-                ButtonAction = ButtonAction.Activate
-            });
+            Add
+            (
+                b = new Button(0, 0x0481, 0x0482, 0x0483)
+                {
+                    Y = Height - 45,
+                    ButtonAction = ButtonAction.Activate
+                }
+            );
 
             b.X = (Width - b.Width) >> 1;
         }

@@ -1,4 +1,5 @@
 #region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,15 +18,15 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
-using System;
 using System.Collections.Generic;
-
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
+using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
@@ -34,15 +35,19 @@ namespace ClassicUO.Game.GameObjects
 {
     internal partial class Item
     {
+        private static EquipConvData? _equipConvData;
+
         public override bool Draw(UltimaBatcher2D batcher, int posX, int posY)
         {
             if (!AllowedToDraw || IsDestroyed)
+            {
                 return false;
+            }
 
             //Engine.DebugInfo.ItemsRendered++;
 
             ResetHueVector();
-
+            DrawTransparent = false;
 
             posX += (int) Offset.X;
             posY += (int) (Offset.Y + Offset.Z);
@@ -53,67 +58,76 @@ namespace ClassicUO.Game.GameObjects
             }
 
             if (AlphaHue != 255)
+            {
                 HueVector.Z = 1f - AlphaHue / 255f;
+            }
 
             if (IsCorpse)
+            {
                 return DrawCorpse(batcher, posX, posY - 3);
+            }
 
 
             ushort hue = Hue;
             ushort graphic = DisplayedGraphic;
+            bool partial = ItemData.IsPartialHue;
 
-            if (OnGround && ItemData.IsAnimated)
+            if (OnGround)
             {
-                if (ProfileManager.Current.FieldsType == 2)
+                if (ItemData.IsAnimated)
                 {
-                    if (StaticFilters.IsFireField(Graphic))
+                    if (ProfileManager.Current.FieldsType == 2)
                     {
-                        graphic = Constants.FIELD_REPLACE_GRAPHIC;
-                        hue = 0x0020;
+                        if (StaticFilters.IsFireField(Graphic))
+                        {
+                            graphic = Constants.FIELD_REPLACE_GRAPHIC;
+                            hue = 0x0020;
+                        }
+                        else if (StaticFilters.IsParalyzeField(Graphic))
+                        {
+                            graphic = Constants.FIELD_REPLACE_GRAPHIC;
+                            hue = 0x0058;
+                        }
+                        else if (StaticFilters.IsEnergyField(Graphic))
+                        {
+                            graphic = Constants.FIELD_REPLACE_GRAPHIC;
+                            hue = 0x0070;
+                        }
+                        else if (StaticFilters.IsPoisonField(Graphic))
+                        {
+                            graphic = Constants.FIELD_REPLACE_GRAPHIC;
+                            hue = 0x0044;
+                        }
+                        else if (StaticFilters.IsWallOfStone(Graphic))
+                        {
+                            graphic = Constants.FIELD_REPLACE_GRAPHIC;
+                            hue = 0x038A;
+                        }
                     }
-                    else if (StaticFilters.IsParalyzeField(Graphic))
-                    {
-                        graphic = Constants.FIELD_REPLACE_GRAPHIC;
-                        hue = 0x0058;
-                    }
-                    else if (StaticFilters.IsEnergyField(Graphic))
-                    {
-                        graphic = Constants.FIELD_REPLACE_GRAPHIC;
-                        hue = 0x0070;
-                    }
-                    else if (StaticFilters.IsPoisonField(Graphic))
-                    {
-                        graphic = Constants.FIELD_REPLACE_GRAPHIC;
-                        hue = 0x0044;
-                    }
-                    else if (StaticFilters.IsWallOfStone(Graphic))
-                    {
-                        graphic = Constants.FIELD_REPLACE_GRAPHIC;
-                        hue = 0x038A;
-                    }
+                }
+
+                if (ItemData.IsContainer && SelectedObject.SelectedContainer == this)
+                {
+                    hue = 0x0035;
+                    partial = false;
                 }
             }
 
-
             if (ProfileManager.Current.HighlightGameObjects && SelectedObject.LastObject == this)
             {
-                HueVector.X = 0x0023;
-                HueVector.Y = 1;
+                hue = Constants.HIGHLIGHT_CURRENT_OBJECT_HUE;
+                partial = false;
             }
             else if (ProfileManager.Current.NoColorObjectsOutOfRange && Distance > World.ClientViewRange)
             {
-                HueVector.X = Constants.OUT_RANGE_COLOR;
-                HueVector.Y = 1;
+                hue = Constants.OUT_RANGE_COLOR;
             }
             else if (World.Player.IsDead && ProfileManager.Current.EnableBlackWhiteEffect)
             {
-                HueVector.X = Constants.DEAD_RANGE_COLOR;
-                HueVector.Y = 1;
+                hue = Constants.DEAD_RANGE_COLOR;
             }
             else
             {
-                bool isPartial = ItemData.IsPartialHue;
-
                 if (!IsLocked && !IsMulti && SelectedObject.LastObject == this)
                 {
                     // TODO: check why i put this.
@@ -121,14 +135,16 @@ namespace ClassicUO.Game.GameObjects
                     hue = 0x0035;
                 }
                 else if (IsHidden)
+                {
                     hue = 0x038E;
-
-                ShaderHuesTraslator.GetHueVector(ref HueVector, hue, isPartial, HueVector.Z);
+                }
             }
+
+            ShaderHueTranslator.GetHueVector(ref HueVector, hue, partial, HueVector.Z);
 
             if (!IsMulti && !IsCoin && Amount > 1 && ItemData.IsStackable)
             {
-                DrawStaticAnimated(batcher, graphic, posX - 5, posY - 5, ref HueVector);
+                DrawStaticAnimated(batcher, graphic, posX - 5, posY - 5, ref HueVector, ref DrawTransparent);
             }
 
             if (ItemData.IsLight)
@@ -138,18 +154,22 @@ namespace ClassicUO.Game.GameObjects
             }
 
             if (!SerialHelper.IsValid(Serial) && IsMulti && TargetManager.TargetingState == CursorTarget.MultiPlacement)
+            {
                 HueVector.Z = 0.5f;
+            }
 
-            DrawStaticAnimated(batcher, graphic, posX, posY, ref HueVector);
+            DrawStaticAnimated(batcher, graphic, posX, posY, ref HueVector, ref DrawTransparent);
 
             if (SelectedObject.Object == this || TargetManager.TargetingState == CursorTarget.MultiPlacement)
+            {
                 return false;
+            }
 
-            var texture = ArtLoader.Instance.GetTexture(graphic);
+            ArtTexture texture = ArtLoader.Instance.GetTexture(graphic);
 
             if (texture != null)
             {
-                ref var index = ref ArtLoader.Instance.GetValidRefEntry(graphic + 0x4000);
+                ref UOFileIndex index = ref ArtLoader.Instance.GetValidRefEntry(graphic + 0x4000);
 
                 posX -= index.Width;
                 posY -= index.Height;
@@ -166,12 +186,14 @@ namespace ClassicUO.Game.GameObjects
         private bool DrawCorpse(UltimaBatcher2D batcher, int posX, int posY)
         {
             if (IsDestroyed || World.CorpseManager.Exists(Serial, 0))
+            {
                 return false;
+            }
 
             posX += 22;
             posY += 22;
 
-            AnimationsLoader.Instance.Direction = (byte) (((byte) Layer & 0x7F) & 7);
+            AnimationsLoader.Instance.Direction = (byte) ((byte) Layer & 0x7F & 7);
             AnimationsLoader.Instance.GetAnimDirection(ref AnimationsLoader.Instance.Direction, ref IsFlipped);
 
             byte animIndex = (byte) AnimIndex;
@@ -197,15 +219,13 @@ namespace ClassicUO.Game.GameObjects
             return true;
         }
 
-        private static EquipConvData? _equipConvData;
-
         private static void DrawLayer(UltimaBatcher2D batcher, int posX, int posY, Item owner, Layer layer, byte animIndex, bool ishuman, ushort color, bool flipped, float alpha)
         {
             _equipConvData = null;
             bool ispartialhue = false;
 
             ushort graphic;
-            
+
             if (layer == Layer.Invalid)
             {
                 graphic = owner.GetGraphicForAnimation();
@@ -214,8 +234,10 @@ namespace ClassicUO.Game.GameObjects
             {
                 Item itemEquip = owner.FindItemByLayer(layer);
 
-                if (itemEquip == null) 
+                if (itemEquip == null)
+                {
                     return;
+                }
 
                 graphic = itemEquip.ItemData.AnimID;
                 ispartialhue = itemEquip.ItemData.IsPartialHue;
@@ -232,47 +254,63 @@ namespace ClassicUO.Game.GameObjects
                 color = itemEquip.Hue;
             }
             else
+            {
                 return;
+            }
 
             byte animGroup = AnimationsLoader.Instance.AnimGroup;
             ushort newHue = 0;
 
             AnimationGroup gr = layer == Layer.Invalid
-                                    ? AnimationsLoader.Instance.GetCorpseAnimationGroup(ref graphic, ref animGroup, ref newHue)
-                                    : AnimationsLoader.Instance.GetBodyAnimationGroup(ref graphic, ref animGroup, ref newHue);
+                ? AnimationsLoader.Instance.GetCorpseAnimationGroup(ref graphic, ref animGroup, ref newHue)
+                : AnimationsLoader.Instance.GetBodyAnimationGroup(ref graphic, ref animGroup, ref newHue);
 
             AnimationsLoader.Instance.AnimID = graphic;
 
             if (color == 0)
+            {
                 color = newHue;
+            }
 
-            var direction = gr.Direction[AnimationsLoader.Instance.Direction];
+            AnimationDirection direction = gr.Direction[AnimationsLoader.Instance.Direction];
 
             if (direction == null)
+            {
                 return;
+            }
 
             if ((direction.FrameCount == 0 || direction.Frames == null) && !AnimationsLoader.Instance.LoadDirectionGroup(ref direction))
+            {
                 return;
+            }
 
             direction.LastAccessTime = Time.Ticks;
             int fc = direction.FrameCount;
 
             if (fc > 0 && animIndex >= fc)
+            {
                 animIndex = (byte) (fc - 1);
+            }
 
             if (animIndex < direction.FrameCount)
             {
                 AnimationFrameTexture frame = direction.Frames[animIndex];
 
                 if (frame == null || frame.IsDisposed)
+                {
                     return;
+                }
 
                 frame.Ticks = Time.Ticks;
 
                 if (flipped)
+                {
                     posX -= frame.Width - frame.CenterX;
+                }
                 else
+                {
                     posX -= frame.CenterX;
+                }
 
                 posY -= frame.Height + frame.CenterY;
 
@@ -293,7 +331,7 @@ namespace ClassicUO.Game.GameObjects
                 }
 
                 ResetHueVector();
-                
+
                 if (ProfileManager.Current.NoColorObjectsOutOfRange && owner.Distance > World.ClientViewRange)
                 {
                     HueVector.X = Constants.OUT_RANGE_COLOR;
@@ -307,11 +345,15 @@ namespace ClassicUO.Game.GameObjects
                 else
                 {
                     if (ProfileManager.Current.GridLootType > 0 && SelectedObject.CorpseObject == owner)
+                    {
                         color = 0x0034;
+                    }
                     else if (ProfileManager.Current.HighlightGameObjects && SelectedObject.LastObject == owner)
-                        color = 0x0023;
+                    {
+                        color = Constants.HIGHLIGHT_CURRENT_OBJECT_HUE;
+                    }
 
-                    ShaderHuesTraslator.GetHueVector(ref HueVector, color, ispartialhue, alpha);
+                    ShaderHueTranslator.GetHueVector(ref HueVector, color, ispartialhue, alpha);
                 }
 
                 batcher.DrawSprite(frame, posX, posY, flipped, ref HueVector);
@@ -322,13 +364,14 @@ namespace ClassicUO.Game.GameObjects
                 }
 
                 if (SelectedObject.Object == owner)
+                {
                     return;
+                }
 
                 if (frame.Contains(flipped ? posX + frame.Width - SelectedObject.TranslatedMousePositionByViewport.X : SelectedObject.TranslatedMousePositionByViewport.X - posX, SelectedObject.TranslatedMousePositionByViewport.Y - posY))
                 {
                     SelectedObject.Object = owner;
                 }
-
             }
         }
     }

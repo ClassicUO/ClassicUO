@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,6 +18,7 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using ClassicUO.Game.GameObjects;
@@ -43,16 +45,22 @@ namespace ClassicUO.Game.Managers
                 _timer = Time.Ticks + 1000;
 
                 if (_actions.Count == 0)
+                {
                     return;
+                }
 
                 uint serial = _actions.RemoveFromFront();
 
                 if (World.Get(serial) != null)
                 {
                     if (SerialHelper.IsMobile(serial))
+                    {
                         GameActions.OpenPaperdoll(serial);
+                    }
                     else
+                    {
                         GameActions.DoubleClick(serial);
+                    }
                 }
             }
         }
@@ -62,7 +70,9 @@ namespace ClassicUO.Game.Managers
             foreach (uint s in _actions)
             {
                 if (serial == s)
+                {
                     return;
+                }
             }
 
             _actions.AddToBack(serial);
@@ -80,11 +90,14 @@ namespace ClassicUO.Game.Managers
                 Entity entity = World.Get(_actions[i]);
 
                 if (entity == null)
+                {
                     continue;
+                }
 
-                if(entity is Item it && it.IsCorpse)
+                if (entity is Item it && it.IsCorpse)
+                {
                     _actions.RemoveAt(i--);
-
+                }
             }
         }
     }

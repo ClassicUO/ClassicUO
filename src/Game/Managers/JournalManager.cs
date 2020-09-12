@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -17,11 +18,11 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
 using System.IO;
-
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Utility;
@@ -86,18 +87,25 @@ namespace ClassicUO.Game.Managers
                 try
                 {
                     string path = FileSystemHelper.CreateFolderIfNotExists(Path.Combine(CUOEnviroment.ExecutablePath, "Data"), "Client", "JournalLogs");
+
                     _fileWriter = new StreamWriter(File.Open(Path.Combine(path, $"{DateTime.Now:yyyy_MM_dd_HH_mm_ss}_journal.txt"), FileMode.Create, FileAccess.Write, FileShare.Read))
                     {
                         AutoFlush = true
                     };
+
                     try
                     {
                         string[] files = Directory.GetFiles(path, "*_journal.txt");
-                        Array.Sort<string>(files);
+                        Array.Sort(files);
+
                         for (int i = files.Length - 1; i >= 100; --i)
+                        {
                             File.Delete(files[i]);
+                        }
                     }
-                    catch { }
+                    catch
+                    {
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -130,8 +138,8 @@ namespace ClassicUO.Game.Managers
         public bool IsUnicode;
         public string Name;
         public string Text;
-        public DateTime Time;
 
         public TEXT_TYPE TextType;
+        public DateTime Time;
     }
 }
