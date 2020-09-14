@@ -143,6 +143,10 @@
   </Target>
 
   <Target Name="CopyExternalDeps_publish" AfterTargets="Publish">
+    <ItemGroup>
+      <MonockickstartPath Include="$(ProjectDir)..\tools\monokickstart\*.*" />
+    </ItemGroup>
+
     <Copy
       SourceFiles="@(DataFiles_x64)"
       DestinationFolder="$(PublishDir)\x64\"
@@ -159,6 +163,13 @@
       SourceFiles="@(DataFiles_vulkan)"
       DestinationFolder="$(PublishDir)\vulkan\icd.d\"
       SkipUnchangedFiles="true" />
+
+    <Copy
+      SourceFiles="@(MonockickstartPath)"
+      DestinationFolder="$(PublishDir)\"
+      SkipUnchangedFiles="true" />
+
   </Target>
+
   
 </Project>
