@@ -421,6 +421,15 @@ namespace ClassicUO.Network
     {
         public PASCIISpeechRequest(string text, MessageType type, byte font, ushort hue) : base(0x03)
         {
+            List<SpeechEntry> entries = SpeechesLoader.Instance.GetKeywords(text);
+
+            bool encoded = entries != null && entries.Count != 0;
+
+            if (encoded)
+            {
+                type |= MessageType.Encoded;
+            }
+
             WriteByte((byte) type);
             WriteUShort(hue);
             WriteUShort(font);

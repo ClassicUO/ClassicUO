@@ -178,7 +178,8 @@ namespace ClassicUO.Game
                 hue = ProfileManager.Current.SpeechHue;
             }
 
-            if (Client.Version >= ClientVersion.CV_500A)
+            // TODO: identify what means 'older client' that uses ASCIISpeechRquest [0x03]
+            if (Client.Version >= ClientVersion.CV_300)
             {
                 Socket.Send(new PUnicodeSpeechRequest(message, type, font, hue, "ENU"));
             }
