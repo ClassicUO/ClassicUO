@@ -66,11 +66,14 @@ namespace ClassicUO.Utility
                     return false;
                 }
 
-                ref StaticTiles data = ref TileDataLoader.Instance.StaticData[g];
-
-                if (!data.IsNoDiagonal || data.IsAnimated && World.Player != null && World.Player.Race == RaceType.GARGOYLE)
+                if (g < TileDataLoader.Instance.StaticData.Length)
                 {
-                    return false;
+                    ref StaticTiles data = ref TileDataLoader.Instance.StaticData[g];
+
+                    if (!data.IsNoDiagonal || data.IsAnimated && World.Player != null && World.Player.Race == RaceType.GARGOYLE)
+                    {
+                        return false;
+                    }
                 }
             }
 
