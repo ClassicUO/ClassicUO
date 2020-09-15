@@ -1423,6 +1423,9 @@ namespace ClassicUO.Game.UI.Gumps
                     _saveHealthbars.IsChecked = false;
                     _use_smooth_boat_movement.IsChecked = false;
                     _hideScreenshotStoredInMessage.IsChecked = false;
+                    _use_old_status_gump.IsChecked = false;
+                    _auraType.SelectedIndex = 0;
+                    _fieldsType.SelectedIndex = 0;
 
                     break;
 
@@ -1445,7 +1448,6 @@ namespace ClassicUO.Game.UI.Gumps
                     _windowBorderless.IsChecked = false;
                     _zoomCheckbox.IsChecked = false;
                     _restorezoomCheckbox.IsChecked = false;
-                    _use_old_status_gump.IsChecked = false;
                     _gameWindowWidth.SetText("600");
                     _gameWindowHeight.SetText("480");
                     _gameWindowPositionX.SetText("20");
@@ -1461,11 +1463,8 @@ namespace ClassicUO.Game.UI.Gumps
                     _useColoredLights.IsChecked = false;
                     _darkNights.IsChecked = false;
                     _enableShadows.IsChecked = true;
-                    _auraType.SelectedIndex = 0;
-                    _fieldsType.SelectedIndex = 0;
                     _runMouseInSeparateThread.IsChecked = true;
                     _auraMouse.IsChecked = true;
-                    _hideChatGradient.IsChecked = false;
                     _partyAura.IsChecked = true;
                     _partyAuraColorPickerBox.SetColor(0x0044, HuesLoader.Instance.GetPolygoneColor(12, 0x0044));
 
@@ -1507,6 +1506,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _chatAdditionalButtonsCheckbox.IsChecked = true;
                     _chatShiftEnterCheckbox.IsChecked = true;
                     _saveJournalCheckBox.IsChecked = false;
+                    _hideChatGradient.IsChecked = false;
 
                     break;
 
