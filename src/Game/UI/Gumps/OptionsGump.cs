@@ -146,7 +146,8 @@ namespace ClassicUO.Game.UI.Gumps
                     X = 1,
                     Y = 1,
                     Width = WIDTH - 2,
-                    Height = HEIGHT - 2
+                    Height = HEIGHT - 2,
+                    Hue = 999
                 }
             );
 
