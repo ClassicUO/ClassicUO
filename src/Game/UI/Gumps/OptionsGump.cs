@@ -549,9 +549,7 @@ namespace ClassicUO.Game.UI.Gumps
             section3.Add(_altLights = AddCheckBox(null, ResGumps.AlternativeLights, ProfileManager.Current.UseAlternativeLights, startX, startY));
             section3.Add(_enableLight = AddCheckBox(null, ResGumps.LightLevel, ProfileManager.Current.UseCustomLightLevel, startX, startY));
             section3.AddRight(_lightBar = AddHSlider(null, 0, 0x1E, 0x1E - ProfileManager.Current.LightLevel, startX, startY, 250));
-            section3.PushIndent();
             section3.Add(_darkNights = AddCheckBox(null, ResGumps.DarkNights, ProfileManager.Current.UseDarkNights, startX, startY));
-            section3.PopIndent();
             section3.Add(_useColoredLights = AddCheckBox(null, ResGumps.UseColoredLights, ProfileManager.Current.UseColoredLights, startX, startY));
 
 
