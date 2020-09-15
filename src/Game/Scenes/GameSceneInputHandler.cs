@@ -993,63 +993,66 @@ namespace ClassicUO.Game.Scenes
 
                 if (macro != null && e.keysym.sym != SDL.SDL_Keycode.SDLK_UNKNOWN)
                 {
-                    if (macro.FirstNode != null && macro.FirstNode.Code == MacroType.Walk)
+                    if (macro.Items != null && macro.Items is MacroObject mac)
                     {
-                        _flags[4] = true;
-
-                        switch (macro.FirstNode.SubCode)
+                        if (mac.Code == MacroType.Walk)
                         {
-                            case MacroSubType.NW:
-                                _flags[0] = true;
+                            _flags[4] = true;
 
-                                break;
+                            switch (mac.SubCode)
+                            {
+                                case MacroSubType.NW:
+                                    _flags[0] = true;
 
-                            case MacroSubType.SW:
-                                _flags[1] = true;
+                                    break;
 
-                                break;
+                                case MacroSubType.SW:
+                                    _flags[1] = true;
 
-                            case MacroSubType.SE:
-                                _flags[2] = true;
+                                    break;
 
-                                break;
+                                case MacroSubType.SE:
+                                    _flags[2] = true;
 
-                            case MacroSubType.NE:
-                                _flags[3] = true;
+                                    break;
 
-                                break;
+                                case MacroSubType.NE:
+                                    _flags[3] = true;
 
-                            case MacroSubType.N:
-                                _flags[0] = true;
-                                _flags[3] = true;
+                                    break;
 
-                                break;
+                                case MacroSubType.N:
+                                    _flags[0] = true;
+                                    _flags[3] = true;
 
-                            case MacroSubType.S:
-                                _flags[1] = true;
-                                _flags[2] = true;
+                                    break;
 
-                                break;
+                                case MacroSubType.S:
+                                    _flags[1] = true;
+                                    _flags[2] = true;
 
-                            case MacroSubType.E:
-                                _flags[3] = true;
-                                _flags[2] = true;
+                                    break;
 
-                                break;
+                                case MacroSubType.E:
+                                    _flags[3] = true;
+                                    _flags[2] = true;
 
-                            case MacroSubType.W:
-                                _flags[0] = true;
-                                _flags[1] = true;
+                                    break;
 
-                                break;
+                                case MacroSubType.W:
+                                    _flags[0] = true;
+                                    _flags[1] = true;
+
+                                    break;
+                            }
                         }
-                    }
-                    else
-                    {
-                        Macros.SetMacroToExecute(macro.FirstNode);
-                        Macros.WaitingBandageTarget = false;
-                        Macros.WaitForTargetTimer = 0;
-                        Macros.Update();
+                        else
+                        {
+                            Macros.SetMacroToExecute(mac);
+                            Macros.WaitingBandageTarget = false;
+                            Macros.WaitForTargetTimer = 0;
+                            Macros.Update();
+                        }
                     }
                 }
                 else
@@ -1097,11 +1100,11 @@ namespace ClassicUO.Game.Scenes
 
                 if (macro != null && e.keysym.sym != SDL.SDL_Keycode.SDLK_UNKNOWN)
                 {
-                    if (macro.FirstNode != null && macro.FirstNode.Code == MacroType.Walk)
+                    if (macro.Items != null && macro.Items is MacroObject mac && mac.Code == MacroType.Walk)
                     {
                         _flags[4] = false;
 
-                        switch (macro.FirstNode.SubCode)
+                        switch (mac.SubCode)
                         {
                             case MacroSubType.NW:
                                 _flags[0] = false;
@@ -1148,7 +1151,7 @@ namespace ClassicUO.Game.Scenes
                                 break;
                         }
 
-                        Macros.SetMacroToExecute(macro.FirstNode);
+                        Macros.SetMacroToExecute(mac);
                         Macros.WaitForTargetTimer = 0;
                         Macros.Update();
 

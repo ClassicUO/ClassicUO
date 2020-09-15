@@ -127,7 +127,7 @@ namespace ClassicUO.Game.Managers
         {
             foreach (Control control in Gumps)
             {
-                if (control.ControlInfo.IsModal)
+                if (control.IsModal)
                 {
                     return true;
                 }
@@ -187,7 +187,7 @@ namespace ClassicUO.Game.Managers
             {
                 foreach (Control s in Gumps)
                 {
-                    if (s.ControlInfo.IsModal && s.ControlInfo.ModalClickOutsideAreaClosesThisControl)
+                    if (s.IsModal && s.ModalClickOutsideAreaClosesThisControl)
                     {
                         s.Dispose();
                         Mouse.CancelDoubleClick = true;
@@ -267,7 +267,7 @@ namespace ClassicUO.Game.Managers
             {
                 foreach (Control s in Gumps)
                 {
-                    if (s.ControlInfo.IsModal && s.ControlInfo.ModalClickOutsideAreaClosesThisControl)
+                    if (s.IsModal && s.ModalClickOutsideAreaClosesThisControl)
                     {
                         s.Dispose();
                         Mouse.CancelDoubleClick = true;
@@ -352,7 +352,7 @@ namespace ClassicUO.Game.Managers
             {
                 foreach (Control s in Gumps)
                 {
-                    if (s.ControlInfo.IsModal && s.ControlInfo.ModalClickOutsideAreaClosesThisControl)
+                    if (s.IsModal && s.ModalClickOutsideAreaClosesThisControl)
                     {
                         s.Dispose();
                         Mouse.CancelDoubleClick = true;
@@ -428,7 +428,7 @@ namespace ClassicUO.Game.Managers
             {
                 foreach (Control s in Gumps)
                 {
-                    if (s.ControlInfo.IsModal && s.ControlInfo.ModalClickOutsideAreaClosesThisControl)
+                    if (s.IsModal && s.ModalClickOutsideAreaClosesThisControl)
                     {
                         s.Dispose();
                         Mouse.CancelDoubleClick = true;
@@ -741,7 +741,7 @@ namespace ClassicUO.Game.Managers
             {
                 Control c = first.Value;
 
-                if (IsModalOpen && !c.ControlInfo.IsModal || !c.IsVisible || !c.IsEnabled)
+                if (IsModalOpen && !c.IsModal || !c.IsVisible || !c.IsEnabled)
                 {
                     continue;
                 }
@@ -787,12 +787,12 @@ namespace ClassicUO.Game.Managers
                 {
                     Control c = el.Value;
 
-                    if (c.ControlInfo.Layer == UILayer.Default)
+                    if (c.LayerOrder == UILayer.Default)
                     {
                         continue;
                     }
 
-                    if (c.ControlInfo.Layer == UILayer.Under)
+                    if (c.LayerOrder == UILayer.Under)
                     {
                         for (LinkedListNode<Control> first = Gumps.First; first != null; first = first.Next)
                         {
@@ -806,7 +806,7 @@ namespace ClassicUO.Game.Managers
                             }
                         }
                     }
-                    else if (c.ControlInfo.Layer == UILayer.Over)
+                    else if (c.LayerOrder == UILayer.Over)
                     {
                         for (LinkedListNode<Control> first = Gumps.First; first != null; first = first.Next)
                         {

@@ -40,7 +40,6 @@ namespace ClassicUO.Game.UI.Gumps
         private const int WIDTH = 500;
         private const int HEIGHT = 400;
         private readonly GameObject _obj;
-        private readonly ScrollArea _scrollArea;
 
         public InspectorGump(GameObject obj) : base(0, 0)
         {
@@ -79,33 +78,40 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             );
 
-            _scrollArea = new ScrollArea(20, 35, WIDTH - 40, HEIGHT - 45, true)
+            ScrollArea scrollArea = new ScrollArea(20, 35, WIDTH - 40, HEIGHT - 45, true)
             {
                 AcceptMouseInput = true
             };
 
-            Add(_scrollArea);
+            Add(scrollArea);
+
+            DataBox databox = new DataBox(0, 0, 1, 1);
+            databox.WantUpdateSize = true;
+            scrollArea.Add(databox);
 
             Dictionary<string, string> dict = ReflectionHolder.GetGameObjectProperties(obj);
 
             if (dict != null)
             {
+                int startX = 5;
+                int startY = 5;
+
                 foreach (KeyValuePair<string, string> item in dict.OrderBy(s => s.Key))
                 {
-                    ScrollAreaItem areaItem = new ScrollAreaItem();
-
                     Label label = new Label(item.Key + ":", true, 33, font: 1, style: FontStyle.BlackBorder)
                     {
-                        X = 2
+                        X = startX,
+                        Y = startY
                     };
 
-                    areaItem.Add(label);
+                    databox.Add(label);
 
                     int height = label.Height;
 
                     label = new Label(item.Value, true, 1153, font: 1, style: FontStyle.BlackBorder, maxwidth: WIDTH - 65 - 200)
                     {
-                        X = 200,
+                        X = startX + 200,
+                        Y = startY,
                         AcceptMouseInput = true
                     };
 
@@ -116,12 +122,14 @@ namespace ClassicUO.Game.UI.Gumps
                         height = label.Height;
                     }
 
-                    areaItem.Add(label);
-                    areaItem.Add(new Line(0, height + 2, WIDTH - 65, 1, Color.Gray.PackedValue));
+                    databox.Add(label);
+                    databox.Add(new Line(startX, startY + height + 2, WIDTH - 65, 1, Color.Gray.PackedValue));
 
-                    _scrollArea.Add(areaItem);
+                    startY += height + 4;
                 }
             }
+
+            databox.ReArrangeChildren();
         }
 
         public override void OnButtonClick(int buttonID)

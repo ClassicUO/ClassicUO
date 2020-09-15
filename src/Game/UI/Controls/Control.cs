@@ -53,7 +53,7 @@ namespace ClassicUO.Game.UI.Controls
         private int _activePage;
         private bool _attempToDrag;
         private Rectangle _bounds;
-        private GumpControlInfo _controlInfo;
+        private Point _offset;
         private bool _handlesKeyboardFocus;
         private Control _parent;
 
@@ -91,6 +91,8 @@ namespace ClassicUO.Game.UI.Controls
         }
 
         public ref Rectangle Bounds => ref _bounds;
+
+        public Point Offset => _offset;
 
         public bool IsDisposed { get; private set; }
 
@@ -211,7 +213,10 @@ namespace ClassicUO.Game.UI.Controls
             }
         }
 
-        public GumpControlInfo ControlInfo => _controlInfo ?? (_controlInfo = new GumpControlInfo(this));
+        public UILayer LayerOrder { get; set; } = UILayer.Default;
+        public bool IsModal { get; set; }
+        public bool ModalClickOutsideAreaClosesThisControl { get; set; }
+
 
         public virtual bool HandlesKeyboardFocus
         {
@@ -261,6 +266,20 @@ namespace ClassicUO.Game.UI.Controls
         public bool AllowedToDraw { get; set; }
 
         public int TooltipMaxLength { get; private set; }
+
+        public void UpdateOffset(int x, int y)
+        {
+            if (_offset.X != x || _offset.Y != y)
+            {
+                _offset.X = x;
+                _offset.Y = y;
+
+                foreach (Control c in Children)
+                {
+                    c.UpdateOffset(x, y);
+                }
+            }
+        }
 
         protected static void ResetHueVector()
         {
@@ -426,7 +445,7 @@ namespace ClassicUO.Game.UI.Controls
             int parentX = ParentX;
             int parentY = ParentY;
 
-            if (Bounds.Contains(x - parentX, y - parentY))
+            if (Bounds.Contains(x - parentX - _offset.X, y - parentY - _offset.Y))
             {
                 if (Contains(x - X - parentX, y - Y - parentY))
                 {
@@ -438,9 +457,11 @@ namespace ClassicUO.Game.UI.Controls
                             OnHitTestSuccess(x, y, ref res);
                         }
                     }
-
-                    foreach (Control c in Children)
+                    
+                    for (int i = 0; i < Children.Count; ++i)
                     {
+                        Control c = Children[i];
+
                         if (c.Page == 0 || c.Page == ActivePage)
                         {
                             c.HitTest(x, y, ref res);
@@ -458,7 +479,7 @@ namespace ClassicUO.Game.UI.Controls
         public virtual void OnHitTestSuccess(int x, int y, ref Control res)
         {
         }
-
+        
         public Control GetFirstControlAcceptKeyboardInput()
         {
             if (_acceptKeyboardInput)

@@ -142,7 +142,7 @@ namespace ClassicUO.Game.Scenes
             {
                 for (int i = 0; i < ProfileManager.Current.Macros.Length; i++)
                 {
-                    Macros.AppendMacro(ProfileManager.Current.Macros[i]);
+                    Macros.PushToBack(ProfileManager.Current.Macros[i]);
                 }
 
                 Macros.Save();
@@ -974,7 +974,6 @@ namespace ClassicUO.Game.Scenes
             }
 
 
-            batcher.SetBrightlight(ProfileManager.Current.Brighlight);
             batcher.Begin(null, matrix);
 
 

@@ -49,6 +49,7 @@ namespace ClassicUO.Game.UI.Gumps
         private bool _shiftPressed;
         private readonly Dictionary<uint, ShopItem> _shopItems;
         private readonly ScrollArea _shopScrollArea, _transactionScrollArea;
+        private readonly DataBox _transactionDataBox;
         private readonly Label _totalLabel, _playerGoldLabel;
         private readonly Dictionary<uint, TransactionItem> _transactionItems;
         private bool _updateTotal;
@@ -169,6 +170,10 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add(_transactionScrollArea = new ScrollArea(260, 215, 245, 53 + _middleGumpRight.Height, false));
 
+            _transactionDataBox = new DataBox(0, 0, 1, 1);
+            _transactionDataBox.WantUpdateSize = true;
+
+            _transactionScrollArea.Add(_transactionDataBox);
 
             HitBox upButton = new HitBox(233, 50, 18, 16)
             {
@@ -257,12 +262,12 @@ namespace ClassicUO.Game.UI.Gumps
                     right_down.Y = _middleGumpRight.Y + _middleGumpRight.Height;
                     boxAccept.Y = 306 + _middleGumpRight.Height;
                     boxClear.Y = 310 + _middleGumpRight.Height;
-                    _transactionScrollArea.Height = _middleGumpRight.Height + 53;
+                    _transactionDataBox.Height = _transactionScrollArea.Height = _middleGumpRight.Height + 53;
                     _shopScrollArea.Height = left_down.Y + 50;
                     _shopScrollArea.ScrollMaxHeight = left_down.Y;
                     _button_expander.Y = left_down.Y + left_down.Height;
                     downButton.Y = 130 + _middleGumpLeft.Height;
-                    downButtonT.Y = 70 + _middleGumpRight.Height;
+                    downButtonT.Y = 270 + _middleGumpRight.Height;
                     name.Y = 308 + _middleGumpRight.Height;
                     _totalLabel.Y = 281 + _middleGumpRight.Height;
 
@@ -362,33 +367,21 @@ namespace ClassicUO.Game.UI.Gumps
 
         public void AddItem(uint serial, ushort graphic, ushort hue, ushort amount, uint price, string name, bool fromcliloc)
         {
-            ShopItem shopItem;
+            int count = _shopScrollArea.Children.Count - 1;
+            int y = count > 0 ? _shopScrollArea.Children[count].Bounds.Bottom : 0;
 
-            _shopScrollArea.Add
-            (
-                shopItem = new ShopItem(serial, graphic, hue, amount, price, name)
-                {
-                    X = 5,
-                    Y = 5,
-                    NameFromCliloc = fromcliloc
-                }
-            );
+            ShopItem shopItem = new ShopItem(serial, graphic, hue, amount, price, name)
+            {
+                X = 5,
+                Y = y + 2,
+                NameFromCliloc = fromcliloc
+            };
 
-            _shopScrollArea.Add
-            (
-                new ResizePicLine(0x39)
-                {
-                    X = 10,
-                    Width = 190
-                }
-            );
+            _shopScrollArea.Add(shopItem);
 
             shopItem.MouseUp += ShopItem_MouseClick;
             shopItem.MouseDoubleClick += ShopItem_MouseDoubleClick;
             _shopItems.Add(serial, shopItem);
-
-            //var it = World.Items.Get(serial);
-            //Console.WriteLine("ITEM: name: {0}  - tiledata name: {1}  - price: {2}   - X,Y= {3},{4}", name, TileDataLoader.Instance.StaticData[graphic].Name, price, it.X, it.Y);
         }
 
         public void SetNameTo(Item item, string name)
@@ -481,8 +474,10 @@ namespace ClassicUO.Game.UI.Gumps
                 transactionItem = new TransactionItem(shopItem.LocalSerial, shopItem.Graphic, shopItem.Hue, total, (ushort) shopItem.Price, shopItem.ShopItemName);
                 transactionItem.OnIncreaseButtomClicked += TransactionItem_OnIncreaseButtomClicked;
                 transactionItem.OnDecreaseButtomClicked += TransactionItem_OnDecreaseButtomClicked;
-                _transactionScrollArea.Add(transactionItem);
+                _transactionDataBox.Add(transactionItem);
                 _transactionItems.Add(shopItem.LocalSerial, transactionItem);
+                _transactionDataBox.WantUpdateSize = true;
+                _transactionDataBox.ReArrangeChildren();
             }
 
             shopItem.Amount -= total;
@@ -519,7 +514,9 @@ namespace ClassicUO.Game.UI.Gumps
             transactionItem.OnIncreaseButtomClicked -= TransactionItem_OnIncreaseButtomClicked;
             transactionItem.OnDecreaseButtomClicked -= TransactionItem_OnDecreaseButtomClicked;
             _transactionItems.Remove(transactionItem.LocalSerial);
-            _transactionScrollArea.Remove(transactionItem);
+            transactionItem.Dispose();
+            _transactionDataBox.WantUpdateSize = true;
+            _transactionDataBox.ReArrangeChildren();
             _updateTotal = true;
         }
 
@@ -598,6 +595,17 @@ namespace ClassicUO.Game.UI.Gumps
                 Price = price;
                 Name = name;
 
+                Add
+                (
+                    new ResizePicLine(0x39)
+                    {
+                        X = 10,
+                        Width = 190
+                    }
+                );
+
+                int offY = 15;
+
                 string itemName = StringHelper.CapitalizeAllWords(Name);
 
                 TextureControl control;
@@ -613,7 +621,7 @@ namespace ClassicUO.Game.UI.Gumps
                         {
                             Texture = direction != null ? direction.FrameCount != 0 ? direction.Frames[0] : null : null,
                             X = 5,
-                            Y = 5,
+                            Y = 5 + offY,
                             AcceptMouseInput = false,
                             Hue = Hue == 0 ? hue2 : Hue,
                             IsPartial = TileDataLoader.Instance.StaticData[Graphic]
@@ -652,7 +660,7 @@ namespace ClassicUO.Game.UI.Gumps
                         {
                             Texture = texture,
                             X = 10 - texture?.ImageRectangle.X ?? 0,
-                            Y = 10 + texture?.ImageRectangle.Y ?? 0,
+                            Y = 5 + offY + texture?.ImageRectangle.Y ?? 0,
                             Width = texture?.ImageRectangle.Width ?? 0,
                             Height = texture?.ImageRectangle.Height ?? 0,
                             AcceptMouseInput = false,
@@ -674,8 +682,8 @@ namespace ClassicUO.Game.UI.Gumps
                 (
                     _name = new Label(subname, true, 0x219, 110, 1, FontStyle.None, TEXT_ALIGN_TYPE.TS_LEFT, true)
                     {
-                        Y = 0,
-                        X = 55
+                        X = 55,
+                        Y = offY
                     }
                 );
 
@@ -686,14 +694,13 @@ namespace ClassicUO.Game.UI.Gumps
                     _amountLabel = new Label(count.ToString(), true, 0x0219, 35, 1, FontStyle.None, TEXT_ALIGN_TYPE.TS_RIGHT)
                     {
                         X = 168,
-                        Y = height >> 2
+                        Y = offY + (height >> 2)
                     }
                 );
 
                 Width = 220;
+                Height = Math.Max(50, height);
 
-
-                Height = height;
                 WantUpdateSize = false;
 
                 if (World.ClientFeatures.TooltipsEnabled)

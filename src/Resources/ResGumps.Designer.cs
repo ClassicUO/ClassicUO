@@ -304,7 +304,7 @@ namespace ClassicUO.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to - Aura under feet:.
+        ///   Looks up a localized string similar to Aura under feet.
         /// </summary>
         public static string AuraUnderFeet {
             get {
@@ -1132,7 +1132,8 @@ namespace ClassicUO.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Enable abbreviated amount values when amount is or exceeds.
+        ///   Looks up a localized string similar to Enable abbreviated amount values
+        ///when amount is or exceeds.
         /// </summary>
         public static string EnableAbbreviatedAmountCountrs {
             get {
@@ -2620,7 +2621,8 @@ namespace ClassicUO.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Query before performing beneficial acts on Murderers, Criminals, Grays (Monsters/Animals).
+        ///   Looks up a localized string similar to Query before performing beneficial acts on
+        ///Murderers, Criminals, Grays (Monsters/Animals).
         /// </summary>
         public static string QueryBeneficialActs {
             get {
@@ -3295,7 +3297,7 @@ namespace ClassicUO.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to  Spell Overhead format: ({power} for powerword - {spell} for spell name).
+        ///   Looks up a localized string similar to Spell Overhead format: ({power} for powerword - {spell} for spell name).
         /// </summary>
         public static string SpellOverheadFormat {
             get {
@@ -3687,7 +3689,7 @@ namespace ClassicUO.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Use All Black Backgrounds.
+        ///   Looks up a localized string similar to Opaque background.
         /// </summary>
         public static string UseBlackBackgr {
             get {
@@ -3705,7 +3707,7 @@ namespace ClassicUO.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Use Custom Health Bars.
+        ///   Looks up a localized string similar to Use custom healthbars gump.
         /// </summary>
         public static string UseCustomHPBars {
             get {

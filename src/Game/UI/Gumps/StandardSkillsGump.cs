@@ -44,7 +44,8 @@ namespace ClassicUO.Game.UI.Gumps
         private readonly GumpPic _bottomComment;
         private readonly GumpPic _bottomLine;
 
-        private readonly ScrollArea _container;
+        private readonly ScrollArea _area;
+        private readonly DataBox _container;
         private readonly GumpPic _gumpPic;
         private readonly HitBox _hitBox;
         private bool _isMinimized;
@@ -77,13 +78,20 @@ namespace ClassicUO.Game.UI.Gumps
             Add(_bottomLine = new GumpPic(50, Height - 98, 0x082B, 0));
             Add(_bottomComment = new GumpPic(25, Height - 85, 0x0836, 0));
 
-            _container = new ScrollArea
+            _area = new ScrollArea
             (
                 22, 45 + _diffY + _bottomLine.Height - 10, _scrollArea.Width - 14,
                 _scrollArea.Height - (83 + _diffY), false
             ) {AcceptMouseInput = true, CanMove = true};
 
-            Add(_container);
+            Add(_area);
+
+            _container = new DataBox(0, 0, 1, 1);
+            _container.WantUpdateSize = true;
+            _container.AcceptMouseInput = true;
+            _container.CanMove = true;
+
+            _area.Add(_container);
 
             Add
             (
@@ -116,13 +124,11 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 foreach (SkillsGroup g in SkillsGroupManager.Groups)
                 {
-                    SkillsGroupControl control = new SkillsGroupControl(g, 3, 3)
-                    {
-                        IsMinimized = true
-                    };
-
+                    SkillsGroupControl control = new SkillsGroupControl(g, 3, 3);
                     _skillsControl.Add(control);
                     _container.Add(control);
+
+                    control.IsMinimized = true;
 
                     int count = g.Count;
 
@@ -141,6 +147,8 @@ namespace ClassicUO.Game.UI.Gumps
             _hitBox = new HitBox(160, 0, 23, 24);
             Add(_hitBox);
             _hitBox.MouseUp += _hitBox_MouseUp;
+
+            _container.ReArrangeChildren();
         }
 
         public override GUMP_TYPE GumpType => GUMP_TYPE.GT_SKILLMENU;
@@ -172,6 +180,9 @@ namespace ClassicUO.Game.UI.Gumps
 
                     _gumpPic.IsVisible = true;
                     WantUpdateSize = true;
+
+                    _container.WantUpdateSize = true;
+                    _container.ReArrangeChildren();
                 }
             }
         }
@@ -208,8 +219,11 @@ namespace ClassicUO.Game.UI.Gumps
 
                 SkillsGroupControl control = new SkillsGroupControl(g, 3, 3);
                 _skillsControl.Add(control);
-                control.IsMinimized = !g.IsMaximized;
                 _container.Add(control);
+                control.IsMinimized = !g.IsMaximized;
+
+                _container.WantUpdateSize = true;
+                _container.ReArrangeChildren();
             }
         }
 
@@ -219,13 +233,20 @@ namespace ClassicUO.Game.UI.Gumps
 
             _bottomLine.Y = Height - 98;
             _bottomComment.Y = Height - 85;
-            _container.Height = Height - (150 + _diffY);
+            _area.Height = _container.Height = Height - (150 + _diffY);
             _newGroupButton.Y = Height - 52;
             _skillsLabelSum.Y = _bottomComment.Y + 2;
             _checkReal.Y = _newGroupButton.Y - 6;
             _checkCaps.Y = _newGroupButton.Y + 7;
 
+            bool wantedResize = _container.WantUpdateSize;
+            
             base.Update(totalMS, frameMS);
+
+            if (wantedResize)
+            {
+                _container.ReArrangeChildren();
+            }
         }
 
 
@@ -307,6 +328,8 @@ namespace ClassicUO.Game.UI.Gumps
 
                 X = x;
                 Y = y;
+                Width = 200;
+                Height = 20;
 
                 _group = group;
 
@@ -326,7 +349,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _textbox = new StbTextBox(6, -1, 200, false, FontStyle.Fixed)
                     {
                         X = 16,
-                        Y = -5,
+                        Y = -3,
                         Width = 200,
                         Height = 17,
                         IsEditable = false
@@ -348,8 +371,6 @@ namespace ClassicUO.Game.UI.Gumps
                 Add(_gumpPic);
 
                 Add(_box = new DataBox(0, 0, 0, 0));
-
-                IsMinimized = !group.IsMaximized;
 
                 _textbox.IsEditable = false;
 
@@ -424,8 +445,10 @@ namespace ClassicUO.Game.UI.Gumps
                     _button.ButtonGraphicOver = graphic;
                     _button.ButtonGraphicPressed = graphic;
 
-
                     _box.IsVisible = !value;
+                    _box.WantUpdateSize = true;
+
+                    Parent.WantUpdateSize = true;
 
                     _isMinimized = value;
                     WantUpdateSize = true;

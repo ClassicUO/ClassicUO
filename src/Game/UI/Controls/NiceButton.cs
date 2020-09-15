@@ -35,10 +35,10 @@ namespace ClassicUO.Game.UI.Controls
         private readonly int _groupnumber;
         private bool _isSelected;
 
-        public NiceButton(int x, int y, int w, int h, ButtonAction action, string text, int groupnumber = 0, TEXT_ALIGN_TYPE align = TEXT_ALIGN_TYPE.TS_CENTER) : base(x, y, w, h)
+        public NiceButton(int x, int y, int w, int h, ButtonAction action, string text, int groupnumber = 0, TEXT_ALIGN_TYPE align = TEXT_ALIGN_TYPE.TS_CENTER, ushort hue = 0xFFFF) : base(x, y, w, h)
         {
             _action = action;
-            Add(TextLabel = new Label(text, true, 999, w, 0xFF, FontStyle.BlackBorder | FontStyle.Cropped, align));
+            Add(TextLabel = new Label(text, true, hue, w, 0xFF, FontStyle.BlackBorder | FontStyle.Cropped, align));
             TextLabel.Y = (h - TextLabel.Height) >> 1;
             _groupnumber = groupnumber;
         }
@@ -70,19 +70,7 @@ namespace ClassicUO.Game.UI.Controls
                         return;
                     }
 
-                    IEnumerable<NiceButton> list;
-
-                    if (p is ScrollAreaItem)
-                    {
-                        p = p.Parent;
-
-                        list = p.FindControls<ScrollAreaItem>()
-                                .SelectMany(s => s.Children.OfType<NiceButton>());
-                    }
-                    else
-                    {
-                        list = p.FindControls<NiceButton>();
-                    }
+                    IEnumerable<NiceButton> list = p.FindControls<NiceButton>();
 
                     foreach (NiceButton b in list)
                     {
@@ -97,10 +85,7 @@ namespace ClassicUO.Game.UI.Controls
 
         internal static NiceButton GetSelected(Control p, int group)
         {
-            IEnumerable<NiceButton> list = p is ScrollArea
-                ? p.FindControls<ScrollAreaItem>()
-                   .SelectMany(s => s.Children.OfType<NiceButton>())
-                : p.FindControls<NiceButton>();
+            IEnumerable<NiceButton> list = p.FindControls<NiceButton>();
 
             foreach (NiceButton b in list)
             {

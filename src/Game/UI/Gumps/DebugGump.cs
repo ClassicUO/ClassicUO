@@ -70,7 +70,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             );
 
-            ControlInfo.Layer = UILayer.Over;
+            LayerOrder = UILayer.Over;
 
             WantUpdateSize = true;
         }

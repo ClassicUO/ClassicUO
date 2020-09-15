@@ -124,7 +124,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 ShowBorder = !_isTopMost;
 
-                ControlInfo.Layer = _isTopMost ? UILayer.Over : UILayer.Default;
+                LayerOrder = _isTopMost ? UILayer.Over : UILayer.Default;
             }
         }
 

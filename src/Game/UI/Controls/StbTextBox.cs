@@ -52,11 +52,6 @@ namespace ClassicUO.Game.UI.Controls
             _rendererCaret = RenderedText.Create("_", hue, font, isunicode, (style & FontStyle.BlackBorder) != 0 ? FontStyle.BlackBorder : FontStyle.None, align);
 
             Height = _rendererCaret.Height;
-
-            if (Height < 50)
-            {
-                Height = 50;
-            }
         }
 
         public StbTextBox(List<string> parts, string[] lines) : this(1, parts[0] == "textentrylimited" ? int.Parse(parts[8]) : byte.MaxValue, int.Parse(parts[3]), style: FontStyle.BlackBorder | FontStyle.CropTexture, hue: (ushort) (UInt16Converter.Parse(parts[5]) + 1))

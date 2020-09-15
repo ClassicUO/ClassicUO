@@ -38,8 +38,8 @@ namespace ClassicUO.Game.UI.Gumps
             CanCloseWithEsc = false;
             AcceptMouseInput = false;
 
-            ControlInfo.IsModal = true;
-            ControlInfo.Layer = UILayer.Over;
+            IsModal = true;
+            LayerOrder = UILayer.Over;
             WantUpdateSize = false;
 
             Width = w;
@@ -122,8 +122,8 @@ namespace ClassicUO.Game.UI.Gumps
             CanCloseWithEsc = false;
             AcceptMouseInput = false;
 
-            ControlInfo.IsModal = true;
-            ControlInfo.Layer = UILayer.Over;
+            IsModal = true;
+            LayerOrder = UILayer.Over;
             WantUpdateSize = false;
 
             Width = w;

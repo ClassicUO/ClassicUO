@@ -150,7 +150,7 @@ namespace ClassicUO.Game.UI.Gumps
             background.Width = startX + 1;
 
             //layer
-            ControlInfo.Layer = UILayer.Over;
+            LayerOrder = UILayer.Over;
         }
 
         public bool IsMinimized { get; private set; }

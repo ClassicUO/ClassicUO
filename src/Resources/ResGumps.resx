@@ -349,10 +349,10 @@
     <value>Trees to stumps</value>
   </data>
   <data name="UseBlackBackgr" xml:space="preserve">
-    <value>Use All Black Backgrounds</value>
+    <value>Opaque background</value>
   </data>
   <data name="UseCustomHPBars" xml:space="preserve">
-    <value>Use Custom Health Bars</value>
+    <value>Use custom healthbars gump</value>
   </data>
   <data name="CircleTransType" xml:space="preserve">
     <value>Transparency type:</value>
@@ -457,7 +457,7 @@
     <value>Shadows</value>
   </data>
   <data name="AuraUnderFeet" xml:space="preserve">
-    <value>- Aura under feet:</value>
+    <value>Aura under feet</value>
   </data>
   <data name="AuraType_None" xml:space="preserve">
     <value>None</value>
@@ -587,7 +587,8 @@ delete it?</value>
     <value>Query before beneficial criminal action</value>
   </data>
   <data name="QueryBeneficialActs" xml:space="preserve">
-    <value>Query before performing beneficial acts on Murderers, Criminals, Grays (Monsters/Animals)</value>
+    <value>Query before performing beneficial acts on
+Murderers, Criminals, Grays (Monsters/Animals)</value>
   </data>
   <data name="EnableOverheadSpellFormat" xml:space="preserve">
     <value>Enable Overhead Spell Format</value>
@@ -629,7 +630,7 @@ delete it?</value>
     <value>Neutral Spell Hue</value>
   </data>
   <data name="SpellOverheadFormat" xml:space="preserve">
-    <value> Spell Overhead format: ({power} for powerword - {spell} for spell name)</value>
+    <value>Spell Overhead format: ({power} for powerword - {spell} for spell name)</value>
   </data>
   <data name="EnableCounters" xml:space="preserve">
     <value>Enable Counters</value>
@@ -638,7 +639,8 @@ delete it?</value>
     <value>Highlight On Use</value>
   </data>
   <data name="EnableAbbreviatedAmountCountrs" xml:space="preserve">
-    <value>Enable abbreviated amount values when amount is or exceeds</value>
+    <value>Enable abbreviated amount values
+when amount is or exceeds</value>
   </data>
   <data name="HighlightRedWhenBelow" xml:space="preserve">
     <value>Highlight red when amount is below</value>

@@ -44,7 +44,11 @@ namespace ClassicUO.Game.UI.Controls
             X = x;
             Y = y;
             Width = width;
-            Height = heigth;
+
+            if (heigth > 0)
+            {
+                Height = heigth;
+            }
         }
 
         public GumpPicTiled(List<string> parts) : this(UInt16Converter.Parse(parts[5]))

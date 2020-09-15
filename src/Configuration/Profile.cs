@@ -233,8 +233,6 @@ namespace ClassicUO.Configuration
 
         public bool SallosEasyGrab { get; set; }
 
-        public float Brighlight { get; set; }
-
         public bool JournalDarkMode { get; set; }
 
         public byte ContainersScale { get; set; } = 100;

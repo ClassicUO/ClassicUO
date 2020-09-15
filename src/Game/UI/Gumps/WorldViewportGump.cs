@@ -54,7 +54,7 @@ namespace ClassicUO.Game.UI.Gumps
             CanMove = !ProfileManager.Current.GameWindowLock;
             CanCloseWithEsc = false;
             CanCloseWithRightClick = false;
-            ControlInfo.Layer = UILayer.Under;
+            LayerOrder = UILayer.Under;
             X = ProfileManager.Current.GameWindowPosition.X;
             Y = ProfileManager.Current.GameWindowPosition.Y;
             _worldWidth = ProfileManager.Current.GameWindowSize.X;

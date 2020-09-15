@@ -90,7 +90,6 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
-        //public override GUMP_TYPE GumpType => GUMP_TYPE.GT_TIPNOTICE;
 
         public override void OnButtonClick(int buttonID)
         {
@@ -103,22 +102,7 @@ namespace ClassicUO.Game.UI.Gumps
             base.Dispose();
         }
 
-        public override void Update(double totalMS, double frameMS)
-        {
-            //if (!_textBox.IsDisposed && _textBox.IsChanged)
-            //{
-            //    _textBox.Height = Math.Max(FontsLoader.Instance.GetHeightUnicode(1, _textBox.TxEntry.Text, 220, TEXT_ALIGN_TYPE.TS_LEFT, 0x0) + 20, 40);
-
-            //    foreach (Control c in _scrollArea.Children)
-            //    {
-            //        if (c is ScrollAreaItem)
-            //            c.OnPageChanged();
-            //    }
-            //}
-
-            base.Update(totalMS, frameMS);
-        }
-
+ 
         public override void OnPageChanged()
         {
             Height = _background.SpecialHeight;
@@ -126,7 +110,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             foreach (Control c in _scrollArea.Children)
             {
-                if (c is ScrollAreaItem)
+               // if (c is ScrollAreaItem)
                 {
                     c.OnPageChanged();
                 }

@@ -118,9 +118,9 @@ namespace ClassicUO.Game.UI.Controls
         public ContextMenuShowMenu(List<ContextMenuItemEntry> list)
         {
             WantUpdateSize = true;
-            ControlInfo.ModalClickOutsideAreaClosesThisControl = true;
-            ControlInfo.IsModal = true;
-            ControlInfo.Layer = UILayer.Over;
+            ModalClickOutsideAreaClosesThisControl = true;
+            IsModal = true;
+            LayerOrder = UILayer.Over;
 
             CanMove = false;
             AcceptMouseInput = true;

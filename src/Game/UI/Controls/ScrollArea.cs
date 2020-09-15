@@ -21,6 +21,7 @@
 
 #endregion
 
+using System;
 using System.Linq;
 using ClassicUO.Input;
 using ClassicUO.Renderer;
@@ -65,8 +66,6 @@ namespace ClassicUO.Game.UI.Controls
 
             _scrollBar.MinValue = 0;
             _scrollBar.MaxValue = scroll_max_height >= 0 ? scroll_max_height : Height;
-            //Add((Control)_scrollBar);
-
             _scrollBar.Parent = this;
 
             AcceptMouseInput = true;
@@ -75,16 +74,22 @@ namespace ClassicUO.Game.UI.Controls
             ScrollbarBehaviour = ScrollbarBehaviour.ShowWhenDataExceedFromView;
         }
 
-        public int ScrollMaxHeight { get; set; } = -1;
+
         public Rectangle ScissorRectangle;
 
 
-        public ScrollbarBehaviour ScrollbarBehaviour;
+        public int ScrollMaxHeight { get; set; } = -1;
+        public ScrollbarBehaviour ScrollbarBehaviour { get; set; }
+        public int ScrollValue => _scrollBar.Value;
+        public int ScrollMinValue => _scrollBar.MinValue;
+        public int ScrollMaxValue => _scrollBar.MaxValue;
+
+
 
         public override void Update(double totalMS, double frameMS)
         {
             base.Update(totalMS, frameMS);
-
+            
             CalculateScrollBarMaxValue();
 
             if (ScrollbarBehaviour == ScrollbarBehaviour.ShowAlways)
@@ -111,7 +116,7 @@ namespace ClassicUO.Game.UI.Controls
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
-            Control scrollbar = Children[0];
+            ScrollBarBase scrollbar = (ScrollBarBase) Children[0];
             scrollbar.Draw(batcher, x + scrollbar.X, y + scrollbar.Y);
 
             Rectangle scissor = ScissorStack.CalculateScissors(Matrix.Identity, x + ScissorRectangle.X, y + ScissorRectangle.Y, Width - 14 + ScissorRectangle.Width, Height + ScissorRectangle.Height);
@@ -119,7 +124,6 @@ namespace ClassicUO.Game.UI.Controls
             if (ScissorStack.PushScissors(batcher.GraphicsDevice, scissor))
             {
                 batcher.EnableScissorTest(true);
-                int height = ScissorRectangle.Y;
 
                 for (int i = 1; i < Children.Count; i++)
                 {
@@ -130,18 +134,12 @@ namespace ClassicUO.Game.UI.Controls
                         continue;
                     }
 
-                    child.Y = height - _scrollBar.Value;
+                    int finalY = y + child.Y - scrollbar.Value + ScissorRectangle.Y;
 
-                    if (height + child.Height <= _scrollBar.Value)
+                    //if (finalY + child.Bounds.Height >= scissor.Y && finalY - child.Height < scissor.Bottom)
                     {
-                        // do nothing
+                        child.Draw(batcher, x + child.X, finalY);
                     }
-                    else
-                    {
-                        child.Draw(batcher, x + child.X, y + child.Y);
-                    }
-
-                    height += child.Height;
                 }
 
                 batcher.EnableScissorTest(false);
@@ -150,6 +148,7 @@ namespace ClassicUO.Game.UI.Controls
 
             return true;
         }
+
 
         protected override void OnMouseWheel(MouseEventType delta)
         {
@@ -167,39 +166,6 @@ namespace ClassicUO.Game.UI.Controls
             }
         }
 
-        public override void Remove(Control c)
-        {
-            if (c is ScrollAreaItem)
-            {
-                base.Remove(c);
-            }
-            else
-            {
-                // Try to find the wrapped control
-                ScrollAreaItem wrapper = Children.OfType<ScrollAreaItem>()
-                                                 .FirstOrDefault(o => o.Children.Contains(c));
-
-                base.Remove(wrapper);
-            }
-        }
-
-        public override void Add(Control c, int page = 0)
-        {
-            ScrollAreaItem item = new ScrollAreaItem
-            {
-                CanMove = true
-            };
-
-            item.Add(c);
-            base.Add(item, page);
-        }
-
-        public void Add(ScrollAreaItem c, int page = 0)
-        {
-            c.CanMove = true;
-            base.Add(c, page);
-        }
-
         public override void Clear()
         {
             for (int i = 1; i < Children.Count; i++)
@@ -213,24 +179,40 @@ namespace ClassicUO.Game.UI.Controls
         {
             _scrollBar.Height = ScrollMaxHeight >= 0 ? ScrollMaxHeight : Height;
             bool maxValue = _scrollBar.Value == _scrollBar.MaxValue && _scrollBar.MaxValue != 0;
-            int height = ScissorRectangle.Y;
+
+            int startX = 0, startY = 0, endX = 0, endY = 0;
 
             for (int i = 1; i < Children.Count; i++)
             {
-                if (Children[i]
-                    .IsVisible)
+                Control c = Children[i];
+
+                if (c.IsVisible && !c.IsDisposed)
                 {
-                    height += Children[i]
-                        .Height;
+                    if (c.X < startX)
+                    {
+                        startX = c.X;
+                    }
+
+                    if (c.Y < startY)
+                    {
+                        startY = c.Y;
+                    }
+
+                    if (c.Bounds.Right > endX)
+                    {
+                        endX = c.Bounds.Right;
+                    }
+
+                    if (c.Bounds.Bottom > endY)
+                    {
+                        endY = c.Bounds.Bottom;
+                    }
                 }
             }
 
-            height -= _scrollBar.Height;
-
-            height -= ScissorRectangle.Y + ScissorRectangle.Height;
-
-            //if (_isNormalScroll)
-            //    height += 40;
+            int width = Math.Abs(startX) + Math.Abs(endX);
+            int height = Math.Abs(startY) + Math.Abs(endY) - _scrollBar.Height;
+            height = Math.Max(0, height - (-ScissorRectangle.Y + ScissorRectangle.Height));
 
             if (height > 0)
             {
@@ -243,32 +225,15 @@ namespace ClassicUO.Game.UI.Controls
             }
             else
             {
-                _scrollBar.MaxValue = 0;
-                _scrollBar.Value = 0;
+                _scrollBar.Value = _scrollBar.MaxValue = 0;
             }
-        }
-    }
+            
+            _scrollBar.UpdateOffset(0, Offset.Y);
 
-    internal class ScrollAreaItem : Control
-    {
-        public override void Update(double totalMS, double frameMS)
-        {
-            base.Update(totalMS, frameMS);
-
-            if (Children.Count == 0)
+            for (int i = 1; i < Children.Count; i++)
             {
-                Dispose();
+                Children[i].UpdateOffset(0, -_scrollBar.Value + ScissorRectangle.Y);
             }
-
-            WantUpdateSize = true;
-        }
-
-        public override void OnPageChanged()
-        {
-            int maxheight = Children.Count > 0 ? Children.Sum(o => o.IsVisible ? o.Y < 0 ? o.Height + o.Y : o.Height : 0) : 0;
-            IsVisible = maxheight > 0;
-            Height = maxheight;
-            Parent?.OnPageChanged();
         }
     }
 }

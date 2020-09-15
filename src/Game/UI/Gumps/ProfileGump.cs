@@ -38,7 +38,7 @@ namespace ClassicUO.Game.UI.Gumps
         private bool _isMinimized;
         private readonly string _originalText;
         private readonly ScrollArea _scrollArea;
-        private readonly ExpandableScroll _scrollExp;
+        private readonly DataBox _databox;
         private readonly StbTextBox _textBox;
 
         public ProfileGump(uint serial, string header, string footer, string body, bool canEdit) : base(serial == World.Player.Serial ? serial = Constants.PROFILE_LOCALSERIAL : serial, serial)
@@ -50,50 +50,55 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add(_gumpPic = new GumpPic(143, 0, 0x82D, 0));
             _gumpPic.MouseDoubleClick += _picBase_MouseDoubleClick;
-            Add(_scrollExp = new ExpandableScroll(0, _diffY, Height - _diffY, 0x0820));
-            _scrollArea = new ScrollArea(0, 32 + _diffY, 272, Height - (96 + _diffY), false);
+          
+            Add(new ExpandableScroll(0, _diffY, Height - _diffY, 0x0820));
+            _scrollArea = new ScrollArea(22, 32 + _diffY, 272 - 22, Height - (96 + _diffY), false);
 
-            Control c = new Label(header, true, 0, font: 1, maxwidth: 140)
+            Label topText = new Label(header, true, 0, font: 1, maxwidth: 140)
             {
-                X = 85,
-                Y = 0
+                X = 53,
+                Y = 6
             };
+            _scrollArea.Add(topText);
 
-            _scrollArea.Add(c);
-            AddHorizontalBar(_scrollArea, 92, 35, 220);
+            int offsetY = topText.Height - 15;
+
+            _scrollArea.Add(new GumpPic(4, offsetY, 0x005C, 0));
+            _scrollArea.Add(new GumpPicTiled(56, offsetY, 138, 0, 0x005D));
+            _scrollArea.Add(new GumpPic(194, offsetY, 0x005E, 0));
+
+            offsetY += 44;
 
             _textBox = new StbTextBox(1, -1, 220)
             {
-                Height = FontsLoader.Instance.GetHeightUnicode(1, body, 220, TEXT_ALIGN_TYPE.TS_LEFT, 0x0),
                 Width = 220,
-                X = 35,
-                Y = 0,
+                X = 4,
+                Y = offsetY,
                 IsEditable = canEdit,
                 Multiline = true
             };
-
             _originalText = body;
-            _textBox.SetText(body);
-
-            if (_textBox.Height < 50)
-            {
-                _textBox.Height = 50;
-            }
-
             _textBox.TextChanged += _textBox_TextChanged;
+            _textBox.SetText(body);
             _scrollArea.Add(_textBox);
-            AddHorizontalBar(_scrollArea, 95, 35, 220);
 
-            _scrollArea.Add
+
+            _databox = new DataBox(4, _textBox.Height + 3, 1, 1);
+            _databox.WantUpdateSize = true;
+
+            _databox.Add(new GumpPic(4, 0, 0x005F, 0));
+            _databox.Add(new GumpPicTiled(13, 0 + 9, 197, 0, 0x0060));
+            _databox.Add(new GumpPic(210, 0, 0x0061, 0));
+            _databox.Add
             (
                 new Label(footer, true, 0, font: 1, maxwidth: 220)
                 {
-                    X = 35,
-                    Y = 0
+                    X = 2,
+                    Y = 26
                 }
             );
-
             Add(_scrollArea);
+            _scrollArea.Add(_databox);
 
             Add(_hitBox = new HitBox(143, 0, 23, 24));
             _hitBox.MouseUp += _hitBox_MouseUp;
@@ -130,17 +135,19 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
+
+        public override void Update(double totalMS, double frameMS)
+        {
+            _scrollArea.Height = Height - (96 + _diffY);
+            _databox.Y = _textBox.Bounds.Bottom + 3;
+            _databox.WantUpdateSize = true;
+
+            base.Update(totalMS, frameMS);
+        }
+
         private void _textBox_TextChanged(object sender, EventArgs e)
         {
             _textBox.Height = Math.Max(FontsLoader.Instance.GetHeightUnicode(1, _textBox.Text, 220, TEXT_ALIGN_TYPE.TS_LEFT, 0x0) + 5, 20);
-
-            foreach (Control c in _scrollArea.Children)
-            {
-                if (c is ScrollAreaItem)
-                {
-                    c.OnPageChanged();
-                }
-            }
         }
 
 
@@ -174,61 +181,5 @@ namespace ClassicUO.Game.UI.Gumps
 
             base.Dispose();
         }
-
-        public override void Update(double totalMS, double frameMS)
-        {
-            //if (!_textBox.IsDisposed && _textBox.IsChanged)
-            //{
-            //    _textBox.Height = Math.Max(FontsLoader.Instance.GetHeightUnicode(1, _textBox.TxEntry.Text, 220, TEXT_ALIGN_TYPE.TS_LEFT, 0x0) + 20, 40);
-
-            //    foreach (Control c in _scrollArea.Children)
-            //    {
-            //        if (c is ScrollAreaItem)
-            //            c.OnPageChanged();
-            //    }
-            //}
-
-            base.Update(totalMS, frameMS);
-        }
-
-        private void AddHorizontalBar(ScrollArea area, ushort start, int x, int width)
-        {
-            UOTexture32 startBounds = GumpsLoader.Instance.GetTexture(start);
-            UOTexture32 middleBounds = GumpsLoader.Instance.GetTexture((ushort) (start + 1));
-            UOTexture32 endBounds = GumpsLoader.Instance.GetTexture((ushort) (start + 2));
-
-            PrivateContainer container = new PrivateContainer();
-
-            Control c = new GumpPic(x, 0, start, 0);
-
-            container.Add(c);
-            container.Add(new GumpPicWithWidth(x + startBounds.Width, (startBounds.Height - middleBounds.Height) >> 1, (ushort) (start + 1), 0, width - startBounds.Width - endBounds.Width));
-            container.Add(new GumpPic(x + width - endBounds.Width, 0, (ushort) (start + 2), 0));
-
-            area.Add(container);
-        }
-
-        public override void OnPageChanged()
-        {
-            Height = _scrollExp.SpecialHeight + _diffY;
-            _scrollArea.Height = _scrollExp.SpecialHeight - (96 + _diffY);
-
-            foreach (Control c in _scrollArea.Children)
-            {
-                if (c is ScrollAreaItem)
-                {
-                    c.OnPageChanged();
-                }
-            }
-        }
-
-        private class PrivateContainer : Control
-        {
-        }
-
-        //public override void OnKeyboardReturn(int textID, string text)
-        //{
-        //    if ((MultiLineBox.PasteRetnCmdID & textID) != 0 && !string.IsNullOrEmpty(text)) _textBox.TxEntry.InsertString(text.Replace("\r", string.Empty));
-        //}
     }
 }

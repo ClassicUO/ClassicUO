@@ -42,10 +42,9 @@ using SDL2;
 
 namespace ClassicUO.Game.Managers
 {
-    internal class MacroManager
+    internal class MacroManager : LinkedObject
     {
         public static readonly string[] MacroNames = Enum.GetNames(typeof(MacroType));
-        private Macro _firstNode;
         private readonly uint[] _itemsInHand = new uint[2];
         private MacroObject _lastMacro;
         private long _nextTimer;
@@ -114,7 +113,7 @@ namespace ClassicUO.Game.Managers
                 {
                     Macro macro = new Macro(xml.GetAttribute("name"));
                     macro.Load(xml);
-                    AppendMacro(macro);
+                    PushToBack(macro);
                 }
             }
         }
@@ -147,77 +146,77 @@ namespace ClassicUO.Game.Managers
 
         private void CreateDefaultMacros()
         {
-            AppendMacro
+            PushToBack
             (
                 new Macro(ResGeneral.Paperdoll, (SDL.SDL_Keycode) 112, true, false, false)
                 {
-                    FirstNode = new MacroObject((MacroType) 8, (MacroSubType) 10)
+                    Items = new MacroObject((MacroType) 8, (MacroSubType) 10)
                     {
                         SubMenuType = 1
                     }
                 }
             );
 
-            AppendMacro
+            PushToBack
             (
                 new Macro(ResGeneral.Options, (SDL.SDL_Keycode) 111, true, false, false)
                 {
-                    FirstNode = new MacroObject((MacroType) 8, (MacroSubType) 9)
+                    Items = new MacroObject((MacroType) 8, (MacroSubType) 9)
                     {
                         SubMenuType = 1
                     }
                 }
             );
 
-            AppendMacro
+            PushToBack
             (
                 new Macro(ResGeneral.Journal, (SDL.SDL_Keycode) 106, true, false, false)
                 {
-                    FirstNode = new MacroObject((MacroType) 8, (MacroSubType) 12)
+                    Items = new MacroObject((MacroType) 8, (MacroSubType) 12)
                     {
                         SubMenuType = 1
                     }
                 }
             );
 
-            AppendMacro
+            PushToBack
             (
                 new Macro(ResGeneral.Backpack, (SDL.SDL_Keycode) 105, true, false, false)
                 {
-                    FirstNode = new MacroObject((MacroType) 8, (MacroSubType) 16)
+                    Items = new MacroObject((MacroType) 8, (MacroSubType) 16)
                     {
                         SubMenuType = 1
                     }
                 }
             );
 
-            AppendMacro
+            PushToBack
             (
                 new Macro(ResGeneral.Radar, (SDL.SDL_Keycode) 114, true, false, false)
                 {
-                    FirstNode = new MacroObject((MacroType) 8, (MacroSubType) 17)
+                    Items = new MacroObject((MacroType) 8, (MacroSubType) 17)
                     {
                         SubMenuType = 1
                     }
                 }
             );
 
-            AppendMacro
+            PushToBack
             (
                 new Macro(ResGeneral.Bow, (SDL.SDL_Keycode) 98, false, true, false)
                 {
-                    FirstNode = new MacroObject((MacroType) 18, 0)
+                    Items = new MacroObject((MacroType) 18, 0)
                     {
                         SubMenuType = 0
                     }
                 }
             );
 
-            AppendMacro
+            PushToBack
             (
                 new Macro(ResGeneral.Salute, (SDL.SDL_Keycode) 115, false, true, false)
                 {
-                    FirstNode = new MacroObject((MacroType) 19, 0)
+                    Items = new MacroObject((MacroType) 19, 0)
                     {
                         SubMenuType = 0
                     }
@@ -226,69 +225,14 @@ namespace ClassicUO.Game.Managers
         }
 
 
-        public void Clear()
-        {
-            while (_firstNode != null)
-            {
-                RemoveMacro(_firstNode);
-            }
-        }
-
-
-        public void AppendMacro(Macro macro)
-        {
-            if (_firstNode == null)
-            {
-                _firstNode = macro;
-            }
-            else
-            {
-                Macro o = _firstNode;
-
-                while (o.Right != null)
-                {
-                    o = o.Right;
-                }
-
-                o.Right = macro;
-                macro.Left = o;
-                macro.Right = null;
-            }
-        }
-
-        public void RemoveMacro(Macro macro)
-        {
-            if (_firstNode == null || macro == null)
-            {
-                return;
-            }
-
-            if (_firstNode == macro)
-            {
-                _firstNode = macro.Right;
-            }
-
-            if (macro.Right != null)
-            {
-                macro.Right.Left = macro.Left;
-            }
-
-            if (macro.Left != null)
-            {
-                macro.Left.Right = macro.Right;
-            }
-
-            macro.Left = null;
-            macro.Right = null;
-        }
-
+       
         public List<Macro> GetAllMacros()
         {
-            Macro m = _firstNode;
+            Macro m = (Macro) Items;
 
-            while (m?.Left != null)
+            while (m?.Previous != null)
             {
-                m = m.Left;
+                m = (Macro) m.Previous;
             }
 
             List<Macro> macros = new List<Macro>();
@@ -304,7 +248,7 @@ namespace ClassicUO.Game.Managers
                     break;
                 }
 
-                m = m.Right;
+                m = (Macro) m.Next;
             }
 
             return macros;
@@ -313,7 +257,7 @@ namespace ClassicUO.Game.Managers
 
         public Macro FindMacro(SDL.SDL_Keycode key, bool alt, bool ctrl, bool shift)
         {
-            Macro obj = _firstNode;
+            Macro obj = (Macro) Items;
 
             while (obj != null)
             {
@@ -322,15 +266,15 @@ namespace ClassicUO.Game.Managers
                     break;
                 }
 
-                obj = obj.Right;
+                obj = (Macro) obj.Next;
             }
 
             return obj;
         }
-
+        
         public Macro FindMacro(string name)
         {
-            Macro obj = _firstNode;
+            Macro obj = (Macro) Items;
 
             while (obj != null)
             {
@@ -339,7 +283,7 @@ namespace ClassicUO.Game.Managers
                     break;
                 }
 
-                obj = obj.Right;
+                obj = (Macro) obj.Next;
             }
 
             return obj;
@@ -366,7 +310,7 @@ namespace ClassicUO.Game.Managers
                         return;
 
                     case 0:
-                        _lastMacro = _lastMacro?.Right;
+                        _lastMacro = (MacroObject) _lastMacro?.Next;
 
                         break;
                 }
@@ -1637,7 +1581,7 @@ namespace ClassicUO.Game.Managers
     }
 
 
-    internal class Macro : IEquatable<Macro>, INode<Macro>
+    internal class Macro : LinkedObject, IEquatable<Macro>
     {
         public Macro(string name, SDL.SDL_Keycode key, bool alt, bool ctrl, bool shift) : this(name)
         {
@@ -1659,8 +1603,6 @@ namespace ClassicUO.Game.Managers
         public bool Ctrl { get; set; }
         public bool Shift { get; set; }
 
-        public MacroObject FirstNode { get; set; }
-
         public bool Equals(Macro other)
         {
             if (other == null)
@@ -1671,28 +1613,28 @@ namespace ClassicUO.Game.Managers
             return Key == other.Key && Alt == other.Alt && Ctrl == other.Ctrl && Shift == other.Shift && Name == other.Name;
         }
 
-        public Macro Left { get; set; }
-        public Macro Right { get; set; }
+        //public Macro Left { get; set; }
+        //public Macro Right { get; set; }
 
-        private void AppendMacro(MacroObject item)
-        {
-            if (FirstNode == null)
-            {
-                FirstNode = item;
-            }
-            else
-            {
-                MacroObject o = FirstNode;
+        //private void AppendMacro(MacroObject item)
+        //{
+        //    if (FirstNode == null)
+        //    {
+        //        FirstNode = item;
+        //    }
+        //    else
+        //    {
+        //        MacroObject o = FirstNode;
 
-                while (o.Right != null)
-                {
-                    o = o.Right;
-                }
+        //        while (o.Right != null)
+        //        {
+        //            o = o.Right;
+        //        }
 
-                o.Right = item;
-                item.Left = o;
-            }
-        }
+        //        o.Right = item;
+        //        item.Left = o;
+        //    }
+        //}
 
 
         public void Save(XmlTextWriter writer)
@@ -1706,7 +1648,7 @@ namespace ClassicUO.Game.Managers
 
             writer.WriteStartElement("actions");
 
-            for (MacroObject action = FirstNode; action != null; action = action.Right)
+            for (MacroObject action = (MacroObject) Items; action != null; action = (MacroObject) action.Next)
             {
                 writer.WriteStartElement("action");
                 writer.WriteAttributeString("code", ((int) action.Code).ToString());
@@ -1792,7 +1734,8 @@ namespace ClassicUO.Game.Managers
                     }
 
                     m.SubMenuType = subMenuType;
-                    AppendMacro(m);
+                    
+                    PushToBack(m);
                 }
             }
         }
@@ -1830,7 +1773,7 @@ namespace ClassicUO.Game.Managers
             Macro macro = new Macro(name, 0, false, false, false);
             MacroObject item = new MacroObject(MacroType.None, MacroSubType.MSC_NONE);
 
-            macro.AppendMacro(item);
+            macro.PushToBack(item);
 
             return macro;
         }
@@ -1902,7 +1845,7 @@ namespace ClassicUO.Game.Managers
     }
 
 
-    internal class MacroObject : INode<MacroObject>
+    internal class MacroObject : LinkedObject
     {
         public MacroObject(MacroType code, MacroSubType sub)
         {
@@ -1960,9 +1903,6 @@ namespace ClassicUO.Game.Managers
         public MacroType Code { get; set; }
         public MacroSubType SubCode { get; set; }
         public sbyte SubMenuType { get; set; }
-
-        public MacroObject Left { get; set; }
-        public MacroObject Right { get; set; }
 
         public virtual bool HasString()
         {
