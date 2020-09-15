@@ -2136,7 +2136,22 @@ namespace ClassicUO.Game.UI.Gumps
                 Y = y
             };
 
-            area?.Add(elem);
+
+            if (area != null)
+            {
+                Label text = AddLabel(area, label, x, y);
+
+                if (set_down)
+                {
+                    elem.Y = text.Bounds.Bottom + 2;
+                }
+                else
+                {
+                    elem.X = text.Bounds.Right + 2;
+                }
+
+                area.Add(elem);
+            }
 
             return elem;
         }
