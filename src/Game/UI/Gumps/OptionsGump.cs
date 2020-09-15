@@ -323,7 +323,15 @@ namespace ClassicUO.Game.UI.Gumps
             section2.PopIndent();
             section2.Add(_showMobileNameIncoming = AddCheckBox(null, ResGumps.ShowIncMobiles, ProfileManager.Current.ShowNewMobileNameIncoming, startX, startY));
             section2.Add(_showCorpseNameIncoming = AddCheckBox(null, ResGumps.ShowIncCorpses, ProfileManager.Current.ShowNewCorpseNameIncoming, startX, startY));
-
+            section2.Add(AddLabel(null, ResGumps.AuraUnderFeet, startX, startY));
+            section2.AddRight(_auraType = AddCombobox(null, new[] { ResGumps.AuraType_None, ResGumps.AuraType_Warmode, ResGumps.AuraType_CtrlShift, ResGumps.AuraType_Always }, ProfileManager.Current.AuraUnderFeetType, startX, startY, 100), 2);
+            section2.PushIndent();
+            section2.Add(_partyAura = AddCheckBox(null, ResGumps.CustomColorAuraForPartyMembers, ProfileManager.Current.PartyAura, startX, startY));
+            section2.PushIndent();
+            section2.Add(_partyAuraColorPickerBox = AddColorBox(null, startX, startY, ProfileManager.Current.PartyAuraHue, ResGumps.PartyAuraColor));
+            section2.AddRight(AddLabel(null, ResGumps.PartyAuraColor, 0, 0));
+            section2.PopIndent();
+            section2.PopIndent();
 
             SettingsSection section3 = AddSettingsSection(box, "Gumps & Context");
             section3.Y = section2.Bounds.Bottom + 40;
@@ -453,166 +461,122 @@ namespace ClassicUO.Game.UI.Gumps
             _sliderFPS = AddHSlider(rightArea, Constants.MIN_FPS, Constants.MAX_FPS, Settings.GlobalSettings.FPS, startX, startY, 250);
             startY += text.Bounds.Bottom + 5;
             _reduceFPSWhenInactive = AddCheckBox(rightArea, ResGumps.FPSInactive, ProfileManager.Current.ReduceFPSWhenInactive, startX, startY);
-            startY += _reduceFPSWhenInactive.Height + 2 + 20;
+            startY += _reduceFPSWhenInactive.Height + 2;
+          
             startX = 5;
-            _gameWindowFullsize = AddCheckBox(rightArea, ResGumps.AlwaysUseFullsizeGameWindow, ProfileManager.Current.GameWindowFullSize, startX, startY);
-            startY += _gameWindowFullsize.Height + 2;
-            _windowBorderless = AddCheckBox(rightArea, ResGumps.BorderlessWindow, ProfileManager.Current.WindowBorderless, startX, startY);
-            startY += _windowBorderless.Height + 2;
-            _gameWindowLock = AddCheckBox(rightArea, ResGumps.LockGameWindowMovingResizing, ProfileManager.Current.GameWindowLock, startX, startY);
-            startY += _gameWindowLock.Height + 2;
-
-
-            text = AddLabel(rightArea, ResGumps.GamePlayWindowPosition, startX, startY);
-            startX += text.Width + 5;
-
-            _gameWindowPositionX = AddInputField
-            (
-                rightArea,
-                startX, startY,
-                50,
-                TEXTBOX_HEIGHT,
-                null,
-                80,
-                false,
-                true,
-                5
-            );
-            _gameWindowPositionX.SetText(ProfileManager.Current.GameWindowPosition.X.ToString());
-
-            startX += _gameWindowPositionX.Width + 5;
-            startX += 5;
-
-            _gameWindowPositionY = AddInputField
-            (
-                rightArea,
-                startX, startY,
-                50,
-                TEXTBOX_HEIGHT,
-                null,
-                80,
-                false,
-                true,
-                5
-            );
-            _gameWindowPositionY.SetText(ProfileManager.Current.GameWindowPosition.Y.ToString());
-
-            startX = text.X;
-            startY += _gameWindowPositionY.Height + 2;
-
-            startY += 5;
-
-            text = AddLabel(rightArea, ResGumps.GamePlayWindowSize, startX, startY);
-            startX += text.Width + 5;
-
-            _gameWindowWidth = AddInputField
-            (
-                rightArea,
-                startX, startY,
-                50,
-                TEXTBOX_HEIGHT,
-                null,
-                80,
-                false,
-                true,
-                5
-            );
-            _gameWindowWidth.SetText(ProfileManager.Current.GameWindowSize.X.ToString());
-
-            startX += _gameWindowWidth.Width + 5;
-            startX += 5;
-            _gameWindowHeight = AddInputField
-            (
-                rightArea,
-                startX, startY,
-                50,
-                TEXTBOX_HEIGHT,
-                null,
-                80,
-                false,
-                true,
-                5
-            );
-            _gameWindowHeight.SetText(ProfileManager.Current.GameWindowSize.Y.ToString());
-
-            startX = 5;
-            startY += _gameWindowHeight.Height + 2;
-
             startY += 20;
 
-            text = AddLabel(rightArea, ResGumps.DefaultZoom, startX, startY);
-            startX += text.Width + 5;
-            _sliderZoom = AddHSlider(rightArea, 0, Client.Game.Scene.Camera.ZoomValuesCount, Client.Game.Scene.Camera.ZoomIndex, startX, startY, 100);
-            startX = 40;
-            startY += text.Height + 2;
-            _zoomCheckbox = AddCheckBox(rightArea, ResGumps.EnableMouseWheelForZoom, ProfileManager.Current.EnableMousewheelScaleZoom, startX, startY);
-            startY += _zoomCheckbox.Height + 2;
-            _restorezoomCheckbox = AddCheckBox(rightArea, ResGumps.ReleasingCtrlRestoresScale, ProfileManager.Current.RestoreScaleAfterUnpressCtrl, startX, startY);
-           
-            startX = 5;
-            startY += _restorezoomCheckbox.Height + 2;
-            
-            _enableDeathScreen = AddCheckBox(rightArea, ResGumps.EnableDeathScreen, ProfileManager.Current.EnableDeathScreen, startX, startY);
-            startX += _enableDeathScreen.Width + 20;
-            _enableBlackWhiteEffect = AddCheckBox(rightArea, ResGumps.BlackWhiteModeForDeadPlayer, ProfileManager.Current.EnableBlackWhiteEffect, startX, startY);
 
-            startX = 5;
-            startY += _enableBlackWhiteEffect.Height + 2;
+            DataBox box = new DataBox(startX, startY, rightArea.Width - 15, 1);
+            box.WantUpdateSize = true;
+            rightArea.Add(box);
 
-            
-            _altLights = AddCheckBox(rightArea, ResGumps.AlternativeLights, ProfileManager.Current.UseAlternativeLights, startX, startY);
-            startY += _altLights.Height + 2;
-            _enableLight = AddCheckBox(rightArea, ResGumps.LightLevel, ProfileManager.Current.UseCustomLightLevel, startX, startY);
-            startX += _enableLight.Width + 5;
-            _lightBar = AddHSlider(rightArea, 0, 0x1E, 0x1E - ProfileManager.Current.LightLevel, startX, startY, 250);
-            startX = 40;
-            startY += _enableLight.Height + 2;
-            _darkNights = AddCheckBox(rightArea, ResGumps.DarkNights, ProfileManager.Current.UseDarkNights, startX, startY);
-            startY += _darkNights.Height + 2;
-            startX = 5;
-        
-            _useColoredLights = AddCheckBox(rightArea, ResGumps.UseColoredLights, ProfileManager.Current.UseColoredLights, startX, startY);
-            startY += _useColoredLights.Height + 2;
+            SettingsSection section = AddSettingsSection(box, "Game window");
+            section.Add(_gameWindowFullsize = AddCheckBox(null, ResGumps.AlwaysUseFullsizeGameWindow, ProfileManager.Current.GameWindowFullSize, startX, startY));
+            section.Add(_windowBorderless = AddCheckBox(null, ResGumps.BorderlessWindow, ProfileManager.Current.WindowBorderless, startX, startY));
+            section.Add(_gameWindowLock = AddCheckBox(null, ResGumps.LockGameWindowMovingResizing, ProfileManager.Current.GameWindowLock, startX, startY));
+            section.Add(AddLabel(null, ResGumps.GamePlayWindowPosition, startX, startY));
+            section.AddRight(_gameWindowPositionX = AddInputField
+                             (
+                                 null,
+                                 startX, startY,
+                                 50,
+                                 TEXTBOX_HEIGHT,
+                                 null,
+                                 80,
+                                 false,
+                                 true,
+                                 5
+                             ), 4);
+            _gameWindowPositionX.SetText(ProfileManager.Current.GameWindowPosition.X.ToString());
 
-
-            _enableShadows = AddCheckBox(rightArea, ResGumps.Shadows, ProfileManager.Current.ShadowsEnabled, startX, startY);
-            startY += _enableShadows.Height + 2;
-
-            text = AddLabel(rightArea, ResGumps.AuraUnderFeet, startX, startY);
-            startX += text.Width + 5;
-            _auraType = AddCombobox(rightArea, new[] {ResGumps.AuraType_None, ResGumps.AuraType_Warmode, ResGumps.AuraType_CtrlShift, ResGumps.AuraType_Always}, ProfileManager.Current.AuraUnderFeetType, startX, startY, 100);
-            startY += _auraType.Height + 2;
-            startX = 40;
-            _partyAura = AddCheckBox(rightArea, ResGumps.CustomColorAuraForPartyMembers, ProfileManager.Current.PartyAura, startX, startY);
-            startX += _partyAura.Width + 10;
-            _partyAuraColorPickerBox = AddColorBox(rightArea, startX, startY, ProfileManager.Current.PartyAuraHue, ResGumps.PartyAuraColor);
-
-            startX = 5;
-            startY += _partyAura.Height + 2;
-
-            _runMouseInSeparateThread = AddCheckBox(rightArea, ResGumps.RunMouseInASeparateThread, Settings.GlobalSettings.RunMouseInASeparateThread, startX, startY);
-            startY += _runMouseInSeparateThread.Height + 2;
-            _auraMouse = AddCheckBox(rightArea, ResGumps.AuraOnMouseTarget, ProfileManager.Current.AuraOnMouse, startX, startY);
-            startY += _auraMouse.Height + 2;
-            
-
-            //_xBR = AddCheckBox(rightArea, ResGumps.UseXBREffectBETA, ProfileManager.Current.UseXBR, startX, startY);
-            // TODO: due to the new rendering engine, xBR cannot be applied directly to the World render target
-            //       we need a PostProcessing system
-            //_xBR.IsVisible = false;
+            section.AddRight(_gameWindowPositionY = AddInputField
+                             (
+                                 null,
+                                 startX, startY,
+                                 50,
+                                 TEXTBOX_HEIGHT,
+                                 null,
+                                 80,
+                                 false,
+                                 true,
+                                 5
+                             ));
+            _gameWindowPositionY.SetText(ProfileManager.Current.GameWindowPosition.Y.ToString());
 
 
+            section.Add(AddLabel(null, ResGumps.GamePlayWindowSize, startX, startY));
+            section.AddRight(_gameWindowWidth = AddInputField
+                             (
+                                 null,
+                                 startX, startY,
+                                 50,
+                                 TEXTBOX_HEIGHT,
+                                 null,
+                                 80,
+                                 false,
+                                 true,
+                                 5
+                             ));
+            _gameWindowWidth.SetText(ProfileManager.Current.GameWindowSize.X.ToString());
 
-            text = AddLabel(rightArea, ResGumps.FilterType, startX, startY);
-            startX += text.Width + 5;
-            _filterType = AddCombobox
-            (
-                rightArea, new[] {ResGumps.OFF, string.Format(ResGumps.FilterTypeFormatON, ResGumps.ON, ResGumps.AnisotropicClamp), string.Format(ResGumps.FilterTypeFormatON, ResGumps.ON, ResGumps.LinearClamp)},
-                ProfileManager.Current.FilterType, startX, startY, 200
-            );
+           section.AddRight(_gameWindowHeight = AddInputField
+                            (
+                                null,
+                                startX, startY,
+                                50,
+                                TEXTBOX_HEIGHT,
+                                null,
+                                80,
+                                false,
+                                true,
+                                5
+                            ));
+            _gameWindowHeight.SetText(ProfileManager.Current.GameWindowSize.Y.ToString());
 
-            startX = 5;
-            startY += text.Height + 2;
+
+
+            SettingsSection section2 = AddSettingsSection(box, "Zoom");
+            section2.Y = section.Bounds.Bottom + 40;
+            section2.Add(AddLabel(null, ResGumps.DefaultZoom, startX, startY));
+            section2.AddRight(_sliderZoom = AddHSlider(null, 0, Client.Game.Scene.Camera.ZoomValuesCount, Client.Game.Scene.Camera.ZoomIndex, startX, startY, 100));
+            section2.Add(_zoomCheckbox = AddCheckBox(null, ResGumps.EnableMouseWheelForZoom, ProfileManager.Current.EnableMousewheelScaleZoom, startX, startY));
+            section2.Add(_restorezoomCheckbox = AddCheckBox(null, ResGumps.ReleasingCtrlRestoresScale, ProfileManager.Current.RestoreScaleAfterUnpressCtrl, startX, startY));
+
+
+            SettingsSection section3 = AddSettingsSection(box, "Lights");
+            section3.Y = section2.Bounds.Bottom + 40;
+            section3.Add(_altLights = AddCheckBox(null, ResGumps.AlternativeLights, ProfileManager.Current.UseAlternativeLights, startX, startY));
+            section3.Add(_enableLight = AddCheckBox(null, ResGumps.LightLevel, ProfileManager.Current.UseCustomLightLevel, startX, startY));
+            section3.AddRight(_lightBar = AddHSlider(null, 0, 0x1E, 0x1E - ProfileManager.Current.LightLevel, startX, startY, 250));
+            section3.PushIndent();
+            section3.Add(_darkNights = AddCheckBox(null, ResGumps.DarkNights, ProfileManager.Current.UseDarkNights, startX, startY));
+            section3.PopIndent();
+            section3.Add(_useColoredLights = AddCheckBox(null, ResGumps.UseColoredLights, ProfileManager.Current.UseColoredLights, startX, startY));
+
+
+            SettingsSection section4 = AddSettingsSection(box, "Misc");
+            section4.Y = section3.Bounds.Bottom + 40;
+            section4.Add(_enableDeathScreen = AddCheckBox(null, ResGumps.EnableDeathScreen, ProfileManager.Current.EnableDeathScreen, startX, startY));
+            section4.AddRight(_enableBlackWhiteEffect = AddCheckBox(null, ResGumps.BlackWhiteModeForDeadPlayer, ProfileManager.Current.EnableBlackWhiteEffect, startX, startY));
+            section4.Add(_runMouseInSeparateThread = AddCheckBox(null, ResGumps.RunMouseInASeparateThread, Settings.GlobalSettings.RunMouseInASeparateThread, startX, startY));
+            section4.Add(_auraMouse = AddCheckBox(null, ResGumps.AuraOnMouseTarget, ProfileManager.Current.AuraOnMouse, startX, startY));
+
+
+            SettingsSection section5 = AddSettingsSection(box, "Shadows");
+            section5.Y = section4.Bounds.Bottom + 40;
+            section5.Add(_enableShadows = AddCheckBox(null, ResGumps.Shadows, ProfileManager.Current.ShadowsEnabled, startX, startY));
+
+
+            SettingsSection section6 = AddSettingsSection(box, "Filters");
+            section6.Y = section5.Bounds.Bottom + 40;
+            section6.Add(AddLabel(null, ResGumps.FilterType, startX, startY));
+            section6.AddRight(_filterType = AddCombobox
+                              (
+                                  null, new[] { ResGumps.OFF, string.Format(ResGumps.FilterTypeFormatON, ResGumps.ON, ResGumps.AnisotropicClamp), string.Format(ResGumps.FilterTypeFormatON, ResGumps.ON, ResGumps.LinearClamp) },
+                                  ProfileManager.Current.FilterType, startX, startY, 200
+                              ));
+         
 
             Add(rightArea, PAGE);
         }
@@ -997,24 +961,24 @@ namespace ClassicUO.Game.UI.Gumps
             _speechColorPickerBox = AddColorBox(rightArea, startX, startY, ProfileManager.Current.SpeechHue, ResGumps.SpeechColor);
             startX += 200;
             _emoteColorPickerBox = AddColorBox(rightArea, startX, startY, ProfileManager.Current.EmoteHue, ResGumps.EmoteColor);
-            startY += _emoteColorPickerBox.Height + 2 + 3;
+            startY += _emoteColorPickerBox.Height + 2;
             startX = 5;
             _yellColorPickerBox = AddColorBox(rightArea, startX, startY, ProfileManager.Current.YellHue, ResGumps.YellColor);
             startX += 200;
             _whisperColorPickerBox = AddColorBox(rightArea, startX, startY, ProfileManager.Current.WhisperHue, ResGumps.WhisperColor);
             
-            startY += _whisperColorPickerBox.Height + 2 + 3;
+            startY += _whisperColorPickerBox.Height + 2;
             startX = 5;
 
             _partyMessageColorPickerBox = AddColorBox(rightArea, startX, startY, ProfileManager.Current.PartyMessageHue, ResGumps.PartyMessageColor);
             startX += 200;
             _guildMessageColorPickerBox = AddColorBox(rightArea, startX, startY, ProfileManager.Current.GuildMessageHue, ResGumps.GuildMessageColor);
-            startY += _guildMessageColorPickerBox.Height + 2 + 3;
+            startY += _guildMessageColorPickerBox.Height + 2;
             startX = 5;
             _allyMessageColorPickerBox = AddColorBox(rightArea, startX, startY, ProfileManager.Current.AllyMessageHue, ResGumps.AllianceMessageColor);
             startX += 200;
             _chatMessageColorPickerBox = AddColorBox(rightArea, startX, startY, ProfileManager.Current.ChatMessageHue, ResGumps.ChatMessageColor);
-            startY += _chatMessageColorPickerBox.Height + 2 + 3;
+            startY += _chatMessageColorPickerBox.Height + 2;
             startX = 5;
 
             Add(rightArea, PAGE);
@@ -1049,29 +1013,29 @@ namespace ClassicUO.Game.UI.Gumps
             int initialY = startY;
 
             _innocentColorPickerBox = AddColorBox(rightArea, startX, startY, ProfileManager.Current.InnocentHue, ResGumps.InnocentColor);
-            startY += _innocentColorPickerBox.Height + 2 + 3;
+            startY += _innocentColorPickerBox.Height + 2;
             _friendColorPickerBox = AddColorBox(rightArea, startX, startY, ProfileManager.Current.FriendHue, ResGumps.FriendColor);
-            startY += _innocentColorPickerBox.Height + 2 + 3;
+            startY += _innocentColorPickerBox.Height + 2;
             _crimialColorPickerBox = AddColorBox(rightArea, startX, startY, ProfileManager.Current.CriminalHue, ResGumps.CriminalColor);
-            startY += _innocentColorPickerBox.Height + 2 + 3;
+            startY += _innocentColorPickerBox.Height + 2;
             _genericColorPickerBox = AddColorBox(rightArea, startX, startY, ProfileManager.Current.AnimalHue, ResGumps.AnimalColor);
-            startY += _innocentColorPickerBox.Height + 2 + 3;
+            startY += _innocentColorPickerBox.Height + 2;
             _murdererColorPickerBox = AddColorBox(rightArea, startX, startY, ProfileManager.Current.MurdererHue, ResGumps.MurdererColor);
-            startY += _innocentColorPickerBox.Height + 2 + 3;
+            startY += _innocentColorPickerBox.Height + 2;
             _enemyColorPickerBox = AddColorBox(rightArea, startX, startY, ProfileManager.Current.EnemyHue, ResGumps.EnemyColor);
-            startY += _innocentColorPickerBox.Height + 2 + 3;
+            startY += _innocentColorPickerBox.Height + 2;
 
             startY = initialY;
             startX += 200;
             _beneficColorPickerBox = AddColorBox(rightArea, startX, startY, ProfileManager.Current.BeneficHue, ResGumps.BeneficSpellHue);
-            startY += _beneficColorPickerBox.Height + 2 + 3;
+            startY += _beneficColorPickerBox.Height + 2;
             _harmfulColorPickerBox = AddColorBox(rightArea, startX, startY, ProfileManager.Current.HarmfulHue, ResGumps.HarmfulSpellHue);
-            startY += _harmfulColorPickerBox.Height + 2 + 3;
+            startY += _harmfulColorPickerBox.Height + 2;
             _neutralColorPickerBox = AddColorBox(rightArea, startX, startY, ProfileManager.Current.NeutralHue, ResGumps.NeutralSpellHue);
-            startY += _neutralColorPickerBox.Height + 2 + 3;
+            startY += _neutralColorPickerBox.Height + 2;
 
             startX = 5;
-            startY += (_neutralColorPickerBox.Height + 2 + 3) * 4;
+            startY += (_neutralColorPickerBox.Height + 2) * 4;
 
             _spellFormatBox = AddInputField
             (
