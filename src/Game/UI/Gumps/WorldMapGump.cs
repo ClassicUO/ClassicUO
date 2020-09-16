@@ -924,11 +924,11 @@ namespace ClassicUO.Game.UI.Gumps
                             int bx, by, mapX, mapY, x, y;
 
 
-                            for (bx = 0; bx < fixedWidth; bx++)
+                            for (bx = 0; bx < fixedWidth; ++bx)
                             {
                                 mapX = bx << 3;
 
-                                for (by = 0; by < fixedHeight; by++)
+                                for (by = 0; by < fixedHeight; ++by)
                                 {
                                     ref IndexMap indexMap = ref World.Map.GetIndex(bx, by);
 
@@ -940,26 +940,21 @@ namespace ClassicUO.Game.UI.Gumps
                                     MapBlock* mapBlock = (MapBlock*) indexMap.MapAddress;
                                     MapCells* cells = (MapCells*) &mapBlock->Cells;
 
-                                    int pos = 0;
                                     mapY = by << 3;
 
-                                    for (y = 0; y < 8; y++)
+                                    for (y = 0; y < 8; ++y)
                                     {
                                         int block = (mapY + y + OFFSET_PIX_HALF) * (realWidth + OFFSET_PIX) + mapX + OFFSET_PIX_HALF;
+                                        int pos = y << 3;
 
-                                        for (x = 0; x < 8; x++)
+                                        for (x = 0; x < 8; ++x, ++pos)
                                         {
-                                            ref MapCells cell = ref cells[pos];
-
-                                            ushort color = (ushort) (0x8000 | HuesLoader.Instance.GetRadarColorData(cell.TileID));
+                                            ushort color = (ushort) (0x8000 | HuesLoader.Instance.GetRadarColorData(cells[pos].TileID & 0x3FFF));
 
                                             ref Color cc = ref buffer[block];
                                             cc.PackedValue = HuesHelper.Color16To32(color) | 0xFF_00_00_00;
 
-                                            allZ[block] = cell.Z;
-
-                                            block++;
-                                            pos++;
+                                            allZ[block++] = cells[pos].Z;
                                         }
                                     }
 
@@ -970,35 +965,31 @@ namespace ClassicUO.Game.UI.Gumps
                                     {
                                         int count = (int) indexMap.StaticCount;
 
-                                        for (int c = 0; c < count; c++)
+                                        for (int c = 0; c < count; ++c, ++sb)
                                         {
-                                            ref readonly StaticsBlock staticBlock = ref sb[c];
-
-                                            if (staticBlock.Color != 0 && staticBlock.Color != 0xFFFF && !GameObjectHelper.IsNoDrawable(staticBlock.Color))
+                                            if (sb->Color != 0 && sb->Color != 0xFFFF && !GameObjectHelper.IsNoDrawable(sb->Color))
                                             {
-                                                pos = (staticBlock.Y << 3) + staticBlock.X;
-                                                ref MapCells cell = ref cells[pos];
+                                                int block = (mapY + sb->Y + OFFSET_PIX_HALF) *
+                                                    (realWidth + OFFSET_PIX) + mapX + sb->X + OFFSET_PIX_HALF;
 
-                                                if (cell.Z <= staticBlock.Z)
+                                                if (sb->Z >= allZ[block])
                                                 {
-                                                    ushort color = (ushort) (0x8000 | (staticBlock.Hue > 0
+                                                    ushort color = (ushort) (0x8000 | (sb->Hue != 0
                                                         ? HuesLoader.Instance.GetColor16
                                                         (
                                                             16384,
-                                                            staticBlock.Hue
+                                                            sb->Hue
                                                         )
                                                         : HuesLoader.Instance.GetRadarColorData
                                                         (
-                                                            staticBlock.Color + 0x4000
+                                                            sb->Color | 0x4000
                                                         )));
 
-                                                    int block = (mapY + staticBlock.Y + OFFSET_PIX_HALF) *
-                                                        (realWidth + OFFSET_PIX) + mapX + staticBlock.X + OFFSET_PIX_HALF;
 
                                                     ref Color cc = ref buffer[block];
                                                     cc.PackedValue = HuesHelper.Color16To32(color) | 0xFF_00_00_00;
 
-                                                    allZ[block] = staticBlock.Z;
+                                                    allZ[block] = sb->Z;
                                                 }
                                             }
                                         }
@@ -1014,11 +1005,11 @@ namespace ClassicUO.Game.UI.Gumps
                             int mapY_plus_one;
                             int r, g, b;
 
-                            for (mapY = 1; mapY < real_height_less_one; mapY++)
+                            for (mapY = 1; mapY < real_height_less_one; ++mapY)
                             {
                                 mapY_plus_one = mapY + 1;
 
-                                for (mapX = 1; mapX < real_width_less_one; mapX++)
+                                for (mapX = 1; mapX < real_width_less_one; ++mapX)
                                 {
                                     int blockCurrent = (mapY + OFFSET_PIX_HALF) * (realWidth + OFFSET_PIX) + mapX + OFFSET_PIX_HALF;
                                     int blockNext = (mapY_plus_one + OFFSET_PIX_HALF) * (realWidth + OFFSET_PIX) + (mapX - 1) + OFFSET_PIX_HALF;
