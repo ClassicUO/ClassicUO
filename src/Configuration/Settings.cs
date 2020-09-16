@@ -83,6 +83,8 @@ namespace ClassicUO.Configuration
 
         [JsonProperty("use_verdata")] public bool UseVerdata { get; set; }
 
+        [JsonProperty("maps_layouts")] public string MapsLayouts { get; set; }
+
         [JsonProperty("encryption")] public byte Encryption { get; set; }
 
         [JsonProperty("plugins")] public string[] Plugins { get; set; } = {@"./Assistant/Razor.dll"};

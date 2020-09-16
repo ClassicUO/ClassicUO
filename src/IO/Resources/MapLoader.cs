@@ -26,10 +26,12 @@ using System.IO;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
+using ClassicUO.Configuration;
 using ClassicUO.Data;
 using ClassicUO.Game;
 using ClassicUO.Network;
 using ClassicUO.Utility;
+using ClassicUO.Utility.Logging;
 
 namespace ClassicUO.IO.Resources
 {
@@ -107,6 +109,41 @@ namespace ClassicUO.IO.Resources
                 {
                     bool foundOneMap = false;
 
+                    if (!string.IsNullOrEmpty(Settings.GlobalSettings.MapsLayouts))
+                    {
+                        string[] values = Settings.GlobalSettings.MapsLayouts.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
+
+                        Constants.MAPS_COUNT = values.Length;
+                        MapsDefaultSize = new int[values.Length, 2];
+
+                        Log.Trace($"default maps size overraided. [count: {Constants.MAPS_COUNT}]");
+
+
+                        int index = 0;
+
+                        char[] splitchar = new char[1] { ',' };
+
+                        foreach (string s in values)
+                        {
+                            string[] v = s.Split(splitchar, StringSplitOptions.RemoveEmptyEntries);
+
+                            if (v.Length >= 2 && int.TryParse(v[0], out int width) && int.TryParse(v[1], out int height))
+                            {
+                                MapsDefaultSize[index, 0] = width;
+                                MapsDefaultSize[index, 1] = height;
+
+                                Log.Trace($"overraided map size: {width},{height}  [index: {index}]");
+                            }
+                            else
+                            {
+                                Log.Error($"Error parsing 'width,height' values: '{s}'");
+                            }
+
+                            ++index;
+                        }
+                    }
+
+
                     for (int i = 0; i < Constants.MAPS_COUNT; i++)
                     {
                         string path = UOFileManager.GetUOFilePath($"map{i}LegacyMUL.uop");
@@ -160,6 +197,7 @@ namespace ClassicUO.IO.Resources
                     {
                         throw new FileNotFoundException("No maps found.");
                     }
+
 
                     int mapblocksize = sizeof(MapBlock);
 

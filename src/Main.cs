@@ -32,6 +32,7 @@ using ClassicUO.Configuration;
 using ClassicUO.Data;
 using ClassicUO.Game;
 using ClassicUO.IO;
+using ClassicUO.IO.Resources;
 using ClassicUO.Resources;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
@@ -420,6 +421,12 @@ namespace ClassicUO
 
                     case "use_verdata":
                         Settings.GlobalSettings.UseVerdata = bool.Parse(value);
+
+                        break;
+
+                    case "maps_layouts":
+
+                        Settings.GlobalSettings.MapsLayouts = value;
 
                         break;
 
