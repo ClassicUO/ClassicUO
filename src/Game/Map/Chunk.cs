@@ -75,25 +75,21 @@ namespace ClassicUO.Game.Map
                 int bx = X << 3;
                 int by = Y << 3;
 
-                for (int x = 0; x < 8; ++x)
+                for (int y = 0; y < 8; ++y)
                 {
-                    ushort tileX = (ushort) (bx + x);
+                    int pos = y << 3;
+                    ushort tileY = (ushort) (by + y);
 
-                    for (int y = 0; y < 8; ++y)
+                    for (int x = 0; x < 8; ++x, ++pos)
                     {
-                        int pos = (y << 3) + x;
-
-                        ushort tileID = (ushort) (cells[pos]
-                            .TileID & 0x3FFF);
-
-                        sbyte z = cells[pos]
-                            .Z;
+                        ushort tileID = (ushort) (cells[pos].TileID & 0x3FFF);
+                        sbyte z = cells[pos].Z;
 
                         Land land = Land.Create(tileID);
                         land.AverageZ = z;
                         land.MinZ = z;
 
-                        ushort tileY = (ushort) (by + y);
+                        ushort tileX = (ushort) (bx + x);
 
                         land.ApplyStrech(tileX, tileY, z);
                         land.X = tileX;
@@ -117,27 +113,20 @@ namespace ClassicUO.Game.Map
                         {
                             if (sb->Color != 0 && sb->Color != 0xFFFF)
                             {
-                                ushort x = sb->X;
-                                ushort y = sb->Y;
-                                int pos = (y << 3) + x;
+                                int pos = (sb->Y << 3) + sb->X;
 
                                 if (pos >= 64)
                                 {
                                     continue;
                                 }
 
-                                sbyte z = sb->Z;
-
-                                ushort staticX = (ushort) (bx + x);
-                                ushort staticY = (ushort) (by + y);
-
                                 Static staticObject = Static.Create(sb->Color, sb->Hue, pos);
-                                staticObject.X = staticX;
-                                staticObject.Y = staticY;
-                                staticObject.Z = z;
+                                staticObject.X = (ushort) (bx + sb->X);
+                                staticObject.Y = (ushort) (by + sb->Y);
+                                staticObject.Z = sb->Z;
                                 staticObject.UpdateScreenPosition();
 
-                                AddGameObject(staticObject, x, y);
+                                AddGameObject(staticObject, sb->X, sb->Y);
                             }
                         }
                     }
