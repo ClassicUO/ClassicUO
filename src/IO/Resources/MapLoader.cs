@@ -38,11 +38,11 @@ namespace ClassicUO.IO.Resources
     internal class MapLoader : UOFileLoader
     {
         private static MapLoader _instance;
-        private readonly UOFileMul[] _mapDif = new UOFileMul[Constants.MAPS_COUNT];
-        private readonly UOFileMul[] _mapDifl = new UOFileMul[Constants.MAPS_COUNT];
-        private readonly UOFileMul[] _staDif = new UOFileMul[Constants.MAPS_COUNT];
-        private readonly UOFileMul[] _staDifi = new UOFileMul[Constants.MAPS_COUNT];
-        private readonly UOFileMul[] _staDifl = new UOFileMul[Constants.MAPS_COUNT];
+        private UOFileMul[] _mapDif;
+        private UOFileMul[] _mapDifl;
+        private UOFileMul[] _staDif;
+        private UOFileMul[] _staDifi;
+        private UOFileMul[] _staDifl;
 
         private protected MapLoader()
         {
@@ -58,9 +58,9 @@ namespace ClassicUO.IO.Resources
             }
         }
 
-        public IndexMap[][] BlockData { get; } = new IndexMap[Constants.MAPS_COUNT][];
+        public IndexMap[][] BlockData { get; private set; }
 
-        public int[,] MapBlocksSize { get; } = new int[Constants.MAPS_COUNT, 2];
+        public int[,] MapBlocksSize { get; private set; }
 
         // ReSharper disable RedundantExplicitArraySize
         public int[,] MapsDefaultSize { get; private protected set; } = new int[6, 2]
@@ -85,16 +85,14 @@ namespace ClassicUO.IO.Resources
                     1280, 4096
                 }
             };
-
         public int PatchesCount { get; private set; }
+        public int[] MapPatchCount { get; private set; }
+        public int[] StaticPatchCount { get; private set; }
 
-        public int[] MapPatchCount { get; } = new int[Constants.MAPS_COUNT];
-        public int[] StaticPatchCount { get; } = new int[Constants.MAPS_COUNT];
-
-        public new UOFileIndex[][] Entries = new UOFileIndex[Constants.MAPS_COUNT][];
-        private protected readonly UOFileMul[] _filesIdxStatics = new UOFileMul[Constants.MAPS_COUNT];
-        private protected readonly UOFile[] _filesMap = new UOFile[Constants.MAPS_COUNT];
-        private protected readonly UOFileMul[] _filesStatics = new UOFileMul[Constants.MAPS_COUNT];
+        public new UOFileIndex[][] Entries;
+        private protected UOFileMul[] _filesIdxStatics;
+        private protected UOFile[] _filesMap;
+        private protected UOFileMul[] _filesStatics;
 
         protected static UOFile GetMapFile(int map)
         {
@@ -143,6 +141,25 @@ namespace ClassicUO.IO.Resources
                         }
                     }
 
+
+                    
+                    _filesMap = new UOFile[Constants.MAPS_COUNT];
+                    _filesStatics  = new UOFileMul[Constants.MAPS_COUNT];
+                    _filesIdxStatics = new UOFileMul[Constants.MAPS_COUNT];
+
+                    Entries = new UOFileIndex[Constants.MAPS_COUNT][];
+
+                    MapPatchCount = new int[Constants.MAPS_COUNT];
+                    StaticPatchCount = new int[Constants.MAPS_COUNT];
+                    MapBlocksSize = new int[Constants.MAPS_COUNT, 2];
+
+                    BlockData = new IndexMap[Constants.MAPS_COUNT][];
+
+                    _mapDif = new UOFileMul[Constants.MAPS_COUNT];
+                    _mapDifl = new UOFileMul[Constants.MAPS_COUNT];
+                    _staDif = new UOFileMul[Constants.MAPS_COUNT];
+                    _staDifi = new UOFileMul[Constants.MAPS_COUNT];
+                    _staDifl = new UOFileMul[Constants.MAPS_COUNT];
 
                     for (int i = 0; i < Constants.MAPS_COUNT; i++)
                     {
