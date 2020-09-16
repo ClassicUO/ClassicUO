@@ -152,10 +152,8 @@ namespace ClassicUO.Game.GameObjects
         }
 
 
-        public void ApplyStrech(int x, int y, sbyte z)
+        public void ApplyStretch(Map.Map map, int x, int y, sbyte z)
         {
-            Map.Map map = World.Map;
-
             if (IsStretched || TexmapsLoader.Instance.GetTexture(TileData.TexID) == null || !TestStretched(x, y, z, true))
             {
                 IsStretched = false;
@@ -178,12 +176,12 @@ namespace ClassicUO.Game.GameObjects
                 int i;
                 int j;
 
-                for (i = -1; i < 2; i++)
+                for (i = -1; i < 2; ++i)
                 {
                     int curX = x + i;
                     int curI = i + 1;
 
-                    for (j = -1; j < 2; j++)
+                    for (j = -1; j < 2; ++j)
                     {
                         int curY = y + j;
                         int curJ = j + 1;
@@ -194,7 +192,7 @@ namespace ClassicUO.Game.GameObjects
 
                         if (currentZ == leftZ && currentZ == rightZ && currentZ == bottomZ)
                         {
-                            for (int k = 0; k < 4; k++)
+                            for (int k = 0; k < 4; ++k)
                             {
                                 ref Vector3 v = ref _vectCache[curI, curJ, k];
                                 v.X = 0;
@@ -308,9 +306,9 @@ namespace ClassicUO.Game.GameObjects
         {
             bool result = false;
 
-            for (int i = -1; i < 2 && !result; i++)
+            for (int i = -1; i < 2 && !result; ++i)
             {
-                for (int j = -1; j < 2 && !result; j++)
+                for (int j = -1; j < 2 && !result; ++j)
                 {
                     if (recurse)
                     {

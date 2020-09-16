@@ -62,11 +62,13 @@ namespace ClassicUO.Game.Map
 
 
         [MethodImpl(256)]
-        public unsafe void Load(int map)
+        public unsafe void Load(int index)
         {
             IsDestroyed = false;
 
-            ref IndexMap im = ref GetIndex(map);
+            Map map = World.Map;
+
+            ref IndexMap im = ref GetIndex(index);
 
             if (im.MapAddress != 0)
             {
@@ -91,7 +93,7 @@ namespace ClassicUO.Game.Map
 
                         ushort tileX = (ushort) (bx + x);
 
-                        land.ApplyStrech(tileX, tileY, z);
+                        land.ApplyStretch(map, tileX, tileY, z);
                         land.X = tileX;
                         land.Y = tileY;
                         land.Z = z;
