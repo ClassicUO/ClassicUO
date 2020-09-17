@@ -312,11 +312,12 @@ namespace ClassicUO.Game.UI.Controls
                 }
             }
 
-            if (isfemale && GumpsLoader.Instance.GetTexture((ushort) (animID + offset)) == null)
+            if (GumpsLoader.Instance.GetTexture((ushort) (animID + offset)) == null)
             {
-                offset = Constants.MALE_GUMP_OFFSET;
+                // inverse
+                offset = isfemale ? Constants.MALE_GUMP_OFFSET : Constants.FEMALE_GUMP_OFFSET;
             }
-
+            
             if (GumpsLoader.Instance.GetTexture((ushort) (animID + offset)) == null)
             {
                 Log.Error($"Texture not found in paperdoll: gump_graphic: {(ushort) (animID + offset)}");
