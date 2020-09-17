@@ -99,6 +99,27 @@ namespace ClassicUO.IO.Resources
             return map < Instance._filesMap.Length ? Instance._filesMap[map] : null;
         }
 
+        protected void Initialize()
+        {
+            _filesMap = new UOFile[Constants.MAPS_COUNT];
+            _filesStatics = new UOFileMul[Constants.MAPS_COUNT];
+            _filesIdxStatics = new UOFileMul[Constants.MAPS_COUNT];
+
+            Entries = new UOFileIndex[Constants.MAPS_COUNT][];
+
+            MapPatchCount = new int[Constants.MAPS_COUNT];
+            StaticPatchCount = new int[Constants.MAPS_COUNT];
+            MapBlocksSize = new int[Constants.MAPS_COUNT, 2];
+
+            BlockData = new IndexMap[Constants.MAPS_COUNT][];
+
+            _mapDif = new UOFileMul[Constants.MAPS_COUNT];
+            _mapDifl = new UOFileMul[Constants.MAPS_COUNT];
+            _staDif = new UOFileMul[Constants.MAPS_COUNT];
+            _staDifi = new UOFileMul[Constants.MAPS_COUNT];
+            _staDifl = new UOFileMul[Constants.MAPS_COUNT];
+        }
+
         public override unsafe Task Load()
         {
             return Task.Run
@@ -142,24 +163,7 @@ namespace ClassicUO.IO.Resources
                     }
 
 
-                    
-                    _filesMap = new UOFile[Constants.MAPS_COUNT];
-                    _filesStatics  = new UOFileMul[Constants.MAPS_COUNT];
-                    _filesIdxStatics = new UOFileMul[Constants.MAPS_COUNT];
-
-                    Entries = new UOFileIndex[Constants.MAPS_COUNT][];
-
-                    MapPatchCount = new int[Constants.MAPS_COUNT];
-                    StaticPatchCount = new int[Constants.MAPS_COUNT];
-                    MapBlocksSize = new int[Constants.MAPS_COUNT, 2];
-
-                    BlockData = new IndexMap[Constants.MAPS_COUNT][];
-
-                    _mapDif = new UOFileMul[Constants.MAPS_COUNT];
-                    _mapDifl = new UOFileMul[Constants.MAPS_COUNT];
-                    _staDif = new UOFileMul[Constants.MAPS_COUNT];
-                    _staDifi = new UOFileMul[Constants.MAPS_COUNT];
-                    _staDifl = new UOFileMul[Constants.MAPS_COUNT];
+                    Initialize();
 
                     for (int i = 0; i < Constants.MAPS_COUNT; i++)
                     {

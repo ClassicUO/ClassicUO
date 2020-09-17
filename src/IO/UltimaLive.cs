@@ -463,7 +463,6 @@ namespace ClassicUO.IO
             }
         }
 
-        [MethodImpl(256)]
         private static void OnUpdateTerrainPacket(Packet p)
         {
             int block = (int) p.ReadUInt();
@@ -551,7 +550,7 @@ namespace ClassicUO.IO
             }
         }
 
-        internal static ushort GetBlockCrc(uint block)
+        private static ushort GetBlockCrc(uint block)
         {
             int mapId = World.Map.Index;
 
@@ -782,6 +781,8 @@ namespace ClassicUO.IO
 
             public ULMapLoader(uint maps)
             {
+                Initialize();
+
                 _feedCancel = new CancellationTokenSource();
                 NumMaps = maps;
                 int[,] old = MapsDefaultSize;
