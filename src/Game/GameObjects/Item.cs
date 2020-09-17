@@ -908,6 +908,13 @@ namespace ClassicUO.Game.GameObjects
 
                         break;
                     }
+
+                    case 0x3ED3: // capybara
+                    {
+                        graphic = 0x05F7;
+
+                        break;
+                    }
                 }
 
                 if (ItemData.AnimID != 0)

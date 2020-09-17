@@ -1010,7 +1010,7 @@ namespace ClassicUO.IO.Resources
 
             for (int i = 0; i < animseqEntries.Length; i++)
             {
-                ref readonly UOFileIndex entry = ref animseqEntries[i];
+                ref UOFileIndex entry = ref animseqEntries[i];
 
                 if (entry.Offset == 0)
                 {
@@ -1048,7 +1048,7 @@ namespace ClassicUO.IO.Resources
 
                 if (DataIndex[animID] != null)
                 {
-                    if (animID == 0x04E7 || animID == 0x042D || animID == 0x04E6)
+                    if (animID == 0x04E7 || animID == 0x042D || animID == 0x04E6 || animID == 0x05F7)
                     {
                         DataIndex[animID]
                             .MountedHeightOffset = 18;
