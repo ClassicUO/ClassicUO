@@ -37,17 +37,23 @@ namespace ClassicUO.Game.UI.Gumps.Login
 {
     internal class LoginGump : Gump
     {
-        private readonly ushort _buttonNormal;
-        private readonly ushort _buttonOver;
-        private readonly Checkbox _checkboxAutologin;
-        private readonly Checkbox _checkboxSaveAccount;
-        private readonly Button _nextArrow0;
-        private readonly PasswordStbTextBox _passwordFake;
-        private readonly StbTextBox _textboxAccount;
+        private ushort _buttonNormal;
+        private ushort _buttonOver;
+        private Checkbox _checkboxAutologin;
+        private Checkbox _checkboxSaveAccount;
+        private Button _nextArrow0;
+        private PasswordStbTextBox _passwordFake;
+        private StbTextBox _textboxAccount;
 
         private float _time;
 
         public LoginGump(LoginScene scene) : base(0, 0)
+        {
+            Language.ChangeLanguage(0);
+            Invalidate(scene);
+        }
+
+        public void Invalidate(LoginScene scene)
         {
             CanCloseWithRightClick = false;
 
@@ -397,6 +403,28 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 scene.Audio.UpdateCurrentMusicVolume(true);
             };
 
+            string[] languages = Language.GetSupportedLanguages();
+            if (languages.Length > 1)
+            {
+                Label language_label = new Label(ResGumps.Localisation, false, 0, font: 9)
+                {
+                    X = 35,
+                    Y = 400
+                };
+                Add(language_label);
+                Combobox language_combobox = new Combobox(language_label.X, language_label.Y + 15, language_label.Width + 5, languages, Settings.GlobalSettings.Language);
+                language_combobox.OnOptionSelected += (sender, e) =>
+                {
+                    if (language_combobox.SelectedIndex != Settings.GlobalSettings.Language)
+                    {
+                        Language.ChangeLanguage(language_combobox.SelectedIndex);
+                        Invalidate(scene);
+                    }
+                };
+                language_combobox.SelectedIndex = Settings.GlobalSettings.Language;
+
+                Add(language_combobox);
+            }
 
             if (!string.IsNullOrEmpty(_textboxAccount.Text))
             {

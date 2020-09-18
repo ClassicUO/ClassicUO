@@ -89,6 +89,8 @@ namespace ClassicUO.Configuration
 
         [JsonProperty("plugins")] public string[] Plugins { get; set; } = {@"./Assistant/Razor.dll"};
 
+        [JsonProperty("language")] public int Language { get; set; } = 0;
+
         public static string GetSettingsFilepath()
         {
             if (CustomSettingsFilepath != null)
