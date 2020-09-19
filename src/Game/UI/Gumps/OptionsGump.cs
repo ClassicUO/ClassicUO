@@ -2323,17 +2323,26 @@ namespace ClassicUO.Game.UI.Gumps
             public override void Add(Control c, int page = 0)
             {
                 int i = _databox.Children.Count - 1;
+                int bottom = 0;
 
                 for (; i >= 0; --i)
                 {
                     if (_databox.Children[i].IsVisible)
                     {
-                        break;
+                        if (bottom == 0 || bottom < _databox.Children[i].Bounds.Bottom + 2)
+                        {
+                            bottom = _databox.Children[i]
+                                             .Bounds.Bottom + 2;
+                        }
+                        else
+                        {
+                            break;
+                        }
                     }
                 }
 
                 c.X = _indent;
-                c.Y = i >= 0 ? _databox.Children[i].Bounds.Bottom + 2 : 0;
+                c.Y = bottom;
 
                 _databox.Add(c, page);
                 _databox.WantUpdateSize = true;
