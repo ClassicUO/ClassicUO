@@ -25,7 +25,6 @@ using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Input;
 using ClassicUO.IO.Resources;
-using ClassicUO.Renderer;
 
 namespace ClassicUO.Game.UI.Controls
 {
@@ -64,7 +63,8 @@ namespace ClassicUO.Game.UI.Controls
         {
             if (button == MouseButtonType.Left)
             {
-                UIManager.GetGump<ColorPickerGump>()?.Dispose();
+                UIManager.GetGump<ColorPickerGump>()
+                         ?.Dispose();
 
                 ColorPickerGump pickerGump = new ColorPickerGump(0, 0, 100, 100, s => _colorBox.SetColor(s, HuesLoader.Instance.GetPolygoneColor(CELL, s)));
                 UIManager.Add(pickerGump);

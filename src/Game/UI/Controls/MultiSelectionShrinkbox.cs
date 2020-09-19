@@ -21,12 +21,6 @@
 
 #endregion
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using ClassicUO.Input;
-using ClassicUO.IO.Resources;
-
 namespace ClassicUO.Game.UI.Controls
 {
     //internal class MultiSelectionShrinkbox : Control

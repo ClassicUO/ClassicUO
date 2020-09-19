@@ -83,7 +83,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             _databox = new DataBox(0, 0, 1, 1);
             _databox.WantUpdateSize = true;
-            
+
             area.Add(_databox);
 
 
@@ -113,6 +113,7 @@ namespace ClassicUO.Game.UI.Gumps
                     child.Dispose();
                     _databox.WantUpdateSize = true;
                     _databox.ReArrangeChildren();
+
                     return;
                 }
             }
@@ -145,9 +146,9 @@ namespace ClassicUO.Game.UI.Gumps
         private readonly Button _buttonPost;
         private readonly Button _buttonRemove;
         private readonly Button _buttonReply;
+        private readonly DataBox _databox;
         private readonly string _datatime;
         private readonly uint _msgSerial;
-        private readonly DataBox _databox;
         private readonly StbTextBox _subjectTextbox;
         private readonly StbTextBox _textBox;
 
@@ -164,6 +165,7 @@ namespace ClassicUO.Game.UI.Gumps
                 TitleGumpID = 0x0820,
                 AcceptMouseInput = true
             };
+
             Add(_articleContainer);
 
             ScrollArea area = new ScrollArea(0, 120, 272, 224, false);
@@ -360,7 +362,7 @@ namespace ClassicUO.Game.UI.Gumps
             base.Update(totalMS, frameMS);
         }
 
-    
+
         public override void OnButtonClick(int buttonID)
         {
             // necessary to avoid closing

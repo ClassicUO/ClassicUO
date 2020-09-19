@@ -49,8 +49,8 @@ namespace ClassicUO.Game.UI.Gumps
         private bool _shiftPressed;
         private readonly Dictionary<uint, ShopItem> _shopItems;
         private readonly ScrollArea _shopScrollArea, _transactionScrollArea;
-        private readonly DataBox _transactionDataBox;
         private readonly Label _totalLabel, _playerGoldLabel;
+        private readonly DataBox _transactionDataBox;
         private readonly Dictionary<uint, TransactionItem> _transactionItems;
         private bool _updateTotal;
 
@@ -368,7 +368,11 @@ namespace ClassicUO.Game.UI.Gumps
         public void AddItem(uint serial, ushort graphic, ushort hue, ushort amount, uint price, string name, bool fromcliloc)
         {
             int count = _shopScrollArea.Children.Count - 1;
-            int y = count > 0 ? _shopScrollArea.Children[count].Bounds.Bottom : 0;
+
+            int y = count > 0
+                ? _shopScrollArea.Children[count]
+                                 .Bounds.Bottom
+                : 0;
 
             ShopItem shopItem = new ShopItem(serial, graphic, hue, amount, price, name)
             {

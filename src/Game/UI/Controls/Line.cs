@@ -21,8 +21,6 @@
 
 #endregion
 
-using System;
-using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;

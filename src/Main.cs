@@ -32,7 +32,6 @@ using ClassicUO.Configuration;
 using ClassicUO.Data;
 using ClassicUO.Game;
 using ClassicUO.IO;
-using ClassicUO.IO.Resources;
 using ClassicUO.Resources;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;

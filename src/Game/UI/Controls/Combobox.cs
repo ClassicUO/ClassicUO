@@ -34,10 +34,10 @@ namespace ClassicUO.Game.UI.Controls
     internal class Combobox : Control
     {
         private readonly byte _font;
+        private readonly string[] _items;
         private readonly Label _label;
+        private readonly int _maxHeight;
         private int _selectedIndex;
-        private string[] _items;
-        private int _maxHeight;
 
         public Combobox(int x, int y, int width, string[] items, int selected = -1, int maxHeight = 200, bool showArrow = true, string emptyString = "", byte font = 9)
         {
@@ -54,7 +54,7 @@ namespace ClassicUO.Game.UI.Controls
             (
                 new ResizePic(0x0BB8)
                 {
-                    Width = width, Height = Height,
+                    Width = width, Height = Height
                 }
             );
 
@@ -123,12 +123,12 @@ namespace ClassicUO.Game.UI.Controls
             base.OnMouseUp(x, y, button);
         }
 
-        class ComboboxGump : Gump
+        private class ComboboxGump : Gump
         {
             private const int ELEMENT_HEIGHT = 15;
 
 
-            private Combobox _combobox;
+            private readonly Combobox _combobox;
 
             public ComboboxGump(int x, int y, int width, int maxHeight, string[] items, byte font, Combobox combobox) : base(0, 0)
             {
@@ -185,7 +185,7 @@ namespace ClassicUO.Game.UI.Controls
 
                 Add(area);
 
-                background.Width = maxWidth; 
+                background.Width = maxWidth;
                 background.Height = totalHeight;
             }
 

@@ -84,8 +84,11 @@ namespace ClassicUO.Game.Map
 
                     for (int x = 0; x < 8; ++x, ++pos)
                     {
-                        ushort tileID = (ushort) (cells[pos].TileID & 0x3FFF);
-                        sbyte z = cells[pos].Z;
+                        ushort tileID = (ushort) (cells[pos]
+                            .TileID & 0x3FFF);
+
+                        sbyte z = cells[pos]
+                            .Z;
 
                         Land land = Land.Create(tileID);
                         land.AverageZ = z;

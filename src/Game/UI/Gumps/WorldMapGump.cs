@@ -949,12 +949,17 @@ namespace ClassicUO.Game.UI.Gumps
 
                                         for (x = 0; x < 8; ++x, ++pos)
                                         {
-                                            ushort color = (ushort) (0x8000 | HuesLoader.Instance.GetRadarColorData(cells[pos].TileID & 0x3FFF));
+                                            ushort color = (ushort) (0x8000 | HuesLoader.Instance.GetRadarColorData
+                                            (
+                                                cells[pos]
+                                                    .TileID & 0x3FFF
+                                            ));
 
                                             ref Color cc = ref buffer[block];
                                             cc.PackedValue = HuesHelper.Color16To32(color) | 0xFF_00_00_00;
 
-                                            allZ[block++] = cells[pos].Z;
+                                            allZ[block++] = cells[pos]
+                                                .Z;
                                         }
                                     }
 

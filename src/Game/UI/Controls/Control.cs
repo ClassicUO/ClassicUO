@@ -53,8 +53,8 @@ namespace ClassicUO.Game.UI.Controls
         private int _activePage;
         private bool _attempToDrag;
         private Rectangle _bounds;
-        private Point _offset;
         private bool _handlesKeyboardFocus;
+        private Point _offset;
         private Control _parent;
 
         protected Control(Control parent = null)
@@ -457,7 +457,7 @@ namespace ClassicUO.Game.UI.Controls
                             OnHitTestSuccess(x, y, ref res);
                         }
                     }
-                    
+
                     for (int i = 0; i < Children.Count; ++i)
                     {
                         Control c = Children[i];
@@ -479,7 +479,7 @@ namespace ClassicUO.Game.UI.Controls
         public virtual void OnHitTestSuccess(int x, int y, ref Control res)
         {
         }
-        
+
         public Control GetFirstControlAcceptKeyboardInput()
         {
             if (_acceptKeyboardInput)

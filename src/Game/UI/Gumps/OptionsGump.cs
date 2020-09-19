@@ -57,7 +57,6 @@ namespace ClassicUO.Game.UI.Gumps
 
         //experimental
         private Checkbox _autoOpenDoors, _autoOpenCorpse, _skipEmptyCorpse, _disableTabBtn, _disableCtrlQWBtn, _disableDefaultHotkeys, _disableArrowBtn, _disableAutoMove, _overrideContainerLocation, _smoothDoors, _showTargetRangeIndicator, _customBars, _customBarsBBG, _saveHealthbars;
-        private HSliderBar _sliderZoom;
         private Checkbox _buffBarTime, _castSpellsByOneClick, _queryBeforAttackCheckbox, _queryBeforeBeneficialCheckbox, _spellColoringCheckbox, _spellFormatCheckbox;
         private HSliderBar _cellSize;
         private Checkbox _containerScaleItems, _containerDoubleClickToLoot, _relativeDragAnDropItems, _useLargeContianersGumps, _highlightContainersWhenMouseIsOver;
@@ -66,6 +65,7 @@ namespace ClassicUO.Game.UI.Gumps
         // containers
         private HSliderBar _containersScale;
         private Combobox _cotType;
+        private DataBox _databox;
         private HSliderBar _delay_before_display_tooltip, _tooltip_zoom, _tooltip_background_opacity;
         private Combobox _dragSelectModifierKey;
 
@@ -98,7 +98,6 @@ namespace ClassicUO.Game.UI.Gumps
         // infobar
         private List<InfoBarBuilderControl> _infoBarBuilderControls;
         private Combobox _infoBarHighlightType;
-        private DataBox _databox;
 
         // combat & spells
         private ClickableColorBox _innocentColorPickerBox, _friendColorPickerBox, _crimialColorPickerBox, _genericColorPickerBox, _enemyColorPickerBox, _murdererColorPickerBox, _neutralColorPickerBox, _beneficColorPickerBox, _harmfulColorPickerBox;
@@ -122,6 +121,7 @@ namespace ClassicUO.Game.UI.Gumps
         // general
         private HSliderBar _sliderFPS, _circleOfTranspRadius;
         private HSliderBar _sliderSpeechDelay;
+        private HSliderBar _sliderZoom;
         private HSliderBar _soundsVolume, _musicVolume, _loginMusicVolume;
         private ClickableColorBox _speechColorPickerBox, _emoteColorPickerBox, _yellColorPickerBox, _whisperColorPickerBox, _partyMessageColorPickerBox, _guildMessageColorPickerBox, _allyMessageColorPickerBox, _chatMessageColorPickerBox, _partyAuraColorPickerBox;
         private InputField _spellFormatBox;
@@ -134,7 +134,6 @@ namespace ClassicUO.Game.UI.Gumps
 
         private Checkbox _use_tooltip;
         private Checkbox _useStandardSkillsGump, _showMobileNameIncoming, _showCorpseNameIncoming;
-
 
 
         public OptionsGump() : base(0, 0)
@@ -151,7 +150,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             );
 
-            
+
             int i = 0;
             Add(new NiceButton(10, 10 + 30 * i++, 140, 25, ButtonAction.SwitchPage, ResGumps.General) {IsSelected = true, ButtonParameter = 1});
             Add(new NiceButton(10, 10 + 30 * i++, 140, 25, ButtonAction.SwitchPage, ResGumps.Sound) {ButtonParameter = 2});
@@ -249,12 +248,10 @@ namespace ClassicUO.Game.UI.Gumps
             int startX = 5;
             int startY = 5;
 
-            
 
             DataBox box = new DataBox(startX, startY, rightArea.Width - 15, 1);
             box.WantUpdateSize = true;
             rightArea.Add(box);
-
 
 
             SettingsSection section = AddSettingsSection(box, "General");
@@ -268,22 +265,27 @@ namespace ClassicUO.Game.UI.Gumps
             section.Add(_autoOpenCorpse = AddCheckBox(null, ResGumps.AutoOpenCorpses, ProfileManager.Current.AutoOpenCorpses, startX, startY));
             section.PushIndent();
             section.Add(AddLabel(null, ResGumps.CorpseOpenRange, 0, 0));
-            section.AddRight(_autoOpenCorpseRange = AddInputField
-                         (
-                             null,
-                             startX,
-                             startY,
-                             50, TEXTBOX_HEIGHT,
-                             ResGumps.CorpseOpenRange,
-                             80,
-                             false,
-                             true,
-                             2
-                         ));
+
+            section.AddRight
+            (
+                _autoOpenCorpseRange = AddInputField
+                (
+                    null,
+                    startX,
+                    startY,
+                    50, TEXTBOX_HEIGHT,
+                    ResGumps.CorpseOpenRange,
+                    80,
+                    false,
+                    true,
+                    2
+                )
+            );
+
             _autoOpenCorpseRange.SetText(ProfileManager.Current.AutoOpenCorpseRange.ToString());
             section.Add(_skipEmptyCorpse = AddCheckBox(null, ResGumps.SkipEmptyCorpses, ProfileManager.Current.SkipEmptyCorpse, startX, startY));
             section.Add(AddLabel(null, ResGumps.CorpseOpenOptions, startX, startY));
-            section.AddRight(_autoOpenCorpseOptions = AddCombobox(null, new[] { ResGumps.CorpseOpt_None, ResGumps.CorpseOpt_NotTar, ResGumps.CorpseOpt_NotHid, ResGumps.CorpseOpt_Both }, ProfileManager.Current.CorpseOpenOptions, startX, startY, 150), 2);
+            section.AddRight(_autoOpenCorpseOptions = AddCombobox(null, new[] {ResGumps.CorpseOpt_None, ResGumps.CorpseOpt_NotTar, ResGumps.CorpseOpt_NotHid, ResGumps.CorpseOpt_Both}, ProfileManager.Current.CorpseOpenOptions, startX, startY, 150), 2);
             section.PopIndent();
             section.Add(_noColorOutOfRangeObjects = AddCheckBox(rightArea, ResGumps.OutOfRangeColor, ProfileManager.Current.NoColorObjectsOutOfRange, startX, startY));
             section.Add(_sallosEasyGrab = AddCheckBox(null, ResGumps.SallosEasyGrab, ProfileManager.Current.SallosEasyGrab, startX, startY));
@@ -291,7 +293,6 @@ namespace ClassicUO.Game.UI.Gumps
             _showHouseContent.IsVisible = Client.Version >= ClientVersion.CV_70796;
             section.Add(_use_smooth_boat_movement = AddCheckBox(null, ResGumps.SmoothBoat, ProfileManager.Current.UseSmoothBoatMovement, startX, startY));
             _use_smooth_boat_movement.IsVisible = Client.Version >= ClientVersion.CV_7090;
-
 
 
             SettingsSection section2 = AddSettingsSection(box, "Mobiles");
@@ -303,7 +304,8 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 mode = 0;
             }
-            section2.AddRight(_hpComboBox = AddCombobox(null, new[] { ResGumps.HP_Percentage, ResGumps.HP_Line, ResGumps.HP_Both }, mode, startX, startY, 100));
+
+            section2.AddRight(_hpComboBox = AddCombobox(null, new[] {ResGumps.HP_Percentage, ResGumps.HP_Line, ResGumps.HP_Both}, mode, startX, startY, 100));
             section2.AddRight(AddLabel(null, ResGumps.HP_Mode, startX, startY));
 
             mode = ProfileManager.Current.MobileHPShowWhen;
@@ -312,7 +314,8 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 mode = 0;
             }
-            section2.AddRight(_hpComboBoxShowWhen = AddCombobox(null, new[] { ResGumps.HPShow_Always, ResGumps.HPShow_Less, ResGumps.HPShow_Smart }, mode, startX, startY, 100), 2);
+
+            section2.AddRight(_hpComboBoxShowWhen = AddCombobox(null, new[] {ResGumps.HPShow_Always, ResGumps.HPShow_Less, ResGumps.HPShow_Smart}, mode, startX, startY, 100), 2);
             section2.Add(_highlightByState = AddCheckBox(null, ResGumps.HighlighState, ProfileManager.Current.HighlightMobilesByFlags, startX, startY));
             section2.PushIndent();
             section2.Add(_poisonColorPickerBox = AddColorBox(null, startX, startY, ProfileManager.Current.PoisonHue, ResGumps.PoisonedColor));
@@ -325,7 +328,7 @@ namespace ClassicUO.Game.UI.Gumps
             section2.Add(_showMobileNameIncoming = AddCheckBox(null, ResGumps.ShowIncMobiles, ProfileManager.Current.ShowNewMobileNameIncoming, startX, startY));
             section2.Add(_showCorpseNameIncoming = AddCheckBox(null, ResGumps.ShowIncCorpses, ProfileManager.Current.ShowNewCorpseNameIncoming, startX, startY));
             section2.Add(AddLabel(null, ResGumps.AuraUnderFeet, startX, startY));
-            section2.AddRight(_auraType = AddCombobox(null, new[] { ResGumps.AuraType_None, ResGumps.AuraType_Warmode, ResGumps.AuraType_CtrlShift, ResGumps.AuraType_Always }, ProfileManager.Current.AuraUnderFeetType, startX, startY, 100), 2);
+            section2.AddRight(_auraType = AddCombobox(null, new[] {ResGumps.AuraType_None, ResGumps.AuraType_Warmode, ResGumps.AuraType_CtrlShift, ResGumps.AuraType_Always}, ProfileManager.Current.AuraUnderFeetType, startX, startY, 100), 2);
             section2.PushIndent();
             section2.Add(_partyAura = AddCheckBox(null, ResGumps.CustomColorAuraForPartyMembers, ProfileManager.Current.PartyAura, startX, startY));
             section2.PushIndent();
@@ -357,14 +360,13 @@ namespace ClassicUO.Game.UI.Gumps
                 mode = 0;
             }
 
-            _healtbarType = AddCombobox(null, new[] { ResGumps.HPType_None, ResGumps.HPType_MobileOOR, ResGumps.HPType_MobileDead }, mode, 0, 0, 150);
+            _healtbarType = AddCombobox(null, new[] {ResGumps.HPType_None, ResGumps.HPType_MobileOOR, ResGumps.HPType_MobileDead}, mode, 0, 0, 150);
             section3.AddRight(_healtbarType);
             section3.PopIndent();
             section3.Add(AddLabel(null, ResGumps.GridLoot, startX, startY));
-            section3.AddRight(_gridLoot = AddCombobox(null, new[] { ResGumps.GridLoot_None, ResGumps.GridLoot_GridOnly, ResGumps.GridLoot_Both }, ProfileManager.Current.GridLootType, startX, startY, 120), 2);
+            section3.AddRight(_gridLoot = AddCombobox(null, new[] {ResGumps.GridLoot_None, ResGumps.GridLoot_GridOnly, ResGumps.GridLoot_Both}, ProfileManager.Current.GridLootType, startX, startY, 120), 2);
             section3.Add(_holdShiftForContext = AddCheckBox(null, ResGumps.ShiftContext, ProfileManager.Current.HoldShiftForContext, 0, 0));
             section3.Add(_holdShiftToSplitStack = AddCheckBox(null, ResGumps.ShiftStack, ProfileManager.Current.HoldShiftToSplitStack, 0, 0));
-
 
 
             SettingsSection section4 = AddSettingsSection(box, "Miscellaneous");
@@ -374,12 +376,13 @@ namespace ClassicUO.Game.UI.Gumps
             section4.PushIndent();
             section4.Add(AddLabel(null, ResGumps.CircleTransType, startX, startY));
             int cottypeindex = ProfileManager.Current.CircleOfTransparencyType;
-            string[] cotTypes = { ResGumps.CircleTransType_Full, ResGumps.CircleTransType_Gradient };
+            string[] cotTypes = {ResGumps.CircleTransType_Full, ResGumps.CircleTransType_Gradient};
 
             if (cottypeindex < 0 || cottypeindex > cotTypes.Length)
             {
                 cottypeindex = 0;
             }
+
             section4.AddRight(_cotType = AddCombobox(null, cotTypes, cottypeindex, startX, startY, 150), 2);
             section4.PopIndent();
             section4.Add(_hideScreenshotStoredInMessage = AddCheckBox(null, ResGumps.HideScreenshotStoredInMessage, ProfileManager.Current.HideScreenshotStoredInMessage, 0, 0));
@@ -389,7 +392,7 @@ namespace ClassicUO.Game.UI.Gumps
             section4.Add(_enableDragSelect = AddCheckBox(null, ResGumps.EnableDragHPBars, ProfileManager.Current.EnableDragSelect, startX, startY));
             section4.PushIndent();
             section4.Add(AddLabel(null, ResGumps.DragKey, startX, startY));
-            section4.AddRight(_dragSelectModifierKey = AddCombobox(null, new[] { ResGumps.KeyMod_None, ResGumps.KeyMod_Ctrl, ResGumps.KeyMod_Shift }, ProfileManager.Current.DragSelectModifierKey, startX, startY, 100));
+            section4.AddRight(_dragSelectModifierKey = AddCombobox(null, new[] {ResGumps.KeyMod_None, ResGumps.KeyMod_Ctrl, ResGumps.KeyMod_Shift}, ProfileManager.Current.DragSelectModifierKey, startX, startY, 100));
             section4.Add(_dragSelectHumanoidsOnly = AddCheckBox(null, ResGumps.DragHumanoidsOnly, ProfileManager.Current.DragSelectHumanoidsOnly, startX, startY));
             section4.PopIndent();
 
@@ -407,8 +410,8 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 mode = 0;
             }
-            section5.AddRight(_fieldsType = AddCombobox(null, new[] { ResGumps.HPFields_Normal, ResGumps.HPFields_Static, ResGumps.HPFields_Tile }, mode, startX, startY, 150));
 
+            section5.AddRight(_fieldsType = AddCombobox(null, new[] {ResGumps.HPFields_Normal, ResGumps.HPFields_Static, ResGumps.HPFields_Tile}, mode, startX, startY, 150));
 
 
             Add(rightArea, PAGE);
@@ -463,7 +466,7 @@ namespace ClassicUO.Game.UI.Gumps
             startY += text.Bounds.Bottom + 5;
             _reduceFPSWhenInactive = AddCheckBox(rightArea, ResGumps.FPSInactive, ProfileManager.Current.ReduceFPSWhenInactive, startX, startY);
             startY += _reduceFPSWhenInactive.Height + 2;
-          
+
             startX = 5;
             startY += 20;
 
@@ -477,64 +480,81 @@ namespace ClassicUO.Game.UI.Gumps
             section.Add(_windowBorderless = AddCheckBox(null, ResGumps.BorderlessWindow, ProfileManager.Current.WindowBorderless, startX, startY));
             section.Add(_gameWindowLock = AddCheckBox(null, ResGumps.LockGameWindowMovingResizing, ProfileManager.Current.GameWindowLock, startX, startY));
             section.Add(AddLabel(null, ResGumps.GamePlayWindowPosition, startX, startY));
-            section.AddRight(_gameWindowPositionX = AddInputField
-                             (
-                                 null,
-                                 startX, startY,
-                                 50,
-                                 TEXTBOX_HEIGHT,
-                                 null,
-                                 80,
-                                 false,
-                                 true,
-                                 5
-                             ), 4);
+
+            section.AddRight
+            (
+                _gameWindowPositionX = AddInputField
+                (
+                    null,
+                    startX, startY,
+                    50,
+                    TEXTBOX_HEIGHT,
+                    null,
+                    80,
+                    false,
+                    true,
+                    5
+                ), 4
+            );
+
             _gameWindowPositionX.SetText(ProfileManager.Current.GameWindowPosition.X.ToString());
 
-            section.AddRight(_gameWindowPositionY = AddInputField
-                             (
-                                 null,
-                                 startX, startY,
-                                 50,
-                                 TEXTBOX_HEIGHT,
-                                 null,
-                                 80,
-                                 false,
-                                 true,
-                                 5
-                             ));
+            section.AddRight
+            (
+                _gameWindowPositionY = AddInputField
+                (
+                    null,
+                    startX, startY,
+                    50,
+                    TEXTBOX_HEIGHT,
+                    null,
+                    80,
+                    false,
+                    true,
+                    5
+                )
+            );
+
             _gameWindowPositionY.SetText(ProfileManager.Current.GameWindowPosition.Y.ToString());
 
 
             section.Add(AddLabel(null, ResGumps.GamePlayWindowSize, startX, startY));
-            section.AddRight(_gameWindowWidth = AddInputField
-                             (
-                                 null,
-                                 startX, startY,
-                                 50,
-                                 TEXTBOX_HEIGHT,
-                                 null,
-                                 80,
-                                 false,
-                                 true,
-                                 5
-                             ));
+
+            section.AddRight
+            (
+                _gameWindowWidth = AddInputField
+                (
+                    null,
+                    startX, startY,
+                    50,
+                    TEXTBOX_HEIGHT,
+                    null,
+                    80,
+                    false,
+                    true,
+                    5
+                )
+            );
+
             _gameWindowWidth.SetText(ProfileManager.Current.GameWindowSize.X.ToString());
 
-           section.AddRight(_gameWindowHeight = AddInputField
-                            (
-                                null,
-                                startX, startY,
-                                50,
-                                TEXTBOX_HEIGHT,
-                                null,
-                                80,
-                                false,
-                                true,
-                                5
-                            ));
-            _gameWindowHeight.SetText(ProfileManager.Current.GameWindowSize.Y.ToString());
+            section.AddRight
+            (
+                _gameWindowHeight = AddInputField
+                (
+                    null,
+                    startX, startY,
+                    50,
+                    TEXTBOX_HEIGHT,
+                    null,
+                    80,
+                    false,
+                    true,
+                    5
+                )
+            );
 
+            _gameWindowHeight.SetText(ProfileManager.Current.GameWindowSize.Y.ToString());
 
 
             SettingsSection section2 = AddSettingsSection(box, "Zoom");
@@ -570,12 +590,16 @@ namespace ClassicUO.Game.UI.Gumps
             SettingsSection section6 = AddSettingsSection(box, "Filters");
             section6.Y = section5.Bounds.Bottom + 40;
             section6.Add(AddLabel(null, ResGumps.FilterType, startX, startY));
-            section6.AddRight(_filterType = AddCombobox
-                              (
-                                  null, new[] { ResGumps.OFF, string.Format(ResGumps.FilterTypeFormatON, ResGumps.ON, ResGumps.AnisotropicClamp), string.Format(ResGumps.FilterTypeFormatON, ResGumps.ON, ResGumps.LinearClamp) },
-                                  ProfileManager.Current.FilterType, startX, startY, 200
-                              ));
-         
+
+            section6.AddRight
+            (
+                _filterType = AddCombobox
+                (
+                    null, new[] {ResGumps.OFF, string.Format(ResGumps.FilterTypeFormatON, ResGumps.ON, ResGumps.AnisotropicClamp), string.Format(ResGumps.FilterTypeFormatON, ResGumps.ON, ResGumps.LinearClamp)},
+                    ProfileManager.Current.FilterType, startX, startY, 200
+                )
+            );
+
 
             Add(rightArea, PAGE);
         }
@@ -591,7 +615,7 @@ namespace ClassicUO.Game.UI.Gumps
             Add(new Line(191 + 150, 21, 1, 418, Color.Gray.PackedValue), PAGE);
             NiceButton addButton = new NiceButton(190, 20, 130, 20, ButtonAction.Activate, ResGumps.NewMacro) {IsSelectable = false, ButtonParameter = (int) Buttons.NewMacro};
             Add(addButton, PAGE);
-            NiceButton delButton = new NiceButton(190, 52, 130, 20, ButtonAction.Activate, ResGumps.DeleteMacro) { IsSelectable = false, ButtonParameter = (int) Buttons.DeleteMacro };
+            NiceButton delButton = new NiceButton(190, 52, 130, 20, ButtonAction.Activate, ResGumps.DeleteMacro) {IsSelectable = false, ButtonParameter = (int) Buttons.DeleteMacro};
             Add(delButton, PAGE);
 
 
@@ -658,7 +682,7 @@ namespace ClassicUO.Game.UI.Gumps
                             }
 
                             MacroControl control = _macroControl.FindControls<MacroControl>()
-                                                                          .SingleOrDefault();
+                                                                .SingleOrDefault();
 
                             if (control == null)
                             {
@@ -694,10 +718,11 @@ namespace ClassicUO.Game.UI.Gumps
 
                 UIManager.Add(dialog);
             };
+
             delButton.MouseUp += (ss, ee) =>
             {
                 NiceButton nb = databox.FindControls<NiceButton>()
-                                         .SingleOrDefault(a => a.IsSelected);
+                                       .SingleOrDefault(a => a.IsSelected);
 
                 if (nb != null)
                 {
@@ -721,7 +746,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                                 _macroControl.Dispose();
                             }
-                            
+
                             nb.Dispose();
                             databox.ReArrangeChildren();
                         }
@@ -730,7 +755,6 @@ namespace ClassicUO.Game.UI.Gumps
                     UIManager.Add(dialog);
                 }
             };
-
 
 
             MacroManager macroManager = Client.Game.GetScene<GameScene>()
@@ -783,6 +807,7 @@ namespace ClassicUO.Game.UI.Gumps
                     NiceButton mupNiceButton = (NiceButton) sss;
 
                     Macro m = mupNiceButton.Tag as Macro;
+
                     if (m == null)
                     {
                         return;
@@ -848,11 +873,13 @@ namespace ClassicUO.Game.UI.Gumps
             text = AddLabel(rightArea, ResGumps.TooltipFont, startX, startY);
             startY += text.Height + 2;
             startX += 40;
+
             _tooltip_font_selector = new FontSelector(7, ProfileManager.Current.TooltipFont, ResGumps.TooltipFontSelect)
             {
                 X = startX,
                 Y = startY
             };
+
             rightArea.Add(_tooltip_font_selector);
 
             Add(rightArea, PAGE);
@@ -869,6 +896,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             _overrideAllFonts = AddCheckBox(rightArea, ResGumps.OverrideGameFont, ProfileManager.Current.OverrideAllFonts, startX, startY);
             startX += _overrideAllFonts.Width + 5;
+
             _overrideAllFontsIsUnicodeCheckbox = AddCombobox
             (
                 rightArea, new[]
@@ -892,6 +920,7 @@ namespace ClassicUO.Game.UI.Gumps
                 X = startX,
                 Y = startY
             };
+
             rightArea.Add(_fontSelectorChat);
 
             Add(rightArea, PAGE);
@@ -933,6 +962,7 @@ namespace ClassicUO.Game.UI.Gumps
             startY += 20;
 
             _randomizeColorsButton = new NiceButton(startX, startY, 140, 25, ButtonAction.Activate, ResGumps.RandomizeSpeechHues) {ButtonParameter = (int) Buttons.Disabled};
+
             _randomizeColorsButton.MouseUp += (sender, e) =>
             {
                 if (e.Button != MouseButtonType.Left)
@@ -953,6 +983,7 @@ namespace ClassicUO.Game.UI.Gumps
                 ProfileManager.Current.WhisperHue = whisperHue;
                 _whisperColorPickerBox.SetColor(whisperHue, HuesLoader.Instance.GetPolygoneColor(12, whisperHue));
             };
+
             rightArea.Add(_randomizeColorsButton);
             startY += _randomizeColorsButton.Height + 2 + 20;
 
@@ -965,7 +996,7 @@ namespace ClassicUO.Game.UI.Gumps
             _yellColorPickerBox = AddColorBox(rightArea, startX, startY, ProfileManager.Current.YellHue, ResGumps.YellColor);
             startX += 200;
             _whisperColorPickerBox = AddColorBox(rightArea, startX, startY, ProfileManager.Current.WhisperHue, ResGumps.WhisperColor);
-            
+
             startY += _whisperColorPickerBox.Height + 2;
             startX = 5;
 
@@ -1038,12 +1069,12 @@ namespace ClassicUO.Game.UI.Gumps
 
             _spellFormatBox = AddInputField
             (
-                rightArea,  
+                rightArea,
                 startX, startY,
                 200,
                 TEXTBOX_HEIGHT,
-                ResGumps.SpellOverheadFormat, 
-                0, 
+                ResGumps.SpellOverheadFormat,
+                0,
                 true,
                 false,
                 30
@@ -1083,8 +1114,9 @@ namespace ClassicUO.Game.UI.Gumps
                 false,
                 true
             );
+
             _abbreviatedAmount.SetText(ProfileManager.Current.CounterBarAbbreviatedAmount.ToString());
-        
+
             startX = 5;
             startX += 40;
             startY += _enableAbbreviatedAmount.Height + 2;
@@ -1105,6 +1137,7 @@ namespace ClassicUO.Game.UI.Gumps
                 true,
                 2
             );
+
             _highlightAmount.SetText(ProfileManager.Current.CounterBarHighlightAmount.ToString());
 
             startX = 5;
@@ -1126,11 +1159,11 @@ namespace ClassicUO.Game.UI.Gumps
 
             startX = initialX;
             startY += text.Height + 2 + 15;
-            
+
             _rows = AddInputField
             (
                 rightArea,
-                startX, startY, 
+                startX, startY,
                 50,
                 30,
                 ResGumps.Counter_Rows,
@@ -1139,6 +1172,7 @@ namespace ClassicUO.Game.UI.Gumps
                 true,
                 5
             );
+
             _rows.SetText(ProfileManager.Current.CounterBarRows.ToString());
 
 
@@ -1147,7 +1181,7 @@ namespace ClassicUO.Game.UI.Gumps
             _columns = AddInputField
             (
                 rightArea,
-                startX, startY, 
+                startX, startY,
                 50,
                 30,
                 ResGumps.Counter_Columns,
@@ -1156,6 +1190,7 @@ namespace ClassicUO.Game.UI.Gumps
                 true,
                 5
             );
+
             _columns.SetText(ProfileManager.Current.CounterBarColumns.ToString());
 
 
@@ -1207,7 +1242,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             startX = 5;
             startY += _infoBarHighlightType.Height + 5;
-           
+
             NiceButton nb = new NiceButton(startX, startY, 90, 20, ButtonAction.Activate, ResGumps.AddItem, 0, TEXT_ALIGN_TYPE.TS_LEFT)
             {
                 ButtonParameter = -1,
@@ -1224,6 +1259,7 @@ namespace ClassicUO.Game.UI.Gumps
                 _databox.Add(ibbc);
                 _databox.WantUpdateSize = true;
             };
+
             rightArea.Add(nb);
 
 
@@ -1244,7 +1280,6 @@ namespace ClassicUO.Game.UI.Gumps
             rightArea.Add(new Line(startX, startY, rightArea.Width, 1, Color.Gray.PackedValue));
 
             startY += 20;
-
 
 
             InfoBarManager ibmanager = Client.Game.GetScene<GameScene>()
@@ -1297,7 +1332,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 startY += _useLargeContianersGumps.Height + 2;
             }
-            
+
             _containerDoubleClickToLoot = AddCheckBox(rightArea, ResGumps.DoubleClickLootContainers, ProfileManager.Current.DoubleClickToLootInsideContainers, startX, startY);
             startY += _containerDoubleClickToLoot.Height + 2;
             _relativeDragAnDropItems = AddCheckBox(rightArea, ResGumps.RelativeDragAndDropContainers, ProfileManager.Current.RelativeDragAndDropItems, startX, startY);
@@ -2161,7 +2196,7 @@ namespace ClassicUO.Game.UI.Gumps
             Label label = new Label(text, true, HUE_FONT)
             {
                 X = x,
-                Y = y,
+                Y = y
             };
 
             area?.Add(label);
@@ -2262,7 +2297,7 @@ namespace ClassicUO.Game.UI.Gumps
             Last = DeleteMacro
         }
 
-        
+
         private class SettingsSection : Control
         {
             private readonly DataBox _databox;
@@ -2274,7 +2309,6 @@ namespace ClassicUO.Game.UI.Gumps
                 AcceptMouseInput = true;
                 WantUpdateSize = true;
 
-                
 
                 Label label = new Label(title, true, HUE_FONT, font: FONT);
                 label.X = 5;
@@ -2307,14 +2341,22 @@ namespace ClassicUO.Game.UI.Gumps
 
                 for (; i >= 0; --i)
                 {
-                    if (_databox.Children[i].IsVisible)
+                    if (_databox.Children[i]
+                                .IsVisible)
                     {
                         break;
                     }
                 }
 
-                c.X = i >= 0 ? _databox.Children[i].Bounds.Right + offset : _indent;
-                c.Y = i >= 0 ? _databox.Children[i].Bounds.Top : 0;
+                c.X = i >= 0
+                    ? _databox.Children[i]
+                              .Bounds.Right + offset
+                    : _indent;
+
+                c.Y = i >= 0
+                    ? _databox.Children[i]
+                              .Bounds.Top
+                    : 0;
 
                 _databox.Add(c);
                 _databox.WantUpdateSize = true;
@@ -2327,9 +2369,11 @@ namespace ClassicUO.Game.UI.Gumps
 
                 for (; i >= 0; --i)
                 {
-                    if (_databox.Children[i].IsVisible)
+                    if (_databox.Children[i]
+                                .IsVisible)
                     {
-                        if (bottom == 0 || bottom < _databox.Children[i].Bounds.Bottom + 2)
+                        if (bottom == 0 || bottom < _databox.Children[i]
+                                                            .Bounds.Bottom + 2)
                         {
                             bottom = _databox.Children[i]
                                              .Bounds.Bottom + 2;
@@ -2441,9 +2485,9 @@ namespace ClassicUO.Game.UI.Gumps
 
             public string Text => _textbox.Text;
 
-            public override bool AcceptKeyboardInput 
-            { 
-                get => _textbox.AcceptKeyboardInput; 
+            public override bool AcceptKeyboardInput
+            {
+                get => _textbox.AcceptKeyboardInput;
                 set => _textbox.AcceptKeyboardInput = value;
             }
 
@@ -2452,7 +2496,6 @@ namespace ClassicUO.Game.UI.Gumps
                 get => _textbox.NumbersOnly;
                 set => _textbox.NumbersOnly = value;
             }
-
 
 
             public void SetText(string text)

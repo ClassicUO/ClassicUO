@@ -102,7 +102,7 @@ namespace ClassicUO.Game.UI.Gumps
             base.Dispose();
         }
 
- 
+
         public override void OnPageChanged()
         {
             Height = _background.SpecialHeight;
@@ -110,7 +110,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             foreach (Control c in _scrollArea.Children)
             {
-               // if (c is ScrollAreaItem)
+                // if (c is ScrollAreaItem)
                 {
                     c.OnPageChanged();
                 }

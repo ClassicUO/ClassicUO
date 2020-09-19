@@ -144,10 +144,10 @@ namespace ClassicUO.Game.UI.Gumps
     internal class UOChatGump : Gump
     {
         private ChannelCreationBox _channelCreationBox;
-        private readonly DataBox _databox;
 
         private readonly List<ChannelListItemControl> _channelList = new List<ChannelListItemControl>();
         private readonly Label _currentChannelLabel;
+        private readonly DataBox _databox;
         private string _selectedChannelText;
 
         public UOChatGump() : base(0, 0)

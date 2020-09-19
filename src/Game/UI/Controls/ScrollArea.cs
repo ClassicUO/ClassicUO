@@ -22,7 +22,6 @@
 #endregion
 
 using System;
-using System.Linq;
 using ClassicUO.Input;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
@@ -75,9 +74,6 @@ namespace ClassicUO.Game.UI.Controls
         }
 
 
-        public Rectangle ScissorRectangle;
-
-
         public int ScrollMaxHeight { get; set; } = -1;
         public ScrollbarBehaviour ScrollbarBehaviour { get; set; }
         public int ScrollValue => _scrollBar.Value;
@@ -85,11 +81,13 @@ namespace ClassicUO.Game.UI.Controls
         public int ScrollMaxValue => _scrollBar.MaxValue;
 
 
+        public Rectangle ScissorRectangle;
+
 
         public override void Update(double totalMS, double frameMS)
         {
             base.Update(totalMS, frameMS);
-            
+
             CalculateScrollBarMaxValue();
 
             if (ScrollbarBehaviour == ScrollbarBehaviour.ShowAlways)
@@ -227,12 +225,13 @@ namespace ClassicUO.Game.UI.Controls
             {
                 _scrollBar.Value = _scrollBar.MaxValue = 0;
             }
-            
+
             _scrollBar.UpdateOffset(0, Offset.Y);
 
             for (int i = 1; i < Children.Count; i++)
             {
-                Children[i].UpdateOffset(0, -_scrollBar.Value + ScissorRectangle.Y);
+                Children[i]
+                    .UpdateOffset(0, -_scrollBar.Value + ScissorRectangle.Y);
             }
         }
     }

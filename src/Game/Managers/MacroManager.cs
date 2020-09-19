@@ -33,7 +33,6 @@ using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Gumps;
-using ClassicUO.Interfaces;
 using ClassicUO.Network;
 using ClassicUO.Resources;
 using ClassicUO.Utility;
@@ -225,7 +224,6 @@ namespace ClassicUO.Game.Managers
         }
 
 
-       
         public List<Macro> GetAllMacros()
         {
             Macro m = (Macro) Items;
@@ -271,7 +269,7 @@ namespace ClassicUO.Game.Managers
 
             return obj;
         }
-        
+
         public Macro FindMacro(string name)
         {
             Macro obj = (Macro) Items;
@@ -1734,7 +1732,7 @@ namespace ClassicUO.Game.Managers
                     }
 
                     m.SubMenuType = subMenuType;
-                    
+
                     PushToBack(m);
                 }
             }

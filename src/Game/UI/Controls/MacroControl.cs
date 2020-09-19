@@ -22,7 +22,6 @@
 #endregion
 
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
@@ -37,11 +36,10 @@ namespace ClassicUO.Game.UI.Controls
 {
     internal class MacroControl : Control
     {
-        private readonly HotkeyBox _hotkeyBox;
-        private DataBox _databox;
-
         private static readonly string[] _allHotkeysNames = Enum.GetNames(typeof(MacroType));
         private static readonly string[] _allSubHotkeysNames = Enum.GetNames(typeof(MacroSubType));
+        private readonly DataBox _databox;
+        private readonly HotkeyBox _hotkeyBox;
 
 
         public MacroControl(string name)
@@ -59,7 +57,6 @@ namespace ClassicUO.Game.UI.Controls
             Add(new NiceButton(52, _hotkeyBox.Height + 30, 50, 25, ButtonAction.Activate, ResGumps.Remove) {ButtonParameter = 1, IsSelectable = false});
 
 
-
             ScrollArea area = new ScrollArea(10, _hotkeyBox.Bounds.Bottom + 80, 280, 280, true);
             Add(area);
 
@@ -68,7 +65,8 @@ namespace ClassicUO.Game.UI.Controls
             area.Add(_databox);
 
 
-            Macro = Client.Game.GetScene<GameScene>().Macros.FindMacro(name) ?? Macro.CreateEmptyMacro(name);
+            Macro = Client.Game.GetScene<GameScene>()
+                          .Macros.FindMacro(name) ?? Macro.CreateEmptyMacro(name);
 
             SetupKeyByDefault();
             SetupMacroUI();
@@ -115,7 +113,9 @@ namespace ClassicUO.Game.UI.Controls
 
                 Macro.Remove(last);
 
-                _databox.Children[_databox.Children.Count - 1].Dispose();
+                _databox.Children[_databox.Children.Count - 1]
+                        .Dispose();
+
                 SetupMacroUI();
             }
 
@@ -255,8 +255,8 @@ namespace ClassicUO.Game.UI.Controls
 
         private class MacroEntry : Control
         {
-            private string[] _items;
-            private MacroControl _control;
+            private readonly MacroControl _control;
+            private readonly string[] _items;
 
             public MacroEntry(MacroControl control, MacroObject obj, string[] items)
             {
@@ -267,6 +267,7 @@ namespace ClassicUO.Game.UI.Controls
                 {
                     Tag = obj
                 };
+
                 mainBox.OnOptionSelected += BoxOnOnOptionSelected;
 
                 Add(mainBox);
@@ -302,6 +303,7 @@ namespace ClassicUO.Game.UI.Controls
                         }
 
                         Combobox sub = new Combobox(20, Height, 180, names, (int) obj.SubCode - offset, 300);
+
                         sub.OnOptionSelected += (senderr, ee) =>
                         {
                             Macro.GetBoundByCode(obj.Code, ref count, ref offset);
@@ -315,6 +317,7 @@ namespace ClassicUO.Game.UI.Controls
 
 
                         break;
+
                     case 2:
 
                         ResizePic background = new ResizePic(0x0BB8)
@@ -324,6 +327,7 @@ namespace ClassicUO.Game.UI.Controls
                             Width = 240,
                             Height = 60
                         };
+
                         Add(background);
 
                         StbTextBox textbox = new StbTextBox(0xFF, 80, 236, true, FontStyle.BlackBorder)
@@ -333,12 +337,15 @@ namespace ClassicUO.Game.UI.Controls
                             Width = background.Width - 4,
                             Height = background.Height - 4
                         };
+
                         textbox.SetText(obj.HasString() ? ((MacroObjectString) obj).Text : string.Empty);
 
                         textbox.TextChanged += (sss, eee) =>
                         {
                             if (obj.HasString())
+                            {
                                 ((MacroObjectString) obj).Text = ((StbTextBox) sss).Text;
+                            }
                         };
 
                         Add(textbox);
@@ -382,7 +389,8 @@ namespace ClassicUO.Game.UI.Controls
 
                     for (int i = 1; i < Children.Count; i++)
                     {
-                        Children[i]?.Dispose();
+                        Children[i]
+                            ?.Dispose();
                     }
 
                     Height = box.Height;

@@ -85,6 +85,7 @@ namespace ClassicUO.IO.Resources
                     1280, 4096
                 }
             };
+
         public int PatchesCount { get; private set; }
         public int[] MapPatchCount { get; private set; }
         public int[] StaticPatchCount { get; private set; }
@@ -130,7 +131,7 @@ namespace ClassicUO.IO.Resources
 
                     if (!string.IsNullOrEmpty(Settings.GlobalSettings.MapsLayouts))
                     {
-                        string[] values = Settings.GlobalSettings.MapsLayouts.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
+                        string[] values = Settings.GlobalSettings.MapsLayouts.Split(new[] {';'}, StringSplitOptions.RemoveEmptyEntries);
 
                         Constants.MAPS_COUNT = values.Length;
                         MapsDefaultSize = new int[values.Length, 2];
@@ -140,7 +141,7 @@ namespace ClassicUO.IO.Resources
 
                         int index = 0;
 
-                        char[] splitchar = new char[1] { ',' };
+                        char[] splitchar = new char[1] {','};
 
                         foreach (string s in values)
                         {

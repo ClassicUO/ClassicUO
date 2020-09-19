@@ -41,10 +41,10 @@ namespace ClassicUO.Game.UI.Gumps
     internal class StandardSkillsGump : Gump
     {
         private const int _diffY = 22;
-        private readonly GumpPic _bottomComment;
-        private readonly GumpPic _bottomLine;
 
         private readonly ScrollArea _area;
+        private readonly GumpPic _bottomComment;
+        private readonly GumpPic _bottomLine;
         private readonly DataBox _container;
         private readonly GumpPic _gumpPic;
         private readonly HitBox _hitBox;
@@ -240,7 +240,7 @@ namespace ClassicUO.Game.UI.Gumps
             _checkCaps.Y = _newGroupButton.Y + 7;
 
             bool wantedResize = _container.WantUpdateSize;
-            
+
             base.Update(totalMS, frameMS);
 
             if (wantedResize)

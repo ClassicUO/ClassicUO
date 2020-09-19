@@ -26,19 +26,18 @@ using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.IO.Resources;
 using ClassicUO.Network;
-using ClassicUO.Renderer;
 
 namespace ClassicUO.Game.UI.Gumps
 {
     internal class ProfileGump : Gump
     {
         private const int _diffY = 22;
+        private readonly DataBox _databox;
         private readonly GumpPic _gumpPic;
         private readonly HitBox _hitBox;
         private bool _isMinimized;
         private readonly string _originalText;
         private readonly ScrollArea _scrollArea;
-        private readonly DataBox _databox;
         private readonly StbTextBox _textBox;
 
         public ProfileGump(uint serial, string header, string footer, string body, bool canEdit) : base(serial == World.Player.Serial ? serial = Constants.PROFILE_LOCALSERIAL : serial, serial)
@@ -50,7 +49,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add(_gumpPic = new GumpPic(143, 0, 0x82D, 0));
             _gumpPic.MouseDoubleClick += _picBase_MouseDoubleClick;
-          
+
             Add(new ExpandableScroll(0, _diffY, Height - _diffY, 0x0820));
             _scrollArea = new ScrollArea(22, 32 + _diffY, 272 - 22, Height - (96 + _diffY), false);
 
@@ -59,6 +58,7 @@ namespace ClassicUO.Game.UI.Gumps
                 X = 53,
                 Y = 6
             };
+
             _scrollArea.Add(topText);
 
             int offsetY = topText.Height - 15;
@@ -77,6 +77,7 @@ namespace ClassicUO.Game.UI.Gumps
                 IsEditable = canEdit,
                 Multiline = true
             };
+
             _originalText = body;
             _textBox.TextChanged += _textBox_TextChanged;
             _textBox.SetText(body);
@@ -89,6 +90,7 @@ namespace ClassicUO.Game.UI.Gumps
             _databox.Add(new GumpPic(4, 0, 0x005F, 0));
             _databox.Add(new GumpPicTiled(13, 0 + 9, 197, 0, 0x0060));
             _databox.Add(new GumpPic(210, 0, 0x0061, 0));
+
             _databox.Add
             (
                 new Label(footer, true, 0, font: 1, maxwidth: 220)
@@ -97,6 +99,7 @@ namespace ClassicUO.Game.UI.Gumps
                     Y = 26
                 }
             );
+
             Add(_scrollArea);
             _scrollArea.Add(_databox);
 

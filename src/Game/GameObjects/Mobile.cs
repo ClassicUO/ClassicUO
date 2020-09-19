@@ -155,8 +155,8 @@ namespace ClassicUO.Game.GameObjects
                                Graphic >= 0x025D && Graphic <= 0x0260 ||
                                Graphic == 0x029A || Graphic == 0x029B ||
                                Graphic == 0x02B6 || Graphic == 0x02B7 ||
-                               Graphic == 0x03DB || Graphic == 0x03DF || 
-                               Graphic == 0x03E2 || Graphic == 0x02E8 || 
+                               Graphic == 0x03DB || Graphic == 0x03DF ||
+                               Graphic == 0x03E2 || Graphic == 0x02E8 ||
                                Graphic == 0x02E9 || Graphic == 0x04E5;
 
         public bool IsGargoyle => Client.Version >= ClientVersion.CV_7000 && Graphic == 0x029A || Graphic == 0x029B;

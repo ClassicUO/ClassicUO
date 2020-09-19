@@ -51,7 +51,12 @@ namespace ClassicUO.Game.UI.Controls
             labelColor = new ClickableColorBox(150, 0, 13, 14, item.hue, color);
 
             NiceButton deleteButton = new NiceButton(390, 0, 60, 25, ButtonAction.Activate, ResGumps.Delete) {ButtonParameter = 999};
-            deleteButton.MouseUp += (sender, e) => { Dispose(); ((DataBox) Parent)?.ReArrangeChildren(); };
+
+            deleteButton.MouseUp += (sender, e) =>
+            {
+                Dispose();
+                ((DataBox) Parent)?.ReArrangeChildren();
+            };
 
             Add(new ResizePic(0x0BB8) {X = infoLabel.X - 5, Y = 0, Width = infoLabel.Width + 10, Height = infoLabel.Height});
             Add(infoLabel);
