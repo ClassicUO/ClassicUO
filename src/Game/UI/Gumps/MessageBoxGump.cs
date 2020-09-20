@@ -22,8 +22,10 @@
 #endregion
 
 using System;
+using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Renderer;
+using SDL2;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -36,7 +38,8 @@ namespace ClassicUO.Game.UI.Gumps
             CanMove = true;
             CanCloseWithRightClick = false;
             CanCloseWithEsc = false;
-            AcceptMouseInput = false;
+            AcceptMouseInput = true;
+            AcceptKeyboardInput = true;
 
             IsModal = true;
             LayerOrder = UILayer.Over;
@@ -94,6 +97,19 @@ namespace ClassicUO.Game.UI.Gumps
             b.X = (Width - b.Width) >> 1;
 
             WantUpdateSize = false;
+
+            UIManager.KeyboardFocusControl = this;
+            UIManager.KeyboardFocusControl.SetKeyboardFocus();
+        }
+
+        protected override void OnKeyUp(SDL.SDL_Keycode key, SDL.SDL_Keymod mod)
+        {
+            base.OnKeyUp(key, mod);
+
+            if (key == SDL.SDL_Keycode.SDLK_RETURN && mod == 0)
+            {
+                OnButtonClick(0);
+            }
         }
 
         public override void OnButtonClick(int buttonID)
