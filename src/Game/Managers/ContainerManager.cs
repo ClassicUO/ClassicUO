@@ -119,11 +119,11 @@ namespace ClassicUO.Game.Managers
 
                         for (int i = 0; i < 4 && passed == 0; i++)
                         {
-                            if (X + texture.Width + Constants.CONTAINER_RECT_STEP > Client.Game.Window.ClientBounds.Width)
+                            if (X + width + Constants.CONTAINER_RECT_STEP > Client.Game.Window.ClientBounds.Width)
                             {
                                 X = Constants.CONTAINER_RECT_DEFAULT_POSITION;
 
-                                if (Y + texture.Height + Constants.CONTAINER_RECT_LINESTEP > Client.Game.Window.ClientBounds.Height)
+                                if (Y + height + Constants.CONTAINER_RECT_LINESTEP > Client.Game.Window.ClientBounds.Height)
                                 {
                                     Y = Constants.CONTAINER_RECT_DEFAULT_POSITION;
                                 }
@@ -132,9 +132,9 @@ namespace ClassicUO.Game.Managers
                                     Y += Constants.CONTAINER_RECT_LINESTEP;
                                 }
                             }
-                            else if (Y + texture.Height + Constants.CONTAINER_RECT_STEP > Client.Game.Window.ClientBounds.Height)
+                            else if (Y + height + Constants.CONTAINER_RECT_STEP > Client.Game.Window.ClientBounds.Height)
                             {
-                                if (X + texture.Width + Constants.CONTAINER_RECT_LINESTEP > Client.Game.Window.ClientBounds.Width)
+                                if (X + width + Constants.CONTAINER_RECT_LINESTEP > Client.Game.Window.ClientBounds.Width)
                                 {
                                     X = Constants.CONTAINER_RECT_DEFAULT_POSITION;
                                 }
