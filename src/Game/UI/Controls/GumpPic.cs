@@ -76,7 +76,7 @@ namespace ClassicUO.Game.UI.Controls
                 return false;
             }
 
-            if (texture.Contains(x, y))
+            if (texture.Contains(x - Offset.X, y - Offset.Y))
             {
                 return true;
             }

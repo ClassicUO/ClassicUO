@@ -92,6 +92,9 @@ namespace ClassicUO.Game.UI.Controls
 
         public override bool Contains(int x, int y)
         {
+            x -= Offset.X;
+            y -= Offset.Y;
+
             int th_0_width = _gumpTexture[0]
                 ?.Width ?? 0;
 
@@ -298,7 +301,7 @@ namespace ClassicUO.Game.UI.Controls
             {
                 return false;
             }
-
+            
             int textureWidth = texture.Width;
             int textureHeight = texture.Height;
 

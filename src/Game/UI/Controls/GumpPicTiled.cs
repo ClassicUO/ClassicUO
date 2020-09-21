@@ -118,6 +118,9 @@ namespace ClassicUO.Game.UI.Controls
             int width = Width;
             int height = Height;
 
+            x -= Offset.X;
+            y -= Offset.Y;
+
             UOTexture32 texture = GumpsLoader.Instance.GetTexture(Graphic);
 
             if (texture == null)

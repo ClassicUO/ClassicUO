@@ -326,7 +326,7 @@ namespace ClassicUO.Game.UI.Controls
             return ContainsByBounds
                 ? base.Contains(x, y)
                 : _textures[NORMAL]
-                    .Contains(x, y);
+                    .Contains(x - Offset.X, y - Offset.Y);
         }
 
         public sealed override void Dispose()

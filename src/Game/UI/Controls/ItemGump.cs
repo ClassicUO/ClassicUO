@@ -154,6 +154,9 @@ namespace ClassicUO.Game.UI.Controls
                 return false;
             }
 
+            x -= Offset.X;
+            y -= Offset.Y;
+
             if (ProfileManager.Current != null && ProfileManager.Current.ScaleItemsInsideContainers)
             {
                 float scale = UIManager.ContainerScale;

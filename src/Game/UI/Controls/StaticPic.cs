@@ -95,7 +95,7 @@ namespace ClassicUO.Game.UI.Controls
         {
             ArtTexture texture = ArtLoader.Instance.GetTexture(Graphic);
 
-            return texture != null && texture.Contains(x, y);
+            return texture != null && texture.Contains(x - Offset.X, y - Offset.Y);
         }
     }
 }

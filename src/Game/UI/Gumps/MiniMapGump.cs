@@ -410,7 +410,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override bool Contains(int x, int y)
         {
-            return _mapTexture.Contains(x, y);
+            return _mapTexture.Contains(x - Offset.X, y - Offset.Y);
         }
 
         public override void Dispose()
