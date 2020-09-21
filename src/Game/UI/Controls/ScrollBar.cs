@@ -31,16 +31,11 @@ namespace ClassicUO.Game.UI.Controls
 {
     internal class ScrollBar : ScrollBarBase
     {
-        private const int TIME_BETWEEN_CLICKS = 2;
-        private bool _btUpClicked, _btDownClicked, _btSliderClicked;
-        private Point _clickPosition;
-        private Rectangle _rectDownButton, _rectUpButton, _rectSlider, _emptySpace;
-        private int _sliderPosition;
+        private Rectangle _rectSlider, _emptySpace;
         private readonly UOTexture32[] _textureBackground;
         private readonly UOTexture32[] _textureDownButton;
         private readonly UOTexture32 _textureSlider;
         private readonly UOTexture32[] _textureUpButton;
-        private uint _timeUntilNextClick;
 
         public ScrollBar(int x, int y, int height)
         {
@@ -100,43 +95,11 @@ namespace ClassicUO.Game.UI.Controls
         }
 
 
+
         public override void Update(double totalMS, double frameMS)
         {
             base.Update(totalMS, frameMS);
 
-            if (MaxValue <= MinValue)
-            {
-                Value = MaxValue = MinValue;
-            }
-
-            _sliderPosition = GetSliderYPosition();
-
-            _rectSlider.Y = _textureUpButton[0]
-                .Height + _sliderPosition;
-
-            if (_btUpClicked || _btDownClicked)
-            {
-                if (_timeUntilNextClick < Time.Ticks)
-                {
-                    _timeUntilNextClick = Time.Ticks + TIME_BETWEEN_CLICKS;
-
-                    if (_btUpClicked)
-                    {
-                        Value -= 1 + _StepChanger;
-                    }
-                    else if (_btDownClicked)
-                    {
-                        Value += 1 + _StepChanger;
-                    }
-
-                    _StepsDone++;
-
-                    if (_StepsDone % 8 == 0)
-                    {
-                        _StepChanger++;
-                    }
-                }
-            }
 
             for (int i = 0; i < 3; i++)
             {
@@ -245,58 +208,15 @@ namespace ClassicUO.Game.UI.Controls
 
         protected override void OnMouseDown(int x, int y, MouseButtonType button)
         {
-            if (button != MouseButtonType.Left)
-            {
-                return;
-            }
+            base.OnMouseDown(x, y, button);
 
-            _timeUntilNextClick = 0;
-
-            if (_rectDownButton.Contains(x, y))
-            {
-                // clicked on the down button
-                _btDownClicked = true;
-            }
-            else if (_rectUpButton.Contains(x, y))
-            {
-                // clicked on the up button
-                _btUpClicked = true;
-            }
-            else if (_rectSlider.Contains(x, y))
-            {
-                // clicked on the slider
-                _btSliderClicked = true;
-                _clickPosition.X = x;
-                _clickPosition.Y = y;
-            }
-            else if (_emptySpace.Contains(x, y))
+            if (_btnSliderClicked && _emptySpace.Contains(x, y))
             {
                 CalculateByPosition(x, y);
             }
         }
 
-        protected override void OnMouseUp(int x, int y, MouseButtonType button)
-        {
-            if (button != MouseButtonType.Left)
-            {
-                return;
-            }
-
-            _btDownClicked = false;
-            _btUpClicked = false;
-            _btSliderClicked = false;
-            _StepChanger = _StepsDone = 1;
-        }
-
-        protected override void OnMouseOver(int x, int y)
-        {
-            if (_btSliderClicked)
-            {
-                CalculateByPosition(x, y);
-            }
-        }
-
-        private void CalculateByPosition(int x, int y)
+        protected override void CalculateByPosition(int x, int y)
         {
             if (y != _clickPosition.Y)
             {
