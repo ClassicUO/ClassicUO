@@ -294,7 +294,7 @@ namespace ClassicUO.Game.UI.Gumps
                 if (!ItemHold.Enabled)
                 {
                     if (UIManager.IsDragging || Math.Max
-                        (Math.Abs(Mouse.LDroppedOffset.X), Math.Abs(Mouse.LDroppedOffset.Y)) >= 1)
+                        (Math.Abs(Mouse.LDragOffset.X), Math.Abs(Mouse.LDragOffset.Y)) >= 1)
                     {
                         _positionLocked = false;
 

@@ -90,7 +90,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }
                 else if (x >= _point.X && x <= Width + 16 && y >= _point.Y && y <= Height + 16)
                 {
-                    Point offset = Mouse.LDroppedOffset;
+                    Point offset = Mouse.LDragOffset;
 
                     if (Math.Abs(offset.X) < 5 && Math.Abs(offset.Y) < 5)
                     {

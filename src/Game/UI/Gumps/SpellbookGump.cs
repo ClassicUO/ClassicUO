@@ -1193,7 +1193,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void OnClicked(object sender, MouseEventArgs e)
         {
-            if (e.Button == MouseButtonType.Left && Mouse.LDroppedOffset == Point.Zero && sender is HoveredLabel l)
+            if (e.Button == MouseButtonType.Left && Mouse.LDragOffset == Point.Zero && sender is HoveredLabel l)
             {
                 _clickTiming += Mouse.MOUSE_DELAY_DOUBLE_CLICK;
 
@@ -1310,7 +1310,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void PageCornerOnMouseClick(object sender, MouseEventArgs e)
         {
-            if (e.Button == MouseButtonType.Left && Mouse.LDroppedOffset == Point.Zero && sender is Control ctrl)
+            if (e.Button == MouseButtonType.Left && Mouse.LDragOffset == Point.Zero && sender is Control ctrl)
             {
                 SetActivePage(ctrl.LocalSerial == 0 ? _dataBox.ActivePage - 1 : _dataBox.ActivePage + 1);
             }

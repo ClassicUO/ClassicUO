@@ -58,11 +58,11 @@ namespace ClassicUO.Input
 
         public static bool IsDragging { get; set; }
 
-        public static Point LDroppedOffset => LButtonPressed ? RealPosition - LClickPosition : Point.Zero;
+        public static Point LDragOffset => LButtonPressed ? RealPosition - LClickPosition : Point.Zero;
 
-        public static Point RDroppedOffset => RButtonPressed ? RealPosition - RClickPosition : Point.Zero;
+        public static Point RDragOffset => RButtonPressed ? RealPosition - RClickPosition : Point.Zero;
 
-        public static Point MDroppedOffset => MButtonPressed ? RealPosition - MClickPosition : Point.Zero;
+        public static Point MDragOffset => MButtonPressed ? RealPosition - MClickPosition : Point.Zero;
 
         public static bool MouseInWindow { get; set; }
 

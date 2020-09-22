@@ -207,7 +207,7 @@ namespace ClassicUO.Game.UI.Controls
 
         private bool CanPickup()
         {
-            Point offset = Mouse.LDroppedOffset;
+            Point offset = Mouse.LDragOffset;
 
             if (Math.Abs(offset.X) < Constants.MIN_PICKUP_DRAG_DISTANCE_PIXELS &&
                 Math.Abs(offset.Y) < Constants.MIN_PICKUP_DRAG_DISTANCE_PIXELS)

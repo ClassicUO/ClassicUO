@@ -136,7 +136,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             base.OnMouseUp(x, y, button);
 
-            Point offset = Mouse.LDroppedOffset;
+            Point offset = Mouse.LDragOffset;
 
             if (ProfileManager.Current.CastSpellsByOneClick && button == MouseButtonType.Left &&
                 Math.Abs(offset.X) < 5 && Math.Abs(offset.Y) < 5)

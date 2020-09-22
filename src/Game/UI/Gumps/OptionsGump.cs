@@ -1220,7 +1220,7 @@ namespace ClassicUO.Game.UI.Gumps
                         nb.DragBegin += (sss, eee) =>
                         {
                             if (UIManager.IsDragging ||
-                                Math.Max(Math.Abs(Mouse.LDroppedOffset.X), Math.Abs(Mouse.LDroppedOffset.Y)) < 5 ||
+                                Math.Max(Math.Abs(Mouse.LDragOffset.X), Math.Abs(Mouse.LDragOffset.Y)) < 5 ||
                                 nb.ScreenCoordinateX > Mouse.LClickPosition.X ||
                                 nb.ScreenCoordinateX < Mouse.LClickPosition.X - nb.Width ||
                                 nb.ScreenCoordinateY > Mouse.LClickPosition.Y ||
@@ -1342,7 +1342,7 @@ namespace ClassicUO.Game.UI.Gumps
                     }
 
                     if (UIManager.IsDragging ||
-                        Math.Max(Math.Abs(Mouse.LDroppedOffset.X), Math.Abs(Mouse.LDroppedOffset.Y)) < 5 ||
+                        Math.Max(Math.Abs(Mouse.LDragOffset.X), Math.Abs(Mouse.LDragOffset.Y)) < 5 ||
                         nb.ScreenCoordinateX > Mouse.LClickPosition.X ||
                         nb.ScreenCoordinateX < Mouse.LClickPosition.X - nb.Width ||
                         nb.ScreenCoordinateY > Mouse.LClickPosition.Y ||

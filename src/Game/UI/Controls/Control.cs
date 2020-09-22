@@ -705,8 +705,8 @@ namespace ClassicUO.Game.UI.Controls
         {
             if (_mouseIsDown && !_attempToDrag)
             {
-                Point offset = Mouse.LButtonPressed ? Mouse.LDroppedOffset :
-                    Mouse.MButtonPressed ? Mouse.MDroppedOffset : Point.Zero;
+                Point offset = Mouse.LButtonPressed ? Mouse.LDragOffset :
+                    Mouse.MButtonPressed ? Mouse.MDragOffset : Point.Zero;
 
                 if (Math.Abs(offset.X) > Constants.MIN_GUMP_DRAG_DISTANCE ||
                     Math.Abs(offset.Y) > Constants.MIN_GUMP_DRAG_DISTANCE)

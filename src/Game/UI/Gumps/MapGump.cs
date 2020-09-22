@@ -178,9 +178,9 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (_currentPin != null)
             {
-                if (Mouse.LDroppedOffset != Point.Zero && Mouse.LDroppedOffset != _lastPoint)
+                if (Mouse.LDragOffset != Point.Zero && Mouse.LDragOffset != _lastPoint)
                 {
-                    _currentPin.Location += Mouse.LDroppedOffset - _lastPoint;
+                    _currentPin.Location += Mouse.LDragOffset - _lastPoint;
 
                     if (_currentPin.X < _textureControl.X)
                     {
@@ -201,7 +201,7 @@ namespace ClassicUO.Game.UI.Gumps
                     }
 
 
-                    _lastPoint = Mouse.LDroppedOffset;
+                    _lastPoint = Mouse.LDragOffset;
                 }
             }
         }
@@ -209,7 +209,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void TextureControlOnMouseUp(object sender, MouseEventArgs e)
         {
-            Point offset = Mouse.LDroppedOffset;
+            Point offset = Mouse.LDragOffset;
 
             if (Math.Abs(offset.X) < 5 && Math.Abs(offset.Y) < 5)
             {

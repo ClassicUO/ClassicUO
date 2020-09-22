@@ -477,7 +477,7 @@ namespace ClassicUO.Game.UI.Gumps
                     }
                     else if (!DelayedObjectClickManager.IsEnabled)
                     {
-                        Point off = Mouse.LDroppedOffset;
+                        Point off = Mouse.LDragOffset;
 
                         DelayedObjectClickManager.Set
                         (

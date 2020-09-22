@@ -845,7 +845,7 @@ namespace ClassicUO.Game.Scenes
 
             if (Mouse.LButtonPressed && !ItemHold.Enabled)
             {
-                Point offset = Mouse.LDroppedOffset;
+                Point offset = Mouse.LDragOffset;
 
                 if (!UIManager.GameCursor
                               .IsDraggingCursorForced && // don't trigger "sallos ez grab" when dragging wmap or skill

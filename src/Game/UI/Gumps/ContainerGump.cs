@@ -174,7 +174,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             if (e.Button == MouseButtonType.Left && !IsMinimized && !ItemHold.Enabled)
             {
-                Point offset = Mouse.LDroppedOffset;
+                Point offset = Mouse.LDragOffset;
 
                 if (Math.Abs(offset.X) < Constants.MIN_PICKUP_DRAG_DISTANCE_PIXELS && Math.Abs
                     (offset.Y) < Constants.MIN_PICKUP_DRAG_DISTANCE_PIXELS)
@@ -367,7 +367,7 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     if (!DelayedObjectClickManager.IsEnabled)
                     {
-                        Point off = Mouse.LDroppedOffset;
+                        Point off = Mouse.LDragOffset;
 
                         DelayedObjectClickManager.Set
                         (
