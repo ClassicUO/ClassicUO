@@ -641,7 +641,7 @@ namespace ClassicUO
                             {
                                 Mouse.Begin();
                                 Mouse.LButtonPressed = true;
-                                Mouse.LDropPosition = Mouse.Position;
+                                Mouse.LClickPosition = Mouse.Position;
                                 Mouse.CancelDoubleClick = false;
                                 uint ticks = Time.Ticks;
 
@@ -697,7 +697,7 @@ namespace ClassicUO
                             {
                                 Mouse.Begin();
                                 Mouse.MButtonPressed = true;
-                                Mouse.MDropPosition = Mouse.Position;
+                                Mouse.MClickPosition = Mouse.Position;
                                 Mouse.CancelDoubleClick = false;
                                 uint ticks = Time.Ticks;
 
@@ -754,7 +754,7 @@ namespace ClassicUO
                             {
                                 Mouse.Begin();
                                 Mouse.RButtonPressed = true;
-                                Mouse.RDropPosition = Mouse.Position;
+                                Mouse.RClickPosition = Mouse.Position;
                                 Mouse.CancelDoubleClick = false;
                                 uint ticks = Time.Ticks;
 

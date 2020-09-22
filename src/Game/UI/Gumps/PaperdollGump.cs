@@ -444,7 +444,7 @@ namespace ClassicUO.Game.UI.Gumps
                         {
                             GameActions.DropItem(ItemHold.Serial, 0xFFFF, 0xFFFF, 0, item.Serial);
                             Mouse.CancelDoubleClick = true;
-                            Mouse.LDropPosition = Mouse.Position;
+                            Mouse.LClickPosition = Mouse.Position;
                         }
                         else
                         {
@@ -456,7 +456,7 @@ namespace ClassicUO.Game.UI.Gumps
                                 {
                                     GameActions.Equip(LocalSerial != World.Player ? container : World.Player);
                                     Mouse.CancelDoubleClick = true;
-                                    Mouse.LDropPosition = Mouse.Position;
+                                    Mouse.LClickPosition = Mouse.Position;
                                 }
                             }
                         }

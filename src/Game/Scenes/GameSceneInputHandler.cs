@@ -886,8 +886,8 @@ namespace ClassicUO.Game.Scenes
                                 (
                                     customgump = new HealthBarGumpCustom(obj)
                                     {
-                                        X = Mouse.LDropPosition.X - (rect.Width >> 1),
-                                        Y = Mouse.LDropPosition.Y - (rect.Height >> 1)
+                                        X = Mouse.LClickPosition.X - (rect.Width >> 1),
+                                        Y = Mouse.LClickPosition.Y - (rect.Height >> 1)
                                     }
                                 );
                             }
@@ -899,8 +899,8 @@ namespace ClassicUO.Game.Scenes
                                 (
                                     customgump = new HealthBarGump(obj)
                                     {
-                                        X = Mouse.LDropPosition.X - (rect.Width >> 1),
-                                        Y = Mouse.LDropPosition.Y - (rect.Height >> 1)
+                                        X = Mouse.LClickPosition.X - (rect.Width >> 1),
+                                        Y = Mouse.LClickPosition.Y - (rect.Height >> 1)
                                     }
                                 );
                             }

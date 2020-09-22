@@ -394,7 +394,7 @@ namespace ClassicUO.Game.UI.Controls
                          Mouse.LDroppedOffset != Point.Zero))
                     {
                         GameActions.PickUp(LocalSerial, 0, 0);
-                        Mouse.LDropPosition = Mouse.Position;
+                        Mouse.LClickPosition = Mouse.Position;
 
                         if (_layer == Layer.OneHanded || _layer == Layer.TwoHanded)
                         {
