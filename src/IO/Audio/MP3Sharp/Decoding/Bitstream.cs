@@ -408,8 +408,8 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
                     b3 = byteread[k + 3];
                 }
 
-                m_FrameBuffer[b++] = ((b0 << 24) & (int) SupportClass.Identity(0xFF000000)) | ((b1 << 16) & 0x00FF0000) |
-                                     ((b2 << 8) & 0x0000FF00) | (b3 & 0x000000FF);
+                m_FrameBuffer[b++] = ((b0 << 24) & (int) SupportClass.Identity(0xFF000000)) |
+                                     ((b1 << 16) & 0x00FF0000) | ((b2 << 8) & 0x0000FF00) | (b3 & 0x000000FF);
             }
 
             m_WordPointer = 0;
@@ -492,10 +492,7 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
                     if (bytesread == -1 || bytesread == 0) // t/DD -- .NET returns 0 at end-of-stream!
                     {
                         // t/DD: this really SHOULD throw an exception here...
-                        Log.Trace
-                        (
-                            "Bitstream: readFully -- returning success at EOF? (" + bytesread + ")"
-                        );
+                        Log.Trace("Bitstream: readFully -- returning success at EOF? (" + bytesread + ")");
 
                         while (len-- > 0)
                         {

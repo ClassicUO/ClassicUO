@@ -125,15 +125,10 @@ namespace ClassicUO.Game.Managers
                         {
                             AnimationsLoader.Instance.GetAnimationDimensions
                             (
-                                mobile.AnimIndex,
-                                mobile.GetGraphicForAnimation(),
+                                mobile.AnimIndex, mobile.GetGraphicForAnimation(),
                                 /*(byte) m.GetDirectionForAnimation()*/ 0,
-                                /*Mobile.GetGroupForAnimation(m, isParent:true)*/ 0,
-                                mobile.IsMounted,
-                                /*(byte) m.AnimIndex*/ 0,
-                                out int centerX,
-                                out int centerY,
-                                out int width,
+                                /*Mobile.GetGroupForAnimation(m, isParent:true)*/ 0, mobile.IsMounted,
+                                /*(byte) m.AnimIndex*/ 0, out int centerX, out int centerY, out int width,
                                 out int height
                             );
 
@@ -167,8 +162,7 @@ namespace ClassicUO.Game.Managers
                 }
 
                 if (mobile.Serial == TargetManager.LastTargetInfo.Serial ||
-                    mobile.Serial == TargetManager.SelectedTarget ||
-                    mobile.Serial == TargetManager.LastAttack)
+                    mobile.Serial == TargetManager.SelectedTarget || mobile.Serial == TargetManager.LastAttack)
                 {
                     continue;
                 }
@@ -239,7 +233,10 @@ namespace ClassicUO.Game.Managers
 
             float alpha = passive ? 0.5f : 0.0f;
 
-            _vectorHue.X = mobile != null ? Notoriety.GetHue(mobile.NotorietyFlag) : Notoriety.GetHue(NotorietyFlag.Gray);
+            _vectorHue.X = mobile != null ?
+                Notoriety.GetHue(mobile.NotorietyFlag) :
+                Notoriety.GetHue(NotorietyFlag.Gray);
+
             _vectorHue.Y = 1;
             _vectorHue.Z = alpha;
 
@@ -253,11 +250,8 @@ namespace ClassicUO.Game.Managers
 
             batcher.Draw2D
             (
-                _background_texture,
-                x, y,
-                _background_texture.Width * MULTIPLER,
-                _background_texture.Height * MULTIPLER,
-                ref _vectorHue
+                _background_texture, x, y, _background_texture.Width * MULTIPLER,
+                _background_texture.Height * MULTIPLER, ref _vectorHue
             );
 
 
@@ -275,11 +269,8 @@ namespace ClassicUO.Game.Managers
 
                 batcher.Draw2DTiled
                 (
-                    _hp_texture,
-                    x + per * MULTIPLER - offset, y,
-                    (BAR_WIDTH - per) * MULTIPLER - offset / 2,
-                    _hp_texture.Height * MULTIPLER,
-                    ref _vectorHue
+                    _hp_texture, x + per * MULTIPLER - offset, y, (BAR_WIDTH - per) * MULTIPLER - offset / 2,
+                    _hp_texture.Height * MULTIPLER, ref _vectorHue
                 );
             }
 
@@ -302,14 +293,7 @@ namespace ClassicUO.Game.Managers
                 _vectorHue.X = hue;
 
 
-                batcher.Draw2DTiled
-                (
-                    _hp_texture,
-                    x, y,
-                    per * MULTIPLER,
-                    _hp_texture.Height * MULTIPLER,
-                    ref _vectorHue
-                );
+                batcher.Draw2DTiled(_hp_texture, x, y, per * MULTIPLER, _hp_texture.Height * MULTIPLER, ref _vectorHue);
             }
         }
     }

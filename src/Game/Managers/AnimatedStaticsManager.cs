@@ -33,8 +33,7 @@ namespace ClassicUO.Game.Managers
 
             for (int i = 0; i < TileDataLoader.Instance.StaticData.Length; i++)
             {
-                if (TileDataLoader.Instance.StaticData[i]
-                                  .IsAnimated)
+                if (TileDataLoader.Instance.StaticData[i].IsAnimated)
                 {
                     uint addr = (uint) (i * 68 + 4 * (i / 8 + 1));
                     uint offset = (uint) (startAddr + addr);
@@ -104,8 +103,7 @@ namespace ClassicUO.Game.Managers
 
                     if (offset < info->FrameCount)
                     {
-                        static_data[o.index + 0x4000]
-                            .AnimOffset = info->FrameData[offset++];
+                        static_data[o.index + 0x4000].AnimOffset = info->FrameData[offset++];
                     }
 
                     if (offset >= info->FrameCount)

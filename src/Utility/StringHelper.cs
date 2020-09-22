@@ -29,7 +29,7 @@ namespace ClassicUO.Utility
 {
     internal static class StringHelper
     {
-        private static readonly char[] _dots = {'.', ',', ';', '!'};
+        private static readonly char[] _dots = { '.', ',', ';', '!' };
         private static readonly StringBuilder _sb = new StringBuilder();
 
         public static string CapitalizeFirstCharacter(string str)
@@ -41,8 +41,7 @@ namespace ClassicUO.Utility
 
             if (str.Length == 1)
             {
-                return char.ToUpper(str[0])
-                           .ToString();
+                return char.ToUpper(str[0]).ToString();
             }
 
             return char.ToUpper(str[0]) + str.Substring(1);
@@ -58,8 +57,7 @@ namespace ClassicUO.Utility
 
             if (str.Length == 1)
             {
-                return char.ToUpper(str[0])
-                           .ToString();
+                return char.ToUpper(str[0]).ToString();
             }
 
             _sb.Clear();
@@ -88,8 +86,7 @@ namespace ClassicUO.Utility
 
             if (str.Length == 1)
             {
-                return char.ToUpper(str[0])
-                           .ToString();
+                return char.ToUpper(str[0]).ToString();
             }
 
             _sb.Clear();
@@ -155,8 +152,8 @@ namespace ClassicUO.Utility
             {
                 if (char.IsUpper(str[i]))
                 {
-                    if (str[i - 1] != ' ' && !char.IsUpper(str[i - 1]) ||
-                        checkAcronyms && char.IsUpper(str[i - 1]) && i < len && !char.IsUpper(str[i + 1]))
+                    if (str[i - 1] != ' ' && !char.IsUpper(str[i - 1]) || checkAcronyms && char.IsUpper
+                        (str[i - 1]) && i < len && !char.IsUpper(str[i + 1]))
                     {
                         _sb.Append(' ');
                     }
@@ -207,10 +204,9 @@ namespace ClassicUO.Utility
         {
             if (SDL.SDL_HasClipboardText() != SDL.SDL_bool.SDL_FALSE)
             {
-                string s = multiline
-                    ? SDL.SDL_GetClipboardText()
-                    : SDL.SDL_GetClipboardText()
-                         ?.Replace('\n', ' ') ?? null;
+                string s = multiline ?
+                    SDL.SDL_GetClipboardText() :
+                    SDL.SDL_GetClipboardText()?.Replace('\n', ' ') ?? null;
 
                 if (!string.IsNullOrEmpty(s))
                 {

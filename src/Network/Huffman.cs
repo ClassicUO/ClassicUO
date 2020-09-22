@@ -1059,7 +1059,15 @@ namespace ClassicUO.Network
 
         #endregion
 
-        public static bool DecompressChunk(ref byte[] src, ref int srcOffset, int srcLength, ref byte[] dest, int destOffset, out int destLength)
+        public static bool DecompressChunk
+        (
+            ref byte[] src,
+            ref int srcOffset,
+            int srcLength,
+            ref byte[] dest,
+            int destOffset,
+            out int destLength
+        )
         {
             //Array.Clear(dest, destOffset, dest.Length - destOffset);
             destLength = 0;

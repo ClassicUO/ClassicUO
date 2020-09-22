@@ -36,7 +36,7 @@ namespace ClassicUO.Renderer
             if (!_textures.TryGetValue(color, out Texture2D t))
             {
                 t = new Texture2D(Client.Game.GraphicsDevice, 1, 1, false, SurfaceFormat.Color);
-                t.SetData(new[] {color});
+                t.SetData(new[] { color });
                 _textures[color] = t;
             }
 

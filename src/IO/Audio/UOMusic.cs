@@ -38,14 +38,18 @@ namespace ClassicUO.IO.Audio
         private MP3Stream m_Stream;
         private readonly byte[] m_WaveBuffer = new byte[NUMBER_OF_PCM_BYTES_TO_READ_PER_CHUNK];
 
-        public UOMusic(int index, string name, bool loop)
-            : base(name, index)
+        public UOMusic(int index, string name, bool loop) : base(name, index)
         {
             m_Repeat = loop;
             m_Playing = false;
             Channels = AudioChannels.Stereo;
             Delay = 0;
-            Path = System.IO.Path.Combine(Settings.GlobalSettings.UltimaOnlineDirectory, Client.Version > ClientVersion.CV_5090 ? $"Music/Digital/{Name}.mp3" : $"music/{Name}.mp3");
+
+            Path = System.IO.Path.Combine
+            (
+                Settings.GlobalSettings.UltimaOnlineDirectory,
+                Client.Version > ClientVersion.CV_5090 ? $"Music/Digital/{Name}.mp3" : $"music/{Name}.mp3"
+            );
         }
 
         private string Path { get; }

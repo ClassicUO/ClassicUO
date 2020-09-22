@@ -88,7 +88,8 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     _isMinimized = value;
 
-                    _picBase.Graphic = value ? (ushort) 0x7EE : (ushort) (0x07d0 + (LocalSerial == World.Player ? 0 : 1));
+                    _picBase.Graphic =
+                        value ? (ushort) 0x7EE : (ushort) (0x07d0 + (LocalSerial == World.Player ? 0 : 1));
 
                     foreach (Control c in Children)
                     {
@@ -335,10 +336,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 GameActions.ReplyGump
                 (
-                    World.Player,
-                    0x000001CD,
-                    0x00000001,
-                    new[]
+                    World.Player, 0x000001CD, 0x00000001, new[]
                     {
                         LocalSerial
                     }, new Tuple<ushort, string>[0]
@@ -404,13 +402,15 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (_paperDollInteractable != null && (CanLift || LocalSerial == World.Player.Serial))
             {
-                bool force_false = SelectedObject.Object is Item item && (item.Layer == Layer.Backpack || item.ItemData.IsContainer);
+                bool force_false = SelectedObject.Object is Item item &&
+                                   (item.Layer == Layer.Backpack || item.ItemData.IsContainer);
 
                 if (_paperDollInteractable.HasFakeItem && !ItemHold.Enabled || force_false)
                 {
                     _paperDollInteractable.SetFakeItem(false);
                 }
-                else if (!_paperDollInteractable.HasFakeItem && ItemHold.Enabled && !ItemHold.IsFixedPosition && UIManager.MouseOverControl?.RootParent == this)
+                else if (!_paperDollInteractable.HasFakeItem && ItemHold.Enabled && !ItemHold.IsFixedPosition &&
+                         UIManager.MouseOverControl?.RootParent == this)
                 {
                     if (ItemHold.ItemData.AnimID != 0)
                     {
@@ -439,7 +439,8 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     if (CanLift || LocalSerial == World.Player.Serial)
                     {
-                        if (SelectedObject.Object is Item item && (item.Layer == Layer.Backpack || item.ItemData.IsContainer))
+                        if (SelectedObject.Object is Item item &&
+                            (item.Layer == Layer.Backpack || item.ItemData.IsContainer))
                         {
                             GameActions.DropItem(ItemHold.Serial, 0xFFFF, 0xFFFF, 0, item.Serial);
                             Mouse.CancelDoubleClick = true;
@@ -480,10 +481,8 @@ namespace ClassicUO.Game.UI.Gumps
 
                         DelayedObjectClickManager.Set
                         (
-                            item.Serial,
-                            Mouse.Position.X - off.X - ScreenCoordinateX,
-                            Mouse.Position.Y - off.Y - ScreenCoordinateY,
-                            Time.Ticks + Mouse.MOUSE_DELAY_DOUBLE_CLICK
+                            item.Serial, Mouse.Position.X - off.X - ScreenCoordinateX,
+                            Mouse.Position.Y - off.Y - ScreenCoordinateY, Time.Ticks + Mouse.MOUSE_DELAY_DOUBLE_CLICK
                         );
                     }
                 }
@@ -513,8 +512,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             LocalSerial = reader.ReadUInt32();
 
-            Client.Game.GetScene<GameScene>()
-                  .DoubleClickDelayed(LocalSerial);
+            Client.Game.GetScene<GameScene>().DoubleClickDelayed(LocalSerial);
 
             if (Profile.GumpsVersion >= 3)
             {
@@ -540,8 +538,7 @@ namespace ClassicUO.Game.UI.Gumps
                 LocalSerial = World.Player;
                 BuildGump();
 
-                Client.Game.GetScene<GameScene>()
-                      ?.DoubleClickDelayed(LocalSerial);
+                Client.Game.GetScene<GameScene>()?.DoubleClickDelayed(LocalSerial);
 
                 //GameActions.OpenPaperdoll(World.Player);
                 IsMinimized = bool.Parse(xml.GetAttribute("isminimized"));
@@ -570,12 +567,9 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 for (int i = 0; i < _slots.Length; i++)
                 {
-                    int idx = (int) _slots[i]
-                        .Layer;
+                    int idx = (int) _slots[i].Layer;
 
-                    _slots[i]
-                        .LocalSerial = mobile.FindItemByLayer((Layer) idx)
-                                             ?.Serial ?? 0;
+                    _slots[i].LocalSerial = mobile.FindItemByLayer((Layer) idx)?.Serial ?? 0;
                 }
             }
         }
@@ -621,8 +615,7 @@ namespace ClassicUO.Game.UI.Gumps
                     break;
 
                 case Buttons.LogOut:
-                    Client.Game.GetScene<GameScene>()
-                          ?.RequestQuitGame();
+                    Client.Game.GetScene<GameScene>()?.RequestQuitGame();
 
                     break;
 
@@ -652,8 +645,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                     if (LocalSerial == World.Player)
                     {
-                        UIManager.GetGump<BaseHealthBarGump>(LocalSerial)
-                                 ?.Dispose();
+                        UIManager.GetGump<BaseHealthBarGump>(LocalSerial)?.Dispose();
 
                         StatusGumpBase status = StatusGumpBase.GetStatusGump();
 
@@ -675,7 +667,8 @@ namespace ClassicUO.Game.UI.Gumps
 
                         if (ProfileManager.Current.CustomBarsToggled)
                         {
-                            Rectangle bounds = new Rectangle(0, 0, HealthBarGumpCustom.HPB_WIDTH, HealthBarGumpCustom.HPB_HEIGHT_SINGLELINE);
+                            Rectangle bounds = new Rectangle
+                                (0, 0, HealthBarGumpCustom.HPB_WIDTH, HealthBarGumpCustom.HPB_HEIGHT_SINGLELINE);
 
                             UIManager.Add
                             (
@@ -688,8 +681,7 @@ namespace ClassicUO.Game.UI.Gumps
                         }
                         else
                         {
-                            Rectangle bounds = GumpsLoader.Instance.GetTexture(0x0804)
-                                                          .Bounds;
+                            Rectangle bounds = GumpsLoader.Instance.GetTexture(0x0804).Bounds;
 
                             UIManager.Add
                             (
@@ -796,7 +788,8 @@ namespace ClassicUO.Game.UI.Gumps
                                     Width = 18,
                                     Height = 18,
                                     HighlightOnMouseOver = false,
-                                    CanPickUp = World.InGame && (World.Player.Serial == _paperDollGump.LocalSerial || _paperDollGump.CanLift)
+                                    CanPickUp = World.InGame && (World.Player.Serial == _paperDollGump.LocalSerial ||
+                                                                 _paperDollGump.CanLift)
                                 }
                             );
                         }
@@ -812,7 +805,8 @@ namespace ClassicUO.Game.UI.Gumps
                 private readonly Point _point;
                 private readonly Rectangle _rect;
 
-                public ItemGumpFixed(Item item, int w, int h) : base(item.Serial, item.DisplayedGraphic, item.Hue, item.X, item.Y)
+                public ItemGumpFixed(Item item, int w, int h) : base
+                    (item.Serial, item.DisplayedGraphic, item.Hue, item.X, item.Y)
                 {
                     Width = w;
                     Height = h;
@@ -857,7 +851,12 @@ namespace ClassicUO.Game.UI.Gumps
                     }
 
                     ResetHueVector();
-                    ShaderHueTranslator.GetHueVector(ref _hueVector, MouseIsOver && HighlightOnMouseOver ? 0x0035 : item.Hue, item.ItemData.IsPartialHue, 0, true);
+
+                    ShaderHueTranslator.GetHueVector
+                    (
+                        ref _hueVector, MouseIsOver && HighlightOnMouseOver ? 0x0035 : item.Hue,
+                        item.ItemData.IsPartialHue, 0, true
+                    );
 
                     ArtTexture texture = ArtLoader.Instance.GetTexture(item.DisplayedGraphic);
 
@@ -865,11 +864,8 @@ namespace ClassicUO.Game.UI.Gumps
                     {
                         return batcher.Draw2D
                         (
-                            texture, x + _point.X, y + _point.Y,
-                            _originalSize.X, _originalSize.Y,
-                            _rect.X, _rect.Y,
-                            _rect.Width, _rect.Height,
-                            ref _hueVector
+                            texture, x + _point.X, y + _point.Y, _originalSize.X, _originalSize.Y, _rect.X, _rect.Y,
+                            _rect.Width, _rect.Height, ref _hueVector
                         );
                     }
 

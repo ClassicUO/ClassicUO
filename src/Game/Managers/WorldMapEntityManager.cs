@@ -103,7 +103,17 @@ namespace ClassicUO.Game.Managers
             }
         }
 
-        public void AddOrUpdate(uint serial, int x, int y, int hp, int map, bool isguild, string name = null, bool from_packet = false)
+        public void AddOrUpdate
+        (
+            uint serial,
+            int x,
+            int y,
+            int hp,
+            int map,
+            bool isguild,
+            string name = null,
+            bool from_packet = false
+        )
         {
             if (from_packet)
             {

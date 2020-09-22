@@ -34,7 +34,15 @@ namespace ClassicUO.Game.UI.Controls
 
         private readonly ColorBox _colorBox;
 
-        public ClickableColorBox(int x, int y, int w, int h, ushort hue, uint color)
+        public ClickableColorBox
+        (
+            int x,
+            int y,
+            int w,
+            int h,
+            ushort hue,
+            uint color
+        )
         {
             X = x;
             Y = y;
@@ -63,10 +71,11 @@ namespace ClassicUO.Game.UI.Controls
         {
             if (button == MouseButtonType.Left)
             {
-                UIManager.GetGump<ColorPickerGump>()
-                         ?.Dispose();
+                UIManager.GetGump<ColorPickerGump>()?.Dispose();
 
-                ColorPickerGump pickerGump = new ColorPickerGump(0, 0, 100, 100, s => _colorBox.SetColor(s, HuesLoader.Instance.GetPolygoneColor(CELL, s)));
+                ColorPickerGump pickerGump = new ColorPickerGump
+                    (0, 0, 100, 100, s => _colorBox.SetColor(s, HuesLoader.Instance.GetPolygoneColor(CELL, s)));
+
                 UIManager.Add(pickerGump);
             }
         }

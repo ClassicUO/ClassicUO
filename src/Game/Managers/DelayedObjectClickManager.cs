@@ -48,10 +48,8 @@ namespace ClassicUO.Game.Managers
 
             if (entity != null)
             {
-                if (!World.ClientFeatures.TooltipsEnabled ||
-                    SerialHelper.IsItem(Serial) &&
-                    ((Item) entity).IsLocked &&
-                    ((Item) entity).ItemData.Weight == 255 &&
+                if (!World.ClientFeatures.TooltipsEnabled || SerialHelper.IsItem
+                        (Serial) && ((Item) entity).IsLocked && ((Item) entity).ItemData.Weight == 255 &&
                     !((Item) entity).ItemData.IsContainer)
                 {
                     GameActions.SingleClick(Serial);

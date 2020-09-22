@@ -135,8 +135,8 @@ namespace ClassicUO.Game.UI.Gumps
 
         public void SetInScreen()
         {
-            if (Bounds.Width >= 0 && Bounds.X <= Client.Game.Window.ClientBounds.Width &&
-                Bounds.Height >= 0 && Bounds.Y <= Client.Game.Window.ClientBounds.Height)
+            if (Bounds.Width >= 0 && Bounds.X <= Client.Game.Window.ClientBounds.Width && Bounds.Height >= 0 &&
+                Bounds.Y <= Client.Game.Window.ClientBounds.Height)
             {
                 return;
             }

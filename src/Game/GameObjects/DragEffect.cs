@@ -32,7 +32,19 @@ namespace ClassicUO.Game.GameObjects
     {
         private uint _lastMoveTime;
 
-        public DragEffect(uint src, uint trg, int xSource, int ySource, int zSource, int xTarget, int yTarget, int zTarget, ushort graphic, ushort hue)
+        public DragEffect
+        (
+            uint src,
+            uint trg,
+            int xSource,
+            int ySource,
+            int zSource,
+            int xTarget,
+            int yTarget,
+            int zTarget,
+            ushort graphic,
+            ushort hue
+        )
         {
             Entity source = World.Get(src);
 
@@ -105,14 +117,14 @@ namespace ClassicUO.Game.GameObjects
 
             //Engine.DebugInfo.EffectsRendered++;
 
-            DrawStatic(batcher, AnimationGraphic, posX - ((int) Offset.X + 22), posY - ((int) -Offset.Y + 22), ref HueVector);
+            DrawStatic
+                (batcher, AnimationGraphic, posX - ((int) Offset.X + 22), posY - ((int) -Offset.Y + 22), ref HueVector);
 
             ref StaticTiles data = ref TileDataLoader.Instance.StaticData[Graphic];
 
             if (data.IsLight && Source != null)
             {
-                Client.Game.GetScene<GameScene>()
-                      .AddLight(Source, Source, posX + 22, posY + 22);
+                Client.Game.GetScene<GameScene>().AddLight(Source, Source, posX + 22, posY + 22);
             }
 
             return true;

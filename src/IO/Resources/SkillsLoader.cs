@@ -73,7 +73,8 @@ namespace ClassicUO.IO.Resources
                             _file.Seek(entry.Offset);
                             bool hasAction = _file.ReadBool();
 
-                            string name = Encoding.UTF8.GetString(_file.ReadArray<byte>(entry.Length - 1))
+                            string name = Encoding.UTF8.GetString
+                                                      (_file.ReadArray<byte>(entry.Length - 1))
                                                   .TrimEnd('\0');
 
                             SkillEntry skill = new SkillEntry(count++, name, hasAction);
@@ -92,8 +93,7 @@ namespace ClassicUO.IO.Resources
         {
             if (index < SkillsCount)
             {
-                return SortedSkills[index]
-                    .Index;
+                return SortedSkills[index].Index;
             }
 
             return -1;

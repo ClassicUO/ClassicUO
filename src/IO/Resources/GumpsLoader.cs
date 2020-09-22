@@ -36,12 +36,12 @@ namespace ClassicUO.IO.Resources
         private static GumpsLoader _instance;
         private UOFile _file;
 
-        private GumpsLoader(int count)
-            : base(count)
+        private GumpsLoader(int count) : base(count)
         {
         }
 
-        public static GumpsLoader Instance => _instance ?? (_instance = new GumpsLoader(Constants.MAX_GUMP_DATA_INDEX_COUNT));
+        public static GumpsLoader Instance =>
+            _instance ?? (_instance = new GumpsLoader(Constants.MAX_GUMP_DATA_INDEX_COUNT));
 
         public override Task Load()
         {
@@ -93,9 +93,7 @@ namespace ClassicUO.IO.Resources
                             int ingump = defReader.ReadInt();
 
                             if (ingump < 0 || ingump >= Constants.MAX_GUMP_DATA_INDEX_COUNT ||
-                                ingump >= Entries.Length ||
-                                Entries[ingump]
-                                    .Length > 0)
+                                ingump >= Entries.Length || Entries[ingump].Length > 0)
                             {
                                 continue;
                             }
@@ -111,17 +109,15 @@ namespace ClassicUO.IO.Resources
                             {
                                 int checkIndex = group[i];
 
-                                if (checkIndex < 0 || checkIndex >= Constants.MAX_GUMP_DATA_INDEX_COUNT || checkIndex >= Entries.Length ||
-                                    Entries[checkIndex]
-                                        .Length <= 0)
+                                if (checkIndex < 0 || checkIndex >= Constants.MAX_GUMP_DATA_INDEX_COUNT ||
+                                    checkIndex >= Entries.Length || Entries[checkIndex].Length <= 0)
                                 {
                                     continue;
                                 }
 
                                 Entries[ingump] = Entries[checkIndex];
 
-                                Entries[ingump]
-                                    .Hue = (ushort) defReader.ReadInt();
+                                Entries[ingump].Hue = (ushort) defReader.ReadInt();
 
                                 break;
                             }
@@ -211,30 +207,20 @@ namespace ClassicUO.IO.Resources
 
                 for (int i = 0; i < gsize; i++)
                 {
-                    uint val = gmul[i]
-                        .Value;
+                    uint val = gmul[i].Value;
 
                     if (color != 0 && val != 0)
                     {
-                        val = HuesLoader.Instance.GetColor16
-                        (
-                            gmul[i]
-                                .Value, color
-                        );
+                        val = HuesLoader.Instance.GetColor16(gmul[i].Value, color);
                     }
 
                     if (val != 0)
                     {
                         //val = 0x8000 | val;
-                        val = HuesHelper.Color16To32
-                        (
-                            gmul[i]
-                                .Value
-                        ) | 0xFF_00_00_00;
+                        val = HuesHelper.Color16To32(gmul[i].Value) | 0xFF_00_00_00;
                     }
 
-                    int count = gmul[i]
-                        .Run;
+                    int count = gmul[i].Run;
 
                     for (int j = 0; j < count; j++)
                     {

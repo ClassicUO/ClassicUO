@@ -170,7 +170,8 @@ namespace ClassicUO.Network
 
             void* func = &header;
 
-            if (Environment.OSVersion.Platform != PlatformID.Unix && Environment.OSVersion.Platform != PlatformID.MacOSX)
+            if (Environment.OSVersion.Platform != PlatformID.Unix &&
+                Environment.OSVersion.Platform != PlatformID.MacOSX)
             {
                 UnblockPath(Path.GetDirectoryName(PluginPath));
             }
@@ -222,12 +223,15 @@ namespace ClassicUO.Network
 
                     if (meth == null)
                     {
-                        Log.Error("Engine class missing public static Install method Needs 'public static unsafe void Install(PluginHeader *plugin)' ");
+                        Log.Error
+                        (
+                            "Engine class missing public static Install method Needs 'public static unsafe void Install(PluginHeader *plugin)' "
+                        );
 
                         return;
                     }
 
-                    meth.Invoke(null, new object[] {(IntPtr) func});
+                    meth.Invoke(null, new object[] { (IntPtr) func });
                 }
                 catch (Exception err)
                 {
@@ -263,7 +267,8 @@ namespace ClassicUO.Network
 
             if (header.OnPlayerPositionChanged != IntPtr.Zero)
             {
-                _onUpdatePlayerPosition = Marshal.GetDelegateForFunctionPointer<OnUpdatePlayerPosition>(header.OnPlayerPositionChanged);
+                _onUpdatePlayerPosition = Marshal.GetDelegateForFunctionPointer<OnUpdatePlayerPosition>
+                    (header.OnPlayerPositionChanged);
             }
 
             if (header.OnClientClosing != IntPtr.Zero)
@@ -374,13 +379,7 @@ namespace ClassicUO.Network
             return false;
         }
 
-        private static bool GetTileData
-        (
-            int index,
-            ref ulong flags,
-            ref ushort textid,
-            ref string name
-        )
+        private static bool GetTileData(int index, ref ulong flags, ref ushort textid, ref string name)
         {
             if (index >= 0 && index < Constants.MAX_STATIC_DATA_INDEX_COUNT)
             {
@@ -489,8 +488,7 @@ namespace ClassicUO.Network
         {
             for (int i = 0; i < Plugins.Count; i++)
             {
-                Plugins[i]
-                    ._onClientClose?.Invoke();
+                Plugins[i]._onClientClose?.Invoke();
 
                 Plugins.RemoveAt(i--);
             }
@@ -535,8 +533,7 @@ namespace ClassicUO.Network
 
 
             if (!World.InGame ||
-                ProfileManager.Current != null &&
-                ProfileManager.Current.ActivateChatAfterEnter &&
+                ProfileManager.Current != null && ProfileManager.Current.ActivateChatAfterEnter &&
                 UIManager.SystemChat?.IsActive == true ||
                 UIManager.KeyboardFocusControl != UIManager.SystemChat.TextBoxControl)
             {
@@ -684,7 +681,8 @@ namespace ClassicUO.Network
             return DeleteFile(fileName + ":Zone.Identifier");
         }
 
-        private void HandleCmdList(GraphicsDevice device, IntPtr ptr, int length, Dictionary<IntPtr, GraphicsResource> resources)
+        private void HandleCmdList
+            (GraphicsDevice device, IntPtr ptr, int length, Dictionary<IntPtr, GraphicsResource> resources)
         {
             if (ptr == IntPtr.Zero || length <= 0)
             {
@@ -776,26 +774,14 @@ namespace ClassicUO.Network
                     case CMD_VIEWPORT:
                         ref cmd_viewport viewport = ref cmd.viewport;
 
-                        device.Viewport = new Viewport
-                        (
-                            viewport.x,
-                            viewport.y,
-                            viewport.w,
-                            viewport.h
-                        );
+                        device.Viewport = new Viewport(viewport.x, viewport.y, viewport.w, viewport.h);
 
                         break;
 
                     case CMD_SCISSOR:
                         ref cmd_scissor scissor = ref cmd.scissor;
 
-                        device.ScissorRectangle = new Rectangle
-                        (
-                            scissor.x,
-                            scissor.y,
-                            scissor.w,
-                            scissor.h
-                        );
+                        device.ScissorRectangle = new Rectangle(scissor.x, scissor.y, scissor.w, scissor.h);
 
                         break;
 
@@ -862,7 +848,8 @@ namespace ClassicUO.Network
                             CounterClockwiseStencilFunction = stencil.counter_clockwise_stencil_func,
                             CounterClockwiseStencilFail = stencil.counter_clockwise_stencil_fail,
                             CounterClockwiseStencilPass = stencil.counter_clockwise_stencil_pass,
-                            CounterClockwiseStencilDepthBufferFail = stencil.counter_clockwise_stencil_depth_buffer_fail,
+                            CounterClockwiseStencilDepthBufferFail =
+                                stencil.counter_clockwise_stencil_depth_buffer_fail,
                             StencilMask = stencil.stencil_mask,
                             StencilWriteMask = stencil.stencil_write_mask,
                             ReferenceStencil = stencil.reference_stencil
@@ -908,7 +895,8 @@ namespace ClassicUO.Network
 
                     case CMD_SAMPLER_STATE:
 
-                        device.SamplerStates[cmd.set_sampler_state.index] = resources[cmd.set_sampler_state.id] as SamplerState;
+                        device.SamplerStates[cmd.set_sampler_state.index] =
+                            resources[cmd.set_sampler_state.id] as SamplerState;
 
                         break;
 
@@ -920,9 +908,7 @@ namespace ClassicUO.Network
 
                         vertex_buffer?.SetDataPointerEXT
                         (
-                            0,
-                            set_vertex_data.vertex_buffer_ptr,
-                            set_vertex_data.vertex_buffer_length,
+                            0, set_vertex_data.vertex_buffer_ptr, set_vertex_data.vertex_buffer_length,
                             SetDataOptions.None
                         );
 
@@ -936,9 +922,7 @@ namespace ClassicUO.Network
 
                         index_buffer?.SetDataPointerEXT
                         (
-                            0,
-                            set_index_data.indices_buffer_ptr,
-                            set_index_data.indices_buffer_length,
+                            0, set_index_data.indices_buffer_ptr, set_index_data.indices_buffer_length,
                             SetDataOptions.None
                         );
 
@@ -955,20 +939,16 @@ namespace ClassicUO.Network
                             elements[j] = ((VertexElement*) create_vertex_buffer.declarations)[j];
                         }
 
-                        VertexBuffer vb = create_vertex_buffer.is_dynamic
-                            ? new DynamicVertexBuffer
+                        VertexBuffer vb = create_vertex_buffer.is_dynamic ?
+                            new DynamicVertexBuffer
                             (
-                                device,
-                                new VertexDeclaration(create_vertex_buffer.size, elements),
-                                create_vertex_buffer.vertex_elements_count,
-                                create_vertex_buffer.buffer_usage
-                            )
-                            : new VertexBuffer
+                                device, new VertexDeclaration(create_vertex_buffer.size, elements),
+                                create_vertex_buffer.vertex_elements_count, create_vertex_buffer.buffer_usage
+                            ) :
+                            new VertexBuffer
                             (
-                                device,
-                                new VertexDeclaration(create_vertex_buffer.size, elements),
-                                create_vertex_buffer.vertex_elements_count,
-                                create_vertex_buffer.buffer_usage
+                                device, new VertexDeclaration(create_vertex_buffer.size, elements),
+                                create_vertex_buffer.vertex_elements_count, create_vertex_buffer.buffer_usage
                             );
 
                         resources[create_vertex_buffer.id] = vb;
@@ -979,9 +959,17 @@ namespace ClassicUO.Network
 
                         ref cmd_create_index_buffer create_index_buffer = ref cmd.create_index_buffer;
 
-                        IndexBuffer ib = create_index_buffer.is_dynamic
-                            ? new DynamicIndexBuffer(device, create_index_buffer.index_element_size, create_index_buffer.index_count, create_index_buffer.buffer_usage)
-                            : new IndexBuffer(device, create_index_buffer.index_element_size, create_index_buffer.index_count, create_index_buffer.buffer_usage);
+                        IndexBuffer ib = create_index_buffer.is_dynamic ?
+                            new DynamicIndexBuffer
+                            (
+                                device, create_index_buffer.index_element_size, create_index_buffer.index_count,
+                                create_index_buffer.buffer_usage
+                            ) :
+                            new IndexBuffer
+                            (
+                                device, create_index_buffer.index_element_size, create_index_buffer.index_count,
+                                create_index_buffer.buffer_usage
+                            );
 
                         resources[create_index_buffer.id] = ib;
 
@@ -1047,22 +1035,15 @@ namespace ClassicUO.Network
                         {
                             texture = new RenderTarget2D
                             (
-                                device,
-                                create_texture_2d.width,
-                                create_texture_2d.height,
-                                false,
-                                create_texture_2d.format,
-                                DepthFormat.Depth24Stencil8
+                                device, create_texture_2d.width, create_texture_2d.height, false,
+                                create_texture_2d.format, DepthFormat.Depth24Stencil8
                             );
                         }
                         else
                         {
                             texture = new Texture2D
                             (
-                                device,
-                                create_texture_2d.width,
-                                create_texture_2d.height,
-                                false,
+                                device, create_texture_2d.width, create_texture_2d.height, false,
                                 create_texture_2d.format
                             );
                         }
@@ -1083,13 +1064,9 @@ namespace ClassicUO.Network
                             set_texture_data_2d.level,
                             new Rectangle
                             (
-                                set_texture_data_2d.x,
-                                set_texture_data_2d.y,
-                                set_texture_data_2d.width,
+                                set_texture_data_2d.x, set_texture_data_2d.y, set_texture_data_2d.width,
                                 set_texture_data_2d.height
-                            ),
-                            set_texture_data_2d.data,
-                            set_texture_data_2d.data_length
+                            ), set_texture_data_2d.data, set_texture_data_2d.data_length
                         );
 
                         break;
@@ -1108,12 +1085,9 @@ namespace ClassicUO.Network
 
                                 device.DrawIndexedPrimitives
                                 (
-                                    indexed_primitive_data.primitive_type,
-                                    indexed_primitive_data.base_vertex,
-                                    indexed_primitive_data.min_vertex_index,
-                                    indexed_primitive_data.num_vertices,
-                                    indexed_primitive_data.start_index,
-                                    indexed_primitive_data.primitive_count
+                                    indexed_primitive_data.primitive_type, indexed_primitive_data.base_vertex,
+                                    indexed_primitive_data.min_vertex_index, indexed_primitive_data.num_vertices,
+                                    indexed_primitive_data.start_index, indexed_primitive_data.primitive_count
                                 );
                             }
                         }
@@ -1121,12 +1095,9 @@ namespace ClassicUO.Network
                         {
                             device.DrawIndexedPrimitives
                             (
-                                indexed_primitive_data.primitive_type,
-                                indexed_primitive_data.base_vertex,
-                                indexed_primitive_data.min_vertex_index,
-                                indexed_primitive_data.num_vertices,
-                                indexed_primitive_data.start_index,
-                                indexed_primitive_data.primitive_count
+                                indexed_primitive_data.primitive_type, indexed_primitive_data.base_vertex,
+                                indexed_primitive_data.min_vertex_index, indexed_primitive_data.num_vertices,
+                                indexed_primitive_data.start_index, indexed_primitive_data.primitive_count
                             );
                         }
 
@@ -1136,8 +1107,7 @@ namespace ClassicUO.Network
 
                         ref cmd_destroy_resource destroy_resource = ref cmd.destroy_resource;
 
-                        resources[destroy_resource.id]
-                            ?.Dispose();
+                        resources[destroy_resource.id]?.Dispose();
 
                         resources.Remove(destroy_resource.id);
 
@@ -1177,7 +1147,8 @@ namespace ClassicUO.Network
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         private delegate bool OnGetStaticData
         (
-            int index, ref ulong flags,
+            int index,
+            ref ulong flags,
             ref byte weight,
             ref byte layer,
             ref int count,
@@ -1189,16 +1160,17 @@ namespace ClassicUO.Network
 
         [return: MarshalAs(UnmanagedType.I1)]
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        private delegate bool OnGetTileData
-        (
-            int index, ref ulong flags,
-            ref ushort textid,
-            ref string name
-        );
+        private delegate bool OnGetTileData(int index, ref ulong flags, ref ushort textid, ref string name);
 
         [return: MarshalAs(UnmanagedType.I1)]
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        private delegate bool OnGetCliloc(int cliloc, [MarshalAs(UnmanagedType.LPStr)] string args, bool capitalize, [Out] [MarshalAs(UnmanagedType.LPStr)] out string buffer);
+        private delegate bool OnGetCliloc
+        (
+            int cliloc,
+            [MarshalAs(UnmanagedType.LPStr)] string args,
+            bool capitalize,
+            [Out] [MarshalAs(UnmanagedType.LPStr)] out string buffer
+        );
 
 
         private struct PluginHeader

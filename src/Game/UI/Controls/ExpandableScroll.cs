@@ -31,7 +31,9 @@ namespace ClassicUO.Game.UI.Controls
     {
         private const int c_ExpandableScrollHeight_Min = 274;
         private const int c_ExpandableScrollHeight_Max = 1000;
-        private const int c_GumplingExpanderY_Offset = 2; // this is the gap between the pixels of the btm Control texture and the height of the btm Control texture.
+        private const int
+            c_GumplingExpanderY_Offset =
+                2; // this is the gap between the pixels of the btm Control texture and the height of the btm Control texture.
         private const int c_GumplingExpander_ButtonID = 0x7FBEEF;
         private readonly GumpPic _gumpBottom;
         private Button _gumpExpander;
@@ -100,12 +102,9 @@ namespace ClassicUO.Game.UI.Controls
                 _gumpExpander.MouseOver += expander_OnMouseOver;
             }
 
-            int off = textures[0]
-                .Width - textures[3]
-                .Width;
+            int off = textures[0].Width - textures[3].Width;
 
-            _maxWidth = textures[1]
-                .Width;
+            _maxWidth = textures[1].Width;
 
             _gumpRight.X = _gumpMiddle.X = 17;
             _gumpRight.X = _gumpMiddle.Y = _gumplingMidY;
@@ -121,7 +120,8 @@ namespace ClassicUO.Game.UI.Controls
 
         private int _gumplingMidY => _gumpTop.Height;
 
-        private int _gumplingMidHeight => SpecialHeight - _gumpTop.Height - _gumpBottom.Height - (_gumpExpander?.Height ?? 0);
+        private int _gumplingMidHeight =>
+            SpecialHeight - _gumpTop.Height - _gumpBottom.Height - (_gumpExpander?.Height ?? 0);
 
         private int _gumplingBottomY => SpecialHeight - _gumpBottom.Height - (_gumpExpander?.Height ?? 0);
 

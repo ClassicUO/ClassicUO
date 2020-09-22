@@ -38,7 +38,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
     internal class CreateCharSelectionCityGump : Gump
     {
         private readonly List<CityControl> _cityControls = new List<CityControl>();
-        private readonly string[] _cityNames = {"Felucca", "Trammel", "Ilshenar", "Malas", "Tokuno", "Ter Mur"};
+        private readonly string[] _cityNames = { "Felucca", "Trammel", "Ilshenar", "Malas", "Tokuno", "Ter Mur" };
         private readonly Label _facetName;
         private readonly HtmlControl _htmlControl;
         private readonly LoginScene _scene;
@@ -180,11 +180,9 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                 }
                 else if (i < _townButtonsText.Length)
                 {
-                    x = _townButtonsText[i]
-                        .X;
+                    x = _townButtonsText[i].X;
 
-                    y = _townButtonsText[i]
-                        .Y;
+                    y = _townButtonsText[i].Y;
                 }
 
                 CityControl control = new CityControl(c, x, y, i);
@@ -275,8 +273,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
         {
             for (int i = 0; i < _cityControls.Count; i++)
             {
-                _cityControls[i]
-                    .IsSelected = index == i;
+                _cityControls[i].IsSelected = index == i;
             }
         }
 

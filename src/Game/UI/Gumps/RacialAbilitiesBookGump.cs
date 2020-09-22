@@ -33,14 +33,15 @@ namespace ClassicUO.Game.UI.Gumps
 {
     internal class RacialAbilitiesBookGump : Gump
     {
-        private static readonly string[] _humanNames = {"Strong Back", "Tough", "Workhorse", "Jack of All Trades"};
+        private static readonly string[] _humanNames = { "Strong Back", "Tough", "Workhorse", "Jack of All Trades" };
         private static readonly string[] _elfNames =
         {
             "Night Sight", "Infused with Magic",
             "Knowledge of Nature", "Difficult to Track",
             "Perception", "Wisdom"
         };
-        private static readonly string[] _gargoyleNames = {"Flying", "Berserk", "Master Artisan", "Deadly Aim", "Mystic Insight"};
+        private static readonly string[] _gargoyleNames =
+            { "Flying", "Berserk", "Master Artisan", "Deadly Aim", "Mystic Insight" };
         private int _abilityCount = 4;
         private float _clickTiming;
         private int _dictionaryPagesCount = 1;
@@ -98,7 +99,7 @@ namespace ClassicUO.Game.UI.Gumps
                     }
 
 
-                    Label text = new Label(ResGumps.Index, false, 0x0288, font: 6) {X = indexX, Y = 10};
+                    Label text = new Label(ResGumps.Index, false, 0x0288, font: 6) { X = indexX, Y = 10 };
                     Add(text, page);
 
                     for (int i = 0; i < abilityOnPage; i++)
@@ -153,8 +154,7 @@ namespace ClassicUO.Game.UI.Gumps
                 bool passive = true;
                 string spellName = GetAbilityName(i, ref passive);
 
-                Label text = new Label(spellName, false, 0x0288, 100, 6)
-                    {X = iconTextX, Y = 34};
+                Label text = new Label(spellName, false, 0x0288, 100, 6) { X = iconTextX, Y = 34 };
 
                 Add(text, page1);
 
@@ -260,9 +260,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                     return _gargoyleNames[offset];
 
-                default:
-
-                    return string.Empty;
+                default: return string.Empty;
             }
         }
 

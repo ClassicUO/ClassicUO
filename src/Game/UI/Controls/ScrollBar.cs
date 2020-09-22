@@ -56,44 +56,28 @@ namespace ClassicUO.Game.UI.Controls
             _textureBackground[2] = GumpsLoader.Instance.GetTexture(255);
             _textureSlider = GumpsLoader.Instance.GetTexture(254);
 
-            Width = _textureBackground[0]
-                .Width;
+            Width = _textureBackground[0].Width;
 
 
             _rectDownButton = new Rectangle
-            (
-                0, Height - _textureDownButton[0]
-                    .Height, _textureDownButton[0]
-                    .Width, _textureDownButton[0]
-                    .Height
-            );
+                (0, Height - _textureDownButton[0].Height, _textureDownButton[0].Width, _textureDownButton[0].Height);
 
-            _rectUpButton = new Rectangle
-            (
-                0, 0, _textureUpButton[0]
-                    .Width, _textureUpButton[0]
-                    .Height
-            );
+            _rectUpButton = new Rectangle(0, 0, _textureUpButton[0].Width, _textureUpButton[0].Height);
 
             _rectSlider = new Rectangle
             (
-                (_textureBackground[0]
-                    .Width - _textureSlider.Width) >> 1, _textureUpButton[0]
-                    .Height + _sliderPosition, _textureSlider.Width, _textureSlider.Height
+                (_textureBackground[0].Width - _textureSlider.Width) >> 1, _textureUpButton[0].Height + _sliderPosition,
+                _textureSlider.Width, _textureSlider.Height
             );
 
             _emptySpace.X = 0;
 
-            _emptySpace.Y = _textureUpButton[0]
-                .Height;
+            _emptySpace.Y = _textureUpButton[0].Height;
 
             _emptySpace.Width = _textureSlider.Width;
 
-            _emptySpace.Height = Height - (_textureDownButton[0]
-                .Height + _textureUpButton[0]
-                .Height);
+            _emptySpace.Height = Height - (_textureDownButton[0].Height + _textureUpButton[0].Height);
         }
-
 
 
         public override void Update(double totalMS, double frameMS)
@@ -110,15 +94,12 @@ namespace ClassicUO.Game.UI.Controls
 
                 if (i < 2)
                 {
-                    _textureUpButton[i]
-                        .Ticks = (long) totalMS;
+                    _textureUpButton[i].Ticks = (long) totalMS;
 
-                    _textureDownButton[i]
-                        .Ticks = (long) totalMS;
+                    _textureDownButton[i].Ticks = (long) totalMS;
                 }
 
-                _textureBackground[i]
-                    .Ticks = (long) totalMS;
+                _textureBackground[i].Ticks = (long) totalMS;
             }
         }
 
@@ -132,46 +113,33 @@ namespace ClassicUO.Game.UI.Controls
             ResetHueVector();
 
             // draw scrollbar background
-            int middleHeight = Height - _textureUpButton[0]
-                .Height - _textureDownButton[0]
-                .Height - _textureBackground[0]
-                .Height - _textureBackground[2]
-                .Height;
+            int middleHeight = Height - _textureUpButton[0].Height - _textureDownButton[0].Height -
+                               _textureBackground[0].Height - _textureBackground[2].Height;
 
             if (middleHeight > 0)
             {
-                batcher.Draw2D
-                (
-                    _textureBackground[0], x, y + _textureUpButton[0]
-                        .Height, ref _hueVector
-                );
+                batcher.Draw2D(_textureBackground[0], x, y + _textureUpButton[0].Height, ref _hueVector);
 
                 batcher.Draw2DTiled
                 (
-                    _textureBackground[1], x, y + _textureUpButton[0]
-                        .Height + _textureBackground[0]
-                        .Height, _textureBackground[0]
-                        .Width, middleHeight, ref _hueVector
+                    _textureBackground[1], x, y + _textureUpButton[0].Height + _textureBackground[0].Height,
+                    _textureBackground[0].Width, middleHeight, ref _hueVector
                 );
 
                 batcher.Draw2D
                 (
-                    _textureBackground[2], x, y + Height - _textureDownButton[0]
-                        .Height - _textureBackground[2]
-                        .Height, ref _hueVector
+                    _textureBackground[2], x, y + Height - _textureDownButton[0].Height - _textureBackground[2].Height,
+                    ref _hueVector
                 );
             }
             else
             {
-                middleHeight = Height - _textureUpButton[0]
-                    .Height - _textureDownButton[0]
-                    .Height;
+                middleHeight = Height - _textureUpButton[0].Height - _textureDownButton[0].Height;
 
                 batcher.Draw2DTiled
                 (
-                    _textureBackground[1], x, y + _textureUpButton[0]
-                        .Height, _textureBackground[0]
-                        .Width, middleHeight, ref _hueVector
+                    _textureBackground[1], x, y + _textureUpButton[0].Height, _textureBackground[0].Width, middleHeight,
+                    ref _hueVector
                 );
             }
 
@@ -181,8 +149,8 @@ namespace ClassicUO.Game.UI.Controls
             // draw down button
             batcher.Draw2D
             (
-                _btDownClicked ? _textureDownButton[1] : _textureDownButton[0], x, y + Height - _textureDownButton[0]
-                    .Height, ref _hueVector
+                _btDownClicked ? _textureDownButton[1] : _textureDownButton[0], x,
+                y + Height - _textureDownButton[0].Height, ref _hueVector
             );
 
             // draw slider
@@ -190,9 +158,8 @@ namespace ClassicUO.Game.UI.Controls
             {
                 batcher.Draw2D
                 (
-                    _textureSlider, x + ((_textureBackground[0]
-                        .Width - _textureSlider.Width) >> 1), y + _textureUpButton[0]
-                        .Height + _sliderPosition, ref _hueVector
+                    _textureSlider, x + ((_textureBackground[0].Width - _textureSlider.Width) >> 1),
+                    y + _textureUpButton[0].Height + _sliderPosition, ref _hueVector
                 );
             }
 
@@ -201,9 +168,7 @@ namespace ClassicUO.Game.UI.Controls
 
         protected override int GetScrollableArea()
         {
-            return Height - _textureUpButton[0]
-                .Height - _textureDownButton[0]
-                .Height - _textureSlider.Height;
+            return Height - _textureUpButton[0].Height - _textureDownButton[0].Height - _textureSlider.Height;
         }
 
         protected override void OnMouseDown(int x, int y, MouseButtonType button)
@@ -238,17 +203,14 @@ namespace ClassicUO.Game.UI.Controls
                 _clickPosition.X = x;
                 _clickPosition.Y = y;
 
-                if (y == 0 && _clickPosition.Y < _textureUpButton[0]
-                    .Height + (_textureSlider.Height >> 1))
+                if (y == 0 && _clickPosition.Y < _textureUpButton[0].Height + (_textureSlider.Height >> 1))
                 {
-                    _clickPosition.Y = _textureUpButton[0]
-                        .Height + (_textureSlider.Height >> 1);
+                    _clickPosition.Y = _textureUpButton[0].Height + (_textureSlider.Height >> 1);
                 }
-                else if (y == scrollableArea && _clickPosition.Y > Height - _textureDownButton[0]
-                    .Height - (_textureSlider.Height >> 1))
+                else if (y == scrollableArea &&
+                         _clickPosition.Y > Height - _textureDownButton[0].Height - (_textureSlider.Height >> 1))
                 {
-                    _clickPosition.Y = Height - _textureDownButton[0]
-                        .Height - (_textureSlider.Height >> 1);
+                    _clickPosition.Y = Height - _textureDownButton[0].Height - (_textureSlider.Height >> 1);
                 }
 
                 _value = (int) Math.Round(y / (float) scrollableArea * (MaxValue - MinValue) + MinValue);

@@ -49,7 +49,8 @@ namespace ClassicUO.Game.UI
 
         public bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
-            if (SerialHelper.IsValid(Serial) && World.OPL.TryGetRevision(Serial, out uint revision) && _hash != revision)
+            if (SerialHelper.IsValid(Serial) && World.OPL.TryGetRevision
+                (Serial, out uint revision) && _hash != revision)
             {
                 _hash = revision;
                 Text = ReadProperties(Serial, out _textHTML);
@@ -90,7 +91,11 @@ namespace ClassicUO.Game.UI
 
             if (_renderedText == null)
             {
-                _renderedText = RenderedText.Create(null, font: font, isunicode: true, style: FontStyle.BlackBorder, cell: 5, isHTML: true, align: TEXT_ALIGN_TYPE.TS_CENTER, recalculateWidthByInfo: true, hue: hue);
+                _renderedText = RenderedText.Create
+                (
+                    null, font: font, isunicode: true, style: FontStyle.BlackBorder, cell: 5, isHTML: true,
+                    align: TEXT_ALIGN_TYPE.TS_CENTER, recalculateWidthByInfo: true, hue: hue
+                );
             }
 
             if (_renderedText.Text != Text)
@@ -104,7 +109,8 @@ namespace ClassicUO.Game.UI
                         width = 600;
                     }
 
-                    width = FontsLoader.Instance.GetWidthExUnicode(font, Text, width, TEXT_ALIGN_TYPE.TS_CENTER, (ushort) FontStyle.BlackBorder);
+                    width = FontsLoader.Instance.GetWidthExUnicode
+                        (font, Text, width, TEXT_ALIGN_TYPE.TS_CENTER, (ushort) FontStyle.BlackBorder);
 
                     if (width > 600)
                     {
@@ -155,8 +161,15 @@ namespace ClassicUO.Game.UI
 
             Vector3 hue_vec = Vector3.Zero;
             ShaderHueTranslator.GetHueVector(ref hue_vec, 0, false, alpha);
-            batcher.Draw2D(Texture2DCache.GetTexture(Color.Black), x - 4, y - 2, z_width * zoom, z_height * zoom, ref hue_vec);
-            batcher.DrawRectangle(Texture2DCache.GetTexture(Color.Gray), x - 4, y - 2, (int) (z_width * zoom), (int) (z_height * zoom), ref hue_vec);
+
+            batcher.Draw2D
+                (Texture2DCache.GetTexture(Color.Black), x - 4, y - 2, z_width * zoom, z_height * zoom, ref hue_vec);
+
+            batcher.DrawRectangle
+            (
+                Texture2DCache.GetTexture(Color.Gray), x - 4, y - 2, (int) (z_width * zoom), (int) (z_height * zoom),
+                ref hue_vec
+            );
 
             hue_vec.X = 0;
             hue_vec.Y = 0;
@@ -164,9 +177,8 @@ namespace ClassicUO.Game.UI
 
             return batcher.Draw2D
             (
-                _renderedText.Texture,
-                x + 3, y + 3, z_width * zoom, z_height * zoom,
-                0, 0, z_width, z_height, ref hue_vec
+                _renderedText.Texture, x + 3, y + 3, z_width * zoom, z_height * zoom, 0, 0, z_width, z_height,
+                ref hue_vec
             );
         }
 
@@ -184,13 +196,18 @@ namespace ClassicUO.Game.UI
             {
                 uint revision2 = 0;
 
-                if (Serial == 0 || Serial != serial || World.OPL.TryGetRevision(Serial, out uint revision) && World.OPL.TryGetRevision(serial, out revision2) && revision != revision2)
+                if (Serial == 0 || Serial != serial || World.OPL.TryGetRevision
+                    (Serial, out uint revision) && World.OPL.TryGetRevision
+                    (serial, out revision2) && revision != revision2)
                 {
                     _maxWidth = 0;
                     Serial = serial;
                     _hash = revision2;
                     Text = ReadProperties(serial, out _textHTML);
-                    _lastHoverTime = (uint) (Time.Ticks + (ProfileManager.Current != null ? ProfileManager.Current.TooltipDelayBeforeDisplay : 250));
+
+                    _lastHoverTime = (uint) (Time.Ticks + (ProfileManager.Current != null ?
+                        ProfileManager.Current.TooltipDelayBeforeDisplay :
+                        250));
                 }
             }
         }
@@ -203,8 +220,7 @@ namespace ClassicUO.Game.UI
 
             bool hasStartColor = false;
 
-            if (SerialHelper.IsValid(serial) &&
-                World.OPL.TryGetNameAndData(serial, out string name, out string data))
+            if (SerialHelper.IsValid(serial) && World.OPL.TryGetNameAndData(serial, out string name, out string data))
             {
                 if (!string.IsNullOrEmpty(name))
                 {
@@ -261,7 +277,10 @@ namespace ClassicUO.Game.UI
                 _maxWidth = maxWidth;
                 Serial = 0;
                 Text = _textHTML = text;
-                _lastHoverTime = (uint) (Time.Ticks + (ProfileManager.Current != null ? ProfileManager.Current.TooltipDelayBeforeDisplay : 250));
+
+                _lastHoverTime = (uint) (Time.Ticks + (ProfileManager.Current != null ?
+                    ProfileManager.Current.TooltipDelayBeforeDisplay :
+                    250));
             }
         }
     }

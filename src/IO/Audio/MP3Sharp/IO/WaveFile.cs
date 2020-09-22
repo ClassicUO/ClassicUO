@@ -102,10 +102,7 @@ namespace ClassicUO.IO.Audio.MP3Sharp.IO
         ///     Pass in either a FileName or a Stream.
         /// </summary>
         public virtual int OpenForWrite
-        (
-            string filename, Stream stream, int samplingRate, short bitsPerSample,
-            short numChannels
-        )
+            (string filename, Stream stream, int samplingRate, short bitsPerSample, short numChannels)
         {
             // Verify parameters...
             if (bitsPerSample != 8 && bitsPerSample != 16 || numChannels < 1 || numChannels > 2)
@@ -225,10 +222,7 @@ namespace ClassicUO.IO.Audio.MP3Sharp.IO
         public virtual int OpenForWrite(string filename, WaveFile otherWave)
         {
             return OpenForWrite
-            (
-                filename, null, otherWave.SamplingRate(), otherWave.BitsPerSample(),
-                otherWave.NumChannels()
-            );
+                (filename, null, otherWave.SamplingRate(), otherWave.BitsPerSample(), otherWave.NumChannels());
         }
 
         internal sealed class WaveFormatChunkData
@@ -286,7 +280,8 @@ namespace ClassicUO.IO.Audio.MP3Sharp.IO
             public virtual int VerifyValidity()
             {
                 bool ret = Header.CkId == FourCC("fmt ") && (Data.NumChannels == 1 || Data.NumChannels == 2) &&
-                           Data.NumAvgBytesPerSec == Data.NumChannels * Data.NumSamplesPerSec * Data.NumBitsPerSample / 8 &&
+                           Data.NumAvgBytesPerSec ==
+                           Data.NumChannels * Data.NumSamplesPerSec * Data.NumBitsPerSample / 8 &&
                            Data.NumBlockAlign == Data.NumChannels * Data.NumBitsPerSample / 8;
 
                 return ret ? 1 : 0;

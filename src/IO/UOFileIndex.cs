@@ -27,7 +27,17 @@ namespace ClassicUO.IO
 {
     internal struct UOFileIndex
     {
-        public UOFileIndex(IntPtr address, uint fileSize, long offset, int length, int decompressed, short width = 0, short height = 0, ushort hue = 0)
+        public UOFileIndex
+        (
+            IntPtr address,
+            uint fileSize,
+            long offset,
+            int length,
+            int decompressed,
+            short width = 0,
+            short height = 0,
+            ushort hue = 0
+        )
         {
             Address = address;
             FileSize = fileSize;

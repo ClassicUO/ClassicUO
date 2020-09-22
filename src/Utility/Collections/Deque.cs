@@ -129,7 +129,8 @@ namespace ClassicUO.Utility.Collections
             {
                 if (value < Count)
                 {
-                    throw new ArgumentOutOfRangeException(nameof(value), "Capacity cannot be set to a value less than Count");
+                    throw new ArgumentOutOfRangeException
+                        (nameof(value), "Capacity cannot be set to a value less than Count");
                 }
 
                 if (value == _buffer.Length)
@@ -971,7 +972,8 @@ namespace ClassicUO.Utility.Collections
         {
             if (index < 0 || index > sourceLength)
             {
-                throw new ArgumentOutOfRangeException(nameof(index), "Invalid new index " + index + " for source length " + sourceLength);
+                throw new ArgumentOutOfRangeException
+                    (nameof(index), "Invalid new index " + index + " for source length " + sourceLength);
             }
         }
 
@@ -989,7 +991,8 @@ namespace ClassicUO.Utility.Collections
         {
             if (index < 0 || index >= sourceLength)
             {
-                throw new ArgumentOutOfRangeException(nameof(index), "Invalid existing index " + index + " for source length " + sourceLength);
+                throw new ArgumentOutOfRangeException
+                    (nameof(index), "Invalid existing index " + index + " for source length " + sourceLength);
             }
         }
 
@@ -1019,7 +1022,8 @@ namespace ClassicUO.Utility.Collections
 
             if (sourceLength - offset < count)
             {
-                throw new ArgumentException("Invalid offset (" + offset + ") or count + (" + count + ") for source length " + sourceLength);
+                throw new ArgumentException
+                    ("Invalid offset (" + offset + ") or count + (" + count + ") for source length " + sourceLength);
             }
         }
 

@@ -62,17 +62,13 @@ namespace ClassicUO.Game.UI.Gumps
 
             hitbox.MouseUp += (sender, e) =>
             {
-                UIManager.GetGump<BulletinBoardItem>(LocalSerial)
-                         ?.Dispose();
+                UIManager.GetGump<BulletinBoardItem>(LocalSerial)?.Dispose();
 
                 UIManager.Add
                 (
                     new BulletinBoardItem
-                        (
-                            LocalSerial, 0, World.Player.Name, string.Empty, ResGumps.DateTime,
-                            string.Empty, 0
-                        )
-                        {X = 400, Y = 335}
+                        (LocalSerial, 0, World.Player.Name, string.Empty, ResGumps.DateTime, string.Empty, 0)
+                        { X = 400, Y = 335 }
                 );
             };
 
@@ -152,7 +148,16 @@ namespace ClassicUO.Game.UI.Gumps
         private readonly StbTextBox _subjectTextbox;
         private readonly StbTextBox _textBox;
 
-        public BulletinBoardItem(uint serial, uint msgSerial, string poster, string subject, string datatime, string data, byte variant) : base(serial, 0)
+        public BulletinBoardItem
+        (
+            uint serial,
+            uint msgSerial,
+            string poster,
+            string subject,
+            string datatime,
+            string data,
+            byte variant
+        ) : base(serial, 0)
         {
             _msgSerial = msgSerial;
             AcceptKeyboardInput = true;
@@ -186,11 +191,12 @@ namespace ClassicUO.Game.UI.Gumps
                 textColor = 0;
             }
 
-            Label text = new Label(ResGumps.Author, useUnicode, textColor, font: useUnicode ? unicodeFontIndex : (byte) 6)
-            {
-                X = 30,
-                Y = 40
-            };
+            Label text = new Label
+                (ResGumps.Author, useUnicode, textColor, font: useUnicode ? unicodeFontIndex : (byte) 6)
+                {
+                    X = 30,
+                    Y = 40
+                };
 
             Add(text);
 
@@ -236,13 +242,14 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add
             (
-                _subjectTextbox = new StbTextBox(useUnicode ? unicodeFontIndex : (byte) 9, maxWidth: 150, isunicode: useUnicode, hue: subjectColor)
-                {
-                    X = 30 + text.Width,
-                    Y = 83 + unicodeFontHeightOffset,
-                    Width = 150,
-                    IsEditable = variant == 0
-                }
+                _subjectTextbox = new StbTextBox
+                    (useUnicode ? unicodeFontIndex : (byte) 9, maxWidth: 150, isunicode: useUnicode, hue: subjectColor)
+                    {
+                        X = 30 + text.Width,
+                        Y = 83 + unicodeFontHeightOffset,
+                        Width = 150,
+                        IsEditable = variant == 0
+                    }
             );
 
             _subjectTextbox.SetText(subject);
@@ -251,15 +258,16 @@ namespace ClassicUO.Game.UI.Gumps
 
             _databox.Add
             (
-                _textBox = new StbTextBox(useUnicode ? unicodeFontIndex : (byte) 9, -1, 220, hue: textColor, isunicode: useUnicode)
-                {
-                    X = 40,
-                    Y = 0,
-                    Width = 220,
-                    Height = 300,
-                    IsEditable = variant == 0,
-                    Multiline = true
-                }
+                _textBox = new StbTextBox
+                    (useUnicode ? unicodeFontIndex : (byte) 9, -1, 220, hue: textColor, isunicode: useUnicode)
+                    {
+                        X = 40,
+                        Y = 0,
+                        Width = 220,
+                        Height = 300,
+                        IsEditable = variant == 0,
+                        Multiline = true
+                    }
             );
 
             _textBox.SetText(data);
@@ -320,7 +328,8 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void _textBox_TextChanged(object sender, EventArgs e)
         {
-            _textBox.Height = Math.Max(FontsLoader.Instance.GetHeightUnicode(1, _textBox.Text, 220, TEXT_ALIGN_TYPE.TS_LEFT, 0x0) + 5, 20);
+            _textBox.Height = Math.Max
+                (FontsLoader.Instance.GetHeightUnicode(1, _textBox.Text, 220, TEXT_ALIGN_TYPE.TS_LEFT, 0x0) + 5, 20);
 
             foreach (Control c in _databox.Children)
             {
@@ -374,7 +383,9 @@ namespace ClassicUO.Game.UI.Gumps
             switch ((ButtonType) buttonID)
             {
                 case ButtonType.Post:
-                    NetClient.Socket.Send(new PBulletinBoardPostMessage(LocalSerial, _msgSerial, _subjectTextbox.Text, _textBox.Text));
+                    NetClient.Socket.Send
+                        (new PBulletinBoardPostMessage(LocalSerial, _msgSerial, _subjectTextbox.Text, _textBox.Text));
+
                     Dispose();
 
                     break;
@@ -383,11 +394,10 @@ namespace ClassicUO.Game.UI.Gumps
                     UIManager.Add
                     (
                         new BulletinBoardItem
-                            (
-                                LocalSerial, _msgSerial, World.Player.Name,
-                                ResGumps.RE + _subjectTextbox.Text, _datatime, string.Empty, 0
-                            )
-                            {X = 400, Y = 335}
+                        (
+                            LocalSerial, _msgSerial, World.Player.Name, ResGumps.RE + _subjectTextbox.Text, _datatime,
+                            string.Empty, 0
+                        ) { X = 400, Y = 335 }
                     );
 
                     Dispose();

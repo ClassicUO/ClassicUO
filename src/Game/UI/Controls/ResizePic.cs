@@ -82,8 +82,7 @@ namespace ClassicUO.Game.UI.Controls
             {
                 if (_gumpTexture[i] != null)
                 {
-                    _gumpTexture[i]
-                        .Ticks = (long) totalMS;
+                    _gumpTexture[i].Ticks = (long) totalMS;
                 }
             }
 
@@ -95,59 +94,41 @@ namespace ClassicUO.Game.UI.Controls
             x -= Offset.X;
             y -= Offset.Y;
 
-            int th_0_width = _gumpTexture[0]
-                ?.Width ?? 0;
+            int th_0_width = _gumpTexture[0]?.Width ?? 0;
 
-            int th_0_height = _gumpTexture[0]
-                ?.Height ?? 0;
+            int th_0_height = _gumpTexture[0]?.Height ?? 0;
 
-            int th_1_width = _gumpTexture[1]
-                ?.Width ?? 0;
+            int th_1_width = _gumpTexture[1]?.Width ?? 0;
 
-            int th_1_height = _gumpTexture[1]
-                ?.Height ?? 0;
+            int th_1_height = _gumpTexture[1]?.Height ?? 0;
 
-            int th_2_width = _gumpTexture[2]
-                ?.Width ?? 0;
+            int th_2_width = _gumpTexture[2]?.Width ?? 0;
 
-            int th_2_height = _gumpTexture[2]
-                ?.Height ?? 0;
+            int th_2_height = _gumpTexture[2]?.Height ?? 0;
 
-            int th_3_width = _gumpTexture[3]
-                ?.Width ?? 0;
+            int th_3_width = _gumpTexture[3]?.Width ?? 0;
 
-            int th_3_height = _gumpTexture[3]
-                ?.Height ?? 0;
+            int th_3_height = _gumpTexture[3]?.Height ?? 0;
 
-            int th_4_width = _gumpTexture[4]
-                ?.Width ?? 0;
+            int th_4_width = _gumpTexture[4]?.Width ?? 0;
 
-            int th_4_height = _gumpTexture[4]
-                ?.Height ?? 0;
+            int th_4_height = _gumpTexture[4]?.Height ?? 0;
 
-            int th_5_width = _gumpTexture[5]
-                ?.Width ?? 0;
+            int th_5_width = _gumpTexture[5]?.Width ?? 0;
 
-            int th_5_height = _gumpTexture[5]
-                ?.Height ?? 0;
+            int th_5_height = _gumpTexture[5]?.Height ?? 0;
 
-            int th_6_width = _gumpTexture[6]
-                ?.Width ?? 0;
+            int th_6_width = _gumpTexture[6]?.Width ?? 0;
 
-            int th_6_height = _gumpTexture[6]
-                ?.Height ?? 0;
+            int th_6_height = _gumpTexture[6]?.Height ?? 0;
 
-            int th_7_width = _gumpTexture[7]
-                ?.Width ?? 0;
+            int th_7_width = _gumpTexture[7]?.Width ?? 0;
 
-            int th_7_height = _gumpTexture[7]
-                ?.Height ?? 0;
+            int th_7_height = _gumpTexture[7]?.Height ?? 0;
 
-            int th_8_width = _gumpTexture[8]
-                ?.Width ?? 0;
+            int th_8_width = _gumpTexture[8]?.Width ?? 0;
 
-            int th_8_height = _gumpTexture[8]
-                ?.Height ?? 0;
+            int th_8_height = _gumpTexture[8]?.Height ?? 0;
 
 
             int offsetTop = Math.Max(th_0_height, th_2_height) - th_1_height;
@@ -190,7 +171,11 @@ namespace ClassicUO.Game.UI.Controls
 
                     case 2:
 
-                        if (PixelsInXY(GumpsLoader.Instance.GetTexture((ushort) (Graphic + 2)), x - (Width - th_2_width), y - offsetTop))
+                        if (PixelsInXY
+                        (
+                            GumpsLoader.Instance.GetTexture((ushort) (Graphic + 2)), x - (Width - th_2_width),
+                            y - offsetTop
+                        ))
                         {
                             return true;
                         }
@@ -206,7 +191,11 @@ namespace ClassicUO.Game.UI.Controls
                             break;
                         }
 
-                        if (PixelsInXY(GumpsLoader.Instance.GetTexture((ushort) (Graphic + 3)), x - offsetLeft, y - th_0_height, 0, DH))
+                        if (PixelsInXY
+                        (
+                            GumpsLoader.Instance.GetTexture((ushort) (Graphic + 3)), x - offsetLeft, y - th_0_height, 0,
+                            DH
+                        ))
                         {
                             return true;
                         }
@@ -223,7 +212,11 @@ namespace ClassicUO.Game.UI.Controls
                             break;
                         }
 
-                        if (PixelsInXY(GumpsLoader.Instance.GetTexture((ushort) (Graphic + 5)), x - (Width - th_4_width - offsetRight), y - th_2_height, 0, DH))
+                        if (PixelsInXY
+                        (
+                            GumpsLoader.Instance.GetTexture((ushort) (Graphic + 5)),
+                            x - (Width - th_4_width - offsetRight), y - th_2_height, 0, DH
+                        ))
                         {
                             return true;
                         }
@@ -232,7 +225,8 @@ namespace ClassicUO.Game.UI.Controls
 
                     case 5:
 
-                        if (PixelsInXY(GumpsLoader.Instance.GetTexture((ushort) (Graphic + 6)), x, y - (Height - th_5_height)))
+                        if (PixelsInXY
+                            (GumpsLoader.Instance.GetTexture((ushort) (Graphic + 6)), x, y - (Height - th_5_height)))
                         {
                             return true;
                         }
@@ -248,7 +242,11 @@ namespace ClassicUO.Game.UI.Controls
                             break;
                         }
 
-                        if (PixelsInXY(GumpsLoader.Instance.GetTexture((ushort) (Graphic + 7)), x - th_5_width, y - (Height - th_6_height - offsetBottom), DW))
+                        if (PixelsInXY
+                        (
+                            GumpsLoader.Instance.GetTexture((ushort) (Graphic + 7)), x - th_5_width,
+                            y - (Height - th_6_height - offsetBottom), DW
+                        ))
                         {
                             return true;
                         }
@@ -258,7 +256,11 @@ namespace ClassicUO.Game.UI.Controls
 
                     case 7:
 
-                        if (PixelsInXY(GumpsLoader.Instance.GetTexture((ushort) (Graphic + 8)), x - (Width - th_7_width), y - (Height - th_7_height)))
+                        if (PixelsInXY
+                        (
+                            GumpsLoader.Instance.GetTexture((ushort) (Graphic + 8)), x - (Width - th_7_width),
+                            y - (Height - th_7_height)
+                        ))
                         {
                             return true;
                         }
@@ -281,7 +283,11 @@ namespace ClassicUO.Game.UI.Controls
                             break;
                         }
 
-                        if (PixelsInXY(GumpsLoader.Instance.GetTexture((ushort) (Graphic + 4)), x - th_0_width, y - th_0_height, DW, DH))
+                        if (PixelsInXY
+                        (
+                            GumpsLoader.Instance.GetTexture((ushort) (Graphic + 4)), x - th_0_width, y - th_0_height,
+                            DW, DH
+                        ))
                         {
                             return true;
                         }
@@ -301,7 +307,7 @@ namespace ClassicUO.Game.UI.Controls
             {
                 return false;
             }
-            
+
             int textureWidth = texture.Width;
             int textureHeight = texture.Height;
 
@@ -367,59 +373,41 @@ namespace ClassicUO.Game.UI.Controls
 
         private void DrawInternal(UltimaBatcher2D batcher, int x, int y, ref Vector3 color)
         {
-            int th_0_width = _gumpTexture[0]
-                ?.Width ?? 0;
+            int th_0_width = _gumpTexture[0]?.Width ?? 0;
 
-            int th_0_height = _gumpTexture[0]
-                ?.Height ?? 0;
+            int th_0_height = _gumpTexture[0]?.Height ?? 0;
 
-            int th_1_width = _gumpTexture[1]
-                ?.Width ?? 0;
+            int th_1_width = _gumpTexture[1]?.Width ?? 0;
 
-            int th_1_height = _gumpTexture[1]
-                ?.Height ?? 0;
+            int th_1_height = _gumpTexture[1]?.Height ?? 0;
 
-            int th_2_width = _gumpTexture[2]
-                ?.Width ?? 0;
+            int th_2_width = _gumpTexture[2]?.Width ?? 0;
 
-            int th_2_height = _gumpTexture[2]
-                ?.Height ?? 0;
+            int th_2_height = _gumpTexture[2]?.Height ?? 0;
 
-            int th_3_width = _gumpTexture[3]
-                ?.Width ?? 0;
+            int th_3_width = _gumpTexture[3]?.Width ?? 0;
 
-            int th_3_height = _gumpTexture[3]
-                ?.Height ?? 0;
+            int th_3_height = _gumpTexture[3]?.Height ?? 0;
 
-            int th_4_width = _gumpTexture[4]
-                ?.Width ?? 0;
+            int th_4_width = _gumpTexture[4]?.Width ?? 0;
 
-            int th_4_height = _gumpTexture[4]
-                ?.Height ?? 0;
+            int th_4_height = _gumpTexture[4]?.Height ?? 0;
 
-            int th_5_width = _gumpTexture[5]
-                ?.Width ?? 0;
+            int th_5_width = _gumpTexture[5]?.Width ?? 0;
 
-            int th_5_height = _gumpTexture[5]
-                ?.Height ?? 0;
+            int th_5_height = _gumpTexture[5]?.Height ?? 0;
 
-            int th_6_width = _gumpTexture[6]
-                ?.Width ?? 0;
+            int th_6_width = _gumpTexture[6]?.Width ?? 0;
 
-            int th_6_height = _gumpTexture[6]
-                ?.Height ?? 0;
+            int th_6_height = _gumpTexture[6]?.Height ?? 0;
 
-            int th_7_width = _gumpTexture[7]
-                ?.Width ?? 0;
+            int th_7_width = _gumpTexture[7]?.Width ?? 0;
 
-            int th_7_height = _gumpTexture[7]
-                ?.Height ?? 0;
+            int th_7_height = _gumpTexture[7]?.Height ?? 0;
 
-            int th_8_width = _gumpTexture[8]
-                ?.Width ?? 0;
+            int th_8_width = _gumpTexture[8]?.Width ?? 0;
 
-            int th_8_height = _gumpTexture[8]
-                ?.Height ?? 0;
+            int th_8_height = _gumpTexture[8]?.Height ?? 0;
 
 
             int offsetTop = Math.Max(th_0_height, th_2_height) - th_1_height;

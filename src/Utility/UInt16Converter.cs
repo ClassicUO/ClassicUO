@@ -41,7 +41,8 @@ namespace ClassicUO.Utility
 
             uint.TryParse(str, out uint v);
 
-            return (ushort) v; // some server send 0xFFFF_FFFF in decimal form. C# doesn't like it. It needs a specific conversion
+            return
+                (ushort) v; // some server send 0xFFFF_FFFF in decimal form. C# doesn't like it. It needs a specific conversion
         }
     }
 }

@@ -65,7 +65,7 @@ namespace ClassicUO.Game.UI.Controls
                 _texture = new UOTexture32(1, 1);
             }
 
-            _texture.SetData(new Color[1] {_colorRGBA});
+            _texture.SetData(new Color[1] { _colorRGBA });
         }
 
 

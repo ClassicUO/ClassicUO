@@ -115,7 +115,10 @@ namespace ClassicUO.Game.UI.Gumps
                 }
                 else
                 {
-                    _sb.Append($"Ping: {_ping} ms\n{"In:"} {NetStatistics.GetSizeAdaptive(_deltaBytesReceived),-6} {"Out:"} {NetStatistics.GetSizeAdaptive(_deltaBytesSent),-6}");
+                    _sb.Append
+                    (
+                        $"Ping: {_ping} ms\n{"In:"} {NetStatistics.GetSizeAdaptive(_deltaBytesReceived),-6} {"Out:"} {NetStatistics.GetSizeAdaptive(_deltaBytesSent),-6}"
+                    );
                 }
 
 

@@ -48,7 +48,8 @@ namespace ClassicUO.IO.Resources
             _landResources = new UOTexture32[landCount];
         }
 
-        public static ArtLoader Instance => _instance ?? (_instance = new ArtLoader(Constants.MAX_STATIC_DATA_INDEX_COUNT, Constants.MAX_LAND_DATA_INDEX_COUNT));
+        public static ArtLoader Instance => _instance ?? (_instance = new ArtLoader
+            (Constants.MAX_STATIC_DATA_INDEX_COUNT, Constants.MAX_LAND_DATA_INDEX_COUNT));
 
 
         public override Task Load()
@@ -262,7 +263,8 @@ namespace ClassicUO.IO.Resources
                     pixels[i * width + width - 1] = 0;
                 }
             }
-            else if (StaticFilters.IsCave(graphic) && ProfileManager.Current != null && ProfileManager.Current.EnableCaveBorder)
+            else if (StaticFilters.IsCave
+                (graphic) && ProfileManager.Current != null && ProfileManager.Current.EnableCaveBorder)
             {
                 for (int yy = 0; yy < height; yy++)
                 {

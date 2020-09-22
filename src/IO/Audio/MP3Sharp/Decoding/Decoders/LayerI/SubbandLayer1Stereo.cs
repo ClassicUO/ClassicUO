@@ -31,8 +31,7 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding.Decoders.LayerI
         /// <summary>
         ///     Constructor
         /// </summary>
-        public SubbandLayer1Stereo(int subbandnumber)
-            : base(subbandnumber)
+        public SubbandLayer1Stereo(int subbandnumber) : base(subbandnumber)
         {
         }
 

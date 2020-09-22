@@ -115,8 +115,7 @@ namespace ClassicUO.Utility
                 return;
             }
 
-            if (m_Context[m_Context.Count - 1]
-                .Name != context_name)
+            if (m_Context[m_Context.Count - 1].Name != context_name)
             {
                 Log.Error("Profiler.ExitProfiledContext: context_name does not match current context.");
             }
@@ -125,12 +124,10 @@ namespace ClassicUO.Utility
 
             for (int i = 0; i < m_Context.Count; i++)
             {
-                context[i] = m_Context[i]
-                    .Name;
+                context[i] = m_Context[i].Name;
             }
 
-            double ms = (_timer.ElapsedTicks - m_Context[m_Context.Count - 1]
-                .Tick) * 1000d / Stopwatch.Frequency;
+            double ms = (_timer.ElapsedTicks - m_Context[m_Context.Count - 1].Tick) * 1000d / Stopwatch.Frequency;
 
             m_ThisFrameData.Add(new Tuple<string[], double>(context, ms));
             m_Context.RemoveAt(m_Context.Count - 1);
@@ -148,8 +145,7 @@ namespace ClassicUO.Utility
                 return false;
             }
 
-            return m_Context[m_Context.Count - 1]
-                .Name == context_name;
+            return m_Context[m_Context.Count - 1].Name == context_name;
         }
 
         public static ProfileData GetContext(string context_name)
@@ -161,9 +157,7 @@ namespace ClassicUO.Utility
 
             for (int i = 0; i < m_AllFrameData.Count; i++)
             {
-                if (m_AllFrameData[i]
-                    .Context[m_AllFrameData[i]
-                             .Context.Length - 1] == context_name)
+                if (m_AllFrameData[i].Context[m_AllFrameData[i].Context.Length - 1] == context_name)
                 {
                     return m_AllFrameData[i];
                 }

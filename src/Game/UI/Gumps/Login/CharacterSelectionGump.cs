@@ -51,7 +51,9 @@ namespace ClassicUO.Game.UI.Gumps.Login
             int listTitleY = 106;
 
             LoginScene loginScene = Client.Game.GetScene<LoginScene>();
-            string lastSelected = loginScene.Characters.FirstOrDefault(o => o == Settings.GlobalSettings.LastCharacterName);
+
+            string lastSelected = loginScene.Characters.FirstOrDefault
+                (o => o == Settings.GlobalSettings.LastCharacterName);
 
             LockedFeatureFlags f = World.ClientLockedFeatures.Flags;
             CharacterListFlags ff = World.ClientFeatures.Flags;
@@ -224,8 +226,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
             if (!string.IsNullOrEmpty(charName))
             {
-                LoadingGump existing = Children.OfType<LoadingGump>()
-                                               .FirstOrDefault();
+                LoadingGump existing = Children.OfType<LoadingGump>().FirstOrDefault();
 
                 if (existing != null)
                 {
@@ -236,7 +237,8 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 (
                     new LoadingGump
                     (
-                        string.Format(ResGumps.PermanentlyDelete0, charName), LoginButtons.OK | LoginButtons.Cancel, buttonID =>
+                        string.Format(ResGumps.PermanentlyDelete0, charName), LoginButtons.OK | LoginButtons.Cancel,
+                        buttonID =>
                         {
                             if (buttonID == (int) LoginButtons.OK)
                             {

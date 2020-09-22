@@ -154,7 +154,6 @@ namespace ClassicUO.Game.UI.Controls
                     }
                 }
             }
-
         }
 
         protected override void OnMouseWheel(MouseEventType delta)
@@ -194,7 +193,7 @@ namespace ClassicUO.Game.UI.Controls
             else if (Contains(x, y))
             {
                 _btnSliderClicked = true;
-               
+
                 CalculateByPosition(x, y);
             }
         }

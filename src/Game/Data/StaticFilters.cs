@@ -44,7 +44,8 @@ namespace ClassicUO.Game.Data
 
     internal static class StaticFilters
     {
-        private static readonly STATIC_TILES_FILTER_FLAGS[] _filteredTiles = new STATIC_TILES_FILTER_FLAGS[Constants.MAX_STATIC_DATA_INDEX_COUNT];
+        private static readonly STATIC_TILES_FILTER_FLAGS[] _filteredTiles =
+            new STATIC_TILES_FILTER_FLAGS[Constants.MAX_STATIC_DATA_INDEX_COUNT];
 
         public static readonly List<ushort> CaveTiles = new List<ushort>();
         public static readonly List<ushort> TreeTiles = new List<ushort>();
@@ -106,8 +107,7 @@ namespace ClassicUO.Game.Data
                     {
                         ushort g = vegetationTiles[i];
 
-                        if (TileDataLoader.Instance.StaticData[g]
-                                          .IsImpassable)
+                        if (TileDataLoader.Instance.StaticData[g].IsImpassable)
                         {
                             continue;
                         }
@@ -158,8 +158,7 @@ namespace ClassicUO.Game.Data
                                 break;
                         }
 
-                        if (!TileDataLoader.Instance.StaticData[graphic]
-                                           .IsImpassable)
+                        if (!TileDataLoader.Instance.StaticData[graphic].IsImpassable)
                         {
                             writerveg.WriteLine(graphic);
                         }
@@ -172,7 +171,8 @@ namespace ClassicUO.Game.Data
             }
 
 
-            TextFileParser caveParser = new TextFileParser(File.ReadAllText(cave), new[] {' ', '\t', ','}, new[] {'#', ';'}, new[] {'"', '"'});
+            TextFileParser caveParser = new TextFileParser
+                (File.ReadAllText(cave), new[] { ' ', '\t', ',' }, new[] { '#', ';' }, new[] { '"', '"' });
 
             while (!caveParser.IsEOF())
             {
@@ -189,7 +189,8 @@ namespace ClassicUO.Game.Data
             }
 
 
-            TextFileParser stumpsParser = new TextFileParser(File.ReadAllText(trees), new[] {' ', '\t', ',', '='}, new[] {'#', ';'}, new[] {'"', '"'});
+            TextFileParser stumpsParser = new TextFileParser
+                (File.ReadAllText(trees), new[] { ' ', '\t', ',', '=' }, new[] { '#', ';' }, new[] { '"', '"' });
 
             while (!stumpsParser.IsEOF())
             {
@@ -213,7 +214,8 @@ namespace ClassicUO.Game.Data
             }
 
 
-            TextFileParser vegetationParser = new TextFileParser(File.ReadAllText(vegetation), new[] {' ', '\t', ','}, new[] {'#', ';'}, new[] {'"', '"'});
+            TextFileParser vegetationParser = new TextFileParser
+                (File.ReadAllText(vegetation), new[] { ' ', '\t', ',' }, new[] { '#', ';' }, new[] { '"', '"' });
 
             while (!vegetationParser.IsEOF())
             {
@@ -315,20 +317,16 @@ namespace ClassicUO.Game.Data
                 case 4958:
                 case 4959:
                 case 4960:
-                case 4962:
-                    return true;
+                case 4962: return true;
 
-                default:
-                    return g >= 6001 && g <= 6012;
+                default: return g >= 6001 && g <= 6012;
             }
         }
 
         [MethodImpl(256)]
         public static bool IsField(ushort g)
         {
-            return g >= 0x398C && g <= 0x399F ||
-                   g >= 0x3967 && g <= 0x397A ||
-                   g >= 0x3946 && g <= 0x3964 ||
+            return g >= 0x398C && g <= 0x399F || g >= 0x3967 && g <= 0x397A || g >= 0x3946 && g <= 0x3964 ||
                    g >= 0x3914 && g <= 0x3929;
         }
 

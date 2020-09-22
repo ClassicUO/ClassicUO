@@ -30,7 +30,8 @@ namespace ClassicUO.Utility
     internal class GraphicHelper
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void ScreenToWorldCoordinates(Rectangle viewport, ref Point in_point, ref Matrix transform, out Point result)
+        public static void ScreenToWorldCoordinates
+            (Rectangle viewport, ref Point in_point, ref Matrix transform, out Point result)
         {
             Matrix matrix = Matrix.Invert(transform);
 
@@ -42,7 +43,8 @@ namespace ClassicUO.Utility
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void WorldToScreenCoordinates(Rectangle viewport, ref Point in_point, ref Matrix transform, out Point result)
+        public static void WorldToScreenCoordinates
+            (Rectangle viewport, ref Point in_point, ref Matrix transform, out Point result)
         {
             float x = in_point.X * transform.M11 + in_point.Y * transform.M21 + transform.M41;
             float y = in_point.X * transform.M12 + in_point.Y * transform.M22 + transform.M42;
@@ -77,7 +79,11 @@ namespace ClassicUO.Utility
 
             for (int p = 0; p < partXYplusWidthHeight.GetLength(0); p++)
             {
-                int x = partXYplusWidthHeight[p, 0], y = partXYplusWidthHeight[p, 1], width = partXYplusWidthHeight[p, 2], height = partXYplusWidthHeight[p, 3];
+                int x = partXYplusWidthHeight[p, 0],
+                    y = partXYplusWidthHeight[p, 1],
+                    width = partXYplusWidthHeight[p, 2],
+                    height = partXYplusWidthHeight[p, 3];
+
                 UOTexture32 part = new UOTexture32(width, height);
                 uint[] partData = new uint[width * height];
 

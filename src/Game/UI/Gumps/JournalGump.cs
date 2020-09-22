@@ -89,7 +89,11 @@ namespace ClassicUO.Game.UI.Gumps
 
             _scrollBar = new ScrollFlag(-25, _diffY + 36, Height - _diffY, true);
 
-            Add(_journalEntries = new RenderedTextList(25, _diffY + 36, _background.Width - (_scrollBar.Width >> 1) - 5, 200, _scrollBar));
+            Add
+            (
+                _journalEntries = new RenderedTextList
+                    (25, _diffY + 36, _background.Width - (_scrollBar.Width >> 1) - 5, 200, _scrollBar)
+            );
 
             Add(_scrollBar);
 
@@ -162,8 +166,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             for (int i = 0; i < _filters_chekboxes.Length; i++)
             {
-                _filters_chekboxes[i]
-                    .ValueChanged += on_check_box;
+                _filters_chekboxes[i].ValueChanged += on_check_box;
 
                 Add(_filters_chekboxes[i]);
             }
@@ -232,9 +235,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             for (int i = 0; i < _filters_chekboxes.Length; i++)
             {
-                _filters_chekboxes[i]
-                    .Y = _background.Height - _filters_chekboxes[i]
-                    .Height - _diffY + 10;
+                _filters_chekboxes[i].Y = _background.Height - _filters_chekboxes[i].Height - _diffY + 10;
             }
         }
 
@@ -389,8 +390,14 @@ namespace ClassicUO.Game.UI.Gumps
                     else
                     {
                         int yyy = maxheight - height;
-                        hour.Draw(batcher, hour.Width, hour.Height, mx, y + _scrollBar.Height - yyy, t.Width, yyy, 0, 0);
-                        t.Draw(batcher, t.Width, t.Height, mx + hour.Width, y + _scrollBar.Height - yyy, t.Width, yyy, 0, 0);
+
+                        hour.Draw
+                            (batcher, hour.Width, hour.Height, mx, y + _scrollBar.Height - yyy, t.Width, yyy, 0, 0);
+
+                        t.Draw
+                        (
+                            batcher, t.Width, t.Height, mx + hour.Width, y + _scrollBar.Height - yyy, t.Width, yyy, 0, 0
+                        );
 
                         // can't fit any more entries - so we break!
                         break;
@@ -424,8 +431,7 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     if (CanBeDrawn(_text_types[i]))
                     {
-                        height += _entries[i]
-                            .Height;
+                        height += _entries[i].Height;
                     }
                 }
 
@@ -447,17 +453,23 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             }
 
-            public void AddEntry(string text, int font, ushort hue, bool isUnicode, DateTime time, TEXT_TYPE text_type)
+            public void AddEntry
+            (
+                string text,
+                int font,
+                ushort hue,
+                bool isUnicode,
+                DateTime time,
+                TEXT_TYPE text_type
+            )
             {
                 bool maxScroll = _scrollBar.Value == _scrollBar.MaxValue;
 
                 while (_entries.Count > 199)
                 {
-                    _entries.RemoveFromFront()
-                            .Destroy();
+                    _entries.RemoveFromFront().Destroy();
 
-                    _hours.RemoveFromFront()
-                          .Destroy();
+                    _hours.RemoveFromFront().Destroy();
 
                     _text_types.RemoveFromFront();
                 }
@@ -465,7 +477,12 @@ namespace ClassicUO.Game.UI.Gumps
                 RenderedText h = RenderedText.Create($"{time:t} ", 1150, 1, true, FontStyle.BlackBorder);
                 _hours.AddToBack(h);
 
-                RenderedText rtext = RenderedText.Create(text, hue, (byte) font, isUnicode, FontStyle.Indention | FontStyle.BlackBorder, maxWidth: Width - (18 + h.Width));
+                RenderedText rtext = RenderedText.Create
+                (
+                    text, hue, (byte) font, isUnicode, FontStyle.Indention | FontStyle.BlackBorder,
+                    maxWidth: Width - (18 + h.Width)
+                );
+
                 _entries.AddToBack(rtext);
 
                 _text_types.AddToBack(text_type);
@@ -507,11 +524,9 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 for (int i = 0; i < _entries.Count; i++)
                 {
-                    _entries[i]
-                        .Destroy();
+                    _entries[i].Destroy();
 
-                    _hours[i]
-                        .Destroy();
+                    _hours[i].Destroy();
                 }
 
                 _entries.Clear();

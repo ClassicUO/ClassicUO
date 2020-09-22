@@ -70,7 +70,10 @@ namespace ClassicUO.IO.Resources
                         if (System.IO.File.Exists(path) && System.IO.File.Exists(pathidx))
                         {
                             File = new UOFileMul(path, pathidx, Constants.MAX_MULTI_DATA_INDEX_COUNT, 14);
-                            Count = Offset = Client.Version >= ClientVersion.CV_7090 ? sizeof(MultiBlockNew) + 2 : sizeof(MultiBlock);
+
+                            Count = Offset = Client.Version >= ClientVersion.CV_7090 ?
+                                sizeof(MultiBlockNew) + 2 :
+                                sizeof(MultiBlock);
                         }
                     }
 

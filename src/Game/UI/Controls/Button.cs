@@ -49,7 +49,18 @@ namespace ClassicUO.Game.UI.Controls
         private readonly ushort[] _gumpGraphics = new ushort[3];
         private readonly UOTexture32[] _textures = new UOTexture32[3];
 
-        public Button(int buttonID, ushort normal, ushort pressed, ushort over = 0, string caption = "", byte font = 0, bool isunicode = true, ushort normalHue = ushort.MaxValue, ushort hoverHue = ushort.MaxValue)
+        public Button
+        (
+            int buttonID,
+            ushort normal,
+            ushort pressed,
+            ushort over = 0,
+            string caption = "",
+            byte font = 0,
+            bool isunicode = true,
+            ushort normalHue = ushort.MaxValue,
+            ushort hoverHue = ushort.MaxValue
+        )
         {
             ButtonID = buttonID;
             _gumpGraphics[NORMAL] = normal;
@@ -97,7 +108,10 @@ namespace ClassicUO.Game.UI.Controls
             CanCloseWithEsc = false;
         }
 
-        public Button(List<string> parts) : this(parts.Count >= 8 ? int.Parse(parts[7]) : 0, UInt16Converter.Parse(parts[3]), UInt16Converter.Parse(parts[4]))
+        public Button(List<string> parts) : this
+        (
+            parts.Count >= 8 ? int.Parse(parts[7]) : 0, UInt16Converter.Parse(parts[3]), UInt16Converter.Parse(parts[4])
+        )
         {
             X = int.Parse(parts[1]);
             Y = int.Parse(parts[2]);
@@ -133,11 +147,9 @@ namespace ClassicUO.Game.UI.Controls
                 _textures[NORMAL] = GumpsLoader.Instance.GetTexture(value);
                 _gumpGraphics[NORMAL] = value;
 
-                Width = _textures[NORMAL]
-                    .Width;
+                Width = _textures[NORMAL].Width;
 
-                Height = _textures[NORMAL]
-                    .Height;
+                Height = _textures[NORMAL].Height;
             }
         }
 
@@ -149,11 +161,9 @@ namespace ClassicUO.Game.UI.Controls
                 _textures[PRESSED] = GumpsLoader.Instance.GetTexture(value);
                 _gumpGraphics[PRESSED] = value;
 
-                Width = _textures[PRESSED]
-                    .Width;
+                Width = _textures[PRESSED].Width;
 
-                Height = _textures[PRESSED]
-                    .Height;
+                Height = _textures[PRESSED].Height;
             }
         }
 
@@ -165,11 +175,9 @@ namespace ClassicUO.Game.UI.Controls
                 _textures[OVER] = GumpsLoader.Instance.GetTexture(value);
                 _gumpGraphics[OVER] = value;
 
-                Width = _textures[OVER]
-                    .Width;
+                Width = _textures[OVER].Width;
 
-                Height = _textures[OVER]
-                    .Height;
+                Height = _textures[OVER].Height;
             }
         }
 
@@ -228,7 +236,12 @@ namespace ClassicUO.Game.UI.Controls
                 if (FontCenter)
                 {
                     int yoffset = IsClicked ? 1 : 0;
-                    textTexture.Draw(batcher, x + ((Width - textTexture.Width) >> 1), y + yoffset + ((Height - textTexture.Height) >> 1));
+
+                    textTexture.Draw
+                    (
+                        batcher, x + ((Width - textTexture.Width) >> 1),
+                        y + yoffset + ((Height - textTexture.Height) >> 1)
+                    );
                 }
                 else
                 {
@@ -323,10 +336,7 @@ namespace ClassicUO.Game.UI.Controls
                 return false;
             }
 
-            return ContainsByBounds
-                ? base.Contains(x, y)
-                : _textures[NORMAL]
-                    .Contains(x - Offset.X, y - Offset.Y);
+            return ContainsByBounds ? base.Contains(x, y) : _textures[NORMAL].Contains(x - Offset.X, y - Offset.Y);
         }
 
         public sealed override void Dispose()

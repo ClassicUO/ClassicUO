@@ -84,11 +84,9 @@ namespace ClassicUO.Game.Map
 
                     for (int x = 0; x < 8; ++x, ++pos)
                     {
-                        ushort tileID = (ushort) (cells[pos]
-                            .TileID & 0x3FFF);
+                        ushort tileID = (ushort) (cells[pos].TileID & 0x3FFF);
 
-                        sbyte z = cells[pos]
-                            .Z;
+                        sbyte z = cells[pos].Z;
 
                         Land land = Land.Create(tileID);
                         land.AverageZ = z;
@@ -299,8 +297,7 @@ namespace ClassicUO.Game.Map
                 int testPriorityZ = o.PriorityZ;
 
                 if (testPriorityZ > priorityZ ||
-                    testPriorityZ == priorityZ &&
-                    (state == 0 || state == 1 && !(o is Land)))
+                    testPriorityZ == priorityZ && (state == 0 || state == 1 && !(o is Land)))
                 {
                     break;
                 }

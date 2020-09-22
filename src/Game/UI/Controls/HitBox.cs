@@ -29,7 +29,15 @@ namespace ClassicUO.Game.UI.Controls
 {
     internal class HitBox : Control
     {
-        public HitBox(int x, int y, int w, int h, string tooltip = null, float alpha = 0.75f)
+        public HitBox
+        (
+            int x,
+            int y,
+            int w,
+            int h,
+            string tooltip = null,
+            float alpha = 0.75f
+        )
         {
             CanMove = false;
             AcceptMouseInput = true;

@@ -63,7 +63,12 @@ namespace ClassicUO
         public GameController()
         {
             GraphicManager = new GraphicsDeviceManager(this);
-            GraphicManager.PreparingDeviceSettings += (sender, e) => { e.GraphicsDeviceInformation.PresentationParameters.RenderTargetUsage = RenderTargetUsage.DiscardContents; };
+
+            GraphicManager.PreparingDeviceSettings += (sender, e) =>
+            {
+                e.GraphicsDeviceInformation.PresentationParameters.RenderTargetUsage =
+                    RenderTargetUsage.DiscardContents;
+            };
 
             GraphicManager.PreferredDepthStencilFormat = DepthFormat.Depth24Stencil8;
             SetVSync(false);
@@ -115,13 +120,11 @@ namespace ClassicUO
 
             _hueSamplers[0] = new Texture2D(GraphicsDevice, TEXTURE_WIDTH, TEXTURE_HEIGHT);
 
-            _hueSamplers[0]
-                .SetData(buffer, 0, TEXTURE_WIDTH * TEXTURE_HEIGHT);
+            _hueSamplers[0].SetData(buffer, 0, TEXTURE_WIDTH * TEXTURE_HEIGHT);
 
             _hueSamplers[1] = new Texture2D(GraphicsDevice, TEXTURE_WIDTH, TEXTURE_HEIGHT);
 
-            _hueSamplers[1]
-                .SetData(buffer, TEXTURE_WIDTH * TEXTURE_HEIGHT, TEXTURE_WIDTH * TEXTURE_HEIGHT);
+            _hueSamplers[1].SetData(buffer, TEXTURE_WIDTH * TEXTURE_HEIGHT, TEXTURE_WIDTH * TEXTURE_HEIGHT);
 
             GraphicsDevice.Textures[1] = _hueSamplers[0];
             GraphicsDevice.Textures[2] = _hueSamplers[1];
@@ -137,7 +140,9 @@ namespace ClassicUO
         protected override void UnloadContent()
         {
             SDL_GetWindowBordersSize(Window.Handle, out int top, out int left, out _, out _);
-            Settings.GlobalSettings.WindowPosition = new Point(Math.Max(0, Window.ClientBounds.X - left), Math.Max(0, Window.ClientBounds.Y - top));
+
+            Settings.GlobalSettings.WindowPosition = new Point
+                (Math.Max(0, Window.ClientBounds.X - left), Math.Max(0, Window.ClientBounds.Y - top));
 
             Scene?.Unload();
             Settings.GlobalSettings.Save();
@@ -343,14 +348,18 @@ namespace ClassicUO
                 _currentFpsTime = 0;
             }
 
-            double x = _intervalFixedUpdate[!IsActive && ProfileManager.Current != null && ProfileManager.Current.ReduceFPSWhenInactive ? 1 : 0];
+            double x = _intervalFixedUpdate[
+                !IsActive && ProfileManager.Current != null && ProfileManager.Current.ReduceFPSWhenInactive ? 1 : 0];
 
             if (_totalElapsed > x)
             {
                 if (Scene != null && Scene.IsLoaded && !Scene.IsDestroyed)
                 {
                     Profiler.EnterContext("FixedUpdate");
-                    Scene.FixedUpdate(gameTime.TotalGameTime.TotalMilliseconds, gameTime.ElapsedGameTime.TotalMilliseconds);
+
+                    Scene.FixedUpdate
+                        (gameTime.TotalGameTime.TotalMilliseconds, gameTime.ElapsedGameTime.TotalMilliseconds);
+
                     Profiler.ExitContext("FixedUpdate");
                 }
 
@@ -527,7 +536,9 @@ namespace ClassicUO
                     if (Plugin.ProcessHotkeys((int) sdlEvent->key.keysym.sym, (int) sdlEvent->key.keysym.mod, true))
                     {
                         _ignoreNextTextInput = false;
-                        UIManager.KeyboardFocusControl?.InvokeKeyDown(sdlEvent->key.keysym.sym, sdlEvent->key.keysym.mod);
+
+                        UIManager.KeyboardFocusControl?.InvokeKeyDown
+                            (sdlEvent->key.keysym.sym, sdlEvent->key.keysym.mod);
 
                         Scene.OnKeyDown(sdlEvent->key);
                     }
@@ -620,7 +631,7 @@ namespace ClassicUO
                     SDL_MouseButtonEvent mouse = sdlEvent->button;
 
                     // The values in MouseButtonType are chosen to exactly match the SDL values
-                    MouseButtonType buttonType = (MouseButtonType)mouse.button;
+                    MouseButtonType buttonType = (MouseButtonType) mouse.button;
 
                     switch ((uint) mouse.button)
                     {
@@ -638,7 +649,9 @@ namespace ClassicUO
                                 {
                                     Mouse.LastLeftButtonClickTime = 0;
 
-                                    bool res = Scene.OnMouseDoubleClick(buttonType) || UIManager.OnMouseDoubleClick(buttonType);
+                                    bool res = Scene.OnMouseDoubleClick(buttonType) || UIManager.OnMouseDoubleClick
+                                        (buttonType);
+
                                     if (!res)
                                     {
                                         if (!Scene.OnMouseDown(buttonType))
@@ -665,7 +678,8 @@ namespace ClassicUO
                             {
                                 if (Mouse.LastLeftButtonClickTime != 0xFFFF_FFFF)
                                 {
-                                    if (!Scene.OnMouseUp(buttonType) || UIManager.LastControlMouseDown(buttonType) != null)
+                                    if (!Scene.OnMouseUp(buttonType) || UIManager.LastControlMouseDown
+                                        (buttonType) != null)
                                     {
                                         UIManager.OnMouseButtonUp(buttonType);
                                     }
@@ -691,7 +705,8 @@ namespace ClassicUO
                                 {
                                     Mouse.LastMidButtonClickTime = 0;
 
-                                    bool res = Scene.OnMouseDoubleClick(buttonType) || UIManager.OnMouseDoubleClick(buttonType);
+                                    bool res = Scene.OnMouseDoubleClick(buttonType) || UIManager.OnMouseDoubleClick
+                                        (buttonType);
 
                                     if (!res)
                                     {
@@ -747,7 +762,8 @@ namespace ClassicUO
                                 {
                                     Mouse.LastRightButtonClickTime = 0;
 
-                                    bool res = Scene.OnMouseDoubleClick(buttonType) || UIManager.OnMouseDoubleClick(buttonType);
+                                    bool res = Scene.OnMouseDoubleClick(buttonType) || UIManager.OnMouseDoubleClick
+                                        (buttonType);
 
                                     if (!res)
                                     {
@@ -795,6 +811,7 @@ namespace ClassicUO
                                 Mouse.XButtonPressed = true;
                                 Mouse.CancelDoubleClick = false;
                                 Plugin.ProcessMouse(sdlEvent->button.button, 0);
+
                                 if (!Scene.OnMouseDown(buttonType))
                                 {
                                     UIManager.OnMouseButtonDown(buttonType);
@@ -824,13 +841,21 @@ namespace ClassicUO
 
         private void TakeScreenshot()
         {
-            string screenshotsFolder = FileSystemHelper.CreateFolderIfNotExists(CUOEnviroment.ExecutablePath, "Data", "Client", "Screenshots");
+            string screenshotsFolder = FileSystemHelper.CreateFolderIfNotExists
+                (CUOEnviroment.ExecutablePath, "Data", "Client", "Screenshots");
+
             string path = Path.Combine(screenshotsFolder, $"screenshot_{DateTime.Now:yyyy-MM-dd_hh-mm-ss}.png");
 
-            Color[] colors = new Color[GraphicManager.PreferredBackBufferWidth * GraphicManager.PreferredBackBufferHeight];
+            Color[] colors =
+                new Color[GraphicManager.PreferredBackBufferWidth * GraphicManager.PreferredBackBufferHeight];
+
             GraphicsDevice.GetBackBufferData(colors);
 
-            using (Texture2D texture = new Texture2D(GraphicsDevice, GraphicManager.PreferredBackBufferWidth, GraphicManager.PreferredBackBufferHeight, false, SurfaceFormat.Color))
+            using (Texture2D texture = new Texture2D
+            (
+                GraphicsDevice, GraphicManager.PreferredBackBufferWidth, GraphicManager.PreferredBackBufferHeight,
+                false, SurfaceFormat.Color
+            ))
             using (FileStream fileStream = File.Create(path))
             {
                 texture.SetData(colors);

@@ -126,11 +126,9 @@ namespace ClassicUO.Game.UI.Gumps
 
                 string name = "";
 
-                if (World.Party.Members[i] != null && World.Party.Members[i]
-                                                           .Name != null)
+                if (World.Party.Members[i] != null && World.Party.Members[i].Name != null)
                 {
-                    name = World.Party.Members[i]
-                                .Name;
+                    name = World.Party.Members[i].Name;
                 }
 
                 Add
@@ -355,8 +353,7 @@ namespace ClassicUO.Game.UI.Gumps
                     {
                         int index = (int) (buttonID - Buttons.TellMember);
 
-                        if (World.Party.Members[index] == null || World.Party.Members[index]
-                                                                       .Serial == 0)
+                        if (World.Party.Members[index] == null || World.Party.Members[index].Serial == 0)
                         {
                             GameActions.Print(ResGumps.ThereIsNoOneInThatPartySlot, 0, MessageType.System, 3, false);
                         }
@@ -371,21 +368,13 @@ namespace ClassicUO.Game.UI.Gumps
                     {
                         int index = (int) (buttonID - Buttons.KickMember);
 
-                        if (World.Party.Members[index] == null || World.Party.Members[index]
-                                                                       .Serial == 0)
+                        if (World.Party.Members[index] == null || World.Party.Members[index].Serial == 0)
                         {
                             GameActions.Print(ResGumps.ThereIsNoOneInThatPartySlot, 0, MessageType.System, 3, false);
                         }
                         else
                         {
-                            NetClient.Socket.Send
-                            (
-                                new PPartyRemoveRequest
-                                (
-                                    World.Party.Members[index]
-                                         .Serial
-                                )
-                            );
+                            NetClient.Socket.Send(new PPartyRemoveRequest(World.Party.Members[index].Serial));
                         }
                     }
 

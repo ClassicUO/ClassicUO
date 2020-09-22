@@ -64,7 +64,7 @@ namespace ClassicUO.Game.UI.Gumps
                 _tips = this;
                 _background.TitleGumpID = 0x9CA;
                 _idx = 0;
-                Add(_prev = new Button(0, 0x9cc, 0x9cc) {X = 35, ContainsByBounds = true});
+                Add(_prev = new Button(0, 0x9cc, 0x9cc) { X = 35, ContainsByBounds = true });
 
                 _prev.MouseUp += (o, e) =>
                 {
@@ -74,7 +74,7 @@ namespace ClassicUO.Game.UI.Gumps
                     }
                 };
 
-                Add(_next = new Button(0, 0x9cd, 0x9cd) {X = 240, ContainsByBounds = true});
+                Add(_next = new Button(0, 0x9cd, 0x9cd) { X = 240, ContainsByBounds = true });
 
                 _next.MouseUp += (o, e) =>
                 {

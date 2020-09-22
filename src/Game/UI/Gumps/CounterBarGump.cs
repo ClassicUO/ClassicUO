@@ -50,7 +50,8 @@ namespace ClassicUO.Game.UI.Gumps
         {
         }
 
-        public CounterBarGump(int x, int y, int rectSize = 30, int rows = 1, int columns = 1 /*, bool vertical = false*/) : base(0, 0)
+        public CounterBarGump
+            (int x, int y, int rectSize = 30, int rows = 1, int columns = 1 /*, bool vertical = false*/) : base(0, 0)
         {
             X = x;
             Y = y;
@@ -95,7 +96,7 @@ namespace ClassicUO.Game.UI.Gumps
             Width = _rectSize * _columns + 1;
             Height = _rectSize * _rows + 1;
 
-            Add(_background = new AlphaBlendControl(0.3f) {Width = Width, Height = Height});
+            Add(_background = new AlphaBlendControl(0.3f) { Width = Width, Height = Height });
 
             for (int row = 0; row < _rows; row++)
             {
@@ -217,11 +218,9 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (index >= 0 && index < items.Length)
                 {
-                    items[i]
-                        .Parent = null;
+                    items[i].Parent = null;
 
-                    items[i]
-                        .Dispose();
+                    items[i].Dispose();
                 }
             }
 
@@ -265,8 +264,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             for (int i = 0; i < count; i++)
             {
-                items[i]
-                    .SetGraphic(reader.ReadUInt16(), version > 1 ? reader.ReadUInt16() : (ushort) 0);
+                items[i].SetGraphic(reader.ReadUInt16(), version > 1 ? reader.ReadUInt16() : (ushort) 0);
             }
 
             IsEnabled = IsVisible = ProfileManager.Current.CounterBarEnabled;
@@ -318,7 +316,11 @@ namespace ClassicUO.Game.UI.Gumps
                     if (index < items.Length)
                     {
                         items[index++]
-                            ?.SetGraphic(ushort.Parse(controlXml.GetAttribute("graphic")), ushort.Parse(controlXml.GetAttribute("hue")));
+                            ?.SetGraphic
+                            (
+                                ushort.Parse(controlXml.GetAttribute("graphic")),
+                                ushort.Parse(controlXml.GetAttribute("hue"))
+                            );
                     }
                     else
                     {
@@ -543,8 +545,7 @@ namespace ClassicUO.Game.UI.Gumps
                         _textureControl.Texture = ArtLoader.Instance.GetTexture(graphic);
                         _textureControl.Hue = hue;
 
-                        _textureControl.IsPartial = TileDataLoader.Instance.StaticData[graphic]
-                                                                  .IsPartialHue;
+                        _textureControl.IsPartial = TileDataLoader.Instance.StaticData[graphic].IsPartialHue;
 
                         _textureControl.Width = Parent.Width;
                         _textureControl.Height = Parent.Height;

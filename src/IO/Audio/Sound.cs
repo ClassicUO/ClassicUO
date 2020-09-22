@@ -95,7 +95,8 @@ namespace ClassicUO.IO.Audio
             }
         }
 
-        public bool IsPlaying => _sound_instance != null && _sound_instance.State == SoundState.Playing && DurationTime > Time.Ticks;
+        public bool IsPlaying => _sound_instance != null && _sound_instance.State == SoundState.Playing &&
+                                 DurationTime > Time.Ticks;
 
         public int CompareTo(Sound other)
         {
@@ -169,8 +170,7 @@ namespace ClassicUO.IO.Audio
                 VolumeFactor = volumeFactor;
                 Volume = volume;
 
-                DurationTime = Time.Ticks + _sound_instance.GetSampleDuration(buffer.Length)
-                                                           .TotalMilliseconds;
+                DurationTime = Time.Ticks + _sound_instance.GetSampleDuration(buffer.Length).TotalMilliseconds;
 
                 _sound_instance.Play();
 

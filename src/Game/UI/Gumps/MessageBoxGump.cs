@@ -33,7 +33,8 @@ namespace ClassicUO.Game.UI.Gumps
     {
         private readonly Action<bool> _action;
 
-        public MessageBoxGump(int w, int h, string message, Action<bool> action, bool hasBackground = false) : base(0, 0)
+        public MessageBoxGump(int w, int h, string message, Action<bool> action, bool hasBackground = false) : base
+            (0, 0)
         {
             CanMove = true;
             CanCloseWithRightClick = false;

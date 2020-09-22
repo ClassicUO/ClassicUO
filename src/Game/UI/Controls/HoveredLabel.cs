@@ -31,7 +31,18 @@ namespace ClassicUO.Game.UI.Controls
     {
         private readonly ushort _overHue, _normalHue, _selectedHue;
 
-        public HoveredLabel(string text, bool isunicode, ushort hue, ushort overHue, ushort selectedHue, int maxwidth = 0, byte font = 255, FontStyle style = FontStyle.None, TEXT_ALIGN_TYPE align = TEXT_ALIGN_TYPE.TS_LEFT) : base($" {text}", isunicode, hue, maxwidth, font, style, align)
+        public HoveredLabel
+        (
+            string text,
+            bool isunicode,
+            ushort hue,
+            ushort overHue,
+            ushort selectedHue,
+            int maxwidth = 0,
+            byte font = 255,
+            FontStyle style = FontStyle.None,
+            TEXT_ALIGN_TYPE align = TEXT_ALIGN_TYPE.TS_LEFT
+        ) : base($" {text}", isunicode, hue, maxwidth, font, style, align)
         {
             _overHue = overHue;
             _normalHue = hue;

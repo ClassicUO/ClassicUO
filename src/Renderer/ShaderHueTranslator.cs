@@ -74,9 +74,7 @@ namespace ClassicUO.Renderer
             {
                 hue -= 1;
 
-                type = partial
-                    ? SHADER_PARTIAL_HUED
-                    : SHADER_HUED;
+                type = partial ? SHADER_PARTIAL_HUED : SHADER_HUED;
 
                 if (gump)
                 {

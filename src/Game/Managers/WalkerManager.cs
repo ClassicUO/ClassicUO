@@ -131,8 +131,7 @@ namespace ClassicUO.Game.Managers
 
             for (int i = 0; i < StepsCount; i++)
             {
-                if (StepInfos[i]
-                    .Sequence == sequence)
+                if (StepInfos[i].Sequence == sequence)
                 {
                     break;
                 }
@@ -147,22 +146,17 @@ namespace ClassicUO.Game.Managers
             {
                 if (stepIndex >= CurrentWalkSequence)
                 {
-                    StepInfos[stepIndex]
-                        .Accepted = true;
+                    StepInfos[stepIndex].Accepted = true;
 
-                    World.RangeSize.X = StepInfos[stepIndex]
-                        .X;
+                    World.RangeSize.X = StepInfos[stepIndex].X;
 
-                    World.RangeSize.Y = StepInfos[stepIndex]
-                        .Y;
+                    World.RangeSize.Y = StepInfos[stepIndex].Y;
                 }
                 else if (stepIndex == 0)
                 {
-                    World.RangeSize.X = StepInfos[0]
-                        .X;
+                    World.RangeSize.X = StepInfos[0].X;
 
-                    World.RangeSize.Y = StepInfos[0]
-                        .Y;
+                    World.RangeSize.Y = StepInfos[0].Y;
 
                     for (int i = 1; i < StepsCount; i++)
                     {

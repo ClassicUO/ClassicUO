@@ -74,7 +74,12 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add(_container);
 
-            Add(_slider = new HSliderBar(40, _container.Y + _container.Height + 12, 217, 0, 1, 0, HSliderBarStyle.MetalWidgetRecessedBar));
+            Add
+            (
+                _slider = new HSliderBar
+                    (40, _container.Y + _container.Height + 12, 217, 0, 1, 0, HSliderBarStyle.MetalWidgetRecessedBar)
+            );
+
             _slider.ValueChanged += (sender, e) => { _container.Value = _slider.Value; };
 
             HitBox left = new HitBox(25, 60, 10, 15)
@@ -118,7 +123,15 @@ namespace ClassicUO.Game.UI.Gumps
         }
 
 
-        public void AddItem(ushort graphic, ushort hue, string name, int x, int y, int index)
+        public void AddItem
+        (
+            ushort graphic,
+            ushort hue,
+            string name,
+            int x,
+            int y,
+            int index
+        )
         {
             ArtTexture texture = ArtLoader.Instance.GetTexture(graphic);
 
@@ -132,8 +145,7 @@ namespace ClassicUO.Game.UI.Gumps
             TextureControl pic = new TextureControl
             {
                 Texture = texture,
-                IsPartial = TileDataLoader.Instance.StaticData[graphic]
-                                          .IsPartialHue,
+                IsPartial = TileDataLoader.Instance.StaticData[graphic].IsPartialHue,
                 Hue = hue,
                 AcceptMouseInput = true,
                 X = x,

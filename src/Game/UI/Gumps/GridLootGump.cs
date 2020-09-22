@@ -65,8 +65,8 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 World.Player.ManualOpenedCorpses.Remove(LocalSerial);
             }
-            else if (World.Player.AutoOpenedCorpses.Contains(LocalSerial) &&
-                     ProfileManager.Current != null && ProfileManager.Current.SkipEmptyCorpse)
+            else if (World.Player.AutoOpenedCorpses.Contains
+                (LocalSerial) && ProfileManager.Current != null && ProfileManager.Current.SkipEmptyCorpse)
             {
                 IsVisible = false;
                 _hideIfEmpty = true;
@@ -87,11 +87,16 @@ namespace ClassicUO.Game.UI.Gumps
             Width = _background.Width;
             Height = _background.Height;
 
-            _setlootbag = new NiceButton(3, Height - 23, 100, 20, ButtonAction.Activate, ResGumps.SetLootBag) {ButtonParameter = 2, IsSelectable = false};
+            _setlootbag = new NiceButton(3, Height - 23, 100, 20, ButtonAction.Activate, ResGumps.SetLootBag)
+                { ButtonParameter = 2, IsSelectable = false };
+
             Add(_setlootbag);
 
-            _buttonPrev = new NiceButton(Width - 80, Height - 20, 40, 20, ButtonAction.Activate, ResGumps.Prev) {ButtonParameter = 0, IsSelectable = false};
-            _buttonNext = new NiceButton(Width - 40, Height - 20, 40, 20, ButtonAction.Activate, ResGumps.Next) {ButtonParameter = 1, IsSelectable = false};
+            _buttonPrev = new NiceButton(Width - 80, Height - 20, 40, 20, ButtonAction.Activate, ResGumps.Prev)
+                { ButtonParameter = 0, IsSelectable = false };
+
+            _buttonNext = new NiceButton(Width - 40, Height - 20, 40, 20, ButtonAction.Activate, ResGumps.Next)
+                { ButtonParameter = 1, IsSelectable = false };
 
             _buttonNext.IsVisible = _buttonPrev.IsVisible = false;
 
@@ -323,7 +328,8 @@ namespace ClassicUO.Game.UI.Gumps
 
             WantUpdateSize = true;
 
-            if (_corpse != null && !_corpse.IsDestroyed && UIManager.MouseOverControl != null && (UIManager.MouseOverControl == this || UIManager.MouseOverControl.RootParent == this))
+            if (_corpse != null && !_corpse.IsDestroyed && UIManager.MouseOverControl != null &&
+                (UIManager.MouseOverControl == this || UIManager.MouseOverControl.RootParent == this))
             {
                 SelectedObject.Object = _corpse;
                 SelectedObject.LastObject = _corpse;
@@ -359,7 +365,12 @@ namespace ClassicUO.Game.UI.Gumps
 
                 CanMove = false;
 
-                HSliderBar amount = new HSliderBar(0, 0, size, 1, item.Amount, item.Amount, HSliderBarStyle.MetalWidgetRecessedBar, true, color: 0xFFFF, drawUp: true);
+                HSliderBar amount = new HSliderBar
+                (
+                    0, 0, size, 1, item.Amount, item.Amount, HSliderBarStyle.MetalWidgetRecessedBar, true,
+                    color: 0xFFFF, drawUp: true
+                );
+
                 Add(amount);
 
                 amount.IsVisible = amount.IsEnabled = amount.MaxValue > 1;
@@ -410,12 +421,18 @@ namespace ClassicUO.Game.UI.Gumps
                 base.Draw(batcher, x, y);
                 ResetHueVector();
 
-                batcher.DrawRectangle(Texture2DCache.GetTexture(Color.Gray), x, y + 15, Width, Height - 15, ref _hueVector);
+                batcher.DrawRectangle
+                    (Texture2DCache.GetTexture(Color.Gray), x, y + 15, Width, Height - 15, ref _hueVector);
 
                 if (_texture.MouseIsOver)
                 {
                     _hueVector.Z = 0.7f;
-                    batcher.Draw2D(Texture2DCache.GetTexture(Color.Yellow), x + 1, y + 15, Width - 1, Height - 15, ref _hueVector);
+
+                    batcher.Draw2D
+                    (
+                        Texture2DCache.GetTexture(Color.Yellow), x + 1, y + 15, Width - 1, Height - 15, ref _hueVector
+                    );
+
                     _hueVector.Z = 0;
                 }
 

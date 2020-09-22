@@ -54,8 +54,8 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
 
         public static readonly int[][] frequencies =
         {
-            new[] {22050, 24000, 16000, 1}, new[] {44100, 48000, 32000, 1},
-            new[] {11025, 12000, 8000, 1}
+            new[] { 22050, 24000, 16000, 1 }, new[] { 44100, 48000, 32000, 1 },
+            new[] { 11025, 12000, 8000, 1 }
         }; // SZD: MPEG25
 
         // E.B -> private to public
@@ -644,8 +644,8 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
         {
             float[][] ms_per_frame_array =
             {
-                new[] {8.707483f, 8.0f, 12.0f}, new[] {26.12245f, 24.0f, 36.0f},
-                new[] {26.12245f, 24.0f, 36.0f}
+                new[] { 8.707483f, 8.0f, 12.0f }, new[] { 26.12245f, 24.0f, 36.0f },
+                new[] { 26.12245f, 24.0f, 36.0f }
             };
 
             return ms_per_frame_array[h_layer - 1][h_sample_frequency];
@@ -668,17 +668,11 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
         {
             switch (h_layer)
             {
-                case 1:
+                case 1: return "I";
 
-                    return "I";
+                case 2: return "II";
 
-                case 2:
-
-                    return "II";
-
-                case 3:
-
-                    return "III";
+                case 3: return "III";
             }
 
             return null;
@@ -752,21 +746,13 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
         {
             switch (h_mode)
             {
-                case STEREO:
+                case STEREO: return "Stereo";
 
-                    return "Stereo";
+                case JOINT_STEREO: return "Joint stereo";
 
-                case JOINT_STEREO:
+                case DUAL_CHANNEL: return "Dual channel";
 
-                    return "Joint stereo";
-
-                case DUAL_CHANNEL:
-
-                    return "Dual channel";
-
-                case SINGLE_CHANNEL:
-
-                    return "Single channel";
+                case SINGLE_CHANNEL: return "Single channel";
             }
 
             return null;
@@ -779,17 +765,11 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
         {
             switch (h_version)
             {
-                case MPEG1:
+                case MPEG1: return "MPEG-1";
 
-                    return "MPEG-1";
+                case MPEG2_LSF: return "MPEG-2 LSF";
 
-                case MPEG2_LSF:
-
-                    return "MPEG-2 LSF";
-
-                case MPEG25_LSF:
-
-                    return "MPEG-2.5 LSF";
+                case MPEG25_LSF: return "MPEG-2.5 LSF";
             }
 
             return null;

@@ -84,7 +84,8 @@ namespace ClassicUO.Game.UI.Controls
                     return batcher.Draw2D(Texture, x, y, w, h, r.X, r.Y, r.Width, r.Height, ref _hueVector);
                 }
 
-                return batcher.Draw2D(Texture, x, y, Width, Height, 0, 0, Texture.Width, Texture.Height, ref _hueVector);
+                return batcher.Draw2D
+                    (Texture, x, y, Width, Height, 0, 0, Texture.Width, Texture.Height, ref _hueVector);
             }
 
             return batcher.Draw2D(Texture, x, y, ref _hueVector);

@@ -47,7 +47,16 @@ namespace ClassicUO.Game.UI.Controls
 
         private bool _selected;
 
-        public ColorPickerBox(int x, int y, int rows = 10, int columns = 20, int cellW = 8, int cellH = 8, ushort[] customPallete = null)
+        public ColorPickerBox
+        (
+            int x,
+            int y,
+            int rows = 10,
+            int columns = 20,
+            int cellW = 8,
+            int cellH = 8,
+            ushort[] customPallete = null
+        )
         {
             X = x;
             Y = y;
@@ -113,7 +122,9 @@ namespace ClassicUO.Game.UI.Controls
             }
         }
 
-        public ushort SelectedHue => SelectedIndex < 0 || SelectedIndex >= _hues.Length ? (ushort) 0 : _hues[SelectedIndex];
+        public ushort SelectedHue =>
+            SelectedIndex < 0 || SelectedIndex >= _hues.Length ? (ushort) 0 : _hues[SelectedIndex];
+
         public EventHandler ColorSelectedIndex;
 
         public void SetHue(ushort hue)
@@ -140,8 +151,7 @@ namespace ClassicUO.Game.UI.Controls
             {
                 for (int x = 0; x < _columns; x++)
                 {
-                    _colorBoxes?[y, x]
-                        .Update(totalMS, frameMS);
+                    _colorBoxes?[y, x].Update(totalMS, frameMS);
                 }
             }
         }
@@ -170,8 +180,7 @@ namespace ClassicUO.Game.UI.Controls
             {
                 for (int j = 0; j < _columns; j++)
                 {
-                    _colorBoxes?[i, j]
-                        .Draw(batcher, x + j * _cellWidth, y + i * _cellHeight);
+                    _colorBoxes?[i, j].Draw(batcher, x + j * _cellWidth, y + i * _cellHeight);
                 }
             }
 
@@ -179,7 +188,11 @@ namespace ClassicUO.Game.UI.Controls
             {
                 ResetHueVector();
 
-                batcher.Draw2D(_pointer, (int) (x + Width / _columns * (SelectedIndex % _columns + .5f) - 1), (int) (y + Height / _rows * (SelectedIndex / _columns + .5f) - 1), 2, 2, ref _hueVector);
+                batcher.Draw2D
+                (
+                    _pointer, (int) (x + Width / _columns * (SelectedIndex % _columns + .5f) - 1),
+                    (int) (y + Height / _rows * (SelectedIndex / _columns + .5f) - 1), 2, 2, ref _hueVector
+                );
             }
 
             return base.Draw(batcher, x, y);
@@ -290,8 +303,7 @@ namespace ClassicUO.Game.UI.Controls
                 {
                     for (int x = 0; x < _columns; x++)
                     {
-                        _colorBoxes[y, x]
-                            ?.Dispose();
+                        _colorBoxes[y, x]?.Dispose();
                     }
                 }
             }

@@ -52,9 +52,27 @@ namespace ClassicUO.Game.UI.Controls
 
 
             Add(_hotkeyBox);
-            Add(new NiceButton(0, _hotkeyBox.Height + 3, 170, 25, ButtonAction.Activate, ResGumps.CreateMacroButton, 0, TEXT_ALIGN_TYPE.TS_LEFT) {ButtonParameter = 2, IsSelectable = false});
-            Add(new NiceButton(0, _hotkeyBox.Height + 30, 50, 25, ButtonAction.Activate, ResGumps.Add) {IsSelectable = false});
-            Add(new NiceButton(52, _hotkeyBox.Height + 30, 50, 25, ButtonAction.Activate, ResGumps.Remove) {ButtonParameter = 1, IsSelectable = false});
+
+            Add
+            (
+                new NiceButton
+                (
+                    0, _hotkeyBox.Height + 3, 170, 25, ButtonAction.Activate, ResGumps.CreateMacroButton, 0,
+                    TEXT_ALIGN_TYPE.TS_LEFT
+                ) { ButtonParameter = 2, IsSelectable = false }
+            );
+
+            Add
+            (
+                new NiceButton(0, _hotkeyBox.Height + 30, 50, 25, ButtonAction.Activate, ResGumps.Add)
+                    { IsSelectable = false }
+            );
+
+            Add
+            (
+                new NiceButton(52, _hotkeyBox.Height + 30, 50, 25, ButtonAction.Activate, ResGumps.Remove)
+                    { ButtonParameter = 1, IsSelectable = false }
+            );
 
 
             ScrollArea area = new ScrollArea(10, _hotkeyBox.Bounds.Bottom + 80, 280, 280, true);
@@ -65,8 +83,7 @@ namespace ClassicUO.Game.UI.Controls
             area.Add(_databox);
 
 
-            Macro = Client.Game.GetScene<GameScene>()
-                          .Macros.FindMacro(name) ?? Macro.CreateEmptyMacro(name);
+            Macro = Client.Game.GetScene<GameScene>().Macros.FindMacro(name) ?? Macro.CreateEmptyMacro(name);
 
             SetupKeyByDefault();
             SetupMacroUI();
@@ -113,8 +130,7 @@ namespace ClassicUO.Game.UI.Controls
 
                 Macro.Remove(last);
 
-                _databox.Children[_databox.Children.Count - 1]
-                        .Dispose();
+                _databox.Children[_databox.Children.Count - 1].Dispose();
 
                 SetupMacroUI();
             }
@@ -196,8 +212,7 @@ namespace ClassicUO.Game.UI.Controls
 
             if (_hotkeyBox.Key != SDL.SDL_Keycode.SDLK_UNKNOWN)
             {
-                Macro macro = Client.Game.GetScene<GameScene>()
-                                    .Macros.FindMacro(_hotkeyBox.Key, alt, ctrl, shift);
+                Macro macro = Client.Game.GetScene<GameScene>().Macros.FindMacro(_hotkeyBox.Key, alt, ctrl, shift);
 
                 if (macro != null)
                 {
@@ -243,9 +258,7 @@ namespace ClassicUO.Game.UI.Controls
             }
             else if (buttonID == 2) // add macro button
             {
-                UIManager.Gumps.OfType<MacroButtonGump>()
-                         .FirstOrDefault(s => s._macro == Macro)
-                         ?.Dispose();
+                UIManager.Gumps.OfType<MacroButtonGump>().FirstOrDefault(s => s._macro == Macro)?.Dispose();
 
                 MacroButtonGump macroButtonGump = new MacroButtonGump(Macro, Mouse.Position.X, Mouse.Position.Y);
                 UIManager.Add(macroButtonGump);
@@ -389,8 +402,7 @@ namespace ClassicUO.Game.UI.Controls
 
                     for (int i = 1; i < Children.Count; i++)
                     {
-                        Children[i]
-                            ?.Dispose();
+                        Children[i]?.Dispose();
                     }
 
                     Height = box.Height;

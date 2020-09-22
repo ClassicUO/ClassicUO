@@ -254,7 +254,8 @@ namespace ClassicUO.Game.Scenes
             }
         }
 
-        private void AddTileToRenderList(GameObject obj, int worldX, int worldY, bool useObjectHandles, int maxZ /*, GameObject entity*/)
+        private void AddTileToRenderList
+            (GameObject obj, int worldX, int worldY, bool useObjectHandles, int maxZ /*, GameObject entity*/)
         {
             /*sbyte HeightChecks = 0;
             if(entity != null)
@@ -383,8 +384,9 @@ namespace ClassicUO.Game.Scenes
                         }
 
                         //we avoid to hide impassable foliage or bushes, if present...
-                        if (ProfileManager.Current.TreeToStumps && itemData.IsFoliage && !itemData.IsMultiMovable && !(obj is Multi) ||
-                            ProfileManager.Current.HideVegetation && (obj is Multi mm && mm.IsVegetation || obj is Static st && st.IsVegetation))
+                        if (ProfileManager.Current.TreeToStumps && itemData.IsFoliage && !itemData.IsMultiMovable &&
+                            !(obj is Multi) || ProfileManager.Current.HideVegetation &&
+                            (obj is Multi mm && mm.IsVegetation || obj is Static st && st.IsVegetation))
                         {
                             continue;
                         }
@@ -401,18 +403,15 @@ namespace ClassicUO.Game.Scenes
 
                 if (useObjectHandles && NameOverHeadManager.IsAllowed(obj as Entity))
                 {
-                    if ((ismobile ||
-                         iscorpse ||
-                         obj is Item it && (!it.IsLocked || it.IsLocked && itemData.IsContainer) && !it.IsMulti) &&
+                    if ((ismobile || iscorpse || obj is Item it &&
+                            (!it.IsLocked || it.IsLocked && itemData.IsContainer) && !it.IsMulti) &&
                         !obj.ClosedObjectHandles)
                     {
                         int index = _objectHandlesCount % Constants.MAX_OBJECT_HANDLES;
 
-                        if (_objectHandles[index] != null && !_objectHandles[index]
-                            .ObjectHandlesOpened)
+                        if (_objectHandles[index] != null && !_objectHandles[index].ObjectHandlesOpened)
                         {
-                            _objectHandles[index]
-                                .UseObjectHandles = false;
+                            _objectHandles[index].UseObjectHandles = false;
 
                             //_objectHandles[index].ObjectHandlesOpened = false;
                         }
@@ -922,7 +921,8 @@ namespace ClassicUO.Game.Scenes
             int maxPixelsY = p.Y;
 
 
-            if (UpdateDrawPosition || oldDrawOffsetX != winDrawOffsetX || oldDrawOffsetY != winDrawOffsetY || old_scaled_offset.X != winGameScaledOffsetX || old_scaled_offset.Y != winGameScaledOffsetY)
+            if (UpdateDrawPosition || oldDrawOffsetX != winDrawOffsetX || oldDrawOffsetY != winDrawOffsetY ||
+                old_scaled_offset.X != winGameScaledOffsetX || old_scaled_offset.Y != winGameScaledOffsetY)
             {
                 UpdateDrawPosition = true;
 
@@ -937,18 +937,13 @@ namespace ClassicUO.Game.Scenes
 
                     _world_render_target = new RenderTarget2D
                     (
-                        Client.Game.GraphicsDevice,
-                        winGameWidth * 1,
-                        winGameHeight * 1,
-                        false,
-                        pp.BackBufferFormat,
-                        pp.DepthStencilFormat,
-                        pp.MultiSampleCount,
-                        pp.RenderTargetUsage
+                        Client.Game.GraphicsDevice, winGameWidth * 1, winGameHeight * 1, false, pp.BackBufferFormat,
+                        pp.DepthStencilFormat, pp.MultiSampleCount, pp.RenderTargetUsage
                     );
                 }
 
-                if (_lightRenderTarget == null || _lightRenderTarget.Width != winGameWidth || _lightRenderTarget.Height != winGameHeight)
+                if (_lightRenderTarget == null || _lightRenderTarget.Width != winGameWidth ||
+                    _lightRenderTarget.Height != winGameHeight)
                 {
                     _lightRenderTarget?.Dispose();
 
@@ -957,14 +952,8 @@ namespace ClassicUO.Game.Scenes
 
                     _lightRenderTarget = new RenderTarget2D
                     (
-                        Client.Game.GraphicsDevice,
-                        winGameWidth,
-                        winGameHeight,
-                        false,
-                        pp.BackBufferFormat,
-                        pp.DepthStencilFormat,
-                        pp.MultiSampleCount,
-                        pp.RenderTargetUsage
+                        Client.Game.GraphicsDevice, winGameWidth, winGameHeight, false, pp.BackBufferFormat,
+                        pp.DepthStencilFormat, pp.MultiSampleCount, pp.RenderTargetUsage
                     );
                 }
             }

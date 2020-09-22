@@ -102,7 +102,8 @@ namespace ClassicUO.Game.UI.Gumps
 
             Point offset = Mouse.LDroppedOffset;
 
-            if (ProfileManager.Current.CastSpellsByOneClick && button == MouseButtonType.Left && !Keyboard.Alt && Math.Abs(offset.X) < 5 && Math.Abs(offset.Y) < 5)
+            if (ProfileManager.Current.CastSpellsByOneClick && button == MouseButtonType.Left && !Keyboard.Alt &&
+                Math.Abs(offset.X) < 5 && Math.Abs(offset.Y) < 5)
             {
                 RunMacro();
             }
@@ -151,9 +152,7 @@ namespace ClassicUO.Game.UI.Gumps
             if (_macro != null)
             {
                 // hack to give macro buttons a unique id for use in anchor groups
-                int macroid = Client.Game.GetScene<GameScene>()
-                                    .Macros.GetAllMacros()
-                                    .IndexOf(_macro);
+                int macroid = Client.Game.GetScene<GameScene>().Macros.GetAllMacros().IndexOf(_macro);
 
                 LocalSerial = (uint) macroid + 1000;
 
@@ -167,9 +166,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             base.Restore(xml);
 
-            Macro macro = Client.Game.GetScene<GameScene>()
-                                .Macros
-                                .FindMacro(xml.GetAttribute("name"));
+            Macro macro = Client.Game.GetScene<GameScene>().Macros.FindMacro(xml.GetAttribute("name"));
 
             if (macro != null)
             {

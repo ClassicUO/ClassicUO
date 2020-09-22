@@ -48,7 +48,21 @@ namespace ClassicUO.Game.UI.Controls
         private readonly RenderedText _text;
         private int _value = -1;
 
-        public HSliderBar(int x, int y, int w, int min, int max, int value, HSliderBarStyle style, bool hasText = false, byte font = 0, ushort color = 0, bool unicode = true, bool drawUp = false)
+        public HSliderBar
+        (
+            int x,
+            int y,
+            int w,
+            int min,
+            int max,
+            int value,
+            HSliderBarStyle style,
+            bool hasText = false,
+            byte font = 0,
+            ushort color = 0,
+            bool unicode = true,
+            bool drawUp = false
+        )
         {
             X = x;
             Y = y;
@@ -74,7 +88,8 @@ namespace ClassicUO.Game.UI.Controls
 
                         _gumpSpliderBackground = new UOTexture32[3]
                         {
-                            GumpsLoader.Instance.GetTexture(213), GumpsLoader.Instance.GetTexture(214), GumpsLoader.Instance.GetTexture(215)
+                            GumpsLoader.Instance.GetTexture(213), GumpsLoader.Instance.GetTexture(214),
+                            GumpsLoader.Instance.GetTexture(215)
                         };
 
                         _gumpWidget = GumpsLoader.Instance.GetTexture(216);
@@ -173,18 +188,13 @@ namespace ClassicUO.Game.UI.Controls
 
                 batcher.Draw2DTiled
                 (
-                    _gumpSpliderBackground[1], x + _gumpSpliderBackground[0]
-                        .Width, y, BarWidth - _gumpSpliderBackground[2]
-                        .Width - _gumpSpliderBackground[0]
-                        .Width, _gumpSpliderBackground[1]
-                        .Height, ref _hueVector
+                    _gumpSpliderBackground[1], x + _gumpSpliderBackground[0].Width, y,
+                    BarWidth - _gumpSpliderBackground[2].Width - _gumpSpliderBackground[0].Width,
+                    _gumpSpliderBackground[1].Height, ref _hueVector
                 );
 
                 batcher.Draw2D
-                (
-                    _gumpSpliderBackground[2], x + BarWidth - _gumpSpliderBackground[2]
-                        .Width, y, ref _hueVector
-                );
+                    (_gumpSpliderBackground[2], x + BarWidth - _gumpSpliderBackground[2].Width, y, ref _hueVector);
             }
 
             batcher.Draw2D(_gumpWidget, x + _sliderX, y, ref _hueVector);
@@ -327,36 +337,22 @@ namespace ClassicUO.Game.UI.Controls
             {
                 if (d > 0)
                 {
-                    if (_pairedSliders[sliderIndex]
-                        .Value < _pairedSliders[sliderIndex]
-                        .MaxValue)
+                    if (_pairedSliders[sliderIndex].Value < _pairedSliders[sliderIndex].MaxValue)
                     {
                         updateSinceLastCycle = true;
 
-                        _pairedSliders[sliderIndex]
-                            .InternalSetValue
-                            (
-                                _pairedSliders[sliderIndex]
-                                    .Value + d
-                            );
+                        _pairedSliders[sliderIndex].InternalSetValue(_pairedSliders[sliderIndex].Value + d);
 
                         points--;
                     }
                 }
                 else
                 {
-                    if (_pairedSliders[sliderIndex]
-                        .Value > _pairedSliders[sliderIndex]
-                        .MinValue)
+                    if (_pairedSliders[sliderIndex].Value > _pairedSliders[sliderIndex].MinValue)
                     {
                         updateSinceLastCycle = true;
 
-                        _pairedSliders[sliderIndex]
-                            .InternalSetValue
-                            (
-                                _pairedSliders[sliderIndex]
-                                    ._value + d
-                            );
+                        _pairedSliders[sliderIndex].InternalSetValue(_pairedSliders[sliderIndex]._value + d);
 
                         points--;
                     }

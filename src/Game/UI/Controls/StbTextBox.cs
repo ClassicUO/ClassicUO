@@ -21,7 +21,16 @@ namespace ClassicUO.Game.UI.Controls
         private readonly int _maxCharCount = -1;
 
 
-        public StbTextBox(byte font, int max_char_count = -1, int maxWidth = 0, bool isunicode = true, FontStyle style = FontStyle.None, ushort hue = 0, TEXT_ALIGN_TYPE align = 0)
+        public StbTextBox
+        (
+            byte font,
+            int max_char_count = -1,
+            int maxWidth = 0,
+            bool isunicode = true,
+            FontStyle style = FontStyle.None,
+            ushort hue = 0,
+            TEXT_ALIGN_TYPE align = 0
+        )
         {
             AcceptKeyboardInput = true;
             AcceptMouseInput = true;
@@ -49,12 +58,21 @@ namespace ClassicUO.Game.UI.Controls
             style &= ~( /*FontStyle.Fixed | */FontStyle.Cropped | FontStyle.CropTexture);
 
             _rendererText = RenderedText.Create(string.Empty, hue, font, isunicode, style, align, maxWidth);
-            _rendererCaret = RenderedText.Create("_", hue, font, isunicode, (style & FontStyle.BlackBorder) != 0 ? FontStyle.BlackBorder : FontStyle.None, align);
+
+            _rendererCaret = RenderedText.Create
+            (
+                "_", hue, font, isunicode,
+                (style & FontStyle.BlackBorder) != 0 ? FontStyle.BlackBorder : FontStyle.None, align
+            );
 
             Height = _rendererCaret.Height;
         }
 
-        public StbTextBox(List<string> parts, string[] lines) : this(1, parts[0] == "textentrylimited" ? int.Parse(parts[8]) : byte.MaxValue, int.Parse(parts[3]), style: FontStyle.BlackBorder | FontStyle.CropTexture, hue: (ushort) (UInt16Converter.Parse(parts[5]) + 1))
+        public StbTextBox(List<string> parts, string[] lines) : this
+        (
+            1, parts[0] == "textentrylimited" ? int.Parse(parts[8]) : byte.MaxValue, int.Parse(parts[3]),
+            style: FontStyle.BlackBorder | FontStyle.CropTexture, hue: (ushort) (UInt16Converter.Parse(parts[5]) + 1)
+        )
         {
             X = int.Parse(parts[1]);
             Y = int.Parse(parts[2]);
@@ -232,10 +250,18 @@ namespace ClassicUO.Game.UI.Controls
         {
             if (IsUnicode)
             {
-                return FontsLoader.Instance.GetInfoUnicode(_rendererText.Font, text, text.Length, _rendererText.Align, (ushort) _rendererText.FontStyle, _rendererText.MaxWidth, countret);
+                return FontsLoader.Instance.GetInfoUnicode
+                (
+                    _rendererText.Font, text, text.Length, _rendererText.Align, (ushort) _rendererText.FontStyle,
+                    _rendererText.MaxWidth, countret
+                );
             }
 
-            return FontsLoader.Instance.GetInfoASCII(_rendererText.Font, text, text.Length, _rendererText.Align, (ushort) _rendererText.FontStyle, _rendererText.MaxWidth, countret);
+            return FontsLoader.Instance.GetInfoASCII
+            (
+                _rendererText.Font, text, text.Length, _rendererText.Align, (ushort) _rendererText.FontStyle,
+                _rendererText.MaxWidth, countret
+            );
         }
 
         public void SelectAll()
@@ -269,7 +295,8 @@ namespace ClassicUO.Game.UI.Controls
 
         private void Sanitize(ref string text)
         {
-            if ((_fontStyle & FontStyle.Fixed) != 0 || (_fontStyle & FontStyle.Cropped) != 0 || (_fontStyle & FontStyle.CropTexture) != 0)
+            if ((_fontStyle & FontStyle.Fixed) != 0 || (_fontStyle & FontStyle.Cropped) != 0 ||
+                (_fontStyle & FontStyle.CropTexture) != 0)
             {
                 if (_rendererText.MaxWidth == 0)
                 {
@@ -284,9 +311,9 @@ namespace ClassicUO.Game.UI.Controls
                 }
 
 
-                int realWidth = _rendererText.IsUnicode
-                    ? FontsLoader.Instance.GetWidthUnicode(_rendererText.Font, text)
-                    : FontsLoader.Instance.GetWidthASCII(_rendererText.Font, text);
+                int realWidth = _rendererText.IsUnicode ?
+                    FontsLoader.Instance.GetWidthUnicode(_rendererText.Font, text) :
+                    FontsLoader.Instance.GetWidthASCII(_rendererText.Font, text);
 
                 if (realWidth > _rendererText.MaxWidth)
                 {
@@ -627,14 +654,16 @@ namespace ClassicUO.Game.UI.Controls
                         {
                             Parent?.OnKeyboardReturn(0, Text);
 
-                            if (UIManager.SystemChat != null && UIManager.SystemChat.TextBoxControl != null && IsFocused)
+                            if (UIManager.SystemChat != null && UIManager.SystemChat.TextBoxControl != null &&
+                                IsFocused)
                             {
                                 if (!IsFromServer || !UIManager.SystemChat.TextBoxControl.IsVisible)
                                 {
                                     OnFocusLost();
                                     OnFocusEnter();
                                 }
-                                else if (UIManager.KeyboardFocusControl == null || UIManager.KeyboardFocusControl != UIManager.SystemChat.TextBoxControl)
+                                else if (UIManager.KeyboardFocusControl == null || UIManager.KeyboardFocusControl !=
+                                    UIManager.SystemChat.TextBoxControl)
                                 {
                                     UIManager.SystemChat.TextBoxControl.SetKeyboardFocus();
                                 }
@@ -830,11 +859,7 @@ namespace ClassicUO.Game.UI.Controls
 
                         for (int i = 0; i < startSelectionIndex; i++)
                         {
-                            drawX += _rendererText.GetCharWidth
-                            (
-                                info.Data[i]
-                                    .Item
-                            );
+                            drawX += _rendererText.GetCharWidth(info.Data[i].Item);
                         }
 
                         // selection is gone. Bye bye
@@ -847,21 +872,13 @@ namespace ClassicUO.Game.UI.Controls
                             // calculate width 
                             for (int k = 0; k < count; k++)
                             {
-                                endX += _rendererText.GetCharWidth
-                                (
-                                    info.Data[startSelectionIndex + k]
-                                        .Item
-                                );
+                                endX += _rendererText.GetCharWidth(info.Data[startSelectionIndex + k].Item);
                             }
 
                             batcher.Draw2D
                             (
-                                Texture2DCache.GetTexture(SELECTION_COLOR),
-                                x + drawX,
-                                y + drawY,
-                                endX,
-                                info.MaxHeight + 1,
-                                ref _hueVector
+                                Texture2DCache.GetTexture(SELECTION_COLOR), x + drawX, y + drawY, endX,
+                                info.MaxHeight + 1, ref _hueVector
                             );
 
                             break;
@@ -871,12 +888,8 @@ namespace ClassicUO.Game.UI.Controls
                         // do the whole line
                         batcher.Draw2D
                         (
-                            Texture2DCache.GetTexture(SELECTION_COLOR),
-                            x + drawX,
-                            y + drawY,
-                            info.Width - drawX,
-                            info.MaxHeight + 1,
-                            ref _hueVector
+                            Texture2DCache.GetTexture(SELECTION_COLOR), x + drawX, y + drawY, info.Width - drawX,
+                            info.MaxHeight + 1, ref _hueVector
                         );
 
                         // first selection is gone. M

@@ -137,8 +137,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         public void RemoveBuff(BuffIconType type)
         {
-            foreach (BuffControlEntry entry in Children.OfType<BuffControlEntry>()
-                                                       .Where(s => s.Icon.Type == type))
+            foreach (BuffControlEntry entry in Children.OfType<BuffControlEntry>().Where(s => s.Icon.Type == type))
             {
                 if (Height > _background.Height)
                 {
@@ -376,7 +375,9 @@ namespace ClassicUO.Game.UI.Gumps
                 _alpha = 0xFF;
                 _decreaseAlpha = true;
                 _timer = (uint) (icon.Timer <= 0 ? 0xFFFF_FFFF : Time.Ticks + icon.Timer * 1000);
-                _gText = RenderedText.Create("", 0xFFFF, 2, true, FontStyle.Fixed | FontStyle.BlackBorder, TEXT_ALIGN_TYPE.TS_CENTER, Width);
+
+                _gText = RenderedText.Create
+                    ("", 0xFFFF, 2, true, FontStyle.Fixed | FontStyle.BlackBorder, TEXT_ALIGN_TYPE.TS_CENTER, Width);
 
 
                 AcceptMouseInput = true;

@@ -77,8 +77,7 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     Point n = ResizeGameWindow(_lastSize);
 
-                    UIManager.GetGump<OptionsGump>()
-                             ?.UpdateVideo();
+                    UIManager.GetGump<OptionsGump>()?.UpdateVideo();
 
                     if (Client.Version >= ClientVersion.CV_200)
                     {
@@ -94,13 +93,10 @@ namespace ClassicUO.Game.UI.Gumps
             Height = _worldHeight + BORDER_WIDTH * 2;
             _borderControl = new BorderControl(0, 0, Width, Height, 4);
 
-            _borderControl.DragEnd += (sender, e) =>
-            {
-                UIManager.GetGump<OptionsGump>()
-                         ?.UpdateVideo();
-            };
+            _borderControl.DragEnd += (sender, e) => { UIManager.GetGump<OptionsGump>()?.UpdateVideo(); };
 
-            UIManager.SystemChat = _systemChatControl = new SystemChatControl(BORDER_WIDTH, BORDER_WIDTH, _worldWidth, _worldHeight);
+            UIManager.SystemChat = _systemChatControl = new SystemChatControl
+                (BORDER_WIDTH, BORDER_WIDTH, _worldWidth, _worldHeight);
 
             Add(_borderControl);
             Add(_button);
@@ -195,8 +191,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             ProfileManager.Current.GameWindowPosition = position;
 
-            UIManager.GetGump<OptionsGump>()
-                     ?.UpdateVideo();
+            UIManager.GetGump<OptionsGump>()?.UpdateVideo();
 
             UpdateGameWindowPos();
         }
@@ -265,13 +260,10 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override bool Contains(int x, int y)
         {
-            if (x >= BORDER_WIDTH &&
-                x < Width - BORDER_WIDTH * 2 &&
-                y >= BORDER_WIDTH &&
-                y < Height - BORDER_WIDTH * 2 - (_systemChatControl?.TextBoxControl != null &&
-                                                 _systemChatControl.IsActive
-                    ? _systemChatControl.TextBoxControl.Height
-                    : 0))
+            if (x >= BORDER_WIDTH && x < Width - BORDER_WIDTH * 2 && y >= BORDER_WIDTH && y < Height -
+                BORDER_WIDTH * 2 - (_systemChatControl?.TextBoxControl != null && _systemChatControl.IsActive ?
+                    _systemChatControl.TextBoxControl.Height :
+                    0))
             {
                 return false;
             }
@@ -330,8 +322,8 @@ namespace ClassicUO.Game.UI.Gumps
             //dx
             batcher.Draw2DTiled
             (
-                _borders[1], x + Width - _borderSize, y + (_borders[1]
-                    .Width >> 1), _borderSize, Height - _borderSize, ref _hueVector
+                _borders[1], x + Width - _borderSize, y + (_borders[1].Width >> 1), _borderSize, Height - _borderSize,
+                ref _hueVector
             );
 
             return base.Draw(batcher, x, y);

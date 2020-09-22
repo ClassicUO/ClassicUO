@@ -34,7 +34,20 @@ namespace ClassicUO.Game.UI.Controls
         private float _timeUntilNextClick;
         private readonly Button _up, _down;
 
-        public ArrowNumbersTextBox(int x, int y, int width, int raiseamount, int minvalue, int maxvalue, byte font = 0, int maxcharlength = -1, bool isunicode = true, FontStyle style = FontStyle.None, ushort hue = 0)
+        public ArrowNumbersTextBox
+        (
+            int x,
+            int y,
+            int width,
+            int raiseamount,
+            int minvalue,
+            int maxvalue,
+            byte font = 0,
+            int maxcharlength = -1,
+            bool isunicode = true,
+            FontStyle style = FontStyle.None,
+            ushort hue = 0
+        )
         {
             int height = 20;
             X = x;

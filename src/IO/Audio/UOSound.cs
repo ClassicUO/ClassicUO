@@ -29,8 +29,7 @@ namespace ClassicUO.IO.Audio
     {
         private readonly byte[] _waveBuffer;
 
-        public UOSound(string name, int index, byte[] buffer)
-            : base(name, index)
+        public UOSound(string name, int index, byte[] buffer) : base(name, index)
         {
             _waveBuffer = buffer;
             Delay = (uint) ((buffer.Length - 32) / 88.2f);

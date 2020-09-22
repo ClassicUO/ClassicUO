@@ -169,7 +169,7 @@ namespace ClassicUO.Game.UI.Gumps
                     );
 
                     _mobilesIndicator = new Texture2D(batcher.GraphicsDevice, 1, 1);
-                    _mobilesIndicator.SetData(new[] {Color.White});
+                    _mobilesIndicator.SetData(new[] { Color.White });
                 }
 
                 int w = Width >> 1;
@@ -312,11 +312,9 @@ namespace ClassicUO.Game.UI.Gumps
                             int gx = px - py;
                             int gy = px + py;
 
-                            int color = mb.Cells[x, y]
-                                          .Graphic;
+                            int color = mb.Cells[x, y].Graphic;
 
-                            bool island = mb.Cells[x, y]
-                                            .IsLand;
+                            bool island = mb.Cells[x, y].IsLand;
 
                             if (block != null)
                             {
@@ -355,7 +353,10 @@ namespace ClassicUO.Game.UI.Gumps
 
                             if (island && color > 0x4000)
                             {
-                                color = HuesLoader.Instance.GetColor16(16384, (ushort) (color - 0x4000)); //28672 is an arbitrary position in hues.mul, is the 14 position in the range
+                                color = HuesLoader.Instance.GetColor16
+                                (
+                                    16384, (ushort) (color - 0x4000)
+                                ); //28672 is an arbitrary position in hues.mul, is the 14 position in the range
                             }
                             else
                             {
@@ -372,18 +373,26 @@ namespace ClassicUO.Game.UI.Gumps
             _mapTexture.PushData(data);
         }
 
-        private void CreatePixels(uint[] data, int color, int x, int y, int w, int h, Point[] table, int count)
+        private void CreatePixels
+        (
+            uint[] data,
+            int color,
+            int x,
+            int y,
+            int w,
+            int h,
+            Point[] table,
+            int count
+        )
         {
             int px = x;
             int py = y;
 
             for (int i = 0; i < count; i++)
             {
-                px += table[i]
-                    .X;
+                px += table[i].X;
 
-                py += table[i]
-                    .Y;
+                py += table[i].Y;
 
                 int gx = px;
 

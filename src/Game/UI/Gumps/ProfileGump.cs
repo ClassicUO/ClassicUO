@@ -40,7 +40,8 @@ namespace ClassicUO.Game.UI.Gumps
         private readonly ScrollArea _scrollArea;
         private readonly StbTextBox _textBox;
 
-        public ProfileGump(uint serial, string header, string footer, string body, bool canEdit) : base(serial == World.Player.Serial ? serial = Constants.PROFILE_LOCALSERIAL : serial, serial)
+        public ProfileGump(uint serial, string header, string footer, string body, bool canEdit) : base
+            (serial == World.Player.Serial ? serial = Constants.PROFILE_LOCALSERIAL : serial, serial)
         {
             Height = 300 + _diffY;
             CanMove = true;
@@ -150,7 +151,8 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void _textBox_TextChanged(object sender, EventArgs e)
         {
-            _textBox.Height = Math.Max(FontsLoader.Instance.GetHeightUnicode(1, _textBox.Text, 220, TEXT_ALIGN_TYPE.TS_LEFT, 0x0) + 5, 20);
+            _textBox.Height = Math.Max
+                (FontsLoader.Instance.GetHeightUnicode(1, _textBox.Text, 220, TEXT_ALIGN_TYPE.TS_LEFT, 0x0) + 5, 20);
         }
 
 
@@ -177,7 +179,8 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override void Dispose()
         {
-            if (_originalText != _textBox.Text && World.Player != null && !World.Player.IsDestroyed && !NetClient.Socket.IsDisposed && NetClient.Socket.IsConnected)
+            if (_originalText != _textBox.Text && World.Player != null && !World.Player.IsDestroyed &&
+                !NetClient.Socket.IsDisposed && NetClient.Socket.IsConnected)
             {
                 NetClient.Socket.Send(new PProfileUpdate(World.Player.Serial, _textBox.Text));
             }

@@ -43,24 +43,22 @@ namespace ClassicUO.IO.Audio.MP3Sharp
         /// <summary>
         ///     Creates a new stream instance using the provided filename, and the default chunk size of 4096 bytes.
         /// </summary>
-        public MP3Stream(string fileName)
-            : this(new FileStream(fileName, FileMode.Open, FileAccess.Read))
+        public MP3Stream(string fileName) : this(new FileStream(fileName, FileMode.Open, FileAccess.Read))
         {
         }
 
         /// <summary>
         ///     Creates a new stream instance using the provided filename and chunk size.
         /// </summary>
-        public MP3Stream(string fileName, int chunkSize)
-            : this(new FileStream(fileName, FileMode.Open, FileAccess.Read), chunkSize)
+        public MP3Stream(string fileName, int chunkSize) : this
+            (new FileStream(fileName, FileMode.Open, FileAccess.Read), chunkSize)
         {
         }
 
         /// <summary>
         ///     Creates a new stream instance using the provided stream as a source, and the default chunk size of 4096 bytes.
         /// </summary>
-        public MP3Stream(Stream sourceStream)
-            : this(sourceStream, 4096)
+        public MP3Stream(Stream sourceStream) : this(sourceStream, 4096)
         {
         }
 
@@ -239,12 +237,7 @@ namespace ClassicUO.IO.Audio.MP3Sharp
                 }
 
                 // Copy as much as we can from the current buffer:
-                bytesRead += m_Buffer.Read
-                (
-                    buffer,
-                    offset + bytesRead,
-                    count - bytesRead
-                );
+                bytesRead += m_Buffer.Read(buffer, offset + bytesRead, count - bytesRead);
 
                 if (bytesRead >= count)
                 {

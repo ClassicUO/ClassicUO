@@ -31,19 +31,18 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding.Decoders.LayerII
         /// <summary>
         ///     Constructor
         /// </summary>
-        public SubbandLayer2Stereo(int subbandnumber)
-            : base(subbandnumber)
+        public SubbandLayer2Stereo(int subbandnumber) : base(subbandnumber)
         {
             channel2_samples = new float[3];
         }
 
         protected internal int channel2_allocation;
-        protected internal float[] channel2_c = {0};
+        protected internal float[] channel2_c = { 0 };
         //protected boolean channel2_grouping;  ???? Never used!
-        protected internal int[] channel2_codelength = {0};
-        protected internal float[] channel2_d = {0};
+        protected internal int[] channel2_codelength = { 0 };
+        protected internal float[] channel2_d = { 0 };
         //protected float[][] channel2_groupingtable = {{0},{0}};
-        protected internal float[] channel2_factor = {0};
+        protected internal float[] channel2_factor = { 0 };
         protected internal float[] channel2_samples;
         protected internal float channel2_scalefactor1, channel2_scalefactor2, channel2_scalefactor3;
         protected internal int channel2_scfsi;
@@ -116,8 +115,8 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding.Decoders.LayerII
 
                     case 2:
 
-                        channel2_scalefactor1 =
-                            channel2_scalefactor2 = channel2_scalefactor3 = ScaleFactors[stream.GetBitsFromBuffer(6)];
+                        channel2_scalefactor1 = channel2_scalefactor2 =
+                            channel2_scalefactor3 = ScaleFactors[stream.GetBitsFromBuffer(6)];
 
                         break;
 
@@ -129,10 +128,7 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding.Decoders.LayerII
                 }
 
                 prepare_sample_reading
-                (
-                    header, channel2_allocation, 1, channel2_factor, channel2_codelength,
-                    channel2_c, channel2_d
-                );
+                    (header, channel2_allocation, 1, channel2_factor, channel2_codelength, channel2_c, channel2_d);
             }
         }
 

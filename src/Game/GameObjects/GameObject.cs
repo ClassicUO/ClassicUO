@@ -104,8 +104,7 @@ namespace ClassicUO.Game.GameObjects
 
                 if (!IsDestroyed)
                 {
-                    World.Map.GetChunk(x, y)
-                         ?.AddGameObject(this, x % 8, y % 8);
+                    World.Map.GetChunk(x, y)?.AddGameObject(this, x % 8, y % 8);
                 }
             }
         }
@@ -160,7 +159,8 @@ namespace ClassicUO.Game.GameObjects
 
         public void AddMessage(MessageType type, string message, TEXT_TYPE text_type)
         {
-            AddMessage(type, message, ProfileManager.Current.ChatFont, ProfileManager.Current.SpeechHue, true, text_type);
+            AddMessage
+                (type, message, ProfileManager.Current.ChatFont, ProfileManager.Current.SpeechHue, true, text_type);
         }
 
         public virtual void UpdateTextCoordsV()
@@ -234,7 +234,8 @@ namespace ClassicUO.Game.GameObjects
 
             for (TextObject item = (TextObject) TextContainer.Items; item != null; item = (TextObject) item.Next)
             {
-                if (item.RenderedText == null || item.RenderedText.IsDestroyed || item.RenderedText.Texture == null || item.Time < Time.Ticks)
+                if (item.RenderedText == null || item.RenderedText.IsDestroyed || item.RenderedText.Texture == null ||
+                    item.Time < Time.Ticks)
                 {
                     continue;
                 }
@@ -272,7 +273,15 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
-        public void AddMessage(MessageType type, string text, byte font, ushort hue, bool isunicode, TEXT_TYPE text_type)
+        public void AddMessage
+        (
+            MessageType type,
+            string text,
+            byte font,
+            ushort hue,
+            bool isunicode,
+            TEXT_TYPE text_type
+        )
         {
             if (string.IsNullOrEmpty(text))
             {

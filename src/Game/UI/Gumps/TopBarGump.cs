@@ -84,22 +84,27 @@ namespace ClassicUO.Game.UI.Gumps
 
             int[][] textTable =
             {
-                new[] {0, (int) Buttons.Map},
-                new[] {1, (int) Buttons.Paperdoll},
-                new[] {1, (int) Buttons.Inventory},
-                new[] {1, (int) Buttons.Journal},
-                new[] {0, (int) Buttons.Chat},
-                new[] {0, (int) Buttons.Help},
-                new[] {1, (int) Buttons.WorldMap},
-                new[] {0, (int) Buttons.Info},
-                new[] {0, (int) Buttons.Debug},
-                new[] {1, (int) Buttons.NetStats},
+                new[] { 0, (int) Buttons.Map },
+                new[] { 1, (int) Buttons.Paperdoll },
+                new[] { 1, (int) Buttons.Inventory },
+                new[] { 1, (int) Buttons.Journal },
+                new[] { 0, (int) Buttons.Chat },
+                new[] { 0, (int) Buttons.Help },
+                new[] { 1, (int) Buttons.WorldMap },
+                new[] { 0, (int) Buttons.Info },
+                new[] { 0, (int) Buttons.Debug },
+                new[] { 1, (int) Buttons.NetStats },
 
-                new[] {1, (int) Buttons.UOStore},
-                new[] {1, (int) Buttons.GlobalChat}
+                new[] { 1, (int) Buttons.UOStore },
+                new[] { 1, (int) Buttons.GlobalChat }
             };
 
-            string[] texts = {ResGumps.Map, ResGumps.Paperdoll, ResGumps.Inventory, ResGumps.Journal, ResGumps.Chat, ResGumps.Help, ResGumps.WorldMap, ResGumps.Info, ResGumps.Debug, ResGumps.NetStats, ResGumps.UOStore, ResGumps.GlobalChat};
+            string[] texts =
+            {
+                ResGumps.Map, ResGumps.Paperdoll, ResGumps.Inventory, ResGumps.Journal, ResGumps.Chat, ResGumps.Help,
+                ResGumps.WorldMap, ResGumps.Info, ResGumps.Debug, ResGumps.NetStats, ResGumps.UOStore,
+                ResGumps.GlobalChat
+            };
 
             bool hasUOStore = Client.Version >= ClientVersion.CV_706400;
 
@@ -270,11 +275,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                     if (journalGump == null)
                     {
-                        UIManager.Add
-                        (
-                            new JournalGump
-                                {X = 64, Y = 64}
-                        );
+                        UIManager.Add(new JournalGump { X = 64, Y = 64 });
                     }
                     else
                     {
@@ -405,7 +406,18 @@ namespace ClassicUO.Game.UI.Gumps
 
         private class RighClickableButton : Button
         {
-            public RighClickableButton(int buttonID, ushort normal, ushort pressed, ushort over = 0, string caption = "", byte font = 0, bool isunicode = true, ushort normalHue = ushort.MaxValue, ushort hoverHue = ushort.MaxValue) : base(buttonID, normal, pressed, over, caption, font, isunicode, normalHue, hoverHue)
+            public RighClickableButton
+            (
+                int buttonID,
+                ushort normal,
+                ushort pressed,
+                ushort over = 0,
+                string caption = "",
+                byte font = 0,
+                bool isunicode = true,
+                ushort normalHue = ushort.MaxValue,
+                ushort hoverHue = ushort.MaxValue
+            ) : base(buttonID, normal, pressed, over, caption, font, isunicode, normalHue, hoverHue)
             {
             }
 

@@ -41,7 +41,21 @@ namespace ClassicUO.Game.GameObjects
             Load();
         }
 
-        public MovingEffect(uint src, uint trg, int xSource, int ySource, int zSource, int xTarget, int yTarget, int zTarget, ushort graphic, ushort hue, bool fixedDir, byte speed) : this(graphic, hue)
+        public MovingEffect
+        (
+            uint src,
+            uint trg,
+            int xSource,
+            int ySource,
+            int zSource,
+            int xTarget,
+            int yTarget,
+            int zTarget,
+            ushort graphic,
+            ushort hue,
+            bool fixedDir,
+            byte speed
+        ) : this(graphic, hue)
         {
             FixedDir = fixedDir;
 
@@ -91,8 +105,11 @@ namespace ClassicUO.Game.GameObjects
             int playerY = World.Player.Y;
             int playerZ = World.Player.Z;
 
-            int screenCenterX = ProfileManager.Current.GameWindowPosition.X + (ProfileManager.Current.GameWindowSize.X >> 1);
-            int screenCenterY = ProfileManager.Current.GameWindowPosition.Y + (ProfileManager.Current.GameWindowSize.Y >> 1);
+            int screenCenterX = ProfileManager.Current.GameWindowPosition.X +
+                                (ProfileManager.Current.GameWindowSize.X >> 1);
+
+            int screenCenterY = ProfileManager.Current.GameWindowPosition.Y +
+                                (ProfileManager.Current.GameWindowSize.Y >> 1);
 
 
             (int sX, int sY, int sZ) = GetSource();
@@ -113,7 +130,8 @@ namespace ClassicUO.Game.GameObjects
             int screenTargetY = screenCenterY + (offsetTargetX + offsetTargetY) * 22 - offsetTargetZ * 4;
 
 
-            _distance = (int) Math.Sqrt(Math.Pow(screenSourceX - screenTargetX, 2) + Math.Pow(screenSourceY - screenTargetY, 2));
+            _distance = (int) Math.Sqrt
+                (Math.Pow(screenSourceX - screenTargetX, 2) + Math.Pow(screenSourceY - screenTargetY, 2));
 
             //_velocity.X = (screenTargetX - screenSourceX) * (MovingDelay / (float) _distance);
             //_velocity.Y = (screenTargetY - screenSourceY) * (MovingDelay / (float) _distance);
@@ -150,8 +168,11 @@ namespace ClassicUO.Game.GameObjects
             int playerY = World.Player.Y;
             int playerZ = World.Player.Z;
 
-            int screenCenterX = ProfileManager.Current.GameWindowPosition.X + (ProfileManager.Current.GameWindowSize.X >> 1);
-            int screenCenterY = ProfileManager.Current.GameWindowPosition.Y + (ProfileManager.Current.GameWindowSize.Y >> 1);
+            int screenCenterX = ProfileManager.Current.GameWindowPosition.X +
+                                (ProfileManager.Current.GameWindowSize.X >> 1);
+
+            int screenCenterY = ProfileManager.Current.GameWindowPosition.Y +
+                                (ProfileManager.Current.GameWindowSize.Y >> 1);
 
 
             (int sX, int sY, int sZ) = GetSource();
@@ -281,7 +302,8 @@ namespace ClassicUO.Game.GameObjects
             IsPositionChanged = true;
 
 
-            int distanceNow = (int) Math.Sqrt(Math.Pow(startX - screenTargetX, 2) + Math.Pow(startY - screenTargetY, 2));
+            int distanceNow = (int) Math.Sqrt
+                (Math.Pow(startX - screenTargetX, 2) + Math.Pow(startY - screenTargetY, 2));
 
             if (distanceNow <= _distance)
             {

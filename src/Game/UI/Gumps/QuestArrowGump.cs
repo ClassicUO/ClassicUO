@@ -122,8 +122,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                     break;
 
-                case Direction.West:
-                    break;
+                case Direction.West: break;
 
                 case Direction.Right:
                     x -= _arrow.Width;
@@ -162,9 +161,11 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 x = ProfileManager.Current.GameWindowPosition.X;
             }
-            else if (x > ProfileManager.Current.GameWindowPosition.X + ProfileManager.Current.GameWindowSize.X - _arrow.Width)
+            else if (x > ProfileManager.Current.GameWindowPosition.X + ProfileManager.Current.GameWindowSize.X -
+                _arrow.Width)
             {
-                x = ProfileManager.Current.GameWindowPosition.X + ProfileManager.Current.GameWindowSize.X - _arrow.Width;
+                x = ProfileManager.Current.GameWindowPosition.X + ProfileManager.Current.GameWindowSize.X -
+                    _arrow.Width;
             }
 
 
@@ -172,9 +173,11 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 y = ProfileManager.Current.GameWindowPosition.Y;
             }
-            else if (y > ProfileManager.Current.GameWindowPosition.Y + ProfileManager.Current.GameWindowSize.Y - _arrow.Height)
+            else if (y > ProfileManager.Current.GameWindowPosition.Y + ProfileManager.Current.GameWindowSize.Y -
+                _arrow.Height)
             {
-                y = ProfileManager.Current.GameWindowPosition.Y + ProfileManager.Current.GameWindowSize.Y - _arrow.Height;
+                y = ProfileManager.Current.GameWindowPosition.Y + ProfileManager.Current.GameWindowSize.Y -
+                    _arrow.Height;
             }
 
             X = x;

@@ -33,12 +33,12 @@ namespace ClassicUO.IO.Resources
         private static LightsLoader _instance;
         private UOFileMul _file;
 
-        private LightsLoader(int count)
-            : base(count)
+        private LightsLoader(int count) : base(count)
         {
         }
 
-        public static LightsLoader Instance => _instance ?? (_instance = new LightsLoader(Constants.MAX_LIGHTS_DATA_INDEX_COUNT));
+        public static LightsLoader Instance =>
+            _instance ?? (_instance = new LightsLoader(Constants.MAX_LIGHTS_DATA_INDEX_COUNT));
 
         public override Task Load()
         {

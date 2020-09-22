@@ -69,7 +69,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 }
 
                 //UO Flag
-                Add(new GumpPic(0, 4, 0x15A0, 0) {AcceptKeyboardInput = false});
+                Add(new GumpPic(0, 4, 0x15A0, 0) { AcceptKeyboardInput = false });
 
                 // Quit Button
                 Add
@@ -324,9 +324,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
             (
                 new HtmlControl
                 (
-                    htmlX, htmlY, 150, 15,
-                    false, false,
-                    false,
+                    htmlX, htmlY, 150, 15, false, false, false,
                     "<body link=\"#ad9413\" vlink=\"#00FF00\" ><a href=\"https://www.paypal.me/muskara\">Click to donate PayPal",
                     0x32, true, isunicode: true, style: FontStyle.BlackBorder
                 )
@@ -336,9 +334,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
             (
                 new HtmlControl
                 (
-                    htmlX, htmlY + 20, 150, 15,
-                    false, false,
-                    false,
+                    htmlX, htmlY + 20, 150, 15, false, false, false,
                     "<body link=\"#ad9413\" vlink=\"#00FF00\" ><a href=\"https://www.patreon.com/classicuo\">Become a Patreon!",
                     0x32, true, isunicode: true, style: FontStyle.BlackBorder
                 )
@@ -349,11 +345,9 @@ namespace ClassicUO.Game.UI.Gumps.Login
             (
                 new HtmlControl
                 (
-                    505, htmlY, 100, 15,
-                    false, false,
-                    false,
-                    "<body link=\"#ad9413\" vlink=\"#00FF00\" ><a href=\"https://www.classicuo.eu\">Website",
-                    0x32, true, isunicode: true, style: FontStyle.BlackBorder
+                    505, htmlY, 100, 15, false, false, false,
+                    "<body link=\"#ad9413\" vlink=\"#00FF00\" ><a href=\"https://www.classicuo.eu\">Website", 0x32,
+                    true, isunicode: true, style: FontStyle.BlackBorder
                 )
             );
 
@@ -361,9 +355,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
             (
                 new HtmlControl
                 (
-                    505, htmlY + 19, 100, 15,
-                    false, false,
-                    false,
+                    505, htmlY + 19, 100, 15, false, false, false,
                     "<body link=\"#ad9413\" vlink=\"#00FF00\" ><a href=\"https://discord.gg/VdyCpjQ\">Join Discord",
                     0x32, true, isunicode: true, style: FontStyle.BlackBorder
                 )
@@ -379,7 +371,12 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
             Add(loginmusic_checkbox);
 
-            HSliderBar login_music = new HSliderBar(loginmusic_checkbox.X + loginmusic_checkbox.Width + 10, loginmusic_checkbox.Y + 4, 80, 0, 100, Settings.GlobalSettings.LoginMusicVolume, HSliderBarStyle.MetalWidgetRecessedBar, true, font, hue, false);
+            HSliderBar login_music = new HSliderBar
+            (
+                loginmusic_checkbox.X + loginmusic_checkbox.Width + 10, loginmusic_checkbox.Y + 4, 80, 0, 100,
+                Settings.GlobalSettings.LoginMusicVolume, HSliderBarStyle.MetalWidgetRecessedBar, true, font, hue, false
+            );
+
             Add(login_music);
             login_music.IsVisible = Settings.GlobalSettings.LoginMusic;
 
@@ -437,7 +434,9 @@ namespace ClassicUO.Game.UI.Gumps.Login
             if (_time < totalMS)
             {
                 _time = (float) totalMS + 1000;
-                _nextArrow0.ButtonGraphicNormal = _nextArrow0.ButtonGraphicNormal == _buttonNormal ? _buttonOver : _buttonNormal;
+
+                _nextArrow0.ButtonGraphicNormal =
+                    _nextArrow0.ButtonGraphicNormal == _buttonNormal ? _buttonOver : _buttonNormal;
             }
 
             if (_passwordFake.HasKeyboardFocus)
@@ -474,8 +473,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
                     if (!_textboxAccount.IsDisposed)
                     {
-                        Client.Game.GetScene<LoginScene>()
-                              .Connect(_textboxAccount.Text, _passwordFake.RealText);
+                        Client.Game.GetScene<LoginScene>().Connect(_textboxAccount.Text, _passwordFake.RealText);
                     }
 
                     break;
@@ -494,10 +492,25 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
             private readonly RenderedText _rendererText;
 
-            public PasswordStbTextBox(byte font, int max_char_count = -1, int maxWidth = 0, bool isunicode = true, FontStyle style = FontStyle.None, ushort hue = 0, TEXT_ALIGN_TYPE align = TEXT_ALIGN_TYPE.TS_LEFT) : base(font, max_char_count, maxWidth, isunicode, style, hue, align)
+            public PasswordStbTextBox
+            (
+                byte font,
+                int max_char_count = -1,
+                int maxWidth = 0,
+                bool isunicode = true,
+                FontStyle style = FontStyle.None,
+                ushort hue = 0,
+                TEXT_ALIGN_TYPE align = TEXT_ALIGN_TYPE.TS_LEFT
+            ) : base(font, max_char_count, maxWidth, isunicode, style, hue, align)
             {
                 _rendererText = RenderedText.Create(string.Empty, hue, font, isunicode, style, align, maxWidth);
-                _rendererCaret = RenderedText.Create("_", hue, font, isunicode, (style & FontStyle.BlackBorder) != 0 ? FontStyle.BlackBorder : FontStyle.None, align);
+
+                _rendererCaret = RenderedText.Create
+                (
+                    "_", hue, font, isunicode,
+                    (style & FontStyle.BlackBorder) != 0 ? FontStyle.BlackBorder : FontStyle.None, align
+                );
+
                 NoSelection = true;
             }
 

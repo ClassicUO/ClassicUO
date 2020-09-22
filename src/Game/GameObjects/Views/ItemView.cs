@@ -149,8 +149,7 @@ namespace ClassicUO.Game.GameObjects
 
             if (ItemData.IsLight)
             {
-                Client.Game.GetScene<GameScene>()
-                      .AddLight(this, this, posX + 22, posY + 22);
+                Client.Game.GetScene<GameScene>().AddLight(this, this, posX + 22, posY + 22);
             }
 
             if (!SerialHelper.IsValid(Serial) && IsMulti && TargetManager.TargetingState == CursorTarget.MultiPlacement)
@@ -201,12 +200,12 @@ namespace ClassicUO.Game.GameObjects
             AnimationsLoader.Instance.ConvertBodyIfNeeded(ref graphic);
             AnimationsLoader.Instance.AnimGroup = AnimationsLoader.Instance.GetDieGroupIndex(graphic, UsedLayer);
 
-            bool ishuman = MathHelper.InRange(Amount, 0x0190, 0x0193) ||
-                           MathHelper.InRange(Amount, 0x00B7, 0x00BA) ||
-                           MathHelper.InRange(Amount, 0x025D, 0x0260) ||
-                           MathHelper.InRange(Amount, 0x029A, 0x029B) ||
-                           MathHelper.InRange(Amount, 0x02B6, 0x02B7) ||
-                           Amount == 0x03DB || Amount == 0x03DF || Amount == 0x03E2 || Amount == 0x02E8 || Amount == 0x02E9;
+            bool ishuman = MathHelper.InRange(Amount, 0x0190, 0x0193) || MathHelper.InRange
+                               (Amount, 0x00B7, 0x00BA) || MathHelper.InRange
+                               (Amount, 0x025D, 0x0260) || MathHelper.InRange
+                               (Amount, 0x029A, 0x029B) || MathHelper.InRange
+                               (Amount, 0x02B6, 0x02B7) || Amount == 0x03DB || Amount == 0x03DF || Amount == 0x03E2 ||
+                           Amount == 0x02E8 || Amount == 0x02E9;
 
             DrawLayer(batcher, posX, posY, this, Layer.Invalid, animIndex, ishuman, Hue, IsFlipped, HueVector.Z);
 
@@ -219,7 +218,19 @@ namespace ClassicUO.Game.GameObjects
             return true;
         }
 
-        private static void DrawLayer(UltimaBatcher2D batcher, int posX, int posY, Item owner, Layer layer, byte animIndex, bool ishuman, ushort color, bool flipped, float alpha)
+        private static void DrawLayer
+        (
+            UltimaBatcher2D batcher,
+            int posX,
+            int posY,
+            Item owner,
+            Layer layer,
+            byte animIndex,
+            bool ishuman,
+            ushort color,
+            bool flipped,
+            float alpha
+        )
         {
             _equipConvData = null;
             bool ispartialhue = false;
@@ -242,7 +253,8 @@ namespace ClassicUO.Game.GameObjects
                 graphic = itemEquip.ItemData.AnimID;
                 ispartialhue = itemEquip.ItemData.IsPartialHue;
 
-                if (AnimationsLoader.Instance.EquipConversions.TryGetValue(graphic, out Dictionary<ushort, EquipConvData> map))
+                if (AnimationsLoader.Instance.EquipConversions.TryGetValue
+                    (graphic, out Dictionary<ushort, EquipConvData> map))
                 {
                     if (map.TryGetValue(graphic, out EquipConvData data))
                     {
@@ -261,9 +273,9 @@ namespace ClassicUO.Game.GameObjects
             byte animGroup = AnimationsLoader.Instance.AnimGroup;
             ushort newHue = 0;
 
-            AnimationGroup gr = layer == Layer.Invalid
-                ? AnimationsLoader.Instance.GetCorpseAnimationGroup(ref graphic, ref animGroup, ref newHue)
-                : AnimationsLoader.Instance.GetBodyAnimationGroup(ref graphic, ref animGroup, ref newHue);
+            AnimationGroup gr = layer == Layer.Invalid ?
+                AnimationsLoader.Instance.GetCorpseAnimationGroup(ref graphic, ref animGroup, ref newHue) :
+                AnimationsLoader.Instance.GetBodyAnimationGroup(ref graphic, ref animGroup, ref newHue);
 
             AnimationsLoader.Instance.AnimID = graphic;
 
@@ -279,7 +291,8 @@ namespace ClassicUO.Game.GameObjects
                 return;
             }
 
-            if ((direction.FrameCount == 0 || direction.Frames == null) && !AnimationsLoader.Instance.LoadDirectionGroup(ref direction))
+            if ((direction.FrameCount == 0 || direction.Frames == null) && !AnimationsLoader.Instance.LoadDirectionGroup
+                (ref direction))
             {
                 return;
             }
@@ -368,7 +381,13 @@ namespace ClassicUO.Game.GameObjects
                     return;
                 }
 
-                if (frame.Contains(flipped ? posX + frame.Width - SelectedObject.TranslatedMousePositionByViewport.X : SelectedObject.TranslatedMousePositionByViewport.X - posX, SelectedObject.TranslatedMousePositionByViewport.Y - posY))
+                if (frame.Contains
+                (
+                    flipped ?
+                        posX + frame.Width - SelectedObject.TranslatedMousePositionByViewport.X :
+                        SelectedObject.TranslatedMousePositionByViewport.X - posX,
+                    SelectedObject.TranslatedMousePositionByViewport.Y - posY
+                ))
                 {
                     SelectedObject.Object = owner;
                 }

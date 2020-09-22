@@ -76,8 +76,8 @@ namespace ClassicUO.Game.Managers
                 return true;
             }
 
-            if (TypeAllowed.HasFlag(NameOverheadTypeAllowed.Corpses) && SerialHelper.IsItem(serial.Serial) && World.Items.Get(serial)
-                                                                                                                   ?.IsCorpse == true)
+            if (TypeAllowed.HasFlag(NameOverheadTypeAllowed.Corpses) && SerialHelper.IsItem
+                (serial.Serial) && World.Items.Get(serial)?.IsCorpse == true)
             {
                 return true;
             }

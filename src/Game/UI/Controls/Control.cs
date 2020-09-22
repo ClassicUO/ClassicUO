@@ -424,7 +424,13 @@ namespace ClassicUO.Game.UI.Controls
             }
         }
 
-        internal event EventHandler<MouseEventArgs> MouseDown, MouseUp, MouseOver, MouseEnter, MouseExit, DragBegin, DragEnd;
+        internal event EventHandler<MouseEventArgs> MouseDown,
+                                                    MouseUp,
+                                                    MouseOver,
+                                                    MouseEnter,
+                                                    MouseExit,
+                                                    DragBegin,
+                                                    DragEnd;
 
         internal event EventHandler<MouseWheelEventArgs> MouseWheel;
 
@@ -547,15 +553,12 @@ namespace ClassicUO.Game.UI.Controls
 
         public T[] GetControls<T>() where T : Control
         {
-            return Children.OfType<T>()
-                           .Where(s => !s.IsDisposed)
-                           .ToArray();
+            return Children.OfType<T>().Where(s => !s.IsDisposed).ToArray();
         }
 
         public IEnumerable<T> FindControls<T>() where T : Control
         {
-            return Children.OfType<T>()
-                           .Where(s => !s.IsDisposed);
+            return Children.OfType<T>().Where(s => !s.IsDisposed);
         }
 
 
@@ -686,7 +689,8 @@ namespace ClassicUO.Game.UI.Controls
 
             Parent?.OnMouseUp(X + x, Y + y, button);
 
-            if (button == MouseButtonType.Right && !IsDisposed && !CanCloseWithRightClick && !Keyboard.Alt && !Keyboard.Shift && !Keyboard.Ctrl)
+            if (button == MouseButtonType.Right && !IsDisposed && !CanCloseWithRightClick && !Keyboard.Alt &&
+                !Keyboard.Shift && !Keyboard.Ctrl)
             {
                 ContextMenu?.Show();
             }
@@ -701,10 +705,11 @@ namespace ClassicUO.Game.UI.Controls
         {
             if (_mouseIsDown && !_attempToDrag)
             {
-                Point offset = Mouse.LButtonPressed ? Mouse.LDroppedOffset : Mouse.MButtonPressed ? Mouse.MDroppedOffset : Point.Zero;
+                Point offset = Mouse.LButtonPressed ? Mouse.LDroppedOffset :
+                    Mouse.MButtonPressed ? Mouse.MDroppedOffset : Point.Zero;
 
-                if (Math.Abs(offset.X) > Constants.MIN_GUMP_DRAG_DISTANCE
-                    || Math.Abs(offset.Y) > Constants.MIN_GUMP_DRAG_DISTANCE)
+                if (Math.Abs(offset.X) > Constants.MIN_GUMP_DRAG_DISTANCE ||
+                    Math.Abs(offset.Y) > Constants.MIN_GUMP_DRAG_DISTANCE)
 
                 {
                     InvokeDragBegin(new Point(x, y));
@@ -826,11 +831,9 @@ namespace ClassicUO.Game.UI.Controls
 
             for (int i = startIndex + 1; i < Children.Count; i++)
             {
-                if (Children[i]
-                    .AcceptKeyboardInput)
+                if (Children[i].AcceptKeyboardInput)
                 {
-                    Children[i]
-                        .SetKeyboardFocus();
+                    Children[i].SetKeyboardFocus();
 
                     return;
                 }
@@ -838,11 +841,9 @@ namespace ClassicUO.Game.UI.Controls
 
             for (int i = 0; i < startIndex; i++)
             {
-                if (Children[i]
-                    .AcceptKeyboardInput)
+                if (Children[i].AcceptKeyboardInput)
                 {
-                    Children[i]
-                        .SetKeyboardFocus();
+                    Children[i].SetKeyboardFocus();
 
                     return;
                 }

@@ -17,12 +17,15 @@ namespace TinyJson
 
                 if (jsonObj is IDictionary)
                 {
-                    PropertyInfo[] properties = type.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);
+                    PropertyInfo[] properties = type.GetProperties
+                        (BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);
+
                     bool match_snake_case = type.GetCustomAttribute<MatchSnakeCaseAttribute>() != null;
 
                     if (properties.Length == 0)
                     {
-                        FieldInfo[] fields = type.GetFields(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);
+                        FieldInfo[] fields = type.GetFields
+                            (BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);
 
                         foreach (DictionaryEntry item in (IDictionary) jsonObj)
                         {
@@ -52,12 +55,7 @@ namespace TinyJson
                 else
                 {
                     Console.WriteLine
-                    (
-                        "Unsupported json type: " + (jsonObj != null
-                            ? jsonObj.GetType()
-                                     .ToString()
-                            : "null")
-                    );
+                        ("Unsupported json type: " + (jsonObj != null ? jsonObj.GetType().ToString() : "null"));
                 }
 
                 return instance;
@@ -75,8 +73,7 @@ namespace TinyJson
                 {
                     Dictionary<string, object> jsonDict = (Dictionary<string, object>) jsonObj;
 
-                    if (type.GetGenericArguments()
-                            .Length == 2)
+                    if (type.GetGenericArguments().Length == 2)
                     {
                         IDictionary instance = null;
                         Type keyType = type.GetGenericArguments()[0];
@@ -128,8 +125,7 @@ namespace TinyJson
                         jsonDict.Add(keyValuePair.Key.ToString(), keyValuePair.Value);
                     }
 
-                    if (type.GetGenericArguments()
-                            .Length == 2)
+                    if (type.GetGenericArguments().Length == 2)
                     {
                         IDictionary instance = null;
                         Type keyType = type.GetGenericArguments()[0];
@@ -210,8 +206,7 @@ namespace TinyJson
         {
             return (type, jsonObj) =>
             {
-                if (type.HasGenericInterface(typeof(IList<>)) && type.GetGenericArguments()
-                                                                     .Length == 1)
+                if (type.HasGenericInterface(typeof(IList<>)) && type.GetGenericArguments().Length == 1)
                 {
                     Type genericType = type.GetGenericArguments()[0];
 
@@ -262,7 +257,12 @@ namespace TinyJson
                     if (jsonObj is IList)
                     {
                         IList jsonList = (IList) jsonObj;
-                        Type listType = type.IsInstanceOfGenericType(typeof(HashSet<>)) ? typeof(HashSet<>) : typeof(List<>);
+
+                        Type listType = type.IsInstanceOfGenericType
+                            (typeof(HashSet<>)) ?
+                            typeof(HashSet<>) :
+                            typeof(List<>);
+
                         Type constructedListType = listType.MakeGenericType(genericType);
                         object instance = Activator.CreateInstance(constructedListType, true);
                         bool nullable = genericType.IsNullable();
@@ -276,7 +276,7 @@ namespace TinyJson
 
                                 if (value != null || nullable)
                                 {
-                                    addMethodInfo.Invoke(instance, new[] {value});
+                                    addMethodInfo.Invoke(instance, new[] { value });
                                 }
                             }
 
@@ -301,8 +301,7 @@ namespace TinyJson
                     if (jsonObj is IDictionary)
                     {
                         // Decode a dictionary
-                        return DictionaryDecoder()
-                            .Invoke(type, jsonObj);
+                        return DictionaryDecoder().Invoke(type, jsonObj);
                     }
 
                     // Or it could be also be a list
@@ -311,22 +310,19 @@ namespace TinyJson
                         // Decode an array
                         if (type.IsArray)
                         {
-                            return ArrayDecoder()
-                                .Invoke(type, jsonObj);
+                            return ArrayDecoder().Invoke(type, jsonObj);
                         }
 
                         // Decode a list
                         if (type.HasGenericInterface(typeof(IList<>)))
                         {
-                            return ListDecoder()
-                                .Invoke(type, jsonObj);
+                            return ListDecoder().Invoke(type, jsonObj);
                         }
 
                         // Decode a collection
                         if (type.HasGenericInterface(typeof(ICollection<>)))
                         {
-                            return CollectionDecoder()
-                                .Invoke(type, jsonObj);
+                            return CollectionDecoder().Invoke(type, jsonObj);
                         }
                     }
                 }

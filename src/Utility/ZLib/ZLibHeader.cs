@@ -116,7 +116,8 @@ namespace ZLibNative
             result.FDict = Convert.ToBoolean(Convert.ToByte((pFlag & 0x20) >> 5));
             result.FLevel = (FLevel) Convert.ToByte((pFlag & 0xC0) >> 6);
 
-            result.IsSupportedZLibStream = result.CompressionMethod == 8 && result.CompressionInfo == 7 && (pCMF * 256 + pFlag) % 31 == 0 && result.FDict == false;
+            result.IsSupportedZLibStream = result.CompressionMethod == 8 && result.CompressionInfo == 7 &&
+                                           (pCMF * 256 + pFlag) % 31 == 0 && result.FDict == false;
 
             return result;
         }

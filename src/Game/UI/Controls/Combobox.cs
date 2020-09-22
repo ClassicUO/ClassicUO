@@ -39,7 +39,18 @@ namespace ClassicUO.Game.UI.Controls
         private readonly int _maxHeight;
         private int _selectedIndex;
 
-        public Combobox(int x, int y, int width, string[] items, int selected = -1, int maxHeight = 200, bool showArrow = true, string emptyString = "", byte font = 9)
+        public Combobox
+        (
+            int x,
+            int y,
+            int width,
+            string[] items,
+            int selected = -1,
+            int maxHeight = 200,
+            bool showArrow = true,
+            string emptyString = "",
+            byte font = 9
+        )
         {
             X = x;
             Y = y;
@@ -118,7 +129,11 @@ namespace ClassicUO.Game.UI.Controls
                 return;
             }
 
-            UIManager.Add(new ComboboxGump(ScreenCoordinateX, ScreenCoordinateY + Offset.Y, Width, _maxHeight, _items, _font, this));
+            UIManager.Add
+            (
+                new ComboboxGump
+                    (ScreenCoordinateX, ScreenCoordinateY + Offset.Y, Width, _maxHeight, _items, _font, this)
+            );
 
             base.OnMouseUp(x, y, button);
         }
@@ -130,7 +145,16 @@ namespace ClassicUO.Game.UI.Controls
 
             private readonly Combobox _combobox;
 
-            public ComboboxGump(int x, int y, int width, int maxHeight, string[] items, byte font, Combobox combobox) : base(0, 0)
+            public ComboboxGump
+            (
+                int x,
+                int y,
+                int width,
+                int maxHeight,
+                string[] items,
+                byte font,
+                Combobox combobox
+            ) : base(0, 0)
             {
                 CanMove = false;
                 AcceptMouseInput = true;

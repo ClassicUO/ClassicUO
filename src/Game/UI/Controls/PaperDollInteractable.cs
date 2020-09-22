@@ -46,7 +46,8 @@ namespace ClassicUO.Game.UI.Controls
         private static readonly Layer[] _layerOrder_quiver_fix =
         {
             Layer.Shirt, Layer.Pants, Layer.Shoes, Layer.Legs, Layer.Arms, Layer.Torso, Layer.Tunic,
-            Layer.Ring, Layer.Bracelet, Layer.Face, Layer.Gloves, Layer.Skirt, Layer.Robe, Layer.Cloak, Layer.Waist, Layer.Necklace,
+            Layer.Ring, Layer.Bracelet, Layer.Face, Layer.Gloves, Layer.Skirt, Layer.Robe, Layer.Cloak, Layer.Waist,
+            Layer.Necklace,
             Layer.Hair, Layer.Beard, Layer.Earrings, Layer.Helmet, Layer.OneHanded, Layer.TwoHanded, Layer.Talisman
         };
 
@@ -178,7 +179,8 @@ namespace ClassicUO.Game.UI.Controls
             {
                 switch_arms_with_torso = arms.Graphic == 0x1410 || arms.Graphic == 0x1417;
             }
-            else if (HasFakeItem && ItemHold.Enabled && !ItemHold.IsFixedPosition && (byte) Layer.Arms == ItemHold.ItemData.Layer)
+            else if (HasFakeItem && ItemHold.Enabled && !ItemHold.IsFixedPosition &&
+                     (byte) Layer.Arms == ItemHold.ItemData.Layer)
             {
                 switch_arms_with_torso = ItemHold.Graphic == 0x1410 || ItemHold.Graphic == 0x1417;
             }
@@ -189,7 +191,8 @@ namespace ClassicUO.Game.UI.Controls
             {
                 layers = equipItem.ItemData.IsContainer ? _layerOrder_quiver_fix : _layerOrder;
             }
-            else if (HasFakeItem && ItemHold.Enabled && !ItemHold.IsFixedPosition && (byte) Layer.Cloak == ItemHold.ItemData.Layer)
+            else if (HasFakeItem && ItemHold.Enabled && !ItemHold.IsFixedPosition &&
+                     (byte) Layer.Cloak == ItemHold.ItemData.Layer)
             {
                 layers = ItemHold.ItemData.IsContainer ? _layerOrder_quiver_fix : _layerOrder;
             }
@@ -232,13 +235,13 @@ namespace ClassicUO.Game.UI.Controls
                         {
                             AcceptMouseInput = true,
                             IsPartialHue = equipItem.ItemData.IsPartialHue,
-                            CanLift = World.InGame &&
-                                      !World.Player.IsDead && layer != Layer.Beard && layer != Layer.Hair &&
-                                      (_paperDollGump.CanLift || LocalSerial == World.Player)
+                            CanLift = World.InGame && !World.Player.IsDead && layer != Layer.Beard &&
+                                      layer != Layer.Hair && (_paperDollGump.CanLift || LocalSerial == World.Player)
                         }
                     );
                 }
-                else if (HasFakeItem && ItemHold.Enabled && !ItemHold.IsFixedPosition && (byte) layer == ItemHold.ItemData.Layer && ItemHold.ItemData.AnimID != 0)
+                else if (HasFakeItem && ItemHold.Enabled && !ItemHold.IsFixedPosition &&
+                         (byte) layer == ItemHold.ItemData.Layer && ItemHold.ItemData.AnimID != 0)
                 {
                     ushort id = GetAnimID(mobile.Graphic, ItemHold.ItemData.AnimID, mobile.IsFemale);
 
@@ -270,10 +273,11 @@ namespace ClassicUO.Game.UI.Controls
 
                 Add
                 (
-                    new GumpPicEquipment(equipItem.Serial, -bx, 0, backpackGraphic, (ushort) (equipItem.Hue & 0x3FFF), Layer.Backpack)
-                    {
-                        AcceptMouseInput = true
-                    }
+                    new GumpPicEquipment
+                        (equipItem.Serial, -bx, 0, backpackGraphic, (ushort) (equipItem.Hue & 0x3FFF), Layer.Backpack)
+                        {
+                            AcceptMouseInput = true
+                        }
                 );
             }
         }
@@ -288,22 +292,25 @@ namespace ClassicUO.Game.UI.Controls
         {
             int offset = isfemale ? Constants.FEMALE_GUMP_OFFSET : Constants.MALE_GUMP_OFFSET;
 
-            if (Client.Version >= ClientVersion.CV_7000 &&
-                animID == 0x03CA                             // graphic for dead shroud
-                && (graphic == 0x02B7 || graphic == 0x02B6)) // dead gargoyle graphics
+            if (Client.Version >= ClientVersion.CV_7000 && animID == 0x03CA // graphic for dead shroud
+                                                        && (graphic == 0x02B7 || graphic == 0x02B6)
+            ) // dead gargoyle graphics
             {
                 animID = 0x0223;
             }
 
             AnimationsLoader.Instance.ConvertBodyIfNeeded(ref graphic);
 
-            if (AnimationsLoader.Instance.EquipConversions.TryGetValue(graphic, out Dictionary<ushort, EquipConvData> dict))
+            if (AnimationsLoader.Instance.EquipConversions.TryGetValue
+                (graphic, out Dictionary<ushort, EquipConvData> dict))
             {
                 if (dict.TryGetValue(animID, out EquipConvData data))
                 {
                     if (data.Gump > Constants.MALE_GUMP_OFFSET)
                     {
-                        animID = (ushort) (data.Gump >= Constants.FEMALE_GUMP_OFFSET ? data.Gump - Constants.FEMALE_GUMP_OFFSET : data.Gump - Constants.MALE_GUMP_OFFSET);
+                        animID = (ushort) (data.Gump >= Constants.FEMALE_GUMP_OFFSET ?
+                            data.Gump - Constants.FEMALE_GUMP_OFFSET :
+                            data.Gump - Constants.MALE_GUMP_OFFSET);
                     }
                     else
                     {
@@ -330,7 +337,15 @@ namespace ClassicUO.Game.UI.Controls
         {
             private readonly Layer _layer;
 
-            public GumpPicEquipment(uint serial, int x, int y, ushort graphic, ushort hue, Layer layer) : base(x, y, graphic, hue)
+            public GumpPicEquipment
+            (
+                uint serial,
+                int x,
+                int y,
+                ushort graphic,
+                ushort hue,
+                Layer layer
+            ) : base(x, y, graphic, hue)
             {
                 LocalSerial = serial;
                 CanMove = false;
@@ -372,11 +387,9 @@ namespace ClassicUO.Game.UI.Controls
 
                 if (World.InGame)
                 {
-                    if (CanLift && !ItemHold.Enabled &&
-                        Mouse.LButtonPressed &&
+                    if (CanLift && !ItemHold.Enabled && Mouse.LButtonPressed &&
                         UIManager.LastControlMouseDown(MouseButtonType.Left) == this &&
-                        (Mouse.LastLeftButtonClickTime != 0xFFFF_FFFF &&
-                         Mouse.LastLeftButtonClickTime != 0 &&
+                        (Mouse.LastLeftButtonClickTime != 0xFFFF_FFFF && Mouse.LastLeftButtonClickTime != 0 &&
                          Mouse.LastLeftButtonClickTime + Mouse.MOUSE_DELAY_DOUBLE_CLICK < Time.Ticks ||
                          Mouse.LDroppedOffset != Point.Zero))
                     {

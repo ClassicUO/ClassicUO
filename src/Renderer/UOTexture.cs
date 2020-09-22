@@ -30,7 +30,8 @@ namespace ClassicUO.Renderer
 {
     internal class UOTexture32 : Texture2D
     {
-        public UOTexture32(int width, int height) : base(Client.Game.GraphicsDevice, width, height, false, SurfaceFormat.Color)
+        public UOTexture32(int width, int height) : base
+            (Client.Game.GraphicsDevice, width, height, false, SurfaceFormat.Color)
         {
             Ticks = Time.Ticks + 3000;
         }

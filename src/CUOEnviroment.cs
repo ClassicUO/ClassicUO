@@ -47,13 +47,7 @@ namespace ClassicUO
                                              Environment.OSVersion.Platform != PlatformID.Win32S &&
                                              Environment.OSVersion.Platform != PlatformID.WinCE;
 
-        public static readonly Version Version = Assembly.GetExecutingAssembly()
-                                                         .GetName()
-                                                         .Version;
-        public static readonly string ExecutablePath = Path.GetDirectoryName
-        (
-            Assembly.GetEntryAssembly()
-                    ?.Location
-        );
+        public static readonly Version Version = Assembly.GetExecutingAssembly().GetName().Version;
+        public static readonly string ExecutablePath = Path.GetDirectoryName(Assembly.GetEntryAssembly()?.Location);
     }
 }

@@ -43,8 +43,7 @@ namespace ClassicUO.Configuration
 
             text = Regex.Replace
             (
-                text,
-                @"(?<!\\)  # lookbehind: Check that previous character isn't a \
+                text, @"(?<!\\)  # lookbehind: Check that previous character isn't a \
                                                 \\         # match a \
                                                 (?!\\)     # lookahead: Check that the following character isn't a \",
                 @"\\", RegexOptions.IgnorePatternWhitespace

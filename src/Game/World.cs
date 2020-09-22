@@ -227,18 +227,15 @@ namespace ClassicUO.Game
                         {
                             if (SerialHelper.IsMobile(container.Serial))
                             {
-                                UIManager.GetGump<PaperDollGump>(container.Serial)
-                                         ?.RequestUpdateContents();
+                                UIManager.GetGump<PaperDollGump>(container.Serial)?.RequestUpdateContents();
                             }
                             else if (SerialHelper.IsItem(container.Serial))
                             {
-                                UIManager.GetGump<ContainerGump>(container.Serial)
-                                         ?.RequestUpdateContents();
+                                UIManager.GetGump<ContainerGump>(container.Serial)?.RequestUpdateContents();
 
                                 if (container.Graphic == 0x2006)
                                 {
-                                    UIManager.GetGump<GridLootGump>(container)
-                                             ?.RequestUpdateContents();
+                                    UIManager.GetGump<GridLootGump>(container)?.RequestUpdateContents();
                                 }
                             }
                         }
@@ -271,26 +268,16 @@ namespace ClassicUO.Game
                         {
                             WMapManager.AddOrUpdate
                             (
-                                mob.Serial,
-                                mob.X,
-                                mob.Y,
-                                MathHelper.PercetangeOf(mob.Hits, mob.HitsMax),
-                                MapIndex,
-                                true,
-                                mob.Name
+                                mob.Serial, mob.X, mob.Y, MathHelper.PercetangeOf(mob.Hits, mob.HitsMax), MapIndex,
+                                true, mob.Name
                             );
                         }
                         else if (Party.Leader != 0 && Party.Contains(mob))
                         {
                             WMapManager.AddOrUpdate
                             (
-                                mob.Serial,
-                                mob.X,
-                                mob.Y,
-                                MathHelper.PercetangeOf(mob.Hits, mob.HitsMax),
-                                MapIndex,
-                                false,
-                                mob.Name
+                                mob.Serial, mob.X, mob.Y, MathHelper.PercetangeOf(mob.Hits, mob.HitsMax), MapIndex,
+                                false, mob.Name
                             );
                         }
                     }
@@ -310,7 +297,8 @@ namespace ClassicUO.Game
                 {
                     item.Update(totalMS, frameMS);
 
-                    if (do_delete && item.OnGround && item.Distance > ClientViewRange /*CheckToRemove(item, ClientViewRange)*/)
+                    if (do_delete && item.OnGround &&
+                        item.Distance > ClientViewRange /*CheckToRemove(item, ClientViewRange)*/)
                     {
                         if (item.IsMulti)
                         {
@@ -445,13 +433,11 @@ namespace ClassicUO.Game
             {
                 if (SerialHelper.IsMobile(containerSerial))
                 {
-                    UIManager.GetGump<PaperDollGump>(containerSerial)
-                             ?.RequestUpdateContents();
+                    UIManager.GetGump<PaperDollGump>(containerSerial)?.RequestUpdateContents();
                 }
                 else if (SerialHelper.IsItem(containerSerial))
                 {
-                    UIManager.GetGump<ContainerGump>(containerSerial)
-                             ?.RequestUpdateContents();
+                    UIManager.GetGump<ContainerGump>(containerSerial)?.RequestUpdateContents();
                 }
 
                 Entity container = Get(containerSerial);
@@ -542,14 +528,30 @@ namespace ClassicUO.Game
 
         public static void AddEffect
         (
-            GraphicEffectType type, uint source, uint target,
-            ushort graphic, ushort hue,
-            ushort srcX, ushort srcY, sbyte srcZ,
-            ushort targetX, ushort targetY, sbyte targetZ,
-            byte speed, int duration, bool fixedDir, bool doesExplode, bool hasparticles, GraphicEffectBlendMode blendmode
+            GraphicEffectType type,
+            uint source,
+            uint target,
+            ushort graphic,
+            ushort hue,
+            ushort srcX,
+            ushort srcY,
+            sbyte srcZ,
+            ushort targetX,
+            ushort targetY,
+            sbyte targetZ,
+            byte speed,
+            int duration,
+            bool fixedDir,
+            bool doesExplode,
+            bool hasparticles,
+            GraphicEffectBlendMode blendmode
         )
         {
-            _effectManager.Add(type, source, target, graphic, hue, srcX, srcY, srcZ, targetX, targetY, targetZ, speed, duration, fixedDir, doesExplode, hasparticles, blendmode);
+            _effectManager.Add
+            (
+                type, source, target, graphic, hue, srcX, srcY, srcZ, targetX, targetY, targetZ, speed, duration,
+                fixedDir, doesExplode, hasparticles, blendmode
+            );
         }
 
         public static uint SearchObject(uint serial, SCAN_TYPE_OBJECT scanType, SCAN_MODE_OBJECT scanMode)
@@ -679,8 +681,7 @@ namespace ClassicUO.Game
                         }
                         else if (scanType == SCAN_TYPE_OBJECT.STO_FOLLOWERS)
                         {
-                            if (!(mobile.IsRenamable &&
-                                  mobile.NotorietyFlag != NotorietyFlag.Invulnerable &&
+                            if (!(mobile.IsRenamable && mobile.NotorietyFlag != NotorietyFlag.Invulnerable &&
                                   mobile.NotorietyFlag != NotorietyFlag.Enemy))
                             {
                                 continue;
@@ -723,8 +724,7 @@ namespace ClassicUO.Game
                         }
                         else if (scanType == SCAN_TYPE_OBJECT.STO_FOLLOWERS)
                         {
-                            if (!(mobile.IsRenamable &&
-                                  mobile.NotorietyFlag != NotorietyFlag.Invulnerable &&
+                            if (!(mobile.IsRenamable && mobile.NotorietyFlag != NotorietyFlag.Invulnerable &&
                                   mobile.NotorietyFlag != NotorietyFlag.Enemy))
                             {
                                 continue;
@@ -770,8 +770,7 @@ namespace ClassicUO.Game
                         }
                         else if (scanType == SCAN_TYPE_OBJECT.STO_FOLLOWERS)
                         {
-                            if (!(mobile.IsRenamable &&
-                                  mobile.NotorietyFlag != NotorietyFlag.Invulnerable &&
+                            if (!(mobile.IsRenamable && mobile.NotorietyFlag != NotorietyFlag.Invulnerable &&
                                   mobile.NotorietyFlag != NotorietyFlag.Enemy))
                             {
                                 continue;
@@ -812,8 +811,7 @@ namespace ClassicUO.Game
                         }
                         else if (scanType == SCAN_TYPE_OBJECT.STO_FOLLOWERS)
                         {
-                            if (!(mobile.IsRenamable &&
-                                  mobile.NotorietyFlag != NotorietyFlag.Invulnerable &&
+                            if (!(mobile.IsRenamable && mobile.NotorietyFlag != NotorietyFlag.Invulnerable &&
                                   mobile.NotorietyFlag != NotorietyFlag.Enemy))
                             {
                                 continue;

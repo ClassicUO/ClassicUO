@@ -30,7 +30,15 @@ namespace ClassicUO.Utility
 {
     public static class ZLibManaged
     {
-        public static void Decompress(byte[] source, int sourceStart, int sourceLength, int offset, byte[] dest, int length)
+        public static void Decompress
+        (
+            byte[] source,
+            int sourceStart,
+            int sourceLength,
+            int offset,
+            byte[] dest,
+            int length
+        )
         {
             using (MemoryStream stream = new MemoryStream(source, sourceStart, sourceLength - offset, true))
             {
@@ -46,7 +54,8 @@ namespace ClassicUO.Utility
 
         public static unsafe void Decompress(IntPtr source, int sourceLength, int offset, IntPtr dest, int length)
         {
-            using (UnmanagedMemoryStream stream = new UnmanagedMemoryStream((byte*) source.ToPointer(), sourceLength - offset))
+            using (UnmanagedMemoryStream stream = new UnmanagedMemoryStream
+                ((byte*) source.ToPointer(), sourceLength - offset))
             {
                 using (ZLIBStream ds = new ZLIBStream(stream, CompressionMode.Decompress))
                 {

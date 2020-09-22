@@ -216,7 +216,11 @@ namespace ClassicUO.Game.Managers
         {
             Groups.Clear();
 
-            string path = Path.Combine(CUOEnviroment.ExecutablePath, "Data", "Profiles", ProfileManager.Current.Username, ProfileManager.Current.ServerName, ProfileManager.Current.CharacterName, "skillsgroups.xml");
+            string path = Path.Combine
+            (
+                CUOEnviroment.ExecutablePath, "Data", "Profiles", ProfileManager.Current.Username,
+                ProfileManager.Current.ServerName, ProfileManager.Current.CharacterName, "skillsgroups.xml"
+            );
 
             if (!File.Exists(path))
             {
@@ -267,7 +271,11 @@ namespace ClassicUO.Game.Managers
 
         public static void Save()
         {
-            string path = Path.Combine(CUOEnviroment.ExecutablePath, "Data", "Profiles", ProfileManager.Current.Username, ProfileManager.Current.ServerName, ProfileManager.Current.CharacterName, "skillsgroups.xml");
+            string path = Path.Combine
+            (
+                CUOEnviroment.ExecutablePath, "Data", "Profiles", ProfileManager.Current.Username,
+                ProfileManager.Current.ServerName, ProfileManager.Current.CharacterName, "skillsgroups.xml"
+            );
 
             using (XmlTextWriter xml = new XmlTextWriter(path, Encoding.UTF8)
             {
@@ -544,8 +552,7 @@ namespace ClassicUO.Game.Managers
 
                         if (grp < groups.Length && skillidx < SkillsLoader.Instance.SkillsCount)
                         {
-                            groups[grp]
-                                .Add(skillidx++);
+                            groups[grp].Add(skillidx++);
                         }
                     }
 

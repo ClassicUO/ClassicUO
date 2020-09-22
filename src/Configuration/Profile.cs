@@ -177,7 +177,14 @@ namespace ClassicUO.Configuration
         public bool EnableDragSelect { get; set; }
         public int DragSelectModifierKey { get; set; } // 0 = none, 1 = control, 2 = shift
         public bool OverrideContainerLocation { get; set; }
-        public int OverrideContainerLocationSetting { get; set; } // 0 = container position, 1 = top right of screen, 2 = last dragged position, 3 = remember every container
+
+        public int
+            OverrideContainerLocationSetting
+        {
+            get;
+            set;
+        } // 0 = container position, 1 = top right of screen, 2 = last dragged position, 3 = remember every container
+
         public Point OverrideContainerLocationPosition { get; set; } = new Point(200, 200);
         public bool DragSelectHumanoidsOnly { get; set; }
         public NameOverheadTypeAllowed NameOverheadTypeAllowed { get; set; } = NameOverheadTypeAllowed.All;
@@ -302,7 +309,8 @@ namespace ClassicUO.Configuration
                 throw new InvalidDataException();
             }
 
-            string path = FileSystemHelper.CreateFolderIfNotExists(ProfilePath, Username.Trim(), ServerName.Trim(), CharacterName.Trim());
+            string path = FileSystemHelper.CreateFolderIfNotExists
+                (ProfilePath, Username.Trim(), ServerName.Trim(), CharacterName.Trim());
 
             Log.Trace($"Saving path:\t\t{path}");
 
@@ -362,7 +370,9 @@ namespace ClassicUO.Configuration
 
         public List<Gump> ReadGumps()
         {
-            string path = FileSystemHelper.CreateFolderIfNotExists(ProfilePath, Username.Trim(), ServerName.Trim(), CharacterName.Trim());
+            string path = FileSystemHelper.CreateFolderIfNotExists
+                (ProfilePath, Username.Trim(), ServerName.Trim(), CharacterName.Trim());
+
             List<Gump> gumps = new List<Gump>();
 
 
@@ -731,7 +741,8 @@ namespace ClassicUO.Configuration
 
                                     if (!gump.IsDisposed)
                                     {
-                                        if (UIManager.AnchorManager[gump] == null && ancoGroup.IsEmptyDirection(matrix_x, matrix_y))
+                                        if (UIManager.AnchorManager[gump] == null && ancoGroup.IsEmptyDirection
+                                            (matrix_x, matrix_y))
                                         {
                                             gumps.Add(gump);
                                             UIManager.AnchorManager[gump] = ancoGroup;

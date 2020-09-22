@@ -67,7 +67,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             );
 
-            Add(new Label(ResGumps.ObjectInformation, true, 1153, font: 3) {X = 20, Y = 10});
+            Add(new Label(ResGumps.ObjectInformation, true, 1153, font: 3) { X = 20, Y = 10 });
             Add(new Line(20, 30, WIDTH - 50, 1, 0xFFFFFFFF));
 
             Add
@@ -108,12 +108,13 @@ namespace ClassicUO.Game.UI.Gumps
 
                     int height = label.Height;
 
-                    label = new Label(item.Value, true, 1153, font: 1, style: FontStyle.BlackBorder, maxwidth: WIDTH - 65 - 200)
-                    {
-                        X = startX + 200,
-                        Y = startY,
-                        AcceptMouseInput = true
-                    };
+                    label = new Label
+                        (item.Value, true, 1153, font: 1, style: FontStyle.BlackBorder, maxwidth: WIDTH - 65 - 200)
+                        {
+                            X = startX + 200,
+                            Y = startY,
+                            AcceptMouseInput = true
+                        };
 
                     label.MouseUp += OnLabelClick;
 

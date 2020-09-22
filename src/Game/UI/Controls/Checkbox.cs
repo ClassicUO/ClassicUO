@@ -38,7 +38,16 @@ namespace ClassicUO.Game.UI.Controls
         private readonly RenderedText _text;
         private readonly UOTexture32[] _textures = new UOTexture32[2];
 
-        public Checkbox(ushort inactive, ushort active, string text = "", byte font = 0, ushort color = 0, bool isunicode = true, int maxWidth = 0)
+        public Checkbox
+        (
+            ushort inactive,
+            ushort active,
+            string text = "",
+            byte font = 0,
+            ushort color = 0,
+            bool isunicode = true,
+            int maxWidth = 0
+        )
         {
             _textures[INACTIVE] = GumpsLoader.Instance.GetTexture(inactive);
             _textures[ACTIVE] = GumpsLoader.Instance.GetTexture(active);
@@ -114,11 +123,7 @@ namespace ClassicUO.Game.UI.Controls
             bool ok = base.Draw(batcher, x, y);
             batcher.Draw2D(IsChecked ? _textures[ACTIVE] : _textures[INACTIVE], x, y, ref _hueVector);
 
-            _text.Draw
-            (
-                batcher, x + _textures[ACTIVE]
-                    .Width + 2, y
-            );
+            _text.Draw(batcher, x + _textures[ACTIVE].Width + 2, y);
 
             return ok;
         }

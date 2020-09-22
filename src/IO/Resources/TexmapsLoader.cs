@@ -35,12 +35,12 @@ namespace ClassicUO.IO.Resources
         private static TexmapsLoader _instance;
         private UOFile _file;
 
-        private TexmapsLoader(int count)
-            : base(count)
+        private TexmapsLoader(int count) : base(count)
         {
         }
 
-        public static TexmapsLoader Instance => _instance ?? (_instance = new TexmapsLoader(Constants.MAX_LAND_TEXTURES_DATA_INDEX_COUNT));
+        public static TexmapsLoader Instance =>
+            _instance ?? (_instance = new TexmapsLoader(Constants.MAX_LAND_TEXTURES_DATA_INDEX_COUNT));
 
         public override Task Load()
         {

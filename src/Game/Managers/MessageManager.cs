@@ -68,7 +68,18 @@ namespace ClassicUO.Game.Managers
         public static event EventHandler<UOMessageEventArgs> LocalizedMessageReceived;
 
 
-        public static void HandleMessage(Entity parent, string text, string name, ushort hue, MessageType type, byte font, TEXT_TYPE text_type, bool unicode = false, string lang = null)
+        public static void HandleMessage
+        (
+            Entity parent,
+            string text,
+            string name,
+            ushort hue,
+            MessageType type,
+            byte font,
+            TEXT_TYPE text_type,
+            bool unicode = false,
+            string lang = null
+        )
         {
             if (string.IsNullOrEmpty(text))
             {
@@ -88,25 +99,24 @@ namespace ClassicUO.Game.Managers
                 case MessageType.System:
                 case MessageType.Party:
                 case MessageType.Guild:
-                case MessageType.Alliance:
-
-                    break;
+                case MessageType.Alliance: break;
 
 
                 case MessageType.Spell:
 
                 {
                     //server hue color per default
-                    if (!string.IsNullOrEmpty(text) && SpellDefinition.WordToTargettype.TryGetValue(text, out SpellDefinition spell))
+                    if (!string.IsNullOrEmpty(text) && SpellDefinition.WordToTargettype.TryGetValue
+                        (text, out SpellDefinition spell))
                     {
-                        if (ProfileManager.Current != null && ProfileManager.Current.EnabledSpellFormat && !string.IsNullOrWhiteSpace(ProfileManager.Current.SpellDisplayFormat))
+                        if (ProfileManager.Current != null && ProfileManager.Current.EnabledSpellFormat &&
+                            !string.IsNullOrWhiteSpace(ProfileManager.Current.SpellDisplayFormat))
                         {
                             StringBuilder sb = new StringBuilder(ProfileManager.Current.SpellDisplayFormat);
                             sb.Replace("{power}", spell.PowerWords);
                             sb.Replace("{spell}", spell.Name);
 
-                            text = sb.ToString()
-                                     .Trim();
+                            text = sb.ToString().Trim();
                         }
 
                         //server hue color per default if not enabled
@@ -202,7 +212,8 @@ namespace ClassicUO.Game.Managers
                 //    break;
             }
 
-            MessageReceived.Raise(new UOMessageEventArgs(parent, text, name, hue, type, font, text_type, unicode, lang), parent);
+            MessageReceived.Raise
+                (new UOMessageEventArgs(parent, text, name, hue, type, font, text_type, unicode, lang), parent);
         }
 
         public static void OnLocalizedMessage(Entity entity, UOMessageEventArgs args)
@@ -211,7 +222,15 @@ namespace ClassicUO.Game.Managers
         }
 
 
-        public static TextObject CreateMessage(string msg, ushort hue, byte font, bool isunicode, MessageType type, TEXT_TYPE text_type)
+        public static TextObject CreateMessage
+        (
+            string msg,
+            ushort hue,
+            byte font,
+            bool isunicode,
+            MessageType type,
+            TEXT_TYPE text_type
+        )
         {
             if (ProfileManager.Current != null && ProfileManager.Current.OverrideAllFonts)
             {
@@ -219,11 +238,17 @@ namespace ClassicUO.Game.Managers
                 isunicode = ProfileManager.Current.OverrideAllFontsIsUnicode;
             }
 
-            int width = isunicode ? FontsLoader.Instance.GetWidthUnicode(font, msg) : FontsLoader.Instance.GetWidthASCII(font, msg);
+            int width = isunicode ?
+                FontsLoader.Instance.GetWidthUnicode(font, msg) :
+                FontsLoader.Instance.GetWidthASCII(font, msg);
 
             if (width > 200)
             {
-                width = isunicode ? FontsLoader.Instance.GetWidthExUnicode(font, msg, 200, TEXT_ALIGN_TYPE.TS_LEFT, (ushort) FontStyle.BlackBorder) : FontsLoader.Instance.GetWidthExASCII(font, msg, 200, TEXT_ALIGN_TYPE.TS_LEFT, (ushort) FontStyle.BlackBorder);
+                width = isunicode ?
+                    FontsLoader.Instance.GetWidthExUnicode
+                        (font, msg, 200, TEXT_ALIGN_TYPE.TS_LEFT, (ushort) FontStyle.BlackBorder) :
+                    FontsLoader.Instance.GetWidthExASCII
+                        (font, msg, 200, TEXT_ALIGN_TYPE.TS_LEFT, (ushort) FontStyle.BlackBorder);
             }
             else
             {
@@ -240,7 +265,12 @@ namespace ClassicUO.Game.Managers
                 hue = 0;
             }
 
-            text_obj.RenderedText = RenderedText.Create(msg, hue, font, isunicode, FontStyle.BlackBorder, TEXT_ALIGN_TYPE.TS_LEFT, width, 30, false, false, text_type == TEXT_TYPE.OBJECT);
+            text_obj.RenderedText = RenderedText.Create
+            (
+                msg, hue, font, isunicode, FontStyle.BlackBorder, TEXT_ALIGN_TYPE.TS_LEFT, width, 30, false, false,
+                text_type == TEXT_TYPE.OBJECT
+            );
+
             text_obj.Time = CalculateTimeToLive(text_obj.RenderedText);
             text_obj.RenderedText.Hue = text_obj.Hue;
 
@@ -277,7 +307,18 @@ namespace ClassicUO.Game.Managers
 
     internal class UOMessageEventArgs : EventArgs
     {
-        public UOMessageEventArgs(Entity parent, string text, string name, ushort hue, MessageType type, byte font, TEXT_TYPE text_type, bool unicode = false, string lang = null)
+        public UOMessageEventArgs
+        (
+            Entity parent,
+            string text,
+            string name,
+            ushort hue,
+            MessageType type,
+            byte font,
+            TEXT_TYPE text_type,
+            bool unicode = false,
+            string lang = null
+        )
         {
             Parent = parent;
             Text = text;

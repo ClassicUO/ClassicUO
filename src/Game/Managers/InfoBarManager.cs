@@ -81,7 +81,11 @@ namespace ClassicUO.Game.Managers
 
         public void Save()
         {
-            string path = Path.Combine(CUOEnviroment.ExecutablePath, "Data", "Profiles", ProfileManager.Current.Username, ProfileManager.Current.ServerName, ProfileManager.Current.CharacterName, "infobar.xml");
+            string path = Path.Combine
+            (
+                CUOEnviroment.ExecutablePath, "Data", "Profiles", ProfileManager.Current.Username,
+                ProfileManager.Current.ServerName, ProfileManager.Current.CharacterName, "infobar.xml"
+            );
 
             using (XmlTextWriter xml = new XmlTextWriter(path, Encoding.UTF8)
             {
@@ -105,7 +109,11 @@ namespace ClassicUO.Game.Managers
 
         public void Load()
         {
-            string path = Path.Combine(CUOEnviroment.ExecutablePath, "Data", "Profiles", ProfileManager.Current.Username, ProfileManager.Current.ServerName, ProfileManager.Current.CharacterName, "infobar.xml");
+            string path = Path.Combine
+            (
+                CUOEnviroment.ExecutablePath, "Data", "Profiles", ProfileManager.Current.Username,
+                ProfileManager.Current.ServerName, ProfileManager.Current.CharacterName, "infobar.xml"
+            );
 
             if (!File.Exists(path))
             {

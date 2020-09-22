@@ -39,7 +39,15 @@ namespace ClassicUO.Game.UI.Controls
         private bool _isNormalScroll;
         private readonly ScrollBarBase _scrollBar;
 
-        public ScrollArea(int x, int y, int w, int h, bool normalScrollbar, int scroll_max_height = -1)
+        public ScrollArea
+        (
+            int x,
+            int y,
+            int w,
+            int h,
+            bool normalScrollbar,
+            int scroll_max_height = -1
+        )
         {
             X = x;
             Y = y;
@@ -117,7 +125,11 @@ namespace ClassicUO.Game.UI.Controls
             ScrollBarBase scrollbar = (ScrollBarBase) Children[0];
             scrollbar.Draw(batcher, x + scrollbar.X, y + scrollbar.Y);
 
-            Rectangle scissor = ScissorStack.CalculateScissors(Matrix.Identity, x + ScissorRectangle.X, y + ScissorRectangle.Y, Width - 14 + ScissorRectangle.Width, Height + ScissorRectangle.Height);
+            Rectangle scissor = ScissorStack.CalculateScissors
+            (
+                Matrix.Identity, x + ScissorRectangle.X, y + ScissorRectangle.Y, Width - 14 + ScissorRectangle.Width,
+                Height + ScissorRectangle.Height
+            );
 
             if (ScissorStack.PushScissors(batcher.GraphicsDevice, scissor))
             {
@@ -168,8 +180,7 @@ namespace ClassicUO.Game.UI.Controls
         {
             for (int i = 1; i < Children.Count; i++)
             {
-                Children[i]
-                    .Dispose();
+                Children[i].Dispose();
             }
         }
 
@@ -230,8 +241,7 @@ namespace ClassicUO.Game.UI.Controls
 
             for (int i = 1; i < Children.Count; i++)
             {
-                Children[i]
-                    .UpdateOffset(0, -_scrollBar.Value + ScissorRectangle.Y);
+                Children[i].UpdateOffset(0, -_scrollBar.Value + ScissorRectangle.Y);
             }
         }
     }

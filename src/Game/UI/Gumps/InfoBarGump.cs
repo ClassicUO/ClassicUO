@@ -49,7 +49,7 @@ namespace ClassicUO.Game.UI.Gumps
             CanCloseWithRightClick = false;
             Height = 20;
 
-            Add(_background = new AlphaBlendControl(0.3f) {Width = Width, Height = Height});
+            Add(_background = new AlphaBlendControl(0.3f) { Width = Width, Height = Height });
 
             ResetItems();
         }
@@ -65,18 +65,12 @@ namespace ClassicUO.Game.UI.Gumps
 
             _infobarControls.Clear();
 
-            List<InfoBarItem> infoBarItems = Client.Game.GetScene<GameScene>()
-                                                   .InfoBars.GetInfoBars();
+            List<InfoBarItem> infoBarItems = Client.Game.GetScene<GameScene>().InfoBars.GetInfoBars();
 
             for (int i = 0; i < infoBarItems.Count; i++)
             {
                 InfoBarControl info = new InfoBarControl
-                (
-                    infoBarItems[i]
-                        .label, infoBarItems[i]
-                        .var, infoBarItems[i]
-                        .hue
-                );
+                    (infoBarItems[i].label, infoBarItems[i].var, infoBarItems[i].hue);
 
                 _infobarControls.Add(info);
                 Add(info);
@@ -166,10 +160,10 @@ namespace ClassicUO.Game.UI.Gumps
             WantUpdateSize = true;
             CanMove = false;
 
-            _label = new Label(label, true, 999) {Height = 20, Hue = hue};
+            _label = new Label(label, true, 999) { Height = 20, Hue = hue };
             Var = var;
 
-            _data = new Label("", true, 999) {Height = 20, X = _label.Width, Hue = 0x0481};
+            _data = new Label("", true, 999) { Height = 20, X = _label.Width, Hue = 0x0481 };
             Add(_label);
             Add(_data);
         }
@@ -217,11 +211,22 @@ namespace ClassicUO.Game.UI.Gumps
 
             ResetHueVector();
 
-            if (Var != InfoBarVars.NameNotoriety && ProfileManager.Current.InfoBarHighlightType == 1 && _warningLinesHue != 0x0481)
+            if (Var != InfoBarVars.NameNotoriety && ProfileManager.Current.InfoBarHighlightType == 1 &&
+                _warningLinesHue != 0x0481)
             {
                 ShaderHueTranslator.GetHueVector(ref _hueVector, _warningLinesHue);
-                batcher.Draw2D(Texture2DCache.GetTexture(Color.White), _data.ScreenCoordinateX, _data.ScreenCoordinateY, _data.Width, 2, ref _hueVector);
-                batcher.Draw2D(Texture2DCache.GetTexture(Color.White), _data.ScreenCoordinateX, _data.ScreenCoordinateY + Parent.Height - 2, _data.Width, 2, ref _hueVector);
+
+                batcher.Draw2D
+                (
+                    Texture2DCache.GetTexture(Color.White), _data.ScreenCoordinateX, _data.ScreenCoordinateY,
+                    _data.Width, 2, ref _hueVector
+                );
+
+                batcher.Draw2D
+                (
+                    Texture2DCache.GetTexture(Color.White), _data.ScreenCoordinateX,
+                    _data.ScreenCoordinateY + Parent.Height - 2, _data.Width, 2, ref _hueVector
+                );
             }
 
             return true;
@@ -231,83 +236,57 @@ namespace ClassicUO.Game.UI.Gumps
         {
             switch (var)
             {
-                case InfoBarVars.HP:
-                    return $"{World.Player.Hits}/{World.Player.HitsMax}";
+                case InfoBarVars.HP: return $"{World.Player.Hits}/{World.Player.HitsMax}";
 
-                case InfoBarVars.Mana:
-                    return $"{World.Player.Mana}/{World.Player.ManaMax}";
+                case InfoBarVars.Mana: return $"{World.Player.Mana}/{World.Player.ManaMax}";
 
-                case InfoBarVars.Stamina:
-                    return $"{World.Player.Stamina}/{World.Player.StaminaMax}";
+                case InfoBarVars.Stamina: return $"{World.Player.Stamina}/{World.Player.StaminaMax}";
 
-                case InfoBarVars.Weight:
-                    return $"{World.Player.Weight}/{World.Player.WeightMax}";
+                case InfoBarVars.Weight: return $"{World.Player.Weight}/{World.Player.WeightMax}";
 
-                case InfoBarVars.Followers:
-                    return $"{World.Player.Followers}/{World.Player.FollowersMax}";
+                case InfoBarVars.Followers: return $"{World.Player.Followers}/{World.Player.FollowersMax}";
 
-                case InfoBarVars.Gold:
-                    return World.Player.Gold.ToString();
+                case InfoBarVars.Gold: return World.Player.Gold.ToString();
 
-                case InfoBarVars.Damage:
-                    return $"{World.Player.DamageMin}-{World.Player.DamageMax}";
+                case InfoBarVars.Damage: return $"{World.Player.DamageMin}-{World.Player.DamageMax}";
 
-                case InfoBarVars.Armor:
-                    return World.Player.PhysicalResistance.ToString();
+                case InfoBarVars.Armor: return World.Player.PhysicalResistance.ToString();
 
-                case InfoBarVars.Luck:
-                    return World.Player.Luck.ToString();
+                case InfoBarVars.Luck: return World.Player.Luck.ToString();
 
-                case InfoBarVars.FireResist:
-                    return World.Player.FireResistance.ToString();
+                case InfoBarVars.FireResist: return World.Player.FireResistance.ToString();
 
-                case InfoBarVars.ColdResist:
-                    return World.Player.ColdResistance.ToString();
+                case InfoBarVars.ColdResist: return World.Player.ColdResistance.ToString();
 
-                case InfoBarVars.PoisonResist:
-                    return World.Player.PoisonResistance.ToString();
+                case InfoBarVars.PoisonResist: return World.Player.PoisonResistance.ToString();
 
-                case InfoBarVars.EnergyResist:
-                    return World.Player.EnergyResistance.ToString();
+                case InfoBarVars.EnergyResist: return World.Player.EnergyResistance.ToString();
 
-                case InfoBarVars.LowerReagentCost:
-                    return World.Player.LowerReagentCost.ToString();
+                case InfoBarVars.LowerReagentCost: return World.Player.LowerReagentCost.ToString();
 
-                case InfoBarVars.SpellDamageInc:
-                    return World.Player.SpellDamageIncrease.ToString();
+                case InfoBarVars.SpellDamageInc: return World.Player.SpellDamageIncrease.ToString();
 
-                case InfoBarVars.FasterCasting:
-                    return World.Player.FasterCasting.ToString();
+                case InfoBarVars.FasterCasting: return World.Player.FasterCasting.ToString();
 
-                case InfoBarVars.FasterCastRecovery:
-                    return World.Player.FasterCastRecovery.ToString();
+                case InfoBarVars.FasterCastRecovery: return World.Player.FasterCastRecovery.ToString();
 
-                case InfoBarVars.HitChanceInc:
-                    return World.Player.HitChanceIncrease.ToString();
+                case InfoBarVars.HitChanceInc: return World.Player.HitChanceIncrease.ToString();
 
-                case InfoBarVars.DefenseChanceInc:
-                    return World.Player.DefenseChanceIncrease.ToString();
+                case InfoBarVars.DefenseChanceInc: return World.Player.DefenseChanceIncrease.ToString();
 
-                case InfoBarVars.LowerManaCost:
-                    return World.Player.LowerManaCost.ToString();
+                case InfoBarVars.LowerManaCost: return World.Player.LowerManaCost.ToString();
 
-                case InfoBarVars.DamageChanceInc:
-                    return World.Player.DamageIncrease.ToString();
+                case InfoBarVars.DamageChanceInc: return World.Player.DamageIncrease.ToString();
 
-                case InfoBarVars.SwingSpeedInc:
-                    return World.Player.SwingSpeedIncrease.ToString();
+                case InfoBarVars.SwingSpeedInc: return World.Player.SwingSpeedIncrease.ToString();
 
-                case InfoBarVars.StatsCap:
-                    return World.Player.StatsCap.ToString();
+                case InfoBarVars.StatsCap: return World.Player.StatsCap.ToString();
 
-                case InfoBarVars.NameNotoriety:
-                    return World.Player.Name;
+                case InfoBarVars.NameNotoriety: return World.Player.Name;
 
-                case InfoBarVars.TithingPoints:
-                    return World.Player.TithingPoints.ToString();
+                case InfoBarVars.TithingPoints: return World.Player.TithingPoints.ToString();
 
-                default:
-                    return "";
+                default: return "";
             }
         }
 
@@ -397,11 +376,9 @@ namespace ClassicUO.Game.UI.Gumps
                         return 0x0481;
                     }
 
-                case InfoBarVars.NameNotoriety:
-                    return Notoriety.GetHue(World.Player.NotorietyFlag);
+                case InfoBarVars.NameNotoriety: return Notoriety.GetHue(World.Player.NotorietyFlag);
 
-                default:
-                    return 0x0481;
+                default: return 0x0481;
             }
         }
     }

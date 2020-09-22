@@ -32,7 +32,8 @@ namespace ClassicUO.Game.Managers
 {
     internal static class CommandManager
     {
-        private static readonly Dictionary<string, Action<string[]>> _commands = new Dictionary<string, Action<string[]>>();
+        private static readonly Dictionary<string, Action<string[]>> _commands =
+            new Dictionary<string, Action<string[]>>();
 
 
         public static void Initialize()

@@ -206,11 +206,7 @@ namespace ClassicUO.Utility
                     {
                         if (save)
                         {
-                            _sb.Append
-                            (
-                                _string.Substring(start, size)
-                                       .TrimEnd('\r', '\n')
-                            );
+                            _sb.Append(_string.Substring(start, size).TrimEnd('\r', '\n'));
                         }
 
                         _pos = pos;

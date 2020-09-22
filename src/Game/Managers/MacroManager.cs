@@ -75,7 +75,11 @@ namespace ClassicUO.Game.Managers
 
         public void Load()
         {
-            string path = Path.Combine(CUOEnviroment.ExecutablePath, "Data", "Profiles", ProfileManager.Current.Username, ProfileManager.Current.ServerName, ProfileManager.Current.CharacterName, "macros.xml");
+            string path = Path.Combine
+            (
+                CUOEnviroment.ExecutablePath, "Data", "Profiles", ProfileManager.Current.Username,
+                ProfileManager.Current.ServerName, ProfileManager.Current.CharacterName, "macros.xml"
+            );
 
             if (!File.Exists(path))
             {
@@ -121,7 +125,11 @@ namespace ClassicUO.Game.Managers
         {
             List<Macro> list = GetAllMacros();
 
-            string path = Path.Combine(CUOEnviroment.ExecutablePath, "Data", "Profiles", ProfileManager.Current.Username, ProfileManager.Current.ServerName, ProfileManager.Current.CharacterName, "macros.xml");
+            string path = Path.Combine
+            (
+                CUOEnviroment.ExecutablePath, "Data", "Profiles", ProfileManager.Current.Username,
+                ProfileManager.Current.ServerName, ProfileManager.Current.CharacterName, "macros.xml"
+            );
 
             using (XmlTextWriter xml = new XmlTextWriter(path, Encoding.UTF8)
             {
@@ -303,9 +311,7 @@ namespace ClassicUO.Game.Managers
 
                         break;
 
-                    case 1:
-
-                        return;
+                    case 1: return;
 
                     case 0:
                         _lastMacro = (MacroObject) _lastMacro?.Next;
@@ -623,8 +629,7 @@ namespace ClassicUO.Game.Managers
 
                                     if (macro.Code == MacroType.Close)
                                     {
-                                        UIManager.GetGump<OptionsGump>()
-                                                 ?.Dispose();
+                                        UIManager.GetGump<OptionsGump>()?.Dispose();
                                     }
 
                                     break;
@@ -663,8 +668,7 @@ namespace ClassicUO.Game.Managers
                                         }
                                         else
                                         {
-                                            UIManager.GetGump<BaseHealthBarGump>(World.Player)
-                                                     ?.Dispose();
+                                            UIManager.GetGump<BaseHealthBarGump>(World.Player)?.Dispose();
                                         }
                                     }
                                     else if (macro.Code == MacroType.Minimize)
@@ -675,17 +679,24 @@ namespace ClassicUO.Game.Managers
 
                                             if (ProfileManager.Current.CustomBarsToggled)
                                             {
-                                                UIManager.Add(new HealthBarGumpCustom(World.Player) {X = status.ScreenCoordinateX, Y = status.ScreenCoordinateY});
+                                                UIManager.Add
+                                                (
+                                                    new HealthBarGumpCustom(World.Player)
+                                                        { X = status.ScreenCoordinateX, Y = status.ScreenCoordinateY }
+                                                );
                                             }
                                             else
                                             {
-                                                UIManager.Add(new HealthBarGump(World.Player) {X = status.ScreenCoordinateX, Y = status.ScreenCoordinateY});
+                                                UIManager.Add
+                                                (
+                                                    new HealthBarGump(World.Player)
+                                                        { X = status.ScreenCoordinateX, Y = status.ScreenCoordinateY }
+                                                );
                                             }
                                         }
                                         else
                                         {
-                                            UIManager.GetGump<BaseHealthBarGump>(World.Player)
-                                                     ?.BringOnTop();
+                                            UIManager.GetGump<BaseHealthBarGump>(World.Player)?.BringOnTop();
                                         }
                                     }
                                     else if (macro.Code == MacroType.Maximize)
@@ -696,11 +707,16 @@ namespace ClassicUO.Game.Managers
                                         }
                                         else
                                         {
-                                            BaseHealthBarGump healthbar = UIManager.GetGump<BaseHealthBarGump>(World.Player);
+                                            BaseHealthBarGump healthbar = UIManager.GetGump<BaseHealthBarGump>
+                                                (World.Player);
 
                                             if (healthbar != null)
                                             {
-                                                UIManager.Add(StatusGumpBase.AddStatusGump(healthbar.ScreenCoordinateX, healthbar.ScreenCoordinateY));
+                                                UIManager.Add
+                                                (
+                                                    StatusGumpBase.AddStatusGump
+                                                        (healthbar.ScreenCoordinateX, healthbar.ScreenCoordinateY)
+                                                );
                                             }
                                         }
                                     }
@@ -752,8 +768,7 @@ namespace ClassicUO.Game.Managers
                                     {
                                         if (macro.Code == MacroType.Close)
                                         {
-                                            UIManager.GetGump<SkillGumpAdvanced>()
-                                                     ?.Dispose();
+                                            UIManager.GetGump<SkillGumpAdvanced>()?.Dispose();
                                         }
                                     }
 
@@ -791,18 +806,15 @@ namespace ClassicUO.Game.Managers
 
                                     if (macro.Code == MacroType.Close)
                                     {
-                                        UIManager.GetGump<MiniMapGump>()
-                                                 ?.Dispose();
+                                        UIManager.GetGump<MiniMapGump>()?.Dispose();
                                     }
                                     else if (macro.Code == MacroType.Minimize)
                                     {
-                                        UIManager.GetGump<MiniMapGump>()
-                                                 ?.ToggleSize(false);
+                                        UIManager.GetGump<MiniMapGump>()?.ToggleSize(false);
                                     }
                                     else if (macro.Code == MacroType.Maximize)
                                     {
-                                        UIManager.GetGump<MiniMapGump>()
-                                                 ?.ToggleSize(true);
+                                        UIManager.GetGump<MiniMapGump>()?.ToggleSize(true);
                                     }
 
                                     break;
@@ -816,8 +828,7 @@ namespace ClassicUO.Game.Managers
 
                                     if (macro.Code == MacroType.Close)
                                     {
-                                        UIManager.GetGump<PartyGump>()
-                                                 ?.Dispose();
+                                        UIManager.GetGump<PartyGump>()?.Dispose();
                                     }
 
                                     break;
@@ -917,8 +928,7 @@ namespace ClassicUO.Game.Managers
                     break;
 
                 case MacroType.QuitGame:
-                    Client.Game.GetScene<GameScene>()
-                          ?.RequestQuitGame();
+                    Client.Game.GetScene<GameScene>()?.RequestQuitGame();
 
                     break;
 
@@ -980,10 +990,8 @@ namespace ClassicUO.Game.Managers
                         {
                             TargetManager.Target
                             (
-                                TargetManager.LastTargetInfo.Graphic,
-                                TargetManager.LastTargetInfo.X,
-                                TargetManager.LastTargetInfo.Y,
-                                TargetManager.LastTargetInfo.Z
+                                TargetManager.LastTargetInfo.Graphic, TargetManager.LastTargetInfo.X,
+                                TargetManager.LastTargetInfo.Y, TargetManager.LastTargetInfo.Z
                             );
                         }
 
@@ -1081,7 +1089,8 @@ namespace ClassicUO.Game.Managers
 
                 case MacroType.TargetNext:
 
-                    uint sel_obj = World.SearchObject(TargetManager.LastTargetInfo.Serial, SCAN_TYPE_OBJECT.STO_MOBILES, SCAN_MODE_OBJECT.SMO_NEXT);
+                    uint sel_obj = World.SearchObject
+                        (TargetManager.LastTargetInfo.Serial, SCAN_TYPE_OBJECT.STO_MOBILES, SCAN_MODE_OBJECT.SMO_NEXT);
 
                     if (SerialHelper.IsValid(sel_obj))
                     {
@@ -1117,8 +1126,8 @@ namespace ClassicUO.Game.Managers
 
                 case MacroType.CloseGump:
 
-                    UIManager.Gumps
-                             .Where(s => !(s is TopBarGump) && !(s is BuffGump) && !(s is WorldViewportGump))
+                    UIManager.Gumps.Where
+                                 (s => !(s is TopBarGump) && !(s is BuffGump) && !(s is WorldViewportGump))
                              .ToList()
                              .ForEach(s => s.Dispose());
 
@@ -1126,18 +1135,15 @@ namespace ClassicUO.Game.Managers
 
                 case MacroType.AlwaysRun:
                     ProfileManager.Current.AlwaysRun = !ProfileManager.Current.AlwaysRun;
-                    GameActions.Print(ProfileManager.Current.AlwaysRun ? ResGeneral.AlwaysRunIsNowOn : ResGeneral.AlwaysRunIsNowOff);
+
+                    GameActions.Print
+                        (ProfileManager.Current.AlwaysRun ? ResGeneral.AlwaysRunIsNowOn : ResGeneral.AlwaysRunIsNowOff);
 
                     break;
 
                 case MacroType.SaveDesktop:
                     ProfileManager.Current?.Save
-                    (
-                        UIManager.Gumps.OfType<Gump>()
-                                 .Where(s => s.CanBeSaved)
-                                 .Reverse()
-                                 .ToList()
-                    );
+                        (UIManager.Gumps.OfType<Gump>().Where(s => s.CanBeSaved).Reverse().ToList());
 
                     break;
 
@@ -1265,7 +1271,8 @@ namespace ClassicUO.Game.Managers
                             }
                             else if (SerialHelper.IsMobile(TargetManager.SelectedTarget))
                             {
-                                NetClient.Socket.Send(new PTargetSelectedObject(bandage.Serial, TargetManager.SelectedTarget));
+                                NetClient.Socket.Send
+                                    (new PTargetSelectedObject(bandage.Serial, TargetManager.SelectedTarget));
                             }
                         }
                     }
@@ -1275,7 +1282,8 @@ namespace ClassicUO.Game.Managers
                 case MacroType.SetUpdateRange:
                 case MacroType.ModifyUpdateRange:
 
-                    if (macro is MacroObjectString moss && !string.IsNullOrEmpty(moss.Text) && byte.TryParse(moss.Text, out byte res))
+                    if (macro is MacroObjectString moss && !string.IsNullOrEmpty(moss.Text) && byte.TryParse
+                        (moss.Text, out byte res))
                     {
                         if (res < Constants.MIN_VIEW_RANGE)
                         {
@@ -1352,7 +1360,11 @@ namespace ClassicUO.Game.Managers
                     // 4 - Mobile (any mobiles)
                     int scantype = macro.SubCode - MacroSubType.Hostile;
 
-                    SetLastTarget(World.SearchObject(TargetManager.SelectedTarget, (SCAN_TYPE_OBJECT) scantype, (SCAN_MODE_OBJECT) scanRange));
+                    SetLastTarget
+                    (
+                        World.SearchObject
+                            (TargetManager.SelectedTarget, (SCAN_TYPE_OBJECT) scantype, (SCAN_MODE_OBJECT) scanRange)
+                    );
 
                     break;
 
@@ -1524,7 +1536,12 @@ namespace ClassicUO.Game.Managers
                 {
                     if (ent != null)
                     {
-                        GameActions.MessageOverhead(string.Format(ResGeneral.Target0, ent.Name), Notoriety.GetHue(((Mobile) ent).NotorietyFlag), World.Player);
+                        GameActions.MessageOverhead
+                        (
+                            string.Format(ResGeneral.Target0, ent.Name), Notoriety.GetHue(((Mobile) ent).NotorietyFlag),
+                            World.Player
+                        );
+
                         TargetManager.SelectedTarget = serial;
                         TargetManager.LastTargetInfo.SetEntity(serial);
 
@@ -1578,7 +1595,8 @@ namespace ClassicUO.Game.Managers
                 return false;
             }
 
-            return Key == other.Key && Alt == other.Alt && Ctrl == other.Ctrl && Shift == other.Shift && Name == other.Name;
+            return Key == other.Key && Alt == other.Alt && Ctrl == other.Ctrl && Shift == other.Shift &&
+                   Name == other.Name;
         }
 
         //public Macro Left { get; set; }

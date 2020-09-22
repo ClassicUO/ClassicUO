@@ -88,11 +88,10 @@ namespace TinyJson
                 throw new ArgumentNullException();
             }
 
-            Predicate<Type> interfaceTest = i => i.IsGenericType && i.GetGenericTypeDefinition()
-                                                                     .IsAssignableFrom(genericInterface);
+            Predicate<Type> interfaceTest = i =>
+                i.IsGenericType && i.GetGenericTypeDefinition().IsAssignableFrom(genericInterface);
 
-            return interfaceTest(type) || type.GetInterfaces()
-                                              .Any(i => interfaceTest(i));
+            return interfaceTest(type) || type.GetInterfaces().Any(i => interfaceTest(i));
         }
 
         private static string UnwrapFieldName(string name)
@@ -165,16 +164,14 @@ namespace TinyJson
                 case TypeCode.Int64:
                 case TypeCode.Decimal:
                 case TypeCode.Double:
-                case TypeCode.Single:
-                    return true;
+                case TypeCode.Single: return true;
 
                 case TypeCode.Object:
                     Type underlyingType = Nullable.GetUnderlyingType(type);
 
                     return underlyingType != null && underlyingType.IsNumeric();
 
-                default:
-                    return false;
+                default: return false;
             }
         }
 
@@ -189,16 +186,14 @@ namespace TinyJson
             {
                 case TypeCode.Decimal:
                 case TypeCode.Double:
-                case TypeCode.Single:
-                    return true;
+                case TypeCode.Single: return true;
 
                 case TypeCode.Object:
                     Type underlyingType = Nullable.GetUnderlyingType(type);
 
                     return underlyingType != null && underlyingType.IsFloatingPoint();
 
-                default:
-                    return false;
+                default: return false;
             }
         }
     }

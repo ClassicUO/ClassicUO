@@ -62,10 +62,11 @@ namespace ClassicUO.Game.UI.Controls
 
             Add
             (
-                _label = new HoveredLabel(string.Empty, false, 1, 0x0021, 0x0021, 150, 1, FontStyle.Italic, TEXT_ALIGN_TYPE.TS_CENTER)
-                {
-                    Y = 5
-                }
+                _label = new HoveredLabel
+                    (string.Empty, false, 1, 0x0021, 0x0021, 150, 1, FontStyle.Italic, TEXT_ALIGN_TYPE.TS_CENTER)
+                    {
+                        Y = 5
+                    }
             );
 
             _label.MouseUp += LabelOnMouseUp;

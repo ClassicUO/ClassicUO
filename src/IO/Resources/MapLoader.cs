@@ -131,7 +131,8 @@ namespace ClassicUO.IO.Resources
 
                     if (!string.IsNullOrEmpty(Settings.GlobalSettings.MapsLayouts))
                     {
-                        string[] values = Settings.GlobalSettings.MapsLayouts.Split(new[] {';'}, StringSplitOptions.RemoveEmptyEntries);
+                        string[] values = Settings.GlobalSettings.MapsLayouts.Split
+                            (new[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
 
                         Constants.MAPS_COUNT = values.Length;
                         MapsDefaultSize = new int[values.Length, 2];
@@ -141,13 +142,14 @@ namespace ClassicUO.IO.Resources
 
                         int index = 0;
 
-                        char[] splitchar = new char[1] {','};
+                        char[] splitchar = new char[1] { ',' };
 
                         foreach (string s in values)
                         {
                             string[] v = s.Split(splitchar, StringSplitOptions.RemoveEmptyEntries);
 
-                            if (v.Length >= 2 && int.TryParse(v[0], out int width) && int.TryParse(v[1], out int height))
+                            if (v.Length >= 2 && int.TryParse(v[0], out int width) && int.TryParse
+                                (v[1], out int height))
                             {
                                 MapsDefaultSize[index, 0] = width;
                                 MapsDefaultSize[index, 1] = height;
@@ -223,15 +225,13 @@ namespace ClassicUO.IO.Resources
 
                     int mapblocksize = sizeof(MapBlock);
 
-                    if (_filesMap[0]
-                        .Length / mapblocksize == 393216 || Client.Version < ClientVersion.CV_4011D)
+                    if (_filesMap[0].Length / mapblocksize == 393216 || Client.Version < ClientVersion.CV_4011D)
                     {
                         MapsDefaultSize[0, 0] = MapsDefaultSize[1, 0] = 6144;
                     }
 
                     // This is an hack to patch correctly all maps when you have to fake map1
-                    if (_filesMap[1] == null || _filesMap[1]
-                        .StartAddress == IntPtr.Zero)
+                    if (_filesMap[1] == null || _filesMap[1].StartAddress == IntPtr.Zero)
                     {
                         _filesMap[1] = _filesMap[0];
                         _filesStatics[1] = _filesStatics[0];
@@ -312,11 +312,9 @@ namespace ClassicUO.IO.Resources
                     {
                         fileNumber = shifted;
 
-                        if (shifted < Entries[i]
-                            .Length)
+                        if (shifted < Entries[i].Length)
                         {
-                            uopoffset = (ulong) Entries[i][shifted]
-                                .Offset;
+                            uopoffset = (ulong) Entries[i][shifted].Offset;
                         }
                     }
                 }
@@ -369,11 +367,9 @@ namespace ClassicUO.IO.Resources
                 return;
             }
 
-            BlockData[0][block]
-                .OriginalMapAddress = address;
+            BlockData[0][block].OriginalMapAddress = address;
 
-            BlockData[0][block]
-                .MapAddress = address;
+            BlockData[0][block].MapAddress = address;
         }
 
         public unsafe bool ApplyPatches(Packet reader)
@@ -403,8 +399,7 @@ namespace ClassicUO.IO.Resources
 
                 //SanitizeMapIndex(ref idx);
 
-                if (_filesMap[idx] == null || _filesMap[idx]
-                    .StartAddress == IntPtr.Zero)
+                if (_filesMap[idx] == null || _filesMap[idx].StartAddress == IntPtr.Zero)
                 {
                     reader.Skip(8);
 
@@ -442,8 +437,7 @@ namespace ClassicUO.IO.Resources
 
                         if (blockIndex < maxBlockCount)
                         {
-                            BlockData[idx][blockIndex]
-                                .MapAddress = (ulong) dif.PositionAddress;
+                            BlockData[idx][blockIndex].MapAddress = (ulong) dif.PositionAddress;
 
                             result = true;
                         }
@@ -457,14 +451,13 @@ namespace ClassicUO.IO.Resources
                     UOFileMul difl = _staDifl[i];
                     UOFileMul difi = _staDifi[i];
 
-                    if (difl == null || difi == null || _staDif[i] == null || difl.Length == 0 || difi.Length == 0 || _staDif[i]
-                        .Length == 0)
+                    if (difl == null || difi == null || _staDif[i] == null || difl.Length == 0 || difi.Length == 0 ||
+                        _staDif[i].Length == 0)
                     {
                         continue;
                     }
 
-                    ulong startAddress = (ulong) _staDif[i]
-                        .StartAddress;
+                    ulong startAddress = (ulong) _staDif[i].StartAddress;
 
                     staticPatchesCount = Math.Min(staticPatchesCount, (int) difl.Length >> 2);
 
@@ -500,11 +493,9 @@ namespace ClassicUO.IO.Resources
                                 }
                             }
 
-                            BlockData[idx][blockIndex]
-                                .StaticAddress = realStaticAddress;
+                            BlockData[idx][blockIndex].StaticAddress = realStaticAddress;
 
-                            BlockData[idx][blockIndex]
-                                .StaticCount = (uint) realStaticCount;
+                            BlockData[idx][blockIndex].StaticCount = (uint) realStaticCount;
 
                             result = true;
                         }
@@ -557,10 +548,9 @@ namespace ClassicUO.IO.Resources
 
         public void SanitizeMapIndex(ref int map)
         {
-            if (map == 1 && (_filesMap[1] == null || _filesMap[1]
-                .StartAddress == IntPtr.Zero || _filesStatics[1] == null || _filesStatics[1]
-                .StartAddress == IntPtr.Zero || _filesIdxStatics[1] == null || _filesIdxStatics[1]
-                .StartAddress == IntPtr.Zero))
+            if (map == 1 && (_filesMap[1] == null || _filesMap[1].StartAddress == IntPtr.Zero ||
+                             _filesStatics[1] == null || _filesStatics[1].StartAddress == IntPtr.Zero ||
+                             _filesIdxStatics[1] == null || _filesIdxStatics[1].StartAddress == IntPtr.Zero))
             {
                 map = 0;
             }

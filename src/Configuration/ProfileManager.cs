@@ -33,7 +33,9 @@ namespace ClassicUO.Configuration
 
         public static void Load(string servername, string username, string charactername)
         {
-            string path = FileSystemHelper.CreateFolderIfNotExists(CUOEnviroment.ExecutablePath, "Data", "Profiles", username, servername, charactername);
+            string path = FileSystemHelper.CreateFolderIfNotExists
+                (CUOEnviroment.ExecutablePath, "Data", "Profiles", username, servername, charactername);
+
             string fileToLoad = Path.Combine(path, "profile.json");
 
             Current = ConfigurationResolver.Load<Profile>(fileToLoad) ?? new Profile();

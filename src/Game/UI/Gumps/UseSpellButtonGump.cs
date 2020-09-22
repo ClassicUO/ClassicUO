@@ -63,7 +63,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void BuildGump()
         {
-            Add(_background = new GumpPic(0, 0, (ushort) _spell.GumpIconSmallID, 0) {AcceptMouseInput = false});
+            Add(_background = new GumpPic(0, 0, (ushort) _spell.GumpIconSmallID, 0) { AcceptMouseInput = false });
 
             int cliloc = GetSpellTooltip(_spell.ID);
 
@@ -138,7 +138,8 @@ namespace ClassicUO.Game.UI.Gumps
 
             Point offset = Mouse.LDroppedOffset;
 
-            if (ProfileManager.Current.CastSpellsByOneClick && button == MouseButtonType.Left && Math.Abs(offset.X) < 5 && Math.Abs(offset.Y) < 5)
+            if (ProfileManager.Current.CastSpellsByOneClick && button == MouseButtonType.Left &&
+                Math.Abs(offset.X) < 5 && Math.Abs(offset.Y) < 5)
             {
                 GameActions.CastSpell(_spell.ID);
             }

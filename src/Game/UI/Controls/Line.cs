@@ -38,11 +38,7 @@ namespace ClassicUO.Game.UI.Controls
             Width = w;
             Height = h;
 
-            _texture = Texture2DCache.GetTexture
-            (
-                new Color
-                    {PackedValue = color}
-            );
+            _texture = Texture2DCache.GetTexture(new Color { PackedValue = color });
         }
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)

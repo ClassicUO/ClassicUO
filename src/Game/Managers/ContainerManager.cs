@@ -123,7 +123,8 @@ namespace ClassicUO.Game.Managers
                             {
                                 X = Constants.CONTAINER_RECT_DEFAULT_POSITION;
 
-                                if (Y + height + Constants.CONTAINER_RECT_LINESTEP > Client.Game.Window.ClientBounds.Height)
+                                if (Y + height + Constants.CONTAINER_RECT_LINESTEP >
+                                    Client.Game.Window.ClientBounds.Height)
                                 {
                                     Y = Constants.CONTAINER_RECT_DEFAULT_POSITION;
                                 }
@@ -132,9 +133,11 @@ namespace ClassicUO.Game.Managers
                                     Y += Constants.CONTAINER_RECT_LINESTEP;
                                 }
                             }
-                            else if (Y + height + Constants.CONTAINER_RECT_STEP > Client.Game.Window.ClientBounds.Height)
+                            else if (Y + height + Constants.CONTAINER_RECT_STEP >
+                                     Client.Game.Window.ClientBounds.Height)
                             {
-                                if (X + width + Constants.CONTAINER_RECT_LINESTEP > Client.Game.Window.ClientBounds.Width)
+                                if (X + width + Constants.CONTAINER_RECT_LINESTEP >
+                                    Client.Game.Window.ClientBounds.Width)
                                 {
                                     X = Constants.CONTAINER_RECT_DEFAULT_POSITION;
                                 }
@@ -231,21 +234,30 @@ namespace ClassicUO.Game.Managers
                 using (StreamWriter writer = new StreamWriter(File.Create(path)))
                 {
                     writer.WriteLine("# FORMAT");
-                    writer.WriteLine("# GRAPHIC OPEN_SOUND_ID CLOSE_SOUND_ID LEFT TOP RIGHT BOTTOM ICONIZED_GRAPHIC [0 if not exists] MINIMIZER_AREA_X [0 if not exists] MINIMIZER_AREA_Y [0 if not exists]");
+
+                    writer.WriteLine
+                    (
+                        "# GRAPHIC OPEN_SOUND_ID CLOSE_SOUND_ID LEFT TOP RIGHT BOTTOM ICONIZED_GRAPHIC [0 if not exists] MINIMIZER_AREA_X [0 if not exists] MINIMIZER_AREA_Y [0 if not exists]"
+                    );
+
                     writer.WriteLine("# LEFT = X,  TOP = Y,  RIGHT = X + WIDTH,  BOTTOM = Y + HEIGHT");
                     writer.WriteLine();
                     writer.WriteLine();
 
                     foreach (KeyValuePair<ushort, ContainerData> e in _data)
                     {
-                        writer.WriteLine($"{e.Value.Graphic} {e.Value.OpenSound} {e.Value.ClosedSound} {e.Value.Bounds.X} {e.Value.Bounds.Y} {e.Value.Bounds.Width} {e.Value.Bounds.Height} {e.Value.IconizedGraphic} {e.Value.MinimizerArea.X} {e.Value.MinimizerArea.Y}");
+                        writer.WriteLine
+                        (
+                            $"{e.Value.Graphic} {e.Value.OpenSound} {e.Value.ClosedSound} {e.Value.Bounds.X} {e.Value.Bounds.Y} {e.Value.Bounds.Width} {e.Value.Bounds.Height} {e.Value.IconizedGraphic} {e.Value.MinimizerArea.X} {e.Value.MinimizerArea.Y}"
+                        );
                     }
                 }
             }
 
             _data.Clear();
 
-            TextFileParser containersParser = new TextFileParser(File.ReadAllText(path), new[] {' ', '\t', ','}, new[] {'#', ';'}, new[] {'"', '"'});
+            TextFileParser containersParser = new TextFileParser
+                (File.ReadAllText(path), new[] { ' ', '\t', ',' }, new[] { '#', ';' }, new[] { '"', '"' });
 
             while (!containersParser.IsEOF())
             {
@@ -253,13 +265,10 @@ namespace ClassicUO.Game.Managers
 
                 if (ss != null && ss.Count != 0)
                 {
-                    if (ushort.TryParse(ss[0], out ushort graphic) &&
-                        ushort.TryParse(ss[1], out ushort open_sound_id) &&
-                        ushort.TryParse(ss[2], out ushort close_sound_id) &&
-                        int.TryParse(ss[3], out int x) &&
-                        int.TryParse(ss[4], out int y) &&
-                        int.TryParse(ss[5], out int w) &&
-                        int.TryParse(ss[6], out int h))
+                    if (ushort.TryParse(ss[0], out ushort graphic) && ushort.TryParse
+                        (ss[1], out ushort open_sound_id) && ushort.TryParse
+                        (ss[2], out ushort close_sound_id) && int.TryParse(ss[3], out int x) && int.TryParse
+                        (ss[4], out int y) && int.TryParse(ss[5], out int w) && int.TryParse(ss[6], out int h))
                     {
                         ushort iconized_graphic = 0;
                         int minimizer_x = 0, minimizer_y = 0;
@@ -275,7 +284,11 @@ namespace ClassicUO.Game.Managers
                             }
                         }
 
-                        _data[graphic] = new ContainerData(graphic, open_sound_id, close_sound_id, x, y, w, h, iconized_graphic, minimizer_x, minimizer_y);
+                        _data[graphic] = new ContainerData
+                        (
+                            graphic, open_sound_id, close_sound_id, x, y, w, h, iconized_graphic, minimizer_x,
+                            minimizer_y
+                        );
                     }
                 }
             }

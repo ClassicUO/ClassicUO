@@ -37,7 +37,8 @@ namespace ClassicUO.Game.UI.Gumps
     internal class DebugGump : Gump
     {
         private const string DEBUG_STRING_0 = "- FPS: {0} (Min={1}, Max={2}), Zoom: {3}, Total Objs: {4}\n";
-        private const string DEBUG_STRING_1 = "- Mobiles: {0}   Items: {1}   Statics: {2}   Multi: {3}   Lands: {4}   Effects: {5}\n";
+        private const string DEBUG_STRING_1 =
+            "- Mobiles: {0}   Items: {1}   Statics: {2}   Multi: {3}   Lands: {4}   Effects: {5}\n";
         private const string DEBUG_STRING_2 = "- CharPos: {0}\n- Mouse: {1}\n- InGamePos: {2}\n";
         private const string DEBUG_STRING_3 = "- Selected: {0}";
 
@@ -104,31 +105,42 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (IsMinimized && scene != null)
                 {
-                    _sb.AppendFormat(DEBUG_STRING_0, CUOEnviroment.CurrentRefreshRate, 0, 0, !World.InGame ? 1f : scene.Camera.Zoom, scene.RenderedObjectsCount);
-                    _sb.AppendLine($"- CUO version: {CUOEnviroment.Version}, Client version: {Settings.GlobalSettings.ClientVersion}");
+                    _sb.AppendFormat
+                    (
+                        DEBUG_STRING_0, CUOEnviroment.CurrentRefreshRate, 0, 0, !World.InGame ? 1f : scene.Camera.Zoom,
+                        scene.RenderedObjectsCount
+                    );
+
+                    _sb.AppendLine
+                    (
+                        $"- CUO version: {CUOEnviroment.Version}, Client version: {Settings.GlobalSettings.ClientVersion}"
+                    );
+
                     //_sb.AppendFormat(DEBUG_STRING_1, Engine.DebugInfo.MobilesRendered, Engine.DebugInfo.ItemsRendered, Engine.DebugInfo.StaticsRendered, Engine.DebugInfo.MultiRendered, Engine.DebugInfo.LandsRendered, Engine.DebugInfo.EffectsRendered);
-                    _sb.AppendFormat(DEBUG_STRING_2, World.InGame ? $"{World.Player.X}, {World.Player.Y}, {World.Player.Z}" : "0xFFFF, 0xFFFF, 0", Mouse.Position, SelectedObject.Object is GameObject gobj ? $"{gobj.X}, {gobj.Y}, {gobj.Z}" : "0xFFFF, 0xFFFF, 0");
+                    _sb.AppendFormat
+                    (
+                        DEBUG_STRING_2,
+                        World.InGame ? $"{World.Player.X}, {World.Player.Y}, {World.Player.Z}" : "0xFFFF, 0xFFFF, 0",
+                        Mouse.Position,
+                        SelectedObject.Object is GameObject gobj ? $"{gobj.X}, {gobj.Y}, {gobj.Z}" : "0xFFFF, 0xFFFF, 0"
+                    );
+
                     _sb.AppendFormat(DEBUG_STRING_3, ReadObject(SelectedObject.Object));
 
                     if (CUOEnviroment.Profiler)
                     {
-                        double timeDraw = Profiler.GetContext("RenderFrame")
-                                                  .TimeInContext;
+                        double timeDraw = Profiler.GetContext("RenderFrame").TimeInContext;
 
-                        double timeUpdate = Profiler.GetContext("Update")
-                                                    .TimeInContext;
+                        double timeUpdate = Profiler.GetContext("Update").TimeInContext;
 
-                        double timeFixedUpdate = Profiler.GetContext("FixedUpdate")
-                                                         .TimeInContext;
+                        double timeFixedUpdate = Profiler.GetContext("FixedUpdate").TimeInContext;
 
-                        double timeOutOfContext = Profiler.GetContext("OutOfContext")
-                                                          .TimeInContext;
+                        double timeOutOfContext = Profiler.GetContext("OutOfContext").TimeInContext;
 
                         //double timeTotalCheck = timeOutOfContext + timeDraw + timeUpdate;
                         double timeTotal = Profiler.TrackedTime;
 
-                        double avgDrawMs = Profiler.GetContext("RenderFrame")
-                                                   .AverageTime;
+                        double avgDrawMs = Profiler.GetContext("RenderFrame").AverageTime;
 
                         _sb.AppendLine("- Profiling");
 
@@ -137,18 +149,16 @@ namespace ClassicUO.Game.UI.Gumps
                             string.Format
                             (
                                 "    Draw:{0:0.0}% Update:{1:0.0}% FixedUpd:{2:0.0} AvgDraw:{3:0.0}ms {4}",
-                                100d * (timeDraw / timeTotal),
-                                100d * (timeUpdate / timeTotal),
-                                100d * (timeFixedUpdate / timeTotal),
-                                avgDrawMs,
-                                CUOEnviroment.CurrentRefreshRate
+                                100d * (timeDraw / timeTotal), 100d * (timeUpdate / timeTotal),
+                                100d * (timeFixedUpdate / timeTotal), avgDrawMs, CUOEnviroment.CurrentRefreshRate
                             )
                         );
                     }
                 }
                 else if (scene != null && scene.Camera.Zoom != 1f)
                 {
-                    _sb.AppendFormat(DEBUG_STRING_SMALL, CUOEnviroment.CurrentRefreshRate, !World.InGame ? 1f : scene.Camera.Zoom);
+                    _sb.AppendFormat
+                        (DEBUG_STRING_SMALL, CUOEnviroment.CurrentRefreshRate, !World.InGame ? 1f : scene.Camera.Zoom);
                 }
                 else
                 {
@@ -185,31 +195,26 @@ namespace ClassicUO.Game.UI.Gumps
                 switch (obj)
                 {
                     case Mobile mob:
-
-                        return $"Mobile (0x{mob.Serial:X8})  graphic: 0x{mob.Graphic:X4}  flags: {mob.Flags}  noto: {mob.NotorietyFlag}";
+                        return
+                            $"Mobile (0x{mob.Serial:X8})  graphic: 0x{mob.Graphic:X4}  flags: {mob.Flags}  noto: {mob.NotorietyFlag}";
 
                     case Item item:
-
-                        return $"Item (0x{item.Serial:X8})  graphic: 0x{item.Graphic:X4}  flags: {item.Flags}  amount: {item.Amount} itemdata: {item.ItemData.Flags}";
+                        return
+                            $"Item (0x{item.Serial:X8})  graphic: 0x{item.Graphic:X4}  flags: {item.Flags}  amount: {item.Amount} itemdata: {item.ItemData.Flags}";
 
                     case Static st:
-
-                        return $"Static (0x{st.Graphic:X4})  height: {st.ItemData.Height}  flags: {st.ItemData.Flags}  Alpha: {st.AlphaHue}";
+                        return
+                            $"Static (0x{st.Graphic:X4})  height: {st.ItemData.Height}  flags: {st.ItemData.Flags}  Alpha: {st.AlphaHue}";
 
                     case Multi multi:
+                        return
+                            $"Multi (0x{multi.Graphic:X4})  height: {multi.ItemData.Height}  flags: {multi.ItemData.Flags}";
 
-                        return $"Multi (0x{multi.Graphic:X4})  height: {multi.ItemData.Height}  flags: {multi.ItemData.Flags}";
+                    case GameEffect effect: return "GameEffect";
 
-                    case GameEffect effect:
-                        return "GameEffect";
+                    case TextObject overhead: return $"TextOverhead type: {overhead.Type}  hue: 0x{overhead.Hue:X4}";
 
-                    case TextObject overhead:
-
-                        return $"TextOverhead type: {overhead.Type}  hue: 0x{overhead.Hue:X4}";
-
-                    case Land land:
-
-                        return $"Land (0x{land.Graphic:X4})  flags: {land.TileData.Flags}";
+                    case Land land: return $"Land (0x{land.Graphic:X4})  flags: {land.TileData.Flags}";
                 }
             }
 

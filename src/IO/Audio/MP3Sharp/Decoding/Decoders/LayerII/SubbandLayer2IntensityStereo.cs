@@ -31,8 +31,7 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding.Decoders.LayerII
         /// <summary>
         ///     Constructor
         /// </summary>
-        public SubbandLayer2IntensityStereo(int subbandnumber)
-            : base(subbandnumber)
+        public SubbandLayer2IntensityStereo(int subbandnumber) : base(subbandnumber)
         {
         }
 
@@ -91,8 +90,8 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding.Decoders.LayerII
 
                     case 2:
 
-                        channel2_scalefactor1 =
-                            channel2_scalefactor2 = channel2_scalefactor3 = ScaleFactors[stream.GetBitsFromBuffer(6)];
+                        channel2_scalefactor1 = channel2_scalefactor2 =
+                            channel2_scalefactor3 = ScaleFactors[stream.GetBitsFromBuffer(6)];
 
                         break;
 

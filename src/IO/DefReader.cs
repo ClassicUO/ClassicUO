@@ -65,8 +65,7 @@ namespace ClassicUO.IO
         public int Position { get; private set; }
         public int LinesCount => _parts.Count;
 
-        public int PartsCount => _parts[Line]
-            .Length;
+        public int PartsCount => _parts[Line].Length;
 
         private bool IsEOF => Line + 1 >= LinesCount;
 
@@ -134,17 +133,17 @@ namespace ClassicUO.IO
 
                 if (groupStart >= 0 && groupEnd >= 0)
                 {
-                    string[] firstPart = line.Substring(0, groupStart)
+                    string[] firstPart = line.Substring
+                                                 (0, groupStart)
                                              .Split(_tokens, StringSplitOptions.RemoveEmptyEntries);
 
                     string group = line.Substring(groupStart, groupEnd - groupStart + 1);
 
-                    string[] lastPart = line.Substring(groupEnd + 1, line.Length - groupEnd - 1)
+                    string[] lastPart = line.Substring
+                                                (groupEnd + 1, line.Length - groupEnd - 1)
                                             .Split(_tokens, StringSplitOptions.RemoveEmptyEntries);
 
-                    p = firstPart.Concat(new[] {group})
-                                 .Concat(lastPart)
-                                 .ToArray();
+                    p = firstPart.Concat(new[] { group }).Concat(lastPart).ToArray();
                 }
                 else
                 {
@@ -164,7 +163,7 @@ namespace ClassicUO.IO
             {
                 Log.Error($"Index out of range [Line: {line}]. Returned '0'");
 
-                return new[] {"0"};
+                return new[] { "0" };
             }
 
             return _parts[line];
@@ -225,8 +224,7 @@ namespace ClassicUO.IO
                             {
                                 NumberStyles style = NumberStyles.Any;
 
-                                if (splitRes[i]
-                                    .Length > 1 && splitRes[i][0] == '0' && splitRes[i][1] == 'x')
+                                if (splitRes[i].Length > 1 && splitRes[i][0] == '0' && splitRes[i][1] == 'x')
                                 {
                                     style = NumberStyles.HexNumber;
                                 }
@@ -274,9 +272,10 @@ namespace ClassicUO.IO
 
             if (!string.IsNullOrEmpty(token))
             {
-                return token.StartsWith("0x")
-                    ? int.Parse(token.Remove(0, 2), NumberStyles.HexNumber)
-                    : int.Parse(token);
+                return token.StartsWith
+                    ("0x") ?
+                    int.Parse(token.Remove(0, 2), NumberStyles.HexNumber) :
+                    int.Parse(token);
             }
 
             return -1;

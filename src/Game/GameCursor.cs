@@ -44,13 +44,16 @@ namespace ClassicUO.Game
         private static readonly ushort[,] _cursorData = new ushort[3, 16]
         {
             {
-                0x206A, 0x206B, 0x206C, 0x206D, 0x206E, 0x206F, 0x2070, 0x2071, 0x2072, 0x2073, 0x2074, 0x2075, 0x2076, 0x2077, 0x2078, 0x2079
+                0x206A, 0x206B, 0x206C, 0x206D, 0x206E, 0x206F, 0x2070, 0x2071, 0x2072, 0x2073, 0x2074, 0x2075, 0x2076,
+                0x2077, 0x2078, 0x2079
             },
             {
-                0x2053, 0x2054, 0x2055, 0x2056, 0x2057, 0x2058, 0x2059, 0x205A, 0x205B, 0x205C, 0x205D, 0x205E, 0x205F, 0x2060, 0x2061, 0x2062
+                0x2053, 0x2054, 0x2055, 0x2056, 0x2057, 0x2058, 0x2059, 0x205A, 0x205B, 0x205C, 0x205D, 0x205E, 0x205F,
+                0x2060, 0x2061, 0x2062
             },
             {
-                0x206A, 0x206B, 0x206C, 0x206D, 0x206E, 0x206F, 0x2070, 0x2071, 0x2072, 0x2073, 0x2074, 0x2075, 0x2076, 0x2077, 0x2078, 0x2079
+                0x206A, 0x206B, 0x206C, 0x206D, 0x206E, 0x206F, 0x2070, 0x2071, 0x2072, 0x2073, 0x2074, 0x2075, 0x2076,
+                0x2077, 0x2078, 0x2079
             }
         };
         private static Vector3 _vec = Vector3.Zero;
@@ -65,7 +68,8 @@ namespace ClassicUO.Game
         private ushort _graphic = 0x2073;
         private bool _needGraphicUpdate = true;
         private Point _offset;
-        private readonly RenderedText _targetDistanceText = RenderedText.Create(string.Empty, 0x0481, style: FontStyle.BlackBorder);
+        private readonly RenderedText _targetDistanceText = RenderedText.Create
+            (string.Empty, 0x0481, style: FontStyle.BlackBorder);
         private readonly List<Multi> _temp = new List<Multi>();
         private readonly Tooltip _tooltip;
 
@@ -249,7 +253,8 @@ namespace ClassicUO.Game
                         {
                             fixed (uint* ptr = pixels)
                             {
-                                SDL.SDL_Surface* surface = (SDL.SDL_Surface*) SDL.SDL_CreateRGBSurfaceWithFormatFrom((IntPtr) ptr, w, h, 32, 4 * w, SDL.SDL_PIXELFORMAT_ABGR8888);
+                                SDL.SDL_Surface* surface = (SDL.SDL_Surface*) SDL.SDL_CreateRGBSurfaceWithFormatFrom
+                                    ((IntPtr) ptr, w, h, 32, 4 * w, SDL.SDL_PIXELFORMAT_ABGR8888);
 
                                 if (i == 2)
                                 {
@@ -267,7 +272,13 @@ namespace ClassicUO.Game
                                             if (*pixels_ptr != 0 && *pixels_ptr != 0xFF_00_00_00)
                                             {
                                                 c.PackedValue = *pixels_ptr;
-                                                *pixels_ptr = HuesHelper.Color16To32(HuesLoader.Instance.GetColor16(HuesHelper.ColorToHue(c), 0x0033)) | 0xFF_00_00_00;
+
+                                                *pixels_ptr = HuesHelper.Color16To32
+                                                              (
+                                                                  HuesLoader.Instance.GetColor16
+                                                                      (HuesHelper.ColorToHue(c), 0x0033)
+                                                              ) |
+                                                              0xFF_00_00_00;
                                             }
 
                                             ++pixels_ptr;
@@ -309,9 +320,10 @@ namespace ClassicUO.Game
 
         public void SetDraggedItem(Point? offset)
         {
-            _draggedItemTexture = ItemHold.IsGumpTexture
-                ? GumpsLoader.Instance.GetTexture((ushort) (ItemHold.DisplayedGraphic - Constants.ITEM_GUMP_TEXTURE_OFFSET))
-                : ArtLoader.Instance.GetTexture(ItemHold.DisplayedGraphic);
+            _draggedItemTexture = ItemHold.IsGumpTexture ?
+                GumpsLoader.Instance.GetTexture
+                    ((ushort) (ItemHold.DisplayedGraphic - Constants.ITEM_GUMP_TEXTURE_OFFSET)) :
+                ArtLoader.Instance.GetTexture(ItemHold.DisplayedGraphic);
 
             if (_draggedItemTexture == null)
             {
@@ -417,17 +429,12 @@ namespace ClassicUO.Game
 
                             for (int i = 0; i < _componentsList.Length; i++)
                             {
-                                if (_componentsList[i]
-                                    .Graphic == 0)
+                                if (_componentsList[i].Graphic == 0)
                                 {
                                     break;
                                 }
 
-                                Multi m = Multi.Create
-                                (
-                                    _componentsList[i]
-                                        .Graphic
-                                );
+                                Multi m = Multi.Create(_componentsList[i].Graphic);
 
                                 m.AlphaHue = 0xFF;
                                 m.Hue = hue;
@@ -444,8 +451,10 @@ namespace ClassicUO.Game
 
                                 if (selectedObj.Z < World.CustomHouseManager.MinHouseZ)
                                 {
-                                    if (selectedObj.X >= World.CustomHouseManager.StartPos.X && selectedObj.X <= World.CustomHouseManager.EndPos.X - 1 &&
-                                        selectedObj.Y >= World.CustomHouseManager.StartPos.Y && selectedObj.Y <= World.CustomHouseManager.EndPos.Y - 1)
+                                    if (selectedObj.X >= World.CustomHouseManager.StartPos.X &&
+                                        selectedObj.X <= World.CustomHouseManager.EndPos.X - 1 &&
+                                        selectedObj.Y >= World.CustomHouseManager.StartPos.Y &&
+                                        selectedObj.Y <= World.CustomHouseManager.EndPos.Y - 1)
                                     {
                                         if (type != CUSTOM_HOUSE_BUILD_TYPE.CHBT_STAIR)
                                         {
@@ -465,23 +474,17 @@ namespace ClassicUO.Game
                                         break;
                                     }
 
-                                    _temp[i]
-                                        .X = (ushort) (selectedObj.X + item.X);
+                                    _temp[i].X = (ushort) (selectedObj.X + item.X);
 
-                                    _temp[i]
-                                        .Y = (ushort) (selectedObj.Y + item.Y);
+                                    _temp[i].Y = (ushort) (selectedObj.Y + item.Y);
 
-                                    _temp[i]
-                                        .Z = (sbyte) (selectedObj.Z + z + item.Z);
+                                    _temp[i].Z = (sbyte) (selectedObj.Z + z + item.Z);
 
-                                    _temp[i]
-                                        .UpdateRealScreenPosition(gs.ScreenOffset.X, gs.ScreenOffset.Y);
+                                    _temp[i].UpdateRealScreenPosition(gs.ScreenOffset.X, gs.ScreenOffset.Y);
 
-                                    _temp[i]
-                                        .UpdateScreenPosition();
+                                    _temp[i].UpdateScreenPosition();
 
-                                    _temp[i]
-                                        .AddToTile();
+                                    _temp[i].AddToTile();
                                 }
                             }
                         }
@@ -532,7 +535,10 @@ namespace ClassicUO.Game
                             break;
                     }
 
-                    sb.Draw2D(_aura, Mouse.Position.X + hotX - (25 >> 1), Mouse.Position.Y + hotY - (25 >> 1), ref _auraVector);
+                    sb.Draw2D
+                    (
+                        _aura, Mouse.Position.X + hotX - (25 >> 1), Mouse.Position.Y + hotY - (25 >> 1), ref _auraVector
+                    );
                 }
 
                 if (ProfileManager.Current.ShowTargetRangeIndicator)
@@ -567,15 +573,26 @@ namespace ClassicUO.Game
                 int y = (ItemHold.IsFixedPosition ? ItemHold.FixedY : Mouse.Position.Y) - _offset.Y;
 
                 Vector3 hue = Vector3.Zero;
-                ShaderHueTranslator.GetHueVector(ref hue, ItemHold.Hue, ItemHold.IsPartialHue, ItemHold.HasAlpha ? .5f : 0);
 
-                sb.Draw2D(_draggedItemTexture, x, y, _draggedItemTexture.Width * scale, _draggedItemTexture.Height * scale, ref hue);
+                ShaderHueTranslator.GetHueVector
+                    (ref hue, ItemHold.Hue, ItemHold.IsPartialHue, ItemHold.HasAlpha ? .5f : 0);
+
+                sb.Draw2D
+                (
+                    _draggedItemTexture, x, y, _draggedItemTexture.Width * scale, _draggedItemTexture.Height * scale,
+                    ref hue
+                );
 
                 if (ItemHold.Amount > 1 && ItemHold.DisplayedGraphic == ItemHold.Graphic && ItemHold.IsStackable)
                 {
                     x += 5;
                     y += 5;
-                    sb.Draw2D(_draggedItemTexture, x, y, _draggedItemTexture.Width * scale, _draggedItemTexture.Height * scale, ref hue);
+
+                    sb.Draw2D
+                    (
+                        _draggedItemTexture, x, y, _draggedItemTexture.Width * scale,
+                        _draggedItemTexture.Height * scale, ref hue
+                    );
                 }
             }
 
@@ -608,7 +625,10 @@ namespace ClassicUO.Game
                     _vec = Vector3.Zero;
                 }
 
-                sb.Draw2D(ArtLoader.Instance.GetTexture(Graphic), Mouse.Position.X + offX, Mouse.Position.Y + offY, ref _vec);
+                sb.Draw2D
+                (
+                    ArtLoader.Instance.GetTexture(Graphic), Mouse.Position.X + offX, Mouse.Position.Y + offY, ref _vec
+                );
             }
         }
 
@@ -617,10 +637,8 @@ namespace ClassicUO.Game
             if (Client.Game.Scene is GameScene gs)
             {
                 if (!World.ClientFeatures.TooltipsEnabled ||
-                    SelectedObject.Object is Item selectedItem &&
-                    selectedItem.IsLocked &&
-                    selectedItem.ItemData.Weight == 255
-                    && !selectedItem.ItemData.IsContainer ||
+                    SelectedObject.Object is Item selectedItem && selectedItem.IsLocked &&
+                    selectedItem.ItemData.Weight == 255 && !selectedItem.ItemData.IsContainer ||
                     ItemHold.Enabled && !ItemHold.IsFixedPosition)
                 {
                     if (!_tooltip.IsEmpty && (UIManager.MouseOverControl == null || UIManager.IsMouseOverWorld))
@@ -696,7 +714,8 @@ namespace ClassicUO.Game
                 return _cursorData[war, 13];
             }
 
-            if (UIManager.MouseOverControl != null && UIManager.MouseOverControl.AcceptKeyboardInput && UIManager.MouseOverControl.IsEditable)
+            if (UIManager.MouseOverControl != null && UIManager.MouseOverControl.AcceptKeyboardInput &&
+                UIManager.MouseOverControl.IsEditable)
             {
                 return _cursorData[war, 14];
             }
@@ -713,10 +732,14 @@ namespace ClassicUO.Game
                 return result;
             }
 
-            int windowCenterX = ProfileManager.Current.GameWindowPosition.X + (ProfileManager.Current.GameWindowSize.X >> 1);
-            int windowCenterY = ProfileManager.Current.GameWindowPosition.Y + (ProfileManager.Current.GameWindowSize.Y >> 1);
+            int windowCenterX = ProfileManager.Current.GameWindowPosition.X +
+                                (ProfileManager.Current.GameWindowSize.X >> 1);
 
-            return _cursorData[war, GetMouseDirection(windowCenterX, windowCenterY, Mouse.Position.X, Mouse.Position.Y, 1)];
+            int windowCenterY = ProfileManager.Current.GameWindowPosition.Y +
+                                (ProfileManager.Current.GameWindowSize.Y >> 1);
+
+            return _cursorData[
+                war, GetMouseDirection(windowCenterX, windowCenterY, Mouse.Position.X, Mouse.Position.Y, 1)];
         }
 
         public static int GetMouseDirection(int x1, int y1, int to_x, int to_y, int current_facing)
@@ -753,69 +776,37 @@ namespace ClassicUO.Game
 
             switch (hashf)
             {
-                case 111:
+                case 111: return (int) Direction.West; // W
 
-                    return (int) Direction.West; // W
+                case 112: return (int) Direction.Up; // NW
 
-                case 112:
+                case 113: return (int) Direction.North; // N
 
-                    return (int) Direction.Up; // NW
+                case 120: return (int) Direction.West; // W
 
-                case 113:
+                case 131: return (int) Direction.West; // W
 
-                    return (int) Direction.North; // N
+                case 132: return (int) Direction.Left; // SW
 
-                case 120:
+                case 133: return (int) Direction.South; // S
 
-                    return (int) Direction.West; // W
+                case 210: return (int) Direction.North; // N
 
-                case 131:
+                case 230: return (int) Direction.South; // S
 
-                    return (int) Direction.West; // W
+                case 311: return (int) Direction.East; // E
 
-                case 132:
+                case 312: return (int) Direction.Right; // NE
 
-                    return (int) Direction.Left; // SW
+                case 313: return (int) Direction.North; // N
 
-                case 133:
+                case 320: return (int) Direction.East; // E
 
-                    return (int) Direction.South; // S
+                case 331: return (int) Direction.East; // E
 
-                case 210:
+                case 332: return (int) Direction.Down; // SE
 
-                    return (int) Direction.North; // N
-
-                case 230:
-
-                    return (int) Direction.South; // S
-
-                case 311:
-
-                    return (int) Direction.East; // E
-
-                case 312:
-
-                    return (int) Direction.Right; // NE
-
-                case 313:
-
-                    return (int) Direction.North; // N
-
-                case 320:
-
-                    return (int) Direction.East; // E
-
-                case 331:
-
-                    return (int) Direction.East; // E
-
-                case 332:
-
-                    return (int) Direction.Down; // SE
-
-                case 333:
-
-                    return (int) Direction.South; // S
+                case 333: return (int) Direction.South; // S
             }
 
             return current_facing;

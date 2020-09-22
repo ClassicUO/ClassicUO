@@ -207,11 +207,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
                 Add
                 (
-                    new Label
-                    (
-                        loginScene.Servers[index]
-                                  .Name, false, 0x0481, font: 9
-                    )
+                    new Label(loginScene.Servers[index].Name, false, 0x0481, font: 9)
                     {
                         X = 243,
                         Y = 420
@@ -250,11 +246,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
                                 index = 1;
                             }
 
-                            loginScene.SelectServer
-                            (
-                                (byte) loginScene.Servers[index - 1]
-                                                 .Index
-                            );
+                            loginScene.SelectServer((byte) loginScene.Servers[index - 1].Index);
                         }
 
                         break;
@@ -284,11 +276,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
                         index = 1;
                     }
 
-                    loginScene.SelectServer
-                    (
-                        (byte) loginScene.Servers[index - 1]
-                                         .Index
-                    );
+                    loginScene.SelectServer((byte) loginScene.Servers[index - 1].Index);
                 }
             }
         }
@@ -321,11 +309,12 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
                 Add
                 (
-                    _serverName = new HoveredLabel(entry.Name, false, normal_hue, selected_hue, selected_hue, font: font)
-                    {
-                        X = 74,
-                        AcceptMouseInput = false
-                    }
+                    _serverName = new HoveredLabel
+                        (entry.Name, false, normal_hue, selected_hue, selected_hue, font: font)
+                        {
+                            X = 74,
+                            AcceptMouseInput = false
+                        }
                 );
 
                 Add
@@ -339,11 +328,12 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
                 Add
                 (
-                    _server_packet_loss = new HoveredLabel("-", false, normal_hue, selected_hue, selected_hue, font: font)
-                    {
-                        X = 320,
-                        AcceptMouseInput = false
-                    }
+                    _server_packet_loss = new HoveredLabel
+                        ("-", false, normal_hue, selected_hue, selected_hue, font: font)
+                        {
+                            X = 320,
+                            AcceptMouseInput = false
+                        }
                 );
 
 

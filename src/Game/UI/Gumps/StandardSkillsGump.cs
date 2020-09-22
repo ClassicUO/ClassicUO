@@ -80,9 +80,9 @@ namespace ClassicUO.Game.UI.Gumps
 
             _area = new ScrollArea
             (
-                22, 45 + _diffY + _bottomLine.Height - 10, _scrollArea.Width - 14,
-                _scrollArea.Height - (83 + _diffY), false
-            ) {AcceptMouseInput = true, CanMove = true};
+                22, 45 + _diffY + _bottomLine.Height - 10, _scrollArea.Width - 14, _scrollArea.Height - (83 + _diffY),
+                false
+            ) { AcceptMouseInput = true, CanMove = true };
 
             Add(_area);
 
@@ -95,11 +95,8 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add
             (
-                _skillsLabelSum = new Label
-                (
-                    World.Player.Skills.Sum(s => s.Value)
-                         .ToString("F1"), false, 600, 0, 3
-                ) {X = _bottomComment.X + _bottomComment.Width + 5, Y = _bottomComment.Y - 5}
+                _skillsLabelSum = new Label(World.Player.Skills.Sum(s => s.Value).ToString("F1"), false, 600, 0, 3)
+                    { X = _bottomComment.X + _bottomComment.Width + 5, Y = _bottomComment.Y - 5 }
             );
 
             //new group
@@ -114,8 +111,18 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             );
 
-            Add(_checkReal = new Checkbox(0x938, 0x939, ResGumps.ShowReal, 1, 0x0386, false) {X = _newGroupButton.X + _newGroupButton.Width + 30, Y = _newGroupButton.Y - 6});
-            Add(_checkCaps = new Checkbox(0x938, 0x939, ResGumps.ShowCaps, 1, 0x0386, false) {X = _newGroupButton.X + _newGroupButton.Width + 30, Y = _newGroupButton.Y + 7});
+            Add
+            (
+                _checkReal = new Checkbox(0x938, 0x939, ResGumps.ShowReal, 1, 0x0386, false)
+                    { X = _newGroupButton.X + _newGroupButton.Width + 30, Y = _newGroupButton.Y - 6 }
+            );
+
+            Add
+            (
+                _checkCaps = new Checkbox(0x938, 0x939, ResGumps.ShowCaps, 1, 0x0386, false)
+                    { X = _newGroupButton.X + _newGroupButton.Width + 30, Y = _newGroupButton.Y + 7 }
+            );
+
             _checkReal.ValueChanged += UpdateSkillsValues;
             _checkCaps.ValueChanged += UpdateSkillsValues;
 
@@ -302,8 +309,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void SumTotalSkills()
         {
-            _skillsLabelSum.Text = World.Player.Skills.Sum(s => _checkReal.IsChecked ? s.Base : s.Value)
-                                        .ToString("F1");
+            _skillsLabelSum.Text = World.Player.Skills.Sum(s => _checkReal.IsChecked ? s.Base : s.Value).ToString("F1");
         }
 
 
@@ -506,9 +512,8 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 if (UIManager.LastControlMouseDown(MouseButtonType.Left) is SkillItemControl skillControl)
                 {
-                    if (skillControl
-                        .Parent // databox
-                        .Parent // skillgruop
+                    if (skillControl.Parent // databox
+                                    .Parent // skillgruop
                         != this)
                     {
                         SkillsGroupControl originalGroup = (SkillsGroupControl) skillControl.Parent.Parent;
@@ -695,13 +700,7 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     if (skill.IsClickable)
                     {
-                        Button buttonUse = new Button
-                        (
-                            0,
-                            0x0837,
-                            0x0838,
-                            0x0838
-                        )
+                        Button buttonUse = new Button(0, 0x0837, 0x0838, 0x0838)
                         {
                             ButtonAction = ButtonAction.Activate,
                             X = 8
@@ -714,13 +713,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                     ushort graphic = GetStatusButtonGraphic();
 
-                    _buttonStatus = new Button
-                    (
-                        1,
-                        graphic,
-                        graphic,
-                        graphic
-                    )
+                    _buttonStatus = new Button(1, graphic, graphic, graphic)
                     {
                         ButtonAction = ButtonAction.Activate,
                         X = 251,
@@ -829,14 +822,11 @@ namespace ClassicUO.Game.UI.Gumps
                 switch (_status)
                 {
                     default:
-                    case Lock.Up:
-                        return 0x0984;
+                    case Lock.Up: return 0x0984;
 
-                    case Lock.Down:
-                        return 0x0986;
+                    case Lock.Down: return 0x0986;
 
-                    case Lock.Locked:
-                        return 0x082C;
+                    case Lock.Locked: return 0x082C;
                 }
             }
 
@@ -849,17 +839,20 @@ namespace ClassicUO.Game.UI.Gumps
 
                 UIManager.GameCursor.IsDraggingCursorForced = false;
 
-                if (UIManager.LastControlMouseDown(MouseButtonType.Left) == this && World.Player.Skills[Index]
-                                                                                         .IsClickable)
+                if (UIManager.LastControlMouseDown(MouseButtonType.Left) == this &&
+                    World.Player.Skills[Index].IsClickable)
                 {
                     if (UIManager.MouseOverControl == null || UIManager.MouseOverControl.RootParent != RootParent)
                     {
-                        GetSpellFloatingButton(Index)
-                            ?.Dispose();
+                        GetSpellFloatingButton(Index)?.Dispose();
 
                         if (Index >= 0 && Index < World.Player.Skills.Length)
                         {
-                            UIManager.Add(new SkillButtonGump(World.Player.Skills[Index], Mouse.Position.X - 44, Mouse.Position.Y - 22));
+                            UIManager.Add
+                            (
+                                new SkillButtonGump
+                                    (World.Player.Skills[Index], Mouse.Position.X - 44, Mouse.Position.Y - 22)
+                            );
                         }
                     }
                 }

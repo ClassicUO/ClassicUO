@@ -74,7 +74,10 @@ namespace ClassicUO.Game.Scenes
                 ArtLoader.Instance.CleaUnusedResources(Constants.MAX_ART_OBJECT_REMOVED_BY_GARBAGE_COLLECTOR);
                 GumpsLoader.Instance.CleaUnusedResources(Constants.MAX_GUMP_OBJECT_REMOVED_BY_GARBAGE_COLLECTOR);
                 TexmapsLoader.Instance.CleaUnusedResources(Constants.MAX_ART_OBJECT_REMOVED_BY_GARBAGE_COLLECTOR);
-                AnimationsLoader.Instance.CleaUnusedResources(Constants.MAX_ANIMATIONS_OBJECT_REMOVED_BY_GARBAGE_COLLECTOR);
+
+                AnimationsLoader.Instance.CleaUnusedResources
+                    (Constants.MAX_ANIMATIONS_OBJECT_REMOVED_BY_GARBAGE_COLLECTOR);
+
                 World.Map?.ClearUnusedBlocks();
                 LightsLoader.Instance.CleaUnusedResources(20);
 
@@ -116,8 +119,17 @@ namespace ClassicUO.Game.Scenes
         internal virtual bool OnMouseDoubleClick(MouseButtonType button) => false;
         internal virtual bool OnMouseWheel(bool up) => false;
         internal virtual bool OnMouseDragging() => false;
-        internal virtual void OnTextInput(string text) { }
-        internal virtual void OnKeyDown(SDL.SDL_KeyboardEvent e) { }
-        internal virtual void OnKeyUp(SDL.SDL_KeyboardEvent e) { }
+
+        internal virtual void OnTextInput(string text)
+        {
+        }
+
+        internal virtual void OnKeyDown(SDL.SDL_KeyboardEvent e)
+        {
+        }
+
+        internal virtual void OnKeyUp(SDL.SDL_KeyboardEvent e)
+        {
+        }
     }
 }

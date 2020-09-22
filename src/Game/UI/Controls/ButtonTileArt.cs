@@ -12,8 +12,7 @@ namespace ClassicUO.Game.UI.Controls
         private readonly UOTexture32 _texture;
         private readonly int _tileX, _tileY;
 
-        public ButtonTileArt(List<string> gparams) :
-            base(gparams)
+        public ButtonTileArt(List<string> gparams) : base(gparams)
         {
             X = int.Parse(gparams[1]);
             Y = int.Parse(gparams[2]);
@@ -32,8 +31,7 @@ namespace ClassicUO.Game.UI.Controls
                 return;
             }
 
-            _isPartial = TileDataLoader.Instance.StaticData[graphic]
-                                       .IsPartialHue;
+            _isPartial = TileDataLoader.Instance.StaticData[graphic].IsPartialHue;
         }
 
         public override void Update(double totalMS, double frameMS)

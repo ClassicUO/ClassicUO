@@ -88,7 +88,8 @@ namespace ClassicUO.Game.UI.Controls
 
     internal sealed class ContextMenuItemEntry
     {
-        public ContextMenuItemEntry(string text, Action action = null, bool canBeSelected = false, bool defaultValue = false)
+        public ContextMenuItemEntry
+            (string text, Action action = null, bool canBeSelected = false, bool defaultValue = false)
         {
             Text = text;
             Action = action;
@@ -172,7 +173,12 @@ namespace ClassicUO.Game.UI.Controls
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
             ResetHueVector();
-            batcher.DrawRectangle(Texture2DCache.GetTexture(Color.Gray), x - 1, y - 1, _background.Width + 1, _background.Height + 1, ref _hueVector);
+
+            batcher.DrawRectangle
+            (
+                Texture2DCache.GetTexture(Color.Gray), x - 1, y - 1, _background.Width + 1, _background.Height + 1,
+                ref _hueVector
+            );
 
             return base.Draw(batcher, x, y);
         }
@@ -200,7 +206,8 @@ namespace ClassicUO.Game.UI.Controls
 
         private class ContextMenuItem : Control
         {
-            private static readonly RenderedText _moreMenuLabel = RenderedText.Create(">", 1150, isunicode: true, style: FontStyle.BlackBorder);
+            private static readonly RenderedText _moreMenuLabel = RenderedText.Create
+                (">", 1150, isunicode: true, style: FontStyle.BlackBorder);
             private readonly ContextMenuItemEntry _entry;
             private readonly Label _label;
             private readonly GumpPic _selectedPic;
@@ -330,14 +337,18 @@ namespace ClassicUO.Game.UI.Controls
                 {
                     ResetHueVector();
 
-                    batcher.Draw2D(Texture2DCache.GetTexture(Color.Gray), x + 2, y + 5, Width - 4, Height - 10, ref _hueVector);
+                    batcher.Draw2D
+                        (Texture2DCache.GetTexture(Color.Gray), x + 2, y + 5, Width - 4, Height - 10, ref _hueVector);
                 }
 
                 base.Draw(batcher, x, y);
 
                 if (_entry.Items != null && _entry.Items.Count != 0)
                 {
-                    _moreMenuLabel.Draw(batcher, x + Width - _moreMenuLabel.Width, y + (Height >> 1) - (_moreMenuLabel.Height >> 1) - 1);
+                    _moreMenuLabel.Draw
+                    (
+                        batcher, x + Width - _moreMenuLabel.Width, y + (Height >> 1) - (_moreMenuLabel.Height >> 1) - 1
+                    );
                 }
 
                 return true;

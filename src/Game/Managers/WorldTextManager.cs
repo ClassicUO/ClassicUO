@@ -72,7 +72,8 @@ namespace ClassicUO.Game.Managers
                     }
                 }
 
-                if (item.RenderedText.Texture.Contains(mouseX - startX - item.RealScreenPosition.X, mouseY - startY - item.RealScreenPosition.Y))
+                if (item.RenderedText.Texture.Contains
+                    (mouseX - startX - item.RealScreenPosition.X, mouseY - startY - item.RealScreenPosition.Y))
                 {
                     SelectedObject.LastObject = item;
                 }
@@ -105,7 +106,9 @@ namespace ClassicUO.Game.Managers
 
             for (TextObject o = _drawPointer; o != null; o = o.DLeft)
             {
-                if (o.IsDestroyed || o.RenderedText == null || o.RenderedText.IsDestroyed || o.RenderedText.Texture == null || o.Time < ClassicUO.Time.Ticks || o.Owner.UseInRender != renderIndex && !isGump)
+                if (o.IsDestroyed || o.RenderedText == null || o.RenderedText.IsDestroyed ||
+                    o.RenderedText.Texture == null || o.Time < ClassicUO.Time.Ticks ||
+                    o.Owner.UseInRender != renderIndex && !isGump)
                 {
                     continue;
                 }
@@ -252,8 +255,7 @@ namespace ClassicUO.Game.Managers
 
             for (int i = 0; i < _bounds.Count; i++)
             {
-                if (_bounds[i]
-                    .Intersects(rect))
+                if (_bounds[i].Intersects(rect))
                 {
                     result = true;
 

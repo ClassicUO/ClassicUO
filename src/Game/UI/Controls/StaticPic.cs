@@ -40,7 +40,8 @@ namespace ClassicUO.Game.UI.Controls
             WantUpdateSize = false;
         }
 
-        public StaticPic(List<string> parts) : this(UInt16Converter.Parse(parts[3]), parts.Count > 4 ? UInt16Converter.Parse(parts[4]) : (ushort) 0)
+        public StaticPic(List<string> parts) : this
+            (UInt16Converter.Parse(parts[3]), parts.Count > 4 ? UInt16Converter.Parse(parts[4]) : (ushort) 0)
         {
             X = int.Parse(parts[1]);
             Y = int.Parse(parts[2]);
@@ -70,8 +71,7 @@ namespace ClassicUO.Game.UI.Controls
                 Width = texture.Width;
                 Height = texture.Height;
 
-                IsPartialHue = TileDataLoader.Instance.StaticData[value]
-                                             .IsPartialHue;
+                IsPartialHue = TileDataLoader.Instance.StaticData[value].IsPartialHue;
             }
         }
 

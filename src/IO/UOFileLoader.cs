@@ -135,16 +135,14 @@ namespace ClassicUO.IO
 
                 if (idx < resourceCache.Length && resourceCache[idx] != null)
                 {
-                    if (resourceCache[idx]
-                        .Ticks < ticks)
+                    if (resourceCache[idx].Ticks < ticks)
                     {
                         if (count++ >= maxCount)
                         {
                             break;
                         }
 
-                        resourceCache[idx]
-                            .Dispose();
+                        resourceCache[idx].Dispose();
 
                         resourceCache[idx] = null;
                         _usedTextures.Remove(first);

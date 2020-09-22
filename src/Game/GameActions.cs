@@ -86,7 +86,8 @@ namespace ClassicUO.Game
 
         public static void OpenStatusBar()
         {
-                    Client.Game.Scene.Audio.StopWarMusic();
+            Client.Game.Scene.Audio.StopWarMusic();
+
             if (StatusGumpBase.GetStatusGump() == null)
             {
                 UIManager.Add(StatusGumpBase.AddStatusGump(100, 100));
@@ -99,8 +100,7 @@ namespace ClassicUO.Game
 
             if (journalGump == null)
             {
-                UIManager.Add(new JournalGump
-                { X = 64, Y = 64 });
+                UIManager.Add(new JournalGump { X = 64, Y = 64 });
             }
             else
             {
@@ -141,12 +141,14 @@ namespace ClassicUO.Game
             {
                 Mobile m = World.Mobiles.Get(serial);
 
-                if (m != null && (World.Player.NotorietyFlag == NotorietyFlag.Innocent || World.Player.NotorietyFlag == NotorietyFlag.Ally) && m.NotorietyFlag == NotorietyFlag.Innocent && m != World.Player)
+                if (m != null &&
+                    (World.Player.NotorietyFlag == NotorietyFlag.Innocent ||
+                     World.Player.NotorietyFlag == NotorietyFlag.Ally) && m.NotorietyFlag == NotorietyFlag.Innocent &&
+                    m != World.Player)
                 {
                     QuestionGump messageBox = new QuestionGump
                     (
-                        ResGeneral.ThisMayFlagYouCriminal,
-                        s =>
+                        ResGeneral.ThisMayFlagYouCriminal, s =>
                         {
                             if (s)
                             {
@@ -167,8 +169,7 @@ namespace ClassicUO.Game
 
         public static void DoubleClickQueued(uint serial)
         {
-            Client.Game.GetScene<GameScene>()
-                  ?.DoubleClickDelayed(serial);
+            Client.Game.GetScene<GameScene>()?.DoubleClickDelayed(serial);
         }
 
         public static void DoubleClick(uint serial)
@@ -206,7 +207,8 @@ namespace ClassicUO.Game
             }
         }
 
-        public static void Say(string message, ushort hue = 0xFFFF, MessageType type = MessageType.Regular, byte font = 3)
+        public static void Say
+            (string message, ushort hue = 0xFFFF, MessageType type = MessageType.Regular, byte font = 3)
         {
             if (hue == 0xFFFF)
             {
@@ -225,14 +227,33 @@ namespace ClassicUO.Game
         }
 
 
-        public static void Print(string message, ushort hue = 946, MessageType type = MessageType.Regular, byte font = 3, bool unicode = true)
+        public static void Print
+        (
+            string message,
+            ushort hue = 946,
+            MessageType type = MessageType.Regular,
+            byte font = 3,
+            bool unicode = true
+        )
         {
             Print(null, message, hue, type, font, unicode);
         }
 
-        public static void Print(Entity entity, string message, ushort hue = 946, MessageType type = MessageType.Regular, byte font = 3, bool unicode = true)
+        public static void Print
+        (
+            Entity entity,
+            string message,
+            ushort hue = 946,
+            MessageType type = MessageType.Regular,
+            byte font = 3,
+            bool unicode = true
+        )
         {
-            MessageManager.HandleMessage(entity, message, entity != null ? entity.Name : "System", hue, type, font, entity == null ? TEXT_TYPE.SYSTEM : TEXT_TYPE.OBJECT, unicode, "ENU");
+            MessageManager.HandleMessage
+            (
+                entity, message, entity != null ? entity.Name : "System", hue, type, font,
+                entity == null ? TEXT_TYPE.SYSTEM : TEXT_TYPE.OBJECT, unicode, "ENU"
+            );
         }
 
         public static void SayParty(string message, uint serial = 0)
@@ -244,8 +265,7 @@ namespace ClassicUO.Game
         {
             Socket.Send(new PPartyAccept(serial));
 
-            UIManager.GetGump<PartyInviteGump>()
-                     ?.Dispose();
+            UIManager.GetGump<PartyInviteGump>()?.Dispose();
         }
 
         public static void RequestPartyRemoveMember(uint serial)
@@ -268,7 +288,15 @@ namespace ClassicUO.Game
             Socket.Send(new PPartyChangeLootTypeRequest(isLootable));
         }
 
-        public static bool PickUp(uint serial, int x, int y, int amount = -1, Point? offset = null, bool is_gump = false)
+        public static bool PickUp
+        (
+            uint serial,
+            int x,
+            int y,
+            int amount = -1,
+            Point? offset = null,
+            bool is_gump = false
+        )
         {
             if (World.Player.IsDead || ItemHold.Enabled)
             {
@@ -277,7 +305,8 @@ namespace ClassicUO.Game
 
             Item item = World.Items.Get(serial);
 
-            if (item == null || item.IsDestroyed || item.IsMulti || item.OnGround && (item.IsLocked || item.Distance > Constants.DRAG_ITEMS_DISTANCE))
+            if (item == null || item.IsDestroyed || item.IsMulti ||
+                item.OnGround && (item.IsLocked || item.Distance > Constants.DRAG_ITEMS_DISTANCE))
             {
                 return false;
             }
@@ -331,7 +360,8 @@ namespace ClassicUO.Game
 
         public static void DropItem(uint serial, int x, int y, int z, uint container)
         {
-            if (ItemHold.Enabled && !ItemHold.IsFixedPosition && (ItemHold.Serial != container || ItemHold.ItemData.IsStackable))
+            if (ItemHold.Enabled && !ItemHold.IsFixedPosition &&
+                (ItemHold.Serial != container || ItemHold.ItemData.IsStackable))
             {
                 if (Client.Version >= ClientVersion.CV_6017)
                 {
@@ -363,7 +393,8 @@ namespace ClassicUO.Game
             }
         }
 
-        public static void ReplyGump(uint local, uint server, int button, uint[] switches = null, Tuple<ushort, string>[] entries = null)
+        public static void ReplyGump
+            (uint local, uint server, int button, uint[] switches = null, Tuple<ushort, string>[] entries = null)
         {
             Socket.Send(new PGumpResponse(local, server, button, switches, entries));
         }
@@ -574,9 +605,9 @@ namespace ClassicUO.Game
 
             if (bag == 0)
             {
-                bag = ProfileManager.Current.GrabBagSerial == 0
-                    ? backpack.Serial
-                    : ProfileManager.Current.GrabBagSerial;
+                bag = ProfileManager.Current.GrabBagSerial == 0 ?
+                    backpack.Serial :
+                    ProfileManager.Current.GrabBagSerial;
             }
 
             if (!World.Items.Contains(bag))

@@ -35,10 +35,10 @@ namespace ClassicUO.Game.Managers
     {
         private static readonly Vector2[][] _anchorTriangles =
         {
-            new[] {new Vector2(0f, 0f), new Vector2(0.5f, 0.5f), new Vector2(0f, 1f)},
-            new[] {new Vector2(0f, 0f), new Vector2(0.5f, 0.5f), new Vector2(1f, 0f)},
-            new[] {new Vector2(1f, 0f), new Vector2(0.5f, 0.5f), new Vector2(1f, 1f)},
-            new[] {new Vector2(0f, 1f), new Vector2(0.5f, 0.5f), new Vector2(1f, 1f)}
+            new[] { new Vector2(0f, 0f), new Vector2(0.5f, 0.5f), new Vector2(0f, 1f) },
+            new[] { new Vector2(0f, 0f), new Vector2(0.5f, 0.5f), new Vector2(1f, 0f) },
+            new[] { new Vector2(1f, 0f), new Vector2(0.5f, 0.5f), new Vector2(1f, 1f) },
+            new[] { new Vector2(0f, 1f), new Vector2(0.5f, 0.5f), new Vector2(1f, 1f) }
         };
 
         private static readonly Point[] _anchorDirectionMatrix =
@@ -57,7 +57,8 @@ namespace ClassicUO.Game.Managers
             new Point(0, 1)
         };
 
-        private readonly Dictionary<AnchorableGump, AnchorGroup> reverseMap = new Dictionary<AnchorableGump, AnchorGroup>();
+        private readonly Dictionary<AnchorableGump, AnchorGroup> reverseMap =
+            new Dictionary<AnchorableGump, AnchorGroup>();
 
         public AnchorGroup this[AnchorableGump control]
         {
@@ -114,11 +115,9 @@ namespace ClassicUO.Game.Managers
                         this[host] = new AnchorGroup(host);
                     }
 
-                    if (this[host]
-                        .IsEmptyDirection(draggedControl, host, relativePosition.Value))
+                    if (this[host].IsEmptyDirection(draggedControl, host, relativePosition.Value))
                     {
-                        this[host]
-                            .AnchorControlAt(draggedControl, host, relativePosition.Value);
+                        this[host].AnchorControlAt(draggedControl, host, relativePosition.Value);
 
                         this[draggedControl] = this[host];
                     }
@@ -134,8 +133,7 @@ namespace ClassicUO.Game.Managers
 
                 if (relativePosition.HasValue)
                 {
-                    if (this[host] == null || this[host]
-                        .IsEmptyDirection(draggedControl, host, relativePosition.Value))
+                    if (this[host] == null || this[host].IsEmptyDirection(draggedControl, host, relativePosition.Value))
                     {
                         Point offset = relativePosition.Value * new Point(g.GroupMatrixWidth, g.GroupMatrixHeight);
 
@@ -156,7 +154,8 @@ namespace ClassicUO.Game.Managers
         {
             if (this[control] != null)
             {
-                List<AnchorableGump> group = reverseMap.Where(o => o.Value == this[control])
+                List<AnchorableGump> group = reverseMap.Where
+                                                           (o => o.Value == this[control])
                                                        .Select(o => o.Key)
                                                        .ToList();
 
@@ -164,16 +163,14 @@ namespace ClassicUO.Game.Managers
                 {
                     foreach (AnchorableGump ctrl in group)
                     {
-                        this[ctrl]
-                            .DetachControl(ctrl);
+                        this[ctrl].DetachControl(ctrl);
 
                         this[ctrl] = null;
                     }
                 }
                 else
                 {
-                    this[control]
-                        .DetachControl(control);
+                    this[control].DetachControl(control);
 
                     this[control] = null;
                 }
@@ -184,7 +181,8 @@ namespace ClassicUO.Game.Managers
         {
             if (this[control] != null)
             {
-                foreach (AnchorableGump ctrl in reverseMap.Where(o => o.Value == this[control])
+                foreach (AnchorableGump ctrl in reverseMap.Where
+                                                              (o => o.Value == this[control])
                                                           .Select(o => o.Key)
                                                           .ToList())
                 {
@@ -223,16 +221,9 @@ namespace ClassicUO.Game.Managers
 
             for (int i = 0, j = polygon.Length - 1; i < polygon.Length; j = i++)
             {
-                if (polygon[i]
-                        .Y > point.Y != polygon[j]
-                        .Y > point.Y &&
-                    point.X < (polygon[j]
-                        .X - polygon[i]
-                        .X) * (point.Y - polygon[i]
-                        .Y) / (polygon[j]
-                        .Y - polygon[i]
-                        .Y) + polygon[i]
-                        .X)
+                if (polygon[i].Y > point.Y != polygon[j].Y > point.Y && point.X <
+                    (polygon[j].X - polygon[i].X) * (point.Y - polygon[i].Y) / (polygon[j].Y - polygon[i].Y) +
+                    polygon[i].X)
                 {
                     isInside = !isInside;
                 }
@@ -330,17 +321,9 @@ namespace ClassicUO.Game.Managers
             {
                 writer.WriteStartElement("anchored_group_gump");
 
-                writer.WriteAttributeString
-                (
-                    "matrix_w", controlMatrix.GetLength(0)
-                                             .ToString()
-                );
+                writer.WriteAttributeString("matrix_w", controlMatrix.GetLength(0).ToString());
 
-                writer.WriteAttributeString
-                (
-                    "matrix_h", controlMatrix.GetLength(1)
-                                             .ToString()
-                );
+                writer.WriteAttributeString("matrix_h", controlMatrix.GetLength(1).ToString());
 
                 for (int y = 0; y < controlMatrix.GetLength(1); y++)
                 {
@@ -411,11 +394,9 @@ namespace ClassicUO.Game.Managers
                             {
                                 if (!visited.Contains(controlMatrix[x, y]))
                                 {
-                                    controlMatrix[x, y]
-                                        .X += deltaX;
+                                    controlMatrix[x, y].X += deltaX;
 
-                                    controlMatrix[x, y]
-                                        .Y += deltaY;
+                                    controlMatrix[x, y].Y += deltaY;
 
                                     visited.Add(controlMatrix[x, y]);
                                 }
@@ -440,20 +421,35 @@ namespace ClassicUO.Game.Managers
                     {
                         if (targetX < 0) // Create new column left
                         {
-                            ResizeMatrix(controlMatrix.GetLength(0) + control.WidthMultiplier, controlMatrix.GetLength(1), control.WidthMultiplier, 0);
+                            ResizeMatrix
+                            (
+                                controlMatrix.GetLength(0) + control.WidthMultiplier, controlMatrix.GetLength(1),
+                                control.WidthMultiplier, 0
+                            );
                         }
-                        else if (targetX > controlMatrix.GetLength(0) - control.WidthMultiplier) // Create new column right
+                        else if (targetX > controlMatrix.GetLength(0) - control.WidthMultiplier
+                        ) // Create new column right
                         {
-                            ResizeMatrix(controlMatrix.GetLength(0) + control.WidthMultiplier, controlMatrix.GetLength(1), 0, 0);
+                            ResizeMatrix
+                            (
+                                controlMatrix.GetLength(0) + control.WidthMultiplier, controlMatrix.GetLength(1), 0, 0
+                            );
                         }
 
                         if (targetY < 0) //Create new row top
                         {
-                            ResizeMatrix(controlMatrix.GetLength(0), controlMatrix.GetLength(1) + control.HeightMultiplier, 0, control.HeightMultiplier);
+                            ResizeMatrix
+                            (
+                                controlMatrix.GetLength(0), controlMatrix.GetLength(1) + control.HeightMultiplier, 0,
+                                control.HeightMultiplier
+                            );
                         }
                         else if (targetY > controlMatrix.GetLength(1) - 1) // Create new row bottom
                         {
-                            ResizeMatrix(controlMatrix.GetLength(0), controlMatrix.GetLength(1) + control.HeightMultiplier, 0, 0);
+                            ResizeMatrix
+                            (
+                                controlMatrix.GetLength(0), controlMatrix.GetLength(1) + control.HeightMultiplier, 0, 0
+                            );
                         }
 
 
@@ -500,8 +496,7 @@ namespace ClassicUO.Game.Managers
 
             public bool IsEmptyDirection(int x, int y)
             {
-                if (x < 0 || x > controlMatrix.GetLength(0) - 1
-                          || y < 0 || y > controlMatrix.GetLength(1) - 1)
+                if (x < 0 || x > controlMatrix.GetLength(0) - 1 || y < 0 || y > controlMatrix.GetLength(1) - 1)
                 {
                     return true;
                 }
@@ -552,11 +547,7 @@ namespace ClassicUO.Game.Managers
                     {
                         if (controlMatrix[x, y] != null)
                         {
-                            Console.Write
-                            (
-                                " " + controlMatrix[x, y]
-                                    .LocalSerial + " "
-                            );
+                            Console.Write(" " + controlMatrix[x, y].LocalSerial + " ");
                         }
                         else
                         {

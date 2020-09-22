@@ -61,11 +61,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add(new BorderControl(0, 0, Width, Height, 4));
 
-            Label text = new Label
-            (
-                ResGumps.ChooseName
-                , true, 23, Width - 17, 3
-            )
+            Label text = new Label(ResGumps.ChooseName, true, 23, Width - 17, 3)
             {
                 X = 6,
                 Y = 6
@@ -180,7 +176,7 @@ namespace ClassicUO.Game.UI.Gumps
             startY += 40;
 
             Add(new BorderControl(61, startY - 3, 220 + 8, 200 + 6, 3));
-            Add(new AlphaBlendControl(0) {X = 64, Y = startY, Width = 220, Height = 200});
+            Add(new AlphaBlendControl(0) { X = 64, Y = startY, Width = 220, Height = 200 });
 
             ScrollArea area = new ScrollArea(64, startY, 220, 200, true)
             {
@@ -204,19 +200,21 @@ namespace ClassicUO.Game.UI.Gumps
 
             startY = 275;
 
-            text = new Label(ResGumps.YourCurrentChannel, false, 0x0386, 345, 2, FontStyle.None, TEXT_ALIGN_TYPE.TS_CENTER)
-            {
-                Y = startY
-            };
+            text = new Label
+                (ResGumps.YourCurrentChannel, false, 0x0386, 345, 2, FontStyle.None, TEXT_ALIGN_TYPE.TS_CENTER)
+                {
+                    Y = startY
+                };
 
             Add(text);
 
             startY += 25;
 
-            _currentChannelLabel = new Label(UOChatManager.CurrentChannelName, false, 0x0386, 345, 2, FontStyle.None, TEXT_ALIGN_TYPE.TS_CENTER)
-            {
-                Y = startY
-            };
+            _currentChannelLabel = new Label
+                (UOChatManager.CurrentChannelName, false, 0x0386, 345, 2, FontStyle.None, TEXT_ALIGN_TYPE.TS_CENTER)
+                {
+                    Y = startY
+                };
 
             Add(_currentChannelLabel);
 
@@ -360,7 +358,7 @@ namespace ClassicUO.Game.UI.Gumps
                 const int BORDER_SIZE = 3;
                 const int ROW_HEIGHT = 25;
 
-                Add(new AlphaBlendControl(0) {Width = Width, Height = Height});
+                Add(new AlphaBlendControl(0) { Width = Width, Height = Height });
 
                 Add(new BorderControl(0, 0, Width, ROW_HEIGHT, BORDER_SIZE));
 

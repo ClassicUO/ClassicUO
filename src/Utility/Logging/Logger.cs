@@ -28,30 +28,31 @@ namespace ClassicUO.Utility.Logging
 {
     internal class Logger
     {
-        private static readonly Dictionary<LogTypes, Tuple<ConsoleColor, string>> _logTypesInfo = new Dictionary<LogTypes, Tuple<ConsoleColor, string>>
-        {
+        private static readonly Dictionary<LogTypes, Tuple<ConsoleColor, string>> _logTypesInfo =
+            new Dictionary<LogTypes, Tuple<ConsoleColor, string>>
             {
-                LogTypes.None, Tuple.Create(ConsoleColor.White, "")
-            },
-            {
-                LogTypes.Info, Tuple.Create(ConsoleColor.Green, "  Info    ")
-            },
-            {
-                LogTypes.Debug, Tuple.Create(ConsoleColor.DarkGreen, "  Debug   ")
-            },
-            {
-                LogTypes.Trace, Tuple.Create(ConsoleColor.Green, "  Trace   ")
-            },
-            {
-                LogTypes.Warning, Tuple.Create(ConsoleColor.Yellow, "  Warning ")
-            },
-            {
-                LogTypes.Error, Tuple.Create(ConsoleColor.Red, "  Error   ")
-            },
-            {
-                LogTypes.Panic, Tuple.Create(ConsoleColor.Red, "  Panic   ")
-            }
-        };
+                {
+                    LogTypes.None, Tuple.Create(ConsoleColor.White, "")
+                },
+                {
+                    LogTypes.Info, Tuple.Create(ConsoleColor.Green, "  Info    ")
+                },
+                {
+                    LogTypes.Debug, Tuple.Create(ConsoleColor.DarkGreen, "  Debug   ")
+                },
+                {
+                    LogTypes.Trace, Tuple.Create(ConsoleColor.Green, "  Trace   ")
+                },
+                {
+                    LogTypes.Warning, Tuple.Create(ConsoleColor.Yellow, "  Warning ")
+                },
+                {
+                    LogTypes.Error, Tuple.Create(ConsoleColor.Red, "  Error   ")
+                },
+                {
+                    LogTypes.Panic, Tuple.Create(ConsoleColor.Red, "  Panic   ")
+                }
+            };
 
         private int _indent;
 
@@ -133,14 +134,9 @@ namespace ClassicUO.Utility.Logging
                     Console.Write($"{DateTime.Now:T} |");
                     ConsoleColor temp = Console.ForegroundColor;
 
-                    Console.ForegroundColor = _logTypesInfo[type]
-                        .Item1;
+                    Console.ForegroundColor = _logTypesInfo[type].Item1;
 
-                    Console.Write
-                    (
-                        _logTypesInfo[type]
-                            .Item2
-                    );
+                    Console.Write(_logTypesInfo[type].Item2);
 
                     Console.ForegroundColor = temp;
 
