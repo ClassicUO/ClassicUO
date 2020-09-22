@@ -523,40 +523,13 @@ namespace ClassicUO.Game.GameObjects
                 return 0;
             }
 
+
+            ANIMATION_GROUPS_TYPE originalType = AnimationsLoader.Instance.DataIndex[graphic].Type;
+            AnimationsLoader.Instance.ConvertBodyIfNeeded(ref graphic, isParent);
             ANIMATION_GROUPS_TYPE type = AnimationsLoader.Instance.DataIndex[graphic].Type;
-
-            ANIMATION_GROUPS_TYPE originalType = ANIMATION_GROUPS_TYPE.UNKNOWN;
-            bool uop = false;
-
-            if (AnimationsLoader.Instance.DataIndex[graphic].IsUOP &&
-                (isParent || !AnimationsLoader.Instance.DataIndex[graphic].IsValidMUL))
-            {
-                // do nothing ?
-                uop = true;
-            }
-            else
-            {
-                if (!AnimationsLoader.Instance.DataIndex[graphic].HasBodyConversion)
-                {
-                    ushort newGraphic = AnimationsLoader.Instance.DataIndex[graphic].Graphic;
-
-                    if (graphic != newGraphic)
-                    {
-                        graphic = newGraphic;
-
-                        ANIMATION_GROUPS_TYPE newType = AnimationsLoader.Instance.DataIndex[graphic].Type;
-
-                        if (newType != type)
-                        {
-                            originalType = type;
-                            type = newType;
-                        }
-                    }
-                }
-            }
-
-
             ANIMATION_FLAGS flags = AnimationsLoader.Instance.DataIndex[graphic].Flags;
+
+            bool uop = (flags & ANIMATION_FLAGS.AF_USE_UOP_ANIMATION) != 0;
 
             if (mobile.AnimationFromServer && mobile.AnimationGroup != 0xFF)
             {

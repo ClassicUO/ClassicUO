@@ -471,12 +471,7 @@ namespace ClassicUO.IO.Resources
                                 AnimIdxBlock* aidx = (AnimIdxBlock*) (address + offset * animIdxBlockSize);
                                 offset++;
 
-                                if ((long) aidx >= maxAddress0)
-                                {
-                                    break;
-                                }
-
-                                if (aidx->Size != 0 && aidx->Position != 0xFFFFFFFF && aidx->Size != 0xFFFFFFFF)
+                                if ((long) aidx < maxAddress0 && aidx->Size != 0 && aidx->Position != 0xFFFFFFFF && aidx->Size != 0xFFFFFFFF)
                                 {
                                     DataIndex[i].Groups[j].Direction[d].Address = aidx->Position;
 
@@ -811,7 +806,7 @@ namespace ClassicUO.IO.Resources
                                 DataIndex[index].Color = (ushort) color;
 
                                 DataIndex[index].IsValidMUL = true;
-
+                                
                                 filter[index] = true;
                             }
                         }

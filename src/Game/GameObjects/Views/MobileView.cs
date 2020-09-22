@@ -311,13 +311,14 @@ namespace ClassicUO.Game.GameObjects
                             }
                         }
 
+                        // Seems like all Gargoyle equipment has the 'IsWeapon' flag
                         if (AnimationsLoader.Instance.SittingValue == 0 && IsGargoyle && item.ItemData.IsWeapon)
                         {
-                            AnimationsLoader.Instance.AnimGroup = GetGroupForAnimation(this, graphic);
+                            AnimationsLoader.Instance.AnimGroup = GetGroupForAnimation(this, graphic, true);
 
                             DrawInternal
                             (
-                                batcher, this, item, drawX, drawY, IsFlipped, animIndex, false, graphic, isHuman, false,
+                                batcher, this, item, drawX, drawY, IsFlipped, animIndex, false, graphic, isHuman, true,
                                 alpha: HueVector.Z
                             );
 
