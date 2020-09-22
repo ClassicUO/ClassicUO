@@ -1730,7 +1730,7 @@ namespace ClassicUO.Network
                 }
 
                 SkillsLoader.Instance.SortedSkills.AddRange(SkillsLoader.Instance.Skills);
-                SkillsLoader.Instance.SortedSkills.Sort((a, b) => a.Name.CompareTo(b.Name));
+                SkillsLoader.Instance.SortedSkills.Sort((a, b) => string.Compare(a.Name, b.Name, StringComparison.InvariantCulture));
             }
             else
             {

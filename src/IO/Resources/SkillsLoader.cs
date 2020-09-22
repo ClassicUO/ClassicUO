@@ -21,6 +21,7 @@
 
 #endregion
 
+using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
@@ -82,7 +83,7 @@ namespace ClassicUO.IO.Resources
                     }
 
                     SortedSkills.AddRange(Skills);
-                    SortedSkills.Sort((a, b) => a.Name.CompareTo(b.Name));
+                    SortedSkills.Sort((a, b) => string.Compare(a.Name, b.Name, StringComparison.InvariantCulture));
                 }
             );
         }
