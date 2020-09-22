@@ -40,9 +40,7 @@ Or visit the [ClassicUO Website](https://www.classicuo.eu/)
 
 Clone repository with:
 ```
-git clone https://github.com/andreakarasho/ClassicUO.git
-cd ClassicUO
-git submodule update --init --recursive
+git clone --recursive https://github.com/andreakarasho/ClassicUO.git
 ```
 
 ### Windows
