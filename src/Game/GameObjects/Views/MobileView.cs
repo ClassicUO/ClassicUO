@@ -289,17 +289,61 @@ namespace ClassicUO.Game.GameObjects
 
                         if (isGargoyle)
                         {
-                            if (graphic == 469)
+                            switch (graphic)
                             {
                                 // gargoyle robe
-                                graphic = 342;
-                            }
-                            else if (graphic == 0x03CA)
-                            {
+                                case 0x01D5: 
+                                    graphic = 0x0156;
+
+                                    break;
+
                                 // gargoyle dead shroud
-                                graphic = 0x0223;
+                                case 0x03CA:
+                                    graphic = 0x0223;
+
+                                    break;
+
+                                // gargoyle spellbook
+                                case 0x03D8:
+                                    graphic = 329;
+
+                                    break;
+
+                                // gargoyle necrobook
+                                case 0x0372:
+                                    graphic = 330;
+
+                                    break;
+
+                                // gargoyle chivalry book
+                                case 0x0374:
+                                    graphic = 328;
+
+                                    break;
+
+                                // gargoyle bushido book
+                                case 0x036F: 
+                                    graphic = 327;
+
+                                    break;
+
+                                // gargoyle ninjitsu book
+                                case 0x036E:
+                                    graphic = 328;
+
+                                    break;
+
+                                // gargoyle masteries book
+                                case 0x0426:
+                                    graphic = 0x042B;
+
+                                    break;
+
+
+                                // gargoyle mysticism book seems ok. Mha!
                             }
                         }
+
 
                         if (AnimationsLoader.Instance.EquipConversions.TryGetValue
                             (Graphic, out Dictionary<ushort, EquipConvData> map))
@@ -312,7 +356,7 @@ namespace ClassicUO.Game.GameObjects
                         }
 
                         // Seems like all Gargoyle equipment has the 'IsWeapon' flag
-                        if (AnimationsLoader.Instance.SittingValue == 0 && IsGargoyle && item.ItemData.IsWeapon)
+                        if (AnimationsLoader.Instance.SittingValue == 0 && IsGargoyle /*&& item.ItemData.IsWeapon*/)
                         {
                             AnimationsLoader.Instance.AnimGroup = GetGroupForAnimation(this, graphic, true);
 
