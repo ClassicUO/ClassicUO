@@ -254,8 +254,8 @@ namespace ClassicUO.Game.UI.Gumps
 
             UseAbilityButtonGump gump = new UseAbilityButtonGump(def.Index, true)
             {
-                X = Mouse.LDropPosition.X - 22,
-                Y = Mouse.LDropPosition.Y - 22
+                X = Mouse.LClickPosition.X - 22,
+                Y = Mouse.LClickPosition.Y - 22
             };
 
             UIManager.Add(gump);
@@ -276,8 +276,8 @@ namespace ClassicUO.Game.UI.Gumps
 
             UseAbilityButtonGump gump = new UseAbilityButtonGump(def.Index, false)
             {
-                X = Mouse.LDropPosition.X - 22,
-                Y = Mouse.LDropPosition.Y - 22
+                X = Mouse.LClickPosition.X - 22,
+                Y = Mouse.LClickPosition.Y - 22
             };
 
             UIManager.Add(gump);

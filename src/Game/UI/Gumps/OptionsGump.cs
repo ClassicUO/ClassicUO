@@ -1221,10 +1221,10 @@ namespace ClassicUO.Game.UI.Gumps
                         {
                             if (UIManager.IsDragging ||
                                 Math.Max(Math.Abs(Mouse.LDroppedOffset.X), Math.Abs(Mouse.LDroppedOffset.Y)) < 5 ||
-                                nb.ScreenCoordinateX > Mouse.LDropPosition.X ||
-                                nb.ScreenCoordinateX < Mouse.LDropPosition.X - nb.Width ||
-                                nb.ScreenCoordinateY > Mouse.LDropPosition.Y ||
-                                nb.ScreenCoordinateY + nb.Height < Mouse.LDropPosition.Y)
+                                nb.ScreenCoordinateX > Mouse.LClickPosition.X ||
+                                nb.ScreenCoordinateX < Mouse.LClickPosition.X - nb.Width ||
+                                nb.ScreenCoordinateY > Mouse.LClickPosition.Y ||
+                                nb.ScreenCoordinateY + nb.Height < Mouse.LClickPosition.Y)
                             {
                                 return;
                             }
@@ -1241,7 +1241,7 @@ namespace ClassicUO.Game.UI.Gumps
                                      ?.Dispose();
 
                             MacroButtonGump macroButtonGump = new MacroButtonGump
-                                (control.Macro, Mouse.LDropPosition.X, Mouse.LDropPosition.Y);
+                                (control.Macro, Mouse.LClickPosition.X, Mouse.LClickPosition.Y);
 
                             UIManager.Add(macroButtonGump);
 
@@ -1343,10 +1343,10 @@ namespace ClassicUO.Game.UI.Gumps
 
                     if (UIManager.IsDragging ||
                         Math.Max(Math.Abs(Mouse.LDroppedOffset.X), Math.Abs(Mouse.LDroppedOffset.Y)) < 5 ||
-                        nb.ScreenCoordinateX > Mouse.LDropPosition.X ||
-                        nb.ScreenCoordinateX < Mouse.LDropPosition.X - nb.Width ||
-                        nb.ScreenCoordinateY > Mouse.LDropPosition.Y ||
-                        nb.ScreenCoordinateY + nb.Height < Mouse.LDropPosition.Y)
+                        nb.ScreenCoordinateX > Mouse.LClickPosition.X ||
+                        nb.ScreenCoordinateX < Mouse.LClickPosition.X - nb.Width ||
+                        nb.ScreenCoordinateY > Mouse.LClickPosition.Y ||
+                        nb.ScreenCoordinateY + nb.Height < Mouse.LClickPosition.Y)
                     {
                         return;
                     }
@@ -1354,7 +1354,7 @@ namespace ClassicUO.Game.UI.Gumps
                     UIManager.Gumps.OfType<MacroButtonGump>().FirstOrDefault(s => s._macro == m)?.Dispose();
 
                     MacroButtonGump macroButtonGump = new MacroButtonGump
-                        (m, Mouse.LDropPosition.X, Mouse.LDropPosition.Y);
+                        (m, Mouse.LClickPosition.X, Mouse.LClickPosition.Y);
 
                     UIManager.Add(macroButtonGump);
 

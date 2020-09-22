@@ -34,11 +34,11 @@ namespace ClassicUO.Input
 
         public static Point RealPosition;
 
-        public static Point LDropPosition;
+        public static Point LClickPosition;
 
-        public static Point RDropPosition;
+        public static Point RClickPosition;
 
-        public static Point MDropPosition;
+        public static Point MClickPosition;
 
         public static uint LastLeftButtonClickTime { get; set; }
 
@@ -58,11 +58,11 @@ namespace ClassicUO.Input
 
         public static bool IsDragging { get; set; }
 
-        public static Point LDroppedOffset => LButtonPressed ? RealPosition - LDropPosition : Point.Zero;
+        public static Point LDroppedOffset => LButtonPressed ? RealPosition - LClickPosition : Point.Zero;
 
-        public static Point RDroppedOffset => RButtonPressed ? RealPosition - RDropPosition : Point.Zero;
+        public static Point RDroppedOffset => RButtonPressed ? RealPosition - RClickPosition : Point.Zero;
 
-        public static Point MDroppedOffset => MButtonPressed ? RealPosition - MDropPosition : Point.Zero;
+        public static Point MDroppedOffset => MButtonPressed ? RealPosition - MClickPosition : Point.Zero;
 
         public static bool MouseInWindow { get; set; }
 

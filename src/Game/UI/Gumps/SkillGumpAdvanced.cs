@@ -336,7 +336,7 @@ namespace ClassicUO.Game.UI.Gumps
                 GetSpellFloatingButton(_skill.Index)?.Dispose();
 
                 SkillButtonGump skillButtonGump = new SkillButtonGump
-                    (_skill, Mouse.LDropPosition.X, Mouse.LDropPosition.Y);
+                    (_skill, Mouse.LClickPosition.X, Mouse.LClickPosition.Y);
 
                 UIManager.Add(skillButtonGump);
 

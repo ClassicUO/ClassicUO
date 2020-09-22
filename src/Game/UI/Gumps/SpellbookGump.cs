@@ -808,8 +808,8 @@ namespace ClassicUO.Game.UI.Gumps
 
             UseSpellButtonGump gump = new UseSpellButtonGump(def)
             {
-                X = Mouse.LDropPosition.X - 22,
-                Y = Mouse.LDropPosition.Y - 22
+                X = Mouse.LClickPosition.X - 22,
+                Y = Mouse.LClickPosition.Y - 22
             };
 
             UIManager.Add(gump);

@@ -349,8 +349,8 @@ namespace ClassicUO.Game
 
                     gump = new SplitMenuGump(item, new Point(x, y))
                     {
-                        X = Mouse.LDropPosition.X - 80,
-                        Y = Mouse.LDropPosition.Y - 40
+                        X = Mouse.LClickPosition.X - 80,
+                        Y = Mouse.LClickPosition.Y - 40
                     };
 
                     UIManager.Add(gump);
