@@ -808,12 +808,12 @@ namespace ClassicUO.Game.UI.Gumps
 
             UseSpellButtonGump gump = new UseSpellButtonGump(def)
             {
-                X = Mouse.LClickPosition.X - 22,
-                Y = Mouse.LClickPosition.Y - 22
+                X = Mouse.Position.X - 22,
+                Y = Mouse.Position.Y - 22
             };
 
             UIManager.Add(gump);
-            UIManager.AttemptDragControl(gump, Mouse.Position, true);
+            UIManager.AttemptDragControl(gump, true);
         }
 
         private static UseSpellButtonGump GetSpellFloatingButton(int id)

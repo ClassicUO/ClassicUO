@@ -886,8 +886,8 @@ namespace ClassicUO.Game.Scenes
                                 (
                                     customgump = new HealthBarGumpCustom(obj)
                                     {
-                                        X = Mouse.LClickPosition.X - (rect.Width >> 1),
-                                        Y = Mouse.LClickPosition.Y - (rect.Height >> 1)
+                                        X = Mouse.Position.X - (rect.Width >> 1),
+                                        Y = Mouse.Position.Y - (rect.Height >> 1)
                                     }
                                 );
                             }
@@ -899,13 +899,13 @@ namespace ClassicUO.Game.Scenes
                                 (
                                     customgump = new HealthBarGump(obj)
                                     {
-                                        X = Mouse.LClickPosition.X - (rect.Width >> 1),
-                                        Y = Mouse.LClickPosition.Y - (rect.Height >> 1)
+                                        X = Mouse.Position.X - (rect.Width >> 1),
+                                        Y = Mouse.Position.Y - (rect.Height >> 1)
                                     }
                                 );
                             }
 
-                            UIManager.AttemptDragControl(customgump, Mouse.Position, true);
+                            UIManager.AttemptDragControl(customgump, true);
                             ok = false;
                         }
                         else if (obj is Item item)
