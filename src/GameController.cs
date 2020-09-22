@@ -1,21 +1,21 @@
 ﻿#region license
 
 // Copyright (C) 2020 ClassicUO Development Community on Github
-// 
+//
 // This project is an alternative client for the game Ultima Online.
 // The goal of this is to develop a lightweight client considering
 // new technologies.
-// 
+//
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
 //  the Free Software Foundation, either version 3 of the License, or
 //  (at your option) any later version.
-// 
+//
 //  This program is distributed in the hope that it will be useful,
 //  but WITHOUT ANY WARRANTY; without even the implied warranty of
 //  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 //  GNU General Public License for more details.
-// 
+//
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
@@ -618,12 +618,86 @@ namespace ClassicUO
 
                     break;
 
-                case SDL_EventType.SDL_MOUSEBUTTONUP:
                 case SDL_EventType.SDL_MOUSEBUTTONDOWN:
+                {
                     Mouse.Update();
-                    bool isDown = sdlEvent->type == SDL_EventType.SDL_MOUSEBUTTONDOWN;
 
-                    if (_dragStarted && !isDown)
+                    SDL_MouseButtonEvent mouse = sdlEvent->button;
+
+                    // The values in MouseButtonType are chosen to exactly match the SDL values
+                    MouseButtonType buttonType = (MouseButtonType) mouse.button;
+
+                    uint lastClickTime = 0;
+                    switch (buttonType)
+                    {
+                        case MouseButtonType.Left:
+                            lastClickTime = Mouse.LastLeftButtonClickTime;
+                            break;
+                        case MouseButtonType.Middle:
+                            lastClickTime = Mouse.LastMidButtonClickTime;
+                            break;
+                        case MouseButtonType.Right:
+                            lastClickTime = Mouse.LastRightButtonClickTime;
+                            break;
+                    }
+
+                    Mouse.ButtonPress(buttonType);
+                    uint ticks = Time.Ticks;
+
+                    if (lastClickTime + Mouse.MOUSE_DELAY_DOUBLE_CLICK >= ticks)
+                    {
+                        lastClickTime = 0;
+
+                        bool res = Scene.OnMouseDoubleClick(buttonType) || UIManager.OnMouseDoubleClick
+                            (buttonType);
+
+                        if (!res)
+                        {
+                            if (!Scene.OnMouseDown(buttonType))
+                            {
+                                UIManager.OnMouseButtonDown(buttonType);
+                            }
+                        }
+                        else
+                        {
+                            lastClickTime = 0xFFFF_FFFF;
+                        }
+                    }
+                    else
+                    {
+                        if (buttonType != MouseButtonType.Left && buttonType != MouseButtonType.Right)
+                        {
+                            Plugin.ProcessMouse(sdlEvent->button.button, 0);
+                        }
+
+                        if (!Scene.OnMouseDown(buttonType))
+                        {
+                            UIManager.OnMouseButtonDown(buttonType);
+                        }
+
+                        lastClickTime = Mouse.CancelDoubleClick ? 0 : ticks;
+                    }
+
+                    switch (buttonType)
+                    {
+                        case MouseButtonType.Left:
+                            Mouse.LastLeftButtonClickTime = lastClickTime;
+                            break;
+                        case MouseButtonType.Middle:
+                            Mouse.LastMidButtonClickTime = lastClickTime;
+                            break;
+                        case MouseButtonType.Right:
+                            Mouse.LastRightButtonClickTime = lastClickTime;
+                            break;
+                    }
+
+                    break;
+                }
+                case SDL_EventType.SDL_MOUSEBUTTONUP:
+                {
+                    Mouse.Update();
+
+                    if (_dragStarted)
                     {
                         _dragStarted = false;
                     }
@@ -633,192 +707,33 @@ namespace ClassicUO
                     // The values in MouseButtonType are chosen to exactly match the SDL values
                     MouseButtonType buttonType = (MouseButtonType) mouse.button;
 
-                    switch ((uint) mouse.button)
+                    uint lastClickTime = 0;
+                    switch (buttonType)
                     {
-                        case SDL_BUTTON_LEFT:
-
-                            if (isDown)
-                            {
-                                Mouse.ButtonPress(buttonType);
-                                uint ticks = Time.Ticks;
-
-                                if (Mouse.LastLeftButtonClickTime + Mouse.MOUSE_DELAY_DOUBLE_CLICK >= ticks)
-                                {
-                                    Mouse.LastLeftButtonClickTime = 0;
-
-                                    bool res = Scene.OnMouseDoubleClick(buttonType) || UIManager.OnMouseDoubleClick
-                                        (buttonType);
-
-                                    if (!res)
-                                    {
-                                        if (!Scene.OnMouseDown(buttonType))
-                                        {
-                                            UIManager.OnMouseButtonDown(buttonType);
-                                        }
-                                    }
-                                    else
-                                    {
-                                        Mouse.LastLeftButtonClickTime = 0xFFFF_FFFF;
-                                    }
-
-                                    break;
-                                }
-
-                                if (!Scene.OnMouseDown(buttonType))
-                                {
-                                    UIManager.OnMouseButtonDown(buttonType);
-                                }
-
-                                Mouse.LastLeftButtonClickTime = Mouse.CancelDoubleClick ? 0 : ticks;
-                            }
-                            else
-                            {
-                                if (Mouse.LastLeftButtonClickTime != 0xFFFF_FFFF)
-                                {
-                                    if (!Scene.OnMouseUp(buttonType) || UIManager.LastControlMouseDown
-                                        (buttonType) != null)
-                                    {
-                                        UIManager.OnMouseButtonUp(buttonType);
-                                    }
-                                }
-
-                                Mouse.ButtonRelease(buttonType);
-                            }
-
+                        case MouseButtonType.Left:
+                            lastClickTime = Mouse.LastLeftButtonClickTime;
                             break;
-
-                        case SDL_BUTTON_MIDDLE:
-
-                            if (isDown)
-                            {
-                                Mouse.ButtonPress(buttonType);
-                                uint ticks = Time.Ticks;
-
-                                if (Mouse.LastMidButtonClickTime + Mouse.MOUSE_DELAY_DOUBLE_CLICK >= ticks)
-                                {
-                                    Mouse.LastMidButtonClickTime = 0;
-
-                                    bool res = Scene.OnMouseDoubleClick(buttonType) || UIManager.OnMouseDoubleClick
-                                        (buttonType);
-
-                                    if (!res)
-                                    {
-                                        if (!Scene.OnMouseDown(buttonType))
-                                        {
-                                            UIManager.OnMouseButtonDown(buttonType);
-                                        }
-                                    }
-                                    else
-                                    {
-                                        Mouse.LastMidButtonClickTime = 0xFFFF_FFFF;
-                                    }
-
-                                    break;
-                                }
-
-                                Plugin.ProcessMouse(sdlEvent->button.button, 0);
-
-                                if (!Scene.OnMouseDown(buttonType))
-                                {
-                                    UIManager.OnMouseButtonDown(buttonType);
-                                }
-
-                                Mouse.LastMidButtonClickTime = Mouse.CancelDoubleClick ? 0 : ticks;
-                            }
-                            else
-                            {
-                                if (Mouse.LastMidButtonClickTime != 0xFFFF_FFFF)
-                                {
-                                    if (!Scene.OnMouseUp(buttonType))
-                                    {
-                                        UIManager.OnMouseButtonUp(buttonType);
-                                    }
-                                }
-
-                                Mouse.ButtonRelease(buttonType);
-                            }
-
+                        case MouseButtonType.Middle:
+                            lastClickTime = Mouse.LastMidButtonClickTime;
                             break;
-
-                        case SDL_BUTTON_RIGHT:
-
-                            if (isDown)
-                            {
-                                Mouse.ButtonPress(buttonType);
-                                uint ticks = Time.Ticks;
-
-                                if (Mouse.LastRightButtonClickTime + Mouse.MOUSE_DELAY_DOUBLE_CLICK >= ticks)
-                                {
-                                    Mouse.LastRightButtonClickTime = 0;
-
-                                    bool res = Scene.OnMouseDoubleClick(buttonType) || UIManager.OnMouseDoubleClick
-                                        (buttonType);
-
-                                    if (!res)
-                                    {
-                                        if (!Scene.OnMouseDown(buttonType))
-                                        {
-                                            UIManager.OnMouseButtonDown(buttonType);
-                                        }
-                                    }
-                                    else
-                                    {
-                                        Mouse.LastRightButtonClickTime = 0xFFFF_FFFF;
-                                    }
-
-                                    break;
-                                }
-
-                                if (!Scene.OnMouseDown(buttonType))
-                                {
-                                    UIManager.OnMouseButtonDown(buttonType);
-                                }
-
-                                Mouse.LastRightButtonClickTime = Mouse.CancelDoubleClick ? 0 : ticks;
-                            }
-                            else
-                            {
-                                if (Mouse.LastRightButtonClickTime != 0xFFFF_FFFF)
-                                {
-                                    if (!Scene.OnMouseUp(buttonType))
-                                    {
-                                        UIManager.OnMouseButtonUp(buttonType);
-                                    }
-                                }
-
-                                Mouse.ButtonRelease(buttonType);
-                            }
-
-                            break;
-
-                        case SDL_BUTTON_X1:
-                        case SDL_BUTTON_X2:
-                            if (isDown)
-                            {
-                                Mouse.ButtonPress(buttonType);
-                                Plugin.ProcessMouse(sdlEvent->button.button, 0);
-
-                                if (!Scene.OnMouseDown(buttonType))
-                                {
-                                    UIManager.OnMouseButtonDown(buttonType);
-                                }
-
-                                // TODO: doubleclick?
-                            }
-                            else
-                            {
-                                if (!Scene.OnMouseUp(buttonType))
-                                {
-                                    UIManager.OnMouseButtonUp(buttonType);
-                                }
-
-                                Mouse.ButtonRelease(buttonType);
-                            }
-
+                        case MouseButtonType.Right:
+                            lastClickTime = Mouse.LastRightButtonClickTime;
                             break;
                     }
 
+                    if (lastClickTime != 0xFFFF_FFFF)
+                    {
+                        if (!Scene.OnMouseUp(buttonType) || UIManager.LastControlMouseDown
+                            (buttonType) != null)
+                        {
+                            UIManager.OnMouseButtonUp(buttonType);
+                        }
+                    }
+
+                    Mouse.ButtonRelease(buttonType);
+
                     break;
+                }
             }
 
             return 0;
