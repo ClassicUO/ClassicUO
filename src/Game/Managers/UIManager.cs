@@ -198,14 +198,30 @@ namespace ClassicUO.Game.Managers
             EndDragControl(Mouse.Position);
             HandleMouseInput();
 
-            _mouseDownControls[(int) button]?.InvokeMouseUp(Mouse.Position, button);
+            int index = (int) button;
+
+            if (MouseOverControl != null)
+            {
+                if (_mouseDownControls[index] != null && MouseOverControl == _mouseDownControls[index] || ItemHold.Enabled)
+                {
+                    MouseOverControl.InvokeMouseUp(Mouse.Position, button);
+                }
+                else if (_mouseDownControls[index] != null && MouseOverControl != _mouseDownControls[index])
+                {
+                    _mouseDownControls[index].InvokeMouseUp(Mouse.Position, button);
+                }
+            }
+            else
+            {
+                _mouseDownControls[index]?.InvokeMouseUp(Mouse.Position, button);
+            }
 
             if (button == MouseButtonType.Right)
             {
-                _mouseDownControls[(int) button]?.InvokeMouseCloseGumpWithRClick();
+                _mouseDownControls[index]?.InvokeMouseCloseGumpWithRClick();
             }
 
-            _mouseDownControls[(int) button] = null;
+            _mouseDownControls[index] = null;
         }
 
         public static bool OnMouseDoubleClick(MouseButtonType button)
