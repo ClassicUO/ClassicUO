@@ -32,8 +32,6 @@ namespace ClassicUO.Input
 
         public static Point Position;
 
-        public static Point RealPosition;
-
         public static Point LClickPosition;
 
         public static Point RClickPosition;
@@ -58,11 +56,11 @@ namespace ClassicUO.Input
 
         public static bool IsDragging { get; set; }
 
-        public static Point LDragOffset => LButtonPressed ? RealPosition - LClickPosition : Point.Zero;
+        public static Point LDragOffset => LButtonPressed ? Position - LClickPosition : Point.Zero;
 
-        public static Point RDragOffset => RButtonPressed ? RealPosition - RClickPosition : Point.Zero;
+        public static Point RDragOffset => RButtonPressed ? Position - RClickPosition : Point.Zero;
 
-        public static Point MDragOffset => MButtonPressed ? RealPosition - MClickPosition : Point.Zero;
+        public static Point MDragOffset => MButtonPressed ? Position - MClickPosition : Point.Zero;
 
         public static bool MouseInWindow { get; set; }
 
@@ -88,11 +86,6 @@ namespace ClassicUO.Input
                 Position.X = x - winX;
                 Position.Y = y - winY;
             }
-            //else if (SDL.SDL_GetRelativeMouseMode() == SDL.SDL_bool.SDL_TRUE)
-            //{
-            //    Console.WriteLine("MOUSE RELATIVE!");
-            //    SDL.SDL_GetRelativeMouseState(out Position.X, out Position.Y);
-            //}
             else
             {
                 SDL.SDL_GetMouseState(out Position.X, out Position.Y);
@@ -106,7 +99,6 @@ namespace ClassicUO.Input
                                 Client.Game.Window.ClientBounds.Height);
 
             IsDragging = LButtonPressed || RButtonPressed || MButtonPressed;
-            RealPosition = Position;
         }
     }
 }
