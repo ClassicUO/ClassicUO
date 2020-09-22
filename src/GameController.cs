@@ -639,10 +639,7 @@ namespace ClassicUO
 
                             if (isDown)
                             {
-                                Mouse.Begin();
-                                Mouse.LButtonPressed = true;
-                                Mouse.LClickPosition = Mouse.Position;
-                                Mouse.CancelDoubleClick = false;
+                                Mouse.ButtonPress(buttonType);
                                 uint ticks = Time.Ticks;
 
                                 if (Mouse.LastLeftButtonClickTime + Mouse.MOUSE_DELAY_DOUBLE_CLICK >= ticks)
@@ -685,8 +682,7 @@ namespace ClassicUO
                                     }
                                 }
 
-                                Mouse.LButtonPressed = false;
-                                Mouse.End();
+                                Mouse.ButtonRelease(buttonType);
                             }
 
                             break;
@@ -695,10 +691,7 @@ namespace ClassicUO
 
                             if (isDown)
                             {
-                                Mouse.Begin();
-                                Mouse.MButtonPressed = true;
-                                Mouse.MClickPosition = Mouse.Position;
-                                Mouse.CancelDoubleClick = false;
+                                Mouse.ButtonPress(buttonType);
                                 uint ticks = Time.Ticks;
 
                                 if (Mouse.LastMidButtonClickTime + Mouse.MOUSE_DELAY_DOUBLE_CLICK >= ticks)
@@ -742,8 +735,7 @@ namespace ClassicUO
                                     }
                                 }
 
-                                Mouse.MButtonPressed = false;
-                                Mouse.End();
+                                Mouse.ButtonRelease(buttonType);
                             }
 
                             break;
@@ -752,10 +744,7 @@ namespace ClassicUO
 
                             if (isDown)
                             {
-                                Mouse.Begin();
-                                Mouse.RButtonPressed = true;
-                                Mouse.RClickPosition = Mouse.Position;
-                                Mouse.CancelDoubleClick = false;
+                                Mouse.ButtonPress(buttonType);
                                 uint ticks = Time.Ticks;
 
                                 if (Mouse.LastRightButtonClickTime + Mouse.MOUSE_DELAY_DOUBLE_CLICK >= ticks)
@@ -797,8 +786,7 @@ namespace ClassicUO
                                     }
                                 }
 
-                                Mouse.RButtonPressed = false;
-                                Mouse.End();
+                                Mouse.ButtonRelease(buttonType);
                             }
 
                             break;
@@ -807,9 +795,7 @@ namespace ClassicUO
                         case SDL_BUTTON_X2:
                             if (isDown)
                             {
-                                Mouse.Begin();
-                                Mouse.XButtonPressed = true;
-                                Mouse.CancelDoubleClick = false;
+                                Mouse.ButtonPress(buttonType);
                                 Plugin.ProcessMouse(sdlEvent->button.button, 0);
 
                                 if (!Scene.OnMouseDown(buttonType))
@@ -826,8 +812,7 @@ namespace ClassicUO
                                     UIManager.OnMouseButtonUp(buttonType);
                                 }
 
-                                Mouse.XButtonPressed = false;
-                                Mouse.End();
+                                Mouse.ButtonRelease(buttonType);
                             }
 
                             break;
