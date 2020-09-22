@@ -349,12 +349,12 @@ namespace ClassicUO.Game
 
                     gump = new SplitMenuGump(item, new Point(x, y))
                     {
-                        X = Mouse.LClickPosition.X - 80,
-                        Y = Mouse.LClickPosition.Y - 40
+                        X = Mouse.Position.X - 80,
+                        Y = Mouse.Position.Y - 40
                     };
 
                     UIManager.Add(gump);
-                    UIManager.AttemptDragControl(gump, Mouse.Position, true);
+                    UIManager.AttemptDragControl(gump, true);
 
                     return true;
                 }

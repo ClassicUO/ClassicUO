@@ -1241,19 +1241,14 @@ namespace ClassicUO.Game.UI.Gumps
                                      ?.Dispose();
 
                             MacroButtonGump macroButtonGump = new MacroButtonGump
-                                (control.Macro, Mouse.LClickPosition.X, Mouse.LClickPosition.Y);
+                                (control.Macro, Mouse.Position.X, Mouse.Position.Y);
+
+                            macroButtonGump.X = Mouse.Position.X + (macroButtonGump.Width >> 1);
+                            macroButtonGump.Y = Mouse.Position.Y + (macroButtonGump.Height >> 1);
 
                             UIManager.Add(macroButtonGump);
 
-                            UIManager.AttemptDragControl
-                            (
-                                macroButtonGump,
-                                new Point
-                                (
-                                    Mouse.Position.X + (macroButtonGump.Width >> 1),
-                                    Mouse.Position.Y + (macroButtonGump.Height >> 1)
-                                ), true
-                            );
+                            UIManager.AttemptDragControl(macroButtonGump, true);
                         };
 
                         nb.MouseUp += (sss, eee) =>
@@ -1354,19 +1349,14 @@ namespace ClassicUO.Game.UI.Gumps
                     UIManager.Gumps.OfType<MacroButtonGump>().FirstOrDefault(s => s._macro == m)?.Dispose();
 
                     MacroButtonGump macroButtonGump = new MacroButtonGump
-                        (m, Mouse.LClickPosition.X, Mouse.LClickPosition.Y);
+                        (m, Mouse.Position.X, Mouse.Position.Y);
+
+                    macroButtonGump.X = Mouse.Position.X + (macroButtonGump.Width >> 1);
+                    macroButtonGump.Y = Mouse.Position.Y + (macroButtonGump.Height >> 1);
 
                     UIManager.Add(macroButtonGump);
 
-                    UIManager.AttemptDragControl
-                    (
-                        macroButtonGump,
-                        new Point
-                        (
-                            Mouse.Position.X + (macroButtonGump.Width >> 1),
-                            Mouse.Position.Y + (macroButtonGump.Height >> 1)
-                        ), true
-                    );
+                    UIManager.AttemptDragControl(macroButtonGump, true);
                 };
 
                 nb.MouseUp += (sss, eee) =>

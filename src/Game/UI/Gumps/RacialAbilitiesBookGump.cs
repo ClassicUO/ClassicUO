@@ -187,12 +187,12 @@ namespace ClassicUO.Game.UI.Gumps
 
                         RacialAbilityButton gump = new RacialAbilityButton((ushort) ((GumpPic) sender).LocalSerial)
                         {
-                            X = Mouse.LClickPosition.X - 20,
-                            Y = Mouse.LClickPosition.Y - 20
+                            X = Mouse.Position.X - 20,
+                            Y = Mouse.Position.Y - 20
                         };
 
                         UIManager.Add(gump);
-                        UIManager.AttemptDragControl(gump, Mouse.Position, true);
+                        UIManager.AttemptDragControl(gump, true);
                     };
 
                     pic.MouseDoubleClick += (sender, e) =>

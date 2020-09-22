@@ -254,12 +254,12 @@ namespace ClassicUO.Game.UI.Gumps
 
             UseAbilityButtonGump gump = new UseAbilityButtonGump(def.Index, true)
             {
-                X = Mouse.LClickPosition.X - 22,
-                Y = Mouse.LClickPosition.Y - 22
+                X = Mouse.Position.X - 22,
+                Y = Mouse.Position.Y - 22
             };
 
             UIManager.Add(gump);
-            UIManager.AttemptDragControl(gump, Mouse.Position, true);
+            UIManager.AttemptDragControl(gump, true);
         }
 
         private void OnGumpicDragBeginSecondary(object sender, EventArgs e)
@@ -276,12 +276,12 @@ namespace ClassicUO.Game.UI.Gumps
 
             UseAbilityButtonGump gump = new UseAbilityButtonGump(def.Index, false)
             {
-                X = Mouse.LClickPosition.X - 22,
-                Y = Mouse.LClickPosition.Y - 22
+                X = Mouse.Position.X - 22,
+                Y = Mouse.Position.Y - 22
             };
 
             UIManager.Add(gump);
-            UIManager.AttemptDragControl(gump, Mouse.Position, true);
+            UIManager.AttemptDragControl(gump, true);
         }
 
         private static UseAbilityButtonGump GetSpellFloatingButton(int id)
