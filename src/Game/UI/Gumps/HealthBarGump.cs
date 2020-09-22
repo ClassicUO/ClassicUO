@@ -174,7 +174,7 @@ namespace ClassicUO.Game.UI.Gumps
                 return;
             }
 
-            Point p = Mouse.LDroppedOffset;
+            Point p = Mouse.LDragOffset;
 
             if (Math.Max(Math.Abs(p.X), Math.Abs(p.Y)) >= 1)
             {

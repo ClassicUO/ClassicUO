@@ -2063,8 +2063,8 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override void OnMouseOver(int x, int y)
         {
-            Point offset = Mouse.LButtonPressed ? Mouse.LDroppedOffset :
-                Mouse.MButtonPressed ? Mouse.MDroppedOffset : Point.Zero;
+            Point offset = Mouse.LButtonPressed ? Mouse.LDragOffset :
+                Mouse.MButtonPressed ? Mouse.MDragOffset : Point.Zero;
 
             if (_isScrolling && offset != Point.Zero)
             {

@@ -116,7 +116,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (Mouse.IsDragging)
             {
-                Point offset = Mouse.LDroppedOffset;
+                Point offset = Mouse.LDragOffset;
 
                 _lastSize = _savedSize;
 

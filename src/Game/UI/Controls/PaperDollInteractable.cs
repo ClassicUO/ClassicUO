@@ -391,7 +391,7 @@ namespace ClassicUO.Game.UI.Controls
                         UIManager.LastControlMouseDown(MouseButtonType.Left) == this &&
                         (Mouse.LastLeftButtonClickTime != 0xFFFF_FFFF && Mouse.LastLeftButtonClickTime != 0 &&
                          Mouse.LastLeftButtonClickTime + Mouse.MOUSE_DELAY_DOUBLE_CLICK < Time.Ticks ||
-                         Mouse.LDroppedOffset != Point.Zero))
+                         Mouse.LDragOffset != Point.Zero))
                     {
                         GameActions.PickUp(LocalSerial, 0, 0);
                         Mouse.LClickPosition = Mouse.Position;

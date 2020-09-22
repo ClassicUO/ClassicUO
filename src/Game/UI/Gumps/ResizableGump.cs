@@ -110,7 +110,7 @@ namespace ClassicUO.Game.UI.Gumps
                 return;
             }
 
-            Point offset = Mouse.LDroppedOffset;
+            Point offset = Mouse.LDragOffset;
 
             _lastSize = _savedSize;
 
