@@ -41,7 +41,6 @@ namespace ClassicUO.Game.UI.Gumps
         //private bool _forceUpdate;
         private UOTexture32 _gumpTexture, _mapTexture;
         private int _lastMap = -1;
-        private Texture2D _playerIndicator, _mobilesIndicator;
         private long _timeMS;
         private bool _useLargeMap;
         private ushort _x, _y;
@@ -156,24 +155,10 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (_draw)
             {
-                if (_playerIndicator == null)
-                {
-                    _playerIndicator = new Texture2D(batcher.GraphicsDevice, 1, 1);
-
-                    _playerIndicator.SetData
-                    (
-                        new uint[1]
-                        {
-                            0xFFFFFFFF
-                        }
-                    );
-
-                    _mobilesIndicator = new Texture2D(batcher.GraphicsDevice, 1, 1);
-                    _mobilesIndicator.SetData(new[] { Color.White });
-                }
-
                 int w = Width >> 1;
                 int h = Height >> 1;
+
+                Texture2D mobilesTextureDot = Texture2DCache.GetTexture(Color.Red);
 
                 foreach (Mobile mob in World.Mobiles)
                 {
@@ -192,12 +177,12 @@ namespace ClassicUO.Game.UI.Gumps
 
                     ShaderHueTranslator.GetHueVector(ref _hueVector, Notoriety.GetHue(mob.NotorietyFlag));
 
-                    batcher.Draw2D(_mobilesIndicator, x + w + gx, y + h + gy, 2, 2, ref _hueVector);
+                    batcher.Draw2D(mobilesTextureDot, x + w + gx, y + h + gy, 2, 2, ref _hueVector);
                 }
 
                 //DRAW DOT OF PLAYER
                 ResetHueVector();
-                batcher.Draw2D(_playerIndicator, x + w, y + h, 2, 2, ref _hueVector);
+                batcher.Draw2D(Texture2DCache.GetTexture(Color.White), x + w, y + h, 2, 2, ref _hueVector);
             }
 
             return base.Draw(batcher, x, y);
@@ -424,9 +409,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override void Dispose()
         {
-            _playerIndicator?.Dispose();
             _mapTexture?.Dispose();
-            _mobilesIndicator?.Dispose();
             base.Dispose();
         }
     }
