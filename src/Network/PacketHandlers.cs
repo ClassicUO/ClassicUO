@@ -5285,12 +5285,12 @@ namespace ClassicUO.Network
                     Console.WriteLine("ADD ITEM TO CONTAINER -- CLEAR HOLD");
                     ItemHold.Clear();
                 }
-                else if (ItemHold.Graphic == graphic && ItemHold.Amount == amount &&
-                         ItemHold.Container == containerSerial)
-                {
-                    ItemHold.Enabled = false;
-                    ItemHold.Dropped = false;
-                }
+                //else if (ItemHold.Graphic == graphic && ItemHold.Amount == amount &&
+                //         ItemHold.Container == containerSerial)
+                //{
+                //    ItemHold.Enabled = false;
+                //    ItemHold.Dropped = false;
+                //}
             }
 
             Entity container = World.Get(containerSerial);
