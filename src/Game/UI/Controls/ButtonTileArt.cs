@@ -34,9 +34,9 @@ namespace ClassicUO.Game.UI.Controls
             _isPartial = TileDataLoader.Instance.StaticData[graphic].IsPartialHue;
         }
 
-        public override void Update(double totalMS, double frameMS)
+        public override void Update(double totalTime, double frameTime)
         {
-            base.Update(totalMS, frameMS);
+            base.Update(totalTime, frameTime);
 
             if (_texture != null)
             {
@@ -52,9 +52,9 @@ namespace ClassicUO.Game.UI.Controls
 
             ResetHueVector();
 
-            ShaderHueTranslator.GetHueVector(ref _hueVector, _hue, _isPartial, 0);
+            ShaderHueTranslator.GetHueVector(ref HueVector, _hue, _isPartial, 0);
 
-            return batcher.Draw2D(_texture, x + _tileX, y + _tileY, ref _hueVector);
+            return batcher.Draw2D(_texture, x + _tileX, y + _tileY, ref HueVector);
         }
     }
 }

@@ -92,9 +92,9 @@ namespace ClassicUO.Game.UI.Controls
         public Rectangle ScissorRectangle;
 
 
-        public override void Update(double totalMS, double frameMS)
+        public override void Update(double totalTime, double frameTime)
         {
-            base.Update(totalMS, frameMS);
+            base.Update(totalTime, frameTime);
 
             CalculateScrollBarMaxValue();
 

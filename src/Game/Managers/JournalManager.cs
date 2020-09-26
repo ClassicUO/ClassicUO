@@ -42,7 +42,7 @@ namespace ClassicUO.Game.Managers
         public event EventHandler<JournalEntry> EntryAdded;
 
 
-        public void Add(string text, ushort hue, string name, TEXT_TYPE type, bool isunicode = true)
+        public void Add(string text, ushort hue, string name, TextType type, bool isunicode = true)
         {
             JournalEntry entry = Entries.Count >= Constants.MAX_JOURNAL_HISTORY_COUNT ?
                 Entries.RemoveFromFront() :
@@ -50,10 +50,10 @@ namespace ClassicUO.Game.Managers
 
             byte font = (byte) (isunicode ? 0 : 9);
 
-            if (ProfileManager.Current != null && ProfileManager.Current.OverrideAllFonts)
+            if (ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.OverrideAllFonts)
             {
-                font = ProfileManager.Current.ChatFont;
-                isunicode = ProfileManager.Current.OverrideAllFontsIsUnicode;
+                font = ProfileManager.CurrentProfile.ChatFont;
+                isunicode = ProfileManager.CurrentProfile.OverrideAllFontsIsUnicode;
             }
 
             DateTime timeNow = DateTime.Now;
@@ -66,7 +66,7 @@ namespace ClassicUO.Game.Managers
             entry.Time = timeNow;
             entry.TextType = type;
 
-            if (ProfileManager.Current != null && ProfileManager.Current.ForceUnicodeJournal)
+            if (ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.ForceUnicodeJournal)
             {
                 entry.Font = 0;
                 entry.IsUnicode = true;
@@ -85,7 +85,7 @@ namespace ClassicUO.Game.Managers
 
         private void CreateWriter()
         {
-            if (_fileWriter == null && ProfileManager.Current != null && ProfileManager.Current.SaveJournalToFile)
+            if (_fileWriter == null && ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.SaveJournalToFile)
             {
                 try
                 {
@@ -150,7 +150,7 @@ namespace ClassicUO.Game.Managers
         public string Name;
         public string Text;
 
-        public TEXT_TYPE TextType;
+        public TextType TextType;
         public DateTime Time;
     }
 }

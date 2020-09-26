@@ -86,9 +86,9 @@ namespace ClassicUO.Game.UI.Gumps
             return false;
         }
 
-        public override void Update(double totalMS, double frameMS)
+        public override void Update(double totalTime, double frameTime)
         {
-            base.Update(totalMS, frameMS);
+            base.Update(totalTime, frameTime);
 
             if (Time.Ticks > _time_to_update)
             {
@@ -141,24 +141,24 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (_ping < 150)
             {
-                _hueVector.X = 0x44; // green
+                HueVector.X = 0x44; // green
             }
             else if (_ping < 200)
             {
-                _hueVector.X = 0x34; // yellow
+                HueVector.X = 0x34; // yellow
             }
             else if (_ping < 300)
             {
-                _hueVector.X = 0x31; // orange
+                HueVector.X = 0x31; // orange
             }
             else
             {
-                _hueVector.X = 0x20; // red
+                HueVector.X = 0x20; // red
             }
 
-            _hueVector.Y = 1;
+            HueVector.Y = 1;
 
-            batcher.DrawString(Fonts.Bold, _sb.ToString(), x + 10, y + 10, ref _hueVector);
+            batcher.DrawString(Fonts.Bold, _sb.ToString(), x + 10, y + 10, ref HueVector);
 
             return true;
         }

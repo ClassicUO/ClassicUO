@@ -206,7 +206,7 @@ namespace ClassicUO.Game.UI.Controls
             return false;
         }
 
-        public override void Update(double totalMS, double frameMS)
+        public override void Update(double totalTime, double frameTime)
         {
             if (SpecialHeight < c_ExpandableScrollHeight_Min)
             {
@@ -263,7 +263,7 @@ namespace ClassicUO.Game.UI.Controls
                 Parent?.OnPageChanged();
             }
 
-            base.Update(totalMS, frameMS);
+            base.Update(totalTime, frameTime);
         }
 
 

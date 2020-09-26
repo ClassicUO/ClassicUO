@@ -332,7 +332,7 @@ namespace ClassicUO.Game
 
             float scale = 1;
 
-            if (ProfileManager.Current != null && ProfileManager.Current.ScaleItemsInsideContainers)
+            if (ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.ScaleItemsInsideContainers)
             {
                 scale = UIManager.ContainerScale;
             }
@@ -346,7 +346,7 @@ namespace ClassicUO.Game
             }
         }
 
-        public void Update(double totalMS, double frameMS)
+        public void Update(double totalTime, double frameTime)
         {
             Graphic = AssignGraphicByState();
 
@@ -380,7 +380,7 @@ namespace ClassicUO.Game
 
             if (ItemHold.Enabled)
             {
-                _draggedItemTexture.Ticks = (long) totalMS;
+                _draggedItemTexture.Ticks = (long) totalTime;
 
                 if (ItemHold.IsFixedPosition && !UIManager.IsDragging)
                 {
@@ -407,7 +407,7 @@ namespace ClassicUO.Game
 
         public void Draw(UltimaBatcher2D sb)
         {
-            if (World.InGame && TargetManager.IsTargeting && ProfileManager.Current != null)
+            if (World.InGame && TargetManager.IsTargeting && ProfileManager.CurrentProfile != null)
             {
                 if (TargetManager.TargetingState == CursorTarget.MultiPlacement)
                 {
@@ -501,7 +501,7 @@ namespace ClassicUO.Game
                     _temp.Clear();
                 }
 
-                if (ProfileManager.Current.AuraOnMouse)
+                if (ProfileManager.CurrentProfile.AuraOnMouse)
                 {
                     ushort id = Graphic;
 
@@ -541,7 +541,7 @@ namespace ClassicUO.Game
                     );
                 }
 
-                if (ProfileManager.Current.ShowTargetRangeIndicator)
+                if (ProfileManager.CurrentProfile.ShowTargetRangeIndicator)
                 {
                     if (UIManager.IsMouseOverWorld)
                     {
@@ -564,7 +564,7 @@ namespace ClassicUO.Game
             {
                 float scale = 1;
 
-                if (ProfileManager.Current != null && ProfileManager.Current.ScaleItemsInsideContainers)
+                if (ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.ScaleItemsInsideContainers)
                 {
                     scale = UIManager.ContainerScale;
                 }
@@ -727,16 +727,16 @@ namespace ClassicUO.Game
                 return result;
             }
 
-            if (ProfileManager.Current == null)
+            if (ProfileManager.CurrentProfile == null)
             {
                 return result;
             }
 
-            int windowCenterX = ProfileManager.Current.GameWindowPosition.X +
-                                (ProfileManager.Current.GameWindowSize.X >> 1);
+            int windowCenterX = ProfileManager.CurrentProfile.GameWindowPosition.X +
+                                (ProfileManager.CurrentProfile.GameWindowSize.X >> 1);
 
-            int windowCenterY = ProfileManager.Current.GameWindowPosition.Y +
-                                (ProfileManager.Current.GameWindowSize.Y >> 1);
+            int windowCenterY = ProfileManager.CurrentProfile.GameWindowPosition.Y +
+                                (ProfileManager.CurrentProfile.GameWindowSize.Y >> 1);
 
             return _cursorData[
                 war, GetMouseDirection(windowCenterX, windowCenterY, Mouse.Position.X, Mouse.Position.Y, 1)];

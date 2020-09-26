@@ -1220,9 +1220,9 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
-        public override void Update(double totalMS, double frameMS)
+        public override void Update(double totalTime, double frameTime)
         {
-            base.Update(totalMS, frameMS);
+            base.Update(totalTime, frameTime);
 
             Item item = World.Items.Get(LocalSerial);
 
@@ -1241,7 +1241,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (_lastPressed != null)
             {
-                _clickTiming -= (float) frameMS;
+                _clickTiming -= (float) frameTime;
 
                 if (_clickTiming <= 0)
                 {
@@ -1367,9 +1367,9 @@ namespace ClassicUO.Game.UI.Gumps
                 _spellID = spellID;
             }
 
-            public override void Update(double totalMS, double frameMS)
+            public override void Update(double totalTime, double frameTime)
             {
-                base.Update(totalMS, frameMS);
+                base.Update(totalTime, frameTime);
 
                 if (World.ActiveSpellIcons.IsActive(_spellID))
                 {

@@ -153,7 +153,7 @@ namespace ClassicUO.Game.UI.Controls
             _textBox.SetText(val.ToString());
         }
 
-        public override void Update(double totalMS, double frameMS)
+        public override void Update(double totalTime, double frameTime)
         {
             if (IsDisposed)
             {
@@ -168,10 +168,10 @@ namespace ClassicUO.Game.UI.Controls
                     UpdateValue();
                 }
 
-                _timeUntilNextClick -= (float) frameMS;
+                _timeUntilNextClick -= (float) frameTime;
             }
 
-            base.Update(totalMS, frameMS);
+            base.Update(totalTime, frameTime);
         }
     }
 }

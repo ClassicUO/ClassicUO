@@ -75,12 +75,12 @@ namespace ClassicUO.IO
 
             UOFileMul verdata = Verdata.File;
 
-            bool use_verdata = Client.Version < ClientVersion.CV_500A ||
+            bool useVerdata = Client.Version < ClientVersion.CV_500A ||
                                verdata != null && verdata.Length != 0 && Verdata.Patches.Length != 0;
 
-            if (!Settings.GlobalSettings.UseVerdata && use_verdata)
+            if (!Settings.GlobalSettings.UseVerdata && useVerdata)
             {
-                Settings.GlobalSettings.UseVerdata = use_verdata;
+                Settings.GlobalSettings.UseVerdata = useVerdata;
             }
 
             Log.Trace($"Use verdata.mul: {(Settings.GlobalSettings.UseVerdata ? "Yes" : "No")}");

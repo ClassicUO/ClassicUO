@@ -134,7 +134,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             base.Save(writer);
 
-            if (ProfileManager.Current.SaveHealthbars)
+            if (ProfileManager.CurrentProfile.SaveHealthbars)
             {
                 writer.WriteAttributeString("name", _name);
             }
@@ -150,7 +150,7 @@ namespace ClassicUO.Game.UI.Gumps
                 _name = World.Player.Name;
                 BuildGump();
             }
-            else if (ProfileManager.Current.SaveHealthbars)
+            else if (ProfileManager.CurrentProfile.SaveHealthbars)
             {
                 _name = xml.GetAttribute("name");
                 _outOfRange = true;
@@ -361,12 +361,12 @@ namespace ClassicUO.Game.UI.Gumps
         private static Color HPB_COLOR_DRAW_BLUE = Color.DodgerBlue;
         private static Color HPB_COLOR_DRAW_BLACK = Color.Black;
 
-        private static readonly Texture2D HPB_COLOR_BLUE = Texture2DCache.GetTexture(Color.DodgerBlue);
-        private static readonly Texture2D HPB_COLOR_GRAY = Texture2DCache.GetTexture(Color.Gray);
-        private static readonly Texture2D HPB_COLOR_RED = Texture2DCache.GetTexture(Color.Red);
-        private static readonly Texture2D HPB_COLOR_YELLOW = Texture2DCache.GetTexture(Color.Orange);
-        private static readonly Texture2D HPB_COLOR_POISON = Texture2DCache.GetTexture(Color.LimeGreen);
-        private static readonly Texture2D HPB_COLOR_BLACK = Texture2DCache.GetTexture(Color.Black);
+        private static readonly Texture2D HPB_COLOR_BLUE = SolidColorTextureCache.GetTexture(Color.DodgerBlue);
+        private static readonly Texture2D HPB_COLOR_GRAY = SolidColorTextureCache.GetTexture(Color.Gray);
+        private static readonly Texture2D HPB_COLOR_RED = SolidColorTextureCache.GetTexture(Color.Red);
+        private static readonly Texture2D HPB_COLOR_YELLOW = SolidColorTextureCache.GetTexture(Color.Orange);
+        private static readonly Texture2D HPB_COLOR_POISON = SolidColorTextureCache.GetTexture(Color.LimeGreen);
+        private static readonly Texture2D HPB_COLOR_BLACK = SolidColorTextureCache.GetTexture(Color.Black);
 
         private readonly LineCHB[] _bars = new LineCHB[3];
         private readonly LineCHB[] _border = new LineCHB[4];
@@ -410,9 +410,9 @@ namespace ClassicUO.Game.UI.Gumps
         }
 
 
-        public override void Update(double totalMS, double frameMS)
+        public override void Update(double totalTime, double frameTime)
         {
-            base.Update(totalMS, frameMS);
+            base.Update(totalTime, frameTime);
 
             if (IsDisposed)
             {
@@ -433,8 +433,8 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (entity == null || entity.IsDestroyed)
             {
-                if (LocalSerial != World.Player && (ProfileManager.Current.CloseHealthBarType == 1 ||
-                                                    ProfileManager.Current.CloseHealthBarType == 2 &&
+                if (LocalSerial != World.Player && (ProfileManager.CurrentProfile.CloseHealthBarType == 1 ||
+                                                    ProfileManager.CurrentProfile.CloseHealthBarType == 2 &&
                                                     World.CorpseManager.Exists(0, LocalSerial | 0x8000_0000)))
                 {
                     //### KEEPS PARTY BAR ACTIVE WHEN PARTY MEMBER DIES & MOBILEBAR CLOSE SELECTED ###//
@@ -511,7 +511,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Mobile mobile = entity as Mobile;
 
                 if (!_isDead && entity != World.Player && mobile != null && mobile.IsDead &&
-                    ProfileManager.Current.CloseHealthBarType == 2) // is dead
+                    ProfileManager.CurrentProfile.CloseHealthBarType == 2) // is dead
                 {
                     if (!inparty && CheckIfAnchoredElseDispose())
                     {
@@ -630,13 +630,13 @@ namespace ClassicUO.Game.UI.Gumps
                     {
                         _background.Hue = 912;
                     }
-                    else if (!ProfileManager.Current.CBBlackBGToggled)
+                    else if (!ProfileManager.CurrentProfile.CBBlackBGToggled)
                     {
                         _background.Hue = barColor;
                     }
                 }
 
-                if (mobile != null && mobile.IsDead || ProfileManager.Current.CBBlackBGToggled)
+                if (mobile != null && mobile.IsDead || ProfileManager.CurrentProfile.CBBlackBGToggled)
                 {
                     if (_background.Hue != 912)
                     {
@@ -1094,7 +1094,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 LineWidth = w;
 
-                LineColor = Texture2DCache.GetTexture(new Color { PackedValue = color });
+                LineColor = SolidColorTextureCache.GetTexture(new Color { PackedValue = color });
 
                 CanMove = true;
             }
@@ -1105,9 +1105,9 @@ namespace ClassicUO.Game.UI.Gumps
             public override bool Draw(UltimaBatcher2D batcher, int x, int y)
             {
                 ResetHueVector();
-                ShaderHueTranslator.GetHueVector(ref _hueVector, 0, false, Alpha);
+                ShaderHueTranslator.GetHueVector(ref HueVector, 0, false, Alpha);
 
-                return batcher.Draw2D(LineColor, x, y, LineWidth, Height, ref _hueVector);
+                return batcher.Draw2D(LineColor, x, y, LineWidth, Height, ref HueVector);
             }
         }
 
@@ -1357,9 +1357,9 @@ namespace ClassicUO.Game.UI.Gumps
         }
 
 
-        public override void Update(double totalMS, double frameMS)
+        public override void Update(double totalTime, double frameTime)
         {
-            base.Update(totalMS, frameMS);
+            base.Update(totalTime, frameTime);
 
             if (IsDisposed /* || (_textBox != null && _textBox.IsDisposed)*/)
             {
@@ -1381,8 +1381,8 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (entity == null || entity.IsDestroyed)
             {
-                if (LocalSerial != World.Player && (ProfileManager.Current.CloseHealthBarType == 1 ||
-                                                    ProfileManager.Current.CloseHealthBarType == 2 &&
+                if (LocalSerial != World.Player && (ProfileManager.CurrentProfile.CloseHealthBarType == 1 ||
+                                                    ProfileManager.CurrentProfile.CloseHealthBarType == 2 &&
                                                     World.CorpseManager.Exists(0, LocalSerial | 0x8000_0000)))
                 {
                     if (CheckIfAnchoredElseDispose())
@@ -1459,7 +1459,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Mobile mobile = entity as Mobile;
 
                 if (!_isDead && entity != World.Player && mobile != null && mobile.IsDead &&
-                    ProfileManager.Current.CloseHealthBarType == 2) // is dead
+                    ProfileManager.CurrentProfile.CloseHealthBarType == 2) // is dead
                 {
                     if (CheckIfAnchoredElseDispose())
                     {

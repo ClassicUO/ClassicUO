@@ -77,8 +77,8 @@ namespace ClassicUO.Game.Managers
         {
             string path = Path.Combine
             (
-                CUOEnviroment.ExecutablePath, "Data", "Profiles", ProfileManager.Current.Username,
-                ProfileManager.Current.ServerName, ProfileManager.Current.CharacterName, "macros.xml"
+                CUOEnviroment.ExecutablePath, "Data", "Profiles", ProfileManager.CurrentProfile.Username,
+                ProfileManager.CurrentProfile.ServerName, ProfileManager.CurrentProfile.CharacterName, "macros.xml"
             );
 
             if (!File.Exists(path))
@@ -127,8 +127,8 @@ namespace ClassicUO.Game.Managers
 
             string path = Path.Combine
             (
-                CUOEnviroment.ExecutablePath, "Data", "Profiles", ProfileManager.Current.Username,
-                ProfileManager.Current.ServerName, ProfileManager.Current.CharacterName, "macros.xml"
+                CUOEnviroment.ExecutablePath, "Data", "Profiles", ProfileManager.CurrentProfile.Username,
+                ProfileManager.CurrentProfile.ServerName, ProfileManager.CurrentProfile.CharacterName, "macros.xml"
             );
 
             using (XmlTextWriter xml = new XmlTextWriter(path, Encoding.UTF8)
@@ -363,20 +363,20 @@ namespace ClassicUO.Game.Managers
                     if (!string.IsNullOrEmpty(text))
                     {
                         MessageType type = MessageType.Regular;
-                        ushort hue = ProfileManager.Current.SpeechHue;
+                        ushort hue = ProfileManager.CurrentProfile.SpeechHue;
 
                         switch (macro.Code)
                         {
                             case MacroType.Emote:
                                 text = ResGeneral.EmoteChar + text + ResGeneral.EmoteChar;
                                 type = MessageType.Emote;
-                                hue = ProfileManager.Current.EmoteHue;
+                                hue = ProfileManager.CurrentProfile.EmoteHue;
 
                                 break;
 
                             case MacroType.Whisper:
                                 type = MessageType.Whisper;
-                                hue = ProfileManager.Current.WhisperHue;
+                                hue = ProfileManager.CurrentProfile.WhisperHue;
 
                                 break;
 
@@ -520,16 +520,16 @@ namespace ClassicUO.Game.Managers
                                     break;
 
                                 case MacroSubType.Chat:
-                                    if (UOChatManager.ChatIsEnabled != CHAT_STATUS.ENABLED)
+                                    if (ChatManager.ChatIsEnabled != ChatStatus.Enabled)
                                     {
                                         break;
                                     }
 
-                                    UOChatGump chatGump = UIManager.GetGump<UOChatGump>();
+                                    ChatGump chatGump = UIManager.GetGump<ChatGump>();
 
                                     if (chatGump == null)
                                     {
-                                        UIManager.Add(new UOChatGump());
+                                        UIManager.Add(new ChatGump());
                                     }
                                     else
                                     {
@@ -677,7 +677,7 @@ namespace ClassicUO.Game.Managers
                                         {
                                             status.Dispose();
 
-                                            if (ProfileManager.Current.CustomBarsToggled)
+                                            if (ProfileManager.CurrentProfile.CustomBarsToggled)
                                             {
                                                 UIManager.Add
                                                 (
@@ -747,7 +747,7 @@ namespace ClassicUO.Game.Managers
 
                                 case MacroSubType.Skills:
 
-                                    if (ProfileManager.Current.StandardSkillsGump)
+                                    if (ProfileManager.CurrentProfile.StandardSkillsGump)
                                     {
                                         StandardSkillsGump skillgump = UIManager.GetGump<StandardSkillsGump>();
 
@@ -1124,7 +1124,7 @@ namespace ClassicUO.Game.Managers
                     break;
 
                 case MacroType.CircleTrans:
-                    ProfileManager.Current.UseCircleOfTransparency = !ProfileManager.Current.UseCircleOfTransparency;
+                    ProfileManager.CurrentProfile.UseCircleOfTransparency = !ProfileManager.CurrentProfile.UseCircleOfTransparency;
 
                     break;
 
@@ -1138,31 +1138,31 @@ namespace ClassicUO.Game.Managers
                     break;
 
                 case MacroType.AlwaysRun:
-                    ProfileManager.Current.AlwaysRun = !ProfileManager.Current.AlwaysRun;
+                    ProfileManager.CurrentProfile.AlwaysRun = !ProfileManager.CurrentProfile.AlwaysRun;
 
                     GameActions.Print
-                        (ProfileManager.Current.AlwaysRun ? ResGeneral.AlwaysRunIsNowOn : ResGeneral.AlwaysRunIsNowOff);
+                        (ProfileManager.CurrentProfile.AlwaysRun ? ResGeneral.AlwaysRunIsNowOn : ResGeneral.AlwaysRunIsNowOff);
 
                     break;
 
                 case MacroType.SaveDesktop:
-                    ProfileManager.Current?.Save
+                    ProfileManager.CurrentProfile?.Save
                         (UIManager.Gumps.OfType<Gump>().Where(s => s.CanBeSaved).Reverse().ToList());
 
                     break;
 
                 case MacroType.EnableRangeColor:
-                    ProfileManager.Current.NoColorObjectsOutOfRange = true;
+                    ProfileManager.CurrentProfile.NoColorObjectsOutOfRange = true;
 
                     break;
 
                 case MacroType.DisableRangeColor:
-                    ProfileManager.Current.NoColorObjectsOutOfRange = false;
+                    ProfileManager.CurrentProfile.NoColorObjectsOutOfRange = false;
 
                     break;
 
                 case MacroType.ToggleRangeColor:
-                    ProfileManager.Current.NoColorObjectsOutOfRange = !ProfileManager.Current.NoColorObjectsOutOfRange;
+                    ProfileManager.CurrentProfile.NoColorObjectsOutOfRange = !ProfileManager.CurrentProfile.NoColorObjectsOutOfRange;
 
                     break;
 
@@ -1218,7 +1218,7 @@ namespace ClassicUO.Game.Managers
                 case MacroType.BandageSelf:
                 case MacroType.BandageTarget:
 
-                    if (Client.Version < ClientVersion.CV_5020 || ProfileManager.Current.BandageSelfOld)
+                    if (Client.Version < ClientVersion.CV_5020 || ProfileManager.CurrentProfile.BandageSelfOld)
                     {
                         if (WaitingBandageTarget)
                         {
@@ -1426,7 +1426,7 @@ namespace ClassicUO.Game.Managers
                     {
                         case MacroSubType.MSC_NONE:
                         case MacroSubType.DefaultZoom:
-                            Client.Game.Scene.Camera.Zoom = ProfileManager.Current.DefaultScale;
+                            Client.Game.Scene.Camera.Zoom = ProfileManager.CurrentProfile.DefaultScale;
 
                             break;
 
@@ -1504,24 +1504,24 @@ namespace ClassicUO.Game.Managers
                     break;
 
                 case MacroType.ToggleDrawRoofs:
-                    ProfileManager.Current.DrawRoofs = !ProfileManager.Current.DrawRoofs;
+                    ProfileManager.CurrentProfile.DrawRoofs = !ProfileManager.CurrentProfile.DrawRoofs;
 
                     break;
 
                 case MacroType.ToggleTreeStumps:
                     StaticFilters.CleanTreeTextures();
-                    ProfileManager.Current.TreeToStumps = !ProfileManager.Current.TreeToStumps;
+                    ProfileManager.CurrentProfile.TreeToStumps = !ProfileManager.CurrentProfile.TreeToStumps;
 
                     break;
 
                 case MacroType.ToggleVegetation:
-                    ProfileManager.Current.HideVegetation = !ProfileManager.Current.HideVegetation;
+                    ProfileManager.CurrentProfile.HideVegetation = !ProfileManager.CurrentProfile.HideVegetation;
 
                     break;
 
                 case MacroType.ToggleCaveTiles:
                     StaticFilters.CleanCaveTextures();
-                    ProfileManager.Current.EnableCaveBorder = !ProfileManager.Current.EnableCaveBorder;
+                    ProfileManager.CurrentProfile.EnableCaveBorder = !ProfileManager.CurrentProfile.EnableCaveBorder;
 
                     break;
             }

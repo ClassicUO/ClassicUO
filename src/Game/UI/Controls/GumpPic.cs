@@ -158,13 +158,13 @@ namespace ClassicUO.Game.UI.Controls
             }
 
             ResetHueVector();
-            ShaderHueTranslator.GetHueVector(ref _hueVector, Hue, IsPartialHue, Alpha, true);
+            ShaderHueTranslator.GetHueVector(ref HueVector, Hue, IsPartialHue, Alpha, true);
 
             UOTexture texture = GumpsLoader.Instance.GetTexture(Graphic);
 
             if (texture != null)
             {
-                batcher.Draw2D(texture, x, y, Width, Height, ref _hueVector);
+                batcher.Draw2D(texture, x, y, Width, Height, ref HueVector);
             }
 
             return base.Draw(batcher, x, y);

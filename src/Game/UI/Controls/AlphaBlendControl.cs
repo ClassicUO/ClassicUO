@@ -40,9 +40,9 @@ namespace ClassicUO.Game.UI.Controls
         {
             ResetHueVector();
 
-            ShaderHueTranslator.GetHueVector(ref _hueVector, Hue, false, Alpha);
+            ShaderHueTranslator.GetHueVector(ref HueVector, Hue, false, Alpha);
 
-            return batcher.Draw2D(Texture2DCache.GetTexture(Color.Black), x, y, Width, Height, ref _hueVector);
+            return batcher.Draw2D(SolidColorTextureCache.GetTexture(Color.Black), x, y, Width, Height, ref HueVector);
         }
     }
 }

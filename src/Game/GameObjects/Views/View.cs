@@ -97,7 +97,7 @@ namespace ClassicUO.Game.GameObjects
         [MethodImpl(256)]
         public bool ProcessAlpha(int max)
         {
-            if (ProfileManager.Current != null && !ProfileManager.Current.UseObjectsFading)
+            if (ProfileManager.CurrentProfile != null && !ProfileManager.CurrentProfile.UseObjectsFading)
             {
                 AlphaHue = (byte) max;
 
@@ -247,7 +247,7 @@ namespace ClassicUO.Game.GameObjects
 
                 if (transparent)
                 {
-                    int maxDist = ProfileManager.Current.CircleOfTransparencyRadius + 22;
+                    int maxDist = ProfileManager.CurrentProfile.CircleOfTransparencyRadius + 22;
                     int fx = (int) (World.Player.RealScreenPosition.X + World.Player.Offset.X);
 
                     int fy =
@@ -263,7 +263,7 @@ namespace ClassicUO.Game.GameObjects
                     {
                         float alpha = hue.Z;
 
-                        switch (ProfileManager.Current.CircleOfTransparencyType)
+                        switch (ProfileManager.CurrentProfile.CircleOfTransparencyType)
                         {
                             default:
                             case 0:

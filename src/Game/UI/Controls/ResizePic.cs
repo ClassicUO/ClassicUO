@@ -76,17 +76,17 @@ namespace ClassicUO.Game.UI.Controls
 
         public ushort Graphic { get; }
 
-        public override void Update(double totalMS, double frameMS)
+        public override void Update(double totalTime, double frameTime)
         {
             for (int i = 0; i < _gumpTexture.Length; i++)
             {
                 if (_gumpTexture[i] != null)
                 {
-                    _gumpTexture[i].Ticks = (long) totalMS;
+                    _gumpTexture[i].Ticks = (long) totalTime;
                 }
             }
 
-            base.Update(totalMS, frameMS);
+            base.Update(totalTime, frameTime);
         }
 
         public override bool Contains(int x, int y)
@@ -355,11 +355,11 @@ namespace ClassicUO.Game.UI.Controls
 
             if (ScissorStack.PushScissors(batcher.GraphicsDevice, rect))
             {
-                ShaderHueTranslator.GetHueVector(ref _hueVector, 0, false, Alpha, true);
+                ShaderHueTranslator.GetHueVector(ref HueVector, 0, false, Alpha, true);
 
                 batcher.EnableScissorTest(true);
 
-                DrawInternal(batcher, x, y, ref _hueVector);
+                DrawInternal(batcher, x, y, ref HueVector);
                 base.Draw(batcher, x, y);
 
                 batcher.EnableScissorTest(false);

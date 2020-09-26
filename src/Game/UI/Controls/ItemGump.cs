@@ -98,14 +98,14 @@ namespace ClassicUO.Game.UI.Controls
         public bool CanPickUp { get; set; }
 
 
-        public override void Update(double totalMS, double frameMS)
+        public override void Update(double totalTime, double frameTime)
         {
             if (IsDisposed)
             {
                 return;
             }
 
-            base.Update(totalMS, frameMS);
+            base.Update(totalTime, frameTime);
 
             if (World.InGame)
             {
@@ -135,20 +135,20 @@ namespace ClassicUO.Game.UI.Controls
             ResetHueVector();
 
             ShaderHueTranslator.GetHueVector
-                (ref _hueVector, HighlightOnMouseOver && MouseIsOver ? 0x0035 : Hue, IsPartialHue, 0);
+                (ref HueVector, HighlightOnMouseOver && MouseIsOver ? 0x0035 : Hue, IsPartialHue, 0);
 
             UOTexture texture =
                 _is_gump ? GumpsLoader.Instance.GetTexture(Graphic) : ArtLoader.Instance.GetTexture(Graphic);
 
             if (texture != null)
             {
-                batcher.Draw2D(texture, x, y, Width, Height, ref _hueVector);
+                batcher.Draw2D(texture, x, y, Width, Height, ref HueVector);
 
                 Item item = World.Items.Get(LocalSerial);
 
                 if (item != null && !item.IsMulti && !item.IsCoin && item.Amount > 1 && item.ItemData.IsStackable)
                 {
-                    batcher.Draw2D(texture, x + 5, y + 5, Width, Height, ref _hueVector);
+                    batcher.Draw2D(texture, x + 5, y + 5, Width, Height, ref HueVector);
                 }
             }
 
@@ -168,7 +168,7 @@ namespace ClassicUO.Game.UI.Controls
             x -= Offset.X;
             y -= Offset.Y;
 
-            if (ProfileManager.Current != null && ProfileManager.Current.ScaleItemsInsideContainers)
+            if (ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.ScaleItemsInsideContainers)
             {
                 float scale = UIManager.ContainerScale;
 
@@ -241,7 +241,7 @@ namespace ClassicUO.Game.UI.Controls
             Item item = World.Items.Get(LocalSerial);
             Item container;
 
-            if (!Keyboard.Ctrl && ProfileManager.Current.DoubleClickToLootInsideContainers && item != null &&
+            if (!Keyboard.Ctrl && ProfileManager.CurrentProfile.DoubleClickToLootInsideContainers && item != null &&
                 !item.IsDestroyed && !item.ItemData.IsContainer && item.IsEmpty &&
                 (container = World.Items.Get(item.RootContainer)) != null && container != World.Player.FindItemByLayer
                     (Layer.Backpack))
@@ -269,14 +269,14 @@ namespace ClassicUO.Game.UI.Controls
                 int centerX = bounds.Width >> 1;
                 int centerY = bounds.Height >> 1;
 
-                if (ProfileManager.Current != null && ProfileManager.Current.ScaleItemsInsideContainers)
+                if (ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.ScaleItemsInsideContainers)
                 {
                     float scale = UIManager.ContainerScale;
                     centerX = (int) (centerX * scale);
                     centerY = (int) (centerY * scale);
                 }
 
-                if (ProfileManager.Current != null && ProfileManager.Current.RelativeDragAndDropItems)
+                if (ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.RelativeDragAndDropItems)
                 {
                     Point p = new Point
                     (

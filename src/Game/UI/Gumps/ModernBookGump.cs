@@ -608,7 +608,7 @@ namespace ClassicUO.Game.UI.Gumps
             internal void DrawSelection(UltimaBatcher2D batcher, int x, int y, int starty, int endy)
             {
                 ResetHueVector();
-                _hueVector.Z = 0.5f;
+                HueVector.Z = 0.5f;
 
                 int selectStart = Math.Min(Stb.SelectStart, Stb.SelectEnd);
                 int selectEnd = Math.Max(Stb.SelectStart, Stb.SelectEnd);
@@ -652,8 +652,8 @@ namespace ClassicUO.Game.UI.Gumps
                                 {
                                     batcher.Draw2D
                                     (
-                                        Texture2DCache.GetTexture(SELECTION_COLOR), x + drawX, y + drawY - starty, endX,
-                                        info.MaxHeight + 1, ref _hueVector
+                                        SolidColorTextureCache.GetTexture(SELECTION_COLOR), x + drawX, y + drawY - starty, endX,
+                                        info.MaxHeight + 1, ref HueVector
                                     );
                                 }
 
@@ -666,8 +666,8 @@ namespace ClassicUO.Game.UI.Gumps
                             {
                                 batcher.Draw2D
                                 (
-                                    Texture2DCache.GetTexture(SELECTION_COLOR), x + drawX, y + drawY - starty,
-                                    info.Width - drawX, info.MaxHeight + 1, ref _hueVector
+                                    SolidColorTextureCache.GetTexture(SELECTION_COLOR), x + drawX, y + drawY - starty,
+                                    info.Width - drawX, info.MaxHeight + 1, ref HueVector
                                 );
                             }
 

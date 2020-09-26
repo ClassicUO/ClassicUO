@@ -267,7 +267,7 @@ namespace ClassicUO.Game.UI.Gumps
                 items[i].SetGraphic(reader.ReadUInt16(), version > 1 ? reader.ReadUInt16() : (ushort) 0);
             }
 
-            IsEnabled = IsVisible = ProfileManager.Current.CounterBarEnabled;
+            IsEnabled = IsVisible = ProfileManager.CurrentProfile.CounterBarEnabled;
         }
 
 
@@ -329,7 +329,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             }
 
-            IsEnabled = IsVisible = ProfileManager.Current.CounterBarEnabled;
+            IsEnabled = IsVisible = ProfileManager.CurrentProfile.CounterBarEnabled;
         }
 
 
@@ -436,9 +436,9 @@ namespace ClassicUO.Game.UI.Gumps
                 return true;
             }
 
-            public override void Update(double totalMs, double frameMs)
+            public override void Update(double totalTime, double frameTime)
             {
-                base.Update(totalMs, frameMs);
+                base.Update(totalTime, frameTime);
 
                 if (_time < Time.Ticks)
                 {
@@ -454,9 +454,9 @@ namespace ClassicUO.Game.UI.Gumps
                         GetAmount(World.Player.FindItemByLayer(Layer.Backpack), Graphic, Hue, ref _amount);
                         GetAmount(World.Player.FindItemByLayer(Layer.Cloak), Graphic, Hue, ref _amount);
 
-                        if (ProfileManager.Current.CounterBarDisplayAbbreviatedAmount)
+                        if (ProfileManager.CurrentProfile.CounterBarDisplayAbbreviatedAmount)
                         {
-                            if (_amount >= ProfileManager.Current.CounterBarAbbreviatedAmount)
+                            if (_amount >= ProfileManager.CurrentProfile.CounterBarAbbreviatedAmount)
                             {
                                 _image.SetAmount(StringHelper.IntToAbbreviatedString(_amount));
 
@@ -494,15 +494,15 @@ namespace ClassicUO.Game.UI.Gumps
                 base.Draw(batcher, x, y);
 
 
-                Texture2D color = Texture2DCache.GetTexture
+                Texture2D color = SolidColorTextureCache.GetTexture
                 (
                     MouseIsOver ? Color.Yellow :
-                    ProfileManager.Current.CounterBarHighlightOnAmount &&
-                    _amount < ProfileManager.Current.CounterBarHighlightAmount && Graphic != 0 ? Color.Red : Color.Gray
+                    ProfileManager.CurrentProfile.CounterBarHighlightOnAmount &&
+                    _amount < ProfileManager.CurrentProfile.CounterBarHighlightAmount && Graphic != 0 ? Color.Red : Color.Gray
                 );
 
                 ResetHueVector();
-                batcher.DrawRectangle(color, x, y, Width, Height, ref _hueVector);
+                batcher.DrawRectangle(color, x, y, Width, Height, ref HueVector);
 
                 return true;
             }

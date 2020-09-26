@@ -38,15 +38,15 @@ namespace ClassicUO.Game.UI.Controls
             Width = w;
             Height = h;
 
-            _texture = Texture2DCache.GetTexture(new Color { PackedValue = color });
+            _texture = SolidColorTextureCache.GetTexture(new Color { PackedValue = color });
         }
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
             ResetHueVector();
-            ShaderHueTranslator.GetHueVector(ref _hueVector, 0, false, Alpha);
+            ShaderHueTranslator.GetHueVector(ref HueVector, 0, false, Alpha);
 
-            return batcher.Draw2D(_texture, x, y, Width, Height, ref _hueVector);
+            return batcher.Draw2D(_texture, x, y, Width, Height, ref HueVector);
         }
     }
 }

@@ -138,7 +138,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             Point offset = Mouse.LDragOffset;
 
-            if (ProfileManager.Current.CastSpellsByOneClick && button == MouseButtonType.Left &&
+            if (ProfileManager.CurrentProfile.CastSpellsByOneClick && button == MouseButtonType.Left &&
                 Math.Abs(offset.X) < 5 && Math.Abs(offset.Y) < 5)
             {
                 GameActions.CastSpell(_spell.ID);
@@ -147,7 +147,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override bool OnMouseDoubleClick(int x, int y, MouseButtonType button)
         {
-            if (!ProfileManager.Current.CastSpellsByOneClick && button == MouseButtonType.Left)
+            if (!ProfileManager.CurrentProfile.CastSpellsByOneClick && button == MouseButtonType.Left)
             {
                 GameActions.CastSpell(_spell.ID);
 

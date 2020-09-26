@@ -719,7 +719,7 @@ namespace ClassicUO.Network
 
         private static void EnterWorld(Packet p)
         {
-            if (ProfileManager.Current == null)
+            if (ProfileManager.CurrentProfile == null)
             {
                 ProfileManager.Load
                     (World.ServerName, LoginScene.Account, Settings.GlobalSettings.LastCharacterName.Trim());
@@ -755,21 +755,21 @@ namespace ClassicUO.Network
             World.RangeSize.X = x;
             World.RangeSize.Y = y;
 
-            if (ProfileManager.Current != null && ProfileManager.Current.UseCustomLightLevel)
+            if (ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.UseCustomLightLevel)
             {
-                World.Light.Overall = ProfileManager.Current.LightLevel;
+                World.Light.Overall = ProfileManager.CurrentProfile.LightLevel;
             }
 
             if (Client.Version >= Data.ClientVersion.CV_200)
             {
-                if (ProfileManager.Current != null)
+                if (ProfileManager.CurrentProfile != null)
                 {
                     NetClient.Socket.Send
                     (
                         new PGameWindowSize
                         (
-                            (uint) ProfileManager.Current.GameWindowSize.X,
-                            (uint) ProfileManager.Current.GameWindowSize.Y
+                            (uint) ProfileManager.CurrentProfile.GameWindowSize.X,
+                            (uint) ProfileManager.CurrentProfile.GameWindowSize.Y
                         )
                     );
                 }
@@ -787,9 +787,9 @@ namespace ClassicUO.Network
                 World.ChangeSeason(Game.Managers.Season.Desolation, 42);
             }
 
-            if (Client.Version >= Data.ClientVersion.CV_70796 && ProfileManager.Current != null)
+            if (Client.Version >= Data.ClientVersion.CV_70796 && ProfileManager.CurrentProfile != null)
             {
-                NetClient.Socket.Send(new PShowPublicHouseContent(ProfileManager.Current.ShowHouseContent));
+                NetClient.Socket.Send(new PShowPublicHouseContent(ProfileManager.CurrentProfile.ShowHouseContent));
             }
         }
 
@@ -822,7 +822,7 @@ namespace ClassicUO.Network
                 return;
             }
 
-            TEXT_TYPE text_type = TEXT_TYPE.SYSTEM;
+            TextType text_type = TextType.SYSTEM;
 
             if (type == MessageType.System || serial == 0xFFFF_FFFF || serial == 0 ||
                 name.ToLower() == "system" && entity == null)
@@ -831,7 +831,7 @@ namespace ClassicUO.Network
             }
             else if (entity != null)
             {
-                text_type = TEXT_TYPE.OBJECT;
+                text_type = TextType.OBJECT;
 
                 if (string.IsNullOrEmpty(entity.Name))
                 {
@@ -900,8 +900,8 @@ namespace ClassicUO.Network
 
                     UIManager.GetGump<ContainerGump>(cont)?.RequestUpdateContents();
 
-                    if (top != null && top.Graphic == 0x2006 && (ProfileManager.Current.GridLootType == 1 ||
-                                                                 ProfileManager.Current.GridLootType == 2))
+                    if (top != null && top.Graphic == 0x2006 && (ProfileManager.CurrentProfile.GridLootType == 1 ||
+                                                                 ProfileManager.CurrentProfile.GridLootType == 2))
                     {
                         UIManager.GetGump<GridLootGump>(cont)?.RequestUpdateContents();
                     }
@@ -1218,14 +1218,14 @@ namespace ClassicUO.Network
 
                 if (item != null)
                 {
-                    if (item.IsCorpse && (ProfileManager.Current.GridLootType == 1 ||
-                                          ProfileManager.Current.GridLootType == 2))
+                    if (item.IsCorpse && (ProfileManager.CurrentProfile.GridLootType == 1 ||
+                                          ProfileManager.CurrentProfile.GridLootType == 2))
                     {
                         //UIManager.GetGump<GridLootGump>(serial)?.Dispose();
                         //UIManager.Add(new GridLootGump(serial));
                         _requestedGridLoot = serial;
 
-                        if (ProfileManager.Current.GridLootType == 1)
+                        if (ProfileManager.CurrentProfile.GridLootType == 1)
                         {
                             return;
                         }
@@ -1236,8 +1236,8 @@ namespace ClassicUO.Network
                     int x, y;
 
                     // TODO: check client version ?
-                    if (Client.Version >= Data.ClientVersion.CV_706000 && ProfileManager.Current != null &&
-                        ProfileManager.Current.UseLargeContainerGumps)
+                    if (Client.Version >= Data.ClientVersion.CV_706000 && ProfileManager.CurrentProfile != null &&
+                        ProfileManager.CurrentProfile.UseLargeContainerGumps)
                     {
                         GumpsLoader loader = GumpsLoader.Instance;
 
@@ -1497,7 +1497,7 @@ namespace ClassicUO.Network
                 MessageManager.HandleMessage
                 (
                     null, ServerErrorMessages.GetError(p.ID, code), string.Empty, 0x03b2, MessageType.System, 3,
-                    TEXT_TYPE.SYSTEM
+                    TextType.SYSTEM
                 );
             }
         }
@@ -1537,7 +1537,7 @@ namespace ClassicUO.Network
 
                 Client.Game.Scene.Audio.PlayMusic(42, true);
 
-                if (ProfileManager.Current.EnableDeathScreen)
+                if (ProfileManager.CurrentProfile.EnableDeathScreen)
                 {
                     World.Player.DeathScreenTimer = Time.Ticks + Constants.DEATH_SCREEN_TIMER;
                 }
@@ -1717,7 +1717,7 @@ namespace ClassicUO.Network
                 StandardSkillsGump standard = null;
                 SkillGumpAdvanced advanced = null;
 
-                if (ProfileManager.Current.StandardSkillsGump)
+                if (ProfileManager.CurrentProfile.StandardSkillsGump)
                 {
                     standard = UIManager.GetGump<StandardSkillsGump>();
                 }
@@ -1731,7 +1731,7 @@ namespace ClassicUO.Network
                     World.SkillsRequested = false;
 
                     // TODO: make a base class for this gump
-                    if (ProfileManager.Current.StandardSkillsGump)
+                    if (ProfileManager.CurrentProfile.StandardSkillsGump)
                     {
                         if (standard == null)
                         {
@@ -1904,7 +1904,7 @@ namespace ClassicUO.Network
 
                 World.Light.RealPersonal = level;
 
-                if (!ProfileManager.Current.UseCustomLightLevel)
+                if (!ProfileManager.CurrentProfile.UseCustomLightLevel)
                 {
                     World.Light.Personal = level;
                 }
@@ -1927,7 +1927,7 @@ namespace ClassicUO.Network
 
             World.Light.RealOverall = level;
 
-            if (!ProfileManager.Current.UseCustomLightLevel)
+            if (!ProfileManager.CurrentProfile.UseCustomLightLevel)
             {
                 World.Light.Overall = level;
             }
@@ -1983,7 +1983,7 @@ namespace ClassicUO.Network
                     NetClient.Socket.Send(new PClientViewRange(World.ClientViewRange));
                 }
 
-                ProfileManager.Current.ReadGumps()?.ForEach(UIManager.Add);
+                ProfileManager.CurrentProfile.ReadGumps()?.ForEach(UIManager.Add);
             }
         }
 
@@ -3335,11 +3335,11 @@ namespace ClassicUO.Network
                 text = p.ReadUnicode();
             }
 
-            TEXT_TYPE text_type = TEXT_TYPE.SYSTEM;
+            TextType text_type = TextType.SYSTEM;
 
             if (type == MessageType.Alliance || type == MessageType.Guild)
             {
-                text_type = TEXT_TYPE.GUILD_ALLY;
+                text_type = TextType.GUILD_ALLY;
             }
             else if (type == MessageType.System || serial == 0xFFFF_FFFF || serial == 0 ||
                      name.ToLower() == "system" && entity == null)
@@ -3348,7 +3348,7 @@ namespace ClassicUO.Network
             }
             else if (entity != null)
             {
-                text_type = TEXT_TYPE.OBJECT;
+                text_type = TextType.OBJECT;
 
                 if (string.IsNullOrEmpty(entity.Name))
                 {
@@ -3357,7 +3357,7 @@ namespace ClassicUO.Network
             }
 
             MessageManager.HandleMessage
-                (entity, text, name, hue, type, ProfileManager.Current.ChatFont, text_type, true, lang);
+                (entity, text, name, hue, type, ProfileManager.CurrentProfile.ChatFont, text_type, true, lang);
         }
 
         private static void DisplayDeath(Packet p)
@@ -3392,7 +3392,7 @@ namespace ClassicUO.Network
             owner.SetAnimation(group, 0, 5, 1);
             owner.AnimIndex = 0;
 
-            if (ProfileManager.Current.AutoOpenCorpses)
+            if (ProfileManager.CurrentProfile.AutoOpenCorpses)
             {
                 World.Player.TryOpenCorpses();
             }
@@ -3449,39 +3449,39 @@ namespace ClassicUO.Network
                     p.Skip(4);
                     string channelName = p.ReadUnicode();
                     bool hasPassword = p.ReadUShort() == 0x31;
-                    UOChatManager.CurrentChannelName = channelName;
-                    UOChatManager.AddChannel(channelName, hasPassword);
+                    ChatManager.CurrentChannelName = channelName;
+                    ChatManager.AddChannel(channelName, hasPassword);
 
-                    UIManager.GetGump<UOChatGump>()?.RequestUpdateContents();
+                    UIManager.GetGump<ChatGump>()?.RequestUpdateContents();
 
                     break;
 
                 case 0x03E9: // destroy conference
                     p.Skip(4);
                     channelName = p.ReadUnicode();
-                    UOChatManager.RemoveChannel(channelName);
+                    ChatManager.RemoveChannel(channelName);
 
-                    UIManager.GetGump<UOChatGump>()?.RequestUpdateContents();
+                    UIManager.GetGump<ChatGump>()?.RequestUpdateContents();
 
                     break;
 
                 case 0x03EB: // display enter username window
-                    UOChatManager.ChatIsEnabled = CHAT_STATUS.ENABLED_USER_REQUEST;
+                    ChatManager.ChatIsEnabled = ChatStatus.EnabledUserRequest;
 
                     break;
 
                 case 0x03EC: // close chat
-                    UOChatManager.Clear();
-                    UOChatManager.ChatIsEnabled = CHAT_STATUS.DISABLED;
+                    ChatManager.Clear();
+                    ChatManager.ChatIsEnabled = ChatStatus.Disabled;
 
-                    UIManager.GetGump<UOChatGump>()?.Dispose();
+                    UIManager.GetGump<ChatGump>()?.Dispose();
 
                     break;
 
                 case 0x03ED: // username accepted, display chat
                     p.Skip(4);
                     string username = p.ReadUnicode();
-                    UOChatManager.ChatIsEnabled = CHAT_STATUS.ENABLED;
+                    ChatManager.ChatIsEnabled = ChatStatus.Enabled;
                     NetClient.Socket.Send(new PChatJoinCommand("General"));
 
                     break;
@@ -3505,14 +3505,14 @@ namespace ClassicUO.Network
                 case 0x03F1: // you have joined a conference
                     p.Skip(4);
                     channelName = p.ReadUnicode();
-                    UOChatManager.CurrentChannelName = channelName;
+                    ChatManager.CurrentChannelName = channelName;
 
-                    UIManager.GetGump<UOChatGump>()?.UpdateConference();
+                    UIManager.GetGump<ChatGump>()?.UpdateConference();
 
                     GameActions.Print
                     (
                         string.Format(ResGeneral.YouHaveJoinedThe0Channel, channelName),
-                        ProfileManager.Current.ChatMessageHue, MessageType.Regular, 1
+                        ProfileManager.CurrentProfile.ChatMessageHue, MessageType.Regular, 1
                     );
 
                     break;
@@ -3524,7 +3524,7 @@ namespace ClassicUO.Network
                     GameActions.Print
                     (
                         string.Format(ResGeneral.YouHaveLeftThe0Channel, channelName),
-                        ProfileManager.Current.ChatMessageHue, MessageType.Regular, 1
+                        ProfileManager.CurrentProfile.ChatMessageHue, MessageType.Regular, 1
                     );
 
                     break;
@@ -3550,7 +3550,7 @@ namespace ClassicUO.Network
 
                     //Color c = new Color(49, 82, 156, 0);
                     GameActions.Print
-                        ($"{username}: {msgSent}", ProfileManager.Current.ChatMessageHue, MessageType.Regular, 1);
+                        ($"{username}: {msgSent}", ProfileManager.CurrentProfile.ChatMessageHue, MessageType.Regular, 1);
 
                     break;
 
@@ -3560,7 +3560,7 @@ namespace ClassicUO.Network
                         // TODO: read Chat.enu ?
                         // http://docs.polserver.com/packets/index.php?Packet=0xB2
 
-                        string msg = UOChatManager.GetMessage(cmd - 1);
+                        string msg = ChatManager.GetMessage(cmd - 1);
 
                         if (string.IsNullOrEmpty(msg))
                         {
@@ -3590,7 +3590,7 @@ namespace ClassicUO.Network
                             }
                         }
 
-                        GameActions.Print(msg, ProfileManager.Current.ChatMessageHue, MessageType.Regular, 1);
+                        GameActions.Print(msg, ProfileManager.CurrentProfile.ChatMessageHue, MessageType.Regular, 1);
                     }
 
                     break;
@@ -3634,7 +3634,7 @@ namespace ClassicUO.Network
 
             World.ClientLockedFeatures.SetFlags((LockedFeatureFlags) flags);
 
-            UOChatManager.ChatIsEnabled = World.ClientLockedFeatures.T2A ? CHAT_STATUS.ENABLED : 0;
+            ChatManager.ChatIsEnabled = World.ClientLockedFeatures.T2A ? ChatStatus.Enabled : 0;
 
             AnimationsLoader.Instance.UpdateAnimationTable(flags);
         }
@@ -3833,7 +3833,7 @@ namespace ClassicUO.Network
                         }
 
                         MessageManager.HandleMessage
-                            (item, str, item.Name, 0x3B2, MessageType.Regular, 3, TEXT_TYPE.OBJECT, true);
+                            (item, str, item.Name, 0x3B2, MessageType.Regular, 3, TextType.OBJECT, true);
                     }
 
                     str = string.Empty;
@@ -3909,7 +3909,7 @@ namespace ClassicUO.Network
                     {
                         MessageManager.HandleMessage
                         (
-                            item, strBuffer.ToString(), item.Name, 0x3B2, MessageType.Regular, 3, TEXT_TYPE.OBJECT, true
+                            item, strBuffer.ToString(), item.Name, 0x3B2, MessageType.Regular, 3, TextType.OBJECT, true
                         );
                     }
 
@@ -4381,7 +4381,7 @@ namespace ClassicUO.Network
                 font = 0;
             }
 
-            TEXT_TYPE text_type = TEXT_TYPE.SYSTEM;
+            TextType text_type = TextType.SYSTEM;
 
             if (serial == 0xFFFF_FFFF || serial == 0 || !string.IsNullOrEmpty(name) && name.ToLower() == "system")
             {
@@ -4390,7 +4390,7 @@ namespace ClassicUO.Network
             else if (entity != null)
             {
                 //entity.Graphic = graphic;
-                text_type = TEXT_TYPE.OBJECT;
+                text_type = TextType.OBJECT;
 
                 if (string.IsNullOrEmpty(entity.Name))
                 {
@@ -5107,7 +5107,7 @@ namespace ClassicUO.Network
                 UpdateGameObject(serial, graphic, graphicInc, amount, x, y, z, dir, hue, flags, unk, type, unk2);
 
 
-                if (graphic == 0x2006 && ProfileManager.Current.AutoOpenCorpses)
+                if (graphic == 0x2006 && ProfileManager.CurrentProfile.AutoOpenCorpses)
                 {
                     World.Player.TryOpenCorpses();
                 }
@@ -5152,7 +5152,7 @@ namespace ClassicUO.Network
             //    }
             //}
 
-            bool smooth = ProfileManager.Current != null && ProfileManager.Current.UseSmoothBoatMovement;
+            bool smooth = ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.UseSmoothBoatMovement;
 
             if (smooth)
             {
@@ -5364,7 +5364,7 @@ namespace ClassicUO.Network
                             ((ContainerGump) gump).CheckItemControlPosition(item);
                         }
 
-                        if (ProfileManager.Current.GridLootType > 0)
+                        if (ProfileManager.CurrentProfile.GridLootType > 0)
                         {
                             GridLootGump grid_gump = UIManager.GetGump<GridLootGump>(containerSerial);
 
@@ -5566,14 +5566,14 @@ namespace ClassicUO.Network
             {
                 if (mobile != null)
                 {
-                    if (ProfileManager.Current.ShowNewMobileNameIncoming)
+                    if (ProfileManager.CurrentProfile.ShowNewMobileNameIncoming)
                     {
                         GameActions.SingleClick(serial);
                     }
                 }
                 else if (graphic == 0x2006)
                 {
-                    if (ProfileManager.Current.ShowNewCorpseNameIncoming)
+                    if (ProfileManager.CurrentProfile.ShowNewCorpseNameIncoming)
                     {
                         GameActions.SingleClick(serial);
                     }
@@ -5605,7 +5605,7 @@ namespace ClassicUO.Network
                     item.AddToTile();
                     item.UpdateScreenPosition();
 
-                    if (graphic == 0x2006 && ProfileManager.Current.AutoOpenCorpses)
+                    if (graphic == 0x2006 && ProfileManager.CurrentProfile.AutoOpenCorpses)
                     {
                         World.Player.TryOpenCorpses();
                     }

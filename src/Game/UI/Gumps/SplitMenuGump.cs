@@ -165,7 +165,7 @@ namespace ClassicUO.Game.UI.Gumps
             Dispose();
         }
 
-        public override void Update(double totalMS, double frameMS)
+        public override void Update(double totalTime, double frameTime)
         {
             Item item = World.Items.Get(LocalSerial);
 
@@ -179,7 +179,7 @@ namespace ClassicUO.Game.UI.Gumps
                 return;
             }
 
-            base.Update(totalMS, frameMS);
+            base.Update(totalTime, frameTime);
         }
 
         public override void Dispose()

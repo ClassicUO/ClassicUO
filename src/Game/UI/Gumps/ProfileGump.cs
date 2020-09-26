@@ -140,13 +140,13 @@ namespace ClassicUO.Game.UI.Gumps
         }
 
 
-        public override void Update(double totalMS, double frameMS)
+        public override void Update(double totalTime, double frameTime)
         {
             _scrollArea.Height = Height - (96 + _diffY);
             _databox.Y = _textBox.Bounds.Bottom + 3;
             _databox.WantUpdateSize = true;
 
-            base.Update(totalMS, frameMS);
+            base.Update(totalTime, frameTime);
         }
 
         private void _textBox_TextChanged(object sender, EventArgs e)

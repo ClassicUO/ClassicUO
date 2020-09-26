@@ -172,9 +172,9 @@ namespace ClassicUO.Game.UI.Gumps
         }
 
 
-        public override void Update(double totalMS, double frameMS)
+        public override void Update(double totalTime, double frameTime)
         {
-            base.Update(totalMS, frameMS);
+            base.Update(totalTime, frameTime);
 
             if (_currentPin != null)
             {
@@ -246,7 +246,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 batcher.DrawLine
                 (
-                    Texture2DCache.GetTexture(Color.White), c0.ScreenCoordinateX, c0.ScreenCoordinateY,
+                    SolidColorTextureCache.GetTexture(Color.White), c0.ScreenCoordinateX, c0.ScreenCoordinateY,
                     c1.ScreenCoordinateX, c1.ScreenCoordinateY,
                     c0.ScreenCoordinateX + (c1.ScreenCoordinateX - c0.ScreenCoordinateX) / 2,
                     c0.ScreenCoordinateY + (c1.ScreenCoordinateY - c0.ScreenCoordinateY) / 2

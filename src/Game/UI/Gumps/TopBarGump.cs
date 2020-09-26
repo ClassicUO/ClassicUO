@@ -166,21 +166,21 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (gump == null)
             {
-                if (ProfileManager.Current.TopbarGumpPosition.X < 0 || ProfileManager.Current.TopbarGumpPosition.Y < 0)
+                if (ProfileManager.CurrentProfile.TopbarGumpPosition.X < 0 || ProfileManager.CurrentProfile.TopbarGumpPosition.Y < 0)
                 {
-                    ProfileManager.Current.TopbarGumpPosition = Point.Zero;
+                    ProfileManager.CurrentProfile.TopbarGumpPosition = Point.Zero;
                 }
 
                 UIManager.Add
                 (
                     gump = new TopBarGump
                     {
-                        X = ProfileManager.Current.TopbarGumpPosition.X,
-                        Y = ProfileManager.Current.TopbarGumpPosition.Y
+                        X = ProfileManager.CurrentProfile.TopbarGumpPosition.X,
+                        Y = ProfileManager.CurrentProfile.TopbarGumpPosition.Y
                     }
                 );
 
-                if (ProfileManager.Current.TopbarGumpIsMinimized)
+                if (ProfileManager.CurrentProfile.TopbarGumpIsMinimized)
                 {
                     gump.ChangePage(2);
                 }
@@ -198,20 +198,20 @@ namespace ClassicUO.Game.UI.Gumps
                 X = 0;
                 Y = 0;
 
-                ProfileManager.Current.TopbarGumpPosition = Location;
+                ProfileManager.CurrentProfile.TopbarGumpPosition = Location;
             }
         }
 
         public override void OnPageChanged()
         {
-            ProfileManager.Current.TopbarGumpIsMinimized = IsMinimized = ActivePage == 2;
+            ProfileManager.CurrentProfile.TopbarGumpIsMinimized = IsMinimized = ActivePage == 2;
             WantUpdateSize = true;
         }
 
         protected override void OnDragEnd(int x, int y)
         {
             base.OnDragEnd(x, y);
-            ProfileManager.Current.TopbarGumpPosition = Location;
+            ProfileManager.CurrentProfile.TopbarGumpPosition = Location;
         }
 
         public override void OnButtonClick(int buttonID)
@@ -286,13 +286,13 @@ namespace ClassicUO.Game.UI.Gumps
                     break;
 
                 case Buttons.Chat:
-                    if (UOChatManager.ChatIsEnabled == CHAT_STATUS.ENABLED)
+                    if (ChatManager.ChatIsEnabled == ChatStatus.Enabled)
                     {
-                        UOChatGump chatGump = UIManager.GetGump<UOChatGump>();
+                        ChatGump chatGump = UIManager.GetGump<ChatGump>();
 
                         if (chatGump == null)
                         {
-                            UIManager.Add(new UOChatGump());
+                            UIManager.Add(new ChatGump());
                         }
                         else
                         {
@@ -300,13 +300,13 @@ namespace ClassicUO.Game.UI.Gumps
                             chatGump.BringOnTop();
                         }
                     }
-                    else if (UOChatManager.ChatIsEnabled == CHAT_STATUS.ENABLED_USER_REQUEST)
+                    else if (ChatManager.ChatIsEnabled == ChatStatus.EnabledUserRequest)
                     {
-                        UOChatGumpChooseName chatGump = UIManager.GetGump<UOChatGumpChooseName>();
+                        ChatGumpChooseName chatGump = UIManager.GetGump<ChatGumpChooseName>();
 
                         if (chatGump == null)
                         {
-                            UIManager.Add(new UOChatGumpChooseName());
+                            UIManager.Add(new ChatGumpChooseName());
                         }
                         else
                         {

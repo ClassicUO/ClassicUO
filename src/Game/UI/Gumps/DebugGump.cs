@@ -92,9 +92,9 @@ namespace ClassicUO.Game.UI.Gumps
             return false;
         }
 
-        public override void Update(double totalMS, double frameMS)
+        public override void Update(double totalTime, double frameTime)
         {
-            base.Update(totalMS, frameMS);
+            base.Update(totalTime, frameTime);
 
             if (Time.Ticks > _timeToUpdate)
             {
@@ -183,7 +183,7 @@ namespace ClassicUO.Game.UI.Gumps
             }
 
             ResetHueVector();
-            batcher.DrawString(Fonts.Bold, _sb.ToString(), x + 10, y + 10, ref _hueVector);
+            batcher.DrawString(Fonts.Bold, _sb.ToString(), x + 10, y + 10, ref HueVector);
 
             return true;
         }

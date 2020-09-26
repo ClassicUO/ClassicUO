@@ -261,13 +261,13 @@ namespace ClassicUO.Game.Managers
                                 bool showCriminalQuery = false;
 
                                 if (TargetingType == TargetType.Harmful &&
-                                    ProfileManager.Current.EnabledCriminalActionQuery &&
+                                    ProfileManager.CurrentProfile.EnabledCriminalActionQuery &&
                                     mobile.NotorietyFlag == NotorietyFlag.Innocent)
                                 {
                                     showCriminalQuery = true;
                                 }
                                 else if (TargetingType == TargetType.Beneficial &&
-                                         ProfileManager.Current.EnabledBeneficialCriminalActionQuery &&
+                                         ProfileManager.CurrentProfile.EnabledBeneficialCriminalActionQuery &&
                                          (mobile.NotorietyFlag == NotorietyFlag.Criminal ||
                                           mobile.NotorietyFlag == NotorietyFlag.Murderer ||
                                           mobile.NotorietyFlag == NotorietyFlag.Gray))
@@ -351,7 +351,7 @@ namespace ClassicUO.Game.Managers
 
                         if (SerialHelper.IsItem(serial))
                         {
-                            ProfileManager.Current.GrabBagSerial = serial;
+                            ProfileManager.CurrentProfile.GrabBagSerial = serial;
                             GameActions.Print(string.Format(ResGeneral.GrabBagSet0, serial));
                         }
 

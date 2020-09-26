@@ -191,8 +191,8 @@ namespace ClassicUO.Game.Managers
             {
                 MessageBoxGump messageBox = new MessageBoxGump(200, 125, ResGeneral.CannotDeleteThisGroup, null)
                 {
-                    X = ProfileManager.Current.GameWindowPosition.X + ProfileManager.Current.GameWindowSize.X / 2 - 100,
-                    Y = ProfileManager.Current.GameWindowPosition.Y + ProfileManager.Current.GameWindowSize.Y / 2 - 62
+                    X = ProfileManager.CurrentProfile.GameWindowPosition.X + ProfileManager.CurrentProfile.GameWindowSize.X / 2 - 100,
+                    Y = ProfileManager.CurrentProfile.GameWindowPosition.Y + ProfileManager.CurrentProfile.GameWindowSize.Y / 2 - 62
                 };
 
                 UIManager.Add(messageBox);
@@ -218,8 +218,8 @@ namespace ClassicUO.Game.Managers
 
             string path = Path.Combine
             (
-                CUOEnviroment.ExecutablePath, "Data", "Profiles", ProfileManager.Current.Username,
-                ProfileManager.Current.ServerName, ProfileManager.Current.CharacterName, "skillsgroups.xml"
+                CUOEnviroment.ExecutablePath, "Data", "Profiles", ProfileManager.CurrentProfile.Username,
+                ProfileManager.CurrentProfile.ServerName, ProfileManager.CurrentProfile.CharacterName, "skillsgroups.xml"
             );
 
             if (!File.Exists(path))
@@ -273,8 +273,8 @@ namespace ClassicUO.Game.Managers
         {
             string path = Path.Combine
             (
-                CUOEnviroment.ExecutablePath, "Data", "Profiles", ProfileManager.Current.Username,
-                ProfileManager.Current.ServerName, ProfileManager.Current.CharacterName, "skillsgroups.xml"
+                CUOEnviroment.ExecutablePath, "Data", "Profiles", ProfileManager.CurrentProfile.Username,
+                ProfileManager.CurrentProfile.ServerName, ProfileManager.CurrentProfile.CharacterName, "skillsgroups.xml"
             );
 
             using (XmlTextWriter xml = new XmlTextWriter(path, Encoding.UTF8)

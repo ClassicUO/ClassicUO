@@ -77,7 +77,7 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
-        public virtual void Update(double totalMS, double frameMS)
+        public virtual void Update(double totalTime, double frameTime)
         {
         }
 
@@ -157,10 +157,10 @@ namespace ClassicUO.Game.GameObjects
         }
 
 
-        public void AddMessage(MessageType type, string message, TEXT_TYPE text_type)
+        public void AddMessage(MessageType type, string message, TextType text_type)
         {
             AddMessage
-                (type, message, ProfileManager.Current.ChatFont, ProfileManager.Current.SpeechHue, true, text_type);
+                (type, message, ProfileManager.CurrentProfile.ChatFont, ProfileManager.CurrentProfile.SpeechHue, true, text_type);
         }
 
         public virtual void UpdateTextCoordsV()
@@ -228,9 +228,9 @@ namespace ClassicUO.Game.GameObjects
             int offsetY = 0;
 
             int minX = 6;
-            int maxX = minX + ProfileManager.Current.GameWindowSize.X - 6;
+            int maxX = minX + ProfileManager.CurrentProfile.GameWindowSize.X - 6;
             int minY = 0;
-            //int maxY = minY + ProfileManager.Current.GameWindowSize.Y - 6;
+            //int maxY = minY + ProfileManager.CurrentProfile.GameWindowSize.Y - 6;
 
             for (TextObject item = (TextObject) TextContainer.Items; item != null; item = (TextObject) item.Next)
             {
@@ -280,7 +280,7 @@ namespace ClassicUO.Game.GameObjects
             byte font,
             ushort hue,
             bool isunicode,
-            TEXT_TYPE text_type
+            TextType text_type
         )
         {
             if (string.IsNullOrEmpty(text))

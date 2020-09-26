@@ -69,9 +69,9 @@ namespace ClassicUO.Game.UI.Controls
         public bool HasFakeItem { get; private set; }
 
 
-        public override void Update(double totalMS, double frameMS)
+        public override void Update(double totalTime, double frameTime)
         {
-            base.Update(totalMS, frameMS);
+            base.Update(totalTime, frameTime);
 
             if (_updateUI)
             {
@@ -381,9 +381,9 @@ namespace ClassicUO.Game.UI.Controls
                 base.OnMouseUp(x, y, button);
             }
 
-            public override void Update(double totalMS, double frameMS)
+            public override void Update(double totalTime, double frameTime)
             {
-                base.Update(totalMS, frameMS);
+                base.Update(totalTime, frameTime);
 
                 if (World.InGame)
                 {

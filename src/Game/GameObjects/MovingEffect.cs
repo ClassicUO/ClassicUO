@@ -105,11 +105,11 @@ namespace ClassicUO.Game.GameObjects
             int playerY = World.Player.Y;
             int playerZ = World.Player.Z;
 
-            int screenCenterX = ProfileManager.Current.GameWindowPosition.X +
-                                (ProfileManager.Current.GameWindowSize.X >> 1);
+            int screenCenterX = ProfileManager.CurrentProfile.GameWindowPosition.X +
+                                (ProfileManager.CurrentProfile.GameWindowSize.X >> 1);
 
-            int screenCenterY = ProfileManager.Current.GameWindowPosition.Y +
-                                (ProfileManager.Current.GameWindowSize.Y >> 1);
+            int screenCenterY = ProfileManager.CurrentProfile.GameWindowPosition.Y +
+                                (ProfileManager.CurrentProfile.GameWindowSize.Y >> 1);
 
 
             (int sX, int sY, int sZ) = GetSource();
@@ -145,14 +145,14 @@ namespace ClassicUO.Game.GameObjects
         }
 
 
-        public override void Update(double totalMS, double frameMS)
+        public override void Update(double totalTime, double frameTime)
         {
             if (_lastMoveTime > Time.Ticks)
             {
                 return;
             }
 
-            base.Update(totalMS, frameMS);
+            base.Update(totalTime, frameTime);
 
             _lastMoveTime = Time.Ticks + MovingDelay;
 
@@ -168,11 +168,11 @@ namespace ClassicUO.Game.GameObjects
             int playerY = World.Player.Y;
             int playerZ = World.Player.Z;
 
-            int screenCenterX = ProfileManager.Current.GameWindowPosition.X +
-                                (ProfileManager.Current.GameWindowSize.X >> 1);
+            int screenCenterX = ProfileManager.CurrentProfile.GameWindowPosition.X +
+                                (ProfileManager.CurrentProfile.GameWindowSize.X >> 1);
 
-            int screenCenterY = ProfileManager.Current.GameWindowPosition.Y +
-                                (ProfileManager.Current.GameWindowSize.Y >> 1);
+            int screenCenterY = ProfileManager.CurrentProfile.GameWindowPosition.Y +
+                                (ProfileManager.CurrentProfile.GameWindowSize.Y >> 1);
 
 
             (int sX, int sY, int sZ) = GetSource();
@@ -318,8 +318,8 @@ namespace ClassicUO.Game.GameObjects
                 Calculate(false);
             }
 
-            //Offset.X += _velocity.X/* * (float) frameMS*/;
-            //Offset.Y += _velocity.Y/* * (float) frameMS*/;
+            //Offset.X += _velocity.X/* * (float) frameTime*/;
+            //Offset.Y += _velocity.Y/* * (float) frameTime*/;
         }
 
         private static void TileOffsetOnMonitorToXY(ref int ofsX, ref int ofsY, ref int x, ref int y)

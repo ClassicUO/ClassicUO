@@ -217,7 +217,7 @@ namespace ClassicUO.Game.UI.Gumps
                     StatusGumpBase.GetStatusGump()?.Dispose();
                 }
 
-                if (ProfileManager.Current.CustomBarsToggled)
+                if (ProfileManager.CurrentProfile.CustomBarsToggled)
                 {
                     Rectangle rect = new Rectangle
                         (0, 0, HealthBarGumpCustom.HPB_WIDTH, HealthBarGumpCustom.HPB_HEIGHT_SINGLELINE);
@@ -441,9 +441,9 @@ namespace ClassicUO.Game.UI.Gumps
             base.OnMouseExit(x, y);
         }
 
-        public override void Update(double totalMS, double frameMS)
+        public override void Update(double totalTime, double frameTime)
         {
-            base.Update(totalMS, frameMS);
+            base.Update(totalTime, frameTime);
 
             Entity entity = World.Get(LocalSerial);
 
@@ -460,10 +460,10 @@ namespace ClassicUO.Game.UI.Gumps
                 return false;
             }
 
-            int gx = ProfileManager.Current.GameWindowPosition.X;
-            int gy = ProfileManager.Current.GameWindowPosition.Y;
-            int w = ProfileManager.Current.GameWindowSize.X;
-            int h = ProfileManager.Current.GameWindowSize.Y;
+            int gx = ProfileManager.CurrentProfile.GameWindowPosition.X;
+            int gy = ProfileManager.CurrentProfile.GameWindowPosition.Y;
+            int w = ProfileManager.CurrentProfile.GameWindowSize.X;
+            int h = ProfileManager.CurrentProfile.GameWindowSize.Y;
 
             if (SerialHelper.IsMobile(LocalSerial))
             {
@@ -548,7 +548,7 @@ namespace ClassicUO.Game.UI.Gumps
             Y = y;
 
             batcher.DrawRectangle
-                (Texture2DCache.GetTexture(Color.Black), x - 1, y - 1, Width + 1, Height + 1, ref _hueVector);
+                (SolidColorTextureCache.GetTexture(Color.Black), x - 1, y - 1, Width + 1, Height + 1, ref HueVector);
 
             base.Draw(batcher, x, y);
 

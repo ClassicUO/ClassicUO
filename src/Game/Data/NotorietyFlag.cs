@@ -43,16 +43,16 @@ namespace ClassicUO.Game.Data
         {
             switch (flag)
             {
-                case NotorietyFlag.Innocent: return ProfileManager.Current.InnocentHue;
+                case NotorietyFlag.Innocent: return ProfileManager.CurrentProfile.InnocentHue;
 
-                case NotorietyFlag.Ally: return ProfileManager.Current.FriendHue;
+                case NotorietyFlag.Ally: return ProfileManager.CurrentProfile.FriendHue;
 
                 case NotorietyFlag.Criminal:
-                case NotorietyFlag.Gray: return ProfileManager.Current.CriminalHue;
+                case NotorietyFlag.Gray: return ProfileManager.CurrentProfile.CriminalHue;
 
-                case NotorietyFlag.Enemy: return ProfileManager.Current.EnemyHue;
+                case NotorietyFlag.Enemy: return ProfileManager.CurrentProfile.EnemyHue;
 
-                case NotorietyFlag.Murderer: return ProfileManager.Current.MurdererHue;
+                case NotorietyFlag.Murderer: return ProfileManager.CurrentProfile.MurdererHue;
 
                 case NotorietyFlag.Invulnerable: return 0x0034;
 

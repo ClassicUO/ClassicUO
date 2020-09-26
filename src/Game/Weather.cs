@@ -78,8 +78,8 @@ namespace ClassicUO.Game
             while (CurrentCount < Count)
             {
                 ref WeatherEffect effect = ref _effects[CurrentCount++];
-                effect.X = RandomHelper.GetValue(0, ProfileManager.Current.GameWindowSize.X);
-                effect.Y = RandomHelper.GetValue(0, ProfileManager.Current.GameWindowSize.Y);
+                effect.X = RandomHelper.GetValue(0, ProfileManager.CurrentProfile.GameWindowSize.X);
+                effect.Y = RandomHelper.GetValue(0, ProfileManager.CurrentProfile.GameWindowSize.Y);
             }
         }
 
@@ -158,8 +158,8 @@ namespace ClassicUO.Game
             //        break;
             //}
 
-            //Point winpos = ProfileManager.Current.GameWindowPosition;
-            Point winsize = ProfileManager.Current.GameWindowSize;
+            //Point winpos = ProfileManager.CurrentProfile.GameWindowPosition;
+            Point winsize = ProfileManager.CurrentProfile.GameWindowSize;
 
             for (int i = 0; i < CurrentCount; i++)
             {
@@ -280,7 +280,7 @@ namespace ClassicUO.Game
 
                         batcher.DrawLine
                         (
-                            Texture2DCache.GetTexture(Color.Gray), startX, startY, endX, endY,
+                            SolidColorTextureCache.GetTexture(Color.Gray), startX, startY, endX, endY,
                             startX + (endX - startX) / 2, startY + (endY - startY) / 2
                         );
 
@@ -294,7 +294,7 @@ namespace ClassicUO.Game
 
                         batcher.Draw2D
                         (
-                            Texture2DCache.GetTexture(Color.White), x + (int) effect.X, y + (int) effect.Y, 2, 2,
+                            SolidColorTextureCache.GetTexture(Color.White), x + (int) effect.X, y + (int) effect.Y, 2, 2,
                             ref _hueVector
                         );
 

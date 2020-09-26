@@ -130,8 +130,8 @@ namespace ClassicUO.Game.UI.Controls
             if (IsSelected)
             {
                 ResetHueVector();
-                ShaderHueTranslator.GetHueVector(ref _hueVector, 0, false, Alpha);
-                batcher.Draw2D(_texture, x, y, 0, 0, Width, Height, ref _hueVector);
+                ShaderHueTranslator.GetHueVector(ref HueVector, 0, false, Alpha);
+                batcher.Draw2D(_texture, x, y, 0, 0, Width, Height, ref HueVector);
             }
 
             return base.Draw(batcher, x, y);

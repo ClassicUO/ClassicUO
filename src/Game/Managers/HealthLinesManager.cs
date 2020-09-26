@@ -47,7 +47,7 @@ namespace ClassicUO.Game.Managers
             _hp_texture = GumpsLoader.Instance.GetTexture(0x1069);
         }
 
-        public bool IsEnabled => ProfileManager.Current != null && ProfileManager.Current.ShowMobilesHP;
+        public bool IsEnabled => ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.ShowMobilesHP;
 
 
         public void Update()
@@ -65,8 +65,8 @@ namespace ClassicUO.Game.Managers
 
         public void Draw(UltimaBatcher2D batcher)
         {
-            int screenW = ProfileManager.Current.GameWindowSize.X;
-            int screenH = ProfileManager.Current.GameWindowSize.Y;
+            int screenW = ProfileManager.CurrentProfile.GameWindowSize.X;
+            int screenH = ProfileManager.CurrentProfile.GameWindowSize.Y;
 
             if (SerialHelper.IsMobile(TargetManager.LastTargetInfo.Serial))
             {
@@ -88,14 +88,14 @@ namespace ClassicUO.Game.Managers
                 return;
             }
 
-            int mode = ProfileManager.Current.MobileHPType;
+            int mode = ProfileManager.CurrentProfile.MobileHPType;
 
             if (mode < 0)
             {
                 return;
             }
 
-            int showWhen = ProfileManager.Current.MobileHPShowWhen;
+            int showWhen = ProfileManager.CurrentProfile.MobileHPShowWhen;
 
             foreach (Mobile mobile in World.Mobiles)
             {

@@ -76,7 +76,7 @@ namespace ClassicUO.Game
                 return false;
             }
 
-            bool ignoreGameCharacters = ProfileManager.Current.IgnoreStaminaCheck ||
+            bool ignoreGameCharacters = ProfileManager.CurrentProfile.IgnoreStaminaCheck ||
                                         stepState == (int) PATH_STEP_STATE.PSS_DEAD_OR_GM ||
                                         World.Player.IgnoreCharacters ||
                                         !(World.Player.Stamina < World.Player.StaminaMax && World.Map.Index == 0);
@@ -179,7 +179,7 @@ namespace ClassicUO.Game
                                 {
                                     dropFlags = true;
                                 }
-                                else if (ProfileManager.Current.SmoothDoors && item2.ItemData.IsDoor)
+                                else if (ProfileManager.CurrentProfile.SmoothDoors && item2.ItemData.IsDoor)
                                 {
                                     dropFlags = true;
                                 }

@@ -275,7 +275,7 @@ namespace ClassicUO
 
             WorldViewportGump viewport = UIManager.GetGump<WorldViewportGump>();
 
-            if (viewport != null && ProfileManager.Current.GameWindowFullSize)
+            if (viewport != null && ProfileManager.CurrentProfile.GameWindowFullSize)
             {
                 viewport.ResizeGameWindow(new Point(width, height));
                 viewport.X = -5;
@@ -349,7 +349,7 @@ namespace ClassicUO
             }
 
             double x = _intervalFixedUpdate[
-                !IsActive && ProfileManager.Current != null && ProfileManager.Current.ReduceFPSWhenInactive ? 1 : 0];
+                !IsActive && ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.ReduceFPSWhenInactive ? 1 : 0];
 
             if (_totalElapsed > x)
             {
@@ -424,7 +424,7 @@ namespace ClassicUO
             Plugin.ProcessDrawCmdList(GraphicsDevice);
         }
 
-        private void OnNetworkUpdate(double totalMilliseconds, double frameMilliseconds)
+        private void OnNetworkUpdate(double totalTime, double frameTime)
         {
             if (NetClient.LoginSocket.IsDisposed && NetClient.LoginSocket.IsConnected)
             {
@@ -433,21 +433,21 @@ namespace ClassicUO
             else if (!NetClient.Socket.IsConnected)
             {
                 NetClient.LoginSocket.Update();
-                UpdateSocketStats(NetClient.LoginSocket, totalMilliseconds);
+                UpdateSocketStats(NetClient.LoginSocket, totalTime);
             }
             else if (!NetClient.Socket.IsDisposed)
             {
                 NetClient.Socket.Update();
-                UpdateSocketStats(NetClient.Socket, totalMilliseconds);
+                UpdateSocketStats(NetClient.Socket, totalTime);
             }
         }
 
-        private void UpdateSocketStats(NetClient socket, double totalMilliseconds)
+        private void UpdateSocketStats(NetClient socket, double totalTime)
         {
-            if (_statisticsTimer < totalMilliseconds)
+            if (_statisticsTimer < totalTime)
             {
                 socket.Statistics.Update();
-                _statisticsTimer = totalMilliseconds + 500;
+                _statisticsTimer = totalTime + 500;
             }
         }
 
@@ -458,14 +458,14 @@ namespace ClassicUO
 
             if (!IsWindowMaximized())
             {
-                ProfileManager.Current.WindowClientBounds = new Point(width, height);
+                ProfileManager.CurrentProfile.WindowClientBounds = new Point(width, height);
             }
 
             SetWindowSize(width, height);
 
             WorldViewportGump viewport = UIManager.GetGump<WorldViewportGump>();
 
-            if (viewport != null && ProfileManager.Current.GameWindowFullSize)
+            if (viewport != null && ProfileManager.CurrentProfile.GameWindowFullSize)
             {
                 viewport.ResizeGameWindow(new Point(width, height));
                 viewport.X = -5;
@@ -762,7 +762,7 @@ namespace ClassicUO
                 texture.SaveAsPng(fileStream, texture.Width, texture.Height);
                 string message = string.Format(ResGeneral.ScreenshotStoredIn0, path);
 
-                if (ProfileManager.Current == null || ProfileManager.Current.HideScreenshotStoredInMessage)
+                if (ProfileManager.CurrentProfile == null || ProfileManager.CurrentProfile.HideScreenshotStoredInMessage)
                 {
                     Log.Info(message);
                 }

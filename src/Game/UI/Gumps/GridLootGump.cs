@@ -39,7 +39,7 @@ namespace ClassicUO.Game.UI.Gumps
         private const int MAX_WIDTH = 300;
         private const int MAX_HEIGHT = 400;
 
-        private static int _lastX = ProfileManager.Current.GridLootType == 2 ? 200 : 100;
+        private static int _lastX = ProfileManager.CurrentProfile.GridLootType == 2 ? 200 : 100;
         private static int _lastY = 100;
         private readonly AlphaBlendControl _background;
         private readonly NiceButton _buttonPrev, _buttonNext, _setlootbag;
@@ -66,7 +66,7 @@ namespace ClassicUO.Game.UI.Gumps
                 World.Player.ManualOpenedCorpses.Remove(LocalSerial);
             }
             else if (World.Player.AutoOpenedCorpses.Contains
-                (LocalSerial) && ProfileManager.Current != null && ProfileManager.Current.SkipEmptyCorpse)
+                (LocalSerial) && ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.SkipEmptyCorpse)
             {
                 IsVisible = false;
                 _hideIfEmpty = true;
@@ -282,13 +282,13 @@ namespace ClassicUO.Game.UI.Gumps
             ResetHueVector();
             base.Draw(batcher, x, y);
             ResetHueVector();
-            batcher.DrawRectangle(Texture2DCache.GetTexture(Color.Gray), x, y, Width, Height, ref _hueVector);
+            batcher.DrawRectangle(SolidColorTextureCache.GetTexture(Color.Gray), x, y, Width, Height, ref HueVector);
 
             return true;
         }
 
 
-        public override void Update(double totalMS, double frameMS)
+        public override void Update(double totalTime, double frameTime)
         {
             if (_corpse == null || _corpse.IsDestroyed || _corpse.OnGround && _corpse.Distance > 3)
             {
@@ -297,7 +297,7 @@ namespace ClassicUO.Game.UI.Gumps
                 return;
             }
 
-            base.Update(totalMS, frameMS);
+            base.Update(totalTime, frameTime);
 
             if (IsDisposed)
             {
@@ -422,18 +422,18 @@ namespace ClassicUO.Game.UI.Gumps
                 ResetHueVector();
 
                 batcher.DrawRectangle
-                    (Texture2DCache.GetTexture(Color.Gray), x, y + 15, Width, Height - 15, ref _hueVector);
+                    (SolidColorTextureCache.GetTexture(Color.Gray), x, y + 15, Width, Height - 15, ref HueVector);
 
                 if (_texture.MouseIsOver)
                 {
-                    _hueVector.Z = 0.7f;
+                    HueVector.Z = 0.7f;
 
                     batcher.Draw2D
                     (
-                        Texture2DCache.GetTexture(Color.Yellow), x + 1, y + 15, Width - 1, Height - 15, ref _hueVector
+                        SolidColorTextureCache.GetTexture(Color.Yellow), x + 1, y + 15, Width - 1, Height - 15, ref HueVector
                     );
 
-                    _hueVector.Z = 0;
+                    HueVector.Z = 0;
                 }
 
                 return true;

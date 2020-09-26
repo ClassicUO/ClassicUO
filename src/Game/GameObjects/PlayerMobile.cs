@@ -1293,15 +1293,15 @@ namespace ClassicUO.Game.GameObjects
 
         public void TryOpenCorpses()
         {
-            if (ProfileManager.Current.AutoOpenCorpses)
+            if (ProfileManager.CurrentProfile.AutoOpenCorpses)
             {
-                if ((ProfileManager.Current.CorpseOpenOptions == 1 || ProfileManager.Current.CorpseOpenOptions == 3) &&
+                if ((ProfileManager.CurrentProfile.CorpseOpenOptions == 1 || ProfileManager.CurrentProfile.CorpseOpenOptions == 3) &&
                     TargetManager.IsTargeting)
                 {
                     return;
                 }
 
-                if ((ProfileManager.Current.CorpseOpenOptions == 2 || ProfileManager.Current.CorpseOpenOptions == 3) &&
+                if ((ProfileManager.CurrentProfile.CorpseOpenOptions == 2 || ProfileManager.CurrentProfile.CorpseOpenOptions == 3) &&
                     IsHidden)
                 {
                     return;
@@ -1310,7 +1310,7 @@ namespace ClassicUO.Game.GameObjects
                 foreach (Item item in World.Items)
                 {
                     if (!item.IsDestroyed && item.IsCorpse &&
-                        item.Distance <= ProfileManager.Current.AutoOpenCorpseRange &&
+                        item.Distance <= ProfileManager.CurrentProfile.AutoOpenCorpseRange &&
                         !AutoOpenedCorpses.Contains(item.Serial))
                     {
                         AutoOpenedCorpses.Add(item.Serial);
@@ -1329,7 +1329,7 @@ namespace ClassicUO.Game.GameObjects
 
         private void TryOpenDoors()
         {
-            if (!World.Player.IsDead && ProfileManager.Current.AutoOpenDoors)
+            if (!World.Player.IsDead && ProfileManager.CurrentProfile.AutoOpenDoors)
             {
                 int x = X, y = Y, z = Z;
                 Pathfinder.GetNewXY((byte) Direction, ref x, ref y);
@@ -1462,9 +1462,9 @@ namespace ClassicUO.Game.GameObjects
         }
 
 
-        public override void Update(double totalMS, double frameMS)
+        public override void Update(double totalTime, double frameTime)
         {
-            base.Update(totalMS, frameMS);
+            base.Update(totalTime, frameTime);
 
             //const int TIME_TURN_TO_LASTTARGET = 2000;
 
@@ -1503,10 +1503,10 @@ namespace ClassicUO.Game.GameObjects
                 return false;
             }
 
-            run |= ProfileManager.Current.AlwaysRun;
+            run |= ProfileManager.CurrentProfile.AlwaysRun;
 
             if (SpeedMode >= CharacterSpeedType.CantRun || Stamina <= 1 && !IsDead ||
-                IsHidden && ProfileManager.Current.AlwaysRunUnlessHidden)
+                IsHidden && ProfileManager.CurrentProfile.AlwaysRunUnlessHidden)
             {
                 run = false;
             }

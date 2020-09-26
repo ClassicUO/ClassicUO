@@ -179,8 +179,8 @@ namespace ClassicUO.Game.Managers
                         {
                             MessageManager.HandleMessage
                             (
-                                null, name, Members[i].Name, ProfileManager.Current.PartyMessageHue, MessageType.Party,
-                                3, TEXT_TYPE.SYSTEM
+                                null, name, Members[i].Name, ProfileManager.CurrentProfile.PartyMessageHue, MessageType.Party,
+                                3, TextType.SYSTEM
                             );
 
                             break;
@@ -192,7 +192,7 @@ namespace ClassicUO.Game.Managers
                 case 7:
                     Inviter = p.ReadUInt();
 
-                    if (ProfileManager.Current.PartyInviteGump)
+                    if (ProfileManager.CurrentProfile.PartyInviteGump)
                     {
                         UIManager.Add(new PartyInviteGump(Inviter));
                     }

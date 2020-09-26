@@ -308,13 +308,13 @@ namespace ClassicUO.Utility.Platforms
                             {
                                 MessageManager.HandleMessage
                                 (
-                                    null, sb.ToString(), "System", hue, MessageType.Regular, 3, TEXT_TYPE.SYSTEM, true
+                                    null, sb.ToString(), "System", hue, MessageType.Regular, 3, TextType.SYSTEM, true
                                 );
                             }
                             else
                             {
                                 World.Player.AddMessage
-                                    (MessageType.Regular, sb.ToString(), 3, hue, true, TEXT_TYPE.OBJECT);
+                                    (MessageType.Regular, sb.ToString(), 3, hue, true, TextType.OBJECT);
                             }
 
                             return 1;

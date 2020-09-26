@@ -89,7 +89,7 @@ namespace ClassicUO.Game.UI.Gumps
             CreateMiniMapTexture(true);
         }
 
-        public override void Update(double totalMS, double frameMS)
+        public override void Update(double totalTime, double frameTime)
         {
             if (!World.InGame)
             {
@@ -109,18 +109,18 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (_gumpTexture != null)
             {
-                _gumpTexture.Ticks = (long) totalMS;
+                _gumpTexture.Ticks = (long) totalTime;
             }
 
             if (_mapTexture != null)
             {
-                _mapTexture.Ticks = (long) totalMS;
+                _mapTexture.Ticks = (long) totalTime;
             }
 
-            if (_timeMS < totalMS)
+            if (_timeMS < totalTime)
             {
                 _draw = !_draw;
-                _timeMS = (long) totalMS + 500;
+                _timeMS = (long) totalTime + 500;
             }
         }
 
@@ -149,16 +149,16 @@ namespace ClassicUO.Game.UI.Gumps
 
             ResetHueVector();
 
-            batcher.Draw2D(_gumpTexture, x, y, ref _hueVector);
+            batcher.Draw2D(_gumpTexture, x, y, ref HueVector);
             CreateMiniMapTexture();
-            batcher.Draw2D(_mapTexture, x, y, ref _hueVector);
+            batcher.Draw2D(_mapTexture, x, y, ref HueVector);
 
             if (_draw)
             {
                 int w = Width >> 1;
                 int h = Height >> 1;
 
-                Texture2D mobilesTextureDot = Texture2DCache.GetTexture(Color.Red);
+                Texture2D mobilesTextureDot = SolidColorTextureCache.GetTexture(Color.Red);
 
                 foreach (Mobile mob in World.Mobiles)
                 {
@@ -173,16 +173,16 @@ namespace ClassicUO.Game.UI.Gumps
                     int gx = xx - yy;
                     int gy = xx + yy;
 
-                    _hueVector.Z = 0;
+                    HueVector.Z = 0;
 
-                    ShaderHueTranslator.GetHueVector(ref _hueVector, Notoriety.GetHue(mob.NotorietyFlag));
+                    ShaderHueTranslator.GetHueVector(ref HueVector, Notoriety.GetHue(mob.NotorietyFlag));
 
-                    batcher.Draw2D(mobilesTextureDot, x + w + gx, y + h + gy, 2, 2, ref _hueVector);
+                    batcher.Draw2D(mobilesTextureDot, x + w + gx, y + h + gy, 2, 2, ref HueVector);
                 }
 
                 //DRAW DOT OF PLAYER
                 ResetHueVector();
-                batcher.Draw2D(Texture2DCache.GetTexture(Color.White), x + w, y + h, 2, 2, ref _hueVector);
+                batcher.Draw2D(SolidColorTextureCache.GetTexture(Color.White), x + w, y + h, 2, 2, ref HueVector);
             }
 
             return base.Draw(batcher, x, y);

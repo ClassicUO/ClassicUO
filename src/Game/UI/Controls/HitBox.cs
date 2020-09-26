@@ -42,7 +42,7 @@ namespace ClassicUO.Game.UI.Controls
             CanMove = false;
             AcceptMouseInput = true;
             Alpha = alpha;
-            _texture = Texture2DCache.GetTexture(Color.White);
+            _texture = SolidColorTextureCache.GetTexture(Color.White);
 
             X = x;
             Y = y;
@@ -68,9 +68,9 @@ namespace ClassicUO.Game.UI.Controls
             if (MouseIsOver)
             {
                 ResetHueVector();
-                ShaderHueTranslator.GetHueVector(ref _hueVector, 0, false, Alpha, true);
+                ShaderHueTranslator.GetHueVector(ref HueVector, 0, false, Alpha, true);
 
-                batcher.Draw2D(_texture, x, y, 0, 0, Width, Height, ref _hueVector);
+                batcher.Draw2D(_texture, x, y, 0, 0, Width, Height, ref HueVector);
             }
 
             return base.Draw(batcher, x, y);

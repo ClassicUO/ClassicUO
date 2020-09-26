@@ -25,6 +25,6 @@ namespace ClassicUO.Interfaces
 {
     public interface IUpdateable
     {
-        void Update(double totalMS, double frameMS);
+        void Update(double totalTime, double frameTime);
     }
 }

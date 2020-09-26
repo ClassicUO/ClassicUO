@@ -32,7 +32,7 @@ namespace ClassicUO.Game.Managers
     {
         private GameEffect _root;
 
-        public void Update(double totalMS, double frameMS)
+        public void Update(double totalTime, double frameTime)
         {
             GameEffect f = _root;
 
@@ -40,7 +40,7 @@ namespace ClassicUO.Game.Managers
             {
                 LinkedObject n = f.Next;
 
-                f.Update(totalMS, frameMS);
+                f.Update(totalTime, frameTime);
 
                 if (!f.IsDestroyed && f.Distance > World.ClientViewRange)
                 {
