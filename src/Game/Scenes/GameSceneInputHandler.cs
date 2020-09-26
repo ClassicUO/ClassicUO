@@ -415,7 +415,7 @@ namespace ClassicUO.Game.Scenes
                 ushort dropY = 0;
                 sbyte dropZ = 0;
 
-                GameObject gobj = lastObj as GameObject;
+                GameObject gobj = SelectedObject.Object as GameObject;
 
                 if (gobj is Entity obj)
                 {
@@ -431,8 +431,8 @@ namespace ClassicUO.Game.Scenes
                             drop_container = obj.Serial;
                         }
                         else if (obj is Item it2 && (it2.ItemData.IsSurface ||
-                                                     it2.ItemData.IsStackable && it2.DisplayedGraphic ==
-                                                     ItemHold.DisplayedGraphic))
+                                                     it2.ItemData.IsStackable && it2.Graphic ==
+                                                     ItemHold.Graphic))
                         {
                             if (!it2.ItemData.IsSurface)
                             {
