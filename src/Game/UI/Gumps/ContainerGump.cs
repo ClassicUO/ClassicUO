@@ -89,7 +89,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         public ushort Graphic { get; }
 
-        public override GUMP_TYPE GumpType => GUMP_TYPE.GT_CONTAINER;
+        public override GumpType GumpType => GumpType.Container;
 
         public bool IsMinimized
         {
@@ -299,7 +299,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                         Rectangle bounds = ContainerManager.Get(gump.Graphic).Bounds;
 
-                        UOTexture32 texture = gump.IsChessboard ?
+                        UOTexture texture = gump.IsChessboard ?
                             GumpsLoader.Instance.GetTexture
                                 ((ushort) (ItemHold.DisplayedGraphic - Constants.ITEM_GUMP_TEXTURE_OFFSET)) :
                             ArtLoader.Instance.GetTexture(ItemHold.DisplayedGraphic);
@@ -532,7 +532,7 @@ namespace ClassicUO.Game.UI.Gumps
             int boundWidth = bounds.Width;
             int boundHeight = bounds.Height + (IsChessboard ? 20 : 0);
 
-            UOTexture32 texture = IsChessboard ?
+            UOTexture texture = IsChessboard ?
                 GumpsLoader.Instance.GetTexture
                     ((ushort) (item.DisplayedGraphic - (IsChessboard ? Constants.ITEM_GUMP_TEXTURE_OFFSET : 0))) :
                 ArtLoader.Instance.GetTexture(item.DisplayedGraphic);

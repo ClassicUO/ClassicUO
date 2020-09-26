@@ -219,11 +219,14 @@ namespace ClassicUO.Renderer
                 float offsetY = baseOffset.Y + (curOffset.Y + cCrop.Y) * axisDirY;
 
 
-                Draw2D
-                (
-                    textureValue, x + (int) offsetX, y + (int) offsetY, cGlyph.X, cGlyph.Y, cGlyph.Width, cGlyph.Height,
-                    ref color
-                );
+                Draw2D(textureValue,
+                       x + (int) offsetX,
+                       y + (int) offsetY,
+                       cGlyph.X,
+                       cGlyph.Y,
+                       cGlyph.Width,
+                       cGlyph.Height,
+                       ref color);
 
                 curOffset.X += cKern.Y + cKern.Z;
             }

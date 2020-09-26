@@ -40,8 +40,8 @@ namespace ClassicUO.Game.UI.Controls
     {
         private bool _clicked;
         private readonly bool _drawUp;
-        private readonly UOTexture32[] _gumpSpliderBackground;
-        private readonly UOTexture32 _gumpWidget;
+        private readonly UOTexture[] _gumpSpliderBackground;
+        private readonly UOTexture _gumpWidget;
         private readonly List<HSliderBar> _pairedSliders = new List<HSliderBar>();
         private int _sliderX;
         private readonly HSliderBarStyle _style;
@@ -86,7 +86,7 @@ namespace ClassicUO.Game.UI.Controls
                 {
                     case HSliderBarStyle.MetalWidgetRecessedBar:
 
-                        _gumpSpliderBackground = new UOTexture32[3]
+                        _gumpSpliderBackground = new UOTexture[3]
                         {
                             GumpsLoader.Instance.GetTexture(213), GumpsLoader.Instance.GetTexture(214),
                             GumpsLoader.Instance.GetTexture(215)
@@ -167,7 +167,7 @@ namespace ClassicUO.Game.UI.Controls
         {
             if (_gumpSpliderBackground != null)
             {
-                foreach (UOTexture32 t in _gumpSpliderBackground)
+                foreach (UOTexture t in _gumpSpliderBackground)
                 {
                     t.Ticks = (long) totalMS;
                 }

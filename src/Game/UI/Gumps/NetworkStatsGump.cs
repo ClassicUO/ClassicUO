@@ -70,7 +70,7 @@ namespace ClassicUO.Game.UI.Gumps
             WantUpdateSize = false;
         }
 
-        public override GUMP_TYPE GumpType => GUMP_TYPE.GT_NETSTATS;
+        public override GumpType GumpType => GumpType.NetStats;
 
         public bool IsMinimized { get; set; }
 

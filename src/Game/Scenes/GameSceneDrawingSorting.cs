@@ -361,7 +361,7 @@ namespace ClassicUO.Game.Scenes
 
                         //if (GameObjectHelper.TryGetStaticData(obj, out itemData))
                     {
-                        if (itemData.IsFoliage && !itemData.IsMultiMovable && World.Season >= Seasons.Winter)
+                        if (itemData.IsFoliage && !itemData.IsMultiMovable && World.Season >= Season.Winter)
                         {
                             continue;
                         }

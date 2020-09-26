@@ -50,7 +50,7 @@ namespace ClassicUO.Game.UI.Gumps
             CanMove = true;
         }
 
-        public override GUMP_TYPE GumpType => GUMP_TYPE.GT_STATUSGUMP;
+        public override GumpType GumpType => GumpType.StatusGump;
         protected Label[] _labels;
         protected readonly GumpPic[] _lockers = new GumpPic[3];
         protected Point _point;

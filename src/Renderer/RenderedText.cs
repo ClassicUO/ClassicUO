@@ -153,7 +153,7 @@ namespace ClassicUO.Renderer
             }
         }
 
-        public int LinesCount => Texture == null || Texture.IsDisposed ? 0 : Texture.LinesCount;
+        public int LinesCount => Texture == null || Texture.IsDisposed ? 0 : Texture.LineCount;
 
         public bool SaveHitMap { get; private set; }
 

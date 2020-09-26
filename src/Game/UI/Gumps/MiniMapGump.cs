@@ -39,7 +39,7 @@ namespace ClassicUO.Game.UI.Gumps
     {
         private bool _draw;
         //private bool _forceUpdate;
-        private UOTexture32 _gumpTexture, _mapTexture;
+        private UOTexture _gumpTexture, _mapTexture;
         private int _lastMap = -1;
         private long _timeMS;
         private bool _useLargeMap;
@@ -53,7 +53,7 @@ namespace ClassicUO.Game.UI.Gumps
         }
 
 
-        public override GUMP_TYPE GumpType => GUMP_TYPE.GT_MINIMAP;
+        public override GumpType GumpType => GumpType.MiniMap;
 
         public override void Save(BinaryWriter writer)
         {
@@ -354,7 +354,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             }
 
-            _mapTexture = new UOTexture32(Width, Height);
+            _mapTexture = new UOTexture(Width, Height);
             _mapTexture.PushData(data);
         }
 

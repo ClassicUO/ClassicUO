@@ -83,7 +83,7 @@ namespace ClassicUO.Game.UI.Gumps
             BuildGump();
         }
 
-        public override GUMP_TYPE GumpType => GUMP_TYPE.GT_COUNTERBAR;
+        public override GumpType GumpType => GumpType.CounterBar;
 
         private void BuildGump()
         {

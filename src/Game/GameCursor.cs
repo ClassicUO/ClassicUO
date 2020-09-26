@@ -64,7 +64,7 @@ namespace ClassicUO.Game
         private readonly CustomBuildObject[] _componentsList = new CustomBuildObject[10];
         private readonly int[,] _cursorOffset = new int[2, 16];
         private readonly IntPtr[,] _cursors_ptr = new IntPtr[3, 16];
-        private UOTexture32 _draggedItemTexture;
+        private UOTexture _draggedItemTexture;
         private ushort _graphic = 0x2073;
         private bool _needGraphicUpdate = true;
         private Point _offset;

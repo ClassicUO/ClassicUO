@@ -32,10 +32,10 @@ namespace ClassicUO.Game.UI.Controls
     internal class ScrollBar : ScrollBarBase
     {
         private Rectangle _rectSlider, _emptySpace;
-        private readonly UOTexture32[] _textureBackground;
-        private readonly UOTexture32[] _textureDownButton;
-        private readonly UOTexture32 _textureSlider;
-        private readonly UOTexture32[] _textureUpButton;
+        private readonly UOTexture[] _textureBackground;
+        private readonly UOTexture[] _textureDownButton;
+        private readonly UOTexture _textureSlider;
+        private readonly UOTexture[] _textureUpButton;
 
         public ScrollBar(int x, int y, int height)
         {
@@ -44,13 +44,13 @@ namespace ClassicUO.Game.UI.Controls
             AcceptMouseInput = true;
 
 
-            _textureUpButton = new UOTexture32[2];
+            _textureUpButton = new UOTexture[2];
             _textureUpButton[0] = GumpsLoader.Instance.GetTexture(251);
             _textureUpButton[1] = GumpsLoader.Instance.GetTexture(250);
-            _textureDownButton = new UOTexture32[2];
+            _textureDownButton = new UOTexture[2];
             _textureDownButton[0] = GumpsLoader.Instance.GetTexture(253);
             _textureDownButton[1] = GumpsLoader.Instance.GetTexture(252);
-            _textureBackground = new UOTexture32[3];
+            _textureBackground = new UOTexture[3];
             _textureBackground[0] = GumpsLoader.Instance.GetTexture(257);
             _textureBackground[1] = GumpsLoader.Instance.GetTexture(256);
             _textureBackground[2] = GumpsLoader.Instance.GetTexture(255);

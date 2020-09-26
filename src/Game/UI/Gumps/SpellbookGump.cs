@@ -96,7 +96,7 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
-        public override GUMP_TYPE GumpType => GUMP_TYPE.GT_SPELLBOOK;
+        public override GumpType GumpType => GumpType.SpellBook;
 
         public override void Save(BinaryWriter writer)
         {

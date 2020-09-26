@@ -49,7 +49,7 @@ namespace ClassicUO.Game.UI.Gumps
             CanCloseWithRightClick = true;
         }
 
-        public override GUMP_TYPE GumpType => GUMP_TYPE.GT_RACIALBUTTON;
+        public override GumpType GumpType => GumpType.RacialButton;
         public ushort Graphic;
 
 

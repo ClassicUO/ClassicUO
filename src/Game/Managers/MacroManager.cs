@@ -1094,7 +1094,7 @@ namespace ClassicUO.Game.Managers
                 case MacroType.TargetNext:
 
                     uint sel_obj = World.SearchObject
-                        (TargetManager.LastTargetInfo.Serial, SCAN_TYPE_OBJECT.STO_MOBILES, SCAN_MODE_OBJECT.SMO_NEXT);
+                        (TargetManager.LastTargetInfo.Serial, ScanTypeObject.Mobiles, ScanModeObject.Next);
 
                     if (SerialHelper.IsValid(sel_obj))
                     {
@@ -1367,7 +1367,7 @@ namespace ClassicUO.Game.Managers
                     SetLastTarget
                     (
                         World.SearchObject
-                            (TargetManager.SelectedTarget, (SCAN_TYPE_OBJECT) scantype, (SCAN_MODE_OBJECT) scanRange)
+                            (TargetManager.SelectedTarget, (ScanTypeObject) scantype, (ScanModeObject) scanRange)
                     );
 
                     break;

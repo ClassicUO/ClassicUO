@@ -47,8 +47,8 @@ namespace ClassicUO.Game.UI.Gumps
         private static Point _last_position = new Point(-1, -1);
 
         private readonly StringBuilder _sb = new StringBuilder();
-        private uint _time_to_update;
-        private readonly AlphaBlendControl _trans;
+        private uint _timeToUpdate;
+        private readonly AlphaBlendControl _alphaBlendControl;
 
         public DebugGump(int x, int y) : base(0, 0)
         {
@@ -65,7 +65,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add
             (
-                _trans = new AlphaBlendControl(.3f)
+                _alphaBlendControl = new AlphaBlendControl(.3f)
                 {
                     Width = Width, Height = Height
                 }
@@ -78,7 +78,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         public bool IsMinimized { get; set; }
 
-        public override GUMP_TYPE GumpType => GUMP_TYPE.GT_DEBUG;
+        public override GumpType GumpType => GumpType.Debug;
 
         protected override bool OnMouseDoubleClick(int x, int y, MouseButtonType button)
         {
@@ -96,9 +96,9 @@ namespace ClassicUO.Game.UI.Gumps
         {
             base.Update(totalMS, frameMS);
 
-            if (Time.Ticks > _time_to_update)
+            if (Time.Ticks > _timeToUpdate)
             {
-                _time_to_update = Time.Ticks + 100;
+                _timeToUpdate = Time.Ticks + 100;
 
                 _sb.Clear();
                 GameScene scene = Client.Game.GetScene<GameScene>();
@@ -168,8 +168,8 @@ namespace ClassicUO.Game.UI.Gumps
 
                 Vector2 size = Fonts.Bold.MeasureString(_sb.ToString());
 
-                _trans.Width = Width = (int) (size.X + 20);
-                _trans.Height = Height = (int) (size.Y + 20);
+                _alphaBlendControl.Width = Width = (int) (size.X + 20);
+                _alphaBlendControl.Height = Height = (int) (size.Y + 20);
 
                 WantUpdateSize = true;
             }

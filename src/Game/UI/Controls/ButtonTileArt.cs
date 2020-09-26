@@ -9,7 +9,7 @@ namespace ClassicUO.Game.UI.Controls
     {
         private readonly ushort _hue;
         private readonly bool _isPartial;
-        private readonly UOTexture32 _texture;
+        private readonly UOTexture _texture;
         private readonly int _tileX, _tileY;
 
         public ButtonTileArt(List<string> gparams) : base(gparams)

@@ -36,7 +36,7 @@ namespace ClassicUO.Game.UI.Controls
         private const int ACTIVE = 1;
         private bool _isChecked;
         private readonly RenderedText _text;
-        private readonly UOTexture32[] _textures = new UOTexture32[2];
+        private readonly UOTexture[] _textures = new UOTexture[2];
 
         public Checkbox
         (
@@ -59,7 +59,7 @@ namespace ClassicUO.Game.UI.Controls
                 return;
             }
 
-            UOTexture32 t = _textures[INACTIVE];
+            UOTexture t = _textures[INACTIVE];
             Width = t.Width;
 
             _text = RenderedText.Create(text, color, font, isunicode, maxWidth: maxWidth);
@@ -100,7 +100,7 @@ namespace ClassicUO.Game.UI.Controls
         {
             for (int i = 0; i < _textures.Length; i++)
             {
-                UOTexture32 t = _textures[i];
+                UOTexture t = _textures[i];
 
                 if (t != null)
                 {

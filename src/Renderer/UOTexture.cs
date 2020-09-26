@@ -21,17 +21,14 @@
 
 #endregion
 
-using ClassicUO.IO.Resources;
-using ClassicUO.Utility.Collections;
-using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.Renderer
 {
-    internal class UOTexture32 : Texture2D
+    internal class UOTexture : Texture2D
     {
-        public UOTexture32(int width, int height) : base
-            (Client.Game.GraphicsDevice, width, height, false, SurfaceFormat.Color)
+        public UOTexture(int width, int height)
+            : base(Client.Game.GraphicsDevice, width, height, false, SurfaceFormat.Color)
         {
             Ticks = Time.Ticks + 3000;
         }
@@ -64,38 +61,5 @@ namespace ClassicUO.Renderer
 
             return false;
         }
-    }
-
-    internal class FontTexture : UOTexture32
-    {
-        public FontTexture(int width, int height, int linescount, RawList<WebLinkRect> links) : base(width, height)
-        {
-            LinesCount = linescount;
-            Links = links;
-        }
-
-        public int LinesCount { get; set; }
-
-        public RawList<WebLinkRect> Links { get; }
-    }
-
-    internal class AnimationFrameTexture : UOTexture32
-    {
-        public AnimationFrameTexture(int width, int height) : base(width, height)
-        {
-        }
-
-        public short CenterX { get; set; }
-
-        public short CenterY { get; set; }
-    }
-
-    internal class ArtTexture : UOTexture32
-    {
-        public ArtTexture(int width, int height) : base(width, height)
-        {
-        }
-
-        public Rectangle ImageRectangle;
     }
 }

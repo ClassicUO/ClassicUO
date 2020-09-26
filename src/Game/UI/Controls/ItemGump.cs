@@ -75,7 +75,7 @@ namespace ClassicUO.Game.UI.Controls
             {
                 _graphic = value;
 
-                UOTexture32 texture =
+                UOTexture texture =
                     _is_gump ? GumpsLoader.Instance.GetTexture(value) : ArtLoader.Instance.GetTexture(value);
 
                 if (texture == null)
@@ -137,7 +137,7 @@ namespace ClassicUO.Game.UI.Controls
             ShaderHueTranslator.GetHueVector
                 (ref _hueVector, HighlightOnMouseOver && MouseIsOver ? 0x0035 : Hue, IsPartialHue, 0);
 
-            UOTexture32 texture =
+            UOTexture texture =
                 _is_gump ? GumpsLoader.Instance.GetTexture(Graphic) : ArtLoader.Instance.GetTexture(Graphic);
 
             if (texture != null)
@@ -157,7 +157,7 @@ namespace ClassicUO.Game.UI.Controls
 
         public override bool Contains(int x, int y)
         {
-            UOTexture32 texture =
+            UOTexture texture =
                 _is_gump ? GumpsLoader.Instance.GetTexture(Graphic) : ArtLoader.Instance.GetTexture(Graphic);
 
             if (texture == null)
@@ -261,7 +261,7 @@ namespace ClassicUO.Game.UI.Controls
         {
             if (CanPickUp)
             {
-                UOTexture32 texture = _is_gump ?
+                UOTexture texture = _is_gump ?
                     GumpsLoader.Instance.GetTexture(Graphic) :
                     ArtLoader.Instance.GetTexture(Graphic);
 

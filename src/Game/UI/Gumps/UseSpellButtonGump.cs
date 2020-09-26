@@ -52,7 +52,7 @@ namespace ClassicUO.Game.UI.Gumps
             BuildGump();
         }
 
-        public override GUMP_TYPE GumpType => GUMP_TYPE.GT_SPELLBUTTON;
+        public override GumpType GumpType => GumpType.SpellButton;
 
         public int SpellID => _spell?.ID ?? 0;
 

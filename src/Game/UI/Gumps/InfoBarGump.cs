@@ -54,7 +54,7 @@ namespace ClassicUO.Game.UI.Gumps
             ResetItems();
         }
 
-        public override GUMP_TYPE GumpType => GUMP_TYPE.GT_INFOBAR;
+        public override GumpType GumpType => GumpType.InfoBar;
 
         public void ResetItems()
         {

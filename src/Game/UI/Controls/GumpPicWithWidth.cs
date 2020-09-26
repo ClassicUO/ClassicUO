@@ -42,7 +42,7 @@ namespace ClassicUO.Game.UI.Controls
             ResetHueVector();
             ShaderHueTranslator.GetHueVector(ref _hueVector, Hue);
 
-            UOTexture32 texture = GumpsLoader.Instance.GetTexture(Graphic);
+            UOTexture texture = GumpsLoader.Instance.GetTexture(Graphic);
 
             if (texture != null)
             {
