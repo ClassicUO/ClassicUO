@@ -88,7 +88,7 @@ namespace ClassicUO.Game.Scenes
             sbyte maxGroundZ = 127;
             _maxGroundZ = 127;
             _maxZ = 127;
-            _noDrawRoofs = !ProfileManager.Current.DrawRoofs;
+            _noDrawRoofs = !ProfileManager.CurrentProfile.DrawRoofs;
             int bx = playerX;
             int by = playerY;
             Chunk chunk = World.Map.GetChunk(bx, by, false);
@@ -384,8 +384,8 @@ namespace ClassicUO.Game.Scenes
                         }
 
                         //we avoid to hide impassable foliage or bushes, if present...
-                        if (ProfileManager.Current.TreeToStumps && itemData.IsFoliage && !itemData.IsMultiMovable &&
-                            !(obj is Multi) || ProfileManager.Current.HideVegetation &&
+                        if (ProfileManager.CurrentProfile.TreeToStumps && itemData.IsFoliage && !itemData.IsMultiMovable &&
+                            !(obj is Multi) || ProfileManager.CurrentProfile.HideVegetation &&
                             (obj is Multi mm && mm.IsVegetation || obj is Static st && st.IsVegetation))
                         {
                             continue;
@@ -798,8 +798,8 @@ namespace ClassicUO.Game.Scenes
 
             int winGamePosX = 0;
             int winGamePosY = 0;
-            int winGameWidth = ProfileManager.Current.GameWindowSize.X;
-            int winGameHeight = ProfileManager.Current.GameWindowSize.Y;
+            int winGameWidth = ProfileManager.CurrentProfile.GameWindowSize.X;
+            int winGameHeight = ProfileManager.CurrentProfile.GameWindowSize.Y;
             int winGameCenterX = winGamePosX + (winGameWidth >> 1);
             int winGameCenterY = winGamePosY + (winGameHeight >> 1) + (World.Player.Z << 2);
             winGameCenterX -= (int) World.Player.Offset.X;
@@ -816,7 +816,7 @@ namespace ClassicUO.Game.Scenes
             int winGameScaledWidth;
             int winGameScaledHeight;
 
-            if (ProfileManager.Current != null && ProfileManager.Current.EnableMousewheelScaleZoom)
+            if (ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.EnableMousewheelScaleZoom)
             {
                 float left = winGamePosX;
                 float right = winGameWidth + left;

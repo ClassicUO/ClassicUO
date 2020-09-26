@@ -65,15 +65,15 @@ namespace ClassicUO.Game.GameObjects
             drawX += 22;
             drawY += 22;
 
-            bool hasShadow = !IsDead && !IsHidden && ProfileManager.Current.ShadowsEnabled;
+            bool hasShadow = !IsDead && !IsHidden && ProfileManager.CurrentProfile.ShadowsEnabled;
 
             if (AuraManager.IsEnabled)
             {
                 AuraManager.Draw
                 (
                     batcher, drawX, drawY,
-                    ProfileManager.Current.PartyAura && World.Party.Contains(this) ?
-                        ProfileManager.Current.PartyAuraHue :
+                    ProfileManager.CurrentProfile.PartyAura && World.Party.Contains(this) ?
+                        ProfileManager.CurrentProfile.PartyAuraHue :
                         Notoriety.GetHue(NotorietyFlag)
                 );
             }
@@ -88,7 +88,7 @@ namespace ClassicUO.Game.GameObjects
                 HueVector.Z = 1f - AlphaHue / 255f;
             }
 
-            if (ProfileManager.Current.HighlightGameObjects && SelectedObject.LastObject == this)
+            if (ProfileManager.CurrentProfile.HighlightGameObjects && SelectedObject.LastObject == this)
             {
                 _viewHue = Constants.HIGHLIGHT_CURRENT_OBJECT_HUE;
                 HueVector.Y = 1;
@@ -97,12 +97,12 @@ namespace ClassicUO.Game.GameObjects
             {
                 _viewHue = Notoriety.GetHue(NotorietyFlag);
             }
-            else if (ProfileManager.Current.NoColorObjectsOutOfRange && Distance > World.ClientViewRange)
+            else if (ProfileManager.CurrentProfile.NoColorObjectsOutOfRange && Distance > World.ClientViewRange)
             {
                 _viewHue = Constants.OUT_RANGE_COLOR;
                 HueVector.Y = 1;
             }
-            else if (World.Player.IsDead && ProfileManager.Current.EnableBlackWhiteEffect)
+            else if (World.Player.IsDead && ProfileManager.CurrentProfile.EnableBlackWhiteEffect)
             {
                 _viewHue = Constants.DEAD_RANGE_COLOR;
                 HueVector.Y = 1;
@@ -122,21 +122,21 @@ namespace ClassicUO.Game.GameObjects
                         _viewHue = 0x0386;
                     }
                 }
-                else if (ProfileManager.Current.HighlightMobilesByFlags)
+                else if (ProfileManager.CurrentProfile.HighlightMobilesByFlags)
                 {
                     if (IsPoisoned)
                     {
-                        _viewHue = ProfileManager.Current.PoisonHue;
+                        _viewHue = ProfileManager.CurrentProfile.PoisonHue;
                     }
 
                     if (IsParalyzed)
                     {
-                        _viewHue = ProfileManager.Current.ParalyzedHue;
+                        _viewHue = ProfileManager.CurrentProfile.ParalyzedHue;
                     }
 
                     if (NotorietyFlag != NotorietyFlag.Invulnerable && IsYellowHits)
                     {
-                        _viewHue = ProfileManager.Current.InvulnerableHue;
+                        _viewHue = ProfileManager.CurrentProfile.InvulnerableHue;
                     }
                 }
             }

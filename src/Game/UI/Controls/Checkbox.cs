@@ -96,7 +96,7 @@ namespace ClassicUO.Game.UI.Controls
 
         public event EventHandler ValueChanged;
 
-        public override void Update(double totalMS, double frameMS)
+        public override void Update(double totalTime, double frameTime)
         {
             for (int i = 0; i < _textures.Length; i++)
             {
@@ -104,11 +104,11 @@ namespace ClassicUO.Game.UI.Controls
 
                 if (t != null)
                 {
-                    t.Ticks = (long) totalMS;
+                    t.Ticks = (long) totalTime;
                 }
             }
 
-            base.Update(totalMS, frameMS);
+            base.Update(totalTime, frameTime);
         }
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
@@ -121,7 +121,7 @@ namespace ClassicUO.Game.UI.Controls
             ResetHueVector();
 
             bool ok = base.Draw(batcher, x, y);
-            batcher.Draw2D(IsChecked ? _textures[ACTIVE] : _textures[INACTIVE], x, y, ref _hueVector);
+            batcher.Draw2D(IsChecked ? _textures[ACTIVE] : _textures[INACTIVE], x, y, ref HueVector);
 
             _text.Draw(batcher, x + _textures[ACTIVE].Width + 2, y);
 

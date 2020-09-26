@@ -242,14 +242,14 @@ namespace ClassicUO.Game.GameObjects
             _lastAnimationIdleDelay = Time.Ticks + (TIME + RandomHelper.GetValue(0, TIME));
         }
 
-        public override void Update(double totalMS, double frameMS)
+        public override void Update(double totalTime, double frameTime)
         {
             if (IsDestroyed)
             {
                 return;
             }
 
-            base.Update(totalMS, frameMS);
+            base.Update(totalTime, frameTime);
 
             if (_lastAnimationIdleDelay < Time.Ticks)
             {
@@ -539,7 +539,7 @@ namespace ClassicUO.Game.GameObjects
 
         private void ProcessFootstepsSound()
         {
-            if (ProfileManager.Current.EnableFootstepsSound && IsHuman && !IsHidden && !IsDead && !IsFlying)
+            if (ProfileManager.CurrentProfile.EnableFootstepsSound && IsHuman && !IsHidden && !IsDead && !IsFlying)
             {
                 long ticks = Time.Ticks;
 
@@ -867,7 +867,7 @@ namespace ClassicUO.Game.GameObjects
                             if (Z - step.Z >= 22)
                             {
                                 // oUCH!!!!
-                                AddMessage(MessageType.Label, ResGeneral.Ouch, TEXT_TYPE.CLIENT);
+                                AddMessage(MessageType.Label, ResGeneral.Ouch, TextType.CLIENT);
                             }
 
                             if (World.Player.Walker.StepInfos[World.Player.Walker.CurrentWalkSequence].Accepted)
@@ -1140,9 +1140,9 @@ namespace ClassicUO.Game.GameObjects
 
             int offY = 0;
 
-            bool health = ProfileManager.Current.ShowMobilesHP;
-            int alwaysHP = ProfileManager.Current.MobileHPShowWhen;
-            int mode = ProfileManager.Current.MobileHPType;
+            bool health = ProfileManager.CurrentProfile.ShowMobilesHP;
+            int alwaysHP = ProfileManager.CurrentProfile.MobileHPShowWhen;
+            int mode = ProfileManager.CurrentProfile.MobileHPType;
 
             Point p = RealScreenPosition;
 

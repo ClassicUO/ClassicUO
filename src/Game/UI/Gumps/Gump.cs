@@ -59,7 +59,7 @@ namespace ClassicUO.Game.UI.Gumps
             set => base.CanMove = value;
         }
 
-        public override void Update(double totalMS, double frameMS)
+        public override void Update(double totalTime, double frameTime)
         {
             if (InvalidateContents)
             {
@@ -72,7 +72,7 @@ namespace ClassicUO.Game.UI.Gumps
                 ActivePage = 1;
             }
 
-            base.Update(totalMS, frameMS);
+            base.Update(totalTime, frameTime);
         }
 
         public override void Dispose()

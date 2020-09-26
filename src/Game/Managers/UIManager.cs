@@ -60,7 +60,7 @@ namespace ClassicUO.Game.Managers
             get
             {
                 Point mouse = Mouse.Position;
-                Profile profile = ProfileManager.Current;
+                Profile profile = ProfileManager.CurrentProfile;
 
                 return profile != null && GameCursor.AllowDrawSDLCursor && DraggingControl == null &&
                        MouseOverControl == null && !IsModalOpen && mouse.X >= profile.GameWindowPosition.X + 5 &&
@@ -137,7 +137,7 @@ namespace ClassicUO.Game.Managers
 
             if (_mouseDownControls[(int) MouseButtonType.Left] != null)
             {
-                if (ProfileManager.Current == null || !ProfileManager.Current.HoldAltToMoveGumps || Keyboard.Alt)
+                if (ProfileManager.CurrentProfile == null || !ProfileManager.CurrentProfile.HoldAltToMoveGumps || Keyboard.Alt)
                 {
                     AttemptDragControl(_mouseDownControls[(int) MouseButtonType.Left], Mouse.Position, true);
                 }
@@ -349,7 +349,7 @@ namespace ClassicUO.Game.Managers
             return null;
         }
 
-        public static void Update(double totalMS, double frameMS)
+        public static void Update(double totalTime, double frameTime)
         {
             SortControlsByInfo();
 
@@ -361,7 +361,7 @@ namespace ClassicUO.Game.Managers
 
                 Control g = first.Value;
 
-                g.Update(totalMS, frameMS);
+                g.Update(totalTime, frameTime);
 
                 if (g.IsDisposed)
                 {
@@ -371,7 +371,7 @@ namespace ClassicUO.Game.Managers
                 first = next;
             }
 
-            GameCursor?.Update(totalMS, frameMS);
+            GameCursor?.Update(totalTime, frameTime);
             HandleKeyboardInput();
             HandleMouseInput();
         }

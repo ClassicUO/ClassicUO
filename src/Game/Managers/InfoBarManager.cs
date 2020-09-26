@@ -40,11 +40,11 @@ namespace ClassicUO.Game.Managers
         {
             infoBarItems = new List<InfoBarItem>();
 
-            if (ProfileManager.Current.InfoBarItems != null)
+            if (ProfileManager.CurrentProfile.InfoBarItems != null)
             {
-                infoBarItems.AddRange(ProfileManager.Current.InfoBarItems);
+                infoBarItems.AddRange(ProfileManager.CurrentProfile.InfoBarItems);
 
-                ProfileManager.Current.InfoBarItems = null;
+                ProfileManager.CurrentProfile.InfoBarItems = null;
                 Save();
             }
         }
@@ -83,8 +83,8 @@ namespace ClassicUO.Game.Managers
         {
             string path = Path.Combine
             (
-                CUOEnviroment.ExecutablePath, "Data", "Profiles", ProfileManager.Current.Username,
-                ProfileManager.Current.ServerName, ProfileManager.Current.CharacterName, "infobar.xml"
+                CUOEnviroment.ExecutablePath, "Data", "Profiles", ProfileManager.CurrentProfile.Username,
+                ProfileManager.CurrentProfile.ServerName, ProfileManager.CurrentProfile.CharacterName, "infobar.xml"
             );
 
             using (XmlTextWriter xml = new XmlTextWriter(path, Encoding.UTF8)
@@ -111,8 +111,8 @@ namespace ClassicUO.Game.Managers
         {
             string path = Path.Combine
             (
-                CUOEnviroment.ExecutablePath, "Data", "Profiles", ProfileManager.Current.Username,
-                ProfileManager.Current.ServerName, ProfileManager.Current.CharacterName, "infobar.xml"
+                CUOEnviroment.ExecutablePath, "Data", "Profiles", ProfileManager.CurrentProfile.Username,
+                ProfileManager.CurrentProfile.ServerName, ProfileManager.CurrentProfile.CharacterName, "infobar.xml"
             );
 
             if (!File.Exists(path))

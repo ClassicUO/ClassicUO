@@ -133,7 +133,7 @@ namespace ClassicUO.Game.UI.Controls
             Graduation = hue - 1;
         }
 
-        public override void Update(double totalMS, double frameMS)
+        public override void Update(double totalTime, double frameTime)
         {
             if (IsDisposed)
             {
@@ -145,13 +145,13 @@ namespace ClassicUO.Game.UI.Controls
                 CreateTexture();
             }
 
-            base.Update(totalMS, frameMS);
+            base.Update(totalTime, frameTime);
 
             for (int y = 0; y < _rows; y++)
             {
                 for (int x = 0; x < _columns; x++)
                 {
-                    _colorBoxes?[y, x].Update(totalMS, frameMS);
+                    _colorBoxes?[y, x].Update(totalTime, frameTime);
                 }
             }
         }
@@ -191,7 +191,7 @@ namespace ClassicUO.Game.UI.Controls
                 batcher.Draw2D
                 (
                     _pointer, (int) (x + Width / _columns * (SelectedIndex % _columns + .5f) - 1),
-                    (int) (y + Height / _rows * (SelectedIndex / _columns + .5f) - 1), 2, 2, ref _hueVector
+                    (int) (y + Height / _rows * (SelectedIndex / _columns + .5f) - 1), 2, 2, ref HueVector
                 );
             }
 

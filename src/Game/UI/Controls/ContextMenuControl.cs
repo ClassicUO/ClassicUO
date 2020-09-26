@@ -164,9 +164,9 @@ namespace ClassicUO.Game.UI.Controls
         }
 
 
-        public override void Update(double totalMS, double frameMS)
+        public override void Update(double totalTime, double frameTime)
         {
-            base.Update(totalMS, frameMS);
+            base.Update(totalTime, frameTime);
             WantUpdateSize = true;
         }
 
@@ -176,8 +176,8 @@ namespace ClassicUO.Game.UI.Controls
 
             batcher.DrawRectangle
             (
-                Texture2DCache.GetTexture(Color.Gray), x - 1, y - 1, _background.Width + 1, _background.Height + 1,
-                ref _hueVector
+                SolidColorTextureCache.GetTexture(Color.Gray), x - 1, y - 1, _background.Width + 1, _background.Height + 1,
+                ref HueVector
             );
 
             return base.Draw(batcher, x, y);
@@ -274,9 +274,9 @@ namespace ClassicUO.Game.UI.Controls
             }
 
 
-            public override void Update(double totalMS, double frameMS)
+            public override void Update(double totalTime, double frameTime)
             {
-                base.Update(totalMS, frameMS);
+                base.Update(totalTime, frameTime);
 
                 if (Width > _label.Width)
                 {
@@ -338,7 +338,7 @@ namespace ClassicUO.Game.UI.Controls
                     ResetHueVector();
 
                     batcher.Draw2D
-                        (Texture2DCache.GetTexture(Color.Gray), x + 2, y + 5, Width - 4, Height - 10, ref _hueVector);
+                        (SolidColorTextureCache.GetTexture(Color.Gray), x + 2, y + 5, Width - 4, Height - 10, ref HueVector);
                 }
 
                 base.Draw(batcher, x, y);

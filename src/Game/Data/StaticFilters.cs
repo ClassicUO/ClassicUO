@@ -264,7 +264,7 @@ namespace ClassicUO.Game.Data
         [MethodImpl(256)]
         public static bool IsTree(ushort g, out int index)
         {
-            if (ProfileManager.Current != null && !ProfileManager.Current.TreeToStumps)
+            if (ProfileManager.CurrentProfile != null && !ProfileManager.CurrentProfile.TreeToStumps)
             {
                 index = 0;
 

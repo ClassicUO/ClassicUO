@@ -36,19 +36,12 @@ using Mouse = ClassicUO.Input.Mouse;
 
 namespace ClassicUO.Game.UI.Controls
 {
-    internal enum ClickPriority
-    {
-        High,
-        Default,
-        Low
-    }
-
     internal abstract class Control
     {
         internal static int _StepsDone = 1;
         internal static int _StepChanger = 1;
 
-        protected static Vector3 _hueVector = Vector3.Zero;
+        protected static Vector3 HueVector = Vector3.Zero;
         private bool _acceptKeyboardInput, _acceptMouseInput, _mouseIsDown;
         private int _activePage;
         private bool _attempToDrag;
@@ -283,9 +276,9 @@ namespace ClassicUO.Game.UI.Controls
 
         protected static void ResetHueVector()
         {
-            _hueVector.X = 0;
-            _hueVector.Y = 0;
-            _hueVector.Z = 0;
+            HueVector.X = 0;
+            HueVector.Y = 0;
+            HueVector.Z = 0;
         }
 
         public virtual bool Draw(UltimaBatcher2D batcher, int x, int y)
@@ -311,7 +304,7 @@ namespace ClassicUO.Game.UI.Controls
             return true;
         }
 
-        public virtual void Update(double totalMS, double frameMS)
+        public virtual void Update(double totalTime, double frameTime)
         {
             if (IsDisposed)
             {
@@ -335,7 +328,7 @@ namespace ClassicUO.Game.UI.Controls
                         continue;
                     }
 
-                    c.Update(totalMS, frameMS);
+                    c.Update(totalTime, frameTime);
 
                     if (WantUpdateSize)
                     {
@@ -385,7 +378,7 @@ namespace ClassicUO.Game.UI.Controls
             if (IsVisible && CUOEnviroment.Debug)
             {
                 ResetHueVector();
-                batcher.DrawRectangle(Texture2DCache.GetTexture(Color.Green), x, y, Width, Height, ref _hueVector);
+                batcher.DrawRectangle(SolidColorTextureCache.GetTexture(Color.Green), x, y, Width, Height, ref HueVector);
             }
         }
 

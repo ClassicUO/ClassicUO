@@ -234,7 +234,7 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
-        public override void Update(double totalMS, double frameMS)
+        public override void Update(double totalTime, double frameTime)
         {
             WantUpdateSize = true;
 
@@ -248,7 +248,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             bool wantedResize = _container.WantUpdateSize;
 
-            base.Update(totalMS, frameMS);
+            base.Update(totalTime, frameTime);
 
             if (wantedResize)
             {
@@ -663,11 +663,11 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (_status == 2)
                 {
-                    batcher.Draw2D(Texture2DCache.GetTexture(Color.Beige), x, y, Width, 17, ref _hueVector);
+                    batcher.Draw2D(SolidColorTextureCache.GetTexture(Color.Beige), x, y, Width, 17, ref HueVector);
                 }
                 else if (_status == 1)
                 {
-                    batcher.Draw2D(Texture2DCache.GetTexture(Color.Bisque), x + 16, y, 200, 17, ref _hueVector);
+                    batcher.Draw2D(SolidColorTextureCache.GetTexture(Color.Bisque), x + 16, y, 200, 17, ref HueVector);
                 }
 
                 return base.Draw(batcher, x, y);
@@ -885,7 +885,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (UIManager.LastControlMouseDown(MouseButtonType.Left) == this)
                 {
-                    batcher.Draw2D(Texture2DCache.GetTexture(Color.Wheat), x, y, Width, Height, ref _hueVector);
+                    batcher.Draw2D(SolidColorTextureCache.GetTexture(Color.Wheat), x, y, Width, Height, ref HueVector);
                 }
 
                 return base.Draw(batcher, x, y);

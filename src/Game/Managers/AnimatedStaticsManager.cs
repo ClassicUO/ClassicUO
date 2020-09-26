@@ -70,7 +70,7 @@ namespace ClassicUO.Game.Managers
             // fix static animations time to reflect the standard client
             uint delay = Constants.ITEM_EFFECT_ANIMATION_DELAY * 2;
             uint next_time = Time.Ticks + 250;
-            bool no_animated_field = ProfileManager.Current != null && ProfileManager.Current.FieldsType != 0;
+            bool no_animated_field = ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.FieldsType != 0;
             long startAddr = file.StartAddress.ToInt64();
             UOFileIndex[] static_data = ArtLoader.Instance.Entries;
 

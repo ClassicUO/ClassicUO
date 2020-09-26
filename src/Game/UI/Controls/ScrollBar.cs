@@ -80,26 +80,26 @@ namespace ClassicUO.Game.UI.Controls
         }
 
 
-        public override void Update(double totalMS, double frameMS)
+        public override void Update(double totalTime, double frameTime)
         {
-            base.Update(totalMS, frameMS);
+            base.Update(totalTime, frameTime);
 
 
             for (int i = 0; i < 3; i++)
             {
                 if (i == 0)
                 {
-                    _textureSlider.Ticks = (long) totalMS;
+                    _textureSlider.Ticks = (long) totalTime;
                 }
 
                 if (i < 2)
                 {
-                    _textureUpButton[i].Ticks = (long) totalMS;
+                    _textureUpButton[i].Ticks = (long) totalTime;
 
-                    _textureDownButton[i].Ticks = (long) totalMS;
+                    _textureDownButton[i].Ticks = (long) totalTime;
                 }
 
-                _textureBackground[i].Ticks = (long) totalMS;
+                _textureBackground[i].Ticks = (long) totalTime;
             }
         }
 
@@ -118,18 +118,18 @@ namespace ClassicUO.Game.UI.Controls
 
             if (middleHeight > 0)
             {
-                batcher.Draw2D(_textureBackground[0], x, y + _textureUpButton[0].Height, ref _hueVector);
+                batcher.Draw2D(_textureBackground[0], x, y + _textureUpButton[0].Height, ref HueVector);
 
                 batcher.Draw2DTiled
                 (
                     _textureBackground[1], x, y + _textureUpButton[0].Height + _textureBackground[0].Height,
-                    _textureBackground[0].Width, middleHeight, ref _hueVector
+                    _textureBackground[0].Width, middleHeight, ref HueVector
                 );
 
                 batcher.Draw2D
                 (
                     _textureBackground[2], x, y + Height - _textureDownButton[0].Height - _textureBackground[2].Height,
-                    ref _hueVector
+                    ref HueVector
                 );
             }
             else
@@ -139,18 +139,18 @@ namespace ClassicUO.Game.UI.Controls
                 batcher.Draw2DTiled
                 (
                     _textureBackground[1], x, y + _textureUpButton[0].Height, _textureBackground[0].Width, middleHeight,
-                    ref _hueVector
+                    ref HueVector
                 );
             }
 
             // draw up button
-            batcher.Draw2D(_btUpClicked ? _textureUpButton[1] : _textureUpButton[0], x, y, ref _hueVector);
+            batcher.Draw2D(_btUpClicked ? _textureUpButton[1] : _textureUpButton[0], x, y, ref HueVector);
 
             // draw down button
             batcher.Draw2D
             (
                 _btDownClicked ? _textureDownButton[1] : _textureDownButton[0], x,
-                y + Height - _textureDownButton[0].Height, ref _hueVector
+                y + Height - _textureDownButton[0].Height, ref HueVector
             );
 
             // draw slider
@@ -159,7 +159,7 @@ namespace ClassicUO.Game.UI.Controls
                 batcher.Draw2D
                 (
                     _textureSlider, x + ((_textureBackground[0].Width - _textureSlider.Width) >> 1),
-                    y + _textureUpButton[0].Height + _sliderPosition, ref _hueVector
+                    y + _textureUpButton[0].Height + _sliderPosition, ref HueVector
                 );
             }
 

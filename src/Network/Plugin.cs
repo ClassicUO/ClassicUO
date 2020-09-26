@@ -534,7 +534,7 @@ namespace ClassicUO.Network
 
 
             if (!World.InGame ||
-                ProfileManager.Current != null && ProfileManager.Current.ActivateChatAfterEnter &&
+                ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.ActivateChatAfterEnter &&
                 UIManager.SystemChat?.IsActive == true ||
                 UIManager.KeyboardFocusControl != UIManager.SystemChat.TextBoxControl)
             {

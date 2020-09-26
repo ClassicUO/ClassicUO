@@ -76,7 +76,7 @@ namespace ClassicUO.Game.GameObjects
             {
                 if (ItemData.IsAnimated)
                 {
-                    if (ProfileManager.Current.FieldsType == 2)
+                    if (ProfileManager.CurrentProfile.FieldsType == 2)
                     {
                         if (StaticFilters.IsFireField(Graphic))
                         {
@@ -113,16 +113,16 @@ namespace ClassicUO.Game.GameObjects
                 }
             }
 
-            if (ProfileManager.Current.HighlightGameObjects && SelectedObject.LastObject == this)
+            if (ProfileManager.CurrentProfile.HighlightGameObjects && SelectedObject.LastObject == this)
             {
                 hue = Constants.HIGHLIGHT_CURRENT_OBJECT_HUE;
                 partial = false;
             }
-            else if (ProfileManager.Current.NoColorObjectsOutOfRange && Distance > World.ClientViewRange)
+            else if (ProfileManager.CurrentProfile.NoColorObjectsOutOfRange && Distance > World.ClientViewRange)
             {
                 hue = Constants.OUT_RANGE_COLOR;
             }
-            else if (World.Player.IsDead && ProfileManager.Current.EnableBlackWhiteEffect)
+            else if (World.Player.IsDead && ProfileManager.CurrentProfile.EnableBlackWhiteEffect)
             {
                 hue = Constants.DEAD_RANGE_COLOR;
             }
@@ -345,23 +345,23 @@ namespace ClassicUO.Game.GameObjects
 
                 ResetHueVector();
 
-                if (ProfileManager.Current.NoColorObjectsOutOfRange && owner.Distance > World.ClientViewRange)
+                if (ProfileManager.CurrentProfile.NoColorObjectsOutOfRange && owner.Distance > World.ClientViewRange)
                 {
                     HueVector.X = Constants.OUT_RANGE_COLOR;
                     HueVector.Y = 1;
                 }
-                else if (World.Player.IsDead && ProfileManager.Current.EnableBlackWhiteEffect)
+                else if (World.Player.IsDead && ProfileManager.CurrentProfile.EnableBlackWhiteEffect)
                 {
                     HueVector.X = Constants.DEAD_RANGE_COLOR;
                     HueVector.Y = 1;
                 }
                 else
                 {
-                    if (ProfileManager.Current.GridLootType > 0 && SelectedObject.CorpseObject == owner)
+                    if (ProfileManager.CurrentProfile.GridLootType > 0 && SelectedObject.CorpseObject == owner)
                     {
                         color = 0x0034;
                     }
-                    else if (ProfileManager.Current.HighlightGameObjects && SelectedObject.LastObject == owner)
+                    else if (ProfileManager.CurrentProfile.HighlightGameObjects && SelectedObject.LastObject == owner)
                     {
                         color = Constants.HIGHLIGHT_CURRENT_OBJECT_HUE;
                     }

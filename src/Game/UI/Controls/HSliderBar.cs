@@ -163,19 +163,19 @@ namespace ClassicUO.Game.UI.Controls
 
         public event EventHandler ValueChanged;
 
-        public override void Update(double totalMS, double frameMS)
+        public override void Update(double totalTime, double frameTime)
         {
             if (_gumpSpliderBackground != null)
             {
                 foreach (UOTexture t in _gumpSpliderBackground)
                 {
-                    t.Ticks = (long) totalMS;
+                    t.Ticks = (long) totalTime;
                 }
             }
 
-            _gumpWidget.Ticks = (long) totalMS;
+            _gumpWidget.Ticks = (long) totalTime;
 
-            base.Update(totalMS, frameMS);
+            base.Update(totalTime, frameTime);
         }
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
@@ -184,20 +184,20 @@ namespace ClassicUO.Game.UI.Controls
 
             if (_gumpSpliderBackground != null)
             {
-                batcher.Draw2D(_gumpSpliderBackground[0], x, y, ref _hueVector);
+                batcher.Draw2D(_gumpSpliderBackground[0], x, y, ref HueVector);
 
                 batcher.Draw2DTiled
                 (
                     _gumpSpliderBackground[1], x + _gumpSpliderBackground[0].Width, y,
                     BarWidth - _gumpSpliderBackground[2].Width - _gumpSpliderBackground[0].Width,
-                    _gumpSpliderBackground[1].Height, ref _hueVector
+                    _gumpSpliderBackground[1].Height, ref HueVector
                 );
 
                 batcher.Draw2D
-                    (_gumpSpliderBackground[2], x + BarWidth - _gumpSpliderBackground[2].Width, y, ref _hueVector);
+                    (_gumpSpliderBackground[2], x + BarWidth - _gumpSpliderBackground[2].Width, y, ref HueVector);
             }
 
-            batcher.Draw2D(_gumpWidget, x + _sliderX, y, ref _hueVector);
+            batcher.Draw2D(_gumpWidget, x + _sliderX, y, ref HueVector);
 
             if (_text != null)
             {

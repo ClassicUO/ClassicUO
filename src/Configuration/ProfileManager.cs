@@ -29,7 +29,7 @@ namespace ClassicUO.Configuration
 {
     internal static class ProfileManager
     {
-        public static Profile Current { get; private set; }
+        public static Profile CurrentProfile { get; private set; }
 
         public static void Load(string servername, string username, string charactername)
         {
@@ -38,13 +38,13 @@ namespace ClassicUO.Configuration
 
             string fileToLoad = Path.Combine(path, "profile.json");
 
-            Current = ConfigurationResolver.Load<Profile>(fileToLoad) ?? new Profile();
+            CurrentProfile = ConfigurationResolver.Load<Profile>(fileToLoad) ?? new Profile();
 
-            Current.Username = username;
-            Current.ServerName = servername;
-            Current.CharacterName = charactername;
+            CurrentProfile.Username = username;
+            CurrentProfile.ServerName = servername;
+            CurrentProfile.CharacterName = charactername;
 
-            ValidateFields(Current);
+            ValidateFields(CurrentProfile);
         }
 
 
@@ -68,7 +68,7 @@ namespace ClassicUO.Configuration
 
         public static void UnLoadProfile()
         {
-            Current = null;
+            CurrentProfile = null;
         }
     }
 }

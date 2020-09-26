@@ -96,7 +96,7 @@ namespace ClassicUO.Game.UI.Gumps
                     {
                         UIManager.GetGump<BaseHealthBarGump>(World.Player)?.Dispose();
 
-                        if (ProfileManager.Current.CustomBarsToggled)
+                        if (ProfileManager.CurrentProfile.CustomBarsToggled)
                         {
                             UIManager.Add
                             (
@@ -131,7 +131,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (!CUOEnviroment.IsOutlands)
             {
-                if (ProfileManager.Current.UseOldStatusGump)
+                if (ProfileManager.CurrentProfile.UseOldStatusGump)
                 {
                     gump = UIManager.GetGump<StatusGumpOld>();
                 }
@@ -157,7 +157,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (!CUOEnviroment.IsOutlands)
             {
-                if (ProfileManager.Current.UseOldStatusGump)
+                if (ProfileManager.CurrentProfile.UseOldStatusGump)
                 {
                     gump = new StatusGumpOld();
                 }
@@ -351,16 +351,16 @@ namespace ClassicUO.Game.UI.Gumps
             _point = p;
         }
 
-        public override void Update(double totalMS, double frameMS)
+        public override void Update(double totalTime, double frameTime)
         {
             if (IsDisposed)
             {
                 return;
             }
 
-            if (_refreshTime < totalMS)
+            if (_refreshTime < totalTime)
             {
-                _refreshTime = (long) totalMS + 250;
+                _refreshTime = (long) totalTime + 250;
 
                 _labels[(int) MobileStats.Name].Text =
                     !string.IsNullOrEmpty(World.Player.Name) ? World.Player.Name : string.Empty;
@@ -386,7 +386,7 @@ namespace ClassicUO.Game.UI.Gumps
                 _labels[(int) MobileStats.WeightCurrent].Text = World.Player.Weight.ToString();
             }
 
-            base.Update(totalMS, frameMS);
+            base.Update(totalTime, frameTime);
         }
 
 
@@ -795,16 +795,16 @@ namespace ClassicUO.Game.UI.Gumps
             Add(label);
         }
 
-        public override void Update(double totalMS, double frameMS)
+        public override void Update(double totalTime, double frameTime)
         {
             if (IsDisposed)
             {
                 return;
             }
 
-            if (_refreshTime < totalMS)
+            if (_refreshTime < totalTime)
             {
-                _refreshTime = (long) totalMS + 250;
+                _refreshTime = (long) totalTime + 250;
 
                 _labels[(int) MobileStats.Name].Text =
                     !string.IsNullOrEmpty(World.Player.Name) ? World.Player.Name : string.Empty;
@@ -903,7 +903,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             }
 
-            base.Update(totalMS, frameMS);
+            base.Update(totalTime, frameTime);
         }
 
 
@@ -1086,7 +1086,7 @@ namespace ClassicUO.Game.UI.Gumps
                 World.Player.ManaMax.ToString(), MobileStats.ManaMax, 117, 137, 40, alignment: TEXT_ALIGN_TYPE.TS_CENTER
             );
 
-            // Current over max lines
+            // CurrentProfile over max lines
             Add(new Line(118, 79, 30, 1, 0xFF383838));
             Add(new Line(118, 108, 30, 1, 0xFF383838));
             Add(new Line(118, 137, 30, 1, 0xFF383838));
@@ -1166,16 +1166,16 @@ namespace ClassicUO.Game.UI.Gumps
             );
         }
 
-        public override void Update(double totalMS, double frameMS)
+        public override void Update(double totalTime, double frameTime)
         {
             if (IsDisposed)
             {
                 return;
             }
 
-            if (_refreshTime < totalMS)
+            if (_refreshTime < totalTime)
             {
-                _refreshTime = (long) totalMS + 250;
+                _refreshTime = (long) totalTime + 250;
 
                 UpdateStatusFillBar(FillStats.Hits, World.Player.Hits, World.Player.HitsMax);
                 UpdateStatusFillBar(FillStats.Mana, World.Player.Mana, World.Player.ManaMax);
@@ -1233,7 +1233,7 @@ namespace ClassicUO.Game.UI.Gumps
                     World.Player.EnergyResistance.ToString(); // FIXME: packet handling
             }
 
-            base.Update(totalMS, frameMS);
+            base.Update(totalTime, frameTime);
         }
 
         protected override void OnMouseUp(int x, int y, MouseButtonType button)
@@ -1255,7 +1255,7 @@ namespace ClassicUO.Game.UI.Gumps
                         UIManager.GetGump<BaseHealthBarGump>(World.Player)?.Dispose();
 
                         //TCH whole if else
-                        if (ProfileManager.Current.CustomBarsToggled)
+                        if (ProfileManager.CurrentProfile.CustomBarsToggled)
                         {
                             UIManager.Add
                             (

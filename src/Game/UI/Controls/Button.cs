@@ -189,9 +189,9 @@ namespace ClassicUO.Game.UI.Controls
 
         public bool ContainsByBounds { get; set; }
 
-        public override void Update(double totalMS, double frameMS)
+        public override void Update(double totalTime, double frameTime)
         {
-            base.Update(totalMS, frameMS);
+            base.Update(totalTime, frameTime);
 
             if (IsDisposed)
             {
@@ -225,9 +225,9 @@ namespace ClassicUO.Game.UI.Controls
 
             ResetHueVector();
 
-            _hueVector.Z = Alpha;
+            HueVector.Z = Alpha;
 
-            batcher.Draw2D(texture, x, y, Width, Height, ref _hueVector);
+            batcher.Draw2D(texture, x, y, Width, Height, ref HueVector);
 
             if (!string.IsNullOrEmpty(_caption))
             {

@@ -114,16 +114,16 @@ namespace ClassicUO.Game.UI.Gumps
             //}
         }
 
-        public override void Update(double totalMS, double frameMS)
+        public override void Update(double totalTime, double frameTime)
         {
             if (IsDisposed)
             {
                 return;
             }
 
-            if (_refreshTime < totalMS)
+            if (_refreshTime < totalTime)
             {
-                _refreshTime = (long) totalMS + 125;
+                _refreshTime = (long) totalTime + 125;
 
                 int x = 5;
 
@@ -134,7 +134,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             }
 
-            base.Update(totalMS, frameMS);
+            base.Update(totalTime, frameTime);
 
             Control last = Children.LastOrDefault();
 
@@ -174,20 +174,20 @@ namespace ClassicUO.Game.UI.Gumps
         public ushort Hue => _label.Hue;
         protected long _refreshTime;
 
-        public override void Update(double totalMS, double frameMS)
+        public override void Update(double totalTime, double frameTime)
         {
             if (IsDisposed)
             {
                 return;
             }
 
-            if (_refreshTime < totalMS)
+            if (_refreshTime < totalTime)
             {
-                _refreshTime = (long) totalMS + 125;
+                _refreshTime = (long) totalTime + 125;
 
                 _data.Text = GetVarData(Var);
 
-                if (ProfileManager.Current.InfoBarHighlightType == 0 || Var == InfoBarVars.NameNotoriety)
+                if (ProfileManager.CurrentProfile.InfoBarHighlightType == 0 || Var == InfoBarVars.NameNotoriety)
                 {
                     _data.Hue = GetVarHue(Var);
                 }
@@ -202,7 +202,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             WantUpdateSize = true;
 
-            base.Update(totalMS, frameMS);
+            base.Update(totalTime, frameTime);
         }
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
@@ -211,21 +211,21 @@ namespace ClassicUO.Game.UI.Gumps
 
             ResetHueVector();
 
-            if (Var != InfoBarVars.NameNotoriety && ProfileManager.Current.InfoBarHighlightType == 1 &&
+            if (Var != InfoBarVars.NameNotoriety && ProfileManager.CurrentProfile.InfoBarHighlightType == 1 &&
                 _warningLinesHue != 0x0481)
             {
-                ShaderHueTranslator.GetHueVector(ref _hueVector, _warningLinesHue);
+                ShaderHueTranslator.GetHueVector(ref HueVector, _warningLinesHue);
 
                 batcher.Draw2D
                 (
-                    Texture2DCache.GetTexture(Color.White), _data.ScreenCoordinateX, _data.ScreenCoordinateY,
-                    _data.Width, 2, ref _hueVector
+                    SolidColorTextureCache.GetTexture(Color.White), _data.ScreenCoordinateX, _data.ScreenCoordinateY,
+                    _data.Width, 2, ref HueVector
                 );
 
                 batcher.Draw2D
                 (
-                    Texture2DCache.GetTexture(Color.White), _data.ScreenCoordinateX,
-                    _data.ScreenCoordinateY + Parent.Height - 2, _data.Width, 2, ref _hueVector
+                    SolidColorTextureCache.GetTexture(Color.White), _data.ScreenCoordinateX,
+                    _data.ScreenCoordinateY + Parent.Height - 2, _data.Width, 2, ref HueVector
                 );
             }
 

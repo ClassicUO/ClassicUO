@@ -80,9 +80,9 @@ namespace ClassicUO.Game.Managers
                     int width = (int) (texture.Width * scale);
                     int height = (int) (texture.Height * scale);
 
-                    if (ProfileManager.Current.OverrideContainerLocation)
+                    if (ProfileManager.CurrentProfile.OverrideContainerLocation)
                     {
-                        switch (ProfileManager.Current.OverrideContainerLocationSetting)
+                        switch (ProfileManager.CurrentProfile.OverrideContainerLocationSetting)
                         {
                             case 0:
                                 SetPositionNearGameObject(g, serial, width, height);
@@ -97,8 +97,8 @@ namespace ClassicUO.Game.Managers
 
                             case 2:
                             case 3:
-                                X = ProfileManager.Current.OverrideContainerLocationPosition.X - (width >> 1);
-                                Y = ProfileManager.Current.OverrideContainerLocationPosition.Y - (height >> 1);
+                                X = ProfileManager.CurrentProfile.OverrideContainerLocationPosition.X - (width >> 1);
+                                Y = ProfileManager.CurrentProfile.OverrideContainerLocationPosition.Y - (height >> 1);
 
                                 break;
                         }
@@ -183,14 +183,14 @@ namespace ClassicUO.Game.Managers
             if (bank != null && serial == bank)
             {
                 // open bank near player
-                X = World.Player.RealScreenPosition.X + ProfileManager.Current.GameWindowPosition.X + 40;
-                Y = World.Player.RealScreenPosition.Y + ProfileManager.Current.GameWindowPosition.Y - (height >> 1);
+                X = World.Player.RealScreenPosition.X + ProfileManager.CurrentProfile.GameWindowPosition.X + 40;
+                Y = World.Player.RealScreenPosition.Y + ProfileManager.CurrentProfile.GameWindowPosition.Y - (height >> 1);
             }
             else if (item.OnGround)
             {
                 // item is in world
-                X = item.RealScreenPosition.X + ProfileManager.Current.GameWindowPosition.X + 40;
-                Y = item.RealScreenPosition.Y + ProfileManager.Current.GameWindowPosition.Y - (height >> 1);
+                X = item.RealScreenPosition.X + ProfileManager.CurrentProfile.GameWindowPosition.X + 40;
+                Y = item.RealScreenPosition.Y + ProfileManager.CurrentProfile.GameWindowPosition.Y - (height >> 1);
             }
             else if (SerialHelper.IsMobile(item.Container))
             {
@@ -199,8 +199,8 @@ namespace ClassicUO.Game.Managers
 
                 if (mobile != null)
                 {
-                    X = mobile.RealScreenPosition.X + ProfileManager.Current.GameWindowPosition.X + 40;
-                    Y = mobile.RealScreenPosition.Y + ProfileManager.Current.GameWindowPosition.Y - (height >> 1);
+                    X = mobile.RealScreenPosition.X + ProfileManager.CurrentProfile.GameWindowPosition.X + 40;
+                    Y = mobile.RealScreenPosition.Y + ProfileManager.CurrentProfile.GameWindowPosition.Y - (height >> 1);
                 }
             }
             else

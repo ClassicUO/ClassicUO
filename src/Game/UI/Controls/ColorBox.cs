@@ -73,7 +73,7 @@ namespace ClassicUO.Game.UI.Controls
         {
             ResetHueVector();
 
-            return batcher.Draw2D(_texture, x, y, Width, Height, ref _hueVector);
+            return batcher.Draw2D(_texture, x, y, Width, Height, ref HueVector);
         }
 
         public override void Dispose()

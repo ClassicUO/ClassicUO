@@ -83,19 +83,19 @@ namespace ClassicUO.Game.UI.Controls
 
             if (MaxValue != MinValue && texture_flag != null)
             {
-                batcher.Draw2D(texture_flag, x, (int) (y + _sliderPosition), ref _hueVector);
+                batcher.Draw2D(texture_flag, x, (int) (y + _sliderPosition), ref HueVector);
             }
 
             if (_showButtons)
             {
                 if (texture_button_up != null)
                 {
-                    batcher.Draw2D(texture_button_up, x, y, ref _hueVector);
+                    batcher.Draw2D(texture_button_up, x, y, ref HueVector);
                 }
 
                 if (texture_button_down != null)
                 {
-                    batcher.Draw2D(texture_button_down, x, y + Height, ref _hueVector);
+                    batcher.Draw2D(texture_button_down, x, y + Height, ref HueVector);
                 }
             }
 

@@ -72,18 +72,18 @@ namespace ClassicUO.Game.UI
             ushort hue = 0xFFFF;
             float zoom = 1;
 
-            if (ProfileManager.Current != null)
+            if (ProfileManager.CurrentProfile != null)
             {
-                font = ProfileManager.Current.TooltipFont;
-                alpha = 1f - ProfileManager.Current.TooltipBackgroundOpacity / 100f;
+                font = ProfileManager.CurrentProfile.TooltipFont;
+                alpha = 1f - ProfileManager.CurrentProfile.TooltipBackgroundOpacity / 100f;
 
                 if (float.IsNaN(alpha))
                 {
                     alpha = 1f;
                 }
 
-                hue = ProfileManager.Current.TooltipTextHue;
-                zoom = ProfileManager.Current.TooltipDisplayZoom / 100f;
+                hue = ProfileManager.CurrentProfile.TooltipTextHue;
+                zoom = ProfileManager.CurrentProfile.TooltipDisplayZoom / 100f;
             }
 
             FontsLoader.Instance.SetUseHTML(true);
@@ -163,11 +163,11 @@ namespace ClassicUO.Game.UI
             ShaderHueTranslator.GetHueVector(ref hue_vec, 0, false, alpha);
 
             batcher.Draw2D
-                (Texture2DCache.GetTexture(Color.Black), x - 4, y - 2, z_width * zoom, z_height * zoom, ref hue_vec);
+                (SolidColorTextureCache.GetTexture(Color.Black), x - 4, y - 2, z_width * zoom, z_height * zoom, ref hue_vec);
 
             batcher.DrawRectangle
             (
-                Texture2DCache.GetTexture(Color.Gray), x - 4, y - 2, (int) (z_width * zoom), (int) (z_height * zoom),
+                SolidColorTextureCache.GetTexture(Color.Gray), x - 4, y - 2, (int) (z_width * zoom), (int) (z_height * zoom),
                 ref hue_vec
             );
 
@@ -205,8 +205,8 @@ namespace ClassicUO.Game.UI
                     _hash = revision2;
                     Text = ReadProperties(serial, out _textHTML);
 
-                    _lastHoverTime = (uint) (Time.Ticks + (ProfileManager.Current != null ?
-                        ProfileManager.Current.TooltipDelayBeforeDisplay :
+                    _lastHoverTime = (uint) (Time.Ticks + (ProfileManager.CurrentProfile != null ?
+                        ProfileManager.CurrentProfile.TooltipDelayBeforeDisplay :
                         250));
                 }
             }
@@ -267,7 +267,7 @@ namespace ClassicUO.Game.UI
 
         public void SetText(string text, int maxWidth = 0)
         {
-            if (ProfileManager.Current != null && !ProfileManager.Current.UseTooltip)
+            if (ProfileManager.CurrentProfile != null && !ProfileManager.CurrentProfile.UseTooltip)
             {
                 return;
             }
@@ -278,8 +278,8 @@ namespace ClassicUO.Game.UI
                 Serial = 0;
                 Text = _textHTML = text;
 
-                _lastHoverTime = (uint) (Time.Ticks + (ProfileManager.Current != null ?
-                    ProfileManager.Current.TooltipDelayBeforeDisplay :
+                _lastHoverTime = (uint) (Time.Ticks + (ProfileManager.CurrentProfile != null ?
+                    ProfileManager.CurrentProfile.TooltipDelayBeforeDisplay :
                     250));
             }
         }

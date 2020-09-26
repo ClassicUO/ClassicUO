@@ -26,30 +26,10 @@ using ClassicUO.Resources;
 
 namespace ClassicUO.Game.Managers
 {
-    internal sealed class UOChatChannel
+    internal static class ChatManager
     {
-        public UOChatChannel(string name, bool haspassword)
-        {
-            Name = name;
-            HasPassword = haspassword;
-        }
-
-        public readonly bool HasPassword;
-
-        public readonly string Name;
-    }
-
-    internal enum CHAT_STATUS : byte
-    {
-        DISABLED,
-        ENABLED,
-        ENABLED_USER_REQUEST
-    }
-
-    internal static class UOChatManager
-    {
-        public static readonly Dictionary<string, UOChatChannel> Channels = new Dictionary<string, UOChatChannel>();
-        public static CHAT_STATUS ChatIsEnabled;
+        public static readonly Dictionary<string, ChatChannel> Channels = new Dictionary<string, ChatChannel>();
+        public static ChatStatus ChatIsEnabled;
         public static string CurrentChannelName = string.Empty;
 
         private static readonly string[] _messages =
@@ -100,19 +80,16 @@ namespace ClassicUO.Game.Managers
 
         public static string GetMessage(int index)
         {
-            if (index < _messages.Length)
-            {
-                return _messages[index];
-            }
-
-            return string.Empty;
+            return index < _messages.Length
+                ? _messages[index]
+                : string.Empty;
         }
 
-        public static void AddChannel(string text, bool haspassword)
+        public static void AddChannel(string text, bool hasPassword)
         {
-            if (!Channels.TryGetValue(text, out UOChatChannel channel))
+            if (!Channels.TryGetValue(text, out ChatChannel channel))
             {
-                channel = new UOChatChannel(text, haspassword);
+                channel = new ChatChannel(text, hasPassword);
                 Channels[text] = channel;
             }
         }
@@ -130,7 +107,7 @@ namespace ClassicUO.Game.Managers
             Channels.Clear();
         }
 
-        //static UOChatManager()
+        //static ChatManager()
         //{
         //    using (StreamReader reader = new StreamReader(File.OpenRead(UOFileManager.GetUOFilePath("Chat.enu"))))
         //    {

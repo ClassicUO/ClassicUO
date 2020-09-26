@@ -44,14 +44,14 @@ namespace ClassicUO.Game.Managers
 
         public static NameOverheadTypeAllowed TypeAllowed
         {
-            get => ProfileManager.Current.NameOverheadTypeAllowed;
-            set => ProfileManager.Current.NameOverheadTypeAllowed = value;
+            get => ProfileManager.CurrentProfile.NameOverheadTypeAllowed;
+            set => ProfileManager.CurrentProfile.NameOverheadTypeAllowed = value;
         }
 
         public static bool IsToggled
         {
-            get => ProfileManager.Current.NameOverheadToggled;
-            set => ProfileManager.Current.NameOverheadToggled = value;
+            get => ProfileManager.CurrentProfile.NameOverheadToggled;
+            set => ProfileManager.CurrentProfile.NameOverheadToggled = value;
         }
 
         public static bool IsAllowed(Entity serial)

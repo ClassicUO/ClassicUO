@@ -264,7 +264,7 @@ namespace ClassicUO.IO.Resources
                 }
             }
             else if (StaticFilters.IsCave
-                (graphic) && ProfileManager.Current != null && ProfileManager.Current.EnableCaveBorder)
+                (graphic) && ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.EnableCaveBorder)
             {
                 for (int yy = 0; yy < height; yy++)
                 {

@@ -371,7 +371,7 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
-        public override void Update(double totalMS, double frameMS)
+        public override void Update(double totalTime, double frameTime)
         {
             if (IsDisposed)
             {
@@ -397,7 +397,7 @@ namespace ClassicUO.Game.UI.Gumps
                 _warModeBtn.ButtonGraphicOver = btngumps[2];
             }
 
-            base.Update(totalMS, frameMS);
+            base.Update(totalTime, frameTime);
 
 
             if (_paperDollInteractable != null && (CanLift || LocalSerial == World.Player.Serial))
@@ -665,7 +665,7 @@ namespace ClassicUO.Game.UI.Gumps
                             break;
                         }
 
-                        if (ProfileManager.Current.CustomBarsToggled)
+                        if (ProfileManager.CurrentProfile.CustomBarsToggled)
                         {
                             Rectangle bounds = new Rectangle
                                 (0, 0, HealthBarGumpCustom.HPB_WIDTH, HealthBarGumpCustom.HPB_HEIGHT_SINGLELINE);
@@ -749,7 +749,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             public Layer Layer { get; }
 
-            public override void Update(double totalMS, double frameMS)
+            public override void Update(double totalTime, double frameTime)
             {
                 Item item = World.Items.Get(LocalSerial);
 
@@ -796,7 +796,7 @@ namespace ClassicUO.Game.UI.Gumps
                     }
                 }
 
-                base.Update(totalMS, frameMS);
+                base.Update(totalTime, frameTime);
             }
 
             private class ItemGumpFixed : ItemGump
@@ -854,7 +854,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                     ShaderHueTranslator.GetHueVector
                     (
-                        ref _hueVector, MouseIsOver && HighlightOnMouseOver ? 0x0035 : item.Hue,
+                        ref HueVector, MouseIsOver && HighlightOnMouseOver ? 0x0035 : item.Hue,
                         item.ItemData.IsPartialHue, 0, true
                     );
 
@@ -865,7 +865,7 @@ namespace ClassicUO.Game.UI.Gumps
                         return batcher.Draw2D
                         (
                             texture, x + _point.X, y + _point.Y, _originalSize.X, _originalSize.Y, _rect.X, _rect.Y,
-                            _rect.Width, _rect.Height, ref _hueVector
+                            _rect.Width, _rect.Height, ref HueVector
                         );
                     }
 

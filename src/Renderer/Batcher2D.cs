@@ -1694,12 +1694,12 @@ namespace ClassicUO.Renderer
         }
 
         [MethodImpl(256)]
-        private void InternalDraw(Texture2D texture, int baseSprite, int batchSize)
+        private void InternalDraw(Texture texture, int baseSprite, int batchSize)
         {
             GraphicsDevice.Textures[0] = texture;
-
-            GraphicsDevice.DrawIndexedPrimitives
-                (PrimitiveType.TriangleList, baseSprite << 2, 0, batchSize << 2, 0, batchSize << 1);
+            GraphicsDevice.DrawIndexedPrimitives(PrimitiveType.TriangleList, baseSprite << 2,
+                                                 0, batchSize << 2,
+                                                 0, batchSize << 1);
         }
 
         public void EnableScissorTest(bool enable)

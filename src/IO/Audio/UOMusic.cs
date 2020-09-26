@@ -64,7 +64,7 @@ namespace ClassicUO.IO.Audio
         {
             try
             {
-                if (m_Playing && _sound_instance != null)
+                if (m_Playing && SoundInstance != null)
                 {
                     int bytesReturned = m_Stream.Read(m_WaveBuffer, 0, m_WaveBuffer.Length);
 
@@ -101,23 +101,23 @@ namespace ClassicUO.IO.Audio
         {
             if (m_Playing)
             {
-                if (_sound_instance == null)
+                if (SoundInstance == null)
                 {
                     Stop();
 
                     return;
                 }
 
-                while (_sound_instance.PendingBufferCount < 3)
+                while (SoundInstance.PendingBufferCount < 3)
                 {
                     byte[] buffer = GetBuffer();
 
-                    if (_sound_instance.IsDisposed || buffer == null)
+                    if (SoundInstance.IsDisposed || buffer == null)
                     {
                         break;
                     }
 
-                    _sound_instance.SubmitBuffer(buffer);
+                    SoundInstance.SubmitBuffer(buffer);
                 }
             }
         }

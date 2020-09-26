@@ -51,7 +51,7 @@ namespace ClassicUO.Game
 
         public static void RequestWarMode(bool war)
         {
-            if (war && ProfileManager.Current != null && ProfileManager.Current.EnableMusic)
+            if (war && ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.EnableMusic)
             {
                 Client.Game.Scene.Audio.PlayMusic((RandomHelper.GetValue(0, 3) % 3) + 38, true);
             }
@@ -137,7 +137,7 @@ namespace ClassicUO.Game
 
         public static void Attack(uint serial)
         {
-            if (ProfileManager.Current.EnabledCriminalActionQuery)
+            if (ProfileManager.CurrentProfile.EnabledCriminalActionQuery)
             {
                 Mobile m = World.Mobiles.Get(serial);
 
@@ -212,7 +212,7 @@ namespace ClassicUO.Game
         {
             if (hue == 0xFFFF)
             {
-                hue = ProfileManager.Current.SpeechHue;
+                hue = ProfileManager.CurrentProfile.SpeechHue;
             }
 
             // TODO: identify what means 'older client' that uses ASCIISpeechRquest [0x03]
@@ -252,7 +252,7 @@ namespace ClassicUO.Game
             MessageManager.HandleMessage
             (
                 entity, message, entity != null ? entity.Name : "System", hue, type, font,
-                entity == null ? TEXT_TYPE.SYSTEM : TEXT_TYPE.OBJECT, unicode, "ENU"
+                entity == null ? TextType.SYSTEM : TextType.OBJECT, unicode, "ENU"
             );
         }
 
@@ -313,7 +313,7 @@ namespace ClassicUO.Game
 
             if (amount <= -1 && item.Amount > 1 && item.ItemData.IsStackable)
             {
-                if (ProfileManager.Current.HoldShiftToSplitStack == Keyboard.Shift)
+                if (ProfileManager.CurrentProfile.HoldShiftToSplitStack == Keyboard.Shift)
                 {
                     SplitMenuGump gump = UIManager.GetGump<SplitMenuGump>(item);
 
@@ -475,7 +475,7 @@ namespace ClassicUO.Game
         {
             shift = shift || Keyboard.Shift;
 
-            if (ProfileManager.Current.HoldShiftForContext && !shift)
+            if (ProfileManager.CurrentProfile.HoldShiftForContext && !shift)
             {
                 return;
             }
@@ -605,15 +605,15 @@ namespace ClassicUO.Game
 
             if (bag == 0)
             {
-                bag = ProfileManager.Current.GrabBagSerial == 0 ?
+                bag = ProfileManager.CurrentProfile.GrabBagSerial == 0 ?
                     backpack.Serial :
-                    ProfileManager.Current.GrabBagSerial;
+                    ProfileManager.CurrentProfile.GrabBagSerial;
             }
 
             if (!World.Items.Contains(bag))
             {
                 Print(ResGeneral.GrabBagNotFound);
-                ProfileManager.Current.GrabBagSerial = 0;
+                ProfileManager.CurrentProfile.GrabBagSerial = 0;
                 bag = backpack.Serial;
             }
 

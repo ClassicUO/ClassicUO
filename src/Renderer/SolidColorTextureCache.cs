@@ -27,20 +27,22 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.Renderer
 {
-    internal static class Texture2DCache
+    internal static class SolidColorTextureCache
     {
         private static readonly Dictionary<Color, Texture2D> _textures = new Dictionary<Color, Texture2D>();
 
         public static Texture2D GetTexture(Color color)
         {
-            if (!_textures.TryGetValue(color, out Texture2D t))
+            if (_textures.TryGetValue(color, out Texture2D texture))
             {
-                t = new Texture2D(Client.Game.GraphicsDevice, 1, 1, false, SurfaceFormat.Color);
-                t.SetData(new[] { color });
-                _textures[color] = t;
+                return texture;
             }
 
-            return t;
+            texture = new Texture2D(Client.Game.GraphicsDevice, 1, 1, false, SurfaceFormat.Color);
+            texture.SetData(new[] { color });
+            _textures[color] = texture;
+
+            return texture;
         }
     }
 }

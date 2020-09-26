@@ -57,7 +57,7 @@ namespace ClassicUO.Game.UI.Gumps
         public ShopGump(uint serial, bool isBuyGump, int x, int y) : base
             (serial, 0) //60 is the base height, original size
         {
-            int height = ProfileManager.Current.VendorGumpHeight;
+            int height = ProfileManager.CurrentProfile.VendorGumpHeight;
 
             if (_shopGumpParts == null)
             {
@@ -263,7 +263,7 @@ namespace ClassicUO.Game.UI.Gumps
                         _middleGumpLeft.Height = 450;
                     }
 
-                    ProfileManager.Current.VendorGumpHeight = _middleGumpLeft.Height;
+                    ProfileManager.CurrentProfile.VendorGumpHeight = _middleGumpLeft.Height;
 
                     _middleGumpRight.Height = _middleGumpLeft.Height >> 1;
 
@@ -405,7 +405,7 @@ namespace ClassicUO.Game.UI.Gumps
         }
 
 
-        public override void Update(double totalMS, double frameMS)
+        public override void Update(double totalTime, double frameTime)
         {
             if (!World.InGame || IsDisposed)
             {
@@ -457,7 +457,7 @@ namespace ClassicUO.Game.UI.Gumps
                 _playerGoldLabel.Text = World.Player.Gold.ToString();
             }
 
-            base.Update(totalMS, frameMS);
+            base.Update(totalTime, frameTime);
         }
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
@@ -821,9 +821,9 @@ namespace ClassicUO.Game.UI.Gumps
                 return true;
             }
 
-            public override void Update(double totalMS, double frameMS)
+            public override void Update(double totalTime, double frameTime)
             {
-                base.Update(totalMS, frameMS);
+                base.Update(totalTime, frameTime);
 
                 if (SerialHelper.IsMobile(LocalSerial))
                 {
@@ -1052,35 +1052,35 @@ namespace ClassicUO.Game.UI.Gumps
                 Height = _gumpTexture.Max(o => o.Height);
             }
 
-            public override void Update(double totalMS, double frameMS)
+            public override void Update(double totalTime, double frameTime)
             {
                 foreach (UOTexture t in _gumpTexture)
                 {
                     if (t != null)
                     {
-                        t.Ticks = (long) totalMS;
+                        t.Ticks = (long) totalTime;
                     }
                 }
 
-                base.Update(totalMS, frameMS);
+                base.Update(totalTime, frameTime);
             }
 
             public override bool Draw(UltimaBatcher2D batcher, int x, int y)
             {
                 ResetHueVector();
 
-                ShaderHueTranslator.GetHueVector(ref _hueVector, 0, false, Alpha, true);
+                ShaderHueTranslator.GetHueVector(ref HueVector, 0, false, Alpha, true);
 
                 int middleWidth = Width - _gumpTexture[0].Width - _gumpTexture[2].Width;
 
-                batcher.Draw2D(_gumpTexture[0], x, y, ref _hueVector);
+                batcher.Draw2D(_gumpTexture[0], x, y, ref HueVector);
 
                 batcher.Draw2DTiled
                 (
-                    _gumpTexture[1], x + _gumpTexture[0].Width, y, middleWidth, _gumpTexture[1].Height, ref _hueVector
+                    _gumpTexture[1], x + _gumpTexture[0].Width, y, middleWidth, _gumpTexture[1].Height, ref HueVector
                 );
 
-                batcher.Draw2D(_gumpTexture[2], x + Width - _gumpTexture[2].Width, y, ref _hueVector);
+                batcher.Draw2D(_gumpTexture[2], x + Width - _gumpTexture[2].Width, y, ref HueVector);
 
                 return base.Draw(batcher, x, y);
             }
@@ -1111,11 +1111,11 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (_tiled)
                 {
-                    batcher.Draw2DTiled(_texture, x, y, Width, Height, ref _hueVector);
+                    batcher.Draw2DTiled(_texture, x, y, Width, Height, ref HueVector);
                 }
                 else
                 {
-                    batcher.Draw2D(_texture, x, y, Width, Height, ref _hueVector);
+                    batcher.Draw2D(_texture, x, y, Width, Height, ref HueVector);
                 }
 
                 return base.Draw(batcher, x, y);

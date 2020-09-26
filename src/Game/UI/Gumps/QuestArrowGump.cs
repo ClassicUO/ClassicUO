@@ -56,9 +56,9 @@ namespace ClassicUO.Game.UI.Gumps
             _my = y;
         }
 
-        public override void Update(double totalMS, double frameMS)
+        public override void Update(double totalTime, double frameTime)
         {
-            base.Update(totalMS, frameMS);
+            base.Update(totalTime, frameTime);
 
             if (!World.InGame)
             {
@@ -67,7 +67,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             GameScene scene = Client.Game.GetScene<GameScene>();
 
-            if (IsDisposed || ProfileManager.Current == null || scene == null)
+            if (IsDisposed || ProfileManager.CurrentProfile == null || scene == null)
             {
                 return;
             }
@@ -96,8 +96,8 @@ namespace ClassicUO.Game.UI.Gumps
             int goy = World.Player.Y - _my;
 
 
-            int x = (ProfileManager.Current.GameWindowSize.X >> 1) - (gox - goy) * 22;
-            int y = (ProfileManager.Current.GameWindowSize.Y >> 1) - (gox + goy) * 22;
+            int x = (ProfileManager.CurrentProfile.GameWindowSize.X >> 1) - (gox - goy) * 22;
+            int y = (ProfileManager.CurrentProfile.GameWindowSize.Y >> 1) - (gox + goy) * 22;
 
             x -= (int) World.Player.Offset.X;
             y -= (int) (World.Player.Offset.Y - World.Player.Offset.Z);
@@ -152,31 +152,31 @@ namespace ClassicUO.Game.UI.Gumps
 
             Point p = new Point(x, y);
             p = Client.Game.Scene.Camera.WorldToScreen(p);
-            p.X += ProfileManager.Current.GameWindowPosition.X;
-            p.Y += ProfileManager.Current.GameWindowPosition.Y;
+            p.X += ProfileManager.CurrentProfile.GameWindowPosition.X;
+            p.Y += ProfileManager.CurrentProfile.GameWindowPosition.Y;
             x = p.X;
             y = p.Y;
 
-            if (x < ProfileManager.Current.GameWindowPosition.X)
+            if (x < ProfileManager.CurrentProfile.GameWindowPosition.X)
             {
-                x = ProfileManager.Current.GameWindowPosition.X;
+                x = ProfileManager.CurrentProfile.GameWindowPosition.X;
             }
-            else if (x > ProfileManager.Current.GameWindowPosition.X + ProfileManager.Current.GameWindowSize.X -
+            else if (x > ProfileManager.CurrentProfile.GameWindowPosition.X + ProfileManager.CurrentProfile.GameWindowSize.X -
                 _arrow.Width)
             {
-                x = ProfileManager.Current.GameWindowPosition.X + ProfileManager.Current.GameWindowSize.X -
+                x = ProfileManager.CurrentProfile.GameWindowPosition.X + ProfileManager.CurrentProfile.GameWindowSize.X -
                     _arrow.Width;
             }
 
 
-            if (y < ProfileManager.Current.GameWindowPosition.Y)
+            if (y < ProfileManager.CurrentProfile.GameWindowPosition.Y)
             {
-                y = ProfileManager.Current.GameWindowPosition.Y;
+                y = ProfileManager.CurrentProfile.GameWindowPosition.Y;
             }
-            else if (y > ProfileManager.Current.GameWindowPosition.Y + ProfileManager.Current.GameWindowSize.Y -
+            else if (y > ProfileManager.CurrentProfile.GameWindowPosition.Y + ProfileManager.CurrentProfile.GameWindowSize.Y -
                 _arrow.Height)
             {
-                y = ProfileManager.Current.GameWindowPosition.Y + ProfileManager.Current.GameWindowSize.Y -
+                y = ProfileManager.CurrentProfile.GameWindowPosition.Y + ProfileManager.CurrentProfile.GameWindowSize.Y -
                     _arrow.Height;
             }
 

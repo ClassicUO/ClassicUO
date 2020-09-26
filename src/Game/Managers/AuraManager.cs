@@ -44,12 +44,12 @@ namespace ClassicUO.Game.Managers
         {
             get
             {
-                if (ProfileManager.Current == null)
+                if (ProfileManager.CurrentProfile == null)
                 {
                     return false;
                 }
 
-                switch (ProfileManager.Current.AuraUnderFeetType)
+                switch (ProfileManager.CurrentProfile.AuraUnderFeetType)
                 {
                     default:
                     case 0: return false;
@@ -65,14 +65,16 @@ namespace ClassicUO.Game.Managers
 
         public static void ToggleVisibility()
         {
+            Profile currentProfile = ProfileManager.CurrentProfile;
+
             if (!IsEnabled)
             {
-                _saveAuraUnderFeetType = ProfileManager.Current.AuraUnderFeetType;
-                ProfileManager.Current.AuraUnderFeetType = 3;
+                _saveAuraUnderFeetType = currentProfile.AuraUnderFeetType;
+                currentProfile.AuraUnderFeetType = 3;
             }
             else
             {
-                ProfileManager.Current.AuraUnderFeetType = _saveAuraUnderFeetType;
+                currentProfile.AuraUnderFeetType = _saveAuraUnderFeetType;
             }
         }
 

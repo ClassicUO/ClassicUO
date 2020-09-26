@@ -297,9 +297,9 @@ namespace ClassicUO.Game.UI.Gumps
             return null;
         }
 
-        public override void Update(double totalMS, double frameMS)
+        public override void Update(double totalTime, double frameTime)
         {
-            base.Update(totalMS, frameMS);
+            base.Update(totalTime, frameTime);
 
             if (IsDisposed)
             {
@@ -335,7 +335,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (_lastPressed != null)
             {
-                _clickTiming -= (float) frameMS;
+                _clickTiming -= (float) frameTime;
 
                 if (_clickTiming <= 0)
                 {

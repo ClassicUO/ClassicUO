@@ -64,7 +64,7 @@ namespace ClassicUO.Game.Scenes
             Unload();
         }
 
-        public virtual void Update(double totalMS, double frameMS)
+        public virtual void Update(double totalTime, double frameTime)
         {
             Audio?.Update();
             Camera.Update();
@@ -88,7 +88,7 @@ namespace ClassicUO.Game.Scenes
         public readonly bool CanResize, CanBeMaximized, CanLoadAudio;
         public readonly int ID;
 
-        public virtual void FixedUpdate(double totalMS, double frameMS)
+        public virtual void FixedUpdate(double totalTime, double frameTime)
         {
         }
 

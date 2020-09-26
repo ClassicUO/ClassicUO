@@ -390,19 +390,18 @@ namespace ClassicUO.Game.UI.Gumps
             public BuffIcon Icon { get; }
 
 
-            public override void Update(double totalMS, double frameMS)
+            public override void Update(double totalTime, double frameTime)
             {
-                base.Update(totalMS, frameMS);
+                base.Update(totalTime, frameTime);
 
                 if (!IsDisposed)
                 {
-                    int delta = (int) (_timer - totalMS);
-
-                    if (_updateTooltipTime < totalMS && delta > 0)
+                    int delta = (int) (_timer - totalTime);
+                    if (_updateTooltipTime < totalTime && delta > 0)
                     {
                         TimeSpan span = TimeSpan.FromMilliseconds(delta);
                         SetTooltip(string.Format(ResGumps.TimeLeft, Icon.Text, span.Hours, span.Minutes, span.Seconds));
-                        _updateTooltipTime = (float) totalMS + 1000;
+                        _updateTooltipTime = (float) totalTime + 1000;
 
                         if (span.Hours > 0)
                         {
@@ -455,20 +454,20 @@ namespace ClassicUO.Game.UI.Gumps
             public override bool Draw(UltimaBatcher2D batcher, int x, int y)
             {
                 ResetHueVector();
-                ShaderHueTranslator.GetHueVector(ref _hueVector, 0, false, 1.0f - _alpha / 255f, true);
+                ShaderHueTranslator.GetHueVector(ref HueVector, 0, false, 1.0f - _alpha / 255f, true);
 
                 UOTexture texture = GumpsLoader.Instance.GetTexture(Graphic);
 
                 if (texture != null)
                 {
-                    if (ProfileManager.Current != null && ProfileManager.Current.BuffBarTime)
+                    if (ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.BuffBarTime)
                     {
-                        batcher.Draw2D(texture, x, y, ref _hueVector);
+                        batcher.Draw2D(texture, x, y, ref HueVector);
 
-                        return _gText.Draw(batcher, x - 3, y + texture.Height / 2 - 3, _hueVector.Z);
+                        return _gText.Draw(batcher, x - 3, y + texture.Height / 2 - 3, HueVector.Z);
                     }
 
-                    return batcher.Draw2D(texture, x, y, ref _hueVector);
+                    return batcher.Draw2D(texture, x, y, ref HueVector);
                 }
 
                 return false;

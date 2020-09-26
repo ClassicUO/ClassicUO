@@ -148,9 +148,9 @@ namespace ClassicUO.Game.Scenes
             base.Unload();
         }
 
-        public override void Update(double totalMS, double frameMS)
+        public override void Update(double totalTime, double frameTime)
         {
-            base.Update(totalMS, frameMS);
+            base.Update(totalTime, frameTime);
 
             if (_lastLoginStep != CurrentLoginStep)
             {
@@ -166,14 +166,14 @@ namespace ClassicUO.Game.Scenes
 
             if (Reconnect && (CurrentLoginStep == LoginSteps.PopUpMessage || CurrentLoginStep == LoginSteps.Main))
             {
-                long rt = (long) totalMS + Settings.GlobalSettings.ReconnectTime * 1000;
+                long rt = (long) totalTime + Settings.GlobalSettings.ReconnectTime * 1000;
 
                 if (_reconnectTime == null)
                 {
                     _reconnectTime = rt;
                 }
 
-                if (_reconnectTime < totalMS)
+                if (_reconnectTime < totalTime)
                 {
                     if (!string.IsNullOrEmpty(Account))
                     {

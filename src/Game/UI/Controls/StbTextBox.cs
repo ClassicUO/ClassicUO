@@ -838,7 +838,7 @@ namespace ClassicUO.Game.UI.Controls
             int selectStart = Math.Min(Stb.SelectStart, Stb.SelectEnd);
             int selectEnd = Math.Max(Stb.SelectStart, Stb.SelectEnd);
 
-            _hueVector.Z = 0.5f;
+            HueVector.Z = 0.5f;
 
             if (selectStart < selectEnd)
             {
@@ -877,8 +877,8 @@ namespace ClassicUO.Game.UI.Controls
 
                             batcher.Draw2D
                             (
-                                Texture2DCache.GetTexture(SELECTION_COLOR), x + drawX, y + drawY, endX,
-                                info.MaxHeight + 1, ref _hueVector
+                                SolidColorTextureCache.GetTexture(SELECTION_COLOR), x + drawX, y + drawY, endX,
+                                info.MaxHeight + 1, ref HueVector
                             );
 
                             break;
@@ -888,8 +888,8 @@ namespace ClassicUO.Game.UI.Controls
                         // do the whole line
                         batcher.Draw2D
                         (
-                            Texture2DCache.GetTexture(SELECTION_COLOR), x + drawX, y + drawY, info.Width - drawX,
-                            info.MaxHeight + 1, ref _hueVector
+                            SolidColorTextureCache.GetTexture(SELECTION_COLOR), x + drawX, y + drawY, info.Width - drawX,
+                            info.MaxHeight + 1, ref HueVector
                         );
 
                         // first selection is gone. M

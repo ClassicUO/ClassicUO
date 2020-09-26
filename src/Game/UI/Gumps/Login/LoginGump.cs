@@ -422,18 +422,18 @@ namespace ClassicUO.Game.UI.Gumps.Login
             Settings.GlobalSettings.AutoLogin = _checkboxAutologin.IsChecked;
         }
 
-        public override void Update(double totalMS, double frameMS)
+        public override void Update(double totalTime, double frameTime)
         {
             if (IsDisposed)
             {
                 return;
             }
 
-            base.Update(totalMS, frameMS);
+            base.Update(totalTime, frameTime);
 
-            if (_time < totalMS)
+            if (_time < totalTime)
             {
-                _time = (float) totalMS + 1000;
+                _time = (float) totalTime + 1000;
 
                 _nextArrow0.ButtonGraphicNormal =
                     _nextArrow0.ButtonGraphicNormal == _buttonNormal ? _buttonOver : _buttonNormal;
