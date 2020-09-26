@@ -175,7 +175,7 @@ namespace ClassicUO.Game.UI.Gumps
             World.Journal.EntryAdded += AddJournalEntry;
         }
 
-        public override GUMP_TYPE GumpType => GUMP_TYPE.GT_JOURNAL;
+        public override GumpType GumpType => GumpType.Journal;
 
         public ushort Hue
         {

@@ -60,7 +60,7 @@ namespace ClassicUO.Game.UI.Gumps
             BuildGump();
         }
 
-        public override GUMP_TYPE GumpType => GUMP_TYPE.GT_BUFF;
+        public override GumpType GumpType => GumpType.Buff;
 
         private void BuildGump()
         {
@@ -457,7 +457,7 @@ namespace ClassicUO.Game.UI.Gumps
                 ResetHueVector();
                 ShaderHueTranslator.GetHueVector(ref _hueVector, 0, false, 1.0f - _alpha / 255f, true);
 
-                UOTexture32 texture = GumpsLoader.Instance.GetTexture(Graphic);
+                UOTexture texture = GumpsLoader.Instance.GetTexture(Graphic);
 
                 if (texture != null)
                 {

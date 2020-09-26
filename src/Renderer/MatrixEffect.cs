@@ -28,28 +28,21 @@ namespace ClassicUO.Renderer
 {
     internal class MatrixEffect : Effect
     {
-        public MatrixEffect(GraphicsDevice graphicsDevice, byte[] effectCode) : base(graphicsDevice, effectCode)
+        protected MatrixEffect(GraphicsDevice graphicsDevice, byte[] effectCode)
+            : base(graphicsDevice, effectCode)
         {
-            MatrixTransform = Parameters["MatrixTransform"];
+            MatrixTransform = Parameters[nameof(MatrixTransform)];
         }
-
-        protected MatrixEffect(Effect cloneSource) : base(cloneSource)
-        {
-        }
-
 
         public EffectParameter MatrixTransform { get; }
-
-        public EffectPass this[int index] => CurrentTechnique.Passes[index];
-
 
         public virtual void ApplyStates(Matrix matrix)
         {
             MatrixTransform.SetValue(matrix);
 
-            foreach (EffectPass pa in CurrentTechnique.Passes)
+            foreach (EffectPass effectPass in CurrentTechnique.Passes)
             {
-                pa.Apply();
+                effectPass.Apply();
             }
         }
     }

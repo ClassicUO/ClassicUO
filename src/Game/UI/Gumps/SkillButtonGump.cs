@@ -59,7 +59,7 @@ namespace ClassicUO.Game.UI.Gumps
         }
 
 
-        public override GUMP_TYPE GumpType => GUMP_TYPE.GT_SKILLBUTTON;
+        public override GumpType GumpType => GumpType.SkillButton;
 
         public int SkillID => _skill.Index;
 

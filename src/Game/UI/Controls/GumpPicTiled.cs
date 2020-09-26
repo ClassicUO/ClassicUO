@@ -60,7 +60,7 @@ namespace ClassicUO.Game.UI.Controls
             IsFromServer = true;
         }
 
-        internal GumpPicTiled(int x, int y, int width, int heigth, UOTexture32 texture)
+        internal GumpPicTiled(int x, int y, int width, int heigth, UOTexture texture)
         {
             CanMove = true;
             AcceptMouseInput = true;
@@ -80,7 +80,7 @@ namespace ClassicUO.Game.UI.Controls
                 {
                     _graphic = value;
 
-                    UOTexture32 texture = GumpsLoader.Instance.GetTexture(_graphic);
+                    UOTexture texture = GumpsLoader.Instance.GetTexture(_graphic);
 
                     if (texture == null)
                     {
@@ -103,7 +103,7 @@ namespace ClassicUO.Game.UI.Controls
             ResetHueVector();
             ShaderHueTranslator.GetHueVector(ref _hueVector, Hue, false, Alpha, true);
 
-            UOTexture32 texture = GumpsLoader.Instance.GetTexture(Graphic);
+            UOTexture texture = GumpsLoader.Instance.GetTexture(Graphic);
 
             if (texture != null)
             {
@@ -121,7 +121,7 @@ namespace ClassicUO.Game.UI.Controls
             x -= Offset.X;
             y -= Offset.Y;
 
-            UOTexture32 texture = GumpsLoader.Instance.GetTexture(Graphic);
+            UOTexture texture = GumpsLoader.Instance.GetTexture(Graphic);
 
             if (texture == null)
             {

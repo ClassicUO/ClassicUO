@@ -58,11 +58,11 @@ namespace ClassicUO.Game.UI.Controls
             CanMove = true;
             AcceptMouseInput = true;
 
-            UOTexture32[] textures = new UOTexture32[4];
+            UOTexture[] textures = new UOTexture[4];
 
             for (int i = 0; i < 4; i++)
             {
-                UOTexture32 t = GumpsLoader.Instance.GetTexture((ushort) (graphic + i));
+                UOTexture t = GumpsLoader.Instance.GetTexture((ushort) (graphic + i));
 
                 if (t == null)
                 {

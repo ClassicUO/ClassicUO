@@ -784,7 +784,7 @@ namespace ClassicUO.Network
 
             if (World.Player.IsDead)
             {
-                World.ChangeSeason(Seasons.Desolation, 42);
+                World.ChangeSeason(Game.Managers.Season.Desolation, 42);
             }
 
             if (Client.Version >= Data.ClientVersion.CV_70796 && ProfileManager.Current != null)
@@ -2681,7 +2681,7 @@ namespace ClassicUO.Network
                 {
                     if (World.Player.IsDead)
                     {
-                        World.ChangeSeason(Seasons.Desolation, 42);
+                        World.ChangeSeason(Game.Managers.Season.Desolation, 42);
                     }
                     else
                     {
@@ -3699,15 +3699,15 @@ namespace ClassicUO.Network
                 return;
             }
 
-            World.OldSeason = (Seasons) season;
+            World.OldSeason = (Season) season;
             World.OldMusicIndex = music;
 
-            if (World.Season == Seasons.Desolation)
+            if (World.Season == Game.Managers.Season.Desolation)
             {
                 World.OldMusicIndex = 42;
             }
 
-            World.ChangeSeason((Seasons) season, music);
+            World.ChangeSeason((Season) season, music);
         }
 
         private static void ClientVersion(Packet p)
@@ -5662,7 +5662,7 @@ namespace ClassicUO.Network
                 {
                     if (World.Player.IsDead)
                     {
-                        World.ChangeSeason(Seasons.Desolation, 42);
+                        World.ChangeSeason(Game.Managers.Season.Desolation, 42);
                     }
                     else
                     {

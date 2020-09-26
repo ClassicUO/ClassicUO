@@ -28,7 +28,7 @@ using ClassicUO.Utility;
 
 namespace ClassicUO.IO.Resources
 {
-    internal class LightsLoader : UOFileLoader<UOTexture32>
+    internal class LightsLoader : UOFileLoader<UOTexture>
     {
         private static LightsLoader _instance;
         private UOFileMul _file;
@@ -58,14 +58,14 @@ namespace ClassicUO.IO.Resources
             );
         }
 
-        public override UOTexture32 GetTexture(uint id)
+        public override UOTexture GetTexture(uint id)
         {
             if (id >= Resources.Length)
             {
                 return null;
             }
 
-            ref UOTexture32 texture = ref Resources[id];
+            ref UOTexture texture = ref Resources[id];
 
             if (texture == null || texture.IsDisposed)
             {
@@ -76,7 +76,7 @@ namespace ClassicUO.IO.Resources
                     return null;
                 }
 
-                texture = new UOTexture32(w, h);
+                texture = new UOTexture(w, h);
                 texture.PushData(pixels);
 
                 SaveId(id);

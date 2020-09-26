@@ -67,7 +67,7 @@ namespace ClassicUO.Game.UI.Gumps
             (CUOEnviroment.ExecutablePath, "Data", "Client", "MapIcons");
         private int _mapIndex;
         private bool _mapMarkersLoaded;
-        private UOTexture32 _mapTexture;
+        private UOTexture _mapTexture;
 
 
         private readonly List<WMapMarkerFile> _markerFiles = new List<WMapMarkerFile>();
@@ -114,7 +114,7 @@ namespace ClassicUO.Game.UI.Gumps
             BuildGump();
         }
 
-        public override GUMP_TYPE GumpType => GUMP_TYPE.GT_WORLDMAP;
+        public override GumpType GumpType => GumpType.WorldMap;
         public float Zoom => _zooms[_zoomIndex];
 
         public bool TopMost
@@ -1103,7 +1103,7 @@ namespace ClassicUO.Game.UI.Gumps
                                 realHeight += OFFSET_PIX;
                             }
 
-                            _mapTexture = new UOTexture32(realWidth, realHeight);
+                            _mapTexture = new UOTexture(realWidth, realHeight);
                             _mapTexture.SetData(buffer);
                         }
                         catch (Exception ex)

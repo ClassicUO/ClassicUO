@@ -85,7 +85,7 @@ namespace ClassicUO.Game.UI.Gumps
             protected set { }
         }
 
-        public override GUMP_TYPE GumpType => GUMP_TYPE.GT_HEALTHBAR;
+        public override GumpType GumpType => GumpType.HealthBar;
         protected bool _canChangeName;
         protected bool _isDead;
         protected string _name;

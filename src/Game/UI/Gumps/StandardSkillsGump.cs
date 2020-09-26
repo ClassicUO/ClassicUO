@@ -158,7 +158,7 @@ namespace ClassicUO.Game.UI.Gumps
             _container.ReArrangeChildren();
         }
 
-        public override GUMP_TYPE GumpType => GUMP_TYPE.GT_SKILLMENU;
+        public override GumpType GumpType => GumpType.SkillMenu;
 
         public bool IsMinimized
         {

@@ -557,7 +557,7 @@ namespace ClassicUO.IO.Resources
             MultilinesFontInfo ptr = info;
             bool isPartial = font != 5 && font != 8 && !UnusePartialHue;
             int font6OffsetY = font == 6 ? 7 : 0;
-            int linesCount = 0; // this value should be added to TextTexture.LinesCount += linesCount
+            int linesCount = 0; // this value should be added to TextTexture.LineCount += linesCount
 
             while (ptr != null)
             {
@@ -670,7 +670,7 @@ namespace ClassicUO.IO.Resources
             else
             {
                 texture.Links.Clear();
-                texture.LinesCount = linesCount;
+                texture.LineCount = linesCount;
             }
 
             texture.PushData(pData);
@@ -2065,7 +2065,7 @@ namespace ClassicUO.IO.Resources
             {
                 texture.Links.Clear();
                 texture.Links.AddRange(links);
-                texture.LinesCount = linesCount;
+                texture.LineCount = linesCount;
             }
 
             texture.PushData(pData);

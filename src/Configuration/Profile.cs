@@ -527,31 +527,31 @@ namespace ClassicUO.Configuration
 
                         try
                         {
-                            GUMP_TYPE type = (GUMP_TYPE) int.Parse(xml.GetAttribute("type"));
-                            int x = int.Parse(xml.GetAttribute("x"));
-                            int y = int.Parse(xml.GetAttribute("y"));
-                            uint serial = uint.Parse(xml.GetAttribute("serial"));
+                            GumpType type = (GumpType) int.Parse(xml.GetAttribute(nameof(type)));
+                            int x = int.Parse(xml.GetAttribute(nameof(x)));
+                            int y = int.Parse(xml.GetAttribute(nameof(y)));
+                            uint serial = uint.Parse(xml.GetAttribute(nameof(serial)));
 
                             Gump gump = null;
 
                             switch (type)
                             {
-                                case GUMP_TYPE.GT_BUFF:
+                                case GumpType.Buff:
                                     gump = new BuffGump();
 
                                     break;
 
-                                case GUMP_TYPE.GT_CONTAINER:
+                                case GumpType.Container:
                                     gump = new ContainerGump();
 
                                     break;
 
-                                case GUMP_TYPE.GT_COUNTERBAR:
+                                case GumpType.CounterBar:
                                     gump = new CounterBarGump();
 
                                     break;
 
-                                case GUMP_TYPE.GT_HEALTHBAR:
+                                case GumpType.HealthBar:
                                     if (CustomBarsToggled)
                                     {
                                         gump = new HealthBarGumpCustom();
@@ -563,32 +563,32 @@ namespace ClassicUO.Configuration
 
                                     break;
 
-                                case GUMP_TYPE.GT_INFOBAR:
+                                case GumpType.InfoBar:
                                     gump = new InfoBarGump();
 
                                     break;
 
-                                case GUMP_TYPE.GT_JOURNAL:
+                                case GumpType.Journal:
                                     gump = new JournalGump();
 
                                     break;
 
-                                case GUMP_TYPE.GT_MACROBUTTON:
+                                case GumpType.MacroButton:
                                     gump = new MacroButtonGump();
 
                                     break;
 
-                                case GUMP_TYPE.GT_MINIMAP:
+                                case GumpType.MiniMap:
                                     gump = new MiniMapGump();
 
                                     break;
 
-                                case GUMP_TYPE.GT_PAPERDOLL:
+                                case GumpType.PaperDoll:
                                     gump = new PaperDollGump();
 
                                     break;
 
-                                case GUMP_TYPE.GT_SKILLMENU:
+                                case GumpType.SkillMenu:
                                     if (StandardSkillsGump)
                                     {
                                         gump = new StandardSkillsGump();
@@ -600,50 +600,50 @@ namespace ClassicUO.Configuration
 
                                     break;
 
-                                case GUMP_TYPE.GT_SPELLBOOK:
+                                case GumpType.SpellBook:
                                     gump = new SpellbookGump();
 
                                     break;
 
-                                case GUMP_TYPE.GT_STATUSGUMP:
+                                case GumpType.StatusGump:
                                     gump = StatusGumpBase.AddStatusGump(0, 0);
 
                                     break;
 
-                                //case GUMP_TYPE.GT_TIPNOTICE: 
+                                //case GumpType.TipNotice:
                                 //    gump = new TipNoticeGump();
                                 //    break;
-                                case GUMP_TYPE.GT_ABILITYBUTTON:
+                                case GumpType.AbilityButton:
                                     gump = new UseAbilityButtonGump();
 
                                     break;
 
-                                case GUMP_TYPE.GT_SPELLBUTTON:
+                                case GumpType.SpellButton:
                                     gump = new UseSpellButtonGump();
 
                                     break;
 
-                                case GUMP_TYPE.GT_SKILLBUTTON:
+                                case GumpType.SkillButton:
                                     gump = new SkillButtonGump();
 
                                     break;
 
-                                case GUMP_TYPE.GT_RACIALBUTTON:
+                                case GumpType.RacialButton:
                                     gump = new RacialAbilityButton();
 
                                     break;
 
-                                case GUMP_TYPE.GT_WORLDMAP:
+                                case GumpType.WorldMap:
                                     gump = new WorldMapGump();
 
                                     break;
 
-                                case GUMP_TYPE.GT_DEBUG:
+                                case GumpType.Debug:
                                     gump = new DebugGump(100, 100);
 
                                     break;
 
-                                case GUMP_TYPE.GT_NETSTATS:
+                                case GumpType.NetStats:
                                     gump = new NetworkStatsGump(100, 100);
 
                                     break;
@@ -687,7 +687,7 @@ namespace ClassicUO.Configuration
                         {
                             try
                             {
-                                GUMP_TYPE type = (GUMP_TYPE) int.Parse(xml.GetAttribute("type"));
+                                GumpType type = (GumpType) int.Parse(xml.GetAttribute("type"));
                                 int x = int.Parse(xml.GetAttribute("x"));
                                 int y = int.Parse(xml.GetAttribute("y"));
                                 uint serial = uint.Parse(xml.GetAttribute("serial"));
@@ -699,17 +699,17 @@ namespace ClassicUO.Configuration
 
                                 switch (type)
                                 {
-                                    case GUMP_TYPE.GT_SPELLBUTTON:
+                                    case GumpType.SpellButton:
                                         gump = new UseSpellButtonGump();
 
                                         break;
 
-                                    case GUMP_TYPE.GT_SKILLBUTTON:
+                                    case GumpType.SkillButton:
                                         gump = new SkillButtonGump();
 
                                         break;
 
-                                    case GUMP_TYPE.GT_HEALTHBAR:
+                                    case GumpType.HealthBar:
                                         if (CustomBarsToggled)
                                         {
                                             gump = new HealthBarGumpCustom();
@@ -721,12 +721,12 @@ namespace ClassicUO.Configuration
 
                                         break;
 
-                                    case GUMP_TYPE.GT_ABILITYBUTTON:
+                                    case GumpType.AbilityButton:
                                         gump = new UseAbilityButtonGump();
 
                                         break;
 
-                                    case GUMP_TYPE.GT_MACROBUTTON:
+                                    case GumpType.MacroButton:
                                         gump = new MacroButtonGump();
 
                                         break;

@@ -47,7 +47,7 @@ namespace ClassicUO.Game.UI.Controls
         private bool _entered;
         private readonly RenderedText[] _fontTexture;
         private readonly ushort[] _gumpGraphics = new ushort[3];
-        private readonly UOTexture32[] _textures = new UOTexture32[3];
+        private readonly UOTexture[] _textures = new UOTexture[3];
 
         public Button
         (
@@ -74,7 +74,7 @@ namespace ClassicUO.Game.UI.Controls
                 _textures[OVER] = GumpsLoader.Instance.GetTexture(over);
             }
 
-            UOTexture32 t = _textures[NORMAL];
+            UOTexture t = _textures[NORMAL];
 
             if (t == null)
             {
@@ -200,7 +200,7 @@ namespace ClassicUO.Game.UI.Controls
 
             for (int i = 0; i < _textures.Length; i++)
             {
-                UOTexture32 t = _textures[i];
+                UOTexture t = _textures[i];
 
                 if (t != null)
                 {
@@ -221,7 +221,7 @@ namespace ClassicUO.Game.UI.Controls
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
-            UOTexture32 texture = GetTextureByState();
+            UOTexture texture = GetTextureByState();
 
             ResetHueVector();
 
@@ -292,7 +292,7 @@ namespace ClassicUO.Game.UI.Controls
             }
         }
 
-        private UOTexture32 GetTextureByState()
+        private UOTexture GetTextureByState()
         {
             if (_entered || IsClicked)
             {

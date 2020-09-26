@@ -39,7 +39,7 @@ namespace ClassicUO.Game.UI.Gumps
 {
     internal class ShopGump : Gump
     {
-        private static UOTexture32[] _shopGumpParts;
+        private static UOTexture[] _shopGumpParts;
         private readonly Button _button_expander;
 
         private bool _isUpDOWN, _isDownDOWN;
@@ -294,9 +294,9 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void GenerateVirtualTextures()
         {
-            _shopGumpParts = new UOTexture32[12];
-            UOTexture32 t = GumpsLoader.Instance.GetTexture(0x0870);
-            UOTexture32[][] splits = new UOTexture32[4][];
+            _shopGumpParts = new UOTexture[12];
+            UOTexture t = GumpsLoader.Instance.GetTexture(0x0870);
+            UOTexture[][] splits = new UOTexture[4][];
 
             splits[0] = GraphicHelper.SplitTexture16
             (
@@ -1033,7 +1033,7 @@ namespace ClassicUO.Game.UI.Gumps
         private class ResizePicLine : Control
         {
             private readonly ushort _graphic;
-            private readonly UOTexture32[] _gumpTexture = new UOTexture32[3];
+            private readonly UOTexture[] _gumpTexture = new UOTexture[3];
 
             public ResizePicLine(ushort graphic)
             {
@@ -1054,7 +1054,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             public override void Update(double totalMS, double frameMS)
             {
-                foreach (UOTexture32 t in _gumpTexture)
+                foreach (UOTexture t in _gumpTexture)
                 {
                     if (t != null)
                     {

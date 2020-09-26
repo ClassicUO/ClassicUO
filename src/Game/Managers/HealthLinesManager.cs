@@ -38,7 +38,7 @@ namespace ClassicUO.Game.Managers
         private const int BAR_HEIGHT_HALF = BAR_HEIGHT >> 1;
 
 
-        private readonly UOTexture32 _background_texture, _hp_texture;
+        private readonly UOTexture _background_texture, _hp_texture;
         private Vector3 _vectorHue = Vector3.Zero;
 
         public HealthLinesManager()

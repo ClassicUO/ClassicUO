@@ -48,7 +48,7 @@ namespace ClassicUO.Game.UI.Gumps
             BuildGump();
         }
 
-        public override GUMP_TYPE GumpType => GUMP_TYPE.GT_ABILITYBUTTON;
+        public override GumpType GumpType => GumpType.AbilityButton;
 
         public int Index { get; }
         public bool IsPrimary { get; private set; }

@@ -31,7 +31,7 @@ namespace ClassicUO.Utility
     {
         private static readonly Dictionary<SDL.SDL_Keycode, string> _keys = new Dictionary<SDL.SDL_Keycode, string>
         {
-            { SDL.SDL_Keycode.SDLK_UNKNOWN, "NONE" },
+            { SDL.SDL_Keycode.SDLK_UNKNOWN, "None" },
             { SDL.SDL_Keycode.SDLK_BACKSPACE, "Backspace" },
             { SDL.SDL_Keycode.SDLK_TAB, "Tab" },
             { SDL.SDL_Keycode.SDLK_RETURN, "Return" },

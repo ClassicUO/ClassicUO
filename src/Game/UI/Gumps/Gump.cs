@@ -34,33 +34,6 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Gumps
 {
-    internal enum GUMP_TYPE
-    {
-        NONE,
-
-        GT_BUFF,
-        GT_CONTAINER,
-        GT_COUNTERBAR,
-        GT_HEALTHBAR,
-        GT_INFOBAR,
-        GT_JOURNAL,
-        GT_MACROBUTTON,
-        GT_MINIMAP,
-        GT_PAPERDOLL,
-        GT_SKILLMENU,
-        GT_SPELLBOOK,
-        GT_STATUSGUMP,
-        GT_TIPNOTICE,
-        GT_ABILITYBUTTON,
-        GT_SPELLBUTTON,
-        GT_SKILLBUTTON,
-        GT_RACIALBUTTON,
-        GT_WORLDMAP,
-
-        GT_DEBUG,
-        GT_NETSTATS
-    }
-
     internal class Gump : Control
     {
         public Gump(uint local, uint server)
@@ -73,9 +46,9 @@ namespace ClassicUO.Game.UI.Gumps
 
         public bool BlockMovement { get; set; }
 
-        public bool CanBeSaved => GumpType != GUMP_TYPE.NONE;
+        public bool CanBeSaved => GumpType != Gumps.GumpType.None;
 
-        public virtual GUMP_TYPE GumpType { get; }
+        public virtual GumpType GumpType { get; }
 
         public bool InvalidateContents { get; set; }
 
@@ -135,7 +108,9 @@ namespace ClassicUO.Game.UI.Gumps
 
         public void SetInScreen()
         {
-            if (Bounds.Width >= 0 && Bounds.X <= Client.Game.Window.ClientBounds.Width && Bounds.Height >= 0 &&
+            if (Bounds.Width >= 0 &&
+                Bounds.X <= Client.Game.Window.ClientBounds.Width &&
+                Bounds.Height >= 0 &&
                 Bounds.Y <= Client.Game.Window.ClientBounds.Height)
             {
                 return;

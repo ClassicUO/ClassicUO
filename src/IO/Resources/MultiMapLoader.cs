@@ -75,7 +75,7 @@ namespace ClassicUO.IO.Resources
             );
         }
 
-        public unsafe UOTexture32 LoadMap
+        public unsafe UOTexture LoadMap
         (
             int width,
             int height,
@@ -209,7 +209,7 @@ namespace ClassicUO.IO.Resources
 
                 Marshal.FreeHGlobal(ptr);
 
-                UOTexture32 texture = new UOTexture32(width, height);
+                UOTexture texture = new UOTexture(width, height);
                 texture.PushData(worldMap);
 
                 return texture;
@@ -218,7 +218,7 @@ namespace ClassicUO.IO.Resources
             return null;
         }
 
-        public UOTexture32 LoadFacet
+        public UOTexture LoadFacet
         (
             int facet,
             int width,
@@ -280,7 +280,7 @@ namespace ClassicUO.IO.Resources
                 }
             }
 
-            UOTexture32 texture = new UOTexture32(pwidth, pheight);
+            UOTexture texture = new UOTexture(pwidth, pheight);
             texture.PushData(map);
 
             return texture;

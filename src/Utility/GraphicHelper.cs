@@ -63,14 +63,14 @@ namespace ClassicUO.Utility
         ///     for each part, in the second dimension, we specify:
         ///     starting x and y, plus width and height for that specified part (4 as size in second dimension).
         /// </param>
-        internal static UOTexture32[] SplitTexture16(UOTexture32 original, int[,] partXYplusWidthHeight)
+        internal static UOTexture[] SplitTexture16(UOTexture original, int[,] partXYplusWidthHeight)
         {
             if (partXYplusWidthHeight.GetLength(0) == 0 || partXYplusWidthHeight.GetLength(1) < 4)
             {
                 return null;
             }
 
-            UOTexture32[] r = new UOTexture32[partXYplusWidthHeight.GetLength(0)];
+            UOTexture[] r = new UOTexture[partXYplusWidthHeight.GetLength(0)];
             int pwidth = original.Width;   //((original.Width + 1) >> 1) << 1;
             int pheight = original.Height; //((original.Height + 1) >> 1) << 1;
             uint[] originalData = original.Data;
@@ -84,7 +84,7 @@ namespace ClassicUO.Utility
                     width = partXYplusWidthHeight[p, 2],
                     height = partXYplusWidthHeight[p, 3];
 
-                UOTexture32 part = new UOTexture32(width, height);
+                UOTexture part = new UOTexture(width, height);
                 uint[] partData = new uint[width * height];
 
                 for (int py = 0; py < height; py++)

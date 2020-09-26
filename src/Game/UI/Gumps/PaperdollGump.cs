@@ -77,7 +77,7 @@ namespace ClassicUO.Game.UI.Gumps
             BuildGump();
         }
 
-        public override GUMP_TYPE GumpType => GUMP_TYPE.GT_PAPERDOLL;
+        public override GumpType GumpType => GumpType.PaperDoll;
 
         public bool IsMinimized
         {

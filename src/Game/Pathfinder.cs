@@ -930,7 +930,7 @@ namespace ClassicUO.Game
             int playerX = World.Player.X;
             int playerY = World.Player.Y;
             //sbyte playerZ = 0;
-            //Direction playerDir = Direction.NONE;
+            //Direction playerDir = Direction.None;
 
             //World.Player.GetEndPosition(ref playerX, ref playerY, ref playerZ, ref playerDir);
             _startPoint.X = playerX;

@@ -31,7 +31,7 @@ using ClassicUO.Utility;
 
 namespace ClassicUO.IO.Resources
 {
-    internal class GumpsLoader : UOFileLoader<UOTexture32>
+    internal class GumpsLoader : UOFileLoader<UOTexture>
     {
         private static GumpsLoader _instance;
         private UOFile _file;
@@ -127,14 +127,14 @@ namespace ClassicUO.IO.Resources
             );
         }
 
-        public override UOTexture32 GetTexture(uint g)
+        public override UOTexture GetTexture(uint g)
         {
             if (g >= Resources.Length)
             {
                 return null;
             }
 
-            ref UOTexture32 texture = ref Resources[g];
+            ref UOTexture texture = ref Resources[g];
 
             if (texture == null || texture.IsDisposed)
             {
@@ -145,7 +145,7 @@ namespace ClassicUO.IO.Resources
                     return null;
                 }
 
-                texture = new UOTexture32(w, h);
+                texture = new UOTexture(w, h);
                 texture.PushData(pixels);
 
                 SaveId(g);

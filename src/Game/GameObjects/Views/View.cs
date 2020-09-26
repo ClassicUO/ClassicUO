@@ -139,7 +139,7 @@ namespace ClassicUO.Game.GameObjects
 
         protected static void DrawLand(UltimaBatcher2D batcher, ushort graphic, int x, int y, ref Vector3 hue)
         {
-            UOTexture32 texture = ArtLoader.Instance.GetLandTexture(graphic);
+            UOTexture texture = ArtLoader.Instance.GetLandTexture(graphic);
 
             if (texture != null)
             {
@@ -163,7 +163,7 @@ namespace ClassicUO.Game.GameObjects
             ref Vector3 hue
         )
         {
-            UOTexture32 texture = TexmapsLoader.Instance.GetTexture(TileDataLoader.Instance.LandData[graphic].TexID);
+            UOTexture texture = TexmapsLoader.Instance.GetTexture(TileDataLoader.Instance.LandData[graphic].TexID);
 
             if (texture != null)
             {
@@ -192,7 +192,7 @@ namespace ClassicUO.Game.GameObjects
 
         protected static void DrawGump(UltimaBatcher2D batcher, ushort graphic, int x, int y, ref Vector3 hue)
         {
-            UOTexture32 texture = GumpsLoader.Instance.GetTexture(graphic);
+            UOTexture texture = GumpsLoader.Instance.GetTexture(graphic);
 
             if (texture != null)
             {
