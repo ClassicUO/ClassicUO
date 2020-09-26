@@ -337,7 +337,7 @@ namespace ClassicUO.Game.Scenes
             }
             else
             {
-                SelectedObject.LastLeftDownObject = SelectedObject.Object as Entity;
+                SelectedObject.LastLeftDownObject = SelectedObject.Object;
 
                 if (ProfileManager.Current.EnableDragSelect && DragSelectModifierActive())
                 {
@@ -399,6 +399,7 @@ namespace ClassicUO.Game.Scenes
                 _continueRunning = true;
             }
 
+            BaseGameObject lastObj = SelectedObject.LastLeftDownObject;
             SelectedObject.LastLeftDownObject = null;
 
             if (UIManager.IsDragging)
@@ -414,7 +415,7 @@ namespace ClassicUO.Game.Scenes
                 ushort dropY = 0;
                 sbyte dropZ = 0;
 
-                GameObject gobj = SelectedObject.LastObject as GameObject;
+                GameObject gobj = lastObj as GameObject;
 
                 if (gobj is Entity obj)
                 {
@@ -488,7 +489,7 @@ namespace ClassicUO.Game.Scenes
                     case CursorTarget.Object:
                     case CursorTarget.MultiPlacement when World.CustomHouseManager == null:
                     {
-                        BaseGameObject obj = SelectedObject.Object;
+                        BaseGameObject obj = lastObj;
 
                         if (obj is TextObject ov)
                         {
@@ -520,7 +521,7 @@ namespace ClassicUO.Game.Scenes
 
                     case CursorTarget.SetTargetClientSide:
                     {
-                        BaseGameObject obj = SelectedObject.Object;
+                        BaseGameObject obj = lastObj;
 
                         if (obj is TextObject ov)
                         {
@@ -569,7 +570,7 @@ namespace ClassicUO.Game.Scenes
             }
             else
             {
-                GameObject obj = SelectedObject.LastObject as GameObject;
+                GameObject obj = lastObj as GameObject;
 
                 switch (obj)
                 {
