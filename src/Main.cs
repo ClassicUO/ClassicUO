@@ -1,21 +1,21 @@
 ﻿#region license
 
 // Copyright (C) 2020 ClassicUO Development Community on Github
-// 
+//
 // This project is an alternative client for the game Ultima Online.
 // The goal of this is to develop a lightweight client considering
 // new technologies.
-// 
+//
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
 //  the Free Software Foundation, either version 3 of the License, or
 //  (at your option) any later version.
-// 
+//
 //  This program is distributed in the hope that it will be useful,
 //  but WITHOUT ANY WARRANTY; without even the implied warranty of
 //  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 //  GNU General Public License for more details.
-// 
+//
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
@@ -23,11 +23,15 @@
 
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
+using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Runtime.Loader;
 using System.Threading;
+using System.Xml;
 using ClassicUO.Configuration;
 using ClassicUO.Data;
 using ClassicUO.Game;
@@ -39,17 +43,171 @@ using SDL2;
 
 namespace ClassicUO
 {
-    internal static class Bootstrap
+
+    public class DllMap
+    {
+        public DllMap(string fname)
+        {
+            var settings = new XmlReaderSettings();
+            settings.IgnoreWhitespace = true;
+
+            using var fileStream = File.OpenText(fname);
+            using var reader = XmlReader.Create(fileStream, settings);
+
+            DllMapEntry entry = null;
+
+            while (reader.Read())
+            {
+                switch (reader.NodeType)
+                {
+                    case XmlNodeType.Element:
+                        if (reader.Name != "dllmap")
+                            continue;
+
+                        if (entry != null)
+                        {
+                            Entries.Add(entry);
+                            entry = null;
+                        }
+
+                        entry = new DllMapEntry();
+                        while (reader.MoveToNextAttribute())
+                        {
+                            if (reader.Name == "dll")
+                                entry.DLL = reader.Value;
+                            else if (reader.Name == "os")
+                                entry.OS = reader.Value;
+                            else if (reader.Name == "target")
+                                entry.Target = reader.Value;
+                        }
+                        break;
+                    case XmlNodeType.EndElement:
+                        if (reader.Name != "dllmap")
+                            continue;
+
+                        Entries.Add(entry);
+                        entry = null;
+                        break;
+                }
+            }
+        }
+
+        public List<DllMapEntry> Entries { get; set; } = new List<DllMapEntry>();
+
+        public string GetName(string name)
+        {
+            var osName = "";
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                osName = "windows";
+            }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            {
+                osName = "osx";
+            }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            {
+                osName = "linux";
+            }
+
+            foreach (var entry in Entries)
+            {
+                if (entry.DLL != name)
+                    continue;
+
+                if (entry.OS.Contains(osName))
+                    return entry.Target;
+            }
+
+            return string.Empty;
+        }
+    }
+
+    public class DllMapEntry
+    {
+        public string DLL { get; set; }
+
+        public string OS { get; set; }
+
+        public string Target { get; set; }
+    }
+
+    internal unsafe static class Bootstrap
     {
         private static bool _skipUpdates;
 
-        [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        private static extern bool SetDllDirectory(string lpPathName);
+        static private AssemblyLoadContext _loadContext;
+        static private string _rootDir;
+
+        static private IntPtr ResolveUnmanagedDll(Assembly assembly, string unmanagedDllName)
+        {
+            Log.Trace($"Loading unamanged DLL {unmanagedDllName} for {assembly.GetName().Name}");
+
+            /* Check for a dllmap */
+            var path = $"{assembly.GetName().Name}.dll.config";
+
+            string name = unmanagedDllName;
+
+            if (File.Exists(path))
+            {
+                Log.Trace($"Using dllmap at {path}");
+                /* A dllmap exists, so use that to get the real file name */
+                var dllMap = new DllMap(path);
+                name = dllMap.GetName(unmanagedDllName);
+            }
+            else
+            {
+                /* Guess the name based on the platform */
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                {
+                    name = $"{unmanagedDllName}.dll";
+                }
+                else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+                {
+                    name = $"lib{unmanagedDllName}.dylib";
+                }
+                else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+                {
+                    name = $"lib{unmanagedDllName}.so";
+                }
+            }
+
+            /* Try the correct native libs directory first */
+            string osDir = "";
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                osDir = "x64";
+            }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            {
+                osDir = "osx";
+            }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            {
+                osDir = "lib64";
+            }
+
+            var libraryPath = Path.Combine(_rootDir, osDir, name);
+
+            Log.Trace($"Resolved DLL to {libraryPath}");
+
+            if (File.Exists(libraryPath))
+                return NativeLibrary.Load(libraryPath);
+
+            return IntPtr.Zero;
+        }
 
         [STAThread]
         public static void Main(string[] args)
         {
+            _rootDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+
+            // Change to the directory where the assembly is
+            Directory.SetCurrentDirectory(_rootDir);
+
+            _loadContext = AssemblyLoadContext.Default;
+            _loadContext.ResolvingUnmanagedDll += ResolveUnmanagedDll;
+
             CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
 
             Log.Start(LogTypes.All);
@@ -99,6 +257,7 @@ namespace ClassicUO
                 }
             };
 #endif
+
             ReadSettingsFromArgs(args);
 
 #if DEV_BUILD
@@ -141,7 +300,7 @@ namespace ClassicUO
             {
                 // settings specified in path does not exists, make new one
                 {
-                    // TODO: 
+                    // TODO:
                     Settings.GlobalSettings.Save();
                 }
             }
@@ -157,15 +316,6 @@ namespace ClassicUO
                 Settings.GlobalSettings = new Settings();
                 Settings.GlobalSettings.Save();
             }
-
-            if (!CUOEnviroment.IsUnix)
-            {
-                string libsPath = Path.Combine
-                    (CUOEnviroment.ExecutablePath, Environment.Is64BitProcess ? "x64" : "x86");
-
-                SetDllDirectory(libsPath);
-            }
-
 
             if (string.IsNullOrWhiteSpace(Settings.GlobalSettings.UltimaOnlineDirectory))
             {
@@ -276,7 +426,7 @@ namespace ClassicUO
 
                 switch (cmd)
                 {
-                    // Here we have it! Using `-settings` option we can now set the filepath that will be used 
+                    // Here we have it! Using `-settings` option we can now set the filepath that will be used
                     // to load and save ClassicUO main settings instead of default `./settings.json`
                     // NOTE: All individual settings like `username`, `password`, etc passed in command-line options
                     // will override and overwrite those in the settings file because they have higher priority
