@@ -2376,7 +2376,7 @@ namespace ClassicUO.Network
 
                             if (lineLen > 0)
                             {
-                                string putta = p.ReadUTF8StringSafe(len);
+                                string putta = p.ReadUTF8StringSafe(lineLen);
                                 sb.Append(putta);
                                 sb.Append('\n');
                             }
