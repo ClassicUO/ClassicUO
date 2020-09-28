@@ -415,7 +415,7 @@ namespace ClassicUO.Game.Scenes
                 ushort dropY = 0;
                 sbyte dropZ = 0;
 
-                GameObject gobj = SelectedObject.Object as GameObject;
+                GameObject gobj = SelectedObject.LastObject as GameObject;
 
                 if (gobj is Entity obj)
                 {
