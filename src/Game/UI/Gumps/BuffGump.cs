@@ -394,57 +394,60 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 base.Update(totalMS, frameMS);
 
-                int delta = (int) (_timer - totalMS);
-
-                if (_updateTooltipTime < totalMS && delta > 0)
+                if (!IsDisposed)
                 {
-                    TimeSpan span = TimeSpan.FromMilliseconds(delta);
-                    SetTooltip(string.Format(ResGumps.TimeLeft, Icon.Text, span.Hours, span.Minutes, span.Seconds));
-                    _updateTooltipTime = (float) totalMS + 1000;
+                    int delta = (int) (_timer - totalMS);
 
-                    if (span.Hours > 0)
+                    if (_updateTooltipTime < totalMS && delta > 0)
                     {
-                        _gText.Text = string.Format(ResGumps.Span0Hours, span.Hours);
-                    }
-                    else
-                    {
-                        _gText.Text = span.Minutes > 0 ? $"{span.Minutes}:{span.Seconds}" : $"{span.Seconds}";
-                    }
-                }
+                        TimeSpan span = TimeSpan.FromMilliseconds(delta);
+                        SetTooltip(string.Format(ResGumps.TimeLeft, Icon.Text, span.Hours, span.Minutes, span.Seconds));
+                        _updateTooltipTime = (float) totalMS + 1000;
 
-                if (_timer != 0xFFFF_FFFF && delta < 10000)
-                {
-                    if (delta <= 0)
-                    {
-                        ((BuffGump) Parent).RemoveBuff(Icon.Type);
-                    }
-                    else
-                    {
-                        int alpha = _alpha;
-                        int addVal = (10000 - delta) / 600;
-
-                        if (_decreaseAlpha)
+                        if (span.Hours > 0)
                         {
-                            alpha -= addVal;
-
-                            if (alpha <= 60)
-                            {
-                                _decreaseAlpha = false;
-                                alpha = 60;
-                            }
+                            _gText.Text = string.Format(ResGumps.Span0Hours, span.Hours);
                         }
                         else
                         {
-                            alpha += addVal;
-
-                            if (alpha >= 255)
-                            {
-                                _decreaseAlpha = true;
-                                alpha = 255;
-                            }
+                            _gText.Text = span.Minutes > 0 ? $"{span.Minutes}:{span.Seconds}" : $"{span.Seconds}";
                         }
+                    }
 
-                        _alpha = (byte) alpha;
+                    if (_timer != 0xFFFF_FFFF && delta < 10000)
+                    {
+                        if (delta <= 0)
+                        {
+                            ((BuffGump) Parent)?.RemoveBuff(Icon.Type);
+                        }
+                        else
+                        {
+                            int alpha = _alpha;
+                            int addVal = (10000 - delta) / 600;
+
+                            if (_decreaseAlpha)
+                            {
+                                alpha -= addVal;
+
+                                if (alpha <= 60)
+                                {
+                                    _decreaseAlpha = false;
+                                    alpha = 60;
+                                }
+                            }
+                            else
+                            {
+                                alpha += addVal;
+
+                                if (alpha >= 255)
+                                {
+                                    _decreaseAlpha = true;
+                                    alpha = 255;
+                                }
+                            }
+
+                            _alpha = (byte) alpha;
+                        }
                     }
                 }
             }
