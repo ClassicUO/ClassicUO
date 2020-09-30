@@ -45,10 +45,6 @@ namespace ClassicUO.Game.GameObjects
             {
                 hue = Constants.DEAD_RANGE_COLOR;
             }
-            else
-            {
-                hue = 1150;
-            }
 
             ShaderHueTranslator.GetHueVector(ref HueVector, hue, false, 0);
             HueVector.Y = ShaderHueTranslator.SHADER_LIGHTS;
