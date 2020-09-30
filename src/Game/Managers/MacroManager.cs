@@ -751,17 +751,20 @@ namespace ClassicUO.Game.Managers
                                     {
                                         StandardSkillsGump skillgump = UIManager.GetGump<StandardSkillsGump>();
 
-                                        if (macro.Code == MacroType.Close)
+                                        if (skillgump != null)
                                         {
-                                            skillgump?.Dispose();
-                                        }
-                                        else if (macro.Code == MacroType.Minimize)
-                                        {
-                                            skillgump.IsMinimized = true;
-                                        }
-                                        else if (macro.Code == MacroType.Maximize)
-                                        {
-                                            skillgump.IsMinimized = false;
+                                            if (macro.Code == MacroType.Close)
+                                            {
+                                                skillgump.Dispose();
+                                            }
+                                            else if (macro.Code == MacroType.Minimize)
+                                            {
+                                                skillgump.IsMinimized = true;
+                                            }
+                                            else if (macro.Code == MacroType.Maximize)
+                                            {
+                                                skillgump.IsMinimized = false;
+                                            }
                                         }
                                     }
                                     else
