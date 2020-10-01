@@ -62,7 +62,8 @@ namespace ClassicUO.Game.Managers
         {
             if (_itemsProperties.TryGetValue(serial, out ItemProperty prop))
             {
-                return (revision & ~0x40000000) == prop.Revision;
+                return (revision & ~0x40000000) == prop.Revision || // remove the mask
+                       revision == prop.Revision;                   // if mask removing didn't work, try a simple compare.
             }
 
             return false;
