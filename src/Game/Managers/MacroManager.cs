@@ -902,9 +902,10 @@ namespace ClassicUO.Game.Managers
                             {
                                 spell += 100;
 
+                                // fix offset for mysticism
                                 if (spellType == 6)
                                 {
-                                    spell -= 16;
+                                    spell -= 23;
                                 }
                             }
 
