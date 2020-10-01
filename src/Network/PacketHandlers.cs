@@ -3017,7 +3017,7 @@ namespace ClassicUO.Network
 
             WMapEntity wme = World.WMapManager.GetEntity(serial);
 
-            if (wme != null)
+            if (wme != null && !string.IsNullOrEmpty(name))
             {
                 wme.Name = name;
             }

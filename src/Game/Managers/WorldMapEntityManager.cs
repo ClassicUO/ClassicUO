@@ -130,6 +130,16 @@ namespace ClassicUO.Game.Managers
                 return;
             }
 
+            if (string.IsNullOrEmpty(name))
+            {
+                Entity ent = World.Get(serial);
+
+                if (ent != null && !string.IsNullOrEmpty(ent.Name))
+                {
+                    name = ent.Name;
+                }
+            }
+
             if (!Entities.TryGetValue(serial, out WMapEntity entity) || entity == null)
             {
                 entity = new WMapEntity(serial)
@@ -151,7 +161,7 @@ namespace ClassicUO.Game.Managers
                 entity.IsGuild = isguild;
                 entity.LastUpdate = Time.Ticks + 1000;
 
-                if (name != null)
+                if (string.IsNullOrEmpty(entity.Name) && !string.IsNullOrEmpty(name))
                 {
                     entity.Name = name;
                 }

@@ -1515,7 +1515,10 @@ namespace ClassicUO.Game.UI.Gumps
 
                             if (wme != null)
                             {
-                                wme.Name = mob.Name;
+                                if (string.IsNullOrEmpty(wme.Name) && !string.IsNullOrEmpty(mob.Name))
+                                {
+                                    wme.Name = mob.Name;
+                                }
                             }
                             else
                             {
@@ -1563,7 +1566,10 @@ namespace ClassicUO.Game.UI.Gumps
 
                             if (wme != null)
                             {
-                                wme.Name = partyMember.Name;
+                                if (string.IsNullOrEmpty(wme.Name) && !string.IsNullOrEmpty(partyMember.Name))
+                                {
+                                    wme.Name = partyMember.Name;
+                                }
                             }
 
                             DrawMobile
