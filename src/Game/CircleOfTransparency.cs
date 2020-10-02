@@ -95,11 +95,9 @@ namespace ClassicUO.Game
                 x -= _width >> 1;
                 y -= _height >> 1;
 
-                //batcher.Begin();
                 batcher.SetStencil(_stencil.Value);
                 batcher.Draw2D(_texture, x, y, ref _hueVector);
                 batcher.SetStencil(null);
-                //batcher.End();
             }
         }
 
