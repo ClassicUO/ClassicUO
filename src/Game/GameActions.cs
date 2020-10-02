@@ -65,7 +65,17 @@ namespace ClassicUO.Game
 
         public static void OpenPaperdoll(uint serial)
         {
-            DoubleClick(serial | 0x80000000);
+            PaperDollGump paperDollGump = UIManager.GetGump<PaperDollGump>(serial);
+
+            if (paperDollGump != null && paperDollGump.IsMinimized)
+            {
+                paperDollGump.IsMinimized = false;
+            }
+            else
+            {
+                DoubleClick(serial | 0x80000000);
+            }
+
         }
 
         public static void OpenSettings()
@@ -106,13 +116,28 @@ namespace ClassicUO.Game
             {
                 journalGump.SetInScreen();
                 journalGump.BringOnTop();
+
+                if (journalGump.IsMinimized)
+                {
+                    journalGump.IsMinimized = false;
+                }
             }
         }
 
         public static void OpenSkills()
         {
-            World.SkillsRequested = true;
-            NetClient.Socket.Send(new PSkillsRequest(World.Player));
+            StandardSkillsGump skillsGump = UIManager.GetGump<StandardSkillsGump>();
+
+            if (skillsGump != null && skillsGump.IsMinimized)
+            {
+                skillsGump.IsMinimized = false;
+            }
+            else
+            {
+                World.SkillsRequested = true;
+                NetClient.Socket.Send(new PSkillsRequest(World.Player));
+            }
+
         }
 
         public static bool OpenCorpse(uint serial)
