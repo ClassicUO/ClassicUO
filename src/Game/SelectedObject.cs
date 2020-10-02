@@ -34,9 +34,9 @@ namespace ClassicUO.Game
         public static BaseGameObject Object;
         public static BaseGameObject LastObject;
         public static BaseGameObject LastLeftDownObject;
-        public static GameObject HealthbarObject;
+        public static Entity HealthbarObject;
         public static Item SelectedContainer;
-        public static GameObject CorpseObject;
+        public static Item CorpseObject;
 
         private static readonly bool[,] _InternalArea = new bool[44, 44];
 
