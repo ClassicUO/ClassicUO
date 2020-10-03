@@ -822,6 +822,33 @@ namespace ClassicUO.Game.Managers
 
                                     break;
 
+                                case MacroSubType.Backpack:
+
+                                    Item backpack = World.Player.FindItemByLayer(Layer.Backpack);
+
+                                    if (backpack != null)
+                                    {
+                                        ContainerGump backpackGump = UIManager.GetGump<ContainerGump>(backpack.Serial);
+
+                                        if (backpackGump != null)
+                                        {
+                                            if (macro.Code == MacroType.Close)
+                                            {
+                                                backpackGump.Dispose();
+                                            }
+                                            else if (macro.Code == MacroType.Minimize)
+                                            {
+                                                backpackGump.IsMinimized = true;
+                                            }
+                                            else if (macro.Code == MacroType.Maximize)
+                                            {
+                                                backpackGump.IsMinimized = false;
+                                            }
+                                        }
+                                    }
+
+                                    break;
+
                                 case MacroSubType.Mail:
                                     Log.Warn($"Macro '{macro.SubCode}' not implemented");
 
