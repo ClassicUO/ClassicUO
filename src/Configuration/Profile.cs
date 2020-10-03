@@ -287,31 +287,10 @@ namespace ClassicUO.Configuration
         public string WorldMapHiddenMarkerFiles { get; set; } = string.Empty;
 
 
-        internal static string ProfilePath { get; } = Path.Combine(CUOEnviroment.ExecutablePath, "Data", "Profiles");
-        internal static string DataPath { get; } = Path.Combine(CUOEnviroment.ExecutablePath, "Data");
-
         public static uint GumpsVersion { get; private set; }
 
-        public void Save(List<Gump> gumps = null)
+        public void Save(string path, List<Gump> gumps = null)
         {
-            if (string.IsNullOrEmpty(ServerName))
-            {
-                throw new InvalidDataException();
-            }
-
-            if (string.IsNullOrEmpty(Username))
-            {
-                throw new InvalidDataException();
-            }
-
-            if (string.IsNullOrEmpty(CharacterName))
-            {
-                throw new InvalidDataException();
-            }
-
-            string path = FileSystemHelper.CreateFolderIfNotExists
-                (ProfilePath, Username.Trim(), ServerName.Trim(), CharacterName.Trim());
-
             Log.Trace($"Saving path:\t\t{path}");
 
             // Save profile settings
@@ -368,11 +347,8 @@ namespace ClassicUO.Configuration
             SkillsGroupManager.Save();
         }
 
-        public List<Gump> ReadGumps()
+        public List<Gump> ReadGumps(string path)
         {
-            string path = FileSystemHelper.CreateFolderIfNotExists
-                (ProfilePath, Username.Trim(), ServerName.Trim(), CharacterName.Trim());
-
             List<Gump> gumps = new List<Gump>();
 
 

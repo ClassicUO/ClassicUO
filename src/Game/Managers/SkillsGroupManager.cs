@@ -216,12 +216,7 @@ namespace ClassicUO.Game.Managers
         {
             Groups.Clear();
 
-            string path = Path.Combine
-            (
-                CUOEnviroment.ExecutablePath, "Data", "Profiles", ProfileManager.CurrentProfile.Username,
-                ProfileManager.CurrentProfile.ServerName, ProfileManager.CurrentProfile.CharacterName, "skillsgroups.xml"
-            );
-
+            string path = Path.Combine(ProfileManager.ProfilePath, "skillsgroups.xml");
             if (!File.Exists(path))
             {
                 Log.Trace("No skillsgroups.xml file. Creating a default file.");
@@ -271,11 +266,7 @@ namespace ClassicUO.Game.Managers
 
         public static void Save()
         {
-            string path = Path.Combine
-            (
-                CUOEnviroment.ExecutablePath, "Data", "Profiles", ProfileManager.CurrentProfile.Username,
-                ProfileManager.CurrentProfile.ServerName, ProfileManager.CurrentProfile.CharacterName, "skillsgroups.xml"
-            );
+            string path = Path.Combine(ProfileManager.ProfilePath, "skillsgroups.xml");
 
             using (XmlTextWriter xml = new XmlTextWriter(path, Encoding.UTF8)
             {

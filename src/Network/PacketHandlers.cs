@@ -1983,7 +1983,7 @@ namespace ClassicUO.Network
                     NetClient.Socket.Send(new PClientViewRange(World.ClientViewRange));
                 }
 
-                ProfileManager.CurrentProfile.ReadGumps()?.ForEach(UIManager.Add);
+                ProfileManager.CurrentProfile.ReadGumps(ProfileManager.ProfilePath)?.ForEach(UIManager.Add);
             }
         }
 
