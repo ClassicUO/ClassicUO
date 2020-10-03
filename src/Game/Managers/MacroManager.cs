@@ -75,11 +75,7 @@ namespace ClassicUO.Game.Managers
 
         public void Load()
         {
-            string path = Path.Combine
-            (
-                CUOEnviroment.ExecutablePath, "Data", "Profiles", ProfileManager.CurrentProfile.Username,
-                ProfileManager.CurrentProfile.ServerName, ProfileManager.CurrentProfile.CharacterName, "macros.xml"
-            );
+            string path = Path.Combine(ProfileManager.ProfilePath, "macros.xml");
 
             if (!File.Exists(path))
             {
@@ -125,11 +121,7 @@ namespace ClassicUO.Game.Managers
         {
             List<Macro> list = GetAllMacros();
 
-            string path = Path.Combine
-            (
-                CUOEnviroment.ExecutablePath, "Data", "Profiles", ProfileManager.CurrentProfile.Username,
-                ProfileManager.CurrentProfile.ServerName, ProfileManager.CurrentProfile.CharacterName, "macros.xml"
-            );
+            string path = Path.Combine(ProfileManager.ProfilePath, "macros.xml");
 
             using (XmlTextWriter xml = new XmlTextWriter(path, Encoding.UTF8)
             {
@@ -1174,7 +1166,7 @@ namespace ClassicUO.Game.Managers
 
                 case MacroType.SaveDesktop:
                     ProfileManager.CurrentProfile?.Save
-                        (UIManager.Gumps.OfType<Gump>().Where(s => s.CanBeSaved).Reverse().ToList());
+                        (ProfileManager.ProfilePath, UIManager.Gumps.OfType<Gump>().Where(s => s.CanBeSaved).Reverse().ToList());
 
                     break;
 

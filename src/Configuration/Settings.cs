@@ -45,6 +45,8 @@ namespace ClassicUO.Configuration
         [JsonProperty("ultimaonlinedirectory")]
         public string UltimaOnlineDirectory { get; set; } = "";
 
+        [JsonProperty("profilespath")] public string ProfilesPath { get; set; } = string.Empty;
+
         [JsonProperty("clientversion")] public string ClientVersion { get; set; } = string.Empty;
 
         [JsonProperty("lastcharactername")] public string LastCharacterName { get; set; } = string.Empty;
@@ -122,6 +124,8 @@ namespace ClassicUO.Configuration
                 settingsToSave.Username = string.Empty;
                 settingsToSave.Password = string.Empty;
             }
+
+            settingsToSave.ProfilesPath = string.Empty;
 
             // NOTE: We can do any other settings clean-ups here before we save them
 

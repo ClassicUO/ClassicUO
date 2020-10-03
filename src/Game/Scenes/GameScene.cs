@@ -325,7 +325,8 @@ namespace ClassicUO.Game.Scenes
             // special case for wmap. this allow us to save settings
             UIManager.GetGump<WorldMapGump>()?.SaveSettings();
 
-            ProfileManager.CurrentProfile?.Save(UIManager.Gumps.OfType<Gump>().Where(s => s.CanBeSaved).Reverse().ToList());
+            ProfileManager.CurrentProfile?.Save
+                (ProfileManager.ProfilePath, UIManager.Gumps.OfType<Gump>().Where(s => s.CanBeSaved).Reverse().ToList());
 
             Macros.Save();
             InfoBars.Save();
