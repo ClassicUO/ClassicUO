@@ -636,7 +636,7 @@ namespace ClassicUO.Game.Managers
 
                                 case MacroSubType.Paperdoll:
 
-                                    PaperDollGump paperdoll = UIManager.GetGump<PaperDollGump>();
+                                    PaperDollGump paperdoll = UIManager.GetGump<PaperDollGump>(World.Player.Serial);
 
                                     if (paperdoll != null)
                                     {
