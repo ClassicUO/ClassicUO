@@ -219,101 +219,27 @@ namespace ClassicUO.Game.UI.Gumps
             switch ((Buttons) buttonID)
             {
                 case Buttons.Map:
-                    MiniMapGump miniMapGump = UIManager.GetGump<MiniMapGump>();
-
-                    if (miniMapGump == null)
-                    {
-                        UIManager.Add(new MiniMapGump());
-                    }
-                    else
-                    {
-                        miniMapGump.SetInScreen();
-                        miniMapGump.BringOnTop();
-                    }
+                    GameActions.OpenMiniMap();
 
                     break;
 
                 case Buttons.Paperdoll:
-                    PaperDollGump paperdollGump = UIManager.GetGump<PaperDollGump>(World.Player);
-
-                    if (paperdollGump == null)
-                    {
-                        GameActions.OpenPaperdoll(World.Player);
-                    }
-                    else
-                    {
-                        paperdollGump.SetInScreen();
-                        paperdollGump.BringOnTop();
-                    }
+                    GameActions.OpenPaperdoll(World.Player);
 
                     break;
 
                 case Buttons.Inventory:
-                    Item backpack = World.Player.FindItemByLayer(Layer.Backpack);
-
-                    if (backpack == null)
-                    {
-                        return;
-                    }
-
-                    ContainerGump backpackGump = UIManager.GetGump<ContainerGump>(backpack);
-
-                    if (backpackGump == null)
-                    {
-                        GameActions.DoubleClick(backpack);
-                    }
-                    else
-                    {
-                        backpackGump.SetInScreen();
-                        backpackGump.BringOnTop();
-                    }
+                    GameActions.OpenBackpack();
 
                     break;
 
                 case Buttons.Journal:
-                    JournalGump journalGump = UIManager.GetGump<JournalGump>();
-
-                    if (journalGump == null)
-                    {
-                        UIManager.Add(new JournalGump { X = 64, Y = 64 });
-                    }
-                    else
-                    {
-                        journalGump.SetInScreen();
-                        journalGump.BringOnTop();
-                    }
+                    GameActions.OpenJournal();
 
                     break;
 
                 case Buttons.Chat:
-                    if (ChatManager.ChatIsEnabled == ChatStatus.Enabled)
-                    {
-                        ChatGump chatGump = UIManager.GetGump<ChatGump>();
-
-                        if (chatGump == null)
-                        {
-                            UIManager.Add(new ChatGump());
-                        }
-                        else
-                        {
-                            chatGump.SetInScreen();
-                            chatGump.BringOnTop();
-                        }
-                    }
-                    else if (ChatManager.ChatIsEnabled == ChatStatus.EnabledUserRequest)
-                    {
-                        ChatGumpChooseName chatGump = UIManager.GetGump<ChatGumpChooseName>();
-
-                        if (chatGump == null)
-                        {
-                            UIManager.Add(new ChatGumpChooseName());
-                        }
-                        else
-                        {
-                            chatGump.SetInScreen();
-                            chatGump.BringOnTop();
-                        }
-                    }
+                    GameActions.OpenChat();
 
                     break;
 
@@ -370,19 +296,7 @@ namespace ClassicUO.Game.UI.Gumps
                     break;
 
                 case Buttons.WorldMap:
-
-                    WorldMapGump worldMap = UIManager.GetGump<WorldMapGump>();
-
-                    if (worldMap == null || worldMap.IsDisposed)
-                    {
-                        worldMap = new WorldMapGump();
-                        UIManager.Add(worldMap);
-                    }
-                    else
-                    {
-                        worldMap.BringOnTop();
-                        worldMap.SetInScreen();
-                    }
+                    GameActions.OpenWorldMap();
 
                     break;
             }

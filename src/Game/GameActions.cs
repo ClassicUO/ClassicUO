@@ -67,15 +67,20 @@ namespace ClassicUO.Game
         {
             PaperDollGump paperDollGump = UIManager.GetGump<PaperDollGump>(serial);
 
-            if (paperDollGump != null && paperDollGump.IsMinimized)
-            {
-                paperDollGump.IsMinimized = false;
-            }
-            else
+            if(paperDollGump == null)
             {
                 DoubleClick(serial | 0x80000000);
             }
+            else
+            {
+                if (paperDollGump.IsMinimized)
+                {
+                    paperDollGump.IsMinimized = false;
+                }
 
+                paperDollGump.SetInScreen();
+                paperDollGump.BringOnTop();
+            }
         }
 
         public static void OpenSettings()
@@ -84,8 +89,14 @@ namespace ClassicUO.Game
 
             if (opt == null)
             {
-                UIManager.Add(opt = new OptionsGump());
-                opt.SetInScreen();
+                OptionsGump optionsGump = new OptionsGump
+                {
+                    X = (Client.Game.Window.ClientBounds.Width >> 1) - 300,
+                    Y = (Client.Game.Window.ClientBounds.Height >> 1) - 250
+                };
+
+                UIManager.Add(optionsGump);
+                optionsGump.SetInScreen();
             }
             else
             {
@@ -137,7 +148,70 @@ namespace ClassicUO.Game
                 World.SkillsRequested = true;
                 NetClient.Socket.Send(new PSkillsRequest(World.Player));
             }
+        }
 
+        public static void OpenMiniMap()
+        {
+            MiniMapGump miniMapGump = UIManager.GetGump<MiniMapGump>();
+
+            if (miniMapGump == null)
+            {
+                UIManager.Add(new MiniMapGump());
+            }
+            else
+            {
+                miniMapGump.ToggleSize();
+                miniMapGump.SetInScreen();
+                miniMapGump.BringOnTop();
+            }
+        }
+
+        public static void OpenWorldMap()
+        {
+            WorldMapGump worldMap = UIManager.GetGump<WorldMapGump>();
+
+            if (worldMap == null || worldMap.IsDisposed)
+            {
+                worldMap = new WorldMapGump();
+                UIManager.Add(worldMap);
+            }
+            else
+            {
+                worldMap.BringOnTop();
+                worldMap.SetInScreen();
+            }
+        }
+
+        public static void OpenChat()
+        {
+            if (ChatManager.ChatIsEnabled == ChatStatus.Enabled)
+            {
+                ChatGump chatGump = UIManager.GetGump<ChatGump>();
+
+                if (chatGump == null)
+                {
+                    UIManager.Add(new ChatGump());
+                }
+                else
+                {
+                    chatGump.SetInScreen();
+                    chatGump.BringOnTop();
+                }
+            }
+            else if (ChatManager.ChatIsEnabled == ChatStatus.EnabledUserRequest)
+            {
+                ChatGumpChooseName chatGump = UIManager.GetGump<ChatGumpChooseName>();
+
+                if (chatGump == null)
+                {
+                    UIManager.Add(new ChatGumpChooseName());
+                }
+                else
+                {
+                    chatGump.SetInScreen();
+                    chatGump.BringOnTop();
+                }
+            }
         }
 
         public static bool OpenCorpse(uint serial)
@@ -156,6 +230,35 @@ namespace ClassicUO.Game
 
             World.Player.ManualOpenedCorpses.Add(serial);
             DoubleClick(serial);
+
+            return true;
+        }
+
+        public static bool OpenBackpack()
+        {
+            Item backpack = World.Player.FindItemByLayer(Layer.Backpack);
+
+            if (backpack == null)
+            {
+                return false;
+            }
+
+            ContainerGump backpackGump = UIManager.GetGump<ContainerGump>(backpack);
+
+            if (backpackGump == null)
+            {
+                GameActions.DoubleClick(backpack);
+            }
+            else
+            {
+                if (backpackGump.IsMinimized)
+                {
+                    backpackGump.IsMinimized = false;
+                }
+
+                backpackGump.SetInScreen();
+                backpackGump.BringOnTop();
+            }
 
             return true;
         }

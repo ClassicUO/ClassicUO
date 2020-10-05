@@ -520,64 +520,22 @@ namespace ClassicUO.Game.Managers
                                     break;
 
                                 case MacroSubType.Chat:
-                                    if (ChatManager.ChatIsEnabled != ChatStatus.Enabled)
-                                    {
-                                        break;
-                                    }
-
-                                    ChatGump chatGump = UIManager.GetGump<ChatGump>();
-
-                                    if (chatGump == null)
-                                    {
-                                        UIManager.Add(new ChatGump());
-                                    }
-                                    else
-                                    {
-                                        chatGump.SetInScreen();
-                                        chatGump.BringOnTop();
-                                    }
+                                    GameActions.OpenChat();
 
                                     break;
 
                                 case MacroSubType.Backpack:
-                                    Item backpack = World.Player.FindItemByLayer(Layer.Backpack);
-
-                                    if (backpack != null)
-                                    {
-                                        GameActions.DoubleClick(backpack);
-                                    }
+                                    GameActions.OpenBackpack();
 
                                     break;
 
                                 case MacroSubType.Overview:
-                                    MiniMapGump miniMapGump = UIManager.GetGump<MiniMapGump>();
-
-                                    if (miniMapGump == null)
-                                    {
-                                        UIManager.Add(new MiniMapGump());
-                                    }
-                                    else
-                                    {
-                                        miniMapGump.ToggleSize();
-                                        miniMapGump.SetInScreen();
-                                        miniMapGump.BringOnTop();
-                                    }
+                                    GameActions.OpenMiniMap();
 
                                     break;
 
                                 case MacroSubType.WorldMap:
-
-                                    WorldMapGump worldMap = UIManager.GetGump<WorldMapGump>();
-
-                                    if (worldMap == null)
-                                    {
-                                        UIManager.Add(new WorldMapGump());
-                                    }
-                                    else
-                                    {
-                                        worldMap.SetInScreen();
-                                        worldMap.BringOnTop();
-                                    }
+                                    GameActions.OpenWorldMap();
 
                                     break;
 

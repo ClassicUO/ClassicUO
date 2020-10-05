@@ -589,26 +589,7 @@ namespace ClassicUO.Game.UI.Gumps
                     break;
 
                 case Buttons.Options:
-
-                    OptionsGump gump = UIManager.GetGump<OptionsGump>();
-
-                    if (gump == null)
-                    {
-                        UIManager.Add
-                        (
-                            new OptionsGump
-                            {
-                                X = (Client.Game.Window.ClientBounds.Width >> 1) - 300,
-                                Y = (Client.Game.Window.ClientBounds.Height >> 1) - 250
-                            }
-                        );
-                    }
-                    else
-                    {
-                        gump.SetInScreen();
-                        gump.BringOnTop();
-                    }
-
+                    GameActions.OpenSettings();
 
                     break;
 
@@ -623,9 +604,7 @@ namespace ClassicUO.Game.UI.Gumps
                     break;
 
                 case Buttons.Skills:
-
-                    World.SkillsRequested = true;
-                    NetClient.Socket.Send(new PSkillsRequest(World.Player));
+                    GameActions.OpenSkills();
 
                     break;
 
