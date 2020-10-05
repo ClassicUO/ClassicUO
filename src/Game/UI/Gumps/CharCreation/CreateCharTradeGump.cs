@@ -22,6 +22,7 @@
 #endregion
 
 using System.Linq;
+using ClassicUO.Data;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
@@ -250,7 +251,13 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             }
             else
             {
-                UIManager.GetGump<CharCreationGump>()?.ShowMessage(ClilocLoader.Instance.GetString(1080032));
+                UIManager.GetGump<CharCreationGump>()
+                         ?.ShowMessage
+                         (
+                             Client.Version <= ClientVersion.CV_5090 ?
+                                 "You must have three unique skills chosen!" :
+                                 ClilocLoader.Instance.GetString(1080032)
+                         );
 
                 return false;
             }
