@@ -4907,7 +4907,7 @@ namespace ClassicUO.Network
                 if (count == 0)
                 {
                     World.Player.RemoveBuff(ic);
-                    gump?.RemoveBuff(ic);
+                    gump?.RequestUpdateContents();
                 }
                 else
                 {
@@ -4964,7 +4964,7 @@ namespace ClassicUO.Network
 
                         if (!alreadyExists)
                         {
-                            gump?.AddBuff(ic);
+                            gump?.RequestUpdateContents();
                         }
                     }
                 }

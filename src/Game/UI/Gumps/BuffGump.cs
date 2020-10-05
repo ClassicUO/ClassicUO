@@ -41,6 +41,7 @@ namespace ClassicUO.Game.UI.Gumps
         private Button _button;
         private GumpDirection _direction;
         private ushort _graphic;
+        private DataBox _box;
 
         public BuffGump() : base(0, 0)
         {
@@ -54,9 +55,12 @@ namespace ClassicUO.Game.UI.Gumps
             X = x;
             Y = y;
 
+            _direction = GumpDirection.LEFT_HORIZONTAL;
+            _graphic = 0x7580;
+
+
             SetInScreen();
 
-            _graphic = 0x7580;
             BuildGump();
         }
 
@@ -65,6 +69,12 @@ namespace ClassicUO.Game.UI.Gumps
         private void BuildGump()
         {
             WantUpdateSize = false;
+
+            _box?.Clear();
+            _box?.Children.Clear();
+
+            Clear();
+
 
             Add
             (
@@ -78,21 +88,58 @@ namespace ClassicUO.Game.UI.Gumps
             (
                 _button = new Button(0, 0x7585, 0x7589, 0x7589)
                 {
-                    X = -2,
-                    Y = 36,
                     ButtonAction = ButtonAction.Activate
                 }
             );
 
-            _direction = GumpDirection.LEFT_HORIZONTAL;
 
+            switch (_direction)
+            {
+                case GumpDirection.LEFT_HORIZONTAL:
+                    _button.X = -2;
+                    _button.Y = 36;
+
+                    break;
+
+                case GumpDirection.RIGHT_VERTICAL:
+                    _button.X = 34;
+                    _button.Y = 78;
+
+                    break;
+
+                case GumpDirection.RIGHT_HORIZONTAL:
+                    _button.X = 76;
+                    _button.Y = 36;
+
+                    break;
+
+                case GumpDirection.LEFT_VERTICAL:
+                default:
+                    _button.X = 0;
+                    _button.Y = 0;
+
+                    break;
+            }
+
+            Add(_box = new DataBox(0, 0, 0, 0)
+            {
+                WantUpdateSize = true
+            });
 
             foreach (KeyValuePair<BuffIconType, BuffIcon> k in World.Player.BuffIcons)
             {
-                Add(new BuffControlEntry(World.Player.BuffIcons[k.Key]));
+                _box.Add(new BuffControlEntry(World.Player.BuffIcons[k.Key]));
             }
 
-            Change();
+            _background.Graphic = _graphic;
+            _background.X = 0;
+            _background.Y = 0;
+
+            Width = _background.Width;
+            Height = _background.Height;
+
+
+            UpdateElements();
         }
 
         public override void Save(BinaryWriter writer)
@@ -128,69 +175,20 @@ namespace ClassicUO.Game.UI.Gumps
             BuildGump();
         }
 
-
-        public void AddBuff(BuffIconType type)
+        protected override void UpdateContents()
         {
-            Add(new BuffControlEntry(World.Player.BuffIcons[type]));
-            UpdateElements();
+            BuildGump();
         }
-
-        public void RemoveBuff(BuffIconType type)
-        {
-            foreach (BuffControlEntry entry in Children.OfType<BuffControlEntry>().Where(s => s.Icon.Type == type))
-            {
-                if (Height > _background.Height)
-                {
-                    int delta = Height - _background.Height;
-
-                    if (_direction == GumpDirection.RIGHT_VERTICAL)
-                    {
-                        Y += delta;
-                        Height -= delta;
-                        _background.Y -= delta;
-                        _button.Y -= delta;
-                    }
-                    else if (_direction == GumpDirection.LEFT_VERTICAL)
-                    {
-                        Height -= delta;
-                    }
-                }
-
-                if (Width > _background.Width)
-                {
-                    int delta = Width - _background.Width;
-
-                    if (_direction == GumpDirection.RIGHT_HORIZONTAL)
-                    {
-                        X += delta;
-                        Width -= delta;
-                        _background.X -= delta;
-                        _button.X -= delta;
-                    }
-                    else if (_direction == GumpDirection.LEFT_HORIZONTAL)
-                    {
-                        Width -= delta;
-                    }
-                }
-
-                entry.Dispose();
-            }
-
-            UpdateElements();
-        }
-
 
         private void UpdateElements()
         {
-            IEnumerable<BuffControlEntry> list = FindControls<BuffControlEntry>();
             int offset = 0;
-
             int maxWidth = 0;
             int maxHeight = 0;
 
             int i = 0;
 
-            foreach (BuffControlEntry e in list)
+            foreach (Control e in _box.Children)
             {
                 maxWidth += e.Width;
                 maxHeight += e.Height;
@@ -234,7 +232,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                             int j = 0;
 
-                            foreach (BuffControlEntry ee in list)
+                            foreach (Control ee in _box.Children)
                             {
                                 if (j >= i)
                                 {
@@ -265,7 +263,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                             int j = 0;
 
-                            foreach (BuffControlEntry ee in list)
+                            foreach (Control ee in _box.Children)
                             {
                                 if (j >= i)
                                 {
@@ -294,58 +292,39 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 _graphic++;
 
-                Change();
+                if (_graphic > 0x7582)
+                {
+                    _graphic = 0x757F;
+                }
+
+                switch (_graphic)
+                {
+                    case 0x7580:
+                        _direction = GumpDirection.LEFT_HORIZONTAL;
+
+                        break;
+
+                    case 0x7581:
+                        _direction = GumpDirection.RIGHT_VERTICAL;
+
+                        break;
+
+                    case 0x7582:
+                        _direction = GumpDirection.RIGHT_HORIZONTAL;
+
+                        break;
+
+                    case 0x757F:
+                    default:
+                        _direction = GumpDirection.LEFT_VERTICAL;
+
+                        break;
+                }
+
+                RequestUpdateContents();
             }
         }
 
-        private void Change()
-        {
-            if (_graphic > 0x7582)
-            {
-                _graphic = 0x757F;
-            }
-
-            switch (_graphic)
-            {
-                case 0x7580:
-                    _button.X = -2;
-                    _button.Y = 36;
-                    _direction = GumpDirection.LEFT_HORIZONTAL;
-
-                    break;
-
-                case 0x7581:
-                    _button.X = 34;
-                    _button.Y = 78;
-                    _direction = GumpDirection.RIGHT_VERTICAL;
-
-                    break;
-
-                case 0x7582:
-                    _button.X = 76;
-                    _button.Y = 36;
-                    _direction = GumpDirection.RIGHT_HORIZONTAL;
-
-                    break;
-
-                case 0x757F:
-                default:
-                    _button.X = 0;
-                    _button.Y = 0;
-                    _direction = GumpDirection.LEFT_VERTICAL;
-
-                    break;
-            }
-
-            _background.Graphic = _graphic;
-            _background.X = 0;
-            _background.Y = 0;
-
-            Width = _background.Width;
-            Height = _background.Height;
-
-            UpdateElements();
-        }
 
         private enum GumpDirection
         {
@@ -417,7 +396,7 @@ namespace ClassicUO.Game.UI.Gumps
                     {
                         if (delta <= 0)
                         {
-                            ((BuffGump) Parent)?.RemoveBuff(Icon.Type);
+                            ((BuffGump) Parent)?.RequestUpdateContents();
                         }
                         else
                         {
