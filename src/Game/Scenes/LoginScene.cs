@@ -597,6 +597,7 @@ namespace ClassicUO.Game.Scenes
                 case 0x86: // UpdateCharacterList
                     ParseCharacterList(e);
 
+                    CurrentLoginStep = LoginSteps.CharacterSelection;
                     UIManager.GetGump<CharacterSelectionGump>()?.Dispose();
 
                     _currentGump?.Dispose();
