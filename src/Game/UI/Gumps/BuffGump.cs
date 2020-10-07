@@ -182,40 +182,21 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void UpdateElements()
         {
-            int offset = 0;
-            int maxWidth = 0;
-            int maxHeight = 0;
-
-            int i = 0;
-
-            foreach (Control e in _box.Children)
+            for (int i = 0, offset = 0; i < _box.Children.Count; i++, offset += 31)
             {
-                maxWidth += e.Width;
-                maxHeight += e.Height;
+                Control e = _box.Children[i];
 
                 switch (_direction)
                 {
                     case GumpDirection.LEFT_VERTICAL:
-                        e.X = 26;
-                        e.Y = 25 + offset;
-                        offset += 31;
-
-                        if (Height < 25 + offset)
-                        {
-                            Height = 25 + offset;
-                        }
+                        e.X = 25;
+                        e.Y = 26 + offset;
 
                         break;
 
                     case GumpDirection.LEFT_HORIZONTAL:
                         e.X = 26 + offset;
                         e.Y = 5;
-                        offset += 31;
-
-                        if (Width < 26 + offset)
-                        {
-                            Width = 26 + offset;
-                        }
 
                         break;
 
@@ -223,66 +204,14 @@ namespace ClassicUO.Game.UI.Gumps
                         e.X = 5;
                         e.Y = Height - 48 - offset;
 
-                        if (e.Y < 0)
-                        {
-                            Y += e.Y;
-                            Height -= e.Y;
-                            _background.Y -= e.Y;
-                            _button.Y -= e.Y;
-
-                            int j = 0;
-
-                            foreach (Control ee in _box.Children)
-                            {
-                                if (j >= i)
-                                {
-                                    break;
-                                }
-
-                                ee.Y -= e.Y;
-                                j++;
-                            }
-
-                            e.Y = Height - 48 - offset;
-                        }
-
-                        offset += 31;
-
                         break;
 
                     case GumpDirection.RIGHT_HORIZONTAL:
                         e.X = Width - 48 - offset;
                         e.Y = 5;
 
-                        if (e.X < 0)
-                        {
-                            X += e.X;
-                            Width -= e.X;
-                            _background.X -= e.X;
-                            _button.X -= e.X;
-
-                            int j = 0;
-
-                            foreach (Control ee in _box.Children)
-                            {
-                                if (j >= i)
-                                {
-                                    break;
-                                }
-
-                                ee.X -= e.X;
-                                j++;
-                            }
-
-                            e.X = Width - 48 - offset;
-                        }
-
-                        offset += 31;
-
                         break;
                 }
-
-                i++;
             }
         }
 
@@ -339,8 +268,6 @@ namespace ClassicUO.Game.UI.Gumps
             private byte _alpha;
             private bool _decreaseAlpha;
             private readonly RenderedText _gText;
-            private readonly uint _timer;
-
             private float _updateTooltipTime;
 
             public BuffControlEntry(BuffIcon icon) : base(0, 0, icon.Graphic, 0)
@@ -353,7 +280,6 @@ namespace ClassicUO.Game.UI.Gumps
                 Icon = icon;
                 _alpha = 0xFF;
                 _decreaseAlpha = true;
-                _timer = (uint) (icon.Timer <= 0 ? 0xFFFF_FFFF : Time.Ticks + icon.Timer * 1000);
 
                 _gText = RenderedText.Create
                     ("", 0xFFFF, 2, true, FontStyle.Fixed | FontStyle.BlackBorder, TEXT_ALIGN_TYPE.TS_CENTER, Width);
@@ -373,9 +299,9 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 base.Update(totalTime, frameTime);
 
-                if (!IsDisposed)
+                if (!IsDisposed && Icon != null)
                 {
-                    int delta = (int) (_timer - totalTime);
+                    int delta = (int) (Icon.Timer - totalTime);
                     if (_updateTooltipTime < totalTime && delta > 0)
                     {
                         TimeSpan span = TimeSpan.FromMilliseconds(delta);
@@ -392,7 +318,7 @@ namespace ClassicUO.Game.UI.Gumps
                         }
                     }
 
-                    if (_timer != 0xFFFF_FFFF && delta < 10000)
+                    if (Icon.Timer != 0xFFFF_FFFF && delta < 10000)
                     {
                         if (delta <= 0)
                         {
