@@ -28,6 +28,7 @@ using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.IO.Resources;
+using ClassicUO.Resources;
 
 namespace ClassicUO.Game.UI.Gumps.CharCreation
 {
@@ -255,7 +256,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                          ?.ShowMessage
                          (
                              Client.Version <= ClientVersion.CV_5090 ?
-                                 "You must have three unique skills chosen!" :
+                                 ResGumps.YouMustHaveThreeUniqueSkillsChosen :
                                  ClilocLoader.Instance.GetString(1080032)
                          );
 

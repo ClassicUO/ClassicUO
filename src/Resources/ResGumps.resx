@@ -1405,4 +1405,7 @@ Client version: '{0}'</value>
   <data name="HighlightContainerWhenSelected" xml:space="preserve">
     <value>Highlight container on ground when mouse is over a container gump</value>
   </data>
+  <data name="YouMustHaveThreeUniqueSkillsChosen" xml:space="preserve">
+    <value>You must have three unique skills chosen!</value>
+  </data>
 </root>

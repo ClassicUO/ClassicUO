@@ -3896,6 +3896,15 @@ namespace ClassicUO.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to You must have three unique skills chosen!.
+        /// </summary>
+        public static string YouMustHaveThreeUniqueSkillsChosen {
+            get {
+                return ResourceManager.GetString("YouMustHaveThreeUniqueSkillsChosen", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Your current channel:.
         /// </summary>
         public static string YourCurrentChannel {
