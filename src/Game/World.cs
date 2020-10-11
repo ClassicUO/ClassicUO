@@ -461,6 +461,7 @@ namespace ClassicUO.Game
                 first = next;
             }
 
+            OPL.Remove(serial);
             item.Destroy();
 
             if (forceRemove)
@@ -491,6 +492,7 @@ namespace ClassicUO.Game
                 first = next;
             }
 
+            OPL.Remove(serial);
             mobile.Destroy();
 
             if (forceRemove)

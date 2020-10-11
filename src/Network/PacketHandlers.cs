@@ -4805,7 +4805,7 @@ namespace ClassicUO.Network
                 uint serial = p.ReadUInt();
                 uint revision = p.ReadUInt();
 
-                if (!World.OPL.IsRevisionEqual(serial, revision))
+                if (!World.OPL.IsRevisionEquals(serial, revision))
                 {
                     AddMegaClilocRequest(serial);
                 }
