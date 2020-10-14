@@ -180,7 +180,7 @@ namespace ClassicUO.Game.Managers
                             MessageManager.HandleMessage
                             (
                                 null, name, Members[i].Name, ProfileManager.CurrentProfile.PartyMessageHue, MessageType.Party,
-                                3, TextType.SYSTEM
+                                3, TextType.GUILD_ALLY
                             );
 
                             break;
