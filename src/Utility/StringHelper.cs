@@ -112,18 +112,6 @@ namespace ClassicUO.Utility
             return _sb.ToString();
         }
 
-        public static unsafe string ReadUTF8(byte* data)
-        {
-            byte* ptr = data;
-
-            while (*ptr != 0)
-            {
-                ptr++;
-            }
-
-            return Encoding.UTF8.GetString(data, (int) (ptr - data));
-        }
-
         [MethodImpl(256)]
         public static bool IsSafeChar(int c)
         {

@@ -42,6 +42,7 @@ using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using SDL2;
 using static SDL2.SDL;
 
 namespace ClassicUO
@@ -570,7 +571,7 @@ namespace ClassicUO
                         break;
                     }
 
-                    string s = StringHelper.ReadUTF8(sdlEvent->text.text);
+                    string s = UTF8_ToManaged((IntPtr) sdlEvent->text.text, false);
 
                     if (!string.IsNullOrEmpty(s))
                     {
