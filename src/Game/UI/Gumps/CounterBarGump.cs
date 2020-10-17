@@ -43,8 +43,6 @@ namespace ClassicUO.Game.UI.Gumps
 {
     internal class CounterBarGump : ResizableGump
     {
-        const int MAX_CELLS = 100;
-
         private AlphaBlendControl _background;
         private DataBox _dataBox;
         private int _rectSize;
@@ -129,8 +127,6 @@ namespace ClassicUO.Game.UI.Gumps
             _dataBox.Width = 0;
             _dataBox.Height = 0;
             _dataBox.WantUpdateSize = true;
-            //int columns = Math.Max(1, (int) Math.Round(width / (float) _rectSize));
-            //int rows = Math.Max(1, (int) Math.Round(height / (float) _rectSize));
 
             int x = 2;
             int y = 2;
