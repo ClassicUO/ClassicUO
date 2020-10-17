@@ -46,6 +46,7 @@ namespace ClassicUO.Game.UI.Gumps
         private AlphaBlendControl _background;
         private DataBox _dataBox;
         private int _rectSize;
+        private ScissorControl _scissor;
 
         public CounterBarGump() : base(0, 0, 50, 50, 0, 0, 0)
         {
@@ -95,8 +96,10 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add(_background = new AlphaBlendControl(0.3f) { X = BorderSize, Y = BorderSize, Width = Width - BorderSize * 2, Height = Height - BorderSize * 2 });
 
-            _dataBox = new DataBox(4, 4, 0, 0);
+            Add(_scissor = new ScissorControl(true, BorderSize, BorderSize, 0, 0));
+            _dataBox = new DataBox(BorderSize, BorderSize, 0, 0);
             Add(_dataBox);
+            Add(new ScissorControl(false));
             _dataBox.WantUpdateSize = true;
 
             ResizeWindow(new Point(Width, Height));
@@ -128,6 +131,9 @@ namespace ClassicUO.Game.UI.Gumps
             _dataBox.Height = 0;
             _dataBox.WantUpdateSize = true;
 
+            _scissor.Width = width;
+            _scissor.Height = height;
+
             int x = 2;
             int y = 2;
 
@@ -144,29 +150,13 @@ namespace ClassicUO.Game.UI.Gumps
 
                     x += _rectSize + 2;
 
-                    if (x > width)
+                    if (x + _rectSize > width)
                     {
                         x = 2;
                         y += _rectSize + 2;
                     }
                 }
             }
-        }
-
-        public override bool Draw(UltimaBatcher2D batcher, int x, int y)
-        {
-            Rectangle scissorRect = ScissorStack.CalculateScissors(Matrix.Identity, x, y, Width, Height);
-
-            if (ScissorStack.PushScissors(batcher.GraphicsDevice, scissorRect))
-            {
-                batcher.EnableScissorTest(true);
-                base.Draw(batcher, x, y);
-                batcher.EnableScissorTest(false);
-
-                ScissorStack.PopScissors(batcher.GraphicsDevice);
-            }
-
-            return true;
         }
 
         protected override bool OnMouseDoubleClick(int x, int y, MouseButtonType button)
