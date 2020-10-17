@@ -1813,25 +1813,8 @@ namespace ClassicUO.Game.UI.Gumps
             startY += text.Height + 2;
             text = AddLabel(rightArea, ResGumps.CellSize, startX, startY);
 
-            int initialX = startX;
             startX += text.Width + 5;
             _cellSize = AddHSlider(rightArea, 30, 80, _currentProfile.CounterBarCellSize, startX, startY, 80);
-
-
-            startX = initialX;
-            startY += text.Height + 2 + 15;
-
-            _rows = AddInputField(rightArea, startX, startY, 50, 30, ResGumps.Counter_Rows, 80, false, true, 5);
-
-            _rows.SetText(_currentProfile.CounterBarRows.ToString());
-
-
-            startX += _rows.Width + 5 + 100;
-
-            _columns = AddInputField(rightArea, startX, startY, 50, 30, ResGumps.Counter_Columns, 80, false, true, 5);
-
-            _columns.SetText(_currentProfile.CounterBarColumns.ToString());
-
 
             Add(rightArea, PAGE);
         }
@@ -2660,8 +2643,6 @@ namespace ClassicUO.Game.UI.Gumps
             bool before = _currentProfile.CounterBarEnabled;
             _currentProfile.CounterBarEnabled = _enableCounters.IsChecked;
             _currentProfile.CounterBarCellSize = _cellSize.Value;
-            _currentProfile.CounterBarRows = int.Parse(_rows.Text);
-            _currentProfile.CounterBarColumns = int.Parse(_columns.Text);
             _currentProfile.CounterBarHighlightOnUse = _highlightOnUse.IsChecked;
 
             _currentProfile.CounterBarHighlightAmount = int.Parse(_highlightAmount.Text);
@@ -2670,13 +2651,6 @@ namespace ClassicUO.Game.UI.Gumps
             _currentProfile.CounterBarDisplayAbbreviatedAmount = _enableAbbreviatedAmount.IsChecked;
 
             CounterBarGump counterGump = UIManager.GetGump<CounterBarGump>();
-
-            counterGump?.SetLayout
-            (
-                _currentProfile.CounterBarCellSize, _currentProfile.CounterBarRows,
-                _currentProfile.CounterBarColumns
-            );
-
 
             if (before != _currentProfile.CounterBarEnabled)
             {
@@ -2688,8 +2662,7 @@ namespace ClassicUO.Game.UI.Gumps
                         (
                             new CounterBarGump
                             (
-                                200, 200, _currentProfile.CounterBarCellSize,
-                                _currentProfile.CounterBarRows, _currentProfile.CounterBarColumns
+                                200, 200, _currentProfile.CounterBarCellSize
                             )
                         );
                     }
@@ -2698,6 +2671,10 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     counterGump.IsEnabled = counterGump.IsVisible = _currentProfile.CounterBarEnabled;
                 }
+            }
+            else
+            {
+                counterGump?.SetCellSize(_currentProfile.CounterBarCellSize);
             }
 
             // experimental

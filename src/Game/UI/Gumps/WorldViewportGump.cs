@@ -275,7 +275,6 @@ namespace ClassicUO.Game.UI.Gumps
     internal class BorderControl : Control
     {
         private readonly UOTexture[] _borders = new UOTexture[2];
-        private readonly int _borderSize;
 
         public BorderControl(int x, int y, int w, int h, int borderSize)
         {
@@ -285,12 +284,13 @@ namespace ClassicUO.Game.UI.Gumps
             Height = h;
             _borders[0] = GumpsLoader.Instance.GetTexture(0x0A8C);
             _borders[1] = GumpsLoader.Instance.GetTexture(0x0A8D);
-            _borderSize = borderSize;
+            BorderSize = borderSize;
             CanMove = true;
             AcceptMouseInput = true;
         }
 
         public ushort Hue { get; set; }
+        public int BorderSize { get; }
 
         public override void Update(double totalTime, double frameTime)
         {
@@ -313,16 +313,16 @@ namespace ClassicUO.Game.UI.Gumps
             }
 
             // sopra
-            batcher.Draw2DTiled(_borders[0], x, y, Width, _borderSize, ref HueVector);
+            batcher.Draw2DTiled(_borders[0], x, y, Width, BorderSize, ref HueVector);
             // sotto
-            batcher.Draw2DTiled(_borders[0], x, y + Height - _borderSize, Width, _borderSize, ref HueVector);
+            batcher.Draw2DTiled(_borders[0], x, y + Height - BorderSize, Width, BorderSize, ref HueVector);
             //sx
-            batcher.Draw2DTiled(_borders[1], x, y, _borderSize, Height, ref HueVector);
+            batcher.Draw2DTiled(_borders[1], x, y, BorderSize, Height, ref HueVector);
 
             //dx
             batcher.Draw2DTiled
             (
-                _borders[1], x + Width - _borderSize, y + (_borders[1].Width >> 1), _borderSize, Height - _borderSize,
+                _borders[1], x + Width - BorderSize, y + (_borders[1].Width >> 1), BorderSize, Height - BorderSize,
                 ref HueVector
             );
 
