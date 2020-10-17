@@ -33,8 +33,8 @@ namespace ClassicUO.Game.UI.Gumps
         private readonly Button _button;
         private bool _clicked;
         private Point _lastSize, _savedSize;
-        private readonly int _minH;
-        private readonly int _minW;
+        private int _minH;
+        private int _minW;
 
 
         protected ResizableGump
@@ -83,6 +83,13 @@ namespace ClassicUO.Game.UI.Gumps
             set => _borderControl.IsVisible = _button.IsVisible = value;
         }
 
+        public int BorderSize => _borderControl.BorderSize;
+
+        public void SetMinSize(Point size)
+        {
+            _minW = size.X;
+            _minH = size.Y;
+        }
 
         public Point ResizeWindow(Point newSize)
         {
