@@ -1270,7 +1270,7 @@ Min. Skill: {1}</value>
   </data>
   <data name="ThisKeyCombinationAlreadyExists" xml:space="preserve">
     <value>This key combination
-already exists.</value>
+already exists. Combination used by: {0}</value>
   </data>
   <data name="ImpossibleToDefineTheClientVersion0" xml:space="preserve">
     <value>Impossible to define the client version.

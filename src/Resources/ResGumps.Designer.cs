@@ -3505,7 +3505,7 @@ namespace ClassicUO.Resources {
         
         /// <summary>
         ///   Looks up a localized string similar to This key combination
-        ///already exists..
+        ///already exists. Combination used by: {0}.
         /// </summary>
         public static string ThisKeyCombinationAlreadyExists {
             get {

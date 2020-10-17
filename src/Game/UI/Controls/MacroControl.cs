@@ -222,7 +222,7 @@ namespace ClassicUO.Game.UI.Controls
                     }
 
                     SetupKeyByDefault();
-                    UIManager.Add(new MessageBoxGump(250, 150, $"{ResGumps.ThisKeyCombinationAlreadyExists} Combination used by macro: {macro.Name}.", null));
+                    UIManager.Add(new MessageBoxGump(250, 150, string.Format(ResGumps.ThisKeyCombinationAlreadyExists, macro.Name), null));
 
                     return;
                 }
