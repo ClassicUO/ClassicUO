@@ -198,6 +198,10 @@ namespace ClassicUO.Utility
 
                 if (!string.IsNullOrEmpty(s))
                 {
+                    if (s.IndexOf('\r') >= 0)
+                    {
+                        s = s.Replace("\r", "");
+                    }
                     if (s.IndexOf('\t') >= 0)
                     {
                         return s.Replace("\t", "   ");

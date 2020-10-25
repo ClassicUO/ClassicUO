@@ -49,49 +49,117 @@ The binary produced will work on all supported platforms.
 You'll need [Visual Studio 2019](https://www.visualstudio.com/downloads/). The free community edition should be fine. Once that
 is installed:
 
-1. Open ClassicUO.sln in the root of the repository.
+- Open ClassicUO.sln from the root of the repository.
 
-2. Select "Debug" or "Release" at the top.
+- Select "Debug" or "Release" at the top.
 
-3. Hit F5 to build. The output will be in the "bin/Release" or "bin/Debug" directory.
+- Hit F5 to build. The output will be in the "bin/Release" or "bin/Debug" directory.
 
-### Linux
-Open a terminal instance and put the following commands:
+# Linux
 
-1. `sudo apt-get install mono-complete`
+- Open a terminal and enter the following commands.
 
-2. Navigate to ClassicUO scripts folder:
-`cd /your/path/to/ClassicUO/scripts`
+## Ubuntu
+![Ubuntu](https://assets.ubuntu.com/v1/ad9a02ac-ubuntu-orange.gif)
+```bash
+sudo apt update
+sudo apt install dirmngr gnupg apt-transport-https ca-certificates software-properties-common lsb-release
+sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 3FA7E0328081BFF6A14DA29AA6A19B38D3D831EF
+```
 
-3. Execute `build.sh` script. If you want build a debug version of ClassicUO just pass "debug" as argument like: `./build.sh debug`.
-   Probably you have to set the `build.sh` file executable with with the command `chmod -x build.sh`
+```
+sudo apt-add-repository "deb https://download.mono-project.com/repo/ubuntu stable-`lsb_release -sc` main"
+```
 
-6. Navigate to `/your/path/to/ClassicUO/bin/[Debug or Release]`
+Check signature
+```
+gpg: key A6A19B38D3D831EF: public key "Xamarin Public Jenkins (auto-signing) <releng@xamarin.com>" imported
+gpg: Total number processed: 1
+gpg:               imported: 1
+```
+```bash
+sudo apt install mono-complete
+```
+
+## Fedora
+![Fedora](https://fedoraproject.org/w/uploads/thumb/3/3c/Fedora_logo.png/150px-Fedora_logo.png)
+
+### Fedora 29
+```bash
+rpm --import "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x3FA7E0328081BFF6A14DA29AA6A19B38D3D831EF"
+su -c 'curl https://download.mono-project.com/repo/centos8-stable.repo | tee /etc/yum.repos.d/mono-centos8-stable.repo'
+dnf update
+```
+
+### Fedora 28
+```bash
+rpm --import "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x3FA7E0328081BFF6A14DA29AA6A19B38D3D831EF"
+su -c 'curl https://download.mono-project.com/repo/centos7-stable.repo | tee /etc/yum.repos.d/mono-centos7-stable.repo'
+dnf update
+```
+
+```bash
+sudo dnf install mono-devel
+```
+
+## ArchLinux
+![ArchLinux](https://www.archlinux.org/static/logos/archlinux-logo-dark-scalable.518881f04ca9.svg)
+
+```bash
+sudo pacman -S mono mono-tools
+```
+
+Verify
+```bash
+mono --version
+```
+```
+Mono JIT compiler version 6.6.0.161 (tarball Tue Dec 10 10:36:32 UTC 2019)
+Copyright (C) 2002-2014 Novell, Inc, Xamarin Inc and Contributors. www.mono-project.com
+    TLS:           __thread
+    SIGSEGV:       altstack
+    Notifications: epoll
+    Architecture:  amd64
+    Disabled:      none
+    Misc:          softdebug
+    Interpreter:   yes
+    LLVM:          yes(610)
+    Suspend:       hybrid
+    GC:            sgen (concurrent by default)
+```
+
+- Navigate to ClassicUO scripts folder:
+  `cd /your/path/to/ClassicUO/scripts`
+
+- Execute `build.sh` script. If you want build a debug version of ClassicUO just pass "debug" as argument like: `./build.sh debug`.
+  Probably you have to set the `build.sh` file executable with with the command `chmod -x build.sh`
+
+- Navigate to `/your/path/to/ClassicUO/bin/[Debug or Release]`
 
 
 ### macOS
 All the commands should be executed in terminal. All global package installs should be done only if not yet installed.
 
-1. Install Homebrew, a package manager for macOS (if not yet installed):
-Follow instructions on https://brew.sh/
+- Install Homebrew, a package manager for macOS (if not yet installed):
+  Follow instructions on https://brew.sh/
 
-2. Install Mono (https://www.mono-project.com/):
-`brew install mono`
+- Install Mono (https://www.mono-project.com/):
+  `brew install mono`
 
-3. Install NuGet, a package manager for .NET (https://docs.microsoft.com/en-us/nuget/):
-`brew install nuget`
+- Install NuGet, a package manager for .NET (https://docs.microsoft.com/en-us/nuget/):
+  `brew install nuget`
 
-4. Navigate to ClassicUO root folder:
-`cd /your/path/to/ClassicUO`
+- Navigate to ClassicUO root folder:
+  `cd /your/path/to/ClassicUO`
 
-5. Restore packages (https://docs.microsoft.com/en-us/nuget/reference/cli-reference/cli-ref-restore):
-`nuget restore`
+- Restore packages (https://docs.microsoft.com/en-us/nuget/reference/cli-reference/cli-ref-restore):
+  `nuget restore`
 
-6. Build:
+- Build:
   - Debug version: `msbuild /t:Rebuild /p:Configuration=Debug`
   - Release version: `msbuild /t:Rebuild /p:Configuration=Release`
 
-7. Run ClassicUO via Mono:
+- Run ClassicUO via Mono:
   - Debug version: `DYLD_LIBRARY_PATH=./bin/Debug/osx/ mono ./bin/Debug/ClassicUO.exe`
   - Release version: `DYLD_LIBRARY_PATH=./bin/Release/osx/ mono ./bin/Release/ClassicUO.exe`
 
