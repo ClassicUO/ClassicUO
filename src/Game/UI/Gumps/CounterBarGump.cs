@@ -451,8 +451,6 @@ namespace ClassicUO.Game.UI.Gumps
                     else
                     {
                         _amount = 0;
-                        //GetAmount(World.Player.FindItemByLayer(Layer.Backpack), Graphic, Hue, ref _amount);
-                        //GetAmount(World.Player.FindItemByLayer(Layer.Cloak), Graphic, Hue, ref _amount);
 
                         for (Item item = (Item) World.Player.Items; item != null; item = (Item) item.Next)
                         {
