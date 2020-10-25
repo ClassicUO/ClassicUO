@@ -32,7 +32,19 @@ namespace ClassicUO.Game.GameObjects
     {
         private uint _lastMoveTime;
 
-        public DragEffect(uint src, uint trg, int xSource, int ySource, int zSource, int xTarget, int yTarget, int zTarget, ushort graphic, ushort hue)
+        public DragEffect
+        (
+            uint src,
+            uint trg,
+            int xSource,
+            int ySource,
+            int zSource,
+            int xTarget,
+            int yTarget,
+            int zTarget,
+            ushort graphic,
+            ushort hue
+        )
         {
             Entity source = World.Get(src);
 
@@ -63,7 +75,7 @@ namespace ClassicUO.Game.GameObjects
             Load();
         }
 
-        public override void Update(double totalMS, double frameMS)
+        public override void Update(double totalTime, double frameTime)
         {
             if (_lastMoveTime > Time.Ticks)
             {
@@ -75,7 +87,7 @@ namespace ClassicUO.Game.GameObjects
 
             _lastMoveTime = Time.Ticks + 20;
 
-            base.Update(totalMS, frameMS);
+            base.Update(totalTime, frameTime);
         }
 
         public override bool Draw(UltimaBatcher2D batcher, int posX, int posY)
@@ -88,12 +100,12 @@ namespace ClassicUO.Game.GameObjects
             ResetHueVector();
 
 
-            if (ProfileManager.Current.NoColorObjectsOutOfRange && Distance > World.ClientViewRange)
+            if (ProfileManager.CurrentProfile.NoColorObjectsOutOfRange && Distance > World.ClientViewRange)
             {
                 HueVector.X = Constants.OUT_RANGE_COLOR;
                 HueVector.Y = 1;
             }
-            else if (World.Player.IsDead && ProfileManager.Current.EnableBlackWhiteEffect)
+            else if (World.Player.IsDead && ProfileManager.CurrentProfile.EnableBlackWhiteEffect)
             {
                 HueVector.X = Constants.DEAD_RANGE_COLOR;
                 HueVector.Y = 1;
@@ -105,14 +117,14 @@ namespace ClassicUO.Game.GameObjects
 
             //Engine.DebugInfo.EffectsRendered++;
 
-            DrawStatic(batcher, AnimationGraphic, posX - ((int) Offset.X + 22), posY - ((int) -Offset.Y + 22), ref HueVector);
+            DrawStatic
+                (batcher, AnimationGraphic, posX - ((int) Offset.X + 22), posY - ((int) -Offset.Y + 22), ref HueVector);
 
             ref StaticTiles data = ref TileDataLoader.Instance.StaticData[Graphic];
 
             if (data.IsLight && Source != null)
             {
-                Client.Game.GetScene<GameScene>()
-                      .AddLight(Source, Source, posX + 22, posY + 22);
+                Client.Game.GetScene<GameScene>().AddLight(Source, Source, posX + 22, posY + 22);
             }
 
             return true;

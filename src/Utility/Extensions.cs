@@ -50,8 +50,7 @@ namespace ClassicUO.Utility
         {
             if (handler != null)
             {
-                Task.Run(() => handler(sender, EventArgs.Empty))
-                    .Catch();
+                Task.Run(() => handler(sender, EventArgs.Empty)).Catch();
             }
         }
 
@@ -59,8 +58,7 @@ namespace ClassicUO.Utility
         {
             if (handler != null)
             {
-                Task.Run(() => handler(sender, e))
-                    .Catch();
+                Task.Run(() => handler(sender, e)).Catch();
             }
         }
 
@@ -205,7 +203,10 @@ namespace ClassicUO.Utility
 
                 if (!completeFileName.StartsWith(destinationDirectoryFullPath, StringComparison.OrdinalIgnoreCase))
                 {
-                    throw new IOException("Trying to extract file outside of destination directory. See this link for more info: https://snyk.io/research/zip-slip-vulnerability");
+                    throw new IOException
+                    (
+                        "Trying to extract file outside of destination directory. See this link for more info: https://snyk.io/research/zip-slip-vulnerability"
+                    );
                 }
 
                 // Assuming Empty for Directory

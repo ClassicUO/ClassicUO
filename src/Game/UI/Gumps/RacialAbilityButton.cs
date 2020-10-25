@@ -37,8 +37,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             LocalSerial = (uint) (7000 + graphic);
 
-            UIManager.GetGump<RacialAbilityButton>(LocalSerial)
-                     ?.Dispose();
+            UIManager.GetGump<RacialAbilityButton>(LocalSerial)?.Dispose();
 
             Graphic = graphic;
             BuildGump();
@@ -50,7 +49,7 @@ namespace ClassicUO.Game.UI.Gumps
             CanCloseWithRightClick = true;
         }
 
-        public override GUMP_TYPE GumpType => GUMP_TYPE.GT_RACIALBUTTON;
+        public override GumpType GumpType => GumpType.RacialButton;
         public ushort Graphic;
 
 

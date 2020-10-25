@@ -68,8 +68,12 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding.Decoders
 
         public virtual void Create
         (
-            Bitstream stream0, Header header0, SynthesisFilter filtera, SynthesisFilter filterb,
-            ABuffer buffer0, int whichCh0
+            Bitstream stream0,
+            Header header0,
+            SynthesisFilter filtera,
+            SynthesisFilter filterb,
+            ABuffer buffer0,
+            int whichCh0
         )
         {
             stream = stream0;
@@ -117,8 +121,7 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding.Decoders
             // start to read audio data:
             for (int i = 0; i < num_subbands; ++i)
             {
-                subbands[i]
-                    .read_allocation(stream, header, crc);
+                subbands[i].read_allocation(stream, header, crc);
             }
         }
 
@@ -131,8 +134,7 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding.Decoders
         {
             for (int i = 0; i < num_subbands; ++i)
             {
-                subbands[i]
-                    .read_scalefactor(stream, header);
+                subbands[i].read_scalefactor(stream, header);
             }
         }
 
@@ -148,16 +150,14 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding.Decoders
 
                 for (i = 0; i < num_subbands; ++i)
                 {
-                    readReady = subbands[i]
-                        .read_sampledata(stream);
+                    readReady = subbands[i].read_sampledata(stream);
                 }
 
                 do
                 {
                     for (i = 0; i < num_subbands; ++i)
                     {
-                        writeReady = subbands[i]
-                            .put_next_sample(which_channels, filter1, filter2);
+                        writeReady = subbands[i].put_next_sample(which_channels, filter1, filter2);
                     }
 
                     filter1.calculate_pcm_samples(buffer);

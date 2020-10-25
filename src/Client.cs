@@ -81,7 +81,8 @@ namespace ClassicUO
             if (!string.IsNullOrWhiteSpace(Settings.GlobalSettings.ClientVersion))
             {
                 // sanitize client version
-                Settings.GlobalSettings.ClientVersion = Settings.GlobalSettings.ClientVersion.Replace(",", ".")
+                Settings.GlobalSettings.ClientVersion = Settings.GlobalSettings.ClientVersion.Replace
+                                                                    (",", ".")
                                                                 .Replace(" ", "")
                                                                 .ToLower();
             }
@@ -103,7 +104,8 @@ namespace ClassicUO
                 Log.Warn($"Client version [{clientVersionText}] is invalid, let's try to read the client.exe");
 
                 // mmm something bad happened, try to load from client.exe
-                if (!ClientVersionHelper.TryParseFromFile(Path.Combine(clientPath, "client.exe"), out clientVersionText) ||
+                if (!ClientVersionHelper.TryParseFromFile
+                        (Path.Combine(clientPath, "client.exe"), out clientVersionText) ||
                     !ClientVersionHelper.IsClientVersionValid(clientVersionText, out clientVersion))
                 {
                     Log.Error("Invalid client version: " + clientVersionText);
@@ -120,7 +122,10 @@ namespace ClassicUO
 
             Version = clientVersion;
             ClientPath = clientPath;
-            IsUOPInstallation = Version >= ClientVersion.CV_7000 && File.Exists(UOFileManager.GetUOFilePath("MainMisc.uop"));
+
+            IsUOPInstallation = Version >= ClientVersion.CV_7000 && File.Exists
+                (UOFileManager.GetUOFilePath("MainMisc.uop"));
+
             Protocol = ClientFlags.CF_T2A;
 
             if (Version >= ClientVersion.CV_200)

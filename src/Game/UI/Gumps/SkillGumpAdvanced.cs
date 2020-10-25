@@ -42,13 +42,13 @@ namespace ClassicUO.Game.UI.Gumps
 
         private readonly Dictionary<Buttons, string> _buttonsToSkillsValues = new Dictionary<Buttons, string>
         {
-            {Buttons.SortName, "Name"},
-            {Buttons.SortReal, "Base"},
-            {Buttons.SortBase, "Value"},
-            {Buttons.SortCap, "Cap"}
+            { Buttons.SortName, "Name" },
+            { Buttons.SortReal, "Base" },
+            { Buttons.SortBase, "Value" },
+            { Buttons.SortCap, "Cap" }
         };
 
-        private readonly ScrollArea _scrollArea;
+        private readonly DataBox _databox;
         private readonly List<SkillListEntry> _skillListEntries = new List<SkillListEntry>();
 
 
@@ -80,12 +80,17 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             );
 
-            _scrollArea = new ScrollArea(20, 60, WIDTH - 40, 250, true)
+            ScrollArea area = new ScrollArea(20, 60, WIDTH - 40, 250, true)
             {
                 AcceptMouseInput = true
             };
 
-            Add(_scrollArea);
+            Add(area);
+
+            _databox = new DataBox(0, 0, 1, 1);
+            _databox.WantUpdateSize = true;
+
+            area.Add(_databox);
 
             Add
             (
@@ -135,7 +140,7 @@ namespace ClassicUO.Game.UI.Gumps
             OnButtonClick((int) Buttons.SortName);
         }
 
-        public override GUMP_TYPE GumpType => GUMP_TYPE.GT_SKILLMENU;
+        public override GumpType GumpType => GumpType.SkillMenu;
 
         public override void OnButtonClick(int buttonID)
         {
@@ -149,11 +154,9 @@ namespace ClassicUO.Game.UI.Gumps
                 _sortField = fieldValue;
             }
 
-            if (FindControls<NiceButton>()
-                .Any(s => s.ButtonParameter == buttonID))
+            if (FindControls<NiceButton>().Any(s => s.ButtonParameter == buttonID))
             {
-                NiceButton btn = FindControls<NiceButton>()
-                    .First(s => s.ButtonParameter == buttonID);
+                NiceButton btn = FindControls<NiceButton>().First(s => s.ButtonParameter == buttonID);
 
                 ushort g = (ushort) (_sortAsc ? 0x985 : 0x983);
 
@@ -169,7 +172,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             _totalReal = 0;
             _totalValue = 0;
-            _scrollArea.Clear();
+            _databox.Clear();
 
             foreach (SkillListEntry entry in _skillListEntries)
             {
@@ -202,18 +205,21 @@ namespace ClassicUO.Game.UI.Gumps
 
             foreach (SkillListEntry t in _skillListEntries)
             {
-                _scrollArea.Add(t);
+                _databox.Add(t);
             }
 
-            Add(new Label(ResGumps.Total, true, 1153) {X = 40, Y = 320});
-            Add(new Label(_totalReal.ToString("F1"), true, 1153) {X = 220, Y = 320});
-            Add(new Label(_totalValue.ToString("F1"), true, 1153) {X = 300, Y = 320});
+            _databox.WantUpdateSize = true;
+            _databox.ReArrangeChildren();
+
+            Add(new Label(ResGumps.Total, true, 1153) { X = 40, Y = 320 });
+            Add(new Label(_totalReal.ToString("F1"), true, 1153) { X = 220, Y = 320 });
+            Add(new Label(_totalValue.ToString("F1"), true, 1153) { X = 300, Y = 320 });
         }
 
 
-        public override void Update(double totalMS, double frameMS)
+        public override void Update(double totalTime, double frameTime)
         {
-            base.Update(totalMS, frameMS);
+            base.Update(totalTime, frameTime);
 
             if (_updateSkillsNeeded)
             {
@@ -232,7 +238,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             ResetHueVector();
 
-            batcher.DrawRectangle(Texture2DCache.GetTexture(Color.Gray), x, y, Width, Height, ref _hueVector);
+            batcher.DrawRectangle(SolidColorTextureCache.GetTexture(Color.Gray), x, y, Width, Height, ref HueVector);
 
             return base.Draw(batcher, x, y);
         }
@@ -290,7 +296,9 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add(skillCap);
 
-            GumpPic loc = new GumpPic(425, 4, (ushort) (skill.Lock == Lock.Up ? 0x983 : skill.Lock == Lock.Down ? 0x985 : 0x82C), 0);
+            GumpPic loc = new GumpPic
+                (425, 4, (ushort) (skill.Lock == Lock.Up ? 0x983 : skill.Lock == Lock.Down ? 0x985 : 0x82C), 0);
+
             Add(loc);
 
             loc.MouseUp += (sender, e) =>
@@ -325,16 +333,16 @@ namespace ClassicUO.Game.UI.Gumps
         {
             if (_skill.IsClickable && Mouse.LButtonPressed)
             {
-                GetSpellFloatingButton(_skill.Index)
-                    ?.Dispose();
+                GetSpellFloatingButton(_skill.Index)?.Dispose();
 
-                SkillButtonGump skillButtonGump = new SkillButtonGump(_skill, Mouse.LDropPosition.X, Mouse.LDropPosition.Y);
+                Rectangle rect = GumpsLoader.Instance.GetTexture(0x24B8).Bounds;
+
+                SkillButtonGump skillButtonGump = new SkillButtonGump
+                    (_skill, Mouse.Position.X + (rect.Width >> 1),
+                    Mouse.Position.Y + (rect.Height >> 1));
+
                 UIManager.Add(skillButtonGump);
-
-                Rectangle rect = GumpsLoader.Instance.GetTexture(0x24B8)
-                                            .Bounds;
-
-                UIManager.AttemptDragControl(skillButtonGump, new Point(Mouse.Position.X + (rect.Width >> 1), Mouse.Position.Y + (rect.Height >> 1)), true);
+                UIManager.AttemptDragControl(skillButtonGump, true);
             }
         }
 

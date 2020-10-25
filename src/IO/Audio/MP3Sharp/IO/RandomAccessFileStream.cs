@@ -32,15 +32,11 @@ namespace ClassicUO.IO.Audio.MP3Sharp.IO
         {
             FileStream newFile = null;
 
-            if (mode.CompareTo("rw") == 0)
+            if (string.Compare(mode, "rw", StringComparison.CurrentCultureIgnoreCase) == 0)
             {
-                newFile = new FileStream
-                (
-                    fileName, FileMode.OpenOrCreate,
-                    FileAccess.ReadWrite
-                );
+                newFile = new FileStream(fileName, FileMode.OpenOrCreate, FileAccess.ReadWrite);
             }
-            else if (mode.CompareTo("r") == 0)
+            else if (string.Compare(mode, "r", StringComparison.CurrentCultureIgnoreCase) == 0)
             {
                 newFile = new FileStream(fileName, FileMode.Open, FileAccess.Read);
             }

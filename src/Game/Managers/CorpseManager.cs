@@ -60,7 +60,8 @@ namespace ClassicUO.Game.Managers
 
                         if (item != null)
                         {
-                            item.Layer = (Layer) ((c.Direction & Direction.Mask) | (c.IsRunning ? Direction.Running : 0));
+                            item.Layer =
+                                (Layer) ((c.Direction & Direction.Mask) | (c.IsRunning ? Direction.Running : 0));
                         }
                     }
 

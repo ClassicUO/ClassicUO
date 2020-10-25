@@ -39,11 +39,11 @@ namespace ClassicUO.Game.UI.Controls
 
         public ushort Hue { get; set; }
         public bool IsPartial { get; set; }
-        public UOTexture32 Texture { get; set; }
+        public UOTexture Texture { get; set; }
 
-        public override void Update(double totalMS, double frameMS)
+        public override void Update(double totalTime, double frameTime)
         {
-            base.Update(totalMS, frameMS);
+            base.Update(totalTime, frameTime);
 
             if (Texture != null)
             {
@@ -59,7 +59,7 @@ namespace ClassicUO.Game.UI.Controls
             }
 
             ResetHueVector();
-            ShaderHueTranslator.GetHueVector(ref _hueVector, Hue, IsPartial, Alpha);
+            ShaderHueTranslator.GetHueVector(ref HueVector, Hue, IsPartial, Alpha);
 
             if (ScaleTexture)
             {
@@ -81,13 +81,14 @@ namespace ClassicUO.Game.UI.Controls
                         y += (Height >> 1) - (h >> 1);
                     }
 
-                    return batcher.Draw2D(Texture, x, y, w, h, r.X, r.Y, r.Width, r.Height, ref _hueVector);
+                    return batcher.Draw2D(Texture, x, y, w, h, r.X, r.Y, r.Width, r.Height, ref HueVector);
                 }
 
-                return batcher.Draw2D(Texture, x, y, Width, Height, 0, 0, Texture.Width, Texture.Height, ref _hueVector);
+                return batcher.Draw2D
+                    (Texture, x, y, Width, Height, 0, 0, Texture.Width, Texture.Height, ref HueVector);
             }
 
-            return batcher.Draw2D(Texture, x, y, ref _hueVector);
+            return batcher.Draw2D(Texture, x, y, ref HueVector);
         }
 
         public override void Dispose()

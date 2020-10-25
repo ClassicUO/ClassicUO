@@ -179,17 +179,22 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
             // Sever Scroll Area
             ScrollArea scrollArea = new ScrollArea(150, 90, 393, 271, true);
+            DataBox databox = new DataBox(0, 0, 1, 1);
+            databox.WantUpdateSize = true;
             LoginScene loginScene = Client.Game.GetScene<LoginScene>();
 
             scrollArea.ScissorRectangle.Y = 16;
-            scrollArea.ScissorRectangle.Height = -(scrollArea.ScissorRectangle.Y + 32);
+            scrollArea.ScissorRectangle.Height = -32;
 
             foreach (ServerListEntry server in loginScene.Servers)
             {
-                scrollArea.Add(new ServerEntryGump(server, 5, NORMAL_COLOR, SELECTED_COLOR));
+                databox.Add(new ServerEntryGump(server, 5, NORMAL_COLOR, SELECTED_COLOR));
             }
 
+            databox.ReArrangeChildren();
+
             Add(scrollArea);
+            scrollArea.Add(databox);
 
             if (loginScene.Servers.Length != 0)
             {
@@ -202,11 +207,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
                 Add
                 (
-                    new Label
-                    (
-                        loginScene.Servers[index]
-                                  .Name, false, 0x0481, font: 9
-                    )
+                    new Label(loginScene.Servers[index].Name, false, 0x0481, font: 9)
                     {
                         X = 243,
                         Y = 420
@@ -245,11 +246,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
                                 index = 1;
                             }
 
-                            loginScene.SelectServer
-                            (
-                                (byte) loginScene.Servers[index - 1]
-                                                 .Index
-                            );
+                            loginScene.SelectServer((byte) loginScene.Servers[index - 1].Index);
                         }
 
                         break;
@@ -279,11 +276,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
                         index = 1;
                     }
 
-                    loginScene.SelectServer
-                    (
-                        (byte) loginScene.Servers[index - 1]
-                                         .Index
-                    );
+                    loginScene.SelectServer((byte) loginScene.Servers[index - 1].Index);
                 }
             }
         }
@@ -299,7 +292,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
             Server = 99
         }
 
-        private class ServerEntryGump : ScrollAreaItem
+        private class ServerEntryGump : Control
         {
             private readonly int _buttonId;
             private readonly ServerListEntry _entry;
@@ -316,11 +309,12 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
                 Add
                 (
-                    _serverName = new HoveredLabel(entry.Name, false, normal_hue, selected_hue, selected_hue, font: font)
-                    {
-                        X = 74,
-                        AcceptMouseInput = false
-                    }
+                    _serverName = new HoveredLabel
+                        (entry.Name, false, normal_hue, selected_hue, selected_hue, font: font)
+                        {
+                            X = 74,
+                            AcceptMouseInput = false
+                        }
                 );
 
                 Add
@@ -334,16 +328,17 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
                 Add
                 (
-                    _server_packet_loss = new HoveredLabel("-", false, normal_hue, selected_hue, selected_hue, font: font)
-                    {
-                        X = 320,
-                        AcceptMouseInput = false
-                    }
+                    _server_packet_loss = new HoveredLabel
+                        ("-", false, normal_hue, selected_hue, selected_hue, font: font)
+                        {
+                            X = 320,
+                            AcceptMouseInput = false
+                        }
                 );
 
 
                 AcceptMouseInput = true;
-                Width = 393;
+                Width = 370;
                 Height = 25;
 
                 WantUpdateSize = false;

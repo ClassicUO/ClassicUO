@@ -158,7 +158,8 @@ namespace ClassicUO.Game.Data
             return deltaY == 0 ? Direction.West : Direction.Up;
         }
 
-        public static Direction DirectionFromKeyboardArrows(bool upPressed, bool downPressed, bool leftPressed, bool rightPressed)
+        public static Direction DirectionFromKeyboardArrows
+            (bool upPressed, bool downPressed, bool leftPressed, bool rightPressed)
         {
             int direction = (int) Direction.NONE;
 

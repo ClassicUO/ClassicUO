@@ -30,17 +30,17 @@ using ClassicUO.Utility;
 
 namespace ClassicUO.IO.Resources
 {
-    internal class TexmapsLoader : UOFileLoader<UOTexture32>
+    internal class TexmapsLoader : UOFileLoader<UOTexture>
     {
         private static TexmapsLoader _instance;
         private UOFile _file;
 
-        private TexmapsLoader(int count)
-            : base(count)
+        private TexmapsLoader(int count) : base(count)
         {
         }
 
-        public static TexmapsLoader Instance => _instance ?? (_instance = new TexmapsLoader(Constants.MAX_LAND_TEXTURES_DATA_INDEX_COUNT));
+        public static TexmapsLoader Instance =>
+            _instance ?? (_instance = new TexmapsLoader(Constants.MAX_LAND_TEXTURES_DATA_INDEX_COUNT));
 
         public override Task Load()
         {
@@ -139,14 +139,14 @@ namespace ClassicUO.IO.Resources
             );
         }
 
-        public override UOTexture32 GetTexture(uint g)
+        public override UOTexture GetTexture(uint g)
         {
             if (g >= Resources.Length)
             {
                 return null;
             }
 
-            ref UOTexture32 texture = ref Resources[g];
+            ref UOTexture texture = ref Resources[g];
 
             if (texture == null || texture.IsDisposed)
             {
@@ -165,7 +165,7 @@ namespace ClassicUO.IO.Resources
             return texture;
         }
 
-        private unsafe void ReadTexmapTexture(ref UOTexture32 texture, ushort index)
+        private unsafe void ReadTexmapTexture(ref UOTexture texture, ushort index)
         {
             ref UOFileIndex entry = ref GetValidRefEntry(index);
 
@@ -193,7 +193,7 @@ namespace ClassicUO.IO.Resources
                 }
             }
 
-            texture = new UOTexture32(size, size);
+            texture = new UOTexture(size, size);
             // we don't need to store the data[] pointer because
             // land is always hoverable
             texture.SetDataPointerEXT(0, null, (IntPtr) data, size_pot * sizeof(uint));

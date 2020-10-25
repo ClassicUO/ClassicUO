@@ -56,7 +56,7 @@ namespace ClassicUO.Game.UI.Gumps
             AcceptMouseInput = false;
             CanCloseWithRightClick = true;
 
-            GumpPic background = new GumpPic(0, 0, 0x085C, 0) {ContainsByBounds = true};
+            GumpPic background = new GumpPic(0, 0, 0x085C, 0) { ContainsByBounds = true };
             Add(background);
             Add(_slider = new HSliderBar(29, 16, 105, 1, item.Amount, item.Amount, HSliderBarStyle.BlueWidgetNoBar));
             _lastValue = _slider.Value;
@@ -124,8 +124,7 @@ namespace ClassicUO.Game.UI.Gumps
                         {
                             if (!_firstChange)
                             {
-                                string last = _textBox.Text[_textBox.Text.Length - 1]
-                                                      .ToString();
+                                string last = _textBox.Text[_textBox.Text.Length - 1].ToString();
 
                                 _slider.Value = int.Parse(last);
                                 _firstChange = true;
@@ -166,7 +165,7 @@ namespace ClassicUO.Game.UI.Gumps
             Dispose();
         }
 
-        public override void Update(double totalMS, double frameMS)
+        public override void Update(double totalTime, double frameTime)
         {
             Item item = World.Items.Get(LocalSerial);
 
@@ -180,7 +179,7 @@ namespace ClassicUO.Game.UI.Gumps
                 return;
             }
 
-            base.Update(totalMS, frameMS);
+            base.Update(totalTime, frameTime);
         }
 
         public override void Dispose()

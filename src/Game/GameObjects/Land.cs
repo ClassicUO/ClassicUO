@@ -152,11 +152,10 @@ namespace ClassicUO.Game.GameObjects
         }
 
 
-        public void ApplyStrech(int x, int y, sbyte z)
+        public void ApplyStretch(Map.Map map, int x, int y, sbyte z)
         {
-            Map.Map map = World.Map;
-
-            if (IsStretched || TexmapsLoader.Instance.GetTexture(TileData.TexID) == null || !TestStretched(x, y, z, true))
+            if (IsStretched || TexmapsLoader.Instance.GetTexture(TileData.TexID) == null ||
+                !TestStretched(x, y, z, true))
             {
                 IsStretched = false;
                 MinZ = z;
@@ -165,25 +164,19 @@ namespace ClassicUO.Game.GameObjects
             {
                 IsStretched = true;
 
-                UpdateZ
-                (
-                    map.GetTileZ(x, y + 1),
-                    map.GetTileZ(x + 1, y + 1),
-                    map.GetTileZ(x + 1, y),
-                    z
-                );
+                UpdateZ(map.GetTileZ(x, y + 1), map.GetTileZ(x + 1, y + 1), map.GetTileZ(x + 1, y), z);
 
                 //Vector3[,,] vec = new Vector3[3, 3, 4];
 
                 int i;
                 int j;
 
-                for (i = -1; i < 2; i++)
+                for (i = -1; i < 2; ++i)
                 {
                     int curX = x + i;
                     int curI = i + 1;
 
-                    for (j = -1; j < 2; j++)
+                    for (j = -1; j < 2; ++j)
                     {
                         int curY = y + j;
                         int curJ = j + 1;
@@ -194,7 +187,7 @@ namespace ClassicUO.Game.GameObjects
 
                         if (currentZ == leftZ && currentZ == rightZ && currentZ == bottomZ)
                         {
-                            for (int k = 0; k < 4; k++)
+                            for (int k = 0; k < 4; ++k)
                             {
                                 ref Vector3 v = ref _vectCache[curI, curJ, k];
                                 v.X = 0;
@@ -241,48 +234,16 @@ namespace ClassicUO.Game.GameObjects
                 j = 1;
 
                 // 0
-                SumAndNormalize
-                (
-                    ref _vectCache,
-                    i - 1, j - 1, 2,
-                    i - 1, j, 1,
-                    i, j - 1, 3,
-                    i, j, 0,
-                    out Normal0
-                );
+                SumAndNormalize(ref _vectCache, i - 1, j - 1, 2, i - 1, j, 1, i, j - 1, 3, i, j, 0, out Normal0);
 
                 // 1
-                SumAndNormalize
-                (
-                    ref _vectCache,
-                    i, j - 1, 2,
-                    i, j, 1,
-                    i + 1, j - 1, 3,
-                    i + 1, j, 0,
-                    out Normal1
-                );
+                SumAndNormalize(ref _vectCache, i, j - 1, 2, i, j, 1, i + 1, j - 1, 3, i + 1, j, 0, out Normal1);
 
                 // 2
-                SumAndNormalize
-                (
-                    ref _vectCache,
-                    i, j, 2,
-                    i, j + 1, 1,
-                    i + 1, j, 3,
-                    i + 1, j + 1, 0,
-                    out Normal2
-                );
+                SumAndNormalize(ref _vectCache, i, j, 2, i, j + 1, 1, i + 1, j, 3, i + 1, j + 1, 0, out Normal2);
 
                 // 3
-                SumAndNormalize
-                (
-                    ref _vectCache,
-                    i - 1, j, 2,
-                    i - 1, j + 1, 1,
-                    i, j, 3,
-                    i, j + 1, 0,
-                    out Normal3
-                );
+                SumAndNormalize(ref _vectCache, i - 1, j, 2, i - 1, j + 1, 1, i, j, 3, i, j + 1, 0, out Normal3);
             }
         }
 
@@ -291,15 +252,27 @@ namespace ClassicUO.Game.GameObjects
         private static void SumAndNormalize
         (
             ref Vector3[,,] vec,
-            int index0_x, int index0_y, int index0_z,
-            int index1_x, int index1_y, int index1_z,
-            int index2_x, int index2_y, int index2_z,
-            int index3_x, int index3_y, int index3_z,
+            int index0_x,
+            int index0_y,
+            int index0_z,
+            int index1_x,
+            int index1_y,
+            int index1_z,
+            int index2_x,
+            int index2_y,
+            int index2_z,
+            int index3_x,
+            int index3_y,
+            int index3_z,
             out Vector3 result
         )
         {
-            Vector3.Add(ref vec[index0_x, index0_y, index0_z], ref vec[index1_x, index1_y, index1_z], out Vector3 v0Result);
-            Vector3.Add(ref vec[index2_x, index2_y, index2_z], ref vec[index3_x, index3_y, index3_z], out Vector3 v1Result);
+            Vector3.Add
+                (ref vec[index0_x, index0_y, index0_z], ref vec[index1_x, index1_y, index1_z], out Vector3 v0Result);
+
+            Vector3.Add
+                (ref vec[index2_x, index2_y, index2_z], ref vec[index3_x, index3_y, index3_z], out Vector3 v1Result);
+
             Vector3.Add(ref v0Result, ref v1Result, out result);
             Vector3.Normalize(ref result, out result);
         }
@@ -308,9 +281,9 @@ namespace ClassicUO.Game.GameObjects
         {
             bool result = false;
 
-            for (int i = -1; i < 2 && !result; i++)
+            for (int i = -1; i < 2 && !result; ++i)
             {
-                for (int j = -1; j < 2 && !result; j++)
+                for (int j = -1; j < 2 && !result; ++j)
                 {
                     if (recurse)
                     {

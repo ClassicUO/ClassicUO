@@ -96,15 +96,17 @@ namespace ClassicUO.Game.GameObjects
         public void Add(int damage)
         {
             TextObject text_obj = TextObject.Create();
-            text_obj.RenderedText = RenderedText.Create(damage.ToString(), (ushort) (Parent == World.Player ? 0x0034 : 0x0021), 3, false);
+
+            text_obj.RenderedText = RenderedText.Create
+                (damage.ToString(), (ushort) (Parent == World.Player ? 0x0034 : 0x0021), 3, false);
+
             text_obj.Time = Time.Ticks + 1500;
 
             _messages.AddToFront(text_obj);
 
             if (_messages.Count > 10)
             {
-                _messages.RemoveFromBack()
-                         ?.Destroy();
+                _messages.RemoveFromBack()?.Destroy();
             }
         }
 
@@ -180,16 +182,10 @@ namespace ClassicUO.Game.GameObjects
 
                     AnimationsLoader.Instance.GetAnimationDimensions
                     (
-                        m.AnimIndex,
-                        m.GetGraphicForAnimation(),
+                        m.AnimIndex, m.GetGraphicForAnimation(),
                         /*(byte) m.GetDirectionForAnimation()*/ 0,
-                        /*Mobile.GetGroupForAnimation(m, isParent:true)*/ 0,
-                        m.IsMounted,
-                        /*(byte) m.AnimIndex*/ 0,
-                        out int centerX,
-                        out int centerY,
-                        out int width,
-                        out int height
+                        /*Mobile.GetGroupForAnimation(m, isParent:true)*/ 0, m.IsMounted,
+                        /*(byte) m.AnimIndex*/ 0, out int centerX, out int centerY, out int width, out int height
                     );
 
                     p.X += (int) m.Offset.X + 22;

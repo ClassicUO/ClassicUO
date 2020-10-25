@@ -79,8 +79,7 @@ namespace ClassicUO.Utility
             // Copy each subdirectory using recursion.
             foreach (DirectoryInfo diSourceSubDir in source.GetDirectories())
             {
-                DirectoryInfo nextTargetSubDir =
-                    target.CreateSubdirectory(diSourceSubDir.Name);
+                DirectoryInfo nextTargetSubDir = target.CreateSubdirectory(diSourceSubDir.Name);
 
                 diSourceSubDir.CopyAllTo(nextTargetSubDir);
             }

@@ -35,7 +35,7 @@ namespace ClassicUO.Game.UI.Controls
 
         public InfoBarBuilderControl(InfoBarItem item)
         {
-            infoLabel = new StbTextBox(0xFF, 10, 80) {X = 5, Y = 0, Width = 130, Height = 30};
+            infoLabel = new StbTextBox(0xFF, 10, 80) { X = 5, Y = 0, Width = 130, Height = 26 };
             infoLabel.SetText(item.label);
 
             string[] dataVars = InfoBarManager.GetVars();
@@ -50,14 +50,28 @@ namespace ClassicUO.Game.UI.Controls
 
             labelColor = new ClickableColorBox(150, 0, 13, 14, item.hue, color);
 
-            NiceButton deleteButton = new NiceButton(390, 0, 60, 25, ButtonAction.Activate, ResGumps.Delete) {ButtonParameter = 999};
-            deleteButton.MouseUp += (sender, e) => { Dispose(); };
+            NiceButton deleteButton = new NiceButton(390, 0, 60, 25, ButtonAction.Activate, ResGumps.Delete)
+                { ButtonParameter = 999 };
 
-            Add(new ResizePic(0x0BB8) {X = infoLabel.X - 5, Y = 0, Width = infoLabel.Width + 10, Height = infoLabel.Height - 6});
+            deleteButton.MouseUp += (sender, e) =>
+            {
+                Dispose();
+                ((DataBox) Parent)?.ReArrangeChildren();
+            };
+
+            Add
+            (
+                new ResizePic(0x0BB8)
+                    { X = infoLabel.X - 5, Y = 0, Width = infoLabel.Width + 10, Height = infoLabel.Height }
+            );
+
             Add(infoLabel);
             Add(varStat);
             Add(labelColor);
             Add(deleteButton);
+
+            Width = infoLabel.Width + 10;
+            Height = infoLabel.Height;
         }
 
         public string LabelText => infoLabel.Text;

@@ -65,8 +65,8 @@ namespace ClassicUO.Game.UI.Gumps
 
 
             // big
-            UOTexture32 th1 = GumpsLoader.Instance.GetTexture(0x098B);
-            UOTexture32 th2 = GumpsLoader.Instance.GetTexture(0x098D);
+            UOTexture th1 = GumpsLoader.Instance.GetTexture(0x098B);
+            UOTexture th2 = GumpsLoader.Instance.GetTexture(0x098D);
 
             int smallWidth = 50;
 
@@ -84,22 +84,27 @@ namespace ClassicUO.Game.UI.Gumps
 
             int[][] textTable =
             {
-                new[] {0, (int) Buttons.Map},
-                new[] {1, (int) Buttons.Paperdoll},
-                new[] {1, (int) Buttons.Inventory},
-                new[] {1, (int) Buttons.Journal},
-                new[] {0, (int) Buttons.Chat},
-                new[] {0, (int) Buttons.Help},
-                new[] {1, (int) Buttons.WorldMap},
-                new[] {0, (int) Buttons.Info},
-                new[] {0, (int) Buttons.Debug},
-                new[] {1, (int) Buttons.NetStats},
+                new[] { 0, (int) Buttons.Map },
+                new[] { 1, (int) Buttons.Paperdoll },
+                new[] { 1, (int) Buttons.Inventory },
+                new[] { 1, (int) Buttons.Journal },
+                new[] { 0, (int) Buttons.Chat },
+                new[] { 0, (int) Buttons.Help },
+                new[] { 1, (int) Buttons.WorldMap },
+                new[] { 0, (int) Buttons.Info },
+                new[] { 0, (int) Buttons.Debug },
+                new[] { 1, (int) Buttons.NetStats },
 
-                new[] {1, (int) Buttons.UOStore},
-                new[] {1, (int) Buttons.GlobalChat}
+                new[] { 1, (int) Buttons.UOStore },
+                new[] { 1, (int) Buttons.GlobalChat }
             };
 
-            string[] texts = {ResGumps.Map, ResGumps.Paperdoll, ResGumps.Inventory, ResGumps.Journal, ResGumps.Chat, ResGumps.Help, ResGumps.WorldMap, ResGumps.Info, ResGumps.Debug, ResGumps.NetStats, ResGumps.UOStore, ResGumps.GlobalChat};
+            string[] texts =
+            {
+                ResGumps.Map, ResGumps.Paperdoll, ResGumps.Inventory, ResGumps.Journal, ResGumps.Chat, ResGumps.Help,
+                ResGumps.WorldMap, ResGumps.Info, ResGumps.Debug, ResGumps.NetStats, ResGumps.UOStore,
+                ResGumps.GlobalChat
+            };
 
             bool hasUOStore = Client.Version >= ClientVersion.CV_706400;
 
@@ -150,7 +155,7 @@ namespace ClassicUO.Game.UI.Gumps
             background.Width = startX + 1;
 
             //layer
-            ControlInfo.Layer = UILayer.Over;
+            LayerOrder = UILayer.Over;
         }
 
         public bool IsMinimized { get; private set; }
@@ -161,21 +166,21 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (gump == null)
             {
-                if (ProfileManager.Current.TopbarGumpPosition.X < 0 || ProfileManager.Current.TopbarGumpPosition.Y < 0)
+                if (ProfileManager.CurrentProfile.TopbarGumpPosition.X < 0 || ProfileManager.CurrentProfile.TopbarGumpPosition.Y < 0)
                 {
-                    ProfileManager.Current.TopbarGumpPosition = Point.Zero;
+                    ProfileManager.CurrentProfile.TopbarGumpPosition = Point.Zero;
                 }
 
                 UIManager.Add
                 (
                     gump = new TopBarGump
                     {
-                        X = ProfileManager.Current.TopbarGumpPosition.X,
-                        Y = ProfileManager.Current.TopbarGumpPosition.Y
+                        X = ProfileManager.CurrentProfile.TopbarGumpPosition.X,
+                        Y = ProfileManager.CurrentProfile.TopbarGumpPosition.Y
                     }
                 );
 
-                if (ProfileManager.Current.TopbarGumpIsMinimized)
+                if (ProfileManager.CurrentProfile.TopbarGumpIsMinimized)
                 {
                     gump.ChangePage(2);
                 }
@@ -193,20 +198,20 @@ namespace ClassicUO.Game.UI.Gumps
                 X = 0;
                 Y = 0;
 
-                ProfileManager.Current.TopbarGumpPosition = Location;
+                ProfileManager.CurrentProfile.TopbarGumpPosition = Location;
             }
         }
 
         public override void OnPageChanged()
         {
-            ProfileManager.Current.TopbarGumpIsMinimized = IsMinimized = ActivePage == 2;
+            ProfileManager.CurrentProfile.TopbarGumpIsMinimized = IsMinimized = ActivePage == 2;
             WantUpdateSize = true;
         }
 
         protected override void OnDragEnd(int x, int y)
         {
             base.OnDragEnd(x, y);
-            ProfileManager.Current.TopbarGumpPosition = Location;
+            ProfileManager.CurrentProfile.TopbarGumpPosition = Location;
         }
 
         public override void OnButtonClick(int buttonID)
@@ -214,105 +219,27 @@ namespace ClassicUO.Game.UI.Gumps
             switch ((Buttons) buttonID)
             {
                 case Buttons.Map:
-                    MiniMapGump miniMapGump = UIManager.GetGump<MiniMapGump>();
-
-                    if (miniMapGump == null)
-                    {
-                        UIManager.Add(new MiniMapGump());
-                    }
-                    else
-                    {
-                        miniMapGump.SetInScreen();
-                        miniMapGump.BringOnTop();
-                    }
+                    GameActions.OpenMiniMap();
 
                     break;
 
                 case Buttons.Paperdoll:
-                    PaperDollGump paperdollGump = UIManager.GetGump<PaperDollGump>(World.Player);
-
-                    if (paperdollGump == null)
-                    {
-                        GameActions.OpenPaperdoll(World.Player);
-                    }
-                    else
-                    {
-                        paperdollGump.SetInScreen();
-                        paperdollGump.BringOnTop();
-                    }
+                    GameActions.OpenPaperdoll(World.Player);
 
                     break;
 
                 case Buttons.Inventory:
-                    Item backpack = World.Player.FindItemByLayer(Layer.Backpack);
-
-                    if (backpack == null)
-                    {
-                        return;
-                    }
-
-                    ContainerGump backpackGump = UIManager.GetGump<ContainerGump>(backpack);
-
-                    if (backpackGump == null)
-                    {
-                        GameActions.DoubleClick(backpack);
-                    }
-                    else
-                    {
-                        backpackGump.SetInScreen();
-                        backpackGump.BringOnTop();
-                    }
+                    GameActions.OpenBackpack();
 
                     break;
 
                 case Buttons.Journal:
-                    JournalGump journalGump = UIManager.GetGump<JournalGump>();
-
-                    if (journalGump == null)
-                    {
-                        UIManager.Add
-                        (
-                            new JournalGump
-                                {X = 64, Y = 64}
-                        );
-                    }
-                    else
-                    {
-                        journalGump.SetInScreen();
-                        journalGump.BringOnTop();
-                    }
+                    GameActions.OpenJournal();
 
                     break;
 
                 case Buttons.Chat:
-                    if (UOChatManager.ChatIsEnabled == CHAT_STATUS.ENABLED)
-                    {
-                        UOChatGump chatGump = UIManager.GetGump<UOChatGump>();
-
-                        if (chatGump == null)
-                        {
-                            UIManager.Add(new UOChatGump());
-                        }
-                        else
-                        {
-                            chatGump.SetInScreen();
-                            chatGump.BringOnTop();
-                        }
-                    }
-                    else if (UOChatManager.ChatIsEnabled == CHAT_STATUS.ENABLED_USER_REQUEST)
-                    {
-                        UOChatGumpChooseName chatGump = UIManager.GetGump<UOChatGumpChooseName>();
-
-                        if (chatGump == null)
-                        {
-                            UIManager.Add(new UOChatGumpChooseName());
-                        }
-                        else
-                        {
-                            chatGump.SetInScreen();
-                            chatGump.BringOnTop();
-                        }
-                    }
+                    GameActions.OpenChat();
 
                     break;
 
@@ -369,19 +296,7 @@ namespace ClassicUO.Game.UI.Gumps
                     break;
 
                 case Buttons.WorldMap:
-
-                    WorldMapGump worldMap = UIManager.GetGump<WorldMapGump>();
-
-                    if (worldMap == null || worldMap.IsDisposed)
-                    {
-                        worldMap = new WorldMapGump();
-                        UIManager.Add(worldMap);
-                    }
-                    else
-                    {
-                        worldMap.BringOnTop();
-                        worldMap.SetInScreen();
-                    }
+                    GameActions.OpenWorldMap();
 
                     break;
             }
@@ -405,7 +320,18 @@ namespace ClassicUO.Game.UI.Gumps
 
         private class RighClickableButton : Button
         {
-            public RighClickableButton(int buttonID, ushort normal, ushort pressed, ushort over = 0, string caption = "", byte font = 0, bool isunicode = true, ushort normalHue = ushort.MaxValue, ushort hoverHue = ushort.MaxValue) : base(buttonID, normal, pressed, over, caption, font, isunicode, normalHue, hoverHue)
+            public RighClickableButton
+            (
+                int buttonID,
+                ushort normal,
+                ushort pressed,
+                ushort over = 0,
+                string caption = "",
+                byte font = 0,
+                bool isunicode = true,
+                ushort normalHue = ushort.MaxValue,
+                ushort hoverHue = ushort.MaxValue
+            ) : base(buttonID, normal, pressed, over, caption, font, isunicode, normalHue, hoverHue)
             {
             }
 

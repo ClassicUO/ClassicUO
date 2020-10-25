@@ -48,19 +48,15 @@ namespace ClassicUO.Network
                 KEY_1 = KEY_2 - 1;
 
 
-                if (version < (ClientVersion) (((1 & 0xFF) << 24) |
-                                               ((25 & 0xFF) << 16) |
-                                               ((35 & 0xFF) << 8) |
-                                               (0 & 0xFF)))
+                if (version <
+                    (ClientVersion) (((1 & 0xFF) << 24) | ((25 & 0xFF) << 16) | ((35 & 0xFF) << 8) | (0 & 0xFF)))
                 {
                     Type = ENCRYPTION_TYPE.OLD_BFISH;
                 }
 
 
-                else if (version == (ClientVersion) (((1 & 0xFF) << 24) |
-                                                     ((25 & 0xFF) << 16) |
-                                                     ((36 & 0xFF) << 8) |
-                                                     (0 & 0xFF)))
+                else if (version ==
+                         (ClientVersion) (((1 & 0xFF) << 24) | ((25 & 0xFF) << 16) | ((36 & 0xFF) << 8) | (0 & 0xFF)))
                 {
                     Type = ENCRYPTION_TYPE.BLOWFISH__1_25_36;
                 }
@@ -71,10 +67,8 @@ namespace ClassicUO.Network
                     Type = ENCRYPTION_TYPE.BLOWFISH;
                 }
 
-                else if (version <= (ClientVersion) (((2 & 0xFF) << 24) |
-                                                     ((0 & 0xFF) << 16) |
-                                                     ((3 & 0xFF) << 8) |
-                                                     (0 & 0xFF)))
+                else if (version <=
+                         (ClientVersion) (((2 & 0xFF) << 24) | ((0 & 0xFF) << 16) | ((3 & 0xFF) << 8) | (0 & 0xFF)))
                 {
                     Type = ENCRYPTION_TYPE.BLOWFISH__2_0_3;
                 }

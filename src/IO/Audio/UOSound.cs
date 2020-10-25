@@ -29,8 +29,7 @@ namespace ClassicUO.IO.Audio
     {
         private readonly byte[] _waveBuffer;
 
-        public UOSound(string name, int index, byte[] buffer)
-            : base(name, index)
+        public UOSound(string name, int index, byte[] buffer) : base(name, index)
         {
             _waveBuffer = buffer;
             Delay = (uint) ((buffer.Length - 32) / 88.2f);
@@ -48,7 +47,7 @@ namespace ClassicUO.IO.Audio
             //    int distY = Math.Abs(Y - World.Player.Y);
             //    int distance = Math.Max(distX, distY);
 
-            //    float volume = ProfileManager.Current.SoundVolume / Constants.SOUND_DELTA;
+            //    float volume = ProfileManager.CurrentProfile.SoundVolume / Constants.SOUND_DELTA;
             //    float distanceFactor = 0.0f;
 
             //    if (distance >= 1)
@@ -64,15 +63,15 @@ namespace ClassicUO.IO.Audio
             //        return;
             //    }
 
-            //    if (ProfileManager.Current == null || !ProfileManager.Current.EnableSound || !Client.Game.IsActive && !ProfileManager.Current.ReproduceSoundsInBackground)
+            //    if (ProfileManager.CurrentProfile == null || !ProfileManager.CurrentProfile.EnableSound || !Client.Game.IsActive && !ProfileManager.CurrentProfile.ReproduceSoundsInBackground)
             //        volume = 0;
 
             //    if (Client.Game.IsActive)
             //    {
-            //        if (!ProfileManager.Current.ReproduceSoundsInBackground)
-            //            volume = ProfileManager.Current.SoundVolume / Constants.SOUND_DELTA;
+            //        if (!ProfileManager.CurrentProfile.ReproduceSoundsInBackground)
+            //            volume = ProfileManager.CurrentProfile.SoundVolume / Constants.SOUND_DELTA;
             //    }
-            //    else if (!ProfileManager.Current.ReproduceSoundsInBackground)
+            //    else if (!ProfileManager.CurrentProfile.ReproduceSoundsInBackground)
             //        volume = 0;
 
             //    VolumeFactor = distanceFactor;

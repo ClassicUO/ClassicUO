@@ -30,7 +30,8 @@ namespace ClassicUO.Input
 {
     internal sealed class MouseEventArgs : EventArgs
     {
-        public MouseEventArgs(int x, int y, MouseButtonType button = MouseButtonType.None, ButtonState state = ButtonState.Released)
+        public MouseEventArgs
+            (int x, int y, MouseButtonType button = MouseButtonType.None, ButtonState state = ButtonState.Released)
         {
             Location = new Point(x, y);
             Button = button;
@@ -71,7 +72,8 @@ namespace ClassicUO.Input
     {
         public MouseWheelEventArgs(MouseEventType direction)
         {
-            if (direction != MouseEventType.WheelScroll && direction != MouseEventType.WheelScrollDown && direction != MouseEventType.WheelScrollUp)
+            if (direction != MouseEventType.WheelScroll && direction != MouseEventType.WheelScrollDown &&
+                direction != MouseEventType.WheelScrollUp)
             {
                 throw new Exception("Wrong scroll direction: " + direction);
             }

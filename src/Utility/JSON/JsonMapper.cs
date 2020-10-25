@@ -199,7 +199,8 @@ namespace TinyJson
             return null;
         }
 
-        public static bool DecodeValue(object target, string name, object value, PropertyInfo[] properties, bool matchSnakeCase)
+        public static bool DecodeValue
+            (object target, string name, object value, PropertyInfo[] properties, bool matchSnakeCase)
         {
             foreach (PropertyInfo property in properties)
             {
@@ -242,7 +243,8 @@ namespace TinyJson
             return false;
         }
 
-        public static bool DecodeValue(object target, string name, object value, FieldInfo[] fields, bool matchSnakeCase)
+        public static bool DecodeValue
+            (object target, string name, object value, FieldInfo[] fields, bool matchSnakeCase)
         {
             foreach (FieldInfo field in fields)
             {

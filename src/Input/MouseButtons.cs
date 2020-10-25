@@ -25,11 +25,13 @@ namespace ClassicUO.Input
 {
     internal enum MouseButtonType
     {
-        Left = 0,
-        Right = 1,
+        None = 0,
+        Left = 1,
         Middle = 2,
-        XButton1 = 3,
-        XButton2 = 4,
-        None = 0x7f
+        Right = 3,
+        XButton1 = 4,
+        XButton2 = 5,
+
+        Size = 6,
     }
 }

@@ -33,125 +33,16 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Gumps
 {
-    internal class UOChatGumpChooseName : Gump
+    internal class ChatGump : Gump
     {
-        private readonly StbTextBox _textBox;
-
-        public UOChatGumpChooseName() : base(0, 0)
-        {
-            CanMove = false;
-            AcceptKeyboardInput = true;
-            AcceptMouseInput = true;
-            WantUpdateSize = true;
-
-            X = 250;
-            Y = 100;
-            Width = 210;
-            Height = 330;
-
-            Add
-            (
-                new AlphaBlendControl
-                {
-                    Alpha = 0,
-                    Width = Width,
-                    Height = Height
-                }
-            );
-
-            Add(new BorderControl(0, 0, Width, Height, 4));
-
-            Label text = new Label
-            (
-                ResGumps.ChooseName
-                , true, 23, Width - 17, 3
-            )
-            {
-                X = 6,
-                Y = 6
-            };
-
-            Add(text);
-
-            int BORDER_SIZE = 4;
-
-            BorderControl border = new BorderControl(0, text.Y + text.Height, Width, 27, BORDER_SIZE);
-            Add(border);
-
-            text = new Label(ResGumps.Name, true, 0x033, 0, 3)
-            {
-                X = 6,
-                Y = border.Y + 2
-            };
-
-            Add(text);
-
-            int x = text.X + text.Width + 2;
-
-            _textBox = new StbTextBox(1, -1, Width - x - 17, true, FontStyle.Fixed, 0x0481)
-            {
-                X = x,
-                Y = text.Y,
-                Width = Width - -x - 17,
-                Height = 27 - BORDER_SIZE * 2
-            };
-
-            Add(_textBox);
-
-            Add(new BorderControl(0, text.Y + text.Height, Width, 27, BORDER_SIZE));
-
-            // close
-            Add
-            (
-                new Button(0, 0x0A94, 0x0A95, 0x0A94)
-                {
-                    X = Width - 19 - BORDER_SIZE,
-                    Y = Height - 19 - BORDER_SIZE * 1,
-                    ButtonAction = ButtonAction.Activate
-                }
-            );
-
-            // ok
-            Add
-            (
-                new Button(1, 0x0A9A, 0x0A9B, 0x0A9A)
-                {
-                    X = Width - 19 * 2 - BORDER_SIZE,
-                    Y = Height - 19 - BORDER_SIZE * 1,
-                    ButtonAction = ButtonAction.Activate
-                }
-            );
-        }
-
-
-        public override void OnButtonClick(int buttonID)
-        {
-            if (buttonID == 0) // close
-            {
-            }
-            else if (buttonID == 1) // ok
-            {
-                if (!string.IsNullOrWhiteSpace(_textBox.Text))
-                {
-                    NetClient.Socket.Send(new POpenChat(_textBox.Text));
-                }
-            }
-
-            Dispose();
-        }
-    }
-
-    internal class UOChatGump : Gump
-    {
-        private readonly ScrollArea _area;
         private ChannelCreationBox _channelCreationBox;
-
 
         private readonly List<ChannelListItemControl> _channelList = new List<ChannelListItemControl>();
         private readonly Label _currentChannelLabel;
+        private readonly DataBox _databox;
         private string _selectedChannelText;
 
-        public UOChatGump() : base(0, 0)
+        public ChatGump() : base(0, 0)
         {
             CanMove = true;
             AcceptMouseInput = true;
@@ -181,37 +72,45 @@ namespace ClassicUO.Game.UI.Gumps
             startY += 40;
 
             Add(new BorderControl(61, startY - 3, 220 + 8, 200 + 6, 3));
-            Add(new AlphaBlendControl(0) {X = 64, Y = startY, Width = 220, Height = 200});
+            Add(new AlphaBlendControl(0) { X = 64, Y = startY, Width = 220, Height = 200 });
 
-            _area = new ScrollArea(64, startY, 220, 200, true)
+            ScrollArea area = new ScrollArea(64, startY, 220, 200, true)
             {
                 ScrollbarBehaviour = ScrollbarBehaviour.ShowAlways
             };
 
-            foreach (KeyValuePair<string, UOChatChannel> k in UOChatManager.Channels)
+            Add(area);
+
+            _databox = new DataBox(0, 0, 1, 1);
+            _databox.WantUpdateSize = true;
+            area.Add(_databox);
+
+            foreach (KeyValuePair<string, ChatChannel> k in ChatManager.Channels)
             {
                 ChannelListItemControl chan = new ChannelListItemControl(k.Key, 195);
-                _area.Add(chan);
+                _databox.Add(chan);
                 _channelList.Add(chan);
             }
 
-            Add(_area);
+            _databox.ReArrangeChildren();
 
             startY = 275;
 
-            text = new Label(ResGumps.YourCurrentChannel, false, 0x0386, 345, 2, FontStyle.None, TEXT_ALIGN_TYPE.TS_CENTER)
-            {
-                Y = startY
-            };
+            text = new Label
+                (ResGumps.YourCurrentChannel, false, 0x0386, 345, 2, FontStyle.None, TEXT_ALIGN_TYPE.TS_CENTER)
+                {
+                    Y = startY
+                };
 
             Add(text);
 
             startY += 25;
 
-            _currentChannelLabel = new Label(UOChatManager.CurrentChannelName, false, 0x0386, 345, 2, FontStyle.None, TEXT_ALIGN_TYPE.TS_CENTER)
-            {
-                Y = startY
-            };
+            _currentChannelLabel = new Label
+                (ChatManager.CurrentChannelName, false, 0x0386, 345, 2, FontStyle.None, TEXT_ALIGN_TYPE.TS_CENTER)
+                {
+                    Y = startY
+                };
 
             Add(_currentChannelLabel);
 
@@ -300,9 +199,9 @@ namespace ClassicUO.Game.UI.Gumps
 
         public void UpdateConference()
         {
-            if (_currentChannelLabel.Text != UOChatManager.CurrentChannelName)
+            if (_currentChannelLabel.Text != ChatManager.CurrentChannelName)
             {
-                _currentChannelLabel.Text = UOChatManager.CurrentChannelName;
+                _currentChannelLabel.Text = ChatManager.CurrentChannelName;
             }
         }
 
@@ -315,12 +214,15 @@ namespace ClassicUO.Game.UI.Gumps
 
             _channelList.Clear();
 
-            foreach (KeyValuePair<string, UOChatChannel> k in UOChatManager.Channels)
+            foreach (KeyValuePair<string, ChatChannel> k in ChatManager.Channels)
             {
                 ChannelListItemControl c = new ChannelListItemControl(k.Key, 195);
-                _area.Add(c);
+                _databox.Add(c);
                 _channelList.Add(c);
             }
+
+            _databox.WantUpdateSize = true;
+            _databox.ReArrangeChildren();
         }
 
         private void OnChannelSelected(string text)
@@ -352,7 +254,7 @@ namespace ClassicUO.Game.UI.Gumps
                 const int BORDER_SIZE = 3;
                 const int ROW_HEIGHT = 25;
 
-                Add(new AlphaBlendControl(0) {Width = Width, Height = Height});
+                Add(new AlphaBlendControl(0) { Width = Width, Height = Height });
 
                 Add(new BorderControl(0, 0, Width, ROW_HEIGHT, BORDER_SIZE));
 
@@ -441,6 +343,8 @@ namespace ClassicUO.Game.UI.Gumps
                         X = 3
                     }
                 );
+
+                Height = _label.Height;
             }
 
             public bool IsSelected
@@ -462,7 +366,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 base.OnMouseUp(x, y, button);
 
-                if (RootParent is UOChatGump g)
+                if (RootParent is ChatGump g)
                 {
                     g.OnChannelSelected(Text);
                 }
@@ -481,7 +385,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (MouseIsOver)
                 {
-                    batcher.Draw2D(Texture2DCache.GetTexture(Color.Cyan), x, y, Width, Height, ref _hueVector);
+                    batcher.Draw2D(SolidColorTextureCache.GetTexture(Color.Cyan), x, y, Width, Height, ref HueVector);
                 }
 
                 return base.Draw(batcher, x, y);

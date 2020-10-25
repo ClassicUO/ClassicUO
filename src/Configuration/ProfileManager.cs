@@ -29,20 +29,32 @@ namespace ClassicUO.Configuration
 {
     internal static class ProfileManager
     {
-        public static Profile Current { get; private set; }
+        public static Profile CurrentProfile { get; private set; }
+        public static string ProfilePath { get; private set; }
 
         public static void Load(string servername, string username, string charactername)
         {
-            string path = FileSystemHelper.CreateFolderIfNotExists(CUOEnviroment.ExecutablePath, "Data", "Profiles", username, servername, charactername);
+            string rootpath;
+            if (string.IsNullOrWhiteSpace(Settings.GlobalSettings.ProfilesPath))
+            {
+                rootpath = Path.Combine(CUOEnviroment.ExecutablePath, "Data", "Profiles");
+            }
+            else
+            {
+                rootpath = Settings.GlobalSettings.ProfilesPath;
+            }
+            
+            string path = FileSystemHelper.CreateFolderIfNotExists(rootpath, username, servername, charactername);
             string fileToLoad = Path.Combine(path, "profile.json");
 
-            Current = ConfigurationResolver.Load<Profile>(fileToLoad) ?? new Profile();
+            ProfilePath = path;
+            CurrentProfile = ConfigurationResolver.Load<Profile>(fileToLoad) ?? new Profile();
 
-            Current.Username = username;
-            Current.ServerName = servername;
-            Current.CharacterName = charactername;
+            CurrentProfile.Username = username;
+            CurrentProfile.ServerName = servername;
+            CurrentProfile.CharacterName = charactername;
 
-            ValidateFields(Current);
+            ValidateFields(CurrentProfile);
         }
 
 
@@ -51,6 +63,21 @@ namespace ClassicUO.Configuration
             if (profile == null)
             {
                 return;
+            }
+
+            if (string.IsNullOrEmpty(profile.ServerName))
+            {
+                throw new InvalidDataException();
+            }
+
+            if (string.IsNullOrEmpty(profile.Username))
+            {
+                throw new InvalidDataException();
+            }
+
+            if (string.IsNullOrEmpty(profile.CharacterName))
+            {
+                throw new InvalidDataException();
             }
 
             if (profile.WindowClientBounds.X < 600)
@@ -66,7 +93,7 @@ namespace ClassicUO.Configuration
 
         public static void UnLoadProfile()
         {
-            Current = null;
+            CurrentProfile = null;
         }
     }
 }

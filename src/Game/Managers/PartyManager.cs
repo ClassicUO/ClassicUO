@@ -67,25 +67,19 @@ namespace ClassicUO.Game.Managers
 
                         for (int i = 0; i < PARTY_SIZE; i++)
                         {
-                            if (Members[i] == null || Members[i]
-                                .Serial == 0)
+                            if (Members[i] == null || Members[i].Serial == 0)
                             {
                                 break;
                             }
 
-                            BaseHealthBarGump gump = UIManager.GetGump<BaseHealthBarGump>
-                            (
-                                Members[i]
-                                    .Serial
-                            );
+                            BaseHealthBarGump gump = UIManager.GetGump<BaseHealthBarGump>(Members[i].Serial);
 
 
                             if (gump != null)
                             {
                                 if (code == 2)
                                 {
-                                    Members[i]
-                                        .Serial = 0;
+                                    Members[i].Serial = 0;
                                 }
 
                                 gump.RequestUpdateContents();
@@ -94,8 +88,7 @@ namespace ClassicUO.Game.Managers
 
                         Clear();
 
-                        UIManager.GetGump<PartyGump>()
-                                 ?.RequestUpdateContents();
+                        UIManager.GetGump<PartyGump>()?.RequestUpdateContents();
 
                         break;
                     }
@@ -108,8 +101,7 @@ namespace ClassicUO.Game.Managers
                     {
                         to_remove = p.ReadUInt();
 
-                        UIManager.GetGump<BaseHealthBarGump>(to_remove)
-                                 ?.RequestUpdateContents();
+                        UIManager.GetGump<BaseHealthBarGump>(to_remove)?.RequestUpdateContents();
                     }
 
                     bool remove_all = !add && to_remove == World.Player;
@@ -158,19 +150,13 @@ namespace ClassicUO.Game.Managers
                     {
                         for (int i = 0; i < PARTY_SIZE; i++)
                         {
-                            if (Members[i] != null && SerialHelper.IsValid
-                            (
-                                Members[i]
-                                    .Serial
-                            ))
+                            if (Members[i] != null && SerialHelper.IsValid(Members[i].Serial))
                             {
-                                uint serial = Members[i]
-                                    .Serial;
+                                uint serial = Members[i].Serial;
 
                                 Members[i] = null;
 
-                                UIManager.GetGump<BaseHealthBarGump>(serial)
-                                         ?.RequestUpdateContents();
+                                UIManager.GetGump<BaseHealthBarGump>(serial)?.RequestUpdateContents();
                             }
                         }
 
@@ -178,8 +164,7 @@ namespace ClassicUO.Game.Managers
                     }
 
 
-                    UIManager.GetGump<PartyGump>()
-                             ?.RequestUpdateContents();
+                    UIManager.GetGump<PartyGump>()?.RequestUpdateContents();
 
                     break;
 
@@ -190,13 +175,12 @@ namespace ClassicUO.Game.Managers
 
                     for (int i = 0; i < PARTY_SIZE; i++)
                     {
-                        if (Members[i] != null && Members[i]
-                            .Serial == ser)
+                        if (Members[i] != null && Members[i].Serial == ser)
                         {
                             MessageManager.HandleMessage
                             (
-                                null, name, Members[i]
-                                    .Name, ProfileManager.Current.PartyMessageHue, MessageType.Party, 3, TEXT_TYPE.SYSTEM
+                                null, name, Members[i].Name, ProfileManager.CurrentProfile.PartyMessageHue, MessageType.Party,
+                                3, TextType.GUILD_ALLY
                             );
 
                             break;
@@ -208,7 +192,7 @@ namespace ClassicUO.Game.Managers
                 case 7:
                     Inviter = p.ReadUInt();
 
-                    if (ProfileManager.Current.PartyInviteGump)
+                    if (ProfileManager.CurrentProfile.PartyInviteGump)
                     {
                         UIManager.Add(new PartyInviteGump(Inviter));
                     }

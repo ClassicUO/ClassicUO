@@ -37,17 +37,13 @@ namespace ClassicUO.Game.GameObjects
 
             ushort hue = Hue;
 
-            if (ProfileManager.Current.NoColorObjectsOutOfRange && Distance > World.ClientViewRange)
+            if (ProfileManager.CurrentProfile.NoColorObjectsOutOfRange && Distance > World.ClientViewRange)
             {
                 hue = Constants.OUT_RANGE_COLOR;
             }
-            else if (World.Player.IsDead && ProfileManager.Current.EnableBlackWhiteEffect)
+            else if (World.Player.IsDead && ProfileManager.CurrentProfile.EnableBlackWhiteEffect)
             {
                 hue = Constants.DEAD_RANGE_COLOR;
-            }
-            else
-            {
-                hue = 1150;
             }
 
             ShaderHueTranslator.GetHueVector(ref HueVector, hue, false, 0);

@@ -35,20 +35,15 @@ namespace ClassicUO.Network.Encryption
         /// <param name="outputOffset"></param>
         /// <returns></returns>
         public int TransformBlock
-        (
-            byte[] inputBuffer,
-            int inputOffset,
-            int inputCount,
-            byte[] outputBuffer,
-            int outputOffset
-        )
+            (byte[] inputBuffer, int inputOffset, int inputCount, byte[] outputBuffer, int outputOffset)
         {
             uint[] x = new uint[4];
 
             // load it up
             for (int i = 0; i < 4; i++)
             {
-                x[i] = (uint) (inputBuffer[i * 4 + 3 + inputOffset] << 24) | (uint) (inputBuffer[i * 4 + 2 + inputOffset] << 16) |
+                x[i] = (uint) (inputBuffer[i * 4 + 3 + inputOffset] << 24) |
+                       (uint) (inputBuffer[i * 4 + 2 + inputOffset] << 16) |
                        (uint) (inputBuffer[i * 4 + 1 + inputOffset] << 8) | inputBuffer[i * 4 + 0 + inputOffset];
             }
 
@@ -75,12 +70,7 @@ namespace ClassicUO.Network.Encryption
             return inputCount;
         }
 
-        public byte[] TransformFinalBlock
-        (
-            byte[] inputBuffer,
-            int inputOffset,
-            int inputCount
-        )
+        public byte[] TransformFinalBlock(byte[] inputBuffer, int inputOffset, int inputCount)
         {
             byte[] outputBuffer; // = new byte[0];
 
@@ -92,7 +82,8 @@ namespace ClassicUO.Network.Encryption
                 // load it up
                 for (int i = 0; i < 4; i++) // should be okay as we have already said to pad with zeros
                 {
-                    x[i] = (uint) (inputBuffer[i * 4 + 3 + inputOffset] << 24) | (uint) (inputBuffer[i * 4 + 2 + inputOffset] << 16) |
+                    x[i] = (uint) (inputBuffer[i * 4 + 3 + inputOffset] << 24) |
+                           (uint) (inputBuffer[i * 4 + 2 + inputOffset] << 16) |
                            (uint) (inputBuffer[i * 4 + 1 + inputOffset] << 8) | inputBuffer[i * 4 + 0 + inputOffset];
                 }
 
@@ -116,7 +107,8 @@ namespace ClassicUO.Network.Encryption
             }
             else
             {
-                outputBuffer = new byte[0]; // the .NET framework doesn't like it if you return null - this calms it down
+                outputBuffer =
+                    new byte[0]; // the .NET framework doesn't like it if you return null - this calms it down
             }
 
             return outputBuffer;
@@ -147,7 +139,8 @@ namespace ClassicUO.Network.Encryption
             // convert our key into an array of ints
             for (int i = 0; i < key.Length / 4; i++)
             {
-                Key[i] = (uint) (key[i * 4 + 3] << 24) | (uint) (key[i * 4 + 2] << 16) | (uint) (key[i * 4 + 1] << 8) | key[i * 4 + 0];
+                Key[i] = (uint) (key[i * 4 + 3] << 24) | (uint) (key[i * 4 + 2] << 16) | (uint) (key[i * 4 + 1] << 8) |
+                         key[i * 4 + 0];
             }
 
             cipherMode = CipherMode.ECB;
@@ -157,7 +150,8 @@ namespace ClassicUO.Network.Encryption
             {
                 for (int i = 0; i < 4; i++)
                 {
-                    IV[i] = (uint) (iv[i * 4 + 3] << 24) | (uint) (iv[i * 4 + 2] << 16) | (uint) (iv[i * 4 + 1] << 8) | iv[i * 4 + 0];
+                    IV[i] = (uint) (iv[i * 4 + 3] << 24) | (uint) (iv[i * 4 + 2] << 16) | (uint) (iv[i * 4 + 1] << 8) |
+                            iv[i * 4 + 0];
                 }
             }
 
@@ -240,14 +234,14 @@ namespace ClassicUO.Network.Encryption
 
         private int keyLength;
 
-        private readonly int[] numRounds = {0, ROUNDS_128, ROUNDS_192, ROUNDS_256};
+        private readonly int[] numRounds = { 0, ROUNDS_128, ROUNDS_192, ROUNDS_256 };
         private int rounds;
 
         protected CipherMode cipherMode = CipherMode.ECB;
 
         protected int inputBlockSize = BLOCK_SIZE / 8;
-        protected uint[] IV = {0, 0, 0, 0};              // this should be one block size
-        protected uint[] Key = {0, 0, 0, 0, 0, 0, 0, 0}; //new int[MAX_KEY_BITS/32];
+        protected uint[] IV = { 0, 0, 0, 0 };              // this should be one block size
+        protected uint[] Key = { 0, 0, 0, 0, 0, 0, 0, 0 }; //new int[MAX_KEY_BITS/32];
         protected int outputBlockSize = BLOCK_SIZE / 8;
 
         protected uint[] sboxKeys = new uint[MAX_KEY_BITS / 64]; /* key bits used for S-boxes */
@@ -284,7 +278,7 @@ namespace ClassicUO.Network.Encryption
         -****************************************************************************/
         private static uint f32(uint x, ref uint[] k32, int keyLen)
         {
-            byte[] b = {b0(x), b1(x), b2(x), b3(x)};
+            byte[] b = { b0(x), b1(x), b2(x), b3(x) };
 
             /* Run each byte thru 8x8 S-boxes, xoring with key byte at each stage. */
             /* Note that each byte goes through a different combination of S-boxes.*/
@@ -603,8 +597,7 @@ namespace ClassicUO.Network.Encryption
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static int LFSR2(int x)
         {
-            return (x >> 2) ^ ((x & 0x02) == 0x02 ? MDS_GF_FDBK / 2 : 0) ^
-                   ((x & 0x01) == 0x01 ? MDS_GF_FDBK / 4 : 0);
+            return (x >> 2) ^ ((x & 0x02) == 0x02 ? MDS_GF_FDBK / 2 : 0) ^ ((x & 0x01) == 0x01 ? MDS_GF_FDBK / 4 : 0);
         }
 
         // TODO: not the most efficient use of code but it allows us to update the code a lot quicker we can possibly optimize this code once we have got it all working

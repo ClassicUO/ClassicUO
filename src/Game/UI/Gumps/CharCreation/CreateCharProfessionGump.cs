@@ -39,7 +39,8 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
         {
             _Parent = parent;
 
-            if (parent == null || !ProfessionLoader.Instance.Professions.TryGetValue(parent, out List<ProfessionInfo> professions) || professions == null)
+            if (parent == null || !ProfessionLoader.Instance.Professions.TryGetValue
+                (parent, out List<ProfessionInfo> professions) || professions == null)
             {
                 professions = new List<ProfessionInfo>(ProfessionLoader.Instance.Professions.Keys);
             }
@@ -101,7 +102,8 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
         public void SelectProfession(ProfessionInfo info)
         {
-            if (info.Type == ProfessionLoader.PROF_TYPE.CATEGORY && ProfessionLoader.Instance.Professions.TryGetValue(info, out List<ProfessionInfo> list) && list != null)
+            if (info.Type == ProfessionLoader.PROF_TYPE.CATEGORY && ProfessionLoader.Instance.Professions.TryGetValue
+                (info, out List<ProfessionInfo> list) && list != null)
             {
                 Parent.Add(new CreateCharProfessionGump(info));
                 Parent.Remove(this);
@@ -193,8 +195,12 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
     internal class ProfessionInfo
     {
-        internal static readonly int[,] _VoidSkills = new int[4, 2] {{0, InitialSkillValue}, {0, InitialSkillValue}, {0, Client.Version < ClientVersion.CV_70160 ? 0 : InitialSkillValue}, {0, InitialSkillValue}};
-        internal static readonly int[] _VoidStats = new int[3] {60, RemainStatValue, RemainStatValue};
+        internal static readonly int[,] _VoidSkills = new int[4, 2]
+        {
+            { 0, InitialSkillValue }, { 0, InitialSkillValue },
+            { 0, Client.Version < ClientVersion.CV_70160 ? 0 : InitialSkillValue }, { 0, InitialSkillValue }
+        };
+        internal static readonly int[] _VoidStats = new int[3] { 60, RemainStatValue, RemainStatValue };
         public static int InitialSkillValue => Client.Version >= ClientVersion.CV_70160 ? 30 : 50;
         public static int RemainStatValue => Client.Version >= ClientVersion.CV_70160 ? 15 : 10;
         public string Name { get; set; }

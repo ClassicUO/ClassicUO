@@ -37,8 +37,24 @@ namespace ClassicUO.Game.UI.Controls
             WantUpdateSize = false;
         }
 
-        public bool ContainsByBounds;
+        public bool ContainsByBounds { get; set; }
 
+        public void ReArrangeChildren()
+        {
+            for (int i = 0, height = 0; i < Children.Count; ++i)
+            {
+                Control c = Children[i];
+
+                if (c.IsVisible && !c.IsDisposed)
+                {
+                    c.Y = height;
+
+                    height += c.Height;
+                }
+            }
+
+            WantUpdateSize = true;
+        }
 
         public override bool Contains(int x, int y)
         {

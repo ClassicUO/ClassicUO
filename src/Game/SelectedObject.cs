@@ -34,9 +34,9 @@ namespace ClassicUO.Game
         public static BaseGameObject Object;
         public static BaseGameObject LastObject;
         public static BaseGameObject LastLeftDownObject;
-        public static GameObject HealthbarObject;
+        public static Entity HealthbarObject;
         public static Item SelectedContainer;
-        public static GameObject CorpseObject;
+        public static Item CorpseObject;
 
         private static readonly bool[,] _InternalArea = new bool[44, 44];
 
@@ -51,7 +51,8 @@ namespace ClassicUO.Game
                         continue;
                     }
 
-                    _InternalArea[x, y] = _InternalArea[43 - x, 43 - y] = _InternalArea[43 - x, y] = _InternalArea[x, 43 - y] = true;
+                    _InternalArea[x, y] = _InternalArea[43 - x, 43 - y] =
+                        _InternalArea[43 - x, y] = _InternalArea[x, 43 - y] = true;
                 }
             }
         }
@@ -253,9 +254,10 @@ namespace ClassicUO.Game
 
 
         [MethodImpl(256)]
-        public static bool IsPointInStatic(UOTexture32 texture, int x, int y)
+        public static bool IsPointInStatic(UOTexture texture, int x, int y)
         {
-            return texture != null && texture.Contains(TranslatedMousePositionByViewport.X - x, TranslatedMousePositionByViewport.Y - y);
+            return texture != null && texture.Contains
+                (TranslatedMousePositionByViewport.X - x, TranslatedMousePositionByViewport.Y - y);
         }
 
         [MethodImpl(256)]
@@ -281,9 +283,8 @@ namespace ClassicUO.Game
             int y3 = 22 - rect.Bottom;
 
 
-            return testY >= testX * (y1 - y0) / -22 + y + y0 &&
-                   testY >= testX * (y3 - y0) / 22 + y + y0 && testY <= testX * (y3 - y2) / 22 + y + y2 &&
-                   testY <= testX * (y1 - y2) / -22 + y + y2;
+            return testY >= testX * (y1 - y0) / -22 + y + y0 && testY >= testX * (y3 - y0) / 22 + y + y0 &&
+                   testY <= testX * (y3 - y2) / 22 + y + y2 && testY <= testX * (y1 - y2) / -22 + y + y2;
         }
     }
 }

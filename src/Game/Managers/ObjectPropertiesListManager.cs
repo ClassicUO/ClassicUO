@@ -58,11 +58,12 @@ namespace ClassicUO.Game.Managers
             return false;
         }
 
-        public bool IsRevisionEqual(uint serial, uint revision)
+        public bool IsRevisionEquals(uint serial, uint revision)
         {
             if (_itemsProperties.TryGetValue(serial, out ItemProperty prop))
             {
-                return prop.Revision == revision;
+                return (revision & ~0x40000000) == prop.Revision || // remove the mask
+                       revision == prop.Revision;                   // if mask removing didn't work, try a simple compare.
             }
 
             return false;
@@ -95,6 +96,11 @@ namespace ClassicUO.Game.Managers
             name = data = null;
 
             return false;
+        }
+
+        public void Remove(uint serial)
+        {
+            _itemsProperties.Remove(serial);
         }
 
         public void Clear()

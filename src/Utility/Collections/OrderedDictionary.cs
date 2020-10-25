@@ -75,18 +75,15 @@ namespace ClassicUO.Utility.Collections
         /// <param name="index">The index of the value to get or set.</param>
         public TValue this[int index]
         {
-            get => GetItem(index)
-                .Value;
+            get => GetItem(index).Value;
             set => SetItem(index, value);
         }
 
         public int Count => _keyedCollection.Count;
 
-        public ICollection<TKey> Keys => _keyedCollection.Select(x => x.Key)
-                                                         .ToList();
+        public ICollection<TKey> Keys => _keyedCollection.Select(x => x.Key).ToList();
 
-        public ICollection<TValue> Values => _keyedCollection.Select(x => x.Value)
-                                                             .ToList();
+        public ICollection<TValue> Values => _keyedCollection.Select(x => x.Value).ToList();
 
         public IEqualityComparer<TKey> Comparer { get; private set; }
 
@@ -186,7 +183,8 @@ namespace ClassicUO.Utility.Collections
         {
             if (index < 0 || index >= _keyedCollection.Count)
             {
-                throw new ArgumentException(string.Format("The index was outside the bounds of the dictionary: {0}", index));
+                throw new ArgumentException
+                    (string.Format("The index was outside the bounds of the dictionary: {0}", index));
             }
 
             return _keyedCollection[index];
@@ -207,11 +205,7 @@ namespace ClassicUO.Utility.Collections
                 throw new ArgumentException($"The index is outside the bounds of the dictionary: {index}");
             }
 
-            KeyValuePair<TKey, TValue> kvp = new KeyValuePair<TKey, TValue>
-            (
-                _keyedCollection[index]
-                    .Key, value
-            );
+            KeyValuePair<TKey, TValue> kvp = new KeyValuePair<TKey, TValue>(_keyedCollection[index].Key, value);
 
             _keyedCollection[index] = kvp;
         }
@@ -276,8 +270,7 @@ namespace ClassicUO.Utility.Collections
         {
             if (_keyedCollection.Contains(key))
             {
-                value = _keyedCollection[key]
-                    .Value;
+                value = _keyedCollection[key].Value;
 
                 return true;
             }
@@ -482,13 +475,15 @@ namespace ClassicUO.Utility.Collections
 
         public KeyedCollection2(Func<TItem, TKey> getKeyForItemDelegate)
         {
-            _getKeyForItemDelegate = getKeyForItemDelegate ?? throw new ArgumentNullException(DelegateNullExceptionMessage);
+            _getKeyForItemDelegate =
+                getKeyForItemDelegate ?? throw new ArgumentNullException(DelegateNullExceptionMessage);
         }
 
-        public KeyedCollection2(Func<TItem, TKey> getKeyForItemDelegate, IEqualityComparer<TKey> comparer)
-            : base(comparer)
+        public KeyedCollection2(Func<TItem, TKey> getKeyForItemDelegate, IEqualityComparer<TKey> comparer) : base
+            (comparer)
         {
-            _getKeyForItemDelegate = getKeyForItemDelegate ?? throw new ArgumentNullException(DelegateNullExceptionMessage);
+            _getKeyForItemDelegate =
+                getKeyForItemDelegate ?? throw new ArgumentNullException(DelegateNullExceptionMessage);
         }
 
         protected override TKey GetKeyForItem(TItem item)
@@ -504,13 +499,17 @@ namespace ClassicUO.Utility.Collections
 
         public void SortByKeys(IComparer<TKey> keyComparer)
         {
-            Comparer2<TItem> comparer = new Comparer2<TItem>((x, y) => keyComparer.Compare(GetKeyForItem(x), GetKeyForItem(y)));
+            Comparer2<TItem> comparer = new Comparer2<TItem>
+                ((x, y) => keyComparer.Compare(GetKeyForItem(x), GetKeyForItem(y)));
+
             Sort(comparer);
         }
 
         public void SortByKeys(Comparison<TKey> keyComparison)
         {
-            Comparer2<TItem> comparer = new Comparer2<TItem>((x, y) => keyComparison(GetKeyForItem(x), GetKeyForItem(y)));
+            Comparer2<TItem> comparer = new Comparer2<TItem>
+                ((x, y) => keyComparison(GetKeyForItem(x), GetKeyForItem(y)));
+
             Sort(comparer);
         }
 

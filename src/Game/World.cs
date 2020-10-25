@@ -33,27 +33,11 @@ using MathHelper = ClassicUO.Utility.MathHelper;
 
 namespace ClassicUO.Game
 {
-    internal enum SCAN_TYPE_OBJECT
-    {
-        STO_HOSTILE = 0,
-        STO_PARTY,
-        STO_FOLLOWERS,
-        STO_OBJECTS,
-        STO_MOBILES
-    }
-
-    internal enum SCAN_MODE_OBJECT
-    {
-        SMO_NEXT = 0,
-        SMO_PREV,
-        SMO_NEAREST
-    }
-
     internal static class World
     {
         private static readonly EffectManager _effectManager = new EffectManager();
         private static readonly List<uint> _toRemove = new List<uint>();
-        private static uint _time_to_delete;
+        private static uint _timeToDelete;
 
         public static Point RangeSize;
 
@@ -85,8 +69,8 @@ namespace ClassicUO.Game
 
         public static bool SkillsRequested { get; set; }
 
-        public static Seasons Season { get; private set; } = Seasons.Summer;
-        public static Seasons OldSeason { get; set; } = Seasons.Summer;
+        public static Season Season { get; private set; } = Season.Summer;
+        public static Season OldSeason { get; set; } = Season.Summer;
 
         public static int OldMusicIndex { get; set; }
 
@@ -169,7 +153,7 @@ namespace ClassicUO.Game
         public static string ServerName { get; set; }
 
 
-        public static void ChangeSeason(Seasons season, int music)
+        public static void ChangeSeason(Season season, int music)
         {
             Season = season;
 
@@ -189,6 +173,7 @@ namespace ClassicUO.Game
                 }
             }
 
+            //TODO(deccer): refactor this out into _audioPlayer.PlayMusic(...)
             Client.Game.Scene.Audio.PlayMusic(music, true);
         }
 
@@ -203,7 +188,7 @@ namespace ClassicUO.Game
         }
         */
 
-        public static void Update(double totalMS, double frameMS)
+        public static void Update(double totalTime, double frameTime)
         {
             if (Player != null)
             {
@@ -227,34 +212,31 @@ namespace ClassicUO.Game
                         {
                             if (SerialHelper.IsMobile(container.Serial))
                             {
-                                UIManager.GetGump<PaperDollGump>(container.Serial)
-                                         ?.RequestUpdateContents();
+                                UIManager.GetGump<PaperDollGump>(container.Serial)?.RequestUpdateContents();
                             }
                             else if (SerialHelper.IsItem(container.Serial))
                             {
-                                UIManager.GetGump<ContainerGump>(container.Serial)
-                                         ?.RequestUpdateContents();
+                                UIManager.GetGump<ContainerGump>(container.Serial)?.RequestUpdateContents();
 
                                 if (container.Graphic == 0x2006)
                                 {
-                                    UIManager.GetGump<GridLootGump>(container)
-                                             ?.RequestUpdateContents();
+                                    UIManager.GetGump<GridLootGump>(container)?.RequestUpdateContents();
                                 }
                             }
                         }
                     }
                 }
 
-                bool do_delete = _time_to_delete < Time.Ticks;
+                bool do_delete = _timeToDelete < Time.Ticks;
 
                 if (do_delete)
                 {
-                    _time_to_delete = Time.Ticks + 50;
+                    _timeToDelete = Time.Ticks + 50;
                 }
 
                 foreach (Mobile mob in Mobiles)
                 {
-                    mob.Update(totalMS, frameMS);
+                    mob.Update(totalTime, frameTime);
 
                     if (do_delete && mob.Distance > ClientViewRange /*CheckToRemove(mob, ClientViewRange)*/)
                     {
@@ -271,26 +253,16 @@ namespace ClassicUO.Game
                         {
                             WMapManager.AddOrUpdate
                             (
-                                mob.Serial,
-                                mob.X,
-                                mob.Y,
-                                MathHelper.PercetangeOf(mob.Hits, mob.HitsMax),
-                                MapIndex,
-                                true,
-                                mob.Name
+                                mob.Serial, mob.X, mob.Y, MathHelper.PercetangeOf(mob.Hits, mob.HitsMax), MapIndex,
+                                true, mob.Name
                             );
                         }
                         else if (Party.Leader != 0 && Party.Contains(mob))
                         {
                             WMapManager.AddOrUpdate
                             (
-                                mob.Serial,
-                                mob.X,
-                                mob.Y,
-                                MathHelper.PercetangeOf(mob.Hits, mob.HitsMax),
-                                MapIndex,
-                                false,
-                                mob.Name
+                                mob.Serial, mob.X, mob.Y, MathHelper.PercetangeOf(mob.Hits, mob.HitsMax), MapIndex,
+                                false, mob.Name
                             );
                         }
                     }
@@ -308,9 +280,10 @@ namespace ClassicUO.Game
 
                 foreach (Item item in Items)
                 {
-                    item.Update(totalMS, frameMS);
+                    item.Update(totalTime, frameTime);
 
-                    if (do_delete && item.OnGround && item.Distance > ClientViewRange /*CheckToRemove(item, ClientViewRange)*/)
+                    if (do_delete && item.OnGround &&
+                        item.Distance > ClientViewRange /*CheckToRemove(item, ClientViewRange)*/)
                     {
                         if (item.IsMulti)
                         {
@@ -341,9 +314,9 @@ namespace ClassicUO.Game
                     _toRemove.Clear();
                 }
 
-                _effectManager.Update(totalMS, frameMS);
+                _effectManager.Update(totalTime, frameTime);
 
-                WorldTextManager.Update(totalMS, frameMS);
+                WorldTextManager.Update(totalTime, frameTime);
                 WMapManager.RemoveUnupdatedWEntity();
             }
         }
@@ -445,13 +418,11 @@ namespace ClassicUO.Game
             {
                 if (SerialHelper.IsMobile(containerSerial))
                 {
-                    UIManager.GetGump<PaperDollGump>(containerSerial)
-                             ?.RequestUpdateContents();
+                    UIManager.GetGump<PaperDollGump>(containerSerial)?.RequestUpdateContents();
                 }
                 else if (SerialHelper.IsItem(containerSerial))
                 {
-                    UIManager.GetGump<ContainerGump>(containerSerial)
-                             ?.RequestUpdateContents();
+                    UIManager.GetGump<ContainerGump>(containerSerial)?.RequestUpdateContents();
                 }
 
                 Entity container = Get(containerSerial);
@@ -490,6 +461,7 @@ namespace ClassicUO.Game
                 first = next;
             }
 
+            OPL.Remove(serial);
             item.Destroy();
 
             if (forceRemove)
@@ -520,6 +492,7 @@ namespace ClassicUO.Game
                 first = next;
             }
 
+            OPL.Remove(serial);
             mobile.Destroy();
 
             if (forceRemove)
@@ -542,25 +515,41 @@ namespace ClassicUO.Game
 
         public static void AddEffect
         (
-            GraphicEffectType type, uint source, uint target,
-            ushort graphic, ushort hue,
-            ushort srcX, ushort srcY, sbyte srcZ,
-            ushort targetX, ushort targetY, sbyte targetZ,
-            byte speed, int duration, bool fixedDir, bool doesExplode, bool hasparticles, GraphicEffectBlendMode blendmode
+            GraphicEffectType type,
+            uint source,
+            uint target,
+            ushort graphic,
+            ushort hue,
+            ushort srcX,
+            ushort srcY,
+            sbyte srcZ,
+            ushort targetX,
+            ushort targetY,
+            sbyte targetZ,
+            byte speed,
+            int duration,
+            bool fixedDir,
+            bool doesExplode,
+            bool hasparticles,
+            GraphicEffectBlendMode blendmode
         )
         {
-            _effectManager.Add(type, source, target, graphic, hue, srcX, srcY, srcZ, targetX, targetY, targetZ, speed, duration, fixedDir, doesExplode, hasparticles, blendmode);
+            _effectManager.Add
+            (
+                type, source, target, graphic, hue, srcX, srcY, srcZ, targetX, targetY, targetZ, speed, duration,
+                fixedDir, doesExplode, hasparticles, blendmode
+            );
         }
 
-        public static uint SearchObject(uint serial, SCAN_TYPE_OBJECT scanType, SCAN_MODE_OBJECT scanMode)
+        public static uint SearchObject(uint serial, ScanTypeObject scanType, ScanModeObject scanMode)
         {
             Entity first = null, selected = null;
             int distance = int.MaxValue;
             bool currentTargetFound = false;
 
-            if (scanType == SCAN_TYPE_OBJECT.STO_OBJECTS)
+            if (scanType == ScanTypeObject.Objects)
             {
-                if (scanMode == SCAN_MODE_OBJECT.SMO_NEAREST)
+                if (scanMode == ScanModeObject.Nearest)
                 {
                     foreach (Item item in Items)
                     {
@@ -590,7 +579,7 @@ namespace ClassicUO.Game
                         return item;
                     }
 
-                    if (scanMode == SCAN_MODE_OBJECT.SMO_NEXT)
+                    if (scanMode == ScanModeObject.Next)
                     {
                         if (serial == item)
                         {
@@ -611,7 +600,7 @@ namespace ClassicUO.Game
                             break;
                         }
                     }
-                    else if (scanMode == SCAN_MODE_OBJECT.SMO_PREV)
+                    else if (scanMode == ScanModeObject.Previous)
                     {
                         if (!currentTargetFound && first != null)
                         {
@@ -627,7 +616,7 @@ namespace ClassicUO.Game
 
                         first = item;
                     }
-                    else if (scanMode == SCAN_MODE_OBJECT.SMO_NEAREST)
+                    else if (scanMode == ScanModeObject.Nearest)
                     {
                         if (item.Distance > distance)
                         {
@@ -661,7 +650,7 @@ namespace ClassicUO.Game
             }
             else
             {
-                if (scanMode == SCAN_MODE_OBJECT.SMO_NEAREST)
+                if (scanMode == ScanModeObject.Nearest)
                 {
                     foreach (Mobile mobile in Mobiles)
                     {
@@ -670,23 +659,22 @@ namespace ClassicUO.Game
                             continue;
                         }
 
-                        if (scanType == SCAN_TYPE_OBJECT.STO_PARTY)
+                        if (scanType == ScanTypeObject.Party)
                         {
                             if (!Party.Contains(mobile))
                             {
                                 continue;
                             }
                         }
-                        else if (scanType == SCAN_TYPE_OBJECT.STO_FOLLOWERS)
+                        else if (scanType == ScanTypeObject.Followers)
                         {
-                            if (!(mobile.IsRenamable &&
-                                  mobile.NotorietyFlag != NotorietyFlag.Invulnerable &&
+                            if (!(mobile.IsRenamable && mobile.NotorietyFlag != NotorietyFlag.Invulnerable &&
                                   mobile.NotorietyFlag != NotorietyFlag.Enemy))
                             {
                                 continue;
                             }
                         }
-                        else if (scanType == SCAN_TYPE_OBJECT.STO_HOSTILE)
+                        else if (scanType == ScanTypeObject.Hostile)
                         {
                             if (mobile.NotorietyFlag == NotorietyFlag.Ally ||
                                 mobile.NotorietyFlag == NotorietyFlag.Innocent ||
@@ -712,25 +700,24 @@ namespace ClassicUO.Game
                         continue;
                     }
 
-                    if (scanMode == SCAN_MODE_OBJECT.SMO_NEXT)
+                    if (scanMode == ScanModeObject.Next)
                     {
-                        if (scanType == SCAN_TYPE_OBJECT.STO_PARTY)
+                        if (scanType == ScanTypeObject.Party)
                         {
                             if (!Party.Contains(mobile))
                             {
                                 continue;
                             }
                         }
-                        else if (scanType == SCAN_TYPE_OBJECT.STO_FOLLOWERS)
+                        else if (scanType == ScanTypeObject.Followers)
                         {
-                            if (!(mobile.IsRenamable &&
-                                  mobile.NotorietyFlag != NotorietyFlag.Invulnerable &&
+                            if (!(mobile.IsRenamable && mobile.NotorietyFlag != NotorietyFlag.Invulnerable &&
                                   mobile.NotorietyFlag != NotorietyFlag.Enemy))
                             {
                                 continue;
                             }
                         }
-                        else if (scanType == SCAN_TYPE_OBJECT.STO_HOSTILE)
+                        else if (scanType == ScanTypeObject.Hostile)
                         {
                             if (mobile.NotorietyFlag == NotorietyFlag.Ally ||
                                 mobile.NotorietyFlag == NotorietyFlag.Innocent ||
@@ -759,25 +746,24 @@ namespace ClassicUO.Game
                             break;
                         }
                     }
-                    else if (scanMode == SCAN_MODE_OBJECT.SMO_PREV)
+                    else if (scanMode == ScanModeObject.Previous)
                     {
-                        if (scanType == SCAN_TYPE_OBJECT.STO_PARTY)
+                        if (scanType == ScanTypeObject.Party)
                         {
                             if (!Party.Contains(mobile))
                             {
                                 continue;
                             }
                         }
-                        else if (scanType == SCAN_TYPE_OBJECT.STO_FOLLOWERS)
+                        else if (scanType == ScanTypeObject.Followers)
                         {
-                            if (!(mobile.IsRenamable &&
-                                  mobile.NotorietyFlag != NotorietyFlag.Invulnerable &&
+                            if (!(mobile.IsRenamable && mobile.NotorietyFlag != NotorietyFlag.Invulnerable &&
                                   mobile.NotorietyFlag != NotorietyFlag.Enemy))
                             {
                                 continue;
                             }
                         }
-                        else if (scanType == SCAN_TYPE_OBJECT.STO_HOSTILE)
+                        else if (scanType == ScanTypeObject.Hostile)
                         {
                             if (mobile.NotorietyFlag == NotorietyFlag.Ally ||
                                 mobile.NotorietyFlag == NotorietyFlag.Innocent ||
@@ -801,25 +787,24 @@ namespace ClassicUO.Game
 
                         first = mobile;
                     }
-                    else if (scanMode == SCAN_MODE_OBJECT.SMO_NEAREST)
+                    else if (scanMode == ScanModeObject.Nearest)
                     {
-                        if (scanType == SCAN_TYPE_OBJECT.STO_PARTY)
+                        if (scanType == ScanTypeObject.Party)
                         {
                             if (!Party.Contains(mobile))
                             {
                                 continue;
                             }
                         }
-                        else if (scanType == SCAN_TYPE_OBJECT.STO_FOLLOWERS)
+                        else if (scanType == ScanTypeObject.Followers)
                         {
-                            if (!(mobile.IsRenamable &&
-                                  mobile.NotorietyFlag != NotorietyFlag.Invulnerable &&
+                            if (!(mobile.IsRenamable && mobile.NotorietyFlag != NotorietyFlag.Invulnerable &&
                                   mobile.NotorietyFlag != NotorietyFlag.Enemy))
                             {
                                 continue;
                             }
                         }
-                        else if (scanType == SCAN_TYPE_OBJECT.STO_HOSTILE)
+                        else if (scanType == ScanTypeObject.Hostile)
                         {
                             if (mobile.NotorietyFlag == NotorietyFlag.Ally ||
                                 mobile.NotorietyFlag == NotorietyFlag.Innocent ||
@@ -902,8 +887,8 @@ namespace ClassicUO.Game
             WMapManager.Clear();
             HouseManager?.Clear();
 
-            Season = Seasons.Summer;
-            OldSeason = Seasons.Summer;
+            Season = Season.Summer;
+            OldSeason = Season.Summer;
 
             Journal.Clear();
             WorldTextManager.Clear();

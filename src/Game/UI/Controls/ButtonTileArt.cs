@@ -9,11 +9,10 @@ namespace ClassicUO.Game.UI.Controls
     {
         private readonly ushort _hue;
         private readonly bool _isPartial;
-        private readonly UOTexture32 _texture;
+        private readonly UOTexture _texture;
         private readonly int _tileX, _tileY;
 
-        public ButtonTileArt(List<string> gparams) :
-            base(gparams)
+        public ButtonTileArt(List<string> gparams) : base(gparams)
         {
             X = int.Parse(gparams[1]);
             Y = int.Parse(gparams[2]);
@@ -32,13 +31,12 @@ namespace ClassicUO.Game.UI.Controls
                 return;
             }
 
-            _isPartial = TileDataLoader.Instance.StaticData[graphic]
-                                       .IsPartialHue;
+            _isPartial = TileDataLoader.Instance.StaticData[graphic].IsPartialHue;
         }
 
-        public override void Update(double totalMS, double frameMS)
+        public override void Update(double totalTime, double frameTime)
         {
-            base.Update(totalMS, frameMS);
+            base.Update(totalTime, frameTime);
 
             if (_texture != null)
             {
@@ -54,9 +52,9 @@ namespace ClassicUO.Game.UI.Controls
 
             ResetHueVector();
 
-            ShaderHueTranslator.GetHueVector(ref _hueVector, _hue, _isPartial, 0);
+            ShaderHueTranslator.GetHueVector(ref HueVector, _hue, _isPartial, 0);
 
-            return batcher.Draw2D(_texture, x + _tileX, y + _tileY, ref _hueVector);
+            return batcher.Draw2D(_texture, x + _tileX, y + _tileY, ref HueVector);
         }
     }
 }

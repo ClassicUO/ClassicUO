@@ -63,22 +63,35 @@ namespace ClassicUO.Game.Managers
     {
         public static PromptData PromptData { get; set; }
 
-        public static event EventHandler<UOMessageEventArgs> MessageReceived;
+        public static event EventHandler<MessageEventArgs> MessageReceived;
 
-        public static event EventHandler<UOMessageEventArgs> LocalizedMessageReceived;
+        public static event EventHandler<MessageEventArgs> LocalizedMessageReceived;
 
 
-        public static void HandleMessage(Entity parent, string text, string name, ushort hue, MessageType type, byte font, TEXT_TYPE text_type, bool unicode = false, string lang = null)
+        public static void HandleMessage
+        (
+            Entity parent,
+            string text,
+            string name,
+            ushort hue,
+            MessageType type,
+            byte font,
+            TextType textType,
+            bool unicode = false,
+            string lang = null
+        )
         {
             if (string.IsNullOrEmpty(text))
             {
                 return;
             }
 
-            if (ProfileManager.Current != null && ProfileManager.Current.OverrideAllFonts)
+            Profile currentProfile = ProfileManager.CurrentProfile;
+
+            if (currentProfile != null && currentProfile.OverrideAllFonts)
             {
-                font = ProfileManager.Current.ChatFont;
-                unicode = ProfileManager.Current.OverrideAllFontsIsUnicode;
+                font = currentProfile.ChatFont;
+                unicode = currentProfile.OverrideAllFontsIsUnicode;
             }
 
             switch (type)
@@ -88,41 +101,40 @@ namespace ClassicUO.Game.Managers
                 case MessageType.System:
                 case MessageType.Party:
                 case MessageType.Guild:
-                case MessageType.Alliance:
-
-                    break;
+                case MessageType.Alliance: break;
 
 
                 case MessageType.Spell:
 
                 {
                     //server hue color per default
-                    if (!string.IsNullOrEmpty(text) && SpellDefinition.WordToTargettype.TryGetValue(text, out SpellDefinition spell))
+                    if (!string.IsNullOrEmpty(text) && SpellDefinition.WordToTargettype.TryGetValue
+                        (text, out SpellDefinition spell))
                     {
-                        if (ProfileManager.Current != null && ProfileManager.Current.EnabledSpellFormat && !string.IsNullOrWhiteSpace(ProfileManager.Current.SpellDisplayFormat))
+                        if (currentProfile != null && currentProfile.EnabledSpellFormat &&
+                            !string.IsNullOrWhiteSpace(currentProfile.SpellDisplayFormat))
                         {
-                            StringBuilder sb = new StringBuilder(ProfileManager.Current.SpellDisplayFormat);
+                            StringBuilder sb = new StringBuilder(currentProfile.SpellDisplayFormat);
                             sb.Replace("{power}", spell.PowerWords);
                             sb.Replace("{spell}", spell.Name);
 
-                            text = sb.ToString()
-                                     .Trim();
+                            text = sb.ToString().Trim();
                         }
 
                         //server hue color per default if not enabled
-                        if (ProfileManager.Current != null && ProfileManager.Current.EnabledSpellHue)
+                        if (currentProfile != null && currentProfile.EnabledSpellHue)
                         {
                             if (spell.TargetType == TargetType.Beneficial)
                             {
-                                hue = ProfileManager.Current.BeneficHue;
+                                hue = currentProfile.BeneficHue;
                             }
                             else if (spell.TargetType == TargetType.Harmful)
                             {
-                                hue = ProfileManager.Current.HarmfulHue;
+                                hue = currentProfile.HarmfulHue;
                             }
                             else
                             {
-                                hue = ProfileManager.Current.NeutralHue;
+                                hue = currentProfile.NeutralHue;
                             }
                         }
                     }
@@ -143,7 +155,7 @@ namespace ClassicUO.Game.Managers
                         break;
                     }
 
-                    TextObject msg = CreateMessage(text, hue, font, unicode, type, text_type);
+                    TextObject msg = CreateMessage(text, hue, font, unicode, type, textType);
                     msg.Owner = parent;
 
                     if (parent is Item it && !it.OnGround)
@@ -202,58 +214,77 @@ namespace ClassicUO.Game.Managers
                 //    break;
             }
 
-            MessageReceived.Raise(new UOMessageEventArgs(parent, text, name, hue, type, font, text_type, unicode, lang), parent);
+            MessageReceived.Raise
+                (new MessageEventArgs(parent, text, name, hue, type, font, textType, unicode, lang), parent);
         }
 
-        public static void OnLocalizedMessage(Entity entity, UOMessageEventArgs args)
+        public static void OnLocalizedMessage(Entity entity, MessageEventArgs args)
         {
             LocalizedMessageReceived.Raise(args, entity);
         }
 
-
-        public static TextObject CreateMessage(string msg, ushort hue, byte font, bool isunicode, MessageType type, TEXT_TYPE text_type)
+        public static TextObject CreateMessage
+        (
+            string msg,
+            ushort hue,
+            byte font,
+            bool isunicode,
+            MessageType type,
+            TextType textType
+        )
         {
-            if (ProfileManager.Current != null && ProfileManager.Current.OverrideAllFonts)
+            if (ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.OverrideAllFonts)
             {
-                font = ProfileManager.Current.ChatFont;
-                isunicode = ProfileManager.Current.OverrideAllFontsIsUnicode;
+                font = ProfileManager.CurrentProfile.ChatFont;
+                isunicode = ProfileManager.CurrentProfile.OverrideAllFontsIsUnicode;
             }
 
-            int width = isunicode ? FontsLoader.Instance.GetWidthUnicode(font, msg) : FontsLoader.Instance.GetWidthASCII(font, msg);
+            int width = isunicode
+                ? FontsLoader.Instance.GetWidthUnicode(font, msg)
+                : FontsLoader.Instance.GetWidthASCII(font, msg);
 
             if (width > 200)
             {
-                width = isunicode ? FontsLoader.Instance.GetWidthExUnicode(font, msg, 200, TEXT_ALIGN_TYPE.TS_LEFT, (ushort) FontStyle.BlackBorder) : FontsLoader.Instance.GetWidthExASCII(font, msg, 200, TEXT_ALIGN_TYPE.TS_LEFT, (ushort) FontStyle.BlackBorder);
+                width = isunicode
+                    ? FontsLoader.Instance.GetWidthExUnicode(font, msg, 200, TEXT_ALIGN_TYPE.TS_LEFT, (ushort) FontStyle.BlackBorder)
+                    : FontsLoader.Instance.GetWidthExASCII(font, msg, 200, TEXT_ALIGN_TYPE.TS_LEFT, (ushort) FontStyle.BlackBorder);
             }
             else
             {
                 width = 0;
             }
 
-            TextObject text_obj = TextObject.Create();
-            text_obj.Alpha = 0xFF;
-            text_obj.Type = type;
-            text_obj.Hue = hue;
+            TextObject textObject = TextObject.Create();
+            textObject.Alpha = 0xFF;
+            textObject.Type = type;
+            textObject.Hue = hue;
 
-            if (!isunicode && text_type == TEXT_TYPE.OBJECT)
+            if (!isunicode && textType == TextType.OBJECT)
             {
                 hue = 0;
             }
 
-            text_obj.RenderedText = RenderedText.Create(msg, hue, font, isunicode, FontStyle.BlackBorder, TEXT_ALIGN_TYPE.TS_LEFT, width, 30, false, false, text_type == TEXT_TYPE.OBJECT);
-            text_obj.Time = CalculateTimeToLive(text_obj.RenderedText);
-            text_obj.RenderedText.Hue = text_obj.Hue;
+            textObject.RenderedText = RenderedText.Create
+            (
+                msg, hue, font, isunicode, FontStyle.BlackBorder, TEXT_ALIGN_TYPE.TS_LEFT, width, 30, false, false,
+                textType == TextType.OBJECT
+            );
 
-            return text_obj;
+            textObject.Time = CalculateTimeToLive(textObject.RenderedText);
+            textObject.RenderedText.Hue = textObject.Hue;
+
+            return textObject;
         }
 
         private static long CalculateTimeToLive(RenderedText rtext)
         {
             long timeToLive;
 
-            if (ProfileManager.Current.ScaleSpeechDelay)
+            Profile currentProfile = ProfileManager.CurrentProfile;
+
+            if (currentProfile.ScaleSpeechDelay)
             {
-                int delay = ProfileManager.Current.SpeechDelay;
+                int delay = currentProfile.SpeechDelay;
 
                 if (delay < 10)
                 {
@@ -264,7 +295,7 @@ namespace ClassicUO.Game.Managers
             }
             else
             {
-                long delay = (5497558140000 * ProfileManager.Current.SpeechDelay) >> 32 >> 5;
+                long delay = (5497558140000 * currentProfile.SpeechDelay) >> 32 >> 5;
 
                 timeToLive = (delay >> 31) + delay;
             }
@@ -273,47 +304,5 @@ namespace ClassicUO.Game.Managers
 
             return timeToLive;
         }
-    }
-
-    internal class UOMessageEventArgs : EventArgs
-    {
-        public UOMessageEventArgs(Entity parent, string text, string name, ushort hue, MessageType type, byte font, TEXT_TYPE text_type, bool unicode = false, string lang = null)
-        {
-            Parent = parent;
-            Text = text;
-            Name = name;
-            Hue = hue;
-            Type = type;
-            Font = font;
-            Language = lang;
-            AffixType = AffixType.None;
-            IsUnicode = unicode;
-            TextType = text_type;
-        }
-
-
-        public Entity Parent { get; }
-
-        public string Text { get; }
-
-        public string Name { get; }
-
-        public ushort Hue { get; }
-
-        public MessageType Type { get; }
-
-        public byte Font { get; }
-
-        public string Language { get; }
-
-        public uint Cliloc { get; }
-
-        public AffixType AffixType { get; }
-
-        public string Affix { get; }
-
-        public bool IsUnicode { get; }
-
-        public TEXT_TYPE TextType { get; }
     }
 }

@@ -34,10 +34,23 @@ namespace ClassicUO.Game.Data
     {
         public static SpellDefinition EmptySpell = new SpellDefinition("", 0, 0, "", 0, 0, 0);
 
-        internal static Dictionary<string, SpellDefinition> WordToTargettype = new Dictionary<string, SpellDefinition>();
+        internal static Dictionary<string, SpellDefinition>
+            WordToTargettype = new Dictionary<string, SpellDefinition>();
 
 
-        public SpellDefinition(string name, int index, int gumpIconID, int gumpSmallIconID, string powerwords, int manacost, int minskill, int tithingcost, TargetType target, params Reagents[] regs)
+        public SpellDefinition
+        (
+            string name,
+            int index,
+            int gumpIconID,
+            int gumpSmallIconID,
+            string powerwords,
+            int manacost,
+            int minskill,
+            int tithingcost,
+            TargetType target,
+            params Reagents[] regs
+        )
         {
             Name = name;
             ID = index;
@@ -52,7 +65,17 @@ namespace ClassicUO.Game.Data
             AddToWatchedSpell();
         }
 
-        public SpellDefinition(string name, int index, int gumpIconID, string powerwords, int manacost, int minskill, TargetType target, params Reagents[] regs)
+        public SpellDefinition
+        (
+            string name,
+            int index,
+            int gumpIconID,
+            string powerwords,
+            int manacost,
+            int minskill,
+            TargetType target,
+            params Reagents[] regs
+        )
         {
             Name = name;
             ID = index;
@@ -67,7 +90,15 @@ namespace ClassicUO.Game.Data
             AddToWatchedSpell();
         }
 
-        public SpellDefinition(string name, int index, int gumpIconID, string powerwords, TargetType target, params Reagents[] regs)
+        public SpellDefinition
+        (
+            string name,
+            int index,
+            int gumpIconID,
+            string powerwords,
+            TargetType target,
+            params Reagents[] regs
+        )
         {
             Name = name;
             ID = index;
@@ -191,14 +222,7 @@ namespace ClassicUO.Game.Data
 
                         if (Regs[i] < Reagents.None)
                         {
-                            sb.Append
-                            (
-                                StringHelper.AddSpaceBeforeCapital
-                                (
-                                    Regs[i]
-                                        .ToString()
-                                )
-                            );
+                            sb.Append(StringHelper.AddSpaceBeforeCapital(Regs[i].ToString()));
                         }
 
                         break;
@@ -258,7 +282,20 @@ namespace ClassicUO.Game.Data
             return SpellsMastery.GetSpell(fullidx % 100);
         }
 
-        public static void FullIndexSetModifySpell(int fullidx, int id, int iconid, int smalliconid, int minskill, int manacost, int tithing, string name, string words, TargetType target, params Reagents[] regs)
+        public static void FullIndexSetModifySpell
+        (
+            int fullidx,
+            int id,
+            int iconid,
+            int smalliconid,
+            int minskill,
+            int manacost,
+            int tithing,
+            string name,
+            string words,
+            TargetType target,
+            params Reagents[] regs
+        )
         {
             if (fullidx < 1 || fullidx > 799)
             {
@@ -305,7 +342,8 @@ namespace ClassicUO.Game.Data
                 }
             }
 
-            sd = new SpellDefinition(name, fullidx, iconid, smalliconid, words, manacost, minskill, tithing, target, regs);
+            sd = new SpellDefinition
+                (name, fullidx, iconid, smalliconid, words, manacost, minskill, tithing, target, regs);
 
             if (fullidx < 100)
             {

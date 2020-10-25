@@ -219,7 +219,9 @@ namespace ClassicUO.Game
                 return null;
             }
 
-            int unitsize = 1; //size of the components we are merging; 1 for first iteration, multiplied by 2 after each iteration
+            int unitsize =
+                1; //size of the components we are merging; 1 for first iteration, multiplied by 2 after each iteration
+
             T p = null, q = null, e = null, head = (T) Items, tail = null;
 
             while (true)

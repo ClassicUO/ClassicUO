@@ -136,18 +136,16 @@ namespace ClassicUO.Renderer
                         {
                             _info = FontsLoader.Instance.GetInfoUnicode
                             (
-                                Font,
-                                Text, Text.Length, Align, (ushort) FontStyle,
-                                MaxWidth > 0 ? MaxWidth : Width, true, true
+                                Font, Text, Text.Length, Align, (ushort) FontStyle, MaxWidth > 0 ? MaxWidth : Width,
+                                true, true
                             );
                         }
                         else
                         {
                             _info = FontsLoader.Instance.GetInfoASCII
                             (
-                                Font,
-                                Text, Text.Length, Align, (ushort) FontStyle,
-                                MaxWidth > 0 ? MaxWidth : Width, true, true
+                                Font, Text, Text.Length, Align, (ushort) FontStyle, MaxWidth > 0 ? MaxWidth : Width,
+                                true, true
                             );
                         }
                     }
@@ -155,7 +153,7 @@ namespace ClassicUO.Renderer
             }
         }
 
-        public int LinesCount => Texture == null || Texture.IsDisposed ? 0 : Texture.LinesCount;
+        public int LinesCount => Texture == null || Texture.IsDisposed ? 0 : Texture.LineCount;
 
         public bool SaveHitMap { get; private set; }
 
@@ -170,9 +168,17 @@ namespace ClassicUO.Renderer
 
         public static RenderedText Create
         (
-            string text, ushort hue = 0xFFFF, byte font = 0xFF, bool isunicode = true, FontStyle style = 0, TEXT_ALIGN_TYPE align = 0,
-            int maxWidth = 0, byte cell = 30, bool isHTML = false,
-            bool recalculateWidthByInfo = false, bool saveHitmap = false
+            string text,
+            ushort hue = 0xFFFF,
+            byte font = 0xFF,
+            bool isunicode = true,
+            FontStyle style = 0,
+            TEXT_ALIGN_TYPE align = 0,
+            int maxWidth = 0,
+            byte cell = 30,
+            bool isHTML = false,
+            bool recalculateWidthByInfo = false,
+            bool saveHitmap = false
         )
         {
             RenderedText r = _pool.GetOne();
@@ -210,26 +216,12 @@ namespace ClassicUO.Renderer
             if (IsUnicode)
             {
                 (p.X, p.Y) = FontsLoader.Instance.GetCaretPosUnicode
-                (
-                    Font,
-                    Text,
-                    caret_index,
-                    MaxWidth,
-                    Align,
-                    (ushort) FontStyle
-                );
+                    (Font, Text, caret_index, MaxWidth, Align, (ushort) FontStyle);
             }
             else
             {
                 (p.X, p.Y) = FontsLoader.Instance.GetCaretPosASCII
-                (
-                    Font,
-                    Text,
-                    caret_index,
-                    MaxWidth,
-                    Align,
-                    (ushort) FontStyle
-                );
+                    (Font, Text, caret_index, MaxWidth, Align, (ushort) FontStyle);
             }
 
             return p;
@@ -322,10 +314,7 @@ namespace ClassicUO.Renderer
 
                     if (x >= 0)
                     {
-                        char c = x >= info.Data.Count
-                            ? '\n'
-                            : info.Data[x]
-                                  .Item;
+                        char c = x >= info.Data.Count ? '\n' : info.Data[x].Item;
 
                         if (IsUnicode)
                         {
@@ -357,9 +346,16 @@ namespace ClassicUO.Renderer
         public bool Draw
         (
             UltimaBatcher2D batcher,
-            int swidth, int sheight,
-            int dx, int dy, int dwidth, int dheight,
-            int offsetX, int offsetY, float alpha = 0, ushort hue = 0
+            int swidth,
+            int sheight,
+            int dx,
+            int dy,
+            int dwidth,
+            int dheight,
+            int offsetX,
+            int offsetY,
+            float alpha = 0,
+            ushort hue = 0
         )
         {
             if (string.IsNullOrEmpty(Text) || Texture == null)
@@ -439,7 +435,17 @@ namespace ClassicUO.Renderer
             return batcher.Draw2D(Texture, dx, dy, dwidth, dheight, srcX, srcY, srcWidth, srcHeight, ref _hueVector);
         }
 
-        public bool Draw(UltimaBatcher2D batcher, int dx, int dy, int sx, int sy, int swidth, int sheight, int hue = -1)
+        public bool Draw
+        (
+            UltimaBatcher2D batcher,
+            int dx,
+            int dy,
+            int sx,
+            int sy,
+            int swidth,
+            int sheight,
+            int hue = -1
+        )
         {
             if (string.IsNullOrEmpty(Text) || Texture == null)
             {
@@ -554,11 +560,13 @@ namespace ClassicUO.Renderer
 
             if (IsUnicode)
             {
-                FontsLoader.Instance.GenerateUnicode(ref _texture, Font, Text, Hue, Cell, MaxWidth, Align, (ushort) FontStyle, SaveHitMap, MaxHeight);
+                FontsLoader.Instance.GenerateUnicode
+                    (ref _texture, Font, Text, Hue, Cell, MaxWidth, Align, (ushort) FontStyle, SaveHitMap, MaxHeight);
             }
             else
             {
-                FontsLoader.Instance.GenerateASCII(ref _texture, Font, Text, Hue, MaxWidth, Align, (ushort) FontStyle, SaveHitMap, MaxHeight);
+                FontsLoader.Instance.GenerateASCII
+                    (ref _texture, Font, Text, Hue, MaxWidth, Align, (ushort) FontStyle, SaveHitMap, MaxHeight);
             }
 
             if (Texture != null)

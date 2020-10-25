@@ -39,7 +39,8 @@ namespace ClassicUO.Game.GameObjects
             {
                 BlendState state = new BlendState
                 {
-                    ColorSourceBlend = Microsoft.Xna.Framework.Graphics.Blend.Zero, ColorDestinationBlend = Microsoft.Xna.Framework.Graphics.Blend.SourceColor
+                    ColorSourceBlend = Microsoft.Xna.Framework.Graphics.Blend.Zero,
+                    ColorDestinationBlend = Microsoft.Xna.Framework.Graphics.Blend.SourceColor
                 };
 
                 return state;
@@ -52,7 +53,8 @@ namespace ClassicUO.Game.GameObjects
             {
                 BlendState state = new BlendState
                 {
-                    ColorSourceBlend = Microsoft.Xna.Framework.Graphics.Blend.One, ColorDestinationBlend = Microsoft.Xna.Framework.Graphics.Blend.One
+                    ColorSourceBlend = Microsoft.Xna.Framework.Graphics.Blend.One,
+                    ColorDestinationBlend = Microsoft.Xna.Framework.Graphics.Blend.One
                 };
 
                 return state;
@@ -65,7 +67,8 @@ namespace ClassicUO.Game.GameObjects
             {
                 BlendState state = new BlendState
                 {
-                    ColorSourceBlend = Microsoft.Xna.Framework.Graphics.Blend.DestinationColor, ColorDestinationBlend = Microsoft.Xna.Framework.Graphics.Blend.InverseSourceAlpha
+                    ColorSourceBlend = Microsoft.Xna.Framework.Graphics.Blend.DestinationColor,
+                    ColorDestinationBlend = Microsoft.Xna.Framework.Graphics.Blend.InverseSourceAlpha
                 };
 
                 return state;
@@ -78,7 +81,8 @@ namespace ClassicUO.Game.GameObjects
             {
                 BlendState state = new BlendState
                 {
-                    ColorSourceBlend = Microsoft.Xna.Framework.Graphics.Blend.DestinationColor, ColorDestinationBlend = Microsoft.Xna.Framework.Graphics.Blend.SourceColor
+                    ColorSourceBlend = Microsoft.Xna.Framework.Graphics.Blend.DestinationColor,
+                    ColorDestinationBlend = Microsoft.Xna.Framework.Graphics.Blend.SourceColor
                 };
 
                 return state;
@@ -91,7 +95,9 @@ namespace ClassicUO.Game.GameObjects
             {
                 BlendState state = new BlendState
                 {
-                    ColorSourceBlend = Microsoft.Xna.Framework.Graphics.Blend.SourceColor, ColorDestinationBlend = Microsoft.Xna.Framework.Graphics.Blend.InverseSourceColor, ColorBlendFunction = BlendFunction.ReverseSubtract
+                    ColorSourceBlend = Microsoft.Xna.Framework.Graphics.Blend.SourceColor,
+                    ColorDestinationBlend = Microsoft.Xna.Framework.Graphics.Blend.InverseSourceColor,
+                    ColorBlendFunction = BlendFunction.ReverseSubtract
                 };
 
                 return state;
@@ -119,11 +125,11 @@ namespace ClassicUO.Game.GameObjects
 
             ushort hue = Hue;
 
-            if (ProfileManager.Current.NoColorObjectsOutOfRange && Distance > World.ClientViewRange)
+            if (ProfileManager.CurrentProfile.NoColorObjectsOutOfRange && Distance > World.ClientViewRange)
             {
                 hue = Constants.OUT_RANGE_COLOR;
             }
-            else if (World.Player.IsDead && ProfileManager.Current.EnableBlackWhiteEffect)
+            else if (World.Player.IsDead && ProfileManager.CurrentProfile.EnableBlackWhiteEffect)
             {
                 hue = Constants.DEAD_RANGE_COLOR;
             }
@@ -191,8 +197,7 @@ namespace ClassicUO.Game.GameObjects
 
             if (data.IsLight && Source != null)
             {
-                Client.Game.GetScene<GameScene>()
-                      .AddLight(Source, Source, posX + 22, posY + 22);
+                Client.Game.GetScene<GameScene>().AddLight(Source, Source, posX + 22, posY + 22);
             }
 
             return true;

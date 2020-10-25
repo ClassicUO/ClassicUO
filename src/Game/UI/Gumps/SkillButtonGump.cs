@@ -59,7 +59,7 @@ namespace ClassicUO.Game.UI.Gumps
         }
 
 
-        public override GUMP_TYPE GumpType => GUMP_TYPE.GT_SKILLBUTTON;
+        public override GumpType GumpType => GumpType.SkillButton;
 
         public int SkillID => _skill.Index;
 
@@ -101,7 +101,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             base.OnMouseUp(x, y, button);
 
-            if (ProfileManager.Current.CastSpellsByOneClick && button == MouseButtonType.Left && !Keyboard.Alt)
+            if (ProfileManager.CurrentProfile.CastSpellsByOneClick && button == MouseButtonType.Left && !Keyboard.Alt)
             {
                 GameActions.UseSkill(_skill.Index);
             }
@@ -109,7 +109,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override bool OnMouseDoubleClick(int x, int y, MouseButtonType button)
         {
-            if (!ProfileManager.Current.CastSpellsByOneClick && button == MouseButtonType.Left && !Keyboard.Alt)
+            if (!ProfileManager.CurrentProfile.CastSpellsByOneClick && button == MouseButtonType.Left && !Keyboard.Alt)
             {
                 GameActions.UseSkill(_skill.Index);
 

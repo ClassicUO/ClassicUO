@@ -66,7 +66,12 @@ namespace ClassicUO.IO.Resources
 
                         if (length > 0)
                         {
-                            entries.Add(new SpeechEntry(id, string.Intern(Encoding.UTF8.GetString((byte*) file.PositionAddress, length))));
+                            entries.Add
+                            (
+                                new SpeechEntry
+                                    (id, string.Intern(Encoding.UTF8.GetString((byte*) file.PositionAddress, length)))
+                            );
+
                             file.Skip(length);
                         }
                     }
@@ -83,20 +88,14 @@ namespace ClassicUO.IO.Resources
 
             for (int i = 0; i < split.Length; i++)
             {
-                if (split[i]
-                    .Length > input.Length || split[i]
-                    .Length == 0)
+                if (split[i].Length > input.Length || split[i].Length == 0)
                 {
                     continue;
                 }
 
                 if (!entry.CheckStart)
                 {
-                    if (input.IndexOf
-                    (
-                        split[i], 0, split[i]
-                            .Length
-                    ) == -1)
+                    if (input.IndexOf(split[i], 0, split[i].Length, StringComparison.InvariantCultureIgnoreCase) == -1)
                     {
                         continue;
                     }
@@ -105,16 +104,13 @@ namespace ClassicUO.IO.Resources
                 if (!entry.CheckEnd)
                 {
                     if (input.IndexOf
-                    (
-                        split[i], input.Length - split[i]
-                            .Length
-                    ) == -1)
+                        (split[i], input.Length - split[i].Length, StringComparison.InvariantCultureIgnoreCase) == -1)
                     {
                         continue;
                     }
                 }
 
-                if (input.IndexOf(split[i]) != -1)
+                if (input.IndexOf(split[i], StringComparison.InvariantCultureIgnoreCase) != -1)
                 {
                     return true;
                 }
@@ -132,9 +128,7 @@ namespace ClassicUO.IO.Resources
                 return list;
             }
 
-            text = text.ToLower()
-                       .TrimStart(' ')
-                       .TrimEnd(' ');
+            text = text.TrimStart(' ').TrimEnd(' ');
 
             for (int i = 0; i < _speech.Length; i++)
             {

@@ -36,12 +36,31 @@ namespace ClassicUO.Game.GameObjects
             Load();
         }
 
-        public AnimatedItemEffect(int sourceX, int sourceY, int sourceZ, ushort graphic, ushort hue, int duration, int speed) : this(graphic, hue, duration, speed)
+        public AnimatedItemEffect
+        (
+            int sourceX,
+            int sourceY,
+            int sourceZ,
+            ushort graphic,
+            ushort hue,
+            int duration,
+            int speed
+        ) : this(graphic, hue, duration, speed)
         {
             SetSource(sourceX, sourceY, sourceZ);
         }
 
-        public AnimatedItemEffect(uint sourceSerial, int sourceX, int sourceY, int sourceZ, ushort graphic, ushort hue, int duration, int speed) : this(graphic, hue, duration, speed)
+        public AnimatedItemEffect
+        (
+            uint sourceSerial,
+            int sourceX,
+            int sourceY,
+            int sourceZ,
+            ushort graphic,
+            ushort hue,
+            int duration,
+            int speed
+        ) : this(graphic, hue, duration, speed)
         {
             Entity source = World.Get(sourceSerial);
 
@@ -55,9 +74,9 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
-        public override void Update(double totalMS, double frameMS)
+        public override void Update(double totalTime, double frameTime)
         {
-            base.Update(totalMS, frameMS);
+            base.Update(totalTime, frameTime);
 
             if (!IsDestroyed)
             {

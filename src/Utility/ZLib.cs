@@ -120,7 +120,8 @@ namespace ClassicUO.Utility
                 return SafeNativeMethods.compress(dest, ref destLength, source, sourceLength);
             }
 
-            public ZLibError Compress(byte[] dest, ref int destLength, byte[] source, int sourceLength, ZLibQuality quality)
+            public ZLibError Compress
+                (byte[] dest, ref int destLength, byte[] source, int sourceLength, ZLibQuality quality)
             {
                 return SafeNativeMethods.compress2(dest, ref destLength, source, sourceLength, quality);
             }
@@ -141,10 +142,12 @@ namespace ClassicUO.Utility
                 internal static extern string zlibVersion();
 
                 [DllImport("zlib")]
-                internal static extern ZLibError compress(byte[] dest, ref int destLength, byte[] source, int sourceLength);
+                internal static extern ZLibError compress
+                    (byte[] dest, ref int destLength, byte[] source, int sourceLength);
 
                 [DllImport("zlib")]
-                internal static extern ZLibError compress2(byte[] dest, ref int destLength, byte[] source, int sourceLength, ZLibQuality quality);
+                internal static extern ZLibError compress2
+                    (byte[] dest, ref int destLength, byte[] source, int sourceLength, ZLibQuality quality);
 
                 [DllImport("zlib")]
                 internal static extern ZLibError uncompress(byte[] dest, ref int destLen, byte[] source, int sourceLen);
@@ -167,7 +170,8 @@ namespace ClassicUO.Utility
                 return z;
             }
 
-            public ZLibError Compress(byte[] dest, ref int destLength, byte[] source, int sourceLength, ZLibQuality quality)
+            public ZLibError Compress
+                (byte[] dest, ref int destLength, byte[] source, int sourceLength, ZLibQuality quality)
             {
                 long destLengthLong = destLength;
                 ZLibError z = SafeNativeMethods.compress2(dest, ref destLengthLong, source, sourceLength, quality);
@@ -196,13 +200,16 @@ namespace ClassicUO.Utility
                 internal static extern string zlibVersion();
 
                 [DllImport("libz")]
-                internal static extern ZLibError compress(byte[] dest, ref long destLength, byte[] source, long sourceLength);
+                internal static extern ZLibError compress
+                    (byte[] dest, ref long destLength, byte[] source, long sourceLength);
 
                 [DllImport("libz")]
-                internal static extern ZLibError compress2(byte[] dest, ref long destLength, byte[] source, long sourceLength, ZLibQuality quality);
+                internal static extern ZLibError compress2
+                    (byte[] dest, ref long destLength, byte[] source, long sourceLength, ZLibQuality quality);
 
                 [DllImport("libz")]
-                internal static extern ZLibError uncompress(byte[] dest, ref long destLen, byte[] source, long sourceLen);
+                internal static extern ZLibError uncompress
+                    (byte[] dest, ref long destLen, byte[] source, long sourceLen);
 
                 [DllImport("libz")]
                 internal static extern ZLibError uncompress(IntPtr dest, ref int destLen, IntPtr source, int sourceLen);
@@ -220,7 +227,8 @@ namespace ClassicUO.Utility
                 return ZLibError.Okay;
             }
 
-            public ZLibError Compress(byte[] dest, ref int destLength, byte[] source, int sourceLength, ZLibQuality quality)
+            public ZLibError Compress
+                (byte[] dest, ref int destLength, byte[] source, int sourceLength, ZLibQuality quality)
             {
                 return Compress(dest, ref destLength, source, sourceLength);
             }

@@ -44,7 +44,11 @@ namespace ClassicUO.Game.UI.Controls
             X = x;
             Y = y;
             Width = width;
-            Height = heigth;
+
+            if (heigth > 0)
+            {
+                Height = heigth;
+            }
         }
 
         public GumpPicTiled(List<string> parts) : this(UInt16Converter.Parse(parts[5]))
@@ -56,7 +60,7 @@ namespace ClassicUO.Game.UI.Controls
             IsFromServer = true;
         }
 
-        internal GumpPicTiled(int x, int y, int width, int heigth, UOTexture32 texture)
+        internal GumpPicTiled(int x, int y, int width, int heigth, UOTexture texture)
         {
             CanMove = true;
             AcceptMouseInput = true;
@@ -76,7 +80,7 @@ namespace ClassicUO.Game.UI.Controls
                 {
                     _graphic = value;
 
-                    UOTexture32 texture = GumpsLoader.Instance.GetTexture(_graphic);
+                    UOTexture texture = GumpsLoader.Instance.GetTexture(_graphic);
 
                     if (texture == null)
                     {
@@ -97,13 +101,13 @@ namespace ClassicUO.Game.UI.Controls
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
             ResetHueVector();
-            ShaderHueTranslator.GetHueVector(ref _hueVector, Hue, false, Alpha, true);
+            ShaderHueTranslator.GetHueVector(ref HueVector, Hue, false, Alpha, true);
 
-            UOTexture32 texture = GumpsLoader.Instance.GetTexture(Graphic);
+            UOTexture texture = GumpsLoader.Instance.GetTexture(Graphic);
 
             if (texture != null)
             {
-                batcher.Draw2DTiled(texture, x, y, Width, Height, ref _hueVector);
+                batcher.Draw2DTiled(texture, x, y, Width, Height, ref HueVector);
             }
 
             return base.Draw(batcher, x, y);
@@ -114,7 +118,10 @@ namespace ClassicUO.Game.UI.Controls
             int width = Width;
             int height = Height;
 
-            UOTexture32 texture = GumpsLoader.Instance.GetTexture(Graphic);
+            x -= Offset.X;
+            y -= Offset.Y;
+
+            UOTexture texture = GumpsLoader.Instance.GetTexture(Graphic);
 
             if (texture == null)
             {

@@ -181,10 +181,7 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Support
         /// <param name="destinationStart">Position in the destination array to start storing the sbytes.</param>
         /// <returns>An array of sbytes</returns>
         public static void GetSBytesFromString
-        (
-            string sourceString, int sourceStart, int sourceEnd,
-            ref sbyte[] destinationArray, int destinationStart
-        )
+            (string sourceString, int sourceStart, int sourceEnd, ref sbyte[] destinationArray, int destinationStart)
         {
             int sourceCounter;
             int destinationCounter;

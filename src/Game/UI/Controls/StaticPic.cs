@@ -40,7 +40,8 @@ namespace ClassicUO.Game.UI.Controls
             WantUpdateSize = false;
         }
 
-        public StaticPic(List<string> parts) : this(UInt16Converter.Parse(parts[3]), parts.Count > 4 ? UInt16Converter.Parse(parts[4]) : (ushort) 0)
+        public StaticPic(List<string> parts) : this
+            (UInt16Converter.Parse(parts[3]), parts.Count > 4 ? UInt16Converter.Parse(parts[4]) : (ushort) 0)
         {
             X = int.Parse(parts[1]);
             Y = int.Parse(parts[2]);
@@ -70,8 +71,7 @@ namespace ClassicUO.Game.UI.Controls
                 Width = texture.Width;
                 Height = texture.Height;
 
-                IsPartialHue = TileDataLoader.Instance.StaticData[value]
-                                             .IsPartialHue;
+                IsPartialHue = TileDataLoader.Instance.StaticData[value].IsPartialHue;
             }
         }
 
@@ -79,13 +79,13 @@ namespace ClassicUO.Game.UI.Controls
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
             ResetHueVector();
-            ShaderHueTranslator.GetHueVector(ref _hueVector, Hue, IsPartialHue, 0);
+            ShaderHueTranslator.GetHueVector(ref HueVector, Hue, IsPartialHue, 0);
 
             ArtTexture texture = ArtLoader.Instance.GetTexture(Graphic);
 
             if (texture != null)
             {
-                batcher.Draw2D(texture, x, y, Width, Height, ref _hueVector);
+                batcher.Draw2D(texture, x, y, Width, Height, ref HueVector);
             }
 
             return base.Draw(batcher, x, y);
@@ -95,7 +95,7 @@ namespace ClassicUO.Game.UI.Controls
         {
             ArtTexture texture = ArtLoader.Instance.GetTexture(Graphic);
 
-            return texture != null && texture.Contains(x, y);
+            return texture != null && texture.Contains(x - Offset.X, y - Offset.Y);
         }
     }
 }

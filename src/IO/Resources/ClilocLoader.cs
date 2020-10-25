@@ -260,13 +260,13 @@ namespace ClassicUO.IO.Resources
                     }
                 }
 
-                baseCliloc = baseCliloc.Remove(pos, pos2 - pos + 1)
+                baseCliloc = baseCliloc.Remove
+                                           (pos, pos2 - pos + 1)
                                        .Insert(pos, index >= arguments.Count ? string.Empty : arguments[index]);
 
                 if (index >= 0 && index < arguments.Count)
                 {
-                    pos += arguments[index]
-                        .Length;
+                    pos += arguments[index].Length;
                 }
             }
 

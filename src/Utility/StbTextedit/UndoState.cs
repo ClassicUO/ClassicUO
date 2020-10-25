@@ -21,11 +21,9 @@ namespace StbTextEditSharp
         {
             if (undo_point > 0)
             {
-                if (undo_rec[0]
-                    .char_storage >= 0)
+                if (undo_rec[0].char_storage >= 0)
                 {
-                    int n = undo_rec[0]
-                        .insert_length;
+                    int n = undo_rec[0].insert_length;
 
                     undo_char_point -= n;
 
@@ -33,11 +31,9 @@ namespace StbTextEditSharp
 
                     for (int i = 0; i < undo_point; ++i)
                     {
-                        if (undo_rec[i]
-                            .char_storage >= 0)
+                        if (undo_rec[i].char_storage >= 0)
                         {
-                            undo_rec[i]
-                                .char_storage -= n;
+                            undo_rec[i].char_storage -= n;
                         }
                     }
                 }
@@ -55,11 +51,9 @@ namespace StbTextEditSharp
 
             if (redo_point <= k)
             {
-                if (undo_rec[k]
-                    .char_storage >= 0)
+                if (undo_rec[k].char_storage >= 0)
                 {
-                    int n = undo_rec[k]
-                        .insert_length;
+                    int n = undo_rec[k].insert_length;
 
                     int i;
                     redo_char_point += n;
@@ -69,11 +63,9 @@ namespace StbTextEditSharp
 
                     for (i = (int) redo_point; i < k; ++i)
                     {
-                        if (undo_rec[i]
-                            .char_storage >= 0)
+                        if (undo_rec[i].char_storage >= 0)
                         {
-                            undo_rec[i]
-                                .char_storage += n;
+                            undo_rec[i].char_storage += n;
                         }
                     }
                 }
@@ -124,30 +116,24 @@ namespace StbTextEditSharp
 
             int rposv = rpos.Value;
 
-            undo_rec[rposv]
-                .where = pos;
+            undo_rec[rposv].where = pos;
 
-            undo_rec[rposv]
-                .insert_length = (short) insert_len;
+            undo_rec[rposv].insert_length = (short) insert_len;
 
-            undo_rec[rposv]
-                .delete_length = (short) delete_len;
+            undo_rec[rposv].delete_length = (short) delete_len;
 
             if (insert_len == 0)
             {
-                undo_rec[rposv]
-                    .char_storage = -1;
+                undo_rec[rposv].char_storage = -1;
 
                 return null;
             }
 
-            undo_rec[rposv]
-                .char_storage = (short) undo_char_point;
+            undo_rec[rposv].char_storage = (short) undo_char_point;
 
             undo_char_point = (short) (undo_char_point + insert_len);
 
-            return undo_rec[rposv]
-                .char_storage;
+            return undo_rec[rposv].char_storage;
         }
     }
 }

@@ -37,7 +37,7 @@ namespace ClassicUO.Game.UI.Gumps
             CanCloseWithRightClick = true;
             Add(new GumpPic(0, 0, 0x0816, 0));
 
-            UOTexture32 t = GumpsLoader.Instance.GetTexture(0x0816);
+            UOTexture t = GumpsLoader.Instance.GetTexture(0x0816);
 
             Width = t.Width;
             Height = t.Height;
@@ -68,7 +68,7 @@ namespace ClassicUO.Game.UI.Gumps
             );
 
             CanMove = false;
-            ControlInfo.IsModal = true;
+            IsModal = true;
 
             X = (Client.Game.Window.ClientBounds.Width - Width) >> 1;
             Y = (Client.Game.Window.ClientBounds.Height - Height) >> 1;

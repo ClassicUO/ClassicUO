@@ -31,7 +31,18 @@ namespace ClassicUO.Game.UI.Controls
     {
         private readonly ushort _overHue, _normalHue, _selectedHue;
 
-        public HoveredLabel(string text, bool isunicode, ushort hue, ushort overHue, ushort selectedHue, int maxwidth = 0, byte font = 255, FontStyle style = FontStyle.None, TEXT_ALIGN_TYPE align = TEXT_ALIGN_TYPE.TS_LEFT) : base($" {text}", isunicode, hue, maxwidth, font, style, align)
+        public HoveredLabel
+        (
+            string text,
+            bool isunicode,
+            ushort hue,
+            ushort overHue,
+            ushort selectedHue,
+            int maxwidth = 0,
+            byte font = 255,
+            FontStyle style = FontStyle.None,
+            TEXT_ALIGN_TYPE align = TEXT_ALIGN_TYPE.TS_LEFT
+        ) : base($" {text}", isunicode, hue, maxwidth, font, style, align)
         {
             _overHue = overHue;
             _normalHue = hue;
@@ -42,7 +53,7 @@ namespace ClassicUO.Game.UI.Controls
         public bool DrawBackgroundCurrentIndex;
         public bool IsSelected, ForceHover;
 
-        public override void Update(double totalMS, double frameMS)
+        public override void Update(double totalTime, double frameTime)
         {
             if (IsSelected)
             {
@@ -64,7 +75,7 @@ namespace ClassicUO.Game.UI.Controls
             }
 
 
-            base.Update(totalMS, frameMS);
+            base.Update(totalTime, frameTime);
         }
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
@@ -72,7 +83,7 @@ namespace ClassicUO.Game.UI.Controls
             if (DrawBackgroundCurrentIndex && MouseIsOver && !string.IsNullOrWhiteSpace(Text))
             {
                 ResetHueVector();
-                batcher.Draw2D(Texture2DCache.GetTexture(Color.Gray), x, y + 2, Width - 4, Height - 4, ref _hueVector);
+                batcher.Draw2D(SolidColorTextureCache.GetTexture(Color.Gray), x, y + 2, Width - 4, Height - 4, ref HueVector);
             }
 
             return base.Draw(batcher, x, y);

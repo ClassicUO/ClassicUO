@@ -78,9 +78,9 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
-        public override void Update(double totalMS, double frameMS)
+        public override void Update(double totalTime, double frameTime)
         {
-            base.Update(totalMS, frameMS);
+            base.Update(totalTime, frameTime);
 
 
             if (Source != null && Source.IsDestroyed)
@@ -97,7 +97,7 @@ namespace ClassicUO.Game.GameObjects
 
             if (IsEnabled)
             {
-                if (Duration < totalMS && Duration >= 0)
+                if (Duration < totalTime && Duration >= 0)
                 {
                     World.RemoveEffect(this);
                 }
@@ -112,10 +112,10 @@ namespace ClassicUO.Game.GameObjects
                 //        AnimationGraphic = (Graphic) (Graphic + AnimDataFrame.FrameData[((int) Math.Max(1, (_start / 50d) / Speed)) % count]);
                 //    }
 
-                //    _start += frameMS;
+                //    _start += frameTime;
                 //}
 
-                else if (NextChangeFrameTime < totalMS)
+                else if (NextChangeFrameTime < totalTime)
                 {
                     if (AnimDataFrame.FrameCount != 0)
                     {
@@ -139,7 +139,7 @@ namespace ClassicUO.Game.GameObjects
                         }
                     }
 
-                    NextChangeFrameTime = (long) totalMS + IntervalInMs;
+                    NextChangeFrameTime = (long) totalTime + IntervalInMs;
                 }
             }
             else if (Graphic != AnimationGraphic)

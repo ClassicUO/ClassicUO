@@ -62,10 +62,10 @@ namespace ClassicUO.Game.UI.Controls
 
             if (_texture == null || _texture.IsDisposed)
             {
-                _texture = new UOTexture32(1, 1);
+                _texture = new UOTexture(1, 1);
             }
 
-            _texture.SetData(new Color[1] {_colorRGBA});
+            _texture.SetData(new Color[1] { _colorRGBA });
         }
 
 
@@ -73,7 +73,7 @@ namespace ClassicUO.Game.UI.Controls
         {
             ResetHueVector();
 
-            return batcher.Draw2D(_texture, x, y, Width, Height, ref _hueVector);
+            return batcher.Draw2D(_texture, x, y, Width, Height, ref HueVector);
         }
 
         public override void Dispose()

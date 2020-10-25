@@ -52,7 +52,7 @@ namespace ClassicUO.Game.UI.Gumps
             BuildGump();
         }
 
-        public override GUMP_TYPE GumpType => GUMP_TYPE.GT_SPELLBUTTON;
+        public override GumpType GumpType => GumpType.SpellButton;
 
         public int SpellID => _spell?.ID ?? 0;
 
@@ -63,7 +63,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void BuildGump()
         {
-            Add(_background = new GumpPic(0, 0, (ushort) _spell.GumpIconSmallID, 0) {AcceptMouseInput = false});
+            Add(_background = new GumpPic(0, 0, (ushort) _spell.GumpIconSmallID, 0) { AcceptMouseInput = false });
 
             int cliloc = GetSpellTooltip(_spell.ID);
 
@@ -136,9 +136,10 @@ namespace ClassicUO.Game.UI.Gumps
         {
             base.OnMouseUp(x, y, button);
 
-            Point offset = Mouse.LDroppedOffset;
+            Point offset = Mouse.LDragOffset;
 
-            if (ProfileManager.Current.CastSpellsByOneClick && button == MouseButtonType.Left && Math.Abs(offset.X) < 5 && Math.Abs(offset.Y) < 5)
+            if (ProfileManager.CurrentProfile.CastSpellsByOneClick && button == MouseButtonType.Left &&
+                Math.Abs(offset.X) < 5 && Math.Abs(offset.Y) < 5)
             {
                 GameActions.CastSpell(_spell.ID);
             }
@@ -146,7 +147,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override bool OnMouseDoubleClick(int x, int y, MouseButtonType button)
         {
-            if (!ProfileManager.Current.CastSpellsByOneClick && button == MouseButtonType.Left)
+            if (!ProfileManager.CurrentProfile.CastSpellsByOneClick && button == MouseButtonType.Left)
             {
                 GameActions.CastSpell(_spell.ID);
 

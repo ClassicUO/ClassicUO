@@ -62,11 +62,13 @@ namespace ClassicUO.Game.Map
 
 
         [MethodImpl(256)]
-        public unsafe void Load(int map)
+        public unsafe void Load(int index)
         {
             IsDestroyed = false;
 
-            ref IndexMap im = ref GetIndex(map);
+            Map map = World.Map;
+
+            ref IndexMap im = ref GetIndex(index);
 
             if (im.MapAddress != 0)
             {
@@ -75,27 +77,24 @@ namespace ClassicUO.Game.Map
                 int bx = X << 3;
                 int by = Y << 3;
 
-                for (int x = 0; x < 8; ++x)
+                for (int y = 0; y < 8; ++y)
                 {
-                    ushort tileX = (ushort) (bx + x);
+                    int pos = y << 3;
+                    ushort tileY = (ushort) (by + y);
 
-                    for (int y = 0; y < 8; ++y)
+                    for (int x = 0; x < 8; ++x, ++pos)
                     {
-                        int pos = (y << 3) + x;
+                        ushort tileID = (ushort) (cells[pos].TileID & 0x3FFF);
 
-                        ushort tileID = (ushort) (cells[pos]
-                            .TileID & 0x3FFF);
-
-                        sbyte z = cells[pos]
-                            .Z;
+                        sbyte z = cells[pos].Z;
 
                         Land land = Land.Create(tileID);
                         land.AverageZ = z;
                         land.MinZ = z;
 
-                        ushort tileY = (ushort) (by + y);
+                        ushort tileX = (ushort) (bx + x);
 
-                        land.ApplyStrech(tileX, tileY, z);
+                        land.ApplyStretch(map, tileX, tileY, z);
                         land.X = tileX;
                         land.Y = tileY;
                         land.Z = z;
@@ -117,27 +116,20 @@ namespace ClassicUO.Game.Map
                         {
                             if (sb->Color != 0 && sb->Color != 0xFFFF)
                             {
-                                ushort x = sb->X;
-                                ushort y = sb->Y;
-                                int pos = (y << 3) + x;
+                                int pos = (sb->Y << 3) + sb->X;
 
                                 if (pos >= 64)
                                 {
                                     continue;
                                 }
 
-                                sbyte z = sb->Z;
-
-                                ushort staticX = (ushort) (bx + x);
-                                ushort staticY = (ushort) (by + y);
-
                                 Static staticObject = Static.Create(sb->Color, sb->Hue, pos);
-                                staticObject.X = staticX;
-                                staticObject.Y = staticY;
-                                staticObject.Z = z;
+                                staticObject.X = (ushort) (bx + sb->X);
+                                staticObject.Y = (ushort) (by + sb->Y);
+                                staticObject.Z = sb->Z;
                                 staticObject.UpdateScreenPosition();
 
-                                AddGameObject(staticObject, x, y);
+                                AddGameObject(staticObject, sb->X, sb->Y);
                             }
                         }
                     }
@@ -305,8 +297,7 @@ namespace ClassicUO.Game.Map
                 int testPriorityZ = o.PriorityZ;
 
                 if (testPriorityZ > priorityZ ||
-                    testPriorityZ == priorityZ &&
-                    (state == 0 || state == 1 && !(o is Land)))
+                    testPriorityZ == priorityZ && (state == 0 || state == 1 && !(o is Land)))
                 {
                     break;
                 }

@@ -1,9 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net47</TargetFramework>
+    <TargetFramework>net472</TargetFramework>
     <ApplicationIcon>cuoicon.ico</ApplicationIcon>
   </PropertyGroup>
 
@@ -14,16 +13,18 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <PlatformTarget>x64</PlatformTarget>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <OutputPath>$(SolutionDir)bin\Release\</OutputPath>
-	  <Optimize>true</Optimize>
+    <OutputPath>$(ProjectDir)..\bin\Release\</OutputPath>
+    <PublishDir>$(ProjectDir)..\bin\dist\</PublishDir>
+    <Optimize>true</Optimize>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <PlatformTarget>x64</PlatformTarget>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <OutputPath>$(SolutionDir)bin\Debug\</OutputPath>
+    <OutputPath>$(ProjectDir)..\bin\Debug\</OutputPath>
   </PropertyGroup>
-  
+
+
   <PropertyGroup>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
@@ -36,8 +37,8 @@
   <PropertyGroup>
     <Company>ClassicUO</Company>
     <Authors>KaRaShO'</Authors>
-    <AssemblyVersion>0.1.5.000</AssemblyVersion>
-    <FileVersion>0.1.5.000</FileVersion>
+    <AssemblyVersion>0.1.6.0</AssemblyVersion>
+    <FileVersion>0.1.6.0</FileVersion>
     <Copyright>ClassicUO</Copyright>
     <PackageProjectUrl>https://www.classicuo.eu/</PackageProjectUrl>
     <Description>An open source implementation of the Ultima Online Classic Client.</Description>
@@ -63,6 +64,12 @@
     <EmbeddedResource Include="shaders\xBR.fxc" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies.net472" Version="1.0.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
 
   <ItemGroup>
     <Reference Include="cuoapi">
@@ -113,30 +120,34 @@
   </ItemGroup>
 
 
-  <Target Name="CopyExternalDeps" AfterTargets="Build">
+  <ItemGroup>
+    <DataFiles_x64 Include="$(ProjectDir)..\external\x64\*.*" />
+    <DataFiles_lib64 Include="$(ProjectDir)..\external\lib64\*.*" />
+    <DataFiles_osx Include="$(ProjectDir)..\external\osx\*.*" />
+    <DataFiles_vulkan Include="$(ProjectDir)..\external\vulkan\icd.d\*.*" />
+  </ItemGroup>
+
+
+  <Target Name="CopyExternalDeps_build" AfterTargets="Build">
+    <Copy SourceFiles="@(DataFiles_x64)" DestinationFolder="$(TargetDir)\x64\" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(DataFiles_lib64)" DestinationFolder="$(TargetDir)\lib64\" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(DataFiles_osx)" DestinationFolder="$(TargetDir)\osx\" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(DataFiles_vulkan)" DestinationFolder="$(TargetDir)\vulkan\icd.d\" SkipUnchangedFiles="true" />
+  </Target>
+
+  <Target Name="CopyExternalDeps_publish" AfterTargets="Publish">
     <ItemGroup>
-      <DataFiles_x64 Include="$(ProjectDir)..\external\x64\*.*" />
-      <DataFiles_lib64 Include="$(ProjectDir)..\external\lib64\*.*" />
-      <DataFiles_osx Include="$(ProjectDir)..\external\osx\*.*" />
-      <DataFiles_vulkan Include="$(ProjectDir)..\external\vulkan\icd.d\*.*" />
+      <MonockickstartPath Include="$(ProjectDir)..\tools\monokickstart\*.*" />
     </ItemGroup>
 
-    <Copy
-      SourceFiles="@(DataFiles_x64)"
-      DestinationFolder="$(TargetDir)\x64\"
-      SkipUnchangedFiles="true" />
-    <Copy
-      SourceFiles="@(DataFiles_lib64)"
-      DestinationFolder="$(TargetDir)\lib64\"
-      SkipUnchangedFiles="true" />
-    <Copy
-      SourceFiles="@(DataFiles_osx)"
-      DestinationFolder="$(TargetDir)\osx\"
-      SkipUnchangedFiles="true" />
-    <Copy
-      SourceFiles="@(DataFiles_vulkan)"
-      DestinationFolder="$(TargetDir)\vulkan\icd.d\"
-      SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(DataFiles_x64)" DestinationFolder="$(PublishDir)\x64\" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(DataFiles_lib64)" DestinationFolder="$(PublishDir)\lib64\" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(DataFiles_osx)" DestinationFolder="$(PublishDir)\osx\" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(DataFiles_vulkan)" DestinationFolder="$(PublishDir)\vulkan\icd.d\" SkipUnchangedFiles="true" />
+
+    <Copy SourceFiles="@(MonockickstartPath)" DestinationFolder="$(PublishDir)\" SkipUnchangedFiles="true" />
+
   </Target>
-  
+
+
 </Project>

@@ -105,8 +105,7 @@ namespace ClassicUO.Game.Map
 
         public GameObject GetTile(int x, int y, bool load = true)
         {
-            return GetChunk(x, y, load)
-                ?.GetHeadObject(x % 8, y % 8);
+            return GetChunk(x, y, load)?.GetHeadObject(x % 8, y % 8);
         }
 
         public sbyte GetTileZ(int x, int y)
@@ -131,8 +130,7 @@ namespace ClassicUO.Game.Map
                 MapBlock* mp = (MapBlock*) blockIndex.MapAddress;
                 MapCells* cells = (MapCells*) &mp->Cells;
 
-                return cells[(my << 3) + mx]
-                    .Z;
+                return cells[(my << 3) + mx].Z;
             }
         }
 
@@ -197,8 +195,7 @@ namespace ClassicUO.Game.Map
                         continue;
                     }
 
-                    if (!TileDataLoader.Instance.StaticData[obj.Graphic]
-                                       .IsRoof || Math.Abs(z - obj.Z) > 6)
+                    if (!TileDataLoader.Instance.StaticData[obj.Graphic].IsRoof || Math.Abs(z - obj.Z) > 6)
                     {
                         continue;
                     }

@@ -85,8 +85,7 @@ namespace ClassicUO.Game.UI.Controls
 
             if (_hotkesBoxes.Count != 0)
             {
-                box.Y = _hotkesBoxes[_hotkesBoxes.Count - 1]
-                        .Bounds.Bottom;
+                box.Y = _hotkesBoxes[_hotkesBoxes.Count - 1].Bounds.Bottom;
             }
 
 

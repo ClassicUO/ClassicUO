@@ -64,7 +64,7 @@ namespace ClassicUO.Game.UI.Gumps
                 _tips = this;
                 _background.TitleGumpID = 0x9CA;
                 _idx = 0;
-                Add(_prev = new Button(0, 0x9cc, 0x9cc) {X = 35, ContainsByBounds = true});
+                Add(_prev = new Button(0, 0x9cc, 0x9cc) { X = 35, ContainsByBounds = true });
 
                 _prev.MouseUp += (o, e) =>
                 {
@@ -74,7 +74,7 @@ namespace ClassicUO.Game.UI.Gumps
                     }
                 };
 
-                Add(_next = new Button(0, 0x9cd, 0x9cd) {X = 240, ContainsByBounds = true});
+                Add(_next = new Button(0, 0x9cd, 0x9cd) { X = 240, ContainsByBounds = true });
 
                 _next.MouseUp += (o, e) =>
                 {
@@ -90,7 +90,6 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
-        //public override GUMP_TYPE GumpType => GUMP_TYPE.GT_TIPNOTICE;
 
         public override void OnButtonClick(int buttonID)
         {
@@ -103,21 +102,6 @@ namespace ClassicUO.Game.UI.Gumps
             base.Dispose();
         }
 
-        public override void Update(double totalMS, double frameMS)
-        {
-            //if (!_textBox.IsDisposed && _textBox.IsChanged)
-            //{
-            //    _textBox.Height = Math.Max(FontsLoader.Instance.GetHeightUnicode(1, _textBox.TxEntry.Text, 220, TEXT_ALIGN_TYPE.TS_LEFT, 0x0) + 20, 40);
-
-            //    foreach (Control c in _scrollArea.Children)
-            //    {
-            //        if (c is ScrollAreaItem)
-            //            c.OnPageChanged();
-            //    }
-            //}
-
-            base.Update(totalMS, frameMS);
-        }
 
         public override void OnPageChanged()
         {
@@ -126,7 +110,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             foreach (Control c in _scrollArea.Children)
             {
-                if (c is ScrollAreaItem)
+                // if (c is ScrollAreaItem)
                 {
                     c.OnPageChanged();
                 }

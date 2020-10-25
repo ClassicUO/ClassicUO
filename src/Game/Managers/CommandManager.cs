@@ -32,8 +32,8 @@ namespace ClassicUO.Game.Managers
 {
     internal static class CommandManager
     {
-        private static readonly Dictionary<string, Action<string[]>> _commands = new Dictionary<string, Action<string[]>>();
-
+        private static readonly Dictionary<string, Action<string[]>> _commands =
+            new Dictionary<string, Action<string[]>>();
 
         public static void Initialize()
         {
@@ -86,7 +86,7 @@ namespace ClassicUO.Game.Managers
             }
             else
             {
-                Log.Error(string.Format($"Attempted to register command: '{0}' twice.", name));
+                Log.Error($"Attempted to register command: '{name}' twice.");
             }
         }
 
@@ -115,7 +115,7 @@ namespace ClassicUO.Game.Managers
             }
             else
             {
-                Log.Warn($"Commad: '{name}' not exists");
+                Log.Warn($"Command: '{name}' not exists");
             }
         }
 

@@ -131,9 +131,9 @@ namespace ClassicUO.Game.GameObjects
         {
         }
 
-        public override void Update(double totalMS, double frameMS)
+        public override void Update(double totalTime, double frameTime)
         {
-            base.Update(totalMS, frameMS);
+            base.Update(totalTime, frameTime);
 
             if (UseObjectHandles && !ObjectHandlesOpened)
             {

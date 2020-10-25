@@ -197,8 +197,21 @@ namespace ClassicUO.Game.Data
         KurakAmbushersEssence,
         BarakoDraftOfMight,
         UraliTranceTonic,
-        SakkhraProphylaxis,
-        MysticalPolymorphTotem = 1188
+        SakkhraProphylaxis, // 1175
+        Sparks,
+        Swarm,
+        BoneBreaker,
+        Unknown2,
+        SwarmImmune,
+        BoneBreakerImmune,
+        UnknownGoblin,
+        UnknownRedDrop,
+        UnknownStar,
+        FeintDebuff,
+        CaddelliteInfused,
+        PotionGloriousFortune,
+        MysticalPolymorphTotem,
+        UnknownDebuff,
     }
 
     internal static class BuffTable
@@ -374,7 +387,31 @@ namespace ClassicUO.Game.Data
             0x9bda,
             0x9bd0,
             0x9bde,
-            0x9bdf
+            0x9bdf,
+
+            0xC349,
+            0xC34D,
+            0xC34E,
+            0xC34C,
+            0xC34B,
+            0xC34A,
+            0xC343,
+            0xC345,
+            0xC346,
+            0xC347,
+            0xC348,
+
+            0x9CDE,
+
+            0x5DE1,
+            0x5DDF,
+            0x5DE3,
+            0x5DE5,
+            0x5DE4,
+            0x5DE6,
+            0x5D51,
+
+            0x0951
         };
     }
 }

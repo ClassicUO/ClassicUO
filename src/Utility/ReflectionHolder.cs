@@ -31,11 +31,9 @@ namespace ClassicUO.Utility
     {
         public static Dictionary<string, string> GetGameObjectProperties<T>(T obj) where T : GameObject
         {
-            PropertyInfo[] props = obj?.GetType()
-                                      .GetProperties(BindingFlags.Public | BindingFlags.Instance);
+            PropertyInfo[] props = obj?.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance);
 
-            FieldInfo[] fields = obj?.GetType()
-                                    .GetFields(BindingFlags.Public | BindingFlags.Instance);
+            FieldInfo[] fields = obj?.GetType().GetFields(BindingFlags.Public | BindingFlags.Instance);
 
             Dictionary<string, string> dict = new Dictionary<string, string>();
 

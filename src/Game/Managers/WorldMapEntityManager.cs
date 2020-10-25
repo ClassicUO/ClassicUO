@@ -103,7 +103,17 @@ namespace ClassicUO.Game.Managers
             }
         }
 
-        public void AddOrUpdate(uint serial, int x, int y, int hp, int map, bool isguild, string name = null, bool from_packet = false)
+        public void AddOrUpdate
+        (
+            uint serial,
+            int x,
+            int y,
+            int hp,
+            int map,
+            bool isguild,
+            string name = null,
+            bool from_packet = false
+        )
         {
             if (from_packet)
             {
@@ -118,6 +128,16 @@ namespace ClassicUO.Game.Managers
             if (!Enabled)
             {
                 return;
+            }
+
+            if (string.IsNullOrEmpty(name))
+            {
+                Entity ent = World.Get(serial);
+
+                if (ent != null && !string.IsNullOrEmpty(ent.Name))
+                {
+                    name = ent.Name;
+                }
             }
 
             if (!Entities.TryGetValue(serial, out WMapEntity entity) || entity == null)
@@ -141,7 +161,7 @@ namespace ClassicUO.Game.Managers
                 entity.IsGuild = isguild;
                 entity.LastUpdate = Time.Ticks + 1000;
 
-                if (name != null)
+                if (string.IsNullOrEmpty(entity.Name) && !string.IsNullOrEmpty(name))
                 {
                     entity.Name = name;
                 }

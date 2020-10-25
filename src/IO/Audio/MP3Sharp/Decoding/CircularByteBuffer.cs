@@ -102,8 +102,8 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
                 {
                     throw new Exception
                     (
-                        "Can't set NumValid to " + value +
-                        " which is greater than the current numValid value of " + m_NumValid
+                        "Can't set NumValid to " + value + " which is greater than the current numValid value of " +
+                        m_NumValid
                     );
                 }
 

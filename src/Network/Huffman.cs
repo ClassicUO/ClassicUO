@@ -1059,7 +1059,15 @@ namespace ClassicUO.Network
 
         #endregion
 
-        public static bool DecompressChunk(ref byte[] src, ref int srcOffset, int srcLength, ref byte[] dest, int destOffset, out int destLength)
+        public static bool DecompressChunk
+        (
+            ref byte[] src,
+            ref int srcOffset,
+            int srcLength,
+            ref byte[] dest,
+            int destOffset,
+            out int destLength
+        )
         {
             //Array.Clear(dest, destOffset, dest.Length - destOffset);
             destLength = 0;
@@ -1077,7 +1085,7 @@ namespace ClassicUO.Network
                 // if the halt codeword has been found, skip this byte
                 if (leafValue == -256)
                 {
-                    srcOffset++;
+                    ++srcOffset;
                     destLength = destPos - destOffset;
 
                     return true;
@@ -1087,17 +1095,17 @@ namespace ClassicUO.Network
                 {
                     dest[destPos] = (byte) -leafValue;
                     leafValue = 0;
-                    destPos++;
+                    ++destPos;
                 }
 
-                bitNum--;
+                --bitNum;
                 node = leafValue;
 
                 /* if its the end of the byte, go to the next byte */
                 if (bitNum < 1)
                 {
                     bitNum = 8;
-                    srcOffset++;
+                    ++srcOffset;
                 }
 
                 // check to see if the current codeword has no end

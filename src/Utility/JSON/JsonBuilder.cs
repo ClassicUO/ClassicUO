@@ -31,9 +31,8 @@ namespace TinyJson
 
         private bool HasPrettyLineBreak()
         {
-            return builder.ToString()
-                          .EndsWith("\t", StringComparison.InvariantCulture) || builder.ToString()
-                                                                                       .EndsWith("\n", StringComparison.InvariantCulture);
+            return builder.ToString().EndsWith("\t", StringComparison.InvariantCulture) ||
+                   builder.ToString().EndsWith("\n", StringComparison.InvariantCulture);
         }
 
         private void RemovePrettyLineBreak()
@@ -141,8 +140,7 @@ namespace TinyJson
             {
                 string numberString = number.ToString();
 
-                if (number.GetType()
-                          .IsFloatingPoint())
+                if (number.GetType().IsFloatingPoint())
                 {
                     numberString = numberString.Replace(',', '.');
 
@@ -214,11 +212,7 @@ namespace TinyJson
                             }
                             else
                             {
-                                builder.Append
-                                (
-                                    "\\u" + Convert.ToString(codepoint, 16)
-                                                   .PadLeft(4, '0')
-                                );
+                                builder.Append("\\u" + Convert.ToString(codepoint, 16).PadLeft(4, '0'));
                             }
 
                             break;
@@ -333,14 +327,12 @@ namespace TinyJson
 
         internal static bool IsNumber(object value)
         {
-            return value != null && value.GetType()
-                                         .IsNumeric();
+            return value != null && value.GetType().IsNumeric();
         }
 
         internal static bool IsEnum(object value)
         {
-            return value != null && value.GetType()
-                                         .IsEnum;
+            return value != null && value.GetType().IsEnum;
         }
 
         internal static bool IsSupported(object obj)

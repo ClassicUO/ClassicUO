@@ -60,21 +60,29 @@ namespace ClassicUO.Game.UI.Gumps
             );
 
 
-            Add(_buttons[0] = new Button((int) ButtonType.PlotCourse, 0x1398, 0x1398) {X = (width - 100) >> 1, Y = 5, ButtonAction = ButtonAction.Activate});
-            Add(_buttons[1] = new Button((int) ButtonType.StopPlotting, 0x1399, 0x1399) {X = (width - 70) >> 1, Y = 5, ButtonAction = ButtonAction.Activate});
-            Add(_buttons[2] = new Button((int) ButtonType.ClearCourse, 0x139A, 0x139A) {X = (width - 66) >> 1, Y = height + 37, ButtonAction = ButtonAction.Activate});
+            Add
+            (
+                _buttons[0] = new Button((int) ButtonType.PlotCourse, 0x1398, 0x1398)
+                    { X = (width - 100) >> 1, Y = 5, ButtonAction = ButtonAction.Activate }
+            );
 
-            _buttons[0]
-                .IsVisible = _buttons[0]
-                .IsEnabled = PlotState == 0;
+            Add
+            (
+                _buttons[1] = new Button((int) ButtonType.StopPlotting, 0x1399, 0x1399)
+                    { X = (width - 70) >> 1, Y = 5, ButtonAction = ButtonAction.Activate }
+            );
 
-            _buttons[1]
-                .IsVisible = _buttons[1]
-                .IsEnabled = PlotState == 1;
+            Add
+            (
+                _buttons[2] = new Button((int) ButtonType.ClearCourse, 0x139A, 0x139A)
+                    { X = (width - 66) >> 1, Y = height + 37, ButtonAction = ButtonAction.Activate }
+            );
 
-            _buttons[2]
-                .IsVisible = _buttons[2]
-                .IsEnabled = PlotState == 1;
+            _buttons[0].IsVisible = _buttons[0].IsEnabled = PlotState == 0;
+
+            _buttons[1].IsVisible = _buttons[1].IsEnabled = PlotState == 1;
+
+            _buttons[2].IsVisible = _buttons[2].IsEnabled = PlotState == 1;
 
             Add
             (
@@ -95,7 +103,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         public int PlotState { get; private set; }
 
-        public void SetMapTexture(UOTexture32 texture)
+        public void SetMapTexture(UOTexture texture)
         {
             _textureControl.Texture?.Dispose();
             _textureControl.WantUpdateSize = true;
@@ -128,17 +136,11 @@ namespace ClassicUO.Game.UI.Gumps
         {
             PlotState = s;
 
-            _buttons[0]
-                .IsVisible = _buttons[0]
-                .IsEnabled = PlotState == 0;
+            _buttons[0].IsVisible = _buttons[0].IsEnabled = PlotState == 0;
 
-            _buttons[1]
-                .IsVisible = _buttons[1]
-                .IsEnabled = PlotState == 1;
+            _buttons[1].IsVisible = _buttons[1].IsEnabled = PlotState == 1;
 
-            _buttons[2]
-                .IsVisible = _buttons[2]
-                .IsEnabled = PlotState == 1;
+            _buttons[2].IsVisible = _buttons[2].IsEnabled = PlotState == 1;
         }
 
         public override void OnButtonClick(int buttonID)
@@ -149,13 +151,20 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 case ButtonType.PlotCourse:
                 case ButtonType.StopPlotting:
-                    NetClient.Socket.Send(new PMapMessage(LocalSerial, 6, (byte) PlotState, unchecked((ushort) -24), unchecked((ushort) -31)));
+                    NetClient.Socket.Send
+                    (
+                        new PMapMessage
+                            (LocalSerial, 6, (byte) PlotState, unchecked((ushort) -24), unchecked((ushort) -31))
+                    );
+
                     SetPlotState(PlotState == 0 ? 1 : 0);
 
                     break;
 
                 case ButtonType.ClearCourse:
-                    NetClient.Socket.Send(new PMapMessage(LocalSerial, 5, 0, unchecked((ushort) -24), unchecked((ushort) -31)));
+                    NetClient.Socket.Send
+                        (new PMapMessage(LocalSerial, 5, 0, unchecked((ushort) -24), unchecked((ushort) -31)));
+
                     ClearContainer();
 
                     break;
@@ -163,15 +172,15 @@ namespace ClassicUO.Game.UI.Gumps
         }
 
 
-        public override void Update(double totalMS, double frameMS)
+        public override void Update(double totalTime, double frameTime)
         {
-            base.Update(totalMS, frameMS);
+            base.Update(totalTime, frameTime);
 
             if (_currentPin != null)
             {
-                if (Mouse.LDroppedOffset != Point.Zero && Mouse.LDroppedOffset != _lastPoint)
+                if (Mouse.LDragOffset != Point.Zero && Mouse.LDragOffset != _lastPoint)
                 {
-                    _currentPin.Location += Mouse.LDroppedOffset - _lastPoint;
+                    _currentPin.Location += Mouse.LDragOffset - _lastPoint;
 
                     if (_currentPin.X < _textureControl.X)
                     {
@@ -192,7 +201,7 @@ namespace ClassicUO.Game.UI.Gumps
                     }
 
 
-                    _lastPoint = Mouse.LDroppedOffset;
+                    _lastPoint = Mouse.LDragOffset;
                 }
             }
         }
@@ -200,7 +209,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void TextureControlOnMouseUp(object sender, MouseEventArgs e)
         {
-            Point offset = Mouse.LDroppedOffset;
+            Point offset = Mouse.LDragOffset;
 
             if (Math.Abs(offset.X) < 5 && Math.Abs(offset.Y) < 5)
             {
@@ -237,10 +246,10 @@ namespace ClassicUO.Game.UI.Gumps
 
                 batcher.DrawLine
                 (
-                    Texture2DCache.GetTexture(Color.White),
-                    c0.ScreenCoordinateX, c0.ScreenCoordinateY,
+                    SolidColorTextureCache.GetTexture(Color.White), c0.ScreenCoordinateX, c0.ScreenCoordinateY,
                     c1.ScreenCoordinateX, c1.ScreenCoordinateY,
-                    c0.ScreenCoordinateX + (c1.ScreenCoordinateX - c0.ScreenCoordinateX) / 2, c0.ScreenCoordinateY + (c1.ScreenCoordinateY - c0.ScreenCoordinateY) / 2
+                    c0.ScreenCoordinateX + (c1.ScreenCoordinateX - c0.ScreenCoordinateX) / 2,
+                    c0.ScreenCoordinateY + (c1.ScreenCoordinateY - c0.ScreenCoordinateY) / 2
                 );
             }
 

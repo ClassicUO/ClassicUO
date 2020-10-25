@@ -37,7 +37,16 @@ namespace ClassicUO.Game.UI.Gumps
         private readonly int _minW;
 
 
-        protected ResizableGump(int width, int height, int minW, int minH, uint local, uint server, ushort borderHue = 0) : base(local, server)
+        protected ResizableGump
+        (
+            int width,
+            int height,
+            int minW,
+            int minH,
+            uint local,
+            uint server,
+            ushort borderHue = 0
+        ) : base(local, server)
         {
             _borderControl = new BorderControl(0, 0, Width, Height, 4)
             {
@@ -94,14 +103,14 @@ namespace ClassicUO.Game.UI.Gumps
         }
 
 
-        public override void Update(double totalMS, double frameMS)
+        public override void Update(double totalTime, double frameTime)
         {
             if (IsDisposed)
             {
                 return;
             }
 
-            Point offset = Mouse.LDroppedOffset;
+            Point offset = Mouse.LDragOffset;
 
             _lastSize = _savedSize;
 
@@ -131,7 +140,7 @@ namespace ClassicUO.Game.UI.Gumps
                 OnResize();
             }
 
-            base.Update(totalMS, frameMS);
+            base.Update(totalTime, frameTime);
         }
 
 

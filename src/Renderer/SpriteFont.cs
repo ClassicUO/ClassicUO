@@ -34,7 +34,17 @@ namespace ClassicUO.Renderer
 {
     internal sealed class SpriteFont
     {
-        private SpriteFont(Texture2D texture, List<Rectangle> glyph, List<Rectangle> cropping, List<char> characters, int lineSpacing, float spacing, List<Vector3> kerning, char? defaultCharacter)
+        private SpriteFont
+        (
+            Texture2D texture,
+            List<Rectangle> glyph,
+            List<Rectangle> cropping,
+            List<char> characters,
+            int lineSpacing,
+            float spacing,
+            List<Vector3> kerning,
+            char? defaultCharacter
+        )
         {
             Characters = new ReadOnlyCollection<char>(characters.ToArray());
             DefaultCharacter = defaultCharacter;
@@ -142,8 +152,7 @@ namespace ClassicUO.Renderer
                 /* If a character is taller than the default line height,
 				 * increase the height to that of the line's tallest character.
 				 */
-                int cCropHeight = CroppingData[index]
-                    .Height;
+                int cCropHeight = CroppingData[index].Height;
 
                 if (cCropHeight > finalLineHeight)
                 {
@@ -212,7 +221,9 @@ namespace ClassicUO.Renderer
                     levelDataSizeInBytes = levelData.Length;
                 }
 
-                Texture2D texture = new Texture2D(Client.Game.GraphicsDevice, width, height, false, SurfaceFormat.Color);
+                Texture2D texture = new Texture2D
+                    (Client.Game.GraphicsDevice, width, height, false, SurfaceFormat.Color);
+
                 texture.SetData(levelData);
 
                 reader.Read7BitEncodedInt();
@@ -319,7 +330,16 @@ namespace ClassicUO.Renderer
             b = (byte) ((temp / 32 + temp) / 32);
         }
 
-        private static void DecompressDxt3Block(BinaryReader imageReader, int x, int y, int blockCountX, int width, int height, byte[] imageData)
+        private static void DecompressDxt3Block
+        (
+            BinaryReader imageReader,
+            int x,
+            int y,
+            int blockCountX,
+            int width,
+            int height,
+            byte[] imageData
+        )
         {
             byte a0 = imageReader.ReadByte();
             byte a1 = imageReader.ReadByte();

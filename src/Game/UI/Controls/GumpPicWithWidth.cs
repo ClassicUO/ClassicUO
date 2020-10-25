@@ -40,13 +40,13 @@ namespace ClassicUO.Game.UI.Controls
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
             ResetHueVector();
-            ShaderHueTranslator.GetHueVector(ref _hueVector, Hue);
+            ShaderHueTranslator.GetHueVector(ref HueVector, Hue);
 
-            UOTexture32 texture = GumpsLoader.Instance.GetTexture(Graphic);
+            UOTexture texture = GumpsLoader.Instance.GetTexture(Graphic);
 
             if (texture != null)
             {
-                return batcher.Draw2DTiled(texture, x, y, Percent, Height, ref _hueVector);
+                return batcher.Draw2DTiled(texture, x, y, Percent, Height, ref HueVector);
             }
 
             return false;

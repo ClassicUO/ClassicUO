@@ -58,7 +58,7 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
-        public override void Update(double totalMS, double frameMS)
+        public override void Update(double totalTime, double frameTime)
         {
             if (!IsDestroyed)
             {
@@ -70,10 +70,10 @@ namespace ClassicUO.Game.GameObjects
                 {
                     AnimationGraphic = (ushort) (Graphic + AnimIndex);
 
-                    if (NextChangeFrameTime < totalMS)
+                    if (NextChangeFrameTime < totalTime)
                     {
                         AnimIndex++;
-                        NextChangeFrameTime = (long) totalMS + IntervalInMs;
+                        NextChangeFrameTime = (long) totalTime + IntervalInMs;
                     }
 
                     (int x, int y, int z) = GetSource();

@@ -41,11 +41,11 @@ namespace ClassicUO.Game.GameObjects
 
             ushort hue = Hue;
 
-            if (ProfileManager.Current.NoColorObjectsOutOfRange && Distance > World.ClientViewRange)
+            if (ProfileManager.CurrentProfile.NoColorObjectsOutOfRange && Distance > World.ClientViewRange)
             {
                 hue = Constants.OUT_RANGE_COLOR;
             }
-            else if (World.Player.IsDead && ProfileManager.Current.EnableBlackWhiteEffect)
+            else if (World.Player.IsDead && ProfileManager.CurrentProfile.EnableBlackWhiteEffect)
             {
                 hue = Constants.DEAD_RANGE_COLOR;
             }
@@ -71,8 +71,7 @@ namespace ClassicUO.Game.GameObjects
 
             if (data.IsLight && Source != null)
             {
-                Client.Game.GetScene<GameScene>()
-                      .AddLight(Source, Source, posX + 22, posY + 22);
+                Client.Game.GetScene<GameScene>().AddLight(Source, Source, posX + 22, posY + 22);
             }
 
             return true;

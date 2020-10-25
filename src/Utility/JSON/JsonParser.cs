@@ -43,7 +43,8 @@ namespace TinyJson
         {
             char c = PeekChar();
 
-            return c == ' ' || c == ',' || c == ':' || c == '\"' || c == '{' || c == '}' || c == '[' || c == ']' || c == '\t' || c == '\n' || c == '\r';
+            return c == ' ' || c == ',' || c == ':' || c == '\"' || c == '{' || c == '}' || c == '[' || c == ']' ||
+                   c == '\t' || c == '\n' || c == '\r';
         }
 
         private bool PeekWhitespace()
@@ -94,26 +95,19 @@ namespace TinyJson
 
             switch (PeekChar())
             {
-                case '{':
-                    return Token.CurlyOpen;
+                case '{': return Token.CurlyOpen;
 
-                case '}':
-                    return Token.CurlyClose;
+                case '}': return Token.CurlyClose;
 
-                case '[':
-                    return Token.SquareOpen;
+                case '[': return Token.SquareOpen;
 
-                case ']':
-                    return Token.SquareClose;
+                case ']': return Token.SquareClose;
 
-                case ',':
-                    return Token.Comma;
+                case ',': return Token.Comma;
 
-                case '"':
-                    return Token.String;
+                case '"': return Token.String;
 
-                case ':':
-                    return Token.Colon;
+                case ':': return Token.Colon;
 
                 case '0':
                 case '1':
@@ -125,16 +119,13 @@ namespace TinyJson
                 case '7':
                 case '8':
                 case '9':
-                case '-':
-                    return Token.Number;
+                case '-': return Token.Number;
 
                 case 't':
                 case 'f':
-                case 'n':
-                    return Token.BoolOrNull;
+                case 'n': return Token.BoolOrNull;
 
-                default:
-                    return Token.None;
+                default: return Token.None;
             }
         }
 
@@ -226,8 +217,7 @@ namespace TinyJson
 
                     switch (c)
                     {
-                        case '"':
-                            return sb.ToString();
+                        case '"': return sb.ToString();
 
                         case '\\':
                             if (EndReached())
@@ -307,8 +297,7 @@ namespace TinyJson
                 {
                     switch (PeekToken())
                     {
-                        case Token.None:
-                            return null;
+                        case Token.None: return null;
 
                         case Token.Comma:
                             json.Read();
@@ -359,8 +348,7 @@ namespace TinyJson
                 {
                     switch (PeekToken())
                     {
-                        case Token.None:
-                            return null;
+                        case Token.None: return null;
 
                         case Token.Comma:
                             json.Read();
@@ -389,20 +377,15 @@ namespace TinyJson
         {
             switch (PeekToken())
             {
-                case Token.String:
-                    return ParseString();
+                case Token.String: return ParseString();
 
-                case Token.Number:
-                    return ParseNumber();
+                case Token.Number: return ParseNumber();
 
-                case Token.BoolOrNull:
-                    return ParseBoolOrNull();
+                case Token.BoolOrNull: return ParseBoolOrNull();
 
-                case Token.CurlyOpen:
-                    return ParseObject();
+                case Token.CurlyOpen: return ParseObject();
 
-                case Token.SquareOpen:
-                    return ParseArray();
+                case Token.SquareOpen: return ParseArray();
             }
 
             Console.WriteLine("Unexpected value token: " + PeekToken());

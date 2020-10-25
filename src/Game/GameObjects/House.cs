@@ -55,7 +55,15 @@ namespace ClassicUO.Game.GameObjects
             return Components.Where(s => s.X == x && s.Y == y);
         }
 
-        public Multi Add(ushort graphic, ushort hue, int x, int y, sbyte z, bool iscustom)
+        public Multi Add
+        (
+            ushort graphic,
+            ushort hue,
+            int x,
+            int y,
+            sbyte z,
+            bool iscustom
+        )
         {
             Item item = World.Items.Get(Serial);
 
@@ -109,7 +117,8 @@ namespace ClassicUO.Game.GameObjects
                     }
                     else if (component.Z <= checkZ)
                     {
-                        component.State = component.State | CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FLOOR | CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_IGNORE_IN_RENDER;
+                        component.State = component.State | CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FLOOR |
+                                          CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_IGNORE_IN_RENDER;
                     }
 
                     if (component.IsDestroyed)

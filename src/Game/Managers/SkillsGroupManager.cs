@@ -191,8 +191,8 @@ namespace ClassicUO.Game.Managers
             {
                 MessageBoxGump messageBox = new MessageBoxGump(200, 125, ResGeneral.CannotDeleteThisGroup, null)
                 {
-                    X = ProfileManager.Current.GameWindowPosition.X + ProfileManager.Current.GameWindowSize.X / 2 - 100,
-                    Y = ProfileManager.Current.GameWindowPosition.Y + ProfileManager.Current.GameWindowSize.Y / 2 - 62
+                    X = ProfileManager.CurrentProfile.GameWindowPosition.X + ProfileManager.CurrentProfile.GameWindowSize.X / 2 - 100,
+                    Y = ProfileManager.CurrentProfile.GameWindowPosition.Y + ProfileManager.CurrentProfile.GameWindowSize.Y / 2 - 62
                 };
 
                 UIManager.Add(messageBox);
@@ -216,8 +216,7 @@ namespace ClassicUO.Game.Managers
         {
             Groups.Clear();
 
-            string path = Path.Combine(CUOEnviroment.ExecutablePath, "Data", "Profiles", ProfileManager.Current.Username, ProfileManager.Current.ServerName, ProfileManager.Current.CharacterName, "skillsgroups.xml");
-
+            string path = Path.Combine(ProfileManager.ProfilePath, "skillsgroups.xml");
             if (!File.Exists(path))
             {
                 Log.Trace("No skillsgroups.xml file. Creating a default file.");
@@ -267,7 +266,7 @@ namespace ClassicUO.Game.Managers
 
         public static void Save()
         {
-            string path = Path.Combine(CUOEnviroment.ExecutablePath, "Data", "Profiles", ProfileManager.Current.Username, ProfileManager.Current.ServerName, ProfileManager.Current.CharacterName, "skillsgroups.xml");
+            string path = Path.Combine(ProfileManager.ProfilePath, "skillsgroups.xml");
 
             using (XmlTextWriter xml = new XmlTextWriter(path, Encoding.UTF8)
             {
@@ -544,8 +543,7 @@ namespace ClassicUO.Game.Managers
 
                         if (grp < groups.Length && skillidx < SkillsLoader.Instance.SkillsCount)
                         {
-                            groups[grp]
-                                .Add(skillidx++);
+                            groups[grp].Add(skillidx++);
                         }
                     }
 

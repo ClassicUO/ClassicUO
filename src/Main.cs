@@ -69,7 +69,9 @@ namespace ClassicUO
                 sb.AppendLine($"ClassicUO [STANDARD_BUILD] - {CUOEnviroment.Version} - {DateTime.Now}");
 #endif
 
-                sb.AppendLine($"OS: {Environment.OSVersion.Platform} {(Environment.Is64BitOperatingSystem ? "x64" : "x86")}");
+                sb.AppendLine
+                    ($"OS: {Environment.OSVersion.Platform} {(Environment.Is64BitOperatingSystem ? "x64" : "x86")}");
+
                 sb.AppendLine($"Thread: {Thread.CurrentThread.Name}");
                 sb.AppendLine();
 
@@ -125,7 +127,13 @@ namespace ClassicUO
             Environment.SetEnvironmentVariable("FNA3D_BACKBUFFER_SCALE_NEAREST", "1");
             Environment.SetEnvironmentVariable("FNA3D_OPENGL_FORCE_COMPATIBILITY_PROFILE", "1");
             Environment.SetEnvironmentVariable(SDL.SDL_HINT_MOUSE_FOCUS_CLICKTHROUGH, "1");
-            Environment.SetEnvironmentVariable("PATH", Environment.GetEnvironmentVariable("PATH") + ";" + Path.Combine(CUOEnviroment.ExecutablePath, "Data", "Plugins"));
+
+            Environment.SetEnvironmentVariable
+            (
+                "PATH",
+                Environment.GetEnvironmentVariable("PATH") + ";" + Path.Combine
+                    (CUOEnviroment.ExecutablePath, "Data", "Plugins")
+            );
 
             string globalSettingsPath = Settings.GetSettingsFilepath();
 
@@ -152,7 +160,9 @@ namespace ClassicUO
 
             if (!CUOEnviroment.IsUnix)
             {
-                string libsPath = Path.Combine(CUOEnviroment.ExecutablePath, Environment.Is64BitProcess ? "x64" : "x86");
+                string libsPath = Path.Combine
+                    (CUOEnviroment.ExecutablePath, Environment.Is64BitProcess ? "x64" : "x86");
+
                 SetDllDirectory(libsPath);
             }
 
@@ -175,13 +185,16 @@ namespace ClassicUO
 
             string clientVersionText = Settings.GlobalSettings.ClientVersion;
 
-            if (!ClientVersionHelper.IsClientVersionValid(Settings.GlobalSettings.ClientVersion, out ClientVersion clientVersion))
+            if (!ClientVersionHelper.IsClientVersionValid
+                (Settings.GlobalSettings.ClientVersion, out ClientVersion clientVersion))
             {
                 Log.Warn($"Client version [{clientVersionText}] is invalid, let's try to read the client.exe");
 
                 // mmm something bad happened, try to load from client.exe [windows only]
-                if (!ClientVersionHelper.TryParseFromFile(Path.Combine(Settings.GlobalSettings.UltimaOnlineDirectory, "client.exe"), out clientVersionText) ||
-                    !ClientVersionHelper.IsClientVersionValid(clientVersionText, out clientVersion))
+                if (!ClientVersionHelper.TryParseFromFile
+                (
+                    Path.Combine(Settings.GlobalSettings.UltimaOnlineDirectory, "client.exe"), out clientVersionText
+                ) || !ClientVersionHelper.IsClientVersionValid(clientVersionText, out clientVersion))
                 {
                     Log.Error("Invalid client version: " + clientVersionText);
 
@@ -240,8 +253,7 @@ namespace ClassicUO
         {
             for (int i = 0; i <= args.Length - 1; i++)
             {
-                string cmd = args[i]
-                    .ToLower();
+                string cmd = args[i].ToLower();
 
                 // NOTE: Command-line option name should start with "-" character
                 if (cmd.Length == 0 || cmd[0] != '-')
@@ -254,8 +266,7 @@ namespace ClassicUO
 
                 if (i < args.Length - 1)
                 {
-                    if (!string.IsNullOrWhiteSpace(args[i + 1]) && !args[i + 1]
-                        .StartsWith("-"))
+                    if (!string.IsNullOrWhiteSpace(args[i + 1]) && !args[i + 1].StartsWith("-"))
                     {
                         value = args[++i];
                     }
@@ -294,7 +305,8 @@ namespace ClassicUO
 
                         break;
 
-                    case "password_enc": // Non-standard setting, similar to `password` but for already encrypted password
+                    case "password_enc"
+                        : // Non-standard setting, similar to `password` but for already encrypted password
                         Settings.GlobalSettings.Password = value;
 
                         break;
@@ -312,6 +324,11 @@ namespace ClassicUO
                     case "ultimaonlinedirectory":
                     case "uopath":
                         Settings.GlobalSettings.UltimaOnlineDirectory = value;
+
+                        break;
+
+                    case "profilespath":
+                        Settings.GlobalSettings.ProfilesPath = value;
 
                         break;
 
@@ -414,12 +431,21 @@ namespace ClassicUO
                         break;
 
                     case "plugins":
-                        Settings.GlobalSettings.Plugins = string.IsNullOrEmpty(value) ? new string[0] : value.Split(new[] {','}, StringSplitOptions.RemoveEmptyEntries);
+                        Settings.GlobalSettings.Plugins = string.IsNullOrEmpty
+                            (value) ?
+                            new string[0] :
+                            value.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
 
                         break;
 
                     case "use_verdata":
                         Settings.GlobalSettings.UseVerdata = bool.Parse(value);
+
+                        break;
+
+                    case "maps_layouts":
+
+                        Settings.GlobalSettings.MapsLayouts = value;
 
                         break;
 
@@ -524,12 +550,16 @@ namespace ClassicUO
                 if (CUOEnviroment.IsUnix)
                 {
                     processStartInfo.FileName = "mono";
-                    processStartInfo.Arguments = $"\"{Path.Combine(path, "ClassicUO.exe")}\" --source \"{currentPath}\" --pid {Process.GetCurrentProcess().Id} --action cleanup";
+
+                    processStartInfo.Arguments =
+                        $"\"{Path.Combine(path, "ClassicUO.exe")}\" --source \"{currentPath}\" --pid {Process.GetCurrentProcess().Id} --action cleanup";
                 }
                 else
                 {
                     processStartInfo.FileName = Path.Combine(path, "ClassicUO.exe");
-                    processStartInfo.Arguments = $"--source \"{currentPath}\" --pid {Process.GetCurrentProcess().Id} --action cleanup";
+
+                    processStartInfo.Arguments =
+                        $"--source \"{currentPath}\" --pid {Process.GetCurrentProcess().Id} --action cleanup";
                 }
 
                 Process.Start(processStartInfo);
@@ -544,8 +574,7 @@ namespace ClassicUO
                     Process.GetProcessById(processId);
                     Thread.Sleep(1000);
 
-                    Process.GetProcessById(processId)
-                           .Kill();
+                    Process.GetProcessById(processId).Kill();
                 }
                 catch
                 {

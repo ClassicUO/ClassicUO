@@ -71,7 +71,7 @@ namespace ClassicUO.IO
         }
     }
 
-    internal abstract class UOFileLoader<T> : UOFileLoader where T : UOTexture32
+    internal abstract class UOFileLoader<T> : UOFileLoader where T : UOTexture
     {
         private readonly LinkedList<uint> _usedTextures = new LinkedList<uint>();
 
@@ -116,7 +116,7 @@ namespace ClassicUO.IO
             }
         }
 
-        public void ClearUnusedResources<T1>(T1[] resourceCache, int maxCount) where T1 : UOTexture32
+        public void ClearUnusedResources<T1>(T1[] resourceCache, int maxCount) where T1 : UOTexture
         {
             if (Time.Ticks <= Constants.CLEAR_TEXTURES_DELAY)
             {
@@ -135,16 +135,14 @@ namespace ClassicUO.IO
 
                 if (idx < resourceCache.Length && resourceCache[idx] != null)
                 {
-                    if (resourceCache[idx]
-                        .Ticks < ticks)
+                    if (resourceCache[idx].Ticks < ticks)
                     {
                         if (count++ >= maxCount)
                         {
                             break;
                         }
 
-                        resourceCache[idx]
-                            .Dispose();
+                        resourceCache[idx].Dispose();
 
                         resourceCache[idx] = null;
                         _usedTextures.Remove(first);

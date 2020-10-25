@@ -32,7 +32,7 @@ namespace ClassicUO.Game.Managers
     {
         private GameEffect _root;
 
-        public void Update(double totalMS, double frameMS)
+        public void Update(double totalTime, double frameTime)
         {
             GameEffect f = _root;
 
@@ -40,7 +40,7 @@ namespace ClassicUO.Game.Managers
             {
                 LinkedObject n = f.Next;
 
-                f.Update(totalMS, frameMS);
+                f.Update(totalTime, frameTime);
 
                 if (!f.IsDestroyed && f.Distance > World.ClientViewRange)
                 {
@@ -70,12 +70,22 @@ namespace ClassicUO.Game.Managers
         public void Add
         (
             GraphicEffectType type,
-            uint source, uint target,
+            uint source,
+            uint target,
             ushort graphic,
             ushort hue,
-            ushort srcX, ushort srcY, sbyte srcZ,
-            ushort targetX, ushort targetY, sbyte targetZ,
-            byte speed, int duration, bool fixedDir, bool doesExplode, bool hasparticles, GraphicEffectBlendMode blendmode
+            ushort srcX,
+            ushort srcY,
+            sbyte srcZ,
+            ushort targetX,
+            ushort targetY,
+            sbyte targetZ,
+            byte speed,
+            int duration,
+            bool fixedDir,
+            bool doesExplode,
+            bool hasparticles,
+            GraphicEffectBlendMode blendmode
         )
         {
             if (hasparticles)
@@ -105,14 +115,16 @@ namespace ClassicUO.Game.Managers
                         speed++;
                     }
 
-                    effect = new MovingEffect(source, target, srcX, srcY, srcZ, targetX, targetY, targetZ, graphic, hue, fixedDir, speed)
-                    {
-                        Blend = blendmode
-                    };
+                    effect = new MovingEffect
+                        (source, target, srcX, srcY, srcZ, targetX, targetY, targetZ, graphic, hue, fixedDir, speed)
+                        {
+                            Blend = blendmode
+                        };
 
                     if (doesExplode)
                     {
-                        effect.AddChildEffect(new AnimatedItemEffect(target, targetX, targetY, targetZ, 0x36Cb, hue, 9, speed));
+                        effect.AddChildEffect
+                            (new AnimatedItemEffect(target, targetX, targetY, targetZ, 0x36Cb, hue, 9, speed));
                     }
 
                     break;

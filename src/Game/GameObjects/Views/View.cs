@@ -97,7 +97,7 @@ namespace ClassicUO.Game.GameObjects
         [MethodImpl(256)]
         public bool ProcessAlpha(int max)
         {
-            if (ProfileManager.Current != null && !ProfileManager.Current.UseObjectsFading)
+            if (ProfileManager.CurrentProfile != null && !ProfileManager.CurrentProfile.UseObjectsFading)
             {
                 AlphaHue = (byte) max;
 
@@ -139,7 +139,7 @@ namespace ClassicUO.Game.GameObjects
 
         protected static void DrawLand(UltimaBatcher2D batcher, ushort graphic, int x, int y, ref Vector3 hue)
         {
-            UOTexture32 texture = ArtLoader.Instance.GetLandTexture(graphic);
+            UOTexture texture = ArtLoader.Instance.GetLandTexture(graphic);
 
             if (texture != null)
             {
@@ -152,17 +152,18 @@ namespace ClassicUO.Game.GameObjects
         protected static void DrawLand
         (
             UltimaBatcher2D batcher,
-            ushort graphic, int x, int y,
+            ushort graphic,
+            int x,
+            int y,
             ref Rectangle rectangle,
-            ref Vector3 n0, ref Vector3 n1, ref Vector3 n2, ref Vector3 n3,
+            ref Vector3 n0,
+            ref Vector3 n1,
+            ref Vector3 n2,
+            ref Vector3 n3,
             ref Vector3 hue
         )
         {
-            UOTexture32 texture = TexmapsLoader.Instance.GetTexture
-            (
-                TileDataLoader.Instance.LandData[graphic]
-                              .TexID
-            );
+            UOTexture texture = TexmapsLoader.Instance.GetTexture(TileDataLoader.Instance.LandData[graphic].TexID);
 
             if (texture != null)
             {
@@ -191,7 +192,7 @@ namespace ClassicUO.Game.GameObjects
 
         protected static void DrawGump(UltimaBatcher2D batcher, ushort graphic, int x, int y, ref Vector3 hue)
         {
-            UOTexture32 texture = GumpsLoader.Instance.GetTexture(graphic);
+            UOTexture texture = GumpsLoader.Instance.GetTexture(graphic);
 
             if (texture != null)
             {
@@ -201,7 +202,17 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
-        protected static void DrawStaticRotated(UltimaBatcher2D batcher, ushort graphic, int x, int y, int destX, int destY, float angle, ref Vector3 hue)
+        protected static void DrawStaticRotated
+        (
+            UltimaBatcher2D batcher,
+            ushort graphic,
+            int x,
+            int y,
+            int destX,
+            int destY,
+            float angle,
+            ref Vector3 hue
+        )
         {
             ArtTexture texture = ArtLoader.Instance.GetTexture(graphic);
 
@@ -213,7 +224,15 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
-        protected static void DrawStaticAnimated(UltimaBatcher2D batcher, ushort graphic, int x, int y, ref Vector3 hue, ref bool transparent)
+        protected static void DrawStaticAnimated
+        (
+            UltimaBatcher2D batcher,
+            ushort graphic,
+            int x,
+            int y,
+            ref Vector3 hue,
+            ref bool transparent
+        )
         {
             ref UOFileIndex index = ref ArtLoader.Instance.GetValidRefEntry(graphic + 0x4000);
 
@@ -228,9 +247,12 @@ namespace ClassicUO.Game.GameObjects
 
                 if (transparent)
                 {
-                    int maxDist = ProfileManager.Current.CircleOfTransparencyRadius + 22;
+                    int maxDist = ProfileManager.CurrentProfile.CircleOfTransparencyRadius + 22;
                     int fx = (int) (World.Player.RealScreenPosition.X + World.Player.Offset.X);
-                    int fy = (int) (World.Player.RealScreenPosition.Y + (World.Player.Offset.Y - World.Player.Offset.Z)) + 44;
+
+                    int fy =
+                        (int) (World.Player.RealScreenPosition.Y + (World.Player.Offset.Y - World.Player.Offset.Z)) +
+                        44;
 
                     fx -= x;
                     fy -= y;
@@ -241,7 +263,7 @@ namespace ClassicUO.Game.GameObjects
                     {
                         float alpha = hue.Z;
 
-                        switch (ProfileManager.Current.CircleOfTransparencyType)
+                        switch (ProfileManager.CurrentProfile.CircleOfTransparencyType)
                         {
                             default:
                             case 0:

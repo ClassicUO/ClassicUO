@@ -31,7 +31,7 @@ namespace ClassicUO.Game.Data
         {
             Type = type;
             Graphic = graphic;
-            Timer = timer;
+            Timer = (timer <= 0 ? 0xFFFF_FFFF : Time.Ticks + timer * 1000);
             Text = text;
         }
 

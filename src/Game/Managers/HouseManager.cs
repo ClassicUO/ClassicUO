@@ -111,10 +111,7 @@ namespace ClassicUO.Game.Managers
                 int minY = found.Y + found.MultiInfo.Value.Width;
                 int maxY = found.Y + found.MultiInfo.Value.Height;
 
-                return obj.X >= minX &&
-                       obj.X <= maxX &&
-                       obj.Y >= minY &&
-                       obj.Y <= maxY;
+                return obj.X >= minX && obj.X <= maxX && obj.Y >= minY && obj.Y <= maxY;
             }
 
             return false;

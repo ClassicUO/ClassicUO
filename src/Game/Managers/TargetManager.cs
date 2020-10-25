@@ -196,8 +196,7 @@ namespace ClassicUO.Game.Managers
                     World.CustomHouseManager.SelectedGraphic = 0;
                     World.CustomHouseManager.CombinedStair = false;
 
-                    UIManager.GetGump<HouseCustomizationGump>()
-                             ?.Update();
+                    UIManager.GetGump<HouseCustomizationGump>()?.Update();
                 }
             }
 
@@ -207,7 +206,15 @@ namespace ClassicUO.Game.Managers
             Reset();
         }
 
-        public static void SetTargetingMulti(uint deedSerial, ushort model, ushort x, ushort y, ushort z, ushort hue)
+        public static void SetTargetingMulti
+        (
+            uint deedSerial,
+            ushort model,
+            ushort x,
+            ushort y,
+            ushort z,
+            ushort hue
+        )
         {
             SetTargeting(CursorTarget.MultiPlacement, deedSerial, TargetType.Neutral);
 
@@ -229,8 +236,7 @@ namespace ClassicUO.Game.Managers
             {
                 switch (TargetingState)
                 {
-                    case CursorTarget.Invalid:
-                        return;
+                    case CursorTarget.Invalid: return;
 
                     case CursorTarget.MultiPlacement:
                     case CursorTarget.Position:
@@ -243,8 +249,10 @@ namespace ClassicUO.Game.Managers
                             LastTargetInfo.SetEntity(serial);
                         }
 
-                        if (SerialHelper.IsMobile(serial) && serial != World.Player &&
-                            (World.Player.NotorietyFlag == NotorietyFlag.Innocent || World.Player.NotorietyFlag == NotorietyFlag.Ally))
+                        if (SerialHelper.IsMobile
+                                (serial) && serial != World.Player &&
+                            (World.Player.NotorietyFlag == NotorietyFlag.Innocent ||
+                             World.Player.NotorietyFlag == NotorietyFlag.Ally))
                         {
                             Mobile mobile = entity as Mobile;
 
@@ -252,12 +260,17 @@ namespace ClassicUO.Game.Managers
                             {
                                 bool showCriminalQuery = false;
 
-                                if (TargetingType == TargetType.Harmful && ProfileManager.Current.EnabledCriminalActionQuery && mobile.NotorietyFlag == NotorietyFlag.Innocent)
+                                if (TargetingType == TargetType.Harmful &&
+                                    ProfileManager.CurrentProfile.EnabledCriminalActionQuery &&
+                                    mobile.NotorietyFlag == NotorietyFlag.Innocent)
                                 {
                                     showCriminalQuery = true;
                                 }
-                                else if (TargetingType == TargetType.Beneficial && ProfileManager.Current.EnabledBeneficialCriminalActionQuery &&
-                                         (mobile.NotorietyFlag == NotorietyFlag.Criminal || mobile.NotorietyFlag == NotorietyFlag.Murderer || mobile.NotorietyFlag == NotorietyFlag.Gray))
+                                else if (TargetingType == TargetType.Beneficial &&
+                                         ProfileManager.CurrentProfile.EnabledBeneficialCriminalActionQuery &&
+                                         (mobile.NotorietyFlag == NotorietyFlag.Criminal ||
+                                          mobile.NotorietyFlag == NotorietyFlag.Murderer ||
+                                          mobile.NotorietyFlag == NotorietyFlag.Gray))
                                 {
                                     showCriminalQuery = true;
                                 }
@@ -266,12 +279,19 @@ namespace ClassicUO.Game.Managers
                                 {
                                     QuestionGump messageBox = new QuestionGump
                                     (
-                                        "This may flag\nyou criminal!",
-                                        s =>
+                                        "This may flag\nyou criminal!", s =>
                                         {
                                             if (s)
                                             {
-                                                NetClient.Socket.Send(new PTargetObject(entity, entity.Graphic, entity.X, entity.Y, entity.Z, _targetCursorId, (byte) TargetingType));
+                                                NetClient.Socket.Send
+                                                (
+                                                    new PTargetObject
+                                                    (
+                                                        entity, entity.Graphic, entity.X, entity.Y, entity.Z,
+                                                        _targetCursorId, (byte) TargetingType
+                                                    )
+                                                );
+
                                                 ClearTargetingWithoutTargetCancelPacket();
 
                                                 if (LastTargetInfo.Serial != serial)
@@ -291,7 +311,11 @@ namespace ClassicUO.Game.Managers
 
                         if (TargetingState != CursorTarget.SetTargetClientSide)
                         {
-                            PTargetObject packet = new PTargetObject(entity, entity.Graphic, entity.X, entity.Y, entity.Z, _targetCursorId, (byte) TargetingType);
+                            PTargetObject packet = new PTargetObject
+                            (
+                                entity, entity.Graphic, entity.X, entity.Y, entity.Z, _targetCursorId,
+                                (byte) TargetingType
+                            );
 
                             for (int i = 0; i < _lastDataBuffer.Length; i++)
                             {
@@ -327,7 +351,7 @@ namespace ClassicUO.Game.Managers
 
                         if (SerialHelper.IsItem(serial))
                         {
-                            ProfileManager.Current.GrabBagSerial = serial;
+                            ProfileManager.CurrentProfile.GrabBagSerial = serial;
                             GameActions.Print(string.Format(ResGeneral.GrabBagSet0, serial));
                         }
 

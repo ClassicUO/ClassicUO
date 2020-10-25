@@ -23,6 +23,7 @@
 
 using System;
 using ClassicUO.Game.Managers;
+using ClassicUO.Input;
 using ClassicUO.Interfaces;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
@@ -63,7 +64,7 @@ namespace ClassicUO.Game.Scenes
             Unload();
         }
 
-        public virtual void Update(double totalMS, double frameMS)
+        public virtual void Update(double totalTime, double frameTime)
         {
             Audio?.Update();
             Camera.Update();
@@ -73,7 +74,10 @@ namespace ClassicUO.Game.Scenes
                 ArtLoader.Instance.CleaUnusedResources(Constants.MAX_ART_OBJECT_REMOVED_BY_GARBAGE_COLLECTOR);
                 GumpsLoader.Instance.CleaUnusedResources(Constants.MAX_GUMP_OBJECT_REMOVED_BY_GARBAGE_COLLECTOR);
                 TexmapsLoader.Instance.CleaUnusedResources(Constants.MAX_ART_OBJECT_REMOVED_BY_GARBAGE_COLLECTOR);
-                AnimationsLoader.Instance.CleaUnusedResources(Constants.MAX_ANIMATIONS_OBJECT_REMOVED_BY_GARBAGE_COLLECTOR);
+
+                AnimationsLoader.Instance.CleaUnusedResources
+                    (Constants.MAX_ANIMATIONS_OBJECT_REMOVED_BY_GARBAGE_COLLECTOR);
+
                 World.Map?.ClearUnusedBlocks();
                 LightsLoader.Instance.CleaUnusedResources(20);
 
@@ -84,7 +88,7 @@ namespace ClassicUO.Game.Scenes
         public readonly bool CanResize, CanBeMaximized, CanLoadAudio;
         public readonly int ID;
 
-        public virtual void FixedUpdate(double totalMS, double frameMS)
+        public virtual void FixedUpdate(double totalTime, double frameTime)
         {
         }
 
@@ -110,71 +114,11 @@ namespace ClassicUO.Game.Scenes
             return true;
         }
 
-
-        internal virtual bool OnLeftMouseUp()
-        {
-            return false;
-        }
-
-        internal virtual bool OnLeftMouseDown()
-        {
-            return false;
-        }
-
-        internal virtual bool OnRightMouseUp()
-        {
-            return false;
-        }
-
-        internal virtual bool OnRightMouseDown()
-        {
-            return false;
-        }
-
-        internal virtual bool OnMiddleMouseUp()
-        {
-            return false;
-        }
-
-        internal virtual bool OnMiddleMouseDown()
-        {
-            return false;
-        }
-
-        internal virtual bool OnExtraMouseUp(int button)
-        {
-            return false;
-        }
-
-        internal virtual bool OnExtraMouseDown(int button)
-        {
-            return false;
-        }
-
-        internal virtual bool OnLeftMouseDoubleClick()
-        {
-            return false;
-        }
-
-        internal virtual bool OnRightMouseDoubleClick()
-        {
-            return false;
-        }
-
-        internal virtual bool OnMiddleMouseDoubleClick()
-        {
-            return false;
-        }
-
-        internal virtual bool OnMouseWheel(bool up)
-        {
-            return false;
-        }
-
-        internal virtual bool OnMouseDragging()
-        {
-            return false;
-        }
+        internal virtual bool OnMouseUp(MouseButtonType button) => false;
+        internal virtual bool OnMouseDown(MouseButtonType button) => false;
+        internal virtual bool OnMouseDoubleClick(MouseButtonType button) => false;
+        internal virtual bool OnMouseWheel(bool up) => false;
+        internal virtual bool OnMouseDragging() => false;
 
         internal virtual void OnTextInput(string text)
         {

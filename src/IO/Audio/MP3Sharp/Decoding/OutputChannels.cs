@@ -112,25 +112,15 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
         {
             switch (code)
             {
-                case (int) OutputChannelsEnum.LEFT_CHANNEL:
+                case (int) OutputChannelsEnum.LEFT_CHANNEL: return LEFT;
 
-                    return LEFT;
+                case (int) OutputChannelsEnum.RIGHT_CHANNEL: return RIGHT;
 
-                case (int) OutputChannelsEnum.RIGHT_CHANNEL:
+                case (int) OutputChannelsEnum.BOTH_CHANNELS: return BOTH;
 
-                    return RIGHT;
+                case (int) OutputChannelsEnum.DOWNMIX_CHANNELS: return DOWNMIX;
 
-                case (int) OutputChannelsEnum.BOTH_CHANNELS:
-
-                    return BOTH;
-
-                case (int) OutputChannelsEnum.DOWNMIX_CHANNELS:
-
-                    return DOWNMIX;
-
-                default:
-
-                    throw new ArgumentException("Invalid channel code: " + code);
+                default: throw new ArgumentException("Invalid channel code: " + code);
             }
         }
 

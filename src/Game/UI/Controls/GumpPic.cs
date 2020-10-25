@@ -49,7 +49,7 @@ namespace ClassicUO.Game.UI.Controls
                 {
                     _graphic = value;
 
-                    UOTexture32 texture = GumpsLoader.Instance.GetTexture(_graphic);
+                    UOTexture texture = GumpsLoader.Instance.GetTexture(_graphic);
 
                     if (texture == null)
                     {
@@ -69,14 +69,14 @@ namespace ClassicUO.Game.UI.Controls
 
         public override bool Contains(int x, int y)
         {
-            UOTexture32 texture = GumpsLoader.Instance.GetTexture(Graphic);
+            UOTexture texture = GumpsLoader.Instance.GetTexture(Graphic);
 
             if (texture == null)
             {
                 return false;
             }
 
-            if (texture.Contains(x, y))
+            if (texture.Contains(x - Offset.X, y - Offset.Y))
             {
                 return true;
             }
@@ -109,20 +109,10 @@ namespace ClassicUO.Game.UI.Controls
 
         public GumpPic(List<string> parts) : this
         (
-            int.Parse(parts[1]), int.Parse(parts[2]), UInt16Converter.Parse(parts[3]), (ushort) (parts.Count > 4
-                ? TransformHue
-                (
-                    (ushort) (UInt16Converter.Parse
-                    (
-                        parts[4]
-                            .Substring
-                            (
-                                parts[4]
-                                    .IndexOf('=') + 1
-                            )
-                    ) + 1)
-                )
-                : 0)
+            int.Parse(parts[1]), int.Parse(parts[2]), UInt16Converter.Parse(parts[3]),
+            (ushort) (parts.Count > 4 ?
+                TransformHue((ushort) (UInt16Converter.Parse(parts[4].Substring(parts[4].IndexOf('=') + 1)) + 1)) :
+                0)
         )
         {
         }
@@ -168,13 +158,13 @@ namespace ClassicUO.Game.UI.Controls
             }
 
             ResetHueVector();
-            ShaderHueTranslator.GetHueVector(ref _hueVector, Hue, IsPartialHue, Alpha, true);
+            ShaderHueTranslator.GetHueVector(ref HueVector, Hue, IsPartialHue, Alpha, true);
 
-            UOTexture32 texture = GumpsLoader.Instance.GetTexture(Graphic);
+            UOTexture texture = GumpsLoader.Instance.GetTexture(Graphic);
 
             if (texture != null)
             {
-                batcher.Draw2D(texture, x, y, Width, Height, ref _hueVector);
+                batcher.Draw2D(texture, x, y, Width, Height, ref HueVector);
             }
 
             return base.Draw(batcher, x, y);

@@ -65,22 +65,30 @@ namespace ClassicUO.Game.GameObjects
             drawX += 22;
             drawY += 22;
 
-            bool hasShadow = !IsDead && !IsHidden && ProfileManager.Current.ShadowsEnabled;
+            bool hasShadow = !IsDead && !IsHidden && ProfileManager.CurrentProfile.ShadowsEnabled;
 
             if (AuraManager.IsEnabled)
             {
-                AuraManager.Draw(batcher, drawX, drawY, ProfileManager.Current.PartyAura && World.Party.Contains(this) ? ProfileManager.Current.PartyAuraHue : Notoriety.GetHue(NotorietyFlag));
+                AuraManager.Draw
+                (
+                    batcher, drawX, drawY,
+                    ProfileManager.CurrentProfile.PartyAura && World.Party.Contains(this) ?
+                        ProfileManager.CurrentProfile.PartyAuraHue :
+                        Notoriety.GetHue(NotorietyFlag)
+                );
             }
 
             bool isHuman = IsHuman;
-            bool isGargoyle = Client.Version >= ClientVersion.CV_7000 && (Graphic == 666 || Graphic == 667 || Graphic == 0x02B7 || Graphic == 0x02B6);
+
+            bool isGargoyle = Client.Version >= ClientVersion.CV_7000 &&
+                              (Graphic == 666 || Graphic == 667 || Graphic == 0x02B7 || Graphic == 0x02B6);
 
             if (AlphaHue != 255)
             {
                 HueVector.Z = 1f - AlphaHue / 255f;
             }
 
-            if (ProfileManager.Current.HighlightGameObjects && SelectedObject.LastObject == this)
+            if (ProfileManager.CurrentProfile.HighlightGameObjects && SelectedObject.LastObject == this)
             {
                 _viewHue = Constants.HIGHLIGHT_CURRENT_OBJECT_HUE;
                 HueVector.Y = 1;
@@ -89,12 +97,12 @@ namespace ClassicUO.Game.GameObjects
             {
                 _viewHue = Notoriety.GetHue(NotorietyFlag);
             }
-            else if (ProfileManager.Current.NoColorObjectsOutOfRange && Distance > World.ClientViewRange)
+            else if (ProfileManager.CurrentProfile.NoColorObjectsOutOfRange && Distance > World.ClientViewRange)
             {
                 _viewHue = Constants.OUT_RANGE_COLOR;
                 HueVector.Y = 1;
             }
-            else if (World.Player.IsDead && ProfileManager.Current.EnableBlackWhiteEffect)
+            else if (World.Player.IsDead && ProfileManager.CurrentProfile.EnableBlackWhiteEffect)
             {
                 _viewHue = Constants.DEAD_RANGE_COLOR;
                 HueVector.Y = 1;
@@ -114,21 +122,21 @@ namespace ClassicUO.Game.GameObjects
                         _viewHue = 0x0386;
                     }
                 }
-                else if (ProfileManager.Current.HighlightMobilesByFlags)
+                else if (ProfileManager.CurrentProfile.HighlightMobilesByFlags)
                 {
                     if (IsPoisoned)
                     {
-                        _viewHue = ProfileManager.Current.PoisonHue;
+                        _viewHue = ProfileManager.CurrentProfile.PoisonHue;
                     }
 
                     if (IsParalyzed)
                     {
-                        _viewHue = ProfileManager.Current.ParalyzedHue;
+                        _viewHue = ProfileManager.CurrentProfile.ParalyzedHue;
                     }
 
                     if (NotorietyFlag != NotorietyFlag.Invulnerable && IsYellowHits)
                     {
-                        _viewHue = ProfileManager.Current.InvulnerableHue;
+                        _viewHue = ProfileManager.CurrentProfile.InvulnerableHue;
                     }
                 }
             }
@@ -136,20 +144,13 @@ namespace ClassicUO.Game.GameObjects
 
             bool isAttack = Serial == TargetManager.LastAttack;
             bool isUnderMouse = TargetManager.IsTargeting && SelectedObject.LastObject == this;
-            //bool needHpLine = false;
 
-            if (this != World.Player)
+            if (Serial != World.Player.Serial)
             {
                 if (isAttack || isUnderMouse)
                 {
                     _viewHue = Notoriety.GetHue(NotorietyFlag);
                 }
-
-                //if (this == TargetManager.LastTarget)
-                //{
-                //    UIManager.SetTargetLineGump(this);
-                //    //needHpLine = true;
-                //}
             }
 
 
@@ -177,16 +178,30 @@ namespace ClassicUO.Game.GameObjects
                 {
                     if (hasShadow)
                     {
-                        DrawInternal(batcher, this, null, drawX, drawY + 10, IsFlipped, animIndex, true, graphic, isHuman, alpha: HueVector.Z);
+                        DrawInternal
+                        (
+                            batcher, this, null, drawX, drawY + 10, IsFlipped, animIndex, true, graphic, isHuman,
+                            alpha: HueVector.Z
+                        );
+
                         AnimationsLoader.Instance.AnimGroup = GetGroupForAnimation(this, mountGraphic);
-                        DrawInternal(batcher, this, mount, drawX, drawY, IsFlipped, animIndex, true, mountGraphic, isHuman, alpha: HueVector.Z);
+
+                        DrawInternal
+                        (
+                            batcher, this, mount, drawX, drawY, IsFlipped, animIndex, true, mountGraphic, isHuman,
+                            alpha: HueVector.Z
+                        );
                     }
                     else
                     {
                         AnimationsLoader.Instance.AnimGroup = GetGroupForAnimation(this, mountGraphic);
                     }
 
-                    drawY += DrawInternal(batcher, this, mount, drawX, drawY, IsFlipped, animIndex, false, mountGraphic, isHuman, isMount: true, alpha: HueVector.Z);
+                    drawY += DrawInternal
+                    (
+                        batcher, this, mount, drawX, drawY, IsFlipped, animIndex, false, mountGraphic, isHuman,
+                        isMount: true, alpha: HueVector.Z
+                    );
                 }
             }
             else
@@ -224,14 +239,19 @@ namespace ClassicUO.Game.GameObjects
                 }
                 else if (hasShadow)
                 {
-                    DrawInternal(batcher, this, null, drawX, drawY, IsFlipped, animIndex, true, graphic, isHuman, alpha: HueVector.Z);
+                    DrawInternal
+                    (
+                        batcher, this, null, drawX, drawY, IsFlipped, animIndex, true, graphic, isHuman,
+                        alpha: HueVector.Z
+                    );
                 }
             }
 
             AnimationsLoader.Instance.AnimGroup = animGroup;
 
 
-            DrawInternal(batcher, this, null, drawX, drawY, IsFlipped, animIndex, false, graphic, isHuman, alpha: HueVector.Z);
+            DrawInternal
+                (batcher, this, null, drawX, drawY, IsFlipped, animIndex, false, graphic, isHuman, alpha: HueVector.Z);
 
             for (int i = 0; i < Constants.USED_LAYER_COUNT; i++)
             {
@@ -262,19 +282,64 @@ namespace ClassicUO.Game.GameObjects
 
                         if (isGargoyle)
                         {
-                            if (graphic == 469)
+                            switch (graphic)
                             {
                                 // gargoyle robe
-                                graphic = 342;
-                            }
-                            else if (graphic == 0x03CA)
-                            {
+                                case 0x01D5: 
+                                    graphic = 0x0156;
+
+                                    break;
+
                                 // gargoyle dead shroud
-                                graphic = 0x0223;
+                                case 0x03CA:
+                                    graphic = 0x0223;
+
+                                    break;
+
+                                // gargoyle spellbook
+                                case 0x03D8:
+                                    graphic = 329;
+
+                                    break;
+
+                                // gargoyle necrobook
+                                case 0x0372:
+                                    graphic = 330;
+
+                                    break;
+
+                                // gargoyle chivalry book
+                                case 0x0374:
+                                    graphic = 328;
+
+                                    break;
+
+                                // gargoyle bushido book
+                                case 0x036F: 
+                                    graphic = 327;
+
+                                    break;
+
+                                // gargoyle ninjitsu book
+                                case 0x036E:
+                                    graphic = 328;
+
+                                    break;
+
+                                // gargoyle masteries book
+                                case 0x0426:
+                                    graphic = 0x042B;
+
+                                    break;
+
+
+                                // gargoyle mysticism book seems ok. Mha!
                             }
                         }
 
-                        if (AnimationsLoader.Instance.EquipConversions.TryGetValue(Graphic, out Dictionary<ushort, EquipConvData> map))
+
+                        if (AnimationsLoader.Instance.EquipConversions.TryGetValue
+                            (Graphic, out Dictionary<ushort, EquipConvData> map))
                         {
                             if (map.TryGetValue(item.ItemData.AnimID, out EquipConvData data))
                             {
@@ -283,23 +348,33 @@ namespace ClassicUO.Game.GameObjects
                             }
                         }
 
-                        if (AnimationsLoader.Instance.SittingValue == 0 && IsGargoyle && item.ItemData.IsWeapon)
+                        // Seems like all Gargoyle equipment has the 'IsWeapon' flag
+                        if (AnimationsLoader.Instance.SittingValue == 0 && IsGargoyle /*&& item.ItemData.IsWeapon*/)
                         {
-                            AnimationsLoader.Instance.AnimGroup = GetGroupForAnimation(this, graphic);
-                            DrawInternal(batcher, this, item, drawX, drawY, IsFlipped, animIndex, false, graphic, isHuman, false, alpha: HueVector.Z);
+                            AnimationsLoader.Instance.AnimGroup = GetGroupForAnimation(this, graphic, true);
+
+                            DrawInternal
+                            (
+                                batcher, this, item, drawX, drawY, IsFlipped, animIndex, false, graphic, isHuman, true,
+                                alpha: HueVector.Z
+                            );
+
                             AnimationsLoader.Instance.AnimGroup = animGroup;
                         }
                         else
                         {
-                            DrawInternal(batcher, this, item, drawX, drawY, IsFlipped, animIndex, false, graphic, isHuman, false, alpha: HueVector.Z);
+                            DrawInternal
+                            (
+                                batcher, this, item, drawX, drawY, IsFlipped, animIndex, false, graphic, isHuman, false,
+                                alpha: HueVector.Z
+                            );
                         }
                     }
                     else
                     {
                         if (item.ItemData.IsLight)
                         {
-                            Client.Game.GetScene<GameScene>()
-                                  .AddLight(this, this, drawX, drawY);
+                            Client.Game.GetScene<GameScene>().AddLight(this, this, drawX, drawY);
                         }
                     }
 
@@ -309,8 +384,7 @@ namespace ClassicUO.Game.GameObjects
                 {
                     if (item.ItemData.IsLight)
                     {
-                        Client.Game.GetScene<GameScene>()
-                              .AddLight(this, this, drawX, drawY);
+                        Client.Game.GetScene<GameScene>().AddLight(this, this, drawX, drawY);
 
                         break;
                     }
@@ -362,7 +436,8 @@ namespace ClassicUO.Game.GameObjects
             ushort hueFromFile = _viewHue;
             byte animGroup = AnimationsLoader.Instance.AnimGroup;
 
-            AnimationDirection direction = AnimationsLoader.Instance.GetBodyAnimationGroup(ref id, ref animGroup, ref hueFromFile, isParent)
+            AnimationDirection direction = AnimationsLoader.Instance.GetBodyAnimationGroup
+                                                               (ref id, ref animGroup, ref hueFromFile, isParent)
                                                            .Direction[AnimationsLoader.Instance.Direction];
 
             AnimationsLoader.Instance.AnimID = id;
@@ -375,7 +450,8 @@ namespace ClassicUO.Game.GameObjects
                 }
             }
 
-            if (direction == null || (direction.FrameCount == 0 || direction.Frames == null) && !AnimationsLoader.Instance.LoadDirectionGroup(ref direction))
+            if (direction == null || (direction.FrameCount == 0 || direction.Frames == null) &&
+                !AnimationsLoader.Instance.LoadDirectionGroup(ref direction))
             {
                 if (!(_transform && entity == null && !hasShadow))
                 {
@@ -601,20 +677,24 @@ namespace ClassicUO.Game.GameObjects
                         }
                     }
 
-                    if (frame.Contains(mirror ? x + frame.Width - SelectedObject.TranslatedMousePositionByViewport.X : SelectedObject.TranslatedMousePositionByViewport.X - x, SelectedObject.TranslatedMousePositionByViewport.Y - y))
+                    if (frame.Contains
+                    (
+                        mirror ?
+                            x + frame.Width - SelectedObject.TranslatedMousePositionByViewport.X :
+                            SelectedObject.TranslatedMousePositionByViewport.X - x,
+                        SelectedObject.TranslatedMousePositionByViewport.Y - y
+                    ))
                     {
                         SelectedObject.Object = owner;
                     }
 
                     if (entity != null && entity.ItemData.IsLight)
                     {
-                        Client.Game.GetScene<GameScene>()
-                              .AddLight(owner, entity, mirror ? x + frame.Width : x, y);
+                        Client.Game.GetScene<GameScene>().AddLight(owner, entity, mirror ? x + frame.Width : x, y);
                     }
                 }
 
-                return AnimationsLoader.Instance.DataIndex[id]
-                                       .MountedHeightOffset;
+                return AnimationsLoader.Instance.DataIndex[id].MountedHeightOffset;
             }
 
             return 0;
@@ -633,7 +713,8 @@ namespace ClassicUO.Game.GameObjects
                     Item pants = mobile.FindItemByLayer(Layer.Pants);
                     Item robe;
 
-                    if (mobile.FindItemByLayer(Layer.Legs) != null || pants != null && (pants.Graphic == 0x1411 || pants.Graphic == 0x141A))
+                    if (mobile.FindItemByLayer(Layer.Legs) != null ||
+                        pants != null && (pants.Graphic == 0x1411 || pants.Graphic == 0x141A))
                     {
                         return true;
                     }
@@ -641,7 +722,8 @@ namespace ClassicUO.Game.GameObjects
                     {
                         robe = mobile.FindItemByLayer(Layer.Robe);
 
-                        if (pants != null && (pants.Graphic == 0x0513 || pants.Graphic == 0x0514) || robe != null && robe.Graphic == 0x0504)
+                        if (pants != null && (pants.Graphic == 0x0513 || pants.Graphic == 0x0514) ||
+                            robe != null && robe.Graphic == 0x0504)
                         {
                             return true;
                         }
@@ -659,7 +741,8 @@ namespace ClassicUO.Game.GameObjects
                         return true;
                     }
 
-                    if (pants != null && (pants.Graphic == 0x01EB || pants.Graphic == 0x03E5 || pants.Graphic == 0x03eB))
+                    if (pants != null &&
+                        (pants.Graphic == 0x01EB || pants.Graphic == 0x03E5 || pants.Graphic == 0x03eB))
                     {
                         skirt = mobile.FindItemByLayer(Layer.Skirt);
 
@@ -685,7 +768,8 @@ namespace ClassicUO.Game.GameObjects
                     else*/
                     if (tunic != null && tunic.Graphic == 0x0238)
                     {
-                        return robe != null && robe.Graphic != 0x9985 && robe.Graphic != 0x9986 && robe.Graphic != 0xA412;
+                        return robe != null && robe.Graphic != 0x9985 && robe.Graphic != 0x9986 &&
+                               robe.Graphic != 0xA412;
                     }
 
                     break;
@@ -693,7 +777,8 @@ namespace ClassicUO.Game.GameObjects
                 case Layer.Torso:
                     robe = mobile.FindItemByLayer(Layer.Robe);
 
-                    if (robe != null && robe.Graphic != 0 && robe.Graphic != 0x9985 && robe.Graphic != 0x9986 && robe.Graphic != 0xA412)
+                    if (robe != null && robe.Graphic != 0 && robe.Graphic != 0x9985 && robe.Graphic != 0x9986 &&
+                        robe.Graphic != 0xA412)
                     {
                         return true;
                     }
@@ -712,7 +797,8 @@ namespace ClassicUO.Game.GameObjects
                 case Layer.Arms:
                     robe = mobile.FindItemByLayer(Layer.Robe);
 
-                    return robe != null && robe.Graphic != 0 && robe.Graphic != 0x9985 && robe.Graphic != 0x9986 && robe.Graphic != 0xA412;
+                    return robe != null && robe.Graphic != 0 && robe.Graphic != 0x9985 && robe.Graphic != 0x9986 &&
+                           robe.Graphic != 0xA412;
 
                 case Layer.Helmet:
                 case Layer.Hair:
