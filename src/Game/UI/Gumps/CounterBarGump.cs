@@ -177,8 +177,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 if (ItemHold.Enabled && ItemHold.Graphic != 0)
                 {
-                    CounterItem item = new CounterItem(0, 0, 0, 0);
-                    item.SetGraphic(ItemHold.Graphic, ItemHold.Hue);
+                    CounterItem item = new CounterItem(ItemHold.Graphic, ItemHold.Hue);
                     _dataBox.Add(item);
                     GameActions.DropItem(ItemHold.Serial, ItemHold.X, ItemHold.Y, 0, ItemHold.Container);
 
@@ -247,8 +246,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                     if (graphic != 0)
                     {
-                        CounterItem c = new CounterItem(0, 0, 0, 0);
-                        c.SetGraphic(graphic, ushort.Parse(controlXml.GetAttribute("hue")));
+                        CounterItem c = new CounterItem(graphic, ushort.Parse(controlXml.GetAttribute("hue")));
                         _dataBox.Add(c);
                     }
                 }
@@ -268,25 +266,23 @@ namespace ClassicUO.Game.UI.Gumps
             private uint _time;
             private string _amountText = "0";
 
+            public CounterItem(ushort graphic, ushort hue) : this()
+            {
+                SetGraphic(graphic, hue);
+            }
 
-            public CounterItem(int x, int y, int w, int h)
+            public CounterItem()
             {
                 AcceptMouseInput = true;
                 WantUpdateSize = false;
                 CanMove = true;
                 CanCloseWithRightClick = false;
 
-                X = x;
-                Y = y;
-                Width = w;
-                Height = h;
 
                 _image = new TextureControl
                 {
                     ScaleTexture = true,
                     AcceptMouseInput = false,
-                    Width = w,
-                    Height = h
                 };
                 Add(_image);
 
