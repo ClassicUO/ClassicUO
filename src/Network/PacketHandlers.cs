@@ -2166,8 +2166,19 @@ namespace ClassicUO.Network
 
                     for (int line = 0; line < lineCnt; line++)
                     {
-                        gump.BookLines[pageNum * ModernBookGump.MAX_BOOK_LINES + line] =
-                            ModernBookGump.IsNewBook ? p.ReadUTF8StringSafe() : p.ReadASCII();
+                        int index = pageNum * ModernBookGump.MAX_BOOK_LINES + line;
+
+                        if (index < gump.BookLines.Length)
+                        {
+                            gump.BookLines[index] = ModernBookGump.IsNewBook ? p.ReadUTF8StringSafe() : p.ReadASCII();
+                        }
+                        else
+                        {
+                            Log.Error
+                            (
+                                "BOOKGUMP: The server is sending a page number GREATER than the allowed number of pages in BOOK!"
+                            );
+                        }
                     }
 
                     if (lineCnt < ModernBookGump.MAX_BOOK_LINES)
