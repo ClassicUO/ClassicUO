@@ -2,14 +2,16 @@ name: Build
 
 on:
   push:
-    branches: [ master, dev ]
+    branches: "*"
   pull_request:
-    branches: [ master, dev ]
+    branches: "*"
 
 jobs:
   build:
-
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+       runs-on: [ macos-latest, ubuntu-latest, ubuntu-latest ]
 
     steps:
     - uses: actions/checkout@v2
