@@ -1,27 +1,4 @@
-﻿#region license
-
-// Copyright (C) 2020 ClassicUO Development Community on Github
-// 
-// This project is an alternative client for the game Ultima Online.
-// The goal of this is to develop a lightweight client considering
-// new technologies.
-// 
-//  This program is free software: you can redistribute it and/or modify
-//  it under the terms of the GNU General Public License as published by
-//  the Free Software Foundation, either version 3 of the License, or
-//  (at your option) any later version.
-// 
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-// 
-//  You should have received a copy of the GNU General Public License
-//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
-#endregion
-
-using System;
+﻿using System;
 using ClassicUO.Configuration;
 using ClassicUO.Data;
 using ClassicUO.Game.Data;
@@ -44,40 +21,174 @@ namespace ClassicUO.Game
         public static int LastSkillIndex { get; set; } = 1;
 
 
-        public static void ChangeWarMode(byte status = 0xFF)
+        public static void ToggleWarMode()
         {
-            bool newStatus = !World.Player.InWarMode;
+            RequestWarMode(!World.Player.InWarMode);
+        }
 
-            if (status != 0xFF)
+        public static void RequestWarMode(bool war)
+        {
+            if (war && ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.EnableMusic)
             {
-                bool ok = status != 0;
-
-                if (World.Player.InWarMode == ok)
-                {
-                    return;
-                }
-
-                newStatus = ok;
+                Client.Game.Scene.Audio.PlayMusic((RandomHelper.GetValue(0, 3) % 3) + 38, true);
+            }
+            else if (!war)
+            {
+                Client.Game.Scene.Audio.StopWarMusic();
             }
 
-            //if (ProfileManager.Current != null && ProfileManager.Current.EnableCombatMusic)
-            {
-                if (newStatus && ProfileManager.Current != null && ProfileManager.Current.EnableMusic)
-                {
-                    Client.Game.Scene.Audio.PlayMusic(RandomHelper.GetValue(0, 3) % 3 + 38, true);
-                }
-                else if (!newStatus)
-                {
-                    Client.Game.Scene.Audio.StopWarMusic();
-                }
-            }
-
-            Socket.Send(new PChangeWarMode(newStatus));
+            Socket.Send(new PChangeWarMode(war));
         }
 
         public static void OpenPaperdoll(uint serial)
         {
-            DoubleClick(serial | 0x80000000);
+            PaperDollGump paperDollGump = UIManager.GetGump<PaperDollGump>(serial);
+
+            if(paperDollGump == null)
+            {
+                DoubleClick(serial | 0x80000000);
+            }
+            else
+            {
+                if (paperDollGump.IsMinimized)
+                {
+                    paperDollGump.IsMinimized = false;
+                }
+
+                paperDollGump.SetInScreen();
+                paperDollGump.BringOnTop();
+            }
+        }
+
+        public static void OpenSettings()
+        {
+            OptionsGump opt = UIManager.GetGump<OptionsGump>();
+
+            if (opt == null)
+            {
+                OptionsGump optionsGump = new OptionsGump
+                {
+                    X = (Client.Game.Window.ClientBounds.Width >> 1) - 300,
+                    Y = (Client.Game.Window.ClientBounds.Height >> 1) - 250
+                };
+
+                UIManager.Add(optionsGump);
+                optionsGump.SetInScreen();
+            }
+            else
+            {
+                opt.SetInScreen();
+                opt.BringOnTop();
+            }
+        }
+
+        public static void OpenStatusBar()
+        {
+            Client.Game.Scene.Audio.StopWarMusic();
+
+            if (StatusGumpBase.GetStatusGump() == null)
+            {
+                UIManager.Add(StatusGumpBase.AddStatusGump(100, 100));
+            }
+        }
+
+        public static void OpenJournal()
+        {
+            JournalGump journalGump = UIManager.GetGump<JournalGump>();
+
+            if (journalGump == null)
+            {
+                UIManager.Add(new JournalGump { X = 64, Y = 64 });
+            }
+            else
+            {
+                journalGump.SetInScreen();
+                journalGump.BringOnTop();
+
+                if (journalGump.IsMinimized)
+                {
+                    journalGump.IsMinimized = false;
+                }
+            }
+        }
+
+        public static void OpenSkills()
+        {
+            StandardSkillsGump skillsGump = UIManager.GetGump<StandardSkillsGump>();
+
+            if (skillsGump != null && skillsGump.IsMinimized)
+            {
+                skillsGump.IsMinimized = false;
+            }
+            else
+            {
+                World.SkillsRequested = true;
+                NetClient.Socket.Send(new PSkillsRequest(World.Player));
+            }
+        }
+
+        public static void OpenMiniMap()
+        {
+            MiniMapGump miniMapGump = UIManager.GetGump<MiniMapGump>();
+
+            if (miniMapGump == null)
+            {
+                UIManager.Add(new MiniMapGump());
+            }
+            else
+            {
+                miniMapGump.ToggleSize();
+                miniMapGump.SetInScreen();
+                miniMapGump.BringOnTop();
+            }
+        }
+
+        public static void OpenWorldMap()
+        {
+            WorldMapGump worldMap = UIManager.GetGump<WorldMapGump>();
+
+            if (worldMap == null || worldMap.IsDisposed)
+            {
+                worldMap = new WorldMapGump();
+                UIManager.Add(worldMap);
+            }
+            else
+            {
+                worldMap.BringOnTop();
+                worldMap.SetInScreen();
+            }
+        }
+
+        public static void OpenChat()
+        {
+            if (ChatManager.ChatIsEnabled == ChatStatus.Enabled)
+            {
+                ChatGump chatGump = UIManager.GetGump<ChatGump>();
+
+                if (chatGump == null)
+                {
+                    UIManager.Add(new ChatGump());
+                }
+                else
+                {
+                    chatGump.SetInScreen();
+                    chatGump.BringOnTop();
+                }
+            }
+            else if (ChatManager.ChatIsEnabled == ChatStatus.EnabledUserRequest)
+            {
+                ChatGumpChooseName chatGump = UIManager.GetGump<ChatGumpChooseName>();
+
+                if (chatGump == null)
+                {
+                    UIManager.Add(new ChatGumpChooseName());
+                }
+                else
+                {
+                    chatGump.SetInScreen();
+                    chatGump.BringOnTop();
+                }
+            }
         }
 
         public static bool OpenCorpse(uint serial)
@@ -100,18 +211,49 @@ namespace ClassicUO.Game
             return true;
         }
 
+        public static bool OpenBackpack()
+        {
+            Item backpack = World.Player.FindItemByLayer(Layer.Backpack);
+
+            if (backpack == null)
+            {
+                return false;
+            }
+
+            ContainerGump backpackGump = UIManager.GetGump<ContainerGump>(backpack);
+
+            if (backpackGump == null)
+            {
+                GameActions.DoubleClick(backpack);
+            }
+            else
+            {
+                if (backpackGump.IsMinimized)
+                {
+                    backpackGump.IsMinimized = false;
+                }
+
+                backpackGump.SetInScreen();
+                backpackGump.BringOnTop();
+            }
+
+            return true;
+        }
+
         public static void Attack(uint serial)
         {
-            if (ProfileManager.Current.EnabledCriminalActionQuery)
+            if (ProfileManager.CurrentProfile.EnabledCriminalActionQuery)
             {
                 Mobile m = World.Mobiles.Get(serial);
 
-                if (m != null && (World.Player.NotorietyFlag == NotorietyFlag.Innocent || World.Player.NotorietyFlag == NotorietyFlag.Ally) && m.NotorietyFlag == NotorietyFlag.Innocent && m != World.Player)
+                if (m != null &&
+                    (World.Player.NotorietyFlag == NotorietyFlag.Innocent ||
+                     World.Player.NotorietyFlag == NotorietyFlag.Ally) && m.NotorietyFlag == NotorietyFlag.Innocent &&
+                    m != World.Player)
                 {
                     QuestionGump messageBox = new QuestionGump
                     (
-                        ResGeneral.ThisMayFlagYouCriminal,
-                        s =>
+                        ResGeneral.ThisMayFlagYouCriminal, s =>
                         {
                             if (s)
                             {
@@ -132,8 +274,7 @@ namespace ClassicUO.Game
 
         public static void DoubleClickQueued(uint serial)
         {
-            Client.Game.GetScene<GameScene>()
-                  ?.DoubleClickDelayed(serial);
+            Client.Game.GetScene<GameScene>()?.DoubleClickDelayed(serial);
         }
 
         public static void DoubleClick(uint serial)
@@ -171,14 +312,16 @@ namespace ClassicUO.Game
             }
         }
 
-        public static void Say(string message, ushort hue = 0xFFFF, MessageType type = MessageType.Regular, byte font = 3)
+        public static void Say
+            (string message, ushort hue = 0xFFFF, MessageType type = MessageType.Regular, byte font = 3)
         {
             if (hue == 0xFFFF)
             {
-                hue = ProfileManager.Current.SpeechHue;
+                hue = ProfileManager.CurrentProfile.SpeechHue;
             }
 
-            if (Client.Version >= ClientVersion.CV_500A)
+            // TODO: identify what means 'older client' that uses ASCIISpeechRquest [0x03]
+            if (Client.Version >= ClientVersion.CV_300)
             {
                 Socket.Send(new PUnicodeSpeechRequest(message, type, font, hue, "ENU"));
             }
@@ -189,14 +332,33 @@ namespace ClassicUO.Game
         }
 
 
-        public static void Print(string message, ushort hue = 946, MessageType type = MessageType.Regular, byte font = 3, bool unicode = true)
+        public static void Print
+        (
+            string message,
+            ushort hue = 946,
+            MessageType type = MessageType.Regular,
+            byte font = 3,
+            bool unicode = true
+        )
         {
             Print(null, message, hue, type, font, unicode);
         }
 
-        public static void Print(Entity entity, string message, ushort hue = 946, MessageType type = MessageType.Regular, byte font = 3, bool unicode = true)
+        public static void Print
+        (
+            Entity entity,
+            string message,
+            ushort hue = 946,
+            MessageType type = MessageType.Regular,
+            byte font = 3,
+            bool unicode = true
+        )
         {
-            MessageManager.HandleMessage(entity, message, entity != null ? entity.Name : "System", hue, type, font, entity == null ? TEXT_TYPE.SYSTEM : TEXT_TYPE.OBJECT, unicode, "ENU");
+            MessageManager.HandleMessage
+            (
+                entity, message, entity != null ? entity.Name : "System", hue, type, font,
+                entity == null ? TextType.SYSTEM : TextType.OBJECT, unicode, "ENU"
+            );
         }
 
         public static void SayParty(string message, uint serial = 0)
@@ -208,8 +370,7 @@ namespace ClassicUO.Game
         {
             Socket.Send(new PPartyAccept(serial));
 
-            UIManager.GetGump<PartyInviteGump>()
-                     ?.Dispose();
+            UIManager.GetGump<PartyInviteGump>()?.Dispose();
         }
 
         public static void RequestPartyRemoveMember(uint serial)
@@ -232,7 +393,15 @@ namespace ClassicUO.Game
             Socket.Send(new PPartyChangeLootTypeRequest(isLootable));
         }
 
-        public static bool PickUp(uint serial, int x, int y, int amount = -1, Point? offset = null, bool is_gump = false)
+        public static bool PickUp
+        (
+            uint serial,
+            int x,
+            int y,
+            int amount = -1,
+            Point? offset = null,
+            bool is_gump = false
+        )
         {
             if (World.Player.IsDead || ItemHold.Enabled)
             {
@@ -241,14 +410,15 @@ namespace ClassicUO.Game
 
             Item item = World.Items.Get(serial);
 
-            if (item == null || item.IsDestroyed || item.IsMulti || item.OnGround && (item.IsLocked || item.Distance > Constants.DRAG_ITEMS_DISTANCE))
+            if (item == null || item.IsDestroyed || item.IsMulti ||
+                item.OnGround && (item.IsLocked || item.Distance > Constants.DRAG_ITEMS_DISTANCE))
             {
                 return false;
             }
 
             if (amount <= -1 && item.Amount > 1 && item.ItemData.IsStackable)
             {
-                if (ProfileManager.Current.HoldShiftToSplitStack == Keyboard.Shift)
+                if (ProfileManager.CurrentProfile.HoldShiftToSplitStack == Keyboard.Shift)
                 {
                     SplitMenuGump gump = UIManager.GetGump<SplitMenuGump>(item);
 
@@ -259,12 +429,12 @@ namespace ClassicUO.Game
 
                     gump = new SplitMenuGump(item, new Point(x, y))
                     {
-                        X = Mouse.LDropPosition.X - 80,
-                        Y = Mouse.LDropPosition.Y - 40
+                        X = Mouse.Position.X - 80,
+                        Y = Mouse.Position.Y - 40
                     };
 
                     UIManager.Add(gump);
-                    UIManager.AttemptDragControl(gump, Mouse.Position, true);
+                    UIManager.AttemptDragControl(gump, true);
 
                     return true;
                 }
@@ -295,7 +465,8 @@ namespace ClassicUO.Game
 
         public static void DropItem(uint serial, int x, int y, int z, uint container)
         {
-            if (ItemHold.Enabled && !ItemHold.IsFixedPosition && (ItemHold.Serial != container || ItemHold.ItemData.IsStackable))
+            if (ItemHold.Enabled && !ItemHold.IsFixedPosition &&
+                (ItemHold.Serial != container || ItemHold.ItemData.IsStackable))
             {
                 if (Client.Version >= ClientVersion.CV_6017)
                 {
@@ -327,7 +498,8 @@ namespace ClassicUO.Game
             }
         }
 
-        public static void ReplyGump(uint local, uint server, int button, uint[] switches = null, Tuple<ushort, string>[] entries = null)
+        public static void ReplyGump
+            (uint local, uint server, int button, uint[] switches = null, Tuple<ushort, string>[] entries = null)
         {
             Socket.Send(new PGumpResponse(local, server, button, switches, entries));
         }
@@ -408,7 +580,7 @@ namespace ClassicUO.Game
         {
             shift = shift || Keyboard.Shift;
 
-            if (ProfileManager.Current.HoldShiftForContext && !shift)
+            if (ProfileManager.CurrentProfile.HoldShiftForContext && !shift)
             {
                 return;
             }
@@ -538,15 +710,15 @@ namespace ClassicUO.Game
 
             if (bag == 0)
             {
-                bag = ProfileManager.Current.GrabBagSerial == 0
-                    ? backpack.Serial
-                    : ProfileManager.Current.GrabBagSerial;
+                bag = ProfileManager.CurrentProfile.GrabBagSerial == 0 ?
+                    backpack.Serial :
+                    ProfileManager.CurrentProfile.GrabBagSerial;
             }
 
             if (!World.Items.Contains(bag))
             {
                 Print(ResGeneral.GrabBagNotFound);
-                ProfileManager.Current.GrabBagSerial = 0;
+                ProfileManager.CurrentProfile.GrabBagSerial = 0;
                 bag = backpack.Serial;
             }
 

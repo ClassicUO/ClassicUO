@@ -1,27 +1,4 @@
-﻿#region license
-
-// Copyright (C) 2020 ClassicUO Development Community on Github
-// 
-// This project is an alternative client for the game Ultima Online.
-// The goal of this is to develop a lightweight client considering
-// new technologies.
-// 
-//  This program is free software: you can redistribute it and/or modify
-//  it under the terms of the GNU General Public License as published by
-//  the Free Software Foundation, either version 3 of the License, or
-//  (at your option) any later version.
-// 
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-// 
-//  You should have received a copy of the GNU General Public License
-//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
-#endregion
-
-using System.Text;
+﻿using System.Text;
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
@@ -49,7 +26,8 @@ namespace ClassicUO.Game.UI
 
         public bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
-            if (SerialHelper.IsValid(Serial) && World.OPL.TryGetRevision(Serial, out uint revision) && _hash != revision)
+            if (SerialHelper.IsValid(Serial) && World.OPL.TryGetRevision
+                (Serial, out uint revision) && _hash != revision)
             {
                 _hash = revision;
                 Text = ReadProperties(Serial, out _textHTML);
@@ -71,18 +49,18 @@ namespace ClassicUO.Game.UI
             ushort hue = 0xFFFF;
             float zoom = 1;
 
-            if (ProfileManager.Current != null)
+            if (ProfileManager.CurrentProfile != null)
             {
-                font = ProfileManager.Current.TooltipFont;
-                alpha = 1f - ProfileManager.Current.TooltipBackgroundOpacity / 100f;
+                font = ProfileManager.CurrentProfile.TooltipFont;
+                alpha = 1f - ProfileManager.CurrentProfile.TooltipBackgroundOpacity / 100f;
 
                 if (float.IsNaN(alpha))
                 {
                     alpha = 1f;
                 }
 
-                hue = ProfileManager.Current.TooltipTextHue;
-                zoom = ProfileManager.Current.TooltipDisplayZoom / 100f;
+                hue = ProfileManager.CurrentProfile.TooltipTextHue;
+                zoom = ProfileManager.CurrentProfile.TooltipDisplayZoom / 100f;
             }
 
             FontsLoader.Instance.SetUseHTML(true);
@@ -90,7 +68,11 @@ namespace ClassicUO.Game.UI
 
             if (_renderedText == null)
             {
-                _renderedText = RenderedText.Create(null, font: font, isunicode: true, style: FontStyle.BlackBorder, cell: 5, isHTML: true, align: TEXT_ALIGN_TYPE.TS_CENTER, recalculateWidthByInfo: true, hue: hue);
+                _renderedText = RenderedText.Create
+                (
+                    null, font: font, isunicode: true, style: FontStyle.BlackBorder, cell: 5, isHTML: true,
+                    align: TEXT_ALIGN_TYPE.TS_CENTER, recalculateWidthByInfo: true, hue: hue
+                );
             }
 
             if (_renderedText.Text != Text)
@@ -104,7 +86,8 @@ namespace ClassicUO.Game.UI
                         width = 600;
                     }
 
-                    width = FontsLoader.Instance.GetWidthExUnicode(font, Text, width, TEXT_ALIGN_TYPE.TS_CENTER, (ushort) FontStyle.BlackBorder);
+                    width = FontsLoader.Instance.GetWidthExUnicode
+                        (font, Text, width, TEXT_ALIGN_TYPE.TS_CENTER, (ushort) FontStyle.BlackBorder);
 
                     if (width > 600)
                     {
@@ -155,8 +138,15 @@ namespace ClassicUO.Game.UI
 
             Vector3 hue_vec = Vector3.Zero;
             ShaderHueTranslator.GetHueVector(ref hue_vec, 0, false, alpha);
-            batcher.Draw2D(Texture2DCache.GetTexture(Color.Black), x - 4, y - 2, z_width * zoom, z_height * zoom, ref hue_vec);
-            batcher.DrawRectangle(Texture2DCache.GetTexture(Color.Gray), x - 4, y - 2, (int) (z_width * zoom), (int) (z_height * zoom), ref hue_vec);
+
+            batcher.Draw2D
+                (SolidColorTextureCache.GetTexture(Color.Black), x - 4, y - 2, z_width * zoom, z_height * zoom, ref hue_vec);
+
+            batcher.DrawRectangle
+            (
+                SolidColorTextureCache.GetTexture(Color.Gray), x - 4, y - 2, (int) (z_width * zoom), (int) (z_height * zoom),
+                ref hue_vec
+            );
 
             hue_vec.X = 0;
             hue_vec.Y = 0;
@@ -164,9 +154,8 @@ namespace ClassicUO.Game.UI
 
             return batcher.Draw2D
             (
-                _renderedText.Texture,
-                x + 3, y + 3, z_width * zoom, z_height * zoom,
-                0, 0, z_width, z_height, ref hue_vec
+                _renderedText.Texture, x + 3, y + 3, z_width * zoom, z_height * zoom, 0, 0, z_width, z_height,
+                ref hue_vec
             );
         }
 
@@ -184,13 +173,18 @@ namespace ClassicUO.Game.UI
             {
                 uint revision2 = 0;
 
-                if (Serial == 0 || Serial != serial || World.OPL.TryGetRevision(Serial, out uint revision) && World.OPL.TryGetRevision(serial, out revision2) && revision != revision2)
+                if (Serial == 0 || Serial != serial || World.OPL.TryGetRevision
+                    (Serial, out uint revision) && World.OPL.TryGetRevision
+                    (serial, out revision2) && revision != revision2)
                 {
                     _maxWidth = 0;
                     Serial = serial;
                     _hash = revision2;
                     Text = ReadProperties(serial, out _textHTML);
-                    _lastHoverTime = (uint) (Time.Ticks + (ProfileManager.Current != null ? ProfileManager.Current.TooltipDelayBeforeDisplay : 250));
+
+                    _lastHoverTime = (uint) (Time.Ticks + (ProfileManager.CurrentProfile != null ?
+                        ProfileManager.CurrentProfile.TooltipDelayBeforeDisplay :
+                        250));
                 }
             }
         }
@@ -203,8 +197,7 @@ namespace ClassicUO.Game.UI
 
             bool hasStartColor = false;
 
-            if (SerialHelper.IsValid(serial) &&
-                World.OPL.TryGetNameAndData(serial, out string name, out string data))
+            if (SerialHelper.IsValid(serial) && World.OPL.TryGetNameAndData(serial, out string name, out string data))
             {
                 if (!string.IsNullOrEmpty(name))
                 {
@@ -251,7 +244,7 @@ namespace ClassicUO.Game.UI
 
         public void SetText(string text, int maxWidth = 0)
         {
-            if (ProfileManager.Current != null && !ProfileManager.Current.UseTooltip)
+            if (ProfileManager.CurrentProfile != null && !ProfileManager.CurrentProfile.UseTooltip)
             {
                 return;
             }
@@ -261,7 +254,10 @@ namespace ClassicUO.Game.UI
                 _maxWidth = maxWidth;
                 Serial = 0;
                 Text = _textHTML = text;
-                _lastHoverTime = (uint) (Time.Ticks + (ProfileManager.Current != null ? ProfileManager.Current.TooltipDelayBeforeDisplay : 250));
+
+                _lastHoverTime = (uint) (Time.Ticks + (ProfileManager.CurrentProfile != null ?
+                    ProfileManager.CurrentProfile.TooltipDelayBeforeDisplay :
+                    250));
             }
         }
     }

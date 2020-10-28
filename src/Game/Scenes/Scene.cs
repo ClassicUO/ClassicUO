@@ -1,28 +1,6 @@
-﻿#region license
-
-// Copyright (C) 2020 ClassicUO Development Community on Github
-// 
-// This project is an alternative client for the game Ultima Online.
-// The goal of this is to develop a lightweight client considering
-// new technologies.
-// 
-//  This program is free software: you can redistribute it and/or modify
-//  it under the terms of the GNU General Public License as published by
-//  the Free Software Foundation, either version 3 of the License, or
-//  (at your option) any later version.
-// 
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-// 
-//  You should have received a copy of the GNU General Public License
-//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
-#endregion
-
-using System;
+﻿using System;
 using ClassicUO.Game.Managers;
+using ClassicUO.Input;
 using ClassicUO.Interfaces;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
@@ -63,7 +41,7 @@ namespace ClassicUO.Game.Scenes
             Unload();
         }
 
-        public virtual void Update(double totalMS, double frameMS)
+        public virtual void Update(double totalTime, double frameTime)
         {
             Audio?.Update();
             Camera.Update();
@@ -73,7 +51,10 @@ namespace ClassicUO.Game.Scenes
                 ArtLoader.Instance.CleaUnusedResources(Constants.MAX_ART_OBJECT_REMOVED_BY_GARBAGE_COLLECTOR);
                 GumpsLoader.Instance.CleaUnusedResources(Constants.MAX_GUMP_OBJECT_REMOVED_BY_GARBAGE_COLLECTOR);
                 TexmapsLoader.Instance.CleaUnusedResources(Constants.MAX_ART_OBJECT_REMOVED_BY_GARBAGE_COLLECTOR);
-                AnimationsLoader.Instance.CleaUnusedResources(Constants.MAX_ANIMATIONS_OBJECT_REMOVED_BY_GARBAGE_COLLECTOR);
+
+                AnimationsLoader.Instance.CleaUnusedResources
+                    (Constants.MAX_ANIMATIONS_OBJECT_REMOVED_BY_GARBAGE_COLLECTOR);
+
                 World.Map?.ClearUnusedBlocks();
                 LightsLoader.Instance.CleaUnusedResources(20);
 
@@ -84,7 +65,7 @@ namespace ClassicUO.Game.Scenes
         public readonly bool CanResize, CanBeMaximized, CanLoadAudio;
         public readonly int ID;
 
-        public virtual void FixedUpdate(double totalMS, double frameMS)
+        public virtual void FixedUpdate(double totalTime, double frameTime)
         {
         }
 
@@ -110,71 +91,11 @@ namespace ClassicUO.Game.Scenes
             return true;
         }
 
-
-        internal virtual bool OnLeftMouseUp()
-        {
-            return false;
-        }
-
-        internal virtual bool OnLeftMouseDown()
-        {
-            return false;
-        }
-
-        internal virtual bool OnRightMouseUp()
-        {
-            return false;
-        }
-
-        internal virtual bool OnRightMouseDown()
-        {
-            return false;
-        }
-
-        internal virtual bool OnMiddleMouseUp()
-        {
-            return false;
-        }
-
-        internal virtual bool OnMiddleMouseDown()
-        {
-            return false;
-        }
-
-        internal virtual bool OnExtraMouseUp(int button)
-        {
-            return false;
-        }
-
-        internal virtual bool OnExtraMouseDown(int button)
-        {
-            return false;
-        }
-
-        internal virtual bool OnLeftMouseDoubleClick()
-        {
-            return false;
-        }
-
-        internal virtual bool OnRightMouseDoubleClick()
-        {
-            return false;
-        }
-
-        internal virtual bool OnMiddleMouseDoubleClick()
-        {
-            return false;
-        }
-
-        internal virtual bool OnMouseWheel(bool up)
-        {
-            return false;
-        }
-
-        internal virtual bool OnMouseDragging()
-        {
-            return false;
-        }
+        internal virtual bool OnMouseUp(MouseButtonType button) => false;
+        internal virtual bool OnMouseDown(MouseButtonType button) => false;
+        internal virtual bool OnMouseDoubleClick(MouseButtonType button) => false;
+        internal virtual bool OnMouseWheel(bool up) => false;
+        internal virtual bool OnMouseDragging() => false;
 
         internal virtual void OnTextInput(string text)
         {

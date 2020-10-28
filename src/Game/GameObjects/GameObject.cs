@@ -1,26 +1,3 @@
-#region license
-
-// Copyright (C) 2020 ClassicUO Development Community on Github
-// 
-// This project is an alternative client for the game Ultima Online.
-// The goal of this is to develop a lightweight client considering
-// new technologies.
-// 
-//  This program is free software: you can redistribute it and/or modify
-//  it under the terms of the GNU General Public License as published by
-//  the Free Software Foundation, either version 3 of the License, or
-//  (at your option) any later version.
-// 
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-// 
-//  You should have received a copy of the GNU General Public License
-//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
-#endregion
-
 using System;
 using System.Runtime.CompilerServices;
 using ClassicUO.Configuration;
@@ -77,7 +54,7 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
-        public virtual void Update(double totalMS, double frameMS)
+        public virtual void Update(double totalTime, double frameTime)
         {
         }
 
@@ -104,8 +81,7 @@ namespace ClassicUO.Game.GameObjects
 
                 if (!IsDestroyed)
                 {
-                    World.Map.GetChunk(x, y)
-                         ?.AddGameObject(this, x % 8, y % 8);
+                    World.Map.GetChunk(x, y)?.AddGameObject(this, x % 8, y % 8);
                 }
             }
         }
@@ -158,9 +134,10 @@ namespace ClassicUO.Game.GameObjects
         }
 
 
-        public void AddMessage(MessageType type, string message, TEXT_TYPE text_type)
+        public void AddMessage(MessageType type, string message, TextType text_type)
         {
-            AddMessage(type, message, ProfileManager.Current.ChatFont, ProfileManager.Current.SpeechHue, true, text_type);
+            AddMessage
+                (type, message, ProfileManager.CurrentProfile.ChatFont, ProfileManager.CurrentProfile.SpeechHue, true, text_type);
         }
 
         public virtual void UpdateTextCoordsV()
@@ -228,13 +205,14 @@ namespace ClassicUO.Game.GameObjects
             int offsetY = 0;
 
             int minX = 6;
-            int maxX = minX + ProfileManager.Current.GameWindowSize.X - 6;
+            int maxX = minX + ProfileManager.CurrentProfile.GameWindowSize.X - 6;
             int minY = 0;
-            //int maxY = minY + ProfileManager.Current.GameWindowSize.Y - 6;
+            //int maxY = minY + ProfileManager.CurrentProfile.GameWindowSize.Y - 6;
 
             for (TextObject item = (TextObject) TextContainer.Items; item != null; item = (TextObject) item.Next)
             {
-                if (item.RenderedText == null || item.RenderedText.IsDestroyed || item.RenderedText.Texture == null || item.Time < Time.Ticks)
+                if (item.RenderedText == null || item.RenderedText.IsDestroyed || item.RenderedText.Texture == null ||
+                    item.Time < Time.Ticks)
                 {
                     continue;
                 }
@@ -272,7 +250,15 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
-        public void AddMessage(MessageType type, string text, byte font, ushort hue, bool isunicode, TEXT_TYPE text_type)
+        public void AddMessage
+        (
+            MessageType type,
+            string text,
+            byte font,
+            ushort hue,
+            bool isunicode,
+            TextType text_type
+        )
         {
             if (string.IsNullOrEmpty(text))
             {

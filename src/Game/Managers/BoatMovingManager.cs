@@ -16,7 +16,8 @@ namespace ClassicUO.Game.Managers
 
         private static readonly Dictionary<uint, Deque<BoatStep>> _steps = new Dictionary<uint, Deque<BoatStep>>();
         private static readonly List<uint> _toRemove = new List<uint>();
-        private static readonly Dictionary<uint, RawList<ItemInside>> _items = new Dictionary<uint, RawList<ItemInside>>();
+        private static readonly Dictionary<uint, RawList<ItemInside>> _items =
+            new Dictionary<uint, RawList<ItemInside>>();
 
         private static uint _timePacket;
 
@@ -25,15 +26,12 @@ namespace ClassicUO.Game.Managers
         {
             switch (speed)
             {
-                case 0x02:
-                    return SLOW_INTERVAL;
+                case 0x02: return SLOW_INTERVAL;
 
                 default:
-                case 0x03:
-                    return NORMAL_INTERVAL;
+                case 0x03: return NORMAL_INTERVAL;
 
-                case 0x04:
-                    return FAST_INTERVAL;
+                case 0x04: return FAST_INTERVAL;
             }
         }
 
@@ -44,7 +42,16 @@ namespace ClassicUO.Game.Managers
         }
 
 
-        public static void AddStep(uint serial, byte speed, Direction movingDir, Direction facingDir, ushort x, ushort y, sbyte z)
+        public static void AddStep
+        (
+            uint serial,
+            byte speed,
+            Direction movingDir,
+            Direction facingDir,
+            ushort x,
+            ushort y,
+            sbyte z
+        )
         {
             Item item = World.Items.Get(serial);
 
@@ -271,8 +278,7 @@ namespace ClassicUO.Game.Managers
                     {
                         if (house != null)
                         {
-                            bool preview = step.MovingDir != Direction.West &&
-                                           step.MovingDir != Direction.Up &&
+                            bool preview = step.MovingDir != Direction.West && step.MovingDir != Direction.Up &&
                                            step.MovingDir != Direction.North;
                             //preview = false;
 
@@ -310,7 +316,15 @@ namespace ClassicUO.Game.Managers
             }
         }
 
-        private static void UpdateEntitiesInside(uint serial, bool removeStep, int x, int y, int z, Direction direction)
+        private static void UpdateEntitiesInside
+        (
+            uint serial,
+            bool removeStep,
+            int x,
+            int y,
+            int z,
+            Direction direction
+        )
         {
             if (_items.TryGetValue(serial, out RawList<ItemInside> list))
             {
@@ -359,7 +373,15 @@ namespace ClassicUO.Game.Managers
             }
         }
 
-        private static void GetEndPosition(Item item, Deque<BoatStep> deque, out ushort x, out ushort y, out sbyte z, out Direction dir)
+        private static void GetEndPosition
+        (
+            Item item,
+            Deque<BoatStep> deque,
+            out ushort x,
+            out ushort y,
+            out sbyte z,
+            out Direction dir
+        )
         {
             if (deque.Count == 0)
             {

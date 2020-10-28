@@ -1,27 +1,4 @@
-﻿#region license
-
-// Copyright (C) 2020 ClassicUO Development Community on Github
-// 
-// This project is an alternative client for the game Ultima Online.
-// The goal of this is to develop a lightweight client considering
-// new technologies.
-// 
-//  This program is free software: you can redistribute it and/or modify
-//  it under the terms of the GNU General Public License as published by
-//  the Free Software Foundation, either version 3 of the License, or
-//  (at your option) any later version.
-// 
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-// 
-//  You should have received a copy of the GNU General Public License
-//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
-#endregion
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
@@ -40,11 +17,11 @@ namespace ClassicUO.Game.Managers
         {
             infoBarItems = new List<InfoBarItem>();
 
-            if (ProfileManager.Current.InfoBarItems != null)
+            if (ProfileManager.CurrentProfile.InfoBarItems != null)
             {
-                infoBarItems.AddRange(ProfileManager.Current.InfoBarItems);
+                infoBarItems.AddRange(ProfileManager.CurrentProfile.InfoBarItems);
 
-                ProfileManager.Current.InfoBarItems = null;
+                ProfileManager.CurrentProfile.InfoBarItems = null;
                 Save();
             }
         }
@@ -81,7 +58,7 @@ namespace ClassicUO.Game.Managers
 
         public void Save()
         {
-            string path = Path.Combine(CUOEnviroment.ExecutablePath, "Data", "Profiles", ProfileManager.Current.Username, ProfileManager.Current.ServerName, ProfileManager.Current.CharacterName, "infobar.xml");
+            string path = Path.Combine(ProfileManager.ProfilePath, "infobar.xml");
 
             using (XmlTextWriter xml = new XmlTextWriter(path, Encoding.UTF8)
             {
@@ -105,7 +82,7 @@ namespace ClassicUO.Game.Managers
 
         public void Load()
         {
-            string path = Path.Combine(CUOEnviroment.ExecutablePath, "Data", "Profiles", ProfileManager.Current.Username, ProfileManager.Current.ServerName, ProfileManager.Current.CharacterName, "infobar.xml");
+            string path = Path.Combine(ProfileManager.ProfilePath, "infobar.xml");
 
             if (!File.Exists(path))
             {

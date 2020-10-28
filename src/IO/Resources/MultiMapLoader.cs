@@ -1,27 +1,4 @@
-﻿#region license
-
-// Copyright (C) 2020 ClassicUO Development Community on Github
-// 
-// This project is an alternative client for the game Ultima Online.
-// The goal of this is to develop a lightweight client considering
-// new technologies.
-// 
-//  This program is free software: you can redistribute it and/or modify
-//  it under the terms of the GNU General Public License as published by
-//  the Free Software Foundation, either version 3 of the License, or
-//  (at your option) any later version.
-// 
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-// 
-//  You should have received a copy of the GNU General Public License
-//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
-#endregion
-
-using System;
+﻿using System;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
@@ -75,7 +52,15 @@ namespace ClassicUO.IO.Resources
             );
         }
 
-        public unsafe UOTexture32 LoadMap(int width, int height, int startx, int starty, int endx, int endy)
+        public unsafe UOTexture LoadMap
+        (
+            int width,
+            int height,
+            int startx,
+            int starty,
+            int endx,
+            int endy
+        )
         {
             if (_file == null || _file.Length == 0)
             {
@@ -201,7 +186,7 @@ namespace ClassicUO.IO.Resources
 
                 Marshal.FreeHGlobal(ptr);
 
-                UOTexture32 texture = new UOTexture32(width, height);
+                UOTexture texture = new UOTexture(width, height);
                 texture.PushData(worldMap);
 
                 return texture;
@@ -210,21 +195,27 @@ namespace ClassicUO.IO.Resources
             return null;
         }
 
-        public UOTexture32 LoadFacet(int facet, int width, int height, int startx, int starty, int endx, int endy)
+        public UOTexture LoadFacet
+        (
+            int facet,
+            int width,
+            int height,
+            int startx,
+            int starty,
+            int endx,
+            int endy
+        )
         {
             if (_file == null || facet < 0 || facet > Constants.MAPS_COUNT || _facets[facet] == null)
             {
                 return null;
             }
 
-            _facets[facet]
-                .Seek(0);
+            _facets[facet].Seek(0);
 
-            int w = _facets[facet]
-                .ReadShort();
+            int w = _facets[facet].ReadShort();
 
-            int h = _facets[facet]
-                .ReadShort();
+            int h = _facets[facet].ReadShort();
 
             if (w < 1 || h < 1)
             {
@@ -246,19 +237,13 @@ namespace ClassicUO.IO.Resources
             {
                 int x = 0;
 
-                int colorCount = _facets[facet]
-                    .ReadInt() / 3;
+                int colorCount = _facets[facet].ReadInt() / 3;
 
                 for (int i = 0; i < colorCount; i++)
                 {
-                    int size = _facets[facet]
-                        .ReadByte();
+                    int size = _facets[facet].ReadByte();
 
-                    uint color = HuesHelper.Color16To32
-                    (
-                        _facets[facet]
-                            .ReadUShort()
-                    ) | 0xFF_00_00_00;
+                    uint color = HuesHelper.Color16To32(_facets[facet].ReadUShort()) | 0xFF_00_00_00;
 
                     for (int j = 0; j < size; j++)
                     {
@@ -272,7 +257,7 @@ namespace ClassicUO.IO.Resources
                 }
             }
 
-            UOTexture32 texture = new UOTexture32(pwidth, pheight);
+            UOTexture texture = new UOTexture(pwidth, pheight);
             texture.PushData(map);
 
             return texture;

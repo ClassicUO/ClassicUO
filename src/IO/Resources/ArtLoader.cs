@@ -1,27 +1,4 @@
-﻿#region license
-
-// Copyright (C) 2020 ClassicUO Development Community on Github
-// 
-// This project is an alternative client for the game Ultima Online.
-// The goal of this is to develop a lightweight client considering
-// new technologies.
-// 
-//  This program is free software: you can redistribute it and/or modify
-//  it under the terms of the GNU General Public License as published by
-//  the Free Software Foundation, either version 3 of the License, or
-//  (at your option) any later version.
-// 
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-// 
-//  You should have received a copy of the GNU General Public License
-//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
-#endregion
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
@@ -39,16 +16,17 @@ namespace ClassicUO.IO.Resources
         private static ArtLoader _instance;
         private UOFile _file;
         private readonly ushort _graphicMask;
-        private readonly UOTexture32[] _landResources;
+        private readonly UOTexture[] _landResources;
         private readonly LinkedList<uint> _usedLandTextureIds = new LinkedList<uint>();
 
         private ArtLoader(int staticCount, int landCount) : base(staticCount)
         {
             _graphicMask = Client.IsUOPInstallation ? (ushort) 0xFFFF : (ushort) 0x3FFF;
-            _landResources = new UOTexture32[landCount];
+            _landResources = new UOTexture[landCount];
         }
 
-        public static ArtLoader Instance => _instance ?? (_instance = new ArtLoader(Constants.MAX_STATIC_DATA_INDEX_COUNT, Constants.MAX_LAND_DATA_INDEX_COUNT));
+        public static ArtLoader Instance => _instance ?? (_instance = new ArtLoader
+            (Constants.MAX_STATIC_DATA_INDEX_COUNT, Constants.MAX_LAND_DATA_INDEX_COUNT));
 
 
         public override Task Load()
@@ -106,14 +84,14 @@ namespace ClassicUO.IO.Resources
             return texture;
         }
 
-        public UOTexture32 GetLandTexture(uint g)
+        public UOTexture GetLandTexture(uint g)
         {
             if (g >= _landResources.Length)
             {
                 return null;
             }
 
-            ref UOTexture32 texture = ref _landResources[g];
+            ref UOTexture texture = ref _landResources[g];
 
             if (texture == null || texture.IsDisposed)
             {
@@ -163,7 +141,7 @@ namespace ClassicUO.IO.Resources
 
                 if (idx < _landResources.Length)
                 {
-                    ref UOTexture32 texture = ref _landResources[idx];
+                    ref UOTexture texture = ref _landResources[idx];
                     texture?.Dispose();
                     texture = null;
                 }
@@ -262,7 +240,8 @@ namespace ClassicUO.IO.Resources
                     pixels[i * width + width - 1] = 0;
                 }
             }
-            else if (StaticFilters.IsCave(graphic) && ProfileManager.Current != null && ProfileManager.Current.EnableCaveBorder)
+            else if (StaticFilters.IsCave
+                (graphic) && ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.EnableCaveBorder)
             {
                 for (int yy = 0; yy < height; yy++)
                 {
@@ -342,7 +321,7 @@ namespace ClassicUO.IO.Resources
             }
         }
 
-        private unsafe void ReadLandArt(ref UOTexture32 texture, ushort graphic)
+        private unsafe void ReadLandArt(ref UOTexture texture, ushort graphic)
         {
             const int SIZE = 44 * 44;
 
@@ -383,7 +362,7 @@ namespace ClassicUO.IO.Resources
                 }
             }
 
-            texture = new UOTexture32(44, 44);
+            texture = new UOTexture(44, 44);
             // we don't need to store the data[] pointer because
             // land is always hoverable
             texture.SetDataPointerEXT(0, null, (IntPtr) data, SIZE * sizeof(uint));

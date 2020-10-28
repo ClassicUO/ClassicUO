@@ -1,27 +1,4 @@
-﻿#region license
-
-// Copyright (C) 2020 ClassicUO Development Community on Github
-// 
-// This project is an alternative client for the game Ultima Online.
-// The goal of this is to develop a lightweight client considering
-// new technologies.
-// 
-//  This program is free software: you can redistribute it and/or modify
-//  it under the terms of the GNU General Public License as published by
-//  the Free Software Foundation, either version 3 of the License, or
-//  (at your option) any later version.
-// 
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-// 
-//  You should have received a copy of the GNU General Public License
-//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
-#endregion
-
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Network;
@@ -103,7 +80,17 @@ namespace ClassicUO.Game.Managers
             }
         }
 
-        public void AddOrUpdate(uint serial, int x, int y, int hp, int map, bool isguild, string name = null, bool from_packet = false)
+        public void AddOrUpdate
+        (
+            uint serial,
+            int x,
+            int y,
+            int hp,
+            int map,
+            bool isguild,
+            string name = null,
+            bool from_packet = false
+        )
         {
             if (from_packet)
             {
@@ -118,6 +105,16 @@ namespace ClassicUO.Game.Managers
             if (!Enabled)
             {
                 return;
+            }
+
+            if (string.IsNullOrEmpty(name))
+            {
+                Entity ent = World.Get(serial);
+
+                if (ent != null && !string.IsNullOrEmpty(ent.Name))
+                {
+                    name = ent.Name;
+                }
             }
 
             if (!Entities.TryGetValue(serial, out WMapEntity entity) || entity == null)
@@ -141,7 +138,7 @@ namespace ClassicUO.Game.Managers
                 entity.IsGuild = isguild;
                 entity.LastUpdate = Time.Ticks + 1000;
 
-                if (name != null)
+                if (string.IsNullOrEmpty(entity.Name) && !string.IsNullOrEmpty(name))
                 {
                     entity.Name = name;
                 }

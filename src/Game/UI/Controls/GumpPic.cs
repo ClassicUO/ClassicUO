@@ -1,27 +1,4 @@
-﻿#region license
-
-// Copyright (C) 2020 ClassicUO Development Community on Github
-// 
-// This project is an alternative client for the game Ultima Online.
-// The goal of this is to develop a lightweight client considering
-// new technologies.
-// 
-//  This program is free software: you can redistribute it and/or modify
-//  it under the terms of the GNU General Public License as published by
-//  the Free Software Foundation, either version 3 of the License, or
-//  (at your option) any later version.
-// 
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-// 
-//  You should have received a copy of the GNU General Public License
-//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
-#endregion
-
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using ClassicUO.Input;
 using ClassicUO.IO.Resources;
 using ClassicUO.Network;
@@ -49,7 +26,7 @@ namespace ClassicUO.Game.UI.Controls
                 {
                     _graphic = value;
 
-                    UOTexture32 texture = GumpsLoader.Instance.GetTexture(_graphic);
+                    UOTexture texture = GumpsLoader.Instance.GetTexture(_graphic);
 
                     if (texture == null)
                     {
@@ -69,14 +46,14 @@ namespace ClassicUO.Game.UI.Controls
 
         public override bool Contains(int x, int y)
         {
-            UOTexture32 texture = GumpsLoader.Instance.GetTexture(Graphic);
+            UOTexture texture = GumpsLoader.Instance.GetTexture(Graphic);
 
             if (texture == null)
             {
                 return false;
             }
 
-            if (texture.Contains(x, y))
+            if (texture.Contains(x - Offset.X, y - Offset.Y))
             {
                 return true;
             }
@@ -109,20 +86,10 @@ namespace ClassicUO.Game.UI.Controls
 
         public GumpPic(List<string> parts) : this
         (
-            int.Parse(parts[1]), int.Parse(parts[2]), UInt16Converter.Parse(parts[3]), (ushort) (parts.Count > 4
-                ? TransformHue
-                (
-                    (ushort) (UInt16Converter.Parse
-                    (
-                        parts[4]
-                            .Substring
-                            (
-                                parts[4]
-                                    .IndexOf('=') + 1
-                            )
-                    ) + 1)
-                )
-                : 0)
+            int.Parse(parts[1]), int.Parse(parts[2]), UInt16Converter.Parse(parts[3]),
+            (ushort) (parts.Count > 4 ?
+                TransformHue((ushort) (UInt16Converter.Parse(parts[4].Substring(parts[4].IndexOf('=') + 1)) + 1)) :
+                0)
         )
         {
         }
@@ -168,13 +135,13 @@ namespace ClassicUO.Game.UI.Controls
             }
 
             ResetHueVector();
-            ShaderHueTranslator.GetHueVector(ref _hueVector, Hue, IsPartialHue, Alpha, true);
+            ShaderHueTranslator.GetHueVector(ref HueVector, Hue, IsPartialHue, Alpha, true);
 
-            UOTexture32 texture = GumpsLoader.Instance.GetTexture(Graphic);
+            UOTexture texture = GumpsLoader.Instance.GetTexture(Graphic);
 
             if (texture != null)
             {
-                batcher.Draw2D(texture, x, y, Width, Height, ref _hueVector);
+                batcher.Draw2D(texture, x, y, Width, Height, ref HueVector);
             }
 
             return base.Draw(batcher, x, y);

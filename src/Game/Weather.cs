@@ -1,27 +1,4 @@
-﻿#region license
-
-// Copyright (C) 2020 ClassicUO Development Community on Github
-// 
-// This project is an alternative client for the game Ultima Online.
-// The goal of this is to develop a lightweight client considering
-// new technologies.
-// 
-//  This program is free software: you can redistribute it and/or modify
-//  it under the terms of the GNU General Public License as published by
-//  the Free Software Foundation, either version 3 of the License, or
-//  (at your option) any later version.
-// 
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-// 
-//  You should have received a copy of the GNU General Public License
-//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
-#endregion
-
-using System;
+﻿using System;
 using ClassicUO.Configuration;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
@@ -78,8 +55,8 @@ namespace ClassicUO.Game
             while (CurrentCount < Count)
             {
                 ref WeatherEffect effect = ref _effects[CurrentCount++];
-                effect.X = RandomHelper.GetValue(0, ProfileManager.Current.GameWindowSize.X);
-                effect.Y = RandomHelper.GetValue(0, ProfileManager.Current.GameWindowSize.Y);
+                effect.X = RandomHelper.GetValue(0, ProfileManager.CurrentProfile.GameWindowSize.X);
+                effect.Y = RandomHelper.GetValue(0, ProfileManager.CurrentProfile.GameWindowSize.Y);
             }
         }
 
@@ -158,15 +135,14 @@ namespace ClassicUO.Game
             //        break;
             //}
 
-            //Point winpos = ProfileManager.Current.GameWindowPosition;
-            Point winsize = ProfileManager.Current.GameWindowSize;
+            //Point winpos = ProfileManager.CurrentProfile.GameWindowPosition;
+            Point winsize = ProfileManager.CurrentProfile.GameWindowSize;
 
             for (int i = 0; i < CurrentCount; i++)
             {
                 ref WeatherEffect effect = ref _effects[i];
 
-                if (effect.X < x || effect.X > x + winsize.X ||
-                    effect.Y < y || effect.Y > y + winsize.Y)
+                if (effect.X < x || effect.X > x + winsize.X || effect.Y < y || effect.Y > y + winsize.Y)
                 {
                     if (removeEffects)
                     {
@@ -220,8 +196,8 @@ namespace ClassicUO.Game
                         {
                             effect.SpeedAngle = MathHelper.ToDegrees((float) Math.Atan2(effect.SpeedX, effect.SpeedY));
 
-                            effect.SpeedMagnitude =
-                                (float) Math.Sqrt(Math.Pow(effect.SpeedX, 2) + Math.Pow(effect.SpeedY, 2));
+                            effect.SpeedMagnitude = (float) Math.Sqrt
+                                (Math.Pow(effect.SpeedX, 2) + Math.Pow(effect.SpeedY, 2));
                         }
 
                         float speed_angle = effect.SpeedAngle;
@@ -279,7 +255,11 @@ namespace ClassicUO.Game
                         int endX = x + (int) effect.X;
                         int endY = y + (int) effect.Y;
 
-                        batcher.DrawLine(Texture2DCache.GetTexture(Color.Gray), startX, startY, endX, endY, startX + (endX - startX) / 2, startY + (endY - startY) / 2);
+                        batcher.DrawLine
+                        (
+                            SolidColorTextureCache.GetTexture(Color.Gray), startX, startY, endX, endY,
+                            startX + (endX - startX) / 2, startY + (endY - startY) / 2
+                        );
 
                         break;
 
@@ -291,8 +271,8 @@ namespace ClassicUO.Game
 
                         batcher.Draw2D
                         (
-                            Texture2DCache.GetTexture(Color.White),
-                            x + (int) effect.X, y + (int) effect.Y, 2, 2, ref _hueVector
+                            SolidColorTextureCache.GetTexture(Color.White), x + (int) effect.X, y + (int) effect.Y, 2, 2,
+                            ref _hueVector
                         );
 
                         break;

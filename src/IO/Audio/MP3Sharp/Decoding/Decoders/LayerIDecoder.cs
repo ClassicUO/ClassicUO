@@ -1,26 +1,3 @@
-#region license
-
-// Copyright (C) 2020 ClassicUO Development Community on Github
-// 
-// This project is an alternative client for the game Ultima Online.
-// The goal of this is to develop a lightweight client considering
-// new technologies.
-// 
-//  This program is free software: you can redistribute it and/or modify
-//  it under the terms of the GNU General Public License as published by
-//  the Free Software Foundation, either version 3 of the License, or
-//  (at your option) any later version.
-// 
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-// 
-//  You should have received a copy of the GNU General Public License
-//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
-#endregion
-
 using ClassicUO.IO.Audio.MP3Sharp.Decoding.Decoders.LayerI;
 
 namespace ClassicUO.IO.Audio.MP3Sharp.Decoding.Decoders
@@ -68,8 +45,12 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding.Decoders
 
         public virtual void Create
         (
-            Bitstream stream0, Header header0, SynthesisFilter filtera, SynthesisFilter filterb,
-            ABuffer buffer0, int whichCh0
+            Bitstream stream0,
+            Header header0,
+            SynthesisFilter filtera,
+            SynthesisFilter filterb,
+            ABuffer buffer0,
+            int whichCh0
         )
         {
             stream = stream0;
@@ -117,8 +98,7 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding.Decoders
             // start to read audio data:
             for (int i = 0; i < num_subbands; ++i)
             {
-                subbands[i]
-                    .read_allocation(stream, header, crc);
+                subbands[i].read_allocation(stream, header, crc);
             }
         }
 
@@ -131,8 +111,7 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding.Decoders
         {
             for (int i = 0; i < num_subbands; ++i)
             {
-                subbands[i]
-                    .read_scalefactor(stream, header);
+                subbands[i].read_scalefactor(stream, header);
             }
         }
 
@@ -148,16 +127,14 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding.Decoders
 
                 for (i = 0; i < num_subbands; ++i)
                 {
-                    readReady = subbands[i]
-                        .read_sampledata(stream);
+                    readReady = subbands[i].read_sampledata(stream);
                 }
 
                 do
                 {
                     for (i = 0; i < num_subbands; ++i)
                     {
-                        writeReady = subbands[i]
-                            .put_next_sample(which_channels, filter1, filter2);
+                        writeReady = subbands[i].put_next_sample(which_channels, filter1, filter2);
                     }
 
                     filter1.calculate_pcm_samples(buffer);

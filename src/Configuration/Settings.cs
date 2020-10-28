@@ -1,27 +1,4 @@
-﻿#region license
-
-// Copyright (C) 2020 ClassicUO Development Community on Github
-// 
-// This project is an alternative client for the game Ultima Online.
-// The goal of this is to develop a lightweight client considering
-// new technologies.
-// 
-//  This program is free software: you can redistribute it and/or modify
-//  it under the terms of the GNU General Public License as published by
-//  the Free Software Foundation, either version 3 of the License, or
-//  (at your option) any later version.
-// 
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-// 
-//  You should have received a copy of the GNU General Public License
-//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
-#endregion
-
-using System.IO;
+﻿using System.IO;
 using Microsoft.Xna.Framework;
 using TinyJson;
 
@@ -44,6 +21,8 @@ namespace ClassicUO.Configuration
 
         [JsonProperty("ultimaonlinedirectory")]
         public string UltimaOnlineDirectory { get; set; } = "";
+
+        [JsonProperty("profilespath")] public string ProfilesPath { get; set; } = string.Empty;
 
         [JsonProperty("clientversion")] public string ClientVersion { get; set; } = string.Empty;
 
@@ -72,7 +51,8 @@ namespace ClassicUO.Configuration
 
         [JsonProperty("login_music_volume")] public int LoginMusicVolume { get; set; } = 70;
 
-        [JsonProperty("shard_type")] public int ShardType { get; set; } // 0 = normal (no customization), 1 = old, 2 = outlands??
+        [JsonProperty("shard_type")]
+        public int ShardType { get; set; } // 0 = normal (no customization), 1 = old, 2 = outlands??
 
         [JsonProperty("fixed_time_step")] public bool FixedTimeStep { get; set; } = true;
 
@@ -83,9 +63,11 @@ namespace ClassicUO.Configuration
 
         [JsonProperty("use_verdata")] public bool UseVerdata { get; set; }
 
+        [JsonProperty("maps_layouts")] public string MapsLayouts { get; set; }
+
         [JsonProperty("encryption")] public byte Encryption { get; set; }
 
-        [JsonProperty("plugins")] public string[] Plugins { get; set; } = {@"./Assistant/Razor.dll"};
+        [JsonProperty("plugins")] public string[] Plugins { get; set; } = { @"./Assistant/Razor.dll" };
 
         public static string GetSettingsFilepath()
         {
@@ -107,7 +89,10 @@ namespace ClassicUO.Configuration
         {
             // Make a copy of the settings object that we will use in the saving process
             string json = this.Encode(true);
-            Settings settingsToSave = json.Decode<Settings>(); // JsonConvert.DeserializeObject<Settings>(JsonConvert.SerializeObject(this));
+
+            Settings
+                settingsToSave =
+                    json.Decode<Settings>(); // JsonConvert.DeserializeObject<Settings>(JsonConvert.SerializeObject(this));
 
             // Make sure we don't save username and password if `saveaccount` flag is not set
             // NOTE: Even if we pass username and password via command-line arguments they won't be saved
@@ -116,6 +101,8 @@ namespace ClassicUO.Configuration
                 settingsToSave.Username = string.Empty;
                 settingsToSave.Password = string.Empty;
             }
+
+            settingsToSave.ProfilesPath = string.Empty;
 
             // NOTE: We can do any other settings clean-ups here before we save them
 

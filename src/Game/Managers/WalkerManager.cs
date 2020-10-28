@@ -1,27 +1,4 @@
-﻿#region license
-
-// Copyright (C) 2020 ClassicUO Development Community on Github
-// 
-// This project is an alternative client for the game Ultima Online.
-// The goal of this is to develop a lightweight client considering
-// new technologies.
-// 
-//  This program is free software: you can redistribute it and/or modify
-//  it under the terms of the GNU General Public License as published by
-//  the Free Software Foundation, either version 3 of the License, or
-//  (at your option) any later version.
-// 
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-// 
-//  You should have received a copy of the GNU General Public License
-//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
-#endregion
-
-using ClassicUO.Network;
+﻿using ClassicUO.Network;
 
 namespace ClassicUO.Game.Managers
 {
@@ -131,8 +108,7 @@ namespace ClassicUO.Game.Managers
 
             for (int i = 0; i < StepsCount; i++)
             {
-                if (StepInfos[i]
-                    .Sequence == sequence)
+                if (StepInfos[i].Sequence == sequence)
                 {
                     break;
                 }
@@ -147,22 +123,17 @@ namespace ClassicUO.Game.Managers
             {
                 if (stepIndex >= CurrentWalkSequence)
                 {
-                    StepInfos[stepIndex]
-                        .Accepted = true;
+                    StepInfos[stepIndex].Accepted = true;
 
-                    World.RangeSize.X = StepInfos[stepIndex]
-                        .X;
+                    World.RangeSize.X = StepInfos[stepIndex].X;
 
-                    World.RangeSize.Y = StepInfos[stepIndex]
-                        .Y;
+                    World.RangeSize.Y = StepInfos[stepIndex].Y;
                 }
                 else if (stepIndex == 0)
                 {
-                    World.RangeSize.X = StepInfos[0]
-                        .X;
+                    World.RangeSize.X = StepInfos[0].X;
 
-                    World.RangeSize.Y = StepInfos[0]
-                        .Y;
+                    World.RangeSize.Y = StepInfos[0].Y;
 
                     for (int i = 1; i < StepsCount; i++)
                     {

@@ -1,55 +1,12 @@
-﻿#region license
-
-// Copyright (C) 2020 ClassicUO Development Community on Github
-// 
-// This project is an alternative client for the game Ultima Online.
-// The goal of this is to develop a lightweight client considering
-// new technologies.
-// 
-//  This program is free software: you can redistribute it and/or modify
-//  it under the terms of the GNU General Public License as published by
-//  the Free Software Foundation, either version 3 of the License, or
-//  (at your option) any later version.
-// 
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-// 
-//  You should have received a copy of the GNU General Public License
-//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
-#endregion
-
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using ClassicUO.Resources;
 
 namespace ClassicUO.Game.Managers
 {
-    internal sealed class UOChatChannel
+    internal static class ChatManager
     {
-        public UOChatChannel(string name, bool haspassword)
-        {
-            Name = name;
-            HasPassword = haspassword;
-        }
-
-        public readonly bool HasPassword;
-
-        public readonly string Name;
-    }
-
-    internal enum CHAT_STATUS : byte
-    {
-        DISABLED,
-        ENABLED,
-        ENABLED_USER_REQUEST
-    }
-
-    internal static class UOChatManager
-    {
-        public static readonly Dictionary<string, UOChatChannel> Channels = new Dictionary<string, UOChatChannel>();
-        public static CHAT_STATUS ChatIsEnabled;
+        public static readonly Dictionary<string, ChatChannel> Channels = new Dictionary<string, ChatChannel>();
+        public static ChatStatus ChatIsEnabled;
         public static string CurrentChannelName = string.Empty;
 
         private static readonly string[] _messages =
@@ -100,19 +57,16 @@ namespace ClassicUO.Game.Managers
 
         public static string GetMessage(int index)
         {
-            if (index < _messages.Length)
-            {
-                return _messages[index];
-            }
-
-            return string.Empty;
+            return index < _messages.Length
+                ? _messages[index]
+                : string.Empty;
         }
 
-        public static void AddChannel(string text, bool haspassword)
+        public static void AddChannel(string text, bool hasPassword)
         {
-            if (!Channels.TryGetValue(text, out UOChatChannel channel))
+            if (!Channels.TryGetValue(text, out ChatChannel channel))
             {
-                channel = new UOChatChannel(text, haspassword);
+                channel = new ChatChannel(text, hasPassword);
                 Channels[text] = channel;
             }
         }
@@ -130,7 +84,7 @@ namespace ClassicUO.Game.Managers
             Channels.Clear();
         }
 
-        //static UOChatManager()
+        //static ChatManager()
         //{
         //    using (StreamReader reader = new StreamReader(File.OpenRead(UOFileManager.GetUOFilePath("Chat.enu"))))
         //    {

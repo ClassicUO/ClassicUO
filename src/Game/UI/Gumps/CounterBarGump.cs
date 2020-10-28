@@ -1,26 +1,3 @@
-#region license
-
-// Copyright (C) 2020 ClassicUO Development Community on Github
-// 
-// This project is an alternative client for the game Ultima Online.
-// The goal of this is to develop a lightweight client considering
-// new technologies.
-// 
-//  This program is free software: you can redistribute it and/or modify
-//  it under the terms of the GNU General Public License as published by
-//  the Free Software Foundation, either version 3 of the License, or
-//  (at your option) any later version.
-// 
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-// 
-//  You should have received a copy of the GNU General Public License
-//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
-#endregion
-
 using System.Collections.Generic;
 using System.IO;
 using System.Xml;
@@ -50,7 +27,8 @@ namespace ClassicUO.Game.UI.Gumps
         {
         }
 
-        public CounterBarGump(int x, int y, int rectSize = 30, int rows = 1, int columns = 1 /*, bool vertical = false*/) : base(0, 0)
+        public CounterBarGump
+            (int x, int y, int rectSize = 30, int rows = 1, int columns = 1 /*, bool vertical = false*/) : base(0, 0)
         {
             X = x;
             Y = y;
@@ -82,7 +60,7 @@ namespace ClassicUO.Game.UI.Gumps
             BuildGump();
         }
 
-        public override GUMP_TYPE GumpType => GUMP_TYPE.GT_COUNTERBAR;
+        public override GumpType GumpType => GumpType.CounterBar;
 
         private void BuildGump()
         {
@@ -95,7 +73,7 @@ namespace ClassicUO.Game.UI.Gumps
             Width = _rectSize * _columns + 1;
             Height = _rectSize * _rows + 1;
 
-            Add(_background = new AlphaBlendControl(0.3f) {Width = Width, Height = Height});
+            Add(_background = new AlphaBlendControl(0.3f) { Width = Width, Height = Height });
 
             for (int row = 0; row < _rows; row++)
             {
@@ -217,11 +195,9 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (index >= 0 && index < items.Length)
                 {
-                    items[i]
-                        .Parent = null;
+                    items[i].Parent = null;
 
-                    items[i]
-                        .Dispose();
+                    items[i].Dispose();
                 }
             }
 
@@ -265,11 +241,10 @@ namespace ClassicUO.Game.UI.Gumps
 
             for (int i = 0; i < count; i++)
             {
-                items[i]
-                    .SetGraphic(reader.ReadUInt16(), version > 1 ? reader.ReadUInt16() : (ushort) 0);
+                items[i].SetGraphic(reader.ReadUInt16(), version > 1 ? reader.ReadUInt16() : (ushort) 0);
             }
 
-            IsEnabled = IsVisible = ProfileManager.Current.CounterBarEnabled;
+            IsEnabled = IsVisible = ProfileManager.CurrentProfile.CounterBarEnabled;
         }
 
 
@@ -318,7 +293,11 @@ namespace ClassicUO.Game.UI.Gumps
                     if (index < items.Length)
                     {
                         items[index++]
-                            ?.SetGraphic(ushort.Parse(controlXml.GetAttribute("graphic")), ushort.Parse(controlXml.GetAttribute("hue")));
+                            ?.SetGraphic
+                            (
+                                ushort.Parse(controlXml.GetAttribute("graphic")),
+                                ushort.Parse(controlXml.GetAttribute("hue"))
+                            );
                     }
                     else
                     {
@@ -327,7 +306,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             }
 
-            IsEnabled = IsVisible = ProfileManager.Current.CounterBarEnabled;
+            IsEnabled = IsVisible = ProfileManager.CurrentProfile.CounterBarEnabled;
         }
 
 
@@ -434,9 +413,9 @@ namespace ClassicUO.Game.UI.Gumps
                 return true;
             }
 
-            public override void Update(double totalMs, double frameMs)
+            public override void Update(double totalTime, double frameTime)
             {
-                base.Update(totalMs, frameMs);
+                base.Update(totalTime, frameTime);
 
                 if (_time < Time.Ticks)
                 {
@@ -449,12 +428,18 @@ namespace ClassicUO.Game.UI.Gumps
                     else
                     {
                         _amount = 0;
-                        GetAmount(World.Player.FindItemByLayer(Layer.Backpack), Graphic, Hue, ref _amount);
-                        GetAmount(World.Player.FindItemByLayer(Layer.Cloak), Graphic, Hue, ref _amount);
 
-                        if (ProfileManager.Current.CounterBarDisplayAbbreviatedAmount)
+                        for (Item item = (Item) World.Player.Items; item != null; item = (Item) item.Next)
                         {
-                            if (_amount >= ProfileManager.Current.CounterBarAbbreviatedAmount)
+                            if (item.ItemData.IsContainer && !item.IsEmpty && item.Layer >= Layer.OneHanded && item.Layer <= Layer.Legs)
+                            {
+                                GetAmount(item, Graphic, Hue, ref _amount);
+                            }
+                        }
+
+                        if (ProfileManager.CurrentProfile.CounterBarDisplayAbbreviatedAmount)
+                        {
+                            if (_amount >= ProfileManager.CurrentProfile.CounterBarAbbreviatedAmount)
                             {
                                 _image.SetAmount(StringHelper.IntToAbbreviatedString(_amount));
 
@@ -492,15 +477,15 @@ namespace ClassicUO.Game.UI.Gumps
                 base.Draw(batcher, x, y);
 
 
-                Texture2D color = Texture2DCache.GetTexture
+                Texture2D color = SolidColorTextureCache.GetTexture
                 (
                     MouseIsOver ? Color.Yellow :
-                    ProfileManager.Current.CounterBarHighlightOnAmount &&
-                    _amount < ProfileManager.Current.CounterBarHighlightAmount && Graphic != 0 ? Color.Red : Color.Gray
+                    ProfileManager.CurrentProfile.CounterBarHighlightOnAmount &&
+                    _amount < ProfileManager.CurrentProfile.CounterBarHighlightAmount && Graphic != 0 ? Color.Red : Color.Gray
                 );
 
                 ResetHueVector();
-                batcher.DrawRectangle(color, x, y, Width, Height, ref _hueVector);
+                batcher.DrawRectangle(color, x, y, Width, Height, ref HueVector);
 
                 return true;
             }
@@ -543,8 +528,7 @@ namespace ClassicUO.Game.UI.Gumps
                         _textureControl.Texture = ArtLoader.Instance.GetTexture(graphic);
                         _textureControl.Hue = hue;
 
-                        _textureControl.IsPartial = TileDataLoader.Instance.StaticData[graphic]
-                                                                  .IsPartialHue;
+                        _textureControl.IsPartial = TileDataLoader.Instance.StaticData[graphic].IsPartialHue;
 
                         _textureControl.Width = Parent.Width;
                         _textureControl.Height = Parent.Height;

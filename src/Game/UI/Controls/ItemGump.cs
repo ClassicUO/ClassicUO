@@ -1,27 +1,4 @@
-﻿#region license
-
-// Copyright (C) 2020 ClassicUO Development Community on Github
-// 
-// This project is an alternative client for the game Ultima Online.
-// The goal of this is to develop a lightweight client considering
-// new technologies.
-// 
-//  This program is free software: you can redistribute it and/or modify
-//  it under the terms of the GNU General Public License as published by
-//  the Free Software Foundation, either version 3 of the License, or
-//  (at your option) any later version.
-// 
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-// 
-//  You should have received a copy of the GNU General Public License
-//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
-#endregion
-
-using System;
+﻿using System;
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
@@ -39,7 +16,15 @@ namespace ClassicUO.Game.UI.Controls
         private ushort _graphic;
         private readonly bool _is_gump;
 
-        public ItemGump(uint serial, ushort graphic, ushort hue, int x, int y, bool is_gump = false)
+        public ItemGump
+        (
+            uint serial,
+            ushort graphic,
+            ushort hue,
+            int x,
+            int y,
+            bool is_gump = false
+        )
         {
             _is_gump = is_gump;
 
@@ -67,7 +52,8 @@ namespace ClassicUO.Game.UI.Controls
             {
                 _graphic = value;
 
-                UOTexture32 texture = _is_gump ? GumpsLoader.Instance.GetTexture(value) : ArtLoader.Instance.GetTexture(value);
+                UOTexture texture =
+                    _is_gump ? GumpsLoader.Instance.GetTexture(value) : ArtLoader.Instance.GetTexture(value);
 
                 if (texture == null)
                 {
@@ -79,8 +65,7 @@ namespace ClassicUO.Game.UI.Controls
                 Width = texture.Width;
                 Height = texture.Height;
 
-                IsPartialHue = !_is_gump && TileDataLoader.Instance.StaticData[value]
-                                                          .IsPartialHue;
+                IsPartialHue = !_is_gump && TileDataLoader.Instance.StaticData[value].IsPartialHue;
             }
         }
 
@@ -90,22 +75,21 @@ namespace ClassicUO.Game.UI.Controls
         public bool CanPickUp { get; set; }
 
 
-        public override void Update(double totalMS, double frameMS)
+        public override void Update(double totalTime, double frameTime)
         {
             if (IsDisposed)
             {
                 return;
             }
 
-            base.Update(totalMS, frameMS);
+            base.Update(totalTime, frameTime);
 
             if (World.InGame)
             {
                 if (CanPickUp && !ItemHold.Enabled && Mouse.LButtonPressed &&
                     UIManager.LastControlMouseDown(MouseButtonType.Left) == this &&
                     (Mouse.LastLeftButtonClickTime != 0xFFFF_FFFF && Mouse.LastLeftButtonClickTime != 0 &&
-                     Mouse.LastLeftButtonClickTime + Mouse.MOUSE_DELAY_DOUBLE_CLICK < Time.Ticks ||
-                     CanPickup()))
+                        Mouse.LastLeftButtonClickTime + Mouse.MOUSE_DELAY_DOUBLE_CLICK < Time.Ticks || CanPickup()))
                 {
                     AttemptPickUp();
                 }
@@ -126,19 +110,22 @@ namespace ClassicUO.Game.UI.Controls
             base.Draw(batcher, x, y);
 
             ResetHueVector();
-            ShaderHueTranslator.GetHueVector(ref _hueVector, HighlightOnMouseOver && MouseIsOver ? 0x0035 : Hue, IsPartialHue, 0);
 
-            UOTexture32 texture = _is_gump ? GumpsLoader.Instance.GetTexture(Graphic) : ArtLoader.Instance.GetTexture(Graphic);
+            ShaderHueTranslator.GetHueVector
+                (ref HueVector, HighlightOnMouseOver && MouseIsOver ? 0x0035 : Hue, IsPartialHue, 0);
+
+            UOTexture texture =
+                _is_gump ? GumpsLoader.Instance.GetTexture(Graphic) : ArtLoader.Instance.GetTexture(Graphic);
 
             if (texture != null)
             {
-                batcher.Draw2D(texture, x, y, Width, Height, ref _hueVector);
+                batcher.Draw2D(texture, x, y, Width, Height, ref HueVector);
 
                 Item item = World.Items.Get(LocalSerial);
 
                 if (item != null && !item.IsMulti && !item.IsCoin && item.Amount > 1 && item.ItemData.IsStackable)
                 {
-                    batcher.Draw2D(texture, x + 5, y + 5, Width, Height, ref _hueVector);
+                    batcher.Draw2D(texture, x + 5, y + 5, Width, Height, ref HueVector);
                 }
             }
 
@@ -147,14 +134,18 @@ namespace ClassicUO.Game.UI.Controls
 
         public override bool Contains(int x, int y)
         {
-            UOTexture32 texture = _is_gump ? GumpsLoader.Instance.GetTexture(Graphic) : ArtLoader.Instance.GetTexture(Graphic);
+            UOTexture texture =
+                _is_gump ? GumpsLoader.Instance.GetTexture(Graphic) : ArtLoader.Instance.GetTexture(Graphic);
 
             if (texture == null)
             {
                 return false;
             }
 
-            if (ProfileManager.Current != null && ProfileManager.Current.ScaleItemsInsideContainers)
+            x -= Offset.X;
+            y -= Offset.Y;
+
+            if (ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.ScaleItemsInsideContainers)
             {
                 float scale = UIManager.ContainerScale;
 
@@ -193,7 +184,7 @@ namespace ClassicUO.Game.UI.Controls
 
         private bool CanPickup()
         {
-            Point offset = Mouse.LDroppedOffset;
+            Point offset = Mouse.LDragOffset;
 
             if (Math.Abs(offset.X) < Constants.MIN_PICKUP_DRAG_DISTANCE_PIXELS &&
                 Math.Abs(offset.Y) < Constants.MIN_PICKUP_DRAG_DISTANCE_PIXELS)
@@ -210,7 +201,7 @@ namespace ClassicUO.Game.UI.Controls
 
             split.X = Mouse.Position.X - 80;
             split.Y = Mouse.Position.Y - 40;
-            UIManager.AttemptDragControl(split, Mouse.Position, true);
+            UIManager.AttemptDragControl(split, true);
             split.BringOnTop();
 
             return false;
@@ -227,13 +218,10 @@ namespace ClassicUO.Game.UI.Controls
             Item item = World.Items.Get(LocalSerial);
             Item container;
 
-            if (!Keyboard.Ctrl &&
-                ProfileManager.Current.DoubleClickToLootInsideContainers &&
-                item != null && !item.IsDestroyed &&
-                !item.ItemData.IsContainer && item.IsEmpty &&
-                (container = World.Items.Get(item.RootContainer)) != null &&
-                container != World.Player.FindItemByLayer(Layer.Backpack)
-            )
+            if (!Keyboard.Ctrl && ProfileManager.CurrentProfile.DoubleClickToLootInsideContainers && item != null &&
+                !item.IsDestroyed && !item.ItemData.IsContainer && item.IsEmpty &&
+                (container = World.Items.Get(item.RootContainer)) != null && container != World.Player.FindItemByLayer
+                    (Layer.Backpack))
             {
                 GameActions.GrabItem(LocalSerial, item.Amount);
             }
@@ -250,22 +238,29 @@ namespace ClassicUO.Game.UI.Controls
         {
             if (CanPickUp)
             {
-                UOTexture32 texture = _is_gump ? GumpsLoader.Instance.GetTexture(Graphic) : ArtLoader.Instance.GetTexture(Graphic);
+                UOTexture texture = _is_gump ?
+                    GumpsLoader.Instance.GetTexture(Graphic) :
+                    ArtLoader.Instance.GetTexture(Graphic);
 
                 Rectangle bounds = texture.Bounds;
                 int centerX = bounds.Width >> 1;
                 int centerY = bounds.Height >> 1;
 
-                if (ProfileManager.Current != null && ProfileManager.Current.ScaleItemsInsideContainers)
+                if (ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.ScaleItemsInsideContainers)
                 {
                     float scale = UIManager.ContainerScale;
                     centerX = (int) (centerX * scale);
                     centerY = (int) (centerY * scale);
                 }
 
-                if (ProfileManager.Current != null && ProfileManager.Current.RelativeDragAndDropItems)
+                if (ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.RelativeDragAndDropItems)
                 {
-                    Point p = new Point(centerX - (Mouse.Position.X - ScreenCoordinateX), centerY - (Mouse.Position.Y - ScreenCoordinateY));
+                    Point p = new Point
+                    (
+                        centerX - (Mouse.Position.X - ScreenCoordinateX),
+                        centerY - (Mouse.Position.Y - ScreenCoordinateY)
+                    );
+
                     GameActions.PickUp(LocalSerial, centerX, centerY, offset: p, is_gump: _is_gump);
                 }
                 else

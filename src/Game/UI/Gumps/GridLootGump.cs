@@ -1,27 +1,4 @@
-﻿#region license
-
-// Copyright (C) 2020 ClassicUO Development Community on Github
-// 
-// This project is an alternative client for the game Ultima Online.
-// The goal of this is to develop a lightweight client considering
-// new technologies.
-// 
-//  This program is free software: you can redistribute it and/or modify
-//  it under the terms of the GNU General Public License as published by
-//  the Free Software Foundation, either version 3 of the License, or
-//  (at your option) any later version.
-// 
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-// 
-//  You should have received a copy of the GNU General Public License
-//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
-#endregion
-
-using System.Linq;
+﻿using System.Linq;
 using ClassicUO.Configuration;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
@@ -39,7 +16,7 @@ namespace ClassicUO.Game.UI.Gumps
         private const int MAX_WIDTH = 300;
         private const int MAX_HEIGHT = 400;
 
-        private static int _lastX = ProfileManager.Current.GridLootType == 2 ? 200 : 100;
+        private static int _lastX = ProfileManager.CurrentProfile.GridLootType == 2 ? 200 : 100;
         private static int _lastY = 100;
         private readonly AlphaBlendControl _background;
         private readonly NiceButton _buttonPrev, _buttonNext, _setlootbag;
@@ -65,8 +42,8 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 World.Player.ManualOpenedCorpses.Remove(LocalSerial);
             }
-            else if (World.Player.AutoOpenedCorpses.Contains(LocalSerial) &&
-                     ProfileManager.Current != null && ProfileManager.Current.SkipEmptyCorpse)
+            else if (World.Player.AutoOpenedCorpses.Contains
+                (LocalSerial) && ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.SkipEmptyCorpse)
             {
                 IsVisible = false;
                 _hideIfEmpty = true;
@@ -87,11 +64,16 @@ namespace ClassicUO.Game.UI.Gumps
             Width = _background.Width;
             Height = _background.Height;
 
-            _setlootbag = new NiceButton(3, Height - 23, 100, 20, ButtonAction.Activate, ResGumps.SetLootBag) {ButtonParameter = 2, IsSelectable = false};
+            _setlootbag = new NiceButton(3, Height - 23, 100, 20, ButtonAction.Activate, ResGumps.SetLootBag)
+                { ButtonParameter = 2, IsSelectable = false };
+
             Add(_setlootbag);
 
-            _buttonPrev = new NiceButton(Width - 80, Height - 20, 40, 20, ButtonAction.Activate, ResGumps.Prev) {ButtonParameter = 0, IsSelectable = false};
-            _buttonNext = new NiceButton(Width - 40, Height - 20, 40, 20, ButtonAction.Activate, ResGumps.Next) {ButtonParameter = 1, IsSelectable = false};
+            _buttonPrev = new NiceButton(Width - 80, Height - 20, 40, 20, ButtonAction.Activate, ResGumps.Prev)
+                { ButtonParameter = 0, IsSelectable = false };
+
+            _buttonNext = new NiceButton(Width - 40, Height - 20, 40, 20, ButtonAction.Activate, ResGumps.Next)
+                { ButtonParameter = 1, IsSelectable = false };
 
             _buttonNext.IsVisible = _buttonPrev.IsVisible = false;
 
@@ -277,13 +259,13 @@ namespace ClassicUO.Game.UI.Gumps
             ResetHueVector();
             base.Draw(batcher, x, y);
             ResetHueVector();
-            batcher.DrawRectangle(Texture2DCache.GetTexture(Color.Gray), x, y, Width, Height, ref _hueVector);
+            batcher.DrawRectangle(SolidColorTextureCache.GetTexture(Color.Gray), x, y, Width, Height, ref HueVector);
 
             return true;
         }
 
 
-        public override void Update(double totalMS, double frameMS)
+        public override void Update(double totalTime, double frameTime)
         {
             if (_corpse == null || _corpse.IsDestroyed || _corpse.OnGround && _corpse.Distance > 3)
             {
@@ -292,7 +274,7 @@ namespace ClassicUO.Game.UI.Gumps
                 return;
             }
 
-            base.Update(totalMS, frameMS);
+            base.Update(totalTime, frameTime);
 
             if (IsDisposed)
             {
@@ -323,7 +305,8 @@ namespace ClassicUO.Game.UI.Gumps
 
             WantUpdateSize = true;
 
-            if (_corpse != null && !_corpse.IsDestroyed && UIManager.MouseOverControl != null && (UIManager.MouseOverControl == this || UIManager.MouseOverControl.RootParent == this))
+            if (_corpse != null && !_corpse.IsDestroyed && UIManager.MouseOverControl != null &&
+                (UIManager.MouseOverControl == this || UIManager.MouseOverControl.RootParent == this))
             {
                 SelectedObject.Object = _corpse;
                 SelectedObject.LastObject = _corpse;
@@ -359,7 +342,12 @@ namespace ClassicUO.Game.UI.Gumps
 
                 CanMove = false;
 
-                HSliderBar amount = new HSliderBar(0, 0, size, 1, item.Amount, item.Amount, HSliderBarStyle.MetalWidgetRecessedBar, true, color: 0xFFFF, drawUp: true);
+                HSliderBar amount = new HSliderBar
+                (
+                    0, 0, size, 1, item.Amount, item.Amount, HSliderBarStyle.MetalWidgetRecessedBar, true,
+                    color: 0xFFFF, drawUp: true
+                );
+
                 Add(amount);
 
                 amount.IsVisible = amount.IsEnabled = amount.MaxValue > 1;
@@ -410,13 +398,19 @@ namespace ClassicUO.Game.UI.Gumps
                 base.Draw(batcher, x, y);
                 ResetHueVector();
 
-                batcher.DrawRectangle(Texture2DCache.GetTexture(Color.Gray), x, y + 15, Width, Height - 15, ref _hueVector);
+                batcher.DrawRectangle
+                    (SolidColorTextureCache.GetTexture(Color.Gray), x, y + 15, Width, Height - 15, ref HueVector);
 
                 if (_texture.MouseIsOver)
                 {
-                    _hueVector.Z = 0.7f;
-                    batcher.Draw2D(Texture2DCache.GetTexture(Color.Yellow), x + 1, y + 15, Width - 1, Height - 15, ref _hueVector);
-                    _hueVector.Z = 0;
+                    HueVector.Z = 0.7f;
+
+                    batcher.Draw2D
+                    (
+                        SolidColorTextureCache.GetTexture(Color.Yellow), x + 1, y + 15, Width - 1, Height - 15, ref HueVector
+                    );
+
+                    HueVector.Z = 0;
                 }
 
                 return true;

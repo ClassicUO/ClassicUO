@@ -1,26 +1,3 @@
-#region license
-
-// Copyright (C) 2020 ClassicUO Development Community on Github
-// 
-// This project is an alternative client for the game Ultima Online.
-// The goal of this is to develop a lightweight client considering
-// new technologies.
-// 
-//  This program is free software: you can redistribute it and/or modify
-//  it under the terms of the GNU General Public License as published by
-//  the Free Software Foundation, either version 3 of the License, or
-//  (at your option) any later version.
-// 
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-// 
-//  You should have received a copy of the GNU General Public License
-//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
-#endregion
-
 using System.IO;
 using ClassicUO.IO.Audio.MP3Sharp.Support;
 
@@ -102,10 +79,7 @@ namespace ClassicUO.IO.Audio.MP3Sharp.IO
         ///     Pass in either a FileName or a Stream.
         /// </summary>
         public virtual int OpenForWrite
-        (
-            string filename, Stream stream, int samplingRate, short bitsPerSample,
-            short numChannels
-        )
+            (string filename, Stream stream, int samplingRate, short bitsPerSample, short numChannels)
         {
             // Verify parameters...
             if (bitsPerSample != 8 && bitsPerSample != 16 || numChannels < 1 || numChannels > 2)
@@ -225,10 +199,7 @@ namespace ClassicUO.IO.Audio.MP3Sharp.IO
         public virtual int OpenForWrite(string filename, WaveFile otherWave)
         {
             return OpenForWrite
-            (
-                filename, null, otherWave.SamplingRate(), otherWave.BitsPerSample(),
-                otherWave.NumChannels()
-            );
+                (filename, null, otherWave.SamplingRate(), otherWave.BitsPerSample(), otherWave.NumChannels());
         }
 
         internal sealed class WaveFormatChunkData
@@ -286,7 +257,8 @@ namespace ClassicUO.IO.Audio.MP3Sharp.IO
             public virtual int VerifyValidity()
             {
                 bool ret = Header.CkId == FourCC("fmt ") && (Data.NumChannels == 1 || Data.NumChannels == 2) &&
-                           Data.NumAvgBytesPerSec == Data.NumChannels * Data.NumSamplesPerSec * Data.NumBitsPerSample / 8 &&
+                           Data.NumAvgBytesPerSec ==
+                           Data.NumChannels * Data.NumSamplesPerSec * Data.NumBitsPerSample / 8 &&
                            Data.NumBlockAlign == Data.NumChannels * Data.NumBitsPerSample / 8;
 
                 return ret ? 1 : 0;

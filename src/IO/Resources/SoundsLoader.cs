@@ -1,27 +1,4 @@
-﻿#region license
-
-// Copyright (C) 2020 ClassicUO Development Community on Github
-// 
-// This project is an alternative client for the game Ultima Online.
-// The goal of this is to develop a lightweight client considering
-// new technologies.
-// 
-//  This program is free software: you can redistribute it and/or modify
-//  it under the terms of the GNU General Public License as published by
-//  the Free Software Foundation, either version 3 of the License, or
-//  (at your option) any later version.
-// 
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-// 
-//  You should have received a copy of the GNU General Public License
-//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
-#endregion
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
@@ -34,8 +11,9 @@ namespace ClassicUO.IO.Resources
 {
     internal class SoundsLoader : UOFileLoader
     {
-        private static readonly char[] _configFileDelimiters = {' ', ',', '\t'};
-        private static readonly Dictionary<int, Tuple<string, bool>> _musicData = new Dictionary<int, Tuple<string, bool>>();
+        private static readonly char[] _configFileDelimiters = { ' ', ',', '\t' };
+        private static readonly Dictionary<int, Tuple<string, bool>> _musicData =
+            new Dictionary<int, Tuple<string, bool>>();
 
         private static SoundsLoader _instance;
 
@@ -89,8 +67,8 @@ namespace ClassicUO.IO.Resources
                             {
                                 int index = reader.ReadInt();
 
-                                if (index < 0 || index >= Constants.MAX_SOUND_DATA_INDEX_COUNT || index >= _file.Length || Entries[index]
-                                    .Length != 0)
+                                if (index < 0 || index >= Constants.MAX_SOUND_DATA_INDEX_COUNT ||
+                                    index >= _file.Length || Entries[index].Length != 0)
                                 {
                                     continue;
                                 }
@@ -145,7 +123,8 @@ namespace ClassicUO.IO.Resources
                             {
                                 if (TryParseConfigLine(line, out Tuple<int, string, bool> songData))
                                 {
-                                    _musicData[songData.Item1] = new Tuple<string, bool>(songData.Item2, songData.Item3);
+                                    _musicData[songData.Item1] = new Tuple<string, bool>
+                                        (songData.Item2, songData.Item3);
                                 }
                             }
                         }
@@ -280,8 +259,7 @@ namespace ClassicUO.IO.Resources
 
             int index = int.Parse(splits[0]);
 
-            string name = splits[1]
-                .Trim();
+            string name = splits[1].Trim();
 
             bool doesLoop = splits.Length == 3 && splits[2] == "loop";
 
@@ -297,11 +275,9 @@ namespace ClassicUO.IO.Resources
 
             if (_musicData.ContainsKey(index))
             {
-                name = _musicData[index]
-                    .Item1;
+                name = _musicData[index].Item1;
 
-                doesLoop = _musicData[index]
-                    .Item2;
+                doesLoop = _musicData[index].Item2;
 
                 return true;
             }
@@ -350,16 +326,14 @@ namespace ClassicUO.IO.Resources
             {
                 if (_sounds[i] != null)
                 {
-                    _sounds[i]
-                        .Dispose();
+                    _sounds[i].Dispose();
 
                     _sounds[i] = null;
                 }
 
                 if (_musics[i] != null)
                 {
-                    _musics[i]
-                        .Dispose();
+                    _musics[i].Dispose();
 
                     _musics[i] = null;
                 }

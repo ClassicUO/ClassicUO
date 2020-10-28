@@ -1,27 +1,4 @@
-﻿#region license
-
-// Copyright (C) 2020 ClassicUO Development Community on Github
-// 
-// This project is an alternative client for the game Ultima Online.
-// The goal of this is to develop a lightweight client considering
-// new technologies.
-// 
-//  This program is free software: you can redistribute it and/or modify
-//  it under the terms of the GNU General Public License as published by
-//  the Free Software Foundation, either version 3 of the License, or
-//  (at your option) any later version.
-// 
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-// 
-//  You should have received a copy of the GNU General Public License
-//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
-#endregion
-
-using ClassicUO.Game.UI.Controls;
+﻿using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.Utility.Collections;
 
@@ -64,7 +41,7 @@ namespace ClassicUO.Game.UI.Gumps
                 _tips = this;
                 _background.TitleGumpID = 0x9CA;
                 _idx = 0;
-                Add(_prev = new Button(0, 0x9cc, 0x9cc) {X = 35, ContainsByBounds = true});
+                Add(_prev = new Button(0, 0x9cc, 0x9cc) { X = 35, ContainsByBounds = true });
 
                 _prev.MouseUp += (o, e) =>
                 {
@@ -74,7 +51,7 @@ namespace ClassicUO.Game.UI.Gumps
                     }
                 };
 
-                Add(_next = new Button(0, 0x9cd, 0x9cd) {X = 240, ContainsByBounds = true});
+                Add(_next = new Button(0, 0x9cd, 0x9cd) { X = 240, ContainsByBounds = true });
 
                 _next.MouseUp += (o, e) =>
                 {
@@ -90,7 +67,6 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
-        //public override GUMP_TYPE GumpType => GUMP_TYPE.GT_TIPNOTICE;
 
         public override void OnButtonClick(int buttonID)
         {
@@ -103,21 +79,6 @@ namespace ClassicUO.Game.UI.Gumps
             base.Dispose();
         }
 
-        public override void Update(double totalMS, double frameMS)
-        {
-            //if (!_textBox.IsDisposed && _textBox.IsChanged)
-            //{
-            //    _textBox.Height = Math.Max(FontsLoader.Instance.GetHeightUnicode(1, _textBox.TxEntry.Text, 220, TEXT_ALIGN_TYPE.TS_LEFT, 0x0) + 20, 40);
-
-            //    foreach (Control c in _scrollArea.Children)
-            //    {
-            //        if (c is ScrollAreaItem)
-            //            c.OnPageChanged();
-            //    }
-            //}
-
-            base.Update(totalMS, frameMS);
-        }
 
         public override void OnPageChanged()
         {
@@ -126,7 +87,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             foreach (Control c in _scrollArea.Children)
             {
-                if (c is ScrollAreaItem)
+                // if (c is ScrollAreaItem)
                 {
                     c.OnPageChanged();
                 }

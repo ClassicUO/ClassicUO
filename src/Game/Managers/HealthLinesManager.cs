@@ -1,27 +1,4 @@
-﻿#region license
-
-// Copyright (C) 2020 ClassicUO Development Community on Github
-// 
-// This project is an alternative client for the game Ultima Online.
-// The goal of this is to develop a lightweight client considering
-// new technologies.
-// 
-//  This program is free software: you can redistribute it and/or modify
-//  it under the terms of the GNU General Public License as published by
-//  the Free Software Foundation, either version 3 of the License, or
-//  (at your option) any later version.
-// 
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-// 
-//  You should have received a copy of the GNU General Public License
-//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
-#endregion
-
-using ClassicUO.Configuration;
+﻿using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.IO.Resources;
@@ -38,7 +15,7 @@ namespace ClassicUO.Game.Managers
         private const int BAR_HEIGHT_HALF = BAR_HEIGHT >> 1;
 
 
-        private readonly UOTexture32 _background_texture, _hp_texture;
+        private readonly UOTexture _background_texture, _hp_texture;
         private Vector3 _vectorHue = Vector3.Zero;
 
         public HealthLinesManager()
@@ -47,7 +24,7 @@ namespace ClassicUO.Game.Managers
             _hp_texture = GumpsLoader.Instance.GetTexture(0x1069);
         }
 
-        public bool IsEnabled => ProfileManager.Current != null && ProfileManager.Current.ShowMobilesHP;
+        public bool IsEnabled => ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.ShowMobilesHP;
 
 
         public void Update()
@@ -65,8 +42,8 @@ namespace ClassicUO.Game.Managers
 
         public void Draw(UltimaBatcher2D batcher)
         {
-            int screenW = ProfileManager.Current.GameWindowSize.X;
-            int screenH = ProfileManager.Current.GameWindowSize.Y;
+            int screenW = ProfileManager.CurrentProfile.GameWindowSize.X;
+            int screenH = ProfileManager.CurrentProfile.GameWindowSize.Y;
 
             if (SerialHelper.IsMobile(TargetManager.LastTargetInfo.Serial))
             {
@@ -88,14 +65,14 @@ namespace ClassicUO.Game.Managers
                 return;
             }
 
-            int mode = ProfileManager.Current.MobileHPType;
+            int mode = ProfileManager.CurrentProfile.MobileHPType;
 
             if (mode < 0)
             {
                 return;
             }
 
-            int showWhen = ProfileManager.Current.MobileHPShowWhen;
+            int showWhen = ProfileManager.CurrentProfile.MobileHPShowWhen;
 
             foreach (Mobile mobile in World.Mobiles)
             {
@@ -125,15 +102,10 @@ namespace ClassicUO.Game.Managers
                         {
                             AnimationsLoader.Instance.GetAnimationDimensions
                             (
-                                mobile.AnimIndex,
-                                mobile.GetGraphicForAnimation(),
+                                mobile.AnimIndex, mobile.GetGraphicForAnimation(),
                                 /*(byte) m.GetDirectionForAnimation()*/ 0,
-                                /*Mobile.GetGroupForAnimation(m, isParent:true)*/ 0,
-                                mobile.IsMounted,
-                                /*(byte) m.AnimIndex*/ 0,
-                                out int centerX,
-                                out int centerY,
-                                out int width,
+                                /*Mobile.GetGroupForAnimation(m, isParent:true)*/ 0, mobile.IsMounted,
+                                /*(byte) m.AnimIndex*/ 0, out int centerX, out int centerY, out int width,
                                 out int height
                             );
 
@@ -167,8 +139,7 @@ namespace ClassicUO.Game.Managers
                 }
 
                 if (mobile.Serial == TargetManager.LastTargetInfo.Serial ||
-                    mobile.Serial == TargetManager.SelectedTarget ||
-                    mobile.Serial == TargetManager.LastAttack)
+                    mobile.Serial == TargetManager.SelectedTarget || mobile.Serial == TargetManager.LastAttack)
                 {
                     continue;
                 }
@@ -239,7 +210,10 @@ namespace ClassicUO.Game.Managers
 
             float alpha = passive ? 0.5f : 0.0f;
 
-            _vectorHue.X = mobile != null ? Notoriety.GetHue(mobile.NotorietyFlag) : Notoriety.GetHue(NotorietyFlag.Gray);
+            _vectorHue.X = mobile != null ?
+                Notoriety.GetHue(mobile.NotorietyFlag) :
+                Notoriety.GetHue(NotorietyFlag.Gray);
+
             _vectorHue.Y = 1;
             _vectorHue.Z = alpha;
 
@@ -253,11 +227,8 @@ namespace ClassicUO.Game.Managers
 
             batcher.Draw2D
             (
-                _background_texture,
-                x, y,
-                _background_texture.Width * MULTIPLER,
-                _background_texture.Height * MULTIPLER,
-                ref _vectorHue
+                _background_texture, x, y, _background_texture.Width * MULTIPLER,
+                _background_texture.Height * MULTIPLER, ref _vectorHue
             );
 
 
@@ -275,11 +246,8 @@ namespace ClassicUO.Game.Managers
 
                 batcher.Draw2DTiled
                 (
-                    _hp_texture,
-                    x + per * MULTIPLER - offset, y,
-                    (BAR_WIDTH - per) * MULTIPLER - offset / 2,
-                    _hp_texture.Height * MULTIPLER,
-                    ref _vectorHue
+                    _hp_texture, x + per * MULTIPLER - offset, y, (BAR_WIDTH - per) * MULTIPLER - offset / 2,
+                    _hp_texture.Height * MULTIPLER, ref _vectorHue
                 );
             }
 
@@ -302,14 +270,7 @@ namespace ClassicUO.Game.Managers
                 _vectorHue.X = hue;
 
 
-                batcher.Draw2DTiled
-                (
-                    _hp_texture,
-                    x, y,
-                    per * MULTIPLER,
-                    _hp_texture.Height * MULTIPLER,
-                    ref _vectorHue
-                );
+                batcher.Draw2DTiled(_hp_texture, x, y, per * MULTIPLER, _hp_texture.Height * MULTIPLER, ref _vectorHue);
             }
         }
     }

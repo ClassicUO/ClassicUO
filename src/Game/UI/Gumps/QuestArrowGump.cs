@@ -1,27 +1,4 @@
-﻿#region license
-
-// Copyright (C) 2020 ClassicUO Development Community on Github
-// 
-// This project is an alternative client for the game Ultima Online.
-// The goal of this is to develop a lightweight client considering
-// new technologies.
-// 
-//  This program is free software: you can redistribute it and/or modify
-//  it under the terms of the GNU General Public License as published by
-//  the Free Software Foundation, either version 3 of the License, or
-//  (at your option) any later version.
-// 
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-// 
-//  You should have received a copy of the GNU General Public License
-//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
-#endregion
-
-using ClassicUO.Configuration;
+﻿using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
@@ -56,9 +33,9 @@ namespace ClassicUO.Game.UI.Gumps
             _my = y;
         }
 
-        public override void Update(double totalMS, double frameMS)
+        public override void Update(double totalTime, double frameTime)
         {
-            base.Update(totalMS, frameMS);
+            base.Update(totalTime, frameTime);
 
             if (!World.InGame)
             {
@@ -67,7 +44,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             GameScene scene = Client.Game.GetScene<GameScene>();
 
-            if (IsDisposed || ProfileManager.Current == null || scene == null)
+            if (IsDisposed || ProfileManager.CurrentProfile == null || scene == null)
             {
                 return;
             }
@@ -96,8 +73,8 @@ namespace ClassicUO.Game.UI.Gumps
             int goy = World.Player.Y - _my;
 
 
-            int x = (ProfileManager.Current.GameWindowSize.X >> 1) - (gox - goy) * 22;
-            int y = (ProfileManager.Current.GameWindowSize.Y >> 1) - (gox + goy) * 22;
+            int x = (ProfileManager.CurrentProfile.GameWindowSize.X >> 1) - (gox - goy) * 22;
+            int y = (ProfileManager.CurrentProfile.GameWindowSize.Y >> 1) - (gox + goy) * 22;
 
             x -= (int) World.Player.Offset.X;
             y -= (int) (World.Player.Offset.Y - World.Player.Offset.Z);
@@ -122,8 +99,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                     break;
 
-                case Direction.West:
-                    break;
+                case Direction.West: break;
 
                 case Direction.Right:
                     x -= _arrow.Width;
@@ -153,28 +129,32 @@ namespace ClassicUO.Game.UI.Gumps
 
             Point p = new Point(x, y);
             p = Client.Game.Scene.Camera.WorldToScreen(p);
-            p.X += ProfileManager.Current.GameWindowPosition.X;
-            p.Y += ProfileManager.Current.GameWindowPosition.Y;
+            p.X += ProfileManager.CurrentProfile.GameWindowPosition.X;
+            p.Y += ProfileManager.CurrentProfile.GameWindowPosition.Y;
             x = p.X;
             y = p.Y;
 
-            if (x < ProfileManager.Current.GameWindowPosition.X)
+            if (x < ProfileManager.CurrentProfile.GameWindowPosition.X)
             {
-                x = ProfileManager.Current.GameWindowPosition.X;
+                x = ProfileManager.CurrentProfile.GameWindowPosition.X;
             }
-            else if (x > ProfileManager.Current.GameWindowPosition.X + ProfileManager.Current.GameWindowSize.X - _arrow.Width)
+            else if (x > ProfileManager.CurrentProfile.GameWindowPosition.X + ProfileManager.CurrentProfile.GameWindowSize.X -
+                _arrow.Width)
             {
-                x = ProfileManager.Current.GameWindowPosition.X + ProfileManager.Current.GameWindowSize.X - _arrow.Width;
+                x = ProfileManager.CurrentProfile.GameWindowPosition.X + ProfileManager.CurrentProfile.GameWindowSize.X -
+                    _arrow.Width;
             }
 
 
-            if (y < ProfileManager.Current.GameWindowPosition.Y)
+            if (y < ProfileManager.CurrentProfile.GameWindowPosition.Y)
             {
-                y = ProfileManager.Current.GameWindowPosition.Y;
+                y = ProfileManager.CurrentProfile.GameWindowPosition.Y;
             }
-            else if (y > ProfileManager.Current.GameWindowPosition.Y + ProfileManager.Current.GameWindowSize.Y - _arrow.Height)
+            else if (y > ProfileManager.CurrentProfile.GameWindowPosition.Y + ProfileManager.CurrentProfile.GameWindowSize.Y -
+                _arrow.Height)
             {
-                y = ProfileManager.Current.GameWindowPosition.Y + ProfileManager.Current.GameWindowSize.Y - _arrow.Height;
+                y = ProfileManager.CurrentProfile.GameWindowPosition.Y + ProfileManager.CurrentProfile.GameWindowSize.Y -
+                    _arrow.Height;
             }
 
             X = x;

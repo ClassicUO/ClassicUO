@@ -1,27 +1,4 @@
-﻿#region license
-
-// Copyright (C) 2020 ClassicUO Development Community on Github
-// 
-// This project is an alternative client for the game Ultima Online.
-// The goal of this is to develop a lightweight client considering
-// new technologies.
-// 
-//  This program is free software: you can redistribute it and/or modify
-//  it under the terms of the GNU General Public License as published by
-//  the Free Software Foundation, either version 3 of the License, or
-//  (at your option) any later version.
-// 
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-// 
-//  You should have received a copy of the GNU General Public License
-//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
-#endregion
-
-using System;
+﻿using System;
 using System.Diagnostics;
 using System.IO;
 using ClassicUO.Configuration;
@@ -81,7 +58,8 @@ namespace ClassicUO
             if (!string.IsNullOrWhiteSpace(Settings.GlobalSettings.ClientVersion))
             {
                 // sanitize client version
-                Settings.GlobalSettings.ClientVersion = Settings.GlobalSettings.ClientVersion.Replace(",", ".")
+                Settings.GlobalSettings.ClientVersion = Settings.GlobalSettings.ClientVersion.Replace
+                                                                    (",", ".")
                                                                 .Replace(" ", "")
                                                                 .ToLower();
             }
@@ -103,7 +81,8 @@ namespace ClassicUO
                 Log.Warn($"Client version [{clientVersionText}] is invalid, let's try to read the client.exe");
 
                 // mmm something bad happened, try to load from client.exe
-                if (!ClientVersionHelper.TryParseFromFile(Path.Combine(clientPath, "client.exe"), out clientVersionText) ||
+                if (!ClientVersionHelper.TryParseFromFile
+                        (Path.Combine(clientPath, "client.exe"), out clientVersionText) ||
                     !ClientVersionHelper.IsClientVersionValid(clientVersionText, out clientVersion))
                 {
                     Log.Error("Invalid client version: " + clientVersionText);
@@ -120,7 +99,10 @@ namespace ClassicUO
 
             Version = clientVersion;
             ClientPath = clientPath;
-            IsUOPInstallation = Version >= ClientVersion.CV_7000 && File.Exists(UOFileManager.GetUOFilePath("MainMisc.uop"));
+
+            IsUOPInstallation = Version >= ClientVersion.CV_7000 && File.Exists
+                (UOFileManager.GetUOFilePath("MainMisc.uop"));
+
             Protocol = ClientFlags.CF_T2A;
 
             if (Version >= ClientVersion.CV_200)

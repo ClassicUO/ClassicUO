@@ -1,27 +1,4 @@
-﻿#region license
-
-// Copyright (C) 2020 ClassicUO Development Community on Github
-// 
-// This project is an alternative client for the game Ultima Online.
-// The goal of this is to develop a lightweight client considering
-// new technologies.
-// 
-//  This program is free software: you can redistribute it and/or modify
-//  it under the terms of the GNU General Public License as published by
-//  the Free Software Foundation, either version 3 of the License, or
-//  (at your option) any later version.
-// 
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-// 
-//  You should have received a copy of the GNU General Public License
-//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
-#endregion
-
-using System.IO;
+﻿using System.IO;
 using System.Xml;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
@@ -39,9 +16,8 @@ namespace ClassicUO.Game.UI.Gumps
     {
         private bool _draw;
         //private bool _forceUpdate;
-        private UOTexture32 _gumpTexture, _mapTexture;
+        private UOTexture _gumpTexture, _mapTexture;
         private int _lastMap = -1;
-        private Texture2D _playerIndicator, _mobilesIndicator;
         private long _timeMS;
         private bool _useLargeMap;
         private ushort _x, _y;
@@ -54,7 +30,7 @@ namespace ClassicUO.Game.UI.Gumps
         }
 
 
-        public override GUMP_TYPE GumpType => GUMP_TYPE.GT_MINIMAP;
+        public override GumpType GumpType => GumpType.MiniMap;
 
         public override void Save(BinaryWriter writer)
         {
@@ -90,7 +66,7 @@ namespace ClassicUO.Game.UI.Gumps
             CreateMiniMapTexture(true);
         }
 
-        public override void Update(double totalMS, double frameMS)
+        public override void Update(double totalTime, double frameTime)
         {
             if (!World.InGame)
             {
@@ -110,18 +86,18 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (_gumpTexture != null)
             {
-                _gumpTexture.Ticks = (long) totalMS;
+                _gumpTexture.Ticks = (long) totalTime;
             }
 
             if (_mapTexture != null)
             {
-                _mapTexture.Ticks = (long) totalMS;
+                _mapTexture.Ticks = (long) totalTime;
             }
 
-            if (_timeMS < totalMS)
+            if (_timeMS < totalTime)
             {
                 _draw = !_draw;
-                _timeMS = (long) totalMS + 500;
+                _timeMS = (long) totalTime + 500;
             }
         }
 
@@ -150,30 +126,16 @@ namespace ClassicUO.Game.UI.Gumps
 
             ResetHueVector();
 
-            batcher.Draw2D(_gumpTexture, x, y, ref _hueVector);
+            batcher.Draw2D(_gumpTexture, x, y, ref HueVector);
             CreateMiniMapTexture();
-            batcher.Draw2D(_mapTexture, x, y, ref _hueVector);
+            batcher.Draw2D(_mapTexture, x, y, ref HueVector);
 
             if (_draw)
             {
-                if (_playerIndicator == null)
-                {
-                    _playerIndicator = new Texture2D(batcher.GraphicsDevice, 1, 1);
-
-                    _playerIndicator.SetData
-                    (
-                        new uint[1]
-                        {
-                            0xFFFFFFFF
-                        }
-                    );
-
-                    _mobilesIndicator = new Texture2D(batcher.GraphicsDevice, 1, 1);
-                    _mobilesIndicator.SetData(new[] {Color.White});
-                }
-
                 int w = Width >> 1;
                 int h = Height >> 1;
+
+                Texture2D mobilesTextureDot = SolidColorTextureCache.GetTexture(Color.Red);
 
                 foreach (Mobile mob in World.Mobiles)
                 {
@@ -188,16 +150,16 @@ namespace ClassicUO.Game.UI.Gumps
                     int gx = xx - yy;
                     int gy = xx + yy;
 
-                    _hueVector.Z = 0;
+                    HueVector.Z = 0;
 
-                    ShaderHueTranslator.GetHueVector(ref _hueVector, Notoriety.GetHue(mob.NotorietyFlag));
+                    ShaderHueTranslator.GetHueVector(ref HueVector, Notoriety.GetHue(mob.NotorietyFlag));
 
-                    batcher.Draw2D(_mobilesIndicator, x + w + gx, y + h + gy, 2, 2, ref _hueVector);
+                    batcher.Draw2D(mobilesTextureDot, x + w + gx, y + h + gy, 2, 2, ref HueVector);
                 }
 
                 //DRAW DOT OF PLAYER
                 ResetHueVector();
-                batcher.Draw2D(_playerIndicator, x + w, y + h, 2, 2, ref _hueVector);
+                batcher.Draw2D(SolidColorTextureCache.GetTexture(Color.White), x + w, y + h, 2, 2, ref HueVector);
             }
 
             return base.Draw(batcher, x, y);
@@ -312,11 +274,9 @@ namespace ClassicUO.Game.UI.Gumps
                             int gx = px - py;
                             int gy = px + py;
 
-                            int color = mb.Cells[x, y]
-                                          .Graphic;
+                            int color = mb.Cells[x, y].Graphic;
 
-                            bool island = mb.Cells[x, y]
-                                            .IsLand;
+                            bool island = mb.Cells[x, y].IsLand;
 
                             if (block != null)
                             {
@@ -355,7 +315,10 @@ namespace ClassicUO.Game.UI.Gumps
 
                             if (island && color > 0x4000)
                             {
-                                color = HuesLoader.Instance.GetColor16(16384, (ushort) (color - 0x4000)); //28672 is an arbitrary position in hues.mul, is the 14 position in the range
+                                color = HuesLoader.Instance.GetColor16
+                                (
+                                    16384, (ushort) (color - 0x4000)
+                                ); //28672 is an arbitrary position in hues.mul, is the 14 position in the range
                             }
                             else
                             {
@@ -368,22 +331,30 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             }
 
-            _mapTexture = new UOTexture32(Width, Height);
+            _mapTexture = new UOTexture(Width, Height);
             _mapTexture.PushData(data);
         }
 
-        private void CreatePixels(uint[] data, int color, int x, int y, int w, int h, Point[] table, int count)
+        private void CreatePixels
+        (
+            uint[] data,
+            int color,
+            int x,
+            int y,
+            int w,
+            int h,
+            Point[] table,
+            int count
+        )
         {
             int px = x;
             int py = y;
 
             for (int i = 0; i < count; i++)
             {
-                px += table[i]
-                    .X;
+                px += table[i].X;
 
-                py += table[i]
-                    .Y;
+                py += table[i].Y;
 
                 int gx = px;
 
@@ -410,14 +381,12 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override bool Contains(int x, int y)
         {
-            return _mapTexture.Contains(x, y);
+            return _mapTexture.Contains(x - Offset.X, y - Offset.Y);
         }
 
         public override void Dispose()
         {
-            _playerIndicator?.Dispose();
             _mapTexture?.Dispose();
-            _mobilesIndicator?.Dispose();
             base.Dispose();
         }
     }

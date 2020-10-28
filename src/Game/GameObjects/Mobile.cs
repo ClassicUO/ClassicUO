@@ -1,26 +1,3 @@
-#region license
-
-// Copyright (C) 2020 ClassicUO Development Community on Github
-// 
-// This project is an alternative client for the game Ultima Online.
-// The goal of this is to develop a lightweight client considering
-// new technologies.
-// 
-//  This program is free software: you can redistribute it and/or modify
-//  it under the terms of the GNU General Public License as published by
-//  the Free Software Foundation, either version 3 of the License, or
-//  (at your option) any later version.
-// 
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-// 
-//  You should have received a copy of the GNU General Public License
-//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
-#endregion
-
 using System;
 using ClassicUO.Configuration;
 using ClassicUO.Data;
@@ -102,13 +79,16 @@ namespace ClassicUO.Game.GameObjects
         private static readonly byte[,] _animationIdle =
         {
             {
-                (byte) LOW_ANIMATION_GROUP.LAG_FIDGET_1, (byte) LOW_ANIMATION_GROUP.LAG_FIDGET_2, (byte) LOW_ANIMATION_GROUP.LAG_FIDGET_1
+                (byte) LOW_ANIMATION_GROUP.LAG_FIDGET_1, (byte) LOW_ANIMATION_GROUP.LAG_FIDGET_2,
+                (byte) LOW_ANIMATION_GROUP.LAG_FIDGET_1
             },
             {
-                (byte) HIGHT_ANIMATION_GROUP.HAG_FIDGET_1, (byte) HIGHT_ANIMATION_GROUP.HAG_FIDGET_2, (byte) HIGHT_ANIMATION_GROUP.HAG_FIDGET_1
+                (byte) HIGHT_ANIMATION_GROUP.HAG_FIDGET_1, (byte) HIGHT_ANIMATION_GROUP.HAG_FIDGET_2,
+                (byte) HIGHT_ANIMATION_GROUP.HAG_FIDGET_1
             },
             {
-                (byte) PEOPLE_ANIMATION_GROUP.PAG_FIDGET_1, (byte) PEOPLE_ANIMATION_GROUP.PAG_FIDGET_2, (byte) PEOPLE_ANIMATION_GROUP.PAG_FIDGET_3
+                (byte) PEOPLE_ANIMATION_GROUP.PAG_FIDGET_1, (byte) PEOPLE_ANIMATION_GROUP.PAG_FIDGET_2,
+                (byte) PEOPLE_ANIMATION_GROUP.PAG_FIDGET_3
             }
         };
         private bool _isDead;
@@ -135,9 +115,7 @@ namespace ClassicUO.Game.GameObjects
 
         public bool IsDead
         {
-            get => Graphic == 0x0192 ||
-                   Graphic == 0x0193 ||
-                   Graphic >= 0x025F && Graphic <= 0x0260 ||
+            get => Graphic == 0x0192 || Graphic == 0x0193 || Graphic >= 0x025F && Graphic <= 0x0260 ||
                    Graphic == 0x2B6 || Graphic == 0x02B7 || _isDead;
             set => _isDead = value;
         }
@@ -150,14 +128,10 @@ namespace ClassicUO.Game.GameObjects
             set { }
         }
 
-        public bool IsHuman => Graphic >= 0x0190 && Graphic <= 0x0193 ||
-                               Graphic >= 0x00B7 && Graphic <= 0x00BA ||
-                               Graphic >= 0x025D && Graphic <= 0x0260 ||
-                               Graphic == 0x029A || Graphic == 0x029B ||
-                               Graphic == 0x02B6 || Graphic == 0x02B7 ||
-                               Graphic == 0x03DB || Graphic == 0x03DF || 
-                               Graphic == 0x03E2 || Graphic == 0x02E8 || 
-                               Graphic == 0x02E9 || Graphic == 0x04E5;
+        public bool IsHuman => Graphic >= 0x0190 && Graphic <= 0x0193 || Graphic >= 0x00B7 && Graphic <= 0x00BA ||
+                               Graphic >= 0x025D && Graphic <= 0x0260 || Graphic == 0x029A || Graphic == 0x029B ||
+                               Graphic == 0x02B6 || Graphic == 0x02B7 || Graphic == 0x03DB || Graphic == 0x03DF ||
+                               Graphic == 0x03E2 || Graphic == 0x02E8 || Graphic == 0x02E9 || Graphic == 0x04E5;
 
         public bool IsGargoyle => Client.Version >= ClientVersion.CV_7000 && Graphic == 0x029A || Graphic == 0x029B;
 
@@ -245,14 +219,14 @@ namespace ClassicUO.Game.GameObjects
             _lastAnimationIdleDelay = Time.Ticks + (TIME + RandomHelper.GetValue(0, TIME));
         }
 
-        public override void Update(double totalMS, double frameMS)
+        public override void Update(double totalTime, double frameTime)
         {
             if (IsDestroyed)
             {
                 return;
             }
 
-            base.Update(totalMS, frameMS);
+            base.Update(totalTime, frameTime);
 
             if (_lastAnimationIdleDelay < Time.Ticks)
             {
@@ -348,7 +322,15 @@ namespace ClassicUO.Game.GameObjects
         }
 
 
-        public void SetAnimation(byte id, byte interval = 0, byte frameCount = 0, byte repeatCount = 0, bool repeat = false, bool forward = false)
+        public void SetAnimation
+        (
+            byte id,
+            byte interval = 0,
+            byte frameCount = 0,
+            byte repeatCount = 0,
+            bool repeat = false,
+            bool forward = false
+        )
         {
             AnimationGroup = id;
             AnimIndex = (sbyte) (forward ? 0 : frameCount);
@@ -386,29 +368,24 @@ namespace ClassicUO.Game.GameObjects
                     return;
                 }
 
-                ANIMATION_GROUPS_TYPE type = AnimationsLoader.Instance.DataIndex[graphic]
-                                                             .Type;
+                ANIMATION_GROUPS_TYPE type = AnimationsLoader.Instance.DataIndex[graphic].Type;
 
-                if (AnimationsLoader.Instance.DataIndex[graphic]
-                                    .IsUOP && !AnimationsLoader.Instance.DataIndex[graphic]
-                                                               .IsValidMUL)
+                if (AnimationsLoader.Instance.DataIndex[graphic].IsUOP &&
+                    !AnimationsLoader.Instance.DataIndex[graphic].IsValidMUL)
                 {
                     // do nothing ?
                 }
                 else
                 {
-                    if (!AnimationsLoader.Instance.DataIndex[graphic]
-                                         .HasBodyConversion)
+                    if (!AnimationsLoader.Instance.DataIndex[graphic].HasBodyConversion)
                     {
-                        ushort newGraphic = AnimationsLoader.Instance.DataIndex[graphic]
-                                                            .Graphic;
+                        ushort newGraphic = AnimationsLoader.Instance.DataIndex[graphic].Graphic;
 
                         if (graphic != newGraphic)
                         {
                             graphic = newGraphic;
 
-                            ANIMATION_GROUPS_TYPE newType = AnimationsLoader.Instance.DataIndex[graphic]
-                                                                            .Type;
+                            ANIMATION_GROUPS_TYPE newType = AnimationsLoader.Instance.DataIndex[graphic].Type;
 
                             if (newType != type)
                             {
@@ -418,8 +395,7 @@ namespace ClassicUO.Game.GameObjects
                     }
                 }
 
-                ANIMATION_FLAGS flags = AnimationsLoader.Instance.DataIndex[graphic]
-                                                        .Flags;
+                ANIMATION_FLAGS flags = AnimationsLoader.Instance.DataIndex[graphic].Flags;
 
                 ANIMATION_GROUPS animGroup = ANIMATION_GROUPS.AG_NONE;
 
@@ -501,7 +477,8 @@ namespace ClassicUO.Game.GameObjects
 
                 if (isLowExtended && AnimationGroup == 18)
                 {
-                    if (!AnimationsLoader.Instance.AnimationExists(graphic, 18) && AnimationsLoader.Instance.AnimationExists(graphic, 17))
+                    if (!AnimationsLoader.Instance.AnimationExists(graphic, 18) &&
+                        AnimationsLoader.Instance.AnimationExists(graphic, 17))
                     {
                         AnimationGroup = GetReplacedObjectAnimation(graphic, 17);
                     }
@@ -539,7 +516,7 @@ namespace ClassicUO.Game.GameObjects
 
         private void ProcessFootstepsSound()
         {
-            if (ProfileManager.Current.EnableFootstepsSound && IsHuman && !IsHidden && !IsDead && !IsFlying)
+            if (ProfileManager.CurrentProfile.EnableFootstepsSound && IsHuman && !IsHidden && !IsDead && !IsFlying)
             {
                 long ticks = Time.Ticks;
 
@@ -629,7 +606,8 @@ namespace ClassicUO.Game.GameObjects
                 {
                     ushort hue = 0;
 
-                    AnimationDirection direction = AnimationsLoader.Instance.GetBodyAnimationGroup(ref id, ref animGroup, ref hue, true)
+                    AnimationDirection direction = AnimationsLoader.Instance.GetBodyAnimationGroup
+                                                                       (ref id, ref animGroup, ref hue, true)
                                                                    .Direction[dir];
 
                     AnimationsLoader.Instance.AnimID = id;
@@ -642,7 +620,8 @@ namespace ClassicUO.Game.GameObjects
                         AnimationsLoader.Instance.LoadDirectionGroup(ref direction);
                     }
 
-                    if (direction != null && (direction.Address != 0 && direction.Size != 0 && direction.FileIndex != -1 || direction.IsUOP))
+                    if (direction != null &&
+                        (direction.Address != 0 && direction.Size != 0 && direction.FileIndex != -1 || direction.IsUOP))
                     {
                         direction.LastAccessTime = Time.Ticks;
                         int fc = direction.FrameCount;
@@ -781,10 +760,8 @@ namespace ClassicUO.Game.GameObjects
 
                     int delay = (int) Time.Ticks - (int) LastStepTime;
 
-                    bool mounted = IsMounted ||
-                                   SpeedMode == CharacterSpeedType.FastUnmount ||
-                                   SpeedMode == CharacterSpeedType.FastUnmountAndCantRun ||
-                                   IsFlying;
+                    bool mounted = IsMounted || SpeedMode == CharacterSpeedType.FastUnmount ||
+                                   SpeedMode == CharacterSpeedType.FastUnmountAndCantRun || IsFlying;
 
                     bool run = step.Run;
 
@@ -867,11 +844,10 @@ namespace ClassicUO.Game.GameObjects
                             if (Z - step.Z >= 22)
                             {
                                 // oUCH!!!!
-                                AddMessage(MessageType.Label, ResGeneral.Ouch, TEXT_TYPE.CLIENT);
+                                AddMessage(MessageType.Label, ResGeneral.Ouch, TextType.CLIENT);
                             }
 
-                            if (World.Player.Walker.StepInfos[World.Player.Walker.CurrentWalkSequence]
-                                     .Accepted)
+                            if (World.Player.Walker.StepInfos[World.Player.Walker.CurrentWalkSequence].Accepted)
                             {
                                 int sequence = World.Player.Walker.CurrentWalkSequence + 1;
 
@@ -881,7 +857,9 @@ namespace ClassicUO.Game.GameObjects
 
                                     for (int i = 0; i < count; i++)
                                     {
-                                        World.Player.Walker.StepInfos[sequence - 1] = World.Player.Walker.StepInfos[sequence];
+                                        World.Player.Walker.StepInfos[sequence - 1] =
+                                            World.Player.Walker.StepInfos[sequence];
+
                                         sequence++;
                                     }
                                 }
@@ -938,7 +916,8 @@ namespace ClassicUO.Game.GameObjects
             {
                 int result = 0;
 
-                if (IsHuman && !IsMounted && !IsFlying && !TestStepNoChangeDirection(this, GetGroupForAnimation(this, isParent: true)))
+                if (IsHuman && !IsMounted && !IsFlying && !TestStepNoChangeDirection
+                    (this, GetGroupForAnimation(this, isParent: true)))
                 {
                     GameObject start = this;
 
@@ -1097,8 +1076,7 @@ namespace ClassicUO.Game.GameObjects
 
                                     for (int i = 0; i < AnimationsLoader.Instance.SittingInfos.Length; i++)
                                     {
-                                        if (AnimationsLoader.Instance.SittingInfos[i]
-                                                            .Graphic == graphic)
+                                        if (AnimationsLoader.Instance.SittingInfos[i].Graphic == graphic)
                                         {
                                             result = i + 1;
 
@@ -1139,9 +1117,9 @@ namespace ClassicUO.Game.GameObjects
 
             int offY = 0;
 
-            bool health = ProfileManager.Current.ShowMobilesHP;
-            int alwaysHP = ProfileManager.Current.MobileHPShowWhen;
-            int mode = ProfileManager.Current.MobileHPType;
+            bool health = ProfileManager.CurrentProfile.ShowMobilesHP;
+            int alwaysHP = ProfileManager.CurrentProfile.MobileHPShowWhen;
+            int mode = ProfileManager.CurrentProfile.MobileHPType;
 
             Point p = RealScreenPosition;
 
@@ -1157,16 +1135,10 @@ namespace ClassicUO.Game.GameObjects
 
             AnimationsLoader.Instance.GetAnimationDimensions
             (
-                AnimIndex,
-                GetGraphicForAnimation(),
+                AnimIndex, GetGraphicForAnimation(),
                 /*(byte) m.GetDirectionForAnimation()*/ 0,
-                /*Mobile.GetGroupForAnimation(m, isParent:true)*/ 0,
-                IsMounted,
-                /*(byte) m.AnimIndex*/ 0,
-                out _,
-                out int centerY,
-                out _,
-                out int height
+                /*Mobile.GetGroupForAnimation(m, isParent:true)*/ 0, IsMounted,
+                /*(byte) m.AnimIndex*/ 0, out _, out int centerY, out _, out int height
             );
 
             p.X += (int) Offset.X + 22;
@@ -1269,8 +1241,7 @@ namespace ClassicUO.Game.GameObjects
 
             if (!(this is PlayerMobile))
             {
-                UIManager.GetGump<PaperDollGump>(serial)
-                         ?.Dispose();
+                UIManager.GetGump<PaperDollGump>(serial)?.Dispose();
 
                 _pool.ReturnOne(this);
             }

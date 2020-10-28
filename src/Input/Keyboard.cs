@@ -1,27 +1,4 @@
-﻿#region license
-
-// Copyright (C) 2020 ClassicUO Development Community on Github
-// 
-// This project is an alternative client for the game Ultima Online.
-// The goal of this is to develop a lightweight client considering
-// new technologies.
-// 
-//  This program is free software: you can redistribute it and/or modify
-//  it under the terms of the GNU General Public License as published by
-//  the Free Software Foundation, either version 3 of the License, or
-//  (at your option) any later version.
-// 
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-// 
-//  You should have received a copy of the GNU General Public License
-//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
-#endregion
-
-using SDL2;
+﻿using SDL2;
 
 namespace ClassicUO.Input
 {
@@ -30,7 +7,9 @@ namespace ClassicUO.Input
         private static SDL.SDL_Keycode _code;
 
 
-        public static SDL.SDL_Keymod IgnoreKeyMod { get; } = SDL.SDL_Keymod.KMOD_CAPS | SDL.SDL_Keymod.KMOD_NUM | SDL.SDL_Keymod.KMOD_MODE | SDL.SDL_Keymod.KMOD_RESERVED;
+        public static SDL.SDL_Keymod IgnoreKeyMod { get; } = SDL.SDL_Keymod.KMOD_CAPS | SDL.SDL_Keymod.KMOD_NUM |
+                                                             SDL.SDL_Keymod.KMOD_MODE | SDL.SDL_Keymod.KMOD_RESERVED;
+
         public static bool Alt { get; private set; }
         public static bool Shift { get; private set; }
         public static bool Ctrl { get; private set; }
@@ -52,7 +31,8 @@ namespace ClassicUO.Input
         {
             SDL.SDL_Keymod mod = e.keysym.mod & ~IgnoreKeyMod;
 
-            if ((mod & (SDL.SDL_Keymod.KMOD_RALT | SDL.SDL_Keymod.KMOD_LCTRL)) == (SDL.SDL_Keymod.KMOD_RALT | SDL.SDL_Keymod.KMOD_LCTRL))
+            if ((mod & (SDL.SDL_Keymod.KMOD_RALT | SDL.SDL_Keymod.KMOD_LCTRL)) ==
+                (SDL.SDL_Keymod.KMOD_RALT | SDL.SDL_Keymod.KMOD_LCTRL))
             {
                 e.keysym.sym = SDL.SDL_Keycode.SDLK_UNKNOWN;
                 e.keysym.mod = SDL.SDL_Keymod.KMOD_NONE;
@@ -69,7 +49,8 @@ namespace ClassicUO.Input
         {
             SDL.SDL_Keymod mod = e.keysym.mod & ~IgnoreKeyMod;
 
-            if ((mod & (SDL.SDL_Keymod.KMOD_RALT | SDL.SDL_Keymod.KMOD_LCTRL)) == (SDL.SDL_Keymod.KMOD_RALT | SDL.SDL_Keymod.KMOD_LCTRL))
+            if ((mod & (SDL.SDL_Keymod.KMOD_RALT | SDL.SDL_Keymod.KMOD_LCTRL)) ==
+                (SDL.SDL_Keymod.KMOD_RALT | SDL.SDL_Keymod.KMOD_LCTRL))
             {
                 e.keysym.sym = SDL.SDL_Keycode.SDLK_UNKNOWN;
                 e.keysym.mod = SDL.SDL_Keymod.KMOD_NONE;

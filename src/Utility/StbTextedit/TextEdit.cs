@@ -847,24 +847,19 @@ namespace StbTextEditSharp
             u = s.undo_rec[s.undo_point - 1];
             int rpos = s.redo_point - 1;
 
-            s.undo_rec[rpos]
-             .char_storage = -1;
+            s.undo_rec[rpos].char_storage = -1;
 
-            s.undo_rec[rpos]
-             .insert_length = u.delete_length;
+            s.undo_rec[rpos].insert_length = u.delete_length;
 
-            s.undo_rec[rpos]
-             .delete_length = u.insert_length;
+            s.undo_rec[rpos].delete_length = u.insert_length;
 
-            s.undo_rec[rpos]
-             .where = u.where;
+            s.undo_rec[rpos].where = u.where;
 
             if (u.delete_length != 0)
             {
                 if (s.undo_char_point + u.delete_length >= 999)
                 {
-                    s.undo_rec[rpos]
-                     .insert_length = 0;
+                    s.undo_rec[rpos].insert_length = 0;
                 }
                 else
                 {
@@ -882,15 +877,13 @@ namespace StbTextEditSharp
 
                     rpos = s.redo_point - 1;
 
-                    s.undo_rec[rpos]
-                     .char_storage = s.redo_char_point - u.delete_length;
+                    s.undo_rec[rpos].char_storage = s.redo_char_point - u.delete_length;
 
                     s.redo_char_point = s.redo_char_point - u.delete_length;
 
                     for (i = 0; i < u.delete_length; ++i)
                     {
-                        s.undo_char[s.undo_rec[rpos]
-                                     .char_storage + i] = (sbyte) text[u.where + i];
+                        s.undo_char[s.undo_rec[rpos].char_storage + i] = (sbyte) text[u.where + i];
                     }
                 }
 
@@ -921,17 +914,13 @@ namespace StbTextEditSharp
             int upos = s.undo_point;
             r = s.undo_rec[s.redo_point];
 
-            s.undo_rec[upos]
-             .delete_length = r.insert_length;
+            s.undo_rec[upos].delete_length = r.insert_length;
 
-            s.undo_rec[upos]
-             .insert_length = r.delete_length;
+            s.undo_rec[upos].insert_length = r.delete_length;
 
-            s.undo_rec[upos]
-             .where = r.where;
+            s.undo_rec[upos].where = r.where;
 
-            s.undo_rec[upos]
-             .char_storage = -1;
+            s.undo_rec[upos].char_storage = -1;
 
             UndoRecord u = s.undo_rec[upos];
 
@@ -939,18 +928,15 @@ namespace StbTextEditSharp
             {
                 if (s.undo_char_point + u.insert_length > s.redo_char_point)
                 {
-                    s.undo_rec[upos]
-                     .insert_length = 0;
+                    s.undo_rec[upos].insert_length = 0;
 
-                    s.undo_rec[upos]
-                     .delete_length = 0;
+                    s.undo_rec[upos].delete_length = 0;
                 }
                 else
                 {
                     int i = 0;
 
-                    s.undo_rec[upos]
-                     .char_storage = s.undo_char_point;
+                    s.undo_rec[upos].char_storage = s.undo_char_point;
 
                     s.undo_char_point = s.undo_char_point + u.insert_length;
                     u = s.undo_rec[upos];

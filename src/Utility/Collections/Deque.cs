@@ -1,27 +1,4 @@
-﻿#region license
-
-// Copyright (C) 2020 ClassicUO Development Community on Github
-// 
-// This project is an alternative client for the game Ultima Online.
-// The goal of this is to develop a lightweight client considering
-// new technologies.
-// 
-//  This program is free software: you can redistribute it and/or modify
-//  it under the terms of the GNU General Public License as published by
-//  the Free Software Foundation, either version 3 of the License, or
-//  (at your option) any later version.
-// 
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-// 
-//  You should have received a copy of the GNU General Public License
-//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
-#endregion
-
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -129,7 +106,8 @@ namespace ClassicUO.Utility.Collections
             {
                 if (value < Count)
                 {
-                    throw new ArgumentOutOfRangeException(nameof(value), "Capacity cannot be set to a value less than Count");
+                    throw new ArgumentOutOfRangeException
+                        (nameof(value), "Capacity cannot be set to a value less than Count");
                 }
 
                 if (value == _buffer.Length)
@@ -971,7 +949,8 @@ namespace ClassicUO.Utility.Collections
         {
             if (index < 0 || index > sourceLength)
             {
-                throw new ArgumentOutOfRangeException(nameof(index), "Invalid new index " + index + " for source length " + sourceLength);
+                throw new ArgumentOutOfRangeException
+                    (nameof(index), "Invalid new index " + index + " for source length " + sourceLength);
             }
         }
 
@@ -989,7 +968,8 @@ namespace ClassicUO.Utility.Collections
         {
             if (index < 0 || index >= sourceLength)
             {
-                throw new ArgumentOutOfRangeException(nameof(index), "Invalid existing index " + index + " for source length " + sourceLength);
+                throw new ArgumentOutOfRangeException
+                    (nameof(index), "Invalid existing index " + index + " for source length " + sourceLength);
             }
         }
 
@@ -1019,7 +999,8 @@ namespace ClassicUO.Utility.Collections
 
             if (sourceLength - offset < count)
             {
-                throw new ArgumentException("Invalid offset (" + offset + ") or count + (" + count + ") for source length " + sourceLength);
+                throw new ArgumentException
+                    ("Invalid offset (" + offset + ") or count + (" + count + ") for source length " + sourceLength);
             }
         }
 

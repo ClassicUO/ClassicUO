@@ -1,33 +1,9 @@
-﻿#region license
-
-// Copyright (C) 2020 ClassicUO Development Community on Github
-// 
-// This project is an alternative client for the game Ultima Online.
-// The goal of this is to develop a lightweight client considering
-// new technologies.
-// 
-//  This program is free software: you can redistribute it and/or modify
-//  it under the terms of the GNU General Public License as published by
-//  the Free Software Foundation, either version 3 of the License, or
-//  (at your option) any later version.
-// 
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-// 
-//  You should have received a copy of the GNU General Public License
-//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
-#endregion
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using ClassicUO.Input;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
-using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Controls
 {
@@ -40,20 +16,30 @@ namespace ClassicUO.Game.UI.Controls
     internal class HSliderBar : Control
     {
         private bool _clicked;
-        private Point _clickPosition;
         private readonly bool _drawUp;
-        private readonly UOTexture32[] _gumpSpliderBackground;
-        private readonly UOTexture32 _gumpWidget;
+        private readonly UOTexture[] _gumpSpliderBackground;
+        private readonly UOTexture _gumpWidget;
         private readonly List<HSliderBar> _pairedSliders = new List<HSliderBar>();
-        private Rectangle _rect;
-
-        //private int _newValue;
         private int _sliderX;
         private readonly HSliderBarStyle _style;
         private readonly RenderedText _text;
         private int _value = -1;
 
-        public HSliderBar(int x, int y, int w, int min, int max, int value, HSliderBarStyle style, bool hasText = false, byte font = 0, ushort color = 0, bool unicode = true, bool drawUp = false)
+        public HSliderBar
+        (
+            int x,
+            int y,
+            int w,
+            int min,
+            int max,
+            int value,
+            HSliderBarStyle style,
+            bool hasText = false,
+            byte font = 0,
+            ushort color = 0,
+            bool unicode = true,
+            bool drawUp = false
+        )
         {
             X = x;
             Y = y;
@@ -77,9 +63,10 @@ namespace ClassicUO.Game.UI.Controls
                 {
                     case HSliderBarStyle.MetalWidgetRecessedBar:
 
-                        _gumpSpliderBackground = new UOTexture32[3]
+                        _gumpSpliderBackground = new UOTexture[3]
                         {
-                            GumpsLoader.Instance.GetTexture(213), GumpsLoader.Instance.GetTexture(214), GumpsLoader.Instance.GetTexture(215)
+                            GumpsLoader.Instance.GetTexture(213), GumpsLoader.Instance.GetTexture(214),
+                            GumpsLoader.Instance.GetTexture(215)
                         };
 
                         _gumpWidget = GumpsLoader.Instance.GetTexture(216);
@@ -99,7 +86,6 @@ namespace ClassicUO.Game.UI.Controls
                     Height = _gumpWidget.Height;
                 }
 
-                //RecalculateSliderX();
                 CalculateOffset();
             }
 
@@ -154,22 +140,19 @@ namespace ClassicUO.Game.UI.Controls
 
         public event EventHandler ValueChanged;
 
-        public override void Update(double totalMS, double frameMS)
+        public override void Update(double totalTime, double frameTime)
         {
             if (_gumpSpliderBackground != null)
             {
-                foreach (UOTexture32 t in _gumpSpliderBackground)
+                foreach (UOTexture t in _gumpSpliderBackground)
                 {
-                    t.Ticks = (long) totalMS;
+                    t.Ticks = (long) totalTime;
                 }
             }
 
-            //ModifyPairedValues(_newValue - Value);
-            _gumpWidget.Ticks = (long) totalMS;
+            _gumpWidget.Ticks = (long) totalTime;
 
-            // if (_value != _newValue)
-            //_value = _newValue;
-            base.Update(totalMS, frameMS);
+            base.Update(totalTime, frameTime);
         }
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
@@ -178,25 +161,20 @@ namespace ClassicUO.Game.UI.Controls
 
             if (_gumpSpliderBackground != null)
             {
-                batcher.Draw2D(_gumpSpliderBackground[0], x, y, ref _hueVector);
+                batcher.Draw2D(_gumpSpliderBackground[0], x, y, ref HueVector);
 
                 batcher.Draw2DTiled
                 (
-                    _gumpSpliderBackground[1], x + _gumpSpliderBackground[0]
-                        .Width, y, BarWidth - _gumpSpliderBackground[2]
-                        .Width - _gumpSpliderBackground[0]
-                        .Width, _gumpSpliderBackground[1]
-                        .Height, ref _hueVector
+                    _gumpSpliderBackground[1], x + _gumpSpliderBackground[0].Width, y,
+                    BarWidth - _gumpSpliderBackground[2].Width - _gumpSpliderBackground[0].Width,
+                    _gumpSpliderBackground[1].Height, ref HueVector
                 );
 
                 batcher.Draw2D
-                (
-                    _gumpSpliderBackground[2], x + BarWidth - _gumpSpliderBackground[2]
-                        .Width, y, ref _hueVector
-                );
+                    (_gumpSpliderBackground[2], x + BarWidth - _gumpSpliderBackground[2].Width, y, ref HueVector);
             }
 
-            batcher.Draw2D(_gumpWidget, x + _sliderX, y, ref _hueVector);
+            batcher.Draw2D(_gumpWidget, x + _sliderX, y, ref HueVector);
 
             if (_text != null)
             {
@@ -232,8 +210,6 @@ namespace ClassicUO.Game.UI.Controls
             }
 
             _clicked = true;
-            _clickPosition.X = x;
-            _clickPosition.Y = y;
         }
 
         protected override void OnMouseUp(int x, int y, MouseButtonType button)
@@ -253,12 +229,12 @@ namespace ClassicUO.Game.UI.Controls
             switch (delta)
             {
                 case MouseEventType.WheelScrollUp:
-                    Value--;
+                    Value++;
 
                     break;
 
                 case MouseEventType.WheelScrollDown:
-                    Value++;
+                    Value--;
 
                     break;
             }
@@ -317,21 +293,6 @@ namespace ClassicUO.Game.UI.Controls
             }
         }
 
-        public override bool Contains(int x, int y)
-        {
-            _rect.X = 0;
-            _rect.Y = 0;
-            _rect.Width = BarWidth;
-            _rect.Height = _gumpWidget.Height;
-
-            return _rect.Contains(x, y);
-        }
-
-        private void RecalculateSliderX()
-        {
-            _sliderX = (BarWidth - _gumpWidget.Width) * ((Value - MinValue) / (MaxValue - MinValue));
-        }
-
         public void AddParisSlider(HSliderBar s)
         {
             _pairedSliders.Add(s);
@@ -353,36 +314,22 @@ namespace ClassicUO.Game.UI.Controls
             {
                 if (d > 0)
                 {
-                    if (_pairedSliders[sliderIndex]
-                        .Value < _pairedSliders[sliderIndex]
-                        .MaxValue)
+                    if (_pairedSliders[sliderIndex].Value < _pairedSliders[sliderIndex].MaxValue)
                     {
                         updateSinceLastCycle = true;
 
-                        _pairedSliders[sliderIndex]
-                            .InternalSetValue
-                            (
-                                _pairedSliders[sliderIndex]
-                                    .Value + d
-                            );
+                        _pairedSliders[sliderIndex].InternalSetValue(_pairedSliders[sliderIndex].Value + d);
 
                         points--;
                     }
                 }
                 else
                 {
-                    if (_pairedSliders[sliderIndex]
-                        .Value > _pairedSliders[sliderIndex]
-                        .MinValue)
+                    if (_pairedSliders[sliderIndex].Value > _pairedSliders[sliderIndex].MinValue)
                     {
                         updateSinceLastCycle = true;
 
-                        _pairedSliders[sliderIndex]
-                            .InternalSetValue
-                            (
-                                _pairedSliders[sliderIndex]
-                                    ._value + d
-                            );
+                        _pairedSliders[sliderIndex].InternalSetValue(_pairedSliders[sliderIndex]._value + d);
 
                         points--;
                     }

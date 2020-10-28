@@ -17,11 +17,13 @@ namespace TinyJson
                 bool matchSnakeCase = type.GetCustomAttribute<MatchSnakeCaseAttribute>(true) != null;
                 bool first = true;
 
-                PropertyInfo[] properties = type.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);
+                PropertyInfo[] properties = type.GetProperties
+                    (BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);
 
                 if (properties.Length == 0)
                 {
-                    FieldInfo[] fields = type.GetFields(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);
+                    FieldInfo[] fields = type.GetFields
+                        (BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);
 
                     foreach (FieldInfo fieldinfo in fields)
                     {
@@ -136,8 +138,7 @@ namespace TinyJson
             {
                 DateTime date = (DateTime) obj;
 
-                string zulu = date.ToUniversalTime()
-                                  .ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'");
+                string zulu = date.ToUniversalTime().ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'");
 
                 builder.AppendString(zulu);
             };

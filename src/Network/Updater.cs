@@ -1,27 +1,4 @@
-﻿#region license
-
-// Copyright (C) 2020 ClassicUO Development Community on Github
-// 
-// This project is an alternative client for the game Ultima Online.
-// The goal of this is to develop a lightweight client considering
-// new technologies.
-// 
-//  This program is free software: you can redistribute it and/or modify
-//  it under the terms of the GNU General Public License as published by
-//  the Free Software Foundation, either version 3 of the License, or
-//  (at your option) any later version.
-// 
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-// 
-//  You should have received a copy of the GNU General Public License
-//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
-#endregion
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -50,7 +27,9 @@ namespace ClassicUO.Network
         static Updater()
         {
             ServicePointManager.ServerCertificateValidationCallback = delegate { return true; };
-            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12;
+
+            ServicePointManager.SecurityProtocol =
+                SecurityProtocolType.Tls | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12;
         }
 
         public Updater()
@@ -85,12 +64,14 @@ namespace ClassicUO.Network
 
                 int progressBlockCount = (int) (_progress * BLOCK_COUNT);
 
-                string text = $"{new string('#', progressBlockCount)}{new string('-', BLOCK_COUNT - progressBlockCount)} - {e.ProgressPercentage}% {ANIMATION[_animIndex++ % ANIMATION.Length]}";
+                string text =
+                    $"{new string('#', progressBlockCount)}{new string('-', BLOCK_COUNT - progressBlockCount)} - {e.ProgressPercentage}% {ANIMATION[_animIndex++ % ANIMATION.Length]}";
 
                 int commonPrefixLength = 0;
                 int commonLength = Math.Min(_currentText.Length, text.Length);
 
-                while (commonPrefixLength < commonLength && text[commonPrefixLength] == _currentText[commonPrefixLength])
+                while (commonPrefixLength < commonLength &&
+                       text[commonPrefixLength] == _currentText[commonPrefixLength])
                 {
                     commonPrefixLength++;
                 }
@@ -159,8 +140,7 @@ namespace ClassicUO.Network
                     continue;
                 }
 
-                string tagName = releaseToken["tag_name"]
-                    .ToString();
+                string tagName = releaseToken["tag_name"].ToString();
 
                 Log.Trace("Fetching: " + tagName);
 
@@ -188,11 +168,9 @@ namespace ClassicUO.Network
                     Log.Trace("Found new version available: " + version);
 
 #endif
-                    string name = releaseToken["name"]
-                        .ToString();
+                    string name = releaseToken["name"].ToString();
 
-                    string body = releaseToken["body"]
-                        .ToString();
+                    string body = releaseToken["body"].ToString();
 
                     List<object> asset_list = releaseToken["assets"] as List<object>;
 
@@ -210,11 +188,9 @@ namespace ClassicUO.Network
                         continue;
                     }
 
-                    string assetName = asset["name"]
-                        .ToString();
+                    string assetName = asset["name"].ToString();
 
-                    string downloadUrl = asset["browser_download_url"]
-                        .ToString();
+                    string downloadUrl = asset["browser_download_url"].ToString();
 
                     string temp;
 
@@ -271,12 +247,16 @@ namespace ClassicUO.Network
                     if (CUOEnviroment.IsUnix)
                     {
                         processStartInfo.FileName = "mono";
-                        processStartInfo.Arguments = $"\"{Path.Combine(tempPath, "ClassicUO.exe")}\" --source \"{CUOEnviroment.ExecutablePath}\" --pid {Process.GetCurrentProcess().Id} --action update";
+
+                        processStartInfo.Arguments =
+                            $"\"{Path.Combine(tempPath, "ClassicUO.exe")}\" --source \"{CUOEnviroment.ExecutablePath}\" --pid {Process.GetCurrentProcess().Id} --action update";
                     }
                     else
                     {
                         processStartInfo.FileName = Path.Combine(tempPath, "ClassicUO.exe");
-                        processStartInfo.Arguments = $"--source \"{CUOEnviroment.ExecutablePath}\" --pid {Process.GetCurrentProcess().Id} --action update";
+
+                        processStartInfo.Arguments =
+                            $"--source \"{CUOEnviroment.ExecutablePath}\" --pid {Process.GetCurrentProcess().Id} --action update";
                     }
 
                     Process.Start(processStartInfo);

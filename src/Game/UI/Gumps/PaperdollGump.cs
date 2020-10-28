@@ -1,26 +1,3 @@
-#region license
-
-// Copyright (C) 2020 ClassicUO Development Community on Github
-// 
-// This project is an alternative client for the game Ultima Online.
-// The goal of this is to develop a lightweight client considering
-// new technologies.
-// 
-//  This program is free software: you can redistribute it and/or modify
-//  it under the terms of the GNU General Public License as published by
-//  the Free Software Foundation, either version 3 of the License, or
-//  (at your option) any later version.
-// 
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-// 
-//  You should have received a copy of the GNU General Public License
-//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
-#endregion
-
 using System;
 using System.IO;
 using System.Xml;
@@ -77,7 +54,7 @@ namespace ClassicUO.Game.UI.Gumps
             BuildGump();
         }
 
-        public override GUMP_TYPE GumpType => GUMP_TYPE.GT_PAPERDOLL;
+        public override GumpType GumpType => GumpType.PaperDoll;
 
         public bool IsMinimized
         {
@@ -88,7 +65,8 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     _isMinimized = value;
 
-                    _picBase.Graphic = value ? (ushort) 0x7EE : (ushort) (0x07d0 + (LocalSerial == World.Player ? 0 : 1));
+                    _picBase.Graphic =
+                        value ? (ushort) 0x7EE : (ushort) (0x07d0 + (LocalSerial == World.Player ? 0 : 1));
 
                     foreach (Control c in Children)
                     {
@@ -335,10 +313,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 GameActions.ReplyGump
                 (
-                    World.Player,
-                    0x000001CD,
-                    0x00000001,
-                    new[]
+                    World.Player, 0x000001CD, 0x00000001, new[]
                     {
                         LocalSerial
                     }, new Tuple<ushort, string>[0]
@@ -373,7 +348,7 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
-        public override void Update(double totalMS, double frameMS)
+        public override void Update(double totalTime, double frameTime)
         {
             if (IsDisposed)
             {
@@ -399,18 +374,20 @@ namespace ClassicUO.Game.UI.Gumps
                 _warModeBtn.ButtonGraphicOver = btngumps[2];
             }
 
-            base.Update(totalMS, frameMS);
+            base.Update(totalTime, frameTime);
 
 
             if (_paperDollInteractable != null && (CanLift || LocalSerial == World.Player.Serial))
             {
-                bool force_false = SelectedObject.Object is Item item && (item.Layer == Layer.Backpack || item.ItemData.IsContainer);
+                bool force_false = SelectedObject.Object is Item item &&
+                                   (item.Layer == Layer.Backpack || item.ItemData.IsContainer);
 
                 if (_paperDollInteractable.HasFakeItem && !ItemHold.Enabled || force_false)
                 {
                     _paperDollInteractable.SetFakeItem(false);
                 }
-                else if (!_paperDollInteractable.HasFakeItem && ItemHold.Enabled && !ItemHold.IsFixedPosition && UIManager.MouseOverControl?.RootParent == this)
+                else if (!_paperDollInteractable.HasFakeItem && ItemHold.Enabled && !ItemHold.IsFixedPosition &&
+                         UIManager.MouseOverControl?.RootParent == this)
                 {
                     if (ItemHold.ItemData.AnimID != 0)
                     {
@@ -439,11 +416,11 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     if (CanLift || LocalSerial == World.Player.Serial)
                     {
-                        if (SelectedObject.Object is Item item && (item.Layer == Layer.Backpack || item.ItemData.IsContainer))
+                        if (SelectedObject.Object is Item item &&
+                            (item.Layer == Layer.Backpack || item.ItemData.IsContainer))
                         {
                             GameActions.DropItem(ItemHold.Serial, 0xFFFF, 0xFFFF, 0, item.Serial);
                             Mouse.CancelDoubleClick = true;
-                            Mouse.LDropPosition = Mouse.Position;
                         }
                         else
                         {
@@ -455,7 +432,6 @@ namespace ClassicUO.Game.UI.Gumps
                                 {
                                     GameActions.Equip(LocalSerial != World.Player ? container : World.Player);
                                     Mouse.CancelDoubleClick = true;
-                                    Mouse.LDropPosition = Mouse.Position;
                                 }
                             }
                         }
@@ -476,14 +452,12 @@ namespace ClassicUO.Game.UI.Gumps
                     }
                     else if (!DelayedObjectClickManager.IsEnabled)
                     {
-                        Point off = Mouse.LDroppedOffset;
+                        Point off = Mouse.LDragOffset;
 
                         DelayedObjectClickManager.Set
                         (
-                            item.Serial,
-                            Mouse.Position.X - off.X - ScreenCoordinateX,
-                            Mouse.Position.Y - off.Y - ScreenCoordinateY,
-                            Time.Ticks + Mouse.MOUSE_DELAY_DOUBLE_CLICK
+                            item.Serial, Mouse.Position.X - off.X - ScreenCoordinateX,
+                            Mouse.Position.Y - off.Y - ScreenCoordinateY, Time.Ticks + Mouse.MOUSE_DELAY_DOUBLE_CLICK
                         );
                     }
                 }
@@ -513,8 +487,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             LocalSerial = reader.ReadUInt32();
 
-            Client.Game.GetScene<GameScene>()
-                  .DoubleClickDelayed(LocalSerial);
+            Client.Game.GetScene<GameScene>().DoubleClickDelayed(LocalSerial);
 
             if (Profile.GumpsVersion >= 3)
             {
@@ -540,8 +513,7 @@ namespace ClassicUO.Game.UI.Gumps
                 LocalSerial = World.Player;
                 BuildGump();
 
-                Client.Game.GetScene<GameScene>()
-                      ?.DoubleClickDelayed(LocalSerial);
+                Client.Game.GetScene<GameScene>()?.DoubleClickDelayed(LocalSerial);
 
                 //GameActions.OpenPaperdoll(World.Player);
                 IsMinimized = bool.Parse(xml.GetAttribute("isminimized"));
@@ -570,12 +542,9 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 for (int i = 0; i < _slots.Length; i++)
                 {
-                    int idx = (int) _slots[i]
-                        .Layer;
+                    int idx = (int) _slots[i].Layer;
 
-                    _slots[i]
-                        .LocalSerial = mobile.FindItemByLayer((Layer) idx)
-                                             ?.Serial ?? 0;
+                    _slots[i].LocalSerial = mobile.FindItemByLayer((Layer) idx)?.Serial ?? 0;
                 }
             }
         }
@@ -597,32 +566,12 @@ namespace ClassicUO.Game.UI.Gumps
                     break;
 
                 case Buttons.Options:
-
-                    OptionsGump gump = UIManager.GetGump<OptionsGump>();
-
-                    if (gump == null)
-                    {
-                        UIManager.Add
-                        (
-                            new OptionsGump
-                            {
-                                X = (Client.Game.Window.ClientBounds.Width >> 1) - 300,
-                                Y = (Client.Game.Window.ClientBounds.Height >> 1) - 250
-                            }
-                        );
-                    }
-                    else
-                    {
-                        gump.SetInScreen();
-                        gump.BringOnTop();
-                    }
-
+                    GameActions.OpenSettings();
 
                     break;
 
                 case Buttons.LogOut:
-                    Client.Game.GetScene<GameScene>()
-                          ?.RequestQuitGame();
+                    Client.Game.GetScene<GameScene>()?.RequestQuitGame();
 
                     break;
 
@@ -632,9 +581,7 @@ namespace ClassicUO.Game.UI.Gumps
                     break;
 
                 case Buttons.Skills:
-
-                    World.SkillsRequested = true;
-                    NetClient.Socket.Send(new PSkillsRequest(World.Player));
+                    GameActions.OpenSkills();
 
                     break;
 
@@ -644,7 +591,7 @@ namespace ClassicUO.Game.UI.Gumps
                     break;
 
                 case Buttons.PeaceWarToggle:
-                    GameActions.ChangeWarMode();
+                    GameActions.ToggleWarMode();
 
                     break;
 
@@ -652,8 +599,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                     if (LocalSerial == World.Player)
                     {
-                        UIManager.GetGump<BaseHealthBarGump>(LocalSerial)
-                                 ?.Dispose();
+                        UIManager.GetGump<BaseHealthBarGump>(LocalSerial)?.Dispose();
 
                         StatusGumpBase status = StatusGumpBase.GetStatusGump();
 
@@ -673,9 +619,10 @@ namespace ClassicUO.Game.UI.Gumps
                             break;
                         }
 
-                        if (ProfileManager.Current.CustomBarsToggled)
+                        if (ProfileManager.CurrentProfile.CustomBarsToggled)
                         {
-                            Rectangle bounds = new Rectangle(0, 0, HealthBarGumpCustom.HPB_WIDTH, HealthBarGumpCustom.HPB_HEIGHT_SINGLELINE);
+                            Rectangle bounds = new Rectangle
+                                (0, 0, HealthBarGumpCustom.HPB_WIDTH, HealthBarGumpCustom.HPB_HEIGHT_SINGLELINE);
 
                             UIManager.Add
                             (
@@ -688,8 +635,7 @@ namespace ClassicUO.Game.UI.Gumps
                         }
                         else
                         {
-                            Rectangle bounds = GumpsLoader.Instance.GetTexture(0x0804)
-                                                          .Bounds;
+                            Rectangle bounds = GumpsLoader.Instance.GetTexture(0x0804).Bounds;
 
                             UIManager.Add
                             (
@@ -757,7 +703,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             public Layer Layer { get; }
 
-            public override void Update(double totalMS, double frameMS)
+            public override void Update(double totalTime, double frameTime)
             {
                 Item item = World.Items.Get(LocalSerial);
 
@@ -796,14 +742,15 @@ namespace ClassicUO.Game.UI.Gumps
                                     Width = 18,
                                     Height = 18,
                                     HighlightOnMouseOver = false,
-                                    CanPickUp = World.InGame && (World.Player.Serial == _paperDollGump.LocalSerial || _paperDollGump.CanLift)
+                                    CanPickUp = World.InGame && (World.Player.Serial == _paperDollGump.LocalSerial ||
+                                                                 _paperDollGump.CanLift)
                                 }
                             );
                         }
                     }
                 }
 
-                base.Update(totalMS, frameMS);
+                base.Update(totalTime, frameTime);
             }
 
             private class ItemGumpFixed : ItemGump
@@ -812,7 +759,8 @@ namespace ClassicUO.Game.UI.Gumps
                 private readonly Point _point;
                 private readonly Rectangle _rect;
 
-                public ItemGumpFixed(Item item, int w, int h) : base(item.Serial, item.DisplayedGraphic, item.Hue, item.X, item.Y)
+                public ItemGumpFixed(Item item, int w, int h) : base
+                    (item.Serial, item.DisplayedGraphic, item.Hue, item.X, item.Y)
                 {
                     Width = w;
                     Height = h;
@@ -857,7 +805,12 @@ namespace ClassicUO.Game.UI.Gumps
                     }
 
                     ResetHueVector();
-                    ShaderHueTranslator.GetHueVector(ref _hueVector, MouseIsOver && HighlightOnMouseOver ? 0x0035 : item.Hue, item.ItemData.IsPartialHue, 0, true);
+
+                    ShaderHueTranslator.GetHueVector
+                    (
+                        ref HueVector, MouseIsOver && HighlightOnMouseOver ? 0x0035 : item.Hue,
+                        item.ItemData.IsPartialHue, 0, true
+                    );
 
                     ArtTexture texture = ArtLoader.Instance.GetTexture(item.DisplayedGraphic);
 
@@ -865,11 +818,8 @@ namespace ClassicUO.Game.UI.Gumps
                     {
                         return batcher.Draw2D
                         (
-                            texture, x + _point.X, y + _point.Y,
-                            _originalSize.X, _originalSize.Y,
-                            _rect.X, _rect.Y,
-                            _rect.Width, _rect.Height,
-                            ref _hueVector
+                            texture, x + _point.X, y + _point.Y, _originalSize.X, _originalSize.Y, _rect.X, _rect.Y,
+                            _rect.Width, _rect.Height, ref HueVector
                         );
                     }
 

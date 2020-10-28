@@ -1,26 +1,3 @@
-#region license
-
-// Copyright (C) 2020 ClassicUO Development Community on Github
-// 
-// This project is an alternative client for the game Ultima Online.
-// The goal of this is to develop a lightweight client considering
-// new technologies.
-// 
-//  This program is free software: you can redistribute it and/or modify
-//  it under the terms of the GNU General Public License as published by
-//  the Free Software Foundation, either version 3 of the License, or
-//  (at your option) any later version.
-// 
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-// 
-//  You should have received a copy of the GNU General Public License
-//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
-#endregion
-
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -177,7 +154,14 @@ namespace ClassicUO.Configuration
         public bool EnableDragSelect { get; set; }
         public int DragSelectModifierKey { get; set; } // 0 = none, 1 = control, 2 = shift
         public bool OverrideContainerLocation { get; set; }
-        public int OverrideContainerLocationSetting { get; set; } // 0 = container position, 1 = top right of screen, 2 = last dragged position, 3 = remember every container
+
+        public int
+            OverrideContainerLocationSetting
+        {
+            get;
+            set;
+        } // 0 = container position, 1 = top right of screen, 2 = last dragged position, 3 = remember every container
+
         public Point OverrideContainerLocationPosition { get; set; } = new Point(200, 200);
         public bool DragSelectHumanoidsOnly { get; set; }
         public NameOverheadTypeAllowed NameOverheadTypeAllowed { get; set; } = NameOverheadTypeAllowed.All;
@@ -233,8 +217,6 @@ namespace ClassicUO.Configuration
 
         public bool SallosEasyGrab { get; set; }
 
-        public float Brighlight { get; set; }
-
         public bool JournalDarkMode { get; set; }
 
         public byte ContainersScale { get; set; } = 100;
@@ -282,30 +264,10 @@ namespace ClassicUO.Configuration
         public string WorldMapHiddenMarkerFiles { get; set; } = string.Empty;
 
 
-        internal static string ProfilePath { get; } = Path.Combine(CUOEnviroment.ExecutablePath, "Data", "Profiles");
-        internal static string DataPath { get; } = Path.Combine(CUOEnviroment.ExecutablePath, "Data");
-
         public static uint GumpsVersion { get; private set; }
 
-        public void Save(List<Gump> gumps = null)
+        public void Save(string path, List<Gump> gumps = null)
         {
-            if (string.IsNullOrEmpty(ServerName))
-            {
-                throw new InvalidDataException();
-            }
-
-            if (string.IsNullOrEmpty(Username))
-            {
-                throw new InvalidDataException();
-            }
-
-            if (string.IsNullOrEmpty(CharacterName))
-            {
-                throw new InvalidDataException();
-            }
-
-            string path = FileSystemHelper.CreateFolderIfNotExists(ProfilePath, Username.Trim(), ServerName.Trim(), CharacterName.Trim());
-
             Log.Trace($"Saving path:\t\t{path}");
 
             // Save profile settings
@@ -362,9 +324,8 @@ namespace ClassicUO.Configuration
             SkillsGroupManager.Save();
         }
 
-        public List<Gump> ReadGumps()
+        public List<Gump> ReadGumps(string path)
         {
-            string path = FileSystemHelper.CreateFolderIfNotExists(ProfilePath, Username.Trim(), ServerName.Trim(), CharacterName.Trim());
             List<Gump> gumps = new List<Gump>();
 
 
@@ -519,31 +480,31 @@ namespace ClassicUO.Configuration
 
                         try
                         {
-                            GUMP_TYPE type = (GUMP_TYPE) int.Parse(xml.GetAttribute("type"));
-                            int x = int.Parse(xml.GetAttribute("x"));
-                            int y = int.Parse(xml.GetAttribute("y"));
-                            uint serial = uint.Parse(xml.GetAttribute("serial"));
+                            GumpType type = (GumpType) int.Parse(xml.GetAttribute(nameof(type)));
+                            int x = int.Parse(xml.GetAttribute(nameof(x)));
+                            int y = int.Parse(xml.GetAttribute(nameof(y)));
+                            uint serial = uint.Parse(xml.GetAttribute(nameof(serial)));
 
                             Gump gump = null;
 
                             switch (type)
                             {
-                                case GUMP_TYPE.GT_BUFF:
+                                case GumpType.Buff:
                                     gump = new BuffGump();
 
                                     break;
 
-                                case GUMP_TYPE.GT_CONTAINER:
+                                case GumpType.Container:
                                     gump = new ContainerGump();
 
                                     break;
 
-                                case GUMP_TYPE.GT_COUNTERBAR:
+                                case GumpType.CounterBar:
                                     gump = new CounterBarGump();
 
                                     break;
 
-                                case GUMP_TYPE.GT_HEALTHBAR:
+                                case GumpType.HealthBar:
                                     if (CustomBarsToggled)
                                     {
                                         gump = new HealthBarGumpCustom();
@@ -555,32 +516,32 @@ namespace ClassicUO.Configuration
 
                                     break;
 
-                                case GUMP_TYPE.GT_INFOBAR:
+                                case GumpType.InfoBar:
                                     gump = new InfoBarGump();
 
                                     break;
 
-                                case GUMP_TYPE.GT_JOURNAL:
+                                case GumpType.Journal:
                                     gump = new JournalGump();
 
                                     break;
 
-                                case GUMP_TYPE.GT_MACROBUTTON:
+                                case GumpType.MacroButton:
                                     gump = new MacroButtonGump();
 
                                     break;
 
-                                case GUMP_TYPE.GT_MINIMAP:
+                                case GumpType.MiniMap:
                                     gump = new MiniMapGump();
 
                                     break;
 
-                                case GUMP_TYPE.GT_PAPERDOLL:
+                                case GumpType.PaperDoll:
                                     gump = new PaperDollGump();
 
                                     break;
 
-                                case GUMP_TYPE.GT_SKILLMENU:
+                                case GumpType.SkillMenu:
                                     if (StandardSkillsGump)
                                     {
                                         gump = new StandardSkillsGump();
@@ -592,50 +553,50 @@ namespace ClassicUO.Configuration
 
                                     break;
 
-                                case GUMP_TYPE.GT_SPELLBOOK:
+                                case GumpType.SpellBook:
                                     gump = new SpellbookGump();
 
                                     break;
 
-                                case GUMP_TYPE.GT_STATUSGUMP:
+                                case GumpType.StatusGump:
                                     gump = StatusGumpBase.AddStatusGump(0, 0);
 
                                     break;
 
-                                //case GUMP_TYPE.GT_TIPNOTICE: 
+                                //case GumpType.TipNotice:
                                 //    gump = new TipNoticeGump();
                                 //    break;
-                                case GUMP_TYPE.GT_ABILITYBUTTON:
+                                case GumpType.AbilityButton:
                                     gump = new UseAbilityButtonGump();
 
                                     break;
 
-                                case GUMP_TYPE.GT_SPELLBUTTON:
+                                case GumpType.SpellButton:
                                     gump = new UseSpellButtonGump();
 
                                     break;
 
-                                case GUMP_TYPE.GT_SKILLBUTTON:
+                                case GumpType.SkillButton:
                                     gump = new SkillButtonGump();
 
                                     break;
 
-                                case GUMP_TYPE.GT_RACIALBUTTON:
+                                case GumpType.RacialButton:
                                     gump = new RacialAbilityButton();
 
                                     break;
 
-                                case GUMP_TYPE.GT_WORLDMAP:
+                                case GumpType.WorldMap:
                                     gump = new WorldMapGump();
 
                                     break;
 
-                                case GUMP_TYPE.GT_DEBUG:
+                                case GumpType.Debug:
                                     gump = new DebugGump(100, 100);
 
                                     break;
 
-                                case GUMP_TYPE.GT_NETSTATS:
+                                case GumpType.NetStats:
                                     gump = new NetworkStatsGump(100, 100);
 
                                     break;
@@ -679,7 +640,7 @@ namespace ClassicUO.Configuration
                         {
                             try
                             {
-                                GUMP_TYPE type = (GUMP_TYPE) int.Parse(xml.GetAttribute("type"));
+                                GumpType type = (GumpType) int.Parse(xml.GetAttribute("type"));
                                 int x = int.Parse(xml.GetAttribute("x"));
                                 int y = int.Parse(xml.GetAttribute("y"));
                                 uint serial = uint.Parse(xml.GetAttribute("serial"));
@@ -691,17 +652,17 @@ namespace ClassicUO.Configuration
 
                                 switch (type)
                                 {
-                                    case GUMP_TYPE.GT_SPELLBUTTON:
+                                    case GumpType.SpellButton:
                                         gump = new UseSpellButtonGump();
 
                                         break;
 
-                                    case GUMP_TYPE.GT_SKILLBUTTON:
+                                    case GumpType.SkillButton:
                                         gump = new SkillButtonGump();
 
                                         break;
 
-                                    case GUMP_TYPE.GT_HEALTHBAR:
+                                    case GumpType.HealthBar:
                                         if (CustomBarsToggled)
                                         {
                                             gump = new HealthBarGumpCustom();
@@ -713,12 +674,12 @@ namespace ClassicUO.Configuration
 
                                         break;
 
-                                    case GUMP_TYPE.GT_ABILITYBUTTON:
+                                    case GumpType.AbilityButton:
                                         gump = new UseAbilityButtonGump();
 
                                         break;
 
-                                    case GUMP_TYPE.GT_MACROBUTTON:
+                                    case GumpType.MacroButton:
                                         gump = new MacroButtonGump();
 
                                         break;
@@ -733,7 +694,8 @@ namespace ClassicUO.Configuration
 
                                     if (!gump.IsDisposed)
                                     {
-                                        if (UIManager.AnchorManager[gump] == null && ancoGroup.IsEmptyDirection(matrix_x, matrix_y))
+                                        if (UIManager.AnchorManager[gump] == null && ancoGroup.IsEmptyDirection
+                                            (matrix_x, matrix_y))
                                         {
                                             gumps.Add(gump);
                                             UIManager.AnchorManager[gump] = ancoGroup;

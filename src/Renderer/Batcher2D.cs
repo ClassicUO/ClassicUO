@@ -1,27 +1,4 @@
-﻿#region license
-
-// Copyright (C) 2020 ClassicUO Development Community on Github
-// 
-// This project is an alternative client for the game Ultima Online.
-// The goal of this is to develop a lightweight client considering
-// new technologies.
-// 
-//  This program is free software: you can redistribute it and/or modify
-//  it under the terms of the GNU General Public License as published by
-//  the Free Software Foundation, either version 3 of the License, or
-//  (at your option) any later version.
-// 
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-// 
-//  You should have received a copy of the GNU General Public License
-//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
-#endregion
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -67,9 +44,16 @@ namespace ClassicUO.Renderer
         {
             GraphicsDevice = device;
             _textureInfo = new Texture2D[MAX_SPRITES];
-            _vertexInfo = (PositionNormalTextureColor4*) Marshal.AllocHGlobal(sizeof(PositionNormalTextureColor4) * MAX_SPRITES);
-            _vertexBuffer = new DynamicVertexBuffer(GraphicsDevice, typeof(PositionNormalTextureColor4), MAX_VERTICES, BufferUsage.WriteOnly);
-            _indexBuffer = new IndexBuffer(GraphicsDevice, IndexElementSize.SixteenBits, MAX_INDICES, BufferUsage.WriteOnly);
+
+            _vertexInfo = (PositionNormalTextureColor4*) Marshal.AllocHGlobal
+                (sizeof(PositionNormalTextureColor4) * MAX_SPRITES);
+
+            _vertexBuffer = new DynamicVertexBuffer
+                (GraphicsDevice, typeof(PositionNormalTextureColor4), MAX_VERTICES, BufferUsage.WriteOnly);
+
+            _indexBuffer = new IndexBuffer
+                (GraphicsDevice, IndexElementSize.SixteenBits, MAX_INDICES, BufferUsage.WriteOnly);
+
             _indexBuffer.SetData(GenerateIndexArray());
             _blendState = BlendState.AlphaBlend;
             _rasterizerState = RasterizerState.CullNone;
@@ -183,10 +167,7 @@ namespace ClassicUO.Renderer
                     }
                     else
                     {
-                        index = characterMap.IndexOf
-                        (
-                            spriteFont.DefaultCharacter.Value
-                        );
+                        index = characterMap.IndexOf(spriteFont.DefaultCharacter.Value);
                     }
                 }
 
@@ -210,22 +191,19 @@ namespace ClassicUO.Renderer
                 Rectangle cCrop = croppingData[index];
                 Rectangle cGlyph = glyphData[index];
 
-                float offsetX = baseOffset.X + (
-                    curOffset.X + cCrop.X
-                ) * axisDirX;
+                float offsetX = baseOffset.X + (curOffset.X + cCrop.X) * axisDirX;
 
-                float offsetY = baseOffset.Y + (
-                    curOffset.Y + cCrop.Y
-                ) * axisDirY;
+                float offsetY = baseOffset.Y + (curOffset.Y + cCrop.Y) * axisDirY;
 
 
-                Draw2D
-                (
-                    textureValue,
-                    x + (int) offsetX, y + (int) offsetY,
-                    cGlyph.X, cGlyph.Y, cGlyph.Width, cGlyph.Height,
-                    ref color
-                );
+                Draw2D(textureValue,
+                       x + (int) offsetX,
+                       y + (int) offsetY,
+                       cGlyph.X,
+                       cGlyph.Y,
+                       cGlyph.Width,
+                       cGlyph.Height,
+                       ref color);
 
                 curOffset.X += cKern.Y + cKern.Z;
             }
@@ -326,10 +304,7 @@ namespace ClassicUO.Renderer
                 vertex.TextureCoordinate3.Z = 0;
             }
 
-            vertex.Hue0 =
-                vertex.Hue1 =
-                    vertex.Hue2 =
-                        vertex.Hue3 = hue;
+            vertex.Hue0 = vertex.Hue1 = vertex.Hue2 = vertex.Hue3 = hue;
 
             PushSprite(texture);
 
@@ -340,7 +315,8 @@ namespace ClassicUO.Renderer
         public bool DrawSpriteLand
         (
             Texture2D texture,
-            int x, int y,
+            int x,
+            int y,
             ref Rectangle rect,
             ref Vector3 normal0,
             ref Vector3 normal1,
@@ -388,10 +364,7 @@ namespace ClassicUO.Renderer
             vertex.Position3.Y = y + (44 - rect.Right);
             vertex.Position3.Z = 0;
 
-            vertex.Hue0 =
-                vertex.Hue1 =
-                    vertex.Hue2 =
-                        vertex.Hue3 = hue;
+            vertex.Hue0 = vertex.Hue1 = vertex.Hue2 = vertex.Hue3 = hue;
 
             PushSprite(texture);
 
@@ -399,7 +372,16 @@ namespace ClassicUO.Renderer
         }
 
         [MethodImpl(256)]
-        public bool DrawSpriteRotated(Texture2D texture, int x, int y, int destX, int destY, ref Vector3 hue, float angle)
+        public bool DrawSpriteRotated
+        (
+            Texture2D texture,
+            int x,
+            int y,
+            int destX,
+            int destY,
+            ref Vector3 hue,
+            float angle
+        )
         {
             EnsureSize();
 
@@ -466,10 +448,7 @@ namespace ClassicUO.Renderer
             vertex.TextureCoordinate3.Z = 0;
 
 
-            vertex.Hue0 =
-                vertex.Hue1 =
-                    vertex.Hue2 =
-                        vertex.Hue3 = hue;
+            vertex.Hue0 = vertex.Hue1 = vertex.Hue2 = vertex.Hue3 = hue;
 
             PushSprite(texture);
 
@@ -569,19 +548,10 @@ namespace ClassicUO.Renderer
                 vertex.TextureCoordinate3.Z = 0;
             }
 
-            vertex.Hue0.Z =
-                vertex.Hue1.Z =
-                    vertex.Hue2.Z =
-                        vertex.Hue3.Z =
-                            vertex.Hue0.X =
-                                vertex.Hue1.X =
-                                    vertex.Hue2.X =
-                                        vertex.Hue3.X = 0;
+            vertex.Hue0.Z = vertex.Hue1.Z = vertex.Hue2.Z =
+                vertex.Hue3.Z = vertex.Hue0.X = vertex.Hue1.X = vertex.Hue2.X = vertex.Hue3.X = 0;
 
-            vertex.Hue0.Y =
-                vertex.Hue1.Y =
-                    vertex.Hue2.Y =
-                        vertex.Hue3.Y = ShaderHueTranslator.SHADER_SHADOW;
+            vertex.Hue0.Y = vertex.Hue1.Y = vertex.Hue2.Y = vertex.Hue3.Y = ShaderHueTranslator.SHADER_SHADOW;
 
             PushSprite(texture);
 
@@ -589,7 +559,17 @@ namespace ClassicUO.Renderer
         }
 
         [MethodImpl(256)]
-        public bool DrawCharacterSitted(Texture2D texture, int x, int y, bool mirror, float h3mod, float h6mod, float h9mod, ref Vector3 hue)
+        public bool DrawCharacterSitted
+        (
+            Texture2D texture,
+            int x,
+            int y,
+            bool mirror,
+            float h3mod,
+            float h6mod,
+            float h9mod,
+            ref Vector3 hue
+        )
         {
             float width = texture.Width;
             float height = texture.Height;
@@ -652,10 +632,7 @@ namespace ClassicUO.Renderer
                     vertex.Normal3.Y = 0;
                     vertex.Normal3.Z = 1;
 
-                    vertex.Hue0 =
-                        vertex.Hue1 =
-                            vertex.Hue2 =
-                                vertex.Hue3 = hue;
+                    vertex.Hue0 = vertex.Hue1 = vertex.Hue2 = vertex.Hue3 = hue;
 
                     PushSprite(texture);
                 }
@@ -754,10 +731,7 @@ namespace ClassicUO.Renderer
                     vertex.Normal3.Y = 0;
                     vertex.Normal3.Z = 1;
 
-                    vertex.Hue0 =
-                        vertex.Hue1 =
-                            vertex.Hue2 =
-                                vertex.Hue3 = hue;
+                    vertex.Hue0 = vertex.Hue1 = vertex.Hue2 = vertex.Hue3 = hue;
 
                     PushSprite(texture);
                     //vertex4_s.Position.X = x + widthOffset;
@@ -858,10 +832,7 @@ namespace ClassicUO.Renderer
                     vertex.Normal3.Y = 0;
                     vertex.Normal3.Z = 1;
 
-                    vertex.Hue0 =
-                        vertex.Hue1 =
-                            vertex.Hue2 =
-                                vertex.Hue3 = hue;
+                    vertex.Hue0 = vertex.Hue1 = vertex.Hue2 = vertex.Hue3 = hue;
 
 
                     PushSprite(texture);
@@ -1121,7 +1092,17 @@ namespace ClassicUO.Renderer
         }
 
         [MethodImpl(256)]
-        public bool Draw2D(Texture2D texture, int x, int y, int sx, int sy, float swidth, float sheight, ref Vector3 hue)
+        public bool Draw2D
+        (
+            Texture2D texture,
+            int x,
+            int y,
+            int sx,
+            int sy,
+            float swidth,
+            float sheight,
+            ref Vector3 hue
+        )
         {
             EnsureSize();
 
@@ -1176,7 +1157,20 @@ namespace ClassicUO.Renderer
         }
 
         [MethodImpl(256)]
-        public bool Draw2D(Texture2D texture, float dx, float dy, float dwidth, float dheight, float sx, float sy, float swidth, float sheight, ref Vector3 hue, float angle = 0.0f)
+        public bool Draw2D
+        (
+            Texture2D texture,
+            float dx,
+            float dy,
+            float dwidth,
+            float dheight,
+            float sx,
+            float sy,
+            float swidth,
+            float sheight,
+            ref Vector3 hue,
+            float angle = 0.0f
+        )
         {
             EnsureSize();
 
@@ -1304,7 +1298,15 @@ namespace ClassicUO.Renderer
         }
 
         [MethodImpl(256)]
-        public bool Draw2D(Texture2D texture, float x, float y, float width, float height, ref Vector3 hue)
+        public bool Draw2D
+        (
+            Texture2D texture,
+            float x,
+            float y,
+            float width,
+            float height,
+            ref Vector3 hue
+        )
         {
             EnsureSize();
 
@@ -1358,7 +1360,15 @@ namespace ClassicUO.Renderer
         }
 
         [MethodImpl(256)]
-        public bool Draw2DTiled(Texture2D texture, int dx, int dy, float dwidth, float dheight, ref Vector3 hue)
+        public bool Draw2DTiled
+        (
+            Texture2D texture,
+            int dx,
+            int dy,
+            float dwidth,
+            float dheight,
+            ref Vector3 hue
+        )
         {
             int y = dy;
             int h = (int) dheight;
@@ -1391,7 +1401,15 @@ namespace ClassicUO.Renderer
         }
 
         [MethodImpl(256)]
-        public bool DrawRectangle(Texture2D texture, int x, int y, int width, int height, ref Vector3 hue)
+        public bool DrawRectangle
+        (
+            Texture2D texture,
+            int x,
+            int y,
+            int width,
+            int height,
+            ref Vector3 hue
+        )
         {
             Draw2D(texture, x, y, width, 1, ref hue);
             Draw2D(texture, x + width, y, 1, height + 1, ref hue);
@@ -1402,7 +1420,16 @@ namespace ClassicUO.Renderer
         }
 
         [MethodImpl(256)]
-        public bool DrawLine(Texture2D texture, int startX, int startY, int endX, int endY, int originX, int originY)
+        public bool DrawLine
+        (
+            Texture2D texture,
+            int startX,
+            int startY,
+            int endX,
+            int endY,
+            int originX,
+            int originY
+        )
         {
             EnsureSize();
 
@@ -1477,10 +1504,7 @@ namespace ClassicUO.Renderer
             vertex.TextureCoordinate3.Z = 0;
 
 
-            vertex.Hue0 =
-                vertex.Hue1 =
-                    vertex.Hue2 =
-                        vertex.Hue3 = Vector3.Zero;
+            vertex.Hue0 = vertex.Hue1 = vertex.Hue2 = vertex.Hue3 = Vector3.Zero;
 
             PushSprite(texture);
 
@@ -1617,8 +1641,7 @@ namespace ClassicUO.Renderer
                 }
                 else
                 {
-                    _customEffect.CurrentTechnique.Passes[0]
-                                 .Apply();
+                    _customEffect.CurrentTechnique.Passes[0].Apply();
                 }
             }
 
@@ -1642,30 +1665,18 @@ namespace ClassicUO.Renderer
             _projectionMatrix.M11 = (float) (2.0 / GraphicsDevice.Viewport.Width);
             _projectionMatrix.M22 = (float) (-2.0 / GraphicsDevice.Viewport.Height);
 
-            Matrix.Multiply
-            (
-                ref _transformMatrix,
-                ref _projectionMatrix,
-                out Matrix matrix
-            );
+            Matrix.Multiply(ref _transformMatrix, ref _projectionMatrix, out Matrix matrix);
 
             effect.ApplyStates(matrix);
         }
 
         [MethodImpl(256)]
-        private void InternalDraw(Texture2D texture, int baseSprite, int batchSize)
+        private void InternalDraw(Texture texture, int baseSprite, int batchSize)
         {
             GraphicsDevice.Textures[0] = texture;
-
-            GraphicsDevice.DrawIndexedPrimitives
-            (
-                PrimitiveType.TriangleList,
-                baseSprite << 2,
-                0,
-                batchSize << 2,
-                0,
-                batchSize << 1
-            );
+            GraphicsDevice.DrawIndexedPrimitives(PrimitiveType.TriangleList, baseSprite << 2,
+                                                 0, batchSize << 2,
+                                                 0, batchSize << 1);
         }
 
         public void EnableScissorTest(bool enable)
@@ -1724,10 +1735,8 @@ namespace ClassicUO.Renderer
 
             _vertexBuffer.SetDataPointerEXT
             (
-                pos * PositionNormalTextureColor4.SIZE_IN_BYTES,
-                (IntPtr) _vertexInfo,
-                len * PositionNormalTextureColor4.SIZE_IN_BYTES,
-                hint
+                pos * PositionNormalTextureColor4.SIZE_IN_BYTES, (IntPtr) _vertexInfo,
+                len * PositionNormalTextureColor4.SIZE_IN_BYTES, hint
             );
 
             _currentBufferPosition = pos + len;
@@ -1812,10 +1821,15 @@ namespace ClassicUO.Renderer
 
             private static readonly VertexDeclaration VertexDeclaration = new VertexDeclaration
             (
-                new VertexElement(0, VertexElementFormat.Vector3, VertexElementUsage.Position, 0),                          // position
-                new VertexElement(sizeof(float) * 3, VertexElementFormat.Vector3, VertexElementUsage.Normal, 0),            // normal
-                new VertexElement(sizeof(float) * 6, VertexElementFormat.Vector3, VertexElementUsage.TextureCoordinate, 0), // tex coord
-                new VertexElement(sizeof(float) * 9, VertexElementFormat.Vector3, VertexElementUsage.TextureCoordinate, 1)  // hue
+                new VertexElement(0, VertexElementFormat.Vector3, VertexElementUsage.Position, 0), // position
+                new VertexElement
+                    (sizeof(float) * 3, VertexElementFormat.Vector3, VertexElementUsage.Normal, 0), // normal
+                new VertexElement
+                (
+                    sizeof(float) * 6, VertexElementFormat.Vector3, VertexElementUsage.TextureCoordinate, 0
+                ), // tex coord
+                new VertexElement
+                    (sizeof(float) * 9, VertexElementFormat.Vector3, VertexElementUsage.TextureCoordinate, 1) // hue
             );
 
             public const int SIZE_IN_BYTES = sizeof(float) * 12 * 4;
@@ -1834,7 +1848,8 @@ namespace ClassicUO.Renderer
     {
         private static byte[] _isometricEffect, _xBREffect;
 
-        public static byte[] IsometricEffect => _isometricEffect ?? (_isometricEffect = GetResource("ClassicUO.shaders.IsometricWorld.fxc"));
+        public static byte[] IsometricEffect => _isometricEffect ?? (_isometricEffect = GetResource
+            ("ClassicUO.shaders.IsometricWorld.fxc"));
 
         public static byte[] xBREffect => _xBREffect ?? (_xBREffect = GetResource("ClassicUO.shaders.xBR.fxc"));
 
@@ -1843,9 +1858,7 @@ namespace ClassicUO.Renderer
             get
             {
                 Stream stream = typeof(SpriteBatch).Assembly.GetManifestResourceStream
-                (
-                    "Microsoft.Xna.Framework.Graphics.Effect.Resources.SpriteEffect.fxb"
-                );
+                    ("Microsoft.Xna.Framework.Graphics.Effect.Resources.SpriteEffect.fxb");
 
                 using (MemoryStream ms = new MemoryStream())
                 {
@@ -1858,10 +1871,7 @@ namespace ClassicUO.Renderer
 
         private static byte[] GetResource(string name)
         {
-            Stream stream = typeof(UltimaBatcher2D).Assembly.GetManifestResourceStream
-            (
-                name
-            );
+            Stream stream = typeof(UltimaBatcher2D).Assembly.GetManifestResourceStream(name);
 
             using (MemoryStream ms = new MemoryStream())
             {

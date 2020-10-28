@@ -1,27 +1,4 @@
-﻿#region license
-
-// Copyright (C) 2020 ClassicUO Development Community on Github
-// 
-// This project is an alternative client for the game Ultima Online.
-// The goal of this is to develop a lightweight client considering
-// new technologies.
-// 
-//  This program is free software: you can redistribute it and/or modify
-//  it under the terms of the GNU General Public License as published by
-//  the Free Software Foundation, either version 3 of the License, or
-//  (at your option) any later version.
-// 
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-// 
-//  You should have received a copy of the GNU General Public License
-//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
-#endregion
-
-using System;
+﻿using System;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
@@ -95,34 +72,25 @@ namespace ClassicUO.IO.Resources
                 {
                     int idx = i * 8 + j;
 
-                    Palette[idx]
-                        .Palette = new float[32 * 3];
+                    Palette[idx].Palette = new float[32 * 3];
 
                     for (int h = 0; h < 32; h++)
                     {
                         int idx1 = h * 3;
 
-                        ushort c = HuesRange[i]
-                                   .Entries[j]
-                                   .ColorTable[h];
+                        ushort c = HuesRange[i].Entries[j].ColorTable[h];
 
-                        Palette[idx]
-                            .Palette[idx1] = ((c >> 10) & 0x1F) / 31.0f;
+                        Palette[idx].Palette[idx1] = ((c >> 10) & 0x1F) / 31.0f;
 
-                        Palette[idx]
-                            .Palette[idx1 + 1] = ((c >> 5) & 0x1F) / 31.0f;
+                        Palette[idx].Palette[idx1 + 1] = ((c >> 5) & 0x1F) / 31.0f;
 
-                        Palette[idx]
-                            .Palette[idx1 + 2] = (c & 0x1F) / 31.0f;
+                        Palette[idx].Palette[idx1 + 2] = (c & 0x1F) / 31.0f;
 
-                        p[idx * 96 + idx1 + 0] = Palette[idx]
-                            .Palette[idx1];
+                        p[idx * 96 + idx1 + 0] = Palette[idx].Palette[idx1];
 
-                        p[idx * 96 + idx1 + 1] = Palette[idx]
-                            .Palette[idx1 + 1];
+                        p[idx * 96 + idx1 + 1] = Palette[idx].Palette[idx1 + 1];
 
-                        p[idx * 96 + idx1 + 2] = Palette[idx]
-                            .Palette[idx1 + 2];
+                        p[idx * 96 + idx1 + 2] = Palette[idx].Palette[idx1 + 2];
 
                         //p[iddd++] = Palette[idx].Palette[idx1];
                         //p[iddd++] = Palette[idx].Palette[idx1 + 1];
@@ -146,12 +114,7 @@ namespace ClassicUO.IO.Resources
                 {
                     for (int x = 0; x < 32; x++)
                     {
-                        buffer[idx++] = HuesHelper.Color16To32
-                        (
-                            HuesRange[r]
-                                .Entries[y]
-                                .ColorTable[x]
-                        ) | 0xFF_00_00_00;
+                        buffer[idx++] = HuesHelper.Color16To32(HuesRange[r].Entries[y].ColorTable[x]) | 0xFF_00_00_00;
 
                         if (idx >= buffer.Length)
                         {
@@ -203,9 +166,7 @@ namespace ClassicUO.IO.Resources
                 int g = color >> 3;
                 int e = color % 8;
 
-                return HuesRange[g]
-                       .Entries[e]
-                       .ColorTable[(c >> 10) & 0x1F];
+                return HuesRange[g].Entries[e].ColorTable[(c >> 10) & 0x1F];
             }
 
             return c;
@@ -219,12 +180,7 @@ namespace ClassicUO.IO.Resources
                 int g = color >> 3;
                 int e = color % 8;
 
-                return HuesHelper.Color16To32
-                (
-                    HuesRange[g]
-                        .Entries[e]
-                        .ColorTable[c]
-                );
+                return HuesHelper.Color16To32(HuesRange[g].Entries[e].ColorTable[c]);
             }
 
             return 0xFF010101;
@@ -238,9 +194,7 @@ namespace ClassicUO.IO.Resources
                 int g = color >> 3;
                 int e = color % 8;
 
-                return HuesRange[g]
-                       .Entries[e]
-                       .ColorTable[8];
+                return HuesRange[g].Entries[e].ColorTable[8];
             }
 
             return HuesHelper.Color16To32(c);
@@ -254,12 +208,7 @@ namespace ClassicUO.IO.Resources
                 int g = color >> 3;
                 int e = color % 8;
 
-                return HuesHelper.Color16To32
-                (
-                    HuesRange[g]
-                        .Entries[e]
-                        .ColorTable[(c >> 10) & 0x1F]
-                );
+                return HuesHelper.Color16To32(HuesRange[g].Entries[e].ColorTable[(c >> 10) & 0x1F]);
             }
 
             return HuesHelper.Color16To32(c);
@@ -280,12 +229,7 @@ namespace ClassicUO.IO.Resources
 
                 if (R == G && R == B)
                 {
-                    cl = HuesHelper.Color16To32
-                    (
-                        HuesRange[g]
-                            .Entries[e]
-                            .ColorTable[(c >> 10) & 0x1F]
-                    );
+                    cl = HuesHelper.Color16To32(HuesRange[g].Entries[e].ColorTable[(c >> 10) & 0x1F]);
                 }
 
                 return cl;

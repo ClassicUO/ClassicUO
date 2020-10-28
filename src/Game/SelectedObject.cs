@@ -1,27 +1,4 @@
-﻿#region license
-
-// Copyright (C) 2020 ClassicUO Development Community on Github
-// 
-// This project is an alternative client for the game Ultima Online.
-// The goal of this is to develop a lightweight client considering
-// new technologies.
-// 
-//  This program is free software: you can redistribute it and/or modify
-//  it under the terms of the GNU General Public License as published by
-//  the Free Software Foundation, either version 3 of the License, or
-//  (at your option) any later version.
-// 
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-// 
-//  You should have received a copy of the GNU General Public License
-//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
-#endregion
-
-using System.Runtime.CompilerServices;
+﻿using System.Runtime.CompilerServices;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
@@ -34,9 +11,9 @@ namespace ClassicUO.Game
         public static BaseGameObject Object;
         public static BaseGameObject LastObject;
         public static BaseGameObject LastLeftDownObject;
-        public static GameObject HealthbarObject;
+        public static Entity HealthbarObject;
         public static Item SelectedContainer;
-        public static GameObject CorpseObject;
+        public static Item CorpseObject;
 
         private static readonly bool[,] _InternalArea = new bool[44, 44];
 
@@ -51,7 +28,8 @@ namespace ClassicUO.Game
                         continue;
                     }
 
-                    _InternalArea[x, y] = _InternalArea[43 - x, 43 - y] = _InternalArea[43 - x, y] = _InternalArea[x, 43 - y] = true;
+                    _InternalArea[x, y] = _InternalArea[43 - x, 43 - y] =
+                        _InternalArea[43 - x, y] = _InternalArea[x, 43 - y] = true;
                 }
             }
         }
@@ -253,9 +231,10 @@ namespace ClassicUO.Game
 
 
         [MethodImpl(256)]
-        public static bool IsPointInStatic(UOTexture32 texture, int x, int y)
+        public static bool IsPointInStatic(UOTexture texture, int x, int y)
         {
-            return texture != null && texture.Contains(TranslatedMousePositionByViewport.X - x, TranslatedMousePositionByViewport.Y - y);
+            return texture != null && texture.Contains
+                (TranslatedMousePositionByViewport.X - x, TranslatedMousePositionByViewport.Y - y);
         }
 
         [MethodImpl(256)]
@@ -281,9 +260,8 @@ namespace ClassicUO.Game
             int y3 = 22 - rect.Bottom;
 
 
-            return testY >= testX * (y1 - y0) / -22 + y + y0 &&
-                   testY >= testX * (y3 - y0) / 22 + y + y0 && testY <= testX * (y3 - y2) / 22 + y + y2 &&
-                   testY <= testX * (y1 - y2) / -22 + y + y2;
+            return testY >= testX * (y1 - y0) / -22 + y + y0 && testY >= testX * (y3 - y0) / 22 + y + y0 &&
+                   testY <= testX * (y3 - y2) / 22 + y + y2 && testY <= testX * (y1 - y2) / -22 + y + y2;
         }
     }
 }

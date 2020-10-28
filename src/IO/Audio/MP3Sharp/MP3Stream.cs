@@ -1,26 +1,3 @@
-#region license
-
-// Copyright (C) 2020 ClassicUO Development Community on Github
-// 
-// This project is an alternative client for the game Ultima Online.
-// The goal of this is to develop a lightweight client considering
-// new technologies.
-// 
-//  This program is free software: you can redistribute it and/or modify
-//  it under the terms of the GNU General Public License as published by
-//  the Free Software Foundation, either version 3 of the License, or
-//  (at your option) any later version.
-// 
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-// 
-//  You should have received a copy of the GNU General Public License
-//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
-#endregion
-
 using System;
 using System.IO;
 using ClassicUO.IO.Audio.MP3Sharp.Decoding;
@@ -43,24 +20,22 @@ namespace ClassicUO.IO.Audio.MP3Sharp
         /// <summary>
         ///     Creates a new stream instance using the provided filename, and the default chunk size of 4096 bytes.
         /// </summary>
-        public MP3Stream(string fileName)
-            : this(new FileStream(fileName, FileMode.Open, FileAccess.Read))
+        public MP3Stream(string fileName) : this(new FileStream(fileName, FileMode.Open, FileAccess.Read))
         {
         }
 
         /// <summary>
         ///     Creates a new stream instance using the provided filename and chunk size.
         /// </summary>
-        public MP3Stream(string fileName, int chunkSize)
-            : this(new FileStream(fileName, FileMode.Open, FileAccess.Read), chunkSize)
+        public MP3Stream(string fileName, int chunkSize) : this
+            (new FileStream(fileName, FileMode.Open, FileAccess.Read), chunkSize)
         {
         }
 
         /// <summary>
         ///     Creates a new stream instance using the provided stream as a source, and the default chunk size of 4096 bytes.
         /// </summary>
-        public MP3Stream(Stream sourceStream)
-            : this(sourceStream, 4096)
+        public MP3Stream(Stream sourceStream) : this(sourceStream, 4096)
         {
         }
 
@@ -239,12 +214,7 @@ namespace ClassicUO.IO.Audio.MP3Sharp
                 }
 
                 // Copy as much as we can from the current buffer:
-                bytesRead += m_Buffer.Read
-                (
-                    buffer,
-                    offset + bytesRead,
-                    count - bytesRead
-                );
+                bytesRead += m_Buffer.Read(buffer, offset + bytesRead, count - bytesRead);
 
                 if (bytesRead >= count)
                 {

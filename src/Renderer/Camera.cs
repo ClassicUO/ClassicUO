@@ -7,7 +7,7 @@ namespace ClassicUO.Renderer
 {
     internal class Camera
     {
-        private float[] _cameraZoomValues = new float[1] {1f};
+        private float[] _cameraZoomValues = new float[1] { 1f };
         private Matrix _projection;
         private Matrix _transform = Matrix.Identity, _inverseTransform = Matrix.Identity;
         private bool _updateMatrixes = true, _updateProjection = true;
@@ -22,16 +22,7 @@ namespace ClassicUO.Renderer
             {
                 if (_updateProjection)
                 {
-                    Matrix.CreateOrthographicOffCenter
-                    (
-                        0,
-                        Bounds.Width,
-                        Bounds.Height,
-                        0,
-                        0,
-                        -1,
-                        out _projection
-                    );
+                    Matrix.CreateOrthographicOffCenter(0, Bounds.Width, Bounds.Height, 0, 0, -1, out _projection);
 
                     _updateProjection = false;
                 }
@@ -150,13 +141,7 @@ namespace ClassicUO.Renderer
 
         public Viewport GetViewport()
         {
-            return new Viewport
-            (
-                Bounds.X,
-                Bounds.Y,
-                Bounds.Width,
-                Bounds.Height
-            );
+            return new Viewport(Bounds.X, Bounds.Y, Bounds.Width, Bounds.Height);
         }
 
         public void Update()

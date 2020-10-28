@@ -1,32 +1,11 @@
-﻿#region license
-
-// Copyright (C) 2020 ClassicUO Development Community on Github
-// 
-// This project is an alternative client for the game Ultima Online.
-// The goal of this is to develop a lightweight client considering
-// new technologies.
-// 
-//  This program is free software: you can redistribute it and/or modify
-//  it under the terms of the GNU General Public License as published by
-//  the Free Software Foundation, either version 3 of the License, or
-//  (at your option) any later version.
-// 
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-// 
-//  You should have received a copy of the GNU General Public License
-//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
-#endregion
-
-using System.Linq;
+﻿using System.Linq;
+using ClassicUO.Data;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.IO.Resources;
+using ClassicUO.Resources;
 
 namespace ClassicUO.Game.UI.Gumps.CharCreation
 {
@@ -100,17 +79,33 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
             // sliders for attributes
             _attributeSliders = new HSliderBar[3];
-            Add(_attributeSliders[0] = new HSliderBar(164, 196, 93, 10, 60, ProfessionInfo._VoidStats[0], HSliderBarStyle.MetalWidgetRecessedBar, true));
-            Add(_attributeSliders[1] = new HSliderBar(164, 276, 93, 10, 60, ProfessionInfo._VoidStats[1], HSliderBarStyle.MetalWidgetRecessedBar, true));
-            Add(_attributeSliders[2] = new HSliderBar(164, 356, 93, 10, 60, ProfessionInfo._VoidStats[2], HSliderBarStyle.MetalWidgetRecessedBar, true));
+
+            Add
+            (
+                _attributeSliders[0] = new HSliderBar
+                    (164, 196, 93, 10, 60, ProfessionInfo._VoidStats[0], HSliderBarStyle.MetalWidgetRecessedBar, true)
+            );
+
+            Add
+            (
+                _attributeSliders[1] = new HSliderBar
+                    (164, 276, 93, 10, 60, ProfessionInfo._VoidStats[1], HSliderBarStyle.MetalWidgetRecessedBar, true)
+            );
+
+            Add
+            (
+                _attributeSliders[2] = new HSliderBar
+                    (164, 356, 93, 10, 60, ProfessionInfo._VoidStats[2], HSliderBarStyle.MetalWidgetRecessedBar, true)
+            );
 
             string[] skillList = SkillsLoader.Instance.SortedSkills.Select
                                              (
                                                  s => s.Index == 52 || s.Index == 47 ||
-                                                      s.Index == 53 && (World.ClientFeatures.Flags & CharacterListFlags.CLF_SAMURAI_NINJA) == 0 ||
-                                                      s.Index == 54
-                                                     ? ""
-                                                     : s.Name
+                                                      s.Index == 53 && (World.ClientFeatures.Flags &
+                                                                        CharacterListFlags.CLF_SAMURAI_NINJA) == 0 ||
+                                                      s.Index == 54 ?
+                                                     "" :
+                                                     s.Name
                                              )
                                              .ToArray();
 
@@ -121,7 +116,16 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             for (int i = 0; i < CharCreationGump._skillsCount; i++)
             {
                 Add(_skills[i] = new Combobox(344, y, 182, skillList, -1, 200, false, "Click here"));
-                Add(_skillSliders[i] = new HSliderBar(344, y + 32, 93, 0, 50, ProfessionInfo._VoidSkills[i, 1], HSliderBarStyle.MetalWidgetRecessedBar, true));
+
+                Add
+                (
+                    _skillSliders[i] = new HSliderBar
+                    (
+                        344, y + 32, 93, 0, 50, ProfessionInfo._VoidSkills[i, 1],
+                        HSliderBarStyle.MetalWidgetRecessedBar, true
+                    )
+                );
+
                 y += 70;
             }
 
@@ -147,8 +151,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                 {
                     if (i != j)
                     {
-                        _attributeSliders[i]
-                            .AddParisSlider(_attributeSliders[j]);
+                        _attributeSliders[i].AddParisSlider(_attributeSliders[j]);
                     }
                 }
             }
@@ -159,8 +162,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                 {
                     if (i != j)
                     {
-                        _skillSliders[i]
-                            .AddParisSlider(_skillSliders[j]);
+                        _skillSliders[i].AddParisSlider(_skillSliders[j]);
                     }
                 }
             }
@@ -183,15 +185,13 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                     {
                         for (int i = 0; i < _skills.Length; i++)
                         {
-                            if (_skills[i]
-                                .SelectedIndex != -1)
+                            if (_skills[i].SelectedIndex != -1)
                             {
-                                Skill skill = _character.Skills[SkillsLoader.Instance.SortedSkills[_skills[i]
-                                                                                                       .SelectedIndex]
-                                                                            .Index];
+                                Skill skill =
+                                    _character.Skills[
+                                        SkillsLoader.Instance.SortedSkills[_skills[i].SelectedIndex].Index];
 
-                                skill.ValueFixed = (ushort) _skillSliders[i]
-                                    .Value;
+                                skill.ValueFixed = (ushort) _skillSliders[i].Value;
 
                                 skill.BaseFixed = 0;
                                 skill.CapFixed = 0;
@@ -199,14 +199,11 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                             }
                         }
 
-                        _character.Strength = (ushort) _attributeSliders[0]
-                            .Value;
+                        _character.Strength = (ushort) _attributeSliders[0].Value;
 
-                        _character.Intelligence = (ushort) _attributeSliders[1]
-                            .Value;
+                        _character.Intelligence = (ushort) _attributeSliders[1].Value;
 
-                        _character.Dexterity = (ushort) _attributeSliders[2]
-                            .Value;
+                        _character.Dexterity = (ushort) _attributeSliders[2].Value;
 
                         charCreationGump.SetAttributes(true);
                     }
@@ -221,13 +218,11 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
         {
             if (_skills.All(s => s.SelectedIndex >= 0))
             {
-                int duplicated = _skills.GroupBy(o => o.SelectedIndex)
-                                        .Count(o => o.Count() > 1);
+                int duplicated = _skills.GroupBy(o => o.SelectedIndex).Count(o => o.Count() > 1);
 
                 if (duplicated > 0)
                 {
-                    UIManager.GetGump<CharCreationGump>()
-                             ?.ShowMessage(ClilocLoader.Instance.GetString(1080032));
+                    UIManager.GetGump<CharCreationGump>()?.ShowMessage(ClilocLoader.Instance.GetString(1080032));
 
                     return false;
                 }
@@ -235,7 +230,12 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             else
             {
                 UIManager.GetGump<CharCreationGump>()
-                         ?.ShowMessage(ClilocLoader.Instance.GetString(1080032));
+                         ?.ShowMessage
+                         (
+                             Client.Version <= ClientVersion.CV_5090 ?
+                                 ResGumps.YouMustHaveThreeUniqueSkillsChosen :
+                                 ClilocLoader.Instance.GetString(1080032)
+                         );
 
                 return false;
             }

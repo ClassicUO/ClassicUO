@@ -1,27 +1,4 @@
-﻿#region license
-
-// Copyright (C) 2020 ClassicUO Development Community on Github
-// 
-// This project is an alternative client for the game Ultima Online.
-// The goal of this is to develop a lightweight client considering
-// new technologies.
-// 
-//  This program is free software: you can redistribute it and/or modify
-//  it under the terms of the GNU General Public License as published by
-//  the Free Software Foundation, either version 3 of the License, or
-//  (at your option) any later version.
-// 
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-// 
-//  You should have received a copy of the GNU General Public License
-//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
-#endregion
-
-namespace ClassicUO.IO.Audio.MP3Sharp.Decoding.Decoders.LayerII
+﻿namespace ClassicUO.IO.Audio.MP3Sharp.Decoding.Decoders.LayerII
 {
     /// <summary>
     ///     Class for layer II subbands in stereo mode.
@@ -31,19 +8,18 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding.Decoders.LayerII
         /// <summary>
         ///     Constructor
         /// </summary>
-        public SubbandLayer2Stereo(int subbandnumber)
-            : base(subbandnumber)
+        public SubbandLayer2Stereo(int subbandnumber) : base(subbandnumber)
         {
             channel2_samples = new float[3];
         }
 
         protected internal int channel2_allocation;
-        protected internal float[] channel2_c = {0};
+        protected internal float[] channel2_c = { 0 };
         //protected boolean channel2_grouping;  ???? Never used!
-        protected internal int[] channel2_codelength = {0};
-        protected internal float[] channel2_d = {0};
+        protected internal int[] channel2_codelength = { 0 };
+        protected internal float[] channel2_d = { 0 };
         //protected float[][] channel2_groupingtable = {{0},{0}};
-        protected internal float[] channel2_factor = {0};
+        protected internal float[] channel2_factor = { 0 };
         protected internal float[] channel2_samples;
         protected internal float channel2_scalefactor1, channel2_scalefactor2, channel2_scalefactor3;
         protected internal int channel2_scfsi;
@@ -116,8 +92,8 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding.Decoders.LayerII
 
                     case 2:
 
-                        channel2_scalefactor1 =
-                            channel2_scalefactor2 = channel2_scalefactor3 = ScaleFactors[stream.GetBitsFromBuffer(6)];
+                        channel2_scalefactor1 = channel2_scalefactor2 =
+                            channel2_scalefactor3 = ScaleFactors[stream.GetBitsFromBuffer(6)];
 
                         break;
 
@@ -129,10 +105,7 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding.Decoders.LayerII
                 }
 
                 prepare_sample_reading
-                (
-                    header, channel2_allocation, 1, channel2_factor, channel2_codelength,
-                    channel2_c, channel2_d
-                );
+                    (header, channel2_allocation, 1, channel2_factor, channel2_codelength, channel2_c, channel2_d);
             }
         }
 

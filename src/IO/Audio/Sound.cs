@@ -1,27 +1,4 @@
-﻿#region license
-
-// Copyright (C) 2020 ClassicUO Development Community on Github
-// 
-// This project is an alternative client for the game Ultima Online.
-// The goal of this is to develop a lightweight client considering
-// new technologies.
-// 
-//  This program is free software: you can redistribute it and/or modify
-//  it under the terms of the GNU General Public License as published by
-//  the Free Software Foundation, either version 3 of the License, or
-//  (at your option) any later version.
-// 
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-// 
-//  You should have received a copy of the GNU General Public License
-//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
-#endregion
-
-using System;
+﻿using System;
 using Microsoft.Xna.Framework.Audio;
 using static System.String;
 
@@ -78,9 +55,9 @@ namespace ClassicUO.IO.Audio
 
                 float instanceVolume = Math.Max(value - VolumeFactor, 0.0f);
 
-                if (_sound_instance != null && !_sound_instance.IsDisposed)
+                if (SoundInstance != null && !SoundInstance.IsDisposed)
                 {
-                    _sound_instance.Volume = instanceVolume;
+                    SoundInstance.Volume = instanceVolume;
                 }
             }
         }
@@ -95,7 +72,8 @@ namespace ClassicUO.IO.Audio
             }
         }
 
-        public bool IsPlaying => _sound_instance != null && _sound_instance.State == SoundState.Playing && DurationTime > Time.Ticks;
+        public bool IsPlaying => SoundInstance != null && SoundInstance.State == SoundState.Playing &&
+                                 DurationTime > Time.Ticks;
 
         public int CompareTo(Sound other)
         {
@@ -104,21 +82,21 @@ namespace ClassicUO.IO.Audio
 
         public void Dispose()
         {
-            if (_sound_instance != null)
+            if (SoundInstance != null)
             {
-                _sound_instance.BufferNeeded -= OnBufferNeeded;
+                SoundInstance.BufferNeeded -= OnBufferNeeded;
 
-                if (!_sound_instance.IsDisposed)
+                if (!SoundInstance.IsDisposed)
                 {
-                    _sound_instance.Stop();
-                    _sound_instance.Dispose();
+                    SoundInstance.Stop();
+                    SoundInstance.Dispose();
                 }
 
-                _sound_instance = null;
+                SoundInstance = null;
             }
         }
 
-        protected DynamicSoundEffectInstance _sound_instance;
+        protected DynamicSoundEffectInstance SoundInstance;
         protected AudioChannels Channels = AudioChannels.Mono;
         protected uint Delay = 250;
 
@@ -148,13 +126,13 @@ namespace ClassicUO.IO.Audio
 
             BeforePlay();
 
-            if (_sound_instance != null && !_sound_instance.IsDisposed)
+            if (SoundInstance != null && !SoundInstance.IsDisposed)
             {
-                _sound_instance.Stop();
+                SoundInstance.Stop();
             }
             else
             {
-                _sound_instance = new DynamicSoundEffectInstance(Frequency, Channels);
+                SoundInstance = new DynamicSoundEffectInstance(Frequency, Channels);
             }
 
 
@@ -164,15 +142,14 @@ namespace ClassicUO.IO.Audio
             {
                 _lastPlayedTime = Time.Ticks + Delay;
 
-                _sound_instance.BufferNeeded += OnBufferNeeded;
-                _sound_instance.SubmitBuffer(buffer, 0, buffer.Length);
+                SoundInstance.BufferNeeded += OnBufferNeeded;
+                SoundInstance.SubmitBuffer(buffer, 0, buffer.Length);
                 VolumeFactor = volumeFactor;
                 Volume = volume;
 
-                DurationTime = Time.Ticks + _sound_instance.GetSampleDuration(buffer.Length)
-                                                           .TotalMilliseconds;
+                DurationTime = Time.Ticks + SoundInstance.GetSampleDuration(buffer.Length).TotalMilliseconds;
 
-                _sound_instance.Play();
+                SoundInstance.Play();
 
                 return true;
             }
@@ -182,10 +159,10 @@ namespace ClassicUO.IO.Audio
 
         public void Stop()
         {
-            if (_sound_instance != null)
+            if (SoundInstance != null)
             {
-                _sound_instance.BufferNeeded -= OnBufferNeeded;
-                _sound_instance.Stop();
+                SoundInstance.BufferNeeded -= OnBufferNeeded;
+                SoundInstance.Stop();
             }
 
             AfterStop();

@@ -1,27 +1,4 @@
-﻿#region license
-
-// Copyright (C) 2020 ClassicUO Development Community on Github
-// 
-// This project is an alternative client for the game Ultima Online.
-// The goal of this is to develop a lightweight client considering
-// new technologies.
-// 
-//  This program is free software: you can redistribute it and/or modify
-//  it under the terms of the GNU General Public License as published by
-//  the Free Software Foundation, either version 3 of the License, or
-//  (at your option) any later version.
-// 
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-// 
-//  You should have received a copy of the GNU General Public License
-//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
-#endregion
-
-using ClassicUO.Game.Data;
+﻿using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
@@ -33,14 +10,15 @@ namespace ClassicUO.Game.UI.Gumps
 {
     internal class RacialAbilitiesBookGump : Gump
     {
-        private static readonly string[] _humanNames = {"Strong Back", "Tough", "Workhorse", "Jack of All Trades"};
+        private static readonly string[] _humanNames = { "Strong Back", "Tough", "Workhorse", "Jack of All Trades" };
         private static readonly string[] _elfNames =
         {
             "Night Sight", "Infused with Magic",
             "Knowledge of Nature", "Difficult to Track",
             "Perception", "Wisdom"
         };
-        private static readonly string[] _gargoyleNames = {"Flying", "Berserk", "Master Artisan", "Deadly Aim", "Mystic Insight"};
+        private static readonly string[] _gargoyleNames =
+            { "Flying", "Berserk", "Master Artisan", "Deadly Aim", "Mystic Insight" };
         private int _abilityCount = 4;
         private float _clickTiming;
         private int _dictionaryPagesCount = 1;
@@ -98,7 +76,7 @@ namespace ClassicUO.Game.UI.Gumps
                     }
 
 
-                    Label text = new Label(ResGumps.Index, false, 0x0288, font: 6) {X = indexX, Y = 10};
+                    Label text = new Label(ResGumps.Index, false, 0x0288, font: 6) { X = indexX, Y = 10 };
                     Add(text, page);
 
                     for (int i = 0; i < abilityOnPage; i++)
@@ -153,8 +131,7 @@ namespace ClassicUO.Game.UI.Gumps
                 bool passive = true;
                 string spellName = GetAbilityName(i, ref passive);
 
-                Label text = new Label(spellName, false, 0x0288, 100, 6)
-                    {X = iconTextX, Y = 34};
+                Label text = new Label(spellName, false, 0x0288, 100, 6) { X = iconTextX, Y = 34 };
 
                 Add(text, page1);
 
@@ -187,12 +164,12 @@ namespace ClassicUO.Game.UI.Gumps
 
                         RacialAbilityButton gump = new RacialAbilityButton((ushort) ((GumpPic) sender).LocalSerial)
                         {
-                            X = Mouse.LDropPosition.X - 20,
-                            Y = Mouse.LDropPosition.Y - 20
+                            X = Mouse.Position.X - 20,
+                            Y = Mouse.Position.Y - 20
                         };
 
                         UIManager.Add(gump);
-                        UIManager.AttemptDragControl(gump, Mouse.Position, true);
+                        UIManager.AttemptDragControl(gump, true);
                     };
 
                     pic.MouseDoubleClick += (sender, e) =>
@@ -260,9 +237,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                     return _gargoyleNames[offset];
 
-                default:
-
-                    return string.Empty;
+                default: return string.Empty;
             }
         }
 
@@ -315,9 +290,9 @@ namespace ClassicUO.Game.UI.Gumps
             Client.Game.Scene.Audio.PlaySound(0x0055);
         }
 
-        public override void Update(double totalMS, double frameMS)
+        public override void Update(double totalTime, double frameTime)
         {
-            base.Update(totalMS, frameMS);
+            base.Update(totalTime, frameTime);
 
             if (IsDisposed)
             {
@@ -326,7 +301,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (_lastPressed != null)
             {
-                _clickTiming -= (float) frameMS;
+                _clickTiming -= (float) frameTime;
 
                 if (_clickTiming <= 0)
                 {

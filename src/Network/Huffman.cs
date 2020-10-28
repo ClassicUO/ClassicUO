@@ -1,28 +1,4 @@
-﻿#region license
-
-// Copyright (C) 2020 ClassicUO Development Community on Github
-// 
-// This project is an alternative client for the game Ultima Online.
-// The goal of this is to develop a lightweight client considering
-// new technologies.
-// 
-//  This program is free software: you can redistribute it and/or modify
-//  it under the terms of the GNU General Public License as published by
-//  the Free Software Foundation, either version 3 of the License, or
-//  (at your option) any later version.
-// 
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-// 
-//  You should have received a copy of the GNU General Public License
-//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
-#endregion
-
-
-namespace ClassicUO.Network
+﻿namespace ClassicUO.Network
 {
     internal static class Huffman
     {
@@ -1059,7 +1035,15 @@ namespace ClassicUO.Network
 
         #endregion
 
-        public static bool DecompressChunk(ref byte[] src, ref int srcOffset, int srcLength, ref byte[] dest, int destOffset, out int destLength)
+        public static bool DecompressChunk
+        (
+            ref byte[] src,
+            ref int srcOffset,
+            int srcLength,
+            ref byte[] dest,
+            int destOffset,
+            out int destLength
+        )
         {
             //Array.Clear(dest, destOffset, dest.Length - destOffset);
             destLength = 0;
@@ -1077,7 +1061,7 @@ namespace ClassicUO.Network
                 // if the halt codeword has been found, skip this byte
                 if (leafValue == -256)
                 {
-                    srcOffset++;
+                    ++srcOffset;
                     destLength = destPos - destOffset;
 
                     return true;
@@ -1087,17 +1071,17 @@ namespace ClassicUO.Network
                 {
                     dest[destPos] = (byte) -leafValue;
                     leafValue = 0;
-                    destPos++;
+                    ++destPos;
                 }
 
-                bitNum--;
+                --bitNum;
                 node = leafValue;
 
                 /* if its the end of the byte, go to the next byte */
                 if (bitNum < 1)
                 {
                     bitNum = 8;
-                    srcOffset++;
+                    ++srcOffset;
                 }
 
                 // check to see if the current codeword has no end

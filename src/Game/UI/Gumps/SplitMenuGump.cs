@@ -1,27 +1,4 @@
-﻿#region license
-
-// Copyright (C) 2020 ClassicUO Development Community on Github
-// 
-// This project is an alternative client for the game Ultima Online.
-// The goal of this is to develop a lightweight client considering
-// new technologies.
-// 
-//  This program is free software: you can redistribute it and/or modify
-//  it under the terms of the GNU General Public License as published by
-//  the Free Software Foundation, either version 3 of the License, or
-//  (at your option) any later version.
-// 
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-// 
-//  You should have received a copy of the GNU General Public License
-//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
-#endregion
-
-using ClassicUO.Game.GameObjects;
+﻿using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using Microsoft.Xna.Framework;
@@ -56,7 +33,7 @@ namespace ClassicUO.Game.UI.Gumps
             AcceptMouseInput = false;
             CanCloseWithRightClick = true;
 
-            GumpPic background = new GumpPic(0, 0, 0x085C, 0) {ContainsByBounds = true};
+            GumpPic background = new GumpPic(0, 0, 0x085C, 0) { ContainsByBounds = true };
             Add(background);
             Add(_slider = new HSliderBar(29, 16, 105, 1, item.Amount, item.Amount, HSliderBarStyle.BlueWidgetNoBar));
             _lastValue = _slider.Value;
@@ -124,8 +101,7 @@ namespace ClassicUO.Game.UI.Gumps
                         {
                             if (!_firstChange)
                             {
-                                string last = _textBox.Text[_textBox.Text.Length - 1]
-                                                      .ToString();
+                                string last = _textBox.Text[_textBox.Text.Length - 1].ToString();
 
                                 _slider.Value = int.Parse(last);
                                 _firstChange = true;
@@ -166,7 +142,7 @@ namespace ClassicUO.Game.UI.Gumps
             Dispose();
         }
 
-        public override void Update(double totalMS, double frameMS)
+        public override void Update(double totalTime, double frameTime)
         {
             Item item = World.Items.Get(LocalSerial);
 
@@ -180,7 +156,7 @@ namespace ClassicUO.Game.UI.Gumps
                 return;
             }
 
-            base.Update(totalMS, frameMS);
+            base.Update(totalTime, frameTime);
         }
 
         public override void Dispose()

@@ -1,27 +1,4 @@
-﻿#region license
-
-// Copyright (C) 2020 ClassicUO Development Community on Github
-// 
-// This project is an alternative client for the game Ultima Online.
-// The goal of this is to develop a lightweight client considering
-// new technologies.
-// 
-//  This program is free software: you can redistribute it and/or modify
-//  it under the terms of the GNU General Public License as published by
-//  the Free Software Foundation, either version 3 of the License, or
-//  (at your option) any later version.
-// 
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-// 
-//  You should have received a copy of the GNU General Public License
-//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
-#endregion
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Input;
@@ -32,8 +9,8 @@ namespace ClassicUO.Game.Managers
 {
     internal static class CommandManager
     {
-        private static readonly Dictionary<string, Action<string[]>> _commands = new Dictionary<string, Action<string[]>>();
-
+        private static readonly Dictionary<string, Action<string[]>> _commands =
+            new Dictionary<string, Action<string[]>>();
 
         public static void Initialize()
         {
@@ -86,7 +63,7 @@ namespace ClassicUO.Game.Managers
             }
             else
             {
-                Log.Error(string.Format($"Attempted to register command: '{0}' twice.", name));
+                Log.Error($"Attempted to register command: '{name}' twice.");
             }
         }
 
@@ -115,7 +92,7 @@ namespace ClassicUO.Game.Managers
             }
             else
             {
-                Log.Warn($"Commad: '{name}' not exists");
+                Log.Warn($"Command: '{name}' not exists");
             }
         }
 

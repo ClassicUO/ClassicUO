@@ -1,27 +1,4 @@
-﻿#region license
-
-// Copyright (C) 2020 ClassicUO Development Community on Github
-// 
-// This project is an alternative client for the game Ultima Online.
-// The goal of this is to develop a lightweight client considering
-// new technologies.
-// 
-//  This program is free software: you can redistribute it and/or modify
-//  it under the terms of the GNU General Public License as published by
-//  the Free Software Foundation, either version 3 of the License, or
-//  (at your option) any later version.
-// 
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-// 
-//  You should have received a copy of the GNU General Public License
-//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
-#endregion
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using ClassicUO.Data;
 using ClassicUO.Game.Managers;
@@ -39,7 +16,8 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
         {
             _Parent = parent;
 
-            if (parent == null || !ProfessionLoader.Instance.Professions.TryGetValue(parent, out List<ProfessionInfo> professions) || professions == null)
+            if (parent == null || !ProfessionLoader.Instance.Professions.TryGetValue
+                (parent, out List<ProfessionInfo> professions) || professions == null)
             {
                 professions = new List<ProfessionInfo>(ProfessionLoader.Instance.Professions.Keys);
             }
@@ -101,7 +79,8 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
         public void SelectProfession(ProfessionInfo info)
         {
-            if (info.Type == ProfessionLoader.PROF_TYPE.CATEGORY && ProfessionLoader.Instance.Professions.TryGetValue(info, out List<ProfessionInfo> list) && list != null)
+            if (info.Type == ProfessionLoader.PROF_TYPE.CATEGORY && ProfessionLoader.Instance.Professions.TryGetValue
+                (info, out List<ProfessionInfo> list) && list != null)
             {
                 Parent.Add(new CreateCharProfessionGump(info));
                 Parent.Remove(this);
@@ -193,8 +172,12 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
     internal class ProfessionInfo
     {
-        internal static readonly int[,] _VoidSkills = new int[4, 2] {{0, InitialSkillValue}, {0, InitialSkillValue}, {0, Client.Version < ClientVersion.CV_70160 ? 0 : InitialSkillValue}, {0, InitialSkillValue}};
-        internal static readonly int[] _VoidStats = new int[3] {60, RemainStatValue, RemainStatValue};
+        internal static readonly int[,] _VoidSkills = new int[4, 2]
+        {
+            { 0, InitialSkillValue }, { 0, InitialSkillValue },
+            { 0, Client.Version < ClientVersion.CV_70160 ? 0 : InitialSkillValue }, { 0, InitialSkillValue }
+        };
+        internal static readonly int[] _VoidStats = new int[3] { 60, RemainStatValue, RemainStatValue };
         public static int InitialSkillValue => Client.Version >= ClientVersion.CV_70160 ? 30 : 50;
         public static int RemainStatValue => Client.Version >= ClientVersion.CV_70160 ? 15 : 10;
         public string Name { get; set; }

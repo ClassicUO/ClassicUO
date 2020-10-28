@@ -1,27 +1,4 @@
-﻿#region license
-
-// Copyright (C) 2020 ClassicUO Development Community on Github
-// 
-// This project is an alternative client for the game Ultima Online.
-// The goal of this is to develop a lightweight client considering
-// new technologies.
-// 
-//  This program is free software: you can redistribute it and/or modify
-//  it under the terms of the GNU General Public License as published by
-//  the Free Software Foundation, either version 3 of the License, or
-//  (at your option) any later version.
-// 
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-// 
-//  You should have received a copy of the GNU General Public License
-//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
-#endregion
-
-using ClassicUO.IO.Resources;
+﻿using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 using ClassicUO.Utility.Collections;
 using Microsoft.Xna.Framework;
@@ -96,15 +73,17 @@ namespace ClassicUO.Game.GameObjects
         public void Add(int damage)
         {
             TextObject text_obj = TextObject.Create();
-            text_obj.RenderedText = RenderedText.Create(damage.ToString(), (ushort) (Parent == World.Player ? 0x0034 : 0x0021), 3, false);
+
+            text_obj.RenderedText = RenderedText.Create
+                (damage.ToString(), (ushort) (Parent == World.Player ? 0x0034 : 0x0021), 3, false);
+
             text_obj.Time = Time.Ticks + 1500;
 
             _messages.AddToFront(text_obj);
 
             if (_messages.Count > 10)
             {
-                _messages.RemoveFromBack()
-                         ?.Destroy();
+                _messages.RemoveFromBack()?.Destroy();
             }
         }
 
@@ -180,16 +159,10 @@ namespace ClassicUO.Game.GameObjects
 
                     AnimationsLoader.Instance.GetAnimationDimensions
                     (
-                        m.AnimIndex,
-                        m.GetGraphicForAnimation(),
+                        m.AnimIndex, m.GetGraphicForAnimation(),
                         /*(byte) m.GetDirectionForAnimation()*/ 0,
-                        /*Mobile.GetGroupForAnimation(m, isParent:true)*/ 0,
-                        m.IsMounted,
-                        /*(byte) m.AnimIndex*/ 0,
-                        out int centerX,
-                        out int centerY,
-                        out int width,
-                        out int height
+                        /*Mobile.GetGroupForAnimation(m, isParent:true)*/ 0, m.IsMounted,
+                        /*(byte) m.AnimIndex*/ 0, out int centerX, out int centerY, out int width, out int height
                     );
 
                     p.X += (int) m.Offset.X + 22;

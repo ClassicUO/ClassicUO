@@ -1,27 +1,4 @@
-﻿#region license
-
-// Copyright (C) 2020 ClassicUO Development Community on Github
-// 
-// This project is an alternative client for the game Ultima Online.
-// The goal of this is to develop a lightweight client considering
-// new technologies.
-// 
-//  This program is free software: you can redistribute it and/or modify
-//  it under the terms of the GNU General Public License as published by
-//  the Free Software Foundation, either version 3 of the License, or
-//  (at your option) any later version.
-// 
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-// 
-//  You should have received a copy of the GNU General Public License
-//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
-#endregion
-
-using System.Linq;
+﻿using System.Linq;
 using ClassicUO.Data;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
@@ -60,7 +37,12 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
         public void SetAttributes(bool force = false)
         {
-            SetStep(_selectedProfession.DescriptionIndex >= 0 || force ? CharCreationStep.ChooseCity : CharCreationStep.ChooseTrade);
+            SetStep
+            (
+                _selectedProfession.DescriptionIndex >= 0 || force ?
+                    CharCreationStep.ChooseCity :
+                    CharCreationStep.ChooseTrade
+            );
         }
 
         public void SetCity(int cityIndex)
@@ -79,7 +61,9 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                     continue;
                 }
 
-                if (!CUOEnviroment.IsOutlands && (World.ClientFeatures.Flags & CharacterListFlags.CLF_SAMURAI_NINJA) == 0 && (skillIndex == 52 || skillIndex == 53))
+                if (!CUOEnviroment.IsOutlands &&
+                    (World.ClientFeatures.Flags & CharacterListFlags.CLF_SAMURAI_NINJA) == 0 &&
+                    (skillIndex == 52 || skillIndex == 53))
                 {
                     // reset skills if needed
                     for (int k = 0; k < i; k++)
@@ -91,12 +75,13 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                         skill.Lock = Lock.Locked;
                     }
 
-                    MessageBoxGump messageBox = new MessageBoxGump(400, 300, ClilocLoader.Instance.GetString(1063016), null, true)
-                    {
-                        X = 470 / 2 - 400 / 2 + 100,
-                        Y = 372 / 2 - 300 / 2 + 20,
-                        CanMove = false
-                    };
+                    MessageBoxGump messageBox = new MessageBoxGump
+                        (400, 300, ClilocLoader.Instance.GetString(1063016), null, true)
+                        {
+                            X = 470 / 2 - 400 / 2 + 100,
+                            Y = 372 / 2 - 300 / 2 + 20,
+                            CanMove = false
+                        };
 
                     UIManager.Add(messageBox);
 
@@ -117,7 +102,8 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
             SetAttributes();
 
-            SetStep(_selectedProfession.DescriptionIndex > 0 ? CharCreationStep.ChooseCity : CharCreationStep.ChooseTrade);
+            SetStep
+                (_selectedProfession.DescriptionIndex > 0 ? CharCreationStep.ChooseCity : CharCreationStep.ChooseTrade);
         }
 
         public void CreateCharacter(byte profession)

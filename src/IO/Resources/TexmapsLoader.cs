@@ -1,27 +1,4 @@
-﻿#region license
-
-// Copyright (C) 2020 ClassicUO Development Community on Github
-// 
-// This project is an alternative client for the game Ultima Online.
-// The goal of this is to develop a lightweight client considering
-// new technologies.
-// 
-//  This program is free software: you can redistribute it and/or modify
-//  it under the terms of the GNU General Public License as published by
-//  the Free Software Foundation, either version 3 of the License, or
-//  (at your option) any later version.
-// 
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-// 
-//  You should have received a copy of the GNU General Public License
-//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
-#endregion
-
-using System;
+﻿using System;
 using System.IO;
 using System.Threading.Tasks;
 using ClassicUO.Game;
@@ -30,17 +7,17 @@ using ClassicUO.Utility;
 
 namespace ClassicUO.IO.Resources
 {
-    internal class TexmapsLoader : UOFileLoader<UOTexture32>
+    internal class TexmapsLoader : UOFileLoader<UOTexture>
     {
         private static TexmapsLoader _instance;
         private UOFile _file;
 
-        private TexmapsLoader(int count)
-            : base(count)
+        private TexmapsLoader(int count) : base(count)
         {
         }
 
-        public static TexmapsLoader Instance => _instance ?? (_instance = new TexmapsLoader(Constants.MAX_LAND_TEXTURES_DATA_INDEX_COUNT));
+        public static TexmapsLoader Instance =>
+            _instance ?? (_instance = new TexmapsLoader(Constants.MAX_LAND_TEXTURES_DATA_INDEX_COUNT));
 
         public override Task Load()
         {
@@ -139,14 +116,14 @@ namespace ClassicUO.IO.Resources
             );
         }
 
-        public override UOTexture32 GetTexture(uint g)
+        public override UOTexture GetTexture(uint g)
         {
             if (g >= Resources.Length)
             {
                 return null;
             }
 
-            ref UOTexture32 texture = ref Resources[g];
+            ref UOTexture texture = ref Resources[g];
 
             if (texture == null || texture.IsDisposed)
             {
@@ -165,7 +142,7 @@ namespace ClassicUO.IO.Resources
             return texture;
         }
 
-        private unsafe void ReadTexmapTexture(ref UOTexture32 texture, ushort index)
+        private unsafe void ReadTexmapTexture(ref UOTexture texture, ushort index)
         {
             ref UOFileIndex entry = ref GetValidRefEntry(index);
 
@@ -193,7 +170,7 @@ namespace ClassicUO.IO.Resources
                 }
             }
 
-            texture = new UOTexture32(size, size);
+            texture = new UOTexture(size, size);
             // we don't need to store the data[] pointer because
             // land is always hoverable
             texture.SetDataPointerEXT(0, null, (IntPtr) data, size_pot * sizeof(uint));

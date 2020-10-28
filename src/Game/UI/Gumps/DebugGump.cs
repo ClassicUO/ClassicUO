@@ -1,27 +1,4 @@
-﻿#region license
-
-// Copyright (C) 2020 ClassicUO Development Community on Github
-// 
-// This project is an alternative client for the game Ultima Online.
-// The goal of this is to develop a lightweight client considering
-// new technologies.
-// 
-//  This program is free software: you can redistribute it and/or modify
-//  it under the terms of the GNU General Public License as published by
-//  the Free Software Foundation, either version 3 of the License, or
-//  (at your option) any later version.
-// 
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-// 
-//  You should have received a copy of the GNU General Public License
-//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
-#endregion
-
-using System.Text;
+﻿using System.Text;
 using System.Xml;
 using ClassicUO.Configuration;
 using ClassicUO.Game.GameObjects;
@@ -37,7 +14,8 @@ namespace ClassicUO.Game.UI.Gumps
     internal class DebugGump : Gump
     {
         private const string DEBUG_STRING_0 = "- FPS: {0} (Min={1}, Max={2}), Zoom: {3}, Total Objs: {4}\n";
-        private const string DEBUG_STRING_1 = "- Mobiles: {0}   Items: {1}   Statics: {2}   Multi: {3}   Lands: {4}   Effects: {5}\n";
+        private const string DEBUG_STRING_1 =
+            "- Mobiles: {0}   Items: {1}   Statics: {2}   Multi: {3}   Lands: {4}   Effects: {5}\n";
         private const string DEBUG_STRING_2 = "- CharPos: {0}\n- Mouse: {1}\n- InGamePos: {2}\n";
         private const string DEBUG_STRING_3 = "- Selected: {0}";
 
@@ -46,8 +24,8 @@ namespace ClassicUO.Game.UI.Gumps
         private static Point _last_position = new Point(-1, -1);
 
         private readonly StringBuilder _sb = new StringBuilder();
-        private uint _time_to_update;
-        private readonly AlphaBlendControl _trans;
+        private uint _timeToUpdate;
+        private readonly AlphaBlendControl _alphaBlendControl;
 
         public DebugGump(int x, int y) : base(0, 0)
         {
@@ -64,20 +42,20 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add
             (
-                _trans = new AlphaBlendControl(.3f)
+                _alphaBlendControl = new AlphaBlendControl(.3f)
                 {
                     Width = Width, Height = Height
                 }
             );
 
-            ControlInfo.Layer = UILayer.Over;
+            LayerOrder = UILayer.Over;
 
             WantUpdateSize = true;
         }
 
         public bool IsMinimized { get; set; }
 
-        public override GUMP_TYPE GumpType => GUMP_TYPE.GT_DEBUG;
+        public override GumpType GumpType => GumpType.Debug;
 
         protected override bool OnMouseDoubleClick(int x, int y, MouseButtonType button)
         {
@@ -91,44 +69,55 @@ namespace ClassicUO.Game.UI.Gumps
             return false;
         }
 
-        public override void Update(double totalMS, double frameMS)
+        public override void Update(double totalTime, double frameTime)
         {
-            base.Update(totalMS, frameMS);
+            base.Update(totalTime, frameTime);
 
-            if (Time.Ticks > _time_to_update)
+            if (Time.Ticks > _timeToUpdate)
             {
-                _time_to_update = Time.Ticks + 100;
+                _timeToUpdate = Time.Ticks + 100;
 
                 _sb.Clear();
                 GameScene scene = Client.Game.GetScene<GameScene>();
 
                 if (IsMinimized && scene != null)
                 {
-                    _sb.AppendFormat(DEBUG_STRING_0, CUOEnviroment.CurrentRefreshRate, 0, 0, !World.InGame ? 1f : scene.Camera.Zoom, scene.RenderedObjectsCount);
-                    _sb.AppendLine($"- CUO version: {CUOEnviroment.Version}, Client version: {Settings.GlobalSettings.ClientVersion}");
+                    _sb.AppendFormat
+                    (
+                        DEBUG_STRING_0, CUOEnviroment.CurrentRefreshRate, 0, 0, !World.InGame ? 1f : scene.Camera.Zoom,
+                        scene.RenderedObjectsCount
+                    );
+
+                    _sb.AppendLine
+                    (
+                        $"- CUO version: {CUOEnviroment.Version}, Client version: {Settings.GlobalSettings.ClientVersion}"
+                    );
+
                     //_sb.AppendFormat(DEBUG_STRING_1, Engine.DebugInfo.MobilesRendered, Engine.DebugInfo.ItemsRendered, Engine.DebugInfo.StaticsRendered, Engine.DebugInfo.MultiRendered, Engine.DebugInfo.LandsRendered, Engine.DebugInfo.EffectsRendered);
-                    _sb.AppendFormat(DEBUG_STRING_2, World.InGame ? $"{World.Player.X}, {World.Player.Y}, {World.Player.Z}" : "0xFFFF, 0xFFFF, 0", Mouse.Position, SelectedObject.Object is GameObject gobj ? $"{gobj.X}, {gobj.Y}, {gobj.Z}" : "0xFFFF, 0xFFFF, 0");
+                    _sb.AppendFormat
+                    (
+                        DEBUG_STRING_2,
+                        World.InGame ? $"{World.Player.X}, {World.Player.Y}, {World.Player.Z}" : "0xFFFF, 0xFFFF, 0",
+                        Mouse.Position,
+                        SelectedObject.Object is GameObject gobj ? $"{gobj.X}, {gobj.Y}, {gobj.Z}" : "0xFFFF, 0xFFFF, 0"
+                    );
+
                     _sb.AppendFormat(DEBUG_STRING_3, ReadObject(SelectedObject.Object));
 
                     if (CUOEnviroment.Profiler)
                     {
-                        double timeDraw = Profiler.GetContext("RenderFrame")
-                                                  .TimeInContext;
+                        double timeDraw = Profiler.GetContext("RenderFrame").TimeInContext;
 
-                        double timeUpdate = Profiler.GetContext("Update")
-                                                    .TimeInContext;
+                        double timeUpdate = Profiler.GetContext("Update").TimeInContext;
 
-                        double timeFixedUpdate = Profiler.GetContext("FixedUpdate")
-                                                         .TimeInContext;
+                        double timeFixedUpdate = Profiler.GetContext("FixedUpdate").TimeInContext;
 
-                        double timeOutOfContext = Profiler.GetContext("OutOfContext")
-                                                          .TimeInContext;
+                        double timeOutOfContext = Profiler.GetContext("OutOfContext").TimeInContext;
 
                         //double timeTotalCheck = timeOutOfContext + timeDraw + timeUpdate;
                         double timeTotal = Profiler.TrackedTime;
 
-                        double avgDrawMs = Profiler.GetContext("RenderFrame")
-                                                   .AverageTime;
+                        double avgDrawMs = Profiler.GetContext("RenderFrame").AverageTime;
 
                         _sb.AppendLine("- Profiling");
 
@@ -137,18 +126,16 @@ namespace ClassicUO.Game.UI.Gumps
                             string.Format
                             (
                                 "    Draw:{0:0.0}% Update:{1:0.0}% FixedUpd:{2:0.0} AvgDraw:{3:0.0}ms {4}",
-                                100d * (timeDraw / timeTotal),
-                                100d * (timeUpdate / timeTotal),
-                                100d * (timeFixedUpdate / timeTotal),
-                                avgDrawMs,
-                                CUOEnviroment.CurrentRefreshRate
+                                100d * (timeDraw / timeTotal), 100d * (timeUpdate / timeTotal),
+                                100d * (timeFixedUpdate / timeTotal), avgDrawMs, CUOEnviroment.CurrentRefreshRate
                             )
                         );
                     }
                 }
                 else if (scene != null && scene.Camera.Zoom != 1f)
                 {
-                    _sb.AppendFormat(DEBUG_STRING_SMALL, CUOEnviroment.CurrentRefreshRate, !World.InGame ? 1f : scene.Camera.Zoom);
+                    _sb.AppendFormat
+                        (DEBUG_STRING_SMALL, CUOEnviroment.CurrentRefreshRate, !World.InGame ? 1f : scene.Camera.Zoom);
                 }
                 else
                 {
@@ -158,8 +145,8 @@ namespace ClassicUO.Game.UI.Gumps
 
                 Vector2 size = Fonts.Bold.MeasureString(_sb.ToString());
 
-                _trans.Width = Width = (int) (size.X + 20);
-                _trans.Height = Height = (int) (size.Y + 20);
+                _alphaBlendControl.Width = Width = (int) (size.X + 20);
+                _alphaBlendControl.Height = Height = (int) (size.Y + 20);
 
                 WantUpdateSize = true;
             }
@@ -173,7 +160,7 @@ namespace ClassicUO.Game.UI.Gumps
             }
 
             ResetHueVector();
-            batcher.DrawString(Fonts.Bold, _sb.ToString(), x + 10, y + 10, ref _hueVector);
+            batcher.DrawString(Fonts.Bold, _sb.ToString(), x + 10, y + 10, ref HueVector);
 
             return true;
         }
@@ -185,31 +172,26 @@ namespace ClassicUO.Game.UI.Gumps
                 switch (obj)
                 {
                     case Mobile mob:
-
-                        return $"Mobile (0x{mob.Serial:X8})  graphic: 0x{mob.Graphic:X4}  flags: {mob.Flags}  noto: {mob.NotorietyFlag}";
+                        return
+                            $"Mobile (0x{mob.Serial:X8})  graphic: 0x{mob.Graphic:X4}  flags: {mob.Flags}  noto: {mob.NotorietyFlag}";
 
                     case Item item:
-
-                        return $"Item (0x{item.Serial:X8})  graphic: 0x{item.Graphic:X4}  flags: {item.Flags}  amount: {item.Amount} itemdata: {item.ItemData.Flags}";
+                        return
+                            $"Item (0x{item.Serial:X8})  graphic: 0x{item.Graphic:X4}  flags: {item.Flags}  amount: {item.Amount} itemdata: {item.ItemData.Flags}";
 
                     case Static st:
-
-                        return $"Static (0x{st.Graphic:X4})  height: {st.ItemData.Height}  flags: {st.ItemData.Flags}  Alpha: {st.AlphaHue}";
+                        return
+                            $"Static (0x{st.Graphic:X4})  height: {st.ItemData.Height}  flags: {st.ItemData.Flags}  Alpha: {st.AlphaHue}";
 
                     case Multi multi:
+                        return
+                            $"Multi (0x{multi.Graphic:X4})  height: {multi.ItemData.Height}  flags: {multi.ItemData.Flags}";
 
-                        return $"Multi (0x{multi.Graphic:X4})  height: {multi.ItemData.Height}  flags: {multi.ItemData.Flags}";
+                    case GameEffect effect: return "GameEffect";
 
-                    case GameEffect effect:
-                        return "GameEffect";
+                    case TextObject overhead: return $"TextOverhead type: {overhead.Type}  hue: 0x{overhead.Hue:X4}";
 
-                    case TextObject overhead:
-
-                        return $"TextOverhead type: {overhead.Type}  hue: 0x{overhead.Hue:X4}";
-
-                    case Land land:
-
-                        return $"Land (0x{land.Graphic:X4})  flags: {land.TileData.Flags}";
+                    case Land land: return $"Land (0x{land.Graphic:X4})  flags: {land.TileData.Flags}";
                 }
             }
 

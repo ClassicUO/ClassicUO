@@ -1,27 +1,4 @@
-﻿#region license
-
-// Copyright (C) 2020 ClassicUO Development Community on Github
-// 
-// This project is an alternative client for the game Ultima Online.
-// The goal of this is to develop a lightweight client considering
-// new technologies.
-// 
-//  This program is free software: you can redistribute it and/or modify
-//  it under the terms of the GNU General Public License as published by
-//  the Free Software Foundation, either version 3 of the License, or
-//  (at your option) any later version.
-// 
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-// 
-//  You should have received a copy of the GNU General Public License
-//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
-#endregion
-
-using System.Linq;
+﻿using System.Linq;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.IO.Resources;
 using ClassicUO.Network;
@@ -74,7 +51,12 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add(_container);
 
-            Add(_slider = new HSliderBar(40, _container.Y + _container.Height + 12, 217, 0, 1, 0, HSliderBarStyle.MetalWidgetRecessedBar));
+            Add
+            (
+                _slider = new HSliderBar
+                    (40, _container.Y + _container.Height + 12, 217, 0, 1, 0, HSliderBarStyle.MetalWidgetRecessedBar)
+            );
+
             _slider.ValueChanged += (sender, e) => { _container.Value = _slider.Value; };
 
             HitBox left = new HitBox(25, 60, 10, 15)
@@ -107,9 +89,9 @@ namespace ClassicUO.Game.UI.Gumps
             Add(right);
         }
 
-        public override void Update(double totalMS, double frameMS)
+        public override void Update(double totalTime, double frameTime)
         {
-            base.Update(totalMS, frameMS);
+            base.Update(totalTime, frameTime);
 
             if (_isDown)
             {
@@ -118,7 +100,15 @@ namespace ClassicUO.Game.UI.Gumps
         }
 
 
-        public void AddItem(ushort graphic, ushort hue, string name, int x, int y, int index)
+        public void AddItem
+        (
+            ushort graphic,
+            ushort hue,
+            string name,
+            int x,
+            int y,
+            int index
+        )
         {
             ArtTexture texture = ArtLoader.Instance.GetTexture(graphic);
 
@@ -132,8 +122,7 @@ namespace ClassicUO.Game.UI.Gumps
             TextureControl pic = new TextureControl
             {
                 Texture = texture,
-                IsPartial = TileDataLoader.Instance.StaticData[graphic]
-                                          .IsPartialHue,
+                IsPartial = TileDataLoader.Instance.StaticData[graphic].IsPartialHue,
                 Hue = hue,
                 AcceptMouseInput = true,
                 X = x,

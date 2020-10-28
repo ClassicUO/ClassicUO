@@ -1,27 +1,4 @@
-﻿#region license
-
-// Copyright (C) 2020 ClassicUO Development Community on Github
-// 
-// This project is an alternative client for the game Ultima Online.
-// The goal of this is to develop a lightweight client considering
-// new technologies.
-// 
-//  This program is free software: you can redistribute it and/or modify
-//  it under the terms of the GNU General Public License as published by
-//  the Free Software Foundation, either version 3 of the License, or
-//  (at your option) any later version.
-// 
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-// 
-//  You should have received a copy of the GNU General Public License
-//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
-#endregion
-
-using System;
+﻿using System;
 using ClassicUO.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
@@ -76,8 +53,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                     if (Client.Version >= ClientVersion.CV_704565)
                     {
-                        _myCoins[0]
-                            .Text = _gold.ToString();
+                        _myCoins[0].Text = _gold.ToString();
                     }
                 }
             }
@@ -94,8 +70,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                     if (Client.Version >= ClientVersion.CV_704565)
                     {
-                        _myCoins[1]
-                            .Text = _platinum.ToString();
+                        _myCoins[1].Text = _platinum.ToString();
                     }
                 }
             }
@@ -112,8 +87,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                     if (Client.Version >= ClientVersion.CV_704565)
                     {
-                        _hisCoins[0]
-                            .Text = _hisGold.ToString();
+                        _hisCoins[0].Text = _hisGold.ToString();
                     }
                 }
             }
@@ -130,8 +104,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                     if (Client.Version >= ClientVersion.CV_704565)
                     {
-                        _hisCoins[1]
-                            .Text = _hisPlatinum.ToString();
+                        _hisCoins[1].Text = _hisPlatinum.ToString();
                     }
                 }
             }
@@ -337,14 +310,12 @@ namespace ClassicUO.Game.UI.Gumps
                     }
                     else if (!DelayedObjectClickManager.IsEnabled)
                     {
-                        Point off = Mouse.LDroppedOffset;
+                        Point off = Mouse.LDragOffset;
 
                         DelayedObjectClickManager.Set
                         (
-                            it.Serial,
-                            Mouse.Position.X - off.X - ScreenCoordinateX,
-                            Mouse.Position.Y - off.Y - ScreenCoordinateY,
-                            Time.Ticks + Mouse.MOUSE_DELAY_DOUBLE_CLICK
+                            it.Serial, Mouse.Position.X - off.X - ScreenCoordinateX,
+                            Mouse.Position.Y - off.Y - ScreenCoordinateY, Time.Ticks + Mouse.MOUSE_DELAY_DOUBLE_CLICK
                         );
                     }
                 }
@@ -418,19 +389,11 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 Add(new GumpPic(0, 0, 0x088A, 0));
 
-                Add
-                (
-                    new Label(World.Player.Name, false, 0x0481, font: 3)
-                        {X = 73, Y = 32}
-                );
+                Add(new Label(World.Player.Name, false, 0x0481, font: 3) { X = 73, Y = 32 });
 
                 int fontWidth = 250 - FontsLoader.Instance.GetWidthASCII(3, _name);
 
-                Add
-                (
-                    new Label(_name, false, 0x0481, font: 3)
-                        {X = fontWidth, Y = 244}
-                );
+                Add(new Label(_name, false, 0x0481, font: 3) { X = fontWidth, Y = 244 });
 
 
                 _myCoins[0] = new Label("0", false, 0x0481, font: 9)
@@ -475,8 +438,7 @@ namespace ClassicUO.Game.UI.Gumps
                     Tag = 0
                 };
 
-                _myCoinsEntries[0]
-                    .SetText("0");
+                _myCoinsEntries[0].SetText("0");
 
                 Add(_myCoinsEntries[0]);
 
@@ -490,8 +452,7 @@ namespace ClassicUO.Game.UI.Gumps
                     Tag = 1
                 };
 
-                _myCoinsEntries[1]
-                    .SetText("0");
+                _myCoinsEntries[1].SetText("0");
 
                 Add(_myCoinsEntries[1]);
 
@@ -568,11 +529,9 @@ namespace ClassicUO.Game.UI.Gumps
                     }
                 }
 
-                _myCoinsEntries[0]
-                    .TextChanged += OnTextChanged;
+                _myCoinsEntries[0].TextChanged += OnTextChanged;
 
-                _myCoinsEntries[1]
-                    .TextChanged += OnTextChanged;
+                _myCoinsEntries[1].TextChanged += OnTextChanged;
 
 
                 mydbX = 30;
@@ -584,19 +543,11 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 Add(new GumpPic(0, 0, 0x0866, 0));
 
-                Add
-                (
-                    new Label(World.Player.Name, false, 0x0386, font: 1)
-                        {X = 84, Y = 40}
-                );
+                Add(new Label(World.Player.Name, false, 0x0386, font: 1) { X = 84, Y = 40 });
 
                 int fontWidth = 260 - FontsLoader.Instance.GetWidthASCII(1, _name);
 
-                Add
-                (
-                    new Label(_name, false, 0x0386, font: 1)
-                        {X = fontWidth, Y = 170}
-                );
+                Add(new Label(_name, false, 0x0386, font: 1) { X = fontWidth, Y = 170 });
 
                 mydbX = 45;
                 mydbY = 70;

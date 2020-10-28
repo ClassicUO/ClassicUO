@@ -1,26 +1,3 @@
-#region license
-
-// Copyright (C) 2020 ClassicUO Development Community on Github
-// 
-// This project is an alternative client for the game Ultima Online.
-// The goal of this is to develop a lightweight client considering
-// new technologies.
-// 
-//  This program is free software: you can redistribute it and/or modify
-//  it under the terms of the GNU General Public License as published by
-//  the Free Software Foundation, either version 3 of the License, or
-//  (at your option) any later version.
-// 
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-// 
-//  You should have received a copy of the GNU General Public License
-//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
-#endregion
-
 using System;
 using System.IO;
 using ClassicUO.IO.Audio.MP3Sharp.Support;
@@ -408,8 +385,8 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
                     b3 = byteread[k + 3];
                 }
 
-                m_FrameBuffer[b++] = ((b0 << 24) & (int) SupportClass.Identity(0xFF000000)) | ((b1 << 16) & 0x00FF0000) |
-                                     ((b2 << 8) & 0x0000FF00) | (b3 & 0x000000FF);
+                m_FrameBuffer[b++] = ((b0 << 24) & (int) SupportClass.Identity(0xFF000000)) |
+                                     ((b1 << 16) & 0x00FF0000) | ((b2 << 8) & 0x0000FF00) | (b3 & 0x000000FF);
             }
 
             m_WordPointer = 0;
@@ -492,10 +469,7 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
                     if (bytesread == -1 || bytesread == 0) // t/DD -- .NET returns 0 at end-of-stream!
                     {
                         // t/DD: this really SHOULD throw an exception here...
-                        Log.Trace
-                        (
-                            "Bitstream: readFully -- returning success at EOF? (" + bytesread + ")"
-                        );
+                        Log.Trace("Bitstream: readFully -- returning success at EOF? (" + bytesread + ")");
 
                         while (len-- > 0)
                         {

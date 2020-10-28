@@ -1,27 +1,4 @@
-﻿#region license
-
-// Copyright (C) 2020 ClassicUO Development Community on Github
-// 
-// This project is an alternative client for the game Ultima Online.
-// The goal of this is to develop a lightweight client considering
-// new technologies.
-// 
-//  This program is free software: you can redistribute it and/or modify
-//  it under the terms of the GNU General Public License as published by
-//  the Free Software Foundation, either version 3 of the License, or
-//  (at your option) any later version.
-// 
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-// 
-//  You should have received a copy of the GNU General Public License
-//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
-#endregion
-
-using ClassicUO.Configuration;
+﻿using ClassicUO.Configuration;
 using ClassicUO.Game.Managers;
 using ClassicUO.Input;
 using ClassicUO.IO.Resources;
@@ -58,14 +35,13 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override void OnMove(int x, int y)
         {
-            if (Keyboard.Alt && !ProfileManager.Current.HoldAltToMoveGumps)
+            if (Keyboard.Alt && !ProfileManager.CurrentProfile.HoldAltToMoveGumps)
             {
                 UIManager.AnchorManager.DetachControl(this);
             }
             else
             {
-                UIManager.AnchorManager[this]
-                         ?.UpdateLocation(this, X - _prevX, Y - _prevY);
+                UIManager.AnchorManager[this]?.UpdateLocation(this, X - _prevX, Y - _prevY);
             }
 
             _prevX = X;
@@ -76,8 +52,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override void OnMouseDown(int x, int y, MouseButtonType button)
         {
-            UIManager.AnchorManager[this]
-                     ?.MakeTopMost();
+            UIManager.AnchorManager[this]?.MakeTopMost();
 
             _prevX = X;
             _prevY = Y;
@@ -116,8 +91,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (lock_texture != null)
                 {
-                    if (x >= Width - lock_texture.Width && x < Width &&
-                        y >= 0 && y <= lock_texture.Height)
+                    if (x >= Width - lock_texture.Width && x < Width && y >= 0 && y <= lock_texture.Height)
                     {
                         UIManager.AnchorManager.DetachControl(this);
                     }
@@ -136,19 +110,20 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 ResetHueVector();
 
-                UOTexture32 lock_texture = GumpsLoader.Instance.GetTexture(0x082C);
+                UOTexture lock_texture = GumpsLoader.Instance.GetTexture(0x082C);
 
                 if (lock_texture != null)
                 {
                     lock_texture.Ticks = Time.Ticks;
 
-                    if (UIManager.MouseOverControl != null && (UIManager.MouseOverControl == this || UIManager.MouseOverControl.RootParent == this))
+                    if (UIManager.MouseOverControl != null && (UIManager.MouseOverControl == this ||
+                                                               UIManager.MouseOverControl.RootParent == this))
                     {
-                        _hueVector.X = 34;
-                        _hueVector.Y = 1;
+                        HueVector.X = 34;
+                        HueVector.Y = 1;
                     }
 
-                    batcher.Draw2D(lock_texture, x + (Width - lock_texture.Width), y, ref _hueVector);
+                    batcher.Draw2D(lock_texture, x + (Width - lock_texture.Width), y, ref HueVector);
                 }
             }
 
@@ -160,15 +135,17 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (drawLoc != Location)
                 {
-                    Texture2D previewColor = Texture2DCache.GetTexture(Color.Silver);
+                    Texture2D previewColor = SolidColorTextureCache.GetTexture(Color.Silver);
                     ResetHueVector();
-                    _hueVector.Z = 0.5f;
-                    batcher.Draw2D(previewColor, drawLoc.X, drawLoc.Y, Width, Height, ref _hueVector);
+                    HueVector.Z = 0.5f;
+                    batcher.Draw2D(previewColor, drawLoc.X, drawLoc.Y, Width, Height, ref HueVector);
 
-                    _hueVector.Z = 0;
+                    HueVector.Z = 0;
                     // double rectangle for thicker "stroke"
-                    batcher.DrawRectangle(previewColor, drawLoc.X, drawLoc.Y, Width, Height, ref _hueVector);
-                    batcher.DrawRectangle(previewColor, drawLoc.X + 1, drawLoc.Y + 1, Width - 2, Height - 2, ref _hueVector);
+                    batcher.DrawRectangle(previewColor, drawLoc.X, drawLoc.Y, Width, Height, ref HueVector);
+
+                    batcher.DrawRectangle
+                        (previewColor, drawLoc.X + 1, drawLoc.Y + 1, Width - 2, Height - 2, ref HueVector);
                 }
             }
 
@@ -177,9 +154,10 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override void CloseWithRightClick()
         {
-            if (UIManager.AnchorManager[this] == null || Keyboard.Alt || !ProfileManager.Current.HoldDownKeyAltToCloseAnchored)
+            if (UIManager.AnchorManager[this] == null || Keyboard.Alt ||
+                !ProfileManager.CurrentProfile.HoldDownKeyAltToCloseAnchored)
             {
-                if (ProfileManager.Current.CloseAllAnchoredGumpsInGroupWithRightClick)
+                if (ProfileManager.CurrentProfile.CloseAllAnchoredGumpsInGroupWithRightClick)
                 {
                     UIManager.AnchorManager.DisposeAllControls(this);
                 }

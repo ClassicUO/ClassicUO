@@ -1,27 +1,4 @@
-﻿#region license
-
-// Copyright (C) 2020 ClassicUO Development Community on Github
-// 
-// This project is an alternative client for the game Ultima Online.
-// The goal of this is to develop a lightweight client considering
-// new technologies.
-// 
-//  This program is free software: you can redistribute it and/or modify
-//  it under the terms of the GNU General Public License as published by
-//  the Free Software Foundation, either version 3 of the License, or
-//  (at your option) any later version.
-// 
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-// 
-//  You should have received a copy of the GNU General Public License
-//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
-#endregion
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.CompilerServices;
@@ -44,7 +21,8 @@ namespace ClassicUO.Game.Data
 
     internal static class StaticFilters
     {
-        private static readonly STATIC_TILES_FILTER_FLAGS[] _filteredTiles = new STATIC_TILES_FILTER_FLAGS[Constants.MAX_STATIC_DATA_INDEX_COUNT];
+        private static readonly STATIC_TILES_FILTER_FLAGS[] _filteredTiles =
+            new STATIC_TILES_FILTER_FLAGS[Constants.MAX_STATIC_DATA_INDEX_COUNT];
 
         public static readonly List<ushort> CaveTiles = new List<ushort>();
         public static readonly List<ushort> TreeTiles = new List<ushort>();
@@ -106,8 +84,7 @@ namespace ClassicUO.Game.Data
                     {
                         ushort g = vegetationTiles[i];
 
-                        if (TileDataLoader.Instance.StaticData[g]
-                                          .IsImpassable)
+                        if (TileDataLoader.Instance.StaticData[g].IsImpassable)
                         {
                             continue;
                         }
@@ -158,8 +135,7 @@ namespace ClassicUO.Game.Data
                                 break;
                         }
 
-                        if (!TileDataLoader.Instance.StaticData[graphic]
-                                           .IsImpassable)
+                        if (!TileDataLoader.Instance.StaticData[graphic].IsImpassable)
                         {
                             writerveg.WriteLine(graphic);
                         }
@@ -172,7 +148,8 @@ namespace ClassicUO.Game.Data
             }
 
 
-            TextFileParser caveParser = new TextFileParser(File.ReadAllText(cave), new[] {' ', '\t', ','}, new[] {'#', ';'}, new[] {'"', '"'});
+            TextFileParser caveParser = new TextFileParser
+                (File.ReadAllText(cave), new[] { ' ', '\t', ',' }, new[] { '#', ';' }, new[] { '"', '"' });
 
             while (!caveParser.IsEOF())
             {
@@ -189,7 +166,8 @@ namespace ClassicUO.Game.Data
             }
 
 
-            TextFileParser stumpsParser = new TextFileParser(File.ReadAllText(trees), new[] {' ', '\t', ',', '='}, new[] {'#', ';'}, new[] {'"', '"'});
+            TextFileParser stumpsParser = new TextFileParser
+                (File.ReadAllText(trees), new[] { ' ', '\t', ',', '=' }, new[] { '#', ';' }, new[] { '"', '"' });
 
             while (!stumpsParser.IsEOF())
             {
@@ -213,7 +191,8 @@ namespace ClassicUO.Game.Data
             }
 
 
-            TextFileParser vegetationParser = new TextFileParser(File.ReadAllText(vegetation), new[] {' ', '\t', ','}, new[] {'#', ';'}, new[] {'"', '"'});
+            TextFileParser vegetationParser = new TextFileParser
+                (File.ReadAllText(vegetation), new[] { ' ', '\t', ',' }, new[] { '#', ';' }, new[] { '"', '"' });
 
             while (!vegetationParser.IsEOF())
             {
@@ -262,7 +241,7 @@ namespace ClassicUO.Game.Data
         [MethodImpl(256)]
         public static bool IsTree(ushort g, out int index)
         {
-            if (ProfileManager.Current != null && !ProfileManager.Current.TreeToStumps)
+            if (ProfileManager.CurrentProfile != null && !ProfileManager.CurrentProfile.TreeToStumps)
             {
                 index = 0;
 
@@ -315,20 +294,16 @@ namespace ClassicUO.Game.Data
                 case 4958:
                 case 4959:
                 case 4960:
-                case 4962:
-                    return true;
+                case 4962: return true;
 
-                default:
-                    return g >= 6001 && g <= 6012;
+                default: return g >= 6001 && g <= 6012;
             }
         }
 
         [MethodImpl(256)]
         public static bool IsField(ushort g)
         {
-            return g >= 0x398C && g <= 0x399F ||
-                   g >= 0x3967 && g <= 0x397A ||
-                   g >= 0x3946 && g <= 0x3964 ||
+            return g >= 0x398C && g <= 0x399F || g >= 0x3967 && g <= 0x397A || g >= 0x3946 && g <= 0x3964 ||
                    g >= 0x3914 && g <= 0x3929;
         }
 

@@ -1,27 +1,4 @@
-﻿#region license
-
-// Copyright (C) 2020 ClassicUO Development Community on Github
-// 
-// This project is an alternative client for the game Ultima Online.
-// The goal of this is to develop a lightweight client considering
-// new technologies.
-// 
-//  This program is free software: you can redistribute it and/or modify
-//  it under the terms of the GNU General Public License as published by
-//  the Free Software Foundation, either version 3 of the License, or
-//  (at your option) any later version.
-// 
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-// 
-//  You should have received a copy of the GNU General Public License
-//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
-#endregion
-
-using System;
+﻿using System;
 using System.Collections.Concurrent;
 using System.Net;
 using System.Net.Sockets;
@@ -144,12 +121,12 @@ namespace ClassicUO.Network
         {
             if (LoginSocket.IsDisposed && Socket.IsConnected)
             {
-                Socket._recvQueue.Enqueue(new Packet(data, length) {Filter = true});
+                Socket._recvQueue.Enqueue(new Packet(data, length) { Filter = true });
                 Socket.Statistics.TotalPacketsReceived++;
             }
             else if (Socket.IsDisposed && LoginSocket.IsConnected)
             {
-                Socket._recvQueue.Enqueue(new Packet(data, length) {Filter = true});
+                Socket._recvQueue.Enqueue(new Packet(data, length) { Filter = true });
                 LoginSocket.Statistics.TotalPacketsReceived++;
             }
             else
@@ -183,7 +160,9 @@ namespace ClassicUO.Network
 
         private void Connect(IPEndPoint endpoint)
         {
-            _socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp) {ReceiveBufferSize = BUFF_SIZE, SendBufferSize = BUFF_SIZE};
+            _socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp)
+                { ReceiveBufferSize = BUFF_SIZE, SendBufferSize = BUFF_SIZE };
+
             _socket.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.NoDelay, 1);
             _recvBuffer = new byte[BUFF_SIZE];
             _incompletePacketBuffer = new byte[BUFF_SIZE];
@@ -320,17 +299,11 @@ namespace ClassicUO.Network
             {
                 if (!skip_encryption)
                 {
-                    EncryptionHelper.Encrypt
-                    (
-                        _is_login_socket,
-                        ref data,
-                        ref data,
-                        length
-                    );
+                    EncryptionHelper.Encrypt(_is_login_socket, ref data, ref data, length);
                 }
 
 #if !DEBUG
-                    //LogPacket(data, true);
+                //LogPacket(data, true);
 #endif
 
                 try
@@ -415,7 +388,7 @@ namespace ClassicUO.Network
                         packetlength = _circularBuffer.Dequeue(data, 0, packetlength);
 
 #if !DEBUG
-                    //LogPacket(data, false);
+                        //LogPacket(data, false);
 #endif
                         _recvQueue.Enqueue(new Packet(data, packetlength));
                         Statistics.TotalPacketsReceived++;
@@ -433,13 +406,22 @@ namespace ClassicUO.Network
         private static void LogPacket(byte[] buffer, bool toServer)
         {
             if (_logFile == null)
-                _logFile = new LogFile(FileSystemHelper.CreateFolderIfNotExists(CUOEnviroment.ExecutablePath, "Logs", "Network"), "packets.log");
+                _logFile = new LogFile
+                (
+                    FileSystemHelper.CreateFolderIfNotExists(CUOEnviroment.ExecutablePath, "Logs", "Network"),
+                    "packets.log"
+                );
 
             int length = buffer.Length;
             int pos = 0;
 
             StringBuilder output = new StringBuilder();
-            output.AppendFormat("{0}   -   ID {1}   Length: {2}\n", (toServer ? "Client -> Server" : "Server -> Client"), buffer[0], buffer.Length);
+
+            output.AppendFormat
+            (
+                "{0}   -   ID {1}   Length: {2}\n", (toServer ? "Client -> Server" : "Server -> Client"), buffer[0],
+                buffer.Length
+            );
 
             if (buffer[0] == 0x80 || buffer[0] == 0x91)
             {
@@ -477,7 +459,7 @@ namespace ClassicUO.Network
 
                         if (c >= 0x20 && c < 0x80)
                         {
-                            chars.Append((char)c);
+                            chars.Append((char) c);
                         }
                         else
                         {
@@ -516,7 +498,7 @@ namespace ClassicUO.Network
 
                             if (c >= 0x20 && c < 0x80)
                             {
-                                chars.Append((char)c);
+                                chars.Append((char) c);
                             }
                             else
                             {
@@ -634,7 +616,8 @@ namespace ClassicUO.Network
             int sourceOffset = 0;
             int offset = 0;
 
-            while (Huffman.DecompressChunk(ref source, ref sourceOffset, sourcelength, ref buffer, offset, out int outSize))
+            while (Huffman.DecompressChunk
+                (ref source, ref sourceOffset, sourcelength, ref buffer, offset, out int outSize))
             {
                 processedOffset = sourceOffset;
                 offset += outSize;

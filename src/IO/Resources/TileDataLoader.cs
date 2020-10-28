@@ -1,27 +1,4 @@
-﻿#region license
-
-// Copyright (C) 2020 ClassicUO Development Community on Github
-// 
-// This project is an alternative client for the game Ultima Online.
-// The goal of this is to develop a lightweight client considering
-// new technologies.
-// 
-//  This program is free software: you can redistribute it and/or modify
-//  it under the terms of the GNU General Public License as published by
-//  the Free Software Foundation, either version 3 of the License, or
-//  (at your option) any later version.
-// 
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-// 
-//  You should have received a copy of the GNU General Public License
-//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
-#endregion
-
-using System;
+﻿using System;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -95,11 +72,7 @@ namespace ClassicUO.IO.Resources
                             ushort textId = tileData.ReadUShort();
                             tileData.Fill(ref bufferString, 20);
 
-                            string name = string.Intern
-                            (
-                                Encoding.UTF8.GetString(bufferString)
-                                        .TrimEnd('\0')
-                            );
+                            string name = string.Intern(Encoding.UTF8.GetString(bufferString).TrimEnd('\0'));
 
                             LandData[idx] = new LandTiles(flags, textId, name);
                         }
@@ -135,13 +108,10 @@ namespace ClassicUO.IO.Resources
                             byte height = tileData.ReadByte();
                             tileData.Fill(ref bufferString, 20);
 
-                            string name = string.Intern
-                            (
-                                Encoding.UTF8.GetString(bufferString)
-                                        .TrimEnd('\0')
-                            );
+                            string name = string.Intern(Encoding.UTF8.GetString(bufferString).TrimEnd('\0'));
 
-                            StaticData[idx] = new StaticTiles(flags, weight, layer, count, animId, hue, lightIndex, height, name);
+                            StaticData[idx] = new StaticTiles
+                                (flags, weight, layer, count, animId, hue, lightIndex, height, name);
                         }
                     }
 
@@ -301,29 +271,31 @@ namespace ClassicUO.IO.Resources
                                 {
                                     int checkIndex = group[i];
 
-                                    if (checkIndex < 0 || checkIndex >= Constants.MAX_LAND_DATA_INDEX_COUNT + StaticData.Length)
+                                    if (checkIndex < 0 || checkIndex >=
+                                        Constants.MAX_LAND_DATA_INDEX_COUNT + StaticData.Length)
                                     {
                                         continue;
                                     }
 
-                                    if (index < Constants.MAX_LAND_DATA_INDEX_COUNT && checkIndex < Constants.MAX_LAND_DATA_INDEX_COUNT && checkIndex < LandData.Length && index < LandData.Length && !LandData[checkIndex]
-                                        .Equals(default) && LandData[index]
-                                        .Equals(default))
+                                    if (index < Constants.MAX_LAND_DATA_INDEX_COUNT &&
+                                        checkIndex < Constants.MAX_LAND_DATA_INDEX_COUNT &&
+                                        checkIndex < LandData.Length && index < LandData.Length &&
+                                        !LandData[checkIndex].Equals(default) && LandData[index].Equals(default))
                                     {
                                         LandData[index] = LandData[checkIndex];
 
                                         break;
                                     }
 
-                                    if (index >= Constants.MAX_LAND_DATA_INDEX_COUNT && checkIndex >= Constants.MAX_LAND_DATA_INDEX_COUNT)
+                                    if (index >= Constants.MAX_LAND_DATA_INDEX_COUNT &&
+                                        checkIndex >= Constants.MAX_LAND_DATA_INDEX_COUNT)
                                     {
                                         checkIndex -= Constants.MAX_LAND_DATA_INDEX_COUNT;
                                         checkIndex &= 0x3FFF;
                                         index -= Constants.MAX_LAND_DATA_INDEX_COUNT;
 
-                                        if (StaticData[index]
-                                            .Equals(default) && !StaticData[checkIndex]
-                                            .Equals(default))
+                                        if (StaticData[index].Equals(default) &&
+                                            !StaticData[checkIndex].Equals(default))
                                         {
                                             StaticData[index] = StaticData[checkIndex];
 
@@ -374,7 +346,18 @@ namespace ClassicUO.IO.Resources
 
     internal struct StaticTiles
     {
-        public StaticTiles(ulong flags, byte weight, byte layer, int count, ushort animId, ushort hue, ushort lightIndex, byte height, string name)
+        public StaticTiles
+        (
+            ulong flags,
+            byte weight,
+            byte layer,
+            int count,
+            ushort animId,
+            ushort hue,
+            ushort lightIndex,
+            byte height,
+            string name
+        )
         {
             Flags = (TileFlag) flags;
             Weight = weight;

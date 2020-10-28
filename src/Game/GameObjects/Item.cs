@@ -1,27 +1,4 @@
-﻿#region license
-
-// Copyright (C) 2020 ClassicUO Development Community on Github
-// 
-// This project is an alternative client for the game Ultima Online.
-// The goal of this is to develop a lightweight client considering
-// new technologies.
-// 
-//  This program is free software: you can redistribute it and/or modify
-//  it under the terms of the GNU General Public License as published by
-//  the Free Software Foundation, either version 3 of the License, or
-//  (at your option) any later version.
-// 
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-// 
-//  You should have received a copy of the GNU General Public License
-//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
-#endregion
-
-using System;
+﻿using System;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
@@ -179,10 +156,8 @@ namespace ClassicUO.Game.GameObjects
         public ref StaticTiles ItemData => ref TileDataLoader.Instance.StaticData[IsMulti ? MultiGraphic : Graphic];
 
         public bool IsLootable =>
-            ItemData.Layer != (int) Layer.Hair &&
-            ItemData.Layer != (int) Layer.Beard &&
-            ItemData.Layer != (int) Layer.Face &&
-            Graphic != 0;
+            ItemData.Layer != (int) Layer.Hair && ItemData.Layer != (int) Layer.Beard &&
+            ItemData.Layer != (int) Layer.Face && Graphic != 0;
 
         public ushort Amount;
         public uint Container = 0xFFFF_FFFF;
@@ -216,26 +191,20 @@ namespace ClassicUO.Game.GameObjects
 
             if (Opened)
             {
-                UIManager.GetGump<ContainerGump>(Serial)
-                         ?.Dispose();
+                UIManager.GetGump<ContainerGump>(Serial)?.Dispose();
 
-                UIManager.GetGump<SpellbookGump>(Serial)
-                         ?.Dispose();
+                UIManager.GetGump<SpellbookGump>(Serial)?.Dispose();
 
-                UIManager.GetGump<MapGump>(Serial)
-                         ?.Dispose();
+                UIManager.GetGump<MapGump>(Serial)?.Dispose();
 
                 if (IsCorpse)
                 {
-                    UIManager.GetGump<GridLootGump>(Serial)
-                             ?.Dispose();
+                    UIManager.GetGump<GridLootGump>(Serial)?.Dispose();
                 }
 
-                UIManager.GetGump<BulletinBoardGump>(Serial)
-                         ?.Dispose();
+                UIManager.GetGump<BulletinBoardGump>(Serial)?.Dispose();
 
-                UIManager.GetGump<SplitMenuGump>(Serial)
-                         ?.Dispose();
+                UIManager.GetGump<SplitMenuGump>(Serial)?.Dispose();
 
                 Opened = false;
             }
@@ -276,7 +245,13 @@ namespace ClassicUO.Game.GameObjects
                     MultiLoader.Instance.File.Seek(entry.Offset);
 
                     byte* data = stackalloc byte[entry.DecompressedLength];
-                    ZLib.Decompress(MultiLoader.Instance.File.PositionAddress, entry.Length, 0, (IntPtr) data, entry.DecompressedLength);
+
+                    ZLib.Decompress
+                    (
+                        MultiLoader.Instance.File.PositionAddress, entry.Length, 0, (IntPtr) data,
+                        entry.DecompressedLength
+                    );
+
                     _reader.SetData(data, entry.DecompressedLength);
                     _reader.Skip(4);
                     int count = (int) _reader.ReadUInt();
@@ -349,7 +324,8 @@ namespace ClassicUO.Game.GameObjects
 
                 for (int i = 0; i < count; i++)
                 {
-                    MultiBlock* block = (MultiBlock*) (MultiLoader.Instance.File.PositionAddress + i * MultiLoader.Instance.Offset);
+                    MultiBlock* block =
+                        (MultiBlock*) (MultiLoader.Instance.File.PositionAddress + i * MultiLoader.Instance.Offset);
 
                     if (block->X < minX)
                     {
@@ -407,13 +383,11 @@ namespace ClassicUO.Game.GameObjects
 
             //house.Generate();
 
-            UIManager.GetGump<MiniMapGump>()
-                     ?.RequestUpdateContents();
+            UIManager.GetGump<MiniMapGump>()?.RequestUpdateContents();
 
             if (World.HouseManager.EntityIntoHouse(Serial, World.Player))
             {
-                Client.Game.GetScene<GameScene>()
-                      ?.UpdateMaxDrawZ(true);
+                Client.Game.GetScene<GameScene>()?.UpdateMaxDrawZ(true);
             }
 
             BoatMovingManager.ClearSteps(Serial);
@@ -457,14 +431,14 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
-        public override void Update(double totalMS, double frameMS)
+        public override void Update(double totalTime, double frameTime)
         {
             if (IsDestroyed)
             {
                 return;
             }
 
-            base.Update(totalMS, frameMS);
+            base.Update(totalTime, frameTime);
 
             ProcessAnimation(out _);
         }
@@ -908,6 +882,13 @@ namespace ClassicUO.Game.GameObjects
 
                         break;
                     }
+
+                    case 0x3ED3: // capybara
+                    {
+                        graphic = 0x05F7;
+
+                        break;
+                    }
                 }
 
                 if (ItemData.AnimID != 0)
@@ -1032,7 +1013,8 @@ namespace ClassicUO.Game.GameObjects
 
                         ushort hue = 0;
 
-                        AnimationDirection direction = AnimationsLoader.Instance.GetCorpseAnimationGroup(ref id, ref animGroup, ref hue)
+                        AnimationDirection direction = AnimationsLoader.Instance.GetCorpseAnimationGroup
+                                                                           (ref id, ref animGroup, ref hue)
                                                                        .Direction[dir];
 
                         AnimationsLoader.Instance.AnimID = id;

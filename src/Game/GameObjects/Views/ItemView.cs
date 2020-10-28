@@ -1,26 +1,3 @@
-#region license
-
-// Copyright (C) 2020 ClassicUO Development Community on Github
-// 
-// This project is an alternative client for the game Ultima Online.
-// The goal of this is to develop a lightweight client considering
-// new technologies.
-// 
-//  This program is free software: you can redistribute it and/or modify
-//  it under the terms of the GNU General Public License as published by
-//  the Free Software Foundation, either version 3 of the License, or
-//  (at your option) any later version.
-// 
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-// 
-//  You should have received a copy of the GNU General Public License
-//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
-#endregion
-
 using System.Collections.Generic;
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
@@ -76,7 +53,7 @@ namespace ClassicUO.Game.GameObjects
             {
                 if (ItemData.IsAnimated)
                 {
-                    if (ProfileManager.Current.FieldsType == 2)
+                    if (ProfileManager.CurrentProfile.FieldsType == 2)
                     {
                         if (StaticFilters.IsFireField(Graphic))
                         {
@@ -113,16 +90,16 @@ namespace ClassicUO.Game.GameObjects
                 }
             }
 
-            if (ProfileManager.Current.HighlightGameObjects && SelectedObject.LastObject == this)
+            if (ProfileManager.CurrentProfile.HighlightGameObjects && SelectedObject.LastObject == this)
             {
                 hue = Constants.HIGHLIGHT_CURRENT_OBJECT_HUE;
                 partial = false;
             }
-            else if (ProfileManager.Current.NoColorObjectsOutOfRange && Distance > World.ClientViewRange)
+            else if (ProfileManager.CurrentProfile.NoColorObjectsOutOfRange && Distance > World.ClientViewRange)
             {
                 hue = Constants.OUT_RANGE_COLOR;
             }
-            else if (World.Player.IsDead && ProfileManager.Current.EnableBlackWhiteEffect)
+            else if (World.Player.IsDead && ProfileManager.CurrentProfile.EnableBlackWhiteEffect)
             {
                 hue = Constants.DEAD_RANGE_COLOR;
             }
@@ -149,8 +126,7 @@ namespace ClassicUO.Game.GameObjects
 
             if (ItemData.IsLight)
             {
-                Client.Game.GetScene<GameScene>()
-                      .AddLight(this, this, posX + 22, posY + 22);
+                Client.Game.GetScene<GameScene>().AddLight(this, this, posX + 22, posY + 22);
             }
 
             if (!SerialHelper.IsValid(Serial) && IsMulti && TargetManager.TargetingState == CursorTarget.MultiPlacement)
@@ -201,12 +177,12 @@ namespace ClassicUO.Game.GameObjects
             AnimationsLoader.Instance.ConvertBodyIfNeeded(ref graphic);
             AnimationsLoader.Instance.AnimGroup = AnimationsLoader.Instance.GetDieGroupIndex(graphic, UsedLayer);
 
-            bool ishuman = MathHelper.InRange(Amount, 0x0190, 0x0193) ||
-                           MathHelper.InRange(Amount, 0x00B7, 0x00BA) ||
-                           MathHelper.InRange(Amount, 0x025D, 0x0260) ||
-                           MathHelper.InRange(Amount, 0x029A, 0x029B) ||
-                           MathHelper.InRange(Amount, 0x02B6, 0x02B7) ||
-                           Amount == 0x03DB || Amount == 0x03DF || Amount == 0x03E2 || Amount == 0x02E8 || Amount == 0x02E9;
+            bool ishuman = MathHelper.InRange(Amount, 0x0190, 0x0193) || MathHelper.InRange
+                               (Amount, 0x00B7, 0x00BA) || MathHelper.InRange
+                               (Amount, 0x025D, 0x0260) || MathHelper.InRange
+                               (Amount, 0x029A, 0x029B) || MathHelper.InRange
+                               (Amount, 0x02B6, 0x02B7) || Amount == 0x03DB || Amount == 0x03DF || Amount == 0x03E2 ||
+                           Amount == 0x02E8 || Amount == 0x02E9;
 
             DrawLayer(batcher, posX, posY, this, Layer.Invalid, animIndex, ishuman, Hue, IsFlipped, HueVector.Z);
 
@@ -219,7 +195,19 @@ namespace ClassicUO.Game.GameObjects
             return true;
         }
 
-        private static void DrawLayer(UltimaBatcher2D batcher, int posX, int posY, Item owner, Layer layer, byte animIndex, bool ishuman, ushort color, bool flipped, float alpha)
+        private static void DrawLayer
+        (
+            UltimaBatcher2D batcher,
+            int posX,
+            int posY,
+            Item owner,
+            Layer layer,
+            byte animIndex,
+            bool ishuman,
+            ushort color,
+            bool flipped,
+            float alpha
+        )
         {
             _equipConvData = null;
             bool ispartialhue = false;
@@ -242,7 +230,8 @@ namespace ClassicUO.Game.GameObjects
                 graphic = itemEquip.ItemData.AnimID;
                 ispartialhue = itemEquip.ItemData.IsPartialHue;
 
-                if (AnimationsLoader.Instance.EquipConversions.TryGetValue(graphic, out Dictionary<ushort, EquipConvData> map))
+                if (AnimationsLoader.Instance.EquipConversions.TryGetValue
+                    (graphic, out Dictionary<ushort, EquipConvData> map))
                 {
                     if (map.TryGetValue(graphic, out EquipConvData data))
                     {
@@ -261,9 +250,9 @@ namespace ClassicUO.Game.GameObjects
             byte animGroup = AnimationsLoader.Instance.AnimGroup;
             ushort newHue = 0;
 
-            AnimationGroup gr = layer == Layer.Invalid
-                ? AnimationsLoader.Instance.GetCorpseAnimationGroup(ref graphic, ref animGroup, ref newHue)
-                : AnimationsLoader.Instance.GetBodyAnimationGroup(ref graphic, ref animGroup, ref newHue);
+            AnimationGroup gr = layer == Layer.Invalid ?
+                AnimationsLoader.Instance.GetCorpseAnimationGroup(ref graphic, ref animGroup, ref newHue) :
+                AnimationsLoader.Instance.GetBodyAnimationGroup(ref graphic, ref animGroup, ref newHue);
 
             AnimationsLoader.Instance.AnimID = graphic;
 
@@ -279,7 +268,8 @@ namespace ClassicUO.Game.GameObjects
                 return;
             }
 
-            if ((direction.FrameCount == 0 || direction.Frames == null) && !AnimationsLoader.Instance.LoadDirectionGroup(ref direction))
+            if ((direction.FrameCount == 0 || direction.Frames == null) && !AnimationsLoader.Instance.LoadDirectionGroup
+                (ref direction))
             {
                 return;
             }
@@ -332,23 +322,23 @@ namespace ClassicUO.Game.GameObjects
 
                 ResetHueVector();
 
-                if (ProfileManager.Current.NoColorObjectsOutOfRange && owner.Distance > World.ClientViewRange)
+                if (ProfileManager.CurrentProfile.NoColorObjectsOutOfRange && owner.Distance > World.ClientViewRange)
                 {
                     HueVector.X = Constants.OUT_RANGE_COLOR;
                     HueVector.Y = 1;
                 }
-                else if (World.Player.IsDead && ProfileManager.Current.EnableBlackWhiteEffect)
+                else if (World.Player.IsDead && ProfileManager.CurrentProfile.EnableBlackWhiteEffect)
                 {
                     HueVector.X = Constants.DEAD_RANGE_COLOR;
                     HueVector.Y = 1;
                 }
                 else
                 {
-                    if (ProfileManager.Current.GridLootType > 0 && SelectedObject.CorpseObject == owner)
+                    if (ProfileManager.CurrentProfile.GridLootType > 0 && SelectedObject.CorpseObject == owner)
                     {
                         color = 0x0034;
                     }
-                    else if (ProfileManager.Current.HighlightGameObjects && SelectedObject.LastObject == owner)
+                    else if (ProfileManager.CurrentProfile.HighlightGameObjects && SelectedObject.LastObject == owner)
                     {
                         color = Constants.HIGHLIGHT_CURRENT_OBJECT_HUE;
                     }
@@ -368,7 +358,13 @@ namespace ClassicUO.Game.GameObjects
                     return;
                 }
 
-                if (frame.Contains(flipped ? posX + frame.Width - SelectedObject.TranslatedMousePositionByViewport.X : SelectedObject.TranslatedMousePositionByViewport.X - posX, SelectedObject.TranslatedMousePositionByViewport.Y - posY))
+                if (frame.Contains
+                (
+                    flipped ?
+                        posX + frame.Width - SelectedObject.TranslatedMousePositionByViewport.X :
+                        SelectedObject.TranslatedMousePositionByViewport.X - posX,
+                    SelectedObject.TranslatedMousePositionByViewport.Y - posY
+                ))
                 {
                     SelectedObject.Object = owner;
                 }

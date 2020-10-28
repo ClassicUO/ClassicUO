@@ -1,27 +1,4 @@
-﻿#region license
-
-// Copyright (C) 2020 ClassicUO Development Community on Github
-// 
-// This project is an alternative client for the game Ultima Online.
-// The goal of this is to develop a lightweight client considering
-// new technologies.
-// 
-//  This program is free software: you can redistribute it and/or modify
-//  it under the terms of the GNU General Public License as published by
-//  the Free Software Foundation, either version 3 of the License, or
-//  (at your option) any later version.
-// 
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-// 
-//  You should have received a copy of the GNU General Public License
-//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
-#endregion
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
@@ -191,8 +168,8 @@ namespace ClassicUO.Game.Managers
             {
                 MessageBoxGump messageBox = new MessageBoxGump(200, 125, ResGeneral.CannotDeleteThisGroup, null)
                 {
-                    X = ProfileManager.Current.GameWindowPosition.X + ProfileManager.Current.GameWindowSize.X / 2 - 100,
-                    Y = ProfileManager.Current.GameWindowPosition.Y + ProfileManager.Current.GameWindowSize.Y / 2 - 62
+                    X = ProfileManager.CurrentProfile.GameWindowPosition.X + ProfileManager.CurrentProfile.GameWindowSize.X / 2 - 100,
+                    Y = ProfileManager.CurrentProfile.GameWindowPosition.Y + ProfileManager.CurrentProfile.GameWindowSize.Y / 2 - 62
                 };
 
                 UIManager.Add(messageBox);
@@ -216,8 +193,7 @@ namespace ClassicUO.Game.Managers
         {
             Groups.Clear();
 
-            string path = Path.Combine(CUOEnviroment.ExecutablePath, "Data", "Profiles", ProfileManager.Current.Username, ProfileManager.Current.ServerName, ProfileManager.Current.CharacterName, "skillsgroups.xml");
-
+            string path = Path.Combine(ProfileManager.ProfilePath, "skillsgroups.xml");
             if (!File.Exists(path))
             {
                 Log.Trace("No skillsgroups.xml file. Creating a default file.");
@@ -267,7 +243,7 @@ namespace ClassicUO.Game.Managers
 
         public static void Save()
         {
-            string path = Path.Combine(CUOEnviroment.ExecutablePath, "Data", "Profiles", ProfileManager.Current.Username, ProfileManager.Current.ServerName, ProfileManager.Current.CharacterName, "skillsgroups.xml");
+            string path = Path.Combine(ProfileManager.ProfilePath, "skillsgroups.xml");
 
             using (XmlTextWriter xml = new XmlTextWriter(path, Encoding.UTF8)
             {
@@ -544,8 +520,7 @@ namespace ClassicUO.Game.Managers
 
                         if (grp < groups.Length && skillidx < SkillsLoader.Instance.SkillsCount)
                         {
-                            groups[grp]
-                                .Add(skillidx++);
+                            groups[grp].Add(skillidx++);
                         }
                     }
 

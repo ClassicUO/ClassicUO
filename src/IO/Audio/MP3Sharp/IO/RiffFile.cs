@@ -1,26 +1,3 @@
-#region license
-
-// Copyright (C) 2020 ClassicUO Development Community on Github
-// 
-// This project is an alternative client for the game Ultima Online.
-// The goal of this is to develop a lightweight client considering
-// new technologies.
-// 
-//  This program is free software: you can redistribute it and/or modify
-//  it under the terms of the GNU General Public License as published by
-//  the Free Software Foundation, either version 3 of the License, or
-//  (at your option) any later version.
-// 
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-// 
-//  You should have received a copy of the GNU General Public License
-//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
-#endregion
-
 using System.IO;
 using ClassicUO.IO.Audio.MP3Sharp.Support;
 
@@ -629,33 +606,19 @@ namespace ClassicUO.IO.Audio.MP3Sharp.IO
         {
             switch (retcode)
             {
-                case DDC_SUCCESS:
+                case DDC_SUCCESS: return "DDC_SUCCESS";
 
-                    return "DDC_SUCCESS";
+                case DDC_FAILURE: return "DDC_FAILURE";
 
-                case DDC_FAILURE:
+                case DDC_OUT_OF_MEMORY: return "DDC_OUT_OF_MEMORY";
 
-                    return "DDC_FAILURE";
+                case DDC_FILE_ERROR: return "DDC_FILE_ERROR";
 
-                case DDC_OUT_OF_MEMORY:
+                case DDC_INVALID_CALL: return "DDC_INVALID_CALL";
 
-                    return "DDC_OUT_OF_MEMORY";
+                case DDC_USER_ABORT: return "DDC_USER_ABORT";
 
-                case DDC_FILE_ERROR:
-
-                    return "DDC_FILE_ERROR";
-
-                case DDC_INVALID_CALL:
-
-                    return "DDC_INVALID_CALL";
-
-                case DDC_USER_ABORT:
-
-                    return "DDC_USER_ABORT";
-
-                case DDC_INVALID_FILE:
-
-                    return "DDC_INVALID_FILE";
+                case DDC_INVALID_FILE: return "DDC_INVALID_FILE";
             }
 
             return "Unknown Error";
@@ -666,7 +629,7 @@ namespace ClassicUO.IO.Audio.MP3Sharp.IO
         /// </summary>
         public static int FourCC(string chunkName)
         {
-            sbyte[] p = {0x20, 0x20, 0x20, 0x20};
+            sbyte[] p = { 0x20, 0x20, 0x20, 0x20 };
             SupportClass.GetSBytesFromString(chunkName, 0, 4, ref p, 0);
 
             int ret = ((p[0] << 24) & (int) SupportClass.Identity(0xFF000000)) | ((p[1] << 16) & 0x00FF0000) |

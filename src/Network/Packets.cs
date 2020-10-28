@@ -1,26 +1,3 @@
-#region license
-
-// Copyright (C) 2020 ClassicUO Development Community on Github
-// 
-// This project is an alternative client for the game Ultima Online.
-// The goal of this is to develop a lightweight client considering
-// new technologies.
-// 
-//  This program is free software: you can redistribute it and/or modify
-//  it under the terms of the GNU General Public License as published by
-//  the Free Software Foundation, either version 3 of the License, or
-//  (at your option) any later version.
-// 
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-// 
-//  You should have received a copy of the GNU General Public License
-//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
-#endregion
-
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -134,7 +111,15 @@ namespace ClassicUO.Network
 
     internal sealed class PCreateCharacter : PacketWriter
     {
-        public PCreateCharacter(PlayerMobile character, int cityIndex, uint clientIP, int serverIndex, uint slot, byte profession) : base(0x00)
+        public PCreateCharacter
+        (
+            PlayerMobile character,
+            int cityIndex,
+            uint clientIP,
+            int serverIndex,
+            uint slot,
+            byte profession
+        ) : base(0x00)
         {
             int skillcount = 3;
 
@@ -179,9 +164,7 @@ namespace ClassicUO.Network
             WriteByte((byte) character.Dexterity);
             WriteByte((byte) character.Intelligence);
 
-            List<Skill> skills = character.Skills.OrderByDescending(o => o.Value)
-                                          .Take(skillcount)
-                                          .ToList();
+            List<Skill> skills = character.Skills.OrderByDescending(o => o.Value).Take(skillcount).ToList();
 
             foreach (Skill skill in skills)
             {
@@ -309,7 +292,15 @@ namespace ClassicUO.Network
 
     internal sealed class PDropRequestNew : PacketWriter
     {
-        public PDropRequestNew(uint serial, ushort x, ushort y, sbyte z, byte slot, uint container) : base(0x08)
+        public PDropRequestNew
+        (
+            uint serial,
+            ushort x,
+            ushort y,
+            sbyte z,
+            byte slot,
+            uint container
+        ) : base(0x08)
         {
             WriteUInt(serial);
             WriteUShort(x);
@@ -421,6 +412,15 @@ namespace ClassicUO.Network
     {
         public PASCIISpeechRequest(string text, MessageType type, byte font, ushort hue) : base(0x03)
         {
+            List<SpeechEntry> entries = SpeechesLoader.Instance.GetKeywords(text);
+
+            bool encoded = entries != null && entries.Count != 0;
+
+            if (encoded)
+            {
+                type |= MessageType.Encoded;
+            }
+
             WriteByte((byte) type);
             WriteUShort(hue);
             WriteUShort(font);
@@ -458,8 +458,7 @@ namespace ClassicUO.Network
 
                 while (index < length)
                 {
-                    int keywordID = entries[index]
-                        .KeywordID;
+                    int keywordID = entries[index].KeywordID;
 
                     if (flag)
                     {
@@ -564,7 +563,8 @@ namespace ClassicUO.Network
 
     internal sealed class PGumpResponse : PacketWriter
     {
-        public PGumpResponse(uint local, uint server, int buttonID, uint[] switches, Tuple<ushort, string>[] entries) : base(0xB1)
+        public PGumpResponse
+            (uint local, uint server, int buttonID, uint[] switches, Tuple<ushort, string>[] entries) : base(0xB1)
         {
             WriteUInt(local);
             WriteUInt(server);
@@ -583,25 +583,13 @@ namespace ClassicUO.Network
             //for (int i = entries.Length - 1; i >= 0; i--)
             for (int i = 0; i < entries.Length; i++)
             {
-                int length = Math.Min
-                (
-                    239, entries[i]
-                         .Item2.Length
-                );
+                int length = Math.Min(239, entries[i].Item2.Length);
 
-                WriteUShort
-                (
-                    entries[i]
-                        .Item1
-                );
+                WriteUShort(entries[i].Item1);
 
                 WriteUShort((ushort) length);
 
-                WriteUnicode
-                (
-                    entries[i]
-                        .Item2, length
-                );
+                WriteUnicode(entries[i].Item2, length);
             }
         }
     }
@@ -722,7 +710,16 @@ namespace ClassicUO.Network
 
     internal sealed class PTargetObject : PacketWriter
     {
-        public PTargetObject(uint entity, ushort graphic, ushort x, ushort y, sbyte z, uint cursorID, byte cursorType) : base(0x6C)
+        public PTargetObject
+        (
+            uint entity,
+            ushort graphic,
+            ushort x,
+            ushort y,
+            sbyte z,
+            uint cursorID,
+            byte cursorType
+        ) : base(0x6C)
         {
             WriteByte(0x00);
             WriteUInt(cursorID);
@@ -737,7 +734,15 @@ namespace ClassicUO.Network
 
     internal sealed class PTargetXYZ : PacketWriter
     {
-        public PTargetXYZ(ushort x, ushort y, short z, ushort modelNumber, uint cursorID, byte targetType) : base(0x6C)
+        public PTargetXYZ
+        (
+            ushort x,
+            ushort y,
+            short z,
+            ushort modelNumber,
+            uint cursorID,
+            byte targetType
+        ) : base(0x6C)
         {
             WriteByte(0x01);
             WriteUInt(cursorID);
@@ -941,8 +946,7 @@ namespace ClassicUO.Network
 
     internal sealed class PBulletinBoardPostMessage : PacketWriter
     {
-        public PBulletinBoardPostMessage(uint serial, uint msgserial, string subject, string _textBox) :
-            base(0x71)
+        public PBulletinBoardPostMessage(uint serial, uint msgserial, string subject, string _textBox) : base(0x71)
         {
             WriteByte(0x05);
             WriteUInt(serial);
@@ -957,11 +961,7 @@ namespace ClassicUO.Network
 
             for (int L = 0; L < numlinee; L++)
             {
-                byte[] buf = Encoding.UTF8.GetBytes
-                (
-                    splits[L]
-                        .Trim()
-                );
+                byte[] buf = Encoding.UTF8.GetBytes(splits[L].Trim());
 
                 WriteByte((byte) (buf.Length + 1));
                 WriteBytes(buf, 0, buf.Length);
@@ -985,7 +985,11 @@ namespace ClassicUO.Network
         public PAssistVersion(byte[] clientversion, uint version) : base(0xBE)
         {
             WriteUInt(version);
-            WriteASCII(string.Format("{0}.{1}.{2}.{3}", clientversion[0], clientversion[1], clientversion[2], clientversion[3]));
+
+            WriteASCII
+            (
+                string.Format("{0}.{1}.{2}.{3}", clientversion[0], clientversion[1], clientversion[2], clientversion[3])
+            );
         }
 
         public PAssistVersion(string v, uint version) : base(0xBE)
@@ -1308,8 +1312,7 @@ namespace ClassicUO.Network
 
             for (int i = 0; i < text.Length; i++)
             {
-                if (text[i] != null && text[i]
-                    .Length > 0)
+                if (text[i] != null && text[i].Length > 0)
                 {
                     WriteBytes(Encoding.UTF8.GetBytes(text[i]));
                 }
@@ -1346,17 +1349,9 @@ namespace ClassicUO.Network
                 {
                     WriteByte(0x1A); // layer?
 
-                    WriteUInt
-                    (
-                        items[i]
-                            .Item1
-                    );
+                    WriteUInt(items[i].Item1);
 
-                    WriteUShort
-                    (
-                        items[i]
-                            .Item2
-                    );
+                    WriteUShort(items[i].Item2);
                 }
             }
             else
@@ -1375,17 +1370,9 @@ namespace ClassicUO.Network
 
             for (int i = 0; i < items.Length; i++)
             {
-                WriteUInt
-                (
-                    items[i]
-                        .Item1
-                );
+                WriteUInt(items[i].Item1);
 
-                WriteUShort
-                (
-                    items[i]
-                        .Item2
-                );
+                WriteUShort(items[i].Item2);
             }
         }
     }
@@ -1449,7 +1436,8 @@ namespace ClassicUO.Network
 
     internal sealed class PChangeRaceRequest : PacketWriter
     {
-        public PChangeRaceRequest(ushort skin_hue, ushort hair_style, ushort hair_color, ushort beard_style, ushort beard_color) : base(0xBF)
+        public PChangeRaceRequest
+            (ushort skin_hue, ushort hair_style, ushort hair_color, ushort beard_style, ushort beard_color) : base(0xBF)
         {
             WriteUShort(skin_hue);
             WriteUShort(hair_style);

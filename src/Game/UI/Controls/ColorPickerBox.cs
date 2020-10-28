@@ -1,27 +1,4 @@
-﻿#region license
-
-// Copyright (C) 2020 ClassicUO Development Community on Github
-// 
-// This project is an alternative client for the game Ultima Online.
-// The goal of this is to develop a lightweight client considering
-// new technologies.
-// 
-//  This program is free software: you can redistribute it and/or modify
-//  it under the terms of the GNU General Public License as published by
-//  the Free Software Foundation, either version 3 of the License, or
-//  (at your option) any later version.
-// 
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-// 
-//  You should have received a copy of the GNU General Public License
-//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
-#endregion
-
-using System;
+﻿using System;
 using System.Runtime.InteropServices;
 using ClassicUO.Input;
 using ClassicUO.IO.Resources;
@@ -47,7 +24,16 @@ namespace ClassicUO.Game.UI.Controls
 
         private bool _selected;
 
-        public ColorPickerBox(int x, int y, int rows = 10, int columns = 20, int cellW = 8, int cellH = 8, ushort[] customPallete = null)
+        public ColorPickerBox
+        (
+            int x,
+            int y,
+            int rows = 10,
+            int columns = 20,
+            int cellW = 8,
+            int cellH = 8,
+            ushort[] customPallete = null
+        )
         {
             X = x;
             Y = y;
@@ -113,7 +99,9 @@ namespace ClassicUO.Game.UI.Controls
             }
         }
 
-        public ushort SelectedHue => SelectedIndex < 0 || SelectedIndex >= _hues.Length ? (ushort) 0 : _hues[SelectedIndex];
+        public ushort SelectedHue =>
+            SelectedIndex < 0 || SelectedIndex >= _hues.Length ? (ushort) 0 : _hues[SelectedIndex];
+
         public EventHandler ColorSelectedIndex;
 
         public void SetHue(ushort hue)
@@ -122,7 +110,7 @@ namespace ClassicUO.Game.UI.Controls
             Graduation = hue - 1;
         }
 
-        public override void Update(double totalMS, double frameMS)
+        public override void Update(double totalTime, double frameTime)
         {
             if (IsDisposed)
             {
@@ -134,14 +122,13 @@ namespace ClassicUO.Game.UI.Controls
                 CreateTexture();
             }
 
-            base.Update(totalMS, frameMS);
+            base.Update(totalTime, frameTime);
 
             for (int y = 0; y < _rows; y++)
             {
                 for (int x = 0; x < _columns; x++)
                 {
-                    _colorBoxes?[y, x]
-                        .Update(totalMS, frameMS);
+                    _colorBoxes?[y, x].Update(totalTime, frameTime);
                 }
             }
         }
@@ -170,8 +157,7 @@ namespace ClassicUO.Game.UI.Controls
             {
                 for (int j = 0; j < _columns; j++)
                 {
-                    _colorBoxes?[i, j]
-                        .Draw(batcher, x + j * _cellWidth, y + i * _cellHeight);
+                    _colorBoxes?[i, j].Draw(batcher, x + j * _cellWidth, y + i * _cellHeight);
                 }
             }
 
@@ -179,7 +165,11 @@ namespace ClassicUO.Game.UI.Controls
             {
                 ResetHueVector();
 
-                batcher.Draw2D(_pointer, (int) (x + Width / _columns * (SelectedIndex % _columns + .5f) - 1), (int) (y + Height / _rows * (SelectedIndex / _columns + .5f) - 1), 2, 2, ref _hueVector);
+                batcher.Draw2D
+                (
+                    _pointer, (int) (x + Width / _columns * (SelectedIndex % _columns + .5f) - 1),
+                    (int) (y + Height / _rows * (SelectedIndex / _columns + .5f) - 1), 2, 2, ref HueVector
+                );
             }
 
             return base.Draw(batcher, x, y);
@@ -290,8 +280,7 @@ namespace ClassicUO.Game.UI.Controls
                 {
                     for (int x = 0; x < _columns; x++)
                     {
-                        _colorBoxes[y, x]
-                            ?.Dispose();
+                        _colorBoxes[y, x]?.Dispose();
                     }
                 }
             }

@@ -1,27 +1,4 @@
-﻿#region license
-
-// Copyright (C) 2020 ClassicUO Development Community on Github
-// 
-// This project is an alternative client for the game Ultima Online.
-// The goal of this is to develop a lightweight client considering
-// new technologies.
-// 
-//  This program is free software: you can redistribute it and/or modify
-//  it under the terms of the GNU General Public License as published by
-//  the Free Software Foundation, either version 3 of the License, or
-//  (at your option) any later version.
-// 
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-// 
-//  You should have received a copy of the GNU General Public License
-//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
-#endregion
-
-using System;
+﻿using System;
 
 namespace ClassicUO.IO.Audio
 {
@@ -29,8 +6,7 @@ namespace ClassicUO.IO.Audio
     {
         private readonly byte[] _waveBuffer;
 
-        public UOSound(string name, int index, byte[] buffer)
-            : base(name, index)
+        public UOSound(string name, int index, byte[] buffer) : base(name, index)
         {
             _waveBuffer = buffer;
             Delay = (uint) ((buffer.Length - 32) / 88.2f);
@@ -48,7 +24,7 @@ namespace ClassicUO.IO.Audio
             //    int distY = Math.Abs(Y - World.Player.Y);
             //    int distance = Math.Max(distX, distY);
 
-            //    float volume = ProfileManager.Current.SoundVolume / Constants.SOUND_DELTA;
+            //    float volume = ProfileManager.CurrentProfile.SoundVolume / Constants.SOUND_DELTA;
             //    float distanceFactor = 0.0f;
 
             //    if (distance >= 1)
@@ -64,15 +40,15 @@ namespace ClassicUO.IO.Audio
             //        return;
             //    }
 
-            //    if (ProfileManager.Current == null || !ProfileManager.Current.EnableSound || !Client.Game.IsActive && !ProfileManager.Current.ReproduceSoundsInBackground)
+            //    if (ProfileManager.CurrentProfile == null || !ProfileManager.CurrentProfile.EnableSound || !Client.Game.IsActive && !ProfileManager.CurrentProfile.ReproduceSoundsInBackground)
             //        volume = 0;
 
             //    if (Client.Game.IsActive)
             //    {
-            //        if (!ProfileManager.Current.ReproduceSoundsInBackground)
-            //            volume = ProfileManager.Current.SoundVolume / Constants.SOUND_DELTA;
+            //        if (!ProfileManager.CurrentProfile.ReproduceSoundsInBackground)
+            //            volume = ProfileManager.CurrentProfile.SoundVolume / Constants.SOUND_DELTA;
             //    }
-            //    else if (!ProfileManager.Current.ReproduceSoundsInBackground)
+            //    else if (!ProfileManager.CurrentProfile.ReproduceSoundsInBackground)
             //        volume = 0;
 
             //    VolumeFactor = distanceFactor;

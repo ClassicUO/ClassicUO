@@ -1,27 +1,4 @@
-﻿#region license
-
-// Copyright (C) 2020 ClassicUO Development Community on Github
-// 
-// This project is an alternative client for the game Ultima Online.
-// The goal of this is to develop a lightweight client considering
-// new technologies.
-// 
-//  This program is free software: you can redistribute it and/or modify
-//  it under the terms of the GNU General Public License as published by
-//  the Free Software Foundation, either version 3 of the License, or
-//  (at your option) any later version.
-// 
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-// 
-//  You should have received a copy of the GNU General Public License
-//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
-#endregion
-
-using System;
+﻿using System;
 using System.IO;
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
@@ -36,21 +13,24 @@ namespace ClassicUO.Game.Managers
         private StreamWriter _fileWriter;
         private bool _writerHasException;
 
-        public static Deque<JournalEntry> Entries { get; } = new Deque<JournalEntry>(Constants.MAX_JOURNAL_HISTORY_COUNT);
+        public static Deque<JournalEntry> Entries { get; } =
+            new Deque<JournalEntry>(Constants.MAX_JOURNAL_HISTORY_COUNT);
 
         public event EventHandler<JournalEntry> EntryAdded;
 
 
-        public void Add(string text, ushort hue, string name, TEXT_TYPE type, bool isunicode = true)
+        public void Add(string text, ushort hue, string name, TextType type, bool isunicode = true)
         {
-            JournalEntry entry = Entries.Count >= Constants.MAX_JOURNAL_HISTORY_COUNT ? Entries.RemoveFromFront() : new JournalEntry();
+            JournalEntry entry = Entries.Count >= Constants.MAX_JOURNAL_HISTORY_COUNT ?
+                Entries.RemoveFromFront() :
+                new JournalEntry();
 
             byte font = (byte) (isunicode ? 0 : 9);
 
-            if (ProfileManager.Current != null && ProfileManager.Current.OverrideAllFonts)
+            if (ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.OverrideAllFonts)
             {
-                font = ProfileManager.Current.ChatFont;
-                isunicode = ProfileManager.Current.OverrideAllFontsIsUnicode;
+                font = ProfileManager.CurrentProfile.ChatFont;
+                isunicode = ProfileManager.CurrentProfile.OverrideAllFontsIsUnicode;
             }
 
             DateTime timeNow = DateTime.Now;
@@ -63,7 +43,7 @@ namespace ClassicUO.Game.Managers
             entry.Time = timeNow;
             entry.TextType = type;
 
-            if (ProfileManager.Current != null && ProfileManager.Current.ForceUnicodeJournal)
+            if (ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.ForceUnicodeJournal)
             {
                 entry.Font = 0;
                 entry.IsUnicode = true;
@@ -82,13 +62,21 @@ namespace ClassicUO.Game.Managers
 
         private void CreateWriter()
         {
-            if (_fileWriter == null && ProfileManager.Current != null && ProfileManager.Current.SaveJournalToFile)
+            if (_fileWriter == null && ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.SaveJournalToFile)
             {
                 try
                 {
-                    string path = FileSystemHelper.CreateFolderIfNotExists(Path.Combine(CUOEnviroment.ExecutablePath, "Data"), "Client", "JournalLogs");
+                    string path = FileSystemHelper.CreateFolderIfNotExists
+                        (Path.Combine(CUOEnviroment.ExecutablePath, "Data"), "Client", "JournalLogs");
 
-                    _fileWriter = new StreamWriter(File.Open(Path.Combine(path, $"{DateTime.Now:yyyy_MM_dd_HH_mm_ss}_journal.txt"), FileMode.Create, FileAccess.Write, FileShare.Read))
+                    _fileWriter = new StreamWriter
+                    (
+                        File.Open
+                        (
+                            Path.Combine(path, $"{DateTime.Now:yyyy_MM_dd_HH_mm_ss}_journal.txt"), FileMode.Create,
+                            FileAccess.Write, FileShare.Read
+                        )
+                    )
                     {
                         AutoFlush = true
                     };
@@ -139,7 +127,7 @@ namespace ClassicUO.Game.Managers
         public string Name;
         public string Text;
 
-        public TEXT_TYPE TextType;
+        public TextType TextType;
         public DateTime Time;
     }
 }

@@ -1,27 +1,4 @@
-﻿#region license
-
-// Copyright (C) 2020 ClassicUO Development Community on Github
-// 
-// This project is an alternative client for the game Ultima Online.
-// The goal of this is to develop a lightweight client considering
-// new technologies.
-// 
-//  This program is free software: you can redistribute it and/or modify
-//  it under the terms of the GNU General Public License as published by
-//  the Free Software Foundation, either version 3 of the License, or
-//  (at your option) any later version.
-// 
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-// 
-//  You should have received a copy of the GNU General Public License
-//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
-#endregion
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -141,20 +118,7 @@ namespace ClassicUO.Utility.Platforms
 
                 // Create window
                 m_hwnd = CreateWindowExW
-                (
-                    0,
-                    class_name,
-                    class_name,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    IntPtr.Zero,
-                    IntPtr.Zero,
-                    hwnd,
-                    IntPtr.Zero
-                );
+                    (0, class_name, class_name, 0, 0, 0, 0, 0, IntPtr.Zero, IntPtr.Zero, hwnd, IntPtr.Zero);
 
                 if (m_hwnd != IntPtr.Zero)
                 {
@@ -255,9 +219,16 @@ namespace ClassicUO.Utility.Platforms
 
                         if (lParam == 1 && World.InGame)
                         {
-                            foreach (Item item in World.Items.Where(s => s.IsMulti))
+                            foreach (Item item in World.Items)
                             {
-                                PostMessage((IntPtr) wParam, (uint) UOAMessage.ADD_MULTI, (IntPtr) ((item.X & 0xFFFF) | ((item.Y & 0xFFFF) << 16)), (IntPtr) item.Graphic);
+                                if (item.IsMulti)
+                                {
+                                    PostMessage
+                                    (
+                                        (IntPtr) wParam, (uint) UOAMessage.ADD_MULTI,
+                                        (IntPtr) ((item.X & 0xFFFF) | ((item.Y & 0xFFFF) << 16)), (IntPtr) item.Graphic
+                                    );
+                                }
                             }
                         }
 
@@ -312,11 +283,15 @@ namespace ClassicUO.Utility.Platforms
 
                             if ((wParam & 0x00010000) != 0)
                             {
-                                MessageManager.HandleMessage(null, sb.ToString(), "System", hue, MessageType.Regular, 3, TEXT_TYPE.SYSTEM, true);
+                                MessageManager.HandleMessage
+                                (
+                                    null, sb.ToString(), "System", hue, MessageType.Regular, 3, TextType.SYSTEM, true
+                                );
                             }
                             else
                             {
-                                World.Player.AddMessage(MessageType.Regular, sb.ToString(), 3, hue, true, TEXT_TYPE.OBJECT);
+                                World.Player.AddMessage
+                                    (MessageType.Regular, sb.ToString(), 3, hue, true, TextType.OBJECT);
                             }
 
                             return 1;
@@ -324,9 +299,7 @@ namespace ClassicUO.Utility.Platforms
 
                         break;
 
-                    case UOAMessage.REQUEST_MULTIS:
-
-                        return World.Player != null ? 1 : 0;
+                    case UOAMessage.REQUEST_MULTIS: return World.Player != null ? 1 : 0;
 
                     case UOAMessage.ADD_CMD:
 
@@ -368,9 +341,7 @@ namespace ClassicUO.Utility.Platforms
 
                         return (int) hwnd;
 
-                    case UOAMessage.GET_POISON:
-
-                        return World.Player != null && World.Player.IsPoisoned ? 1 : 0;
+                    case UOAMessage.GET_POISON: return World.Player != null && World.Player.IsPoisoned ? 1 : 0;
 
                     case UOAMessage.SET_SKILL_LOCK: break;
                     case UOAMessage.GET_ACCT_ID: break;
@@ -409,7 +380,8 @@ namespace ClassicUO.Utility.Platforms
             {
                 if (World.Player != null)
                 {
-                    PostMessage((uint) UOAMessage.STR_STATUS, (IntPtr) World.Player.HitsMax, (IntPtr) World.Player.Hits);
+                    PostMessage
+                        ((uint) UOAMessage.STR_STATUS, (IntPtr) World.Player.HitsMax, (IntPtr) World.Player.Hits);
                 }
             }
 
@@ -417,7 +389,8 @@ namespace ClassicUO.Utility.Platforms
             {
                 if (World.Player != null)
                 {
-                    PostMessage((uint) UOAMessage.DEX_STATUS, (IntPtr) World.Player.HitsMax, (IntPtr) World.Player.Hits);
+                    PostMessage
+                        ((uint) UOAMessage.DEX_STATUS, (IntPtr) World.Player.HitsMax, (IntPtr) World.Player.Hits);
                 }
             }
 
@@ -425,7 +398,8 @@ namespace ClassicUO.Utility.Platforms
             {
                 if (World.Player != null)
                 {
-                    PostMessage((uint) UOAMessage.INT_STATUS, (IntPtr) World.Player.HitsMax, (IntPtr) World.Player.Hits);
+                    PostMessage
+                        ((uint) UOAMessage.INT_STATUS, (IntPtr) World.Player.HitsMax, (IntPtr) World.Player.Hits);
                 }
             }
 
@@ -517,11 +491,7 @@ namespace ClassicUO.Utility.Platforms
 
             private delegate IntPtr WndProc(IntPtr hWnd, uint msg, IntPtr wParam, IntPtr lParam);
 
-            [StructLayout
-            (
-                LayoutKind.Sequential,
-                CharSet = CharSet.Unicode
-            )]
+            [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
             private struct WNDCLASS
             {
                 public readonly uint style;

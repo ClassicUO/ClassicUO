@@ -1,26 +1,3 @@
-#region license
-
-// Copyright (C) 2020 ClassicUO Development Community on Github
-// 
-// This project is an alternative client for the game Ultima Online.
-// The goal of this is to develop a lightweight client considering
-// new technologies.
-// 
-//  This program is free software: you can redistribute it and/or modify
-//  it under the terms of the GNU General Public License as published by
-//  the Free Software Foundation, either version 3 of the License, or
-//  (at your option) any later version.
-// 
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-// 
-//  You should have received a copy of the GNU General Public License
-//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
-#endregion
-
 using System.Collections.Generic;
 using System.Linq;
 using ClassicUO.Configuration;
@@ -281,7 +258,7 @@ namespace ClassicUO.Game.GameObjects
 
             if (equippedGraphic != 0)
             {
-                ushort[] graphics = {equippedGraphic, 0};
+                ushort[] graphics = { equippedGraphic, 0 };
 
                 if (layerObject != null)
                 {
@@ -291,8 +268,7 @@ namespace ClassicUO.Game.GameObjects
 
                     ushort testGraphic = (ushort) (equippedGraphic - 1);
 
-                    if (TileDataLoader.Instance.StaticData[testGraphic]
-                                      .AnimID == imageID)
+                    if (TileDataLoader.Instance.StaticData[testGraphic].AnimID == imageID)
                     {
                         graphics[1] = testGraphic;
                         count = 2;
@@ -301,8 +277,7 @@ namespace ClassicUO.Game.GameObjects
                     {
                         testGraphic = (ushort) (equippedGraphic + 1);
 
-                        if (TileDataLoader.Instance.StaticData[testGraphic]
-                                          .AnimID == imageID)
+                        if (TileDataLoader.Instance.StaticData[testGraphic].AnimID == imageID)
                         {
                             graphics[1] = testGraphic;
                             count = 2;
@@ -1295,21 +1270,25 @@ namespace ClassicUO.Game.GameObjects
 
         public void TryOpenCorpses()
         {
-            if (ProfileManager.Current.AutoOpenCorpses)
+            if (ProfileManager.CurrentProfile.AutoOpenCorpses)
             {
-                if ((ProfileManager.Current.CorpseOpenOptions == 1 || ProfileManager.Current.CorpseOpenOptions == 3) && TargetManager.IsTargeting)
+                if ((ProfileManager.CurrentProfile.CorpseOpenOptions == 1 || ProfileManager.CurrentProfile.CorpseOpenOptions == 3) &&
+                    TargetManager.IsTargeting)
                 {
                     return;
                 }
 
-                if ((ProfileManager.Current.CorpseOpenOptions == 2 || ProfileManager.Current.CorpseOpenOptions == 3) && IsHidden)
+                if ((ProfileManager.CurrentProfile.CorpseOpenOptions == 2 || ProfileManager.CurrentProfile.CorpseOpenOptions == 3) &&
+                    IsHidden)
                 {
                     return;
                 }
 
                 foreach (Item item in World.Items)
                 {
-                    if (!item.IsDestroyed && item.IsCorpse && item.Distance <= ProfileManager.Current.AutoOpenCorpseRange && !AutoOpenedCorpses.Contains(item.Serial))
+                    if (!item.IsDestroyed && item.IsCorpse &&
+                        item.Distance <= ProfileManager.CurrentProfile.AutoOpenCorpseRange &&
+                        !AutoOpenedCorpses.Contains(item.Serial))
                     {
                         AutoOpenedCorpses.Add(item.Serial);
                         GameActions.DoubleClickQueued(item.Serial);
@@ -1327,17 +1306,12 @@ namespace ClassicUO.Game.GameObjects
 
         private void TryOpenDoors()
         {
-            if (!World.Player.IsDead && ProfileManager.Current.AutoOpenDoors)
+            if (!World.Player.IsDead && ProfileManager.CurrentProfile.AutoOpenDoors)
             {
                 int x = X, y = Y, z = Z;
                 Pathfinder.GetNewXY((byte) Direction, ref x, ref y);
 
-                if (World.Items.Any
-                (
-                    s =>
-                        s.ItemData.IsDoor && s.X == x && s.Y == y && s.Z - 15 <= z &&
-                        s.Z + 15 >= z
-                ))
+                if (World.Items.Any(s => s.ItemData.IsDoor && s.X == x && s.Y == y && s.Z - 15 <= z && s.Z + 15 >= z))
                 {
                     GameActions.OpenDoor();
                 }
@@ -1379,8 +1353,7 @@ namespace ClassicUO.Game.GameObjects
                     bank.Items = null;
                 }
 
-                UIManager.GetGump<ContainerGump>(bank.Serial)
-                         ?.Dispose();
+                UIManager.GetGump<ContainerGump>(bank.Serial)?.Dispose();
 
                 bank.Opened = false;
             }
@@ -1466,9 +1439,9 @@ namespace ClassicUO.Game.GameObjects
         }
 
 
-        public override void Update(double totalMS, double frameMS)
+        public override void Update(double totalTime, double frameTime)
         {
-            base.Update(totalMS, frameMS);
+            base.Update(totalTime, frameTime);
 
             //const int TIME_TURN_TO_LASTTARGET = 2000;
 
@@ -1500,15 +1473,17 @@ namespace ClassicUO.Game.GameObjects
 
         public bool Walk(Direction direction, bool run)
         {
-            if (Walker.WalkingFailed || Walker.LastStepRequestTime > Time.Ticks || Walker.StepsCount >= Constants.MAX_STEP_COUNT ||
+            if (Walker.WalkingFailed || Walker.LastStepRequestTime > Time.Ticks ||
+                Walker.StepsCount >= Constants.MAX_STEP_COUNT ||
                 Client.Version >= ClientVersion.CV_60142 && IsParalyzed)
             {
                 return false;
             }
 
-            run |= ProfileManager.Current.AlwaysRun;
+            run |= ProfileManager.CurrentProfile.AlwaysRun;
 
-            if (SpeedMode >= CharacterSpeedType.CantRun || Stamina <= 1 && !IsDead || IsHidden && ProfileManager.Current.AlwaysRunUnlessHidden)
+            if (SpeedMode >= CharacterSpeedType.CantRun || Stamina <= 1 && !IsDead ||
+                IsHidden && ProfileManager.CurrentProfile.AlwaysRunUnlessHidden)
             {
                 run = false;
             }
@@ -1558,10 +1533,8 @@ namespace ClassicUO.Game.GameObjects
                     walkTime = (ushort) MovementSpeed.TimeToCompleteMovement
                     (
                         run,
-                        IsMounted ||
-                        SpeedMode == CharacterSpeedType.FastUnmount ||
-                        SpeedMode == CharacterSpeedType.FastUnmountAndCantRun ||
-                        IsFlying
+                        IsMounted || SpeedMode == CharacterSpeedType.FastUnmount ||
+                        SpeedMode == CharacterSpeedType.FastUnmountAndCantRun || IsFlying
                     );
                 }
             }
@@ -1589,10 +1562,8 @@ namespace ClassicUO.Game.GameObjects
                     walkTime = (ushort) MovementSpeed.TimeToCompleteMovement
                     (
                         run,
-                        IsMounted ||
-                        SpeedMode == CharacterSpeedType.FastUnmount ||
-                        SpeedMode == CharacterSpeedType.FastUnmountAndCantRun ||
-                        IsFlying
+                        IsMounted || SpeedMode == CharacterSpeedType.FastUnmount ||
+                        SpeedMode == CharacterSpeedType.FastUnmountAndCantRun || IsFlying
                     );
                 }
 
@@ -1638,7 +1609,8 @@ namespace ClassicUO.Game.GameObjects
             );
 
 
-            NetClient.Socket.Send(new PWalkRequest(direction, Walker.WalkSequence, run, Walker.FastWalkStack.GetValue()));
+            NetClient.Socket.Send
+                (new PWalkRequest(direction, Walker.WalkSequence, run, Walker.FastWalkStack.GetValue()));
 
 
             if (Walker.WalkSequence == 0xFF)

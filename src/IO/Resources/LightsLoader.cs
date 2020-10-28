@@ -1,44 +1,21 @@
-﻿#region license
-
-// Copyright (C) 2020 ClassicUO Development Community on Github
-// 
-// This project is an alternative client for the game Ultima Online.
-// The goal of this is to develop a lightweight client considering
-// new technologies.
-// 
-//  This program is free software: you can redistribute it and/or modify
-//  it under the terms of the GNU General Public License as published by
-//  the Free Software Foundation, either version 3 of the License, or
-//  (at your option) any later version.
-// 
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-// 
-//  You should have received a copy of the GNU General Public License
-//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
-#endregion
-
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using ClassicUO.Game;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
 
 namespace ClassicUO.IO.Resources
 {
-    internal class LightsLoader : UOFileLoader<UOTexture32>
+    internal class LightsLoader : UOFileLoader<UOTexture>
     {
         private static LightsLoader _instance;
         private UOFileMul _file;
 
-        private LightsLoader(int count)
-            : base(count)
+        private LightsLoader(int count) : base(count)
         {
         }
 
-        public static LightsLoader Instance => _instance ?? (_instance = new LightsLoader(Constants.MAX_LIGHTS_DATA_INDEX_COUNT));
+        public static LightsLoader Instance =>
+            _instance ?? (_instance = new LightsLoader(Constants.MAX_LIGHTS_DATA_INDEX_COUNT));
 
         public override Task Load()
         {
@@ -58,14 +35,14 @@ namespace ClassicUO.IO.Resources
             );
         }
 
-        public override UOTexture32 GetTexture(uint id)
+        public override UOTexture GetTexture(uint id)
         {
             if (id >= Resources.Length)
             {
                 return null;
             }
 
-            ref UOTexture32 texture = ref Resources[id];
+            ref UOTexture texture = ref Resources[id];
 
             if (texture == null || texture.IsDisposed)
             {
@@ -76,7 +53,7 @@ namespace ClassicUO.IO.Resources
                     return null;
                 }
 
-                texture = new UOTexture32(w, h);
+                texture = new UOTexture(w, h);
                 texture.PushData(pixels);
 
                 SaveId(id);

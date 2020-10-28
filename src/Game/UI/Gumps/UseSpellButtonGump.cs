@@ -1,27 +1,4 @@
-﻿#region license
-
-// Copyright (C) 2020 ClassicUO Development Community on Github
-// 
-// This project is an alternative client for the game Ultima Online.
-// The goal of this is to develop a lightweight client considering
-// new technologies.
-// 
-//  This program is free software: you can redistribute it and/or modify
-//  it under the terms of the GNU General Public License as published by
-//  the Free Software Foundation, either version 3 of the License, or
-//  (at your option) any later version.
-// 
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-// 
-//  You should have received a copy of the GNU General Public License
-//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
-#endregion
-
-using System;
+﻿using System;
 using System.IO;
 using System.Xml;
 using ClassicUO.Configuration;
@@ -52,7 +29,7 @@ namespace ClassicUO.Game.UI.Gumps
             BuildGump();
         }
 
-        public override GUMP_TYPE GumpType => GUMP_TYPE.GT_SPELLBUTTON;
+        public override GumpType GumpType => GumpType.SpellButton;
 
         public int SpellID => _spell?.ID ?? 0;
 
@@ -63,7 +40,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void BuildGump()
         {
-            Add(_background = new GumpPic(0, 0, (ushort) _spell.GumpIconSmallID, 0) {AcceptMouseInput = false});
+            Add(_background = new GumpPic(0, 0, (ushort) _spell.GumpIconSmallID, 0) { AcceptMouseInput = false });
 
             int cliloc = GetSpellTooltip(_spell.ID);
 
@@ -136,9 +113,10 @@ namespace ClassicUO.Game.UI.Gumps
         {
             base.OnMouseUp(x, y, button);
 
-            Point offset = Mouse.LDroppedOffset;
+            Point offset = Mouse.LDragOffset;
 
-            if (ProfileManager.Current.CastSpellsByOneClick && button == MouseButtonType.Left && Math.Abs(offset.X) < 5 && Math.Abs(offset.Y) < 5)
+            if (ProfileManager.CurrentProfile.CastSpellsByOneClick && button == MouseButtonType.Left &&
+                Math.Abs(offset.X) < 5 && Math.Abs(offset.Y) < 5)
             {
                 GameActions.CastSpell(_spell.ID);
             }
@@ -146,7 +124,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override bool OnMouseDoubleClick(int x, int y, MouseButtonType button)
         {
-            if (!ProfileManager.Current.CastSpellsByOneClick && button == MouseButtonType.Left)
+            if (!ProfileManager.CurrentProfile.CastSpellsByOneClick && button == MouseButtonType.Left)
             {
                 GameActions.CastSpell(_spell.ID);
 

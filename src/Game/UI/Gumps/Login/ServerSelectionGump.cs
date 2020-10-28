@@ -1,27 +1,4 @@
-﻿#region license
-
-// Copyright (C) 2020 ClassicUO Development Community on Github
-// 
-// This project is an alternative client for the game Ultima Online.
-// The goal of this is to develop a lightweight client considering
-// new technologies.
-// 
-//  This program is free software: you can redistribute it and/or modify
-//  it under the terms of the GNU General Public License as published by
-//  the Free Software Foundation, either version 3 of the License, or
-//  (at your option) any later version.
-// 
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-// 
-//  You should have received a copy of the GNU General Public License
-//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
-#endregion
-
-using System.Linq;
+﻿using System.Linq;
 using ClassicUO.Configuration;
 using ClassicUO.Data;
 using ClassicUO.Game.Scenes;
@@ -179,17 +156,22 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
             // Sever Scroll Area
             ScrollArea scrollArea = new ScrollArea(150, 90, 393, 271, true);
+            DataBox databox = new DataBox(0, 0, 1, 1);
+            databox.WantUpdateSize = true;
             LoginScene loginScene = Client.Game.GetScene<LoginScene>();
 
             scrollArea.ScissorRectangle.Y = 16;
-            scrollArea.ScissorRectangle.Height = -(scrollArea.ScissorRectangle.Y + 32);
+            scrollArea.ScissorRectangle.Height = -32;
 
             foreach (ServerListEntry server in loginScene.Servers)
             {
-                scrollArea.Add(new ServerEntryGump(server, 5, NORMAL_COLOR, SELECTED_COLOR));
+                databox.Add(new ServerEntryGump(server, 5, NORMAL_COLOR, SELECTED_COLOR));
             }
 
+            databox.ReArrangeChildren();
+
             Add(scrollArea);
+            scrollArea.Add(databox);
 
             if (loginScene.Servers.Length != 0)
             {
@@ -202,11 +184,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
                 Add
                 (
-                    new Label
-                    (
-                        loginScene.Servers[index]
-                                  .Name, false, 0x0481, font: 9
-                    )
+                    new Label(loginScene.Servers[index].Name, false, 0x0481, font: 9)
                     {
                         X = 243,
                         Y = 420
@@ -245,11 +223,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
                                 index = 1;
                             }
 
-                            loginScene.SelectServer
-                            (
-                                (byte) loginScene.Servers[index - 1]
-                                                 .Index
-                            );
+                            loginScene.SelectServer((byte) loginScene.Servers[index - 1].Index);
                         }
 
                         break;
@@ -279,11 +253,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
                         index = 1;
                     }
 
-                    loginScene.SelectServer
-                    (
-                        (byte) loginScene.Servers[index - 1]
-                                         .Index
-                    );
+                    loginScene.SelectServer((byte) loginScene.Servers[index - 1].Index);
                 }
             }
         }
@@ -299,7 +269,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
             Server = 99
         }
 
-        private class ServerEntryGump : ScrollAreaItem
+        private class ServerEntryGump : Control
         {
             private readonly int _buttonId;
             private readonly ServerListEntry _entry;
@@ -316,11 +286,12 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
                 Add
                 (
-                    _serverName = new HoveredLabel(entry.Name, false, normal_hue, selected_hue, selected_hue, font: font)
-                    {
-                        X = 74,
-                        AcceptMouseInput = false
-                    }
+                    _serverName = new HoveredLabel
+                        (entry.Name, false, normal_hue, selected_hue, selected_hue, font: font)
+                        {
+                            X = 74,
+                            AcceptMouseInput = false
+                        }
                 );
 
                 Add
@@ -334,16 +305,17 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
                 Add
                 (
-                    _server_packet_loss = new HoveredLabel("-", false, normal_hue, selected_hue, selected_hue, font: font)
-                    {
-                        X = 320,
-                        AcceptMouseInput = false
-                    }
+                    _server_packet_loss = new HoveredLabel
+                        ("-", false, normal_hue, selected_hue, selected_hue, font: font)
+                        {
+                            X = 320,
+                            AcceptMouseInput = false
+                        }
                 );
 
 
                 AcceptMouseInput = true;
-                Width = 393;
+                Width = 370;
                 Height = 25;
 
                 WantUpdateSize = false;

@@ -1,26 +1,3 @@
-#region license
-
-// Copyright (C) 2020 ClassicUO Development Community on Github
-// 
-// This project is an alternative client for the game Ultima Online.
-// The goal of this is to develop a lightweight client considering
-// new technologies.
-// 
-//  This program is free software: you can redistribute it and/or modify
-//  it under the terms of the GNU General Public License as published by
-//  the Free Software Foundation, either version 3 of the License, or
-//  (at your option) any later version.
-// 
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-// 
-//  You should have received a copy of the GNU General Public License
-//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
-#endregion
-
 using System;
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
@@ -67,25 +44,19 @@ namespace ClassicUO.Game.Managers
 
                         for (int i = 0; i < PARTY_SIZE; i++)
                         {
-                            if (Members[i] == null || Members[i]
-                                .Serial == 0)
+                            if (Members[i] == null || Members[i].Serial == 0)
                             {
                                 break;
                             }
 
-                            BaseHealthBarGump gump = UIManager.GetGump<BaseHealthBarGump>
-                            (
-                                Members[i]
-                                    .Serial
-                            );
+                            BaseHealthBarGump gump = UIManager.GetGump<BaseHealthBarGump>(Members[i].Serial);
 
 
                             if (gump != null)
                             {
                                 if (code == 2)
                                 {
-                                    Members[i]
-                                        .Serial = 0;
+                                    Members[i].Serial = 0;
                                 }
 
                                 gump.RequestUpdateContents();
@@ -94,8 +65,7 @@ namespace ClassicUO.Game.Managers
 
                         Clear();
 
-                        UIManager.GetGump<PartyGump>()
-                                 ?.RequestUpdateContents();
+                        UIManager.GetGump<PartyGump>()?.RequestUpdateContents();
 
                         break;
                     }
@@ -108,8 +78,7 @@ namespace ClassicUO.Game.Managers
                     {
                         to_remove = p.ReadUInt();
 
-                        UIManager.GetGump<BaseHealthBarGump>(to_remove)
-                                 ?.RequestUpdateContents();
+                        UIManager.GetGump<BaseHealthBarGump>(to_remove)?.RequestUpdateContents();
                     }
 
                     bool remove_all = !add && to_remove == World.Player;
@@ -158,19 +127,13 @@ namespace ClassicUO.Game.Managers
                     {
                         for (int i = 0; i < PARTY_SIZE; i++)
                         {
-                            if (Members[i] != null && SerialHelper.IsValid
-                            (
-                                Members[i]
-                                    .Serial
-                            ))
+                            if (Members[i] != null && SerialHelper.IsValid(Members[i].Serial))
                             {
-                                uint serial = Members[i]
-                                    .Serial;
+                                uint serial = Members[i].Serial;
 
                                 Members[i] = null;
 
-                                UIManager.GetGump<BaseHealthBarGump>(serial)
-                                         ?.RequestUpdateContents();
+                                UIManager.GetGump<BaseHealthBarGump>(serial)?.RequestUpdateContents();
                             }
                         }
 
@@ -178,8 +141,7 @@ namespace ClassicUO.Game.Managers
                     }
 
 
-                    UIManager.GetGump<PartyGump>()
-                             ?.RequestUpdateContents();
+                    UIManager.GetGump<PartyGump>()?.RequestUpdateContents();
 
                     break;
 
@@ -190,13 +152,12 @@ namespace ClassicUO.Game.Managers
 
                     for (int i = 0; i < PARTY_SIZE; i++)
                     {
-                        if (Members[i] != null && Members[i]
-                            .Serial == ser)
+                        if (Members[i] != null && Members[i].Serial == ser)
                         {
                             MessageManager.HandleMessage
                             (
-                                null, name, Members[i]
-                                    .Name, ProfileManager.Current.PartyMessageHue, MessageType.Party, 3, TEXT_TYPE.SYSTEM
+                                null, name, Members[i].Name, ProfileManager.CurrentProfile.PartyMessageHue, MessageType.Party,
+                                3, TextType.GUILD_ALLY
                             );
 
                             break;
@@ -208,7 +169,7 @@ namespace ClassicUO.Game.Managers
                 case 7:
                     Inviter = p.ReadUInt();
 
-                    if (ProfileManager.Current.PartyInviteGump)
+                    if (ProfileManager.CurrentProfile.PartyInviteGump)
                     {
                         UIManager.Add(new PartyInviteGump(Inviter));
                     }

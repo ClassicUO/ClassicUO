@@ -1,27 +1,4 @@
-﻿#region license
-
-// Copyright (C) 2020 ClassicUO Development Community on Github
-// 
-// This project is an alternative client for the game Ultima Online.
-// The goal of this is to develop a lightweight client considering
-// new technologies.
-// 
-//  This program is free software: you can redistribute it and/or modify
-//  it under the terms of the GNU General Public License as published by
-//  the Free Software Foundation, either version 3 of the License, or
-//  (at your option) any later version.
-// 
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-// 
-//  You should have received a copy of the GNU General Public License
-//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
-#endregion
-
-using ClassicUO.Game.Data;
+﻿using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Interfaces;
 using ClassicUO.Utility.Logging;
@@ -32,7 +9,7 @@ namespace ClassicUO.Game.Managers
     {
         private GameEffect _root;
 
-        public void Update(double totalMS, double frameMS)
+        public void Update(double totalTime, double frameTime)
         {
             GameEffect f = _root;
 
@@ -40,7 +17,7 @@ namespace ClassicUO.Game.Managers
             {
                 LinkedObject n = f.Next;
 
-                f.Update(totalMS, frameMS);
+                f.Update(totalTime, frameTime);
 
                 if (!f.IsDestroyed && f.Distance > World.ClientViewRange)
                 {
@@ -70,12 +47,22 @@ namespace ClassicUO.Game.Managers
         public void Add
         (
             GraphicEffectType type,
-            uint source, uint target,
+            uint source,
+            uint target,
             ushort graphic,
             ushort hue,
-            ushort srcX, ushort srcY, sbyte srcZ,
-            ushort targetX, ushort targetY, sbyte targetZ,
-            byte speed, int duration, bool fixedDir, bool doesExplode, bool hasparticles, GraphicEffectBlendMode blendmode
+            ushort srcX,
+            ushort srcY,
+            sbyte srcZ,
+            ushort targetX,
+            ushort targetY,
+            sbyte targetZ,
+            byte speed,
+            int duration,
+            bool fixedDir,
+            bool doesExplode,
+            bool hasparticles,
+            GraphicEffectBlendMode blendmode
         )
         {
             if (hasparticles)
@@ -105,14 +92,16 @@ namespace ClassicUO.Game.Managers
                         speed++;
                     }
 
-                    effect = new MovingEffect(source, target, srcX, srcY, srcZ, targetX, targetY, targetZ, graphic, hue, fixedDir, speed)
-                    {
-                        Blend = blendmode
-                    };
+                    effect = new MovingEffect
+                        (source, target, srcX, srcY, srcZ, targetX, targetY, targetZ, graphic, hue, fixedDir, speed)
+                        {
+                            Blend = blendmode
+                        };
 
                     if (doesExplode)
                     {
-                        effect.AddChildEffect(new AnimatedItemEffect(target, targetX, targetY, targetZ, 0x36Cb, hue, 9, speed));
+                        effect.AddChildEffect
+                            (new AnimatedItemEffect(target, targetX, targetY, targetZ, 0x36Cb, hue, 9, speed));
                     }
 
                     break;

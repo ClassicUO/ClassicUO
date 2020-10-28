@@ -1,27 +1,4 @@
-﻿#region license
-
-// Copyright (C) 2020 ClassicUO Development Community on Github
-// 
-// This project is an alternative client for the game Ultima Online.
-// The goal of this is to develop a lightweight client considering
-// new technologies.
-// 
-//  This program is free software: you can redistribute it and/or modify
-//  it under the terms of the GNU General Public License as published by
-//  the Free Software Foundation, either version 3 of the License, or
-//  (at your option) any later version.
-// 
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-// 
-//  You should have received a copy of the GNU General Public License
-//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
-#endregion
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using ClassicUO.Utility.Logging;
@@ -115,8 +92,7 @@ namespace ClassicUO.Utility
                 return;
             }
 
-            if (m_Context[m_Context.Count - 1]
-                .Name != context_name)
+            if (m_Context[m_Context.Count - 1].Name != context_name)
             {
                 Log.Error("Profiler.ExitProfiledContext: context_name does not match current context.");
             }
@@ -125,12 +101,10 @@ namespace ClassicUO.Utility
 
             for (int i = 0; i < m_Context.Count; i++)
             {
-                context[i] = m_Context[i]
-                    .Name;
+                context[i] = m_Context[i].Name;
             }
 
-            double ms = (_timer.ElapsedTicks - m_Context[m_Context.Count - 1]
-                .Tick) * 1000d / Stopwatch.Frequency;
+            double ms = (_timer.ElapsedTicks - m_Context[m_Context.Count - 1].Tick) * 1000d / Stopwatch.Frequency;
 
             m_ThisFrameData.Add(new Tuple<string[], double>(context, ms));
             m_Context.RemoveAt(m_Context.Count - 1);
@@ -148,8 +122,7 @@ namespace ClassicUO.Utility
                 return false;
             }
 
-            return m_Context[m_Context.Count - 1]
-                .Name == context_name;
+            return m_Context[m_Context.Count - 1].Name == context_name;
         }
 
         public static ProfileData GetContext(string context_name)
@@ -161,9 +134,7 @@ namespace ClassicUO.Utility
 
             for (int i = 0; i < m_AllFrameData.Count; i++)
             {
-                if (m_AllFrameData[i]
-                    .Context[m_AllFrameData[i]
-                             .Context.Length - 1] == context_name)
+                if (m_AllFrameData[i].Context[m_AllFrameData[i].Context.Length - 1] == context_name)
                 {
                     return m_AllFrameData[i];
                 }

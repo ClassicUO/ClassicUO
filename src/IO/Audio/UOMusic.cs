@@ -1,27 +1,4 @@
-﻿#region license
-
-// Copyright (C) 2020 ClassicUO Development Community on Github
-// 
-// This project is an alternative client for the game Ultima Online.
-// The goal of this is to develop a lightweight client considering
-// new technologies.
-// 
-//  This program is free software: you can redistribute it and/or modify
-//  it under the terms of the GNU General Public License as published by
-//  the Free Software Foundation, either version 3 of the License, or
-//  (at your option) any later version.
-// 
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-// 
-//  You should have received a copy of the GNU General Public License
-//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
-#endregion
-
-using System;
+﻿using System;
 using ClassicUO.Configuration;
 using ClassicUO.Data;
 using ClassicUO.IO.Audio.MP3Sharp;
@@ -38,14 +15,18 @@ namespace ClassicUO.IO.Audio
         private MP3Stream m_Stream;
         private readonly byte[] m_WaveBuffer = new byte[NUMBER_OF_PCM_BYTES_TO_READ_PER_CHUNK];
 
-        public UOMusic(int index, string name, bool loop)
-            : base(name, index)
+        public UOMusic(int index, string name, bool loop) : base(name, index)
         {
             m_Repeat = loop;
             m_Playing = false;
             Channels = AudioChannels.Stereo;
             Delay = 0;
-            Path = System.IO.Path.Combine(Settings.GlobalSettings.UltimaOnlineDirectory, Client.Version > ClientVersion.CV_5090 ? $"Music/Digital/{Name}.mp3" : $"music/{Name}.mp3");
+
+            Path = System.IO.Path.Combine
+            (
+                Settings.GlobalSettings.UltimaOnlineDirectory,
+                Client.Version > ClientVersion.CV_5090 ? $"Music/Digital/{Name}.mp3" : $"music/{Name}.mp3"
+            );
         }
 
         private string Path { get; }
@@ -60,7 +41,7 @@ namespace ClassicUO.IO.Audio
         {
             try
             {
-                if (m_Playing && _sound_instance != null)
+                if (m_Playing && SoundInstance != null)
                 {
                     int bytesReturned = m_Stream.Read(m_WaveBuffer, 0, m_WaveBuffer.Length);
 
@@ -97,23 +78,23 @@ namespace ClassicUO.IO.Audio
         {
             if (m_Playing)
             {
-                if (_sound_instance == null)
+                if (SoundInstance == null)
                 {
                     Stop();
 
                     return;
                 }
 
-                while (_sound_instance.PendingBufferCount < 3)
+                while (SoundInstance.PendingBufferCount < 3)
                 {
                     byte[] buffer = GetBuffer();
 
-                    if (_sound_instance.IsDisposed || buffer == null)
+                    if (SoundInstance.IsDisposed || buffer == null)
                     {
                         break;
                     }
 
-                    _sound_instance.SubmitBuffer(buffer);
+                    SoundInstance.SubmitBuffer(buffer);
                 }
             }
         }

@@ -1,27 +1,4 @@
-﻿#region license
-
-// Copyright (C) 2020 ClassicUO Development Community on Github
-// 
-// This project is an alternative client for the game Ultima Online.
-// The goal of this is to develop a lightweight client considering
-// new technologies.
-// 
-//  This program is free software: you can redistribute it and/or modify
-//  it under the terms of the GNU General Public License as published by
-//  the Free Software Foundation, either version 3 of the License, or
-//  (at your option) any later version.
-// 
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-// 
-//  You should have received a copy of the GNU General Public License
-//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
-#endregion
-
-using System;
+﻿using System;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
@@ -31,17 +8,17 @@ using ClassicUO.Utility;
 
 namespace ClassicUO.IO.Resources
 {
-    internal class GumpsLoader : UOFileLoader<UOTexture32>
+    internal class GumpsLoader : UOFileLoader<UOTexture>
     {
         private static GumpsLoader _instance;
         private UOFile _file;
 
-        private GumpsLoader(int count)
-            : base(count)
+        private GumpsLoader(int count) : base(count)
         {
         }
 
-        public static GumpsLoader Instance => _instance ?? (_instance = new GumpsLoader(Constants.MAX_GUMP_DATA_INDEX_COUNT));
+        public static GumpsLoader Instance =>
+            _instance ?? (_instance = new GumpsLoader(Constants.MAX_GUMP_DATA_INDEX_COUNT));
 
         public override Task Load()
         {
@@ -93,9 +70,7 @@ namespace ClassicUO.IO.Resources
                             int ingump = defReader.ReadInt();
 
                             if (ingump < 0 || ingump >= Constants.MAX_GUMP_DATA_INDEX_COUNT ||
-                                ingump >= Entries.Length ||
-                                Entries[ingump]
-                                    .Length > 0)
+                                ingump >= Entries.Length || Entries[ingump].Length > 0)
                             {
                                 continue;
                             }
@@ -111,17 +86,15 @@ namespace ClassicUO.IO.Resources
                             {
                                 int checkIndex = group[i];
 
-                                if (checkIndex < 0 || checkIndex >= Constants.MAX_GUMP_DATA_INDEX_COUNT || checkIndex >= Entries.Length ||
-                                    Entries[checkIndex]
-                                        .Length <= 0)
+                                if (checkIndex < 0 || checkIndex >= Constants.MAX_GUMP_DATA_INDEX_COUNT ||
+                                    checkIndex >= Entries.Length || Entries[checkIndex].Length <= 0)
                                 {
                                     continue;
                                 }
 
                                 Entries[ingump] = Entries[checkIndex];
 
-                                Entries[ingump]
-                                    .Hue = (ushort) defReader.ReadInt();
+                                Entries[ingump].Hue = (ushort) defReader.ReadInt();
 
                                 break;
                             }
@@ -131,14 +104,14 @@ namespace ClassicUO.IO.Resources
             );
         }
 
-        public override UOTexture32 GetTexture(uint g)
+        public override UOTexture GetTexture(uint g)
         {
             if (g >= Resources.Length)
             {
                 return null;
             }
 
-            ref UOTexture32 texture = ref Resources[g];
+            ref UOTexture texture = ref Resources[g];
 
             if (texture == null || texture.IsDisposed)
             {
@@ -149,7 +122,7 @@ namespace ClassicUO.IO.Resources
                     return null;
                 }
 
-                texture = new UOTexture32(w, h);
+                texture = new UOTexture(w, h);
                 texture.PushData(pixels);
 
                 SaveId(g);
@@ -211,30 +184,20 @@ namespace ClassicUO.IO.Resources
 
                 for (int i = 0; i < gsize; i++)
                 {
-                    uint val = gmul[i]
-                        .Value;
+                    uint val = gmul[i].Value;
 
                     if (color != 0 && val != 0)
                     {
-                        val = HuesLoader.Instance.GetColor16
-                        (
-                            gmul[i]
-                                .Value, color
-                        );
+                        val = HuesLoader.Instance.GetColor16(gmul[i].Value, color);
                     }
 
                     if (val != 0)
                     {
                         //val = 0x8000 | val;
-                        val = HuesHelper.Color16To32
-                        (
-                            gmul[i]
-                                .Value
-                        ) | 0xFF_00_00_00;
+                        val = HuesHelper.Color16To32(gmul[i].Value) | 0xFF_00_00_00;
                     }
 
-                    int count = gmul[i]
-                        .Run;
+                    int count = gmul[i].Run;
 
                     for (int j = 0; j < count; j++)
                     {

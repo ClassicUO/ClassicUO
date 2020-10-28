@@ -1,27 +1,4 @@
-﻿#region license
-
-// Copyright (C) 2020 ClassicUO Development Community on Github
-// 
-// This project is an alternative client for the game Ultima Online.
-// The goal of this is to develop a lightweight client considering
-// new technologies.
-// 
-//  This program is free software: you can redistribute it and/or modify
-//  it under the terms of the GNU General Public License as published by
-//  the Free Software Foundation, either version 3 of the License, or
-//  (at your option) any later version.
-// 
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-// 
-//  You should have received a copy of the GNU General Public License
-//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
-#endregion
-
-using System;
+﻿using System;
 using ClassicUO.Renderer;
 
 namespace ClassicUO.Game.UI.Controls
@@ -34,7 +11,20 @@ namespace ClassicUO.Game.UI.Controls
         private float _timeUntilNextClick;
         private readonly Button _up, _down;
 
-        public ArrowNumbersTextBox(int x, int y, int width, int raiseamount, int minvalue, int maxvalue, byte font = 0, int maxcharlength = -1, bool isunicode = true, FontStyle style = FontStyle.None, ushort hue = 0)
+        public ArrowNumbersTextBox
+        (
+            int x,
+            int y,
+            int width,
+            int raiseamount,
+            int minvalue,
+            int maxvalue,
+            byte font = 0,
+            int maxcharlength = -1,
+            bool isunicode = true,
+            FontStyle style = FontStyle.None,
+            ushort hue = 0
+        )
         {
             int height = 20;
             X = x;
@@ -140,7 +130,7 @@ namespace ClassicUO.Game.UI.Controls
             _textBox.SetText(val.ToString());
         }
 
-        public override void Update(double totalMS, double frameMS)
+        public override void Update(double totalTime, double frameTime)
         {
             if (IsDisposed)
             {
@@ -155,10 +145,10 @@ namespace ClassicUO.Game.UI.Controls
                     UpdateValue();
                 }
 
-                _timeUntilNextClick -= (float) frameMS;
+                _timeUntilNextClick -= (float) frameTime;
             }
 
-            base.Update(totalMS, frameMS);
+            base.Update(totalTime, frameTime);
         }
     }
 }

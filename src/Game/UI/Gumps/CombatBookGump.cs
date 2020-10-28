@@ -1,27 +1,4 @@
-﻿#region license
-
-// Copyright (C) 2020 ClassicUO Development Community on Github
-// 
-// This project is an alternative client for the game Ultima Online.
-// The goal of this is to develop a lightweight client considering
-// new technologies.
-// 
-//  This program is free software: you can redistribute it and/or modify
-//  it under the terms of the GNU General Public License as published by
-//  the Free Software Foundation, either version 3 of the License, or
-//  (at your option) any later version.
-// 
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-// 
-//  You should have received a copy of the GNU General Public License
-//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
-#endregion
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using ClassicUO.Data;
 using ClassicUO.Game.Data;
@@ -103,7 +80,7 @@ namespace ClassicUO.Game.UI.Gumps
                         spellsOnPage = 4;
                     }
 
-                    Label text = new Label(ResGumps.Index, false, 0x0288, font: 6) {X = indexX, Y = 6};
+                    Label text = new Label(ResGumps.Index, false, 0x0288, font: 6) { X = indexX, Y = 6 };
                     Add(text, page);
 
                     for (int i = 0; i < spellsOnPage; i++)
@@ -113,11 +90,7 @@ namespace ClassicUO.Game.UI.Gumps
                             break;
                         }
 
-                        text = new HoveredLabel
-                        (
-                            AbilityData.Abilities[offs]
-                                       .Name, false, 0x0288, 0x33, 0x0288, font: 9
-                        )
+                        text = new HoveredLabel(AbilityData.Abilities[offs].Name, false, 0x0288, 0x33, 0x0288, font: 9)
                         {
                             X = dataX, Y = 42 + y, AcceptMouseInput = true,
                             LocalSerial = (uint) maxPages++,
@@ -149,7 +122,7 @@ namespace ClassicUO.Game.UI.Gumps
                         byte bab1 = (byte) (((byte) World.Player.PrimaryAbility & 0x7F) - 1);
 
                         _primAbility = new GumpPic(215, 105, (ushort) (0x5200 + bab1), 0);
-                        text = new Label(ResGumps.PrimaryAbilityIcon, false, 0x0288, 80, 6) {X = 265, Y = 105};
+                        text = new Label(ResGumps.PrimaryAbilityIcon, false, 0x0288, 80, 6) { X = 265, Y = 105 };
                         Add(_primAbility, page);
                         Add(text, page);
                         _primAbility.SetTooltip(ClilocLoader.Instance.GetString(1028838 + bab1));
@@ -159,7 +132,7 @@ namespace ClassicUO.Game.UI.Gumps
                         byte bab2 = (byte) (((byte) World.Player.SecondaryAbility & 0x7F) - 1);
 
                         _secAbility = new GumpPic(215, 150, (ushort) (0x5200 + bab2), 0);
-                        text = new Label(ResGumps.SecondaryAbilityIcon, false, 0x0288, 80, 6) {X = 265, Y = 150};
+                        text = new Label(ResGumps.SecondaryAbilityIcon, false, 0x0288, 80, 6) { X = 265, Y = 150 };
                         Add(_secAbility, page);
                         Add(text, page);
                         _secAbility.SetTooltip(ClilocLoader.Instance.GetString(1028838 + bab2));
@@ -185,17 +158,11 @@ namespace ClassicUO.Game.UI.Gumps
                 icon.SetTooltip(ClilocLoader.Instance.GetString(1061693 + i), 150);
 
                 Label text = new Label
-                (
-                    StringHelper.CapitalizeAllWords
-                    (
-                        AbilityData.Abilities[i]
-                                   .Name
-                    ), false, 0x0288, 80, 6
-                )
-                {
-                    X = 110,
-                    Y = 34
-                };
+                    (StringHelper.CapitalizeAllWords(AbilityData.Abilities[i].Name), false, 0x0288, 80, 6)
+                    {
+                        X = 110,
+                        Y = 34
+                    };
 
                 Add(text, pageW);
 
@@ -234,11 +201,8 @@ namespace ClassicUO.Game.UI.Gumps
 
                     text = new Label
                     (
-                        StringHelper.CapitalizeAllWords
-                        (
-                            TileDataLoader.Instance.StaticData[id]
-                                          .Name
-                        ), false, 0x0288, font: 9
+                        StringHelper.CapitalizeAllWords(TileDataLoader.Instance.StaticData[id].Name), false, 0x0288,
+                        font: 9
                     )
                     {
                         X = textX,
@@ -260,19 +224,19 @@ namespace ClassicUO.Game.UI.Gumps
                 return;
             }
 
-            ref readonly AbilityDefinition def = ref AbilityData.Abilities[((byte) World.Player.PrimaryAbility & 0x7F) - 1];
+            ref readonly AbilityDefinition def =
+                ref AbilityData.Abilities[((byte) World.Player.PrimaryAbility & 0x7F) - 1];
 
-            GetSpellFloatingButton(def.Index)
-                ?.Dispose();
+            GetSpellFloatingButton(def.Index)?.Dispose();
 
             UseAbilityButtonGump gump = new UseAbilityButtonGump(def.Index, true)
             {
-                X = Mouse.LDropPosition.X - 22,
-                Y = Mouse.LDropPosition.Y - 22
+                X = Mouse.Position.X - 22,
+                Y = Mouse.Position.Y - 22
             };
 
             UIManager.Add(gump);
-            UIManager.AttemptDragControl(gump, Mouse.Position, true);
+            UIManager.AttemptDragControl(gump, true);
         }
 
         private void OnGumpicDragBeginSecondary(object sender, EventArgs e)
@@ -282,19 +246,19 @@ namespace ClassicUO.Game.UI.Gumps
                 return;
             }
 
-            ref readonly AbilityDefinition def = ref AbilityData.Abilities[((byte) World.Player.SecondaryAbility & 0x7F) - 1];
+            ref readonly AbilityDefinition def =
+                ref AbilityData.Abilities[((byte) World.Player.SecondaryAbility & 0x7F) - 1];
 
-            GetSpellFloatingButton(def.Index)
-                ?.Dispose();
+            GetSpellFloatingButton(def.Index)?.Dispose();
 
             UseAbilityButtonGump gump = new UseAbilityButtonGump(def.Index, false)
             {
-                X = Mouse.LDropPosition.X - 22,
-                Y = Mouse.LDropPosition.Y - 22
+                X = Mouse.Position.X - 22,
+                Y = Mouse.Position.Y - 22
             };
 
             UIManager.Add(gump);
-            UIManager.AttemptDragControl(gump, Mouse.Position, true);
+            UIManager.AttemptDragControl(gump, true);
         }
 
         private static UseAbilityButtonGump GetSpellFloatingButton(int id)
@@ -310,9 +274,9 @@ namespace ClassicUO.Game.UI.Gumps
             return null;
         }
 
-        public override void Update(double totalMS, double frameMS)
+        public override void Update(double totalTime, double frameTime)
         {
-            base.Update(totalMS, frameMS);
+            base.Update(totalTime, frameTime);
 
             if (IsDisposed)
             {
@@ -348,7 +312,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (_lastPressed != null)
             {
-                _clickTiming -= (float) frameMS;
+                _clickTiming -= (float) frameTime;
 
                 if (_clickTiming <= 0)
                 {

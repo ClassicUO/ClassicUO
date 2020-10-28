@@ -1,27 +1,4 @@
-﻿#region license
-
-// Copyright (C) 2020 ClassicUO Development Community on Github
-// 
-// This project is an alternative client for the game Ultima Online.
-// The goal of this is to develop a lightweight client considering
-// new technologies.
-// 
-//  This program is free software: you can redistribute it and/or modify
-//  it under the terms of the GNU General Public License as published by
-//  the Free Software Foundation, either version 3 of the License, or
-//  (at your option) any later version.
-// 
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-// 
-//  You should have received a copy of the GNU General Public License
-//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
-#endregion
-
-using System.Text;
+﻿using System.Text;
 using System.Xml;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
@@ -65,12 +42,12 @@ namespace ClassicUO.Game.UI.Gumps
             );
 
 
-            ControlInfo.Layer = UILayer.Over;
+            LayerOrder = UILayer.Over;
 
             WantUpdateSize = false;
         }
 
-        public override GUMP_TYPE GumpType => GUMP_TYPE.GT_NETSTATS;
+        public override GumpType GumpType => GumpType.NetStats;
 
         public bool IsMinimized { get; set; }
 
@@ -86,9 +63,9 @@ namespace ClassicUO.Game.UI.Gumps
             return false;
         }
 
-        public override void Update(double totalMS, double frameMS)
+        public override void Update(double totalTime, double frameTime)
         {
-            base.Update(totalMS, frameMS);
+            base.Update(totalTime, frameTime);
 
             if (Time.Ticks > _time_to_update)
             {
@@ -115,7 +92,10 @@ namespace ClassicUO.Game.UI.Gumps
                 }
                 else
                 {
-                    _sb.Append($"Ping: {_ping} ms\n{"In:"} {NetStatistics.GetSizeAdaptive(_deltaBytesReceived),-6} {"Out:"} {NetStatistics.GetSizeAdaptive(_deltaBytesSent),-6}");
+                    _sb.Append
+                    (
+                        $"Ping: {_ping} ms\n{"In:"} {NetStatistics.GetSizeAdaptive(_deltaBytesReceived),-6} {"Out:"} {NetStatistics.GetSizeAdaptive(_deltaBytesSent),-6}"
+                    );
                 }
 
 
@@ -138,24 +118,24 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (_ping < 150)
             {
-                _hueVector.X = 0x44; // green
+                HueVector.X = 0x44; // green
             }
             else if (_ping < 200)
             {
-                _hueVector.X = 0x34; // yellow
+                HueVector.X = 0x34; // yellow
             }
             else if (_ping < 300)
             {
-                _hueVector.X = 0x31; // orange
+                HueVector.X = 0x31; // orange
             }
             else
             {
-                _hueVector.X = 0x20; // red
+                HueVector.X = 0x20; // red
             }
 
-            _hueVector.Y = 1;
+            HueVector.Y = 1;
 
-            batcher.DrawString(Fonts.Bold, _sb.ToString(), x + 10, y + 10, ref _hueVector);
+            batcher.DrawString(Fonts.Bold, _sb.ToString(), x + 10, y + 10, ref HueVector);
 
             return true;
         }

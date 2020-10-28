@@ -1,27 +1,4 @@
-﻿#region license
-
-// Copyright (C) 2020 ClassicUO Development Community on Github
-// 
-// This project is an alternative client for the game Ultima Online.
-// The goal of this is to develop a lightweight client considering
-// new technologies.
-// 
-//  This program is free software: you can redistribute it and/or modify
-//  it under the terms of the GNU General Public License as published by
-//  the Free Software Foundation, either version 3 of the License, or
-//  (at your option) any later version.
-// 
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-// 
-//  You should have received a copy of the GNU General Public License
-//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
-#endregion
-
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using ClassicUO.Data;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
@@ -38,7 +15,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
     internal class CreateCharSelectionCityGump : Gump
     {
         private readonly List<CityControl> _cityControls = new List<CityControl>();
-        private readonly string[] _cityNames = {"Felucca", "Trammel", "Ilshenar", "Malas", "Tokuno", "Ter Mur"};
+        private readonly string[] _cityNames = { "Felucca", "Trammel", "Ilshenar", "Malas", "Tokuno", "Ter Mur" };
         private readonly Label _facetName;
         private readonly HtmlControl _htmlControl;
         private readonly LoginScene _scene;
@@ -180,11 +157,9 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                 }
                 else if (i < _townButtonsText.Length)
                 {
-                    x = _townButtonsText[i]
-                        .X;
+                    x = _townButtonsText[i].X;
 
-                    y = _townButtonsText[i]
-                        .Y;
+                    y = _townButtonsText[i].Y;
                 }
 
                 CityControl control = new CityControl(c, x, y, i);
@@ -275,8 +250,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
         {
             for (int i = 0; i < _cityControls.Count; i++)
             {
-                _cityControls[i]
-                    .IsSelected = index == i;
+                _cityControls[i].IsSelected = index == i;
             }
         }
 
@@ -347,9 +321,9 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             }
 
 
-            public override void Update(double totalMS, double frameMS)
+            public override void Update(double totalTime, double frameTime)
             {
-                base.Update(totalMS, frameMS);
+                base.Update(totalTime, frameTime);
 
                 if (!_isSelected)
                 {
