@@ -1,4 +1,4 @@
-Copyright (c) 2020, Andrea Angelini
+Copyright (c) 2020, andreakarasho
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
