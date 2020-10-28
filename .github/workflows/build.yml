@@ -21,12 +21,9 @@ jobs:
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: 3.1.301
-        
-    - name: Install dependencies
-      run: dotnet restore
-      
+            
     - name: Build
-      run: dotnet build "./src/ClassicUO.csproj" --configuration Release --no-restore
+      run: dotnet build -c Release
       
     - name: Test
       run: dotnet test --verbosity normal
