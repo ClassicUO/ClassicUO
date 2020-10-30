@@ -129,10 +129,21 @@ namespace ClassicUO.Game.UI.Controls
                 return;
             }
 
+            int comboY = ScreenCoordinateY + Offset.Y;
+
+            if (comboY < 0)
+            {
+                comboY = 0;
+            }
+            else if (comboY + _maxHeight > Client.Game.Window.ClientBounds.Height)
+            {
+                comboY = Client.Game.Window.ClientBounds.Height - _maxHeight;
+            }
+
             UIManager.Add
             (
                 new ComboboxGump
-                    (ScreenCoordinateX, ScreenCoordinateY + Offset.Y, Width, _maxHeight, _items, _font, this)
+                    (ScreenCoordinateX, comboY, Width, _maxHeight, _items, _font, this)
             );
 
             base.OnMouseUp(x, y, button);
