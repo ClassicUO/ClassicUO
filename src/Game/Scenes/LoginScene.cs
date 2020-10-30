@@ -37,6 +37,7 @@ using ClassicUO.Game.UI.Gumps.Login;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Network;
+using ClassicUO.Network.Encryption;
 using ClassicUO.Resources;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;

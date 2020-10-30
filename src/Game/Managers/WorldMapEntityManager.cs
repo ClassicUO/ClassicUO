@@ -25,6 +25,7 @@ using System.Collections.Generic;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Network;
+using ClassicUO.Network.Encryption;
 using ClassicUO.Utility.Logging;
 
 namespace ClassicUO.Game.Managers

@@ -27,6 +27,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
+using ClassicUO.Network.Encryption;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
 
