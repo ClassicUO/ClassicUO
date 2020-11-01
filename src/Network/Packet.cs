@@ -84,27 +84,29 @@ namespace ClassicUO.Network
 
         public int Position;
         public int Length;
+
         public int Remains => Length - Position;
-
-
         public ref byte this[int index] => ref _buffer[index];
-
         public byte[] Buffer => _buffer.ptr;
-
         public byte ID => this[0];
 
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public byte ReadByte() => Position + 1 > Length ? (byte) 0 : _buffer[Position++];
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public sbyte ReadSByte() => (sbyte) ReadByte();
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool ReadBool() => ReadByte() != 0;
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ushort ReadUShort() => (ushort) (Position + 2 > Length ?  0 : ((ReadByte() << 8) | ReadByte()));
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public uint ReadUInt() => (uint) (Position + 4 > Length ? 0 : ((ReadByte() << 24) | (ReadByte() << 16) | (ReadByte() << 8) | ReadByte()));
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public string ReadASCII()
         {
             if (Position + 1 > Length)
@@ -124,6 +126,7 @@ namespace ClassicUO.Network
             return sb.ToString();
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public string ReadASCII(int length)
         {
             if (Position + length > Length)
@@ -150,6 +153,7 @@ namespace ClassicUO.Network
             return sb.ToString();
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public string ReadUnicode()
         {
             if (Position + 1 > Length)
@@ -168,6 +172,7 @@ namespace ClassicUO.Network
                 Encoding.BigEndianUnicode.GetString(_buffer.ptr, start, Position - start);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public string ReadUnicode(int length)
         {
             if (Position + length > Length)
@@ -181,6 +186,7 @@ namespace ClassicUO.Network
             return length <= 0 ? string.Empty : Encoding.BigEndianUnicode.GetString(_buffer.ptr, start, length);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public string ReadUnicodeReversed()
         {
             if (Position + 2 > Length)
@@ -198,6 +204,7 @@ namespace ClassicUO.Network
             return start == Position ? string.Empty : Encoding.Unicode.GetString(_buffer.ptr, start, Position - start);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public string ReadUnicodeReversed(int length)
         {
             if (Position + length > Length)
@@ -221,17 +228,11 @@ namespace ClassicUO.Network
             return i <= 0 ? string.Empty : Encoding.Unicode.GetString(_buffer.ptr, start, i);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ushort ReadUShortReversed() =>
             (ushort) (Position + 2 > Length ? 0 : (ReadByte() | (ReadByte() << 8)));
 
-
-
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Skip(int length) => Position += length;
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Seek(int position) => Position = position;
-
         public string ReadUTF8StringSafe()
         {
             if (Position >= Length)
@@ -279,6 +280,7 @@ namespace ClassicUO.Network
             return sb.ToString();
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public string ReadUTF8StringSafe(int length)
         {
             if (Position + length > Length)
@@ -327,6 +329,7 @@ namespace ClassicUO.Network
             return sb.ToString();
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public byte[] ReadArray(int count)
         {
             byte[] data = new byte[count];
@@ -338,5 +341,12 @@ namespace ClassicUO.Network
 
             return data;
         }
+
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void Skip(int length) => Position += length;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void Seek(int position) => Position = position;
     }
 }
