@@ -21,12 +21,9 @@
 
 #endregion
 
-using System;
 using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 using System.Text;
 using ClassicUO.Utility;
-using static System.String;
 
 namespace ClassicUO.Network
 {
