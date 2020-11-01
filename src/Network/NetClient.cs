@@ -41,7 +41,7 @@ namespace ClassicUO.Network
         private byte[] _recvBuffer, _incompletePacketBuffer, _decompBuffer;
         private Socket _socket;
         private CircularBuffer _circularBuffer;
-        private ConcurrentQueue<Packet> _recvQueue = new ConcurrentQueue<Packet>();
+        private ConcurrentQueue<byte[]> _recvQueue = new ConcurrentQueue<byte[]>();
         private readonly bool _connectAsync;
         private readonly bool _is_login_socket;
 

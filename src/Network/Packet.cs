@@ -23,12 +23,232 @@
 
 using System;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Text;
 using ClassicUO.Utility;
 using static System.String;
 
 namespace ClassicUO.Network
 {
+    unsafe ref struct BufferReaderUnmanaged<T> where T : unmanaged
+    {
+        public BufferReaderUnmanaged(T* data, int length)
+        {
+            ptr = data;
+            Length = length;
+        }
+
+        public T* ptr;
+        public int Length;
+
+        public T this[int index] => ptr[index];
+    }
+
+    unsafe ref struct BufferReader<T> where T : struct
+    {
+        public BufferReader(T[] data, int length)
+        {
+            ptr = data;
+            Length = length;
+        }
+
+        public BufferReader(T[] data) : this(data, data.Length)
+        {
+            
+        }
+
+
+        public T[] ptr;
+        public int Length;
+
+        public ref T this[int index] => ref ptr[index];
+    }
+
+    unsafe ref struct PacketBufferReader
+    {
+        private readonly BufferReader<byte> _buffer;
+
+
+        public PacketBufferReader(byte[] data) : this(data, data.Length)
+        {
+        }
+
+        public PacketBufferReader(byte[] data, int length)
+        {
+            _buffer = new BufferReader<byte>(data, length);
+            Position = 0;
+            Length = length;
+        }
+
+       
+
+        public int Position;
+        public int Length;
+        public int Remains => Length - Position;
+
+
+        public ref byte this[int index] => ref _buffer[index];
+
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public byte ReadByte() => Position + sizeof(byte) > Length ? (byte) 0 : _buffer[Position++];
+
+        public sbyte ReadSByte() => (sbyte) ReadByte();
+
+        public bool ReadBool() => ReadByte() != 0;
+
+        public ushort ReadUShort() => (ushort) (Position + sizeof(ushort) > Length ?  0 : ((ReadByte() << 8) | ReadByte()));
+
+        public uint ReadUInt() => (uint) (Position + sizeof(uint) > Length ? 0 : ((ReadByte() << 24) | (ReadByte() << 16) | (ReadByte() << 8) | ReadByte()));
+
+        public string ReadASCII()
+        {
+            if (Position + sizeof(char) > Length)
+            {
+                return string.Empty;
+            }
+
+            StringBuilder sb = new StringBuilder();
+
+            char c;
+
+            while ((c = (char) ReadByte()) != 0)
+            {
+                sb.Append(c);
+            }
+
+            return sb.ToString();
+        }
+
+        public string ReadASCII(int length)
+        {
+            if (Position + length >= Length)
+            {
+                return string.Empty;
+            }
+
+            if (Position + sizeof(char) * length > Length)
+            {
+                length = Length - Position - sizeof(char);
+            }
+
+            if (length <= 0)
+            {
+                return string.Empty;
+            }
+
+            StringBuilder sb = new StringBuilder();
+
+            for (int i = 0; i < length; ++i)
+            {
+                byte b = ReadByte();
+
+                if (b == 0)
+                {
+                    Skip(length - i - sizeof(char));
+
+                    break;
+                }
+
+                sb.Append((char) b);
+            }
+
+            return sb.ToString();
+        }
+
+        public string ReadUnicode()
+        {
+            if (Position + sizeof(ushort) > Length)
+            {
+                return string.Empty;
+            }
+
+            int start = Position;
+
+            while (ReadUShort() != 0)
+            {
+            }
+
+            return Position == start ?
+                string.Empty :
+                Encoding.BigEndianUnicode.GetString(_buffer.ptr, start, Position - start);
+        }
+
+        public string ReadUnicode(int length)
+        {
+            if (Position + length >= Length)
+            {
+                return string.Empty;
+            }
+
+            if (Position + length * sizeof(ushort) > Length)
+            {
+                length = Length - Position - sizeof(ushort);
+            }
+
+            int start = Position;
+            Position += length;
+
+            return length <= 0 ? string.Empty : Encoding.BigEndianUnicode.GetString(_buffer.ptr, start, length);
+        }
+
+        public string ReadUnicodeReversed()
+        {
+            if (Position + sizeof(ushort) > Length)
+            {
+                return string.Empty;
+            }
+
+            int start = Position;
+
+            while (ReadUShortReversed() != 0)
+            {
+
+            }
+
+            return start == Position ? string.Empty : Encoding.Unicode.GetString(_buffer.ptr, start, Position - start);
+        }
+
+        public string ReadUnicodeReversed(int length)
+        {
+            if (Position + length >= Length)
+            {
+                return string.Empty;
+            }
+
+            if (Position + length * sizeof(ushort) > Length)
+            {
+                length = Length - Position - sizeof(ushort);
+            }
+
+            int start = Position;
+            int i = 0;
+
+            for (; i < length; i += 2)
+            {
+                if (ReadUShortReversed() == 0)
+                {
+                    break;
+                }
+            }
+
+            Seek(start + length);
+
+            return i <= 0 ? string.Empty : Encoding.Unicode.GetString(_buffer.ptr, start, i);
+        }
+
+        public ushort ReadUShortReversed() =>
+            (ushort) (Position + sizeof(ushort) > Length ? 0 : (ReadByte() | (ReadByte() << 8)));
+
+
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void Skip(int length) => Position += length;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void Seek(int position) => Position = position;
+    }
+
     internal sealed class Packet : PacketBase
     {
         private static readonly StringBuilder _sb = new StringBuilder();
@@ -36,6 +256,9 @@ namespace ClassicUO.Network
 
         public Packet(byte[] data, int length)
         {
+            PacketBufferReader buff = new PacketBufferReader(data, length);
+            var b = buff.ReadByte();
+
             _data = data;
             Length = length;
             IsDynamic = PacketsTable.GetPacketLength(ID) < 0;
