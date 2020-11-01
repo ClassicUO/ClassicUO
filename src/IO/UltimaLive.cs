@@ -75,7 +75,7 @@ namespace ClassicUO.IO
         }
 
         //The UltimaLive packets could be also used for other things than maps and statics
-        private static void OnUltimaLivePacket(Packet p)
+        private static void OnUltimaLivePacket(ref PacketBufferReader p)
         {
             p.Seek(13);
             byte command = p.ReadByte();
@@ -239,6 +239,7 @@ namespace ClassicUO.IO
                         return;
                     }
 
+                    // TODO(andrea): using a struct range instead of allocate the array to the heap?
                     byte[] staticsData = p.ReadArray(totalLength);
 
                     if (block >= 0 && block < MapLoader.Instance.MapBlocksSize[mapId, 0] *
@@ -486,7 +487,7 @@ namespace ClassicUO.IO
             }
         }
 
-        private static void OnUpdateTerrainPacket(Packet p)
+        private static void OnUpdateTerrainPacket(ref PacketBufferReader p)
         {
             int block = (int) p.ReadUInt();
             byte[] landData = new byte[LAND_BLOCK_LENGTH];

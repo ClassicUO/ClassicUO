@@ -42,6 +42,7 @@ namespace ClassicUO.Network
         private Socket _socket;
         private CircularBuffer _circularBuffer;
         private ConcurrentQueue<byte[]> _recvQueue = new ConcurrentQueue<byte[]>();
+        private ConcurrentQueue<byte[]> _pluginRecvQueue = new ConcurrentQueue<byte[]>();
         private readonly bool _connectAsync;
         private readonly bool _is_login_socket;
 
@@ -138,19 +139,18 @@ namespace ClassicUO.Network
         public event EventHandler Connected;
         public event EventHandler<SocketError> Disconnected;
 
-        public static event EventHandler<Packet> PacketReceived;
         public static event EventHandler<PacketWriter> PacketSent;
 
         public static void EnqueuePacketFromPlugin(byte[] data, int length)
         {
             if (LoginSocket.IsDisposed && Socket.IsConnected)
             {
-                Socket._recvQueue.Enqueue(new Packet(data, length) { Filter = true });
+                Socket._pluginRecvQueue.Enqueue(data);
                 Socket.Statistics.TotalPacketsReceived++;
             }
             else if (Socket.IsDisposed && LoginSocket.IsConnected)
             {
-                Socket._recvQueue.Enqueue(new Packet(data, length) { Filter = true });
+                LoginSocket._pluginRecvQueue.Enqueue(data);
                 LoginSocket.Statistics.TotalPacketsReceived++;
             }
             else
@@ -192,7 +192,8 @@ namespace ClassicUO.Network
             _incompletePacketBuffer = new byte[BUFF_SIZE];
             _decompBuffer = new byte[BUFF_SIZE];
             _circularBuffer = new CircularBuffer();
-            _recvQueue = new ConcurrentQueue<Packet>();
+            _recvQueue = new ConcurrentQueue<byte[]>();
+            _pluginRecvQueue = new ConcurrentQueue<byte[]>();
             Statistics.Reset();
 
             _socket.ReceiveTimeout = -1;
@@ -354,15 +355,22 @@ namespace ClassicUO.Network
 
         public void Update()
         {
-            while (_recvQueue.TryDequeue(out Packet p))
-            {
-                ref byte[] data = ref p.ToArray();
-                int length = p.Length;
+            int length = 0;
 
-                if (p.Filter || Plugin.ProcessRecvPacket(ref data, ref length))
+            while (_recvQueue.TryDequeue(out byte[] data))
+            {
+                length = data.Length;
+
+                if (Plugin.ProcessRecvPacket(ref data, ref length))
                 {
-                    PacketReceived.Raise(p);
+                    PacketHandlers.Handlers.AnalyzePacket(data, length);
                 }
+            }
+
+            while (_pluginRecvQueue.TryDequeue(out byte[] data))
+            {
+                length = data.Length;
+                PacketHandlers.Handlers.AnalyzePacket(data, length);
             }
         }
 
@@ -414,7 +422,7 @@ namespace ClassicUO.Network
 #if !DEBUG
                         //LogPacket(data, false);
 #endif
-                        _recvQueue.Enqueue(new Packet(data, packetlength));
+                        _recvQueue.Enqueue(data);
                         Statistics.TotalPacketsReceived++;
                     }
 
