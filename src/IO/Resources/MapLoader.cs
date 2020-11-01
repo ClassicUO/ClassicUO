@@ -372,7 +372,7 @@ namespace ClassicUO.IO.Resources
             BlockData[0][block].MapAddress = address;
         }
 
-        public unsafe bool ApplyPatches(Packet reader)
+        public unsafe bool ApplyPatches(ref PacketBufferReader reader)
         {
             ResetPatchesInBlockTable();
 

@@ -101,7 +101,7 @@ namespace ClassicUO.Game.Scenes
             UIManager.Add(_currentGump = new LoginGump(this));
 
             // Registering Packet Events
-            NetClient.PacketReceived += NetClient_PacketReceived;
+            //NetClient.PacketReceived += NetClient_PacketReceived;
             NetClient.Socket.Disconnected += NetClient_Disconnected;
             NetClient.LoginSocket.Connected += NetClient_Connected;
             NetClient.LoginSocket.Disconnected += Login_NetClient_Disconnected;
@@ -143,7 +143,7 @@ namespace ClassicUO.Game.Scenes
             NetClient.Socket.Disconnected -= NetClient_Disconnected;
             NetClient.LoginSocket.Connected -= NetClient_Connected;
             NetClient.LoginSocket.Disconnected -= Login_NetClient_Disconnected;
-            NetClient.PacketReceived -= NetClient_PacketReceived;
+            //NetClient.PacketReceived -= NetClient_PacketReceived;
 
             UIManager.GameCursor.IsLoading = false;
             base.Unload();
@@ -558,130 +558,97 @@ namespace ClassicUO.Game.Scenes
             }
         }
 
-        private void NetClient_PacketReceived(object sender, Packet e)
+        public void ServerListReceived(ref PacketBufferReader p)
         {
-            e.MoveToData();
+            byte flags = p.ReadByte();
+            ushort count = p.ReadUShort();
+            Servers = new ServerListEntry[count];
 
-            switch (e.ID)
+            for (ushort i = 0; i < count; i++)
             {
-                case 0xA8: // ServerListReceived
-                    ParseServerList(e);
+                Servers[i] = ServerListEntry.Create(ref p);
+            }
 
-                    CurrentLoginStep = LoginSteps.ServerSelection;
+            CurrentLoginStep = LoginSteps.ServerSelection;
 
-                    if (Settings.GlobalSettings.AutoLogin || Reconnect)
+            if (Settings.GlobalSettings.AutoLogin || Reconnect)
+            {
+                if (Servers.Length != 0)
+                {
+                    int index = Settings.GlobalSettings.LastServerNum;
+
+                    if (index <= 0 || index > Servers.Length)
                     {
-                        if (Servers.Length != 0)
-                        {
-                            int index = Settings.GlobalSettings.LastServerNum;
-
-                            if (index <= 0 || index > Servers.Length)
-                            {
-                                Log.Warn($"Wrong server index: {index}");
-                                index = 1;
-                            }
-
-                            SelectServer((byte) Servers[index - 1].Index);
-                        }
+                        Log.Warn($"Wrong server index: {index}");
+                        index = 1;
                     }
 
-                    break;
-
-                case 0x8C: // ReceiveServerRelay
-                    // On OSI, upon receiving this packet, the client would disconnect and
-                    // log in to the specified server. Since emulated servers use the same
-                    // server for both shard selection and world, we don't need to disconnect.
-                    HandleRelayServerPacket(e);
-
-                    break;
-
-                case 0x86: // UpdateCharacterList
-                    ParseCharacterList(e);
-
-                    CurrentLoginStep = LoginSteps.CharacterSelection;
-                    UIManager.GetGump<CharacterSelectionGump>()?.Dispose();
-
-                    _currentGump?.Dispose();
-
-                    UIManager.Add(_currentGump = new CharacterSelectionGump());
-
-                    break;
-
-                case 0xA9: // ReceiveCharacterList
-                    ParseCharacterList(e);
-                    ParseCities(e);
-                    ParseFlags(e);
-                    CurrentLoginStep = LoginSteps.CharacterSelection;
-
-                    uint charToSelect = 0;
-
-                    bool haveAnyCharacter = false;
-                    bool tryAutologin = Settings.GlobalSettings.AutoLogin || Reconnect;
-
-                    for (byte i = 0; i < Characters.Length; i++)
-                    {
-                        if (Characters[i].Length > 0)
-                        {
-                            haveAnyCharacter = true;
-
-                            if (Characters[i] == Settings.GlobalSettings.LastCharacterName)
-                            {
-                                charToSelect = i;
-
-                                break;
-                            }
-                        }
-                    }
-
-                    if (tryAutologin && haveAnyCharacter)
-                    {
-                        SelectCharacter(charToSelect);
-                    }
-                    else if (!haveAnyCharacter)
-                    {
-                        StartCharCreation();
-                    }
-
-                    break;
-
-                case 0xBD: // ReceiveVersionRequest
-                    NetClient.Socket.Send(new PClientVersion(Settings.GlobalSettings.ClientVersion));
-
-                    break;
-
-                case 0x82: // ReceiveLoginRejection
-                case 0x85: // character list notification
-                case 0x53: // Error Code
-                    byte code = e.ReadByte();
-
-                    PopupMessage = ServerErrorMessages.GetError(e.ID, code);
-                    CurrentLoginStep = LoginSteps.PopUpMessage;
-
-                    break;
-
-                case 0xB9:
-                    uint flags = 0;
-
-                    if (Client.Version >= ClientVersion.CV_60142)
-                    {
-                        flags = e.ReadUInt();
-                    }
-                    else
-                    {
-                        flags = e.ReadUShort();
-                    }
-
-                    World.ClientLockedFeatures.SetFlags((LockedFeatureFlags) flags);
-
-                    break;
+                    SelectServer((byte) Servers[index - 1].Index);
+                }
             }
         }
 
-        private void HandleRelayServerPacket(Packet p)
+        public void UpdateCharacterList(ref PacketBufferReader p)
         {
-            p.Seek(0);
-            p.MoveToData();
+            ParseCharacterList(ref p);
 
+            CurrentLoginStep = LoginSteps.CharacterSelection;
+            UIManager.GetGump<CharacterSelectionGump>()?.Dispose();
+
+            _currentGump?.Dispose();
+
+            UIManager.Add(_currentGump = new CharacterSelectionGump());
+
+        }
+
+        public void ReceiveCharacterList(ref PacketBufferReader p)
+        {
+            ParseCharacterList(ref p);
+            ParseCities(ref p);
+
+            World.ClientFeatures.SetFlags((CharacterListFlags) p.ReadUInt());
+            CurrentLoginStep = LoginSteps.CharacterSelection;
+
+            uint charToSelect = 0;
+
+            bool haveAnyCharacter = false;
+            bool tryAutologin = Settings.GlobalSettings.AutoLogin || Reconnect;
+
+            for (byte i = 0; i < Characters.Length; i++)
+            {
+                if (Characters[i].Length > 0)
+                {
+                    haveAnyCharacter = true;
+
+                    if (Characters[i] == Settings.GlobalSettings.LastCharacterName)
+                    {
+                        charToSelect = i;
+
+                        break;
+                    }
+                }
+            }
+
+            if (tryAutologin && haveAnyCharacter)
+            {
+                SelectCharacter(charToSelect);
+            }
+            else if (!haveAnyCharacter)
+            {
+                StartCharCreation();
+            }
+        }
+
+        public void HandleErrorCode(ref PacketBufferReader p)
+        {
+            byte code = p.ReadByte();
+
+            PopupMessage = ServerErrorMessages.GetError(p.ID, code);
+            CurrentLoginStep = LoginSteps.PopUpMessage;
+        }
+
+        public void HandleRelayServerPacket(ref PacketBufferReader p)
+        {
             byte[] ip =
             {
                 p.ReadByte(), p.ReadByte(), p.ReadByte(), p.ReadByte()
@@ -699,19 +666,8 @@ namespace ClassicUO.Game.Scenes
             NetClient.Socket.Send(new PSecondLogin(Account, Password, seed));
         }
 
-        private void ParseServerList(Packet reader)
-        {
-            byte flags = reader.ReadByte();
-            ushort count = reader.ReadUShort();
-            Servers = new ServerListEntry[count];
 
-            for (ushort i = 0; i < count; i++)
-            {
-                Servers[i] = new ServerListEntry(reader);
-            }
-        }
-
-        private void ParseCharacterList(Packet p)
+        private void ParseCharacterList(ref PacketBufferReader p)
         {
             int count = p.ReadByte();
             Characters = new string[count];
@@ -724,7 +680,7 @@ namespace ClassicUO.Game.Scenes
             }
         }
 
-        private void ParseCities(Packet p)
+        private void ParseCities(ref PacketBufferReader p)
         {
             byte count = p.ReadByte();
             Cities = new CityInfo[count];
@@ -894,31 +850,34 @@ namespace ClassicUO.Game.Scenes
 
             return descr;
         }
-
-        private void ParseFlags(Packet p)
-        {
-            World.ClientFeatures.SetFlags((CharacterListFlags) p.ReadUInt());
-        }
     }
 
     internal class ServerListEntry
     {
-        public ServerListEntry(Packet reader)
+        private ServerListEntry()
         {
-            Index = reader.ReadUShort();
-
-            Name = reader.ReadASCII(32).MakeSafe();
-
-            PercentFull = reader.ReadByte();
-            Timezone = reader.ReadByte();
-            Address = reader.ReadUInt();
+          
         }
 
-        public readonly uint Address;
-        public readonly ushort Index;
-        public readonly string Name;
-        public readonly byte PercentFull;
-        public readonly byte Timezone;
+        public static ServerListEntry Create(ref PacketBufferReader p)
+        {
+            ServerListEntry entry = new ServerListEntry()
+            {
+                Index = p.ReadUShort(),
+                Name = p.ReadASCII(32).MakeSafe(),
+                PercentFull = p.ReadByte(),
+                Timezone = p.ReadByte(),
+                Address = p.ReadUInt()
+            };
+
+            return entry;
+        }
+
+        public uint Address;
+        public ushort Index;
+        public string Name;
+        public byte PercentFull;
+        public byte Timezone;
     }
 
     internal class CityInfo
