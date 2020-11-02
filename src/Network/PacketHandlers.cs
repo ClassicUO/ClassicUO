@@ -50,7 +50,7 @@ namespace ClassicUO.Network
 
         private static readonly DataReader _reader = new DataReader();
 
-        public delegate void PacketDel(ref PacketBufferReader p);
+        public delegate void OnPacketBufferReader(ref PacketBufferReader p);
 
 
         private static readonly TextFileParser _parser = new TextFileParser
@@ -60,40 +60,24 @@ namespace ClassicUO.Network
 
         private List<uint> _clilocRequests = new List<uint>();
 
-        private readonly PacketDel[] _handlers = new PacketDel[0x100];
-
-        static PacketHandlers()
-        {
-            Handlers = new PacketHandlers();
-            //NetClient.PacketReceived += Handlers.OnPacket;
-        }
+        private readonly OnPacketBufferReader[] _handlers = new OnPacketBufferReader[0x100];
 
 
-        public static PacketHandlers Handlers { get; }
+        public static PacketHandlers Handlers { get; } = new PacketHandlers();
 
 
-        public void Add(byte id, PacketDel handler)
+        public void Add(byte id, OnPacketBufferReader handler)
         {
             _handlers[id] = handler;
         }
 
 
-        //private void OnPacket(object sender, Packet p)
-        //{
-        //    Action<Packet> handler = _handlers[p.ID];
-
-        //    if (handler != null)
-        //    {
-        //        p.MoveToData();
-        //        handler(p);
-        //    }
-        //}
 
         public void AnalyzePacket(byte[] data, int length)
         {
-            PacketDel del = _handlers[data[0]];
+            OnPacketBufferReader bufferReader = _handlers[data[0]];
 
-            if (del != null)
+            if (bufferReader != null)
             {
                 int packetLength = PacketsTable.GetPacketLength(data[0]);
                 int position = 1;
@@ -109,7 +93,7 @@ namespace ClassicUO.Network
                     Position = position
                 };
 
-                del(ref buffer);
+                bufferReader(ref buffer);
             }
         }
 
@@ -140,7 +124,7 @@ namespace ClassicUO.Network
             Handlers.Add(0x2D, MobileAttributes);
             Handlers.Add(0x2E, EquipItem);
             Handlers.Add(0x2F, Swing);
-            //Handlers.Add(0x32, p => { }); // unknown
+            Handlers.Add(0x32, Unknown_0x32);
             Handlers.Add(0x38, Pathfinding);
             Handlers.Add(0x3A, UpdateSkills);
             Handlers.Add(0x3C, UpdateContainedItems);
@@ -234,7 +218,6 @@ namespace ClassicUO.Network
             Handlers.Add(0x82, ReceiveLoginRejection);
             Handlers.Add(0x85, ReceiveLoginRejection);
             Handlers.Add(0x53, ReceiveLoginRejection);
-
         }
 
 
@@ -1716,6 +1699,11 @@ namespace ClassicUO.Network
                     }
                 }
             }
+        }
+
+        private static void Unknown_0x32(ref PacketBufferReader p)
+        {
+
         }
 
         private static void UpdateSkills(ref PacketBufferReader p)
