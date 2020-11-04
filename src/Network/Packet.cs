@@ -21,6 +21,7 @@
 
 #endregion
 
+using System;
 using System.Runtime.CompilerServices;
 using System.Text;
 using ClassicUO.Utility;
@@ -337,6 +338,23 @@ namespace ClassicUO.Network
             }
 
             return data;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public ArraySegment<byte> Slice(int count)
+        {
+            return Slice(Position, Math.Min(count, Length - 1));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public ArraySegment<byte> Slice(int start, int count)
+        {
+            if (count >= Length)
+            {
+                count = Length - 1;
+            }
+
+            return new ArraySegment<byte>(_buffer.ptr, start, count);
         }
 
 

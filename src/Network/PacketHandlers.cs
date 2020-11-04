@@ -46,20 +46,16 @@ namespace ClassicUO.Network
 {
     internal class PacketHandlers
     {
-        private static uint _requestedGridLoot;
-
-        private static readonly DataReader _reader = new DataReader();
-
         public delegate void OnPacketBufferReader(ref PacketBufferReader p);
 
+        private static uint _requestedGridLoot;
+        private static readonly DataReader _reader = new DataReader();
 
-        private static readonly TextFileParser _parser = new TextFileParser
-            (string.Empty, new[] { ' ' }, new char[] { }, new[] { '{', '}' });
-        private static readonly TextFileParser _cmdparser = new TextFileParser
-            (string.Empty, new[] { ' ', ',' }, new char[] { }, new[] { '@', '@' });
+        private static readonly TextFileParser _parser = new TextFileParser(string.Empty, new[] { ' ' }, new char[] { }, new[] { '{', '}' });
+        private static readonly TextFileParser _cmdparser = new TextFileParser(string.Empty, new[] { ' ', ',' }, new char[] { }, new[] { '@', '@' });
+
 
         private List<uint> _clilocRequests = new List<uint>();
-
         private readonly OnPacketBufferReader[] _handlers = new OnPacketBufferReader[0x100];
 
 
@@ -70,7 +66,6 @@ namespace ClassicUO.Network
         {
             _handlers[id] = handler;
         }
-
 
 
         public void AnalyzePacket(byte[] data, int length)
