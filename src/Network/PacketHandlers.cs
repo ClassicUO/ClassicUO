@@ -3744,6 +3744,7 @@ namespace ClassicUO.Network
 
         private static void ClientVersion(ref PacketBufferReader p)
         {
+            NetClient.Socket.Send(new PClientVersion(Settings.GlobalSettings.ClientVersion));
         }
 
         private static void AssistVersion(ref PacketBufferReader p)
