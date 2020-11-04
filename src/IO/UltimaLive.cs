@@ -242,8 +242,7 @@ namespace ClassicUO.IO
                     // TODO(andrea): using a struct range instead of allocate the array to the heap?
                     byte[] staticsData = p.ReadArray(totalLength);
 
-                    if (block >= 0 && block < MapLoader.Instance.MapBlocksSize[mapId, 0] *
-                        MapLoader.Instance.MapBlocksSize[mapId, 1])
+                    if (block >= 0 && block < MapLoader.Instance.MapBlocksSize[mapId, 0] * MapLoader.Instance.MapBlocksSize[mapId, 1])
                     {
                         int index = block * 12;
 
@@ -780,6 +779,17 @@ namespace ClassicUO.IO
             public override void Dispose()
             {
                 MapLoader.Instance.Dispose();
+            }
+
+            internal void WriteArray(long position, ArraySegment<byte> seg)
+            {
+                if (!_accessor.CanWrite || seg.Array == null)
+                {
+                    return;
+                }
+
+                _accessor.WriteArray(position, seg.Array, seg.Offset, seg.Count);
+                _accessor.Flush();
             }
 
             internal void WriteArray(long position, byte[] array)
