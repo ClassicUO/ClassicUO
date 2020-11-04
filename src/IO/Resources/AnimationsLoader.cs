@@ -731,12 +731,7 @@ namespace ClassicUO.IO.Resources
 
                                                 offset++;
 
-                                                if ((long) aidx >= maxaddress)
-                                                {
-                                                    continue;
-                                                }
-
-                                                if (aidx->Size != 0 && aidx->Position != 0xFFFFFFFF &&
+                                                if ((long) aidx < maxaddress && aidx->Size != 0 && aidx->Position != 0xFFFFFFFF &&
                                                     aidx->Size != 0xFFFFFFFF)
                                                 {
                                                     AnimationDirection dataindex =

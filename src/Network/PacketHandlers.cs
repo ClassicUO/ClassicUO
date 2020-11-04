@@ -3666,12 +3666,9 @@ namespace ClassicUO.Network
 
             World.ClientLockedFeatures.SetFlags((LockedFeatureFlags) flags);
 
-            if (World.InGame)
-            {
-                ChatManager.ChatIsEnabled = World.ClientLockedFeatures.T2A ? ChatStatus.Enabled : 0;
+            ChatManager.ChatIsEnabled = World.ClientLockedFeatures.T2A ? ChatStatus.Enabled : 0;
 
-                AnimationsLoader.Instance.UpdateAnimationTable(flags);
-            }
+            AnimationsLoader.Instance.UpdateAnimationTable(flags);
         }
 
         private static void DisplayQuestArrow(ref PacketBufferReader p)
