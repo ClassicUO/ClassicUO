@@ -938,7 +938,7 @@ namespace ClassicUO.IO.Resources
             }
 
             UOFileUop animSeq = new UOFileUop(animationSequencePath, "build/animationsequence/{0:D8}.bin");
-            UOFileIndex[] animseqEntries = new UOFileIndex[Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT];
+            UOFileIndex[] animseqEntries = new UOFileIndex[Math.Max(animSeq.TotalEntriesCount, Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT)];
             animSeq.FillEntries(ref animseqEntries);
             DataReader reader = new DataReader();
 
