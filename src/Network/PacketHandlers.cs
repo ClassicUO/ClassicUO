@@ -418,7 +418,7 @@ namespace ClassicUO.Network
                         World.Player.Weight = p.ReadUShort();
 
 
-                        if (World.Player.Strength != 0)
+                        if (World.Player.Strength != 0 && ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.ShowStatsChangedMessage)
                         {
                             ushort currentStr = World.Player.Strength;
                             ushort currentDex = World.Player.Dexterity;
@@ -1820,7 +1820,10 @@ namespace ClassicUO.Network
                             {
                                 float change = realVal / 10.0f - skill.Value;
 
-                                if (change != 0.0f && !float.IsNaN(change))
+                                if (change != 0.0f && !float.IsNaN(change) && 
+                                    ProfileManager.CurrentProfile != null && 
+                                    ProfileManager.CurrentProfile.ShowSkillsChangedMessage && 
+                                    Math.Abs(change) >= ProfileManager.CurrentProfile.ShowSkillsChangedDeltaValue)
                                 {
                                     GameActions.Print
                                     (

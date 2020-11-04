@@ -3153,6 +3153,24 @@ namespace ClassicUO.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Inform when skills change by.
+        /// </summary>
+        public static string ShowSkillsChangedMessageBy {
+            get {
+                return ResourceManager.GetString("ShowSkillsChangedMessageBy", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Inform when stats change.
+        /// </summary>
+        public static string ShowStatsChangedMessage {
+            get {
+                return ResourceManager.GetString("ShowStatsChangedMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Show target range indicator.
         /// </summary>
         public static string ShowTarRangeIndic {
