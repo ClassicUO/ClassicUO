@@ -414,7 +414,9 @@ namespace ClassicUO.Game
         {
             uint containerSerial = obj.Container;
 
-            if (SerialHelper.IsValid(containerSerial))
+            // if entity is running the "dying" animation we have to reset container too.
+            // SerialHelper.IsValid(containerSerial) is not ideal in this case
+            if (containerSerial != 0xFFFF_FFFF)
             {
                 if (SerialHelper.IsMobile(containerSerial))
                 {
