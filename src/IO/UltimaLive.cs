@@ -280,6 +280,8 @@ namespace ClassicUO.IO
                             _UL._filesStatics[mapId].WriteArray(lookup, staticsData);
 
                             _UL._writequeue.Enqueue((mapId, lookup, staticsData));
+
+                            // TODO: stackalloc
                             //update lookup AND index length on disk
                             byte[] idxData = new byte[8];
                             idxData[0] = (byte) lookup;
@@ -489,6 +491,7 @@ namespace ClassicUO.IO
         private static void OnUpdateTerrainPacket(ref PacketBufferReader p)
         {
             int block = (int) p.ReadUInt();
+            // TODO: stackalloc
             byte[] landData = new byte[LAND_BLOCK_LENGTH];
 
             for (int i = 0; i < LAND_BLOCK_LENGTH; i++)
@@ -1012,6 +1015,7 @@ namespace ClassicUO.IO
                 int numberOfBytesInStrip = 196 * mapHeightInBlocks;
                 byte[] pVerticalBlockStrip = new byte[numberOfBytesInStrip];
 
+                // TODO: stackalloc
                 // ReSharper disable once RedundantExplicitArraySize
                 byte[] block = new byte[196]
                 {
@@ -1056,6 +1060,7 @@ namespace ClassicUO.IO
                 numberOfBytesInStrip = 12 * mapHeightInBlocks;
                 pVerticalBlockStrip = new byte[numberOfBytesInStrip];
 
+                // TODO: stackalloc
                 // ReSharper disable once RedundantExplicitArraySize
                 block = new byte[12] { 0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
 
