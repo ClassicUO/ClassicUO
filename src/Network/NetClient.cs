@@ -33,6 +33,13 @@ using ClassicUO.Utility.Logging;
 
 namespace ClassicUO.Network
 {
+    enum ClientSocketStatus
+    {
+        Disconnected,
+        Connecting,
+        Connected,
+    }
+
     internal sealed class NetClient
     {
         private const int BUFF_SIZE = 0x80000;
@@ -60,6 +67,8 @@ namespace ClassicUO.Network
         public bool IsConnected => _socket != null && _socket.Connected;
 
         public bool IsDisposed { get; private set; }
+
+        public ClientSocketStatus Status { get; private set; }
 
         public NetStatistics Statistics { get; }
 
@@ -138,8 +147,17 @@ namespace ClassicUO.Network
 
         private void Connect(IPEndPoint endpoint)
         {
+            if (Status != ClientSocketStatus.Disconnected)
+            {
+                Log.Warn($"Socket status: {Status}");
+                return;
+            }
+
             _socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp)
-                { ReceiveBufferSize = BUFF_SIZE, SendBufferSize = BUFF_SIZE };
+            { 
+                ReceiveBufferSize = BUFF_SIZE, 
+                SendBufferSize = BUFF_SIZE
+            };
 
             _socket.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.NoDelay, 1);
             _recvBuffer = new byte[BUFF_SIZE];
@@ -152,6 +170,7 @@ namespace ClassicUO.Network
 
             _socket.ReceiveTimeout = -1;
             _socket.SendTimeout = -1;
+            Status = ClientSocketStatus.Connecting;
 
             if (_connectAsync)
             {
@@ -171,12 +190,14 @@ namespace ClassicUO.Network
 
                 if (_socket.Connected)
                 {
+                    Status = ClientSocketStatus.Connected;
                     Connected.Raise();
                     Statistics.ConnectedFrom = DateTime.Now;
                     StartRecv();
                 }
                 else
                 {
+                    Status = ClientSocketStatus.Disconnected;
                     Log.Error("socket not connected");
                 }
             }
@@ -199,6 +220,7 @@ namespace ClassicUO.Network
                 return;
             }
 
+            Status = ClientSocketStatus.Disconnected;
             IsDisposed = true;
 
             if (_socket == null)

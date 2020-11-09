@@ -64,7 +64,7 @@ namespace ClassicUO.Game.Scenes
         private Gump _currentGump;
         private LoginSteps _lastLoginStep;
         private uint _pingTime;
-        private long? _reconnectTime;
+        private long _reconnectTime;
         private int _reconnectTryCounter = 1;
 
 
@@ -165,15 +165,8 @@ namespace ClassicUO.Game.Scenes
                 _lastLoginStep = CurrentLoginStep;
             }
 
-            if (Reconnect && (CurrentLoginStep == LoginSteps.PopUpMessage || CurrentLoginStep == LoginSteps.Main))
+            if (Reconnect && (CurrentLoginStep == LoginSteps.PopUpMessage || CurrentLoginStep == LoginSteps.Main) && !NetClient.Socket.IsConnected && !NetClient.LoginSocket.IsConnected)
             {
-                long rt = (long) totalTime + Settings.GlobalSettings.ReconnectTime * 1000;
-
-                if (_reconnectTime == null)
-                {
-                    _reconnectTime = rt;
-                }
-
                 if (_reconnectTime < totalTime)
                 {
                     if (!string.IsNullOrEmpty(Account))
@@ -185,7 +178,14 @@ namespace ClassicUO.Game.Scenes
                         Connect(Settings.GlobalSettings.Username, Crypter.Decrypt(Settings.GlobalSettings.Password));
                     }
 
-                    _reconnectTime = rt;
+                    int timeT = Settings.GlobalSettings.ReconnectTime * 1000;
+
+                    if (timeT < 1000)
+                    {
+                        timeT = 1000;
+                    }
+
+                    _reconnectTime = (long) totalTime + timeT;
                     _reconnectTryCounter++;
                 }
             }
@@ -334,8 +334,7 @@ namespace ClassicUO.Game.Scenes
             Log.Trace($"Start login to: {Settings.GlobalSettings.IP},{Settings.GlobalSettings.Port}");
 
 
-            EncryptionHelper.Initialize
-                (true, NetClient.ClientAddress, (ENCRYPTION_TYPE) Settings.GlobalSettings.Encryption);
+            EncryptionHelper.Initialize(true, NetClient.ClientAddress, (ENCRYPTION_TYPE) Settings.GlobalSettings.Encryption);
 
             if (!NetClient.LoginSocket.Connect(Settings.GlobalSettings.IP, Settings.GlobalSettings.Port))
             {
@@ -500,6 +499,7 @@ namespace ClassicUO.Game.Scenes
             {
                 uint address = NetClient.ClientAddress;
 
+                // TODO: stackalloc
                 byte[] packet = new byte[4];
                 packet[0] = (byte) (address >> 24);
                 packet[1] = (byte) (address >> 16);
@@ -661,6 +661,7 @@ namespace ClassicUO.Game.Scenes
 
             NetClient.Socket.Connect(new IPAddress(ip), port);
             NetClient.Socket.EnableCompression();
+            // TODO: stackalloc
             byte[] ss = new byte[4] { (byte) (seed >> 24), (byte) (seed >> 16), (byte) (seed >> 8), (byte) seed };
             NetClient.Socket.Send(ss, 4, true, true);
             NetClient.Socket.Send(new PSecondLogin(Account, Password, seed));
@@ -752,6 +753,7 @@ namespace ClassicUO.Game.Scenes
 
             string[] descr = new string[count];
 
+            // TODO: stackalloc ? 
             byte[] data = new byte[4];
 
             StringBuilder name = new StringBuilder();
