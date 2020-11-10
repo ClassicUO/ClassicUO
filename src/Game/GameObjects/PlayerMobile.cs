@@ -586,7 +586,7 @@ namespace ClassicUO.Game.GameObjects
                             case 0x1406:
                             case 0x1407: // War Maces
                                 Abilities[0] = Ability.CrushingBlow;
-                                Abilities[1] = Ability.BleedAttack;
+                                Abilities[1] = Ability.MortalStrike;
 
                                 goto done;
 
@@ -749,6 +749,13 @@ namespace ClassicUO.Game.GameObjects
                             case 0x26CD: // also Repeating Crossbows
                                 Abilities[0] = Ability.DoubleStrike;
                                 Abilities[1] = Ability.MovingShot;
+
+                                goto done;
+
+                            case 0x26CE:
+                            case 0x26CF: // paladin sword
+                                Abilities[0] = Ability.WhirlwindAttack;
+                                Abilities[1] = Ability.Disarm;
 
                                 goto done;
 
