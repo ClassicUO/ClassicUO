@@ -561,38 +561,38 @@ namespace ClassicUO.Network
 
             try
             {
-                int bytesLen = _socket.EndReceive(e);
+                int received = _socket.EndReceive(e, out SocketError error);
 
-                if (bytesLen > 0)
+                if (received > 0)
                 {
-                    Statistics.TotalBytesReceived += (uint) bytesLen;
+                    Statistics.TotalBytesReceived += (uint) received;
 
                     byte[] buffer = _recvBuffer;
 
                     if (!_is_login_socket)
                     {
-                        EncryptionHelper.Decrypt(ref buffer, ref buffer, bytesLen);
+                        EncryptionHelper.Decrypt(ref buffer, ref buffer, received);
                     }
 
                     if (_isCompressionEnabled)
                     {
-                        DecompressBuffer(ref buffer, ref bytesLen);
+                        DecompressBuffer(ref buffer, ref received);
                     }
 
                     lock (_circularBuffer)
                     {
-                        _circularBuffer.Enqueue(buffer, 0, bytesLen);
+                        _circularBuffer.Enqueue(buffer, 0, received);
                     }
 
                     ExtractPackets();
 
                     StartRecv();
                 }
-                else
-                {
-                    Log.Warn("Server sent 0 bytes. Closing connection");
-                    Disconnect(SocketError.SocketError);
-                }
+                //else
+                //{
+                //    Log.Warn("Server sent 0 bytes. Closing connection");
+                //    Disconnect(SocketError.SocketError);
+                //}
             }
             catch (SocketException socketException)
             {
