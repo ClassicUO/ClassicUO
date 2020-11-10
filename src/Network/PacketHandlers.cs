@@ -4910,6 +4910,13 @@ namespace ClassicUO.Network
 
         private static void UpdateMobileStatus(ref PacketBufferReader p)
         {
+            uint serial = p.ReadUInt();
+            byte status = p.ReadByte();
+
+            if (status == 1)
+            {
+                uint attackerSerial = p.ReadUInt();
+            }
         }
 
         private static void BuffDebuff(ref PacketBufferReader p)
