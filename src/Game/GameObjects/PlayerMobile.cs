@@ -281,7 +281,8 @@ namespace ClassicUO.Game.GameObjects
 
             if (equippedGraphic != 0)
             {
-                ushort[] graphics = { equippedGraphic, 0 };
+                ushort graphic0 = equippedGraphic;
+                ushort graphic1 = 0;
 
                 if (layerObject != null)
                 {
@@ -293,7 +294,7 @@ namespace ClassicUO.Game.GameObjects
 
                     if (TileDataLoader.Instance.StaticData[testGraphic].AnimID == imageID)
                     {
-                        graphics[1] = testGraphic;
+                        graphic1 = testGraphic;
                         count = 2;
                     }
                     else
@@ -302,14 +303,14 @@ namespace ClassicUO.Game.GameObjects
 
                         if (TileDataLoader.Instance.StaticData[testGraphic].AnimID == imageID)
                         {
-                            graphics[1] = testGraphic;
+                            graphic1 = testGraphic;
                             count = 2;
                         }
                     }
 
                     for (int i = 0; i < count; i++)
                     {
-                        ushort g = graphics[i];
+                        ushort g = i == 0 ? graphic0 : graphic1;
 
                         switch (g)
                         {
