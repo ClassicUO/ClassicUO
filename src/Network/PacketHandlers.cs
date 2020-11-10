@@ -4300,6 +4300,8 @@ namespace ClassicUO.Network
 
                     // TODO: gump race request
 
+                    GameActions.Print("[DEBUG]: change-race gump is not implemented yet.", 34);
+
                     break;
 
                 case 0x2B:
