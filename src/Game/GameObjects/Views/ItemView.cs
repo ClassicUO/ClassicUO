@@ -291,7 +291,7 @@ namespace ClassicUO.Game.GameObjects
             }
 
             if ((direction.FrameCount == 0 || direction.Frames == null) && 
-                !AnimationsLoader.Instance.LoadDirectionGroup(graphic, animGroup, dir, ref direction))
+                !AnimationsLoader.Instance.LoadAnimationFrames(graphic, animGroup, dir, ref direction))
             {
                 return;
             }

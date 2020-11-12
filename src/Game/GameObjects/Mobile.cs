@@ -500,8 +500,8 @@ namespace ClassicUO.Game.GameObjects
 
                 if (isLowExtended && AnimationGroup == 18)
                 {
-                    if (!AnimationsLoader.Instance.AnimationExists(graphic, 18) &&
-                        AnimationsLoader.Instance.AnimationExists(graphic, 17))
+                    if (!AnimationsLoader.Instance.IsAnimationExists(graphic, 18) &&
+                        AnimationsLoader.Instance.IsAnimationExists(graphic, 17))
                     {
                         AnimationGroup = GetReplacedObjectAnimation(graphic, 17);
                     }
@@ -511,7 +511,7 @@ namespace ClassicUO.Game.GameObjects
                     }
                 }
 
-                if (!AnimationsLoader.Instance.AnimationExists(graphic, AnimationGroup))
+                if (!AnimationsLoader.Instance.IsAnimationExists(graphic, AnimationGroup))
                 {
                     if (first_value == 0)
                     {
@@ -524,7 +524,7 @@ namespace ClassicUO.Game.GameObjects
 
                     AnimationGroup = _animationIdle[(byte) animGroup - 1, first_value];
 
-                    if (!AnimationsLoader.Instance.AnimationExists(graphic, AnimationGroup))
+                    if (!AnimationsLoader.Instance.IsAnimationExists(graphic, AnimationGroup))
                     {
                         SetAnimation(original_value);
                     }
@@ -634,7 +634,7 @@ namespace ClassicUO.Game.GameObjects
 
                     if (direction != null && (direction.FrameCount == 0 || direction.Frames == null))
                     {
-                        AnimationsLoader.Instance.LoadDirectionGroup(id, animGroup, dir, ref direction);
+                        AnimationsLoader.Instance.LoadAnimationFrames(id, animGroup, dir, ref direction);
                     }
 
                     if (direction != null &&

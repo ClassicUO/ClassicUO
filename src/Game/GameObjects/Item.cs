@@ -1041,7 +1041,7 @@ namespace ClassicUO.Game.GameObjects
 
                         if (direction.FrameCount == 0 || direction.Frames == null)
                         {
-                            AnimationsLoader.Instance.LoadDirectionGroup(id, animGroup, dir, ref direction);
+                            AnimationsLoader.Instance.LoadAnimationFrames(id, animGroup, dir, ref direction);
                         }
 
                         if (direction.Address != 0 && direction.Size != 0 || direction.IsUOP)

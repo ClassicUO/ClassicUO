@@ -789,7 +789,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 for (int i = 0; i < 2 && direction.FrameCount == 0; i++)
                 {
-                    if (!AnimationsLoader.Instance.LoadDirectionGroup(graphic, group, dirIndex, ref direction))
+                    if (!AnimationsLoader.Instance.LoadAnimationFrames(graphic, group, dirIndex, ref direction))
                     {
                         //direction = AnimationsLoader.Instance.GetCorpseAnimationGroup(ref graphic, ref group, ref hue2).Direction[dirIndex];
                         //graphic = item.ItemData.AnimID;

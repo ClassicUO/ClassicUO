@@ -436,7 +436,7 @@ namespace ClassicUO.Game.GameObjects
             }
 
             if (direction == null || (direction.FrameCount == 0 || direction.Frames == null) &&
-                !AnimationsLoader.Instance.LoadDirectionGroup(id, animGroup, dir, ref direction))
+                !AnimationsLoader.Instance.LoadAnimationFrames(id, animGroup, dir, ref direction))
             {
                 if (!(_transform && entity == null && !hasShadow))
                 {

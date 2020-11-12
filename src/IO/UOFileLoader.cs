@@ -33,7 +33,7 @@ namespace ClassicUO.IO
     {
         public bool IsDisposed { get; private set; }
 
-        public void Dispose()
+        public virtual void Dispose()
         {
             if (IsDisposed)
             {
