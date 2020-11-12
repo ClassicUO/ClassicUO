@@ -1634,90 +1634,94 @@ namespace ClassicUO.IO.Resources
             animDirection.Frames = new AnimationFrameTexture[animDirection.FrameCount];
             long end = (long)_reader.StartAddress + _reader.Length;
 
-            for (int i = 0; i < animDirection.FrameCount; i++)
+            unchecked
             {
-                if (animDirection.Frames[i] != null)
+                for (int i = 0, count = animDirection.FrameCount; i < count; ++i)
                 {
-                    continue;
-                }
-
-                ref UOPFrameData frameData = ref _uop_frame_pixels_offsets[i + dirFrameStartIdx];
-
-                if (frameData.DataStart == 0)
-                {
-                    continue;
-                }
-
-                _reader.Seek((int)(frameData.DataStart + frameData.PixelDataOffset));
-                ushort* palette = (ushort*)_reader.PositionAddress;
-                _reader.Skip(512);
-                short imageCenterX = _reader.ReadShort();
-                short imageCenterY = _reader.ReadShort();
-                short imageWidth = _reader.ReadShort();
-                short imageHeight = _reader.ReadShort();
-
-                if (imageWidth == 0 || imageHeight == 0)
-                {
-                    Log.Warn("frame size is null");
-
-                    continue;
-                }
-
-                uint[] data = new uint[imageWidth * imageHeight];
-
-                uint header = _reader.ReadUInt();
-
-                long pos = _reader.Position;
-
-                int sum = imageCenterY + imageHeight;
-
-                while (header != 0x7FFF7FFF && pos < end)
-                {
-                    ushort runLength = (ushort)(header & 0x0FFF);
-                    int x = (int)((header >> 22) & 0x03FF);
-
-                    if ((x & 0x0200) > 0)
+                    if (animDirection.Frames[i] != null)
                     {
-                        x |= unchecked((int)0xFFFFFE00);
+                        continue;
                     }
 
-                    int y = (int)((header >> 12) & 0x3FF);
+                    ref UOPFrameData frameData = ref _uop_frame_pixels_offsets[i + dirFrameStartIdx];
 
-                    if ((y & 0x0200) > 0)
+                    if (frameData.DataStart == 0)
                     {
-                        y |= unchecked((int)0xFFFFFE00);
+                        continue;
                     }
 
-                    x += imageCenterX;
-                    y += sum;
+                    _reader.Seek((int)(frameData.DataStart + frameData.PixelDataOffset));
+                    ushort* palette = (ushort*)_reader.PositionAddress;
+                    _reader.Skip(512);
+                    short imageCenterX = _reader.ReadShort();
+                    short imageCenterY = _reader.ReadShort();
+                    short imageWidth = _reader.ReadShort();
+                    short imageHeight = _reader.ReadShort();
 
-                    int block = y * imageWidth + x;
-
-                    for (int k = 0; k < runLength; k++)
+                    if (imageWidth == 0 || imageHeight == 0)
                     {
-                        ushort val = palette[_reader.ReadByte()];
+                        Log.Warn("frame size is null");
 
-                        // FIXME: same of MUL ? Keep it as original for the moment
-                        if (val != 0)
+                        continue;
+                    }
+
+                    uint[] data = new uint[imageWidth * imageHeight];
+
+                    uint header = _reader.ReadUInt();
+
+                    long pos = _reader.Position;
+
+                    int sum = imageCenterY + imageHeight;
+
+                    while (header != 0x7FFF7FFF && pos < end)
+                    {
+                        ushort runLength = (ushort)(header & 0x0FFF);
+                        int x = (int)((header >> 22) & 0x03FF);
+
+                        if ((x & 0x0200) > 0)
                         {
-                            data[block] = HuesHelper.Color16To32(val) | 0xFF_00_00_00;
+                            x |= (int)0xFFFFFE00;
                         }
 
-                        block++;
+                        int y = (int)((header >> 12) & 0x3FF);
+
+                        if ((y & 0x0200) > 0)
+                        {
+                            y |= (int) 0xFFFFFE00;
+                        }
+
+                        x += imageCenterX;
+                        y += sum;
+
+                        int block = y * imageWidth + x;
+
+                        for (int k = 0; k < runLength; ++k)
+                        {
+                            ushort val = palette[_reader.ReadByte()];
+
+                            // FIXME: same of MUL ? Keep it as original for the moment
+                            if (val != 0)
+                            {
+                                data[block] = HuesHelper.Color16To32(val) | 0xFF_00_00_00;
+                            }
+
+                            block++;
+                        }
+
+                        header = _reader.ReadUInt();
                     }
 
-                    header = _reader.ReadUInt();
+
+                    AnimationFrameTexture f = new AnimationFrameTexture(imageWidth, imageHeight)
+                    {
+                        CenterX = imageCenterX,
+                        CenterY = imageCenterY
+                    };
+
+                    f.PushData(data);
+                    animDirection.Frames[i] = f;
                 }
 
-
-                AnimationFrameTexture f = new AnimationFrameTexture(imageWidth, imageHeight)
-                {
-                    CenterX = imageCenterX,
-                    CenterY = imageCenterY
-                };
-
-                f.PushData(data);
-                animDirection.Frames[i] = f;
             }
 
             _usedTextures.AddLast(animDirection);
