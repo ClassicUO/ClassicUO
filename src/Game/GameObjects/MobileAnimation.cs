@@ -44,7 +44,7 @@ namespace ClassicUO.Game.GameObjects
             0x0240, 0x0241, 0x0242, 0x0243, 0x0244, 0x0245, 0x0246, 0x03E0, 0x03E1, 0
         };
 
-        [MethodImpl(256)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override ushort GetGraphicForAnimation()
         {
             ushort g = Graphic;
@@ -73,7 +73,7 @@ namespace ClassicUO.Game.GameObjects
             return g;
         }
 
-        [MethodImpl(256)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Direction GetDirectionForAnimation()
         {
             if (Steps.Count != 0)
@@ -1433,7 +1433,7 @@ namespace ClassicUO.Game.GameObjects
             return (byte) (index % (ushort) HIGHT_ANIMATION_GROUP.HAG_ANIMATION_COUNT);
         }
 
-        [MethodImpl(256)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static byte GetObjectNewAnimation(Mobile mobile, ushort type, ushort action, byte mode)
         {
             if (mobile.Graphic >= Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT)
@@ -1470,7 +1470,7 @@ namespace ClassicUO.Game.GameObjects
             return 0;
         }
 
-        [MethodImpl(256)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static bool TestStepNoChangeDirection(Mobile mob, byte group)
         {
             switch ((PEOPLE_ANIMATION_GROUP) group)
@@ -1499,7 +1499,7 @@ namespace ClassicUO.Game.GameObjects
             return false;
         }
 
-        [MethodImpl(256)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static byte GetObjectNewAnimationType_0(Mobile mobile, ushort action, byte mode)
         {
             if (action <= 10)
@@ -1620,7 +1620,7 @@ namespace ClassicUO.Game.GameObjects
             return 0;
         }
 
-        [MethodImpl(256)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static byte GetObjectNewAnimationType_1_2(Mobile mobile, ushort action, byte mode)
         {
             IndexAnimation ia = AnimationsLoader.Instance.DataIndex[mobile.Graphic];
@@ -1649,7 +1649,7 @@ namespace ClassicUO.Game.GameObjects
             return 16;
         }
 
-        [MethodImpl(256)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static byte GetObjectNewAnimationType_3(Mobile mobile, ushort action, byte mode)
         {
             IndexAnimation ia = AnimationsLoader.Instance.DataIndex[mobile.Graphic];
@@ -1693,7 +1693,7 @@ namespace ClassicUO.Game.GameObjects
             return 3;
         }
 
-        [MethodImpl(256)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static byte GetObjectNewAnimationType_4(Mobile mobile, ushort action, byte mode)
         {
             IndexAnimation ia = AnimationsLoader.Instance.DataIndex[mobile.Graphic];
@@ -1728,7 +1728,7 @@ namespace ClassicUO.Game.GameObjects
             return 10;
         }
 
-        [MethodImpl(256)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static byte GetObjectNewAnimationType_5(Mobile mobile, ushort action, byte mode)
         {
             IndexAnimation ia = AnimationsLoader.Instance.DataIndex[mobile.Graphic];
@@ -1774,7 +1774,7 @@ namespace ClassicUO.Game.GameObjects
             return 9;
         }
 
-        [MethodImpl(256)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static byte GetObjectNewAnimationType_6_14(Mobile mobile, ushort action, byte mode)
         {
             IndexAnimation ia = AnimationsLoader.Instance.DataIndex[mobile.Graphic];
@@ -1808,7 +1808,7 @@ namespace ClassicUO.Game.GameObjects
             return 11;
         }
 
-        [MethodImpl(256)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static byte GetObjectNewAnimationType_7(Mobile mobile, ushort action, byte mode)
         {
             if (mobile.IsMounted)
@@ -1831,7 +1831,7 @@ namespace ClassicUO.Game.GameObjects
             return 0;
         }
 
-        [MethodImpl(256)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static byte GetObjectNewAnimationType_8(Mobile mobile, ushort action, byte mode)
         {
             IndexAnimation ia = AnimationsLoader.Instance.DataIndex[mobile.Graphic];
@@ -1860,7 +1860,7 @@ namespace ClassicUO.Game.GameObjects
             return 11;
         }
 
-        [MethodImpl(256)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static byte GetObjectNewAnimationType_9_10(Mobile mobile, ushort action, byte mode)
         {
             IndexAnimation ia = AnimationsLoader.Instance.DataIndex[mobile.Graphic];
@@ -1897,7 +1897,7 @@ namespace ClassicUO.Game.GameObjects
             return 20;
         }
 
-        [MethodImpl(256)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static byte GetObjectNewAnimationType_11(Mobile mobile, ushort action, byte mode)
         {
             IndexAnimation ia = AnimationsLoader.Instance.DataIndex[mobile.Graphic];

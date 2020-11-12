@@ -235,7 +235,7 @@ namespace ClassicUO.Game.Map
             return ref block >= list.Length ? ref IndexMap.Invalid : ref list[block];
         }
 
-        [MethodImpl(256)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private int GetBlock(int blockX, int blockY)
         {
             return blockX * MapLoader.Instance.MapBlocksSize[Index, 1] + blockY;

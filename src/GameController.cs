@@ -172,7 +172,7 @@ namespace ClassicUO
             base.UnloadContent();
         }
 
-        [MethodImpl(256)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public T GetScene<T>() where T : Scene
         {
             return Scene as T;

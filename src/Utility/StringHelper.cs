@@ -112,7 +112,7 @@ namespace ClassicUO.Utility
             return _sb.ToString();
         }
 
-        [MethodImpl(256)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsSafeChar(int c)
         {
             return c >= 0x20 && c < 0xFFFE;

@@ -34,7 +34,7 @@ namespace ClassicUO.Utility
             0x94, 0x9C, 0xA4, 0xAC, 0xB4, 0xBD, 0xC5, 0xCD, 0xD5, 0xDE, 0xE6, 0xEE, 0xF6, 0xFF
         };
 
-        [MethodImpl(256)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static (byte, byte, byte, byte) GetBGRA(uint cl)
         {
             return ((byte) (cl & 0xFF),         // B
@@ -44,32 +44,32 @@ namespace ClassicUO.Utility
                 );
         }
 
-        [MethodImpl(256)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static uint RgbaToArgb(uint rgba)
         {
             return (rgba >> 8) | (rgba << 24);
         }
 
-        [MethodImpl(256)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static uint Color16To32(ushort c)
         {
             return (uint) (_table[(c >> 10) & 0x1F] | (_table[(c >> 5) & 0x1F] << 8) | (_table[c & 0x1F] << 16));
         }
 
-        [MethodImpl(256)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ushort Color32To16(uint c)
         {
             return (ushort) ((((c & 0xFF) << 5) >> 8) | (((((c >> 16) & 0xFF) << 5) >> 8) << 10) |
                              (((((c >> 8) & 0xFF) << 5) >> 8) << 5));
         }
 
-        [MethodImpl(256)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ushort ConvertToGray(ushort c)
         {
             return (ushort) (((c & 0x1F) * 299 + ((c >> 5) & 0x1F) * 587 + ((c >> 10) & 0x1F) * 114) / 1000);
         }
 
-        [MethodImpl(256)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ushort ColorToHue(Color c)
         {
             ushort origred = c.R;
