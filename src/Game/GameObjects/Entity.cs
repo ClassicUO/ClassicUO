@@ -173,6 +173,11 @@ namespace ClassicUO.Game.GameObjects
         {
             base.Destroy();
 
+            if (HitsMax != 0)
+            {
+                NetClient.Socket.Send(new PCloseStatusBarGump(Serial));
+            }
+
             AnimIndex = 0;
             LastAnimationChangeTime = 0;
             HitsTexture?.Destroy();
