@@ -5922,7 +5922,7 @@ namespace ClassicUO.Network
 
                         GumpPic pic = new GumpPic(gparams);
 
-                        if (gparams.Count >= 6 && gparams[5].ToLower().Contains("virtuegumpitem"))
+                        if (gparams.Count >= 6 && gparams[5].IndexOf("virtuegumpitem", StringComparison.InvariantCultureIgnoreCase) >= 0)
                         {
                             pic.ContainsByBounds = true;
                             pic.IsVirtue = true;
