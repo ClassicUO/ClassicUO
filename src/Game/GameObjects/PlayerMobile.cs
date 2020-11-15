@@ -281,7 +281,8 @@ namespace ClassicUO.Game.GameObjects
 
             if (equippedGraphic != 0)
             {
-                ushort[] graphics = { equippedGraphic, 0 };
+                ushort graphic0 = equippedGraphic;
+                ushort graphic1 = 0;
 
                 if (layerObject != null)
                 {
@@ -293,7 +294,7 @@ namespace ClassicUO.Game.GameObjects
 
                     if (TileDataLoader.Instance.StaticData[testGraphic].AnimID == imageID)
                     {
-                        graphics[1] = testGraphic;
+                        graphic1 = testGraphic;
                         count = 2;
                     }
                     else
@@ -302,14 +303,14 @@ namespace ClassicUO.Game.GameObjects
 
                         if (TileDataLoader.Instance.StaticData[testGraphic].AnimID == imageID)
                         {
-                            graphics[1] = testGraphic;
+                            graphic1 = testGraphic;
                             count = 2;
                         }
                     }
 
                     for (int i = 0; i < count; i++)
                     {
-                        ushort g = graphics[i];
+                        ushort g = i == 0 ? graphic0 : graphic1;
 
                         switch (g)
                         {
@@ -586,7 +587,7 @@ namespace ClassicUO.Game.GameObjects
                             case 0x1406:
                             case 0x1407: // War Maces
                                 Abilities[0] = Ability.CrushingBlow;
-                                Abilities[1] = Ability.BleedAttack;
+                                Abilities[1] = Ability.MortalStrike;
 
                                 goto done;
 
@@ -749,6 +750,13 @@ namespace ClassicUO.Game.GameObjects
                             case 0x26CD: // also Repeating Crossbows
                                 Abilities[0] = Ability.DoubleStrike;
                                 Abilities[1] = Ability.MovingShot;
+
+                                goto done;
+
+                            case 0x26CE:
+                            case 0x26CF: // paladin sword
+                                Abilities[0] = Ability.WhirlwindAttack;
+                                Abilities[1] = Ability.Disarm;
 
                                 goto done;
 

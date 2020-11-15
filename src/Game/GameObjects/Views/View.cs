@@ -69,7 +69,7 @@ namespace ClassicUO.Game.GameObjects
         public abstract bool Draw(UltimaBatcher2D batcher, int posX, int posY);
 
 
-        [MethodImpl(256)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         protected static void ResetHueVector()
         {
             HueVector.X = 0;
@@ -94,7 +94,7 @@ namespace ClassicUO.Game.GameObjects
             return false;
         }
 
-        [MethodImpl(256)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool ProcessAlpha(int max)
         {
             if (ProfileManager.CurrentProfile != null && !ProfileManager.CurrentProfile.UseObjectsFading)

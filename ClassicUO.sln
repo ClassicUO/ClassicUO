@@ -52,13 +52,14 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "settings", "settings", "{21
 	ProjectSection(SolutionItems) = preProject
 		ClassicUO.licenseheader = ClassicUO.licenseheader
 		ClassicUO.sln.DotSettings = ClassicUO.sln.DotSettings
+		FNA.Settings.props = FNA.Settings.props
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{B766E918-7350-473A-B28D-63C344385924}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ClassicUO.UnitTests", "tests\ClassicUO.UnitTests\ClassicUO.UnitTests.csproj", "{85972CEA-4AB1-45DC-922C-00C4E17764B5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FNA.Core", "external\FNA\FNA.Core.csproj", "{3F9AB6CE-3AD1-40B6-B2AA-C4D82F76258F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FNA.Core", "external\FNA\FNA.Core.csproj", "{3F9AB6CE-3AD1-40B6-B2AA-C4D82F76258F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

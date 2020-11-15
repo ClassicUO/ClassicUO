@@ -1,7 +1,6 @@
 ﻿using ClassicUO.Data;
-using ClassicUO.Network.Encryption;
 
-namespace ClassicUO.Network
+namespace ClassicUO.Network.Encryption
 {
     internal enum ENCRYPTION_TYPE
     {

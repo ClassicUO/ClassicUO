@@ -35,7 +35,7 @@ namespace ClassicUO.Utility
             Console.WriteLine("Platform: {0}", PlatformHelper.IsMonoRuntime ? "Mono" : ".NET");
         }
 
-        [MethodImpl(256)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void* AsPointer<T>(ref T v)
         {
             TypedReference t = __makeref(v);
@@ -48,7 +48,7 @@ namespace ClassicUO.Utility
             return ToStruct<T>(ptr, SizeOf<T>());
         }
 
-        [MethodImpl(256)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static T ToStruct<T>(IntPtr ptr, int size)
         {
             byte* str = (byte*) ptr;
@@ -60,7 +60,7 @@ namespace ClassicUO.Utility
             return result;
         }
 
-        [MethodImpl(256)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static T As<T>(object v)
         {
             int size = SizeOf<T>();
@@ -68,7 +68,7 @@ namespace ClassicUO.Utility
             return Reinterpret<object, T>(v, size);
         }
 
-        [MethodImpl(256)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int SizeOf<T>()
         {
             DoubleStruct<T> doubleStruct = DoubleStruct<T>.Value;
@@ -91,7 +91,7 @@ namespace ClassicUO.Utility
         }
 
 
-        [MethodImpl(256)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static TOut Reinterpret<TIn, TOut>(TIn curValue, int sizeBytes) //where TIn : struct where TOut : struct
         {
             TOut result = default;

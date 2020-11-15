@@ -372,7 +372,7 @@ namespace ClassicUO.IO.Resources
             BlockData[0][block].MapAddress = address;
         }
 
-        public unsafe bool ApplyPatches(Packet reader)
+        public unsafe bool ApplyPatches(ref PacketBufferReader reader)
         {
             ResetPatchesInBlockTable();
 
@@ -614,7 +614,7 @@ namespace ClassicUO.IO.Resources
             return mb;
         }
 
-        [MethodImpl(256)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ref IndexMap GetIndex(int map, int x, int y)
         {
             int block = x * MapBlocksSize[map, 1] + y;

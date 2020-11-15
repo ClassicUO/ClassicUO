@@ -33,7 +33,7 @@ namespace ClassicUO.IO
     {
         public bool IsDisposed { get; private set; }
 
-        public void Dispose()
+        public virtual void Dispose()
         {
             if (IsDisposed)
             {
@@ -62,7 +62,7 @@ namespace ClassicUO.IO
 
             ref UOFileIndex entry = ref Entries[index];
 
-            if (entry.Offset < 0 || entry.Length <= 0)
+            if (entry.Offset < 0 || entry.Length <= 0 || entry.Offset == 0x0000_0000_FFFF_FFFF)
             {
                 return ref UOFileIndex.Invalid;
             }

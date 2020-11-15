@@ -253,14 +253,14 @@ namespace ClassicUO.Game
         }
 
 
-        [MethodImpl(256)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsPointInStatic(UOTexture texture, int x, int y)
         {
             return texture != null && texture.Contains
                 (TranslatedMousePositionByViewport.X - x, TranslatedMousePositionByViewport.Y - y);
         }
 
-        [MethodImpl(256)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsPointInLand(int x, int y)
         {
             x = TranslatedMousePositionByViewport.X - x;

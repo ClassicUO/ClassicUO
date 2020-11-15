@@ -48,7 +48,7 @@ namespace ClassicUO.Game.GameObjects
 
         public int Distance
         {
-            [MethodImpl(256)]
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get
             {
                 if (World.Player == null /*|| IsDestroyed*/)
@@ -95,7 +95,7 @@ namespace ClassicUO.Game.GameObjects
         public ushort X, Y;
         public sbyte Z;
 
-        [MethodImpl(256)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void AddToTile(int x, int y)
         {
             if (World.Map != null)
@@ -109,14 +109,14 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
-        [MethodImpl(256)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void AddToTile()
         {
             AddToTile(X, Y);
         }
 
 
-        [MethodImpl(256)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void RemoveFromTile()
         {
             if (TPrevious != null)
@@ -137,7 +137,7 @@ namespace ClassicUO.Game.GameObjects
         {
         }
 
-        [MethodImpl(256)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void UpdateScreenPosition()
         {
             _screenPosition.X = (X - Y) * 22;
@@ -146,7 +146,7 @@ namespace ClassicUO.Game.GameObjects
             OnPositionChanged();
         }
 
-        [MethodImpl(256)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void UpdateRealScreenPosition(int offsetX, int offsetY)
         {
             RealScreenPosition.X = _screenPosition.X - offsetX - 22;

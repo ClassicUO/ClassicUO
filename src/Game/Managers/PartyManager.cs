@@ -45,7 +45,7 @@ namespace ClassicUO.Game.Managers
         public long PartyHealTimer { get; set; }
         public uint PartyHealTarget { get; set; }
 
-        public void ParsePacket(Packet p)
+        public void ParsePacket(ref PacketBufferReader p)
         {
             byte code = p.ReadByte();
 

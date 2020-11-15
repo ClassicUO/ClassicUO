@@ -390,7 +390,13 @@ namespace ClassicUO
                         break;
 
                     case "reconnect_time":
-                        Settings.GlobalSettings.ReconnectTime = int.Parse(value);
+
+                        if (!int.TryParse(value, out int reconnectTime) || reconnectTime < 1000)
+                        {
+                            reconnectTime = 1000;
+                        }
+
+                        Settings.GlobalSettings.ReconnectTime = reconnectTime;
 
                         break;
 

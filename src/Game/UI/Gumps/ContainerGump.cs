@@ -100,7 +100,7 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     _isMinimized = value;
                     _gumpPicContainer.Graphic = value ? _data.IconizedGraphic : Graphic;
-                    float scale = UIManager.ContainerScale;
+                    float scale = GetScale();
 
                     Width = _gumpPicContainer.Width = (int) (_gumpPicContainer.Width * scale);
                     Height = _gumpPicContainer.Height = (int) (_gumpPicContainer.Height * scale);
@@ -135,7 +135,7 @@ namespace ClassicUO.Game.UI.Gumps
                 return;
             }
 
-            float scale = UIManager.ContainerScale;
+            float scale = GetScale();
 
             _data = ContainerManager.Get(Graphic);
             ushort g = _data.Graphic;
@@ -304,7 +304,7 @@ namespace ClassicUO.Game.UI.Gumps
                                 ((ushort) (ItemHold.DisplayedGraphic - Constants.ITEM_GUMP_TEXTURE_OFFSET)) :
                             ArtLoader.Instance.GetTexture(ItemHold.DisplayedGraphic);
 
-                        float scale = UIManager.ContainerScale;
+                        float scale = GetScale();
 
                         bounds.X = (int) (bounds.X * scale);
                         bounds.Y = (int) (bounds.Y * scale);
@@ -408,7 +408,7 @@ namespace ClassicUO.Game.UI.Gumps
                 _eyeCorspeOffset = _eyeCorspeOffset == 0 ? 1 : 0;
                 _corpseEyeTicks = (long) totalTime + 750;
                 _eyeGumpPic.Graphic = (ushort) (0x0045 + _eyeCorspeOffset);
-                float scale = UIManager.ContainerScale;
+                float scale = GetScale();
                 _eyeGumpPic.Width = (int) (_eyeGumpPic.Width * scale);
                 _eyeGumpPic.Height = (int) (_eyeGumpPic.Height * scale);
             }
@@ -473,6 +473,11 @@ namespace ClassicUO.Game.UI.Gumps
         }
 
 
+        private float GetScale()
+        {
+            return IsChessboard ? 1f : UIManager.ContainerScale;
+        }
+
         private void ItemsOnAdded()
         {
             Entity container = World.Get(LocalSerial);
@@ -505,7 +510,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                     itemControl.IsVisible = !IsMinimized;
 
-                    float scale = UIManager.ContainerScale;
+                    float scale = GetScale();
 
                     if (ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.ScaleItemsInsideContainers)
                     {
@@ -539,8 +544,10 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (texture != null)
             {
-                boundWidth -= (int) (texture.Width / UIManager.ContainerScale);
-                boundHeight -= (int) (texture.Height / UIManager.ContainerScale);
+                float scale = GetScale();
+
+                boundWidth -= (int) (texture.Width / scale);
+                boundHeight -= (int) (texture.Height / scale);
             }
 
             if (item.X < boundX)
@@ -570,7 +577,7 @@ namespace ClassicUO.Game.UI.Gumps
             if (CUOEnviroment.Debug && !IsMinimized)
             {
                 Rectangle bounds = _data.Bounds;
-                float scale = UIManager.ContainerScale;
+                float scale = GetScale();
                 ushort boundX = (ushort) (bounds.X * scale);
                 ushort boundY = (ushort) (bounds.Y * scale);
                 ushort boundWidth = (ushort) (bounds.Width * scale);
@@ -644,7 +651,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             public override bool Contains(int x, int y)
             {
-                float scale = UIManager.ContainerScale;
+                float scale = Graphic == 0x091A || Graphic == 0x092E ? 1f : UIManager.ContainerScale;
 
                 x = (int) (x / scale);
                 y = (int) (y / scale);

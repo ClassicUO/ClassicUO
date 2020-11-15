@@ -192,13 +192,13 @@ namespace ClassicUO.Game.GameObjects
             posX += 22;
             posY += 22;
 
-            AnimationsLoader.Instance.Direction = (byte) ((byte) Layer & 0x7F & 7);
-            AnimationsLoader.Instance.GetAnimDirection(ref AnimationsLoader.Instance.Direction, ref IsFlipped);
+            byte direction = (byte) ((byte) Layer & 0x7F & 7);
+            AnimationsLoader.Instance.GetAnimDirection(ref direction, ref IsFlipped);
 
             byte animIndex = (byte) AnimIndex;
             ushort graphic = GetGraphicForAnimation();
             AnimationsLoader.Instance.ConvertBodyIfNeeded(ref graphic);
-            AnimationsLoader.Instance.AnimGroup = AnimationsLoader.Instance.GetDieGroupIndex(graphic, UsedLayer);
+            byte group = AnimationsLoader.Instance.GetDieGroupIndex(graphic, UsedLayer);
 
             bool ishuman = MathHelper.InRange(Amount, 0x0190, 0x0193) || MathHelper.InRange
                                (Amount, 0x00B7, 0x00BA) || MathHelper.InRange
@@ -207,12 +207,12 @@ namespace ClassicUO.Game.GameObjects
                                (Amount, 0x02B6, 0x02B7) || Amount == 0x03DB || Amount == 0x03DF || Amount == 0x03E2 ||
                            Amount == 0x02E8 || Amount == 0x02E9;
 
-            DrawLayer(batcher, posX, posY, this, Layer.Invalid, animIndex, ishuman, Hue, IsFlipped, HueVector.Z);
+            DrawLayer(batcher, posX, posY, this, Layer.Invalid, animIndex, ishuman, Hue, IsFlipped, HueVector.Z, group, direction);
 
             for (int i = 0; i < Constants.USED_LAYER_COUNT; i++)
             {
-                Layer layer = LayerOrder.UsedLayers[AnimationsLoader.Instance.Direction, i];
-                DrawLayer(batcher, posX, posY, this, layer, animIndex, ishuman, 0, IsFlipped, HueVector.Z);
+                Layer layer = LayerOrder.UsedLayers[direction, i];
+                DrawLayer(batcher, posX, posY, this, layer, animIndex, ishuman, 0, IsFlipped, HueVector.Z, group, direction);
             }
 
             return true;
@@ -229,7 +229,9 @@ namespace ClassicUO.Game.GameObjects
             bool ishuman,
             ushort color,
             bool flipped,
-            float alpha
+            float alpha,
+            byte animGroup,
+            byte dir
         )
         {
             _equipConvData = null;
@@ -270,29 +272,26 @@ namespace ClassicUO.Game.GameObjects
                 return;
             }
 
-            byte animGroup = AnimationsLoader.Instance.AnimGroup;
             ushort newHue = 0;
 
             AnimationGroup gr = layer == Layer.Invalid ?
                 AnimationsLoader.Instance.GetCorpseAnimationGroup(ref graphic, ref animGroup, ref newHue) :
                 AnimationsLoader.Instance.GetBodyAnimationGroup(ref graphic, ref animGroup, ref newHue);
 
-            AnimationsLoader.Instance.AnimID = graphic;
-
             if (color == 0)
             {
                 color = newHue;
             }
 
-            AnimationDirection direction = gr.Direction[AnimationsLoader.Instance.Direction];
+            AnimationDirection direction = gr.Direction[dir];
 
             if (direction == null)
             {
                 return;
             }
 
-            if ((direction.FrameCount == 0 || direction.Frames == null) && !AnimationsLoader.Instance.LoadDirectionGroup
-                (ref direction))
+            if ((direction.FrameCount == 0 || direction.Frames == null) && 
+                !AnimationsLoader.Instance.LoadAnimationFrames(graphic, animGroup, dir, ref direction))
             {
                 return;
             }

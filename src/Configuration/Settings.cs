@@ -68,7 +68,7 @@ namespace ClassicUO.Configuration
 
         [JsonProperty("reconnect")] public bool Reconnect { get; set; }
 
-        [JsonProperty("reconnect_time")] public int ReconnectTime { get; set; }
+        [JsonProperty("reconnect_time")] public int ReconnectTime { get; set; } = 1;
 
         [JsonProperty("login_music")] public bool LoginMusic { get; set; } = true;
 

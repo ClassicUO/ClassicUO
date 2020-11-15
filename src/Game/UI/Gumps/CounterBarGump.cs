@@ -399,8 +399,13 @@ namespace ClassicUO.Game.UI.Gumps
                     {
                         int newAmount = 0;
 
-                        GetAmount(World.Player.FindItemByLayer(Layer.Backpack), Graphic, Hue, ref newAmount);
-                        GetAmount(World.Player.FindItemByLayer(Layer.Cloak), Graphic, Hue, ref newAmount);
+                        for (Item item = (Item) World.Player.Items; item != null; item = (Item) item.Next)
+                        {
+                            if (item.ItemData.IsContainer && !item.IsEmpty && item.Layer >= Layer.OneHanded && item.Layer <= Layer.Legs)
+                            {
+                                GetAmount(item, Graphic, Hue, ref newAmount);
+                            }
+                        }
 
                         if (ProfileManager.CurrentProfile.CounterBarDisplayAbbreviatedAmount)
                         {

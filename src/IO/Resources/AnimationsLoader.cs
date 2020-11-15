@@ -38,13 +38,13 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.IO.Resources
 {
-    internal class AnimationsLoader : UOFileLoader
+    internal unsafe class AnimationsLoader : UOFileLoader
     {
         private static AnimationsLoader _instance;
 
         private readonly Dictionary<ushort, byte> _animationSequenceReplacing = new Dictionary<ushort, byte>();
         private readonly Dictionary<ushort, Rectangle> _animDimensionCache = new Dictionary<ushort, Rectangle>();
-        private readonly byte[] _buffer = new byte[0x800000];
+        private IntPtr _bufferCachePtr = Marshal.AllocHGlobal(0x800000);
         private readonly AnimationGroup _empty = new AnimationGroup
         {
             Direction = new AnimationDirection[5]
@@ -70,7 +70,6 @@ namespace ClassicUO.IO.Resources
         }
 
         public static AnimationsLoader Instance => _instance ?? (_instance = new AnimationsLoader());
-        public int SittingValue { get; set; }
 
         public IndexAnimation[] DataIndex { get; } = new IndexAnimation[Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT];
 
@@ -263,12 +262,6 @@ namespace ClassicUO.IO.Resources
             new SittingInfoData(0x996C, 4, 4, 4, 4, 4, 4, false)  // SOUTH ONLY
         };
 
-        public byte AnimGroup;
-        public ushort AnimID;
-
-
-        public ushort Color;
-        public byte Direction;
 
 
         public override unsafe Task Load()
@@ -731,12 +724,7 @@ namespace ClassicUO.IO.Resources
 
                                                 offset++;
 
-                                                if ((long) aidx >= maxaddress)
-                                                {
-                                                    continue;
-                                                }
-
-                                                if (aidx->Size != 0 && aidx->Position != 0xFFFFFFFF &&
+                                                if ((long) aidx < maxaddress && aidx->Size != 0 && aidx->Position != 0xFFFFFFFF &&
                                                     aidx->Size != 0xFFFFFFFF)
                                                 {
                                                     AnimationDirection dataindex =
@@ -872,6 +860,18 @@ namespace ClassicUO.IO.Resources
             );
         }
 
+
+
+        public override void Dispose()
+        {
+            base.Dispose();
+
+            if (_bufferCachePtr != IntPtr.Zero)
+            {
+                Marshal.FreeHGlobal(_bufferCachePtr);
+            }
+        }
+
         private void LoadUop()
         {
             if (Client.Version <= ClientVersion.CV_60144)
@@ -943,7 +943,7 @@ namespace ClassicUO.IO.Resources
             }
 
             UOFileUop animSeq = new UOFileUop(animationSequencePath, "build/animationsequence/{0:D8}.bin");
-            UOFileIndex[] animseqEntries = new UOFileIndex[Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT];
+            UOFileIndex[] animseqEntries = new UOFileIndex[Math.Max(animSeq.TotalEntriesCount, Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT)];
             animSeq.FillEntries(ref animseqEntries);
             DataReader reader = new DataReader();
 
@@ -1002,21 +1002,25 @@ namespace ClassicUO.IO.Resources
         }
 
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static unsafe uint CalculatePeopleGroupOffset(ushort graphic)
         {
             return (uint) (((graphic - 400) * 175 + 35000) * sizeof(AnimIdxBlock));
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static unsafe uint CalculateHighGroupOffset(ushort graphic)
         {
             return (uint) (graphic * 110 * sizeof(AnimIdxBlock));
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static unsafe uint CalculateLowGroupOffset(ushort graphic)
         {
             return (uint) (((graphic - 200) * 65 + 22000) * sizeof(AnimIdxBlock));
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private ANIMATION_GROUPS_TYPE CalculateTypeByGraphic(ushort graphic)
         {
             return graphic < 200 ? ANIMATION_GROUPS_TYPE.MONSTER :
@@ -1060,8 +1064,7 @@ namespace ClassicUO.IO.Resources
             }
         }
 
-        public AnimationGroup GetBodyAnimationGroup
-            (ref ushort graphic, ref byte group, ref ushort hue, bool isParent = false)
+        public AnimationGroup GetBodyAnimationGroup(ref ushort graphic, ref byte group, ref ushort hue, bool isParent = false)
         {
             if (graphic < Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT && group < 100)
             {
@@ -1224,7 +1227,7 @@ namespace ClassicUO.IO.Resources
             }
         }
 
-        [MethodImpl(256)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void GetAnimDirection(ref byte dir, ref bool mirror)
         {
             switch (dir)
@@ -1262,7 +1265,7 @@ namespace ClassicUO.IO.Resources
             }
         }
 
-        [MethodImpl(256)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void GetSittingAnimDirection(ref byte dir, ref bool mirror, ref int x, ref int y)
         {
             switch (dir)
@@ -1293,106 +1296,103 @@ namespace ClassicUO.IO.Resources
             }
         }
 
-        [MethodImpl(256)]
-        public void FixSittingDirection(ref byte layerDirection, ref bool mirror, ref int x, ref int y)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void FixSittingDirection(ref byte direction, ref bool mirror, ref int x, ref int y, int sittingIndex)
         {
-            ref SittingInfoData data = ref SittingInfos[SittingValue - 1];
+            ref SittingInfoData data = ref SittingInfos[sittingIndex - 1];
 
-            switch (Direction)
+            switch (direction)
             {
                 case 7:
                 case 0:
-                {
-                    if (data.Direction1 == -1)
                     {
-                        if (Direction == 7)
+                        if (data.Direction1 == -1)
                         {
-                            Direction = (byte) data.Direction4;
+                            if (direction == 7)
+                            {
+                                direction = (byte)data.Direction4;
+                            }
+                            else
+                            {
+                                direction = (byte)data.Direction2;
+                            }
                         }
                         else
                         {
-                            Direction = (byte) data.Direction2;
+                            direction = (byte)data.Direction1;
                         }
-                    }
-                    else
-                    {
-                        Direction = (byte) data.Direction1;
-                    }
 
-                    break;
-                }
+                        break;
+                    }
 
                 case 1:
                 case 2:
-                {
-                    if (data.Direction2 == -1)
                     {
-                        if (Direction == 1)
+                        if (data.Direction2 == -1)
                         {
-                            Direction = (byte) data.Direction1;
+                            if (direction == 1)
+                            {
+                                direction = (byte)data.Direction1;
+                            }
+                            else
+                            {
+                                direction = (byte)data.Direction3;
+                            }
                         }
                         else
                         {
-                            Direction = (byte) data.Direction3;
+                            direction = (byte)data.Direction2;
                         }
-                    }
-                    else
-                    {
-                        Direction = (byte) data.Direction2;
-                    }
 
-                    break;
-                }
+                        break;
+                    }
 
                 case 3:
                 case 4:
-                {
-                    if (data.Direction3 == -1)
                     {
-                        if (Direction == 3)
+                        if (data.Direction3 == -1)
                         {
-                            Direction = (byte) data.Direction2;
+                            if (direction == 3)
+                            {
+                                direction = (byte)data.Direction2;
+                            }
+                            else
+                            {
+                                direction = (byte)data.Direction4;
+                            }
                         }
                         else
                         {
-                            Direction = (byte) data.Direction4;
+                            direction = (byte)data.Direction3;
                         }
-                    }
-                    else
-                    {
-                        Direction = (byte) data.Direction3;
-                    }
 
-                    break;
-                }
+                        break;
+                    }
 
                 case 5:
                 case 6:
-                {
-                    if (data.Direction4 == -1)
                     {
-                        if (Direction == 5)
+                        if (data.Direction4 == -1)
                         {
-                            Direction = (byte) data.Direction3;
+                            if (direction == 5)
+                            {
+                                direction = (byte)data.Direction3;
+                            }
+                            else
+                            {
+                                direction = (byte)data.Direction1;
+                            }
                         }
                         else
                         {
-                            Direction = (byte) data.Direction1;
+                            direction = (byte)data.Direction4;
                         }
-                    }
-                    else
-                    {
-                        Direction = (byte) data.Direction4;
-                    }
 
-                    break;
-                }
+                        break;
+                    }
             }
 
-            layerDirection = Direction;
-            byte dir = Direction;
-            GetSittingAnimDirection(ref dir, ref mirror, ref x, ref y);
-            Direction = dir;
+            GetSittingAnimDirection(ref direction, ref mirror, ref x, ref y);
 
             const int SITTING_OFFSET_X = 8;
 
@@ -1400,7 +1400,7 @@ namespace ClassicUO.IO.Resources
 
             if (mirror)
             {
-                if (Direction == 3)
+                if (direction == 3)
                 {
                     y += 25 + data.MirrorOffsetY;
                     x += offsX - 4;
@@ -1412,7 +1412,7 @@ namespace ClassicUO.IO.Resources
             }
             else
             {
-                if (Direction == 3)
+                if (direction == 3)
                 {
                     y += 23 + data.MirrorOffsetY;
                     x -= 3;
@@ -1426,7 +1426,7 @@ namespace ClassicUO.IO.Resources
         }
 
 
-        [MethodImpl(256)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ANIMATION_GROUPS GetGroupIndex(ushort graphic)
         {
             if (graphic >= Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT)
@@ -1448,7 +1448,7 @@ namespace ClassicUO.IO.Resources
             return ANIMATION_GROUPS.AG_HIGHT;
         }
 
-        [MethodImpl(256)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public byte GetDieGroupIndex(ushort id, bool second, bool isRunning = false)
         {
             if (id >= Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT)
@@ -1503,8 +1503,8 @@ namespace ClassicUO.IO.Resources
             return 0;
         }
 
-        [MethodImpl(256)]
-        public bool AnimationExists(ushort graphic, byte group, bool isCorpse = false)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool IsAnimationExists(ushort graphic, byte group, bool isCorpse = false)
         {
             if (graphic < Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT && group < 100)
             {
@@ -1522,28 +1522,28 @@ namespace ClassicUO.IO.Resources
         }
 
 
-        public bool LoadDirectionGroup(ref AnimationDirection animDir)
+        public bool LoadAnimationFrames(ushort animID, byte animGroup, byte direction, ref AnimationDirection animDir)
         {
             if (animDir.FileIndex == -1 && animDir.Address == -1)
             {
                 return false;
             }
 
-            if (animDir.FileIndex >= _files.Length || AnimID >= Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT)
+            if (animDir.FileIndex >= _files.Length || animID >= Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT)
             {
                 return false;
             }
 
             if (animDir.IsUOP || animDir.Address == 0 && animDir.Size == 0)
             {
-                AnimationGroupUop animData = DataIndex[AnimID].GetUopGroup(AnimGroup);
+                AnimationGroupUop animData = DataIndex[animID].GetUopGroup(animGroup);
 
                 if (animData == null || animData.Offset == 0)
                 {
                     return false;
                 }
 
-                return ReadUOPAnimationFrame(ref animDir);
+                return ReadUOPAnimationFrame(animID, animGroup, direction, ref animDir);
             }
 
             if (animDir.Address == 0 && animDir.Size == 0)
@@ -1558,9 +1558,9 @@ namespace ClassicUO.IO.Resources
             return true;
         }
 
-        private unsafe bool ReadUOPAnimationFrame(ref AnimationDirection animDirection)
+        private unsafe bool ReadUOPAnimationFrame(ushort animID, byte animGroup, byte direction, ref AnimationDirection animDirection)
         {
-            AnimationGroupUop animData = DataIndex[AnimID].GetUopGroup(AnimGroup);
+            AnimationGroupUop animData = DataIndex[animID].GetUopGroup(animGroup);
 
             if (animData.FileIndex < 0 || animData.FileIndex >= _filesUop.Length)
             {
@@ -1580,66 +1580,63 @@ namespace ClassicUO.IO.Resources
             UOFileUop file = _filesUop[animData.FileIndex];
             file.Seek(animData.Offset);
 
-            // byte* decBuffer = stackalloc byte[decLen];
+            ZLib.Decompress(file.PositionAddress, (int)animData.CompressedLength, 0, _bufferCachePtr, decLen);
+            _reader.SetData(_bufferCachePtr, decLen);
+            _reader.Skip(32);
 
-            fixed (byte* ptr = &_buffer[0])
+            int frameCount = _reader.ReadInt();
+            int dataStart = _reader.ReadInt();
+            _reader.Seek(dataStart);
+
+            for (int i = 0; i < frameCount; i++)
             {
-                ZLib.Decompress(file.PositionAddress, (int) animData.CompressedLength, 0, (IntPtr) ptr, decLen);
-                _reader.SetData(ptr, decLen);
-                _reader.Skip(32);
+                uint start = (uint)_reader.Position;
+                ushort group = _reader.ReadUShort();
+                short frameID = _reader.ReadShort();
+                _reader.Skip(8);
+                uint pixelOffset = _reader.ReadUInt();
+                //int vsize = pixelDataOffsets.Count;
 
-                int frameCount = _reader.ReadInt();
-                int dataStart = _reader.ReadInt();
-                _reader.Seek(dataStart);
+                ref UOPFrameData data = ref _uop_frame_pixels_offsets[i];
+                data.DataStart = start;
+                data.PixelDataOffset = pixelOffset;
 
-                for (int i = 0; i < frameCount; i++)
-                {
-                    uint start = (uint) _reader.Position;
-                    ushort group = _reader.ReadUShort();
-                    short frameID = _reader.ReadShort();
-                    _reader.Skip(8);
-                    uint pixelOffset = _reader.ReadUInt();
-                    //int vsize = pixelDataOffsets.Count;
-
-                    ref UOPFrameData data = ref _uop_frame_pixels_offsets[i];
-                    data.DataStart = start;
-                    data.PixelDataOffset = pixelOffset;
-
-                    //if (vsize + 1 < data.FrameID)
-                    //{
-                    //    while (vsize + 1 != data.FrameID)
-                    //    {
-                    //        pixelDataOffsets.Add(new UOPFrameData());
-                    //        vsize++;
-                    //    }
-                    //}
-
-                    //pixelDataOffsets.Add(data);
-                }
-
-                //int vectorSize = pixelDataOffsets.Count;
-                //if (vectorSize < 50)
+                //if (vsize + 1 < data.FrameID)
                 //{
-                //    while (vectorSize != 50)
+                //    while (vsize + 1 != data.FrameID)
                 //    {
                 //        pixelDataOffsets.Add(new UOPFrameData());
-                //        vectorSize++;
+                //        vsize++;
                 //    }
                 //}
 
-                animDirection.FrameCount = (byte) (frameCount / 5);
-                int dirFrameStartIdx = animDirection.FrameCount * Direction;
+                //pixelDataOffsets.Add(data);
+            }
 
+            //int vectorSize = pixelDataOffsets.Count;
+            //if (vectorSize < 50)
+            //{
+            //    while (vectorSize != 50)
+            //    {
+            //        pixelDataOffsets.Add(new UOPFrameData());
+            //        vectorSize++;
+            //    }
+            //}
 
-                if (animDirection.Frames != null && animDirection.Frames.Length != 0)
-                {
-                    Log.Panic("MEMORY LEAK UOP ANIM");
-                }
+            animDirection.FrameCount = (byte)(frameCount / 5);
+            int dirFrameStartIdx = animDirection.FrameCount * direction;
 
-                animDirection.Frames = new AnimationFrameTexture[animDirection.FrameCount];
-                long end = (long) _reader.StartAddress + _reader.Length;
+            if (animDirection.Frames != null && animDirection.Frames.Length != 0)
+            {
+                Log.Panic("MEMORY LEAK UOP ANIM");
+            }
 
-                for (int i = 0; i < animDirection.FrameCount; i++)
+            animDirection.Frames = new AnimationFrameTexture[animDirection.FrameCount];
+            long end = (long)_reader.StartAddress + _reader.Length;
+
+            unchecked
+            {
+                for (int i = 0, count = animDirection.FrameCount; i < count; ++i)
                 {
                     if (animDirection.Frames[i] != null)
                     {
@@ -1653,8 +1650,8 @@ namespace ClassicUO.IO.Resources
                         continue;
                     }
 
-                    _reader.Seek((int) (frameData.DataStart + frameData.PixelDataOffset));
-                    ushort* palette = (ushort*) _reader.PositionAddress;
+                    _reader.Seek((int)(frameData.DataStart + frameData.PixelDataOffset));
+                    ushort* palette = (ushort*)_reader.PositionAddress;
                     _reader.Skip(512);
                     short imageCenterX = _reader.ReadShort();
                     short imageCenterY = _reader.ReadShort();
@@ -1678,19 +1675,19 @@ namespace ClassicUO.IO.Resources
 
                     while (header != 0x7FFF7FFF && pos < end)
                     {
-                        ushort runLength = (ushort) (header & 0x0FFF);
-                        int x = (int) ((header >> 22) & 0x03FF);
+                        ushort runLength = (ushort)(header & 0x0FFF);
+                        int x = (int)((header >> 22) & 0x03FF);
 
                         if ((x & 0x0200) > 0)
                         {
-                            x |= unchecked((int) 0xFFFFFE00);
+                            x |= (int)0xFFFFFE00;
                         }
 
-                        int y = (int) ((header >> 12) & 0x3FF);
+                        int y = (int)((header >> 12) & 0x3FF);
 
                         if ((y & 0x0200) > 0)
                         {
-                            y |= unchecked((int) 0xFFFFFE00);
+                            y |= (int) 0xFFFFFE00;
                         }
 
                         x += imageCenterX;
@@ -1698,7 +1695,7 @@ namespace ClassicUO.IO.Resources
 
                         int block = y * imageWidth + x;
 
-                        for (int k = 0; k < runLength; k++)
+                        for (int k = 0; k < runLength; ++k)
                         {
                             ushort val = palette[_reader.ReadByte()];
 
@@ -1725,11 +1722,11 @@ namespace ClassicUO.IO.Resources
                     animDirection.Frames[i] = f;
                 }
 
-                _usedTextures.AddLast(animDirection);
-
-                _reader.ReleaseData();
             }
 
+            _usedTextures.AddLast(animDirection);
+
+            _reader.ReleaseData();
 
             return true;
         }

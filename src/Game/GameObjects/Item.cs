@@ -1036,17 +1036,12 @@ namespace ClassicUO.Game.GameObjects
 
                         ushort hue = 0;
 
-                        AnimationDirection direction = AnimationsLoader.Instance.GetCorpseAnimationGroup
-                                                                           (ref id, ref animGroup, ref hue)
+                        AnimationDirection direction = AnimationsLoader.Instance.GetCorpseAnimationGroup(ref id, ref animGroup, ref hue)
                                                                        .Direction[dir];
-
-                        AnimationsLoader.Instance.AnimID = id;
-                        AnimationsLoader.Instance.AnimGroup = animGroup;
-                        AnimationsLoader.Instance.Direction = dir;
 
                         if (direction.FrameCount == 0 || direction.Frames == null)
                         {
-                            AnimationsLoader.Instance.LoadDirectionGroup(ref direction);
+                            AnimationsLoader.Instance.LoadAnimationFrames(id, animGroup, dir, ref direction);
                         }
 
                         if (direction.Address != 0 && direction.Size != 0 || direction.IsUOP)

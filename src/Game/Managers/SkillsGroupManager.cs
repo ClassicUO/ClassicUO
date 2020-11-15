@@ -116,9 +116,9 @@ namespace ClassicUO.Game.Managers
             return false;
         }
 
-        public void Sort()
+        public unsafe void Sort()
         {
-            byte[] table = new byte[60];
+            byte* table = stackalloc byte[60];
             int index = 0;
 
             int count = SkillsLoader.Instance.SkillsCount;
