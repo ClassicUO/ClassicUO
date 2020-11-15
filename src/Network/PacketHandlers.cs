@@ -6271,7 +6271,8 @@ namespace ClassicUO.Network
                     case "noresize": break;
 
                     case "mastergump":
-                        Log.Warn("Gump part 'mastergump' not handled.");
+
+                        gump.MasterGumpSerial = gparams.Count > 0 ? SerialHelper.Parse(gparams[0]) : 0;
 
                         break;
 

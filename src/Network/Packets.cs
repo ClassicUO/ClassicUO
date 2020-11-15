@@ -586,8 +586,7 @@ namespace ClassicUO.Network
 
     internal sealed class PGumpResponse : PacketWriter
     {
-        public PGumpResponse
-            (uint local, uint server, int buttonID, uint[] switches, Tuple<ushort, string>[] entries) : base(0xB1)
+        public PGumpResponse(uint local, uint server, int buttonID, uint[] switches, Tuple<ushort, string>[] entries) : base(0xB1)
         {
             WriteUInt(local);
             WriteUInt(server);
