@@ -233,7 +233,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add
             (
-                _coords = new Label("", true, 0x03b2, font: 1, style: FontStyle.BlackBorder)
+                _coords = new Label("", true, 0xFFFF, font: 1, style: FontStyle.BlackBorder)
                 {
                     X = 10,
                     Y = 5
@@ -986,8 +986,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                                         for (x = 0; x < 8; ++x, ++pos)
                                         {
-                                            ushort color = (ushort) (0x8000 | HuesLoader.Instance.GetRadarColorData
-                                                (cells[pos].TileID & 0x3FFF));
+                                            ushort color = (ushort) (0x8000 | HuesLoader.Instance.GetRadarColorData(cells[pos].TileID & 0x3FFF));
 
                                             ref Color cc = ref buffer[block];
                                             cc.PackedValue = HuesHelper.Color16To32(color) | 0xFF_00_00_00;
@@ -1005,8 +1004,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                                         for (int c = 0; c < count; ++c, ++sb)
                                         {
-                                            if (sb->Color != 0 && sb->Color != 0xFFFF && !GameObjectHelper.IsNoDrawable
-                                                (sb->Color))
+                                            if (sb->Color != 0 && sb->Color != 0xFFFF && !GameObjectHelper.IsNoDrawable(sb->Color))
                                             {
                                                 int block =
                                                     (mapY + sb->Y + OFFSET_PIX_HALF) * (realWidth + OFFSET_PIX) + mapX +
