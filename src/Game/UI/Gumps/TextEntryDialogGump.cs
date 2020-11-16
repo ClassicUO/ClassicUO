@@ -21,6 +21,7 @@
 
 #endregion
 
+using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Network;
 
@@ -101,6 +102,9 @@ namespace ClassicUO.Game.UI.Gumps
 
             ButtonID = buttonid;
             ParentID = parentid;
+
+            UIManager.KeyboardFocusControl = _textBox;
+            _textBox.SetKeyboardFocus();
         }
 
         public byte ParentID { get; }
