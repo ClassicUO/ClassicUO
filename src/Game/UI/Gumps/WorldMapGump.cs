@@ -63,8 +63,7 @@ namespace ClassicUO.Game.UI.Gumps
         private int _lastZ;
         private int _lastZoom;
         private readonly string _mapFilesPath = Path.Combine(CUOEnviroment.ExecutablePath, "Data", "Client");
-        private readonly string _mapIconsPath = Path.Combine
-            (CUOEnviroment.ExecutablePath, "Data", "Client", "MapIcons");
+        private readonly string _mapIconsPath = Path.Combine(CUOEnviroment.ExecutablePath, "Data", "Client", "MapIcons");
         private int _mapIndex;
         private bool _mapMarkersLoaded;
         private UOTexture _mapTexture;
@@ -76,8 +75,7 @@ namespace ClassicUO.Game.UI.Gumps
         private int _markerFontIndex = 1;
         private readonly Dictionary<string, Texture2D> _markerIcons = new Dictionary<string, Texture2D>();
 
-        private readonly Dictionary<string, ContextMenuItemEntry> _options =
-            new Dictionary<string, ContextMenuItemEntry>();
+        private readonly Dictionary<string, ContextMenuItemEntry> _options = new Dictionary<string, ContextMenuItemEntry>();
         private bool _showCoordinates;
         private bool _showGroupBar = true;
         private bool _showGroupName = true;
@@ -183,8 +181,7 @@ namespace ClassicUO.Game.UI.Gumps
             _showMarkerNames = ProfileManager.CurrentProfile.WorldMapShowMarkersNames;
 
 
-            _hiddenMarkerFiles = string.IsNullOrEmpty
-                (ProfileManager.CurrentProfile.WorldMapHiddenMarkerFiles) ?
+            _hiddenMarkerFiles = string.IsNullOrEmpty(ProfileManager.CurrentProfile.WorldMapHiddenMarkerFiles) ?
                 new List<string>() :
                 ProfileManager.CurrentProfile.WorldMapHiddenMarkerFiles.Split(',').ToList();
         }
@@ -313,7 +310,7 @@ namespace ClassicUO.Game.UI.Gumps
             markerFontEntry.Add(new ContextMenuItemEntry(string.Format(ResGumps.Style0, 6), () => { SetFont(6); }));
 
             ContextMenuItemEntry markersEntry = new ContextMenuItemEntry(ResGumps.MapMarkerOptions);
-            markersEntry.Add(new ContextMenuItemEntry(ResGumps.ReloadMarkers, () => { LoadMarkers(); }));
+            markersEntry.Add(new ContextMenuItemEntry(ResGumps.ReloadMarkers, LoadMarkers));
 
             markersEntry.Add(markerFontEntry);
 
@@ -984,18 +981,18 @@ namespace ClassicUO.Game.UI.Gumps
 
                                         int pos = y << 3;
 
-                                        for (x = 0; x < 8; ++x, ++pos)
+                                        for (x = 0; x < 8; ++x, ++pos, ++block)
                                         {
                                             ushort color = (ushort) (0x8000 | HuesLoader.Instance.GetRadarColorData(cells[pos].TileID & 0x3FFF));
 
                                             ref Color cc = ref buffer[block];
                                             cc.PackedValue = HuesHelper.Color16To32(color) | 0xFF_00_00_00;
 
-                                            allZ[block++] = cells[pos].Z;
+                                            allZ[block] = cells[pos].Z;
                                         }
                                     }
 
-
+                                    
                                     StaticsBlock* sb = (StaticsBlock*) indexMap.StaticAddress;
 
                                     if (sb != null)
@@ -1012,10 +1009,9 @@ namespace ClassicUO.Game.UI.Gumps
 
                                                 if (sb->Z >= allZ[block])
                                                 {
-                                                    ushort color = (ushort) (0x8000 | (sb->Hue != 0 ?
+                                                    ushort color = (ushort)(0x8000 | (sb->Hue != 0 ?
                                                         HuesLoader.Instance.GetColor16(16384, sb->Hue) :
-                                                        HuesLoader.Instance.GetRadarColorData(sb->Color | 0x4000)));
-
+                                                        HuesLoader.Instance.GetRadarColorData(sb->Color + 0x4000)));
 
                                                     ref Color cc = ref buffer[block];
                                                     cc.PackedValue = HuesHelper.Color16To32(color) | 0xFF_00_00_00;
