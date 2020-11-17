@@ -692,11 +692,11 @@ namespace ClassicUO.Network
 
     internal sealed class PTextEntryDialogResponse : PacketWriter
     {
-        public PTextEntryDialogResponse(uint serial, byte button, string text, bool code) : base(0xAC)
+        public PTextEntryDialogResponse(uint serial, byte parentID, byte button, string text, bool code) : base(0xAC)
         {
             WriteUInt(serial);
+            WriteByte(parentID);
             WriteByte(button);
-            WriteByte(0);
             WriteBool(code);
 
             WriteUShort((ushort) (text.Length + 1));
