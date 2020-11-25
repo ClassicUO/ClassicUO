@@ -24,6 +24,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Xml;
 using ClassicUO.Game;
@@ -301,9 +302,47 @@ namespace ClassicUO.Configuration
             ConfigurationResolver.Save(this, Path.Combine(path, "profile.json"));
 
             // Save opened gumps
-            SaveGumps(path, gumps);
+            SaveGumps(path, SortGumps(new List<Gump>(gumps)));
 
             Log.Trace("Saving done!");
+        }
+
+        private List<Gump> SortGumps(List<Gump> gumps)
+        {
+            List<Gump> sortedGumps = new List<Gump>();
+            var et = gumps.GetEnumerator();
+            while (et.MoveNext())
+            {
+                var gump = et.Current;
+                if (!(gump is ContainerGump) || (gump is ContainerGump cont && !gumps.Any(x => x.LocalSerial == cont.ParentSerial)))
+                {
+                    sortedGumps.Add(gump);
+                    gumps.Remove(gump);
+                    et = gumps.GetEnumerator();
+                }
+                else
+                {
+                    SortGump(gump, sortedGumps, gumps);
+                    et = gumps.GetEnumerator();
+                }
+            }
+
+            return sortedGumps;
+        }
+
+        private void SortGump(Gump gump, List<Gump> sortedGumps, List<Gump> gumps)
+        {
+            if (gump is ContainerGump cont)
+            {
+                var parent = gumps.FirstOrDefault(x => x.LocalSerial == cont.ParentSerial);
+                if (parent != null)
+                {
+                    SortGump(parent, sortedGumps, gumps);
+                }
+            }
+
+            sortedGumps.Add(gump);
+            gumps.Remove(gump);
         }
 
         private void SaveGumps(string path, List<Gump> gumps)

@@ -63,6 +63,8 @@ namespace ClassicUO.Game.UI.Gumps
                 return;
             }
 
+            ParentSerial = item.Container;
+
             Graphic = gumpid;
 
             BuildGump();
@@ -88,6 +90,8 @@ namespace ClassicUO.Game.UI.Gumps
         }
 
         public ushort Graphic { get; }
+
+        public uint ParentSerial { get; set; }
 
         public override GumpType GumpType => GumpType.Container;
 
