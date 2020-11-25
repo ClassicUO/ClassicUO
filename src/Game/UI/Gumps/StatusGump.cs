@@ -157,7 +157,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (!CUOEnviroment.IsOutlands)
             {
-                if (ProfileManager.CurrentProfile.UseOldStatusGump)
+                if (Client.Version < ClientVersion.CV_308Z || ProfileManager.CurrentProfile.UseOldStatusGump)
                 {
                     gump = new StatusGumpOld();
                 }
@@ -806,8 +806,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 _refreshTime = (long) totalTime + 250;
 
-                _labels[(int) MobileStats.Name].Text =
-                    !string.IsNullOrEmpty(World.Player.Name) ? World.Player.Name : string.Empty;
+                _labels[(int) MobileStats.Name].Text = !string.IsNullOrEmpty(World.Player.Name) ? World.Player.Name : string.Empty;
 
                 if (Client.UseUOPGumps)
                 {
@@ -822,8 +821,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (Client.UseUOPGumps)
                 {
-                    _labels[(int) MobileStats.DefenseChanceInc].Text =
-                        $"{World.Player.DefenseChanceIncrease}/{World.Player.MaxDefenseChanceIncrease}";
+                    _labels[(int) MobileStats.DefenseChanceInc].Text = $"{World.Player.DefenseChanceIncrease}/{World.Player.MaxDefenseChanceIncrease}";
                 }
 
                 _labels[(int) MobileStats.HealthCurrent].Text = World.Player.Hits.ToString();
@@ -874,20 +872,15 @@ namespace ClassicUO.Game.UI.Gumps
 
                     _labels[(int) MobileStats.FasterCastRecovery].Text = World.Player.FasterCastRecovery.ToString();
 
-                    _labels[(int) MobileStats.AR].Text =
-                        $"{World.Player.PhysicalResistance}/{World.Player.MaxPhysicResistence}";
+                    _labels[(int) MobileStats.AR].Text = $"{World.Player.PhysicalResistance}/{World.Player.MaxPhysicResistence}";
 
-                    _labels[(int) MobileStats.RF].Text =
-                        $"{World.Player.FireResistance}/{World.Player.MaxFireResistence}";
+                    _labels[(int) MobileStats.RF].Text = $"{World.Player.FireResistance}/{World.Player.MaxFireResistence}";
 
-                    _labels[(int) MobileStats.RC].Text =
-                        $"{World.Player.ColdResistance}/{World.Player.MaxColdResistence}";
+                    _labels[(int) MobileStats.RC].Text = $"{World.Player.ColdResistance}/{World.Player.MaxColdResistence}";
 
-                    _labels[(int) MobileStats.RP].Text =
-                        $"{World.Player.PoisonResistance}/{World.Player.MaxPoisonResistence}";
+                    _labels[(int) MobileStats.RP].Text = $"{World.Player.PoisonResistance}/{World.Player.MaxPoisonResistence}";
 
-                    _labels[(int) MobileStats.RE].Text =
-                        $"{World.Player.EnergyResistance}/{World.Player.MaxEnergyResistence}";
+                    _labels[(int) MobileStats.RE].Text = $"{World.Player.EnergyResistance}/{World.Player.MaxEnergyResistence}";
                 }
                 else
                 {
