@@ -88,6 +88,11 @@ namespace ClassicUO.IO.Resources
                 return null;
             }
 
+            if (g == 0x3FEC)
+            {
+
+            }
+
             ref ArtTexture texture = ref Resources[g];
 
             if (texture == null || texture.IsDisposed)
@@ -195,6 +200,7 @@ namespace ClassicUO.IO.Resources
                 return null;
             }
 
+            _file.SetData(entry.Address, entry.FileSize);
             _file.Seek(entry.Offset);
             _file.Skip(4);
             width = _file.ReadShort();
@@ -358,6 +364,7 @@ namespace ClassicUO.IO.Resources
                 return;
             }
 
+            _file.SetData(entry.Address, entry.FileSize);
             _file.Seek(entry.Offset);
 
             uint* data = stackalloc uint[SIZE];

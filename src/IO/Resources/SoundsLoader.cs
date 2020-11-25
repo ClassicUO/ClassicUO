@@ -238,6 +238,7 @@ namespace ClassicUO.IO.Resources
 
             ref UOFileIndex entry = ref GetValidRefEntry(sound);
 
+            _file.SetData(entry.Address, entry.FileSize);
             _file.Seek(entry.Offset);
 
             long offset = _file.Position;

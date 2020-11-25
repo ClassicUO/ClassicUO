@@ -180,7 +180,6 @@ namespace ClassicUO.IO.Resources
             }
 
             _file.SetData(entry.Address, entry.FileSize);
-
             _file.Seek(entry.Offset);
 
             IntPtr dataStart = _file.PositionAddress;

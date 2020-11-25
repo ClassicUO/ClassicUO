@@ -104,6 +104,7 @@ namespace ClassicUO.IO.Resources
 
             uint[] pixels = new uint[width * height];
 
+            _file.SetData(entry.Address, entry.FileSize);
             _file.Seek(entry.Offset);
 
             for (int i = 0; i < height; i++)

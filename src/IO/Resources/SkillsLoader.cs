@@ -70,6 +70,7 @@ namespace ClassicUO.IO.Resources
 
                         if (entry.Length > 0)
                         {
+                            _file.SetData(entry.Address, entry.FileSize);
                             _file.Seek(entry.Offset);
                             bool hasAction = _file.ReadBool();
 
