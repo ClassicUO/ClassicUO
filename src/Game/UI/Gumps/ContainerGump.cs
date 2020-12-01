@@ -91,7 +91,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         public ushort Graphic { get; }
 
-        public uint ParentSerial { get; set; }
+        public uint ParentSerial { get; }
 
         public override GumpType GumpType => GumpType.Container;
 
