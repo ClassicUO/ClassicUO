@@ -6272,7 +6272,7 @@ namespace ClassicUO.Network
 
                     case "mastergump":
 
-                        gump.MasterGumpSerial = gparams.Count > 0 ? SerialHelper.Parse(gparams[0]) : 0;
+                        gump.MasterGumpSerial = gparams.Count > 0 ? SerialHelper.Parse(gparams[1]) : 0;
 
                         break;
 
