@@ -735,7 +735,7 @@ namespace ClassicUO.Game.UI.Controls
 
         protected override void OnTextInput(string c)
         {
-            if (c == null || !IsEditable)
+            if (c == null || !IsEditable || Keyboard.Alt || Keyboard.Ctrl)
             {
                 return;
             }
