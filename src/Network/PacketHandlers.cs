@@ -406,6 +406,11 @@ namespace ClassicUO.Network
 
                     if (mobile == World.Player)
                     {
+                        if (!string.IsNullOrEmpty(World.Player.Name))
+                        {
+                            Client.Game.SetWindowTitle(World.Player.Name);
+                        }
+
                         ushort str = p.ReadUShort();
                         ushort dex = p.ReadUShort();
                         ushort intell = p.ReadUShort();
@@ -3062,6 +3067,11 @@ namespace ClassicUO.Network
             if (entity != null)
             {
                 entity.Name = name;
+
+                if (serial == World.Player.Serial)
+                {
+                    Client.Game.SetWindowTitle(name);
+                }
 
                 UIManager.GetGump<NameOverheadGump>(serial)?.SetName();
             }

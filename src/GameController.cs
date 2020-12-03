@@ -172,6 +172,27 @@ namespace ClassicUO
             base.UnloadContent();
         }
 
+
+        public void SetWindowTitle(string title)
+        {
+            if (string.IsNullOrEmpty(title))
+            {
+#if DEV_BUILD
+                Window.Title = $"ClassicUO [dev] - {CUOEnviroment.Version}";
+#else
+                Window.Title = $"ClassicUO - {CUOEnviroment.Version}";
+#endif
+            }
+            else
+            {
+#if DEV_BUILD
+                Window.Title = $"{title} - ClassicUO [dev] - {CUOEnviroment.Version}";
+#else
+                Window.Title = $"{title} - ClassicUO - {CUOEnviroment.Version}";
+#endif
+            }
+        }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public T GetScene<T>() where T : Scene
         {
