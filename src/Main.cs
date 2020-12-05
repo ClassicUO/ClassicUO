@@ -120,7 +120,6 @@ namespace ClassicUO
 
             if (CUOEnviroment.IsHighDPI)
             {
-                Log.Trace("HIGH DPI - ENABLED");
                 Environment.SetEnvironmentVariable("FNA_GRAPHICS_ENABLE_HIGHDPI", "1");
             }
 
