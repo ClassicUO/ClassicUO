@@ -102,6 +102,7 @@ namespace ClassicUO.Network
 
         public void Reset()
         {
+            _pingStopwatch.Reset();
             ConnectedFrom = DateTime.MinValue;
             _lastTotalBytesReceived = _lastTotalBytesSent = _lastTotalPacketsReceived = _lastTotalPacketsSent = 0;
             TotalBytesReceived = TotalBytesSent = TotalPacketsReceived = TotalPacketsSent = 0;

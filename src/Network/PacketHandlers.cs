@@ -2453,6 +2453,10 @@ namespace ClassicUO.Network
             {
                 NetClient.Socket.Statistics.PingReceived();
             }
+            else if (NetClient.LoginSocket.IsConnected && !NetClient.LoginSocket.IsDisposed)
+            {
+                NetClient.LoginSocket.Statistics.PingReceived();
+            }
         }
 
 
