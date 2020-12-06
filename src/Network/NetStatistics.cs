@@ -28,11 +28,23 @@ namespace ClassicUO.Network
 {
     internal class NetStatistics
     {
+        private NetClient _socket;
         private uint _lastTotalBytesReceived, _lastTotalBytesSent, _lastTotalPacketsReceived, _lastTotalPacketsSent;
         private byte _pingIdx;
 
         private readonly uint[] _pings = new uint[5];
         private readonly Stopwatch _pingStopwatch = new Stopwatch();
+
+
+
+        public NetStatistics(NetClient socket)
+        {
+            _socket = socket;
+        }
+
+
+
+
 
         public DateTime ConnectedFrom { get; set; }
 
@@ -91,13 +103,13 @@ namespace ClassicUO.Network
 
         public void SendPing()
         {
-            if (!NetClient.Socket.IsConnected || NetClient.Socket.IsDisposed)
+            if (!_socket.IsConnected || _socket.IsDisposed)
             {
                 return;
             }
 
             _pingStopwatch.Restart();
-            NetClient.Socket.Send(new PPing());
+            _socket.Send(new PPing());
         }
 
         public void Reset()

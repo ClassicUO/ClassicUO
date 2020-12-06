@@ -21,7 +21,10 @@
 
 #endregion
 
+using System;
 using System.Linq;
+using System.Net;
+using System.Net.NetworkInformation;
 using ClassicUO.Configuration;
 using ClassicUO.Data;
 using ClassicUO.Game.Scenes;
@@ -298,8 +301,8 @@ namespace ClassicUO.Game.UI.Gumps.Login
             private readonly ServerListEntry _entry;
             private readonly HoveredLabel _server_packet_loss;
             private readonly HoveredLabel _server_ping;
-
             private readonly HoveredLabel _serverName;
+            private uint _pingCheckTime = 0;
 
             public ServerEntryGump(ServerListEntry entry, byte font, ushort normal_hue, ushort selected_hue)
             {
@@ -367,6 +370,31 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 if (button == MouseButtonType.Left)
                 {
                     OnButtonClick((int) Buttons.Server + _buttonId);
+                }
+            }
+
+            public override void Update(double totalTime, double frameTime)
+            {
+                base.Update(totalTime, frameTime);
+
+                if (_pingCheckTime < Time.Ticks)
+                {
+                    _pingCheckTime = Time.Ticks + 2000;
+                    _entry.DoPing();
+
+                    switch (_entry.PingStatus)
+                    {
+                        case IPStatus.Success: _server_ping.Text = _entry.Ping == -1 ? "-" : _entry.Ping.ToString(); break;
+                        case IPStatus.DestinationNetworkUnreachable:
+                        case IPStatus.DestinationHostUnreachable:
+                        case IPStatus.DestinationProtocolUnreachable:
+                        case IPStatus.DestinationPortUnreachable:
+                        case IPStatus.DestinationUnreachable: _server_ping.Text = "unreach."; break;
+                        case IPStatus.TimedOut: _server_ping.Text = "time out"; break;
+                        default: _server_ping.Text = $"unk. [{(int) _entry.PingStatus}]"; break;
+                    }
+
+                    _server_packet_loss.Text = $"{_entry.PacketLoss}%";
                 }
             }
         }

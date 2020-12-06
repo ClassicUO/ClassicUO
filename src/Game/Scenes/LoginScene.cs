@@ -24,6 +24,7 @@
 using System;
 using System.IO;
 using System.Net;
+using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Text;
 using ClassicUO.Configuration;
@@ -194,11 +195,11 @@ namespace ClassicUO.Game.Scenes
             {
                 if (NetClient.Socket != null && NetClient.Socket.IsConnected)
                 {
-                    NetClient.Socket.Send(new PPing());
+                    NetClient.Socket.Statistics.SendPing();
                 }
                 else if (NetClient.LoginSocket != null && NetClient.LoginSocket.IsConnected)
                 {
-                    NetClient.LoginSocket.Send(new PPing());
+                    NetClient.LoginSocket.Statistics.SendPing();
                 }
 
                 _pingTime = Time.Ticks + 60000;
@@ -436,7 +437,7 @@ namespace ClassicUO.Game.Scenes
                 case LoginSteps.Connecting:
                 case LoginSteps.VerifyingAccount:
                 case LoginSteps.ServerSelection:
-                    Servers = null;
+                    DisposeAllServerEntries();
                     CurrentLoginStep = LoginSteps.Main;
                     NetClient.LoginSocket.Disconnect();
 
@@ -445,7 +446,7 @@ namespace ClassicUO.Game.Scenes
                 case LoginSteps.LoginInToServer:
                     NetClient.Socket.Disconnect();
                     Characters = null;
-                    Servers = null;
+                    DisposeAllServerEntries();
                     Connect(Account, Password);
 
                     break;
@@ -460,7 +461,7 @@ namespace ClassicUO.Game.Scenes
                     NetClient.LoginSocket.Disconnect();
                     NetClient.Socket.Disconnect();
                     Characters = null;
-                    Servers = null;
+                    DisposeAllServerEntries();
                     CurrentLoginStep = LoginSteps.Main;
 
                     break;
@@ -522,7 +523,7 @@ namespace ClassicUO.Game.Scenes
             }
 
             Characters = null;
-            Servers = null;
+            DisposeAllServerEntries();
             PopupMessage = string.Format(ResGeneral.ConnectionLost0, StringHelper.AddSpaceBeforeCapital(e.ToString()));
             CurrentLoginStep = LoginSteps.PopUpMessage;
         }
@@ -534,7 +535,7 @@ namespace ClassicUO.Game.Scenes
             if (e > 0)
             {
                 Characters = null;
-                Servers = null;
+                DisposeAllServerEntries();
 
                 if (Settings.GlobalSettings.Reconnect)
                 {
@@ -562,6 +563,7 @@ namespace ClassicUO.Game.Scenes
         {
             byte flags = p.ReadByte();
             ushort count = p.ReadUShort();
+            DisposeAllServerEntries();
             Servers = new ServerListEntry[count];
 
             for (ushort i = 0; i < count; i++)
@@ -852,10 +854,33 @@ namespace ClassicUO.Game.Scenes
 
             return descr;
         }
+
+        private void DisposeAllServerEntries()
+        {
+            if (Servers != null)
+            {
+                for (int i = 0; i < Servers.Length; i++)
+                {
+                    if (Servers[i] != null)
+                    {
+                        Servers[i].Dispose();
+                        Servers[i] = null;
+                    }
+                }
+
+                Servers = null;
+            }
+        }
     }
 
     internal class ServerListEntry
     {
+        private IPAddress _ipAddress;
+        private readonly Ping _pinger = new Ping();
+        private bool _sending;
+        private readonly bool[] _last10Results = new bool[10];
+        private int _resultIndex;
+
         private ServerListEntry()
         {
           
@@ -872,14 +897,98 @@ namespace ClassicUO.Game.Scenes
                 Address = p.ReadUInt()
             };
 
+            // some server sends invalid ip.
+            try
+            {
+                entry._ipAddress = new IPAddress(new byte[] {
+                    (byte)((entry.Address>>24) & 0xFF) ,
+                    (byte)((entry.Address>>16) & 0xFF) ,
+                    (byte)((entry.Address>>8)  & 0xFF) ,
+                    (byte)( entry.Address & 0xFF)});
+            }
+            catch (Exception e)
+            {
+                Log.Error(e.ToString());
+            }
+
+            entry._pinger.PingCompleted += entry.PingerOnPingCompleted;
+
             return entry;
         }
+
 
         public uint Address;
         public ushort Index;
         public string Name;
         public byte PercentFull;
         public byte Timezone;
+        public int Ping = -1;
+        public int PacketLoss;
+        public IPStatus PingStatus;
+
+        private static byte[] _buffData = new byte[32];
+        private static PingOptions _pingOptions = new PingOptions(64, true);
+
+        public void DoPing()
+        {
+            if (_ipAddress != null && !_sending)
+            {
+                if (_resultIndex >= _last10Results.Length)
+                {
+                    _resultIndex = 0;
+                }
+
+                _sending = true;
+                _pinger.SendAsync(_ipAddress, 1000, _buffData, _pingOptions, _resultIndex++);
+            }
+        }
+
+        private void PingerOnPingCompleted(object sender, PingCompletedEventArgs e)
+        {
+            int index = (int)e.UserState;
+
+            if (e.Reply != null)
+            {
+                Ping = (int) e.Reply.RoundtripTime;
+                PingStatus = e.Reply.Status;
+
+                _last10Results[index] = e.Reply.Status == IPStatus.Success;
+            }
+
+            //if (index >= _last10Results.Length - 1)
+            {
+                PacketLoss = 0;
+
+                for (int i = 0; i < _resultIndex; i++)
+                {
+                    if (!_last10Results[i])
+                    {
+                        ++PacketLoss;
+                    }
+                }
+
+                PacketLoss = (PacketLoss / _resultIndex) * 100;
+
+                //_resultIndex = 0;
+            }
+
+            _sending = false;
+        }
+
+        public void Dispose()
+        {
+            if (_pinger != null)
+            {
+                _pinger.PingCompleted -= PingerOnPingCompleted;
+
+                if (_sending)
+                {
+                    _pinger.SendAsyncCancel();
+                }
+
+                _pinger.Dispose();
+            }
+        }
     }
 
     internal class CityInfo

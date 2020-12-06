@@ -57,7 +57,7 @@ namespace ClassicUO.Network
         {
             _is_login_socket = is_login_socket;
             _connectAsync = connectAsync;
-            Statistics = new NetStatistics();
+            Statistics = new NetStatistics(this);
         }
 
         public static NetClient LoginSocket { get; } = new NetClient(true, true);
