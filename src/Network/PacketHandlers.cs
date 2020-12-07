@@ -384,6 +384,7 @@ namespace ClassicUO.Network
                 return;
             }
 
+            string oldName = entity.Name;
             entity.Name = p.ReadASCII(30);
             entity.Hits = p.ReadUShort();
             entity.HitsMax = p.ReadUShort();
@@ -406,7 +407,7 @@ namespace ClassicUO.Network
 
                     if (mobile == World.Player)
                     {
-                        if (!string.IsNullOrEmpty(World.Player.Name))
+                        if (!string.IsNullOrEmpty(World.Player.Name) && oldName != World.Player.Name)
                         {
                             Client.Game.SetWindowTitle(World.Player.Name);
                         }
@@ -3072,7 +3073,7 @@ namespace ClassicUO.Network
             {
                 entity.Name = name;
 
-                if (serial == World.Player.Serial)
+                if (serial == World.Player.Serial && !string.IsNullOrEmpty(name) && name != World.Player.Name)
                 {
                     Client.Game.SetWindowTitle(name);
                 }
