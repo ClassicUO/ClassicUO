@@ -351,7 +351,7 @@ namespace ClassicUO.Game
             // TODO: identify what means 'older client' that uses ASCIISpeechRquest [0x03]
             // 
             // Fix -> #1267
-            if (Client.Version >= ClientVersion.CV_207)
+            if (Client.Version >= ClientVersion.CV_200)
             {
                 Socket.Send(new PUnicodeSpeechRequest(message, type, font, hue, "ENU"));
             }
