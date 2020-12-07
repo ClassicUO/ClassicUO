@@ -3805,11 +3805,11 @@ namespace ClassicUO.Network
                     int button = (int) p.ReadUInt();
 
 
-                    LinkedListNode<Control> first = UIManager.Gumps.First;
+                    LinkedListNode<Gump> first = UIManager.Gumps.First;
 
                     while (first != null)
                     {
-                        LinkedListNode<Control> nextGump = first.Next;
+                        LinkedListNode<Gump> nextGump = first.Next;
 
                         if (first.Value.ServerSerial == ser && first.Value.IsFromServer)
                         {
@@ -4380,7 +4380,7 @@ namespace ClassicUO.Network
 
             if (cliloc == 1008092 || cliloc == 1005445) // value for "You notify them you don't want to join the party" || "You have been added to the party"
             {
-                for (LinkedListNode<Control> g = UIManager.Gumps.Last; g != null; g = g.Previous)
+                for (LinkedListNode<Gump> g = UIManager.Gumps.Last; g != null; g = g.Previous)
                 {
                     if (g.Value is PartyInviteGump pg)
                     {
@@ -5860,7 +5860,7 @@ namespace ClassicUO.Network
                 x = pos.X;
                 y = pos.Y;
 
-                for (LinkedListNode<Control> last = UIManager.Gumps.Last; last != null; last = last.Previous)
+                for (LinkedListNode<Gump> last = UIManager.Gumps.Last; last != null; last = last.Previous)
                 {
                     Control g = last.Value;
 
