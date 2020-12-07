@@ -336,7 +336,12 @@ namespace ClassicUO.Game
         }
 
         public static void Say
-            (string message, ushort hue = 0xFFFF, MessageType type = MessageType.Regular, byte font = 3)
+        (
+            string message, 
+            ushort hue = 0xFFFF,
+            MessageType type = MessageType.Regular, 
+            byte font = 3
+        )
         {
             if (hue == 0xFFFF)
             {
@@ -344,7 +349,9 @@ namespace ClassicUO.Game
             }
 
             // TODO: identify what means 'older client' that uses ASCIISpeechRquest [0x03]
-            if (Client.Version >= ClientVersion.CV_300)
+            // 
+            // Fix -> #1267
+            if (Client.Version >= ClientVersion.CV_207)
             {
                 Socket.Send(new PUnicodeSpeechRequest(message, type, font, hue, "ENU"));
             }
