@@ -184,7 +184,7 @@ namespace ClassicUO.Game.UI.Controls
         private class ContextMenuItem : Control
         {
             private static readonly RenderedText _moreMenuLabel = RenderedText.Create
-                (">", 1150, isunicode: true, style: FontStyle.BlackBorder);
+                (">", 0xFFFF, isunicode: true, style: FontStyle.BlackBorder);
             private readonly ContextMenuItemEntry _entry;
             private readonly Label _label;
             private readonly GumpPic _selectedPic;
@@ -196,7 +196,7 @@ namespace ClassicUO.Game.UI.Controls
                 CanCloseWithRightClick = false;
                 _entry = entry;
 
-                _label = new Label(entry.Text, true, 1150, 0, style: FontStyle.BlackBorder)
+                _label = new Label(entry.Text, true, 0xFFFF, 0, style: FontStyle.BlackBorder)
                 {
                     X = 25
                 };

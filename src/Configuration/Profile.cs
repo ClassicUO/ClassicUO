@@ -189,6 +189,10 @@ namespace ClassicUO.Configuration
         public int CounterBarRows { get; set; } = 1;
         public int CounterBarColumns { get; set; } = 1;
 
+        public bool ShowSkillsChangedMessage { get; set; } = true;
+        public int ShowSkillsChangedDeltaValue { get; set; } = 1;
+        public bool ShowStatsChangedMessage { get; set; } = true;
+
 
         public int FilterType { get; set; } = 0;
         public bool ShadowsEnabled { get; set; } = true;

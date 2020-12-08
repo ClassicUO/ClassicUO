@@ -21,7 +21,7 @@ namespace ClassicUO.Game.GameObjects
             0x0240, 0x0241, 0x0242, 0x0243, 0x0244, 0x0245, 0x0246, 0x03E0, 0x03E1, 0
         };
 
-        [MethodImpl(256)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override ushort GetGraphicForAnimation()
         {
             ushort g = Graphic;
@@ -50,7 +50,7 @@ namespace ClassicUO.Game.GameObjects
             return g;
         }
 
-        [MethodImpl(256)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Direction GetDirectionForAnimation()
         {
             if (Steps.Count != 0)
@@ -110,7 +110,7 @@ namespace ClassicUO.Game.GameObjects
                     if (result == 0xFF)
                     {
                         if ((flags & ANIMATION_FLAGS.AF_IDLE_AT_8_FRAME) != 0 &&
-                            AnimationsLoader.Instance.AnimationExists(graphic, 8))
+                            AnimationsLoader.Instance.IsAnimationExists(graphic, 8))
                         {
                             result = 8;
                         }
@@ -129,7 +129,7 @@ namespace ClassicUO.Game.GameObjects
                 }
                 else if (isrun)
                 {
-                    if ((flags & ANIMATION_FLAGS.AF_CAN_FLYING) != 0 && AnimationsLoader.Instance.AnimationExists
+                    if ((flags & ANIMATION_FLAGS.AF_CAN_FLYING) != 0 && AnimationsLoader.Instance.IsAnimationExists
                         (graphic, 19))
                     {
                         result = 19;
@@ -613,7 +613,7 @@ namespace ClassicUO.Game.GameObjects
                     }
 
 
-                    if (!AnimationsLoader.Instance.AnimationExists(graphic, (byte) v13))
+                    if (!AnimationsLoader.Instance.IsAnimationExists(graphic, (byte) v13))
                     {
                         v13 = 1;
                     }
@@ -998,7 +998,7 @@ namespace ClassicUO.Game.GameObjects
                             {
                                 if ((flags & ANIMATION_FLAGS.AF_USE_UOP_ANIMATION) != 0)
                                 {
-                                    if (mobile.InWarMode && AnimationsLoader.Instance.AnimationExists(graphic, 1))
+                                    if (mobile.InWarMode && AnimationsLoader.Instance.IsAnimationExists(graphic, 1))
                                     {
                                         result = 1;
                                     }
@@ -1021,11 +1021,11 @@ namespace ClassicUO.Game.GameObjects
                             }
                             else
                             {
-                                result = AnimationsLoader.Instance.AnimationExists(graphic, 1) ? (byte) 1 : (byte) 2;
+                                result = AnimationsLoader.Instance.IsAnimationExists(graphic, 1) ? (byte) 1 : (byte) 2;
                             }
                         }
                         else if ((flags & ANIMATION_FLAGS.AF_USE_UOP_ANIMATION) != 0 && (!mobile.InWarMode ||
-                            !AnimationsLoader.Instance.AnimationExists(graphic, 0)))
+                            !AnimationsLoader.Instance.IsAnimationExists(graphic, 0)))
                         {
                             result = 22;
                         }
@@ -1106,7 +1106,7 @@ namespace ClassicUO.Game.GameObjects
                                 else
                                 {
                                     if (uop && type == ANIMATION_GROUPS_TYPE.EQUIPMENT &&
-                                        !AnimationsLoader.Instance.AnimationExists(graphic, 4))
+                                        !AnimationsLoader.Instance.IsAnimationExists(graphic, 4))
                                     {
                                         result = 37;
                                     }
@@ -1145,7 +1145,7 @@ namespace ClassicUO.Game.GameObjects
                                         if (hand2 != null)
                                         {
                                             if (uop && type == ANIMATION_GROUPS_TYPE.EQUIPMENT &&
-                                                !AnimationsLoader.Instance.AnimationExists(graphic, 7))
+                                                !AnimationsLoader.Instance.IsAnimationExists(graphic, 7))
                                             {
                                                 result = 8;
                                             }
@@ -1221,7 +1221,7 @@ namespace ClassicUO.Game.GameObjects
                             }
                             else
                             {
-                                if (isRun && AnimationsLoader.Instance.AnimationExists(graphic, 24))
+                                if (isRun && AnimationsLoader.Instance.IsAnimationExists(graphic, 24))
                                 {
                                     result = 24;
                                 }
@@ -1230,7 +1230,7 @@ namespace ClassicUO.Game.GameObjects
                                     if (isRun)
                                     {
                                         if (uop && type == ANIMATION_GROUPS_TYPE.EQUIPMENT &&
-                                            !AnimationsLoader.Instance.AnimationExists(graphic, 2))
+                                            !AnimationsLoader.Instance.IsAnimationExists(graphic, 2))
                                         {
                                             result = 3;
                                         }
@@ -1247,7 +1247,7 @@ namespace ClassicUO.Game.GameObjects
                                     else
                                     {
                                         if (uop && type == ANIMATION_GROUPS_TYPE.EQUIPMENT &&
-                                            !AnimationsLoader.Instance.AnimationExists(graphic, 0))
+                                            !AnimationsLoader.Instance.IsAnimationExists(graphic, 0))
                                         {
                                             result = 1;
                                         }
@@ -1410,7 +1410,7 @@ namespace ClassicUO.Game.GameObjects
             return (byte) (index % (ushort) HIGHT_ANIMATION_GROUP.HAG_ANIMATION_COUNT);
         }
 
-        [MethodImpl(256)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static byte GetObjectNewAnimation(Mobile mobile, ushort type, ushort action, byte mode)
         {
             if (mobile.Graphic >= Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT)
@@ -1447,7 +1447,7 @@ namespace ClassicUO.Game.GameObjects
             return 0;
         }
 
-        [MethodImpl(256)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static bool TestStepNoChangeDirection(Mobile mob, byte group)
         {
             switch ((PEOPLE_ANIMATION_GROUP) group)
@@ -1476,7 +1476,7 @@ namespace ClassicUO.Game.GameObjects
             return false;
         }
 
-        [MethodImpl(256)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static byte GetObjectNewAnimationType_0(Mobile mobile, ushort action, byte mode)
         {
             if (action <= 10)
@@ -1543,12 +1543,12 @@ namespace ClassicUO.Game.GameObjects
                     switch (action)
                     {
                         default:
-                            if (mobile.IsGargoyle && mobile.IsFlying && AnimationsLoader.Instance.AnimationExists
+                            if (mobile.IsGargoyle && mobile.IsFlying && AnimationsLoader.Instance.IsAnimationExists
                                 (mobile.Graphic, 71))
                             {
                                 return 71;
                             }
-                            else if (AnimationsLoader.Instance.AnimationExists(mobile.Graphic, 31))
+                            else if (AnimationsLoader.Instance.IsAnimationExists(mobile.Graphic, 31))
                             {
                                 return 31;
                             }
@@ -1562,7 +1562,7 @@ namespace ClassicUO.Game.GameObjects
                         case 6: return 12;
 
                         case 7:
-                            if (mobile.IsGargoyle && mobile.IsFlying && AnimationsLoader.Instance.AnimationExists
+                            if (mobile.IsGargoyle && mobile.IsFlying && AnimationsLoader.Instance.IsAnimationExists
                                 (mobile.Graphic, 72))
                             {
                                 return 72;
@@ -1597,7 +1597,7 @@ namespace ClassicUO.Game.GameObjects
             return 0;
         }
 
-        [MethodImpl(256)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static byte GetObjectNewAnimationType_1_2(Mobile mobile, ushort action, byte mode)
         {
             IndexAnimation ia = AnimationsLoader.Instance.DataIndex[mobile.Graphic];
@@ -1626,7 +1626,7 @@ namespace ClassicUO.Game.GameObjects
             return 16;
         }
 
-        [MethodImpl(256)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static byte GetObjectNewAnimationType_3(Mobile mobile, ushort action, byte mode)
         {
             IndexAnimation ia = AnimationsLoader.Instance.DataIndex[mobile.Graphic];
@@ -1670,7 +1670,7 @@ namespace ClassicUO.Game.GameObjects
             return 3;
         }
 
-        [MethodImpl(256)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static byte GetObjectNewAnimationType_4(Mobile mobile, ushort action, byte mode)
         {
             IndexAnimation ia = AnimationsLoader.Instance.DataIndex[mobile.Graphic];
@@ -1685,7 +1685,7 @@ namespace ClassicUO.Game.GameObjects
             {
                 if (type > ANIMATION_GROUPS_TYPE.ANIMAL)
                 {
-                    if (mobile.IsGargoyle && mobile.IsFlying && AnimationsLoader.Instance.AnimationExists
+                    if (mobile.IsGargoyle && mobile.IsFlying && AnimationsLoader.Instance.IsAnimationExists
                         (mobile.Graphic, 77))
                     {
                         return 77;
@@ -1705,7 +1705,7 @@ namespace ClassicUO.Game.GameObjects
             return 10;
         }
 
-        [MethodImpl(256)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static byte GetObjectNewAnimationType_5(Mobile mobile, ushort action, byte mode)
         {
             IndexAnimation ia = AnimationsLoader.Instance.DataIndex[mobile.Graphic];
@@ -1751,7 +1751,7 @@ namespace ClassicUO.Game.GameObjects
             return 9;
         }
 
-        [MethodImpl(256)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static byte GetObjectNewAnimationType_6_14(Mobile mobile, ushort action, byte mode)
         {
             IndexAnimation ia = AnimationsLoader.Instance.DataIndex[mobile.Graphic];
@@ -1785,7 +1785,7 @@ namespace ClassicUO.Game.GameObjects
             return 11;
         }
 
-        [MethodImpl(256)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static byte GetObjectNewAnimationType_7(Mobile mobile, ushort action, byte mode)
         {
             if (mobile.IsMounted)
@@ -1808,7 +1808,7 @@ namespace ClassicUO.Game.GameObjects
             return 0;
         }
 
-        [MethodImpl(256)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static byte GetObjectNewAnimationType_8(Mobile mobile, ushort action, byte mode)
         {
             IndexAnimation ia = AnimationsLoader.Instance.DataIndex[mobile.Graphic];
@@ -1837,7 +1837,7 @@ namespace ClassicUO.Game.GameObjects
             return 11;
         }
 
-        [MethodImpl(256)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static byte GetObjectNewAnimationType_9_10(Mobile mobile, ushort action, byte mode)
         {
             IndexAnimation ia = AnimationsLoader.Instance.DataIndex[mobile.Graphic];
@@ -1874,7 +1874,7 @@ namespace ClassicUO.Game.GameObjects
             return 20;
         }
 
-        [MethodImpl(256)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static byte GetObjectNewAnimationType_11(Mobile mobile, ushort action, byte mode)
         {
             IndexAnimation ia = AnimationsLoader.Instance.DataIndex[mobile.Graphic];

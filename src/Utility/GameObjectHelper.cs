@@ -8,7 +8,7 @@ namespace ClassicUO.Utility
 {
     internal static class GameObjectHelper
     {
-        [MethodImpl(256)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsNoDrawable(ushort g)
         {
             switch (g)

@@ -287,6 +287,8 @@ namespace ClassicUO.Game.Scenes
 
         public override void Unload()
         {
+            Client.Game.SetWindowTitle(string.Empty);
+
             ItemHold.Clear();
 
             try

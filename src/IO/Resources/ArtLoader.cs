@@ -40,7 +40,7 @@ namespace ClassicUO.IO.Resources
                     if (Client.IsUOPInstallation && File.Exists(filePath))
                     {
                         _file = new UOFileUop(filePath, "build/artlegacymul/{0:D8}.tga");
-                        Entries = new UOFileIndex[Constants.MAX_STATIC_DATA_INDEX_COUNT];
+                        Entries = new UOFileIndex[Math.Max(((UOFileUop) _file).TotalEntriesCount, Constants.MAX_STATIC_DATA_INDEX_COUNT)];
                     }
                     else
                     {
@@ -63,6 +63,11 @@ namespace ClassicUO.IO.Resources
             if (g >= Resources.Length)
             {
                 return null;
+            }
+
+            if (g == 0x3FEC)
+            {
+
             }
 
             ref ArtTexture texture = ref Resources[g];
@@ -172,6 +177,7 @@ namespace ClassicUO.IO.Resources
                 return null;
             }
 
+            _file.SetData(entry.Address, entry.FileSize);
             _file.Seek(entry.Offset);
             _file.Skip(4);
             width = _file.ReadShort();
@@ -335,6 +341,7 @@ namespace ClassicUO.IO.Resources
                 return;
             }
 
+            _file.SetData(entry.Address, entry.FileSize);
             _file.Seek(entry.Offset);
 
             uint* data = stackalloc uint[SIZE];

@@ -4,11 +4,19 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
+using ClassicUO.Network.Encryption;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
 
 namespace ClassicUO.Network
 {
+    enum ClientSocketStatus
+    {
+        Disconnected,
+        Connecting,
+        Connected,
+    }
+
     internal sealed class NetClient
     {
         private const int BUFF_SIZE = 0x80000;
@@ -17,7 +25,8 @@ namespace ClassicUO.Network
         private byte[] _recvBuffer, _incompletePacketBuffer, _decompBuffer;
         private Socket _socket;
         private CircularBuffer _circularBuffer;
-        private ConcurrentQueue<Packet> _recvQueue = new ConcurrentQueue<Packet>();
+        private ConcurrentQueue<byte[]> _recvQueue = new ConcurrentQueue<byte[]>();
+        private ConcurrentQueue<byte[]> _pluginRecvQueue = new ConcurrentQueue<byte[]>();
         private readonly bool _connectAsync;
         private readonly bool _is_login_socket;
 
@@ -25,7 +34,7 @@ namespace ClassicUO.Network
         {
             _is_login_socket = is_login_socket;
             _connectAsync = connectAsync;
-            Statistics = new NetStatistics();
+            Statistics = new NetStatistics(this);
         }
 
         public static NetClient LoginSocket { get; } = new NetClient(true, true);
@@ -36,56 +45,12 @@ namespace ClassicUO.Network
 
         public bool IsDisposed { get; private set; }
 
+        public ClientSocketStatus Status { get; private set; }
+
         public NetStatistics Statistics { get; }
 
         private static uint? _client_address;
 
-
-        //public static uint GetLocalIpAddress()
-        //{
-        //    UnicastIPAddressInformation mostSuitableIp = null;
-
-        //    var networkInterfaces = NetworkInterface.GetAllNetworkInterfaces();
-
-        //    foreach (var network in networkInterfaces)
-        //    {
-        //        if (network.OperationalStatus != OperationalStatus.Up)
-        //            continue;
-
-        //        var properties = network.GetIPProperties();
-
-        //        if (properties.GatewayAddresses.Count == 0)
-        //            continue;
-
-        //        foreach (var address in properties.UnicastAddresses)
-        //        {
-        //            if (address.Address.AddressFamily != AddressFamily.InterNetwork)
-        //                continue;
-
-        //            if (IPAddress.IsLoopback(address.Address))
-        //                continue;
-
-        //            if (!address.IsDnsEligible)
-        //            {
-        //                if (mostSuitableIp == null)
-        //                    mostSuitableIp = address;
-        //                continue;
-        //            }
-
-        //            // The best IP is the IP got from DHCP server
-        //            if (address.PrefixOrigin != PrefixOrigin.Dhcp)
-        //            {
-        //                if (mostSuitableIp == null || !mostSuitableIp.IsDnsEligible)
-        //                    mostSuitableIp = address;
-        //                continue;
-        //            }
-
-        //            return BitConverter.ToUInt32(address.Address.GetAddressBytes(), 0);
-        //        }
-        //    }
-
-        //    return mostSuitableIp != null ? BitConverter.ToUInt32(mostSuitableIp.Address.GetAddressBytes(), 0) : 0x100007f;
-        //}
 
         public static uint ClientAddress
         {
@@ -114,19 +79,18 @@ namespace ClassicUO.Network
         public event EventHandler Connected;
         public event EventHandler<SocketError> Disconnected;
 
-        public static event EventHandler<Packet> PacketReceived;
         public static event EventHandler<PacketWriter> PacketSent;
 
         public static void EnqueuePacketFromPlugin(byte[] data, int length)
         {
             if (LoginSocket.IsDisposed && Socket.IsConnected)
             {
-                Socket._recvQueue.Enqueue(new Packet(data, length) { Filter = true });
+                Socket._pluginRecvQueue.Enqueue(data);
                 Socket.Statistics.TotalPacketsReceived++;
             }
             else if (Socket.IsDisposed && LoginSocket.IsConnected)
             {
-                Socket._recvQueue.Enqueue(new Packet(data, length) { Filter = true });
+                LoginSocket._pluginRecvQueue.Enqueue(data);
                 LoginSocket.Statistics.TotalPacketsReceived++;
             }
             else
@@ -160,19 +124,30 @@ namespace ClassicUO.Network
 
         private void Connect(IPEndPoint endpoint)
         {
+            if (Status != ClientSocketStatus.Disconnected)
+            {
+                Log.Warn($"Socket status: {Status}");
+                return;
+            }
+
             _socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp)
-                { ReceiveBufferSize = BUFF_SIZE, SendBufferSize = BUFF_SIZE };
+            { 
+                ReceiveBufferSize = BUFF_SIZE, 
+                SendBufferSize = BUFF_SIZE
+            };
 
             _socket.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.NoDelay, 1);
             _recvBuffer = new byte[BUFF_SIZE];
             _incompletePacketBuffer = new byte[BUFF_SIZE];
             _decompBuffer = new byte[BUFF_SIZE];
             _circularBuffer = new CircularBuffer();
-            _recvQueue = new ConcurrentQueue<Packet>();
+            _recvQueue = new ConcurrentQueue<byte[]>();
+            _pluginRecvQueue = new ConcurrentQueue<byte[]>();
             Statistics.Reset();
 
             _socket.ReceiveTimeout = -1;
             _socket.SendTimeout = -1;
+            Status = ClientSocketStatus.Connecting;
 
             if (_connectAsync)
             {
@@ -192,12 +167,14 @@ namespace ClassicUO.Network
 
                 if (_socket.Connected)
                 {
+                    Status = ClientSocketStatus.Connected;
                     Connected.Raise();
                     Statistics.ConnectedFrom = DateTime.Now;
                     StartRecv();
                 }
                 else
                 {
+                    Status = ClientSocketStatus.Disconnected;
                     Log.Error("socket not connected");
                 }
             }
@@ -220,6 +197,7 @@ namespace ClassicUO.Network
                 return;
             }
 
+            Status = ClientSocketStatus.Disconnected;
             IsDisposed = true;
 
             if (_socket == null)
@@ -330,15 +308,22 @@ namespace ClassicUO.Network
 
         public void Update()
         {
-            while (_recvQueue.TryDequeue(out Packet p))
-            {
-                ref byte[] data = ref p.ToArray();
-                int length = p.Length;
+            int length = 0;
 
-                if (p.Filter || Plugin.ProcessRecvPacket(ref data, ref length))
+            while (_recvQueue.TryDequeue(out byte[] data))
+            {
+                length = data.Length;
+
+                if (Plugin.ProcessRecvPacket(ref data, ref length))
                 {
-                    PacketReceived.Raise(p);
+                    PacketHandlers.Handlers.AnalyzePacket(data, length);
                 }
+            }
+
+            while (_pluginRecvQueue.TryDequeue(out byte[] data))
+            {
+                length = data.Length;
+                PacketHandlers.Handlers.AnalyzePacket(data, length);
             }
         }
 
@@ -390,7 +375,7 @@ namespace ClassicUO.Network
 #if !DEBUG
                         //LogPacket(data, false);
 #endif
-                        _recvQueue.Enqueue(new Packet(data, packetlength));
+                        _recvQueue.Enqueue(data);
                         Statistics.TotalPacketsReceived++;
                     }
 
@@ -553,38 +538,38 @@ namespace ClassicUO.Network
 
             try
             {
-                int bytesLen = _socket.EndReceive(e);
+                int received = _socket.EndReceive(e, out SocketError error);
 
-                if (bytesLen > 0)
+                if (received > 0)
                 {
-                    Statistics.TotalBytesReceived += (uint) bytesLen;
+                    Statistics.TotalBytesReceived += (uint) received;
 
                     byte[] buffer = _recvBuffer;
 
                     if (!_is_login_socket)
                     {
-                        EncryptionHelper.Decrypt(ref buffer, ref buffer, bytesLen);
+                        EncryptionHelper.Decrypt(ref buffer, ref buffer, received);
                     }
 
                     if (_isCompressionEnabled)
                     {
-                        DecompressBuffer(ref buffer, ref bytesLen);
+                        DecompressBuffer(ref buffer, ref received);
                     }
 
                     lock (_circularBuffer)
                     {
-                        _circularBuffer.Enqueue(buffer, 0, bytesLen);
+                        _circularBuffer.Enqueue(buffer, 0, received);
                     }
 
                     ExtractPackets();
 
                     StartRecv();
                 }
-                else
-                {
-                    Log.Warn("Server sent 0 bytes. Closing connection");
-                    Disconnect(SocketError.SocketError);
-                }
+                //else
+                //{
+                //    Log.Warn("Server sent 0 bytes. Closing connection");
+                //    Disconnect(SocketError.SocketError);
+                //}
             }
             catch (SocketException socketException)
             {

@@ -45,7 +45,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void BuildGump()
         {
-            WantUpdateSize = false;
+            WantUpdateSize = true;
 
             _box?.Clear();
             _box?.Children.Clear();
@@ -112,9 +112,6 @@ namespace ClassicUO.Game.UI.Gumps
             _background.X = 0;
             _background.Y = 0;
 
-            Width = _background.Width;
-            Height = _background.Height;
-
 
             UpdateElements();
         }
@@ -179,12 +176,12 @@ namespace ClassicUO.Game.UI.Gumps
 
                     case GumpDirection.RIGHT_VERTICAL:
                         e.X = 5;
-                        e.Y = Height - 48 - offset;
+                        e.Y = _background.Height - 48 - offset;
 
                         break;
 
                     case GumpDirection.RIGHT_HORIZONTAL:
-                        e.X = Width - 48 - offset;
+                        e.X = _background.Width - 48 - offset;
                         e.Y = 5;
 
                         break;

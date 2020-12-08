@@ -106,33 +106,13 @@ namespace ClassicUO.Game.UI.Controls
             set => _acceptMouseInput = value;
         }
 
-        public int Width
-        {
-            get => _bounds.Width;
-            set
-            {
-                if (_bounds.Width != value)
-                {
-                    _bounds.Width = value;
-                }
-            }
-        }
-
-        public int Height
-        {
-            get => _bounds.Height;
-            set
-            {
-                if (_bounds.Height != value)
-                {
-                    _bounds.Height = value;
-                }
-            }
-        }
-
         public ref int X => ref _bounds.X;
 
         public ref int Y => ref _bounds.Y;
+
+        public ref int Width => ref _bounds.Width;
+
+        public ref int Height => ref _bounds.Height;
 
         public int ParentX => Parent != null ? Parent.X + Parent.ParentX : 0;
 

@@ -209,7 +209,7 @@ namespace ClassicUO.Renderer
             }
         }
 
-        [MethodImpl(256)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool DrawSprite(Texture2D texture, int x, int y, bool mirror, ref Vector3 hue)
         {
             EnsureSize();
@@ -311,7 +311,7 @@ namespace ClassicUO.Renderer
             return true;
         }
 
-        [MethodImpl(256)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool DrawSpriteLand
         (
             Texture2D texture,
@@ -371,7 +371,7 @@ namespace ClassicUO.Renderer
             return true;
         }
 
-        [MethodImpl(256)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool DrawSpriteRotated
         (
             Texture2D texture,
@@ -455,7 +455,7 @@ namespace ClassicUO.Renderer
             return true;
         }
 
-        [MethodImpl(256)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool DrawSpriteShadow(Texture2D texture, int x, int y, bool flip)
         {
             EnsureSize();
@@ -558,7 +558,7 @@ namespace ClassicUO.Renderer
             return true;
         }
 
-        [MethodImpl(256)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool DrawCharacterSitted
         (
             Texture2D texture,
@@ -1037,7 +1037,7 @@ namespace ClassicUO.Renderer
             return true;
         }
 
-        [MethodImpl(256)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Draw2D(Texture2D texture, int x, int y, ref Vector3 hue)
         {
             EnsureSize();
@@ -1091,7 +1091,7 @@ namespace ClassicUO.Renderer
             return true;
         }
 
-        [MethodImpl(256)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Draw2D
         (
             Texture2D texture,
@@ -1156,7 +1156,7 @@ namespace ClassicUO.Renderer
             return true;
         }
 
-        [MethodImpl(256)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Draw2D
         (
             Texture2D texture,
@@ -1297,7 +1297,7 @@ namespace ClassicUO.Renderer
             return false;
         }
 
-        [MethodImpl(256)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Draw2D
         (
             Texture2D texture,
@@ -1359,7 +1359,7 @@ namespace ClassicUO.Renderer
             return true;
         }
 
-        [MethodImpl(256)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Draw2DTiled
         (
             Texture2D texture,
@@ -1400,7 +1400,7 @@ namespace ClassicUO.Renderer
             return true;
         }
 
-        [MethodImpl(256)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool DrawRectangle
         (
             Texture2D texture,
@@ -1419,7 +1419,7 @@ namespace ClassicUO.Renderer
             return true;
         }
 
-        [MethodImpl(256)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool DrawLine
         (
             Texture2D texture,
@@ -1511,19 +1511,19 @@ namespace ClassicUO.Renderer
             return true;
         }
 
-        [MethodImpl(256)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Begin()
         {
             Begin(null, Matrix.Identity);
         }
 
-        [MethodImpl(256)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Begin(Effect effect)
         {
             Begin(effect, Matrix.Identity);
         }
 
-        [MethodImpl(256)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Begin(Effect customEffect, Matrix transform_matrix)
         {
             EnsureNotStarted();
@@ -1540,7 +1540,7 @@ namespace ClassicUO.Renderer
             _transformMatrix = transform_matrix;
         }
 
-        [MethodImpl(256)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void End()
         {
             EnsureStarted();
@@ -1550,7 +1550,7 @@ namespace ClassicUO.Renderer
         }
 
 
-        [MethodImpl(256)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void EnsureSize()
         {
             EnsureStarted();
@@ -1561,7 +1561,7 @@ namespace ClassicUO.Renderer
             }
         }
 
-        [MethodImpl(256)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private bool PushSprite(Texture2D texture)
         {
             if (texture == null || texture.IsDisposed)
@@ -1670,7 +1670,7 @@ namespace ClassicUO.Renderer
             effect.ApplyStates(matrix);
         }
 
-        [MethodImpl(256)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void InternalDraw(Texture texture, int baseSprite, int batchSize)
         {
             GraphicsDevice.Textures[0] = texture;

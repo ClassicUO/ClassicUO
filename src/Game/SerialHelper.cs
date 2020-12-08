@@ -5,25 +5,25 @@ namespace ClassicUO.Game
 {
     internal static class SerialHelper
     {
-        [MethodImpl(256)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsValid(uint serial)
         {
             return serial > 0 && serial < 0x80000000;
         }
 
-        [MethodImpl(256)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsMobile(uint serial)
         {
             return serial > 0 && serial < 0x40000000;
         }
 
-        [MethodImpl(256)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsItem(uint serial)
         {
             return serial >= 0x40000000 && serial < 0x80000000;
         }
 
-        [MethodImpl(256)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsValidLocalGumpSerial(uint serial)
         {
             return serial >= Constants.JOURNAL_LOCALSERIAL && serial < 0xFFFF_FFFF;

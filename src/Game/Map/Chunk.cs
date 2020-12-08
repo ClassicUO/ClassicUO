@@ -38,7 +38,7 @@ namespace ClassicUO.Game.Map
         }
 
 
-        [MethodImpl(256)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public unsafe void Load(int index)
         {
             IsDestroyed = false;
@@ -87,9 +87,7 @@ namespace ClassicUO.Game.Map
 
                     if (sb != null)
                     {
-                        int count = (int) im.StaticCount;
-
-                        for (int i = 0; i < count; ++i, ++sb)
+                        for (int i = 0, count = (int) im.StaticCount; i < count; ++i, ++sb)
                         {
                             if (sb->Color != 0 && sb->Color != 0xFFFF)
                             {

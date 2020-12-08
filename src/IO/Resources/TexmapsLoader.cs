@@ -158,6 +158,7 @@ namespace ClassicUO.IO.Resources
 
             uint* data = stackalloc uint[size_pot];
 
+            _file.SetData(entry.Address, entry.FileSize);
             _file.Seek(entry.Offset);
 
             for (int i = 0; i < size; ++i)

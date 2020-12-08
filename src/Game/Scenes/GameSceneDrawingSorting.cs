@@ -231,8 +231,7 @@ namespace ClassicUO.Game.Scenes
             }
         }
 
-        private void AddTileToRenderList
-            (GameObject obj, int worldX, int worldY, bool useObjectHandles, int maxZ /*, GameObject entity*/)
+        private void AddTileToRenderList(GameObject obj, int worldX, int worldY, bool useObjectHandles, int maxZ /*, GameObject entity*/)
         {
             /*sbyte HeightChecks = 0;
             if(entity != null)
@@ -336,8 +335,6 @@ namespace ClassicUO.Game.Scenes
 
                         itemData = ref loader.StaticData[graphic];
 
-                        //if (GameObjectHelper.TryGetStaticData(obj, out itemData))
-                    {
                         if (itemData.IsFoliage && !itemData.IsMultiMovable && World.Season >= Season.Winter)
                         {
                             continue;
@@ -372,7 +369,6 @@ namespace ClassicUO.Game.Scenes
                         {
                             maxObjectZ += itemData.Height == 0xFF ? 0 : itemData.Height;
                         }
-                    }
 
                         break;
                 }

@@ -187,6 +187,9 @@ namespace ClassicUO.Game.UI.Gumps
 
         private Checkbox _use_tooltip;
         private Checkbox _useStandardSkillsGump, _showMobileNameIncoming, _showCorpseNameIncoming;
+        private Checkbox _showStatsMessage, _showSkillsMessage;
+        private HSliderBar _showSkillsMessageDelta;
+
 
         private Profile _currentProfile = ProfileManager.CurrentProfile;
 
@@ -793,6 +796,12 @@ namespace ClassicUO.Game.UI.Gumps
                     (null, ResGumps.DragHumanoidsOnly, _currentProfile.DragSelectHumanoidsOnly, startX, startY)
             );
 
+            section4.PopIndent();
+
+            section4.Add(_showStatsMessage = AddCheckBox(null, ResGumps.ShowStatsChangedMessage, _currentProfile.ShowStatsChangedMessage, startX, startY));
+            section4.Add(_showSkillsMessage  = AddCheckBox(null, ResGumps.ShowSkillsChangedMessageBy, _currentProfile.ShowStatsChangedMessage, startX, startY));
+            section4.PushIndent();
+            section4.AddRight(_showSkillsMessageDelta = AddHSlider(null, 0, 100, _currentProfile.ShowSkillsChangedDeltaValue, startX, startY, 200));
             section4.PopIndent();
 
 
@@ -2151,6 +2160,10 @@ namespace ClassicUO.Game.UI.Gumps
                     _auraType.SelectedIndex = 0;
                     _fieldsType.SelectedIndex = 0;
 
+                    _showSkillsMessage.IsChecked = true;
+                    _showSkillsMessageDelta.Value = 1;
+                    _showStatsMessage.IsChecked = true;
+
                     break;
 
                 case 2: // sounds
@@ -2703,6 +2716,10 @@ namespace ClassicUO.Game.UI.Gumps
             _currentProfile.EnableDragSelect = _enableDragSelect.IsChecked;
             _currentProfile.DragSelectModifierKey = _dragSelectModifierKey.SelectedIndex;
             _currentProfile.DragSelectHumanoidsOnly = _dragSelectHumanoidsOnly.IsChecked;
+
+            _currentProfile.ShowSkillsChangedMessage =_showSkillsMessage.IsChecked;
+            _currentProfile.ShowSkillsChangedDeltaValue = _showSkillsMessageDelta.Value;
+            _currentProfile.ShowStatsChangedMessage = _showStatsMessage.IsChecked;
 
             _currentProfile.OverrideContainerLocation = _overrideContainerLocation.IsChecked;
             _currentProfile.OverrideContainerLocationSetting = _overrideContainerLocationSetting.SelectedIndex;

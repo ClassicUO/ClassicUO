@@ -22,7 +22,7 @@ namespace ClassicUO.IO
 
         internal IntPtr PositionAddress => (IntPtr) (_data + Position);
 
-        [MethodImpl(256)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void ReleaseData()
         {
             if (_handle.IsAllocated)
@@ -31,7 +31,7 @@ namespace ClassicUO.IO
             }
         }
 
-        [MethodImpl(256)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal void SetData(byte* data, long length)
         {
             ReleaseData();
@@ -41,7 +41,7 @@ namespace ClassicUO.IO
             Position = 0;
         }
 
-        [MethodImpl(256)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal void SetData(byte[] data, long length)
         {
             //fixed (byte* d = data)
@@ -53,40 +53,40 @@ namespace ClassicUO.IO
             Position = 0;
         }
 
-        [MethodImpl(256)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal void SetData(IntPtr data, long length)
         {
             SetData((byte*) data, length);
         }
 
-        [MethodImpl(256)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal void SetData(IntPtr data)
         {
             SetData((byte*) data, Length);
         }
 
-        [MethodImpl(256)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal void Seek(long idx)
         {
             Position = idx;
             EnsureSize(0);
         }
 
-        [MethodImpl(256)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal void Seek(int idx)
         {
             Position = idx;
             EnsureSize(0);
         }
 
-        [MethodImpl(256)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal void Skip(int count)
         {
             EnsureSize(count);
             Position += count;
         }
 
-        [MethodImpl(256)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal byte ReadByte()
         {
             EnsureSize(1);
@@ -94,19 +94,19 @@ namespace ClassicUO.IO
             return _data[Position++];
         }
 
-        [MethodImpl(256)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal sbyte ReadSByte()
         {
             return (sbyte) ReadByte();
         }
 
-        [MethodImpl(256)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal bool ReadBool()
         {
             return ReadByte() != 0;
         }
 
-        [MethodImpl(256)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal short ReadShort()
         {
             EnsureSize(2);
@@ -117,7 +117,7 @@ namespace ClassicUO.IO
             return v;
         }
 
-        [MethodImpl(256)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal ushort ReadUShort()
         {
             EnsureSize(2);
@@ -128,7 +128,7 @@ namespace ClassicUO.IO
             return v;
         }
 
-        [MethodImpl(256)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal int ReadInt()
         {
             EnsureSize(4);
@@ -140,7 +140,7 @@ namespace ClassicUO.IO
             return v;
         }
 
-        [MethodImpl(256)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal uint ReadUInt()
         {
             EnsureSize(4);
@@ -151,7 +151,7 @@ namespace ClassicUO.IO
             return v;
         }
 
-        [MethodImpl(256)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal long ReadLong()
         {
             EnsureSize(8);
@@ -162,7 +162,7 @@ namespace ClassicUO.IO
             return v;
         }
 
-        [MethodImpl(256)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal ulong ReadULong()
         {
             EnsureSize(8);
@@ -173,7 +173,7 @@ namespace ClassicUO.IO
             return v;
         }
 
-        [MethodImpl(256)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal byte[] ReadArray(int count)
         {
             EnsureSize(count);
@@ -210,7 +210,7 @@ namespace ClassicUO.IO
         }
 
         [Conditional("DEBUG")]
-        [MethodImpl(256)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void EnsureSize(int size)
         {
             if (Position + size > Length)
@@ -220,7 +220,7 @@ namespace ClassicUO.IO
         }
 
 
-        [MethodImpl(256)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ushort ReadUShortReversed()
         {
             EnsureSize(2);
@@ -228,7 +228,7 @@ namespace ClassicUO.IO
             return (ushort) ((ReadByte() << 8) | ReadByte());
         }
 
-        [MethodImpl(256)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public uint ReadUIntReversed()
         {
             EnsureSize(4);

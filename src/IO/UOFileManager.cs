@@ -79,12 +79,10 @@ namespace ClassicUO.IO
                         }
                         else if (vh.FileID == 4)
                         {
-                            ushort id = (ushort) (vh.BlockID - Constants.MAX_LAND_DATA_INDEX_COUNT);
-
-                            if (id < ArtLoader.Instance.Entries.Length)
+                            if (vh.BlockID < ArtLoader.Instance.Entries.Length)
                             {
-                                ArtLoader.Instance.Entries[id] = new UOFileIndex
-                                    (verdata.StartAddress, (uint) verdata.Length, vh.Position, (int) vh.Length, 0);
+                                ArtLoader.Instance.Entries[vh.BlockID] = new UOFileIndex
+                                    (verdata.StartAddress, (uint)verdata.Length, vh.Position, (int)vh.Length, 0);
                             }
                         }
                         else if (vh.FileID == 12)

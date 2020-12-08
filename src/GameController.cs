@@ -148,7 +148,28 @@ namespace ClassicUO
             base.UnloadContent();
         }
 
-        [MethodImpl(256)]
+
+        public void SetWindowTitle(string title)
+        {
+            if (string.IsNullOrEmpty(title))
+            {
+#if DEV_BUILD
+                Window.Title = $"ClassicUO [dev] - {CUOEnviroment.Version}";
+#else
+                Window.Title = $"ClassicUO - {CUOEnviroment.Version}";
+#endif
+            }
+            else
+            {
+#if DEV_BUILD
+                Window.Title = $"{title} - ClassicUO [dev] - {CUOEnviroment.Version}";
+#else
+                Window.Title = $"{title} - ClassicUO - {CUOEnviroment.Version}";
+#endif
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public T GetScene<T>() where T : Scene
         {
             return Scene as T;
@@ -212,6 +233,12 @@ namespace ClassicUO
         {
             //width = (int) ((double) width * Client.Game.GraphicManager.PreferredBackBufferWidth / Client.Game.Window.ClientBounds.Width);
             //height = (int) ((double) height * Client.Game.GraphicManager.PreferredBackBufferHeight / Client.Game.Window.ClientBounds.Height);
+
+            if (CUOEnviroment.IsHighDPI)
+            {
+                width *= 2;
+                height *= 2;
+            }
 
             GraphicManager.PreferredBackBufferWidth = width;
             GraphicManager.PreferredBackBufferHeight = height;

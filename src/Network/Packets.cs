@@ -563,8 +563,7 @@ namespace ClassicUO.Network
 
     internal sealed class PGumpResponse : PacketWriter
     {
-        public PGumpResponse
-            (uint local, uint server, int buttonID, uint[] switches, Tuple<ushort, string>[] entries) : base(0xB1)
+        public PGumpResponse(uint local, uint server, int buttonID, uint[] switches, Tuple<ushort, string>[] entries) : base(0xB1)
         {
             WriteUInt(local);
             WriteUInt(server);
@@ -670,11 +669,11 @@ namespace ClassicUO.Network
 
     internal sealed class PTextEntryDialogResponse : PacketWriter
     {
-        public PTextEntryDialogResponse(uint serial, byte button, string text, bool code) : base(0xAC)
+        public PTextEntryDialogResponse(uint serial, byte parentID, byte button, string text, bool code) : base(0xAC)
         {
             WriteUInt(serial);
+            WriteByte(parentID);
             WriteByte(button);
-            WriteByte(0);
             WriteBool(code);
 
             WriteUShort((ushort) (text.Length + 1));

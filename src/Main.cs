@@ -96,7 +96,6 @@ namespace ClassicUO
 
             if (CUOEnviroment.IsHighDPI)
             {
-                Log.Trace("HIGH DPI - ENABLED");
                 Environment.SetEnvironmentVariable("FNA_GRAPHICS_ENABLE_HIGHDPI", "1");
             }
 
@@ -366,7 +365,13 @@ namespace ClassicUO
                         break;
 
                     case "reconnect_time":
-                        Settings.GlobalSettings.ReconnectTime = int.Parse(value);
+
+                        if (!int.TryParse(value, out int reconnectTime) || reconnectTime < 1000)
+                        {
+                            reconnectTime = 1000;
+                        }
+
+                        Settings.GlobalSettings.ReconnectTime = reconnectTime;
 
                         break;
 

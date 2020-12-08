@@ -116,7 +116,7 @@ namespace ClassicUO.Game.GameObjects
             return (result + GetDirectionZ(direction >> 1)) >> 1;
         }
 
-        [MethodImpl(256)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private int GetDirectionZ(int direction)
         {
             switch (direction)
@@ -225,7 +225,7 @@ namespace ClassicUO.Game.GameObjects
         }
 
 
-        [MethodImpl(256)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static void SumAndNormalize
         (
             ref Vector3[,,] vec,
@@ -277,7 +277,7 @@ namespace ClassicUO.Game.GameObjects
             return result;
         }
 
-        [MethodImpl(256)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static void MergeAndNormalize(ref Vector3 v, float x, float y, float z)
         {
             float newX = v.Y * z - v.Z * y;

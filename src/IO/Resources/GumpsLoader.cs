@@ -31,7 +31,7 @@ namespace ClassicUO.IO.Resources
                     if (Client.IsUOPInstallation && File.Exists(path))
                     {
                         _file = new UOFileUop(path, "build/gumpartlegacymul/{0:D8}.tga", true);
-                        Entries = new UOFileIndex[Constants.MAX_GUMP_DATA_INDEX_COUNT];
+                        Entries = new UOFileIndex[Math.Max(((UOFileUop) _file).TotalEntriesCount, Constants.MAX_GUMP_DATA_INDEX_COUNT)];
                         Client.UseUOPGumps = true;
                     }
                     else
@@ -157,7 +157,6 @@ namespace ClassicUO.IO.Resources
             }
 
             _file.SetData(entry.Address, entry.FileSize);
-
             _file.Seek(entry.Offset);
 
             IntPtr dataStart = _file.PositionAddress;

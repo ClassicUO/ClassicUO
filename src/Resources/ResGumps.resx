@@ -1408,4 +1408,10 @@ Client version: '{0}'</value>
   <data name="YouMustHaveThreeUniqueSkillsChosen" xml:space="preserve">
     <value>You must have three unique skills chosen!</value>
   </data>
+  <data name="ShowSkillsChangedMessageBy" xml:space="preserve">
+    <value>Inform when skills change by</value>
+  </data>
+  <data name="ShowStatsChangedMessage" xml:space="preserve">
+    <value>Inform when stats change</value>
+  </data>
 </root>

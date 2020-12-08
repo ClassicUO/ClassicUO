@@ -318,11 +318,7 @@ namespace ClassicUO.Network
 
         private static void SetWindowTitle(string str)
         {
-#if DEV_BUILD
-            Client.Game.Window.Title = $"{str} - ClassicUO [dev] - {CUOEnviroment.Version}";
-#else
-            Client.Game.Window.Title = $"{str} - ClassicUO - {CUOEnviroment.Version}";
-#endif
+            Client.Game.SetWindowTitle(str);
         }
 
         private static bool GetStaticData

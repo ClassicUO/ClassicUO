@@ -6,6 +6,7 @@ using ClassicUO.Data;
 using ClassicUO.Game.Data;
 using ClassicUO.IO;
 using ClassicUO.Network;
+using ClassicUO.Network.Encryption;
 using ClassicUO.Resources;
 using ClassicUO.Utility.Logging;
 using ClassicUO.Utility.Platforms;
@@ -34,6 +35,12 @@ namespace ClassicUO
             {
                 // https://github.com/FNA-XNA/FNA/wiki/7:-FNA-Environment-Variables#fna_graphics_enable_highdpi
                 CUOEnviroment.IsHighDPI = Environment.GetEnvironmentVariable("FNA_GRAPHICS_ENABLE_HIGHDPI") == "1";
+
+                if (CUOEnviroment.IsHighDPI)
+                {
+                    Log.Trace("HIGH DPI - ENABLED");
+                }
+
                 Game.Run();
             }
 

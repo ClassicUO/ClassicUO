@@ -38,7 +38,7 @@ namespace ClassicUO.IO.Resources
                     if (Client.IsUOPInstallation && File.Exists(path))
                     {
                         _file = new UOFileUop(path, "build/soundlegacymul/{0:D8}.dat");
-                        Entries = new UOFileIndex[Constants.MAX_SOUND_DATA_INDEX_COUNT];
+                        Entries = new UOFileIndex[Math.Max(((UOFileUop)_file).TotalEntriesCount, Constants.MAX_SOUND_DATA_INDEX_COUNT)];
                     }
                     else
                     {
@@ -215,6 +215,7 @@ namespace ClassicUO.IO.Resources
 
             ref UOFileIndex entry = ref GetValidRefEntry(sound);
 
+            _file.SetData(entry.Address, entry.FileSize);
             _file.Seek(entry.Offset);
 
             long offset = _file.Position;
