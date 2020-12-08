@@ -1,4 +1,5 @@
-﻿using ClassicUO.Game.UI.Controls;
+﻿using ClassicUO.Game.Managers;
+using ClassicUO.Game.UI.Controls;
 using ClassicUO.Network;
 
 namespace ClassicUO.Game.UI.Gumps
