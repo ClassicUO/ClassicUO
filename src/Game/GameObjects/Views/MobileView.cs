@@ -698,8 +698,13 @@ namespace ClassicUO.Game.GameObjects
                     Item pants = mobile.FindItemByLayer(Layer.Pants);
                     Item robe;
 
+                    if (mobile == World.Player)
+                    {
+
+                    }
+
                     if (mobile.FindItemByLayer(Layer.Legs) != null ||
-                        pants != null && (pants.Graphic == 0x1411 || pants.Graphic == 0x141A))
+                        pants != null && (pants.Graphic == 0x1411 /*|| pants.Graphic == 0x141A*/))
                     {
                         return true;
                     }
@@ -717,7 +722,7 @@ namespace ClassicUO.Game.GameObjects
                     break;
 
                 case Layer.Pants:
-                    Item skirt;
+
                     robe = mobile.FindItemByLayer(Layer.Robe);
                     pants = mobile.FindItemByLayer(Layer.Pants);
 
@@ -729,7 +734,7 @@ namespace ClassicUO.Game.GameObjects
                     if (pants != null &&
                         (pants.Graphic == 0x01EB || pants.Graphic == 0x03E5 || pants.Graphic == 0x03eB))
                     {
-                        skirt = mobile.FindItemByLayer(Layer.Skirt);
+                        Item skirt = mobile.FindItemByLayer(Layer.Skirt);
 
                         if (skirt != null && skirt.Graphic != 0x01C7 && skirt.Graphic != 0x01E4)
                         {
