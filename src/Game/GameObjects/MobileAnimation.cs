@@ -589,7 +589,7 @@ namespace ClassicUO.Game.GameObjects
                                         break;
 
                                     case 28:
-                                        v13 = 10;
+                                        v13 = (ushort) (AnimationsLoader.Instance.IsAnimationExists(graphic, 10) ? 10 : 5);
 
                                         break;
 
