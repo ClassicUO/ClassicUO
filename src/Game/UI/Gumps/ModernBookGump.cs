@@ -69,13 +69,23 @@ namespace ClassicUO.Game.UI.Gumps
 
             for (int i = 0, l = BookLines.Length; i < l; i++)
             {
+                if (BookLines[i] != null && BookLines[i].Contains("\n"))
+                {
+                    BookLines[i] = BookLines[i].Replace("\n", "");
+                }
+            }
+
+            for (int i = 0, l = BookLines.Length; i < l; i++)
+            {
                 int w = IsNewBook ?
                     FontsLoader.Instance.GetWidthUnicode(_bookPage.renderedText.Font, BookLines[i]) :
                     FontsLoader.Instance.GetWidthASCII(_bookPage.renderedText.Font, BookLines[i]);
 
                 sb.Append(BookLines[i]);
 
-                if (i + 1 < l && (string.IsNullOrWhiteSpace(BookLines[i]) || w + sw < _bookPage.renderedText.MaxWidth))
+                if (BookLines[i] == null) continue;
+
+                if (i + 1 < l && (string.IsNullOrWhiteSpace(BookLines[i]) && !BookLines[i].Contains("\n") || w + sw < _bookPage.renderedText.MaxWidth))
                 {
                     sb.Append('\n');
                     BookLines[i] += '\n';

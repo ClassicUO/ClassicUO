@@ -2171,7 +2171,7 @@ namespace ClassicUO.Network
                     {
                         for (int n = 0; n < gump.BookLines.Length; n++)
                         {
-                            if (n < startline - 8 && n >= startline + 8)
+                            if (n < startline - 8 || n >= startline + 8)
                             {
                                 gump.BookLines[n] = string.Empty;
                             }
@@ -2181,7 +2181,7 @@ namespace ClassicUO.Network
                     {
                         for (int n = 0; n < gump.BookLines.Length; n++)
                         {
-                            if (n >= startline + 16 && n < startline)
+                            if (n >= startline + 16 || n < startline)
                             {
                                 gump.BookLines[n] = string.Empty;
                             }
@@ -2189,7 +2189,7 @@ namespace ClassicUO.Network
                     }
                 }
 
-                if (pageNum < pageCnt && pageNum >= 0)
+                if (pageNum < gump.BookPageCount && pageNum >= 0)
                 {
                     ushort lineCnt = p.ReadUShort();
 
