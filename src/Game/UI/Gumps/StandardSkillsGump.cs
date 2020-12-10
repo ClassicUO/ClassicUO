@@ -55,7 +55,7 @@ namespace ClassicUO.Game.UI.Gumps
         private readonly List<SkillsGroupControl> _skillsControl = new List<SkillsGroupControl>();
         private readonly Label _skillsLabelSum;
 
-        public StandardSkillsGump() : base(Constants.SKILLSTD_LOCALSERIAL, 0)
+        public StandardSkillsGump() : base(0, 0)
         {
             AcceptMouseInput = false;
             CanMove = true;

@@ -40,8 +40,7 @@ namespace ClassicUO.Game.UI.Gumps
         private readonly ScrollArea _scrollArea;
         private readonly StbTextBox _textBox;
 
-        public ProfileGump(uint serial, string header, string footer, string body, bool canEdit) : base
-            (serial == World.Player.Serial ? serial = Constants.PROFILE_LOCALSERIAL : serial, serial)
+        public ProfileGump(uint serial, string header, string footer, string body, bool canEdit) : base(serial, 0)
         {
             Height = 300 + _diffY;
             CanMove = true;
@@ -182,7 +181,7 @@ namespace ClassicUO.Game.UI.Gumps
             if (_originalText != _textBox.Text && World.Player != null && !World.Player.IsDestroyed &&
                 !NetClient.Socket.IsDisposed && NetClient.Socket.IsConnected)
             {
-                NetClient.Socket.Send(new PProfileUpdate(World.Player.Serial, _textBox.Text));
+                NetClient.Socket.Send(new PProfileUpdate(LocalSerial, _textBox.Text));
             }
 
             base.Dispose();

@@ -46,12 +46,6 @@ namespace ClassicUO.Game
             return serial >= 0x40000000 && serial < 0x80000000;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool IsValidLocalGumpSerial(uint serial)
-        {
-            return serial >= Constants.JOURNAL_LOCALSERIAL && serial < 0xFFFF_FFFF;
-        }
-
         public static uint Parse(string str)
         {
             if (str.StartsWith("0x"))
