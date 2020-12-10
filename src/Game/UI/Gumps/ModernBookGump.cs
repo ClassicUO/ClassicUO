@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Text;
 using ClassicUO.Data;
 using ClassicUO.Game.Managers;
@@ -50,6 +51,7 @@ namespace ClassicUO.Game.UI.Gumps
 
 
         public ushort BookPageCount { get; internal set; }
+        public HashSet<int> KnownPages { get; internal set; } = new HashSet<int>();
         public static bool IsNewBook => Client.Version > ClientVersion.CV_200;
         public bool UseNewHeader { get; set; } = true;
         public static byte DefaultFont => (byte) (IsNewBook ? 1 : 4);
@@ -266,18 +268,19 @@ namespace ClassicUO.Game.UI.Gumps
                 Client.Game.Scene.Audio.PlaySound(0x0055);
             }
 
-            //Non-editable books only have page data sent for currently viewed pages
+            //Non-editable books may only have data for the currently displayed pages,
+            //but some servers send their entire contents in one go so we need to keep track of which pages we know
             if (!IsEditable)
             {
                 int leftPage = (page - 1) << 1;
                 int rightPage = leftPage + 1;
 
-                if (leftPage > 0)
+                if (leftPage > 0 && !KnownPages.Contains(leftPage))
                 {
                     NetClient.Socket.Send(new PBookPageDataRequest(LocalSerial, (ushort) leftPage));
                 }
 
-                if (leftPage + 1 < MaxPage * 2)
+                if (rightPage < MaxPage * 2 && !KnownPages.Contains(rightPage))
                 {
                     NetClient.Socket.Send(new PBookPageDataRequest(LocalSerial, (ushort) rightPage));
                 }
