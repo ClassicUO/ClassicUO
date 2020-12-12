@@ -3257,22 +3257,23 @@ namespace ClassicUO.Network
             }
 
             uint tip = p.ReadUInt();
-            string str = p.ReadASCII(p.ReadUShort()).Replace('\r', '\n');
+            string str = p.ReadASCII(p.ReadUShort())?
+                          .Replace('\r', '\n');
+
+            int x = 20;
+            int y = 20;
 
             if (flag == 0)
             {
-                if (TipNoticeGump._tips == null || TipNoticeGump._tips.IsDisposed)
-                {
-                    TipNoticeGump._tips = new TipNoticeGump(flag, str);
-                    UIManager.Add(TipNoticeGump._tips);
-                }
+                x = 200;
+                y = 100;
+            }
 
-                TipNoticeGump._tips.AddTip(tip, str);
-            }
-            else
+            UIManager.Add(new TipNoticeGump(tip, flag, str)
             {
-                UIManager.Add(new TipNoticeGump(flag, str));
-            }
+                X = x,
+                Y = y
+            });
         }
 
         private static void AttackCharacter(ref PacketBufferReader p)

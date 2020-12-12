@@ -23,21 +23,19 @@
 
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
+using ClassicUO.Network;
 using ClassicUO.Utility.Collections;
 
 namespace ClassicUO.Game.UI.Gumps
 {
     internal class TipNoticeGump : Gump
     {
-        internal static TipNoticeGump _tips;
         private readonly ExpandableScroll _background;
-        private int _idx;
-        private readonly OrderedDictionary<uint, string> _pages;
         private readonly Button _prev, _next;
         private readonly ScrollArea _scrollArea;
         private readonly StbTextBox _textBox;
 
-        public TipNoticeGump(byte type, string page) : base(0, 0)
+        public TipNoticeGump(uint serial, byte type, string text) : base(serial, 0)
         {
             Height = 300;
             CanMove = true;
@@ -53,36 +51,16 @@ namespace ClassicUO.Game.UI.Gumps
                 IsEditable = false
             };
 
-            _textBox.SetText(page);
+            _textBox.SetText(text);
             Add(_background = new ExpandableScroll(0, 0, Height, 0x0820));
             _scrollArea.Add(_textBox);
             Add(_scrollArea);
 
             if (type == 0)
             {
-                _pages = new OrderedDictionary<uint, string>();
-                _tips = this;
                 _background.TitleGumpID = 0x9CA;
-                _idx = 0;
-                Add(_prev = new Button(0, 0x9cc, 0x9cc) { X = 35, ContainsByBounds = true });
-
-                _prev.MouseUp += (o, e) =>
-                {
-                    if (e.Button == MouseButtonType.Left)
-                    {
-                        SetPage(_idx - 1);
-                    }
-                };
-
-                Add(_next = new Button(0, 0x9cd, 0x9cd) { X = 240, ContainsByBounds = true });
-
-                _next.MouseUp += (o, e) =>
-                {
-                    if (e.Button == MouseButtonType.Left)
-                    {
-                        SetPage(_idx + 1);
-                    }
-                };
+                Add(new Button(1, 0x9cc, 0x9cc) { X = 35, ContainsByBounds = true, ButtonAction = ButtonAction.Activate });
+                Add(new Button(2, 0x9cd, 0x9cd) { X = 240, ContainsByBounds = true, ButtonAction = ButtonAction.Activate });
             }
             else
             {
@@ -93,47 +71,35 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override void OnButtonClick(int buttonID)
         {
-            // necessary to avoid closing
-        }
-
-        public override void Dispose()
-        {
-            _tips = null;
-            base.Dispose();
-        }
-
-
-        public override void OnPageChanged()
-        {
-            Height = _background.SpecialHeight;
-            _scrollArea.Height = _background.SpecialHeight - 96;
-
-            foreach (Control c in _scrollArea.Children)
+            switch (buttonID)
             {
-                // if (c is ScrollAreaItem)
-                {
-                    c.OnPageChanged();
-                }
-            }
-
-            if (_prev != null && _next != null)
-            {
-                _prev.Y = _next.Y = _background.SpecialHeight - 53;
+                case 1: // prev
+                    NetClient.Socket.Send(new PTipRequest((ushort) LocalSerial, 0));
+                    break;
+                case 2: // next
+                    NetClient.Socket.Send(new PTipRequest((ushort) LocalSerial, 1));
+                    break;
             }
         }
 
-        internal void AddTip(uint tipnum, string entry)
-        {
-            _pages.SetValue(tipnum, entry);
-        }
 
-        private void SetPage(int page)
-        {
-            if (page >= 0 && page < _pages.Count)
-            {
-                _idx = page;
-                _textBox.SetText(_pages[_idx]);
-            }
-        }
+        //public override void OnPageChanged()
+        //{
+        //    Height = _background.SpecialHeight;
+        //    _scrollArea.Height = _background.SpecialHeight - 96;
+
+        //    foreach (Control c in _scrollArea.Children)
+        //    {
+        //        // if (c is ScrollAreaItem)
+        //        {
+        //            c.OnPageChanged();
+        //        }
+        //    }
+
+        //    if (_prev != null && _next != null)
+        //    {
+        //        _prev.Y = _next.Y = _background.SpecialHeight - 53;
+        //    }
+        //}
     }
 }
