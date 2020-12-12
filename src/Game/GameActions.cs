@@ -563,6 +563,14 @@ namespace ClassicUO.Game
             Socket.Send(new PStatusRequest(serial));
         }
 
+        public static void SendCloseStatus(uint serial)
+        {
+            if (Client.Version >= ClientVersion.CV_200)
+            {
+                Socket.Send(new PCloseStatusBarGump(serial));
+            }
+        }
+
         public static void CastSpellFromBook(int index, uint bookSerial)
         {
             if (index >= 0)

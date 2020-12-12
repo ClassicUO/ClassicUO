@@ -3259,7 +3259,7 @@ namespace ClassicUO.Network
             {
                 if (SerialHelper.IsValid(TargetManager.LastAttack))
                 {
-                    NetClient.Socket.Send(new PCloseStatusBarGump(TargetManager.LastAttack));
+                    GameActions.SendCloseStatus(TargetManager.LastAttack);
                 }
 
                 TargetManager.LastAttack = serial;
