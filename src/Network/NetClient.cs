@@ -305,14 +305,14 @@ namespace ClassicUO.Network
 
             if (data != null && data.Length != 0 && length > 0)
             {
-                if (!skip_encryption)
-                {
-                    EncryptionHelper.Encrypt(_is_login_socket, ref data, ref data, length);
-                }
-
                 if (CUOEnviroment.PacketLog)
                 {
                     LogPacket(data, length, true);
+                }
+
+                if (!skip_encryption)
+                {
+                    EncryptionHelper.Encrypt(_is_login_socket, ref data, ref data, length);
                 }
 
                 try
@@ -550,8 +550,7 @@ namespace ClassicUO.Network
 
             output.AppendFormat
             (
-                "{0}   -   ID {1}   Length: {2}\n", (toServer ? "Client -> Server" : "Server -> Client"), buffer[0],
-                buffer.Length
+                "{0}   -   ID {1:X2}   Length: {2}\n", (toServer ? "Client -> Server" : "Server -> Client"), buffer[0], buffer.Length
             );
 
             if (buffer[0] == 0x80 || buffer[0] == 0x91)
