@@ -44,7 +44,7 @@ namespace ClassicUO.Game.UI.Gumps
             CanCloseWithRightClick = true;
             _scrollArea = new ScrollArea(0, 32, 272, Height - 96, false);
 
-            _textBox = new StbTextBox(1, -1, 220)
+            _textBox = new StbTextBox(6, -1, 220, isunicode: false)
             {
                 Height = 20,
                 X = 35,

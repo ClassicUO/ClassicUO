@@ -43,8 +43,12 @@ namespace ClassicUO.Game.UI.Controls
         {
             X = x;
             Y = y;
-            Width = width;
 
+            if (width > 0)
+            {
+                Width = width;
+            }
+            
             if (heigth > 0)
             {
                 Height = heigth;
@@ -60,16 +64,6 @@ namespace ClassicUO.Game.UI.Controls
             IsFromServer = true;
         }
 
-        internal GumpPicTiled(int x, int y, int width, int heigth, UOTexture texture)
-        {
-            CanMove = true;
-            AcceptMouseInput = true;
-            X = x;
-            Y = y;
-            Width = width;
-            Height = heigth;
-            Graphic = 0xFFFF;
-        }
 
         public ushort Graphic
         {

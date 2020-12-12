@@ -3257,7 +3257,7 @@ namespace ClassicUO.Network
             }
 
             uint tip = p.ReadUInt();
-            string str = p.ReadASCII(p.ReadUShort());
+            string str = p.ReadASCII(p.ReadUShort()).Replace('\r', '\n');
 
             if (flag == 0)
             {
