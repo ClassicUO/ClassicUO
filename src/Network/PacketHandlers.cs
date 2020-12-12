@@ -2162,34 +2162,9 @@ namespace ClassicUO.Network
             for (int i = 0; i < pageCnt; i++)
             {
                 int pageNum = p.ReadUShort() - 1;
+                gump.KnownPages.Add(pageNum);
 
-                if (!gump.IsEditable) //other pages are blank
-                {
-                    int startline = pageNum * ModernBookGump.MAX_BOOK_LINES;
-
-                    if (pageNum % 2 == 0)
-                    {
-                        for (int n = 0; n < gump.BookLines.Length; n++)
-                        {
-                            if (n < startline - 8 && n >= startline + 8)
-                            {
-                                gump.BookLines[n] = string.Empty;
-                            }
-                        }
-                    }
-                    else
-                    {
-                        for (int n = 0; n < gump.BookLines.Length; n++)
-                        {
-                            if (n >= startline + 16 && n < startline)
-                            {
-                                gump.BookLines[n] = string.Empty;
-                            }
-                        }
-                    }
-                }
-
-                if (pageNum < pageCnt && pageNum >= 0)
+                if (pageNum < gump.BookPageCount && pageNum >= 0)
                 {
                     ushort lineCnt = p.ReadUShort();
 
