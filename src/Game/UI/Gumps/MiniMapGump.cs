@@ -135,6 +135,11 @@ namespace ClassicUO.Game.UI.Gumps
                 _useLargeMap = !_useLargeMap;
             }
 
+            if (_mapTexture != null && !_mapTexture.IsDisposed)
+            {
+                _mapTexture.Dispose();
+            }
+
             CreateMap();
 
             return _useLargeMap;
@@ -226,10 +231,6 @@ namespace ClassicUO.Game.UI.Gumps
                 return;
             }
 
-            if (_mapTexture != null && !_mapTexture.IsDisposed)
-            {
-                _mapTexture.Dispose();
-            }
 
             int blockOffsetX = Width >> 2;
             int blockOffsetY = Height >> 2;
@@ -354,7 +355,11 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             }
 
-            _mapTexture = new UOTexture(Width, Height);
+            if (_mapTexture == null || _mapTexture.IsDisposed)
+            {
+                _mapTexture = new UOTexture(Width, Height);
+            }
+
             _mapTexture.PushData(data);
         }
 
