@@ -310,7 +310,7 @@ namespace ClassicUO.IO.Resources
     {
         public readonly uint Header;
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 8)]
-        public readonly HuesBlock[] Entries;
+        public readonly VerdataHuesBlock[] Entries;
     }
 
     internal struct FloatHues
