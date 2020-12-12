@@ -41,6 +41,7 @@ namespace ClassicUO
         public static uint CurrentRefreshRate;
         public static bool SkipLoginScreen;
         public static bool IsOutlands;
+        public static bool PacketLog;
 
         public static readonly bool IsUnix = Environment.OSVersion.Platform != PlatformID.Win32NT &&
                                              Environment.OSVersion.Platform != PlatformID.Win32Windows &&

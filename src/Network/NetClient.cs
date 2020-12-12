@@ -43,28 +43,31 @@ namespace ClassicUO.Network
     internal sealed class NetClient
     {
         private const int BUFF_SIZE = 0x80000;
+
         private int _incompletePacketLength;
         private bool _isCompressionEnabled;
-        private byte[] _recvBuffer, _incompletePacketBuffer, _decompBuffer;
-        private Socket _socket;
+        private byte[] _recvBuffer, _incompletePacketBuffer, _decompBuffer, _packetBuffer;
         private CircularBuffer _circularBuffer;
-        private ConcurrentQueue<byte[]> _recvQueue = new ConcurrentQueue<byte[]>();
         private ConcurrentQueue<byte[]> _pluginRecvQueue = new ConcurrentQueue<byte[]>();
-        private readonly bool _connectAsync;
         private readonly bool _is_login_socket;
+        private TcpClient _tcpClient;
+        private NetworkStream _netStream;
 
-        private NetClient(bool connectAsync, bool is_login_socket)
+
+        private NetClient(bool is_login_socket)
         {
             _is_login_socket = is_login_socket;
-            _connectAsync = connectAsync;
             Statistics = new NetStatistics(this);
         }
 
-        public static NetClient LoginSocket { get; } = new NetClient(true, true);
 
-        public static NetClient Socket { get; } = new NetClient(false, false);
+        public static NetClient LoginSocket { get; } = new NetClient(true);
 
-        public bool IsConnected => _socket != null && _socket.Connected;
+        public static NetClient Socket { get; } = new NetClient(false);
+
+
+
+        public bool IsConnected => _tcpClient != null && _tcpClient.Connected;
 
         public bool IsDisposed { get; private set; }
 
@@ -104,6 +107,8 @@ namespace ClassicUO.Network
 
         public static event EventHandler<PacketWriter> PacketSent;
 
+        private static readonly Task<bool> TaskCompletedFalse = new Task<bool>(() => false);
+
         public static void EnqueuePacketFromPlugin(byte[] data, int length)
         {
             if (LoginSocket.IsDisposed && Socket.IsConnected)
@@ -122,89 +127,85 @@ namespace ClassicUO.Network
             }
         }
 
-        public bool Connect(string ip, ushort port)
+        public Task<bool> Connect(string ip, ushort port)
         {
             IsDisposed = false;
             IPAddress address = ResolveIP(ip);
 
             if (address == null)
             {
-                return false;
+                return TaskCompletedFalse;
             }
 
-            IPEndPoint endpoint = new IPEndPoint(address, port);
-            Connect(endpoint);
-
-            return true;
+            return Connect(address, port);
         }
 
-        public void Connect(IPAddress address, ushort port)
+        public Task<bool> Connect(IPAddress address, ushort port)
         {
             IsDisposed = false;
-            IPEndPoint endpoint = new IPEndPoint(address, port);
-            Connect(endpoint);
-        }
 
-        private void Connect(IPEndPoint endpoint)
-        {
             if (Status != ClientSocketStatus.Disconnected)
             {
                 Log.Warn($"Socket status: {Status}");
-                return;
+
+                return TaskCompletedFalse;
             }
 
-            _socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp)
-            { 
-                ReceiveBufferSize = BUFF_SIZE, 
-                SendBufferSize = BUFF_SIZE
+            _tcpClient = new TcpClient
+            {
+                ReceiveBufferSize = BUFF_SIZE,
+                SendBufferSize = BUFF_SIZE,
+                NoDelay = true,
+                ReceiveTimeout = -1,
+                SendTimeout = -1
             };
 
-            _socket.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.NoDelay, 1);
             _recvBuffer = new byte[BUFF_SIZE];
             _incompletePacketBuffer = new byte[BUFF_SIZE];
             _decompBuffer = new byte[BUFF_SIZE];
+            _packetBuffer = new byte[4096 * 4];
             _circularBuffer = new CircularBuffer();
-            _recvQueue = new ConcurrentQueue<byte[]>();
             _pluginRecvQueue = new ConcurrentQueue<byte[]>();
             Statistics.Reset();
 
-            _socket.ReceiveTimeout = -1;
-            _socket.SendTimeout = -1;
             Status = ClientSocketStatus.Connecting;
 
-            if (_connectAsync)
-            {
-                Task.Run(() => { InternalConnect(endpoint); });
-            }
-            else
-            {
-                InternalConnect(endpoint);
-            }
+            return InternalConnect(address, port);
         }
 
-        private void InternalConnect(EndPoint endpoint)
+        private Task<bool> InternalConnect(IPAddress address, ushort port)
         {
             try
             {
-                _socket.Connect(endpoint);
+                return _tcpClient
+                       .ConnectAsync(address, port)
+                          .ContinueWith(
+                    (t) =>
+                    {
+                        if (!t.IsFaulted && _tcpClient.Connected)
+                        {
+                            _netStream = _tcpClient.GetStream();
+                            Status = ClientSocketStatus.Connected;
+                            Connected.Raise();
+                            Statistics.ConnectedFrom = DateTime.Now;
 
-                if (_socket.Connected)
-                {
-                    Status = ClientSocketStatus.Connected;
-                    Connected.Raise();
-                    Statistics.ConnectedFrom = DateTime.Now;
-                    StartRecv();
-                }
-                else
-                {
-                    Status = ClientSocketStatus.Disconnected;
-                    Log.Error("socket not connected");
-                }
+                            return true;
+                        }
+
+
+                        Status = ClientSocketStatus.Disconnected;
+                        Log.Error("socket not connected");
+
+                        return false;
+
+                    }, TaskContinuationOptions.ExecuteSynchronously);
             }
             catch (SocketException e)
             {
                 Log.Error($"Socket error when connecting:\n{e}");
                 Disconnect(e.SocketErrorCode);
+
+                return TaskCompletedFalse;
             }
         }
 
@@ -223,14 +224,14 @@ namespace ClassicUO.Network
             Status = ClientSocketStatus.Disconnected;
             IsDisposed = true;
 
-            if (_socket == null)
+            if (_tcpClient == null)
             {
                 return;
             }
 
             try
             {
-                _socket.Shutdown(SocketShutdown.Both);
+                _tcpClient.Close();
             }
             catch
             {
@@ -238,7 +239,7 @@ namespace ClassicUO.Network
 
             try
             {
-                _socket.Close();
+                _netStream?.Dispose();
             }
             catch
             {
@@ -250,7 +251,8 @@ namespace ClassicUO.Network
             _incompletePacketLength = 0;
             _recvBuffer = null;
             _isCompressionEnabled = false;
-            _socket = null;
+            _tcpClient = null;
+            _netStream = null;
             _circularBuffer = null;
 
             if (error != 0)
@@ -291,7 +293,12 @@ namespace ClassicUO.Network
 
         private void Send(byte[] data, int length, bool skip_encryption)
         {
-            if (_socket == null || IsDisposed)
+            if (_tcpClient == null || IsDisposed)
+            {
+                return;
+            }
+
+            if (_netStream == null || !_tcpClient.Connected)
             {
                 return;
             }
@@ -303,22 +310,18 @@ namespace ClassicUO.Network
                     EncryptionHelper.Encrypt(_is_login_socket, ref data, ref data, length);
                 }
 
-#if !DEBUG
-                //LogPacket(data, true);
-#endif
+                if (CUOEnviroment.PacketLog)
+                {
+                    LogPacket(data, length, true);
+                }
 
                 try
                 {
-                    lock (_socket)
-                    {
-                        int sent = _socket.Send(data, 0, length, SocketFlags.None);
+                    _netStream.Write(data, 0, length);
+                    _netStream.Flush();
 
-                        if (sent > 0)
-                        {
-                            Statistics.TotalBytesSent += (uint) sent;
-                            Statistics.TotalPacketsSent++;
-                        }
-                    }
+                    Statistics.TotalBytesSent += (uint) length;
+                    Statistics.TotalPacketsSent++;
                 }
                 catch (SocketException ex)
                 {
@@ -331,22 +334,11 @@ namespace ClassicUO.Network
 
         public void Update()
         {
-            int length = 0;
-
-            while (_recvQueue.TryDequeue(out byte[] data))
-            {
-                length = data.Length;
-
-                if (Plugin.ProcessRecvPacket(ref data, ref length))
-                {
-                    PacketHandlers.Handlers.AnalyzePacket(data, length);
-                }
-            }
+            ProcessRecv();
 
             while (_pluginRecvQueue.TryDequeue(out byte[] data))
             {
-                length = data.Length;
-                PacketHandlers.Handlers.AnalyzePacket(data, length);
+                PacketHandlers.Handlers.AnalyzePacket(data, data.Length);
             }
         }
 
@@ -392,162 +384,32 @@ namespace ClassicUO.Network
 
                     if (packetlength > 0)
                     {
-                        byte[] data = new byte[packetlength];
+                        // Patch to maintain a retrocompatibiliy with older cuoapi
+                        byte[] data = new byte[length]; // _packetBuffer;
+
                         packetlength = _circularBuffer.Dequeue(data, 0, packetlength);
 
-#if !DEBUG
-                        //LogPacket(data, false);
-#endif
-                        _recvQueue.Enqueue(data);
-                        Statistics.TotalPacketsReceived++;
+                        if (CUOEnviroment.PacketLog)
+                        {
+                            LogPacket(data, packetlength, false);
+                        }
+
+                        if (Plugin.ProcessRecvPacket(ref data, ref packetlength))
+                        {
+                            PacketHandlers.Handlers.AnalyzePacket(data, packetlength);
+
+                            Statistics.TotalPacketsReceived++;
+                        }
                     }
 
-                    length = _circularBuffer.Length;
+                    length = _circularBuffer?.Length ?? 0;
                 }
             }
         }
 
-
-#if !DEBUG
-        private static LogFile _logFile;
-
-        private static void LogPacket(byte[] buffer, bool toServer)
+        private void ProcessRecv()
         {
-            if (_logFile == null)
-                _logFile = new LogFile
-                (
-                    FileSystemHelper.CreateFolderIfNotExists(CUOEnviroment.ExecutablePath, "Logs", "Network"),
-                    "packets.log"
-                );
-
-            int length = buffer.Length;
-            int pos = 0;
-
-            StringBuilder output = new StringBuilder();
-
-            output.AppendFormat
-            (
-                "{0}   -   ID {1}   Length: {2}\n", (toServer ? "Client -> Server" : "Server -> Client"), buffer[0],
-                buffer.Length
-            );
-
-            if (buffer[0] == 0x80 || buffer[0] == 0x91)
-            {
-                output.AppendLine("[ACCOUNT CREDENTIALS HIDDEN]");
-            }
-            else
-            {
-                output.AppendLine("        0  1  2  3  4  5  6  7   8  9  A  B  C  D  E  F");
-                output.AppendLine("       -- -- -- -- -- -- -- --  -- -- -- -- -- -- -- --");
-
-                int byteIndex = 0;
-
-                int whole = length >> 4;
-                int rem = length & 0xF;
-
-                for (int i = 0; i < whole; ++i, byteIndex += 16)
-                {
-                    StringBuilder bytes = new StringBuilder(49);
-                    StringBuilder chars = new StringBuilder(16);
-
-                    for (int j = 0; j < 16; ++j)
-                    {
-                        int c = buffer[pos++];
-
-                        bytes.Append(c.ToString("X2"));
-
-                        if (j != 7)
-                        {
-                            bytes.Append(' ');
-                        }
-                        else
-                        {
-                            bytes.Append("  ");
-                        }
-
-                        if (c >= 0x20 && c < 0x80)
-                        {
-                            chars.Append((char) c);
-                        }
-                        else
-                        {
-                            chars.Append('.');
-                        }
-                    }
-
-                    output.Append(byteIndex.ToString("X4"));
-                    output.Append("   ");
-                    output.Append(bytes);
-                    output.Append("  ");
-                    output.AppendLine(chars.ToString());
-                }
-
-                if (rem != 0)
-                {
-                    StringBuilder bytes = new StringBuilder(49);
-                    StringBuilder chars = new StringBuilder(rem);
-
-                    for (int j = 0; j < 16; ++j)
-                    {
-                        if (j < rem)
-                        {
-                            int c = buffer[pos++];
-
-                            bytes.Append(c.ToString("X2"));
-
-                            if (j != 7)
-                            {
-                                bytes.Append(' ');
-                            }
-                            else
-                            {
-                                bytes.Append("  ");
-                            }
-
-                            if (c >= 0x20 && c < 0x80)
-                            {
-                                chars.Append((char) c);
-                            }
-                            else
-                            {
-                                chars.Append('.');
-                            }
-                        }
-                        else
-                        {
-                            bytes.Append("   ");
-                        }
-                    }
-
-                    output.Append(byteIndex.ToString("X4"));
-                    output.Append("   ");
-                    output.Append(bytes);
-                    output.Append("  ");
-                    output.AppendLine(chars.ToString());
-                }
-            }
-
-
-            output.AppendLine();
-            output.AppendLine();
-
-            _logFile.Write(output.ToString());
-        }
-#endif
-
-
-        private void StartRecv()
-        {
-            if (IsConnected && !IsDisposed)
-            {
-                _socket.BeginReceive(_recvBuffer, 0, BUFF_SIZE, SocketFlags.None, ProcessRecv, null);
-            }
-        }
-
-
-        private void ProcessRecv(IAsyncResult e)
-        {
-            if (IsDisposed)
+            if (IsDisposed || Status != ClientSocketStatus.Connected)
             {
                 return;
             }
@@ -559,9 +421,14 @@ namespace ClassicUO.Network
                 return;
             }
 
+            if (_tcpClient.Available <= 0)
+            {
+                return;
+            }
+
             try
             {
-                int received = _socket.EndReceive(e, out SocketError error);
+                int received = _netStream.Read(_recvBuffer, 0, _tcpClient.Available);
 
                 if (received > 0)
                 {
@@ -585,14 +452,12 @@ namespace ClassicUO.Network
                     }
 
                     ExtractPackets();
-
-                    StartRecv();
                 }
-                //else
-                //{
-                //    Log.Warn("Server sent 0 bytes. Closing connection");
-                //    Disconnect(SocketError.SocketError);
-                //}
+                else
+                {
+                    Log.Warn("Server sent 0 bytes. Closing connection");
+                    Disconnect(SocketError.SocketError);
+                }
             }
             catch (SocketException socketException)
             {
@@ -668,5 +533,129 @@ namespace ClassicUO.Network
 
             return result;
         }
+
+        private static LogFile _logFile;
+        private static void LogPacket(byte[] buffer, int length, bool toServer)
+        {
+            if (_logFile == null)
+                _logFile = new LogFile
+                (
+                    FileSystemHelper.CreateFolderIfNotExists(CUOEnviroment.ExecutablePath, "Logs", "Network"),
+                    "packets.log"
+                );
+
+            int pos = 0;
+
+            StringBuilder output = new StringBuilder();
+
+            output.AppendFormat
+            (
+                "{0}   -   ID {1}   Length: {2}\n", (toServer ? "Client -> Server" : "Server -> Client"), buffer[0],
+                buffer.Length
+            );
+
+            if (buffer[0] == 0x80 || buffer[0] == 0x91)
+            {
+                output.AppendLine("[ACCOUNT CREDENTIALS HIDDEN]");
+            }
+            else
+            {
+                output.AppendLine("        0  1  2  3  4  5  6  7   8  9  A  B  C  D  E  F");
+                output.AppendLine("       -- -- -- -- -- -- -- --  -- -- -- -- -- -- -- --");
+
+                int byteIndex = 0;
+
+                int whole = length >> 4;
+                int rem = length & 0xF;
+
+                for (int i = 0; i < whole; ++i, byteIndex += 16)
+                {
+                    StringBuilder bytes = new StringBuilder(49);
+                    StringBuilder chars = new StringBuilder(16);
+
+                    for (int j = 0; j < 16; ++j)
+                    {
+                        int c = buffer[pos++];
+
+                        bytes.Append(c.ToString("X2"));
+
+                        if (j != 7)
+                        {
+                            bytes.Append(' ');
+                        }
+                        else
+                        {
+                            bytes.Append("  ");
+                        }
+
+                        if (c >= 0x20 && c < 0x80)
+                        {
+                            chars.Append((char)c);
+                        }
+                        else
+                        {
+                            chars.Append('.');
+                        }
+                    }
+
+                    output.Append(byteIndex.ToString("X4"));
+                    output.Append("   ");
+                    output.Append(bytes);
+                    output.Append("  ");
+                    output.AppendLine(chars.ToString());
+                }
+
+                if (rem != 0)
+                {
+                    StringBuilder bytes = new StringBuilder(49);
+                    StringBuilder chars = new StringBuilder(rem);
+
+                    for (int j = 0; j < 16; ++j)
+                    {
+                        if (j < rem)
+                        {
+                            int c = buffer[pos++];
+
+                            bytes.Append(c.ToString("X2"));
+
+                            if (j != 7)
+                            {
+                                bytes.Append(' ');
+                            }
+                            else
+                            {
+                                bytes.Append("  ");
+                            }
+
+                            if (c >= 0x20 && c < 0x80)
+                            {
+                                chars.Append((char)c);
+                            }
+                            else
+                            {
+                                chars.Append('.');
+                            }
+                        }
+                        else
+                        {
+                            bytes.Append("   ");
+                        }
+                    }
+
+                    output.Append(byteIndex.ToString("X4"));
+                    output.Append("   ");
+                    output.Append(bytes);
+                    output.Append("  ");
+                    output.AppendLine(chars.ToString());
+                }
+            }
+
+
+            output.AppendLine();
+            output.AppendLine();
+
+            _logFile.Write(output.ToString());
+        }
+
     }
 }

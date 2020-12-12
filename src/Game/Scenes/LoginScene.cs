@@ -27,6 +27,7 @@ using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading.Tasks;
 using ClassicUO.Configuration;
 using ClassicUO.Data;
 using ClassicUO.Game.Data;
@@ -314,7 +315,7 @@ namespace ClassicUO.Game.Scenes
             }
         }
 
-        public void Connect(string account, string password)
+        public async void Connect(string account, string password)
         {
             if (CurrentLoginStep == LoginSteps.Connecting)
             {
@@ -335,17 +336,18 @@ namespace ClassicUO.Game.Scenes
             Log.Trace($"Start login to: {Settings.GlobalSettings.IP},{Settings.GlobalSettings.Port}");
 
 
-            EncryptionHelper.Initialize(true, NetClient.ClientAddress, (ENCRYPTION_TYPE) Settings.GlobalSettings.Encryption);
-
-            if (!NetClient.LoginSocket.Connect(Settings.GlobalSettings.IP, Settings.GlobalSettings.Port))
-            {
-                PopupMessage = ResGeneral.CheckYourConnectionAndTryAgain;
-                Log.Error("No Internet Access");
-            }
-
             if (!Reconnect)
             {
                 CurrentLoginStep = LoginSteps.Connecting;
+            }
+
+            EncryptionHelper.Initialize(true, NetClient.ClientAddress, (ENCRYPTION_TYPE) Settings.GlobalSettings.Encryption);
+
+            if (!await NetClient.LoginSocket.Connect(Settings.GlobalSettings.IP, Settings.GlobalSettings.Port))
+            {
+                PopupMessage = ResGeneral.CheckYourConnectionAndTryAgain;
+                CurrentLoginStep = LoginSteps.PopUpMessage;
+                Log.Error("No Internet Access");
             }
         }
 
@@ -661,12 +663,20 @@ namespace ClassicUO.Game.Scenes
             NetClient.LoginSocket.Disconnect();
             EncryptionHelper.Initialize(false, seed, (ENCRYPTION_TYPE) Settings.GlobalSettings.Encryption);
 
-            NetClient.Socket.Connect(new IPAddress(ip), port);
-            NetClient.Socket.EnableCompression();
-            // TODO: stackalloc
-            byte[] ss = new byte[4] { (byte) (seed >> 24), (byte) (seed >> 16), (byte) (seed >> 8), (byte) seed };
-            NetClient.Socket.Send(ss, 4, true, true);
-            NetClient.Socket.Send(new PSecondLogin(Account, Password, seed));
+            NetClient.Socket
+                     .Connect(new IPAddress(ip), port)
+                     .ContinueWith(
+                t =>
+                        {
+                            if (!t.IsFaulted)
+                            {
+                                NetClient.Socket.EnableCompression();
+                                // TODO: stackalloc
+                                byte[] ss = new byte[4] { (byte)(seed >> 24), (byte)(seed >> 16), (byte)(seed >> 8), (byte)seed };
+                                NetClient.Socket.Send(ss, 4, true, true);
+                                NetClient.Socket.Send(new PSecondLogin(Account, Password, seed));
+                            }
+                        }, TaskContinuationOptions.ExecuteSynchronously);
         }
 
 

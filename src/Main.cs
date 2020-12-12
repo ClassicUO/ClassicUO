@@ -21,7 +21,6 @@
 
 #endregion
 
-
 using System;
 using System.Diagnostics;
 using System.Globalization;
@@ -484,6 +483,12 @@ namespace ClassicUO
                         {
                             Settings.GlobalSettings.ForceDriver = 0;
                         }
+
+                        break;
+
+                    case "packetlog":
+                        
+                        CUOEnviroment.PacketLog = true;
 
                         break;
                 }
