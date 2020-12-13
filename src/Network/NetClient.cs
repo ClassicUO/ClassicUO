@@ -328,6 +328,19 @@ namespace ClassicUO.Network
                     Log.Error("socket error when sending:\n" + ex);
                     Disconnect(ex.SocketErrorCode);
                 }
+                catch (Exception ex)
+                {
+                    if (ex.InnerException is SocketException socketEx)
+                    {
+                        Log.Error("socket error when sending:\n" + socketEx);
+                        Disconnect(socketEx.SocketErrorCode);
+                    }
+                    else
+                    {
+                        Log.Error("fatal error when receiving:\n" + ex);
+                        Disconnect();
+                    }
+                }
             }
         }
 
@@ -466,8 +479,16 @@ namespace ClassicUO.Network
             }
             catch (Exception ex)
             {
-                Log.Error("fatal error when receiving:\n" + ex);
-                Disconnect();
+                if (ex.InnerException is SocketException socketEx)
+                {
+                    Log.Error("socket error when receiving:\n" + socketEx);
+                    Disconnect(socketEx.SocketErrorCode);
+                }
+                else
+                {
+                    Log.Error("fatal error when receiving:\n" + ex);
+                    Disconnect();
+                }
             }
         }
 
