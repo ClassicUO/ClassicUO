@@ -156,8 +156,8 @@ namespace ClassicUO.Network
                 ReceiveBufferSize = BUFF_SIZE,
                 SendBufferSize = BUFF_SIZE,
                 NoDelay = true,
-                ReceiveTimeout = -1,
-                SendTimeout = -1
+                ReceiveTimeout = 0,
+                SendTimeout = 0
             };
 
             _recvBuffer = new byte[BUFF_SIZE];
