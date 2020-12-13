@@ -75,9 +75,11 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 case 1: // prev
                     NetClient.Socket.Send(new PTipRequest((ushort) LocalSerial, 0));
+                    Dispose();
                     break;
                 case 2: // next
                     NetClient.Socket.Send(new PTipRequest((ushort) LocalSerial, 1));
+                    Dispose();
                     break;
             }
         }
