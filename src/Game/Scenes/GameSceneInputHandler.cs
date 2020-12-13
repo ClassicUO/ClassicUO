@@ -441,7 +441,7 @@ namespace ClassicUO.Game.Scenes
 
                             dropX = obj.X;
                             dropY = obj.Y;
-                            dropZ = obj.Z;
+                            dropZ = (sbyte)(obj.Z + it2.ItemData.Height);
                         }
                     }
                     else
