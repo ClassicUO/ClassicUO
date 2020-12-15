@@ -818,7 +818,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         private static UseSpellButtonGump GetSpellFloatingButton(int id)
         {
-            for (LinkedListNode<Control> i = UIManager.Gumps.Last; i != null; i = i.Previous)
+            for (LinkedListNode<Gump> i = UIManager.Gumps.Last; i != null; i = i.Previous)
             {
                 if (i.Value is UseSpellButtonGump g && g.SpellID == id)
                 {

@@ -176,8 +176,8 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 Point offset = Mouse.LDragOffset;
 
-                if (Math.Abs(offset.X) < Constants.MIN_PICKUP_DRAG_DISTANCE_PIXELS && Math.Abs
-                    (offset.Y) < Constants.MIN_PICKUP_DRAG_DISTANCE_PIXELS)
+                if (Math.Abs(offset.X) < Constants.MIN_PICKUP_DRAG_DISTANCE_PIXELS && 
+                    Math.Abs(offset.Y) < Constants.MIN_PICKUP_DRAG_DISTANCE_PIXELS)
                 {
                     IsMinimized = true;
                 }

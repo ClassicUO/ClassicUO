@@ -24,6 +24,7 @@
 using System;
 using System.Collections.Generic;
 using ClassicUO.Game.Managers;
+using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Input;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
@@ -110,13 +111,13 @@ namespace ClassicUO.Game.UI.Controls
     }
 
 
-    internal class ContextMenuShowMenu : Control
+    internal class ContextMenuShowMenu : Gump
     {
         private readonly AlphaBlendControl _background;
         private List<ContextMenuShowMenu> _subMenus;
 
 
-        public ContextMenuShowMenu(List<ContextMenuItemEntry> list)
+        public ContextMenuShowMenu(List<ContextMenuItemEntry> list) : base(0, 0)
         {
             WantUpdateSize = true;
             ModalClickOutsideAreaClosesThisControl = true;

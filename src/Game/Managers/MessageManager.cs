@@ -165,7 +165,7 @@ namespace ClassicUO.Game.Managers
                         msg.IsTextGump = true;
                         bool found = false;
 
-                        for (LinkedListNode<Control> gump = UIManager.Gumps.Last; gump != null; gump = gump.Previous)
+                        for (LinkedListNode<Gump> gump = UIManager.Gumps.Last; gump != null; gump = gump.Previous)
                         {
                             Control g = gump.Value;
 

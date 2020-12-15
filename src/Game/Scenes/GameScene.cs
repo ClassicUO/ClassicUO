@@ -77,7 +77,6 @@ namespace ClassicUO.Game.Scenes
         private bool _alphaChanged;
         private long _alphaTimer;
         private bool _deathScreenActive;
-        private Label _deathScreenLabel;
         private bool _forceStopScene;
         private HealthLinesManager _healthLinesManager;
 
@@ -327,8 +326,7 @@ namespace ClassicUO.Game.Scenes
             // special case for wmap. this allow us to save settings
             UIManager.GetGump<WorldMapGump>()?.SaveSettings();
 
-            ProfileManager.CurrentProfile?.Save
-                (ProfileManager.ProfilePath, UIManager.Gumps.OfType<Gump>().Where(s => s.CanBeSaved).Reverse().ToList());
+            ProfileManager.CurrentProfile?.Save(ProfileManager.ProfilePath);
 
             Macros.Save();
             InfoBars.Save();
@@ -834,8 +832,7 @@ namespace ClassicUO.Game.Scenes
                 return false;
             }
 
-            CheckDeathScreen();
-
+            CheckDeathScreen(batcher);
 
             int posX = ProfileManager.CurrentProfile.GameWindowPosition.X + 5;
             int posY = ProfileManager.CurrentProfile.GameWindowPosition.Y + 5;
@@ -1140,32 +1137,52 @@ namespace ClassicUO.Game.Scenes
             }
         }
 
-        private void CheckDeathScreen()
+        private static readonly RenderedText _youAreDeadText = RenderedText.Create(ResGeneral.YouAreDead, 0, 3, false, FontStyle.BlackBorder, TEXT_ALIGN_TYPE.TS_CENTER, 200);
+       
+        private void CheckDeathScreen(UltimaBatcher2D batcher)
         {
             if (ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.EnableDeathScreen)
             {
-                if (_deathScreenLabel == null || _deathScreenLabel.IsDisposed)
+                if (World.InGame)
                 {
                     if (World.Player.IsDead && World.Player.DeathScreenTimer > Time.Ticks)
                     {
-                        UIManager.Add
+                        _youAreDeadText.Draw
                         (
-                            _deathScreenLabel = new Label(ResGeneral.YouAreDead, false, 999, 200, 3)
-                            {
-                                X = (Client.Game.Window.ClientBounds.Width >> 1) - 50,
-                                Y = (Client.Game.Window.ClientBounds.Height >> 1) - 50
-                            }
+                            batcher,
+                            (Client.Game.Window.ClientBounds.Width >> 1) - 50,
+                            (Client.Game.Window.ClientBounds.Height >> 1) - 50
                         );
-
                         _deathScreenActive = true;
                     }
+                    else if (World.Player.DeathScreenTimer < Time.Ticks)
+                    {
+                        _deathScreenActive = false;
+                    }
                 }
-                else if (World.Player.DeathScreenTimer < Time.Ticks)
-                {
-                    _deathScreenActive = false;
-                    _deathScreenLabel?.Dispose();
-                    _deathScreenLabel = null;
-                }
+
+                //if (_deathScreenLabel == null || _deathScreenLabel.IsDisposed)
+                //{
+                //    if (World.Player.IsDead && World.Player.DeathScreenTimer > Time.Ticks)
+                //    {
+                //        UIManager.Add
+                //        (
+                //            _deathScreenLabel = new Label(ResGeneral.YouAreDead, false, 0, 200, 3)
+                //            {
+                //                X = (Client.Game.Window.ClientBounds.Width >> 1) - 50,
+                //                Y = (Client.Game.Window.ClientBounds.Height >> 1) - 50
+                //            }
+                //        );
+
+                //        _deathScreenActive = true;
+                //    }
+                //}
+                //else if (World.Player.DeathScreenTimer < Time.Ticks)
+                //{
+                //    _deathScreenActive = false;
+                //    _deathScreenLabel?.Dispose();
+                //    _deathScreenLabel = null;
+                //}
             }
         }
 
