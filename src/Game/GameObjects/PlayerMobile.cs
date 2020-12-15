@@ -1295,7 +1295,7 @@ namespace ClassicUO.Game.GameObjects
 
             int max = 0;
 
-            foreach (Control control in UIManager.Gumps)
+            foreach (Gump control in UIManager.Gumps)
             {
                 if (control is UseAbilityButtonGump s)
                 {
@@ -1413,7 +1413,7 @@ namespace ClassicUO.Game.GameObjects
 
         public void CloseRangedGumps()
         {
-            foreach (Control gump in UIManager.Gumps)
+            foreach (Gump gump in UIManager.Gumps)
             {
                 switch (gump)
                 {

@@ -119,7 +119,7 @@ namespace ClassicUO.Game.Managers
 
         public static bool IsModalControlOpen()
         {
-            foreach (Control control in Gumps)
+            foreach (Gump control in Gumps)
             {
                 if (control.IsModal)
                 {
@@ -177,7 +177,7 @@ namespace ClassicUO.Game.Managers
             }
             else
             {
-                foreach (Control s in Gumps)
+                foreach (Gump s in Gumps)
                 {
                     if (s.IsModal && s.ModalClickOutsideAreaClosesThisControl)
                     {

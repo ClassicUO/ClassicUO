@@ -242,7 +242,7 @@ namespace ClassicUO.Game.Managers
             AnchorableGump closestControl = null;
             int closestDistance = 99999;
 
-            foreach (Control c in UIManager.Gumps)
+            foreach (Gump c in UIManager.Gumps)
             {
                 if (!c.IsDisposed && c is AnchorableGump host && host.AnchorType == control.AnchorType)
                 {
