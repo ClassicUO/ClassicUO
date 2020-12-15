@@ -29,6 +29,7 @@ using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
+using ClassicUO.Utility.Platforms;
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Controls
@@ -296,14 +297,7 @@ namespace ClassicUO.Game.UI.Controls
                         {
                             Log.Info("LINK CLICKED: " + result.Link);
 
-                            try
-                            {
-                                Process.Start(result.Link);
-                            }
-                            catch (Exception ex)
-                            {
-                                Log.Error(ex.ToString());
-                            }
+                            PlatformHelper.LaunchBrowser(result.Link);
 
                             break;
                         }
