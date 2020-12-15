@@ -1066,6 +1066,7 @@ namespace ClassicUO.Game.GameObjects
 
                                 goto done;
 
+                            case 0x8FD:
                             case 0x4068: // Dual Short Axes
                                 Abilities[0] = Ability.DoubleStrike;
                                 Abilities[1] = Ability.InfectiousStrike;
