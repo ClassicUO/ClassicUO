@@ -47,8 +47,9 @@ namespace ClassicUO.Game.Data
 
                 case NotorietyFlag.Ally: return ProfileManager.CurrentProfile.FriendHue;
 
-                case NotorietyFlag.Criminal:
-                case NotorietyFlag.Gray: return ProfileManager.CurrentProfile.CriminalHue;
+                case NotorietyFlag.Criminal: return ProfileManager.CurrentProfile.CriminalHue;
+
+                case NotorietyFlag.Gray: return ProfileManager.CurrentProfile.CanAttackHue;
 
                 case NotorietyFlag.Enemy: return ProfileManager.CurrentProfile.EnemyHue;
 

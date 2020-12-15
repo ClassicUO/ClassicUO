@@ -223,15 +223,6 @@ namespace ClassicUO.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Animal Color.
-        /// </summary>
-        public static string AnimalColor {
-            get {
-                return ResourceManager.GetString("AnimalColor", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Anisotropic Clamp.
         /// </summary>
         public static string AnisotropicClamp {
@@ -435,6 +426,15 @@ namespace ClassicUO.Resources {
         public static string By {
             get {
                 return ResourceManager.GetString("By", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Can Be Attacked Color.
+        /// </summary>
+        public static string CanAttackColor {
+            get {
+                return ResourceManager.GetString("CanAttackColor", resourceCulture);
             }
         }
         

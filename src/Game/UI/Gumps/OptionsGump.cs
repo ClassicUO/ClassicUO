@@ -151,7 +151,7 @@ namespace ClassicUO.Game.UI.Gumps
         private ClickableColorBox _innocentColorPickerBox,
                                   _friendColorPickerBox,
                                   _crimialColorPickerBox,
-                                  _genericColorPickerBox,
+                                  _canAttackColorPickerBox,
                                   _enemyColorPickerBox,
                                   _murdererColorPickerBox,
                                   _neutralColorPickerBox,
@@ -1718,8 +1718,8 @@ namespace ClassicUO.Game.UI.Gumps
 
             startY += _innocentColorPickerBox.Height + 2;
 
-            _genericColorPickerBox = AddColorBox
-                (rightArea, startX, startY, _currentProfile.AnimalHue, ResGumps.AnimalColor);
+            _canAttackColorPickerBox = AddColorBox
+                (rightArea, startX, startY, _currentProfile.CanAttackHue, ResGumps.CanAttackColor);
 
             startY += _innocentColorPickerBox.Height + 2;
 
@@ -2274,7 +2274,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _innocentColorPickerBox.SetColor(0x005A, HuesLoader.Instance.GetPolygoneColor(12, 0x005A));
                     _friendColorPickerBox.SetColor(0x0044, HuesLoader.Instance.GetPolygoneColor(12, 0x0044));
                     _crimialColorPickerBox.SetColor(0x03b2, HuesLoader.Instance.GetPolygoneColor(12, 0x03b2));
-                    _genericColorPickerBox.SetColor(0x03b2, HuesLoader.Instance.GetPolygoneColor(12, 0x03b2));
+                    _canAttackColorPickerBox.SetColor(0x03b2, HuesLoader.Instance.GetPolygoneColor(12, 0x03b2));
                     _murdererColorPickerBox.SetColor(0x0023, HuesLoader.Instance.GetPolygoneColor(12, 0x0023));
                     _enemyColorPickerBox.SetColor(0x0031, HuesLoader.Instance.GetPolygoneColor(12, 0x0031));
                     _queryBeforAttackCheckbox.IsChecked = true;
@@ -2650,7 +2650,7 @@ namespace ClassicUO.Game.UI.Gumps
             _currentProfile.InnocentHue = _innocentColorPickerBox.Hue;
             _currentProfile.FriendHue = _friendColorPickerBox.Hue;
             _currentProfile.CriminalHue = _crimialColorPickerBox.Hue;
-            _currentProfile.AnimalHue = _genericColorPickerBox.Hue;
+            _currentProfile.CanAttackHue = _canAttackColorPickerBox.Hue;
             _currentProfile.EnemyHue = _enemyColorPickerBox.Hue;
             _currentProfile.MurdererHue = _murdererColorPickerBox.Hue;
             _currentProfile.EnabledCriminalActionQuery = _queryBeforAttackCheckbox.IsChecked;

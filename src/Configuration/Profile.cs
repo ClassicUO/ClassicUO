@@ -73,7 +73,7 @@ namespace ClassicUO.Configuration
         public ushort PartyAuraHue { get; set; } = 0x0044;
         public ushort FriendHue { get; set; } = 0x0044;
         public ushort CriminalHue { get; set; } = 0x03B2;
-        public ushort AnimalHue { get; set; } = 0x03B2;
+        public ushort CanAttackHue { get; set; } = 0x03B2;
         public ushort EnemyHue { get; set; } = 0x0031;
         public ushort MurdererHue { get; set; } = 0x0023;
         public ushort BeneficHue { get; set; } = 0x0059;

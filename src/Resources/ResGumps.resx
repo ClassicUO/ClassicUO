@@ -611,8 +611,8 @@ Murderers, Criminals, Grays (Monsters/Animals)</value>
   <data name="CriminalColor" xml:space="preserve">
     <value>Criminal Color</value>
   </data>
-  <data name="AnimalColor" xml:space="preserve">
-    <value>Animal Color</value>
+  <data name="CanAttackColor" xml:space="preserve">
+    <value>Can Be Attacked Color</value>
   </data>
   <data name="MurdererColor" xml:space="preserve">
     <value>Murderer Color</value>
