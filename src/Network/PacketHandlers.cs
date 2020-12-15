@@ -3211,14 +3211,7 @@ namespace ClassicUO.Network
 
             if (!string.IsNullOrEmpty(url))
             {
-                try
-                {
-                    Process.Start(url);
-                }
-                catch (Exception)
-                {
-                    Log.Warn("Failed to open url: " + url);
-                }
+                PlatformHelper.LaunchBrowser(url);
             }
         }
 
