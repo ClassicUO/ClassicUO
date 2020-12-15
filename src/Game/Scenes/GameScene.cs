@@ -76,7 +76,6 @@ namespace ClassicUO.Game.Scenes
         private static XBREffect _xbr;
         private bool _alphaChanged;
         private long _alphaTimer;
-        private bool _deathScreenActive;
         private bool _forceStopScene;
         private HealthLinesManager _healthLinesManager;
 
@@ -832,14 +831,18 @@ namespace ClassicUO.Game.Scenes
                 return false;
             }
 
-            CheckDeathScreen(batcher);
 
             int posX = ProfileManager.CurrentProfile.GameWindowPosition.X + 5;
             int posY = ProfileManager.CurrentProfile.GameWindowPosition.Y + 5;
             int width = ProfileManager.CurrentProfile.GameWindowSize.X;
             int height = ProfileManager.CurrentProfile.GameWindowSize.Y;
 
+            if (CheckDeathScreen(batcher, posX, posY, width, height))
+            {
+                return true;
+            }
 
+            
             Viewport r_viewport = batcher.GraphicsDevice.Viewport;
             Viewport camera_viewport = Camera.GetViewport();
 
@@ -992,34 +995,30 @@ namespace ClassicUO.Game.Scenes
                 CircleOfTransparency.Draw(batcher, fx, fy);
             }
 
-            if (!_deathScreenActive)
+            RenderedObjectsCount = 0;
+
+            int z = World.Player.Z + 5;
+
+            for (int i = 0; i < _renderListCount; ++i)
             {
-                RenderedObjectsCount = 0;
+                GameObject obj = _renderList[i];
 
-                int z = World.Player.Z + 5;
-
-                for (int i = 0; i < _renderListCount; ++i)
+                if (obj.Z <= _maxGroundZ)
                 {
-                    GameObject obj = _renderList[i];
+                    GameObject.DrawTransparent = usecircle && obj.TransparentTest(z);
 
-                    if (obj.Z <= _maxGroundZ)
+                    if (obj.Draw(batcher, obj.RealScreenPosition.X, obj.RealScreenPosition.Y))
                     {
-                        GameObject.DrawTransparent = usecircle && obj.TransparentTest(z);
-
-                        if (obj.Draw(batcher, obj.RealScreenPosition.X, obj.RealScreenPosition.Y))
-                        {
-                            ++RenderedObjectsCount;
-                        }
+                        ++RenderedObjectsCount;
                     }
-                }
-
-                if (_multi != null && TargetManager.IsTargeting &&
-                    TargetManager.TargetingState == CursorTarget.MultiPlacement)
-                {
-                    _multi.Draw(batcher, _multi.RealScreenPosition.X, _multi.RealScreenPosition.Y);
                 }
             }
 
+            if (_multi != null && TargetManager.IsTargeting &&
+                TargetManager.TargetingState == CursorTarget.MultiPlacement)
+            {
+                _multi.Draw(batcher, _multi.RealScreenPosition.X, _multi.RealScreenPosition.Y);
+            }
 
             // draw weather
             Weather.Draw(batcher, 0, 0);
@@ -1034,7 +1033,7 @@ namespace ClassicUO.Game.Scenes
 
         private bool PrepareLightsRendering(UltimaBatcher2D batcher, ref Matrix matrix)
         {
-            if (_deathScreenActive || !UseLights && !UseAltLights ||
+            if (!UseLights && !UseAltLights ||
                 World.Player.IsDead && ProfileManager.CurrentProfile.EnableBlackWhiteEffect || _lightRenderTarget == null)
             {
                 return false;
@@ -1137,9 +1136,9 @@ namespace ClassicUO.Game.Scenes
             }
         }
 
-        private static readonly RenderedText _youAreDeadText = RenderedText.Create(ResGeneral.YouAreDead, 0, 3, false, FontStyle.BlackBorder, TEXT_ALIGN_TYPE.TS_CENTER, 200);
+        private static readonly RenderedText _youAreDeadText = RenderedText.Create(ResGeneral.YouAreDead, 0xFFFF, 3, false, FontStyle.BlackBorder, TEXT_ALIGN_TYPE.TS_LEFT);
        
-        private void CheckDeathScreen(UltimaBatcher2D batcher)
+        private bool CheckDeathScreen(UltimaBatcher2D batcher, int x, int y, int width, int height)
         {
             if (ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.EnableDeathScreen)
             {
@@ -1147,43 +1146,21 @@ namespace ClassicUO.Game.Scenes
                 {
                     if (World.Player.IsDead && World.Player.DeathScreenTimer > Time.Ticks)
                     {
+                        batcher.Begin();
                         _youAreDeadText.Draw
                         (
                             batcher,
-                            (Client.Game.Window.ClientBounds.Width >> 1) - 50,
-                            (Client.Game.Window.ClientBounds.Height >> 1) - 50
+                            x + (width / 2 - _youAreDeadText.Width / 2),
+                            y + height / 2
                         );
-                        _deathScreenActive = true;
-                    }
-                    else if (World.Player.DeathScreenTimer < Time.Ticks)
-                    {
-                        _deathScreenActive = false;
+                        batcher.End();
+
+                        return true;
                     }
                 }
-
-                //if (_deathScreenLabel == null || _deathScreenLabel.IsDisposed)
-                //{
-                //    if (World.Player.IsDead && World.Player.DeathScreenTimer > Time.Ticks)
-                //    {
-                //        UIManager.Add
-                //        (
-                //            _deathScreenLabel = new Label(ResGeneral.YouAreDead, false, 0, 200, 3)
-                //            {
-                //                X = (Client.Game.Window.ClientBounds.Width >> 1) - 50,
-                //                Y = (Client.Game.Window.ClientBounds.Height >> 1) - 50
-                //            }
-                //        );
-
-                //        _deathScreenActive = true;
-                //    }
-                //}
-                //else if (World.Player.DeathScreenTimer < Time.Ticks)
-                //{
-                //    _deathScreenActive = false;
-                //    _deathScreenLabel?.Dispose();
-                //    _deathScreenLabel = null;
-                //}
             }
+
+            return false;
         }
 
         private void StopFollowing()
