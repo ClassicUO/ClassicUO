@@ -464,11 +464,12 @@ namespace ClassicUO.IO.Resources
                                 AnimIdxBlock* aidx = (AnimIdxBlock*) (address + offset * animIdxBlockSize);
                                 offset++;
 
-                                if ((long) aidx < maxAddress0 && aidx->Size != 0 && aidx->Position != 0xFFFFFFFF && aidx->Size != 0xFFFFFFFF)
+                                // some custom animations uses aidx.Size == 0, but give a good position address...
+                                if ((long) aidx < maxAddress0 && /*aidx->Size != 0 &&*/ aidx->Position != 0xFFFFFFFF && aidx->Size != 0xFFFFFFFF)
                                 {
                                     DataIndex[i].Groups[j].Direction[d].Address = aidx->Position;
 
-                                    DataIndex[i].Groups[j].Direction[d].Size = aidx->Size;
+                                    DataIndex[i].Groups[j].Direction[d].Size = Math.Max(1, aidx->Size);
 
                                     isValid = true;
                                 }
@@ -690,8 +691,12 @@ namespace ClassicUO.IO.Resources
                                             DataIndex[index].MountedHeightOffset = mountedHeightOffset;
                                         }
 
-                                        DataIndex[index].GraphicConversion = (ushort) (realAnimID | 0x8000);
+                                        if (index == 270)
+                                        {
 
+                                        }
+
+                                        DataIndex[index].GraphicConversion = (ushort) (realAnimID | 0x8000);
                                         DataIndex[index].FileIndex = (byte) animFile;
 
                                         addressOffset += currentIdxFile.StartAddress.ToInt64();
@@ -707,31 +712,27 @@ namespace ClassicUO.IO.Resources
 
                                             if (DataIndex[index].BodyConvGroups[j].Direction == null)
                                             {
-                                                DataIndex[index].BodyConvGroups[j].Direction =
-                                                    new AnimationDirection[5];
+                                                DataIndex[index].BodyConvGroups[j].Direction = new AnimationDirection[5];
                                             }
 
                                             for (byte d = 0; d < 5; d++)
                                             {
                                                 if (DataIndex[index].BodyConvGroups[j].Direction[d] == null)
                                                 {
-                                                    DataIndex[index].BodyConvGroups[j].Direction[d] =
-                                                        new AnimationDirection();
+                                                    DataIndex[index].BodyConvGroups[j].Direction[d] = new AnimationDirection();
                                                 }
 
-                                                AnimIdxBlock* aidx =
-                                                    (AnimIdxBlock*) (addressOffset + offset * animIdxBlockSize);
+                                                AnimIdxBlock* aidx = (AnimIdxBlock*) (addressOffset + offset * animIdxBlockSize);
 
-                                                offset++;
+                                                ++offset;
 
-                                                if ((long) aidx < maxaddress && aidx->Size != 0 && aidx->Position != 0xFFFFFFFF &&
-                                                    aidx->Size != 0xFFFFFFFF)
+                                                // some custom animations uses aidx.Size == 0, but give a good position address...
+                                                if ((long) aidx < maxaddress && /*aidx->Size != 0 &&*/ aidx->Position != 0xFFFFFFFF && aidx->Size != 0xFFFFFFFF)
                                                 {
-                                                    AnimationDirection dataindex =
-                                                        DataIndex[index].BodyConvGroups[j].Direction[d];
+                                                    AnimationDirection dataindex = DataIndex[index].BodyConvGroups[j].Direction[d];
 
                                                     dataindex.Address = aidx->Position;
-                                                    dataindex.Size = aidx->Size;
+                                                    dataindex.Size = Math.Max(1, aidx->Size);
                                                     dataindex.FileIndex = animFile;
                                                 }
                                             }
@@ -1914,9 +1915,7 @@ namespace ClassicUO.IO.Resources
                     }
                 }
 
-                AnimationDirection direction1 = Instance.GetBodyAnimationGroup
-                                                            (ref id, ref animGroup, ref hue, true)
-                                                        .Direction[0];
+                AnimationDirection direction1 = Instance.GetBodyAnimationGroup(ref id, ref animGroup, ref hue, true).Direction[0];
 
                 if (direction1 != null)
                 {
