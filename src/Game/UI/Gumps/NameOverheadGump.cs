@@ -356,14 +356,18 @@ namespace ClassicUO.Game.UI.Gumps
                                 else if (obj is Item it2 && (it2.ItemData.IsSurface || it2.ItemData.IsStackable &&
                                     it2.DisplayedGraphic == ItemHold.DisplayedGraphic))
                                 {
-                                    if (!it2.ItemData.IsSurface)
-                                    {
-                                        drop_container = obj.Serial;
-                                    }
-
                                     dropX = obj.X;
                                     dropY = obj.Y;
                                     dropZ = obj.Z;
+
+                                    if (it2.ItemData.IsSurface)
+                                    {
+                                        dropZ += (sbyte)(it2.ItemData.Height == 0xFF ? 0 : it2.ItemData.Height);
+                                    }
+                                    else
+                                    {
+                                        drop_container = obj.Serial;
+                                    }
                                 }
                             }
                             else
