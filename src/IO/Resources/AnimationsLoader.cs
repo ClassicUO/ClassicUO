@@ -462,14 +462,12 @@ namespace ClassicUO.IO.Resources
                                 }
 
                                 AnimIdxBlock* aidx = (AnimIdxBlock*) (address + offset * animIdxBlockSize);
-                                offset++;
+                                ++offset;
 
-                                // some custom animations uses aidx.Size == 0, but give a good position address...
-                                if ((long) aidx < maxAddress0 && /*aidx->Size != 0 &&*/ aidx->Position != 0xFFFFFFFF && aidx->Size != 0xFFFFFFFF)
+                                if ((long) aidx < maxAddress0 && aidx->Size != 0 && aidx->Position != 0xFFFFFFFF && aidx->Size != 0xFFFFFFFF)
                                 {
                                     DataIndex[i].Groups[j].Direction[d].Address = aidx->Position;
-
-                                    DataIndex[i].Groups[j].Direction[d].Size = Math.Max(1, aidx->Size);
+                                    DataIndex[i].Groups[j].Direction[d].Size = aidx->Size;
 
                                     isValid = true;
                                 }
