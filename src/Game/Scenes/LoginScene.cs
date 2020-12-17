@@ -977,7 +977,7 @@ namespace ClassicUO.Game.Scenes
                     }
                 }
 
-                PacketLoss = (PacketLoss / _resultIndex) * 100;
+                PacketLoss = (Math.Max(1, PacketLoss) / Math.Max(1, _resultIndex)) * 100;
 
                 //_resultIndex = 0;
             }
