@@ -3968,6 +3968,11 @@ namespace ClassicUO.Network
                         case 2: //statusbar
                             UIManager.GetGump<HealthBarGump>(serial)?.Dispose();
 
+                            if (serial == World.Player.Serial)
+                            {
+                                StatusGumpBase.GetStatusGump()?.Dispose();
+                            }
+                            
                             break;
 
                         case 8: // char profile
