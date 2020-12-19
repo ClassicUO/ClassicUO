@@ -36,6 +36,16 @@ namespace ClassicUO.Utility
                 Directory.CreateDirectory(path);
             }
 
+            char[] invalid = Path.GetInvalidFileNameChars();
+
+            for (int i = 0; i < parts.Length; i++)
+            {
+                for (int j = 0; j < invalid.Length; j++)
+                {
+                    parts[i] = parts[i].Replace(invalid[j].ToString(), "");
+                }
+            }
+
             StringBuilder sb = new StringBuilder();
 
             foreach (string part in parts)
