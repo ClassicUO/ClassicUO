@@ -398,7 +398,7 @@ namespace ClassicUO.Network
                     if (packetlength > 0)
                     {
                         // Patch to maintain a retrocompatibiliy with older cuoapi
-                        byte[] data = new byte[length]; // _packetBuffer;
+                        byte[] data = new byte[packetlength]; // _packetBuffer;
 
                         packetlength = _circularBuffer.Dequeue(data, 0, packetlength);
 
