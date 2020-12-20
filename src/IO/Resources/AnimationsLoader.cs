@@ -689,11 +689,6 @@ namespace ClassicUO.IO.Resources
                                             DataIndex[index].MountedHeightOffset = mountedHeightOffset;
                                         }
 
-                                        if (index == 270)
-                                        {
-
-                                        }
-
                                         DataIndex[index].GraphicConversion = (ushort) (realAnimID | 0x8000);
                                         DataIndex[index].FileIndex = (byte) animFile;
 
@@ -724,7 +719,6 @@ namespace ClassicUO.IO.Resources
 
                                                 ++offset;
 
-                                                // some custom animations uses aidx.Size == 0, but give a good position address...
                                                 if ((long) aidx < maxaddress && /*aidx->Size != 0 &&*/ aidx->Position != 0xFFFFFFFF && aidx->Size != 0xFFFFFFFF)
                                                 {
                                                     AnimationDirection dataindex = DataIndex[index].BodyConvGroups[j].Direction[d];
@@ -1026,7 +1020,7 @@ namespace ClassicUO.IO.Resources
                 graphic < 400 ? ANIMATION_GROUPS_TYPE.ANIMAL : ANIMATION_GROUPS_TYPE.HUMAN;
         }
 
-        public void ConvertBodyIfNeeded(ref ushort graphic, bool isParent = false)
+        public void ConvertBodyIfNeeded(ref ushort graphic, bool isParent = false, bool forceUOP = false)
         {
             if (graphic >= Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT)
             {
@@ -1035,7 +1029,7 @@ namespace ClassicUO.IO.Resources
 
             IndexAnimation dataIndex = DataIndex[graphic];
 
-            if (dataIndex.IsUOP && (isParent || !dataIndex.IsValidMUL))
+            if ((dataIndex.IsUOP && (isParent || !dataIndex.IsValidMUL)) || forceUOP)
             {
                 // do nothing ?
             }
@@ -1063,13 +1057,13 @@ namespace ClassicUO.IO.Resources
             }
         }
 
-        public AnimationGroup GetBodyAnimationGroup(ref ushort graphic, ref byte group, ref ushort hue, bool isParent = false)
+        public AnimationGroup GetBodyAnimationGroup(ref ushort graphic, ref byte group, ref ushort hue, bool isParent = false, bool forceUOP = false)
         {
             if (graphic < Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT && group < 100)
             {
                 IndexAnimation index = DataIndex[graphic];
 
-                if (index.IsUOP && (isParent || !index.IsValidMUL))
+                if ((index.IsUOP && (isParent || !index.IsValidMUL)) || forceUOP)
                 {
                     AnimationGroupUop uop = index.GetUopGroup(group);
 
@@ -1220,7 +1214,7 @@ namespace ClassicUO.IO.Resources
                 {
                     if (!DataIndex[i].HasBodyConversion)
                     {
-                        DataIndex[i].GraphicConversion = (ushort) (DataIndex[i].GraphicConversion & ~0x8000);
+                       DataIndex[i].GraphicConversion = (ushort) (DataIndex[i].GraphicConversion & ~0x8000);
                     }
                 }
             }

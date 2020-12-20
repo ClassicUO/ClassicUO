@@ -242,7 +242,7 @@ namespace ClassicUO.Game.GameObjects
                 }
             }
 
-            DrawInternal(batcher, this, null, drawX, drawY, IsFlipped, animIndex, false, graphic, animGroup, dir, isHuman, alpha: HueVector.Z);
+            DrawInternal(batcher, this, null, drawX, drawY, IsFlipped, animIndex, false, graphic, animGroup, dir, isHuman, alpha: HueVector.Z, forceUOP: isGargoyle);
 
             if (!IsEmpty)
             {
@@ -347,7 +347,7 @@ namespace ClassicUO.Game.GameObjects
                                 DrawInternal
                                 (
                                     batcher, this, item, drawX, drawY, IsFlipped, animIndex, false, graphic, GetGroupForAnimation(this, graphic, true), dir, isHuman, true,
-                                    alpha: HueVector.Z
+                                    alpha: HueVector.Z, forceUOP: true
                                 );
                             }
                             else
@@ -418,6 +418,7 @@ namespace ClassicUO.Game.GameObjects
             bool isHuman,
             bool isParent = true,
             bool isMount = false,
+            bool forceUOP = false,
             float alpha = 0
         )
         {
@@ -428,7 +429,7 @@ namespace ClassicUO.Game.GameObjects
 
             ushort hueFromFile = _viewHue;
 
-            AnimationDirection direction = AnimationsLoader.Instance.GetBodyAnimationGroup(ref id, ref animGroup, ref hueFromFile, isParent)
+            AnimationDirection direction = AnimationsLoader.Instance.GetBodyAnimationGroup(ref id, ref animGroup, ref hueFromFile, isParent, forceUOP)
                                                            .Direction[dir];
 
             if (direction == null || direction.Address == -1 || direction.FileIndex == -1)
