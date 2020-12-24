@@ -1266,8 +1266,8 @@ namespace ClassicUO.Network
             WriteByte(0);
             WriteByte(1);
             WriteUShort(0);
-            WriteASCII(title, 60);
-            WriteASCII(author, 30);
+            WriteUTF8(title, 60);
+            WriteUTF8(author, 30);
         }
     }
 
