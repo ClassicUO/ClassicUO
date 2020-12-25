@@ -254,19 +254,37 @@ namespace ClassicUO.Game.Managers
                 width = 0;
             }
 
+
+            ushort fixedColor = (ushort)(hue & 0x3FFF);
+
+            if (fixedColor != 0)
+            {
+                if (fixedColor >= 0x0BB8)
+                {
+                    fixedColor = 1;
+                }
+
+                fixedColor |= (ushort)(hue & 0xC000);
+            }
+            else
+            {
+                fixedColor = (ushort)(hue & 0x8000);
+            }
+
             TextObject textObject = TextObject.Create();
             textObject.Alpha = 0xFF;
             textObject.Type = type;
-            textObject.Hue = hue;
+            textObject.Hue = fixedColor;
+            
 
             if (!isunicode && textType == TextType.OBJECT)
             {
-                hue = 0;
+                fixedColor = 0;
             }
 
             textObject.RenderedText = RenderedText.Create
             (
-                msg, hue, font, isunicode, FontStyle.BlackBorder, TEXT_ALIGN_TYPE.TS_LEFT, width, 30, false, false,
+                msg, fixedColor, font, isunicode, FontStyle.BlackBorder, TEXT_ALIGN_TYPE.TS_LEFT, width, 30, false, false,
                 textType == TextType.OBJECT
             );
 
