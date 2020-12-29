@@ -349,9 +349,23 @@ namespace ClassicUO.Network
         {
             ProcessRecv();
 
-            while (_pluginRecvQueue.TryDequeue(out byte[] data))
+            while (_pluginRecvQueue.TryDequeue(out byte[] data) && data != null && data.Length != 0)
             {
-                PacketHandlers.Handlers.AnalyzePacket(data, data.Length);
+                int length = PacketsTable.GetPacketLength(data[0]);
+                int offset = 1;
+
+                if (length == -1)
+                {
+                    if (data.Length < 3)
+                    {
+                        continue;
+                    }
+
+                    length = data[2] | (data[1] << 8);
+                    offset = 3;
+                }
+
+                PacketHandlers.Handlers.AnalyzePacket(data, offset, length);
             }
         }
 
@@ -368,39 +382,17 @@ namespace ClassicUO.Network
 
                 while (length > 0 && IsConnected)
                 {
-                    byte id = _circularBuffer.GetID();
-
-                    if (id == 0xFF)
+                    if (!GetPacketInfo(_circularBuffer, length, out int offset, out int packetlength))
                     {
                         break;
                     }
-
-                    int packetlength = PacketsTable.GetPacketLength(id);
-
-                    if (packetlength == -1)
-                    {
-                        if (length >= 3)
-                        {
-                            packetlength = _circularBuffer.GetLength();
-                        }
-                        else
-                        {
-                            break;
-                        }
-                    }
-
-                    if (length < packetlength)
-                    {
-                        break;
-                    }
-
 
                     if (packetlength > 0)
                     {
                         // Patch to maintain a retrocompatibiliy with older cuoapi
                         byte[] data = new byte[packetlength]; // _packetBuffer;
 
-                        packetlength = _circularBuffer.Dequeue(data, 0, packetlength);
+                        _circularBuffer.Dequeue(data, 0, packetlength);
 
                         if (CUOEnviroment.PacketLog)
                         {
@@ -409,7 +401,7 @@ namespace ClassicUO.Network
 
                         if (Plugin.ProcessRecvPacket(ref data, ref packetlength))
                         {
-                            PacketHandlers.Handlers.AnalyzePacket(data, packetlength);
+                            PacketHandlers.Handlers.AnalyzePacket(data, offset, packetlength);
 
                             Statistics.TotalPacketsReceived++;
                         }
@@ -418,6 +410,33 @@ namespace ClassicUO.Network
                     length = _circularBuffer?.Length ?? 0;
                 }
             }
+        }
+
+        private static bool GetPacketInfo(CircularBuffer buffer, int bufferLength, out int offset, out int length)
+        {
+            if (buffer == null || bufferLength <= 0)
+            {
+                length = 0;
+                offset = 0;
+
+                return false;
+            }
+
+            length = PacketsTable.GetPacketLength(buffer.GetID());
+            offset = 1;
+
+            if (length == -1)
+            {
+                if (bufferLength < 3)
+                {
+                    return false;
+                }
+
+                length = buffer.GetLength();
+                offset = 3;
+            }
+
+            return bufferLength >= length;
         }
 
         private void ProcessRecv()

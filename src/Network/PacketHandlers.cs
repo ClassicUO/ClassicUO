@@ -68,24 +68,15 @@ namespace ClassicUO.Network
         }
 
 
-        public void AnalyzePacket(byte[] data, int length)
+        public void AnalyzePacket(byte[] data, int offset, int length)
         {
             OnPacketBufferReader bufferReader = _handlers[data[0]];
 
             if (bufferReader != null)
             {
-                int packetLength = PacketsTable.GetPacketLength(data[0]);
-                int position = 1;
-
-                if (packetLength < 0)
+                PacketBufferReader buffer = new PacketBufferReader(data, length)
                 {
-                    packetLength = length;
-                    position = 3;
-                }
-
-                PacketBufferReader buffer = new PacketBufferReader(data, packetLength)
-                {
-                    Position = position
+                    Position = offset
                 };
 
                 bufferReader(ref buffer);
