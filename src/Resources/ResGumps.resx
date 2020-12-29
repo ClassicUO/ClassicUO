@@ -1414,4 +1414,7 @@ Client version: '{0}'</value>
   <data name="ShowStatsChangedMessage" xml:space="preserve">
     <value>Inform when stats change</value>
   </data>
+  <data name="ShadowStatics" xml:space="preserve">
+    <value>Show tree and rock shadows</value>
+  </data>
 </root>

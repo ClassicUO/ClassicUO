@@ -81,25 +81,19 @@ namespace ClassicUO.Game.GameObjects
 
             ShaderHueTranslator.GetHueVector(ref HueVector, hue, partial, 0);
 
-            //Engine.DebugInfo.StaticsRendered++;
+            bool isTree = StaticFilters.IsTree(graphic, out _);
 
-            //if ((StaticFilters.IsTree(Graphic) || ItemData.IsFoliage || StaticFilters.IsRock(Graphic)))
-            //{
-            //    batcher.DrawSpriteShadow(Texture, posX - Bounds.X, posY - Bounds.Y /*- 10*/, false);
-            //}
-
-            if (StaticFilters.IsTree(graphic, out _))
+            if (isTree && ProfileManager.CurrentProfile.TreeToStumps)
             {
                 graphic = Constants.TREE_REPLACE_GRAPHIC;
             }
-
 
             if (AlphaHue != 255)
             {
                 HueVector.Z = 1f - AlphaHue / 255f;
             }
 
-            DrawStaticAnimated(batcher, graphic, posX, posY, ref HueVector, ref DrawTransparent);
+            DrawStaticAnimated(batcher, graphic, posX, posY, ref HueVector, ref DrawTransparent, ProfileManager.CurrentProfile.ShadowsEnabled && ProfileManager.CurrentProfile.ShadowsStatics && (isTree || ItemData.IsFoliage || StaticFilters.IsRock(graphic)));
 
             if (ItemData.IsLight)
             {

@@ -231,7 +231,8 @@ namespace ClassicUO.Game.GameObjects
             int x,
             int y,
             ref Vector3 hue,
-            ref bool transparent
+            ref bool transparent,
+            bool shadow
         )
         {
             ref UOFileIndex index = ref ArtLoader.Instance.GetValidRefEntry(graphic + 0x4000);
@@ -295,6 +296,11 @@ namespace ClassicUO.Game.GameObjects
                 x -= index.Width;
                 y -= index.Height;
 
+
+                if (shadow)
+                {
+                    batcher.DrawSpriteShadow(texture, x, y, false);
+                }
 
                 batcher.DrawSprite(texture, x, y, false, ref hue);
             }

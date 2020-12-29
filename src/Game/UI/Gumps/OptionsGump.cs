@@ -199,7 +199,7 @@ namespace ClassicUO.Game.UI.Gumps
                          _enableBlackWhiteEffect,
                          _altLights,
                          _enableLight,
-                         _enableShadows,
+                         _enableShadows, _enableShadowsStatics,
                          _auraMouse,
                          _runMouseInSeparateThread,
                          _useColoredLights,
@@ -1132,6 +1132,10 @@ namespace ClassicUO.Game.UI.Gumps
                 _enableShadows = AddCheckBox
                     (null, ResGumps.Shadows, _currentProfile.ShadowsEnabled, startX, startY)
             );
+
+            section5.PushIndent();
+            section5.Add(_enableShadowsStatics = AddCheckBox(null, ResGumps.ShadowStatics, _currentProfile.ShadowsStatics, startX, startY));
+            section5.PopIndent();
 
 
             SettingsSection section6 = AddSettingsSection(box, "Filters");
@@ -2223,6 +2227,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _useColoredLights.IsChecked = false;
                     _darkNights.IsChecked = false;
                     _enableShadows.IsChecked = true;
+                    _enableShadowsStatics.IsChecked = true;
                     _runMouseInSeparateThread.IsChecked = true;
                     _auraMouse.IsChecked = true;
                     _partyAura.IsChecked = true;
@@ -2623,6 +2628,7 @@ namespace ClassicUO.Game.UI.Gumps
             _currentProfile.UseColoredLights = _useColoredLights.IsChecked;
             _currentProfile.UseDarkNights = _darkNights.IsChecked;
             _currentProfile.ShadowsEnabled = _enableShadows.IsChecked;
+            _currentProfile.ShadowsStatics = _enableShadowsStatics.IsChecked;
             _currentProfile.AuraUnderFeetType = _auraType.SelectedIndex;
             _currentProfile.FilterType = _filterType.SelectedIndex;
 

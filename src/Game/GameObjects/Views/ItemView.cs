@@ -144,7 +144,7 @@ namespace ClassicUO.Game.GameObjects
 
             if (!IsMulti && !IsCoin && Amount > 1 && ItemData.IsStackable)
             {
-                DrawStaticAnimated(batcher, graphic, posX - 5, posY - 5, ref HueVector, ref DrawTransparent);
+                DrawStaticAnimated(batcher, graphic, posX - 5, posY - 5, ref HueVector, ref DrawTransparent, false);
             }
 
             if (ItemData.IsLight)
@@ -157,7 +157,7 @@ namespace ClassicUO.Game.GameObjects
                 HueVector.Z = 0.5f;
             }
 
-            DrawStaticAnimated(batcher, graphic, posX, posY, ref HueVector, ref DrawTransparent);
+            DrawStaticAnimated(batcher, graphic, posX, posY, ref HueVector, ref DrawTransparent, false);
 
             if (SelectedObject.Object == this || TargetManager.TargetingState == CursorTarget.MultiPlacement)
             {

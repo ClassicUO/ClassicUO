@@ -127,7 +127,7 @@ namespace ClassicUO.Game.GameObjects
                 HueVector.Z = 1f - AlphaHue / 255f;
             }
 
-            DrawStaticAnimated(batcher, graphic, posX, posY, ref HueVector, ref DrawTransparent);
+            DrawStaticAnimated(batcher, graphic, posX, posY, ref HueVector, ref DrawTransparent, false);
 
             if (ItemData.IsLight)
             {

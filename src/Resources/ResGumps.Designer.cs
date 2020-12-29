@@ -2955,6 +2955,15 @@ namespace ClassicUO.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Show tree and rock shadows.
+        /// </summary>
+        public static string ShadowStatics {
+            get {
+                return ResourceManager.GetString("ShadowStatics", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Hold Shift for Context Menus.
         /// </summary>
         public static string ShiftContext {

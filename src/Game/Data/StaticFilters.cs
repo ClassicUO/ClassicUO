@@ -264,13 +264,6 @@ namespace ClassicUO.Game.Data
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsTree(ushort g, out int index)
         {
-            if (ProfileManager.CurrentProfile != null && !ProfileManager.CurrentProfile.TreeToStumps)
-            {
-                index = 0;
-
-                return false;
-            }
-
             STATIC_TILES_FILTER_FLAGS flag = _filteredTiles[g];
 
             if ((flag & STATIC_TILES_FILTER_FLAGS.STFF_STUMP) != 0)
