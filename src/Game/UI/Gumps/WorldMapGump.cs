@@ -89,6 +89,8 @@ namespace ClassicUO.Game.UI.Gumps
         private bool _showPlayerName = true;
         private int _zoomIndex = 4;
 
+        private WMapMarker _gotoMarker;
+
         private readonly float[] _zooms = new float[10] { 0.125f, 0.25f, 0.5f, 0.75f, 1f, 1.5f, 2f, 4f, 6f, 8f };
 
         public WorldMapGump() : base(400, 400, 100, 100, 0, 0)
@@ -254,6 +256,78 @@ namespace ClassicUO.Game.UI.Gumps
             _options["flip_map"] = new ContextMenuItemEntry
                 (ResGumps.FlipMap, () => { _flipMap = !_flipMap; }, true, _flipMap);
 
+            _options["goto_location"] = new ContextMenuItemEntry
+            (
+                ResGumps.GotoLocation, () =>
+                {
+                    EntryDialog dialog = new EntryDialog
+                    (
+                        250, 150, ResGumps.EnterLocation, name =>
+                        {
+                            _gotoMarker = null;
+
+                            if (string.IsNullOrWhiteSpace(name))
+                            {
+                                GameActions.Print(ResGumps.InvalidLocation, 0x35);
+                                return;
+                            }
+
+                            int x = -1;
+                            int y = -1;
+
+                            string[] coords = name.Split(' ');
+
+                            if (coords.Length < 2)
+                            {
+                                try
+                                {
+                                    ConvertCoords(name, ref x, ref y);
+                                }
+                                catch
+                                {
+                                    GameActions.Print(ResGumps.InvalidLocation, 0x35);
+                                }
+                            }
+                            else
+                            {
+                                if (!int.TryParse(coords[0], out x))
+                                {
+                                    GameActions.Print(ResGumps.InvalidLocation, 0x35);
+                                }
+
+                                if (!int.TryParse(coords[1], out y))
+                                {
+                                    GameActions.Print(ResGumps.InvalidLocation, 0x35);
+                                }
+                            }
+
+                            if (x != -1 && y != -1)
+                            {
+                                FreeView = true;
+
+                                _gotoMarker = new WMapMarker
+                                {
+                                    Color = Color.Aquamarine,
+                                    MapId = World.MapIndex,
+                                    Name = $"Go to: {x}, {y}",
+                                    X = x,
+                                    Y = y,
+                                    ZoomIndex = 1
+                                };
+
+                                _center.X = x;
+                                _center.Y = y;
+                            }
+                        }
+                    )
+                    {
+                        CanCloseWithRightClick = true
+                    };
+
+                    UIManager.Add(dialog);
+                }
+            );
+
             _options["top_most"] = new ContextMenuItemEntry
                 (ResGumps.TopMost, () => { TopMost = !TopMost; }, true, _isTopMost);
 
@@ -367,6 +441,7 @@ namespace ClassicUO.Game.UI.Gumps
             ContextMenu.Add(namesHpBarEntry);
 
             ContextMenu.Add("", null);
+            ContextMenu.Add(_options["goto_location"]);
             ContextMenu.Add(_options["flip_map"]);
             ContextMenu.Add(_options["top_most"]);
             ContextMenu.Add(_options["free_view"]);
@@ -1475,6 +1550,11 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             }
 
+            if (_gotoMarker != null)
+            {
+                DrawMarker(batcher, _gotoMarker, gX, gY, halfWidth, halfHeight, Zoom);
+            }
+
             if (_showMultis)
             {
                 foreach (House house in World.HouseManager.Houses)
@@ -2144,5 +2224,70 @@ namespace ClassicUO.Game.UI.Gumps
         }
 
         #endregion
+
+        #region Helpers
+
+        /// <summary>
+        /// Converts latitudes and longitudes to X and Y locations based on Lord British's throne is located at 1323.1624 or 0° 0'N 0° 0'E
+        /// </summary>
+        /// <param name="coords"></param>
+        /// <param name="xAxis"></param>
+        /// <param name="yAxis"></param>
+        private static void ConvertCoords(string coords, ref int xAxis, ref int yAxis)
+        {
+            string[] coordsSplit = coords.Split(',');
+
+            string yCoord = coordsSplit[0];
+            string xCoord = coordsSplit[1];
+
+            // Calc Y first
+            string[] ySplit = yCoord.Split('°', 'o');
+            double yDegree = Convert.ToDouble(ySplit[0]);
+            double yMinute = Convert.ToDouble(ySplit[1].Substring(0, ySplit[1].IndexOf("'", StringComparison.Ordinal)));
+
+            if (yCoord.Substring(yCoord.Length - 1).Equals("N"))
+            {
+                yAxis = (int) (1624 - (yMinute / 60) * (4096.0 / 360) - yDegree * (4096.0 / 360));
+            }
+            else
+            {
+                yAxis = (int) (1624 + (yMinute / 60) * (4096.0 / 360) + yDegree * (4096.0 / 360));
+            }
+
+            // Calc X next
+            string[] xSplit = xCoord.Split('°', 'o');
+            double xDegree = Convert.ToDouble(xSplit[0]);
+            double xMinute = Convert.ToDouble(xSplit[1].Substring(0, xSplit[1].IndexOf("'", StringComparison.Ordinal)));
+
+            if (xCoord.Substring(xCoord.Length - 1).Equals("W"))
+            {
+                xAxis = (int) (1323 - (xMinute / 60) * (5120.0 / 360) - xDegree * (5120.0 / 360));
+            }
+            else
+            {
+                xAxis = (int) (1323 + (xMinute / 60) * (5120.0 / 360) + xDegree * (5120.0 / 360));
+            }
+
+            // Normalize values outside of map range.
+            if (xAxis < 0)
+            {
+                xAxis += 5120;
+            }
+            else if (xAxis > 5120)
+            {
+                xAxis -= 5120;
+            }
+
+            if (yAxis < 0)
+            {
+                yAxis += 4096;
+            }
+            else if (yAxis > 4096)
+            {
+                yAxis -= 4096;
+            }
+        }
     }
+
+    #endregion
 }
