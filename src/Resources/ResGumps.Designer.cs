@@ -1232,6 +1232,15 @@ namespace ClassicUO.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Enter X Y location:.
+        /// </summary>
+        public static string EnterLocation {
+            get {
+                return ResourceManager.GetString("EnterLocation", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Erase.
         /// </summary>
         public static string Erase {
@@ -1462,6 +1471,15 @@ namespace ClassicUO.Resources {
         public static string Gold {
             get {
                 return ResourceManager.GetString("Gold", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Go to location.
+        /// </summary>
+        public static string GotoLocation {
+            get {
+                return ResourceManager.GetString("GotoLocation", resourceCulture);
             }
         }
         
@@ -1841,6 +1859,15 @@ namespace ClassicUO.Resources {
         public static string Intelligence {
             get {
                 return ResourceManager.GetString("Intelligence", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Invalid location entered: Enter &quot;X Y&quot; or &quot;0°0&apos;N,0°0&apos;W&quot;.
+        /// </summary>
+        public static string InvalidLocation {
+            get {
+                return ResourceManager.GetString("InvalidLocation", resourceCulture);
             }
         }
         
@@ -3642,7 +3669,7 @@ namespace ClassicUO.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to TopMost.
+        ///   Looks up a localized string similar to Keep map on top.
         /// </summary>
         public static string TopMost {
             get {
