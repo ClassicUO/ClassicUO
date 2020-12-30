@@ -38,7 +38,7 @@ namespace ClassicUO.Game.GameObjects
                 m.IsDestroyed = false;
                 m.AlphaHue = 0;
                 m.FoliageIndex = 0;
-                m.IsFromTarget = false;
+                m.IsHousePreview = false;
                 m.MultiOffsetX = m.MultiOffsetY = m.MultiOffsetZ = 0;
                 m.IsCustom = false;
                 m.State = 0;

@@ -774,7 +774,7 @@ namespace ClassicUO.Game.Scenes
 
                     foreach (Multi s in house.Components)
                     {
-                        s.IsFromTarget = true;
+                        s.IsHousePreview = true;
                         s.X = (ushort) (_multi.X + s.MultiOffsetX);
                         s.Y = (ushort) (_multi.Y + s.MultiOffsetY);
                         s.Z = (sbyte) (_multi.Z + s.MultiOffsetZ);

@@ -193,8 +193,8 @@ namespace ClassicUO.Game
 
                             case Multi m:
 
-                                if (World.CustomHouseManager != null && m.IsCustom &&
-                                    (m.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_GENERIC_INTERNAL) == 0)
+                                if ((World.CustomHouseManager != null && m.IsCustom &&
+                                    (m.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_GENERIC_INTERNAL) == 0) || m.IsHousePreview)
                                 {
                                     canBeAdd = false;
                                 }

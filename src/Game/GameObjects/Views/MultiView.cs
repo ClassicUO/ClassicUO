@@ -33,7 +33,7 @@ namespace ClassicUO.Game.GameObjects
     internal partial class Multi
     {
         private int _canBeTransparent;
-        public bool IsFromTarget;
+        public bool IsHousePreview;
 
         public override bool TransparentTest(int z)
         {
@@ -114,7 +114,7 @@ namespace ClassicUO.Game.GameObjects
 
             //Engine.DebugInfo.MultiRendered++;
 
-            if (IsFromTarget)
+            if (IsHousePreview)
             {
                 HueVector.Z = 0.5f;
             }
@@ -134,7 +134,7 @@ namespace ClassicUO.Game.GameObjects
                 Client.Game.GetScene<GameScene>().AddLight(this, this, posX + 22, posY + 22);
             }
 
-            if (!(SelectedObject.Object == this || IsFromTarget ||
+            if (!(SelectedObject.Object == this || IsHousePreview ||
                   FoliageIndex != -1 && Client.Game.GetScene<GameScene>().FoliageIndex == FoliageIndex))
             {
                 if (State != 0)
