@@ -1338,7 +1338,7 @@ namespace ClassicUO.Network
             {
                 if (text[i] != null && text[i].Length > 0)
                 {
-                    WriteBytes(Encoding.UTF8.GetBytes(text[i]));
+                    WriteBytes(Encoding.UTF8.GetBytes(text[i].Replace("\n", "")));
                 }
 
                 WriteByte(0);
