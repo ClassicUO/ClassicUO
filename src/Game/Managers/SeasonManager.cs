@@ -607,7 +607,7 @@ namespace ClassicUO.Game.Managers
 
                 case 0x0CAF:
                 case 0x0CB0:
-                    graphic = 0x0D32;
+                    graphic = 0x17CD;
 
                     break;
 
@@ -626,6 +626,7 @@ namespace ClassicUO.Game.Managers
                 case 0x0C45:
                 case 0x0C48:
                 case 0x0C4E:
+                case 0x0D2B:
                 case 0x0C85:
                 case 0x0D15:
                 case 0x0D29:
@@ -640,9 +641,8 @@ namespace ClassicUO.Game.Managers
                 case 0x0CB7:
                 case 0x0CC5:
                 case 0x0D0C:
-
                 case 0x0CB6:
-                    graphic = 0x1B9E;
+                    graphic = 0x17CD;
 
                     break;
 
@@ -692,6 +692,12 @@ namespace ClassicUO.Game.Managers
                 case 0x0C84:
                 case 0x0C8B:
                     graphic = 0x1B84;
+
+                    break;
+
+                case 0x0CE9:
+                case 0x0C9E:
+                    graphic = 0x0CCA;
 
                     break;
 
