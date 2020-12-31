@@ -1279,10 +1279,12 @@ namespace ClassicUO.Network
             WriteByte(0);
             WriteByte(0);
             WriteUShort(0);
-            WriteUShort((ushort) (title.Length + 1));
-            WriteASCII(title);
-            WriteUShort((ushort) (author.Length + 1));
-            WriteASCII(author);
+            int titleLength = Encoding.UTF8.GetByteCount(title);
+            WriteUShort((ushort) titleLength);
+            WriteUTF8(title, titleLength);
+            int authorLength = Encoding.UTF8.GetByteCount(author);
+            WriteUShort((ushort) authorLength);
+            WriteUTF8(author, authorLength);
         }
     }
 
