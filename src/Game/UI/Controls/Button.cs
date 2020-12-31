@@ -223,7 +223,9 @@ namespace ClassicUO.Game.UI.Controls
         {
             UOTexture texture = GetTextureByState();
 
-            ResetHueVector();
+            int hue = IsEnabled ? 0 : 944;
+            
+            ShaderHueTranslator.GetHueVector(ref HueVector, hue, false, Alpha, true);
 
             HueVector.Z = Alpha;
 
