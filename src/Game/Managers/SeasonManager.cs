@@ -306,12 +306,12 @@ namespace ClassicUO.Game.Managers
             _winterGraphic[1530] = 283;
             _winterGraphic[1531] = 284;
             _winterGraphic[1532] = 285;
-            _winterGraphic[1533] = 283;
-            _winterGraphic[1534] = 284;
-            _winterGraphic[1535] = 285;
-            _winterGraphic[1536] = 283;
-            _winterGraphic[1537] = 284;
-            _winterGraphic[1538] = 285;
+            _winterGraphic[1533] = 282;
+            _winterGraphic[1534] = 283;
+            _winterGraphic[1535] = 284;
+            _winterGraphic[1536] = 285;
+            _winterGraphic[1537] = 282;
+            _winterGraphic[1538] = 283;
             _winterGraphic[1539] = 284;
             _winterGraphic[1540] = 285;
 
@@ -342,6 +342,21 @@ namespace ClassicUO.Game.Managers
             _winterGraphic[765] = 384;
             _winterGraphic[766] = 384;
             _winterGraphic[767] = 379;
+
+            // crops/furrows
+            _winterGraphic[9] = 282;
+            _winterGraphic[10] = 283;
+            _winterGraphic[11] = 284;
+            _winterGraphic[12] = 285;
+            _winterGraphic[13] = 282;
+            _winterGraphic[14] = 283;
+            _winterGraphic[15] = 284;
+            _winterGraphic[16] = 285;
+            _winterGraphic[17] = 282;
+            _winterGraphic[18] = 283;
+            _winterGraphic[19] = 284;
+            _winterGraphic[20] = 285;
+            _winterGraphic[21] = 282;
 
         }
 
