@@ -314,6 +314,35 @@ namespace ClassicUO.Game.Managers
             _winterGraphic[1538] = 285;
             _winterGraphic[1539] = 284;
             _winterGraphic[1540] = 285;
+
+            _winterGraphic[741] = 379;
+            _winterGraphic[742] = 385;
+            _winterGraphic[743] = 389;
+            _winterGraphic[744] = 393;
+            _winterGraphic[745] = 378;
+            _winterGraphic[746] = 384;
+            _winterGraphic[747] = 388;
+            _winterGraphic[748] = 392;
+            _winterGraphic[749] = 377;
+            _winterGraphic[750] = 385;
+            _winterGraphic[751] = 383;
+            _winterGraphic[752] = 380;
+            _winterGraphic[753] = 391;
+            _winterGraphic[754] = 388;
+            _winterGraphic[755] = 385;
+            _winterGraphic[756] = 384;
+            _winterGraphic[757] = 391;
+            _winterGraphic[758] = 379;
+            _winterGraphic[759] = 393;
+            _winterGraphic[760] = 383;
+            _winterGraphic[761] = 385;
+            _winterGraphic[762] = 391;
+            _winterGraphic[763] = 391;
+            _winterGraphic[764] = 379;
+            _winterGraphic[765] = 384;
+            _winterGraphic[766] = 384;
+            _winterGraphic[767] = 379;
+
         }
 
         public static ushort GetSeasonGraphic(Season season, ushort graphic)
