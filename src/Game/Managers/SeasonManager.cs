@@ -578,7 +578,6 @@ namespace ClassicUO.Game.Managers
 
                 case 0x0CAF:
                 case 0x0CB0:
-                case 0x0CB6:
                     graphic = 0x0D32;
 
                     break;
@@ -612,10 +611,38 @@ namespace ClassicUO.Game.Managers
                 case 0x0CB7:
                 case 0x0CC5:
                 case 0x0D0C:
+
+                case 0x0CB6:
                     graphic = 0x1B9E;
 
                     break;
 
+                case 0x0C37:
+                case 0x0C38:
+                case 0x0C47:
+                case 0x0C4A:
+                case 0x0C4B:
+                case 0x0C4D:
+                case 0x0C8C:
+                case 0x0D2F:
+                    graphic = 0x1B1F;
+
+                    break;
+
+                case 0x0C8D:
+                case 0x0C93:
+                case 0x0C94:
+                case 0x0C98:
+                case 0x0C9F:
+                case 0x0CA0:
+                case 0x0CA1:
+                case 0x0CA2:
+                    graphic = 0x1B22;
+
+                    break;
+
+                case 0x0CA3:
+                case 0x0CA4:
                 case 0x0D0D:
                 case 0x0D0E:
                 case 0x0D10:
@@ -624,51 +651,21 @@ namespace ClassicUO.Game.Managers
                 case 0x0D18:
                 case 0x0D19:
                 case 0x0D2D:
-                case 0x0D2F:
                     graphic = 0x1BAE;
 
                     break;
 
-                    /*case 0x0D0D:
-                    case 0x0D14:
-                        graphic = 0x0D2B;
+                case 0x0CC7:
+                    graphic = 0x1B20;
 
-                        break;
+                    break;
 
-                    case 0x0D0C:
-                        graphic = 0x0D29;
+                case 0x0C84:
+                case 0x0C8B:
+                    graphic = 0x1B84;
 
-                        break;
+                    break;
 
-                    case 0x0D0E:
-                        graphic = 0x0CBE;
-
-                        break;
-
-                    case 0x0D0F:
-                        graphic = 0x0CBF;
-
-                        break;
-
-                    case 0x0D10:
-                        graphic = 0x0CC0;
-
-                        break;
-
-                    case 0x0D11:
-                        graphic = 0x0C87;
-
-                        break;
-
-                    case 0x0D12:
-                        graphic = 0x0C38;
-
-                        break;
-
-                    case 0x0D13:
-                        graphic = 0x0D2F;
-
-                        break;*/
             }
 
             return graphic;
