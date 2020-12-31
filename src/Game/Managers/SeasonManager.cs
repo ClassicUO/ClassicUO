@@ -267,6 +267,13 @@ namespace ClassicUO.Game.Managers
             _winterGraphic[41] = 392;
             _winterGraphic[42] = 393;
             _winterGraphic[43] = 394;
+            _winterGraphic[44] = 387;
+            _winterGraphic[45] = 388;
+            _winterGraphic[46] = 383;
+            _winterGraphic[47] = 380;
+            _winterGraphic[48] = 383;
+            _winterGraphic[49] = 378;
+            _winterGraphic[50] = 379;
 
             _winterGraphic[141] = 379;
             _winterGraphic[142] = 386;
@@ -620,7 +627,14 @@ namespace ClassicUO.Game.Managers
 
                     break;
 
+                // snow
                 case 0x0CAF:
+                case 0x0C87:
+                case 0x0C89:
+                case 0x0D16:
+                case 0x0D17:
+                case 0x0D32:
+                case 0x0D33:
                 case 0x0CB0:
                     graphic = 0x17CD;
 
@@ -640,6 +654,7 @@ namespace ClassicUO.Game.Managers
 
                 case 0x0C45:
                 case 0x0C48:
+                case 0x0CBF:
                 case 0x0C4E:
                 case 0x0D2B:
                 case 0x0C85:
@@ -716,6 +731,16 @@ namespace ClassicUO.Game.Managers
 
                     break;
 
+                // misc grasses
+                case 0x33A1:
+                case 0x33A2:
+                case 0x33A3:
+                case 0x33A4:
+                case 0x33A6:
+                case 0x33AB:
+                    graphic = 0x17CD;
+
+                    break;
             }
 
             return graphic;
