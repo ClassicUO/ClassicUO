@@ -358,14 +358,17 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             if (race == RaceType.ELF && !allowElf)
             {
                 _nextButton.IsEnabled = false;
+                _nextButton.Hue = 944;
             }
             else if (race == RaceType.GARGOYLE && !allowGarg)
             {
                 _nextButton.IsEnabled = false;
+                _nextButton.Hue = 944;
             }
             else
             {
                 _nextButton.IsEnabled = true;
+                _nextButton.Hue = 0;
             }
         }
 
