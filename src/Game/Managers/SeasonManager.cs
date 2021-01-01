@@ -1,380 +1,157 @@
+using System;
+using System.IO;
+
 namespace ClassicUO.Game.Managers
 {
     internal static class SeasonManager
     {
-        private static readonly ushort[] _winterGraphic = new ushort[Constants.MAX_LAND_DATA_INDEX_COUNT];
+        private static ushort[] _springLandTile;
+        private static ushort[] _summerLandTile;
+        private static ushort[] _fallLandTile;
+        private static ushort[] _winterLandTile;
+        private static ushort[] _desolationLandTile;
+
+        private static ushort[] _springGraphic;
+        private static ushort[] _summerGraphic;
+        private static ushort[] _fallGraphic;
+        private static ushort[] _winterGraphic;
+        private static ushort[] _desolationGraphic;
+
+        private static readonly string _seasonsFilePath = Path.Combine(CUOEnviroment.ExecutablePath, "Data", "Client");
 
         static SeasonManager()
         {
-            // solid forest tiles
-            _winterGraphic[196] = 282;
-            _winterGraphic[197] = 283;
-            _winterGraphic[198] = 284;
-            _winterGraphic[199] = 285;
+            LoadSeasonFile();
+        }
 
-            _winterGraphic[248] = 282;
-            _winterGraphic[249] = 283;
-            _winterGraphic[250] = 284;
-            _winterGraphic[251] = 285;
+        public static void LoadSeasonFile()
+        {
+            _springLandTile = new ushort[Constants.MAX_LAND_DATA_INDEX_COUNT];
+            _summerLandTile = new ushort[Constants.MAX_LAND_DATA_INDEX_COUNT];
+            _fallLandTile = new ushort[Constants.MAX_LAND_DATA_INDEX_COUNT];
+            _winterLandTile = new ushort[Constants.MAX_LAND_DATA_INDEX_COUNT];
+            _desolationLandTile = new ushort[Constants.MAX_LAND_DATA_INDEX_COUNT];
 
-            _winterGraphic[349] = 937;
-            _winterGraphic[350] = 940;
-            _winterGraphic[351] = 938;
-            _winterGraphic[352] = 939;
+            _springGraphic = new ushort[Constants.MAX_STATIC_DATA_INDEX_COUNT];
+            _summerGraphic = new ushort[Constants.MAX_STATIC_DATA_INDEX_COUNT];
+            _fallGraphic = new ushort[Constants.MAX_STATIC_DATA_INDEX_COUNT];
+            _winterGraphic = new ushort[Constants.MAX_STATIC_DATA_INDEX_COUNT];
+            _desolationGraphic = new ushort[Constants.MAX_STATIC_DATA_INDEX_COUNT];
 
-            // transition forest/grass tiles
-            _winterGraphic[200] = 282;
-            _winterGraphic[201] = 283;
-            _winterGraphic[202] = 284;
-            _winterGraphic[203] = 285;
-            _winterGraphic[204] = 282;
-            _winterGraphic[205] = 283;
-            _winterGraphic[206] = 284;
-            _winterGraphic[207] = 285;
-            _winterGraphic[208] = 282;
-            _winterGraphic[209] = 283;
-            _winterGraphic[210] = 284;
-            _winterGraphic[211] = 285;
-            _winterGraphic[212] = 282;
-            _winterGraphic[213] = 283;
-            _winterGraphic[214] = 284;
-            _winterGraphic[215] = 285;
-            _winterGraphic[216] = 282;
-            _winterGraphic[217] = 283;
-            _winterGraphic[218] = 284;
-            _winterGraphic[219] = 285;
+            string seasonsFile = Path.Combine(_seasonsFilePath, "seasons.csv");
 
-            _winterGraphic[1697] = 282;
-            _winterGraphic[1698] = 283;
-            _winterGraphic[1699] = 284;
-            _winterGraphic[1700] = 285;
+            if (!File.Exists(seasonsFile))
+            {
+                CreateDefaultSeasonsFile();
+            }
 
-            _winterGraphic[1711] = 282;
-            _winterGraphic[1712] = 283;
-            _winterGraphic[1713] = 284;
-            _winterGraphic[1714] = 285;
-            _winterGraphic[1715] = 282;
-            _winterGraphic[1716] = 283;
-            _winterGraphic[1717] = 284;
-            _winterGraphic[1718] = 285;
-            _winterGraphic[1719] = 282;
-            _winterGraphic[1720] = 283;
-            _winterGraphic[1721] = 284;
-            _winterGraphic[1722] = 285;
-            _winterGraphic[1723] = 282;
-            _winterGraphic[1724] = 283;
-            _winterGraphic[1725] = 284;
-            _winterGraphic[1726] = 285;
-            _winterGraphic[1727] = 282;
-            _winterGraphic[1728] = 283;
-            _winterGraphic[1729] = 284;
-            _winterGraphic[1730] = 285;
+            using (StreamReader reader = new StreamReader(seasonsFile))
+            {
+                while (!reader.EndOfStream)
+                {
+                    string line = reader.ReadLine();
 
-            // transition forest/dirt tiles
-            _winterGraphic[332] = 932;
-            _winterGraphic[333] = 929;
-            _winterGraphic[334] = 930;
-            _winterGraphic[335] = 931;
+                    if (string.IsNullOrEmpty(line) || line.StartsWith("#") || line.StartsWith("//"))
+                    {
+                        continue;
+                    }
 
-            _winterGraphic[353] = 908;
-            _winterGraphic[354] = 907;
-            _winterGraphic[355] = 905;
-            _winterGraphic[356] = 906;
-            _winterGraphic[357] = 904;
-            _winterGraphic[358] = 903;
-            _winterGraphic[359] = 902;
-            _winterGraphic[360] = 901;
+                    string[] seasonLine = line.Split(',');
 
-            _winterGraphic[361] = 912;
-            _winterGraphic[362] = 911;
-            _winterGraphic[363] = 909;
-            _winterGraphic[364] = 910;
+                    if (seasonLine.Length < 4)
+                    {
+                        continue;
+                    }
 
-            _winterGraphic[369] = 916;
-            _winterGraphic[370] = 915;
-            _winterGraphic[371] = 914;
-            _winterGraphic[372] = 913;
+                    ushort orig = seasonLine[2].StartsWith("0x", StringComparison.InvariantCultureIgnoreCase) ?
+                        Convert.ToUInt16(seasonLine[2], 16) :
+                        Convert.ToUInt16(seasonLine[2]);
 
-            _winterGraphic[1351] = 917;
-            _winterGraphic[1352] = 918;
-            _winterGraphic[1353] = 919;
-            _winterGraphic[1354] = 920;
-            _winterGraphic[1355] = 921;
-            _winterGraphic[1356] = 922;
-            _winterGraphic[1357] = 923;
-            _winterGraphic[1358] = 924;
-            _winterGraphic[1359] = 925;
+                    ushort replace = seasonLine[3].StartsWith("0x", StringComparison.InvariantCultureIgnoreCase) ?
+                        Convert.ToUInt16(seasonLine[3], 16) :
+                        Convert.ToUInt16(seasonLine[3]);
 
-            _winterGraphic[1360] = 927;
-            _winterGraphic[1361] = 928;
-            _winterGraphic[1362] = 930;
+                    bool isStatic = seasonLine[1].StartsWith("static", StringComparison.InvariantCultureIgnoreCase);
 
-            _winterGraphic[1363] = 933;
-            _winterGraphic[1364] = 934;
-            _winterGraphic[1365] = 935;
-            _winterGraphic[1366] = 936;
+                    switch (seasonLine[0].ToLower())
+                    {
+                        case "spring":
 
-            _winterGraphic[804] = 931;
-            _winterGraphic[805] = 929;
-            _winterGraphic[806] = 926;
-            _winterGraphic[807] = 925;
-            _winterGraphic[808] = 932;
-            _winterGraphic[809] = 930;
-            _winterGraphic[810] = 928;
-            _winterGraphic[811] = 927;
-            _winterGraphic[812] = 919;
-            _winterGraphic[813] = 920;
-            _winterGraphic[814] = 917;
-            _winterGraphic[815] = 921;
+                            if (isStatic)
+                            {
+                                _springGraphic[orig] = replace;
+                            }
+                            else
+                            {
+                                _springLandTile[orig] = replace;
+                            }
 
-            // solid grass tiles
-            _winterGraphic[3] = 282;
-            _winterGraphic[4] = 283;
-            _winterGraphic[5] = 284;
-            _winterGraphic[6] = 285;
+                            break;
 
-            // transition grass/dirt tiles
-            _winterGraphic[121] = 910;
-            _winterGraphic[122] = 909;
-            _winterGraphic[123] = 912;
-            _winterGraphic[124] = 911;
+                        case "summer":
 
-            _winterGraphic[125] = 906;
-            _winterGraphic[126] = 905;
-            _winterGraphic[130] = 908;
-            _winterGraphic[131] = 907;
+                            if (isStatic)
+                            {
+                                _summerGraphic[orig] = replace;
+                            }
+                            else
+                            {
+                                _summerLandTile[orig] = replace;
+                            }
 
-            _winterGraphic[133] = 904;
-            _winterGraphic[134] = 904;
+                            break;
 
-            _winterGraphic[135] = 903;
-            _winterGraphic[136] = 903;
+                        case "fall":
 
-            _winterGraphic[137] = 902;
-            _winterGraphic[138] = 902;
+                            if (isStatic)
+                            {
+                                _fallGraphic[orig] = replace;
+                            }
+                            else
+                            {
+                                _fallLandTile[orig] = replace;
+                            }
 
-            _winterGraphic[139] = 901;
-            _winterGraphic[140] = 901;
+                            break;
 
-            _winterGraphic[871] = 917;
-            _winterGraphic[872] = 918;
-            _winterGraphic[873] = 919;
-            _winterGraphic[874] = 920;
-            _winterGraphic[875] = 921;
-            _winterGraphic[876] = 922;
-            _winterGraphic[877] = 923;
-            _winterGraphic[878] = 924;
-            _winterGraphic[879] = 925;
-            _winterGraphic[880] = 926;
-            _winterGraphic[881] = 927;
-            _winterGraphic[882] = 928;
-            _winterGraphic[883] = 929;
-            _winterGraphic[884] = 930;
-            _winterGraphic[885] = 931;
-            _winterGraphic[886] = 932;
-            _winterGraphic[887] = 933;
-            _winterGraphic[888] = 934;
-            _winterGraphic[889] = 935;
-            _winterGraphic[890] = 936;
-            _winterGraphic[891] = 937;
-            _winterGraphic[892] = 938;
-            _winterGraphic[893] = 939;
-            _winterGraphic[894] = 940;
+                        case "winter":
 
-            _winterGraphic[365] = 916;
-            _winterGraphic[366] = 915;
-            _winterGraphic[367] = 913;
-            _winterGraphic[368] = 914;
+                            if (isStatic)
+                            {
+                                _winterGraphic[orig] = replace;
+                            }
+                            else
+                            {
+                                _winterLandTile[orig] = replace;
+                            }
 
+                            break;
 
-            // transition forest/mountain tiles
-            _winterGraphic[236] = 278;
-            _winterGraphic[237] = 279;
-            _winterGraphic[238] = 276;
-            _winterGraphic[239] = 277;
+                        case "desolation":
+                            if (isStatic)
+                            {
+                                _desolationGraphic[orig] = replace;
+                            }
+                            else
+                            {
+                                _desolationLandTile[orig] = replace;
+                            }
 
-            _winterGraphic[240] = 305;
-            _winterGraphic[241] = 302;
-            _winterGraphic[242] = 303;
-            _winterGraphic[243] = 304;
-
-            _winterGraphic[244] = 272;
-            _winterGraphic[245] = 273;
-            _winterGraphic[246] = 274;
-            _winterGraphic[247] = 275;
-
-            // transition grass/mountain tiles
-            _winterGraphic[561] = 268;
-            _winterGraphic[562] = 269;
-            _winterGraphic[563] = 270;
-            _winterGraphic[564] = 271;
-            _winterGraphic[565] = 272;
-            _winterGraphic[566] = 273;
-            _winterGraphic[567] = 274;
-            _winterGraphic[568] = 275;
-            _winterGraphic[569] = 276;
-            _winterGraphic[570] = 277;
-            _winterGraphic[571] = 278;
-            _winterGraphic[572] = 279;
-
-            _winterGraphic[573] = 1861;
-            _winterGraphic[574] = 1862;
-            _winterGraphic[575] = 1863;
-            _winterGraphic[576] = 1864;
-            _winterGraphic[577] = 1865;
-            _winterGraphic[578] = 1866;
-            _winterGraphic[579] = 1867;
-
-            _winterGraphic[1741] = 1868;
-            _winterGraphic[1742] = 1869;
-            _winterGraphic[1743] = 1870;
-            _winterGraphic[1744] = 1871;
-            _winterGraphic[1745] = 1872;
-            _winterGraphic[1746] = 1873;
-            _winterGraphic[1747] = 1874;
-            _winterGraphic[1748] = 1875;
-            _winterGraphic[1749] = 1876;
-            _winterGraphic[1750] = 1877;
-            _winterGraphic[1751] = 1878;
-            _winterGraphic[1752] = 1879;
-            _winterGraphic[1753] = 1880;
-            _winterGraphic[1754] = 1881;
-            _winterGraphic[1755] = 1882;
-            _winterGraphic[1756] = 1883;
-            _winterGraphic[1757] = 1884;
-
-            _winterGraphic[1758] = 282;
-            _winterGraphic[1759] = 283;
-            _winterGraphic[1760] = 284;
-            _winterGraphic[1761] = 285;
-
-            // transition grass/coastline tiles
-            _winterGraphic[26] = 379;
-            _winterGraphic[27] = 378;
-            _winterGraphic[28] = 377;
-            _winterGraphic[29] = 380;
-            _winterGraphic[30] = 381;
-            _winterGraphic[31] = 382;
-            _winterGraphic[32] = 383;
-            _winterGraphic[33] = 384;
-            _winterGraphic[34] = 385;
-            _winterGraphic[35] = 386;
-            _winterGraphic[36] = 387;
-            _winterGraphic[37] = 388;
-            _winterGraphic[38] = 389;
-            _winterGraphic[39] = 390;
-            _winterGraphic[40] = 391;
-            _winterGraphic[41] = 392;
-            _winterGraphic[42] = 393;
-            _winterGraphic[43] = 394;
-            _winterGraphic[44] = 387;
-            _winterGraphic[45] = 388;
-            _winterGraphic[46] = 383;
-            _winterGraphic[47] = 380;
-            _winterGraphic[48] = 383;
-            _winterGraphic[49] = 378;
-            _winterGraphic[50] = 379;
-
-            _winterGraphic[141] = 379;
-            _winterGraphic[142] = 386;
-            _winterGraphic[143] = 385;
-            _winterGraphic[144] = 393;
-
-            _winterGraphic[145] = 378;
-            _winterGraphic[146] = 387;
-            _winterGraphic[147] = 391;
-            _winterGraphic[148] = 392;
-
-            _winterGraphic[149] = 377;
-            _winterGraphic[150] = 379;
-            _winterGraphic[151] = 383;
-            _winterGraphic[152] = 380;
-            _winterGraphic[153] = 387;
-            _winterGraphic[154] = 388;
-            _winterGraphic[155] = 393;
-            _winterGraphic[156] = 391;
-            _winterGraphic[157] = 387;
-            _winterGraphic[158] = 385;
-            _winterGraphic[159] = 385;
-            _winterGraphic[160] = 389;
-            _winterGraphic[161] = 379;
-            _winterGraphic[162] = 384;
-            _winterGraphic[163] = 380;
-            _winterGraphic[164] = 379;
-            _winterGraphic[165] = 378;
-            _winterGraphic[166] = 378;
-            _winterGraphic[167] = 394;
-
-            _winterGraphic[1521] = 282;
-            _winterGraphic[1522] = 283;
-            _winterGraphic[1523] = 284;
-            _winterGraphic[1524] = 285;
-            _winterGraphic[1529] = 282;
-            _winterGraphic[1530] = 283;
-            _winterGraphic[1531] = 284;
-            _winterGraphic[1532] = 285;
-            _winterGraphic[1533] = 282;
-            _winterGraphic[1534] = 283;
-            _winterGraphic[1535] = 284;
-            _winterGraphic[1536] = 285;
-            _winterGraphic[1537] = 282;
-            _winterGraphic[1538] = 283;
-            _winterGraphic[1539] = 284;
-            _winterGraphic[1540] = 285;
-
-            _winterGraphic[741] = 379;
-            _winterGraphic[742] = 385;
-            _winterGraphic[743] = 389;
-            _winterGraphic[744] = 393;
-            _winterGraphic[745] = 378;
-            _winterGraphic[746] = 384;
-            _winterGraphic[747] = 388;
-            _winterGraphic[748] = 392;
-            _winterGraphic[749] = 377;
-            _winterGraphic[750] = 385;
-            _winterGraphic[751] = 383;
-            _winterGraphic[752] = 380;
-            _winterGraphic[753] = 391;
-            _winterGraphic[754] = 388;
-            _winterGraphic[755] = 385;
-            _winterGraphic[756] = 384;
-            _winterGraphic[757] = 391;
-            _winterGraphic[758] = 379;
-            _winterGraphic[759] = 393;
-            _winterGraphic[760] = 383;
-            _winterGraphic[761] = 385;
-            _winterGraphic[762] = 391;
-            _winterGraphic[763] = 391;
-            _winterGraphic[764] = 379;
-            _winterGraphic[765] = 384;
-            _winterGraphic[766] = 384;
-            _winterGraphic[767] = 379;
-
-            // crops/furrows
-            _winterGraphic[9] = 282;
-            _winterGraphic[10] = 283;
-            _winterGraphic[11] = 284;
-            _winterGraphic[12] = 285;
-            _winterGraphic[13] = 282;
-            _winterGraphic[14] = 283;
-            _winterGraphic[15] = 284;
-            _winterGraphic[16] = 285;
-            _winterGraphic[17] = 282;
-            _winterGraphic[18] = 283;
-            _winterGraphic[19] = 284;
-            _winterGraphic[20] = 285;
-            _winterGraphic[21] = 282;
-
+                            break;
+                    }
+                }
+            }
         }
 
         public static ushort GetSeasonGraphic(Season season, ushort graphic)
         {
             switch (season)
             {
-                case Season.Spring: return GetSpringGraphic(graphic);
-                case Season.Fall: return GetFallGraphic(graphic);
-                case Season.Winter: return GetWinterGraphic(graphic);
-                case Season.Desolation: return GetDesolationGraphic(graphic);
+                case Season.Spring: return _springGraphic[graphic] == 0 ? graphic : _springGraphic[graphic];
+                case Season.Summer: return _summerGraphic[graphic] == 0 ? graphic : _summerGraphic[graphic];
+                case Season.Fall: return _fallGraphic[graphic] == 0 ? graphic : _fallGraphic[graphic];
+                case Season.Winter: return _winterGraphic[graphic] == 0 ? graphic : _winterGraphic[graphic];
+                case Season.Desolation: return _desolationGraphic[graphic] == 0 ? graphic : _desolationGraphic[graphic];
             }
 
             return graphic;
@@ -382,516 +159,532 @@ namespace ClassicUO.Game.Managers
 
         public static ushort GetLandSeasonGraphic(Season season, ushort graphic)
         {
-            if (season != Season.Winter)
+            switch (season)
             {
-                return graphic;
-            }
-
-            ushort buf = _winterGraphic[graphic];
-
-            if (buf != 0)
-            {
-                graphic = buf;
+                case Season.Spring: return _springLandTile[graphic] == 0 ? graphic : _springLandTile[graphic];
+                case Season.Summer: return _summerLandTile[graphic] == 0 ? graphic : _summerLandTile[graphic];
+                case Season.Fall: return _fallLandTile[graphic] == 0 ? graphic : _fallLandTile[graphic];
+                case Season.Winter: return _winterLandTile[graphic] == 0 ? graphic : _winterLandTile[graphic];
+                case Season.Desolation: return _desolationLandTile[graphic] == 0 ? graphic : _desolationLandTile[graphic];
             }
 
             return graphic;
         }
 
-        private static ushort GetSpringGraphic(ushort graphic)
+        #region CreateDefaultFile
+
+        private static void CreateDefaultSeasonsFile()
         {
-            switch (graphic)
+            string seasonsFile = Path.Combine(_seasonsFilePath, "seasons.csv");
+
+            if (File.Exists(seasonsFile))
             {
-                case 0x0CA7:
-                    graphic = 0x0C84;
-
-                    break;
-
-                case 0x0CAC:
-                    graphic = 0x0C46;
-
-                    break;
-
-                case 0x0CAD:
-                    graphic = 0x0C48;
-
-                    break;
-
-                case 0x0CAE:
-                case 0x0CB5:
-                    graphic = 0x0C4A;
-
-                    break;
-
-                case 0x0CAF:
-                    graphic = 0x0C4E;
-
-                    break;
-
-                case 0x0CB0:
-                    graphic = 0x0C4D;
-
-                    break;
-
-                case 0x0CB6:
-                case 0x0D0D:
-                case 0x0D14:
-                    graphic = 0x0D2B;
-
-                    break;
-
-                case 0x0D0C:
-                    graphic = 0x0D29;
-
-                    break;
-
-                case 0x0D0E:
-                    graphic = 0x0CBE;
-
-                    break;
-
-                case 0x0D0F:
-                    graphic = 0x0CBF;
-
-                    break;
-
-                case 0x0D10:
-                    graphic = 0x0CC0;
-
-                    break;
-
-                case 0x0D11:
-                    graphic = 0x0C87;
-
-                    break;
-
-                case 0x0D12:
-                    graphic = 0x0C38;
-
-                    break;
-
-                case 0x0D13:
-                    graphic = 0x0D2F;
-
-                    break;
+                return;
             }
 
-            return graphic;
-        }
-
-        private static ushort GetSummerGraphic(ushort graphic)
-        {
-            return graphic;
-        }
-
-        private static ushort GetFallGraphic(ushort graphic)
-        {
-            switch (graphic)
+            using (StreamWriter writer = new StreamWriter(seasonsFile))
             {
-                case 0x0CD1:
-                    graphic = 0x0CD2;
-
-                    break;
-
-                case 0x0CD4:
-                    graphic = 0x0CD5;
-
-                    break;
-
-                case 0x0CDB:
-                    graphic = 0x0CDC;
-
-                    break;
-
-                case 0x0CDE:
-                    graphic = 0x0CDF;
-
-                    break;
-
-                case 0x0CE1:
-                    graphic = 0x0CE2;
-
-                    break;
-
-                case 0x0CE4:
-                    graphic = 0x0CE5;
-
-                    break;
-
-                case 0x0CE7:
-                    graphic = 0x0CE8;
-
-                    break;
-
-                case 0x0D95:
-                    graphic = 0x0D97;
-
-                    break;
-
-                case 0x0D99:
-                    graphic = 0x0D9B;
-
-                    break;
-
-                case 0x0CCE:
-                    graphic = 0x0CCF;
-
-                    break;
-
-                case 0x0CE9:
-                case 0x0C9E:
-                    graphic = 0x0D3F;
-
-                    break;
-
-                case 0x0CEA:
-                    graphic = 0x0D40;
-
-                    break;
-
-                case 0x0C84:
-                case 0x0CB0:
-                    graphic = 0x1B22;
-
-                    break;
-
-                case 0x0C8B:
-                case 0x0C8C:
-                case 0x0C8D:
-                case 0x0C8E:
-                    graphic = 0x0CC6;
-
-                    break;
-
-                case 0x0CA7:
-                    graphic = 0x0C48;
-
-                    break;
-
-                case 0x0CAC:
-                    graphic = 0x1B1F;
-
-                    break;
-
-                case 0x0CAD:
-                    graphic = 0x1B20;
-
-                    break;
-
-                case 0x0CAE:
-                    graphic = 0x1B21;
-
-                    break;
-
-                case 0x0CAF:
-                    graphic = 0x0D0D;
-
-                    break;
-
-                case 0x0CB5:
-                    graphic = 0x0D10;
-
-                    break;
-
-                case 0x0CB6:
-                    graphic = 0x0D2B;
-
-                    break;
-
-                case 0x0CC7:
-                    graphic = 0x0C4E;
-
-                    break;
+                writer.WriteLine("spring,static,0x0CA7,0x0C84");
+                writer.WriteLine("spring,static,0x0CAC,0x0C46");
+                writer.WriteLine("spring,static,0x0CAD,0x0C48");
+                writer.WriteLine("spring,static,0x0CAE,0x0CB5");
+                writer.WriteLine("spring,static,0x0C4A,0x0CB5");
+                writer.WriteLine("spring,static,0x0CAF,0x0C4E");
+                writer.WriteLine("spring,static,0x0CB0,0x0C4D");
+                writer.WriteLine("spring,static,0x0CB6,0x0D2B");
+                writer.WriteLine("spring,static,0x0D0D,0x0D2B");
+                writer.WriteLine("spring,static,0x0D14,0x0D2B");
+                writer.WriteLine("spring,static,0x0D0C,0x0D29");
+                writer.WriteLine("spring,static,0x0D0E,0x0CBE");
+                writer.WriteLine("spring,static,0x0D0F,0x0CBF");
+                writer.WriteLine("spring,static,0x0D10,0x0CC0");
+                writer.WriteLine("spring,static,0x0D11,0x0C87");
+                writer.WriteLine("spring,static,0x0D12,0x0C38");
+                writer.WriteLine("spring,static,0x0D13,0x0D2F");
+                writer.WriteLine("fall,static,0x0CD1,0x0CD2");
+                writer.WriteLine("fall,static,0x0CD4,0x0CD5");
+                writer.WriteLine("fall,static,0x0CDB,0x0CDC");
+                writer.WriteLine("fall,static,0x0CDE,0x0CDF");
+                writer.WriteLine("fall,static,0x0CE1,0x0CE2");
+                writer.WriteLine("fall,static,0x0CE4,0x0CE5");
+                writer.WriteLine("fall,static,0x0CE7,0x0CE8");
+                writer.WriteLine("fall,static,0x0D95,0x0D97");
+                writer.WriteLine("fall,static,0x0D99,0x0D9B");
+                writer.WriteLine("fall,static,0x0CCE,0x0CCF");
+                writer.WriteLine("fall,static,0x0CE9,0x0D3F");
+                writer.WriteLine("fall,static,0x0C9E,0x0D3F");
+                writer.WriteLine("fall,static,0x0CEA,0x0D40");
+                writer.WriteLine("fall,static,0x0C84,0x1B22");
+                writer.WriteLine("fall,static,0x0CB0,0x1B22");
+                writer.WriteLine("fall,static,0x0C8B,0x0CC6");
+                writer.WriteLine("fall,static,0x0C8C,0x0CC6");
+                writer.WriteLine("fall,static,0x0C8D,0x0CC6");
+                writer.WriteLine("fall,static,0x0C8E,0x0CC6");
+                writer.WriteLine("fall,static,0x0CA7,0x0C48");
+                writer.WriteLine("fall,static,0x0CAC,0x1B1F");
+                writer.WriteLine("fall,static,0x0CAD,0x1B20");
+                writer.WriteLine("fall,static,0x0CAE,0x1B21");
+                writer.WriteLine("fall,static,0x0CAF,0x0D0D");
+                writer.WriteLine("fall,static,0x0CB5,0x0D10");
+                writer.WriteLine("fall,static,0x0CB6,0x0D2B");
+                writer.WriteLine("fall,static,0x0CC7,0x0C4E");
+                writer.WriteLine("winter,static,0x0CA7,0x0CC6");
+                writer.WriteLine("winter,static,0x0CAC,0x0D3D");
+                writer.WriteLine("winter,static,0x0CAD,0x0D33");
+                writer.WriteLine("winter,static,0x0CAE,0x0D33");
+                writer.WriteLine("winter,static,0x0CB5,0x0D33");
+                writer.WriteLine("winter,static,0x0CAF,0x17CD");
+                writer.WriteLine("winter,static,0x0C87,0x17CD");
+                writer.WriteLine("winter,static,0x0C89,0x17CD");
+                writer.WriteLine("winter,static,0x0D16,0x17CD");
+                writer.WriteLine("winter,static,0x0D17,0x17CD");
+                writer.WriteLine("winter,static,0x0D32,0x17CD");
+                writer.WriteLine("winter,static,0x0D33,0x17CD");
+                writer.WriteLine("winter,static,0x0CB0,0x17CD");
+                writer.WriteLine("winter,static,0x0C8E,0x1B8D");
+                writer.WriteLine("winter,static,0x0C99,0x1B8D");
+                writer.WriteLine("winter,static,0x0C46,0x1B9D");
+                writer.WriteLine("winter,static,0x0C49,0x1B9D");
+                writer.WriteLine("winter,static,0x0C45,0x1B9C");
+                writer.WriteLine("winter,static,0x0C48,0x1B9C");
+                writer.WriteLine("winter,static,0x0CBF,0x1B9C");
+                writer.WriteLine("winter,static,0x0C4E,0x1B9C");
+                writer.WriteLine("winter,static,0x0D2B,0x1B9C");
+                writer.WriteLine("winter,static,0x0C85,0x1B9C");
+                writer.WriteLine("winter,static,0x0D15,0x1B9C");
+                writer.WriteLine("winter,static,0x0D29,0x1B9C");
+                writer.WriteLine("winter,static,0x0CB1,0x17CD");
+                writer.WriteLine("winter,static,0x0CB2,0x17CD");
+                writer.WriteLine("winter,static,0x0CB3,0x17CD");
+                writer.WriteLine("winter,static,0x0CB4,0x17CD");
+                writer.WriteLine("winter,static,0x0CB7,0x17CD");
+                writer.WriteLine("winter,static,0x0CC5,0x17CD");
+                writer.WriteLine("winter,static,0x0D0C,0x17CD");
+                writer.WriteLine("winter,static,0x0CB6,0x17CD");
+                writer.WriteLine("winter,static,0x0C37,0x1B1F");
+                writer.WriteLine("winter,static,0x0C38,0x1B1F");
+                writer.WriteLine("winter,static,0x0C47,0x1B1F");
+                writer.WriteLine("winter,static,0x0C4A,0x1B1F");
+                writer.WriteLine("winter,static,0x0C4B,0x1B1F");
+                writer.WriteLine("winter,static,0x0C4D,0x1B1F");
+                writer.WriteLine("winter,static,0x0C8C,0x1B1F");
+                writer.WriteLine("winter,static,0x0D2F,0x1B1F");
+                writer.WriteLine("winter,static,0x0C8D,0x1B22");
+                writer.WriteLine("winter,static,0x0C93,0x1B22");
+                writer.WriteLine("winter,static,0x0C94,0x1B22");
+                writer.WriteLine("winter,static,0x0C98,0x1B22");
+                writer.WriteLine("winter,static,0x0C9F,0x1B22");
+                writer.WriteLine("winter,static,0x0CA0,0x1B22");
+                writer.WriteLine("winter,static,0x0CA1,0x1B22");
+                writer.WriteLine("winter,static,0x0CA2,0x1B22");
+                writer.WriteLine("winter,static,0x0CA3,0x1BAE");
+                writer.WriteLine("winter,static,0x0CA4,0x1BAE");
+                writer.WriteLine("winter,static,0x0D0D,0x1BAE");
+                writer.WriteLine("winter,static,0x0D0E,0x1BAE");
+                writer.WriteLine("winter,static,0x0D10,0x1BAE");
+                writer.WriteLine("winter,static,0x0D12,0x1BAE");
+                writer.WriteLine("winter,static,0x0D13,0x1BAE");
+                writer.WriteLine("winter,static,0x0D18,0x1BAE");
+                writer.WriteLine("winter,static,0x0D19,0x1BAE");
+                writer.WriteLine("winter,static,0x0D2D,0x1BAE");
+                writer.WriteLine("winter,static,0x0CC7,0x1B20");
+                writer.WriteLine("winter,static,0x0C84,0x1B84");
+                writer.WriteLine("winter,static,0x0C8B,0x1B84");
+                writer.WriteLine("winter,static,0x0CE9,0x0CCA");
+                writer.WriteLine("winter,static,0x0C9E,0x0CCA");
+                writer.WriteLine("winter,static,0x33A1,0x17CD");
+                writer.WriteLine("winter,static,0x33A2,0x17CD");
+                writer.WriteLine("winter,static,0x33A3,0x17CD");
+                writer.WriteLine("winter,static,0x33A4,0x17CD");
+                writer.WriteLine("winter,static,0x33A6,0x17CD");
+                writer.WriteLine("winter,static,0x33AB,0x17CD");
+                writer.WriteLine("winter,landtile,196,282");
+                writer.WriteLine("winter,landtile,197,283");
+                writer.WriteLine("winter,landtile,198,284");
+                writer.WriteLine("winter,landtile,199,285");
+                writer.WriteLine("winter,landtile,248,282");
+                writer.WriteLine("winter,landtile,249,283");
+                writer.WriteLine("winter,landtile,250,284");
+                writer.WriteLine("winter,landtile,251,285");
+                writer.WriteLine("winter,landtile,349,937");
+                writer.WriteLine("winter,landtile,350,940");
+                writer.WriteLine("winter,landtile,351,938");
+                writer.WriteLine("winter,landtile,352,939");
+                writer.WriteLine("winter,landtile,200,282");
+                writer.WriteLine("winter,landtile,201,283");
+                writer.WriteLine("winter,landtile,202,284");
+                writer.WriteLine("winter,landtile,203,285");
+                writer.WriteLine("winter,landtile,204,282");
+                writer.WriteLine("winter,landtile,205,283");
+                writer.WriteLine("winter,landtile,206,284");
+                writer.WriteLine("winter,landtile,207,285");
+                writer.WriteLine("winter,landtile,208,282");
+                writer.WriteLine("winter,landtile,209,283");
+                writer.WriteLine("winter,landtile,210,284");
+                writer.WriteLine("winter,landtile,211,285");
+                writer.WriteLine("winter,landtile,212,282");
+                writer.WriteLine("winter,landtile,213,283");
+                writer.WriteLine("winter,landtile,214,284");
+                writer.WriteLine("winter,landtile,215,285");
+                writer.WriteLine("winter,landtile,216,282");
+                writer.WriteLine("winter,landtile,217,283");
+                writer.WriteLine("winter,landtile,218,284");
+                writer.WriteLine("winter,landtile,219,285");
+                writer.WriteLine("winter,landtile,1697,282");
+                writer.WriteLine("winter,landtile,1698,283");
+                writer.WriteLine("winter,landtile,1699,284");
+                writer.WriteLine("winter,landtile,1700,285");
+                writer.WriteLine("winter,landtile,1711,282");
+                writer.WriteLine("winter,landtile,1712,283");
+                writer.WriteLine("winter,landtile,1713,284");
+                writer.WriteLine("winter,landtile,1714,285");
+                writer.WriteLine("winter,landtile,1715,282");
+                writer.WriteLine("winter,landtile,1716,283");
+                writer.WriteLine("winter,landtile,1717,284");
+                writer.WriteLine("winter,landtile,1718,285");
+                writer.WriteLine("winter,landtile,1719,282");
+                writer.WriteLine("winter,landtile,1720,283");
+                writer.WriteLine("winter,landtile,1721,284");
+                writer.WriteLine("winter,landtile,1722,285");
+                writer.WriteLine("winter,landtile,1723,282");
+                writer.WriteLine("winter,landtile,1724,283");
+                writer.WriteLine("winter,landtile,1725,284");
+                writer.WriteLine("winter,landtile,1726,285");
+                writer.WriteLine("winter,landtile,1727,282");
+                writer.WriteLine("winter,landtile,1728,283");
+                writer.WriteLine("winter,landtile,1729,284");
+                writer.WriteLine("winter,landtile,1730,285");
+                writer.WriteLine("winter,landtile,332,932");
+                writer.WriteLine("winter,landtile,333,929");
+                writer.WriteLine("winter,landtile,334,930");
+                writer.WriteLine("winter,landtile,335,931");
+                writer.WriteLine("winter,landtile,353,908");
+                writer.WriteLine("winter,landtile,354,907");
+                writer.WriteLine("winter,landtile,355,905");
+                writer.WriteLine("winter,landtile,356,906");
+                writer.WriteLine("winter,landtile,357,904");
+                writer.WriteLine("winter,landtile,358,903");
+                writer.WriteLine("winter,landtile,359,902");
+                writer.WriteLine("winter,landtile,360,901");
+                writer.WriteLine("winter,landtile,361,912");
+                writer.WriteLine("winter,landtile,362,911");
+                writer.WriteLine("winter,landtile,363,909");
+                writer.WriteLine("winter,landtile,364,910");
+                writer.WriteLine("winter,landtile,369,916");
+                writer.WriteLine("winter,landtile,370,915");
+                writer.WriteLine("winter,landtile,371,914");
+                writer.WriteLine("winter,landtile,372,913");
+                writer.WriteLine("winter,landtile,1351,917");
+                writer.WriteLine("winter,landtile,1352,918");
+                writer.WriteLine("winter,landtile,1353,919");
+                writer.WriteLine("winter,landtile,1354,920");
+                writer.WriteLine("winter,landtile,1355,921");
+                writer.WriteLine("winter,landtile,1356,922");
+                writer.WriteLine("winter,landtile,1357,923");
+                writer.WriteLine("winter,landtile,1358,924");
+                writer.WriteLine("winter,landtile,1359,925");
+                writer.WriteLine("winter,landtile,1360,927");
+                writer.WriteLine("winter,landtile,1361,928");
+                writer.WriteLine("winter,landtile,1362,930");
+                writer.WriteLine("winter,landtile,1363,933");
+                writer.WriteLine("winter,landtile,1364,934");
+                writer.WriteLine("winter,landtile,1365,935");
+                writer.WriteLine("winter,landtile,1366,936");
+                writer.WriteLine("winter,landtile,804,931");
+                writer.WriteLine("winter,landtile,805,929");
+                writer.WriteLine("winter,landtile,806,926");
+                writer.WriteLine("winter,landtile,807,925");
+                writer.WriteLine("winter,landtile,808,932");
+                writer.WriteLine("winter,landtile,809,930");
+                writer.WriteLine("winter,landtile,810,928");
+                writer.WriteLine("winter,landtile,811,927");
+                writer.WriteLine("winter,landtile,812,919");
+                writer.WriteLine("winter,landtile,813,920");
+                writer.WriteLine("winter,landtile,814,917");
+                writer.WriteLine("winter,landtile,815,921");
+                writer.WriteLine("winter,landtile,3,282");
+                writer.WriteLine("winter,landtile,4,283");
+                writer.WriteLine("winter,landtile,5,284");
+                writer.WriteLine("winter,landtile,6,285");
+                writer.WriteLine("winter,landtile,121,910");
+                writer.WriteLine("winter,landtile,122,909");
+                writer.WriteLine("winter,landtile,123,912");
+                writer.WriteLine("winter,landtile,124,911");
+                writer.WriteLine("winter,landtile,125,906");
+                writer.WriteLine("winter,landtile,126,905");
+                writer.WriteLine("winter,landtile,130,908");
+                writer.WriteLine("winter,landtile,131,907");
+                writer.WriteLine("winter,landtile,133,904");
+                writer.WriteLine("winter,landtile,134,904");
+                writer.WriteLine("winter,landtile,135,903");
+                writer.WriteLine("winter,landtile,136,903");
+                writer.WriteLine("winter,landtile,137,902");
+                writer.WriteLine("winter,landtile,138,902");
+                writer.WriteLine("winter,landtile,139,901");
+                writer.WriteLine("winter,landtile,140,901");
+                writer.WriteLine("winter,landtile,871,917");
+                writer.WriteLine("winter,landtile,872,918");
+                writer.WriteLine("winter,landtile,873,919");
+                writer.WriteLine("winter,landtile,874,920");
+                writer.WriteLine("winter,landtile,875,921");
+                writer.WriteLine("winter,landtile,876,922");
+                writer.WriteLine("winter,landtile,877,923");
+                writer.WriteLine("winter,landtile,878,924");
+                writer.WriteLine("winter,landtile,879,925");
+                writer.WriteLine("winter,landtile,880,926");
+                writer.WriteLine("winter,landtile,881,927");
+                writer.WriteLine("winter,landtile,882,928");
+                writer.WriteLine("winter,landtile,883,929");
+                writer.WriteLine("winter,landtile,884,930");
+                writer.WriteLine("winter,landtile,885,931");
+                writer.WriteLine("winter,landtile,886,932");
+                writer.WriteLine("winter,landtile,887,933");
+                writer.WriteLine("winter,landtile,888,934");
+                writer.WriteLine("winter,landtile,889,935");
+                writer.WriteLine("winter,landtile,890,936");
+                writer.WriteLine("winter,landtile,891,937");
+                writer.WriteLine("winter,landtile,892,938");
+                writer.WriteLine("winter,landtile,893,939");
+                writer.WriteLine("winter,landtile,894,940");
+                writer.WriteLine("winter,landtile,365,916");
+                writer.WriteLine("winter,landtile,366,915");
+                writer.WriteLine("winter,landtile,367,913");
+                writer.WriteLine("winter,landtile,368,914");
+                writer.WriteLine("winter,landtile,236,278");
+                writer.WriteLine("winter,landtile,237,279");
+                writer.WriteLine("winter,landtile,238,276");
+                writer.WriteLine("winter,landtile,239,277");
+                writer.WriteLine("winter,landtile,240,305");
+                writer.WriteLine("winter,landtile,241,302");
+                writer.WriteLine("winter,landtile,242,303");
+                writer.WriteLine("winter,landtile,243,304");
+                writer.WriteLine("winter,landtile,244,272");
+                writer.WriteLine("winter,landtile,245,273");
+                writer.WriteLine("winter,landtile,246,274");
+                writer.WriteLine("winter,landtile,247,275");
+                writer.WriteLine("winter,landtile,561,268");
+                writer.WriteLine("winter,landtile,562,269");
+                writer.WriteLine("winter,landtile,563,270");
+                writer.WriteLine("winter,landtile,564,271");
+                writer.WriteLine("winter,landtile,565,272");
+                writer.WriteLine("winter,landtile,566,273");
+                writer.WriteLine("winter,landtile,567,274");
+                writer.WriteLine("winter,landtile,568,275");
+                writer.WriteLine("winter,landtile,569,276");
+                writer.WriteLine("winter,landtile,570,277");
+                writer.WriteLine("winter,landtile,571,278");
+                writer.WriteLine("winter,landtile,572,279");
+                writer.WriteLine("winter,landtile,573,1861");
+                writer.WriteLine("winter,landtile,574,1862");
+                writer.WriteLine("winter,landtile,575,1863");
+                writer.WriteLine("winter,landtile,576,1864");
+                writer.WriteLine("winter,landtile,577,1865");
+                writer.WriteLine("winter,landtile,578,1866");
+                writer.WriteLine("winter,landtile,579,1867");
+                writer.WriteLine("winter,landtile,1741,1868");
+                writer.WriteLine("winter,landtile,1742,1869");
+                writer.WriteLine("winter,landtile,1743,1870");
+                writer.WriteLine("winter,landtile,1744,1871");
+                writer.WriteLine("winter,landtile,1745,1872");
+                writer.WriteLine("winter,landtile,1746,1873");
+                writer.WriteLine("winter,landtile,1747,1874");
+                writer.WriteLine("winter,landtile,1748,1875");
+                writer.WriteLine("winter,landtile,1749,1876");
+                writer.WriteLine("winter,landtile,1750,1877");
+                writer.WriteLine("winter,landtile,1751,1878");
+                writer.WriteLine("winter,landtile,1752,1879");
+                writer.WriteLine("winter,landtile,1753,1880");
+                writer.WriteLine("winter,landtile,1754,1881");
+                writer.WriteLine("winter,landtile,1755,1882");
+                writer.WriteLine("winter,landtile,1756,1883");
+                writer.WriteLine("winter,landtile,1757,1884");
+                writer.WriteLine("winter,landtile,1758,282");
+                writer.WriteLine("winter,landtile,1759,283");
+                writer.WriteLine("winter,landtile,1760,284");
+                writer.WriteLine("winter,landtile,1761,285");
+                writer.WriteLine("winter,landtile,26,379");
+                writer.WriteLine("winter,landtile,27,378");
+                writer.WriteLine("winter,landtile,28,377");
+                writer.WriteLine("winter,landtile,29,380");
+                writer.WriteLine("winter,landtile,30,381");
+                writer.WriteLine("winter,landtile,31,382");
+                writer.WriteLine("winter,landtile,32,383");
+                writer.WriteLine("winter,landtile,33,384");
+                writer.WriteLine("winter,landtile,34,385");
+                writer.WriteLine("winter,landtile,35,386");
+                writer.WriteLine("winter,landtile,36,387");
+                writer.WriteLine("winter,landtile,37,388");
+                writer.WriteLine("winter,landtile,38,389");
+                writer.WriteLine("winter,landtile,39,390");
+                writer.WriteLine("winter,landtile,40,391");
+                writer.WriteLine("winter,landtile,41,392");
+                writer.WriteLine("winter,landtile,42,393");
+                writer.WriteLine("winter,landtile,43,394");
+                writer.WriteLine("winter,landtile,44,387");
+                writer.WriteLine("winter,landtile,45,388");
+                writer.WriteLine("winter,landtile,46,383");
+                writer.WriteLine("winter,landtile,47,380");
+                writer.WriteLine("winter,landtile,48,383");
+                writer.WriteLine("winter,landtile,49,378");
+                writer.WriteLine("winter,landtile,50,379");
+                writer.WriteLine("winter,landtile,141,379");
+                writer.WriteLine("winter,landtile,142,386");
+                writer.WriteLine("winter,landtile,143,385");
+                writer.WriteLine("winter,landtile,144,393");
+                writer.WriteLine("winter,landtile,145,378");
+                writer.WriteLine("winter,landtile,146,387");
+                writer.WriteLine("winter,landtile,147,391");
+                writer.WriteLine("winter,landtile,148,392");
+                writer.WriteLine("winter,landtile,149,377");
+                writer.WriteLine("winter,landtile,150,379");
+                writer.WriteLine("winter,landtile,151,383");
+                writer.WriteLine("winter,landtile,152,380");
+                writer.WriteLine("winter,landtile,153,387");
+                writer.WriteLine("winter,landtile,154,388");
+                writer.WriteLine("winter,landtile,155,393");
+                writer.WriteLine("winter,landtile,156,391");
+                writer.WriteLine("winter,landtile,157,387");
+                writer.WriteLine("winter,landtile,158,385");
+                writer.WriteLine("winter,landtile,159,385");
+                writer.WriteLine("winter,landtile,160,389");
+                writer.WriteLine("winter,landtile,161,379");
+                writer.WriteLine("winter,landtile,162,384");
+                writer.WriteLine("winter,landtile,163,380");
+                writer.WriteLine("winter,landtile,164,379");
+                writer.WriteLine("winter,landtile,165,378");
+                writer.WriteLine("winter,landtile,166,378");
+                writer.WriteLine("winter,landtile,167,394");
+                writer.WriteLine("winter,landtile,1521,282");
+                writer.WriteLine("winter,landtile,1522,283");
+                writer.WriteLine("winter,landtile,1523,284");
+                writer.WriteLine("winter,landtile,1524,285");
+                writer.WriteLine("winter,landtile,1529,282");
+                writer.WriteLine("winter,landtile,1530,283");
+                writer.WriteLine("winter,landtile,1531,284");
+                writer.WriteLine("winter,landtile,1532,285");
+                writer.WriteLine("winter,landtile,1533,282");
+                writer.WriteLine("winter,landtile,1534,283");
+                writer.WriteLine("winter,landtile,1535,284");
+                writer.WriteLine("winter,landtile,1536,285");
+                writer.WriteLine("winter,landtile,1537,282");
+                writer.WriteLine("winter,landtile,1538,283");
+                writer.WriteLine("winter,landtile,1539,284");
+                writer.WriteLine("winter,landtile,1540,285");
+                writer.WriteLine("winter,landtile,741,379");
+                writer.WriteLine("winter,landtile,742,385");
+                writer.WriteLine("winter,landtile,743,389");
+                writer.WriteLine("winter,landtile,744,393");
+                writer.WriteLine("winter,landtile,745,378");
+                writer.WriteLine("winter,landtile,746,384");
+                writer.WriteLine("winter,landtile,747,388");
+                writer.WriteLine("winter,landtile,748,392");
+                writer.WriteLine("winter,landtile,749,377");
+                writer.WriteLine("winter,landtile,750,385");
+                writer.WriteLine("winter,landtile,751,383");
+                writer.WriteLine("winter,landtile,752,380");
+                writer.WriteLine("winter,landtile,753,391");
+                writer.WriteLine("winter,landtile,754,388");
+                writer.WriteLine("winter,landtile,755,385");
+                writer.WriteLine("winter,landtile,756,384");
+                writer.WriteLine("winter,landtile,757,391");
+                writer.WriteLine("winter,landtile,758,379");
+                writer.WriteLine("winter,landtile,759,393");
+                writer.WriteLine("winter,landtile,760,383");
+                writer.WriteLine("winter,landtile,761,385");
+                writer.WriteLine("winter,landtile,762,391");
+                writer.WriteLine("winter,landtile,763,391");
+                writer.WriteLine("winter,landtile,764,379");
+                writer.WriteLine("winter,landtile,765,384");
+                writer.WriteLine("winter,landtile,766,384");
+                writer.WriteLine("winter,landtile,767,379");
+                writer.WriteLine("winter,landtile,9,282");
+                writer.WriteLine("winter,landtile,10,283");
+                writer.WriteLine("winter,landtile,11,284");
+                writer.WriteLine("winter,landtile,12,285");
+                writer.WriteLine("winter,landtile,13,282");
+                writer.WriteLine("winter,landtile,14,283");
+                writer.WriteLine("winter,landtile,15,284");
+                writer.WriteLine("winter,landtile,16,285");
+                writer.WriteLine("winter,landtile,17,282");
+                writer.WriteLine("winter,landtile,18,283");
+                writer.WriteLine("winter,landtile,19,284");
+                writer.WriteLine("winter,landtile,20,285");
+                writer.WriteLine("winter,landtile,21,282");
+                writer.WriteLine("desolation,statics,0x1B7E,0x1E34");
+                writer.WriteLine("desolation,statics,0x0D2B,0x1B15");
+                writer.WriteLine("desolation,statics,0x0D11,0x122B");
+                writer.WriteLine("desolation,statics,0x0D14,0x122B");
+                writer.WriteLine("desolation,statics,0x0D17,0x122B");
+                writer.WriteLine("desolation,statics,0x0D16,0x1B8D");
+                writer.WriteLine("desolation,statics,0x0CB9,0x1B8D");
+                writer.WriteLine("desolation,statics,0x0CBA,0x1B8D");
+                writer.WriteLine("desolation,statics,0x0CBB,0x1B8D");
+                writer.WriteLine("desolation,statics,0x0CBC,0x1B8D");
+                writer.WriteLine("desolation,statics,0x0CBD,0x1B8D");
+                writer.WriteLine("desolation,statics,0x0CBE,0x1B8D");
+                writer.WriteLine("desolation,statics,0x0CC7,0x1B0D");
+                writer.WriteLine("desolation,statics,0x0CE9,0x0ED7");
+                writer.WriteLine("desolation,statics,0x0CEA,0x0D3F");
+                writer.WriteLine("desolation,statics,0x0D0F,0x1B1C");
+                writer.WriteLine("desolation,statics,0x0CB8,0x1CEA");
+                writer.WriteLine("desolation,statics,0x0C84,0x1B84");
+                writer.WriteLine("desolation,statics,0x0C8B,0x1B84");
+                writer.WriteLine("desolation,statics,0x0C9E,0x1182");
+                writer.WriteLine("desolation,statics,0x0CAD,0x1AE1");
+                writer.WriteLine("desolation,statics,0x0C4C,0x1B16");
+                writer.WriteLine("desolation,statics,0x0C8E,0x1B8D");
+                writer.WriteLine("desolation,statics,0x0C99,0x1B8D");
+                writer.WriteLine("desolation,statics,0x0CAC,0x1B8D");
+                writer.WriteLine("desolation,statics,0x0C46,0x1B9D");
+                writer.WriteLine("desolation,statics,0x0C49,0x1B9D");
+                writer.WriteLine("desolation,statics,0x0CB6,0x1B9D");
+                writer.WriteLine("desolation,statics,0x0C45,0x1B9C");
+                writer.WriteLine("desolation,statics,0x0C48,0x1B9C");
+                writer.WriteLine("desolation,statics,0x0C4E,0x1B9C");
+                writer.WriteLine("desolation,statics,0x0C85,0x1B9C");
+                writer.WriteLine("desolation,statics,0x0CA7,0x1B9C");
+                writer.WriteLine("desolation,statics,0x0CAE,0x1B9C");
+                writer.WriteLine("desolation,statics,0x0CAF,0x1B9C");
+                writer.WriteLine("desolation,statics,0x0CB5,0x1B9C");
+                writer.WriteLine("desolation,statics,0x0D15,0x1B9C");
+                writer.WriteLine("desolation,statics,0x0D29,0x1B9C");
+                writer.WriteLine("desolation,statics,0x0C37,0x1BAE");
+                writer.WriteLine("desolation,statics,0x0C38,0x1BAE");
+                writer.WriteLine("desolation,statics,0x0C47,0x1BAE");
+                writer.WriteLine("desolation,statics,0x0C4A,0x1BAE");
+                writer.WriteLine("desolation,statics,0x0C4B,0x1BAE");
+                writer.WriteLine("desolation,statics,0x0C4D,0x1BAE");
+                writer.WriteLine("desolation,statics,0x0C8C,0x1BAE");
+                writer.WriteLine("desolation,statics,0x0C8D,0x1BAE");
+                writer.WriteLine("desolation,statics,0x0C93,0x1BAE");
+                writer.WriteLine("desolation,statics,0x0C94,0x1BAE");
+                writer.WriteLine("desolation,statics,0x0C98,0x1BAE");
+                writer.WriteLine("desolation,statics,0x0C9F,0x1BAE");
+                writer.WriteLine("desolation,statics,0x0CA0,0x1BAE");
+                writer.WriteLine("desolation,statics,0x0CA1,0x1BAE");
+                writer.WriteLine("desolation,statics,0x0CA2,0x1BAE");
+                writer.WriteLine("desolation,statics,0x0CA3,0x1BAE");
+                writer.WriteLine("desolation,statics,0x0CA4,0x1BAE");
+                writer.WriteLine("desolation,statics,0x0CB0,0x1BAE");
+                writer.WriteLine("desolation,statics,0x0CB1,0x1BAE");
+                writer.WriteLine("desolation,statics,0x0CB2,0x1BAE");
+                writer.WriteLine("desolation,statics,0x0CB3,0x1BAE");
+                writer.WriteLine("desolation,statics,0x0CB4,0x1BAE");
+                writer.WriteLine("desolation,statics,0x0CB7,0x1BAE");
+                writer.WriteLine("desolation,statics,0x0CC5,0x1BAE");
+                writer.WriteLine("desolation,statics,0x0D0C,0x1BAE");
+                writer.WriteLine("desolation,statics,0x0D0D,0x1BAE");
+                writer.WriteLine("desolation,statics,0x0D0E,0x1BAE");
+                writer.WriteLine("desolation,statics,0x0D10,0x1BAE");
+                writer.WriteLine("desolation,statics,0x0D12,0x1BAE");
+                writer.WriteLine("desolation,statics,0x0D13,0x1BAE");
+                writer.WriteLine("desolation,statics,0x0D18,0x1BAE");
+                writer.WriteLine("desolation,statics,0x0D19,0x1BAE");
+                writer.WriteLine("desolation,statics,0x0D2D,0x1BAE");
+                writer.WriteLine("desolation,statics,0x0D2F,0x1BAE");
             }
-
-            return graphic;
         }
 
-        private static ushort GetWinterGraphic(ushort graphic)
-        {
-            switch (graphic)
-            {
-                case 0x0CA7:
-                    graphic = 0x0CC6;
-
-                    break;
-
-                case 0x0CAC:
-                    graphic = 0x0D3D;
-
-                    break;
-
-                case 0x0CAD:
-                case 0x0CAE:
-                case 0x0CB5:
-                    graphic = 0x0D33;
-
-                    break;
-
-                // snow
-                case 0x0CAF:
-                case 0x0C87:
-                case 0x0C89:
-                case 0x0D16:
-                case 0x0D17:
-                case 0x0D32:
-                case 0x0D33:
-                case 0x0CB0:
-                    graphic = 0x17CD;
-
-                    break;
-
-                case 0x0C8E:
-                case 0x0C99:
-                    graphic = 0x1B8D;
-
-                    break;
-
-                case 0x0C46:
-                case 0x0C49:
-                    graphic = 0x1B9D;
-
-                    break;
-
-                case 0x0C45:
-                case 0x0C48:
-                case 0x0CBF:
-                case 0x0C4E:
-                case 0x0D2B:
-                case 0x0C85:
-                case 0x0D15:
-                case 0x0D29:
-                    graphic = 0x1B9C;
-
-                    break;
-
-                case 0x0CB1:
-                case 0x0CB2:
-                case 0x0CB3:
-                case 0x0CB4:
-                case 0x0CB7:
-                case 0x0CC5:
-                case 0x0D0C:
-                case 0x0CB6:
-                    graphic = 0x17CD;
-
-                    break;
-
-                case 0x0C37:
-                case 0x0C38:
-                case 0x0C47:
-                case 0x0C4A:
-                case 0x0C4B:
-                case 0x0C4D:
-                case 0x0C8C:
-                case 0x0D2F:
-                    graphic = 0x1B1F;
-
-                    break;
-
-                case 0x0C8D:
-                case 0x0C93:
-                case 0x0C94:
-                case 0x0C98:
-                case 0x0C9F:
-                case 0x0CA0:
-                case 0x0CA1:
-                case 0x0CA2:
-                    graphic = 0x1B22;
-
-                    break;
-
-                case 0x0CA3:
-                case 0x0CA4:
-                case 0x0D0D:
-                case 0x0D0E:
-                case 0x0D10:
-                case 0x0D12:
-                case 0x0D13:
-                case 0x0D18:
-                case 0x0D19:
-                case 0x0D2D:
-                    graphic = 0x1BAE;
-
-                    break;
-
-                case 0x0CC7:
-                    graphic = 0x1B20;
-
-                    break;
-
-                case 0x0C84:
-                case 0x0C8B:
-                    graphic = 0x1B84;
-
-                    break;
-
-                case 0x0CE9:
-                case 0x0C9E:
-                    graphic = 0x0CCA;
-
-                    break;
-
-                // misc grasses
-                case 0x33A1:
-                case 0x33A2:
-                case 0x33A3:
-                case 0x33A4:
-                case 0x33A6:
-                case 0x33AB:
-                    graphic = 0x17CD;
-
-                    break;
-            }
-
-            return graphic;
-        }
-
-        private static ushort GetDesolationGraphic(ushort graphic)
-        {
-            switch (graphic)
-            {
-                case 0x1B7E:
-                    graphic = 0x1E34;
-
-                    break;
-
-                case 0x0D2B:
-                    graphic = 0x1B15;
-
-                    break;
-
-                case 0x0D11:
-                case 0x0D14:
-                case 0x0D17:
-                    graphic = 0x122B;
-
-                    break;
-
-                case 0x0D16:
-                case 0x0CB9:
-                case 0x0CBA:
-                case 0x0CBB:
-                case 0x0CBC:
-                case 0x0CBD:
-                case 0x0CBE:
-                    graphic = 0x1B8D;
-
-                    break;
-
-                case 0x0CC7:
-                    graphic = 0x1B0D;
-
-                    break;
-
-                case 0x0CE9:
-                    graphic = 0x0ED7;
-
-                    break;
-
-                case 0x0CEA:
-                    graphic = 0x0D3F;
-
-                    break;
-
-                case 0x0D0F:
-                    graphic = 0x1B1C;
-
-                    break;
-
-                case 0x0CB8:
-                    graphic = 0x1CEA;
-
-                    break;
-
-                case 0x0C84:
-                case 0x0C8B:
-                    graphic = 0x1B84;
-
-                    break;
-
-                case 0x0C9E:
-                    graphic = 0x1182;
-
-                    break;
-
-                case 0x0CAD:
-                    graphic = 0x1AE1;
-
-                    break;
-
-                case 0x0C4C:
-                    graphic = 0x1B16;
-
-                    break;
-
-                case 0x0C8E:
-                case 0x0C99:
-                case 0x0CAC:
-                    graphic = 0x1B8D;
-
-                    break;
-
-                case 0x0C46:
-                case 0x0C49:
-                case 0x0CB6:
-                    graphic = 0x1B9D;
-
-                    break;
-
-                case 0x0C45:
-                case 0x0C48:
-                case 0x0C4E:
-                case 0x0C85:
-                case 0x0CA7:
-                case 0x0CAE:
-                case 0x0CAF:
-                case 0x0CB5:
-                case 0x0D15:
-                case 0x0D29:
-                    graphic = 0x1B9C;
-
-                    break;
-
-                case 0x0C37:
-                case 0x0C38:
-                case 0x0C47:
-                case 0x0C4A:
-                case 0x0C4B:
-                case 0x0C4D:
-                case 0x0C8C:
-                case 0x0C8D:
-                case 0x0C93:
-                case 0x0C94:
-                case 0x0C98:
-                case 0x0C9F:
-                case 0x0CA0:
-                case 0x0CA1:
-                case 0x0CA2:
-                case 0x0CA3:
-                case 0x0CA4:
-                case 0x0CB0:
-                case 0x0CB1:
-                case 0x0CB2:
-                case 0x0CB3:
-                case 0x0CB4:
-                case 0x0CB7:
-                case 0x0CC5:
-                case 0x0D0C:
-                case 0x0D0D:
-                case 0x0D0E:
-                case 0x0D10:
-                case 0x0D12:
-                case 0x0D13:
-                case 0x0D18:
-                case 0x0D19:
-                case 0x0D2D:
-                case 0x0D2F:
-                    graphic = 0x1BAE;
-
-                    break;
-            }
-
-            return graphic;
-        }
+        #endregion
     }
 }
