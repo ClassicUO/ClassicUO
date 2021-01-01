@@ -18,6 +18,7 @@ namespace ClassicUO.Game.Managers
         private static ushort[] _desolationGraphic;
 
         private static readonly string _seasonsFilePath = Path.Combine(CUOEnviroment.ExecutablePath, "Data", "Client");
+        private static readonly string _seasonsFile = Path.Combine(_seasonsFilePath, "seasons.txt");
 
         static SeasonManager()
         {
@@ -38,14 +39,12 @@ namespace ClassicUO.Game.Managers
             _winterGraphic = new ushort[Constants.MAX_STATIC_DATA_INDEX_COUNT];
             _desolationGraphic = new ushort[Constants.MAX_STATIC_DATA_INDEX_COUNT];
 
-            string seasonsFile = Path.Combine(_seasonsFilePath, "seasons.csv");
-
-            if (!File.Exists(seasonsFile))
+            if (!File.Exists(_seasonsFile))
             {
                 CreateDefaultSeasonsFile();
             }
 
-            using (StreamReader reader = new StreamReader(seasonsFile))
+            using (StreamReader reader = new StreamReader(_seasonsFile))
             {
                 while (!reader.EndOfStream)
                 {
@@ -175,14 +174,12 @@ namespace ClassicUO.Game.Managers
 
         private static void CreateDefaultSeasonsFile()
         {
-            string seasonsFile = Path.Combine(_seasonsFilePath, "seasons.csv");
-
-            if (File.Exists(seasonsFile))
+            if (File.Exists(_seasonsFile))
             {
                 return;
             }
 
-            using (StreamWriter writer = new StreamWriter(seasonsFile))
+            using (StreamWriter writer = new StreamWriter(_seasonsFile))
             {
                 writer.WriteLine("spring,static,0x0CA7,0x0C84");
                 writer.WriteLine("spring,static,0x0CAC,0x0C46");
