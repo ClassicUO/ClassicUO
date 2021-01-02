@@ -137,7 +137,7 @@ namespace ClassicUO.Game.GameObjects
 
             Vector2.Subtract(ref target, ref source, out Vector2 offset);
             Vector2.Distance(ref source, ref target, out float distance);
-            Vector2.Multiply(ref offset, 1 / distance, out Vector2 s0);
+            Vector2.Multiply(ref offset, MovingDelay / distance, out Vector2 s0);
 
 
             if (distance <= 22)
@@ -147,8 +147,8 @@ namespace ClassicUO.Game.GameObjects
                 return;
             }
 
-            int newOffsetX = (int)(source.X / 22f);
-            int newOffsetY = (int)(source.Y / 22f);
+            int newOffsetX = (int) (source.X / 22f);
+            int newOffsetY = (int) (source.Y / 22f);
 
             TileOffsetOnMonitorToXY(ref newOffsetX, ref newOffsetY, out int newCoordX, out int newCoordY);
 
