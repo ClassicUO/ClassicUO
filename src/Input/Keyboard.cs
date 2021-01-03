@@ -22,6 +22,7 @@
 #endregion
 
 using SDL2;
+using ClassicUO.Utility.Platforms;
 
 namespace ClassicUO.Input
 {
@@ -36,6 +37,7 @@ namespace ClassicUO.Input
         public static bool Alt { get; private set; }
         public static bool Shift { get; private set; }
         public static bool Ctrl { get; private set; }
+        public static bool Cmd { get; private set; }
 
 
         //public static bool IsKeyPressed(SDL.SDL_Keycode code)
@@ -64,6 +66,7 @@ namespace ClassicUO.Input
             Shift = (e.keysym.mod & SDL.SDL_Keymod.KMOD_SHIFT) != SDL.SDL_Keymod.KMOD_NONE;
             Alt = (e.keysym.mod & SDL.SDL_Keymod.KMOD_ALT) != SDL.SDL_Keymod.KMOD_NONE;
             Ctrl = (e.keysym.mod & SDL.SDL_Keymod.KMOD_CTRL) != SDL.SDL_Keymod.KMOD_NONE;
+            Cmd = (e.keysym.mod & SDL.SDL_Keymod.KMOD_GUI) != SDL.SDL_Keymod.KMOD_NONE && PlatformHelper.IsOSX;
 
             _code = SDL.SDL_Keycode.SDLK_UNKNOWN;
         }
@@ -82,6 +85,7 @@ namespace ClassicUO.Input
             Shift = (e.keysym.mod & SDL.SDL_Keymod.KMOD_SHIFT) != SDL.SDL_Keymod.KMOD_NONE;
             Alt = (e.keysym.mod & SDL.SDL_Keymod.KMOD_ALT) != SDL.SDL_Keymod.KMOD_NONE;
             Ctrl = (e.keysym.mod & SDL.SDL_Keymod.KMOD_CTRL) != SDL.SDL_Keymod.KMOD_NONE;
+            Cmd = (e.keysym.mod & SDL.SDL_Keymod.KMOD_GUI) != SDL.SDL_Keymod.KMOD_NONE && PlatformHelper.IsOSX;
 
             if (e.keysym.sym != SDL.SDL_Keycode.SDLK_UNKNOWN)
             {

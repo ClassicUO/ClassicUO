@@ -253,13 +253,13 @@ namespace ClassicUO.Game.Managers
         }
 
 
-        public Macro FindMacro(SDL.SDL_Keycode key, bool alt, bool ctrl, bool shift)
+        public Macro FindMacro(SDL.SDL_Keycode key, bool alt, bool ctrl, bool shift, bool cmd = false)
         {
             Macro obj = (Macro) Items;
 
             while (obj != null)
             {
-                if (obj.Key == key && obj.Alt == alt && obj.Ctrl == ctrl && obj.Shift == shift)
+                if (obj.Key == key && obj.Alt == alt && obj.Ctrl == ctrl && obj.Shift == shift && obj.Cmd == cmd)
                 {
                     break;
                 }
@@ -1548,12 +1548,13 @@ namespace ClassicUO.Game.Managers
 
     internal class Macro : LinkedObject, IEquatable<Macro>
     {
-        public Macro(string name, SDL.SDL_Keycode key, bool alt, bool ctrl, bool shift) : this(name)
+        public Macro(string name, SDL.SDL_Keycode key, bool alt, bool ctrl, bool shift, bool cmd = false) : this(name)
         {
             Key = key;
             Alt = alt;
             Ctrl = ctrl;
             Shift = shift;
+            Cmd = cmd;
         }
 
         public Macro(string name)
@@ -1567,6 +1568,7 @@ namespace ClassicUO.Game.Managers
         public bool Alt { get; set; }
         public bool Ctrl { get; set; }
         public bool Shift { get; set; }
+        public bool Cmd { get; set; }
 
         public bool Equals(Macro other)
         {
@@ -1575,7 +1577,7 @@ namespace ClassicUO.Game.Managers
                 return false;
             }
 
-            return Key == other.Key && Alt == other.Alt && Ctrl == other.Ctrl && Shift == other.Shift &&
+            return Key == other.Key && Alt == other.Alt && Ctrl == other.Ctrl && Shift == other.Shift && Cmd == other.Cmd &&
                    Name == other.Name;
         }
 
@@ -1611,6 +1613,7 @@ namespace ClassicUO.Game.Managers
             writer.WriteAttributeString("alt", Alt.ToString());
             writer.WriteAttributeString("ctrl", Ctrl.ToString());
             writer.WriteAttributeString("shift", Shift.ToString());
+            writer.WriteAttributeString("cmd", Cmd.ToString());
 
             writer.WriteStartElement("actions");
 
@@ -1642,9 +1645,10 @@ namespace ClassicUO.Game.Managers
             }
 
             Key = (SDL.SDL_Keycode) int.Parse(xml.GetAttribute("key"));
-            Alt = bool.Parse(xml.GetAttribute("alt"));
-            Ctrl = bool.Parse(xml.GetAttribute("ctrl"));
-            Shift = bool.Parse(xml.GetAttribute("shift"));
+            Alt = xml.GetAttribute("alt") == String.Empty ? false : bool.Parse(xml.GetAttribute("alt"));
+            Ctrl = xml.GetAttribute("ctrl") == String.Empty ? false : bool.Parse(xml.GetAttribute("ctrl"));
+            Shift = xml.GetAttribute("shift") == String.Empty ? false : bool.Parse(xml.GetAttribute("shift"));
+            Cmd = xml.GetAttribute("cmd") == String.Empty ? false : bool.Parse(xml.GetAttribute("cmd"));
 
             XmlElement actions = xml["actions"];
 

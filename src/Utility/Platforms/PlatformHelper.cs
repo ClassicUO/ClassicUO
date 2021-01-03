@@ -32,6 +32,10 @@ namespace ClassicUO.Utility.Platforms
     {
         public static readonly bool IsMonoRuntime = Type.GetType("Mono.Runtime") != null;
 
+        public static readonly bool IsWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
+        public static readonly bool IsLinux = RuntimeInformation.IsOSPlatform(OSPlatform.Linux);
+        public static readonly bool IsOSX = RuntimeInformation.IsOSPlatform(OSPlatform.OSX);
+
         public static void LaunchBrowser(string url)
         {
             try
