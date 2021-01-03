@@ -137,7 +137,7 @@ namespace ClassicUO.Game.GameObjects
 
             Vector2.Subtract(ref target, ref source, out Vector2 offset);
             Vector2.Distance(ref source, ref target, out float distance);
-            Vector2.Multiply(ref offset, 1 / distance, out Vector2 s0);
+            Vector2.Multiply(ref offset, MovingDelay / distance, out Vector2 s0);
 
 
             if (distance <= 22)
