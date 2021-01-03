@@ -42,13 +42,13 @@ namespace ClassicUO.Utility.Platforms
 
         static Native()
         {
-            if (SDL.SDL_GetPlatform() != "Windows")
+            if (PlatformHelper.IsWindows)
             {
-                _loader = new UnixNativeLoader();
+                _loader = new WinNativeLoader();
             }
             else
             {
-                _loader = new WinNativeLoader();
+                _loader = new UnixNativeLoader();
             }
         }
 
