@@ -361,11 +361,11 @@ namespace ClassicUO.Network
                         continue;
                     }
 
-                    length = data[2] | (data[1] << 8);
+                    //length = data[2] | (data[1] << 8);
                     offset = 3;
                 }
 
-                PacketHandlers.Handlers.AnalyzePacket(data, offset, length);
+                PacketHandlers.Handlers.AnalyzePacket(data, offset, data.Length);
             }
         }
 
@@ -401,7 +401,7 @@ namespace ClassicUO.Network
 
                         if (Plugin.ProcessRecvPacket(ref data, ref packetlength))
                         {
-                            PacketHandlers.Handlers.AnalyzePacket(data, offset, packetlength);
+                            PacketHandlers.Handlers.AnalyzePacket(data, offset, data.Length);
 
                             Statistics.TotalPacketsReceived++;
                         }
