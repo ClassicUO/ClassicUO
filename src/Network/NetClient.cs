@@ -401,7 +401,7 @@ namespace ClassicUO.Network
 
                         if (Plugin.ProcessRecvPacket(ref data, ref packetlength))
                         {
-                            PacketHandlers.Handlers.AnalyzePacket(data, offset, data.Length);
+                            PacketHandlers.Handlers.AnalyzePacket(data, offset, packetlength);
 
                             Statistics.TotalPacketsReceived++;
                         }
