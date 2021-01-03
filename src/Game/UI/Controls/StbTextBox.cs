@@ -8,6 +8,7 @@ using ClassicUO.Renderer;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using SDL2;
 using StbTextEditSharp;
 
@@ -15,7 +16,7 @@ namespace ClassicUO.Game.UI.Controls
 {
     internal class StbTextBox : Control, ITextEditHandler
     {
-        protected static readonly Color SELECTION_COLOR = new Color(0, 148, 216);
+        protected static readonly Color SELECTION_COLOR = new Color() { PackedValue = 0x80a06020 };
         private readonly FontStyle _fontStyle;
 
         private readonly int _maxCharCount = -1;
@@ -826,6 +827,17 @@ namespace ClassicUO.Game.UI.Controls
             return true;
         }
 
+        private static Lazy<BlendState> _blendState = new Lazy<BlendState>(
+            () =>
+            {
+                BlendState blend = new BlendState();
+
+                blend.AlphaBlendFunction = BlendFunction.Max;
+                blend.ColorBlendFunction = BlendFunction.Max;
+
+                return blend;
+            });
+
         private protected void DrawSelection(UltimaBatcher2D batcher, int x, int y)
         {
             if (!AllowSelection)
@@ -838,14 +850,14 @@ namespace ClassicUO.Game.UI.Controls
             int selectStart = Math.Min(Stb.SelectStart, Stb.SelectEnd);
             int selectEnd = Math.Max(Stb.SelectStart, Stb.SelectEnd);
 
-            HueVector.Z = 0.5f;
-
             if (selectStart < selectEnd)
             {
                 MultilinesFontInfo info = _rendererText.GetInfo();
 
                 int drawY = 1;
                 int start = 0;
+
+                batcher.SetBlendState(_blendState.Value);
 
                 while (info != null && selectStart < selectEnd)
                 {
@@ -900,6 +912,8 @@ namespace ClassicUO.Game.UI.Controls
                     drawY += info.MaxHeight;
                     info = info.Next;
                 }
+
+                batcher.SetBlendState(null);
             }
 
 
