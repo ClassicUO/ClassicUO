@@ -220,7 +220,9 @@ namespace ClassicUO.Game.GameObjects
             {
                 texture.Ticks = Time.Ticks;
 
-                batcher.DrawSpriteRotated(texture, x, y, destX, destY, ref hue, angle);
+                ref UOFileIndex index = ref ArtLoader.Instance.GetValidRefEntry(graphic + 0x4000);
+
+                batcher.DrawSpriteRotated(texture, x - index.Width, y - index.Height, destX, destY, ref hue, angle);
             }
         }
 
