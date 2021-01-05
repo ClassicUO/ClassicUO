@@ -599,6 +599,12 @@ namespace ClassicUO
                         break;
                     }
 
+                    // Fix for linux OS: https://github.com/andreakarasho/ClassicUO/pull/1263
+                    if (Keyboard.Alt || Keyboard.Ctrl)
+                    {
+                        break;
+                    }
+
                     string s = UTF8_ToManaged((IntPtr) sdlEvent->text.text, false);
 
                     if (!string.IsNullOrEmpty(s))
