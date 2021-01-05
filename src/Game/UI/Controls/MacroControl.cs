@@ -378,11 +378,11 @@ namespace ClassicUO.Game.UI.Controls
                 WantUpdateSize = true;
 
                 Combobox box = (Combobox) sender;
-                MacroObject m = (MacroObject) box.Tag;
+                MacroObject currentMacroObj = (MacroObject) box.Tag;
 
                 if (e == 0)
                 {
-                    _control.Macro.Remove(m);
+                    _control.Macro.Remove(currentMacroObj);
 
                     box.Tag = null;
 
@@ -392,12 +392,12 @@ namespace ClassicUO.Game.UI.Controls
                 }
                 else
                 {
-                    MacroObject newmacro = Macro.Create((MacroType) e);
+                    MacroObject newMacroObj = Macro.Create((MacroType) e);
 
-                    _control.Macro.Remove(m);
-                    _control.Macro.PushToBack(newmacro);
+                    _control.Macro.Insert(currentMacroObj, newMacroObj);
+                    _control.Macro.Remove(currentMacroObj);
 
-                    box.Tag = newmacro;
+                    box.Tag = newMacroObj;
 
 
                     for (int i = 1; i < Children.Count; i++)
@@ -407,7 +407,7 @@ namespace ClassicUO.Game.UI.Controls
 
                     Height = box.Height;
 
-                    AddSubMacro(newmacro);
+                    AddSubMacro(newMacroObj);
                 }
             }
         }
