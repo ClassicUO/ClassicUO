@@ -30,6 +30,7 @@ using ClassicUO.Input;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 using ClassicUO.Resources;
+using ClassicUO.Utility.Platforms;
 using SDL2;
 
 namespace ClassicUO.Game.UI.Controls
@@ -200,6 +201,11 @@ namespace ClassicUO.Game.UI.Controls
                     mod |= SDL.SDL_Keymod.KMOD_CTRL;
                 }
 
+                if (Macro.Cmd)
+                {
+                    mod |= SDL.SDL_Keymod.KMOD_GUI;
+                }
+
                 _hotkeyBox.SetKey(Macro.Key, mod);
             }
         }
@@ -209,10 +215,11 @@ namespace ClassicUO.Game.UI.Controls
             bool shift = (_hotkeyBox.Mod & SDL.SDL_Keymod.KMOD_SHIFT) != SDL.SDL_Keymod.KMOD_NONE;
             bool alt = (_hotkeyBox.Mod & SDL.SDL_Keymod.KMOD_ALT) != SDL.SDL_Keymod.KMOD_NONE;
             bool ctrl = (_hotkeyBox.Mod & SDL.SDL_Keymod.KMOD_CTRL) != SDL.SDL_Keymod.KMOD_NONE;
+            bool cmd = (_hotkeyBox.Mod & SDL.SDL_Keymod.KMOD_GUI) != SDL.SDL_Keymod.KMOD_NONE && PlatformHelper.IsOSX;
 
             if (_hotkeyBox.Key != SDL.SDL_Keycode.SDLK_UNKNOWN)
             {
-                Macro macro = Client.Game.GetScene<GameScene>().Macros.FindMacro(_hotkeyBox.Key, alt, ctrl, shift);
+                Macro macro = Client.Game.GetScene<GameScene>().Macros.FindMacro(_hotkeyBox.Key, alt, ctrl, shift, cmd);
 
                 if (macro != null)
                 {
@@ -237,12 +244,13 @@ namespace ClassicUO.Game.UI.Controls
             m.Shift = shift;
             m.Alt = alt;
             m.Ctrl = ctrl;
+            m.Cmd = cmd;
         }
 
         private void BoxOnHotkeyCancelled(object sender, EventArgs e)
         {
             Macro m = Macro;
-            m.Alt = m.Ctrl = m.Shift = false;
+            m.Alt = m.Ctrl = m.Shift = m.Cmd = false;
             m.Key = SDL.SDL_Keycode.SDLK_UNKNOWN;
         }
 

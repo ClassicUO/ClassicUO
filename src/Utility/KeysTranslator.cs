@@ -24,6 +24,7 @@
 using System.Collections.Generic;
 using System.Text;
 using SDL2;
+using ClassicUO.Utility.Platforms;
 
 namespace ClassicUO.Utility
 {
@@ -291,7 +292,7 @@ namespace ClassicUO.Utility
                 bool isshift = (mod & SDL.SDL_Keymod.KMOD_SHIFT) != SDL.SDL_Keymod.KMOD_NONE;
                 bool isctrl = (mod & SDL.SDL_Keymod.KMOD_CTRL) != SDL.SDL_Keymod.KMOD_NONE;
                 bool isalt = (mod & SDL.SDL_Keymod.KMOD_ALT) != SDL.SDL_Keymod.KMOD_NONE;
-
+                bool iscmd = (mod & SDL.SDL_Keymod.KMOD_GUI) != SDL.SDL_Keymod.KMOD_NONE && PlatformHelper.IsOSX;
 
                 if (isshift)
                 {
@@ -308,6 +309,10 @@ namespace ClassicUO.Utility
                     sb.Append("Alt ");
                 }
 
+                if(iscmd)
+                {
+                    sb.Append("Cmd ");
+                }
 
                 sb.Append(value);
 
