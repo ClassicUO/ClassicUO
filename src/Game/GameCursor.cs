@@ -25,6 +25,9 @@ using System;
 using System.Collections.Generic;
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
+// ## BEGIN - END ## //
+using ClassicUO.Game.InteropServices.Runtime.UOClassicCombat;
+// ## BEGIN - END ## //
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
@@ -72,6 +75,13 @@ namespace ClassicUO.Game
             (string.Empty, 0x0481, style: FontStyle.BlackBorder);
         private readonly List<Multi> _temp = new List<Multi>();
         private readonly Tooltip _tooltip;
+        // ## BEGIN - END ## //
+        private Vector3 _spellIconVector = new Vector3(0, 13, 0);
+        public static RenderedText _spellTimeText { get; set; }
+        public static uint _spellTime { get; set; }
+        public static uint _startSpellTime { get; set; }
+        public static bool _fieldEastToWest { get; set; }
+        // ## BEGIN - END ## //
 
 
         public GameCursor()
@@ -540,6 +550,23 @@ namespace ClassicUO.Game
                         _aura, Mouse.Position.X + hotX - (25 >> 1), Mouse.Position.Y + hotY - (25 >> 1), ref _auraVector
                     );
                 }
+
+                // ## BEGIN - END ## //
+                if (GameActions.LastSpellIndexCursor >= 1 && GameActions.LastSpellIndexCursor <= 64)
+                {
+                    UOClassicCombatCollection.UpdateSpelltime();
+
+                    if (_spellTime < 10 && ProfileManager.CurrentProfile.SpellOnCursor)
+                        _spellTimeText.Draw(sb, Mouse.Position.X + ProfileManager.CurrentProfile.SpellOnCursorOffset.X - 17, Mouse.Position.Y + ProfileManager.CurrentProfile.SpellOnCursorOffset.Y, 0);
+
+                    _spellIconVector.X = UOClassicCombatCollection.SpellIconHue(_spellIconVector.X);
+
+                    SpellDefinition def = SpellsMagery.GetSpell(GameActions.LastSpellIndexCursor);
+
+                    if (ProfileManager.CurrentProfile.SpellOnCursor)
+                        sb.Draw2D(GumpsLoader.Instance.GetTexture((ushort)def.GumpIconSmallID), Mouse.Position.X + ProfileManager.CurrentProfile.SpellOnCursorOffset.X, Mouse.Position.Y + ProfileManager.CurrentProfile.SpellOnCursorOffset.Y, 20, 20, ref _spellIconVector);
+                }
+                // ## BEGIN - END ## //
 
                 if (ProfileManager.CurrentProfile.ShowTargetRangeIndicator)
                 {

@@ -51,7 +51,11 @@ namespace ClassicUO.Game.GameObjects
         public T Get(uint serial)
         {
             _entities.TryGetValue(serial, out T entity);
-
+            // ## BEGIN - END ## //
+            /*if (entity == null)
+                return null;
+            else*/
+            // ## BEGIN - END ## //
             return entity;
         }
 

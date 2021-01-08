@@ -24,6 +24,9 @@
 using System;
 using System.IO;
 using System.Threading.Tasks;
+// ## BEGIN - END ## // 
+using ClassicUO.Configuration;
+// ## BEGIN - END ## // 
 using ClassicUO.Game;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
@@ -191,6 +194,21 @@ namespace ClassicUO.IO.Resources
                 for (int j = 0; j < size; ++j)
                 {
                     data[pos + j] = HuesHelper.Color16To32(_file.ReadUShort()) | 0xFF_00_00_00;
+
+                    // ## BEGIN - END ## //
+                    if (ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.WireFrameView)
+                    {
+                        if (pos <= 100)
+                        {
+                            data[pos + j] = 0xAA_AA_AA_AA;
+                        }
+
+                        if (j == 0 | j == 1 | j == 2)
+                        {
+                            data[pos + j] = 0xAA_AA_AA_AA;
+                        }
+                    }
+                    // ## BEGIN - END ## //
                 }
             }
 
@@ -199,5 +217,91 @@ namespace ClassicUO.IO.Resources
             // land is always hoverable
             texture.SetDataPointerEXT(0, null, (IntPtr) data, size_pot * sizeof(uint));
         }
+
+        // ## BEGIN - END ## //
+        public UOTexture GetTextureWF(uint g, bool isImpassable) // ## BEGIN - END ## //
+        {
+            if (g >= Resources.Length)
+            {
+                return null;
+            }
+
+            ref UOTexture texture = ref Resources[g];
+
+            if (texture == null || texture.IsDisposed)
+            {
+                ReadTexmapTextureWF(ref texture, (ushort)g, isImpassable);
+
+                if (texture != null)
+                {
+                    SaveId(g);
+                }
+            }
+            else
+            {
+                texture.Ticks = Time.Ticks;
+            }
+
+            return texture;
+        }
+
+        private unsafe void ReadTexmapTextureWF(ref UOTexture texture, ushort index, bool isImpassable)
+        {
+            ref UOFileIndex entry = ref GetValidRefEntry(index);
+
+            if (entry.Length <= 0)
+            {
+                texture = null;
+
+                return;
+            }
+
+            int size = entry.Width == 0 && entry.Height == 0 ? 64 : 128;
+            int size_pot = size * size;
+
+            uint* data = stackalloc uint[size_pot];
+
+            _file.Seek(entry.Offset);
+
+            for (int i = 0; i < size; ++i)
+            {
+                int pos = i * size;
+
+                for (int j = 0; j < size; ++j)
+                {
+                    data[pos + j] = HuesHelper.Color16To32(_file.ReadUShort()) | 0xFF_00_00_00;
+
+                    if (pos <= 100)
+                    {
+                        if (isImpassable)
+                        {
+                            data[pos + j] = 0xFF_00_00_00;
+                        }
+                        else
+                        {
+                            data[pos + j] = 0xAA_AA_AA_AA;
+                        }
+                    }
+
+                    if (j == 0 | j == 1 | j == 2)
+                    {
+                        if (isImpassable)
+                        {
+                            data[pos + j] = 0xFF_00_00_00;
+                        }
+                        else
+                        {
+                            data[pos + j] = 0xAA_AA_AA_AA;
+                        }
+                    }
+                }
+            }
+
+            texture = new UOTexture(size, size);
+            // we don't need to store the data[] pointer because
+            // land is always hoverable
+            texture.SetDataPointerEXT(0, null, (IntPtr)data, size_pot * sizeof(uint));
+        }
+        // ## BEGIN - END ## //
     }
 }

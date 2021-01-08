@@ -73,20 +73,32 @@ namespace ClassicUO.Utility
                         e =>
                         {
                             Log.Panic(e.ToString());
-                            //try
-                            //{
-                            //    using (StreamWriter txt = new StreamWriter("crash.log", true))
-                            //    {
-                            //        txt.AutoFlush = true;
-                            //        txt.WriteLine("Exception @ {0}", Engine.CurrDateTime.ToString("MM-dd-yy HH:mm:ss.ffff"));
-                            //        txt.WriteLine(e.ToString());
-                            //        txt.WriteLine("");
-                            //        txt.WriteLine("");
-                            //    }
-                            //}
-                            //catch
-                            //{
-                            //}
+                            // ## BEGIN - END ## // ORIG COMMENTED OUT
+                            try
+                            {
+                                using (StreamWriter txt = new StreamWriter("crash.log", true))
+                                {
+                                    Log.Panic(e.ToString());
+                                    //try
+                                    //{
+                                    //    using (StreamWriter txt = new StreamWriter("crash.log", true))
+                                    //    {
+                                    //        txt.AutoFlush = true;
+                                    //        txt.WriteLine("Exception @ {0}", Engine.CurrDateTime.ToString("MM-dd-yy HH:mm:ss.ffff"));
+                                    //        txt.WriteLine(e.ToString());
+                                    //        txt.WriteLine("");
+                                    //        txt.WriteLine("");
+                                    //    }
+                                    //}
+                                    //catch
+                                    //{
+                                    //}
+                                }
+                            }
+                            catch
+                            {
+                            }
+                            // ## BEGIN - END ## //
 
                             return true;
                         }

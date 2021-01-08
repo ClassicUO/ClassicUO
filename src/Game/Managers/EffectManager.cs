@@ -30,7 +30,11 @@ namespace ClassicUO.Game.Managers
 {
     internal class EffectManager : IUpdateable
     {
-        private GameEffect _root;
+        // ## BEGIN - END ## //
+        //private GameEffect _root;
+        // ## BEGIN - END ## //
+        public GameEffect _root;
+        // ## BEGIN - END ## //
 
         public void Update(double totalTime, double frameTime)
         {

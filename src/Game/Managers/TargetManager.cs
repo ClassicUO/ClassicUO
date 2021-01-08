@@ -23,6 +23,9 @@
 
 using ClassicUO.Configuration;
 using ClassicUO.Data;
+// ## BEGIN - END ## //
+using ClassicUO.Game.InteropServices.Runtime.UOClassicCombat;
+// ## BEGIN - END ## //
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.UI.Gumps;
@@ -42,6 +45,9 @@ namespace ClassicUO.Game.Managers
         SetTargetClientSide = 3,
         Grab,
         SetGrabBag,
+        // ## BEGIN - END ## // 
+        SetCustomSerial,
+        // ## BEGIN - END ## //
         HueCommandTarget
     }
 
@@ -146,6 +152,11 @@ namespace ClassicUO.Game.Managers
             }
 
             IsTargeting = false;
+
+            // ## BEGIN - END ## //
+            GameActions.LastSpellIndexCursor = 0;
+            GameCursor._spellTime = 0;
+            // ## BEGIN - END ## //
         }
 
         public static void Reset()
@@ -168,6 +179,10 @@ namespace ClassicUO.Game.Managers
             TargetingState = targeting;
             _targetCursorId = cursorID;
             TargetingType = cursorType;
+
+            // ## BEGIN - END ## //
+            UOClassicCombatCollection.StartSpelltime();
+            // ## BEGIN - END ## //
 
             bool lastTargetting = IsTargeting;
             IsTargeting = cursorType < TargetType.Cancel;
@@ -202,6 +217,11 @@ namespace ClassicUO.Game.Managers
 
             NetClient.Socket.Send(new PTargetCancel(TargetingState, _targetCursorId, (byte) TargetingType));
             IsTargeting = false;
+
+            // ## BEGIN - END ## //
+            GameActions.LastSpellIndexCursor = 0;
+            GameCursor._spellTime = 0;
+            // ## BEGIN - END ## //
 
             Reset();
         }
@@ -358,6 +378,30 @@ namespace ClassicUO.Game.Managers
                         ClearTargetingWithoutTargetCancelPacket();
 
                         return;
+
+                    // ## BEGIN - END ## //
+                    case CursorTarget.SetCustomSerial:
+
+                        if (SerialHelper.IsItem(serial))
+                        {
+                            ProfileManager.CurrentProfile.CustomSerial = serial;
+                            GameActions.Print($"Custom UOClassicEquipment Item set: {serial}", 88);
+                        }
+                        else if ((TargetingType == TargetType.Neutral && SerialHelper.IsMobile(serial)))
+                        {
+                            Mobile mobile = entity as Mobile;
+
+                            if ((!World.Player.IsDead && !mobile.IsDead) && serial != World.Player)
+                            {
+                                ProfileManager.CurrentProfile.Mimic_PlayerSerial = entity;//entity.serial
+                                GameActions.Print($"Mimic Player Serial Set: {entity.Name} : {entity.Serial}", 88);//entity.serial
+                            }
+                        }
+
+                        ClearTargetingWithoutTargetCancelPacket();
+
+                        return;
+                        // ## BEGIN - END ## //
                 }
             }
         }

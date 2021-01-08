@@ -22,6 +22,9 @@
 #endregion
 
 using ClassicUO.Configuration;
+// ## BEGIN - END ## //
+using ClassicUO.Game.InteropServices.Runtime.UOClassicCombat;
+// ## BEGIN - END ## //
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Scenes;
 using ClassicUO.IO;
@@ -81,12 +84,48 @@ namespace ClassicUO.Game.GameObjects
 
             ShaderHueTranslator.GetHueVector(ref HueVector, hue, partial, 0);
 
+            // ## BEGIN - END ## //
+            if (ProfileManager.CurrentProfile.HighlightTileAtRange && Distance == ProfileManager.CurrentProfile.HighlightTileAtRangeRange)
+            {
+                HueVector.X = ProfileManager.CurrentProfile.HighlightTileRangeHue;
+                HueVector.Y = 1;
+            }
+            if (ProfileManager.CurrentProfile.HighlightTileAtRangeSpell)
+            {
+                if (GameCursor._spellTime >= 1 && Distance == ProfileManager.CurrentProfile.HighlightTileAtRangeRangeSpell)
+                {
+                    HueVector.X = ProfileManager.CurrentProfile.HighlightTileRangeHueSpell;
+                    HueVector.Y = 1;
+                }
+            }
+            if (ProfileManager.CurrentProfile.PreviewFields)
+            {
+                if (UOClassicCombatCollection.StaticFieldPreview(this))
+                {
+                    HueVector.X = 0x0040;
+                    HueVector.Y = 1;
+                }
+                if (SelectedObject.LastObject == this)
+                {
+                    HueVector.X = 0x0023;
+                    HueVector.Y = 1;
+                }
+            }
+            // ## BEGIN - END ## //
+            // ## BEGIN - END ## // ORIG
+            /*
             bool isTree = StaticFilters.IsTree(graphic, out _);
 
             if (isTree && ProfileManager.CurrentProfile.TreeToStumps)
             {
                 graphic = Constants.TREE_REPLACE_GRAPHIC;
             }
+            */
+            // ## BEGIN - END ## // ORIG
+            graphic = UOClassicCombatCollection.ArtloaderFilters(graphic);
+
+            bool isTree = StaticFilters.IsTree(graphic, out _);
+            // ## BEGIN - END ## //
 
             if (AlphaHue != 255)
             {

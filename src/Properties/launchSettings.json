@@ -2,7 +2,8 @@
   "profiles": {
     "ClassicUO": {
       "commandName": "Project",
-      "commandLineArgs": "-skiploginscreen"
+      "commandLineArgs": "-skiploginscreen",
+      "nativeDebugging": false
     }
   }
 }

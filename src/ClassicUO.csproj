@@ -51,17 +51,32 @@
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="cuologo.png" />
-    <EmbeddedResource Include="Renderer\fonts\bold_font.xnb" />
-    <EmbeddedResource Include="Renderer\fonts\map1_font.xnb" />
-    <EmbeddedResource Include="Renderer\fonts\map2_font.xnb" />
-    <EmbeddedResource Include="Renderer\fonts\map3_font.xnb" />
-    <EmbeddedResource Include="Renderer\fonts\map4_font.xnb" />
-    <EmbeddedResource Include="Renderer\fonts\map5_font.xnb" />
-    <EmbeddedResource Include="Renderer\fonts\map6_font.xnb" />
-    <EmbeddedResource Include="Renderer\fonts\regular_font.xnb" />
-    <EmbeddedResource Include="shaders\IsometricWorld.fxc" />
-    <EmbeddedResource Include="shaders\xBR.fxc" />
+    <EmbeddedResource Include="cuologo.png"/>
+    <EmbeddedResource Include="Renderer\fonts\bold_font.xnb"/>
+    <EmbeddedResource Include="Renderer\fonts\map1_font.xnb"/>
+    <EmbeddedResource Include="Renderer\fonts\map2_font.xnb"/>
+    <EmbeddedResource Include="Renderer\fonts\map3_font.xnb"/>
+    <EmbeddedResource Include="Renderer\fonts\map4_font.xnb"/>
+    <EmbeddedResource Include="Renderer\fonts\map5_font.xnb"/>
+    <EmbeddedResource Include="Renderer\fonts\map6_font.xnb"/>
+    <EmbeddedResource Include="Renderer\fonts\regular_font.xnb"/>
+    <EmbeddedResource Include="shaders\IsometricWorld.fxc"/>
+    <EmbeddedResource Include="shaders\xBR.fxc"/>
+    <!-- // ## BEGIN - END ## // -->
+	  <EmbeddedResource Include="halo_green.png" />
+    <EmbeddedResource Include="halo_purple.png" />
+    <EmbeddedResource Include="halo_red.png" />
+    <EmbeddedResource Include="halo_red2.png" />
+    <EmbeddedResource Include="halo_yellow.png" />
+    <EmbeddedResource Include="halo_orange.png" />
+    <EmbeddedResource Include="halo_white.png" />
+    <EmbeddedResource Include="arrow_green.png" />
+    <EmbeddedResource Include="arrow_purple.png" />
+    <EmbeddedResource Include="arrow_red.png" />
+    <EmbeddedResource Include="arrow_yellow.png" />
+    <EmbeddedResource Include="arrow_yellow2.png" />
+    <EmbeddedResource Include="arrow_orange.png" />
+    <!-- // ## BEGIN - END ## // -->
   </ItemGroup>
 
   <ItemGroup>

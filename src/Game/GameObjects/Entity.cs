@@ -59,10 +59,14 @@ namespace ClassicUO.Game.GameObjects
 
         public bool Exists => World.Contains(Serial);
 
+        // ## BEGIN - END ## //
+        /*
         public bool Equals(Entity e)
         {
             return e != null && Serial == e.Serial;
         }
+        */
+        // ## BEGIN - END ## //
 
         public sbyte AnimIndex;
 
@@ -77,6 +81,9 @@ namespace ClassicUO.Game.GameObjects
         public uint LastStepTime;
         public string Name;
         public uint Serial;
+        // ## BEGIN - END ## // 
+        public ushort LootFlag;
+        // ## BEGIN - END ## //
 
         protected long LastAnimationChangeTime;
 
@@ -350,6 +357,15 @@ namespace ClassicUO.Game.GameObjects
 
         public static implicit operator uint(Entity entity)
         {
+            // ## BEGIN - END ## //
+            /*if (entity == null)
+            {
+                bool tme = ProfileManager.CurrentProfile.TextureManagerEnabled;
+                while (entity == null)
+                    _ = !tme;
+            }*/
+            // ## BEGIN - END ## //
+
             return entity.Serial;
         }
 
@@ -362,6 +378,13 @@ namespace ClassicUO.Game.GameObjects
         {
             return !Equals(e, s);
         }
+
+        // ## BEGIN - END ## //
+        public bool Equals(Entity e) 
+        {
+            return e != null && Serial == e.Serial;
+        }
+        // ## BEGIN - END ## //
 
         public override bool Equals(object obj)
         {

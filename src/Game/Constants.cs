@@ -28,7 +28,7 @@ namespace ClassicUO.Game
     {
         public const string WIKI_LINK = "https://github.com/andreakarasho/ClassicUO/wiki";
 
-        public const int MIN_FPS = 12;
+        public const int MIN_FPS = 60;//12; // ## BEGIN - END ## //
         public const int MAX_FPS = 250;
         public const int LOGIN_SCREEN_FPS = 60;
 
@@ -75,7 +75,7 @@ namespace ClassicUO.Game
         public const int SPELLBOOK_7_SPELLS_COUNT = 30;
         public const int SPELLBOOK_8_SPELLS_COUNT = 45;
 
-        public const int WAIT_FOR_TARGET_DELAY = 5000;
+        public const int WAIT_FOR_TARGET_DELAY = 4000;//5000; // ## BEGIN - END ## //
 
         public const int CONTAINER_RECT_STEP = 20;
         public const int CONTAINER_RECT_DEFAULT_POSITION = 40;
@@ -115,8 +115,8 @@ namespace ClassicUO.Game
 
         public const ushort HIGHLIGHT_CURRENT_OBJECT_HUE = 0x014;
 
-        public const int MAX_JOURNAL_HISTORY_COUNT = 100;
-        
+        public const int MAX_JOURNAL_HISTORY_COUNT = 250;//100; // ## BEGIN - END ## //
+
         public const byte MIN_CONTAINER_SIZE_PERC = 50;
         public const byte MAX_CONTAINER_SIZE_PERC = 200;
 

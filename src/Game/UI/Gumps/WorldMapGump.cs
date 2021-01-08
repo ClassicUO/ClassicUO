@@ -52,6 +52,18 @@ namespace ClassicUO.Game.UI.Gumps
         private Point _center, _lastScroll;
         private Label _coords;
 
+        // ## BEGIN - END ## //
+        public int _tempX = 0;
+        public int _tempY = 0;
+        public int _tempTmapStartX = 0;
+        public int _tempTmapStartY = 0;
+        public int _tempTmapEndX = 0;
+        public int _tempTmapEndY = 0;
+        public int _tempTmapWidth = 0;
+        public int _tempTmapHeight = 0;
+        public int _tempTmapX = 0;
+        public int _tempTmapY = 0;
+        // ## BEGIN - END ## //
 
         private bool _flipMap = true;
         private bool _freeView;
@@ -1664,6 +1676,78 @@ namespace ClassicUO.Game.UI.Gumps
                     }
                 }
             }
+
+            // ## BEGIN - END ## //
+            //TMAP
+            if (_tempTmapX != 0 && _tempTmapY != 0)
+            {
+                //DESTINATION
+                int sx = _tempTmapX - _center.X;
+                int sy = _tempTmapY - _center.Y;
+
+                (int rotX, int rotY) = RotatePoint(sx, sy, Zoom, 1, _flipMap ? 45f : 0f);
+
+                rotX += gX + halfWidth;
+                rotY += gY + halfHeight;
+
+                const int DOT_SIZE = 4;
+                const int DOT_SIZE_HALF = DOT_SIZE >> 1;
+
+                batcher.Draw2D
+                (
+                    SolidColorTextureCache.GetTexture(Color.Orange), rotX - DOT_SIZE_HALF, rotY - DOT_SIZE_HALF, DOT_SIZE,
+                    DOT_SIZE, ref HueVector
+                );
+
+                //PLAYER
+                int psx = World.Player.X - _center.X;
+                int psy = World.Player.Y - _center.Y;
+
+                (int protX, int protY) = RotatePoint(psx, psy, Zoom, 1, _flipMap ? 45f : 0f);
+
+                protX += gX + halfWidth;
+                protY += gY + halfHeight;
+
+                int ox = (rotX - DOT_SIZE_HALF + protX - DOT_SIZE_HALF) / 2;
+                int oy = (rotY - DOT_SIZE_HALF + protY - DOT_SIZE_HALF) / 2;
+                batcher.DrawLine(SolidColorTextureCache.GetTexture(Color.DarkRed), rotX - DOT_SIZE_HALF, rotY - DOT_SIZE_HALF, protX - DOT_SIZE_HALF, protY - DOT_SIZE_HALF, ox, oy);
+            }
+
+            //COMMAND
+            if (_tempX != 0 && _tempY != 0)
+            {
+                //DESTINATION
+                int sx = _tempX - _center.X;
+                int sy = _tempY - _center.Y;
+
+                (int rotX, int rotY) = RotatePoint(sx, sy, Zoom, 1, _flipMap ? 45f : 0f);
+
+                rotX += gX + halfWidth;
+                rotY += gY + halfHeight;
+
+                const int DOT_SIZE = 4;
+                const int DOT_SIZE_HALF = DOT_SIZE >> 1;
+
+                batcher.Draw2D
+                (
+                    SolidColorTextureCache.GetTexture(Color.Orange), rotX - DOT_SIZE_HALF, rotY - DOT_SIZE_HALF, DOT_SIZE,
+                    DOT_SIZE, ref HueVector
+                );
+
+                //PLAYER
+                int psx = World.Player.X - _center.X;
+                int psy = World.Player.Y - _center.Y;
+
+                (int protX, int protY) = RotatePoint(psx, psy, Zoom, 1, _flipMap ? 45f : 0f);
+
+                protX += gX + halfWidth;
+                protY += gY + halfHeight;
+
+                int ox = (rotX - DOT_SIZE_HALF + protX - DOT_SIZE_HALF) / 2;
+                int oy = (rotY - DOT_SIZE_HALF + protY - DOT_SIZE_HALF) / 2;
+                batcher.DrawLine(SolidColorTextureCache.GetTexture(Color.DarkRed), rotX - DOT_SIZE_HALF, rotY - DOT_SIZE_HALF, protX - DOT_SIZE_HALF, protY - DOT_SIZE_HALF, ox, oy);
+            }
+            // ## BEGIN - END ## //
 
             DrawMobile
             (

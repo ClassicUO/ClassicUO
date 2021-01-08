@@ -30,7 +30,7 @@ namespace ClassicUO.Utility
 {
     internal static class Profiler
     {
-        public const int ProfileTimeCount = 60;
+        public const int ProfileTimeCount = 144;//60; // ## BEGIN - END ## //
         private static readonly List<ContextAndTick> m_Context;
         private static readonly List<Tuple<string[], double>> m_ThisFrameData;
         private static readonly List<ProfileData> m_AllFrameData;
@@ -245,7 +245,7 @@ namespace ClassicUO.Utility
         {
             public readonly string Name;
             public readonly long Tick;
-
+            
             public ContextAndTick(string name, long tick)
             {
                 Name = name;

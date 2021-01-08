@@ -22,6 +22,9 @@
 #endregion
 
 using ClassicUO.Configuration;
+// ## BEGIN - END ## // 
+using ClassicUO.Game.InteropServices.Runtime.UOClassicCombat;
+// ## BEGIN - END ## //
 using ClassicUO.Renderer;
 
 namespace ClassicUO.Game.GameObjects
@@ -64,16 +67,73 @@ namespace ClassicUO.Game.GameObjects
             {
                 HueVector.Y = IsStretched ? ShaderHueTranslator.SHADER_LAND : ShaderHueTranslator.SHADER_NONE;
             }
+            // ## BEGIN - END ## //
+            if (ProfileManager.CurrentProfile.HighlightTileAtRange && Distance == ProfileManager.CurrentProfile.HighlightTileAtRangeRange)
+            {
+                HueVector.X = ProfileManager.CurrentProfile.HighlightTileRangeHue;
+                HueVector.Y = 1;
+            }
+            if (ProfileManager.CurrentProfile.HighlightTileAtRangeSpell)
+            {
+                if (GameCursor._spellTime >= 1 && Distance == ProfileManager.CurrentProfile.HighlightTileAtRangeRangeSpell)
+                {
+                    HueVector.X = ProfileManager.CurrentProfile.HighlightTileRangeHueSpell;
+                    HueVector.Y = 1;
+                }
+            }
+            if (ProfileManager.CurrentProfile.PreviewFields)
+            {
+                if (UOClassicCombatCollection.LandFieldPreview(this))
+                {
+                    HueVector.X = 0x0040;
+                    HueVector.Y = 1;
+                }
+                if (SelectedObject.LastObject == this)
+                {
+                    HueVector.X = 0x0023;
+                    HueVector.Y = 1;
+                }
+            }
+            if (ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.HueImpassableView)
+            {
+                if (this.TileData.IsImpassable)
+                {
+                    HueVector.X = ProfileManager.CurrentProfile.HueImpassableViewHue;
+                    HueVector.Y = 1;
+                }
+            }
+            // ## BEGIN - END ## //
 
             if (IsStretched)
             {
                 posY += Z << 2;
 
+                // ## BEGIN - END ## // ORIG
+                /*
                 DrawLand
                 (
                     batcher, Graphic, posX, posY, ref Rectangle, ref Normal0, ref Normal1, ref Normal2, ref Normal3,
                     ref HueVector
                 );
+                */
+                // ## BEGIN - END ## //
+                if (ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.WireFrameView)
+                {
+                    DrawLandWF
+                    (
+                        batcher, Graphic, posX, posY, ref Rectangle, ref Normal0, ref Normal1, ref Normal2, ref Normal3,
+                        ref HueVector, this.TileData.IsImpassable
+                    );
+                }
+                else
+                {
+                    DrawLand
+                    (
+                        batcher, Graphic, posX, posY, ref Rectangle, ref Normal0, ref Normal1, ref Normal2, ref Normal3,
+                        ref HueVector
+                    );
+                }
+                // ## BEGIN - END ## //
 
                 if (SelectedObject.IsPointInStretchedLand(ref Rectangle, posX, posY))
                 {
@@ -82,7 +142,18 @@ namespace ClassicUO.Game.GameObjects
             }
             else
             {
-                DrawLand(batcher, Graphic, posX, posY, ref HueVector);
+                // ## BEGIN - END ## // ORIG
+                //DrawLand(batcher, Graphic, posX, posY, ref HueVector);
+                // ## BEGIN - END ## //
+                if (ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.WireFrameView)
+                {
+                    DrawLandWF(batcher, Graphic, posX, posY, ref HueVector, this.TileData.IsImpassable);
+                }
+                else
+                {
+                    DrawLand(batcher, Graphic, posX, posY, ref HueVector);
+                }
+                // ## BEGIN - END ## //
 
                 if (SelectedObject.IsPointInLand(posX, posY))
                 {

@@ -23,6 +23,9 @@
 
 using System.Collections.Generic;
 using ClassicUO.Game.Data;
+// ## BEGIN - END ## // 
+using ClassicUO.Game.InteropServices.Runtime.UOClassicCombat;
+// ## BEGIN - END ## //
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Map;
@@ -75,6 +78,11 @@ namespace ClassicUO.Game
         public static int OldMusicIndex { get; set; }
 
         public static WorldTextManager WorldTextManager { get; } = new WorldTextManager();
+
+        // ## BEGIN - END ## //
+        public static EffectManager Effects => _effectManager;
+        public static UOClassicCombatCliloc UOClassicCombatCliloc { get; } = new UOClassicCombatCliloc();
+        // ## BEGIN - END ## //
 
         public static JournalManager Journal { get; } = new JournalManager();
 
@@ -313,7 +321,9 @@ namespace ClassicUO.Game
 
                     _toRemove.Clear();
                 }
-
+                // ## BEGIN - END ## //
+                ModulesManager.OnWorldUpdate(totalTime);
+                // ## BEGIN - END ## //
                 _effectManager.Update(totalTime, frameTime);
 
                 WorldTextManager.Update(totalTime, frameTime);

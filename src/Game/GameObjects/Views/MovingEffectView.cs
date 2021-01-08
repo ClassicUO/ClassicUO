@@ -22,6 +22,9 @@
 #endregion
 
 using ClassicUO.Configuration;
+// ## BEGIN - END ## //
+using ClassicUO.Game.InteropServices.Runtime.UOClassicCombat;
+// ## BEGIN - END ## //
 using ClassicUO.Game.Scenes;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
@@ -38,6 +41,17 @@ namespace ClassicUO.Game.GameObjects
             }
 
             ResetHueVector();
+
+            // ## BEGIN - END ## //
+            if (Graphic == 0x379F) //energy bolt
+            {
+                if (ProfileManager.CurrentProfile.EnergyBoltArtType != 0)
+                    Graphic = UOClassicCombatCollection.EnergyBoltArt(Graphic);
+
+                if (ProfileManager.CurrentProfile.ColorEnergyBolt || ProfileManager.CurrentProfile.EnergyBoltNeonType != 0)
+                    Hue = UOClassicCombatCollection.EnergyBoltHue(Hue);
+            }
+            // ## BEGIN - END ## //
 
             ushort hue = Hue;
 

@@ -430,10 +430,20 @@ namespace ClassicUO.Network
 
         internal static void Tick()
         {
-            foreach (Plugin t in Plugins)
+            // ## BEGIN - END ## //  ORIG
+            //foreach (Plugin t in Plugins)
+            //    t._tick?.Invoke();
+            // ## BEGIN - END ## // 
+            try
             {
-                t._tick?.Invoke();
+                foreach (Plugin t in Plugins)
+                    t._tick?.Invoke();
             }
+            catch
+            {
+
+            }
+            // ## BEGIN - END ## //
         }
 
 

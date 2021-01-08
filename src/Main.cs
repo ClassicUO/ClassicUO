@@ -358,7 +358,11 @@ namespace ClassicUO
                         break;
 
                     case "debug":
-                        CUOEnviroment.Debug = true;
+						// ## BEGIN - END ## //
+					    //CUOEnviroment.Debug = true;
+						// ## BEGIN - END ## //
+                        CUOEnviroment.Debug = bool.Parse(value); 
+						// ## BEGIN - END ## //
 
                         break;
 

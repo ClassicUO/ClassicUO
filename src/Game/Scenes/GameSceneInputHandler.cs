@@ -24,6 +24,9 @@
 using System;
 using System.Linq;
 using ClassicUO.Configuration;
+// ## BEGIN - END ## //
+using ClassicUO.Game.InteropServices.Runtime.UOClassicCombat;
+// ## BEGIN - END ## //
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
@@ -490,6 +493,9 @@ namespace ClassicUO.Game.Scenes
                 {
                     case CursorTarget.Grab:
                     case CursorTarget.SetGrabBag:
+                    // ## BEGIN - END ## //
+                    case CursorTarget.SetCustomSerial:
+                    // ## BEGIN - END ## //
                     case CursorTarget.Position:
                     case CursorTarget.Object:
                     case CursorTarget.MultiPlacement when World.CustomHouseManager == null:
@@ -827,6 +833,11 @@ namespace ClassicUO.Game.Scenes
             {
                 return false;
             }
+
+            // ## BEGIN - END ## // 
+            if (!ProfileManager.CurrentProfile.EnableMousewheelScaleZoom || !(Keyboard.Ctrl && Keyboard.Alt && Keyboard.Shift))
+                return false;
+            // ## BEGIN - END ## //
 
             if (Keyboard.Ctrl && ProfileManager.CurrentProfile.EnableMousewheelScaleZoom)
             {
@@ -1261,6 +1272,19 @@ namespace ClassicUO.Game.Scenes
                     GameActions.ToggleWarMode();
                 }
             }
+
+            // ## BEGIN - END ## //
+            Macro macro2 = Macros.FindMacro(e.keysym.sym, Keyboard.Alt, Keyboard.Ctrl, Keyboard.Shift);
+
+            if (macro2 != null && e.keysym.sym != SDL.SDL_Keycode.SDLK_UNKNOWN)
+            {
+                if (macro2.Name == "HealOnHPChange")
+                    UOClassicCombatCollection._HealOnHPChangeON = false;
+
+                if (macro2.Name == "HarmOnSwing")
+                    UOClassicCombatCollection._HarmOnSwingON = false;
+            }
+            // ## BEGIN - END ## //
         }
     }
 }

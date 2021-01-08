@@ -42,7 +42,9 @@ namespace ClassicUO.Game
     {
         public static int LastSpellIndex { get; set; } = 1;
         public static int LastSkillIndex { get; set; } = 1;
-
+        // ## BEGIN - END ## // 
+        public static int LastSpellIndexCursor { get; set; } = 0;
+        // ## BEGIN - END ## //
 
         public static void ToggleWarMode()
         {
@@ -575,6 +577,11 @@ namespace ClassicUO.Game
         {
             if (index >= 0)
             {
+                // ## BEGIN - END ## //
+                LastSpellIndexCursor = index;
+                GameCursor._spellTime = 0;
+                // ## BEGIN - END ## //
+
                 LastSpellIndex = index;
                 Socket.Send(new PCastSpellFromBook(index, bookSerial));
             }
@@ -584,6 +591,11 @@ namespace ClassicUO.Game
         {
             if (index >= 0)
             {
+                // ## BEGIN - END ## //
+                LastSpellIndexCursor = index;
+                GameCursor._spellTime = 0;
+                // ## BEGIN - END ## //
+
                 LastSpellIndex = index;
                 Socket.Send(new PCastSpell(index));
             }

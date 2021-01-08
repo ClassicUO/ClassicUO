@@ -27,6 +27,10 @@ using System.Diagnostics;
 using System.Text;
 using ClassicUO.Configuration;
 using ClassicUO.Game;
+// ## BEGIN - END ## //
+using ClassicUO.Game.InteropServices.Runtime.UOClassicCombat;
+using ClassicUO.Game.InteropServices.Runtime.Autos;
+// ## BEGIN - END ## //
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
@@ -825,6 +829,24 @@ namespace ClassicUO.Network
             {
                 text = string.Empty;
             }
+
+            // ## BEGIN - END ## // 
+            Item item = World.Items.Get(serial);
+            if (item != null)
+            {
+                if (item.IsCorpse)
+                {
+                    UOClassicCombatCollection.SetLootFlag(serial, hue);
+                }
+            }
+
+            if (serial == ProfileManager.CurrentProfile.Mimic_PlayerSerial && type == MessageType.Spell && !string.IsNullOrEmpty(text))
+                AutoMimic.SyncByClilocString(serial, text);
+
+            if (serial == World.Player.Serial && type == MessageType.Spell && !string.IsNullOrEmpty(text))
+                UOClassicCombatCollection.SpellCastFromCliloc(text);
+
+            // ## BEGIN - END ## //
 
             if (serial == 0 && graphic == 0 && type == MessageType.Regular && font == 0xFFFF && hue == 0xFFFF &&
                 name.StartsWith("SYSTEM"))
@@ -2030,6 +2052,10 @@ namespace ClassicUO.Network
 
                         gump.AddPin(x, y);
 
+                        // ## BEGIN - END ## //
+                        AutoWorldMapMarker.TmapPinXY(x, y);
+                        // ## BEGIN - END ## //
+
                         break;
 
                     case MapMessageType.Insert: break;
@@ -2219,6 +2245,11 @@ namespace ClassicUO.Network
             );
 
             mobile.AnimationFromServer = true;
+
+            // ## BEGIN - END ## //
+            if (mobile == World.Player)
+                World.UOClassicCombatCliloc.OnOwnCharacterAnimation(action);
+            // ## BEGIN - END ## //
         }
 
         private static void GraphicEffect(ref PacketBufferReader p)
@@ -2276,6 +2307,13 @@ namespace ClassicUO.Network
                 type, source, target, graphic, hue, srcX, srcY, srcZ, targetX, targetY, targetZ, speed, duration,
                 fixedDirection, doesExplode, false, blendmode
             );
+
+            // ## BEGIN - END ## //
+            Defender.gfxTrigger(source, target, graphic);
+
+            if (graphic == 0x5683)
+                UOClassicCombatCollection.SetHamstrungTime(source);
+            // ## BEGIN - END ## //
         }
 
         private static void ClientViewRange(ref PacketBufferReader p)
@@ -2908,6 +2946,10 @@ namespace ClassicUO.Network
 
             MapGump gump = new MapGump(serial, gumpid, width, height);
 
+            // ## BEGIN - END ## //
+            AutoWorldMapMarker.TmapMarker(startX, startY, endX, endY, width, height);
+            // ## BEGIN - END ## //
+
             if (p.ID == 0xF5 || Client.Version >= Data.ClientVersion.CV_308Z)
             {
                 ushort facet = 0;
@@ -3364,6 +3406,20 @@ namespace ClassicUO.Network
                     entity.Name = string.IsNullOrEmpty(name) ? text : name;
                 }
             }
+
+            // ## BEGIN - END ## //
+            if (text.StartsWith("(summoned"))
+                UOClassicCombatCollection.SetSummonTime(text, serial);
+
+            if (text.Equals("*looks calmed*"))
+                UOClassicCombatCollection.GetPeaceTime(serial);
+
+            if (text.StartsWith("*pacified"))
+                UOClassicCombatCollection.SetPeaceTime(text, serial);
+
+            if (text.Equals(ProfileManager.CurrentProfile.SpecialSetLastTargetClilocText.ToString()))
+                UOClassicCombatCollection.SpecialSetLastTargetCliloc(serial);
+            // ## BEGIN - END ## //
 
             MessageManager.HandleMessage
                 (entity, text, name, hue, type, ProfileManager.CurrentProfile.ChatFont, text_type, true, lang);
@@ -4342,6 +4398,20 @@ namespace ClassicUO.Network
             string affix = p.ID == 0xCC ? p.ReadASCII() : string.Empty;
 
             string arguments = null;
+
+            // ## BEGIN - END ## //
+            World.UOClassicCombatCliloc.OnCliloc(cliloc);
+            World.Player?.BandageTimer.OnCliloc(cliloc);
+
+            Item item = World.Items.Get(serial);
+            if (item != null)
+            {
+                if (item.IsCorpse)
+                {
+                    UOClassicCombatCollection.SetLootFlag(serial, hue);
+                }
+            }
+            // ## BEGIN - END ## //
 
             if (cliloc == 1008092 || cliloc == 1005445) // value for "You notify them you don't want to join the party" || "You have been added to the party"
             {

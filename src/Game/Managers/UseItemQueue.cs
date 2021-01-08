@@ -35,14 +35,22 @@ namespace ClassicUO.Game.Managers
 
         public UseItemQueue()
         {
-            _timer = Time.Ticks + 1000;
+            // ## BEGIN - END ## //  ORIG
+            //_timer = Time.Ticks + 1000;
+            // ## BEGIN - END ## // 
+            _timer = Time.Ticks + 600;// 1000;
+            // ## BEGIN - END ## //
         }
 
         public void Update(double totalTime, double frameTime)
         {
             if (_timer < Time.Ticks)
             {
-                _timer = Time.Ticks + 1000;
+                // ## BEGIN - END ## //  ORIG
+                //_timer = Time.Ticks + 1000;
+                // ## BEGIN - END ## // 
+                _timer = Time.Ticks + 600;// 1000;
+                // ## BEGIN - END ## //
 
                 if (_actions.Count == 0)
                 {

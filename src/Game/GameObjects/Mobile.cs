@@ -124,6 +124,17 @@ namespace ClassicUO.Game.GameObjects
             CalculateRandomIdleTime();
         }
 
+        // ## BEGIN - END ## // 
+        public uint SummonTimeTick { get; set; } = 0;
+        public int SummonTime { get; set; } = 0;
+        public uint PeaceTimeTick { get; set; } = 0;
+        public int PeaceTime { get; set; } = 0;
+        public uint HamstrungTimeTick { get; set; } = 0;
+        public uint HamstrungTime { get; set; } = 0;
+        public uint FlashTimeTick { get; set; } = 0;
+        public ushort OldHits { get; set; } = 0;
+        // ## BEGIN - END ## //
+
         public Mobile() : base(0)
         {
         }

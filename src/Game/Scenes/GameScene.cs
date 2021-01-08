@@ -26,6 +26,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Sockets;
 using ClassicUO.Configuration;
+// ## BEGIN - END ## //
+using ClassicUO.Game.InteropServices.Runtime.UOClassicCombat;
+using ClassicUO.Game.InteropServices.Runtime.External;
+// ## BEGIN - END ## //
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
@@ -78,7 +82,10 @@ namespace ClassicUO.Game.Scenes
         private long _alphaTimer;
         private bool _forceStopScene;
         private HealthLinesManager _healthLinesManager;
-
+        // ## BEGIN - END ## // 
+        private UOClassicCombatLines _UOClassicCombatLines;
+        private TextureManager _textureManager;
+        // ## BEGIN - END ## //
         private bool _isListReady;
         private Point _lastSelectedMultiPositionInHouseCustomization;
         private int _lightCount;
@@ -150,6 +157,10 @@ namespace ClassicUO.Game.Scenes
             InfoBars = new InfoBarManager();
             InfoBars.Load();
             _healthLinesManager = new HealthLinesManager();
+            // ## BEGIN - END ## // 
+            _UOClassicCombatLines = new UOClassicCombatLines();
+            _textureManager = new TextureManager();
+            // ## BEGIN - END ## //
             Weather = new Weather();
 
             WorldViewportGump viewport = new WorldViewportGump(this);
@@ -190,10 +201,55 @@ namespace ClassicUO.Game.Scenes
                 Client.Game.SetWindowSize(w, h);
             }
 
+            // ## BEGIN - END ## //
+            if (ProfileManager.CurrentProfile.UOClassicCombatSelf)
+            {
+                UIManager.Add(new UOClassicCombatSelf
+                {
+                    X = ProfileManager.CurrentProfile.UOClassicCombatSelfLocation.X,
+                    Y = ProfileManager.CurrentProfile.UOClassicCombatSelfLocation.Y
+                });
+
+            }
+            if (ProfileManager.CurrentProfile.UOClassicCombatBuffbar)
+            {
+                UIManager.Add(new UOClassicCombatBuffbar
+                {
+                    X = ProfileManager.CurrentProfile.UOClassicCombatBuffbarLocation.X,
+                    Y = ProfileManager.CurrentProfile.UOClassicCombatBuffbarLocation.Y
+                });
+
+            }
+            if (ProfileManager.CurrentProfile.UOClassicCombatLines)
+            {
+                UIManager.Add(new UOClassicCombatLines
+                {
+                    X = ProfileManager.CurrentProfile.UOClassicCombatLinesLocation.X,
+                    Y = ProfileManager.CurrentProfile.UOClassicCombatLinesLocation.Y
+                });
+
+            }
+            if (ProfileManager.CurrentProfile.UOClassicCombatAL)
+            {
+                UIManager.Add(new UOClassicCombatAL
+                {
+                    X = ProfileManager.CurrentProfile.UOClassicCombatALLocation.X,
+                    Y = ProfileManager.CurrentProfile.UOClassicCombatALLocation.Y
+                });
+
+            }
+            if (ProfileManager.CurrentProfile.BandageGump)
+            {
+                UIManager.Add(new BandageGump());
+            }
+            // ## BEGIN - END ## //
 
             CircleOfTransparency.Create(ProfileManager.CurrentProfile.CircleOfTransparencyRadius);
             Plugin.OnConnected();
 
+            // ## BEGIN - END ## //
+            ModulesManager.Load();
+            // ## BEGIN - END ## //
 
             Camera.SetZoomValues
             (
@@ -300,6 +356,15 @@ namespace ClassicUO.Game.Scenes
                     break;
             }
 
+            // ## BEGIN - END ## //
+            if (ProfileManager.CurrentProfile.UOClassicCombatSelf || ProfileManager.CurrentProfile.UOClassicCombatBuffbar)
+            {
+                World.UOClassicCombatCliloc.OnMessage(text, hue, name, e.IsUnicode);
+            }
+
+            World.Player?.BandageTimer.OnMessage(text, hue, name, e.IsUnicode);
+            // ## BEGIN - END ## //
+
             if (!string.IsNullOrEmpty(text))
             {
                 World.Journal.Add(text, hue, name, e.TextType, e.IsUnicode);
@@ -319,7 +384,15 @@ namespace ClassicUO.Game.Scenes
             catch
             {
             }
-
+            // ## BEGIN - END ## // 
+            try
+            {
+                ModulesManager.Unload();
+            }
+            catch
+            {
+            }
+            // ## BEGIN - END ## //
             TargetManager.Reset();
 
             // special case for wmap. this allow us to save settings
@@ -1092,6 +1165,11 @@ namespace ClassicUO.Game.Scenes
 
         public void DrawOverheads(UltimaBatcher2D batcher, int x, int y)
         {
+            // ## BEGIN - END ## //
+            _UOClassicCombatLines.Draw(batcher);
+            _textureManager.Draw(batcher);
+            // ## BEGIN - END ## //
+
             _healthLinesManager.Draw(batcher);
 
             int renderIndex = _renderIndex - 1;

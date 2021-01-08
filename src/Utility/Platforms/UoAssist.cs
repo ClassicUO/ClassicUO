@@ -135,7 +135,7 @@ namespace ClassicUO.Utility.Platforms
 
                 if (class_atom == 0 && last_error != ERROR_CLASS_ALREADY_EXISTS)
                 {
-                    throw new Exception("Could not register window class");
+                    //throw new Exception("Could not register window class"); // ## BEGIN - END ## //
                 }
 
 
@@ -203,6 +203,7 @@ namespace ClassicUO.Utility.Platforms
                     if (disposing)
                     {
                         // Dispose managed resources
+                        Dispose();// ## BEGIN - END ## //
                     }
 
                     // Dispose unmanaged resources
