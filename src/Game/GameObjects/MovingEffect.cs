@@ -71,6 +71,9 @@ namespace ClassicUO.Game.GameObjects
             if (SerialHelper.IsValid(src) && source != null)
             {
                 SetSource(source);
+
+                //Offset.X = source.FrameInfo.Right;
+                //Offset.Y = source.FrameInfo.Bottom;
             }
             else
             {
