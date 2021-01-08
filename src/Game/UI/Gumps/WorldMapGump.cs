@@ -50,18 +50,12 @@ namespace ClassicUO.Game.UI.Gumps
     {
         private static Point _last_position = new Point(100, 100);
         private Point _center, _lastScroll;
-        private Label _coords;
-
 
         private bool _flipMap = true;
         private bool _freeView;
         private List<string> _hiddenMarkerFiles;
         private bool _isScrolling;
         private bool _isTopMost;
-        private int _lastX;
-        private int _lastY;
-        private int _lastZ;
-        private int _lastZoom;
         private readonly string _mapFilesPath = Path.Combine(CUOEnviroment.ExecutablePath, "Data", "Client");
         private readonly string _mapIconsPath = Path.Combine(CUOEnviroment.ExecutablePath, "Data", "Client", "MapIcons");
         private int _mapIndex;
@@ -228,16 +222,6 @@ namespace ClassicUO.Game.UI.Gumps
         private void BuildGump()
         {
             BuildContextMenu();
-            _coords?.Dispose();
-
-            Add
-            (
-                _coords = new Label("", true, 0xFFFF, font: 1, style: FontStyle.BlackBorder)
-                {
-                    X = 10,
-                    Y = 5
-                }
-            );
         }
 
         private void BuildOptionDictionary()
@@ -1517,23 +1501,6 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void DrawAll(UltimaBatcher2D batcher, int gX, int gY, int halfWidth, int halfHeight)
         {
-            if (_showCoordinates)
-            {
-                if (World.Player.X != _lastX || World.Player.Y != _lastY || World.Player.Z != _lastZ ||
-                    _zoomIndex != _lastZoom)
-                {
-                    _coords.Text = $"{World.Player.X}, {World.Player.Y} ({World.Player.Z}) [{_zoomIndex}]";
-                    _lastX = World.Player.X;
-                    _lastY = World.Player.Y;
-                    _lastZ = World.Player.Z;
-                    _lastZoom = _zoomIndex;
-                }
-            }
-            else
-            {
-                _coords.Text = string.Empty;
-            }
-
             if (_showMarkers && _mapMarkersLoaded)
             {
                 foreach (WMapMarkerFile file in _markerFiles)
@@ -1670,6 +1637,19 @@ namespace ClassicUO.Game.UI.Gumps
                 batcher, World.Player, gX, gY, halfWidth, halfHeight, Zoom, Color.White, _showPlayerName, false,
                 _showPlayerBar
             );
+
+
+            if (_showCoordinates)
+            {
+                ResetHueVector();
+
+                HueVector.Y = 1;
+                batcher.DrawString(Fonts.Bold, $"{World.Player.X}, {World.Player.Y} ({World.Player.Z}) [{_zoomIndex}]", gX + 6, gY + 6, ref HueVector);
+
+                ResetHueVector();
+
+                batcher.DrawString(Fonts.Bold, $"{World.Player.X}, {World.Player.Y} ({World.Player.Z}) [{_zoomIndex}]", gX + 5, gY + 5, ref HueVector);
+            }
         }
 
         private void DrawMobile
