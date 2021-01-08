@@ -1530,7 +1530,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                     if (item != null)
                     {
-                        DrawMulti(batcher, item.X, item.Y, gX, gY, halfWidth, halfHeight, Zoom);
+                        DrawMulti(batcher, house, item.X, item.Y, gX, gY, halfWidth, halfHeight, Zoom);
                     }
                 }
             }
@@ -1876,6 +1876,7 @@ namespace ClassicUO.Game.UI.Gumps
         private void DrawMulti
         (
             UltimaBatcher2D batcher,
+            House house,
             int multiX,
             int multiY,
             int x,
@@ -1908,6 +1909,30 @@ namespace ClassicUO.Game.UI.Gumps
                 SolidColorTextureCache.GetTexture(Color.Aquamarine), rotX - DOT_SIZE_HALF, rotY - DOT_SIZE_HALF, DOT_SIZE,
                 DOT_SIZE, ref HueVector
             );
+
+
+            /*ResetHueVector();
+
+            foreach (Multi component in house.Components)
+            {
+                sx = component.X - _center.X;
+                sy = component.Y - _center.Y;
+
+                (rotX, rotY) = RotatePoint(sx, sy, zoom, 1, _flipMap ? 45f : 0f);
+
+                rotX += x + width;
+                rotY += y + height;
+
+                batcher.Draw2D
+                (
+                    SolidColorTextureCache.GetTexture(Color.Aquamarine),
+                    rotX - DOT_SIZE_HALF,
+                    rotY - DOT_SIZE_HALF, 
+                    WWW,
+                    HHH, 
+                    ref HueVector
+                );
+            }*/
         }
 
         private void DrawWMEntity
