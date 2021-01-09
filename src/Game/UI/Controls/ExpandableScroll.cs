@@ -24,8 +24,6 @@ namespace ClassicUO.Game.UI.Controls
         private int _isExpanding_InitialX, _isExpanding_InitialY, _isExpanding_InitialHeight;
         private readonly bool _isResizable = true;
 
-        private readonly int _maxWidth;
-
         public ExpandableScroll(int x, int y, int height, ushort graphic, bool isResizable = true)
         {
             X = x;
@@ -36,6 +34,7 @@ namespace ClassicUO.Game.UI.Controls
             AcceptMouseInput = true;
 
             UOTexture[] textures = new UOTexture[4];
+            int width = 0;
 
             for (int i = 0; i < 4; i++)
             {
@@ -48,9 +47,9 @@ namespace ClassicUO.Game.UI.Controls
                     return;
                 }
 
-                if (t.Width > _maxWidth)
+                if (t.Width > width)
                 {
-                    _maxWidth = t.Width;
+                    width = t.Width;
                 }
 
                 textures[i] = t;
@@ -81,13 +80,11 @@ namespace ClassicUO.Game.UI.Controls
 
             int off = textures[0].Width - textures[3].Width;
 
-            _maxWidth = textures[1].Width;
-
-            _gumpRight.X = _gumpMiddle.X = 17;
-            _gumpRight.X = _gumpMiddle.Y = _gumplingMidY;
-            _gumpRight.Width = _gumpMiddle.Width = _maxWidth;
+            _gumpRight.X = _gumpMiddle.X = (width - textures[1].Width) / 2;
+            _gumpRight.Y = _gumpMiddle.Y = _gumplingMidY;
             _gumpRight.Height = _gumpMiddle.Height = _gumplingMidHeight;
             _gumpRight.WantUpdateSize = _gumpMiddle.WantUpdateSize = true;
+            _gumpBottom.X = (off / 2) + (off / 4);
 
             Width = _gumpMiddle.Width;
 
@@ -212,13 +209,10 @@ namespace ClassicUO.Game.UI.Controls
                 _gumpTop.Y = 0;
                 _gumpTop.WantUpdateSize = true;
                 //MIDDLE
-                _gumpRight.X = _gumpMiddle.X = 17;
                 _gumpRight.Y = _gumpMiddle.Y = _gumplingMidY;
-                _gumpRight.Width = _gumpMiddle.Width = _maxWidth;
                 _gumpRight.Height = _gumpMiddle.Height = _gumplingMidHeight;
                 _gumpRight.WantUpdateSize = _gumpMiddle.WantUpdateSize = true;
                 //BOTTOM
-                _gumpBottom.X = 17;
                 _gumpBottom.Y = _gumplingBottomY;
                 _gumpBottom.WantUpdateSize = true;
 

@@ -77,6 +77,15 @@ namespace ClassicUO.IO
                         {
                             MapLoader.Instance.PatchMapBlock(vh.BlockID, vh.Position);
                         }
+                        else if (vh.FileID == 2)
+                        {
+                            MapLoader.Instance.PatchStaticBlock
+                            (
+                                vh.BlockID,
+                        ((ulong) verdata.StartAddress.ToInt64() + vh.Position), 
+                                vh.Length
+                            );
+                        }
                         else if (vh.FileID == 4)
                         {
                             if (vh.BlockID < ArtLoader.Instance.Entries.Length)
@@ -183,17 +192,19 @@ namespace ClassicUO.IO
                         {
                             if (vh.BlockID < HuesLoader.Instance.HuesCount)
                             {
-                                VerdataHuesGroup group = Marshal.PtrToStructure<VerdataHuesGroup>
-                                    (verdata.StartAddress + (int) vh.Position);
+                                VerdataHuesGroup group = Marshal.PtrToStructure<VerdataHuesGroup>(verdata.StartAddress + (int) vh.Position);
 
-                                HuesLoader.Instance.HuesRange[vh.BlockID].Header = group.Header;
+                                HuesGroup[] hues = HuesLoader.Instance.HuesRange;
+
+                                hues[vh.BlockID].Header = group.Header;
 
                                 for (int j = 0; j < 8; j++)
                                 {
                                     Array.Copy
                                     (
                                         group.Entries[j].ColorTable,
-                                        HuesLoader.Instance.HuesRange[vh.BlockID].Entries[j].ColorTable, 32
+                                        hues[vh.BlockID].Entries[j].ColorTable,
+                                        32
                                     );
                                 }
                             }

@@ -1,14 +1,14 @@
 ﻿using System;
 using ClassicUO.Configuration;
 using ClassicUO.Utility;
+using Microsoft.Xna.Framework;
+using MathHelper = Microsoft.Xna.Framework.MathHelper;
 
 namespace ClassicUO.Game.GameObjects
 {
     internal sealed partial class MovingEffect : GameEffect
     {
-        private int _distance;
         private uint _lastMoveTime;
-        //private Vector2 _velocity;
 
         private MovingEffect(ushort graphic, ushort hue)
         {
@@ -38,16 +38,20 @@ namespace ClassicUO.Game.GameObjects
 
             if (speed > 20)
             {
-                speed = (byte) (speed - 20);
+                speed = (byte)(speed - 20);
             }
 
-            MovingDelay = (byte) (20 - speed);
+            MovingDelay = (byte)(20 - speed);
+            _lastMoveTime = Time.Ticks;
 
             Entity source = World.Get(src);
 
             if (SerialHelper.IsValid(src) && source != null)
             {
                 SetSource(source);
+
+                //Offset.X = source.FrameInfo.Right;
+                //Offset.Y = source.FrameInfo.Bottom;
             }
             else
             {
@@ -65,9 +69,6 @@ namespace ClassicUO.Game.GameObjects
             {
                 SetTarget(xTarget, yTarget, zTarget);
             }
-
-
-            Calculate(true);
         }
 
         public float AngleToTarget;
@@ -76,60 +77,27 @@ namespace ClassicUO.Game.GameObjects
         public byte MovingDelay = 10;
 
 
-        private void Calculate(bool angle)
+        public override void Update(double totalTime, double frameTime)
         {
-            int playerX = World.Player.X;
-            int playerY = World.Player.Y;
-            int playerZ = World.Player.Z;
+            base.Update(totalTime, frameTime);
 
-            int screenCenterX = ProfileManager.CurrentProfile.GameWindowPosition.X +
-                                (ProfileManager.CurrentProfile.GameWindowSize.X >> 1);
-
-            int screenCenterY = ProfileManager.CurrentProfile.GameWindowPosition.Y +
-                                (ProfileManager.CurrentProfile.GameWindowSize.Y >> 1);
-
-
-            (int sX, int sY, int sZ) = GetSource();
-            int offsetSourceX = sX - playerX;
-            int offsetSourceY = sY - playerY;
-            int offsetSourceZ = sZ - playerZ;
-
-            int screenSourceX = screenCenterX + (offsetSourceX - offsetSourceY) * 22;
-            int screenSourceY = screenCenterY + (offsetSourceX + offsetSourceY) * 22 - offsetSourceZ * 4;
-
-
-            (int tX, int tY, int tZ) = GetTarget();
-            int offsetTargetX = tX - playerX;
-            int offsetTargetY = tY - playerY;
-            int offsetTargetZ = tZ - playerZ;
-
-            int screenTargetX = screenCenterX + (offsetTargetX - offsetTargetY) * 22;
-            int screenTargetY = screenCenterY + (offsetTargetX + offsetTargetY) * 22 - offsetTargetZ * 4;
-
-
-            _distance = (int) Math.Sqrt
-                (Math.Pow(screenSourceX - screenTargetX, 2) + Math.Pow(screenSourceY - screenTargetY, 2));
-
-            //_velocity.X = (screenTargetX - screenSourceX) * (MovingDelay / (float) _distance);
-            //_velocity.Y = (screenTargetY - screenSourceY) * (MovingDelay / (float) _distance);
-
-            //Vector2.Normalize(ref _velocity, out _velocity);
-
-            if (angle)
-            {
-                AngleToTarget = (float) -Math.Atan2(screenTargetY - screenSourceY, screenTargetX - screenSourceX);
-            }
+            UpdateOffset();
         }
 
 
-        public override void Update(double totalTime, double frameTime)
+        private void UpdateOffset()
         {
-            if (_lastMoveTime > Time.Ticks)
+            if (_lastMoveTime >= Time.Ticks)
             {
                 return;
             }
 
-            base.Update(totalTime, frameTime);
+            int time = (int)(Time.Ticks - _lastMoveTime);
+
+            if (time < MovingDelay)
+            {
+                time = MovingDelay;
+            }
 
             _lastMoveTime = Time.Ticks + MovingDelay;
 
@@ -145,122 +113,40 @@ namespace ClassicUO.Game.GameObjects
             int playerY = World.Player.Y;
             int playerZ = World.Player.Z;
 
-            int screenCenterX = ProfileManager.CurrentProfile.GameWindowPosition.X +
-                                (ProfileManager.CurrentProfile.GameWindowSize.X >> 1);
-
-            int screenCenterY = ProfileManager.CurrentProfile.GameWindowPosition.Y +
-                                (ProfileManager.CurrentProfile.GameWindowSize.Y >> 1);
-
-
             (int sX, int sY, int sZ) = GetSource();
             int offsetSourceX = sX - playerX;
             int offsetSourceY = sY - playerY;
             int offsetSourceZ = sZ - playerZ;
-
-            int screenSourceX = screenCenterX + (offsetSourceX - offsetSourceY) * 22;
-            int screenSourceY = screenCenterY + (offsetSourceX + offsetSourceY) * 22 - offsetSourceZ * 4;
-
 
             (int tX, int tY, int tZ) = GetTarget();
             int offsetTargetX = tX - playerX;
             int offsetTargetY = tY - playerY;
             int offsetTargetZ = tZ - playerZ;
 
-            int screenTargetX = screenCenterX + (offsetTargetX - offsetTargetY) * 22;
-            int screenTargetY = screenCenterY + (offsetTargetX + offsetTargetY) * 22 - offsetTargetZ * 4;
+            Vector2 source = new Vector2((offsetSourceX - offsetSourceY) * 22, (offsetSourceX + offsetSourceY) * 22 - offsetSourceZ * 4);
 
+            source.X += Offset.X;
+            source.Y += Offset.Y;
 
-            int offX = screenSourceX - screenTargetX + (int) Offset.X;
-            int offY = screenSourceY - screenTargetY + (int) Offset.Y;
+            Vector2 target = new Vector2((offsetTargetX - offsetTargetY) * 22, (offsetTargetX + offsetTargetY) * 22 - offsetTargetZ * 4);
 
+            Vector2.Subtract(ref target, ref source, out Vector2 offset);
+            Vector2.Distance(ref source, ref target, out float distance);
+            distance -= 22;
+            Vector2.Multiply(ref offset, time / distance, out Vector2 s0);
 
-            int startX = screenSourceX + offX;
-            int startY = screenSourceY + offY;
-
-
-            int realDrawX = screenSourceX + (int) Offset.X;
-            int realDrawY = screenSourceY + (int) Offset.Y;
-            int drawDestX = screenTargetX;
-            int drawDestY = screenTargetY;
-
-            int[] deltaXY =
+            if (distance <= 22)
             {
-                Math.Abs(drawDestX - realDrawX), Math.Abs(drawDestY - realDrawY)
-            };
+                World.RemoveEffect(this);
 
-            int x = 0;
-
-            if (deltaXY[0] < deltaXY[1])
-            {
-                x = 1;
-                int temp = deltaXY[0];
-                deltaXY[0] = deltaXY[1];
-                deltaXY[1] = temp;
+                return;
             }
 
-            int delta = deltaXY[0];
-            int stepXY = 0;
-            const int EFFECT_SPEED = 5;
+            int newOffsetX = (int)(source.X / 22f);
+            int newOffsetY = (int)(source.Y / 22f);
 
-            int[] tempXY =
-            {
-                EFFECT_SPEED, 0
-            };
+            TileOffsetOnMonitorToXY(ref newOffsetX, ref newOffsetY, out int newCoordX, out int newCoordY);
 
-            for (int j = 0; j < EFFECT_SPEED; j++)
-            {
-                stepXY += deltaXY[1];
-
-                if (stepXY >= delta)
-                {
-                    tempXY[1]++;
-                    stepXY -= deltaXY[0];
-                }
-            }
-
-            if (realDrawX < drawDestX)
-            {
-                realDrawX += tempXY[x];
-
-                if (realDrawX > drawDestX)
-                {
-                    realDrawX = drawDestX;
-                }
-            }
-            else
-            {
-                realDrawX -= tempXY[x];
-
-                if (realDrawX < drawDestX)
-                {
-                    realDrawX = drawDestX;
-                }
-            }
-
-            if (realDrawY < drawDestY)
-            {
-                realDrawY += tempXY[(x + 1) % 2];
-
-                if (realDrawY > drawDestY)
-                {
-                    realDrawY = drawDestY;
-                }
-            }
-            else
-            {
-                realDrawY -= tempXY[(x + 1) % 2];
-
-                if (realDrawY < drawDestY)
-                {
-                    realDrawY = drawDestY;
-                }
-            }
-
-            int newOffsetX = (realDrawX - screenCenterX) / 22;
-            int newOffsetY = (realDrawY - screenCenterY) / 22;
-            int newCoordX = 0;
-            int newCoordY = 0;
-            TileOffsetOnMonitorToXY(ref newOffsetX, ref newOffsetY, ref newCoordX, ref newCoordY);
             int newX = playerX + newCoordX;
             int newY = playerY + newCoordY;
 
@@ -272,35 +158,31 @@ namespace ClassicUO.Game.GameObjects
             }
 
 
-            int newDrawX = screenCenterX + (newCoordX - newCoordY) * 22;
-            int newDrawY = screenCenterY + ((newCoordX + newCoordY) * 22 - offsetSourceZ * 4);
-            Offset.X = realDrawX - newDrawX;
-            Offset.Y = realDrawY - newDrawY;
             IsPositionChanged = true;
-
-
-            int distanceNow = (int) Math.Sqrt
-                (Math.Pow(startX - screenTargetX, 2) + Math.Pow(startY - screenTargetY, 2));
-
-            if (distanceNow <= _distance)
-            {
-                World.RemoveEffect(this);
-
-                return;
-            }
+            AngleToTarget = (float)-Math.Atan2(offset.Y, offset.X);
 
             if (newX != sX || newY != sY)
             {
+                // TODO: Z is wrong. We have to calculate an average
                 SetSource(newX, newY, sZ);
-                Calculate(false);
-            }
 
-            //Offset.X += _velocity.X/* * (float) frameTime*/;
-            //Offset.Y += _velocity.Y/* * (float) frameTime*/;
+                Vector2 nextSource = new Vector2((newCoordX - newCoordY) * 22, (newCoordX + newCoordY) * 22 - offsetSourceZ * 4);
+
+                Offset.X = source.X - nextSource.X;
+                Offset.Y = source.Y - nextSource.Y;
+            }
+            else
+            {
+                Offset.X += s0.X;
+                Offset.Y += s0.Y;
+            }
         }
 
-        private static void TileOffsetOnMonitorToXY(ref int ofsX, ref int ofsY, ref int x, ref int y)
+
+        private static void TileOffsetOnMonitorToXY(ref int ofsX, ref int ofsY, out int x, out int y)
         {
+            y = 0;
+
             if (ofsX == 0)
             {
                 x = y = ofsY >> 1;

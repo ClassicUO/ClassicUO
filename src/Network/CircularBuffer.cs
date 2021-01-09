@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
 
 namespace ClassicUO.Network
 {
@@ -142,6 +143,7 @@ namespace ClassicUO.Network
             return size;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public byte GetID()
         {
             if (Length >= 1)
@@ -152,14 +154,13 @@ namespace ClassicUO.Network
             return 0xFF;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public int GetLength()
         {
             if (Length >= 3)
             {
                 return _buffer[(_head + 2) % _buffer.Length] | (_buffer[(_head + 1) % _buffer.Length] << 8);
             }
-
-            // return (_buffer[(_head + 1) % _buffer.Length] << 8) | _buffer[(_head + 2) % _buffer.Length];
             return 0;
         }
     }

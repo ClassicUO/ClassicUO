@@ -1,5 +1,6 @@
 using System;
 using System.Runtime.CompilerServices;
+using ClassicUO.Data;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Gumps;
@@ -116,7 +117,7 @@ namespace ClassicUO.Game.GameObjects
             {
                 // TODO: Some servers may not want to receive this (causing original client to not send it),
                 //but all servers tested (latest POL, old POL, ServUO, Outlands) do.
-                if (SerialHelper.IsMobile(Serial))
+                if (/*Client.Version > ClientVersion.CV_200 &&*/ SerialHelper.IsMobile(Serial))
                 {
                     Socket.Send(new PNameRequest(Serial));
                 }
@@ -152,7 +153,7 @@ namespace ClassicUO.Game.GameObjects
 
             if (HitsMax != 0)
             {
-                NetClient.Socket.Send(new PCloseStatusBarGump(Serial));
+                GameActions.SendCloseStatus(Serial);
             }
 
             AnimIndex = 0;

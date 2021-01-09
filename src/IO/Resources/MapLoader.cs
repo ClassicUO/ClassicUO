@@ -345,8 +345,32 @@ namespace ClassicUO.IO.Resources
             }
 
             BlockData[0][block].OriginalMapAddress = address;
-
             BlockData[0][block].MapAddress = address;
+        }
+
+
+        public unsafe void PatchStaticBlock(ulong block, ulong address, uint count)
+        {
+            int w = MapBlocksSize[0, 0];
+            int h = MapBlocksSize[0, 1];
+
+            int maxBlockCount = w * h;
+
+            if (maxBlockCount < 1)
+            {
+                return;
+            }
+
+            BlockData[0][block].StaticAddress = BlockData[0][block].OriginalStaticAddress = address;
+
+            count = (uint)(count / (sizeof(StaidxBlockVerdata)));
+
+            if (count > 1024)
+            {
+                count = 1024;
+            }
+
+            BlockData[0][block].StaticCount = BlockData[0][block].OriginalStaticCount = count;
         }
 
         public unsafe bool ApplyPatches(ref PacketBufferReader reader)
@@ -616,6 +640,14 @@ namespace ClassicUO.IO.Resources
         public uint Position;
         public uint Size;
         public uint Unknown;
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    internal ref struct StaidxBlockVerdata
+    {
+        public uint Position;
+        public ushort Size;
+        public byte Unknown;
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]

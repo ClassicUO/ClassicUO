@@ -503,16 +503,14 @@ namespace ClassicUO.Network
 
         internal static bool ProcessHotkeys(int key, int mod, bool ispressed)
         {
-            bool result = true;
-
-
             if (!World.InGame ||
                 ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.ActivateChatAfterEnter &&
-                UIManager.SystemChat?.IsActive == true ||
-                UIManager.KeyboardFocusControl != UIManager.SystemChat.TextBoxControl)
+                UIManager.SystemChat != null && (UIManager.SystemChat.IsActive || UIManager.KeyboardFocusControl != UIManager.SystemChat.TextBoxControl))
             {
-                return result;
+                return true;
             }
+
+            bool result = true;
 
             foreach (Plugin plugin in Plugins)
             {

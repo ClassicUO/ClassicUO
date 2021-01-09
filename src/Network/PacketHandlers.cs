@@ -45,24 +45,15 @@ namespace ClassicUO.Network
         }
 
 
-        public void AnalyzePacket(byte[] data, int length)
+        public void AnalyzePacket(byte[] data, int offset, int length)
         {
             OnPacketBufferReader bufferReader = _handlers[data[0]];
 
             if (bufferReader != null)
             {
-                int packetLength = PacketsTable.GetPacketLength(data[0]);
-                int position = 1;
-
-                if (packetLength < 0)
+                PacketBufferReader buffer = new PacketBufferReader(data, length)
                 {
-                    packetLength = length;
-                    position = 3;
-                }
-
-                PacketBufferReader buffer = new PacketBufferReader(data, packetLength)
-                {
-                    Position = position
+                    Position = offset
                 };
 
                 bufferReader(ref buffer);
@@ -2139,34 +2130,9 @@ namespace ClassicUO.Network
             for (int i = 0; i < pageCnt; i++)
             {
                 int pageNum = p.ReadUShort() - 1;
+                gump.KnownPages.Add(pageNum);
 
-                if (!gump.IsEditable) //other pages are blank
-                {
-                    int startline = pageNum * ModernBookGump.MAX_BOOK_LINES;
-
-                    if (pageNum % 2 == 0)
-                    {
-                        for (int n = 0; n < gump.BookLines.Length; n++)
-                        {
-                            if (n < startline - 8 && n >= startline + 8)
-                            {
-                                gump.BookLines[n] = string.Empty;
-                            }
-                        }
-                    }
-                    else
-                    {
-                        for (int n = 0; n < gump.BookLines.Length; n++)
-                        {
-                            if (n >= startline + 16 && n < startline)
-                            {
-                                gump.BookLines[n] = string.Empty;
-                            }
-                        }
-                    }
-                }
-
-                if (pageNum < pageCnt && pageNum >= 0)
+                if (pageNum < gump.BookPageCount && pageNum >= 0)
                 {
                     ushort lineCnt = p.ReadUShort();
 
@@ -3213,14 +3179,7 @@ namespace ClassicUO.Network
 
             if (!string.IsNullOrEmpty(url))
             {
-                try
-                {
-                    Process.Start(url);
-                }
-                catch (Exception)
-                {
-                    Log.Warn("Failed to open url: " + url);
-                }
+                PlatformHelper.LaunchBrowser(url);
             }
         }
 
@@ -3234,22 +3193,23 @@ namespace ClassicUO.Network
             }
 
             uint tip = p.ReadUInt();
-            string str = p.ReadASCII(p.ReadUShort());
+            string str = p.ReadASCII(p.ReadUShort())?
+                          .Replace('\r', '\n');
+
+            int x = 20;
+            int y = 20;
 
             if (flag == 0)
             {
-                if (TipNoticeGump._tips == null || TipNoticeGump._tips.IsDisposed)
-                {
-                    TipNoticeGump._tips = new TipNoticeGump(flag, str);
-                    UIManager.Add(TipNoticeGump._tips);
-                }
+                x = 200;
+                y = 100;
+            }
 
-                TipNoticeGump._tips.AddTip(tip, str);
-            }
-            else
+            UIManager.Add(new TipNoticeGump(tip, flag, str)
             {
-                UIManager.Add(new TipNoticeGump(flag, str));
-            }
+                X = x,
+                Y = y
+            });
         }
 
         private static void AttackCharacter(ref PacketBufferReader p)
@@ -3260,7 +3220,7 @@ namespace ClassicUO.Network
             {
                 if (SerialHelper.IsValid(TargetManager.LastAttack))
                 {
-                    NetClient.Socket.Send(new PCloseStatusBarGump(TargetManager.LastAttack));
+                    GameActions.SendCloseStatus(TargetManager.LastAttack);
                 }
 
                 TargetManager.LastAttack = serial;
@@ -3782,11 +3742,11 @@ namespace ClassicUO.Network
                     int button = (int) p.ReadUInt();
 
 
-                    LinkedListNode<Control> first = UIManager.Gumps.First;
+                    LinkedListNode<Gump> first = UIManager.Gumps.First;
 
                     while (first != null)
                     {
-                        LinkedListNode<Control> nextGump = first.Next;
+                        LinkedListNode<Gump> nextGump = first.Next;
 
                         if (first.Value.ServerSerial == ser && first.Value.IsFromServer)
                         {
@@ -3976,6 +3936,11 @@ namespace ClassicUO.Network
                         case 2: //statusbar
                             UIManager.GetGump<HealthBarGump>(serial)?.Dispose();
 
+                            if (serial == World.Player.Serial)
+                            {
+                                StatusGumpBase.GetStatusGump()?.Dispose();
+                            }
+                            
                             break;
 
                         case 8: // char profile
@@ -4357,7 +4322,7 @@ namespace ClassicUO.Network
 
             if (cliloc == 1008092 || cliloc == 1005445) // value for "You notify them you don't want to join the party" || "You have been added to the party"
             {
-                for (LinkedListNode<Control> g = UIManager.Gumps.Last; g != null; g = g.Previous)
+                for (LinkedListNode<Gump> g = UIManager.Gumps.Last; g != null; g = g.Previous)
                 {
                     if (g.Value is PartyInviteGump pg)
                     {
@@ -5837,7 +5802,7 @@ namespace ClassicUO.Network
                 x = pos.X;
                 y = pos.Y;
 
-                for (LinkedListNode<Control> last = UIManager.Gumps.Last; last != null; last = last.Previous)
+                for (LinkedListNode<Gump> last = UIManager.Gumps.Last; last != null; last = last.Previous)
                 {
                     Control g = last.Value;
 

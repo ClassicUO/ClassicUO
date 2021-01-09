@@ -24,6 +24,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
         private readonly RadioButton _maleRadio;
         private readonly StbTextBox _nameTextBox;
         private PaperDollInteractable _paperDoll;
+        private readonly Button _nextButton;
         private readonly Dictionary<Layer, Tuple<int, ushort>> CurrentColorOption =
             new Dictionary<Layer, Tuple<int, ushort>>();
         private readonly Dictionary<Layer, int> CurrentOption = new Dictionary<Layer, int>
@@ -175,7 +176,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
             Add
             (
-                new Button((int) Buttons.Next, 0x15A4, 0x15A6, 0x15A5)
+                _nextButton = new Button((int) Buttons.Next, 0x15A4, 0x15A6, 0x15A5)
                 {
                     X = 610, Y = 445, ButtonAction = ButtonAction.Activate
                 }, 1
@@ -322,6 +323,30 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
         {
             CurrentColorOption.Clear();
             HandleGenreChange();
+            RaceType race = GetSelectedRace();
+            CharacterListFlags flags = World.ClientFeatures.Flags;
+            LockedFeatureFlags locks = World.ClientLockedFeatures.Flags;
+
+            bool allowElf = (flags & CharacterListFlags.CLF_ELVEN_RACE) != 0 &&
+                            (locks & LockedFeatureFlags.MondainsLegacy) != 0;
+
+            bool allowGarg = (locks & LockedFeatureFlags.StygianAbyss) != 0;
+            
+            if (race == RaceType.ELF && !allowElf)
+            {
+                _nextButton.IsEnabled = false;
+                _nextButton.Hue = 944;
+            }
+            else if (race == RaceType.GARGOYLE && !allowGarg)
+            {
+                _nextButton.IsEnabled = false;
+                _nextButton.Hue = 944;
+            }
+            else
+            {
+                _nextButton.IsEnabled = true;
+                _nextButton.Hue = 0;
+            }
         }
 
         private void Genre_ValueChanged(object sender, EventArgs e)

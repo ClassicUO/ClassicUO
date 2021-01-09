@@ -65,11 +65,6 @@ namespace ClassicUO.IO.Resources
                 return null;
             }
 
-            if (g == 0x3FEC)
-            {
-
-            }
-
             ref ArtTexture texture = ref Resources[g];
 
             if (texture == null || texture.IsDisposed)

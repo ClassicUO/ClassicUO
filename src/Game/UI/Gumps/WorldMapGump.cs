@@ -27,18 +27,12 @@ namespace ClassicUO.Game.UI.Gumps
     {
         private static Point _last_position = new Point(100, 100);
         private Point _center, _lastScroll;
-        private Label _coords;
-
 
         private bool _flipMap = true;
         private bool _freeView;
         private List<string> _hiddenMarkerFiles;
         private bool _isScrolling;
         private bool _isTopMost;
-        private int _lastX;
-        private int _lastY;
-        private int _lastZ;
-        private int _lastZoom;
         private readonly string _mapFilesPath = Path.Combine(CUOEnviroment.ExecutablePath, "Data", "Client");
         private readonly string _mapIconsPath = Path.Combine(CUOEnviroment.ExecutablePath, "Data", "Client", "MapIcons");
         private int _mapIndex;
@@ -65,6 +59,8 @@ namespace ClassicUO.Game.UI.Gumps
         private bool _showPlayerBar = true;
         private bool _showPlayerName = true;
         private int _zoomIndex = 4;
+
+        private WMapMarker _gotoMarker;
 
         private readonly float[] _zooms = new float[10] { 0.125f, 0.25f, 0.5f, 0.75f, 1f, 1.5f, 2f, 4f, 6f, 8f };
 
@@ -203,16 +199,6 @@ namespace ClassicUO.Game.UI.Gumps
         private void BuildGump()
         {
             BuildContextMenu();
-            _coords?.Dispose();
-
-            Add
-            (
-                _coords = new Label("", true, 0xFFFF, font: 1, style: FontStyle.BlackBorder)
-                {
-                    X = 10,
-                    Y = 5
-                }
-            );
         }
 
         private void BuildOptionDictionary()
@@ -230,6 +216,78 @@ namespace ClassicUO.Game.UI.Gumps
 
             _options["flip_map"] = new ContextMenuItemEntry
                 (ResGumps.FlipMap, () => { _flipMap = !_flipMap; }, true, _flipMap);
+
+            _options["goto_location"] = new ContextMenuItemEntry
+            (
+                ResGumps.GotoLocation, () =>
+                {
+                    EntryDialog dialog = new EntryDialog
+                    (
+                        250, 150, ResGumps.EnterLocation, name =>
+                        {
+                            _gotoMarker = null;
+
+                            if (string.IsNullOrWhiteSpace(name))
+                            {
+                                GameActions.Print(ResGumps.InvalidLocation, 0x35);
+                                return;
+                            }
+
+                            int x = -1;
+                            int y = -1;
+
+                            string[] coords = name.Split(' ');
+
+                            if (coords.Length < 2)
+                            {
+                                try
+                                {
+                                    ConvertCoords(name, ref x, ref y);
+                                }
+                                catch
+                                {
+                                    GameActions.Print(ResGumps.InvalidLocation, 0x35);
+                                }
+                            }
+                            else
+                            {
+                                if (!int.TryParse(coords[0], out x))
+                                {
+                                    GameActions.Print(ResGumps.InvalidLocation, 0x35);
+                                }
+
+                                if (!int.TryParse(coords[1], out y))
+                                {
+                                    GameActions.Print(ResGumps.InvalidLocation, 0x35);
+                                }
+                            }
+
+                            if (x != -1 && y != -1)
+                            {
+                                FreeView = true;
+
+                                _gotoMarker = new WMapMarker
+                                {
+                                    Color = Color.Aquamarine,
+                                    MapId = World.MapIndex,
+                                    Name = $"Go to: {x}, {y}",
+                                    X = x,
+                                    Y = y,
+                                    ZoomIndex = 1
+                                };
+
+                                _center.X = x;
+                                _center.Y = y;
+                            }
+                        }
+                    )
+                    {
+                        CanCloseWithRightClick = true
+                    };
+
+                    UIManager.Add(dialog);
+                }
+            );
 
             _options["top_most"] = new ContextMenuItemEntry
                 (ResGumps.TopMost, () => { TopMost = !TopMost; }, true, _isTopMost);
@@ -344,6 +402,7 @@ namespace ClassicUO.Game.UI.Gumps
             ContextMenu.Add(namesHpBarEntry);
 
             ContextMenu.Add("", null);
+            ContextMenu.Add(_options["goto_location"]);
             ContextMenu.Add(_options["flip_map"]);
             ContextMenu.Add(_options["top_most"]);
             ContextMenu.Add(_options["free_view"]);
@@ -1419,23 +1478,6 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void DrawAll(UltimaBatcher2D batcher, int gX, int gY, int halfWidth, int halfHeight)
         {
-            if (_showCoordinates)
-            {
-                if (World.Player.X != _lastX || World.Player.Y != _lastY || World.Player.Z != _lastZ ||
-                    _zoomIndex != _lastZoom)
-                {
-                    _coords.Text = $"{World.Player.X}, {World.Player.Y} ({World.Player.Z}) [{_zoomIndex}]";
-                    _lastX = World.Player.X;
-                    _lastY = World.Player.Y;
-                    _lastZ = World.Player.Z;
-                    _lastZoom = _zoomIndex;
-                }
-            }
-            else
-            {
-                _coords.Text = string.Empty;
-            }
-
             if (_showMarkers && _mapMarkersLoaded)
             {
                 foreach (WMapMarkerFile file in _markerFiles)
@@ -1452,6 +1494,11 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             }
 
+            if (_gotoMarker != null)
+            {
+                DrawMarker(batcher, _gotoMarker, gX, gY, halfWidth, halfHeight, Zoom);
+            }
+
             if (_showMultis)
             {
                 foreach (House house in World.HouseManager.Houses)
@@ -1460,7 +1507,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                     if (item != null)
                     {
-                        DrawMulti(batcher, item.X, item.Y, gX, gY, halfWidth, halfHeight, Zoom);
+                        DrawMulti(batcher, house, item.X, item.Y, gX, gY, halfWidth, halfHeight, Zoom);
                     }
                 }
             }
@@ -1567,6 +1614,19 @@ namespace ClassicUO.Game.UI.Gumps
                 batcher, World.Player, gX, gY, halfWidth, halfHeight, Zoom, Color.White, _showPlayerName, false,
                 _showPlayerBar
             );
+
+
+            if (_showCoordinates)
+            {
+                ResetHueVector();
+
+                HueVector.Y = 1;
+                batcher.DrawString(Fonts.Bold, $"{World.Player.X}, {World.Player.Y} ({World.Player.Z}) [{_zoomIndex}]", gX + 6, gY + 6, ref HueVector);
+
+                ResetHueVector();
+
+                batcher.DrawString(Fonts.Bold, $"{World.Player.X}, {World.Player.Y} ({World.Player.Z}) [{_zoomIndex}]", gX + 5, gY + 5, ref HueVector);
+            }
         }
 
         private void DrawMobile
@@ -1793,6 +1853,7 @@ namespace ClassicUO.Game.UI.Gumps
         private void DrawMulti
         (
             UltimaBatcher2D batcher,
+            House house,
             int multiX,
             int multiY,
             int x,
@@ -1825,6 +1886,30 @@ namespace ClassicUO.Game.UI.Gumps
                 SolidColorTextureCache.GetTexture(Color.Aquamarine), rotX - DOT_SIZE_HALF, rotY - DOT_SIZE_HALF, DOT_SIZE,
                 DOT_SIZE, ref HueVector
             );
+
+
+            /*ResetHueVector();
+
+            foreach (Multi component in house.Components)
+            {
+                sx = component.X - _center.X;
+                sy = component.Y - _center.Y;
+
+                (rotX, rotY) = RotatePoint(sx, sy, zoom, 1, _flipMap ? 45f : 0f);
+
+                rotX += x + width;
+                rotY += y + height;
+
+                batcher.Draw2D
+                (
+                    SolidColorTextureCache.GetTexture(Color.Aquamarine),
+                    rotX - DOT_SIZE_HALF,
+                    rotY - DOT_SIZE_HALF, 
+                    WWW,
+                    HHH, 
+                    ref HueVector
+                );
+            }*/
         }
 
         private void DrawWMEntity
@@ -2121,5 +2206,70 @@ namespace ClassicUO.Game.UI.Gumps
         }
 
         #endregion
+
+        #region Helpers
+
+        /// <summary>
+        /// Converts latitudes and longitudes to X and Y locations based on Lord British's throne is located at 1323.1624 or 0° 0'N 0° 0'E
+        /// </summary>
+        /// <param name="coords"></param>
+        /// <param name="xAxis"></param>
+        /// <param name="yAxis"></param>
+        private static void ConvertCoords(string coords, ref int xAxis, ref int yAxis)
+        {
+            string[] coordsSplit = coords.Split(',');
+
+            string yCoord = coordsSplit[0];
+            string xCoord = coordsSplit[1];
+
+            // Calc Y first
+            string[] ySplit = yCoord.Split('°', 'o');
+            double yDegree = Convert.ToDouble(ySplit[0]);
+            double yMinute = Convert.ToDouble(ySplit[1].Substring(0, ySplit[1].IndexOf("'", StringComparison.Ordinal)));
+
+            if (yCoord.Substring(yCoord.Length - 1).Equals("N"))
+            {
+                yAxis = (int) (1624 - (yMinute / 60) * (4096.0 / 360) - yDegree * (4096.0 / 360));
+            }
+            else
+            {
+                yAxis = (int) (1624 + (yMinute / 60) * (4096.0 / 360) + yDegree * (4096.0 / 360));
+            }
+
+            // Calc X next
+            string[] xSplit = xCoord.Split('°', 'o');
+            double xDegree = Convert.ToDouble(xSplit[0]);
+            double xMinute = Convert.ToDouble(xSplit[1].Substring(0, xSplit[1].IndexOf("'", StringComparison.Ordinal)));
+
+            if (xCoord.Substring(xCoord.Length - 1).Equals("W"))
+            {
+                xAxis = (int) (1323 - (xMinute / 60) * (5120.0 / 360) - xDegree * (5120.0 / 360));
+            }
+            else
+            {
+                xAxis = (int) (1323 + (xMinute / 60) * (5120.0 / 360) + xDegree * (5120.0 / 360));
+            }
+
+            // Normalize values outside of map range.
+            if (xAxis < 0)
+            {
+                xAxis += 5120;
+            }
+            else if (xAxis > 5120)
+            {
+                xAxis -= 5120;
+            }
+
+            if (yAxis < 0)
+            {
+                yAxis += 4096;
+            }
+            else if (yAxis > 4096)
+            {
+                yAxis -= 4096;
+            }
+        }
     }
+
+    #endregion
 }

@@ -15,7 +15,7 @@ namespace ClassicUO.Game.UI.Controls
 {
     internal class StbTextBox : Control, ITextEditHandler
     {
-        protected static readonly Color SELECTION_COLOR = new Color(0, 148, 216);
+        protected static readonly Color SELECTION_COLOR = new Color() { PackedValue = 0x80a06020 };
         private readonly FontStyle _fontStyle;
 
         private readonly int _maxCharCount = -1;

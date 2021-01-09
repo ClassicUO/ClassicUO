@@ -158,6 +158,7 @@ namespace ClassicUO.Game.UI.Controls
             }
         }
 
+        public int Hue { get; set; }
         public ushort FontHue { get; }
 
         public ushort HueHover { get; }
@@ -200,7 +201,7 @@ namespace ClassicUO.Game.UI.Controls
         {
             UOTexture texture = GetTextureByState();
 
-            ResetHueVector();
+            ShaderHueTranslator.GetHueVector(ref HueVector, Hue, false, Alpha, true);
 
             HueVector.Z = Alpha;
 

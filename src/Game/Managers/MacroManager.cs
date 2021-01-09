@@ -1100,8 +1100,7 @@ namespace ClassicUO.Game.Managers
                     break;
 
                 case MacroType.SaveDesktop:
-                    ProfileManager.CurrentProfile?.Save
-                        (ProfileManager.ProfilePath, UIManager.Gumps.OfType<Gump>().Where(s => s.CanBeSaved).Reverse().ToList());
+                    ProfileManager.CurrentProfile?.Save(ProfileManager.ProfilePath);
 
                     break;
 

@@ -11,6 +11,7 @@ using ClassicUO.IO;
 using ClassicUO.Resources;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
+using ClassicUO.Utility.Platforms;
 using SDL2;
 
 namespace ClassicUO
@@ -195,13 +196,7 @@ namespace ClassicUO
                     Client.ShowErrorMessage(ResGeneral.YourUOClientVersionIsInvalid);
                 }
 
-                try
-                {
-                    Process.Start(ResGeneral.ClassicUOLink);
-                }
-                catch
-                {
-                }
+                PlatformHelper.LaunchBrowser(ResGeneral.ClassicUOLink);
             }
             else
             {
@@ -460,6 +455,12 @@ namespace ClassicUO
                         {
                             Settings.GlobalSettings.ForceDriver = 0;
                         }
+
+                        break;
+
+                    case "packetlog":
+                        
+                        CUOEnviroment.PacketLog = true;
 
                         break;
                 }

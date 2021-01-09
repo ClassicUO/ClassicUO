@@ -391,7 +391,7 @@ namespace ClassicUO.Renderer
             float hh = texture.Height * 0.5f;
 
 
-            float startX = x - (destX - 44 + ww);
+            float startX = x - (destX + ww);
             float startY = y - (destY + hh);
 
             float sin = (float) Math.Sin(angle);

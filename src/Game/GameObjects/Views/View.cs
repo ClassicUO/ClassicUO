@@ -197,7 +197,12 @@ namespace ClassicUO.Game.GameObjects
             {
                 texture.Ticks = Time.Ticks;
 
-                batcher.DrawSpriteRotated(texture, x, y, destX, destY, ref hue, angle);
+                ref UOFileIndex index = ref ArtLoader.Instance.GetValidRefEntry(graphic + 0x4000);
+
+                int offX = index.Width == 0 ? -44 : index.Width;
+                int offY = index.Height == 0 ? -22 : index.Height;
+
+                batcher.DrawSpriteRotated(texture, x - offX, y - offY, destX, destY, ref hue, angle);
             }
         }
 
@@ -208,7 +213,8 @@ namespace ClassicUO.Game.GameObjects
             int x,
             int y,
             ref Vector3 hue,
-            ref bool transparent
+            ref bool transparent,
+            bool shadow
         )
         {
             ref UOFileIndex index = ref ArtLoader.Instance.GetValidRefEntry(graphic + 0x4000);
@@ -272,6 +278,11 @@ namespace ClassicUO.Game.GameObjects
                 x -= index.Width;
                 y -= index.Height;
 
+
+                if (shadow)
+                {
+                    batcher.DrawSpriteShadow(texture, x, y, false);
+                }
 
                 batcher.DrawSprite(texture, x, y, false, ref hue);
             }

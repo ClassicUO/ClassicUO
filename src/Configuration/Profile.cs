@@ -4,6 +4,7 @@ using System.IO;
 using System.Text;
 using System.Xml;
 using ClassicUO.Game;
+using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Utility;
@@ -49,7 +50,7 @@ namespace ClassicUO.Configuration
         public ushort PartyAuraHue { get; set; } = 0x0044;
         public ushort FriendHue { get; set; } = 0x0044;
         public ushort CriminalHue { get; set; } = 0x03B2;
-        public ushort AnimalHue { get; set; } = 0x03B2;
+        public ushort CanAttackHue { get; set; } = 0x03B2;
         public ushort EnemyHue { get; set; } = 0x0031;
         public ushort MurdererHue { get; set; } = 0x0023;
         public ushort BeneficHue { get; set; } = 0x0059;
@@ -196,6 +197,7 @@ namespace ClassicUO.Configuration
 
         public int FilterType { get; set; } = 0;
         public bool ShadowsEnabled { get; set; } = true;
+        public bool ShadowsStatics { get; set; } = true;
         public int AuraUnderFeetType { get; set; } // 0 = NO, 1 = in warmode, 2 = ctrl+shift, 3 = always
         public bool AuraOnMouse { get; set; } = true;
 
@@ -270,7 +272,7 @@ namespace ClassicUO.Configuration
 
         public static uint GumpsVersion { get; private set; }
 
-        public void Save(string path, List<Gump> gumps = null)
+        public void Save(string path)
         {
             Log.Trace($"Saving path:\t\t{path}");
 
@@ -278,12 +280,12 @@ namespace ClassicUO.Configuration
             ConfigurationResolver.Save(this, Path.Combine(path, "profile.json"));
 
             // Save opened gumps
-            SaveGumps(path, gumps);
+            SaveGumps(path);
 
             Log.Trace("Saving done!");
         }
 
-        private void SaveGumps(string path, List<Gump> gumps)
+        private void SaveGumps(string path)
         {
             string gumpsXmlPath = Path.Combine(path, "gumps.xml");
 
@@ -299,25 +301,57 @@ namespace ClassicUO.Configuration
 
                 UIManager.AnchorManager.Save(xml);
 
-                for (int i = 0; i < gumps.Count; i++)
+                LinkedList<Gump> gumps = new LinkedList<Gump>();
+
+                foreach (Gump gump in UIManager.Gumps)
                 {
-                    Gump gump = gumps[i];
+                    if (!gump.IsDisposed && gump.CanBeSaved && !(gump is AnchorableGump anchored && UIManager.AnchorManager[anchored] != null))
+                    {
+                        gumps.AddLast(gump);
+                    }
+                }
 
-                    if (gump.IsDisposed)
+
+                LinkedListNode<Gump> first = gumps.First;
+
+                while (first != null)
+                {
+                    Gump gump = first.Value;
+
+                    if (gump.LocalSerial != 0)
                     {
-                        continue;
+                        Item item = World.Items.Get(gump.LocalSerial);
+
+                        if (item != null && !item.IsDestroyed && item.Opened)
+                        {
+                            while (SerialHelper.IsItem(item.Container))
+                            {
+                                item = World.Items.Get(item.Container);
+                            }
+
+                            SaveItemsGumpRecursive(item, xml, gumps);
+
+                            if (first.List != null)
+                            {
+                                gumps.Remove(first);
+                            }
+
+                            first = gumps.First;
+
+                            continue;
+                        }
                     }
 
-                    if (gump is AnchorableGump anchored && UIManager.AnchorManager[anchored] != null)
+                    xml.WriteStartElement("gump");
+                    gump.Save(xml);
+                    xml.WriteEndElement();
+
+                    if (first.List != null)
                     {
-                        // do nothing
+                        gumps.Remove(first);
                     }
-                    else
-                    {
-                        xml.WriteStartElement("gump");
-                        gump.Save(xml);
-                        xml.WriteEndElement();
-                    }
+
+                    first = gumps.First;
                 }
 
                 xml.WriteEndElement();
@@ -327,6 +361,52 @@ namespace ClassicUO.Configuration
 
             SkillsGroupManager.Save();
         }
+
+        private static void SaveItemsGumpRecursive(Item parent, XmlTextWriter xml, LinkedList<Gump> list)
+        {
+            if (parent != null && !parent.IsDestroyed && parent.Opened)
+            {
+                SaveItemsGump(parent, xml, list);
+
+                Item first = (Item) parent.Items;
+
+                while (first != null)
+                {
+                    Item next = (Item) first.Next;
+
+                    SaveItemsGumpRecursive(first, xml, list);
+
+                    first = next;
+                }
+            }
+        }
+
+        private static void SaveItemsGump(Item item, XmlTextWriter xml, LinkedList<Gump> list)
+        {
+            if (item != null && !item.IsDestroyed && item.Opened)
+            {
+                LinkedListNode<Gump> first = list.First;
+
+                while (first != null)
+                {
+                    LinkedListNode<Gump> next = first.Next;
+
+                    if (first.Value.LocalSerial == item.Serial && !first.Value.IsDisposed)
+                    {
+                        xml.WriteStartElement("gump");
+                        first.Value.Save(xml);
+                        xml.WriteEndElement();
+
+                        list.Remove(first);
+
+                        break;
+                    }
+
+                    first = next;
+                }
+            }
+        }
+
 
         public List<Gump> ReadGumps(string path)
         {
@@ -434,7 +514,7 @@ namespace ClassicUO.Configuration
                     }
                 }
 
-                SaveGumps(path, gumps);
+                SaveGumps(path);
 
                 gumps.Clear();
 

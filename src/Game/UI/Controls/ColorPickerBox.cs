@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.InteropServices;
+using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Input;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
@@ -9,7 +10,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.Game.UI.Controls
 {
-    internal class ColorPickerBox : Control
+    internal class ColorPickerBox : Gump
     {
         private readonly int _cellHeight;
         private readonly int _cellWidth;
@@ -33,7 +34,7 @@ namespace ClassicUO.Game.UI.Controls
             int cellW = 8,
             int cellH = 8,
             ushort[] customPallete = null
-        )
+        ) : base(0, 0)
         {
             X = x;
             Y = y;

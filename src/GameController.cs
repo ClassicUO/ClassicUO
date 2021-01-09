@@ -234,11 +234,12 @@ namespace ClassicUO
             //width = (int) ((double) width * Client.Game.GraphicManager.PreferredBackBufferWidth / Client.Game.Window.ClientBounds.Width);
             //height = (int) ((double) height * Client.Game.GraphicManager.PreferredBackBufferHeight / Client.Game.Window.ClientBounds.Height);
 
-            if (CUOEnviroment.IsHighDPI)
+            /*if (CUOEnviroment.IsHighDPI)
             {
                 width *= 2;
                 height *= 2;
             }
+            */
 
             GraphicManager.PreferredBackBufferWidth = width;
             GraphicManager.PreferredBackBufferHeight = height;
@@ -570,6 +571,12 @@ namespace ClassicUO
                 case SDL_EventType.SDL_TEXTINPUT:
 
                     if (_ignoreNextTextInput)
+                    {
+                        break;
+                    }
+
+                    // Fix for linux OS: https://github.com/andreakarasho/ClassicUO/pull/1263
+                    if (Keyboard.Alt || Keyboard.Ctrl)
                     {
                         break;
                     }
