@@ -1,23 +1,32 @@
 ﻿#region license
 
-// Copyright (C) 2020 ClassicUO Development Community on Github
+// Copyright (c) 2021, andreakarasho
+// All rights reserved.
 // 
-// This project is an alternative client for the game Ultima Online.
-// The goal of this is to develop a lightweight client considering
-// new technologies.
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+// 1. Redistributions of source code must retain the above copyright
+//    notice, this list of conditions and the following disclaimer.
+// 2. Redistributions in binary form must reproduce the above copyright
+//    notice, this list of conditions and the following disclaimer in the
+//    documentation and/or other materials provided with the distribution.
+// 3. All advertising materials mentioning features or use of this software
+//    must display the following acknowledgement:
+//    This product includes software developed by andreakarasho - https://github.com/andreakarasho
+// 4. Neither the name of the copyright holder nor the
+//    names of its contributors may be used to endorse or promote products
+//    derived from this software without specific prior written permission.
 // 
-//  This program is free software: you can redistribute it and/or modify
-//  it under the terms of the GNU General Public License as published by
-//  the Free Software Foundation, either version 3 of the License, or
-//  (at your option) any later version.
-// 
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-// 
-//  You should have received a copy of the GNU General Public License
-//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ''AS IS'' AND ANY
+// EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+// WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+// DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY
+// DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+// (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+// LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+// ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+// SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #endregion
 
@@ -50,21 +59,14 @@ namespace ClassicUO.Game.UI.Gumps
     {
         private static Point _last_position = new Point(100, 100);
         private Point _center, _lastScroll;
-        private Label _coords;
-
 
         private bool _flipMap = true;
         private bool _freeView;
         private List<string> _hiddenMarkerFiles;
         private bool _isScrolling;
         private bool _isTopMost;
-        private int _lastX;
-        private int _lastY;
-        private int _lastZ;
-        private int _lastZoom;
         private readonly string _mapFilesPath = Path.Combine(CUOEnviroment.ExecutablePath, "Data", "Client");
-        private readonly string _mapIconsPath = Path.Combine
-            (CUOEnviroment.ExecutablePath, "Data", "Client", "MapIcons");
+        private readonly string _mapIconsPath = Path.Combine(CUOEnviroment.ExecutablePath, "Data", "Client", "MapIcons");
         private int _mapIndex;
         private bool _mapMarkersLoaded;
         private UOTexture _mapTexture;
@@ -76,8 +78,7 @@ namespace ClassicUO.Game.UI.Gumps
         private int _markerFontIndex = 1;
         private readonly Dictionary<string, Texture2D> _markerIcons = new Dictionary<string, Texture2D>();
 
-        private readonly Dictionary<string, ContextMenuItemEntry> _options =
-            new Dictionary<string, ContextMenuItemEntry>();
+        private readonly Dictionary<string, ContextMenuItemEntry> _options = new Dictionary<string, ContextMenuItemEntry>();
         private bool _showCoordinates;
         private bool _showGroupBar = true;
         private bool _showGroupName = true;
@@ -91,9 +92,19 @@ namespace ClassicUO.Game.UI.Gumps
         private bool _showPlayerName = true;
         private int _zoomIndex = 4;
 
+        private WMapMarker _gotoMarker;
+
         private readonly float[] _zooms = new float[10] { 0.125f, 0.25f, 0.5f, 0.75f, 1f, 1.5f, 2f, 4f, 6f, 8f };
 
-        public WorldMapGump() : base(400, 400, 100, 100, 0, 0)
+        public WorldMapGump() : base
+        (
+            400,
+            400,
+            100,
+            100,
+            0,
+            0
+        )
         {
             CanMove = true;
             AcceptMouseInput = true;
@@ -183,10 +194,7 @@ namespace ClassicUO.Game.UI.Gumps
             _showMarkerNames = ProfileManager.CurrentProfile.WorldMapShowMarkersNames;
 
 
-            _hiddenMarkerFiles = string.IsNullOrEmpty
-                (ProfileManager.CurrentProfile.WorldMapHiddenMarkerFiles) ?
-                new List<string>() :
-                ProfileManager.CurrentProfile.WorldMapHiddenMarkerFiles.Split(',').ToList();
+            _hiddenMarkerFiles = string.IsNullOrEmpty(ProfileManager.CurrentProfile.WorldMapHiddenMarkerFiles) ? new List<string>() : ProfileManager.CurrentProfile.WorldMapHiddenMarkerFiles.Split(',').ToList();
         }
 
         public void SaveSettings()
@@ -229,70 +237,127 @@ namespace ClassicUO.Game.UI.Gumps
         private void BuildGump()
         {
             BuildContextMenu();
-            _coords?.Dispose();
-
-            Add
-            (
-                _coords = new Label("", true, 0x03b2, font: 1, style: FontStyle.BlackBorder)
-                {
-                    X = 10,
-                    Y = 5
-                }
-            );
         }
 
         private void BuildOptionDictionary()
         {
             _options.Clear();
 
-            _options["show_all_markers"] = new ContextMenuItemEntry
-                (ResGumps.ShowAllMarkers, () => { _showMarkers = !_showMarkers; }, true, _showMarkers);
+            _options["show_all_markers"] = new ContextMenuItemEntry(ResGumps.ShowAllMarkers, () => { _showMarkers = !_showMarkers; }, true, _showMarkers);
 
-            _options["show_marker_names"] = new ContextMenuItemEntry
-                (ResGumps.ShowMarkerNames, () => { _showMarkerNames = !_showMarkerNames; }, true, _showMarkerNames);
+            _options["show_marker_names"] = new ContextMenuItemEntry(ResGumps.ShowMarkerNames, () => { _showMarkerNames = !_showMarkerNames; }, true, _showMarkerNames);
 
-            _options["show_marker_icons"] = new ContextMenuItemEntry
-                (ResGumps.ShowMarkerIcons, () => { _showMarkerIcons = !_showMarkerIcons; }, true, _showMarkerIcons);
+            _options["show_marker_icons"] = new ContextMenuItemEntry(ResGumps.ShowMarkerIcons, () => { _showMarkerIcons = !_showMarkerIcons; }, true, _showMarkerIcons);
 
-            _options["flip_map"] = new ContextMenuItemEntry
-                (ResGumps.FlipMap, () => { _flipMap = !_flipMap; }, true, _flipMap);
+            _options["flip_map"] = new ContextMenuItemEntry(ResGumps.FlipMap, () => { _flipMap = !_flipMap; }, true, _flipMap);
 
-            _options["top_most"] = new ContextMenuItemEntry
-                (ResGumps.TopMost, () => { TopMost = !TopMost; }, true, _isTopMost);
+            _options["goto_location"] = new ContextMenuItemEntry
+            (
+                ResGumps.GotoLocation,
+                () =>
+                {
+                    EntryDialog dialog = new EntryDialog
+                    (
+                        250,
+                        150,
+                        ResGumps.EnterLocation,
+                        name =>
+                        {
+                            _gotoMarker = null;
 
-            _options["free_view"] = new ContextMenuItemEntry
-                (ResGumps.FreeView, () => { FreeView = !FreeView; }, true, FreeView);
+                            if (string.IsNullOrWhiteSpace(name))
+                            {
+                                GameActions.Print(ResGumps.InvalidLocation, 0x35);
+
+                                return;
+                            }
+
+                            int x = -1;
+                            int y = -1;
+
+                            string[] coords = name.Split(' ');
+
+                            if (coords.Length < 2)
+                            {
+                                try
+                                {
+                                    ConvertCoords(name, ref x, ref y);
+                                }
+                                catch
+                                {
+                                    GameActions.Print(ResGumps.InvalidLocation, 0x35);
+                                }
+                            }
+                            else
+                            {
+                                if (!int.TryParse(coords[0], out x))
+                                {
+                                    GameActions.Print(ResGumps.InvalidLocation, 0x35);
+                                }
+
+                                if (!int.TryParse(coords[1], out y))
+                                {
+                                    GameActions.Print(ResGumps.InvalidLocation, 0x35);
+                                }
+                            }
+
+                            if (x != -1 && y != -1)
+                            {
+                                FreeView = true;
+
+                                _gotoMarker = new WMapMarker
+                                {
+                                    Color = Color.Aquamarine,
+                                    MapId = World.MapIndex,
+                                    Name = $"Go to: {x}, {y}",
+                                    X = x,
+                                    Y = y,
+                                    ZoomIndex = 1
+                                };
+
+                                _center.X = x;
+                                _center.Y = y;
+                            }
+                        }
+                    )
+                    {
+                        CanCloseWithRightClick = true
+                    };
+
+                    UIManager.Add(dialog);
+                }
+            );
+
+            _options["top_most"] = new ContextMenuItemEntry(ResGumps.TopMost, () => { TopMost = !TopMost; }, true, _isTopMost);
+
+            _options["free_view"] = new ContextMenuItemEntry(ResGumps.FreeView, () => { FreeView = !FreeView; }, true, FreeView);
 
             _options["show_party_members"] = new ContextMenuItemEntry
             (
-                ResGumps.ShowPartyMembers, () =>
+                ResGumps.ShowPartyMembers,
+                () =>
                 {
                     _showPartyMembers = !_showPartyMembers;
 
                     World.WMapManager.SetEnable(_showPartyMembers);
-                }, true, _showPartyMembers
+                },
+                true,
+                _showPartyMembers
             );
 
-            _options["show_mobiles"] = new ContextMenuItemEntry
-                (ResGumps.ShowMobiles, () => { _showMobiles = !_showMobiles; }, true, _showMobiles);
+            _options["show_mobiles"] = new ContextMenuItemEntry(ResGumps.ShowMobiles, () => { _showMobiles = !_showMobiles; }, true, _showMobiles);
 
-            _options["show_multis"] = new ContextMenuItemEntry
-                (ResGumps.ShowHousesBoats, () => { _showMultis = !_showMultis; }, true, _showMultis);
+            _options["show_multis"] = new ContextMenuItemEntry(ResGumps.ShowHousesBoats, () => { _showMultis = !_showMultis; }, true, _showMultis);
 
-            _options["show_your_name"] = new ContextMenuItemEntry
-                (ResGumps.ShowYourName, () => { _showPlayerName = !_showPlayerName; }, true, _showPlayerName);
+            _options["show_your_name"] = new ContextMenuItemEntry(ResGumps.ShowYourName, () => { _showPlayerName = !_showPlayerName; }, true, _showPlayerName);
 
-            _options["show_your_healthbar"] = new ContextMenuItemEntry
-                (ResGumps.ShowYourHealthbar, () => { _showPlayerBar = !_showPlayerBar; }, true, _showPlayerBar);
+            _options["show_your_healthbar"] = new ContextMenuItemEntry(ResGumps.ShowYourHealthbar, () => { _showPlayerBar = !_showPlayerBar; }, true, _showPlayerBar);
 
-            _options["show_party_name"] = new ContextMenuItemEntry
-                (ResGumps.ShowGroupName, () => { _showGroupName = !_showGroupName; }, true, _showGroupName);
+            _options["show_party_name"] = new ContextMenuItemEntry(ResGumps.ShowGroupName, () => { _showGroupName = !_showGroupName; }, true, _showGroupName);
 
-            _options["show_party_healthbar"] = new ContextMenuItemEntry
-                (ResGumps.ShowGroupHealthbar, () => { _showGroupBar = !_showGroupBar; }, true, _showGroupBar);
+            _options["show_party_healthbar"] = new ContextMenuItemEntry(ResGumps.ShowGroupHealthbar, () => { _showGroupBar = !_showGroupBar; }, true, _showGroupBar);
 
-            _options["show_coordinates"] = new ContextMenuItemEntry
-                (ResGumps.ShowYourCoordinates, () => { _showCoordinates = !_showCoordinates; }, true, _showCoordinates);
+            _options["show_coordinates"] = new ContextMenuItemEntry(ResGumps.ShowYourCoordinates, () => { _showCoordinates = !_showCoordinates; }, true, _showCoordinates);
 
             _options["saveclose"] = new ContextMenuItemEntry(ResGumps.SaveClose, Dispose);
         }
@@ -313,7 +378,7 @@ namespace ClassicUO.Game.UI.Gumps
             markerFontEntry.Add(new ContextMenuItemEntry(string.Format(ResGumps.Style0, 6), () => { SetFont(6); }));
 
             ContextMenuItemEntry markersEntry = new ContextMenuItemEntry(ResGumps.MapMarkerOptions);
-            markersEntry.Add(new ContextMenuItemEntry(ResGumps.ReloadMarkers, () => { LoadMarkers(); }));
+            markersEntry.Add(new ContextMenuItemEntry(ResGumps.ReloadMarkers, LoadMarkers));
 
             markersEntry.Add(markerFontEntry);
 
@@ -329,7 +394,8 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     ContextMenuItemEntry entry = new ContextMenuItemEntry
                     (
-                        string.Format(ResGumps.ShowHide0, markerFile.Name), () =>
+                        string.Format(ResGumps.ShowHide0, markerFile.Name),
+                        () =>
                         {
                             markerFile.Hidden = !markerFile.Hidden;
 
@@ -346,7 +412,9 @@ namespace ClassicUO.Game.UI.Gumps
                             {
                                 _hiddenMarkerFiles.Add(markerFile.Name);
                             }
-                        }, true, !markerFile.Hidden
+                        },
+                        true,
+                        !markerFile.Hidden
                     );
 
                     _options[$"show_marker_{markerFile.Name}"] = entry;
@@ -370,6 +438,7 @@ namespace ClassicUO.Game.UI.Gumps
             ContextMenu.Add(namesHpBarEntry);
 
             ContextMenu.Add("", null);
+            ContextMenu.Add(_options["goto_location"]);
             ContextMenu.Add(_options["flip_map"]);
             ContextMenu.Add(_options["top_most"]);
             ContextMenu.Add(_options["free_view"]);
@@ -410,8 +479,7 @@ namespace ClassicUO.Game.UI.Gumps
                 return (x, y);
             }
 
-            return ((int) Math.Round(Math.Cos(dist * Math.PI / 4.0) * x - Math.Sin(dist * Math.PI / 4.0) * y),
-                    (int) Math.Round(Math.Sin(dist * Math.PI / 4.0) * x + Math.Cos(dist * Math.PI / 4.0) * y));
+            return ((int) Math.Round(Math.Cos(dist * Math.PI / 4.0) * x - Math.Sin(dist * Math.PI / 4.0) * y), (int) Math.Round(Math.Sin(dist * Math.PI / 4.0) * x + Math.Cos(dist * Math.PI / 4.0) * y));
         }
 
         private void AdjustPosition
@@ -649,12 +717,7 @@ namespace ClassicUO.Game.UI.Gumps
                 uint bi_size, bi_width, bi_height;
                 ushort bi_planes, bi_bit_count;
 
-                uint bi_compression,
-                     bi_size_image,
-                     bi_x_perls_per_meter,
-                     bi_y_perls_per_meter,
-                     bi_clr_used,
-                     bi_clr_important;
+                uint bi_compression, bi_size_image, bi_x_perls_per_meter, bi_y_perls_per_meter, bi_clr_used, bi_clr_important;
 
                 bf_reserved = reader.ReadUShort();
                 bf_type = reader.ReadUShort();
@@ -758,7 +821,16 @@ namespace ClassicUO.Game.UI.Gumps
                 bi_height >>= 1;
 
                 surface = (SDL.SDL_Surface*) SDL.SDL_CreateRGBSurface
-                    (0, (int) bi_width, (int) bi_height, 32, 0x00FF0000, 0x0000FF00, 0x000000FF, 0xFF000000);
+                (
+                    0,
+                    (int) bi_width,
+                    (int) bi_height,
+                    32,
+                    0x00FF0000,
+                    0x0000FF00,
+                    0x000000FF,
+                    0xFF000000
+                );
 
                 if (bi_bit_count <= 8)
                 {
@@ -979,20 +1051,18 @@ namespace ClassicUO.Game.UI.Gumps
 
                                     for (y = 0; y < 8; ++y)
                                     {
-                                        int block = (mapY + y + OFFSET_PIX_HALF) * (realWidth + OFFSET_PIX) + mapX +
-                                                    OFFSET_PIX_HALF;
+                                        int block = (mapY + y + OFFSET_PIX_HALF) * (realWidth + OFFSET_PIX) + mapX + OFFSET_PIX_HALF;
 
                                         int pos = y << 3;
 
-                                        for (x = 0; x < 8; ++x, ++pos)
+                                        for (x = 0; x < 8; ++x, ++pos, ++block)
                                         {
-                                            ushort color = (ushort) (0x8000 | HuesLoader.Instance.GetRadarColorData
-                                                (cells[pos].TileID & 0x3FFF));
+                                            ushort color = (ushort) (0x8000 | HuesLoader.Instance.GetRadarColorData(cells[pos].TileID & 0x3FFF));
 
                                             ref Color cc = ref buffer[block];
                                             cc.PackedValue = HuesHelper.Color16To32(color) | 0xFF_00_00_00;
 
-                                            allZ[block++] = cells[pos].Z;
+                                            allZ[block] = cells[pos].Z;
                                         }
                                     }
 
@@ -1005,19 +1075,13 @@ namespace ClassicUO.Game.UI.Gumps
 
                                         for (int c = 0; c < count; ++c, ++sb)
                                         {
-                                            if (sb->Color != 0 && sb->Color != 0xFFFF && !GameObjectHelper.IsNoDrawable
-                                                (sb->Color))
+                                            if (sb->Color != 0 && sb->Color != 0xFFFF && !GameObjectHelper.IsNoDrawable(sb->Color))
                                             {
-                                                int block =
-                                                    (mapY + sb->Y + OFFSET_PIX_HALF) * (realWidth + OFFSET_PIX) + mapX +
-                                                    sb->X + OFFSET_PIX_HALF;
+                                                int block = (mapY + sb->Y + OFFSET_PIX_HALF) * (realWidth + OFFSET_PIX) + mapX + sb->X + OFFSET_PIX_HALF;
 
                                                 if (sb->Z >= allZ[block])
                                                 {
-                                                    ushort color = (ushort) (0x8000 | (sb->Hue != 0 ?
-                                                        HuesLoader.Instance.GetColor16(16384, sb->Hue) :
-                                                        HuesLoader.Instance.GetRadarColorData(sb->Color | 0x4000)));
-
+                                                    ushort color = (ushort) (0x8000 | (sb->Hue != 0 ? HuesLoader.Instance.GetColor16(16384, sb->Hue) : HuesLoader.Instance.GetRadarColorData(sb->Color + 0x4000)));
 
                                                     ref Color cc = ref buffer[block];
                                                     cc.PackedValue = HuesHelper.Color16To32(color) | 0xFF_00_00_00;
@@ -1044,11 +1108,9 @@ namespace ClassicUO.Game.UI.Gumps
 
                                 for (mapX = 1; mapX < real_width_less_one; ++mapX)
                                 {
-                                    int blockCurrent = (mapY + OFFSET_PIX_HALF) * (realWidth + OFFSET_PIX) + mapX +
-                                                       OFFSET_PIX_HALF;
+                                    int blockCurrent = (mapY + OFFSET_PIX_HALF) * (realWidth + OFFSET_PIX) + mapX + OFFSET_PIX_HALF;
 
-                                    int blockNext = (mapY_plus_one + OFFSET_PIX_HALF) * (realWidth + OFFSET_PIX) +
-                                                    (mapX - 1) + OFFSET_PIX_HALF;
+                                    int blockNext = (mapY_plus_one + OFFSET_PIX_HALF) * (realWidth + OFFSET_PIX) + (mapX - 1) + OFFSET_PIX_HALF;
 
                                     ref sbyte z0 = ref allZ[blockCurrent];
                                     ref sbyte z1 = ref allZ[blockNext];
@@ -1143,9 +1205,7 @@ namespace ClassicUO.Game.UI.Gumps
                         Directory.CreateDirectory(_mapIconsPath);
                     }
 
-                    foreach (string icon in Directory.GetFiles
-                                                         (_mapIconsPath, "*.cur")
-                                                     .Union(Directory.GetFiles(_mapIconsPath, "*.ico")))
+                    foreach (string icon in Directory.GetFiles(_mapIconsPath, "*.cur").Union(Directory.GetFiles(_mapIconsPath, "*.ico")))
                     {
                         FileStream fs = new FileStream(icon, FileMode.Open, FileAccess.Read);
                         MemoryStream ms = new MemoryStream();
@@ -1169,9 +1229,7 @@ namespace ClassicUO.Game.UI.Gumps
                         }
                     }
 
-                    foreach (string icon in Directory.GetFiles
-                                                         (_mapIconsPath, "*.png")
-                                                     .Union(Directory.GetFiles(_mapIconsPath, "*.jpg")))
+                    foreach (string icon in Directory.GetFiles(_mapIconsPath, "*.png").Union(Directory.GetFiles(_mapIconsPath, "*.jpg")))
                     {
                         FileStream fs = new FileStream(icon, FileMode.Open, FileAccess.Read);
                         MemoryStream ms = new MemoryStream();
@@ -1195,11 +1253,7 @@ namespace ClassicUO.Game.UI.Gumps
                         }
                     }
 
-                    string[] mapFiles = Directory.GetFiles
-                                                     (_mapFilesPath, "*.map")
-                                                 .Union(Directory.GetFiles(_mapFilesPath, "*.csv"))
-                                                 .Union(Directory.GetFiles(_mapFilesPath, "*.xml"))
-                                                 .ToArray();
+                    string[] mapFiles = Directory.GetFiles(_mapFilesPath, "*.map").Union(Directory.GetFiles(_mapFilesPath, "*.csv")).Union(Directory.GetFiles(_mapFilesPath, "*.xml")).ToArray();
 
                     _markerFiles.Clear();
 
@@ -1240,8 +1294,7 @@ namespace ClassicUO.Game.UI.Gumps
                                             ZoomIndex = 3
                                         };
 
-                                        if (_markerIcons.TryGetValue
-                                            (reader.GetAttribute("Icon").ToLower(), out Texture2D value))
+                                        if (_markerIcons.TryGetValue(reader.GetAttribute("Icon").ToLower(), out Texture2D value))
                                         {
                                             marker.MarkerIcon = value;
 
@@ -1409,11 +1462,26 @@ namespace ClassicUO.Game.UI.Gumps
             ResetHueVector();
 
 
-            batcher.Draw2D(SolidColorTextureCache.GetTexture(Color.Black), gX, gY, gWidth, gHeight, ref HueVector);
+            batcher.Draw2D
+            (
+                SolidColorTextureCache.GetTexture(Color.Black),
+                gX,
+                gY,
+                gWidth,
+                gHeight,
+                ref HueVector
+            );
 
             if (_mapTexture != null)
             {
-                Rectangle rect = ScissorStack.CalculateScissors(Matrix.Identity, gX, gY, gWidth, gHeight);
+                Rectangle rect = ScissorStack.CalculateScissors
+                (
+                    Matrix.Identity,
+                    gX,
+                    gY,
+                    gWidth,
+                    gHeight
+                );
 
                 if (ScissorStack.PushScissors(batcher.GraphicsDevice, rect))
                 {
@@ -1423,11 +1491,27 @@ namespace ClassicUO.Game.UI.Gumps
 
                     batcher.Draw2D
                     (
-                        _mapTexture, gX - offset + halfWidth, gY - offset + halfHeight, size, size, sx - size_zoom_half,
-                        sy - size_zoom_half, size_zoom, size_zoom, ref HueVector, _flipMap ? 45 : 0
+                        _mapTexture,
+                        gX - offset + halfWidth,
+                        gY - offset + halfHeight,
+                        size,
+                        size,
+                        sx - size_zoom_half,
+                        sy - size_zoom_half,
+                        size_zoom,
+                        size_zoom,
+                        ref HueVector,
+                        _flipMap ? 45 : 0
                     );
 
-                    DrawAll(batcher, gX, gY, halfWidth, halfHeight);
+                    DrawAll
+                    (
+                        batcher,
+                        gX,
+                        gY,
+                        halfWidth,
+                        halfHeight
+                    );
 
                     batcher.EnableScissorTest(false);
                     ScissorStack.PopScissors(batcher.GraphicsDevice);
@@ -1448,23 +1532,6 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void DrawAll(UltimaBatcher2D batcher, int gX, int gY, int halfWidth, int halfHeight)
         {
-            if (_showCoordinates)
-            {
-                if (World.Player.X != _lastX || World.Player.Y != _lastY || World.Player.Z != _lastZ ||
-                    _zoomIndex != _lastZoom)
-                {
-                    _coords.Text = $"{World.Player.X}, {World.Player.Y} ({World.Player.Z}) [{_zoomIndex}]";
-                    _lastX = World.Player.X;
-                    _lastY = World.Player.Y;
-                    _lastZ = World.Player.Z;
-                    _lastZoom = _zoomIndex;
-                }
-            }
-            else
-            {
-                _coords.Text = string.Empty;
-            }
-
             if (_showMarkers && _mapMarkersLoaded)
             {
                 foreach (WMapMarkerFile file in _markerFiles)
@@ -1476,9 +1543,32 @@ namespace ClassicUO.Game.UI.Gumps
 
                     foreach (WMapMarker marker in file.Markers)
                     {
-                        DrawMarker(batcher, marker, gX, gY, halfWidth, halfHeight, Zoom);
+                        DrawMarker
+                        (
+                            batcher,
+                            marker,
+                            gX,
+                            gY,
+                            halfWidth,
+                            halfHeight,
+                            Zoom
+                        );
                     }
                 }
+            }
+
+            if (_gotoMarker != null)
+            {
+                DrawMarker
+                (
+                    batcher,
+                    _gotoMarker,
+                    gX,
+                    gY,
+                    halfWidth,
+                    halfHeight,
+                    Zoom
+                );
             }
 
             if (_showMultis)
@@ -1489,7 +1579,18 @@ namespace ClassicUO.Game.UI.Gumps
 
                     if (item != null)
                     {
-                        DrawMulti(batcher, item.X, item.Y, gX, gY, halfWidth, halfHeight, Zoom);
+                        DrawMulti
+                        (
+                            batcher,
+                            house,
+                            item.X,
+                            item.Y,
+                            gX,
+                            gY,
+                            halfWidth,
+                            halfHeight,
+                            Zoom
+                        );
                     }
                 }
             }
@@ -1505,7 +1606,17 @@ namespace ClassicUO.Game.UI.Gumps
 
                     if (mob.NotorietyFlag != NotorietyFlag.Ally)
                     {
-                        DrawMobile(batcher, mob, gX, gY, halfWidth, halfHeight, Zoom, Color.Red);
+                        DrawMobile
+                        (
+                            batcher,
+                            mob,
+                            gX,
+                            gY,
+                            halfWidth,
+                            halfHeight,
+                            Zoom,
+                            Color.Red
+                        );
                     }
                     else
                     {
@@ -1524,7 +1635,16 @@ namespace ClassicUO.Game.UI.Gumps
                             {
                                 DrawMobile
                                 (
-                                    batcher, mob, gX, gY, halfWidth, halfHeight, Zoom, Color.Lime, true, true,
+                                    batcher,
+                                    mob,
+                                    gX,
+                                    gY,
+                                    halfWidth,
+                                    halfHeight,
+                                    Zoom,
+                                    Color.Lime,
+                                    true,
+                                    true,
                                     _showGroupBar
                                 );
                             }
@@ -1535,7 +1655,16 @@ namespace ClassicUO.Game.UI.Gumps
 
                             if (wme != null && wme.IsGuild)
                             {
-                                DrawWMEntity(batcher, wme, gX, gY, halfWidth, halfHeight, Zoom);
+                                DrawWMEntity
+                                (
+                                    batcher,
+                                    wme,
+                                    gX,
+                                    gY,
+                                    halfWidth,
+                                    halfHeight,
+                                    Zoom
+                                );
                             }
                         }
                     }
@@ -1546,7 +1675,16 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 if (wme.IsGuild && !World.Party.Contains(wme.Serial))
                 {
-                    DrawWMEntity(batcher, wme, gX, gY, halfWidth, halfHeight, Zoom);
+                    DrawWMEntity
+                    (
+                        batcher,
+                        wme,
+                        gX,
+                        gY,
+                        halfWidth,
+                        halfHeight,
+                        Zoom
+                    );
                 }
             }
 
@@ -1574,7 +1712,16 @@ namespace ClassicUO.Game.UI.Gumps
 
                             DrawMobile
                             (
-                                batcher, mob, gX, gY, halfWidth, halfHeight, Zoom, Color.Yellow, _showGroupName, true,
+                                batcher,
+                                mob,
+                                gX,
+                                gY,
+                                halfWidth,
+                                halfHeight,
+                                Zoom,
+                                Color.Yellow,
+                                _showGroupName,
+                                true,
                                 _showGroupBar
                             );
                         }
@@ -1584,7 +1731,16 @@ namespace ClassicUO.Game.UI.Gumps
 
                             if (wme != null && !wme.IsGuild)
                             {
-                                DrawWMEntity(batcher, wme, gX, gY, halfWidth, halfHeight, Zoom);
+                                DrawWMEntity
+                                (
+                                    batcher,
+                                    wme,
+                                    gX,
+                                    gY,
+                                    halfWidth,
+                                    halfHeight,
+                                    Zoom
+                                );
                             }
                         }
                     }
@@ -1593,9 +1749,46 @@ namespace ClassicUO.Game.UI.Gumps
 
             DrawMobile
             (
-                batcher, World.Player, gX, gY, halfWidth, halfHeight, Zoom, Color.White, _showPlayerName, false,
+                batcher,
+                World.Player,
+                gX,
+                gY,
+                halfWidth,
+                halfHeight,
+                Zoom,
+                Color.White,
+                _showPlayerName,
+                false,
                 _showPlayerBar
             );
+
+
+            if (_showCoordinates)
+            {
+                ResetHueVector();
+
+                HueVector.Y = 1;
+
+                batcher.DrawString
+                (
+                    Fonts.Bold,
+                    $"{World.Player.X}, {World.Player.Y} ({World.Player.Z}) [{_zoomIndex}]",
+                    gX + 6,
+                    gY + 6,
+                    ref HueVector
+                );
+
+                ResetHueVector();
+
+                batcher.DrawString
+                (
+                    Fonts.Bold,
+                    $"{World.Player.X}, {World.Player.Y} ({World.Player.Z}) [{_zoomIndex}]",
+                    gX + 5,
+                    gY + 5,
+                    ref HueVector
+                );
+            }
         }
 
         private void DrawMobile
@@ -1618,8 +1811,24 @@ namespace ClassicUO.Game.UI.Gumps
             int sx = mobile.X - _center.X;
             int sy = mobile.Y - _center.Y;
 
-            (int rotX, int rotY) = RotatePoint(sx, sy, zoom, 1, _flipMap ? 45f : 0f);
-            AdjustPosition(rotX, rotY, width - 4, height - 4, out rotX, out rotY);
+            (int rotX, int rotY) = RotatePoint
+            (
+                sx,
+                sy,
+                zoom,
+                1,
+                _flipMap ? 45f : 0f
+            );
+
+            AdjustPosition
+            (
+                rotX,
+                rotY,
+                width - 4,
+                height - 4,
+                out rotX,
+                out rotY
+            );
 
             rotX += x + width;
             rotY += y + height;
@@ -1649,7 +1858,11 @@ namespace ClassicUO.Game.UI.Gumps
 
             batcher.Draw2D
             (
-                SolidColorTextureCache.GetTexture(color), rotX - DOT_SIZE_HALF, rotY - DOT_SIZE_HALF, DOT_SIZE, DOT_SIZE,
+                SolidColorTextureCache.GetTexture(color),
+                rotX - DOT_SIZE_HALF,
+                rotY - DOT_SIZE_HALF,
+                DOT_SIZE,
+                DOT_SIZE,
                 ref HueVector
             );
 
@@ -1680,11 +1893,28 @@ namespace ClassicUO.Game.UI.Gumps
 
                 HueVector.X = 0;
                 HueVector.Y = 1;
-                batcher.DrawString(Fonts.Regular, mobile.Name, xx + 1, yy + 1, ref HueVector);
+
+                batcher.DrawString
+                (
+                    Fonts.Regular,
+                    mobile.Name,
+                    xx + 1,
+                    yy + 1,
+                    ref HueVector
+                );
+
                 ResetHueVector();
                 HueVector.X = isparty ? 0x0034 : Notoriety.GetHue(mobile.NotorietyFlag);
                 HueVector.Y = 1;
-                batcher.DrawString(Fonts.Regular, mobile.Name, xx, yy, ref HueVector);
+
+                batcher.DrawString
+                (
+                    Fonts.Regular,
+                    mobile.Name,
+                    xx,
+                    yy,
+                    ref HueVector
+                );
             }
 
             if (drawHpBar)
@@ -1737,7 +1967,14 @@ namespace ClassicUO.Game.UI.Gumps
             int sx = marker.X - _center.X;
             int sy = marker.Y - _center.Y;
 
-            (int rotX, int rotY) = RotatePoint(sx, sy, zoom, 1, _flipMap ? 45f : 0f);
+            (int rotX, int rotY) = RotatePoint
+            (
+                sx,
+                sy,
+                zoom,
+                1,
+                _flipMap ? 45f : 0f
+            );
 
             rotX += x + width;
             rotY += y + height;
@@ -1756,30 +1993,26 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 batcher.Draw2D
                 (
-                    SolidColorTextureCache.GetTexture(marker.Color), rotX - DOT_SIZE_HALF, rotY - DOT_SIZE_HALF, DOT_SIZE,
-                    DOT_SIZE, ref HueVector
+                    SolidColorTextureCache.GetTexture(marker.Color),
+                    rotX - DOT_SIZE_HALF,
+                    rotY - DOT_SIZE_HALF,
+                    DOT_SIZE,
+                    DOT_SIZE,
+                    ref HueVector
                 );
 
-                if (Mouse.Position.X >= rotX - DOT_SIZE && Mouse.Position.X <= rotX + DOT_SIZE_HALF &&
-                    Mouse.Position.Y >= rotY - DOT_SIZE && Mouse.Position.Y <= rotY + DOT_SIZE_HALF)
+                if (Mouse.Position.X >= rotX - DOT_SIZE && Mouse.Position.X <= rotX + DOT_SIZE_HALF && Mouse.Position.Y >= rotY - DOT_SIZE && Mouse.Position.Y <= rotY + DOT_SIZE_HALF)
                 {
                     showMarkerName = true;
                 }
             }
             else
             {
-                batcher.Draw2D
-                (
-                    marker.MarkerIcon, rotX - (marker.MarkerIcon.Width >> 1), rotY - (marker.MarkerIcon.Height >> 1),
-                    ref HueVector
-                );
+                batcher.Draw2D(marker.MarkerIcon, rotX - (marker.MarkerIcon.Width >> 1), rotY - (marker.MarkerIcon.Height >> 1), ref HueVector);
 
                 if (!showMarkerName)
                 {
-                    if (Mouse.Position.X >= rotX - (marker.MarkerIcon.Width >> 1) &&
-                        Mouse.Position.X <= rotX + (marker.MarkerIcon.Width >> 1) &&
-                        Mouse.Position.Y >= rotY - (marker.MarkerIcon.Height >> 1) &&
-                        Mouse.Position.Y <= rotY + (marker.MarkerIcon.Height >> 1))
+                    if (Mouse.Position.X >= rotX - (marker.MarkerIcon.Width >> 1) && Mouse.Position.X <= rotX + (marker.MarkerIcon.Width >> 1) && Mouse.Position.Y >= rotY - (marker.MarkerIcon.Height >> 1) && Mouse.Position.Y <= rotY + (marker.MarkerIcon.Height >> 1))
                     {
                         showMarkerName = true;
                     }
@@ -1813,15 +2046,33 @@ namespace ClassicUO.Game.UI.Gumps
 
                 HueVector.X = 0;
                 HueVector.Y = 1;
-                batcher.DrawString(_markerFont, marker.Name, xx + 1, yy + 1, ref HueVector);
+
+                batcher.DrawString
+                (
+                    _markerFont,
+                    marker.Name,
+                    xx + 1,
+                    yy + 1,
+                    ref HueVector
+                );
+
                 ResetHueVector();
-                batcher.DrawString(_markerFont, marker.Name, xx, yy, ref HueVector);
+
+                batcher.DrawString
+                (
+                    _markerFont,
+                    marker.Name,
+                    xx,
+                    yy,
+                    ref HueVector
+                );
             }
         }
 
         private void DrawMulti
         (
             UltimaBatcher2D batcher,
+            House house,
             int multiX,
             int multiY,
             int x,
@@ -1836,7 +2087,14 @@ namespace ClassicUO.Game.UI.Gumps
             int sx = multiX - _center.X;
             int sy = multiY - _center.Y;
 
-            (int rotX, int rotY) = RotatePoint(sx, sy, zoom, 1, _flipMap ? 45f : 0f);
+            (int rotX, int rotY) = RotatePoint
+            (
+                sx,
+                sy,
+                zoom,
+                1,
+                _flipMap ? 45f : 0f
+            );
 
             rotX += x + width;
             rotY += y + height;
@@ -1851,9 +2109,37 @@ namespace ClassicUO.Game.UI.Gumps
 
             batcher.Draw2D
             (
-                SolidColorTextureCache.GetTexture(Color.Aquamarine), rotX - DOT_SIZE_HALF, rotY - DOT_SIZE_HALF, DOT_SIZE,
-                DOT_SIZE, ref HueVector
+                SolidColorTextureCache.GetTexture(Color.Aquamarine),
+                rotX - DOT_SIZE_HALF,
+                rotY - DOT_SIZE_HALF,
+                DOT_SIZE,
+                DOT_SIZE,
+                ref HueVector
             );
+
+
+            /*ResetHueVector();
+
+            foreach (Multi component in house.Components)
+            {
+                sx = component.X - _center.X;
+                sy = component.Y - _center.Y;
+
+                (rotX, rotY) = RotatePoint(sx, sy, zoom, 1, _flipMap ? 45f : 0f);
+
+                rotX += x + width;
+                rotY += y + height;
+
+                batcher.Draw2D
+                (
+                    SolidColorTextureCache.GetTexture(Color.Aquamarine),
+                    rotX - DOT_SIZE_HALF,
+                    rotY - DOT_SIZE_HALF, 
+                    WWW,
+                    HHH, 
+                    ref HueVector
+                );
+            }*/
         }
 
         private void DrawWMEntity
@@ -1892,8 +2178,24 @@ namespace ClassicUO.Game.UI.Gumps
             int sx = entity.X - _center.X;
             int sy = entity.Y - _center.Y;
 
-            (int rotX, int rotY) = RotatePoint(sx, sy, zoom, 1, _flipMap ? 45f : 0f);
-            AdjustPosition(rotX, rotY, width - 4, height - 4, out rotX, out rotY);
+            (int rotX, int rotY) = RotatePoint
+            (
+                sx,
+                sy,
+                zoom,
+                1,
+                _flipMap ? 45f : 0f
+            );
+
+            AdjustPosition
+            (
+                rotX,
+                rotY,
+                width - 4,
+                height - 4,
+                out rotX,
+                out rotY
+            );
 
             rotX += x + width;
             rotY += y + height;
@@ -1923,7 +2225,11 @@ namespace ClassicUO.Game.UI.Gumps
 
             batcher.Draw2D
             (
-                SolidColorTextureCache.GetTexture(color), rotX - DOT_SIZE_HALF, rotY - DOT_SIZE_HALF, DOT_SIZE, DOT_SIZE,
+                SolidColorTextureCache.GetTexture(color),
+                rotX - DOT_SIZE_HALF,
+                rotY - DOT_SIZE_HALF,
+                DOT_SIZE,
+                DOT_SIZE,
                 ref HueVector
             );
 
@@ -1955,11 +2261,28 @@ namespace ClassicUO.Game.UI.Gumps
 
                 HueVector.X = 0;
                 HueVector.Y = 1;
-                batcher.DrawString(Fonts.Regular, name, xx + 1, yy + 1, ref HueVector);
+
+                batcher.DrawString
+                (
+                    Fonts.Regular,
+                    name,
+                    xx + 1,
+                    yy + 1,
+                    ref HueVector
+                );
+
                 ResetHueVector();
                 HueVector.X = uohue;
                 HueVector.Y = 1;
-                batcher.DrawString(Fonts.Regular, name, xx, yy, ref HueVector);
+
+                batcher.DrawString
+                (
+                    Fonts.Regular,
+                    name,
+                    xx,
+                    yy,
+                    ref HueVector
+                );
             }
 
             if (_showGroupBar)
@@ -1982,14 +2305,22 @@ namespace ClassicUO.Game.UI.Gumps
 
             batcher.Draw2D
             (
-                SolidColorTextureCache.GetTexture(Color.Black), x - BAR_MAX_WIDTH_HALF - 1, y - BAR_MAX_HEIGHT_HALF - 1,
-                BAR_MAX_WIDTH + 2, BAR_MAX_HEIGHT + 2, ref HueVector
+                SolidColorTextureCache.GetTexture(Color.Black),
+                x - BAR_MAX_WIDTH_HALF - 1,
+                y - BAR_MAX_HEIGHT_HALF - 1,
+                BAR_MAX_WIDTH + 2,
+                BAR_MAX_HEIGHT + 2,
+                ref HueVector
             );
 
             batcher.Draw2D
             (
-                SolidColorTextureCache.GetTexture(Color.Red), x - BAR_MAX_WIDTH_HALF, y - BAR_MAX_HEIGHT_HALF, BAR_MAX_WIDTH,
-                BAR_MAX_HEIGHT, ref HueVector
+                SolidColorTextureCache.GetTexture(Color.Red),
+                x - BAR_MAX_WIDTH_HALF,
+                y - BAR_MAX_HEIGHT_HALF,
+                BAR_MAX_WIDTH,
+                BAR_MAX_HEIGHT,
+                ref HueVector
             );
 
             int max = 100;
@@ -2012,8 +2343,12 @@ namespace ClassicUO.Game.UI.Gumps
 
             batcher.Draw2D
             (
-                SolidColorTextureCache.GetTexture(Color.CornflowerBlue), x - BAR_MAX_WIDTH_HALF, y - BAR_MAX_HEIGHT_HALF, max,
-                BAR_MAX_HEIGHT, ref HueVector
+                SolidColorTextureCache.GetTexture(Color.CornflowerBlue),
+                x - BAR_MAX_WIDTH_HALF,
+                y - BAR_MAX_HEIGHT_HALF,
+                max,
+                BAR_MAX_HEIGHT,
+                ref HueVector
             );
         }
 
@@ -2063,15 +2398,21 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override void OnMouseOver(int x, int y)
         {
-            Point offset = Mouse.LButtonPressed ? Mouse.LDragOffset :
-                Mouse.MButtonPressed ? Mouse.MDragOffset : Point.Zero;
+            Point offset = Mouse.LButtonPressed ? Mouse.LDragOffset : Mouse.MButtonPressed ? Mouse.MDragOffset : Point.Zero;
 
             if (_isScrolling && offset != Point.Zero)
             {
                 int scrollX = _lastScroll.X - x;
                 int scrollY = _lastScroll.Y - y;
 
-                (scrollX, scrollY) = RotatePoint(scrollX, scrollY, 1f, -1, _flipMap ? 45f : 0f);
+                (scrollX, scrollY) = RotatePoint
+                (
+                    scrollX,
+                    scrollY,
+                    1f,
+                    -1,
+                    _flipMap ? 45f : 0f
+                );
 
                 _center.X += (int) (scrollX / Zoom);
                 _center.Y += (int) (scrollY / Zoom);
@@ -2150,5 +2491,70 @@ namespace ClassicUO.Game.UI.Gumps
         }
 
         #endregion
+
+        #region Helpers
+
+        /// <summary>
+        /// Converts latitudes and longitudes to X and Y locations based on Lord British's throne is located at 1323.1624 or 0° 0'N 0° 0'E
+        /// </summary>
+        /// <param name="coords"></param>
+        /// <param name="xAxis"></param>
+        /// <param name="yAxis"></param>
+        private static void ConvertCoords(string coords, ref int xAxis, ref int yAxis)
+        {
+            string[] coordsSplit = coords.Split(',');
+
+            string yCoord = coordsSplit[0];
+            string xCoord = coordsSplit[1];
+
+            // Calc Y first
+            string[] ySplit = yCoord.Split('°', 'o');
+            double yDegree = Convert.ToDouble(ySplit[0]);
+            double yMinute = Convert.ToDouble(ySplit[1].Substring(0, ySplit[1].IndexOf("'", StringComparison.Ordinal)));
+
+            if (yCoord.Substring(yCoord.Length - 1).Equals("N"))
+            {
+                yAxis = (int) (1624 - (yMinute / 60) * (4096.0 / 360) - yDegree * (4096.0 / 360));
+            }
+            else
+            {
+                yAxis = (int) (1624 + (yMinute / 60) * (4096.0 / 360) + yDegree * (4096.0 / 360));
+            }
+
+            // Calc X next
+            string[] xSplit = xCoord.Split('°', 'o');
+            double xDegree = Convert.ToDouble(xSplit[0]);
+            double xMinute = Convert.ToDouble(xSplit[1].Substring(0, xSplit[1].IndexOf("'", StringComparison.Ordinal)));
+
+            if (xCoord.Substring(xCoord.Length - 1).Equals("W"))
+            {
+                xAxis = (int) (1323 - (xMinute / 60) * (5120.0 / 360) - xDegree * (5120.0 / 360));
+            }
+            else
+            {
+                xAxis = (int) (1323 + (xMinute / 60) * (5120.0 / 360) + xDegree * (5120.0 / 360));
+            }
+
+            // Normalize values outside of map range.
+            if (xAxis < 0)
+            {
+                xAxis += 5120;
+            }
+            else if (xAxis > 5120)
+            {
+                xAxis -= 5120;
+            }
+
+            if (yAxis < 0)
+            {
+                yAxis += 4096;
+            }
+            else if (yAxis > 4096)
+            {
+                yAxis -= 4096;
+            }
+        }
     }
+
+    #endregion
 }

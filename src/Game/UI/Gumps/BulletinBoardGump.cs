@@ -1,23 +1,32 @@
 ﻿#region license
 
-// Copyright (C) 2020 ClassicUO Development Community on Github
+// Copyright (c) 2021, andreakarasho
+// All rights reserved.
 // 
-// This project is an alternative client for the game Ultima Online.
-// The goal of this is to develop a lightweight client considering
-// new technologies.
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+// 1. Redistributions of source code must retain the above copyright
+//    notice, this list of conditions and the following disclaimer.
+// 2. Redistributions in binary form must reproduce the above copyright
+//    notice, this list of conditions and the following disclaimer in the
+//    documentation and/or other materials provided with the distribution.
+// 3. All advertising materials mentioning features or use of this software
+//    must display the following acknowledgement:
+//    This product includes software developed by andreakarasho - https://github.com/andreakarasho
+// 4. Neither the name of the copyright holder nor the
+//    names of its contributors may be used to endorse or promote products
+//    derived from this software without specific prior written permission.
 // 
-//  This program is free software: you can redistribute it and/or modify
-//  it under the terms of the GNU General Public License as published by
-//  the Free Software Foundation, either version 3 of the License, or
-//  (at your option) any later version.
-// 
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-// 
-//  You should have received a copy of the GNU General Public License
-//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ''AS IS'' AND ANY
+// EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+// WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+// DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY
+// DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+// (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+// LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+// ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+// SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #endregion
 
@@ -47,7 +56,15 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add(new GumpPic(0, 0, 0x087A, 0));
 
-            Label label = new Label(name, true, 1, 170, 1, align: TEXT_ALIGN_TYPE.TS_CENTER)
+            Label label = new Label
+            (
+                name,
+                true,
+                1,
+                170,
+                1,
+                align: TEXT_ALIGN_TYPE.TS_CENTER
+            )
             {
                 X = 159,
                 Y = 36
@@ -67,14 +84,29 @@ namespace ClassicUO.Game.UI.Gumps
                 UIManager.Add
                 (
                     new BulletinBoardItem
-                        (LocalSerial, 0, World.Player.Name, string.Empty, ResGumps.DateTime, string.Empty, 0)
-                        { X = 400, Y = 335 }
+                    (
+                        LocalSerial,
+                        0,
+                        World.Player.Name,
+                        string.Empty,
+                        ResGumps.DateTime,
+                        string.Empty,
+                        0
+                    ) { X = 400, Y = 335 }
                 );
             };
 
             Add(hitbox);
 
-            ScrollArea area = new ScrollArea(127, 159, 241, 195, false);
+            ScrollArea area = new ScrollArea
+            (
+                127,
+                159,
+                241,
+                195,
+                false
+            );
+
             Add(area);
 
             _databox = new DataBox(0, 0, 1, 1);
@@ -89,7 +121,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override void Dispose()
         {
-            for (LinkedListNode<Control> g = UIManager.Gumps.Last; g != null; g = g.Previous)
+            for (LinkedListNode<Gump> g = UIManager.Gumps.Last; g != null; g = g.Previous)
             {
                 if (g.Value is BulletinBoardItem)
                 {
@@ -173,7 +205,15 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add(_articleContainer);
 
-            ScrollArea area = new ScrollArea(0, 120, 272, 224, false);
+            ScrollArea area = new ScrollArea
+            (
+                0,
+                120,
+                272,
+                224,
+                false
+            );
+
             Add(area);
 
             _databox = new DataBox(0, 0, 1, 1);
@@ -191,12 +231,11 @@ namespace ClassicUO.Game.UI.Gumps
                 textColor = 0;
             }
 
-            Label text = new Label
-                (ResGumps.Author, useUnicode, textColor, font: useUnicode ? unicodeFontIndex : (byte) 6)
-                {
-                    X = 30,
-                    Y = 40
-                };
+            Label text = new Label(ResGumps.Author, useUnicode, textColor, font: useUnicode ? unicodeFontIndex : (byte) 6)
+            {
+                X = 30,
+                Y = 40
+            };
 
             Add(text);
 
@@ -242,32 +281,47 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add
             (
-                _subjectTextbox = new StbTextBox
-                    (useUnicode ? unicodeFontIndex : (byte) 9, maxWidth: 150, isunicode: useUnicode, hue: subjectColor)
-                    {
-                        X = 30 + text.Width,
-                        Y = 83 + unicodeFontHeightOffset,
-                        Width = 150,
-                        IsEditable = variant == 0
-                    }
+                _subjectTextbox = new StbTextBox(useUnicode ? unicodeFontIndex : (byte) 9, maxWidth: 150, isunicode: useUnicode, hue: subjectColor)
+                {
+                    X = 30 + text.Width,
+                    Y = 83 + unicodeFontHeightOffset,
+                    Width = 150,
+                    IsEditable = variant == 0
+                }
             );
 
             _subjectTextbox.SetText(subject);
 
-            Add(new GumpPicTiled(30, 106, 235, 4, 0x0835));
+            Add
+            (
+                new GumpPicTiled
+                (
+                    30,
+                    106,
+                    235,
+                    4,
+                    0x0835
+                )
+            );
 
             _databox.Add
             (
                 _textBox = new StbTextBox
-                    (useUnicode ? unicodeFontIndex : (byte) 9, -1, 220, hue: textColor, isunicode: useUnicode)
-                    {
-                        X = 40,
-                        Y = 0,
-                        Width = 220,
-                        Height = 300,
-                        IsEditable = variant == 0,
-                        Multiline = true
-                    }
+                (
+                    useUnicode ? unicodeFontIndex : (byte) 9,
+                    -1,
+                    220,
+                    hue: textColor,
+                    isunicode: useUnicode
+                )
+                {
+                    X = 40,
+                    Y = 0,
+                    Width = 220,
+                    Height = 300,
+                    IsEditable = variant == 0,
+                    Multiline = true
+                }
             );
 
             _textBox.SetText(data);
@@ -329,7 +383,17 @@ namespace ClassicUO.Game.UI.Gumps
         private void _textBox_TextChanged(object sender, EventArgs e)
         {
             _textBox.Height = Math.Max
-                (FontsLoader.Instance.GetHeightUnicode(1, _textBox.Text, 220, TEXT_ALIGN_TYPE.TS_LEFT, 0x0) + 5, 20);
+            (
+                FontsLoader.Instance.GetHeightUnicode
+                (
+                    1,
+                    _textBox.Text,
+                    220,
+                    TEXT_ALIGN_TYPE.TS_LEFT,
+                    0x0
+                ) + 5,
+                20
+            );
 
             foreach (Control c in _databox.Children)
             {
@@ -383,8 +447,7 @@ namespace ClassicUO.Game.UI.Gumps
             switch ((ButtonType) buttonID)
             {
                 case ButtonType.Post:
-                    NetClient.Socket.Send
-                        (new PBulletinBoardPostMessage(LocalSerial, _msgSerial, _subjectTextbox.Text, _textBox.Text));
+                    NetClient.Socket.Send(new PBulletinBoardPostMessage(LocalSerial, _msgSerial, _subjectTextbox.Text, _textBox.Text));
 
                     Dispose();
 
@@ -395,8 +458,13 @@ namespace ClassicUO.Game.UI.Gumps
                     (
                         new BulletinBoardItem
                         (
-                            LocalSerial, _msgSerial, World.Player.Name, ResGumps.RE + _subjectTextbox.Text, _datatime,
-                            string.Empty, 0
+                            LocalSerial,
+                            _msgSerial,
+                            World.Player.Name,
+                            ResGumps.RE + _subjectTextbox.Text,
+                            _datatime,
+                            string.Empty,
+                            0
                         ) { X = 400, Y = 335 }
                     );
 
@@ -456,7 +524,15 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 Add
                 (
-                    new Label(text, true, 0, Width - 23, 1, FontStyle.Fixed)
+                    new Label
+                    (
+                        text,
+                        true,
+                        0,
+                        Width - 23,
+                        1,
+                        FontStyle.Fixed
+                    )
                     {
                         X = 23, Y = 1
                     }
@@ -466,7 +542,15 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 Add
                 (
-                    new Label(text, false, 0x0386, Width - 23, 9, FontStyle.Fixed)
+                    new Label
+                    (
+                        text,
+                        false,
+                        0x0386,
+                        Width - 23,
+                        9,
+                        FontStyle.Fixed
+                    )
                     {
                         X = 23,
                         Y = 1

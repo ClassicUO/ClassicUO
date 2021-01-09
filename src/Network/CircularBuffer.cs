@@ -1,27 +1,37 @@
 ﻿#region license
 
-// Copyright (C) 2020 ClassicUO Development Community on Github
+// Copyright (c) 2021, andreakarasho
+// All rights reserved.
 // 
-// This project is an alternative client for the game Ultima Online.
-// The goal of this is to develop a lightweight client considering
-// new technologies.
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+// 1. Redistributions of source code must retain the above copyright
+//    notice, this list of conditions and the following disclaimer.
+// 2. Redistributions in binary form must reproduce the above copyright
+//    notice, this list of conditions and the following disclaimer in the
+//    documentation and/or other materials provided with the distribution.
+// 3. All advertising materials mentioning features or use of this software
+//    must display the following acknowledgement:
+//    This product includes software developed by andreakarasho - https://github.com/andreakarasho
+// 4. Neither the name of the copyright holder nor the
+//    names of its contributors may be used to endorse or promote products
+//    derived from this software without specific prior written permission.
 // 
-//  This program is free software: you can redistribute it and/or modify
-//  it under the terms of the GNU General Public License as published by
-//  the Free Software Foundation, either version 3 of the License, or
-//  (at your option) any later version.
-// 
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-// 
-//  You should have received a copy of the GNU General Public License
-//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ''AS IS'' AND ANY
+// EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+// WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+// DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY
+// DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+// (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+// LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+// ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+// SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #endregion
 
 using System;
+using System.Runtime.CompilerServices;
 
 namespace ClassicUO.Network
 {
@@ -65,12 +75,34 @@ namespace ClassicUO.Network
             {
                 if (_head < _tail)
                 {
-                    Buffer.BlockCopy(_buffer, _head, newBuffer, 0, Length);
+                    Buffer.BlockCopy
+                    (
+                        _buffer,
+                        _head,
+                        newBuffer,
+                        0,
+                        Length
+                    );
                 }
                 else
                 {
-                    Buffer.BlockCopy(_buffer, _head, newBuffer, 0, _buffer.Length - _head);
-                    Buffer.BlockCopy(_buffer, 0, newBuffer, _buffer.Length - _head, _tail);
+                    Buffer.BlockCopy
+                    (
+                        _buffer,
+                        _head,
+                        newBuffer,
+                        0,
+                        _buffer.Length - _head
+                    );
+
+                    Buffer.BlockCopy
+                    (
+                        _buffer,
+                        0,
+                        newBuffer,
+                        _buffer.Length - _head,
+                        _tail
+                    );
                 }
             }
 
@@ -98,17 +130,46 @@ namespace ClassicUO.Network
 
                 if (rightLength >= size)
                 {
-                    Buffer.BlockCopy(buffer, offset, _buffer, _tail, size);
+                    Buffer.BlockCopy
+                    (
+                        buffer,
+                        offset,
+                        _buffer,
+                        _tail,
+                        size
+                    );
                 }
                 else
                 {
-                    Buffer.BlockCopy(buffer, offset, _buffer, _tail, rightLength);
-                    Buffer.BlockCopy(buffer, offset + rightLength, _buffer, 0, size - rightLength);
+                    Buffer.BlockCopy
+                    (
+                        buffer,
+                        offset,
+                        _buffer,
+                        _tail,
+                        rightLength
+                    );
+
+                    Buffer.BlockCopy
+                    (
+                        buffer,
+                        offset + rightLength,
+                        _buffer,
+                        0,
+                        size - rightLength
+                    );
                 }
             }
             else
             {
-                Buffer.BlockCopy(buffer, offset, _buffer, _tail, size);
+                Buffer.BlockCopy
+                (
+                    buffer,
+                    offset,
+                    _buffer,
+                    _tail,
+                    size
+                );
             }
 
             _tail = (_tail + size) % _buffer.Length;
@@ -136,7 +197,14 @@ namespace ClassicUO.Network
 
             if (_head < _tail)
             {
-                Buffer.BlockCopy(_buffer, _head, buffer, offset, size);
+                Buffer.BlockCopy
+                (
+                    _buffer,
+                    _head,
+                    buffer,
+                    offset,
+                    size
+                );
             }
             else
             {
@@ -144,12 +212,34 @@ namespace ClassicUO.Network
 
                 if (rightLength >= size)
                 {
-                    Buffer.BlockCopy(_buffer, _head, buffer, offset, size);
+                    Buffer.BlockCopy
+                    (
+                        _buffer,
+                        _head,
+                        buffer,
+                        offset,
+                        size
+                    );
                 }
                 else
                 {
-                    Buffer.BlockCopy(_buffer, _head, buffer, offset, rightLength);
-                    Buffer.BlockCopy(_buffer, 0, buffer, offset + rightLength, size - rightLength);
+                    Buffer.BlockCopy
+                    (
+                        _buffer,
+                        _head,
+                        buffer,
+                        offset,
+                        rightLength
+                    );
+
+                    Buffer.BlockCopy
+                    (
+                        _buffer,
+                        0,
+                        buffer,
+                        offset + rightLength,
+                        size - rightLength
+                    );
                 }
             }
 
@@ -165,6 +255,7 @@ namespace ClassicUO.Network
             return size;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public byte GetID()
         {
             if (Length >= 1)
@@ -175,6 +266,7 @@ namespace ClassicUO.Network
             return 0xFF;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public int GetLength()
         {
             if (Length >= 3)
@@ -182,7 +274,6 @@ namespace ClassicUO.Network
                 return _buffer[(_head + 2) % _buffer.Length] | (_buffer[(_head + 1) % _buffer.Length] << 8);
             }
 
-            // return (_buffer[(_head + 1) % _buffer.Length] << 8) | _buffer[(_head + 2) % _buffer.Length];
             return 0;
         }
     }

@@ -1,23 +1,32 @@
 ﻿#region license
 
-// Copyright (C) 2020 ClassicUO Development Community on Github
+// Copyright (c) 2021, andreakarasho
+// All rights reserved.
 // 
-// This project is an alternative client for the game Ultima Online.
-// The goal of this is to develop a lightweight client considering
-// new technologies.
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+// 1. Redistributions of source code must retain the above copyright
+//    notice, this list of conditions and the following disclaimer.
+// 2. Redistributions in binary form must reproduce the above copyright
+//    notice, this list of conditions and the following disclaimer in the
+//    documentation and/or other materials provided with the distribution.
+// 3. All advertising materials mentioning features or use of this software
+//    must display the following acknowledgement:
+//    This product includes software developed by andreakarasho - https://github.com/andreakarasho
+// 4. Neither the name of the copyright holder nor the
+//    names of its contributors may be used to endorse or promote products
+//    derived from this software without specific prior written permission.
 // 
-//  This program is free software: you can redistribute it and/or modify
-//  it under the terms of the GNU General Public License as published by
-//  the Free Software Foundation, either version 3 of the License, or
-//  (at your option) any later version.
-// 
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-// 
-//  You should have received a copy of the GNU General Public License
-//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ''AS IS'' AND ANY
+// EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+// WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+// DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY
+// DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+// (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+// LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+// ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+// SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #endregion
 
@@ -163,7 +172,15 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
                 Add
                 (
-                    _checkboxAutologin = new Checkbox(0x00D2, 0x00D3, ResGumps.Autologin, 1, 0x0386, false)
+                    _checkboxAutologin = new Checkbox
+                    (
+                        0x00D2,
+                        0x00D3,
+                        ResGumps.Autologin,
+                        1,
+                        0x0386,
+                        false
+                    )
                     {
                         X = 150,
                         Y = 417
@@ -172,7 +189,15 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
                 Add
                 (
-                    _checkboxSaveAccount = new Checkbox(0x00D2, 0x00D3, ResGumps.SaveAccount, 1, 0x0386, false)
+                    _checkboxSaveAccount = new Checkbox
+                    (
+                        0x00D2,
+                        0x00D3,
+                        ResGumps.SaveAccount,
+                        1,
+                        0x0386,
+                        false
+                    )
                     {
                         X = _checkboxAutologin.X + _checkboxAutologin.Width + 10,
                         Y = 417
@@ -237,7 +262,15 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
                 Add
                 (
-                    _checkboxAutologin = new Checkbox(0x00D2, 0x00D3, ResGumps.Autologin, 9, 0x0481, false)
+                    _checkboxAutologin = new Checkbox
+                    (
+                        0x00D2,
+                        0x00D3,
+                        ResGumps.Autologin,
+                        9,
+                        0x0481,
+                        false
+                    )
                     {
                         X = 150,
                         Y = 417
@@ -246,7 +279,15 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
                 Add
                 (
-                    _checkboxSaveAccount = new Checkbox(0x00D2, 0x00D3, ResGumps.SaveAccount, 9, 0x0481, false)
+                    _checkboxSaveAccount = new Checkbox
+                    (
+                        0x00D2,
+                        0x00D3,
+                        ResGumps.SaveAccount,
+                        9,
+                        0x0481,
+                        false
+                    )
                     {
                         X = _checkboxAutologin.X + _checkboxAutologin.Width + 10,
                         Y = 417
@@ -287,7 +328,14 @@ namespace ClassicUO.Game.UI.Gumps.Login
             // Text Inputs
             Add
             (
-                _textboxAccount = new StbTextBox(5, 16, 190, false, hue: 0x034F)
+                _textboxAccount = new StbTextBox
+                (
+                    5,
+                    16,
+                    190,
+                    false,
+                    hue: 0x034F
+                )
                 {
                     X = offsetX,
                     Y = offsetY,
@@ -300,7 +348,14 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
             Add
             (
-                _passwordFake = new PasswordStbTextBox(5, 16, 190, false, hue: 0x034F)
+                _passwordFake = new PasswordStbTextBox
+                (
+                    5,
+                    16,
+                    190,
+                    false,
+                    hue: 0x034F
+                )
                 {
                     X = offsetX,
                     Y = offsetY + offtextY + 2,
@@ -324,9 +379,18 @@ namespace ClassicUO.Game.UI.Gumps.Login
             (
                 new HtmlControl
                 (
-                    htmlX, htmlY, 150, 15, false, false, false,
+                    htmlX,
+                    htmlY,
+                    150,
+                    15,
+                    false,
+                    false,
+                    false,
                     "<body link=\"#ad9413\" vlink=\"#00FF00\" ><a href=\"https://www.paypal.me/muskara\">Click to donate PayPal",
-                    0x32, true, isunicode: true, style: FontStyle.BlackBorder
+                    0x32,
+                    true,
+                    isunicode: true,
+                    style: FontStyle.BlackBorder
                 )
             );
 
@@ -334,9 +398,18 @@ namespace ClassicUO.Game.UI.Gumps.Login
             (
                 new HtmlControl
                 (
-                    htmlX, htmlY + 20, 150, 15, false, false, false,
+                    htmlX,
+                    htmlY + 20,
+                    150,
+                    15,
+                    false,
+                    false,
+                    false,
                     "<body link=\"#ad9413\" vlink=\"#00FF00\" ><a href=\"https://www.patreon.com/classicuo\">Become a Patreon!",
-                    0x32, true, isunicode: true, style: FontStyle.BlackBorder
+                    0x32,
+                    true,
+                    isunicode: true,
+                    style: FontStyle.BlackBorder
                 )
             );
 
@@ -345,9 +418,18 @@ namespace ClassicUO.Game.UI.Gumps.Login
             (
                 new HtmlControl
                 (
-                    505, htmlY, 100, 15, false, false, false,
-                    "<body link=\"#ad9413\" vlink=\"#00FF00\" ><a href=\"https://www.classicuo.eu\">Website", 0x32,
-                    true, isunicode: true, style: FontStyle.BlackBorder
+                    505,
+                    htmlY,
+                    100,
+                    15,
+                    false,
+                    false,
+                    false,
+                    "<body link=\"#ad9413\" vlink=\"#00FF00\" ><a href=\"https://www.classicuo.eu\">Website",
+                    0x32,
+                    true,
+                    isunicode: true,
+                    style: FontStyle.BlackBorder
                 )
             );
 
@@ -355,14 +437,31 @@ namespace ClassicUO.Game.UI.Gumps.Login
             (
                 new HtmlControl
                 (
-                    505, htmlY + 19, 100, 15, false, false, false,
+                    505,
+                    htmlY + 19,
+                    100,
+                    15,
+                    false,
+                    false,
+                    false,
                     "<body link=\"#ad9413\" vlink=\"#00FF00\" ><a href=\"https://discord.gg/VdyCpjQ\">Join Discord",
-                    0x32, true, isunicode: true, style: FontStyle.BlackBorder
+                    0x32,
+                    true,
+                    isunicode: true,
+                    style: FontStyle.BlackBorder
                 )
             );
 
 
-            Checkbox loginmusic_checkbox = new Checkbox(0x00D2, 0x00D3, "Music", font, hue, false)
+            Checkbox loginmusic_checkbox = new Checkbox
+            (
+                0x00D2,
+                0x00D3,
+                "Music",
+                font,
+                hue,
+                false
+            )
             {
                 X = _checkboxSaveAccount.X + _checkboxSaveAccount.Width + 10,
                 Y = 417,
@@ -373,8 +472,17 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
             HSliderBar login_music = new HSliderBar
             (
-                loginmusic_checkbox.X + loginmusic_checkbox.Width + 10, loginmusic_checkbox.Y + 4, 80, 0, 100,
-                Settings.GlobalSettings.LoginMusicVolume, HSliderBarStyle.MetalWidgetRecessedBar, true, font, hue, false
+                loginmusic_checkbox.X + loginmusic_checkbox.Width + 10,
+                loginmusic_checkbox.Y + 4,
+                80,
+                0,
+                100,
+                Settings.GlobalSettings.LoginMusicVolume,
+                HSliderBarStyle.MetalWidgetRecessedBar,
+                true,
+                font,
+                hue,
+                false
             );
 
             Add(login_music);
@@ -435,8 +543,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
             {
                 _time = (float) totalTime + 1000;
 
-                _nextArrow0.ButtonGraphicNormal =
-                    _nextArrow0.ButtonGraphicNormal == _buttonNormal ? _buttonOver : _buttonNormal;
+                _nextArrow0.ButtonGraphicNormal = _nextArrow0.ButtonGraphicNormal == _buttonNormal ? _buttonOver : _buttonNormal;
             }
 
             if (_passwordFake.HasKeyboardFocus)
@@ -501,14 +608,36 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 FontStyle style = FontStyle.None,
                 ushort hue = 0,
                 TEXT_ALIGN_TYPE align = TEXT_ALIGN_TYPE.TS_LEFT
-            ) : base(font, max_char_count, maxWidth, isunicode, style, hue, align)
+            ) : base
+            (
+                font,
+                max_char_count,
+                maxWidth,
+                isunicode,
+                style,
+                hue,
+                align
+            )
             {
-                _rendererText = RenderedText.Create(string.Empty, hue, font, isunicode, style, align, maxWidth);
+                _rendererText = RenderedText.Create
+                (
+                    string.Empty,
+                    hue,
+                    font,
+                    isunicode,
+                    style,
+                    align,
+                    maxWidth
+                );
 
                 _rendererCaret = RenderedText.Create
                 (
-                    "_", hue, font, isunicode,
-                    (style & FontStyle.BlackBorder) != 0 ? FontStyle.BlackBorder : FontStyle.None, align
+                    "_",
+                    hue,
+                    font,
+                    isunicode,
+                    (style & FontStyle.BlackBorder) != 0 ? FontStyle.BlackBorder : FontStyle.None,
+                    align
                 );
 
                 NoSelection = true;
@@ -602,7 +731,14 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
             public override bool Draw(UltimaBatcher2D batcher, int x, int y)
             {
-                Rectangle scissor = ScissorStack.CalculateScissors(Matrix.Identity, x, y, Width, Height);
+                Rectangle scissor = ScissorStack.CalculateScissors
+                (
+                    Matrix.Identity,
+                    x,
+                    y,
+                    Width,
+                    Height
+                );
 
                 if (ScissorStack.PushScissors(batcher.GraphicsDevice, scissor))
                 {

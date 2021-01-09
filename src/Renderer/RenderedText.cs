@@ -1,23 +1,32 @@
 #region license
 
-// Copyright (C) 2020 ClassicUO Development Community on Github
+// Copyright (c) 2021, andreakarasho
+// All rights reserved.
 // 
-// This project is an alternative client for the game Ultima Online.
-// The goal of this is to develop a lightweight client considering
-// new technologies.
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+// 1. Redistributions of source code must retain the above copyright
+//    notice, this list of conditions and the following disclaimer.
+// 2. Redistributions in binary form must reproduce the above copyright
+//    notice, this list of conditions and the following disclaimer in the
+//    documentation and/or other materials provided with the distribution.
+// 3. All advertising materials mentioning features or use of this software
+//    must display the following acknowledgement:
+//    This product includes software developed by andreakarasho - https://github.com/andreakarasho
+// 4. Neither the name of the copyright holder nor the
+//    names of its contributors may be used to endorse or promote products
+//    derived from this software without specific prior written permission.
 // 
-//  This program is free software: you can redistribute it and/or modify
-//  it under the terms of the GNU General Public License as published by
-//  the Free Software Foundation, either version 3 of the License, or
-//  (at your option) any later version.
-// 
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-// 
-//  You should have received a copy of the GNU General Public License
-//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ''AS IS'' AND ANY
+// EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+// WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+// DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY
+// DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+// (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+// LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+// ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+// SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #endregion
 
@@ -51,7 +60,8 @@ namespace ClassicUO.Renderer
     {
         private static readonly QueuedPool<RenderedText> _pool = new QueuedPool<RenderedText>
         (
-            3000, r =>
+            3000,
+            r =>
             {
                 r.IsDestroyed = false;
                 r.Links.Count = 0;
@@ -136,16 +146,28 @@ namespace ClassicUO.Renderer
                         {
                             _info = FontsLoader.Instance.GetInfoUnicode
                             (
-                                Font, Text, Text.Length, Align, (ushort) FontStyle, MaxWidth > 0 ? MaxWidth : Width,
-                                true, true
+                                Font,
+                                Text,
+                                Text.Length,
+                                Align,
+                                (ushort) FontStyle,
+                                MaxWidth > 0 ? MaxWidth : Width,
+                                true,
+                                true
                             );
                         }
                         else
                         {
                             _info = FontsLoader.Instance.GetInfoASCII
                             (
-                                Font, Text, Text.Length, Align, (ushort) FontStyle, MaxWidth > 0 ? MaxWidth : Width,
-                                true, true
+                                Font,
+                                Text,
+                                Text.Length,
+                                Align,
+                                (ushort) FontStyle,
+                                MaxWidth > 0 ? MaxWidth : Width,
+                                true,
+                                true
                             );
                         }
                     }
@@ -216,12 +238,26 @@ namespace ClassicUO.Renderer
             if (IsUnicode)
             {
                 (p.X, p.Y) = FontsLoader.Instance.GetCaretPosUnicode
-                    (Font, Text, caret_index, MaxWidth, Align, (ushort) FontStyle);
+                (
+                    Font,
+                    Text,
+                    caret_index,
+                    MaxWidth,
+                    Align,
+                    (ushort) FontStyle
+                );
             }
             else
             {
                 (p.X, p.Y) = FontsLoader.Instance.GetCaretPosASCII
-                    (Font, Text, caret_index, MaxWidth, Align, (ushort) FontStyle);
+                (
+                    Font,
+                    Text,
+                    caret_index,
+                    MaxWidth,
+                    Align,
+                    (ushort) FontStyle
+                );
             }
 
             return p;
@@ -432,7 +468,19 @@ namespace ClassicUO.Renderer
 
             _hueVector.Z = alpha;
 
-            return batcher.Draw2D(Texture, dx, dy, dwidth, dheight, srcX, srcY, srcWidth, srcHeight, ref _hueVector);
+            return batcher.Draw2D
+            (
+                Texture,
+                dx,
+                dy,
+                dwidth,
+                dheight,
+                srcX,
+                srcY,
+                srcWidth,
+                srcHeight,
+                ref _hueVector
+            );
         }
 
         public bool Draw
@@ -494,7 +542,17 @@ namespace ClassicUO.Renderer
 
             _hueVector.Z = 0;
 
-            return batcher.Draw2D(Texture, dx, dy, sx, sy, swidth, sheight, ref _hueVector);
+            return batcher.Draw2D
+            (
+                Texture,
+                dx,
+                dy,
+                sx,
+                sy,
+                swidth,
+                sheight,
+                ref _hueVector
+            );
         }
 
         public bool Draw(UltimaBatcher2D batcher, int x, int y, float alpha = 0, ushort hue = 0)
@@ -539,7 +597,15 @@ namespace ClassicUO.Renderer
 
             _hueVector.Z = alpha;
 
-            return batcher.Draw2D(Texture, x, y, Width, Height, ref _hueVector);
+            return batcher.Draw2D
+            (
+                Texture,
+                x,
+                y,
+                Width,
+                Height,
+                ref _hueVector
+            );
         }
 
         public void CreateTexture()
@@ -561,12 +627,33 @@ namespace ClassicUO.Renderer
             if (IsUnicode)
             {
                 FontsLoader.Instance.GenerateUnicode
-                    (ref _texture, Font, Text, Hue, Cell, MaxWidth, Align, (ushort) FontStyle, SaveHitMap, MaxHeight);
+                (
+                    ref _texture,
+                    Font,
+                    Text,
+                    Hue,
+                    Cell,
+                    MaxWidth,
+                    Align,
+                    (ushort) FontStyle,
+                    SaveHitMap,
+                    MaxHeight
+                );
             }
             else
             {
                 FontsLoader.Instance.GenerateASCII
-                    (ref _texture, Font, Text, Hue, MaxWidth, Align, (ushort) FontStyle, SaveHitMap, MaxHeight);
+                (
+                    ref _texture,
+                    Font,
+                    Text,
+                    Hue,
+                    MaxWidth,
+                    Align,
+                    (ushort) FontStyle,
+                    SaveHitMap,
+                    MaxHeight
+                );
             }
 
             if (Texture != null)

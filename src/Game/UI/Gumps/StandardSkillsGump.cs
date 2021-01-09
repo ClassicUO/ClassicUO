@@ -1,23 +1,32 @@
 ﻿#region license
 
-// Copyright (C) 2020 ClassicUO Development Community on Github
+// Copyright (c) 2021, andreakarasho
+// All rights reserved.
 // 
-// This project is an alternative client for the game Ultima Online.
-// The goal of this is to develop a lightweight client considering
-// new technologies.
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+// 1. Redistributions of source code must retain the above copyright
+//    notice, this list of conditions and the following disclaimer.
+// 2. Redistributions in binary form must reproduce the above copyright
+//    notice, this list of conditions and the following disclaimer in the
+//    documentation and/or other materials provided with the distribution.
+// 3. All advertising materials mentioning features or use of this software
+//    must display the following acknowledgement:
+//    This product includes software developed by andreakarasho - https://github.com/andreakarasho
+// 4. Neither the name of the copyright holder nor the
+//    names of its contributors may be used to endorse or promote products
+//    derived from this software without specific prior written permission.
 // 
-//  This program is free software: you can redistribute it and/or modify
-//  it under the terms of the GNU General Public License as published by
-//  the Free Software Foundation, either version 3 of the License, or
-//  (at your option) any later version.
-// 
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-// 
-//  You should have received a copy of the GNU General Public License
-//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ''AS IS'' AND ANY
+// EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+// WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+// DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY
+// DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+// (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+// LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+// ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+// SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #endregion
 
@@ -55,7 +64,7 @@ namespace ClassicUO.Game.UI.Gumps
         private readonly List<SkillsGroupControl> _skillsControl = new List<SkillsGroupControl>();
         private readonly Label _skillsLabelSum;
 
-        public StandardSkillsGump() : base(Constants.SKILLSTD_LOCALSERIAL, 0)
+        public StandardSkillsGump() : base(0, 0)
         {
             AcceptMouseInput = false;
             CanMove = true;
@@ -80,7 +89,10 @@ namespace ClassicUO.Game.UI.Gumps
 
             _area = new ScrollArea
             (
-                22, 45 + _diffY + _bottomLine.Height - 10, _scrollArea.Width - 14, _scrollArea.Height - (83 + _diffY),
+                22,
+                45 + _diffY + _bottomLine.Height - 10,
+                _scrollArea.Width - 14,
+                _scrollArea.Height - (83 + _diffY),
                 false
             ) { AcceptMouseInput = true, CanMove = true };
 
@@ -95,8 +107,14 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add
             (
-                _skillsLabelSum = new Label(World.Player.Skills.Sum(s => s.Value).ToString("F1"), false, 600, 0, 3)
-                    { X = _bottomComment.X + _bottomComment.Width + 5, Y = _bottomComment.Y - 5 }
+                _skillsLabelSum = new Label
+                (
+                    World.Player.Skills.Sum(s => s.Value).ToString("F1"),
+                    false,
+                    600,
+                    0,
+                    3
+                ) { X = _bottomComment.X + _bottomComment.Width + 5, Y = _bottomComment.Y - 5 }
             );
 
             //new group
@@ -113,14 +131,28 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add
             (
-                _checkReal = new Checkbox(0x938, 0x939, ResGumps.ShowReal, 1, 0x0386, false)
-                    { X = _newGroupButton.X + _newGroupButton.Width + 30, Y = _newGroupButton.Y - 6 }
+                _checkReal = new Checkbox
+                (
+                    0x938,
+                    0x939,
+                    ResGumps.ShowReal,
+                    1,
+                    0x0386,
+                    false
+                ) { X = _newGroupButton.X + _newGroupButton.Width + 30, Y = _newGroupButton.Y - 6 }
             );
 
             Add
             (
-                _checkCaps = new Checkbox(0x938, 0x939, ResGumps.ShowCaps, 1, 0x0386, false)
-                    { X = _newGroupButton.X + _newGroupButton.Width + 30, Y = _newGroupButton.Y + 7 }
+                _checkCaps = new Checkbox
+                (
+                    0x938,
+                    0x939,
+                    ResGumps.ShowCaps,
+                    1,
+                    0x0386,
+                    false
+                ) { X = _newGroupButton.X + _newGroupButton.Width + 30, Y = _newGroupButton.Y + 7 }
             );
 
             _checkReal.ValueChanged += UpdateSkillsValues;
@@ -352,7 +384,14 @@ namespace ClassicUO.Game.UI.Gumps
 
                 Add
                 (
-                    _textbox = new StbTextBox(6, -1, 200, false, FontStyle.Fixed)
+                    _textbox = new StbTextBox
+                    (
+                        6,
+                        -1,
+                        200,
+                        false,
+                        FontStyle.Fixed
+                    )
                     {
                         X = 16,
                         Y = -3,
@@ -663,11 +702,27 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (_status == 2)
                 {
-                    batcher.Draw2D(SolidColorTextureCache.GetTexture(Color.Beige), x, y, Width, 17, ref HueVector);
+                    batcher.Draw2D
+                    (
+                        SolidColorTextureCache.GetTexture(Color.Beige),
+                        x,
+                        y,
+                        Width,
+                        17,
+                        ref HueVector
+                    );
                 }
                 else if (_status == 1)
                 {
-                    batcher.Draw2D(SolidColorTextureCache.GetTexture(Color.Bisque), x + 16, y, 200, 17, ref HueVector);
+                    batcher.Draw2D
+                    (
+                        SolidColorTextureCache.GetTexture(Color.Bisque),
+                        x + 16,
+                        y,
+                        200,
+                        17,
+                        ref HueVector
+                    );
                 }
 
                 return base.Draw(batcher, x, y);
@@ -839,8 +894,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 UIManager.GameCursor.IsDraggingCursorForced = false;
 
-                if (UIManager.LastControlMouseDown(MouseButtonType.Left) == this &&
-                    World.Player.Skills[Index].IsClickable)
+                if (UIManager.LastControlMouseDown(MouseButtonType.Left) == this && World.Player.Skills[Index].IsClickable)
                 {
                     if (UIManager.MouseOverControl == null || UIManager.MouseOverControl.RootParent != RootParent)
                     {
@@ -848,11 +902,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                         if (Index >= 0 && Index < World.Player.Skills.Length)
                         {
-                            UIManager.Add
-                            (
-                                new SkillButtonGump
-                                    (World.Player.Skills[Index], Mouse.Position.X - 44, Mouse.Position.Y - 22)
-                            );
+                            UIManager.Add(new SkillButtonGump(World.Player.Skills[Index], Mouse.Position.X - 44, Mouse.Position.Y - 22));
                         }
                     }
                 }
@@ -860,7 +910,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             private static SkillButtonGump GetSpellFloatingButton(int id)
             {
-                for (LinkedListNode<Control> i = UIManager.Gumps.Last; i != null; i = i.Previous)
+                for (LinkedListNode<Gump> i = UIManager.Gumps.Last; i != null; i = i.Previous)
                 {
                     if (i.Value is SkillButtonGump g && g.SkillID == id)
                     {
@@ -885,7 +935,15 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (UIManager.LastControlMouseDown(MouseButtonType.Left) == this)
                 {
-                    batcher.Draw2D(SolidColorTextureCache.GetTexture(Color.Wheat), x, y, Width, Height, ref HueVector);
+                    batcher.Draw2D
+                    (
+                        SolidColorTextureCache.GetTexture(Color.Wheat),
+                        x,
+                        y,
+                        Width,
+                        Height,
+                        ref HueVector
+                    );
                 }
 
                 return base.Draw(batcher, x, y);

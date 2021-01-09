@@ -1,23 +1,32 @@
 ﻿#region license
 
-// Copyright (C) 2020 ClassicUO Development Community on Github
+// Copyright (c) 2021, andreakarasho
+// All rights reserved.
 // 
-// This project is an alternative client for the game Ultima Online.
-// The goal of this is to develop a lightweight client considering
-// new technologies.
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+// 1. Redistributions of source code must retain the above copyright
+//    notice, this list of conditions and the following disclaimer.
+// 2. Redistributions in binary form must reproduce the above copyright
+//    notice, this list of conditions and the following disclaimer in the
+//    documentation and/or other materials provided with the distribution.
+// 3. All advertising materials mentioning features or use of this software
+//    must display the following acknowledgement:
+//    This product includes software developed by andreakarasho - https://github.com/andreakarasho
+// 4. Neither the name of the copyright holder nor the
+//    names of its contributors may be used to endorse or promote products
+//    derived from this software without specific prior written permission.
 // 
-//  This program is free software: you can redistribute it and/or modify
-//  it under the terms of the GNU General Public License as published by
-//  the Free Software Foundation, either version 3 of the License, or
-//  (at your option) any later version.
-// 
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-// 
-//  You should have received a copy of the GNU General Public License
-//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ''AS IS'' AND ANY
+// EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+// WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+// DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY
+// DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+// (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+// LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+// ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+// SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #endregion
 
@@ -51,22 +60,7 @@ namespace ClassicUO.Game.Data
         public ushort[] Graphics = new ushort[GRAPHICS_COUNT];
 
 
-        public int Style,
-                   TID,
-                   South1,
-                   South2,
-                   South3,
-                   Corner,
-                   East1,
-                   East2,
-                   East3,
-                   Post,
-                   WindowS,
-                   AltWindowS,
-                   WindowE,
-                   AltWindowE,
-                   SecondAltWindowS,
-                   SecondAltWindowE;
+        public int Style, TID, South1, South2, South3, Corner, East1, East2, East3, Post, WindowS, AltWindowS, WindowE, AltWindowE, SecondAltWindowS, SecondAltWindowE;
         public ushort[] WindowGraphics = new ushort[GRAPHICS_COUNT];
 
         public override int Contains(ushort graphic)
@@ -90,15 +84,7 @@ namespace ClassicUO.Game.Data
 
             if (scanf.Length >= 17)
             {
-                result = int.TryParse(scanf[0], out Category) && int.TryParse(scanf[1], out Style) && int.TryParse
-                    (scanf[2], out TID) && int.TryParse(scanf[3], out South1) && int.TryParse
-                    (scanf[4], out South2) && int.TryParse(scanf[5], out South3) && int.TryParse
-                    (scanf[6], out Corner) && int.TryParse(scanf[7], out East1) && int.TryParse
-                    (scanf[8], out East2) && int.TryParse(scanf[9], out East3) && int.TryParse
-                    (scanf[10], out Post) && int.TryParse(scanf[11], out WindowS) && int.TryParse
-                    (scanf[12], out AltWindowS) && int.TryParse(scanf[13], out WindowE) && int.TryParse
-                    (scanf[14], out AltWindowE) && int.TryParse(scanf[15], out SecondAltWindowS) && int.TryParse
-                    (scanf[16], out SecondAltWindowE) && int.TryParse(scanf[17], out FeatureMask);
+                result = int.TryParse(scanf[0], out Category) && int.TryParse(scanf[1], out Style) && int.TryParse(scanf[2], out TID) && int.TryParse(scanf[3], out South1) && int.TryParse(scanf[4], out South2) && int.TryParse(scanf[5], out South3) && int.TryParse(scanf[6], out Corner) && int.TryParse(scanf[7], out East1) && int.TryParse(scanf[8], out East2) && int.TryParse(scanf[9], out East3) && int.TryParse(scanf[10], out Post) && int.TryParse(scanf[11], out WindowS) && int.TryParse(scanf[12], out AltWindowS) && int.TryParse(scanf[13], out WindowE) && int.TryParse(scanf[14], out AltWindowE) && int.TryParse(scanf[15], out SecondAltWindowS) && int.TryParse(scanf[16], out SecondAltWindowE) && int.TryParse(scanf[17], out FeatureMask);
             }
 
             if (result)
@@ -172,15 +158,7 @@ namespace ClassicUO.Game.Data
 
             if (scanf.Length >= 17)
             {
-                result = int.TryParse(scanf[0], out Category) && int.TryParse(scanf[1], out F1) && int.TryParse
-                    (scanf[2], out F2) && int.TryParse(scanf[3], out F3) && int.TryParse
-                    (scanf[4], out F4) && int.TryParse(scanf[5], out F5) && int.TryParse
-                    (scanf[6], out F6) && int.TryParse(scanf[7], out F7) && int.TryParse
-                    (scanf[8], out F8) && int.TryParse(scanf[9], out F9) && int.TryParse
-                    (scanf[10], out F10) && int.TryParse(scanf[11], out F11) && int.TryParse
-                    (scanf[12], out F12) && int.TryParse(scanf[13], out F13) && int.TryParse
-                    (scanf[14], out F14) && int.TryParse(scanf[15], out F15) && int.TryParse
-                    (scanf[16], out F16) && int.TryParse(scanf[17], out FeatureMask);
+                result = int.TryParse(scanf[0], out Category) && int.TryParse(scanf[1], out F1) && int.TryParse(scanf[2], out F2) && int.TryParse(scanf[3], out F3) && int.TryParse(scanf[4], out F4) && int.TryParse(scanf[5], out F5) && int.TryParse(scanf[6], out F6) && int.TryParse(scanf[7], out F7) && int.TryParse(scanf[8], out F8) && int.TryParse(scanf[9], out F9) && int.TryParse(scanf[10], out F10) && int.TryParse(scanf[11], out F11) && int.TryParse(scanf[12], out F12) && int.TryParse(scanf[13], out F13) && int.TryParse(scanf[14], out F14) && int.TryParse(scanf[15], out F15) && int.TryParse(scanf[16], out F16) && int.TryParse(scanf[17], out FeatureMask);
             }
 
             if (result)
@@ -225,24 +203,7 @@ namespace ClassicUO.Game.Data
         public const int GRAPHICS_COUNT = 16;
         public ushort[] Graphics = new ushort[GRAPHICS_COUNT];
 
-        public int Style,
-                   TID,
-                   North,
-                   East,
-                   South,
-                   West,
-                   NSCrosspiece,
-                   EWCrosspiece,
-                   NDent,
-                   SDent,
-                   WDent,
-                   NTPiece,
-                   ETPiece,
-                   STPiece,
-                   WTPiece,
-                   XPiece,
-                   Extra,
-                   Piece;
+        public int Style, TID, North, East, South, West, NSCrosspiece, EWCrosspiece, NDent, SDent, WDent, NTPiece, ETPiece, STPiece, WTPiece, XPiece, Extra, Piece;
 
         public override bool Parse(string text)
         {
@@ -252,16 +213,7 @@ namespace ClassicUO.Game.Data
 
             if (scanf.Length >= 19)
             {
-                result = int.TryParse(scanf[0], out Category) && int.TryParse(scanf[1], out Style) && int.TryParse
-                    (scanf[2], out TID) && int.TryParse(scanf[3], out North) && int.TryParse
-                    (scanf[4], out East) && int.TryParse(scanf[5], out South) && int.TryParse
-                    (scanf[6], out West) && int.TryParse(scanf[7], out NSCrosspiece) && int.TryParse
-                    (scanf[8], out EWCrosspiece) && int.TryParse(scanf[9], out NDent) && int.TryParse
-                    (scanf[10], out SDent) && int.TryParse(scanf[11], out WDent) && int.TryParse
-                    (scanf[12], out NTPiece) && int.TryParse(scanf[13], out ETPiece) && int.TryParse
-                    (scanf[14], out STPiece) && int.TryParse(scanf[15], out WTPiece) && int.TryParse
-                    (scanf[16], out XPiece) && int.TryParse(scanf[17], out Extra) && int.TryParse
-                    (scanf[18], out Piece) && int.TryParse(scanf[19], out FeatureMask);
+                result = int.TryParse(scanf[0], out Category) && int.TryParse(scanf[1], out Style) && int.TryParse(scanf[2], out TID) && int.TryParse(scanf[3], out North) && int.TryParse(scanf[4], out East) && int.TryParse(scanf[5], out South) && int.TryParse(scanf[6], out West) && int.TryParse(scanf[7], out NSCrosspiece) && int.TryParse(scanf[8], out EWCrosspiece) && int.TryParse(scanf[9], out NDent) && int.TryParse(scanf[10], out SDent) && int.TryParse(scanf[11], out WDent) && int.TryParse(scanf[12], out NTPiece) && int.TryParse(scanf[13], out ETPiece) && int.TryParse(scanf[14], out STPiece) && int.TryParse(scanf[15], out WTPiece) && int.TryParse(scanf[16], out XPiece) && int.TryParse(scanf[17], out Extra) && int.TryParse(scanf[18], out Piece) && int.TryParse(scanf[19], out FeatureMask);
             }
 
             if (result)
@@ -320,12 +272,7 @@ namespace ClassicUO.Game.Data
 
             if (scanf.Length >= 11)
             {
-                result = int.TryParse(scanf[0], out Category) && int.TryParse(scanf[1], out Style) && int.TryParse
-                    (scanf[2], out TID) && int.TryParse(scanf[3], out Piece1) && int.TryParse
-                    (scanf[4], out Piece2) && int.TryParse(scanf[5], out Piece3) && int.TryParse
-                    (scanf[6], out Piece4) && int.TryParse(scanf[7], out Piece5) && int.TryParse
-                    (scanf[8], out Piece6) && int.TryParse(scanf[9], out Piece7) && int.TryParse
-                    (scanf[10], out Piece8) && int.TryParse(scanf[11], out FeatureMask);
+                result = int.TryParse(scanf[0], out Category) && int.TryParse(scanf[1], out Style) && int.TryParse(scanf[2], out TID) && int.TryParse(scanf[3], out Piece1) && int.TryParse(scanf[4], out Piece2) && int.TryParse(scanf[5], out Piece3) && int.TryParse(scanf[6], out Piece4) && int.TryParse(scanf[7], out Piece5) && int.TryParse(scanf[8], out Piece6) && int.TryParse(scanf[9], out Piece7) && int.TryParse(scanf[10], out Piece8) && int.TryParse(scanf[11], out FeatureMask);
             }
 
             if (result)
@@ -376,11 +323,7 @@ namespace ClassicUO.Game.Data
 
             if (scanf.Length >= 9)
             {
-                result = int.TryParse(scanf[0], out Category) && int.TryParse(scanf[1], out Piece1) && int.TryParse
-                    (scanf[2], out Piece2) && int.TryParse(scanf[3], out Piece3) && int.TryParse
-                    (scanf[4], out Piece4) && int.TryParse(scanf[5], out Piece5) && int.TryParse
-                    (scanf[6], out Piece6) && int.TryParse(scanf[7], out Piece7) && int.TryParse
-                    (scanf[8], out Piece8) && int.TryParse(scanf[9], out FeatureMask);
+                result = int.TryParse(scanf[0], out Category) && int.TryParse(scanf[1], out Piece1) && int.TryParse(scanf[2], out Piece2) && int.TryParse(scanf[3], out Piece3) && int.TryParse(scanf[4], out Piece4) && int.TryParse(scanf[5], out Piece5) && int.TryParse(scanf[6], out Piece6) && int.TryParse(scanf[7], out Piece7) && int.TryParse(scanf[8], out Piece8) && int.TryParse(scanf[9], out FeatureMask);
             }
 
             if (result)
@@ -427,15 +370,7 @@ namespace ClassicUO.Game.Data
 
             if (scanf.Length >= 17)
             {
-                result = int.TryParse(scanf[0], out Category) && int.TryParse(scanf[1], out F1) && int.TryParse
-                    (scanf[2], out F2) && int.TryParse(scanf[3], out F3) && int.TryParse
-                    (scanf[4], out F4) && int.TryParse(scanf[5], out F5) && int.TryParse
-                    (scanf[6], out F6) && int.TryParse(scanf[7], out F7) && int.TryParse
-                    (scanf[8], out F8) && int.TryParse(scanf[9], out F9) && int.TryParse
-                    (scanf[10], out F10) && int.TryParse(scanf[11], out F11) && int.TryParse
-                    (scanf[12], out F12) && int.TryParse(scanf[13], out F13) && int.TryParse
-                    (scanf[14], out F14) && int.TryParse(scanf[15], out F15) && int.TryParse
-                    (scanf[16], out F16) && int.TryParse(scanf[17], out FeatureMask);
+                result = int.TryParse(scanf[0], out Category) && int.TryParse(scanf[1], out F1) && int.TryParse(scanf[2], out F2) && int.TryParse(scanf[3], out F3) && int.TryParse(scanf[4], out F4) && int.TryParse(scanf[5], out F5) && int.TryParse(scanf[6], out F6) && int.TryParse(scanf[7], out F7) && int.TryParse(scanf[8], out F8) && int.TryParse(scanf[9], out F9) && int.TryParse(scanf[10], out F10) && int.TryParse(scanf[11], out F11) && int.TryParse(scanf[12], out F12) && int.TryParse(scanf[13], out F13) && int.TryParse(scanf[14], out F14) && int.TryParse(scanf[15], out F15) && int.TryParse(scanf[16], out F16) && int.TryParse(scanf[17], out FeatureMask);
             }
 
             if (result)
@@ -479,19 +414,7 @@ namespace ClassicUO.Game.Data
     {
         public const int GRAPHICS_COUNT = 9;
 
-        public int Block,
-                   North,
-                   East,
-                   South,
-                   West,
-                   Squared1,
-                   Squared2,
-                   Rounded1,
-                   Rounded2,
-                   MultiNorth,
-                   MultiEast,
-                   MultiSouth,
-                   MultiWest;
+        public int Block, North, East, South, West, Squared1, Squared2, Rounded1, Rounded2, MultiNorth, MultiEast, MultiSouth, MultiWest;
         public ushort[] Graphics = new ushort[GRAPHICS_COUNT];
 
         public override bool Parse(string text)
@@ -502,14 +425,7 @@ namespace ClassicUO.Game.Data
 
             if (scanf.Length >= 14)
             {
-                result = int.TryParse(scanf[0], out Category) && int.TryParse(scanf[1], out Block) && int.TryParse
-                    (scanf[2], out North) && int.TryParse(scanf[3], out East) && int.TryParse
-                    (scanf[4], out South) && int.TryParse(scanf[5], out West) && int.TryParse
-                    (scanf[6], out Squared1) && int.TryParse(scanf[7], out Squared2) && int.TryParse
-                    (scanf[8], out Rounded1) && int.TryParse(scanf[9], out Rounded2) && int.TryParse
-                    (scanf[10], out MultiNorth) && int.TryParse(scanf[11], out MultiEast) && int.TryParse
-                    (scanf[12], out MultiSouth) && int.TryParse(scanf[13], out MultiWest) && int.TryParse
-                    (scanf[14], out FeatureMask);
+                result = int.TryParse(scanf[0], out Category) && int.TryParse(scanf[1], out Block) && int.TryParse(scanf[2], out North) && int.TryParse(scanf[3], out East) && int.TryParse(scanf[4], out South) && int.TryParse(scanf[5], out West) && int.TryParse(scanf[6], out Squared1) && int.TryParse(scanf[7], out Squared2) && int.TryParse(scanf[8], out Rounded1) && int.TryParse(scanf[9], out Rounded2) && int.TryParse(scanf[10], out MultiNorth) && int.TryParse(scanf[11], out MultiEast) && int.TryParse(scanf[12], out MultiSouth) && int.TryParse(scanf[13], out MultiWest) && int.TryParse(scanf[14], out FeatureMask);
             }
 
             if (result)
@@ -545,21 +461,7 @@ namespace ClassicUO.Game.Data
     internal class CustomHousePlaceInfo : CustomHouseObject
     {
         public const int GRAPHICS_COUNT = 1;
-        public int Graphic,
-                   Top,
-                   Bottom,
-                   AdjUN,
-                   AdjLN,
-                   AdjUE,
-                   AdjLE,
-                   AdjUS,
-                   AdjLS,
-                   AdjUW,
-                   AdjLW,
-                   DirectSupports,
-                   CanGoW,
-                   CanGoN,
-                   CanGoNWS;
+        public int Graphic, Top, Bottom, AdjUN, AdjLN, AdjUE, AdjLE, AdjUS, AdjLS, AdjUW, AdjLW, DirectSupports, CanGoW, CanGoN, CanGoNWS;
 
         public ushort[] Graphics = new ushort[GRAPHICS_COUNT];
 
@@ -571,14 +473,7 @@ namespace ClassicUO.Game.Data
 
             if (scanf.Length >= 16)
             {
-                result = int.TryParse(scanf[1], out Graphic) && int.TryParse(scanf[2], out Top) && int.TryParse
-                    (scanf[3], out Bottom) && int.TryParse(scanf[4], out AdjUN) && int.TryParse
-                    (scanf[5], out AdjLN) && int.TryParse(scanf[6], out AdjUE) && int.TryParse
-                    (scanf[7], out AdjLE) && int.TryParse(scanf[8], out AdjUS) && int.TryParse
-                    (scanf[9], out AdjLS) && int.TryParse(scanf[10], out AdjUW) && int.TryParse
-                    (scanf[11], out AdjLW) && int.TryParse(scanf[12], out DirectSupports) && int.TryParse
-                    (scanf[13], out CanGoW) && int.TryParse(scanf[14], out CanGoN) && int.TryParse
-                    (scanf[15], out CanGoNWS);
+                result = int.TryParse(scanf[1], out Graphic) && int.TryParse(scanf[2], out Top) && int.TryParse(scanf[3], out Bottom) && int.TryParse(scanf[4], out AdjUN) && int.TryParse(scanf[5], out AdjLN) && int.TryParse(scanf[6], out AdjUE) && int.TryParse(scanf[7], out AdjLE) && int.TryParse(scanf[8], out AdjUS) && int.TryParse(scanf[9], out AdjLS) && int.TryParse(scanf[10], out AdjUW) && int.TryParse(scanf[11], out AdjLW) && int.TryParse(scanf[12], out DirectSupports) && int.TryParse(scanf[13], out CanGoW) && int.TryParse(scanf[14], out CanGoN) && int.TryParse(scanf[15], out CanGoNWS);
             }
 
             if (result)

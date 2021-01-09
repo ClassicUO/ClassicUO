@@ -1,23 +1,32 @@
 #region license
 
-// Copyright (C) 2020 ClassicUO Development Community on Github
+// Copyright (c) 2021, andreakarasho
+// All rights reserved.
 // 
-// This project is an alternative client for the game Ultima Online.
-// The goal of this is to develop a lightweight client considering
-// new technologies.
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+// 1. Redistributions of source code must retain the above copyright
+//    notice, this list of conditions and the following disclaimer.
+// 2. Redistributions in binary form must reproduce the above copyright
+//    notice, this list of conditions and the following disclaimer in the
+//    documentation and/or other materials provided with the distribution.
+// 3. All advertising materials mentioning features or use of this software
+//    must display the following acknowledgement:
+//    This product includes software developed by andreakarasho - https://github.com/andreakarasho
+// 4. Neither the name of the copyright holder nor the
+//    names of its contributors may be used to endorse or promote products
+//    derived from this software without specific prior written permission.
 // 
-//  This program is free software: you can redistribute it and/or modify
-//  it under the terms of the GNU General Public License as published by
-//  the Free Software Foundation, either version 3 of the License, or
-//  (at your option) any later version.
-// 
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-// 
-//  You should have received a copy of the GNU General Public License
-//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ''AS IS'' AND ANY
+// EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+// WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+// DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY
+// DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+// (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+// LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+// ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+// SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #endregion
 
@@ -69,19 +78,12 @@ namespace ClassicUO.Game.GameObjects
 
             if (AuraManager.IsEnabled)
             {
-                AuraManager.Draw
-                (
-                    batcher, drawX, drawY,
-                    ProfileManager.CurrentProfile.PartyAura && World.Party.Contains(this) ?
-                        ProfileManager.CurrentProfile.PartyAuraHue :
-                        Notoriety.GetHue(NotorietyFlag)
-                );
+                AuraManager.Draw(batcher, drawX, drawY, ProfileManager.CurrentProfile.PartyAura && World.Party.Contains(this) ? ProfileManager.CurrentProfile.PartyAuraHue : Notoriety.GetHue(NotorietyFlag));
             }
 
             bool isHuman = IsHuman;
 
-            bool isGargoyle = Client.Version >= ClientVersion.CV_7000 &&
-                              (Graphic == 666 || Graphic == 667 || Graphic == 0x02B7 || Graphic == 0x02B6);
+            bool isGargoyle = Client.Version >= ClientVersion.CV_7000 && (Graphic == 666 || Graphic == 667 || Graphic == 0x02B7 || Graphic == 0x02B6);
 
             if (AlphaHue != 255)
             {
@@ -176,7 +178,18 @@ namespace ClassicUO.Game.GameObjects
                     {
                         DrawInternal
                         (
-                            batcher, this, null, drawX, drawY + 10, IsFlipped, animIndex, true, graphic, animGroup, dir, isHuman,
+                            batcher,
+                            this,
+                            null,
+                            drawX,
+                            drawY + 10,
+                            IsFlipped,
+                            animIndex,
+                            true,
+                            graphic,
+                            animGroup,
+                            dir,
+                            isHuman,
                             alpha: HueVector.Z
                         );
 
@@ -184,7 +197,18 @@ namespace ClassicUO.Game.GameObjects
 
                         DrawInternal
                         (
-                            batcher, this, mount, drawX, drawY, IsFlipped, animIndex, true, mountGraphic, animGroupMount, dir, isHuman,
+                            batcher,
+                            this,
+                            mount,
+                            drawX,
+                            drawY,
+                            IsFlipped,
+                            animIndex,
+                            true,
+                            mountGraphic,
+                            animGroupMount,
+                            dir,
+                            isHuman,
                             alpha: HueVector.Z
                         );
                     }
@@ -195,8 +219,20 @@ namespace ClassicUO.Game.GameObjects
 
                     drawY += DrawInternal
                     (
-                        batcher, this, mount, drawX, drawY, IsFlipped, animIndex, false, mountGraphic, animGroupMount, dir, isHuman,
-                        isMount: true, alpha: HueVector.Z
+                        batcher,
+                        this,
+                        mount,
+                        drawX,
+                        drawY,
+                        IsFlipped,
+                        animIndex,
+                        false,
+                        mountGraphic,
+                        animGroupMount,
+                        dir,
+                        isHuman,
+                        isMount: true,
+                        alpha: HueVector.Z
                     );
                 }
             }
@@ -208,7 +244,16 @@ namespace ClassicUO.Game.GameObjects
                     animIndex = 0;
 
                     ProcessSteps(out dir);
-                    AnimationsLoader.Instance.FixSittingDirection(ref dir, ref IsFlipped, ref drawX, ref drawY, sittigIndex);
+
+                    AnimationsLoader.Instance.FixSittingDirection
+                    (
+                        ref dir,
+                        ref IsFlipped,
+                        ref drawX,
+                        ref drawY,
+                        sittigIndex
+                    );
+
                     drawY += SIT_OFFSET_Y;
 
                     if (dir == 3)
@@ -236,147 +281,202 @@ namespace ClassicUO.Game.GameObjects
                 {
                     DrawInternal
                     (
-                        batcher, this, null, drawX, drawY, IsFlipped, animIndex, true, graphic, animGroup, dir, isHuman,
+                        batcher,
+                        this,
+                        null,
+                        drawX,
+                        drawY,
+                        IsFlipped,
+                        animIndex,
+                        true,
+                        graphic,
+                        animGroup,
+                        dir,
+                        isHuman,
                         alpha: HueVector.Z
                     );
                 }
             }
 
-            DrawInternal(batcher, this, null, drawX, drawY, IsFlipped, animIndex, false, graphic, animGroup, dir, isHuman, alpha: HueVector.Z);
+            DrawInternal
+            (
+                batcher,
+                this,
+                null,
+                drawX,
+                drawY,
+                IsFlipped,
+                animIndex,
+                false,
+                graphic,
+                animGroup,
+                dir,
+                isHuman,
+                alpha: HueVector.Z,
+                forceUOP: isGargoyle
+            );
 
-            for (int i = 0; i < Constants.USED_LAYER_COUNT; i++)
+            if (!IsEmpty)
             {
-                Layer layer = LayerOrder.UsedLayers[layerDir, i];
-
-                Item item = FindItemByLayer(layer);
-
-                if (item == null)
+                for (int i = 0; i < Constants.USED_LAYER_COUNT; i++)
                 {
-                    continue;
-                }
+                    Layer layer = LayerOrder.UsedLayers[layerDir, i];
 
-                if (IsDead && (layer == Layer.Hair || layer == Layer.Beard))
-                {
-                    continue;
-                }
+                    Item item = FindItemByLayer(layer);
 
-                if (isHuman)
-                {
-                    if (IsCovered(this, layer))
+                    if (item == null)
                     {
                         continue;
                     }
 
-                    if (item.ItemData.AnimID != 0)
+                    if (IsDead && (layer == Layer.Hair || layer == Layer.Beard))
                     {
-                        graphic = item.ItemData.AnimID;
+                        continue;
+                    }
 
-                        if (isGargoyle)
+                    if (isHuman)
+                    {
+                        if (IsCovered(this, layer))
                         {
-                            switch (graphic)
-                            {
-                                // gargoyle robe
-                                case 0x01D5: 
-                                    graphic = 0x0156;
-
-                                    break;
-
-                                // gargoyle dead shroud
-                                case 0x03CA:
-                                    graphic = 0x0223;
-
-                                    break;
-
-                                // gargoyle spellbook
-                                case 0x03D8:
-                                    graphic = 329;
-
-                                    break;
-
-                                // gargoyle necrobook
-                                case 0x0372:
-                                    graphic = 330;
-
-                                    break;
-
-                                // gargoyle chivalry book
-                                case 0x0374:
-                                    graphic = 328;
-
-                                    break;
-
-                                // gargoyle bushido book
-                                case 0x036F: 
-                                    graphic = 327;
-
-                                    break;
-
-                                // gargoyle ninjitsu book
-                                case 0x036E:
-                                    graphic = 328;
-
-                                    break;
-
-                                // gargoyle masteries book
-                                case 0x0426:
-                                    graphic = 0x042B;
-
-                                    break;
-
-
-                                // gargoyle mysticism book seems ok. Mha!
-                            }
+                            continue;
                         }
 
-
-                        if (AnimationsLoader.Instance.EquipConversions.TryGetValue
-                            (Graphic, out Dictionary<ushort, EquipConvData> map))
+                        if (item.ItemData.AnimID != 0)
                         {
-                            if (map.TryGetValue(item.ItemData.AnimID, out EquipConvData data))
+                            graphic = item.ItemData.AnimID;
+
+                            if (isGargoyle)
                             {
-                                _equipConvData = data;
-                                graphic = data.Graphic;
-                            }
-                        }
+                                switch (graphic)
+                                {
+                                    // gargoyle robe
+                                    case 0x01D5:
+                                        graphic = 0x0156;
 
-                        // Seems like all Gargoyle equipment has the 'IsWeapon' flag
-                        if (sittigIndex == 0 && IsGargoyle /*&& item.ItemData.IsWeapon*/)
-                        {
-                            DrawInternal
-                            (
-                                batcher, this, item, drawX, drawY, IsFlipped, animIndex, false, graphic, GetGroupForAnimation(this, graphic, true), dir, isHuman, true,
-                                alpha: HueVector.Z
-                            );
+                                        break;
+
+                                    // gargoyle dead shroud
+                                    case 0x03CA:
+                                        graphic = 0x0223;
+
+                                        break;
+
+                                    // gargoyle spellbook
+                                    case 0x03D8:
+                                        graphic = 329;
+
+                                        break;
+
+                                    // gargoyle necrobook
+                                    case 0x0372:
+                                        graphic = 330;
+
+                                        break;
+
+                                    // gargoyle chivalry book
+                                    case 0x0374:
+                                        graphic = 328;
+
+                                        break;
+
+                                    // gargoyle bushido book
+                                    case 0x036F:
+                                        graphic = 327;
+
+                                        break;
+
+                                    // gargoyle ninjitsu book
+                                    case 0x036E:
+                                        graphic = 328;
+
+                                        break;
+
+                                    // gargoyle masteries book
+                                    case 0x0426:
+                                        graphic = 0x042B;
+
+                                        break;
+
+
+                                    // gargoyle mysticism book seems ok. Mha!
+                                }
+                            }
+
+
+                            if (AnimationsLoader.Instance.EquipConversions.TryGetValue(Graphic, out Dictionary<ushort, EquipConvData> map))
+                            {
+                                if (map.TryGetValue(item.ItemData.AnimID, out EquipConvData data))
+                                {
+                                    _equipConvData = data;
+                                    graphic = data.Graphic;
+                                }
+                            }
+
+                            // Seems like all Gargoyle equipment has the 'IsWeapon' flag
+                            if (sittigIndex == 0 && IsGargoyle /*&& item.ItemData.IsWeapon*/)
+                            {
+                                DrawInternal
+                                (
+                                    batcher,
+                                    this,
+                                    item,
+                                    drawX,
+                                    drawY,
+                                    IsFlipped,
+                                    animIndex,
+                                    false,
+                                    graphic,
+                                    GetGroupForAnimation(this, graphic, true),
+                                    dir,
+                                    isHuman,
+                                    true,
+                                    alpha: HueVector.Z,
+                                    forceUOP: true
+                                );
+                            }
+                            else
+                            {
+                                DrawInternal
+                                (
+                                    batcher,
+                                    this,
+                                    item,
+                                    drawX,
+                                    drawY,
+                                    IsFlipped,
+                                    animIndex,
+                                    false,
+                                    graphic,
+                                    animGroup,
+                                    dir,
+                                    isHuman,
+                                    false,
+                                    alpha: HueVector.Z
+                                );
+                            }
                         }
                         else
                         {
-                            DrawInternal
-                            (
-                                batcher, this, item, drawX, drawY, IsFlipped, animIndex, false, graphic, animGroup, dir, isHuman, false,
-                                alpha: HueVector.Z
-                            );
+                            if (item.ItemData.IsLight)
+                            {
+                                Client.Game.GetScene<GameScene>().AddLight(this, this, drawX, drawY);
+                            }
                         }
+
+                        _equipConvData = null;
                     }
                     else
                     {
                         if (item.ItemData.IsLight)
                         {
                             Client.Game.GetScene<GameScene>().AddLight(this, this, drawX, drawY);
+
+                            break;
                         }
-                    }
-
-                    _equipConvData = null;
-                }
-                else
-                {
-                    if (item.ItemData.IsLight)
-                    {
-                        Client.Game.GetScene<GameScene>().AddLight(this, this, drawX, drawY);
-
-                        break;
                     }
                 }
             }
+
 
             //if (FileManager.Animations.SittingValue != 0)
             //{
@@ -414,6 +514,7 @@ namespace ClassicUO.Game.GameObjects
             bool isHuman,
             bool isParent = true,
             bool isMount = false,
+            bool forceUOP = false,
             float alpha = 0
         )
         {
@@ -591,11 +692,28 @@ namespace ClassicUO.Game.GameObjects
                         }
                     }
 
-                    batcher.DrawCharacterSitted(frame, x, y, mirror, h3mod, h6mod, h9mod, ref HueVector);
-                }
-                else if (frame != null)
-                {
-                    batcher.DrawSprite(frame, x, y, mirror, ref HueVector);
+                        batcher.DrawCharacterSitted
+                        (
+                            frame,
+                            x,
+                            y,
+                            mirror,
+                            h3mod,
+                            h6mod,
+                            h9mod,
+                            ref HueVector
+                        );
+                    }
+                    else if (frame != null)
+                    {
+                        batcher.DrawSprite
+                        (
+                            frame,
+                            x,
+                            y,
+                            mirror,
+                            ref HueVector
+                        );
 
                     int yy = -(frame.Height + frame.CenterY + 3);
                     int xx = -frame.CenterX;
@@ -626,16 +744,10 @@ namespace ClassicUO.Game.GameObjects
                     }
                 }
 
-                if (frame.Contains
-                (
-                    mirror ?
-                        x + frame.Width - SelectedObject.TranslatedMousePositionByViewport.X :
-                        SelectedObject.TranslatedMousePositionByViewport.X - x,
-                    SelectedObject.TranslatedMousePositionByViewport.Y - y
-                ))
-                {
-                    SelectedObject.Object = owner;
-                }
+                    if (frame.Contains(mirror ? x + frame.Width - SelectedObject.TranslatedMousePositionByViewport.X : SelectedObject.TranslatedMousePositionByViewport.X - x, SelectedObject.TranslatedMousePositionByViewport.Y - y))
+                    {
+                        SelectedObject.Object = owner;
+                    }
 
                 if (entity != null && entity.ItemData.IsLight)
                 {
@@ -659,8 +771,7 @@ namespace ClassicUO.Game.GameObjects
                     Item pants = mobile.FindItemByLayer(Layer.Pants);
                     Item robe;
 
-                    if (mobile.FindItemByLayer(Layer.Legs) != null ||
-                        pants != null && (pants.Graphic == 0x1411 || pants.Graphic == 0x141A))
+                    if (mobile.FindItemByLayer(Layer.Legs) != null || pants != null && (pants.Graphic == 0x1411 /*|| pants.Graphic == 0x141A*/))
                     {
                         return true;
                     }
@@ -668,8 +779,7 @@ namespace ClassicUO.Game.GameObjects
                     {
                         robe = mobile.FindItemByLayer(Layer.Robe);
 
-                        if (pants != null && (pants.Graphic == 0x0513 || pants.Graphic == 0x0514) ||
-                            robe != null && robe.Graphic == 0x0504)
+                        if (pants != null && (pants.Graphic == 0x0513 || pants.Graphic == 0x0514) || robe != null && robe.Graphic == 0x0504)
                         {
                             return true;
                         }
@@ -678,7 +788,7 @@ namespace ClassicUO.Game.GameObjects
                     break;
 
                 case Layer.Pants:
-                    Item skirt;
+
                     robe = mobile.FindItemByLayer(Layer.Robe);
                     pants = mobile.FindItemByLayer(Layer.Pants);
 
@@ -687,10 +797,9 @@ namespace ClassicUO.Game.GameObjects
                         return true;
                     }
 
-                    if (pants != null &&
-                        (pants.Graphic == 0x01EB || pants.Graphic == 0x03E5 || pants.Graphic == 0x03eB))
+                    if (pants != null && (pants.Graphic == 0x01EB || pants.Graphic == 0x03E5 || pants.Graphic == 0x03eB))
                     {
-                        skirt = mobile.FindItemByLayer(Layer.Skirt);
+                        Item skirt = mobile.FindItemByLayer(Layer.Skirt);
 
                         if (skirt != null && skirt.Graphic != 0x01C7 && skirt.Graphic != 0x01E4)
                         {
@@ -714,8 +823,7 @@ namespace ClassicUO.Game.GameObjects
                     else*/
                     if (tunic != null && tunic.Graphic == 0x0238)
                     {
-                        return robe != null && robe.Graphic != 0x9985 && robe.Graphic != 0x9986 &&
-                               robe.Graphic != 0xA412;
+                        return robe != null && robe.Graphic != 0x9985 && robe.Graphic != 0x9986 && robe.Graphic != 0xA412;
                     }
 
                     break;
@@ -723,8 +831,7 @@ namespace ClassicUO.Game.GameObjects
                 case Layer.Torso:
                     robe = mobile.FindItemByLayer(Layer.Robe);
 
-                    if (robe != null && robe.Graphic != 0 && robe.Graphic != 0x9985 && robe.Graphic != 0x9986 &&
-                        robe.Graphic != 0xA412)
+                    if (robe != null && robe.Graphic != 0 && robe.Graphic != 0x9985 && robe.Graphic != 0x9986 && robe.Graphic != 0xA412)
                     {
                         return true;
                     }
@@ -743,8 +850,7 @@ namespace ClassicUO.Game.GameObjects
                 case Layer.Arms:
                     robe = mobile.FindItemByLayer(Layer.Robe);
 
-                    return robe != null && robe.Graphic != 0 && robe.Graphic != 0x9985 && robe.Graphic != 0x9986 &&
-                           robe.Graphic != 0xA412;
+                    return robe != null && robe.Graphic != 0 && robe.Graphic != 0x9985 && robe.Graphic != 0x9986 && robe.Graphic != 0xA412;
 
                 case Layer.Helmet:
                 case Layer.Hair:

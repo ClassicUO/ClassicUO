@@ -1,23 +1,32 @@
 #region license
 
-// Copyright (C) 2020 ClassicUO Development Community on Github
+// Copyright (c) 2021, andreakarasho
+// All rights reserved.
 // 
-// This project is an alternative client for the game Ultima Online.
-// The goal of this is to develop a lightweight client considering
-// new technologies.
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+// 1. Redistributions of source code must retain the above copyright
+//    notice, this list of conditions and the following disclaimer.
+// 2. Redistributions in binary form must reproduce the above copyright
+//    notice, this list of conditions and the following disclaimer in the
+//    documentation and/or other materials provided with the distribution.
+// 3. All advertising materials mentioning features or use of this software
+//    must display the following acknowledgement:
+//    This product includes software developed by andreakarasho - https://github.com/andreakarasho
+// 4. Neither the name of the copyright holder nor the
+//    names of its contributors may be used to endorse or promote products
+//    derived from this software without specific prior written permission.
 // 
-//  This program is free software: you can redistribute it and/or modify
-//  it under the terms of the GNU General Public License as published by
-//  the Free Software Foundation, either version 3 of the License, or
-//  (at your option) any later version.
-// 
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-// 
-//  You should have received a copy of the GNU General Public License
-//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ''AS IS'' AND ANY
+// EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+// WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+// DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY
+// DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+// (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+// LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+// ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+// SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #endregion
 
@@ -1066,6 +1075,7 @@ namespace ClassicUO.Game.GameObjects
 
                                 goto done;
 
+                            case 0x8FD:
                             case 0x4068: // Dual Short Axes
                                 Abilities[0] = Ability.DoubleStrike;
                                 Abilities[1] = Ability.InfectiousStrike;
@@ -1084,30 +1094,35 @@ namespace ClassicUO.Game.GameObjects
 
                                 goto done;
 
+                            case 0x904:
                             case 0x406D: // Dual Pointed Spear
                                 Abilities[0] = Ability.DoubleStrike;
                                 Abilities[1] = Ability.Disarm;
 
                                 goto done;
 
+                            case 0x903:
                             case 0x406E: // Disc Mace
                                 Abilities[0] = Ability.ArmorIgnore;
                                 Abilities[1] = Ability.Disarm;
 
                                 goto done;
 
+                            case 0x8FE:
                             case 0x4072: // Blood Blade
                                 Abilities[0] = Ability.BleedAttack;
                                 Abilities[1] = Ability.ParalyzingBlow;
 
                                 goto done;
 
+                            case 0x90B:
                             case 0x4074: // Dread Sword
                                 Abilities[0] = Ability.CrushingBlow;
                                 Abilities[1] = Ability.ConcussionBlow;
 
                                 goto done;
 
+                            case 0x908:
                             case 0x4075: // Gargish Talwar
                                 Abilities[0] = Ability.WhirlwindAttack;
                                 Abilities[1] = Ability.Dismount;
@@ -1132,96 +1147,112 @@ namespace ClassicUO.Game.GameObjects
 
                                 goto done;
 
+                            case 0x48B3:
                             case 0x48B2: // Gargish Axe
                                 Abilities[0] = Ability.CrushingBlow;
                                 Abilities[1] = Ability.Dismount;
 
                                 goto done;
 
+                            case 0x48B5:
                             case 0x48B4: // Gargish Bardiche
                                 Abilities[0] = Ability.ParalyzingBlow;
                                 Abilities[1] = Ability.Dismount;
 
                                 goto done;
 
+                            case 0x48B7:
                             case 0x48B6: // Gargish Butcher Knife
                                 Abilities[0] = Ability.InfectiousStrike;
                                 Abilities[1] = Ability.Disarm;
 
                                 goto done;
 
+                            case 0x48B9:
                             case 0x48B8: // Gargish Gnarled Staff
                                 Abilities[0] = Ability.ConcussionBlow;
                                 Abilities[1] = Ability.ParalyzingBlow;
 
                                 goto done;
 
+                            case 0x48BB:
                             case 0x48BA: // Gargish Katana
                                 Abilities[0] = Ability.DoubleStrike;
                                 Abilities[1] = Ability.ArmorIgnore;
 
                                 goto done;
 
+                            case 0x48BD:
                             case 0x48BC: // Gargish Kryss
                                 Abilities[0] = Ability.ArmorIgnore;
                                 Abilities[1] = Ability.InfectiousStrike;
 
                                 goto done;
 
+                            case 0x48BF:
                             case 0x48BE: // Gargish War Fork
                                 Abilities[0] = Ability.BleedAttack;
                                 Abilities[1] = Ability.Disarm;
 
                                 goto done;
 
+                            case 0x48CB:
                             case 0x48CA: // Gargish Lance
                                 Abilities[0] = Ability.Dismount;
                                 Abilities[1] = Ability.ConcussionBlow;
 
                                 goto done;
 
+                            case 0x481:
                             case 0x48C0: // Gargish War Hammer
                                 Abilities[0] = Ability.WhirlwindAttack;
                                 Abilities[1] = Ability.CrushingBlow;
 
                                 goto done;
 
+                            case 0x48C3:
                             case 0x48C2: // Gargish Maul
                                 Abilities[0] = Ability.CrushingBlow;
                                 Abilities[1] = Ability.ConcussionBlow;
 
                                 goto done;
 
+                            case 0x48C5:
                             case 0x48C4: // Gargish Scyte
                                 Abilities[0] = Ability.BleedAttack;
                                 Abilities[1] = Ability.ParalyzingBlow;
 
                                 goto done;
 
+                            case 0x48C7:
                             case 0x48C6: // Gargish Bone Harvester
                                 Abilities[0] = Ability.ParalyzingBlow;
                                 Abilities[1] = Ability.MortalStrike;
 
                                 goto done;
 
+                            case 0x48C9:
                             case 0x48C8: // Gargish Pike
                                 Abilities[0] = Ability.ParalyzingBlow;
                                 Abilities[1] = Ability.InfectiousStrike;
 
                                 goto done;
 
+                            case 0x48CC:
                             case 0x48CD: // Gargish Tessen
                                 Abilities[0] = Ability.Feint;
                                 Abilities[1] = Ability.Block;
 
                                 goto done;
 
+                            case 0x48CF:
                             case 0x48CE: // Gargish Tekagi
                                 Abilities[0] = Ability.DualWield;
                                 Abilities[1] = Ability.TalonStrike;
 
                                 goto done;
 
+                            case 0x48D1:
                             case 0x48D0: // Gargish Daisho
                                 Abilities[0] = Ability.Feint;
                                 Abilities[1] = Ability.DoubleStrike;
@@ -1274,7 +1305,7 @@ namespace ClassicUO.Game.GameObjects
 
             int max = 0;
 
-            foreach (Control control in UIManager.Gumps)
+            foreach (Gump control in UIManager.Gumps)
             {
                 if (control is UseAbilityButtonGump s)
                 {
@@ -1303,23 +1334,19 @@ namespace ClassicUO.Game.GameObjects
         {
             if (ProfileManager.CurrentProfile.AutoOpenCorpses)
             {
-                if ((ProfileManager.CurrentProfile.CorpseOpenOptions == 1 || ProfileManager.CurrentProfile.CorpseOpenOptions == 3) &&
-                    TargetManager.IsTargeting)
+                if ((ProfileManager.CurrentProfile.CorpseOpenOptions == 1 || ProfileManager.CurrentProfile.CorpseOpenOptions == 3) && TargetManager.IsTargeting)
                 {
                     return;
                 }
 
-                if ((ProfileManager.CurrentProfile.CorpseOpenOptions == 2 || ProfileManager.CurrentProfile.CorpseOpenOptions == 3) &&
-                    IsHidden)
+                if ((ProfileManager.CurrentProfile.CorpseOpenOptions == 2 || ProfileManager.CurrentProfile.CorpseOpenOptions == 3) && IsHidden)
                 {
                     return;
                 }
 
                 foreach (Item item in World.Items)
                 {
-                    if (!item.IsDestroyed && item.IsCorpse &&
-                        item.Distance <= ProfileManager.CurrentProfile.AutoOpenCorpseRange &&
-                        !AutoOpenedCorpses.Contains(item.Serial))
+                    if (!item.IsDestroyed && item.IsCorpse && item.Distance <= ProfileManager.CurrentProfile.AutoOpenCorpseRange && !AutoOpenedCorpses.Contains(item.Serial))
                     {
                         AutoOpenedCorpses.Add(item.Serial);
                         GameActions.DoubleClickQueued(item.Serial);
@@ -1392,7 +1419,7 @@ namespace ClassicUO.Game.GameObjects
 
         public void CloseRangedGumps()
         {
-            foreach (Control gump in UIManager.Gumps)
+            foreach (Gump gump in UIManager.Gumps)
             {
                 switch (gump)
                 {
@@ -1504,17 +1531,14 @@ namespace ClassicUO.Game.GameObjects
 
         public bool Walk(Direction direction, bool run)
         {
-            if (Walker.WalkingFailed || Walker.LastStepRequestTime > Time.Ticks ||
-                Walker.StepsCount >= Constants.MAX_STEP_COUNT ||
-                Client.Version >= ClientVersion.CV_60142 && IsParalyzed)
+            if (Walker.WalkingFailed || Walker.LastStepRequestTime > Time.Ticks || Walker.StepsCount >= Constants.MAX_STEP_COUNT || Client.Version >= ClientVersion.CV_60142 && IsParalyzed)
             {
                 return false;
             }
 
             run |= ProfileManager.CurrentProfile.AlwaysRun;
 
-            if (SpeedMode >= CharacterSpeedType.CantRun || Stamina <= 1 && !IsDead ||
-                IsHidden && ProfileManager.CurrentProfile.AlwaysRunUnlessHidden)
+            if (SpeedMode >= CharacterSpeedType.CantRun || Stamina <= 1 && !IsDead || IsHidden && ProfileManager.CurrentProfile.AlwaysRunUnlessHidden)
             {
                 run = false;
             }
@@ -1561,12 +1585,7 @@ namespace ClassicUO.Game.GameObjects
                     y = newY;
                     z = newZ;
 
-                    walkTime = (ushort) MovementSpeed.TimeToCompleteMovement
-                    (
-                        run,
-                        IsMounted || SpeedMode == CharacterSpeedType.FastUnmount ||
-                        SpeedMode == CharacterSpeedType.FastUnmountAndCantRun || IsFlying
-                    );
+                    walkTime = (ushort) MovementSpeed.TimeToCompleteMovement(run, IsMounted || SpeedMode == CharacterSpeedType.FastUnmount || SpeedMode == CharacterSpeedType.FastUnmountAndCantRun || IsFlying);
                 }
             }
             else
@@ -1590,12 +1609,7 @@ namespace ClassicUO.Game.GameObjects
                     y = newY;
                     z = newZ;
 
-                    walkTime = (ushort) MovementSpeed.TimeToCompleteMovement
-                    (
-                        run,
-                        IsMounted || SpeedMode == CharacterSpeedType.FastUnmount ||
-                        SpeedMode == CharacterSpeedType.FastUnmountAndCantRun || IsFlying
-                    );
+                    walkTime = (ushort) MovementSpeed.TimeToCompleteMovement(run, IsMounted || SpeedMode == CharacterSpeedType.FastUnmount || SpeedMode == CharacterSpeedType.FastUnmountAndCantRun || IsFlying);
                 }
 
                 direction = newDir;
@@ -1640,8 +1654,7 @@ namespace ClassicUO.Game.GameObjects
             );
 
 
-            NetClient.Socket.Send
-                (new PWalkRequest(direction, Walker.WalkSequence, run, Walker.FastWalkStack.GetValue()));
+            NetClient.Socket.Send(new PWalkRequest(direction, Walker.WalkSequence, run, Walker.FastWalkStack.GetValue()));
 
 
             if (Walker.WalkSequence == 0xFF)

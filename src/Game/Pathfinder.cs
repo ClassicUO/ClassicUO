@@ -1,23 +1,32 @@
 #region license
 
-// Copyright (C) 2020 ClassicUO Development Community on Github
+// Copyright (c) 2021, andreakarasho
+// All rights reserved.
 // 
-// This project is an alternative client for the game Ultima Online.
-// The goal of this is to develop a lightweight client considering
-// new technologies.
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+// 1. Redistributions of source code must retain the above copyright
+//    notice, this list of conditions and the following disclaimer.
+// 2. Redistributions in binary form must reproduce the above copyright
+//    notice, this list of conditions and the following disclaimer in the
+//    documentation and/or other materials provided with the distribution.
+// 3. All advertising materials mentioning features or use of this software
+//    must display the following acknowledgement:
+//    This product includes software developed by andreakarasho - https://github.com/andreakarasho
+// 4. Neither the name of the copyright holder nor the
+//    names of its contributors may be used to endorse or promote products
+//    derived from this software without specific prior written permission.
 // 
-//  This program is free software: you can redistribute it and/or modify
-//  it under the terms of the GNU General Public License as published by
-//  the Free Software Foundation, either version 3 of the License, or
-//  (at your option) any later version.
-// 
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-// 
-//  You should have received a copy of the GNU General Public License
-//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ''AS IS'' AND ANY
+// EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+// WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+// DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY
+// DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+// (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+// LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+// ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+// SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #endregion
 
@@ -76,10 +85,7 @@ namespace ClassicUO.Game
                 return false;
             }
 
-            bool ignoreGameCharacters = ProfileManager.CurrentProfile.IgnoreStaminaCheck ||
-                                        stepState == (int) PATH_STEP_STATE.PSS_DEAD_OR_GM ||
-                                        World.Player.IgnoreCharacters ||
-                                        !(World.Player.Stamina < World.Player.StaminaMax && World.Map.Index == 0);
+            bool ignoreGameCharacters = ProfileManager.CurrentProfile.IgnoreStaminaCheck || stepState == (int) PATH_STEP_STATE.PSS_DEAD_OR_GM || World.Player.IgnoreCharacters || !(World.Player.Stamina < World.Player.StaminaMax && World.Map.Index == 0);
 
             bool isGM = World.Player.Graphic == 0x03DB;
 
@@ -103,8 +109,7 @@ namespace ClassicUO.Game
                 {
                     case Land tile1:
 
-                        if (graphicHelper < 0x01AE && graphicHelper != 2 ||
-                            graphicHelper > 0x01B5 && graphicHelper != 0x01DB)
+                        if (graphicHelper < 0x01AE && graphicHelper != 2 || graphicHelper > 0x01B5 && graphicHelper != 0x01DB)
                         {
                             uint flags = (uint) PATH_OBJECT_FLAGS.POF_IMPASSABLE_OR_SURFACE;
 
@@ -112,16 +117,14 @@ namespace ClassicUO.Game
                             {
                                 if (tile1.TileData.IsWet)
                                 {
-                                    flags = (uint) (PATH_OBJECT_FLAGS.POF_IMPASSABLE_OR_SURFACE |
-                                                    PATH_OBJECT_FLAGS.POF_SURFACE | PATH_OBJECT_FLAGS.POF_BRIDGE);
+                                    flags = (uint) (PATH_OBJECT_FLAGS.POF_IMPASSABLE_OR_SURFACE | PATH_OBJECT_FLAGS.POF_SURFACE | PATH_OBJECT_FLAGS.POF_BRIDGE);
                                 }
                             }
                             else
                             {
                                 if (!tile1.TileData.IsImpassable)
                                 {
-                                    flags = (uint) (PATH_OBJECT_FLAGS.POF_IMPASSABLE_OR_SURFACE |
-                                                    PATH_OBJECT_FLAGS.POF_SURFACE | PATH_OBJECT_FLAGS.POF_BRIDGE);
+                                    flags = (uint) (PATH_OBJECT_FLAGS.POF_IMPASSABLE_OR_SURFACE | PATH_OBJECT_FLAGS.POF_SURFACE | PATH_OBJECT_FLAGS.POF_BRIDGE);
                                 }
 
                                 if (stepState == (int) PATH_STEP_STATE.PSS_FLYING && tile1.TileData.IsNoDiagonal)
@@ -133,7 +136,18 @@ namespace ClassicUO.Game
                             int landMinZ = tile1.MinZ;
                             int landAverageZ = tile1.AverageZ;
                             int landHeight = landAverageZ - landMinZ;
-                            list.Add(new PathObject(flags, landMinZ, landAverageZ, landHeight, obj));
+
+                            list.Add
+                            (
+                                new PathObject
+                                (
+                                    flags,
+                                    landMinZ,
+                                    landAverageZ,
+                                    landHeight,
+                                    obj
+                                )
+                            );
                         }
 
                         break;
@@ -154,9 +168,11 @@ namespace ClassicUO.Game
                                     (
                                         new PathObject
                                         (
-                                            (uint) PATH_OBJECT_FLAGS.POF_IMPASSABLE_OR_SURFACE, mobile.Z,
+                                            (uint) PATH_OBJECT_FLAGS.POF_IMPASSABLE_OR_SURFACE,
+                                            mobile.Z,
                                             mobile.Z + Constants.DEFAULT_CHARACTER_HEIGHT,
-                                            Constants.DEFAULT_CHARACTER_HEIGHT, mobile
+                                            Constants.DEFAULT_CHARACTER_HEIGHT,
+                                            mobile
                                         )
                                     );
                                 }
@@ -174,8 +190,7 @@ namespace ClassicUO.Game
                             }
 
                             case Item item2:
-                                if (stepState == (int) PATH_STEP_STATE.PSS_DEAD_OR_GM && (item2.ItemData.IsDoor ||
-                                    item2.ItemData.Weight <= 0x5A || isGM && !item2.IsLocked))
+                                if (stepState == (int) PATH_STEP_STATE.PSS_DEAD_OR_GM && (item2.ItemData.IsDoor || item2.ItemData.Weight <= 0x5A || isGM && !item2.IsLocked))
                                 {
                                     dropFlags = true;
                                 }
@@ -185,16 +200,14 @@ namespace ClassicUO.Game
                                 }
                                 else
                                 {
-                                    dropFlags = graphicHelper >= 0x3946 && graphicHelper <= 0x3964 ||
-                                                graphicHelper == 0x0082;
+                                    dropFlags = graphicHelper >= 0x3946 && graphicHelper <= 0x3964 || graphicHelper == 0x0082;
                                 }
 
                                 break;
 
                             case Multi m:
 
-                                if (World.CustomHouseManager != null && m.IsCustom &&
-                                    (m.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_GENERIC_INTERNAL) == 0)
+                                if ((World.CustomHouseManager != null && m.IsCustom && (m.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_GENERIC_INTERNAL) == 0) || m.IsHousePreview)
                                 {
                                     canBeAdd = false;
                                 }
@@ -246,8 +259,7 @@ namespace ClassicUO.Game
                                     {
                                         if (graphicHelper <= 0x0846)
                                         {
-                                            if (!(graphicHelper != 0x0846 && graphicHelper != 0x0692 &&
-                                                  (graphicHelper <= 0x06F4 || graphicHelper > 0x06F6)))
+                                            if (!(graphicHelper != 0x0846 && graphicHelper != 0x0692 && (graphicHelper <= 0x06F4 || graphicHelper > 0x06F6)))
                                             {
                                                 dropFlags = true;
                                             }
@@ -280,7 +292,17 @@ namespace ClassicUO.Game
                                         staticAverageZ /= 2;
                                     }
 
-                                    list.Add(new PathObject(flags, objZ, staticAverageZ + objZ, staticHeight, obj));
+                                    list.Add
+                                    (
+                                        new PathObject
+                                        (
+                                            flags,
+                                            objZ,
+                                            staticAverageZ + objZ,
+                                            staticHeight,
+                                            obj
+                                        )
+                                    );
                                 }
                             }
                         }
@@ -337,8 +359,7 @@ namespace ClassicUO.Game
                 }
                 else
                 {
-                    if ((obj.Flags & (uint) PATH_OBJECT_FLAGS.POF_IMPASSABLE_OR_SURFACE) != 0 && averageZ <= currentZ &&
-                        minZ < averageZ)
+                    if ((obj.Flags & (uint) PATH_OBJECT_FLAGS.POF_IMPASSABLE_OR_SURFACE) != 0 && averageZ <= currentZ && minZ < averageZ)
                     {
                         minZ = averageZ;
                     }
@@ -393,16 +414,23 @@ namespace ClassicUO.Game
 
             int minZ = -128;
             int maxZ = z;
-            CalculateMinMaxZ(ref minZ, ref maxZ, x, y, z, direction, stepState);
+
+            CalculateMinMaxZ
+            (
+                ref minZ,
+                ref maxZ,
+                x,
+                y,
+                z,
+                direction,
+                stepState
+            );
+
             List<PathObject> list = new List<PathObject>();
 
             if (World.CustomHouseManager != null)
             {
-                Rectangle rect = new Rectangle
-                (
-                    World.CustomHouseManager.StartPos.X, World.CustomHouseManager.StartPos.Y,
-                    World.CustomHouseManager.EndPos.X, World.CustomHouseManager.EndPos.Y
-                );
+                Rectangle rect = new Rectangle(World.CustomHouseManager.StartPos.X, World.CustomHouseManager.StartPos.Y, World.CustomHouseManager.EndPos.X, World.CustomHouseManager.EndPos.Y);
 
                 if (!rect.Contains(x, y))
                 {
@@ -417,7 +445,18 @@ namespace ClassicUO.Game
 
             list.Sort();
 
-            list.Add(new PathObject((uint) PATH_OBJECT_FLAGS.POF_IMPASSABLE_OR_SURFACE, 128, 128, 128, null));
+            list.Add
+            (
+                new PathObject
+                (
+                    (uint) PATH_OBJECT_FLAGS.POF_IMPASSABLE_OR_SURFACE,
+                    128,
+                    128,
+                    128,
+                    null
+                )
+            );
+
             int resultZ = -128;
 
             if (z < minZ)
@@ -432,8 +471,7 @@ namespace ClassicUO.Game
             {
                 PathObject obj = list[i];
 
-                if ((obj.Flags & (uint) PATH_OBJECT_FLAGS.POF_NO_DIAGONAL) != 0 &&
-                    stepState == (int) PATH_STEP_STATE.PSS_FLYING)
+                if ((obj.Flags & (uint) PATH_OBJECT_FLAGS.POF_NO_DIAGONAL) != 0 && stepState == (int) PATH_STEP_STATE.PSS_FLYING)
                 {
                     int objAverageZ = obj.AverageZ;
                     int delta = Math.Abs(objAverageZ - z);
@@ -456,16 +494,11 @@ namespace ClassicUO.Game
                         {
                             PathObject tempObj = list[j];
 
-                            if ((tempObj.Flags &
-                                 (uint) (PATH_OBJECT_FLAGS.POF_SURFACE | PATH_OBJECT_FLAGS.POF_BRIDGE)) != 0)
+                            if ((tempObj.Flags & (uint) (PATH_OBJECT_FLAGS.POF_SURFACE | PATH_OBJECT_FLAGS.POF_BRIDGE)) != 0)
                             {
                                 int tempAverageZ = tempObj.AverageZ;
 
-                                if (tempAverageZ >= currentZ && objZ - tempAverageZ >= Constants.DEFAULT_BLOCK_HEIGHT &&
-                                    (tempAverageZ <= maxZ &&
-                                     (tempObj.Flags & (uint) PATH_OBJECT_FLAGS.POF_SURFACE) != 0 ||
-                                     (tempObj.Flags & (uint) PATH_OBJECT_FLAGS.POF_BRIDGE) != 0 &&
-                                     tempObj.Z <= maxZ))
+                                if (tempAverageZ >= currentZ && objZ - tempAverageZ >= Constants.DEFAULT_BLOCK_HEIGHT && (tempAverageZ <= maxZ && (tempObj.Flags & (uint) PATH_OBJECT_FLAGS.POF_SURFACE) != 0 || (tempObj.Flags & (uint) PATH_OBJECT_FLAGS.POF_BRIDGE) != 0 && tempObj.Z <= maxZ))
                                 {
                                     int delta = Math.Abs(z - tempAverageZ);
 
@@ -796,7 +829,16 @@ namespace ClassicUO.Game
                         }
                     }
 
-                    if (diagonal >= 0 && AddNodeToList(0, (int) direction, x, y, z, node, diagonal == 0 ? 1 : 2) != -1)
+                    if (diagonal >= 0 && AddNodeToList
+                    (
+                        0,
+                        (int) direction,
+                        x,
+                        y,
+                        z,
+                        node,
+                        diagonal == 0 ? 1 : 2
+                    ) != -1)
                     {
                         found = true;
                     }
@@ -828,7 +870,16 @@ namespace ClassicUO.Game
 
             if (cheapestNode != -1)
             {
-                result = AddNodeToList(1, 0, 0, 0, 0, _openList[cheapestNode], 2);
+                result = AddNodeToList
+                (
+                    1,
+                    0,
+                    0,
+                    0,
+                    0,
+                    _openList[cheapestNode],
+                    2
+                );
             }
 
             return result;
@@ -962,8 +1013,7 @@ namespace ClassicUO.Game
 
         public static void ProcessAutoWalk()
         {
-            if (AutoWalking && World.InGame && World.Player.Walker.StepsCount < Constants.MAX_STEP_COUNT &&
-                World.Player.Walker.LastStepRequestTime <= Time.Ticks)
+            if (AutoWalking && World.InGame && World.Player.Walker.StepsCount < Constants.MAX_STEP_COUNT && World.Player.Walker.LastStepRequestTime <= Time.Ticks)
             {
                 if (_pointIndex >= 0 && _pointIndex < _pathSize)
                 {

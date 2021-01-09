@@ -1,23 +1,32 @@
 ﻿#region license
 
-// Copyright (C) 2020 ClassicUO Development Community on Github
+// Copyright (c) 2021, andreakarasho
+// All rights reserved.
 // 
-// This project is an alternative client for the game Ultima Online.
-// The goal of this is to develop a lightweight client considering
-// new technologies.
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+// 1. Redistributions of source code must retain the above copyright
+//    notice, this list of conditions and the following disclaimer.
+// 2. Redistributions in binary form must reproduce the above copyright
+//    notice, this list of conditions and the following disclaimer in the
+//    documentation and/or other materials provided with the distribution.
+// 3. All advertising materials mentioning features or use of this software
+//    must display the following acknowledgement:
+//    This product includes software developed by andreakarasho - https://github.com/andreakarasho
+// 4. Neither the name of the copyright holder nor the
+//    names of its contributors may be used to endorse or promote products
+//    derived from this software without specific prior written permission.
 // 
-//  This program is free software: you can redistribute it and/or modify
-//  it under the terms of the GNU General Public License as published by
-//  the Free Software Foundation, either version 3 of the License, or
-//  (at your option) any later version.
-// 
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-// 
-//  You should have received a copy of the GNU General Public License
-//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ''AS IS'' AND ANY
+// EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+// WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+// DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY
+// DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+// (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+// LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+// ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+// SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #endregion
 
@@ -40,8 +49,7 @@ namespace ClassicUO.Game.UI.Gumps
         private readonly ScrollArea _scrollArea;
         private readonly StbTextBox _textBox;
 
-        public ProfileGump(uint serial, string header, string footer, string body, bool canEdit) : base
-            (serial == World.Player.Serial ? serial = Constants.PROFILE_LOCALSERIAL : serial, serial)
+        public ProfileGump(uint serial, string header, string footer, string body, bool canEdit) : base(serial, 0)
         {
             Height = 300 + _diffY;
             CanMove = true;
@@ -52,9 +60,24 @@ namespace ClassicUO.Game.UI.Gumps
             _gumpPic.MouseDoubleClick += _picBase_MouseDoubleClick;
 
             Add(new ExpandableScroll(0, _diffY, Height - _diffY, 0x0820));
-            _scrollArea = new ScrollArea(22, 32 + _diffY, 272 - 22, Height - (96 + _diffY), false);
 
-            Label topText = new Label(header, true, 0, font: 1, maxwidth: 140)
+            _scrollArea = new ScrollArea
+            (
+                22,
+                32 + _diffY,
+                272 - 22,
+                Height - (96 + _diffY),
+                false
+            );
+
+            Label topText = new Label
+            (
+                header,
+                true,
+                0,
+                font: 1,
+                maxwidth: 140
+            )
             {
                 X = 53,
                 Y = 6
@@ -65,7 +88,19 @@ namespace ClassicUO.Game.UI.Gumps
             int offsetY = topText.Height - 15;
 
             _scrollArea.Add(new GumpPic(4, offsetY, 0x005C, 0));
-            _scrollArea.Add(new GumpPicTiled(56, offsetY, 138, 0, 0x005D));
+
+            _scrollArea.Add
+            (
+                new GumpPicTiled
+                (
+                    56,
+                    offsetY,
+                    138,
+                    0,
+                    0x005D
+                )
+            );
+
             _scrollArea.Add(new GumpPic(194, offsetY, 0x005E, 0));
 
             offsetY += 44;
@@ -89,12 +124,31 @@ namespace ClassicUO.Game.UI.Gumps
             _databox.WantUpdateSize = true;
 
             _databox.Add(new GumpPic(4, 0, 0x005F, 0));
-            _databox.Add(new GumpPicTiled(13, 0 + 9, 197, 0, 0x0060));
+
+            _databox.Add
+            (
+                new GumpPicTiled
+                (
+                    13,
+                    0 + 9,
+                    197,
+                    0,
+                    0x0060
+                )
+            );
+
             _databox.Add(new GumpPic(210, 0, 0x0061, 0));
 
             _databox.Add
             (
-                new Label(footer, true, 0, font: 1, maxwidth: 220)
+                new Label
+                (
+                    footer,
+                    true,
+                    0,
+                    font: 1,
+                    maxwidth: 220
+                )
                 {
                     X = 2,
                     Y = 26
@@ -152,7 +206,17 @@ namespace ClassicUO.Game.UI.Gumps
         private void _textBox_TextChanged(object sender, EventArgs e)
         {
             _textBox.Height = Math.Max
-                (FontsLoader.Instance.GetHeightUnicode(1, _textBox.Text, 220, TEXT_ALIGN_TYPE.TS_LEFT, 0x0) + 5, 20);
+            (
+                FontsLoader.Instance.GetHeightUnicode
+                (
+                    1,
+                    _textBox.Text,
+                    220,
+                    TEXT_ALIGN_TYPE.TS_LEFT,
+                    0x0
+                ) + 5,
+                20
+            );
         }
 
 
@@ -179,10 +243,9 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override void Dispose()
         {
-            if (_originalText != _textBox.Text && World.Player != null && !World.Player.IsDestroyed &&
-                !NetClient.Socket.IsDisposed && NetClient.Socket.IsConnected)
+            if (_originalText != _textBox.Text && World.Player != null && !World.Player.IsDestroyed && !NetClient.Socket.IsDisposed && NetClient.Socket.IsConnected)
             {
-                NetClient.Socket.Send(new PProfileUpdate(World.Player.Serial, _textBox.Text));
+                NetClient.Socket.Send(new PProfileUpdate(LocalSerial, _textBox.Text));
             }
 
             base.Dispose();

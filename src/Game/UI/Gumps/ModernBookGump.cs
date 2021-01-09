@@ -1,4 +1,37 @@
-﻿using System;
+﻿#region license
+
+// Copyright (c) 2021, andreakarasho
+// All rights reserved.
+// 
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+// 1. Redistributions of source code must retain the above copyright
+//    notice, this list of conditions and the following disclaimer.
+// 2. Redistributions in binary form must reproduce the above copyright
+//    notice, this list of conditions and the following disclaimer in the
+//    documentation and/or other materials provided with the distribution.
+// 3. All advertising materials mentioning features or use of this software
+//    must display the following acknowledgement:
+//    This product includes software developed by andreakarasho - https://github.com/andreakarasho
+// 4. Neither the name of the copyright holder nor the
+//    names of its contributors may be used to endorse or promote products
+//    derived from this software without specific prior written permission.
+// 
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ''AS IS'' AND ANY
+// EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+// WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+// DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY
+// DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+// (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+// LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+// ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+// SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+#endregion
+
+using System;
+using System.Collections.Generic;
 using System.Text;
 using ClassicUO.Data;
 using ClassicUO.Game.Managers;
@@ -50,6 +83,7 @@ namespace ClassicUO.Game.UI.Gumps
 
 
         public ushort BookPageCount { get; internal set; }
+        public HashSet<int> KnownPages { get; internal set; } = new HashSet<int>();
         public static bool IsNewBook => Client.Version > ClientVersion.CV_200;
         public bool UseNewHeader { get; set; } = true;
         public static byte DefaultFont => (byte) (IsNewBook ? 1 : 4);
@@ -69,13 +103,22 @@ namespace ClassicUO.Game.UI.Gumps
 
             for (int i = 0, l = BookLines.Length; i < l; i++)
             {
-                int w = IsNewBook ?
-                    FontsLoader.Instance.GetWidthUnicode(_bookPage.renderedText.Font, BookLines[i]) :
-                    FontsLoader.Instance.GetWidthASCII(_bookPage.renderedText.Font, BookLines[i]);
+                if (BookLines[i] != null && BookLines[i].Contains("\n"))
+                {
+                    BookLines[i] = BookLines[i].Replace("\n", "");
+                }
+            }
+
+            for (int i = 0, l = BookLines.Length; i < l; i++)
+            {
+                int w = IsNewBook ? FontsLoader.Instance.GetWidthUnicode(_bookPage.renderedText.Font, BookLines[i]) : FontsLoader.Instance.GetWidthASCII(_bookPage.renderedText.Font, BookLines[i]);
 
                 sb.Append(BookLines[i]);
 
-                if (i + 1 < l && (string.IsNullOrWhiteSpace(BookLines[i]) || w + sw < _bookPage.renderedText.MaxWidth))
+                if (BookLines[i] == null)
+                    continue;
+
+                if (i + 1 < l && (string.IsNullOrWhiteSpace(BookLines[i]) && !BookLines[i].Contains("\n") || w + sw < _bookPage.renderedText.MaxWidth))
                 {
                     sb.Append('\n');
                     BookLines[i] += '\n';
@@ -140,8 +183,14 @@ namespace ClassicUO.Game.UI.Gumps
 
             _bookPage = new StbPageTextBox
             (
-                DefaultFont, BookPageCount, this, MAX_BOOK_CHARS_PER_LINE * MAX_BOOK_LINES * BookPageCount, 156,
-                IsNewBook, FontStyle.ExtraHeight, 2
+                DefaultFont,
+                BookPageCount,
+                this,
+                MAX_BOOK_CHARS_PER_LINE * MAX_BOOK_LINES * BookPageCount,
+                156,
+                IsNewBook,
+                FontStyle.ExtraHeight,
+                2
             )
             {
                 X = 0,
@@ -161,7 +210,8 @@ namespace ClassicUO.Game.UI.Gumps
                     Height = 25,
                     Width = 155,
                     IsEditable = IsEditable
-                }, 1
+                },
+                1
             );
 
             _titleTextBox.SetText(title);
@@ -177,7 +227,8 @@ namespace ClassicUO.Game.UI.Gumps
                     Height = 25,
                     Width = 155,
                     IsEditable = IsEditable
-                }, 1
+                },
+                1
             );
 
             _authorTextBox.SetText(author);
@@ -256,18 +307,19 @@ namespace ClassicUO.Game.UI.Gumps
                 Client.Game.Scene.Audio.PlaySound(0x0055);
             }
 
-            //Non-editable books only have page data sent for currently viewed pages
+            //Non-editable books may only have data for the currently displayed pages,
+            //but some servers send their entire contents in one go so we need to keep track of which pages we know
             if (!IsEditable)
             {
                 int leftPage = (page - 1) << 1;
                 int rightPage = leftPage + 1;
 
-                if (leftPage > 0)
+                if (leftPage > 0 && !KnownPages.Contains(leftPage))
                 {
                     NetClient.Socket.Send(new PBookPageDataRequest(LocalSerial, (ushort) leftPage));
                 }
 
-                if (leftPage + 1 < MaxPage * 2)
+                if (rightPage < MaxPage * 2 && !KnownPages.Contains(rightPage))
                 {
                     NetClient.Socket.Send(new PBookPageDataRequest(LocalSerial, (ushort) rightPage));
                 }
@@ -284,13 +336,11 @@ namespace ClassicUO.Game.UI.Gumps
                         {
                             if (UseNewHeader)
                             {
-                                NetClient.Socket.Send
-                                    (new PBookHeaderChanged(LocalSerial, _titleTextBox.Text, _authorTextBox.Text));
+                                NetClient.Socket.Send(new PBookHeaderChanged(LocalSerial, _titleTextBox.Text, _authorTextBox.Text));
                             }
                             else
                             {
-                                NetClient.Socket.Send
-                                    (new PBookHeaderChangedOld(LocalSerial, _titleTextBox.Text, _authorTextBox.Text));
+                                NetClient.Socket.Send(new PBookHeaderChangedOld(LocalSerial, _titleTextBox.Text, _authorTextBox.Text));
                             }
                         }
                         else
@@ -311,9 +361,7 @@ namespace ClassicUO.Game.UI.Gumps
             ActivePage = page;
             UpdatePageButtonVisibility();
 
-            if (UIManager.KeyboardFocusControl == null ||
-                UIManager.KeyboardFocusControl != UIManager.SystemChat.TextBoxControl &&
-                UIManager.KeyboardFocusControl != _bookPage && page != _bookPage._focusPage / 2 + 1)
+            if (UIManager.KeyboardFocusControl == null || UIManager.KeyboardFocusControl != UIManager.SystemChat.TextBoxControl && UIManager.KeyboardFocusControl != _bookPage && page != _bookPage._focusPage / 2 + 1)
             {
                 UIManager.SystemChat.TextBoxControl.SetKeyboardFocus();
             }
@@ -333,7 +381,15 @@ namespace ClassicUO.Game.UI.Gumps
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
             base.Draw(batcher, x, y);
-            Rectangle scissor = ScissorStack.CalculateScissors(Matrix.Identity, x, y, Width, Height);
+
+            Rectangle scissor = ScissorStack.CalculateScissors
+            (
+                Matrix.Identity,
+                x,
+                y,
+                Width,
+                Height
+            );
 
             if (ScissorStack.PushScissors(batcher.GraphicsDevice, scissor))
             {
@@ -344,8 +400,26 @@ namespace ClassicUO.Game.UI.Gumps
                 if (startpage < BookPageCount)
                 {
                     int poy = _bookPage._pageCoords[startpage, 0], phy = _bookPage._pageCoords[startpage, 1];
-                    _bookPage.DrawSelection(batcher, x + RIGHT_X, y + UPPER_MARGIN, poy, poy + phy);
-                    t.Draw(batcher, x + RIGHT_X, y + UPPER_MARGIN, 0, poy, t.Width, phy);
+
+                    _bookPage.DrawSelection
+                    (
+                        batcher,
+                        x + RIGHT_X,
+                        y + UPPER_MARGIN,
+                        poy,
+                        poy + phy
+                    );
+
+                    t.Draw
+                    (
+                        batcher,
+                        x + RIGHT_X,
+                        y + UPPER_MARGIN,
+                        0,
+                        poy,
+                        t.Width,
+                        phy
+                    );
 
                     if (startpage == _bookPage._caretPage)
                     {
@@ -357,9 +431,13 @@ namespace ClassicUO.Game.UI.Gumps
                                 {
                                     _bookPage.renderedCaret.Draw
                                     (
-                                        batcher, _bookPage._caretPos.X + x + RIGHT_X,
-                                        _bookPage._caretPos.Y + y + UPPER_MARGIN - poy, 0, 0,
-                                        _bookPage.renderedCaret.Width, _bookPage.renderedCaret.Height
+                                        batcher,
+                                        _bookPage._caretPos.X + x + RIGHT_X,
+                                        _bookPage._caretPos.Y + y + UPPER_MARGIN - poy,
+                                        0,
+                                        0,
+                                        _bookPage.renderedCaret.Width,
+                                        _bookPage.renderedCaret.Height
                                     );
                                 }
                             }
@@ -384,8 +462,26 @@ namespace ClassicUO.Game.UI.Gumps
                 if (startpage > 0)
                 {
                     int poy = _bookPage._pageCoords[startpage, 0], phy = _bookPage._pageCoords[startpage, 1];
-                    _bookPage.DrawSelection(batcher, x + LEFT_X, y + UPPER_MARGIN, poy, poy + phy);
-                    t.Draw(batcher, x + LEFT_X, y + UPPER_MARGIN, 0, poy, t.Width, phy);
+
+                    _bookPage.DrawSelection
+                    (
+                        batcher,
+                        x + LEFT_X,
+                        y + UPPER_MARGIN,
+                        poy,
+                        poy + phy
+                    );
+
+                    t.Draw
+                    (
+                        batcher,
+                        x + LEFT_X,
+                        y + UPPER_MARGIN,
+                        0,
+                        poy,
+                        t.Width,
+                        phy
+                    );
 
                     if (startpage == _bookPage._caretPage)
                     {
@@ -397,9 +493,13 @@ namespace ClassicUO.Game.UI.Gumps
                                 {
                                     _bookPage.renderedCaret.Draw
                                     (
-                                        batcher, _bookPage._caretPos.X + x + LEFT_X,
-                                        _bookPage._caretPos.Y + y + UPPER_MARGIN - poy, 0, 0,
-                                        _bookPage.renderedCaret.Width, _bookPage.renderedCaret.Height
+                                        batcher,
+                                        _bookPage._caretPos.X + x + LEFT_X,
+                                        _bookPage._caretPos.Y + y + UPPER_MARGIN - poy,
+                                        0,
+                                        0,
+                                        _bookPage.renderedCaret.Width,
+                                        _bookPage.renderedCaret.Height
                                     );
                                 }
                             }
@@ -471,7 +571,15 @@ namespace ClassicUO.Game.UI.Gumps
                 bool isunicode = true,
                 FontStyle style = FontStyle.None,
                 ushort hue = 0
-            ) : base(font, max_char_count, maxWidth, isunicode, style, hue)
+            ) : base
+            (
+                font,
+                max_char_count,
+                maxWidth,
+                isunicode,
+                style,
+                hue
+            )
             {
                 _pageCoords = new int[bookpages, 2];
                 _pageLines = new string[bookpages * MAX_BOOK_LINES];
@@ -652,8 +760,12 @@ namespace ClassicUO.Game.UI.Gumps
                                 {
                                     batcher.Draw2D
                                     (
-                                        SolidColorTextureCache.GetTexture(SELECTION_COLOR), x + drawX, y + drawY - starty, endX,
-                                        info.MaxHeight + 1, ref HueVector
+                                        SolidColorTextureCache.GetTexture(SELECTION_COLOR),
+                                        x + drawX,
+                                        y + drawY - starty,
+                                        endX,
+                                        info.MaxHeight + 1,
+                                        ref HueVector
                                     );
                                 }
 
@@ -666,8 +778,12 @@ namespace ClassicUO.Game.UI.Gumps
                             {
                                 batcher.Draw2D
                                 (
-                                    SolidColorTextureCache.GetTexture(SELECTION_COLOR), x + drawX, y + drawY - starty,
-                                    info.Width - drawX, info.MaxHeight + 1, ref HueVector
+                                    SolidColorTextureCache.GetTexture(SELECTION_COLOR),
+                                    x + drawX,
+                                    y + drawY - starty,
+                                    info.Width - drawX,
+                                    info.MaxHeight + 1,
+                                    ref HueVector
                                 );
                             }
 
@@ -699,8 +815,7 @@ namespace ClassicUO.Game.UI.Gumps
                     {
                         if (split[i].Length > 0)
                         {
-                            for (int p = 0, w = 0, pw = _rendererText.GetCharWidth(split[i][p]);;
-                                 pw = _rendererText.GetCharWidth(split[i][p]))
+                            for (int p = 0, w = 0, pw = _rendererText.GetCharWidth(split[i][p]);; pw = _rendererText.GetCharWidth(split[i][p]))
                             {
                                 if (w + pw > _rendererText.MaxWidth)
                                 {

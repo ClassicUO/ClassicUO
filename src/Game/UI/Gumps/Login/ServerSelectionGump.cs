@@ -1,27 +1,38 @@
 ﻿#region license
 
-// Copyright (C) 2020 ClassicUO Development Community on Github
+// Copyright (c) 2021, andreakarasho
+// All rights reserved.
 // 
-// This project is an alternative client for the game Ultima Online.
-// The goal of this is to develop a lightweight client considering
-// new technologies.
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+// 1. Redistributions of source code must retain the above copyright
+//    notice, this list of conditions and the following disclaimer.
+// 2. Redistributions in binary form must reproduce the above copyright
+//    notice, this list of conditions and the following disclaimer in the
+//    documentation and/or other materials provided with the distribution.
+// 3. All advertising materials mentioning features or use of this software
+//    must display the following acknowledgement:
+//    This product includes software developed by andreakarasho - https://github.com/andreakarasho
+// 4. Neither the name of the copyright holder nor the
+//    names of its contributors may be used to endorse or promote products
+//    derived from this software without specific prior written permission.
 // 
-//  This program is free software: you can redistribute it and/or modify
-//  it under the terms of the GNU General Public License as published by
-//  the Free Software Foundation, either version 3 of the License, or
-//  (at your option) any later version.
-// 
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-// 
-//  You should have received a copy of the GNU General Public License
-//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ''AS IS'' AND ANY
+// EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+// WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+// DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY
+// DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+// (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+// LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+// ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+// SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #endregion
 
 using System.Linq;
+using System.Net;
+using System.Net.NetworkInformation;
 using ClassicUO.Configuration;
 using ClassicUO.Data;
 using ClassicUO.Game.Scenes;
@@ -178,7 +189,15 @@ namespace ClassicUO.Game.UI.Gumps.Login
             );
 
             // Sever Scroll Area
-            ScrollArea scrollArea = new ScrollArea(150, 90, 393, 271, true);
+            ScrollArea scrollArea = new ScrollArea
+            (
+                150,
+                90,
+                393,
+                271,
+                true
+            );
+
             DataBox databox = new DataBox(0, 0, 1, 1);
             databox.WantUpdateSize = true;
             LoginScene loginScene = Client.Game.GetScene<LoginScene>();
@@ -298,8 +317,8 @@ namespace ClassicUO.Game.UI.Gumps.Login
             private readonly ServerListEntry _entry;
             private readonly HoveredLabel _server_packet_loss;
             private readonly HoveredLabel _server_ping;
-
             private readonly HoveredLabel _serverName;
+            private uint _pingCheckTime = 0;
 
             public ServerEntryGump(ServerListEntry entry, byte font, ushort normal_hue, ushort selected_hue)
             {
@@ -310,16 +329,31 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 Add
                 (
                     _serverName = new HoveredLabel
-                        (entry.Name, false, normal_hue, selected_hue, selected_hue, font: font)
-                        {
-                            X = 74,
-                            AcceptMouseInput = false
-                        }
+                    (
+                        entry.Name,
+                        false,
+                        normal_hue,
+                        selected_hue,
+                        selected_hue,
+                        font: font
+                    )
+                    {
+                        X = 74,
+                        AcceptMouseInput = false
+                    }
                 );
 
                 Add
                 (
-                    _server_ping = new HoveredLabel("-", false, normal_hue, selected_hue, selected_hue, font: font)
+                    _server_ping = new HoveredLabel
+                    (
+                        "-",
+                        false,
+                        normal_hue,
+                        selected_hue,
+                        selected_hue,
+                        font: font
+                    )
                     {
                         X = 250,
                         AcceptMouseInput = false
@@ -329,11 +363,18 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 Add
                 (
                     _server_packet_loss = new HoveredLabel
-                        ("-", false, normal_hue, selected_hue, selected_hue, font: font)
-                        {
-                            X = 320,
-                            AcceptMouseInput = false
-                        }
+                    (
+                        "-",
+                        false,
+                        normal_hue,
+                        selected_hue,
+                        selected_hue,
+                        font: font
+                    )
+                    {
+                        X = 320,
+                        AcceptMouseInput = false
+                    }
                 );
 
 
@@ -367,6 +408,46 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 if (button == MouseButtonType.Left)
                 {
                     OnButtonClick((int) Buttons.Server + _buttonId);
+                }
+            }
+
+            public override void Update(double totalTime, double frameTime)
+            {
+                base.Update(totalTime, frameTime);
+
+                if (_pingCheckTime < Time.Ticks)
+                {
+                    _pingCheckTime = Time.Ticks + 2000;
+                    _entry.DoPing();
+
+                    switch (_entry.PingStatus)
+                    {
+                        case IPStatus.Success:
+                            _server_ping.Text = _entry.Ping == -1 ? "-" : _entry.Ping.ToString();
+
+                            break;
+
+                        case IPStatus.DestinationNetworkUnreachable:
+                        case IPStatus.DestinationHostUnreachable:
+                        case IPStatus.DestinationProtocolUnreachable:
+                        case IPStatus.DestinationPortUnreachable:
+                        case IPStatus.DestinationUnreachable:
+                            _server_ping.Text = "unreach.";
+
+                            break;
+
+                        case IPStatus.TimedOut:
+                            _server_ping.Text = "time out";
+
+                            break;
+
+                        default:
+                            _server_ping.Text = $"unk. [{(int) _entry.PingStatus}]";
+
+                            break;
+                    }
+
+                    _server_packet_loss.Text = $"{_entry.PacketLoss}%";
                 }
             }
         }

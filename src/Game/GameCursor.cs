@@ -1,23 +1,32 @@
 ﻿#region license
 
-// Copyright (C) 2020 ClassicUO Development Community on Github
+// Copyright (c) 2021, andreakarasho
+// All rights reserved.
 // 
-// This project is an alternative client for the game Ultima Online.
-// The goal of this is to develop a lightweight client considering
-// new technologies.
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+// 1. Redistributions of source code must retain the above copyright
+//    notice, this list of conditions and the following disclaimer.
+// 2. Redistributions in binary form must reproduce the above copyright
+//    notice, this list of conditions and the following disclaimer in the
+//    documentation and/or other materials provided with the distribution.
+// 3. All advertising materials mentioning features or use of this software
+//    must display the following acknowledgement:
+//    This product includes software developed by andreakarasho - https://github.com/andreakarasho
+// 4. Neither the name of the copyright holder nor the
+//    names of its contributors may be used to endorse or promote products
+//    derived from this software without specific prior written permission.
 // 
-//  This program is free software: you can redistribute it and/or modify
-//  it under the terms of the GNU General Public License as published by
-//  the Free Software Foundation, either version 3 of the License, or
-//  (at your option) any later version.
-// 
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-// 
-//  You should have received a copy of the GNU General Public License
-//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ''AS IS'' AND ANY
+// EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+// WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+// DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY
+// DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+// (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+// LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+// ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+// SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #endregion
 
@@ -68,8 +77,7 @@ namespace ClassicUO.Game
         private ushort _graphic = 0x2073;
         private bool _needGraphicUpdate = true;
         private Point _offset;
-        private readonly RenderedText _targetDistanceText = RenderedText.Create
-            (string.Empty, 0x0481, style: FontStyle.BlackBorder);
+        private readonly RenderedText _targetDistanceText = RenderedText.Create(string.Empty, 0x0481, style: FontStyle.BlackBorder);
         private readonly List<Multi> _temp = new List<Multi>();
         private readonly Tooltip _tooltip;
 
@@ -254,7 +262,14 @@ namespace ClassicUO.Game
                             fixed (uint* ptr = pixels)
                             {
                                 SDL.SDL_Surface* surface = (SDL.SDL_Surface*) SDL.SDL_CreateRGBSurfaceWithFormatFrom
-                                    ((IntPtr) ptr, w, h, 32, 4 * w, SDL.SDL_PIXELFORMAT_ABGR8888);
+                                (
+                                    (IntPtr) ptr,
+                                    w,
+                                    h,
+                                    32,
+                                    4 * w,
+                                    SDL.SDL_PIXELFORMAT_ABGR8888
+                                );
 
                                 if (i == 2)
                                 {
@@ -273,12 +288,7 @@ namespace ClassicUO.Game
                                             {
                                                 c.PackedValue = *pixels_ptr;
 
-                                                *pixels_ptr = HuesHelper.Color16To32
-                                                              (
-                                                                  HuesLoader.Instance.GetColor16
-                                                                      (HuesHelper.ColorToHue(c), 0x0033)
-                                                              ) |
-                                                              0xFF_00_00_00;
+                                                *pixels_ptr = HuesHelper.Color16To32(HuesLoader.Instance.GetColor16(HuesHelper.ColorToHue(c), 0x0033)) | 0xFF_00_00_00;
                                             }
 
                                             ++pixels_ptr;
@@ -320,10 +330,7 @@ namespace ClassicUO.Game
 
         public void SetDraggedItem(Point? offset)
         {
-            _draggedItemTexture = ItemHold.IsGumpTexture ?
-                GumpsLoader.Instance.GetTexture
-                    ((ushort) (ItemHold.DisplayedGraphic - Constants.ITEM_GUMP_TEXTURE_OFFSET)) :
-                ArtLoader.Instance.GetTexture(ItemHold.DisplayedGraphic);
+            _draggedItemTexture = ItemHold.IsGumpTexture ? GumpsLoader.Instance.GetTexture((ushort) (ItemHold.DisplayedGraphic - Constants.ITEM_GUMP_TEXTURE_OFFSET)) : ArtLoader.Instance.GetTexture(ItemHold.DisplayedGraphic);
 
             if (_draggedItemTexture == null)
             {
@@ -387,8 +394,7 @@ namespace ClassicUO.Game
                     int x = ItemHold.FixedX - _offset.X;
                     int y = ItemHold.FixedY - _offset.Y;
 
-                    if (Mouse.Position.X >= x && Mouse.Position.X < x + _draggedItemTexture.Width &&
-                        Mouse.Position.Y >= y && Mouse.Position.Y < y + _draggedItemTexture.Height)
+                    if (Mouse.Position.X >= x && Mouse.Position.X < x + _draggedItemTexture.Width && Mouse.Position.Y >= y && Mouse.Position.Y < y + _draggedItemTexture.Height)
                     {
                         if (!ItemHold.IgnoreFixedPosition)
                         {
@@ -451,10 +457,7 @@ namespace ClassicUO.Game
 
                                 if (selectedObj.Z < World.CustomHouseManager.MinHouseZ)
                                 {
-                                    if (selectedObj.X >= World.CustomHouseManager.StartPos.X &&
-                                        selectedObj.X <= World.CustomHouseManager.EndPos.X - 1 &&
-                                        selectedObj.Y >= World.CustomHouseManager.StartPos.Y &&
-                                        selectedObj.Y <= World.CustomHouseManager.EndPos.Y - 1)
+                                    if (selectedObj.X >= World.CustomHouseManager.StartPos.X && selectedObj.X <= World.CustomHouseManager.EndPos.X - 1 && selectedObj.Y >= World.CustomHouseManager.StartPos.Y && selectedObj.Y <= World.CustomHouseManager.EndPos.Y - 1)
                                     {
                                         if (type != CUSTOM_HOUSE_BUILD_TYPE.CHBT_STAIR)
                                         {
@@ -535,10 +538,7 @@ namespace ClassicUO.Game
                             break;
                     }
 
-                    sb.Draw2D
-                    (
-                        _aura, Mouse.Position.X + hotX - (25 >> 1), Mouse.Position.Y + hotY - (25 >> 1), ref _auraVector
-                    );
+                    sb.Draw2D(_aura, Mouse.Position.X + hotX - (25 >> 1), Mouse.Position.Y + hotY - (25 >> 1), ref _auraVector);
                 }
 
                 if (ProfileManager.CurrentProfile.ShowTargetRangeIndicator)
@@ -574,12 +574,15 @@ namespace ClassicUO.Game
 
                 Vector3 hue = Vector3.Zero;
 
-                ShaderHueTranslator.GetHueVector
-                    (ref hue, ItemHold.Hue, ItemHold.IsPartialHue, ItemHold.HasAlpha ? .5f : 0);
+                ShaderHueTranslator.GetHueVector(ref hue, ItemHold.Hue, ItemHold.IsPartialHue, ItemHold.HasAlpha ? .5f : 0);
 
                 sb.Draw2D
                 (
-                    _draggedItemTexture, x, y, _draggedItemTexture.Width * scale, _draggedItemTexture.Height * scale,
+                    _draggedItemTexture,
+                    x,
+                    y,
+                    _draggedItemTexture.Width * scale,
+                    _draggedItemTexture.Height * scale,
                     ref hue
                 );
 
@@ -590,8 +593,12 @@ namespace ClassicUO.Game
 
                     sb.Draw2D
                     (
-                        _draggedItemTexture, x, y, _draggedItemTexture.Width * scale,
-                        _draggedItemTexture.Height * scale, ref hue
+                        _draggedItemTexture,
+                        x,
+                        y,
+                        _draggedItemTexture.Width * scale,
+                        _draggedItemTexture.Height * scale,
+                        ref hue
                     );
                 }
             }
@@ -625,10 +632,7 @@ namespace ClassicUO.Game
                     _vec = Vector3.Zero;
                 }
 
-                sb.Draw2D
-                (
-                    ArtLoader.Instance.GetTexture(Graphic), Mouse.Position.X + offX, Mouse.Position.Y + offY, ref _vec
-                );
+                sb.Draw2D(ArtLoader.Instance.GetTexture(Graphic), Mouse.Position.X + offX, Mouse.Position.Y + offY, ref _vec);
             }
         }
 
@@ -636,10 +640,7 @@ namespace ClassicUO.Game
         {
             if (Client.Game.Scene is GameScene gs)
             {
-                if (!World.ClientFeatures.TooltipsEnabled ||
-                    SelectedObject.Object is Item selectedItem && selectedItem.IsLocked &&
-                    selectedItem.ItemData.Weight == 255 && !selectedItem.ItemData.IsContainer ||
-                    ItemHold.Enabled && !ItemHold.IsFixedPosition)
+                if (!World.ClientFeatures.TooltipsEnabled || SelectedObject.Object is Item selectedItem && selectedItem.IsLocked && selectedItem.ItemData.Weight == 255 && !selectedItem.ItemData.IsContainer || ItemHold.Enabled && !ItemHold.IsFixedPosition)
                 {
                     if (!_tooltip.IsEmpty && (UIManager.MouseOverControl == null || UIManager.IsMouseOverWorld))
                     {
@@ -714,8 +715,7 @@ namespace ClassicUO.Game
                 return _cursorData[war, 13];
             }
 
-            if (UIManager.MouseOverControl != null && UIManager.MouseOverControl.AcceptKeyboardInput &&
-                UIManager.MouseOverControl.IsEditable)
+            if (UIManager.MouseOverControl != null && UIManager.MouseOverControl.AcceptKeyboardInput && UIManager.MouseOverControl.IsEditable)
             {
                 return _cursorData[war, 14];
             }
@@ -732,14 +732,19 @@ namespace ClassicUO.Game
                 return result;
             }
 
-            int windowCenterX = ProfileManager.CurrentProfile.GameWindowPosition.X +
-                                (ProfileManager.CurrentProfile.GameWindowSize.X >> 1);
+            int windowCenterX = ProfileManager.CurrentProfile.GameWindowPosition.X + (ProfileManager.CurrentProfile.GameWindowSize.X >> 1);
 
-            int windowCenterY = ProfileManager.CurrentProfile.GameWindowPosition.Y +
-                                (ProfileManager.CurrentProfile.GameWindowSize.Y >> 1);
+            int windowCenterY = ProfileManager.CurrentProfile.GameWindowPosition.Y + (ProfileManager.CurrentProfile.GameWindowSize.Y >> 1);
 
-            return _cursorData[
-                war, GetMouseDirection(windowCenterX, windowCenterY, Mouse.Position.X, Mouse.Position.Y, 1)];
+            return _cursorData[war,
+                               GetMouseDirection
+                               (
+                                   windowCenterX,
+                                   windowCenterY,
+                                   Mouse.Position.X,
+                                   Mouse.Position.Y,
+                                   1
+                               )];
         }
 
         public static int GetMouseDirection(int x1, int y1, int to_x, int to_y, int current_facing)

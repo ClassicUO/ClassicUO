@@ -1,23 +1,32 @@
 ﻿#region license
 
-// Copyright (C) 2020 ClassicUO Development Community on Github
+// Copyright (c) 2021, andreakarasho
+// All rights reserved.
 // 
-// This project is an alternative client for the game Ultima Online.
-// The goal of this is to develop a lightweight client considering
-// new technologies.
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+// 1. Redistributions of source code must retain the above copyright
+//    notice, this list of conditions and the following disclaimer.
+// 2. Redistributions in binary form must reproduce the above copyright
+//    notice, this list of conditions and the following disclaimer in the
+//    documentation and/or other materials provided with the distribution.
+// 3. All advertising materials mentioning features or use of this software
+//    must display the following acknowledgement:
+//    This product includes software developed by andreakarasho - https://github.com/andreakarasho
+// 4. Neither the name of the copyright holder nor the
+//    names of its contributors may be used to endorse or promote products
+//    derived from this software without specific prior written permission.
 // 
-//  This program is free software: you can redistribute it and/or modify
-//  it under the terms of the GNU General Public License as published by
-//  the Free Software Foundation, either version 3 of the License, or
-//  (at your option) any later version.
-// 
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-// 
-//  You should have received a copy of the GNU General Public License
-//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ''AS IS'' AND ANY
+// EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+// WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+// DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY
+// DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+// (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+// LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+// ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+// SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #endregion
 
@@ -47,8 +56,7 @@ namespace ClassicUO.IO
 
         private static UltimaLive _UL;
 
-        private static readonly char[] _pathSeparatorChars =
-            { Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar };
+        private static readonly char[] _pathSeparatorChars = { Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar };
         private uint[] _EOF;
         private ULFileMul[] _filesIdxStatics;
         private ULFileMul[] _filesMap;
@@ -98,10 +106,7 @@ namespace ClassicUO.IO
                     {
                         if (Time.Ticks >= _UL._SentWarning)
                         {
-                            Log.Trace
-                            (
-                                $"The server is requesting access to MAP: {mapId} but we only have {_UL._filesMap.Length} maps!"
-                            );
+                            Log.Trace($"The server is requesting access to MAP: {mapId} but we only have {_UL._filesMap.Length} maps!");
 
                             _UL._SentWarning = Time.Ticks + 100000;
                         }
@@ -137,13 +142,9 @@ namespace ClassicUO.IO
                     int blockY = block % mapHeightInBlocks;
 
                     //this will avoid going OVER the wrapsize, so that we have the ILLUSION of never going over the main world
-                    mapWidthInBlocks = blockX < _UL.MapSizeWrapSize[mapId, 2] >> 3 ?
-                        _UL.MapSizeWrapSize[mapId, 2] >> 3 :
-                        mapWidthInBlocks;
+                    mapWidthInBlocks = blockX < _UL.MapSizeWrapSize[mapId, 2] >> 3 ? _UL.MapSizeWrapSize[mapId, 2] >> 3 : mapWidthInBlocks;
 
-                    mapHeightInBlocks = blockY < _UL.MapSizeWrapSize[mapId, 3] >> 3 ?
-                        _UL.MapSizeWrapSize[mapId, 3] >> 3 :
-                        mapHeightInBlocks;
+                    mapHeightInBlocks = blockY < _UL.MapSizeWrapSize[mapId, 3] >> 3 ? _UL.MapSizeWrapSize[mapId, 3] >> 3 : mapHeightInBlocks;
 
                     ushort[] checkSumsToBeSent = new ushort[CRC_LENGTH]; //byte 015 through 64   -  25 block CRCs
 
@@ -223,10 +224,7 @@ namespace ClassicUO.IO
                     {
                         if (Time.Ticks >= _UL._SentWarning)
                         {
-                            Log.Trace
-                            (
-                                $"The server is requesting access to MAP: {mapId} but we only have {_UL._filesMap.Length} maps!"
-                            );
+                            Log.Trace($"The server is requesting access to MAP: {mapId} but we only have {_UL._filesMap.Length} maps!");
 
                             _UL._SentWarning = Time.Ticks + 100000;
                         }
@@ -249,8 +247,7 @@ namespace ClassicUO.IO
                         if (totalLength <= 0)
                         {
                             //update index lookup AND static size on disk (first 4 bytes lookup, next 4 is statics size)
-                            _UL._filesIdxStatics[mapId]
-                               .WriteArray(index, new byte[8] { 0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00 });
+                            _UL._filesIdxStatics[mapId].WriteArray(index, new byte[8] { 0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00 });
 
                             Log.Trace($"writing zero length statics to index at 0x{index:X8}");
                         }
@@ -265,10 +262,7 @@ namespace ClassicUO.IO
                             //Do we have enough room to write the statics into the existing location?
                             if (existingStaticsLength >= totalLength && lookup != 0xFFFFFFFF)
                             {
-                                Log.Trace
-                                (
-                                    $"writing statics to existing file location at 0x{lookup:X8}, length:{totalLength}"
-                                );
+                                Log.Trace($"writing statics to existing file location at 0x{lookup:X8}, length:{totalLength}");
                             }
                             else
                             {
@@ -378,8 +372,7 @@ namespace ClassicUO.IO
                     p.Seek(7);
                     uint maps = p.ReadUInt() * 7 / 9;
 
-                    if (p.Length < maps * 9 + 15
-                    ) //the packet has padding inside, so it's usually larger or equal than what we expect
+                    if (p.Length < maps * 9 + 15) //the packet has padding inside, so it's usually larger or equal than what we expect
                     {
                         return;
                     }
@@ -389,9 +382,7 @@ namespace ClassicUO.IO
                     if (_UL.MapCRCs == null || _UL.MapCRCs.Length < maps)*/
                     _UL.MapCRCs = new ushort[sbyte.MaxValue][];
 
-                    _UL.MapSizeWrapSize =
-                        new ushort[sbyte.MaxValue,
-                            4]; //we always need to reinitialize this, as it could change from login to login even on the same server, in case of map changes (a change could happen on the fly with a client kick or on reboot)
+                    _UL.MapSizeWrapSize = new ushort[sbyte.MaxValue, 4]; //we always need to reinitialize this, as it could change from login to login even on the same server, in case of map changes (a change could happen on the fly with a client kick or on reboot)
 
                     p.Seek(15); //byte 15 to end of packet, the map definitions
                     List<int> validMaps = new List<int>();
@@ -401,19 +392,16 @@ namespace ClassicUO.IO
                         int mapNumber = p.ReadByte();
                         validMaps.Add(mapNumber);
 
-                        _UL.MapSizeWrapSize[mapNumber, 0] = Math.Min
-                            ((ushort) MapLoader.Instance.MapsDefaultSize[0, 0], p.ReadUShort());
+                        _UL.MapSizeWrapSize[mapNumber, 0] = Math.Min((ushort) MapLoader.Instance.MapsDefaultSize[0, 0], p.ReadUShort());
 
-                        _UL.MapSizeWrapSize[mapNumber, 1] = Math.Min
-                            ((ushort) MapLoader.Instance.MapsDefaultSize[0, 1], p.ReadUShort());
+                        _UL.MapSizeWrapSize[mapNumber, 1] = Math.Min((ushort) MapLoader.Instance.MapsDefaultSize[0, 1], p.ReadUShort());
 
                         _UL.MapSizeWrapSize[mapNumber, 2] = Math.Min(p.ReadUShort(), _UL.MapSizeWrapSize[mapNumber, 0]);
                         _UL.MapSizeWrapSize[mapNumber, 3] = Math.Min(p.ReadUShort(), _UL.MapSizeWrapSize[mapNumber, 1]);
                     }
 
                     //previously there were a minor amount of maps
-                    if (_UL._ValidMaps.Count == 0 || validMaps.Count > _UL._ValidMaps.Count ||
-                        !validMaps.TrueForAll(i => _UL._ValidMaps.Contains(i)))
+                    if (_UL._ValidMaps.Count == 0 || validMaps.Count > _UL._ValidMaps.Count || !validMaps.TrueForAll(i => _UL._ValidMaps.Contains(i)))
                     {
                         _UL._ValidMaps = validMaps;
                         Constants.MAPS_COUNT = sbyte.MaxValue;
@@ -644,12 +632,7 @@ namespace ClassicUO.IO
                 //we cannot allow directory separator inside our name
                 if (!string.IsNullOrEmpty(shardName) && shardName.IndexOfAny(_pathSeparatorChars) == -1)
                 {
-                    string folderPath = Environment.GetFolderPath
-                    (
-                        CUOEnviroment.IsUnix ?
-                            Environment.SpecialFolder.LocalApplicationData :
-                            Environment.SpecialFolder.CommonApplicationData
-                    );
+                    string folderPath = Environment.GetFolderPath(CUOEnviroment.IsUnix ? Environment.SpecialFolder.LocalApplicationData : Environment.SpecialFolder.CommonApplicationData);
 
                     string fullPath = Path.GetFullPath(Path.Combine(folderPath, shardName));
 
@@ -707,8 +690,7 @@ namespace ClassicUO.IO
                 uint size = (uint) fileInfo.Length;
                 Log.Trace($"UltimaLive -> ReLoading file:\t{FilePath}");
 
-                if (size > 0 || isStaticMul
-                ) //if new map is generated automatically, staticX.mul size is equal to ZERO, other files should always be major than zero!
+                if (size > 0 || isStaticMul) //if new map is generated automatically, staticX.mul size is equal to ZERO, other files should always be major than zero!
                 {
                     MemoryMappedFile mmf;
 
@@ -720,13 +702,9 @@ namespace ClassicUO.IO
                         }
                         catch
                         {
-                            mmf = MemoryMappedFile.CreateNew
-                            (
-                                _UL.RealShardName + fileInfo.Name, STATICS_MEMORY_SIZE, MemoryMappedFileAccess.ReadWrite
-                            );
+                            mmf = MemoryMappedFile.CreateNew(_UL.RealShardName + fileInfo.Name, STATICS_MEMORY_SIZE, MemoryMappedFileAccess.ReadWrite);
 
-                            using (FileStream stream = File.Open
-                                (fileInfo.FullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+                            using (FileStream stream = File.Open(fileInfo.FullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
                             using (Stream s = mmf.CreateViewStream(0, stream.Length, MemoryMappedFileAccess.Write))
                             {
                                 stream.CopyTo(s);
@@ -746,16 +724,18 @@ namespace ClassicUO.IO
                             mmf = MemoryMappedFile.CreateFromFile
                             (
                                 File.Open(FilePath, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite),
-                                _UL.RealShardName + fileInfo.Name, size, MemoryMappedFileAccess.ReadWrite,
-                                HandleInheritability.None, false
+                                _UL.RealShardName + fileInfo.Name,
+                                size,
+                                MemoryMappedFileAccess.ReadWrite,
+                                HandleInheritability.None,
+                                false
                             );
                         }
 
                         _file = mmf;
                     }
 
-                    _accessor = _file.CreateViewAccessor
-                        (0, isStaticMul ? STATICS_MEMORY_SIZE : size, MemoryMappedFileAccess.ReadWrite);
+                    _accessor = _file.CreateViewAccessor(0, isStaticMul ? STATICS_MEMORY_SIZE : size, MemoryMappedFileAccess.ReadWrite);
 
                     byte* ptr = null;
 
@@ -834,8 +814,7 @@ namespace ClassicUO.IO
 
                 _writer = new AsyncWriterTasked(this, _feedCancel);
 
-                _writerTask = Task.Run
-                    (_writer.Loop); // new Thread(_writer.Loop) {Name = "UL_File_Writer", IsBackground = true};
+                _writerTask = Task.Run(_writer.Loop); // new Thread(_writer.Loop) {Name = "UL_File_Writer", IsBackground = true};
             }
 
             internal (UOFile[], UOFileMul[], UOFileMul[]) GetFilesReference =>
@@ -907,8 +886,7 @@ namespace ClassicUO.IO
 
                             _filesStatics[i] = new ULFileMul(path, true);
 
-                            _filesStaticsStream[i] = File.Open
-                                (path, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite);
+                            _filesStaticsStream[i] = File.Open(path, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite);
 
                             _UL._EOF[i] = (uint) new FileInfo(path).Length;
 
@@ -1006,11 +984,9 @@ namespace ClassicUO.IO
 
             private static void CreateNewPersistentMap(int mapId, string mapPath, string staIdxPath, string staticsPath)
             {
-                int mapWidthInBlocks =
-                    Instance.MapBlocksSize[Instance.MapBlocksSize.GetLength(0) > mapId ? mapId : 0, 0]; //horizontal
+                int mapWidthInBlocks = Instance.MapBlocksSize[Instance.MapBlocksSize.GetLength(0) > mapId ? mapId : 0, 0]; //horizontal
 
-                int mapHeightInBlocks =
-                    Instance.MapBlocksSize[Instance.MapBlocksSize.GetLength(0) > mapId ? mapId : 0, 1]; //vertical
+                int mapHeightInBlocks = Instance.MapBlocksSize[Instance.MapBlocksSize.GetLength(0) > mapId ? mapId : 0, 1]; //vertical
 
                 int numberOfBytesInStrip = 196 * mapHeightInBlocks;
                 byte[] pVerticalBlockStrip = new byte[numberOfBytesInStrip];
@@ -1040,7 +1016,14 @@ namespace ClassicUO.IO
 
                 for (int y = 0; y < mapHeightInBlocks; y++)
                 {
-                    Array.Copy(block, 0, pVerticalBlockStrip, 196 * y, 196);
+                    Array.Copy
+                    (
+                        block,
+                        0,
+                        pVerticalBlockStrip,
+                        196 * y,
+                        196
+                    );
                 }
 
                 //create map new file
@@ -1066,7 +1049,14 @@ namespace ClassicUO.IO
 
                 for (int y = 0; y < mapHeightInBlocks; y++)
                 {
-                    Array.Copy(block, 0, pVerticalBlockStrip, 12 * y, 12);
+                    Array.Copy
+                    (
+                        block,
+                        0,
+                        pVerticalBlockStrip,
+                        12 * y,
+                        12
+                    );
                 }
 
                 //create map new file
@@ -1183,8 +1173,7 @@ namespace ClassicUO.IO
                     _token = token;
                 }
 
-                internal readonly ConcurrentQueue<(int, long, byte[])> _toWrite =
-                    new ConcurrentQueue<(int, long, byte[])>();
+                internal readonly ConcurrentQueue<(int, long, byte[])> _toWrite = new ConcurrentQueue<(int, long, byte[])>();
 
                 public void Loop()
                 {

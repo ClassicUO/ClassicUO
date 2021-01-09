@@ -611,8 +611,8 @@ Murderers, Criminals, Grays (Monsters/Animals)</value>
   <data name="CriminalColor" xml:space="preserve">
     <value>Criminal Color</value>
   </data>
-  <data name="AnimalColor" xml:space="preserve">
-    <value>Animal Color</value>
+  <data name="CanAttackColor" xml:space="preserve">
+    <value>Can Be Attacked Color</value>
   </data>
   <data name="MurdererColor" xml:space="preserve">
     <value>Murderer Color</value>
@@ -1188,7 +1188,16 @@ Min. Skill: {1}</value>
     <value>Flip map</value>
   </data>
   <data name="TopMost" xml:space="preserve">
-    <value>TopMost</value>
+    <value>Keep map on top</value>
+  </data>
+  <data name="GotoLocation" xml:space="preserve">
+    <value>Go to location</value>
+  </data>
+  <data name="EnterLocation" xml:space="preserve">
+    <value>Enter X Y location:</value>
+  </data>
+  <data name="InvalidLocation" xml:space="preserve">
+    <value>Invalid location entered: Enter "X Y" or "0°0'N,0°0'W"</value>
   </data>
   <data name="FreeView" xml:space="preserve">
     <value>Free view</value>
@@ -1413,5 +1422,8 @@ Client version: '{0}'</value>
   </data>
   <data name="ShowStatsChangedMessage" xml:space="preserve">
     <value>Inform when stats change</value>
+  </data>
+  <data name="ShadowStatics" xml:space="preserve">
+    <value>Show tree and rock shadows</value>
   </data>
 </root>

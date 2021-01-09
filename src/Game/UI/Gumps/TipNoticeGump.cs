@@ -1,50 +1,65 @@
 ﻿#region license
 
-// Copyright (C) 2020 ClassicUO Development Community on Github
+// Copyright (c) 2021, andreakarasho
+// All rights reserved.
 // 
-// This project is an alternative client for the game Ultima Online.
-// The goal of this is to develop a lightweight client considering
-// new technologies.
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+// 1. Redistributions of source code must retain the above copyright
+//    notice, this list of conditions and the following disclaimer.
+// 2. Redistributions in binary form must reproduce the above copyright
+//    notice, this list of conditions and the following disclaimer in the
+//    documentation and/or other materials provided with the distribution.
+// 3. All advertising materials mentioning features or use of this software
+//    must display the following acknowledgement:
+//    This product includes software developed by andreakarasho - https://github.com/andreakarasho
+// 4. Neither the name of the copyright holder nor the
+//    names of its contributors may be used to endorse or promote products
+//    derived from this software without specific prior written permission.
 // 
-//  This program is free software: you can redistribute it and/or modify
-//  it under the terms of the GNU General Public License as published by
-//  the Free Software Foundation, either version 3 of the License, or
-//  (at your option) any later version.
-// 
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-// 
-//  You should have received a copy of the GNU General Public License
-//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ''AS IS'' AND ANY
+// EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+// WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+// DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY
+// DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+// (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+// LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+// ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+// SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #endregion
 
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
+using ClassicUO.Network;
 using ClassicUO.Utility.Collections;
 
 namespace ClassicUO.Game.UI.Gumps
 {
     internal class TipNoticeGump : Gump
     {
-        internal static TipNoticeGump _tips;
         private readonly ExpandableScroll _background;
-        private int _idx;
-        private readonly OrderedDictionary<uint, string> _pages;
         private readonly Button _prev, _next;
         private readonly ScrollArea _scrollArea;
         private readonly StbTextBox _textBox;
 
-        public TipNoticeGump(byte type, string page) : base(0, 0)
+        public TipNoticeGump(uint serial, byte type, string text) : base(serial, 0)
         {
             Height = 300;
             CanMove = true;
             CanCloseWithRightClick = true;
-            _scrollArea = new ScrollArea(0, 32, 272, Height - 96, false);
 
-            _textBox = new StbTextBox(1, -1, 220)
+            _scrollArea = new ScrollArea
+            (
+                0,
+                32,
+                272,
+                Height - 96,
+                false
+            );
+
+            _textBox = new StbTextBox(6, -1, 220, isunicode: false)
             {
                 Height = 20,
                 X = 35,
@@ -53,36 +68,16 @@ namespace ClassicUO.Game.UI.Gumps
                 IsEditable = false
             };
 
-            _textBox.SetText(page);
+            _textBox.SetText(text);
             Add(_background = new ExpandableScroll(0, 0, Height, 0x0820));
             _scrollArea.Add(_textBox);
             Add(_scrollArea);
 
             if (type == 0)
             {
-                _pages = new OrderedDictionary<uint, string>();
-                _tips = this;
                 _background.TitleGumpID = 0x9CA;
-                _idx = 0;
-                Add(_prev = new Button(0, 0x9cc, 0x9cc) { X = 35, ContainsByBounds = true });
-
-                _prev.MouseUp += (o, e) =>
-                {
-                    if (e.Button == MouseButtonType.Left)
-                    {
-                        SetPage(_idx - 1);
-                    }
-                };
-
-                Add(_next = new Button(0, 0x9cd, 0x9cd) { X = 240, ContainsByBounds = true });
-
-                _next.MouseUp += (o, e) =>
-                {
-                    if (e.Button == MouseButtonType.Left)
-                    {
-                        SetPage(_idx + 1);
-                    }
-                };
+                Add(new Button(1, 0x9cc, 0x9cc) { X = 35, ContainsByBounds = true, ButtonAction = ButtonAction.Activate });
+                Add(new Button(2, 0x9cd, 0x9cd) { X = 240, ContainsByBounds = true, ButtonAction = ButtonAction.Activate });
             }
             else
             {
@@ -93,47 +88,40 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override void OnButtonClick(int buttonID)
         {
-            // necessary to avoid closing
-        }
-
-        public override void Dispose()
-        {
-            _tips = null;
-            base.Dispose();
-        }
-
-
-        public override void OnPageChanged()
-        {
-            Height = _background.SpecialHeight;
-            _scrollArea.Height = _background.SpecialHeight - 96;
-
-            foreach (Control c in _scrollArea.Children)
+            switch (buttonID)
             {
-                // if (c is ScrollAreaItem)
-                {
-                    c.OnPageChanged();
-                }
-            }
+                case 1: // prev
+                    NetClient.Socket.Send(new PTipRequest((ushort) LocalSerial, 0));
+                    Dispose();
 
-            if (_prev != null && _next != null)
-            {
-                _prev.Y = _next.Y = _background.SpecialHeight - 53;
+                    break;
+
+                case 2: // next
+                    NetClient.Socket.Send(new PTipRequest((ushort) LocalSerial, 1));
+                    Dispose();
+
+                    break;
             }
         }
 
-        internal void AddTip(uint tipnum, string entry)
-        {
-            _pages.SetValue(tipnum, entry);
-        }
 
-        private void SetPage(int page)
-        {
-            if (page >= 0 && page < _pages.Count)
-            {
-                _idx = page;
-                _textBox.SetText(_pages[_idx]);
-            }
-        }
+        //public override void OnPageChanged()
+        //{
+        //    Height = _background.SpecialHeight;
+        //    _scrollArea.Height = _background.SpecialHeight - 96;
+
+        //    foreach (Control c in _scrollArea.Children)
+        //    {
+        //        // if (c is ScrollAreaItem)
+        //        {
+        //            c.OnPageChanged();
+        //        }
+        //    }
+
+        //    if (_prev != null && _next != null)
+        //    {
+        //        _prev.Y = _next.Y = _background.SpecialHeight - 53;
+        //    }
+        //}
     }
 }

@@ -18,7 +18,7 @@ namespace ManifestCreator
             "ClassicUO",
             "ClassicUO.bin.osx",
             "ClassicUO.bin.x86_64",
-            "ClassicUO.exe.config",  
+            //"ClassicUO.exe.config",  
             //"ClassicUO.pdb",                    // to verify
             "cuoapi.dll",
             "FNA.dll",

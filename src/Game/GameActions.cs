@@ -1,23 +1,32 @@
 ﻿#region license
 
-// Copyright (C) 2020 ClassicUO Development Community on Github
+// Copyright (c) 2021, andreakarasho
+// All rights reserved.
 // 
-// This project is an alternative client for the game Ultima Online.
-// The goal of this is to develop a lightweight client considering
-// new technologies.
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+// 1. Redistributions of source code must retain the above copyright
+//    notice, this list of conditions and the following disclaimer.
+// 2. Redistributions in binary form must reproduce the above copyright
+//    notice, this list of conditions and the following disclaimer in the
+//    documentation and/or other materials provided with the distribution.
+// 3. All advertising materials mentioning features or use of this software
+//    must display the following acknowledgement:
+//    This product includes software developed by andreakarasho - https://github.com/andreakarasho
+// 4. Neither the name of the copyright holder nor the
+//    names of its contributors may be used to endorse or promote products
+//    derived from this software without specific prior written permission.
 // 
-//  This program is free software: you can redistribute it and/or modify
-//  it under the terms of the GNU General Public License as published by
-//  the Free Software Foundation, either version 3 of the License, or
-//  (at your option) any later version.
-// 
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-// 
-//  You should have received a copy of the GNU General Public License
-//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ''AS IS'' AND ANY
+// EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+// WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+// DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY
+// DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+// (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+// LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+// ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+// SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #endregion
 
@@ -67,7 +76,7 @@ namespace ClassicUO.Game
         {
             PaperDollGump paperDollGump = UIManager.GetGump<PaperDollGump>(serial);
 
-            if(paperDollGump == null)
+            if (paperDollGump == null)
             {
                 DoubleClick(serial | 0x80000000);
             }
@@ -269,14 +278,12 @@ namespace ClassicUO.Game
             {
                 Mobile m = World.Mobiles.Get(serial);
 
-                if (m != null &&
-                    (World.Player.NotorietyFlag == NotorietyFlag.Innocent ||
-                     World.Player.NotorietyFlag == NotorietyFlag.Ally) && m.NotorietyFlag == NotorietyFlag.Innocent &&
-                    m != World.Player)
+                if (m != null && (World.Player.NotorietyFlag == NotorietyFlag.Innocent || World.Player.NotorietyFlag == NotorietyFlag.Ally) && m.NotorietyFlag == NotorietyFlag.Innocent && m != World.Player)
                 {
                     QuestionGump messageBox = new QuestionGump
                     (
-                        ResGeneral.ThisMayFlagYouCriminal, s =>
+                        ResGeneral.ThisMayFlagYouCriminal,
+                        s =>
                         {
                             if (s)
                             {
@@ -335,8 +342,7 @@ namespace ClassicUO.Game
             }
         }
 
-        public static void Say
-            (string message, ushort hue = 0xFFFF, MessageType type = MessageType.Regular, byte font = 3)
+        public static void Say(string message, ushort hue = 0xFFFF, MessageType type = MessageType.Regular, byte font = 3)
         {
             if (hue == 0xFFFF)
             {
@@ -344,9 +350,21 @@ namespace ClassicUO.Game
             }
 
             // TODO: identify what means 'older client' that uses ASCIISpeechRquest [0x03]
-            if (Client.Version >= ClientVersion.CV_300)
+            // 
+            // Fix -> #1267
+            if (Client.Version >= ClientVersion.CV_200)
             {
-                Socket.Send(new PUnicodeSpeechRequest(message, type, font, hue, "ENU"));
+                Socket.Send
+                (
+                    new PUnicodeSpeechRequest
+                    (
+                        message,
+                        type,
+                        font,
+                        hue,
+                        "ENU"
+                    )
+                );
             }
             else
             {
@@ -355,16 +373,17 @@ namespace ClassicUO.Game
         }
 
 
-        public static void Print
-        (
-            string message,
-            ushort hue = 946,
-            MessageType type = MessageType.Regular,
-            byte font = 3,
-            bool unicode = true
-        )
+        public static void Print(string message, ushort hue = 946, MessageType type = MessageType.Regular, byte font = 3, bool unicode = true)
         {
-            Print(null, message, hue, type, font, unicode);
+            Print
+            (
+                null,
+                message,
+                hue,
+                type,
+                font,
+                unicode
+            );
         }
 
         public static void Print
@@ -379,8 +398,15 @@ namespace ClassicUO.Game
         {
             MessageManager.HandleMessage
             (
-                entity, message, entity != null ? entity.Name : "System", hue, type, font,
-                entity == null ? TextType.SYSTEM : TextType.OBJECT, unicode, "ENU"
+                entity,
+                message,
+                entity != null ? entity.Name : "System",
+                hue,
+                type,
+                font,
+                entity == null ? TextType.SYSTEM : TextType.OBJECT,
+                unicode,
+                "ENU"
             );
         }
 
@@ -433,8 +459,7 @@ namespace ClassicUO.Game
 
             Item item = World.Items.Get(serial);
 
-            if (item == null || item.IsDestroyed || item.IsMulti ||
-                item.OnGround && (item.IsLocked || item.Distance > Constants.DRAG_ITEMS_DISTANCE))
+            if (item == null || item.IsDestroyed || item.IsMulti || item.OnGround && (item.IsLocked || item.Distance > Constants.DRAG_ITEMS_DISTANCE))
             {
                 return false;
             }
@@ -488,16 +513,36 @@ namespace ClassicUO.Game
 
         public static void DropItem(uint serial, int x, int y, int z, uint container)
         {
-            if (ItemHold.Enabled && !ItemHold.IsFixedPosition &&
-                (ItemHold.Serial != container || ItemHold.ItemData.IsStackable))
+            if (ItemHold.Enabled && !ItemHold.IsFixedPosition && (ItemHold.Serial != container || ItemHold.ItemData.IsStackable))
             {
                 if (Client.Version >= ClientVersion.CV_6017)
                 {
-                    Socket.Send(new PDropRequestNew(serial, (ushort) x, (ushort) y, (sbyte) z, 0, container));
+                    Socket.Send
+                    (
+                        new PDropRequestNew
+                        (
+                            serial,
+                            (ushort) x,
+                            (ushort) y,
+                            (sbyte) z,
+                            0,
+                            container
+                        )
+                    );
                 }
                 else
                 {
-                    Socket.Send(new PDropRequestOld(serial, (ushort) x, (ushort) y, (sbyte) z, container));
+                    Socket.Send
+                    (
+                        new PDropRequestOld
+                        (
+                            serial,
+                            (ushort) x,
+                            (ushort) y,
+                            (sbyte) z,
+                            container
+                        )
+                    );
                 }
 
                 ItemHold.Enabled = false;
@@ -521,10 +566,19 @@ namespace ClassicUO.Game
             }
         }
 
-        public static void ReplyGump
-            (uint local, uint server, int button, uint[] switches = null, Tuple<ushort, string>[] entries = null)
+        public static void ReplyGump(uint local, uint server, int button, uint[] switches = null, Tuple<ushort, string>[] entries = null)
         {
-            Socket.Send(new PGumpResponse(local, server, button, switches, entries));
+            Socket.Send
+            (
+                new PGumpResponse
+                (
+                    local,
+                    server,
+                    button,
+                    switches,
+                    entries
+                )
+            );
         }
 
         public static void RequestHelp()
@@ -555,6 +609,14 @@ namespace ClassicUO.Game
             //    mob.AddMessage(MessageType.Regular, "[PACKET REQUESTED]");
             //}
             Socket.Send(new PStatusRequest(serial));
+        }
+
+        public static void SendCloseStatus(uint serial)
+        {
+            if (Client.Version >= ClientVersion.CV_200)
+            {
+                Socket.Send(new PCloseStatusBarGump(serial));
+            }
         }
 
         public static void CastSpellFromBook(int index, uint bookSerial)
@@ -733,9 +795,7 @@ namespace ClassicUO.Game
 
             if (bag == 0)
             {
-                bag = ProfileManager.CurrentProfile.GrabBagSerial == 0 ?
-                    backpack.Serial :
-                    ProfileManager.CurrentProfile.GrabBagSerial;
+                bag = ProfileManager.CurrentProfile.GrabBagSerial == 0 ? backpack.Serial : ProfileManager.CurrentProfile.GrabBagSerial;
             }
 
             if (!World.Items.Contains(bag))
@@ -746,7 +806,15 @@ namespace ClassicUO.Game
             }
 
             PickUp(serial, 0, 0, amount);
-            DropItem(serial, 0xFFFF, 0xFFFF, 0, bag);
+
+            DropItem
+            (
+                serial,
+                0xFFFF,
+                0xFFFF,
+                0,
+                bag
+            );
         }
     }
 }
