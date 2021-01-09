@@ -1,4 +1,4 @@
-Copyright (c) 2020, andreakarasho
+Copyright (c) 2021, andreakarasho
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
