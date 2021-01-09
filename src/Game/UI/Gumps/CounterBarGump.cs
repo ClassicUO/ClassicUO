@@ -1,4 +1,5 @@
 #region license
+
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
 // 
@@ -26,6 +27,7 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 #endregion
 
 using System.Collections.Generic;
@@ -57,8 +59,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
         }
 
-        public CounterBarGump
-            (int x, int y, int rectSize = 30, int rows = 1, int columns = 1 /*, bool vertical = false*/) : base(0, 0)
+        public CounterBarGump(int x, int y, int rectSize = 30, int rows = 1, int columns = 1 /*, bool vertical = false*/) : base(0, 0)
         {
             X = x;
             Y = y;
@@ -322,12 +323,7 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     if (index < items.Length)
                     {
-                        items[index++]
-                            ?.SetGraphic
-                            (
-                                ushort.Parse(controlXml.GetAttribute("graphic")),
-                                ushort.Parse(controlXml.GetAttribute("hue"))
-                            );
+                        items[index++]?.SetGraphic(ushort.Parse(controlXml.GetAttribute("graphic")), ushort.Parse(controlXml.GetAttribute("hue")));
                     }
                     else
                     {
@@ -420,7 +416,15 @@ namespace ClassicUO.Game.UI.Gumps
                     if (ItemHold.Enabled)
                     {
                         SetGraphic(ItemHold.Graphic, ItemHold.Hue);
-                        GameActions.DropItem(ItemHold.Serial, ItemHold.X, ItemHold.Y, 0, ItemHold.Container);
+
+                        GameActions.DropItem
+                        (
+                            ItemHold.Serial,
+                            ItemHold.X,
+                            ItemHold.Y,
+                            0,
+                            ItemHold.Container
+                        );
                     }
                 }
                 else if (button == MouseButtonType.Right && Keyboard.Alt && Graphic != 0)
@@ -507,15 +511,19 @@ namespace ClassicUO.Game.UI.Gumps
                 base.Draw(batcher, x, y);
 
 
-                Texture2D color = SolidColorTextureCache.GetTexture
-                (
-                    MouseIsOver ? Color.Yellow :
-                    ProfileManager.CurrentProfile.CounterBarHighlightOnAmount &&
-                    _amount < ProfileManager.CurrentProfile.CounterBarHighlightAmount && Graphic != 0 ? Color.Red : Color.Gray
-                );
+                Texture2D color = SolidColorTextureCache.GetTexture(MouseIsOver ? Color.Yellow : ProfileManager.CurrentProfile.CounterBarHighlightOnAmount && _amount < ProfileManager.CurrentProfile.CounterBarHighlightAmount && Graphic != 0 ? Color.Red : Color.Gray);
 
                 ResetHueVector();
-                batcher.DrawRectangle(color, x, y, Width, Height, ref HueVector);
+
+                batcher.DrawRectangle
+                (
+                    color,
+                    x,
+                    y,
+                    Width,
+                    Height,
+                    ref HueVector
+                );
 
                 return true;
             }
@@ -541,7 +549,15 @@ namespace ClassicUO.Game.UI.Gumps
                     Add(_textureControl);
 
 
-                    _label = new Label("", true, 0x35, 0, 1, FontStyle.BlackBorder)
+                    _label = new Label
+                    (
+                        "",
+                        true,
+                        0x35,
+                        0,
+                        1,
+                        FontStyle.BlackBorder
+                    )
                     {
                         X = 2,
                         Y = Height - 15

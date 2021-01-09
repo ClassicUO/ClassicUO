@@ -1,4 +1,5 @@
 #region license
+
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
 // 
@@ -26,6 +27,7 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 #endregion
 
 using System.Collections.Generic;
@@ -115,10 +117,7 @@ namespace ClassicUO.Game.UI.Controls
             CanCloseWithEsc = false;
         }
 
-        public Button(List<string> parts) : this
-        (
-            parts.Count >= 8 ? int.Parse(parts[7]) : 0, UInt16Converter.Parse(parts[3]), UInt16Converter.Parse(parts[4])
-        )
+        public Button(List<string> parts) : this(parts.Count >= 8 ? int.Parse(parts[7]) : 0, UInt16Converter.Parse(parts[3]), UInt16Converter.Parse(parts[4]))
         {
             X = int.Parse(parts[1]);
             Y = int.Parse(parts[2]);
@@ -231,11 +230,26 @@ namespace ClassicUO.Game.UI.Controls
         {
             UOTexture texture = GetTextureByState();
 
-            ShaderHueTranslator.GetHueVector(ref HueVector, Hue, false, Alpha, true);
+            ShaderHueTranslator.GetHueVector
+            (
+                ref HueVector,
+                Hue,
+                false,
+                Alpha,
+                true
+            );
 
             HueVector.Z = Alpha;
 
-            batcher.Draw2D(texture, x, y, Width, Height, ref HueVector);
+            batcher.Draw2D
+            (
+                texture,
+                x,
+                y,
+                Width,
+                Height,
+                ref HueVector
+            );
 
             if (!string.IsNullOrEmpty(_caption))
             {
@@ -245,11 +259,7 @@ namespace ClassicUO.Game.UI.Controls
                 {
                     int yoffset = IsClicked ? 1 : 0;
 
-                    textTexture.Draw
-                    (
-                        batcher, x + ((Width - textTexture.Width) >> 1),
-                        y + yoffset + ((Height - textTexture.Height) >> 1)
-                    );
+                    textTexture.Draw(batcher, x + ((Width - textTexture.Width) >> 1), y + yoffset + ((Height - textTexture.Height) >> 1));
                 }
                 else
                 {

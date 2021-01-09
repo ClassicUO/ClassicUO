@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
 // 
@@ -26,6 +27,7 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 #endregion
 
 using System;
@@ -141,7 +143,17 @@ namespace ClassicUO.IO.Resources
                             string name = string.Intern(Encoding.UTF8.GetString(bufferString).TrimEnd('\0'));
 
                             StaticData[idx] = new StaticTiles
-                                (flags, weight, layer, count, animId, hue, lightIndex, height, name);
+                            (
+                                flags,
+                                weight,
+                                layer,
+                                count,
+                                animId,
+                                hue,
+                                lightIndex,
+                                height,
+                                name
+                            );
                         }
                     }
 
@@ -301,31 +313,25 @@ namespace ClassicUO.IO.Resources
                                 {
                                     int checkIndex = group[i];
 
-                                    if (checkIndex < 0 || checkIndex >=
-                                        Constants.MAX_LAND_DATA_INDEX_COUNT + StaticData.Length)
+                                    if (checkIndex < 0 || checkIndex >= Constants.MAX_LAND_DATA_INDEX_COUNT + StaticData.Length)
                                     {
                                         continue;
                                     }
 
-                                    if (index < Constants.MAX_LAND_DATA_INDEX_COUNT &&
-                                        checkIndex < Constants.MAX_LAND_DATA_INDEX_COUNT &&
-                                        checkIndex < LandData.Length && index < LandData.Length &&
-                                        !LandData[checkIndex].Equals(default) && LandData[index].Equals(default))
+                                    if (index < Constants.MAX_LAND_DATA_INDEX_COUNT && checkIndex < Constants.MAX_LAND_DATA_INDEX_COUNT && checkIndex < LandData.Length && index < LandData.Length && !LandData[checkIndex].Equals(default) && LandData[index].Equals(default))
                                     {
                                         LandData[index] = LandData[checkIndex];
 
                                         break;
                                     }
 
-                                    if (index >= Constants.MAX_LAND_DATA_INDEX_COUNT &&
-                                        checkIndex >= Constants.MAX_LAND_DATA_INDEX_COUNT)
+                                    if (index >= Constants.MAX_LAND_DATA_INDEX_COUNT && checkIndex >= Constants.MAX_LAND_DATA_INDEX_COUNT)
                                     {
                                         checkIndex -= Constants.MAX_LAND_DATA_INDEX_COUNT;
                                         checkIndex &= 0x3FFF;
                                         index -= Constants.MAX_LAND_DATA_INDEX_COUNT;
 
-                                        if (StaticData[index].Equals(default) &&
-                                            !StaticData[checkIndex].Equals(default))
+                                        if (StaticData[index].Equals(default) && !StaticData[checkIndex].Equals(default))
                                         {
                                             StaticData[index] = StaticData[checkIndex];
 

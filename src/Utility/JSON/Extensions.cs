@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
 // 
@@ -26,6 +27,7 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 #endregion
 
 using System;
@@ -118,8 +120,7 @@ namespace TinyJson
                 throw new ArgumentNullException();
             }
 
-            Predicate<Type> interfaceTest = i =>
-                i.IsGenericType && i.GetGenericTypeDefinition().IsAssignableFrom(genericInterface);
+            Predicate<Type> interfaceTest = i => i.IsGenericType && i.GetGenericTypeDefinition().IsAssignableFrom(genericInterface);
 
             return interfaceTest(type) || type.GetInterfaces().Any(i => interfaceTest(i));
         }

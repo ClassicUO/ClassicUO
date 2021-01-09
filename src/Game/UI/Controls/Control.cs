@@ -1,4 +1,5 @@
 #region license
+
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
 // 
@@ -26,6 +27,7 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 #endregion
 
 using System;
@@ -365,7 +367,16 @@ namespace ClassicUO.Game.UI.Controls
             if (IsVisible && CUOEnviroment.Debug)
             {
                 ResetHueVector();
-                batcher.DrawRectangle(SolidColorTextureCache.GetTexture(Color.Green), x, y, Width, Height, ref HueVector);
+
+                batcher.DrawRectangle
+                (
+                    SolidColorTextureCache.GetTexture(Color.Green),
+                    x,
+                    y,
+                    Width,
+                    Height,
+                    ref HueVector
+                );
             }
         }
 
@@ -404,13 +415,7 @@ namespace ClassicUO.Game.UI.Controls
             }
         }
 
-        internal event EventHandler<MouseEventArgs> MouseDown,
-                                                    MouseUp,
-                                                    MouseOver,
-                                                    MouseEnter,
-                                                    MouseExit,
-                                                    DragBegin,
-                                                    DragEnd;
+        internal event EventHandler<MouseEventArgs> MouseDown, MouseUp, MouseOver, MouseEnter, MouseExit, DragBegin, DragEnd;
 
         internal event EventHandler<MouseWheelEventArgs> MouseWheel;
 
@@ -669,8 +674,7 @@ namespace ClassicUO.Game.UI.Controls
 
             Parent?.OnMouseUp(X + x, Y + y, button);
 
-            if (button == MouseButtonType.Right && !IsDisposed && !CanCloseWithRightClick && !Keyboard.Alt &&
-                !Keyboard.Shift && !Keyboard.Ctrl)
+            if (button == MouseButtonType.Right && !IsDisposed && !CanCloseWithRightClick && !Keyboard.Alt && !Keyboard.Shift && !Keyboard.Ctrl)
             {
                 ContextMenu?.Show();
             }
@@ -685,11 +689,9 @@ namespace ClassicUO.Game.UI.Controls
         {
             if (_mouseIsDown && !_attempToDrag)
             {
-                Point offset = Mouse.LButtonPressed ? Mouse.LDragOffset :
-                    Mouse.MButtonPressed ? Mouse.MDragOffset : Point.Zero;
+                Point offset = Mouse.LButtonPressed ? Mouse.LDragOffset : Mouse.MButtonPressed ? Mouse.MDragOffset : Point.Zero;
 
-                if (Math.Abs(offset.X) > Constants.MIN_GUMP_DRAG_DISTANCE ||
-                    Math.Abs(offset.Y) > Constants.MIN_GUMP_DRAG_DISTANCE)
+                if (Math.Abs(offset.X) > Constants.MIN_GUMP_DRAG_DISTANCE || Math.Abs(offset.Y) > Constants.MIN_GUMP_DRAG_DISTANCE)
 
                 {
                     InvokeDragBegin(new Point(x, y));

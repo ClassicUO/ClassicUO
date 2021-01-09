@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
 // 
@@ -26,6 +27,7 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 #endregion
 
 using System;
@@ -115,11 +117,9 @@ namespace ClassicUO.Game.Managers
 
                 {
                     //server hue color per default
-                    if (!string.IsNullOrEmpty(text) && SpellDefinition.WordToTargettype.TryGetValue
-                        (text, out SpellDefinition spell))
+                    if (!string.IsNullOrEmpty(text) && SpellDefinition.WordToTargettype.TryGetValue(text, out SpellDefinition spell))
                     {
-                        if (currentProfile != null && currentProfile.EnabledSpellFormat &&
-                            !string.IsNullOrWhiteSpace(currentProfile.SpellDisplayFormat))
+                        if (currentProfile != null && currentProfile.EnabledSpellFormat && !string.IsNullOrWhiteSpace(currentProfile.SpellDisplayFormat))
                         {
                             StringBuilder sb = new StringBuilder(currentProfile.SpellDisplayFormat);
                             sb.Replace("{power}", spell.PowerWords);
@@ -162,7 +162,16 @@ namespace ClassicUO.Game.Managers
                         break;
                     }
 
-                    TextObject msg = CreateMessage(text, hue, font, unicode, type, textType);
+                    TextObject msg = CreateMessage
+                    (
+                        text,
+                        hue,
+                        font,
+                        unicode,
+                        type,
+                        textType
+                    );
+
                     msg.Owner = parent;
 
                     if (parent is Item it && !it.OnGround)
@@ -222,7 +231,21 @@ namespace ClassicUO.Game.Managers
             }
 
             MessageReceived.Raise
-                (new MessageEventArgs(parent, text, name, hue, type, font, textType, unicode, lang), parent);
+            (
+                new MessageEventArgs
+                (
+                    parent,
+                    text,
+                    name,
+                    hue,
+                    type,
+                    font,
+                    textType,
+                    unicode,
+                    lang
+                ),
+                parent
+            );
         }
 
         public static void OnLocalizedMessage(Entity entity, MessageEventArgs args)
@@ -246,15 +269,27 @@ namespace ClassicUO.Game.Managers
                 isunicode = ProfileManager.CurrentProfile.OverrideAllFontsIsUnicode;
             }
 
-            int width = isunicode
-                ? FontsLoader.Instance.GetWidthUnicode(font, msg)
-                : FontsLoader.Instance.GetWidthASCII(font, msg);
+            int width = isunicode ? FontsLoader.Instance.GetWidthUnicode(font, msg) : FontsLoader.Instance.GetWidthASCII(font, msg);
 
             if (width > 200)
             {
-                width = isunicode
-                    ? FontsLoader.Instance.GetWidthExUnicode(font, msg, 200, TEXT_ALIGN_TYPE.TS_LEFT, (ushort) FontStyle.BlackBorder)
-                    : FontsLoader.Instance.GetWidthExASCII(font, msg, 200, TEXT_ALIGN_TYPE.TS_LEFT, (ushort) FontStyle.BlackBorder);
+                width = isunicode ?
+                    FontsLoader.Instance.GetWidthExUnicode
+                    (
+                        font,
+                        msg,
+                        200,
+                        TEXT_ALIGN_TYPE.TS_LEFT,
+                        (ushort) FontStyle.BlackBorder
+                    ) :
+                    FontsLoader.Instance.GetWidthExASCII
+                    (
+                        font,
+                        msg,
+                        200,
+                        TEXT_ALIGN_TYPE.TS_LEFT,
+                        (ushort) FontStyle.BlackBorder
+                    );
             }
             else
             {
@@ -262,7 +297,7 @@ namespace ClassicUO.Game.Managers
             }
 
 
-            ushort fixedColor = (ushort)(hue & 0x3FFF);
+            ushort fixedColor = (ushort) (hue & 0x3FFF);
 
             if (fixedColor != 0)
             {
@@ -271,18 +306,18 @@ namespace ClassicUO.Game.Managers
                     fixedColor = 1;
                 }
 
-                fixedColor |= (ushort)(hue & 0xC000);
+                fixedColor |= (ushort) (hue & 0xC000);
             }
             else
             {
-                fixedColor = (ushort)(hue & 0x8000);
+                fixedColor = (ushort) (hue & 0x8000);
             }
 
             TextObject textObject = TextObject.Create();
             textObject.Alpha = 0xFF;
             textObject.Type = type;
             textObject.Hue = fixedColor;
-            
+
 
             if (!isunicode && textType == TextType.OBJECT)
             {
@@ -291,7 +326,16 @@ namespace ClassicUO.Game.Managers
 
             textObject.RenderedText = RenderedText.Create
             (
-                msg, fixedColor, font, isunicode, FontStyle.BlackBorder, TEXT_ALIGN_TYPE.TS_LEFT, width, 30, false, false,
+                msg,
+                fixedColor,
+                font,
+                isunicode,
+                FontStyle.BlackBorder,
+                TEXT_ALIGN_TYPE.TS_LEFT,
+                width,
+                30,
+                false,
+                false,
                 textType == TextType.OBJECT
             );
 

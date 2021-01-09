@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
 // 
@@ -26,6 +27,7 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 #endregion
 
 using System;
@@ -187,7 +189,14 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 Item it = (Item) i;
 
-                ItemGump g = new ItemGump(it.Serial, it.DisplayedGraphic, it.Hue, it.X, it.Y)
+                ItemGump g = new ItemGump
+                (
+                    it.Serial,
+                    it.DisplayedGraphic,
+                    it.Hue,
+                    it.X,
+                    it.Y
+                )
                 {
                     HighlightOnMouseOver = true
                 };
@@ -243,7 +252,14 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 Item it = (Item) i;
 
-                ItemGump g = new ItemGump(it.Serial, it.DisplayedGraphic, it.Hue, it.X, it.Y)
+                ItemGump g = new ItemGump
+                (
+                    it.Serial,
+                    it.DisplayedGraphic,
+                    it.Hue,
+                    it.X,
+                    it.Y
+                )
                 {
                     HighlightOnMouseOver = true
                 };
@@ -323,7 +339,14 @@ namespace ClassicUO.Game.UI.Gumps
                             y = 0;
                         }
 
-                        GameActions.DropItem(ItemHold.Serial, x, y, 0, ID1);
+                        GameActions.DropItem
+                        (
+                            ItemHold.Serial,
+                            x,
+                            y,
+                            0,
+                            ID1
+                        );
                     }
                 }
                 else if (SelectedObject.Object is Item it)
@@ -342,11 +365,7 @@ namespace ClassicUO.Game.UI.Gumps
                     {
                         Point off = Mouse.LDragOffset;
 
-                        DelayedObjectClickManager.Set
-                        (
-                            it.Serial, Mouse.Position.X - off.X - ScreenCoordinateX,
-                            Mouse.Position.Y - off.Y - ScreenCoordinateY, Time.Ticks + Mouse.MOUSE_DELAY_DOUBLE_CLICK
-                        );
+                        DelayedObjectClickManager.Set(it.Serial, Mouse.Position.X - off.X - ScreenCoordinateX, Mouse.Position.Y - off.Y - ScreenCoordinateY, Time.Ticks + Mouse.MOUSE_DELAY_DOUBLE_CLICK);
                     }
                 }
             }

@@ -1,4 +1,5 @@
 #region license
+
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
 // 
@@ -26,6 +27,7 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 #endregion
 
 using System.IO;
@@ -146,13 +148,9 @@ namespace ClassicUO.IO.Audio.MP3Sharp.IO
                                 SupportClass.ReadInput(m_File, ref br, 0, 8);
                                 Fmode = RFM_READ;
 
-                                m_RiffHeader.CkId = ((br[0] << 24) & (int) SupportClass.Identity(0xFF000000)) |
-                                                    ((br[1] << 16) & 0x00FF0000) | ((br[2] << 8) & 0x0000FF00) |
-                                                    (br[3] & 0x000000FF);
+                                m_RiffHeader.CkId = ((br[0] << 24) & (int) SupportClass.Identity(0xFF000000)) | ((br[1] << 16) & 0x00FF0000) | ((br[2] << 8) & 0x0000FF00) | (br[3] & 0x000000FF);
 
-                                m_RiffHeader.CkSize = ((br[4] << 24) & (int) SupportClass.Identity(0xFF000000)) |
-                                                      ((br[5] << 16) & 0x00FF0000) | ((br[6] << 8) & 0x0000FF00) |
-                                                      (br[7] & 0x000000FF);
+                                m_RiffHeader.CkSize = ((br[4] << 24) & (int) SupportClass.Identity(0xFF000000)) | ((br[5] << 16) & 0x00FF0000) | ((br[6] << 8) & 0x0000FF00) | (br[7] & 0x000000FF);
                             }
                             catch
                             {
@@ -252,13 +250,9 @@ namespace ClassicUO.IO.Audio.MP3Sharp.IO
                                 SupportClass.ReadInput(m_File, ref br, 0, 8);
                                 Fmode = RFM_READ;
 
-                                m_RiffHeader.CkId = ((br[0] << 24) & (int) SupportClass.Identity(0xFF000000)) |
-                                                    ((br[1] << 16) & 0x00FF0000) | ((br[2] << 8) & 0x0000FF00) |
-                                                    (br[3] & 0x000000FF);
+                                m_RiffHeader.CkId = ((br[0] << 24) & (int) SupportClass.Identity(0xFF000000)) | ((br[1] << 16) & 0x00FF0000) | ((br[2] << 8) & 0x0000FF00) | (br[3] & 0x000000FF);
 
-                                m_RiffHeader.CkSize = ((br[4] << 24) & (int) SupportClass.Identity(0xFF000000)) |
-                                                      ((br[5] << 16) & 0x00FF0000) | ((br[6] << 8) & 0x0000FF00) |
-                                                      (br[7] & 0x000000FF);
+                                m_RiffHeader.CkSize = ((br[4] << 24) & (int) SupportClass.Identity(0xFF000000)) | ((br[5] << 16) & 0x00FF0000) | ((br[6] << 8) & 0x0000FF00) | (br[7] & 0x000000FF);
                             }
                             catch
                             {
@@ -660,10 +654,17 @@ namespace ClassicUO.IO.Audio.MP3Sharp.IO
         public static int FourCC(string chunkName)
         {
             sbyte[] p = { 0x20, 0x20, 0x20, 0x20 };
-            SupportClass.GetSBytesFromString(chunkName, 0, 4, ref p, 0);
 
-            int ret = ((p[0] << 24) & (int) SupportClass.Identity(0xFF000000)) | ((p[1] << 16) & 0x00FF0000) |
-                      ((p[2] << 8) & 0x0000FF00) | (p[3] & 0x000000FF);
+            SupportClass.GetSBytesFromString
+            (
+                chunkName,
+                0,
+                4,
+                ref p,
+                0
+            );
+
+            int ret = ((p[0] << 24) & (int) SupportClass.Identity(0xFF000000)) | ((p[1] << 16) & 0x00FF0000) | ((p[2] << 8) & 0x0000FF00) | (p[3] & 0x000000FF);
 
             return ret;
         }

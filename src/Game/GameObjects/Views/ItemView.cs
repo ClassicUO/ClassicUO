@@ -1,4 +1,5 @@
 #region license
+
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
 // 
@@ -26,6 +27,7 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 #endregion
 
 using System.Collections.Generic;
@@ -151,7 +153,16 @@ namespace ClassicUO.Game.GameObjects
 
             if (!IsMulti && !IsCoin && Amount > 1 && ItemData.IsStackable)
             {
-                DrawStaticAnimated(batcher, graphic, posX - 5, posY - 5, ref HueVector, ref DrawTransparent, false);
+                DrawStaticAnimated
+                (
+                    batcher,
+                    graphic,
+                    posX - 5,
+                    posY - 5,
+                    ref HueVector,
+                    ref DrawTransparent,
+                    false
+                );
             }
 
             if (ItemData.IsLight)
@@ -164,7 +175,16 @@ namespace ClassicUO.Game.GameObjects
                 HueVector.Z = 0.5f;
             }
 
-            DrawStaticAnimated(batcher, graphic, posX, posY, ref HueVector, ref DrawTransparent, false);
+            DrawStaticAnimated
+            (
+                batcher,
+                graphic,
+                posX,
+                posY,
+                ref HueVector,
+                ref DrawTransparent,
+                false
+            );
 
             if (SelectedObject.Object == this || TargetManager.TargetingState == CursorTarget.MultiPlacement)
             {
@@ -207,19 +227,43 @@ namespace ClassicUO.Game.GameObjects
             AnimationsLoader.Instance.ConvertBodyIfNeeded(ref graphic);
             byte group = AnimationsLoader.Instance.GetDieGroupIndex(graphic, UsedLayer);
 
-            bool ishuman = MathHelper.InRange(Amount, 0x0190, 0x0193) || MathHelper.InRange
-                               (Amount, 0x00B7, 0x00BA) || MathHelper.InRange
-                               (Amount, 0x025D, 0x0260) || MathHelper.InRange
-                               (Amount, 0x029A, 0x029B) || MathHelper.InRange
-                               (Amount, 0x02B6, 0x02B7) || Amount == 0x03DB || Amount == 0x03DF || Amount == 0x03E2 ||
-                           Amount == 0x02E8 || Amount == 0x02E9;
+            bool ishuman = MathHelper.InRange(Amount, 0x0190, 0x0193) || MathHelper.InRange(Amount, 0x00B7, 0x00BA) || MathHelper.InRange(Amount, 0x025D, 0x0260) || MathHelper.InRange(Amount, 0x029A, 0x029B) || MathHelper.InRange(Amount, 0x02B6, 0x02B7) || Amount == 0x03DB || Amount == 0x03DF || Amount == 0x03E2 || Amount == 0x02E8 || Amount == 0x02E9;
 
-            DrawLayer(batcher, posX, posY, this, Layer.Invalid, animIndex, ishuman, Hue, IsFlipped, HueVector.Z, group, direction);
+            DrawLayer
+            (
+                batcher,
+                posX,
+                posY,
+                this,
+                Layer.Invalid,
+                animIndex,
+                ishuman,
+                Hue,
+                IsFlipped,
+                HueVector.Z,
+                group,
+                direction
+            );
 
             for (int i = 0; i < Constants.USED_LAYER_COUNT; i++)
             {
                 Layer layer = LayerOrder.UsedLayers[direction, i];
-                DrawLayer(batcher, posX, posY, this, layer, animIndex, ishuman, 0, IsFlipped, HueVector.Z, group, direction);
+
+                DrawLayer
+                (
+                    batcher,
+                    posX,
+                    posY,
+                    this,
+                    layer,
+                    animIndex,
+                    ishuman,
+                    0,
+                    IsFlipped,
+                    HueVector.Z,
+                    group,
+                    direction
+                );
             }
 
             return true;
@@ -262,8 +306,7 @@ namespace ClassicUO.Game.GameObjects
                 graphic = itemEquip.ItemData.AnimID;
                 ispartialhue = itemEquip.ItemData.IsPartialHue;
 
-                if (AnimationsLoader.Instance.EquipConversions.TryGetValue
-                    (graphic, out Dictionary<ushort, EquipConvData> map))
+                if (AnimationsLoader.Instance.EquipConversions.TryGetValue(graphic, out Dictionary<ushort, EquipConvData> map))
                 {
                     if (map.TryGetValue(graphic, out EquipConvData data))
                     {
@@ -281,9 +324,7 @@ namespace ClassicUO.Game.GameObjects
 
             ushort newHue = 0;
 
-            AnimationGroup gr = layer == Layer.Invalid ?
-                AnimationsLoader.Instance.GetCorpseAnimationGroup(ref graphic, ref animGroup, ref newHue) :
-                AnimationsLoader.Instance.GetBodyAnimationGroup(ref graphic, ref animGroup, ref newHue);
+            AnimationGroup gr = layer == Layer.Invalid ? AnimationsLoader.Instance.GetCorpseAnimationGroup(ref graphic, ref animGroup, ref newHue) : AnimationsLoader.Instance.GetBodyAnimationGroup(ref graphic, ref animGroup, ref newHue);
 
             if (color == 0)
             {
@@ -297,8 +338,7 @@ namespace ClassicUO.Game.GameObjects
                 return;
             }
 
-            if ((direction.FrameCount == 0 || direction.Frames == null) && 
-                !AnimationsLoader.Instance.LoadAnimationFrames(graphic, animGroup, dir, ref direction))
+            if ((direction.FrameCount == 0 || direction.Frames == null) && !AnimationsLoader.Instance.LoadAnimationFrames(graphic, animGroup, dir, ref direction))
             {
                 return;
             }
@@ -375,7 +415,14 @@ namespace ClassicUO.Game.GameObjects
                     ShaderHueTranslator.GetHueVector(ref HueVector, color, ispartialhue, alpha);
                 }
 
-                batcher.DrawSprite(frame, posX, posY, flipped, ref HueVector);
+                batcher.DrawSprite
+                (
+                    frame,
+                    posX,
+                    posY,
+                    flipped,
+                    ref HueVector
+                );
 
                 if (!SerialHelper.IsValid(owner))
                 {
@@ -387,13 +434,7 @@ namespace ClassicUO.Game.GameObjects
                     return;
                 }
 
-                if (frame.Contains
-                (
-                    flipped ?
-                        posX + frame.Width - SelectedObject.TranslatedMousePositionByViewport.X :
-                        SelectedObject.TranslatedMousePositionByViewport.X - posX,
-                    SelectedObject.TranslatedMousePositionByViewport.Y - posY
-                ))
+                if (frame.Contains(flipped ? posX + frame.Width - SelectedObject.TranslatedMousePositionByViewport.X : SelectedObject.TranslatedMousePositionByViewport.X - posX, SelectedObject.TranslatedMousePositionByViewport.Y - posY))
                 {
                     SelectedObject.Object = owner;
                 }

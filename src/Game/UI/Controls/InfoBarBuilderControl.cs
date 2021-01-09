@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
 // 
@@ -26,6 +27,7 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 #endregion
 
 using ClassicUO.Game.Managers;
@@ -46,7 +48,15 @@ namespace ClassicUO.Game.UI.Controls
             infoLabel.SetText(item.label);
 
             string[] dataVars = InfoBarManager.GetVars();
-            varStat = new Combobox(200, 0, 170, dataVars, (int) item.var);
+
+            varStat = new Combobox
+            (
+                200,
+                0,
+                170,
+                dataVars,
+                (int) item.var
+            );
 
             uint color = 0xFF7F7F7F;
 
@@ -55,10 +65,25 @@ namespace ClassicUO.Game.UI.Controls
                 color = HuesLoader.Instance.GetPolygoneColor(12, item.hue);
             }
 
-            labelColor = new ClickableColorBox(150, 0, 13, 14, item.hue, color);
+            labelColor = new ClickableColorBox
+            (
+                150,
+                0,
+                13,
+                14,
+                item.hue,
+                color
+            );
 
-            NiceButton deleteButton = new NiceButton(390, 0, 60, 25, ButtonAction.Activate, ResGumps.Delete)
-                { ButtonParameter = 999 };
+            NiceButton deleteButton = new NiceButton
+            (
+                390,
+                0,
+                60,
+                25,
+                ButtonAction.Activate,
+                ResGumps.Delete
+            ) { ButtonParameter = 999 };
 
             deleteButton.MouseUp += (sender, e) =>
             {
@@ -66,11 +91,7 @@ namespace ClassicUO.Game.UI.Controls
                 ((DataBox) Parent)?.ReArrangeChildren();
             };
 
-            Add
-            (
-                new ResizePic(0x0BB8)
-                    { X = infoLabel.X - 5, Y = 0, Width = infoLabel.Width + 10, Height = infoLabel.Height }
-            );
+            Add(new ResizePic(0x0BB8) { X = infoLabel.X - 5, Y = 0, Width = infoLabel.Width + 10, Height = infoLabel.Height });
 
             Add(infoLabel);
             Add(varStat);

@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
 // 
@@ -26,6 +27,7 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 #endregion
 
 using System;
@@ -119,8 +121,7 @@ namespace ClassicUO.Game.Scenes
 
             Audio.PlayMusic(music, false, true);
 
-            if ((Settings.GlobalSettings.AutoLogin || Reconnect) && CurrentLoginStep != LoginSteps.Main ||
-                CUOEnviroment.SkipLoginScreen)
+            if ((Settings.GlobalSettings.AutoLogin || Reconnect) && CurrentLoginStep != LoginSteps.Main || CUOEnviroment.SkipLoginScreen)
             {
                 if (!string.IsNullOrEmpty(Settings.GlobalSettings.Username))
                 {
@@ -283,22 +284,19 @@ namespace ClassicUO.Game.Scenes
                         break;
 
                     case LoginSteps.VerifyingAccount:
-                        labelText = ClilocLoader.Instance.GetString
-                            (3000003, ResGeneral.VerifyingAccount); // "Verifying Account..."
+                        labelText = ClilocLoader.Instance.GetString(3000003, ResGeneral.VerifyingAccount); // "Verifying Account..."
 
                         showButtons = LoginButtons.Cancel;
 
                         break;
 
                     case LoginSteps.LoginInToServer:
-                        labelText = ClilocLoader.Instance.GetString
-                            (3000053, ResGeneral.LoggingIntoShard); // logging into shard
+                        labelText = ClilocLoader.Instance.GetString(3000053, ResGeneral.LoggingIntoShard); // logging into shard
 
                         break;
 
                     case LoginSteps.EnteringBritania:
-                        labelText = ClilocLoader.Instance.GetString
-                            (3000001, ResGeneral.EnteringBritannia); // Entering Britania...
+                        labelText = ClilocLoader.Instance.GetString(3000001, ResGeneral.EnteringBritannia); // Entering Britania...
 
                         break;
 
@@ -418,7 +416,15 @@ namespace ClassicUO.Game.Scenes
 
             NetClient.Socket.Send
             (
-                new PCreateCharacter(character, cityIndex, NetClient.ClientAddress, ServerIndex, (uint) i, profession)
+                new PCreateCharacter
+                (
+                    character,
+                    cityIndex,
+                    NetClient.ClientAddress,
+                    ServerIndex,
+                    (uint) i,
+                    profession
+                )
             );
 
             CurrentLoginStep = LoginSteps.CharacterCreationDone;
@@ -501,7 +507,14 @@ namespace ClassicUO.Game.Scenes
                 byte build = (byte) (clientVersion >> 8);
                 byte extra = (byte) clientVersion;
 
-                PSeed packet = new PSeed(NetClient.ClientAddress, major, minor, build, extra);
+                PSeed packet = new PSeed
+                (
+                    NetClient.ClientAddress,
+                    major,
+                    minor,
+                    build,
+                    extra
+                );
 
                 NetClient.LoginSocket.Send(packet.ToArray(), packet.Length, true, true);
             }
@@ -550,18 +563,13 @@ namespace ClassicUO.Game.Scenes
                 {
                     Reconnect = true;
 
-                    PopupMessage = string.Format
-                    (
-                        ResGeneral.ReconnectPleaseWait01, _reconnectTryCounter,
-                        StringHelper.AddSpaceBeforeCapital(e.ToString())
-                    );
+                    PopupMessage = string.Format(ResGeneral.ReconnectPleaseWait01, _reconnectTryCounter, StringHelper.AddSpaceBeforeCapital(e.ToString()));
 
                     UIManager.GetGump<LoadingGump>()?.SetText(PopupMessage);
                 }
                 else
                 {
-                    PopupMessage = string.Format
-                        (ResGeneral.ConnectionLost0, StringHelper.AddSpaceBeforeCapital(e.ToString()));
+                    PopupMessage = string.Format(ResGeneral.ConnectionLost0, StringHelper.AddSpaceBeforeCapital(e.ToString()));
                 }
 
                 CurrentLoginStep = LoginSteps.PopUpMessage;
@@ -609,7 +617,6 @@ namespace ClassicUO.Game.Scenes
             _currentGump?.Dispose();
 
             UIManager.Add(_currentGump = new CharacterSelectionGump());
-
         }
 
         public void ReceiveCharacterList(ref PacketBufferReader p)
@@ -670,20 +677,22 @@ namespace ClassicUO.Game.Scenes
             NetClient.LoginSocket.Disconnect();
             EncryptionHelper.Initialize(false, seed, (ENCRYPTION_TYPE) Settings.GlobalSettings.Encryption);
 
-            NetClient.Socket
-                     .Connect(new IPAddress(ip), port)
-                     .ContinueWith(
-                t =>
-                        {
-                            if (!t.IsFaulted)
-                            {
-                                NetClient.Socket.EnableCompression();
-                                // TODO: stackalloc
-                                byte[] ss = new byte[4] { (byte)(seed >> 24), (byte)(seed >> 16), (byte)(seed >> 8), (byte)seed };
-                                NetClient.Socket.Send(ss, 4, true, true);
-                                NetClient.Socket.Send(new PSecondLogin(Account, Password, seed));
-                            }
-                        }, TaskContinuationOptions.ExecuteSynchronously);
+            NetClient.Socket.Connect(new IPAddress(ip), port)
+                     .ContinueWith
+                     (
+                         t =>
+                         {
+                             if (!t.IsFaulted)
+                             {
+                                 NetClient.Socket.EnableCompression();
+                                 // TODO: stackalloc
+                                 byte[] ss = new byte[4] { (byte) (seed >> 24), (byte) (seed >> 16), (byte) (seed >> 8), (byte) seed };
+                                 NetClient.Socket.Send(ss, 4, true, true);
+                                 NetClient.Socket.Send(new PSecondLogin(Account, Password, seed));
+                             }
+                         },
+                         TaskContinuationOptions.ExecuteSynchronously
+                     );
         }
 
 
@@ -740,8 +749,15 @@ namespace ClassicUO.Game.Scenes
 
                     cityInfo = new CityInfo
                     (
-                        cityIndex, cityName, cityBuilding, ClilocLoader.Instance.GetString((int) cityDescription),
-                        cityX, cityY, cityZ, cityMapIndex, isNew
+                        cityIndex,
+                        cityName,
+                        cityBuilding,
+                        ClilocLoader.Instance.GetString((int) cityDescription),
+                        cityX,
+                        cityY,
+                        cityZ,
+                        cityMapIndex,
+                        isNew
                     );
                 }
                 else
@@ -752,8 +768,15 @@ namespace ClassicUO.Game.Scenes
 
                     cityInfo = new CityInfo
                     (
-                        cityIndex, cityName, cityBuilding, descriptions != null ? descriptions[i] : string.Empty,
-                        (ushort) oldtowns[i].X, (ushort) oldtowns[i].Y, 0, 0, isNew
+                        cityIndex,
+                        cityName,
+                        cityBuilding,
+                        descriptions != null ? descriptions[i] : string.Empty,
+                        (ushort) oldtowns[i].X,
+                        (ushort) oldtowns[i].Y,
+                        0,
+                        0,
+                        isNew
                     );
                 }
 
@@ -900,7 +923,6 @@ namespace ClassicUO.Game.Scenes
 
         private ServerListEntry()
         {
-          
         }
 
         public static ServerListEntry Create(ref PacketBufferReader p)
@@ -917,11 +939,16 @@ namespace ClassicUO.Game.Scenes
             // some server sends invalid ip.
             try
             {
-                entry._ipAddress = new IPAddress(new byte[] {
-                    (byte)((entry.Address>>24) & 0xFF) ,
-                    (byte)((entry.Address>>16) & 0xFF) ,
-                    (byte)((entry.Address>>8)  & 0xFF) ,
-                    (byte)( entry.Address & 0xFF)});
+                entry._ipAddress = new IPAddress
+                (
+                    new byte[]
+                    {
+                        (byte) ((entry.Address >> 24) & 0xFF),
+                        (byte) ((entry.Address >> 16) & 0xFF),
+                        (byte) ((entry.Address >> 8) & 0xFF),
+                        (byte) (entry.Address & 0xFF)
+                    }
+                );
             }
             catch (Exception e)
             {
@@ -956,13 +983,21 @@ namespace ClassicUO.Game.Scenes
                 }
 
                 _sending = true;
-                _pinger.SendAsync(_ipAddress, 1000, _buffData, _pingOptions, _resultIndex++);
+
+                _pinger.SendAsync
+                (
+                    _ipAddress,
+                    1000,
+                    _buffData,
+                    _pingOptions,
+                    _resultIndex++
+                );
             }
         }
 
         private void PingerOnPingCompleted(object sender, PingCompletedEventArgs e)
         {
-            int index = (int)e.UserState;
+            int index = (int) e.UserState;
 
             if (e.Reply != null)
             {

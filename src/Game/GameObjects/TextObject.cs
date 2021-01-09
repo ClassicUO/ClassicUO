@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
 // 
@@ -26,6 +27,7 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 #endregion
 
 using ClassicUO.Game.Data;
@@ -40,7 +42,8 @@ namespace ClassicUO.Game.GameObjects
     {
         private static readonly QueuedPool<TextObject> _queue = new QueuedPool<TextObject>
         (
-            1000, o =>
+            1000,
+            o =>
             {
                 o.IsDestroyed = false;
                 o.Alpha = 0;

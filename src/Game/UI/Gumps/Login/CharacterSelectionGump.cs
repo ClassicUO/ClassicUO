@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
 // 
@@ -26,6 +27,7 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 #endregion
 
 using System;
@@ -59,14 +61,12 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
             LoginScene loginScene = Client.Game.GetScene<LoginScene>();
 
-            string lastSelected = loginScene.Characters.FirstOrDefault
-                (o => o == Settings.GlobalSettings.LastCharacterName);
+            string lastSelected = loginScene.Characters.FirstOrDefault(o => o == Settings.GlobalSettings.LastCharacterName);
 
             LockedFeatureFlags f = World.ClientLockedFeatures.Flags;
             CharacterListFlags ff = World.ClientFeatures.Flags;
 
-            if (Client.Version >= ClientVersion.CV_6040 ||
-                Client.Version >= ClientVersion.CV_5020 && loginScene.Characters.Length > 5)
+            if (Client.Version >= ClientVersion.CV_6040 || Client.Version >= ClientVersion.CV_5020 && loginScene.Characters.Length > 5)
             {
                 listTitleY = 96;
                 yOffset = 125;
@@ -87,7 +87,8 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 new ResizePic(0x0A28)
                 {
                     X = 160, Y = 70, Width = 408, Height = 343 + yBonus
-                }, 1
+                },
+                1
             );
 
             Add
@@ -95,7 +96,8 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 new Label(ClilocLoader.Instance.GetString(3000050, "Character Selection"), false, 0x0386, font: 2)
                 {
                     X = 267, Y = listTitleY
-                }, 1
+                },
+                1
             );
 
             for (int i = 0, valid = 0; i < loginScene.Characters.Length; i++)
@@ -126,7 +128,8 @@ namespace ClassicUO.Game.UI.Gumps.Login
                             X = 224,
                             Y = yOffset + posInList * 40,
                             Hue = posInList == _selectedCharacter ? SELECTED_COLOR : NORMAL_COLOR
-                        }, 1
+                        },
+                        1
                     );
 
                     posInList++;
@@ -140,7 +143,8 @@ namespace ClassicUO.Game.UI.Gumps.Login
                     new Button((int) Buttons.New, 0x159D, 0x159F, 0x159E)
                     {
                         X = 224, Y = 350 + yBonus, ButtonAction = ButtonAction.Activate
-                    }, 1
+                    },
+                    1
                 );
             }
 
@@ -151,7 +155,8 @@ namespace ClassicUO.Game.UI.Gumps.Login
                     X = 442,
                     Y = 350 + yBonus,
                     ButtonAction = ButtonAction.Activate
-                }, 1
+                },
+                1
             );
 
             Add
@@ -159,7 +164,8 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 new Button((int) Buttons.Prev, 0x15A1, 0x15A3, 0x15A2)
                 {
                     X = 586, Y = 445, ButtonAction = ButtonAction.Activate
-                }, 1
+                },
+                1
             );
 
             Add
@@ -167,7 +173,8 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 new Button((int) Buttons.Next, 0x15A4, 0x15A6, 0x15A5)
                 {
                     X = 610, Y = 445, ButtonAction = ButtonAction.Activate
-                }, 1
+                },
+                1
             );
 
             AcceptKeyboardInput = true;
@@ -244,7 +251,8 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 (
                     new LoadingGump
                     (
-                        string.Format(ResGumps.PermanentlyDelete0, charName), LoginButtons.OK | LoginButtons.Cancel,
+                        string.Format(ResGumps.PermanentlyDelete0, charName),
+                        LoginButtons.OK | LoginButtons.Cancel,
                         buttonID =>
                         {
                             if (buttonID == (int) LoginButtons.OK)
@@ -256,7 +264,8 @@ namespace ClassicUO.Game.UI.Gumps.Login
                                 ChangePage(1);
                             }
                         }
-                    ), 2
+                    ),
+                    2
                 );
 
                 ChangePage(2);
@@ -315,7 +324,15 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 // Char Name
                 Add
                 (
-                    _label = new Label(character, false, NORMAL_COLOR, 270, 5, align: TEXT_ALIGN_TYPE.TS_CENTER)
+                    _label = new Label
+                    (
+                        character,
+                        false,
+                        NORMAL_COLOR,
+                        270,
+                        5,
+                        align: TEXT_ALIGN_TYPE.TS_CENTER
+                    )
                     {
                         X = 0
                     }

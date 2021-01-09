@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
 // 
@@ -26,6 +27,7 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 #endregion
 
 using System.Linq;
@@ -187,7 +189,15 @@ namespace ClassicUO.Game.UI.Gumps.Login
             );
 
             // Sever Scroll Area
-            ScrollArea scrollArea = new ScrollArea(150, 90, 393, 271, true);
+            ScrollArea scrollArea = new ScrollArea
+            (
+                150,
+                90,
+                393,
+                271,
+                true
+            );
+
             DataBox databox = new DataBox(0, 0, 1, 1);
             databox.WantUpdateSize = true;
             LoginScene loginScene = Client.Game.GetScene<LoginScene>();
@@ -319,16 +329,31 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 Add
                 (
                     _serverName = new HoveredLabel
-                        (entry.Name, false, normal_hue, selected_hue, selected_hue, font: font)
-                        {
-                            X = 74,
-                            AcceptMouseInput = false
-                        }
+                    (
+                        entry.Name,
+                        false,
+                        normal_hue,
+                        selected_hue,
+                        selected_hue,
+                        font: font
+                    )
+                    {
+                        X = 74,
+                        AcceptMouseInput = false
+                    }
                 );
 
                 Add
                 (
-                    _server_ping = new HoveredLabel("-", false, normal_hue, selected_hue, selected_hue, font: font)
+                    _server_ping = new HoveredLabel
+                    (
+                        "-",
+                        false,
+                        normal_hue,
+                        selected_hue,
+                        selected_hue,
+                        font: font
+                    )
                     {
                         X = 250,
                         AcceptMouseInput = false
@@ -338,11 +363,18 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 Add
                 (
                     _server_packet_loss = new HoveredLabel
-                        ("-", false, normal_hue, selected_hue, selected_hue, font: font)
-                        {
-                            X = 320,
-                            AcceptMouseInput = false
-                        }
+                    (
+                        "-",
+                        false,
+                        normal_hue,
+                        selected_hue,
+                        selected_hue,
+                        font: font
+                    )
+                    {
+                        X = 320,
+                        AcceptMouseInput = false
+                    }
                 );
 
 
@@ -390,14 +422,29 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
                     switch (_entry.PingStatus)
                     {
-                        case IPStatus.Success: _server_ping.Text = _entry.Ping == -1 ? "-" : _entry.Ping.ToString(); break;
+                        case IPStatus.Success:
+                            _server_ping.Text = _entry.Ping == -1 ? "-" : _entry.Ping.ToString();
+
+                            break;
+
                         case IPStatus.DestinationNetworkUnreachable:
                         case IPStatus.DestinationHostUnreachable:
                         case IPStatus.DestinationProtocolUnreachable:
                         case IPStatus.DestinationPortUnreachable:
-                        case IPStatus.DestinationUnreachable: _server_ping.Text = "unreach."; break;
-                        case IPStatus.TimedOut: _server_ping.Text = "time out"; break;
-                        default: _server_ping.Text = $"unk. [{(int) _entry.PingStatus}]"; break;
+                        case IPStatus.DestinationUnreachable:
+                            _server_ping.Text = "unreach.";
+
+                            break;
+
+                        case IPStatus.TimedOut:
+                            _server_ping.Text = "time out";
+
+                            break;
+
+                        default:
+                            _server_ping.Text = $"unk. [{(int) _entry.PingStatus}]";
+
+                            break;
                     }
 
                     _server_packet_loss.Text = $"{_entry.PacketLoss}%";

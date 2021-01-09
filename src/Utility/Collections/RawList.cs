@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
 // 
@@ -26,6 +27,7 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 #endregion
 
 #define VALIDATE
@@ -142,7 +144,15 @@ namespace ClassicUO.Utility.Collections
                 Array.Resize(ref _items, (int) (requiredSize * GrowthFactor));
             }
 
-            Array.Copy(items, 0, _items, (int) _count, items.Length);
+            Array.Copy
+            (
+                items,
+                0,
+                _items,
+                (int) _count,
+                items.Length
+            );
+
             _count += (uint) items.Length;
         }
 
@@ -281,7 +291,16 @@ namespace ClassicUO.Utility.Collections
         private void CoreRemoveAt(uint index)
         {
             _count -= 1;
-            Array.Copy(_items, (int) index + 1, _items, (int) index, (int) (_count - index));
+
+            Array.Copy
+            (
+                _items,
+                (int) index + 1,
+                _items,
+                (int) index,
+                (int) (_count - index)
+            );
+
             _items[_count] = default;
         }
 

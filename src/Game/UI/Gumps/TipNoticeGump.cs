@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
 // 
@@ -26,6 +27,7 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 #endregion
 
 using ClassicUO.Game.UI.Controls;
@@ -47,7 +49,15 @@ namespace ClassicUO.Game.UI.Gumps
             Height = 300;
             CanMove = true;
             CanCloseWithRightClick = true;
-            _scrollArea = new ScrollArea(0, 32, 272, Height - 96, false);
+
+            _scrollArea = new ScrollArea
+            (
+                0,
+                32,
+                272,
+                Height - 96,
+                false
+            );
 
             _textBox = new StbTextBox(6, -1, 220, isunicode: false)
             {
@@ -83,10 +93,13 @@ namespace ClassicUO.Game.UI.Gumps
                 case 1: // prev
                     NetClient.Socket.Send(new PTipRequest((ushort) LocalSerial, 0));
                     Dispose();
+
                     break;
+
                 case 2: // next
                     NetClient.Socket.Send(new PTipRequest((ushort) LocalSerial, 1));
                     Dispose();
+
                     break;
             }
         }

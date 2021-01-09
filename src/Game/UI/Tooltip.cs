@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
 // 
@@ -26,6 +27,7 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 #endregion
 
 using System.Text;
@@ -56,8 +58,7 @@ namespace ClassicUO.Game.UI
 
         public bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
-            if (SerialHelper.IsValid(Serial) && World.OPL.TryGetRevision
-                (Serial, out uint revision) && _hash != revision)
+            if (SerialHelper.IsValid(Serial) && World.OPL.TryGetRevision(Serial, out uint revision) && _hash != revision)
             {
                 _hash = revision;
                 Text = ReadProperties(Serial, out _textHTML);
@@ -100,8 +101,15 @@ namespace ClassicUO.Game.UI
             {
                 _renderedText = RenderedText.Create
                 (
-                    null, font: font, isunicode: true, style: FontStyle.BlackBorder, cell: 5, isHTML: true,
-                    align: TEXT_ALIGN_TYPE.TS_CENTER, recalculateWidthByInfo: true, hue: hue
+                    null,
+                    font: font,
+                    isunicode: true,
+                    style: FontStyle.BlackBorder,
+                    cell: 5,
+                    isHTML: true,
+                    align: TEXT_ALIGN_TYPE.TS_CENTER,
+                    recalculateWidthByInfo: true,
+                    hue: hue
                 );
             }
 
@@ -117,7 +125,13 @@ namespace ClassicUO.Game.UI
                     }
 
                     width = FontsLoader.Instance.GetWidthExUnicode
-                        (font, Text, width, TEXT_ALIGN_TYPE.TS_CENTER, (ushort) FontStyle.BlackBorder);
+                    (
+                        font,
+                        Text,
+                        width,
+                        TEXT_ALIGN_TYPE.TS_CENTER,
+                        (ushort) FontStyle.BlackBorder
+                    );
 
                     if (width > 600)
                     {
@@ -170,11 +184,22 @@ namespace ClassicUO.Game.UI
             ShaderHueTranslator.GetHueVector(ref hue_vec, 0, false, alpha);
 
             batcher.Draw2D
-                (SolidColorTextureCache.GetTexture(Color.Black), x - 4, y - 2, z_width * zoom, z_height * zoom, ref hue_vec);
+            (
+                SolidColorTextureCache.GetTexture(Color.Black),
+                x - 4,
+                y - 2,
+                z_width * zoom,
+                z_height * zoom,
+                ref hue_vec
+            );
 
             batcher.DrawRectangle
             (
-                SolidColorTextureCache.GetTexture(Color.Gray), x - 4, y - 2, (int) (z_width * zoom), (int) (z_height * zoom),
+                SolidColorTextureCache.GetTexture(Color.Gray),
+                x - 4,
+                y - 2,
+                (int) (z_width * zoom),
+                (int) (z_height * zoom),
                 ref hue_vec
             );
 
@@ -184,7 +209,15 @@ namespace ClassicUO.Game.UI
 
             return batcher.Draw2D
             (
-                _renderedText.Texture, x + 3, y + 3, z_width * zoom, z_height * zoom, 0, 0, z_width, z_height,
+                _renderedText.Texture,
+                x + 3,
+                y + 3,
+                z_width * zoom,
+                z_height * zoom,
+                0,
+                0,
+                z_width,
+                z_height,
                 ref hue_vec
             );
         }
@@ -203,18 +236,14 @@ namespace ClassicUO.Game.UI
             {
                 uint revision2 = 0;
 
-                if (Serial == 0 || Serial != serial || World.OPL.TryGetRevision
-                    (Serial, out uint revision) && World.OPL.TryGetRevision
-                    (serial, out revision2) && revision != revision2)
+                if (Serial == 0 || Serial != serial || World.OPL.TryGetRevision(Serial, out uint revision) && World.OPL.TryGetRevision(serial, out revision2) && revision != revision2)
                 {
                     _maxWidth = 0;
                     Serial = serial;
                     _hash = revision2;
                     Text = ReadProperties(serial, out _textHTML);
 
-                    _lastHoverTime = (uint) (Time.Ticks + (ProfileManager.CurrentProfile != null ?
-                        ProfileManager.CurrentProfile.TooltipDelayBeforeDisplay :
-                        250));
+                    _lastHoverTime = (uint) (Time.Ticks + (ProfileManager.CurrentProfile != null ? ProfileManager.CurrentProfile.TooltipDelayBeforeDisplay : 250));
                 }
             }
         }
@@ -285,9 +314,7 @@ namespace ClassicUO.Game.UI
                 Serial = 0;
                 Text = _textHTML = text;
 
-                _lastHoverTime = (uint) (Time.Ticks + (ProfileManager.CurrentProfile != null ?
-                    ProfileManager.CurrentProfile.TooltipDelayBeforeDisplay :
-                    250));
+                _lastHoverTime = (uint) (Time.Ticks + (ProfileManager.CurrentProfile != null ? ProfileManager.CurrentProfile.TooltipDelayBeforeDisplay : 250));
             }
         }
     }

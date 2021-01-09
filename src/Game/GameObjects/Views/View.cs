@@ -1,4 +1,5 @@
 #region license
+
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
 // 
@@ -26,6 +27,7 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 #endregion
 
 using System;
@@ -152,7 +154,14 @@ namespace ClassicUO.Game.GameObjects
             {
                 texture.Ticks = Time.Ticks;
 
-                batcher.DrawSprite(texture, x, y, false, ref hue);
+                batcher.DrawSprite
+                (
+                    texture,
+                    x,
+                    y,
+                    false,
+                    ref hue
+                );
             }
         }
 
@@ -176,11 +185,29 @@ namespace ClassicUO.Game.GameObjects
             {
                 texture.Ticks = Time.Ticks;
 
-                batcher.DrawSpriteLand(texture, x, y, ref rectangle, ref n0, ref n1, ref n2, ref n3, ref hue);
+                batcher.DrawSpriteLand
+                (
+                    texture,
+                    x,
+                    y,
+                    ref rectangle,
+                    ref n0,
+                    ref n1,
+                    ref n2,
+                    ref n3,
+                    ref hue
+                );
             }
             else
             {
-                DrawStatic(batcher, graphic, x, y, ref hue);
+                DrawStatic
+                (
+                    batcher,
+                    graphic,
+                    x,
+                    y,
+                    ref hue
+                );
             }
         }
 
@@ -193,7 +220,14 @@ namespace ClassicUO.Game.GameObjects
                 texture.Ticks = Time.Ticks;
                 ref UOFileIndex index = ref ArtLoader.Instance.GetValidRefEntry(graphic + 0x4000);
 
-                batcher.DrawSprite(texture, x - index.Width, y - index.Height, false, ref hue);
+                batcher.DrawSprite
+                (
+                    texture,
+                    x - index.Width,
+                    y - index.Height,
+                    false,
+                    ref hue
+                );
             }
         }
 
@@ -205,7 +239,14 @@ namespace ClassicUO.Game.GameObjects
             {
                 texture.Ticks = Time.Ticks;
 
-                batcher.DrawSprite(texture, x, y, false, ref hue);
+                batcher.DrawSprite
+                (
+                    texture,
+                    x,
+                    y,
+                    false,
+                    ref hue
+                );
             }
         }
 
@@ -232,7 +273,16 @@ namespace ClassicUO.Game.GameObjects
                 int offX = index.Width == 0 ? -44 : index.Width;
                 int offY = index.Height == 0 ? -22 : index.Height;
 
-                batcher.DrawSpriteRotated(texture, x - offX, y - offY, destX, destY, ref hue, angle);
+                batcher.DrawSpriteRotated
+                (
+                    texture,
+                    x - offX,
+                    y - offY,
+                    destX,
+                    destY,
+                    ref hue,
+                    angle
+                );
             }
         }
 
@@ -263,9 +313,7 @@ namespace ClassicUO.Game.GameObjects
                     int maxDist = ProfileManager.CurrentProfile.CircleOfTransparencyRadius + 22;
                     int fx = (int) (World.Player.RealScreenPosition.X + World.Player.Offset.X);
 
-                    int fy =
-                        (int) (World.Player.RealScreenPosition.Y + (World.Player.Offset.Y - World.Player.Offset.Z)) +
-                        44;
+                    int fy = (int) (World.Player.RealScreenPosition.Y + (World.Player.Offset.Y - World.Player.Offset.Z)) + 44;
 
                     fx -= x;
                     fy -= y;
@@ -294,10 +342,27 @@ namespace ClassicUO.Game.GameObjects
                         y -= index.Height;
 
 
-                        batcher.DrawSprite(texture, x, y, false, ref hue);
+                        batcher.DrawSprite
+                        (
+                            texture,
+                            x,
+                            y,
+                            false,
+                            ref hue
+                        );
+
                         batcher.SetStencil(StaticTransparentStencil.Value);
                         hue.Z = alpha;
-                        batcher.DrawSprite(texture, x, y, false, ref hue);
+
+                        batcher.DrawSprite
+                        (
+                            texture,
+                            x,
+                            y,
+                            false,
+                            ref hue
+                        );
+
                         batcher.SetStencil(null);
 
                         return;
@@ -314,7 +379,14 @@ namespace ClassicUO.Game.GameObjects
                     batcher.DrawSpriteShadow(texture, x, y, false);
                 }
 
-                batcher.DrawSprite(texture, x, y, false, ref hue);
+                batcher.DrawSprite
+                (
+                    texture,
+                    x,
+                    y,
+                    false,
+                    ref hue
+                );
             }
         }
     }

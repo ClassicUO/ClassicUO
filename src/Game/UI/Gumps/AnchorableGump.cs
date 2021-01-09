@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
 // 
@@ -26,6 +27,7 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 #endregion
 
 using ClassicUO.Configuration;
@@ -146,8 +148,7 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     lock_texture.Ticks = Time.Ticks;
 
-                    if (UIManager.MouseOverControl != null && (UIManager.MouseOverControl == this ||
-                                                               UIManager.MouseOverControl.RootParent == this))
+                    if (UIManager.MouseOverControl != null && (UIManager.MouseOverControl == this || UIManager.MouseOverControl.RootParent == this))
                     {
                         HueVector.X = 34;
                         HueVector.Y = 1;
@@ -168,14 +169,39 @@ namespace ClassicUO.Game.UI.Gumps
                     Texture2D previewColor = SolidColorTextureCache.GetTexture(Color.Silver);
                     ResetHueVector();
                     HueVector.Z = 0.5f;
-                    batcher.Draw2D(previewColor, drawLoc.X, drawLoc.Y, Width, Height, ref HueVector);
+
+                    batcher.Draw2D
+                    (
+                        previewColor,
+                        drawLoc.X,
+                        drawLoc.Y,
+                        Width,
+                        Height,
+                        ref HueVector
+                    );
 
                     HueVector.Z = 0;
+
                     // double rectangle for thicker "stroke"
-                    batcher.DrawRectangle(previewColor, drawLoc.X, drawLoc.Y, Width, Height, ref HueVector);
+                    batcher.DrawRectangle
+                    (
+                        previewColor,
+                        drawLoc.X,
+                        drawLoc.Y,
+                        Width,
+                        Height,
+                        ref HueVector
+                    );
 
                     batcher.DrawRectangle
-                        (previewColor, drawLoc.X + 1, drawLoc.Y + 1, Width - 2, Height - 2, ref HueVector);
+                    (
+                        previewColor,
+                        drawLoc.X + 1,
+                        drawLoc.Y + 1,
+                        Width - 2,
+                        Height - 2,
+                        ref HueVector
+                    );
                 }
             }
 
@@ -184,8 +210,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override void CloseWithRightClick()
         {
-            if (UIManager.AnchorManager[this] == null || Keyboard.Alt ||
-                !ProfileManager.CurrentProfile.HoldDownKeyAltToCloseAnchored)
+            if (UIManager.AnchorManager[this] == null || Keyboard.Alt || !ProfileManager.CurrentProfile.HoldDownKeyAltToCloseAnchored)
             {
                 if (ProfileManager.CurrentProfile.CloseAllAnchoredGumpsInGroupWithRightClick)
                 {

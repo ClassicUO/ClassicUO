@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
 // 
@@ -26,6 +27,7 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 #endregion
 
 using System;
@@ -39,10 +41,18 @@ namespace ClassicUO.Game.Data
 {
     internal class SpellDefinition : IEquatable<SpellDefinition>
     {
-        public static SpellDefinition EmptySpell = new SpellDefinition("", 0, 0, "", 0, 0, 0);
+        public static SpellDefinition EmptySpell = new SpellDefinition
+        (
+            "",
+            0,
+            0,
+            "",
+            0,
+            0,
+            0
+        );
 
-        internal static Dictionary<string, SpellDefinition>
-            WordToTargettype = new Dictionary<string, SpellDefinition>();
+        internal static Dictionary<string, SpellDefinition> WordToTargettype = new Dictionary<string, SpellDefinition>();
 
 
         public SpellDefinition
@@ -350,7 +360,18 @@ namespace ClassicUO.Game.Data
             }
 
             sd = new SpellDefinition
-                (name, fullidx, iconid, smalliconid, words, manacost, minskill, tithing, target, regs);
+            (
+                name,
+                fullidx,
+                iconid,
+                smalliconid,
+                words,
+                manacost,
+                minskill,
+                tithing,
+                target,
+                regs
+            );
 
             if (fullidx < 100)
             {

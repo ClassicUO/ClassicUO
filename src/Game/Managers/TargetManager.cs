@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
 // 
@@ -26,6 +27,7 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 #endregion
 
 using ClassicUO.Configuration;
@@ -226,7 +228,14 @@ namespace ClassicUO.Game.Managers
             SetTargeting(CursorTarget.MultiPlacement, deedSerial, TargetType.Neutral);
 
             //if (model != 0)
-            MultiTargetInfo = new MultiTargetInfo(model, x, y, z, hue);
+            MultiTargetInfo = new MultiTargetInfo
+            (
+                model,
+                x,
+                y,
+                z,
+                hue
+            );
         }
 
 
@@ -256,10 +265,7 @@ namespace ClassicUO.Game.Managers
                             LastTargetInfo.SetEntity(serial);
                         }
 
-                        if (SerialHelper.IsMobile
-                                (serial) && serial != World.Player &&
-                            (World.Player.NotorietyFlag == NotorietyFlag.Innocent ||
-                             World.Player.NotorietyFlag == NotorietyFlag.Ally))
+                        if (SerialHelper.IsMobile(serial) && serial != World.Player && (World.Player.NotorietyFlag == NotorietyFlag.Innocent || World.Player.NotorietyFlag == NotorietyFlag.Ally))
                         {
                             Mobile mobile = entity as Mobile;
 
@@ -267,17 +273,11 @@ namespace ClassicUO.Game.Managers
                             {
                                 bool showCriminalQuery = false;
 
-                                if (TargetingType == TargetType.Harmful &&
-                                    ProfileManager.CurrentProfile.EnabledCriminalActionQuery &&
-                                    mobile.NotorietyFlag == NotorietyFlag.Innocent)
+                                if (TargetingType == TargetType.Harmful && ProfileManager.CurrentProfile.EnabledCriminalActionQuery && mobile.NotorietyFlag == NotorietyFlag.Innocent)
                                 {
                                     showCriminalQuery = true;
                                 }
-                                else if (TargetingType == TargetType.Beneficial &&
-                                         ProfileManager.CurrentProfile.EnabledBeneficialCriminalActionQuery &&
-                                         (mobile.NotorietyFlag == NotorietyFlag.Criminal ||
-                                          mobile.NotorietyFlag == NotorietyFlag.Murderer ||
-                                          mobile.NotorietyFlag == NotorietyFlag.Gray))
+                                else if (TargetingType == TargetType.Beneficial && ProfileManager.CurrentProfile.EnabledBeneficialCriminalActionQuery && (mobile.NotorietyFlag == NotorietyFlag.Criminal || mobile.NotorietyFlag == NotorietyFlag.Murderer || mobile.NotorietyFlag == NotorietyFlag.Gray))
                                 {
                                     showCriminalQuery = true;
                                 }
@@ -286,7 +286,8 @@ namespace ClassicUO.Game.Managers
                                 {
                                     QuestionGump messageBox = new QuestionGump
                                     (
-                                        "This may flag\nyou criminal!", s =>
+                                        "This may flag\nyou criminal!",
+                                        s =>
                                         {
                                             if (s)
                                             {
@@ -294,8 +295,13 @@ namespace ClassicUO.Game.Managers
                                                 (
                                                     new PTargetObject
                                                     (
-                                                        entity, entity.Graphic, entity.X, entity.Y, entity.Z,
-                                                        _targetCursorId, (byte) TargetingType
+                                                        entity,
+                                                        entity.Graphic,
+                                                        entity.X,
+                                                        entity.Y,
+                                                        entity.Z,
+                                                        _targetCursorId,
+                                                        (byte) TargetingType
                                                     )
                                                 );
 
@@ -320,7 +326,12 @@ namespace ClassicUO.Game.Managers
                         {
                             PTargetObject packet = new PTargetObject
                             (
-                                entity, entity.Graphic, entity.X, entity.Y, entity.Z, _targetCursorId,
+                                entity,
+                                entity.Graphic,
+                                entity.X,
+                                entity.Y,
+                                entity.Z,
+                                _targetCursorId,
                                 (byte) TargetingType
                             );
 
@@ -436,7 +447,16 @@ namespace ClassicUO.Game.Managers
                 return;
             }
 
-            PTargetXYZ packet = new PTargetXYZ(x, y, z, graphic, _targetCursorId, (byte) TargetingType);
+            PTargetXYZ packet = new PTargetXYZ
+            (
+                x,
+                y,
+                z,
+                graphic,
+                _targetCursorId,
+                (byte) TargetingType
+            );
+
             NetClient.Socket.Send(packet);
 
             for (int i = 0; i < _lastDataBuffer.Length; i++)

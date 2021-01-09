@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
 // 
@@ -26,6 +27,7 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 #endregion
 
 using System;
@@ -64,8 +66,7 @@ namespace ClassicUO.Game.Managers
             new Point(0, 1)
         };
 
-        private readonly Dictionary<AnchorableGump, AnchorGroup> reverseMap =
-            new Dictionary<AnchorableGump, AnchorGroup>();
+        private readonly Dictionary<AnchorableGump, AnchorGroup> reverseMap = new Dictionary<AnchorableGump, AnchorGroup>();
 
         public AnchorGroup this[AnchorableGump control]
         {
@@ -161,10 +162,7 @@ namespace ClassicUO.Game.Managers
         {
             if (this[control] != null)
             {
-                List<AnchorableGump> group = reverseMap.Where
-                                                           (o => o.Value == this[control])
-                                                       .Select(o => o.Key)
-                                                       .ToList();
+                List<AnchorableGump> group = reverseMap.Where(o => o.Value == this[control]).Select(o => o.Key).ToList();
 
                 if (group.Count == 2) // if detach 1+1 - need destroy all group
                 {
@@ -188,10 +186,7 @@ namespace ClassicUO.Game.Managers
         {
             if (this[control] != null)
             {
-                foreach (AnchorableGump ctrl in reverseMap.Where
-                                                              (o => o.Value == this[control])
-                                                          .Select(o => o.Key)
-                                                          .ToList())
+                foreach (AnchorableGump ctrl in reverseMap.Where(o => o.Value == this[control]).Select(o => o.Key).ToList())
                 {
                     this[ctrl] = null;
                     ctrl.Dispose();
@@ -228,9 +223,7 @@ namespace ClassicUO.Game.Managers
 
             for (int i = 0, j = polygon.Length - 1; i < polygon.Length; j = i++)
             {
-                if (polygon[i].Y > point.Y != polygon[j].Y > point.Y && point.X <
-                    (polygon[j].X - polygon[i].X) * (point.Y - polygon[i].Y) / (polygon[j].Y - polygon[i].Y) +
-                    polygon[i].X)
+                if (polygon[i].Y > point.Y != polygon[j].Y > point.Y && point.X < (polygon[j].X - polygon[i].X) * (point.Y - polygon[i].Y) / (polygon[j].Y - polygon[i].Y) + polygon[i].X)
                 {
                     isInside = !isInside;
                 }
@@ -428,35 +421,20 @@ namespace ClassicUO.Game.Managers
                     {
                         if (targetX < 0) // Create new column left
                         {
-                            ResizeMatrix
-                            (
-                                controlMatrix.GetLength(0) + control.WidthMultiplier, controlMatrix.GetLength(1),
-                                control.WidthMultiplier, 0
-                            );
+                            ResizeMatrix(controlMatrix.GetLength(0) + control.WidthMultiplier, controlMatrix.GetLength(1), control.WidthMultiplier, 0);
                         }
-                        else if (targetX > controlMatrix.GetLength(0) - control.WidthMultiplier
-                        ) // Create new column right
+                        else if (targetX > controlMatrix.GetLength(0) - control.WidthMultiplier) // Create new column right
                         {
-                            ResizeMatrix
-                            (
-                                controlMatrix.GetLength(0) + control.WidthMultiplier, controlMatrix.GetLength(1), 0, 0
-                            );
+                            ResizeMatrix(controlMatrix.GetLength(0) + control.WidthMultiplier, controlMatrix.GetLength(1), 0, 0);
                         }
 
                         if (targetY < 0) //Create new row top
                         {
-                            ResizeMatrix
-                            (
-                                controlMatrix.GetLength(0), controlMatrix.GetLength(1) + control.HeightMultiplier, 0,
-                                control.HeightMultiplier
-                            );
+                            ResizeMatrix(controlMatrix.GetLength(0), controlMatrix.GetLength(1) + control.HeightMultiplier, 0, control.HeightMultiplier);
                         }
                         else if (targetY > controlMatrix.GetLength(1) - 1) // Create new row bottom
                         {
-                            ResizeMatrix
-                            (
-                                controlMatrix.GetLength(0), controlMatrix.GetLength(1) + control.HeightMultiplier, 0, 0
-                            );
+                            ResizeMatrix(controlMatrix.GetLength(0), controlMatrix.GetLength(1) + control.HeightMultiplier, 0, 0);
                         }
 
 

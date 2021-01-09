@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
 // 
@@ -26,6 +27,7 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 #endregion
 
 using System;
@@ -78,7 +80,15 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add
             (
-                darkMode = new Checkbox(0x00D2, 0x00D3, str, 6, 0x0288, false)
+                darkMode = new Checkbox
+                (
+                    0x00D2,
+                    0x00D3,
+                    str,
+                    6,
+                    0x0288,
+                    false
+                )
                 {
                     X = _background.Width - width - 2,
                     Y = _diffY + 7,
@@ -99,7 +109,13 @@ namespace ClassicUO.Game.UI.Gumps
             Add
             (
                 _journalEntries = new RenderedTextList
-                    (25, _diffY + 36, _background.Width - (_scrollBar.Width >> 1) - 5, 200, _scrollBar)
+                (
+                    25,
+                    _diffY + 36,
+                    _background.Width - (_scrollBar.Width >> 1) - 5,
+                    200,
+                    _scrollBar
+                )
             );
 
             Add(_scrollBar);
@@ -112,28 +128,60 @@ namespace ClassicUO.Game.UI.Gumps
             int dist = 75; // 85
             byte font = 6; // 1
 
-            _filters_chekboxes[0] = new Checkbox(0x00D2, 0x00D3, "System", font, 0x0386, false)
+            _filters_chekboxes[0] = new Checkbox
+            (
+                0x00D2,
+                0x00D3,
+                "System",
+                font,
+                0x0386,
+                false
+            )
             {
                 X = cx,
                 LocalSerial = 1,
                 IsChecked = ProfileManager.CurrentProfile.ShowJournalSystem
             };
 
-            _filters_chekboxes[1] = new Checkbox(0x00D2, 0x00D3, "Objects", font, 0x0386, false)
+            _filters_chekboxes[1] = new Checkbox
+            (
+                0x00D2,
+                0x00D3,
+                "Objects",
+                font,
+                0x0386,
+                false
+            )
             {
                 X = cx + dist,
                 LocalSerial = 2,
                 IsChecked = ProfileManager.CurrentProfile.ShowJournalObjects
             };
 
-            _filters_chekboxes[2] = new Checkbox(0x00D2, 0x00D3, "Client", font, 0x0386, false)
+            _filters_chekboxes[2] = new Checkbox
+            (
+                0x00D2,
+                0x00D3,
+                "Client",
+                font,
+                0x0386,
+                false
+            )
             {
                 X = cx + dist * 2,
                 LocalSerial = 0,
                 IsChecked = ProfileManager.CurrentProfile.ShowJournalClient
             };
 
-            _filters_chekboxes[3] = new Checkbox(0x00D2, 0x00D3, "Guild", font, 0x0386, false)
+            _filters_chekboxes[3] = new Checkbox
+            (
+                0x00D2,
+                0x00D3,
+                "Guild",
+                font,
+                0x0386,
+                false
+            )
             {
                 X = cx + dist * 3,
                 LocalSerial = 3,
@@ -250,7 +298,15 @@ namespace ClassicUO.Game.UI.Gumps
         {
             string text = $"{(entry.Name != string.Empty ? $"{entry.Name}: " : string.Empty)}{entry.Text}";
 
-            _journalEntries.AddEntry(text, entry.Font, entry.Hue, entry.IsUnicode, entry.Time, entry.TextType);
+            _journalEntries.AddEntry
+            (
+                text,
+                entry.Font,
+                entry.Hue,
+                entry.IsUnicode,
+                entry.Time,
+                entry.TextType
+            );
         }
 
         public override void Save(BinaryWriter writer)
@@ -380,8 +436,32 @@ namespace ClassicUO.Game.UI.Gumps
                         if (yy < 0)
                         {
                             // this entry starts above the renderable area, but exists partially within it.
-                            hour.Draw(batcher, hour.Width, hour.Height, mx, y, t.Width, t.Height + yy, 0, -yy);
-                            t.Draw(batcher, t.Width, t.Height, mx + hour.Width, y, t.Width, t.Height + yy, 0, -yy);
+                            hour.Draw
+                            (
+                                batcher,
+                                hour.Width,
+                                hour.Height,
+                                mx,
+                                y,
+                                t.Width,
+                                t.Height + yy,
+                                0,
+                                -yy
+                            );
+
+                            t.Draw
+                            (
+                                batcher,
+                                t.Width,
+                                t.Height,
+                                mx + hour.Width,
+                                y,
+                                t.Width,
+                                t.Height + yy,
+                                0,
+                                -yy
+                            );
+
                             my += t.Height + yy;
                         }
                         else
@@ -399,11 +479,29 @@ namespace ClassicUO.Game.UI.Gumps
                         int yyy = maxheight - height;
 
                         hour.Draw
-                            (batcher, hour.Width, hour.Height, mx, y + _scrollBar.Height - yyy, t.Width, yyy, 0, 0);
+                        (
+                            batcher,
+                            hour.Width,
+                            hour.Height,
+                            mx,
+                            y + _scrollBar.Height - yyy,
+                            t.Width,
+                            yyy,
+                            0,
+                            0
+                        );
 
                         t.Draw
                         (
-                            batcher, t.Width, t.Height, mx + hour.Width, y + _scrollBar.Height - yyy, t.Width, yyy, 0, 0
+                            batcher,
+                            t.Width,
+                            t.Height,
+                            mx + hour.Width,
+                            y + _scrollBar.Height - yyy,
+                            t.Width,
+                            yyy,
+                            0,
+                            0
                         );
 
                         // can't fit any more entries - so we break!
@@ -481,12 +579,24 @@ namespace ClassicUO.Game.UI.Gumps
                     _text_types.RemoveFromFront();
                 }
 
-                RenderedText h = RenderedText.Create($"{time:t} ", 1150, 1, true, FontStyle.BlackBorder);
+                RenderedText h = RenderedText.Create
+                (
+                    $"{time:t} ",
+                    1150,
+                    1,
+                    true,
+                    FontStyle.BlackBorder
+                );
+
                 _hours.AddToBack(h);
 
                 RenderedText rtext = RenderedText.Create
                 (
-                    text, hue, (byte) font, isUnicode, FontStyle.Indention | FontStyle.BlackBorder,
+                    text,
+                    hue,
+                    (byte) font,
+                    isUnicode,
+                    FontStyle.Indention | FontStyle.BlackBorder,
                     maxWidth: Width - (18 + h.Width)
                 );
 

@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
 // 
@@ -26,6 +27,7 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 #endregion
 
 using ClassicUO.Configuration;
@@ -53,25 +55,30 @@ namespace ClassicUO.Game.UI.Gumps
 
             Mobile mobile = World.Mobiles.Get(inviter);
 
-            Label text = new Label
-            (
-                string.Format
-                (
-                    ResGumps.P0HasInvitedYouToParty,
-                    mobile == null || string.IsNullOrEmpty(mobile.Name) ? ResGumps.NoName : mobile.Name
-                ), true, 15
-            )
+            Label text = new Label(string.Format(ResGumps.P0HasInvitedYouToParty, mobile == null || string.IsNullOrEmpty(mobile.Name) ? ResGumps.NoName : mobile.Name), true, 15)
             {
                 X = ProfileManager.CurrentProfile.GameWindowSize.X / 2 - 115,
                 Y = 165
             };
 
             NiceButton acceptButton = new NiceButton
-                (ProfileManager.CurrentProfile.GameWindowSize.X / 2 + 70, 205, 45, 25, ButtonAction.Activate, ResGumps.Accept);
+            (
+                ProfileManager.CurrentProfile.GameWindowSize.X / 2 + 70,
+                205,
+                45,
+                25,
+                ButtonAction.Activate,
+                ResGumps.Accept
+            );
 
             NiceButton declineButton = new NiceButton
             (
-                ProfileManager.CurrentProfile.GameWindowSize.X / 2 + 10, 205, 45, 25, ButtonAction.Activate, ResGumps.Decline
+                ProfileManager.CurrentProfile.GameWindowSize.X / 2 + 10,
+                205,
+                45,
+                25,
+                ButtonAction.Activate,
+                ResGumps.Decline
             );
 
             Add(partyGumpBackground);

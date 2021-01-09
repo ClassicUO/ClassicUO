@@ -1,4 +1,5 @@
 #region license
+
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
 // 
@@ -26,6 +27,7 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 #endregion
 
 using System;
@@ -67,7 +69,6 @@ namespace ClassicUO.Game.UI.Gumps
         }
 
         public uint MasterGumpSerial { get; set; }
-
 
 
         public override void Update(double totalTime, double frameTime)
@@ -119,10 +120,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         public void SetInScreen()
         {
-            if (Bounds.Width >= 0 &&
-                Bounds.X <= Client.Game.Window.ClientBounds.Width &&
-                Bounds.Height >= 0 &&
-                Bounds.Y <= Client.Game.Window.ClientBounds.Height)
+            if (Bounds.Width >= 0 && Bounds.X <= Client.Game.Window.ClientBounds.Width && Bounds.Height >= 0 && Bounds.Y <= Client.Game.Window.ClientBounds.Height)
             {
                 return;
             }
@@ -205,7 +203,14 @@ namespace ClassicUO.Game.UI.Gumps
                     }
                 }
 
-                GameActions.ReplyGump(LocalSerial, MasterGumpSerial != 0 ? MasterGumpSerial : ServerSerial, buttonID, switches.ToArray(), entries.ToArray());
+                GameActions.ReplyGump
+                (
+                    LocalSerial,
+                    MasterGumpSerial != 0 ? MasterGumpSerial : ServerSerial,
+                    buttonID,
+                    switches.ToArray(),
+                    entries.ToArray()
+                );
 
                 if (CanMove)
                 {

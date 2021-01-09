@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
 // 
@@ -26,6 +27,7 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 #endregion
 
 using ClassicUO.Input;
@@ -38,9 +40,7 @@ namespace ClassicUO.Game.UI.Controls
     {
         private const int c_ExpandableScrollHeight_Min = 274;
         private const int c_ExpandableScrollHeight_Max = 1000;
-        private const int
-            c_GumplingExpanderY_Offset =
-                2; // this is the gap between the pixels of the btm Control texture and the height of the btm Control texture.
+        private const int c_GumplingExpanderY_Offset = 2; // this is the gap between the pixels of the btm Control texture and the height of the btm Control texture.
         private const int c_GumplingExpander_ButtonID = 0x7FBEEF;
         private readonly GumpPic _gumpBottom;
         private Button _gumpExpander;
@@ -87,8 +87,31 @@ namespace ClassicUO.Game.UI.Controls
 
 
             Add(_gumpTop = new GumpPic(0, 0, graphic, 0));
-            Add(_gumpRight = new GumpPicTiled(0, 0, 0, 0, (ushort) (graphic + 1)));
-            Add(_gumpMiddle = new GumpPicTiled(0, 0, 0, 0, (ushort) (graphic + 2)));
+
+            Add
+            (
+                _gumpRight = new GumpPicTiled
+                (
+                    0,
+                    0,
+                    0,
+                    0,
+                    (ushort) (graphic + 1)
+                )
+            );
+
+            Add
+            (
+                _gumpMiddle = new GumpPicTiled
+                (
+                    0,
+                    0,
+                    0,
+                    0,
+                    (ushort) (graphic + 2)
+                )
+            );
+
             Add(_gumpBottom = new GumpPic(0, 0, (ushort) (graphic + 3), 0));
 
             if (_isResizable)

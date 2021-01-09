@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
 // 
@@ -26,6 +27,7 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 #endregion
 
 using Microsoft.Xna.Framework;
@@ -53,9 +55,7 @@ namespace ClassicUO.Game.Data
             OpenSound = sound;
             ClosedSound = closed;
 
-            MinimizerArea = minimizerX == 0 && minimizerY == 0 ?
-                Rectangle.Empty :
-                new Rectangle(minimizerX, minimizerY, 16, 16);
+            MinimizerArea = minimizerX == 0 && minimizerY == 0 ? Rectangle.Empty : new Rectangle(minimizerX, minimizerY, 16, 16);
 
             IconizedGraphic = iconizedgraphic;
         }

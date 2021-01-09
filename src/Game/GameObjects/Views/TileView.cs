@@ -1,4 +1,5 @@
 #region license
+
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
 // 
@@ -26,6 +27,7 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 #endregion
 
 using ClassicUO.Configuration;
@@ -78,7 +80,15 @@ namespace ClassicUO.Game.GameObjects
 
                 DrawLand
                 (
-                    batcher, Graphic, posX, posY, ref Rectangle, ref Normal0, ref Normal1, ref Normal2, ref Normal3,
+                    batcher,
+                    Graphic,
+                    posX,
+                    posY,
+                    ref Rectangle,
+                    ref Normal0,
+                    ref Normal1,
+                    ref Normal2,
+                    ref Normal3,
                     ref HueVector
                 );
 
@@ -89,7 +99,14 @@ namespace ClassicUO.Game.GameObjects
             }
             else
             {
-                DrawLand(batcher, Graphic, posX, posY, ref HueVector);
+                DrawLand
+                (
+                    batcher,
+                    Graphic,
+                    posX,
+                    posY,
+                    ref HueVector
+                );
 
                 if (SelectedObject.IsPointInLand(posX, posY))
                 {

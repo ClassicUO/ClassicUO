@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
 // 
@@ -26,6 +27,7 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 #endregion
 
 using System.Collections.Generic;
@@ -267,9 +269,7 @@ namespace ClassicUO.IO.Resources
                     }
                 }
 
-                baseCliloc = baseCliloc.Remove
-                                           (pos, pos2 - pos + 1)
-                                       .Insert(pos, index >= arguments.Count ? string.Empty : arguments[index]);
+                baseCliloc = baseCliloc.Remove(pos, pos2 - pos + 1).Insert(pos, index >= arguments.Count ? string.Empty : arguments[index]);
 
                 if (index >= 0 && index < arguments.Count)
                 {

@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
 // 
@@ -26,6 +27,7 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 #endregion
 
 using Microsoft.Xna.Framework;
@@ -47,18 +49,25 @@ namespace ClassicUO.Input
                 case MouseButtonType.Left:
                     LButtonPressed = true;
                     LClickPosition = Position;
+
                     break;
+
                 case MouseButtonType.Middle:
                     MButtonPressed = true;
                     MClickPosition = Position;
+
                     break;
+
                 case MouseButtonType.Right:
                     RButtonPressed = true;
                     RClickPosition = Position;
+
                     break;
+
                 case MouseButtonType.XButton1:
                 case MouseButtonType.XButton2:
                     XButtonPressed = true;
+
                     break;
             }
 
@@ -72,16 +81,23 @@ namespace ClassicUO.Input
             {
                 case MouseButtonType.Left:
                     LButtonPressed = false;
+
                     break;
+
                 case MouseButtonType.Middle:
                     MButtonPressed = false;
+
                     break;
+
                 case MouseButtonType.Right:
                     RButtonPressed = false;
+
                     break;
+
                 case MouseButtonType.XButton1:
                 case MouseButtonType.XButton2:
                     XButtonPressed = false;
+
                     break;
             }
 
@@ -140,11 +156,9 @@ namespace ClassicUO.Input
             }
 
             // Scale the mouse coordinates for the faux-backbuffer
-            Position.X = (int) ((double) Position.X * Client.Game.GraphicManager.PreferredBackBufferWidth /
-                                Client.Game.Window.ClientBounds.Width);
+            Position.X = (int) ((double) Position.X * Client.Game.GraphicManager.PreferredBackBufferWidth / Client.Game.Window.ClientBounds.Width);
 
-            Position.Y = (int) ((double) Position.Y * Client.Game.GraphicManager.PreferredBackBufferHeight /
-                                Client.Game.Window.ClientBounds.Height);
+            Position.Y = (int) ((double) Position.Y * Client.Game.GraphicManager.PreferredBackBufferHeight / Client.Game.Window.ClientBounds.Height);
 
             IsDragging = LButtonPressed || RButtonPressed || MButtonPressed;
         }

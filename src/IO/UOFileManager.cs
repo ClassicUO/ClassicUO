@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
 // 
@@ -26,6 +27,7 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 #endregion
 
 using System;
@@ -82,8 +84,7 @@ namespace ClassicUO.IO
 
             UOFileMul verdata = Verdata.File;
 
-            bool useVerdata = Client.Version < ClientVersion.CV_500A ||
-                               verdata != null && verdata.Length != 0 && Verdata.Patches.Length != 0;
+            bool useVerdata = Client.Version < ClientVersion.CV_500A || verdata != null && verdata.Length != 0 && Verdata.Patches.Length != 0;
 
             if (!Settings.GlobalSettings.UseVerdata && useVerdata)
             {
@@ -109,33 +110,45 @@ namespace ClassicUO.IO
                         }
                         else if (vh.FileID == 2)
                         {
-                            MapLoader.Instance.PatchStaticBlock
-                            (
-                                vh.BlockID,
-                        ((ulong) verdata.StartAddress.ToInt64() + vh.Position), 
-                                vh.Length
-                            );
+                            MapLoader.Instance.PatchStaticBlock(vh.BlockID, ((ulong) verdata.StartAddress.ToInt64() + vh.Position), vh.Length);
                         }
                         else if (vh.FileID == 4)
                         {
                             if (vh.BlockID < ArtLoader.Instance.Entries.Length)
                             {
                                 ArtLoader.Instance.Entries[vh.BlockID] = new UOFileIndex
-                                    (verdata.StartAddress, (uint)verdata.Length, vh.Position, (int)vh.Length, 0);
+                                (
+                                    verdata.StartAddress,
+                                    (uint) verdata.Length,
+                                    vh.Position,
+                                    (int) vh.Length,
+                                    0
+                                );
                             }
                         }
                         else if (vh.FileID == 12)
                         {
                             GumpsLoader.Instance.Entries[vh.BlockID] = new UOFileIndex
                             (
-                                verdata.StartAddress, (uint) verdata.Length, vh.Position, (int) vh.Length, 0,
-                                (short) (vh.GumpData >> 16), (short) (vh.GumpData & 0xFFFF)
+                                verdata.StartAddress,
+                                (uint) verdata.Length,
+                                vh.Position,
+                                (int) vh.Length,
+                                0,
+                                (short) (vh.GumpData >> 16),
+                                (short) (vh.GumpData & 0xFFFF)
                             );
                         }
                         else if (vh.FileID == 14 && vh.BlockID < MultiLoader.Instance.Count)
                         {
                             MultiLoader.Instance.Entries[vh.BlockID] = new UOFileIndex
-                                (verdata.StartAddress, (uint) verdata.Length, vh.Position, (int) vh.Length, 0);
+                            (
+                                verdata.StartAddress,
+                                (uint) verdata.Length,
+                                vh.Position,
+                                (int) vh.Length,
+                                0
+                            );
                         }
                         else if (vh.FileID == 16 && vh.BlockID < SkillsLoader.Instance.SkillsCount)
                         {
@@ -181,8 +194,7 @@ namespace ClassicUO.IO
                                         flags = verdata.ReadULong();
                                     }
 
-                                    TileDataLoader.Instance.LandData[offset + j] = new LandTiles
-                                        (flags, verdata.ReadUShort(), verdata.ReadASCII(20));
+                                    TileDataLoader.Instance.LandData[offset + j] = new LandTiles(flags, verdata.ReadUShort(), verdata.ReadASCII(20));
                                 }
                             }
                             else if (vh.Length == 1188)
@@ -211,9 +223,15 @@ namespace ClassicUO.IO
 
                                     TileDataLoader.Instance.StaticData[offset + j] = new StaticTiles
                                     (
-                                        flags, verdata.ReadByte(), verdata.ReadByte(), verdata.ReadInt(),
-                                        verdata.ReadUShort(), verdata.ReadUShort(), verdata.ReadUShort(),
-                                        verdata.ReadByte(), verdata.ReadASCII(20)
+                                        flags,
+                                        verdata.ReadByte(),
+                                        verdata.ReadByte(),
+                                        verdata.ReadInt(),
+                                        verdata.ReadUShort(),
+                                        verdata.ReadUShort(),
+                                        verdata.ReadUShort(),
+                                        verdata.ReadByte(),
+                                        verdata.ReadASCII(20)
                                     );
                                 }
                             }
@@ -230,12 +248,7 @@ namespace ClassicUO.IO
 
                                 for (int j = 0; j < 8; j++)
                                 {
-                                    Array.Copy
-                                    (
-                                        group.Entries[j].ColorTable,
-                                        hues[vh.BlockID].Entries[j].ColorTable,
-                                        32
-                                    );
+                                    Array.Copy(group.Entries[j].ColorTable, hues[vh.BlockID].Entries[j].ColorTable, 32);
                                 }
                             }
                         }

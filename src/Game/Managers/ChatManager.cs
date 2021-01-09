@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
 // 
@@ -26,6 +27,7 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 #endregion
 
 using System.Collections.Generic;
@@ -87,9 +89,7 @@ namespace ClassicUO.Game.Managers
 
         public static string GetMessage(int index)
         {
-            return index < _messages.Length
-                ? _messages[index]
-                : string.Empty;
+            return index < _messages.Length ? _messages[index] : string.Empty;
         }
 
         public static void AddChannel(string text, bool hasPassword)

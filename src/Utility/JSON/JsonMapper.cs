@@ -1,4 +1,5 @@
 #region license
+
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
 // 
@@ -26,6 +27,7 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 #endregion
 
 using System;
@@ -229,8 +231,7 @@ namespace TinyJson
             return null;
         }
 
-        public static bool DecodeValue
-            (object target, string name, object value, PropertyInfo[] properties, bool matchSnakeCase)
+        public static bool DecodeValue(object target, string name, object value, PropertyInfo[] properties, bool matchSnakeCase)
         {
             foreach (PropertyInfo property in properties)
             {
@@ -273,8 +274,7 @@ namespace TinyJson
             return false;
         }
 
-        public static bool DecodeValue
-            (object target, string name, object value, FieldInfo[] fields, bool matchSnakeCase)
+        public static bool DecodeValue(object target, string name, object value, FieldInfo[] fields, bool matchSnakeCase)
         {
             foreach (FieldInfo field in fields)
             {

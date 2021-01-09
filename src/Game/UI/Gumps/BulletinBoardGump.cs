@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
 // 
@@ -26,6 +27,7 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 #endregion
 
 using System;
@@ -54,7 +56,15 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add(new GumpPic(0, 0, 0x087A, 0));
 
-            Label label = new Label(name, true, 1, 170, 1, align: TEXT_ALIGN_TYPE.TS_CENTER)
+            Label label = new Label
+            (
+                name,
+                true,
+                1,
+                170,
+                1,
+                align: TEXT_ALIGN_TYPE.TS_CENTER
+            )
             {
                 X = 159,
                 Y = 36
@@ -74,14 +84,29 @@ namespace ClassicUO.Game.UI.Gumps
                 UIManager.Add
                 (
                     new BulletinBoardItem
-                        (LocalSerial, 0, World.Player.Name, string.Empty, ResGumps.DateTime, string.Empty, 0)
-                        { X = 400, Y = 335 }
+                    (
+                        LocalSerial,
+                        0,
+                        World.Player.Name,
+                        string.Empty,
+                        ResGumps.DateTime,
+                        string.Empty,
+                        0
+                    ) { X = 400, Y = 335 }
                 );
             };
 
             Add(hitbox);
 
-            ScrollArea area = new ScrollArea(127, 159, 241, 195, false);
+            ScrollArea area = new ScrollArea
+            (
+                127,
+                159,
+                241,
+                195,
+                false
+            );
+
             Add(area);
 
             _databox = new DataBox(0, 0, 1, 1);
@@ -180,7 +205,15 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add(_articleContainer);
 
-            ScrollArea area = new ScrollArea(0, 120, 272, 224, false);
+            ScrollArea area = new ScrollArea
+            (
+                0,
+                120,
+                272,
+                224,
+                false
+            );
+
             Add(area);
 
             _databox = new DataBox(0, 0, 1, 1);
@@ -198,12 +231,11 @@ namespace ClassicUO.Game.UI.Gumps
                 textColor = 0;
             }
 
-            Label text = new Label
-                (ResGumps.Author, useUnicode, textColor, font: useUnicode ? unicodeFontIndex : (byte) 6)
-                {
-                    X = 30,
-                    Y = 40
-                };
+            Label text = new Label(ResGumps.Author, useUnicode, textColor, font: useUnicode ? unicodeFontIndex : (byte) 6)
+            {
+                X = 30,
+                Y = 40
+            };
 
             Add(text);
 
@@ -249,32 +281,47 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add
             (
-                _subjectTextbox = new StbTextBox
-                    (useUnicode ? unicodeFontIndex : (byte) 9, maxWidth: 150, isunicode: useUnicode, hue: subjectColor)
-                    {
-                        X = 30 + text.Width,
-                        Y = 83 + unicodeFontHeightOffset,
-                        Width = 150,
-                        IsEditable = variant == 0
-                    }
+                _subjectTextbox = new StbTextBox(useUnicode ? unicodeFontIndex : (byte) 9, maxWidth: 150, isunicode: useUnicode, hue: subjectColor)
+                {
+                    X = 30 + text.Width,
+                    Y = 83 + unicodeFontHeightOffset,
+                    Width = 150,
+                    IsEditable = variant == 0
+                }
             );
 
             _subjectTextbox.SetText(subject);
 
-            Add(new GumpPicTiled(30, 106, 235, 4, 0x0835));
+            Add
+            (
+                new GumpPicTiled
+                (
+                    30,
+                    106,
+                    235,
+                    4,
+                    0x0835
+                )
+            );
 
             _databox.Add
             (
                 _textBox = new StbTextBox
-                    (useUnicode ? unicodeFontIndex : (byte) 9, -1, 220, hue: textColor, isunicode: useUnicode)
-                    {
-                        X = 40,
-                        Y = 0,
-                        Width = 220,
-                        Height = 300,
-                        IsEditable = variant == 0,
-                        Multiline = true
-                    }
+                (
+                    useUnicode ? unicodeFontIndex : (byte) 9,
+                    -1,
+                    220,
+                    hue: textColor,
+                    isunicode: useUnicode
+                )
+                {
+                    X = 40,
+                    Y = 0,
+                    Width = 220,
+                    Height = 300,
+                    IsEditable = variant == 0,
+                    Multiline = true
+                }
             );
 
             _textBox.SetText(data);
@@ -336,7 +383,17 @@ namespace ClassicUO.Game.UI.Gumps
         private void _textBox_TextChanged(object sender, EventArgs e)
         {
             _textBox.Height = Math.Max
-                (FontsLoader.Instance.GetHeightUnicode(1, _textBox.Text, 220, TEXT_ALIGN_TYPE.TS_LEFT, 0x0) + 5, 20);
+            (
+                FontsLoader.Instance.GetHeightUnicode
+                (
+                    1,
+                    _textBox.Text,
+                    220,
+                    TEXT_ALIGN_TYPE.TS_LEFT,
+                    0x0
+                ) + 5,
+                20
+            );
 
             foreach (Control c in _databox.Children)
             {
@@ -390,8 +447,7 @@ namespace ClassicUO.Game.UI.Gumps
             switch ((ButtonType) buttonID)
             {
                 case ButtonType.Post:
-                    NetClient.Socket.Send
-                        (new PBulletinBoardPostMessage(LocalSerial, _msgSerial, _subjectTextbox.Text, _textBox.Text));
+                    NetClient.Socket.Send(new PBulletinBoardPostMessage(LocalSerial, _msgSerial, _subjectTextbox.Text, _textBox.Text));
 
                     Dispose();
 
@@ -402,8 +458,13 @@ namespace ClassicUO.Game.UI.Gumps
                     (
                         new BulletinBoardItem
                         (
-                            LocalSerial, _msgSerial, World.Player.Name, ResGumps.RE + _subjectTextbox.Text, _datatime,
-                            string.Empty, 0
+                            LocalSerial,
+                            _msgSerial,
+                            World.Player.Name,
+                            ResGumps.RE + _subjectTextbox.Text,
+                            _datatime,
+                            string.Empty,
+                            0
                         ) { X = 400, Y = 335 }
                     );
 
@@ -463,7 +524,15 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 Add
                 (
-                    new Label(text, true, 0, Width - 23, 1, FontStyle.Fixed)
+                    new Label
+                    (
+                        text,
+                        true,
+                        0,
+                        Width - 23,
+                        1,
+                        FontStyle.Fixed
+                    )
                     {
                         X = 23, Y = 1
                     }
@@ -473,7 +542,15 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 Add
                 (
-                    new Label(text, false, 0x0386, Width - 23, 9, FontStyle.Fixed)
+                    new Label
+                    (
+                        text,
+                        false,
+                        0x0386,
+                        Width - 23,
+                        9,
+                        FontStyle.Fixed
+                    )
                     {
                         X = 23,
                         Y = 1

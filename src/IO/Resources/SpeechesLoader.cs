@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
 // 
@@ -26,6 +27,7 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 #endregion
 
 using System;
@@ -73,11 +75,7 @@ namespace ClassicUO.IO.Resources
 
                         if (length > 0)
                         {
-                            entries.Add
-                            (
-                                new SpeechEntry
-                                    (id, string.Intern(Encoding.UTF8.GetString((byte*) file.PositionAddress, length)))
-                            );
+                            entries.Add(new SpeechEntry(id, string.Intern(Encoding.UTF8.GetString((byte*) file.PositionAddress, length))));
 
                             file.Skip(length);
                         }
@@ -110,8 +108,7 @@ namespace ClassicUO.IO.Resources
 
                 if (!entry.CheckEnd)
                 {
-                    if (input.IndexOf
-                        (split[i], input.Length - split[i].Length, StringComparison.InvariantCultureIgnoreCase) == -1)
+                    if (input.IndexOf(split[i], input.Length - split[i].Length, StringComparison.InvariantCultureIgnoreCase) == -1)
                     {
                         continue;
                     }
@@ -164,7 +161,8 @@ namespace ClassicUO.IO.Resources
                 new[]
                 {
                     '*'
-                }, StringSplitOptions.RemoveEmptyEntries
+                },
+                StringSplitOptions.RemoveEmptyEntries
             );
 
             CheckStart = keyword.Length > 0 && keyword[0] == '*';

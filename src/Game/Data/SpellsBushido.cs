@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
 // 
@@ -26,6 +27,7 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 #endregion
 
 using System.Collections.Generic;
@@ -45,32 +47,86 @@ namespace ClassicUO.Game.Data
                 {
                     1,
                     new SpellDefinition
-                        ("Honorable Execution", 401, 0x5420, string.Empty, 0, 25, TargetType.Harmful, Reagents.None)
+                    (
+                        "Honorable Execution",
+                        401,
+                        0x5420,
+                        string.Empty,
+                        0,
+                        25,
+                        TargetType.Harmful,
+                        Reagents.None
+                    )
                 },
                 {
                     2,
                     new SpellDefinition
-                        ("Confidence", 402, 0x5421, string.Empty, 10, 25, TargetType.Beneficial, Reagents.None)
+                    (
+                        "Confidence",
+                        402,
+                        0x5421,
+                        string.Empty,
+                        10,
+                        25,
+                        TargetType.Beneficial,
+                        Reagents.None
+                    )
                 },
                 {
                     3,
                     new SpellDefinition
-                        ("Evasion", 403, 0x5422, string.Empty, 10, 60, TargetType.Beneficial, Reagents.None)
+                    (
+                        "Evasion",
+                        403,
+                        0x5422,
+                        string.Empty,
+                        10,
+                        60,
+                        TargetType.Beneficial,
+                        Reagents.None
+                    )
                 },
                 {
                     4,
                     new SpellDefinition
-                        ("Counter Attack", 404, 0x5423, string.Empty, 5, 40, TargetType.Harmful, Reagents.None)
+                    (
+                        "Counter Attack",
+                        404,
+                        0x5423,
+                        string.Empty,
+                        5,
+                        40,
+                        TargetType.Harmful,
+                        Reagents.None
+                    )
                 },
                 {
                     5,
                     new SpellDefinition
-                        ("Lightning Strike", 405, 0x5424, string.Empty, 10, 50, TargetType.Harmful, Reagents.None)
+                    (
+                        "Lightning Strike",
+                        405,
+                        0x5424,
+                        string.Empty,
+                        10,
+                        50,
+                        TargetType.Harmful,
+                        Reagents.None
+                    )
                 },
                 {
                     6,
                     new SpellDefinition
-                        ("Momentum Strike", 406, 0x5425, string.Empty, 10, 70, TargetType.Harmful, Reagents.None)
+                    (
+                        "Momentum Strike",
+                        406,
+                        0x5425,
+                        string.Empty,
+                        10,
+                        70,
+                        TargetType.Harmful,
+                        Reagents.None
+                    )
                 }
             };
         }

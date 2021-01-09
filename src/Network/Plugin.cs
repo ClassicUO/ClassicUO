@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
 // 
@@ -26,6 +27,7 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 #endregion
 
 using System;
@@ -178,8 +180,7 @@ namespace ClassicUO.Network
 
             void* func = &header;
 
-            if (Environment.OSVersion.Platform != PlatformID.Unix &&
-                Environment.OSVersion.Platform != PlatformID.MacOSX)
+            if (Environment.OSVersion.Platform != PlatformID.Unix && Environment.OSVersion.Platform != PlatformID.MacOSX)
             {
                 UnblockPath(Path.GetDirectoryName(PluginPath));
             }
@@ -219,10 +220,7 @@ namespace ClassicUO.Network
 
                     if (type == null)
                     {
-                        Log.Error
-                        (
-                            "Unable to find Plugin Type, API requires the public class Engine in namespace Assistant."
-                        );
+                        Log.Error("Unable to find Plugin Type, API requires the public class Engine in namespace Assistant.");
 
                         return;
                     }
@@ -231,10 +229,7 @@ namespace ClassicUO.Network
 
                     if (meth == null)
                     {
-                        Log.Error
-                        (
-                            "Engine class missing public static Install method Needs 'public static unsafe void Install(PluginHeader *plugin)' "
-                        );
+                        Log.Error("Engine class missing public static Install method Needs 'public static unsafe void Install(PluginHeader *plugin)' ");
 
                         return;
                     }
@@ -243,10 +238,7 @@ namespace ClassicUO.Network
                 }
                 catch (Exception err)
                 {
-                    Log.Error
-                    (
-                        $"Plugin threw an error during Initialization. {err.Message} {err.StackTrace} {err.InnerException?.Message} {err.InnerException?.StackTrace}"
-                    );
+                    Log.Error($"Plugin threw an error during Initialization. {err.Message} {err.StackTrace} {err.InnerException?.Message} {err.InnerException?.StackTrace}");
 
                     return;
                 }
@@ -275,8 +267,7 @@ namespace ClassicUO.Network
 
             if (header.OnPlayerPositionChanged != IntPtr.Zero)
             {
-                _onUpdatePlayerPosition = Marshal.GetDelegateForFunctionPointer<OnUpdatePlayerPosition>
-                    (header.OnPlayerPositionChanged);
+                _onUpdatePlayerPosition = Marshal.GetDelegateForFunctionPointer<OnUpdatePlayerPosition>(header.OnPlayerPositionChanged);
             }
 
             if (header.OnClientClosing != IntPtr.Zero)
@@ -533,9 +524,7 @@ namespace ClassicUO.Network
 
         internal static bool ProcessHotkeys(int key, int mod, bool ispressed)
         {
-            if (!World.InGame ||
-                ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.ActivateChatAfterEnter &&
-                UIManager.SystemChat != null && (UIManager.SystemChat.IsActive || UIManager.KeyboardFocusControl != UIManager.SystemChat.TextBoxControl))
+            if (!World.InGame || ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.ActivateChatAfterEnter && UIManager.SystemChat != null && (UIManager.SystemChat.IsActive || UIManager.KeyboardFocusControl != UIManager.SystemChat.TextBoxControl))
             {
                 return true;
             }
@@ -683,11 +672,7 @@ namespace ClassicUO.Network
             return DeleteFile(fileName + ":Zone.Identifier");
         }
 
-        private void HandleCmdList(
-            GraphicsDevice device,
-            IntPtr ptr,
-            int length,
-            IDictionary<IntPtr, GraphicsResource> resources)
+        private void HandleCmdList(GraphicsDevice device, IntPtr ptr, int length, IDictionary<IntPtr, GraphicsResource> resources)
         {
             if (ptr == IntPtr.Zero || length <= 0)
             {
@@ -853,8 +838,7 @@ namespace ClassicUO.Network
                             CounterClockwiseStencilFunction = createStencil.CounterClockwiseStencilFunc,
                             CounterClockwiseStencilFail = createStencil.CounterClockwiseStencilFail,
                             CounterClockwiseStencilPass = createStencil.CounterClockwiseStencilPass,
-                            CounterClockwiseStencilDepthBufferFail =
-                                createStencil.CounterClockwiseStencilDepthBufferFail,
+                            CounterClockwiseStencilDepthBufferFail = createStencil.CounterClockwiseStencilDepthBufferFail,
                             StencilMask = createStencil.StencilMask,
                             StencilWriteMask = createStencil.StencilWriteMask,
                             ReferenceStencil = createStencil.ReferenceStencil
@@ -900,8 +884,7 @@ namespace ClassicUO.Network
 
                     case CMD_SAMPLER_STATE:
 
-                        device.SamplerStates[command.SetSamplerStateCommand.index] =
-                            resources[command.SetSamplerStateCommand.id] as SamplerState;
+                        device.SamplerStates[command.SetSamplerStateCommand.index] = resources[command.SetSamplerStateCommand.id] as SamplerState;
 
                         break;
 
@@ -911,11 +894,7 @@ namespace ClassicUO.Network
 
                         VertexBuffer vertex_buffer = resources[setVertexDataCommand.id] as VertexBuffer;
 
-                        vertex_buffer?.SetDataPointerEXT
-                        (
-                            0, setVertexDataCommand.vertex_buffer_ptr, setVertexDataCommand.vertex_buffer_length,
-                            SetDataOptions.None
-                        );
+                        vertex_buffer?.SetDataPointerEXT(0, setVertexDataCommand.vertex_buffer_ptr, setVertexDataCommand.vertex_buffer_length, SetDataOptions.None);
 
                         break;
 
@@ -925,11 +904,7 @@ namespace ClassicUO.Network
 
                         IndexBuffer index_buffer = resources[setIndexDataCommand.id] as IndexBuffer;
 
-                        index_buffer?.SetDataPointerEXT
-                        (
-                            0, setIndexDataCommand.indices_buffer_ptr, setIndexDataCommand.indices_buffer_length,
-                            SetDataOptions.None
-                        );
+                        index_buffer?.SetDataPointerEXT(0, setIndexDataCommand.indices_buffer_ptr, setIndexDataCommand.indices_buffer_length, SetDataOptions.None);
 
                         break;
 
@@ -944,17 +919,7 @@ namespace ClassicUO.Network
                             elements[j] = ((VertexElement*) createVertexBufferCommand.Declarations)[j];
                         }
 
-                        VertexBuffer vb = createVertexBufferCommand.IsDynamic ?
-                            new DynamicVertexBuffer
-                            (
-                                device, new VertexDeclaration(createVertexBufferCommand.Size, elements),
-                                createVertexBufferCommand.VertexElementsCount, createVertexBufferCommand.BufferUsage
-                            ) :
-                            new VertexBuffer
-                            (
-                                device, new VertexDeclaration(createVertexBufferCommand.Size, elements),
-                                createVertexBufferCommand.VertexElementsCount, createVertexBufferCommand.BufferUsage
-                            );
+                        VertexBuffer vb = createVertexBufferCommand.IsDynamic ? new DynamicVertexBuffer(device, new VertexDeclaration(createVertexBufferCommand.Size, elements), createVertexBufferCommand.VertexElementsCount, createVertexBufferCommand.BufferUsage) : new VertexBuffer(device, new VertexDeclaration(createVertexBufferCommand.Size, elements), createVertexBufferCommand.VertexElementsCount, createVertexBufferCommand.BufferUsage);
 
                         resources[createVertexBufferCommand.id] = vb;
 
@@ -964,17 +929,7 @@ namespace ClassicUO.Network
 
                         ref CreateIndexBufferCommand createIndexBufferCommand = ref command.CreateIndexBufferCommand;
 
-                        IndexBuffer ib = createIndexBufferCommand.IsDynamic ?
-                            new DynamicIndexBuffer
-                            (
-                                device, createIndexBufferCommand.IndexElementSize, createIndexBufferCommand.IndexCount,
-                                createIndexBufferCommand.BufferUsage
-                            ) :
-                            new IndexBuffer
-                            (
-                                device, createIndexBufferCommand.IndexElementSize, createIndexBufferCommand.IndexCount,
-                                createIndexBufferCommand.BufferUsage
-                            );
+                        IndexBuffer ib = createIndexBufferCommand.IsDynamic ? new DynamicIndexBuffer(device, createIndexBufferCommand.IndexElementSize, createIndexBufferCommand.IndexCount, createIndexBufferCommand.BufferUsage) : new IndexBuffer(device, createIndexBufferCommand.IndexElementSize, createIndexBufferCommand.IndexCount, createIndexBufferCommand.BufferUsage);
 
                         resources[createIndexBufferCommand.id] = ib;
 
@@ -1040,15 +995,22 @@ namespace ClassicUO.Network
                         {
                             texture = new RenderTarget2D
                             (
-                                device, createTexture2DCommand.Width, createTexture2DCommand.Height, false,
-                                createTexture2DCommand.Format, DepthFormat.Depth24Stencil8
+                                device,
+                                createTexture2DCommand.Width,
+                                createTexture2DCommand.Height,
+                                false,
+                                createTexture2DCommand.Format,
+                                DepthFormat.Depth24Stencil8
                             );
                         }
                         else
                         {
                             texture = new Texture2D
                             (
-                                device, createTexture2DCommand.Width, createTexture2DCommand.Height, false,
+                                device,
+                                createTexture2DCommand.Width,
+                                createTexture2DCommand.Height,
+                                false,
                                 createTexture2DCommand.Format
                             );
                         }
@@ -1064,15 +1026,7 @@ namespace ClassicUO.Network
 
                         texture = resources[setTexture2DDataCommand.id] as Texture2D;
 
-                        texture?.SetDataPointerEXT
-                        (
-                            setTexture2DDataCommand.level,
-                            new Rectangle
-                            (
-                                setTexture2DDataCommand.x, setTexture2DDataCommand.y, setTexture2DDataCommand.width,
-                                setTexture2DDataCommand.height
-                            ), setTexture2DDataCommand.data, setTexture2DDataCommand.data_length
-                        );
+                        texture?.SetDataPointerEXT(setTexture2DDataCommand.level, new Rectangle(setTexture2DDataCommand.x, setTexture2DDataCommand.y, setTexture2DDataCommand.width, setTexture2DDataCommand.height), setTexture2DDataCommand.data, setTexture2DDataCommand.data_length);
 
                         break;
 
@@ -1090,9 +1044,12 @@ namespace ClassicUO.Network
 
                                 device.DrawIndexedPrimitives
                                 (
-                                    indexedPrimitiveDataCommand.PrimitiveType, indexedPrimitiveDataCommand.BaseVertex,
-                                    indexedPrimitiveDataCommand.MinVertexIndex, indexedPrimitiveDataCommand.NumVertices,
-                                    indexedPrimitiveDataCommand.StartIndex, indexedPrimitiveDataCommand.PrimitiveCount
+                                    indexedPrimitiveDataCommand.PrimitiveType,
+                                    indexedPrimitiveDataCommand.BaseVertex,
+                                    indexedPrimitiveDataCommand.MinVertexIndex,
+                                    indexedPrimitiveDataCommand.NumVertices,
+                                    indexedPrimitiveDataCommand.StartIndex,
+                                    indexedPrimitiveDataCommand.PrimitiveCount
                                 );
                             }
                         }
@@ -1100,9 +1057,12 @@ namespace ClassicUO.Network
                         {
                             device.DrawIndexedPrimitives
                             (
-                                indexedPrimitiveDataCommand.PrimitiveType, indexedPrimitiveDataCommand.BaseVertex,
-                                indexedPrimitiveDataCommand.MinVertexIndex, indexedPrimitiveDataCommand.NumVertices,
-                                indexedPrimitiveDataCommand.StartIndex, indexedPrimitiveDataCommand.PrimitiveCount
+                                indexedPrimitiveDataCommand.PrimitiveType,
+                                indexedPrimitiveDataCommand.BaseVertex,
+                                indexedPrimitiveDataCommand.MinVertexIndex,
+                                indexedPrimitiveDataCommand.NumVertices,
+                                indexedPrimitiveDataCommand.StartIndex,
+                                indexedPrimitiveDataCommand.PrimitiveCount
                             );
                         }
 
@@ -1169,13 +1129,7 @@ namespace ClassicUO.Network
 
         [return: MarshalAs(UnmanagedType.I1)]
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        private delegate bool OnGetCliloc
-        (
-            int cliloc,
-            [MarshalAs(UnmanagedType.LPStr)] string args,
-            bool capitalize,
-            [Out] [MarshalAs(UnmanagedType.LPStr)] out string buffer
-        );
+        private delegate bool OnGetCliloc(int cliloc, [MarshalAs(UnmanagedType.LPStr)] string args, bool capitalize, [Out] [MarshalAs(UnmanagedType.LPStr)] out string buffer);
 
 
         private struct PluginHeader

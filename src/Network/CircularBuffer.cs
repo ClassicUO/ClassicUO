@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
 // 
@@ -26,6 +27,7 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 #endregion
 
 using System;
@@ -73,12 +75,34 @@ namespace ClassicUO.Network
             {
                 if (_head < _tail)
                 {
-                    Buffer.BlockCopy(_buffer, _head, newBuffer, 0, Length);
+                    Buffer.BlockCopy
+                    (
+                        _buffer,
+                        _head,
+                        newBuffer,
+                        0,
+                        Length
+                    );
                 }
                 else
                 {
-                    Buffer.BlockCopy(_buffer, _head, newBuffer, 0, _buffer.Length - _head);
-                    Buffer.BlockCopy(_buffer, 0, newBuffer, _buffer.Length - _head, _tail);
+                    Buffer.BlockCopy
+                    (
+                        _buffer,
+                        _head,
+                        newBuffer,
+                        0,
+                        _buffer.Length - _head
+                    );
+
+                    Buffer.BlockCopy
+                    (
+                        _buffer,
+                        0,
+                        newBuffer,
+                        _buffer.Length - _head,
+                        _tail
+                    );
                 }
             }
 
@@ -106,17 +130,46 @@ namespace ClassicUO.Network
 
                 if (rightLength >= size)
                 {
-                    Buffer.BlockCopy(buffer, offset, _buffer, _tail, size);
+                    Buffer.BlockCopy
+                    (
+                        buffer,
+                        offset,
+                        _buffer,
+                        _tail,
+                        size
+                    );
                 }
                 else
                 {
-                    Buffer.BlockCopy(buffer, offset, _buffer, _tail, rightLength);
-                    Buffer.BlockCopy(buffer, offset + rightLength, _buffer, 0, size - rightLength);
+                    Buffer.BlockCopy
+                    (
+                        buffer,
+                        offset,
+                        _buffer,
+                        _tail,
+                        rightLength
+                    );
+
+                    Buffer.BlockCopy
+                    (
+                        buffer,
+                        offset + rightLength,
+                        _buffer,
+                        0,
+                        size - rightLength
+                    );
                 }
             }
             else
             {
-                Buffer.BlockCopy(buffer, offset, _buffer, _tail, size);
+                Buffer.BlockCopy
+                (
+                    buffer,
+                    offset,
+                    _buffer,
+                    _tail,
+                    size
+                );
             }
 
             _tail = (_tail + size) % _buffer.Length;
@@ -144,7 +197,14 @@ namespace ClassicUO.Network
 
             if (_head < _tail)
             {
-                Buffer.BlockCopy(_buffer, _head, buffer, offset, size);
+                Buffer.BlockCopy
+                (
+                    _buffer,
+                    _head,
+                    buffer,
+                    offset,
+                    size
+                );
             }
             else
             {
@@ -152,12 +212,34 @@ namespace ClassicUO.Network
 
                 if (rightLength >= size)
                 {
-                    Buffer.BlockCopy(_buffer, _head, buffer, offset, size);
+                    Buffer.BlockCopy
+                    (
+                        _buffer,
+                        _head,
+                        buffer,
+                        offset,
+                        size
+                    );
                 }
                 else
                 {
-                    Buffer.BlockCopy(_buffer, _head, buffer, offset, rightLength);
-                    Buffer.BlockCopy(_buffer, 0, buffer, offset + rightLength, size - rightLength);
+                    Buffer.BlockCopy
+                    (
+                        _buffer,
+                        _head,
+                        buffer,
+                        offset,
+                        rightLength
+                    );
+
+                    Buffer.BlockCopy
+                    (
+                        _buffer,
+                        0,
+                        buffer,
+                        offset + rightLength,
+                        size - rightLength
+                    );
                 }
             }
 
@@ -191,6 +273,7 @@ namespace ClassicUO.Network
             {
                 return _buffer[(_head + 2) % _buffer.Length] | (_buffer[(_head + 1) % _buffer.Length] << 8);
             }
+
             return 0;
         }
     }

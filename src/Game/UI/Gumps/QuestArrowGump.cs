@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
 // 
@@ -26,6 +27,7 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 #endregion
 
 using ClassicUO.Configuration;
@@ -79,7 +81,15 @@ namespace ClassicUO.Game.UI.Gumps
                 return;
             }
 
-            Direction dir = (Direction) GameCursor.GetMouseDirection(World.Player.X, World.Player.Y, _mx, _my, 0);
+            Direction dir = (Direction) GameCursor.GetMouseDirection
+            (
+                World.Player.X,
+                World.Player.Y,
+                _mx,
+                _my,
+                0
+            );
+
             ushort gumpID = (ushort) (0x1194 + ((int) dir + 1) % 8);
 
             if (_direction != dir || _arrow == null)
@@ -168,11 +178,9 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 x = ProfileManager.CurrentProfile.GameWindowPosition.X;
             }
-            else if (x > ProfileManager.CurrentProfile.GameWindowPosition.X + ProfileManager.CurrentProfile.GameWindowSize.X -
-                _arrow.Width)
+            else if (x > ProfileManager.CurrentProfile.GameWindowPosition.X + ProfileManager.CurrentProfile.GameWindowSize.X - _arrow.Width)
             {
-                x = ProfileManager.CurrentProfile.GameWindowPosition.X + ProfileManager.CurrentProfile.GameWindowSize.X -
-                    _arrow.Width;
+                x = ProfileManager.CurrentProfile.GameWindowPosition.X + ProfileManager.CurrentProfile.GameWindowSize.X - _arrow.Width;
             }
 
 
@@ -180,11 +188,9 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 y = ProfileManager.CurrentProfile.GameWindowPosition.Y;
             }
-            else if (y > ProfileManager.CurrentProfile.GameWindowPosition.Y + ProfileManager.CurrentProfile.GameWindowSize.Y -
-                _arrow.Height)
+            else if (y > ProfileManager.CurrentProfile.GameWindowPosition.Y + ProfileManager.CurrentProfile.GameWindowSize.Y - _arrow.Height)
             {
-                y = ProfileManager.CurrentProfile.GameWindowPosition.Y + ProfileManager.CurrentProfile.GameWindowSize.Y -
-                    _arrow.Height;
+                y = ProfileManager.CurrentProfile.GameWindowPosition.Y + ProfileManager.CurrentProfile.GameWindowSize.Y - _arrow.Height;
             }
 
             X = x;

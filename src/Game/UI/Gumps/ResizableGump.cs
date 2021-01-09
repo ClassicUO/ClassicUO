@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
 // 
@@ -26,6 +27,7 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 #endregion
 
 using ClassicUO.Game.UI.Controls;
@@ -55,7 +57,14 @@ namespace ClassicUO.Game.UI.Gumps
             ushort borderHue = 0
         ) : base(local, server)
         {
-            _borderControl = new BorderControl(0, 0, Width, Height, 4)
+            _borderControl = new BorderControl
+            (
+                0,
+                0,
+                Width,
+                Height,
+                4
+            )
             {
                 Hue = borderHue
             };

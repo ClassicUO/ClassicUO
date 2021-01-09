@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
 // 
@@ -26,6 +27,7 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 #endregion
 
 using System.Collections.Generic;
@@ -76,8 +78,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             for (int i = 0; i < infoBarItems.Count; i++)
             {
-                InfoBarControl info = new InfoBarControl
-                    (infoBarItems[i].label, infoBarItems[i].var, infoBarItems[i].hue);
+                InfoBarControl info = new InfoBarControl(infoBarItems[i].label, infoBarItems[i].var, infoBarItems[i].hue);
 
                 _infobarControls.Add(info);
                 Add(info);
@@ -218,21 +219,28 @@ namespace ClassicUO.Game.UI.Gumps
 
             ResetHueVector();
 
-            if (Var != InfoBarVars.NameNotoriety && ProfileManager.CurrentProfile.InfoBarHighlightType == 1 &&
-                _warningLinesHue != 0x0481)
+            if (Var != InfoBarVars.NameNotoriety && ProfileManager.CurrentProfile.InfoBarHighlightType == 1 && _warningLinesHue != 0x0481)
             {
                 ShaderHueTranslator.GetHueVector(ref HueVector, _warningLinesHue);
 
                 batcher.Draw2D
                 (
-                    SolidColorTextureCache.GetTexture(Color.White), _data.ScreenCoordinateX, _data.ScreenCoordinateY,
-                    _data.Width, 2, ref HueVector
+                    SolidColorTextureCache.GetTexture(Color.White),
+                    _data.ScreenCoordinateX,
+                    _data.ScreenCoordinateY,
+                    _data.Width,
+                    2,
+                    ref HueVector
                 );
 
                 batcher.Draw2D
                 (
-                    SolidColorTextureCache.GetTexture(Color.White), _data.ScreenCoordinateX,
-                    _data.ScreenCoordinateY + Parent.Height - 2, _data.Width, 2, ref HueVector
+                    SolidColorTextureCache.GetTexture(Color.White),
+                    _data.ScreenCoordinateX,
+                    _data.ScreenCoordinateY + Parent.Height - 2,
+                    _data.Width,
+                    2,
+                    ref HueVector
                 );
             }
 

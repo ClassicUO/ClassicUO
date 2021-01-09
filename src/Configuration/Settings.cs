@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
 // 
@@ -26,6 +27,7 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 #endregion
 
 using System.IO;
@@ -81,8 +83,7 @@ namespace ClassicUO.Configuration
 
         [JsonProperty("login_music_volume")] public int LoginMusicVolume { get; set; } = 70;
 
-        [JsonProperty("shard_type")]
-        public int ShardType { get; set; } // 0 = normal (no customization), 1 = old, 2 = outlands??
+        [JsonProperty("shard_type")] public int ShardType { get; set; } // 0 = normal (no customization), 1 = old, 2 = outlands??
 
         [JsonProperty("fixed_time_step")] public bool FixedTimeStep { get; set; } = true;
 
@@ -120,9 +121,7 @@ namespace ClassicUO.Configuration
             // Make a copy of the settings object that we will use in the saving process
             string json = this.Encode(true);
 
-            Settings
-                settingsToSave =
-                    json.Decode<Settings>(); // JsonConvert.DeserializeObject<Settings>(JsonConvert.SerializeObject(this));
+            Settings settingsToSave = json.Decode<Settings>(); // JsonConvert.DeserializeObject<Settings>(JsonConvert.SerializeObject(this));
 
             // Make sure we don't save username and password if `saveaccount` flag is not set
             // NOTE: Even if we pass username and password via command-line arguments they won't be saved

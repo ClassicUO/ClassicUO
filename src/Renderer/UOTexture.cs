@@ -1,4 +1,5 @@
 #region license
+
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
 // 
@@ -26,6 +27,7 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 #endregion
 
 using Microsoft.Xna.Framework.Graphics;
@@ -34,8 +36,14 @@ namespace ClassicUO.Renderer
 {
     internal class UOTexture : Texture2D
     {
-        public UOTexture(int width, int height)
-            : base(Client.Game.GraphicsDevice, width, height, false, SurfaceFormat.Color)
+        public UOTexture(int width, int height) : base
+        (
+            Client.Game.GraphicsDevice,
+            width,
+            height,
+            false,
+            SurfaceFormat.Color
+        )
         {
             Ticks = Time.Ticks + 3000;
         }

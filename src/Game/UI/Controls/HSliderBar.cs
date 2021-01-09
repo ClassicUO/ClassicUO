@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
 // 
@@ -26,6 +27,7 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 #endregion
 
 using System;
@@ -195,13 +197,15 @@ namespace ClassicUO.Game.UI.Controls
 
                 batcher.Draw2DTiled
                 (
-                    _gumpSpliderBackground[1], x + _gumpSpliderBackground[0].Width, y,
+                    _gumpSpliderBackground[1],
+                    x + _gumpSpliderBackground[0].Width,
+                    y,
                     BarWidth - _gumpSpliderBackground[2].Width - _gumpSpliderBackground[0].Width,
-                    _gumpSpliderBackground[1].Height, ref HueVector
+                    _gumpSpliderBackground[1].Height,
+                    ref HueVector
                 );
 
-                batcher.Draw2D
-                    (_gumpSpliderBackground[2], x + BarWidth - _gumpSpliderBackground[2].Width, y, ref HueVector);
+                batcher.Draw2D(_gumpSpliderBackground[2], x + BarWidth - _gumpSpliderBackground[2].Width, y, ref HueVector);
             }
 
             batcher.Draw2D(_gumpWidget, x + _sliderX, y, ref HueVector);

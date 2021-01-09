@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
 // 
@@ -26,6 +27,7 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 #endregion
 
 using ClassicUO.Data;
@@ -77,15 +79,13 @@ namespace ClassicUO.Network.Encryption
                 KEY_1 = KEY_2 - 1;
 
 
-                if (version <
-                    (ClientVersion) (((1 & 0xFF) << 24) | ((25 & 0xFF) << 16) | ((35 & 0xFF) << 8) | (0 & 0xFF)))
+                if (version < (ClientVersion) (((1 & 0xFF) << 24) | ((25 & 0xFF) << 16) | ((35 & 0xFF) << 8) | (0 & 0xFF)))
                 {
                     Type = ENCRYPTION_TYPE.OLD_BFISH;
                 }
 
 
-                else if (version ==
-                         (ClientVersion) (((1 & 0xFF) << 24) | ((25 & 0xFF) << 16) | ((36 & 0xFF) << 8) | (0 & 0xFF)))
+                else if (version == (ClientVersion) (((1 & 0xFF) << 24) | ((25 & 0xFF) << 16) | ((36 & 0xFF) << 8) | (0 & 0xFF)))
                 {
                     Type = ENCRYPTION_TYPE.BLOWFISH__1_25_36;
                 }
@@ -96,8 +96,7 @@ namespace ClassicUO.Network.Encryption
                     Type = ENCRYPTION_TYPE.BLOWFISH;
                 }
 
-                else if (version <=
-                         (ClientVersion) (((2 & 0xFF) << 24) | ((0 & 0xFF) << 16) | ((3 & 0xFF) << 8) | (0 & 0xFF)))
+                else if (version <= (ClientVersion) (((2 & 0xFF) << 24) | ((0 & 0xFF) << 16) | ((3 & 0xFF) << 8) | (0 & 0xFF)))
                 {
                     Type = ENCRYPTION_TYPE.BLOWFISH__2_0_3;
                 }
@@ -161,7 +160,15 @@ namespace ClassicUO.Network.Encryption
             {
                 int index_s = 0, index_d = 0;
 
-                _blowfishEncryption.Encrypt(ref src, ref dst, size, ref index_s, ref index_d);
+                _blowfishEncryption.Encrypt
+                (
+                    ref src,
+                    ref dst,
+                    size,
+                    ref index_s,
+                    ref index_d
+                );
+
                 _twoFishBehaviour.Encrypt(ref dst, ref dst, size);
             }
             else if (Type == ENCRYPTION_TYPE.TWOFISH_MD5)
@@ -171,7 +178,15 @@ namespace ClassicUO.Network.Encryption
             else
             {
                 int index_s = 0, index_d = 0;
-                _blowfishEncryption.Encrypt(ref src, ref dst, size, ref index_s, ref index_d);
+
+                _blowfishEncryption.Encrypt
+                (
+                    ref src,
+                    ref dst,
+                    size,
+                    ref index_s,
+                    ref index_d
+                );
             }
         }
 

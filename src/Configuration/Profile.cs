@@ -1,4 +1,5 @@
 #region license
+
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
 // 
@@ -26,6 +27,7 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 #endregion
 
 using System;
@@ -186,12 +188,7 @@ namespace ClassicUO.Configuration
         public int DragSelectModifierKey { get; set; } // 0 = none, 1 = control, 2 = shift
         public bool OverrideContainerLocation { get; set; }
 
-        public int
-            OverrideContainerLocationSetting
-        {
-            get;
-            set;
-        } // 0 = container position, 1 = top right of screen, 2 = last dragged position, 3 = remember every container
+        public int OverrideContainerLocationSetting { get; set; } // 0 = container position, 1 = top right of screen, 2 = last dragged position, 3 = remember every container
 
         public Point OverrideContainerLocationPosition { get; set; } = new Point(200, 200);
         public bool DragSelectHumanoidsOnly { get; set; }
@@ -808,8 +805,7 @@ namespace ClassicUO.Configuration
 
                                     if (!gump.IsDisposed)
                                     {
-                                        if (UIManager.AnchorManager[gump] == null && ancoGroup.IsEmptyDirection
-                                            (matrix_x, matrix_y))
+                                        if (UIManager.AnchorManager[gump] == null && ancoGroup.IsEmptyDirection(matrix_x, matrix_y))
                                         {
                                             gumps.Add(gump);
                                             UIManager.AnchorManager[gump] = ancoGroup;

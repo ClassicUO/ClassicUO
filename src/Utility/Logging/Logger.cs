@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
 // 
@@ -26,6 +27,7 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 #endregion
 
 using System;
@@ -35,31 +37,30 @@ namespace ClassicUO.Utility.Logging
 {
     internal class Logger
     {
-        private static readonly Dictionary<LogTypes, Tuple<ConsoleColor, string>> _logTypesInfo =
-            new Dictionary<LogTypes, Tuple<ConsoleColor, string>>
+        private static readonly Dictionary<LogTypes, Tuple<ConsoleColor, string>> _logTypesInfo = new Dictionary<LogTypes, Tuple<ConsoleColor, string>>
+        {
             {
-                {
-                    LogTypes.None, Tuple.Create(ConsoleColor.White, "")
-                },
-                {
-                    LogTypes.Info, Tuple.Create(ConsoleColor.Green, "  Info    ")
-                },
-                {
-                    LogTypes.Debug, Tuple.Create(ConsoleColor.DarkGreen, "  Debug   ")
-                },
-                {
-                    LogTypes.Trace, Tuple.Create(ConsoleColor.Green, "  Trace   ")
-                },
-                {
-                    LogTypes.Warning, Tuple.Create(ConsoleColor.Yellow, "  Warning ")
-                },
-                {
-                    LogTypes.Error, Tuple.Create(ConsoleColor.Red, "  Error   ")
-                },
-                {
-                    LogTypes.Panic, Tuple.Create(ConsoleColor.Red, "  Panic   ")
-                }
-            };
+                LogTypes.None, Tuple.Create(ConsoleColor.White, "")
+            },
+            {
+                LogTypes.Info, Tuple.Create(ConsoleColor.Green, "  Info    ")
+            },
+            {
+                LogTypes.Debug, Tuple.Create(ConsoleColor.DarkGreen, "  Debug   ")
+            },
+            {
+                LogTypes.Trace, Tuple.Create(ConsoleColor.Green, "  Trace   ")
+            },
+            {
+                LogTypes.Warning, Tuple.Create(ConsoleColor.Yellow, "  Warning ")
+            },
+            {
+                LogTypes.Error, Tuple.Create(ConsoleColor.Red, "  Error   ")
+            },
+            {
+                LogTypes.Panic, Tuple.Create(ConsoleColor.Red, "  Panic   ")
+            }
+        };
 
         private int _indent;
 

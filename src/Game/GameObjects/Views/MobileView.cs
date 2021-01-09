@@ -1,4 +1,5 @@
 #region license
+
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
 // 
@@ -26,6 +27,7 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 #endregion
 
 using System;
@@ -76,19 +78,12 @@ namespace ClassicUO.Game.GameObjects
 
             if (AuraManager.IsEnabled)
             {
-                AuraManager.Draw
-                (
-                    batcher, drawX, drawY,
-                    ProfileManager.CurrentProfile.PartyAura && World.Party.Contains(this) ?
-                        ProfileManager.CurrentProfile.PartyAuraHue :
-                        Notoriety.GetHue(NotorietyFlag)
-                );
+                AuraManager.Draw(batcher, drawX, drawY, ProfileManager.CurrentProfile.PartyAura && World.Party.Contains(this) ? ProfileManager.CurrentProfile.PartyAuraHue : Notoriety.GetHue(NotorietyFlag));
             }
 
             bool isHuman = IsHuman;
 
-            bool isGargoyle = Client.Version >= ClientVersion.CV_7000 &&
-                              (Graphic == 666 || Graphic == 667 || Graphic == 0x02B7 || Graphic == 0x02B6);
+            bool isGargoyle = Client.Version >= ClientVersion.CV_7000 && (Graphic == 666 || Graphic == 667 || Graphic == 0x02B7 || Graphic == 0x02B6);
 
             if (AlphaHue != 255)
             {
@@ -183,7 +178,18 @@ namespace ClassicUO.Game.GameObjects
                     {
                         DrawInternal
                         (
-                            batcher, this, null, drawX, drawY + 10, IsFlipped, animIndex, true, graphic, animGroup, dir, isHuman,
+                            batcher,
+                            this,
+                            null,
+                            drawX,
+                            drawY + 10,
+                            IsFlipped,
+                            animIndex,
+                            true,
+                            graphic,
+                            animGroup,
+                            dir,
+                            isHuman,
                             alpha: HueVector.Z
                         );
 
@@ -191,7 +197,18 @@ namespace ClassicUO.Game.GameObjects
 
                         DrawInternal
                         (
-                            batcher, this, mount, drawX, drawY, IsFlipped, animIndex, true, mountGraphic, animGroupMount, dir, isHuman,
+                            batcher,
+                            this,
+                            mount,
+                            drawX,
+                            drawY,
+                            IsFlipped,
+                            animIndex,
+                            true,
+                            mountGraphic,
+                            animGroupMount,
+                            dir,
+                            isHuman,
                             alpha: HueVector.Z
                         );
                     }
@@ -202,8 +219,20 @@ namespace ClassicUO.Game.GameObjects
 
                     drawY += DrawInternal
                     (
-                        batcher, this, mount, drawX, drawY, IsFlipped, animIndex, false, mountGraphic, animGroupMount, dir, isHuman,
-                        isMount: true, alpha: HueVector.Z
+                        batcher,
+                        this,
+                        mount,
+                        drawX,
+                        drawY,
+                        IsFlipped,
+                        animIndex,
+                        false,
+                        mountGraphic,
+                        animGroupMount,
+                        dir,
+                        isHuman,
+                        isMount: true,
+                        alpha: HueVector.Z
                     );
                 }
             }
@@ -215,7 +244,16 @@ namespace ClassicUO.Game.GameObjects
                     animIndex = 0;
 
                     ProcessSteps(out dir);
-                    AnimationsLoader.Instance.FixSittingDirection(ref dir, ref IsFlipped, ref drawX, ref drawY, sittigIndex);
+
+                    AnimationsLoader.Instance.FixSittingDirection
+                    (
+                        ref dir,
+                        ref IsFlipped,
+                        ref drawX,
+                        ref drawY,
+                        sittigIndex
+                    );
+
                     drawY += SIT_OFFSET_Y;
 
                     if (dir == 3)
@@ -243,13 +281,40 @@ namespace ClassicUO.Game.GameObjects
                 {
                     DrawInternal
                     (
-                        batcher, this, null, drawX, drawY, IsFlipped, animIndex, true, graphic, animGroup, dir, isHuman,
+                        batcher,
+                        this,
+                        null,
+                        drawX,
+                        drawY,
+                        IsFlipped,
+                        animIndex,
+                        true,
+                        graphic,
+                        animGroup,
+                        dir,
+                        isHuman,
                         alpha: HueVector.Z
                     );
                 }
             }
 
-            DrawInternal(batcher, this, null, drawX, drawY, IsFlipped, animIndex, false, graphic, animGroup, dir, isHuman, alpha: HueVector.Z, forceUOP: isGargoyle);
+            DrawInternal
+            (
+                batcher,
+                this,
+                null,
+                drawX,
+                drawY,
+                IsFlipped,
+                animIndex,
+                false,
+                graphic,
+                animGroup,
+                dir,
+                isHuman,
+                alpha: HueVector.Z,
+                forceUOP: isGargoyle
+            );
 
             if (!IsEmpty)
             {
@@ -333,13 +398,12 @@ namespace ClassicUO.Game.GameObjects
                                         break;
 
 
-                                        // gargoyle mysticism book seems ok. Mha!
+                                    // gargoyle mysticism book seems ok. Mha!
                                 }
                             }
 
 
-                            if (AnimationsLoader.Instance.EquipConversions.TryGetValue
-                                (Graphic, out Dictionary<ushort, EquipConvData> map))
+                            if (AnimationsLoader.Instance.EquipConversions.TryGetValue(Graphic, out Dictionary<ushort, EquipConvData> map))
                             {
                                 if (map.TryGetValue(item.ItemData.AnimID, out EquipConvData data))
                                 {
@@ -353,15 +417,40 @@ namespace ClassicUO.Game.GameObjects
                             {
                                 DrawInternal
                                 (
-                                    batcher, this, item, drawX, drawY, IsFlipped, animIndex, false, graphic, GetGroupForAnimation(this, graphic, true), dir, isHuman, true,
-                                    alpha: HueVector.Z, forceUOP: true
+                                    batcher,
+                                    this,
+                                    item,
+                                    drawX,
+                                    drawY,
+                                    IsFlipped,
+                                    animIndex,
+                                    false,
+                                    graphic,
+                                    GetGroupForAnimation(this, graphic, true),
+                                    dir,
+                                    isHuman,
+                                    true,
+                                    alpha: HueVector.Z,
+                                    forceUOP: true
                                 );
                             }
                             else
                             {
                                 DrawInternal
                                 (
-                                    batcher, this, item, drawX, drawY, IsFlipped, animIndex, false, graphic, animGroup, dir, isHuman, false,
+                                    batcher,
+                                    this,
+                                    item,
+                                    drawX,
+                                    drawY,
+                                    IsFlipped,
+                                    animIndex,
+                                    false,
+                                    graphic,
+                                    animGroup,
+                                    dir,
+                                    isHuman,
+                                    false,
                                     alpha: HueVector.Z
                                 );
                             }
@@ -387,7 +476,7 @@ namespace ClassicUO.Game.GameObjects
                     }
                 }
             }
-            
+
 
             //if (FileManager.Animations.SittingValue != 0)
             //{
@@ -436,7 +525,14 @@ namespace ClassicUO.Game.GameObjects
 
             ushort hueFromFile = _viewHue;
 
-            AnimationDirection direction = AnimationsLoader.Instance.GetBodyAnimationGroup(ref id, ref animGroup, ref hueFromFile, isParent, forceUOP)
+            AnimationDirection direction = AnimationsLoader.Instance.GetBodyAnimationGroup
+                                                           (
+                                                               ref id,
+                                                               ref animGroup,
+                                                               ref hueFromFile,
+                                                               isParent,
+                                                               forceUOP
+                                                           )
                                                            .Direction[dir];
 
             if (direction == null || direction.Address == -1 || direction.FileIndex == -1)
@@ -447,8 +543,7 @@ namespace ClassicUO.Game.GameObjects
                 }
             }
 
-            if (direction == null || (direction.FrameCount == 0 || direction.Frames == null) &&
-                !AnimationsLoader.Instance.LoadAnimationFrames(id, animGroup, dir, ref direction))
+            if (direction == null || (direction.FrameCount == 0 || direction.Frames == null) && !AnimationsLoader.Instance.LoadAnimationFrames(id, animGroup, dir, ref direction))
             {
                 if (!(_transform && entity == null && !hasShadow))
                 {
@@ -639,11 +734,28 @@ namespace ClassicUO.Game.GameObjects
                             }
                         }
 
-                        batcher.DrawCharacterSitted(frame, x, y, mirror, h3mod, h6mod, h9mod, ref HueVector);
+                        batcher.DrawCharacterSitted
+                        (
+                            frame,
+                            x,
+                            y,
+                            mirror,
+                            h3mod,
+                            h6mod,
+                            h9mod,
+                            ref HueVector
+                        );
                     }
                     else if (frame != null)
                     {
-                        batcher.DrawSprite(frame, x, y, mirror, ref HueVector);
+                        batcher.DrawSprite
+                        (
+                            frame,
+                            x,
+                            y,
+                            mirror,
+                            ref HueVector
+                        );
 
                         int yy = -(frame.Height + frame.CenterY + 3);
                         int xx = -frame.CenterX;
@@ -674,13 +786,7 @@ namespace ClassicUO.Game.GameObjects
                         }
                     }
 
-                    if (frame.Contains
-                    (
-                        mirror ?
-                            x + frame.Width - SelectedObject.TranslatedMousePositionByViewport.X :
-                            SelectedObject.TranslatedMousePositionByViewport.X - x,
-                        SelectedObject.TranslatedMousePositionByViewport.Y - y
-                    ))
+                    if (frame.Contains(mirror ? x + frame.Width - SelectedObject.TranslatedMousePositionByViewport.X : SelectedObject.TranslatedMousePositionByViewport.X - x, SelectedObject.TranslatedMousePositionByViewport.Y - y))
                     {
                         SelectedObject.Object = owner;
                     }
@@ -710,8 +816,7 @@ namespace ClassicUO.Game.GameObjects
                     Item pants = mobile.FindItemByLayer(Layer.Pants);
                     Item robe;
 
-                    if (mobile.FindItemByLayer(Layer.Legs) != null ||
-                        pants != null && (pants.Graphic == 0x1411 /*|| pants.Graphic == 0x141A*/))
+                    if (mobile.FindItemByLayer(Layer.Legs) != null || pants != null && (pants.Graphic == 0x1411 /*|| pants.Graphic == 0x141A*/))
                     {
                         return true;
                     }
@@ -719,8 +824,7 @@ namespace ClassicUO.Game.GameObjects
                     {
                         robe = mobile.FindItemByLayer(Layer.Robe);
 
-                        if (pants != null && (pants.Graphic == 0x0513 || pants.Graphic == 0x0514) ||
-                            robe != null && robe.Graphic == 0x0504)
+                        if (pants != null && (pants.Graphic == 0x0513 || pants.Graphic == 0x0514) || robe != null && robe.Graphic == 0x0504)
                         {
                             return true;
                         }
@@ -738,8 +842,7 @@ namespace ClassicUO.Game.GameObjects
                         return true;
                     }
 
-                    if (pants != null &&
-                        (pants.Graphic == 0x01EB || pants.Graphic == 0x03E5 || pants.Graphic == 0x03eB))
+                    if (pants != null && (pants.Graphic == 0x01EB || pants.Graphic == 0x03E5 || pants.Graphic == 0x03eB))
                     {
                         Item skirt = mobile.FindItemByLayer(Layer.Skirt);
 
@@ -765,8 +868,7 @@ namespace ClassicUO.Game.GameObjects
                     else*/
                     if (tunic != null && tunic.Graphic == 0x0238)
                     {
-                        return robe != null && robe.Graphic != 0x9985 && robe.Graphic != 0x9986 &&
-                               robe.Graphic != 0xA412;
+                        return robe != null && robe.Graphic != 0x9985 && robe.Graphic != 0x9986 && robe.Graphic != 0xA412;
                     }
 
                     break;
@@ -774,8 +876,7 @@ namespace ClassicUO.Game.GameObjects
                 case Layer.Torso:
                     robe = mobile.FindItemByLayer(Layer.Robe);
 
-                    if (robe != null && robe.Graphic != 0 && robe.Graphic != 0x9985 && robe.Graphic != 0x9986 &&
-                        robe.Graphic != 0xA412)
+                    if (robe != null && robe.Graphic != 0 && robe.Graphic != 0x9985 && robe.Graphic != 0x9986 && robe.Graphic != 0xA412)
                     {
                         return true;
                     }
@@ -794,8 +895,7 @@ namespace ClassicUO.Game.GameObjects
                 case Layer.Arms:
                     robe = mobile.FindItemByLayer(Layer.Robe);
 
-                    return robe != null && robe.Graphic != 0 && robe.Graphic != 0x9985 && robe.Graphic != 0x9986 &&
-                           robe.Graphic != 0xA412;
+                    return robe != null && robe.Graphic != 0 && robe.Graphic != 0x9985 && robe.Graphic != 0x9986 && robe.Graphic != 0xA412;
 
                 case Layer.Helmet:
                 case Layer.Hair:

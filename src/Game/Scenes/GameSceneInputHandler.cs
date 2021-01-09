@@ -1,4 +1,5 @@
 #region license
+
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
 // 
@@ -26,6 +27,7 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 #endregion
 
 using System;
@@ -73,7 +75,13 @@ namespace ClassicUO.Game.Scenes
                 int y = ProfileManager.CurrentProfile.GameWindowPosition.Y + (ProfileManager.CurrentProfile.GameWindowSize.Y >> 1);
 
                 Direction direction = (Direction) GameCursor.GetMouseDirection
-                    (x, y, Mouse.Position.X, Mouse.Position.Y, 1);
+                (
+                    x,
+                    y,
+                    Mouse.Position.X,
+                    Mouse.Position.Y,
+                    1
+                );
 
                 double mouseRange = MathHelper.Hypotenuse(x - Mouse.Position.X, y - Mouse.Position.Y);
 
@@ -110,8 +118,7 @@ namespace ClassicUO.Game.Scenes
 
         private bool CanDragSelectOnObject(GameObject obj)
         {
-            return obj is null || obj is Static || obj is Land || obj is Multi ||
-                   obj is Item tmpitem && tmpitem.IsLocked;
+            return obj is null || obj is Static || obj is Land || obj is Multi || obj is Item tmpitem && tmpitem.IsLocked;
         }
 
 
@@ -176,9 +183,7 @@ namespace ClassicUO.Game.Scenes
 
             bool useCHB = ProfileManager.CurrentProfile.CustomBarsToggled;
 
-            Rectangle rect = useCHB ?
-                new Rectangle(0, 0, HealthBarGumpCustom.HPB_BAR_WIDTH, HealthBarGumpCustom.HPB_HEIGHT_MULTILINE) :
-                GumpsLoader.Instance.GetTexture(0x0804).Bounds;
+            Rectangle rect = useCHB ? new Rectangle(0, 0, HealthBarGumpCustom.HPB_BAR_WIDTH, HealthBarGumpCustom.HPB_HEIGHT_MULTILINE) : GumpsLoader.Instance.GetTexture(0x0804).Bounds;
 
             foreach (Mobile mobile in World.Mobiles)
             {
@@ -225,15 +230,13 @@ namespace ClassicUO.Game.Scenes
                             hbgc = new HealthBarGump(mobile);
                         }
 
-                        if (finalY >= ProfileManager.CurrentProfile.GameWindowPosition.Y +
-                            ProfileManager.CurrentProfile.GameWindowSize.Y - 100)
+                        if (finalY >= ProfileManager.CurrentProfile.GameWindowPosition.Y + ProfileManager.CurrentProfile.GameWindowSize.Y - 100)
                         {
                             finalY = 100;
                             finalX += rect.Width + 2;
                         }
 
-                        if (finalX >= ProfileManager.CurrentProfile.GameWindowPosition.X +
-                            ProfileManager.CurrentProfile.GameWindowSize.X - 100)
+                        if (finalX >= ProfileManager.CurrentProfile.GameWindowPosition.X + ProfileManager.CurrentProfile.GameWindowSize.X - 100)
                         {
                             finalX = 100;
                         }
@@ -252,15 +255,13 @@ namespace ClassicUO.Game.Scenes
                             {
                                 finalY = bar.Bounds.Bottom + 2;
 
-                                if (finalY >= ProfileManager.CurrentProfile.GameWindowPosition.Y +
-                                    ProfileManager.CurrentProfile.GameWindowSize.Y - 100)
+                                if (finalY >= ProfileManager.CurrentProfile.GameWindowPosition.Y + ProfileManager.CurrentProfile.GameWindowSize.Y - 100)
                                 {
                                     finalY = 100;
                                     finalX = bar.Bounds.Right + 2;
                                 }
 
-                                if (finalX >= ProfileManager.CurrentProfile.GameWindowPosition.X +
-                                    ProfileManager.CurrentProfile.GameWindowSize.X - 100)
+                                if (finalX >= ProfileManager.CurrentProfile.GameWindowPosition.X + ProfileManager.CurrentProfile.GameWindowSize.X - 100)
                                 {
                                     finalX = 100;
                                 }
@@ -333,9 +334,7 @@ namespace ClassicUO.Game.Scenes
             {
                 _isMouseLeftDown = true;
 
-                if (TargetManager.IsTargeting && TargetManager.TargetingState == CursorTarget.MultiPlacement &&
-                    (World.CustomHouseManager.SelectedGraphic != 0 || World.CustomHouseManager.Erasing ||
-                     World.CustomHouseManager.SeekTile) && SelectedObject.LastObject is GameObject obj)
+                if (TargetManager.IsTargeting && TargetManager.TargetingState == CursorTarget.MultiPlacement && (World.CustomHouseManager.SelectedGraphic != 0 || World.CustomHouseManager.Erasing || World.CustomHouseManager.SeekTile) && SelectedObject.LastObject is GameObject obj)
                 {
                     World.CustomHouseManager.OnTargetWorld(obj);
                     _lastSelectedMultiPositionInHouseCustomization.X = obj.X;
@@ -437,11 +436,8 @@ namespace ClassicUO.Game.Scenes
                             dropZ = 0;
                             drop_container = obj.Serial;
                         }
-                        else if (obj is Item it2 && (it2.ItemData.IsSurface ||
-                                                     it2.ItemData.IsStackable && it2.Graphic ==
-                                                     ItemHold.Graphic))
+                        else if (obj is Item it2 && (it2.ItemData.IsSurface || it2.ItemData.IsStackable && it2.Graphic == ItemHold.Graphic))
                         {
-
                             dropX = obj.X;
                             dropY = obj.Y;
                             dropZ = obj.Z;
@@ -487,7 +483,14 @@ namespace ClassicUO.Game.Scenes
 
                     if (can_drop)
                     {
-                        GameActions.DropItem(ItemHold.Serial, dropX, dropY, dropZ, drop_container);
+                        GameActions.DropItem
+                        (
+                            ItemHold.Serial,
+                            dropX,
+                            dropY,
+                            dropZ,
+                            drop_container
+                        );
                     }
                 }
             }
@@ -516,7 +519,14 @@ namespace ClassicUO.Game.Scenes
                                 break;
 
                             case Land land:
-                                TargetManager.Target(0, land.X, land.Y, land.Z, land.TileData.IsWet);
+                                TargetManager.Target
+                                (
+                                    0,
+                                    land.X,
+                                    land.Y,
+                                    land.Z,
+                                    land.TileData.IsWet
+                                );
 
                                 break;
 
@@ -595,9 +605,25 @@ namespace ClassicUO.Game.Scenes
                         }
 
                         MessageManager.HandleMessage
-                            (null, name, string.Empty, 0x03b2, MessageType.Label, 3, TextType.CLIENT);
+                        (
+                            null,
+                            name,
+                            string.Empty,
+                            0x03b2,
+                            MessageType.Label,
+                            3,
+                            TextType.CLIENT
+                        );
 
-                        obj.AddMessage(MessageType.Label, name, 3, 0x03b2, false, TextType.CLIENT);
+                        obj.AddMessage
+                        (
+                            MessageType.Label,
+                            name,
+                            3,
+                            0x03b2,
+                            false,
+                            TextType.CLIENT
+                        );
 
 
                         if (obj.TextContainer != null && obj.TextContainer.MaxSize != 1)
@@ -616,9 +642,25 @@ namespace ClassicUO.Game.Scenes
                         }
 
                         MessageManager.HandleMessage
-                            (null, name, string.Empty, 0x03b2, MessageType.Label, 3, TextType.CLIENT);
+                        (
+                            null,
+                            name,
+                            string.Empty,
+                            0x03b2,
+                            MessageType.Label,
+                            3,
+                            TextType.CLIENT
+                        );
 
-                        obj.AddMessage(MessageType.Label, name, 3, 0x03b2, false, TextType.CLIENT);
+                        obj.AddMessage
+                        (
+                            MessageType.Label,
+                            name,
+                            3,
+                            0x03b2,
+                            false,
+                            TextType.CLIENT
+                        );
 
                         if (obj.TextContainer != null && obj.TextContainer.MaxSize == 5)
                         {
@@ -633,7 +675,12 @@ namespace ClassicUO.Game.Scenes
                         {
                             MessageManager.HandleMessage
                             (
-                                World.Player, ResGeneral.NowFollowing, string.Empty, 0, MessageType.Regular, 3,
+                                World.Player,
+                                ResGeneral.NowFollowing,
+                                string.Empty,
+                                0,
+                                MessageType.Regular,
+                                3,
                                 TextType.CLIENT
                             );
 
@@ -642,11 +689,7 @@ namespace ClassicUO.Game.Scenes
                         }
                         else if (!DelayedObjectClickManager.IsEnabled)
                         {
-                            DelayedObjectClickManager.Set
-                            (
-                                ent.Serial, Mouse.Position.X, Mouse.Position.Y,
-                                Time.Ticks + Mouse.MOUSE_DELAY_DOUBLE_CLICK
-                            );
+                            DelayedObjectClickManager.Set(ent.Serial, Mouse.Position.X, Mouse.Position.Y, Time.Ticks + Mouse.MOUSE_DELAY_DOUBLE_CLICK);
                         }
 
                         break;
@@ -785,7 +828,14 @@ namespace ClassicUO.Game.Scenes
                         if (itemdata.IsSurface && Pathfinder.WalkTo(obj.X, obj.Y, obj.Z, 0))
                         {
                             World.Player.AddMessage
-                                (MessageType.Label, ResGeneral.Pathfinding, 3, 0, false, TextType.CLIENT);
+                            (
+                                MessageType.Label,
+                                ResGeneral.Pathfinding,
+                                3,
+                                0,
+                                false,
+                                TextType.CLIENT
+                            );
 
                             return true;
                         }
@@ -793,7 +843,14 @@ namespace ClassicUO.Game.Scenes
                     else if (obj is Land && Pathfinder.WalkTo(obj.X, obj.Y, obj.Z, 0))
                     {
                         World.Player.AddMessage
-                            (MessageType.Label, ResGeneral.Pathfinding, 3, 0, false, TextType.CLIENT);
+                        (
+                            MessageType.Label,
+                            ResGeneral.Pathfinding,
+                            3,
+                            0,
+                            false,
+                            TextType.CLIENT
+                        );
 
                         return true;
                     }
@@ -859,16 +916,13 @@ namespace ClassicUO.Game.Scenes
             {
                 Point offset = Mouse.LDragOffset;
 
-                if (!UIManager.GameCursor
-                              .IsDraggingCursorForced && // don't trigger "sallos ez grab" when dragging wmap or skill
-                    !_isSelectionActive &&               // and ofc when selection is enabled
-                    (Math.Abs(offset.X) > Constants.MIN_PICKUP_DRAG_DISTANCE_PIXELS || Math.Abs
-                        (offset.Y) > Constants.MIN_PICKUP_DRAG_DISTANCE_PIXELS))
+                if (!UIManager.GameCursor.IsDraggingCursorForced && // don't trigger "sallos ez grab" when dragging wmap or skill
+                    !_isSelectionActive &&                          // and ofc when selection is enabled
+                    (Math.Abs(offset.X) > Constants.MIN_PICKUP_DRAG_DISTANCE_PIXELS || Math.Abs(offset.Y) > Constants.MIN_PICKUP_DRAG_DISTANCE_PIXELS))
                 {
                     Entity obj;
 
-                    if (ProfileManager.CurrentProfile.SallosEasyGrab && SelectedObject.LastObject is Entity ent &&
-                        SelectedObject.LastLeftDownObject == null)
+                    if (ProfileManager.CurrentProfile.SallosEasyGrab && SelectedObject.LastObject is Entity ent && SelectedObject.LastLeftDownObject == null)
                     {
                         obj = ent;
                     }
@@ -891,8 +945,7 @@ namespace ClassicUO.Game.Scenes
 
                             if (ProfileManager.CurrentProfile.CustomBarsToggled)
                             {
-                                Rectangle rect = new Rectangle
-                                    (0, 0, HealthBarGumpCustom.HPB_WIDTH, HealthBarGumpCustom.HPB_HEIGHT_SINGLELINE);
+                                Rectangle rect = new Rectangle(0, 0, HealthBarGumpCustom.HPB_WIDTH, HealthBarGumpCustom.HPB_HEIGHT_SINGLELINE);
 
                                 UIManager.Add
                                 (
@@ -984,8 +1037,7 @@ namespace ClassicUO.Game.Scenes
                 case SDL.SDL_Keycode.SDLK_1 when Keyboard.Shift:         // !
                 case SDL.SDL_Keycode.SDLK_BACKSLASH when Keyboard.Shift: // \
 
-                    if (ProfileManager.CurrentProfile.ActivateChatAfterEnter &&
-                        ProfileManager.CurrentProfile.ActivateChatAdditionalButtons && !UIManager.SystemChat.IsActive)
+                    if (ProfileManager.CurrentProfile.ActivateChatAfterEnter && ProfileManager.CurrentProfile.ActivateChatAdditionalButtons && !UIManager.SystemChat.IsActive)
                     {
                         UIManager.SystemChat.IsActive = true;
                     }
@@ -1003,8 +1055,7 @@ namespace ClassicUO.Game.Scenes
                 case SDL.SDL_Keycode.SDLK_LEFTBRACKET: // [
                 case SDL.SDL_Keycode.SDLK_MINUS:       // -
                 case SDL.SDL_Keycode.SDLK_KP_MINUS:    // -
-                    if (ProfileManager.CurrentProfile.ActivateChatAfterEnter &&
-                        ProfileManager.CurrentProfile.ActivateChatAdditionalButtons && !UIManager.SystemChat.IsActive)
+                    if (ProfileManager.CurrentProfile.ActivateChatAfterEnter && ProfileManager.CurrentProfile.ActivateChatAdditionalButtons && !UIManager.SystemChat.IsActive)
                     {
                         if (!Keyboard.Shift && !Keyboard.Alt && !Keyboard.Ctrl)
                         {
@@ -1039,14 +1090,12 @@ namespace ClassicUO.Game.Scenes
                     break;
             }
 
-            if (UIManager.KeyboardFocusControl == UIManager.SystemChat.TextBoxControl &&
-                UIManager.SystemChat.IsActive && ProfileManager.CurrentProfile.ActivateChatAfterEnter)
+            if (UIManager.KeyboardFocusControl == UIManager.SystemChat.TextBoxControl && UIManager.SystemChat.IsActive && ProfileManager.CurrentProfile.ActivateChatAfterEnter)
             {
                 return;
             }
 
-            bool canExecuteMacro = UIManager.KeyboardFocusControl == UIManager.SystemChat.TextBoxControl &&
-                                   UIManager.SystemChat.Mode >= ChatMode.Default;
+            bool canExecuteMacro = UIManager.KeyboardFocusControl == UIManager.SystemChat.TextBoxControl && UIManager.SystemChat.Mode >= ChatMode.Default;
 
             if (canExecuteMacro)
             {
@@ -1150,8 +1199,7 @@ namespace ClassicUO.Game.Scenes
 
         internal override void OnKeyUp(SDL.SDL_KeyboardEvent e)
         {
-            if (ProfileManager.CurrentProfile.EnableMousewheelScaleZoom &&
-                ProfileManager.CurrentProfile.RestoreScaleAfterUnpressCtrl && !Keyboard.Ctrl)
+            if (ProfileManager.CurrentProfile.EnableMousewheelScaleZoom && ProfileManager.CurrentProfile.RestoreScaleAfterUnpressCtrl && !Keyboard.Ctrl)
             {
                 Camera.Zoom = ProfileManager.CurrentProfile.DefaultScale;
             }

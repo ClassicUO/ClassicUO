@@ -1,4 +1,5 @@
 #region license
+
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
 // 
@@ -26,6 +27,7 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 #endregion
 
 using ClassicUO.IO.Resources;
@@ -35,8 +37,7 @@ namespace ClassicUO.Renderer
 {
     internal class FontTexture : UOTexture
     {
-        public FontTexture(int width, int height, int lineCount, RawList<WebLinkRect> links)
-            : base(width, height)
+        public FontTexture(int width, int height, int lineCount, RawList<WebLinkRect> links) : base(width, height)
         {
             LineCount = lineCount;
             Links = links;

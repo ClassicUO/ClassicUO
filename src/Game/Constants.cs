@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
 // 
@@ -26,6 +27,7 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 #endregion
 
 namespace ClassicUO.Game
@@ -42,9 +44,7 @@ namespace ClassicUO.Game
         public const int ITEM_EFFECT_ANIMATION_DELAY = 50;
 
         public const int MAX_STEP_COUNT = 5;
-        public const int
-            TURN_DELAY =
-                100; // original client 12.5 fps = 80ms delay. FIXME: this patch causes a packet throttle. Reverted back to 100ms
+        public const int TURN_DELAY = 100; // original client 12.5 fps = 80ms delay. FIXME: this patch causes a packet throttle. Reverted back to 100ms
         public const int TURN_DELAY_FAST = 45;
         public const int WALKING_DELAY = 150; // 750
         public const int PLAYER_WALKING_DELAY = 150;
@@ -122,7 +122,7 @@ namespace ClassicUO.Game
         public const ushort HIGHLIGHT_CURRENT_OBJECT_HUE = 0x014;
 
         public const int MAX_JOURNAL_HISTORY_COUNT = 100;
-        
+
         public const byte MIN_CONTAINER_SIZE_PERC = 50;
         public const byte MAX_CONTAINER_SIZE_PERC = 200;
 

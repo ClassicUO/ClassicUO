@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
 // 
@@ -26,6 +27,7 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 #endregion
 
 using ClassicUO.Game.Managers;
@@ -122,13 +124,35 @@ namespace ClassicUO.Game.UI.Gumps
             switch ((ButtonType) buttonID)
             {
                 case ButtonType.Ok:
-                    NetClient.Socket.Send(new PTextEntryDialogResponse(LocalSerial, ParentID, ButtonID, _textBox.Text, true));
+                    NetClient.Socket.Send
+                    (
+                        new PTextEntryDialogResponse
+                        (
+                            LocalSerial,
+                            ParentID,
+                            ButtonID,
+                            _textBox.Text,
+                            true
+                        )
+                    );
+
                     Dispose();
 
                     break;
 
                 case ButtonType.Cancel:
-                    NetClient.Socket.Send(new PTextEntryDialogResponse(LocalSerial, ParentID, ButtonID, _textBox.Text, false));
+                    NetClient.Socket.Send
+                    (
+                        new PTextEntryDialogResponse
+                        (
+                            LocalSerial,
+                            ParentID,
+                            ButtonID,
+                            _textBox.Text,
+                            false
+                        )
+                    );
+
                     Dispose();
 
                     break;

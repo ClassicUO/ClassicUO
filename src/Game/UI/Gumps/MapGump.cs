@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
 // 
@@ -26,6 +27,7 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 #endregion
 
 using System;
@@ -67,23 +69,11 @@ namespace ClassicUO.Game.UI.Gumps
             );
 
 
-            Add
-            (
-                _buttons[0] = new Button((int) ButtonType.PlotCourse, 0x1398, 0x1398)
-                    { X = (width - 100) >> 1, Y = 5, ButtonAction = ButtonAction.Activate }
-            );
+            Add(_buttons[0] = new Button((int) ButtonType.PlotCourse, 0x1398, 0x1398) { X = (width - 100) >> 1, Y = 5, ButtonAction = ButtonAction.Activate });
 
-            Add
-            (
-                _buttons[1] = new Button((int) ButtonType.StopPlotting, 0x1399, 0x1399)
-                    { X = (width - 70) >> 1, Y = 5, ButtonAction = ButtonAction.Activate }
-            );
+            Add(_buttons[1] = new Button((int) ButtonType.StopPlotting, 0x1399, 0x1399) { X = (width - 70) >> 1, Y = 5, ButtonAction = ButtonAction.Activate });
 
-            Add
-            (
-                _buttons[2] = new Button((int) ButtonType.ClearCourse, 0x139A, 0x139A)
-                    { X = (width - 66) >> 1, Y = height + 37, ButtonAction = ButtonAction.Activate }
-            );
+            Add(_buttons[2] = new Button((int) ButtonType.ClearCourse, 0x139A, 0x139A) { X = (width - 66) >> 1, Y = height + 37, ButtonAction = ButtonAction.Activate });
 
             _buttons[0].IsVisible = _buttons[0].IsEnabled = PlotState == 0;
 
@@ -161,7 +151,13 @@ namespace ClassicUO.Game.UI.Gumps
                     NetClient.Socket.Send
                     (
                         new PMapMessage
-                            (LocalSerial, 6, (byte) PlotState, unchecked((ushort) -24), unchecked((ushort) -31))
+                        (
+                            LocalSerial,
+                            6,
+                            (byte) PlotState,
+                            unchecked((ushort) -24),
+                            unchecked((ushort) -31)
+                        )
                     );
 
                     SetPlotState(PlotState == 0 ? 1 : 0);
@@ -170,7 +166,16 @@ namespace ClassicUO.Game.UI.Gumps
 
                 case ButtonType.ClearCourse:
                     NetClient.Socket.Send
-                        (new PMapMessage(LocalSerial, 5, 0, unchecked((ushort) -24), unchecked((ushort) -31)));
+                    (
+                        new PMapMessage
+                        (
+                            LocalSerial,
+                            5,
+                            0,
+                            unchecked((ushort) -24),
+                            unchecked((ushort) -31)
+                        )
+                    );
 
                     ClearContainer();
 
@@ -225,7 +230,17 @@ namespace ClassicUO.Game.UI.Gumps
                     ushort x = (ushort) (e.X + 5);
                     ushort y = (ushort) e.Y;
 
-                    NetClient.Socket.Send(new PMapMessage(LocalSerial, 1, 0, x, y));
+                    NetClient.Socket.Send
+                    (
+                        new PMapMessage
+                        (
+                            LocalSerial,
+                            1,
+                            0,
+                            x,
+                            y
+                        )
+                    );
 
                     AddPin(x, y);
                 }
@@ -253,8 +268,11 @@ namespace ClassicUO.Game.UI.Gumps
 
                 batcher.DrawLine
                 (
-                    SolidColorTextureCache.GetTexture(Color.White), c0.ScreenCoordinateX, c0.ScreenCoordinateY,
-                    c1.ScreenCoordinateX, c1.ScreenCoordinateY,
+                    SolidColorTextureCache.GetTexture(Color.White),
+                    c0.ScreenCoordinateX,
+                    c0.ScreenCoordinateY,
+                    c1.ScreenCoordinateX,
+                    c1.ScreenCoordinateY,
                     c0.ScreenCoordinateX + (c1.ScreenCoordinateX - c0.ScreenCoordinateX) / 2,
                     c0.ScreenCoordinateY + (c1.ScreenCoordinateY - c0.ScreenCoordinateY) / 2
                 );

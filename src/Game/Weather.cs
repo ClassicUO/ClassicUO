@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
 // 
@@ -26,6 +27,7 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 #endregion
 
 using System;
@@ -226,8 +228,7 @@ namespace ClassicUO.Game
                         {
                             effect.SpeedAngle = MathHelper.ToDegrees((float) Math.Atan2(effect.SpeedX, effect.SpeedY));
 
-                            effect.SpeedMagnitude = (float) Math.Sqrt
-                                (Math.Pow(effect.SpeedX, 2) + Math.Pow(effect.SpeedY, 2));
+                            effect.SpeedMagnitude = (float) Math.Sqrt(Math.Pow(effect.SpeedX, 2) + Math.Pow(effect.SpeedY, 2));
                         }
 
                         float speed_angle = effect.SpeedAngle;
@@ -287,8 +288,13 @@ namespace ClassicUO.Game
 
                         batcher.DrawLine
                         (
-                            SolidColorTextureCache.GetTexture(Color.Gray), startX, startY, endX, endY,
-                            startX + (endX - startX) / 2, startY + (endY - startY) / 2
+                            SolidColorTextureCache.GetTexture(Color.Gray),
+                            startX,
+                            startY,
+                            endX,
+                            endY,
+                            startX + (endX - startX) / 2,
+                            startY + (endY - startY) / 2
                         );
 
                         break;
@@ -301,7 +307,11 @@ namespace ClassicUO.Game
 
                         batcher.Draw2D
                         (
-                            SolidColorTextureCache.GetTexture(Color.White), x + (int) effect.X, y + (int) effect.Y, 2, 2,
+                            SolidColorTextureCache.GetTexture(Color.White),
+                            x + (int) effect.X,
+                            y + (int) effect.Y,
+                            2,
+                            2,
                             ref _hueVector
                         );
 

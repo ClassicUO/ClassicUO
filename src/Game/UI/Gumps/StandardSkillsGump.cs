@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
 // 
@@ -26,6 +27,7 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 #endregion
 
 using System;
@@ -87,7 +89,10 @@ namespace ClassicUO.Game.UI.Gumps
 
             _area = new ScrollArea
             (
-                22, 45 + _diffY + _bottomLine.Height - 10, _scrollArea.Width - 14, _scrollArea.Height - (83 + _diffY),
+                22,
+                45 + _diffY + _bottomLine.Height - 10,
+                _scrollArea.Width - 14,
+                _scrollArea.Height - (83 + _diffY),
                 false
             ) { AcceptMouseInput = true, CanMove = true };
 
@@ -102,8 +107,14 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add
             (
-                _skillsLabelSum = new Label(World.Player.Skills.Sum(s => s.Value).ToString("F1"), false, 600, 0, 3)
-                    { X = _bottomComment.X + _bottomComment.Width + 5, Y = _bottomComment.Y - 5 }
+                _skillsLabelSum = new Label
+                (
+                    World.Player.Skills.Sum(s => s.Value).ToString("F1"),
+                    false,
+                    600,
+                    0,
+                    3
+                ) { X = _bottomComment.X + _bottomComment.Width + 5, Y = _bottomComment.Y - 5 }
             );
 
             //new group
@@ -120,14 +131,28 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add
             (
-                _checkReal = new Checkbox(0x938, 0x939, ResGumps.ShowReal, 1, 0x0386, false)
-                    { X = _newGroupButton.X + _newGroupButton.Width + 30, Y = _newGroupButton.Y - 6 }
+                _checkReal = new Checkbox
+                (
+                    0x938,
+                    0x939,
+                    ResGumps.ShowReal,
+                    1,
+                    0x0386,
+                    false
+                ) { X = _newGroupButton.X + _newGroupButton.Width + 30, Y = _newGroupButton.Y - 6 }
             );
 
             Add
             (
-                _checkCaps = new Checkbox(0x938, 0x939, ResGumps.ShowCaps, 1, 0x0386, false)
-                    { X = _newGroupButton.X + _newGroupButton.Width + 30, Y = _newGroupButton.Y + 7 }
+                _checkCaps = new Checkbox
+                (
+                    0x938,
+                    0x939,
+                    ResGumps.ShowCaps,
+                    1,
+                    0x0386,
+                    false
+                ) { X = _newGroupButton.X + _newGroupButton.Width + 30, Y = _newGroupButton.Y + 7 }
             );
 
             _checkReal.ValueChanged += UpdateSkillsValues;
@@ -359,7 +384,14 @@ namespace ClassicUO.Game.UI.Gumps
 
                 Add
                 (
-                    _textbox = new StbTextBox(6, -1, 200, false, FontStyle.Fixed)
+                    _textbox = new StbTextBox
+                    (
+                        6,
+                        -1,
+                        200,
+                        false,
+                        FontStyle.Fixed
+                    )
                     {
                         X = 16,
                         Y = -3,
@@ -670,11 +702,27 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (_status == 2)
                 {
-                    batcher.Draw2D(SolidColorTextureCache.GetTexture(Color.Beige), x, y, Width, 17, ref HueVector);
+                    batcher.Draw2D
+                    (
+                        SolidColorTextureCache.GetTexture(Color.Beige),
+                        x,
+                        y,
+                        Width,
+                        17,
+                        ref HueVector
+                    );
                 }
                 else if (_status == 1)
                 {
-                    batcher.Draw2D(SolidColorTextureCache.GetTexture(Color.Bisque), x + 16, y, 200, 17, ref HueVector);
+                    batcher.Draw2D
+                    (
+                        SolidColorTextureCache.GetTexture(Color.Bisque),
+                        x + 16,
+                        y,
+                        200,
+                        17,
+                        ref HueVector
+                    );
                 }
 
                 return base.Draw(batcher, x, y);
@@ -846,8 +894,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 UIManager.GameCursor.IsDraggingCursorForced = false;
 
-                if (UIManager.LastControlMouseDown(MouseButtonType.Left) == this &&
-                    World.Player.Skills[Index].IsClickable)
+                if (UIManager.LastControlMouseDown(MouseButtonType.Left) == this && World.Player.Skills[Index].IsClickable)
                 {
                     if (UIManager.MouseOverControl == null || UIManager.MouseOverControl.RootParent != RootParent)
                     {
@@ -855,11 +902,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                         if (Index >= 0 && Index < World.Player.Skills.Length)
                         {
-                            UIManager.Add
-                            (
-                                new SkillButtonGump
-                                    (World.Player.Skills[Index], Mouse.Position.X - 44, Mouse.Position.Y - 22)
-                            );
+                            UIManager.Add(new SkillButtonGump(World.Player.Skills[Index], Mouse.Position.X - 44, Mouse.Position.Y - 22));
                         }
                     }
                 }
@@ -892,7 +935,15 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (UIManager.LastControlMouseDown(MouseButtonType.Left) == this)
                 {
-                    batcher.Draw2D(SolidColorTextureCache.GetTexture(Color.Wheat), x, y, Width, Height, ref HueVector);
+                    batcher.Draw2D
+                    (
+                        SolidColorTextureCache.GetTexture(Color.Wheat),
+                        x,
+                        y,
+                        Width,
+                        Height,
+                        ref HueVector
+                    );
                 }
 
                 return base.Draw(batcher, x, y);

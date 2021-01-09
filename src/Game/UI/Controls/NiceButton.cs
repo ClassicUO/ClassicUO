@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
 // 
@@ -26,6 +27,7 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 #endregion
 
 using System.Collections.Generic;
@@ -55,7 +57,21 @@ namespace ClassicUO.Game.UI.Controls
         ) : base(x, y, w, h)
         {
             _action = action;
-            Add(TextLabel = new Label(text, true, hue, w, 0xFF, FontStyle.BlackBorder | FontStyle.Cropped, align));
+
+            Add
+            (
+                TextLabel = new Label
+                (
+                    text,
+                    true,
+                    hue,
+                    w,
+                    0xFF,
+                    FontStyle.BlackBorder | FontStyle.Cropped,
+                    align
+                )
+            );
+
             TextLabel.Y = (h - TextLabel.Height) >> 1;
             _groupnumber = groupnumber;
         }
@@ -138,7 +154,18 @@ namespace ClassicUO.Game.UI.Controls
             {
                 ResetHueVector();
                 ShaderHueTranslator.GetHueVector(ref HueVector, 0, false, Alpha);
-                batcher.Draw2D(_texture, x, y, 0, 0, Width, Height, ref HueVector);
+
+                batcher.Draw2D
+                (
+                    _texture,
+                    x,
+                    y,
+                    0,
+                    0,
+                    Width,
+                    Height,
+                    ref HueVector
+                );
             }
 
             return base.Draw(batcher, x, y);

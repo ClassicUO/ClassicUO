@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
 // 
@@ -26,6 +27,7 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 #endregion
 
 using System;
@@ -64,7 +66,14 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add
             (
-                all = new RadioButton(0, 0x00D0, 0x00D1, ResGumps.All, color: 0xFFFF)
+                all = new RadioButton
+                (
+                    0,
+                    0x00D0,
+                    0x00D1,
+                    ResGumps.All,
+                    color: 0xFFFF
+                )
                 {
                     IsChecked = NameOverHeadManager.TypeAllowed == NameOverheadTypeAllowed.All
                 }
@@ -72,7 +81,14 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add
             (
-                mobiles = new RadioButton(0, 0x00D0, 0x00D1, ResGumps.MobilesOnly, color: 0xFFFF)
+                mobiles = new RadioButton
+                (
+                    0,
+                    0x00D0,
+                    0x00D1,
+                    ResGumps.MobilesOnly,
+                    color: 0xFFFF
+                )
                 {
                     Y = all.Y + all.Height,
                     IsChecked = NameOverHeadManager.TypeAllowed == NameOverheadTypeAllowed.Mobiles
@@ -81,7 +97,14 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add
             (
-                items = new RadioButton(0, 0x00D0, 0x00D1, ResGumps.ItemsOnly, color: 0xFFFF)
+                items = new RadioButton
+                (
+                    0,
+                    0x00D0,
+                    0x00D1,
+                    ResGumps.ItemsOnly,
+                    color: 0xFFFF
+                )
                 {
                     Y = mobiles.Y + mobiles.Height,
                     IsChecked = NameOverHeadManager.TypeAllowed == NameOverheadTypeAllowed.Items
@@ -90,7 +113,14 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add
             (
-                mobilesCorpses = new RadioButton(0, 0x00D0, 0x00D1, ResGumps.MobilesAndCorpsesOnly, color: 0xFFFF)
+                mobilesCorpses = new RadioButton
+                (
+                    0,
+                    0x00D0,
+                    0x00D1,
+                    ResGumps.MobilesAndCorpsesOnly,
+                    color: 0xFFFF
+                )
                 {
                     Y = items.Y + items.Height,
                     IsChecked = NameOverHeadManager.TypeAllowed == NameOverheadTypeAllowed.MobilesCorpses

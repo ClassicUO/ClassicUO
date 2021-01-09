@@ -1,4 +1,5 @@
 #region license
+
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
 // 
@@ -26,6 +27,7 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 #endregion
 
 using System.Collections.Generic;
@@ -55,7 +57,7 @@ namespace ClassicUO.Game.UI.Controls
             {
                 Width = width;
             }
-            
+
             if (heigth > 0)
             {
                 Height = heigth;
@@ -102,13 +104,29 @@ namespace ClassicUO.Game.UI.Controls
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
             ResetHueVector();
-            ShaderHueTranslator.GetHueVector(ref HueVector, Hue, false, Alpha, true);
+
+            ShaderHueTranslator.GetHueVector
+            (
+                ref HueVector,
+                Hue,
+                false,
+                Alpha,
+                true
+            );
 
             UOTexture texture = GumpsLoader.Instance.GetTexture(Graphic);
 
             if (texture != null)
             {
-                batcher.Draw2DTiled(texture, x, y, Width, Height, ref HueVector);
+                batcher.Draw2DTiled
+                (
+                    texture,
+                    x,
+                    y,
+                    Width,
+                    Height,
+                    ref HueVector
+                );
             }
 
             return base.Draw(batcher, x, y);

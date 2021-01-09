@@ -1,4 +1,5 @@
 #region license
+
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
 // 
@@ -26,6 +27,7 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 #endregion
 
 using System;
@@ -58,7 +60,8 @@ namespace ClassicUO.Renderer
     {
         private static readonly QueuedPool<RenderedText> _pool = new QueuedPool<RenderedText>
         (
-            3000, r =>
+            3000,
+            r =>
             {
                 r.IsDestroyed = false;
                 r.Links.Count = 0;
@@ -143,16 +146,28 @@ namespace ClassicUO.Renderer
                         {
                             _info = FontsLoader.Instance.GetInfoUnicode
                             (
-                                Font, Text, Text.Length, Align, (ushort) FontStyle, MaxWidth > 0 ? MaxWidth : Width,
-                                true, true
+                                Font,
+                                Text,
+                                Text.Length,
+                                Align,
+                                (ushort) FontStyle,
+                                MaxWidth > 0 ? MaxWidth : Width,
+                                true,
+                                true
                             );
                         }
                         else
                         {
                             _info = FontsLoader.Instance.GetInfoASCII
                             (
-                                Font, Text, Text.Length, Align, (ushort) FontStyle, MaxWidth > 0 ? MaxWidth : Width,
-                                true, true
+                                Font,
+                                Text,
+                                Text.Length,
+                                Align,
+                                (ushort) FontStyle,
+                                MaxWidth > 0 ? MaxWidth : Width,
+                                true,
+                                true
                             );
                         }
                     }
@@ -223,12 +238,26 @@ namespace ClassicUO.Renderer
             if (IsUnicode)
             {
                 (p.X, p.Y) = FontsLoader.Instance.GetCaretPosUnicode
-                    (Font, Text, caret_index, MaxWidth, Align, (ushort) FontStyle);
+                (
+                    Font,
+                    Text,
+                    caret_index,
+                    MaxWidth,
+                    Align,
+                    (ushort) FontStyle
+                );
             }
             else
             {
                 (p.X, p.Y) = FontsLoader.Instance.GetCaretPosASCII
-                    (Font, Text, caret_index, MaxWidth, Align, (ushort) FontStyle);
+                (
+                    Font,
+                    Text,
+                    caret_index,
+                    MaxWidth,
+                    Align,
+                    (ushort) FontStyle
+                );
             }
 
             return p;
@@ -439,7 +468,19 @@ namespace ClassicUO.Renderer
 
             _hueVector.Z = alpha;
 
-            return batcher.Draw2D(Texture, dx, dy, dwidth, dheight, srcX, srcY, srcWidth, srcHeight, ref _hueVector);
+            return batcher.Draw2D
+            (
+                Texture,
+                dx,
+                dy,
+                dwidth,
+                dheight,
+                srcX,
+                srcY,
+                srcWidth,
+                srcHeight,
+                ref _hueVector
+            );
         }
 
         public bool Draw
@@ -501,7 +542,17 @@ namespace ClassicUO.Renderer
 
             _hueVector.Z = 0;
 
-            return batcher.Draw2D(Texture, dx, dy, sx, sy, swidth, sheight, ref _hueVector);
+            return batcher.Draw2D
+            (
+                Texture,
+                dx,
+                dy,
+                sx,
+                sy,
+                swidth,
+                sheight,
+                ref _hueVector
+            );
         }
 
         public bool Draw(UltimaBatcher2D batcher, int x, int y, float alpha = 0, ushort hue = 0)
@@ -546,7 +597,15 @@ namespace ClassicUO.Renderer
 
             _hueVector.Z = alpha;
 
-            return batcher.Draw2D(Texture, x, y, Width, Height, ref _hueVector);
+            return batcher.Draw2D
+            (
+                Texture,
+                x,
+                y,
+                Width,
+                Height,
+                ref _hueVector
+            );
         }
 
         public void CreateTexture()
@@ -568,12 +627,33 @@ namespace ClassicUO.Renderer
             if (IsUnicode)
             {
                 FontsLoader.Instance.GenerateUnicode
-                    (ref _texture, Font, Text, Hue, Cell, MaxWidth, Align, (ushort) FontStyle, SaveHitMap, MaxHeight);
+                (
+                    ref _texture,
+                    Font,
+                    Text,
+                    Hue,
+                    Cell,
+                    MaxWidth,
+                    Align,
+                    (ushort) FontStyle,
+                    SaveHitMap,
+                    MaxHeight
+                );
             }
             else
             {
                 FontsLoader.Instance.GenerateASCII
-                    (ref _texture, Font, Text, Hue, MaxWidth, Align, (ushort) FontStyle, SaveHitMap, MaxHeight);
+                (
+                    ref _texture,
+                    Font,
+                    Text,
+                    Hue,
+                    MaxWidth,
+                    Align,
+                    (ushort) FontStyle,
+                    SaveHitMap,
+                    MaxHeight
+                );
             }
 
             if (Texture != null)

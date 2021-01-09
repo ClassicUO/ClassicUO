@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
 // 
@@ -26,6 +27,7 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 #endregion
 
 using System.IO;
@@ -50,10 +52,12 @@ namespace ClassicUO.Configuration
 
             text = Regex.Replace
             (
-                text, @"(?<!\\)  # lookbehind: Check that previous character isn't a \
+                text,
+                @"(?<!\\)  # lookbehind: Check that previous character isn't a \
                                                 \\         # match a \
                                                 (?!\\)     # lookahead: Check that the following character isn't a \",
-                @"\\", RegexOptions.IgnorePatternWhitespace
+                @"\\",
+                RegexOptions.IgnorePatternWhitespace
             );
 
             T settings = text.Decode<T>();

@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
 // 
@@ -26,6 +27,7 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 #endregion
 
 using System;
@@ -354,8 +356,7 @@ namespace ClassicUO.Game.Scenes
                         goto default;
 
                     case Multi multi:
-                        push_with_priority = (multi.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_PREVIEW) != 0 &&
-                                             multi.Offset != Vector3.Zero;
+                        push_with_priority = (multi.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_PREVIEW) != 0 && multi.Offset != Vector3.Zero;
 
                         //push_with_priority = multi.IsMovable;
 
@@ -388,17 +389,15 @@ namespace ClassicUO.Game.Scenes
                         }
 
                         //we avoid to hide impassable foliage or bushes, if present...
-                        if (ProfileManager.CurrentProfile.TreeToStumps && itemData.IsFoliage && !itemData.IsMultiMovable &&
-                            !(obj is Multi) || ProfileManager.CurrentProfile.HideVegetation &&
-                            (obj is Multi mm && mm.IsVegetation || obj is Static st && st.IsVegetation))
+                        if (ProfileManager.CurrentProfile.TreeToStumps && itemData.IsFoliage && !itemData.IsMultiMovable && !(obj is Multi) || ProfileManager.CurrentProfile.HideVegetation && (obj is Multi mm && mm.IsVegetation || obj is Static st && st.IsVegetation))
                         {
                             continue;
                         }
 
                         //if (HeightChecks <= 0 && (!itemData.IsBridge || ((itemData.Flags & TileFlag.StairBack | TileFlag.StairRight) != 0) || itemData.IsWall))
-                        {
-                            maxObjectZ += itemData.Height == 0xFF ? 0 : itemData.Height;
-                        }
+                    {
+                        maxObjectZ += itemData.Height == 0xFF ? 0 : itemData.Height;
+                    }
 
                         break;
                 }
@@ -406,9 +405,7 @@ namespace ClassicUO.Game.Scenes
 
                 if (useObjectHandles && NameOverHeadManager.IsAllowed(obj as Entity))
                 {
-                    if ((ismobile || iscorpse || obj is Item it &&
-                            (!it.IsLocked || it.IsLocked && itemData.IsContainer) && !it.IsMulti) &&
-                        !obj.ClosedObjectHandles)
+                    if ((ismobile || iscorpse || obj is Item it && (!it.IsLocked || it.IsLocked && itemData.IsContainer) && !it.IsMulti) && !obj.ClosedObjectHandles)
                     {
                         int index = _objectHandlesCount % Constants.MAX_OBJECT_HANDLES;
 
@@ -702,7 +699,14 @@ namespace ClassicUO.Game.Scenes
 
                 if (tile != null)
                 {
-                    AddTileToRenderList(tile, x, y, useObjectHandles, currentMaxZ);
+                    AddTileToRenderList
+                    (
+                        tile,
+                        x,
+                        y,
+                        useObjectHandles,
+                        currentMaxZ
+                    );
                 }
             }
 
@@ -924,15 +928,12 @@ namespace ClassicUO.Game.Scenes
             int maxPixelsY = p.Y;
 
 
-            if (UpdateDrawPosition || oldDrawOffsetX != winDrawOffsetX || oldDrawOffsetY != winDrawOffsetY ||
-                old_scaled_offset.X != winGameScaledOffsetX || old_scaled_offset.Y != winGameScaledOffsetY)
+            if (UpdateDrawPosition || oldDrawOffsetX != winDrawOffsetX || oldDrawOffsetY != winDrawOffsetY || old_scaled_offset.X != winGameScaledOffsetX || old_scaled_offset.Y != winGameScaledOffsetY)
             {
                 UpdateDrawPosition = true;
 
 
-                if (_use_render_target && (_world_render_target == null ||
-                                           _world_render_target.Width != (int) (winGameWidth * zoom) ||
-                                           _world_render_target.Height != (int) (winGameHeight * zoom)))
+                if (_use_render_target && (_world_render_target == null || _world_render_target.Width != (int) (winGameWidth * zoom) || _world_render_target.Height != (int) (winGameHeight * zoom)))
                 {
                     _world_render_target?.Dispose();
 
@@ -940,13 +941,18 @@ namespace ClassicUO.Game.Scenes
 
                     _world_render_target = new RenderTarget2D
                     (
-                        Client.Game.GraphicsDevice, winGameWidth * 1, winGameHeight * 1, false, pp.BackBufferFormat,
-                        pp.DepthStencilFormat, pp.MultiSampleCount, pp.RenderTargetUsage
+                        Client.Game.GraphicsDevice,
+                        winGameWidth * 1,
+                        winGameHeight * 1,
+                        false,
+                        pp.BackBufferFormat,
+                        pp.DepthStencilFormat,
+                        pp.MultiSampleCount,
+                        pp.RenderTargetUsage
                     );
                 }
 
-                if (_lightRenderTarget == null || _lightRenderTarget.Width != winGameWidth ||
-                    _lightRenderTarget.Height != winGameHeight)
+                if (_lightRenderTarget == null || _lightRenderTarget.Width != winGameWidth || _lightRenderTarget.Height != winGameHeight)
                 {
                     _lightRenderTarget?.Dispose();
 
@@ -955,8 +961,14 @@ namespace ClassicUO.Game.Scenes
 
                     _lightRenderTarget = new RenderTarget2D
                     (
-                        Client.Game.GraphicsDevice, winGameWidth, winGameHeight, false, pp.BackBufferFormat,
-                        pp.DepthStencilFormat, pp.MultiSampleCount, pp.RenderTargetUsage
+                        Client.Game.GraphicsDevice,
+                        winGameWidth,
+                        winGameHeight,
+                        false,
+                        pp.BackBufferFormat,
+                        pp.DepthStencilFormat,
+                        pp.MultiSampleCount,
+                        pp.RenderTargetUsage
                     );
                 }
             }

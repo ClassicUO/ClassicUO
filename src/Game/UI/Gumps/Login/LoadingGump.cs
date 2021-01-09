@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
 // 
@@ -26,6 +27,7 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 #endregion
 
 using System;
@@ -54,7 +56,15 @@ namespace ClassicUO.Game.UI.Gumps.Login
             CanCloseWithRightClick = false;
             CanCloseWithEsc = false;
 
-            _label = new Label(labelText, false, 0x0386, 326, 2, align: TEXT_ALIGN_TYPE.TS_CENTER)
+            _label = new Label
+            (
+                labelText,
+                false,
+                0x0386,
+                326,
+                2,
+                align: TEXT_ALIGN_TYPE.TS_CENTER
+            )
             {
                 X = 162,
                 Y = 178

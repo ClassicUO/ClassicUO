@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
 // 
@@ -26,6 +27,7 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 #endregion
 
 using System;
@@ -84,8 +86,12 @@ namespace ClassicUO.Game.UI.Gumps
 
                     GetBookInfo
                     (
-                        _spellBookType, out ushort bookGraphic, out ushort minimizedGraphic,
-                        out ushort iconStartGraphic, out int maxSpellsCount, out int spellsOnPage,
+                        _spellBookType,
+                        out ushort bookGraphic,
+                        out ushort minimizedGraphic,
+                        out ushort iconStartGraphic,
+                        out int maxSpellsCount,
+                        out int spellsOnPage,
                         out int dictionaryPagesCount
                     );
 
@@ -162,8 +168,13 @@ namespace ClassicUO.Game.UI.Gumps
 
             GetBookInfo
             (
-                _spellBookType, out ushort bookGraphic, out ushort minimizedGraphic, out ushort iconStartGraphic,
-                out int maxSpellsCount, out int spellsOnPage, out int dictionaryPagesCount
+                _spellBookType,
+                out ushort bookGraphic,
+                out ushort minimizedGraphic,
+                out ushort iconStartGraphic,
+                out int maxSpellsCount,
+                out int spellsOnPage,
+                out int dictionaryPagesCount
             );
 
             Add(_picBase = new GumpPic(0, 0, bookGraphic, 0));
@@ -232,8 +243,13 @@ namespace ClassicUO.Game.UI.Gumps
 
             GetBookInfo
             (
-                _spellBookType, out ushort bookGraphic, out ushort minimizedGraphic, out ushort iconStartGraphic,
-                out int maxSpellsCount, out int spellsOnPage, out int dictionaryPagesCount
+                _spellBookType,
+                out ushort bookGraphic,
+                out ushort minimizedGraphic,
+                out ushort iconStartGraphic,
+                out int maxSpellsCount,
+                out int spellsOnPage,
+                out int dictionaryPagesCount
             );
 
             int totalSpells = 0;
@@ -260,9 +276,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             }
 
-            int pagesToFill = _spellBookType == SpellBookType.Mastery ?
-                dictionaryPagesCount :
-                dictionaryPagesCount >> 1;
+            int pagesToFill = _spellBookType == SpellBookType.Mastery ? dictionaryPagesCount : dictionaryPagesCount >> 1;
 
             _maxPage = pagesToFill + ((totalSpells + 1) >> 1);
 
@@ -343,11 +357,10 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     if (page == 1 && _spellBookType == SpellBookType.Chivalry)
                     {
-                        Label label = new Label
-                            (ResGumps.TithingPointsAvailable + World.Player.TithingPoints, false, 0x0288, font: 6)
-                            {
-                                X = 62, Y = 162
-                            };
+                        Label label = new Label(ResGumps.TithingPointsAvailable + World.Player.TithingPoints, false, 0x0288, font: 6)
+                        {
+                            X = 62, Y = 162
+                        };
 
                         _dataBox.Add(label, page);
                     }
@@ -424,7 +437,14 @@ namespace ClassicUO.Game.UI.Gumps
                                                 icon.MouseDoubleClick += OnIconDoubleClick;
                                                 icon.DragBegin += OnIconDragBegin;
 
-                                                text = new Label(spell.Name, false, 0x0288, 80, 6)
+                                                text = new Label
+                                                (
+                                                    spell.Name,
+                                                    false,
+                                                    0x0288,
+                                                    80,
+                                                    6
+                                                )
                                                 {
                                                     X = 225 + 44 + 4,
                                                     Y = iconMY + 2
@@ -434,8 +454,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                                                 if (toolTipCliloc > 0)
                                                 {
-                                                    string tooltip = ClilocLoader.Instance.GetString
-                                                        (toolTipCliloc + id);
+                                                    string tooltip = ClilocLoader.Instance.GetString(toolTipCliloc + id);
 
                                                     icon.SetTooltip(tooltip, 250);
                                                 }
@@ -462,12 +481,11 @@ namespace ClassicUO.Game.UI.Gumps
                     }
                     else if (_spellBookType == SpellBookType.Mastery)
                     {
-                        text = new Label
-                            (page == pagesToFill ? ResGumps.Passive : ResGumps.Activated, false, 0x0288, font: 6)
-                            {
-                                X = dataX,
-                                Y = 30
-                            };
+                        text = new Label(page == pagesToFill ? ResGumps.Passive : ResGumps.Activated, false, 0x0288, font: 6)
+                        {
+                            X = dataX,
+                            Y = 30
+                        };
 
                         _dataBox.Add(text, page);
                     }
@@ -485,8 +503,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                             if (_spells[currentSpellIndex])
                             {
-                                GetSpellNames
-                                    (currentSpellIndex, out string name, out string abbreviature, out string reagents);
+                                GetSpellNames(currentSpellIndex, out string name, out string abbreviature, out string reagents);
 
                                 if (spellDone % 2 == 0)
                                 {
@@ -497,7 +514,14 @@ namespace ClassicUO.Game.UI.Gumps
 
                                 text = new HoveredLabel
                                 (
-                                    name, false, 0x0288, 0x33, 0x0288, font: 9, maxwidth: 130, style: FontStyle.Cropped
+                                    name,
+                                    false,
+                                    0x0288,
+                                    0x33,
+                                    0x0288,
+                                    font: 9,
+                                    maxwidth: 130,
+                                    style: FontStyle.Cropped
                                 )
                                 {
                                     X = dataX,
@@ -522,8 +546,7 @@ namespace ClassicUO.Game.UI.Gumps
                         {
                             if (_spells[currentSpellIndex])
                             {
-                                GetSpellNames
-                                    (currentSpellIndex, out string name, out string abbreviature, out string reagents);
+                                GetSpellNames(currentSpellIndex, out string name, out string abbreviature, out string reagents);
 
                                 if (spellDone % 2 == 0)
                                 {
@@ -534,7 +557,14 @@ namespace ClassicUO.Game.UI.Gumps
 
                                 text = new HoveredLabel
                                 (
-                                    name, false, 0x0288, 0x33, 0x0288, font: 9, maxwidth: 130, style: FontStyle.Cropped
+                                    name,
+                                    false,
+                                    0x0288,
+                                    0x33,
+                                    0x0288,
+                                    font: 9,
+                                    maxwidth: 130,
+                                    style: FontStyle.Cropped
                                 )
                                 {
                                     X = dataX,
@@ -603,7 +633,14 @@ namespace ClassicUO.Game.UI.Gumps
 
                         _dataBox.Add(text, page1);
 
-                        text = new Label(name, false, 0x0288, 80, 6)
+                        text = new Label
+                        (
+                            name,
+                            false,
+                            0x0288,
+                            80,
+                            6
+                        )
                         {
                             X = iconTextX,
                             Y = 34
@@ -641,7 +678,14 @@ namespace ClassicUO.Game.UI.Gumps
 
                         _dataBox.Add(text, page1);
 
-                        text = new Label(name, false, 0x0288, 80, 6)
+                        text = new Label
+                        (
+                            name,
+                            false,
+                            0x0288,
+                            80,
+                            6
+                        )
                         {
                             X = iconTextX,
                             Y = 34
@@ -660,7 +704,14 @@ namespace ClassicUO.Game.UI.Gumps
 
                             abbreviatureY += text.Height;
 
-                            text = new Label(abbreviature, false, 0x0288, 80, 6)
+                            text = new Label
+                            (
+                                abbreviature,
+                                false,
+                                0x0288,
+                                80,
+                                6
+                            )
                             {
                                 X = iconTextX,
                                 Y = abbreviatureY
@@ -685,7 +736,14 @@ namespace ClassicUO.Game.UI.Gumps
 
                         if (!string.IsNullOrEmpty(abbreviature))
                         {
-                            text = new Label(abbreviature, false, 0x0288, 80, 6)
+                            text = new Label
+                            (
+                                abbreviature,
+                                false,
+                                0x0288,
+                                80,
+                                6
+                            )
                             {
                                 X = iconTextX,
                                 Y = 34
@@ -713,7 +771,14 @@ namespace ClassicUO.Game.UI.Gumps
                     GetSpellToolTip(out toolTipCliloc);
                 }
 
-                HueGumpPic icon = new HueGumpPic(iconX, 40, iconGraphic, 0, (ushort) GetSpellDefinition(iconSerial).ID)
+                HueGumpPic icon = new HueGumpPic
+                (
+                    iconX,
+                    40,
+                    iconGraphic,
+                    0,
+                    (ushort) GetSpellDefinition(iconSerial).ID
+                )
                 {
                     X = iconX, Y = 40, LocalSerial = iconSerial
                 };
@@ -734,7 +799,18 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     if (_spellBookType != SpellBookType.Mastery)
                     {
-                        _dataBox.Add(new GumpPicTiled(iconX, 88, 120, 5, 0x0835), page1);
+                        _dataBox.Add
+                        (
+                            new GumpPicTiled
+                            (
+                                iconX,
+                                88,
+                                120,
+                                5,
+                                0x0835
+                            ),
+                            page1
+                        );
                     }
 
                     Label text = new Label(ResGumps.Reagents, false, 0x0288, font: 6)

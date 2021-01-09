@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
 // 
@@ -26,6 +27,7 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 #endregion
 
 using System.Linq;
@@ -62,7 +64,15 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             );
 
-            Label label = new Label(name, false, 0x0386, 200, 1, FontStyle.Fixed)
+            Label label = new Label
+            (
+                name,
+                false,
+                0x0386,
+                200,
+                1,
+                FontStyle.Fixed
+            )
             {
                 X = 39,
                 Y = 18
@@ -84,7 +94,15 @@ namespace ClassicUO.Game.UI.Gumps
             Add
             (
                 _slider = new HSliderBar
-                    (40, _container.Y + _container.Height + 12, 217, 0, 1, 0, HSliderBarStyle.MetalWidgetRecessedBar)
+                (
+                    40,
+                    _container.Y + _container.Height + 12,
+                    217,
+                    0,
+                    1,
+                    0,
+                    HSliderBarStyle.MetalWidgetRecessedBar
+                )
             );
 
             _slider.ValueChanged += (sender, e) => { _container.Value = _slider.Value; };
@@ -164,7 +182,18 @@ namespace ClassicUO.Game.UI.Gumps
 
             pic.MouseDoubleClick += (sender, e) =>
             {
-                NetClient.Socket.Send(new PMenuResponse(LocalSerial, (ushort) ServerSerial, index, graphic, hue));
+                NetClient.Socket.Send
+                (
+                    new PMenuResponse
+                    (
+                        LocalSerial,
+                        (ushort) ServerSerial,
+                        index,
+                        graphic,
+                        hue
+                    )
+                );
+
                 Dispose();
                 e.Result = true;
             };
@@ -182,7 +211,17 @@ namespace ClassicUO.Game.UI.Gumps
         {
             base.CloseWithRightClick();
 
-            NetClient.Socket.Send(new PMenuResponse(LocalSerial, (ushort) ServerSerial, 0, 0, 0));
+            NetClient.Socket.Send
+            (
+                new PMenuResponse
+                (
+                    LocalSerial,
+                    (ushort) ServerSerial,
+                    0,
+                    0,
+                    0
+                )
+            );
         }
 
 
@@ -213,7 +252,14 @@ namespace ClassicUO.Game.UI.Gumps
 
             public override bool Draw(UltimaBatcher2D batcher, int x, int y)
             {
-                Rectangle scissor = ScissorStack.CalculateScissors(Matrix.Identity, x, y, Width, Height);
+                Rectangle scissor = ScissorStack.CalculateScissors
+                (
+                    Matrix.Identity,
+                    x,
+                    y,
+                    Width,
+                    Height
+                );
 
                 if (ScissorStack.PushScissors(batcher.GraphicsDevice, scissor))
                 {
@@ -295,7 +341,14 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add
             (
-                l = new Label(name, false, 0x0386, 370, 1)
+                l = new Label
+                (
+                    name,
+                    false,
+                    0x0386,
+                    370,
+                    1
+                )
                 {
                     X = 20,
                     Y = 16
@@ -316,7 +369,17 @@ namespace ClassicUO.Game.UI.Gumps
 
         public int AddItem(string name, int y)
         {
-            RadioButton radio = new RadioButton(0, 0x138A, 0x138B, name, 1, 0x0386, false, 330)
+            RadioButton radio = new RadioButton
+            (
+                0,
+                0x138A,
+                0x138B,
+                name,
+                1,
+                0x0386,
+                false,
+                330
+            )
             {
                 X = 50,
                 Y = y

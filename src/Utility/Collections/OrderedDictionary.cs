@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
 // 
@@ -26,6 +27,7 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 #endregion
 
 using System;
@@ -190,8 +192,7 @@ namespace ClassicUO.Utility.Collections
         {
             if (index < 0 || index >= _keyedCollection.Count)
             {
-                throw new ArgumentException
-                    (string.Format("The index was outside the bounds of the dictionary: {0}", index));
+                throw new ArgumentException(string.Format("The index was outside the bounds of the dictionary: {0}", index));
             }
 
             return _keyedCollection[index];
@@ -482,15 +483,12 @@ namespace ClassicUO.Utility.Collections
 
         public KeyedCollection2(Func<TItem, TKey> getKeyForItemDelegate)
         {
-            _getKeyForItemDelegate =
-                getKeyForItemDelegate ?? throw new ArgumentNullException(DelegateNullExceptionMessage);
+            _getKeyForItemDelegate = getKeyForItemDelegate ?? throw new ArgumentNullException(DelegateNullExceptionMessage);
         }
 
-        public KeyedCollection2(Func<TItem, TKey> getKeyForItemDelegate, IEqualityComparer<TKey> comparer) : base
-            (comparer)
+        public KeyedCollection2(Func<TItem, TKey> getKeyForItemDelegate, IEqualityComparer<TKey> comparer) : base(comparer)
         {
-            _getKeyForItemDelegate =
-                getKeyForItemDelegate ?? throw new ArgumentNullException(DelegateNullExceptionMessage);
+            _getKeyForItemDelegate = getKeyForItemDelegate ?? throw new ArgumentNullException(DelegateNullExceptionMessage);
         }
 
         protected override TKey GetKeyForItem(TItem item)
@@ -506,16 +504,14 @@ namespace ClassicUO.Utility.Collections
 
         public void SortByKeys(IComparer<TKey> keyComparer)
         {
-            Comparer2<TItem> comparer = new Comparer2<TItem>
-                ((x, y) => keyComparer.Compare(GetKeyForItem(x), GetKeyForItem(y)));
+            Comparer2<TItem> comparer = new Comparer2<TItem>((x, y) => keyComparer.Compare(GetKeyForItem(x), GetKeyForItem(y)));
 
             Sort(comparer);
         }
 
         public void SortByKeys(Comparison<TKey> keyComparison)
         {
-            Comparer2<TItem> comparer = new Comparer2<TItem>
-                ((x, y) => keyComparison(GetKeyForItem(x), GetKeyForItem(y)));
+            Comparer2<TItem> comparer = new Comparer2<TItem>((x, y) => keyComparison(GetKeyForItem(x), GetKeyForItem(y)));
 
             Sort(comparer);
         }

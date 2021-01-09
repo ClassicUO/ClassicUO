@@ -1,4 +1,5 @@
 #region license
+
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
 // 
@@ -26,6 +27,7 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 #endregion
 
 using ClassicUO.Game.UI.Controls;
@@ -61,9 +63,26 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             );
 
-            Add(new BorderControl(0, 0, Width, Height, 4));
+            Add
+            (
+                new BorderControl
+                (
+                    0,
+                    0,
+                    Width,
+                    Height,
+                    4
+                )
+            );
 
-            Label text = new Label(ResGumps.ChooseName, true, 23, Width - 17, 3)
+            Label text = new Label
+            (
+                ResGumps.ChooseName,
+                true,
+                23,
+                Width - 17,
+                3
+            )
             {
                 X = 6,
                 Y = 6
@@ -73,10 +92,25 @@ namespace ClassicUO.Game.UI.Gumps
 
             int BORDER_SIZE = 4;
 
-            BorderControl border = new BorderControl(0, text.Y + text.Height, Width, 27, BORDER_SIZE);
+            BorderControl border = new BorderControl
+            (
+                0,
+                text.Y + text.Height,
+                Width,
+                27,
+                BORDER_SIZE
+            );
+
             Add(border);
 
-            text = new Label(ResGumps.Name, true, 0x033, 0, 3)
+            text = new Label
+            (
+                ResGumps.Name,
+                true,
+                0x033,
+                0,
+                3
+            )
             {
                 X = 6,
                 Y = border.Y + 2
@@ -86,7 +120,15 @@ namespace ClassicUO.Game.UI.Gumps
 
             int x = text.X + text.Width + 2;
 
-            _textBox = new StbTextBox(1, -1, Width - x - 17, true, FontStyle.Fixed, 0x0481)
+            _textBox = new StbTextBox
+            (
+                1,
+                -1,
+                Width - x - 17,
+                true,
+                FontStyle.Fixed,
+                0x0481
+            )
             {
                 X = x,
                 Y = text.Y,
@@ -96,7 +138,17 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add(_textBox);
 
-            Add(new BorderControl(0, text.Y + text.Height, Width, 27, BORDER_SIZE));
+            Add
+            (
+                new BorderControl
+                (
+                    0,
+                    text.Y + text.Height,
+                    Width,
+                    27,
+                    BORDER_SIZE
+                )
+            );
 
             // close
             Add

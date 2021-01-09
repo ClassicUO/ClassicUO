@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
 // 
@@ -26,6 +27,7 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 #endregion
 
 using ClassicUO.Game.Data;
@@ -140,7 +142,15 @@ namespace ClassicUO.Game.UI.Gumps
 
                 Add
                 (
-                    new Label(name, false, 0x0386, font: 2, maxwidth: 250, align: TEXT_ALIGN_TYPE.TS_CENTER)
+                    new Label
+                    (
+                        name,
+                        false,
+                        0x0386,
+                        font: 2,
+                        maxwidth: 250,
+                        align: TEXT_ALIGN_TYPE.TS_CENTER
+                    )
                     {
                         X = 140,
                         Y = yPtr + 1
@@ -312,7 +322,14 @@ namespace ClassicUO.Game.UI.Gumps
                 case Buttons.SendMessage:
                     if (World.Party.Leader == 0)
                     {
-                        GameActions.Print(ResGumps.YouAreNotInAParty, 0, MessageType.System, 3, false);
+                        GameActions.Print
+                        (
+                            ResGumps.YouAreNotInAParty,
+                            0,
+                            MessageType.System,
+                            3,
+                            false
+                        );
                     }
                     else
                     {
@@ -330,7 +347,14 @@ namespace ClassicUO.Game.UI.Gumps
                 case Buttons.Leave:
                     if (World.Party.Leader == 0)
                     {
-                        GameActions.Print(ResGumps.YouAreNotInAParty, 0, MessageType.System, 3, false);
+                        GameActions.Print
+                        (
+                            ResGumps.YouAreNotInAParty,
+                            0,
+                            MessageType.System,
+                            3,
+                            false
+                        );
                     }
                     else
                     {
@@ -362,7 +386,14 @@ namespace ClassicUO.Game.UI.Gumps
 
                         if (World.Party.Members[index] == null || World.Party.Members[index].Serial == 0)
                         {
-                            GameActions.Print(ResGumps.ThereIsNoOneInThatPartySlot, 0, MessageType.System, 3, false);
+                            GameActions.Print
+                            (
+                                ResGumps.ThereIsNoOneInThatPartySlot,
+                                0,
+                                MessageType.System,
+                                3,
+                                false
+                            );
                         }
                         else
                         {
@@ -377,7 +408,14 @@ namespace ClassicUO.Game.UI.Gumps
 
                         if (World.Party.Members[index] == null || World.Party.Members[index].Serial == 0)
                         {
-                            GameActions.Print(ResGumps.ThereIsNoOneInThatPartySlot, 0, MessageType.System, 3, false);
+                            GameActions.Print
+                            (
+                                ResGumps.ThereIsNoOneInThatPartySlot,
+                                0,
+                                MessageType.System,
+                                3,
+                                false
+                            );
                         }
                         else
                         {

@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
 // 
@@ -26,6 +27,7 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 #endregion
 
 using System;
@@ -58,8 +60,7 @@ namespace ClassicUO.Network
         {
             ServicePointManager.ServerCertificateValidationCallback = delegate { return true; };
 
-            ServicePointManager.SecurityProtocol =
-                SecurityProtocolType.Tls | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12;
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12;
         }
 
         public Updater()
@@ -94,14 +95,12 @@ namespace ClassicUO.Network
 
                 int progressBlockCount = (int) (_progress * BLOCK_COUNT);
 
-                string text =
-                    $"{new string('#', progressBlockCount)}{new string('-', BLOCK_COUNT - progressBlockCount)} - {e.ProgressPercentage}% {ANIMATION[_animIndex++ % ANIMATION.Length]}";
+                string text = $"{new string('#', progressBlockCount)}{new string('-', BLOCK_COUNT - progressBlockCount)} - {e.ProgressPercentage}% {ANIMATION[_animIndex++ % ANIMATION.Length]}";
 
                 int commonPrefixLength = 0;
                 int commonLength = Math.Min(_currentText.Length, text.Length);
 
-                while (commonPrefixLength < commonLength &&
-                       text[commonPrefixLength] == _currentText[commonPrefixLength])
+                while (commonPrefixLength < commonLength && text[commonPrefixLength] == _currentText[commonPrefixLength])
                 {
                     commonPrefixLength++;
                 }
@@ -278,15 +277,13 @@ namespace ClassicUO.Network
                     {
                         processStartInfo.FileName = "mono";
 
-                        processStartInfo.Arguments =
-                            $"\"{Path.Combine(tempPath, "ClassicUO.exe")}\" --source \"{CUOEnviroment.ExecutablePath}\" --pid {Process.GetCurrentProcess().Id} --action update";
+                        processStartInfo.Arguments = $"\"{Path.Combine(tempPath, "ClassicUO.exe")}\" --source \"{CUOEnviroment.ExecutablePath}\" --pid {Process.GetCurrentProcess().Id} --action update";
                     }
                     else
                     {
                         processStartInfo.FileName = Path.Combine(tempPath, "ClassicUO.exe");
 
-                        processStartInfo.Arguments =
-                            $"--source \"{CUOEnviroment.ExecutablePath}\" --pid {Process.GetCurrentProcess().Id} --action update";
+                        processStartInfo.Arguments = $"--source \"{CUOEnviroment.ExecutablePath}\" --pid {Process.GetCurrentProcess().Id} --action update";
                     }
 
                     Process.Start(processStartInfo);

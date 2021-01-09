@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
 // 
@@ -26,6 +27,7 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 #endregion
 
 using System;
@@ -76,7 +78,16 @@ namespace ClassicUO.Game.UI.Gumps
             Width = 88;
             Height = 44;
 
-            label = new Label(_macro.Name, true, 0x03b2, Width, 255, FontStyle.BlackBorder, TEXT_ALIGN_TYPE.TS_CENTER)
+            label = new Label
+            (
+                _macro.Name,
+                true,
+                0x03b2,
+                Width,
+                255,
+                FontStyle.BlackBorder,
+                TEXT_ALIGN_TYPE.TS_CENTER
+            )
             {
                 X = 0,
                 Width = Width - 10
@@ -109,8 +120,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             Point offset = Mouse.LDragOffset;
 
-            if (ProfileManager.CurrentProfile.CastSpellsByOneClick && button == MouseButtonType.Left && !Keyboard.Alt &&
-                Math.Abs(offset.X) < 5 && Math.Abs(offset.Y) < 5)
+            if (ProfileManager.CurrentProfile.CastSpellsByOneClick && button == MouseButtonType.Left && !Keyboard.Alt && Math.Abs(offset.X) < 5 && Math.Abs(offset.Y) < 5)
             {
                 RunMacro();
             }
@@ -144,10 +154,27 @@ namespace ClassicUO.Game.UI.Gumps
             ResetHueVector();
             HueVector.Z = 0.1f;
 
-            batcher.Draw2D(backgroundTexture, x, y, Width, Height, ref HueVector);
+            batcher.Draw2D
+            (
+                backgroundTexture,
+                x,
+                y,
+                Width,
+                Height,
+                ref HueVector
+            );
 
             HueVector.Z = 0;
-            batcher.DrawRectangle(SolidColorTextureCache.GetTexture(Color.Gray), x, y, Width, Height, ref HueVector);
+
+            batcher.DrawRectangle
+            (
+                SolidColorTextureCache.GetTexture(Color.Gray),
+                x,
+                y,
+                Width,
+                Height,
+                ref HueVector
+            );
 
             base.Draw(batcher, x, y);
 

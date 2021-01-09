@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
 // 
@@ -26,6 +27,7 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 #endregion
 
 using System;
@@ -47,7 +49,8 @@ namespace ClassicUO.Game.GameObjects
     {
         private static readonly QueuedPool<Item> _pool = new QueuedPool<Item>
         (
-            Constants.PREDICTABLE_CHUNKS * 3, i =>
+            Constants.PREDICTABLE_CHUNKS * 3,
+            i =>
             {
                 i.IsDestroyed = false;
                 i.Graphic = 0;
@@ -186,8 +189,7 @@ namespace ClassicUO.Game.GameObjects
         public ref StaticTiles ItemData => ref TileDataLoader.Instance.StaticData[IsMulti ? MultiGraphic : Graphic];
 
         public bool IsLootable =>
-            ItemData.Layer != (int) Layer.Hair && ItemData.Layer != (int) Layer.Beard &&
-            ItemData.Layer != (int) Layer.Face && Graphic != 0;
+            ItemData.Layer != (int) Layer.Hair && ItemData.Layer != (int) Layer.Beard && ItemData.Layer != (int) Layer.Face && Graphic != 0;
 
         public ushort Amount;
         public uint Container = 0xFFFF_FFFF;
@@ -278,7 +280,10 @@ namespace ClassicUO.Game.GameObjects
 
                     ZLib.Decompress
                     (
-                        MultiLoader.Instance.File.PositionAddress, entry.Length, 0, (IntPtr) data,
+                        MultiLoader.Instance.File.PositionAddress,
+                        entry.Length,
+                        0,
+                        (IntPtr) data,
                         entry.DecompressedLength
                     );
 
@@ -354,8 +359,7 @@ namespace ClassicUO.Game.GameObjects
 
                 for (int i = 0; i < count; i++)
                 {
-                    MultiBlock* block =
-                        (MultiBlock*) (MultiLoader.Instance.File.PositionAddress + i * MultiLoader.Instance.Offset);
+                    MultiBlock* block = (MultiBlock*) (MultiLoader.Instance.File.PositionAddress + i * MultiLoader.Instance.Offset);
 
                     if (block->X < minX)
                     {
@@ -1043,8 +1047,7 @@ namespace ClassicUO.Game.GameObjects
 
                         ushort hue = 0;
 
-                        AnimationDirection direction = AnimationsLoader.Instance.GetCorpseAnimationGroup(ref id, ref animGroup, ref hue)
-                                                                       .Direction[dir];
+                        AnimationDirection direction = AnimationsLoader.Instance.GetCorpseAnimationGroup(ref id, ref animGroup, ref hue).Direction[dir];
 
                         if (direction.FrameCount == 0 || direction.Frames == null)
                         {

@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
 // 
@@ -26,6 +27,7 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 #endregion
 
 using System;
@@ -43,17 +45,14 @@ namespace ClassicUO.Game.Managers
         private StreamWriter _fileWriter;
         private bool _writerHasException;
 
-        public static Deque<JournalEntry> Entries { get; } =
-            new Deque<JournalEntry>(Constants.MAX_JOURNAL_HISTORY_COUNT);
+        public static Deque<JournalEntry> Entries { get; } = new Deque<JournalEntry>(Constants.MAX_JOURNAL_HISTORY_COUNT);
 
         public event EventHandler<JournalEntry> EntryAdded;
 
 
         public void Add(string text, ushort hue, string name, TextType type, bool isunicode = true)
         {
-            JournalEntry entry = Entries.Count >= Constants.MAX_JOURNAL_HISTORY_COUNT ?
-                Entries.RemoveFromFront() :
-                new JournalEntry();
+            JournalEntry entry = Entries.Count >= Constants.MAX_JOURNAL_HISTORY_COUNT ? Entries.RemoveFromFront() : new JournalEntry();
 
             byte font = (byte) (isunicode ? 0 : 9);
 
@@ -96,17 +95,9 @@ namespace ClassicUO.Game.Managers
             {
                 try
                 {
-                    string path = FileSystemHelper.CreateFolderIfNotExists
-                        (Path.Combine(CUOEnviroment.ExecutablePath, "Data"), "Client", "JournalLogs");
+                    string path = FileSystemHelper.CreateFolderIfNotExists(Path.Combine(CUOEnviroment.ExecutablePath, "Data"), "Client", "JournalLogs");
 
-                    _fileWriter = new StreamWriter
-                    (
-                        File.Open
-                        (
-                            Path.Combine(path, $"{DateTime.Now:yyyy_MM_dd_HH_mm_ss}_journal.txt"), FileMode.Create,
-                            FileAccess.Write, FileShare.Read
-                        )
-                    )
+                    _fileWriter = new StreamWriter(File.Open(Path.Combine(path, $"{DateTime.Now:yyyy_MM_dd_HH_mm_ss}_journal.txt"), FileMode.Create, FileAccess.Write, FileShare.Read))
                     {
                         AutoFlush = true
                     };

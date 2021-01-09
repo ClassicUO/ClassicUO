@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
 // 
@@ -26,6 +27,7 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 #endregion
 
 using System;
@@ -114,8 +116,13 @@ namespace ClassicUO.IO
                             hash,
                             new UOFileIndex
                             (
-                                StartAddress, (uint) Length, offset + 8, compressedLength - 8, decompressedLength,
-                                extra1, extra2
+                                StartAddress,
+                                (uint) Length,
+                                offset + 8,
+                                compressedLength - 8,
+                                decompressedLength,
+                                extra1,
+                                extra2
                             )
                         );
 
@@ -126,7 +133,14 @@ namespace ClassicUO.IO
                         _hashes.Add
                         (
                             hash,
-                            new UOFileIndex(StartAddress, (uint) Length, offset, compressedLength, decompressedLength)
+                            new UOFileIndex
+                            (
+                                StartAddress,
+                                (uint) Length,
+                                offset,
+                                compressedLength,
+                                decompressedLength
+                            )
                         );
                     }
                 }
@@ -187,7 +201,14 @@ namespace ClassicUO.IO
 
             fixed (byte* destPtr = data)
             {
-                ZLib.Decompress(PositionAddress, compressedSize, 0, (IntPtr) destPtr, uncompressedSize);
+                ZLib.Decompress
+                (
+                    PositionAddress,
+                    compressedSize,
+                    0,
+                    (IntPtr) destPtr,
+                    uncompressedSize
+                );
             }
 
 

@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
 // 
@@ -26,6 +27,7 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 #endregion
 
 using System;
@@ -96,8 +98,7 @@ namespace ClassicUO.Game.UI.Controls
 
     internal sealed class ContextMenuItemEntry
     {
-        public ContextMenuItemEntry
-            (string text, Action action = null, bool canBeSelected = false, bool defaultValue = false)
+        public ContextMenuItemEntry(string text, Action action = null, bool canBeSelected = false, bool defaultValue = false)
         {
             Text = text;
             Action = action;
@@ -184,7 +185,11 @@ namespace ClassicUO.Game.UI.Controls
 
             batcher.DrawRectangle
             (
-                SolidColorTextureCache.GetTexture(Color.Gray), x - 1, y - 1, _background.Width + 1, _background.Height + 1,
+                SolidColorTextureCache.GetTexture(Color.Gray),
+                x - 1,
+                y - 1,
+                _background.Width + 1,
+                _background.Height + 1,
                 ref HueVector
             );
 
@@ -214,8 +219,7 @@ namespace ClassicUO.Game.UI.Controls
 
         private class ContextMenuItem : Control
         {
-            private static readonly RenderedText _moreMenuLabel = RenderedText.Create
-                (">", 0xFFFF, isunicode: true, style: FontStyle.BlackBorder);
+            private static readonly RenderedText _moreMenuLabel = RenderedText.Create(">", 0xFFFF, isunicode: true, style: FontStyle.BlackBorder);
             private readonly ContextMenuItemEntry _entry;
             private readonly Label _label;
             private readonly GumpPic _selectedPic;
@@ -227,7 +231,14 @@ namespace ClassicUO.Game.UI.Controls
                 CanCloseWithRightClick = false;
                 _entry = entry;
 
-                _label = new Label(entry.Text, true, 0xFFFF, 0, style: FontStyle.BlackBorder)
+                _label = new Label
+                (
+                    entry.Text,
+                    true,
+                    0xFFFF,
+                    0,
+                    style: FontStyle.BlackBorder
+                )
                 {
                     X = 25
                 };
@@ -346,17 +357,21 @@ namespace ClassicUO.Game.UI.Controls
                     ResetHueVector();
 
                     batcher.Draw2D
-                        (SolidColorTextureCache.GetTexture(Color.Gray), x + 2, y + 5, Width - 4, Height - 10, ref HueVector);
+                    (
+                        SolidColorTextureCache.GetTexture(Color.Gray),
+                        x + 2,
+                        y + 5,
+                        Width - 4,
+                        Height - 10,
+                        ref HueVector
+                    );
                 }
 
                 base.Draw(batcher, x, y);
 
                 if (_entry.Items != null && _entry.Items.Count != 0)
                 {
-                    _moreMenuLabel.Draw
-                    (
-                        batcher, x + Width - _moreMenuLabel.Width, y + (Height >> 1) - (_moreMenuLabel.Height >> 1) - 1
-                    );
+                    _moreMenuLabel.Draw(batcher, x + Width - _moreMenuLabel.Width, y + (Height >> 1) - (_moreMenuLabel.Height >> 1) - 1);
                 }
 
                 return true;

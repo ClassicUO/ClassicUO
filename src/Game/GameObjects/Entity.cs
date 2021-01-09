@@ -1,4 +1,5 @@
 #region license
+
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
 // 
@@ -26,6 +27,7 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 #endregion
 
 using System;
@@ -147,7 +149,7 @@ namespace ClassicUO.Game.GameObjects
             {
                 // TODO: Some servers may not want to receive this (causing original client to not send it),
                 //but all servers tested (latest POL, old POL, ServUO, Outlands) do.
-                if (/*Client.Version > ClientVersion.CV_200 &&*/ SerialHelper.IsMobile(Serial))
+                if ( /*Client.Version > ClientVersion.CV_200 &&*/ SerialHelper.IsMobile(Serial))
                 {
                     Socket.Send(new PNameRequest(Serial));
                 }

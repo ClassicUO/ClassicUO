@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
 // 
@@ -26,6 +27,7 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 #endregion
 
 using System;
@@ -47,22 +49,27 @@ namespace TinyJson
 
                 if (jsonObj is IDictionary)
                 {
-                    PropertyInfo[] properties = type.GetProperties
-                        (BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);
+                    PropertyInfo[] properties = type.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);
 
                     bool match_snake_case = type.GetCustomAttribute<MatchSnakeCaseAttribute>() != null;
 
                     if (properties.Length == 0)
                     {
-                        FieldInfo[] fields = type.GetFields
-                            (BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);
+                        FieldInfo[] fields = type.GetFields(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);
 
                         foreach (DictionaryEntry item in (IDictionary) jsonObj)
                         {
                             string name = (string) item.Key;
                             object value = item.Value;
 
-                            if (!JsonMapper.DecodeValue(instance, name, value, fields, match_snake_case))
+                            if (!JsonMapper.DecodeValue
+                            (
+                                instance,
+                                name,
+                                value,
+                                fields,
+                                match_snake_case
+                            ))
                             {
                                 Console.WriteLine("Couldn't decode field \"" + name + "\" of " + type);
                             }
@@ -75,7 +82,14 @@ namespace TinyJson
                             string name = (string) item.Key;
                             object value = item.Value;
 
-                            if (!JsonMapper.DecodeValue(instance, name, value, properties, match_snake_case))
+                            if (!JsonMapper.DecodeValue
+                            (
+                                instance,
+                                name,
+                                value,
+                                properties,
+                                match_snake_case
+                            ))
                             {
                                 Console.WriteLine("Couldn't decode field \"" + name + "\" of " + type);
                             }
@@ -84,8 +98,7 @@ namespace TinyJson
                 }
                 else
                 {
-                    Console.WriteLine
-                        ("Unsupported json type: " + (jsonObj != null ? jsonObj.GetType().ToString() : "null"));
+                    Console.WriteLine("Unsupported json type: " + (jsonObj != null ? jsonObj.GetType().ToString() : "null"));
                 }
 
                 return instance;
@@ -288,10 +301,7 @@ namespace TinyJson
                     {
                         IList jsonList = (IList) jsonObj;
 
-                        Type listType = type.IsInstanceOfGenericType
-                            (typeof(HashSet<>)) ?
-                            typeof(HashSet<>) :
-                            typeof(List<>);
+                        Type listType = type.IsInstanceOfGenericType(typeof(HashSet<>)) ? typeof(HashSet<>) : typeof(List<>);
 
                         Type constructedListType = listType.MakeGenericType(genericType);
                         object instance = Activator.CreateInstance(constructedListType, true);

@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
 // 
@@ -26,6 +27,7 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 #endregion
 
 using System.Runtime.CompilerServices;
@@ -147,8 +149,7 @@ namespace ClassicUO.Utility
             {
                 if (char.IsUpper(str[i]))
                 {
-                    if (str[i - 1] != ' ' && !char.IsUpper(str[i - 1]) || checkAcronyms && char.IsUpper
-                        (str[i - 1]) && i < len && !char.IsUpper(str[i + 1]))
+                    if (str[i - 1] != ' ' && !char.IsUpper(str[i - 1]) || checkAcronyms && char.IsUpper(str[i - 1]) && i < len && !char.IsUpper(str[i + 1]))
                     {
                         _sb.Append(' ');
                     }
@@ -199,9 +200,7 @@ namespace ClassicUO.Utility
         {
             if (SDL.SDL_HasClipboardText() != SDL.SDL_bool.SDL_FALSE)
             {
-                string s = multiline ?
-                    SDL.SDL_GetClipboardText() :
-                    SDL.SDL_GetClipboardText()?.Replace('\n', ' ') ?? null;
+                string s = multiline ? SDL.SDL_GetClipboardText() : SDL.SDL_GetClipboardText()?.Replace('\n', ' ') ?? null;
 
                 if (!string.IsNullOrEmpty(s))
                 {
@@ -209,6 +208,7 @@ namespace ClassicUO.Utility
                     {
                         s = s.Replace("\r", "");
                     }
+
                     if (s.IndexOf('\t') >= 0)
                     {
                         return s.Replace("\t", "   ");

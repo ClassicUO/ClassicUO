@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
 // 
@@ -26,6 +27,7 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 #endregion
 
 using ClassicUO.Game.Managers;
@@ -81,7 +83,13 @@ namespace ClassicUO.Game.UI.Controls
                 UIManager.GetGump<ColorPickerGump>()?.Dispose();
 
                 ColorPickerGump pickerGump = new ColorPickerGump
-                    (0, 0, 100, 100, s => _colorBox.SetColor(s, HuesLoader.Instance.GetPolygoneColor(CELL, s)));
+                (
+                    0,
+                    0,
+                    100,
+                    100,
+                    s => _colorBox.SetColor(s, HuesLoader.Instance.GetPolygoneColor(CELL, s))
+                );
 
                 UIManager.Add(pickerGump);
             }

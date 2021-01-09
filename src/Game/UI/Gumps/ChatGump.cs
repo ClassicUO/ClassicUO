@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
 // 
@@ -26,6 +27,7 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 #endregion
 
 using System.Collections.Generic;
@@ -69,7 +71,16 @@ namespace ClassicUO.Game.UI.Gumps
 
             int startY = 25;
 
-            Label text = new Label(ResGumps.Channels, false, 0x0386, 345, 2, FontStyle.None, TEXT_ALIGN_TYPE.TS_CENTER)
+            Label text = new Label
+            (
+                ResGumps.Channels,
+                false,
+                0x0386,
+                345,
+                2,
+                FontStyle.None,
+                TEXT_ALIGN_TYPE.TS_CENTER
+            )
             {
                 Y = startY
             };
@@ -78,10 +89,28 @@ namespace ClassicUO.Game.UI.Gumps
 
             startY += 40;
 
-            Add(new BorderControl(61, startY - 3, 220 + 8, 200 + 6, 3));
+            Add
+            (
+                new BorderControl
+                (
+                    61,
+                    startY - 3,
+                    220 + 8,
+                    200 + 6,
+                    3
+                )
+            );
+
             Add(new AlphaBlendControl(0) { X = 64, Y = startY, Width = 220, Height = 200 });
 
-            ScrollArea area = new ScrollArea(64, startY, 220, 200, true)
+            ScrollArea area = new ScrollArea
+            (
+                64,
+                startY,
+                220,
+                200,
+                true
+            )
             {
                 ScrollbarBehaviour = ScrollbarBehaviour.ShowAlways
             };
@@ -104,20 +133,36 @@ namespace ClassicUO.Game.UI.Gumps
             startY = 275;
 
             text = new Label
-                (ResGumps.YourCurrentChannel, false, 0x0386, 345, 2, FontStyle.None, TEXT_ALIGN_TYPE.TS_CENTER)
-                {
-                    Y = startY
-                };
+            (
+                ResGumps.YourCurrentChannel,
+                false,
+                0x0386,
+                345,
+                2,
+                FontStyle.None,
+                TEXT_ALIGN_TYPE.TS_CENTER
+            )
+            {
+                Y = startY
+            };
 
             Add(text);
 
             startY += 25;
 
             _currentChannelLabel = new Label
-                (ChatManager.CurrentChannelName, false, 0x0386, 345, 2, FontStyle.None, TEXT_ALIGN_TYPE.TS_CENTER)
-                {
-                    Y = startY
-                };
+            (
+                ChatManager.CurrentChannelName,
+                false,
+                0x0386,
+                345,
+                2,
+                FontStyle.None,
+                TEXT_ALIGN_TYPE.TS_CENTER
+            )
+            {
+                Y = startY
+            };
 
             Add(_currentChannelLabel);
 
@@ -151,7 +196,14 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add(button);
 
-            text = new Label(ResGumps.Join, false, 0x0386, 0, 2)
+            text = new Label
+            (
+                ResGumps.Join,
+                false,
+                0x0386,
+                0,
+                2
+            )
             {
                 X = 65,
                 Y = startY
@@ -159,7 +211,14 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add(text);
 
-            text = new Label(ResGumps.Leave, false, 0x0386, 0, 2)
+            text = new Label
+            (
+                ResGumps.Leave,
+                false,
+                0x0386,
+                0,
+                2
+            )
             {
                 X = 140,
                 Y = startY
@@ -167,7 +226,14 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add(text);
 
-            text = new Label(ResGumps.Create, false, 0x0386, 0, 2)
+            text = new Label
+            (
+                ResGumps.Create,
+                false,
+                0x0386,
+                0,
+                2
+            )
             {
                 X = 233,
                 Y = startY
@@ -263,9 +329,26 @@ namespace ClassicUO.Game.UI.Gumps
 
                 Add(new AlphaBlendControl(0) { Width = Width, Height = Height });
 
-                Add(new BorderControl(0, 0, Width, ROW_HEIGHT, BORDER_SIZE));
+                Add
+                (
+                    new BorderControl
+                    (
+                        0,
+                        0,
+                        Width,
+                        ROW_HEIGHT,
+                        BORDER_SIZE
+                    )
+                );
 
-                Label text = new Label(ResGumps.CreateAChannel, true, 0x23, Width - 4, 1)
+                Label text = new Label
+                (
+                    ResGumps.CreateAChannel,
+                    true,
+                    0x23,
+                    Width - 4,
+                    1
+                )
                 {
                     X = 6,
                     Y = BORDER_SIZE
@@ -273,9 +356,26 @@ namespace ClassicUO.Game.UI.Gumps
 
                 Add(text);
 
-                Add(new BorderControl(0, ROW_HEIGHT - BORDER_SIZE, Width, ROW_HEIGHT, BORDER_SIZE));
+                Add
+                (
+                    new BorderControl
+                    (
+                        0,
+                        ROW_HEIGHT - BORDER_SIZE,
+                        Width,
+                        ROW_HEIGHT,
+                        BORDER_SIZE
+                    )
+                );
 
-                text = new Label(ResGumps.Name, true, 0x23, Width - 4, 1)
+                text = new Label
+                (
+                    ResGumps.Name,
+                    true,
+                    0x23,
+                    Width - 4,
+                    1
+                )
                 {
                     X = 6,
                     Y = ROW_HEIGHT
@@ -283,7 +383,14 @@ namespace ClassicUO.Game.UI.Gumps
 
                 Add(text);
 
-                _textBox = new StbTextBox(1, -1, Width - 50, hue: 0x0481, style: FontStyle.Fixed)
+                _textBox = new StbTextBox
+                (
+                    1,
+                    -1,
+                    Width - 50,
+                    hue: 0x0481,
+                    style: FontStyle.Fixed
+                )
                 {
                     X = 45,
                     Y = ROW_HEIGHT,
@@ -293,7 +400,17 @@ namespace ClassicUO.Game.UI.Gumps
 
                 Add(_textBox);
 
-                Add(new BorderControl(0, ROW_HEIGHT * 2 - BORDER_SIZE * 2, Width, ROW_HEIGHT, BORDER_SIZE));
+                Add
+                (
+                    new BorderControl
+                    (
+                        0,
+                        ROW_HEIGHT * 2 - BORDER_SIZE * 2,
+                        Width,
+                        ROW_HEIGHT,
+                        BORDER_SIZE
+                    )
+                );
 
                 // close
                 Add
@@ -345,7 +462,14 @@ namespace ClassicUO.Game.UI.Gumps
 
                 Add
                 (
-                    _label = new Label(text, false, 0x49, Width, 3)
+                    _label = new Label
+                    (
+                        text,
+                        false,
+                        0x49,
+                        Width,
+                        3
+                    )
                     {
                         X = 3
                     }
@@ -392,7 +516,15 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (MouseIsOver)
                 {
-                    batcher.Draw2D(SolidColorTextureCache.GetTexture(Color.Cyan), x, y, Width, Height, ref HueVector);
+                    batcher.Draw2D
+                    (
+                        SolidColorTextureCache.GetTexture(Color.Cyan),
+                        x,
+                        y,
+                        Width,
+                        Height,
+                        ref HueVector
+                    );
                 }
 
                 return base.Draw(batcher, x, y);

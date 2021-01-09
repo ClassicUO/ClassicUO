@@ -1,4 +1,5 @@
 #region license
+
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
 // 
@@ -26,6 +27,7 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 #endregion
 
 using System;
@@ -57,7 +59,14 @@ namespace StbTextEditSharp
 
                     undo_char_point -= n;
 
-                    Array.Copy(undo_char, n, undo_char, 0, undo_char_point);
+                    Array.Copy
+                    (
+                        undo_char,
+                        n,
+                        undo_char,
+                        0,
+                        undo_char_point
+                    );
 
                     for (int i = 0; i < undo_point; ++i)
                     {
@@ -70,7 +79,14 @@ namespace StbTextEditSharp
 
                 --undo_point;
 
-                Array.Copy(undo_rec, 1, undo_rec, 0, undo_point);
+                Array.Copy
+                (
+                    undo_rec,
+                    1,
+                    undo_rec,
+                    0,
+                    undo_point
+                );
             }
         }
 
@@ -89,7 +105,14 @@ namespace StbTextEditSharp
                     redo_char_point += n;
                     num = 999 - redo_char_point;
 
-                    Array.Copy(undo_char, redo_char_point - n, undo_char, redo_char_point, num);
+                    Array.Copy
+                    (
+                        undo_char,
+                        redo_char_point - n,
+                        undo_char,
+                        redo_char_point,
+                        num
+                    );
 
                     for (i = (int) redo_point; i < k; ++i)
                     {
@@ -105,7 +128,14 @@ namespace StbTextEditSharp
 
                 if (num != 0)
                 {
-                    Array.Copy(undo_rec, redo_point, undo_rec, redo_point - 1, num);
+                    Array.Copy
+                    (
+                        undo_rec,
+                        redo_point,
+                        undo_rec,
+                        redo_point - 1,
+                        num
+                    );
                 }
             }
         }

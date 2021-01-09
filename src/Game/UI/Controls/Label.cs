@@ -1,4 +1,5 @@
 #region license
+
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
 // 
@@ -26,6 +27,7 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 #endregion
 
 using System.Collections.Generic;
@@ -51,7 +53,17 @@ namespace ClassicUO.Game.UI.Controls
             bool ishtml = false
         )
         {
-            _gText = RenderedText.Create(text, hue, font, isunicode, style, align, maxwidth, isHTML: ishtml);
+            _gText = RenderedText.Create
+            (
+                text,
+                hue,
+                font,
+                isunicode,
+                style,
+                align,
+                maxwidth,
+                isHTML: ishtml
+            );
 
             AcceptMouseInput = false;
             Width = _gText.Width;
@@ -60,9 +72,11 @@ namespace ClassicUO.Game.UI.Controls
 
         public Label(List<string> parts, string[] lines) : this
         (
-            int.TryParse(parts[4], out int lineIndex) && lineIndex >= 0 && lineIndex < lines.Length ?
-                lines[lineIndex] :
-                string.Empty, true, (ushort) (UInt16Converter.Parse(parts[3]) + 1), 0, style: FontStyle.BlackBorder
+            int.TryParse(parts[4], out int lineIndex) && lineIndex >= 0 && lineIndex < lines.Length ? lines[lineIndex] : string.Empty,
+            true,
+            (ushort) (UInt16Converter.Parse(parts[3]) + 1),
+            0,
+            style: FontStyle.BlackBorder
         )
         {
             X = int.Parse(parts[1]);

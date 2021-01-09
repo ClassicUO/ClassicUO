@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
 // 
@@ -26,6 +27,7 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 #endregion
 
 using System;
@@ -56,11 +58,29 @@ namespace ClassicUO.Game.UI.Gumps
             CanMove = true;
             AcceptMouseInput = false;
             CanCloseWithRightClick = true;
-            Add(new BorderControl(0, 0, WIDTH, HEIGHT, 4));
 
             Add
             (
-                new GumpPicTiled(4, 4, WIDTH - 8, HEIGHT - 8, 0x0A40)
+                new BorderControl
+                (
+                    0,
+                    0,
+                    WIDTH,
+                    HEIGHT,
+                    4
+                )
+            );
+
+            Add
+            (
+                new GumpPicTiled
+                (
+                    4,
+                    4,
+                    WIDTH - 8,
+                    HEIGHT - 8,
+                    0x0A40
+                )
                 {
                     Alpha = 0.5f
                 }
@@ -68,24 +88,57 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add
             (
-                new GumpPicTiled(4, 4, WIDTH - 8, HEIGHT - 8, 0x0A40)
+                new GumpPicTiled
+                (
+                    4,
+                    4,
+                    WIDTH - 8,
+                    HEIGHT - 8,
+                    0x0A40
+                )
                 {
                     Alpha = 0.5f
                 }
             );
 
             Add(new Label(ResGumps.ObjectInformation, true, 1153, font: 3) { X = 20, Y = 10 });
-            Add(new Line(20, 30, WIDTH - 50, 1, 0xFFFFFFFF));
 
             Add
             (
-                new NiceButton(WIDTH - 115, 5, 100, 25, ButtonAction.Activate, ResGumps.Dump)
+                new Line
+                (
+                    20,
+                    30,
+                    WIDTH - 50,
+                    1,
+                    0xFFFFFFFF
+                )
+            );
+
+            Add
+            (
+                new NiceButton
+                (
+                    WIDTH - 115,
+                    5,
+                    100,
+                    25,
+                    ButtonAction.Activate,
+                    ResGumps.Dump
+                )
                 {
                     ButtonParameter = 0
                 }
             );
 
-            ScrollArea scrollArea = new ScrollArea(20, 35, WIDTH - 40, HEIGHT - 45, true)
+            ScrollArea scrollArea = new ScrollArea
+            (
+                20,
+                35,
+                WIDTH - 40,
+                HEIGHT - 45,
+                true
+            )
             {
                 AcceptMouseInput = true
             };
@@ -105,7 +158,14 @@ namespace ClassicUO.Game.UI.Gumps
 
                 foreach (KeyValuePair<string, string> item in dict.OrderBy(s => s.Key))
                 {
-                    Label label = new Label(item.Key + ":", true, 33, font: 1, style: FontStyle.BlackBorder)
+                    Label label = new Label
+                    (
+                        item.Key + ":",
+                        true,
+                        33,
+                        font: 1,
+                        style: FontStyle.BlackBorder
+                    )
                     {
                         X = startX,
                         Y = startY
@@ -116,12 +176,19 @@ namespace ClassicUO.Game.UI.Gumps
                     int height = label.Height;
 
                     label = new Label
-                        (item.Value, true, 1153, font: 1, style: FontStyle.BlackBorder, maxwidth: WIDTH - 65 - 200)
-                        {
-                            X = startX + 200,
-                            Y = startY,
-                            AcceptMouseInput = true
-                        };
+                    (
+                        item.Value,
+                        true,
+                        1153,
+                        font: 1,
+                        style: FontStyle.BlackBorder,
+                        maxwidth: WIDTH - 65 - 200
+                    )
+                    {
+                        X = startX + 200,
+                        Y = startY,
+                        AcceptMouseInput = true
+                    };
 
                     label.MouseUp += OnLabelClick;
 
@@ -131,7 +198,18 @@ namespace ClassicUO.Game.UI.Gumps
                     }
 
                     databox.Add(label);
-                    databox.Add(new Line(startX, startY + height + 2, WIDTH - 65, 1, Color.Gray.PackedValue));
+
+                    databox.Add
+                    (
+                        new Line
+                        (
+                            startX,
+                            startY + height + 2,
+                            WIDTH - 65,
+                            1,
+                            Color.Gray.PackedValue
+                        )
+                    );
 
                     startY += height + 4;
                 }

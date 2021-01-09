@@ -1,4 +1,5 @@
 #region license
+
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
 // 
@@ -26,6 +27,7 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 #endregion
 
 using System;
@@ -167,7 +169,14 @@ namespace ClassicUO.Game.GameObjects
         public void AddMessage(MessageType type, string message, TextType text_type)
         {
             AddMessage
-                (type, message, ProfileManager.CurrentProfile.ChatFont, ProfileManager.CurrentProfile.SpeechHue, true, text_type);
+            (
+                type,
+                message,
+                ProfileManager.CurrentProfile.ChatFont,
+                ProfileManager.CurrentProfile.SpeechHue,
+                true,
+                text_type
+            );
         }
 
         public virtual void UpdateTextCoordsV()
@@ -241,8 +250,7 @@ namespace ClassicUO.Game.GameObjects
 
             for (TextObject item = (TextObject) TextContainer.Items; item != null; item = (TextObject) item.Next)
             {
-                if (item.RenderedText == null || item.RenderedText.IsDestroyed || item.RenderedText.Texture == null ||
-                    item.Time < Time.Ticks)
+                if (item.RenderedText == null || item.RenderedText.IsDestroyed || item.RenderedText.Texture == null || item.Time < Time.Ticks)
                 {
                     continue;
                 }
@@ -295,7 +303,16 @@ namespace ClassicUO.Game.GameObjects
                 return;
             }
 
-            TextObject msg = MessageManager.CreateMessage(text, hue, font, isunicode, type, text_type);
+            TextObject msg = MessageManager.CreateMessage
+            (
+                text,
+                hue,
+                font,
+                isunicode,
+                type,
+                text_type
+            );
+
             AddMessage(msg);
         }
 

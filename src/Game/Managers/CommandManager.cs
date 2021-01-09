@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
 // 
@@ -26,6 +27,7 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 #endregion
 
 using System;
@@ -39,14 +41,14 @@ namespace ClassicUO.Game.Managers
 {
     internal static class CommandManager
     {
-        private static readonly Dictionary<string, Action<string[]>> _commands =
-            new Dictionary<string, Action<string[]>>();
+        private static readonly Dictionary<string, Action<string[]>> _commands = new Dictionary<string, Action<string[]>>();
 
         public static void Initialize()
         {
             Register
             (
-                "info", s =>
+                "info",
+                s =>
                 {
                     if (TargetManager.IsTargeting)
                     {
@@ -59,7 +61,8 @@ namespace ClassicUO.Game.Managers
 
             Register
             (
-                "datetime", s =>
+                "datetime",
+                s =>
                 {
                     if (World.Player != null)
                     {
@@ -70,7 +73,8 @@ namespace ClassicUO.Game.Managers
 
             Register
             (
-                "hue", s =>
+                "hue",
+                s =>
                 {
                     if (TargetManager.IsTargeting)
                     {

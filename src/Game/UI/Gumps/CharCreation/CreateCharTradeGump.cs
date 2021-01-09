@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
 // 
@@ -26,6 +27,7 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 #endregion
 
 using System.Linq;
@@ -113,31 +115,49 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             Add
             (
                 _attributeSliders[0] = new HSliderBar
-                    (164, 196, 93, 10, 60, ProfessionInfo._VoidStats[0], HSliderBarStyle.MetalWidgetRecessedBar, true)
+                (
+                    164,
+                    196,
+                    93,
+                    10,
+                    60,
+                    ProfessionInfo._VoidStats[0],
+                    HSliderBarStyle.MetalWidgetRecessedBar,
+                    true
+                )
             );
 
             Add
             (
                 _attributeSliders[1] = new HSliderBar
-                    (164, 276, 93, 10, 60, ProfessionInfo._VoidStats[1], HSliderBarStyle.MetalWidgetRecessedBar, true)
+                (
+                    164,
+                    276,
+                    93,
+                    10,
+                    60,
+                    ProfessionInfo._VoidStats[1],
+                    HSliderBarStyle.MetalWidgetRecessedBar,
+                    true
+                )
             );
 
             Add
             (
                 _attributeSliders[2] = new HSliderBar
-                    (164, 356, 93, 10, 60, ProfessionInfo._VoidStats[2], HSliderBarStyle.MetalWidgetRecessedBar, true)
+                (
+                    164,
+                    356,
+                    93,
+                    10,
+                    60,
+                    ProfessionInfo._VoidStats[2],
+                    HSliderBarStyle.MetalWidgetRecessedBar,
+                    true
+                )
             );
 
-            string[] skillList = SkillsLoader.Instance.SortedSkills.Select
-                                             (
-                                                 s => s.Index == 52 || s.Index == 47 ||
-                                                      s.Index == 53 && (World.ClientFeatures.Flags &
-                                                                        CharacterListFlags.CLF_SAMURAI_NINJA) == 0 ||
-                                                      s.Index == 54 ?
-                                                     "" :
-                                                     s.Name
-                                             )
-                                             .ToArray();
+            string[] skillList = SkillsLoader.Instance.SortedSkills.Select(s => s.Index == 52 || s.Index == 47 || s.Index == 53 && (World.ClientFeatures.Flags & CharacterListFlags.CLF_SAMURAI_NINJA) == 0 || s.Index == 54 ? "" : s.Name).ToArray();
 
             int y = 172;
             _skillSliders = new HSliderBar[CharCreationGump._skillsCount];
@@ -145,14 +165,33 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
             for (int i = 0; i < CharCreationGump._skillsCount; i++)
             {
-                Add(_skills[i] = new Combobox(344, y, 182, skillList, -1, 200, false, "Click here"));
+                Add
+                (
+                    _skills[i] = new Combobox
+                    (
+                        344,
+                        y,
+                        182,
+                        skillList,
+                        -1,
+                        200,
+                        false,
+                        "Click here"
+                    )
+                );
 
                 Add
                 (
                     _skillSliders[i] = new HSliderBar
                     (
-                        344, y + 32, 93, 0, 50, ProfessionInfo._VoidSkills[i, 1],
-                        HSliderBarStyle.MetalWidgetRecessedBar, true
+                        344,
+                        y + 32,
+                        93,
+                        0,
+                        50,
+                        ProfessionInfo._VoidSkills[i, 1],
+                        HSliderBarStyle.MetalWidgetRecessedBar,
+                        true
                     )
                 );
 
@@ -217,9 +256,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                         {
                             if (_skills[i].SelectedIndex != -1)
                             {
-                                Skill skill =
-                                    _character.Skills[
-                                        SkillsLoader.Instance.SortedSkills[_skills[i].SelectedIndex].Index];
+                                Skill skill = _character.Skills[SkillsLoader.Instance.SortedSkills[_skills[i].SelectedIndex].Index];
 
                                 skill.ValueFixed = (ushort) _skillSliders[i].Value;
 
@@ -259,13 +296,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             }
             else
             {
-                UIManager.GetGump<CharCreationGump>()
-                         ?.ShowMessage
-                         (
-                             Client.Version <= ClientVersion.CV_5090 ?
-                                 ResGumps.YouMustHaveThreeUniqueSkillsChosen :
-                                 ClilocLoader.Instance.GetString(1080032)
-                         );
+                UIManager.GetGump<CharCreationGump>()?.ShowMessage(Client.Version <= ClientVersion.CV_5090 ? ResGumps.YouMustHaveThreeUniqueSkillsChosen : ClilocLoader.Instance.GetString(1080032));
 
                 return false;
             }

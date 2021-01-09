@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
 // 
@@ -26,6 +27,7 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 #endregion
 
 using System.Collections.Generic;
@@ -51,7 +53,16 @@ namespace ClassicUO.Game.UI.Controls
             ushort color = 0,
             bool isunicode = true,
             int maxWidth = 0
-        ) : base(inactive, active, text, font, color, isunicode, maxWidth)
+        ) : base
+        (
+            inactive,
+            active,
+            text,
+            font,
+            color,
+            isunicode,
+            maxWidth
+        )
         {
             GroupIndex = group;
         }
@@ -77,8 +88,7 @@ namespace ClassicUO.Game.UI.Controls
 
         private bool HandleClick()
         {
-            IEnumerable<RadioButton> en = Parent?.FindControls<RadioButton>()
-                                                .Where(s => s.GroupIndex == GroupIndex && s != this);
+            IEnumerable<RadioButton> en = Parent?.FindControls<RadioButton>().Where(s => s.GroupIndex == GroupIndex && s != this);
 
             if (en == null)
             {

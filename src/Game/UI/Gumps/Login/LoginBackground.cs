@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
 // 
@@ -26,6 +27,7 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 #endregion
 
 using ClassicUO.Data;
@@ -40,14 +42,36 @@ namespace ClassicUO.Game.UI.Gumps.Login
             if (Client.Version >= ClientVersion.CV_706400)
             {
                 // Background
-                Add(new GumpPicTiled(0, 0, 640, 480, 0x0150) { AcceptKeyboardInput = false });
+                Add
+                (
+                    new GumpPicTiled
+                    (
+                        0,
+                        0,
+                        640,
+                        480,
+                        0x0150
+                    ) { AcceptKeyboardInput = false }
+                );
+
                 // UO Flag
                 Add(new GumpPic(0, 4, 0x0151, 0) { AcceptKeyboardInput = false });
             }
             else
             {
                 // Background
-                Add(new GumpPicTiled(0, 0, 640, 480, 0x0E14) { AcceptKeyboardInput = false });
+                Add
+                (
+                    new GumpPicTiled
+                    (
+                        0,
+                        0,
+                        640,
+                        480,
+                        0x0E14
+                    ) { AcceptKeyboardInput = false }
+                );
+
                 // Border
                 Add(new GumpPic(0, 0, 0x157C, 0) { AcceptKeyboardInput = false });
                 // UO Flag

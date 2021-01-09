@@ -1,4 +1,5 @@
 #region license
+
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
 // 
@@ -26,6 +27,7 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 #endregion
 
 using System;
@@ -69,11 +71,7 @@ namespace ClassicUO.Game.Managers
                 Point mouse = Mouse.Position;
                 Profile profile = ProfileManager.CurrentProfile;
 
-                return profile != null && GameCursor.AllowDrawSDLCursor && DraggingControl == null &&
-                       MouseOverControl == null && !IsModalOpen && mouse.X >= profile.GameWindowPosition.X + 5 &&
-                       mouse.X < profile.GameWindowPosition.X + 5 + profile.GameWindowSize.X &&
-                       mouse.Y >= profile.GameWindowPosition.Y + 5 &&
-                       mouse.Y < profile.GameWindowPosition.Y + 5 + profile.GameWindowSize.Y;
+                return profile != null && GameCursor.AllowDrawSDLCursor && DraggingControl == null && MouseOverControl == null && !IsModalOpen && mouse.X >= profile.GameWindowPosition.X + 5 && mouse.X < profile.GameWindowPosition.X + 5 + profile.GameWindowSize.X && mouse.Y >= profile.GameWindowPosition.Y + 5 && mouse.Y < profile.GameWindowPosition.Y + 5 + profile.GameWindowSize.Y;
             }
         }
 
@@ -346,8 +344,7 @@ namespace ClassicUO.Game.Managers
         {
             for (LinkedListNode<Gump> g = Gumps.Last; g != null; g = g.Previous)
             {
-                if (g.Value != null && !g.Value.IsDisposed && g.Value is TradingGump trading &&
-                    (trading.ID1 == serial || trading.ID2 == serial || trading.LocalSerial == serial))
+                if (g.Value != null && !g.Value.IsDisposed && g.Value is TradingGump trading && (trading.ID1 == serial || trading.ID2 == serial || trading.LocalSerial == serial))
                 {
                     return trading;
                 }
@@ -597,8 +594,7 @@ namespace ClassicUO.Game.Managers
             }
         }
 
-        public static void AttemptDragControl
-            (Control control, bool attemptAlwaysSuccessful = false)
+        public static void AttemptDragControl(Control control, bool attemptAlwaysSuccessful = false)
         {
             if (_isDraggingControl || ItemHold.Enabled && !ItemHold.IsFixedPosition)
             {

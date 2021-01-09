@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
 // 
@@ -26,6 +27,7 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 #endregion
 
 using System;
@@ -115,7 +117,14 @@ namespace ClassicUO.Game.UI.Controls
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
-            Rectangle scissor = ScissorStack.CalculateScissors(Matrix.Identity, x, y, Width, Height);
+            Rectangle scissor = ScissorStack.CalculateScissors
+            (
+                Matrix.Identity,
+                x,
+                y,
+                Width,
+                Height
+            );
 
             if (ScissorStack.PushScissors(batcher.GraphicsDevice, scissor))
             {
@@ -150,7 +159,15 @@ namespace ClassicUO.Game.UI.Controls
             UIManager.Add
             (
                 new ComboboxGump
-                    (ScreenCoordinateX, comboY, Width, _maxHeight, _items, _font, this)
+                (
+                    ScreenCoordinateX,
+                    comboY,
+                    Width,
+                    _maxHeight,
+                    _items,
+                    _font,
+                    this
+                )
             );
 
             base.OnMouseUp(x, y, button);
@@ -200,7 +217,15 @@ namespace ClassicUO.Game.UI.Controls
                         item = string.Empty;
                     }
 
-                    HoveredLabel label = new HoveredLabel(item, false, 0x0453, 0x0453, 0x0453, font: font)
+                    HoveredLabel label = new HoveredLabel
+                    (
+                        item,
+                        false,
+                        0x0453,
+                        0x0453,
+                        0x0453,
+                        font: font
+                    )
                     {
                         X = 2,
                         Y = i * ELEMENT_HEIGHT,
@@ -217,7 +242,14 @@ namespace ClassicUO.Game.UI.Controls
                 int totalHeight = Math.Min(maxHeight, labels.Max(o => o.Y + o.Height));
                 int maxWidth = Math.Max(width, labels.Max(o => o.X + o.Width));
 
-                ScrollArea area = new ScrollArea(0, 0, maxWidth + 15, totalHeight, true);
+                ScrollArea area = new ScrollArea
+                (
+                    0,
+                    0,
+                    maxWidth + 15,
+                    totalHeight,
+                    true
+                );
 
                 foreach (HoveredLabel label in labels)
                 {

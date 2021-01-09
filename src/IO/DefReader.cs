@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
 // 
@@ -26,6 +27,7 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 #endregion
 
 using System;
@@ -140,15 +142,11 @@ namespace ClassicUO.IO
 
                 if (groupStart >= 0 && groupEnd >= 0)
                 {
-                    string[] firstPart = line.Substring
-                                                 (0, groupStart)
-                                             .Split(_tokens, StringSplitOptions.RemoveEmptyEntries);
+                    string[] firstPart = line.Substring(0, groupStart).Split(_tokens, StringSplitOptions.RemoveEmptyEntries);
 
                     string group = line.Substring(groupStart, groupEnd - groupStart + 1);
 
-                    string[] lastPart = line.Substring
-                                                (groupEnd + 1, line.Length - groupEnd - 1)
-                                            .Split(_tokens, StringSplitOptions.RemoveEmptyEntries);
+                    string[] lastPart = line.Substring(groupEnd + 1, line.Length - groupEnd - 1).Split(_tokens, StringSplitOptions.RemoveEmptyEntries);
 
                     p = firstPart.Concat(new[] { group }).Concat(lastPart).ToArray();
                 }
@@ -279,10 +277,7 @@ namespace ClassicUO.IO
 
             if (!string.IsNullOrEmpty(token))
             {
-                return token.StartsWith
-                    ("0x") ?
-                    int.Parse(token.Remove(0, 2), NumberStyles.HexNumber) :
-                    int.Parse(token);
+                return token.StartsWith("0x") ? int.Parse(token.Remove(0, 2), NumberStyles.HexNumber) : int.Parse(token);
             }
 
             return -1;

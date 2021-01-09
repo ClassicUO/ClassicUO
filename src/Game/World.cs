@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
 // 
@@ -26,6 +27,7 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 #endregion
 
 using System.Collections.Generic;
@@ -260,16 +262,26 @@ namespace ClassicUO.Game
                         {
                             WMapManager.AddOrUpdate
                             (
-                                mob.Serial, mob.X, mob.Y, MathHelper.PercetangeOf(mob.Hits, mob.HitsMax), MapIndex,
-                                true, mob.Name
+                                mob.Serial,
+                                mob.X,
+                                mob.Y,
+                                MathHelper.PercetangeOf(mob.Hits, mob.HitsMax),
+                                MapIndex,
+                                true,
+                                mob.Name
                             );
                         }
                         else if (Party.Leader != 0 && Party.Contains(mob))
                         {
                             WMapManager.AddOrUpdate
                             (
-                                mob.Serial, mob.X, mob.Y, MathHelper.PercetangeOf(mob.Hits, mob.HitsMax), MapIndex,
-                                false, mob.Name
+                                mob.Serial,
+                                mob.X,
+                                mob.Y,
+                                MathHelper.PercetangeOf(mob.Hits, mob.HitsMax),
+                                MapIndex,
+                                false,
+                                mob.Name
                             );
                         }
                     }
@@ -289,8 +301,7 @@ namespace ClassicUO.Game
                 {
                     item.Update(totalTime, frameTime);
 
-                    if (do_delete && item.OnGround &&
-                        item.Distance > ClientViewRange /*CheckToRemove(item, ClientViewRange)*/)
+                    if (do_delete && item.OnGround && item.Distance > ClientViewRange /*CheckToRemove(item, ClientViewRange)*/)
                     {
                         if (item.IsMulti)
                         {
@@ -545,8 +556,23 @@ namespace ClassicUO.Game
         {
             _effectManager.Add
             (
-                type, source, target, graphic, hue, srcX, srcY, srcZ, targetX, targetY, targetZ, speed, duration,
-                fixedDir, doesExplode, hasparticles, blendmode
+                type,
+                source,
+                target,
+                graphic,
+                hue,
+                srcX,
+                srcY,
+                srcZ,
+                targetX,
+                targetY,
+                targetZ,
+                speed,
+                duration,
+                fixedDir,
+                doesExplode,
+                hasparticles,
+                blendmode
             );
         }
 
@@ -677,17 +703,14 @@ namespace ClassicUO.Game
                         }
                         else if (scanType == ScanTypeObject.Followers)
                         {
-                            if (!(mobile.IsRenamable && mobile.NotorietyFlag != NotorietyFlag.Invulnerable &&
-                                  mobile.NotorietyFlag != NotorietyFlag.Enemy))
+                            if (!(mobile.IsRenamable && mobile.NotorietyFlag != NotorietyFlag.Invulnerable && mobile.NotorietyFlag != NotorietyFlag.Enemy))
                             {
                                 continue;
                             }
                         }
                         else if (scanType == ScanTypeObject.Hostile)
                         {
-                            if (mobile.NotorietyFlag == NotorietyFlag.Ally ||
-                                mobile.NotorietyFlag == NotorietyFlag.Innocent ||
-                                mobile.NotorietyFlag == NotorietyFlag.Invulnerable)
+                            if (mobile.NotorietyFlag == NotorietyFlag.Ally || mobile.NotorietyFlag == NotorietyFlag.Innocent || mobile.NotorietyFlag == NotorietyFlag.Invulnerable)
                             {
                                 continue;
                             }
@@ -720,17 +743,14 @@ namespace ClassicUO.Game
                         }
                         else if (scanType == ScanTypeObject.Followers)
                         {
-                            if (!(mobile.IsRenamable && mobile.NotorietyFlag != NotorietyFlag.Invulnerable &&
-                                  mobile.NotorietyFlag != NotorietyFlag.Enemy))
+                            if (!(mobile.IsRenamable && mobile.NotorietyFlag != NotorietyFlag.Invulnerable && mobile.NotorietyFlag != NotorietyFlag.Enemy))
                             {
                                 continue;
                             }
                         }
                         else if (scanType == ScanTypeObject.Hostile)
                         {
-                            if (mobile.NotorietyFlag == NotorietyFlag.Ally ||
-                                mobile.NotorietyFlag == NotorietyFlag.Innocent ||
-                                mobile.NotorietyFlag == NotorietyFlag.Invulnerable)
+                            if (mobile.NotorietyFlag == NotorietyFlag.Ally || mobile.NotorietyFlag == NotorietyFlag.Innocent || mobile.NotorietyFlag == NotorietyFlag.Invulnerable)
                             {
                                 continue;
                             }
@@ -766,17 +786,14 @@ namespace ClassicUO.Game
                         }
                         else if (scanType == ScanTypeObject.Followers)
                         {
-                            if (!(mobile.IsRenamable && mobile.NotorietyFlag != NotorietyFlag.Invulnerable &&
-                                  mobile.NotorietyFlag != NotorietyFlag.Enemy))
+                            if (!(mobile.IsRenamable && mobile.NotorietyFlag != NotorietyFlag.Invulnerable && mobile.NotorietyFlag != NotorietyFlag.Enemy))
                             {
                                 continue;
                             }
                         }
                         else if (scanType == ScanTypeObject.Hostile)
                         {
-                            if (mobile.NotorietyFlag == NotorietyFlag.Ally ||
-                                mobile.NotorietyFlag == NotorietyFlag.Innocent ||
-                                mobile.NotorietyFlag == NotorietyFlag.Invulnerable)
+                            if (mobile.NotorietyFlag == NotorietyFlag.Ally || mobile.NotorietyFlag == NotorietyFlag.Innocent || mobile.NotorietyFlag == NotorietyFlag.Invulnerable)
                             {
                                 continue;
                             }
@@ -807,17 +824,14 @@ namespace ClassicUO.Game
                         }
                         else if (scanType == ScanTypeObject.Followers)
                         {
-                            if (!(mobile.IsRenamable && mobile.NotorietyFlag != NotorietyFlag.Invulnerable &&
-                                  mobile.NotorietyFlag != NotorietyFlag.Enemy))
+                            if (!(mobile.IsRenamable && mobile.NotorietyFlag != NotorietyFlag.Invulnerable && mobile.NotorietyFlag != NotorietyFlag.Enemy))
                             {
                                 continue;
                             }
                         }
                         else if (scanType == ScanTypeObject.Hostile)
                         {
-                            if (mobile.NotorietyFlag == NotorietyFlag.Ally ||
-                                mobile.NotorietyFlag == NotorietyFlag.Innocent ||
-                                mobile.NotorietyFlag == NotorietyFlag.Invulnerable)
+                            if (mobile.NotorietyFlag == NotorietyFlag.Ally || mobile.NotorietyFlag == NotorietyFlag.Innocent || mobile.NotorietyFlag == NotorietyFlag.Invulnerable)
                             {
                                 continue;
                             }

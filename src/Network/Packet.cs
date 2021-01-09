@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
 // 
@@ -26,6 +27,7 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 #endregion
 
 using System;
@@ -59,7 +61,6 @@ namespace ClassicUO.Network
 
         public BufferWrapper(T[] data) : this(data, data.Length)
         {
-            
         }
 
 
@@ -85,7 +86,6 @@ namespace ClassicUO.Network
             Length = length;
         }
 
-       
 
         public int Position;
         public int Length;
@@ -106,7 +106,7 @@ namespace ClassicUO.Network
         public bool ReadBool() => ReadByte() != 0;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public ushort ReadUShort() => (ushort) (Position + 2 > Length ?  0 : ((ReadByte() << 8) | ReadByte()));
+        public ushort ReadUShort() => (ushort) (Position + 2 > Length ? 0 : ((ReadByte() << 8) | ReadByte()));
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public uint ReadUInt() => (uint) (Position + 4 > Length ? 0 : ((ReadByte() << 24) | (ReadByte() << 16) | (ReadByte() << 8) | ReadByte()));
@@ -172,9 +172,7 @@ namespace ClassicUO.Network
             {
             }
 
-            return Position == start ?
-                string.Empty :
-                Encoding.BigEndianUnicode.GetString(_buffer.ptr, start, Position - start);
+            return Position == start ? string.Empty : Encoding.BigEndianUnicode.GetString(_buffer.ptr, start, Position - start);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -203,7 +201,6 @@ namespace ClassicUO.Network
 
             while (ReadUShortReversed() != 0)
             {
-
             }
 
             return start == Position ? string.Empty : Encoding.Unicode.GetString(_buffer.ptr, start, Position - start);
@@ -216,7 +213,7 @@ namespace ClassicUO.Network
             {
                 return string.Empty;
             }
-            
+
             int start = Position;
             int i = 0;
 

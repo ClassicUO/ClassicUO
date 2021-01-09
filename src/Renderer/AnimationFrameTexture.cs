@@ -1,4 +1,5 @@
 #region license
+
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
 // 
@@ -26,14 +27,14 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 #endregion
 
 namespace ClassicUO.Renderer
 {
     internal class AnimationFrameTexture : UOTexture
     {
-        public AnimationFrameTexture(int width, int height)
-            : base(width, height)
+        public AnimationFrameTexture(int width, int height) : base(width, height)
         {
         }
 

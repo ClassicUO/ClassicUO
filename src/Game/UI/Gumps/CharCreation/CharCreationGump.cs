@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
 // 
@@ -26,6 +27,7 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 #endregion
 
 using System.Linq;
@@ -67,12 +69,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
         public void SetAttributes(bool force = false)
         {
-            SetStep
-            (
-                _selectedProfession.DescriptionIndex >= 0 || force ?
-                    CharCreationStep.ChooseCity :
-                    CharCreationStep.ChooseTrade
-            );
+            SetStep(_selectedProfession.DescriptionIndex >= 0 || force ? CharCreationStep.ChooseCity : CharCreationStep.ChooseTrade);
         }
 
         public void SetCity(int cityIndex)
@@ -91,9 +88,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                     continue;
                 }
 
-                if (!CUOEnviroment.IsOutlands &&
-                    (World.ClientFeatures.Flags & CharacterListFlags.CLF_SAMURAI_NINJA) == 0 &&
-                    (skillIndex == 52 || skillIndex == 53))
+                if (!CUOEnviroment.IsOutlands && (World.ClientFeatures.Flags & CharacterListFlags.CLF_SAMURAI_NINJA) == 0 && (skillIndex == 52 || skillIndex == 53))
                 {
                     // reset skills if needed
                     for (int k = 0; k < i; k++)
@@ -106,12 +101,18 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                     }
 
                     MessageBoxGump messageBox = new MessageBoxGump
-                        (400, 300, ClilocLoader.Instance.GetString(1063016), null, true)
-                        {
-                            X = 470 / 2 - 400 / 2 + 100,
-                            Y = 372 / 2 - 300 / 2 + 20,
-                            CanMove = false
-                        };
+                    (
+                        400,
+                        300,
+                        ClilocLoader.Instance.GetString(1063016),
+                        null,
+                        true
+                    )
+                    {
+                        X = 470 / 2 - 400 / 2 + 100,
+                        Y = 372 / 2 - 300 / 2 + 20,
+                        CanMove = false
+                    };
 
                     UIManager.Add(messageBox);
 
@@ -132,8 +133,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
             SetAttributes();
 
-            SetStep
-                (_selectedProfession.DescriptionIndex > 0 ? CharCreationStep.ChooseCity : CharCreationStep.ChooseTrade);
+            SetStep(_selectedProfession.DescriptionIndex > 0 ? CharCreationStep.ChooseCity : CharCreationStep.ChooseTrade);
         }
 
         public void CreateCharacter(byte profession)

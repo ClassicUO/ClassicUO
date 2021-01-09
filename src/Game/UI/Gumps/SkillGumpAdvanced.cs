@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
 // 
@@ -26,6 +27,7 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 #endregion
 
 using System.Collections.Generic;
@@ -87,7 +89,14 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             );
 
-            ScrollArea area = new ScrollArea(20, 60, WIDTH - 40, 250, true)
+            ScrollArea area = new ScrollArea
+            (
+                20,
+                60,
+                WIDTH - 40,
+                250,
+                true
+            )
             {
                 AcceptMouseInput = true
             };
@@ -101,7 +110,15 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add
             (
-                new NiceButton(10, 10, 180, 25, ButtonAction.Activate, ResGumps.Name)
+                new NiceButton
+                (
+                    10,
+                    10,
+                    180,
+                    25,
+                    ButtonAction.Activate,
+                    ResGumps.Name
+                )
                 {
                     ButtonParameter = (int) Buttons.SortName,
                     IsSelected = true,
@@ -112,7 +129,15 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add
             (
-                new NiceButton(10, 10, 80, 25, ButtonAction.Activate, ResGumps.Real)
+                new NiceButton
+                (
+                    10,
+                    10,
+                    80,
+                    25,
+                    ButtonAction.Activate,
+                    ResGumps.Real
+                )
                 {
                     ButtonParameter = (int) Buttons.SortReal,
                     X = 220,
@@ -122,7 +147,15 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add
             (
-                new NiceButton(10, 10, 80, 25, ButtonAction.Activate, ResGumps.Base)
+                new NiceButton
+                (
+                    10,
+                    10,
+                    80,
+                    25,
+                    ButtonAction.Activate,
+                    ResGumps.Base
+                )
                 {
                     ButtonParameter = (int) Buttons.SortBase,
                     X = 300,
@@ -132,7 +165,15 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add
             (
-                new NiceButton(10, 10, 80, 25, ButtonAction.Activate, ResGumps.Cap)
+                new NiceButton
+                (
+                    10,
+                    10,
+                    80,
+                    25,
+                    ButtonAction.Activate,
+                    ResGumps.Cap
+                )
                 {
                     ButtonParameter = (int) Buttons.SortCap,
                     X = 380,
@@ -140,8 +181,29 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             );
 
-            Add(new Line(20, 60, 435, 1, 0xFFFFFFFF));
-            Add(new Line(20, 310, 435, 1, 0xFFFFFFFF));
+            Add
+            (
+                new Line
+                (
+                    20,
+                    60,
+                    435,
+                    1,
+                    0xFFFFFFFF
+                )
+            );
+
+            Add
+            (
+                new Line
+                (
+                    20,
+                    310,
+                    435,
+                    1,
+                    0xFFFFFFFF
+                )
+            );
 
             Add(_sortOrderIndicator = new GumpPic(0, 0, 0x985, 0));
             OnButtonClick((int) Buttons.SortName);
@@ -207,7 +269,17 @@ namespace ClassicUO.Game.UI.Gumps
                 Label skillValue = new Label(skill.Value.ToString(), true, 1153, font: 3);
                 Label skillCap = new Label(skill.Cap.ToString(), true, 1153, font: 3);
 
-                _skillListEntries.Add(new SkillListEntry(skillName, skillValueBase, skillValue, skillCap, skill));
+                _skillListEntries.Add
+                (
+                    new SkillListEntry
+                    (
+                        skillName,
+                        skillValueBase,
+                        skillValue,
+                        skillCap,
+                        skill
+                    )
+                );
             }
 
             foreach (SkillListEntry t in _skillListEntries)
@@ -245,7 +317,15 @@ namespace ClassicUO.Game.UI.Gumps
         {
             ResetHueVector();
 
-            batcher.DrawRectangle(SolidColorTextureCache.GetTexture(Color.Gray), x, y, Width, Height, ref HueVector);
+            batcher.DrawRectangle
+            (
+                SolidColorTextureCache.GetTexture(Color.Gray),
+                x,
+                y,
+                Width,
+                Height,
+                ref HueVector
+            );
 
             return base.Draw(batcher, x, y);
         }
@@ -303,8 +383,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add(skillCap);
 
-            GumpPic loc = new GumpPic
-                (425, 4, (ushort) (skill.Lock == Lock.Up ? 0x983 : skill.Lock == Lock.Down ? 0x985 : 0x82C), 0);
+            GumpPic loc = new GumpPic(425, 4, (ushort) (skill.Lock == Lock.Up ? 0x983 : skill.Lock == Lock.Down ? 0x985 : 0x82C), 0);
 
             Add(loc);
 
@@ -344,9 +423,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 Rectangle rect = GumpsLoader.Instance.GetTexture(0x24B8).Bounds;
 
-                SkillButtonGump skillButtonGump = new SkillButtonGump
-                    (_skill, Mouse.Position.X + (rect.Width >> 1),
-                    Mouse.Position.Y + (rect.Height >> 1));
+                SkillButtonGump skillButtonGump = new SkillButtonGump(_skill, Mouse.Position.X + (rect.Width >> 1), Mouse.Position.Y + (rect.Height >> 1));
 
                 UIManager.Add(skillButtonGump);
                 UIManager.AttemptDragControl(skillButtonGump, true);

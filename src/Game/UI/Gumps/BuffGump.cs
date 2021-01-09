@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
 // 
@@ -26,6 +27,7 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 #endregion
 
 using System;
@@ -128,10 +130,13 @@ namespace ClassicUO.Game.UI.Gumps
                     break;
             }
 
-            Add(_box = new DataBox(0, 0, 0, 0)
-            {
-                WantUpdateSize = true
-            });
+            Add
+            (
+                _box = new DataBox(0, 0, 0, 0)
+                {
+                    WantUpdateSize = true
+                }
+            );
 
             foreach (KeyValuePair<BuffIconType, BuffIcon> k in World.Player.BuffIcons)
             {
@@ -286,7 +291,15 @@ namespace ClassicUO.Game.UI.Gumps
                 _decreaseAlpha = true;
 
                 _gText = RenderedText.Create
-                    ("", 0xFFFF, 2, true, FontStyle.Fixed | FontStyle.BlackBorder, TEXT_ALIGN_TYPE.TS_CENTER, Width);
+                (
+                    "",
+                    0xFFFF,
+                    2,
+                    true,
+                    FontStyle.Fixed | FontStyle.BlackBorder,
+                    TEXT_ALIGN_TYPE.TS_CENTER,
+                    Width
+                );
 
 
                 AcceptMouseInput = true;
@@ -306,10 +319,23 @@ namespace ClassicUO.Game.UI.Gumps
                 if (!IsDisposed && Icon != null)
                 {
                     int delta = (int) (Icon.Timer - totalTime);
+
                     if (_updateTooltipTime < totalTime && delta > 0)
                     {
                         TimeSpan span = TimeSpan.FromMilliseconds(delta);
-                        SetTooltip(string.Format(ResGumps.TimeLeft, Icon.Text, span.Hours, span.Minutes, span.Seconds));
+
+                        SetTooltip
+                        (
+                            string.Format
+                            (
+                                ResGumps.TimeLeft,
+                                Icon.Text,
+                                span.Hours,
+                                span.Minutes,
+                                span.Seconds
+                            )
+                        );
+
                         _updateTooltipTime = (float) totalTime + 1000;
 
                         if (span.Hours > 0)
@@ -363,7 +389,15 @@ namespace ClassicUO.Game.UI.Gumps
             public override bool Draw(UltimaBatcher2D batcher, int x, int y)
             {
                 ResetHueVector();
-                ShaderHueTranslator.GetHueVector(ref HueVector, 0, false, 1.0f - _alpha / 255f, true);
+
+                ShaderHueTranslator.GetHueVector
+                (
+                    ref HueVector,
+                    0,
+                    false,
+                    1.0f - _alpha / 255f,
+                    true
+                );
 
                 UOTexture texture = GumpsLoader.Instance.GetTexture(Graphic);
 

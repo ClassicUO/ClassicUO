@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
 // 
@@ -26,6 +27,7 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 #endregion
 
 using System;
@@ -198,8 +200,12 @@ namespace ClassicUO.Game.UI.Controls
 
                 batcher.Draw2D
                 (
-                    _pointer, (int) (x + Width / _columns * (SelectedIndex % _columns + .5f) - 1),
-                    (int) (y + Height / _rows * (SelectedIndex / _columns + .5f) - 1), 2, 2, ref HueVector
+                    _pointer,
+                    (int) (x + Width / _columns * (SelectedIndex % _columns + .5f) - 1),
+                    (int) (y + Height / _rows * (SelectedIndex / _columns + .5f) - 1),
+                    2,
+                    2,
+                    ref HueVector
                 );
             }
 

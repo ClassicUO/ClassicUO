@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
 // 
@@ -26,6 +27,7 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 #endregion
 
 namespace ClassicUO.Game.Data
@@ -213,8 +215,7 @@ namespace ClassicUO.Game.Data
 
                                                                     default:
 
-                                                                        if (id >= 0x983B && id <= 0x983D ||
-                                                                            id >= 0x983F && id <= 0x9841)
+                                                                        if (id >= 0x983B && id <= 0x983D || id >= 0x983F && id <= 0x9841)
                                                                         {
                                                                             color = 30;
                                                                         }

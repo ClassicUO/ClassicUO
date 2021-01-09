@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
 // 
@@ -26,6 +27,7 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 #endregion
 
 using ClassicUO.Game.Data;
@@ -47,8 +49,7 @@ namespace ClassicUO.Game.UI.Gumps
             "Knowledge of Nature", "Difficult to Track",
             "Perception", "Wisdom"
         };
-        private static readonly string[] _gargoyleNames =
-            { "Flying", "Berserk", "Master Artisan", "Deadly Aim", "Mystic Insight" };
+        private static readonly string[] _gargoyleNames = { "Flying", "Berserk", "Master Artisan", "Deadly Aim", "Mystic Insight" };
         private int _abilityCount = 4;
         private float _clickTiming;
         private int _dictionaryPagesCount = 1;
@@ -123,7 +124,15 @@ namespace ClassicUO.Game.UI.Gumps
 
                         bool passive = true;
 
-                        text = new HoveredLabel(GetAbilityName(offs, ref passive), false, 0x0288, 0x33, 0x0288, font: 9)
+                        text = new HoveredLabel
+                        (
+                            GetAbilityName(offs, ref passive),
+                            false,
+                            0x0288,
+                            0x33,
+                            0x0288,
+                            font: 9
+                        )
                         {
                             X = dataX,
                             Y = 52 + y,
@@ -161,7 +170,14 @@ namespace ClassicUO.Game.UI.Gumps
                 bool passive = true;
                 string spellName = GetAbilityName(i, ref passive);
 
-                Label text = new Label(spellName, false, 0x0288, 100, 6) { X = iconTextX, Y = 34 };
+                Label text = new Label
+                (
+                    spellName,
+                    false,
+                    0x0288,
+                    100,
+                    6
+                ) { X = iconTextX, Y = 34 };
 
                 Add(text, page1);
 
@@ -214,7 +230,19 @@ namespace ClassicUO.Game.UI.Gumps
 
                 Add(pic, page1);
                 pic.SetTooltip(ClilocLoader.Instance.GetString(_tooltipOffset + i), 150);
-                Add(new GumpPicTiled(iconX, 88, 120, 4, 0x0835), page1);
+
+                Add
+                (
+                    new GumpPicTiled
+                    (
+                        iconX,
+                        88,
+                        120,
+                        4,
+                        0x0835
+                    ),
+                    page1
+                );
             }
         }
 

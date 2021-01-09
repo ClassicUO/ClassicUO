@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
 // 
@@ -26,6 +27,7 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 #endregion
 
 using System;
@@ -58,9 +60,24 @@ namespace ClassicUO.Game.UI.Gumps
             _gumpPic.MouseDoubleClick += _picBase_MouseDoubleClick;
 
             Add(new ExpandableScroll(0, _diffY, Height - _diffY, 0x0820));
-            _scrollArea = new ScrollArea(22, 32 + _diffY, 272 - 22, Height - (96 + _diffY), false);
 
-            Label topText = new Label(header, true, 0, font: 1, maxwidth: 140)
+            _scrollArea = new ScrollArea
+            (
+                22,
+                32 + _diffY,
+                272 - 22,
+                Height - (96 + _diffY),
+                false
+            );
+
+            Label topText = new Label
+            (
+                header,
+                true,
+                0,
+                font: 1,
+                maxwidth: 140
+            )
             {
                 X = 53,
                 Y = 6
@@ -71,7 +88,19 @@ namespace ClassicUO.Game.UI.Gumps
             int offsetY = topText.Height - 15;
 
             _scrollArea.Add(new GumpPic(4, offsetY, 0x005C, 0));
-            _scrollArea.Add(new GumpPicTiled(56, offsetY, 138, 0, 0x005D));
+
+            _scrollArea.Add
+            (
+                new GumpPicTiled
+                (
+                    56,
+                    offsetY,
+                    138,
+                    0,
+                    0x005D
+                )
+            );
+
             _scrollArea.Add(new GumpPic(194, offsetY, 0x005E, 0));
 
             offsetY += 44;
@@ -95,12 +124,31 @@ namespace ClassicUO.Game.UI.Gumps
             _databox.WantUpdateSize = true;
 
             _databox.Add(new GumpPic(4, 0, 0x005F, 0));
-            _databox.Add(new GumpPicTiled(13, 0 + 9, 197, 0, 0x0060));
+
+            _databox.Add
+            (
+                new GumpPicTiled
+                (
+                    13,
+                    0 + 9,
+                    197,
+                    0,
+                    0x0060
+                )
+            );
+
             _databox.Add(new GumpPic(210, 0, 0x0061, 0));
 
             _databox.Add
             (
-                new Label(footer, true, 0, font: 1, maxwidth: 220)
+                new Label
+                (
+                    footer,
+                    true,
+                    0,
+                    font: 1,
+                    maxwidth: 220
+                )
                 {
                     X = 2,
                     Y = 26
@@ -158,7 +206,17 @@ namespace ClassicUO.Game.UI.Gumps
         private void _textBox_TextChanged(object sender, EventArgs e)
         {
             _textBox.Height = Math.Max
-                (FontsLoader.Instance.GetHeightUnicode(1, _textBox.Text, 220, TEXT_ALIGN_TYPE.TS_LEFT, 0x0) + 5, 20);
+            (
+                FontsLoader.Instance.GetHeightUnicode
+                (
+                    1,
+                    _textBox.Text,
+                    220,
+                    TEXT_ALIGN_TYPE.TS_LEFT,
+                    0x0
+                ) + 5,
+                20
+            );
         }
 
 
@@ -185,8 +243,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override void Dispose()
         {
-            if (_originalText != _textBox.Text && World.Player != null && !World.Player.IsDestroyed &&
-                !NetClient.Socket.IsDisposed && NetClient.Socket.IsConnected)
+            if (_originalText != _textBox.Text && World.Player != null && !World.Player.IsDestroyed && !NetClient.Socket.IsDisposed && NetClient.Socket.IsConnected)
             {
                 NetClient.Socket.Send(new PProfileUpdate(LocalSerial, _textBox.Text));
             }

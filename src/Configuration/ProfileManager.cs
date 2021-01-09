@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
 // 
@@ -26,6 +27,7 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 #endregion
 
 using System.IO;
@@ -42,6 +44,7 @@ namespace ClassicUO.Configuration
         public static void Load(string servername, string username, string charactername)
         {
             string rootpath;
+
             if (string.IsNullOrWhiteSpace(Settings.GlobalSettings.ProfilesPath))
             {
                 rootpath = Path.Combine(CUOEnviroment.ExecutablePath, "Data", "Profiles");
@@ -50,7 +53,7 @@ namespace ClassicUO.Configuration
             {
                 rootpath = Settings.GlobalSettings.ProfilesPath;
             }
-            
+
             string path = FileSystemHelper.CreateFolderIfNotExists(rootpath, username, servername, charactername);
             string fileToLoad = Path.Combine(path, "profile.json");
 

@@ -1,4 +1,5 @@
 #region license
+
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
 // 
@@ -26,6 +27,7 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 #endregion
 
 using System;
@@ -429,7 +431,17 @@ namespace ClassicUO.Network
     {
         public PClientVersion(byte[] version) : base(0xBD)
         {
-            WriteASCII(string.Format("{0}.{1}.{2}.{3}", version[0], version[1], version[2], version[3]));
+            WriteASCII
+            (
+                string.Format
+                (
+                    "{0}.{1}.{2}.{3}",
+                    version[0],
+                    version[1],
+                    version[2],
+                    version[3]
+                )
+            );
         }
 
         public PClientVersion(string v) : base(0xBD)
@@ -1017,7 +1029,14 @@ namespace ClassicUO.Network
 
             WriteASCII
             (
-                string.Format("{0}.{1}.{2}.{3}", clientversion[0], clientversion[1], clientversion[2], clientversion[3])
+                string.Format
+                (
+                    "{0}.{1}.{2}.{3}",
+                    clientversion[0],
+                    clientversion[1],
+                    clientversion[2],
+                    clientversion[3]
+                )
             );
         }
 
@@ -1467,8 +1486,7 @@ namespace ClassicUO.Network
 
     internal sealed class PChangeRaceRequest : PacketWriter
     {
-        public PChangeRaceRequest
-            (ushort skin_hue, ushort hair_style, ushort hair_color, ushort beard_style, ushort beard_color) : base(0xBF)
+        public PChangeRaceRequest(ushort skin_hue, ushort hair_style, ushort hair_color, ushort beard_style, ushort beard_color) : base(0xBF)
         {
             WriteUShort(skin_hue);
             WriteUShort(hair_style);

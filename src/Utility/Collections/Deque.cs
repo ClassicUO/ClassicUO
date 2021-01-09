@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
 // 
@@ -26,6 +27,7 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 #endregion
 
 using System;
@@ -136,8 +138,7 @@ namespace ClassicUO.Utility.Collections
             {
                 if (value < Count)
                 {
-                    throw new ArgumentOutOfRangeException
-                        (nameof(value), "Capacity cannot be set to a value less than Count");
+                    throw new ArgumentOutOfRangeException(nameof(value), "Capacity cannot be set to a value less than Count");
                 }
 
                 if (value == _buffer.Length)
@@ -228,7 +229,8 @@ namespace ClassicUO.Utility.Collections
 
             DoInsertRange
             (
-                index, new[]
+                index,
+                new[]
                 {
                     item
                 }
@@ -779,13 +781,36 @@ namespace ClassicUO.Utility.Collections
             {
                 // The existing buffer is split, so we have to copy it in parts
                 int length = Capacity - _offset;
-                Array.Copy(_buffer, _offset, array, arrayIndex, length);
-                Array.Copy(_buffer, 0, array, arrayIndex + length, Count - length);
+
+                Array.Copy
+                (
+                    _buffer,
+                    _offset,
+                    array,
+                    arrayIndex,
+                    length
+                );
+
+                Array.Copy
+                (
+                    _buffer,
+                    0,
+                    array,
+                    arrayIndex + length,
+                    Count - length
+                );
             }
             else
             {
                 // The existing buffer is whole
-                Array.Copy(_buffer, _offset, array, arrayIndex, Count);
+                Array.Copy
+                (
+                    _buffer,
+                    _offset,
+                    array,
+                    arrayIndex,
+                    Count
+                );
             }
         }
 
@@ -979,8 +1004,7 @@ namespace ClassicUO.Utility.Collections
         {
             if (index < 0 || index > sourceLength)
             {
-                throw new ArgumentOutOfRangeException
-                    (nameof(index), "Invalid new index " + index + " for source length " + sourceLength);
+                throw new ArgumentOutOfRangeException(nameof(index), "Invalid new index " + index + " for source length " + sourceLength);
             }
         }
 
@@ -998,8 +1022,7 @@ namespace ClassicUO.Utility.Collections
         {
             if (index < 0 || index >= sourceLength)
             {
-                throw new ArgumentOutOfRangeException
-                    (nameof(index), "Invalid existing index " + index + " for source length " + sourceLength);
+                throw new ArgumentOutOfRangeException(nameof(index), "Invalid existing index " + index + " for source length " + sourceLength);
             }
         }
 
@@ -1029,8 +1052,7 @@ namespace ClassicUO.Utility.Collections
 
             if (sourceLength - offset < count)
             {
-                throw new ArgumentException
-                    ("Invalid offset (" + offset + ") or count + (" + count + ") for source length " + sourceLength);
+                throw new ArgumentException("Invalid offset (" + offset + ") or count + (" + count + ") for source length " + sourceLength);
             }
         }
 

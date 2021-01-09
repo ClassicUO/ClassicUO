@@ -1,4 +1,5 @@
 #region license
+
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
 // 
@@ -26,6 +27,7 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 #endregion
 
 using System;
@@ -217,9 +219,7 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
         {
             int read = readBytes(m_SyncBuffer, 0, 4);
 
-            int headerstring = ((m_SyncBuffer[0] << 24) & (int) SupportClass.Identity(0xFF000000)) |
-                               ((m_SyncBuffer[1] << 16) & 0x00FF0000) | ((m_SyncBuffer[2] << 8) & 0x0000FF00) |
-                               ((m_SyncBuffer[3] << 0) & 0x000000FF);
+            int headerstring = ((m_SyncBuffer[0] << 24) & (int) SupportClass.Identity(0xFF000000)) | ((m_SyncBuffer[1] << 16) & 0x00FF0000) | ((m_SyncBuffer[2] << 8) & 0x0000FF00) | ((m_SyncBuffer[3] << 0) & 0x000000FF);
 
             try
             {
@@ -293,8 +293,7 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
 
             //_baos.write(syncbuf, 0, 3); // E.B
 
-            int headerstring = ((m_SyncBuffer[0] << 16) & 0x00FF0000) | ((m_SyncBuffer[1] << 8) & 0x0000FF00) |
-                               ((m_SyncBuffer[2] << 0) & 0x000000FF);
+            int headerstring = ((m_SyncBuffer[0] << 16) & 0x00FF0000) | ((m_SyncBuffer[1] << 8) & 0x0000FF00) | ((m_SyncBuffer[2] << 0) & 0x000000FF);
 
             do
             {
@@ -415,8 +414,7 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
                     b3 = byteread[k + 3];
                 }
 
-                m_FrameBuffer[b++] = ((b0 << 24) & (int) SupportClass.Identity(0xFF000000)) |
-                                     ((b1 << 16) & 0x00FF0000) | ((b2 << 8) & 0x0000FF00) | (b3 & 0x000000FF);
+                m_FrameBuffer[b++] = ((b0 << 24) & (int) SupportClass.Identity(0xFF000000)) | ((b1 << 16) & 0x00FF0000) | ((b2 << 8) & 0x0000FF00) | (b3 & 0x000000FF);
             }
 
             m_WordPointer = 0;
@@ -464,8 +462,7 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
             m_WordPointer++;
             int Left = m_FrameBuffer[m_WordPointer] & (int) SupportClass.Identity(0xFFFF0000);
 
-            returnvalue = ((Right << 16) & (int) SupportClass.Identity(0xFFFF0000)) |
-                          (SupportClass.URShift(Left, 16) & 0x0000FFFF);
+            returnvalue = ((Right << 16) & (int) SupportClass.Identity(0xFFFF0000)) | (SupportClass.URShift(Left, 16) & 0x0000FFFF);
 
             returnvalue = SupportClass.URShift(returnvalue, 48 - sum);
             // returnvalue >>= 16 - (number_of_bits - (32 - bitindex))

@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
 // 
@@ -26,6 +27,7 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 #endregion
 
 using System;
@@ -95,10 +97,7 @@ namespace ClassicUO
             if (!string.IsNullOrWhiteSpace(Settings.GlobalSettings.ClientVersion))
             {
                 // sanitize client version
-                Settings.GlobalSettings.ClientVersion = Settings.GlobalSettings.ClientVersion.Replace
-                                                                    (",", ".")
-                                                                .Replace(" ", "")
-                                                                .ToLower();
+                Settings.GlobalSettings.ClientVersion = Settings.GlobalSettings.ClientVersion.Replace(",", ".").Replace(" ", "").ToLower();
             }
 
             string clientVersionText = Settings.GlobalSettings.ClientVersion;
@@ -135,8 +134,7 @@ namespace ClassicUO
             Version = clientVersion;
             ClientPath = clientPath;
 
-            IsUOPInstallation = Version >= ClientVersion.CV_7000 && File.Exists
-                (UOFileManager.GetUOFilePath("MainMisc.uop"));
+            IsUOPInstallation = Version >= ClientVersion.CV_7000 && File.Exists(UOFileManager.GetUOFilePath("MainMisc.uop"));
 
             Protocol = ClientFlags.CF_T2A;
 

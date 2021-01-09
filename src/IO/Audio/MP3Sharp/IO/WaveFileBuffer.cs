@@ -1,4 +1,5 @@
 #region license
+
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
 // 
@@ -26,6 +27,7 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 #endregion
 
 using System;
@@ -60,7 +62,14 @@ namespace ClassicUO.IO.Audio.MP3Sharp.IO
 
             m_OutWave = new WaveFile();
 
-            int rc = m_OutWave.OpenForWrite(fileName, null, freq, 16, (short) m_Channels);
+            int rc = m_OutWave.OpenForWrite
+            (
+                fileName,
+                null,
+                freq,
+                16,
+                (short) m_Channels
+            );
         }
 
         public WaveFileBuffer(int numberOfChannels, int freq, Stream stream)
@@ -76,7 +85,14 @@ namespace ClassicUO.IO.Audio.MP3Sharp.IO
 
             m_OutWave = new WaveFile();
 
-            int rc = m_OutWave.OpenForWrite(null, stream, freq, 16, (short) m_Channels);
+            int rc = m_OutWave.OpenForWrite
+            (
+                null,
+                stream,
+                freq,
+                16,
+                (short) m_Channels
+            );
         }
 
         /// <summary>

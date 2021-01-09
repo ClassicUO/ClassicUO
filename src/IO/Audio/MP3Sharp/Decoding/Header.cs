@@ -1,4 +1,5 @@
 #region license
+
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
 // 
@@ -26,6 +27,7 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 #endregion
 
 using System.Text;
@@ -575,8 +577,7 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
             }
             else
             {
-                framesize = 144 * bitrates[h_version][h_layer - 1][h_bitrate_index] /
-                            frequencies[h_version][h_sample_frequency];
+                framesize = 144 * bitrates[h_version][h_layer - 1][h_bitrate_index] / frequencies[h_version][h_sample_frequency];
 
                 if (h_version == MPEG2_LSF || h_version == MPEG25_LSF)
                 {
@@ -594,14 +595,12 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
                 {
                     if (h_version == MPEG1)
                     {
-                        nSlots = framesize - (h_mode == SINGLE_CHANNEL ? 17 : 32) - (h_protection_bit != 0 ? 0 : 2) -
-                                 4; // header size
+                        nSlots = framesize - (h_mode == SINGLE_CHANNEL ? 17 : 32) - (h_protection_bit != 0 ? 0 : 2) - 4; // header size
                     }
                     else
                     {
                         // MPEG-2 LSF, SZD: MPEG-2.5 LSF
-                        nSlots = framesize - (h_mode == SINGLE_CHANNEL ? 9 : 17) - (h_protection_bit != 0 ? 0 : 2) -
-                                 4; // header size
+                        nSlots = framesize - (h_mode == SINGLE_CHANNEL ? 9 : 17) - (h_protection_bit != 0 ? 0 : 2) - 4; // header size
                     }
                 }
                 else

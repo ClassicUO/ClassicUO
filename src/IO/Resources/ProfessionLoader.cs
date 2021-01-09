@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
 // 
@@ -26,6 +27,7 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 #endregion
 
 using System.Collections.Generic;
@@ -51,8 +53,7 @@ namespace ClassicUO.IO.Resources
 
         public static ProfessionLoader Instance => _instance ?? (_instance = new ProfessionLoader());
 
-        public Dictionary<ProfessionInfo, List<ProfessionInfo>> Professions { get; } =
-            new Dictionary<ProfessionInfo, List<ProfessionInfo>>();
+        public Dictionary<ProfessionInfo, List<ProfessionInfo>> Professions { get; } = new Dictionary<ProfessionInfo, List<ProfessionInfo>>();
 
         public override Task Load()
         {
@@ -68,18 +69,11 @@ namespace ClassicUO.IO.Resources
                     {
                         if (file.Length > 0x100000) //1megabyte limit of string file
                         {
-                            throw new InternalBufferOverflowException
-                            (
-                                $"{file.FullName} exceeds the maximum 1Megabyte allowed size for a string text file, please, check that the file is correct and not corrupted -> {file.Length} file size"
-                            );
+                            throw new InternalBufferOverflowException($"{file.FullName} exceeds the maximum 1Megabyte allowed size for a string text file, please, check that the file is correct and not corrupted -> {file.Length} file size");
                         }
 
                         //what if file doesn't exist? we skip section completely...directly into advanced selection
-                        TextFileParser read = new TextFileParser
-                        (
-                            File.ReadAllText(file.FullName), new[] { ' ', '\t', ',' }, new[] { '#', ';' },
-                            new[] { '"', '"' }
-                        );
+                        TextFileParser read = new TextFileParser(File.ReadAllText(file.FullName), new[] { ' ', '\t', ',' }, new[] { '#', ';' }, new[] { '"', '"' });
 
                         while (!read.IsEOF())
                         {
@@ -269,9 +263,7 @@ namespace ClassicUO.IO.Resources
                             {
                                 SkillEntry skill = SkillsLoader.Instance.Skills[j];
 
-                                if (strings[1] == skill.Name ||
-                                    ((SkillEntry.HardCodedName) skill.Index).ToString().ToLower() ==
-                                    strings[1].ToLower())
+                                if (strings[1] == skill.Name || ((SkillEntry.HardCodedName) skill.Index).ToString().ToLower() == strings[1].ToLower())
                                 {
                                     skillIndex[idx, 0] = j;
                                     int.TryParse(strings[2], out skillIndex[idx, 1]);

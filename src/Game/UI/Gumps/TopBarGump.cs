@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
 // 
@@ -26,6 +27,7 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 #endregion
 
 using System.Collections.Generic;
@@ -59,7 +61,8 @@ namespace ClassicUO.Game.UI.Gumps
                 new ResizePic(0x13BE)
                 {
                     Width = 30, Height = 27
-                }, 2
+                },
+                2
             );
 
             Add
@@ -67,7 +70,8 @@ namespace ClassicUO.Game.UI.Gumps
                 new Button(0, 0x15A1, 0x15A1, 0x15A1)
                 {
                     X = 5, Y = 3, ToPage = 1
-                }, 2
+                },
+                2
             );
 
 
@@ -122,7 +126,8 @@ namespace ClassicUO.Game.UI.Gumps
                 background = new ResizePic(0x13BE)
                 {
                     Height = 27
-                }, 1
+                },
+                1
             );
 
             Add
@@ -130,7 +135,8 @@ namespace ClassicUO.Game.UI.Gumps
                 new Button(0, 0x15A4, 0x15A4, 0x15A4)
                 {
                     X = 5, Y = 3, ToPage = 2
-                }, 1
+                },
+                1
             );
 
             int startX = 30;
@@ -146,13 +152,25 @@ namespace ClassicUO.Game.UI.Gumps
 
                 Add
                 (
-                    new RighClickableButton(textTable[i][1], graphic, graphic, graphic, texts[i], 1, true, 0, 0x0036)
+                    new RighClickableButton
+                    (
+                        textTable[i][1],
+                        graphic,
+                        graphic,
+                        graphic,
+                        texts[i],
+                        1,
+                        true,
+                        0,
+                        0x0036
+                    )
                     {
                         ButtonAction = ButtonAction.Activate,
                         X = startX,
                         Y = 1,
                         FontCenter = true
-                    }, 1
+                    },
+                    1
                 );
 
                 startX += (textTable[i][0] != 0 ? largeWidth : smallWidth) + 1;
@@ -338,7 +356,18 @@ namespace ClassicUO.Game.UI.Gumps
                 bool isunicode = true,
                 ushort normalHue = ushort.MaxValue,
                 ushort hoverHue = ushort.MaxValue
-            ) : base(buttonID, normal, pressed, over, caption, font, isunicode, normalHue, hoverHue)
+            ) : base
+            (
+                buttonID,
+                normal,
+                pressed,
+                over,
+                caption,
+                font,
+                isunicode,
+                normalHue,
+                hoverHue
+            )
             {
             }
 

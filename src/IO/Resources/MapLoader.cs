@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
 // 
@@ -26,6 +27,7 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 #endregion
 
 using System;
@@ -138,8 +140,7 @@ namespace ClassicUO.IO.Resources
 
                     if (!string.IsNullOrEmpty(Settings.GlobalSettings.MapsLayouts))
                     {
-                        string[] values = Settings.GlobalSettings.MapsLayouts.Split
-                            (new[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
+                        string[] values = Settings.GlobalSettings.MapsLayouts.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
 
                         Constants.MAPS_COUNT = values.Length;
                         MapsDefaultSize = new int[values.Length, 2];
@@ -155,8 +156,7 @@ namespace ClassicUO.IO.Resources
                         {
                             string[] v = s.Split(splitchar, StringSplitOptions.RemoveEmptyEntries);
 
-                            if (v.Length >= 2 && int.TryParse(v[0], out int width) && int.TryParse
-                                (v[1], out int height))
+                            if (v.Length >= 2 && int.TryParse(v[0], out int width) && int.TryParse(v[1], out int height))
                             {
                                 MapsDefaultSize[index, 0] = width;
                                 MapsDefaultSize[index, 1] = height;
@@ -248,7 +248,9 @@ namespace ClassicUO.IO.Resources
                     //for (int i = 0; i < MAPS_COUNT; i++)
                     Parallel.For
                     (
-                        0, Constants.MAPS_COUNT, i =>
+                        0,
+                        Constants.MAPS_COUNT,
+                        i =>
                         {
                             MapBlocksSize[i, 0] = MapsDefaultSize[i, 0] >> 3;
                             MapBlocksSize[i, 1] = MapsDefaultSize[i, 1] >> 3;
@@ -393,7 +395,7 @@ namespace ClassicUO.IO.Resources
 
             BlockData[0][block].StaticAddress = BlockData[0][block].OriginalStaticAddress = address;
 
-            count = (uint)(count / (sizeof(StaidxBlockVerdata)));
+            count = (uint) (count / (sizeof(StaidxBlockVerdata)));
 
             if (count > 1024)
             {
@@ -482,8 +484,7 @@ namespace ClassicUO.IO.Resources
                     UOFileMul difl = _staDifl[i];
                     UOFileMul difi = _staDifi[i];
 
-                    if (difl == null || difi == null || _staDif[i] == null || difl.Length == 0 || difi.Length == 0 ||
-                        _staDif[i].Length == 0)
+                    if (difl == null || difi == null || _staDif[i] == null || difl.Length == 0 || difi.Length == 0 || _staDif[i].Length == 0)
                     {
                         continue;
                     }
@@ -579,9 +580,7 @@ namespace ClassicUO.IO.Resources
 
         public void SanitizeMapIndex(ref int map)
         {
-            if (map == 1 && (_filesMap[1] == null || _filesMap[1].StartAddress == IntPtr.Zero ||
-                             _filesStatics[1] == null || _filesStatics[1].StartAddress == IntPtr.Zero ||
-                             _filesIdxStatics[1] == null || _filesIdxStatics[1].StartAddress == IntPtr.Zero))
+            if (map == 1 && (_filesMap[1] == null || _filesMap[1].StartAddress == IntPtr.Zero || _filesStatics[1] == null || _filesStatics[1].StartAddress == IntPtr.Zero || _filesIdxStatics[1] == null || _filesIdxStatics[1].StartAddress == IntPtr.Zero))
             {
                 map = 0;
             }

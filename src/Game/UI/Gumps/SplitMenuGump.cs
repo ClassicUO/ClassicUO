@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
 // 
@@ -26,6 +27,7 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 #endregion
 
 using ClassicUO.Game.GameObjects;
@@ -65,7 +67,21 @@ namespace ClassicUO.Game.UI.Gumps
 
             GumpPic background = new GumpPic(0, 0, 0x085C, 0) { ContainsByBounds = true };
             Add(background);
-            Add(_slider = new HSliderBar(29, 16, 105, 1, item.Amount, item.Amount, HSliderBarStyle.BlueWidgetNoBar));
+
+            Add
+            (
+                _slider = new HSliderBar
+                (
+                    29,
+                    16,
+                    105,
+                    1,
+                    item.Amount,
+                    item.Amount,
+                    HSliderBarStyle.BlueWidgetNoBar
+                )
+            );
+
             _lastValue = _slider.Value;
 
             Add

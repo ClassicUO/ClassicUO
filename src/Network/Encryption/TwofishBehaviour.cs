@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
 // 
@@ -26,6 +27,7 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 #endregion
 
 using System;
@@ -64,17 +66,14 @@ namespace ClassicUO.Network.Encryption
         /// <param name="outputBuffer"></param>
         /// <param name="outputOffset"></param>
         /// <returns></returns>
-        public int TransformBlock
-            (byte[] inputBuffer, int inputOffset, int inputCount, byte[] outputBuffer, int outputOffset)
+        public int TransformBlock(byte[] inputBuffer, int inputOffset, int inputCount, byte[] outputBuffer, int outputOffset)
         {
             uint[] x = new uint[4];
 
             // load it up
             for (int i = 0; i < 4; i++)
             {
-                x[i] = (uint) (inputBuffer[i * 4 + 3 + inputOffset] << 24) |
-                       (uint) (inputBuffer[i * 4 + 2 + inputOffset] << 16) |
-                       (uint) (inputBuffer[i * 4 + 1 + inputOffset] << 8) | inputBuffer[i * 4 + 0 + inputOffset];
+                x[i] = (uint) (inputBuffer[i * 4 + 3 + inputOffset] << 24) | (uint) (inputBuffer[i * 4 + 2 + inputOffset] << 16) | (uint) (inputBuffer[i * 4 + 1 + inputOffset] << 8) | inputBuffer[i * 4 + 0 + inputOffset];
             }
 
             if (encryptionDirection == EncryptionDirection.Encrypting)
@@ -112,9 +111,7 @@ namespace ClassicUO.Network.Encryption
                 // load it up
                 for (int i = 0; i < 4; i++) // should be okay as we have already said to pad with zeros
                 {
-                    x[i] = (uint) (inputBuffer[i * 4 + 3 + inputOffset] << 24) |
-                           (uint) (inputBuffer[i * 4 + 2 + inputOffset] << 16) |
-                           (uint) (inputBuffer[i * 4 + 1 + inputOffset] << 8) | inputBuffer[i * 4 + 0 + inputOffset];
+                    x[i] = (uint) (inputBuffer[i * 4 + 3 + inputOffset] << 24) | (uint) (inputBuffer[i * 4 + 2 + inputOffset] << 16) | (uint) (inputBuffer[i * 4 + 1 + inputOffset] << 8) | inputBuffer[i * 4 + 0 + inputOffset];
                 }
 
                 if (encryptionDirection == EncryptionDirection.Encrypting)
@@ -137,8 +134,7 @@ namespace ClassicUO.Network.Encryption
             }
             else
             {
-                outputBuffer =
-                    new byte[0]; // the .NET framework doesn't like it if you return null - this calms it down
+                outputBuffer = new byte[0]; // the .NET framework doesn't like it if you return null - this calms it down
             }
 
             return outputBuffer;
@@ -169,8 +165,7 @@ namespace ClassicUO.Network.Encryption
             // convert our key into an array of ints
             for (int i = 0; i < key.Length / 4; i++)
             {
-                Key[i] = (uint) (key[i * 4 + 3] << 24) | (uint) (key[i * 4 + 2] << 16) | (uint) (key[i * 4 + 1] << 8) |
-                         key[i * 4 + 0];
+                Key[i] = (uint) (key[i * 4 + 3] << 24) | (uint) (key[i * 4 + 2] << 16) | (uint) (key[i * 4 + 1] << 8) | key[i * 4 + 0];
             }
 
             cipherMode = CipherMode.ECB;
@@ -180,8 +175,7 @@ namespace ClassicUO.Network.Encryption
             {
                 for (int i = 0; i < 4; i++)
                 {
-                    IV[i] = (uint) (iv[i * 4 + 3] << 24) | (uint) (iv[i * 4 + 2] << 16) | (uint) (iv[i * 4 + 1] << 8) |
-                            iv[i * 4 + 0];
+                    IV[i] = (uint) (iv[i * 4 + 3] << 24) | (uint) (iv[i * 4 + 2] << 16) | (uint) (iv[i * 4 + 1] << 8) | iv[i * 4 + 0];
                 }
             }
 
@@ -242,9 +236,25 @@ namespace ClassicUO.Network.Encryption
 
             for (i = 0; i < 256; i += 16)
             {
-                Buffer.BlockCopy(_cipher_table, i, _block_cache, 0, 16);
+                Buffer.BlockCopy
+                (
+                    _cipher_table,
+                    i,
+                    _block_cache,
+                    0,
+                    16
+                );
+
                 blockEncrypt(ref _block_cache);
-                Buffer.BlockCopy(_block_cache, 0, _cipher_table, i, 16);
+
+                Buffer.BlockCopy
+                (
+                    _block_cache,
+                    0,
+                    _cipher_table,
+                    i,
+                    16
+                );
             }
 
             _rect_pos = 0;
@@ -343,10 +353,7 @@ namespace ClassicUO.Network.Encryption
 
 
             /* Now perform the MDS matrix multiply inline. */
-            return (uint) (M00(b[0]) ^ M01(b[1]) ^ M02(b[2]) ^ M03(b[3])) ^
-                   (uint) ((M10(b[0]) ^ M11(b[1]) ^ M12(b[2]) ^ M13(b[3])) << 8) ^
-                   (uint) ((M20(b[0]) ^ M21(b[1]) ^ M22(b[2]) ^ M23(b[3])) << 16) ^
-                   (uint) ((M30(b[0]) ^ M31(b[1]) ^ M32(b[2]) ^ M33(b[3])) << 24);
+            return (uint) (M00(b[0]) ^ M01(b[1]) ^ M02(b[2]) ^ M03(b[3])) ^ (uint) ((M10(b[0]) ^ M11(b[1]) ^ M12(b[2]) ^ M13(b[3])) << 8) ^ (uint) ((M20(b[0]) ^ M21(b[1]) ^ M22(b[2]) ^ M23(b[3])) << 16) ^ (uint) ((M30(b[0]) ^ M31(b[1]) ^ M32(b[2]) ^ M33(b[3])) << 24);
         }
 
         /*

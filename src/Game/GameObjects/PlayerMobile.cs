@@ -1,4 +1,5 @@
 #region license
+
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
 // 
@@ -26,6 +27,7 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 #endregion
 
 using System.Collections.Generic;
@@ -1332,23 +1334,19 @@ namespace ClassicUO.Game.GameObjects
         {
             if (ProfileManager.CurrentProfile.AutoOpenCorpses)
             {
-                if ((ProfileManager.CurrentProfile.CorpseOpenOptions == 1 || ProfileManager.CurrentProfile.CorpseOpenOptions == 3) &&
-                    TargetManager.IsTargeting)
+                if ((ProfileManager.CurrentProfile.CorpseOpenOptions == 1 || ProfileManager.CurrentProfile.CorpseOpenOptions == 3) && TargetManager.IsTargeting)
                 {
                     return;
                 }
 
-                if ((ProfileManager.CurrentProfile.CorpseOpenOptions == 2 || ProfileManager.CurrentProfile.CorpseOpenOptions == 3) &&
-                    IsHidden)
+                if ((ProfileManager.CurrentProfile.CorpseOpenOptions == 2 || ProfileManager.CurrentProfile.CorpseOpenOptions == 3) && IsHidden)
                 {
                     return;
                 }
 
                 foreach (Item item in World.Items)
                 {
-                    if (!item.IsDestroyed && item.IsCorpse &&
-                        item.Distance <= ProfileManager.CurrentProfile.AutoOpenCorpseRange &&
-                        !AutoOpenedCorpses.Contains(item.Serial))
+                    if (!item.IsDestroyed && item.IsCorpse && item.Distance <= ProfileManager.CurrentProfile.AutoOpenCorpseRange && !AutoOpenedCorpses.Contains(item.Serial))
                     {
                         AutoOpenedCorpses.Add(item.Serial);
                         GameActions.DoubleClickQueued(item.Serial);
@@ -1533,17 +1531,14 @@ namespace ClassicUO.Game.GameObjects
 
         public bool Walk(Direction direction, bool run)
         {
-            if (Walker.WalkingFailed || Walker.LastStepRequestTime > Time.Ticks ||
-                Walker.StepsCount >= Constants.MAX_STEP_COUNT ||
-                Client.Version >= ClientVersion.CV_60142 && IsParalyzed)
+            if (Walker.WalkingFailed || Walker.LastStepRequestTime > Time.Ticks || Walker.StepsCount >= Constants.MAX_STEP_COUNT || Client.Version >= ClientVersion.CV_60142 && IsParalyzed)
             {
                 return false;
             }
 
             run |= ProfileManager.CurrentProfile.AlwaysRun;
 
-            if (SpeedMode >= CharacterSpeedType.CantRun || Stamina <= 1 && !IsDead ||
-                IsHidden && ProfileManager.CurrentProfile.AlwaysRunUnlessHidden)
+            if (SpeedMode >= CharacterSpeedType.CantRun || Stamina <= 1 && !IsDead || IsHidden && ProfileManager.CurrentProfile.AlwaysRunUnlessHidden)
             {
                 run = false;
             }
@@ -1590,12 +1585,7 @@ namespace ClassicUO.Game.GameObjects
                     y = newY;
                     z = newZ;
 
-                    walkTime = (ushort) MovementSpeed.TimeToCompleteMovement
-                    (
-                        run,
-                        IsMounted || SpeedMode == CharacterSpeedType.FastUnmount ||
-                        SpeedMode == CharacterSpeedType.FastUnmountAndCantRun || IsFlying
-                    );
+                    walkTime = (ushort) MovementSpeed.TimeToCompleteMovement(run, IsMounted || SpeedMode == CharacterSpeedType.FastUnmount || SpeedMode == CharacterSpeedType.FastUnmountAndCantRun || IsFlying);
                 }
             }
             else
@@ -1619,12 +1609,7 @@ namespace ClassicUO.Game.GameObjects
                     y = newY;
                     z = newZ;
 
-                    walkTime = (ushort) MovementSpeed.TimeToCompleteMovement
-                    (
-                        run,
-                        IsMounted || SpeedMode == CharacterSpeedType.FastUnmount ||
-                        SpeedMode == CharacterSpeedType.FastUnmountAndCantRun || IsFlying
-                    );
+                    walkTime = (ushort) MovementSpeed.TimeToCompleteMovement(run, IsMounted || SpeedMode == CharacterSpeedType.FastUnmount || SpeedMode == CharacterSpeedType.FastUnmountAndCantRun || IsFlying);
                 }
 
                 direction = newDir;
@@ -1669,8 +1654,7 @@ namespace ClassicUO.Game.GameObjects
             );
 
 
-            NetClient.Socket.Send
-                (new PWalkRequest(direction, Walker.WalkSequence, run, Walker.FastWalkStack.GetValue()));
+            NetClient.Socket.Send(new PWalkRequest(direction, Walker.WalkSequence, run, Walker.FastWalkStack.GetValue()));
 
 
             if (Walker.WalkSequence == 0xFF)

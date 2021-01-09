@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
 // 
@@ -26,6 +27,7 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 #endregion
 
 using ClassicUO.IO.Resources;
@@ -49,7 +51,16 @@ namespace ClassicUO.Game.UI.Controls
             byte font = 255,
             FontStyle style = FontStyle.None,
             TEXT_ALIGN_TYPE align = TEXT_ALIGN_TYPE.TS_LEFT
-        ) : base($" {text}", isunicode, hue, maxwidth, font, style, align)
+        ) : base
+        (
+            $" {text}",
+            isunicode,
+            hue,
+            maxwidth,
+            font,
+            style,
+            align
+        )
         {
             _overHue = overHue;
             _normalHue = hue;
@@ -90,7 +101,16 @@ namespace ClassicUO.Game.UI.Controls
             if (DrawBackgroundCurrentIndex && MouseIsOver && !string.IsNullOrWhiteSpace(Text))
             {
                 ResetHueVector();
-                batcher.Draw2D(SolidColorTextureCache.GetTexture(Color.Gray), x, y + 2, Width - 4, Height - 4, ref HueVector);
+
+                batcher.Draw2D
+                (
+                    SolidColorTextureCache.GetTexture(Color.Gray),
+                    x,
+                    y + 2,
+                    Width - 4,
+                    Height - 4,
+                    ref HueVector
+                );
             }
 
             return base.Draw(batcher, x, y);

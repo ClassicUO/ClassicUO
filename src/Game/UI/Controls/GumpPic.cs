@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
 // 
@@ -26,6 +27,7 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 #endregion
 
 using System.Collections.Generic;
@@ -114,13 +116,7 @@ namespace ClassicUO.Game.UI.Controls
             IsFromServer = true;
         }
 
-        public GumpPic(List<string> parts) : this
-        (
-            int.Parse(parts[1]), int.Parse(parts[2]), UInt16Converter.Parse(parts[3]),
-            (ushort) (parts.Count > 4 ?
-                TransformHue((ushort) (UInt16Converter.Parse(parts[4].Substring(parts[4].IndexOf('=') + 1)) + 1)) :
-                0)
-        )
+        public GumpPic(List<string> parts) : this(int.Parse(parts[1]), int.Parse(parts[2]), UInt16Converter.Parse(parts[3]), (ushort) (parts.Count > 4 ? TransformHue((ushort) (UInt16Converter.Parse(parts[4].Substring(parts[4].IndexOf('=') + 1)) + 1)) : 0))
         {
         }
 
@@ -165,13 +161,29 @@ namespace ClassicUO.Game.UI.Controls
             }
 
             ResetHueVector();
-            ShaderHueTranslator.GetHueVector(ref HueVector, Hue, IsPartialHue, Alpha, true);
+
+            ShaderHueTranslator.GetHueVector
+            (
+                ref HueVector,
+                Hue,
+                IsPartialHue,
+                Alpha,
+                true
+            );
 
             UOTexture texture = GumpsLoader.Instance.GetTexture(Graphic);
 
             if (texture != null)
             {
-                batcher.Draw2D(texture, x, y, Width, Height, ref HueVector);
+                batcher.Draw2D
+                (
+                    texture,
+                    x,
+                    y,
+                    Width,
+                    Height,
+                    ref HueVector
+                );
             }
 
             return base.Draw(batcher, x, y);

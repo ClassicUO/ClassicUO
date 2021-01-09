@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
 // 
@@ -26,6 +27,7 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 #endregion
 
 namespace ClassicUO.IO.Audio.MP3Sharp.Decoding.Decoders.LayerII
@@ -97,8 +99,7 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding.Decoders.LayerII
 
                     case 2:
 
-                        channel2_scalefactor1 = channel2_scalefactor2 =
-                            channel2_scalefactor3 = ScaleFactors[stream.GetBitsFromBuffer(6)];
+                        channel2_scalefactor1 = channel2_scalefactor2 = channel2_scalefactor3 = ScaleFactors[stream.GetBitsFromBuffer(6)];
 
                         break;
 

@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
 // 
@@ -26,6 +27,7 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 #endregion
 
 using System.Runtime.CompilerServices;
@@ -58,8 +60,7 @@ namespace ClassicUO.Game
                         continue;
                     }
 
-                    _InternalArea[x, y] = _InternalArea[43 - x, 43 - y] =
-                        _InternalArea[43 - x, y] = _InternalArea[x, 43 - y] = true;
+                    _InternalArea[x, y] = _InternalArea[43 - x, 43 - y] = _InternalArea[43 - x, y] = _InternalArea[x, 43 - y] = true;
                 }
             }
         }
@@ -263,8 +264,7 @@ namespace ClassicUO.Game
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsPointInStatic(UOTexture texture, int x, int y)
         {
-            return texture != null && texture.Contains
-                (TranslatedMousePositionByViewport.X - x, TranslatedMousePositionByViewport.Y - y);
+            return texture != null && texture.Contains(TranslatedMousePositionByViewport.X - x, TranslatedMousePositionByViewport.Y - y);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -290,8 +290,7 @@ namespace ClassicUO.Game
             int y3 = 22 - rect.Bottom;
 
 
-            return testY >= testX * (y1 - y0) / -22 + y + y0 && testY >= testX * (y3 - y0) / 22 + y + y0 &&
-                   testY <= testX * (y3 - y2) / 22 + y + y2 && testY <= testX * (y1 - y2) / -22 + y + y2;
+            return testY >= testX * (y1 - y0) / -22 + y + y0 && testY >= testX * (y3 - y0) / 22 + y + y0 && testY <= testX * (y3 - y2) / 22 + y + y2 && testY <= testX * (y1 - y2) / -22 + y + y2;
         }
     }
 }

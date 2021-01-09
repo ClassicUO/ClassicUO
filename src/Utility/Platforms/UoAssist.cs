@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
 // 
@@ -26,6 +27,7 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 #endregion
 
 using System;
@@ -148,7 +150,20 @@ namespace ClassicUO.Utility.Platforms
 
                 // Create window
                 m_hwnd = CreateWindowExW
-                    (0, class_name, class_name, 0, 0, 0, 0, 0, IntPtr.Zero, IntPtr.Zero, hwnd, IntPtr.Zero);
+                (
+                    0,
+                    class_name,
+                    class_name,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    IntPtr.Zero,
+                    IntPtr.Zero,
+                    hwnd,
+                    IntPtr.Zero
+                );
 
                 if (m_hwnd != IntPtr.Zero)
                 {
@@ -253,11 +268,7 @@ namespace ClassicUO.Utility.Platforms
                             {
                                 if (item.IsMulti)
                                 {
-                                    PostMessage
-                                    (
-                                        (IntPtr) wParam, (uint) UOAMessage.ADD_MULTI,
-                                        (IntPtr) ((item.X & 0xFFFF) | ((item.Y & 0xFFFF) << 16)), (IntPtr) item.Graphic
-                                    );
+                                    PostMessage((IntPtr) wParam, (uint) UOAMessage.ADD_MULTI, (IntPtr) ((item.X & 0xFFFF) | ((item.Y & 0xFFFF) << 16)), (IntPtr) item.Graphic);
                                 }
                             }
                         }
@@ -315,13 +326,27 @@ namespace ClassicUO.Utility.Platforms
                             {
                                 MessageManager.HandleMessage
                                 (
-                                    null, sb.ToString(), "System", hue, MessageType.Regular, 3, TextType.SYSTEM, true
+                                    null,
+                                    sb.ToString(),
+                                    "System",
+                                    hue,
+                                    MessageType.Regular,
+                                    3,
+                                    TextType.SYSTEM,
+                                    true
                                 );
                             }
                             else
                             {
                                 World.Player.AddMessage
-                                    (MessageType.Regular, sb.ToString(), 3, hue, true, TextType.OBJECT);
+                                (
+                                    MessageType.Regular,
+                                    sb.ToString(),
+                                    3,
+                                    hue,
+                                    true,
+                                    TextType.OBJECT
+                                );
                             }
 
                             return 1;
@@ -410,8 +435,7 @@ namespace ClassicUO.Utility.Platforms
             {
                 if (World.Player != null)
                 {
-                    PostMessage
-                        ((uint) UOAMessage.STR_STATUS, (IntPtr) World.Player.HitsMax, (IntPtr) World.Player.Hits);
+                    PostMessage((uint) UOAMessage.STR_STATUS, (IntPtr) World.Player.HitsMax, (IntPtr) World.Player.Hits);
                 }
             }
 
@@ -419,8 +443,7 @@ namespace ClassicUO.Utility.Platforms
             {
                 if (World.Player != null)
                 {
-                    PostMessage
-                        ((uint) UOAMessage.DEX_STATUS, (IntPtr) World.Player.HitsMax, (IntPtr) World.Player.Hits);
+                    PostMessage((uint) UOAMessage.DEX_STATUS, (IntPtr) World.Player.HitsMax, (IntPtr) World.Player.Hits);
                 }
             }
 
@@ -428,8 +451,7 @@ namespace ClassicUO.Utility.Platforms
             {
                 if (World.Player != null)
                 {
-                    PostMessage
-                        ((uint) UOAMessage.INT_STATUS, (IntPtr) World.Player.HitsMax, (IntPtr) World.Player.Hits);
+                    PostMessage((uint) UOAMessage.INT_STATUS, (IntPtr) World.Player.HitsMax, (IntPtr) World.Player.Hits);
                 }
             }
 

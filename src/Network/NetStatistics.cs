@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
 // 
@@ -26,6 +27,7 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 #endregion
 
 using System;
@@ -43,14 +45,10 @@ namespace ClassicUO.Network
         private readonly Stopwatch _pingStopwatch = new Stopwatch();
 
 
-
         public NetStatistics(NetClient socket)
         {
             _socket = socket;
         }
-
-
-
 
 
         public DateTime ConnectedFrom { get; set; }
@@ -142,8 +140,7 @@ namespace ClassicUO.Network
 
         public override string ToString()
         {
-            return
-                $"Packets:\n >> {DeltaPacketsReceived}\n << {DeltaPacketsSent}\nBytes:\n >> {GetSizeAdaptive(DeltaBytesReceived)}\n << {GetSizeAdaptive(DeltaBytesSent)}";
+            return $"Packets:\n >> {DeltaPacketsReceived}\n << {DeltaPacketsSent}\nBytes:\n >> {GetSizeAdaptive(DeltaBytesReceived)}\n << {GetSizeAdaptive(DeltaBytesSent)}";
         }
 
         public static string GetSizeAdaptive(long bytes)

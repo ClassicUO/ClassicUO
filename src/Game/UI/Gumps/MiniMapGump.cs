@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
 // 
@@ -26,6 +27,7 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 #endregion
 
 using System.IO;
@@ -189,12 +191,29 @@ namespace ClassicUO.Game.UI.Gumps
 
                     ShaderHueTranslator.GetHueVector(ref HueVector, Notoriety.GetHue(mob.NotorietyFlag));
 
-                    batcher.Draw2D(mobilesTextureDot, x + w + gx, y + h + gy, 2, 2, ref HueVector);
+                    batcher.Draw2D
+                    (
+                        mobilesTextureDot,
+                        x + w + gx,
+                        y + h + gy,
+                        2,
+                        2,
+                        ref HueVector
+                    );
                 }
 
                 //DRAW DOT OF PLAYER
                 ResetHueVector();
-                batcher.Draw2D(SolidColorTextureCache.GetTexture(Color.White), x + w, y + h, 2, 2, ref HueVector);
+
+                batcher.Draw2D
+                (
+                    SolidColorTextureCache.GetTexture(Color.White),
+                    x + w,
+                    y + h,
+                    2,
+                    2,
+                    ref HueVector
+                );
             }
 
             return base.Draw(batcher, x, y);
@@ -346,17 +365,24 @@ namespace ClassicUO.Game.UI.Gumps
 
                             if (island && color > 0x4000)
                             {
-                                color = HuesLoader.Instance.GetColor16
-                                (
-                                    16384, (ushort) (color - 0x4000)
-                                ); //28672 is an arbitrary position in hues.mul, is the 14 position in the range
+                                color = HuesLoader.Instance.GetColor16(16384, (ushort) (color - 0x4000)); //28672 is an arbitrary position in hues.mul, is the 14 position in the range
                             }
                             else
                             {
                                 color = HuesLoader.Instance.GetRadarColorData(color);
                             }
 
-                            CreatePixels(data, 0x8000 | color, gx, gy, Width, Height, table, tableSize);
+                            CreatePixels
+                            (
+                                data,
+                                0x8000 | color,
+                                gx,
+                                gy,
+                                Width,
+                                Height,
+                                table,
+                                tableSize
+                            );
                         }
                     }
                 }

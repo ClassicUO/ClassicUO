@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
 // 
@@ -26,6 +27,7 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 #endregion
 
 using System;
@@ -69,7 +71,15 @@ namespace ClassicUO.Game.UI.Controls
             UOTexture t = _textures[INACTIVE];
             Width = t.Width;
 
-            _text = RenderedText.Create(text, color, font, isunicode, maxWidth: maxWidth);
+            _text = RenderedText.Create
+            (
+                text,
+                color,
+                font,
+                isunicode,
+                maxWidth: maxWidth
+            );
+
             Width += _text.Width;
 
             Height = Math.Max(t.Width, _text.Height);

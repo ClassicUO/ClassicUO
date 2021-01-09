@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
 // 
@@ -26,6 +27,7 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 #endregion
 
 using System;
@@ -134,12 +136,7 @@ namespace ClassicUO
             Environment.SetEnvironmentVariable("FNA3D_OPENGL_FORCE_COMPATIBILITY_PROFILE", "1");
             Environment.SetEnvironmentVariable(SDL.SDL_HINT_MOUSE_FOCUS_CLICKTHROUGH, "1");
 
-            Environment.SetEnvironmentVariable
-            (
-                "PATH",
-                Environment.GetEnvironmentVariable("PATH") + ";" + Path.Combine
-                    (CUOEnviroment.ExecutablePath, "Data", "Plugins")
-            );
+            Environment.SetEnvironmentVariable("PATH", Environment.GetEnvironmentVariable("PATH") + ";" + Path.Combine(CUOEnviroment.ExecutablePath, "Data", "Plugins"));
 
             string globalSettingsPath = Settings.GetSettingsFilepath();
 
@@ -166,8 +163,7 @@ namespace ClassicUO
 
             if (!CUOEnviroment.IsUnix)
             {
-                string libsPath = Path.Combine
-                    (CUOEnviroment.ExecutablePath, Environment.Is64BitProcess ? "x64" : "x86");
+                string libsPath = Path.Combine(CUOEnviroment.ExecutablePath, Environment.Is64BitProcess ? "x64" : "x86");
 
                 SetDllDirectory(libsPath);
             }
@@ -183,24 +179,19 @@ namespace ClassicUO
 
             uint flags = 0;
 
-            if (!Directory.Exists(Settings.GlobalSettings.UltimaOnlineDirectory) ||
-                !File.Exists(UOFileManager.GetUOFilePath("tiledata.mul")))
+            if (!Directory.Exists(Settings.GlobalSettings.UltimaOnlineDirectory) || !File.Exists(UOFileManager.GetUOFilePath("tiledata.mul")))
             {
                 flags |= INVALID_UO_DIRECTORY;
             }
 
             string clientVersionText = Settings.GlobalSettings.ClientVersion;
 
-            if (!ClientVersionHelper.IsClientVersionValid
-                (Settings.GlobalSettings.ClientVersion, out ClientVersion clientVersion))
+            if (!ClientVersionHelper.IsClientVersionValid(Settings.GlobalSettings.ClientVersion, out ClientVersion clientVersion))
             {
                 Log.Warn($"Client version [{clientVersionText}] is invalid, let's try to read the client.exe");
 
                 // mmm something bad happened, try to load from client.exe [windows only]
-                if (!ClientVersionHelper.TryParseFromFile
-                (
-                    Path.Combine(Settings.GlobalSettings.UltimaOnlineDirectory, "client.exe"), out clientVersionText
-                ) || !ClientVersionHelper.IsClientVersionValid(clientVersionText, out clientVersion))
+                if (!ClientVersionHelper.TryParseFromFile(Path.Combine(Settings.GlobalSettings.UltimaOnlineDirectory, "client.exe"), out clientVersionText) || !ClientVersionHelper.IsClientVersionValid(clientVersionText, out clientVersion))
                 {
                     Log.Error("Invalid client version: " + clientVersionText);
 
@@ -305,8 +296,7 @@ namespace ClassicUO
 
                         break;
 
-                    case "password_enc"
-                        : // Non-standard setting, similar to `password` but for already encrypted password
+                    case "password_enc": // Non-standard setting, similar to `password` but for already encrypted password
                         Settings.GlobalSettings.Password = value;
 
                         break;
@@ -437,10 +427,7 @@ namespace ClassicUO
                         break;
 
                     case "plugins":
-                        Settings.GlobalSettings.Plugins = string.IsNullOrEmpty
-                            (value) ?
-                            new string[0] :
-                            value.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+                        Settings.GlobalSettings.Plugins = string.IsNullOrEmpty(value) ? new string[0] : value.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
 
                         break;
 
@@ -489,7 +476,7 @@ namespace ClassicUO
                         break;
 
                     case "packetlog":
-                        
+
                         CUOEnviroment.PacketLog = true;
 
                         break;
@@ -563,15 +550,13 @@ namespace ClassicUO
                 {
                     processStartInfo.FileName = "mono";
 
-                    processStartInfo.Arguments =
-                        $"\"{Path.Combine(path, "ClassicUO.exe")}\" --source \"{currentPath}\" --pid {Process.GetCurrentProcess().Id} --action cleanup";
+                    processStartInfo.Arguments = $"\"{Path.Combine(path, "ClassicUO.exe")}\" --source \"{currentPath}\" --pid {Process.GetCurrentProcess().Id} --action cleanup";
                 }
                 else
                 {
                     processStartInfo.FileName = Path.Combine(path, "ClassicUO.exe");
 
-                    processStartInfo.Arguments =
-                        $"--source \"{currentPath}\" --pid {Process.GetCurrentProcess().Id} --action cleanup";
+                    processStartInfo.Arguments = $"--source \"{currentPath}\" --pid {Process.GetCurrentProcess().Id} --action cleanup";
                 }
 
                 Process.Start(processStartInfo);

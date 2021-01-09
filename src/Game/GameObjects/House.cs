@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
 // 
@@ -26,6 +27,7 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 #endregion
 
 using System;
@@ -101,10 +103,7 @@ namespace ClassicUO.Game.GameObjects
                 {
                     Multi component = Components[i];
 
-                    component.State = component.State & ~(CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_TRANSPARENT |
-                                                          CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_IGNORE_IN_RENDER |
-                                                          CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_VALIDATED_PLACE |
-                                                          CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_INCORRECT_PLACE);
+                    component.State = component.State & ~(CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_TRANSPARENT | CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_IGNORE_IN_RENDER | CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_VALIDATED_PLACE | CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_INCORRECT_PLACE);
 
 
                     if (component.IsCustom)
@@ -124,8 +123,7 @@ namespace ClassicUO.Game.GameObjects
                     }
                     else if (component.Z <= checkZ)
                     {
-                        component.State = component.State | CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FLOOR |
-                                          CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_IGNORE_IN_RENDER;
+                        component.State = component.State | CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FLOOR | CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_IGNORE_IN_RENDER;
                     }
 
                     if (component.IsDestroyed)
@@ -145,7 +143,16 @@ namespace ClassicUO.Game.GameObjects
             for (int i = 0; i < list.Count; i++)
             {
                 ref CustomBuildObject b = ref list[i];
-                Add(b.Graphic, 0, b.X, b.Y, (sbyte) (item.Z + b.Z), true);
+
+                Add
+                (
+                    b.Graphic,
+                    0,
+                    b.X,
+                    b.Y,
+                    (sbyte) (item.Z + b.Z),
+                    true
+                );
             }
         }
 

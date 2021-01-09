@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
 // 
@@ -26,6 +27,7 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 #endregion
 
 using System;
@@ -42,7 +44,8 @@ namespace ClassicUO.Game.GameObjects
         private static Vector3[,,] _vectCache = new Vector3[3, 3, 4];
         private static readonly QueuedPool<Land> _pool = new QueuedPool<Land>
         (
-            Constants.PREDICTABLE_TILE_COUNT, l =>
+            Constants.PREDICTABLE_TILE_COUNT,
+            l =>
             {
                 l.IsDestroyed = false;
                 l.AlphaHue = 255;
@@ -161,8 +164,7 @@ namespace ClassicUO.Game.GameObjects
 
         public void ApplyStretch(Map.Map map, int x, int y, sbyte z)
         {
-            if (IsStretched || TexmapsLoader.Instance.GetTexture(TileData.TexID) == null ||
-                !TestStretched(x, y, z, true))
+            if (IsStretched || TexmapsLoader.Instance.GetTexture(TileData.TexID) == null || !TestStretched(x, y, z, true))
             {
                 IsStretched = false;
                 MinZ = z;
@@ -241,16 +243,80 @@ namespace ClassicUO.Game.GameObjects
                 j = 1;
 
                 // 0
-                SumAndNormalize(ref _vectCache, i - 1, j - 1, 2, i - 1, j, 1, i, j - 1, 3, i, j, 0, out Normal0);
+                SumAndNormalize
+                (
+                    ref _vectCache,
+                    i - 1,
+                    j - 1,
+                    2,
+                    i - 1,
+                    j,
+                    1,
+                    i,
+                    j - 1,
+                    3,
+                    i,
+                    j,
+                    0,
+                    out Normal0
+                );
 
                 // 1
-                SumAndNormalize(ref _vectCache, i, j - 1, 2, i, j, 1, i + 1, j - 1, 3, i + 1, j, 0, out Normal1);
+                SumAndNormalize
+                (
+                    ref _vectCache,
+                    i,
+                    j - 1,
+                    2,
+                    i,
+                    j,
+                    1,
+                    i + 1,
+                    j - 1,
+                    3,
+                    i + 1,
+                    j,
+                    0,
+                    out Normal1
+                );
 
                 // 2
-                SumAndNormalize(ref _vectCache, i, j, 2, i, j + 1, 1, i + 1, j, 3, i + 1, j + 1, 0, out Normal2);
+                SumAndNormalize
+                (
+                    ref _vectCache,
+                    i,
+                    j,
+                    2,
+                    i,
+                    j + 1,
+                    1,
+                    i + 1,
+                    j,
+                    3,
+                    i + 1,
+                    j + 1,
+                    0,
+                    out Normal2
+                );
 
                 // 3
-                SumAndNormalize(ref _vectCache, i - 1, j, 2, i - 1, j + 1, 1, i, j, 3, i, j + 1, 0, out Normal3);
+                SumAndNormalize
+                (
+                    ref _vectCache,
+                    i - 1,
+                    j,
+                    2,
+                    i - 1,
+                    j + 1,
+                    1,
+                    i,
+                    j,
+                    3,
+                    i,
+                    j + 1,
+                    0,
+                    out Normal3
+                );
             }
         }
 
@@ -274,11 +340,9 @@ namespace ClassicUO.Game.GameObjects
             out Vector3 result
         )
         {
-            Vector3.Add
-                (ref vec[index0_x, index0_y, index0_z], ref vec[index1_x, index1_y, index1_z], out Vector3 v0Result);
+            Vector3.Add(ref vec[index0_x, index0_y, index0_z], ref vec[index1_x, index1_y, index1_z], out Vector3 v0Result);
 
-            Vector3.Add
-                (ref vec[index2_x, index2_y, index2_z], ref vec[index3_x, index3_y, index3_z], out Vector3 v1Result);
+            Vector3.Add(ref vec[index2_x, index2_y, index2_z], ref vec[index3_x, index3_y, index3_z], out Vector3 v1Result);
 
             Vector3.Add(ref v0Result, ref v1Result, out result);
             Vector3.Normalize(ref result, out result);

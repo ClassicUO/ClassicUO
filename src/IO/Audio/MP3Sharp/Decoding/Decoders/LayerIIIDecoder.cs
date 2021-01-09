@@ -1,4 +1,5 @@
 #region license
+
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
 // 
@@ -26,6 +27,7 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 #endregion
 
 using System;
@@ -398,8 +400,7 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding.Decoders
             channels = this.header.mode() == Header.SINGLE_CHANNEL ? 1 : 2;
             max_gr = this.header.version() == Header.MPEG1 ? 2 : 1;
 
-            sfreq = this.header.sample_frequency() + (this.header.version() == Header.MPEG1 ? 3 :
-                this.header.version() == Header.MPEG25_LSF ? 6 : 0); // SZD
+            sfreq = this.header.sample_frequency() + (this.header.version() == Header.MPEG1 ? 3 : this.header.version() == Header.MPEG25_LSF ? 6 : 0); // SZD
 
             if (channels == 2)
             {
@@ -726,8 +727,7 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding.Decoders
                                 return false;
                             }
 
-                            if (m_SideInfo.Channels[ch].Granules[gr].BlockType == 2 &&
-                                m_SideInfo.Channels[ch].Granules[gr].MixedBlockFlag == 0)
+                            if (m_SideInfo.Channels[ch].Granules[gr].BlockType == 2 && m_SideInfo.Channels[ch].Granules[gr].MixedBlockFlag == 0)
                             {
                                 m_SideInfo.Channels[ch].Granules[gr].Region0Count = 8;
                             }
@@ -736,8 +736,7 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding.Decoders
                                 m_SideInfo.Channels[ch].Granules[gr].Region0Count = 7;
                             }
 
-                            m_SideInfo.Channels[ch].Granules[gr].Region1Count =
-                                20 - m_SideInfo.Channels[ch].Granules[gr].Region0Count;
+                            m_SideInfo.Channels[ch].Granules[gr].Region1Count = 20 - m_SideInfo.Channels[ch].Granules[gr].Region0Count;
                         }
                         else
                         {
@@ -813,8 +812,7 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding.Decoders
                             return false;
                         }
 
-                        if (m_SideInfo.Channels[ch].Granules[0].BlockType == 2 &&
-                            m_SideInfo.Channels[ch].Granules[0].MixedBlockFlag == 0)
+                        if (m_SideInfo.Channels[ch].Granules[0].BlockType == 2 && m_SideInfo.Channels[ch].Granules[0].MixedBlockFlag == 0)
                         {
                             m_SideInfo.Channels[ch].Granules[0].Region0Count = 8;
                         }
@@ -822,8 +820,7 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding.Decoders
                         {
                             m_SideInfo.Channels[ch].Granules[0].Region0Count = 7;
 
-                            m_SideInfo.Channels[ch].Granules[0].Region1Count =
-                                20 - m_SideInfo.Channels[ch].Granules[0].Region0Count;
+                            m_SideInfo.Channels[ch].Granules[0].Region1Count = 20 - m_SideInfo.Channels[ch].Granules[0].Region0Count;
                         }
                     }
                     else
@@ -1274,8 +1271,7 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding.Decoders
 
             // Find region boundary for short block case
 
-            if (m_SideInfo.Channels[ch].Granules[gr].WindowSwitchingFlag != 0 &&
-                m_SideInfo.Channels[ch].Granules[gr].BlockType == 2)
+            if (m_SideInfo.Channels[ch].Granules[gr].WindowSwitchingFlag != 0 && m_SideInfo.Channels[ch].Granules[gr].BlockType == 2)
             {
                 // Region2.
                 //MS: Extrahandling for 8KHZ
@@ -1318,7 +1314,15 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding.Decoders
                     h = Huffman.ht[m_SideInfo.Channels[ch].Granules[gr].TableSelect[2]];
                 }
 
-                Huffman.Decode(h, x, y, v, w, m_BitReserve);
+                Huffman.Decode
+                (
+                    h,
+                    x,
+                    y,
+                    v,
+                    w,
+                    m_BitReserve
+                );
 
                 is_1d[index++] = x[0];
                 is_1d[index++] = y[0];
@@ -1333,7 +1337,15 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding.Decoders
 
             while (num_bits < part2_3_end && index < 576)
             {
-                Huffman.Decode(h, x, y, v, w, m_BitReserve);
+                Huffman.Decode
+                (
+                    h,
+                    x,
+                    y,
+                    v,
+                    w,
+                    m_BitReserve
+                );
 
                 is_1d[index++] = v[0];
                 is_1d[index++] = w[0];
@@ -1555,9 +1567,7 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding.Decoders
 
                 // Do long/short dependent scaling operations
 
-                if (gr_info.WindowSwitchingFlag != 0 && (gr_info.BlockType == 2 && gr_info.MixedBlockFlag == 0 ||
-                                                         gr_info.BlockType == 2 && gr_info.MixedBlockFlag != 0 &&
-                                                         j >= 36))
+                if (gr_info.WindowSwitchingFlag != 0 && (gr_info.BlockType == 2 && gr_info.MixedBlockFlag == 0 || gr_info.BlockType == 2 && gr_info.MixedBlockFlag != 0 && j >= 36))
                 {
                     t_index = (index - cb_begin) / cb_width;
 
@@ -1642,10 +1652,7 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding.Decoders
                     }
 
                     // REORDERING FOR REST SWITCHED SHORT
-                    for (sfb = 3, sfb_start = sfBandIndex[sfreq].s[3], sfb_lines = sfBandIndex[sfreq].s[4] - sfb_start;
-                         sfb < 13;
-                         sfb++, sfb_start = sfBandIndex[sfreq].s[sfb], sfb_lines =
-                             sfBandIndex[sfreq].s[sfb + 1] - sfb_start)
+                    for (sfb = 3, sfb_start = sfBandIndex[sfreq].s[3], sfb_lines = sfBandIndex[sfreq].s[4] - sfb_start; sfb < 13; sfb++, sfb_start = sfBandIndex[sfreq].s[sfb], sfb_lines = sfBandIndex[sfreq].s[sfb + 1] - sfb_start)
                     {
                         int sfb_start3 = (sfb_start << 2) - sfb_start;
 
@@ -2206,9 +2213,7 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding.Decoders
 
             for (sb18 = 0; sb18 < 576; sb18 += 18)
             {
-                bt = gr_info.WindowSwitchingFlag != 0 && gr_info.MixedBlockFlag != 0 && sb18 < 36 ?
-                    0 :
-                    gr_info.BlockType;
+                bt = gr_info.WindowSwitchingFlag != 0 && gr_info.MixedBlockFlag != 0 && sb18 < 36 ? 0 : gr_info.BlockType;
 
                 tsOut = out_1d;
 
@@ -2292,8 +2297,7 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding.Decoders
             float tmpf_0, tmpf_1, tmpf_2, tmpf_3, tmpf_4, tmpf_5, tmpf_6, tmpf_7, tmpf_8, tmpf_9;
             float tmpf_10, tmpf_11, tmpf_12, tmpf_13, tmpf_14, tmpf_15, tmpf_16, tmpf_17;
 
-            tmpf_0 = tmpf_1 = tmpf_2 = tmpf_3 = tmpf_4 = tmpf_5 = tmpf_6 = tmpf_7 = tmpf_8 =
-                tmpf_9 = tmpf_10 = tmpf_11 = tmpf_12 = tmpf_13 = tmpf_14 = tmpf_15 = tmpf_16 = tmpf_17 = 0.0f;
+            tmpf_0 = tmpf_1 = tmpf_2 = tmpf_3 = tmpf_4 = tmpf_5 = tmpf_6 = tmpf_7 = tmpf_8 = tmpf_9 = tmpf_10 = tmpf_11 = tmpf_12 = tmpf_13 = tmpf_14 = tmpf_15 = tmpf_16 = tmpf_17 = 0.0f;
 
             if (blockType == 2)
             {
@@ -2498,65 +2502,52 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding.Decoders
                 float i00 = inValues[0] + inValues[0];
                 float iip12 = i00 + inValues[12];
 
-                tmp0 = iip12 + inValues[4] * 1.8793852415718f + inValues[8] * 1.532088886238f +
-                       inValues[16] * 0.34729635533386f;
+                tmp0 = iip12 + inValues[4] * 1.8793852415718f + inValues[8] * 1.532088886238f + inValues[16] * 0.34729635533386f;
 
                 tmp1 = i00 + inValues[4] - inValues[8] - inValues[12] - inValues[12] - inValues[16];
 
-                tmp2 = iip12 - inValues[4] * 0.34729635533386f - inValues[8] * 1.8793852415718f +
-                       inValues[16] * 1.532088886238f;
+                tmp2 = iip12 - inValues[4] * 0.34729635533386f - inValues[8] * 1.8793852415718f + inValues[16] * 1.532088886238f;
 
-                tmp3 = iip12 - inValues[4] * 1.532088886238f + inValues[8] * 0.34729635533386f -
-                       inValues[16] * 1.8793852415718f;
+                tmp3 = iip12 - inValues[4] * 1.532088886238f + inValues[8] * 0.34729635533386f - inValues[16] * 1.8793852415718f;
 
                 tmp4 = inValues[0] - inValues[4] + inValues[8] - inValues[12] + inValues[16];
 
                 // 4 points on even indices
                 float i66_ = inValues[6] * 1.732050808f; // Sqrt[3]
 
-                tmp0_ = inValues[2] * 1.9696155060244f + i66_ + inValues[10] * 1.2855752193731f +
-                        inValues[14] * 0.68404028665134f;
+                tmp0_ = inValues[2] * 1.9696155060244f + i66_ + inValues[10] * 1.2855752193731f + inValues[14] * 0.68404028665134f;
 
                 tmp1_ = (inValues[2] - inValues[10] - inValues[14]) * 1.732050808f;
 
-                tmp2_ = inValues[2] * 1.2855752193731f - i66_ - inValues[10] * 0.68404028665134f +
-                        inValues[14] * 1.9696155060244f;
+                tmp2_ = inValues[2] * 1.2855752193731f - i66_ - inValues[10] * 0.68404028665134f + inValues[14] * 1.9696155060244f;
 
-                tmp3_ = inValues[2] * 0.68404028665134f - i66_ + inValues[10] * 1.9696155060244f -
-                        inValues[14] * 1.2855752193731f;
+                tmp3_ = inValues[2] * 0.68404028665134f - i66_ + inValues[10] * 1.9696155060244f - inValues[14] * 1.2855752193731f;
 
                 // 9 point IDCT on odd indices
                 // 5 points on odd indices (not realy an IDCT)
                 float i0 = inValues[0 + 1] + inValues[0 + 1];
                 float i0p12 = i0 + inValues[12 + 1];
 
-                tmp0o = i0p12 + inValues[4 + 1] * 1.8793852415718f + inValues[8 + 1] * 1.532088886238f +
-                        inValues[16 + 1] * 0.34729635533386f;
+                tmp0o = i0p12 + inValues[4 + 1] * 1.8793852415718f + inValues[8 + 1] * 1.532088886238f + inValues[16 + 1] * 0.34729635533386f;
 
                 tmp1o = i0 + inValues[4 + 1] - inValues[8 + 1] - inValues[12 + 1] - inValues[12 + 1] - inValues[16 + 1];
 
-                tmp2o = i0p12 - inValues[4 + 1] * 0.34729635533386f - inValues[8 + 1] * 1.8793852415718f +
-                        inValues[16 + 1] * 1.532088886238f;
+                tmp2o = i0p12 - inValues[4 + 1] * 0.34729635533386f - inValues[8 + 1] * 1.8793852415718f + inValues[16 + 1] * 1.532088886238f;
 
-                tmp3o = i0p12 - inValues[4 + 1] * 1.532088886238f + inValues[8 + 1] * 0.34729635533386f -
-                        inValues[16 + 1] * 1.8793852415718f;
+                tmp3o = i0p12 - inValues[4 + 1] * 1.532088886238f + inValues[8 + 1] * 0.34729635533386f - inValues[16 + 1] * 1.8793852415718f;
 
-                tmp4o = (inValues[0 + 1] - inValues[4 + 1] + inValues[8 + 1] - inValues[12 + 1] + inValues[16 + 1]) *
-                        0.707106781f; // Twiddled
+                tmp4o = (inValues[0 + 1] - inValues[4 + 1] + inValues[8 + 1] - inValues[12 + 1] + inValues[16 + 1]) * 0.707106781f; // Twiddled
 
                 // 4 points on even indices
                 float i6_ = inValues[6 + 1] * 1.732050808f; // Sqrt[3]
 
-                tmp0_o = inValues[2 + 1] * 1.9696155060244f + i6_ + inValues[10 + 1] * 1.2855752193731f +
-                         inValues[14 + 1] * 0.68404028665134f;
+                tmp0_o = inValues[2 + 1] * 1.9696155060244f + i6_ + inValues[10 + 1] * 1.2855752193731f + inValues[14 + 1] * 0.68404028665134f;
 
                 tmp1_o = (inValues[2 + 1] - inValues[10 + 1] - inValues[14 + 1]) * 1.732050808f;
 
-                tmp2_o = inValues[2 + 1] * 1.2855752193731f - i6_ - inValues[10 + 1] * 0.68404028665134f +
-                         inValues[14 + 1] * 1.9696155060244f;
+                tmp2_o = inValues[2 + 1] * 1.2855752193731f - i6_ - inValues[10 + 1] * 0.68404028665134f + inValues[14 + 1] * 1.9696155060244f;
 
-                tmp3_o = inValues[2 + 1] * 0.68404028665134f - i6_ + inValues[10 + 1] * 1.9696155060244f -
-                         inValues[14 + 1] * 1.2855752193731f;
+                tmp3_o = inValues[2 + 1] * 0.68404028665134f - i6_ + inValues[10 + 1] * 1.9696155060244f - inValues[14 + 1] * 1.2855752193731f;
 
                 // Twiddle factors on odd indices
                 // and

@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
 // 
@@ -26,6 +27,7 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 #endregion
 
 using ClassicUO.Game.Data;
@@ -123,21 +125,53 @@ namespace ClassicUO.Game.Managers
                     }
 
                     effect = new MovingEffect
-                        (source, target, srcX, srcY, srcZ, targetX, targetY, targetZ, graphic, hue, fixedDir, speed)
-                        {
-                            Blend = blendmode
-                        };
+                    (
+                        source,
+                        target,
+                        srcX,
+                        srcY,
+                        srcZ,
+                        targetX,
+                        targetY,
+                        targetZ,
+                        graphic,
+                        hue,
+                        fixedDir,
+                        speed
+                    )
+                    {
+                        Blend = blendmode
+                    };
 
                     if (doesExplode)
                     {
                         effect.AddChildEffect
-                            (new AnimatedItemEffect(target, targetX, targetY, targetZ, 0x36Cb, hue, 9, speed));
+                        (
+                            new AnimatedItemEffect
+                            (
+                                target,
+                                targetX,
+                                targetY,
+                                targetZ,
+                                0x36Cb,
+                                hue,
+                                9,
+                                speed
+                            )
+                        );
                     }
 
                     break;
 
                 case GraphicEffectType.Lightning:
-                    effect = new LightningEffect(source, srcX, srcY, srcZ, hue);
+                    effect = new LightningEffect
+                    (
+                        source,
+                        srcX,
+                        srcY,
+                        srcZ,
+                        hue
+                    );
 
                     break;
 
@@ -148,7 +182,16 @@ namespace ClassicUO.Game.Managers
                         return;
                     }
 
-                    effect = new AnimatedItemEffect(srcX, srcY, srcZ, graphic, hue, duration, speed)
+                    effect = new AnimatedItemEffect
+                    (
+                        srcX,
+                        srcY,
+                        srcZ,
+                        graphic,
+                        hue,
+                        duration,
+                        speed
+                    )
                     {
                         Blend = blendmode
                     };
@@ -162,7 +205,17 @@ namespace ClassicUO.Game.Managers
                         return;
                     }
 
-                    effect = new AnimatedItemEffect(source, srcX, srcY, srcZ, graphic, hue, duration, speed)
+                    effect = new AnimatedItemEffect
+                    (
+                        source,
+                        srcX,
+                        srcY,
+                        srcZ,
+                        graphic,
+                        hue,
+                        duration,
+                        speed
+                    )
                     {
                         Blend = blendmode
                     };

@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
 // 
@@ -26,6 +27,7 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 #endregion
 
 using System.Collections.Generic;
@@ -46,33 +48,72 @@ namespace ClassicUO.Game.Data
                     1,
                     new SpellDefinition
                     (
-                        "Animate Dead", 101, 0x5000, "Uus Corp", 23, 40, TargetType.Neutral, Reagents.DaemonBlood,
+                        "Animate Dead",
+                        101,
+                        0x5000,
+                        "Uus Corp",
+                        23,
+                        40,
+                        TargetType.Neutral,
+                        Reagents.DaemonBlood,
                         Reagents.GraveDust
                     )
                 },
                 {
                     2,
                     new SpellDefinition
-                        ("Blood Oath", 102, 0x5001, "In Jux Mani Xen", 13, 20, TargetType.Harmful, Reagents.DaemonBlood)
+                    (
+                        "Blood Oath",
+                        102,
+                        0x5001,
+                        "In Jux Mani Xen",
+                        13,
+                        20,
+                        TargetType.Harmful,
+                        Reagents.DaemonBlood
+                    )
                 },
                 {
                     3,
                     new SpellDefinition
                     (
-                        "Corpse Skin", 103, 0x5002, "In Agle Corp Ylem", 11, 20, TargetType.Harmful, Reagents.BatWing,
+                        "Corpse Skin",
+                        103,
+                        0x5002,
+                        "In Agle Corp Ylem",
+                        11,
+                        20,
+                        TargetType.Harmful,
+                        Reagents.BatWing,
                         Reagents.GraveDust
                     )
                 },
                 {
                     4,
                     new SpellDefinition
-                        ("Curse Weapon", 104, 0x5003, "An Sanct Gra Char", 7, 0, TargetType.Neutral, Reagents.PigIron)
+                    (
+                        "Curse Weapon",
+                        104,
+                        0x5003,
+                        "An Sanct Gra Char",
+                        7,
+                        0,
+                        TargetType.Neutral,
+                        Reagents.PigIron
+                    )
                 },
                 {
                     5,
                     new SpellDefinition
                     (
-                        "Evil Omen", 105, 0x5004, "Pas Tym An Sanct", 11, 20, TargetType.Harmful, Reagents.BatWing,
+                        "Evil Omen",
+                        105,
+                        0x5004,
+                        "Pas Tym An Sanct",
+                        11,
+                        20,
+                        TargetType.Harmful,
+                        Reagents.BatWing,
                         Reagents.NoxCrystal
                     )
                 },
@@ -80,7 +121,14 @@ namespace ClassicUO.Game.Data
                     6,
                     new SpellDefinition
                     (
-                        "Horrific Beast", 106, 0x5005, "Rel Xen Vas Bal", 11, 40, TargetType.Neutral, Reagents.BatWing,
+                        "Horrific Beast",
+                        106,
+                        0x5005,
+                        "Rel Xen Vas Bal",
+                        11,
+                        40,
+                        TargetType.Neutral,
+                        Reagents.BatWing,
                         Reagents.DaemonBlood
                     )
                 },
@@ -88,36 +136,75 @@ namespace ClassicUO.Game.Data
                     7,
                     new SpellDefinition
                     (
-                        "Lich Form", 107, 0x5006, "Rel Xen Corp Ort", 25, 70, TargetType.Neutral, Reagents.DaemonBlood,
-                        Reagents.GraveDust, Reagents.NoxCrystal
+                        "Lich Form",
+                        107,
+                        0x5006,
+                        "Rel Xen Corp Ort",
+                        25,
+                        70,
+                        TargetType.Neutral,
+                        Reagents.DaemonBlood,
+                        Reagents.GraveDust,
+                        Reagents.NoxCrystal
                     )
                 },
                 {
                     8,
                     new SpellDefinition
                     (
-                        "Mind Rot", 108, 0x5007, "Wis An Ben", 17, 30, TargetType.Harmful, Reagents.BatWing,
-                        Reagents.DaemonBlood, Reagents.PigIron
+                        "Mind Rot",
+                        108,
+                        0x5007,
+                        "Wis An Ben",
+                        17,
+                        30,
+                        TargetType.Harmful,
+                        Reagents.BatWing,
+                        Reagents.DaemonBlood,
+                        Reagents.PigIron
                     )
                 },
                 {
                     9,
                     new SpellDefinition
                     (
-                        "Pain Spike", 109, 0x5008, "In Sar", 5, 20, TargetType.Harmful, Reagents.GraveDust,
+                        "Pain Spike",
+                        109,
+                        0x5008,
+                        "In Sar",
+                        5,
+                        20,
+                        TargetType.Harmful,
+                        Reagents.GraveDust,
                         Reagents.PigIron
                     )
                 },
                 {
                     10,
                     new SpellDefinition
-                        ("Poison Strike", 110, 0x5009, "In Vas Nox", 17, 50, TargetType.Harmful, Reagents.NoxCrystal)
+                    (
+                        "Poison Strike",
+                        110,
+                        0x5009,
+                        "In Vas Nox",
+                        17,
+                        50,
+                        TargetType.Harmful,
+                        Reagents.NoxCrystal
+                    )
                 },
                 {
                     11,
                     new SpellDefinition
                     (
-                        "Strangle", 111, 0x500A, "In Bal Nox", 29, 65, TargetType.Harmful, Reagents.DaemonBlood,
+                        "Strangle",
+                        111,
+                        0x500A,
+                        "In Bal Nox",
+                        29,
+                        65,
+                        TargetType.Harmful,
+                        Reagents.DaemonBlood,
                         Reagents.NoxCrystal
                     )
                 },
@@ -125,39 +212,78 @@ namespace ClassicUO.Game.Data
                     12,
                     new SpellDefinition
                     (
-                        "Summon Familiar", 112, 0x500B, "Kal Xen Bal", 17, 30, TargetType.Neutral, Reagents.BatWing,
-                        Reagents.DaemonBlood, Reagents.GraveDust
+                        "Summon Familiar",
+                        112,
+                        0x500B,
+                        "Kal Xen Bal",
+                        17,
+                        30,
+                        TargetType.Neutral,
+                        Reagents.BatWing,
+                        Reagents.DaemonBlood,
+                        Reagents.GraveDust
                     )
                 },
                 {
                     13,
                     new SpellDefinition
                     (
-                        "Vampiric Embrace", 113, 0x500C, "Rel Xen An Sanct", 25, 99, TargetType.Neutral,
-                        Reagents.BatWing, Reagents.NoxCrystal, Reagents.PigIron
+                        "Vampiric Embrace",
+                        113,
+                        0x500C,
+                        "Rel Xen An Sanct",
+                        25,
+                        99,
+                        TargetType.Neutral,
+                        Reagents.BatWing,
+                        Reagents.NoxCrystal,
+                        Reagents.PigIron
                     )
                 },
                 {
                     14,
                     new SpellDefinition
                     (
-                        "Vengeful Spirit", 114, 0x500D, "Kal Xen Bal Beh", 41, 80, TargetType.Harmful, Reagents.BatWing,
-                        Reagents.GraveDust, Reagents.PigIron
+                        "Vengeful Spirit",
+                        114,
+                        0x500D,
+                        "Kal Xen Bal Beh",
+                        41,
+                        80,
+                        TargetType.Harmful,
+                        Reagents.BatWing,
+                        Reagents.GraveDust,
+                        Reagents.PigIron
                     )
                 },
                 {
                     15,
                     new SpellDefinition
                     (
-                        "Wither", 115, 0x500E, "Kal Vas An Flam", 23, 60, TargetType.Harmful, Reagents.GraveDust,
-                        Reagents.NoxCrystal, Reagents.PigIron
+                        "Wither",
+                        115,
+                        0x500E,
+                        "Kal Vas An Flam",
+                        23,
+                        60,
+                        TargetType.Harmful,
+                        Reagents.GraveDust,
+                        Reagents.NoxCrystal,
+                        Reagents.PigIron
                     )
                 },
                 {
                     16,
                     new SpellDefinition
                     (
-                        "Wraith Form", 116, 0x500F, "Rel Xen Um", 17, 20, TargetType.Neutral, Reagents.NoxCrystal,
+                        "Wraith Form",
+                        116,
+                        0x500F,
+                        "Rel Xen Um",
+                        17,
+                        20,
+                        TargetType.Neutral,
+                        Reagents.NoxCrystal,
                         Reagents.PigIron
                     )
                 },
@@ -165,7 +291,14 @@ namespace ClassicUO.Game.Data
                     17,
                     new SpellDefinition
                     (
-                        "Exorcism", 117, 0x5010, "Ort Corp Grav", 40, 80, TargetType.Neutral, Reagents.NoxCrystal,
+                        "Exorcism",
+                        117,
+                        0x5010,
+                        "Ort Corp Grav",
+                        40,
+                        80,
+                        TargetType.Neutral,
+                        Reagents.NoxCrystal,
                         Reagents.GraveDust
                     )
                 }

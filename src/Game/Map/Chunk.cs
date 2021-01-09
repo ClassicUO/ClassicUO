@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
 // 
@@ -26,6 +27,7 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 #endregion
 
 using System.Collections.Generic;
@@ -41,7 +43,8 @@ namespace ClassicUO.Game.Map
     {
         private static readonly QueuedPool<Chunk> _pool = new QueuedPool<Chunk>
         (
-            Constants.PREDICTABLE_CHUNKS, c =>
+            Constants.PREDICTABLE_CHUNKS,
+            c =>
             {
                 c.LastAccessTime = Time.Ticks + Constants.CLEAR_TEXTURES_DELAY;
                 c.IsDestroyed = false;
@@ -301,8 +304,7 @@ namespace ClassicUO.Game.Map
             {
                 int testPriorityZ = o.PriorityZ;
 
-                if (testPriorityZ > priorityZ ||
-                    testPriorityZ == priorityZ && (state == 0 || state == 1 && !(o is Land)))
+                if (testPriorityZ > priorityZ || testPriorityZ == priorityZ && (state == 0 || state == 1 && !(o is Land)))
                 {
                     break;
                 }

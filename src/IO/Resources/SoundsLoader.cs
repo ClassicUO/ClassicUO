@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
 // 
@@ -26,6 +27,7 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 #endregion
 
 using System;
@@ -42,8 +44,7 @@ namespace ClassicUO.IO.Resources
     internal class SoundsLoader : UOFileLoader
     {
         private static readonly char[] _configFileDelimiters = { ' ', ',', '\t' };
-        private static readonly Dictionary<int, Tuple<string, bool>> _musicData =
-            new Dictionary<int, Tuple<string, bool>>();
+        private static readonly Dictionary<int, Tuple<string, bool>> _musicData = new Dictionary<int, Tuple<string, bool>>();
 
         private static SoundsLoader _instance;
 
@@ -68,7 +69,7 @@ namespace ClassicUO.IO.Resources
                     if (Client.IsUOPInstallation && File.Exists(path))
                     {
                         _file = new UOFileUop(path, "build/soundlegacymul/{0:D8}.dat");
-                        Entries = new UOFileIndex[Math.Max(((UOFileUop)_file).TotalEntriesCount, Constants.MAX_SOUND_DATA_INDEX_COUNT)];
+                        Entries = new UOFileIndex[Math.Max(((UOFileUop) _file).TotalEntriesCount, Constants.MAX_SOUND_DATA_INDEX_COUNT)];
                     }
                     else
                     {
@@ -97,8 +98,7 @@ namespace ClassicUO.IO.Resources
                             {
                                 int index = reader.ReadInt();
 
-                                if (index < 0 || index >= Constants.MAX_SOUND_DATA_INDEX_COUNT ||
-                                    index >= _file.Length || Entries[index].Length != 0)
+                                if (index < 0 || index >= Constants.MAX_SOUND_DATA_INDEX_COUNT || index >= _file.Length || Entries[index].Length != 0)
                                 {
                                     continue;
                                 }
@@ -153,8 +153,7 @@ namespace ClassicUO.IO.Resources
                             {
                                 if (TryParseConfigLine(line, out Tuple<int, string, bool> songData))
                                 {
-                                    _musicData[songData.Item1] = new Tuple<string, bool>
-                                        (songData.Item2, songData.Item3);
+                                    _musicData[songData.Item1] = new Tuple<string, bool>(songData.Item2, songData.Item3);
                                 }
                             }
                         }

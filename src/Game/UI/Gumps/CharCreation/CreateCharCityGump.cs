@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
 // 
@@ -26,6 +27,7 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 #endregion
 
 using System.Collections.Generic;
@@ -105,7 +107,14 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                 map = city.Map;
             }
 
-            _facetName = new Label("", true, 0x0481, font: 0, style: FontStyle.BlackBorder)
+            _facetName = new Label
+            (
+                "",
+                true,
+                0x0481,
+                font: 0,
+                style: FontStyle.BlackBorder
+            )
             {
                 X = 240,
                 Y = 440
@@ -153,7 +162,18 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             );
 
 
-            _htmlControl = new HtmlControl(452, 60, 175, 367, true, true, ishtml: true, text: city.Description);
+            _htmlControl = new HtmlControl
+            (
+                452,
+                60,
+                175,
+                367,
+                true,
+                true,
+                ishtml: true,
+                text: city.Description
+            );
+
             Add(_htmlControl);
 
             if (CUOEnviroment.IsOutlands)
@@ -313,7 +333,15 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
                 y -= 20;
 
-                _label = new HoveredLabel(c.City, false, 0x0058, 0x0099, 0x0481, font: 3)
+                _label = new HoveredLabel
+                (
+                    c.City,
+                    false,
+                    0x0058,
+                    0x0099,
+                    0x0481,
+                    font: 3
+                )
                 {
                     X = x,
                     Y = y,

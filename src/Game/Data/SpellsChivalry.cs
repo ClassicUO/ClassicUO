@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
 // 
@@ -26,6 +27,7 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 #endregion
 
 using System.Collections.Generic;
@@ -46,7 +48,15 @@ namespace ClassicUO.Game.Data
                     1,
                     new SpellDefinition
                     (
-                        "Cleanse by Fire", 201, 0x5100, 0x5100, "Expor Flamus", 10, 5, 10, TargetType.Beneficial,
+                        "Cleanse by Fire",
+                        201,
+                        0x5100,
+                        0x5100,
+                        "Expor Flamus",
+                        10,
+                        5,
+                        10,
+                        TargetType.Beneficial,
                         Reagents.None
                     )
                 },
@@ -54,7 +64,15 @@ namespace ClassicUO.Game.Data
                     2,
                     new SpellDefinition
                     (
-                        "Close Wounds", 202, 0x5101, 0x5101, "Obsu Vulni", 10, 0, 10, TargetType.Beneficial,
+                        "Close Wounds",
+                        202,
+                        0x5101,
+                        0x5101,
+                        "Obsu Vulni",
+                        10,
+                        0,
+                        10,
+                        TargetType.Beneficial,
                         Reagents.None
                     )
                 },
@@ -62,7 +80,15 @@ namespace ClassicUO.Game.Data
                     3,
                     new SpellDefinition
                     (
-                        "Consecrate Weapon", 203, 0x5102, 0x5102, "Consecrus Arma", 10, 15, 10, TargetType.Neutral,
+                        "Consecrate Weapon",
+                        203,
+                        0x5102,
+                        0x5102,
+                        "Consecrus Arma",
+                        10,
+                        15,
+                        10,
+                        TargetType.Neutral,
                         Reagents.None
                     )
                 },
@@ -70,7 +96,15 @@ namespace ClassicUO.Game.Data
                     4,
                     new SpellDefinition
                     (
-                        "Dispel Evil", 204, 0x5103, 0x5103, "Dispiro Malas", 10, 35, 10, TargetType.Neutral,
+                        "Dispel Evil",
+                        204,
+                        0x5103,
+                        0x5103,
+                        "Dispiro Malas",
+                        10,
+                        35,
+                        10,
+                        TargetType.Neutral,
                         Reagents.None
                     )
                 },
@@ -78,7 +112,15 @@ namespace ClassicUO.Game.Data
                     5,
                     new SpellDefinition
                     (
-                        "Divine Fury", 205, 0x5104, 0x5104, "Divinum Furis", 10, 25, 10, TargetType.Neutral,
+                        "Divine Fury",
+                        205,
+                        0x5104,
+                        0x5104,
+                        "Divinum Furis",
+                        10,
+                        25,
+                        10,
+                        TargetType.Neutral,
                         Reagents.None
                     )
                 },
@@ -86,7 +128,15 @@ namespace ClassicUO.Game.Data
                     6,
                     new SpellDefinition
                     (
-                        "Enemy of One", 206, 0x5105, 0x5105, "Forul Solum", 20, 45, 10, TargetType.Neutral,
+                        "Enemy of One",
+                        206,
+                        0x5105,
+                        0x5105,
+                        "Forul Solum",
+                        20,
+                        45,
+                        10,
+                        TargetType.Neutral,
                         Reagents.None
                     )
                 },
@@ -94,7 +144,15 @@ namespace ClassicUO.Game.Data
                     7,
                     new SpellDefinition
                     (
-                        "Holy Light", 207, 0x5106, 0x5106, "Augus Luminos", 20, 55, 10, TargetType.Harmful,
+                        "Holy Light",
+                        207,
+                        0x5106,
+                        0x5106,
+                        "Augus Luminos",
+                        20,
+                        55,
+                        10,
+                        TargetType.Harmful,
                         Reagents.None
                     )
                 },
@@ -102,7 +160,15 @@ namespace ClassicUO.Game.Data
                     8,
                     new SpellDefinition
                     (
-                        "Noble Sacrifice", 208, 0x5107, 0x5107, "Dium Prostra", 20, 65, 30, TargetType.Beneficial,
+                        "Noble Sacrifice",
+                        208,
+                        0x5107,
+                        0x5107,
+                        "Dium Prostra",
+                        20,
+                        65,
+                        30,
+                        TargetType.Beneficial,
                         Reagents.None
                     )
                 },
@@ -110,7 +176,15 @@ namespace ClassicUO.Game.Data
                     9,
                     new SpellDefinition
                     (
-                        "Remove Curse", 209, 0x5108, 0x5108, "Extermo Vomica", 20, 5, 10, TargetType.Beneficial,
+                        "Remove Curse",
+                        209,
+                        0x5108,
+                        0x5108,
+                        "Extermo Vomica",
+                        20,
+                        5,
+                        10,
+                        TargetType.Beneficial,
                         Reagents.None
                     )
                 },
@@ -118,7 +192,15 @@ namespace ClassicUO.Game.Data
                     10,
                     new SpellDefinition
                     (
-                        "Sacred Journey", 210, 0x5109, 0x5109, "Sanctum Viatas", 20, 5, 10, TargetType.Neutral,
+                        "Sacred Journey",
+                        210,
+                        0x5109,
+                        0x5109,
+                        "Sanctum Viatas",
+                        20,
+                        5,
+                        10,
+                        TargetType.Neutral,
                         Reagents.None
                     )
                 }

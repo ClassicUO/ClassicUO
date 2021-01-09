@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
 // 
@@ -26,6 +27,7 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 #endregion
 
 using System;
@@ -46,8 +48,7 @@ namespace ClassicUO.Game.Managers
 
         private static readonly Dictionary<uint, Deque<BoatStep>> _steps = new Dictionary<uint, Deque<BoatStep>>();
         private static readonly List<uint> _toRemove = new List<uint>();
-        private static readonly Dictionary<uint, RawList<ItemInside>> _items =
-            new Dictionary<uint, RawList<ItemInside>>();
+        private static readonly Dictionary<uint, RawList<ItemInside>> _items = new Dictionary<uint, RawList<ItemInside>>();
 
         private static uint _timePacket;
 
@@ -300,7 +301,16 @@ namespace ClassicUO.Game.Managers
                         }
 
                         house?.Generate(true, true, true);
-                        UpdateEntitiesInside(item, removeStep, step.X, step.Y, step.Z, step.MovingDir);
+
+                        UpdateEntitiesInside
+                        (
+                            item,
+                            removeStep,
+                            step.X,
+                            step.Y,
+                            step.Z,
+                            step.MovingDir
+                        );
 
                         item.LastStepTime = Time.Ticks;
                     }
@@ -308,8 +318,7 @@ namespace ClassicUO.Game.Managers
                     {
                         if (house != null)
                         {
-                            bool preview = step.MovingDir != Direction.West && step.MovingDir != Direction.Up &&
-                                           step.MovingDir != Direction.North;
+                            bool preview = step.MovingDir != Direction.West && step.MovingDir != Direction.Up && step.MovingDir != Direction.North;
                             //preview = false;
 
                             foreach (Multi c in house.Components)
@@ -323,7 +332,15 @@ namespace ClassicUO.Game.Managers
                             }
                         }
 
-                        UpdateEntitiesInside(item, removeStep, item.X, item.Y, item.Z, step.MovingDir);
+                        UpdateEntitiesInside
+                        (
+                            item,
+                            removeStep,
+                            item.X,
+                            item.Y,
+                            item.Z,
+                            step.MovingDir
+                        );
                     }
 
                     if (!directionChange)

@@ -1,4 +1,5 @@
 #region license
+
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
 // 
@@ -26,6 +27,7 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 #endregion
 
 using System;
@@ -267,7 +269,14 @@ namespace ClassicUO.Game.UI.Controls
 
             ResetHueVector();
 
-            Rectangle scissor = ScissorStack.CalculateScissors(Matrix.Identity, x, y, Width, Height);
+            Rectangle scissor = ScissorStack.CalculateScissors
+            (
+                Matrix.Identity,
+                x,
+                y,
+                Width,
+                Height
+            );
 
             if (ScissorStack.PushScissors(batcher.GraphicsDevice, scissor))
             {
@@ -276,9 +285,15 @@ namespace ClassicUO.Game.UI.Controls
 
                 _gameText.Draw
                 (
-                    batcher, Width + ScrollX, Height + ScrollY, x + (HasBackground ? 4 : 0),
-                    y + (HasBackground ? 4 : 0), Width - (HasBackground ? 8 : 0), Height - (HasBackground ? 8 : 0),
-                    ScrollX, ScrollY
+                    batcher,
+                    Width + ScrollX,
+                    Height + ScrollY,
+                    x + (HasBackground ? 4 : 0),
+                    y + (HasBackground ? 4 : 0),
+                    Width - (HasBackground ? 8 : 0),
+                    Height - (HasBackground ? 8 : 0),
+                    ScrollX,
+                    ScrollY
                 );
 
                 batcher.EnableScissorTest(false);

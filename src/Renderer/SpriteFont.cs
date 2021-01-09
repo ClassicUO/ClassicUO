@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
 // 
@@ -26,6 +27,7 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 #endregion
 
 using System;
@@ -229,7 +231,13 @@ namespace ClassicUO.Renderer
                 }
 
                 Texture2D texture = new Texture2D
-                    (Client.Game.GraphicsDevice, width, height, false, SurfaceFormat.Color);
+                (
+                    Client.Game.GraphicsDevice,
+                    width,
+                    height,
+                    false,
+                    SurfaceFormat.Color
+                );
 
                 texture.SetData(levelData);
 
@@ -294,7 +302,17 @@ namespace ClassicUO.Renderer
                 }
 
 
-                return new SpriteFont(texture, glyphs, croppings, charMap, lineSpacing, spacing, kernings, defaultChar);
+                return new SpriteFont
+                (
+                    texture,
+                    glyphs,
+                    croppings,
+                    charMap,
+                    lineSpacing,
+                    spacing,
+                    kernings,
+                    defaultChar
+                );
             }
         }
 
@@ -319,7 +337,16 @@ namespace ClassicUO.Renderer
                 {
                     for (int x = 0; x < blockCountX; x++)
                     {
-                        DecompressDxt3Block(imageReader, x, y, blockCountX, width, height, imageData);
+                        DecompressDxt3Block
+                        (
+                            imageReader,
+                            x,
+                            y,
+                            blockCountX,
+                            width,
+                            height,
+                            imageData
+                        );
                     }
                 }
             }

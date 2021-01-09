@@ -1,4 +1,5 @@
 #region license
+
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
 // 
@@ -26,6 +27,7 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 #endregion
 
 using System;
@@ -46,7 +48,8 @@ namespace ClassicUO.Game.GameObjects
     {
         private static readonly QueuedPool<Mobile> _pool = new QueuedPool<Mobile>
         (
-            Constants.PREDICTABLE_CHUNKS, mobile =>
+            Constants.PREDICTABLE_CHUNKS,
+            mobile =>
             {
                 mobile.IsDestroyed = false;
                 mobile.Graphic = 0;
@@ -145,8 +148,7 @@ namespace ClassicUO.Game.GameObjects
 
         public bool IsDead
         {
-            get => Graphic == 0x0192 || Graphic == 0x0193 || Graphic >= 0x025F && Graphic <= 0x0260 ||
-                   Graphic == 0x2B6 || Graphic == 0x02B7 || _isDead;
+            get => Graphic == 0x0192 || Graphic == 0x0193 || Graphic >= 0x025F && Graphic <= 0x0260 || Graphic == 0x2B6 || Graphic == 0x02B7 || _isDead;
             set => _isDead = value;
         }
 
@@ -158,10 +160,7 @@ namespace ClassicUO.Game.GameObjects
             set { }
         }
 
-        public bool IsHuman => Graphic >= 0x0190 && Graphic <= 0x0193 || Graphic >= 0x00B7 && Graphic <= 0x00BA ||
-                               Graphic >= 0x025D && Graphic <= 0x0260 || Graphic == 0x029A || Graphic == 0x029B ||
-                               Graphic == 0x02B6 || Graphic == 0x02B7 || Graphic == 0x03DB || Graphic == 0x03DF ||
-                               Graphic == 0x03E2 || Graphic == 0x02E8 || Graphic == 0x02E9 || Graphic == 0x04E5;
+        public bool IsHuman => Graphic >= 0x0190 && Graphic <= 0x0193 || Graphic >= 0x00B7 && Graphic <= 0x00BA || Graphic >= 0x025D && Graphic <= 0x0260 || Graphic == 0x029A || Graphic == 0x029B || Graphic == 0x02B6 || Graphic == 0x02B7 || Graphic == 0x03DB || Graphic == 0x03DF || Graphic == 0x03E2 || Graphic == 0x02E8 || Graphic == 0x02E9 || Graphic == 0x04E5;
 
         public bool IsGargoyle => Client.Version >= ClientVersion.CV_7000 && Graphic == 0x029A || Graphic == 0x029B;
 
@@ -400,8 +399,7 @@ namespace ClassicUO.Game.GameObjects
 
                 ANIMATION_GROUPS_TYPE type = AnimationsLoader.Instance.DataIndex[graphic].Type;
 
-                if (AnimationsLoader.Instance.DataIndex[graphic].IsUOP &&
-                    !AnimationsLoader.Instance.DataIndex[graphic].IsValidMUL)
+                if (AnimationsLoader.Instance.DataIndex[graphic].IsUOP && !AnimationsLoader.Instance.DataIndex[graphic].IsValidMUL)
                 {
                     // do nothing ?
                 }
@@ -507,8 +505,7 @@ namespace ClassicUO.Game.GameObjects
 
                 if (isLowExtended && AnimationGroup == 18)
                 {
-                    if (!AnimationsLoader.Instance.IsAnimationExists(graphic, 18) &&
-                        AnimationsLoader.Instance.IsAnimationExists(graphic, 17))
+                    if (!AnimationsLoader.Instance.IsAnimationExists(graphic, 18) && AnimationsLoader.Instance.IsAnimationExists(graphic, 17))
                     {
                         AnimationGroup = GetReplacedObjectAnimation(graphic, 17);
                     }
@@ -636,16 +633,14 @@ namespace ClassicUO.Game.GameObjects
                 {
                     ushort hue = 0;
 
-                    AnimationDirection direction = AnimationsLoader.Instance.GetBodyAnimationGroup                                                                       (ref id, ref animGroup, ref hue, true)
-                                                                   .Direction[dir];
+                    AnimationDirection direction = AnimationsLoader.Instance.GetBodyAnimationGroup(ref id, ref animGroup, ref hue, true).Direction[dir];
 
                     if (direction != null && (direction.FrameCount == 0 || direction.Frames == null))
                     {
                         AnimationsLoader.Instance.LoadAnimationFrames(id, animGroup, dir, ref direction);
                     }
 
-                    if (direction != null &&
-                        (direction.Address != 0 && direction.Size != 0 && direction.FileIndex != -1 || direction.IsUOP))
+                    if (direction != null && (direction.Address != 0 && direction.Size != 0 && direction.FileIndex != -1 || direction.IsUOP))
                     {
                         direction.LastAccessTime = Time.Ticks;
                         int fc = direction.FrameCount;
@@ -784,8 +779,7 @@ namespace ClassicUO.Game.GameObjects
 
                     int delay = (int) Time.Ticks - (int) LastStepTime;
 
-                    bool mounted = IsMounted || SpeedMode == CharacterSpeedType.FastUnmount ||
-                                   SpeedMode == CharacterSpeedType.FastUnmountAndCantRun || IsFlying;
+                    bool mounted = IsMounted || SpeedMode == CharacterSpeedType.FastUnmount || SpeedMode == CharacterSpeedType.FastUnmountAndCantRun || IsFlying;
 
                     bool run = step.Run;
 
@@ -881,8 +875,7 @@ namespace ClassicUO.Game.GameObjects
 
                                     for (int i = 0; i < count; i++)
                                     {
-                                        World.Player.Walker.StepInfos[sequence - 1] =
-                                            World.Player.Walker.StepInfos[sequence];
+                                        World.Player.Walker.StepInfos[sequence - 1] = World.Player.Walker.StepInfos[sequence];
 
                                         sequence++;
                                     }
@@ -940,8 +933,7 @@ namespace ClassicUO.Game.GameObjects
             {
                 int result = 0;
 
-                if (IsHuman && !IsMounted && !IsFlying && !TestStepNoChangeDirection
-                    (this, GetGroupForAnimation(this, isParent: true)))
+                if (IsHuman && !IsMounted && !IsFlying && !TestStepNoChangeDirection(this, GetGroupForAnimation(this, isParent: true)))
                 {
                     GameObject start = this;
 
@@ -1159,10 +1151,19 @@ namespace ClassicUO.Game.GameObjects
 
             AnimationsLoader.Instance.GetAnimationDimensions
             (
-                AnimIndex, GetGraphicForAnimation(),
-                /*(byte) m.GetDirectionForAnimation()*/ 0,
-                /*Mobile.GetGroupForAnimation(m, isParent:true)*/ 0, IsMounted,
-                /*(byte) m.AnimIndex*/ 0, out _, out int centerY, out _, out int height
+                AnimIndex,
+                GetGraphicForAnimation(),
+                /*(byte) m.GetDirectionForAnimation()*/
+                0,
+                /*Mobile.GetGroupForAnimation(m, isParent:true)*/
+                0,
+                IsMounted,
+                /*(byte) m.AnimIndex*/
+                0,
+                out _,
+                out int centerY,
+                out _,
+                out int height
             );
 
             p.X += (int) Offset.X + 22;

@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
 // 
@@ -26,6 +27,7 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 #endregion
 
 using System;
@@ -72,8 +74,12 @@ namespace ClassicUO.IO
             {
                 _file = MemoryMappedFile.CreateFromFile
                 (
-                    File.Open(fileInfo.FullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite), null, 0,
-                    MemoryMappedFileAccess.Read, HandleInheritability.None, false
+                    File.Open(fileInfo.FullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite),
+                    null,
+                    0,
+                    MemoryMappedFileAccess.Read,
+                    HandleInheritability.None,
+                    false
                 );
 
                 _accessor = _file.CreateViewAccessor(0, size, MemoryMappedFileAccess.Read);

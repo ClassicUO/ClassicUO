@@ -1,4 +1,5 @@
 #region license
+
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
 // 
@@ -26,6 +27,7 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 #endregion
 
 using System;
@@ -147,7 +149,16 @@ namespace ClassicUO.Game.GameObjects
             {
                 case GraphicEffectBlendMode.Multiply:
                     batcher.SetBlendState(_multiplyBlendState.Value);
-                    DrawStatic(batcher, AnimationGraphic, posX, posY, ref HueVector);
+
+                    DrawStatic
+                    (
+                        batcher,
+                        AnimationGraphic,
+                        posX,
+                        posY,
+                        ref HueVector
+                    );
+
                     batcher.SetBlendState(null);
 
                     break;
@@ -155,28 +166,64 @@ namespace ClassicUO.Game.GameObjects
                 case GraphicEffectBlendMode.Screen:
                 case GraphicEffectBlendMode.ScreenMore:
                     batcher.SetBlendState(_screenBlendState.Value);
-                    DrawStatic(batcher, AnimationGraphic, posX, posY, ref HueVector);
+
+                    DrawStatic
+                    (
+                        batcher,
+                        AnimationGraphic,
+                        posX,
+                        posY,
+                        ref HueVector
+                    );
+
                     batcher.SetBlendState(null);
 
                     break;
 
                 case GraphicEffectBlendMode.ScreenLess:
                     batcher.SetBlendState(_screenLessBlendState.Value);
-                    DrawStatic(batcher, AnimationGraphic, posX, posY, ref HueVector);
+
+                    DrawStatic
+                    (
+                        batcher,
+                        AnimationGraphic,
+                        posX,
+                        posY,
+                        ref HueVector
+                    );
+
                     batcher.SetBlendState(null);
 
                     break;
 
                 case GraphicEffectBlendMode.NormalHalfTransparent:
                     batcher.SetBlendState(_normalHalfBlendState.Value);
-                    DrawStatic(batcher, AnimationGraphic, posX, posY, ref HueVector);
+
+                    DrawStatic
+                    (
+                        batcher,
+                        AnimationGraphic,
+                        posX,
+                        posY,
+                        ref HueVector
+                    );
+
                     batcher.SetBlendState(null);
 
                     break;
 
                 case GraphicEffectBlendMode.ShadowBlue:
                     batcher.SetBlendState(_shadowBlueBlendState.Value);
-                    DrawStatic(batcher, AnimationGraphic, posX, posY, ref HueVector);
+
+                    DrawStatic
+                    (
+                        batcher,
+                        AnimationGraphic,
+                        posX,
+                        posY,
+                        ref HueVector
+                    );
+
                     batcher.SetBlendState(null);
 
                     break;
@@ -194,7 +241,14 @@ namespace ClassicUO.Game.GameObjects
                     //}
                     //else
 
-                    DrawStatic(batcher, AnimationGraphic, posX, posY, ref HueVector);
+                    DrawStatic
+                    (
+                        batcher,
+                        AnimationGraphic,
+                        posX,
+                        posY,
+                        ref HueVector
+                    );
 
                     break;
             }

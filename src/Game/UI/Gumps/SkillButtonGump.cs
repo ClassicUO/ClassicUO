@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
 // 
@@ -26,6 +27,7 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 #endregion
 
 using System.IO;
@@ -90,7 +92,16 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add
             (
-                label = new Label(_skill.Name, true, 0, Width - 8, 1, FontStyle.None, TEXT_ALIGN_TYPE.TS_CENTER)
+                label = new Label
+                (
+                    _skill.Name,
+                    true,
+                    0,
+                    Width - 8,
+                    1,
+                    FontStyle.None,
+                    TEXT_ALIGN_TYPE.TS_CENTER
+                )
                 {
                     X = 4,
                     Y = 0,

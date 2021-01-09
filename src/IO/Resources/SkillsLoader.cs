@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
 // 
@@ -26,6 +27,7 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 #endregion
 
 using System;
@@ -81,9 +83,7 @@ namespace ClassicUO.IO.Resources
                             _file.Seek(entry.Offset);
                             bool hasAction = _file.ReadBool();
 
-                            string name = Encoding.UTF8.GetString
-                                                      (_file.ReadArray<byte>(entry.Length - 1))
-                                                  .TrimEnd('\0');
+                            string name = Encoding.UTF8.GetString(_file.ReadArray<byte>(entry.Length - 1)).TrimEnd('\0');
 
                             SkillEntry skill = new SkillEntry(count++, name, hasAction);
 

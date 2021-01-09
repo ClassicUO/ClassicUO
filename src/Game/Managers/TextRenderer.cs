@@ -1,4 +1,5 @@
 #region license
+
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
 // 
@@ -26,6 +27,7 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 #endregion
 
 using System.Collections.Generic;
@@ -79,8 +81,7 @@ namespace ClassicUO.Game.Managers
                     }
                 }
 
-                if (item.RenderedText.Texture.Contains
-                    (mouseX - startX - item.RealScreenPosition.X, mouseY - startY - item.RealScreenPosition.Y))
+                if (item.RenderedText.Texture.Contains(mouseX - startX - item.RealScreenPosition.X, mouseY - startY - item.RealScreenPosition.Y))
                 {
                     SelectedObject.LastObject = item;
                 }
@@ -113,9 +114,7 @@ namespace ClassicUO.Game.Managers
 
             for (TextObject o = DrawPointer; o != null; o = o.DLeft)
             {
-                if (o.IsDestroyed || o.RenderedText == null || o.RenderedText.IsDestroyed ||
-                    o.RenderedText.Texture == null || o.Time < ClassicUO.Time.Ticks ||
-                    o.Owner.UseInRender != renderIndex && !isGump)
+                if (o.IsDestroyed || o.RenderedText == null || o.RenderedText.IsDestroyed || o.RenderedText.Texture == null || o.Time < ClassicUO.Time.Ticks || o.Owner.UseInRender != renderIndex && !isGump)
                 {
                     continue;
                 }
@@ -160,7 +159,14 @@ namespace ClassicUO.Game.Managers
                     y += startY;
                 }
 
-                o.RenderedText.Draw(batcher, x, y, alpha, hue);
+                o.RenderedText.Draw
+                (
+                    batcher,
+                    x,
+                    y,
+                    alpha,
+                    hue
+                );
             }
         }
 

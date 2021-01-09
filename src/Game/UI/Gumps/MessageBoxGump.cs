@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
 // 
@@ -26,6 +27,7 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 #endregion
 
 using System;
@@ -40,8 +42,7 @@ namespace ClassicUO.Game.UI.Gumps
     {
         private readonly Action<bool> _action;
 
-        public MessageBoxGump(int w, int h, string message, Action<bool> action, bool hasBackground = false) : base
-            (0, 0)
+        public MessageBoxGump(int w, int h, string message, Action<bool> action, bool hasBackground = false) : base(0, 0)
         {
             CanMove = true;
             CanCloseWithRightClick = false;
@@ -80,7 +81,14 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add
             (
-                new Label(message, false, 0x0386, Width - 90, 1)
+                new Label
+                (
+                    message,
+                    false,
+                    0x0386,
+                    Width - 90,
+                    1
+                )
                 {
                     X = 40,
                     Y = 45
@@ -167,7 +175,14 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add
             (
-                l = new Label(message, false, 0x0386, Width - 90, 1)
+                l = new Label
+                (
+                    message,
+                    false,
+                    0x0386,
+                    Width - 90,
+                    1
+                )
                 {
                     X = 40,
                     Y = 45
@@ -187,7 +202,14 @@ namespace ClassicUO.Game.UI.Gumps
 
             int ww = w - 94;
 
-            _textBox = new StbTextBox(0xFF, -1, ww, true, FontStyle.BlackBorder | FontStyle.Fixed)
+            _textBox = new StbTextBox
+            (
+                0xFF,
+                -1,
+                ww,
+                true,
+                FontStyle.BlackBorder | FontStyle.Fixed
+            )
             {
                 X = 42,
                 Y = 45 + l.Height + 7,

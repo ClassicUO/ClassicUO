@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
 // 
@@ -26,6 +27,7 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 #endregion
 
 using System.Text;
@@ -122,10 +124,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }
                 else
                 {
-                    _sb.Append
-                    (
-                        $"Ping: {_ping} ms\n{"In:"} {NetStatistics.GetSizeAdaptive(_deltaBytesReceived),-6} {"Out:"} {NetStatistics.GetSizeAdaptive(_deltaBytesSent),-6}"
-                    );
+                    _sb.Append($"Ping: {_ping} ms\n{"In:"} {NetStatistics.GetSizeAdaptive(_deltaBytesReceived),-6} {"Out:"} {NetStatistics.GetSizeAdaptive(_deltaBytesSent),-6}");
                 }
 
 
@@ -165,7 +164,14 @@ namespace ClassicUO.Game.UI.Gumps
 
             HueVector.Y = 1;
 
-            batcher.DrawString(Fonts.Bold, _sb.ToString(), x + 10, y + 10, ref HueVector);
+            batcher.DrawString
+            (
+                Fonts.Bold,
+                _sb.ToString(),
+                x + 10,
+                y + 10,
+                ref HueVector
+            );
 
             return true;
         }

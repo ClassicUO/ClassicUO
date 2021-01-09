@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
 // 
@@ -26,6 +27,7 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 #endregion
 
 using System;
@@ -68,10 +70,10 @@ namespace ClassicUO.Game.GameObjects
 
             if (speed > 20)
             {
-                speed = (byte)(speed - 20);
+                speed = (byte) (speed - 20);
             }
 
-            MovingDelay = (byte)(20 - speed);
+            MovingDelay = (byte) (20 - speed);
             _lastMoveTime = Time.Ticks;
 
             Entity source = World.Get(src);
@@ -122,7 +124,7 @@ namespace ClassicUO.Game.GameObjects
                 return;
             }
 
-            int time = (int)(Time.Ticks - _lastMoveTime);
+            int time = (int) (Time.Ticks - _lastMoveTime);
 
             if (time < MovingDelay)
             {
@@ -172,8 +174,8 @@ namespace ClassicUO.Game.GameObjects
                 return;
             }
 
-            int newOffsetX = (int)(source.X / 22f);
-            int newOffsetY = (int)(source.Y / 22f);
+            int newOffsetX = (int) (source.X / 22f);
+            int newOffsetY = (int) (source.Y / 22f);
 
             TileOffsetOnMonitorToXY(ref newOffsetX, ref newOffsetY, out int newCoordX, out int newCoordY);
 
@@ -189,7 +191,7 @@ namespace ClassicUO.Game.GameObjects
 
 
             IsPositionChanged = true;
-            AngleToTarget = (float)-Math.Atan2(offset.Y, offset.X);
+            AngleToTarget = (float) -Math.Atan2(offset.Y, offset.X);
 
             if (newX != sX || newY != sY)
             {

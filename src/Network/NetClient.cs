@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
 // 
@@ -26,6 +27,7 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 #endregion
 
 using System;
@@ -71,7 +73,6 @@ namespace ClassicUO.Network
         public static NetClient LoginSocket { get; } = new NetClient(true);
 
         public static NetClient Socket { get; } = new NetClient(false);
-
 
 
         public bool IsConnected => _tcpClient != null && _tcpClient.Connected;
@@ -184,28 +185,29 @@ namespace ClassicUO.Network
         {
             try
             {
-                return _tcpClient
-                       .ConnectAsync(address, port)
-                          .ContinueWith(
-                    (t) =>
-                    {
-                        if (!t.IsFaulted && _tcpClient.Connected)
-                        {
-                            _netStream = _tcpClient.GetStream();
-                            Status = ClientSocketStatus.Connected;
-                            Connected.Raise();
-                            Statistics.ConnectedFrom = DateTime.Now;
+                return _tcpClient.ConnectAsync(address, port)
+                                 .ContinueWith
+                                 (
+                                     (t) =>
+                                     {
+                                         if (!t.IsFaulted && _tcpClient.Connected)
+                                         {
+                                             _netStream = _tcpClient.GetStream();
+                                             Status = ClientSocketStatus.Connected;
+                                             Connected.Raise();
+                                             Statistics.ConnectedFrom = DateTime.Now;
 
-                            return true;
-                        }
+                                             return true;
+                                         }
 
 
-                        Status = ClientSocketStatus.Disconnected;
-                        Log.Error("socket not connected");
+                                         Status = ClientSocketStatus.Disconnected;
+                                         Log.Error("socket not connected");
 
-                        return false;
-
-                    }, TaskContinuationOptions.ExecuteSynchronously);
+                                         return false;
+                                     },
+                                     TaskContinuationOptions.ExecuteSynchronously
+                                 );
             }
             catch (SocketException e)
             {
@@ -526,18 +528,41 @@ namespace ClassicUO.Network
 
             if (incompletelength > 0)
             {
-                Buffer.BlockCopy(_incompletePacketBuffer, 0, source, 0, _incompletePacketLength);
+                Buffer.BlockCopy
+                (
+                    _incompletePacketBuffer,
+                    0,
+                    source,
+                    0,
+                    _incompletePacketLength
+                );
+
                 _incompletePacketLength = 0;
             }
 
             // if outbounds exception, BUFF_SIZE must be increased
-            Buffer.BlockCopy(buffer, 0, source, incompletelength, length);
+            Buffer.BlockCopy
+            (
+                buffer,
+                0,
+                source,
+                incompletelength,
+                length
+            );
+
             int processedOffset = 0;
             int sourceOffset = 0;
             int offset = 0;
 
             while (Huffman.DecompressChunk
-                (ref source, ref sourceOffset, sourcelength, ref buffer, offset, out int outSize))
+            (
+                ref source,
+                ref sourceOffset,
+                sourcelength,
+                ref buffer,
+                offset,
+                out int outSize
+            ))
             {
                 processedOffset = sourceOffset;
                 offset += outSize;
@@ -548,7 +573,16 @@ namespace ClassicUO.Network
             if (processedOffset < sourcelength)
             {
                 int l = sourcelength - processedOffset;
-                Buffer.BlockCopy(source, processedOffset, _incompletePacketBuffer, _incompletePacketLength, l);
+
+                Buffer.BlockCopy
+                (
+                    source,
+                    processedOffset,
+                    _incompletePacketBuffer,
+                    _incompletePacketLength,
+                    l
+                );
+
                 _incompletePacketLength += l;
             }
         }
@@ -582,23 +616,17 @@ namespace ClassicUO.Network
         }
 
         private static LogFile _logFile;
+
         private static void LogPacket(byte[] buffer, int length, bool toServer)
         {
             if (_logFile == null)
-                _logFile = new LogFile
-                (
-                    FileSystemHelper.CreateFolderIfNotExists(CUOEnviroment.ExecutablePath, "Logs", "Network"),
-                    "packets.log"
-                );
+                _logFile = new LogFile(FileSystemHelper.CreateFolderIfNotExists(CUOEnviroment.ExecutablePath, "Logs", "Network"), "packets.log");
 
             int pos = 0;
 
             StringBuilder output = new StringBuilder();
 
-            output.AppendFormat
-            (
-                "{0}   -   ID {1:X2}   Length: {2}\n", (toServer ? "Client -> Server" : "Server -> Client"), buffer[0], buffer.Length
-            );
+            output.AppendFormat("{0}   -   ID {1:X2}   Length: {2}\n", (toServer ? "Client -> Server" : "Server -> Client"), buffer[0], buffer.Length);
 
             if (buffer[0] == 0x80 || buffer[0] == 0x91)
             {
@@ -636,7 +664,7 @@ namespace ClassicUO.Network
 
                         if (c >= 0x20 && c < 0x80)
                         {
-                            chars.Append((char)c);
+                            chars.Append((char) c);
                         }
                         else
                         {
@@ -675,7 +703,7 @@ namespace ClassicUO.Network
 
                             if (c >= 0x20 && c < 0x80)
                             {
-                                chars.Append((char)c);
+                                chars.Append((char) c);
                             }
                             else
                             {
@@ -702,6 +730,5 @@ namespace ClassicUO.Network
 
             _logFile.Write(output.ToString());
         }
-
     }
 }

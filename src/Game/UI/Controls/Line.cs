@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
 // 
@@ -26,6 +27,7 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 #endregion
 
 using ClassicUO.Renderer;
@@ -53,7 +55,15 @@ namespace ClassicUO.Game.UI.Controls
             ResetHueVector();
             ShaderHueTranslator.GetHueVector(ref HueVector, 0, false, Alpha);
 
-            return batcher.Draw2D(_texture, x, y, Width, Height, ref HueVector);
+            return batcher.Draw2D
+            (
+                _texture,
+                x,
+                y,
+                Width,
+                Height,
+                ref HueVector
+            );
         }
     }
 }

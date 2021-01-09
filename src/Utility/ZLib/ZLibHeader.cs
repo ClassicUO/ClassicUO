@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
 // 
@@ -26,6 +27,7 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 #endregion
 
 using System;
@@ -146,8 +148,7 @@ namespace ZLibNative
             result.FDict = Convert.ToBoolean(Convert.ToByte((pFlag & 0x20) >> 5));
             result.FLevel = (FLevel) Convert.ToByte((pFlag & 0xC0) >> 6);
 
-            result.IsSupportedZLibStream = result.CompressionMethod == 8 && result.CompressionInfo == 7 &&
-                                           (pCMF * 256 + pFlag) % 31 == 0 && result.FDict == false;
+            result.IsSupportedZLibStream = result.CompressionMethod == 8 && result.CompressionInfo == 7 && (pCMF * 256 + pFlag) % 31 == 0 && result.FDict == false;
 
             return result;
         }

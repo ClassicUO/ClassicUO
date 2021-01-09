@@ -1,4 +1,5 @@
 ﻿#region license
+
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
 // 
@@ -26,6 +27,7 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 #endregion
 
 using System;
@@ -64,25 +66,53 @@ namespace ClassicUO.Game.UI.Controls
             (
                 new NiceButton
                 (
-                    0, _hotkeyBox.Height + 3, 170, 25, ButtonAction.Activate, ResGumps.CreateMacroButton, 0,
+                    0,
+                    _hotkeyBox.Height + 3,
+                    170,
+                    25,
+                    ButtonAction.Activate,
+                    ResGumps.CreateMacroButton,
+                    0,
                     TEXT_ALIGN_TYPE.TS_LEFT
                 ) { ButtonParameter = 2, IsSelectable = false }
             );
 
             Add
             (
-                new NiceButton(0, _hotkeyBox.Height + 30, 50, 25, ButtonAction.Activate, ResGumps.Add)
-                    { IsSelectable = false }
+                new NiceButton
+                (
+                    0,
+                    _hotkeyBox.Height + 30,
+                    50,
+                    25,
+                    ButtonAction.Activate,
+                    ResGumps.Add
+                ) { IsSelectable = false }
             );
 
             Add
             (
-                new NiceButton(52, _hotkeyBox.Height + 30, 50, 25, ButtonAction.Activate, ResGumps.Remove)
-                    { ButtonParameter = 1, IsSelectable = false }
+                new NiceButton
+                (
+                    52,
+                    _hotkeyBox.Height + 30,
+                    50,
+                    25,
+                    ButtonAction.Activate,
+                    ResGumps.Remove
+                ) { ButtonParameter = 1, IsSelectable = false }
             );
 
 
-            ScrollArea area = new ScrollArea(10, _hotkeyBox.Bounds.Bottom + 80, 280, 280, true);
+            ScrollArea area = new ScrollArea
+            (
+                10,
+                _hotkeyBox.Bounds.Bottom + 80,
+                280,
+                280,
+                true
+            );
+
             Add(area);
 
             _databox = new DataBox(0, 0, 280, 280);
@@ -283,7 +313,14 @@ namespace ClassicUO.Game.UI.Controls
                 _control = control;
                 _items = items;
 
-                Combobox mainBox = new Combobox(0, 0, 200, _items, (int) obj.Code)
+                Combobox mainBox = new Combobox
+                (
+                    0,
+                    0,
+                    200,
+                    _items,
+                    (int) obj.Code
+                )
                 {
                     Tag = obj
                 };
@@ -322,7 +359,15 @@ namespace ClassicUO.Game.UI.Controls
                             names[i] = _allSubHotkeysNames[i + offset];
                         }
 
-                        Combobox sub = new Combobox(20, Height, 180, names, (int) obj.SubCode - offset, 300);
+                        Combobox sub = new Combobox
+                        (
+                            20,
+                            Height,
+                            180,
+                            names,
+                            (int) obj.SubCode - offset,
+                            300
+                        );
 
                         sub.OnOptionSelected += (senderr, ee) =>
                         {
@@ -350,7 +395,14 @@ namespace ClassicUO.Game.UI.Controls
 
                         Add(background);
 
-                        StbTextBox textbox = new StbTextBox(0xFF, 80, 236, true, FontStyle.BlackBorder)
+                        StbTextBox textbox = new StbTextBox
+                        (
+                            0xFF,
+                            80,
+                            236,
+                            true,
+                            FontStyle.BlackBorder
+                        )
                         {
                             X = background.X + 4,
                             Y = background.Y + 4,

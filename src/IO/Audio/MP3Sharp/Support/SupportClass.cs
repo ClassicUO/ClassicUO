@@ -1,4 +1,5 @@
 #region license
+
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
 // 
@@ -26,6 +27,7 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 #endregion
 
 using System;
@@ -187,8 +189,7 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Support
         /// <param name="destinationArray">Array to store the bytes.</param>
         /// <param name="destinationStart">Position in the destination array to start storing the sbytes.</param>
         /// <returns>An array of sbytes</returns>
-        public static void GetSBytesFromString
-            (string sourceString, int sourceStart, int sourceEnd, ref sbyte[] destinationArray, int destinationStart)
+        public static void GetSBytesFromString(string sourceString, int sourceStart, int sourceEnd, ref sbyte[] destinationArray, int destinationStart)
         {
             int sourceCounter;
             int destinationCounter;
