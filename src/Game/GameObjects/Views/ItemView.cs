@@ -58,8 +58,8 @@ namespace ClassicUO.Game.GameObjects
             ResetHueVector();
             DrawTransparent = false;
 
-            posX += (int) Offset.X;
-            posY += (int) (Offset.Y + Offset.Z);
+            posX += (int)Offset.X;
+            posY += (int)(Offset.Y + Offset.Z);
 
             if (ItemData.IsTranslucent)
             {
@@ -219,10 +219,10 @@ namespace ClassicUO.Game.GameObjects
             posX += 22;
             posY += 22;
 
-            byte direction = (byte) ((byte) Layer & 0x7F & 7);
+            byte direction = (byte)((byte)Layer & 0x7F & 7);
             AnimationsLoader.Instance.GetAnimDirection(ref direction, ref IsFlipped);
 
-            byte animIndex = (byte) AnimIndex;
+            byte animIndex = (byte)AnimIndex;
             ushort graphic = GetGraphicForAnimation();
             AnimationsLoader.Instance.ConvertBodyIfNeeded(ref graphic);
             byte group = AnimationsLoader.Instance.GetDieGroupIndex(graphic, UsedLayer);
@@ -328,12 +328,12 @@ namespace ClassicUO.Game.GameObjects
                 AnimationsLoader.Instance.GetCorpseFrame(ref graphic, ref newHue, animGroup, dir, animIndex) :
                 AnimationsLoader.Instance.GetBodyFrame(ref graphic, ref newHue, animGroup, dir, animIndex, false);
 
-         
+
             if (color == 0)
             {
                 color = newHue;
             }
-                   
+
             if (frame == null || frame.IsDisposed)
             {
                 return;
@@ -394,14 +394,14 @@ namespace ClassicUO.Game.GameObjects
                 ShaderHueTranslator.GetHueVector(ref HueVector, color, ispartialhue, alpha);
             }
 
-                batcher.DrawSprite
-                (
-                    frame,
-                    posX,
-                    posY,
-                    flipped,
-                    ref HueVector
-                );
+            batcher.DrawSprite
+            (
+                frame,
+                posX,
+                posY,
+                flipped,
+                ref HueVector
+            );
 
             if (!SerialHelper.IsValid(owner))
             {
@@ -413,10 +413,9 @@ namespace ClassicUO.Game.GameObjects
                 return;
             }
 
-                if (frame.Contains(flipped ? posX + frame.Width - SelectedObject.TranslatedMousePositionByViewport.X : SelectedObject.TranslatedMousePositionByViewport.X - posX, SelectedObject.TranslatedMousePositionByViewport.Y - posY))
-                {
-                    SelectedObject.Object = owner;
-                }
+            if (frame.Contains(flipped ? posX + frame.Width - SelectedObject.TranslatedMousePositionByViewport.X : SelectedObject.TranslatedMousePositionByViewport.X - posX, SelectedObject.TranslatedMousePositionByViewport.Y - posY))
+            {
+                SelectedObject.Object = owner;
             }
         }
     }
