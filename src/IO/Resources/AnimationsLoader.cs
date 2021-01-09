@@ -3147,7 +3147,7 @@ namespace ClassicUO.IO.Resources
             ZLib.Decompress
             (
                 file.PositionAddress,
-                (int) animData.CompressedLength,
+                fileIndex.Length,
                 0,
                 _bufferCachePtr,
                 decLen
