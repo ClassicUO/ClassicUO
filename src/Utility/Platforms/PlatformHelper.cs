@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+using ClassicUO.Utility.Logging;
 
 namespace ClassicUO.Utility.Platforms
 {
