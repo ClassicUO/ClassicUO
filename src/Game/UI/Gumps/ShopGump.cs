@@ -637,13 +637,13 @@ namespace ClassicUO.Game.UI.Gumps
                 if (SerialHelper.IsMobile(LocalSerial))
                 {
                     ushort hue2 = Hue;
-                    AnimationDirection direction = GetMobileAnimationDirection(Graphic, ref hue2, 1);
+                    AnimationFrameTexture frame = AnimationsLoader.Instance.GetBodyFrame(ref graphic, ref hue2, 1, 0, 1, true); 
 
                     Add
                     (
                         control = new TextureControl
                         {
-                            Texture = direction != null ? direction.FrameCount != 0 ? direction.Frames[0] : null : null,
+                            Texture = frame,
                             X = 5,
                             Y = 5 + offY,
                             AcceptMouseInput = false,
@@ -783,27 +783,29 @@ namespace ClassicUO.Game.UI.Gumps
                 }
 
                 byte group = GetAnimGroup(graphic);
-                IndexAnimation index = AnimationsLoader.Instance.DataIndex[graphic];
+                //IndexAnimation index = AnimationsLoader.Instance.DataIndex[graphic];
 
-                AnimationDirection direction = index.Groups[group].Direction[dirIndex];
+                // AnimationDirection direction = index.Groups[group].Direction[dirIndex];
 
-                for (int i = 0; i < 2 && direction.FrameCount == 0; i++)
-                {
-                    if (!AnimationsLoader.Instance.LoadAnimationFrames(graphic, group, dirIndex, ref direction))
-                    {
-                        //direction = AnimationsLoader.Instance.GetCorpseAnimationGroup(ref graphic, ref group, ref hue2).Direction[dirIndex];
-                        //graphic = item.ItemData.AnimID;
-                        //group = GetAnimGroup(graphic);
-                        //index = AnimationsLoader.Instance.DataIndex[graphic];
-                        //direction = AnimationsLoader.Instance.GetBodyAnimationGroup(ref graphic, ref group, ref hue2, true).Direction[dirIndex];
-                        ////direction = index.Groups[group].Direction[1];
-                        //AnimationsLoader.Instance.AnimID = graphic;
-                        //AnimationsLoader.Instance.AnimGroup = group;
-                        //AnimationsLoader.Instance.Direction = dirIndex;
-                    }
-                }
+                //ref var entry = ref AnimationsLoader.Instance.GetBodyFrame();
 
-                return direction;
+                //for (int i = 0; i < 2 && direction.FrameCount == 0; i++)
+                //{
+                //    if (!AnimationsLoader.Instance.LoadAnimationFrames(graphic, group, dirIndex, ref direction))
+                //    {
+                //        //direction = AnimationsLoader.Instance.GetCorpseAnimationGroup(ref graphic, ref group, ref hue2).Direction[dirIndex];
+                //        //graphic = item.ItemData.AnimID;
+                //        //group = GetAnimGroup(graphic);
+                //        //index = AnimationsLoader.Instance.DataIndex[graphic];
+                //        //direction = AnimationsLoader.Instance.GetBodyAnimationGroup(ref graphic, ref group, ref hue2, true).Direction[dirIndex];
+                //        ////direction = index.Groups[group].Direction[1];
+                //        //AnimationsLoader.Instance.AnimID = graphic;
+                //        //AnimationsLoader.Instance.AnimGroup = group;
+                //        //AnimationsLoader.Instance.Direction = dirIndex;
+                //    }
+                //}
+
+                return null;
             }
 
             public void SetName(string s, bool new_name)

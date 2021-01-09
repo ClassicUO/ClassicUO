@@ -424,265 +424,226 @@ namespace ClassicUO.Game.GameObjects
 
             ushort hueFromFile = _viewHue;
 
-            AnimationDirection direction = AnimationsLoader.Instance.GetBodyAnimationGroup(ref id, ref animGroup, ref hueFromFile, isParent)
-                                                           .Direction[dir];
+            AnimationFrameTexture frame = AnimationsLoader.Instance.GetBodyFrame(ref id, ref hueFromFile, animGroup, dir, frameIndex, isParent);
 
-            if (direction == null || direction.Address == -1 || direction.FileIndex == -1)
+            if (frame == null || frame.IsDisposed)
             {
                 if (!(_transform && entity == null && !hasShadow))
                 {
                     return 0;
                 }
+
+                goto SKIP;
             }
 
-            if (direction == null || (direction.FrameCount == 0 || direction.Frames == null) &&
-                !AnimationsLoader.Instance.LoadAnimationFrames(id, animGroup, dir, ref direction))
+            frame.Ticks = Time.Ticks;
+
+            if (mirror)
             {
-                if (!(_transform && entity == null && !hasShadow))
+                x -= frame.Width - frame.CenterX;
+            }
+            else
+            {
+                x -= frame.CenterX;
+            }
+
+            y -= frame.Height + frame.CenterY;
+
+            SKIP:
+
+            if (hasShadow)
+            {
+                batcher.DrawSpriteShadow(frame, x, y, mirror);
+            }
+            else
+            {
+                ushort hue = _viewHue;
+                bool partialHue = false;
+
+                if (hue == 0)
                 {
-                    return 0;
-                }
-            }
+                    hue = entity?.Hue ?? owner.Hue;
+                    partialHue = !isMount && entity != null && entity.ItemData.IsPartialHue;
 
-            if (direction == null)
-            {
-                return 0;
-            }
-
-            direction.LastAccessTime = Time.Ticks;
-
-            int fc = direction.FrameCount;
-
-            if (fc > 0 && frameIndex >= fc || frameIndex < 0)
-            {
-                frameIndex = 0;
-            }
-
-            if (frameIndex < direction.FrameCount)
-            {
-                AnimationFrameTexture frame = direction.Frames[frameIndex];
-
-                if (frame == null || frame.IsDisposed)
-                {
-                    if (!(_transform && entity == null && !hasShadow))
+                    if ((hue & 0x8000) != 0)
                     {
-                        return 0;
+                        partialHue = true;
+                        hue &= 0x7FFF;
                     }
-
-                    goto SKIP;
-                }
-
-                frame.Ticks = Time.Ticks;
-
-                if (mirror)
-                {
-                    x -= frame.Width - frame.CenterX;
-                }
-                else
-                {
-                    x -= frame.CenterX;
-                }
-
-                y -= frame.Height + frame.CenterY;
-
-                SKIP:
-
-                if (hasShadow)
-                {
-                    batcher.DrawSpriteShadow(frame, x, y, mirror);
-                }
-                else
-                {
-                    ushort hue = _viewHue;
-                    bool partialHue = false;
 
                     if (hue == 0)
                     {
-                        hue = entity?.Hue ?? owner.Hue;
-                        partialHue = !isMount && entity != null && entity.ItemData.IsPartialHue;
+                        hue = hueFromFile;
 
-                        if ((hue & 0x8000) != 0)
+                        if (hue == 0 && _equipConvData.HasValue)
                         {
-                            partialHue = true;
-                            hue &= 0x7FFF;
+                            hue = _equipConvData.Value.Color;
                         }
 
-                        if (hue == 0)
-                        {
-                            hue = hueFromFile;
-
-                            if (hue == 0 && _equipConvData.HasValue)
-                            {
-                                hue = _equipConvData.Value.Color;
-                            }
-
-                            partialHue = false;
-                        }
-                    }
-
-                    ResetHueVector();
-                    ShaderHueTranslator.GetHueVector(ref HueVector, hue, partialHue, alpha);
-
-                    if (_transform)
-                    {
-                        const float UPPER_BODY_RATIO = 0.35f;
-                        const float MID_BODY_RATIO = 0.60f;
-                        const float LOWER_BODY_RATIO = 0.94f;
-
-                        if (entity == null && isHuman)
-                        {
-                            int frameHeight = frame?.Height ?? 61;
-                            _characterFrameStartY = y - (frame != null ? 0 : frameHeight - SIT_OFFSET_Y);
-                            _characterFrameHeight = frameHeight;
-                            _startCharacterWaistY = (int) (frameHeight * UPPER_BODY_RATIO) + _characterFrameStartY;
-                            _startCharacterKneesY = (int) (frameHeight * MID_BODY_RATIO) + _characterFrameStartY;
-                            _startCharacterFeetY = (int) (frameHeight * LOWER_BODY_RATIO) + _characterFrameStartY;
-
-                            if (frame == null)
-                            {
-                                return 0;
-                            }
-                        }
-
-                        float h3mod = UPPER_BODY_RATIO;
-                        float h6mod = MID_BODY_RATIO;
-                        float h9mod = LOWER_BODY_RATIO;
-
-
-                        if (entity != null)
-                        {
-                            float itemsEndY = y + frame.Height;
-
-                            if (y >= _startCharacterWaistY)
-                            {
-                                h3mod = 0;
-                            }
-                            else if (itemsEndY <= _startCharacterWaistY)
-                            {
-                                h3mod = 1.0f;
-                            }
-                            else
-                            {
-                                float upperBodyDiff = _startCharacterWaistY - y;
-                                h3mod = upperBodyDiff / frame.Height;
-
-                                if (h3mod < 0)
-                                {
-                                    h3mod = 0;
-                                }
-                            }
-
-
-                            if (_startCharacterWaistY >= itemsEndY || y >= _startCharacterKneesY)
-                            {
-                                h6mod = 0;
-                            }
-                            else if (_startCharacterWaistY <= y && itemsEndY <= _startCharacterKneesY)
-                            {
-                                h6mod = 1.0f;
-                            }
-                            else
-                            {
-                                float midBodyDiff;
-
-                                if (y >= _startCharacterWaistY)
-                                {
-                                    midBodyDiff = _startCharacterKneesY - y;
-                                }
-                                else if (itemsEndY <= _startCharacterKneesY)
-                                {
-                                    midBodyDiff = itemsEndY - _startCharacterWaistY;
-                                }
-                                else
-                                {
-                                    midBodyDiff = _startCharacterKneesY - _startCharacterWaistY;
-                                }
-
-                                h6mod = h3mod + midBodyDiff / frame.Height;
-
-                                if (h6mod < 0)
-                                {
-                                    h6mod = 0;
-                                }
-                            }
-
-
-                            if (itemsEndY <= _startCharacterKneesY)
-                            {
-                                h9mod = 0;
-                            }
-                            else if (y >= _startCharacterKneesY)
-                            {
-                                h9mod = 1.0f;
-                            }
-                            else
-                            {
-                                float lowerBodyDiff = itemsEndY - _startCharacterKneesY;
-                                h9mod = h6mod + lowerBodyDiff / frame.Height;
-
-                                if (h9mod < 0)
-                                {
-                                    h9mod = 0;
-                                }
-                            }
-                        }
-
-                        batcher.DrawCharacterSitted(frame, x, y, mirror, h3mod, h6mod, h9mod, ref HueVector);
-                    }
-                    else if (frame != null)
-                    {
-                        batcher.DrawSprite(frame, x, y, mirror, ref HueVector);
-
-                        int yy = -(frame.Height + frame.CenterY + 3);
-                        int xx = -frame.CenterX;
-
-                        if (mirror)
-                        {
-                            xx = -(frame.Width - frame.CenterX);
-                        }
-
-                        if (xx < owner.FrameInfo.X)
-                        {
-                            owner.FrameInfo.X = xx;
-                        }
-
-                        if (yy < owner.FrameInfo.Y)
-                        {
-                            owner.FrameInfo.Y = yy;
-                        }
-
-                        if (owner.FrameInfo.Width < xx + frame.Width)
-                        {
-                            owner.FrameInfo.Width = xx + frame.Width;
-                        }
-
-                        if (owner.FrameInfo.Height < yy + frame.Height)
-                        {
-                            owner.FrameInfo.Height = yy + frame.Height;
-                        }
-                    }
-
-                    if (frame.Contains
-                    (
-                        mirror ?
-                            x + frame.Width - SelectedObject.TranslatedMousePositionByViewport.X :
-                            SelectedObject.TranslatedMousePositionByViewport.X - x,
-                        SelectedObject.TranslatedMousePositionByViewport.Y - y
-                    ))
-                    {
-                        SelectedObject.Object = owner;
-                    }
-
-                    if (entity != null && entity.ItemData.IsLight)
-                    {
-                        Client.Game.GetScene<GameScene>().AddLight(owner, entity, mirror ? x + frame.Width : x, y);
+                        partialHue = false;
                     }
                 }
 
-                return AnimationsLoader.Instance.DataIndex[id].MountedHeightOffset;
+                ResetHueVector();
+                ShaderHueTranslator.GetHueVector(ref HueVector, hue, partialHue, alpha);
+
+                if (_transform)
+                {
+                    const float UPPER_BODY_RATIO = 0.35f;
+                    const float MID_BODY_RATIO = 0.60f;
+                    const float LOWER_BODY_RATIO = 0.94f;
+
+                    if (entity == null && isHuman)
+                    {
+                        int frameHeight = frame?.Height ?? 61;
+                        _characterFrameStartY = y - (frame != null ? 0 : frameHeight - SIT_OFFSET_Y);
+                        _characterFrameHeight = frameHeight;
+                        _startCharacterWaistY = (int) (frameHeight * UPPER_BODY_RATIO) + _characterFrameStartY;
+                        _startCharacterKneesY = (int) (frameHeight * MID_BODY_RATIO) + _characterFrameStartY;
+                        _startCharacterFeetY = (int) (frameHeight * LOWER_BODY_RATIO) + _characterFrameStartY;
+
+                        if (frame == null)
+                        {
+                            return 0;
+                        }
+                    }
+
+                    float h3mod = UPPER_BODY_RATIO;
+                    float h6mod = MID_BODY_RATIO;
+                    float h9mod = LOWER_BODY_RATIO;
+
+
+                    if (entity != null)
+                    {
+                        float itemsEndY = y + frame.Height;
+
+                        if (y >= _startCharacterWaistY)
+                        {
+                            h3mod = 0;
+                        }
+                        else if (itemsEndY <= _startCharacterWaistY)
+                        {
+                            h3mod = 1.0f;
+                        }
+                        else
+                        {
+                            float upperBodyDiff = _startCharacterWaistY - y;
+                            h3mod = upperBodyDiff / frame.Height;
+
+                            if (h3mod < 0)
+                            {
+                                h3mod = 0;
+                            }
+                        }
+
+
+                        if (_startCharacterWaistY >= itemsEndY || y >= _startCharacterKneesY)
+                        {
+                            h6mod = 0;
+                        }
+                        else if (_startCharacterWaistY <= y && itemsEndY <= _startCharacterKneesY)
+                        {
+                            h6mod = 1.0f;
+                        }
+                        else
+                        {
+                            float midBodyDiff;
+
+                            if (y >= _startCharacterWaistY)
+                            {
+                                midBodyDiff = _startCharacterKneesY - y;
+                            }
+                            else if (itemsEndY <= _startCharacterKneesY)
+                            {
+                                midBodyDiff = itemsEndY - _startCharacterWaistY;
+                            }
+                            else
+                            {
+                                midBodyDiff = _startCharacterKneesY - _startCharacterWaistY;
+                            }
+
+                            h6mod = h3mod + midBodyDiff / frame.Height;
+
+                            if (h6mod < 0)
+                            {
+                                h6mod = 0;
+                            }
+                        }
+
+
+                        if (itemsEndY <= _startCharacterKneesY)
+                        {
+                            h9mod = 0;
+                        }
+                        else if (y >= _startCharacterKneesY)
+                        {
+                            h9mod = 1.0f;
+                        }
+                        else
+                        {
+                            float lowerBodyDiff = itemsEndY - _startCharacterKneesY;
+                            h9mod = h6mod + lowerBodyDiff / frame.Height;
+
+                            if (h9mod < 0)
+                            {
+                                h9mod = 0;
+                            }
+                        }
+                    }
+
+                    batcher.DrawCharacterSitted(frame, x, y, mirror, h3mod, h6mod, h9mod, ref HueVector);
+                }
+                else if (frame != null)
+                {
+                    batcher.DrawSprite(frame, x, y, mirror, ref HueVector);
+
+                    int yy = -(frame.Height + frame.CenterY + 3);
+                    int xx = -frame.CenterX;
+
+                    if (mirror)
+                    {
+                        xx = -(frame.Width - frame.CenterX);
+                    }
+
+                    if (xx < owner.FrameInfo.X)
+                    {
+                        owner.FrameInfo.X = xx;
+                    }
+
+                    if (yy < owner.FrameInfo.Y)
+                    {
+                        owner.FrameInfo.Y = yy;
+                    }
+
+                    if (owner.FrameInfo.Width < xx + frame.Width)
+                    {
+                        owner.FrameInfo.Width = xx + frame.Width;
+                    }
+
+                    if (owner.FrameInfo.Height < yy + frame.Height)
+                    {
+                        owner.FrameInfo.Height = yy + frame.Height;
+                    }
+                }
+
+                if (frame.Contains
+                (
+                    mirror ?
+                        x + frame.Width - SelectedObject.TranslatedMousePositionByViewport.X :
+                        SelectedObject.TranslatedMousePositionByViewport.X - x,
+                    SelectedObject.TranslatedMousePositionByViewport.Y - y
+                ))
+                {
+                    SelectedObject.Object = owner;
+                }
+
+                if (entity != null && entity.ItemData.IsLight)
+                {
+                    Client.Game.GetScene<GameScene>().AddLight(owner, entity, mirror ? x + frame.Width : x, y);
+                }
             }
 
-            return 0;
+            return AnimationsLoader.Instance.GetAnimationEntry(id).MountOffsetY; //AnimationsLoader.Instance.DataIndex[id].MountedHeightOffset;
         }
 
         internal static bool IsCovered(Mobile mobile, Layer layer)

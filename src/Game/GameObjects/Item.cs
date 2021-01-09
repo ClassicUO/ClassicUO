@@ -1034,20 +1034,12 @@ namespace ClassicUO.Game.GameObjects
                     {
                         byte animGroup = AnimationsLoader.Instance.GetDieGroupIndex(id, UsedLayer);
 
-                        ushort hue = 0;
-
-                        AnimationDirection direction = AnimationsLoader.Instance.GetCorpseAnimationGroup(ref id, ref animGroup, ref hue)
-                                                                       .Direction[dir];
-
-                        if (direction.FrameCount == 0 || direction.Frames == null)
+                        ref AnimationDirectionEntry entry = ref AnimationsLoader.Instance.GetAnimationDirectionEntry(id, animGroup, dir, loadTextures: true);
+                       
+                        if (entry.Address != IntPtr.Zero && entry.Size != 0 || entry.IsUOP)
                         {
-                            AnimationsLoader.Instance.LoadAnimationFrames(id, animGroup, dir, ref direction);
-                        }
-
-                        if (direction.Address != 0 && direction.Size != 0 || direction.IsUOP)
-                        {
-                            direction.LastAccessTime = Time.Ticks;
-                            int fc = direction.FrameCount;
+                            entry.LastAccessTime = Time.Ticks;
+                            int fc = entry.FramesCount;
 
                             if (frameIndex >= fc)
                             {

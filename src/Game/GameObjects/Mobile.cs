@@ -391,24 +391,26 @@ namespace ClassicUO.Game.GameObjects
                     return;
                 }
 
-                ANIMATION_GROUPS_TYPE type = AnimationsLoader.Instance.DataIndex[graphic].Type;
+                ref AnimationEntry ia = ref AnimationsLoader.Instance.GetAnimationEntry(graphic);
 
-                if (AnimationsLoader.Instance.DataIndex[graphic].IsUOP &&
-                    !AnimationsLoader.Instance.DataIndex[graphic].IsValidMUL)
+                ANIMATION_GROUPS_TYPE type = ia.Type;
+
+                if ((ia.Flags & ANIMATION_FLAGS.AF_USE_UOP_ANIMATION) != 0 && !ia.IsValidMUL)
                 {
                     // do nothing ?
                 }
                 else
                 {
-                    if (!AnimationsLoader.Instance.DataIndex[graphic].HasBodyConversion)
+                    if ((ia.GraphicConversion & ~0x8000) == 0)
                     {
-                        ushort newGraphic = AnimationsLoader.Instance.DataIndex[graphic].Graphic;
+                        ushort newGraphic = ia.Graphic;
 
                         if (graphic != newGraphic)
                         {
                             graphic = newGraphic;
 
-                            ANIMATION_GROUPS_TYPE newType = AnimationsLoader.Instance.DataIndex[graphic].Type;
+                            ia = ref AnimationsLoader.Instance.GetAnimationEntry(graphic);
+                            ANIMATION_GROUPS_TYPE newType = ia.Type;
 
                             if (newType != type)
                             {
@@ -418,7 +420,7 @@ namespace ClassicUO.Game.GameObjects
                     }
                 }
 
-                ANIMATION_FLAGS flags = AnimationsLoader.Instance.DataIndex[graphic].Flags;
+                ANIMATION_FLAGS flags = ia.Flags;
 
                 ANIMATION_GROUPS animGroup = ANIMATION_GROUPS.AG_NONE;
 
@@ -627,21 +629,12 @@ namespace ClassicUO.Game.GameObjects
 
                 if (id < Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT && dir < 5)
                 {
-                    ushort hue = 0;
-
-                    AnimationDirection direction = AnimationsLoader.Instance.GetBodyAnimationGroup                                                                       (ref id, ref animGroup, ref hue, true)
-                                                                   .Direction[dir];
-
-                    if (direction != null && (direction.FrameCount == 0 || direction.Frames == null))
+                    ref AnimationDirectionEntry entry = ref AnimationsLoader.Instance.GetAnimationDirectionEntry(id, animGroup, dir, loadTextures: true);
+ 
+                    if (entry.Address != IntPtr.Zero && entry.Size != 0 /*&& entry.FileIndex != -1*/ || entry.IsUOP)
                     {
-                        AnimationsLoader.Instance.LoadAnimationFrames(id, animGroup, dir, ref direction);
-                    }
-
-                    if (direction != null &&
-                        (direction.Address != 0 && direction.Size != 0 && direction.FileIndex != -1 || direction.IsUOP))
-                    {
-                        direction.LastAccessTime = Time.Ticks;
-                        int fc = direction.FrameCount;
+                        entry.LastAccessTime = Time.Ticks;
+                        int fc = entry.FramesCount;
 
                         if (AnimationFromServer)
                         {
