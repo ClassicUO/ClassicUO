@@ -3069,9 +3069,7 @@ namespace ClassicUO.IO.Resources
         {
             if (graphic < Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT && group < 100)
             {
-                ushort hue = 0;
-
-                ref var dirEntry = ref _animationCache.GetDirectionEntry(graphic, group, 0);
+                ref var dirEntry = ref GetAnimationDirectionEntry(graphic, group, 0);
 
                 //AnimationDirection direction = isCorpse ?
                 //    GetCorpseAnimationGroup(ref graphic, ref group, ref hue)?.Direction[0] :
