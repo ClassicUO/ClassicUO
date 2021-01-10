@@ -1,23 +1,32 @@
 ﻿#region license
 
-// Copyright (C) 2020 ClassicUO Development Community on Github
+// Copyright (c) 2021, andreakarasho
+// All rights reserved.
 // 
-// This project is an alternative client for the game Ultima Online.
-// The goal of this is to develop a lightweight client considering
-// new technologies.
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+// 1. Redistributions of source code must retain the above copyright
+//    notice, this list of conditions and the following disclaimer.
+// 2. Redistributions in binary form must reproduce the above copyright
+//    notice, this list of conditions and the following disclaimer in the
+//    documentation and/or other materials provided with the distribution.
+// 3. All advertising materials mentioning features or use of this software
+//    must display the following acknowledgement:
+//    This product includes software developed by andreakarasho - https://github.com/andreakarasho
+// 4. Neither the name of the copyright holder nor the
+//    names of its contributors may be used to endorse or promote products
+//    derived from this software without specific prior written permission.
 // 
-//  This program is free software: you can redistribute it and/or modify
-//  it under the terms of the GNU General Public License as published by
-//  the Free Software Foundation, either version 3 of the License, or
-//  (at your option) any later version.
-// 
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-// 
-//  You should have received a copy of the GNU General Public License
-//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ''AS IS'' AND ANY
+// EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+// WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+// DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY
+// DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+// (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+// LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+// ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+// SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #endregion
 
@@ -62,7 +71,16 @@ namespace ClassicUO.Game.UI.Gumps
 
             int startY = 25;
 
-            Label text = new Label(ResGumps.Channels, false, 0x0386, 345, 2, FontStyle.None, TEXT_ALIGN_TYPE.TS_CENTER)
+            Label text = new Label
+            (
+                ResGumps.Channels,
+                false,
+                0x0386,
+                345,
+                2,
+                FontStyle.None,
+                TEXT_ALIGN_TYPE.TS_CENTER
+            )
             {
                 Y = startY
             };
@@ -71,10 +89,28 @@ namespace ClassicUO.Game.UI.Gumps
 
             startY += 40;
 
-            Add(new BorderControl(61, startY - 3, 220 + 8, 200 + 6, 3));
+            Add
+            (
+                new BorderControl
+                (
+                    61,
+                    startY - 3,
+                    220 + 8,
+                    200 + 6,
+                    3
+                )
+            );
+
             Add(new AlphaBlendControl(0) { X = 64, Y = startY, Width = 220, Height = 200 });
 
-            ScrollArea area = new ScrollArea(64, startY, 220, 200, true)
+            ScrollArea area = new ScrollArea
+            (
+                64,
+                startY,
+                220,
+                200,
+                true
+            )
             {
                 ScrollbarBehaviour = ScrollbarBehaviour.ShowAlways
             };
@@ -97,20 +133,36 @@ namespace ClassicUO.Game.UI.Gumps
             startY = 275;
 
             text = new Label
-                (ResGumps.YourCurrentChannel, false, 0x0386, 345, 2, FontStyle.None, TEXT_ALIGN_TYPE.TS_CENTER)
-                {
-                    Y = startY
-                };
+            (
+                ResGumps.YourCurrentChannel,
+                false,
+                0x0386,
+                345,
+                2,
+                FontStyle.None,
+                TEXT_ALIGN_TYPE.TS_CENTER
+            )
+            {
+                Y = startY
+            };
 
             Add(text);
 
             startY += 25;
 
             _currentChannelLabel = new Label
-                (ChatManager.CurrentChannelName, false, 0x0386, 345, 2, FontStyle.None, TEXT_ALIGN_TYPE.TS_CENTER)
-                {
-                    Y = startY
-                };
+            (
+                ChatManager.CurrentChannelName,
+                false,
+                0x0386,
+                345,
+                2,
+                FontStyle.None,
+                TEXT_ALIGN_TYPE.TS_CENTER
+            )
+            {
+                Y = startY
+            };
 
             Add(_currentChannelLabel);
 
@@ -144,7 +196,14 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add(button);
 
-            text = new Label(ResGumps.Join, false, 0x0386, 0, 2)
+            text = new Label
+            (
+                ResGumps.Join,
+                false,
+                0x0386,
+                0,
+                2
+            )
             {
                 X = 65,
                 Y = startY
@@ -152,7 +211,14 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add(text);
 
-            text = new Label(ResGumps.Leave, false, 0x0386, 0, 2)
+            text = new Label
+            (
+                ResGumps.Leave,
+                false,
+                0x0386,
+                0,
+                2
+            )
             {
                 X = 140,
                 Y = startY
@@ -160,7 +226,14 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add(text);
 
-            text = new Label(ResGumps.Create, false, 0x0386, 0, 2)
+            text = new Label
+            (
+                ResGumps.Create,
+                false,
+                0x0386,
+                0,
+                2
+            )
             {
                 X = 233,
                 Y = startY
@@ -256,9 +329,26 @@ namespace ClassicUO.Game.UI.Gumps
 
                 Add(new AlphaBlendControl(0) { Width = Width, Height = Height });
 
-                Add(new BorderControl(0, 0, Width, ROW_HEIGHT, BORDER_SIZE));
+                Add
+                (
+                    new BorderControl
+                    (
+                        0,
+                        0,
+                        Width,
+                        ROW_HEIGHT,
+                        BORDER_SIZE
+                    )
+                );
 
-                Label text = new Label(ResGumps.CreateAChannel, true, 0x23, Width - 4, 1)
+                Label text = new Label
+                (
+                    ResGumps.CreateAChannel,
+                    true,
+                    0x23,
+                    Width - 4,
+                    1
+                )
                 {
                     X = 6,
                     Y = BORDER_SIZE
@@ -266,9 +356,26 @@ namespace ClassicUO.Game.UI.Gumps
 
                 Add(text);
 
-                Add(new BorderControl(0, ROW_HEIGHT - BORDER_SIZE, Width, ROW_HEIGHT, BORDER_SIZE));
+                Add
+                (
+                    new BorderControl
+                    (
+                        0,
+                        ROW_HEIGHT - BORDER_SIZE,
+                        Width,
+                        ROW_HEIGHT,
+                        BORDER_SIZE
+                    )
+                );
 
-                text = new Label(ResGumps.Name, true, 0x23, Width - 4, 1)
+                text = new Label
+                (
+                    ResGumps.Name,
+                    true,
+                    0x23,
+                    Width - 4,
+                    1
+                )
                 {
                     X = 6,
                     Y = ROW_HEIGHT
@@ -276,7 +383,14 @@ namespace ClassicUO.Game.UI.Gumps
 
                 Add(text);
 
-                _textBox = new StbTextBox(1, -1, Width - 50, hue: 0x0481, style: FontStyle.Fixed)
+                _textBox = new StbTextBox
+                (
+                    1,
+                    -1,
+                    Width - 50,
+                    hue: 0x0481,
+                    style: FontStyle.Fixed
+                )
                 {
                     X = 45,
                     Y = ROW_HEIGHT,
@@ -286,7 +400,17 @@ namespace ClassicUO.Game.UI.Gumps
 
                 Add(_textBox);
 
-                Add(new BorderControl(0, ROW_HEIGHT * 2 - BORDER_SIZE * 2, Width, ROW_HEIGHT, BORDER_SIZE));
+                Add
+                (
+                    new BorderControl
+                    (
+                        0,
+                        ROW_HEIGHT * 2 - BORDER_SIZE * 2,
+                        Width,
+                        ROW_HEIGHT,
+                        BORDER_SIZE
+                    )
+                );
 
                 // close
                 Add
@@ -338,7 +462,14 @@ namespace ClassicUO.Game.UI.Gumps
 
                 Add
                 (
-                    _label = new Label(text, false, 0x49, Width, 3)
+                    _label = new Label
+                    (
+                        text,
+                        false,
+                        0x49,
+                        Width,
+                        3
+                    )
                     {
                         X = 3
                     }
@@ -385,7 +516,15 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (MouseIsOver)
                 {
-                    batcher.Draw2D(SolidColorTextureCache.GetTexture(Color.Cyan), x, y, Width, Height, ref HueVector);
+                    batcher.Draw2D
+                    (
+                        SolidColorTextureCache.GetTexture(Color.Cyan),
+                        x,
+                        y,
+                        Width,
+                        Height,
+                        ref HueVector
+                    );
                 }
 
                 return base.Draw(batcher, x, y);

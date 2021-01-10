@@ -1,23 +1,32 @@
 ﻿#region license
 
-//  Copyright (C) 2020 ClassicUO Development Community on Github
-//
-//	This project is an alternative client for the game Ultima Online.
-//	The goal of this is to develop a lightweight client considering 
-//	new technologies.  
-//      
-//  This program is free software: you can redistribute it and/or modify
-//  it under the terms of the GNU General Public License as published by
-//  the Free Software Foundation, either version 3 of the License, or
-//  (at your option) any later version.
-//
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-//
-//  You should have received a copy of the GNU General Public License
-//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// Copyright (c) 2021, andreakarasho
+// All rights reserved.
+// 
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+// 1. Redistributions of source code must retain the above copyright
+//    notice, this list of conditions and the following disclaimer.
+// 2. Redistributions in binary form must reproduce the above copyright
+//    notice, this list of conditions and the following disclaimer in the
+//    documentation and/or other materials provided with the distribution.
+// 3. All advertising materials mentioning features or use of this software
+//    must display the following acknowledgement:
+//    This product includes software developed by andreakarasho - https://github.com/andreakarasho
+// 4. Neither the name of the copyright holder nor the
+//    names of its contributors may be used to endorse or promote products
+//    derived from this software without specific prior written permission.
+// 
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ''AS IS'' AND ANY
+// EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+// WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+// DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY
+// DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+// (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+// LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+// ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+// SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #endregion
 
@@ -132,8 +141,7 @@ namespace ClassicUO.Game.GameObjects
                 {
                     if (result == 0xFF)
                     {
-                        if ((flags & ANIMATION_FLAGS.AF_IDLE_AT_8_FRAME) != 0 &&
-                            AnimationsLoader.Instance.IsAnimationExists(graphic, 8))
+                        if ((flags & ANIMATION_FLAGS.AF_IDLE_AT_8_FRAME) != 0 && AnimationsLoader.Instance.IsAnimationExists(graphic, 8))
                         {
                             result = 8;
                         }
@@ -152,8 +160,7 @@ namespace ClassicUO.Game.GameObjects
                 }
                 else if (isrun)
                 {
-                    if ((flags & ANIMATION_FLAGS.AF_CAN_FLYING) != 0 && AnimationsLoader.Instance.IsAnimationExists
-                        (graphic, 19))
+                    if ((flags & ANIMATION_FLAGS.AF_CAN_FLYING) != 0 && AnimationsLoader.Instance.IsAnimationExists(graphic, 19))
                     {
                         result = 19;
                     }
@@ -537,8 +544,7 @@ namespace ClassicUO.Game.GameObjects
 
                 if (v13 == 12)
                 {
-                    if (!(type == ANIMATION_GROUPS_TYPE.HUMAN || type == ANIMATION_GROUPS_TYPE.EQUIPMENT ||
-                          (flags & ANIMATION_FLAGS.AF_UNKNOWN_1000) != 0))
+                    if (!(type == ANIMATION_GROUPS_TYPE.HUMAN || type == ANIMATION_GROUPS_TYPE.EQUIPMENT || (flags & ANIMATION_FLAGS.AF_UNKNOWN_1000) != 0))
                     {
                         if (type != ANIMATION_GROUPS_TYPE.MONSTER)
                         {
@@ -1011,7 +1017,15 @@ namespace ClassicUO.Game.GameObjects
 
                     if ((flags & ANIMATION_FLAGS.AF_CALCULATE_OFFSET_LOW_GROUP_EXTENDED) != 0)
                     {
-                        CalculateHight(graphic, mobile, flags, isRun, isWalking, ref result);
+                        CalculateHight
+                        (
+                            graphic,
+                            mobile,
+                            flags,
+                            isRun,
+                            isWalking,
+                            ref result
+                        );
                     }
                     else
                     {
@@ -1047,8 +1061,7 @@ namespace ClassicUO.Game.GameObjects
                                 result = AnimationsLoader.Instance.IsAnimationExists(graphic, 1) ? (byte) 1 : (byte) 2;
                             }
                         }
-                        else if ((flags & ANIMATION_FLAGS.AF_USE_UOP_ANIMATION) != 0 && (!mobile.InWarMode ||
-                            !AnimationsLoader.Instance.IsAnimationExists(graphic, 0)))
+                        else if ((flags & ANIMATION_FLAGS.AF_USE_UOP_ANIMATION) != 0 && (!mobile.InWarMode || !AnimationsLoader.Instance.IsAnimationExists(graphic, 0)))
                         {
                             result = 22;
                         }
@@ -1061,7 +1074,15 @@ namespace ClassicUO.Game.GameObjects
                     break;
 
                 case ANIMATION_GROUPS_TYPE.MONSTER:
-                    CalculateHight(graphic, mobile, flags, isRun, isWalking, ref result);
+                    CalculateHight
+                    (
+                        graphic,
+                        mobile,
+                        flags,
+                        isRun,
+                        isWalking,
+                        ref result
+                    );
 
                     break;
 
@@ -1094,8 +1115,7 @@ namespace ClassicUO.Game.GameObjects
                     {
                         if (result == 0xFF)
                         {
-                            bool haveLightAtHand2 = hand2 != null && hand2.ItemData.IsLight &&
-                                                    hand2.ItemData.AnimID == graphic;
+                            bool haveLightAtHand2 = hand2 != null && hand2.ItemData.IsLight && hand2.ItemData.AnimID == graphic;
 
                             if (mobile.IsMounted)
                             {
@@ -1128,8 +1148,7 @@ namespace ClassicUO.Game.GameObjects
                                 }
                                 else
                                 {
-                                    if (uop && type == ANIMATION_GROUPS_TYPE.EQUIPMENT &&
-                                        !AnimationsLoader.Instance.IsAnimationExists(graphic, 4))
+                                    if (uop && type == ANIMATION_GROUPS_TYPE.EQUIPMENT && !AnimationsLoader.Instance.IsAnimationExists(graphic, 4))
                                     {
                                         result = 37;
                                     }
@@ -1167,8 +1186,7 @@ namespace ClassicUO.Game.GameObjects
                                     {
                                         if (hand2 != null)
                                         {
-                                            if (uop && type == ANIMATION_GROUPS_TYPE.EQUIPMENT &&
-                                                !AnimationsLoader.Instance.IsAnimationExists(graphic, 7))
+                                            if (uop && type == ANIMATION_GROUPS_TYPE.EQUIPMENT && !AnimationsLoader.Instance.IsAnimationExists(graphic, 7))
                                             {
                                                 result = 8;
                                             }
@@ -1252,8 +1270,7 @@ namespace ClassicUO.Game.GameObjects
                                 {
                                     if (isRun)
                                     {
-                                        if (uop && type == ANIMATION_GROUPS_TYPE.EQUIPMENT &&
-                                            !AnimationsLoader.Instance.IsAnimationExists(graphic, 2))
+                                        if (uop && type == ANIMATION_GROUPS_TYPE.EQUIPMENT && !AnimationsLoader.Instance.IsAnimationExists(graphic, 2))
                                         {
                                             result = 3;
                                         }
@@ -1269,8 +1286,7 @@ namespace ClassicUO.Game.GameObjects
                                     }
                                     else
                                     {
-                                        if (uop && type == ANIMATION_GROUPS_TYPE.EQUIPMENT &&
-                                            !AnimationsLoader.Instance.IsAnimationExists(graphic, 0))
+                                        if (uop && type == ANIMATION_GROUPS_TYPE.EQUIPMENT && !AnimationsLoader.Instance.IsAnimationExists(graphic, 0))
                                         {
                                             result = 1;
                                         }
@@ -1414,20 +1430,12 @@ namespace ClassicUO.Game.GameObjects
 
             if (group == ANIMATION_GROUPS.AG_LOW)
             {
-                return (byte) (getReplacedGroup
-                               (
-                                   AnimationsLoader.Instance.GroupReplaces[0], index,
-                                   (ushort) LOW_ANIMATION_GROUP.LAG_WALK
-                               ) %
-                               (ushort) LOW_ANIMATION_GROUP.LAG_ANIMATION_COUNT);
+                return (byte) (getReplacedGroup(AnimationsLoader.Instance.GroupReplaces[0], index, (ushort) LOW_ANIMATION_GROUP.LAG_WALK) % (ushort) LOW_ANIMATION_GROUP.LAG_ANIMATION_COUNT);
             }
 
             if (group == ANIMATION_GROUPS.AG_PEOPLE)
             {
-                return (byte) (getReplacedGroup
-                (
-                    AnimationsLoader.Instance.GroupReplaces[1], index, (ushort) PEOPLE_ANIMATION_GROUP.PAG_WALK_UNARMED
-                ) % (ushort) PEOPLE_ANIMATION_GROUP.PAG_ANIMATION_COUNT);
+                return (byte) (getReplacedGroup(AnimationsLoader.Instance.GroupReplaces[1], index, (ushort) PEOPLE_ANIMATION_GROUP.PAG_WALK_UNARMED) % (ushort) PEOPLE_ANIMATION_GROUP.PAG_ANIMATION_COUNT);
             }
 
             return (byte) (index % (ushort) HIGHT_ANIMATION_GROUP.HAG_ANIMATION_COUNT);
@@ -1566,8 +1574,7 @@ namespace ClassicUO.Game.GameObjects
                     switch (action)
                     {
                         default:
-                            if (mobile.IsGargoyle && mobile.IsFlying && AnimationsLoader.Instance.IsAnimationExists
-                                (mobile.Graphic, 71))
+                            if (mobile.IsGargoyle && mobile.IsFlying && AnimationsLoader.Instance.IsAnimationExists(mobile.Graphic, 71))
                             {
                                 return 71;
                             }
@@ -1585,8 +1592,7 @@ namespace ClassicUO.Game.GameObjects
                         case 6: return 12;
 
                         case 7:
-                            if (mobile.IsGargoyle && mobile.IsFlying && AnimationsLoader.Instance.IsAnimationExists
-                                (mobile.Graphic, 72))
+                            if (mobile.IsGargoyle && mobile.IsFlying && AnimationsLoader.Instance.IsAnimationExists(mobile.Graphic, 72))
                             {
                                 return 72;
                             }
@@ -1708,8 +1714,7 @@ namespace ClassicUO.Game.GameObjects
             {
                 if (type > ANIMATION_GROUPS_TYPE.ANIMAL)
                 {
-                    if (mobile.IsGargoyle && mobile.IsFlying && AnimationsLoader.Instance.IsAnimationExists
-                        (mobile.Graphic, 77))
+                    if (mobile.IsGargoyle && mobile.IsFlying && AnimationsLoader.Instance.IsAnimationExists(mobile.Graphic, 77))
                     {
                         return 77;
                     }

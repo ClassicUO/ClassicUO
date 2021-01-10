@@ -1,23 +1,32 @@
 #region license
 
-// Copyright (C) 2020 ClassicUO Development Community on Github
+// Copyright (c) 2021, andreakarasho
+// All rights reserved.
 // 
-// This project is an alternative client for the game Ultima Online.
-// The goal of this is to develop a lightweight client considering
-// new technologies.
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+// 1. Redistributions of source code must retain the above copyright
+//    notice, this list of conditions and the following disclaimer.
+// 2. Redistributions in binary form must reproduce the above copyright
+//    notice, this list of conditions and the following disclaimer in the
+//    documentation and/or other materials provided with the distribution.
+// 3. All advertising materials mentioning features or use of this software
+//    must display the following acknowledgement:
+//    This product includes software developed by andreakarasho - https://github.com/andreakarasho
+// 4. Neither the name of the copyright holder nor the
+//    names of its contributors may be used to endorse or promote products
+//    derived from this software without specific prior written permission.
 // 
-//  This program is free software: you can redistribute it and/or modify
-//  it under the terms of the GNU General Public License as published by
-//  the Free Software Foundation, either version 3 of the License, or
-//  (at your option) any later version.
-// 
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-// 
-//  You should have received a copy of the GNU General Public License
-//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ''AS IS'' AND ANY
+// EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+// WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+// DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY
+// DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+// (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+// LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+// ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+// SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #endregion
 
@@ -144,7 +153,16 @@ namespace ClassicUO.Game.GameObjects
 
             if (!IsMulti && !IsCoin && Amount > 1 && ItemData.IsStackable)
             {
-                DrawStaticAnimated(batcher, graphic, posX - 5, posY - 5, ref HueVector, ref DrawTransparent, false);
+                DrawStaticAnimated
+                (
+                    batcher,
+                    graphic,
+                    posX - 5,
+                    posY - 5,
+                    ref HueVector,
+                    ref DrawTransparent,
+                    false
+                );
             }
 
             if (ItemData.IsLight)
@@ -157,7 +175,16 @@ namespace ClassicUO.Game.GameObjects
                 HueVector.Z = 0.5f;
             }
 
-            DrawStaticAnimated(batcher, graphic, posX, posY, ref HueVector, ref DrawTransparent, false);
+            DrawStaticAnimated
+            (
+                batcher,
+                graphic,
+                posX,
+                posY,
+                ref HueVector,
+                ref DrawTransparent,
+                false
+            );
 
             if (SelectedObject.Object == this || TargetManager.TargetingState == CursorTarget.MultiPlacement)
             {
@@ -200,19 +227,43 @@ namespace ClassicUO.Game.GameObjects
             AnimationsLoader.Instance.ConvertBodyIfNeeded(ref graphic);
             byte group = AnimationsLoader.Instance.GetDieGroupIndex(graphic, UsedLayer);
 
-            bool ishuman = MathHelper.InRange(Amount, 0x0190, 0x0193) || MathHelper.InRange
-                               (Amount, 0x00B7, 0x00BA) || MathHelper.InRange
-                               (Amount, 0x025D, 0x0260) || MathHelper.InRange
-                               (Amount, 0x029A, 0x029B) || MathHelper.InRange
-                               (Amount, 0x02B6, 0x02B7) || Amount == 0x03DB || Amount == 0x03DF || Amount == 0x03E2 ||
-                           Amount == 0x02E8 || Amount == 0x02E9;
+            bool ishuman = MathHelper.InRange(Amount, 0x0190, 0x0193) || MathHelper.InRange(Amount, 0x00B7, 0x00BA) || MathHelper.InRange(Amount, 0x025D, 0x0260) || MathHelper.InRange(Amount, 0x029A, 0x029B) || MathHelper.InRange(Amount, 0x02B6, 0x02B7) || Amount == 0x03DB || Amount == 0x03DF || Amount == 0x03E2 || Amount == 0x02E8 || Amount == 0x02E9;
 
-            DrawLayer(batcher, posX, posY, this, Layer.Invalid, animIndex, ishuman, Hue, IsFlipped, HueVector.Z, group, direction);
+            DrawLayer
+            (
+                batcher,
+                posX,
+                posY,
+                this,
+                Layer.Invalid,
+                animIndex,
+                ishuman,
+                Hue,
+                IsFlipped,
+                HueVector.Z,
+                group,
+                direction
+            );
 
             for (int i = 0; i < Constants.USED_LAYER_COUNT; i++)
             {
                 Layer layer = LayerOrder.UsedLayers[direction, i];
-                DrawLayer(batcher, posX, posY, this, layer, animIndex, ishuman, 0, IsFlipped, HueVector.Z, group, direction);
+
+                DrawLayer
+                (
+                    batcher,
+                    posX,
+                    posY,
+                    this,
+                    layer,
+                    animIndex,
+                    ishuman,
+                    0,
+                    IsFlipped,
+                    HueVector.Z,
+                    group,
+                    direction
+                );
             }
 
             return true;
@@ -255,8 +306,7 @@ namespace ClassicUO.Game.GameObjects
                 graphic = itemEquip.ItemData.AnimID;
                 ispartialhue = itemEquip.ItemData.IsPartialHue;
 
-                if (AnimationsLoader.Instance.EquipConversions.TryGetValue
-                    (graphic, out Dictionary<ushort, EquipConvData> map))
+                if (AnimationsLoader.Instance.EquipConversions.TryGetValue(graphic, out Dictionary<ushort, EquipConvData> map))
                 {
                     if (map.TryGetValue(graphic, out EquipConvData data))
                     {
@@ -274,9 +324,7 @@ namespace ClassicUO.Game.GameObjects
 
             ushort newHue = 0;
 
-            AnimationGroup gr = layer == Layer.Invalid ?
-                AnimationsLoader.Instance.GetCorpseAnimationGroup(ref graphic, ref animGroup, ref newHue) :
-                AnimationsLoader.Instance.GetBodyAnimationGroup(ref graphic, ref animGroup, ref newHue);
+            AnimationGroup gr = layer == Layer.Invalid ? AnimationsLoader.Instance.GetCorpseAnimationGroup(ref graphic, ref animGroup, ref newHue) : AnimationsLoader.Instance.GetBodyAnimationGroup(ref graphic, ref animGroup, ref newHue);
 
             if (color == 0)
             {
@@ -290,8 +338,7 @@ namespace ClassicUO.Game.GameObjects
                 return;
             }
 
-            if ((direction.FrameCount == 0 || direction.Frames == null) && 
-                !AnimationsLoader.Instance.LoadAnimationFrames(graphic, animGroup, dir, ref direction))
+            if ((direction.FrameCount == 0 || direction.Frames == null) && !AnimationsLoader.Instance.LoadAnimationFrames(graphic, animGroup, dir, ref direction))
             {
                 return;
             }
@@ -368,7 +415,14 @@ namespace ClassicUO.Game.GameObjects
                     ShaderHueTranslator.GetHueVector(ref HueVector, color, ispartialhue, alpha);
                 }
 
-                batcher.DrawSprite(frame, posX, posY, flipped, ref HueVector);
+                batcher.DrawSprite
+                (
+                    frame,
+                    posX,
+                    posY,
+                    flipped,
+                    ref HueVector
+                );
 
                 if (!SerialHelper.IsValid(owner))
                 {
@@ -380,13 +434,7 @@ namespace ClassicUO.Game.GameObjects
                     return;
                 }
 
-                if (frame.Contains
-                (
-                    flipped ?
-                        posX + frame.Width - SelectedObject.TranslatedMousePositionByViewport.X :
-                        SelectedObject.TranslatedMousePositionByViewport.X - posX,
-                    SelectedObject.TranslatedMousePositionByViewport.Y - posY
-                ))
+                if (frame.Contains(flipped ? posX + frame.Width - SelectedObject.TranslatedMousePositionByViewport.X : SelectedObject.TranslatedMousePositionByViewport.X - posX, SelectedObject.TranslatedMousePositionByViewport.Y - posY))
                 {
                     SelectedObject.Object = owner;
                 }

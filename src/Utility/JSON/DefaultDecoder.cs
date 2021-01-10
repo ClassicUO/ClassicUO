@@ -1,4 +1,36 @@
-﻿using System;
+﻿#region license
+
+// Copyright (c) 2021, andreakarasho
+// All rights reserved.
+// 
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+// 1. Redistributions of source code must retain the above copyright
+//    notice, this list of conditions and the following disclaimer.
+// 2. Redistributions in binary form must reproduce the above copyright
+//    notice, this list of conditions and the following disclaimer in the
+//    documentation and/or other materials provided with the distribution.
+// 3. All advertising materials mentioning features or use of this software
+//    must display the following acknowledgement:
+//    This product includes software developed by andreakarasho - https://github.com/andreakarasho
+// 4. Neither the name of the copyright holder nor the
+//    names of its contributors may be used to endorse or promote products
+//    derived from this software without specific prior written permission.
+// 
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ''AS IS'' AND ANY
+// EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+// WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+// DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY
+// DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+// (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+// LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+// ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+// SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+#endregion
+
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
@@ -17,22 +49,27 @@ namespace TinyJson
 
                 if (jsonObj is IDictionary)
                 {
-                    PropertyInfo[] properties = type.GetProperties
-                        (BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);
+                    PropertyInfo[] properties = type.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);
 
                     bool match_snake_case = type.GetCustomAttribute<MatchSnakeCaseAttribute>() != null;
 
                     if (properties.Length == 0)
                     {
-                        FieldInfo[] fields = type.GetFields
-                            (BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);
+                        FieldInfo[] fields = type.GetFields(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);
 
                         foreach (DictionaryEntry item in (IDictionary) jsonObj)
                         {
                             string name = (string) item.Key;
                             object value = item.Value;
 
-                            if (!JsonMapper.DecodeValue(instance, name, value, fields, match_snake_case))
+                            if (!JsonMapper.DecodeValue
+                            (
+                                instance,
+                                name,
+                                value,
+                                fields,
+                                match_snake_case
+                            ))
                             {
                                 Console.WriteLine("Couldn't decode field \"" + name + "\" of " + type);
                             }
@@ -45,7 +82,14 @@ namespace TinyJson
                             string name = (string) item.Key;
                             object value = item.Value;
 
-                            if (!JsonMapper.DecodeValue(instance, name, value, properties, match_snake_case))
+                            if (!JsonMapper.DecodeValue
+                            (
+                                instance,
+                                name,
+                                value,
+                                properties,
+                                match_snake_case
+                            ))
                             {
                                 Console.WriteLine("Couldn't decode field \"" + name + "\" of " + type);
                             }
@@ -54,8 +98,7 @@ namespace TinyJson
                 }
                 else
                 {
-                    Console.WriteLine
-                        ("Unsupported json type: " + (jsonObj != null ? jsonObj.GetType().ToString() : "null"));
+                    Console.WriteLine("Unsupported json type: " + (jsonObj != null ? jsonObj.GetType().ToString() : "null"));
                 }
 
                 return instance;
@@ -258,10 +301,7 @@ namespace TinyJson
                     {
                         IList jsonList = (IList) jsonObj;
 
-                        Type listType = type.IsInstanceOfGenericType
-                            (typeof(HashSet<>)) ?
-                            typeof(HashSet<>) :
-                            typeof(List<>);
+                        Type listType = type.IsInstanceOfGenericType(typeof(HashSet<>)) ? typeof(HashSet<>) : typeof(List<>);
 
                         Type constructedListType = listType.MakeGenericType(genericType);
                         object instance = Activator.CreateInstance(constructedListType, true);

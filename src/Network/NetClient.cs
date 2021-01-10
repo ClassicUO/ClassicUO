@@ -1,23 +1,32 @@
 ﻿#region license
 
-// Copyright (C) 2020 ClassicUO Development Community on Github
+// Copyright (c) 2021, andreakarasho
+// All rights reserved.
 // 
-// This project is an alternative client for the game Ultima Online.
-// The goal of this is to develop a lightweight client considering
-// new technologies.
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+// 1. Redistributions of source code must retain the above copyright
+//    notice, this list of conditions and the following disclaimer.
+// 2. Redistributions in binary form must reproduce the above copyright
+//    notice, this list of conditions and the following disclaimer in the
+//    documentation and/or other materials provided with the distribution.
+// 3. All advertising materials mentioning features or use of this software
+//    must display the following acknowledgement:
+//    This product includes software developed by andreakarasho - https://github.com/andreakarasho
+// 4. Neither the name of the copyright holder nor the
+//    names of its contributors may be used to endorse or promote products
+//    derived from this software without specific prior written permission.
 // 
-//  This program is free software: you can redistribute it and/or modify
-//  it under the terms of the GNU General Public License as published by
-//  the Free Software Foundation, either version 3 of the License, or
-//  (at your option) any later version.
-// 
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-// 
-//  You should have received a copy of the GNU General Public License
-//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ''AS IS'' AND ANY
+// EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+// WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+// DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY
+// DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+// (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+// LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+// ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+// SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #endregion
 
@@ -64,7 +73,6 @@ namespace ClassicUO.Network
         public static NetClient LoginSocket { get; } = new NetClient(true);
 
         public static NetClient Socket { get; } = new NetClient(false);
-
 
 
         public bool IsConnected => _tcpClient != null && _tcpClient.Connected;
@@ -177,28 +185,29 @@ namespace ClassicUO.Network
         {
             try
             {
-                return _tcpClient
-                       .ConnectAsync(address, port)
-                          .ContinueWith(
-                    (t) =>
-                    {
-                        if (!t.IsFaulted && _tcpClient.Connected)
-                        {
-                            _netStream = _tcpClient.GetStream();
-                            Status = ClientSocketStatus.Connected;
-                            Connected.Raise();
-                            Statistics.ConnectedFrom = DateTime.Now;
+                return _tcpClient.ConnectAsync(address, port)
+                                 .ContinueWith
+                                 (
+                                     (t) =>
+                                     {
+                                         if (!t.IsFaulted && _tcpClient.Connected)
+                                         {
+                                             _netStream = _tcpClient.GetStream();
+                                             Status = ClientSocketStatus.Connected;
+                                             Connected.Raise();
+                                             Statistics.ConnectedFrom = DateTime.Now;
 
-                            return true;
-                        }
+                                             return true;
+                                         }
 
 
-                        Status = ClientSocketStatus.Disconnected;
-                        Log.Error("socket not connected");
+                                         Status = ClientSocketStatus.Disconnected;
+                                         Log.Error("socket not connected");
 
-                        return false;
-
-                    }, TaskContinuationOptions.ExecuteSynchronously);
+                                         return false;
+                                     },
+                                     TaskContinuationOptions.ExecuteSynchronously
+                                 );
             }
             catch (SocketException e)
             {
@@ -361,11 +370,11 @@ namespace ClassicUO.Network
                         continue;
                     }
 
-                    length = data[2] | (data[1] << 8);
+                    //length = data[2] | (data[1] << 8);
                     offset = 3;
                 }
 
-                PacketHandlers.Handlers.AnalyzePacket(data, offset, length);
+                PacketHandlers.Handlers.AnalyzePacket(data, offset, data.Length);
             }
         }
 
@@ -519,18 +528,41 @@ namespace ClassicUO.Network
 
             if (incompletelength > 0)
             {
-                Buffer.BlockCopy(_incompletePacketBuffer, 0, source, 0, _incompletePacketLength);
+                Buffer.BlockCopy
+                (
+                    _incompletePacketBuffer,
+                    0,
+                    source,
+                    0,
+                    _incompletePacketLength
+                );
+
                 _incompletePacketLength = 0;
             }
 
             // if outbounds exception, BUFF_SIZE must be increased
-            Buffer.BlockCopy(buffer, 0, source, incompletelength, length);
+            Buffer.BlockCopy
+            (
+                buffer,
+                0,
+                source,
+                incompletelength,
+                length
+            );
+
             int processedOffset = 0;
             int sourceOffset = 0;
             int offset = 0;
 
             while (Huffman.DecompressChunk
-                (ref source, ref sourceOffset, sourcelength, ref buffer, offset, out int outSize))
+            (
+                ref source,
+                ref sourceOffset,
+                sourcelength,
+                ref buffer,
+                offset,
+                out int outSize
+            ))
             {
                 processedOffset = sourceOffset;
                 offset += outSize;
@@ -541,7 +573,16 @@ namespace ClassicUO.Network
             if (processedOffset < sourcelength)
             {
                 int l = sourcelength - processedOffset;
-                Buffer.BlockCopy(source, processedOffset, _incompletePacketBuffer, _incompletePacketLength, l);
+
+                Buffer.BlockCopy
+                (
+                    source,
+                    processedOffset,
+                    _incompletePacketBuffer,
+                    _incompletePacketLength,
+                    l
+                );
+
                 _incompletePacketLength += l;
             }
         }
@@ -575,23 +616,17 @@ namespace ClassicUO.Network
         }
 
         private static LogFile _logFile;
+
         private static void LogPacket(byte[] buffer, int length, bool toServer)
         {
             if (_logFile == null)
-                _logFile = new LogFile
-                (
-                    FileSystemHelper.CreateFolderIfNotExists(CUOEnviroment.ExecutablePath, "Logs", "Network"),
-                    "packets.log"
-                );
+                _logFile = new LogFile(FileSystemHelper.CreateFolderIfNotExists(CUOEnviroment.ExecutablePath, "Logs", "Network"), "packets.log");
 
             int pos = 0;
 
             StringBuilder output = new StringBuilder();
 
-            output.AppendFormat
-            (
-                "{0}   -   ID {1:X2}   Length: {2}\n", (toServer ? "Client -> Server" : "Server -> Client"), buffer[0], buffer.Length
-            );
+            output.AppendFormat("{0}   -   ID {1:X2}   Length: {2}\n", (toServer ? "Client -> Server" : "Server -> Client"), buffer[0], buffer.Length);
 
             if (buffer[0] == 0x80 || buffer[0] == 0x91)
             {
@@ -629,7 +664,7 @@ namespace ClassicUO.Network
 
                         if (c >= 0x20 && c < 0x80)
                         {
-                            chars.Append((char)c);
+                            chars.Append((char) c);
                         }
                         else
                         {
@@ -668,7 +703,7 @@ namespace ClassicUO.Network
 
                             if (c >= 0x20 && c < 0x80)
                             {
-                                chars.Append((char)c);
+                                chars.Append((char) c);
                             }
                             else
                             {
@@ -695,6 +730,5 @@ namespace ClassicUO.Network
 
             _logFile.Write(output.ToString());
         }
-
     }
 }

@@ -1,23 +1,32 @@
 #region license
 
-// Copyright (C) 2020 ClassicUO Development Community on Github
+// Copyright (c) 2021, andreakarasho
+// All rights reserved.
 // 
-// This project is an alternative client for the game Ultima Online.
-// The goal of this is to develop a lightweight client considering
-// new technologies.
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+// 1. Redistributions of source code must retain the above copyright
+//    notice, this list of conditions and the following disclaimer.
+// 2. Redistributions in binary form must reproduce the above copyright
+//    notice, this list of conditions and the following disclaimer in the
+//    documentation and/or other materials provided with the distribution.
+// 3. All advertising materials mentioning features or use of this software
+//    must display the following acknowledgement:
+//    This product includes software developed by andreakarasho - https://github.com/andreakarasho
+// 4. Neither the name of the copyright holder nor the
+//    names of its contributors may be used to endorse or promote products
+//    derived from this software without specific prior written permission.
 // 
-//  This program is free software: you can redistribute it and/or modify
-//  it under the terms of the GNU General Public License as published by
-//  the Free Software Foundation, either version 3 of the License, or
-//  (at your option) any later version.
-// 
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-// 
-//  You should have received a copy of the GNU General Public License
-//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ''AS IS'' AND ANY
+// EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+// WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+// DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY
+// DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+// (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+// LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+// ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+// SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #endregion
 
@@ -928,40 +937,482 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
             }
 
             ht = new Huffman[HTN];
-            ht[0] = new Huffman("0  ", 0, 0, 0, 0, -1, null, null, ValTab0, 0);
-            ht[1] = new Huffman("1  ", 2, 2, 0, 0, -1, null, null, ValTab1, 7);
-            ht[2] = new Huffman("2  ", 3, 3, 0, 0, -1, null, null, ValTab2, 17);
-            ht[3] = new Huffman("3  ", 3, 3, 0, 0, -1, null, null, ValTab3, 17);
-            ht[4] = new Huffman("4  ", 0, 0, 0, 0, -1, null, null, ValTab4, 0);
-            ht[5] = new Huffman("5  ", 4, 4, 0, 0, -1, null, null, ValTab5, 31);
-            ht[6] = new Huffman("6  ", 4, 4, 0, 0, -1, null, null, ValTab6, 31);
-            ht[7] = new Huffman("7  ", 6, 6, 0, 0, -1, null, null, ValTab7, 71);
-            ht[8] = new Huffman("8  ", 6, 6, 0, 0, -1, null, null, ValTab8, 71);
-            ht[9] = new Huffman("9  ", 6, 6, 0, 0, -1, null, null, ValTab9, 71);
-            ht[10] = new Huffman("10 ", 8, 8, 0, 0, -1, null, null, ValTab10, 127);
-            ht[11] = new Huffman("11 ", 8, 8, 0, 0, -1, null, null, ValTab11, 127);
-            ht[12] = new Huffman("12 ", 8, 8, 0, 0, -1, null, null, ValTab12, 127);
-            ht[13] = new Huffman("13 ", 16, 16, 0, 0, -1, null, null, ValTab13, 511);
-            ht[14] = new Huffman("14 ", 0, 0, 0, 0, -1, null, null, ValTab14, 0);
-            ht[15] = new Huffman("15 ", 16, 16, 0, 0, -1, null, null, ValTab15, 511);
-            ht[16] = new Huffman("16 ", 16, 16, 1, 1, -1, null, null, ValTab16, 511);
-            ht[17] = new Huffman("17 ", 16, 16, 2, 3, 16, null, null, ValTab16, 511);
-            ht[18] = new Huffman("18 ", 16, 16, 3, 7, 16, null, null, ValTab16, 511);
-            ht[19] = new Huffman("19 ", 16, 16, 4, 15, 16, null, null, ValTab16, 511);
-            ht[20] = new Huffman("20 ", 16, 16, 6, 63, 16, null, null, ValTab16, 511);
-            ht[21] = new Huffman("21 ", 16, 16, 8, 255, 16, null, null, ValTab16, 511);
-            ht[22] = new Huffman("22 ", 16, 16, 10, 1023, 16, null, null, ValTab16, 511);
-            ht[23] = new Huffman("23 ", 16, 16, 13, 8191, 16, null, null, ValTab16, 511);
-            ht[24] = new Huffman("24 ", 16, 16, 4, 15, -1, null, null, ValTab24, 512);
-            ht[25] = new Huffman("25 ", 16, 16, 5, 31, 24, null, null, ValTab24, 512);
-            ht[26] = new Huffman("26 ", 16, 16, 6, 63, 24, null, null, ValTab24, 512);
-            ht[27] = new Huffman("27 ", 16, 16, 7, 127, 24, null, null, ValTab24, 512);
-            ht[28] = new Huffman("28 ", 16, 16, 8, 255, 24, null, null, ValTab24, 512);
-            ht[29] = new Huffman("29 ", 16, 16, 9, 511, 24, null, null, ValTab24, 512);
-            ht[30] = new Huffman("30 ", 16, 16, 11, 2047, 24, null, null, ValTab24, 512);
-            ht[31] = new Huffman("31 ", 16, 16, 13, 8191, 24, null, null, ValTab24, 512);
-            ht[32] = new Huffman("32 ", 1, 16, 0, 0, -1, null, null, ValTab32, 31);
-            ht[33] = new Huffman("33 ", 1, 16, 0, 0, -1, null, null, ValTab33, 31);
+
+            ht[0] = new Huffman
+            (
+                "0  ",
+                0,
+                0,
+                0,
+                0,
+                -1,
+                null,
+                null,
+                ValTab0,
+                0
+            );
+
+            ht[1] = new Huffman
+            (
+                "1  ",
+                2,
+                2,
+                0,
+                0,
+                -1,
+                null,
+                null,
+                ValTab1,
+                7
+            );
+
+            ht[2] = new Huffman
+            (
+                "2  ",
+                3,
+                3,
+                0,
+                0,
+                -1,
+                null,
+                null,
+                ValTab2,
+                17
+            );
+
+            ht[3] = new Huffman
+            (
+                "3  ",
+                3,
+                3,
+                0,
+                0,
+                -1,
+                null,
+                null,
+                ValTab3,
+                17
+            );
+
+            ht[4] = new Huffman
+            (
+                "4  ",
+                0,
+                0,
+                0,
+                0,
+                -1,
+                null,
+                null,
+                ValTab4,
+                0
+            );
+
+            ht[5] = new Huffman
+            (
+                "5  ",
+                4,
+                4,
+                0,
+                0,
+                -1,
+                null,
+                null,
+                ValTab5,
+                31
+            );
+
+            ht[6] = new Huffman
+            (
+                "6  ",
+                4,
+                4,
+                0,
+                0,
+                -1,
+                null,
+                null,
+                ValTab6,
+                31
+            );
+
+            ht[7] = new Huffman
+            (
+                "7  ",
+                6,
+                6,
+                0,
+                0,
+                -1,
+                null,
+                null,
+                ValTab7,
+                71
+            );
+
+            ht[8] = new Huffman
+            (
+                "8  ",
+                6,
+                6,
+                0,
+                0,
+                -1,
+                null,
+                null,
+                ValTab8,
+                71
+            );
+
+            ht[9] = new Huffman
+            (
+                "9  ",
+                6,
+                6,
+                0,
+                0,
+                -1,
+                null,
+                null,
+                ValTab9,
+                71
+            );
+
+            ht[10] = new Huffman
+            (
+                "10 ",
+                8,
+                8,
+                0,
+                0,
+                -1,
+                null,
+                null,
+                ValTab10,
+                127
+            );
+
+            ht[11] = new Huffman
+            (
+                "11 ",
+                8,
+                8,
+                0,
+                0,
+                -1,
+                null,
+                null,
+                ValTab11,
+                127
+            );
+
+            ht[12] = new Huffman
+            (
+                "12 ",
+                8,
+                8,
+                0,
+                0,
+                -1,
+                null,
+                null,
+                ValTab12,
+                127
+            );
+
+            ht[13] = new Huffman
+            (
+                "13 ",
+                16,
+                16,
+                0,
+                0,
+                -1,
+                null,
+                null,
+                ValTab13,
+                511
+            );
+
+            ht[14] = new Huffman
+            (
+                "14 ",
+                0,
+                0,
+                0,
+                0,
+                -1,
+                null,
+                null,
+                ValTab14,
+                0
+            );
+
+            ht[15] = new Huffman
+            (
+                "15 ",
+                16,
+                16,
+                0,
+                0,
+                -1,
+                null,
+                null,
+                ValTab15,
+                511
+            );
+
+            ht[16] = new Huffman
+            (
+                "16 ",
+                16,
+                16,
+                1,
+                1,
+                -1,
+                null,
+                null,
+                ValTab16,
+                511
+            );
+
+            ht[17] = new Huffman
+            (
+                "17 ",
+                16,
+                16,
+                2,
+                3,
+                16,
+                null,
+                null,
+                ValTab16,
+                511
+            );
+
+            ht[18] = new Huffman
+            (
+                "18 ",
+                16,
+                16,
+                3,
+                7,
+                16,
+                null,
+                null,
+                ValTab16,
+                511
+            );
+
+            ht[19] = new Huffman
+            (
+                "19 ",
+                16,
+                16,
+                4,
+                15,
+                16,
+                null,
+                null,
+                ValTab16,
+                511
+            );
+
+            ht[20] = new Huffman
+            (
+                "20 ",
+                16,
+                16,
+                6,
+                63,
+                16,
+                null,
+                null,
+                ValTab16,
+                511
+            );
+
+            ht[21] = new Huffman
+            (
+                "21 ",
+                16,
+                16,
+                8,
+                255,
+                16,
+                null,
+                null,
+                ValTab16,
+                511
+            );
+
+            ht[22] = new Huffman
+            (
+                "22 ",
+                16,
+                16,
+                10,
+                1023,
+                16,
+                null,
+                null,
+                ValTab16,
+                511
+            );
+
+            ht[23] = new Huffman
+            (
+                "23 ",
+                16,
+                16,
+                13,
+                8191,
+                16,
+                null,
+                null,
+                ValTab16,
+                511
+            );
+
+            ht[24] = new Huffman
+            (
+                "24 ",
+                16,
+                16,
+                4,
+                15,
+                -1,
+                null,
+                null,
+                ValTab24,
+                512
+            );
+
+            ht[25] = new Huffman
+            (
+                "25 ",
+                16,
+                16,
+                5,
+                31,
+                24,
+                null,
+                null,
+                ValTab24,
+                512
+            );
+
+            ht[26] = new Huffman
+            (
+                "26 ",
+                16,
+                16,
+                6,
+                63,
+                24,
+                null,
+                null,
+                ValTab24,
+                512
+            );
+
+            ht[27] = new Huffman
+            (
+                "27 ",
+                16,
+                16,
+                7,
+                127,
+                24,
+                null,
+                null,
+                ValTab24,
+                512
+            );
+
+            ht[28] = new Huffman
+            (
+                "28 ",
+                16,
+                16,
+                8,
+                255,
+                24,
+                null,
+                null,
+                ValTab24,
+                512
+            );
+
+            ht[29] = new Huffman
+            (
+                "29 ",
+                16,
+                16,
+                9,
+                511,
+                24,
+                null,
+                null,
+                ValTab24,
+                512
+            );
+
+            ht[30] = new Huffman
+            (
+                "30 ",
+                16,
+                16,
+                11,
+                2047,
+                24,
+                null,
+                null,
+                ValTab24,
+                512
+            );
+
+            ht[31] = new Huffman
+            (
+                "31 ",
+                16,
+                16,
+                13,
+                8191,
+                24,
+                null,
+                null,
+                ValTab24,
+                512
+            );
+
+            ht[32] = new Huffman
+            (
+                "32 ",
+                1,
+                16,
+                0,
+                0,
+                -1,
+                null,
+                null,
+                ValTab32,
+                31
+            );
+
+            ht[33] = new Huffman
+            (
+                "33 ",
+                1,
+                16,
+                0,
+                0,
+                -1,
+                null,
+                null,
+                ValTab33,
+                31
+            );
         }
     }
 }

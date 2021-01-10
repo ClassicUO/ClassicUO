@@ -1,23 +1,32 @@
 ﻿#region license
 
-// Copyright (C) 2020 ClassicUO Development Community on Github
+// Copyright (c) 2021, andreakarasho
+// All rights reserved.
 // 
-// This project is an alternative client for the game Ultima Online.
-// The goal of this is to develop a lightweight client considering
-// new technologies.
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+// 1. Redistributions of source code must retain the above copyright
+//    notice, this list of conditions and the following disclaimer.
+// 2. Redistributions in binary form must reproduce the above copyright
+//    notice, this list of conditions and the following disclaimer in the
+//    documentation and/or other materials provided with the distribution.
+// 3. All advertising materials mentioning features or use of this software
+//    must display the following acknowledgement:
+//    This product includes software developed by andreakarasho - https://github.com/andreakarasho
+// 4. Neither the name of the copyright holder nor the
+//    names of its contributors may be used to endorse or promote products
+//    derived from this software without specific prior written permission.
 // 
-//  This program is free software: you can redistribute it and/or modify
-//  it under the terms of the GNU General Public License as published by
-//  the Free Software Foundation, either version 3 of the License, or
-//  (at your option) any later version.
-// 
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-// 
-//  You should have received a copy of the GNU General Public License
-//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ''AS IS'' AND ANY
+// EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+// WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+// DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY
+// DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+// (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+// LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+// ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+// SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #endregion
 
@@ -56,8 +65,7 @@ namespace ClassicUO.Game.Managers
 
         private void OnWindowDeactivated(object sender, EventArgs e)
         {
-            if (!_canReproduceAudio || ProfileManager.CurrentProfile == null ||
-                ProfileManager.CurrentProfile.ReproduceSoundsInBackground)
+            if (!_canReproduceAudio || ProfileManager.CurrentProfile == null || ProfileManager.CurrentProfile.ReproduceSoundsInBackground)
             {
                 return;
             }
@@ -67,8 +75,7 @@ namespace ClassicUO.Game.Managers
 
         private void OnWindowActivated(object sender, EventArgs e)
         {
-            if (!_canReproduceAudio || ProfileManager.CurrentProfile == null ||
-                ProfileManager.CurrentProfile.ReproduceSoundsInBackground)
+            if (!_canReproduceAudio || ProfileManager.CurrentProfile == null || ProfileManager.CurrentProfile.ReproduceSoundsInBackground)
             {
                 return;
             }
@@ -104,8 +111,7 @@ namespace ClassicUO.Game.Managers
                 return;
             }
 
-            if (!currentProfile.EnableSound ||
-                !Client.Game.IsActive && !currentProfile.ReproduceSoundsInBackground)
+            if (!currentProfile.EnableSound || !Client.Game.IsActive && !currentProfile.ReproduceSoundsInBackground)
             {
                 volume = 0;
             }
@@ -153,8 +159,7 @@ namespace ClassicUO.Game.Managers
                 return;
             }
 
-            if (currentProfile == null || !currentProfile.EnableSound ||
-                !Client.Game.IsActive && !currentProfile.ReproduceSoundsInBackground)
+            if (currentProfile == null || !currentProfile.EnableSound || !Client.Game.IsActive && !currentProfile.ReproduceSoundsInBackground)
             {
                 volume = 0;
             }
@@ -187,9 +192,7 @@ namespace ClassicUO.Game.Managers
 
             if (is_login)
             {
-                volume = Settings.GlobalSettings.LoginMusic ?
-                    Settings.GlobalSettings.LoginMusicVolume / Constants.SOUND_DELTA :
-                    0;
+                volume = Settings.GlobalSettings.LoginMusic ? Settings.GlobalSettings.LoginMusicVolume / Constants.SOUND_DELTA : 0;
             }
             else
             {
@@ -249,17 +252,13 @@ namespace ClassicUO.Game.Managers
 
                     if (isLogin)
                     {
-                        volume = Settings.GlobalSettings.LoginMusic ?
-                            Settings.GlobalSettings.LoginMusicVolume / Constants.SOUND_DELTA :
-                            0;
+                        volume = Settings.GlobalSettings.LoginMusic ? Settings.GlobalSettings.LoginMusicVolume / Constants.SOUND_DELTA : 0;
                     }
                     else
                     {
                         Profile currentProfile = ProfileManager.CurrentProfile;
 
-                        volume = currentProfile == null || !currentProfile.EnableMusic ?
-                            0 :
-                            currentProfile.MusicVolume / Constants.SOUND_DELTA;
+                        volume = currentProfile == null || !currentProfile.EnableMusic ? 0 : currentProfile.MusicVolume / Constants.SOUND_DELTA;
                     }
 
 
@@ -282,9 +281,7 @@ namespace ClassicUO.Game.Managers
 
             Profile currentProfile = ProfileManager.CurrentProfile;
 
-            float volume = currentProfile == null || !currentProfile.EnableSound
-                ? 0
-                : currentProfile.SoundVolume / Constants.SOUND_DELTA;
+            float volume = currentProfile == null || !currentProfile.EnableSound ? 0 : currentProfile.SoundVolume / Constants.SOUND_DELTA;
 
             if (volume < -1 || volume > 1f)
             {
@@ -338,7 +335,9 @@ namespace ClassicUO.Game.Managers
                 return;
             }
 
-            bool runninWarMusic = _currentMusic[1] != null;Profile currentProfile = ProfileManager.CurrentProfile;
+            bool runninWarMusic = _currentMusic[1] != null;
+            Profile currentProfile = ProfileManager.CurrentProfile;
+
             for (int i = 0; i < 2; i++)
             {
                 if (_currentMusic[i] != null && currentProfile != null)
@@ -347,9 +346,7 @@ namespace ClassicUO.Game.Managers
                     {
                         if (!currentProfile.ReproduceSoundsInBackground)
                         {
-                            _currentMusic[i].Volume = i == 0 && runninWarMusic || !currentProfile.EnableMusic ?
-                                0 :
-                                currentProfile.MusicVolume / Constants.SOUND_DELTA;
+                            _currentMusic[i].Volume = i == 0 && runninWarMusic || !currentProfile.EnableMusic ? 0 : currentProfile.MusicVolume / Constants.SOUND_DELTA;
                         }
                     }
                     else if (!currentProfile.ReproduceSoundsInBackground && _currentMusic[i].Volume != 0.0f)

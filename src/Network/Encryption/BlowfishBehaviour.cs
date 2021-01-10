@@ -1,4 +1,36 @@
-﻿using System;
+﻿#region license
+
+// Copyright (c) 2021, andreakarasho
+// All rights reserved.
+// 
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+// 1. Redistributions of source code must retain the above copyright
+//    notice, this list of conditions and the following disclaimer.
+// 2. Redistributions in binary form must reproduce the above copyright
+//    notice, this list of conditions and the following disclaimer in the
+//    documentation and/or other materials provided with the distribution.
+// 3. All advertising materials mentioning features or use of this software
+//    must display the following acknowledgement:
+//    This product includes software developed by andreakarasho - https://github.com/andreakarasho
+// 4. Neither the name of the copyright holder nor the
+//    names of its contributors may be used to endorse or promote products
+//    derived from this software without specific prior written permission.
+// 
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ''AS IS'' AND ANY
+// EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+// WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+// DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY
+// DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+// (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+// LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+// ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+// SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+#endregion
+
+using System;
 
 namespace ClassicUO.Network.Encryption
 {
@@ -26,8 +58,7 @@ namespace ClassicUO.Network.Encryption
                 Array.Copy(Crypt_Constants.p_box, Crypt_Constants.p_table[key_index], Crypt_Constants.p_box.Length);
                 Array.Copy(Crypt_Constants.s_box, Crypt_Constants.s_table[key_index], Crypt_Constants.s_box.Length);
 
-                fixed (byte* key_table_ptr = &Crypt_Constants.g_key_table[key_index, 0], key_table_end_ptr =
-                    &Crypt_Constants.g_key_table[key_index + 1, 0])
+                fixed (byte* key_table_ptr = &Crypt_Constants.g_key_table[key_index, 0], key_table_end_ptr = &Crypt_Constants.g_key_table[key_index + 1, 0])
                 {
                     byte* pkey = key_table_ptr;
                     byte* pkey_end = key_table_end_ptr;
@@ -107,13 +138,18 @@ namespace ClassicUO.Network.Encryption
             {
                 int len_remaining = Crypt_Constants.CRYPT_GAME_TABLE_TRIGGER - _stream_pos;
 
-                Encrypt(ref src, ref dst, len_remaining, ref index_in, ref index_out);
+                Encrypt
+                (
+                    ref src,
+                    ref dst,
+                    len_remaining,
+                    ref index_in,
+                    ref index_out
+                );
 
-                _table_index = (_table_index + Crypt_Constants.CRYPT_GAME_TABLE_STEP) %
-                               Crypt_Constants.CRYPT_GAME_TABLE_MODULO;
+                _table_index = (_table_index + Crypt_Constants.CRYPT_GAME_TABLE_STEP) % Crypt_Constants.CRYPT_GAME_TABLE_MODULO;
 
-                Array.Copy
-                    (Crypt_Constants.g_seed_table[1][_table_index][0], _seed, Crypt_Constants.CRYPT_GAME_SEED_LENGTH);
+                Array.Copy(Crypt_Constants.g_seed_table[1][_table_index][0], _seed, Crypt_Constants.CRYPT_GAME_SEED_LENGTH);
 
                 _stream_pos = 0;
                 _block_pos = 0;
@@ -167,11 +203,9 @@ namespace ClassicUO.Network.Encryption
 
             for (int i = 1; i < 16; i += 2)
             {
-                Crypt_Constants.Round
-                    (ref right, left, Crypt_Constants.s_table[table], Crypt_Constants.p_table[table][i]);
+                Crypt_Constants.Round(ref right, left, Crypt_Constants.s_table[table], Crypt_Constants.p_table[table][i]);
 
-                Crypt_Constants.Round
-                    (ref left, right, Crypt_Constants.s_table[table], Crypt_Constants.p_table[table][i + 1]);
+                Crypt_Constants.Round(ref left, right, Crypt_Constants.s_table[table], Crypt_Constants.p_table[table][i + 1]);
             }
 
             right ^= Crypt_Constants.p_table[table][17];
@@ -367,315 +401,314 @@ namespace ClassicUO.Network.Encryption
             };
 
             // Seed Table
-            public static readonly byte[][][][] g_seed_table =
-                new byte[2][][][] //, CRYPT_GAME_SEED_COUNT, 2, CRYPT_GAME_SEED_LENGTH] 
+            public static readonly byte[][][][] g_seed_table = new byte[2][][][] //, CRYPT_GAME_SEED_COUNT, 2, CRYPT_GAME_SEED_LENGTH] 
+            {
+                new byte[CRYPT_GAME_SEED_COUNT][][]
                 {
-                    new byte[CRYPT_GAME_SEED_COUNT][][]
+                    new byte[2][]
                     {
-                        new byte[2][]
-                        {
-                            new byte[CRYPT_GAME_SEED_LENGTH] { 0x9E, 0xEC, 0x5B, 0x3C, 0x8F, 0xA8, 0x8C, 0x55 },
-                            new byte[CRYPT_GAME_SEED_LENGTH] { 0xB6, 0x21, 0x71, 0x98, 0xA4, 0x47, 0x22, 0x58 }
-                        },
-
-                        new byte[2][]
-                        {
-                            new byte[CRYPT_GAME_SEED_LENGTH] { 0xF8, 0xC4, 0xD8, 0x72, 0x54, 0xFC, 0xF9, 0xDE },
-                            new byte[CRYPT_GAME_SEED_LENGTH] { 0x2D, 0x53, 0xDB, 0x32, 0x03, 0x10, 0x5A, 0x18 }
-                        },
-
-                        new byte[2][]
-                        {
-                            new byte[CRYPT_GAME_SEED_LENGTH] { 0x89, 0x9F, 0x5C, 0x53, 0x06, 0x7F, 0x44, 0x38 },
-                            new byte[CRYPT_GAME_SEED_LENGTH] { 0x32, 0xCE, 0xAC, 0xDB, 0x91, 0x44, 0x4E, 0x1E }
-                        },
-
-                        new byte[2][]
-                        {
-                            new byte[CRYPT_GAME_SEED_LENGTH] { 0x29, 0x78, 0x5A, 0xF0, 0xAB, 0x00, 0x7F, 0x91 },
-                            new byte[CRYPT_GAME_SEED_LENGTH] { 0xE6, 0xB6, 0xD2, 0xE7, 0xA0, 0x05, 0xC2, 0xF2 }
-                        },
-
-                        new byte[2][]
-                        {
-                            new byte[CRYPT_GAME_SEED_LENGTH] { 0x8D, 0x46, 0xA9, 0xBB, 0x52, 0x1B, 0x41, 0xDF },
-                            new byte[CRYPT_GAME_SEED_LENGTH] { 0xF0, 0x4A, 0xC9, 0x14, 0x27, 0xA9, 0x6B, 0x4A }
-                        },
-
-                        new byte[2][]
-                        {
-                            new byte[CRYPT_GAME_SEED_LENGTH] { 0x91, 0x4B, 0x8A, 0x80, 0xF5, 0xCF, 0xBB, 0x3C },
-                            new byte[CRYPT_GAME_SEED_LENGTH] { 0xBC, 0xF4, 0xC9, 0xD5, 0x42, 0x7A, 0xFA, 0xB7 }
-                        },
-
-                        new byte[2][]
-                        {
-                            new byte[CRYPT_GAME_SEED_LENGTH] { 0xD5, 0x8C, 0x01, 0xC0, 0xFD, 0x1E, 0xAA, 0x57 },
-                            new byte[CRYPT_GAME_SEED_LENGTH] { 0xC1, 0x20, 0x7A, 0x38, 0x2C, 0xB7, 0xCD, 0x14 }
-                        },
-
-                        new byte[2][]
-                        {
-                            new byte[CRYPT_GAME_SEED_LENGTH] { 0x55, 0x9F, 0xD1, 0x5B, 0xFB, 0x70, 0xC0, 0x77 },
-                            new byte[CRYPT_GAME_SEED_LENGTH] { 0xA4, 0x15, 0xB3, 0x9F, 0x6B, 0xBB, 0x10, 0x5A }
-                        },
-
-                        new byte[2][]
-                        {
-                            new byte[CRYPT_GAME_SEED_LENGTH] { 0x80, 0x9D, 0x16, 0x54, 0x6B, 0x7C, 0x5F, 0xAD },
-                            new byte[CRYPT_GAME_SEED_LENGTH] { 0x35, 0xCB, 0x92, 0x24, 0x08, 0x11, 0xD9, 0x61 }
-                        },
-
-                        new byte[2][]
-                        {
-                            new byte[CRYPT_GAME_SEED_LENGTH] { 0x24, 0xA7, 0x75, 0xBF, 0x4D, 0x7E, 0x70, 0x0C },
-                            new byte[CRYPT_GAME_SEED_LENGTH] { 0x90, 0xCF, 0x9C, 0x04, 0xAC, 0x53, 0x89, 0xEF }
-                        },
-
-                        new byte[2][]
-                        {
-                            new byte[CRYPT_GAME_SEED_LENGTH] { 0x99, 0x22, 0xF6, 0x89, 0x10, 0xE6, 0x72, 0x23 },
-                            new byte[CRYPT_GAME_SEED_LENGTH] { 0x0A, 0x5C, 0xA5, 0xFF, 0x9C, 0x78, 0xDA, 0x7F }
-                        },
-
-                        new byte[2][]
-                        {
-                            new byte[CRYPT_GAME_SEED_LENGTH] { 0xDF, 0xFF, 0xBB, 0x11, 0x6B, 0x75, 0xF0, 0x29 },
-                            new byte[CRYPT_GAME_SEED_LENGTH] { 0xA5, 0x86, 0xD0, 0x53, 0x77, 0xE7, 0xB1, 0x0D }
-                        },
-
-                        new byte[2][]
-                        {
-                            new byte[CRYPT_GAME_SEED_LENGTH] { 0x4C, 0x06, 0xDA, 0x55, 0x4E, 0x50, 0x1B, 0x7A },
-                            new byte[CRYPT_GAME_SEED_LENGTH] { 0x1C, 0x90, 0xCE, 0x64, 0xD6, 0x17, 0x52, 0xFB }
-                        },
-
-                        new byte[2][]
-                        {
-                            new byte[CRYPT_GAME_SEED_LENGTH] { 0x00, 0x26, 0x75, 0x25, 0xCD, 0x95, 0x15, 0x0F },
-                            new byte[CRYPT_GAME_SEED_LENGTH] { 0x13, 0xD8, 0xAB, 0x30, 0xF1, 0xC5, 0xC5, 0xFA }
-                        },
-
-                        new byte[2][]
-                        {
-                            new byte[CRYPT_GAME_SEED_LENGTH] { 0x0C, 0x8E, 0x86, 0x1E, 0x3F, 0xCB, 0x8B, 0xD1 },
-                            new byte[CRYPT_GAME_SEED_LENGTH] { 0xEC, 0xCE, 0xA9, 0x96, 0x91, 0x11, 0xB4, 0x97 }
-                        },
-
-                        new byte[2][]
-                        {
-                            new byte[CRYPT_GAME_SEED_LENGTH] { 0x1E, 0x65, 0x5F, 0xA4, 0x55, 0xEB, 0xEC, 0xCF },
-                            new byte[CRYPT_GAME_SEED_LENGTH] { 0x19, 0xD9, 0x9F, 0xE0, 0x5E, 0x57, 0x45, 0x73 }
-                        },
-
-                        new byte[2][]
-                        {
-                            new byte[CRYPT_GAME_SEED_LENGTH] { 0x0E, 0x2D, 0x18, 0xE1, 0x55, 0x05, 0x04, 0xBF },
-                            new byte[CRYPT_GAME_SEED_LENGTH] { 0x5E, 0x81, 0x1F, 0xDD, 0xFF, 0x5C, 0xC3, 0xF4 }
-                        },
-
-                        new byte[2][]
-                        {
-                            new byte[CRYPT_GAME_SEED_LENGTH] { 0xF2, 0x06, 0x56, 0x54, 0x4D, 0xFB, 0x96, 0x54 },
-                            new byte[CRYPT_GAME_SEED_LENGTH] { 0x33, 0x97, 0x07, 0x43, 0x4F, 0x39, 0xC4, 0xA8 }
-                        },
-
-                        new byte[2][]
-                        {
-                            new byte[CRYPT_GAME_SEED_LENGTH] { 0x5E, 0x02, 0x37, 0x17, 0x7B, 0x64, 0xE6, 0xA2 },
-                            new byte[CRYPT_GAME_SEED_LENGTH] { 0x2E, 0x24, 0x13, 0x07, 0xFE, 0xA1, 0x88, 0xB7 }
-                        },
-
-                        new byte[2][]
-                        {
-                            new byte[CRYPT_GAME_SEED_LENGTH] { 0x60, 0xDD, 0x4C, 0xE0, 0xA1, 0xDC, 0xBA, 0x6C },
-                            new byte[CRYPT_GAME_SEED_LENGTH] { 0x81, 0x5C, 0x3F, 0x93, 0x7A, 0x1F, 0x2A, 0x1C }
-                        },
-
-                        new byte[2][]
-                        {
-                            new byte[CRYPT_GAME_SEED_LENGTH] { 0xAE, 0x5C, 0xBE, 0x9D, 0x84, 0x6F, 0xCB, 0x51 },
-                            new byte[CRYPT_GAME_SEED_LENGTH] { 0x4D, 0x13, 0xC6, 0x81, 0x28, 0xC3, 0x03, 0x34 }
-                        },
-
-                        new byte[2][]
-                        {
-                            new byte[CRYPT_GAME_SEED_LENGTH] { 0xB0, 0x5D, 0xCB, 0x8D, 0x69, 0x1C, 0xDE, 0x29 },
-                            new byte[CRYPT_GAME_SEED_LENGTH] { 0x31, 0xF1, 0x22, 0xC3, 0x1C, 0x82, 0x8A, 0x57 }
-                        },
-
-                        new byte[2][]
-                        {
-                            new byte[CRYPT_GAME_SEED_LENGTH] { 0x08, 0x32, 0x8B, 0xA2, 0x1E, 0x12, 0xC9, 0xB9 },
-                            new byte[CRYPT_GAME_SEED_LENGTH] { 0xCD, 0xA8, 0xE6, 0x1C, 0x59, 0xAC, 0x0C, 0xF6 }
-                        },
-
-                        new byte[2][]
-                        {
-                            new byte[CRYPT_GAME_SEED_LENGTH] { 0xA5, 0x3B, 0xE4, 0x64, 0x2F, 0x45, 0x33, 0xA2 },
-                            new byte[CRYPT_GAME_SEED_LENGTH] { 0x4A, 0xDA, 0x39, 0xE2, 0x0E, 0x94, 0xF2, 0xAA }
-                        },
-
-                        new byte[2][]
-                        {
-                            new byte[CRYPT_GAME_SEED_LENGTH] { 0xB0, 0x82, 0xB7, 0x33, 0xD2, 0x6F, 0xC0, 0x00 },
-                            new byte[CRYPT_GAME_SEED_LENGTH] { 0xD7, 0x8D, 0x1F, 0x8E, 0x79, 0x85, 0x3E, 0x2A }
-                        }
+                        new byte[CRYPT_GAME_SEED_LENGTH] { 0x9E, 0xEC, 0x5B, 0x3C, 0x8F, 0xA8, 0x8C, 0x55 },
+                        new byte[CRYPT_GAME_SEED_LENGTH] { 0xB6, 0x21, 0x71, 0x98, 0xA4, 0x47, 0x22, 0x58 }
                     },
 
-                    new byte[CRYPT_GAME_SEED_COUNT][][]
+                    new byte[2][]
                     {
-                        new byte[2][]
-                        {
-                            new byte[CRYPT_GAME_SEED_LENGTH] { 0xD2, 0xB7, 0xF6, 0x9C, 0xCF, 0x06, 0xE8, 0xC1 },
-                            new byte[CRYPT_GAME_SEED_LENGTH] { 0xAE, 0xEB, 0x7F, 0xE9, 0x87, 0x28, 0x1C, 0x9B }
-                        },
+                        new byte[CRYPT_GAME_SEED_LENGTH] { 0xF8, 0xC4, 0xD8, 0x72, 0x54, 0xFC, 0xF9, 0xDE },
+                        new byte[CRYPT_GAME_SEED_LENGTH] { 0x2D, 0x53, 0xDB, 0x32, 0x03, 0x10, 0x5A, 0x18 }
+                    },
 
-                        new byte[2][]
-                        {
-                            new byte[CRYPT_GAME_SEED_LENGTH] { 0xE8, 0x8C, 0x2A, 0x97, 0xD1, 0xD2, 0xA6, 0x76 },
-                            new byte[CRYPT_GAME_SEED_LENGTH] { 0xAD, 0x23, 0x69, 0xA0, 0xEF, 0x1F, 0x8C, 0xBA }
-                        },
+                    new byte[2][]
+                    {
+                        new byte[CRYPT_GAME_SEED_LENGTH] { 0x89, 0x9F, 0x5C, 0x53, 0x06, 0x7F, 0x44, 0x38 },
+                        new byte[CRYPT_GAME_SEED_LENGTH] { 0x32, 0xCE, 0xAC, 0xDB, 0x91, 0x44, 0x4E, 0x1E }
+                    },
 
-                        new byte[2][]
-                        {
-                            new byte[CRYPT_GAME_SEED_LENGTH] { 0x24, 0x62, 0x40, 0x0B, 0x21, 0xC6, 0x07, 0x89 },
-                            new byte[CRYPT_GAME_SEED_LENGTH] { 0xBA, 0x60, 0x9E, 0x26, 0x98, 0x18, 0xAF, 0x01 }
-                        },
+                    new byte[2][]
+                    {
+                        new byte[CRYPT_GAME_SEED_LENGTH] { 0x29, 0x78, 0x5A, 0xF0, 0xAB, 0x00, 0x7F, 0x91 },
+                        new byte[CRYPT_GAME_SEED_LENGTH] { 0xE6, 0xB6, 0xD2, 0xE7, 0xA0, 0x05, 0xC2, 0xF2 }
+                    },
 
-                        new byte[2][]
-                        {
-                            new byte[CRYPT_GAME_SEED_LENGTH] { 0xDF, 0x2B, 0x56, 0xC9, 0xB3, 0x72, 0x35, 0x8D },
-                            new byte[CRYPT_GAME_SEED_LENGTH] { 0x1D, 0x4F, 0x61, 0xAF, 0x53, 0x12, 0x6E, 0x49 }
-                        },
+                    new byte[2][]
+                    {
+                        new byte[CRYPT_GAME_SEED_LENGTH] { 0x8D, 0x46, 0xA9, 0xBB, 0x52, 0x1B, 0x41, 0xDF },
+                        new byte[CRYPT_GAME_SEED_LENGTH] { 0xF0, 0x4A, 0xC9, 0x14, 0x27, 0xA9, 0x6B, 0x4A }
+                    },
 
-                        new byte[2][]
-                        {
-                            new byte[CRYPT_GAME_SEED_LENGTH] { 0x1C, 0x87, 0x6C, 0xB1, 0xD4, 0x1B, 0xA2, 0xB2 },
-                            new byte[CRYPT_GAME_SEED_LENGTH] { 0xD4, 0xA1, 0x2C, 0xE2, 0x2F, 0xE9, 0xA4, 0x62 }
-                        },
+                    new byte[2][]
+                    {
+                        new byte[CRYPT_GAME_SEED_LENGTH] { 0x91, 0x4B, 0x8A, 0x80, 0xF5, 0xCF, 0xBB, 0x3C },
+                        new byte[CRYPT_GAME_SEED_LENGTH] { 0xBC, 0xF4, 0xC9, 0xD5, 0x42, 0x7A, 0xFA, 0xB7 }
+                    },
 
-                        new byte[2][]
-                        {
-                            new byte[CRYPT_GAME_SEED_LENGTH] { 0x17, 0x83, 0x1C, 0x68, 0xB3, 0xD6, 0x65, 0x2D },
-                            new byte[CRYPT_GAME_SEED_LENGTH] { 0x81, 0x5B, 0x4D, 0x9B, 0x15, 0x6F, 0x0B, 0xDF }
-                        },
+                    new byte[2][]
+                    {
+                        new byte[CRYPT_GAME_SEED_LENGTH] { 0xD5, 0x8C, 0x01, 0xC0, 0xFD, 0x1E, 0xAA, 0x57 },
+                        new byte[CRYPT_GAME_SEED_LENGTH] { 0xC1, 0x20, 0x7A, 0x38, 0x2C, 0xB7, 0xCD, 0x14 }
+                    },
 
-                        new byte[2][]
-                        {
-                            new byte[CRYPT_GAME_SEED_LENGTH] { 0xCE, 0x91, 0xB9, 0x8A, 0x61, 0x20, 0xB1, 0xF9 },
-                            new byte[CRYPT_GAME_SEED_LENGTH] { 0xCA, 0x0A, 0xC4, 0x76, 0x5B, 0x4B, 0xAB, 0x16 }
-                        },
+                    new byte[2][]
+                    {
+                        new byte[CRYPT_GAME_SEED_LENGTH] { 0x55, 0x9F, 0xD1, 0x5B, 0xFB, 0x70, 0xC0, 0x77 },
+                        new byte[CRYPT_GAME_SEED_LENGTH] { 0xA4, 0x15, 0xB3, 0x9F, 0x6B, 0xBB, 0x10, 0x5A }
+                    },
 
-                        new byte[2][]
-                        {
-                            new byte[CRYPT_GAME_SEED_LENGTH] { 0x5B, 0xD2, 0x4A, 0xFD, 0x44, 0xB7, 0xDF, 0x1F },
-                            new byte[CRYPT_GAME_SEED_LENGTH] { 0x8B, 0x6F, 0xAB, 0x0C, 0xAB, 0x3D, 0x0C, 0x7A }
-                        },
+                    new byte[2][]
+                    {
+                        new byte[CRYPT_GAME_SEED_LENGTH] { 0x80, 0x9D, 0x16, 0x54, 0x6B, 0x7C, 0x5F, 0xAD },
+                        new byte[CRYPT_GAME_SEED_LENGTH] { 0x35, 0xCB, 0x92, 0x24, 0x08, 0x11, 0xD9, 0x61 }
+                    },
 
-                        new byte[2][]
-                        {
-                            new byte[CRYPT_GAME_SEED_LENGTH] { 0x35, 0x6C, 0xBD, 0xFF, 0x62, 0x53, 0x77, 0x44 },
-                            new byte[CRYPT_GAME_SEED_LENGTH] { 0xF2, 0x44, 0x5F, 0x8C, 0x59, 0x25, 0x5F, 0x6B }
-                        },
+                    new byte[2][]
+                    {
+                        new byte[CRYPT_GAME_SEED_LENGTH] { 0x24, 0xA7, 0x75, 0xBF, 0x4D, 0x7E, 0x70, 0x0C },
+                        new byte[CRYPT_GAME_SEED_LENGTH] { 0x90, 0xCF, 0x9C, 0x04, 0xAC, 0x53, 0x89, 0xEF }
+                    },
 
-                        new byte[2][]
-                        {
-                            new byte[CRYPT_GAME_SEED_LENGTH] { 0xB5, 0x27, 0x0D, 0xD2, 0x23, 0xBE, 0x40, 0xB3 },
-                            new byte[CRYPT_GAME_SEED_LENGTH] { 0x3E, 0x8B, 0x92, 0xB1, 0x78, 0x57, 0xCB, 0xB0 }
-                        },
+                    new byte[2][]
+                    {
+                        new byte[CRYPT_GAME_SEED_LENGTH] { 0x99, 0x22, 0xF6, 0x89, 0x10, 0xE6, 0x72, 0x23 },
+                        new byte[CRYPT_GAME_SEED_LENGTH] { 0x0A, 0x5C, 0xA5, 0xFF, 0x9C, 0x78, 0xDA, 0x7F }
+                    },
 
-                        new byte[2][]
-                        {
-                            new byte[CRYPT_GAME_SEED_LENGTH] { 0xB3, 0xB4, 0xB6, 0xD5, 0xB6, 0xA7, 0x66, 0x6E },
-                            new byte[CRYPT_GAME_SEED_LENGTH] { 0xFB, 0xA7, 0x32, 0x93, 0xEE, 0x79, 0x61, 0x45 }
-                        },
+                    new byte[2][]
+                    {
+                        new byte[CRYPT_GAME_SEED_LENGTH] { 0xDF, 0xFF, 0xBB, 0x11, 0x6B, 0x75, 0xF0, 0x29 },
+                        new byte[CRYPT_GAME_SEED_LENGTH] { 0xA5, 0x86, 0xD0, 0x53, 0x77, 0xE7, 0xB1, 0x0D }
+                    },
 
-                        new byte[2][]
-                        {
-                            new byte[CRYPT_GAME_SEED_LENGTH] { 0x49, 0xD7, 0x93, 0x34, 0x90, 0x1A, 0xAD, 0x2C },
-                            new byte[CRYPT_GAME_SEED_LENGTH] { 0x84, 0x3E, 0xE9, 0x0B, 0x2C, 0xC6, 0xB3, 0xB1 }
-                        },
+                    new byte[2][]
+                    {
+                        new byte[CRYPT_GAME_SEED_LENGTH] { 0x4C, 0x06, 0xDA, 0x55, 0x4E, 0x50, 0x1B, 0x7A },
+                        new byte[CRYPT_GAME_SEED_LENGTH] { 0x1C, 0x90, 0xCE, 0x64, 0xD6, 0x17, 0x52, 0xFB }
+                    },
 
-                        new byte[2][]
-                        {
-                            new byte[CRYPT_GAME_SEED_LENGTH] { 0x82, 0xFB, 0x86, 0xEC, 0xA8, 0x76, 0x55, 0x98 },
-                            new byte[CRYPT_GAME_SEED_LENGTH] { 0x7E, 0xE3, 0xA2, 0x47, 0xB6, 0x72, 0x05, 0x61 }
-                        },
+                    new byte[2][]
+                    {
+                        new byte[CRYPT_GAME_SEED_LENGTH] { 0x00, 0x26, 0x75, 0x25, 0xCD, 0x95, 0x15, 0x0F },
+                        new byte[CRYPT_GAME_SEED_LENGTH] { 0x13, 0xD8, 0xAB, 0x30, 0xF1, 0xC5, 0xC5, 0xFA }
+                    },
 
-                        new byte[2][]
-                        {
-                            new byte[CRYPT_GAME_SEED_LENGTH] { 0x0B, 0xA5, 0x72, 0x17, 0xCB, 0x18, 0xAE, 0x03 },
-                            new byte[CRYPT_GAME_SEED_LENGTH] { 0x8C, 0x61, 0x32, 0xD9, 0x2B, 0x42, 0xEF, 0xF2 }
-                        },
+                    new byte[2][]
+                    {
+                        new byte[CRYPT_GAME_SEED_LENGTH] { 0x0C, 0x8E, 0x86, 0x1E, 0x3F, 0xCB, 0x8B, 0xD1 },
+                        new byte[CRYPT_GAME_SEED_LENGTH] { 0xEC, 0xCE, 0xA9, 0x96, 0x91, 0x11, 0xB4, 0x97 }
+                    },
 
-                        new byte[2][]
-                        {
-                            new byte[CRYPT_GAME_SEED_LENGTH] { 0x3F, 0x0A, 0x06, 0x82, 0x09, 0xC9, 0x76, 0xF2 },
-                            new byte[CRYPT_GAME_SEED_LENGTH] { 0x3D, 0x54, 0x50, 0xFD, 0x25, 0xA2, 0x2F, 0x2E }
-                        },
+                    new byte[2][]
+                    {
+                        new byte[CRYPT_GAME_SEED_LENGTH] { 0x1E, 0x65, 0x5F, 0xA4, 0x55, 0xEB, 0xEC, 0xCF },
+                        new byte[CRYPT_GAME_SEED_LENGTH] { 0x19, 0xD9, 0x9F, 0xE0, 0x5E, 0x57, 0x45, 0x73 }
+                    },
 
-                        new byte[2][]
-                        {
-                            new byte[CRYPT_GAME_SEED_LENGTH] { 0xF1, 0x34, 0x64, 0x94, 0xDC, 0x90, 0x58, 0x5D },
-                            new byte[CRYPT_GAME_SEED_LENGTH] { 0x1E, 0x6F, 0xB4, 0xEF, 0x73, 0xE8, 0xB0, 0xED }
-                        },
+                    new byte[2][]
+                    {
+                        new byte[CRYPT_GAME_SEED_LENGTH] { 0x0E, 0x2D, 0x18, 0xE1, 0x55, 0x05, 0x04, 0xBF },
+                        new byte[CRYPT_GAME_SEED_LENGTH] { 0x5E, 0x81, 0x1F, 0xDD, 0xFF, 0x5C, 0xC3, 0xF4 }
+                    },
 
-                        new byte[2][]
-                        {
-                            new byte[CRYPT_GAME_SEED_LENGTH] { 0xC0, 0xD2, 0xE1, 0x42, 0xEC, 0x04, 0x69, 0xA8 },
-                            new byte[CRYPT_GAME_SEED_LENGTH] { 0x27, 0x9C, 0x7C, 0x79, 0x87, 0x9A, 0xB2, 0x48 }
-                        },
+                    new byte[2][]
+                    {
+                        new byte[CRYPT_GAME_SEED_LENGTH] { 0xF2, 0x06, 0x56, 0x54, 0x4D, 0xFB, 0x96, 0x54 },
+                        new byte[CRYPT_GAME_SEED_LENGTH] { 0x33, 0x97, 0x07, 0x43, 0x4F, 0x39, 0xC4, 0xA8 }
+                    },
 
-                        new byte[2][]
-                        {
-                            new byte[CRYPT_GAME_SEED_LENGTH] { 0x50, 0x73, 0xEC, 0x1E, 0x4D, 0xD0, 0x80, 0x51 },
-                            new byte[CRYPT_GAME_SEED_LENGTH] { 0x46, 0x21, 0xC9, 0xF8, 0x93, 0xCC, 0xE8, 0x41 }
-                        },
+                    new byte[2][]
+                    {
+                        new byte[CRYPT_GAME_SEED_LENGTH] { 0x5E, 0x02, 0x37, 0x17, 0x7B, 0x64, 0xE6, 0xA2 },
+                        new byte[CRYPT_GAME_SEED_LENGTH] { 0x2E, 0x24, 0x13, 0x07, 0xFE, 0xA1, 0x88, 0xB7 }
+                    },
 
-                        new byte[2][]
-                        {
-                            new byte[CRYPT_GAME_SEED_LENGTH] { 0x70, 0xC9, 0xE4, 0x78, 0x8F, 0x6B, 0x2C, 0x27 },
-                            new byte[CRYPT_GAME_SEED_LENGTH] { 0x4C, 0x7E, 0x2C, 0x5A, 0x15, 0x69, 0x64, 0xDD }
-                        },
+                    new byte[2][]
+                    {
+                        new byte[CRYPT_GAME_SEED_LENGTH] { 0x60, 0xDD, 0x4C, 0xE0, 0xA1, 0xDC, 0xBA, 0x6C },
+                        new byte[CRYPT_GAME_SEED_LENGTH] { 0x81, 0x5C, 0x3F, 0x93, 0x7A, 0x1F, 0x2A, 0x1C }
+                    },
 
-                        new byte[2][]
-                        {
-                            new byte[CRYPT_GAME_SEED_LENGTH] { 0x00, 0xC7, 0x09, 0xCD, 0xF6, 0x2D, 0x2D, 0x31 },
-                            new byte[CRYPT_GAME_SEED_LENGTH] { 0x6F, 0x01, 0x01, 0x3E, 0xCD, 0x60, 0x16, 0xB4 }
-                        },
+                    new byte[2][]
+                    {
+                        new byte[CRYPT_GAME_SEED_LENGTH] { 0xAE, 0x5C, 0xBE, 0x9D, 0x84, 0x6F, 0xCB, 0x51 },
+                        new byte[CRYPT_GAME_SEED_LENGTH] { 0x4D, 0x13, 0xC6, 0x81, 0x28, 0xC3, 0x03, 0x34 }
+                    },
 
-                        new byte[2][]
-                        {
-                            new byte[CRYPT_GAME_SEED_LENGTH] { 0xE7, 0xE8, 0x76, 0xC4, 0x50, 0x4F, 0x08, 0x5B },
-                            new byte[CRYPT_GAME_SEED_LENGTH] { 0x62, 0x28, 0x24, 0x42, 0x7D, 0x9A, 0x19, 0x26 }
-                        },
+                    new byte[2][]
+                    {
+                        new byte[CRYPT_GAME_SEED_LENGTH] { 0xB0, 0x5D, 0xCB, 0x8D, 0x69, 0x1C, 0xDE, 0x29 },
+                        new byte[CRYPT_GAME_SEED_LENGTH] { 0x31, 0xF1, 0x22, 0xC3, 0x1C, 0x82, 0x8A, 0x57 }
+                    },
 
-                        new byte[2][]
-                        {
-                            new byte[CRYPT_GAME_SEED_LENGTH] { 0x2F, 0xD4, 0x67, 0xB9, 0x24, 0x0C, 0xBB, 0x14 },
-                            new byte[CRYPT_GAME_SEED_LENGTH] { 0x7D, 0x19, 0xC8, 0x73, 0x79, 0xA7, 0x70, 0xCF }
-                        },
+                    new byte[2][]
+                    {
+                        new byte[CRYPT_GAME_SEED_LENGTH] { 0x08, 0x32, 0x8B, 0xA2, 0x1E, 0x12, 0xC9, 0xB9 },
+                        new byte[CRYPT_GAME_SEED_LENGTH] { 0xCD, 0xA8, 0xE6, 0x1C, 0x59, 0xAC, 0x0C, 0xF6 }
+                    },
 
-                        new byte[2][]
-                        {
-                            new byte[CRYPT_GAME_SEED_LENGTH] { 0x2D, 0x53, 0xDC, 0x91, 0x83, 0xF2, 0x0C, 0x12 },
-                            new byte[CRYPT_GAME_SEED_LENGTH] { 0x3B, 0xAF, 0x1B, 0x6B, 0x02, 0x99, 0x8B, 0x61 }
-                        },
+                    new byte[2][]
+                    {
+                        new byte[CRYPT_GAME_SEED_LENGTH] { 0xA5, 0x3B, 0xE4, 0x64, 0x2F, 0x45, 0x33, 0xA2 },
+                        new byte[CRYPT_GAME_SEED_LENGTH] { 0x4A, 0xDA, 0x39, 0xE2, 0x0E, 0x94, 0xF2, 0xAA }
+                    },
 
-                        new byte[2][]
-                        {
-                            new byte[CRYPT_GAME_SEED_LENGTH] { 0xE3, 0x2C, 0xA2, 0x54, 0xCD, 0x51, 0xAF, 0xE5 },
-                            new byte[CRYPT_GAME_SEED_LENGTH] { 0x18, 0x58, 0x11, 0x7F, 0xF0, 0x50, 0x9C, 0x15 }
-                        },
-
-                        new byte[2][]
-                        {
-                            new byte[CRYPT_GAME_SEED_LENGTH] { 0x6E, 0x26, 0x01, 0xE9, 0xDB, 0x50, 0x13, 0xEA },
-                            new byte[CRYPT_GAME_SEED_LENGTH] { 0x22, 0x59, 0x30, 0x3B, 0xE4, 0x5F, 0x43, 0x1E }
-                        }
+                    new byte[2][]
+                    {
+                        new byte[CRYPT_GAME_SEED_LENGTH] { 0xB0, 0x82, 0xB7, 0x33, 0xD2, 0x6F, 0xC0, 0x00 },
+                        new byte[CRYPT_GAME_SEED_LENGTH] { 0xD7, 0x8D, 0x1F, 0x8E, 0x79, 0x85, 0x3E, 0x2A }
                     }
-                };
+                },
+
+                new byte[CRYPT_GAME_SEED_COUNT][][]
+                {
+                    new byte[2][]
+                    {
+                        new byte[CRYPT_GAME_SEED_LENGTH] { 0xD2, 0xB7, 0xF6, 0x9C, 0xCF, 0x06, 0xE8, 0xC1 },
+                        new byte[CRYPT_GAME_SEED_LENGTH] { 0xAE, 0xEB, 0x7F, 0xE9, 0x87, 0x28, 0x1C, 0x9B }
+                    },
+
+                    new byte[2][]
+                    {
+                        new byte[CRYPT_GAME_SEED_LENGTH] { 0xE8, 0x8C, 0x2A, 0x97, 0xD1, 0xD2, 0xA6, 0x76 },
+                        new byte[CRYPT_GAME_SEED_LENGTH] { 0xAD, 0x23, 0x69, 0xA0, 0xEF, 0x1F, 0x8C, 0xBA }
+                    },
+
+                    new byte[2][]
+                    {
+                        new byte[CRYPT_GAME_SEED_LENGTH] { 0x24, 0x62, 0x40, 0x0B, 0x21, 0xC6, 0x07, 0x89 },
+                        new byte[CRYPT_GAME_SEED_LENGTH] { 0xBA, 0x60, 0x9E, 0x26, 0x98, 0x18, 0xAF, 0x01 }
+                    },
+
+                    new byte[2][]
+                    {
+                        new byte[CRYPT_GAME_SEED_LENGTH] { 0xDF, 0x2B, 0x56, 0xC9, 0xB3, 0x72, 0x35, 0x8D },
+                        new byte[CRYPT_GAME_SEED_LENGTH] { 0x1D, 0x4F, 0x61, 0xAF, 0x53, 0x12, 0x6E, 0x49 }
+                    },
+
+                    new byte[2][]
+                    {
+                        new byte[CRYPT_GAME_SEED_LENGTH] { 0x1C, 0x87, 0x6C, 0xB1, 0xD4, 0x1B, 0xA2, 0xB2 },
+                        new byte[CRYPT_GAME_SEED_LENGTH] { 0xD4, 0xA1, 0x2C, 0xE2, 0x2F, 0xE9, 0xA4, 0x62 }
+                    },
+
+                    new byte[2][]
+                    {
+                        new byte[CRYPT_GAME_SEED_LENGTH] { 0x17, 0x83, 0x1C, 0x68, 0xB3, 0xD6, 0x65, 0x2D },
+                        new byte[CRYPT_GAME_SEED_LENGTH] { 0x81, 0x5B, 0x4D, 0x9B, 0x15, 0x6F, 0x0B, 0xDF }
+                    },
+
+                    new byte[2][]
+                    {
+                        new byte[CRYPT_GAME_SEED_LENGTH] { 0xCE, 0x91, 0xB9, 0x8A, 0x61, 0x20, 0xB1, 0xF9 },
+                        new byte[CRYPT_GAME_SEED_LENGTH] { 0xCA, 0x0A, 0xC4, 0x76, 0x5B, 0x4B, 0xAB, 0x16 }
+                    },
+
+                    new byte[2][]
+                    {
+                        new byte[CRYPT_GAME_SEED_LENGTH] { 0x5B, 0xD2, 0x4A, 0xFD, 0x44, 0xB7, 0xDF, 0x1F },
+                        new byte[CRYPT_GAME_SEED_LENGTH] { 0x8B, 0x6F, 0xAB, 0x0C, 0xAB, 0x3D, 0x0C, 0x7A }
+                    },
+
+                    new byte[2][]
+                    {
+                        new byte[CRYPT_GAME_SEED_LENGTH] { 0x35, 0x6C, 0xBD, 0xFF, 0x62, 0x53, 0x77, 0x44 },
+                        new byte[CRYPT_GAME_SEED_LENGTH] { 0xF2, 0x44, 0x5F, 0x8C, 0x59, 0x25, 0x5F, 0x6B }
+                    },
+
+                    new byte[2][]
+                    {
+                        new byte[CRYPT_GAME_SEED_LENGTH] { 0xB5, 0x27, 0x0D, 0xD2, 0x23, 0xBE, 0x40, 0xB3 },
+                        new byte[CRYPT_GAME_SEED_LENGTH] { 0x3E, 0x8B, 0x92, 0xB1, 0x78, 0x57, 0xCB, 0xB0 }
+                    },
+
+                    new byte[2][]
+                    {
+                        new byte[CRYPT_GAME_SEED_LENGTH] { 0xB3, 0xB4, 0xB6, 0xD5, 0xB6, 0xA7, 0x66, 0x6E },
+                        new byte[CRYPT_GAME_SEED_LENGTH] { 0xFB, 0xA7, 0x32, 0x93, 0xEE, 0x79, 0x61, 0x45 }
+                    },
+
+                    new byte[2][]
+                    {
+                        new byte[CRYPT_GAME_SEED_LENGTH] { 0x49, 0xD7, 0x93, 0x34, 0x90, 0x1A, 0xAD, 0x2C },
+                        new byte[CRYPT_GAME_SEED_LENGTH] { 0x84, 0x3E, 0xE9, 0x0B, 0x2C, 0xC6, 0xB3, 0xB1 }
+                    },
+
+                    new byte[2][]
+                    {
+                        new byte[CRYPT_GAME_SEED_LENGTH] { 0x82, 0xFB, 0x86, 0xEC, 0xA8, 0x76, 0x55, 0x98 },
+                        new byte[CRYPT_GAME_SEED_LENGTH] { 0x7E, 0xE3, 0xA2, 0x47, 0xB6, 0x72, 0x05, 0x61 }
+                    },
+
+                    new byte[2][]
+                    {
+                        new byte[CRYPT_GAME_SEED_LENGTH] { 0x0B, 0xA5, 0x72, 0x17, 0xCB, 0x18, 0xAE, 0x03 },
+                        new byte[CRYPT_GAME_SEED_LENGTH] { 0x8C, 0x61, 0x32, 0xD9, 0x2B, 0x42, 0xEF, 0xF2 }
+                    },
+
+                    new byte[2][]
+                    {
+                        new byte[CRYPT_GAME_SEED_LENGTH] { 0x3F, 0x0A, 0x06, 0x82, 0x09, 0xC9, 0x76, 0xF2 },
+                        new byte[CRYPT_GAME_SEED_LENGTH] { 0x3D, 0x54, 0x50, 0xFD, 0x25, 0xA2, 0x2F, 0x2E }
+                    },
+
+                    new byte[2][]
+                    {
+                        new byte[CRYPT_GAME_SEED_LENGTH] { 0xF1, 0x34, 0x64, 0x94, 0xDC, 0x90, 0x58, 0x5D },
+                        new byte[CRYPT_GAME_SEED_LENGTH] { 0x1E, 0x6F, 0xB4, 0xEF, 0x73, 0xE8, 0xB0, 0xED }
+                    },
+
+                    new byte[2][]
+                    {
+                        new byte[CRYPT_GAME_SEED_LENGTH] { 0xC0, 0xD2, 0xE1, 0x42, 0xEC, 0x04, 0x69, 0xA8 },
+                        new byte[CRYPT_GAME_SEED_LENGTH] { 0x27, 0x9C, 0x7C, 0x79, 0x87, 0x9A, 0xB2, 0x48 }
+                    },
+
+                    new byte[2][]
+                    {
+                        new byte[CRYPT_GAME_SEED_LENGTH] { 0x50, 0x73, 0xEC, 0x1E, 0x4D, 0xD0, 0x80, 0x51 },
+                        new byte[CRYPT_GAME_SEED_LENGTH] { 0x46, 0x21, 0xC9, 0xF8, 0x93, 0xCC, 0xE8, 0x41 }
+                    },
+
+                    new byte[2][]
+                    {
+                        new byte[CRYPT_GAME_SEED_LENGTH] { 0x70, 0xC9, 0xE4, 0x78, 0x8F, 0x6B, 0x2C, 0x27 },
+                        new byte[CRYPT_GAME_SEED_LENGTH] { 0x4C, 0x7E, 0x2C, 0x5A, 0x15, 0x69, 0x64, 0xDD }
+                    },
+
+                    new byte[2][]
+                    {
+                        new byte[CRYPT_GAME_SEED_LENGTH] { 0x00, 0xC7, 0x09, 0xCD, 0xF6, 0x2D, 0x2D, 0x31 },
+                        new byte[CRYPT_GAME_SEED_LENGTH] { 0x6F, 0x01, 0x01, 0x3E, 0xCD, 0x60, 0x16, 0xB4 }
+                    },
+
+                    new byte[2][]
+                    {
+                        new byte[CRYPT_GAME_SEED_LENGTH] { 0xE7, 0xE8, 0x76, 0xC4, 0x50, 0x4F, 0x08, 0x5B },
+                        new byte[CRYPT_GAME_SEED_LENGTH] { 0x62, 0x28, 0x24, 0x42, 0x7D, 0x9A, 0x19, 0x26 }
+                    },
+
+                    new byte[2][]
+                    {
+                        new byte[CRYPT_GAME_SEED_LENGTH] { 0x2F, 0xD4, 0x67, 0xB9, 0x24, 0x0C, 0xBB, 0x14 },
+                        new byte[CRYPT_GAME_SEED_LENGTH] { 0x7D, 0x19, 0xC8, 0x73, 0x79, 0xA7, 0x70, 0xCF }
+                    },
+
+                    new byte[2][]
+                    {
+                        new byte[CRYPT_GAME_SEED_LENGTH] { 0x2D, 0x53, 0xDC, 0x91, 0x83, 0xF2, 0x0C, 0x12 },
+                        new byte[CRYPT_GAME_SEED_LENGTH] { 0x3B, 0xAF, 0x1B, 0x6B, 0x02, 0x99, 0x8B, 0x61 }
+                    },
+
+                    new byte[2][]
+                    {
+                        new byte[CRYPT_GAME_SEED_LENGTH] { 0xE3, 0x2C, 0xA2, 0x54, 0xCD, 0x51, 0xAF, 0xE5 },
+                        new byte[CRYPT_GAME_SEED_LENGTH] { 0x18, 0x58, 0x11, 0x7F, 0xF0, 0x50, 0x9C, 0x15 }
+                    },
+
+                    new byte[2][]
+                    {
+                        new byte[CRYPT_GAME_SEED_LENGTH] { 0x6E, 0x26, 0x01, 0xE9, 0xDB, 0x50, 0x13, 0xEA },
+                        new byte[CRYPT_GAME_SEED_LENGTH] { 0x22, 0x59, 0x30, 0x3B, 0xE4, 0x5F, 0x43, 0x1E }
+                    }
+                }
+            };
 
             public static readonly uint[][] p_table = new uint[CRYPT_GAME_KEY_COUNT][]; // 18
             public static readonly uint[][] s_table = new uint[CRYPT_GAME_KEY_COUNT][]; // 1024
@@ -699,14 +732,12 @@ namespace ClassicUO.Network.Encryption
 
             public static void L2N(ref uint LL, uint R, uint P, byte[] S)
             {
-                LL = (uint) (LL ^ P ^ (((S[R >> 24] + S[0x0100 + ((R >> 16) & 0xff)]) ^ S[0x0200 + ((R >> 8) & 0xff)]) +
-                                       S[0x0300 + (R & 0xff)]));
+                LL = (uint) (LL ^ P ^ (((S[R >> 24] + S[0x0100 + ((R >> 16) & 0xff)]) ^ S[0x0200 + ((R >> 8) & 0xff)]) + S[0x0300 + (R & 0xff)]));
             }
 
             public static void Round(ref uint LL, uint R, uint[] S, uint P)
             {
-                LL = LL ^ P ^ (((S[R >> 24] + S[0x0100 + ((R >> 16) & 0xff)]) ^ S[0x0200 + ((R >> 8) & 0xff)]) +
-                               S[0x0300 + (R & 0xff)]);
+                LL = LL ^ P ^ (((S[R >> 24] + S[0x0100 + ((R >> 16) & 0xff)]) ^ S[0x0200 + ((R >> 8) & 0xff)]) + S[0x0300 + (R & 0xff)]);
             }
         }
     }

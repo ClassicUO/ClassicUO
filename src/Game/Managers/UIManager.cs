@@ -1,23 +1,32 @@
 #region license
 
-// Copyright (C) 2020 ClassicUO Development Community on Github
-//
-// This project is an alternative client for the game Ultima Online.
-// The goal of this is to develop a lightweight client considering
-// new technologies.
-//
-//  This program is free software: you can redistribute it and/or modify
-//  it under the terms of the GNU General Public License as published by
-//  the Free Software Foundation, either version 3 of the License, or
-//  (at your option) any later version.
-//
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-//
-//  You should have received a copy of the GNU General Public License
-//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// Copyright (c) 2021, andreakarasho
+// All rights reserved.
+// 
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+// 1. Redistributions of source code must retain the above copyright
+//    notice, this list of conditions and the following disclaimer.
+// 2. Redistributions in binary form must reproduce the above copyright
+//    notice, this list of conditions and the following disclaimer in the
+//    documentation and/or other materials provided with the distribution.
+// 3. All advertising materials mentioning features or use of this software
+//    must display the following acknowledgement:
+//    This product includes software developed by andreakarasho - https://github.com/andreakarasho
+// 4. Neither the name of the copyright holder nor the
+//    names of its contributors may be used to endorse or promote products
+//    derived from this software without specific prior written permission.
+// 
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ''AS IS'' AND ANY
+// EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+// WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+// DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY
+// DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+// (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+// LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+// ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+// SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #endregion
 
@@ -62,11 +71,7 @@ namespace ClassicUO.Game.Managers
                 Point mouse = Mouse.Position;
                 Profile profile = ProfileManager.CurrentProfile;
 
-                return profile != null && GameCursor.AllowDrawSDLCursor && DraggingControl == null &&
-                       MouseOverControl == null && !IsModalOpen && mouse.X >= profile.GameWindowPosition.X + 5 &&
-                       mouse.X < profile.GameWindowPosition.X + 5 + profile.GameWindowSize.X &&
-                       mouse.Y >= profile.GameWindowPosition.Y + 5 &&
-                       mouse.Y < profile.GameWindowPosition.Y + 5 + profile.GameWindowSize.Y;
+                return profile != null && GameCursor.AllowDrawSDLCursor && DraggingControl == null && MouseOverControl == null && !IsModalOpen && mouse.X >= profile.GameWindowPosition.X + 5 && mouse.X < profile.GameWindowPosition.X + 5 + profile.GameWindowSize.X && mouse.Y >= profile.GameWindowPosition.Y + 5 && mouse.Y < profile.GameWindowPosition.Y + 5 + profile.GameWindowSize.Y;
             }
         }
 
@@ -339,8 +344,7 @@ namespace ClassicUO.Game.Managers
         {
             for (LinkedListNode<Gump> g = Gumps.Last; g != null; g = g.Previous)
             {
-                if (g.Value != null && !g.Value.IsDisposed && g.Value is TradingGump trading &&
-                    (trading.ID1 == serial || trading.ID2 == serial || trading.LocalSerial == serial))
+                if (g.Value != null && !g.Value.IsDisposed && g.Value is TradingGump trading && (trading.ID1 == serial || trading.ID2 == serial || trading.LocalSerial == serial))
                 {
                     return trading;
                 }
@@ -590,8 +594,7 @@ namespace ClassicUO.Game.Managers
             }
         }
 
-        public static void AttemptDragControl
-            (Control control, bool attemptAlwaysSuccessful = false)
+        public static void AttemptDragControl(Control control, bool attemptAlwaysSuccessful = false)
         {
             if (_isDraggingControl || ItemHold.Enabled && !ItemHold.IsFixedPosition)
             {

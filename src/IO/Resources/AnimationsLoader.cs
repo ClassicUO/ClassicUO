@@ -1,23 +1,32 @@
 ﻿#region license
 
-// Copyright (C) 2020 ClassicUO Development Community on Github
+// Copyright (c) 2021, andreakarasho
+// All rights reserved.
 // 
-// This project is an alternative client for the game Ultima Online.
-// The goal of this is to develop a lightweight client considering
-// new technologies.
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+// 1. Redistributions of source code must retain the above copyright
+//    notice, this list of conditions and the following disclaimer.
+// 2. Redistributions in binary form must reproduce the above copyright
+//    notice, this list of conditions and the following disclaimer in the
+//    documentation and/or other materials provided with the distribution.
+// 3. All advertising materials mentioning features or use of this software
+//    must display the following acknowledgement:
+//    This product includes software developed by andreakarasho - https://github.com/andreakarasho
+// 4. Neither the name of the copyright holder nor the
+//    names of its contributors may be used to endorse or promote products
+//    derived from this software without specific prior written permission.
 // 
-//  This program is free software: you can redistribute it and/or modify
-//  it under the terms of the GNU General Public License as published by
-//  the Free Software Foundation, either version 3 of the License, or
-//  (at your option) any later version.
-// 
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-// 
-//  You should have received a copy of the GNU General Public License
-//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ''AS IS'' AND ANY
+// EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+// WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+// DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY
+// DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+// (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+// LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+// ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+// SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #endregion
 
@@ -56,8 +65,7 @@ namespace ClassicUO.IO.Resources
                 new AnimationDirection { FileIndex = -1, Address = -1 }
             }
         };
-        private readonly Dictionary<ushort, Dictionary<ushort, EquipConvData>> _equipConv =
-            new Dictionary<ushort, Dictionary<ushort, EquipConvData>>();
+        private readonly Dictionary<ushort, Dictionary<ushort, EquipConvData>> _equipConv = new Dictionary<ushort, Dictionary<ushort, EquipConvData>>();
         private readonly UOFileMul[] _files = new UOFileMul[5];
         private readonly UOFileUop[] _filesUop = new UOFileUop[4];
 
@@ -82,186 +90,1765 @@ namespace ClassicUO.IO.Resources
 
         public SittingInfoData[] SittingInfos { get; } =
         {
-            new SittingInfoData(0x0459, 0, -1, 4, -1, 2, 2, false),
-            new SittingInfoData(0x045A, -1, 2, -1, 6, 2, 2, false),
-            new SittingInfoData(0x045B, 0, -1, 4, -1, 2, 2, false),
-            new SittingInfoData(0x045C, -1, 2, -1, 6, 2, 2, false),
-            new SittingInfoData(0x0A2A, 0, 2, 4, 6, -4, -4, false),
-            new SittingInfoData(0x0A2B, 0, 2, 4, 6, -8, -8, false),
-            new SittingInfoData(0x0B2C, -1, 2, -1, 6, 2, 2, false),
-            new SittingInfoData(0x0B2D, 0, -1, 4, -1, 2, 2, false),
-            new SittingInfoData(0x0B2E, 4, 4, 4, 4, 0, 0, false),
-            new SittingInfoData(0x0B2F, 2, 2, 2, 2, 6, 6, false),
-            new SittingInfoData(0x0B30, 6, 6, 6, 6, -8, 8, true),
-            new SittingInfoData(0x0B31, 0, 0, 0, 0, 0, 4, true),
-            new SittingInfoData(0x0B32, 4, 4, 4, 4, 0, 0, false),
-            new SittingInfoData(0x0B33, 2, 2, 2, 2, 0, 0, false),
-            new SittingInfoData(0x0B4E, 2, 2, 2, 2, 0, 0, false),
-            new SittingInfoData(0x0B4F, 4, 4, 4, 4, 0, 0, false),
-            new SittingInfoData(0x0B50, 0, 0, 0, 0, 0, 0, true),
-            new SittingInfoData(0x0B51, 6, 6, 6, 6, 0, 0, true),
-            new SittingInfoData(0x0B52, 2, 2, 2, 2, 0, 0, false),
-            new SittingInfoData(0x0B53, 4, 4, 4, 4, 0, 0, false),
-            new SittingInfoData(0x0B54, 0, 0, 0, 0, 0, 0, true),
-            new SittingInfoData(0x0B55, 6, 6, 6, 6, 0, 0, true),
-            new SittingInfoData(0x0B56, 2, 2, 2, 2, 4, 4, false),
-            new SittingInfoData(0x0B57, 4, 4, 4, 4, 4, 4, false),
-            new SittingInfoData(0x0B58, 6, 6, 6, 6, 0, 8, true),
-            new SittingInfoData(0x0B59, 0, 0, 0, 0, 0, 8, true),
-            new SittingInfoData(0x0B5A, 2, 2, 2, 2, 8, 8, false),
-            new SittingInfoData(0x0B5B, 4, 4, 4, 4, 8, 8, false),
-            new SittingInfoData(0x0B5C, 0, 0, 0, 0, 0, 8, true),
-            new SittingInfoData(0x0B5D, 6, 6, 6, 6, 0, 8, true),
-            new SittingInfoData(0x0B5E, 0, 2, 4, 6, -8, -8, false),
-            new SittingInfoData(0x0B5F, -1, 2, -1, 6, 3, 14, false),
-            new SittingInfoData(0x0B60, -1, 2, -1, 6, 3, 14, false),
-            new SittingInfoData(0x0B61, -1, 2, -1, 6, 3, 14, false),
-            new SittingInfoData(0x0B62, -1, 2, -1, 6, 3, 10, false),
-            new SittingInfoData(0x0B63, -1, 2, -1, 6, 3, 10, false),
-            new SittingInfoData(0x0B64, -1, 2, -1, 6, 3, 10, false),
-            new SittingInfoData(0x0B65, 0, -1, 4, -1, 3, 10, false),
-            new SittingInfoData(0x0B66, 0, -1, 4, -1, 3, 10, false),
-            new SittingInfoData(0x0B67, 0, -1, 4, -1, 3, 10, false),
-            new SittingInfoData(0x0B68, 0, -1, 4, -1, 3, 10, false),
-            new SittingInfoData(0x0B69, 0, -1, 4, -1, 3, 10, false),
-            new SittingInfoData(0x0B6A, 0, -1, 4, -1, 3, 10, false),
-            new SittingInfoData(0x0B91, 4, 4, 4, 4, 6, 6, false),
-            new SittingInfoData(0x0B92, 4, 4, 4, 4, 6, 6, false),
-            new SittingInfoData(0x0B93, 2, 2, 2, 2, 6, 6, false),
-            new SittingInfoData(0x0B94, 2, 2, 2, 2, 6, 6, false),
-            new SittingInfoData(0x0CF3, -1, 2, -1, 6, 2, 8, false),
-            new SittingInfoData(0x0CF4, -1, 2, -1, 6, 2, 8, false),
-            new SittingInfoData(0x0CF6, 0, -1, 4, -1, 2, 8, false),
-            new SittingInfoData(0x0CF7, 0, -1, 4, -1, 2, 8, false),
-            new SittingInfoData(0x11FC, 0, 2, 4, 6, 2, 7, false),
-            new SittingInfoData(0x1218, 4, 4, 4, 4, 4, 4, false),
-            new SittingInfoData(0x1219, 2, 2, 2, 2, 4, 4, false),
-            new SittingInfoData(0x121A, 0, 0, 0, 0, 0, 8, true),
-            new SittingInfoData(0x121B, 6, 6, 6, 6, 0, 8, true),
-            new SittingInfoData(0x1527, 2, 2, 2, 2, 0, 0, false),
-            new SittingInfoData(0x1771, 0, 2, 4, 6, 0, 0, false),
-            new SittingInfoData(0x1776, 0, 2, 4, 6, 0, 0, false),
-            new SittingInfoData(0x1779, 0, 2, 4, 6, 0, 0, false),
-            new SittingInfoData(0x1DC7, -1, 2, -1, 6, 3, 10, false),
-            new SittingInfoData(0x1DC8, -1, 2, -1, 6, 3, 10, false),
-            new SittingInfoData(0x1DC9, -1, 2, -1, 6, 3, 10, false),
-            new SittingInfoData(0x1DCA, 0, -1, 4, -1, 3, 10, false),
-            new SittingInfoData(0x1DCB, 0, -1, 4, -1, 3, 10, false),
-            new SittingInfoData(0x1DCC, 0, -1, 4, -1, 3, 10, false),
-            new SittingInfoData(0x1DCD, -1, 2, -1, 6, 3, 10, false),
-            new SittingInfoData(0x1DCE, -1, 2, -1, 6, 3, 10, false),
-            new SittingInfoData(0x1DCF, -1, 2, -1, 6, 3, 10, false),
-            new SittingInfoData(0x1DD0, 0, -1, 4, -1, 3, 10, false),
-            new SittingInfoData(0x1DD1, 0, -1, 4, -1, 3, 10, false),
-            new SittingInfoData(0x1DD2, -1, 2, -1, 6, 3, 10, false),
+            new SittingInfoData
+            (
+                0x0459,
+                0,
+                -1,
+                4,
+                -1,
+                2,
+                2,
+                false
+            ),
+            new SittingInfoData
+            (
+                0x045A,
+                -1,
+                2,
+                -1,
+                6,
+                2,
+                2,
+                false
+            ),
+            new SittingInfoData
+            (
+                0x045B,
+                0,
+                -1,
+                4,
+                -1,
+                2,
+                2,
+                false
+            ),
+            new SittingInfoData
+            (
+                0x045C,
+                -1,
+                2,
+                -1,
+                6,
+                2,
+                2,
+                false
+            ),
+            new SittingInfoData
+            (
+                0x0A2A,
+                0,
+                2,
+                4,
+                6,
+                -4,
+                -4,
+                false
+            ),
+            new SittingInfoData
+            (
+                0x0A2B,
+                0,
+                2,
+                4,
+                6,
+                -8,
+                -8,
+                false
+            ),
+            new SittingInfoData
+            (
+                0x0B2C,
+                -1,
+                2,
+                -1,
+                6,
+                2,
+                2,
+                false
+            ),
+            new SittingInfoData
+            (
+                0x0B2D,
+                0,
+                -1,
+                4,
+                -1,
+                2,
+                2,
+                false
+            ),
+            new SittingInfoData
+            (
+                0x0B2E,
+                4,
+                4,
+                4,
+                4,
+                0,
+                0,
+                false
+            ),
+            new SittingInfoData
+            (
+                0x0B2F,
+                2,
+                2,
+                2,
+                2,
+                6,
+                6,
+                false
+            ),
+            new SittingInfoData
+            (
+                0x0B30,
+                6,
+                6,
+                6,
+                6,
+                -8,
+                8,
+                true
+            ),
+            new SittingInfoData
+            (
+                0x0B31,
+                0,
+                0,
+                0,
+                0,
+                0,
+                4,
+                true
+            ),
+            new SittingInfoData
+            (
+                0x0B32,
+                4,
+                4,
+                4,
+                4,
+                0,
+                0,
+                false
+            ),
+            new SittingInfoData
+            (
+                0x0B33,
+                2,
+                2,
+                2,
+                2,
+                0,
+                0,
+                false
+            ),
+            new SittingInfoData
+            (
+                0x0B4E,
+                2,
+                2,
+                2,
+                2,
+                0,
+                0,
+                false
+            ),
+            new SittingInfoData
+            (
+                0x0B4F,
+                4,
+                4,
+                4,
+                4,
+                0,
+                0,
+                false
+            ),
+            new SittingInfoData
+            (
+                0x0B50,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                true
+            ),
+            new SittingInfoData
+            (
+                0x0B51,
+                6,
+                6,
+                6,
+                6,
+                0,
+                0,
+                true
+            ),
+            new SittingInfoData
+            (
+                0x0B52,
+                2,
+                2,
+                2,
+                2,
+                0,
+                0,
+                false
+            ),
+            new SittingInfoData
+            (
+                0x0B53,
+                4,
+                4,
+                4,
+                4,
+                0,
+                0,
+                false
+            ),
+            new SittingInfoData
+            (
+                0x0B54,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                true
+            ),
+            new SittingInfoData
+            (
+                0x0B55,
+                6,
+                6,
+                6,
+                6,
+                0,
+                0,
+                true
+            ),
+            new SittingInfoData
+            (
+                0x0B56,
+                2,
+                2,
+                2,
+                2,
+                4,
+                4,
+                false
+            ),
+            new SittingInfoData
+            (
+                0x0B57,
+                4,
+                4,
+                4,
+                4,
+                4,
+                4,
+                false
+            ),
+            new SittingInfoData
+            (
+                0x0B58,
+                6,
+                6,
+                6,
+                6,
+                0,
+                8,
+                true
+            ),
+            new SittingInfoData
+            (
+                0x0B59,
+                0,
+                0,
+                0,
+                0,
+                0,
+                8,
+                true
+            ),
+            new SittingInfoData
+            (
+                0x0B5A,
+                2,
+                2,
+                2,
+                2,
+                8,
+                8,
+                false
+            ),
+            new SittingInfoData
+            (
+                0x0B5B,
+                4,
+                4,
+                4,
+                4,
+                8,
+                8,
+                false
+            ),
+            new SittingInfoData
+            (
+                0x0B5C,
+                0,
+                0,
+                0,
+                0,
+                0,
+                8,
+                true
+            ),
+            new SittingInfoData
+            (
+                0x0B5D,
+                6,
+                6,
+                6,
+                6,
+                0,
+                8,
+                true
+            ),
+            new SittingInfoData
+            (
+                0x0B5E,
+                0,
+                2,
+                4,
+                6,
+                -8,
+                -8,
+                false
+            ),
+            new SittingInfoData
+            (
+                0x0B5F,
+                -1,
+                2,
+                -1,
+                6,
+                3,
+                14,
+                false
+            ),
+            new SittingInfoData
+            (
+                0x0B60,
+                -1,
+                2,
+                -1,
+                6,
+                3,
+                14,
+                false
+            ),
+            new SittingInfoData
+            (
+                0x0B61,
+                -1,
+                2,
+                -1,
+                6,
+                3,
+                14,
+                false
+            ),
+            new SittingInfoData
+            (
+                0x0B62,
+                -1,
+                2,
+                -1,
+                6,
+                3,
+                10,
+                false
+            ),
+            new SittingInfoData
+            (
+                0x0B63,
+                -1,
+                2,
+                -1,
+                6,
+                3,
+                10,
+                false
+            ),
+            new SittingInfoData
+            (
+                0x0B64,
+                -1,
+                2,
+                -1,
+                6,
+                3,
+                10,
+                false
+            ),
+            new SittingInfoData
+            (
+                0x0B65,
+                0,
+                -1,
+                4,
+                -1,
+                3,
+                10,
+                false
+            ),
+            new SittingInfoData
+            (
+                0x0B66,
+                0,
+                -1,
+                4,
+                -1,
+                3,
+                10,
+                false
+            ),
+            new SittingInfoData
+            (
+                0x0B67,
+                0,
+                -1,
+                4,
+                -1,
+                3,
+                10,
+                false
+            ),
+            new SittingInfoData
+            (
+                0x0B68,
+                0,
+                -1,
+                4,
+                -1,
+                3,
+                10,
+                false
+            ),
+            new SittingInfoData
+            (
+                0x0B69,
+                0,
+                -1,
+                4,
+                -1,
+                3,
+                10,
+                false
+            ),
+            new SittingInfoData
+            (
+                0x0B6A,
+                0,
+                -1,
+                4,
+                -1,
+                3,
+                10,
+                false
+            ),
+            new SittingInfoData
+            (
+                0x0B91,
+                4,
+                4,
+                4,
+                4,
+                6,
+                6,
+                false
+            ),
+            new SittingInfoData
+            (
+                0x0B92,
+                4,
+                4,
+                4,
+                4,
+                6,
+                6,
+                false
+            ),
+            new SittingInfoData
+            (
+                0x0B93,
+                2,
+                2,
+                2,
+                2,
+                6,
+                6,
+                false
+            ),
+            new SittingInfoData
+            (
+                0x0B94,
+                2,
+                2,
+                2,
+                2,
+                6,
+                6,
+                false
+            ),
+            new SittingInfoData
+            (
+                0x0CF3,
+                -1,
+                2,
+                -1,
+                6,
+                2,
+                8,
+                false
+            ),
+            new SittingInfoData
+            (
+                0x0CF4,
+                -1,
+                2,
+                -1,
+                6,
+                2,
+                8,
+                false
+            ),
+            new SittingInfoData
+            (
+                0x0CF6,
+                0,
+                -1,
+                4,
+                -1,
+                2,
+                8,
+                false
+            ),
+            new SittingInfoData
+            (
+                0x0CF7,
+                0,
+                -1,
+                4,
+                -1,
+                2,
+                8,
+                false
+            ),
+            new SittingInfoData
+            (
+                0x11FC,
+                0,
+                2,
+                4,
+                6,
+                2,
+                7,
+                false
+            ),
+            new SittingInfoData
+            (
+                0x1218,
+                4,
+                4,
+                4,
+                4,
+                4,
+                4,
+                false
+            ),
+            new SittingInfoData
+            (
+                0x1219,
+                2,
+                2,
+                2,
+                2,
+                4,
+                4,
+                false
+            ),
+            new SittingInfoData
+            (
+                0x121A,
+                0,
+                0,
+                0,
+                0,
+                0,
+                8,
+                true
+            ),
+            new SittingInfoData
+            (
+                0x121B,
+                6,
+                6,
+                6,
+                6,
+                0,
+                8,
+                true
+            ),
+            new SittingInfoData
+            (
+                0x1527,
+                2,
+                2,
+                2,
+                2,
+                0,
+                0,
+                false
+            ),
+            new SittingInfoData
+            (
+                0x1771,
+                0,
+                2,
+                4,
+                6,
+                0,
+                0,
+                false
+            ),
+            new SittingInfoData
+            (
+                0x1776,
+                0,
+                2,
+                4,
+                6,
+                0,
+                0,
+                false
+            ),
+            new SittingInfoData
+            (
+                0x1779,
+                0,
+                2,
+                4,
+                6,
+                0,
+                0,
+                false
+            ),
+            new SittingInfoData
+            (
+                0x1DC7,
+                -1,
+                2,
+                -1,
+                6,
+                3,
+                10,
+                false
+            ),
+            new SittingInfoData
+            (
+                0x1DC8,
+                -1,
+                2,
+                -1,
+                6,
+                3,
+                10,
+                false
+            ),
+            new SittingInfoData
+            (
+                0x1DC9,
+                -1,
+                2,
+                -1,
+                6,
+                3,
+                10,
+                false
+            ),
+            new SittingInfoData
+            (
+                0x1DCA,
+                0,
+                -1,
+                4,
+                -1,
+                3,
+                10,
+                false
+            ),
+            new SittingInfoData
+            (
+                0x1DCB,
+                0,
+                -1,
+                4,
+                -1,
+                3,
+                10,
+                false
+            ),
+            new SittingInfoData
+            (
+                0x1DCC,
+                0,
+                -1,
+                4,
+                -1,
+                3,
+                10,
+                false
+            ),
+            new SittingInfoData
+            (
+                0x1DCD,
+                -1,
+                2,
+                -1,
+                6,
+                3,
+                10,
+                false
+            ),
+            new SittingInfoData
+            (
+                0x1DCE,
+                -1,
+                2,
+                -1,
+                6,
+                3,
+                10,
+                false
+            ),
+            new SittingInfoData
+            (
+                0x1DCF,
+                -1,
+                2,
+                -1,
+                6,
+                3,
+                10,
+                false
+            ),
+            new SittingInfoData
+            (
+                0x1DD0,
+                0,
+                -1,
+                4,
+                -1,
+                3,
+                10,
+                false
+            ),
+            new SittingInfoData
+            (
+                0x1DD1,
+                0,
+                -1,
+                4,
+                -1,
+                3,
+                10,
+                false
+            ),
+            new SittingInfoData
+            (
+                0x1DD2,
+                -1,
+                2,
+                -1,
+                6,
+                3,
+                10,
+                false
+            ),
 
-            new SittingInfoData(0x2A58, 4, 4, 4, 4, 0, 0, false),
-            new SittingInfoData(0x2A59, 2, 2, 2, 2, 0, 0, false),
-            new SittingInfoData(0x2A5A, 0, 2, 4, 6, 0, 0, false),
-            new SittingInfoData(0x2A5B, 0, 2, 4, 6, 10, 10, false),
-            new SittingInfoData(0x2A7F, 0, 2, 4, 6, 0, 0, false),
-            new SittingInfoData(0x2A80, 0, 2, 4, 6, 0, 0, false),
-            new SittingInfoData(0x2DDF, 0, 2, 4, 6, 2, 2, false),
-            new SittingInfoData(0x2DE0, 0, 2, 4, 6, 2, 2, false),
-            new SittingInfoData(0x2DE3, 2, 2, 2, 2, 4, 4, false),
-            new SittingInfoData(0x2DE4, 4, 4, 4, 4, 4, 4, false),
-            new SittingInfoData(0x2DE5, 6, 6, 6, 6, 4, 4, false),
-            new SittingInfoData(0x2DE6, 0, 0, 0, 0, 4, 4, false),
-            new SittingInfoData(0x2DEB, 0, 0, 0, 0, 4, 4, false),
-            new SittingInfoData(0x2DEC, 4, 4, 4, 4, 4, 4, false),
-            new SittingInfoData(0x2DED, 2, 2, 2, 2, 4, 4, false),
-            new SittingInfoData(0x2DEE, 6, 6, 6, 6, 4, 4, false),
-            new SittingInfoData(0x2DF5, 0, 2, 4, 6, 4, 4, false),
-            new SittingInfoData(0x2DF6, 0, 2, 4, 6, 4, 4, false),
-            new SittingInfoData(0x3088, 0, 2, 4, 6, 4, 4, false),
-            new SittingInfoData(0x3089, 0, 2, 4, 6, 4, 4, false),
-            new SittingInfoData(0x308A, 0, 2, 4, 6, 4, 4, false),
-            new SittingInfoData(0x308B, 0, 2, 4, 6, 4, 4, false),
-            new SittingInfoData(0x35ED, 0, 2, 4, 6, 0, 0, false),
-            new SittingInfoData(0x35EE, 0, 2, 4, 6, 0, 0, false),
+            new SittingInfoData
+            (
+                0x2A58,
+                4,
+                4,
+                4,
+                4,
+                0,
+                0,
+                false
+            ),
+            new SittingInfoData
+            (
+                0x2A59,
+                2,
+                2,
+                2,
+                2,
+                0,
+                0,
+                false
+            ),
+            new SittingInfoData
+            (
+                0x2A5A,
+                0,
+                2,
+                4,
+                6,
+                0,
+                0,
+                false
+            ),
+            new SittingInfoData
+            (
+                0x2A5B,
+                0,
+                2,
+                4,
+                6,
+                10,
+                10,
+                false
+            ),
+            new SittingInfoData
+            (
+                0x2A7F,
+                0,
+                2,
+                4,
+                6,
+                0,
+                0,
+                false
+            ),
+            new SittingInfoData
+            (
+                0x2A80,
+                0,
+                2,
+                4,
+                6,
+                0,
+                0,
+                false
+            ),
+            new SittingInfoData
+            (
+                0x2DDF,
+                0,
+                2,
+                4,
+                6,
+                2,
+                2,
+                false
+            ),
+            new SittingInfoData
+            (
+                0x2DE0,
+                0,
+                2,
+                4,
+                6,
+                2,
+                2,
+                false
+            ),
+            new SittingInfoData
+            (
+                0x2DE3,
+                2,
+                2,
+                2,
+                2,
+                4,
+                4,
+                false
+            ),
+            new SittingInfoData
+            (
+                0x2DE4,
+                4,
+                4,
+                4,
+                4,
+                4,
+                4,
+                false
+            ),
+            new SittingInfoData
+            (
+                0x2DE5,
+                6,
+                6,
+                6,
+                6,
+                4,
+                4,
+                false
+            ),
+            new SittingInfoData
+            (
+                0x2DE6,
+                0,
+                0,
+                0,
+                0,
+                4,
+                4,
+                false
+            ),
+            new SittingInfoData
+            (
+                0x2DEB,
+                0,
+                0,
+                0,
+                0,
+                4,
+                4,
+                false
+            ),
+            new SittingInfoData
+            (
+                0x2DEC,
+                4,
+                4,
+                4,
+                4,
+                4,
+                4,
+                false
+            ),
+            new SittingInfoData
+            (
+                0x2DED,
+                2,
+                2,
+                2,
+                2,
+                4,
+                4,
+                false
+            ),
+            new SittingInfoData
+            (
+                0x2DEE,
+                6,
+                6,
+                6,
+                6,
+                4,
+                4,
+                false
+            ),
+            new SittingInfoData
+            (
+                0x2DF5,
+                0,
+                2,
+                4,
+                6,
+                4,
+                4,
+                false
+            ),
+            new SittingInfoData
+            (
+                0x2DF6,
+                0,
+                2,
+                4,
+                6,
+                4,
+                4,
+                false
+            ),
+            new SittingInfoData
+            (
+                0x3088,
+                0,
+                2,
+                4,
+                6,
+                4,
+                4,
+                false
+            ),
+            new SittingInfoData
+            (
+                0x3089,
+                0,
+                2,
+                4,
+                6,
+                4,
+                4,
+                false
+            ),
+            new SittingInfoData
+            (
+                0x308A,
+                0,
+                2,
+                4,
+                6,
+                4,
+                4,
+                false
+            ),
+            new SittingInfoData
+            (
+                0x308B,
+                0,
+                2,
+                4,
+                6,
+                4,
+                4,
+                false
+            ),
+            new SittingInfoData
+            (
+                0x35ED,
+                0,
+                2,
+                4,
+                6,
+                0,
+                0,
+                false
+            ),
+            new SittingInfoData
+            (
+                0x35EE,
+                0,
+                2,
+                4,
+                6,
+                0,
+                0,
+                false
+            ),
 
-            new SittingInfoData(0x3DFF, 0, -1, 4, -1, 2, 2, false),
-            new SittingInfoData(0x3E00, -1, 2, -1, 6, 2, 2, false),
+            new SittingInfoData
+            (
+                0x3DFF,
+                0,
+                -1,
+                4,
+                -1,
+                2,
+                2,
+                false
+            ),
+            new SittingInfoData
+            (
+                0x3E00,
+                -1,
+                2,
+                -1,
+                6,
+                2,
+                2,
+                false
+            ),
 
             // TODO: new expansion
-            new SittingInfoData(0x4C8D, 4, 4, 4, 4, 4, 4, false),
-            new SittingInfoData(0x4C8E, 4, 4, 4, 4, 4, 4, false),
-            new SittingInfoData(0x4C8F, 4, 4, 4, 4, 4, 4, false),
+            new SittingInfoData
+            (
+                0x4C8D,
+                4,
+                4,
+                4,
+                4,
+                4,
+                4,
+                false
+            ),
+            new SittingInfoData
+            (
+                0x4C8E,
+                4,
+                4,
+                4,
+                4,
+                4,
+                4,
+                false
+            ),
+            new SittingInfoData
+            (
+                0x4C8F,
+                4,
+                4,
+                4,
+                4,
+                4,
+                4,
+                false
+            ),
 
-            new SittingInfoData(0x4C1E, 2, 2, 2, 2, 6, 6, false),
+            new SittingInfoData
+            (
+                0x4C1E,
+                2,
+                2,
+                2,
+                2,
+                6,
+                6,
+                false
+            ),
             //new SittingInfoData(0x4C1F, 2, 2, 2, 2, 6, 6, false),
 
-            new SittingInfoData(0x4C8B, 2, 2, 2, 2, 0, 0, false),
-            new SittingInfoData(0x4C8C, 2, 2, 2, 2, 0, 0, false),
-            new SittingInfoData(0x4C8D, 4, 4, 4, 4, 4, 4, false),
-            new SittingInfoData(0x4C8E, 4, 4, 4, 4, 4, 4, false),
-            new SittingInfoData(0x4C8F, 4, 4, 4, 4, 4, 4, false),
+            new SittingInfoData
+            (
+                0x4C8B,
+                2,
+                2,
+                2,
+                2,
+                0,
+                0,
+                false
+            ),
+            new SittingInfoData
+            (
+                0x4C8C,
+                2,
+                2,
+                2,
+                2,
+                0,
+                0,
+                false
+            ),
+            new SittingInfoData
+            (
+                0x4C8D,
+                4,
+                4,
+                4,
+                4,
+                4,
+                4,
+                false
+            ),
+            new SittingInfoData
+            (
+                0x4C8E,
+                4,
+                4,
+                4,
+                4,
+                4,
+                4,
+                false
+            ),
+            new SittingInfoData
+            (
+                0x4C8F,
+                4,
+                4,
+                4,
+                4,
+                4,
+                4,
+                false
+            ),
 
-            new SittingInfoData(0x4C1E, 2, 2, 2, 2, 6, 6, false),
-            new SittingInfoData(0x4C80, 4, 4, 4, 4, 4, 4, false),
-            new SittingInfoData(0x4C81, 2, 2, 2, 2, 0, 0, false),
-            new SittingInfoData(0x4C82, 4, 4, 4, 4, 4, 4, false),
-            new SittingInfoData(0x4C83, 4, 4, 4, 4, 4, 4, false),
-            new SittingInfoData(0x4C84, 2, 2, 2, 2, 0, 0, false),
-            new SittingInfoData(0x4C85, 2, 2, 2, 2, 0, 0, false),
-            new SittingInfoData(0x4C86, 4, 4, 4, 4, 4, 4, false),
-            new SittingInfoData(0x4C87, 4, 4, 4, 4, 4, 4, false),
-            new SittingInfoData(0x4C88, 2, 2, 2, 2, 0, 0, false),
-            new SittingInfoData(0x4C89, 2, 2, 2, 2, 0, 0, false),
-            new SittingInfoData(0x4C8A, 2, 2, 2, 2, 0, 0, false),
-            new SittingInfoData(0x4C8B, 2, 2, 2, 2, 0, 0, false),
-            new SittingInfoData(0x4C8C, 2, 2, 2, 2, 0, 0, false),
-            new SittingInfoData(0x4C8D, 4, 4, 4, 4, 4, 4, false),
-            new SittingInfoData(0x4C8E, 4, 4, 4, 4, 4, 4, false),
-            new SittingInfoData(0x4C8F, 4, 4, 4, 4, 4, 4, false),
+            new SittingInfoData
+            (
+                0x4C1E,
+                2,
+                2,
+                2,
+                2,
+                6,
+                6,
+                false
+            ),
+            new SittingInfoData
+            (
+                0x4C80,
+                4,
+                4,
+                4,
+                4,
+                4,
+                4,
+                false
+            ),
+            new SittingInfoData
+            (
+                0x4C81,
+                2,
+                2,
+                2,
+                2,
+                0,
+                0,
+                false
+            ),
+            new SittingInfoData
+            (
+                0x4C82,
+                4,
+                4,
+                4,
+                4,
+                4,
+                4,
+                false
+            ),
+            new SittingInfoData
+            (
+                0x4C83,
+                4,
+                4,
+                4,
+                4,
+                4,
+                4,
+                false
+            ),
+            new SittingInfoData
+            (
+                0x4C84,
+                2,
+                2,
+                2,
+                2,
+                0,
+                0,
+                false
+            ),
+            new SittingInfoData
+            (
+                0x4C85,
+                2,
+                2,
+                2,
+                2,
+                0,
+                0,
+                false
+            ),
+            new SittingInfoData
+            (
+                0x4C86,
+                4,
+                4,
+                4,
+                4,
+                4,
+                4,
+                false
+            ),
+            new SittingInfoData
+            (
+                0x4C87,
+                4,
+                4,
+                4,
+                4,
+                4,
+                4,
+                false
+            ),
+            new SittingInfoData
+            (
+                0x4C88,
+                2,
+                2,
+                2,
+                2,
+                0,
+                0,
+                false
+            ),
+            new SittingInfoData
+            (
+                0x4C89,
+                2,
+                2,
+                2,
+                2,
+                0,
+                0,
+                false
+            ),
+            new SittingInfoData
+            (
+                0x4C8A,
+                2,
+                2,
+                2,
+                2,
+                0,
+                0,
+                false
+            ),
+            new SittingInfoData
+            (
+                0x4C8B,
+                2,
+                2,
+                2,
+                2,
+                0,
+                0,
+                false
+            ),
+            new SittingInfoData
+            (
+                0x4C8C,
+                2,
+                2,
+                2,
+                2,
+                0,
+                0,
+                false
+            ),
+            new SittingInfoData
+            (
+                0x4C8D,
+                4,
+                4,
+                4,
+                4,
+                4,
+                4,
+                false
+            ),
+            new SittingInfoData
+            (
+                0x4C8E,
+                4,
+                4,
+                4,
+                4,
+                4,
+                4,
+                false
+            ),
+            new SittingInfoData
+            (
+                0x4C8F,
+                4,
+                4,
+                4,
+                4,
+                4,
+                4,
+                false
+            ),
             //new SittingInfoData(0x4C1F, 2, 2, 2, 2, 6, 6, false),
 
             // thanks Tony!
-            new SittingInfoData(0xA05F, 2, 2, 2, 2, 0, 0, false), // EAST ONLY
-            new SittingInfoData(0xA05E, 0, 0, 0, 0, 4, 4, false), // NORTH ONLY
-            new SittingInfoData(0xA05D, 4, 4, 4, 4, 4, 4, false), // SOUTH ONLY
-            new SittingInfoData(0xA05C, 6, 6, 6, 6, 6, 4, false), // WEST ONLY
+            new SittingInfoData
+            (
+                0xA05F,
+                2,
+                2,
+                2,
+                2,
+                0,
+                0,
+                false
+            ), // EAST ONLY
+            new SittingInfoData
+            (
+                0xA05E,
+                0,
+                0,
+                0,
+                0,
+                4,
+                4,
+                false
+            ), // NORTH ONLY
+            new SittingInfoData
+            (
+                0xA05D,
+                4,
+                4,
+                4,
+                4,
+                4,
+                4,
+                false
+            ), // SOUTH ONLY
+            new SittingInfoData
+            (
+                0xA05C,
+                6,
+                6,
+                6,
+                6,
+                6,
+                4,
+                false
+            ), // WEST ONLY
 
-            new SittingInfoData(0x9EA2, 2, 2, 2, 2, 0, 0, false), // EAST ONLY
-            new SittingInfoData(0x9EA1, 4, 4, 4, 4, 4, 4, false), // SOUTH ONLY
-            new SittingInfoData(0x9E9F, 0, 0, 0, 0, 4, 4, false), // NORTH ONLY
-            new SittingInfoData(0x9EA0, 6, 6, 6, 6, 6, 4, false), // WEST ONLY
+            new SittingInfoData
+            (
+                0x9EA2,
+                2,
+                2,
+                2,
+                2,
+                0,
+                0,
+                false
+            ), // EAST ONLY
+            new SittingInfoData
+            (
+                0x9EA1,
+                4,
+                4,
+                4,
+                4,
+                4,
+                4,
+                false
+            ), // SOUTH ONLY
+            new SittingInfoData
+            (
+                0x9E9F,
+                0,
+                0,
+                0,
+                0,
+                4,
+                4,
+                false
+            ), // NORTH ONLY
+            new SittingInfoData
+            (
+                0x9EA0,
+                6,
+                6,
+                6,
+                6,
+                6,
+                4,
+                false
+            ), // WEST ONLY
 
-            new SittingInfoData(0x9E91, 4, 4, 4, 4, 4, 4, false), // SOUTH ONLY
-            new SittingInfoData(0x9E90, 2, 2, 2, 2, 0, 0, false), // EAST ONLY
-            new SittingInfoData(0x9E8F, 6, 6, 6, 6, 6, 4, false), // WEST ONLY
-            new SittingInfoData(0x9E8E, 0, 0, 0, 0, 4, 4, false), // NORTH ONLY
+            new SittingInfoData
+            (
+                0x9E91,
+                4,
+                4,
+                4,
+                4,
+                4,
+                4,
+                false
+            ), // SOUTH ONLY
+            new SittingInfoData
+            (
+                0x9E90,
+                2,
+                2,
+                2,
+                2,
+                0,
+                0,
+                false
+            ), // EAST ONLY
+            new SittingInfoData
+            (
+                0x9E8F,
+                6,
+                6,
+                6,
+                6,
+                6,
+                4,
+                false
+            ), // WEST ONLY
+            new SittingInfoData
+            (
+                0x9E8E,
+                0,
+                0,
+                0,
+                0,
+                4,
+                4,
+                false
+            ), // NORTH ONLY
 
-            new SittingInfoData(0x9C62, 0, 0, 0, 0, 4, 4, false), // NORTH ONLY
-            new SittingInfoData(0x9C61, 0, 0, 0, 0, 4, 4, false), // NORTH ONLY
-            new SittingInfoData(0x9C60, 0, 0, 0, 0, 4, 4, false), // NORTH ONLY
+            new SittingInfoData
+            (
+                0x9C62,
+                0,
+                0,
+                0,
+                0,
+                4,
+                4,
+                false
+            ), // NORTH ONLY
+            new SittingInfoData
+            (
+                0x9C61,
+                0,
+                0,
+                0,
+                0,
+                4,
+                4,
+                false
+            ), // NORTH ONLY
+            new SittingInfoData
+            (
+                0x9C60,
+                0,
+                0,
+                0,
+                0,
+                4,
+                4,
+                false
+            ), // NORTH ONLY
 
-            new SittingInfoData(0x9C5F, 6, 6, 6, 6, 6, 4, false), // WEST ONLY
-            new SittingInfoData(0x9C5E, 6, 6, 6, 6, 6, 4, false), // WEST ONLY
-            new SittingInfoData(0x9C5D, 6, 6, 6, 6, 6, 4, false), // WEST ONLY
+            new SittingInfoData
+            (
+                0x9C5F,
+                6,
+                6,
+                6,
+                6,
+                6,
+                4,
+                false
+            ), // WEST ONLY
+            new SittingInfoData
+            (
+                0x9C5E,
+                6,
+                6,
+                6,
+                6,
+                6,
+                4,
+                false
+            ), // WEST ONLY
+            new SittingInfoData
+            (
+                0x9C5D,
+                6,
+                6,
+                6,
+                6,
+                6,
+                4,
+                false
+            ), // WEST ONLY
 
-            new SittingInfoData(0x9C5A, 0, 0, 0, 0, 4, 4, false), // NORTH ONLY
-            new SittingInfoData(0x9C59, 0, 0, 0, 0, 4, 4, false), // NORTH ONLY
+            new SittingInfoData
+            (
+                0x9C5A,
+                0,
+                0,
+                0,
+                0,
+                4,
+                4,
+                false
+            ), // NORTH ONLY
+            new SittingInfoData
+            (
+                0x9C59,
+                0,
+                0,
+                0,
+                0,
+                4,
+                4,
+                false
+            ), // NORTH ONLY
 
-            new SittingInfoData(0x9C58, 6, 6, 6, 6, 6, 4, false), // WEST ONLY
-            new SittingInfoData(0x9C57, 6, 6, 6, 6, 6, 4, false), // WEST ONLY
+            new SittingInfoData
+            (
+                0x9C58,
+                6,
+                6,
+                6,
+                6,
+                6,
+                4,
+                false
+            ), // WEST ONLY
+            new SittingInfoData
+            (
+                0x9C57,
+                6,
+                6,
+                6,
+                6,
+                6,
+                4,
+                false
+            ), // WEST ONLY
 
-            new SittingInfoData(0x402A, 2, 2, 2, 2, 0, 0, false), // EAST ONLY
-            new SittingInfoData(0x4029, 2, 2, 2, 2, 0, 0, false), // EAST ONLY
+            new SittingInfoData
+            (
+                0x402A,
+                2,
+                2,
+                2,
+                2,
+                0,
+                0,
+                false
+            ), // EAST ONLY
+            new SittingInfoData
+            (
+                0x4029,
+                2,
+                2,
+                2,
+                2,
+                0,
+                0,
+                false
+            ), // EAST ONLY
 
-            new SittingInfoData(0x4028, 4, 4, 4, 4, 4, 4, false), // SOUTH ONLY
-            new SittingInfoData(0x4027, 4, 4, 4, 4, 4, 4, false), // SOUTH ONLY
-            new SittingInfoData(0x4023, 4, 4, 4, 4, 4, 4, false), // SOUTH ONLY
-            new SittingInfoData(0x4024, 2, 2, 2, 2, 0, 0, false), // EAST ONLY
-            new SittingInfoData(0x4C1E, 2, 2, 2, 2, 0, 0, false), // EAST ONLY
-            new SittingInfoData(0x4C1B, 4, 4, 4, 4, 4, 4, false), // SOUTH ONLY
-            new SittingInfoData(0x7132, 2, 2, 2, 2, 0, 0, false), // EAST ONLY
-            new SittingInfoData(0x71C2, 4, 4, 4, 4, 4, 4, false), // SOUTH ONLY
+            new SittingInfoData
+            (
+                0x4028,
+                4,
+                4,
+                4,
+                4,
+                4,
+                4,
+                false
+            ), // SOUTH ONLY
+            new SittingInfoData
+            (
+                0x4027,
+                4,
+                4,
+                4,
+                4,
+                4,
+                4,
+                false
+            ), // SOUTH ONLY
+            new SittingInfoData
+            (
+                0x4023,
+                4,
+                4,
+                4,
+                4,
+                4,
+                4,
+                false
+            ), // SOUTH ONLY
+            new SittingInfoData
+            (
+                0x4024,
+                2,
+                2,
+                2,
+                2,
+                0,
+                0,
+                false
+            ), // EAST ONLY
+            new SittingInfoData
+            (
+                0x4C1E,
+                2,
+                2,
+                2,
+                2,
+                0,
+                0,
+                false
+            ), // EAST ONLY
+            new SittingInfoData
+            (
+                0x4C1B,
+                4,
+                4,
+                4,
+                4,
+                4,
+                4,
+                false
+            ), // SOUTH ONLY
+            new SittingInfoData
+            (
+                0x7132,
+                2,
+                2,
+                2,
+                2,
+                0,
+                0,
+                false
+            ), // EAST ONLY
+            new SittingInfoData
+            (
+                0x71C2,
+                4,
+                4,
+                4,
+                4,
+                4,
+                4,
+                false
+            ), // SOUTH ONLY
 
-            new SittingInfoData(0x9977, 2, 2, 2, 2, 0, 0, false), // EAST ONLY
-            new SittingInfoData(0x996C, 4, 4, 4, 4, 4, 4, false)  // SOUTH ONLY
+            new SittingInfoData
+            (
+                0x9977,
+                2,
+                2,
+                2,
+                2,
+                0,
+                0,
+                false
+            ), // EAST ONLY
+            new SittingInfoData
+            (
+                0x996C,
+                4,
+                4,
+                4,
+                4,
+                4,
+                4,
+                false
+            ) // SOUTH ONLY
         };
-
 
 
         public override unsafe Task Load()
@@ -275,11 +1862,9 @@ namespace ClassicUO.IO.Resources
 
                     for (int i = 0; i < 5; i++)
                     {
-                        string pathmul = UOFileManager.GetUOFilePath
-                            ("anim" + (i == 0 ? string.Empty : (i + 1).ToString()) + ".mul");
+                        string pathmul = UOFileManager.GetUOFilePath("anim" + (i == 0 ? string.Empty : (i + 1).ToString()) + ".mul");
 
-                        string pathidx = UOFileManager.GetUOFilePath
-                            ("anim" + (i == 0 ? string.Empty : (i + 1).ToString()) + ".idx");
+                        string pathidx = UOFileManager.GetUOFilePath("anim" + (i == 0 ? string.Empty : (i + 1).ToString()) + ".idx");
 
                         if (File.Exists(pathmul) && File.Exists(pathidx))
                         {
@@ -292,8 +1877,7 @@ namespace ClassicUO.IO.Resources
 
                             if (File.Exists(pathuop))
                             {
-                                _filesUop[i - 1] = new UOFileUop
-                                    (pathuop, "build/animationlegacyframe/{0:D6}/{0:D2}.bin");
+                                _filesUop[i - 1] = new UOFileUop(pathuop, "build/animationlegacyframe/{0:D6}/{0:D2}.bin");
 
                                 if (!loaduop)
                                 {
@@ -359,7 +1943,8 @@ namespace ClassicUO.IO.Resources
                                         new[]
                                         {
                                             '\t', ' '
-                                        }, StringSplitOptions.RemoveEmptyEntries
+                                        },
+                                        StringSplitOptions.RemoveEmptyEntries
                                     );
 
                                     if (parts.Length < 3)
@@ -673,12 +2258,9 @@ namespace ClassicUO.IO.Resources
                                 {
                                     UOFile currentIdxFile = _files[animFile].IdxFile;
 
-                                    ANIMATION_GROUPS_TYPE realType = Client.Version < ClientVersion.CV_500A ?
-                                        CalculateTypeByGraphic(realAnimID) :
-                                        DataIndex[index].Type;
+                                    ANIMATION_GROUPS_TYPE realType = Client.Version < ClientVersion.CV_500A ? CalculateTypeByGraphic(realAnimID) : DataIndex[index].Type;
 
-                                    long addressOffset = DataIndex[index]
-                                        .CalculateOffset(realAnimID, realType, out int count);
+                                    long addressOffset = DataIndex[index].CalculateOffset(realAnimID, realType, out int count);
 
                                     if (addressOffset < currentIdxFile.Length)
                                     {
@@ -787,7 +2369,7 @@ namespace ClassicUO.IO.Resources
                                 DataIndex[index].Color = (ushort) color;
 
                                 DataIndex[index].IsValidMUL = true;
-                                
+
                                 filter[index] = true;
                             }
                         }
@@ -852,7 +2434,6 @@ namespace ClassicUO.IO.Resources
                 }
             );
         }
-
 
 
         public override void Dispose()
@@ -1016,8 +2597,7 @@ namespace ClassicUO.IO.Resources
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private ANIMATION_GROUPS_TYPE CalculateTypeByGraphic(ushort graphic)
         {
-            return graphic < 200 ? ANIMATION_GROUPS_TYPE.MONSTER :
-                graphic < 400 ? ANIMATION_GROUPS_TYPE.ANIMAL : ANIMATION_GROUPS_TYPE.HUMAN;
+            return graphic < 200 ? ANIMATION_GROUPS_TYPE.MONSTER : graphic < 400 ? ANIMATION_GROUPS_TYPE.ANIMAL : ANIMATION_GROUPS_TYPE.HUMAN;
         }
 
         public void ConvertBodyIfNeeded(ref ushort graphic, bool isParent = false, bool forceUOP = false)
@@ -1039,8 +2619,7 @@ namespace ClassicUO.IO.Resources
 
                 do
                 {
-                    if ((DataIndex[newGraphic].HasBodyConversion || !dataIndex.HasBodyConversion) &&
-                        !(DataIndex[newGraphic].HasBodyConversion && dataIndex.HasBodyConversion))
+                    if ((DataIndex[newGraphic].HasBodyConversion || !dataIndex.HasBodyConversion) && !(DataIndex[newGraphic].HasBodyConversion && dataIndex.HasBodyConversion))
                     {
                         if (graphic != newGraphic)
                         {
@@ -1074,8 +2653,7 @@ namespace ClassicUO.IO.Resources
 
                 do
                 {
-                    if ((DataIndex[newGraphic].HasBodyConversion || !index.HasBodyConversion) &&
-                        !(DataIndex[newGraphic].HasBodyConversion && index.HasBodyConversion))
+                    if ((DataIndex[newGraphic].HasBodyConversion || !index.HasBodyConversion) && !(DataIndex[newGraphic].HasBodyConversion && index.HasBodyConversion))
                     {
                         if (graphic != newGraphic)
                         {
@@ -1123,8 +2701,7 @@ namespace ClassicUO.IO.Resources
 
                 do
                 {
-                    if ((DataIndex[newGraphic].HasBodyConversion || !index.HasBodyConversion) &&
-                        !(DataIndex[newGraphic].HasBodyConversion && index.HasBodyConversion))
+                    if ((DataIndex[newGraphic].HasBodyConversion || !index.HasBodyConversion) && !(DataIndex[newGraphic].HasBodyConversion && index.HasBodyConversion))
                     {
                         if (graphic != newGraphic)
                         {
@@ -1142,9 +2719,7 @@ namespace ClassicUO.IO.Resources
 
                 if (DataIndex[graphic].HasBodyConversion)
                 {
-                    return DataIndex[graphic].BodyConvGroups != null ?
-                        DataIndex[graphic].BodyConvGroups[group] :
-                        _empty;
+                    return DataIndex[graphic].BodyConvGroups != null ? DataIndex[graphic].BodyConvGroups[group] : _empty;
                 }
 
                 return DataIndex[graphic].Groups != null ? DataIndex[graphic].Groups[group] ?? _empty : _empty;
@@ -1214,7 +2789,7 @@ namespace ClassicUO.IO.Resources
                 {
                     if (!DataIndex[i].HasBodyConversion)
                     {
-                       DataIndex[i].GraphicConversion = (ushort) (DataIndex[i].GraphicConversion & ~0x8000);
+                        DataIndex[i].GraphicConversion = (ushort) (DataIndex[i].GraphicConversion & ~0x8000);
                     }
                 }
             }
@@ -1298,91 +2873,91 @@ namespace ClassicUO.IO.Resources
             {
                 case 7:
                 case 0:
+                {
+                    if (data.Direction1 == -1)
                     {
-                        if (data.Direction1 == -1)
+                        if (direction == 7)
                         {
-                            if (direction == 7)
-                            {
-                                direction = (byte)data.Direction4;
-                            }
-                            else
-                            {
-                                direction = (byte)data.Direction2;
-                            }
+                            direction = (byte) data.Direction4;
                         }
                         else
                         {
-                            direction = (byte)data.Direction1;
+                            direction = (byte) data.Direction2;
                         }
-
-                        break;
                     }
+                    else
+                    {
+                        direction = (byte) data.Direction1;
+                    }
+
+                    break;
+                }
 
                 case 1:
                 case 2:
+                {
+                    if (data.Direction2 == -1)
                     {
-                        if (data.Direction2 == -1)
+                        if (direction == 1)
                         {
-                            if (direction == 1)
-                            {
-                                direction = (byte)data.Direction1;
-                            }
-                            else
-                            {
-                                direction = (byte)data.Direction3;
-                            }
+                            direction = (byte) data.Direction1;
                         }
                         else
                         {
-                            direction = (byte)data.Direction2;
+                            direction = (byte) data.Direction3;
                         }
-
-                        break;
                     }
+                    else
+                    {
+                        direction = (byte) data.Direction2;
+                    }
+
+                    break;
+                }
 
                 case 3:
                 case 4:
+                {
+                    if (data.Direction3 == -1)
                     {
-                        if (data.Direction3 == -1)
+                        if (direction == 3)
                         {
-                            if (direction == 3)
-                            {
-                                direction = (byte)data.Direction2;
-                            }
-                            else
-                            {
-                                direction = (byte)data.Direction4;
-                            }
+                            direction = (byte) data.Direction2;
                         }
                         else
                         {
-                            direction = (byte)data.Direction3;
+                            direction = (byte) data.Direction4;
                         }
-
-                        break;
                     }
+                    else
+                    {
+                        direction = (byte) data.Direction3;
+                    }
+
+                    break;
+                }
 
                 case 5:
                 case 6:
+                {
+                    if (data.Direction4 == -1)
                     {
-                        if (data.Direction4 == -1)
+                        if (direction == 5)
                         {
-                            if (direction == 5)
-                            {
-                                direction = (byte)data.Direction3;
-                            }
-                            else
-                            {
-                                direction = (byte)data.Direction1;
-                            }
+                            direction = (byte) data.Direction3;
                         }
                         else
                         {
-                            direction = (byte)data.Direction4;
+                            direction = (byte) data.Direction1;
                         }
-
-                        break;
                     }
+                    else
+                    {
+                        direction = (byte) data.Direction4;
+                    }
+
+                    break;
+                }
             }
 
             GetSittingAnimDirection(ref direction, ref mirror, ref x, ref y);
@@ -1455,8 +3030,7 @@ namespace ClassicUO.IO.Resources
             {
                 case ANIMATION_GROUPS_TYPE.ANIMAL:
 
-                    if ((flags & ANIMATION_FLAGS.AF_USE_2_IF_HITTED_WHILE_RUNNING) != 0 ||
-                        (flags & ANIMATION_FLAGS.AF_CAN_FLYING) != 0)
+                    if ((flags & ANIMATION_FLAGS.AF_USE_2_IF_HITTED_WHILE_RUNNING) != 0 || (flags & ANIMATION_FLAGS.AF_CAN_FLYING) != 0)
                     {
                         return 2;
                     }
@@ -1489,8 +3063,7 @@ namespace ClassicUO.IO.Resources
                     return (byte) (second ? HIGHT_ANIMATION_GROUP.HAG_DIE_2 : HIGHT_ANIMATION_GROUP.HAG_DIE_1);
 
                 case ANIMATION_GROUPS_TYPE.HUMAN:
-                case ANIMATION_GROUPS_TYPE.EQUIPMENT:
-                    return (byte) (second ? PEOPLE_ANIMATION_GROUP.PAG_DIE_2 : PEOPLE_ANIMATION_GROUP.PAG_DIE_1);
+                case ANIMATION_GROUPS_TYPE.EQUIPMENT: return (byte) (second ? PEOPLE_ANIMATION_GROUP.PAG_DIE_2 : PEOPLE_ANIMATION_GROUP.PAG_DIE_1);
             }
 
             return 0;
@@ -1503,9 +3076,7 @@ namespace ClassicUO.IO.Resources
             {
                 ushort hue = 0;
 
-                AnimationDirection direction = isCorpse ?
-                    GetCorpseAnimationGroup(ref graphic, ref group, ref hue)?.Direction[0] :
-                    GetBodyAnimationGroup(ref graphic, ref group, ref hue, true)?.Direction[0];
+                AnimationDirection direction = isCorpse ? GetCorpseAnimationGroup(ref graphic, ref group, ref hue)?.Direction[0] : GetBodyAnimationGroup(ref graphic, ref group, ref hue, true)?.Direction[0];
 
 
                 return direction != null && (direction.Address != 0 && direction.Size != 0 || direction.IsUOP);
@@ -1560,8 +3131,7 @@ namespace ClassicUO.IO.Resources
                 return false;
             }
 
-            if (animData.FileIndex == 0 && animData.CompressedLength == 0 && animData.DecompressedLength == 0 &&
-                animData.Offset == 0)
+            if (animData.FileIndex == 0 && animData.CompressedLength == 0 && animData.DecompressedLength == 0 && animData.Offset == 0)
             {
                 Log.Warn("uop animData is null");
 
@@ -1573,7 +3143,15 @@ namespace ClassicUO.IO.Resources
             UOFileUop file = _filesUop[animData.FileIndex];
             file.Seek(animData.Offset);
 
-            ZLib.Decompress(file.PositionAddress, (int)animData.CompressedLength, 0, _bufferCachePtr, decLen);
+            ZLib.Decompress
+            (
+                file.PositionAddress,
+                (int) animData.CompressedLength,
+                0,
+                _bufferCachePtr,
+                decLen
+            );
+
             _reader.SetData(_bufferCachePtr, decLen);
             _reader.Skip(32);
 
@@ -1583,7 +3161,7 @@ namespace ClassicUO.IO.Resources
 
             for (int i = 0; i < frameCount; i++)
             {
-                uint start = (uint)_reader.Position;
+                uint start = (uint) _reader.Position;
                 ushort group = _reader.ReadUShort();
                 short frameID = _reader.ReadShort();
                 _reader.Skip(8);
@@ -1616,7 +3194,7 @@ namespace ClassicUO.IO.Resources
             //    }
             //}
 
-            animDirection.FrameCount = (byte)(frameCount / 5);
+            animDirection.FrameCount = (byte) (frameCount / 5);
             int dirFrameStartIdx = animDirection.FrameCount * direction;
 
             if (animDirection.Frames != null && animDirection.Frames.Length != 0)
@@ -1625,7 +3203,7 @@ namespace ClassicUO.IO.Resources
             }
 
             animDirection.Frames = new AnimationFrameTexture[animDirection.FrameCount];
-            long end = (long)_reader.StartAddress + _reader.Length;
+            long end = (long) _reader.StartAddress + _reader.Length;
 
             unchecked
             {
@@ -1643,8 +3221,8 @@ namespace ClassicUO.IO.Resources
                         continue;
                     }
 
-                    _reader.Seek((int)(frameData.DataStart + frameData.PixelDataOffset));
-                    ushort* palette = (ushort*)_reader.PositionAddress;
+                    _reader.Seek((int) (frameData.DataStart + frameData.PixelDataOffset));
+                    ushort* palette = (ushort*) _reader.PositionAddress;
                     _reader.Skip(512);
                     short imageCenterX = _reader.ReadShort();
                     short imageCenterY = _reader.ReadShort();
@@ -1668,15 +3246,15 @@ namespace ClassicUO.IO.Resources
 
                     while (header != 0x7FFF7FFF && pos < end)
                     {
-                        ushort runLength = (ushort)(header & 0x0FFF);
-                        int x = (int)((header >> 22) & 0x03FF);
+                        ushort runLength = (ushort) (header & 0x0FFF);
+                        int x = (int) ((header >> 22) & 0x03FF);
 
                         if ((x & 0x0200) > 0)
                         {
-                            x |= (int)0xFFFFFE00;
+                            x |= (int) 0xFFFFFE00;
                         }
 
-                        int y = (int)((header >> 12) & 0x3FF);
+                        int y = (int) ((header >> 12) & 0x3FF);
 
                         if ((y & 0x0200) > 0)
                         {
@@ -1714,7 +3292,6 @@ namespace ClassicUO.IO.Resources
                     f.PushData(data);
                     animDirection.Frames[i] = f;
                 }
-
             }
 
             _usedTextures.AddLast(animDirection);
@@ -1840,7 +3417,16 @@ namespace ClassicUO.IO.Resources
             }
 
             Instance.GetAnimationDimensions
-                (frameIndex, graphic, dir, animGroup, out centerX, out centerY, out width, out height);
+            (
+                frameIndex,
+                graphic,
+                dir,
+                animGroup,
+                out centerX,
+                out centerY,
+                out width,
+                out height
+            );
 
             if (centerX == 0 && centerY == 0 && width == 0 && height == 0)
             {
@@ -1876,9 +3462,7 @@ namespace ClassicUO.IO.Resources
 
                 if (dir < 5)
                 {
-                    AnimationDirection direction = Instance.GetBodyAnimationGroup
-                                                               (ref id, ref animGroup, ref hue, true)
-                                                           .Direction[dir];
+                    AnimationDirection direction = Instance.GetBodyAnimationGroup(ref id, ref animGroup, ref hue, true).Direction[dir];
 
                     if (direction != null)
                     {
@@ -1917,17 +3501,25 @@ namespace ClassicUO.IO.Resources
                         {
                             UOFileMul file = _files[direction1.FileIndex];
                             file.Seek(direction1.Address);
-                            ReadFrameDimensionData(frameIndex, out x, out y, out w, out h, file);
+
+                            ReadFrameDimensionData
+                            (
+                                frameIndex,
+                                out x,
+                                out y,
+                                out w,
+                                out h,
+                                file
+                            );
+
                             _animDimensionCache[id] = new Rectangle(x, y, w, h);
 
                             return;
                         }
                     }
-                    else if (direction1.IsUOP && Instance.GetBodyAnimationGroup
-                        (ref id, ref animGroup, ref hue, true) is AnimationGroupUop animDataStruct)
+                    else if (direction1.IsUOP && Instance.GetBodyAnimationGroup(ref id, ref animGroup, ref hue, true) is AnimationGroupUop animDataStruct)
                     {
-                        if (!(animDataStruct.FileIndex == 0 && animDataStruct.CompressedLength == 0 &&
-                              animDataStruct.DecompressedLength == 0 && animDataStruct.Offset == 0))
+                        if (!(animDataStruct.FileIndex == 0 && animDataStruct.CompressedLength == 0 && animDataStruct.DecompressedLength == 0 && animDataStruct.Offset == 0))
                         {
                             int decLen = (int) animDataStruct.DecompressedLength;
                             UOFileUop file = _filesUop[animDataStruct.FileIndex];
