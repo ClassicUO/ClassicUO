@@ -845,38 +845,6 @@ namespace ClassicUO.Game.UI.Gumps
                 return 0;
             }
 
-            private static AnimationDirection GetMobileAnimationDirection(ushort graphic, ref ushort hue, byte dirIndex)
-            {
-                if (graphic >= Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT)
-                {
-                    return null;
-                }
-
-                byte group = GetAnimGroup(graphic);
-                //IndexAnimation index = AnimationsLoader.Instance.DataIndex[graphic];
-
-                // AnimationDirection direction = index.Groups[group].Direction[dirIndex];
-
-                //ref var entry = ref AnimationsLoader.Instance.GetBodyFrame();
-
-                //for (int i = 0; i < 2 && direction.FrameCount == 0; i++)
-                //{
-                //    if (!AnimationsLoader.Instance.LoadAnimationFrames(graphic, group, dirIndex, ref direction))
-                //    {
-                //        //direction = AnimationsLoader.Instance.GetCorpseAnimationGroup(ref graphic, ref group, ref hue2).Direction[dirIndex];
-                //        //graphic = item.ItemData.AnimID;
-                //        //group = GetAnimGroup(graphic);
-                //        //index = AnimationsLoader.Instance.DataIndex[graphic];
-                //        //direction = AnimationsLoader.Instance.GetBodyAnimationGroup(ref graphic, ref group, ref hue2, true).Direction[dirIndex];
-                //        ////direction = index.Groups[group].Direction[1];
-                //        //AnimationsLoader.Instance.AnimID = graphic;
-                //        //AnimationsLoader.Instance.AnimGroup = group;
-                //        //AnimationsLoader.Instance.Direction = dirIndex;
-                //    }
-                //}
-
-                return null;
-            }
 
             public void SetName(string s, bool new_name)
             {
@@ -893,15 +861,9 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 base.Update(totalTime, frameTime);
 
-                if (SerialHelper.IsMobile(LocalSerial))
+                if (SerialHelper.IsMobile(LocalSerial) && Graphic < Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT)
                 {
-                    ushort hue = Hue;
-                    AnimationDirection dir = GetMobileAnimationDirection(Graphic, ref hue, 1);
-
-                    if (dir != null)
-                    {
-                        dir.LastAccessTime = Time.Ticks;
-                    }
+                    _ = AnimationsLoader.Instance.GetFrameInfo(Graphic, GetAnimGroup(Graphic), 1);
                 }
             }
         }

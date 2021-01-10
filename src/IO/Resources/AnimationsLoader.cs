@@ -1971,7 +1971,7 @@ namespace ClassicUO.IO.Resources
                                         {
                                             ref var index = ref _animationCache.GetEntry(id);
 
-                                            index.Type = (ANIMATION_GROUPS_TYPE) i;
+                                            index.Type = (ANIMATION_GROUPS_TYPE) (i + 1);
                                             index.Flags = (ANIMATION_FLAGS) (0x80000000 | number);
 
                                             break;
@@ -2008,13 +2008,8 @@ namespace ClassicUO.IO.Resources
 
                         int offset = 0;
 
-                        for (byte j = 0; j < 100; j++)
+                        for (byte j = 0; j < count; j++)
                         {
-                            if (j >= count)
-                            {
-                                continue;
-                            }
-
                             for (byte d = 0; d < 5; d++)
                             {
                                 AnimIdxBlock* aidx = (AnimIdxBlock*) (address + offset * animIdxBlockSize);
@@ -2574,12 +2569,19 @@ namespace ClassicUO.IO.Resources
 
             bool conv = HasBodyConversion(ref entry);
 
-            ref AnimationDirectionEntry dirEntry = ref 
-                (conv ? 
-                    ref _animationCache.GetConvertedDirectionEntry(graphic, group, direction, isUop) 
-                    : 
-                    ref _animationCache.GetDirectionEntry(graphic, group, direction, isUop)
-                );
+            //ref AnimationDirectionEntry dirEntry = ref _animationCache.GetConvertedDirectionEntry(graphic, group, direction, isUop);
+
+            //if (!conv || dirEntry.Address == IntPtr.Zero || dirEntry.IsUOP)
+            //{
+            //    dirEntry = ref _animationCache.GetDirectionEntry(graphic, group, direction, isUop);
+            //}
+
+            ref AnimationDirectionEntry dirEntry = ref
+               (conv ?
+                   ref _animationCache.GetConvertedDirectionEntry(graphic, group, direction, isUop)
+                   :
+                   ref _animationCache.GetDirectionEntry(graphic, group, direction, isUop)
+               );
 
             if (dirEntry.Address == IntPtr.Zero)
             {
@@ -2654,11 +2656,6 @@ namespace ClassicUO.IO.Resources
         {
             ref var entry = ref _animationCache.GetEntry(graphic);
 
-            if (hue == 0)
-            {
-                hue = isCorpse ? entry.CorpseColor : entry.Color;
-            }
-
             isUop = (entry.Flags & ANIMATION_FLAGS.AF_USE_UOP_ANIMATION) != 0 && (isParent || !entry.IsValidMUL);
 
             if (!isUop)
@@ -2682,6 +2679,11 @@ namespace ClassicUO.IO.Resources
                             ref var ent = ref _animationCache.GetEntry(graphic);
 
                             newGraphic = isCorpse ? entry.CorpseGraphic : ent.Graphic;
+
+                            if (hue == 0)
+                            {
+                                hue = isCorpse ? entry.CorpseColor : entry.Color;
+                            }
                         }
                     }
                     else
@@ -3759,8 +3761,8 @@ namespace ClassicUO.IO.Resources
 
     internal enum ANIMATION_GROUPS_TYPE : byte
     {
-        UNKNOWN = 0xFF,
-        MONSTER = 0,
+        UNKNOWN = 0,
+        MONSTER,
         SEA_MONSTER,
         ANIMAL,
         HUMAN,
@@ -3931,16 +3933,19 @@ namespace ClassicUO.IO.Resources
         private readonly AnimationDirectionEntry[,,] _indexCache = new AnimationDirectionEntry[Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT, 100 * 2 /* uop */, 5];
         private readonly AnimationDirectionEntry[,,] _indexBodyConversionCache = new AnimationDirectionEntry[Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT, 100 * 2 /* uop */, 5];
         private readonly byte[,] _uopIndexConvertionCache = new byte[Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT, 100];
-
         private readonly Dictionary<ulong, (byte, UOFileIndex)> _uopHashses = new Dictionary<ulong, (byte, UOFileIndex)>();
+
+
+        public ref AnimationEntry this[int graphic] => ref _indexEntries[graphic];
+
 
         public ref AnimationEntry GetEntry(int graphic)
         {
             ref AnimationEntry entry = ref _indexEntries[graphic];
 
             return ref entry;
-        }
-
+    }
+    
         public ref AnimationDirectionEntry GetDirectionEntry(ushort animID, byte group, byte direction, bool uop = false)
         {
             if (uop)
@@ -3966,7 +3971,7 @@ namespace ClassicUO.IO.Resources
 
             return ref entry;
         }
-
+        
         
         public bool Push(ushort animID, byte group, byte direction, int frame, int totalFrames, AnimationFrameTexture texture, bool uop = false)
         {            
@@ -4112,94 +4117,6 @@ namespace ClassicUO.IO.Resources
             }
 
             return null;
-        }
-    }
-
-    internal class IndexAnimation
-    {
-        private byte[] _uopReplaceGroupIndex;
-        public bool IsUOP => (Flags & ANIMATION_FLAGS.AF_USE_UOP_ANIMATION) != 0;
-
-        public bool HasBodyConversion => (GraphicConversion & 0x8000) == 0 && BodyConvGroups != null;
-        public AnimationGroup[] BodyConvGroups;
-        public ushort Color;
-        public ushort CorpseColor;
-
-        public ushort CorpseGraphic;
-
-        public byte FileIndex;
-        public ANIMATION_FLAGS Flags;
-
-        public ushort Graphic;
-
-        public ushort GraphicConversion = 0x8000;
-
-        // 100
-        public AnimationGroup[] Groups;
-
-        public bool IsValidMUL;
-        public sbyte MountedHeightOffset;
-
-        public ANIMATION_GROUPS_TYPE Type = ANIMATION_GROUPS_TYPE.UNKNOWN;
-        public AnimationGroupUop[] UopGroups;
-
-
-        public AnimationGroupUop GetUopGroup(byte group)
-        {
-            return group < 100 && UopGroups != null ? UopGroups[_uopReplaceGroupIndex[group]] : null;
-        }
-
-        public void InitializeUOP()
-        {
-            if (_uopReplaceGroupIndex == null)
-            {
-                _uopReplaceGroupIndex = new byte[100];
-
-                for (byte i = 0; i < 100; i++)
-                {
-                    _uopReplaceGroupIndex[i] = i;
-                }
-            }
-        }
-
-        public void ReplaceUopGroup(byte old, byte newG)
-        {
-            _uopReplaceGroupIndex[old] = newG;
-        }
-    }
-
-    internal class AnimationGroup
-    {
-        public AnimationDirection[] Direction { get; set; }
-    }
-
-    internal class AnimationGroupUop : AnimationGroup
-    {
-        public uint CompressedLength;
-        public uint DecompressedLength;
-        public int FileIndex;
-        public uint Offset;
-    }
-
-    internal class AnimationDirection
-    {
-        public long Address;
-        public int FileIndex;
-        public byte FrameCount;
-        public int FrameIndexStart = -1;
-        public bool IsUOP;
-        public bool IsVerdata;
-        public long LastAccessTime;
-        public uint Size;
-
-        internal AnimationFrameTexture GetFrame(byte animIndex)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal ArraySegment<AnimationFrameTexture> GetFrames()
-        {
-            throw new NotImplementedException();
         }
     }
 
