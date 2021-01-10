@@ -326,7 +326,8 @@ namespace ClassicUO.Game.UI.Controls
                 animID = 0x0223;
             }
 
-            AnimationsLoader.Instance.ConvertBodyIfNeeded(ref graphic);
+            ushort hue = 0;
+            AnimationsLoader.Instance.FixAnimationGraphicAndHue(ref graphic, ref hue, false, false, out bool isUop);
 
             if (AnimationsLoader.Instance.EquipConversions.TryGetValue(graphic, out Dictionary<ushort, EquipConvData> dict))
             {

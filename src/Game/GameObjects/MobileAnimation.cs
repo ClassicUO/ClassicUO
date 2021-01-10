@@ -533,12 +533,11 @@ namespace ClassicUO.Game.GameObjects
             ref AnimationEntry ia = ref AnimationsLoader.Instance.GetAnimationEntry(graphic);
 
             ANIMATION_GROUPS_TYPE originalType = ia.Type;
-            AnimationsLoader.Instance.ConvertBodyIfNeeded(ref graphic, isParent);
+            ushort hue = 0;
+            AnimationsLoader.Instance.FixAnimationGraphicAndHue(ref graphic, ref hue, false, isParent, out bool uop);
             ia = ref AnimationsLoader.Instance.GetAnimationEntry(graphic);
             ANIMATION_GROUPS_TYPE type = ia.Type;
             ANIMATION_FLAGS flags = ia.Flags;
-
-            bool uop = (flags & ANIMATION_FLAGS.AF_USE_UOP_ANIMATION) != 0;
 
             if (mobile.AnimationFromServer && mobile.AnimationGroup != 0xFF)
             {

@@ -309,7 +309,7 @@ namespace ClassicUO.IO
             return ((ulong) esi << 32) | eax;
         }
 
-        internal static ulong CreateHash(char[] s)
+        internal static ulong CreateHash(byte[] s)
         {
             uint eax, ecx, edx, ebx, esi, edi;
             eax = ecx = edx = ebx = esi = edi = 0;

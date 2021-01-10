@@ -183,9 +183,9 @@ namespace ClassicUO.IO.Resources
             }
         }
 
-        public override void CleaUnusedResources(int count)
+        public override void ClearUnusedResources(int count)
         {
-            base.CleaUnusedResources(count);
+            base.ClearUnusedResources(count);
             ClearUnusedResources(_landResources, count);
         }
 

@@ -224,9 +224,9 @@ namespace ClassicUO.Game.GameObjects
 
             byte animIndex = (byte)AnimIndex;
             ushort graphic = GetGraphicForAnimation();
-            AnimationsLoader.Instance.ConvertBodyIfNeeded(ref graphic);
+            ushort hue = Hue;
+            AnimationsLoader.Instance.FixAnimationGraphicAndHue(ref graphic, ref hue, true, false, out bool isUop);
             byte group = AnimationsLoader.Instance.GetDieGroupIndex(graphic, UsedLayer);
-
             bool ishuman = MathHelper.InRange(Amount, 0x0190, 0x0193) || MathHelper.InRange(Amount, 0x00B7, 0x00BA) || MathHelper.InRange(Amount, 0x025D, 0x0260) || MathHelper.InRange(Amount, 0x029A, 0x029B) || MathHelper.InRange(Amount, 0x02B6, 0x02B7) || Amount == 0x03DB || Amount == 0x03DF || Amount == 0x03E2 || Amount == 0x02E8 || Amount == 0x02E9;
 
             DrawLayer
@@ -238,32 +238,35 @@ namespace ClassicUO.Game.GameObjects
                 Layer.Invalid,
                 animIndex,
                 ishuman,
-                Hue,
+                hue,
                 IsFlipped,
                 HueVector.Z,
                 group,
                 direction
             );
 
-            for (int i = 0; i < Constants.USED_LAYER_COUNT; i++)
+            if (!IsEmpty)
             {
-                Layer layer = LayerOrder.UsedLayers[direction, i];
+                for (int i = 0; i < Constants.USED_LAYER_COUNT; i++)
+                {
+                    Layer layer = LayerOrder.UsedLayers[direction, i];
 
-                DrawLayer
-                (
-                    batcher,
-                    posX,
-                    posY,
-                    this,
-                    layer,
-                    animIndex,
-                    ishuman,
-                    0,
-                    IsFlipped,
-                    HueVector.Z,
-                    group,
-                    direction
-                );
+                    DrawLayer
+                    (
+                        batcher,
+                        posX,
+                        posY,
+                        this,
+                        layer,
+                        animIndex,
+                        ishuman,
+                        0,
+                        IsFlipped,
+                        HueVector.Z,
+                        group,
+                        direction
+                    );
+                }
             }
 
             return true;

@@ -98,7 +98,7 @@ namespace ClassicUO.IO
             _usedTextures.AddLast(id);
         }
 
-        public virtual void CleaUnusedResources(int count)
+        public virtual void ClearUnusedResources(int count)
         {
             ClearUnusedResources(Resources, count);
         }

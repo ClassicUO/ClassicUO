@@ -1045,13 +1045,10 @@ namespace ClassicUO.Game.GameObjects
                     {
                         byte animGroup = AnimationsLoader.Instance.GetDieGroupIndex(id, UsedLayer);
 
-                        ref AnimationDirectionEntry entry = ref AnimationsLoader.Instance.GetAnimationDirectionEntry(id, animGroup, dir, loadTextures: true);
+                        int fc = AnimationsLoader.Instance.GetFrameInfo(id, animGroup, dir);
                        
-                        if (entry.Address != IntPtr.Zero && entry.Size != 0 || entry.IsUOP)
+                        if (fc != 0)
                         {
-                            entry.LastAccessTime = Time.Ticks;
-                            int fc = entry.FramesCount;
-
                             if (frameIndex >= fc)
                             {
                                 frameIndex = (sbyte) (fc - 1);

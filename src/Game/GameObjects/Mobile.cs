@@ -634,13 +634,10 @@ namespace ClassicUO.Game.GameObjects
 
                 if (id < Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT && dir < 5)
                 {
-                    ref AnimationDirectionEntry entry = ref AnimationsLoader.Instance.GetAnimationDirectionEntry(id, animGroup, dir, loadTextures: true);
- 
-                    if (entry.Address != IntPtr.Zero && entry.Size != 0 /*&& entry.FileIndex != -1*/ || entry.IsUOP)
-                    {
-                        entry.LastAccessTime = Time.Ticks;
-                        int fc = entry.FramesCount;
+                    int fc = AnimationsLoader.Instance.GetFrameInfo(id, animGroup, dir);
 
+                    if (fc != 0)
+                    {
                         if (AnimationFromServer)
                         {
                             currentDelay += currentDelay * (AnimationInterval + 1);
