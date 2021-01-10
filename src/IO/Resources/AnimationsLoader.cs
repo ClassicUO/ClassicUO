@@ -2551,12 +2551,7 @@ namespace ClassicUO.IO.Resources
             return graphic < 200 ? ANIMATION_GROUPS_TYPE.MONSTER : graphic < 400 ? ANIMATION_GROUPS_TYPE.ANIMAL : ANIMATION_GROUPS_TYPE.HUMAN;
         }
 
-        public ref AnimationEntry GetAnimationEntry(ushort graphic)
-        {
-            ref AnimationEntry entry = ref _animationCache.GetEntry(graphic);
-
-            return ref entry;
-        }
+        public ref AnimationEntry GetAnimationEntry(ushort graphic) => ref _animationCache.GetEntry(graphic);
 
         private ref AnimationDirectionEntry GetAnimationDirectionEntry(ushort graphic, byte group, byte direction, bool isUop = false)
         {

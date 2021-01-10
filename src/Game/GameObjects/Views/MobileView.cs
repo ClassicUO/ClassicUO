@@ -550,7 +550,7 @@ namespace ClassicUO.Game.GameObjects
 
             y -= frame.Height + frame.CenterY;
 
-            SKIP:
+        SKIP:
 
             if (hasShadow)
             {
@@ -599,9 +599,9 @@ namespace ClassicUO.Game.GameObjects
                         int frameHeight = frame?.Height ?? 61;
                         _characterFrameStartY = y - (frame != null ? 0 : frameHeight - SIT_OFFSET_Y);
                         _characterFrameHeight = frameHeight;
-                        _startCharacterWaistY = (int) (frameHeight * UPPER_BODY_RATIO) + _characterFrameStartY;
-                        _startCharacterKneesY = (int) (frameHeight * MID_BODY_RATIO) + _characterFrameStartY;
-                        _startCharacterFeetY = (int) (frameHeight * LOWER_BODY_RATIO) + _characterFrameStartY;
+                        _startCharacterWaistY = (int)(frameHeight * UPPER_BODY_RATIO) + _characterFrameStartY;
+                        _startCharacterKneesY = (int)(frameHeight * MID_BODY_RATIO) + _characterFrameStartY;
+                        _startCharacterFeetY = (int)(frameHeight * LOWER_BODY_RATIO) + _characterFrameStartY;
 
                         if (frame == null)
                         {
@@ -692,28 +692,28 @@ namespace ClassicUO.Game.GameObjects
                         }
                     }
 
-                        batcher.DrawCharacterSitted
-                        (
-                            frame,
-                            x,
-                            y,
-                            mirror,
-                            h3mod,
-                            h6mod,
-                            h9mod,
-                            ref HueVector
-                        );
-                    }
-                    else if (frame != null)
-                    {
-                        batcher.DrawSprite
-                        (
-                            frame,
-                            x,
-                            y,
-                            mirror,
-                            ref HueVector
-                        );
+                    batcher.DrawCharacterSitted
+                    (
+                        frame,
+                        x,
+                        y,
+                        mirror,
+                        h3mod,
+                        h6mod,
+                        h9mod,
+                        ref HueVector
+                    );
+                }
+                else if (frame != null)
+                {
+                    batcher.DrawSprite
+                    (
+                        frame,
+                        x,
+                        y,
+                        mirror,
+                        ref HueVector
+                    );
 
                     int yy = -(frame.Height + frame.CenterY + 3);
                     int xx = -frame.CenterX;
@@ -744,10 +744,10 @@ namespace ClassicUO.Game.GameObjects
                     }
                 }
 
-                    if (frame.Contains(mirror ? x + frame.Width - SelectedObject.TranslatedMousePositionByViewport.X : SelectedObject.TranslatedMousePositionByViewport.X - x, SelectedObject.TranslatedMousePositionByViewport.Y - y))
-                    {
-                        SelectedObject.Object = owner;
-                    }
+                if (frame.Contains(mirror ? x + frame.Width - SelectedObject.TranslatedMousePositionByViewport.X : SelectedObject.TranslatedMousePositionByViewport.X - x, SelectedObject.TranslatedMousePositionByViewport.Y - y))
+                {
+                    SelectedObject.Object = owner;
+                }
 
                 if (entity != null && entity.ItemData.IsLight)
                 {
