@@ -2431,9 +2431,14 @@ namespace ClassicUO.IO.Resources
                         if (uopFile != null && uopFile.TryGetUOPData(hash, out UOFileIndex data))
                         {
                             _animationCache.StoreUopHash(hash, data, i);
+                            _animationCache.ReplaceUopGroup(animID, grpID, grpID);
 
                             ref var entry = ref _animationCache.GetEntry(animID);
+                            entry.Graphic = animID;
+                            entry.CorpseGraphic = animID;
+                            entry.GraphicConversion = 0x8000;
                             entry.FileIndex = i;
+                            entry.Flags |= ANIMATION_FLAGS.AF_USE_UOP_ANIMATION | ANIMATION_FLAGS.AF_FOUND;
 
                             for (byte d = 0; d < 5; d++)
                             {
@@ -2490,6 +2495,11 @@ namespace ClassicUO.IO.Resources
 
                 ref var animEntry = ref _animationCache.GetEntry((int)animID);
 
+                if ((animEntry.Flags & ANIMATION_FLAGS.AF_FOUND) != 0 && (animEntry.Flags & ANIMATION_FLAGS.AF_USE_UOP_ANIMATION) == 0)
+                {
+                    animEntry.Flags |= ANIMATION_FLAGS.AF_USE_UOP_ANIMATION;
+                }
+
                 for (int k = 0; k < replaces; k++)
                 {
                     int oldGroup = reader.ReadInt();
@@ -2498,7 +2508,7 @@ namespace ClassicUO.IO.Resources
 
                     if (frameCount == 0 && animEntry.Graphic != 0)
                     {
-                        _animationCache.ReplaceUopGroup((ushort)animID, (byte) oldGroup, (byte) newGroup);
+                        _animationCache.ReplaceUopGroup((ushort) animID, (byte) oldGroup, (byte) newGroup);
                     }
 
                     reader.Skip(60);
@@ -3100,30 +3110,9 @@ namespace ClassicUO.IO.Resources
             return true;
         }
 
-        private static byte[] _hashMaster = Encoding.ASCII.GetBytes("build/animationlegacyframe/000000/00.bin");
-
-        private unsafe bool ReadUOPAnimationFrame(ushort animID, byte animGroup, byte direction, ref AnimationDirectionEntry animDirection)
-        {          
-            //_hashMaster[28] = (char)(animID >> 8);
-            //_hashMaster[29] = (char)(animID & 0xFF);
-            //_hashMaster[30] = '0';
-            //_hashMaster[31] = '0';
-            //_hashMaster[32] = '0';
-            //_hashMaster[33] = '0';
-            
-            //_hashMaster[31] = (byte)(animID);
-            //_hashMaster[32] = (byte)(animID >> 8);
-
-            //_hashMaster[34] = (byte)(animGroup >> 8);
-            //_hashMaster[35] = (byte)(animGroup & 0xFF);
-
-            //string ffff = Encoding.ASCII.GetString(_hashMaster);
-          
-            //ulong hash = UOFileUop.CreateHash(_hashMaster);
-
-            ulong hash = UOFileUop.CreateHash($"build/animationlegacyframe/{animID:D6}/{animGroup:D2}.bin");
-
-            if (!_animationCache.TryGetUopHash(hash, out var index))
+        private bool ReadUOPAnimationFrame(ushort animID, byte animGroup, byte direction, ref AnimationDirectionEntry animDirection)
+        {
+            if (!_animationCache.TryGetUopHash(animID, animGroup, out var index))
             {
                 return false;
             }
@@ -3941,6 +3930,8 @@ namespace ClassicUO.IO.Resources
         private readonly AnimationFrameTexture[,,][] _cache = new AnimationFrameTexture[Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT, 100 * 2 /* uop */, 5][];
         private readonly AnimationDirectionEntry[,,] _indexCache = new AnimationDirectionEntry[Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT, 100 * 2 /* uop */, 5];
         private readonly AnimationDirectionEntry[,,] _indexBodyConversionCache = new AnimationDirectionEntry[Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT, 100 * 2 /* uop */, 5];
+        private readonly byte[,] _uopIndexConvertionCache = new byte[Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT, 100];
+
         private readonly Dictionary<ulong, (byte, UOFileIndex)> _uopHashses = new Dictionary<ulong, (byte, UOFileIndex)>();
 
         public ref AnimationEntry GetEntry(int graphic)
@@ -3954,6 +3945,7 @@ namespace ClassicUO.IO.Resources
         {
             if (uop)
             {
+                group = _uopIndexConvertionCache[animID, group];
                 group += 100;
             }
 
@@ -3966,6 +3958,7 @@ namespace ClassicUO.IO.Resources
         {
             if (uop)
             {
+                group = _uopIndexConvertionCache[animID, group];
                 group += 100;
             }
 
@@ -3984,6 +3977,7 @@ namespace ClassicUO.IO.Resources
 
             if (uop)
             {
+                group = _uopIndexConvertionCache[animID, group];
                 group += 100;
             }
 
@@ -4013,6 +4007,7 @@ namespace ClassicUO.IO.Resources
         {
             if (uop)
             {
+                group = _uopIndexConvertionCache[animID, group];
                 group += 100;
             }
 
@@ -4036,32 +4031,60 @@ namespace ClassicUO.IO.Resources
 
         public void ReplaceUopGroup(ushort animID, byte oldGroup, byte newGroup)
         {
-            for (byte i = 0; i < 5; ++i)
-            {
-                ref var oldDir = ref GetDirectionEntry(animID, oldGroup, i, true);
-                ref var newDir = ref GetDirectionEntry(animID, newGroup, i, true);
+            _uopIndexConvertionCache[animID, oldGroup] = newGroup;
 
-                IntPtr address = oldDir.Address;
-                byte fileIndex = oldDir.FileIndex;
-                uint size = oldDir.Size;
+            //ulong oldHash = UOFileUop.CreateHash($"build/animationlegacyframe/{animID:D6}/{oldGroup:D2}.bin");
+            //ulong newHash = UOFileUop.CreateHash($"build/animationlegacyframe/{animID:D6}/{newGroup:D2}.bin");
 
-                oldDir.Address = newDir.Address;
-                oldDir.FileIndex = newDir.FileIndex;      
-                oldDir.Size = newDir.Size;
+            //if (_uopHashses.TryGetValue(oldHash, out var d))
+            //{
 
-                // invert ?
-                newDir.Address = address;
-                newDir.FileIndex = fileIndex;
-                newDir.Size = size;
+            //}
 
-                oldDir.FramesCount = newDir.FramesCount = 0;
-                oldDir.IsUOP = newDir.IsUOP = true;
-            }       
+            //if (_uopHashses.TryGetValue(newHash, out var d2))
+            //{
+
+            //}
+
+
+            ////_uopHashses[oldHash] = d2;
+            ////_uopHashses[newHash] = d;
+
+            //for (byte i = 0; i < 5; ++i)
+            //{
+            //    ref var oldDir = ref GetDirectionEntry(animID, oldGroup, i, true);
+            //    ref var newDir = ref GetDirectionEntry(animID, newGroup, i, true);
+
+            //    //IntPtr address = oldDir.Address;
+            //    //byte fileIndex = oldDir.FileIndex;
+            //    //uint size = oldDir.Size;
+
+            //    //oldDir.Address = newDir.Address;
+            //    //oldDir.FileIndex = newDir.FileIndex;      
+            //    //oldDir.Size = newDir.Size;
+
+            //    //// invert ?
+            //    //newDir.Address = address;
+            //    //newDir.FileIndex = fileIndex;
+            //    //newDir.Size = size;
+
+            //    oldDir.FramesCount = newDir.FramesCount = 0;
+            //    oldDir.IsUOP = newDir.IsUOP = true;
+            //}       
         }
 
         public void StoreUopHash(ulong hash, UOFileIndex index, byte fileNum)
         {
             _uopHashses[hash] = (fileNum, index);
+        }
+
+        public bool TryGetUopHash(ushort animID, byte group, out (byte, UOFileIndex) index)
+        {
+            group = _uopIndexConvertionCache[animID, group];
+
+            ulong hash = UOFileUop.CreateHash($"build/animationlegacyframe/{animID:D6}/{group:D2}.bin");
+
+            return TryGetUopHash(hash, out index);
         }
 
         public bool TryGetUopHash(ulong hash, out (byte, UOFileIndex) index)

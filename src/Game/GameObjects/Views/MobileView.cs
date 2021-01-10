@@ -194,7 +194,7 @@ namespace ClassicUO.Game.GameObjects
                         );
 
                         animGroupMount = GetGroupForAnimation(this, mountGraphic);
-
+                        
                         DrawInternal
                         (
                             batcher,
@@ -524,6 +524,11 @@ namespace ClassicUO.Game.GameObjects
             }
 
             ushort hueFromFile = _viewHue;
+
+            if (id == 0x03e8)
+            {
+
+            }
 
             AnimationFrameTexture frame = AnimationsLoader.Instance.GetBodyFrame(ref id, ref hueFromFile, animGroup, dir, frameIndex, isParent);
 
