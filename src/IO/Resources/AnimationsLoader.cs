@@ -2619,7 +2619,7 @@ namespace ClassicUO.IO.Resources
             return 0;
         }
 
-        public AnimationFrameTexture GetBodyFrame(ref ushort graphic, ref ushort hue, byte group, byte direction, int frame, bool isParent = false)
+        public AnimationFrameTexture GetBodyFrame(ref ushort graphic, ref ushort hue, byte group, byte direction, int frame, bool isParent = false, bool forceUOP = false)
         {
             return GetFrame
             (
@@ -2629,11 +2629,12 @@ namespace ClassicUO.IO.Resources
                 direction,
                 frame,
                 false,
-                isParent
+                isParent,
+                forceUOP
             );
         }
 
-        public AnimationFrameTexture GetCorpseFrame(ref ushort graphic, ref ushort hue, byte group, byte direction, int frame)
+        public AnimationFrameTexture GetCorpseFrame(ref ushort graphic, ref ushort hue, byte group, byte direction, int frame, bool forceUOP = false)
         {
             return GetFrame
             (
@@ -2643,15 +2644,16 @@ namespace ClassicUO.IO.Resources
                 direction,
                 frame,
                 true,
-                false
+                false,
+                forceUOP
             );
         }
 
-        public void FixAnimationGraphicAndHue(ref ushort graphic, ref ushort hue, bool isCorpse, bool isParent, out bool isUop)
+        public void FixAnimationGraphicAndHue(ref ushort graphic, ref ushort hue, bool isCorpse, bool isParent, bool forceUOP, out bool isUop)
         {
             ref var entry = ref _animationCache.GetEntry(graphic);
 
-            isUop = (entry.Flags & ANIMATION_FLAGS.AF_USE_UOP_ANIMATION) != 0 && (isParent || !entry.IsValidMUL);
+            isUop = forceUOP || ((entry.Flags & ANIMATION_FLAGS.AF_USE_UOP_ANIMATION) != 0 && (isParent || !entry.IsValidMUL));
 
             if (!isUop)
             {
@@ -2697,7 +2699,8 @@ namespace ClassicUO.IO.Resources
             byte direction,
             int frame,
             bool isCorpse,
-            bool isParent
+            bool isParent,
+            bool forceUOP
         )
         {
             FixAnimationGraphicAndHue
@@ -2706,6 +2709,7 @@ namespace ClassicUO.IO.Resources
                 ref hue,
                 isCorpse,
                 isParent,
+                forceUOP,
                 out bool isUop
             );
 
@@ -3389,14 +3393,14 @@ namespace ClassicUO.IO.Resources
         {
             dir &= 0x7F;
             bool mirror = false;
-            Instance.GetAnimDirection(ref dir, ref mirror);
+            GetAnimDirection(ref dir, ref mirror);
 
             if (frameIndex == 0xFF)
             {
                 frameIndex = (byte) animIndex;
             }
 
-            Instance.GetAnimationDimensions
+            GetAnimationDimensions
             (
                 frameIndex,
                 graphic,
@@ -3414,7 +3418,7 @@ namespace ClassicUO.IO.Resources
             }
         }
 
-        public unsafe void GetAnimationDimensions
+        public void GetAnimationDimensions
         (
             byte frameIndex,
             ushort id,
@@ -3426,150 +3430,51 @@ namespace ClassicUO.IO.Resources
             out int h
         )
         {
-            //if (id < Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT)
-            //{
-            //    if (_animDimensionCache.TryGetValue(id, out Rectangle rect))
-            //    {
-            //        x = rect.X;
-            //        y = rect.Y;
-            //        w = rect.Width;
-            //        h = rect.Height;
+            if (id < Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT)
+            {
+                if (_animDimensionCache.TryGetValue(id, out Rectangle rect))
+                {
+                    x = rect.X;
+                    y = rect.Y;
+                    w = rect.Width;
+                    h = rect.Height;
 
-            //        return;
-            //    }
+                    return;
+                }
 
-            //    ushort hue = 0;
+                ushort hue = 0;
 
-            //    if (dir < 5)
-            //    {
-            //        AnimationDirection direction = Instance.GetBodyAnimationGroup
-            //                                                   (ref id, ref animGroup, ref hue, true)
-            //                                               .Direction[dir];
+                if (dir < 5)
+                {
+                    AnimationFrameTexture frame = GetBodyFrame
+                    (
+                        ref id,
+                        ref hue,
+                        animGroup,
+                        dir,
+                        frameIndex,
+                        true,
+                        false
+                    );
 
-            //        if (direction != null)
-            //        {
-            //            int fc = direction.FrameCount;
 
-            //            if (fc > 0)
-            //            {
-            //                if (frameIndex >= fc)
-            //                {
-            //                    frameIndex = 0;
-            //                }
+                    if (frame != null)
+                    {
+                        x = frame.CenterX;
+                        y = frame.CenterY;
+                        w = frame.Width;
+                        h = frame.Height;
+                        _animDimensionCache[id] = new Rectangle(x, y, w, h);
 
-            //                AnimationFrameTexture animationFrameTexture = direction.GetFrame(frameIndex);
-
-            //                if (animationFrameTexture != null)
-            //                {
-            //                    x = animationFrameTexture.CenterX;
-            //                    y = animationFrameTexture.CenterY;
-            //                    w = animationFrameTexture.Width;
-            //                    h = animationFrameTexture.Height;
-            //                    _animDimensionCache[id] = new Rectangle(x, y, w, h);
-
-            //                    return;
-            //                }
-            //            }
-            //        }
-            //    }
-
-            //    AnimationDirection direction1 = Instance.GetBodyAnimationGroup
-            //                                                (ref id, ref animGroup, ref hue, true)
-            //                                            .Direction[0];
-
-            //    if (direction1 != null)
-            //    {
-            //        if (direction1.Address != 0 && direction1.Size != 0)
-            //        {
-            //            if (!direction1.IsVerdata)
-            //            {
-            //                UOFileMul file = _files[direction1.FileIndex];
-            //                file.Seek(direction1.Address);
-            //                ReadFrameDimensionData(frameIndex, out x, out y, out w, out h, file);
-            //                _animDimensionCache[id] = new Rectangle(x, y, w, h);
-
-            //                return;
-            //            }
-            //        }
-            //        else if (direction1.IsUOP && GetBodyAnimationGroup(ref id, ref animGroup, ref hue, true) is AnimationGroupUop animDataStruct)
-            //        {
-            //            if (!(animDataStruct.FileIndex == 0 && animDataStruct.CompressedLength == 0 &&
-            //                  animDataStruct.DecompressedLength == 0 && animDataStruct.Offset == 0))
-            //            {
-            //                int decLen = (int) animDataStruct.DecompressedLength;
-            //                UOFileUop file = _filesUop[animDataStruct.FileIndex];
-            //                file.Seek(animDataStruct.Offset);
-            //                byte[] decbuffer = file.GetData((int) animDataStruct.CompressedLength, decLen);
-
-            //                fixed (byte* ptr = decbuffer)
-            //                {
-            //                    DataReader reader = new DataReader();
-            //                    reader.SetData(ptr, decLen);
-            //                    reader.Skip(32);
-
-            //                    int frameCount = reader.ReadInt();
-            //                    int dataStart = reader.ReadInt();
-            //                    reader.Seek(dataStart);
-
-            //                    reader.Skip(2);
-            //                    short frameID = reader.ReadShort();
-            //                    reader.Skip(8);
-            //                    uint pixelOffset = reader.ReadUInt();
-
-            //                    reader.Seek((int) (dataStart + pixelOffset));
-            //                    reader.Skip(512);
-            //                    x = reader.ReadShort();
-            //                    y = reader.ReadShort();
-            //                    w = reader.ReadShort();
-            //                    h = reader.ReadShort();
-            //                    _animDimensionCache[id] = new Rectangle(x, y, w, h);
-            //                    reader.ReleaseData();
-
-            //                    return;
-            //                }
-            //            }
-            //        }
-            //    }
-            //}
+                        return;
+                    }
+                }
+            }
 
             x = 0;
             y = 0;
             w = 0;
             h = 0;
-        }
-
-        private unsafe void ReadFrameDimensionData
-        (
-            byte frameIndex,
-            out int x,
-            out int y,
-            out int w,
-            out int h,
-            UOFile reader
-        )
-        {
-            reader.Skip(512);
-            long dataStart = reader.Position;
-            uint frameCount = reader.ReadUInt();
-
-            if (frameCount > 0 && frameIndex >= frameCount)
-            {
-                frameIndex = 0;
-            }
-
-            if (frameIndex < frameCount)
-            {
-                uint* frameOffset = (uint*) reader.PositionAddress;
-                reader.Seek(dataStart + frameOffset[frameIndex]);
-                x = reader.ReadShort();
-                y = reader.ReadShort();
-                w = reader.ReadShort();
-                h = reader.ReadShort();
-            }
-            else
-            {
-                x = y = w = h = 0;
-            }
         }
 
         public void ClearUnusedResources(int maxCount)
@@ -4094,6 +3999,7 @@ namespace ClassicUO.IO.Resources
         {
             if (uop)
             {
+                group = _uopIndexConvertionCache[animID, group];
                 group += 100;
             }
 

@@ -534,7 +534,7 @@ namespace ClassicUO.Game.GameObjects
 
             ANIMATION_GROUPS_TYPE originalType = ia.Type;
             ushort hue = 0;
-            AnimationsLoader.Instance.FixAnimationGraphicAndHue(ref graphic, ref hue, false, isParent, out bool uop);
+            AnimationsLoader.Instance.FixAnimationGraphicAndHue(ref graphic, ref hue, false, isParent, false, out bool uop);
             ia = ref AnimationsLoader.Instance.GetAnimationEntry(graphic);
             ANIMATION_GROUPS_TYPE type = ia.Type;
             ANIMATION_FLAGS flags = ia.Flags;

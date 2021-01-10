@@ -525,7 +525,7 @@ namespace ClassicUO.Game.GameObjects
 
             ushort hueFromFile = _viewHue;
 
-            AnimationFrameTexture frame = AnimationsLoader.Instance.GetBodyFrame(ref id, ref hueFromFile, animGroup, dir, frameIndex, isParent);
+            AnimationFrameTexture frame = AnimationsLoader.Instance.GetBodyFrame(ref id, ref hueFromFile, animGroup, dir, frameIndex, isParent, forceUOP);
 
             if (frame == null || frame.IsDisposed)
             {
