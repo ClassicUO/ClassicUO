@@ -466,6 +466,20 @@ namespace ClassicUO.Game.Scenes
                         dropX = gobj.X;
                         dropY = gobj.Y;
                         dropZ = gobj.Z;
+
+                        if (gobj is Land land)
+                        {
+
+                        }
+                        else
+                        {
+                            ref StaticTiles itemData = ref TileDataLoader.Instance.StaticData[gobj.Graphic];
+
+                            if (itemData.IsSurface)
+                            {
+                                dropZ += (sbyte)(itemData.Height == 0xFF ? 0 : itemData.Height);
+                            }
+                        }
                     }
                     else
                     {
