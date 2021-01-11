@@ -15,9 +15,9 @@ float4x4 MatrixTransform;
 float4x4 WorldMatrix;
 float2 Viewport;
 float Brightlight;
-const float HuesPerTexture = 2048;
 
 
+const static float HUES_PER_TEXTURE = 2048;
 const static float3 LIGHT_DIRECTION = float3(-1.0f, -1.0f, .5f);
 const static float3 VEC3_ZERO = float3(0, 0, 0);
 
@@ -33,27 +33,18 @@ struct VS_INPUT
 	float3 Hue		: TEXCOORD1;
 };
 
-struct PS_INPUT
-{
-	float4 Position : POSITION0;
-	float3 TexCoord : TEXCOORD0;
-	float3 Normal	: TEXCOORD1;
-	float3 Hue		: TEXCOORD2;
-};
-
 
 float3 get_rgb(float red, float hue)
 {
-	//float p = floor((hue / Hues_count_double) * 1000000.0f) / 1000000.0f;
-	if (hue < HuesPerTexture)
+	if (hue < HUES_PER_TEXTURE)
 	{
-		float2 texcoord = float2(red % 32, hue / HuesPerTexture);
+		float2 texcoord = float2(red % 32, hue / HUES_PER_TEXTURE);
 
 		return tex2D(HueSampler0, texcoord).rgb;
 	}
 	else
 	{
-		float2 texcoord = float2(red % 32, (hue - HuesPerTexture) / HuesPerTexture);
+		float2 texcoord = float2(red % 32, (hue - HUES_PER_TEXTURE) / HUES_PER_TEXTURE);
 
 		return tex2D(HueSampler1, texcoord).rgb;
 	}
@@ -67,20 +58,14 @@ float3 get_light(float3 norm)
 }
 
 
-PS_INPUT VertexShaderFunction(VS_INPUT IN)
-{
-	PS_INPUT OUT;
+VS_INPUT VertexShaderFunction(VS_INPUT IN)
+{	
+	IN.Position = mul(mul(IN.Position, WorldMatrix), MatrixTransform);
 	
-	OUT.Position = mul(mul(IN.Position, WorldMatrix), MatrixTransform);
-	
-	OUT.TexCoord = IN.TexCoord; 
-	OUT.Normal = IN.Normal;
-	OUT.Hue = IN.Hue;
-	
-    return OUT;
+    return IN;
 }
 
-float4 PixelShader_Hue(PS_INPUT IN) : COLOR0
+float4 PixelShader_Hue(VS_INPUT IN) : COLOR0
 {	
 	float4 color = tex2D(DrawSampler, IN.TexCoord);
 		
@@ -155,7 +140,7 @@ float4 PixelShader_Hue(PS_INPUT IN) : COLOR0
 				}
 			}
 		}
-		else if (mode == 4 || (mode == 3 && (color.r > 0.04f || color.g > 0.04f || color.b > 0.04f)) /*|| (mode == 5 && color.r >= 0.08f)*/)
+		else if (mode == 4 || (mode == 3 && (color.r > 0.04f || color.g > 0.04f || color.b > 0.04f)))
 		{
 			color.rgb = get_rgb(31, hue);
 		}
