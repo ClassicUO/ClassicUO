@@ -58,13 +58,13 @@ namespace ClassicUO.Utility
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static ulong Combine(int val1, int val2)
+        public static ulong Pack(int val1, int val2)
         {
             return (ulong) val1 | ((ulong) val2 << 32);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void GetNumbersFromCombine(ulong b, out int val1, out int val2)
+        public static void UnPack(ulong b, out int val1, out int val2)
         {
             val1 = (int) (0xFFFFFFFF & b);
             val2 = (int) (b >> 32);

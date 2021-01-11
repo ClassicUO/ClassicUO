@@ -62,7 +62,7 @@ namespace ClassicUO.IO.Resources
 
         private readonly DataReader _reader = new DataReader();
         private readonly UOPFrameData[] _uop_frame_pixels_offsets = new UOPFrameData[1000];
-        private readonly LinkedList<(ushort, byte, byte, bool)> _usedTextures = new LinkedList<(ushort, byte, byte, bool)>();
+        private readonly LinkedList<ulong> _usedTextures = new LinkedList<ulong>();
 
         private AnimationsLoader()
         {
@@ -2726,22 +2726,31 @@ namespace ClassicUO.IO.Resources
 
         public override void ClearResources()
         {
-            LinkedListNode<(ushort, byte, byte, bool)> first = _usedTextures.First;
+            LinkedListNode<ulong> first = _usedTextures.First;
 
             while (first != null)
             {
                 var next = first.Next;
 
-                ref var entry = ref GetAnimationDirectionEntry(first.Value.Item1,
-                                                               first.Value.Item2,
-                                                               first.Value.Item3,
-                                                               first.Value.Item4);
+                ulong value = first.Value;
+
+                ushort animID = (ushort)(0xFFFF_FFFF & value);
+                uint unpacked32 = (uint)(value >> 32);
+
+                byte group = (byte)((unpacked32) & 0xFF);
+                byte dir = (byte)((unpacked32 >> 8) & 0xFF);
+                bool isUOP = (byte)((unpacked32 >> 16) & 0xFF) != 0;
+
+                ref var entry = ref GetAnimationDirectionEntry(animID,
+                                                               group,
+                                                               dir,
+                                                               isUOP);
 
                 if (entry.LastAccessTime != 0)
                 {
                     for (int j = 0; j < entry.FramesCount; j++)
                     {
-                        _animationCache.Remove(first.Value.Item1, first.Value.Item2, first.Value.Item3, j, first.Value.Item4);
+                        _animationCache.Remove(animID, group, dir, j, isUOP);
                     }
 
                     entry.FramesCount = 0;
@@ -3272,13 +3281,18 @@ namespace ClassicUO.IO.Resources
                     };
 
                     f.PushData(data);
-                    //animDirection.Frames[i] = f;
 
                     _animationCache.Push(animID, animGroup, direction, i, animDirection.FramesCount, f, true);
                 }
             }
 
-            _usedTextures.AddLast((animID, animGroup, direction, true));
+            uint packed32 = (uint) ((animGroup | (direction << 8) | (0x01 << 16)));
+            ulong packed = (animID | ((ulong) packed32 << 32));
+
+            _usedTextures.AddLast
+            (
+                packed
+            );
 
             _reader.ReleaseData();
 
@@ -3374,7 +3388,13 @@ namespace ClassicUO.IO.Resources
                 _animationCache.Push(animID, animGroup, direction, i, (int) frameCount, f);
             }
 
-            _usedTextures.AddLast((animID, animGroup, direction, false));
+            uint packed32 = (uint)((animGroup | (direction << 8) | (0x00 << 16)));
+            ulong packed = (animID | ((ulong)packed32 << 32));
+
+            _usedTextures.AddLast
+            (
+                packed
+            );
         }
 
         public void GetAnimationDimensions
@@ -3482,23 +3502,31 @@ namespace ClassicUO.IO.Resources
             int count = 0;
             long ticks = Time.Ticks - Constants.CLEAR_TEXTURES_DELAY;
 
-            LinkedListNode<(ushort, byte, byte, bool)> first = _usedTextures.First;
+            LinkedListNode<ulong> first = _usedTextures.First;
 
             while (first != null)
             {
-                LinkedListNode<(ushort, byte, byte, bool)> next = first.Next;
+                var next = first.Next;
 
-                ref var entry = ref GetAnimationDirectionEntry(first.Value.Item1,
-                                                                first.Value.Item2,
-                                                                first.Value.Item3,
-                                                                first.Value.Item4);
+                ulong value = first.Value;
 
+                ushort animID = (ushort) (0xFFFF_FFFF & value);
+                uint unpacked32 = (uint) (value >> 32);
+
+                byte group = (byte)((unpacked32) & 0xFF);
+                byte dir = (byte)((unpacked32 >> 8) & 0xFF);
+                bool isUOP = (byte)((unpacked32 >> 16) & 0xFF) != 0;
+
+                ref var entry = ref GetAnimationDirectionEntry(animID,
+                                                               group,
+                                                               dir,
+                                                               isUOP);
 
                 if (entry.LastAccessTime != 0 && entry.LastAccessTime < ticks)
                 {
                     for (int j = 0; j < entry.FramesCount; j++)
                     {
-                        _animationCache.Remove(first.Value.Item1, first.Value.Item2, first.Value.Item3, j, first.Value.Item4);
+                        _animationCache.Remove(animID, group, dir, j, isUOP);
                     }
 
                     entry.FramesCount = 0;
