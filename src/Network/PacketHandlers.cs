@@ -5200,12 +5200,13 @@ namespace ClassicUO.Network
                 for (int i = 0, index = 0; i < linesNum; i++)
                 {
                     int length = ((decData[index++] << 8) | decData[index++]) << 1;
-
                     int true_length = 0;
 
-                    while (true_length < length)
+                    for (int k = 0; k < length && true_length < length; ++k, true_length += 2)
                     {
-                        if (((decData[index + true_length++] << 8) | decData[index + true_length++]) << 1 == '\0')
+                        ushort c = (ushort)(((decData[index + true_length] << 8) | decData[index + true_length + 1]) << 1);
+
+                        if (c == '\0')
                         {
                             break;
                         }

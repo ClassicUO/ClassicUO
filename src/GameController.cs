@@ -677,8 +677,6 @@ namespace ClassicUO
 
                 case SDL_EventType.SDL_MOUSEBUTTONDOWN:
                 {
-                    Mouse.Update();
-
                     SDL_MouseButtonEvent mouse = sdlEvent->button;
 
                     // The values in MouseButtonType are chosen to exactly match the SDL values
@@ -705,6 +703,8 @@ namespace ClassicUO
                     }
 
                     Mouse.ButtonPress(buttonType);
+                    Mouse.Update();
+
                     uint ticks = Time.Ticks;
 
                     if (lastClickTime + Mouse.MOUSE_DELAY_DOUBLE_CLICK >= ticks)
@@ -763,8 +763,6 @@ namespace ClassicUO
 
                 case SDL_EventType.SDL_MOUSEBUTTONUP:
                 {
-                    Mouse.Update();
-
                     if (_dragStarted)
                     {
                         _dragStarted = false;
@@ -804,6 +802,7 @@ namespace ClassicUO
                     }
 
                     Mouse.ButtonRelease(buttonType);
+                    Mouse.Update();
 
                     break;
                 }
