@@ -69,16 +69,16 @@ namespace ClassicUO.Game.GameObjects
                 mobile.IsFemale = false;
                 mobile.InWarMode = false;
                 mobile.IsRunning = false;
-                mobile.AnimationInterval = 0;
+                mobile._animationInterval = 0;
                 mobile.AnimationFrameCount = 0;
-                mobile.AnimationRepeatMode = 1;
-                mobile.AnimationRepeat = false;
+                mobile._animationRepeatMode = 1;
+                mobile._animationRepeat = false;
                 mobile.AnimationFromServer = false;
-                mobile.AnimationForwardDirection = false;
+                mobile._animationForwardDirection = false;
                 mobile.LastStepSoundTime = 0;
                 mobile.StepSoundOffset = 0;
                 mobile.Title = string.Empty;
-                mobile.AnimationGroup = 0xFF;
+                mobile._animationGroup = 0xFF;
                 mobile._isDead = false;
                 mobile._isSA_Poisoned = false;
                 mobile._lastAnimationIdleDelay = 0;
@@ -124,9 +124,17 @@ namespace ClassicUO.Game.GameObjects
                 (byte) PEOPLE_ANIMATION_GROUP.PAG_FIDGET_3
             }
         };
+
         private bool _isDead;
         private bool _isSA_Poisoned;
         private long _lastAnimationIdleDelay;
+        private bool _animationForwardDirection;
+        private byte _animationGroup = 0xFF;
+        private byte _animationInterval;
+        private bool _animationRepeat;
+        private ushort _animationRepeatMode = 1;
+        private ushort _animationRepeatModeCount = 1;
+
 
         public Mobile(uint serial) : base(serial)
         {
@@ -190,14 +198,9 @@ namespace ClassicUO.Game.GameObjects
         }
 
         protected virtual bool IsWalking => LastStepTime > Time.Ticks - Constants.WALKING_DELAY;
-        public bool AnimationForwardDirection;
         public byte AnimationFrameCount;
         public bool AnimationFromServer;
-        public byte AnimationGroup = 0xFF;
-        public byte AnimationInterval;
-        public bool AnimationRepeat;
-        public ushort AnimationRepeatMode = 1;
-        public ushort AnimationRepeatModeCount = 1;
+       
         public bool IsFemale;
         public bool IsRenamable;
 
@@ -358,20 +361,22 @@ namespace ClassicUO.Game.GameObjects
             byte frameCount = 0,
             ushort repeatCount = 0,
             bool repeat = false,
-            bool forward = false
+            bool forward = false,
+            bool fromServer = false
         )
         {
-            AnimationGroup = id;
+            _animationGroup = id;
             AnimIndex = (byte) (forward ? 0 : frameCount);
-            AnimationInterval = interval;
+            _animationInterval = interval;
             AnimationFrameCount = (byte)(forward ? 0 : frameCount);
-            AnimationRepeatMode = repeatCount;
-            AnimationRepeatModeCount = repeatCount;
-            AnimationRepeat = repeat;
-            AnimationForwardDirection = forward;
+            _animationRepeatMode = repeatCount;
+            _animationRepeatModeCount = repeatCount;
+            _animationRepeat = repeat;
+            _animationForwardDirection = forward;
             AnimationFromServer = false;
-            LastAnimationChangeTime = Time.Ticks;
+            AnimationFromServer = fromServer;
 
+            LastAnimationChangeTime = Time.Ticks;
 
             CalculateRandomIdleTime();
         }
@@ -385,10 +390,10 @@ namespace ClassicUO.Game.GameObjects
             {
                 AnimIndex = 0;
                 AnimationFrameCount = 0;
-                AnimationInterval = 1;
-                AnimationRepeatMode = AnimationRepeatModeCount = 1;
-                AnimationForwardDirection = true;
-                AnimationRepeat = false;
+                _animationInterval = 1;
+                _animationRepeatMode = _animationRepeatModeCount = 1;
+                _animationForwardDirection = true;
+                _animationRepeat = false;
                 AnimationFromServer = true;
 
 
@@ -477,11 +482,11 @@ namespace ClassicUO.Game.GameObjects
                     {
                         if (InWarMode)
                         {
-                            AnimationGroup = 28;
+                            _animationGroup = 28;
                         }
                         else
                         {
-                            AnimationGroup = 26;
+                            _animationGroup = 26;
                         }
 
                         return;
@@ -491,11 +496,11 @@ namespace ClassicUO.Game.GameObjects
                     {
                         if (RandomHelper.GetValue(0, 2) != 0)
                         {
-                            AnimationGroup = 66;
+                            _animationGroup = 66;
                         }
                         else
                         {
-                            AnimationGroup = 67;
+                            _animationGroup = 67;
                         }
 
                         return;
@@ -504,23 +509,23 @@ namespace ClassicUO.Game.GameObjects
 
                 int first_value = RandomHelper.GetValue(0, 2);
 
-                byte original_value = AnimationGroup;
+                byte original_value = _animationGroup;
 
-                AnimationGroup = _animationIdle[(byte) animGroup - 1, first_value];
+                _animationGroup = _animationIdle[(byte) animGroup - 1, first_value];
 
-                if (isLowExtended && AnimationGroup == 18)
+                if (isLowExtended && _animationGroup == 18)
                 {
                     if (!AnimationsLoader.Instance.IsAnimationExists(graphic, 18) && AnimationsLoader.Instance.IsAnimationExists(graphic, 17))
                     {
-                        AnimationGroup = GetReplacedObjectAnimation(graphic, 17);
+                        _animationGroup = GetReplacedObjectAnimation(graphic, 17);
                     }
                     else
                     {
-                        AnimationGroup = 1;
+                        _animationGroup = 1;
                     }
                 }
 
-                if (!AnimationsLoader.Instance.IsAnimationExists(graphic, AnimationGroup))
+                if (!AnimationsLoader.Instance.IsAnimationExists(graphic, _animationGroup))
                 {
                     if (first_value == 0)
                     {
@@ -531,9 +536,9 @@ namespace ClassicUO.Game.GameObjects
                         first_value = 0;
                     }
 
-                    AnimationGroup = _animationIdle[(byte) animGroup - 1, first_value];
+                    _animationGroup = _animationIdle[(byte) animGroup - 1, first_value];
 
-                    if (!AnimationsLoader.Instance.IsAnimationExists(graphic, AnimationGroup))
+                    if (!AnimationsLoader.Instance.IsAnimationExists(graphic, _animationGroup))
                     {
                         SetAnimation(original_value);
                     }
@@ -607,11 +612,11 @@ namespace ClassicUO.Game.GameObjects
                     
                     if (fc != 0)
                     {
-                        int frameIndex = AnimIndex + (AnimationFromServer && !AnimationForwardDirection ? -1 : 1);
+                        int frameIndex = AnimIndex + (AnimationFromServer && !_animationForwardDirection ? -1 : 1);
                         
                         if (AnimationFromServer)
                         {
-                            currentDelay += currentDelay * (AnimationInterval + 1);
+                            currentDelay += currentDelay * (_animationInterval + 1);
 
                             if (AnimationFrameCount == 0)
                             {
@@ -622,11 +627,11 @@ namespace ClassicUO.Game.GameObjects
                                 fc = AnimationFrameCount;
                             }
 
-                            if (AnimationForwardDirection && frameIndex >= fc)
+                            if (_animationForwardDirection && frameIndex >= fc)
                             {
                                 frameIndex = 0;
                             }
-                            else if (!AnimationForwardDirection && frameIndex < 0)
+                            else if (!_animationForwardDirection && frameIndex < 0)
                             {
                                 if (fc == 0)
                                 {
@@ -642,21 +647,21 @@ namespace ClassicUO.Game.GameObjects
                                 goto SKIP;
                             }
 
-                            if (AnimationRepeatMode == 0) // play animation infinite time
+                            if (_animationRepeatMode == 0) // play animation infinite time
                             {
                                 goto SKIP;
                             }
 
-                            if (--AnimationRepeatModeCount > 0) // play animation n times
+                            if (--_animationRepeatModeCount > 0) // play animation n times
                             {
                                 goto SKIP;
                             }
 
-                            if (AnimationRepeat) // repeat the whole cycle, so reset animation to the received values
+                            if (_animationRepeat) // repeat the whole cycle, so reset animation to the received values
                             {
-                                AnimationRepeatModeCount = AnimationRepeatMode;
+                                _animationRepeatModeCount = _animationRepeatMode;
 
-                                AnimationRepeat = false;
+                                _animationRepeat = false;
                             }
                             else
                             {

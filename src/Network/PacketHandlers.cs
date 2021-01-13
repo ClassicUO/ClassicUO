@@ -2326,10 +2326,9 @@ namespace ClassicUO.Network
                 (byte) frame_count,
                 repeat_count,
                 repeat,
-                forward
+                forward,
+                true
             );
-
-            mobile.AnimationFromServer = true;
         }
 
         private static void GraphicEffect(ref PacketBufferReader p)
@@ -5345,16 +5344,8 @@ namespace ClassicUO.Network
             ushort action = p.ReadUShort();
             byte mode = p.ReadByte();
             byte group = Mobile.GetObjectNewAnimation(mobile, type, action, mode);
-            mobile.SetAnimation(group);
-            mobile.AnimationRepeatMode = 1;
-            mobile.AnimationForwardDirection = true;
 
-            if ((type == 1 || type == 2) && mobile.Graphic == 0x0015)
-            {
-                mobile.AnimationRepeat = true;
-            }
-
-            mobile.AnimationFromServer = true;
+            mobile.SetAnimation(group, repeatCount: 1, repeat: (type == 1 || type == 2) && mobile.Graphic == 0x0015, forward: true, fromServer: true);
         }
 
         private static void KREncryptionResponse(ref PacketBufferReader p)

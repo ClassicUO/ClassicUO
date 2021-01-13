@@ -539,9 +539,9 @@ namespace ClassicUO.Game.GameObjects
             ANIMATION_GROUPS_TYPE type = ia.Type;
             ANIMATION_FLAGS flags = ia.Flags;
 
-            if (mobile.AnimationFromServer && mobile.AnimationGroup != 0xFF)
+            if (mobile.AnimationFromServer && mobile._animationGroup != 0xFF)
             {
-                ushort v13 = mobile.AnimationGroup;
+                ushort v13 = mobile._animationGroup;
 
                 if (v13 == 12)
                 {
@@ -999,7 +999,7 @@ namespace ClassicUO.Game.GameObjects
             }
 
 
-            byte result = mobile.AnimationGroup;
+            byte result = mobile._animationGroup;
 
 
             bool isWalking = mobile.IsWalking;
