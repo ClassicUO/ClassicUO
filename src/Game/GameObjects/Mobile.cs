@@ -72,6 +72,7 @@ namespace ClassicUO.Game.GameObjects
                 mobile._animationInterval = 0;
                 mobile.AnimationFrameCount = 0;
                 mobile._animationRepeatMode = 1;
+                mobile._animationRepeatModeCount = 1;
                 mobile._animationRepeat = false;
                 mobile.AnimationFromServer = false;
                 mobile._animationForwardDirection = false;
