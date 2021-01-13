@@ -2324,7 +2324,7 @@ namespace ClassicUO.Network
                 Mobile.GetReplacedObjectAnimation(mobile.Graphic, action),
                 delay,
                 (byte) frame_count,
-                (byte) repeat_count,
+                repeat_count,
                 repeat,
                 forward
             );

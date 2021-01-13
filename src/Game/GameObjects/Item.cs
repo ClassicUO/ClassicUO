@@ -427,7 +427,7 @@ namespace ClassicUO.Game.GameObjects
             BoatMovingManager.ClearSteps(Serial);
         }
 
-        public override void CheckGraphicChange(sbyte animIndex = 0)
+        public override void CheckGraphicChange(byte animIndex = 0)
         {
             if (!IsMulti)
             {
@@ -1028,7 +1028,7 @@ namespace ClassicUO.Game.GameObjects
 
                 if (LastAnimationChangeTime < Time.Ticks)
                 {
-                    sbyte frameIndex = (sbyte) (AnimIndex + 1);
+                    byte frameIndex = (byte) (AnimIndex + 1);
                     ushort id = GetGraphicForAnimation();
 
                     //FileManager.Animations.GetCorpseAnimationGroup(ref graphic, ref animGroup, ref newHue);
@@ -1051,7 +1051,7 @@ namespace ClassicUO.Game.GameObjects
                         {
                             if (frameIndex >= fc)
                             {
-                                frameIndex = (sbyte) (fc - 1);
+                                frameIndex = (byte) (fc - 1);
                             }
 
                             AnimIndex = frameIndex;

@@ -46,6 +46,7 @@ using ClassicUO.Renderer;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.IO.Resources
 {
@@ -3399,7 +3400,7 @@ namespace ClassicUO.IO.Resources
 
         public void GetAnimationDimensions
         (
-            sbyte animIndex,
+            byte animIndex,
             ushort graphic,
             byte dir,
             byte animGroup,
@@ -3850,6 +3851,35 @@ namespace ClassicUO.IO.Resources
         public byte FileIndex;
 
         public bool IsUOP;
+    }
+
+
+    class AnimationFrameSequenceTextureAtlas
+    {
+        private Point _offset;
+        private Point _maxSize;
+        private Texture2D _atlas;
+
+        public AnimationFrameSequenceTextureAtlas(int width, int height)
+        {
+            _atlas = new Texture2D(Client.Game.GraphicsDevice, width, height);
+        }
+
+        public void AddFrame(uint[] buffer, short centerX, short centerY, int width, int height)
+        {
+            if (_offset.X + width > _atlas.Width)
+            {
+                _offset.Y += height;
+            }
+
+            Rectangle rect = new Rectangle(_offset.X, _offset.Y, width, height);
+
+            _atlas.SetData(0, rect, buffer, 0, buffer.Length);
+
+            _offset.X += width;
+            _offset.Y += height;
+        }
+
     }
 
     class AnimationCache

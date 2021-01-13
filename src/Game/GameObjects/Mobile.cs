@@ -196,7 +196,8 @@ namespace ClassicUO.Game.GameObjects
         public byte AnimationGroup = 0xFF;
         public byte AnimationInterval;
         public bool AnimationRepeat;
-        public byte AnimationRepeatMode = 1;
+        public ushort AnimationRepeatMode = 1;
+        public ushort AnimationRepeatModeCount = 1;
         public bool IsFemale;
         public bool IsRenamable;
 
@@ -350,22 +351,22 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
-
         public void SetAnimation
         (
             byte id,
             byte interval = 0,
             byte frameCount = 0,
-            byte repeatCount = 0,
+            ushort repeatCount = 0,
             bool repeat = false,
             bool forward = false
         )
         {
             AnimationGroup = id;
-            AnimIndex = (sbyte) (forward ? 0 : frameCount);
+            AnimIndex = (byte) (forward ? 0 : frameCount);
             AnimationInterval = interval;
-            AnimationFrameCount = frameCount;
+            AnimationFrameCount = (byte)(forward ? 0 : frameCount);
             AnimationRepeatMode = repeatCount;
+            AnimationRepeatModeCount = repeatCount;
             AnimationRepeat = repeat;
             AnimationForwardDirection = forward;
             AnimationFromServer = false;
@@ -374,6 +375,7 @@ namespace ClassicUO.Game.GameObjects
 
             CalculateRandomIdleTime();
         }
+
 
         public void SetIdleAnimation()
         {
@@ -384,7 +386,7 @@ namespace ClassicUO.Game.GameObjects
                 AnimIndex = 0;
                 AnimationFrameCount = 0;
                 AnimationInterval = 1;
-                AnimationRepeatMode = 1;
+                AnimationRepeatMode = AnimationRepeatModeCount = 1;
                 AnimationForwardDirection = true;
                 AnimationRepeat = false;
                 AnimationFromServer = true;
@@ -592,52 +594,21 @@ namespace ClassicUO.Game.GameObjects
 
             if (LastAnimationChangeTime < Time.Ticks && !NoIterateAnimIndex())
             {
-                sbyte frameIndex = AnimIndex;
-
-                if (AnimationFromServer && !AnimationForwardDirection)
-                {
-                    frameIndex--;
-                }
-                else
-                {
-                    frameIndex++;
-                }
-
                 ushort id = GetGraphicForAnimation();
                 byte animGroup = GetGroupForAnimation(this, id, true);
-
-                //if (animGroup == 64 || animGroup == 65)
-                //{
-                //    animGroup = (byte) (InWarMode ? 65 : 64);
-                //    AnimationGroup = animGroup;
-                //}
-
-                //Item mount = HasEquipment ? Equipment[(int) Layer.Mount] : null;
-
-                //if (mount != null)
-                //{
-                //    switch (animGroup)
-                //    {
-                //        case (byte)PEOPLE_ANIMATION_GROUP.PAG_FIDGET_1:
-                //        case (byte)PEOPLE_ANIMATION_GROUP.PAG_FIDGET_2:
-                //        case (byte)PEOPLE_ANIMATION_GROUP.PAG_FIDGET_3:
-                //            id = mount.GetGraphicForAnimation();
-                //            animGroup = GetGroupForAnimation(this, id, true);
-
-                //            break;
-                //    }
-                //}
-
                 bool mirror = false;
                 AnimationsLoader.Instance.GetAnimDirection(ref dir, ref mirror);
                 int currentDelay = Constants.CHARACTER_ANIMATION_DELAY;
 
                 if (id < Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT && dir < 5)
                 {
-                    int fc = AnimationsLoader.Instance.GetFrameInfo(id, animGroup, dir);
-
+                    int totalFrames = AnimationsLoader.Instance.GetFrameInfo(id, animGroup, dir);
+                    int fc = totalFrames;
+                    
                     if (fc != 0)
                     {
+                        int frameIndex = AnimIndex + (AnimationFromServer && !AnimationForwardDirection ? -1 : 1);
+                        
                         if (AnimationFromServer)
                         {
                             currentDelay += currentDelay * (AnimationInterval + 1);
@@ -648,73 +619,51 @@ namespace ClassicUO.Game.GameObjects
                             }
                             else
                             {
-                                /*fc -= AnimationFrameCount;
-
-                                if (fc <= 0)
-                                    fc = AnimationFrameCount;*/
-
                                 fc = AnimationFrameCount;
                             }
 
-                            if (AnimationForwardDirection)
+                            if (AnimationForwardDirection && frameIndex >= fc)
                             {
-                                if (frameIndex >= fc)
+                                frameIndex = 0;
+                            }
+                            else if (!AnimationForwardDirection && frameIndex < 0)
+                            {
+                                if (fc == 0)
                                 {
                                     frameIndex = 0;
-
-                                    if (AnimationRepeat)
-                                    {
-                                        byte repCount = AnimationRepeatMode;
-
-                                        if (repCount == 2)
-                                        {
-                                            repCount--;
-                                            AnimationRepeatMode = repCount;
-                                        }
-                                        else if (repCount == 1)
-                                        {
-                                            SetAnimation(0xFF);
-                                        }
-                                    }
-                                    else
-                                    {
-                                        SetAnimation(0xFF);
-                                    }
+                                }
+                                else
+                                {
+                                    frameIndex = (byte)(totalFrames - 1);
                                 }
                             }
                             else
                             {
-                                if (frameIndex < 0)
-                                {
-                                    if (fc == 0)
-                                    {
-                                        frameIndex = 0;
-                                    }
-                                    else
-                                    {
-                                        frameIndex = (sbyte) (fc - 1);
-                                    }
-
-                                    if (AnimationRepeat)
-                                    {
-                                        byte repCount = AnimationRepeatMode;
-
-                                        if (repCount == 2)
-                                        {
-                                            repCount--;
-                                            AnimationRepeatMode = repCount;
-                                        }
-                                        else if (repCount == 1)
-                                        {
-                                            SetAnimation(0xFF);
-                                        }
-                                    }
-                                    else
-                                    {
-                                        SetAnimation(0xFF);
-                                    }
-                                }
+                                goto SKIP;
                             }
+
+                            if (AnimationRepeatMode == 0) // play animation infinite time
+                            {
+                                goto SKIP;
+                            }
+
+                            if (--AnimationRepeatModeCount > 0) // play animation n times
+                            {
+                                goto SKIP;
+                            }
+
+                            if (AnimationRepeat) // repeat the whole cycle, so reset animation to the received values
+                            {
+                                AnimationRepeatModeCount = AnimationRepeatMode;
+
+                                AnimationRepeat = false;
+                            }
+                            else
+                            {
+                                SetAnimation(0xFF);
+                            }
+
+                            SKIP: ;
                         }
                         else
                         {
@@ -730,7 +679,7 @@ namespace ClassicUO.Game.GameObjects
                             }
                         }
 
-                        AnimIndex = frameIndex;
+                        AnimIndex = (byte) (frameIndex % totalFrames);
                     }
                     else if ((Serial & 0x80000000) != 0)
                     {
@@ -1193,7 +1142,7 @@ namespace ClassicUO.Game.GameObjects
             FixTextCoordinatesInScreen();
         }
 
-        public override void CheckGraphicChange(sbyte animIndex = 0)
+        public override void CheckGraphicChange(byte animIndex = 0)
         {
             switch (Graphic)
             {

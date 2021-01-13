@@ -163,7 +163,7 @@ namespace ClassicUO.Game.GameObjects
 
             ushort graphic = GetGraphicForAnimation();
             byte animGroup = GetGroupForAnimation(this, graphic, true);
-            sbyte animIndex = AnimIndex;
+            short animIndex = AnimIndex;
 
             Item mount = FindItemByLayer(Layer.Mount);
 
@@ -506,7 +506,7 @@ namespace ClassicUO.Game.GameObjects
             int x,
             int y,
             bool mirror,
-            sbyte frameIndex,
+            short frameIndex,
             bool hasShadow,
             ushort id,
             byte animGroup,
