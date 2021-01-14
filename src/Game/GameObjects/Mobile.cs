@@ -601,13 +601,14 @@ namespace ClassicUO.Game.GameObjects
             if (LastAnimationChangeTime < Time.Ticks && !NoIterateAnimIndex())
             {
                 ushort id = GetGraphicForAnimation();
-                byte animGroup = GetGroupForAnimation(this, id, true);
-                bool mirror = false;
-                AnimationsLoader.Instance.GetAnimDirection(ref dir, ref mirror);
                 int currentDelay = Constants.CHARACTER_ANIMATION_DELAY;
 
                 if (id < Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT && dir < 5)
                 {
+                    byte animGroup = GetGroupForAnimation(this, id, true);
+                    bool mirror = false;
+                    AnimationsLoader.Instance.GetAnimDirection(ref dir, ref mirror);
+                    
                     int totalFrames = AnimationsLoader.Instance.GetFrameInfo(id, animGroup, dir);
                     int fc = totalFrames;
                     
