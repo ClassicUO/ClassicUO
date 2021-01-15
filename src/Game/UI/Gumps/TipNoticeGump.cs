@@ -85,6 +85,14 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
+        public override void Update(double totalTime, double frameTime)
+        {
+            base.Update(totalTime, frameTime);
+
+            Height = _background.SpecialHeight;
+
+            _scrollArea.Height = _background.Height - 96;
+        }
 
         public override void OnButtonClick(int buttonID)
         {
