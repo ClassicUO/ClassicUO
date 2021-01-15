@@ -1263,7 +1263,7 @@ namespace ClassicUO.Game.GameObjects
                             }
                             else
                             {
-                                if (isRun && AnimationsLoader.Instance.IsAnimationExists(graphic, 24))
+                                if (isRun && !mobile.IsGargoyle && AnimationsLoader.Instance.IsAnimationExists(graphic, 24))
                                 {
                                     result = 24;
                                 }
