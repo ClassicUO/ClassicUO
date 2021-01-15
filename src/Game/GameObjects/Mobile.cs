@@ -75,7 +75,7 @@ namespace ClassicUO.Game.GameObjects
                 mobile._animationRepeatModeCount = 1;
                 mobile._animationRepeat = false;
                 mobile.AnimationFromServer = false;
-                mobile._animationForwardDirection = false;
+                mobile._animationForwardDirection = true;
                 mobile.LastStepSoundTime = 0;
                 mobile.StepSoundOffset = 0;
                 mobile.Title = string.Empty;
@@ -609,9 +609,9 @@ namespace ClassicUO.Game.GameObjects
 
                 if (id < Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT && dir < 5)
                 {
-                    int totalFrames = AnimationsLoader.Instance.GetFrameInfo(id, animGroup, dir);
+                    int totalFrames = AnimationsLoader.Instance.GetFrameInfo(id, animGroup, dir, IsGargoyle);
                     int fc = totalFrames;
-                    
+
                     if (fc != 0)
                     {
                         int frameIndex = AnimIndex + (AnimationFromServer && !_animationForwardDirection ? -1 : 1);

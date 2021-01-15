@@ -3300,6 +3300,12 @@ namespace ClassicUO.IO.Resources
             return true;
         }
 
+        struct FrameInfo
+        {
+            public int CenterX, CenterY, Width, Height;
+            public byte[] Data;
+        }
+
         private unsafe void ReadMULAnimationFrame(ushort animID, byte animGroup, byte direction, ref AnimationDirectionEntry animDir, UOFile reader)
         {
             animDir.LastAccessTime = Time.Ticks;
@@ -3320,6 +3326,8 @@ namespace ClassicUO.IO.Resources
 
 
             long end = (long) reader.StartAddress + reader.Length;
+
+            
 
             for (int i = 0; i < frameCount; i++)
             {
@@ -4065,7 +4073,12 @@ namespace ClassicUO.IO.Resources
 
             if (frames != null)
             {
-                if (frame < 0 || frame >= frames.Length)
+                if (frame >= frames.Length)
+                {
+                    frame = frames.Length - 1;
+                }
+
+                if (frame < 0)
                 {
                     frame = 0;
                 }
