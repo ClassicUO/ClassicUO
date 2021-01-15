@@ -74,6 +74,7 @@ namespace ClassicUO.Game.GameObjects
             land.OriginalGraphic = graphic;
             land.IsStretched = land.TileData.TexID == 0 && land.TileData.IsWet;
             land.AllowedToDraw = graphic > 2;
+            land.UpdateGraphicBySeason();
 
             return land;
         }
