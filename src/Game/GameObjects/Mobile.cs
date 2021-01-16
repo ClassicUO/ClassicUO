@@ -105,6 +105,7 @@ namespace ClassicUO.Game.GameObjects
                 mobile.Next = null;
                 mobile.Previous = null;
                 mobile.Name = null;
+                mobile.ExecuteAnimation = true;
 
                 mobile.CalculateRandomIdleTime();
             }
@@ -549,7 +550,7 @@ namespace ClassicUO.Game.GameObjects
 
         protected virtual bool NoIterateAnimIndex()
         {
-            return LastStepTime > Time.Ticks - Constants.WALKING_DELAY && Steps.Count == 0;
+            return !ExecuteAnimation || (LastStepTime > Time.Ticks - Constants.WALKING_DELAY && Steps.Count == 0);
         }
 
         private void ProcessFootstepsSound()

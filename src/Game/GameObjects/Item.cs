@@ -96,6 +96,7 @@ namespace ClassicUO.Game.GameObjects
                 i.ObjectHandlesOpened = false;
                 i.AlphaHue = 0;
                 i.AllowedToDraw = true;
+                i.ExecuteAnimation = true;
             }
         );
 
@@ -1028,7 +1029,7 @@ namespace ClassicUO.Game.GameObjects
 
                 if (LastAnimationChangeTime < Time.Ticks)
                 {
-                    byte frameIndex = (byte) (AnimIndex + 1);
+                    byte frameIndex = (byte) (AnimIndex + (ExecuteAnimation ? 1 : 0));
                     ushort id = GetGraphicForAnimation();
 
                     //FileManager.Animations.GetCorpseAnimationGroup(ref graphic, ref animGroup, ref newHue);

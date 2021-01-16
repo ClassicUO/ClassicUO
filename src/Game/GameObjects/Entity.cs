@@ -86,7 +86,7 @@ namespace ClassicUO.Game.GameObjects
         public uint LastStepTime;
         public string Name;
         public uint Serial;
-
+        public bool ExecuteAnimation = true;
         protected long LastAnimationChangeTime;
 
 

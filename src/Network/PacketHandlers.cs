@@ -4569,23 +4569,17 @@ namespace ClassicUO.Network
                     byte animID = p.ReadByte();
                     byte frameCount = p.ReadByte();
 
-                    //foreach (Mobile m in World.Mobiles)
-                    //{
-                    //    if ((m.Serial & 0xFFFF) == serial)
-                    //    {
-                    //       // byte group = Mobile.GetObjectNewAnimation(m, animID, action, mode);
-                    //        m.SetAnimation(animID);
-                    //        //m.AnimationRepeatMode = 1;
-                    //        //m.AnimationForwardDirection = true;
-                    //        //if ((type == 1 || type == 2) && mobile.Graphic == 0x0015)
-                    //        //    mobile.AnimationRepeat = true;
-                    //        //mobile.AnimationFromServer = true;
+                    foreach (Mobile m in World.Mobiles)
+                    {
+                        if ((m.Serial & 0xFFFF) == serial)
+                        {
+                            m.SetAnimation(animID);
+                            m.AnimIndex = frameCount;
+                            m.ExecuteAnimation = false;
 
-                    //        //m.SetAnimation(Mobile.GetReplacedObjectAnimation(m.Graphic, animID), 0, frameCount);
-                    //       // m.AnimationFromServer = true;
-                    //        break;
-                    //    }
-                    //}
+                            break;
+                        }
+                    }
 
                     break;
 
