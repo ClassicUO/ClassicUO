@@ -50,7 +50,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             AlphaBlendControl partyGumpBackground = new AlphaBlendControl
             {
-                Width = 270 + (mobile == null ? 0 : mobile.Name.Length > 9 ? mobile.Name.Length * 5 : 0),
+                Width = 270 + nameWidthAdjustment,
                 Height = 80,
                 X = ProfileManager.CurrentProfile.GameWindowSize.X / 2 - 125,
                 Y = 150,
