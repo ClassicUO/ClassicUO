@@ -2484,9 +2484,14 @@ namespace ClassicUO.IO.Resources
                 reader.Skip(48);
                 int replaces = reader.ReadInt();
 
+                if (animID == 699)
+                {
+
+                }
+
                 if (replaces == 48 || replaces == 68)
                 {
-                    continue;
+                    //continue;
                 }
 
                 ref var animEntry = ref _animationCache.GetEntry((int)animID);
@@ -2502,9 +2507,25 @@ namespace ClassicUO.IO.Resources
                     uint frameCount = reader.ReadUInt();
                     int newGroup = reader.ReadInt();
 
-                    if (frameCount == 0 && animEntry.Graphic != 0)
+
+                    if (frameCount == 0)
                     {
-                        _animationCache.ReplaceUopGroup((ushort) animID, (byte) oldGroup, (byte) newGroup);
+                        if (oldGroup >= 0 && newGroup >= 0)
+                        {
+                            _animationCache.ReplaceUopGroup((ushort)animID, (byte)oldGroup, (byte)newGroup);
+                        }
+                    }
+                    else
+                    {
+                        if (oldGroup >= 0)
+                        {
+                            for (int j = k; j < 5; ++j)
+                            {
+                                ref var group = ref _animationCache.GetDirectionEntry((ushort)animID, (byte)oldGroup, (byte)j, true);
+
+                                group.RealFrameCount = (byte)frameCount;
+                            }
+                        }
                     }
 
                     reader.Skip(60);
@@ -3161,7 +3182,7 @@ namespace ClassicUO.IO.Resources
             int frameCount = _reader.ReadInt();
             int dataStart = _reader.ReadInt();
             _reader.Seek(dataStart);
-
+            
             for (int i = 0; i < frameCount; i++)
             {
                 uint start = (uint) _reader.Position;
@@ -3197,7 +3218,15 @@ namespace ClassicUO.IO.Resources
             //    }
             //}
 
-            animDirection.FramesCount = (byte)(frameCount / 5);
+            if (animDirection.RealFrameCount == 0)
+            {
+                animDirection.FramesCount = (byte)(frameCount / 5);
+            }
+            else
+            {
+                animDirection.FramesCount = animDirection.RealFrameCount;
+            }
+            
             int dirFrameStartIdx = animDirection.FramesCount * direction;
 
             long end = (long)_reader.StartAddress + _reader.Length;
@@ -3856,6 +3885,7 @@ namespace ClassicUO.IO.Resources
         public uint LastAccessTime;
 
         public byte FramesCount;
+        public byte RealFrameCount;
         public byte FileIndex;
 
         public bool IsUOP;

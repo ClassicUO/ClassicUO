@@ -4316,8 +4316,7 @@ namespace ClassicUO.Network
                                 break;
                             }
 
-                            bool dead = p.ReadBool();
-                            bonded.IsDead = dead;
+                            bonded.IsDead = p.ReadBool();
 
                             break;
 
@@ -4359,9 +4358,9 @@ namespace ClassicUO.Network
 
                                 if (mobile != null)
                                 {
-                                    // TODO: animation for statues
-                                    //mobile.SetAnimation(Mobile.GetReplacedObjectAnimation(mobile.Graphic, animation), 0, (byte) frame, 0, false, false);
-                                    //mobile.AnimationFromServer = true;
+                                    mobile.SetAnimation(Mobile.GetReplacedObjectAnimation(mobile.Graphic, animation));
+                                    mobile.ExecuteAnimation = false;
+                                    mobile.AnimIndex = (byte) frame;
                                 }
                             }
                             else if (World.Player != null && serial == World.Player)

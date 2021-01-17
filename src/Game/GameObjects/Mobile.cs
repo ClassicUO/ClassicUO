@@ -388,7 +388,7 @@ namespace ClassicUO.Game.GameObjects
         {
             CalculateRandomIdleTime();
 
-            if (!IsMounted && !InWarMode)
+            if (!IsMounted && !InWarMode && ExecuteAnimation)
             {
                 AnimIndex = 0;
                 AnimationFrameCount = 0;
