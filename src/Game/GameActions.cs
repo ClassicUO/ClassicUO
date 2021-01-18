@@ -615,8 +615,8 @@ namespace ClassicUO.Game
 
                 if (force && SerialHelper.IsValid(serial))
                 {
-                    ent = ent ?? World.Player;
-                    ent.AddMessage(MessageType.Regular, $"PACKET SENT: 0x{serial:X8}", 3, 0x34, true, TextType.OBJECT);
+                    //ent = ent ?? World.Player;
+                    //ent.AddMessage(MessageType.Regular, $"PACKET SENT: 0x{serial:X8}", 3, 0x34, true, TextType.OBJECT);
                     Socket.Send(new PStatusRequest(serial));
                 }
             }
@@ -636,8 +636,8 @@ namespace ClassicUO.Game
 
                 if (force && SerialHelper.IsValid(serial))
                 {
-                    ent = ent ?? World.Player;
-                    ent.AddMessage(MessageType.Regular, $"PACKET REMOVED SENT: 0x{serial:X8}", 3, 0x34 + 10, true, TextType.OBJECT);
+                    //ent = ent ?? World.Player;
+                    //ent.AddMessage(MessageType.Regular, $"PACKET REMOVED SENT: 0x{serial:X8}", 3, 0x34 + 10, true, TextType.OBJECT);
                     Socket.Send(new PCloseStatusBarGump(serial));
                 }
             }

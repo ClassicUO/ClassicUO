@@ -642,7 +642,7 @@ namespace ClassicUO.Game.GameObjects
                         AnimationsLoader.Instance.LoadAnimationFrames(id, animGroup, dir, ref direction);
                     }
 
-                    if (fc != 0)
+                    if (direction != null && direction.FrameCount != 0)
                     {
                         direction.LastAccessTime = Time.Ticks;
                         int fc = direction.FrameCount;
