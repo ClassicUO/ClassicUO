@@ -2450,7 +2450,7 @@ namespace ClassicUO.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to {0}has invited you to join a party..
+        ///   Looks up a localized string similar to {0} has invited you to join a party..
         /// </summary>
         public static string P0HasInvitedYouToParty {
             get {
