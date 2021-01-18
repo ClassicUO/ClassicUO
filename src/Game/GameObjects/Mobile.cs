@@ -104,6 +104,8 @@ namespace ClassicUO.Game.GameObjects
                 mobile.Next = null;
                 mobile.Previous = null;
                 mobile.Name = null;
+                
+                mobile.HitsRequested = false;
 
                 mobile.CalculateRandomIdleTime();
             }
@@ -640,7 +642,7 @@ namespace ClassicUO.Game.GameObjects
                         AnimationsLoader.Instance.LoadAnimationFrames(id, animGroup, dir, ref direction);
                     }
 
-                    if (direction != null && (direction.Address != 0 && direction.Size != 0 && direction.FileIndex != -1 || direction.IsUOP))
+                    if (fc != 0)
                     {
                         direction.LastAccessTime = Time.Ticks;
                         int fc = direction.FrameCount;

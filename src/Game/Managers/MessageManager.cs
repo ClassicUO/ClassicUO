@@ -347,9 +347,14 @@ namespace ClassicUO.Game.Managers
 
         private static long CalculateTimeToLive(RenderedText rtext)
         {
-            long timeToLive;
-
             Profile currentProfile = ProfileManager.CurrentProfile;
+
+            if (currentProfile == null)
+            {
+                return 0;
+            }
+
+            long timeToLive;
 
             if (currentProfile.ScaleSpeechDelay)
             {

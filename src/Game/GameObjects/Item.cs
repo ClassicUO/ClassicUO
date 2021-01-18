@@ -96,6 +96,8 @@ namespace ClassicUO.Game.GameObjects
                 i.ObjectHandlesOpened = false;
                 i.AlphaHue = 0;
                 i.AllowedToDraw = true;
+                
+                i.HitsRequested = false;
             }
         );
 
