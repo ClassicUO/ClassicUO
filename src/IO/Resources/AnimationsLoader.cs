@@ -2484,14 +2484,9 @@ namespace ClassicUO.IO.Resources
                 reader.Skip(48);
                 int replaces = reader.ReadInt();
 
-                if (animID == 699)
-                {
-
-                }
-
                 if (replaces == 48 || replaces == 68)
                 {
-                    //continue;
+                    continue;
                 }
 
                 ref var animEntry = ref _animationCache.GetEntry((int)animID);
@@ -2517,7 +2512,7 @@ namespace ClassicUO.IO.Resources
                     }
                     else
                     {
-                        if (oldGroup >= 0)
+                        /*if (oldGroup >= 0)
                         {
                             for (int j = k; j < 5; ++j)
                             {
@@ -2525,7 +2520,7 @@ namespace ClassicUO.IO.Resources
 
                                 group.RealFrameCount = (byte)frameCount;
                             }
-                        }
+                        }*/
                     }
 
                     reader.Skip(60);
@@ -2630,6 +2625,8 @@ namespace ClassicUO.IO.Resources
 
         public byte GetFrameInfo(ushort graphic, byte group, byte direction, bool forceUop = false)
         {
+            ushort hue = 0;
+            FixAnimationGraphicAndHue(ref graphic, ref hue, false, false, forceUop, out _);
             ref AnimationDirectionEntry dirEntry = ref GetAnimationDirectionEntry(graphic, group, direction, forceUop);
 
             if (dirEntry.FramesCount != 0)
@@ -3099,6 +3096,8 @@ namespace ClassicUO.IO.Resources
         {
             if (graphic < Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT && group < 100)
             {
+                ushort hue = 0;
+                FixAnimationGraphicAndHue(ref graphic, ref hue, isCorpse, false, false, out _);
                 ref var dirEntry = ref GetAnimationDirectionEntry(graphic, group, 0);
 
                 //AnimationDirection direction = isCorpse ?
