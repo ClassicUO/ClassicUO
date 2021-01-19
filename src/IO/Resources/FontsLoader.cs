@@ -593,7 +593,7 @@ namespace ClassicUO.IO.Resources
             return sb.ToString();
         }
 
-        private void GeneratePixelsASCII
+        private unsafe void GeneratePixelsASCII
         (
             ref FontTexture texture,
             byte font,
@@ -664,136 +664,169 @@ namespace ClassicUO.IO.Resources
             }
 
             int blocksize = height * width;
-            uint[] pData = new uint[blocksize];
-            int lineOffsY = 0;
-            MultilinesFontInfo ptr = info;
-            bool isPartial = font != 5 && font != 8 && !UnusePartialHue;
-            int font6OffsetY = font == 6 ? 7 : 0;
-            int linesCount = 0; // this value should be added to TextTexture.LineCount += linesCount
-
-            while (ptr != null)
+            //uint[] pData = new uint[blocksize];
+            
+            //fixed (uint* pdata = pData)
+            uint* pdata = stackalloc uint[blocksize];
             {
-                info = ptr;
-                linesCount++;
-                int w = 0;
+                int lineOffsY = 0;
+                MultilinesFontInfo ptr = info;
+                bool isPartial = font != 5 && font != 8 && !UnusePartialHue;
+                int font6OffsetY = font == 6 ? 7 : 0;
+                int linesCount = 0; // this value should be added to TextTexture.LineCount += linesCount
 
-                switch (ptr.Align)
+                while (ptr != null)
                 {
-                    case TEXT_ALIGN_TYPE.TS_CENTER:
+                    info = ptr;
+                    linesCount++;
+                    int w = 0;
 
+                    switch (ptr.Align)
                     {
-                        w = (width - ptr.Width) >> 1;
+                        case TEXT_ALIGN_TYPE.TS_CENTER:
 
-                        if (w < 0)
-                        {
-                            w = 0;
-                        }
+                            {
+                                w = (width - ptr.Width) >> 1;
 
-                        break;
-                    }
+                                if (w < 0)
+                                {
+                                    w = 0;
+                                }
 
-                    case TEXT_ALIGN_TYPE.TS_RIGHT:
+                                break;
+                            }
 
-                    {
-                        w = width - 10 - ptr.Width;
+                        case TEXT_ALIGN_TYPE.TS_RIGHT:
 
-                        if (w < 0)
-                        {
-                            w = width;
-                        }
+                            {
+                                w = width - 10 - ptr.Width;
 
-                        break;
-                    }
+                                if (w < 0)
+                                {
+                                    w = width;
+                                }
 
-                    case TEXT_ALIGN_TYPE.TS_LEFT when (flags & UOFONT_INDENTION) != 0:
-                        w = ptr.IndentionOffset;
+                                break;
+                            }
 
-                        break;
-                }
+                        case TEXT_ALIGN_TYPE.TS_LEFT when (flags & UOFONT_INDENTION) != 0:
+                            w = ptr.IndentionOffset;
 
-                uint count = ptr.Data.Count;
-
-                for (int i = 0; i < count; i++)
-                {
-                    byte index = (byte) ptr.Data[i].Item;
-
-                    int offsY = GetFontOffsetY(font, index);
-
-                    ref FontCharacterData fcd = ref fd[GetASCIIIndex(ptr.Data[i].Item)];
-
-                    int dw = fcd.Width;
-                    int dh = fcd.Height;
-                    ushort charColor = color;
-
-                    for (int y = 0; y < dh; y++)
-                    {
-                        int testY = y + lineOffsY + offsY;
-
-                        if (testY >= height)
-                        {
                             break;
-                        }
+                    }
 
-                        for (int x = 0; x < dw; x++)
+                    uint count = ptr.Data.Count;
+
+                    for (int i = 0; i < count; i++)
+                    {
+                        byte index = (byte)ptr.Data[i].Item;
+
+                        int offsY = GetFontOffsetY(font, index);
+
+                        ref FontCharacterData fcd = ref fd[GetASCIIIndex(ptr.Data[i].Item)];
+
+                        int dw = fcd.Width;
+                        int dh = fcd.Height;
+                        ushort charColor = color;
+
+                        for (int y = 0; y < dh; y++)
                         {
-                            if (x + w >= width)
+                            int testY = y + lineOffsY + offsY;
+
+                            if (testY >= height)
                             {
                                 break;
                             }
 
-                            ushort pic = fcd.Data[y * dw + x];
-
-                            if (pic != 0)
+                            for (int x = 0; x < dw; x++)
                             {
-                                uint pcl;
-
-                                if (isPartial)
+                                if (x + w >= width)
                                 {
-                                    pcl = HuesLoader.Instance.GetPartialHueColor(pic, charColor);
-                                }
-                                else
-                                {
-                                    pcl = HuesLoader.Instance.GetColor(pic, charColor);
+                                    break;
                                 }
 
-                                int block = testY * width + x + w;
+                                ushort pic = fcd.Data[y * dw + x];
 
-                                if (block >= 0)
+                                if (pic != 0)
                                 {
-                                    pData[block] = pcl | 0xFF_00_00_00;
+                                    uint pcl;
+
+                                    if (isPartial)
+                                    {
+                                        pcl = HuesLoader.Instance.GetPartialHueColor(pic, charColor);
+                                    }
+                                    else
+                                    {
+                                        pcl = HuesLoader.Instance.GetColor(pic, charColor);
+                                    }
+
+                                    int block = testY * width + x + w;
+
+                                    if (block >= 0)
+                                    {
+                                        pdata[block] = pcl | 0xFF_00_00_00;
+                                    }
                                 }
                             }
                         }
+
+                        w += dw;
                     }
 
-                    w += dw;
+                    lineOffsY += ptr.MaxHeight - font6OffsetY;
+                    ptr = ptr.Next;
+                    info.Data.Clear();
+                    info.Data.Count = 0;
+                    info = null;
                 }
 
-                lineOffsY += ptr.MaxHeight - font6OffsetY;
-                ptr = ptr.Next;
-                info.Data.Clear();
-                info.Data.Count = 0;
-                info = null;
-            }
+                if (saveHitmap)
+                {
+                    uint[] data = new uint[blocksize];
 
+                    blocksize *= sizeof(uint);
+                    fixed (uint* ptrData = data)
+                    {
+                        Buffer.MemoryCopy(pdata, ptrData, blocksize, blocksize);
+                    }
+
+                    CreateTexture(ref texture, data, width, height, linesCount, new RawList<WebLinkRect>());
+                }
+                else
+                {
+                    CreateTexture(ref texture, pdata, blocksize, width, height, linesCount, new RawList<WebLinkRect>());
+                }
+            }
+        }
+
+        private unsafe void CreateTexture(ref FontTexture texture, uint* data, int datalength, int width, int height, int lines, RawList<WebLinkRect> links)
+        {
             if (texture == null || texture.IsDisposed)
             {
-                texture = new FontTexture(width, height, linesCount, new RawList<WebLinkRect>());
+                texture = new FontTexture(width, height, lines, links);
             }
             else
             {
                 texture.Links.Clear();
-                texture.LineCount = linesCount;
+                texture.LineCount = lines;
             }
 
-            if (saveHitmap)
+            texture.SetDataPointerEXT(0, null, (IntPtr) data, datalength);
+        }
+
+        private void CreateTexture(ref FontTexture texture, uint[] data, int width, int height, int lines, RawList<WebLinkRect> links)
+        {
+            if (texture == null || texture.IsDisposed)
             {
-                texture.PushData(pData);
+                texture = new FontTexture(width, height, lines, links);
             }
             else
             {
-                texture.SetData(pData);
+                texture.Links.Clear();
+                texture.LineCount = lines;
             }
+
+            texture.PushData(data);
         }
 
         public int GetFontOffsetY(byte font, byte index)
@@ -1781,8 +1814,8 @@ namespace ClassicUO.IO.Resources
 
             height += _topMargin + _bottomMargin + 4;
             int blocksize = height * width;
-            uint[] pData = new uint[blocksize];
-            //uint* pData = stackalloc uint[blocksize];
+            //uint[] pData = new uint[blocksize];
+            uint* pData = stackalloc uint[blocksize];
             uint* table = (uint*) _unicodeFontAddress[font];
             int lineOffsY = _topMargin;
             MultilinesFontInfo ptr = info;
@@ -2189,7 +2222,7 @@ namespace ClassicUO.IO.Resources
                                                     continue;
                                                 }
 
-                                                if (testBlock < pData.Length && pData[testBlock] != 0 && pData[testBlock] != blackColor)
+                                                if (testBlock < blocksize && pData[testBlock] != 0 && pData[testBlock] != blackColor)
                                                 {
                                                     pData[block] = blackColor;
                                                     passed = true;
@@ -2286,24 +2319,21 @@ namespace ClassicUO.IO.Resources
                 }
             }
 
-            if (texture == null || texture.IsDisposed)
-            {
-                texture = new FontTexture(width, height, linesCount, links);
-            }
-            else
-            {
-                texture.Links.Clear();
-                texture.Links.AddRange(links);
-                texture.LineCount = linesCount;
-            }
-
             if (saveHitmap)
             {
-                texture.PushData(pData);
+                uint[] data = new uint[blocksize];
+
+                blocksize *= sizeof(uint);
+                fixed (uint* ptrData = data)
+                {
+                    Buffer.MemoryCopy(pData, ptrData, blocksize, blocksize);
+                }
+
+                CreateTexture(ref texture, data, width, height, linesCount, links);
             }
             else
             {
-                texture.SetData(pData);
+                CreateTexture(ref texture, pData, blocksize, width, height, linesCount, links);
             }
         }
 

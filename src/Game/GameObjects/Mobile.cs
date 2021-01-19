@@ -617,14 +617,8 @@ namespace ClassicUO.Game.GameObjects
 
                     if (fc != 0)
                     {
-                        AnimationsLoader.Instance.LoadAnimationFrames(id, animGroup, dir, ref direction);
-                    }
-
-                    if (direction != null && (direction.Address != 0 && direction.Size != 0 && direction.FileIndex != -1 || direction.IsUOP))
-                    {
-                        direction.LastAccessTime = Time.Ticks;
-                        int fc = direction.FrameCount;
-
+                        int frameIndex = AnimIndex + (AnimationFromServer && !_animationForwardDirection ? -1 : 1);
+                       
                         if (AnimationFromServer)
                         {
                             currentDelay += currentDelay * (_animationInterval + 1);
