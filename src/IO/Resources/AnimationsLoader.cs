@@ -3844,49 +3844,30 @@ namespace ClassicUO.IO.Resources
         AF_FOUND = 0x80000000
     }
 
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
     struct AnimationEntry
     {
         public ANIMATION_FLAGS Flags;
-
         public ushort Graphic;
         public ushort GraphicConversion;
-
         public ushort CorpseGraphic;
-
         public ushort Color;
         public ushort CorpseColor;
-
         public ANIMATION_GROUPS_TYPE Type;
-
         public byte FileIndex;
         public sbyte MountOffsetY;
-        internal bool IsValidMUL;
-
-        //public AnimationEntry()
-        //{
-        //    Flags = 0;
-        //    Graphic = 0;
-        //    GraphicConversion = 0x8000;
-        //    CorpseGraphic = 0;
-        //    Color = 0;
-        //    CorpseColor = 0;
-        //    Type = ANIMATION_GROUPS_TYPE.UNKNOWN;
-        //    FileIndex = 0;
-        //    MountOffsetY = 0;
-        //}
+        public bool IsValidMUL;
     }
 
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
     struct AnimationDirectionEntry
     {
         public IntPtr Address;
         public uint Size;
-
         public uint LastAccessTime;
-
         public byte FramesCount;
         public byte RealFrameCount;
         public byte FileIndex;
-
         public bool IsUOP;
     }
 
