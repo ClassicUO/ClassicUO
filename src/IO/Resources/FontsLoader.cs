@@ -357,6 +357,7 @@ namespace ClassicUO.IO.Resources
                 MultilinesFontInfo ptr = info;
                 info = info.Next;
                 ptr.Data.Clear();
+                ptr.Data.Count = 0;
                 ptr = null;
             }
 
@@ -410,6 +411,7 @@ namespace ClassicUO.IO.Resources
                 MultilinesFontInfo ptr = info;
                 info = info.Next;
                 ptr.Data.Clear();
+                ptr.Data.Count = 0;
                 ptr = null;
             }
 
@@ -654,6 +656,7 @@ namespace ClassicUO.IO.Resources
                     info = ptr1;
                     ptr1 = ptr1.Next;
                     info.Data.Clear();
+                    info.Data.Count = 0;
                     info = null;
                 }
 
@@ -769,6 +772,7 @@ namespace ClassicUO.IO.Resources
                 lineOffsY += ptr.MaxHeight - font6OffsetY;
                 ptr = ptr.Next;
                 info.Data.Clear();
+                info.Data.Count = 0;
                 info = null;
             }
 
@@ -782,7 +786,14 @@ namespace ClassicUO.IO.Resources
                 texture.LineCount = linesCount;
             }
 
-            texture.PushData(pData);
+            if (saveHitmap)
+            {
+                texture.PushData(pData);
+            }
+            else
+            {
+                texture.SetData(pData);
+            }
         }
 
         public int GetFontOffsetY(byte font, byte index)
@@ -1351,6 +1362,7 @@ namespace ClassicUO.IO.Resources
                 MultilinesFontInfo ptr = info;
                 info = info.Next;
                 ptr.Data.Clear();
+                ptr.Data.Count = 0;
                 ptr = null;
             }
 
@@ -1706,6 +1718,7 @@ namespace ClassicUO.IO.Resources
                 {
                     MultilinesFontInfo ptr1 = info.Next;
                     info.Data.Clear();
+                    info.Data.Count = 0;
                     info = null;
                     info = ptr1;
                 }
@@ -1759,6 +1772,7 @@ namespace ClassicUO.IO.Resources
                     MultilinesFontInfo ptr1 = info;
                     info = info.Next;
                     ptr1.Data.Clear();
+                    ptr1.Data.Count = 0;
                     ptr1 = null;
                 }
 
@@ -2248,6 +2262,7 @@ namespace ClassicUO.IO.Resources
                 lineOffsY += ptr.MaxHeight;
                 ptr = ptr.Next;
                 info.Data.Clear();
+                info.Data.Count = 0;
                 info = null;
             }
 
@@ -2282,7 +2297,14 @@ namespace ClassicUO.IO.Resources
                 texture.LineCount = linesCount;
             }
 
-            texture.PushData(pData);
+            if (saveHitmap)
+            {
+                texture.PushData(pData);
+            }
+            else
+            {
+                texture.SetData(pData);
+            }
         }
 
         private unsafe MultilinesFontInfo GetInfoHTML
@@ -3517,6 +3539,7 @@ namespace ClassicUO.IO.Resources
                 MultilinesFontInfo ptr = info;
                 info = info.Next;
                 ptr.Data.Clear();
+                ptr.Data.Count = 0;
                 ptr = null;
             }
 
@@ -3654,6 +3677,7 @@ namespace ClassicUO.IO.Resources
                 MultilinesFontInfo ptr = info;
                 info = info.Next;
                 ptr.Data.Clear();
+                ptr.Data.Count = 0;
                 ptr = null;
             }
 
@@ -3787,6 +3811,7 @@ namespace ClassicUO.IO.Resources
                 MultilinesFontInfo ptr = info;
                 info = info.Next;
                 ptr.Data.Clear();
+                ptr.Data.Count = 0;
                 ptr = null;
             }
 
@@ -3913,6 +3938,7 @@ namespace ClassicUO.IO.Resources
                 MultilinesFontInfo ptr = info;
                 info = info.Next;
                 ptr.Data.Clear();
+                ptr.Data.Count = 0;
                 ptr = null;
             }
 
@@ -4034,6 +4060,7 @@ namespace ClassicUO.IO.Resources
                 MultilinesFontInfo ptr1 = info;
                 info = info.Next;
                 ptr1.Data.Clear();
+                ptr1.Data.Count = 0;
                 ptr1 = null;
             }
 

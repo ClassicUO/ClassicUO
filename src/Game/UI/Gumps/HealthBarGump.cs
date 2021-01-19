@@ -106,8 +106,11 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override void Dispose()
         {
-            GameActions.SendCloseStatus(LocalSerial);
-
+            /*if (TargetManager.LastAttack != LocalSerial)
+            {
+                GameActions.SendCloseStatus(LocalSerial);
+            }*/
+            
             _textBox?.Dispose();
             _textBox = null;
             base.Dispose();
@@ -459,7 +462,11 @@ namespace ClassicUO.Game.UI.Gumps
                     _outOfRange = true;
                     textColor = 912;
 
-
+                    if (TargetManager.LastAttack != LocalSerial)
+                    {
+                        GameActions.SendCloseStatus(LocalSerial);
+                    }
+                    
                     if (inparty)
                     {
                         if (_textBox != null && _textBox.Hue != textColor)
@@ -1647,6 +1654,11 @@ namespace ClassicUO.Game.UI.Gumps
                     //_normalHits = true;
 
                     _outOfRange = true;
+
+                    if (TargetManager.LastAttack != LocalSerial)
+                    {
+                        GameActions.SendCloseStatus(LocalSerial);
+                    }
 
                     if (inparty)
                     {

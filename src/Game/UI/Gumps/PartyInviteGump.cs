@@ -44,16 +44,18 @@ namespace ClassicUO.Game.UI.Gumps
         {
             CanCloseWithRightClick = true;
 
+            Mobile mobile = World.Mobiles.Get(inviter);
+
+            var nameWidthAdjustment = mobile == null || mobile.Name.Length < 10 ? 0 : mobile.Name.Length * 5;
+
             AlphaBlendControl partyGumpBackground = new AlphaBlendControl
             {
-                Width = 250,
+                Width = 270 + nameWidthAdjustment,
                 Height = 80,
                 X = ProfileManager.CurrentProfile.GameWindowSize.X / 2 - 125,
                 Y = 150,
                 Alpha = 0.2f
             };
-
-            Mobile mobile = World.Mobiles.Get(inviter);
 
             Label text = new Label(string.Format(ResGumps.P0HasInvitedYouToParty, mobile == null || string.IsNullOrEmpty(mobile.Name) ? ResGumps.NoName : mobile.Name), true, 15)
             {
@@ -63,7 +65,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             NiceButton acceptButton = new NiceButton
             (
-                ProfileManager.CurrentProfile.GameWindowSize.X / 2 + 70,
+                ProfileManager.CurrentProfile.GameWindowSize.X / 2 + 99 + nameWidthAdjustment,
                 205,
                 45,
                 25,
@@ -73,7 +75,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             NiceButton declineButton = new NiceButton
             (
-                ProfileManager.CurrentProfile.GameWindowSize.X / 2 + 10,
+                ProfileManager.CurrentProfile.GameWindowSize.X / 2 + 39 + nameWidthAdjustment,
                 205,
                 45,
                 25,

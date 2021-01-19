@@ -2681,11 +2681,6 @@ namespace ClassicUO.Network
                 return;
             }
 
-            if (!mobile.Exists)
-            {
-                GameActions.RequestMobileStatus(mobile);
-            }
-
             ushort graphic = p.ReadUShort();
             ushort x = p.ReadUShort();
             ushort y = p.ReadUShort();
@@ -3477,16 +3472,16 @@ namespace ClassicUO.Network
         {
             uint serial = p.ReadUInt();
 
-            if (TargetManager.LastAttack != serial && World.InGame)
-            {
-                if (SerialHelper.IsValid(TargetManager.LastAttack))
-                {
-                    GameActions.SendCloseStatus(TargetManager.LastAttack);
-                }
+            //if (TargetManager.LastAttack != serial && World.InGame)
+            //{
 
-                TargetManager.LastAttack = serial;
-                GameActions.RequestMobileStatus(TargetManager.LastAttack);
-            }
+
+
+            //}
+
+            GameActions.SendCloseStatus(TargetManager.LastAttack);
+            TargetManager.LastAttack = serial;
+            GameActions.RequestMobileStatus(serial);
         }
 
         private static void TextEntryDialog(ref PacketBufferReader p)
@@ -6096,13 +6091,21 @@ namespace ClassicUO.Network
 
             if (mobile != null)
             {
-                if (created /*|| mobile.HitsMax == 0*/)
-                {
-                    GameActions.RequestMobileStatus(serial);
-                }
-
                 mobile.AddToTile();
                 mobile.UpdateScreenPosition();
+
+                if (created)
+                {
+                    // This is actually a way to get all Hp from all new mobiles.
+                    // Real UO client does it only when LastAttack == serial.
+                    // We force to close suddenly.
+                    GameActions.RequestMobileStatus(serial);
+
+                    //if (TargetManager.LastAttack != serial)
+                    //{
+                    //    GameActions.SendCloseStatus(serial);
+                    //}
+                }
             }
             else
             {
