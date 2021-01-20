@@ -68,12 +68,7 @@ namespace ClassicUO.Game.GameObjects
         {
             FixedDir = fixedDir;
 
-            if (speed > 20)
-            {
-                speed = (byte) (speed - 20);
-            }
-
-            MovingDelay = (byte) (20 - speed);
+            MovingDelay = speed;
             _lastMoveTime = Time.Ticks + MovingDelay;
 
             Entity source = World.Get(src);
