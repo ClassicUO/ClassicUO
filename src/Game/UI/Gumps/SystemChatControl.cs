@@ -259,7 +259,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 case MessageType.Regular when e.Parent == null || !SerialHelper.IsValid(e.Parent.Serial):
                 case MessageType.System:
-                    if (!string.IsNullOrEmpty(e.Name) && e.Name.ToLowerInvariant() != "system")
+                    if (!string.IsNullOrEmpty(e.Name) && !e.Name.Equals("system", StringComparison.InvariantCultureIgnoreCase))
                     {
                         AddLine($"{e.Name}: {e.Text}", e.Font, e.Hue, e.IsUnicode);
                     }
@@ -287,6 +287,18 @@ namespace ClassicUO.Game.UI.Gumps
 
                 case MessageType.Alliance:
                     AddLine(string.Format(ResGumps.AllianceName0Text1, e.Name, e.Text), e.Font, ProfileManager.CurrentProfile.AllyMessageHue, e.IsUnicode);
+
+                    break;
+
+                default:
+
+                    if (e.Parent == null || !SerialHelper.IsValid(e.Parent.Serial))
+                    {
+                        if (string.IsNullOrEmpty(e.Name) || e.Name.Equals("system", StringComparison.InvariantCultureIgnoreCase))
+                        {
+                            AddLine(e.Text, e.Font, e.Hue, e.IsUnicode);
+                        }
+                    }
 
                     break;
             }
