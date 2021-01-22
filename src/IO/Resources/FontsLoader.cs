@@ -543,14 +543,20 @@ namespace ClassicUO.IO.Resources
             {
                 int strLen = str.Length;
 
-                GetHTMLData
-                (
-                    font,
-                    str,
-                    ref strLen,
-                    align,
-                    flags
-                );
+                unsafe
+                {
+                    HTMLChar* chars = stackalloc HTMLChar[strLen];
+
+                    GetHTMLData
+                    (
+                        chars,
+                        font,
+                        str,
+                        ref strLen,
+                        align,
+                        flags
+                    );
+                }
 
                 int size = str.Length - strLen;
 
@@ -1202,15 +1208,21 @@ namespace ClassicUO.IO.Resources
             {
                 int strLen = str.Length;
 
-                GetHTMLData
-                (
-                    font,
-                    str,
-                    ref strLen,
-                    align,
-                    flags
-                );
+                unsafe
+                {
+                    HTMLChar* data = stackalloc HTMLChar[strLen];
 
+                    GetHTMLData
+                    (
+                        data,
+                        font,
+                        str,
+                        ref strLen,
+                        align,
+                        flags
+                    );
+                }
+                
                 int size = str.Length - strLen;
 
                 if (size > 0)
@@ -2317,8 +2329,16 @@ namespace ClassicUO.IO.Resources
             int width
         )
         {
-            HTMLChar[] htmlData = GetHTMLData
+            if (len <= 0)
+            {
+                return null;
+            }
+
+            HTMLChar* htmlData = stackalloc HTMLChar[len];
+                
+            GetHTMLData
             (
+                htmlData,
                 font,
                 str,
                 ref len,
@@ -2326,7 +2346,7 @@ namespace ClassicUO.IO.Resources
                 flags
             );
 
-            if (htmlData.Length == 0)
+            if (len <= 0)
             {
                 return null;
             }
@@ -2545,14 +2565,8 @@ namespace ClassicUO.IO.Resources
             return info;
         }
 
-        private HTMLChar[] GetHTMLData(byte font, string str, ref int len, TEXT_ALIGN_TYPE align, ushort flags)
+        private unsafe void GetHTMLData(HTMLChar* data, byte font, string str, ref int len, TEXT_ALIGN_TYPE align, ushort flags)
         {
-            if (len < 1)
-            {
-                return _emptyHTML;
-            }
-
-            HTMLChar[] data = new HTMLChar[len];
             int newlen = 0;
 
             HTMLDataInfo info = new HTMLDataInfo
@@ -2700,10 +2714,7 @@ namespace ClassicUO.IO.Resources
                 }
             }
 
-            Array.Resize(ref data, newlen);
             len = newlen;
-
-            return data;
         }
 
         private HTMLDataInfo GetCurrentHTMLInfo(ref RawList<HTMLDataInfo> list)
@@ -2965,10 +2976,15 @@ namespace ClassicUO.IO.Resources
 
                     default:
 
-                        if (str.Contains("bodybgcolor"))
+                        if (str.IndexOf("bodybgcolor", StringComparison.InvariantCultureIgnoreCase) >= 0)
                         {
                             tag = HTML_TAG_TYPE.HTT_BODYBGCOLOR;
-                            j = str.IndexOf("bgcolor", StringComparison.Ordinal);
+                            j = str.IndexOf("bgcolor", StringComparison.InvariantCultureIgnoreCase);
+                        }
+                        else if (str.IndexOf("basefont", StringComparison.InvariantCultureIgnoreCase) >= 0)
+                        {
+                            tag = HTML_TAG_TYPE.HTT_BASEFONT;
+                            j = str.IndexOf("color", StringComparison.InvariantCultureIgnoreCase);
                         }
                         else
                         {
