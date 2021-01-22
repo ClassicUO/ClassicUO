@@ -2654,7 +2654,7 @@ namespace ClassicUO.IO.Resources
                         }
                     }
 
-                    currentInfo = GetCurrentHTMLInfo(ref stack);
+                    GetCurrentHTMLInfo(ref stack, ref currentInfo);
 
                     switch (tag)
                     {
@@ -2698,36 +2698,30 @@ namespace ClassicUO.IO.Resources
 
                 if (si != 0)
                 {
-                    data[newlen].Char = si;
+                    ref HTMLChar c = ref data[newlen];
 
-                    data[newlen].Font = currentInfo.Font;
+                    c.Char = si;
+                    c.Font = currentInfo.Font;
+                    c.Align = currentInfo.Align;
+                    c.Flags = currentInfo.Flags;
+                    c.Color = currentInfo.Color;
+                    c.LinkID = currentInfo.Link;
 
-                    data[newlen].Align = currentInfo.Align;
-
-                    data[newlen].Flags = currentInfo.Flags;
-
-                    data[newlen].Color = currentInfo.Color;
-
-                    data[newlen].LinkID = currentInfo.Link;
-
-                    newlen++;
+                    ++newlen;
                 }
             }
 
             len = newlen;
         }
 
-        private HTMLDataInfo GetCurrentHTMLInfo(ref RawList<HTMLDataInfo> list)
+        private void GetCurrentHTMLInfo(ref RawList<HTMLDataInfo> list, ref HTMLDataInfo info)
         {
-            HTMLDataInfo info = new HTMLDataInfo
-            {
-                Tag = HTML_TAG_TYPE.HTT_NONE,
-                Align = TEXT_ALIGN_TYPE.TS_LEFT,
-                Flags = 0,
-                Font = 0xFF,
-                Color = 0,
-                Link = 0
-            };
+            info.Tag = HTML_TAG_TYPE.HTT_NONE;
+            info.Align = TEXT_ALIGN_TYPE.TS_LEFT;
+            info.Flags = 0;
+            info.Font = 0xFF;
+            info.Color = 0;
+            info.Link = 0;
 
             for (int i = 0; i < list.Count; i++)
             {
@@ -2816,8 +2810,6 @@ namespace ClassicUO.IO.Resources
                         break;
                 }
             }
-
-            return info;
         }
 
         private HTML_TAG_TYPE ParseHTMLTag(string str, int len, ref int i, ref bool endTag, ref HTMLDataInfo info)
@@ -2858,7 +2850,7 @@ namespace ClassicUO.IO.Resources
             {
                 int cmdLen = i - j;
 
-                string cmd = str.Substring(j, cmdLen).ToLower();
+                string cmd = str.Substring(j, cmdLen);
 
                 j = i;
 
@@ -2867,133 +2859,108 @@ namespace ClassicUO.IO.Resources
                     i++;
                 }
 
-                switch (cmd)
+                if (string.Equals(cmd, "b", StringComparison.CurrentCultureIgnoreCase))
                 {
-                    case "b":
-                        tag = HTML_TAG_TYPE.HTT_B;
-
-                        break;
-
-                    case "i":
-                        tag = HTML_TAG_TYPE.HTT_I;
-
-                        break;
-
-                    case "a":
-                        tag = HTML_TAG_TYPE.HTT_A;
-
-                        break;
-
-                    case "u":
-                        tag = HTML_TAG_TYPE.HTT_U;
-
-                        break;
-
-                    case "p":
-                        tag = HTML_TAG_TYPE.HTT_P;
-
-                        break;
-
-                    case "big":
-                        tag = HTML_TAG_TYPE.HTT_BIG;
-
-                        break;
-
-                    case "small":
-                        tag = HTML_TAG_TYPE.HTT_SMALL;
-
-                        break;
-
-                    case "body":
-                        tag = HTML_TAG_TYPE.HTT_BODY;
-
-                        break;
-
-                    case "basefont":
+                    tag = HTML_TAG_TYPE.HTT_B;
+                }
+                else if (string.Equals(cmd, "i", StringComparison.InvariantCultureIgnoreCase))
+                {
+                    tag = HTML_TAG_TYPE.HTT_I;
+                }
+                else if (string.Equals(cmd, "a", StringComparison.InvariantCultureIgnoreCase))
+                {
+                    tag = HTML_TAG_TYPE.HTT_A;
+                }
+                else if (string.Equals(cmd, "u", StringComparison.InvariantCultureIgnoreCase))
+                {
+                    tag = HTML_TAG_TYPE.HTT_U;
+                }
+                else if (string.Equals(cmd, "p", StringComparison.InvariantCultureIgnoreCase))
+                {
+                    tag = HTML_TAG_TYPE.HTT_P;
+                }
+                else if (string.Equals(cmd, "big", StringComparison.InvariantCultureIgnoreCase))
+                {
+                    tag = HTML_TAG_TYPE.HTT_BIG;
+                }
+                else if (string.Equals(cmd, "small", StringComparison.InvariantCultureIgnoreCase))
+                {
+                    tag = HTML_TAG_TYPE.HTT_SMALL;
+                }
+                else if (string.Equals(cmd, "body", StringComparison.InvariantCultureIgnoreCase))
+                {
+                    tag = HTML_TAG_TYPE.HTT_BODY;
+                }
+                else if (string.Equals(cmd, "basefont", StringComparison.InvariantCultureIgnoreCase))
+                {
+                    tag = HTML_TAG_TYPE.HTT_BASEFONT;
+                }
+                else if (string.Equals(cmd, "h1", StringComparison.InvariantCultureIgnoreCase))
+                {
+                    tag = HTML_TAG_TYPE.HTT_H1;
+                }
+                else if (string.Equals(cmd, "h2", StringComparison.InvariantCultureIgnoreCase))
+                {
+                    tag = HTML_TAG_TYPE.HTT_H2;
+                }
+                else if (string.Equals(cmd, "h3", StringComparison.InvariantCultureIgnoreCase))
+                {
+                    tag = HTML_TAG_TYPE.HTT_H3;
+                }
+                else if (string.Equals(cmd, "h4", StringComparison.InvariantCultureIgnoreCase))
+                {
+                    tag = HTML_TAG_TYPE.HTT_H4;
+                }
+                else if (string.Equals(cmd, "h5", StringComparison.InvariantCultureIgnoreCase))
+                {
+                    tag = HTML_TAG_TYPE.HTT_H5;
+                }
+                else if (string.Equals(cmd, "h6", StringComparison.InvariantCultureIgnoreCase))
+                {
+                    tag = HTML_TAG_TYPE.HTT_H6;
+                }
+                else if (string.Equals(cmd, "br", StringComparison.InvariantCultureIgnoreCase))
+                {
+                    tag = HTML_TAG_TYPE.HTT_BR;
+                }
+                else if (string.Equals(cmd, "bq", StringComparison.InvariantCultureIgnoreCase))
+                {
+                    tag = HTML_TAG_TYPE.HTT_BQ;
+                }
+                else if (string.Equals(cmd, "left", StringComparison.InvariantCultureIgnoreCase))
+                {
+                    tag = HTML_TAG_TYPE.HTT_LEFT;
+                }
+                else if (string.Equals(cmd, "center", StringComparison.InvariantCultureIgnoreCase))
+                {
+                    tag = HTML_TAG_TYPE.HTT_CENTER;
+                }
+                else if (string.Equals(cmd, "right", StringComparison.InvariantCultureIgnoreCase))
+                {
+                    tag = HTML_TAG_TYPE.HTT_RIGHT;
+                }
+                else if (string.Equals(cmd, "div", StringComparison.InvariantCultureIgnoreCase))
+                {
+                    tag = HTML_TAG_TYPE.HTT_DIV;
+                }
+                else
+                {
+                    if (str.IndexOf("bodybgcolor", StringComparison.InvariantCultureIgnoreCase) >= 0)
+                    {
+                        tag = HTML_TAG_TYPE.HTT_BODYBGCOLOR;
+                        j = str.IndexOf("bgcolor", StringComparison.InvariantCultureIgnoreCase);
+                        endTag = false;
+                    }
+                    else if (str.IndexOf("basefont", StringComparison.InvariantCultureIgnoreCase) >= 0)
+                    {
                         tag = HTML_TAG_TYPE.HTT_BASEFONT;
-
-                        break;
-
-                    case "h1":
-                        tag = HTML_TAG_TYPE.HTT_H1;
-
-                        break;
-
-                    case "h2":
-                        tag = HTML_TAG_TYPE.HTT_H2;
-
-                        break;
-
-                    case "h3":
-                        tag = HTML_TAG_TYPE.HTT_H3;
-
-                        break;
-
-                    case "h4":
-                        tag = HTML_TAG_TYPE.HTT_H4;
-
-                        break;
-
-                    case "h5":
-                        tag = HTML_TAG_TYPE.HTT_H5;
-
-                        break;
-
-                    case "h6":
-                        tag = HTML_TAG_TYPE.HTT_H6;
-
-                        break;
-
-                    case "br":
-                        tag = HTML_TAG_TYPE.HTT_BR;
-
-                        break;
-
-                    case "bq":
-                        tag = HTML_TAG_TYPE.HTT_BQ;
-
-                        break;
-
-                    case "left":
-                        tag = HTML_TAG_TYPE.HTT_LEFT;
-
-                        break;
-
-                    case "center":
-                        tag = HTML_TAG_TYPE.HTT_CENTER;
-
-                        break;
-
-                    case "right":
-                        tag = HTML_TAG_TYPE.HTT_RIGHT;
-
-                        break;
-
-                    case "div":
-                        tag = HTML_TAG_TYPE.HTT_DIV;
-
-                        break;
-
-                    default:
-
-                        if (str.IndexOf("bodybgcolor", StringComparison.InvariantCultureIgnoreCase) >= 0)
-                        {
-                            tag = HTML_TAG_TYPE.HTT_BODYBGCOLOR;
-                            j = str.IndexOf("bgcolor", StringComparison.InvariantCultureIgnoreCase);
-                            endTag = false;
-                        }
-                        else if (str.IndexOf("basefont", StringComparison.InvariantCultureIgnoreCase) >= 0)
-                        {
-                            tag = HTML_TAG_TYPE.HTT_BASEFONT;
-                            j = str.IndexOf("color", StringComparison.InvariantCultureIgnoreCase);
-                            endTag = false;
-                        }
-                        else
-                        {
-                            Log.Warn($"Unhandled HTML param:\t{str}");
-                        }
-
-                        break;
+                        j = str.IndexOf("color", StringComparison.InvariantCultureIgnoreCase);
+                        endTag = false;
+                    }
+                    else
+                    {
+                        Log.Warn($"Unhandled HTML param:\t{str}");
+                    }
                 }
 
                 if (!endTag)
@@ -3018,9 +2985,6 @@ namespace ClassicUO.IO.Resources
                                 {
                                     GetHTMLInfoFromContent(ref info, content);
                                 }
-
-                                //if (tag == HTML_TAG_TYPE.HTT_BODYBGCOLOR)
-                                //    i = 1;
 
                                 break;
                         }
@@ -3067,62 +3031,51 @@ namespace ClassicUO.IO.Resources
                     case HTML_TAG_TYPE.HTT_BODYBGCOLOR:
                     case HTML_TAG_TYPE.HTT_BODY:
 
-                        switch (str)
+                        if (string.Equals(str, "text", StringComparison.InvariantCultureIgnoreCase))
                         {
-                            case "text":
-                                info.Color = GetHTMLColorFromText(ref value);
-
-                                break;
-
-                            case "bgcolor":
-
-                                if (_HTMLBackgroundCanBeColored)
-                                {
-                                    _backgroundColor = GetHTMLColorFromText(ref value);
-                                }
-
-                                break;
-
-                            case "link":
-                                _webLinkColor = GetHTMLColorFromText(ref value);
-
-                                break;
-
-                            case "vlink":
-                                _visitedWebLinkColor = GetHTMLColorFromText(ref value);
-
-                                break;
-
-                            case "leftmargin":
-                                _leftMargin = int.Parse(value);
-
-                                break;
-
-                            case "topmargin":
-                                _topMargin = int.Parse(value);
-
-                                break;
-
-                            case "rightmargin":
-                                _rightMargin = int.Parse(value);
-
-                                break;
-
-                            case "bottommargin":
-                                _bottomMargin = int.Parse(value);
-
-                                break;
+                            info.Color = GetHTMLColorFromText(ref value);
+                        }
+                        else if (string.Equals(str, "bgcolor", StringComparison.InvariantCultureIgnoreCase))
+                        {
+                            if (_HTMLBackgroundCanBeColored)
+                            {
+                                _backgroundColor = GetHTMLColorFromText(ref value);
+                            }
+                        }
+                        else if (string.Equals(str, "link", StringComparison.InvariantCultureIgnoreCase))
+                        {
+                            _webLinkColor = GetHTMLColorFromText(ref value);
+                        }
+                        else if (string.Equals(str, "vlink", StringComparison.InvariantCultureIgnoreCase))
+                        {
+                            _visitedWebLinkColor = GetHTMLColorFromText(ref value);
+                        }
+                        else if (string.Equals(str, "leftmargin", StringComparison.InvariantCultureIgnoreCase))
+                        {
+                            _leftMargin = int.Parse(value);
+                        }
+                        else if (string.Equals(str, "topmargin", StringComparison.InvariantCultureIgnoreCase))
+                        {
+                            _topMargin = int.Parse(value);
+                        }
+                        else if (string.Equals(str, "rightmargin", StringComparison.InvariantCultureIgnoreCase))
+                        {
+                            _rightMargin = int.Parse(value);
+                        }
+                        else if (string.Equals(str, "bottommargin", StringComparison.InvariantCultureIgnoreCase))
+                        {
+                            _bottomMargin = int.Parse(value);
                         }
 
                         break;
 
                     case HTML_TAG_TYPE.HTT_BASEFONT:
 
-                        if (str == "color")
+                        if (string.Equals(str, "color", StringComparison.InvariantCultureIgnoreCase))
                         {
                             info.Color = GetHTMLColorFromText(ref value);
                         }
-                        else if (str == "size")
+                        else if (string.Equals(str, "size", StringComparison.InvariantCultureIgnoreCase))
                         {
                             byte font = byte.Parse(value);
 
@@ -3151,7 +3104,7 @@ namespace ClassicUO.IO.Resources
 
                     case HTML_TAG_TYPE.HTT_A:
 
-                        if (str == "href")
+                        if (string.Equals(str, "href", StringComparison.InvariantCultureIgnoreCase))
                         {
                             info.Flags = UOFONT_UNDERLINE;
                             info.Color = _webLinkColor;
@@ -3173,26 +3126,21 @@ namespace ClassicUO.IO.Resources
                     case HTML_TAG_TYPE.HTT_P:
                     case HTML_TAG_TYPE.HTT_DIV:
 
-                        if (str == "align")
+                        if (string.Equals(str, "align", StringComparison.InvariantCultureIgnoreCase))
                         {
                             str = value.ToLower();
 
-                            switch (str)
+                            if (string.Equals(str, "left", StringComparison.InvariantCultureIgnoreCase))
                             {
-                                case "left":
-                                    info.Align = TEXT_ALIGN_TYPE.TS_LEFT;
-
-                                    break;
-
-                                case "center":
-                                    info.Align = TEXT_ALIGN_TYPE.TS_CENTER;
-
-                                    break;
-
-                                case "right":
-                                    info.Align = TEXT_ALIGN_TYPE.TS_RIGHT;
-
-                                    break;
+                                info.Align = TEXT_ALIGN_TYPE.TS_LEFT;
+                            }
+                            else if (string.Equals(str, "center", StringComparison.InvariantCultureIgnoreCase))
+                            {
+                                info.Align = TEXT_ALIGN_TYPE.TS_CENTER;
+                            }
+                            else if (string.Equals(str, "right", StringComparison.InvariantCultureIgnoreCase))
+                            {
+                                info.Align = TEXT_ALIGN_TYPE.TS_RIGHT;
                             }
                         }
 
