@@ -2980,11 +2980,13 @@ namespace ClassicUO.IO.Resources
                         {
                             tag = HTML_TAG_TYPE.HTT_BODYBGCOLOR;
                             j = str.IndexOf("bgcolor", StringComparison.InvariantCultureIgnoreCase);
+                            endTag = false;
                         }
                         else if (str.IndexOf("basefont", StringComparison.InvariantCultureIgnoreCase) >= 0)
                         {
                             tag = HTML_TAG_TYPE.HTT_BASEFONT;
                             j = str.IndexOf("color", StringComparison.InvariantCultureIgnoreCase);
+                            endTag = false;
                         }
                         else
                         {
@@ -3389,9 +3391,18 @@ namespace ClassicUO.IO.Resources
 
         private void TrimHTMLString(ref string str)
         {
-            if (str.Length >= 2 && str[0] == '"' && str[str.Length - 1] == '"')
+            if (str.Length >= 2 && str[0] == '"')
             {
-                str = str.Substring(1, str.Length - 2);
+                int i = 1;
+                for (; i < str.Length; ++i)
+                {
+                    if (str[i] == '"')
+                    {
+                        break;
+                    }
+                }
+
+                str = str.Substring(1, i - 1);
             }
         }
 
