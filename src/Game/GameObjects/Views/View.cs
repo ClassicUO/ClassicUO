@@ -281,6 +281,8 @@ namespace ClassicUO.Game.GameObjects
                     texture,
                     x,
                     y,
+                    texture.Width * 0.5f,
+                    texture.Height * 0.5f,
                     destX - offX,
                     destY - offY,
                     ref hue,
