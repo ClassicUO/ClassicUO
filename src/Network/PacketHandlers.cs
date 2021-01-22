@@ -33,6 +33,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Text;
 using ClassicUO.Configuration;
 using ClassicUO.Game;
@@ -6667,7 +6668,7 @@ namespace ClassicUO.Network
 
                     case "tooltip":
 
-                        if (World.ClientFeatures.TooltipsEnabled)
+                        //if (World.ClientFeatures.TooltipsEnabled)
                         {
                             string text = null;
 
@@ -6711,6 +6712,8 @@ namespace ClassicUO.Network
                                 {
                                     last.SetTooltip(text);
                                 }
+
+                                last.Priority = ClickPriority.High;
                             }
                         }
 
