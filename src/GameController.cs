@@ -622,7 +622,7 @@ namespace ClassicUO
                     }
 
                     // Fix for linux OS: https://github.com/andreakarasho/ClassicUO/pull/1263
-                    if (Keyboard.Alt || Keyboard.Ctrl)
+                    if (Keyboard.LeftAlt || Keyboard.Ctrl)
                     {
                         break;
                     }
