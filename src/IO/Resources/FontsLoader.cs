@@ -2980,7 +2980,7 @@ namespace ClassicUO.IO.Resources
                             case HTML_TAG_TYPE.HTT_P:
                                 cmdLen = i - j;
 
-                                if (str.Length != 0 && j < cmdLen && str.Length > j && str.Length >= cmdLen)
+                                if (str.Length != 0 && str.Length > j && str.Length >= cmdLen)
                                 {
                                     GetHTMLInfoFromContent(ref info, str, j, cmdLen);
                                 }
@@ -3153,36 +3153,28 @@ namespace ClassicUO.IO.Resources
 
         private unsafe ushort GetWebLinkID(char* link, int linkLength, ref uint color)
         {
-            ushort linkID;
-            KeyValuePair<ushort, WebLink>? l = null;
-
             foreach (KeyValuePair<ushort, WebLink> ll in _webLinks)
             {
                 if (StringHelper.UnsafeCompare(link, ll.Value.Link, linkLength))
                 {
-                    l = ll;
-                    break;
+                    if (ll.Value.IsVisited)
+                    {
+                        color = _visitedWebLinkColor;
+                    }
+
+                    return ll.Key;
                 }
             }
 
-            if (!l.HasValue)
-            {
-                linkID = (ushort) (_webLinks.Count + 1);
+            ushort linkID = (ushort)_webLinks.Count;
 
-                _webLinks[linkID] = new WebLink
-                {
-                    IsVisited = false,
-                    Link = new string(link, 0, linkLength)
-                };
-            }
-            else
+            if (!_webLinks.TryGetValue(linkID, out WebLink webLink))
             {
-                if (l.Value.Value.IsVisited)
-                {
-                    color = _visitedWebLinkColor;
-                }
+                webLink = new WebLink();
+                webLink.IsVisited = false;
+                webLink.Link = new string(link, 0, linkLength);
 
-                linkID = l.Value.Key;
+                _webLinks[linkID] = webLink;
             }
 
             return linkID;
