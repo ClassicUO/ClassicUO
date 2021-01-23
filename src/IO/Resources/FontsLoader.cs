@@ -3030,7 +3030,7 @@ namespace ClassicUO.IO.Resources
                     {
                         c = content[i + start];
 
-                        if (c == ' ' || c == '=' || c == '\\')
+                        if (c == ' ' || c == '=' || c == '\\' || c == '<' || c == '>')
                         {
                             break;
                         }
