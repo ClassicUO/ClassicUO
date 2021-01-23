@@ -33,6 +33,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Text;
 using ClassicUO.Configuration;
 using ClassicUO.Game;
@@ -2375,10 +2376,24 @@ namespace ClassicUO.Network
             ushort hue = 0;
             GraphicEffectBlendMode blendmode = 0;
 
-            if (p.ID != 0x70)
+            if (p.ID == 0x70)
             {
-                hue = (ushort) p.ReadUInt();
-                blendmode = (GraphicEffectBlendMode) (p.ReadUInt() % 7);
+                if (speed > 20)
+                {
+                    speed = (byte)(speed - 20);
+                }
+
+                speed = (byte)(20 - speed);
+            }
+            else
+            {
+                hue = (ushort)p.ReadUInt();
+                blendmode = (GraphicEffectBlendMode)(p.ReadUInt() % 7);
+
+                if (speed > 7)
+                {
+                    speed = 7;
+                }
             }
 
             World.AddEffect
@@ -6637,7 +6652,7 @@ namespace ClassicUO.Network
 
                     case "tooltip":
 
-                        if (World.ClientFeatures.TooltipsEnabled)
+                        //if (World.ClientFeatures.TooltipsEnabled)
                         {
                             string text = null;
 
@@ -6681,6 +6696,8 @@ namespace ClassicUO.Network
                                 {
                                     last.SetTooltip(text);
                                 }
+
+                                last.Priority = ClickPriority.High;
                             }
                         }
 

@@ -237,12 +237,11 @@ namespace ClassicUO.Renderer
 
                 float offsetY = baseOffset.Y + (curOffset.Y + cCrop.Y) * axisDirY;
 
-
                 Draw2D
                 (
                     textureValue,
-                    x + (int) offsetX,
-                    y + (int) offsetY,
+                    x + (int) Math.Round(offsetX),
+                    y + (int) Math.Round(offsetY),
                     cGlyph.X,
                     cGlyph.Y,
                     cGlyph.Width,
@@ -422,6 +421,8 @@ namespace ClassicUO.Renderer
             Texture2D texture,
             int x,
             int y,
+            float width,
+            float height,
             int destX,
             int destY,
             ref Vector3 hue,
@@ -431,21 +432,17 @@ namespace ClassicUO.Renderer
             EnsureSize();
 
             ref PositionNormalTextureColor4 vertex = ref _vertexInfo[_numSprites];
-
-            float ww = texture.Width * 0.5f;
-            float hh = texture.Height * 0.5f;
-
-
-            float startX = x - (destX + ww);
-            float startY = y - (destY + hh);
+            
+            float startX = x - (destX + width);
+            float startY = y - (destY + height);
 
             float sin = (float) Math.Sin(angle);
             float cos = (float) Math.Cos(angle);
 
-            float sinx = sin * ww;
-            float cosx = cos * ww;
-            float siny = sin * hh;
-            float cosy = cos * hh;
+            float sinx = sin * width;
+            float cosx = cos * width;
+            float siny = sin * height;
+            float cosy = cos * height;
 
 
             vertex.Position0.X = startX;

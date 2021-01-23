@@ -270,16 +270,21 @@ namespace ClassicUO.Game.GameObjects
 
                 ref UOFileIndex index = ref ArtLoader.Instance.GetValidRefEntry(graphic + 0x4000);
 
-                int offX = index.Width == 0 ? -44 : index.Width;
-                int offY = index.Height == 0 ? -22 : index.Height;
+                int offX = index.Width;
+                int offY = index.Height;
+
+                offX += 22;
+                offY += 22;
 
                 batcher.DrawSpriteRotated
                 (
                     texture,
-                    x - offX,
-                    y - offY,
-                    destX,
-                    destY,
+                    x,
+                    y,
+                    texture.Width * 0.5f,
+                    texture.Height * 0.5f,
+                    destX - offX,
+                    destY - offY,
                     ref hue,
                     angle
                 );

@@ -417,7 +417,7 @@ namespace ClassicUO.Game.GameObjects
 
             MultiDistanceBonus = Math.Max(Math.Max(Math.Abs(minX), maxX), Math.Max(Math.Abs(minY), maxY));
 
-            //house.Generate();
+            house.Bounds = MultiInfo.Value;
 
             UIManager.GetGump<MiniMapGump>()?.RequestUpdateContents();
 
