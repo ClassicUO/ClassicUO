@@ -218,7 +218,6 @@ namespace ClassicUO.Game.GameObjects
                             v0.Z = half_0;
                             MergeAndNormalize(ref v0, -22.0f, -22.0f, half_1);
 
-
                             ref Vector3 v1 = ref vectBuffer[1 + curJ * 3 + curI * 3 * 4];
                             v1.X = 22;
                             v1.Y = 22;
