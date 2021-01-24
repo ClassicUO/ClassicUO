@@ -206,7 +206,8 @@ namespace ClassicUO.Game.UI.Gumps
                 GameActions.ReplyGump
                 (
                     LocalSerial,
-                    MasterGumpSerial != 0 ? MasterGumpSerial : ServerSerial,
+                    // Seems like MasterGump serial does not work as expected.
+                    /*MasterGumpSerial != 0 ? MasterGumpSerial :*/ ServerSerial,
                     buttonID,
                     switches.ToArray(),
                     entries.ToArray()
