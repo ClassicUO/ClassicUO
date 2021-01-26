@@ -4794,7 +4794,7 @@ namespace ClassicUO.Network
                 entity = World.Items.Get(serial);
             }
 
-            List<string> list = new List<string>();
+            List<(int, string)> list = new List<(int, string)>();
 
             while (p.Position < p.Length)
             {
@@ -4816,6 +4816,10 @@ namespace ClassicUO.Network
 
                 string str = ClilocLoader.Instance.Translate(cliloc, argument, true);
 
+                if (str == null)
+                {
+                    continue;
+                }
 
                 // horrible fix for (Imbued) hue
                 if (Client.Version >= Data.ClientVersion.CV_60143 && cliloc == 1080418)
@@ -4827,9 +4831,7 @@ namespace ClassicUO.Network
 
                 for (int i = 0; i < list.Count; i++)
                 {
-                    string tempstr = list[i];
-
-                    if (tempstr == str)
+                    if (list[i].Item1 == cliloc && string.Equals(list[i].Item2, str, StringComparison.Ordinal))
                     {
                         list.RemoveAt(i);
 
@@ -4837,7 +4839,7 @@ namespace ClassicUO.Network
                     }
                 }
 
-                list.Add(str);
+                list.Add((cliloc, str));
             }
 
             Item container = null;
@@ -4862,8 +4864,10 @@ namespace ClassicUO.Network
 
             if (list.Count != 0)
             {
-                foreach (string str in list)
+                foreach (var s in list)
                 {
+                    string str = s.Item2;
+
                     if (first)
                     {
                         name = str;
