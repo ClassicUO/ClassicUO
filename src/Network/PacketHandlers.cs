@@ -6623,8 +6623,6 @@ namespace ClassicUO.Network
                          string.Equals(entry, "tilepic", StringComparison.InvariantCultureIgnoreCase))
                 {
                     gump.Add(new StaticPic(gparams), page);
-
-                    break;
                 }
                 else if (string.Equals(entry, "noclose", StringComparison.InvariantCultureIgnoreCase))
                 {
