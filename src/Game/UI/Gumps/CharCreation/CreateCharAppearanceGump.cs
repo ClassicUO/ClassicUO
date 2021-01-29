@@ -741,15 +741,193 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
         private bool ValidateCharacter(PlayerMobile character)
         {
-            if (string.IsNullOrEmpty(character.Name))
+            int invalid = Validate(character.Name);
+            if (invalid > 0)
             {
-                UIManager.GetGump<CharCreationGump>()?.ShowMessage(ClilocLoader.Instance.GetString(3000612));
+                UIManager.GetGump<CharCreationGump>()?.ShowMessage(ClilocLoader.Instance.GetString(invalid));
 
                 return false;
             }
 
             return true;
         }
+
+        public static int Validate(string name)
+        {
+            return Validate(name, 2, 16, true, false, true, 1, _SpaceDashPeriodQuote, Client.Version >= ClientVersion.CV_5020 ? _Disallowed : new string[] { }, _StartDisallowed);
+        }
+
+        public static int Validate(string name, int minLength, int maxLength, bool allowLetters, bool allowDigits, bool noExceptionsAtStart, int maxExceptions, char[] exceptions, string[] disallowed, string[] startDisallowed)
+        {
+            if (string.IsNullOrEmpty(name) || name.Length < minLength)
+                return 3000612;
+            else if (name.Length > maxLength)
+                return 3000611;
+
+            int exceptCount = 0;
+
+            name = name.ToLowerInvariant();
+
+            if (!allowLetters || !allowDigits || (exceptions.Length > 0 && (noExceptionsAtStart || maxExceptions < int.MaxValue)))
+            {
+                for (int i = 0; i < name.Length; ++i)
+                {
+                    char c = name[i];
+
+                    if (c >= 'a' && c <= 'z')
+                    {
+                        exceptCount = 0;
+                    }
+                    else if (c >= '0' && c <= '9')
+                    {
+                        if (!allowDigits)
+                            return 3000611;
+
+                        exceptCount = 0;
+                    }
+                    else
+                    {
+                        bool except = false;
+
+                        for (int j = 0; !except && j < exceptions.Length; ++j)
+                            if (c == exceptions[j])
+                                except = true;
+
+                        if (!except || (i == 0 && noExceptionsAtStart))
+                            return 3000611;
+
+                        if (exceptCount++ == maxExceptions)
+                            return 3000611;
+                    }
+                }
+            }
+
+            for (int i = 0; i < disallowed.Length; ++i)
+            {
+                int indexOf = name.IndexOf(disallowed[i]);
+
+                if (indexOf == -1)
+                    continue;
+
+                bool badPrefix = (indexOf == 0);
+
+                for (int j = 0; !badPrefix && j < exceptions.Length; ++j)
+                    badPrefix = (name[indexOf - 1] == exceptions[j]);
+
+                if (!badPrefix)
+                    continue;
+
+                bool badSuffix = ((indexOf + disallowed[i].Length) >= name.Length);
+
+                for (int j = 0; !badSuffix && j < exceptions.Length; ++j)
+                    badSuffix = (name[indexOf + disallowed[i].Length] == exceptions[j]);
+
+                if (badSuffix)
+                    return 3000611;
+            }
+
+            for (int i = 0; i < startDisallowed.Length; ++i)
+            {
+                if (name.StartsWith(startDisallowed[i]))
+                    return 3000611;
+            }
+
+            return 0;
+        }
+
+        private static readonly char[] _SpaceDashPeriodQuote = new char[]
+        {
+            ' ', '-', '.', '\''
+        };
+
+        private static string[] _StartDisallowed = new string[]
+        {
+            "seer",
+            "counselor",
+            "gm",
+            "admin",
+            "lady",
+            "lord"
+        };
+
+        private static readonly string[] _Disallowed = new string[]
+        {
+            "jigaboo",
+            "chigaboo",
+            "wop",
+            "kyke",
+            "kike",
+            "tit",
+            "spic",
+            "prick",
+            "piss",
+            "lezbo",
+            "lesbo",
+            "felatio",
+            "dyke",
+            "dildo",
+            "chinc",
+            "chink",
+            "cunnilingus",
+            "cum",
+            "cocksucker",
+            "cock",
+            "clitoris",
+            "clit",
+            "ass",
+            "hitler",
+            "penis",
+            "nigga",
+            "nigger",
+            "klit",
+            "kunt",
+            "jiz",
+            "jism",
+            "jerkoff",
+            "jackoff",
+            "goddamn",
+            "fag",
+            "blowjob",
+            "bitch",
+            "asshole",
+            "dick",
+            "pussy",
+            "snatch",
+            "cunt",
+            "twat",
+            "shit",
+            "fuck",
+            "tailor",
+            "smith",
+            "scholar",
+            "rogue",
+            "novice",
+            "neophyte",
+            "merchant",
+            "medium",
+            "master",
+            "mage",
+            "lb",
+            "journeyman",
+            "grandmaster",
+            "fisherman",
+            "expert",
+            "chef",
+            "carpenter",
+            "british",
+            "blackthorne",
+            "blackthorn",
+            "beggar",
+            "archer",
+            "apprentice",
+            "adept",
+            "gamemaster",
+            "frozen",
+            "squelched",
+            "invulnerable",
+            "osi",
+            "origin"
+        };
 
         private RaceType GetSelectedRace()
         {
