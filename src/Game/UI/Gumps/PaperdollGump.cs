@@ -611,15 +611,11 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (LocalSerial == World.Player)
             {
-                LocalSerial = World.Player;
                 BuildGump();
 
-                Client.Game.GetScene<GameScene>()?.DoubleClickDelayed(LocalSerial);
+                GameActions.DoubleClick(0x8000_0000 | LocalSerial);
 
-                //GameActions.OpenPaperdoll(World.Player);
                 IsMinimized = bool.Parse(xml.GetAttribute("isminimized"));
-
-                //Dispose();
             }
             else
             {
