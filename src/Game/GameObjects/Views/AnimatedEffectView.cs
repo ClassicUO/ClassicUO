@@ -145,6 +145,11 @@ namespace ClassicUO.Game.GameObjects
 
             ShaderHueTranslator.GetHueVector(ref HueVector, hue, data.IsPartialHue, data.IsTranslucent ? .5f : 0);
 
+            if (data.IsLight)
+            {
+                HueVector.Y = ShaderHueTranslator.SHADER_LIGHTS;
+            }
+            
             switch (Blend)
             {
                 case GraphicEffectBlendMode.Multiply:
