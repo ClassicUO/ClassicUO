@@ -619,7 +619,7 @@ namespace ClassicUO.Game.UI.Gumps
                 //GameActions.OpenPaperdoll(World.Player);
                 IsMinimized = bool.Parse(xml.GetAttribute("isminimized"));
 
-                Dispose();
+                //Dispose();
             }
             else
             {

@@ -64,7 +64,7 @@ namespace ClassicUO.Game.Managers
                 {
                     if (SerialHelper.IsMobile(serial))
                     {
-                        GameActions.OpenPaperdoll(serial);
+                        GameActions.OpenPaperdoll(serial, true);
                     }
                     else
                     {

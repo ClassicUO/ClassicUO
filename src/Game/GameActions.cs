@@ -72,11 +72,11 @@ namespace ClassicUO.Game
             Socket.Send(new PChangeWarMode(war));
         }
 
-        public static void OpenPaperdoll(uint serial)
+        public static void OpenPaperdoll(uint serial, bool force = false)
         {
             PaperDollGump paperDollGump = UIManager.GetGump<PaperDollGump>(serial);
 
-            if (paperDollGump == null)
+            if (paperDollGump == null || force)
             {
                 DoubleClick(serial | 0x80000000);
             }
