@@ -462,14 +462,21 @@ namespace ClassicUO.Network
                 return;
             }
 
-            if (_tcpClient.Available <= 0)
+            if (!_netStream.DataAvailable)
+            {
+                return;
+            }
+
+            int available = _tcpClient.Available;
+
+            if (available <= 0)
             {
                 return;
             }
 
             try
             {
-                int received = _netStream.Read(_recvBuffer, 0, _tcpClient.Available);
+                 int received = _netStream.Read(_recvBuffer, 0, available);
 
                 if (received > 0)
                 {
