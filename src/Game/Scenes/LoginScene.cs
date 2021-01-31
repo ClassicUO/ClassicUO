@@ -554,7 +554,7 @@ namespace ClassicUO.Game.Scenes
         {
             Log.Warn("Disconnected (login socket)!");
 
-            if (e > 0)
+            if (e != 0)
             {
                 Characters = null;
                 DisposeAllServerEntries();
