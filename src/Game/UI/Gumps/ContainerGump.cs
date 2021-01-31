@@ -424,38 +424,6 @@ namespace ClassicUO.Game.UI.Gumps
             ItemsOnAdded();
         }
 
-        public override void Save(BinaryWriter writer)
-        {
-            base.Save(writer);
-            writer.Write(LocalSerial);
-            writer.Write(Graphic);
-            writer.Write(IsMinimized);
-        }
-
-        public override void Restore(BinaryReader reader)
-        {
-            base.Restore(reader);
-
-            if (Profile.GumpsVersion == 2)
-            {
-                reader.ReadUInt32();
-                _isMinimized = reader.ReadBoolean();
-            }
-
-            LocalSerial = reader.ReadUInt32();
-
-            Client.Game.GetScene<GameScene>()?.DoubleClickDelayed(LocalSerial);
-
-            reader.ReadUInt16();
-
-            if (Profile.GumpsVersion >= 3)
-            {
-                _isMinimized = reader.ReadBoolean();
-            }
-
-            Dispose();
-        }
-
         public override void Save(XmlTextWriter writer)
         {
             base.Save(writer);

@@ -235,50 +235,6 @@ namespace ClassicUO.Game.UI.Gumps
             SetInScreen();
         }
 
-        public override void Save(BinaryWriter writer)
-        {
-            base.Save(writer);
-
-            writer.Write((byte) 2);
-            writer.Write(_rows);
-            writer.Write(_columns);
-            writer.Write(_rectSize);
-
-            CounterItem[] controls = GetControls<CounterItem>();
-
-            writer.Write(controls.Length);
-
-            foreach (CounterItem c in controls)
-            {
-                writer.Write(c.Graphic);
-                writer.Write(c.Hue);
-            }
-        }
-
-        public override void Restore(BinaryReader reader)
-        {
-            base.Restore(reader);
-
-            byte version = reader.ReadByte();
-            _rows = reader.ReadInt32();
-            _columns = reader.ReadInt32();
-            _rectSize = reader.ReadInt32();
-
-            int count = reader.ReadInt32();
-
-            BuildGump();
-
-            CounterItem[] items = GetControls<CounterItem>();
-
-            for (int i = 0; i < count; i++)
-            {
-                items[i].SetGraphic(reader.ReadUInt16(), version > 1 ? reader.ReadUInt16() : (ushort) 0);
-            }
-
-            IsEnabled = IsVisible = ProfileManager.CurrentProfile.CounterBarEnabled;
-        }
-
-
         public override void Save(XmlTextWriter writer)
         {
             base.Save(writer);

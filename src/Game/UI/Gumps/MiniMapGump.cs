@@ -64,19 +64,6 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override GumpType GumpType => GumpType.MiniMap;
 
-        public override void Save(BinaryWriter writer)
-        {
-            base.Save(writer);
-            writer.Write(_useLargeMap);
-        }
-
-        public override void Restore(BinaryReader reader)
-        {
-            base.Restore(reader);
-            _useLargeMap = reader.ReadBoolean();
-            CreateMap();
-        }
-
         public override void Save(XmlTextWriter writer)
         {
             base.Save(writer);

@@ -165,49 +165,6 @@ namespace ClassicUO.Game.UI.Gumps
             return false;
         }
 
-        public override void Save(BinaryWriter writer)
-        {
-            base.Save(writer);
-            writer.Write(0);         //version - 4
-            writer.Write(_spell.ID); // 4
-        }
-
-        public override void Restore(BinaryReader reader)
-        {
-            base.Restore(reader);
-            int version = reader.ReadInt32();
-            int id;
-
-            if (version > 0)
-            {
-                string name = reader.ReadUTF8String(version);
-                id = reader.ReadInt32();
-                int gumpID = reader.ReadInt32();
-                int smallGumpID = reader.ReadInt32();
-                int reagsCount = reader.ReadInt32();
-
-                Reagents[] reagents = new Reagents[reagsCount];
-
-                for (int i = 0; i < reagsCount; i++)
-                {
-                    reagents[i] = (Reagents) reader.ReadInt32();
-                }
-
-                int manaCost = reader.ReadInt32();
-                int minSkill = reader.ReadInt32();
-                string powerWord = reader.ReadUTF8String(reader.ReadInt32());
-                int tithingCost = reader.ReadInt32();
-            }
-            else
-            {
-                id = reader.ReadInt32();
-            }
-
-            _spell = SpellDefinition.FullIndexGetSpell(id);
-            BuildGump();
-        }
-
-
         public override void Save(XmlTextWriter writer)
         {
             base.Save(writer);
