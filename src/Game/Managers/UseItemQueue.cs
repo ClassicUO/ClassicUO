@@ -64,12 +64,10 @@ namespace ClassicUO.Game.Managers
                 {
                     if (SerialHelper.IsMobile(serial))
                     {
-                        GameActions.OpenPaperdoll(serial);
+                        serial |= 0x8000_0000;
                     }
-                    else
-                    {
-                        GameActions.DoubleClick(serial);
-                    }
+
+                    GameActions.DoubleClick(serial);
                 }
             }
         }
