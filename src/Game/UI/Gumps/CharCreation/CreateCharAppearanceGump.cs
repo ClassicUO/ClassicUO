@@ -47,16 +47,14 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
     internal class CreateCharAppearanceGump : Gump
     {
         private PlayerMobile _character;
-        private readonly RadioButton _elfRadio;
-        private readonly RadioButton _femaleRadio;
-        private readonly RadioButton _gargoyleRadio;
+        private readonly Button _humanRadio, _elfRadio, _gargoyleRadio;
+        private readonly Button _maleRadio, _femaleRadio;
         private Combobox _hairCombobox, _facialCombobox;
         private Label _hairLabel, _facialLabel;
-        private readonly RadioButton _humanRadio;
-        private readonly RadioButton _maleRadio;
         private readonly StbTextBox _nameTextBox;
         private PaperDollInteractable _paperDoll;
         private readonly Button _nextButton;
+        private bool _isFemaleSelected;
         private readonly Dictionary<Layer, Tuple<int, ushort>> CurrentColorOption = new Dictionary<Layer, Tuple<int, ushort>>();
         private readonly Dictionary<Layer, int> CurrentOption = new Dictionary<Layer, int>
         {
@@ -110,25 +108,21 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             // Male/Female Radios
             Add
             (
-                _maleRadio = new RadioButton(0, 0x0768, 0x0767)
+                _maleRadio = new Button((int)Buttons.MaleButton, 0x0768, 0x0767)
                 {
-                    X = 425, Y = 435
+                    X = 425, Y = 435, ButtonAction = ButtonAction.Activate
                 },
                 1
             );
-
-            _maleRadio.ValueChanged += Genre_ValueChanged;
 
             Add
             (
-                _femaleRadio = new RadioButton(0, 0x0768, 0x0767)
+                _femaleRadio = new Button((int)Buttons.FemaleButton, 0x0768, 0x0767)
                 {
-                    X = 425, Y = 455
+                    X = 425, Y = 455, ButtonAction = ButtonAction.Activate
                 },
                 1
             );
-
-            _femaleRadio.ValueChanged += Genre_ValueChanged;
 
             Add
             (
@@ -169,9 +163,9 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             // Races
             Add
             (
-                _humanRadio = new RadioButton(1, 0x0768, 0x0767)
+                _humanRadio = new Button((int)Buttons.HumanButton, 0x0768, 0x0767)
                 {
-                    X = 180, Y = 435
+                    X = 180, Y = 435, ButtonAction = ButtonAction.Activate
                 },
                 1
             );
@@ -185,13 +179,11 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                 1
             );
 
-            _humanRadio.ValueChanged += Race_ValueChanged;
-
             Add
             (
-                _elfRadio = new RadioButton(1, 0x0768, 0x0767)
+                _elfRadio = new Button((int)Buttons.ElfButton, 0x0768, 0x0767, 0x0768)
                 {
-                    X = 180, Y = 455
+                    X = 180, Y = 455, ButtonAction = ButtonAction.Activate
                 },
                 1
             );
@@ -205,15 +197,13 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                 1
             );
 
-            _elfRadio.ValueChanged += Race_ValueChanged;
-
             if (Client.Version >= ClientVersion.CV_60144)
             {
                 Add
                 (
-                    _gargoyleRadio = new RadioButton(1, 0x0768, 0x0767)
+                    _gargoyleRadio = new Button((int)Buttons.GargoyleButton, 0x0768, 0x0767)
                     {
-                        X = 60, Y = 435
+                        X = 60, Y = 435, ButtonAction = ButtonAction.Activate
                     },
                     1
                 );
@@ -226,8 +216,6 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                     },
                     1
                 );
-
-                _gargoyleRadio.ValueChanged += Race_ValueChanged;
             }
 
             // Prev/Next
@@ -249,8 +237,11 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                 1
             );
 
-            _maleRadio.IsChecked = true;
-            _humanRadio.IsChecked = true;
+            _maleRadio.IsClicked = true;
+            _humanRadio.IsClicked = true;
+
+            HandleGenreChange();
+            HandleRaceChanged();
         }
 
         private void CreateCharacter(bool isFemale, RaceType race)
@@ -361,14 +352,13 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
         private void UpdateEquipments()
         {
-            bool isFemale = _femaleRadio.IsChecked;
             RaceType race = GetSelectedRace();
             Layer layer;
             CharacterCreationValues.ComboContent content;
 
             _character.Hue = CurrentColorOption[Layer.Invalid].Item2;
 
-            if (!isFemale && race != RaceType.ELF)
+            if (!_isFemaleSelected && race != RaceType.ELF)
             {
                 layer = Layer.Beard;
                 content = CharacterCreationValues.GetFacialHairComboContent(race);
@@ -379,14 +369,14 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             }
 
             layer = Layer.Hair;
-            content = CharacterCreationValues.GetHairComboContent(isFemale, race);
+            content = CharacterCreationValues.GetHairComboContent(_isFemaleSelected, race);
 
             Item it = CreateItem(content.GetGraphic(CurrentOption[layer]), CurrentColorOption[layer].Item2, layer);
 
             _character.PushToBack(it);
         }
 
-        private void Race_ValueChanged(object sender, EventArgs e)
+        private void HandleRaceChanged()
         {
             CurrentColorOption.Clear();
             HandleGenreChange();
@@ -415,14 +405,8 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             }
         }
 
-        private void Genre_ValueChanged(object sender, EventArgs e)
-        {
-            HandleGenreChange();
-        }
-
         private void HandleGenreChange()
         {
-            bool isFemale = _femaleRadio.IsChecked;
             RaceType race = GetSelectedRace();
             CurrentOption[Layer.Beard] = 0;
             CurrentOption[Layer.Hair] = 1;
@@ -450,7 +434,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             }
 
             // Hair
-            CharacterCreationValues.ComboContent content = CharacterCreationValues.GetHairComboContent(isFemale, race);
+            CharacterCreationValues.ComboContent content = CharacterCreationValues.GetHairComboContent(_isFemaleSelected, race);
 
             Add
             (
@@ -477,7 +461,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             _hairCombobox.OnOptionSelected += Hair_OnOptionSelected;
 
             // Facial Hair
-            if (!isFemale && race != RaceType.ELF)
+            if (!_isFemaleSelected && race != RaceType.ELF)
             {
                 content = CharacterCreationValues.GetFacialHairComboContent(race);
 
@@ -566,7 +550,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                 pallet.Length >> 3
             );
 
-            if (!isFemale && race != RaceType.ELF)
+            if (!_isFemaleSelected && race != RaceType.ELF)
             {
                 // Facial
                 pallet = CharacterCreationValues.GetHairPallet(race);
@@ -583,7 +567,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                 );
             }
 
-            CreateCharacter(isFemale, race);
+            CreateCharacter(_isFemaleSelected, race);
 
             UpdateEquipments();
 
@@ -696,27 +680,69 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             switch ((Buttons) buttonID)
             {
                 case Buttons.FemaleButton:
-                    _femaleRadio.IsChecked = true;
+                    _femaleRadio.IsClicked = true;
+                    _maleRadio.IsClicked = false;
+                    _isFemaleSelected = true;
+                    HandleGenreChange();
 
                     break;
 
                 case Buttons.MaleButton:
-                    _maleRadio.IsChecked = true;
+                    _maleRadio.IsClicked = true;
+                    _femaleRadio.IsClicked = false;
+                    _isFemaleSelected = false;
+                    HandleGenreChange();
 
                     break;
 
                 case Buttons.HumanButton:
-                    _humanRadio.IsChecked = true;
 
+                    if (!_humanRadio.IsClicked)
+                    {
+                        _humanRadio.IsClicked = true;
+
+                        if (_elfRadio != null)
+                        {
+                            _elfRadio.IsClicked = false;
+                        }
+
+                        if (_gargoyleRadio != null)
+                        {
+                            _gargoyleRadio.IsClicked = false;
+                        }
+
+                        HandleRaceChanged();
+                    }
+                   
                     break;
 
                 case Buttons.ElfButton:
-                    _elfRadio.IsChecked = true;
 
+                    if (!_elfRadio.IsClicked)
+                    {
+                        _elfRadio.IsClicked = true;
+                        _humanRadio.IsClicked = false;
+
+                        if (_gargoyleRadio != null)
+                        {
+                            _gargoyleRadio.IsClicked = false;
+                        }
+
+                        HandleRaceChanged();
+                    }
+                    
                     break;
 
                 case Buttons.GargoyleButton:
-                    _gargoyleRadio.IsChecked = true;
+                   
+                    if (!_gargoyleRadio.IsClicked)
+                    {
+                        _gargoyleRadio.IsClicked = true;
+                        _elfRadio.IsClicked = false;
+                        _humanRadio.IsClicked = false;
+
+                        HandleRaceChanged();
+                    }
 
                     break;
 
@@ -931,17 +957,17 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
         private RaceType GetSelectedRace()
         {
-            if (_humanRadio.IsChecked)
+            if (_humanRadio.IsClicked)
             {
                 return RaceType.HUMAN;
             }
 
-            if (_elfRadio != null && _elfRadio.IsChecked)
+            if (_elfRadio != null && _elfRadio.IsClicked)
             {
                 return RaceType.ELF;
             }
 
-            if (_gargoyleRadio != null && _gargoyleRadio.IsChecked)
+            if (_gargoyleRadio != null && _gargoyleRadio.IsClicked)
             {
                 return RaceType.GARGOYLE;
             }
