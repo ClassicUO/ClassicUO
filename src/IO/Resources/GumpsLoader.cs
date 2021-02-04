@@ -165,7 +165,7 @@ namespace ClassicUO.IO.Resources
             return texture;
         }
 
-        public unsafe uint[] GetGumpPixels(uint index, out int width, out int height)
+        private unsafe uint[] GetGumpPixels(uint index, out int width, out int height)
         {
             ref UOFileIndex entry = ref GetValidRefEntry((int) index);
 
