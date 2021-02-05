@@ -151,23 +151,6 @@ namespace ClassicUO.Game.UI.Gumps
             UpdateElements();
         }
 
-        public override void Save(BinaryWriter writer)
-        {
-            base.Save(writer);
-            writer.Write(_graphic);
-            writer.Write((byte) _direction);
-        }
-
-        public override void Restore(BinaryReader reader)
-        {
-            base.Restore(reader);
-
-            _graphic = reader.ReadUInt16();
-            _direction = (GumpDirection) reader.ReadByte();
-            BuildGump();
-        }
-
-
         public override void Save(XmlTextWriter writer)
         {
             base.Save(writer);

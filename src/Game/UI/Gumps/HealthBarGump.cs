@@ -116,29 +116,6 @@ namespace ClassicUO.Game.UI.Gumps
             base.Dispose();
         }
 
-        public override void Save(BinaryWriter writer)
-        {
-            base.Save(writer);
-            writer.Write(LocalSerial);
-        }
-
-        public override void Restore(BinaryReader reader)
-        {
-            base.Restore(reader);
-            LocalSerial = reader.ReadUInt32();
-
-            if (LocalSerial == World.Player)
-            {
-                _name = World.Player.Name;
-                BuildGump();
-            }
-            else
-            {
-                Dispose();
-            }
-        }
-
-
         public override void Save(XmlTextWriter writer)
         {
             base.Save(writer);
@@ -148,7 +125,6 @@ namespace ClassicUO.Game.UI.Gumps
                 writer.WriteAttributeString("name", _name);
             }
         }
-
 
         public override void Restore(XmlElement xml)
         {

@@ -32,7 +32,7 @@
 
 using System;
 using System.Runtime.InteropServices;
-using SDL2;
+using ClassicUO.Utility.Platforms;
 
 namespace ClassicUO.Utility
 {
@@ -44,33 +44,22 @@ namespace ClassicUO.Utility
 
         static ZLib()
         {
-            switch (SDL.SDL_GetPlatform())
+            if(Environment.Is64BitProcess) 
             {
-                case "Mac OS X":
-                case "Linux":
-                    if (Environment.Is64BitProcess)
-                    {
-                        _compressor = new CompressorUnix64();
-                    }
-                    else
-                    {
-                        goto default;
-                    }
-
-                    break;
-
-                case "Windows" when Environment.Is64BitProcess:
+                if(PlatformHelper.IsWindows)
+                {
                     _compressor = new Compressor64();
-
-                    break;
-
-                default:
-                    _compressor = new ManagedUniversal();
-
-                    break;
+                }
+                else
+                {
+                    _compressor = new CompressorUnix64();
+                }
+            }
+            else
+            {
+                _compressor = new ManagedUniversal();
             }
         }
-
 
         public static void Decompress(byte[] source, int offset, byte[] dest, int length)
         {

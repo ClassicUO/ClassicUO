@@ -111,33 +111,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override GumpType GumpType => GumpType.SpellBook;
 
-        public override void Save(BinaryWriter writer)
-        {
-            base.Save(writer);
-            writer.Write(LocalSerial);
-            writer.Write(IsMinimized);
-        }
-
-        public override void Restore(BinaryReader reader)
-        {
-            base.Restore(reader);
-
-            if (Profile.GumpsVersion == 2)
-            {
-                reader.ReadUInt32();
-                IsMinimized = reader.ReadBoolean();
-            }
-
-            Client.Game.GetScene<GameScene>().DoubleClickDelayed(reader.ReadUInt32());
-
-            if (Profile.GumpsVersion >= 3)
-            {
-                reader.ReadBoolean();
-            }
-
-            Dispose();
-        }
-
+ 
         public override void Save(XmlTextWriter writer)
         {
             base.Save(writer);

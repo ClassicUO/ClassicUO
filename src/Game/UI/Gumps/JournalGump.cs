@@ -309,31 +309,6 @@ namespace ClassicUO.Game.UI.Gumps
             );
         }
 
-        public override void Save(BinaryWriter writer)
-        {
-            base.Save(writer);
-            writer.Write(_background.SpecialHeight);
-            writer.Write(IsMinimized);
-        }
-
-        public override void Restore(BinaryReader reader)
-        {
-            base.Restore(reader);
-
-            if (Profile.GumpsVersion == 2)
-            {
-                reader.ReadUInt32();
-                _isMinimized = reader.ReadBoolean();
-            }
-
-            _background.Height = _background.SpecialHeight = reader.ReadInt32();
-
-            if (Profile.GumpsVersion >= 3)
-            {
-                _isMinimized = reader.ReadBoolean();
-            }
-        }
-
         public override void Save(XmlTextWriter writer)
         {
             base.Save(writer);
