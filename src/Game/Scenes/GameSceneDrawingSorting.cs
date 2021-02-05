@@ -366,7 +366,7 @@ namespace ClassicUO.Game.Scenes
 
                         itemData = ref loader.StaticData[graphic];
 
-                        if (itemData.IsFoliage && !itemData.IsMultiMovable && World.Season >= Season.Winter)
+                        if (itemData.IsFoliage && !itemData.IsMultiMovable && World.Season >= Season.Winter && !(obj is Multi))
                         {
                             continue;
                         }
