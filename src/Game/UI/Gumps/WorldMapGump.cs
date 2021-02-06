@@ -1535,7 +1535,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             if (_showMarkers && _mapMarkersLoaded)
             {
-                WMapMarker markerHovered = null;
+                WMapMarker lastMarker = null;
 
                 foreach (WMapMarkerFile file in _markerFiles)
                 {
@@ -1557,91 +1557,14 @@ namespace ClassicUO.Game.UI.Gumps
                             Zoom
                         ))
                         {
-                            markerHovered = marker;
+                            lastMarker = marker;
                         }
                     }
                 }
 
-                if (markerHovered != null)
+                if (lastMarker != null)
                 {
-                    int sx = markerHovered.X - _center.X;
-                    int sy = markerHovered.Y - _center.Y;
-
-                    (int rotX, int rotY) = RotatePoint
-                    (
-                        sx,
-                        sy,
-                        Zoom,
-                        1,
-                        _flipMap ? 45f : 0f
-                    );
-
-                    rotX += gX + halfWidth;
-                    rotY += gY + halfHeight;
-
-                    Vector2 size = _markerFont.MeasureString(markerHovered.Name);
-
-                    if (rotX + size.X / 2 > gX + Width - 8)
-                    {
-                        rotX = gX + Width - 8 - (int)(size.X / 2);
-                    }
-                    else if (rotX - size.X / 2 < gX)
-                    {
-                        rotX = gX + (int)(size.X / 2);
-                    }
-
-                    if (rotY + size.Y > gY + Height)
-                    {
-                        rotY = gY + Height - (int)size.Y;
-                    }
-                    else if (rotY - size.Y < gY)
-                    {
-                        rotY = gY + (int)size.Y;
-                    }
-
-                    int xx = (int)(rotX - size.X / 2);
-                    int yy = (int)(rotY - size.Y - 5);
-
-                    ResetHueVector();
-
-                    HueVector.X = 0;
-                    HueVector.Y = 1;
-                    HueVector.Z = 0.5f;
-
-                    batcher.Draw2D
-                    (
-                        SolidColorTextureCache.GetTexture(Color.Black),
-                        xx - 2,
-                        yy - 2,
-                        size.X + 4,
-                        size.Y + 4,
-                        ref HueVector
-                    );
-
-                    ResetHueVector();
-
-                    HueVector.X = 0;
-                    HueVector.Y = 1;
-
-                    batcher.DrawString
-                    (
-                        _markerFont,
-                        markerHovered.Name,
-                        xx + 1,
-                        yy + 1,
-                        ref HueVector
-                    );
-
-                    ResetHueVector();
-
-                    batcher.DrawString
-                    (
-                        _markerFont,
-                        markerHovered.Name,
-                        xx,
-                        yy,
-                        ref HueVector
-                    );
+                    DrawMarkerString(batcher, lastMarker, gX, gY, halfWidth, halfHeight);
                 }
             }
 
@@ -2076,6 +1999,7 @@ namespace ClassicUO.Game.UI.Gumps
             }
 
             bool showMarkerName = _showMarkerNames && !string.IsNullOrEmpty(marker.Name) && _zoomIndex > 5;
+            bool drawSingleName = false;
 
             if (_zoomIndex < marker.ZoomIndex || !_showMarkerIcons || marker.MarkerIcon == null)
             {
@@ -2089,25 +2013,118 @@ namespace ClassicUO.Game.UI.Gumps
                     ref HueVector
                 );
 
-                if (Mouse.Position.X >= rotX - DOT_SIZE && Mouse.Position.X <= rotX + DOT_SIZE_HALF && Mouse.Position.Y >= rotY - DOT_SIZE && Mouse.Position.Y <= rotY + DOT_SIZE_HALF)
+                if (Mouse.Position.X >= rotX - DOT_SIZE && Mouse.Position.X <= rotX + DOT_SIZE_HALF &&
+                    Mouse.Position.Y >= rotY - DOT_SIZE && Mouse.Position.Y <= rotY + DOT_SIZE_HALF)
                 {
-                    showMarkerName = true;
+                    drawSingleName = true;
                 }
             }
             else
             {
                 batcher.Draw2D(marker.MarkerIcon, rotX - (marker.MarkerIcon.Width >> 1), rotY - (marker.MarkerIcon.Height >> 1), ref HueVector);
-
+               
                 if (!showMarkerName)
                 {
-                    if (Mouse.Position.X >= rotX - (marker.MarkerIcon.Width >> 1) && Mouse.Position.X <= rotX + (marker.MarkerIcon.Width >> 1) && Mouse.Position.Y >= rotY - (marker.MarkerIcon.Height >> 1) && Mouse.Position.Y <= rotY + (marker.MarkerIcon.Height >> 1))
+                    if (Mouse.Position.X >= rotX - (marker.MarkerIcon.Width >> 1) &&
+                        Mouse.Position.X <= rotX + (marker.MarkerIcon.Width >> 1) &&
+                        Mouse.Position.Y >= rotY - (marker.MarkerIcon.Height >> 1) &&
+                        Mouse.Position.Y <= rotY + (marker.MarkerIcon.Height >> 1))
                     {
-                        showMarkerName = true;
+                        drawSingleName = true;
                     }
                 }
             }
 
-            return showMarkerName;
+            if (showMarkerName)
+            {
+                DrawMarkerString(batcher, marker, x, y, width, height);
+
+                drawSingleName = false;
+            }
+
+            return drawSingleName;
+        }
+
+        private void DrawMarkerString(UltimaBatcher2D batcher, WMapMarker marker, int x, int y, int width, int height)
+        {
+            int sx = marker.X - _center.X;
+            int sy = marker.Y - _center.Y;
+
+            (int rotX, int rotY) = RotatePoint
+            (
+                sx,
+                sy,
+                Zoom,
+                1,
+                _flipMap ? 45f : 0f
+            );
+
+            rotX += x + width;
+            rotY += y + height;
+
+            Vector2 size = _markerFont.MeasureString(marker.Name);
+
+            if (rotX + size.X / 2 > x + Width - 8)
+            {
+                rotX = x + Width - 8 - (int)(size.X / 2);
+            }
+            else if (rotX - size.X / 2 < x)
+            {
+                rotX = x + (int)(size.X / 2);
+            }
+
+            if (rotY + size.Y > y + Height)
+            {
+                rotY = y + Height - (int)size.Y;
+            }
+            else if (rotY - size.Y < y)
+            {
+                rotY = y + (int)size.Y;
+            }
+
+            int xx = (int)(rotX - size.X / 2);
+            int yy = (int)(rotY - size.Y - 5);
+
+            ResetHueVector();
+
+            HueVector.X = 0;
+            HueVector.Y = 1;
+            HueVector.Z = 0.5f;
+
+            batcher.Draw2D
+            (
+                SolidColorTextureCache.GetTexture(Color.Black),
+                xx - 2,
+                yy - 2,
+                size.X + 4,
+                size.Y + 4,
+                ref HueVector
+            );
+
+            ResetHueVector();
+
+            HueVector.X = 0;
+            HueVector.Y = 1;
+
+            batcher.DrawString
+            (
+                _markerFont,
+                marker.Name,
+                xx + 1,
+                yy + 1,
+                ref HueVector
+            );
+
+            ResetHueVector();
+
+            batcher.DrawString
+            (
+                _markerFont,
+                marker.Name,
+                xx,
+                yy,
+                ref HueVector
+            );
         }
 
         private void DrawMulti
