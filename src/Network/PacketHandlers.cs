@@ -4533,19 +4533,25 @@ namespace ClassicUO.Network
                     ushort spell = p.ReadUShort();
                     bool active = p.ReadBool();
 
-                    UseSpellButtonGump g = UIManager.GetGump<UseSpellButtonGump>(spell);
-
-                    if (g != null)
+                    foreach (Gump g in UIManager.Gumps)
                     {
-                        if (active)
+                        if (!g.IsDisposed && g.IsVisible)
                         {
-                            g.Hue = 38;
-                            World.ActiveSpellIcons.Add(spell);
-                        }
-                        else
-                        {
-                            g.Hue = 0;
-                            World.ActiveSpellIcons.Remove(spell);
+                            if (g is UseSpellButtonGump spellButton && spellButton.SpellID == spell)
+                            {
+                                if (active)
+                                {
+                                    spellButton.Hue = 38;
+                                    World.ActiveSpellIcons.Add(spell);
+                                }
+                                else
+                                {
+                                    spellButton.Hue = 0;
+                                    World.ActiveSpellIcons.Remove(spell);
+                                }
+
+                                break;
+                            }
                         }
                     }
 
