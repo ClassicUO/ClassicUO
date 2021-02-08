@@ -1966,8 +1966,8 @@ namespace ClassicUO.Game.UI.Gumps
 
                             MacroButtonGump macroButtonGump = new MacroButtonGump(control.Macro, Mouse.Position.X, Mouse.Position.Y);
 
-                            macroButtonGump.X = Mouse.Position.X + (macroButtonGump.Width >> 1);
-                            macroButtonGump.Y = Mouse.Position.Y + (macroButtonGump.Height >> 1);
+                            macroButtonGump.X = Mouse.LClickPosition.X + (macroButtonGump.Width >> 1);
+                            macroButtonGump.Y = Mouse.LClickPosition.Y + (macroButtonGump.Height >> 1);
 
                             UIManager.Add(macroButtonGump);
 
@@ -2075,8 +2075,8 @@ namespace ClassicUO.Game.UI.Gumps
 
                     MacroButtonGump macroButtonGump = new MacroButtonGump(m, Mouse.Position.X, Mouse.Position.Y);
 
-                    macroButtonGump.X = Mouse.Position.X + (macroButtonGump.Width >> 1);
-                    macroButtonGump.Y = Mouse.Position.Y + (macroButtonGump.Height >> 1);
+                    macroButtonGump.X = Mouse.LClickPosition.X + (macroButtonGump.Width >> 1);
+                    macroButtonGump.Y = Mouse.LClickPosition.Y + (macroButtonGump.Height >> 1);
 
                     UIManager.Add(macroButtonGump);
 
