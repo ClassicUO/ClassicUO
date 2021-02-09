@@ -77,6 +77,7 @@ namespace ClassicUO.Game.UI.Gumps
         private DataBox _databox;
         private HSliderBar _delay_before_display_tooltip, _tooltip_zoom, _tooltip_background_opacity;
         private Combobox _dragSelectModifierKey;
+        private Combobox _backpackStyle;
 
 
         //counters
@@ -3133,6 +3134,20 @@ namespace ClassicUO.Game.UI.Gumps
             int startX = 5;
             int startY = 5;
 
+            _backpackStyle = AddCombobox
+            (
+                rightArea,
+                new[]
+                {
+                    ResGumps.BackpackStyle_Default, ResGumps.BackpackStyle_Suede,
+                    ResGumps.BackpackStyle_PolarBear, ResGumps.BackpackStyle_GhoulSkin
+                },
+                _currentProfile.BackpackStyle,
+                startX,
+                startY,
+                200
+            );
+
             Label text = AddLabel(rightArea, ResGumps.ContainerScale, startX, startY);
             startX += text.Width + 5;
 
@@ -3495,6 +3510,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _highlightContainersWhenMouseIsOver.IsChecked = false;
                     _overrideContainerLocation.IsChecked = false;
                     _overrideContainerLocationSetting.SelectedIndex = 0;
+                    _backpackStyle.SelectedIndex = 0;
 
                     break;
 
@@ -3920,6 +3936,8 @@ namespace ClassicUO.Game.UI.Gumps
             _currentProfile.OverrideContainerLocationSetting = _overrideContainerLocationSetting.SelectedIndex;
 
             _currentProfile.ShowTargetRangeIndicator = _showTargetRangeIndicator.IsChecked;
+
+            _currentProfile.BackpackStyle = _backpackStyle.SelectedIndex;
 
 
             bool updateHealthBars = _currentProfile.CustomBarsToggled != _customBars.IsChecked;
