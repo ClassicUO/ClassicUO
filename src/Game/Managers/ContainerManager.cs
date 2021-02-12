@@ -1018,7 +1018,7 @@ namespace ClassicUO.Game.Managers
                 159,
                 0x775F,
                 105,
-                172
+                178
             );
 
             _data[0x7760] = new ContainerData
@@ -1032,7 +1032,7 @@ namespace ClassicUO.Game.Managers
                 159,
                 0x7761,
                 105,
-                172
+                178
             );
 
             _data[0x7762] = new ContainerData
@@ -1046,7 +1046,7 @@ namespace ClassicUO.Game.Managers
                 159,
                 0x7763,
                 105,
-                172
+                178
             );
 
             _data[0x777A] = new ContainerData

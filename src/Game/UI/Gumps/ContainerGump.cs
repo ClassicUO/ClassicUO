@@ -74,6 +74,44 @@ namespace ClassicUO.Game.UI.Gumps
 
             Graphic = gumpid;
 
+            // New Backpack gumps. Client Version 7.0.53.1
+            if (item == World.Player.FindItemByLayer(Layer.Backpack) && Client.Version >= ClassicUO.Data.ClientVersion.CV_706000 && ProfileManager.CurrentProfile != null)
+            {
+                GumpsLoader loader = GumpsLoader.Instance;
+
+                switch (ProfileManager.CurrentProfile.BackpackStyle)
+                {
+                    case 1:
+                        if (loader.GetTexture(0x775E) != null)
+                        {
+                            Graphic = 0x775E; // Suede Backpack
+                        }
+
+                        break;
+                    case 2:
+                        if (loader.GetTexture(0x7760) != null)
+                        {
+                            Graphic = 0x7760; // Polar Bear Backpack
+                        }
+
+                        break;
+                    case 3:
+                        if (loader.GetTexture(0x7762) != null)
+                        {
+                            Graphic = 0x7762; // Ghoul Skin Backpack
+                        }
+
+                        break;
+                    default:
+                        if (loader.GetTexture(0x003C) != null)
+                        {
+                            Graphic = 0x003C; // Default Backpack
+                        }
+
+                        break;
+                }
+            }
+
             BuildGump();
 
             if (Graphic == 0x0009)
