@@ -1303,6 +1303,44 @@ namespace ClassicUO.Network
                     bool playsound = false;
                     int x, y;
 
+                    // New Backpack gumps. Client Version 7.0.53.1
+                    if (item == World.Player.FindItemByLayer(Layer.Backpack) && Client.Version >= Data.ClientVersion.CV_706000 && ProfileManager.CurrentProfile != null)
+                    {
+                        GumpsLoader loader = GumpsLoader.Instance;
+
+                        switch (ProfileManager.CurrentProfile.BackpackStyle)
+                        {
+                            case 1:
+                                if (loader.GetTexture(0x775E) != null)
+                                {
+                                    graphic = 0x775E; // Suede Backpack
+                                }
+
+                                break;
+                            case 2:
+                                if (loader.GetTexture(0x7760) != null)
+                                {
+                                    graphic = 0x7760; // Polar Bear Backpack
+                                }
+
+                                break;
+                            case 3:
+                                if (loader.GetTexture(0x7762) != null)
+                                {
+                                    graphic = 0x7762; // Ghoul Skin Backpack
+                                }
+
+                                break;
+                            default:
+                                if (loader.GetTexture(0x003C) != null)
+                                {
+                                    graphic = 0x003C; // Default Backpack
+                                }
+
+                                break;
+                        }
+                    }
+ 
                     // TODO: check client version ?
                     if (Client.Version >= Data.ClientVersion.CV_706000 && ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.UseLargeContainerGumps)
                     {

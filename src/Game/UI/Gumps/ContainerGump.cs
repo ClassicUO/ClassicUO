@@ -89,27 +89,6 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             }
 
-            if (Graphic == 0x0015)
-            {
-                if (ProfileManager.CurrentProfile != null)
-                {
-                    switch (ProfileManager.CurrentProfile.GridLootType)
-                    {
-                        case 1:
-                            _data.Graphic = 0x775E; // Suede Backpack
-                            break;
-                        case 2:
-                            _data.Graphic = 0x7760; // Polar Bear Backpack
-                            break;
-                        case 3:
-                            _data.Graphic = 0x7762; // Ghoul Skin Backpack
-                            break;
-                        default:
-                            _data.Graphic = 0x003C; // Default Backpack
-                            break;
-                    }
-                }
-            }
 
             if (_data.OpenSound != 0 && playsound)
             {
