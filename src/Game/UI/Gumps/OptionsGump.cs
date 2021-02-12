@@ -37,6 +37,7 @@ using System.Linq;
 using ClassicUO.Configuration;
 using ClassicUO.Data;
 using ClassicUO.Game.Data;
+using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
@@ -3134,6 +3135,9 @@ namespace ClassicUO.Game.UI.Gumps
             int startX = 5;
             int startY = 5;
 
+            Label text = AddLabel(rightArea, ResGumps.BackpackStyle, startX, startY);
+            startX += text.Width + 5;
+
             _backpackStyle = AddCombobox
             (
                 rightArea,
@@ -3148,7 +3152,10 @@ namespace ClassicUO.Game.UI.Gumps
                 200
             );
 
-            Label text = AddLabel(rightArea, ResGumps.ContainerScale, startX, startY);
+            startX = 5;
+            startY += _backpackStyle.Height + 2 + 10;
+
+            text = AddLabel(rightArea, ResGumps.ContainerScale, startX, startY);
             startX += text.Width + 5;
 
             _containersScale = AddHSlider
@@ -3937,9 +3944,6 @@ namespace ClassicUO.Game.UI.Gumps
 
             _currentProfile.ShowTargetRangeIndicator = _showTargetRangeIndicator.IsChecked;
 
-            _currentProfile.BackpackStyle = _backpackStyle.SelectedIndex;
-
-
             bool updateHealthBars = _currentProfile.CustomBarsToggled != _customBars.IsChecked;
             _currentProfile.CustomBarsToggled = _customBars.IsChecked;
 
@@ -4034,6 +4038,15 @@ namespace ClassicUO.Game.UI.Gumps
             _currentProfile.DoubleClickToLootInsideContainers = _containerDoubleClickToLoot.IsChecked;
             _currentProfile.RelativeDragAndDropItems = _relativeDragAnDropItems.IsChecked;
             _currentProfile.HighlightContainerWhenSelected = _highlightContainersWhenMouseIsOver.IsChecked;
+
+            // TODO: Fix minimize button
+            if (_currentProfile.BackpackStyle != _backpackStyle.SelectedIndex)
+            {
+                _currentProfile.BackpackStyle = _backpackStyle.SelectedIndex;
+                UIManager.GetGump<PaperDollGump>(World.Player.Serial)?.RequestUpdateContents();
+                Item backpack = World.Player.FindItemByLayer(Layer.Backpack);
+                GameActions.DoubleClick(backpack);
+            }
 
 
             // tooltip
