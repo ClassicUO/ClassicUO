@@ -1302,7 +1302,7 @@ namespace ClassicUO.Network
                     ContainerGump container = UIManager.GetGump<ContainerGump>(serial);
                     bool playsound = false;
                     int x, y;
- 
+
                     // TODO: check client version ?
                     if (Client.Version >= Data.ClientVersion.CV_706000 && ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.UseLargeContainerGumps)
                     {

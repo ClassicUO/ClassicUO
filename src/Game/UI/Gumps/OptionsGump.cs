@@ -4040,7 +4040,6 @@ namespace ClassicUO.Game.UI.Gumps
             _currentProfile.RelativeDragAndDropItems = _relativeDragAnDropItems.IsChecked;
             _currentProfile.HighlightContainerWhenSelected = _highlightContainersWhenMouseIsOver.IsChecked;
 
-            // TODO: Fix minimize button
             if (_currentProfile.BackpackStyle != _backpackStyle.SelectedIndex)
             {
                 _currentProfile.BackpackStyle = _backpackStyle.SelectedIndex;
