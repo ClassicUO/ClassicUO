@@ -89,7 +89,6 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             }
 
-
             if (_data.OpenSound != 0 && playsound)
             {
                 Client.Game.Scene.Audio.PlaySound(_data.OpenSound);
