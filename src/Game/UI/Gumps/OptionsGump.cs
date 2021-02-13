@@ -3134,10 +3134,11 @@ namespace ClassicUO.Game.UI.Gumps
 
             int startX = 5;
             int startY = 5;
+            Label text;
 
             if (Client.Version >= ClientVersion.CV_705301)
             {
-                Label text = AddLabel(rightArea, ResGumps.BackpackStyle, startX, startY);
+                text = AddLabel(rightArea, ResGumps.BackpackStyle, startX, startY);
                 startX += text.Width + 5;
 
                 _backpackStyle = AddCombobox
