@@ -611,12 +611,23 @@ namespace ClassicUO.Game.Scenes
         {
             ParseCharacterList(ref p);
 
+            if (CurrentLoginStep != LoginSteps.PopUpMessage)
+            {
+                PopupMessage = null;
+            }
             CurrentLoginStep = LoginSteps.CharacterSelection;
             UIManager.GetGump<CharacterSelectionGump>()?.Dispose();
 
             _currentGump?.Dispose();
 
             UIManager.Add(_currentGump = new CharacterSelectionGump());
+            if (!string.IsNullOrWhiteSpace(PopupMessage))
+            {
+                Gump g = null;
+                g = new LoadingGump(PopupMessage, LoginButtons.OK, (but) => g.Dispose()) { IsModal = true };
+                UIManager.Add(g);
+                PopupMessage = null;
+            }
         }
 
         public void ReceiveCharacterList(ref PacketBufferReader p)
