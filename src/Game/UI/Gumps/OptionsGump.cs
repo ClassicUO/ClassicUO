@@ -3135,25 +3135,28 @@ namespace ClassicUO.Game.UI.Gumps
             int startX = 5;
             int startY = 5;
 
-            Label text = AddLabel(rightArea, ResGumps.BackpackStyle, startX, startY);
-            startX += text.Width + 5;
+            if (Client.Version >= ClientVersion.CV_705301)
+            {
+                Label text = AddLabel(rightArea, ResGumps.BackpackStyle, startX, startY);
+                startX += text.Width + 5;
 
-            _backpackStyle = AddCombobox
-            (
-                rightArea,
-                new[]
-                {
-                    ResGumps.BackpackStyle_Default, ResGumps.BackpackStyle_Suede,
-                    ResGumps.BackpackStyle_PolarBear, ResGumps.BackpackStyle_GhoulSkin
-                },
-                _currentProfile.BackpackStyle,
-                startX,
-                startY,
-                200
-            );
+                _backpackStyle = AddCombobox
+                (
+                    rightArea,
+                    new[]
+                    {
+                        ResGumps.BackpackStyle_Default, ResGumps.BackpackStyle_Suede,
+                        ResGumps.BackpackStyle_PolarBear, ResGumps.BackpackStyle_GhoulSkin
+                    },
+                    _currentProfile.BackpackStyle,
+                    startX,
+                    startY,
+                    200
+                );
 
-            startX = 5;
-            startY += _backpackStyle.Height + 2 + 10;
+                startX = 5;
+                startY += _backpackStyle.Height + 2 + 10;
+            }
 
             text = AddLabel(rightArea, ResGumps.ContainerScale, startX, startY);
             startX += text.Width + 5;
