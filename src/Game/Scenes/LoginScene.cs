@@ -916,7 +916,7 @@ namespace ClassicUO.Game.Scenes
     internal class ServerListEntry
     {
         private IPAddress _ipAddress;
-        private readonly Ping _pinger = new Ping();
+        private Ping _pinger = new Ping();
         private bool _sending;
         private readonly bool[] _last10Results = new bool[10];
         private int _resultIndex;
@@ -975,23 +975,31 @@ namespace ClassicUO.Game.Scenes
 
         public void DoPing()
         {
-            if (_ipAddress != null && !_sending)
+            if (_ipAddress != null && !_sending && _pinger != null)
             {
                 if (_resultIndex >= _last10Results.Length)
                 {
                     _resultIndex = 0;
                 }
 
-                _sending = true;
+                try
+                {
+                    _pinger.SendAsync
+                    (
+                        _ipAddress,
+                        1000,
+                        _buffData,
+                        _pingOptions,
+                        _resultIndex++
+                    );
 
-                _pinger.SendAsync
-                (
-                    _ipAddress,
-                    1000,
-                    _buffData,
-                    _pingOptions,
-                    _resultIndex++
-                );
+                    _sending = true;
+                }
+                catch
+                {
+                    _ipAddress = null;
+                    Dispose();
+                }
             }
         }
 
@@ -1035,10 +1043,16 @@ namespace ClassicUO.Game.Scenes
 
                 if (_sending)
                 {
-                    _pinger.SendAsyncCancel();
+                    try
+                    {
+                        _pinger.SendAsyncCancel();
+                    }
+                    catch { }
+                   
                 }
 
                 _pinger.Dispose();
+                _pinger = null;
             }
         }
     }
