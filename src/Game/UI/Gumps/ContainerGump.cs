@@ -75,7 +75,7 @@ namespace ClassicUO.Game.UI.Gumps
             Graphic = gumpid;
 
             // New Backpack gumps. Client Version 7.0.53.1
-            if (item == World.Player.FindItemByLayer(Layer.Backpack) && Client.Version >= ClassicUO.Data.ClientVersion.CV_706000 && ProfileManager.CurrentProfile != null)
+            if (item == World.Player.FindItemByLayer(Layer.Backpack) && Client.Version >= ClassicUO.Data.ClientVersion.CV_705301 && ProfileManager.CurrentProfile != null)
             {
                 GumpsLoader loader = GumpsLoader.Instance;
 
