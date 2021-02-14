@@ -506,7 +506,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                     if (!IsActive)
                     {
-                        IsActive = true;
+                        return;
                     }
 
                     if (_messageHistoryIndex > 0)
@@ -536,7 +536,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                     if (!IsActive)
                     {
-                        IsActive = true;
+                        return;
                     }
 
                     if (_messageHistoryIndex < _messageHistory.Count - 1)
