@@ -5682,7 +5682,7 @@ namespace ClassicUO.Network
                             cSerial,
                             ent.Graphic,
                             0,
-                            0,
+                            (ushort) (ent.Graphic == 0x2006 ? ((Item) ent).Amount : 0),
                             cx,
                             cy,
                             (sbyte) cz,
