@@ -1006,7 +1006,19 @@ namespace ClassicUO.Game.GameObjects
                                 case 0x0CF4:
                                 case 0x0CF6:
                                 case 0x0CF7:
+                                case 0x0E50:
+                                case 0x0E51:
+                                case 0x0E52:
+                                case 0x0E53:
+                                case 0x1049:
+                                case 0x104A:
                                 case 0x11FC:
+                                case 0x1207:
+                                case 0x1208:
+                                case 0x1209:
+                                case 0x120A:
+                                case 0x120B:
+                                case 0x120C:
                                 case 0x1218:
                                 case 0x1219:
                                 case 0x121A:
@@ -1049,14 +1061,43 @@ namespace ClassicUO.Game.GameObjects
                                 case 0x3089:
                                 case 0x308A:
                                 case 0x308B:
+                                case 0x319A:
+                                case 0x319B:
                                 case 0x35ED:
                                 case 0x35EE:
                                 case 0x3DFF:
                                 case 0x3E00:
+                                case 0x402A:
+                                case 0x4029:
+                                case 0x4028:
+                                case 0x4027:
+                                case 0x4023:
+                                case 0x4024:
+                                case 0x4BDC:
+                                case 0x4C1B:
+                                case 0x4C80:
+                                case 0x4C81:
+                                case 0x4C82:
+                                case 0x4C83:
+                                case 0x4C84:
+                                case 0x4C85:
+                                case 0x4C86:
+                                case 0x4C87:
+                                case 0x4C88:
+                                case 0x4C89:
+                                case 0x4C8A:
+                                case 0x4C8B:
+                                case 0x4C8C:
                                 case 0x4C8D:
                                 case 0x4C8E:
                                 case 0x4C8F:
                                 case 0x4C1E:
+                                case 0x4DE0:
+                                case 0x4DE1:
+                                case 0x63BC:
+                                case 0x63BD:
+                                case 0x63C3:
+                                case 0x63C4:
                                 case 0xA05F:
                                 case 0xA05E:
                                 case 0xA05D:
@@ -1079,17 +1120,15 @@ namespace ClassicUO.Game.GameObjects
                                 case 0x9C59:
                                 case 0x9C58:
                                 case 0x9C57:
-                                case 0x402A:
-                                case 0x4029:
-                                case 0x4028:
-                                case 0x4027:
-                                case 0x4023:
-                                case 0x4024:
-                                case 0x4C1B:
                                 case 0x7132:
                                 case 0x71C2:
                                 case 0x9977:
                                 case 0x996C:
+                                case 0xA211:
+                                case 0xA4EA:
+                                case 0xA4EB:
+                                case 0xA587:
+                                case 0xA586:
                                     //case 0x4C1F:
 
                                     for (int i = 0; i < AnimationsLoader.Instance.SittingInfos.Length; i++)
