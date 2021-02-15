@@ -1085,6 +1085,8 @@ namespace ClassicUO.Game.GameObjects
                                 case 0x63BD:
                                 case 0x63C3:
                                 case 0x63C4:
+                                case 0x7132:
+                                case 0x71C2:
                                 case 0xA05F:
                                 case 0xA05E:
                                 case 0xA05D:
@@ -1107,8 +1109,6 @@ namespace ClassicUO.Game.GameObjects
                                 case 0x9C59:
                                 case 0x9C58:
                                 case 0x9C57:
-                                case 0x7132:
-                                case 0x71C2:
                                 case 0x9977:
                                 case 0x996C:
                                 case 0xA211:
