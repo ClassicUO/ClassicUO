@@ -1,23 +1,32 @@
 #region license
 
-//  Copyright (C) 2019 ClassicUO Development Community on Github
-//
-//	This project is an alternative client for the game Ultima Online.
-//	The goal of this is to develop a lightweight client considering
-//	new technologies.
-//
-//  This program is free software: you can redistribute it and/or modify
-//  it under the terms of the GNU General Public License as published by
-//  the Free Software Foundation, either version 3 of the License, or
-//  (at your option) any later version.
-//
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-//
-//  You should have received a copy of the GNU General Public License
-//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// Copyright (c) 2021, andreakarasho
+// All rights reserved.
+// 
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+// 1. Redistributions of source code must retain the above copyright
+//    notice, this list of conditions and the following disclaimer.
+// 2. Redistributions in binary form must reproduce the above copyright
+//    notice, this list of conditions and the following disclaimer in the
+//    documentation and/or other materials provided with the distribution.
+// 3. All advertising materials mentioning features or use of this software
+//    must display the following acknowledgement:
+//    This product includes software developed by andreakarasho - https://github.com/andreakarasho
+// 4. Neither the name of the copyright holder nor the
+//    names of its contributors may be used to endorse or promote products
+//    derived from this software without specific prior written permission.
+// 
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ''AS IS'' AND ANY
+// EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+// WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+// DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY
+// DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+// (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+// LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+// ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+// SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #endregion
 
@@ -25,16 +34,19 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-
 using ClassicUO.Configuration;
+using ClassicUO.Data;
+using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
-using ClassicUO.IO;
+using ClassicUO.IO.Resources;
+using ClassicUO.Network;
 using ClassicUO.Renderer;
-
+using ClassicUO.Resources;
+using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
@@ -43,162 +55,357 @@ namespace ClassicUO.Game.UI.Gumps
     internal class OptionsGump : Gump
     {
         private const byte FONT = 0xFF;
-        private const ushort HUE_FONT = 999;
-
+        private const ushort HUE_FONT = 0xFFFF;
         private const int WIDTH = 700;
         private const int HEIGHT = 500;
+        private const int TEXTBOX_HEIGHT = 25;
 
-        private static UOTexture _logoTexture2D;
-        private ScrollAreaItem _activeChatArea;
+        private static Texture2D _logoTexture2D;
+        private Combobox _auraType, _filterType;
         private Combobox _autoOpenCorpseOptions;
-        private TextBox _autoOpenCorpseRange;
-        private Checkbox _buffBarTime,_castSpellsByOneClick, _queryBeforAttackCheckbox, _spellColoringCheckbox, _spellFormatCheckbox;
-        private HSliderBar _cellSize;
+        private InputField _autoOpenCorpseRange;
 
-        // video
-        private Checkbox _windowBorderless, _debugControls, _enableDeathScreen, _enableBlackWhiteEffect, _altLights, _enableLight, _enableShadows, _auraMouse, _xBR, _runMouseInSeparateThread, _useColoredLights, _darkNights, _partyAura, _hideChatGradient;
-        private ScrollAreaItem _defaultHotkeysArea, _autoOpenCorpseArea, _dragSelectArea;
+        //experimental
+        private Checkbox _autoOpenDoors, _autoOpenCorpse, _skipEmptyCorpse, _disableTabBtn, _disableCtrlQWBtn, _disableDefaultHotkeys, _disableArrowBtn, _disableAutoMove, _overrideContainerLocation, _smoothDoors, _showTargetRangeIndicator, _customBars, _customBarsBBG, _saveHealthbars;
+        private Checkbox _buffBarTime, _castSpellsByOneClick, _queryBeforAttackCheckbox, _queryBeforeBeneficialCheckbox, _spellColoringCheckbox, _spellFormatCheckbox;
+        private HSliderBar _cellSize;
+        private Checkbox _containerScaleItems, _containerDoubleClickToLoot, _relativeDragAnDropItems, _useLargeContianersGumps, _highlightContainersWhenMouseIsOver;
+
+
+        // containers
+        private HSliderBar _containersScale;
+        private Combobox _cotType;
+        private DataBox _databox;
+        private HSliderBar _delay_before_display_tooltip, _tooltip_zoom, _tooltip_background_opacity;
         private Combobox _dragSelectModifierKey;
-        private HSliderBar _brighlight;
+        private Combobox _backpackStyle;
+
 
         //counters
         private Checkbox _enableCounters, _highlightOnUse, _highlightOnAmount, _enableAbbreviatedAmount;
         private Checkbox _enableDragSelect, _dragSelectHumanoidsOnly;
-        private TextBox _rows, _columns, _highlightAmount, _abbreviatedAmount;
-
-        //experimental
-        private Checkbox _enableSelectionArea, _debugGumpIsDisabled, _restoreLastGameSize, _autoOpenDoors, _autoOpenCorpse, _skipEmptyCorpse, _disableTabBtn, _disableCtrlQWBtn, _disableDefaultHotkeys, _disableArrowBtn, _overrideContainerLocation, _smoothDoors, _showTargetRangeIndicator, _customBars, _customBarsBBG;
-        private Combobox _overrideContainerLocationSetting;
 
         // sounds
         private Checkbox _enableSounds, _enableMusic, _footStepsSound, _combatMusic, _musicInBackground, _loginMusic;
 
         // fonts
         private FontSelector _fontSelectorChat;
-        private TextBox _gameWindowHeight;
-        private Checkbox _overrideAllFonts;
-        private Combobox _overrideAllFontsIsUnicodeCheckbox;
+        private Checkbox _forceUnicodeJournal;
+        private InputField _gameWindowHeight;
 
         private Checkbox _gameWindowLock, _gameWindowFullsize;
         // GameWindowPosition
-        private TextBox _gameWindowPositionX;
-        private TextBox _gameWindowPositionY;
+        private InputField _gameWindowPositionX;
+        private InputField _gameWindowPositionY;
 
         // GameWindowSize
-        private TextBox _gameWindowWidth;
+        private InputField _gameWindowWidth;
         private Combobox _gridLoot;
-        private Checkbox _highlightObjects, /*_smoothMovements,*/ _enablePathfind, _useShiftPathfind, _alwaysRun, _alwaysRunUnlessHidden, _showHpMobile, _highlightByState, _drawRoofs, _treeToStumps, _hideVegetation, _noColorOutOfRangeObjects, _useCircleOfTransparency, _enableTopbar, _holdDownKeyTab, _holdDownKeyAlt, _chatAfterEnter, _chatAdditionalButtonsCheckbox, _chatShiftEnterCheckbox, _enableCaveBorder;
+        private Checkbox _hideScreenshotStoredInMessage;
+        private Checkbox _highlightObjects, /*_smoothMovements,*/
+                         _enablePathfind,
+                         _useShiftPathfind,
+                         _alwaysRun,
+                         _alwaysRunUnlessHidden,
+                         _showHpMobile,
+                         _highlightByState,
+                         _drawRoofs,
+                         _treeToStumps,
+                         _hideVegetation,
+                         _noColorOutOfRangeObjects,
+                         _useCircleOfTransparency,
+                         _enableTopbar,
+                         _holdDownKeyTab,
+                         _holdDownKeyAlt,
+                         _closeAllAnchoredGumpsWithRClick,
+                         _chatAfterEnter,
+                         _chatAdditionalButtonsCheckbox,
+                         _chatShiftEnterCheckbox,
+                         _enableCaveBorder;
+        private Checkbox _holdShiftForContext, _holdShiftToSplitStack, _reduceFPSWhenInactive, _sallosEasyGrab, _partyInviteGump, _objectsFading, _textFading, _holdAltToMoveGumps;
         private Combobox _hpComboBox, _healtbarType, _fieldsType, _hpComboBoxShowWhen;
 
+        // infobar
+        private List<InfoBarBuilderControl> _infoBarBuilderControls;
+        private Combobox _infoBarHighlightType;
+
         // combat & spells
-        private ColorBox _innocentColorPickerBox, _friendColorPickerBox, _crimialColorPickerBox, _genericColorPickerBox, _enemyColorPickerBox, _murdererColorPickerBox, _neutralColorPickerBox, _beneficColorPickerBox, _harmfulColorPickerBox;
+        private ClickableColorBox _innocentColorPickerBox, _friendColorPickerBox, _crimialColorPickerBox, _canAttackColorPickerBox, _enemyColorPickerBox, _murdererColorPickerBox, _neutralColorPickerBox, _beneficColorPickerBox, _harmfulColorPickerBox;
         private HSliderBar _lightBar;
 
         // macro
         private MacroControl _macroControl;
-        private Checkbox _restorezoomCheckbox, _savezoomCheckbox, _zoomCheckbox;
-
-        // infobar
-        private List<InfoBarBuilderControl> _infoBarBuilderControls;
-        private Checkbox _showInfoBar;
-        private Combobox _infoBarHighlightType;
+        private Checkbox _overrideAllFonts;
+        private Combobox _overrideAllFontsIsUnicodeCheckbox;
+        private Combobox _overrideContainerLocationSetting;
+        private ClickableColorBox _poisonColorPickerBox, _paralyzedColorPickerBox, _invulnerableColorPickerBox;
+        private NiceButton _randomizeColorsButton;
+        private Checkbox _restorezoomCheckbox, _zoomCheckbox;
+        private InputField _rows, _columns, _highlightAmount, _abbreviatedAmount;
 
         // speech
         private Checkbox _scaleSpeechDelay, _saveJournalCheckBox;
-        private Combobox _shardType, _auraType;
-
-        // network
-        private Checkbox _showNetStats;
+        private Checkbox _showHouseContent;
+        private Checkbox _showInfoBar;
 
         // general
         private HSliderBar _sliderFPS, _circleOfTranspRadius;
         private HSliderBar _sliderSpeechDelay;
+        private HSliderBar _sliderZoom;
         private HSliderBar _soundsVolume, _musicVolume, _loginMusicVolume;
-        private ColorBox _speechColorPickerBox, _emoteColorPickerBox, _yellColorPickerBox, _whisperColorPickerBox, _partyMessageColorPickerBox, _guildMessageColorPickerBox, _allyMessageColorPickerBox, _partyAuraColorPickerBox;
-        private ColorBox _poisonColorPickerBox, _paralyzedColorPickerBox, _invulnerableColorPickerBox;
-        private TextBox _spellFormatBox;
+        private ClickableColorBox _speechColorPickerBox, _emoteColorPickerBox, _yellColorPickerBox, _whisperColorPickerBox, _partyMessageColorPickerBox, _guildMessageColorPickerBox, _allyMessageColorPickerBox, _chatMessageColorPickerBox, _partyAuraColorPickerBox;
+        private InputField _spellFormatBox;
+        private ClickableColorBox _tooltip_font_hue;
+        private FontSelector _tooltip_font_selector;
+
+        // video
+        private Checkbox _use_old_status_gump, _windowBorderless, _enableDeathScreen, _enableBlackWhiteEffect, _altLights, _enableLight, _enableShadows, _enableShadowsStatics, _auraMouse, _runMouseInSeparateThread, _useColoredLights, _darkNights, _partyAura, _hideChatGradient;
+        private Checkbox _use_smooth_boat_movement;
+
+        private Checkbox _use_tooltip;
         private Checkbox _useStandardSkillsGump, _showMobileNameIncoming, _showCorpseNameIncoming;
-        private Checkbox _holdShiftForContext, _holdShiftToSplitStack, _reduceFPSWhenInactive, _sallosEasyGrab, _partyInviteGump, _objectsFading;
-
-        //VendorGump Size Option
-        private ArrowNumbersTextBox _vendorGumpSize;
-
-        private ScrollAreaItem _windowSizeArea;
-        private ScrollAreaItem _zoomSizeArea;
+        private Checkbox _showStatsMessage, _showSkillsMessage;
+        private HSliderBar _showSkillsMessageDelta;
 
 
-        // containers
-        private HSliderBar _containersScale;
-        private Checkbox _containerScaleItems, _containerDoubleClickToLoot;
+        private Profile _currentProfile = ProfileManager.CurrentProfile;
 
         public OptionsGump() : base(0, 0)
         {
-            Add(new AlphaBlendControl(0.05f)
-            {
-                X = 1,
-                Y = 1,
-                Width = WIDTH - 2,
-                Height = HEIGHT - 2
-            });
+            Add
+            (
+                new AlphaBlendControl(0.05f)
+                {
+                    X = 1,
+                    Y = 1,
+                    Width = WIDTH - 2,
+                    Height = HEIGHT - 2,
+                    Hue = 999
+                }
+            );
 
 
-            TextureControl tc = new TextureControl
-            {
-                X = 150 + ((WIDTH - 150 - 350) >> 1),
-                Y = (HEIGHT - 365) >> 1,
-                Width = LogoTexture.Width,
-                Height = LogoTexture.Height,
-                Alpha = 0.95f,
-                ScaleTexture = false,
-                Texture = LogoTexture
-            };
+            int i = 0;
 
-            Add(tc);
+            Add
+            (
+                new NiceButton
+                (
+                    10,
+                    10 + 30 * i++,
+                    140,
+                    25,
+                    ButtonAction.SwitchPage,
+                    ResGumps.General
+                ) { IsSelected = true, ButtonParameter = 1 }
+            );
 
-            Add(new NiceButton(10, 10, 140, 25, ButtonAction.SwitchPage, "General") {IsSelected = true, ButtonParameter = 1});
-            Add(new NiceButton(10, 10 + 30 * 1, 140, 25, ButtonAction.SwitchPage, "Sound") {ButtonParameter = 2});
-            Add(new NiceButton(10, 10 + 30 * 2, 140, 25, ButtonAction.SwitchPage, "Video") {ButtonParameter = 3});
-            Add(new NiceButton(10, 10 + 30 * 3, 140, 25, ButtonAction.SwitchPage, "Macros") {ButtonParameter = 4});
-            //Add(new NiceButton(10, 10 + 30 * 4, 140, 25, ButtonAction.SwitchPage, "Tooltip") {ButtonParameter = 5});
-            Add(new NiceButton(10, 10 + 30 * 4, 140, 25, ButtonAction.SwitchPage, "Fonts") {ButtonParameter = 6});
-            Add(new NiceButton(10, 10 + 30 * 5, 140, 25, ButtonAction.SwitchPage, "Speech") {ButtonParameter = 7});
-            Add(new NiceButton(10, 10 + 30 * 6, 140, 25, ButtonAction.SwitchPage, "Combat / Spells") {ButtonParameter = 8});
-            Add(new NiceButton(10, 10 + 30 * 7, 140, 25, ButtonAction.SwitchPage, "Counters") {ButtonParameter = 9});
-            Add(new NiceButton(10, 10 + 30 * 8, 140, 25, ButtonAction.SwitchPage, "Experimental") {ButtonParameter = 10});
-            Add(new NiceButton(10, 10 + 30 * 9, 140, 25, ButtonAction.SwitchPage, "Network") {ButtonParameter = 11});
-            Add(new NiceButton(10, 10 + 30 * 10, 140, 25, ButtonAction.SwitchPage, "Info Bar") { ButtonParameter = 12 });
-            Add(new NiceButton(10, 10 + 30 * 11, 140, 25, ButtonAction.SwitchPage, "Containers") { ButtonParameter = 13 });
+            Add
+            (
+                new NiceButton
+                (
+                    10,
+                    10 + 30 * i++,
+                    140,
+                    25,
+                    ButtonAction.SwitchPage,
+                    ResGumps.Sound
+                ) { ButtonParameter = 2 }
+            );
+
+            Add
+            (
+                new NiceButton
+                (
+                    10,
+                    10 + 30 * i++,
+                    140,
+                    25,
+                    ButtonAction.SwitchPage,
+                    ResGumps.Video
+                ) { ButtonParameter = 3 }
+            );
+
+            Add
+            (
+                new NiceButton
+                (
+                    10,
+                    10 + 30 * i++,
+                    140,
+                    25,
+                    ButtonAction.SwitchPage,
+                    ResGumps.Macros
+                ) { ButtonParameter = 4 }
+            );
+
+            Add
+            (
+                new NiceButton
+                (
+                    10,
+                    10 + 30 * i++,
+                    140,
+                    25,
+                    ButtonAction.SwitchPage,
+                    ResGumps.Tooltip
+                ) { ButtonParameter = 5 }
+            );
+
+            Add
+            (
+                new NiceButton
+                (
+                    10,
+                    10 + 30 * i++,
+                    140,
+                    25,
+                    ButtonAction.SwitchPage,
+                    ResGumps.Fonts
+                ) { ButtonParameter = 6 }
+            );
+
+            Add
+            (
+                new NiceButton
+                (
+                    10,
+                    10 + 30 * i++,
+                    140,
+                    25,
+                    ButtonAction.SwitchPage,
+                    ResGumps.Speech
+                ) { ButtonParameter = 7 }
+            );
+
+            Add
+            (
+                new NiceButton
+                (
+                    10,
+                    10 + 30 * i++,
+                    140,
+                    25,
+                    ButtonAction.SwitchPage,
+                    ResGumps.CombatSpells
+                ) { ButtonParameter = 8 }
+            );
+
+            Add
+            (
+                new NiceButton
+                (
+                    10,
+                    10 + 30 * i++,
+                    140,
+                    25,
+                    ButtonAction.SwitchPage,
+                    ResGumps.Counters
+                ) { ButtonParameter = 9 }
+            );
+
+            Add
+            (
+                new NiceButton
+                (
+                    10,
+                    10 + 30 * i++,
+                    140,
+                    25,
+                    ButtonAction.SwitchPage,
+                    ResGumps.InfoBar
+                ) { ButtonParameter = 10 }
+            );
+
+            Add
+            (
+                new NiceButton
+                (
+                    10,
+                    10 + 30 * i++,
+                    140,
+                    25,
+                    ButtonAction.SwitchPage,
+                    ResGumps.Containers
+                ) { ButtonParameter = 11 }
+            );
+
+            Add
+            (
+                new NiceButton
+                (
+                    10,
+                    10 + 30 * i++,
+                    140,
+                    25,
+                    ButtonAction.SwitchPage,
+                    ResGumps.Experimental
+                ) { ButtonParameter = 12 }
+            );
 
 
-            Add(new Line(160, 5, 1, HEIGHT - 10, Color.Gray.PackedValue));
+            Add
+            (
+                new Line
+                (
+                    160,
+                    5,
+                    1,
+                    HEIGHT - 10,
+                    Color.Gray.PackedValue
+                )
+            );
 
             int offsetX = 60;
             int offsetY = 60;
 
-            Add(new Line(160, 405 + 35 + 1, WIDTH - 160, 1, Color.Gray.PackedValue));
+            Add
+            (
+                new Line
+                (
+                    160,
+                    405 + 35 + 1,
+                    WIDTH - 160,
+                    1,
+                    Color.Gray.PackedValue
+                )
+            );
 
-            Add(new Button((int) Buttons.Cancel, 0x00F3, 0x00F1, 0x00F2)
-            {
-                X = 154 + offsetX, Y = 405 + offsetY, ButtonAction = ButtonAction.Activate
-            });
+            Add
+            (
+                new Button((int) Buttons.Cancel, 0x00F3, 0x00F1, 0x00F2)
+                {
+                    X = 154 + offsetX, Y = 405 + offsetY, ButtonAction = ButtonAction.Activate
+                }
+            );
 
-            Add(new Button((int) Buttons.Apply, 0x00EF, 0x00F0, 0x00EE)
-            {
-                X = 248 + offsetX, Y = 405 + offsetY, ButtonAction = ButtonAction.Activate
-            });
+            Add
+            (
+                new Button((int) Buttons.Apply, 0x00EF, 0x00F0, 0x00EE)
+                {
+                    X = 248 + offsetX, Y = 405 + offsetY, ButtonAction = ButtonAction.Activate
+                }
+            );
 
-            Add(new Button((int) Buttons.Default, 0x00F6, 0x00F4, 0x00F5)
-            {
-                X = 346 + offsetX, Y = 405 + offsetY, ButtonAction = ButtonAction.Activate
-            });
+            Add
+            (
+                new Button((int) Buttons.Default, 0x00F6, 0x00F4, 0x00F5)
+                {
+                    X = 346 + offsetX, Y = 405 + offsetY, ButtonAction = ButtonAction.Activate
+                }
+            );
 
-            Add(new Button((int) Buttons.Ok, 0x00F9, 0x00F8, 0x00F7)
-            {
-                X = 443 + offsetX, Y = 405 + offsetY, ButtonAction = ButtonAction.Activate
-            });
+            Add
+            (
+                new Button((int) Buttons.Ok, 0x00F9, 0x00F8, 0x00F7)
+                {
+                    X = 443 + offsetX, Y = 405 + offsetY, ButtonAction = ButtonAction.Activate
+                }
+            );
 
             AcceptMouseInput = true;
             CanMove = true;
+            CanCloseWithRightClick = true;
 
             BuildGeneral();
             BuildSounds();
@@ -209,25 +416,21 @@ namespace ClassicUO.Game.UI.Gumps
             BuildCombat();
             BuildTooltip();
             BuildCounters();
-            BuildExperimental();
-            BuildNetwork();
             BuildInfoBar();
             BuildContainers();
+            BuildExperimental();
 
             ChangePage(1);
         }
 
-        private static UOTexture LogoTexture
+        private static Texture2D LogoTexture
         {
             get
             {
                 if (_logoTexture2D == null || _logoTexture2D.IsDisposed)
                 {
                     Stream stream = typeof(CUOEnviroment).Assembly.GetManifestResourceStream("ClassicUO.cuologo.png");
-                    Texture2D.TextureDataFromStreamEXT(stream, out int w, out int h, out byte[] pixels, 350, 365);
-
-                    _logoTexture2D = new UOTexture32(w, h);
-                    _logoTexture2D.SetData(pixels);
+                    _logoTexture2D = Texture2D.FromStream(Client.Game.GraphicsDevice, stream);
                 }
 
                 return _logoTexture2D;
@@ -237,173 +440,872 @@ namespace ClassicUO.Game.UI.Gumps
         private void BuildGeneral()
         {
             const int PAGE = 1;
-            ScrollArea rightArea = new ScrollArea(190, 20, WIDTH - 210, 420, true);
 
-            ScrollAreaItem fpsItem = new ScrollAreaItem();
-            Label text = new Label("- FPS:", true, HUE_FONT);
-            fpsItem.Add(text);
-            _sliderFPS = new HSliderBar(text.X + 90, 5, 250, Constants.MIN_FPS, Constants.MAX_FPS, Settings.GlobalSettings.FPS, HSliderBarStyle.MetalWidgetRecessedBar, true, FONT, HUE_FONT);
-            fpsItem.Add(_sliderFPS);
-            rightArea.Add(fpsItem);
+            ScrollArea rightArea = new ScrollArea
+            (
+                190,
+                20,
+                WIDTH - 210,
+                420,
+                true
+            );
 
-
-            _reduceFPSWhenInactive = CreateCheckBox(rightArea, "Reduce FPS when game is inactive", ProfileManager.Current.ReduceFPSWhenInactive, 0, 5);
-
-            _highlightObjects = CreateCheckBox(rightArea, "Highlight game objects", ProfileManager.Current.HighlightGameObjects, 0, 20);
-            _enablePathfind = CreateCheckBox(rightArea, "Enable pathfinding", ProfileManager.Current.EnablePathfind, 0, 0);
-            _useShiftPathfind = CreateCheckBox(rightArea, "Use SHIFT for pathfinding", ProfileManager.Current.UseShiftToPathfind, 0, 0);
-
-            ScrollAreaItem alwaysRunItem = new ScrollAreaItem();
-            _alwaysRun = new Checkbox(0x00D2, 0x00D3, "Always run", FONT, HUE_FONT)
-            {
-                IsChecked = ProfileManager.Current.AlwaysRun
-            };
-            rightArea.Add(_alwaysRun);
-            _alwaysRun.ValueChanged += (sender, e) => { alwaysRunItem.IsVisible = _alwaysRun.IsChecked; };
-
-            _alwaysRunUnlessHidden = new Checkbox(0x00D2, 0x00D3, "Unless hidden", FONT, HUE_FONT)
-            {
-                X = 20,
-                Y = 5,
-                IsChecked = ProfileManager.Current.AlwaysRunUnlessHidden
-            };
-            _alwaysRunUnlessHidden.Height += 5;
-            alwaysRunItem.Add(_alwaysRunUnlessHidden);
-            rightArea.Add(alwaysRunItem);
-
-            alwaysRunItem.IsVisible = _alwaysRun.IsChecked;
-
-            _enableTopbar = CreateCheckBox(rightArea, "Disable the Menu Bar", ProfileManager.Current.TopbarGumpIsDisabled, 0, 0);
-            _holdDownKeyTab = CreateCheckBox(rightArea, "Hold TAB key for combat", ProfileManager.Current.HoldDownKeyTab, 0, 0);
-            _holdDownKeyAlt = CreateCheckBox(rightArea, "Hold ALT key + right click to close Anchored gumps", ProfileManager.Current.HoldDownKeyAltToCloseAnchored, 0, 0);
-            _holdShiftForContext = CreateCheckBox(rightArea, "Hold Shift for Context Menus", ProfileManager.Current.HoldShiftForContext, 0, 0);
-            _holdShiftToSplitStack = CreateCheckBox(rightArea, "Hold Shift to split stack of items", ProfileManager.Current.HoldShiftToSplitStack, 0, 0);
-            _highlightByState = CreateCheckBox(rightArea, "Highlight by state (poisoned, yellow hits, paralyzed)", ProfileManager.Current.HighlightMobilesByFlags, 0, 0);
-            _poisonColorPickerBox = CreateClickableColorBox(rightArea, 20, 5, ProfileManager.Current.PoisonHue, "Poisoned Color", 40, 5);
-            _paralyzedColorPickerBox = CreateClickableColorBox(rightArea, 20, 0, ProfileManager.Current.ParalyzedHue, "Paralyzed Color", 40, 0);
-            _invulnerableColorPickerBox = CreateClickableColorBox(rightArea, 20, 0, ProfileManager.Current.InvulnerableHue, "Invulnerable Color", 40, 0);
-            _noColorOutOfRangeObjects = CreateCheckBox(rightArea, "No color for object out of range", ProfileManager.Current.NoColorObjectsOutOfRange, 0, 5);
-            _objectsFading = CreateCheckBox(rightArea, "Objects fading", ProfileManager.Current.UseObjectsFading, 0, 0);
-            _useStandardSkillsGump = CreateCheckBox(rightArea, "Use standard skills gump", ProfileManager.Current.StandardSkillsGump, 0, 0);
-            _showMobileNameIncoming = CreateCheckBox(rightArea, "Show incoming new mobiles", ProfileManager.Current.ShowNewMobileNameIncoming, 0, 0);
-            _showCorpseNameIncoming = CreateCheckBox(rightArea, "Show incoming new corpses", ProfileManager.Current.ShowNewCorpseNameIncoming, 0, 0);
-            _sallosEasyGrab = CreateCheckBox(rightArea, "Sallos easy grab", ProfileManager.Current.SallosEasyGrab, 0, 0);
-            _partyInviteGump = CreateCheckBox(rightArea, "Show gump for party invites", ProfileManager.Current.PartyInviteGump, 0, 0);
-
-            fpsItem = new ScrollAreaItem();
-
-            text = new Label("Grid Loot", true, HUE_FONT)
-            {
-                Y = _showCorpseNameIncoming.Bounds.Bottom + 10
-            };
-            _gridLoot = new Combobox(text.X + text.Width + 10, text.Y, 200, new[] {"None", "Grid loot only", "Both"}, ProfileManager.Current.GridLootType);
-
-            fpsItem.Add(text);
-            fpsItem.Add(_gridLoot);
-
-            rightArea.Add(fpsItem);
-
-            ScrollAreaItem item = new ScrollAreaItem();
-
-            _useCircleOfTransparency = new Checkbox(0x00D2, 0x00D3, "Enable circle of transparency", FONT, HUE_FONT)
-            {
-                Y = 20,
-                IsChecked = ProfileManager.Current.UseCircleOfTransparency
-            };
-            _useCircleOfTransparency.ValueChanged += (sender, e) => { _circleOfTranspRadius.IsVisible = _useCircleOfTransparency.IsChecked; };
-            item.Add(_useCircleOfTransparency);
-            _circleOfTranspRadius = new HSliderBar(210, _useCircleOfTransparency.Y + 5, 200, Constants.MIN_CIRCLE_OF_TRANSPARENCY_RADIUS, Constants.MAX_CIRCLE_OF_TRANSPARENCY_RADIUS, ProfileManager.Current.CircleOfTransparencyRadius, HSliderBarStyle.MetalWidgetRecessedBar, true, FONT, HUE_FONT);
-            item.Add(_circleOfTranspRadius);
-            rightArea.Add(item);
+            int startX = 5;
+            int startY = 5;
 
 
-            _drawRoofs = CreateCheckBox(rightArea, "Hide roof tiles", !ProfileManager.Current.DrawRoofs, 0, 15);
-            _treeToStumps = CreateCheckBox(rightArea, "Tree to stumps", ProfileManager.Current.TreeToStumps, 0, 0);
-            _hideVegetation = CreateCheckBox(rightArea, "Hide vegetation", ProfileManager.Current.HideVegetation, 0, 0);
-            _enableCaveBorder = CreateCheckBox(rightArea, "Mark cave tiles", ProfileManager.Current.EnableCaveBorder, 0, 0);
+            DataBox box = new DataBox(startX, startY, rightArea.Width - 15, 1);
+            box.WantUpdateSize = true;
+            rightArea.Add(box);
 
 
-            ScrollAreaItem hpAreaItem = new ScrollAreaItem();
+            SettingsSection section = AddSettingsSection(box, "General");
 
-            _showHpMobile = new Checkbox(0x00D2, 0x00D3, "Show HP", FONT, HUE_FONT)
-            {
-                X = 0, Y = 20, IsChecked = ProfileManager.Current.ShowMobilesHP
-            };
 
-            hpAreaItem.Add(_showHpMobile);
+            section.Add
+            (
+                _highlightObjects = AddCheckBox
+                (
+                    null,
+                    ResGumps.HighlightObjects,
+                    _currentProfile.HighlightGameObjects,
+                    startX,
+                    startY
+                )
+            );
 
-            int mode = ProfileManager.Current.MobileHPType;
+            section.Add
+            (
+                _enablePathfind = AddCheckBox
+                (
+                    null,
+                    ResGumps.EnablePathfinding,
+                    _currentProfile.EnablePathfind,
+                    startX,
+                    startY
+                )
+            );
+
+            section.AddRight
+            (
+                _useShiftPathfind = AddCheckBox
+                (
+                    null,
+                    ResGumps.ShiftPathfinding,
+                    _currentProfile.UseShiftToPathfind,
+                    startX,
+                    startY
+                )
+            );
+
+            section.Add
+            (
+                _alwaysRun = AddCheckBox
+                (
+                    null,
+                    ResGumps.AlwaysRun,
+                    _currentProfile.AlwaysRun,
+                    startX,
+                    startY
+                )
+            );
+
+            section.AddRight
+            (
+                _alwaysRunUnlessHidden = AddCheckBox
+                (
+                    null,
+                    ResGumps.AlwaysRunHidden,
+                    _currentProfile.AlwaysRunUnlessHidden,
+                    startX,
+                    startY
+                )
+            );
+
+            section.Add
+            (
+                _autoOpenDoors = AddCheckBox
+                (
+                    null,
+                    ResGumps.AutoOpenDoors,
+                    _currentProfile.AutoOpenDoors,
+                    startX,
+                    startY
+                )
+            );
+
+            section.AddRight
+            (
+                _smoothDoors = AddCheckBox
+                (
+                    null,
+                    ResGumps.SmoothDoors,
+                    _currentProfile.SmoothDoors,
+                    startX,
+                    startY
+                )
+            );
+
+            section.Add
+            (
+                _autoOpenCorpse = AddCheckBox
+                (
+                    null,
+                    ResGumps.AutoOpenCorpses,
+                    _currentProfile.AutoOpenCorpses,
+                    startX,
+                    startY
+                )
+            );
+
+            section.PushIndent();
+            section.Add(AddLabel(null, ResGumps.CorpseOpenRange, 0, 0));
+
+            section.AddRight
+            (
+                _autoOpenCorpseRange = AddInputField
+                (
+                    null,
+                    startX,
+                    startY,
+                    50,
+                    TEXTBOX_HEIGHT,
+                    ResGumps.CorpseOpenRange,
+                    80,
+                    false,
+                    true,
+                    2
+                )
+            );
+
+            _autoOpenCorpseRange.SetText(_currentProfile.AutoOpenCorpseRange.ToString());
+
+            section.Add
+            (
+                _skipEmptyCorpse = AddCheckBox
+                (
+                    null,
+                    ResGumps.SkipEmptyCorpses,
+                    _currentProfile.SkipEmptyCorpse,
+                    startX,
+                    startY
+                )
+            );
+
+            section.Add(AddLabel(null, ResGumps.CorpseOpenOptions, startX, startY));
+
+            section.AddRight
+            (
+                _autoOpenCorpseOptions = AddCombobox
+                (
+                    null,
+                    new[]
+                    {
+                        ResGumps.CorpseOpt_None, ResGumps.CorpseOpt_NotTar, ResGumps.CorpseOpt_NotHid,
+                        ResGumps.CorpseOpt_Both
+                    },
+                    _currentProfile.CorpseOpenOptions,
+                    startX,
+                    startY,
+                    150
+                ),
+                2
+            );
+
+            section.PopIndent();
+
+            section.Add
+            (
+                _noColorOutOfRangeObjects = AddCheckBox
+                (
+                    rightArea,
+                    ResGumps.OutOfRangeColor,
+                    _currentProfile.NoColorObjectsOutOfRange,
+                    startX,
+                    startY
+                )
+            );
+
+            section.Add
+            (
+                _sallosEasyGrab = AddCheckBox
+                (
+                    null,
+                    ResGumps.SallosEasyGrab,
+                    _currentProfile.SallosEasyGrab,
+                    startX,
+                    startY
+                )
+            );
+
+            section.Add
+            (
+                _showHouseContent = AddCheckBox
+                (
+                    null,
+                    ResGumps.ShowHousesContent,
+                    _currentProfile.ShowHouseContent,
+                    startX,
+                    startY
+                )
+            );
+
+            _showHouseContent.IsVisible = Client.Version >= ClientVersion.CV_70796;
+
+            section.Add
+            (
+                _use_smooth_boat_movement = AddCheckBox
+                (
+                    null,
+                    ResGumps.SmoothBoat,
+                    _currentProfile.UseSmoothBoatMovement,
+                    startX,
+                    startY
+                )
+            );
+
+            _use_smooth_boat_movement.IsVisible = Client.Version >= ClientVersion.CV_7090;
+
+
+            SettingsSection section2 = AddSettingsSection(box, "Mobiles");
+            section2.Y = section.Bounds.Bottom + 40;
+
+            section2.Add
+            (
+                _showHpMobile = AddCheckBox
+                (
+                    null,
+                    ResGumps.ShowHP,
+                    _currentProfile.ShowMobilesHP,
+                    startX,
+                    startY
+                )
+            );
+
+            int mode = _currentProfile.MobileHPType;
 
             if (mode < 0 || mode > 2)
+            {
                 mode = 0;
+            }
 
-            _hpComboBox = new Combobox(_showHpMobile.Bounds.Right + 10, 20, 150, new[]
-            {
-                "Percentage", "Line", "Both"
-            }, mode);
-            hpAreaItem.Add(_hpComboBox);
+            section2.AddRight
+            (
+                _hpComboBox = AddCombobox
+                (
+                    null,
+                    new[] { ResGumps.HP_Percentage, ResGumps.HP_Line, ResGumps.HP_Both },
+                    mode,
+                    startX,
+                    startY,
+                    100
+                )
+            );
 
-            text = new Label("mode:", true, HUE_FONT)
-            {
-                X = _showHpMobile.Bounds.Right + 170,
-                Y = 20
-            };
-            hpAreaItem.Add(text);
+            section2.AddRight(AddLabel(null, ResGumps.HP_Mode, startX, startY));
 
-            mode = ProfileManager.Current.MobileHPShowWhen;
+            mode = _currentProfile.MobileHPShowWhen;
 
             if (mode != 0 && mode > 2)
-                mode = 0;
-
-            _hpComboBoxShowWhen = new Combobox(text.Bounds.Right + 10, 20, 150, new[]
             {
-                "Always", "Less than 100%", "Smart"
-            }, mode);
-            hpAreaItem.Add(_hpComboBoxShowWhen);
+                mode = 0;
+            }
 
-            mode = ProfileManager.Current.CloseHealthBarType;
+            section2.AddRight
+            (
+                _hpComboBoxShowWhen = AddCombobox
+                (
+                    null,
+                    new[] { ResGumps.HPShow_Always, ResGumps.HPShow_Less, ResGumps.HPShow_Smart },
+                    mode,
+                    startX,
+                    startY,
+                    100
+                ),
+                2
+            );
+
+            section2.Add
+            (
+                _highlightByState = AddCheckBox
+                (
+                    null,
+                    ResGumps.HighlighState,
+                    _currentProfile.HighlightMobilesByFlags,
+                    startX,
+                    startY
+                )
+            );
+
+            section2.PushIndent();
+
+            section2.Add
+            (
+                _poisonColorPickerBox = AddColorBox
+                (
+                    null,
+                    startX,
+                    startY,
+                    _currentProfile.PoisonHue,
+                    ResGumps.PoisonedColor
+                )
+            );
+
+            section2.AddRight(AddLabel(null, ResGumps.PoisonedColor, 0, 0), 2);
+
+            section2.Add
+            (
+                _paralyzedColorPickerBox = AddColorBox
+                (
+                    null,
+                    startX,
+                    startY,
+                    _currentProfile.ParalyzedHue,
+                    ResGumps.ParalyzedColor
+                )
+            );
+
+            section2.AddRight(AddLabel(null, ResGumps.ParalyzedColor, 0, 0), 2);
+
+            section2.Add
+            (
+                _invulnerableColorPickerBox = AddColorBox
+                (
+                    null,
+                    startX,
+                    startY,
+                    _currentProfile.InvulnerableHue,
+                    ResGumps.InvulColor
+                )
+            );
+
+            section2.AddRight(AddLabel(null, ResGumps.InvulColor, 0, 0), 2);
+            section2.PopIndent();
+
+            section2.Add
+            (
+                _showMobileNameIncoming = AddCheckBox
+                (
+                    null,
+                    ResGumps.ShowIncMobiles,
+                    _currentProfile.ShowNewMobileNameIncoming,
+                    startX,
+                    startY
+                )
+            );
+
+            section2.Add
+            (
+                _showCorpseNameIncoming = AddCheckBox
+                (
+                    null,
+                    ResGumps.ShowIncCorpses,
+                    _currentProfile.ShowNewCorpseNameIncoming,
+                    startX,
+                    startY
+                )
+            );
+
+            section2.Add(AddLabel(null, ResGumps.AuraUnderFeet, startX, startY));
+
+            section2.AddRight
+            (
+                _auraType = AddCombobox
+                (
+                    null,
+                    new[]
+                    {
+                        ResGumps.AuraType_None, ResGumps.AuraType_Warmode, ResGumps.AuraType_CtrlShift,
+                        ResGumps.AuraType_Always
+                    },
+                    _currentProfile.AuraUnderFeetType,
+                    startX,
+                    startY,
+                    100
+                ),
+                2
+            );
+
+            section2.PushIndent();
+
+            section2.Add
+            (
+                _partyAura = AddCheckBox
+                (
+                    null,
+                    ResGumps.CustomColorAuraForPartyMembers,
+                    _currentProfile.PartyAura,
+                    startX,
+                    startY
+                )
+            );
+
+            section2.PushIndent();
+
+            section2.Add
+            (
+                _partyAuraColorPickerBox = AddColorBox
+                (
+                    null,
+                    startX,
+                    startY,
+                    _currentProfile.PartyAuraHue,
+                    ResGumps.PartyAuraColor
+                )
+            );
+
+            section2.AddRight(AddLabel(null, ResGumps.PartyAuraColor, 0, 0));
+            section2.PopIndent();
+            section2.PopIndent();
+
+            SettingsSection section3 = AddSettingsSection(box, "Gumps & Context");
+            section3.Y = section2.Bounds.Bottom + 40;
+
+            section3.Add
+            (
+                _enableTopbar = AddCheckBox
+                (
+                    null,
+                    ResGumps.DisableMenu,
+                    _currentProfile.TopbarGumpIsDisabled,
+                    0,
+                    0
+                )
+            );
+
+            section3.Add
+            (
+                _holdDownKeyAlt = AddCheckBox
+                (
+                    null,
+                    ResGumps.AltCloseGumps,
+                    _currentProfile.HoldDownKeyAltToCloseAnchored,
+                    0,
+                    0
+                )
+            );
+
+            section3.Add
+            (
+                _holdAltToMoveGumps = AddCheckBox
+                (
+                    null,
+                    ResGumps.AltMoveGumps,
+                    _currentProfile.HoldAltToMoveGumps,
+                    0,
+                    0
+                )
+            );
+
+            section3.Add
+            (
+                _closeAllAnchoredGumpsWithRClick = AddCheckBox
+                (
+                    null,
+                    ResGumps.ClickCloseAllGumps,
+                    _currentProfile.CloseAllAnchoredGumpsInGroupWithRightClick,
+                    0,
+                    0
+                )
+            );
+
+            section3.Add
+            (
+                _useStandardSkillsGump = AddCheckBox
+                (
+                    null,
+                    ResGumps.StandardSkillGump,
+                    _currentProfile.StandardSkillsGump,
+                    0,
+                    0
+                )
+            );
+
+            section3.Add
+            (
+                _use_old_status_gump = AddCheckBox
+                (
+                    null,
+                    ResGumps.UseOldStatusGump,
+                    _currentProfile.UseOldStatusGump,
+                    startX,
+                    startY
+                )
+            );
+
+            _use_old_status_gump.IsVisible = !CUOEnviroment.IsOutlands;
+
+            section3.Add
+            (
+                _partyInviteGump = AddCheckBox
+                (
+                    null,
+                    ResGumps.ShowGumpPartyInv,
+                    _currentProfile.PartyInviteGump,
+                    0,
+                    0
+                )
+            );
+
+            section3.Add
+            (
+                _customBars = AddCheckBox
+                (
+                    null,
+                    ResGumps.UseCustomHPBars,
+                    _currentProfile.CustomBarsToggled,
+                    0,
+                    0
+                )
+            );
+
+            section3.AddRight
+            (
+                _customBarsBBG = AddCheckBox
+                (
+                    null,
+                    ResGumps.UseBlackBackgr,
+                    _currentProfile.CBBlackBGToggled,
+                    0,
+                    0
+                )
+            );
+
+            section3.Add
+            (
+                _saveHealthbars = AddCheckBox
+                (
+                    null,
+                    ResGumps.SaveHPBarsOnLogout,
+                    _currentProfile.SaveHealthbars,
+                    0,
+                    0
+                )
+            );
+
+            section3.PushIndent();
+            section3.Add(AddLabel(null, ResGumps.CloseHPGumpWhen, 0, 0));
+
+            mode = _currentProfile.CloseHealthBarType;
 
             if (mode < 0 || mode > 2)
+            {
                 mode = 0;
+            }
 
-            text = new Label("Close healthbar gump when:", true, HUE_FONT)
+            _healtbarType = AddCombobox
+            (
+                null,
+                new[] { ResGumps.HPType_None, ResGumps.HPType_MobileOOR, ResGumps.HPType_MobileDead },
+                mode,
+                0,
+                0,
+                150
+            );
+
+            section3.AddRight(_healtbarType);
+            section3.PopIndent();
+            section3.Add(AddLabel(null, ResGumps.GridLoot, startX, startY));
+
+            section3.AddRight
+            (
+                _gridLoot = AddCombobox
+                (
+                    null,
+                    new[] { ResGumps.GridLoot_None, ResGumps.GridLoot_GridOnly, ResGumps.GridLoot_Both },
+                    _currentProfile.GridLootType,
+                    startX,
+                    startY,
+                    120
+                ),
+                2
+            );
+
+            section3.Add
+            (
+                _holdShiftForContext = AddCheckBox
+                (
+                    null,
+                    ResGumps.ShiftContext,
+                    _currentProfile.HoldShiftForContext,
+                    0,
+                    0
+                )
+            );
+
+            section3.Add
+            (
+                _holdShiftToSplitStack = AddCheckBox
+                (
+                    null,
+                    ResGumps.ShiftStack,
+                    _currentProfile.HoldShiftToSplitStack,
+                    0,
+                    0
+                )
+            );
+
+
+            SettingsSection section4 = AddSettingsSection(box, "Miscellaneous");
+            section4.Y = section3.Bounds.Bottom + 40;
+
+            section4.Add
+            (
+                _useCircleOfTransparency = AddCheckBox
+                (
+                    null,
+                    ResGumps.EnableCircleTrans,
+                    _currentProfile.UseCircleOfTransparency,
+                    startX,
+                    startY
+                )
+            );
+
+            section4.AddRight
+            (
+                _circleOfTranspRadius = AddHSlider
+                (
+                    null,
+                    Constants.MIN_CIRCLE_OF_TRANSPARENCY_RADIUS,
+                    Constants.MAX_CIRCLE_OF_TRANSPARENCY_RADIUS,
+                    _currentProfile.CircleOfTransparencyRadius,
+                    startX,
+                    startY,
+                    200
+                )
+            );
+
+            section4.PushIndent();
+            section4.Add(AddLabel(null, ResGumps.CircleTransType, startX, startY));
+            int cottypeindex = _currentProfile.CircleOfTransparencyType;
+            string[] cotTypes = { ResGumps.CircleTransType_Full, ResGumps.CircleTransType_Gradient };
+
+            if (cottypeindex < 0 || cottypeindex > cotTypes.Length)
             {
-                Y = _hpComboBox.Bounds.Bottom + 10
-            };
-            hpAreaItem.Add(text);
+                cottypeindex = 0;
+            }
 
-            _healtbarType = new Combobox(text.Bounds.Right + 10, _hpComboBox.Bounds.Bottom + 10, 150, new[]
-            {
-                "None", "Mobile Out of Range", "Mobile is Dead"
-            }, mode);
-            hpAreaItem.Add(_healtbarType);
+            section4.AddRight
+            (
+                _cotType = AddCombobox
+                (
+                    null,
+                    cotTypes,
+                    cottypeindex,
+                    startX,
+                    startY,
+                    150
+                ),
+                2
+            );
 
-            text = new Label("Fields: ", true, HUE_FONT)
-            {
-                Y = _hpComboBox.Bounds.Bottom + 45
-            };
-            hpAreaItem.Add(text);
+            section4.PopIndent();
 
-            mode = ProfileManager.Current.FieldsType;
+            section4.Add
+            (
+                _hideScreenshotStoredInMessage = AddCheckBox
+                (
+                    null,
+                    ResGumps.HideScreenshotStoredInMessage,
+                    _currentProfile.HideScreenshotStoredInMessage,
+                    0,
+                    0
+                )
+            );
+
+            section4.Add
+            (
+                _objectsFading = AddCheckBox
+                (
+                    null,
+                    ResGumps.ObjAlphaFading,
+                    _currentProfile.UseObjectsFading,
+                    startX,
+                    startY
+                )
+            );
+
+            section4.Add
+            (
+                _textFading = AddCheckBox
+                (
+                    null,
+                    ResGumps.TextAlphaFading,
+                    _currentProfile.TextFading,
+                    startX,
+                    startY
+                )
+            );
+
+            section4.Add
+            (
+                _showTargetRangeIndicator = AddCheckBox
+                (
+                    null,
+                    ResGumps.ShowTarRangeIndic,
+                    _currentProfile.ShowTargetRangeIndicator,
+                    startX,
+                    startY
+                )
+            );
+
+            section4.Add
+            (
+                _enableDragSelect = AddCheckBox
+                (
+                    null,
+                    ResGumps.EnableDragHPBars,
+                    _currentProfile.EnableDragSelect,
+                    startX,
+                    startY
+                )
+            );
+
+            section4.PushIndent();
+            section4.Add(AddLabel(null, ResGumps.DragKey, startX, startY));
+
+            section4.AddRight
+            (
+                _dragSelectModifierKey = AddCombobox
+                (
+                    null,
+                    new[] { ResGumps.KeyMod_None, ResGumps.KeyMod_Ctrl, ResGumps.KeyMod_Shift },
+                    _currentProfile.DragSelectModifierKey,
+                    startX,
+                    startY,
+                    100
+                )
+            );
+
+            section4.Add
+            (
+                _dragSelectHumanoidsOnly = AddCheckBox
+                (
+                    null,
+                    ResGumps.DragHumanoidsOnly,
+                    _currentProfile.DragSelectHumanoidsOnly,
+                    startX,
+                    startY
+                )
+            );
+
+            section4.PopIndent();
+
+            section4.Add
+            (
+                _showStatsMessage = AddCheckBox
+                (
+                    null,
+                    ResGumps.ShowStatsChangedMessage,
+                    _currentProfile.ShowStatsChangedMessage,
+                    startX,
+                    startY
+                )
+            );
+
+            section4.Add
+            (
+                _showSkillsMessage = AddCheckBox
+                (
+                    null,
+                    ResGumps.ShowSkillsChangedMessageBy,
+                    _currentProfile.ShowStatsChangedMessage,
+                    startX,
+                    startY
+                )
+            );
+
+            section4.PushIndent();
+
+            section4.AddRight
+            (
+                _showSkillsMessageDelta = AddHSlider
+                (
+                    null,
+                    0,
+                    100,
+                    _currentProfile.ShowSkillsChangedDeltaValue,
+                    startX,
+                    startY,
+                    200
+                )
+            );
+
+            section4.PopIndent();
+
+
+            SettingsSection section5 = AddSettingsSection(box, "Terrain & Statics");
+            section5.Y = section4.Bounds.Bottom + 40;
+
+            section5.Add
+            (
+                _drawRoofs = AddCheckBox
+                (
+                    null,
+                    ResGumps.HideRoofTiles,
+                    !_currentProfile.DrawRoofs,
+                    startX,
+                    startY
+                )
+            );
+
+            section5.Add
+            (
+                _treeToStumps = AddCheckBox
+                (
+                    null,
+                    ResGumps.TreesStumps,
+                    _currentProfile.TreeToStumps,
+                    startX,
+                    startY
+                )
+            );
+
+            section5.Add
+            (
+                _hideVegetation = AddCheckBox
+                (
+                    null,
+                    ResGumps.HideVegetation,
+                    _currentProfile.HideVegetation,
+                    startX,
+                    startY
+                )
+            );
+
+            section5.Add
+            (
+                _enableCaveBorder = AddCheckBox
+                (
+                    null,
+                    ResGumps.MarkCaveTiles,
+                    _currentProfile.EnableCaveBorder,
+                    startX,
+                    startY
+                )
+            );
+
+            section5.Add(AddLabel(null, ResGumps.HPFields, startX, startY));
+            mode = _currentProfile.FieldsType;
 
             if (mode < 0 || mode > 2)
-                mode = 0;
-
-            _fieldsType = new Combobox(text.Bounds.Right + 10, _hpComboBox.Bounds.Bottom + 45, 150, new[]
             {
-                "Normal fields", "Static fields", "Tile fields"
-            }, mode);
+                mode = 0;
+            }
 
-            hpAreaItem.Add(_fieldsType);
-            rightArea.Add(hpAreaItem);
+            section5.AddRight
+            (
+                _fieldsType = AddCombobox
+                (
+                    null,
+                    new[] { ResGumps.HPFields_Normal, ResGumps.HPFields_Static, ResGumps.HPFields_Tile },
+                    mode,
+                    startX,
+                    startY,
+                    150
+                )
+            );
 
-            _circleOfTranspRadius.IsVisible = _useCircleOfTransparency.IsChecked;
-
-            hpAreaItem = new ScrollAreaItem();
-            Control c = new Label("Shop Gump Size (multiple of 60): ", true, HUE_FONT) {Y = 10};
-            hpAreaItem.Add(c);
-            hpAreaItem.Add(_vendorGumpSize = new ArrowNumbersTextBox(c.Width + 5, 10, 60, 60, 60, 240, FONT, hue: 1) {Text = ProfileManager.Current.VendorGumpHeight.ToString(), Tag = ProfileManager.Current.VendorGumpHeight});
-            rightArea.Add(hpAreaItem);
 
             Add(rightArea, PAGE);
         }
@@ -412,56 +1314,118 @@ namespace ClassicUO.Game.UI.Gumps
         {
             const int PAGE = 2;
 
-            ScrollArea rightArea = new ScrollArea(190, 20, WIDTH - 210, 420, true);
+            ScrollArea rightArea = new ScrollArea
+            (
+                190,
+                20,
+                WIDTH - 210,
+                420,
+                true
+            );
 
+            int startX = 5;
+            int startY = 5;
 
-            ScrollAreaItem item = new ScrollAreaItem();
+            const int VOLUME_WIDTH = 200;
 
-            _enableSounds = new Checkbox(0x00D2, 0x00D3, "Sounds", FONT, HUE_FONT)
-            {
-                IsChecked = ProfileManager.Current.EnableSound
-            };
-            _enableSounds.ValueChanged += (sender, e) => { _soundsVolume.IsVisible = _enableSounds.IsChecked; };
-            item.Add(_enableSounds);
-            _soundsVolume = new HSliderBar(90, 0, 180, 0, 100, ProfileManager.Current.SoundVolume, HSliderBarStyle.MetalWidgetRecessedBar, true, FONT, HUE_FONT);
-            item.Add(_soundsVolume);
-            rightArea.Add(item);
+            _enableSounds = AddCheckBox
+            (
+                rightArea,
+                ResGumps.Sounds,
+                _currentProfile.EnableSound,
+                startX,
+                startY
+            );
 
+            _enableMusic = AddCheckBox
+            (
+                rightArea,
+                ResGumps.Music,
+                _currentProfile.EnableMusic,
+                startX,
+                startY + _enableSounds.Height + 2
+            );
 
-            item = new ScrollAreaItem();
+            _loginMusic = AddCheckBox
+            (
+                rightArea,
+                ResGumps.LoginMusic,
+                Settings.GlobalSettings.LoginMusic,
+                startX,
+                startY + _enableSounds.Height + 2 + _enableMusic.Height + 2
+            );
 
-            _enableMusic = new Checkbox(0x00D2, 0x00D3, "Music", FONT, HUE_FONT)
-            {
-                IsChecked = ProfileManager.Current.EnableMusic
-            };
-            _enableMusic.ValueChanged += (sender, e) => { _musicVolume.IsVisible = _enableMusic.IsChecked; };
-            item.Add(_enableMusic);
-            _musicVolume = new HSliderBar(90, 0, 180, 0, 100, ProfileManager.Current.MusicVolume, HSliderBarStyle.MetalWidgetRecessedBar, true, FONT, HUE_FONT);
-            item.Add(_musicVolume);
-            rightArea.Add(item);
+            startX = 120;
+            startY += 2;
 
+            _soundsVolume = AddHSlider
+            (
+                rightArea,
+                0,
+                100,
+                _currentProfile.SoundVolume,
+                startX,
+                startY,
+                VOLUME_WIDTH
+            );
 
-            item = new ScrollAreaItem();
+            _musicVolume = AddHSlider
+            (
+                rightArea,
+                0,
+                100,
+                _currentProfile.MusicVolume,
+                startX,
+                startY + _enableSounds.Height + 2,
+                VOLUME_WIDTH
+            );
 
-            _loginMusic = new Checkbox(0x00D2, 0x00D3, "Login music", FONT, HUE_FONT)
-            {
-                IsChecked = Settings.GlobalSettings.LoginMusic
-            };
-            _loginMusic.ValueChanged += (sender, e) => { _loginMusicVolume.IsVisible = _loginMusic.IsChecked; };
-            item.Add(_loginMusic);
-            _loginMusicVolume = new HSliderBar(90, 0, 180, 0, 100, Settings.GlobalSettings.LoginMusicVolume, HSliderBarStyle.MetalWidgetRecessedBar, true, FONT, HUE_FONT);
-            item.Add(_loginMusicVolume);
-            rightArea.Add(item);
+            _loginMusicVolume = AddHSlider
+            (
+                rightArea,
+                0,
+                100,
+                Settings.GlobalSettings.LoginMusicVolume,
+                startX,
+                startY + _enableSounds.Height + 2 + _enableMusic.Height + 2,
+                VOLUME_WIDTH
+            );
 
+            startX = 5;
+            startY += _loginMusic.Bounds.Bottom + 2;
 
-            _footStepsSound = CreateCheckBox(rightArea, "Play Footsteps", ProfileManager.Current.EnableFootstepsSound, 0, 15);
-            _combatMusic = CreateCheckBox(rightArea, "Combat music", ProfileManager.Current.EnableCombatMusic, 0, 0);
-            _musicInBackground = CreateCheckBox(rightArea, "Reproduce sounds and music when ClassicUO is not focused", ProfileManager.Current.ReproduceSoundsInBackground, 0, 0);
+            _footStepsSound = AddCheckBox
+            (
+                rightArea,
+                ResGumps.PlayFootsteps,
+                _currentProfile.EnableFootstepsSound,
+                startX,
+                startY
+            );
 
+            startY += _footStepsSound.Height + 2;
 
-            _loginMusicVolume.IsVisible = _loginMusic.IsChecked;
-            _soundsVolume.IsVisible = _enableSounds.IsChecked;
-            _musicVolume.IsVisible = _enableMusic.IsChecked;
+            _combatMusic = AddCheckBox
+            (
+                rightArea,
+                ResGumps.CombatMusic,
+                _currentProfile.EnableCombatMusic,
+                startX,
+                startY
+            );
+
+            startY += _combatMusic.Height + 2;
+
+            _musicInBackground = AddCheckBox
+            (
+                rightArea,
+                ResGumps.ReproduceSoundsAndMusic,
+                _currentProfile.ReproduceSoundsInBackground,
+                startX,
+                startY
+            );
+
+            startY += _musicInBackground.Height + 2;
 
             Add(rightArea, PAGE);
         }
@@ -470,216 +1434,390 @@ namespace ClassicUO.Game.UI.Gumps
         {
             const int PAGE = 3;
 
-            ScrollArea rightArea = new ScrollArea(190, 20, WIDTH - 210, 420, true);
-            Label text;
+            ScrollArea rightArea = new ScrollArea
+            (
+                190,
+                20,
+                WIDTH - 210,
+                420,
+                true
+            );
 
-            _debugControls = CreateCheckBox(rightArea, "Debugging mode", Settings.GlobalSettings.Debug, 0, 0);
-
-            _windowBorderless = CreateCheckBox(rightArea, "Borderless window", ProfileManager.Current.WindowBorderless, 0, 0);
-
-            // [BLOCK] game size
-            {
-                _gameWindowFullsize = new Checkbox(0x00D2, 0x00D3, "Always use fullsize game window", FONT, HUE_FONT)
-                {
-                    IsChecked = ProfileManager.Current.GameWindowFullSize
-                };
-                _gameWindowFullsize.ValueChanged += (sender, e) => { _windowSizeArea.IsVisible = !_gameWindowFullsize.IsChecked; };
-
-                rightArea.Add(_gameWindowFullsize);
-
-                _windowSizeArea = new ScrollAreaItem();
-
-                _gameWindowLock = new Checkbox(0x00D2, 0x00D3, "Lock game window moving/resizing", FONT, HUE_FONT)
-                {
-                    X = 20,
-                    Y = 15,
-                    IsChecked = ProfileManager.Current.GameWindowLock
-                };
-
-                _windowSizeArea.Add(_gameWindowLock);
-
-                text = new Label("Game Play Window Size: ", true, HUE_FONT)
-                {
-                    X = 20,
-                    Y = 40
-                };
-                _windowSizeArea.Add(text);
-
-                _gameWindowWidth = CreateInputField(_windowSizeArea, new TextBox(FONT, 5, 80, 80)
-                {
-                    Text = ProfileManager.Current.GameWindowSize.X.ToString(),
-                    X = 30,
-                    Y = 70,
-                    Width = 50,
-                    Height = 30,
-                    UNumericOnly = true
-                }, "");
-
-                _gameWindowHeight = CreateInputField(_windowSizeArea, new TextBox(FONT, 5, 80, 80)
-                {
-                    Text = ProfileManager.Current.GameWindowSize.Y.ToString(),
-                    X = 100,
-                    Y = 70,
-                    Width = 50,
-                    Height = 30,
-                    UNumericOnly = true
-                });
-
-                text = new Label("Game Play Window Position: ", true, HUE_FONT)
-                {
-                    X = 205,
-                    Y = 40
-                };
-                _windowSizeArea.Add(text);
-
-                _gameWindowPositionX = CreateInputField(_windowSizeArea, new TextBox(FONT, 5, 80, 80)
-                {
-                    Text = ProfileManager.Current.GameWindowPosition.X.ToString(),
-                    X = 215,
-                    Y = 70,
-                    Width = 50,
-                    Height = 30,
-                    NumericOnly = true
-                });
-
-                _gameWindowPositionY = CreateInputField(_windowSizeArea, new TextBox(FONT, 5, 80, 80)
-                {
-                    Text = ProfileManager.Current.GameWindowPosition.Y.ToString(),
-                    X = 285,
-                    Y = 70,
-                    Width = 50,
-                    Height = 30,
-                    NumericOnly = true
-                });
-
-                rightArea.Add(_windowSizeArea);
-                _windowSizeArea.IsVisible = !_gameWindowFullsize.IsChecked;
-            }
-
-            // [BLOCK] scale
-            {
-                _zoomCheckbox = new Checkbox(0x00D2, 0x00D3, "Enable in game zoom scaling (Ctrl + Scroll)", FONT, HUE_FONT)
-                {
-                    IsChecked = ProfileManager.Current.EnableScaleZoom
-                };
-                _zoomCheckbox.ValueChanged += (sender, e) => { _zoomSizeArea.IsVisible = _zoomCheckbox.IsChecked; };
-
-                rightArea.Add(_zoomCheckbox);
-
-                _zoomSizeArea = new ScrollAreaItem();
-
-                _savezoomCheckbox = new Checkbox(0x00D2, 0x00D3, "Save scale after exit", FONT, HUE_FONT)
-                {
-                    X = 20,
-                    Y = 15,
-                    IsChecked = ProfileManager.Current.SaveScaleAfterClose
-                };
-                _zoomSizeArea.Add(_savezoomCheckbox);
-
-                _restorezoomCheckbox = new Checkbox(0x00D2, 0x00D3, "Releasing Ctrl Restores Scale", FONT, HUE_FONT)
-                {
-                    X = 20,
-                    Y = 35,
-                    IsChecked = ProfileManager.Current.RestoreScaleAfterUnpressCtrl
-                };
-                _zoomSizeArea.Add(_restorezoomCheckbox);
-
-                rightArea.Add(_zoomSizeArea);
-                _zoomSizeArea.IsVisible = _zoomCheckbox.IsChecked;
-            }
-
-            _enableDeathScreen = CreateCheckBox(rightArea, "Enable Death Screen", ProfileManager.Current.EnableDeathScreen, 0, 10);
-            _enableBlackWhiteEffect = CreateCheckBox(rightArea, "Black & White mode for dead player", ProfileManager.Current.EnableBlackWhiteEffect, 0, 0);
-
-            ScrollAreaItem item = new ScrollAreaItem();
-
-            text = new Label("- Status gump type:", true, HUE_FONT)
-            {
-                Y = 30
-            };
-
-            item.Add(text);
-
-            _shardType = new Combobox(text.Width + 20, text.Y, 100, new[] {"Modern", "Old", "Outlands"})
-            {
-                SelectedIndex = Settings.GlobalSettings.ShardType
-            };
-            item.Add(_shardType);
-            rightArea.Add(item);
-
-            item = new ScrollAreaItem();
-            item.Y = 30;
-            text = new Label("- Brighlight:", true, HUE_FONT)
-            {
-                Y = 30,
-                IsVisible = false,
-            };
-            _brighlight = new HSliderBar(text.Width + 10, text.Y + 5, 250, 0, 100, (int) (ProfileManager.Current.Brighlight * 100f), HSliderBarStyle.MetalWidgetRecessedBar, true, FONT, HUE_FONT);
-            _brighlight.IsVisible = false;
-            item.Add(text);
-            item.Add(_brighlight);
-            rightArea.Add(item);
-
-            item = new ScrollAreaItem();
-            ScrollAreaItem _normalLightsArea = new ScrollAreaItem();
-
-            _altLights = CreateCheckBox(rightArea, "Alternative lights", ProfileManager.Current.UseAlternativeLights, 0, 0);
-            _altLights.ValueChanged += (sender, e) =>
-            {
-                _normalLightsArea.IsVisible = !_altLights.IsChecked;
-            };
-            _normalLightsArea.IsVisible = !_altLights.IsChecked;
-            _altLights.SetTooltip( "Sets light level to max but still renders lights" );
-
-            _enableLight = new Checkbox(0x00D2, 0x00D3, "Light level", FONT, HUE_FONT)
-            {
-                IsChecked = ProfileManager.Current.UseCustomLightLevel
-            };
-
-            _lightBar = new HSliderBar(_enableLight.Width + 10, _enableLight.Y + 5, 250, 0, 0x1E, 0x1E - ProfileManager.Current.LightLevel, HSliderBarStyle.MetalWidgetRecessedBar, true, FONT, HUE_FONT);
-
-            _darkNights = new Checkbox(0x00D2, 0x00D3, "Dark nights", FONT, HUE_FONT)
-            {
-                Y = _enableLight.Height,
-                IsChecked = ProfileManager.Current.UseDarkNights
-            };
-
-            _normalLightsArea.Add(_enableLight);
-            _normalLightsArea.Add(_lightBar);
-            _normalLightsArea.Add(_darkNights);
-            rightArea.Add(_normalLightsArea);
-            rightArea.Add(item);
-
-            _useColoredLights = CreateCheckBox(rightArea, "Use colored lights", ProfileManager.Current.UseColoredLights, 0, 0);
-
-            _enableShadows = new Checkbox(0x00D2, 0x00D3, "Shadows", FONT, HUE_FONT)
-            {
-                IsChecked = ProfileManager.Current.ShadowsEnabled
-            };
-            rightArea.Add(_enableShadows);
+            int startX = 5;
+            int startY = 5;
 
 
-            item = new ScrollAreaItem();
+            Label text = AddLabel(rightArea, ResGumps.FPS, startX, startY);
+            startX += text.Bounds.Right + 5;
 
-            text = new Label("- Aura under feet:", true, HUE_FONT)
-            {
-                Y = 10
-            };
-            item.Add(text);
+            _sliderFPS = AddHSlider
+            (
+                rightArea,
+                Constants.MIN_FPS,
+                Constants.MAX_FPS,
+                Settings.GlobalSettings.FPS,
+                startX,
+                startY,
+                250
+            );
 
-            _auraType = new Combobox(text.Width + 20, text.Y, 100, new[] {"None", "Warmode", "Ctrl+Shift", "Always"})
-            {
-                SelectedIndex = ProfileManager.Current.AuraUnderFeetType
-            };
-            item.Add(_auraType);
-            rightArea.Add(item);
+            startY += text.Bounds.Bottom + 5;
 
-            _partyAura = CreateCheckBox(rightArea, "Custom color aura for party members", ProfileManager.Current.PartyAura, 0, 0);
-            _partyAuraColorPickerBox = CreateClickableColorBox(rightArea, 20, 5, ProfileManager.Current.PartyAuraHue, "Party Aura Color", 40, 5);
-            _runMouseInSeparateThread = CreateCheckBox(rightArea, "Run mouse in a separate thread", Settings.GlobalSettings.RunMouseInASeparateThread, 0, 5);
-            _auraMouse = CreateCheckBox(rightArea, "Aura on mouse target", ProfileManager.Current.AuraOnMouse, 0, 0);
-            _xBR = CreateCheckBox(rightArea, "Use xBR effect [BETA]", ProfileManager.Current.UseXBR, 0, 0);
-            _hideChatGradient = CreateCheckBox(rightArea, "Hide Chat Gradient", ProfileManager.Current.HideChatGradient, 0, 0);
+            _reduceFPSWhenInactive = AddCheckBox
+            (
+                rightArea,
+                ResGumps.FPSInactive,
+                _currentProfile.ReduceFPSWhenInactive,
+                startX,
+                startY
+            );
+
+            startY += _reduceFPSWhenInactive.Height + 2;
+
+            startX = 5;
+            startY += 20;
+
+
+            DataBox box = new DataBox(startX, startY, rightArea.Width - 15, 1);
+            box.WantUpdateSize = true;
+            rightArea.Add(box);
+
+            SettingsSection section = AddSettingsSection(box, "Game window");
+
+            section.Add
+            (
+                _gameWindowFullsize = AddCheckBox
+                (
+                    null,
+                    ResGumps.AlwaysUseFullsizeGameWindow,
+                    _currentProfile.GameWindowFullSize,
+                    startX,
+                    startY
+                )
+            );
+
+            section.Add
+            (
+                _windowBorderless = AddCheckBox
+                (
+                    null,
+                    ResGumps.BorderlessWindow,
+                    _currentProfile.WindowBorderless,
+                    startX,
+                    startY
+                )
+            );
+
+            section.Add
+            (
+                _gameWindowLock = AddCheckBox
+                (
+                    null,
+                    ResGumps.LockGameWindowMovingResizing,
+                    _currentProfile.GameWindowLock,
+                    startX,
+                    startY
+                )
+            );
+
+            section.Add(AddLabel(null, ResGumps.GamePlayWindowPosition, startX, startY));
+
+            section.AddRight
+            (
+                _gameWindowPositionX = AddInputField
+                (
+                    null,
+                    startX,
+                    startY,
+                    50,
+                    TEXTBOX_HEIGHT,
+                    null,
+                    80,
+                    false,
+                    true,
+                    5
+                ),
+                4
+            );
+
+            _gameWindowPositionX.SetText(_currentProfile.GameWindowPosition.X.ToString());
+
+            section.AddRight
+            (
+                _gameWindowPositionY = AddInputField
+                (
+                    null,
+                    startX,
+                    startY,
+                    50,
+                    TEXTBOX_HEIGHT,
+                    null,
+                    80,
+                    false,
+                    true,
+                    5
+                )
+            );
+
+            _gameWindowPositionY.SetText(_currentProfile.GameWindowPosition.Y.ToString());
+
+
+            section.Add(AddLabel(null, ResGumps.GamePlayWindowSize, startX, startY));
+
+            section.AddRight
+            (
+                _gameWindowWidth = AddInputField
+                (
+                    null,
+                    startX,
+                    startY,
+                    50,
+                    TEXTBOX_HEIGHT,
+                    null,
+                    80,
+                    false,
+                    true,
+                    5
+                )
+            );
+
+            _gameWindowWidth.SetText(_currentProfile.GameWindowSize.X.ToString());
+
+            section.AddRight
+            (
+                _gameWindowHeight = AddInputField
+                (
+                    null,
+                    startX,
+                    startY,
+                    50,
+                    TEXTBOX_HEIGHT,
+                    null,
+                    80,
+                    false,
+                    true,
+                    5
+                )
+            );
+
+            _gameWindowHeight.SetText(_currentProfile.GameWindowSize.Y.ToString());
+
+
+            SettingsSection section2 = AddSettingsSection(box, "Zoom");
+            section2.Y = section.Bounds.Bottom + 40;
+            section2.Add(AddLabel(null, ResGumps.DefaultZoom, startX, startY));
+
+            section2.AddRight
+            (
+                _sliderZoom = AddHSlider
+                (
+                    null,
+                    0,
+                    Client.Game.Scene.Camera.ZoomValuesCount,
+                    Client.Game.Scene.Camera.ZoomIndex,
+                    startX,
+                    startY,
+                    100
+                )
+            );
+
+            section2.Add
+            (
+                _zoomCheckbox = AddCheckBox
+                (
+                    null,
+                    ResGumps.EnableMouseWheelForZoom,
+                    _currentProfile.EnableMousewheelScaleZoom,
+                    startX,
+                    startY
+                )
+            );
+
+            section2.Add
+            (
+                _restorezoomCheckbox = AddCheckBox
+                (
+                    null,
+                    ResGumps.ReleasingCtrlRestoresScale,
+                    _currentProfile.RestoreScaleAfterUnpressCtrl,
+                    startX,
+                    startY
+                )
+            );
+
+
+            SettingsSection section3 = AddSettingsSection(box, "Lights");
+            section3.Y = section2.Bounds.Bottom + 40;
+
+            section3.Add
+            (
+                _altLights = AddCheckBox
+                (
+                    null,
+                    ResGumps.AlternativeLights,
+                    _currentProfile.UseAlternativeLights,
+                    startX,
+                    startY
+                )
+            );
+
+            section3.Add
+            (
+                _enableLight = AddCheckBox
+                (
+                    null,
+                    ResGumps.LightLevel,
+                    _currentProfile.UseCustomLightLevel,
+                    startX,
+                    startY
+                )
+            );
+
+            section3.AddRight
+            (
+                _lightBar = AddHSlider
+                (
+                    null,
+                    0,
+                    0x1E,
+                    0x1E - _currentProfile.LightLevel,
+                    startX,
+                    startY,
+                    250
+                )
+            );
+
+            section3.Add
+            (
+                _darkNights = AddCheckBox
+                (
+                    null,
+                    ResGumps.DarkNights,
+                    _currentProfile.UseDarkNights,
+                    startX,
+                    startY
+                )
+            );
+
+            section3.Add
+            (
+                _useColoredLights = AddCheckBox
+                (
+                    null,
+                    ResGumps.UseColoredLights,
+                    _currentProfile.UseColoredLights,
+                    startX,
+                    startY
+                )
+            );
+
+
+            SettingsSection section4 = AddSettingsSection(box, "Misc");
+            section4.Y = section3.Bounds.Bottom + 40;
+
+            section4.Add
+            (
+                _enableDeathScreen = AddCheckBox
+                (
+                    null,
+                    ResGumps.EnableDeathScreen,
+                    _currentProfile.EnableDeathScreen,
+                    startX,
+                    startY
+                )
+            );
+
+            section4.AddRight
+            (
+                _enableBlackWhiteEffect = AddCheckBox
+                (
+                    null,
+                    ResGumps.BlackWhiteModeForDeadPlayer,
+                    _currentProfile.EnableBlackWhiteEffect,
+                    startX,
+                    startY
+                )
+            );
+
+            section4.Add
+            (
+                _runMouseInSeparateThread = AddCheckBox
+                (
+                    null,
+                    ResGumps.RunMouseInASeparateThread,
+                    Settings.GlobalSettings.RunMouseInASeparateThread,
+                    startX,
+                    startY
+                )
+            );
+
+            section4.Add
+            (
+                _auraMouse = AddCheckBox
+                (
+                    null,
+                    ResGumps.AuraOnMouseTarget,
+                    _currentProfile.AuraOnMouse,
+                    startX,
+                    startY
+                )
+            );
+
+
+            SettingsSection section5 = AddSettingsSection(box, "Shadows");
+            section5.Y = section4.Bounds.Bottom + 40;
+
+            section5.Add
+            (
+                _enableShadows = AddCheckBox
+                (
+                    null,
+                    ResGumps.Shadows,
+                    _currentProfile.ShadowsEnabled,
+                    startX,
+                    startY
+                )
+            );
+
+            section5.PushIndent();
+
+            section5.Add
+            (
+                _enableShadowsStatics = AddCheckBox
+                (
+                    null,
+                    ResGumps.ShadowStatics,
+                    _currentProfile.ShadowsStatics,
+                    startX,
+                    startY
+                )
+            );
+
+            section5.PopIndent();
+
+
+            SettingsSection section6 = AddSettingsSection(box, "Filters");
+            section6.Y = section5.Bounds.Bottom + 40;
+            section6.Add(AddLabel(null, ResGumps.FilterType, startX, startY));
+
+            section6.AddRight
+            (
+                _filterType = AddCombobox
+                (
+                    null,
+                    new[]
+                    {
+                        ResGumps.OFF,
+                        string.Format(ResGumps.FilterTypeFormatON, ResGumps.ON, ResGumps.AnisotropicClamp),
+                        string.Format(ResGumps.FilterTypeFormatON, ResGumps.ON, ResGumps.LinearClamp)
+                    },
+                    _currentProfile.FilterType,
+                    startX,
+                    startY,
+                    200
+                )
+            );
+
 
             Add(rightArea, PAGE);
         }
@@ -689,62 +1827,117 @@ namespace ClassicUO.Game.UI.Gumps
         {
             const int PAGE = 4;
 
-            ScrollArea rightArea = new ScrollArea(190, 52 + 25 + 4, 150, 360, true);
-            NiceButton addButton = new NiceButton(190, 20, 130, 20, ButtonAction.Activate, "New macro") {IsSelectable = false, ButtonParameter = (int) Buttons.NewMacro};
+            ScrollArea rightArea = new ScrollArea
+            (
+                190,
+                52 + 25 + 4,
+                150,
+                360,
+                true
+            );
+
+            Add
+            (
+                new Line
+                (
+                    190,
+                    52 + 25 + 2,
+                    150,
+                    1,
+                    Color.Gray.PackedValue
+                ),
+                PAGE
+            );
+
+            Add
+            (
+                new Line
+                (
+                    191 + 150,
+                    21,
+                    1,
+                    418,
+                    Color.Gray.PackedValue
+                ),
+                PAGE
+            );
+
+            NiceButton addButton = new NiceButton
+            (
+                190,
+                20,
+                130,
+                20,
+                ButtonAction.Activate,
+                ResGumps.NewMacro
+            ) { IsSelectable = false, ButtonParameter = (int) Buttons.NewMacro };
+
+            Add(addButton, PAGE);
+
+            NiceButton delButton = new NiceButton
+            (
+                190,
+                52,
+                130,
+                20,
+                ButtonAction.Activate,
+                ResGumps.DeleteMacro
+            ) { IsSelectable = false, ButtonParameter = (int) Buttons.DeleteMacro };
+
+            Add(delButton, PAGE);
+
+
+            int startX = 5;
+            int startY = 5;
+
+            DataBox databox = new DataBox(startX, startY, 1, 1);
+            databox.WantUpdateSize = true;
+            rightArea.Add(databox);
+
 
             addButton.MouseUp += (sender, e) =>
             {
-                EntryDialog dialog = new EntryDialog(250, 150, "Macro name:", name =>
-                {
-                    if (string.IsNullOrWhiteSpace(name))
-                        return;
-
-                    MacroManager manager = CUOEnviroment.Client.GetScene<GameScene>().Macros;
-                    List<Macro> macros = manager.GetAllMacros();
-
-                    if (macros.Any(s => s.Name == name))
-                        return;
-
-                    NiceButton nb;
-
-                    rightArea.Add(nb = new NiceButton(0, 0, 130, 25, ButtonAction.Activate, name)
+                EntryDialog dialog = new EntryDialog
+                (
+                    250,
+                    150,
+                    ResGumps.MacroName,
+                    name =>
                     {
-                        ButtonParameter = (int) Buttons.Last + 1 + rightArea.Children.Count
-                    });
-
-                    nb.IsSelected = true;
-
-                    _macroControl?.Dispose();
-
-                    _macroControl = new MacroControl(name)
-                    {
-                        X = 400,
-                        Y = 20
-                    };
-
-                    Add(_macroControl, PAGE);
-
-                    nb.DragBegin += (sss, eee) =>
-                    {
-                        if (UIManager.IsDragging || Math.Max(Math.Abs(Mouse.LDroppedOffset.X), Math.Abs(Mouse.LDroppedOffset.Y)) < 5
-                            || nb.ScreenCoordinateX > Mouse.LDropPosition.X || nb.ScreenCoordinateX < Mouse.LDropPosition.X - nb.Width
-                            || nb.ScreenCoordinateY > Mouse.LDropPosition.Y || nb.ScreenCoordinateY + nb.Height < Mouse.LDropPosition.Y)
+                        if (string.IsNullOrWhiteSpace(name))
+                        {
                             return;
+                        }
 
-                        MacroCollectionControl control = _macroControl.FindControls<MacroCollectionControl>().SingleOrDefault();
+                        MacroManager manager = Client.Game.GetScene<GameScene>().Macros;
 
-                        if (control == null)
+                        if (manager.FindMacro(name) != null)
+                        {
                             return;
+                        }
 
-                        UIManager.Gumps.OfType<MacroButtonGump>().FirstOrDefault(s => s._macro == control.Macro)?.Dispose();
+                        NiceButton nb;
 
-                        MacroButtonGump macroButtonGump = new MacroButtonGump(control.Macro, Mouse.Position.X, Mouse.Position.Y);
-                        UIManager.Add(macroButtonGump);
-                        UIManager.AttemptDragControl(macroButtonGump, new Point(Mouse.Position.X + (macroButtonGump.Width >> 1), Mouse.Position.Y + (macroButtonGump.Height >> 1)), true);
-                    };
+                        databox.Add
+                        (
+                            nb = new NiceButton
+                            (
+                                0,
+                                0,
+                                130,
+                                25,
+                                ButtonAction.Activate,
+                                name
+                            )
+                            {
+                                ButtonParameter = (int) Buttons.Last + 1 + rightArea.Children.Count
+                            }
+                        );
 
-                    nb.MouseUp += (sss, eee) =>
-                    {
+                        databox.ReArrangeChildren();
+
+                        nb.IsSelected = true;
+
                         _macroControl?.Dispose();
 
                         _macroControl = new MacroControl(name)
@@ -752,86 +1945,160 @@ namespace ClassicUO.Game.UI.Gumps
                             X = 400,
                             Y = 20
                         };
+
+                        manager.PushToBack(_macroControl.Macro);
+
                         Add(_macroControl, PAGE);
-                    };
-                })
+
+                        nb.DragBegin += (sss, eee) =>
+                        {
+                            if (UIManager.IsDragging || Math.Max(Math.Abs(Mouse.LDragOffset.X), Math.Abs(Mouse.LDragOffset.Y)) < 5 || nb.ScreenCoordinateX > Mouse.LClickPosition.X || nb.ScreenCoordinateX < Mouse.LClickPosition.X - nb.Width || nb.ScreenCoordinateY > Mouse.LClickPosition.Y || nb.ScreenCoordinateY + nb.Height < Mouse.LClickPosition.Y)
+                            {
+                                return;
+                            }
+
+                            MacroControl control = _macroControl.FindControls<MacroControl>().SingleOrDefault();
+
+                            if (control == null)
+                            {
+                                return;
+                            }
+
+                            UIManager.Gumps.OfType<MacroButtonGump>().FirstOrDefault(s => s._macro == control.Macro)?.Dispose();
+
+                            MacroButtonGump macroButtonGump = new MacroButtonGump(control.Macro, Mouse.Position.X, Mouse.Position.Y);
+
+                            macroButtonGump.X = Mouse.LClickPosition.X + (macroButtonGump.Width >> 1);
+                            macroButtonGump.Y = Mouse.LClickPosition.Y + (macroButtonGump.Height >> 1);
+
+                            UIManager.Add(macroButtonGump);
+
+                            UIManager.AttemptDragControl(macroButtonGump, true);
+                        };
+
+                        nb.MouseUp += (sss, eee) =>
+                        {
+                            _macroControl?.Dispose();
+
+                            _macroControl = new MacroControl(name)
+                            {
+                                X = 400,
+                                Y = 20
+                            };
+
+                            Add(_macroControl, PAGE);
+                        };
+                    }
+                )
                 {
                     CanCloseWithRightClick = true
                 };
+
                 UIManager.Add(dialog);
             };
 
-            Add(addButton, PAGE);
-
-            NiceButton delButton = new NiceButton(190, 52, 130, 20, ButtonAction.Activate, "Delete macro") {IsSelectable = false, ButtonParameter = (int) Buttons.DeleteMacro};
-
             delButton.MouseUp += (ss, ee) =>
             {
-                NiceButton nb = rightArea.FindControls<ScrollAreaItem>()
-                                         .SelectMany(s => s.Children.OfType<NiceButton>())
-                                         .SingleOrDefault(a => a.IsSelected);
+                NiceButton nb = databox.FindControls<NiceButton>().SingleOrDefault(a => a.IsSelected);
 
                 if (nb != null)
                 {
-                    QuestionGump dialog = new QuestionGump("Do you want\ndelete it?", b =>
-                    {
-                        if (!b)
-                            return;
-
-                        nb.Parent.Dispose();
-
-                        if (_macroControl != null)
+                    QuestionGump dialog = new QuestionGump
+                    (
+                        ResGumps.MacroDeleteConfirmation,
+                        b =>
                         {
-                            MacroCollectionControl control = _macroControl.FindControls<MacroCollectionControl>().SingleOrDefault();
-
-                            if (control == null)
+                            if (!b)
+                            {
                                 return;
+                            }
 
-                            UIManager.Gumps.OfType<MacroButtonGump>().FirstOrDefault(s => s._macro == control.Macro)?.Dispose();
-                            CUOEnviroment.Client.GetScene<GameScene>().Macros.RemoveMacro(control.Macro);
+                            if (_macroControl != null)
+                            {
+                                UIManager.Gumps.OfType<MacroButtonGump>().FirstOrDefault(s => s._macro == _macroControl.Macro)?.Dispose();
+
+                                Client.Game.GetScene<GameScene>().Macros.Remove(_macroControl.Macro);
+
+                                _macroControl.Dispose();
+                            }
+
+                            nb.Dispose();
+                            databox.ReArrangeChildren();
                         }
+                    );
 
-                        if (rightArea.Children.OfType<ScrollAreaItem>().All(s => s.IsDisposed)) _macroControl?.Dispose();
-                    });
                     UIManager.Add(dialog);
                 }
             };
 
-            Add(delButton, PAGE);
-            Add(new Line(190, 52 + 25 + 2, 150, 1, Color.Gray.PackedValue), PAGE);
-            Add(rightArea, PAGE);
-            Add(new Line(191 + 150, 21, 1, 418, Color.Gray.PackedValue), PAGE);
 
-            foreach (Macro macro in CUOEnviroment.Client.GetScene<GameScene>().Macros.GetAllMacros())
+            MacroManager macroManager = Client.Game.GetScene<GameScene>().Macros;
+
+            for (Macro macro = (Macro) macroManager.Items; macro != null; macro = (Macro) macro.Next)
             {
                 NiceButton nb;
 
-                rightArea.Add(nb = new NiceButton(0, 0, 130, 25, ButtonAction.Activate, macro.Name)
-                {
-                    ButtonParameter = (int) Buttons.Last + 1 + rightArea.Children.Count
-                });
+                databox.Add
+                (
+                    nb = new NiceButton
+                    (
+                        0,
+                        0,
+                        130,
+                        25,
+                        ButtonAction.Activate,
+                        macro.Name
+                    )
+                    {
+                        ButtonParameter = (int) Buttons.Last + 1 + rightArea.Children.Count,
+                        Tag = macro
+                    }
+                );
 
                 nb.IsSelected = true;
 
                 nb.DragBegin += (sss, eee) =>
                 {
-                    if (UIManager.IsDragging || Math.Max(Math.Abs(Mouse.LDroppedOffset.X), Math.Abs(Mouse.LDroppedOffset.Y)) < 5
-                        || nb.ScreenCoordinateX > Mouse.LDropPosition.X || nb.ScreenCoordinateX < Mouse.LDropPosition.X - nb.Width
-                        || nb.ScreenCoordinateY > Mouse.LDropPosition.Y || nb.ScreenCoordinateY + nb.Height < Mouse.LDropPosition.Y)
-                            return;
+                    NiceButton mupNiceButton = (NiceButton) sss;
 
-                    UIManager.Gumps.OfType<MacroButtonGump>().FirstOrDefault(s => s._macro == macro)?.Dispose();
+                    Macro m = mupNiceButton.Tag as Macro;
 
-                    MacroButtonGump macroButtonGump = new MacroButtonGump(macro, Mouse.Position.X, Mouse.Position.Y);
+                    if (m == null)
+                    {
+                        return;
+                    }
+
+                    if (UIManager.IsDragging || Math.Max(Math.Abs(Mouse.LDragOffset.X), Math.Abs(Mouse.LDragOffset.Y)) < 5 || nb.ScreenCoordinateX > Mouse.LClickPosition.X || nb.ScreenCoordinateX < Mouse.LClickPosition.X - nb.Width || nb.ScreenCoordinateY > Mouse.LClickPosition.Y || nb.ScreenCoordinateY + nb.Height < Mouse.LClickPosition.Y)
+                    {
+                        return;
+                    }
+
+                    UIManager.Gumps.OfType<MacroButtonGump>().FirstOrDefault(s => s._macro == m)?.Dispose();
+
+                    MacroButtonGump macroButtonGump = new MacroButtonGump(m, Mouse.Position.X, Mouse.Position.Y);
+
+                    macroButtonGump.X = Mouse.LClickPosition.X + (macroButtonGump.Width >> 1);
+                    macroButtonGump.Y = Mouse.LClickPosition.Y + (macroButtonGump.Height >> 1);
+
                     UIManager.Add(macroButtonGump);
-                    UIManager.AttemptDragControl(macroButtonGump, new Point(Mouse.Position.X + (macroButtonGump.Width >> 1), Mouse.Position.Y + (macroButtonGump.Height >> 1)), true);
+
+                    UIManager.AttemptDragControl(macroButtonGump, true);
                 };
 
                 nb.MouseUp += (sss, eee) =>
                 {
+                    NiceButton mupNiceButton = (NiceButton) sss;
+
+                    Macro m = mupNiceButton.Tag as Macro;
+
+                    if (m == null)
+                    {
+                        return;
+                    }
+
                     _macroControl?.Dispose();
 
-                    _macroControl = new MacroControl(macro.Name)
+                    _macroControl = new MacroControl(m.Name)
                     {
                         X = 400,
                         Y = 20
@@ -840,51 +2107,184 @@ namespace ClassicUO.Game.UI.Gumps
                     Add(_macroControl, PAGE);
                 };
             }
+
+            databox.ReArrangeChildren();
+
+            Add(rightArea, PAGE);
         }
 
         private void BuildTooltip()
         {
             const int PAGE = 5;
-            ScrollArea rightArea = new ScrollArea(190, 20, WIDTH - 210, 420, true);
-            ScrollAreaItem item = new ScrollAreaItem();
+
+            ScrollArea rightArea = new ScrollArea
+            (
+                190,
+                20,
+                WIDTH - 210,
+                420,
+                true
+            );
+
+            int startX = 5;
+            int startY = 5;
+
+            _use_tooltip = AddCheckBox
+            (
+                rightArea,
+                ResGumps.UseTooltip,
+                _currentProfile.UseTooltip,
+                startX,
+                startY
+            );
+
+            startY += _use_tooltip.Height + 2;
+
+            startX += 40;
+
+            Label text = AddLabel(rightArea, ResGumps.DelayBeforeDisplay, startX, startY);
+            startX += text.Width + 5;
+
+            _delay_before_display_tooltip = AddHSlider
+            (
+                rightArea,
+                0,
+                1000,
+                _currentProfile.TooltipDelayBeforeDisplay,
+                startX,
+                startY,
+                200
+            );
+
+            startX = 5 + 40;
+            startY += text.Height + 2;
+
+            text = AddLabel(rightArea, ResGumps.TooltipZoom, startX, startY);
+            startX += text.Width + 5;
+
+            _tooltip_zoom = AddHSlider
+            (
+                rightArea,
+                100,
+                200,
+                _currentProfile.TooltipDisplayZoom,
+                startX,
+                startY,
+                200
+            );
+
+            startX = 5 + 40;
+            startY += text.Height + 2;
+
+            text = AddLabel(rightArea, ResGumps.TooltipBackgroundOpacity, startX, startY);
+            startX += text.Width + 5;
+
+            _tooltip_background_opacity = AddHSlider
+            (
+                rightArea,
+                0,
+                100,
+                _currentProfile.TooltipBackgroundOpacity,
+                startX,
+                startY,
+                200
+            );
+
+            startX = 5 + 40;
+            startY += text.Height + 2;
+
+            _tooltip_font_hue = AddColorBox
+            (
+                rightArea,
+                startX,
+                startY,
+                _currentProfile.TooltipTextHue,
+                ResGumps.TooltipFontHue
+            );
+
+            startY += _tooltip_font_hue.Height + 2;
+
+            startY += 15;
+
+            text = AddLabel(rightArea, ResGumps.TooltipFont, startX, startY);
+            startY += text.Height + 2;
+            startX += 40;
+
+            _tooltip_font_selector = new FontSelector(7, _currentProfile.TooltipFont, ResGumps.TooltipFontSelect)
+            {
+                X = startX,
+                Y = startY
+            };
+
+            rightArea.Add(_tooltip_font_selector);
+
             Add(rightArea, PAGE);
         }
 
         private void BuildFonts()
         {
             const int PAGE = 6;
-            ScrollArea rightArea = new ScrollArea(190, 20, WIDTH - 210, 420, true);
 
-            ScrollAreaItem item = new ScrollAreaItem();
+            ScrollArea rightArea = new ScrollArea
+            (
+                190,
+                20,
+                WIDTH - 210,
+                420,
+                true
+            );
 
-            _overrideAllFonts = new Checkbox(0x00D2, 0x00D3, "Override game font", FONT, HUE_FONT)
+            int startX = 5;
+            int startY = 5;
+
+            _overrideAllFonts = AddCheckBox
+            (
+                rightArea,
+                ResGumps.OverrideGameFont,
+                _currentProfile.OverrideAllFonts,
+                startX,
+                startY
+            );
+
+            startX += _overrideAllFonts.Width + 5;
+
+            _overrideAllFontsIsUnicodeCheckbox = AddCombobox
+            (
+                rightArea,
+                new[]
+                {
+                    ResGumps.ASCII, ResGumps.Unicode
+                },
+                _currentProfile.OverrideAllFontsIsUnicode ? 1 : 0,
+                startX,
+                startY,
+                100
+            );
+
+            startX = 5;
+            startY += _overrideAllFonts.Height + 2;
+
+            _forceUnicodeJournal = AddCheckBox
+            (
+                rightArea,
+                ResGumps.ForceUnicodeInJournal,
+                _currentProfile.ForceUnicodeJournal,
+                startX,
+                startY
+            );
+
+            startY += _forceUnicodeJournal.Height + 2;
+
+            Label text = AddLabel(rightArea, ResGumps.SpeechFont, startX, startY);
+            startX += 40;
+            startY += text.Height + 2;
+
+            _fontSelectorChat = new FontSelector(20, _currentProfile.ChatFont, ResGumps.ThatSClassicUO)
             {
-                IsChecked = ProfileManager.Current.OverrideAllFonts
+                X = startX,
+                Y = startY
             };
 
-            _overrideAllFontsIsUnicodeCheckbox = new Combobox(_overrideAllFonts.Width + 5, _overrideAllFonts.Y, 100, new[]
-            {
-                "ASCII", "Unicode"
-            }, ProfileManager.Current.OverrideAllFontsIsUnicode ? 1 : 0)
-            {
-                IsVisible = _overrideAllFonts.IsChecked
-            };
-            _overrideAllFonts.ValueChanged += (ss, ee) => { _overrideAllFontsIsUnicodeCheckbox.IsVisible = _overrideAllFonts.IsChecked; };
-
-            item.Add(_overrideAllFonts);
-            item.Add(_overrideAllFontsIsUnicodeCheckbox);
-            rightArea.Add(item);
-
-
-
-            Label text = new Label("Speech font:", true, HUE_FONT)
-            {
-                Y = 20,
-            };
-            rightArea.Add(text);
-
-            _fontSelectorChat = new FontSelector
-                {X = 20};
             rightArea.Add(_fontSelectorChat);
 
             Add(rightArea, PAGE);
@@ -893,66 +2293,235 @@ namespace ClassicUO.Game.UI.Gumps
         private void BuildSpeech()
         {
             const int PAGE = 7;
-            ScrollArea rightArea = new ScrollArea(190, 20, WIDTH - 210, 420, true);
 
-            ScrollAreaItem item = new ScrollAreaItem();
+            ScrollArea rightArea = new ScrollArea
+            (
+                190,
+                20,
+                WIDTH - 210,
+                420,
+                true
+            );
 
-            _scaleSpeechDelay = new Checkbox(0x00D2, 0x00D3, "Scale speech delay", FONT, HUE_FONT)
+            int startX = 5;
+            int startY = 5;
+
+            _scaleSpeechDelay = AddCheckBox
+            (
+                rightArea,
+                ResGumps.ScaleSpeechDelay,
+                _currentProfile.ScaleSpeechDelay,
+                startX,
+                startY
+            );
+
+            startX += _scaleSpeechDelay.Width + 5;
+
+            _sliderSpeechDelay = AddHSlider
+            (
+                rightArea,
+                0,
+                1000,
+                _currentProfile.SpeechDelay,
+                startX,
+                startY,
+                180
+            );
+
+            startX = 5;
+            startY += _scaleSpeechDelay.Height + 2;
+
+            _saveJournalCheckBox = AddCheckBox
+            (
+                rightArea,
+                ResGumps.SaveJournalToFileInGameFolder,
+                _currentProfile.SaveJournalToFile,
+                startX,
+                startY
+            );
+
+            startY += _saveJournalCheckBox.Height + 2;
+
+            if (!_currentProfile.SaveJournalToFile)
             {
-                IsChecked = ProfileManager.Current.ScaleSpeechDelay
-            };
-            _scaleSpeechDelay.ValueChanged += (sender, e) => { _sliderSpeechDelay.IsVisible = _scaleSpeechDelay.IsChecked; };
-            item.Add(_scaleSpeechDelay);
-            _sliderSpeechDelay = new HSliderBar(150, 1, 180, 0, 1000, ProfileManager.Current.SpeechDelay, HSliderBarStyle.MetalWidgetRecessedBar, true, FONT, HUE_FONT);
-            item.Add(_sliderSpeechDelay);
-            rightArea.Add(item);
-
-            _saveJournalCheckBox = CreateCheckBox(rightArea, "Save Journal to file in game folder", false, 0, 0);
-            _saveJournalCheckBox.ValueChanged += (o, e) => { World.Journal.CreateWriter(_saveJournalCheckBox.IsChecked); };
-            _saveJournalCheckBox.IsChecked = ProfileManager.Current.SaveJournalToFile;
-
-            // [BLOCK] activate chat
-            {
-                _chatAfterEnter = new Checkbox(0x00D2, 0x00D3, "Press `Enter` to activate chat", FONT, HUE_FONT)
-                {
-                    Y = 0,
-                    IsChecked = ProfileManager.Current.ActivateChatAfterEnter
-                };
-                _chatAfterEnter.ValueChanged += (sender, e) => { _activeChatArea.IsVisible = _chatAfterEnter.IsChecked; };
-                rightArea.Add(_chatAfterEnter);
-
-                _activeChatArea = new ScrollAreaItem();
-
-                _chatAdditionalButtonsCheckbox = new Checkbox(0x00D2, 0x00D3, "Use additional buttons to activate chat: ! ; : / \\ , . [ | -", FONT, HUE_FONT)
-                {
-                    X = 20,
-                    Y = 15,
-                    IsChecked = ProfileManager.Current.ActivateChatAdditionalButtons
-                };
-                _activeChatArea.Add(_chatAdditionalButtonsCheckbox);
-
-                _chatShiftEnterCheckbox = new Checkbox(0x00D2, 0x00D3, "Use `Shift+Enter` to send message without closing chat", FONT, HUE_FONT)
-                {
-                    X = 20,
-                    Y = 35,
-                    IsChecked = ProfileManager.Current.ActivateChatShiftEnterSupport
-                };
-                _activeChatArea.Add(_chatShiftEnterCheckbox);
-
-                _activeChatArea.IsVisible = _chatAfterEnter.IsChecked;
-
-                rightArea.Add(_activeChatArea);
+                World.Journal.CloseWriter();
             }
 
-            _speechColorPickerBox = CreateClickableColorBox(rightArea, 0, 20, ProfileManager.Current.SpeechHue, "Speech Color", 20, 20);
-            _emoteColorPickerBox = CreateClickableColorBox(rightArea, 0, 0, ProfileManager.Current.EmoteHue, "Emote Color", 20, 0);
-            _yellColorPickerBox = CreateClickableColorBox(rightArea, 0, 0, ProfileManager.Current.YellHue, "Yell Color", 20, 0);
-            _whisperColorPickerBox = CreateClickableColorBox(rightArea, 0, 0, ProfileManager.Current.WhisperHue, "Whisper Color", 20, 0);
-            _partyMessageColorPickerBox = CreateClickableColorBox(rightArea, 0, 0, ProfileManager.Current.PartyMessageHue, "Party Message Color", 20, 0);
-            _guildMessageColorPickerBox = CreateClickableColorBox(rightArea, 0, 0, ProfileManager.Current.GuildMessageHue, "Guild Message Color", 20, 0);
-            _allyMessageColorPickerBox = CreateClickableColorBox(rightArea, 0, 0, ProfileManager.Current.AllyMessageHue, "Alliance Message Color", 20, 0);
+            _chatAfterEnter = AddCheckBox
+            (
+                rightArea,
+                ResGumps.ActiveChatWhenPressingEnter,
+                _currentProfile.ActivateChatAfterEnter,
+                startX,
+                startY
+            );
 
-            _sliderSpeechDelay.IsVisible = _scaleSpeechDelay.IsChecked;
+            startX += 40;
+            startY += _chatAfterEnter.Height + 2;
+
+            _chatAdditionalButtonsCheckbox = AddCheckBox
+            (
+                rightArea,
+                ResGumps.UseAdditionalButtonsToActivateChat,
+                _currentProfile.ActivateChatAdditionalButtons,
+                startX,
+                startY
+            );
+
+            startY += _chatAdditionalButtonsCheckbox.Height + 2;
+
+            _chatShiftEnterCheckbox = AddCheckBox
+            (
+                rightArea,
+                ResGumps.UseShiftEnterToSendMessage,
+                _currentProfile.ActivateChatShiftEnterSupport,
+                startX,
+                startY
+            );
+
+            startY += _chatShiftEnterCheckbox.Height + 2;
+            startX = 5;
+
+            _hideChatGradient = AddCheckBox
+            (
+                rightArea,
+                ResGumps.HideChatGradient,
+                _currentProfile.HideChatGradient,
+                startX,
+                startY
+            );
+
+            startY += _hideChatGradient.Height + 2;
+
+            startY += 20;
+
+            _randomizeColorsButton = new NiceButton
+            (
+                startX,
+                startY,
+                140,
+                25,
+                ButtonAction.Activate,
+                ResGumps.RandomizeSpeechHues
+            ) { ButtonParameter = (int) Buttons.Disabled };
+
+            _randomizeColorsButton.MouseUp += (sender, e) =>
+            {
+                if (e.Button != MouseButtonType.Left)
+                {
+                    return;
+                }
+
+                ushort speechHue = (ushort) RandomHelper.GetValue(2, 0x03b2); //this seems to be the acceptable hue range for chat messages,
+
+                ushort emoteHue = (ushort) RandomHelper.GetValue(2, 0x03b2); //taken from POL source code.
+                ushort yellHue = (ushort) RandomHelper.GetValue(2, 0x03b2);
+                ushort whisperHue = (ushort) RandomHelper.GetValue(2, 0x03b2);
+                _currentProfile.SpeechHue = speechHue;
+                _speechColorPickerBox.SetColor(speechHue, HuesLoader.Instance.GetPolygoneColor(12, speechHue));
+                _currentProfile.EmoteHue = emoteHue;
+                _emoteColorPickerBox.SetColor(emoteHue, HuesLoader.Instance.GetPolygoneColor(12, emoteHue));
+                _currentProfile.YellHue = yellHue;
+                _yellColorPickerBox.SetColor(yellHue, HuesLoader.Instance.GetPolygoneColor(12, yellHue));
+                _currentProfile.WhisperHue = whisperHue;
+                _whisperColorPickerBox.SetColor(whisperHue, HuesLoader.Instance.GetPolygoneColor(12, whisperHue));
+            };
+
+            rightArea.Add(_randomizeColorsButton);
+            startY += _randomizeColorsButton.Height + 2 + 20;
+
+
+            _speechColorPickerBox = AddColorBox
+            (
+                rightArea,
+                startX,
+                startY,
+                _currentProfile.SpeechHue,
+                ResGumps.SpeechColor
+            );
+
+            startX += 200;
+
+            _emoteColorPickerBox = AddColorBox
+            (
+                rightArea,
+                startX,
+                startY,
+                _currentProfile.EmoteHue,
+                ResGumps.EmoteColor
+            );
+
+            startY += _emoteColorPickerBox.Height + 2;
+            startX = 5;
+
+            _yellColorPickerBox = AddColorBox
+            (
+                rightArea,
+                startX,
+                startY,
+                _currentProfile.YellHue,
+                ResGumps.YellColor
+            );
+
+            startX += 200;
+
+            _whisperColorPickerBox = AddColorBox
+            (
+                rightArea,
+                startX,
+                startY,
+                _currentProfile.WhisperHue,
+                ResGumps.WhisperColor
+            );
+
+            startY += _whisperColorPickerBox.Height + 2;
+            startX = 5;
+
+            _partyMessageColorPickerBox = AddColorBox
+            (
+                rightArea,
+                startX,
+                startY,
+                _currentProfile.PartyMessageHue,
+                ResGumps.PartyMessageColor
+            );
+
+            startX += 200;
+
+            _guildMessageColorPickerBox = AddColorBox
+            (
+                rightArea,
+                startX,
+                startY,
+                _currentProfile.GuildMessageHue,
+                ResGumps.GuildMessageColor
+            );
+
+            startY += _guildMessageColorPickerBox.Height + 2;
+            startX = 5;
+
+            _allyMessageColorPickerBox = AddColorBox
+            (
+                rightArea,
+                startX,
+                startY,
+                _currentProfile.AllyMessageHue,
+                ResGumps.AllianceMessageColor
+            );
+
+            startX += 200;
+
+            _chatMessageColorPickerBox = AddColorBox
+            (
+                rightArea,
+                startX,
+                startY,
+                _currentProfile.ChatMessageHue,
+                ResGumps.ChatMessageColor
+            );
+
+            startY += _chatMessageColorPickerBox.Height + 2;
+            startX = 5;
 
             Add(rightArea, PAGE);
         }
@@ -961,37 +2530,219 @@ namespace ClassicUO.Game.UI.Gumps
         {
             const int PAGE = 8;
 
-            ScrollArea rightArea = new ScrollArea(190, 20, WIDTH - 210, 420, true);
+            ScrollArea rightArea = new ScrollArea
+            (
+                190,
+                20,
+                WIDTH - 210,
+                420,
+                true
+            );
 
-            _queryBeforAttackCheckbox = CreateCheckBox(rightArea, "Query before attack", ProfileManager.Current.EnabledCriminalActionQuery, 0, 0);
-            _spellFormatCheckbox = CreateCheckBox(rightArea, "Enable Overhead Spell Format", ProfileManager.Current.EnabledSpellFormat, 0, 0);
-            _spellColoringCheckbox = CreateCheckBox(rightArea, "Enable Overhead Spell Hue", ProfileManager.Current.EnabledSpellHue, 0, 0);
-            _castSpellsByOneClick = CreateCheckBox(rightArea, "Cast spells by one click", ProfileManager.Current.CastSpellsByOneClick, 0, 0);
-            _buffBarTime = CreateCheckBox(rightArea, "Show buff duration", ProfileManager.Current.BuffBarTime, 0, 0);
+            int startX = 5;
+            int startY = 5;
 
-            _innocentColorPickerBox = CreateClickableColorBox(rightArea, 0, 20, ProfileManager.Current.InnocentHue, "Innocent Color", 20, 20);
-            _friendColorPickerBox = CreateClickableColorBox(rightArea, 0, 0, ProfileManager.Current.FriendHue, "Friend Color", 20, 0);
-            _crimialColorPickerBox = CreateClickableColorBox(rightArea, 0, 0, ProfileManager.Current.CriminalHue, "Criminal Color", 20, 0);
-            _genericColorPickerBox = CreateClickableColorBox(rightArea, 0, 0, ProfileManager.Current.AnimalHue, "Animal Color", 20, 0);
-            _murdererColorPickerBox = CreateClickableColorBox(rightArea, 0, 0, ProfileManager.Current.MurdererHue, "Murderer Color", 20, 0);
-            _enemyColorPickerBox = CreateClickableColorBox(rightArea, 0, 0, ProfileManager.Current.EnemyHue, "Enemy Color", 20, 0);
+            _holdDownKeyTab = AddCheckBox
+            (
+                rightArea,
+                ResGumps.TabCombat,
+                _currentProfile.HoldDownKeyTab,
+                startX,
+                startY
+            );
 
-            _beneficColorPickerBox = CreateClickableColorBox(rightArea, 0, 20, ProfileManager.Current.BeneficHue, "Benefic Spell Hue", 20, 20);
-            _harmfulColorPickerBox = CreateClickableColorBox(rightArea, 0, 0, ProfileManager.Current.HarmfulHue, "Harmful Spell Hue", 20, 0);
-            _neutralColorPickerBox = CreateClickableColorBox(rightArea, 0, 0, ProfileManager.Current.NeutralHue, "Neutral Spell Hue", 20, 0);
+            startY += _holdDownKeyTab.Height + 2;
 
-            ScrollAreaItem it = new ScrollAreaItem();
+            _queryBeforAttackCheckbox = AddCheckBox
+            (
+                rightArea,
+                ResGumps.QueryAttack,
+                _currentProfile.EnabledCriminalActionQuery,
+                startX,
+                startY
+            );
 
-            _spellFormatBox = CreateInputField(it, new TextBox(FONT, 30, 200, 200)
-            {
-                Text = ProfileManager.Current.SpellDisplayFormat,
-                X = 0,
-                Y = 20,
-                Width = 200,
-                Height = 30
-            }, " Spell Overhead format: ({power} for powerword - {spell} for spell name)", rightArea.Width - 20);
+            startY += _queryBeforAttackCheckbox.Height + 2;
 
-            rightArea.Add(it);
+            _queryBeforeBeneficialCheckbox = AddCheckBox
+            (
+                rightArea,
+                ResGumps.QueryBeneficialActs,
+                _currentProfile.EnabledBeneficialCriminalActionQuery,
+                startX,
+                startY
+            );
+
+            startY += _queryBeforeBeneficialCheckbox.Height + 2;
+
+            _spellFormatCheckbox = AddCheckBox
+            (
+                rightArea,
+                ResGumps.EnableOverheadSpellFormat,
+                _currentProfile.EnabledSpellFormat,
+                startX,
+                startY
+            );
+
+            startY += _spellFormatCheckbox.Height + 2;
+
+            _spellColoringCheckbox = AddCheckBox
+            (
+                rightArea,
+                ResGumps.EnableOverheadSpellHue,
+                _currentProfile.EnabledSpellHue,
+                startX,
+                startY
+            );
+
+            startY += _spellColoringCheckbox.Height + 2;
+
+            _castSpellsByOneClick = AddCheckBox
+            (
+                rightArea,
+                ResGumps.CastSpellsByOneClick,
+                _currentProfile.CastSpellsByOneClick,
+                startX,
+                startY
+            );
+
+            startY += _castSpellsByOneClick.Height + 2;
+
+            _buffBarTime = AddCheckBox
+            (
+                rightArea,
+                ResGumps.ShowBuffDuration,
+                _currentProfile.BuffBarTime,
+                startX,
+                startY
+            );
+
+            startY += _buffBarTime.Height + 2;
+
+            startY += 40;
+
+            int initialY = startY;
+
+            _innocentColorPickerBox = AddColorBox
+            (
+                rightArea,
+                startX,
+                startY,
+                _currentProfile.InnocentHue,
+                ResGumps.InnocentColor
+            );
+
+            startY += _innocentColorPickerBox.Height + 2;
+
+            _friendColorPickerBox = AddColorBox
+            (
+                rightArea,
+                startX,
+                startY,
+                _currentProfile.FriendHue,
+                ResGumps.FriendColor
+            );
+
+            startY += _innocentColorPickerBox.Height + 2;
+
+            _crimialColorPickerBox = AddColorBox
+            (
+                rightArea,
+                startX,
+                startY,
+                _currentProfile.CriminalHue,
+                ResGumps.CriminalColor
+            );
+
+            startY += _innocentColorPickerBox.Height + 2;
+
+            _canAttackColorPickerBox = AddColorBox
+            (
+                rightArea,
+                startX,
+                startY,
+                _currentProfile.CanAttackHue,
+                ResGumps.CanAttackColor
+            );
+
+            startY += _innocentColorPickerBox.Height + 2;
+
+            _murdererColorPickerBox = AddColorBox
+            (
+                rightArea,
+                startX,
+                startY,
+                _currentProfile.MurdererHue,
+                ResGumps.MurdererColor
+            );
+
+            startY += _innocentColorPickerBox.Height + 2;
+
+            _enemyColorPickerBox = AddColorBox
+            (
+                rightArea,
+                startX,
+                startY,
+                _currentProfile.EnemyHue,
+                ResGumps.EnemyColor
+            );
+
+            startY += _innocentColorPickerBox.Height + 2;
+
+            startY = initialY;
+            startX += 200;
+
+            _beneficColorPickerBox = AddColorBox
+            (
+                rightArea,
+                startX,
+                startY,
+                _currentProfile.BeneficHue,
+                ResGumps.BeneficSpellHue
+            );
+
+            startY += _beneficColorPickerBox.Height + 2;
+
+            _harmfulColorPickerBox = AddColorBox
+            (
+                rightArea,
+                startX,
+                startY,
+                _currentProfile.HarmfulHue,
+                ResGumps.HarmfulSpellHue
+            );
+
+            startY += _harmfulColorPickerBox.Height + 2;
+
+            _neutralColorPickerBox = AddColorBox
+            (
+                rightArea,
+                startX,
+                startY,
+                _currentProfile.NeutralHue,
+                ResGumps.NeutralSpellHue
+            );
+
+            startY += _neutralColorPickerBox.Height + 2;
+
+            startX = 5;
+            startY += (_neutralColorPickerBox.Height + 2) * 4;
+
+            _spellFormatBox = AddInputField
+            (
+                rightArea,
+                startX,
+                startY,
+                200,
+                TEXTBOX_HEIGHT,
+                ResGumps.SpellOverheadFormat,
+                0,
+                true,
+                false,
+                30
+            );
+
+            _spellFormatBox.SetText(_currentProfile.SpellDisplayFormat);
 
             Add(rightArea, PAGE);
         }
@@ -999,343 +2750,544 @@ namespace ClassicUO.Game.UI.Gumps
         private void BuildCounters()
         {
             const int PAGE = 9;
-            ScrollArea rightArea = new ScrollArea(190, 20, WIDTH - 210, 420, true);
 
-            _enableCounters = CreateCheckBox(rightArea, "Enable Counters", ProfileManager.Current.CounterBarEnabled, 0, 0);
-            _highlightOnUse = CreateCheckBox(rightArea, "Highlight On Use", ProfileManager.Current.CounterBarHighlightOnUse, 0, 0);
-            _enableAbbreviatedAmount = CreateCheckBox(rightArea, "Enable abbreviated amount values when amount is or exceeds", ProfileManager.Current.CounterBarDisplayAbbreviatedAmount, 0, 0);
+            ScrollArea rightArea = new ScrollArea
+            (
+                190,
+                20,
+                WIDTH - 210,
+                420,
+                true
+            );
 
-            ScrollAreaItem item = new ScrollAreaItem();
-
-            _abbreviatedAmount = CreateInputField(item, new TextBox(FONT, -1, 80, 80)
-            {
-                X = _enableAbbreviatedAmount.X + 30,
-                Y = 10,
-                Width = 50,
-                Height = 30,
-                NumericOnly = true,
-                Text = ProfileManager.Current.CounterBarAbbreviatedAmount.ToString()
-            });
-
-            rightArea.Add(item);
-
-            _highlightOnAmount = CreateCheckBox(rightArea, "Highlight red when amount is below", ProfileManager.Current.CounterBarHighlightOnAmount, 0, 0);
-
-            item = new ScrollAreaItem();
-
-            _highlightAmount = CreateInputField(item, new TextBox(FONT, 2, 80, 80)
-            {
-                X = _highlightOnAmount.X + 30,
-                Y = 10,
-                Width = 50,
-                Height = 30,
-                NumericOnly = true,
-                Text = ProfileManager.Current.CounterBarHighlightAmount.ToString()
-            });
-
-            rightArea.Add(item);
-
-            item = new ScrollAreaItem();
-
-            Label text = new Label("Counter Layout:", true, HUE_FONT)
-            {
-                Y = _highlightOnUse.Bounds.Bottom + 5
-            };
-            item.Add(text);
-            //_counterLayout = new Combobox(text.Bounds.Right + 10, _highlightOnUse.Bounds.Bottom + 5, 150, new[] { "Horizontal", "Vertical" }, ProfileManager.Current.CounterBarIsVertical ? 1 : 0);
-            //item.Add(_counterLayout);
-            rightArea.Add(item);
+            int startX = 5;
+            int startY = 5;
 
 
-            item = new ScrollAreaItem();
+            _enableCounters = AddCheckBox
+            (
+                rightArea,
+                ResGumps.EnableCounters,
+                _currentProfile.CounterBarEnabled,
+                startX,
+                startY
+            );
 
-            text = new Label("Cell size:", true, HUE_FONT)
-            {
-                X = 10,
-                Y = 10
-            };
-            item.Add(text);
+            startX += 40;
+            startY += _enableCounters.Height + 2;
 
-            _cellSize = new HSliderBar(text.X + text.Width + 10, text.Y + 5, 80, 30, 80, ProfileManager.Current.CounterBarCellSize, HSliderBarStyle.MetalWidgetRecessedBar, true, FONT, HUE_FONT);
-            item.Add(_cellSize);
-            rightArea.Add(item);
+            _highlightOnUse = AddCheckBox
+            (
+                rightArea,
+                ResGumps.HighlightOnUse,
+                _currentProfile.CounterBarHighlightOnUse,
+                startX,
+                startY
+            );
 
-            item = new ScrollAreaItem();
+            startY += _highlightOnUse.Height + 2;
 
-            _rows = CreateInputField(item, new TextBox(FONT, 5, 80, 80)
-            {
-                X = 20,
-                Y = _cellSize.Y + _cellSize.Height + 25,
-                Width = 50,
-                Height = 30,
-                NumericOnly = true,
-                Text = ProfileManager.Current.CounterBarRows.ToString()
-            }, "Rows:");
+            _enableAbbreviatedAmount = AddCheckBox
+            (
+                rightArea,
+                ResGumps.EnableAbbreviatedAmountCountrs,
+                _currentProfile.CounterBarDisplayAbbreviatedAmount,
+                startX,
+                startY
+            );
 
-            _columns = CreateInputField(item, new TextBox(FONT, 5, 80, 80)
-            {
-                X = _rows.X + _rows.Width + 30,
-                Y = _cellSize.Y + _cellSize.Height + 25,
-                Width = 50,
-                Height = 30,
-                NumericOnly = true,
-                Text = ProfileManager.Current.CounterBarColumns.ToString()
-            }, "Columns:");
+            startX += _enableAbbreviatedAmount.Width + 5;
 
-            rightArea.Add(item);
+            _abbreviatedAmount = AddInputField
+            (
+                rightArea,
+                startX,
+                startY,
+                50,
+                TEXTBOX_HEIGHT,
+                null,
+                80,
+                false,
+                true
+            );
+
+            _abbreviatedAmount.SetText(_currentProfile.CounterBarAbbreviatedAmount.ToString());
+
+            startX = 5;
+            startX += 40;
+            startY += _enableAbbreviatedAmount.Height + 2;
+
+            _highlightOnAmount = AddCheckBox
+            (
+                rightArea,
+                ResGumps.HighlightRedWhenBelow,
+                _currentProfile.CounterBarHighlightOnAmount,
+                startX,
+                startY
+            );
+
+            startX += _highlightOnAmount.Width + 5;
+
+            _highlightAmount = AddInputField
+            (
+                rightArea,
+                startX,
+                startY,
+                50,
+                TEXTBOX_HEIGHT,
+                null,
+                80,
+                false,
+                true,
+                2
+            );
+
+            _highlightAmount.SetText(_currentProfile.CounterBarHighlightAmount.ToString());
+
+            startX = 5;
+            startX += 40;
+            startY += _highlightAmount.Height + 2 + 5;
+
+            startY += 40;
+
+            Label text = AddLabel(rightArea, ResGumps.CounterLayout, startX, startY);
+
+            startX += 40;
+            startY += text.Height + 2;
+            text = AddLabel(rightArea, ResGumps.CellSize, startX, startY);
+
+            int initialX = startX;
+            startX += text.Width + 5;
+
+            _cellSize = AddHSlider
+            (
+                rightArea,
+                30,
+                80,
+                _currentProfile.CounterBarCellSize,
+                startX,
+                startY,
+                80
+            );
+
+
+            startX = initialX;
+            startY += text.Height + 2 + 15;
+
+            _rows = AddInputField
+            (
+                rightArea,
+                startX,
+                startY,
+                50,
+                30,
+                ResGumps.Counter_Rows,
+                80,
+                false,
+                true,
+                5
+            );
+
+            _rows.SetText(_currentProfile.CounterBarRows.ToString());
+
+
+            startX += _rows.Width + 5 + 100;
+
+            _columns = AddInputField
+            (
+                rightArea,
+                startX,
+                startY,
+                50,
+                30,
+                ResGumps.Counter_Columns,
+                80,
+                false,
+                true,
+                5
+            );
+
+            _columns.SetText(_currentProfile.CounterBarColumns.ToString());
+
 
             Add(rightArea, PAGE);
         }
 
         private void BuildExperimental()
         {
-            const int PAGE = 10;
-            ScrollArea rightArea = new ScrollArea(190, 20, WIDTH - 210, 420, true);
+            const int PAGE = 12;
 
-            _enableSelectionArea = CreateCheckBox(rightArea, "Enable Text Selection Area", ProfileManager.Current.EnableSelectionArea, 0, 0);
+            ScrollArea rightArea = new ScrollArea
+            (
+                190,
+                20,
+                WIDTH - 210,
+                420,
+                true
+            );
 
-            _debugGumpIsDisabled = CreateCheckBox(rightArea, "Disable Debug Gump", ProfileManager.Current.DebugGumpIsDisabled, 0, 0);
-            _restoreLastGameSize = CreateCheckBox(rightArea, "Disable automatic maximize. Restore windows size after re-login", ProfileManager.Current.RestoreLastGameSize, 0, 0);
+            int startX = 5;
+            int startY = 5;
 
-            _autoOpenDoors = CreateCheckBox(rightArea, "Auto Open Doors", ProfileManager.Current.AutoOpenDoors, 0, 0);
-            _smoothDoors = CreateCheckBox(rightArea, "Smooth doors", ProfileManager.Current.SmoothDoors, 20, 5);
+            _disableDefaultHotkeys = AddCheckBox
+            (
+                rightArea,
+                ResGumps.DisableDefaultUOHotkeys,
+                _currentProfile.DisableDefaultHotkeys,
+                startX,
+                startY
+            );
 
-            _autoOpenCorpseArea = new ScrollAreaItem();
+            startX += 40;
+            startY += _disableDefaultHotkeys.Height + 2;
 
-            _autoOpenCorpse = CreateCheckBox(rightArea, "Auto Open Corpses", ProfileManager.Current.AutoOpenCorpses, 0, 5);
-            _autoOpenCorpse.ValueChanged += (sender, e) => { _autoOpenCorpseArea.IsVisible = _autoOpenCorpse.IsChecked; };
+            _disableArrowBtn = AddCheckBox
+            (
+                rightArea,
+                ResGumps.DisableArrowsPlayerMovement,
+                _currentProfile.DisableArrowBtn,
+                startX,
+                startY
+            );
 
-           _skipEmptyCorpse = new Checkbox(0x00D2, 0x00D3, "Skip empty corpses", FONT, HUE_FONT)
-            {
-                X = 20,
-                Y = _cellSize.Y + _cellSize.Height - 15,
-                IsChecked = ProfileManager.Current.SkipEmptyCorpse
-            };
-            _autoOpenCorpseArea.Add(_skipEmptyCorpse);
+            startY += _disableArrowBtn.Height + 2;
 
-            _autoOpenCorpseRange = CreateInputField(_autoOpenCorpseArea, new TextBox(FONT, 2, 80, 80)
-            {
-                X = 25,
-                Y = _skipEmptyCorpse.Y + _skipEmptyCorpse.Height,
-                Width = 50,
-                Height = 30,
-                NumericOnly = true,
-                Text = ProfileManager.Current.AutoOpenCorpseRange.ToString()
-            }, "Corpse Open Range:");
+            _disableTabBtn = AddCheckBox
+            (
+                rightArea,
+                ResGumps.DisableTab,
+                _currentProfile.DisableTabBtn,
+                startX,
+                startY
+            );
 
-            /* text = new Label("- Aura under feet:", true, HUE_FONT, 0, FONT)
-            {
-                Y = 10
-            };
-            item.Add(text);
+            startY += _disableTabBtn.Height + 2;
 
-            _auraType = new Combobox(text.Width + 20, text.Y, 100, new[] {"None", "Warmode", "Ctrl+Shift", "Always"})
-            {
-                SelectedIndex = ProfileManager.Current.AuraUnderFeetType
-            };*/
-            var text = new Label("Corpse Open Options:", true, HUE_FONT)
-            {
-                Y = _autoOpenCorpseRange.Y + 20,
-                X = 20
-            };
-            _autoOpenCorpseArea.Add(text);
+            _disableCtrlQWBtn = AddCheckBox
+            (
+                rightArea,
+                ResGumps.DisableMessageHistory,
+                _currentProfile.DisableCtrlQWBtn,
+                startX,
+                startY
+            );
 
-            _autoOpenCorpseOptions = new Combobox(text.Width + 20, text.Y, 150, new[]
-            {
-                "None", "Not Targeting", "Not Hiding", "Both"
-            })
-            {
-                SelectedIndex = ProfileManager.Current.CorpseOpenOptions
-            };
-            _autoOpenCorpseArea.Add(_autoOpenCorpseOptions);
+            startY += _disableCtrlQWBtn.Height + 2;
 
-            rightArea.Add(_autoOpenCorpseArea);
+            _disableAutoMove = AddCheckBox
+            (
+                rightArea,
+                ResGumps.DisableClickAutomove,
+                _currentProfile.DisableAutoMove,
+                startX,
+                startY
+            );
 
-            // [BLOCK] disable hotkeys
-            {
-                _disableDefaultHotkeys = new Checkbox(0x00D2, 0x00D3, "Disable default UO hotkeys", FONT, HUE_FONT)
-                {
-                    Y = 0,
-                    IsChecked = ProfileManager.Current.DisableDefaultHotkeys
-                };
-                _disableDefaultHotkeys.ValueChanged += (sender, e) => { _defaultHotkeysArea.IsVisible = _disableDefaultHotkeys.IsChecked; };
-
-                rightArea.Add(_disableDefaultHotkeys);
-
-                _defaultHotkeysArea = new ScrollAreaItem();
-
-                _disableArrowBtn = new Checkbox(0x00D2, 0x00D3, "Disable arrows & numlock arrows (player moving)", FONT, HUE_FONT)
-                {
-                    X = 20,
-                    Y = 5,
-                    IsChecked = ProfileManager.Current.DisableArrowBtn
-                };
-                _defaultHotkeysArea.Add(_disableArrowBtn);
-
-                _disableTabBtn = new Checkbox(0x00D2, 0x00D3, "Disable TAB (toggle warmode)", FONT, HUE_FONT)
-                {
-                    X = 20,
-                    Y = 25,
-                    IsChecked = ProfileManager.Current.DisableTabBtn
-                };
-                _defaultHotkeysArea.Add(_disableTabBtn);
-
-                _disableCtrlQWBtn = new Checkbox(0x00D2, 0x00D3, "Disable Ctrl + Q/W (messageHistory)", FONT, HUE_FONT)
-                {
-                    X = 20,
-                    Y = 45,
-                    IsChecked = ProfileManager.Current.DisableCtrlQWBtn
-                };
-                _defaultHotkeysArea.Add(_disableCtrlQWBtn);
-
-                rightArea.Add(_defaultHotkeysArea);
-
-                _defaultHotkeysArea.IsVisible = _disableDefaultHotkeys.IsChecked;
-            }
-
-            _enableDragSelect = CreateCheckBox(rightArea, "Enable drag-select to open health bars", ProfileManager.Current.EnableDragSelect, 0, 0);
-
-            _dragSelectArea = new ScrollAreaItem();
-
-            text = new Label("Drag-select modifier key", true, HUE_FONT)
-            {
-                X = 20
-            };
-            _dragSelectArea.Add(text);
-
-            _dragSelectModifierKey = new Combobox(text.Width + 80, text.Y, 100, new[] {"None", "Ctrl", "Shift"})
-            {
-                SelectedIndex = ProfileManager.Current.DragSelectModifierKey
-            };
-            _dragSelectArea.Add(_dragSelectModifierKey);
-
-            _dragSelectHumanoidsOnly = new Checkbox(0x00D2, 0x00D3, "Select humanoids only", FONT, HUE_FONT, true)
-            {
-                IsChecked = ProfileManager.Current.DragSelectHumanoidsOnly,
-                X = 20,
-                Y = 20
-            };
-            _dragSelectArea.Add(_dragSelectHumanoidsOnly);
-
-            _enableDragSelect.ValueChanged += (sender, e) => { _dragSelectArea.IsVisible = _enableDragSelect.IsChecked; };
-
-            rightArea.Add(_dragSelectArea);
-
-
-            ScrollAreaItem _containerGumpLocation = new ScrollAreaItem();
-
-            _overrideContainerLocation = new Checkbox(0x00D2, 0x00D3, "Override container gump location", FONT, HUE_FONT, true)
-            {
-                IsChecked = ProfileManager.Current.OverrideContainerLocation,
-            };
-
-            _overrideContainerLocationSetting = new Combobox(_overrideContainerLocation.Width + 20, 0, 200, new[] { "Near container position", "Top right", "Last dragged position" }, ProfileManager.Current.OverrideContainerLocationSetting);
-
-            _containerGumpLocation.Add(_overrideContainerLocation);
-            _containerGumpLocation.Add(_overrideContainerLocationSetting);
-
-            rightArea.Add(_containerGumpLocation);
-
-            _showTargetRangeIndicator = new Checkbox(0x00D2, 0x00D3, "Show target range indicator", FONT, HUE_FONT, true)
-            {
-                IsChecked = ProfileManager.Current.ShowTargetRangeIndicator,
-            };
-
-            rightArea.Add(_showTargetRangeIndicator);
-
-            _customBars = CreateCheckBox(rightArea, "Use Custom Health Bars", ProfileManager.Current.CustomBarsToggled, 0, 5);
-            _customBarsBBG = CreateCheckBox(rightArea, "Use All Black Backgrounds", ProfileManager.Current.CBBlackBGToggled, 20, 5);
-
-            Add(rightArea, PAGE);
-
-            _autoOpenCorpseArea.IsVisible = _autoOpenCorpse.IsChecked;
-            _dragSelectArea.IsVisible = _enableDragSelect.IsChecked;
-        }
-
-        private void BuildNetwork()
-        {
-            const int PAGE = 11;
-
-            ScrollArea rightArea = new ScrollArea(190, 20, WIDTH - 210, 420, true);
-
-            _showNetStats = CreateCheckBox(rightArea, "Show network stats", ProfileManager.Current.ShowNetworkStats, 0, 0);
+            startY += _disableAutoMove.Height + 2;
 
             Add(rightArea, PAGE);
         }
+
 
         private void BuildInfoBar()
         {
-            const int PAGE = 12;
+            const int PAGE = 10;
 
-            ScrollArea rightArea = new ScrollArea(190, 20, WIDTH - 210, 420, true);
+            ScrollArea rightArea = new ScrollArea
+            (
+                190,
+                20,
+                WIDTH - 210,
+                420,
+                true
+            );
 
-            _showInfoBar = CreateCheckBox(rightArea, "Show Info Bar", ProfileManager.Current.ShowInfoBar, 0, 0);
+            int startX = 5;
+            int startY = 5;
 
+            _showInfoBar = AddCheckBox
+            (
+                rightArea,
+                ResGumps.ShowInfoBar,
+                _currentProfile.ShowInfoBar,
+                startX,
+                startY
+            );
 
-            ScrollAreaItem _infoBarHighlightScrollArea = new ScrollAreaItem();
+            startX += 40;
+            startY += _showInfoBar.Height + 2;
 
-            _infoBarHighlightScrollArea.Add(new Label("Data highlight type:", true, 999));
-            _infoBarHighlightType = new Combobox(130, 0, 150, new[] { "Text color", "Colored bars" }, ProfileManager.Current.InfoBarHighlightType);
-            _infoBarHighlightScrollArea.Add(_infoBarHighlightType);
+            Label text = AddLabel(rightArea, ResGumps.DataHighlightType, startX, startY);
 
-            rightArea.Add(_infoBarHighlightScrollArea);
+            startX += text.Width + 5;
 
+            _infoBarHighlightType = AddCombobox
+            (
+                rightArea,
+                new[] { ResGumps.TextColor, ResGumps.ColoredBars },
+                _currentProfile.InfoBarHighlightType,
+                startX,
+                startY,
+                150
+            );
 
-            NiceButton nb = new NiceButton(0, 10, 90, 20, ButtonAction.Activate, "+ Add item", 0, IO.Resources.TEXT_ALIGN_TYPE.TS_LEFT) { ButtonParameter = 999 };
+            startX = 5;
+            startY += _infoBarHighlightType.Height + 5;
+
+            NiceButton nb = new NiceButton
+            (
+                startX,
+                startY,
+                90,
+                20,
+                ButtonAction.Activate,
+                ResGumps.AddItem,
+                0,
+                TEXT_ALIGN_TYPE.TS_LEFT
+            )
+            {
+                ButtonParameter = -1,
+                IsSelectable = true,
+                IsSelected = true
+            };
+
             nb.MouseUp += (sender, e) =>
             {
                 InfoBarBuilderControl ibbc = new InfoBarBuilderControl(new InfoBarItem("", InfoBarVars.HP, 0x3B9));
+                ibbc.X = 5;
+                ibbc.Y = _databox.Children.Count * ibbc.Height;
                 _infoBarBuilderControls.Add(ibbc);
-                rightArea.Add(ibbc);
+                _databox.Add(ibbc);
+                _databox.WantUpdateSize = true;
             };
+
             rightArea.Add(nb);
 
 
-            ScrollAreaItem _infobarBuilderLabels = new ScrollAreaItem();
+            startY += 40;
 
-            _infobarBuilderLabels.Add(new Label("Label", true, 999) { Y = 15 });
-            _infobarBuilderLabels.Add(new Label("Color", true, 999) { X = 150, Y = 15 });
-            _infobarBuilderLabels.Add(new Label("Data", true, 999) { X = 200, Y = 15 });
+            text = AddLabel(rightArea, ResGumps.Label, startX, startY);
 
-            rightArea.Add(_infobarBuilderLabels);
-            rightArea.Add(new Line(0, 0, rightArea.Width, 1, Color.Gray.PackedValue));
-            rightArea.Add(new Line(0, 0, rightArea.Width, 5, Color.Black.PackedValue));
+            startX += 150;
+
+            text = AddLabel(rightArea, ResGumps.Color, startX, startY);
+
+            startX += 55;
+            text = AddLabel(rightArea, ResGumps.Data, startX, startY);
+
+            startX = 5;
+            startY += text.Height + 2;
+
+            rightArea.Add
+            (
+                new Line
+                (
+                    startX,
+                    startY,
+                    rightArea.Width,
+                    1,
+                    Color.Gray.PackedValue
+                )
+            );
+
+            startY += 20;
 
 
-            InfoBarManager ibmanager = CUOEnviroment.Client.GetScene<GameScene>().InfoBars;
+            InfoBarManager ibmanager = Client.Game.GetScene<GameScene>().InfoBars;
 
             List<InfoBarItem> _infoBarItems = ibmanager.GetInfoBars();
 
             _infoBarBuilderControls = new List<InfoBarBuilderControl>();
 
+            _databox = new DataBox(startX, startY, 10, 10)
+            {
+                WantUpdateSize = true
+            };
+
+
             for (int i = 0; i < _infoBarItems.Count; i++)
             {
                 InfoBarBuilderControl ibbc = new InfoBarBuilderControl(_infoBarItems[i]);
+                ibbc.X = 5;
+                ibbc.Y = i * ibbc.Height;
                 _infoBarBuilderControls.Add(ibbc);
-                rightArea.Add(ibbc);
+                _databox.Add(ibbc);
             }
+
+            rightArea.Add(_databox);
 
             Add(rightArea, PAGE);
         }
 
         private void BuildContainers()
         {
-            const int PAGE = 13;
+            const int PAGE = 11;
 
-            ScrollArea rightArea = new ScrollArea(190, 20, WIDTH - 210, 420, true);
+            ScrollArea rightArea = new ScrollArea
+            (
+                190,
+                20,
+                WIDTH - 210,
+                420,
+                true
+            );
 
-            ScrollAreaItem item = new ScrollAreaItem();
+            int startX = 5;
+            int startY = 5;
+            Label text;
 
-            Label text = new Label("- Container scale:",true, HUE_FONT, font: FONT);
-            item.Add(text);
+            bool hasBackpacks = Client.Version >= ClientVersion.CV_705301;
 
-            _containersScale = new HSliderBar(text.X + text.Width + 10, text.Y + 5, 200, Constants.MIN_CONTAINER_SIZE_PERC, Constants.MAX_CONTAINER_SIZE_PERC, ProfileManager.Current.ContainersScale, HSliderBarStyle.MetalWidgetRecessedBar, true, FONT, HUE_FONT);
-            item.Add(_containersScale);
+            if(hasBackpacks)
+            {
+                text = AddLabel(rightArea, ResGumps.BackpackStyle, startX, startY);
+                startX += text.Width + 5;
+            }
 
-            rightArea.Add(item);
+            _backpackStyle = AddCombobox
+            (
+                rightArea,
+                new[]
+                {
+                    ResGumps.BackpackStyle_Default, ResGumps.BackpackStyle_Suede,
+                    ResGumps.BackpackStyle_PolarBear, ResGumps.BackpackStyle_GhoulSkin
+                },
+                _currentProfile.BackpackStyle,
+                startX,
+                startY,
+                200
+            );
 
-            _containerScaleItems = CreateCheckBox(rightArea, "Scale items inside containers", ProfileManager.Current.ScaleItemsInsideContainers, 0, 20);
-            _containerDoubleClickToLoot = CreateCheckBox(rightArea, "Double click to loot items inside containers", ProfileManager.Current.DoubleClickToLootInsideContainers, 0, 0);
+            _backpackStyle.IsVisible = hasBackpacks;
+
+            if (hasBackpacks)
+            {
+                startX = 5;
+                startY += _backpackStyle.Height + 2 + 10;
+            }
+
+            text = AddLabel(rightArea, ResGumps.ContainerScale, startX, startY);
+            startX += text.Width + 5;
+
+            _containersScale = AddHSlider
+            (
+                rightArea,
+                Constants.MIN_CONTAINER_SIZE_PERC,
+                Constants.MAX_CONTAINER_SIZE_PERC,
+                _currentProfile.ContainersScale,
+                startX,
+                startY,
+                200
+            );
+
+            startX = 5;
+            startY += text.Height + 2;
+
+            _containerScaleItems = AddCheckBox
+            (
+                rightArea,
+                ResGumps.ScaleItemsInsideContainers,
+                _currentProfile.ScaleItemsInsideContainers,
+                startX,
+                startY
+            );
+
+            startY += _containerScaleItems.Height + 2;
+
+            _useLargeContianersGumps = AddCheckBox
+            (
+                rightArea,
+                ResGumps.UseLargeContainersGump,
+                _currentProfile.UseLargeContainerGumps,
+                startX,
+                startY
+            );
+
+            _useLargeContianersGumps.IsVisible = Client.Version >= ClientVersion.CV_706000;
+
+            if (_useLargeContianersGumps.IsVisible)
+            {
+                startY += _useLargeContianersGumps.Height + 2;
+            }
+
+            _containerDoubleClickToLoot = AddCheckBox
+            (
+                rightArea,
+                ResGumps.DoubleClickLootContainers,
+                _currentProfile.DoubleClickToLootInsideContainers,
+                startX,
+                startY
+            );
+
+            startY += _containerDoubleClickToLoot.Height + 2;
+
+            _relativeDragAnDropItems = AddCheckBox
+            (
+                rightArea,
+                ResGumps.RelativeDragAndDropContainers,
+                _currentProfile.RelativeDragAndDropItems,
+                startX,
+                startY
+            );
+
+            startY += _relativeDragAnDropItems.Height + 2;
+
+            _highlightContainersWhenMouseIsOver = AddCheckBox
+            (
+                rightArea,
+                ResGumps.HighlightContainerWhenSelected,
+                _currentProfile.HighlightContainerWhenSelected,
+                startX,
+                startY
+            );
+
+            startY += _highlightContainersWhenMouseIsOver.Height + 2;
+
+            _overrideContainerLocation = AddCheckBox
+            (
+                rightArea,
+                ResGumps.OverrideContainerGumpLocation,
+                _currentProfile.OverrideContainerLocation,
+                startX,
+                startY
+            );
+
+            startX += _overrideContainerLocation.Width + 5;
+
+            _overrideContainerLocationSetting = AddCombobox
+            (
+                rightArea,
+                new[]
+                {
+                    ResGumps.ContLoc_NearContainerPosition, ResGumps.ContLoc_TopRight,
+                    ResGumps.ContLoc_LastDraggedPosition, ResGumps.ContLoc_RememberEveryContainer
+                },
+                _currentProfile.OverrideContainerLocationSetting,
+                startX,
+                startY,
+                200
+            );
+
+            startX = 5;
+            startY += _overrideContainerLocation.Height + 2 + 10;
+
+            NiceButton button = new NiceButton
+            (
+                startX,
+                startY,
+                130,
+                30,
+                ButtonAction.Activate,
+                ResGumps.RebuildContainers
+            )
+            {
+                ButtonParameter = -1,
+                IsSelectable = true,
+                IsSelected = true
+            };
+
+            button.MouseUp += (sender, e) => { ContainerManager.BuildContainerFile(true); };
+            rightArea.Add(button);
 
             Add(rightArea, PAGE);
         }
@@ -1351,6 +3303,8 @@ namespace ClassicUO.Game.UI.Gumps
 
             switch ((Buttons) buttonID)
             {
+                case Buttons.Disabled: break;
+
                 case Buttons.Cancel:
                     Dispose();
 
@@ -1372,11 +3326,9 @@ namespace ClassicUO.Game.UI.Gumps
 
                     break;
 
-                case Buttons.NewMacro:
-                    break;
+                case Buttons.NewMacro: break;
 
-                case Buttons.DeleteMacro:
-                    break;
+                case Buttons.DeleteMacro: break;
             }
         }
 
@@ -1391,7 +3343,9 @@ namespace ClassicUO.Game.UI.Gumps
                     _enableTopbar.IsChecked = false;
                     _holdDownKeyTab.IsChecked = true;
                     _holdDownKeyAlt.IsChecked = true;
+                    _closeAllAnchoredGumpsWithRClick.IsChecked = false;
                     _holdShiftForContext.IsChecked = false;
+                    _holdAltToMoveGumps.IsChecked = false;
                     _holdShiftToSplitStack.IsChecked = false;
                     _enablePathfind.IsChecked = false;
                     _useShiftPathfind.IsChecked = false;
@@ -1401,26 +3355,47 @@ namespace ClassicUO.Game.UI.Gumps
                     _hpComboBox.SelectedIndex = 0;
                     _hpComboBoxShowWhen.SelectedIndex = 0;
                     _highlightByState.IsChecked = true;
-                    _poisonColorPickerBox.SetColor(0x0044, FileManager.Hues.GetPolygoneColor(12, 0x0044));
-                    _paralyzedColorPickerBox.SetColor(0x014C, FileManager.Hues.GetPolygoneColor(12, 0x014C));
-                    _invulnerableColorPickerBox.SetColor(0x0030, FileManager.Hues.GetPolygoneColor(12, 0x0030));
-                    _drawRoofs.IsChecked = true;
+                    _poisonColorPickerBox.SetColor(0x0044, HuesLoader.Instance.GetPolygoneColor(12, 0x0044));
+                    _paralyzedColorPickerBox.SetColor(0x014C, HuesLoader.Instance.GetPolygoneColor(12, 0x014C));
+                    _invulnerableColorPickerBox.SetColor(0x0030, HuesLoader.Instance.GetPolygoneColor(12, 0x0030));
+                    _drawRoofs.IsChecked = false;
                     _enableCaveBorder.IsChecked = false;
                     _treeToStumps.IsChecked = false;
                     _hideVegetation.IsChecked = false;
                     _noColorOutOfRangeObjects.IsChecked = false;
-                    _circleOfTranspRadius.Value = 5;
+                    _circleOfTranspRadius.Value = Constants.MIN_CIRCLE_OF_TRANSPARENCY_RADIUS;
+                    _cotType.SelectedIndex = 0;
                     _useCircleOfTransparency.IsChecked = false;
                     _healtbarType.SelectedIndex = 0;
                     _fieldsType.SelectedIndex = 0;
-                    _vendorGumpSize.Text = "60";
                     _useStandardSkillsGump.IsChecked = true;
                     _showCorpseNameIncoming.IsChecked = true;
                     _showMobileNameIncoming.IsChecked = true;
                     _gridLoot.SelectedIndex = 0;
                     _sallosEasyGrab.IsChecked = false;
                     _partyInviteGump.IsChecked = false;
+                    _showHouseContent.IsChecked = false;
                     _objectsFading.IsChecked = true;
+                    _textFading.IsChecked = true;
+                    _enableDragSelect.IsChecked = false;
+                    _dragSelectHumanoidsOnly.IsChecked = false;
+                    _showTargetRangeIndicator.IsChecked = false;
+                    _customBars.IsChecked = false;
+                    _customBarsBBG.IsChecked = false;
+                    _autoOpenCorpse.IsChecked = false;
+                    _autoOpenDoors.IsChecked = false;
+                    _smoothDoors.IsChecked = false;
+                    _skipEmptyCorpse.IsChecked = false;
+                    _saveHealthbars.IsChecked = false;
+                    _use_smooth_boat_movement.IsChecked = false;
+                    _hideScreenshotStoredInMessage.IsChecked = false;
+                    _use_old_status_gump.IsChecked = false;
+                    _auraType.SelectedIndex = 0;
+                    _fieldsType.SelectedIndex = 0;
+
+                    _showSkillsMessage.IsChecked = true;
+                    _showSkillsMessageDelta.Value = 1;
+                    _showStatsMessage.IsChecked = true;
 
                     break;
 
@@ -1440,137 +3415,131 @@ namespace ClassicUO.Game.UI.Gumps
                     break;
 
                 case 3: // video
-                    _debugControls.IsChecked = false;
                     _windowBorderless.IsChecked = false;
                     _zoomCheckbox.IsChecked = false;
-                    _savezoomCheckbox.IsChecked = false;
                     _restorezoomCheckbox.IsChecked = false;
-                    _shardType.SelectedIndex = 0;
-                    _gameWindowWidth.Text = "600";
-                    _gameWindowHeight.Text = "480";
-                    _gameWindowPositionX.Text = "20";
-                    _gameWindowPositionY.Text = "20";
+                    _gameWindowWidth.SetText("600");
+                    _gameWindowHeight.SetText("480");
+                    _gameWindowPositionX.SetText("20");
+                    _gameWindowPositionY.SetText("20");
                     _gameWindowLock.IsChecked = false;
                     _gameWindowFullsize.IsChecked = false;
                     _enableDeathScreen.IsChecked = true;
                     _enableBlackWhiteEffect.IsChecked = true;
-                    CUOEnviroment.Client.GetScene<GameScene>().Scale = 1;
-                    ProfileManager.Current.RestoreScaleValue = ProfileManager.Current.ScaleZoom = 1f;
+                    Client.Game.Scene.Camera.Zoom = 1f;
+                    _currentProfile.DefaultScale = 1f;
                     _lightBar.Value = 0;
                     _enableLight.IsChecked = false;
                     _useColoredLights.IsChecked = false;
                     _darkNights.IsChecked = false;
-                    _brighlight.Value = 0;
                     _enableShadows.IsChecked = true;
-                    _auraType.SelectedIndex = 0;
+                    _enableShadowsStatics.IsChecked = true;
                     _runMouseInSeparateThread.IsChecked = true;
                     _auraMouse.IsChecked = true;
-                    _xBR.IsChecked = true;
-                    _hideChatGradient.IsChecked = false;
                     _partyAura.IsChecked = true;
-                    _partyAuraColorPickerBox.SetColor(0x0044, FileManager.Hues.GetPolygoneColor(12, 0x0044));
-
-                    _windowSizeArea.IsVisible = !_gameWindowFullsize.IsChecked;
-                    _zoomSizeArea.IsVisible = _zoomCheckbox.IsChecked;
+                    _partyAuraColorPickerBox.SetColor(0x0044, HuesLoader.Instance.GetPolygoneColor(12, 0x0044));
 
                     break;
 
-                case 4: // commands
+                case 4: // macros
                     break;
 
                 case 5: // tooltip
+                    _use_tooltip.IsChecked = true;
+                    _tooltip_font_hue.SetColor(0xFFFF, 0xFF7F7F7F);
+                    _delay_before_display_tooltip.Value = 200;
+                    _tooltip_background_opacity.Value = 70;
+                    _tooltip_zoom.Value = 100;
+                    _tooltip_font_selector.SetSelectedFont(1);
+
                     break;
 
                 case 6: // fonts
                     _fontSelectorChat.SetSelectedFont(0);
                     _overrideAllFonts.IsChecked = false;
                     _overrideAllFontsIsUnicodeCheckbox.SelectedIndex = 1;
+
                     break;
 
                 case 7: // speech
                     _scaleSpeechDelay.IsChecked = true;
                     _sliderSpeechDelay.Value = 100;
-                    _speechColorPickerBox.SetColor(0x02B2, FileManager.Hues.GetPolygoneColor(12, 0x02B2));
-                    _emoteColorPickerBox.SetColor(0x0021, FileManager.Hues.GetPolygoneColor(12, 0x0021));
-                    _yellColorPickerBox.SetColor(0x0021, FileManager.Hues.GetPolygoneColor(12, 0x0021));
-                    _whisperColorPickerBox.SetColor(0x0033, FileManager.Hues.GetPolygoneColor(12, 0x0033));
-                    _partyMessageColorPickerBox.SetColor(0x0044, FileManager.Hues.GetPolygoneColor(12, 0x0044));
-                    _guildMessageColorPickerBox.SetColor(0x0044, FileManager.Hues.GetPolygoneColor(12, 0x0044));
-                    _allyMessageColorPickerBox.SetColor(0x0057, FileManager.Hues.GetPolygoneColor(12, 0x0057));
+                    _speechColorPickerBox.SetColor(0x02B2, HuesLoader.Instance.GetPolygoneColor(12, 0x02B2));
+                    _emoteColorPickerBox.SetColor(0x0021, HuesLoader.Instance.GetPolygoneColor(12, 0x0021));
+                    _yellColorPickerBox.SetColor(0x0021, HuesLoader.Instance.GetPolygoneColor(12, 0x0021));
+                    _whisperColorPickerBox.SetColor(0x0033, HuesLoader.Instance.GetPolygoneColor(12, 0x0033));
+                    _partyMessageColorPickerBox.SetColor(0x0044, HuesLoader.Instance.GetPolygoneColor(12, 0x0044));
+                    _guildMessageColorPickerBox.SetColor(0x0044, HuesLoader.Instance.GetPolygoneColor(12, 0x0044));
+                    _allyMessageColorPickerBox.SetColor(0x0057, HuesLoader.Instance.GetPolygoneColor(12, 0x0057));
+                    _chatMessageColorPickerBox.SetColor(0x0256, HuesLoader.Instance.GetPolygoneColor(12, 0x0256));
                     _chatAfterEnter.IsChecked = false;
                     UIManager.SystemChat.IsActive = !_chatAfterEnter.IsChecked;
                     _chatAdditionalButtonsCheckbox.IsChecked = true;
                     _chatShiftEnterCheckbox.IsChecked = true;
-                    _activeChatArea.IsVisible = _chatAfterEnter.IsChecked;
                     _saveJournalCheckBox.IsChecked = false;
+                    _hideChatGradient.IsChecked = false;
 
                     break;
 
                 case 8: // combat
-                    _innocentColorPickerBox.SetColor(0x005A, FileManager.Hues.GetPolygoneColor(12, 0x005A));
-                    _friendColorPickerBox.SetColor(0x0044, FileManager.Hues.GetPolygoneColor(12, 0x0044));
-                    _crimialColorPickerBox.SetColor(0x03B2, FileManager.Hues.GetPolygoneColor(12, 0x03B2));
-                    _genericColorPickerBox.SetColor(0x03B2, FileManager.Hues.GetPolygoneColor(12, 0x03B2));
-                    _murdererColorPickerBox.SetColor(0x0023, FileManager.Hues.GetPolygoneColor(12, 0x0023));
-                    _enemyColorPickerBox.SetColor(0x0031, FileManager.Hues.GetPolygoneColor(12, 0x0031));
+                    _innocentColorPickerBox.SetColor(0x005A, HuesLoader.Instance.GetPolygoneColor(12, 0x005A));
+                    _friendColorPickerBox.SetColor(0x0044, HuesLoader.Instance.GetPolygoneColor(12, 0x0044));
+                    _crimialColorPickerBox.SetColor(0x03b2, HuesLoader.Instance.GetPolygoneColor(12, 0x03b2));
+                    _canAttackColorPickerBox.SetColor(0x03b2, HuesLoader.Instance.GetPolygoneColor(12, 0x03b2));
+                    _murdererColorPickerBox.SetColor(0x0023, HuesLoader.Instance.GetPolygoneColor(12, 0x0023));
+                    _enemyColorPickerBox.SetColor(0x0031, HuesLoader.Instance.GetPolygoneColor(12, 0x0031));
                     _queryBeforAttackCheckbox.IsChecked = true;
+                    _queryBeforeBeneficialCheckbox.IsChecked = false;
                     _castSpellsByOneClick.IsChecked = false;
                     _buffBarTime.IsChecked = false;
-                    _beneficColorPickerBox.SetColor(0x0059, FileManager.Hues.GetPolygoneColor(12, 0x0059));
-                    _harmfulColorPickerBox.SetColor(0x0020, FileManager.Hues.GetPolygoneColor(12, 0x0020));
-                    _neutralColorPickerBox.SetColor(0x03B1, FileManager.Hues.GetPolygoneColor(12, 0x03B1));
-                    _spellFormatBox.SetText("{power} [{spell}]");
+                    _beneficColorPickerBox.SetColor(0x0059, HuesLoader.Instance.GetPolygoneColor(12, 0x0059));
+                    _harmfulColorPickerBox.SetColor(0x0020, HuesLoader.Instance.GetPolygoneColor(12, 0x0020));
+                    _neutralColorPickerBox.SetColor(0x03b2, HuesLoader.Instance.GetPolygoneColor(12, 0x03b2));
+                    _spellFormatBox.SetText(ResGumps.SpellFormat_Default);
                     _spellColoringCheckbox.IsChecked = false;
                     _spellFormatCheckbox.IsChecked = false;
 
                     break;
 
-                case 9:
+                case 9: // counters
                     _enableCounters.IsChecked = false;
                     _highlightOnUse.IsChecked = false;
                     _enableAbbreviatedAmount.IsChecked = false;
-                    _columns.Text = "1";
-                    _rows.Text = "1";
+                    _columns.SetText("1");
+                    _rows.SetText("1");
                     _cellSize.Value = 40;
                     _highlightOnAmount.IsChecked = false;
-                    _highlightAmount.Text = "5";
-                    _abbreviatedAmount.Text = "1000";
+                    _highlightAmount.SetText("5");
+                    _abbreviatedAmount.SetText("1000");
 
                     break;
 
-                case 10:
-                    _enableSelectionArea.IsChecked = false;
-                    _debugGumpIsDisabled.IsChecked = false;
-                    _restoreLastGameSize.IsChecked = false;
+                case 10: // info bar
+
+
+                    break;
+
+                case 11: // containers
+                    _containersScale.Value = 100;
+                    _containerScaleItems.IsChecked = false;
+                    _useLargeContianersGumps.IsChecked = false;
+                    _containerDoubleClickToLoot.IsChecked = false;
+                    _relativeDragAnDropItems.IsChecked = false;
+                    _highlightContainersWhenMouseIsOver.IsChecked = false;
+                    _overrideContainerLocation.IsChecked = false;
+                    _overrideContainerLocationSetting.SelectedIndex = 0;
+                    _backpackStyle.SelectedIndex = 0;
+
+                    break;
+
+                case 12: // experimental
+
                     _disableDefaultHotkeys.IsChecked = false;
                     _disableArrowBtn.IsChecked = false;
                     _disableTabBtn.IsChecked = false;
                     _disableCtrlQWBtn.IsChecked = false;
-                    _enableDragSelect.IsChecked = false;
-                    _overrideContainerLocation.IsChecked = false;
-                    _overrideContainerLocationSetting.SelectedIndex = 0;
-                    _dragSelectHumanoidsOnly.IsChecked = false;
-                    _showTargetRangeIndicator.IsChecked = false;
-                    _customBars.IsChecked = false;
-                    _customBarsBBG.IsChecked = false;
-                    _autoOpenCorpse.IsChecked = false;
-                    _skipEmptyCorpse.IsChecked = false;
-                    
-                    break;
+                    _disableAutoMove.IsChecked = false;
 
-                case 11:
-                    _showNetStats.IsChecked = false;
-
-                    break;
-
-                case 12:
-
-                    break;
-
-                case 13:
-                    _containersScale.Value = 100;
-                    _containerScaleItems.IsChecked = false;
-                    _containerDoubleClickToLoot.IsChecked = false;
                     break;
             }
         }
@@ -1582,204 +3551,232 @@ namespace ClassicUO.Game.UI.Gumps
             // general
             if (Settings.GlobalSettings.FPS != _sliderFPS.Value)
             {
-                CUOEnviroment.Client.SetRefreshRate(_sliderFPS.Value);
+                Client.Game.SetRefreshRate(_sliderFPS.Value);
             }
-            ProfileManager.Current.HighlightGameObjects = _highlightObjects.IsChecked;
-            ProfileManager.Current.ReduceFPSWhenInactive = _reduceFPSWhenInactive.IsChecked;
-            ProfileManager.Current.EnablePathfind = _enablePathfind.IsChecked;
-            ProfileManager.Current.UseShiftToPathfind = _useShiftPathfind.IsChecked;
-            ProfileManager.Current.AlwaysRun = _alwaysRun.IsChecked;
-            ProfileManager.Current.AlwaysRunUnlessHidden = _alwaysRunUnlessHidden.IsChecked;
-            ProfileManager.Current.ShowMobilesHP = _showHpMobile.IsChecked;
-            ProfileManager.Current.HighlightMobilesByFlags = _highlightByState.IsChecked;
-            ProfileManager.Current.PoisonHue = _poisonColorPickerBox.Hue;
-            ProfileManager.Current.ParalyzedHue = _paralyzedColorPickerBox.Hue;
-            ProfileManager.Current.InvulnerableHue = _invulnerableColorPickerBox.Hue;
-            ProfileManager.Current.MobileHPType = _hpComboBox.SelectedIndex;
-            ProfileManager.Current.MobileHPShowWhen = _hpComboBoxShowWhen.SelectedIndex;
-            ProfileManager.Current.HoldDownKeyTab = _holdDownKeyTab.IsChecked;
-            ProfileManager.Current.HoldDownKeyAltToCloseAnchored = _holdDownKeyAlt.IsChecked;
-            ProfileManager.Current.HoldShiftForContext = _holdShiftForContext.IsChecked;
-            ProfileManager.Current.HoldShiftToSplitStack = _holdShiftToSplitStack.IsChecked;
-            ProfileManager.Current.CloseHealthBarType = _healtbarType.SelectedIndex;
 
-            if (ProfileManager.Current.DrawRoofs == _drawRoofs.IsChecked)
+            _currentProfile.HighlightGameObjects = _highlightObjects.IsChecked;
+            _currentProfile.ReduceFPSWhenInactive = _reduceFPSWhenInactive.IsChecked;
+            _currentProfile.EnablePathfind = _enablePathfind.IsChecked;
+            _currentProfile.UseShiftToPathfind = _useShiftPathfind.IsChecked;
+            _currentProfile.AlwaysRun = _alwaysRun.IsChecked;
+            _currentProfile.AlwaysRunUnlessHidden = _alwaysRunUnlessHidden.IsChecked;
+            _currentProfile.ShowMobilesHP = _showHpMobile.IsChecked;
+            _currentProfile.HighlightMobilesByFlags = _highlightByState.IsChecked;
+            _currentProfile.PoisonHue = _poisonColorPickerBox.Hue;
+            _currentProfile.ParalyzedHue = _paralyzedColorPickerBox.Hue;
+            _currentProfile.InvulnerableHue = _invulnerableColorPickerBox.Hue;
+            _currentProfile.MobileHPType = _hpComboBox.SelectedIndex;
+            _currentProfile.MobileHPShowWhen = _hpComboBoxShowWhen.SelectedIndex;
+            _currentProfile.HoldDownKeyTab = _holdDownKeyTab.IsChecked;
+            _currentProfile.HoldDownKeyAltToCloseAnchored = _holdDownKeyAlt.IsChecked;
+
+            _currentProfile.CloseAllAnchoredGumpsInGroupWithRightClick = _closeAllAnchoredGumpsWithRClick.IsChecked;
+
+            _currentProfile.HoldShiftForContext = _holdShiftForContext.IsChecked;
+            _currentProfile.HoldAltToMoveGumps = _holdAltToMoveGumps.IsChecked;
+            _currentProfile.HoldShiftToSplitStack = _holdShiftToSplitStack.IsChecked;
+            _currentProfile.CloseHealthBarType = _healtbarType.SelectedIndex;
+            _currentProfile.HideScreenshotStoredInMessage = _hideScreenshotStoredInMessage.IsChecked;
+
+            if (_currentProfile.DrawRoofs == _drawRoofs.IsChecked)
             {
-                ProfileManager.Current.DrawRoofs = !_drawRoofs.IsChecked;
-                CUOEnviroment.Client.GetScene<GameScene>()?.UpdateMaxDrawZ(true);
+                _currentProfile.DrawRoofs = !_drawRoofs.IsChecked;
+
+                Client.Game.GetScene<GameScene>()?.UpdateMaxDrawZ(true);
             }
 
-            if (ProfileManager.Current.TopbarGumpIsDisabled != _enableTopbar.IsChecked)
+            if (_currentProfile.TopbarGumpIsDisabled != _enableTopbar.IsChecked)
             {
                 if (_enableTopbar.IsChecked)
+                {
                     UIManager.GetGump<TopBarGump>()?.Dispose();
+                }
                 else
+                {
                     TopBarGump.Create();
+                }
 
-                ProfileManager.Current.TopbarGumpIsDisabled = _enableTopbar.IsChecked;
+                _currentProfile.TopbarGumpIsDisabled = _enableTopbar.IsChecked;
             }
 
-            if (ProfileManager.Current.EnableCaveBorder != _enableCaveBorder.IsChecked)
+            if (_currentProfile.EnableCaveBorder != _enableCaveBorder.IsChecked)
             {
-                ProfileManager.Current.EnableCaveBorder = _enableCaveBorder.IsChecked;
-                FileManager.Art.ClearCaveTextures();
+                StaticFilters.CleanCaveTextures();
+                _currentProfile.EnableCaveBorder = _enableCaveBorder.IsChecked;
             }
 
-            ProfileManager.Current.TreeToStumps = _treeToStumps.IsChecked;
-            ProfileManager.Current.FieldsType = _fieldsType.SelectedIndex;
-            ProfileManager.Current.HideVegetation = _hideVegetation.IsChecked;
-            ProfileManager.Current.NoColorObjectsOutOfRange = _noColorOutOfRangeObjects.IsChecked;
-            ProfileManager.Current.UseCircleOfTransparency = _useCircleOfTransparency.IsChecked;
-            ProfileManager.Current.CircleOfTransparencyRadius = _circleOfTranspRadius.Value;
+            if (_currentProfile.TreeToStumps != _treeToStumps.IsChecked)
+            {
+                StaticFilters.CleanTreeTextures();
+                _currentProfile.TreeToStumps = _treeToStumps.IsChecked;
+            }
 
-            ProfileManager.Current.VendorGumpHeight = (int) _vendorGumpSize.Tag;
-            ProfileManager.Current.StandardSkillsGump = _useStandardSkillsGump.IsChecked;
+            _currentProfile.FieldsType = _fieldsType.SelectedIndex;
+            _currentProfile.HideVegetation = _hideVegetation.IsChecked;
+            _currentProfile.NoColorObjectsOutOfRange = _noColorOutOfRangeObjects.IsChecked;
+            _currentProfile.UseCircleOfTransparency = _useCircleOfTransparency.IsChecked;
+
+            if (_currentProfile.CircleOfTransparencyRadius != _circleOfTranspRadius.Value)
+            {
+                _currentProfile.CircleOfTransparencyRadius = _circleOfTranspRadius.Value;
+                CircleOfTransparency.Create(_currentProfile.CircleOfTransparencyRadius);
+            }
+
+            _currentProfile.CircleOfTransparencyType = _cotType.SelectedIndex;
+            _currentProfile.StandardSkillsGump = _useStandardSkillsGump.IsChecked;
 
             if (_useStandardSkillsGump.IsChecked)
             {
-                var newGump = UIManager.GetGump<SkillGumpAdvanced>();
+                SkillGumpAdvanced newGump = UIManager.GetGump<SkillGumpAdvanced>();
 
                 if (newGump != null)
                 {
-                    UIManager.Add(new StandardSkillsGump
-                                      {X = newGump.X, Y = newGump.Y});
+                    UIManager.Add(new StandardSkillsGump { X = newGump.X, Y = newGump.Y });
+
                     newGump.Dispose();
                 }
             }
             else
             {
-                var standardGump = UIManager.GetGump<StandardSkillsGump>();
+                StandardSkillsGump standardGump = UIManager.GetGump<StandardSkillsGump>();
 
                 if (standardGump != null)
                 {
-                    UIManager.Add(new SkillGumpAdvanced
-                                      {X = standardGump.X, Y = standardGump.Y});
+                    UIManager.Add(new SkillGumpAdvanced { X = standardGump.X, Y = standardGump.Y });
+
                     standardGump.Dispose();
                 }
             }
 
-            ProfileManager.Current.ShowNewMobileNameIncoming = _showMobileNameIncoming.IsChecked;
-            ProfileManager.Current.ShowNewCorpseNameIncoming = _showCorpseNameIncoming.IsChecked;
-            ProfileManager.Current.GridLootType = _gridLoot.SelectedIndex;
-            ProfileManager.Current.SallosEasyGrab = _sallosEasyGrab.IsChecked;
-            ProfileManager.Current.PartyInviteGump = _partyInviteGump.IsChecked;
-            ProfileManager.Current.UseObjectsFading = _objectsFading.IsChecked;
+            _currentProfile.ShowNewMobileNameIncoming = _showMobileNameIncoming.IsChecked;
+            _currentProfile.ShowNewCorpseNameIncoming = _showCorpseNameIncoming.IsChecked;
+            _currentProfile.GridLootType = _gridLoot.SelectedIndex;
+            _currentProfile.SallosEasyGrab = _sallosEasyGrab.IsChecked;
+            _currentProfile.PartyInviteGump = _partyInviteGump.IsChecked;
+            _currentProfile.UseObjectsFading = _objectsFading.IsChecked;
+            _currentProfile.TextFading = _textFading.IsChecked;
+            _currentProfile.UseSmoothBoatMovement = _use_smooth_boat_movement.IsChecked;
+
+            if (_currentProfile.ShowHouseContent != _showHouseContent.IsChecked)
+            {
+                _currentProfile.ShowHouseContent = _showHouseContent.IsChecked;
+                NetClient.Socket.Send(new PShowPublicHouseContent(_currentProfile.ShowHouseContent));
+            }
 
 
             // sounds
-            ProfileManager.Current.EnableSound = _enableSounds.IsChecked;
-            ProfileManager.Current.EnableMusic = _enableMusic.IsChecked;
-            ProfileManager.Current.EnableFootstepsSound = _footStepsSound.IsChecked;
-            ProfileManager.Current.EnableCombatMusic = _combatMusic.IsChecked;
-            ProfileManager.Current.ReproduceSoundsInBackground = _musicInBackground.IsChecked;
-            ProfileManager.Current.SoundVolume = _soundsVolume.Value;
-            ProfileManager.Current.MusicVolume = _musicVolume.Value;
+            _currentProfile.EnableSound = _enableSounds.IsChecked;
+            _currentProfile.EnableMusic = _enableMusic.IsChecked;
+            _currentProfile.EnableFootstepsSound = _footStepsSound.IsChecked;
+            _currentProfile.EnableCombatMusic = _combatMusic.IsChecked;
+            _currentProfile.ReproduceSoundsInBackground = _musicInBackground.IsChecked;
+            _currentProfile.SoundVolume = _soundsVolume.Value;
+            _currentProfile.MusicVolume = _musicVolume.Value;
             Settings.GlobalSettings.LoginMusicVolume = _loginMusicVolume.Value;
             Settings.GlobalSettings.LoginMusic = _loginMusic.IsChecked;
 
-            CUOEnviroment.Client.Scene.Audio.UpdateCurrentMusicVolume();
-            CUOEnviroment.Client.Scene.Audio.UpdateCurrentSoundsVolume();
+            Client.Game.Scene.Audio.UpdateCurrentMusicVolume();
+            Client.Game.Scene.Audio.UpdateCurrentSoundsVolume();
 
-            if (!ProfileManager.Current.EnableMusic)
-                CUOEnviroment.Client.Scene.Audio.StopMusic();
+            if (!_currentProfile.EnableMusic)
+            {
+                Client.Game.Scene.Audio.StopMusic();
+            }
 
-            if (!ProfileManager.Current.EnableSound)
-                CUOEnviroment.Client.Scene.Audio.StopSounds();
+            if (!_currentProfile.EnableSound)
+            {
+                Client.Game.Scene.Audio.StopSounds();
+            }
 
             // speech
-            ProfileManager.Current.ScaleSpeechDelay = _scaleSpeechDelay.IsChecked;
-            ProfileManager.Current.SpeechDelay = _sliderSpeechDelay.Value;
-            ProfileManager.Current.SpeechHue = _speechColorPickerBox.Hue;
-            ProfileManager.Current.EmoteHue = _emoteColorPickerBox.Hue;
-            ProfileManager.Current.YellHue = _yellColorPickerBox.Hue;
-            ProfileManager.Current.WhisperHue = _whisperColorPickerBox.Hue;
-            ProfileManager.Current.PartyMessageHue = _partyMessageColorPickerBox.Hue;
-            ProfileManager.Current.GuildMessageHue = _guildMessageColorPickerBox.Hue;
-            ProfileManager.Current.AllyMessageHue = _allyMessageColorPickerBox.Hue;
+            _currentProfile.ScaleSpeechDelay = _scaleSpeechDelay.IsChecked;
+            _currentProfile.SpeechDelay = _sliderSpeechDelay.Value;
+            _currentProfile.SpeechHue = _speechColorPickerBox.Hue;
+            _currentProfile.EmoteHue = _emoteColorPickerBox.Hue;
+            _currentProfile.YellHue = _yellColorPickerBox.Hue;
+            _currentProfile.WhisperHue = _whisperColorPickerBox.Hue;
+            _currentProfile.PartyMessageHue = _partyMessageColorPickerBox.Hue;
+            _currentProfile.GuildMessageHue = _guildMessageColorPickerBox.Hue;
+            _currentProfile.AllyMessageHue = _allyMessageColorPickerBox.Hue;
+            _currentProfile.ChatMessageHue = _chatMessageColorPickerBox.Hue;
 
-            if (ProfileManager.Current.ActivateChatAfterEnter != _chatAfterEnter.IsChecked)
+            if (_currentProfile.ActivateChatAfterEnter != _chatAfterEnter.IsChecked)
             {
                 UIManager.SystemChat.IsActive = !_chatAfterEnter.IsChecked;
-                ProfileManager.Current.ActivateChatAfterEnter = _chatAfterEnter.IsChecked;
+                _currentProfile.ActivateChatAfterEnter = _chatAfterEnter.IsChecked;
             }
 
-            ProfileManager.Current.ActivateChatAdditionalButtons = _chatAdditionalButtonsCheckbox.IsChecked;
-            ProfileManager.Current.ActivateChatShiftEnterSupport = _chatShiftEnterCheckbox.IsChecked;
-            ProfileManager.Current.SaveJournalToFile = _saveJournalCheckBox.IsChecked;
+            _currentProfile.ActivateChatAdditionalButtons = _chatAdditionalButtonsCheckbox.IsChecked;
+            _currentProfile.ActivateChatShiftEnterSupport = _chatShiftEnterCheckbox.IsChecked;
+            _currentProfile.SaveJournalToFile = _saveJournalCheckBox.IsChecked;
 
             // video
-            ProfileManager.Current.EnableDeathScreen = _enableDeathScreen.IsChecked;
-            ProfileManager.Current.EnableBlackWhiteEffect = _enableBlackWhiteEffect.IsChecked;
+            _currentProfile.EnableDeathScreen = _enableDeathScreen.IsChecked;
+            _currentProfile.EnableBlackWhiteEffect = _enableBlackWhiteEffect.IsChecked;
 
-            Settings.GlobalSettings.Debug = _debugControls.IsChecked;
+            Client.Game.Scene.Camera.ZoomIndex = _sliderZoom.Value;
+            _currentProfile.DefaultScale = Client.Game.Scene.Camera.Zoom;
+            _currentProfile.EnableMousewheelScaleZoom = _zoomCheckbox.IsChecked;
+            _currentProfile.RestoreScaleAfterUnpressCtrl = _restorezoomCheckbox.IsChecked;
 
-            if (ProfileManager.Current.EnableScaleZoom != _zoomCheckbox.IsChecked)
+            if (!CUOEnviroment.IsOutlands && _use_old_status_gump.IsChecked != _currentProfile.UseOldStatusGump)
             {
-                if (!_zoomCheckbox.IsChecked)
-                    CUOEnviroment.Client.GetScene<GameScene>().Scale = 1;
+                StatusGumpBase status = StatusGumpBase.GetStatusGump();
 
-                ProfileManager.Current.EnableScaleZoom = _zoomCheckbox.IsChecked;
-            }
-
-            ProfileManager.Current.SaveScaleAfterClose = _savezoomCheckbox.IsChecked;
-
-            if (_restorezoomCheckbox.IsChecked != ProfileManager.Current.RestoreScaleAfterUnpressCtrl)
-            {
-                if (_restorezoomCheckbox.IsChecked)
-                    ProfileManager.Current.RestoreScaleValue = CUOEnviroment.Client.GetScene<GameScene>().Scale;
-
-                ProfileManager.Current.RestoreScaleAfterUnpressCtrl = _restorezoomCheckbox.IsChecked;
-            }
-
-            if (Settings.GlobalSettings.ShardType != _shardType.SelectedIndex)
-            {
-                var status = StatusGumpBase.GetStatusGump();
-
-                Settings.GlobalSettings.ShardType = _shardType.SelectedIndex;
+                _currentProfile.UseOldStatusGump = _use_old_status_gump.IsChecked;
 
                 if (status != null)
                 {
                     status.Dispose();
-                    StatusGumpBase.AddStatusGump(status.ScreenCoordinateX, status.ScreenCoordinateY);
+                    UIManager.Add(StatusGumpBase.AddStatusGump(status.ScreenCoordinateX, status.ScreenCoordinateY));
                 }
             }
+
 
             int.TryParse(_gameWindowWidth.Text, out int gameWindowSizeWidth);
             int.TryParse(_gameWindowHeight.Text, out int gameWindowSizeHeight);
 
-            if (gameWindowSizeWidth != ProfileManager.Current.GameWindowSize.X || gameWindowSizeHeight != ProfileManager.Current.GameWindowSize.Y)
+            if (gameWindowSizeWidth != _currentProfile.GameWindowSize.X || gameWindowSizeHeight != _currentProfile.GameWindowSize.Y)
             {
                 if (vp != null)
                 {
                     Point n = vp.ResizeGameWindow(new Point(gameWindowSizeWidth, gameWindowSizeHeight));
 
-                    _gameWindowWidth.Text = n.X.ToString();
-                    _gameWindowHeight.Text = n.Y.ToString();
+                    _gameWindowWidth.SetText(n.X.ToString());
+                    _gameWindowHeight.SetText(n.Y.ToString());
                 }
             }
 
             int.TryParse(_gameWindowPositionX.Text, out int gameWindowPositionX);
             int.TryParse(_gameWindowPositionY.Text, out int gameWindowPositionY);
 
-            if (gameWindowPositionX != ProfileManager.Current.GameWindowPosition.X || gameWindowPositionY != ProfileManager.Current.GameWindowPosition.Y)
+            if (gameWindowPositionX != _currentProfile.GameWindowPosition.X || gameWindowPositionY != _currentProfile.GameWindowPosition.Y)
             {
                 if (vp != null)
-                    vp.Location = ProfileManager.Current.GameWindowPosition = new Point(gameWindowPositionX, gameWindowPositionY);
+                {
+                    vp.Location = _currentProfile.GameWindowPosition = new Point(gameWindowPositionX, gameWindowPositionY);
+                }
             }
 
-            if (ProfileManager.Current.GameWindowLock != _gameWindowLock.IsChecked)
+            if (_currentProfile.GameWindowLock != _gameWindowLock.IsChecked)
             {
-                if (vp != null) vp.CanMove = !_gameWindowLock.IsChecked;
-                ProfileManager.Current.GameWindowLock = _gameWindowLock.IsChecked;
+                if (vp != null)
+                {
+                    vp.CanMove = !_gameWindowLock.IsChecked;
+                }
+
+                _currentProfile.GameWindowLock = _gameWindowLock.IsChecked;
             }
 
             if (_gameWindowFullsize.IsChecked && (gameWindowPositionX != -5 || gameWindowPositionY != -5))
             {
-                if (ProfileManager.Current.GameWindowFullSize == _gameWindowFullsize.IsChecked)
+                if (_currentProfile.GameWindowFullSize == _gameWindowFullsize.IsChecked)
+                {
                     _gameWindowFullsize.IsChecked = false;
+                }
             }
 
-            if (ProfileManager.Current.GameWindowFullSize != _gameWindowFullsize.IsChecked)
+            if (_currentProfile.GameWindowFullSize != _gameWindowFullsize.IsChecked)
             {
                 Point n = Point.Zero, loc = Point.Zero;
 
@@ -1787,8 +3784,9 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     if (vp != null)
                     {
-                        n = vp.ResizeGameWindow(new Point(CUOEnviroment.Client.Window.ClientBounds.Width, CUOEnviroment.Client.Window.ClientBounds.Height));
-                        loc = ProfileManager.Current.GameWindowPosition = vp.Location = new Point(-5, -5);
+                        n = vp.ResizeGameWindow(new Point(Client.Game.Window.ClientBounds.Width, Client.Game.Window.ClientBounds.Height));
+
+                        loc = _currentProfile.GameWindowPosition = vp.Location = new Point(-5, -5);
                     }
                 }
                 else
@@ -1796,32 +3794,32 @@ namespace ClassicUO.Game.UI.Gumps
                     if (vp != null)
                     {
                         n = vp.ResizeGameWindow(new Point(600, 480));
-                        loc = vp.Location = ProfileManager.Current.GameWindowPosition = new Point(20, 20);
+                        loc = vp.Location = _currentProfile.GameWindowPosition = new Point(20, 20);
                     }
                 }
 
-                _gameWindowPositionX.Text = loc.X.ToString();
-                _gameWindowPositionY.Text = loc.Y.ToString();
-                _gameWindowWidth.Text = n.X.ToString();
-                _gameWindowHeight.Text = n.Y.ToString();
+                _gameWindowPositionX.SetText(loc.X.ToString());
+                _gameWindowPositionY.SetText(loc.Y.ToString());
+                _gameWindowWidth.SetText(n.X.ToString());
+                _gameWindowHeight.SetText(n.Y.ToString());
 
-                ProfileManager.Current.GameWindowFullSize = _gameWindowFullsize.IsChecked;
+                _currentProfile.GameWindowFullSize = _gameWindowFullsize.IsChecked;
             }
 
-            if (ProfileManager.Current.WindowBorderless != _windowBorderless.IsChecked)
+            if (_currentProfile.WindowBorderless != _windowBorderless.IsChecked)
             {
-                ProfileManager.Current.WindowBorderless = _windowBorderless.IsChecked;
-                CUOEnviroment.Client.SetWindowBorderless(_windowBorderless.IsChecked);
+                _currentProfile.WindowBorderless = _windowBorderless.IsChecked;
+                Client.Game.SetWindowBorderless(_windowBorderless.IsChecked);
             }
 
-            ProfileManager.Current.UseAlternativeLights = _altLights.IsChecked;
-            ProfileManager.Current.UseCustomLightLevel = _enableLight.IsChecked;
-            ProfileManager.Current.LightLevel = (byte) (_lightBar.MaxValue - _lightBar.Value);
+            _currentProfile.UseAlternativeLights = _altLights.IsChecked;
+            _currentProfile.UseCustomLightLevel = _enableLight.IsChecked;
+            _currentProfile.LightLevel = (byte) (_lightBar.MaxValue - _lightBar.Value);
 
             if (_enableLight.IsChecked)
             {
-               World.Light.Overall = ProfileManager.Current.LightLevel;
-               World.Light.Personal = 0;
+                World.Light.Overall = _currentProfile.LightLevel;
+                World.Light.Personal = 0;
             }
             else
             {
@@ -1829,205 +3827,194 @@ namespace ClassicUO.Game.UI.Gumps
                 World.Light.Personal = World.Light.RealPersonal;
             }
 
-            ProfileManager.Current.UseColoredLights = _useColoredLights.IsChecked;
-            ProfileManager.Current.UseDarkNights = _darkNights.IsChecked;
+            _currentProfile.UseColoredLights = _useColoredLights.IsChecked;
+            _currentProfile.UseDarkNights = _darkNights.IsChecked;
+            _currentProfile.ShadowsEnabled = _enableShadows.IsChecked;
+            _currentProfile.ShadowsStatics = _enableShadowsStatics.IsChecked;
+            _currentProfile.AuraUnderFeetType = _auraType.SelectedIndex;
+            _currentProfile.FilterType = _filterType.SelectedIndex;
 
-            ProfileManager.Current.Brighlight = _brighlight.Value / 100f;
+            Client.Game.IsMouseVisible = Settings.GlobalSettings.RunMouseInASeparateThread = _runMouseInSeparateThread.IsChecked;
 
-            ProfileManager.Current.ShadowsEnabled = _enableShadows.IsChecked;
-            ProfileManager.Current.AuraUnderFeetType = _auraType.SelectedIndex;
-            CUOEnviroment.Client.IsMouseVisible = Settings.GlobalSettings.RunMouseInASeparateThread = _runMouseInSeparateThread.IsChecked;
-            ProfileManager.Current.AuraOnMouse = _auraMouse.IsChecked;
-            ProfileManager.Current.UseXBR = _xBR.IsChecked;
-            ProfileManager.Current.PartyAura = _partyAura.IsChecked;
-            ProfileManager.Current.PartyAuraHue = _partyAuraColorPickerBox.Hue;
-            ProfileManager.Current.HideChatGradient = _hideChatGradient.IsChecked;
+            _currentProfile.AuraOnMouse = _auraMouse.IsChecked;
+            _currentProfile.PartyAura = _partyAura.IsChecked;
+            _currentProfile.PartyAuraHue = _partyAuraColorPickerBox.Hue;
+            _currentProfile.HideChatGradient = _hideChatGradient.IsChecked;
 
             // fonts
-            var _fontValue = _fontSelectorChat.GetSelectedFont();
-            ProfileManager.Current.OverrideAllFonts = _overrideAllFonts.IsChecked;
-            ProfileManager.Current.OverrideAllFontsIsUnicode = _overrideAllFontsIsUnicodeCheckbox.SelectedIndex == 1;
-            if (ProfileManager.Current.ChatFont != _fontValue)
+            _currentProfile.ForceUnicodeJournal = _forceUnicodeJournal.IsChecked;
+            byte _fontValue = _fontSelectorChat.GetSelectedFont();
+            _currentProfile.OverrideAllFonts = _overrideAllFonts.IsChecked;
+            _currentProfile.OverrideAllFontsIsUnicode = _overrideAllFontsIsUnicodeCheckbox.SelectedIndex == 1;
+
+            if (_currentProfile.ChatFont != _fontValue)
             {
-                ProfileManager.Current.ChatFont = _fontValue;
-                WorldViewportGump viewport = UIManager.GetGump<WorldViewportGump>();
-                viewport?.ReloadChatControl(new SystemChatControl(5, 5, ProfileManager.Current.GameWindowSize.X, ProfileManager.Current.GameWindowSize.Y));
+                _currentProfile.ChatFont = _fontValue;
+                UIManager.SystemChat.TextBoxControl.Font = _fontValue;
             }
 
             // combat
-            ProfileManager.Current.InnocentHue = _innocentColorPickerBox.Hue;
-            ProfileManager.Current.FriendHue = _friendColorPickerBox.Hue;
-            ProfileManager.Current.CriminalHue = _crimialColorPickerBox.Hue;
-            ProfileManager.Current.AnimalHue = _genericColorPickerBox.Hue;
-            ProfileManager.Current.EnemyHue = _enemyColorPickerBox.Hue;
-            ProfileManager.Current.MurdererHue = _murdererColorPickerBox.Hue;
-            ProfileManager.Current.EnabledCriminalActionQuery = _queryBeforAttackCheckbox.IsChecked;
-            ProfileManager.Current.CastSpellsByOneClick = _castSpellsByOneClick.IsChecked;
-            ProfileManager.Current.BuffBarTime = _buffBarTime.IsChecked;
+            _currentProfile.InnocentHue = _innocentColorPickerBox.Hue;
+            _currentProfile.FriendHue = _friendColorPickerBox.Hue;
+            _currentProfile.CriminalHue = _crimialColorPickerBox.Hue;
+            _currentProfile.CanAttackHue = _canAttackColorPickerBox.Hue;
+            _currentProfile.EnemyHue = _enemyColorPickerBox.Hue;
+            _currentProfile.MurdererHue = _murdererColorPickerBox.Hue;
+            _currentProfile.EnabledCriminalActionQuery = _queryBeforAttackCheckbox.IsChecked;
+            _currentProfile.EnabledBeneficialCriminalActionQuery = _queryBeforeBeneficialCheckbox.IsChecked;
+            _currentProfile.CastSpellsByOneClick = _castSpellsByOneClick.IsChecked;
+            _currentProfile.BuffBarTime = _buffBarTime.IsChecked;
 
-            ProfileManager.Current.BeneficHue = _beneficColorPickerBox.Hue;
-            ProfileManager.Current.HarmfulHue = _harmfulColorPickerBox.Hue;
-            ProfileManager.Current.NeutralHue = _neutralColorPickerBox.Hue;
-            ProfileManager.Current.EnabledSpellHue = _spellColoringCheckbox.IsChecked;
-            ProfileManager.Current.EnabledSpellFormat = _spellFormatCheckbox.IsChecked;
-            ProfileManager.Current.SpellDisplayFormat = _spellFormatBox.Text;
+            _currentProfile.BeneficHue = _beneficColorPickerBox.Hue;
+            _currentProfile.HarmfulHue = _harmfulColorPickerBox.Hue;
+            _currentProfile.NeutralHue = _neutralColorPickerBox.Hue;
+            _currentProfile.EnabledSpellHue = _spellColoringCheckbox.IsChecked;
+            _currentProfile.EnabledSpellFormat = _spellFormatCheckbox.IsChecked;
+            _currentProfile.SpellDisplayFormat = _spellFormatBox.Text;
 
             // macros
-            ProfileManager.Current.Macros = CUOEnviroment.Client.GetScene<GameScene>().Macros.GetAllMacros().ToArray();
+            Client.Game.GetScene<GameScene>().Macros.Save();
 
             // counters
 
-            bool before = ProfileManager.Current.CounterBarEnabled;
-            ProfileManager.Current.CounterBarEnabled = _enableCounters.IsChecked;
-            ProfileManager.Current.CounterBarCellSize = _cellSize.Value;
-            ProfileManager.Current.CounterBarRows = int.Parse(_rows.Text);
-            ProfileManager.Current.CounterBarColumns = int.Parse(_columns.Text);
-            ProfileManager.Current.CounterBarHighlightOnUse = _highlightOnUse.IsChecked;
+            bool before = _currentProfile.CounterBarEnabled;
+            _currentProfile.CounterBarEnabled = _enableCounters.IsChecked;
+            _currentProfile.CounterBarCellSize = _cellSize.Value;
+            _currentProfile.CounterBarRows = int.Parse(_rows.Text);
+            _currentProfile.CounterBarColumns = int.Parse(_columns.Text);
+            _currentProfile.CounterBarHighlightOnUse = _highlightOnUse.IsChecked;
 
-            ProfileManager.Current.CounterBarHighlightAmount = int.Parse(_highlightAmount.Text);
-            ProfileManager.Current.CounterBarAbbreviatedAmount = int.Parse(_abbreviatedAmount.Text);
-            ProfileManager.Current.CounterBarHighlightOnAmount = _highlightOnAmount.IsChecked;
-            ProfileManager.Current.CounterBarDisplayAbbreviatedAmount = _enableAbbreviatedAmount.IsChecked;
+            _currentProfile.CounterBarHighlightAmount = int.Parse(_highlightAmount.Text);
+            _currentProfile.CounterBarAbbreviatedAmount = int.Parse(_abbreviatedAmount.Text);
+            _currentProfile.CounterBarHighlightOnAmount = _highlightOnAmount.IsChecked;
+            _currentProfile.CounterBarDisplayAbbreviatedAmount = _enableAbbreviatedAmount.IsChecked;
 
             CounterBarGump counterGump = UIManager.GetGump<CounterBarGump>();
 
-            counterGump?.SetLayout(ProfileManager.Current.CounterBarCellSize,
-                                   ProfileManager.Current.CounterBarRows,
-                                   ProfileManager.Current.CounterBarColumns);
+            counterGump?.SetLayout(_currentProfile.CounterBarCellSize, _currentProfile.CounterBarRows, _currentProfile.CounterBarColumns);
 
 
-            if (before != ProfileManager.Current.CounterBarEnabled)
+            if (before != _currentProfile.CounterBarEnabled)
             {
                 if (counterGump == null)
                 {
-                    if (ProfileManager.Current.CounterBarEnabled)
-                        UIManager.Add(new CounterBarGump(200, 200, ProfileManager.Current.CounterBarCellSize, ProfileManager.Current.CounterBarRows, ProfileManager.Current.CounterBarColumns));
+                    if (_currentProfile.CounterBarEnabled)
+                    {
+                        UIManager.Add
+                        (
+                            new CounterBarGump
+                            (
+                                200,
+                                200,
+                                _currentProfile.CounterBarCellSize,
+                                _currentProfile.CounterBarRows,
+                                _currentProfile.CounterBarColumns
+                            )
+                        );
+                    }
                 }
                 else
-                    counterGump.IsEnabled = counterGump.IsVisible = ProfileManager.Current.CounterBarEnabled;
+                {
+                    counterGump.IsEnabled = counterGump.IsVisible = _currentProfile.CounterBarEnabled;
+                }
             }
 
             // experimental
-            ProfileManager.Current.EnableSelectionArea = _enableSelectionArea.IsChecked;
-            ProfileManager.Current.RestoreLastGameSize = _restoreLastGameSize.IsChecked;
-
             // Reset nested checkboxes if parent checkbox is unchecked
             if (!_disableDefaultHotkeys.IsChecked)
             {
                 _disableArrowBtn.IsChecked = false;
                 _disableTabBtn.IsChecked = false;
                 _disableCtrlQWBtn.IsChecked = false;
+                _disableAutoMove.IsChecked = false;
             }
 
             // NOTE: Keep these assignments AFTER the code above that resets nested checkboxes if parent checkbox is unchecked
-            ProfileManager.Current.DisableDefaultHotkeys = _disableDefaultHotkeys.IsChecked;
-            ProfileManager.Current.DisableArrowBtn = _disableArrowBtn.IsChecked;
-            ProfileManager.Current.DisableTabBtn = _disableTabBtn.IsChecked;
-            ProfileManager.Current.DisableCtrlQWBtn = _disableCtrlQWBtn.IsChecked;
+            _currentProfile.DisableDefaultHotkeys = _disableDefaultHotkeys.IsChecked;
+            _currentProfile.DisableArrowBtn = _disableArrowBtn.IsChecked;
+            _currentProfile.DisableTabBtn = _disableTabBtn.IsChecked;
+            _currentProfile.DisableCtrlQWBtn = _disableCtrlQWBtn.IsChecked;
+            _currentProfile.DisableAutoMove = _disableAutoMove.IsChecked;
+            _currentProfile.AutoOpenDoors = _autoOpenDoors.IsChecked;
+            _currentProfile.SmoothDoors = _smoothDoors.IsChecked;
+            _currentProfile.AutoOpenCorpses = _autoOpenCorpse.IsChecked;
+            _currentProfile.AutoOpenCorpseRange = int.Parse(_autoOpenCorpseRange.Text);
+            _currentProfile.CorpseOpenOptions = _autoOpenCorpseOptions.SelectedIndex;
+            _currentProfile.SkipEmptyCorpse = _skipEmptyCorpse.IsChecked;
 
-            if (ProfileManager.Current.DebugGumpIsDisabled != _debugGumpIsDisabled.IsChecked)
-            {
-                DebugGump debugGump = UIManager.GetGump<DebugGump>();
+            _currentProfile.EnableDragSelect = _enableDragSelect.IsChecked;
+            _currentProfile.DragSelectModifierKey = _dragSelectModifierKey.SelectedIndex;
+            _currentProfile.DragSelectHumanoidsOnly = _dragSelectHumanoidsOnly.IsChecked;
 
-                if (_debugGumpIsDisabled.IsChecked)
-                {
-                    if (debugGump != null)
-                        debugGump.IsVisible = false;
-                }
-                else
-                {
-                    if (debugGump == null)
-                    {
-                        debugGump = new DebugGump
-                        {
-                            X = ProfileManager.Current.DebugGumpPosition.X,
-                            Y = ProfileManager.Current.DebugGumpPosition.Y
-                        };
-                        UIManager.Add(debugGump);
-                    }
-                    else
-                    {
-                        debugGump.IsVisible = true;
-                        debugGump.SetInScreen();
-                    }
-                }
+            _currentProfile.ShowSkillsChangedMessage = _showSkillsMessage.IsChecked;
+            _currentProfile.ShowSkillsChangedDeltaValue = _showSkillsMessageDelta.Value;
+            _currentProfile.ShowStatsChangedMessage = _showStatsMessage.IsChecked;
 
-                ProfileManager.Current.DebugGumpIsDisabled = _debugGumpIsDisabled.IsChecked;
-            }
+            _currentProfile.OverrideContainerLocation = _overrideContainerLocation.IsChecked;
+            _currentProfile.OverrideContainerLocationSetting = _overrideContainerLocationSetting.SelectedIndex;
 
-            ProfileManager.Current.AutoOpenDoors = _autoOpenDoors.IsChecked;
-            ProfileManager.Current.SmoothDoors = _smoothDoors.IsChecked;
-            ProfileManager.Current.AutoOpenCorpses = _autoOpenCorpse.IsChecked;
-            ProfileManager.Current.AutoOpenCorpseRange = int.Parse(_autoOpenCorpseRange.Text);
-            ProfileManager.Current.CorpseOpenOptions = _autoOpenCorpseOptions.SelectedIndex;
-            ProfileManager.Current.SkipEmptyCorpse = _skipEmptyCorpse.IsChecked;
-
-            ProfileManager.Current.EnableDragSelect = _enableDragSelect.IsChecked;
-            ProfileManager.Current.DragSelectModifierKey = _dragSelectModifierKey.SelectedIndex;
-            ProfileManager.Current.DragSelectHumanoidsOnly = _dragSelectHumanoidsOnly.IsChecked;
-
-            ProfileManager.Current.OverrideContainerLocation = _overrideContainerLocation.IsChecked;
-            ProfileManager.Current.OverrideContainerLocationSetting = _overrideContainerLocationSetting.SelectedIndex;
-
-            ProfileManager.Current.ShowTargetRangeIndicator = _showTargetRangeIndicator.IsChecked;
+            _currentProfile.ShowTargetRangeIndicator = _showTargetRangeIndicator.IsChecked;
 
 
-            bool updateHealthBars = ProfileManager.Current.CustomBarsToggled != _customBars.IsChecked;
-            ProfileManager.Current.CustomBarsToggled = _customBars.IsChecked;
+            bool updateHealthBars = _currentProfile.CustomBarsToggled != _customBars.IsChecked;
+            _currentProfile.CustomBarsToggled = _customBars.IsChecked;
 
             if (updateHealthBars)
             {
-                if (ProfileManager.Current.CustomBarsToggled)
+                if (_currentProfile.CustomBarsToggled)
                 {
-                    var hbgstandard = UIManager.Gumps.OfType<HealthBarGump>().ToList();
+                    List<HealthBarGump> hbgstandard = UIManager.Gumps.OfType<HealthBarGump>().ToList();
 
-                    foreach (var healthbar in hbgstandard)
+                    foreach (HealthBarGump healthbar in hbgstandard)
                     {
-                        UIManager.Add(new HealthBarGumpCustom(healthbar.LocalSerial) {X = healthbar.X, Y = healthbar.Y});
+                        UIManager.Add(new HealthBarGumpCustom(healthbar.LocalSerial) { X = healthbar.X, Y = healthbar.Y });
+
                         healthbar.Dispose();
                     }
                 }
                 else
                 {
-                    var hbgcustom = UIManager.Gumps.OfType<HealthBarGumpCustom>().ToList();
+                    List<HealthBarGumpCustom> hbgcustom = UIManager.Gumps.OfType<HealthBarGumpCustom>().ToList();
 
-                    foreach (var customhealthbar in hbgcustom)
+                    foreach (HealthBarGumpCustom customhealthbar in hbgcustom)
                     {
-                        UIManager.Add(new HealthBarGump(customhealthbar.LocalSerial) {X = customhealthbar.X, Y = customhealthbar.Y});
+                        UIManager.Add(new HealthBarGump(customhealthbar.LocalSerial) { X = customhealthbar.X, Y = customhealthbar.Y });
+
                         customhealthbar.Dispose();
                     }
                 }
             }
 
-            ProfileManager.Current.CBBlackBGToggled = _customBarsBBG.IsChecked;
+            _currentProfile.CBBlackBGToggled = _customBarsBBG.IsChecked;
+            _currentProfile.SaveHealthbars = _saveHealthbars.IsChecked;
 
-            // network
-            ProfileManager.Current.ShowNetworkStats = _showNetStats.IsChecked;
 
             // infobar
-            ProfileManager.Current.ShowInfoBar = _showInfoBar.IsChecked;
-            ProfileManager.Current.InfoBarHighlightType = _infoBarHighlightType.SelectedIndex;
+            _currentProfile.ShowInfoBar = _showInfoBar.IsChecked;
+            _currentProfile.InfoBarHighlightType = _infoBarHighlightType.SelectedIndex;
 
 
-            InfoBarManager ibmanager = CUOEnviroment.Client.GetScene<GameScene>().InfoBars;
+            InfoBarManager ibmanager = Client.Game.GetScene<GameScene>().InfoBars;
+
             ibmanager.Clear();
 
             for (int i = 0; i < _infoBarBuilderControls.Count; i++)
             {
                 if (!_infoBarBuilderControls[i].IsDisposed)
+                {
                     ibmanager.AddItem(new InfoBarItem(_infoBarBuilderControls[i].LabelText, _infoBarBuilderControls[i].Var, _infoBarBuilderControls[i].Hue));
+                }
             }
 
-            ProfileManager.Current.InfoBarItems = ibmanager.GetInfoBars().ToArray();
-
+            ibmanager.Save();
 
             InfoBarGump infoBarGump = UIManager.GetGump<InfoBarGump>();
 
-            if (ProfileManager.Current.ShowInfoBar)
+            if (_currentProfile.ShowInfoBar)
             {
                 if (infoBarGump == null)
                 {
-                    UIManager.Add(new InfoBarGump() { X = 300, Y = 300 });
+                    UIManager.Add(new InfoBarGump { X = 300, Y = 300 });
                 }
                 else
                 {
@@ -2044,121 +4031,262 @@ namespace ClassicUO.Game.UI.Gumps
             }
 
 
-
             // containers
-            int containerScale = ProfileManager.Current.ContainersScale;
+            int containerScale = _currentProfile.ContainersScale;
 
-            if ((byte) _containersScale.Value != containerScale || ProfileManager.Current.ScaleItemsInsideContainers != _containerScaleItems.IsChecked)
+            if ((byte) _containersScale.Value != containerScale || _currentProfile.ScaleItemsInsideContainers != _containerScaleItems.IsChecked)
             {
-                containerScale = ProfileManager.Current.ContainersScale = (byte)_containersScale.Value;
+                containerScale = _currentProfile.ContainersScale = (byte) _containersScale.Value;
                 UIManager.ContainerScale = containerScale / 100f;
-                ProfileManager.Current.ScaleItemsInsideContainers = _containerScaleItems.IsChecked;
+                _currentProfile.ScaleItemsInsideContainers = _containerScaleItems.IsChecked;
 
                 foreach (ContainerGump resizableGump in UIManager.Gumps.OfType<ContainerGump>())
                 {
-                    resizableGump.ForceUpdate();
+                    resizableGump.RequestUpdateContents();
                 }
             }
 
-            ProfileManager.Current.DoubleClickToLootInsideContainers = _containerDoubleClickToLoot.IsChecked;
+            _currentProfile.UseLargeContainerGumps = _useLargeContianersGumps.IsChecked;
+            _currentProfile.DoubleClickToLootInsideContainers = _containerDoubleClickToLoot.IsChecked;
+            _currentProfile.RelativeDragAndDropItems = _relativeDragAnDropItems.IsChecked;
+            _currentProfile.HighlightContainerWhenSelected = _highlightContainersWhenMouseIsOver.IsChecked;
 
-            ProfileManager.Current?.Save(UIManager.Gumps.OfType<Gump>().Where(s => s.CanBeSaved).Reverse().ToList());
+            if (_currentProfile.BackpackStyle != _backpackStyle.SelectedIndex)
+            {
+                _currentProfile.BackpackStyle = _backpackStyle.SelectedIndex;
+                UIManager.GetGump<PaperDollGump>(World.Player.Serial)?.RequestUpdateContents();
+                Item backpack = World.Player.FindItemByLayer(Layer.Backpack);
+                GameActions.DoubleClick(backpack);
+            }
+
+
+            // tooltip
+            _currentProfile.UseTooltip = _use_tooltip.IsChecked;
+            _currentProfile.TooltipTextHue = _tooltip_font_hue.Hue;
+            _currentProfile.TooltipDelayBeforeDisplay = _delay_before_display_tooltip.Value;
+            _currentProfile.TooltipBackgroundOpacity = _tooltip_background_opacity.Value;
+            _currentProfile.TooltipDisplayZoom = _tooltip_zoom.Value;
+            _currentProfile.TooltipFont = _tooltip_font_selector.GetSelectedFont();
+
+            _currentProfile?.Save(ProfileManager.ProfilePath);
         }
 
         internal void UpdateVideo()
         {
-            WorldViewportGump gump = UIManager.GetGump<WorldViewportGump>();
-            _gameWindowWidth.Text = gump.Width.ToString();
-            _gameWindowHeight.Text = gump.Height.ToString();
-            _gameWindowPositionX.Text = gump.X.ToString();
-            _gameWindowPositionY.Text = gump.Y.ToString();
+            _gameWindowWidth.SetText(_currentProfile.GameWindowSize.X.ToString());
+            _gameWindowHeight.SetText(_currentProfile.GameWindowSize.Y.ToString());
+            _gameWindowPositionX.SetText(_currentProfile.GameWindowPosition.X.ToString());
+            _gameWindowPositionY.SetText(_currentProfile.GameWindowPosition.Y.ToString());
         }
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
             ResetHueVector();
 
-            batcher.DrawRectangle(Textures.GetTexture(Color.Gray), x, y, Width, Height, ref _hueVector);
+            batcher.Draw2D
+            (
+                LogoTexture,
+                x + 190,
+                y + 20,
+                WIDTH - 250,
+                400,
+                ref HueVector
+            );
+
+            batcher.DrawRectangle
+            (
+                SolidColorTextureCache.GetTexture(Color.Gray),
+                x,
+                y,
+                Width,
+                Height,
+                ref HueVector
+            );
 
             return base.Draw(batcher, x, y);
         }
 
-        private TextBox CreateInputField(ScrollAreaItem area, TextBox elem, string label = null, int maxWidth = 0)
+        private InputField AddInputField
+        (
+            ScrollArea area,
+            int x,
+            int y,
+            int width,
+            int height,
+            string label = null,
+            int maxWidth = 0,
+            bool set_down = false,
+            bool numbersOnly = false,
+            int maxCharCount = -1
+        )
         {
-            if (label != null)
+            InputField elem = new InputField
+            (
+                0x0BB8,
+                FONT,
+                HUE_FONT,
+                true,
+                width,
+                height,
+                maxWidth,
+                maxCharCount
+            )
             {
-                Label text = new Label(label, true, HUE_FONT, maxWidth)
+                NumbersOnly = numbersOnly,
+                X = x,
+                Y = y
+            };
+
+
+            if (area != null)
+            {
+                Label text = AddLabel(area, label, x, y);
+
+                if (set_down)
                 {
-                    X = elem.X - 10,
-                    Y = elem.Y
-                };
+                    elem.Y = text.Bounds.Bottom + 2;
+                }
+                else
+                {
+                    elem.X = text.Bounds.Right + 2;
+                }
 
-                elem.Y += text.Height;
-                area.Add(text);
+                area.Add(elem);
             }
-
-            area.Add(new ResizePic(0x0BB8)
-            {
-                X = elem.X - 5,
-                Y = elem.Y - 2,
-                Width = elem.Width + 10,
-                Height = elem.Height - 7
-            });
-
-            area.Add(elem);
 
             return elem;
         }
 
-        private Checkbox CreateCheckBox(ScrollArea area, string text, bool ischecked, int x, int y)
+        private Label AddLabel(ScrollArea area, string text, int x, int y)
         {
-            Checkbox box = new Checkbox(0x00D2, 0x00D3, text, FONT, HUE_FONT)
+            Label label = new Label(text, true, HUE_FONT)
             {
-                IsChecked = ischecked
+                X = x,
+                Y = y
             };
 
-            if (x != 0)
-            {
-                ScrollAreaItem item = new ScrollAreaItem();
-                box.X = x;
-                box.Y = y;
+            area?.Add(label);
 
-                item.Add(box);
-                area.Add(item);
-            }
-            else
-            {
-                box.Y = y;
+            return label;
+        }
 
-                area.Add(box);
-            }
+        private Checkbox AddCheckBox(ScrollArea area, string text, bool ischecked, int x, int y)
+        {
+            Checkbox box = new Checkbox
+            (
+                0x00D2,
+                0x00D3,
+                text,
+                FONT,
+                HUE_FONT
+            )
+            {
+                IsChecked = ischecked,
+                X = x,
+                Y = y
+            };
+
+            area?.Add(box);
 
             return box;
         }
 
-        private ClickableColorBox CreateClickableColorBox(ScrollArea area, int x, int y, ushort hue, string text, int labelX, int labelY)
+        private Combobox AddCombobox
+        (
+            ScrollArea area,
+            string[] values,
+            int currentIndex,
+            int x,
+            int y,
+            int width
+        )
         {
-            ScrollAreaItem item = new ScrollAreaItem();
+            Combobox combobox = new Combobox(x, y, width, values)
+            {
+                SelectedIndex = currentIndex
+            };
 
+            area?.Add(combobox);
+
+            return combobox;
+        }
+
+        private HSliderBar AddHSlider
+        (
+            ScrollArea area,
+            int min,
+            int max,
+            int value,
+            int x,
+            int y,
+            int width
+        )
+        {
+            HSliderBar slider = new HSliderBar
+            (
+                x,
+                y,
+                width,
+                min,
+                max,
+                value,
+                HSliderBarStyle.MetalWidgetRecessedBar,
+                true,
+                FONT,
+                HUE_FONT
+            );
+
+            area?.Add(slider);
+
+            return slider;
+        }
+
+        private ClickableColorBox AddColorBox(ScrollArea area, int x, int y, ushort hue, string text)
+        {
             uint color = 0xFF7F7F7F;
 
             if (hue != 0xFFFF)
-                color = FileManager.Hues.GetPolygoneColor(12, hue);
-
-            ClickableColorBox box = new ClickableColorBox(x, y, 13, 14, hue, color);
-            item.Add(box);
-
-            item.Add(new Label(text, true, HUE_FONT)
             {
-                X = labelX, Y = labelY
-            });
-            area.Add(item);
+                color = HuesLoader.Instance.GetPolygoneColor(12, hue);
+            }
+
+            ClickableColorBox box = new ClickableColorBox
+            (
+                x,
+                y,
+                13,
+                14,
+                hue,
+                color
+            );
+
+            area?.Add(box);
+
+            area?.Add
+            (
+                new Label(text, true, HUE_FONT)
+                {
+                    X = x + box.Width + 10,
+                    Y = y
+                }
+            );
 
             return box;
+        }
+
+        private SettingsSection AddSettingsSection(DataBox area, string label)
+        {
+            SettingsSection section = new SettingsSection(label, area.Width);
+            area.Add(section);
+            area.WantUpdateSize = true;
+            //area.ReArrangeChildren();
+
+            return section;
         }
 
         private enum Buttons
         {
+            Disabled, //no action will be done on these buttons, at least not by OnButtonClick()
             Cancel,
             Apply,
             Default,
@@ -2180,27 +4308,138 @@ namespace ClassicUO.Game.UI.Gumps
             Last = DeleteMacro
         }
 
+
+        private class SettingsSection : Control
+        {
+            private readonly DataBox _databox;
+            private int _indent;
+
+            public SettingsSection(string title, int width)
+            {
+                CanMove = true;
+                AcceptMouseInput = true;
+                WantUpdateSize = true;
+
+
+                Label label = new Label(title, true, HUE_FONT, font: FONT);
+                label.X = 5;
+                base.Add(label);
+
+                base.Add
+                (
+                    new Line
+                    (
+                        0,
+                        label.Height,
+                        width - 30,
+                        1,
+                        0xFFbabdc2
+                    )
+                );
+
+                Width = width;
+                Height = label.Height + 1;
+
+                _databox = new DataBox(label.X + 10, label.Height + 4, 0, 0);
+
+                base.Add(_databox);
+            }
+
+            public void PushIndent()
+            {
+                _indent += 40;
+            }
+
+            public void PopIndent()
+            {
+                _indent -= 40;
+            }
+
+
+            public void AddRight(Control c, int offset = 15)
+            {
+                int i = _databox.Children.Count - 1;
+
+                for (; i >= 0; --i)
+                {
+                    if (_databox.Children[i].IsVisible)
+                    {
+                        break;
+                    }
+                }
+
+                c.X = i >= 0 ? _databox.Children[i].Bounds.Right + offset : _indent;
+
+                c.Y = i >= 0 ? _databox.Children[i].Bounds.Top : 0;
+
+                _databox.Add(c);
+                _databox.WantUpdateSize = true;
+            }
+
+            public override void Add(Control c, int page = 0)
+            {
+                int i = _databox.Children.Count - 1;
+                int bottom = 0;
+
+                for (; i >= 0; --i)
+                {
+                    if (_databox.Children[i].IsVisible)
+                    {
+                        if (bottom == 0 || bottom < _databox.Children[i].Bounds.Bottom + 2)
+                        {
+                            bottom = _databox.Children[i].Bounds.Bottom + 2;
+                        }
+                        else
+                        {
+                            break;
+                        }
+                    }
+                }
+
+                c.X = _indent;
+                c.Y = bottom;
+
+                _databox.Add(c, page);
+                _databox.WantUpdateSize = true;
+
+                Height += c.Height + 2;
+            }
+        }
+
         private class FontSelector : Control
         {
-            private readonly RadioButton[] _buttons = new RadioButton[20];
+            private readonly RadioButton[] _buttons;
 
-            public FontSelector()
+            public FontSelector(int max_font, int current_font_index, string markup)
             {
                 CanMove = false;
                 CanCloseWithRightClick = false;
 
                 int y = 0;
 
-                for (byte i = 0; i < 20; i++)
+                _buttons = new RadioButton[max_font];
+
+                for (byte i = 0; i < max_font; i++)
                 {
-                    if (FileManager.Fonts.UnicodeFontExists(i))
+                    if (FontsLoader.Instance.UnicodeFontExists(i))
                     {
-                        Add(_buttons[i] = new RadioButton(0, 0x00D0, 0x00D1, "That's ClassicUO!", i, HUE_FONT)
-                        {
-                            Y = y,
-                            Tag = i,
-                            IsChecked = ProfileManager.Current.ChatFont == i
-                        });
+                        Add
+                        (
+                            _buttons[i] = new RadioButton
+                            (
+                                0,
+                                0x00D0,
+                                0x00D1,
+                                markup,
+                                i,
+                                HUE_FONT
+                            )
+                            {
+                                Y = y,
+                                Tag = i,
+                                IsChecked = current_font_index == i
+                            }
+                        );
 
                         y += 25;
                     }
@@ -2213,7 +4452,10 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     RadioButton b = _buttons[i];
 
-                    if (b != null && b.IsChecked) return i;
+                    if (b != null && b.IsChecked)
+                    {
+                        return i;
+                    }
                 }
 
                 return 0xFF;
@@ -2221,7 +4463,80 @@ namespace ClassicUO.Game.UI.Gumps
 
             public void SetSelectedFont(int index)
             {
-                _buttons[index].IsChecked = true;
+                if (index >= 0 && index < _buttons.Length && _buttons[index] != null)
+                {
+                    _buttons[index].IsChecked = true;
+                }
+            }
+        }
+
+        private class InputField : Control
+        {
+            private readonly StbTextBox _textbox;
+
+            public InputField
+            (
+                ushort backgroundGraphic,
+                byte font,
+                ushort hue,
+                bool unicode,
+                int width,
+                int height,
+                int maxWidthText = 0,
+                int maxCharsCount = -1
+            )
+            {
+                WantUpdateSize = false;
+
+                Width = width;
+                Height = height;
+
+                ResizePic background = new ResizePic(backgroundGraphic)
+                {
+                    Width = width,
+                    Height = height
+                };
+
+                _textbox = new StbTextBox
+                (
+                    font,
+                    maxCharsCount,
+                    maxWidthText,
+                    unicode,
+                    FontStyle.BlackBorder,
+                    hue
+                )
+                {
+                    X = 4,
+                    Y = 4,
+                    Width = width - 8,
+                    Height = height - 8
+                };
+
+
+                Add(background);
+                Add(_textbox);
+            }
+
+
+            public string Text => _textbox.Text;
+
+            public override bool AcceptKeyboardInput
+            {
+                get => _textbox.AcceptKeyboardInput;
+                set => _textbox.AcceptKeyboardInput = value;
+            }
+
+            public bool NumbersOnly
+            {
+                get => _textbox.NumbersOnly;
+                set => _textbox.NumbersOnly = value;
+            }
+
+
+            public void SetText(string text)
+            {
+                _textbox.SetText(text);
             }
         }
     }

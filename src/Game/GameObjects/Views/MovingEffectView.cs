@@ -1,31 +1,37 @@
 ﻿#region license
 
-//  Copyright (C) 2019 ClassicUO Development Community on Github
-//
-//	This project is an alternative client for the game Ultima Online.
-//	The goal of this is to develop a lightweight client considering 
-//	new technologies.  
-//      
-//  This program is free software: you can redistribute it and/or modify
-//  it under the terms of the GNU General Public License as published by
-//  the Free Software Foundation, either version 3 of the License, or
-//  (at your option) any later version.
-//
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-//
-//  You should have received a copy of the GNU General Public License
-//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// Copyright (c) 2021, andreakarasho
+// All rights reserved.
+// 
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+// 1. Redistributions of source code must retain the above copyright
+//    notice, this list of conditions and the following disclaimer.
+// 2. Redistributions in binary form must reproduce the above copyright
+//    notice, this list of conditions and the following disclaimer in the
+//    documentation and/or other materials provided with the distribution.
+// 3. All advertising materials mentioning features or use of this software
+//    must display the following acknowledgement:
+//    This product includes software developed by andreakarasho - https://github.com/andreakarasho
+// 4. Neither the name of the copyright holder nor the
+//    names of its contributors may be used to endorse or promote products
+//    derived from this software without specific prior written permission.
+// 
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ''AS IS'' AND ANY
+// EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+// WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+// DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY
+// DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+// (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+// LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+// ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+// SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #endregion
 
-using System;
-
 using ClassicUO.Configuration;
 using ClassicUO.Game.Scenes;
-using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 
@@ -33,62 +39,48 @@ namespace ClassicUO.Game.GameObjects
 {
     internal sealed partial class MovingEffect
     {
-        private Graphic _displayedGraphic = Graphic.INVALID;
-
-
         public override bool Draw(UltimaBatcher2D batcher, int posX, int posY)
         {
-            if (IsDestroyed)
+            if (IsDestroyed || !AllowedToDraw)
+            {
                 return false;
+            }
 
             ResetHueVector();
 
-            if (AnimationGraphic != _displayedGraphic || Texture == null || Texture.IsDisposed)
+            ushort hue = Hue;
+
+            if (ProfileManager.CurrentProfile.NoColorObjectsOutOfRange && Distance > World.ClientViewRange)
             {
-                _displayedGraphic = AnimationGraphic;
-                Texture = FileManager.Art.GetTexture(AnimationGraphic);
-                Bounds.X = -((Texture.Width >> 1) - 22);
-                Bounds.Y = -(Texture.Height - 44);
-                Bounds.Width = Texture.Width;
-                Bounds.Height = Texture.Height;
+                hue = Constants.OUT_RANGE_COLOR;
+            }
+            else if (World.Player.IsDead && ProfileManager.CurrentProfile.EnableBlackWhiteEffect)
+            {
+                hue = Constants.DEAD_RANGE_COLOR;
             }
 
-
-            posX += (int) Offset.X;
-            posY += (int) (Offset.Y + Offset.Z);
-
-            //posX += 22;
-            //posY += 22;
-
-            if (ProfileManager.Current.NoColorObjectsOutOfRange && Distance > World.ClientViewRange)
-            {
-                HueVector.X = Constants.OUT_RANGE_COLOR;
-                HueVector.Y = 1;
-            }
-            else if (World.Player.IsDead && ProfileManager.Current.EnableBlackWhiteEffect)
-            {
-                HueVector.X = Constants.DEAD_RANGE_COLOR;
-                HueVector.Y = 1;
-            }
-            else
-                ShaderHuesTraslator.GetHueVector(ref HueVector, Hue);
+            ShaderHueTranslator.GetHueVector(ref HueVector, hue);
 
             //Engine.DebugInfo.EffectsRendered++;
 
-            if (FixedDir)
-                batcher.DrawSprite(Texture, posX, posY, false, ref HueVector);
-            else
-                batcher.DrawSpriteRotated(Texture, posX, posY, Bounds.X, Bounds.Y, ref HueVector, AngleToTarget);
+            posX += (int)Offset.X;
+            posY += (int)(Offset.Y + Offset.Z);
 
-            //Select(posX, posY);
-            Texture.Ticks = Time.Ticks;
+            DrawStaticRotated
+            (
+                batcher,
+                AnimationGraphic,
+                posX,
+                posY,
+                AngleToTarget,
+                ref HueVector
+            );
 
-            ref readonly StaticTiles data = ref FileManager.TileData.StaticData[_displayedGraphic];
+            ref StaticTiles data = ref TileDataLoader.Instance.StaticData[AnimationGraphic];
 
             if (data.IsLight && Source != null)
             {
-                CUOEnviroment.Client.GetScene<GameScene>()
-                      .AddLight(Source, Source, posX + 22, posY + 22);
+                Client.Game.GetScene<GameScene>().AddLight(Source, Source, posX + 22, posY + 22);
             }
 
             return true;

@@ -1,34 +1,41 @@
 ﻿#region license
 
-//  Copyright (C) 2019 ClassicUO Development Community on Github
-//
-//	This project is an alternative client for the game Ultima Online.
-//	The goal of this is to develop a lightweight client considering 
-//	new technologies.  
-//      
-//  This program is free software: you can redistribute it and/or modify
-//  it under the terms of the GNU General Public License as published by
-//  the Free Software Foundation, either version 3 of the License, or
-//  (at your option) any later version.
-//
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-//
-//  You should have received a copy of the GNU General Public License
-//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// Copyright (c) 2021, andreakarasho
+// All rights reserved.
+// 
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+// 1. Redistributions of source code must retain the above copyright
+//    notice, this list of conditions and the following disclaimer.
+// 2. Redistributions in binary form must reproduce the above copyright
+//    notice, this list of conditions and the following disclaimer in the
+//    documentation and/or other materials provided with the distribution.
+// 3. All advertising materials mentioning features or use of this software
+//    must display the following acknowledgement:
+//    This product includes software developed by andreakarasho - https://github.com/andreakarasho
+// 4. Neither the name of the copyright holder nor the
+//    names of its contributors may be used to endorse or promote products
+//    derived from this software without specific prior written permission.
+// 
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ''AS IS'' AND ANY
+// EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+// WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+// DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY
+// DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+// (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+// LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+// ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+// SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #endregion
 
 using System.Collections.Generic;
-
 using ClassicUO.Input;
-using ClassicUO.IO;
+using ClassicUO.IO.Resources;
 using ClassicUO.Network;
 using ClassicUO.Renderer;
-
-using Microsoft.Xna.Framework;
+using ClassicUO.Utility;
 
 namespace ClassicUO.Game.UI.Controls
 {
@@ -42,54 +49,56 @@ namespace ClassicUO.Game.UI.Controls
             AcceptMouseInput = true;
         }
 
-        public Graphic Graphic
+        public ushort Graphic
         {
             get => _graphic;
             set
             {
-                _graphic = value;
-
-                Texture = FileManager.Gumps.GetTexture(_graphic);
-
-                if (Texture == null)
+                //if (_graphic != value)
                 {
-                    Dispose();
-                    return;
+                    _graphic = value;
+
+                    UOTexture texture = GumpsLoader.Instance.GetTexture(_graphic);
+
+                    if (texture == null)
+                    {
+                        Dispose();
+
+                        return;
+                    }
+
+                    Width = texture.Width;
+                    Height = texture.Height;
                 }
-
-                Width = Texture.Width;
-                Height = Texture.Height;
             }
         }
 
-        public Hue Hue { get; set; }
+        public ushort Hue { get; set; }
 
-
-        public override void Update(double totalMS, double frameMS)
-        {
-            if (Texture == null)
-            {
-                Dispose();
-
-                return;
-            }
-
-            Texture.Ticks = (long) totalMS;
-
-            base.Update(totalMS, frameMS);
-        }
 
         public override bool Contains(int x, int y)
         {
-            if (Texture.Contains(x, y))
+            UOTexture texture = GumpsLoader.Instance.GetTexture(Graphic);
+
+            if (texture == null)
+            {
+                return false;
+            }
+
+            if (texture.Contains(x - Offset.X, y - Offset.Y))
+            {
                 return true;
+            }
 
             for (int i = 0; i < Children.Count; i++)
             {
-                var c = Children[i];
+                Control c = Children[i];
 
+                // might be wrong x, y. They should be calculated by position
                 if (c.Contains(x, y))
+                {
                     return true;
+                }
             }
 
             return false;
@@ -98,56 +107,30 @@ namespace ClassicUO.Game.UI.Controls
 
     internal class GumpPic : GumpPicBase
     {
-        public GumpPic(int x, int y, Graphic graphic, Hue hue)
+        public GumpPic(int x, int y, ushort graphic, ushort hue)
         {
             X = x;
             Y = y;
             Graphic = graphic;
             Hue = hue;
-
-            if (Texture == null)
-                Dispose();
-            else
-            {
-                Width = Texture.Width;
-                Height = Texture.Height;
-            }
+            IsFromServer = true;
         }
 
-        public GumpPic(List<string> parts) : this(int.Parse(parts[1]), int.Parse(parts[2]), Graphic.Parse(parts[3]), (ushort) (parts.Count > 4 ? TransformHue((ushort) (Hue.Parse(parts[4].Substring(parts[4].IndexOf('=') + 1)) + 1)) : 0))
+        public GumpPic(List<string> parts) : this(int.Parse(parts[1]), int.Parse(parts[2]), UInt16Converter.Parse(parts[3]), (ushort) (parts.Count > 4 ? TransformHue((ushort) (UInt16Converter.Parse(parts[4].Substring(parts[4].IndexOf('=') + 1)) + 1)) : 0))
         {
-        }
-
-        public GumpPic(int x, int y, UOTexture texture, Hue hue)
-        {
-            X = x;
-            Y = y;
-
-            Hue = hue;
-
-            Texture = texture;
-
-            if (Texture == null)
-                Dispose();
-            else
-            {
-                Width = Texture.Width;
-                Height = Texture.Height;
-            }
-            WantUpdateSize = false;
         }
 
         public bool IsPartialHue { get; set; }
         public bool ContainsByBounds { get; set; }
         public bool IsVirtue { get; set; }
 
-        protected override bool OnMouseDoubleClick(int x, int y, MouseButton button)
+        protected override bool OnMouseDoubleClick(int x, int y, MouseButtonType button)
         {
-            if (IsVirtue && button == MouseButton.Left)
+            if (IsVirtue && button == MouseButtonType.Left)
             {
-                NetClient.Socket.Send(new PVirtueGumpReponse(World.Player, Graphic.Value));
+                NetClient.Socket.Send(new PVirtueGumpReponse(World.Player, Graphic));
 
-                return false;
+                return true;
             }
 
             return base.OnMouseDoubleClick(x, y, button);
@@ -161,7 +144,9 @@ namespace ClassicUO.Game.UI.Controls
         private static ushort TransformHue(ushort hue)
         {
             if (hue <= 2)
+            {
                 hue = 0;
+            }
 
             //if (hue < 2)
             //    hue = 1;
@@ -171,12 +156,35 @@ namespace ClassicUO.Game.UI.Controls
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
             if (IsDisposed)
+            {
                 return false;
+            }
 
             ResetHueVector();
-            ShaderHuesTraslator.GetHueVector(ref _hueVector, Hue, IsPartialHue, Alpha, true);
 
-            batcher.Draw2D(Texture, x, y, Width, Height, ref _hueVector);
+            ShaderHueTranslator.GetHueVector
+            (
+                ref HueVector,
+                Hue,
+                IsPartialHue,
+                Alpha,
+                true
+            );
+
+            UOTexture texture = GumpsLoader.Instance.GetTexture(Graphic);
+
+            if (texture != null)
+            {
+                batcher.Draw2D
+                (
+                    texture,
+                    x,
+                    y,
+                    Width,
+                    Height,
+                    ref HueVector
+                );
+            }
 
             return base.Draw(batcher, x, y);
         }

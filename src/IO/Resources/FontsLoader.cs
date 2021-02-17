@@ -1,23 +1,32 @@
 ﻿#region license
 
-//  Copyright (C) 2019 ClassicUO Development Community on Github
-//
-//	This project is an alternative client for the game Ultima Online.
-//	The goal of this is to develop a lightweight client considering 
-//	new technologies.  
-//      
-//  This program is free software: you can redistribute it and/or modify
-//  it under the terms of the GNU General Public License as published by
-//  the Free Software Foundation, either version 3 of the License, or
-//  (at your option) any later version.
-//
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-//
-//  You should have received a copy of the GNU General Public License
-//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// Copyright (c) 2021, andreakarasho
+// All rights reserved.
+// 
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+// 1. Redistributions of source code must retain the above copyright
+//    notice, this list of conditions and the following disclaimer.
+// 2. Redistributions in binary form must reproduce the above copyright
+//    notice, this list of conditions and the following disclaimer in the
+//    documentation and/or other materials provided with the distribution.
+// 3. All advertising materials mentioning features or use of this software
+//    must display the following acknowledgement:
+//    This product includes software developed by andreakarasho - https://github.com/andreakarasho
+// 4. Neither the name of the copyright holder nor the
+//    names of its contributors may be used to endorse or promote products
+//    derived from this software without specific prior written permission.
+// 
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ''AS IS'' AND ANY
+// EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+// WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+// DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY
+// DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+// (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+// LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+// ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+// SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #endregion
 
@@ -25,17 +34,14 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
-using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
-
-using ClassicUO.Game;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Collections;
 using ClassicUO.Utility.Logging;
-
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.IO.Resources
@@ -52,31 +58,45 @@ namespace ClassicUO.IO.Resources
         private const int UOFONT_BQ = 0x0080;
         private const int UOFONT_EXTRAHEIGHT = 0x0100;
         private const int UOFONT_CROPTEXTURE = 0x0200;
+        private const int UOFONT_FIXEDHEIGHT = 0x0400;
         private const int UNICODE_SPACE_WIDTH = 8;
         private const int MAX_HTML_TEXT_HEIGHT = 18;
+        private const byte NOPRINT_CHARS = 32;
         private const float ITALIC_FONT_KOEFFICIENT = 3.3f;
-        private readonly byte[] _fontIndex =
+
+        private static FontsLoader _instance;
+
+        struct HtmlStatus
         {
-            0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 136, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 152, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 160, 161, 162, 163, 164, 165, 166, 167, 168, 169, 170, 171, 172, 173, 174, 175, 176, 177, 178, 179, 180, 181, 182, 183, 184, 185, 186, 187, 188, 189, 190, 191, 192, 193, 194, 195, 196, 197, 198, 199, 200, 201, 202, 203, 204, 205, 206, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219, 220, 221, 222, 223
-        };
+            public uint BackgroundColor;
+            public uint VisitedWebLinkColor;
+            public uint WebLinkColor;
+            public uint Color;
+            public Rectangle Margins;
+
+            public bool IsHtmlBackgroundColored;
+        }
+
+        private HtmlStatus _htmlStatus;
+
+        private FontCharacterData[][] _fontData;
         private readonly IntPtr[] _unicodeFontAddress = new IntPtr[20];
         private readonly long[] _unicodeFontSize = new long[20];
         private readonly Dictionary<ushort, WebLink> _webLinks = new Dictionary<ushort, WebLink>();
-        private readonly int[] offsetCharTable =
+        private readonly int[] _offsetCharTable =
         {
             2, 0, 2, 2, 0, 0, 2, 2, 0, 0
         };
-        private readonly int[] offsetSymbolTable =
+        private readonly int[] _offsetSymbolTable =
         {
             1, 0, 1, 1, -1, 0, 1, 1, 0, 0
         };
-        private uint _backgroundColor;
-        private FontData[] _font;
-        private bool _HTMLBackgroundCanBeColored;
-        private uint _HTMLColor = 0xFFFFFFFF;
-        private int _leftMargin, _topMargin, _rightMargin, _bottomMargin;
-        private uint _visitedWebLinkColor;
-        private uint _webLinkColor;
+
+        private FontsLoader()
+        {
+        }
+
+        public static FontsLoader Instance => _instance ?? (_instance = new FontsLoader());
 
         public int FontCount { get; private set; }
 
@@ -86,43 +106,45 @@ namespace ClassicUO.IO.Resources
 
         public bool IsUsingHTML { get; set; }
 
-
-
-        public override Task Load()
+        public override unsafe Task Load()
         {
-            return Task.Run(() =>
-            {
-                UOFileMul fonts = new UOFileMul(Path.Combine(FileManager.UoFolderPath, "fonts.mul"));
-                UOFileMul[] uniFonts = new UOFileMul[20];
-
-                for (int i = 0; i < 20; i++)
+            return Task.Run
+            (
+                () =>
                 {
-                    string path = Path.Combine(FileManager.UoFolderPath, "unifont" + (i == 0 ? "" : i.ToString()) + ".mul");
+                    UOFileMul fonts = new UOFileMul(UOFileManager.GetUOFilePath("fonts.mul"));
+                    UOFileMul[] uniFonts = new UOFileMul[20];
 
-                    if (File.Exists(path))
+                    for (int i = 0; i < 20; i++)
                     {
-                        uniFonts[i] = new UOFileMul(path);
-                        _unicodeFontAddress[i] = uniFonts[i].StartAddress;
-                        _unicodeFontSize[i] = uniFonts[i].Length;
+                        string path = UOFileManager.GetUOFilePath("unifont" + (i == 0 ? "" : i.ToString()) + ".mul");
+
+                        if (File.Exists(path))
+                        {
+                            uniFonts[i] = new UOFileMul(path);
+
+                            _unicodeFontAddress[i] = uniFonts[i].StartAddress;
+
+                            _unicodeFontSize[i] = uniFonts[i].Length;
+                        }
                     }
-                }
 
-                int fontHeaderSize = UnsafeMemoryManager.SizeOf<FontHeader>();
-                FontCount = 0;
+                    int fontHeaderSize = sizeof(FontHeader);
+                    FontCount = 0;
 
-                while (fonts.Position < fonts.Length)
-                {
-                    bool exit = false;
-                    fonts.Skip(1);
-
-                    unsafe
+                    while (fonts.Position < fonts.Length)
                     {
+                        bool exit = false;
+                        fonts.Skip(1);
+
                         for (int i = 0; i < 224; i++)
                         {
                             FontHeader* fh = (FontHeader*) fonts.PositionAddress;
 
                             if (fonts.Position + fontHeaderSize >= fonts.Length)
+                            {
                                 continue;
+                            }
 
                             fonts.Skip(fontHeaderSize);
                             int bcount = fh->Width * fh->Height * 2;
@@ -136,73 +158,72 @@ namespace ClassicUO.IO.Resources
 
                             fonts.Skip(bcount);
                         }
+
+                        if (exit)
+                        {
+                            break;
+                        }
+
+                        FontCount++;
                     }
 
-                    if (exit)
-                        break;
-
-                    FontCount++;
-                }
-
-                if (FontCount < 1)
-                {
-                    FontCount = 0;
-
-                    return;
-                }
-
-                _font = new FontData[FontCount];
-                fonts.Seek(0);
-
-                for (int i = 0; i < FontCount; i++)
-                {
-                    byte header = fonts.ReadByte();
-
-                    FontCharacterData[] datas = new FontCharacterData[224];
-
-                    for (int j = 0; j < 224; j++)
+                    if (FontCount < 1)
                     {
-                        if (fonts.Position + 3 >= fonts.Length)
-                            continue;
+                        FontCount = 0;
 
-                        byte w = fonts.ReadByte();
-                        byte h = fonts.ReadByte();
-                        fonts.Skip(1);
-                        ushort[] data = fonts.ReadArray<ushort>(w * h);
-
-                        datas[j] = new FontCharacterData(w, h, data);
+                        return;
                     }
 
-                    _font[i] = new FontData(header, datas);
-                }
+                    _fontData = new FontCharacterData[FontCount][];
+                    fonts.Seek(0);
 
-                if (_unicodeFontAddress[1] == IntPtr.Zero)
-                {
-                    _unicodeFontAddress[1] = _unicodeFontAddress[0];
-                    _unicodeFontSize[1] = _unicodeFontSize[0];
-                }
+                    for (int i = 0; i < FontCount; i++)
+                    {
+                        byte header = fonts.ReadByte();
 
-                for (int i = 0; i < 256; i++)
-                {
-                    if (_fontIndex[i] >= 0xE0)
-                        _fontIndex[i] = _fontIndex[' '];
+                        FontCharacterData[] datas = new FontCharacterData[224];
+
+                        for (int j = 0; j < 224; j++)
+                        {
+                            if (fonts.Position + 3 >= fonts.Length)
+                            {
+                                continue;
+                            }
+
+                            byte w = fonts.ReadByte();
+                            byte h = fonts.ReadByte();
+                            fonts.Skip(1);
+                            ushort[] data = fonts.ReadArray<ushort>(w * h);
+
+                            datas[j] = new FontCharacterData(w, h, data);
+                        }
+
+                        _fontData[i] = datas;
+                    }
+
+                    if (_unicodeFontAddress[1] == IntPtr.Zero)
+                    {
+                        _unicodeFontAddress[1] = _unicodeFontAddress[0];
+                        _unicodeFontSize[1] = _unicodeFontSize[0];
+                    }
                 }
-            });
+            );
         }
-
-        public override void CleanResources()
-        {
-            // do nothing
-        }
-
 
         public bool UnicodeFontExists(byte font)
         {
             return font < 20 && _unicodeFontAddress[font] != IntPtr.Zero;
         }
 
-
-        public (int, int) MeasureText(string text, byte font, bool isunicode, TEXT_ALIGN_TYPE align, ushort flags, int maxWidth = 200)
+        public (int, int) MeasureText
+        (
+            string text,
+            byte font,
+            bool isunicode,
+            TEXT_ALIGN_TYPE align,
+            ushort flags,
+            int maxWidth = 200
+        )
         {
             int width, height;
 
@@ -211,58 +232,144 @@ namespace ClassicUO.IO.Resources
                 width = GetWidthUnicode(font, text);
 
                 if (width > maxWidth)
-                    width = GetWidthExUnicode(font, text, maxWidth, align, flags);
+                {
+                    width = GetWidthExUnicode
+                    (
+                        font,
+                        text,
+                        maxWidth,
+                        align,
+                        flags
+                    );
+                }
 
-                height = GetHeightUnicode(font, text, width, align, flags);
+                height = GetHeightUnicode
+                (
+                    font,
+                    text,
+                    width,
+                    align,
+                    flags
+                );
             }
             else
             {
                 width = GetWidthASCII(font, text);
 
                 if (width > maxWidth)
-                    width = GetWidthExASCII(font, text, maxWidth, align, flags);
+                {
+                    width = GetWidthExASCII
+                    (
+                        font,
+                        text,
+                        maxWidth,
+                        align,
+                        flags
+                    );
+                }
 
-                height = GetHeightASCII(font, text, width, align, flags);
+                height = GetHeightASCII
+                (
+                    font,
+                    text,
+                    width,
+                    align,
+                    flags
+                );
             }
 
             return (width, height);
         }
 
+        /// <summary> Get the index in ASCII fonts of a character. </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private int GetASCIIIndex(char c)
+        {
+            byte ch = (byte) c; // ASCII fonts cover only 256 characters
+
+            if (ch < NOPRINT_CHARS)
+            {
+                return 0;
+            }
+
+            return ch - NOPRINT_CHARS;
+        }
 
         public int GetWidthASCII(byte font, string str)
         {
             if (font >= FontCount || string.IsNullOrEmpty(str))
+            {
                 return 0;
+            }
 
-            FontData fd = _font[font];
             int textLength = 0;
 
             foreach (char c in str)
-                textLength += fd.Chars[_fontIndex[(byte) c]].Width;
+            {
+                textLength += _fontData[font][GetASCIIIndex(c)].Width;
+            }
 
             return textLength;
+        }
+
+        public int GetCharWidthASCII(byte font, char c)
+        {
+            if (font >= FontCount || c == 0 || c == '\r')
+            {
+                return 0;
+            }
+
+            if (c < NOPRINT_CHARS)
+            {
+                return _fontData[font][0].Width;
+            }
+
+            int index = c - NOPRINT_CHARS;
+
+            if (index < _fontData[font].Length)
+            {
+                return _fontData[font][index].Width;
+            }
+
+            return 0;
         }
 
         public int GetWidthExASCII(byte font, string text, int maxwidth, TEXT_ALIGN_TYPE align, ushort flags)
         {
             if (font > FontCount || string.IsNullOrEmpty(text))
+            {
                 return 0;
+            }
 
-            MultilinesFontInfo info = GetInfoASCII(font, text, text.Length, align, flags, maxwidth);
+            MultilinesFontInfo info = GetInfoASCII
+            (
+                font,
+                text,
+                text.Length,
+                align,
+                flags,
+                maxwidth
+            );
+
             int textWidth = 0;
 
             while (info != null)
             {
                 if (info.Width > textWidth)
+                {
                     textWidth = info.Width;
+                }
+
                 MultilinesFontInfo ptr = info;
                 info = info.Next;
                 ptr.Data.Clear();
+                ptr.Data.Count = 0;
                 ptr = null;
             }
 
             return textWidth;
         }
+
 
         private int GetHeightASCII(MultilinesFontInfo info)
         {
@@ -280,71 +387,161 @@ namespace ClassicUO.IO.Resources
         public int GetHeightASCII(byte font, string str, int width, TEXT_ALIGN_TYPE align, ushort flags)
         {
             if (width == 0)
+            {
                 width = GetWidthASCII(font, str);
+            }
 
-            MultilinesFontInfo info = GetInfoASCII(font, str, str.Length, align, flags, width);
+            MultilinesFontInfo info = GetInfoASCII
+            (
+                font,
+                str,
+                str.Length,
+                align,
+                flags,
+                width
+            );
 
             int textHeight = 0;
 
             while (info != null)
             {
                 if (IsUsingHTML)
+                {
                     textHeight += MAX_HTML_TEXT_HEIGHT;
+                }
                 else
+                {
                     textHeight += info.MaxHeight;
+                }
+
                 MultilinesFontInfo ptr = info;
                 info = info.Next;
                 ptr.Data.Clear();
+                ptr.Data.Count = 0;
                 ptr = null;
             }
 
             return textHeight;
         }
 
-        public void GenerateASCII(ref FontTexture texture, byte font, string str, ushort color, int width, TEXT_ALIGN_TYPE align, ushort flags, out bool isPartial, bool saveHitmap, int height)
+        public void GenerateASCII
+        (
+            ref FontTexture texture,
+            byte font,
+            string str,
+            ushort color,
+            int width,
+            TEXT_ALIGN_TYPE align,
+            ushort flags,
+            bool saveHitmap,
+            int height
+        )
         {
-            isPartial = false;
-
             if (string.IsNullOrEmpty(str))
+            {
                 return;
+            }
 
             if ((flags & UOFONT_FIXED) != 0 || (flags & UOFONT_CROPPED) != 0 || (flags & UOFONT_CROPTEXTURE) != 0)
             {
                 if (width == 0 || string.IsNullOrEmpty(str))
+                {
                     return;
+                }
 
                 int realWidth = GetWidthASCII(font, str);
 
                 if (realWidth > width)
                 {
-                    string newstr = GetTextByWidthASCII(font, str, width, (flags & UOFONT_CROPPED) != 0, align, flags);
-                    if((flags & UOFONT_CROPTEXTURE) != 0)
+                    string newstr = GetTextByWidthASCII
+                    (
+                        font,
+                        str,
+                        width,
+                        (flags & UOFONT_CROPPED) != 0,
+                        align,
+                        flags
+                    );
+
+                    if ((flags & UOFONT_CROPTEXTURE) != 0 && !string.IsNullOrEmpty(newstr))
                     {
                         int totalheight = 0;
-                        while(totalheight < height)
+
+                        while (totalheight < height)
                         {
-                            totalheight += GetHeightASCII(font, newstr, width, align, flags);
+                            totalheight += GetHeightASCII
+                            (
+                                font,
+                                newstr,
+                                width,
+                                align,
+                                flags
+                            );
+
                             if (str.Length > newstr.Length)
-                                newstr += GetTextByWidthASCII(font, str.Substring(newstr.Length), width, (flags & UOFONT_CROPPED) != 0, align, flags);
+                            {
+                                newstr += GetTextByWidthASCII
+                                (
+                                    font,
+                                    str.Substring(newstr.Length),
+                                    width,
+                                    (flags & UOFONT_CROPPED) != 0,
+                                    align,
+                                    flags
+                                );
+                            }
                             else
+                            {
                                 break;
+                            }
                         }
                     }
-                    GeneratePixelsASCII(ref texture, font, newstr, color, width, align, flags, out isPartial, saveHitmap);
+
+                    GeneratePixelsASCII
+                    (
+                        ref texture,
+                        font,
+                        newstr,
+                        color,
+                        width,
+                        align,
+                        flags,
+                        saveHitmap
+                    );
 
                     return;
                 }
             }
 
-            GeneratePixelsASCII(ref texture, font, str, color, width, align, flags, out isPartial, saveHitmap);
+            GeneratePixelsASCII
+            (
+                ref texture,
+                font,
+                str,
+                color,
+                width,
+                align,
+                flags,
+                saveHitmap
+            );
         }
 
-        private string GetTextByWidthASCII(byte font, string str, int width, bool isCropped, TEXT_ALIGN_TYPE align, ushort flags)
+        public string GetTextByWidthASCII
+        (
+            byte font,
+            string str,
+            int width,
+            bool isCropped,
+            TEXT_ALIGN_TYPE align,
+            ushort flags
+        )
         {
             if (font >= FontCount || string.IsNullOrEmpty(str))
+            {
                 return string.Empty;
+            }
 
-            ref readonly FontData fd = ref _font[font];
+            ref FontCharacterData[] fd = ref _fontData[font];
 
             StringBuilder sb = new StringBuilder();
 
@@ -352,62 +549,112 @@ namespace ClassicUO.IO.Resources
             {
                 int strLen = str.Length;
 
-                GetHTMLData(font, str, ref strLen, align, flags);
+                unsafe
+                {
+                    HTMLChar* chars = stackalloc HTMLChar[strLen];
+
+                    GetHTMLData
+                    (
+                        chars,
+                        font,
+                        str,
+                        ref strLen,
+                        align,
+                        flags
+                    );
+                }
+
                 int size = str.Length - strLen;
+
                 if (size > 0)
                 {
                     sb.Append(str.Substring(0, size));
                     str = str.Substring(str.Length - strLen, strLen);
 
                     if (GetWidthASCII(font, str) < width)
+                    {
                         isCropped = false;
+                    }
                 }
             }
 
             if (isCropped)
-                width -= fd.Chars[_fontIndex[(byte) '.']].Width * 3;
+            {
+                width -= fd['.' - NOPRINT_CHARS].Width * 3;
+            }
+
             int textLength = 0;
 
             foreach (char c in str)
             {
-                textLength += fd.Chars[_fontIndex[(byte) c]].Width;
+                textLength += _fontData[font][GetASCIIIndex(c)].Width;
 
                 if (textLength > width)
+                {
                     break;
+                }
 
                 sb.Append(c);
             }
 
             if (isCropped)
+            {
                 sb.Append("...");
+            }
 
             return sb.ToString();
         }
 
-        private void GeneratePixelsASCII(ref FontTexture texture, byte font, string str, ushort color, int width, TEXT_ALIGN_TYPE align, ushort flags, out bool isPartial, bool saveHitmap)
+        private void GeneratePixelsASCII
+        (
+            ref FontTexture texture,
+            byte font,
+            string str,
+            ushort color,
+            int width,
+            TEXT_ALIGN_TYPE align,
+            ushort flags,
+            bool saveHitmap
+        )
         {
-            isPartial = false;
-
             if (font >= FontCount)
+            {
                 return;
+            }
 
             int len = str.Length;
 
             if (len == 0)
+            {
                 return;
+            }
 
-            ref readonly FontData fd = ref _font[font];
+            ref FontCharacterData[] fd = ref _fontData[font];
 
             if (width <= 0)
+            {
                 width = GetWidthASCII(font, str);
+            }
 
             if (width <= 0)
-                return ;
+            {
+                return;
+            }
 
-            MultilinesFontInfo info = GetInfoASCII(font, str, len, align, flags, width);
+            MultilinesFontInfo info = GetInfoASCII
+            (
+                font,
+                str,
+                len,
+                align,
+                flags,
+                width
+            );
 
             if (info == null)
+            {
                 return;
+            }
 
             width += 4;
             int height = GetHeightASCII(info);
@@ -421,6 +668,7 @@ namespace ClassicUO.IO.Resources
                     info = ptr1;
                     ptr1 = ptr1.Next;
                     info.Data.Clear();
+                    info.Data.Count = 0;
                     info = null;
                 }
 
@@ -431,9 +679,9 @@ namespace ClassicUO.IO.Resources
             uint[] pData = new uint[blocksize];
             int lineOffsY = 0;
             MultilinesFontInfo ptr = info;
-            isPartial = font != 5 && font != 8 && !UnusePartialHue;
+            bool isPartial = font != 5 && font != 8 && !UnusePartialHue;
             int font6OffsetY = font == 6 ? 7 : 0;
-            int linesCount = 0; // this value should be added to TextTexture.LinesCount += linesCount
+            int linesCount = 0; // this value should be added to TextTexture.LineCount += linesCount
 
             while (ptr != null)
             {
@@ -449,7 +697,9 @@ namespace ClassicUO.IO.Resources
                         w = (width - ptr.Width) >> 1;
 
                         if (w < 0)
+                        {
                             w = 0;
+                        }
 
                         break;
                     }
@@ -459,8 +709,10 @@ namespace ClassicUO.IO.Resources
                     {
                         w = width - 10 - ptr.Width;
 
-                        if (w == 0)
-                            w = 0;
+                        if (w < 0)
+                        {
+                            w = width;
+                        }
 
                         break;
                     }
@@ -476,36 +728,52 @@ namespace ClassicUO.IO.Resources
                 for (int i = 0; i < count; i++)
                 {
                     byte index = (byte) ptr.Data[i].Item;
+
                     int offsY = GetFontOffsetY(font, index);
-                    ref readonly FontCharacterData fcd = ref fd.Chars[_fontIndex[index]];
+
+                    ref FontCharacterData fcd = ref fd[GetASCIIIndex(ptr.Data[i].Item)];
+
                     int dw = fcd.Width;
                     int dh = fcd.Height;
                     ushort charColor = color;
 
                     for (int y = 0; y < dh; y++)
                     {
-                        int testrY = y + lineOffsY + offsY;
+                        int testY = y + lineOffsY + offsY;
 
-                        if (testrY >= height)
+                        if (testY >= height)
+                        {
                             break;
+                        }
 
                         for (int x = 0; x < dw; x++)
                         {
                             if (x + w >= width)
+                            {
                                 break;
+                            }
 
                             ushort pic = fcd.Data[y * dw + x];
 
                             if (pic != 0)
                             {
-                                uint pcl = 0;
+                                uint pcl;
 
                                 if (isPartial)
-                                    pcl = FileManager.Hues.GetPartialHueColor(pic, charColor) | 0xFF000000;
+                                {
+                                    pcl = HuesLoader.Instance.GetPartialHueColor(pic, charColor);
+                                }
                                 else
-                                    pcl = FileManager.Hues.GetColor(pic, charColor) | 0xFF000000;
-                                int block = testrY * width + x + w;
-                                pData[block] = pcl; //HuesHelper.RgbaToArgb((pcl << 8) | 0xFF);
+                                {
+                                    pcl = HuesLoader.Instance.GetColor(pic, charColor);
+                                }
+
+                                int block = testY * width + x + w;
+
+                                if (block >= 0)
+                                {
+                                    pData[block] = pcl | 0xFF_00_00_00;
+                                }
                             }
                         }
                     }
@@ -516,33 +784,47 @@ namespace ClassicUO.IO.Resources
                 lineOffsY += ptr.MaxHeight - font6OffsetY;
                 ptr = ptr.Next;
                 info.Data.Clear();
+                info.Data.Count = 0;
                 info = null;
             }
 
             if (texture == null || texture.IsDisposed)
-                texture = new FontTexture(width, height, linesCount, new List<WebLinkRect>());
+            {
+                texture = new FontTexture(width, height, linesCount, new RawList<WebLinkRect>());
+            }
             else
             {
                 texture.Links.Clear();
-                texture.LinesCount = linesCount;
+                texture.LineCount = linesCount;
             }
 
-            texture.PushData(pData);
+            if (saveHitmap)
+            {
+                texture.PushData(pData);
+            }
+            else
+            {
+                texture.SetData(pData);
+            }
         }
 
-        public int GetFontOffsetY(byte font, byte index)
+        private int GetFontOffsetY(byte font, byte index)
         {
             if (index == 0xB8)
+            {
                 return 1;
+            }
 
             if (!(index >= 0x41 && index <= 0x5A) && !(index >= 0xC0 && index <= 0xDF) && index != 0xA8)
             {
                 if (font < 10)
                 {
                     if (index >= 0x61 && index <= 0x7A)
-                        return offsetCharTable[font];
+                    {
+                        return _offsetCharTable[font];
+                    }
 
-                    return offsetSymbolTable[font];
+                    return _offsetSymbolTable[font];
                 }
 
                 return 2;
@@ -551,12 +833,24 @@ namespace ClassicUO.IO.Resources
             return 0;
         }
 
-        public MultilinesFontInfo GetInfoASCII(byte font, string str, int len, TEXT_ALIGN_TYPE align, ushort flags, int width, bool countret = false, bool countspaces = false)
+        public MultilinesFontInfo GetInfoASCII
+        (
+            byte font,
+            string str,
+            int len,
+            TEXT_ALIGN_TYPE align,
+            ushort flags,
+            int width,
+            bool countret = false,
+            bool countspaces = false
+        )
         {
             if (font >= FontCount)
+            {
                 return null;
+            }
 
-            ref readonly FontData fd = ref _font[font];
+            ref FontCharacterData[] fd = ref _fontData[font];
             MultilinesFontInfo info = new MultilinesFontInfo();
             info.Reset();
             info.Align = align;
@@ -574,12 +868,12 @@ namespace ClassicUO.IO.Resources
             {
                 char si = str[i];
 
-                if (si == '\r' || si == '\n')
+                if ( /*si == '\r' ||*/ si == '\n')
                 {
                     if (si == '\r' || isFixed || isCropped)
+                    {
                         continue;
-
-                    si = '\n';
+                    }
                 }
 
                 if (si == ' ')
@@ -591,12 +885,15 @@ namespace ClassicUO.IO.Resources
                     charCount = 0;
                 }
 
-                ref readonly FontCharacterData fcd = ref fd.Chars[_fontIndex[(byte) si]];
+                ref FontCharacterData fcd = ref fd[GetASCIIIndex(si)];
+                int eval = ptr.CharStart;
 
                 if (si == '\n' || ptr.Width + readWidth + fcd.Width > width)
                 {
                     if (lastSpace == ptr.CharStart && lastSpace == 0 && si != '\n')
-                        ptr.CharStart = 1;
+                    {
+                        ++eval;
+                    }
 
                     if (si == '\n')
                     {
@@ -605,11 +902,17 @@ namespace ClassicUO.IO.Resources
                         lastSpace = i;
 
                         if (ptr.Width == 0)
+                        {
                             ptr.Width = 1;
+                        }
 
                         if (ptr.MaxHeight == 0)
+                        {
                             ptr.MaxHeight = 14;
+                        }
+
                         ptr.Data.Resize((uint) (ptr.CharCount - newlineval)); // = new List<MultilinesFontData>(ptr.CharCount);
+
                         MultilinesFontInfo newptr = new MultilinesFontInfo();
                         newptr.Reset();
                         ptr.Next = newptr;
@@ -624,16 +927,21 @@ namespace ClassicUO.IO.Resources
                         continue;
                     }
 
-                    if (lastSpace + 1 == ptr.CharStart && !isFixed && !isCropped)
+                    if (lastSpace + 1 == eval && !isFixed && !isCropped)
                     {
                         ptr.Width += readWidth;
                         ptr.CharCount += charCount;
 
                         if (ptr.Width == 0)
+                        {
                             ptr.Width = 1;
+                        }
 
                         if (ptr.MaxHeight == 0)
+                        {
                             ptr.MaxHeight = 14;
+                        }
+
                         MultilinesFontInfo newptr = new MultilinesFontInfo();
                         newptr.Reset();
                         ptr.Next = newptr;
@@ -644,7 +952,10 @@ namespace ClassicUO.IO.Resources
                         charCount = 0;
 
                         if (ptr.Align == TEXT_ALIGN_TYPE.TS_LEFT && (flags & UOFONT_INDENTION) != 0)
+                        {
                             indentionOffset = 14;
+                        }
+
                         ptr.IndentionOffset = indentionOffset;
                         readWidth = indentionOffset;
                     }
@@ -652,13 +963,23 @@ namespace ClassicUO.IO.Resources
                     {
                         if (isFixed)
                         {
-                            MultilinesFontData mfd1 = new MultilinesFontData(0xFFFFFFFF, flags, font, si, 0);
+                            MultilinesFontData mfd1 = new MultilinesFontData
+                            (
+                                0xFFFFFFFF,
+                                flags,
+                                font,
+                                si,
+                                0
+                            );
 
                             ptr.Data.Add(mfd1);
                             readWidth += fcd.Width;
 
                             if (fcd.Height > ptr.MaxHeight)
+                            {
                                 ptr.MaxHeight = fcd.Height;
+                            }
+
                             charCount++;
                             ptr.Width += readWidth;
                             ptr.CharCount += charCount;
@@ -668,19 +989,27 @@ namespace ClassicUO.IO.Resources
                         si = i < len ? str[i] : '\0';
 
                         if (ptr.Width == 0)
+                        {
                             ptr.Width = 1;
-                        else if (countspaces && si != '\0' && lastSpace - ptr.CharStart == ptr.CharCount)
+                        }
+                        else if (countspaces && si != '\0' && lastSpace - eval == ptr.CharCount)
+                        {
                             ptr.CharCount++;
+                        }
 
                         if (ptr.MaxHeight == 0)
+                        {
                             ptr.MaxHeight = 14;
+                        }
 
                         //ptr.CharCount = charCount;
                         charCount = 0;
-                        ptr.Data.Resize( (uint) ptr.CharCount);
+                        ptr.Data.Resize((uint) ptr.CharCount);
 
                         if (isFixed || isCropped)
+                        {
                             break;
+                        }
 
                         MultilinesFontInfo newptr = new MultilinesFontInfo();
                         newptr.Reset();
@@ -690,18 +1019,32 @@ namespace ClassicUO.IO.Resources
                         ptr.CharStart = i;
 
                         if (ptr.Align == TEXT_ALIGN_TYPE.TS_LEFT && (flags & UOFONT_INDENTION) != 0)
+                        {
                             indentionOffset = 14;
+                        }
+
                         ptr.IndentionOffset = indentionOffset;
                         readWidth = indentionOffset;
                     }
                 }
 
-                MultilinesFontData mfd = new MultilinesFontData(0xFFFFFFFF, flags, font, si, 0);
+                MultilinesFontData mfd = new MultilinesFontData
+                (
+                    0xFFFFFFFF,
+                    flags,
+                    font,
+                    si,
+                    0
+                );
+
                 ptr.Data.Add(mfd);
-                readWidth += fcd.Width;
+                readWidth += si == '\r' ? 0 : fcd.Width;
 
                 if (fcd.Height > ptr.MaxHeight)
+                {
                     ptr.MaxHeight = fcd.Height;
+                }
+
                 charCount++;
             }
 
@@ -721,9 +1064,14 @@ namespace ClassicUO.IO.Resources
                 while (ptr != null)
                 {
                     if (ptr.Width > 1)
+                    {
                         ptr.MaxHeight = ptr.MaxHeight + 2;
+                    }
                     else
+                    {
                         ptr.MaxHeight = ptr.MaxHeight + 6;
+                    }
+
                     ptr = ptr.Next;
                 }
             }
@@ -734,50 +1082,129 @@ namespace ClassicUO.IO.Resources
         public void SetUseHTML(bool value, uint htmlStartColor = 0xFFFFFFFF, bool backgroundCanBeColored = false)
         {
             IsUsingHTML = value;
-            _HTMLColor = htmlStartColor;
-            _HTMLBackgroundCanBeColored = backgroundCanBeColored;
+            _htmlStatus.Color = htmlStartColor;
+            _htmlStatus.IsHtmlBackgroundColored = backgroundCanBeColored;
         }
 
-        public void GenerateUnicode(ref FontTexture texture, byte font, string str, ushort color, byte cell, int width, TEXT_ALIGN_TYPE align, ushort flags, bool saveHitmap, int height)
+        public void GenerateUnicode
+        (
+            ref FontTexture texture,
+            byte font,
+            string str,
+            ushort color,
+            byte cell,
+            int width,
+            TEXT_ALIGN_TYPE align,
+            ushort flags,
+            bool saveHitmap,
+            int height
+        )
         {
             if (string.IsNullOrEmpty(str))
+            {
                 return;
+            }
 
             if ((flags & UOFONT_FIXED) != 0 || (flags & UOFONT_CROPPED) != 0 || (flags & UOFONT_CROPTEXTURE) != 0)
             {
                 if (width == 0 || string.IsNullOrEmpty(str))
+                {
                     return;
+                }
 
                 int realWidth = GetWidthUnicode(font, str);
 
                 if (realWidth > width)
                 {
-                    string newstr = GetTextByWidthUnicode(font, str, width, (flags & UOFONT_CROPPED) != 0, align, flags);
-                    if ((flags & UOFONT_CROPTEXTURE) != 0)
+                    string newstr = GetTextByWidthUnicode
+                    (
+                        font,
+                        str,
+                        width,
+                        (flags & UOFONT_CROPPED) != 0,
+                        align,
+                        flags
+                    );
+
+                    if ((flags & UOFONT_CROPTEXTURE) != 0 && !string.IsNullOrEmpty(newstr))
                     {
                         int totalheight = 0;
+
                         while (totalheight < height)
                         {
-                            totalheight += GetHeightUnicode(font, newstr, width, align, flags);
+                            totalheight += GetHeightUnicode
+                            (
+                                font,
+                                newstr,
+                                width,
+                                align,
+                                flags
+                            );
+
                             if (str.Length > newstr.Length)
-                                newstr += GetTextByWidthUnicode(font, str.Substring(newstr.Length), width, (flags & UOFONT_CROPPED) != 0, align, flags);
+                            {
+                                newstr += GetTextByWidthUnicode
+                                (
+                                    font,
+                                    str.Substring(newstr.Length),
+                                    width,
+                                    (flags & UOFONT_CROPPED) != 0,
+                                    align,
+                                    flags
+                                );
+                            }
                             else
+                            {
                                 break;
+                            }
                         }
                     }
-                    GeneratePixelsUnicode(ref texture, font, newstr, color, cell, width, align, flags, saveHitmap);
+
+                    GeneratePixelsUnicode
+                    (
+                        ref texture,
+                        font,
+                        newstr,
+                        color,
+                        cell,
+                        width,
+                        align,
+                        flags,
+                        saveHitmap
+                    );
 
                     return;
                 }
             }
 
-            GeneratePixelsUnicode(ref texture, font, str, color, cell, width, align, flags, saveHitmap);
+            GeneratePixelsUnicode
+            (
+                ref texture,
+                font,
+                str,
+                color,
+                cell,
+                width,
+                align,
+                flags,
+                saveHitmap
+            );
         }
 
-        public unsafe string GetTextByWidthUnicode(byte font, string str, int width, bool isCropped, TEXT_ALIGN_TYPE align, ushort flags)
+        public unsafe string GetTextByWidthUnicode
+        (
+            byte font,
+            string str,
+            int width,
+            bool isCropped,
+            TEXT_ALIGN_TYPE align,
+            ushort flags
+        )
         {
             if (font >= 20 || _unicodeFontAddress[font] == IntPtr.Zero || string.IsNullOrEmpty(str))
+            {
                 return string.Empty;
+            }
 
             uint* table = (uint*) _unicodeFontAddress[font];
 
@@ -787,15 +1214,32 @@ namespace ClassicUO.IO.Resources
             {
                 int strLen = str.Length;
 
-                GetHTMLData(font, str, ref strLen, align, flags);
+                unsafe
+                {
+                    HTMLChar* data = stackalloc HTMLChar[strLen];
+
+                    GetHTMLData
+                    (
+                        data,
+                        font,
+                        str,
+                        ref strLen,
+                        align,
+                        flags
+                    );
+                }
+                
                 int size = str.Length - strLen;
+
                 if (size > 0)
                 {
                     sb.Append(str.Substring(0, size));
                     str = str.Substring(str.Length - strLen, strLen);
 
                     if (GetWidthUnicode(font, str) < width)
+                    {
                         isCropped = false;
+                    }
                 }
             }
 
@@ -804,7 +1248,9 @@ namespace ClassicUO.IO.Resources
                 uint offset = table['.'];
 
                 if (offset != 0 && offset != 0xFFFFFFFF)
-                    width -= *(byte*)((IntPtr)table + (int)offset + 2) * 3 + 3;
+                {
+                    width -= *(byte*) ((IntPtr) table + (int) offset + 2) * 3 + 3;
+                }
             }
 
 
@@ -820,21 +1266,28 @@ namespace ClassicUO.IO.Resources
                     byte* ptr = (byte*) ((IntPtr) table + (int) offset);
                     charWidth = (sbyte) ((sbyte) ptr[0] + (sbyte) ptr[2] + 1);
                 }
-                else if (c == ' ') charWidth = UNICODE_SPACE_WIDTH;
+                else if (c == ' ')
+                {
+                    charWidth = UNICODE_SPACE_WIDTH;
+                }
 
                 if (charWidth != 0)
                 {
                     textLength += charWidth;
 
                     if (textLength > width)
+                    {
                         break;
+                    }
 
                     sb.Append(c);
                 }
             }
 
             if (isCropped)
+            {
                 sb.Append("...");
+            }
 
             return sb.ToString();
         }
@@ -842,7 +1295,9 @@ namespace ClassicUO.IO.Resources
         public unsafe int GetWidthUnicode(byte font, string str)
         {
             if (font >= 20 || _unicodeFontAddress[font] == IntPtr.Zero || string.IsNullOrEmpty(str))
+            {
                 return 0;
+            }
 
             uint* table = (uint*) _unicodeFontAddress[font];
             int textLength = 0;
@@ -852,14 +1307,16 @@ namespace ClassicUO.IO.Resources
             {
                 uint offset = table[c];
 
-                if (offset != 0 && offset != 0xFFFFFFFF)
+                if (c != '\r' && offset != 0 && offset != 0xFFFFFFFF)
                 {
                     byte* ptr = (byte*) ((IntPtr) table + (int) offset);
                     textLength += (sbyte) ptr[0] + (sbyte) ptr[2] + 1;
                 }
                 else if (c == ' ')
+                {
                     textLength += UNICODE_SPACE_WIDTH;
-                else if (c == '\n' || c == '\r')
+                }
+                else if (c == '\n')
                 {
                     maxTextLenght = Math.Max(maxTextLenght, textLength);
                     textLength = 0;
@@ -869,42 +1326,101 @@ namespace ClassicUO.IO.Resources
             return Math.Max(maxTextLenght, textLength);
         }
 
+        public unsafe int GetCharWidthUnicode(byte font, char c)
+        {
+            if (font >= 20 || _unicodeFontAddress[font] == IntPtr.Zero || c == 0 || c == '\r')
+            {
+                return 0;
+            }
+
+            uint* table = (uint*) _unicodeFontAddress[font];
+            uint offset = table[c];
+
+            if (offset != 0 && offset != 0xFFFFFFFF)
+            {
+                byte* ptr = (byte*) ((IntPtr) table + (int) offset);
+
+                return (sbyte) ptr[0] + (sbyte) ptr[2] + 1;
+            }
+
+            if (c == ' ')
+            {
+                return UNICODE_SPACE_WIDTH;
+            }
+
+            return 0;
+        }
+
         public int GetWidthExUnicode(byte font, string text, int maxwidth, TEXT_ALIGN_TYPE align, ushort flags)
         {
             if (font >= 20 || _unicodeFontAddress[font] == IntPtr.Zero || string.IsNullOrEmpty(text))
+            {
                 return 0;
+            }
 
-            MultilinesFontInfo info = GetInfoUnicode(font, text, text.Length, align, flags, maxwidth);
+            MultilinesFontInfo info = GetInfoUnicode
+            (
+                font,
+                text,
+                text.Length,
+                align,
+                flags,
+                maxwidth
+            );
+
             int textWidth = 0;
 
             while (info != null)
             {
                 if (info.Width > textWidth)
+                {
                     textWidth = info.Width;
+                }
+
                 MultilinesFontInfo ptr = info;
                 info = info.Next;
                 ptr.Data.Clear();
+                ptr.Data.Count = 0;
                 ptr = null;
             }
 
             return textWidth;
         }
 
-        private unsafe MultilinesFontInfo GetInfoUnicode(byte font, string str, int len, TEXT_ALIGN_TYPE align, ushort flags, int width, bool countret = false, bool countspaces = false)
+        public unsafe MultilinesFontInfo GetInfoUnicode
+        (
+            byte font,
+            string str,
+            int len,
+            TEXT_ALIGN_TYPE align,
+            ushort flags,
+            int width,
+            bool countret = false,
+            bool countspaces = false
+        )
         {
-            _webLinkColor = 0xFF0000FF;
-            _visitedWebLinkColor = 0x0000FFFF;
-            _backgroundColor = 0;
-            _leftMargin = 0;
-            _topMargin = 0;
-            _rightMargin = 0;
-            _bottomMargin = 0;
+            _htmlStatus.WebLinkColor = 0xFF0000FF;
+            _htmlStatus.VisitedWebLinkColor = 0x0000FFFF;
+            _htmlStatus.BackgroundColor = 0;
+            _htmlStatus.Margins = Rectangle.Empty;
 
             if (font >= 20 || _unicodeFontAddress[font] == IntPtr.Zero)
+            {
                 return null;
+            }
 
             if (IsUsingHTML)
-                return GetInfoHTML(font, str, len, align, flags, width);
+            {
+                return GetInfoHTML
+                (
+                    font,
+                    str,
+                    len,
+                    align,
+                    flags,
+                    width
+                );
+            }
 
             uint* table = (uint*) _unicodeFontAddress[font];
             MultilinesFontInfo info = new MultilinesFontInfo();
@@ -932,16 +1448,19 @@ namespace ClassicUO.IO.Resources
             {
                 char si = str[i];
 
-                if (si == '\r' || si == '\n')
+                if (si == '\n')
                 {
                     if (isFixed || isCropped)
+                    {
                         si = (char) 0;
-                    else
-                        si = '\n';
+                    }
                 }
 
-                if ((table[si] == 0 || table[si] == 0xFFFFFFFF) && si != ' ' && si != '\n')
+
+                if ((table[si] == 0 || table[si] == 0xFFFFFFFF) && si != ' ' && si != '\n' && si != '\r')
+                {
                     continue;
+                }
 
                 byte* data = (byte*) ((IntPtr) table + (int) table[si]);
 
@@ -956,10 +1475,14 @@ namespace ClassicUO.IO.Resources
                     lastaspace_current_charcolor = current_charcolor;
                 }
 
+                int eval = ptr.CharStart;
+
                 if (ptr.Width + readWidth + (sbyte) data[0] + (sbyte) data[2] > width || si == '\n')
                 {
                     if (lastSpace == ptr.CharStart && lastSpace == 0 && si != '\n')
-                        ptr.CharStart = 1;
+                    {
+                        ++eval;
+                    }
 
                     if (si == '\n')
                     {
@@ -968,10 +1491,14 @@ namespace ClassicUO.IO.Resources
                         lastSpace = i;
 
                         if (ptr.Width == 0)
+                        {
                             ptr.Width = 1;
+                        }
 
                         if (ptr.MaxHeight == 0)
+                        {
                             ptr.MaxHeight = 14 + extraheight;
+                        }
 
                         ptr.Data.Resize((uint) (ptr.CharCount - newlineval));
                         MultilinesFontInfo newptr = new MultilinesFontInfo();
@@ -988,16 +1515,21 @@ namespace ClassicUO.IO.Resources
                         continue;
                     }
 
-                    if (lastSpace + 1 == ptr.CharStart && !isFixed && !isCropped)
+                    if (lastSpace + 1 == eval && !isFixed && !isCropped)
                     {
                         ptr.Width += readWidth;
                         ptr.CharCount += charCount;
 
                         if (ptr.Width == 0)
+                        {
                             ptr.Width = 1;
+                        }
 
                         if (ptr.MaxHeight == 0)
+                        {
                             ptr.MaxHeight = 14 + extraheight;
+                        }
+
                         MultilinesFontInfo newptr = new MultilinesFontInfo();
                         newptr.Reset();
                         ptr.Next = newptr;
@@ -1008,7 +1540,10 @@ namespace ClassicUO.IO.Resources
                         charCount = 0;
 
                         if (ptr.Align == TEXT_ALIGN_TYPE.TS_LEFT && (current_flags & UOFONT_INDENTION) != 0)
+                        {
                             indetionOffset = 14;
+                        }
+
                         ptr.IndentionOffset = indetionOffset;
                         readWidth = indetionOffset;
                     }
@@ -1016,12 +1551,23 @@ namespace ClassicUO.IO.Resources
                     {
                         if (isFixed)
                         {
-                            MultilinesFontData mfd1 = new MultilinesFontData(current_charcolor, current_flags, current_font, si, 0);
+                            MultilinesFontData mfd1 = new MultilinesFontData
+                            (
+                                current_charcolor,
+                                current_flags,
+                                current_font,
+                                si,
+                                0
+                            );
+
                             ptr.Data.Add(mfd1);
-                            readWidth += (sbyte) data[0] + (sbyte) data[2] + 1;
+                            readWidth += si == '\r' ? 0 : (sbyte) data[0] + (sbyte) data[2] + 1;
 
                             if ((sbyte) data[1] + (sbyte) data[3] > ptr.MaxHeight)
+                            {
                                 ptr.MaxHeight = (sbyte) data[1] + (sbyte) data[3] + extraheight;
+                            }
+
                             charCount++;
                             ptr.Width += readWidth;
                             ptr.CharCount += charCount;
@@ -1033,19 +1579,28 @@ namespace ClassicUO.IO.Resources
                         si = i < str.Length ? str[i] : '\0';
 
                         if (ptr.Width == 0)
+                        {
                             ptr.Width = 1;
-                        else if (countspaces && si != '\0' && lastSpace - ptr.CharStart == ptr.CharCount)
+                        }
+                        else if (countspaces && si != '\0' && lastSpace - eval == ptr.CharCount)
+                        {
                             ptr.CharCount++;
+                        }
 
                         if (ptr.MaxHeight == 0)
+                        {
                             ptr.MaxHeight = 14 + extraheight;
+                        }
 
                         //ptr.CharCount = charCount;
+
                         charCount = 0;
-                        ptr.Data.Resize((uint)ptr.CharCount);
+                        ptr.Data.Resize((uint) ptr.CharCount);
 
                         if (isFixed || isCropped)
+                        {
                             break;
+                        }
 
                         MultilinesFontInfo newptr = new MultilinesFontInfo();
                         newptr.Reset();
@@ -1056,13 +1611,24 @@ namespace ClassicUO.IO.Resources
                         charCount = 0;
 
                         if (ptr.Align == TEXT_ALIGN_TYPE.TS_LEFT && (current_flags & UOFONT_INDENTION) != 0)
+                        {
                             indetionOffset = 14;
+                        }
+
                         ptr.IndentionOffset = indetionOffset;
                         readWidth = indetionOffset;
                     }
                 }
 
-                MultilinesFontData mfd = new MultilinesFontData(current_charcolor, current_flags, current_font, si, 0);
+                MultilinesFontData mfd = new MultilinesFontData
+                (
+                    current_charcolor,
+                    current_flags,
+                    current_font,
+                    si,
+                    0
+                );
+
                 ptr.Data.Add(mfd);
 
                 if (si == ' ')
@@ -1070,14 +1636,18 @@ namespace ClassicUO.IO.Resources
                     readWidth += UNICODE_SPACE_WIDTH;
 
                     if (ptr.MaxHeight <= 0)
+                    {
                         ptr.MaxHeight = 5 + extraheight;
+                    }
                 }
                 else
                 {
-                    readWidth += (sbyte) data[0] + (sbyte) data[2] + 1;
+                    readWidth += si == '\r' ? 0 : (sbyte) data[0] + (sbyte) data[2] + 1;
 
                     if ((sbyte) data[1] + (sbyte) data[3] > ptr.MaxHeight)
+                    {
                         ptr.MaxHeight = (sbyte) data[1] + (sbyte) data[3] + extraheight;
+                    }
                 }
 
                 charCount++;
@@ -1086,545 +1656,705 @@ namespace ClassicUO.IO.Resources
             ptr.Width += readWidth;
             ptr.CharCount += charCount;
 
-            if (readWidth == 0 && len != 0 && (str[len - 1] == '\n' || str[len - 1] == '\r'))
+            if (readWidth == 0 && len != 0)
             {
-                ptr.Width = 1;
-                ptr.MaxHeight = 14;
+                switch (str[len - 1])
+                {
+                    case '\n':
+                        ptr.CharCount += newlineval;
+                        goto case '\r';
+
+                    case '\r':
+                        ptr.Width = 1;
+                        ptr.MaxHeight = 14;
+
+                        break;
+                }
             }
 
             return info;
         }
 
-        private unsafe void GeneratePixelsUnicode(ref FontTexture texture, byte font, string str, ushort color, byte cell, int width, TEXT_ALIGN_TYPE align, ushort flags, bool saveHitmap)
+        private unsafe void GeneratePixelsUnicode
+        (
+            ref FontTexture texture,
+            byte font,
+            string str,
+            ushort color,
+            byte cell,
+            int width,
+            TEXT_ALIGN_TYPE align,
+            ushort flags,
+            bool saveHitmap
+        )
         {
-#if !DEBUG
-            try
+            if (font >= 20 || _unicodeFontAddress[font] == IntPtr.Zero)
             {
-#endif
-                if (font >= 20 || _unicodeFontAddress[font] == IntPtr.Zero)
-                    return;
+                return;
+            }
 
-                int len = str.Length;
+            int len = str.Length;
 
-                if (len == 0)
-                    return;
+            if (len == 0)
+            {
+                return;
+            }
 
-                int oldWidth = width;
+            int oldWidth = width;
+
+            if (width == 0)
+            {
+                width = GetWidthUnicode(font, str);
 
                 if (width == 0)
                 {
-                    width = GetWidthUnicode(font, str);
+                    return;
+                }
+            }
 
-                    if (width == 0)
-                        return;
+            MultilinesFontInfo info = GetInfoUnicode
+            (
+                font,
+                str,
+                len,
+                align,
+                flags,
+                width
+            );
+
+            if (info == null)
+            {
+                return;
+            }
+
+            if (IsUsingHTML && (_htmlStatus.Margins.X != 0 || _htmlStatus.Margins.Width != 0))
+            {
+                while (info != null)
+                {
+                    MultilinesFontInfo ptr1 = info.Next;
+                    info.Data.Clear();
+                    info.Data.Count = 0;
+                    info = null;
+                    info = ptr1;
                 }
 
-                MultilinesFontInfo info = GetInfoUnicode(font, str, len, align, flags, width);
+                int newWidth = width - (_htmlStatus.Margins.Right);
+
+                if (newWidth < 10)
+                {
+                    newWidth = 10;
+                }
+
+                info = GetInfoUnicode
+                (
+                    font,
+                    str,
+                    len,
+                    align,
+                    flags,
+                    newWidth
+                );
 
                 if (info == null)
-                    return;
-
-                if (IsUsingHTML && (_leftMargin != 0 || _rightMargin != 0))
                 {
-                    while (info != null)
+                    return;
+                }
+            }
+
+            if (oldWidth == 0 && RecalculateWidthByInfo)
+            {
+                MultilinesFontInfo ptr1 = info;
+                width = 0;
+
+                while (ptr1 != null)
+                {
+                    if (ptr1.Width > width)
                     {
-                        MultilinesFontInfo ptr1 = info.Next;
-                        info.Data.Clear();
-                        info = null;
-                        info = ptr1;
+                        width = ptr1.Width;
                     }
 
-                    int newWidth = width - (_leftMargin + _rightMargin);
-
-                    if (newWidth < 10)
-                        newWidth = 10;
-                    info = GetInfoUnicode(font, str, len, align, flags, newWidth);
-
-                    if (info == null)
-                        return;
+                    ptr1 = ptr1.Next;
                 }
+            }
 
-                if (oldWidth == 0 && RecalculateWidthByInfo)
+            width += 4;
+            int height = GetHeightUnicode(info);
+
+            if (height == 0)
+            {
+                while (info != null)
                 {
                     MultilinesFontInfo ptr1 = info;
-                    width = 0;
-
-                    while (ptr1 != null)
-                    {
-                        if (ptr1.Width > width)
-                            width = ptr1.Width;
-                        ptr1 = ptr1.Next;
-                    }
+                    info = info.Next;
+                    ptr1.Data.Clear();
+                    ptr1.Data.Count = 0;
+                    ptr1 = null;
                 }
-
-                width += 4;
-                int height = GetHeightUnicode(info);
-
-                if (height == 0)
-                {
-                    while (info != null)
-                    {
-                        MultilinesFontInfo ptr1 = info;
-                        info = info.Next;
-                        ptr1.Data.Clear();
-                        ptr1 = null;
-                    }
-
-                    return;
-                }
-
-                height += _topMargin + _bottomMargin + 4;
-                int blocksize = height * width;
-                uint[] pData = new uint[blocksize];
-                //uint* pData = stackalloc uint[blocksize];
-                uint* table = (uint*) _unicodeFontAddress[font];
-                int lineOffsY = 1 + _topMargin;
-                MultilinesFontInfo ptr = info;
-                uint datacolor = 0;
-
-                if (color == 0xFFFF)
-                    datacolor = 0xFEFFFFFF;
-                else
-                {
-                    datacolor = /*FileManager.Hues.GetPolygoneColor(cell, color) << 8 | 0xFF;*/
-                        HuesHelper.RgbaToArgb((FileManager.Hues.GetPolygoneColor(cell, color) << 8) | 0xFF);
-                }
-
-                bool isItalic = (flags & UOFONT_ITALIC) != 0;
-                bool isSolid = (flags & UOFONT_SOLID) != 0;
-                bool isBlackBorder = (flags & UOFONT_BLACK_BORDER) != 0;
-                bool isUnderline = (flags & UOFONT_UNDERLINE) != 0;
-                uint blackColor = 0xFF010101;
-                bool isLink = false;
-                int linkStartX = 0;
-                int linkStartY = 0;
-                int linesCount = 0;
-                List<WebLinkRect> links = new List<WebLinkRect>();
-
-                while (ptr != null)
-                {
-                    info = ptr;
-                    linesCount++;
-                    int w = _leftMargin;
-
-                    switch (ptr.Align)
-                    {
-                        case TEXT_ALIGN_TYPE.TS_CENTER:
-
-                        {
-                            w += (width - ptr.Width) >> 1;
-
-                            if (w < 0)
-                                w = 0;
-
-                            break;
-                        }
-
-                        case TEXT_ALIGN_TYPE.TS_RIGHT:
-
-                        {
-                            w += width - 10 - ptr.Width;
-
-                            if (w < 0)
-                                w = 0;
-
-                            break;
-                        }
-
-                        case TEXT_ALIGN_TYPE.TS_LEFT when (flags & UOFONT_INDENTION) != 0:
-                            w += ptr.IndentionOffset;
-
-                            break;
-                    }
-
-                    ushort oldLink = 0;
-                    uint dataSize = ptr.Data.Count;
-
-                    for (int i = 0; i < dataSize; i++)
-                    {
-                        ref readonly MultilinesFontData dataPtr = ref ptr.Data[i];
-                        char si = dataPtr.Item;
-                        table = (uint*) _unicodeFontAddress[dataPtr.Font];
-
-                        if (!isLink)
-                        {
-                            oldLink = dataPtr.LinkID;
-
-                            if (oldLink != 0)
-                            {
-                                isLink = true;
-                                linkStartX = w;
-                                linkStartY = lineOffsY + 3;
-                            }
-                        }
-                        else if (dataPtr.LinkID == 0 || i + 1 == dataSize)
-                        {
-                            isLink = false;
-                            int linkHeight = lineOffsY - linkStartY;
-
-                            if (linkHeight < 14)
-                                linkHeight = 14;
-                            int ofsX = 0;
-
-                            if (si == ' ')
-                                ofsX = UNICODE_SPACE_WIDTH;
-                            else if ((table[si] == 0 || table[si] == 0xFFFFFFFF) && si != ' ')
-                            {
-                            }
-                            else
-                            {
-                                byte* xData = (byte*) ((IntPtr) table + (int) table[si]);
-                                ofsX = (sbyte) xData[2];
-                            }
-
-                            WebLinkRect wlr = new WebLinkRect
-                            {
-                                LinkID = oldLink,
-                                StartX = linkStartX,
-                                StartY = linkStartY,
-                                EndX = w - ofsX,
-                                EndY = linkHeight
-                            };
-                            links.Add(wlr);
-                            oldLink = 0;
-                        }
-
-                        if ((table[si] == 0 || table[si] == 0xFFFFFFFF) && si != ' ')
-                            continue;
-
-                        byte* data = (byte*) ((IntPtr) table + (int) table[si]);
-                        int offsX = 0;
-                        int offsY = 0;
-                        int dw = 0;
-                        int dh = 0;
-
-                        if (si == ' ')
-                        {
-                            offsX = 0;
-                            dw = UNICODE_SPACE_WIDTH;
-                        }
-                        else
-                        {
-                            offsX = (sbyte) data[0] + 1;
-                            offsY = (sbyte) data[1];
-                            dw = (sbyte) data[2];
-                            dh = (sbyte) data[3];
-                            data += 4;
-                        }
-
-                        int tmpW = w;
-                        uint charcolor = datacolor;
-                        //bool isBlackPixel = ((charcolor >> 24) & 0xFF) <= 8 && ((charcolor >> 16) & 0xFF) <= 8 && ((charcolor >> 8) & 0xFF) <= 8;
-                        bool isBlackPixel = ((charcolor >> 0) & 0xFF) <= 8 && ((charcolor >> 8) & 0xFF) <= 8 && ((charcolor >> 16) & 0xFF) <= 8;
-
-                        if (si != ' ')
-                        {
-                            if (IsUsingHTML && i < ptr.Data.Count)
-                            {
-                                isItalic = (dataPtr.Flags & UOFONT_ITALIC) != 0;
-                                isSolid = (dataPtr.Flags & UOFONT_SOLID) != 0;
-                                isBlackBorder = (dataPtr.Flags & UOFONT_BLACK_BORDER) != 0;
-                                isUnderline = (dataPtr.Flags & UOFONT_UNDERLINE) != 0;
-
-                                if (dataPtr.Color != 0xFFFFFFFF)
-                                {
-                                    charcolor = HuesHelper.RgbaToArgb(dataPtr.Color);
-                                    //isBlackPixel = ((charcolor >> 24) & 0xFF) <= 8 && ((charcolor >> 16) & 0xFF) <= 8 && ((charcolor >> 8) & 0xFF) <= 8;
-                                    isBlackPixel = ((charcolor >> 0) & 0xFF) <= 8 && ((charcolor >> 8) & 0xFF) <= 8 && ((charcolor >> 16) & 0xFF) <= 8;
-                                }
-                            }
-
-                            int scanlineCount = ((dw - 1) >> 3) + 1;
-
-                            for (int y = 0; y < dh; y++)
-                            {
-                                int testY = offsY + lineOffsY + y;
-
-                                if (testY >= height)
-                                    break;
-
-                                byte* scanlines = data;
-                                data += scanlineCount;
-
-                                //data = (byte*) ((IntPtr) data + scanlineCount);
-                                int italicOffset = 0;
-
-                                if (isItalic)
-                                    italicOffset = (int) ((dh - y) / ITALIC_FONT_KOEFFICIENT);
-                                int testX = w + offsX + italicOffset + (isSolid ? 1 : 0);
-
-                                for (int c = 0; c < scanlineCount; c++)
-                                {
-                                    for (int j = 0; j < 8; j++)
-                                    {
-                                        int x = (c << 3) + j;
-
-                                        if (x >= dw)
-                                            break;
-
-                                        int nowX = testX + x;
-
-                                        if (nowX >= width)
-                                            break;
-
-                                        byte cl = (byte) (scanlines[c] & (1 << (7 - j)));
-                                        int block = testY * width + nowX;
-
-                                        if (cl != 0)
-                                            pData[block] = charcolor;
-                                    }
-                                }
-                            }
-
-                            if (isSolid)
-                            {
-                                uint solidColor = blackColor;
-
-                                if (solidColor == charcolor)
-                                    solidColor++;
-                                int minXOk = w + offsX > 0 ? -1 : 0;
-                                int maxXOk = w + offsX + dw < width ? 1 : 0;
-                                maxXOk += dw;
-
-                                for (int cy = 0; cy < dh; cy++)
-                                {
-                                    int testY = offsY + lineOffsY + cy;
-
-                                    if (testY >= height)
-                                        break;
-
-                                    int italicOffset = 0;
-
-                                    if (isItalic && cy < dh)
-                                        italicOffset = (int) ((dh - cy) / ITALIC_FONT_KOEFFICIENT);
-
-                                    for (int cx = minXOk; cx < maxXOk; cx++)
-                                    {
-                                        int testX = cx + w + offsX + italicOffset;
-
-                                        if (testX >= width)
-                                            break;
-
-                                        int block = testY * width + testX;
-
-                                        if (pData[block] == 0 && pData[block] != solidColor)
-                                        {
-                                            int endX = cx < dw ? 2 : 1;
-
-                                            if (endX == 2 && testX + 1 >= width)
-                                                endX--;
-
-                                            for (int x = 0; x < endX; x++)
-                                            {
-                                                int nowX = testX + x;
-                                                int testBlock = testY * width + nowX;
-
-                                                if (pData[testBlock] != 0 && pData[testBlock] != solidColor)
-                                                {
-                                                    pData[block] = solidColor;
-
-                                                    break;
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-
-                                for (int cy = 0; cy < dh; cy++)
-                                {
-                                    int testY = offsY + lineOffsY + cy;
-
-                                    if (testY >= height)
-                                        break;
-
-                                    int italicOffset = 0;
-
-                                    if (isItalic)
-                                        italicOffset = (int) ((dh - cy) / ITALIC_FONT_KOEFFICIENT);
-
-                                    for (int cx = 0; cx < dw; cx++)
-                                    {
-                                        int testX = cx + w + offsX + italicOffset;
-
-                                        if (testX >= width)
-                                            break;
-
-                                        int block = testY * width + testX;
-
-                                        if (pData[block] == solidColor)
-                                            pData[block] = charcolor;
-                                    }
-                                }
-                            }
-
-                            if (isBlackBorder && !isBlackPixel)
-                            {
-                                int minXOk = w + offsX > 0 ? -1 : 0;
-                                int minYOk = offsY + lineOffsY > 0 ? -1 : 0;
-                                int maxXOk = w + offsX + dw < width ? 1 : 0;
-                                int maxYOk = offsY + lineOffsY + dh < height ? 1 : 0;
-                                maxXOk += dw;
-                                maxYOk += dh;
-
-                                for (int cy = minYOk; cy < maxYOk; cy++)
-                                {
-                                    int testY = offsY + lineOffsY + cy;
-
-                                    if (testY >= height)
-                                        break;
-
-                                    int italicOffset = 0;
-
-                                    if (isItalic && cy >= 0 && cy < dh)
-                                        italicOffset = (int) ((dh - cy) / ITALIC_FONT_KOEFFICIENT);
-
-                                    for (int cx = minXOk; cx < maxXOk; cx++)
-                                    {
-                                        int testX = cx + w + offsX + italicOffset;
-
-                                        if (testX >= width)
-                                            break;
-
-                                        int block = testY * width + testX;
-
-                                        if (pData[block] == 0 && pData[block] != blackColor)
-                                        {
-                                            int startX = cx > 0 ? -1 : 0;
-                                            int startY = cy > 0 ? -1 : 0;
-                                            int endX = cx < dw - 1 ? 2 : 1;
-                                            int endY = cy < dh - 1 ? 2 : 1;
-
-                                            if (endX == 2 && testX + 1 >= width)
-                                                endX--;
-                                            bool passed = false;
-
-                                            for (int x = startX; x < endX; x++)
-                                            {
-                                                int nowX = testX + x;
-
-                                                for (int y = startY; y < endY; y++)
-                                                {
-                                                    int testBlock = (testY + y) * width + nowX;
-
-                                                    if (testBlock < pData.Length && pData[testBlock] != 0 && pData[testBlock] != blackColor)
-                                                    {
-                                                        pData[block] = blackColor;
-                                                        passed = true;
-
-                                                        break;
-                                                    }
-                                                }
-
-                                                if (passed)
-                                                    break;
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-
-                            w += dw + offsX + (isSolid ? 1 : 0);
-                        }
-                        else if (si == ' ')
-                        {
-                            w += UNICODE_SPACE_WIDTH;
-
-                            if (IsUsingHTML)
-                            {
-                                isUnderline = (dataPtr.Flags & UOFONT_UNDERLINE) != 0;
-
-                                if (dataPtr.Color != 0xFFFFFFFF)
-                                {
-                                    charcolor = HuesHelper.RgbaToArgb(dataPtr.Color);
-                                    isBlackPixel = ((charcolor >> 0) & 0xFF) <= 8 && ((charcolor >> 8) & 0xFF) <= 8 && ((charcolor >> 16) & 0xFF) <= 8;
-                                }
-                            }
-                        }
-
-                        if (isUnderline)
-                        {
-                            int minXOk = tmpW + offsX > 0 ? -1 : 0;
-                            int maxXOk = w + offsX + dw < width ? 1 : 0;
-                            byte* aData = (byte*) ((IntPtr) table + (int) table[(byte) 'a']);
-                            int testY = lineOffsY + (sbyte) aData[1] + (sbyte) aData[3];
-
-                            if (testY >= height)
-                                break;
-
-                            for (int cx = minXOk; cx < dw + maxXOk; cx++)
-                            {
-                                int testX = cx + tmpW + offsX + (isSolid ? 1 : 0);
-
-                                if (testX >= width)
-                                    break;
-
-                                int block = testY * width + testX;
-                                pData[block] = charcolor;
-                            }
-                        }
-                    }
-
-                    lineOffsY += ptr.MaxHeight;
-                    ptr = ptr.Next;
-                    info.Data.Clear();
-                    info = null;
-                }
-
-                if (IsUsingHTML && _HTMLBackgroundCanBeColored && _backgroundColor != 0)
-                {
-                    _backgroundColor |= 0xFF;
-
-                    for (int y = 0; y < height; y++)
-                    {
-                        int yPos = y * width;
-
-                        for (int x = 0; x < width; x++)
-                        {
-                            ref uint p = ref pData[yPos + x];
-
-                            if (p == 0)
-                                p = HuesHelper.RgbaToArgb(_backgroundColor);
-                        }
-                    }
-                }
-
-                if (texture == null || texture.IsDisposed)
-                    texture = new FontTexture(width, height, linesCount, links);
-                else
-                {
-                    texture.Links.Clear();
-                    texture.Links.AddRange(links);
-                    texture.LinesCount = linesCount;
-                }
-
-                texture.PushData(pData);
-
-#if !DEBUG
-            }
-            catch (Exception ex)
-            {
-                string path = Path.Combine(CUOEnviroment.ExecutablePath, "Logs");
-                FileSystemHelper.CreateFolderIfNotExists(path);
-
-                StringBuilder sb = new StringBuilder();
-                sb.AppendFormat("Fonts crash log\r\nParams:\r\ntext: {0}\r\nfont: {1}\r\ncolor: {2}\r\ncell: {3}\r\nwidth: {4}\r\nalign: {5}\r\nflags: {6}\r\nsavehitmap: {7}\r\nStackTrace: {8}", str, font, color, cell, width, align, flags, saveHitmap, ex);
-
-                using (LogFile file = new LogFile(path, "font_crash.txt"))
-                    file.Write(sb.ToString());
-
-                Chat.HandleMessage(World.Player, "An issue has been reported in /Logs.\nPlease report to CUO devs", "CUO ERROR", 32, MessageType.Regular, 1, true);
 
                 return;
             }
-#endif
+
+            height += _htmlStatus.Margins.Y + _htmlStatus.Margins.Height + 4;
+            int blocksize = height * width;
+            uint[] pData = new uint[blocksize];
+            //uint* pData = stackalloc uint[blocksize];
+            uint* table = (uint*) _unicodeFontAddress[font];
+            int lineOffsY = _htmlStatus.Margins.Y;
+            MultilinesFontInfo ptr = info;
+            uint datacolor = 0;
+
+            if (color == 0xFFFF)
+            {
+                datacolor = 0xFEFFFFFF;
+            }
+            else
+            {
+                datacolor = /*FileManager.Hues.GetPolygoneColor(cell, color) << 8 | 0xFF;*/
+                    HuesHelper.RgbaToArgb((HuesLoader.Instance.GetPolygoneColor(cell, color) << 8) | 0xFF);
+            }
+
+            bool isItalic = (flags & UOFONT_ITALIC) != 0;
+            bool isSolid = (flags & UOFONT_SOLID) != 0;
+            bool isBlackBorder = (flags & UOFONT_BLACK_BORDER) != 0;
+            bool isUnderline = (flags & UOFONT_UNDERLINE) != 0;
+            uint blackColor = 0xFF010101;
+            bool isLink = false;
+            int linkStartX = 0;
+            int linkStartY = 0;
+            int linesCount = 0;
+            RawList<WebLinkRect> links = new RawList<WebLinkRect>();
+
+            while (ptr != null)
+            {
+                info = ptr;
+                linesCount++;
+                int w = _htmlStatus.Margins.Y;
+
+                switch (ptr.Align)
+                {
+                    case TEXT_ALIGN_TYPE.TS_CENTER:
+
+                    {
+                        w += (width - 8) / 2 - ptr.Width / 2;
+
+                        if (w < 0)
+                        {
+                            w = 0;
+                        }
+
+                        break;
+                    }
+
+                    case TEXT_ALIGN_TYPE.TS_RIGHT:
+
+                    {
+                        w += width - 10 - ptr.Width;
+
+                        if (w < 0)
+                        {
+                            w = 0;
+                        }
+
+                        break;
+                    }
+
+                    case TEXT_ALIGN_TYPE.TS_LEFT when (flags & UOFONT_INDENTION) != 0:
+                        w += ptr.IndentionOffset;
+
+                        break;
+                }
+
+                ushort oldLink = 0;
+                uint dataSize = ptr.Data.Count;
+
+                for (int i = 0; i < dataSize; i++)
+                {
+                    ref MultilinesFontData dataPtr = ref ptr.Data[i];
+                    char si = dataPtr.Item;
+                    table = (uint*) _unicodeFontAddress[dataPtr.Font];
+
+                    if (!isLink)
+                    {
+                        oldLink = dataPtr.LinkID;
+
+                        if (oldLink != 0)
+                        {
+                            isLink = true;
+                            linkStartX = w;
+                            linkStartY = lineOffsY + 3;
+                        }
+                    }
+                    else if (dataPtr.LinkID == 0 || i + 1 == dataSize)
+                    {
+                        isLink = false;
+                        int linkHeight = lineOffsY - linkStartY;
+
+                        if (linkHeight < 14)
+                        {
+                            linkHeight = 14;
+                        }
+
+                        int ofsX = 0;
+
+                        if (si == ' ')
+                        {
+                            ofsX = UNICODE_SPACE_WIDTH;
+                        }
+                        else if ((table[si] == 0 || table[si] == 0xFFFFFFFF) && si != ' ')
+                        {
+                        }
+                        else
+                        {
+                            byte* xData = (byte*) ((IntPtr) table + (int) table[si]);
+                            ofsX = (sbyte) xData[2];
+                        }
+
+                        WebLinkRect wlr = new WebLinkRect
+                        {
+                            LinkID = oldLink,
+                            Bounds = new Rectangle(linkStartX, linkStartY, w - ofsX, linkHeight)
+                        };
+
+                        links.Add(wlr);
+                        oldLink = 0;
+                    }
+
+                    if ((table[si] == 0 || table[si] == 0xFFFFFFFF) && si != ' ')
+                    {
+                        continue;
+                    }
+
+                    byte* data = (byte*) ((IntPtr) table + (int) table[si]);
+                    int offsX = 0;
+                    int offsY = 0;
+                    int dw = 0;
+                    int dh = 0;
+
+                    if (si == ' ')
+                    {
+                        offsX = 0;
+                        dw = UNICODE_SPACE_WIDTH;
+                    }
+                    else
+                    {
+                        offsX = (sbyte) data[0] + 1;
+                        offsY = (sbyte) data[1];
+                        dw = data[2];
+                        dh = data[3];
+                        data += 4;
+                    }
+
+                    int tmpW = w;
+                    uint charcolor = datacolor;
+
+                    bool isBlackPixel = ((charcolor >> 0) & 0xFF) <= 8 && ((charcolor >> 8) & 0xFF) <= 8 && ((charcolor >> 16) & 0xFF) <= 8;
+
+                    if (si != ' ')
+                    {
+                        if (IsUsingHTML && i < ptr.Data.Count)
+                        {
+                            isItalic = (dataPtr.Flags & UOFONT_ITALIC) != 0;
+                            isSolid = (dataPtr.Flags & UOFONT_SOLID) != 0;
+                            isBlackBorder = (dataPtr.Flags & UOFONT_BLACK_BORDER) != 0;
+                            isUnderline = (dataPtr.Flags & UOFONT_UNDERLINE) != 0;
+
+                            if (dataPtr.Color != 0xFFFFFFFF)
+                            {
+                                charcolor = HuesHelper.RgbaToArgb(dataPtr.Color);
+
+                                //isBlackPixel = ((charcolor >> 24) & 0xFF) <= 8 && ((charcolor >> 16) & 0xFF) <= 8 && ((charcolor >> 8) & 0xFF) <= 8;
+                                isBlackPixel = ((charcolor >> 0) & 0xFF) <= 8 && ((charcolor >> 8) & 0xFF) <= 8 && ((charcolor >> 16) & 0xFF) <= 8;
+                            }
+                        }
+
+                        int scanlineCount = ((dw - 1) >> 3) + 1;
+
+                        for (int y = 0; y < dh; y++)
+                        {
+                            int testY = offsY + lineOffsY + y;
+
+                            if (testY < 0)
+                            {
+                                testY = 0;
+                            }
+
+                            if (testY >= height)
+                            {
+                                break;
+                            }
+
+                            byte* scanlines = data;
+                            data += scanlineCount;
+
+                            int italicOffset = 0;
+
+                            if (isItalic)
+                            {
+                                italicOffset = (int) ((dh - y) / ITALIC_FONT_KOEFFICIENT);
+                            }
+
+                            int testX = w + offsX + italicOffset + (isSolid ? 1 : 0);
+
+                            for (int c = 0; c < scanlineCount; c++)
+                            {
+                                int coff = c << 3;
+
+                                for (int j = 0; j < 8; j++)
+                                {
+                                    int x = coff + j;
+
+                                    if (x >= dw)
+                                    {
+                                        break;
+                                    }
+
+                                    int nowX = testX + x;
+
+                                    if (nowX >= width)
+                                    {
+                                        break;
+                                    }
+
+                                    byte cl = (byte) (scanlines[c] & (1 << (7 - j)));
+                                    int block = testY * width + nowX;
+
+                                    if (cl != 0)
+                                    {
+                                        pData[block] = charcolor;
+                                    }
+                                }
+                            }
+                        }
+
+                        if (isSolid)
+                        {
+                            uint solidColor = blackColor;
+
+                            if (solidColor == charcolor)
+                            {
+                                solidColor++;
+                            }
+
+                            int minXOk = w + offsX > 0 ? -1 : 0;
+                            int maxXOk = w + offsX + dw < width ? 1 : 0;
+                            maxXOk += dw;
+
+                            for (int cy = 0; cy < dh; cy++)
+                            {
+                                int testY = offsY + lineOffsY + cy;
+
+                                if (testY >= height)
+                                {
+                                    break;
+                                }
+
+                                if (testY < 0)
+                                {
+                                    testY = 0;
+                                }
+
+                                int italicOffset = 0;
+
+                                if (isItalic && cy < dh)
+                                {
+                                    italicOffset = (int) ((dh - cy) / ITALIC_FONT_KOEFFICIENT);
+                                }
+
+                                for (int cx = minXOk; cx < maxXOk; cx++)
+                                {
+                                    int testX = cx + w + offsX + italicOffset;
+
+                                    if (testX >= width)
+                                    {
+                                        break;
+                                    }
+
+                                    int block = testY * width + testX;
+
+                                    if (pData[block] == 0 && pData[block] != solidColor)
+                                    {
+                                        int endX = cx < dw ? 2 : 1;
+
+                                        if (endX == 2 && testX + 1 >= width)
+                                        {
+                                            endX--;
+                                        }
+
+                                        for (int x = 0; x < endX; x++)
+                                        {
+                                            int nowX = testX + x;
+                                            int testBlock = testY * width + nowX;
+
+                                            if (pData[testBlock] != 0 && pData[testBlock] != solidColor)
+                                            {
+                                                pData[block] = solidColor;
+
+                                                break;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+
+                            for (int cy = 0; cy < dh; cy++)
+                            {
+                                int testY = offsY + lineOffsY + cy;
+
+                                if (testY >= height)
+                                {
+                                    break;
+                                }
+
+                                if (testY < 0)
+                                {
+                                    testY = 0;
+                                }
+
+                                int italicOffset = 0;
+
+                                if (isItalic)
+                                {
+                                    italicOffset = (int) ((dh - cy) / ITALIC_FONT_KOEFFICIENT);
+                                }
+
+                                for (int cx = 0; cx < dw; cx++)
+                                {
+                                    int testX = cx + w + offsX + italicOffset;
+
+                                    if (testX >= width)
+                                    {
+                                        break;
+                                    }
+
+                                    int block = testY * width + testX;
+
+                                    if (pData[block] == solidColor)
+                                    {
+                                        pData[block] = charcolor;
+                                    }
+                                }
+                            }
+                        }
+
+                        if (isBlackBorder && !isBlackPixel)
+                        {
+                            int minXOk = w + offsX > 0 ? -1 : 0;
+                            int minYOk = offsY + lineOffsY > 0 ? -1 : 0;
+                            int maxXOk = w + offsX + dw < width ? 1 : 0;
+                            int maxYOk = offsY + lineOffsY + dh < height ? 1 : 0;
+                            maxXOk += dw;
+                            maxYOk += dh;
+
+                            for (int cy = minYOk; cy < maxYOk; cy++)
+                            {
+                                int testY = offsY + lineOffsY + cy;
+
+                                if (testY < 0)
+                                {
+                                    testY = 0;
+                                }
+
+                                if (testY >= height)
+                                {
+                                    break;
+                                }
+
+                                int italicOffset = 0;
+
+                                if (isItalic && cy >= 0 && cy < dh)
+                                {
+                                    italicOffset = (int) ((dh - cy) / ITALIC_FONT_KOEFFICIENT);
+                                }
+
+                                for (int cx = minXOk; cx < maxXOk; cx++)
+                                {
+                                    int testX = cx + w + offsX + italicOffset;
+
+                                    if (testX >= width)
+                                    {
+                                        break;
+                                    }
+
+                                    int block = testY * width + testX;
+
+                                    if (pData[block] == 0 && pData[block] != blackColor)
+                                    {
+                                        int startX = cx > 0 ? -1 : 0;
+                                        int startY = cy > 0 ? -1 : 0;
+                                        int endX = cx < dw - 1 ? 2 : 1;
+                                        int endY = cy < dh - 1 ? 2 : 1;
+
+                                        if (endX == 2 && testX + 1 >= width)
+                                        {
+                                            endX--;
+                                        }
+
+                                        bool passed = false;
+
+                                        for (int x = startX; x < endX; x++)
+                                        {
+                                            int nowX = testX + x;
+
+                                            for (int y = startY; y < endY; y++)
+                                            {
+                                                int testBlock = (testY + y) * width + nowX;
+
+                                                if (testBlock < 0)
+                                                {
+                                                    continue;
+                                                }
+
+                                                if (testBlock < pData.Length && pData[testBlock] != 0 && pData[testBlock] != blackColor)
+                                                {
+                                                    pData[block] = blackColor;
+                                                    passed = true;
+
+                                                    break;
+                                                }
+                                            }
+
+                                            if (passed)
+                                            {
+                                                break;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        w += dw + offsX + (isSolid ? 1 : 0);
+                    }
+                    else if (si == ' ')
+                    {
+                        w += UNICODE_SPACE_WIDTH;
+
+                        if (IsUsingHTML)
+                        {
+                            isUnderline = (dataPtr.Flags & UOFONT_UNDERLINE) != 0;
+
+                            if (dataPtr.Color != 0xFFFFFFFF)
+                            {
+                                charcolor = HuesHelper.RgbaToArgb(dataPtr.Color);
+
+                                isBlackPixel = ((charcolor >> 0) & 0xFF) <= 8 && ((charcolor >> 8) & 0xFF) <= 8 && ((charcolor >> 16) & 0xFF) <= 8;
+                            }
+                        }
+                    }
+
+                    if (isUnderline)
+                    {
+                        int minXOk = tmpW + offsX > 0 ? -1 : 0;
+                        int maxXOk = w + offsX + dw < width ? 1 : 0;
+                        byte* aData = (byte*) ((IntPtr) table + (int) table[(byte) 'a']);
+                        int testY = lineOffsY + (sbyte) aData[1] + (sbyte) aData[3];
+
+                        if (testY >= height)
+                        {
+                            break;
+                        }
+
+                        if (testY < 0)
+                        {
+                            testY = 0;
+                        }
+
+                        for (int cx = minXOk; cx < dw + maxXOk; cx++)
+                        {
+                            int testX = cx + tmpW + offsX + (isSolid ? 1 : 0);
+
+                            if (testX >= width)
+                            {
+                                break;
+                            }
+
+                            int block = testY * width + testX;
+                            pData[block] = charcolor;
+                        }
+                    }
+                }
+
+                lineOffsY += ptr.MaxHeight;
+                ptr = ptr.Next;
+                info.Data.Clear();
+                info.Data.Count = 0;
+                info = null;
+            }
+
+            if (IsUsingHTML && _htmlStatus.IsHtmlBackgroundColored && _htmlStatus.BackgroundColor != 0)
+            {
+                _htmlStatus.BackgroundColor |= 0xFF;
+
+                uint hue = HuesHelper.RgbaToArgb(_htmlStatus.BackgroundColor);
+
+                for (int y = 0; y < height; y++)
+                {
+                    int yPos = y * width;
+
+                    for (int x = 0; x < width; x++)
+                    {
+                        ref uint p = ref pData[yPos + x];
+
+                        if (p == 0)
+                        {
+                            p = hue;
+                        }
+                    }
+                }
+            }
+
+            if (texture == null || texture.IsDisposed)
+            {
+                texture = new FontTexture(width, height, linesCount, links);
+            }
+            else
+            {
+                texture.Links.Clear();
+                texture.Links.AddRange(links);
+                texture.LineCount = linesCount;
+            }
+
+            if (saveHitmap)
+            {
+                texture.PushData(pData);
+            }
+            else
+            {
+                texture.SetData(pData);
+            }
         }
 
-        private unsafe MultilinesFontInfo GetInfoHTML(byte font, string str, int len, TEXT_ALIGN_TYPE align, ushort flags, int width)
+        private unsafe MultilinesFontInfo GetInfoHTML
+        (
+            byte font,
+            string str,
+            int len,
+            TEXT_ALIGN_TYPE align,
+            ushort flags,
+            int width
+        )
         {
-            HTMLChar[] htmlData = GetHTMLData(font, str, ref len, align, flags);
-
-            if (htmlData.Length == 0)
+            if (len <= 0)
+            {
                 return null;
+            }
+
+            HTMLChar* htmlData = stackalloc HTMLChar[len];
+                
+            GetHTMLData
+            (
+                htmlData,
+                font,
+                str,
+                ref len,
+                align,
+                flags
+            );
+
+            if (len <= 0)
+            {
+                return null;
+            }
 
             MultilinesFontInfo info = new MultilinesFontInfo();
             info.Reset();
@@ -1639,23 +2369,32 @@ namespace ClassicUO.IO.Resources
             bool isCropped = (flags & UOFONT_CROPPED) != 0;
 
             if (len != 0)
+            {
                 ptr.Align = htmlData[0].Align;
+            }
 
             for (int i = 0; i < len; i++)
             {
                 char si = htmlData[i].Char;
+
                 uint* table = (uint*) _unicodeFontAddress[htmlData[i].Font];
 
-                if ((byte) si == 0x000D || si == '\n')
+                if (si == 0x000D || si == '\n')
                 {
-                    if ((byte) si == 0x000D || isFixed || isCropped)
+                    if (si == 0x000D || isFixed || isCropped)
+                    {
                         si = (char) 0;
+                    }
                     else
+                    {
                         si = '\n';
+                    }
                 }
 
                 if ((table[si] == 0 || table[si] == 0xFFFFFFFF) && si != ' ' && si != '\n')
+                {
                     continue;
+                }
 
                 byte* data = (byte*) ((IntPtr) table + (int) table[si]);
 
@@ -1673,7 +2412,9 @@ namespace ClassicUO.IO.Resources
                 if (ptr.Width + readWidth + (sbyte) data[0] + (sbyte) data[2] + solidWidth > width || si == '\n')
                 {
                     if (lastSpace == ptr.CharStart && lastSpace == 0 && si != '\n')
+                    {
                         ptr.CharStart = 1;
+                    }
 
                     if (si == '\n')
                     {
@@ -1682,14 +2423,19 @@ namespace ClassicUO.IO.Resources
                         lastSpace = i;
 
                         if (ptr.Width <= 0)
+                        {
                             ptr.Width = 1;
+                        }
+
                         ptr.MaxHeight = MAX_HTML_TEXT_HEIGHT;
-                        ptr.Data.Resize( (uint) ptr.CharCount);
+                        ptr.Data.Resize((uint) ptr.CharCount);
                         MultilinesFontInfo newptr = new MultilinesFontInfo();
                         newptr.Reset();
                         ptr.Next = newptr;
                         ptr = newptr;
+
                         ptr.Align = htmlData[i].Align;
+
                         ptr.CharStart = i + 1;
                         readWidth = 0;
                         charCount = 0;
@@ -1705,19 +2451,27 @@ namespace ClassicUO.IO.Resources
                         ptr.CharCount += charCount;
 
                         if (ptr.Width <= 0)
+                        {
                             ptr.Width = 1;
+                        }
+
                         ptr.MaxHeight = MAX_HTML_TEXT_HEIGHT;
                         MultilinesFontInfo newptr = new MultilinesFontInfo();
                         newptr.Reset();
                         ptr.Next = newptr;
                         ptr = newptr;
+
                         ptr.Align = htmlData[i].Align;
+
                         ptr.CharStart = i;
                         lastSpace = i - 1;
                         charCount = 0;
 
                         if (ptr.Align == TEXT_ALIGN_TYPE.TS_LEFT && (htmlData[i].Flags & UOFONT_INDENTION) != 0)
+                        {
                             indentionOffset = 14;
+                        }
+
                         ptr.IndentionOffset = indentionOffset;
                         readWidth = indentionOffset;
                     }
@@ -1725,7 +2479,15 @@ namespace ClassicUO.IO.Resources
                     {
                         if (isFixed)
                         {
-                            MultilinesFontData mfd1 = new MultilinesFontData(htmlData[i].Color, htmlData[i].Flags, htmlData[i].Font, si, htmlData[i].LinkID);
+                            MultilinesFontData mfd1 = new MultilinesFontData
+                            (
+                                htmlData[i].Color,
+                                htmlData[i].Flags,
+                                htmlData[i].Font,
+                                si,
+                                htmlData[i].LinkID
+                            );
+
                             ptr.Data.Add(mfd1);
                             readWidth += (sbyte) data[0] + (sbyte) data[2] + 1;
                             ptr.MaxHeight = MAX_HTML_TEXT_HEIGHT;
@@ -1737,41 +2499,67 @@ namespace ClassicUO.IO.Resources
                         i = lastSpace + 1;
 
                         if (i >= len)
+                        {
                             break;
+                        }
 
                         si = htmlData[i].Char;
+
                         solidWidth = htmlData[i].Flags & UOFONT_SOLID;
 
                         if (ptr.Width <= 0)
+                        {
                             ptr.Width = 1;
+                        }
+
                         ptr.MaxHeight = MAX_HTML_TEXT_HEIGHT;
-                        ptr.Data.Resize( (uint) ptr.CharCount);
+                        ptr.Data.Resize((uint) ptr.CharCount);
                         charCount = 0;
 
                         if (isFixed || isCropped)
+                        {
                             break;
+                        }
 
                         MultilinesFontInfo newptr = new MultilinesFontInfo();
                         newptr.Reset();
                         ptr.Next = newptr;
                         ptr = newptr;
+
                         ptr.Align = htmlData[i].Align;
+
                         ptr.CharStart = i;
 
                         if (ptr.Align == TEXT_ALIGN_TYPE.TS_LEFT && (htmlData[i].Flags & UOFONT_INDENTION) != 0)
+                        {
                             indentionOffset = 14;
+                        }
+
                         ptr.IndentionOffset = indentionOffset;
                         readWidth = indentionOffset;
                     }
                 }
 
-                MultilinesFontData mfd = new MultilinesFontData(htmlData[i].Color, htmlData[i].Flags, htmlData[i].Font, si, htmlData[i].LinkID);
+                MultilinesFontData mfd = new MultilinesFontData
+                (
+                    htmlData[i].Color,
+                    htmlData[i].Flags,
+                    htmlData[i].Font,
+                    si,
+                    htmlData[i].LinkID
+                );
+
                 ptr.Data.Add(mfd);
 
                 if (si == ' ')
+                {
                     readWidth += UNICODE_SPACE_WIDTH;
+                }
                 else
+                {
                     readWidth += (sbyte) data[0] + (sbyte) data[2] + 1 + solidWidth;
+                }
+
                 charCount++;
             }
 
@@ -1782,14 +2570,8 @@ namespace ClassicUO.IO.Resources
             return info;
         }
 
-        private static readonly HTMLChar[] _emptyHTML = { };
-
-        private HTMLChar[] GetHTMLData(byte font, string str, ref int len, TEXT_ALIGN_TYPE align, ushort flags)
+        private unsafe void GetHTMLData(HTMLChar* data, byte font, string str, ref int len, TEXT_ALIGN_TYPE align, ushort flags)
         {
-            if (len < 1)
-                return _emptyHTML;
-
-            var data = new HTMLChar[len];
             int newlen = 0;
 
             HTMLDataInfo info = new HTMLDataInfo
@@ -1798,9 +2580,10 @@ namespace ClassicUO.IO.Resources
                 Align = align,
                 Flags = flags,
                 Font = font,
-                Color = _HTMLColor,
+                Color = _htmlStatus.Color,
                 Link = 0
             };
+
             RawList<HTMLDataInfo> stack = new RawList<HTMLDataInfo>();
             stack.Add(info);
             HTMLDataInfo currentInfo = info;
@@ -1822,25 +2605,42 @@ namespace ClassicUO.IO.Resources
                         Color = 0,
                         Link = 0
                     };
-                    HTML_TAG_TYPE tag = ParseHTMLTag(str, len, ref i, ref endTag, ref newInfo);
+
+                    HTML_TAG_TYPE tag = ParseHTMLTag
+                    (
+                        str,
+                        len,
+                        ref i,
+                        ref endTag,
+                        ref newInfo
+                    );
 
                     if (tag == HTML_TAG_TYPE.HTT_NONE)
+                    {
                         continue;
+                    }
 
                     if (!endTag)
                     {
                         if (newInfo.Font == 0xFF)
+                        {
                             newInfo.Font = stack[stack.Count - 1].Font;
+                        }
 
                         if (tag != HTML_TAG_TYPE.HTT_BODY)
+                        {
                             stack.Add(newInfo);
+                        }
                         else
                         {
                             stack.Clear();
                             newlen = 0;
 
                             if (newInfo.Color != 0)
+                            {
                                 info.Color = newInfo.Color;
+                            }
+
                             stack.Add(info);
                         }
                     }
@@ -1859,7 +2659,7 @@ namespace ClassicUO.IO.Resources
                         }
                     }
 
-                    currentInfo = GetCurrentHTMLInfo(ref stack);
+                    GetCurrentHTMLInfo(ref stack, ref currentInfo);
 
                     switch (tag)
                     {
@@ -1868,15 +2668,22 @@ namespace ClassicUO.IO.Resources
                         case HTML_TAG_TYPE.HTT_RIGHT:
 
                             if (newlen != 0)
+                            {
                                 endTag = true;
+                            }
+
                             goto case HTML_TAG_TYPE.HTT_P;
 
                         case HTML_TAG_TYPE.HTT_P:
 
                             if (endTag)
+                            {
                                 si = '\n';
+                            }
                             else
+                            {
                                 si = (char) 0;
+                            }
 
                             break;
 
@@ -1896,33 +2703,30 @@ namespace ClassicUO.IO.Resources
 
                 if (si != 0)
                 {
-                    data[newlen].Char = si;
-                    data[newlen].Font = currentInfo.Font;
-                    data[newlen].Align = currentInfo.Align;
-                    data[newlen].Flags = currentInfo.Flags;
-                    data[newlen].Color = currentInfo.Color;
-                    data[newlen].LinkID = currentInfo.Link;
-                    newlen++;
+                    ref HTMLChar c = ref data[newlen];
+
+                    c.Char = si;
+                    c.Font = currentInfo.Font;
+                    c.Align = currentInfo.Align;
+                    c.Flags = currentInfo.Flags;
+                    c.Color = currentInfo.Color;
+                    c.LinkID = currentInfo.Link;
+
+                    ++newlen;
                 }
             }
 
-            Array.Resize(ref data, newlen);
             len = newlen;
-
-            return data;
         }
 
-        private HTMLDataInfo GetCurrentHTMLInfo(ref RawList<HTMLDataInfo> list)
+        private void GetCurrentHTMLInfo(ref RawList<HTMLDataInfo> list, ref HTMLDataInfo info)
         {
-            HTMLDataInfo info = new HTMLDataInfo
-            {
-                Tag = HTML_TAG_TYPE.HTT_NONE,
-                Align = TEXT_ALIGN_TYPE.TS_LEFT,
-                Flags = 0,
-                Font = 0xFF,
-                Color = 0,
-                Link = 0
-            };
+            info.Tag = HTML_TAG_TYPE.HTT_NONE;
+            info.Align = TEXT_ALIGN_TYPE.TS_LEFT;
+            info.Flags = 0;
+            info.Font = 0xFF;
+            info.Color = 0;
+            info.Link = 0;
 
             for (int i = 0; i < list.Count; i++)
             {
@@ -1940,6 +2744,7 @@ namespace ClassicUO.IO.Resources
                     case HTML_TAG_TYPE.HTT_U:
                     case HTML_TAG_TYPE.HTT_P:
                         info.Flags |= current.Flags;
+                        info.Align = current.Align;
 
                         break;
 
@@ -1954,17 +2759,23 @@ namespace ClassicUO.IO.Resources
                     case HTML_TAG_TYPE.HTT_SMALL:
 
                         if (current.Font != 0xFF && _unicodeFontAddress[current.Font] != IntPtr.Zero)
+                        {
                             info.Font = current.Font;
+                        }
 
                         break;
 
                     case HTML_TAG_TYPE.HTT_BASEFONT:
 
                         if (current.Font != 0xFF && _unicodeFontAddress[current.Font] != IntPtr.Zero)
+                        {
                             info.Font = current.Font;
+                        }
 
                         if (current.Color != 0)
+                        {
                             info.Color = current.Color;
+                        }
 
                         break;
 
@@ -1979,7 +2790,9 @@ namespace ClassicUO.IO.Resources
                     case HTML_TAG_TYPE.HTT_H6:
 
                         if (current.Font != 0xFF && _unicodeFontAddress[current.Font] != IntPtr.Zero)
+                        {
                             info.Font = current.Font;
+                        }
 
                         break;
 
@@ -2002,8 +2815,6 @@ namespace ClassicUO.IO.Resources
                         break;
                 }
             }
-
-            return info;
         }
 
         private HTML_TAG_TYPE ParseHTMLTag(string str, int len, ref int i, ref bool endTag, ref HTMLDataInfo info)
@@ -2018,166 +2829,166 @@ namespace ClassicUO.IO.Resources
             }
 
             while (i < len && str[i] == ' ')
+            {
                 i++;
+            }
+
             int j = i;
 
             for (; i < len; i++)
             {
-                if (str[i] == ' ' || str[i] == '>')
+                // special case for single <{TAG}/>
+                if (str[i] == '/')
+                {
+                    endTag = true;
+
                     break;
+                }
+
+                if (str[i] == ' ' || str[i] == '>')
+                {
+                    break;
+                }
             }
 
             if (j != i && i < len)
             {
                 int cmdLen = i - j;
-                string cmd = str.Substring(j, cmdLen).ToLower();
+
+                int startIndex = j;
+
                 j = i;
 
                 while (i < len && str[i] != '>')
-                    i++;
-
-                switch (cmd)
                 {
-                    case "b":
-                        tag = HTML_TAG_TYPE.HTT_B;
+                    i++;
+                }
 
-                        break;
 
-                    case "i":
-                        tag = HTML_TAG_TYPE.HTT_I;
-
-                        break;
-
-                    case "a":
-                        tag = HTML_TAG_TYPE.HTT_A;
-
-                        break;
-
-                    case "u":
-                        tag = HTML_TAG_TYPE.HTT_U;
-
-                        break;
-
-                    case "p":
-                        tag = HTML_TAG_TYPE.HTT_P;
-
-                        break;
-
-                    case "big":
-                        tag = HTML_TAG_TYPE.HTT_BIG;
-
-                        break;
-
-                    case "small":
-                        tag = HTML_TAG_TYPE.HTT_SMALL;
-
-                        break;
-
-                    case "body":
-                        tag = HTML_TAG_TYPE.HTT_BODY;
-
-                        break;
-
-                    case "basefont":
+                if (string.Compare(str, startIndex, "b", 0, cmdLen, StringComparison.InvariantCultureIgnoreCase) == 0)
+                {
+                    tag = HTML_TAG_TYPE.HTT_B;
+                }
+                else if (string.Compare(str, startIndex, "i", 0, cmdLen, StringComparison.InvariantCultureIgnoreCase) == 0)
+                {
+                    tag = HTML_TAG_TYPE.HTT_I;
+                }
+                else if (string.Compare(str, startIndex, "a", 0, cmdLen, StringComparison.InvariantCultureIgnoreCase) == 0)
+                {
+                    tag = HTML_TAG_TYPE.HTT_A;
+                }
+                else if (string.Compare(str, startIndex, "u", 0, cmdLen, StringComparison.InvariantCultureIgnoreCase) == 0)
+                {
+                    tag = HTML_TAG_TYPE.HTT_U;
+                }
+                else if (string.Compare(str, startIndex, "p", 0, cmdLen, StringComparison.InvariantCultureIgnoreCase) == 0)
+                {
+                    tag = HTML_TAG_TYPE.HTT_P;
+                }
+                else if (string.Compare(str, startIndex, "big", 0, cmdLen, StringComparison.InvariantCultureIgnoreCase) == 0)
+                {
+                    tag = HTML_TAG_TYPE.HTT_BIG;
+                }
+                else if (string.Compare(str, startIndex, "small", 0, cmdLen, StringComparison.InvariantCultureIgnoreCase) == 0)
+                {
+                    tag = HTML_TAG_TYPE.HTT_SMALL;
+                }
+                else if (string.Compare(str, startIndex, "body", 0, cmdLen, StringComparison.InvariantCultureIgnoreCase) == 0)
+                {
+                    tag = HTML_TAG_TYPE.HTT_BODY;
+                }
+                else if (string.Compare(str, startIndex, "basefont", 0, cmdLen, StringComparison.InvariantCultureIgnoreCase) == 0)
+                {
+                    tag = HTML_TAG_TYPE.HTT_BASEFONT;
+                }
+                else if (string.Compare(str, startIndex, "h1", 0, cmdLen, StringComparison.InvariantCultureIgnoreCase) == 0)
+                {
+                    tag = HTML_TAG_TYPE.HTT_H1;
+                }
+                else if (string.Compare(str, startIndex, "h2", 0, cmdLen, StringComparison.InvariantCultureIgnoreCase) == 0)
+                {
+                    tag = HTML_TAG_TYPE.HTT_H2;
+                }
+                else if (string.Compare(str, startIndex, "h3", 0, cmdLen, StringComparison.InvariantCultureIgnoreCase) == 0)
+                {
+                    tag = HTML_TAG_TYPE.HTT_H3;
+                }
+                else if (string.Compare(str, startIndex, "h4", 0, cmdLen, StringComparison.InvariantCultureIgnoreCase) == 0)
+                {
+                    tag = HTML_TAG_TYPE.HTT_H4;
+                }
+                else if (string.Compare(str, startIndex, "h5", 0, cmdLen, StringComparison.InvariantCultureIgnoreCase) == 0)
+                {
+                    tag = HTML_TAG_TYPE.HTT_H5;
+                }
+                else if (string.Compare(str, startIndex, "h6", 0, cmdLen, StringComparison.InvariantCultureIgnoreCase) == 0)
+                {
+                    tag = HTML_TAG_TYPE.HTT_H6;
+                }
+                else if (string.Compare(str, startIndex, "br", 0, cmdLen, StringComparison.InvariantCultureIgnoreCase) == 0)
+                {
+                    tag = HTML_TAG_TYPE.HTT_BR;
+                }
+                else if (string.Compare(str, startIndex, "bq", 0, cmdLen, StringComparison.InvariantCultureIgnoreCase) == 0)
+                {
+                    tag = HTML_TAG_TYPE.HTT_BQ;
+                }
+                else if (string.Compare(str, startIndex, "left", 0, cmdLen, StringComparison.InvariantCultureIgnoreCase) == 0)
+                {
+                    tag = HTML_TAG_TYPE.HTT_LEFT;
+                }
+                else if (string.Compare(str, startIndex, "center", 0, cmdLen, StringComparison.InvariantCultureIgnoreCase) == 0)
+                {
+                    tag = HTML_TAG_TYPE.HTT_CENTER;
+                }
+                else if (string.Compare(str, startIndex, "right", 0, cmdLen, StringComparison.InvariantCultureIgnoreCase) == 0)
+                {
+                    tag = HTML_TAG_TYPE.HTT_RIGHT;
+                }
+                else if (string.Compare(str, startIndex, "div", 0, cmdLen, StringComparison.InvariantCultureIgnoreCase) == 0)
+                {
+                    tag = HTML_TAG_TYPE.HTT_DIV;
+                }
+                else
+                {
+                    if (str.IndexOf("bodybgcolor", StringComparison.InvariantCultureIgnoreCase) >= 0)
+                    {
+                        tag = HTML_TAG_TYPE.HTT_BODYBGCOLOR;
+                        j = str.IndexOf("bgcolor", StringComparison.InvariantCultureIgnoreCase);
+                        endTag = false;
+                    }
+                    else if (str.IndexOf("basefont", StringComparison.InvariantCultureIgnoreCase) >= 0)
+                    {
                         tag = HTML_TAG_TYPE.HTT_BASEFONT;
-
-                        break;
-
-                    case "h1":
-                        tag = HTML_TAG_TYPE.HTT_H1;
-
-                        break;
-
-                    case "h2":
-                        tag = HTML_TAG_TYPE.HTT_H2;
-
-                        break;
-
-                    case "h3":
-                        tag = HTML_TAG_TYPE.HTT_H3;
-
-                        break;
-
-                    case "h4":
-                        tag = HTML_TAG_TYPE.HTT_H4;
-
-                        break;
-
-                    case "h5":
-                        tag = HTML_TAG_TYPE.HTT_H5;
-
-                        break;
-
-                    case "h6":
-                        tag = HTML_TAG_TYPE.HTT_H6;
-
-                        break;
-
-                    case "br":
-                        tag = HTML_TAG_TYPE.HTT_BR;
-
-                        break;
-
-                    case "bq":
-                        tag = HTML_TAG_TYPE.HTT_BQ;
-
-                        break;
-
-                    case "left":
-                        tag = HTML_TAG_TYPE.HTT_LEFT;
-
-                        break;
-
-                    case "center":
-                        tag = HTML_TAG_TYPE.HTT_CENTER;
-
-                        break;
-
-                    case "right":
-                        tag = HTML_TAG_TYPE.HTT_RIGHT;
-
-                        break;
-
-                    case "div":
-                        tag = HTML_TAG_TYPE.HTT_DIV;
-
-                        break;
-
-                    default:
-
-                        if (str.Contains("bodybgcolor"))
-                        {
-                            tag = HTML_TAG_TYPE.HTT_BODYBGCOLOR;
-                            j = str.IndexOf("bgcolor", StringComparison.Ordinal);
-                        }
-                        else
-                            Log.Warn( $"Unhandled HTML param:\t{str}");
-
-                        break;
+                        j = str.IndexOf("color", StringComparison.InvariantCultureIgnoreCase);
+                        endTag = false;
+                    }
+                    else
+                    {
+                        Log.Warn($"Unhandled HTML param:\t{str}");
+                    }
                 }
 
                 if (!endTag)
                 {
-                    info = GetHTMLInfoFromTag(tag);
+                    GetHTMLInfoFromTag(tag, ref info);
 
                     if (i < len && j != i)
                     {
                         switch (tag)
                         {
                             case HTML_TAG_TYPE.HTT_BODYBGCOLOR:
-
                             case HTML_TAG_TYPE.HTT_BODY:
                             case HTML_TAG_TYPE.HTT_BASEFONT:
                             case HTML_TAG_TYPE.HTT_A:
                             case HTML_TAG_TYPE.HTT_DIV:
+                            case HTML_TAG_TYPE.HTT_P:
                                 cmdLen = i - j;
-                                string content = str.Substring(j, cmdLen);
 
-                                if (content.Length != 0)
-                                    GetHTMLInfoFromContent(ref info, content);
-
-                                //if (tag == HTML_TAG_TYPE.HTT_BODYBGCOLOR)
-                                //    i = 1;
+                                if (str.Length != 0 && str.Length > j && str.Length >= cmdLen)
+                                {
+                                    GetHTMLInfoFromContent(ref info, str, j, cmdLen);
+                                }
 
                                 break;
                         }
@@ -2188,183 +2999,187 @@ namespace ClassicUO.IO.Resources
             return tag;
         }
 
-        private void GetHTMLInfoFromContent(ref HTMLDataInfo info, string content)
+        
+        private unsafe void GetHTMLInfoFromContent(ref HTMLDataInfo info, string content, int start, int length)
         {
-            string[] strings = content.Split(new[]
+            int i = 0;
+
+            if (!string.IsNullOrEmpty(content))
             {
-                ' ', '=', '\\'
-            }, StringSplitOptions.RemoveEmptyEntries);
-
-
-            int size = strings.Length;
-
-            for (int i = 0; i < size; i += 2)
-            {
-                if (i + 1 >= size)
-                    break;
-
-                string str = strings[i].ToLower();
-                string value = strings[i + 1];
-                TrimHTMLString(ref value);
-
-                if (value.Length == 0)
-                    continue;
-
-                switch (info.Tag)
+                while (i < length && char.IsWhiteSpace(content[i + start]))
                 {
-                    case HTML_TAG_TYPE.HTT_BODYBGCOLOR:
-                    case HTML_TAG_TYPE.HTT_BODY:
+                    ++i;
+                }
+            }
+            else
+            {
+                return;
+            }
 
-                        switch (str)
+            char* bufferCmd = stackalloc char[128];
+            char* bufferValue = stackalloc char[128];
+            
+            for (int cmdLenght = 0; i < length; ++i)
+            {
+                char c = content[i + start];
+
+                bufferCmd[cmdLenght++] = char.IsLetter(c) ? char.ToLowerInvariant(c) : c;
+
+                if (c == ' ' || c == '=' || c == '\\')
+                {
+                    ++i;
+
+                    int valueLength = 0;
+
+                    for (; i < length; ++i)
+                    {
+                        c = content[i + start];
+
+                        if (c == ' ' || c == '=' || c == '\\' || c == '<' || c == '>')
                         {
-                            case "text":
-                                info.Color = GetHTMLColorFromText(ref value);
+                            break;
+                        }
+
+                        if (c != '"')
+                        {
+                            bufferValue[valueLength++] = char.IsLetter(c) ? char.ToLowerInvariant(c) : c;
+                        }
+                    }
+
+                    if (valueLength != 0)
+                    {
+                        switch (info.Tag)
+                        {
+                            case HTML_TAG_TYPE.HTT_BODY:
+                            case HTML_TAG_TYPE.HTT_BODYBGCOLOR:
+                                
+                                if (StringHelper.UnsafeCompare(bufferCmd, "text", cmdLenght))
+                                {
+                                    ReadColorFromTextBuffer(bufferValue, valueLength, ref info.Color);
+                                }
+                                else if (StringHelper.UnsafeCompare(bufferCmd, "bgcolor", cmdLenght))
+                                {
+                                    if (_htmlStatus.IsHtmlBackgroundColored)
+                                    {
+                                        ReadColorFromTextBuffer(bufferValue, valueLength, ref _htmlStatus.BackgroundColor);
+                                    }
+                                }
+                                else if (StringHelper.UnsafeCompare(bufferCmd, "link", cmdLenght))
+                                {
+                                    ReadColorFromTextBuffer(bufferValue, valueLength, ref _htmlStatus.WebLinkColor);
+                                }
+                                else if (StringHelper.UnsafeCompare(bufferCmd, "vlink", cmdLenght))
+                                {
+                                    ReadColorFromTextBuffer(bufferValue, valueLength, ref _htmlStatus.VisitedWebLinkColor);
+                                }
+                                else if (StringHelper.UnsafeCompare(bufferCmd, "leftmargin", cmdLenght))
+                                {
+                                    _htmlStatus.Margins.X = int.Parse(new string(bufferValue, 0, valueLength));
+                                }
+                                else if (StringHelper.UnsafeCompare(bufferCmd, "topmargin", cmdLenght))
+                                {
+                                    _htmlStatus.Margins.Y = int.Parse(new string(bufferValue, 0, valueLength));
+                                }
+                                else if (StringHelper.UnsafeCompare(bufferCmd, "rightmargin", cmdLenght))
+                                {
+                                    _htmlStatus.Margins.Width = int.Parse(new string(bufferValue, 0, valueLength));
+                                }
+                                else if (StringHelper.UnsafeCompare(bufferCmd, "bottommargin", cmdLenght))
+                                {
+                                    _htmlStatus.Margins.Height = int.Parse(new string(bufferValue, 0, valueLength));
+                                }
 
                                 break;
 
-                            case "bgcolor":
+                            case HTML_TAG_TYPE.HTT_BASEFONT:
 
-                                if (_HTMLBackgroundCanBeColored)
-                                    _backgroundColor = GetHTMLColorFromText(ref value);
+                                if (StringHelper.UnsafeCompare(bufferCmd, "color", cmdLenght))
+                                {
+                                    ReadColorFromTextBuffer(bufferValue, valueLength, ref info.Color);
+                                }
+                                else if (StringHelper.UnsafeCompare(bufferCmd, "size", cmdLenght))
+                                {
+                                    byte font = byte.Parse(new string(bufferValue, 0, valueLength));
 
-                                break;
-
-                            case "link":
-                                _webLinkColor = GetHTMLColorFromText(ref value);
-
-                                break;
-
-                            case "vlink":
-                                _visitedWebLinkColor = GetHTMLColorFromText(ref value);
-
-                                break;
-
-                            case "leftmargin":
-                                _leftMargin = int.Parse(value);
-
-                                break;
-
-                            case "topmargin":
-                                _topMargin = int.Parse(value);
-
-                                break;
-
-                            case "rightmargin":
-                                _rightMargin = int.Parse(value);
+                                    if (font == 0 || font == 4)
+                                    {
+                                        info.Font = 1;
+                                    }
+                                    else if (font < 4)
+                                    {
+                                        info.Font = 2;
+                                    }
+                                    else
+                                    {
+                                        info.Font = 0;
+                                    }
+                                }
 
                                 break;
 
-                            case "bottommargin":
-                                _bottomMargin = int.Parse(value);
+                            case HTML_TAG_TYPE.HTT_A:
+
+                                if (StringHelper.UnsafeCompare(bufferCmd, "href", cmdLenght))
+                                {
+                                    info.Flags = UOFONT_UNDERLINE;
+                                    info.Color = _htmlStatus.WebLinkColor;
+                                    info.Link = GetWebLinkID(bufferValue, valueLength, ref info.Color);
+                                }
+
+                                break;
+
+                            case HTML_TAG_TYPE.HTT_P:
+                            case HTML_TAG_TYPE.HTT_DIV:
+
+                                if (StringHelper.UnsafeCompare(bufferCmd, "align", cmdLenght))
+                                {
+                                    if (StringHelper.UnsafeCompare(bufferValue, "left", valueLength))
+                                    {
+                                        info.Align = TEXT_ALIGN_TYPE.TS_LEFT;
+                                    }
+                                    else if (StringHelper.UnsafeCompare(bufferValue, "center", valueLength))
+                                    {
+                                        info.Align = TEXT_ALIGN_TYPE.TS_CENTER;
+                                    }
+                                    else if (StringHelper.UnsafeCompare(bufferValue, "right", valueLength))
+                                    {
+                                        info.Align = TEXT_ALIGN_TYPE.TS_RIGHT;
+                                    }
+                                }
 
                                 break;
                         }
+                    }
 
-                        break;
-
-                    case HTML_TAG_TYPE.HTT_BASEFONT:
-
-                        if (str == "color")
-                            info.Color = GetHTMLColorFromText(ref value);
-                        else if (str == "size")
-                        {
-                            byte font = byte.Parse(value);
-
-                            if (font == 0 || font == 4)
-                                info.Font = 1;
-                            else if (font < 4)
-                                info.Font = 2;
-                            else
-                                info.Font = 0;
-                        }
-                        //else if (str == "face")
-                        //{
-                        //    byte face = byte.Parse(value);
-
-                        //    if (face == 1)
-                        //        info.Font = 0;
-                        //}
-
-                        break;
-
-                    case HTML_TAG_TYPE.HTT_A:
-
-                        if (str == "href")
-                        {
-                            info.Flags = UOFONT_UNDERLINE;
-                            info.Color = _webLinkColor;
-
-                            int start = i + 1;
-
-                            while (value[0] == '"' && value[value.Length - 1] != '"' && start + 1 < size) value += strings[++start];
-
-                            i = start;
-
-                            info.Link = GetWebLinkID(value, ref info.Color);
-                        }
-
-                        break;
-
-                    case HTML_TAG_TYPE.HTT_DIV:
-
-                        if (str == "align")
-                        {
-                            str = value.ToLower();
-
-                            switch (str)
-                            {
-                                case "left":
-                                    info.Align = TEXT_ALIGN_TYPE.TS_LEFT;
-
-                                    break;
-
-                                case "center":
-                                    info.Align = TEXT_ALIGN_TYPE.TS_CENTER;
-
-                                    break;
-
-                                case "right":
-                                    info.Align = TEXT_ALIGN_TYPE.TS_RIGHT;
-
-                                    break;
-                            }
-                        }
-
-                        break;
+                    cmdLenght = 0;
                 }
             }
         }
 
-        private ushort GetWebLinkID(string link, ref uint color)
+        private unsafe ushort GetWebLinkID(char* link, int linkLength, ref uint color)
         {
-            ushort linkID = 0;
-            KeyValuePair<ushort, WebLink>? l = null;
-
             foreach (KeyValuePair<ushort, WebLink> ll in _webLinks)
             {
-                if (ll.Value.Link == link)
+                if (StringHelper.UnsafeCompare(link, ll.Value.Link, linkLength))
                 {
-                    l = ll;
+                    if (ll.Value.IsVisited)
+                    {
+                        color = _htmlStatus.VisitedWebLinkColor;
+                    }
 
-                    break;
+                    return ll.Key;
                 }
             }
 
-            if (!l.HasValue)
-            {
-                linkID = (ushort) (_webLinks.Count + 1);
+            ushort linkID = (ushort)_webLinks.Count;
 
-                _webLinks[linkID] = new WebLink
-                {
-                    IsVisited = false,
-                    Link = link
-                };
-            }
-            else
+            if (!_webLinks.TryGetValue(linkID, out WebLink webLink))
             {
-                if (l.Value.Value.IsVisited)
-                    color = _visitedWebLinkColor;
-                linkID = l.Value.Key;
+                webLink = new WebLink();
+                webLink.IsVisited = false;
+                webLink.Link = new string(link, 0, linkLength);
+
+                _webLinks[linkID] = webLink;
             }
 
             return linkID;
@@ -2372,164 +3187,126 @@ namespace ClassicUO.IO.Resources
 
         public bool GetWebLink(ushort link, out WebLink result)
         {
-            if (!_webLinks.TryGetValue(link, out result)) return false;
+            if (!_webLinks.TryGetValue(link, out result))
+            {
+                return false;
+            }
 
             result.IsVisited = true;
 
             return true;
         }
 
-        private unsafe uint GetHTMLColorFromText(ref string str)
+
+        private unsafe void ReadColorFromTextBuffer(char* buffer, int length, ref uint color)
         {
-            uint color = 0;
+            color = 0x00_00_00_00;
 
-            if (str.Length > 1)
+            if (length > 0)
             {
-                if (str[0] == '#')
+                if (buffer[0] == '#')
                 {
-                    int start = 1;
-                    if (str[1] == '0' && str[2] == 'x')
+                    if (length > 1)
                     {
-                        start = 3;
+                        int startIndex = buffer[1] == '0' && buffer[2] == 'x' ? 3 : 1;
+
+                        string temp = new string(buffer, startIndex, length - startIndex);
+                        uint.TryParse(temp, NumberStyles.HexNumber, CultureInfo.InvariantCulture, out var cc);
+
+                        byte* clrbuf = (byte*)&cc;
+                        color = (uint)((clrbuf[0] << 24) | (clrbuf[1] << 16) | (clrbuf[2] << 8) | 0xFF);
                     }
-                    color = Convert.ToUInt32(str.Substring(start), 16);
-
-                    byte* clrbuf = (byte*) &color;
-                    color = (uint) ((clrbuf[0] << 24) | (clrbuf[1] << 16) | (clrbuf[2] << 8) | 0xFF);
                 }
-                else if (char.IsNumber(str[0]))
+                else if (char.IsNumber(buffer[0]))
                 {
-                    color = Convert.ToUInt32(str, 16);
-                    //color = (HuesHelper.Color16To32((ushort)color) >> 8) | 0xFF;
-                    //byte* clrbuf = (byte*)&color;
-                    //color = (uint)((clrbuf[0] << 24) | (clrbuf[1] << 16) | (clrbuf[2] << 8) | 0xFF);
-
-                    ////(byte b, byte g, byte r, byte a) = HuesHelper.GetBGRA(color);
-                    //Color cc = new Color()
-                    //{
-                    //    PackedValue = HuesHelper.RgbaToArgb(color)
-                    //};
+                    color = Convert.ToUInt32(new string(buffer, 0, length), 16);
                 }
                 else
                 {
-                    str = str.ToLower();
-
-                    switch (str)
+                    if (StringHelper.UnsafeCompare(buffer, "red", length))
                     {
-                        case "red":
-                            color = 0x0000FFFF;
-
-                            break;
-
-                        case "cyan":
-                            color = 0xFFFF00FF;
-
-                            break;
-
-                        case "blue":
-                            color = 0xFF0000FF;
-
-                            break;
-
-                        case "darkblue":
-                            color = 0xA00000FF;
-
-                            break;
-
-                        case "lightblue":
-                            color = 0xE6D8ADFF;
-
-                            break;
-
-                        case "purple":
-                            color = 0x800080FF;
-
-                            break;
-
-                        case "yellow":
-                            color = 0x00FFFFFF;
-
-                            break;
-
-                        case "lime":
-                            color = 0x00FF00FF;
-
-                            break;
-
-                        case "magenta":
-                            color = 0xFF00FFFF;
-
-                            break;
-
-                        case "white":
-                            color = 0xFFFEFEFF;
-
-                            break;
-
-                        case "silver":
-                            color = 0xC0C0C0FF;
-
-                            break;
-
-                        case "gray":
-                        case "grey":
-                            color = 0x808080FF;
-
-                            break;
-
-                        case "black":
-                            color = 0x010101FF;
-
-                            break;
-
-                        case "orange":
-                            color = 0x00A5FFFF;
-
-                            break;
-
-                        case "brown":
-                            color = 0x2A2AA5FF;
-
-                            break;
-
-                        case "maroon":
-                            color = 0x000080FF;
-
-                            break;
-
-                        case "green":
-                            color = 0x008000FF;
-
-                            break;
-
-                        case "olive":
-                            color = 0x008080FF;
-
-                            break;
+                        color = 0x0000FFFF;
+                    }
+                    else if (StringHelper.UnsafeCompare(buffer, "cyan", length))
+                    {
+                        color = 0xFFFF00FF;
+                    }
+                    else if (StringHelper.UnsafeCompare(buffer, "blue", length))
+                    {
+                        color = 0xFF0000FF;
+                    }
+                    else if (StringHelper.UnsafeCompare(buffer, "darkblue", length))
+                    {
+                        color = 0xA00000FF;
+                    }
+                    else if (StringHelper.UnsafeCompare(buffer, "lightblue", length))
+                    {
+                        color = 0xE6D8ADFF;
+                    }
+                    else if (StringHelper.UnsafeCompare(buffer, "purple", length))
+                    {
+                        color = 0x800080FF;
+                    }
+                    else if (StringHelper.UnsafeCompare(buffer, "yellow", length))
+                    {
+                        color = 0x00FFFFFF;
+                    }
+                    else if (StringHelper.UnsafeCompare(buffer, "lime", length))
+                    {
+                        color = 0x00FF00FF;
+                    }
+                    else if (StringHelper.UnsafeCompare(buffer, "magenta", length))
+                    {
+                        color = 0xFF00FFFF;
+                    }
+                    else if (StringHelper.UnsafeCompare(buffer, "white", length))
+                    {
+                        color = 0xFFFEFEFF;
+                    }
+                    else if (StringHelper.UnsafeCompare(buffer, "silver", length))
+                    {
+                        color = 0xC0C0C0FF;
+                    }
+                    else if (StringHelper.UnsafeCompare(buffer, "gray", length) || StringHelper.UnsafeCompare(buffer, "grey", length))
+                    {
+                        color = 0x808080FF;
+                    }
+                    else if (StringHelper.UnsafeCompare(buffer, "black", length))
+                    {
+                        color = 0x010101FF;
+                    }
+                    else if (StringHelper.UnsafeCompare(buffer, "orange", length))
+                    {
+                        color = 0x00A5FFFF;
+                    }
+                    else if (StringHelper.UnsafeCompare(buffer, "brown", length))
+                    {
+                        color = 0x2A2AA5FF;
+                    }
+                    else if (StringHelper.UnsafeCompare(buffer, "maroon", length))
+                    {
+                        color = 0x000080FF;
+                    }
+                    else if (StringHelper.UnsafeCompare(buffer, "green", length))
+                    {
+                        color = 0x008000FF;
+                    }
+                    else if (StringHelper.UnsafeCompare(buffer, "olive", length))
+                    {
+                        color = 0x008080FF;
                     }
                 }
             }
-
-            return color;
         }
 
-        private void TrimHTMLString(ref string str)
+        private void GetHTMLInfoFromTag(HTML_TAG_TYPE tag, ref HTMLDataInfo info)
         {
-            if (str.Length >= 2 && str[0] == '"' && str[str.Length - 1] == '"')
-                str = str.Substring(1, str.Length - 2);
-        }
-
-        private HTMLDataInfo GetHTMLInfoFromTag(HTML_TAG_TYPE tag)
-        {
-            HTMLDataInfo info = new HTMLDataInfo
-            {
-                Tag = tag,
-                Align = TEXT_ALIGN_TYPE.TS_LEFT,
-                Flags = 0,
-                Font = 0xFF,
-                Color = 0,
-                Link = 0
-            };
+            info.Tag = tag;
+            info.Align = TEXT_ALIGN_TYPE.TS_LEFT;
+            info.Flags = 0;
+            info.Font = 0xFF;
+            info.Color = 0;
+            info.Link = 0;
 
             switch (tag)
             {
@@ -2618,8 +3395,6 @@ namespace ClassicUO.IO.Resources
 
                     break;
             }
-
-            return info;
         }
 
         private int GetHeightUnicode(MultilinesFontInfo info)
@@ -2629,9 +3404,13 @@ namespace ClassicUO.IO.Resources
             for (; info != null; info = info.Next)
             {
                 if (IsUsingHTML)
+                {
                     textHeight += MAX_HTML_TEXT_HEIGHT;
+                }
                 else
+                {
                     textHeight += info.MaxHeight;
+                }
             }
 
             return textHeight;
@@ -2640,63 +3419,100 @@ namespace ClassicUO.IO.Resources
         public int GetHeightUnicode(byte font, string str, int width, TEXT_ALIGN_TYPE align, ushort flags)
         {
             if (font >= 20 || _unicodeFontAddress[font] == IntPtr.Zero || string.IsNullOrEmpty(str))
+            {
                 return 0;
+            }
 
             if (width <= 0)
+            {
                 width = GetWidthUnicode(font, str);
-            MultilinesFontInfo info = GetInfoUnicode(font, str, str.Length, align, flags, width);
+            }
+
+            MultilinesFontInfo info = GetInfoUnicode
+            (
+                font,
+                str,
+                str.Length,
+                align,
+                flags,
+                width
+            );
+
             int textHeight = 0;
 
             while (info != null)
             {
                 if (IsUsingHTML)
+                {
                     textHeight += MAX_HTML_TEXT_HEIGHT;
+                }
                 else
+                {
                     textHeight += info.MaxHeight;
+                }
+
                 MultilinesFontInfo ptr = info;
                 info = info.Next;
                 ptr.Data.Clear();
+                ptr.Data.Count = 0;
                 ptr = null;
             }
 
             return textHeight;
         }
 
-        public unsafe int CalculateCaretPosUnicode(byte font, string str, int x, int y, int width, TEXT_ALIGN_TYPE align, ushort flags)
+        public unsafe int CalculateCaretPosUnicode
+        (
+            byte font,
+            string str,
+            int x,
+            int y,
+            int width,
+            TEXT_ALIGN_TYPE align,
+            ushort flags
+        )
         {
             if (x < 0 || y < 0 || font >= 20 || _unicodeFontAddress[font] == IntPtr.Zero || string.IsNullOrEmpty(str))
             {
                 switch (align)
                 {
-                    case TEXT_ALIGN_TYPE.TS_CENTER:
-                        return width >> 1;
-                    case TEXT_ALIGN_TYPE.TS_RIGHT:
-                        return width;
-                    default:
-                        return 0;
+                    case TEXT_ALIGN_TYPE.TS_CENTER: return width >> 1;
+
+                    case TEXT_ALIGN_TYPE.TS_RIGHT: return width;
+
+                    default: return 0;
                 }
             }
 
             if (width == 0)
+            {
                 width = GetWidthUnicode(font, str);
+            }
 
             if (x >= width)
             {
                 return str.Length;
             }
 
-            MultilinesFontInfo info = GetInfoUnicode(font, str, str.Length, align, flags, width);
+            MultilinesFontInfo info = GetInfoUnicode
+            (
+                font,
+                str,
+                str.Length,
+                align,
+                flags,
+                width
+            );
 
             if (info == null)
             {
                 switch (align)
                 {
-                    case TEXT_ALIGN_TYPE.TS_CENTER:
-                        return width >> 1;
-                    case TEXT_ALIGN_TYPE.TS_RIGHT:
-                        return width;
-                    default:
-                        return 0;
+                    case TEXT_ALIGN_TYPE.TS_CENTER: return width >> 1;
+
+                    case TEXT_ALIGN_TYPE.TS_RIGHT: return width;
+
+                    default: return 0;
                 }
             }
 
@@ -2715,14 +3531,22 @@ namespace ClassicUO.IO.Resources
                 {
                     case TEXT_ALIGN_TYPE.TS_CENTER:
                         width = (fwidth - info.Width) >> 1;
+
                         if (width < 0)
+                        {
                             width = 0;
+                        }
+
                         break;
+
                     case TEXT_ALIGN_TYPE.TS_RIGHT:
                         width = fwidth;
+
                         break;
+
                     default:
                         width = 0;
+
                         break;
                 }
 
@@ -2735,17 +3559,23 @@ namespace ClassicUO.IO.Resources
                         for (int i = 0; i < len && i < info.Data.Count; i++)
                         {
                             char ch = info.Data[i].Item;
+
                             uint offset = table[ch];
 
-                            if (offset != 0 && offset != 0xFFFFFFFF)
+                            if (ch != '\r' && offset != 0 && offset != 0xFFFFFFFF)
                             {
                                 byte* cptr = (byte*) ((IntPtr) table + (int) offset);
                                 width += (sbyte) cptr[0] + (sbyte) cptr[2] + 1;
                             }
-                            else if (ch == ' ') width += UNICODE_SPACE_WIDTH;
+                            else if (ch == ' ')
+                            {
+                                width += UNICODE_SPACE_WIDTH;
+                            }
 
                             if (width > x)
+                            {
                                 break;
+                            }
 
                             pos++;
                         }
@@ -2762,16 +3592,27 @@ namespace ClassicUO.IO.Resources
                 MultilinesFontInfo ptr = info;
                 info = info.Next;
                 ptr.Data.Clear();
+                ptr.Data.Count = 0;
                 ptr = null;
             }
 
             if (pos > str.Length)
+            {
                 pos = str.Length;
+            }
 
             return pos;
         }
 
-        public unsafe (int, int) GetCaretPosUnicode(byte font, string str, int pos, int width, TEXT_ALIGN_TYPE align, ushort flags)
+        public unsafe (int, int) GetCaretPosUnicode
+        (
+            byte font,
+            string str,
+            int pos,
+            int width,
+            TEXT_ALIGN_TYPE align,
+            ushort flags
+        )
         {
             int x = 0;
             int y = 0;
@@ -2780,24 +3621,41 @@ namespace ClassicUO.IO.Resources
             {
                 case TEXT_ALIGN_TYPE.TS_CENTER:
                     x = width >> 1;
+
                     break;
+
                 case TEXT_ALIGN_TYPE.TS_RIGHT:
                     x = width;
+
                     break;
             }
 
             if (font >= 20 || _unicodeFontAddress[font] == IntPtr.Zero || string.IsNullOrEmpty(str))
+            {
                 return (x, y);
+            }
 
             if (width == 0)
+            {
                 width = GetWidthUnicode(font, str);
-            MultilinesFontInfo info = GetInfoUnicode(font, str, str.Length, align, flags, width);
+            }
+
+            MultilinesFontInfo info = GetInfoUnicode
+            (
+                font,
+                str,
+                str.Length,
+                align,
+                flags,
+                width
+            );
 
             if (info == null)
+            {
                 return (x, y);
+            }
 
             uint* table = (uint*) _unicodeFontAddress[font];
-          
 
             while (info != null)
             {
@@ -2805,89 +3663,130 @@ namespace ClassicUO.IO.Resources
                 {
                     case TEXT_ALIGN_TYPE.TS_CENTER:
                         x = (width - info.Width) >> 1;
+
                         if (x < 0)
+                        {
                             x = 0;
+                        }
+
                         break;
+
                     case TEXT_ALIGN_TYPE.TS_RIGHT:
                         x = width;
+
                         break;
+
                     default:
                         x = 0;
+
                         break;
                 }
 
                 int len = info.CharCount;
 
                 if (info.CharStart == pos)
+                {
                     return (x, y);
+                }
 
                 if (pos <= info.CharStart + len && info.Data.Count >= len)
                 {
                     for (int i = 0; i < len; i++)
                     {
                         char ch = info.Data[i].Item;
+
                         uint offset = table[ch];
 
-                        if (offset != 0 && offset != 0xFFFFFFFF)
+                        if (ch != '\r' && offset != 0 && offset != 0xFFFFFFFF)
                         {
                             byte* cptr = (byte*) ((IntPtr) table + (int) offset);
                             x += (sbyte) cptr[0] + (sbyte) cptr[2] + 1;
                         }
-                        else if (ch == ' ') x += UNICODE_SPACE_WIDTH;
+                        else if (ch == ' ')
+                        {
+                            x += UNICODE_SPACE_WIDTH;
+                        }
 
                         if (info.CharStart + i + 1 == pos)
+                        {
                             return (x, y);
+                        }
                     }
                 }
                 else
+                {
                     x = width;
+                }
 
                 if (info.Next != null)
+                {
                     y += info.MaxHeight;
+                }
+
                 MultilinesFontInfo ptr = info;
                 info = info.Next;
                 ptr.Data.Clear();
+                ptr.Data.Count = 0;
                 ptr = null;
             }
 
             return (x, y);
         }
 
-        public int CalculateCaretPosASCII(byte font, string str, int x, int y, int width, TEXT_ALIGN_TYPE align, ushort flags)
+        public int CalculateCaretPosASCII
+        (
+            byte font,
+            string str,
+            int x,
+            int y,
+            int width,
+            TEXT_ALIGN_TYPE align,
+            ushort flags
+        )
         {
             if (font >= FontCount || x < 0 || y < 0 || string.IsNullOrEmpty(str))
             {
                 switch (align)
                 {
-                    case TEXT_ALIGN_TYPE.TS_CENTER:
-                        return width >> 1;
-                    case TEXT_ALIGN_TYPE.TS_RIGHT:
-                        return width;
-                    default:
-                        return 0;
+                    case TEXT_ALIGN_TYPE.TS_CENTER: return width >> 1;
+
+                    case TEXT_ALIGN_TYPE.TS_RIGHT: return width;
+
+                    default: return 0;
                 }
             }
 
-            FontData fd = _font[font];
+            ref FontCharacterData[] fd = ref _fontData[font];
 
             if (width <= 0)
+            {
                 width = GetWidthASCII(font, str);
+            }
 
             if (x >= width)
+            {
                 return str.Length;
+            }
 
-            MultilinesFontInfo info = GetInfoASCII(font, str, str.Length, align, flags, width);
+            MultilinesFontInfo info = GetInfoASCII
+            (
+                font,
+                str,
+                str.Length,
+                align,
+                flags,
+                width
+            );
 
             if (info == null)
             {
                 switch (align)
                 {
-                    case TEXT_ALIGN_TYPE.TS_CENTER:
-                        return width >> 1;
-                    case TEXT_ALIGN_TYPE.TS_RIGHT:
-                        return width;
-                    default:
-                        return 0;
+                    case TEXT_ALIGN_TYPE.TS_CENTER: return width >> 1;
+
+                    case TEXT_ALIGN_TYPE.TS_RIGHT: return width;
+
+                    default: return 0;
                 }
             }
 
@@ -2900,18 +3799,27 @@ namespace ClassicUO.IO.Resources
             while (info != null)
             {
                 height += info.MaxHeight;
+
                 switch (info.Align)
                 {
                     case TEXT_ALIGN_TYPE.TS_CENTER:
                         width = (fwidth - info.Width) >> 1;
+
                         if (width < 0)
+                        {
                             width = 0;
+                        }
+
                         break;
+
                     case TEXT_ALIGN_TYPE.TS_RIGHT:
                         width = fwidth;
+
                         break;
+
                     default:
                         width = 0;
+
                         break;
                 }
 
@@ -2923,11 +3831,12 @@ namespace ClassicUO.IO.Resources
 
                         for (int i = 0; i < len && i < info.Data.Count; i++)
                         {
-                            byte index = _fontIndex[info.Data[i].Item];
-                            width += fd.Chars[index].Width;
+                            width += fd[GetASCIIIndex(info.Data[i].Item)].Width;
 
                             if (width > x)
+                            {
                                 break;
+                            }
 
                             pos++;
                         }
@@ -2941,19 +3850,30 @@ namespace ClassicUO.IO.Resources
                     }
                 }
 
-                var ptr = info;
+                MultilinesFontInfo ptr = info;
                 info = info.Next;
                 ptr.Data.Clear();
+                ptr.Data.Count = 0;
                 ptr = null;
             }
 
             if (pos > str.Length)
+            {
                 pos = str.Length;
+            }
 
             return pos;
         }
 
-        public (int, int) GetCaretPosASCII(byte font, string str, int pos, int width, TEXT_ALIGN_TYPE align, ushort flags)
+        public (int, int) GetCaretPosASCII
+        (
+            byte font,
+            string str,
+            int pos,
+            int width,
+            TEXT_ALIGN_TYPE align,
+            ushort flags
+        )
         {
             int x = 0;
             int y = 0;
@@ -2962,23 +3882,41 @@ namespace ClassicUO.IO.Resources
             {
                 case TEXT_ALIGN_TYPE.TS_CENTER:
                     x = width >> 1;
+
                     break;
+
                 case TEXT_ALIGN_TYPE.TS_RIGHT:
                     x = width;
+
                     break;
             }
 
             if (font >= FontCount || string.IsNullOrEmpty(str))
+            {
                 return (x, y);
+            }
 
-            FontData fd = _font[font];
+            ref FontCharacterData[] fd = ref _fontData[font];
 
             if (width == 0)
+            {
                 width = GetWidthASCII(font, str);
-            MultilinesFontInfo info = GetInfoASCII(font, str, str.Length, align, flags, width);
+            }
+
+            MultilinesFontInfo info = GetInfoASCII
+            (
+                font,
+                str,
+                str.Length,
+                align,
+                flags,
+                width
+            );
 
             if (info == null)
+            {
                 return (x, y);
+            }
 
             while (info != null)
             {
@@ -2986,55 +3924,96 @@ namespace ClassicUO.IO.Resources
                 {
                     case TEXT_ALIGN_TYPE.TS_CENTER:
                         x = (width - info.Width) >> 1;
+
                         if (x < 0)
+                        {
                             x = 0;
+                        }
+
                         break;
+
                     case TEXT_ALIGN_TYPE.TS_RIGHT:
                         x = width;
+
                         break;
+
                     default:
                         x = 0;
+
                         break;
                 }
 
                 int len = info.CharCount;
 
                 if (info.CharStart == pos)
+                {
                     return (x, y);
+                }
 
                 if (pos <= info.CharStart + len && info.Data.Count >= len)
                 {
                     for (int i = 0; i < len; i++)
                     {
-                        byte index = _fontIndex[info.Data[i].Item];
-                        x += fd.Chars[index].Width;
+                        x += fd[GetASCIIIndex(info.Data[i].Item)].Width;
 
                         if (info.CharStart + i + 1 == pos)
+                        {
                             return (x, y);
+                        }
                     }
                 }
                 else
+                {
                     x = width;
+                }
 
                 if (info.Next != null)
+                {
                     y += info.MaxHeight;
+                }
+
                 MultilinesFontInfo ptr1 = info;
                 info = info.Next;
                 ptr1.Data.Clear();
+                ptr1.Data.Count = 0;
                 ptr1 = null;
             }
 
             return (x, y);
         }
 
-        public int[] GetLinesCharsCountASCII(byte font, string str, TEXT_ALIGN_TYPE align, ushort flags, int width, bool countret = false, bool countspaces = false)
+        public int[] GetLinesCharsCountASCII
+        (
+            byte font,
+            string str,
+            TEXT_ALIGN_TYPE align,
+            ushort flags,
+            int width,
+            bool countret = false,
+            bool countspaces = false
+        )
         {
             if (width == 0)
+            {
                 width = GetWidthASCII(font, str);
-            MultilinesFontInfo info = GetInfoASCII(font, str, str.Length, align, flags, width, countret, countspaces);
+            }
+
+            MultilinesFontInfo info = GetInfoASCII
+            (
+                font,
+                str,
+                str.Length,
+                align,
+                flags,
+                width,
+                countret,
+                countspaces
+            );
 
             if (info == null)
+            {
                 return new int[0];
+            }
 
             MultilinesFontInfo orig = info;
             int count = 0;
@@ -3057,14 +4036,38 @@ namespace ClassicUO.IO.Resources
             return chars;
         }
 
-        public int[] GetLinesCharsCountUnicode(byte font, string str, TEXT_ALIGN_TYPE align, ushort flags, int width, bool countret = false, bool countspaces = false)
+        public int[] GetLinesCharsCountUnicode
+        (
+            byte font,
+            string str,
+            TEXT_ALIGN_TYPE align,
+            ushort flags,
+            int width,
+            bool countret = false,
+            bool countspaces = false
+        )
         {
             if (width == 0)
+            {
                 width = GetWidthUnicode(font, str);
-            MultilinesFontInfo info = GetInfoUnicode(font, str, str.Length, align, flags, width, countret, countspaces);
+            }
+
+            MultilinesFontInfo info = GetInfoUnicode
+            (
+                font,
+                str,
+                str.Length,
+                align,
+                flags,
+                width,
+                countret,
+                countspaces
+            );
 
             if (info == null)
+            {
                 return new int[0];
+            }
 
             MultilinesFontInfo orig = info;
             int count = 0;
@@ -3088,14 +4091,14 @@ namespace ClassicUO.IO.Resources
         }
     }
 
-    public enum TEXT_ALIGN_TYPE
+    internal enum TEXT_ALIGN_TYPE
     {
         TS_LEFT = 0,
         TS_CENTER,
         TS_RIGHT
     }
 
-    public enum HTML_TAG_TYPE
+    internal enum HTML_TAG_TYPE
     {
         HTT_NONE = 0,
         HTT_B,
@@ -3124,18 +4127,13 @@ namespace ClassicUO.IO.Resources
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    internal readonly struct FontHeader
+    internal ref struct FontHeader
     {
-        public readonly byte Width, Height, Unknown;
+        public byte Width, Height, Unknown;
     }
 
-    [StructLayout(LayoutKind.Sequential)]
-    internal readonly struct FontCharacter
-    {
-        public readonly byte Width, Height, Unknown;
-    }
 
-    internal readonly struct FontCharacterData
+    internal struct FontCharacterData
     {
         public FontCharacterData(byte w, byte h, ushort[] data)
         {
@@ -3144,22 +4142,8 @@ namespace ClassicUO.IO.Resources
             Data = data;
         }
 
-        public readonly byte Width, Height;
-        public readonly ushort[] Data;
-    }
-
-    internal readonly struct FontData
-    {
-        public FontData(byte header, FontCharacterData[] chars)
-        {
-            Header = header;
-            Chars = chars;
-        }
-
-        public readonly byte Header;
-
-        // 224
-        public readonly FontCharacterData[] Chars;
+        public byte Width, Height;
+        public ushort[] Data;
     }
 
     internal sealed class MultilinesFontInfo
@@ -3185,7 +4169,7 @@ namespace ClassicUO.IO.Resources
         }
     }
 
-    internal readonly struct MultilinesFontData
+    internal struct MultilinesFontData
     {
         public MultilinesFontData(uint color, ushort flags, byte font, char item, ushort linkid)
         {
@@ -3196,21 +4180,21 @@ namespace ClassicUO.IO.Resources
             LinkID = linkid;
         }
 
-        public readonly uint Color;
-        public readonly ushort Flags;
-        public readonly byte Font;
-        public readonly char Item;
-        public readonly ushort LinkID;
+        public uint Color;
+        public ushort Flags;
+        public byte Font;
+        public char Item;
+        public ushort LinkID;
         //public MultilinesFontData Next;
     }
 
     internal struct WebLinkRect
     {
         public ushort LinkID;
-        public int StartX, StartY, EndX, EndY;
+        public Rectangle Bounds;
     }
 
-    internal struct WebLink
+    internal class WebLink
     {
         public bool IsVisited;
         public string Link;

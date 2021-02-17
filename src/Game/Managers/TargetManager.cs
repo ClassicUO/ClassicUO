@@ -1,40 +1,48 @@
 ﻿#region license
 
-//  Copyright (C) 2019 ClassicUO Development Community on Github
-//
-//	This project is an alternative client for the game Ultima Online.
-//	The goal of this is to develop a lightweight client considering 
-//	new technologies.  
-//      
-//  This program is free software: you can redistribute it and/or modify
-//  it under the terms of the GNU General Public License as published by
-//  the Free Software Foundation, either version 3 of the License, or
-//  (at your option) any later version.
-//
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-//
-//  You should have received a copy of the GNU General Public License
-//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// Copyright (c) 2021, andreakarasho
+// All rights reserved.
+// 
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+// 1. Redistributions of source code must retain the above copyright
+//    notice, this list of conditions and the following disclaimer.
+// 2. Redistributions in binary form must reproduce the above copyright
+//    notice, this list of conditions and the following disclaimer in the
+//    documentation and/or other materials provided with the distribution.
+// 3. All advertising materials mentioning features or use of this software
+//    must display the following acknowledgement:
+//    This product includes software developed by andreakarasho - https://github.com/andreakarasho
+// 4. Neither the name of the copyright holder nor the
+//    names of its contributors may be used to endorse or promote products
+//    derived from this software without specific prior written permission.
+// 
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ''AS IS'' AND ANY
+// EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+// WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+// DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY
+// DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+// (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+// LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+// ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+// SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #endregion
 
-using System;
-
 using ClassicUO.Configuration;
+using ClassicUO.Data;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
-using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Input;
-using ClassicUO.IO;
+using ClassicUO.IO.Resources;
 using ClassicUO.Network;
+using ClassicUO.Resources;
 
 namespace ClassicUO.Game.Managers
 {
-    public enum CursorTarget
+    internal enum CursorTarget
     {
         Invalid = -1,
         Object = 0,
@@ -48,10 +56,10 @@ namespace ClassicUO.Game.Managers
 
     internal class CursorType
     {
-        public static readonly Serial Target = new Serial(6983686);
+        public static readonly uint Target = 6983686;
     }
 
-    public enum TargetType
+    internal enum TargetType
     {
         Neutral,
         Harmful,
@@ -61,8 +69,6 @@ namespace ClassicUO.Game.Managers
 
     internal class MultiTargetInfo
     {
-        public readonly ushort XOff, YOff, ZOff, Model, Hue;
-
         public MultiTargetInfo(ushort model, ushort x, ushort y, ushort z, ushort hue)
         {
             Model = model;
@@ -71,30 +77,83 @@ namespace ClassicUO.Game.Managers
             ZOff = z;
             Hue = hue;
         }
+
+        public readonly ushort XOff, YOff, ZOff, Model, Hue;
+    }
+
+    internal class LastTargetInfo
+    {
+        public bool IsEntity => SerialHelper.IsValid(Serial);
+        public bool IsStatic => !IsEntity && Graphic != 0 && Graphic != 0xFFFF;
+        public bool IsLand => !IsStatic;
+        public ushort Graphic;
+        public uint Serial;
+        public ushort X, Y;
+        public sbyte Z;
+
+
+        public void SetEntity(uint serial)
+        {
+            Serial = serial;
+            Graphic = 0xFFFF;
+            X = Y = 0xFFFF;
+            Z = sbyte.MinValue;
+        }
+
+        public void SetStatic(ushort graphic, ushort x, ushort y, sbyte z)
+        {
+            Serial = 0;
+            Graphic = graphic;
+            X = x;
+            Y = y;
+            Z = z;
+        }
+
+        public void SetLand(ushort x, ushort y, sbyte z)
+        {
+            Serial = 0;
+            Graphic = 0xFFFF;
+            X = x;
+            Y = y;
+            Z = z;
+        }
+
+        public void Clear()
+        {
+            Serial = 0;
+            Graphic = 0xFFFF;
+            X = Y = 0xFFFF;
+            Z = sbyte.MinValue;
+        }
     }
 
     internal static class TargetManager
     {
-        private static Serial _targetCursorId;
+        private static uint _targetCursorId;
+        private static readonly byte[] _lastDataBuffer = new byte[19];
 
-        private static Action<Serial, Graphic, ushort, ushort, sbyte, bool> _enqueuedAction;
+        public static uint LastAttack, SelectedTarget;
+
+        public static readonly LastTargetInfo LastTargetInfo = new LastTargetInfo();
+
 
         public static MultiTargetInfo MultiTargetInfo { get; private set; }
 
         public static CursorTarget TargetingState { get; private set; } = CursorTarget.Invalid;
 
-        public static Serial LastTarget { get; set; }
-
-        public static Serial LastAttack { get; set; }
-
-
         public static bool IsTargeting { get; private set; }
 
-        public static TargetType TargeringType { get; private set; }
+        public static TargetType TargetingType { get; private set; }
 
-        public static void ClearTargetingWithoutTargetCancelPacket()
+        private static void ClearTargetingWithoutTargetCancelPacket()
         {
-            if (TargetingState == CursorTarget.MultiPlacement) World.HouseManager.Remove(Serial.INVALID);
+            if (TargetingState == CursorTarget.MultiPlacement)
+            {
+                MultiTargetInfo = null;
+                TargetingState = 0;
+                World.HouseManager.Remove(0);
+            }
+
             IsTargeting = false;
         }
 
@@ -105,376 +164,308 @@ namespace ClassicUO.Game.Managers
             TargetingState = 0;
             _targetCursorId = 0;
             MultiTargetInfo = null;
-            TargeringType = 0;
+            TargetingType = 0;
         }
 
-        public static void SetTargeting(CursorTarget targeting, Serial cursorID, TargetType cursorType)
+        public static void SetTargeting(CursorTarget targeting, uint cursorID, TargetType cursorType)
         {
             if (targeting == CursorTarget.Invalid)
+            {
                 return;
+            }
 
             TargetingState = targeting;
             _targetCursorId = cursorID;
-            TargeringType = cursorType;
+            TargetingType = cursorType;
 
             bool lastTargetting = IsTargeting;
             IsTargeting = cursorType < TargetType.Cancel;
 
             if (IsTargeting)
-                UIManager.RemoveTargetLineGump(LastTarget);
+            {
+                //UIManager.RemoveTargetLineGump(LastTarget);
+            }
             else if (lastTargetting)
             {
                 CancelTarget();
             }
         }
 
-        public static void EnqueueAction(Action<Serial, Graphic, ushort, ushort, sbyte, bool> action)
-        {
-            _enqueuedAction = action;
-        }
 
         public static void CancelTarget()
         {
-            if (TargetingState == CursorTarget.MultiPlacement) World.HouseManager.Remove(Serial.INVALID);
-            NetClient.Socket.Send(new PTargetCancel(TargetingState, _targetCursorId, (byte) TargeringType));
+            if (TargetingState == CursorTarget.MultiPlacement)
+            {
+                World.HouseManager.Remove(0);
+
+                if (World.CustomHouseManager != null)
+                {
+                    World.CustomHouseManager.Erasing = false;
+                    World.CustomHouseManager.SeekTile = false;
+                    World.CustomHouseManager.SelectedGraphic = 0;
+                    World.CustomHouseManager.CombinedStair = false;
+
+                    UIManager.GetGump<HouseCustomizationGump>()?.Update();
+                }
+            }
+
+            NetClient.Socket.Send(new PTargetCancel(TargetingState, _targetCursorId, (byte) TargetingType));
             IsTargeting = false;
+
+            Reset();
         }
 
-        public static void SetTargetingMulti(Serial deedSerial, ushort model, ushort x, ushort y, ushort z, ushort hue)
+        public static void SetTargetingMulti
+        (
+            uint deedSerial,
+            ushort model,
+            ushort x,
+            ushort y,
+            ushort z,
+            ushort hue
+        )
         {
             SetTargeting(CursorTarget.MultiPlacement, deedSerial, TargetType.Neutral);
 
-            if (model != 0)
-                MultiTargetInfo = new MultiTargetInfo(model, x, y, z, hue);
+            //if (model != 0)
+            MultiTargetInfo = new MultiTargetInfo
+            (
+                model,
+                x,
+                y,
+                z,
+                hue
+            );
         }
 
 
-        private static void TargetXYZ(GameObject selectedEntity)
+        public static void Target(uint serial)
         {
-            Graphic modelNumber = 0;
-            short z = selectedEntity.Position.Z;
-
-            if (selectedEntity is Static st)
+            if (!IsTargeting)
             {
-                modelNumber = selectedEntity.Graphic;
-                z += st.ItemData.Height;
-            }
-
-            NetClient.Socket.Send(new PTargetXYZ(selectedEntity.X, selectedEntity.Y, z, modelNumber, _targetCursorId, (byte) TargeringType));
-            ClearTargetingWithoutTargetCancelPacket();
-        }
-
-        public static void TargetGameObject(BaseGameObject selectedEntity)
-        {
-            if (selectedEntity == null || !IsTargeting)
-                return;
-
-            if (selectedEntity is GameEffect effect && effect.Source != null)
-                selectedEntity = effect.Source;
-            else if (selectedEntity is TextOverhead overhead && overhead.Owner != null)
-                selectedEntity = overhead.Owner;
-
-            if (TargetingState == CursorTarget.SetGrabBag)
-            {
-                if (selectedEntity is Item item)
-                {
-                    ProfileManager.Current.GrabBagSerial = item.Serial;
-                    GameActions.Print($"Grab Bag set: {item.Serial}");
-                }
-
-                ClearTargetingWithoutTargetCancelPacket();
-
                 return;
             }
 
-            if (TargetingState == CursorTarget.Grab)
+            Entity entity = World.InGame ? World.Get(serial) : null;
+
+            if (entity != null)
             {
-                if (selectedEntity is Item item)
+                switch (TargetingState)
                 {
-                    GameActions.GrabItem(item,item.Amount);
-                }
+                    case CursorTarget.Invalid: return;
 
-                ClearTargetingWithoutTargetCancelPacket();
+                    case CursorTarget.MultiPlacement:
+                    case CursorTarget.Position:
+                    case CursorTarget.Object:
+                    case CursorTarget.HueCommandTarget:
+                    case CursorTarget.SetTargetClientSide:
 
-                return;
-            }
-
-            if (selectedEntity is Entity entity)
-            {
-                if (selectedEntity != World.Player)
-                {
-                    UIManager.RemoveTargetLineGump(LastAttack);
-                    UIManager.RemoveTargetLineGump(LastTarget);
-                    LastTarget = entity.Serial;
-                }
-
-                if (_enqueuedAction != null)
-                    _enqueuedAction(entity.Serial, entity.Graphic, entity.X, entity.Y, entity.Z, entity is Item it && it.OnGround || entity.Serial.IsMobile);
-                else
-                {
-                    if (ProfileManager.Current.EnabledCriminalActionQuery && TargeringType == TargetType.Harmful)
-                    {
-                        Mobile m = World.Mobiles.Get(entity);
-
-                        if (m != null && (World.Player.NotorietyFlag == NotorietyFlag.Innocent || World.Player.NotorietyFlag == NotorietyFlag.Ally) && m.NotorietyFlag == NotorietyFlag.Innocent && m != World.Player)
+                        if (entity != World.Player)
                         {
-                            QuestionGump messageBox = new QuestionGump("This may flag\nyou criminal!",
-                                                                       s =>
-                                                                       {
-                                                                           if (s)
-                                                                           {
-                                                                               NetClient.Socket.Send(new PTargetObject(entity, entity.Graphic, entity.X, entity.Y, entity.Z, _targetCursorId, (byte) TargeringType));
-                                                                               ClearTargetingWithoutTargetCancelPacket();
-                                                                           }
-                                                                       });
-
-                            UIManager.Add(messageBox);
-
-                            return;
+                            LastTargetInfo.SetEntity(serial);
                         }
-                    }
 
-                    NetClient.Socket.Send(new PTargetObject(entity, entity.Graphic, entity.X, entity.Y, entity.Z, _targetCursorId, (byte) TargeringType));
-                    ClearTargetingWithoutTargetCancelPacket();
+                        if (SerialHelper.IsMobile(serial) && serial != World.Player && (World.Player.NotorietyFlag == NotorietyFlag.Innocent || World.Player.NotorietyFlag == NotorietyFlag.Ally))
+                        {
+                            Mobile mobile = entity as Mobile;
+
+                            if (mobile != null)
+                            {
+                                bool showCriminalQuery = false;
+
+                                if (TargetingType == TargetType.Harmful && ProfileManager.CurrentProfile.EnabledCriminalActionQuery && mobile.NotorietyFlag == NotorietyFlag.Innocent)
+                                {
+                                    showCriminalQuery = true;
+                                }
+                                else if (TargetingType == TargetType.Beneficial && ProfileManager.CurrentProfile.EnabledBeneficialCriminalActionQuery && (mobile.NotorietyFlag == NotorietyFlag.Criminal || mobile.NotorietyFlag == NotorietyFlag.Murderer || mobile.NotorietyFlag == NotorietyFlag.Gray))
+                                {
+                                    showCriminalQuery = true;
+                                }
+
+                                if (showCriminalQuery && UIManager.GetGump<QuestionGump>() == null)
+                                {
+                                    QuestionGump messageBox = new QuestionGump
+                                    (
+                                        "This may flag\nyou criminal!",
+                                        s =>
+                                        {
+                                            if (s)
+                                            {
+                                                NetClient.Socket.Send
+                                                (
+                                                    new PTargetObject
+                                                    (
+                                                        entity,
+                                                        entity.Graphic,
+                                                        entity.X,
+                                                        entity.Y,
+                                                        entity.Z,
+                                                        _targetCursorId,
+                                                        (byte) TargetingType
+                                                    )
+                                                );
+
+                                                ClearTargetingWithoutTargetCancelPacket();
+
+                                                if (LastTargetInfo.Serial != serial)
+                                                {
+                                                    GameActions.RequestMobileStatus(serial);
+                                                }
+                                            }
+                                        }
+                                    );
+
+                                    UIManager.Add(messageBox);
+
+                                    return;
+                                }
+                            }
+                        }
+
+                        if (TargetingState != CursorTarget.SetTargetClientSide)
+                        {
+                            PTargetObject packet = new PTargetObject
+                            (
+                                entity,
+                                entity.Graphic,
+                                entity.X,
+                                entity.Y,
+                                entity.Z,
+                                _targetCursorId,
+                                (byte) TargetingType
+                            );
+
+                            for (int i = 0; i < _lastDataBuffer.Length; i++)
+                            {
+                                _lastDataBuffer[i] = packet[i];
+                            }
+
+                            NetClient.Socket.Send(packet);
+
+                            if (SerialHelper.IsMobile(serial) && LastTargetInfo.Serial != serial)
+                            {
+                                GameActions.RequestMobileStatus(serial);
+                            }
+                        }
+
+                        ClearTargetingWithoutTargetCancelPacket();
+
+                        Mouse.CancelDoubleClick = true;
+
+                        break;
+
+                    case CursorTarget.Grab:
+
+                        if (SerialHelper.IsItem(serial))
+                        {
+                            GameActions.GrabItem(serial, ((Item) entity).Amount);
+                        }
+
+                        ClearTargetingWithoutTargetCancelPacket();
+
+                        return;
+
+                    case CursorTarget.SetGrabBag:
+
+                        if (SerialHelper.IsItem(serial))
+                        {
+                            ProfileManager.CurrentProfile.GrabBagSerial = serial;
+                            GameActions.Print(string.Format(ResGeneral.GrabBagSet0, serial));
+                        }
+
+                        ClearTargetingWithoutTargetCancelPacket();
+
+                        return;
                 }
-
-                Mouse.CancelDoubleClick = true;
             }
-            else if (TargeringType == TargetType.Neutral && selectedEntity is GameObject gobj)
+        }
+
+        public static void Target(ushort graphic, ushort x, ushort y, short z, bool wet = false)
+        {
+            if (!IsTargeting)
             {
-                Graphic modelNumber = 0;
-                short z = gobj.Z;
-
-                if (gobj is Static st)
-                {
-                    modelNumber = st.OriginalGraphic;
-                    var data = st.ItemData;
-
-                    if (FileManager.ClientVersion >= ClientVersions.CV_7090 && data.IsSurface)
-                    {
-                        z += data.Height;
-                    }
-
-
-                    //if (data.IsSurface && !data.IsBridge && !data.IsBackground && !data.IsNoShoot)
-                    //    z += data.Height;
-                }
-                else if (gobj is Multi m)
-                {
-                    modelNumber = m.Graphic;
-                    var data = m.ItemData;
-
-                    if (FileManager.ClientVersion >= ClientVersions.CV_7090 && data.IsSurface)
-                    {
-                        z += data.Height;
-                    }
-                }
-
-                NetClient.Socket.Send(new PTargetXYZ(gobj.X, gobj.Y, z, modelNumber, _targetCursorId, (byte) TargeringType));
-                Mouse.CancelDoubleClick = true;
-                ClearTargetingWithoutTargetCancelPacket();
+                return;
             }
+
+            if (graphic == 0)
+            {
+                if (TargetingState == CursorTarget.Object)
+                {
+                    return;
+                }
+            }
+            else
+            {
+                if (graphic >= TileDataLoader.Instance.StaticData.Length)
+                {
+                    return;
+                }
+
+                ref StaticTiles itemData = ref TileDataLoader.Instance.StaticData[graphic];
+
+                if (Client.Version >= ClientVersion.CV_7090 && itemData.IsSurface)
+                {
+                    z += itemData.Height;
+                }
+            }
+
+            LastTargetInfo.SetStatic(graphic, x, y, (sbyte) z);
+
+            TargetPacket(graphic, x, y, (sbyte) z);
         }
 
         public static void SendMultiTarget(ushort x, ushort y, sbyte z)
         {
-            NetClient.Socket.Send(new PTargetXYZ(x, y, z, 0, _targetCursorId, (byte)TargeringType));
-            Mouse.CancelDoubleClick = true;
+            TargetPacket(0, x, y, z);
             MultiTargetInfo = null;
+        }
+
+        public static void TargetLast()
+        {
+            if (!IsTargeting)
+            {
+                return;
+            }
+
+            _lastDataBuffer[0] = 0x6C;
+            _lastDataBuffer[1] = (byte) TargetingState;
+            _lastDataBuffer[2] = (byte) (_targetCursorId >> 24);
+            _lastDataBuffer[3] = (byte) (_targetCursorId >> 16);
+            _lastDataBuffer[4] = (byte) (_targetCursorId >> 8);
+            _lastDataBuffer[5] = (byte) _targetCursorId;
+            _lastDataBuffer[6] = (byte) TargetingType;
+
+            NetClient.Socket.Send(_lastDataBuffer, _lastDataBuffer.Length);
+            Mouse.CancelDoubleClick = true;
             ClearTargetingWithoutTargetCancelPacket();
         }
 
-        public static bool IsMobileSelectableAsTarget(Serial serial, int type)
+        private static void TargetPacket(ushort graphic, ushort x, ushort y, sbyte z)
         {
-            Mobile mobile = World.Mobiles.Get(serial);
-
-            if (mobile == null)
-                return false;
-
-            if (mobile == World.Player)
-                return false;
-
-            if (Math.Abs(mobile.Z - World.Player.Z) >= 20)
-                return false;
-
-            if (mobile.Distance > 12)
-                return false;
-
-            if (type >= 0 && type != 4)
+            if (!IsTargeting)
             {
-                // 0 - Hostile (only hostile mobiles: gray, criminal, enemy, murderer)
-                if (
-                    type == 0 &&
-                    mobile.NotorietyFlag != NotorietyFlag.Gray &&
-                    mobile.NotorietyFlag != NotorietyFlag.Criminal &&
-                    mobile.NotorietyFlag != NotorietyFlag.Enemy &&
-                    mobile.NotorietyFlag != NotorietyFlag.Murderer
-                )
-                    return false;
-
-                // 1 - Party (only party members)
-                if (type == 1 && !World.Party.Contains(mobile))
-                    return false;
-
-                // 2 - Follower (only your followers)
-                // TODO: Find a better way to determine follower instead of checking if it is "renamable"
-                if (type == 2 && (mobile.NotorietyFlag != NotorietyFlag.Ally || !mobile.IsRenamable))
-                    return false;
-
-                // 3 - Object (no mobiles, only objects (items)?!)
-                if (type == 3)
-                    return false;
-
-                // 4 - Mobile (any mobiles)
-                // No need to check anything here
-            }
-
-            return true;
-        }
-
-        public static void SetLastTarget(Serial serial)
-        {
-            Mobile target = World.Mobiles.Get(serial);
-
-            if (target == null)
                 return;
-
-            GameActions.MessageOverhead($"Target: {target.Name}", Notoriety.GetHue(target.NotorietyFlag), World.Player);
-            UIManager.RemoveTargetLineGump(TargetManager.LastTarget);
-            UIManager.RemoveTargetLineGump(TargetManager.LastAttack);
-            TargetManager.LastTarget = target.Serial;
-            UIManager.SetTargetLineGump(TargetManager.LastTarget);
-        }
-
-        public static void SelectNextMobile(int type = -1)
-        {
-            Mobile target = null;
-            Mobile firstMobile = null;
-            bool currentTargetFound = false;
-
-            foreach (Mobile mobile in World.Mobiles)
-            {
-                if (mobile == null)
-                    continue;
-
-                if (!IsMobileSelectableAsTarget(mobile.Serial, type))
-                    continue;
-
-                if (TargetManager.LastTarget != null && TargetManager.LastTarget == mobile.Serial)
-                {
-                    currentTargetFound = true;
-                    continue;
-                }
-
-                if (firstMobile == null)
-                    firstMobile = mobile;
-
-                if (!currentTargetFound)
-                    continue;
-
-                target = mobile;
-                break;
             }
 
-            if (target == null && firstMobile != null)
-                target = firstMobile;
+            PTargetXYZ packet = new PTargetXYZ
+            (
+                x,
+                y,
+                z,
+                graphic,
+                _targetCursorId,
+                (byte) TargetingType
+            );
 
-            if (target != null)
-                SetLastTarget(target.Serial);
-            else
-                GameActions.Print("No new target found");
-        }
+            NetClient.Socket.Send(packet);
 
-        public static void SelectPreviousMobile(int type = -1)
-        {
-            Mobile target = null;
-            Mobile lastMobile = null;
-            bool currentTargetFound = false;
-
-            foreach (Mobile mobile in World.Mobiles)
+            for (int i = 0; i < _lastDataBuffer.Length; i++)
             {
-                if (mobile == null)
-                    continue;
-
-                if (!IsMobileSelectableAsTarget(mobile.Serial, type))
-                    continue;
-
-                if (!currentTargetFound && lastMobile != null)
-                    target = lastMobile;
-
-                if (TargetManager.LastTarget != null && TargetManager.LastTarget == mobile.Serial)
-                {
-                    currentTargetFound = true;
-                    continue;
-                }
-
-                lastMobile = mobile;
+                _lastDataBuffer[i] = packet[i];
             }
 
-            if (target == null && lastMobile != null)
-                target = lastMobile;
-
-            if (target != null)
-                SetLastTarget(target.Serial);
-            else
-                GameActions.Print("No new target found");
-        }
-
-        public static void SelectNearestMobile(int type = -1)
-        {
-            Mobile target = null;
-            int closestDist = ushort.MaxValue;
-            Mobile firstMobile = null;
-            bool currentTargetFound = false;
-
-            // NOTE: This first cycle is required to first determine closest distance
-            // that we will use to rotate our nearest group of mobiles
-            foreach (Mobile mobile in World.Mobiles)
-            {
-                if (mobile == null)
-                    continue;
-
-                if (!IsMobileSelectableAsTarget(mobile.Serial, type))
-                    continue;
-
-                if (mobile.Distance < closestDist)
-                    closestDist = mobile.Distance;
-            }
-
-            foreach (Mobile mobile in World.Mobiles)
-            {
-                if (mobile == null)
-                    continue;
-
-                if (!IsMobileSelectableAsTarget(mobile.Serial, type))
-                    continue;
-
-                if (mobile.Distance > closestDist)
-                    continue;
-
-                if (TargetManager.LastTarget != null && TargetManager.LastTarget == mobile.Serial)
-                {
-                    currentTargetFound = true;
-                    continue;
-                }
-
-                if (firstMobile == null)
-                    firstMobile = mobile;
-
-                if (!currentTargetFound)
-                    continue;
-
-                target = mobile;
-                break;
-            }
-
-            if (target == null && firstMobile != null)
-                target = firstMobile;
-
-            if (target != null)
-                SetLastTarget(target.Serial);
-            else
-                GameActions.Print("No new target found");
+            Mouse.CancelDoubleClick = true;
+            ClearTargetingWithoutTargetCancelPacket();
         }
     }
 }

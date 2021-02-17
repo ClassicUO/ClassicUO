@@ -1,108 +1,279 @@
 ﻿#region license
 
-//  Copyright (C) 2019 ClassicUO Development Community on Github
-//
-//	This project is an alternative client for the game Ultima Online.
-//	The goal of this is to develop a lightweight client considering 
-//	new technologies.  
-//      
-//  This program is free software: you can redistribute it and/or modify
-//  it under the terms of the GNU General Public License as published by
-//  the Free Software Foundation, either version 3 of the License, or
-//  (at your option) any later version.
-//
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-//
-//  You should have received a copy of the GNU General Public License
-//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// Copyright (c) 2021, andreakarasho
+// All rights reserved.
+// 
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+// 1. Redistributions of source code must retain the above copyright
+//    notice, this list of conditions and the following disclaimer.
+// 2. Redistributions in binary form must reproduce the above copyright
+//    notice, this list of conditions and the following disclaimer in the
+//    documentation and/or other materials provided with the distribution.
+// 3. All advertising materials mentioning features or use of this software
+//    must display the following acknowledgement:
+//    This product includes software developed by andreakarasho - https://github.com/andreakarasho
+// 4. Neither the name of the copyright holder nor the
+//    names of its contributors may be used to endorse or promote products
+//    derived from this software without specific prior written permission.
+// 
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ''AS IS'' AND ANY
+// EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+// WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+// DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY
+// DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+// (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+// LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+// ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+// SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #endregion
 
 using System;
 using System.IO;
-
+using System.Xml;
 using ClassicUO.Configuration;
+using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
-using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
-using ClassicUO.IO;
+using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
+using ClassicUO.Resources;
 using ClassicUO.Utility.Collections;
-using ClassicUO.Utility.Logging;
 
 namespace ClassicUO.Game.UI.Gumps
 {
-    internal class JournalGump : MinimizableGump
+    internal class JournalGump : Gump
     {
+        private const int _diffY = 22;
         private readonly ExpandableScroll _background;
+        private readonly Checkbox[] _filters_chekboxes = new Checkbox[4];
+        private readonly GumpPic _gumpPic;
+        private readonly HitBox _hitBox;
+        private bool _isMinimized;
         private readonly RenderedTextList _journalEntries;
         private readonly ScrollFlag _scrollBar;
-        private const int _diffY = 22;
 
-        public JournalGump() : base(Constants.JOURNAL_LOCALSERIAL, 0)
+        public JournalGump() : base(0, 0)
         {
             Height = 300;
             CanMove = true;
-            CanBeSaved = true;
+            CanCloseWithRightClick = true;
+            Add(_gumpPic = new GumpPic(160, 0, 0x82D, 0));
 
-            Add(new GumpPic(160, 0, 0x82D, 0));
-            Add(_background = new ExpandableScroll(0, _diffY, Height - _diffY, 0x1F40)
-            {
-                TitleGumpID = 0x82A
-            });
+            Add
+            (
+                _background = new ExpandableScroll(0, _diffY, Height - _diffY, 0x1F40)
+                {
+                    TitleGumpID = 0x82A
+                }
+            );
 
             const ushort DARK_MODE_JOURNAL_HUE = 903;
 
-            string str = "Dark mode";
-            int width = FileManager.Fonts.GetWidthASCII(6, str);
+            string str = ResGumps.DarkMode;
+            int width = FontsLoader.Instance.GetWidthASCII(6, str);
 
             Checkbox darkMode;
-            Add(darkMode = new Checkbox(0x00D2, 0x00D3, str, 6, 0x0288, false)
-            {
-                X = _background.Width - width -2, 
-                Y = _diffY + 7,
-                IsChecked = ProfileManager.Current.JournalDarkMode
-            });
 
-            Hue = (ushort)(ProfileManager.Current.JournalDarkMode ? DARK_MODE_JOURNAL_HUE : 0);
+            Add
+            (
+                darkMode = new Checkbox
+                (
+                    0x00D2,
+                    0x00D3,
+                    str,
+                    6,
+                    0x0288,
+                    false
+                )
+                {
+                    X = _background.Width - width - 2,
+                    Y = _diffY + 7,
+                    IsChecked = ProfileManager.CurrentProfile.JournalDarkMode
+                }
+            );
+
+            Hue = (ushort) (ProfileManager.CurrentProfile.JournalDarkMode ? DARK_MODE_JOURNAL_HUE : 0);
+
             darkMode.ValueChanged += (sender, e) =>
             {
-                var ok = ProfileManager.Current.JournalDarkMode = !ProfileManager.Current.JournalDarkMode;
+                bool ok = ProfileManager.CurrentProfile.JournalDarkMode = !ProfileManager.CurrentProfile.JournalDarkMode;
                 Hue = (ushort) (ok ? DARK_MODE_JOURNAL_HUE : 0);
             };
 
             _scrollBar = new ScrollFlag(-25, _diffY + 36, Height - _diffY, true);
 
-            Add(_journalEntries = new RenderedTextList(25, _diffY + 36, _background.Width - (_scrollBar.Width >> 1) - 5, 200, _scrollBar));
+            Add
+            (
+                _journalEntries = new RenderedTextList
+                (
+                    25,
+                    _diffY + 36,
+                    _background.Width - (_scrollBar.Width >> 1) - 5,
+                    200,
+                    _scrollBar
+                )
+            );
 
             Add(_scrollBar);
+
+            Add(_hitBox = new HitBox(160, 0, 23, 24));
+            _hitBox.MouseUp += _hitBox_MouseUp;
+            _gumpPic.MouseDoubleClick += _gumpPic_MouseDoubleClick;
+
+            int cx = 43;   // 63
+            int dist = 75; // 85
+            byte font = 6; // 1
+
+            _filters_chekboxes[0] = new Checkbox
+            (
+                0x00D2,
+                0x00D3,
+                "System",
+                font,
+                0x0386,
+                false
+            )
+            {
+                X = cx,
+                LocalSerial = 1,
+                IsChecked = ProfileManager.CurrentProfile.ShowJournalSystem
+            };
+
+            _filters_chekboxes[1] = new Checkbox
+            (
+                0x00D2,
+                0x00D3,
+                "Objects",
+                font,
+                0x0386,
+                false
+            )
+            {
+                X = cx + dist,
+                LocalSerial = 2,
+                IsChecked = ProfileManager.CurrentProfile.ShowJournalObjects
+            };
+
+            _filters_chekboxes[2] = new Checkbox
+            (
+                0x00D2,
+                0x00D3,
+                "Client",
+                font,
+                0x0386,
+                false
+            )
+            {
+                X = cx + dist * 2,
+                LocalSerial = 0,
+                IsChecked = ProfileManager.CurrentProfile.ShowJournalClient
+            };
+
+            _filters_chekboxes[3] = new Checkbox
+            (
+                0x00D2,
+                0x00D3,
+                "Guild",
+                font,
+                0x0386,
+                false
+            )
+            {
+                X = cx + dist * 3,
+                LocalSerial = 3,
+                IsChecked = ProfileManager.CurrentProfile.ShowJournalGuildAlly
+            };
+
+            void on_check_box(object sender, EventArgs e)
+            {
+                Checkbox c = (Checkbox) sender;
+
+                if (c != null)
+                {
+                    switch ((TextType) c.LocalSerial)
+                    {
+                        case TextType.CLIENT:
+                            ProfileManager.CurrentProfile.ShowJournalClient = c.IsChecked;
+
+                            break;
+
+                        case TextType.SYSTEM:
+                            ProfileManager.CurrentProfile.ShowJournalSystem = c.IsChecked;
+
+                            break;
+
+                        case TextType.OBJECT:
+                            ProfileManager.CurrentProfile.ShowJournalObjects = c.IsChecked;
+
+                            break;
+
+                        case TextType.GUILD_ALLY:
+                            ProfileManager.CurrentProfile.ShowJournalGuildAlly = c.IsChecked;
+
+                            break;
+                    }
+                }
+            }
+
+            for (int i = 0; i < _filters_chekboxes.Length; i++)
+            {
+                _filters_chekboxes[i].ValueChanged += on_check_box;
+
+                Add(_filters_chekboxes[i]);
+            }
+
+            InitializeJournalEntries();
+            World.Journal.EntryAdded += AddJournalEntry;
         }
 
-        internal override GumpPic Iconized { get; } = new GumpPic(0, 0, 0x830, 0);
-        internal override HitBox IconizerArea { get; } = new HitBox(160, 0, 23, 24);
+        public override GumpType GumpType => GumpType.Journal;
 
-
-
-        public Hue Hue
+        public ushort Hue
         {
             get => _background.Hue;
             set => _background.Hue = value;
         }
 
-        protected override void OnMouseWheel(MouseEvent delta)
+        public bool IsMinimized
+        {
+            get => _isMinimized;
+            set
+            {
+                if (_isMinimized != value)
+                {
+                    _isMinimized = value;
+
+                    _gumpPic.Graphic = value ? (ushort) 0x830 : (ushort) 0x82D;
+
+                    if (value)
+                    {
+                        _gumpPic.X = 0;
+                    }
+                    else
+                    {
+                        _gumpPic.X = 160;
+                    }
+
+                    foreach (Control c in Children)
+                    {
+                        c.IsVisible = !value;
+                    }
+
+                    _gumpPic.IsVisible = true;
+                    WantUpdateSize = true;
+                }
+            }
+        }
+
+        protected override void OnMouseWheel(MouseEventType delta)
         {
             _scrollBar.InvokeMouseWheel(delta);
         }
 
-        protected override void OnInitialize()
-        {
-            InitializeJournalEntries();
-            World.Journal.EntryAdded += AddJournalEntry;
-        }
 
         public override void Dispose()
         {
@@ -110,65 +281,84 @@ namespace ClassicUO.Game.UI.Gumps
             base.Dispose();
         }
 
-        public override void Update(double totalMS, double frameMS)
+        public override void Update(double totalTime, double frameTime)
         {
+            base.Update(totalTime, frameTime);
+
             WantUpdateSize = true;
             _journalEntries.Height = Height - (98 + _diffY);
-            base.Update(totalMS, frameMS);
+
+            for (int i = 0; i < _filters_chekboxes.Length; i++)
+            {
+                _filters_chekboxes[i].Y = _background.Height - _filters_chekboxes[i].Height - _diffY + 10;
+            }
         }
 
         private void AddJournalEntry(object sender, JournalEntry entry)
         {
             string text = $"{(entry.Name != string.Empty ? $"{entry.Name}: " : string.Empty)}{entry.Text}";
-            //TransformFont(ref font, ref asUnicode);
-            _journalEntries.AddEntry(text, entry.Font, entry.Hue, entry.IsUnicode, entry.Time);
+
+            _journalEntries.AddEntry
+            (
+                text,
+                entry.Font,
+                entry.Hue,
+                entry.IsUnicode,
+                entry.Time,
+                entry.TextType
+            );
         }
 
-        //private void TransformFont(ref byte font, ref bool asUnicode)
-        //{
-        //    if (asUnicode)
-        //        return;
-
-        //    switch (font)
-        //    {
-        //        case 3:
-
-        //        {
-        //            font = 1;
-        //            asUnicode = true;
-
-        //            break;
-        //        }
-        //    }
-        //}
-
-        public override void Save(BinaryWriter writer)
+        public override void Save(XmlTextWriter writer)
         {
             base.Save(writer);
-            writer.Write(_background.SpecialHeight);
+            writer.WriteAttributeString("height", _background.SpecialHeight.ToString());
+            writer.WriteAttributeString("isminimized", IsMinimized.ToString());
         }
 
-        public override void Restore(BinaryReader reader)
+        public override void Restore(XmlElement xml)
         {
-            base.Restore(reader);
+            base.Restore(xml);
 
-            _background.Height = _background.SpecialHeight = reader.ReadInt32();
+            _background.Height = _background.SpecialHeight = int.Parse(xml.GetAttribute("height"));
+            IsMinimized = bool.Parse(xml.GetAttribute("isminimized"));
         }
 
         private void InitializeJournalEntries()
         {
-            foreach (JournalEntry t in World.Journal.Entries)
+            foreach (JournalEntry t in JournalManager.Entries)
+            {
                 AddJournalEntry(null, t);
+            }
 
             _scrollBar.MinValue = 0;
         }
 
+        private void _gumpPic_MouseDoubleClick(object sender, MouseDoubleClickEventArgs e)
+        {
+            if (e.Button == MouseButtonType.Left && IsMinimized)
+            {
+                IsMinimized = false;
+                e.Result = true;
+            }
+        }
+
+        private void _hitBox_MouseUp(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtonType.Left && !IsMinimized)
+            {
+                IsMinimized = true;
+            }
+        }
+
+
         private class RenderedTextList : Control
         {
             private readonly Deque<RenderedText> _entries, _hours;
-            private readonly IScrollBar _scrollBar;
+            private readonly ScrollBarBase _scrollBar;
+            private readonly Deque<TextType> _text_types;
 
-            public RenderedTextList(int x, int y, int width, int height, IScrollBar scrollBarControl)
+            public RenderedTextList(int x, int y, int width, int height, ScrollBarBase scrollBarControl)
             {
                 _scrollBar = scrollBarControl;
                 _scrollBar.IsVisible = false;
@@ -178,8 +368,10 @@ namespace ClassicUO.Game.UI.Gumps
                 Y = y;
                 Width = width;
                 Height = height;
+
                 _entries = new Deque<RenderedText>();
                 _hours = new Deque<RenderedText>();
+                _text_types = new Deque<TextType>();
 
                 WantUpdateSize = false;
             }
@@ -196,8 +388,16 @@ namespace ClassicUO.Game.UI.Gumps
 
                 for (int i = 0; i < _entries.Count; i++)
                 {
-                    var t = _entries[i];
-                    var hour = _hours[i];
+                    RenderedText t = _entries[i];
+                    RenderedText hour = _hours[i];
+                    TextType type = _text_types[i];
+
+
+                    if (!CanBeDrawn(type))
+                    {
+                        continue;
+                    }
+
 
                     if (height + t.Height <= _scrollBar.Value)
                     {
@@ -211,8 +411,32 @@ namespace ClassicUO.Game.UI.Gumps
                         if (yy < 0)
                         {
                             // this entry starts above the renderable area, but exists partially within it.
-                            hour.Draw(batcher, mx, y, t.Width, t.Height + yy, 0, -yy);
-                            t.Draw(batcher, mx + hour.Width, y, t.Width, t.Height + yy, 0, -yy);
+                            hour.Draw
+                            (
+                                batcher,
+                                hour.Width,
+                                hour.Height,
+                                mx,
+                                y,
+                                t.Width,
+                                t.Height + yy,
+                                0,
+                                -yy
+                            );
+
+                            t.Draw
+                            (
+                                batcher,
+                                t.Width,
+                                t.Height,
+                                mx + hour.Width,
+                                y,
+                                t.Width,
+                                t.Height + yy,
+                                0,
+                                -yy
+                            );
+
                             my += t.Height + yy;
                         }
                         else
@@ -228,8 +452,32 @@ namespace ClassicUO.Game.UI.Gumps
                     else
                     {
                         int yyy = maxheight - height;
-                        hour.Draw(batcher, mx, y + _scrollBar.Height - yyy, t.Width, yyy, 0, 0);
-                        t.Draw(batcher, mx + hour.Width, y + _scrollBar.Height - yyy, t.Width, yyy, 0, 0);
+
+                        hour.Draw
+                        (
+                            batcher,
+                            hour.Width,
+                            hour.Height,
+                            mx,
+                            y + _scrollBar.Height - yyy,
+                            t.Width,
+                            yyy,
+                            0,
+                            0
+                        );
+
+                        t.Draw
+                        (
+                            batcher,
+                            t.Width,
+                            t.Height,
+                            mx + hour.Width,
+                            y + _scrollBar.Height - yyy,
+                            t.Width,
+                            yyy,
+                            0,
+                            0
+                        );
 
                         // can't fit any more entries - so we break!
                         break;
@@ -239,9 +487,15 @@ namespace ClassicUO.Game.UI.Gumps
                 return true;
             }
 
-            public override void Update(double totalMS, double frameMS)
+            public override void Update(double totalTime, double frameTime)
             {
-                base.Update(totalMS, frameMS);
+                base.Update(totalTime, frameTime);
+
+                if (!IsVisible)
+                {
+                    return;
+                }
+
                 _scrollBar.X = X + Width - (_scrollBar.Width >> 1) + 5;
                 _scrollBar.Height = Height;
                 CalculateScrollBarMaxValue();
@@ -253,8 +507,13 @@ namespace ClassicUO.Game.UI.Gumps
                 bool maxValue = _scrollBar.Value == _scrollBar.MaxValue;
                 int height = 0;
 
-                foreach (RenderedText t in _entries)
-                    height += t.Height;
+                for (int i = 0; i < _entries.Count; i++)
+                {
+                    if (CanBeDrawn(_text_types[i]))
+                    {
+                        height += _entries[i].Height;
+                    }
+                }
 
                 height -= _scrollBar.Height;
 
@@ -263,7 +522,9 @@ namespace ClassicUO.Game.UI.Gumps
                     _scrollBar.MaxValue = height;
 
                     if (maxValue)
+                    {
                         _scrollBar.Value = _scrollBar.MaxValue;
+                    }
                 }
                 else
                 {
@@ -272,41 +533,100 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             }
 
-            public void AddEntry(string text, int font, Hue hue, bool isUnicode, DateTime time)
+            public void AddEntry
+            (
+                string text,
+                int font,
+                ushort hue,
+                bool isUnicode,
+                DateTime time,
+                TextType text_type
+            )
             {
                 bool maxScroll = _scrollBar.Value == _scrollBar.MaxValue;
 
                 while (_entries.Count > 199)
                 {
                     _entries.RemoveFromFront().Destroy();
+
                     _hours.RemoveFromFront().Destroy();
+
+                    _text_types.RemoveFromFront();
                 }
 
-                RenderedText h = RenderedText.Create($"{time:t} ", 1150, 1, true, FontStyle.BlackBorder);
+                RenderedText h = RenderedText.Create
+                (
+                    $"{time:t} ",
+                    1150,
+                    1,
+                    true,
+                    FontStyle.BlackBorder
+                );
 
                 _hours.AddToBack(h);
 
-                _entries.AddToBack(RenderedText.Create(text, hue, (byte)font, isUnicode, FontStyle.Indention | FontStyle.BlackBorder, maxWidth: Width - (18 + h.Width)));
+                RenderedText rtext = RenderedText.Create
+                (
+                    text,
+                    hue,
+                    (byte) font,
+                    isUnicode,
+                    FontStyle.Indention | FontStyle.BlackBorder,
+                    maxWidth: Width - (18 + h.Width)
+                );
 
-                _scrollBar.MaxValue += _entries[_entries.Count - 1].Height;
-                if (maxScroll) _scrollBar.Value = _scrollBar.MaxValue;
+                _entries.AddToBack(rtext);
+
+                _text_types.AddToBack(text_type);
+
+                _scrollBar.MaxValue += rtext.Height;
+
+                if (maxScroll)
+                {
+                    _scrollBar.Value = _scrollBar.MaxValue;
+                }
             }
 
+            private static bool CanBeDrawn(TextType type)
+            {
+                if (type == TextType.CLIENT && !ProfileManager.CurrentProfile.ShowJournalClient)
+                {
+                    return false;
+                }
+
+                if (type == TextType.SYSTEM && !ProfileManager.CurrentProfile.ShowJournalSystem)
+                {
+                    return false;
+                }
+
+                if (type == TextType.OBJECT && !ProfileManager.CurrentProfile.ShowJournalObjects)
+                {
+                    return false;
+                }
+
+                if (type == TextType.GUILD_ALLY && !ProfileManager.CurrentProfile.ShowJournalGuildAlly)
+                {
+                    return false;
+                }
+
+                return true;
+            }
 
             public override void Dispose()
             {
                 for (int i = 0; i < _entries.Count; i++)
                 {
                     _entries[i].Destroy();
+
                     _hours[i].Destroy();
                 }
 
                 _entries.Clear();
                 _hours.Clear();
+                _text_types.Clear();
 
                 base.Dispose();
             }
         }
-
     }
 }

@@ -1,6 +1,9 @@
 ---
 name: Bug report
 about: Create a report to help us improve
+title: ''
+labels: ''
+assignees: ''
 
 ---
 
@@ -20,10 +23,15 @@ A clear and concise description of what you expected to happen.
 **Screenshots**
 If applicable, add screenshots to help explain your problem.
 
-**Desktop (please complete the following information):**
- - OS: [e.g. iOS]
- - Browser [e.g. chrome, safari]
- - Version [e.g. 22]
+**Shard**
+ - Name of the shard:
+
+**Information (please complete the following information):**
+ - OS: [e.g. win7, win10, win10.17134] (just run `ver` in a command prompt) (for linux-distros `cat /etc/lsb-release`)
+ - ClassicUO Version: (can be fetched from the login screen)
+ - [ ] Using DEV Version?
+ - Launcher: [classicuo_launcher, uof launcher, ...]
 
 **Additional context**
-Add any other context about the problem here.
+ - How many clients do you run in parallel: 
+ - Screen Resolution: [e.g. 1920x1080]

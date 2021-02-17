@@ -1,55 +1,61 @@
 ﻿#region license
 
-//  Copyright (C) 2019 ClassicUO Development Community on Github
-//
-//	This project is an alternative client for the game Ultima Online.
-//	The goal of this is to develop a lightweight client considering 
-//	new technologies.  
-//      
-//  This program is free software: you can redistribute it and/or modify
-//  it under the terms of the GNU General Public License as published by
-//  the Free Software Foundation, either version 3 of the License, or
-//  (at your option) any later version.
-//
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-//
-//  You should have received a copy of the GNU General Public License
-//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// Copyright (c) 2021, andreakarasho
+// All rights reserved.
+// 
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+// 1. Redistributions of source code must retain the above copyright
+//    notice, this list of conditions and the following disclaimer.
+// 2. Redistributions in binary form must reproduce the above copyright
+//    notice, this list of conditions and the following disclaimer in the
+//    documentation and/or other materials provided with the distribution.
+// 3. All advertising materials mentioning features or use of this software
+//    must display the following acknowledgement:
+//    This product includes software developed by andreakarasho - https://github.com/andreakarasho
+// 4. Neither the name of the copyright holder nor the
+//    names of its contributors may be used to endorse or promote products
+//    derived from this software without specific prior written permission.
+// 
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ''AS IS'' AND ANY
+// EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+// WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+// DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY
+// DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+// (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+// LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+// ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+// SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #endregion
-
-using System;
 
 using ClassicUO.Configuration;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
-using ClassicUO.Game.UI.Gumps;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
-
-using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.GameObjects
 {
     internal partial class Multi
     {
         private int _canBeTransparent;
-
-        public bool CharacterIsBehindFoliage { get; set; }
-        public bool IsFromTarget { get; set; }
+        public bool IsHousePreview;
 
         public override bool TransparentTest(int z)
         {
             bool r = true;
 
             if (Z <= z - ItemData.Height)
+            {
                 r = false;
+            }
             else if (z < Z && (_canBeTransparent & 0xFF) == 0)
+            {
                 r = false;
+            }
 
             return r;
         }
@@ -57,16 +63,20 @@ namespace ClassicUO.Game.GameObjects
         public override bool Draw(UltimaBatcher2D batcher, int posX, int posY)
         {
             if (!AllowedToDraw || IsDestroyed)
+            {
                 return false;
+            }
 
             ResetHueVector();
 
             ushort hue = Hue;
-            float alpha = 0;
+
             if (State != 0)
             {
                 if ((State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_IGNORE_IN_RENDER) != 0)
+                {
                     return false;
+                }
 
                 if ((State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_INCORRECT_PLACE) != 0)
                 {
@@ -77,123 +87,98 @@ namespace ClassicUO.Game.GameObjects
                 {
                     if (AlphaHue >= 192)
                     {
-                        alpha = 0.25f;
                         AlphaHue = 0xFF;
                     }
                     else
-                        ProcessAlpha(192);
-                }
-            }
-
-            ushort graphic = Graphic;
-
-            if (ItemData.IsFoliage)
-            {
-                if (CharacterIsBehindFoliage)
-                {
-                    if (AlphaHue != Constants.FOLIAGE_ALPHA)
-                        ProcessAlpha(Constants.FOLIAGE_ALPHA);
-                }
-                else
-                {
-                    if (AlphaHue != 0xFF)
-                        ProcessAlpha(0xFF);
-                }
-            }
-            else if (ItemData.IsAnimated && _lastAnimationFrameTime < Time.Ticks)
-            {
-                IntPtr ptr = FileManager.AnimData.GetAddressToAnim(Graphic);
-
-                if (ptr != IntPtr.Zero)
-                {
-                    unsafe
                     {
-                        AnimDataFrame2* animData = (AnimDataFrame2*)ptr;
-
-                        if (animData->FrameCount != 0)
-                        {
-                            graphic = (Graphic)(Graphic + animData->FrameData[AnimIndex++]);
-
-                            if (AnimIndex >= animData->FrameCount)
-                                AnimIndex = 0;
-
-                            _lastAnimationFrameTime = Time.Ticks + (uint)(animData->FrameInterval != 0 ?
-                                                          animData->FrameInterval * Constants.ITEM_EFFECT_ANIMATION_DELAY + 25 : Constants.ITEM_EFFECT_ANIMATION_DELAY);
-                        }
+                        ProcessAlpha(192);
                     }
                 }
             }
 
+            ResetHueVector();
 
-            if (Texture == null || Texture.IsDisposed || Graphic != graphic)
+            ushort graphic = Graphic;
+            bool partial = ItemData.IsPartialHue;
+
+            Profile currentProfile = ProfileManager.CurrentProfile;
+
+            if (currentProfile.HighlightGameObjects && SelectedObject.LastObject == this)
             {
-                ArtTexture texture = FileManager.Art.GetTexture(graphic);
-                Texture = texture;
-                Bounds = new Rectangle((Texture.Width >> 1) - 22, Texture.Height - 44, Texture.Width, Texture.Height);
-
-                FrameInfo.Width = texture.ImageRectangle.Width;
-                FrameInfo.Height = texture.ImageRectangle.Height;
-
-                FrameInfo.X = (Texture.Width >> 1) - 22 - texture.ImageRectangle.X;
-                FrameInfo.Y = Texture.Height - 44 - texture.ImageRectangle.Y;
+                hue = Constants.HIGHLIGHT_CURRENT_OBJECT_HUE;
+                partial = false;
+            }
+            else if (currentProfile.NoColorObjectsOutOfRange && Distance > World.ClientViewRange)
+            {
+                hue = Constants.OUT_RANGE_COLOR;
+                partial = false;
+            }
+            else if (World.Player.IsDead && currentProfile.EnableBlackWhiteEffect)
+            {
+                hue = Constants.DEAD_RANGE_COLOR;
+                partial = false;
             }
 
-            if (ProfileManager.Current.HighlightGameObjects && SelectedObject.LastObject == this)
-            {
-                HueVector.X = 0x0023;
-                HueVector.Y = 1;
-            }
-            else if (ProfileManager.Current.NoColorObjectsOutOfRange && Distance > World.ClientViewRange)
-            {
-                HueVector.X = Constants.OUT_RANGE_COLOR;
-                HueVector.Y = 1;
-            }
-            else if (World.Player.IsDead && ProfileManager.Current.EnableBlackWhiteEffect)
-            {
-                HueVector.X = Constants.DEAD_RANGE_COLOR;
-                HueVector.Y = 1;
-            }
-            else
-                ShaderHuesTraslator.GetHueVector(ref HueVector, hue, ItemData.IsPartialHue, alpha);
+            ShaderHueTranslator.GetHueVector(ref HueVector, hue, partial, 0);
 
             //Engine.DebugInfo.MultiRendered++;
 
-            if (IsFromTarget)
+            if (IsHousePreview)
+            {
                 HueVector.Z = 0.5f;
+            }
 
-            base.Draw(batcher, posX, posY);
+            posX += (int) Offset.X;
+            posY += (int) (Offset.Y + Offset.Z);
+
+            if (AlphaHue != 255)
+            {
+                HueVector.Z = 1f - AlphaHue / 255f;
+            }
+
+            DrawStaticAnimated
+            (
+                batcher,
+                graphic,
+                posX,
+                posY,
+                ref HueVector,
+                ref DrawTransparent,
+                false
+            );
 
             if (ItemData.IsLight)
             {
-                CUOEnviroment.Client.GetScene<GameScene>()
-                      .AddLight(this, this, posX + 22, posY + 22);
+                Client.Game.GetScene<GameScene>().AddLight(this, this, posX + 22, posY + 22);
+            }
+
+            if (!(SelectedObject.Object == this || IsHousePreview || FoliageIndex != -1 && Client.Game.GetScene<GameScene>().FoliageIndex == FoliageIndex))
+            {
+                if (State != 0)
+                {
+                    if ((State & (CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_IGNORE_IN_RENDER | CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_PREVIEW)) != 0)
+                    {
+                        return true;
+                    }
+                }
+
+                if (DrawTransparent)
+                {
+                    return true;
+                }
+
+                ref UOFileIndex index = ref ArtLoader.Instance.GetValidRefEntry(graphic + 0x4000);
+
+                posX -= index.Width;
+                posY -= index.Height;
+
+                if (SelectedObject.IsPointInStatic(ArtLoader.Instance.GetTexture(graphic), posX, posY))
+                {
+                    SelectedObject.Object = this;
+                }
             }
 
             return true;
-        }
-
-        public override void Select(int x, int y)
-        {
-            if (SelectedObject.Object == this || IsFromTarget || CharacterIsBehindFoliage)
-                return;
-
-            if (State != 0)
-            {
-                if ((State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_IGNORE_IN_RENDER) != 0)
-                    return;
-            }
-
-            if (DrawTransparent)
-            {
-                int d = Distance;
-                int maxD = ProfileManager.Current.CircleOfTransparencyRadius + 1;
-
-                if (d <= maxD && d <= 3)
-                    return;
-            }
-
-            if (SelectedObject.IsPointInStatic(Texture, x - Bounds.X, y - Bounds.Y))
-                SelectedObject.Object = this;
         }
     }
 }

@@ -1,71 +1,80 @@
 ﻿#region license
 
-//  Copyright (C) 2019 ClassicUO Development Community on Github
-//
-//	This project is an alternative client for the game Ultima Online.
-//	The goal of this is to develop a lightweight client considering 
-//	new technologies.  
-//      
-//  This program is free software: you can redistribute it and/or modify
-//  it under the terms of the GNU General Public License as published by
-//  the Free Software Foundation, either version 3 of the License, or
-//  (at your option) any later version.
-//
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-//
-//  You should have received a copy of the GNU General Public License
-//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// Copyright (c) 2021, andreakarasho
+// All rights reserved.
+// 
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+// 1. Redistributions of source code must retain the above copyright
+//    notice, this list of conditions and the following disclaimer.
+// 2. Redistributions in binary form must reproduce the above copyright
+//    notice, this list of conditions and the following disclaimer in the
+//    documentation and/or other materials provided with the distribution.
+// 3. All advertising materials mentioning features or use of this software
+//    must display the following acknowledgement:
+//    This product includes software developed by andreakarasho - https://github.com/andreakarasho
+// 4. Neither the name of the copyright holder nor the
+//    names of its contributors may be used to endorse or promote products
+//    derived from this software without specific prior written permission.
+// 
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ''AS IS'' AND ANY
+// EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+// WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+// DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY
+// DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+// (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+// LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+// ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+// SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #endregion
 
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-
+using System.Xml;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
-using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
-using ClassicUO.IO;
 using ClassicUO.IO.Resources;
+using ClassicUO.Network;
 using ClassicUO.Renderer;
-
+using ClassicUO.Resources;
 using Microsoft.Xna.Framework;
-
 using SDL2;
 
 namespace ClassicUO.Game.UI.Gumps
 {
-    internal class StandardSkillsGump : MinimizableGump
+    internal class StandardSkillsGump : Gump
     {
-        internal override GumpPic Iconized { get; } = new GumpPic(0, 0, 0x839, 0);
-        internal override HitBox IconizerArea { get; } = new HitBox(160, 0, 23, 24);
-        private readonly SkillControl[] _allSkillControls;
-        private readonly GumpPic _bottomComment;
-        private readonly GumpPic _bottomLine;
-
-        private readonly List<MultiSelectionShrinkbox> _boxes = new List<MultiSelectionShrinkbox>();
-        private readonly ScrollArea _container;
-        private readonly SkillNameComparer _instance = new SkillNameComparer();
-        private readonly Button _newGroupButton;
-        private readonly ExpandableScroll _scrollArea;
-        private readonly Label _skillsLabelSum;
-        internal Checkbox _checkReal, _checkCaps;
         private const int _diffY = 22;
 
-        public StandardSkillsGump() : base(Constants.SKILLSTD_LOCALSERIAL, 0)
+        private readonly ScrollArea _area;
+        private readonly GumpPic _bottomComment;
+        private readonly GumpPic _bottomLine;
+        private readonly DataBox _container;
+        private readonly GumpPic _gumpPic;
+        private readonly HitBox _hitBox;
+        private bool _isMinimized;
+        private readonly Button _newGroupButton;
+        private readonly ExpandableScroll _scrollArea;
+
+        private readonly List<SkillsGroupControl> _skillsControl = new List<SkillsGroupControl>();
+        private readonly Label _skillsLabelSum;
+
+        public StandardSkillsGump() : base(0, 0)
         {
-            CanBeSaved = true;
             AcceptMouseInput = false;
             CanMove = true;
+            CanCloseWithRightClick = true;
+
             Height = 200 + _diffY;
 
-            Add(new GumpPic(160, 0, 0x82D, 0));
+            Add(_gumpPic = new GumpPic(160, 0, 0x82D, 0));
+            _gumpPic.MouseDoubleClick += _picBase_MouseDoubleClick;
+
             _scrollArea = new ExpandableScroll(0, _diffY, Height, 0x1F40)
             {
                 TitleGumpID = 0x0834,
@@ -78,384 +87,866 @@ namespace ClassicUO.Game.UI.Gumps
             Add(_bottomLine = new GumpPic(50, Height - 98, 0x082B, 0));
             Add(_bottomComment = new GumpPic(25, Height - 85, 0x0836, 0));
 
-            _container = new ScrollArea(22, 45 + _diffY + _bottomLine.Height - 10, _scrollArea.Width - 14,
-                                        _scrollArea.Height - (83 + _diffY), false) {AcceptMouseInput = true, CanMove = true};
-            Add(_container);
-            Add(_skillsLabelSum = new Label(World.Player.Skills.Sum(s => s.Value).ToString("F1"), false, 600, 0, 3) {X = _bottomComment.X + _bottomComment.Width + 5, Y = _bottomComment.Y - 5});
+            _area = new ScrollArea
+            (
+                22,
+                45 + _diffY + _bottomLine.Height - 10,
+                _scrollArea.Width - 14,
+                _scrollArea.Height - (83 + _diffY),
+                false
+            ) { AcceptMouseInput = true, CanMove = true };
+
+            Add(_area);
+
+            _container = new DataBox(0, 0, 1, 1);
+            _container.WantUpdateSize = true;
+            _container.AcceptMouseInput = true;
+            _container.CanMove = true;
+
+            _area.Add(_container);
+
+            Add
+            (
+                _skillsLabelSum = new Label
+                (
+                    World.Player.Skills.Sum(s => s.Value).ToString("F1"),
+                    false,
+                    600,
+                    0,
+                    3
+                ) { X = _bottomComment.X + _bottomComment.Width + 5, Y = _bottomComment.Y - 5 }
+            );
 
             //new group
-            Add(_newGroupButton = new Button(0, 0x083A, 0x083A, 0x083A)
+            Add
+            (
+                _newGroupButton = new Button(0, 0x083A, 0x083A, 0x083A)
+                {
+                    X = 60,
+                    Y = Height,
+                    ContainsByBounds = true,
+                    ButtonAction = ButtonAction.Activate
+                }
+            );
+
+            Add
+            (
+                _checkReal = new Checkbox
+                (
+                    0x938,
+                    0x939,
+                    ResGumps.ShowReal,
+                    1,
+                    0x0386,
+                    false
+                ) { X = _newGroupButton.X + _newGroupButton.Width + 30, Y = _newGroupButton.Y - 6 }
+            );
+
+            Add
+            (
+                _checkCaps = new Checkbox
+                (
+                    0x938,
+                    0x939,
+                    ResGumps.ShowCaps,
+                    1,
+                    0x0386,
+                    false
+                ) { X = _newGroupButton.X + _newGroupButton.Width + 30, Y = _newGroupButton.Y + 7 }
+            );
+
+            _checkReal.ValueChanged += UpdateSkillsValues;
+            _checkCaps.ValueChanged += UpdateSkillsValues;
+
+
+            if (World.Player != null)
             {
-                X = 60,
-                Y = Height,
-                ContainsByBounds = true,
-                ButtonAction = ButtonAction.Activate
-            });
-            Add(_checkReal = new Checkbox(0x938, 0x939, " - Show Real", 1, 0x0386, false) {X = _newGroupButton.X + _newGroupButton.Width + 30, Y = _newGroupButton.Y - 6});
-            Add(_checkCaps = new Checkbox(0x938, 0x939, " - Show Caps", 1, 0x0386, false) {X = _newGroupButton.X + _newGroupButton.Width + 30, Y = _newGroupButton.Y + 7});
-            _checkReal.ValueChanged += UpdateGump;
-            _checkCaps.ValueChanged += UpdateGump;
+                foreach (SkillsGroup g in SkillsGroupManager.Groups)
+                {
+                    SkillsGroupControl control = new SkillsGroupControl(g, 3, 3);
+                    _skillsControl.Add(control);
+                    _container.Add(control);
 
-            _allSkillControls = new SkillControl[FileManager.Skills.SkillsCount];
+                    control.IsMinimized = true;
 
-            foreach (KeyValuePair<string, List<int>> k in SkillsGroupManager.Groups)
-                AddSkillsToGroup(k.Key, k.Value.OrderBy(s => s, _instance).ToList());
+                    int count = g.Count;
 
+                    for (int i = 0; i < count; i++)
+                    {
+                        byte index = g.GetSkill(i);
+
+                        if (index < SkillsLoader.Instance.SkillsCount)
+                        {
+                            control.AddSkill(index, 0, 17 + i * 17);
+                        }
+                    }
+                }
+            }
+
+            _hitBox = new HitBox(160, 0, 23, 24);
+            Add(_hitBox);
+            _hitBox.MouseUp += _hitBox_MouseUp;
+
+            _container.ReArrangeChildren();
         }
 
+        public override GumpType GumpType => GumpType.SkillMenu;
+
+        public bool IsMinimized
+        {
+            get => _isMinimized;
+            set
+            {
+                if (_isMinimized != value)
+                {
+                    _isMinimized = value;
+
+                    _gumpPic.Graphic = value ? (ushort) 0x839 : (ushort) 0x82D;
+
+                    if (value)
+                    {
+                        _gumpPic.X = 0;
+                    }
+                    else
+                    {
+                        _gumpPic.X = 160;
+                    }
+
+                    foreach (Control c in Children)
+                    {
+                        c.IsVisible = !value;
+                    }
+
+                    _gumpPic.IsVisible = true;
+                    WantUpdateSize = true;
+
+                    _container.WantUpdateSize = true;
+                    _container.ReArrangeChildren();
+                }
+            }
+        }
+
+        internal Checkbox _checkReal, _checkCaps;
+
+
+        private void _picBase_MouseDoubleClick(object sender, MouseDoubleClickEventArgs e)
+        {
+            if (e.Button == MouseButtonType.Left && IsMinimized)
+            {
+                IsMinimized = false;
+            }
+        }
+
+        private void _hitBox_MouseUp(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtonType.Left && !IsMinimized)
+            {
+                IsMinimized = true;
+            }
+        }
 
         public override void OnButtonClick(int buttonID)
         {
             if (buttonID == 0)
             {
-                string group = "New Group";
-
-                if (SkillsGroupManager.AddNewGroup(group))
-                    AddSkillsToGroup(group, SkillsGroupManager.GetSkillsInGroup(group));
-            }
-        }
-
-        private void AddSkillsToGroup(string group, List<int> skills)
-        {
-            MultiSelectionShrinkbox box = new MultiSelectionShrinkbox(0, 0, _container.Width - 30, group, 0, 6, false, true)
-            {
-                CanMove = true,
-                IsEditable = true
-            };
-
-            box.EditStateStart += (ss, e) =>
-            {
-                Control p = _container;
-                var items = p.FindControls<ScrollAreaItem>().SelectMany(s => s.Children.OfType<MultiSelectionShrinkbox>());
-
-                foreach (var item in items)
+                SkillsGroup g = new SkillsGroup
                 {
-                    foreach (EditableLabel c in item.FindControls<EditableLabel>()) c.SetEditable(false);
-                }
-            };
-
-            box.EditStateEnd += (ss, e) =>
-            {
-                if (!string.IsNullOrWhiteSpace(e.BackupText) && !string.IsNullOrWhiteSpace(e.Text)) SkillsGroupManager.ReplaceGroup(e.BackupText, e.Text);
-            };
-
-            _container.Add(box);
-
-            SkillControl[] controls = new SkillControl[skills.Count];
-            int idx = 0;
-
-            foreach (var skill in skills)
-            {
-                var c = new SkillControl(skill, box.Width - 15, group, box)
-                {
-                    Width = box.Width - 15
+                    Name = ResGumps.NewGroup
                 };
-                controls[idx++] = c;
-                _allSkillControls[skill] = c;
-            }
 
-            box.SetItemsValue(controls);
+                SkillsGroupManager.Add(g);
 
-            _boxes.Add(box);
-        }
+                SkillsGroupControl control = new SkillsGroupControl(g, 3, 3);
+                _skillsControl.Add(control);
+                _container.Add(control);
+                control.IsMinimized = !g.IsMaximized;
 
-        protected override void OnKeyDown(SDL.SDL_Keycode key, SDL.SDL_Keymod mod)
-        {
-            if (key == SDL.SDL_Keycode.SDLK_DELETE)
-            {
-                for (int i = 0; i < _boxes.Count; i++)
-                {
-                    var box = _boxes[i];
-
-                    if (box.IsEditing)
-                    {
-                        if (i == 0)
-                        {
-                            UIManager.Add(new MessageBoxGump(200, 150, "Cannot delete this group.", null));
-                            break;
-                        }
-
-                        if (SkillsGroupManager.RemoveGroup(box.LabelText))
-                        {
-                            foreach (var child in box.FindControls<SkillControl>())
-                            {
-                                _boxes[0].AddItem(child);
-                            }
-
-                            _boxes[0].Items.Sort((a, b) =>
-                            {
-                                var s0 = (SkillControl)a;
-                                var s1 = (SkillControl)b;
-
-                                var skill0 = World.Player.Skills[s0.SkillIndex];
-                                var skill1 = World.Player.Skills[s1.SkillIndex];
-
-                                return skill0.Name.CompareTo(skill1.Name);
-                            });
-
-                            _boxes[0].GenerateButtons();
-
-                            box.Children.Clear();
-                            _container.Remove(box);
-                            _boxes.RemoveAt(i);
-                        }
-
-                        break;
-                    }
-                }
+                _container.WantUpdateSize = true;
+                _container.ReArrangeChildren();
             }
         }
 
-
-        public override void Update(double totalMS, double frameMS)
+        public override void Update(double totalTime, double frameTime)
         {
             WantUpdateSize = true;
 
             _bottomLine.Y = Height - 98;
             _bottomComment.Y = Height - 85;
-            _container.Height = Height - (150 + _diffY);
+            _area.Height = _container.Height = Height - (150 + _diffY);
             _newGroupButton.Y = Height - 52;
             _skillsLabelSum.Y = _bottomComment.Y + 2;
             _checkReal.Y = _newGroupButton.Y - 6;
             _checkCaps.Y = _newGroupButton.Y + 7;
 
-            base.Update(totalMS, frameMS);
+            bool wantedResize = _container.WantUpdateSize;
+
+            base.Update(totalTime, frameTime);
+
+            if (wantedResize)
+            {
+                _container.ReArrangeChildren();
+            }
         }
 
-        public void ForceUpdate(int skillIndex)
+
+        public void Update(int skillIndex)
         {
-            if (skillIndex < _allSkillControls.Length)
-                _allSkillControls[skillIndex]?.UpdateSkillValue(UIManager.GetGump<StandardSkillsGump>());
-            _skillsLabelSum.Text = World.Player.Skills.Sum(s => _checkReal.IsChecked ? s.Base : s.Value).ToString("F1");
+            foreach (SkillsGroupControl c in _skillsControl)
+            {
+                if (c.UpdateSkillValue(skillIndex, _checkReal.IsChecked, _checkCaps.IsChecked))
+                {
+                    break;
+                }
+            }
+
+            SumTotalSkills();
         }
 
-        private void UpdateGump(object sender, EventArgs e)
+        private void UpdateSkillsValues(object sender, EventArgs e)
         {
-            StandardSkillsGump skg = UIManager.GetGump<StandardSkillsGump>();
-            for (int i = 0; i < _allSkillControls.Length; i++) _allSkillControls[i]?.UpdateSkillValue(skg);
-            _skillsLabelSum.Text = World.Player.Skills.Sum(s => _checkReal.IsChecked ? s.Base : s.Value).ToString("F1");
+            Checkbox checkbox = (Checkbox) sender;
+
+            if (_checkReal.IsChecked && _checkCaps.IsChecked)
+            {
+                if (checkbox == _checkReal)
+                {
+                    _checkCaps.IsChecked = false;
+                }
+                else
+                {
+                    _checkReal.IsChecked = false;
+                }
+            }
+
+            foreach (SkillsGroupControl c in _skillsControl)
+            {
+                c.UpdateAllSkillsValues(_checkReal.IsChecked, _checkCaps.IsChecked);
+            }
+
+            SumTotalSkills();
         }
 
-        public override void Save(BinaryWriter writer)
+        public override void Save(XmlTextWriter writer)
         {
             base.Save(writer);
-            writer.Write(_scrollArea.SpecialHeight);
-
-            writer.Write(_boxes.Count);
-
-            for (int i = 0; i < _boxes.Count; i++) writer.Write(_boxes[i].Opened);
+            writer.WriteAttributeString("isminimized", IsMinimized.ToString());
+            writer.WriteAttributeString("height", _scrollArea.SpecialHeight.ToString());
         }
 
-        public override void Restore(BinaryReader reader)
+        public override void Restore(XmlElement xml)
         {
-            base.Restore(reader);
-            _scrollArea.Height = _scrollArea.SpecialHeight = reader.ReadInt32();
-
-            int count = reader.ReadInt32();
-
-            for (int i = 0; i < count; i++)
-            {
-                bool opened = reader.ReadBoolean();
-
-                if (i < _boxes.Count)
-                    _boxes[i].Opened = opened;
-            }
+            base.Restore(xml);
+            _scrollArea.Height = _scrollArea.SpecialHeight = int.Parse(xml.GetAttribute("height"));
         }
 
-        private class SkillNameComparer : IComparer<int>
+        private void SumTotalSkills()
         {
-            public int Compare(int x, int y)
-            {
-                if (x >= FileManager.Skills.SkillNames.Length || y >= FileManager.Skills.SkillNames.Length)
-                    return 0;
-
-                return FileManager.Skills.SkillNames[x].CompareTo(FileManager.Skills.SkillNames[y]);
-            }
+            _skillsLabelSum.Text = World.Player.Skills.Sum(s => _checkReal.IsChecked ? s.Base : s.Value).ToString("F1");
         }
 
-        private class SkillControl : Control
+
+        private class SkillsGroupControl : Control
         {
-            private readonly Label _labelValue;
-            private readonly int _skillIndex;
-            private readonly GumpPic _lock;
-            private MultiSelectionShrinkbox _parent;
+            private readonly DataBox _box;
+            private readonly Button _button;
+            private readonly SkillsGroup _group;
+            private readonly GumpPicTiled _gumpPic;
+            private bool _isMinimized;
 
-            public SkillControl(int skillIndexIndex, int maxWidth, string group, MultiSelectionShrinkbox parent)
-            {
-                AcceptMouseInput = true;
-                CanMove = true;
+            private readonly List<SkillItemControl> _skills = new List<SkillItemControl>();
+            private byte _status;
+            private readonly StbTextBox _textbox;
 
-                _parent = parent;
-
-                Skill skill = World.Player.Skills[skillIndexIndex];
-                _skillIndex = skillIndexIndex;
-
-                if (skill.IsClickable)
-                {
-                    Button button = new Button(0, 0x0837, 0x0838, 0x0837);
-                    button.MouseUp += (ss, e) => { if (IsVisible) GameActions.UseSkill(skillIndexIndex); };
-                    Add(button);
-                }
-
-                Label label = new Label(skill.Name, false, 0x0288, maxWidth, 9)
-                {
-                    X = 12
-                };
-                Add(label);
-
-                _labelValue = new Label(skill.Value.ToString("F1"), false, 0x0288, maxWidth - 10, 9, align: TEXT_ALIGN_TYPE.TS_RIGHT);
-                Add(_labelValue);
-
-
-                _lock = new GumpPic(maxWidth - 8, 1, GetLockValue(skill.Lock), 0) {AcceptMouseInput = true};
-
-                _lock.MouseUp += (sender, e) =>
-                {
-                    if (IsVisible)
-                    {
-                        byte slock = (byte)skill.Lock;
-
-                        if (slock < 2)
-                            slock++;
-                        else
-                            slock = 0;
-
-                        skill.Lock = (Lock)slock;
-
-                        GameActions.ChangeSkillLockStatus((ushort)skill.Index, slock);
-
-                        ushort graphic = GetLockValue(skill.Lock);
-                        _lock.Graphic = graphic;
-                        _lock.Texture = FileManager.Gumps.GetTexture(graphic);
-                    }
-                };
-                Add(_lock);
-
-                WantUpdateSize = false;
-
-                Width = maxWidth;
-                Height = label.Height;
-                Group = group;
-            }
-
-            public string Group { get; private set; }
-
-            public int SkillIndex => _skillIndex;
-
-            private static ushort GetLockValue(Lock lockStatus)
-            {
-                switch (lockStatus)
-                {
-                    case Lock.Up:
-
-                        return 0x0984;
-
-                    case Lock.Down:
-
-                        return 0x0986;
-
-                    case Lock.Locked:
-
-                        return 0x082C;
-
-                    default:
-
-                        return Graphic.INVALID;
-                }
-            }
-
-           
-            protected override void OnMouseDown(int x, int y, MouseButton button)
+            public SkillsGroupControl(SkillsGroup group, int x, int y)
             {
                 CanMove = false;
+                AcceptMouseInput = true;
+                WantUpdateSize = true;
+                AcceptKeyboardInput = true;
+
+                X = x;
+                Y = y;
+                Width = 200;
+                Height = 20;
+
+                _group = group;
+
+                _button = new Button(1000, 0x0827, 0x0827, 0x0827)
+                {
+                    ButtonAction = ButtonAction.Activate,
+                    ContainsByBounds = true,
+                    IsVisible = false
+                };
+
+                Add(_button);
+
+                int width = FontsLoader.Instance.GetWidthASCII(6, group.Name);
+
+                Add
+                (
+                    _textbox = new StbTextBox
+                    (
+                        6,
+                        -1,
+                        200,
+                        false,
+                        FontStyle.Fixed
+                    )
+                    {
+                        X = 16,
+                        Y = -3,
+                        Width = 200,
+                        Height = 17,
+                        IsEditable = false
+                    }
+                );
+
+                _textbox.SetText(group.Name);
+
+                int xx = width + 11 + 16;
+
+                _gumpPic = new GumpPicTiled(0x0835)
+                {
+                    X = xx,
+                    Y = 5,
+                    Width = 215 - xx,
+                    AcceptMouseInput = false
+                };
+
+                Add(_gumpPic);
+
+                Add(_box = new DataBox(0, 0, 0, 0));
+
+                _textbox.IsEditable = false;
+
+                _textbox.MouseDown += (s, e) =>
+                {
+                    if (_textbox.IsEditable && _status == 2)
+                    {
+                        return;
+                    }
+
+                    _status++;
+
+                    if (_status >= 3)
+                    {
+                        _status = 0;
+                    }
+
+                    switch (_status)
+                    {
+                        default:
+                        case 0:
+                            _gumpPic.IsVisible = true;
+                            _textbox.IsEditable = false;
+                            _textbox.AllowSelection = false;
+                            UIManager.KeyboardFocusControl = this;
+                            UIManager.SystemChat.SetFocus();
+
+                            break;
+
+                        case 1:
+                            _gumpPic.IsVisible = true;
+                            _textbox.IsEditable = false;
+                            _textbox.AllowSelection = false;
+                            UIManager.KeyboardFocusControl = this;
+
+                            //UIManager.SystemChat.SetFocus();
+                            break;
+
+                        case 2:
+                            _gumpPic.IsVisible = false;
+                            _textbox.IsEditable = true;
+                            _textbox.AllowSelection = true;
+                            UIManager.KeyboardFocusControl = _textbox;
+                            _textbox.SetKeyboardFocus();
+
+                            break;
+                    }
+                };
+
+                _textbox.FocusLost += (s, e) =>
+                {
+                    _status = 0;
+                    _gumpPic.IsVisible = true;
+                    _textbox.IsEditable = false;
+                    _textbox.AllowSelection = false;
+                    UIManager.KeyboardFocusControl = null;
+                    UIManager.SystemChat.SetFocus();
+                };
             }
+
+
+            public int Count => _skills.Count;
+
+            public bool IsMinimized
+            {
+                get => _isMinimized;
+                set
+                {
+                    ushort graphic = (ushort) (value ? 0x0827 : 0x826);
+
+                    _button.ButtonGraphicNormal = graphic;
+                    _button.ButtonGraphicOver = graphic;
+                    _button.ButtonGraphicPressed = graphic;
+
+                    _box.IsVisible = !value;
+                    _box.WantUpdateSize = true;
+
+                    Parent.WantUpdateSize = true;
+
+                    _isMinimized = value;
+                    WantUpdateSize = true;
+                }
+            }
+
+
+            public void AddSkill(int index, int x, int y)
+            {
+                SkillItemControl c = new SkillItemControl(index, x, y);
+                _skills.Add(c);
+                _box.Add(c);
+                _box.WantUpdateSize = true;
+                WantUpdateSize = true;
+
+                if (!_button.IsVisible)
+                {
+                    _button.IsVisible = true;
+                }
+            }
+
+            public void UpdateAllSkillsValues(bool showReal, bool showCaps)
+            {
+                foreach (SkillItemControl skill in _skills)
+                {
+                    skill.UpdateValueText(showReal, showCaps);
+                }
+            }
+
+            public bool UpdateSkillValue(int index, bool showReal, bool showCaps)
+            {
+                foreach (SkillItemControl c in _skills)
+                {
+                    if (c.Index == index && index >= 0 && index < World.Player.Skills.Length)
+                    {
+                        Skill skill = World.Player.Skills[index];
+
+                        if (skill == null)
+                        {
+                            return true;
+                        }
+
+                        c.UpdateValueText(showReal, showCaps);
+                        c.SetStatus(skill.Lock);
+
+                        return true;
+                    }
+                }
+
+                return false;
+            }
+
 
             protected override void OnMouseOver(int x, int y)
             {
-                if (CanMove)
-                    return;
-
-                var c = UIManager.MouseOverControl;
-
-                if (c != null && c != this)
+                if (UIManager.LastControlMouseDown(MouseButtonType.Left) is SkillItemControl skillControl)
                 {
-                    var p = c.Parent;
-
-                    while (p != null)
+                    if (skillControl.Parent // databox
+                                    .Parent // skillgruop
+                        != this)
                     {
-                        if (p is MultiSelectionShrinkbox box)
+                        SkillsGroupControl originalGroup = (SkillsGroupControl) skillControl.Parent.Parent;
+
+                        if (originalGroup != null)
                         {
-                            if (box.LabelText != Group)
+                            // remove from original control the skillcontrol
+                            if (!_group.Contains((byte) skillControl.Index))
                             {
-                                SkillsGroupManager.MoveSkillToGroup(Group, box.LabelText, _skillIndex);
+                                byte index = (byte) skillControl.Index;
 
-                                int index = -1;
+                                originalGroup._skills.Remove(skillControl);
 
-                                foreach (SkillControl skillControl in box.Items.OfType<SkillControl>())
+                                // update groups
+                                originalGroup._group.Remove(index);
+                                _group.Add(index);
+                                _group.Sort();
+
+                                originalGroup._button.IsVisible = originalGroup._skills.Count != 0;
+
+                                // insert skillcontrol at the right index
+                                int itemCount = _group.Count;
+
+                                for (int i = 0; i < itemCount; i++)
                                 {
-                                    index++;
+                                    if (_group.GetSkill(i) == index)
+                                    {
+                                        _skills.Insert(i, skillControl);
+                                        _box.Insert(i, skillControl);
 
-                                    if (skillControl._skillIndex > _skillIndex) break;
+                                        if (!_button.IsVisible)
+                                        {
+                                            _button.IsVisible = true;
+                                        }
+
+                                        break;
+                                    }
                                 }
 
-                                _parent.Remove(this);
-                                box.AddItem(this, index);
-
-                                _parent = box;
-                                Group = box.LabelText;
+                                // update gump positions
+                                UpdateSkillsPosition();
+                                originalGroup.UpdateSkillsPosition();
                             }
-
-                            break;
                         }
-
-                        p = p.Parent;
                     }
-                }
-
-                if (!(c?.RootParent is StandardSkillsGump))
-                {
-                    uint serial = (uint) (World.Player + _skillIndex + 1);
-
-                    if (UIManager.GetGump<SkillButtonGump>(serial) != null)
-                        UIManager.Remove<SkillButtonGump>(serial);
-
-                    SkillButtonGump skillButtonGump = new SkillButtonGump(World.Player.Skills[_skillIndex], Mouse.Position.X, Mouse.Position.Y);
-                    UIManager.Add(skillButtonGump);
-                    Rectangle rect = FileManager.Gumps.GetTexture(0x24B8).Bounds;
-                    UIManager.AttemptDragControl(skillButtonGump, new Point(Mouse.Position.X + (rect.Width >> 1), Mouse.Position.Y + (rect.Height >> 1)), true);
                 }
 
                 base.OnMouseOver(x, y);
             }
 
-            protected override void OnMouseUp(int x, int y, MouseButton button)
+            public override void OnKeyboardReturn(int textID, string text)
             {
-                CanMove = true;
+                if (string.IsNullOrWhiteSpace(text))
+                {
+                    text = ResGumps.NoName;
+                    _textbox.SetText(text);
+                }
+
+                int width = FontsLoader.Instance.GetWidthASCII(6, text);
+                int xx = width + 11 + 16;
+
+                if (xx > 0)
+                {
+                    _gumpPic.IsVisible = true;
+                    _gumpPic.X = xx;
+                    _gumpPic.Width = 215 - xx;
+                }
+                else
+                {
+                    _gumpPic.IsVisible = false;
+                }
+
+                UIManager.KeyboardFocusControl = null;
+                UIManager.SystemChat.SetFocus();
+
+                _group.Name = text;
+
+                base.OnKeyboardReturn(textID, text);
+            }
+
+            protected override void OnKeyUp(SDL.SDL_Keycode key, SDL.SDL_Keymod mod)
+            {
+                base.OnKeyUp(key, mod);
+
+                if (key == SDL.SDL_Keycode.SDLK_DELETE && _status == 1)
+                {
+                    if (SkillsGroupManager.Remove(_group) && RootParent is StandardSkillsGump gump)
+                    {
+                        SkillsGroupControl first = gump._skillsControl[0];
+
+                        while (_box.Children.Count != 0)
+                        {
+                            SkillItemControl skillControl = (SkillItemControl) _box.Children[0];
+
+                            int itemCount = first._group.Count;
+
+                            for (int i = 0; i < itemCount; i++)
+                            {
+                                if (first._group.GetSkill(i) == skillControl.Index)
+                                {
+                                    first._skills.Insert(i, skillControl);
+                                    first._box.Insert(i, skillControl);
+
+                                    if (!first._button.IsVisible)
+                                    {
+                                        first._button.IsVisible = true;
+                                    }
+
+                                    break;
+                                }
+                            }
+                        }
+
+                        _skills.Clear();
+                        Dispose();
+
+                        first.UpdateSkillsPosition();
+                    }
+                }
+            }
+
+            public override void OnButtonClick(int buttonID)
+            {
+                if (buttonID == 1000)
+                {
+                    IsMinimized = !IsMinimized;
+                }
+            }
+
+            private void UpdateSkillsPosition()
+            {
+                int currY = 17;
+
+                foreach (SkillItemControl c in _skills)
+                {
+                    c.Y = currY;
+                    currY += 17;
+                }
+
+                _box.WantUpdateSize = true;
+                WantUpdateSize = true;
             }
 
             public override bool Draw(UltimaBatcher2D batcher, int x, int y)
             {
                 ResetHueVector();
 
-                if (!CanMove) batcher.Draw2D(Textures.GetTexture(Color.Wheat), x, y, Width, Height, ref _hueVector);
+                if (_status == 2)
+                {
+                    batcher.Draw2D
+                    (
+                        SolidColorTextureCache.GetTexture(Color.Beige),
+                        x,
+                        y,
+                        Width,
+                        17,
+                        ref HueVector
+                    );
+                }
+                else if (_status == 1)
+                {
+                    batcher.Draw2D
+                    (
+                        SolidColorTextureCache.GetTexture(Color.Bisque),
+                        x + 16,
+                        y,
+                        200,
+                        17,
+                        ref HueVector
+                    );
+                }
 
                 return base.Draw(batcher, x, y);
             }
+        }
+
+        private class SkillItemControl : Control
+        {
+            private readonly Button _buttonStatus;
+            private Lock _status;
+            private readonly Label _value;
 
 
-            public void UpdateSkillValue(StandardSkillsGump skg)
+            public SkillItemControl(int index, int x, int y)
             {
-                Skill skill = World.Player.Skills[_skillIndex];
+                Index = index;
+                X = x;
+                Y = y;
+
+                if (index < 0 || index >= SkillsLoader.Instance.Skills.Count)
+                {
+                    Dispose();
+
+                    return;
+                }
+
+                Skill skill = World.Player.Skills[Index];
 
                 if (skill != null)
                 {
-                    _labelValue.Text = (skg == null || skg._checkCaps.IsChecked ? skill.Cap : skg._checkReal.IsChecked ? skill.Base : skill.Value).ToString("F1");
+                    if (skill.IsClickable)
+                    {
+                        Button buttonUse = new Button(0, 0x0837, 0x0838, 0x0838)
+                        {
+                            ButtonAction = ButtonAction.Activate,
+                            X = 8
+                        };
 
+                        Add(buttonUse);
+                    }
 
-                    ushort graphic = GetLockValue(skill.Lock);
-                    _lock.Graphic = graphic;
-                    _lock.Texture = FileManager.Gumps.GetTexture(graphic);
+                    _status = skill.Lock;
+
+                    ushort graphic = GetStatusButtonGraphic();
+
+                    _buttonStatus = new Button(1, graphic, graphic, graphic)
+                    {
+                        ButtonAction = ButtonAction.Activate,
+                        X = 251,
+                        ContainsByBounds = true
+                    };
+
+                    Add(_buttonStatus);
+
+                    Label name;
+                    Add(name = new Label(skill.Name, false, 0x0288, font: 9));
+                    name.X = 22;
+
+                    Add(_value = new Label("", false, 0x0288, font: 9));
+
+                    UpdateValueText(false, false);
                 }
+                else
+                {
+                    Dispose();
+
+                    return;
+                }
+
+
+                Width = 255;
+                Height = 17;
+                WantUpdateSize = true;
+                AcceptMouseInput = true;
+                CanMove = false;
+            }
+
+            public readonly int Index;
+
+
+            public override void OnButtonClick(int buttonID)
+            {
+                if (buttonID == 0) // use
+                {
+                    GameActions.UseSkill(Index);
+                }
+                else if (buttonID == 1) // change status
+                {
+                    if (World.Player == null)
+                    {
+                        return;
+                    }
+
+                    Skill skill = World.Player.Skills[Index];
+                    byte newStatus = (byte) skill.Lock;
+
+                    if (newStatus < 2)
+                    {
+                        newStatus++;
+                    }
+                    else
+                    {
+                        newStatus = 0;
+                    }
+
+                    NetClient.Socket.Send(new PSkillsStatusChangeRequest((ushort) Index, newStatus));
+
+                    skill.Lock = (Lock) newStatus;
+                    SetStatus((Lock) newStatus);
+                }
+            }
+
+            public void SetStatus(Lock status)
+            {
+                _status = status;
+                ushort graphic = GetStatusButtonGraphic();
+
+                _buttonStatus.ButtonGraphicNormal = graphic;
+                _buttonStatus.ButtonGraphicOver = graphic;
+                _buttonStatus.ButtonGraphicPressed = graphic;
+            }
+
+            public void UpdateValueText(bool showReal, bool showCap)
+            {
+                if (World.Player == null || Index < 0 || Index >= World.Player.Skills.Length)
+                {
+                    return;
+                }
+
+                Skill skill = World.Player.Skills[Index];
+
+                if (skill != null)
+                {
+                    double val = skill.Value;
+
+                    if (showReal)
+                    {
+                        val = skill.Base;
+                    }
+                    else if (showCap)
+                    {
+                        val = skill.Cap;
+                    }
+
+                    _value.Text = $"{val:F1}";
+                    _value.X = 250 - _value.Width;
+                }
+            }
+
+            private ushort GetStatusButtonGraphic()
+            {
+                switch (_status)
+                {
+                    default:
+                    case Lock.Up: return 0x0984;
+
+                    case Lock.Down: return 0x0986;
+
+                    case Lock.Locked: return 0x082C;
+                }
+            }
+
+            protected override void OnMouseUp(int x, int y, MouseButtonType button)
+            {
+                if (button != MouseButtonType.Left)
+                {
+                    return;
+                }
+
+                UIManager.GameCursor.IsDraggingCursorForced = false;
+
+                if (UIManager.LastControlMouseDown(MouseButtonType.Left) == this && World.Player.Skills[Index].IsClickable)
+                {
+                    if (UIManager.MouseOverControl == null || UIManager.MouseOverControl.RootParent != RootParent)
+                    {
+                        GetSpellFloatingButton(Index)?.Dispose();
+
+                        if (Index >= 0 && Index < World.Player.Skills.Length)
+                        {
+                            UIManager.Add(new SkillButtonGump(World.Player.Skills[Index], Mouse.Position.X - 44, Mouse.Position.Y - 22));
+                        }
+                    }
+                }
+            }
+
+            private static SkillButtonGump GetSpellFloatingButton(int id)
+            {
+                for (LinkedListNode<Gump> i = UIManager.Gumps.Last; i != null; i = i.Previous)
+                {
+                    if (i.Value is SkillButtonGump g && g.SkillID == id)
+                    {
+                        return g;
+                    }
+                }
+
+                return null;
+            }
+
+            protected override void OnMouseDown(int x, int y, MouseButtonType button)
+            {
+                if (button == MouseButtonType.Left)
+                {
+                    UIManager.GameCursor.IsDraggingCursorForced = true;
+                }
+            }
+
+            public override bool Draw(UltimaBatcher2D batcher, int x, int y)
+            {
+                ResetHueVector();
+
+                if (UIManager.LastControlMouseDown(MouseButtonType.Left) == this)
+                {
+                    batcher.Draw2D
+                    (
+                        SolidColorTextureCache.GetTexture(Color.Wheat),
+                        x,
+                        y,
+                        Width,
+                        Height,
+                        ref HueVector
+                    );
+                }
+
+                return base.Draw(batcher, x, y);
             }
         }
     }

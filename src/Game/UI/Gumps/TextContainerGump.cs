@@ -1,51 +1,73 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿#region license
+
+// Copyright (c) 2021, andreakarasho
+// All rights reserved.
+// 
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+// 1. Redistributions of source code must retain the above copyright
+//    notice, this list of conditions and the following disclaimer.
+// 2. Redistributions in binary form must reproduce the above copyright
+//    notice, this list of conditions and the following disclaimer in the
+//    documentation and/or other materials provided with the distribution.
+// 3. All advertising materials mentioning features or use of this software
+//    must display the following acknowledgement:
+//    This product includes software developed by andreakarasho - https://github.com/andreakarasho
+// 4. Neither the name of the copyright holder nor the
+//    names of its contributors may be used to endorse or promote products
+//    derived from this software without specific prior written permission.
+// 
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ''AS IS'' AND ANY
+// EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+// WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+// DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY
+// DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+// (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+// LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+// ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+// SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+#endregion
 
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
-using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
-
-using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Input;
-
-using Mouse = ClassicUO.Input.Mouse;
 
 namespace ClassicUO.Game.UI.Gumps
 {
-    abstract class TextContainerGump : Gump
+    internal abstract class TextContainerGump : Gump
     {
-        protected TextContainerGump(Serial local, Serial server) : base(local, server)
+        protected TextContainerGump(uint local, uint server) : base(local, server)
         {
-
         }
 
         public TextRenderer TextRenderer { get; } = new TextRenderer();
 
 
-        public void AddText(TextOverhead msg)
+        public void AddText(TextObject msg)
         {
-            if (World.ClientFeatures.TooltipsEnabled || msg == null)
+            if (msg == null)
+            {
                 return;
+            }
 
             msg.Time = Time.Ticks + 4000;
-           
+
             TextRenderer.AddMessage(msg);
         }
 
-        public override void Update(double totalMS, double frameMS)
+        public override void Update(double totalTime, double frameTime)
         {
-            base.Update(totalMS, frameMS);
-            TextRenderer.Update(totalMS, frameMS);
+            base.Update(totalTime, frameTime);
+            TextRenderer.Update(totalTime, frameTime);
         }
 
         public override void Dispose()
         {
-            TextRenderer.Clear();
+            TextRenderer.UnlinkD();
+
+            //TextRenderer.Clear();
             base.Dispose();
         }
 
@@ -56,7 +78,16 @@ namespace ClassicUO.Game.UI.Gumps
 
             //TextRenderer.MoveToTopIfSelected();
             TextRenderer.ProcessWorldText(true);
-            TextRenderer.Draw(batcher, x, y, -1, true);
+
+            TextRenderer.Draw
+            (
+                batcher,
+                x,
+                y,
+                -1,
+                true
+            );
+
             return true;
         }
     }

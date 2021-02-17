@@ -1,5 +1,36 @@
-using System.Text;
+#region license
 
+// Copyright (c) 2021, andreakarasho
+// All rights reserved.
+// 
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+// 1. Redistributions of source code must retain the above copyright
+//    notice, this list of conditions and the following disclaimer.
+// 2. Redistributions in binary form must reproduce the above copyright
+//    notice, this list of conditions and the following disclaimer in the
+//    documentation and/or other materials provided with the distribution.
+// 3. All advertising materials mentioning features or use of this software
+//    must display the following acknowledgement:
+//    This product includes software developed by andreakarasho - https://github.com/andreakarasho
+// 4. Neither the name of the copyright holder nor the
+//    names of its contributors may be used to endorse or promote products
+//    derived from this software without specific prior written permission.
+// 
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ''AS IS'' AND ANY
+// EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+// WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+// DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY
+// DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+// (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+// LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+// ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+// SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+#endregion
+
+using System.Text;
 using ClassicUO.IO.Audio.MP3Sharp.Support;
 
 namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
@@ -32,8 +63,8 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
 
         public static readonly int[][] frequencies =
         {
-            new[] {22050, 24000, 16000, 1}, new[] {44100, 48000, 32000, 1},
-            new[] {11025, 12000, 8000, 1}
+            new[] { 22050, 24000, 16000, 1 }, new[] { 44100, 48000, 32000, 1 },
+            new[] { 11025, 12000, 8000, 1 }
         }; // SZD: MPEG25
 
         // E.B -> private to public
@@ -171,9 +202,7 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
                 }
             }
         };
-        public short checksum;
         private Crc16 crc;
-        public int framesize;
         private bool h_copyright, h_original;
 
         private int h_headerstring = -1;
@@ -182,7 +211,6 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
         private int h_number_of_subbands, h_intensity_stereo_bound;
         private int h_sample_frequency;
         private int h_version;
-        public int nSlots;
         private sbyte syncmode;
         // E.B
 
@@ -195,6 +223,10 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
         ///     Returns synchronized header.
         /// </summary>
         public virtual int SyncHeader => h_headerstring;
+
+        public short checksum;
+        public int framesize;
+        public int nSlots;
 
         private void InitBlock()
         {
@@ -212,7 +244,10 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
             buffer.Append(version_string());
 
             if (!IsProtection())
+            {
                 buffer.Append(" no");
+            }
+
             buffer.Append(" checksums");
             buffer.Append(' ');
             buffer.Append(sample_frequency_string());
@@ -248,12 +283,19 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
                         // SZD: MPEG2.5 detection
                     {
                         if (h_version == MPEG2_LSF)
+                        {
                             h_version = MPEG25_LSF;
+                        }
                         else
+                        {
                             throw stream.newBitstreamException(BitstreamErrors.UNKNOWN_ERROR);
+                        }
                     }
 
-                    if ((h_sample_frequency = SupportClass.URShift(headerstring, 10) & 3) == 3) throw stream.newBitstreamException(BitstreamErrors.UNKNOWN_ERROR);
+                    if ((h_sample_frequency = SupportClass.URShift(headerstring, 10) & 3) == 3)
+                    {
+                        throw stream.newBitstreamException(BitstreamErrors.UNKNOWN_ERROR);
+                    }
                 }
 
                 h_layer = (4 - SupportClass.URShift(headerstring, 17)) & 3;
@@ -264,20 +306,30 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
                 h_mode_extension = SupportClass.URShift(headerstring, 4) & 3;
 
                 if (h_mode == JOINT_STEREO)
+                {
                     h_intensity_stereo_bound = (h_mode_extension << 2) + 4;
+                }
                 else
+                {
                     h_intensity_stereo_bound = 0;
+                }
 
                 // should never be used
                 if ((SupportClass.URShift(headerstring, 3) & 1) == 1)
+                {
                     h_copyright = true;
+                }
 
                 if ((SupportClass.URShift(headerstring, 2) & 1) == 1)
+                {
                     h_original = true;
+                }
 
                 // calculate number of subbands:
                 if (h_layer == 1)
+                {
                     h_number_of_subbands = 32;
+                }
                 else
                 {
                     channel_bitrate = h_bitrate_index;
@@ -286,26 +338,41 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
                     if (h_mode != SINGLE_CHANNEL)
                     {
                         if (channel_bitrate == 4)
+                        {
                             channel_bitrate = 1;
+                        }
                         else
+                        {
                             channel_bitrate -= 4;
+                        }
                     }
 
                     if (channel_bitrate == 1 || channel_bitrate == 2)
                     {
                         if (h_sample_frequency == THIRTYTWO)
+                        {
                             h_number_of_subbands = 12;
+                        }
                         else
+                        {
                             h_number_of_subbands = 8;
+                        }
                     }
                     else if (h_sample_frequency == FOURTYEIGHT || channel_bitrate >= 3 && channel_bitrate <= 5)
+                    {
                         h_number_of_subbands = 27;
+                    }
                     else
+                    {
                         h_number_of_subbands = 30;
+                    }
                 }
 
                 if (h_intensity_stereo_bound > h_number_of_subbands)
+                {
                     h_intensity_stereo_bound = h_number_of_subbands;
+                }
+
                 // calculate framesize and nSlots
                 calculate_framesize();
 
@@ -323,7 +390,9 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
                     sync = true;
                 }
                 else
+                {
                     stream.unreadFrame();
+                }
             } while (!sync);
 
             stream.ParseFrame();
@@ -334,12 +403,17 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
                 checksum = (short) stream.GetBitsFromBuffer(16);
 
                 if (crc == null)
+                {
                     crc = new Crc16();
+                }
+
                 crc.add_bits(headerstring, 16);
                 crcp[0] = crc;
             }
             else
+            {
                 crcp[0] = null;
+            }
 
             if (h_sample_frequency == FOURTYFOUR_POINT_ONE)
             {
@@ -420,7 +494,9 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
         public bool IsProtection()
         {
             if (h_protection_bit == 0)
+            {
                 return true;
+            }
 
             return false;
         }
@@ -457,7 +533,9 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
         public bool IsPadding()
         {
             if (h_padding_bit == 0)
+            {
                 return false;
+            }
 
             return true;
         }
@@ -490,39 +568,45 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
                 framesize = 12 * bitrates[h_version][0][h_bitrate_index] / frequencies[h_version][h_sample_frequency];
 
                 if (h_padding_bit != 0)
+                {
                     framesize++;
+                }
+
                 framesize <<= 2; // one slot is 4 bytes long
                 nSlots = 0;
             }
             else
             {
-                framesize = 144 * bitrates[h_version][h_layer - 1][h_bitrate_index] /
-                            frequencies[h_version][h_sample_frequency];
+                framesize = 144 * bitrates[h_version][h_layer - 1][h_bitrate_index] / frequencies[h_version][h_sample_frequency];
 
                 if (h_version == MPEG2_LSF || h_version == MPEG25_LSF)
+                {
                     framesize >>= 1;
+                }
 
                 // SZD
                 if (h_padding_bit != 0)
+                {
                     framesize++;
+                }
 
                 // Layer III slots
                 if (h_layer == 3)
                 {
                     if (h_version == MPEG1)
                     {
-                        nSlots = framesize - (h_mode == SINGLE_CHANNEL ? 17 : 32) - (h_protection_bit != 0 ? 0 : 2) -
-                                 4; // header size
+                        nSlots = framesize - (h_mode == SINGLE_CHANNEL ? 17 : 32) - (h_protection_bit != 0 ? 0 : 2) - 4; // header size
                     }
                     else
                     {
                         // MPEG-2 LSF, SZD: MPEG-2.5 LSF
-                        nSlots = framesize - (h_mode == SINGLE_CHANNEL ? 9 : 17) - (h_protection_bit != 0 ? 0 : 2) -
-                                 4; // header size
+                        nSlots = framesize - (h_mode == SINGLE_CHANNEL ? 9 : 17) - (h_protection_bit != 0 ? 0 : 2) - 4; // header size
                     }
                 }
                 else
+                {
                     nSlots = 0;
+                }
             }
 
             framesize -= 4; // subtract header size
@@ -537,7 +621,9 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
             // E.B
         {
             if (framesize + 4 - h_padding_bit == 0)
+            {
                 return 0;
+            }
 
             return streamsize / (framesize + 4 - h_padding_bit);
         }
@@ -549,7 +635,9 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
             // E.B
         {
             if (framesize + 5 - h_padding_bit == 0)
+            {
                 return 0;
+            }
 
             return streamsize / (framesize + 5 - h_padding_bit);
         }
@@ -562,8 +650,8 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
         {
             float[][] ms_per_frame_array =
             {
-                new[] {8.707483f, 8.0f, 12.0f}, new[] {26.12245f, 24.0f, 36.0f},
-                new[] {26.12245f, 24.0f, 36.0f}
+                new[] { 8.707483f, 8.0f, 12.0f }, new[] { 26.12245f, 24.0f, 36.0f },
+                new[] { 26.12245f, 24.0f, 36.0f }
             };
 
             return ms_per_frame_array[h_layer - 1][h_sample_frequency];
@@ -586,17 +674,11 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
         {
             switch (h_layer)
             {
-                case 1:
+                case 1: return "I";
 
-                    return "I";
+                case 2: return "II";
 
-                case 2:
-
-                    return "II";
-
-                case 3:
-
-                    return "III";
+                case 3: return "III";
             }
 
             return null;
@@ -620,30 +702,42 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
                 case THIRTYTWO:
 
                     if (h_version == MPEG1)
+                    {
                         return "32 kHz";
+                    }
 
                     if (h_version == MPEG2_LSF)
+                    {
                         return "16 kHz";
+                    }
 
                     return "8 kHz";
 
                 case FOURTYFOUR_POINT_ONE:
 
                     if (h_version == MPEG1)
+                    {
                         return "44.1 kHz";
+                    }
 
                     if (h_version == MPEG2_LSF)
+                    {
                         return "22.05 kHz";
+                    }
 
                     return "11.025 kHz";
 
                 case FOURTYEIGHT:
 
                     if (h_version == MPEG1)
+                    {
                         return "48 kHz";
+                    }
 
                     if (h_version == MPEG2_LSF)
+                    {
                         return "24 kHz";
+                    }
 
                     return "12 kHz";
             }
@@ -658,21 +752,13 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
         {
             switch (h_mode)
             {
-                case STEREO:
+                case STEREO: return "Stereo";
 
-                    return "Stereo";
+                case JOINT_STEREO: return "Joint stereo";
 
-                case JOINT_STEREO:
+                case DUAL_CHANNEL: return "Dual channel";
 
-                    return "Joint stereo";
-
-                case DUAL_CHANNEL:
-
-                    return "Dual channel";
-
-                case SINGLE_CHANNEL:
-
-                    return "Single channel";
+                case SINGLE_CHANNEL: return "Single channel";
             }
 
             return null;
@@ -685,17 +771,11 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
         {
             switch (h_version)
             {
-                case MPEG1:
+                case MPEG1: return "MPEG-1";
 
-                    return "MPEG-1";
+                case MPEG2_LSF: return "MPEG-2 LSF";
 
-                case MPEG2_LSF:
-
-                    return "MPEG-2 LSF";
-
-                case MPEG25_LSF:
-
-                    return "MPEG-2.5 LSF";
+                case MPEG25_LSF: return "MPEG-2.5 LSF";
             }
 
             return null;

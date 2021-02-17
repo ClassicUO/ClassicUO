@@ -1,5 +1,36 @@
-using System;
+#region license
 
+// Copyright (c) 2021, andreakarasho
+// All rights reserved.
+// 
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+// 1. Redistributions of source code must retain the above copyright
+//    notice, this list of conditions and the following disclaimer.
+// 2. Redistributions in binary form must reproduce the above copyright
+//    notice, this list of conditions and the following disclaimer in the
+//    documentation and/or other materials provided with the distribution.
+// 3. All advertising materials mentioning features or use of this software
+//    must display the following acknowledgement:
+//    This product includes software developed by andreakarasho - https://github.com/andreakarasho
+// 4. Neither the name of the copyright holder nor the
+//    names of its contributors may be used to endorse or promote products
+//    derived from this software without specific prior written permission.
+// 
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ''AS IS'' AND ANY
+// EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+// WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+// DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY
+// DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+// (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+// LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+// ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+// SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+#endregion
+
+using System;
 using ClassicUO.IO.Audio.MP3Sharp.Decoding.Decoders;
 
 namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
@@ -10,7 +41,6 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
     internal class Decoder
     {
         private static readonly Params DEFAULT_PARAMS = new Params();
-        private readonly Params params_Renamed;
         private Equalizer m_Equalizer;
 
         private bool m_IsInitialized;
@@ -25,6 +55,7 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
         private int m_OutputChannels;
         private int m_OutputFrequency;
         private SynthesisFilter m_RightChannelFilter;
+        private readonly Params params_Renamed;
 
         /// <summary>
         ///     Creates a new Decoder instance with default parameters.
@@ -42,12 +73,18 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
             InitBlock();
 
             if (params0 == null)
+            {
                 params0 = DEFAULT_PARAMS;
+            }
 
             params_Renamed = params0;
 
             Equalizer eq = params_Renamed.InitialEqualizerSettings;
-            if (eq != null) m_Equalizer.FromEqualizer = eq;
+
+            if (eq != null)
+            {
+                m_Equalizer.FromEqualizer = eq;
+            }
         }
 
         public static Params DefaultParams => (Params) DEFAULT_PARAMS.Clone();
@@ -57,17 +94,23 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
             set
             {
                 if (value == null)
+                {
                     value = Equalizer.PASS_THRU_EQ;
+                }
 
                 m_Equalizer.FromEqualizer = value;
 
                 float[] factors = m_Equalizer.BandFactors;
 
                 if (m_LeftChannelFilter != null)
+                {
                     m_LeftChannelFilter.EQ = factors;
+                }
 
                 if (m_RightChannelFilter != null)
+                {
                     m_RightChannelFilter.EQ = factors;
+                }
             }
         }
 
@@ -123,7 +166,10 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
         /// </returns>
         public virtual ABuffer DecodeFrame(Header header, Bitstream stream)
         {
-            if (!m_IsInitialized) Initialize(header);
+            if (!m_IsInitialized)
+            {
+                Initialize(header);
+            }
 
             int layer = header.layer();
 
@@ -160,8 +206,15 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
 
                     if (m_L3Decoder == null)
                     {
-                        m_L3Decoder = new LayerIIIDecoder(stream, header, m_LeftChannelFilter, m_RightChannelFilter, m_Output,
-                                                          (int) OutputChannelsEnum.BOTH_CHANNELS);
+                        m_L3Decoder = new LayerIIIDecoder
+                        (
+                            stream,
+                            header,
+                            m_LeftChannelFilter,
+                            m_RightChannelFilter,
+                            m_Output,
+                            (int) OutputChannelsEnum.BOTH_CHANNELS
+                        );
                     }
 
                     decoder = m_L3Decoder;
@@ -174,8 +227,15 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
                     {
                         m_L2Decoder = new LayerIIDecoder();
 
-                        m_L2Decoder.Create(stream, header, m_LeftChannelFilter, m_RightChannelFilter, m_Output,
-                                           (int) OutputChannelsEnum.BOTH_CHANNELS);
+                        m_L2Decoder.Create
+                        (
+                            stream,
+                            header,
+                            m_LeftChannelFilter,
+                            m_RightChannelFilter,
+                            m_Output,
+                            (int) OutputChannelsEnum.BOTH_CHANNELS
+                        );
                     }
 
                     decoder = m_L2Decoder;
@@ -188,8 +248,15 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
                     {
                         m_L1Decoder = new LayerIDecoder();
 
-                        m_L1Decoder.Create(stream, header, m_LeftChannelFilter, m_RightChannelFilter, m_Output,
-                                           (int) OutputChannelsEnum.BOTH_CHANNELS);
+                        m_L1Decoder.Create
+                        (
+                            stream,
+                            header,
+                            m_LeftChannelFilter,
+                            m_RightChannelFilter,
+                            m_Output,
+                            (int) OutputChannelsEnum.BOTH_CHANNELS
+                        );
                     }
 
                     decoder = m_L1Decoder;
@@ -197,7 +264,10 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
                     break;
             }
 
-            if (decoder == null) throw NewDecoderException(DecoderErrors.UNSUPPORTED_LAYER, null);
+            if (decoder == null)
+            {
+                throw NewDecoderException(DecoderErrors.UNSUPPORTED_LAYER, null);
+            }
 
             return decoder;
         }
@@ -213,7 +283,9 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
 
             // set up output buffer if not set up by client.
             if (m_Output == null)
+            {
                 m_Output = new SampleBuffer(header.frequency(), channels);
+            }
 
             float[] factors = m_Equalizer.BandFactors;
             //Console.WriteLine("NOT CREATING SYNTHESIS FILTERS");
@@ -221,7 +293,9 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
 
             // REVIEW: allow mono output for stereo
             if (channels == 2)
+            {
                 m_RightChannelFilter = new SynthesisFilter(1, scalefactor, factors);
+            }
 
             m_OutputChannels = channels;
             m_OutputFrequency = header.frequency();
@@ -244,7 +318,9 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
                 set
                 {
                     if (value == null)
+                    {
                         throw new NullReferenceException("out");
+                    }
 
                     m_OutputChannels = value;
                 }

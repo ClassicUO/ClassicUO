@@ -1,30 +1,38 @@
 ﻿#region license
 
-//  Copyright (C) 2019 ClassicUO Development Community on Github
-//
-//	This project is an alternative client for the game Ultima Online.
-//	The goal of this is to develop a lightweight client considering 
-//	new technologies.  
-//      
-//  This program is free software: you can redistribute it and/or modify
-//  it under the terms of the GNU General Public License as published by
-//  the Free Software Foundation, either version 3 of the License, or
-//  (at your option) any later version.
-//
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-//
-//  You should have received a copy of the GNU General Public License
-//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// Copyright (c) 2021, andreakarasho
+// All rights reserved.
+// 
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+// 1. Redistributions of source code must retain the above copyright
+//    notice, this list of conditions and the following disclaimer.
+// 2. Redistributions in binary form must reproduce the above copyright
+//    notice, this list of conditions and the following disclaimer in the
+//    documentation and/or other materials provided with the distribution.
+// 3. All advertising materials mentioning features or use of this software
+//    must display the following acknowledgement:
+//    This product includes software developed by andreakarasho - https://github.com/andreakarasho
+// 4. Neither the name of the copyright holder nor the
+//    names of its contributors may be used to endorse or promote products
+//    derived from this software without specific prior written permission.
+// 
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ''AS IS'' AND ANY
+// EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+// WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+// DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY
+// DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+// (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+// LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+// ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+// SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #endregion
 
 using System;
 using System.IO;
 using System.Threading.Tasks;
-
 using ClassicUO.Game;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
@@ -33,190 +41,172 @@ namespace ClassicUO.IO.Resources
 {
     internal class TexmapsLoader : UOFileLoader<UOTexture>
     {
-        private readonly ushort[] _textmapPixels128 = new ushort[128 * 128];
-        private readonly ushort[] _textmapPixels64 = new ushort[64 * 64];
+        private static TexmapsLoader _instance;
         private UOFile _file;
-        //private readonly List<uint> _usedIndex = new List<uint>();
 
+        private TexmapsLoader(int count) : base(count)
+        {
+        }
+
+        public static TexmapsLoader Instance =>
+            _instance ?? (_instance = new TexmapsLoader(Constants.MAX_LAND_TEXTURES_DATA_INDEX_COUNT));
 
         public override Task Load()
         {
-            return Task.Run(() =>
-            {
-                string path = Path.Combine(FileManager.UoFolderPath, "texmaps.mul");
-                string pathidx = Path.Combine(FileManager.UoFolderPath, "texidx.mul");
-
-                FileSystemHelper.EnsureFileExists(path);
-                FileSystemHelper.EnsureFileExists(pathidx);
-
-                _file = new UOFileMul(path, pathidx, Constants.MAX_LAND_TEXTURES_DATA_INDEX_COUNT, 10);
-                _file.FillEntries(ref Entries);
-                string pathdef = Path.Combine(FileManager.UoFolderPath, "TexTerr.def");
-
-                if (!File.Exists(pathdef))
-                    return;
-
-                using (DefReader defReader = new DefReader(pathdef))
+            return Task.Run
+            (
+                () =>
                 {
-                    while (defReader.Next())
+                    string path = UOFileManager.GetUOFilePath("texmaps.mul");
+                    string pathidx = UOFileManager.GetUOFilePath("texidx.mul");
+
+                    FileSystemHelper.EnsureFileExists(path);
+                    FileSystemHelper.EnsureFileExists(pathidx);
+
+                    _file = new UOFileMul(path, pathidx, Constants.MAX_LAND_TEXTURES_DATA_INDEX_COUNT, 10);
+                    _file.FillEntries(ref Entries);
+                    string pathdef = UOFileManager.GetUOFilePath("TexTerr.def");
+
+                    if (!File.Exists(pathdef))
                     {
-                        int index = defReader.ReadInt();
+                        return;
+                    }
 
-                        if (index < 0 || index >= Constants.MAX_LAND_TEXTURES_DATA_INDEX_COUNT)
-                            continue;
-
-                        int[] group = defReader.ReadGroup();
-
-                        for (int i = 0; i < group.Length; i++)
+                    using (DefReader defReader = new DefReader(pathdef))
+                    {
+                        while (defReader.Next())
                         {
-                            int checkindex = group[i];
+                            int index = defReader.ReadInt();
 
-                            if (checkindex < 0 || checkindex >= Constants.MAX_LAND_TEXTURES_DATA_INDEX_COUNT)
+                            if (index < 0 || index >= Constants.MAX_LAND_TEXTURES_DATA_INDEX_COUNT)
+                            {
                                 continue;
+                            }
 
-                            Entries[index] = Entries[checkindex];
+                            int[] group = defReader.ReadGroup();
+
+                            if (group == null)
+                            {
+                                continue;
+                            }
+
+                            for (int i = 0; i < group.Length; i++)
+                            {
+                                int checkindex = group[i];
+
+                                if (checkindex < 0 || checkindex >= Constants.MAX_LAND_TEXTURES_DATA_INDEX_COUNT)
+                                {
+                                    continue;
+                                }
+
+                                Entries[index] = Entries[checkindex];
+                            }
                         }
                     }
+
+                    //using (StreamReader reader = new StreamReader(File.OpenRead(pathdef)))
+                    //{
+                    //    string line;
+
+                    //    while ((line = reader.ReadLine()) != null)
+                    //    {
+                    //        line = line.Trim();
+
+                    //        if (line.Length <= 0 || line[0] == '#')
+                    //            continue;
+
+                    //        string[] defs = line.Split(new[]
+                    //        {
+                    //            '\t', ' ', '#'
+                    //        }, StringSplitOptions.RemoveEmptyEntries);
+
+                    //        if (defs.Length < 2)
+                    //            continue;
+                    //        int index = int.Parse(defs[0]);
+
+                    //        if (index < 0 || index >= TEXTMAP_COUNT)
+                    //            continue;
+                    //        int first = defs[1].IndexOf("{");
+                    //        int last = defs[1].IndexOf("}");
+
+                    //        string[] newdef = defs[1].Substring(first + 1, last - 1).Split(new[]
+                    //        {
+                    //            ' ', ','
+                    //        }, StringSplitOptions.RemoveEmptyEntries);
+
+                    //        foreach (string s in newdef)
+                    //        {
+                    //            int checkindex = int.Parse(s);
+
+                    //            if (checkindex < 0 || checkindex >= TEXTMAP_COUNT)
+                    //                continue;
+                    //            _file.Entries[index] = _file.Entries[checkindex];
+                    //        }
+                    //    }
+                    //}
                 }
-
-                //using (StreamReader reader = new StreamReader(File.OpenRead(pathdef)))
-                //{
-                //    string line;
-
-                //    while ((line = reader.ReadLine()) != null)
-                //    {
-                //        line = line.Trim();
-
-                //        if (line.Length <= 0 || line[0] == '#')
-                //            continue;
-
-                //        string[] defs = line.Split(new[]
-                //        {
-                //            '\t', ' ', '#'
-                //        }, StringSplitOptions.RemoveEmptyEntries);
-
-                //        if (defs.Length < 2)
-                //            continue;
-                //        int index = int.Parse(defs[0]);
-
-                //        if (index < 0 || index >= TEXTMAP_COUNT)
-                //            continue;
-                //        int first = defs[1].IndexOf("{");
-                //        int last = defs[1].IndexOf("}");
-
-                //        string[] newdef = defs[1].Substring(first + 1, last - 1).Split(new[]
-                //        {
-                //            ' ', ','
-                //        }, StringSplitOptions.RemoveEmptyEntries);
-
-                //        foreach (string s in newdef)
-                //        {
-                //            int checkindex = int.Parse(s);
-
-                //            if (checkindex < 0 || checkindex >= TEXTMAP_COUNT)
-                //                continue;
-                //            _file.Entries[index] = _file.Entries[checkindex];
-                //        }
-                //    }
-                //}
-            });
-
+            );
         }
 
         public override UOTexture GetTexture(uint g)
         {
-            if (!ResourceDictionary.TryGetValue(g, out UOTexture texture) || texture.IsDisposed)
+            if (g >= Resources.Length)
             {
-                ushort[] pixels = GetTextmapTexture((ushort) g, out int size);
-
-                if (pixels == null || pixels.Length == 0)
-                    return null;
-
-                texture = new UOTexture16(size, size);
-                texture.SetData(pixels);
-                //_usedIndex.Add(g);
-                ResourceDictionary.Add(g, texture);
+                return null;
             }
-            //else
-            //    texture.Ticks = Time.Ticks + 3000;
+
+            ref UOTexture texture = ref Resources[g];
+
+            if (texture == null || texture.IsDisposed)
+            {
+                ReadTexmapTexture(ref texture, (ushort) g);
+
+                if (texture != null)
+                {
+                    SaveId(g);
+                }
+            }
+            else
+            {
+                texture.Ticks = Time.Ticks;
+            }
 
             return texture;
         }
 
-        public override void CleanResources()
+        private unsafe void ReadTexmapTexture(ref UOTexture texture, ushort index)
         {
-            throw new NotImplementedException();
-        }
-
-        //public void ClearUnusedTextures()
-        //{
-        //    int count = 0;
-        //    long ticks = Time.Ticks - 3000;
-
-        //    for (int i = 0; i < _usedIndex.Count; i++)
-        //    {
-        //        uint g = _usedIndex[i];
-        //        UOTexture texture = ResourceDictionary[g];
-
-        //        if (texture.Ticks < ticks)
-        //        {
-        //            texture.Dispose();
-        //            _usedIndex.RemoveAt(i--);
-        //            ResourceDictionary.Remove(g);
-
-        //            if (++count >= 20)
-        //                break;
-        //        }
-        //    }
-        //}
-
-        //public void Clear()
-        //{
-        //    for (int i = 0; i < _usedIndex.Count; i++)
-        //    {
-        //        uint g = _usedIndex[i];
-        //        UOTexture texture = ResourceDictionary[g];
-        //        texture.Dispose();
-        //        _usedIndex.RemoveAt(i--);
-        //        ResourceDictionary.Remove(g);
-        //    }
-        //}
-
-        private ushort[] GetTextmapTexture(ushort index, out int size)
-        {
-            ref readonly var entry = ref GetValidRefEntry(index);
+            ref UOFileIndex entry = ref GetValidRefEntry(index);
 
             if (entry.Length <= 0)
             {
-                size = 0;
+                texture = null;
 
-                return null;
+                return;
             }
 
-            ushort[] pixels;
+            int size = entry.Width == 0 && entry.Height == 0 ? 64 : 128;
+            int size_pot = size * size;
 
-            if (entry.Extra == 0)
-            {
-                size = 64;
-                pixels = _textmapPixels64;
-            }
-            else
-            {
-                size = 128;
-                pixels = _textmapPixels128;
-            }
+            uint* data = stackalloc uint[size_pot];
 
+            _file.SetData(entry.Address, entry.FileSize);
             _file.Seek(entry.Offset);
 
-            for (int i = 0; i < size; i++)
+            for (int i = 0; i < size; ++i)
             {
                 int pos = i * size;
 
-                for (int j = 0; j < size; j++)
-                    pixels[pos + j] = (ushort) (0x8000 | _file.ReadUShort());
+                for (int j = 0; j < size; ++j)
+                {
+                    data[pos + j] = HuesHelper.Color16To32(_file.ReadUShort()) | 0xFF_00_00_00;
+                }
             }
 
-            return pixels;
+            texture = new UOTexture(size, size);
+            // we don't need to store the data[] pointer because
+            // land is always hoverable
+            texture.SetDataPointerEXT(0, null, (IntPtr) data, size_pot * sizeof(uint));
         }
     }
 }

@@ -1,31 +1,40 @@
 ﻿#region license
 
-//  Copyright (C) 2019 ClassicUO Development Community on Github
-//
-//	This project is an alternative client for the game Ultima Online.
-//	The goal of this is to develop a lightweight client considering 
-//	new technologies.  
-//      
-//  This program is free software: you can redistribute it and/or modify
-//  it under the terms of the GNU General Public License as published by
-//  the Free Software Foundation, either version 3 of the License, or
-//  (at your option) any later version.
-//
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-//
-//  You should have received a copy of the GNU General Public License
-//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// Copyright (c) 2021, andreakarasho
+// All rights reserved.
+// 
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+// 1. Redistributions of source code must retain the above copyright
+//    notice, this list of conditions and the following disclaimer.
+// 2. Redistributions in binary form must reproduce the above copyright
+//    notice, this list of conditions and the following disclaimer in the
+//    documentation and/or other materials provided with the distribution.
+// 3. All advertising materials mentioning features or use of this software
+//    must display the following acknowledgement:
+//    This product includes software developed by andreakarasho - https://github.com/andreakarasho
+// 4. Neither the name of the copyright holder nor the
+//    names of its contributors may be used to endorse or promote products
+//    derived from this software without specific prior written permission.
+// 
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ''AS IS'' AND ANY
+// EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+// WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+// DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY
+// DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+// (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+// LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+// ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+// SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #endregion
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
-
 using ClassicUO.Utility.Logging;
 
 namespace ClassicUO.IO
@@ -44,9 +53,9 @@ namespace ClassicUO.IO
             ',', ' ', '{', '}'
         };
         private readonly string _file;
+        private List<string[]> _groups = new List<string[]>();
 
         private readonly int _minSize;
-        private List<string[]> _groups = new List<string[]>();
         private List<string[]> _parts = new List<string[]>();
 
         private StreamReader _reader;
@@ -64,6 +73,7 @@ namespace ClassicUO.IO
         public int Line { get; private set; }
         public int Position { get; private set; }
         public int LinesCount => _parts.Count;
+
         public int PartsCount => _parts[Line].Length;
 
         private bool IsEOF => Line + 1 >= LinesCount;
@@ -72,7 +82,9 @@ namespace ClassicUO.IO
         public void Dispose()
         {
             if (_reader == null)
+            {
                 return;
+            }
 
             _reader.Dispose();
             _reader = null;
@@ -96,10 +108,14 @@ namespace ClassicUO.IO
         private void Parse()
         {
             if (_parts.Count > 0)
+            {
                 _parts.Clear();
+            }
 
             if (_groups.Count > 0)
+            {
                 _groups.Clear();
+            }
 
             string line;
 
@@ -108,12 +124,16 @@ namespace ClassicUO.IO
                 line = line.Trim();
 
                 if (line.Length <= 0 || line[0] == COMMENT || !char.IsNumber(line[0]))
+                {
                     continue;
+                }
 
                 int comment = line.IndexOf('#');
 
                 if (comment >= 0)
+                {
                     line = line.Substring(0, comment);
+                }
 
                 int groupStart = line.IndexOf('{');
                 int groupEnd = line.IndexOf('}');
@@ -122,56 +142,52 @@ namespace ClassicUO.IO
 
                 if (groupStart >= 0 && groupEnd >= 0)
                 {
-                    var firstpart = line.Substring(0, groupStart).Split(_tokens, StringSplitOptions.RemoveEmptyEntries);
-                    var group = line.Substring(groupStart, groupEnd - groupStart + 1);
-                    var lastpart = line.Substring(groupEnd + 1, line.Length - groupEnd - 1).Split(_tokens, StringSplitOptions.RemoveEmptyEntries);
+                    string[] firstPart = line.Substring(0, groupStart).Split(_tokens, StringSplitOptions.RemoveEmptyEntries);
 
-                    p = firstpart.Concat(new[] {group}).Concat(lastpart).ToArray();
+                    string group = line.Substring(groupStart, groupEnd - groupStart + 1);
+
+                    string[] lastPart = line.Substring(groupEnd + 1, line.Length - groupEnd - 1).Split(_tokens, StringSplitOptions.RemoveEmptyEntries);
+
+                    p = firstPart.Concat(new[] { group }).Concat(lastPart).ToArray();
                 }
                 else
+                {
                     p = line.Split(_tokens, StringSplitOptions.RemoveEmptyEntries);
+                }
 
-                if (p.Length >= _minSize) _parts.Add(p);
+                if (p.Length >= _minSize)
+                {
+                    _parts.Add(p);
+                }
             }
         }
 
-        public string[] GetTokensAtLine(int line)
+        private string[] GetTokensAtLine(int line)
         {
             if (line >= _parts.Count || line < 0)
             {
-                Log.Error( $"Index out of range [Line: {line}]. Returned '0'");
-                return new [] {"0"};
+                Log.Error($"Index out of range [Line: {line}]. Returned '0'");
+
+                return new[] { "0" };
             }
 
             return _parts[line];
         }
 
 
-        public string TokenAt(int line, int index)
+        private string TokenAt(int line, int index)
         {
             string[] p = GetTokensAtLine(line);
 
             if (index >= p.Length || index < 0)
             {
-                Log.Error( $"Index out of range [Line: {line}]. Returned '0'");
+                Log.Error($"Index out of range [Line: {line}]. Returned '0'");
+
                 return "0";
             }
 
             return p[index];
         }
-
-        //public byte ReadByte()
-        //{
-        //    Advance();
-        //    return ReadByte(Line, Position++);
-        //}
-
-        //public ushort ReadUShort()
-        //{
-        //    Advance();
-
-        //    return ReadUShort(Line, Position++);
-        //}
 
         public int ReadInt()
         {
@@ -180,10 +196,15 @@ namespace ClassicUO.IO
 
         public int ReadGroupInt(int index = 0)
         {
-            if (!TryReadGroup(TokenAt(Line, Position++), out string[] group)) throw new Exception("It's not a group");
+            if (!TryReadGroup(TokenAt(Line, Position++), out string[] group))
+            {
+                throw new Exception("It's not a group");
+            }
 
             if (index >= group.Length)
+            {
                 throw new IndexOutOfRangeException();
+            }
 
             return int.Parse(group[index]);
         }
@@ -198,19 +219,39 @@ namespace ClassicUO.IO
                 {
                     if (s[s.Length - 1] == '}')
                     {
-                        return s.Split(_tokensGroup, StringSplitOptions.RemoveEmptyEntries)
-                                .Select(int.Parse)
-                                .ToArray();
+                        List<int> results = new List<int>();
+
+                        string[] splitRes = s.Split(_tokensGroup, StringSplitOptions.RemoveEmptyEntries);
+
+                        for (int i = 0; i < splitRes.Length; i++)
+                        {
+                            if (!string.IsNullOrEmpty(splitRes[i]) && char.IsNumber(splitRes[i][0]))
+                            {
+                                NumberStyles style = NumberStyles.Any;
+
+                                if (splitRes[i].Length > 1 && splitRes[i][0] == '0' && splitRes[i][1] == 'x')
+                                {
+                                    style = NumberStyles.HexNumber;
+                                }
+
+                                if (int.TryParse(splitRes[i], style, null, out int res))
+                                {
+                                    results.Add(res);
+                                }
+                            }
+                        }
+
+                        return results.ToArray();
                     }
 
-                    Log.Error( $"Missing }} at line {Line + 1}, in '{_file}'");
+                    Log.Error($"Missing }} at line {Line + 1}, in '{_file}'");
                 }
             }
 
             return null;
         }
 
-        private bool TryReadGroup(string s, out string[] group)
+        private static bool TryReadGroup(string s, out string[] group)
         {
             if (s.Length > 0)
             {
@@ -222,9 +263,6 @@ namespace ClassicUO.IO
 
                         return true;
                     }
-
-                    //throw new Exception("Wrong def file");
-
                 }
             }
 
@@ -233,34 +271,16 @@ namespace ClassicUO.IO
             return false;
         }
 
-        private byte ReadByte(int line, int index)
-        {
-            return byte.Parse(TokenAt(line, index));
-        }
-
-        private sbyte ReadSByte(int line, int index)
-        {
-            return sbyte.Parse(TokenAt(line, index));
-        }
-
-        private short ReadShort(int line, int index)
-        {
-            return short.Parse(TokenAt(line, index));
-        }
-
-        private ushort ReadUShort(int line, int index)
-        {
-            return ushort.Parse(TokenAt(line, index));
-        }
-
         private int ReadInt(int line, int index)
         {
-            return int.Parse(TokenAt(line, index));
-        }
+            string token = TokenAt(line, index);
 
-        private uint ReadUInt(int line, int index)
-        {
-            return uint.Parse(TokenAt(line, index));
+            if (!string.IsNullOrEmpty(token))
+            {
+                return token.StartsWith("0x") ? int.Parse(token.Remove(0, 2), NumberStyles.HexNumber) : int.Parse(token);
+            }
+
+            return -1;
         }
     }
 }

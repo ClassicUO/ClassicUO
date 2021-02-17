@@ -1,28 +1,36 @@
 ﻿#region license
 
-//  Copyright (C) 2019 ClassicUO Development Community on Github
-//
-//	This project is an alternative client for the game Ultima Online.
-//	The goal of this is to develop a lightweight client considering 
-//	new technologies.  
-//      
-//  This program is free software: you can redistribute it and/or modify
-//  it under the terms of the GNU General Public License as published by
-//  the Free Software Foundation, either version 3 of the License, or
-//  (at your option) any later version.
-//
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-//
-//  You should have received a copy of the GNU General Public License
-//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// Copyright (c) 2021, andreakarasho
+// All rights reserved.
+// 
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+// 1. Redistributions of source code must retain the above copyright
+//    notice, this list of conditions and the following disclaimer.
+// 2. Redistributions in binary form must reproduce the above copyright
+//    notice, this list of conditions and the following disclaimer in the
+//    documentation and/or other materials provided with the distribution.
+// 3. All advertising materials mentioning features or use of this software
+//    must display the following acknowledgement:
+//    This product includes software developed by andreakarasho - https://github.com/andreakarasho
+// 4. Neither the name of the copyright holder nor the
+//    names of its contributors may be used to endorse or promote products
+//    derived from this software without specific prior written permission.
+// 
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ''AS IS'' AND ANY
+// EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+// WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+// DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY
+// DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+// (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+// LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+// ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+// SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #endregion
 
 using System;
-
 using ClassicUO.Configuration;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.UI.Gumps;
@@ -42,34 +50,45 @@ namespace ClassicUO.Game.Managers
     internal static class NameOverHeadManager
     {
         private static NameOverHeadHandlerGump _gump;
+
         public static NameOverheadTypeAllowed TypeAllowed
         {
-            get { return ProfileManager.Current.NameOverheadTypeAllowed; }
-            set { ProfileManager.Current.NameOverheadTypeAllowed = value; }
+            get => ProfileManager.CurrentProfile.NameOverheadTypeAllowed;
+            set => ProfileManager.CurrentProfile.NameOverheadTypeAllowed = value;
         }
 
         public static bool IsToggled
         {
-            get { return ProfileManager.Current.NameOverheadToggled; }
-            set { ProfileManager.Current.NameOverheadToggled = value; }
+            get => ProfileManager.CurrentProfile.NameOverheadToggled;
+            set => ProfileManager.CurrentProfile.NameOverheadToggled = value;
         }
 
         public static bool IsAllowed(Entity serial)
         {
             if (serial == null)
+            {
                 return false;
+            }
 
             if (TypeAllowed == NameOverheadTypeAllowed.All)
+            {
                 return true;
+            }
 
-            if (serial.Serial.IsItem && TypeAllowed == NameOverheadTypeAllowed.Items)
+            if (SerialHelper.IsItem(serial.Serial) && TypeAllowed == NameOverheadTypeAllowed.Items)
+            {
                 return true;
+            }
 
-            if (serial.Serial.IsMobile && TypeAllowed.HasFlag(NameOverheadTypeAllowed.Mobiles))
+            if (SerialHelper.IsMobile(serial.Serial) && TypeAllowed.HasFlag(NameOverheadTypeAllowed.Mobiles))
+            {
                 return true;
+            }
 
-            if (TypeAllowed.HasFlag(NameOverheadTypeAllowed.Corpses) && serial.Serial.IsItem && World.Items.Get(serial)?.IsCorpse == true)
+            if (TypeAllowed.HasFlag(NameOverheadTypeAllowed.Corpses) && SerialHelper.IsItem(serial.Serial) && World.Items.Get(serial)?.IsCorpse == true)
+            {
                 return true;
+            }
 
             return false;
         }
@@ -77,7 +96,9 @@ namespace ClassicUO.Game.Managers
         public static void Open()
         {
             if (_gump != null)
+            {
                 return;
+            }
 
             _gump = new NameOverHeadHandlerGump();
             UIManager.Add(_gump);

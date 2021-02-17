@@ -1,4 +1,36 @@
-﻿using System.Collections.Generic;
+﻿#region license
+
+// Copyright (c) 2021, andreakarasho
+// All rights reserved.
+// 
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+// 1. Redistributions of source code must retain the above copyright
+//    notice, this list of conditions and the following disclaimer.
+// 2. Redistributions in binary form must reproduce the above copyright
+//    notice, this list of conditions and the following disclaimer in the
+//    documentation and/or other materials provided with the distribution.
+// 3. All advertising materials mentioning features or use of this software
+//    must display the following acknowledgement:
+//    This product includes software developed by andreakarasho - https://github.com/andreakarasho
+// 4. Neither the name of the copyright holder nor the
+//    names of its contributors may be used to endorse or promote products
+//    derived from this software without specific prior written permission.
+// 
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ''AS IS'' AND ANY
+// EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+// WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+// DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY
+// DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+// (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+// LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+// ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+// SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+#endregion
+
+using System.Collections.Generic;
 using System.Text;
 
 namespace ClassicUO.Utility
@@ -8,11 +40,10 @@ namespace ClassicUO.Utility
         private readonly char[] _delimiters, _comments, _quotes;
         private int _eol;
         private int _pos;
+        private readonly StringBuilder _sb = new StringBuilder();
         private int _Size;
         private string _string;
         private bool _trim;
-
-        private string RawLine;
 
         public TextFileParser(string str, char[] delimiters, char[] comments, char[] quotes)
         {
@@ -33,7 +64,9 @@ namespace ClassicUO.Utility
             bool result = false;
 
             for (int i = 0; i < _delimiters.Length && !result; i++)
+            {
                 result = _string[_pos] == _delimiters[i];
+            }
 
             return result;
         }
@@ -59,7 +92,9 @@ namespace ClassicUO.Utility
         private void SkipToData()
         {
             while (_pos < _eol && IsDelimiter())
+            {
                 _pos++;
+            }
         }
 
         private bool IsComment()
@@ -114,14 +149,14 @@ namespace ClassicUO.Utility
             return result;
         }
 
-        private string ObtainData()
+        private void ObtainData()
         {
-            StringBuilder result = new StringBuilder();
-
             while (_pos < _Size && _string[_pos] != '\n')
             {
                 if (IsDelimiter())
+                {
                     break;
+                }
 
                 if (IsComment())
                 {
@@ -131,19 +166,26 @@ namespace ClassicUO.Utility
                 }
 
                 if (_string[_pos] != '\r' && (!_trim || _string[_pos] != ' ' && _string[_pos] != '\t'))
-                    result.Append(_string[_pos]);
+                {
+                    for (int i = 0; i < _quotes.Length; i++)
+                    {
+                        if (_string[_pos] == _quotes[i])
+                        {
+                            return;
+                        }
+                    }
+
+                    _sb.Append(_string[_pos]);
+                }
 
                 _pos++;
             }
-
-            return result.ToString();
         }
 
-        private string ObtainQuotedData()
+        private void ObtainQuotedData(bool save = true)
         {
             bool exit = false;
-            string result = "";
-            
+
             for (int i = 0; i < _quotes.Length; i += 2)
             {
                 if (_string[_pos] == _quotes[i])
@@ -159,7 +201,7 @@ namespace ClassicUO.Utility
                         if (_string[pos] == _quotes[i]) // another {
                         {
                             _pos = pos;
-                            ObtainQuotedData(); // skip
+                            ObtainQuotedData(false); // skip
                             pos = _pos;
                         }
 
@@ -171,11 +213,17 @@ namespace ClassicUO.Utility
 
                     if (size > 0)
                     {
-                        result = _string.Substring(start, size).TrimEnd('\r', '\n');
+                        if (save)
+                        {
+                            _sb.Append(_string.Substring(start, size).TrimEnd('\r', '\n'));
+                        }
+
                         _pos = pos;
 
                         if (_pos < _eol && _string[_pos] == endQuote)
+                        {
                             _pos++;
+                        }
                     }
 
                     break;
@@ -183,19 +231,9 @@ namespace ClassicUO.Utility
             }
 
             if (!exit)
-                result = ObtainData();
-
-            return result;
-        }
-
-        private void SaveRawLine()
-        {
-            int size = _eol - _pos;
-
-            if (size > 0)
-                RawLine = _string.Substring(_pos, size).TrimEnd('\r', '\n');
-            else
-                RawLine = "";
+            {
+                ObtainData();
+            }
         }
 
         internal List<string> ReadTokens(bool trim = true)
@@ -207,21 +245,26 @@ namespace ClassicUO.Utility
             {
                 GetEOL();
 
-                SaveRawLine();
-
                 while (_pos < _eol)
                 {
                     SkipToData();
 
                     if (IsComment())
+                    {
                         break;
+                    }
 
-                    string buf = ObtainQuotedData();
+                    ObtainQuotedData();
 
-                    if (buf.Length > 0)
-                        result.Add(buf);
+                    if (_sb.Length > 0)
+                    {
+                        result.Add(_sb.ToString());
+                        _sb.Clear();
+                    }
                     else if (IsSecondQuote())
+                    {
                         _pos++;
+                    }
                 }
 
                 _pos = _eol + 1;
@@ -240,19 +283,22 @@ namespace ClassicUO.Utility
             _Size = str.Length;
             _eol = _Size - 1;
 
-            SaveRawLine();
-
             while (_pos < _eol)
             {
                 SkipToData();
 
                 if (IsComment())
+                {
                     break;
+                }
 
-                string buf = ObtainQuotedData();
+                ObtainQuotedData();
 
-                if (buf.Length > 0)
-                    result.Add(buf);
+                if (_sb.Length > 0)
+                {
+                    result.Add(_sb.ToString());
+                    _sb.Clear();
+                }
             }
 
             return result;

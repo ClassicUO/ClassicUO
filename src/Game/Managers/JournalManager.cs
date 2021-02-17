@@ -1,110 +1,154 @@
 ﻿#region license
 
-//  Copyright (C) 2019 ClassicUO Development Community on Github
-//
-//	This project is an alternative client for the game Ultima Online.
-//	The goal of this is to develop a lightweight client considering 
-//	new technologies.  
-//      
-//  This program is free software: you can redistribute it and/or modify
-//  it under the terms of the GNU General Public License as published by
-//  the Free Software Foundation, either version 3 of the License, or
-//  (at your option) any later version.
-//
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-//
-//  You should have received a copy of the GNU General Public License
-//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// Copyright (c) 2021, andreakarasho
+// All rights reserved.
+// 
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+// 1. Redistributions of source code must retain the above copyright
+//    notice, this list of conditions and the following disclaimer.
+// 2. Redistributions in binary form must reproduce the above copyright
+//    notice, this list of conditions and the following disclaimer in the
+//    documentation and/or other materials provided with the distribution.
+// 3. All advertising materials mentioning features or use of this software
+//    must display the following acknowledgement:
+//    This product includes software developed by andreakarasho - https://github.com/andreakarasho
+// 4. Neither the name of the copyright holder nor the
+//    names of its contributors may be used to endorse or promote products
+//    derived from this software without specific prior written permission.
+// 
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ''AS IS'' AND ANY
+// EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+// WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+// DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY
+// DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+// (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+// LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+// ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+// SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #endregion
 
 using System;
 using System.IO;
-
 using ClassicUO.Configuration;
+using ClassicUO.Game.Data;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Collections;
+using ClassicUO.Utility.Logging;
 
 namespace ClassicUO.Game.Managers
 {
     internal class JournalManager
     {
         private StreamWriter _fileWriter;
-        public Deque<JournalEntry> Entries { get; } = new Deque<JournalEntry>();
+        private bool _writerHasException;
+
+        public static Deque<JournalEntry> Entries { get; } = new Deque<JournalEntry>(Constants.MAX_JOURNAL_HISTORY_COUNT);
 
         public event EventHandler<JournalEntry> EntryAdded;
 
-        public void Add(string text, Hue hue, string name, bool isunicode = true)
+
+        public void Add(string text, ushort hue, string name, TextType type, bool isunicode = true)
         {
-            if (Entries.Count >= 100)
-                Entries.RemoveFromFront();
+            JournalEntry entry = Entries.Count >= Constants.MAX_JOURNAL_HISTORY_COUNT ? Entries.RemoveFromFront() : new JournalEntry();
 
             byte font = (byte) (isunicode ? 0 : 9);
 
-            if (ProfileManager.Current != null && ProfileManager.Current.OverrideAllFonts)
+            if (ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.OverrideAllFonts)
             {
-                font = ProfileManager.Current.ChatFont;
-                isunicode = ProfileManager.Current.OverrideAllFontsIsUnicode;
+                font = ProfileManager.CurrentProfile.ChatFont;
+                isunicode = ProfileManager.CurrentProfile.OverrideAllFontsIsUnicode;
             }
 
-            var n = DateTime.Now;
-            JournalEntry entry = new JournalEntry(text, font, hue, name, isunicode, n);
+            DateTime timeNow = DateTime.Now;
+
+            entry.Text = text;
+            entry.Font = font;
+            entry.Hue = hue;
+            entry.Name = name;
+            entry.IsUnicode = isunicode;
+            entry.Time = timeNow;
+            entry.TextType = type;
+
+            if (ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.ForceUnicodeJournal)
+            {
+                entry.Font = 0;
+                entry.IsUnicode = true;
+            }
+
             Entries.AddToBack(entry);
             EntryAdded.Raise(entry);
-            _fileWriter?.WriteLine($"[{n:g}]  {name}: {text}");
+
+            if (_fileWriter == null && !_writerHasException)
+            {
+                CreateWriter();
+            }
+
+            _fileWriter?.WriteLine($"[{timeNow:g}]  {name}: {text}");
         }
 
-        public void CreateWriter(bool create)
+        private void CreateWriter()
         {
-            if (create)
+            if (_fileWriter == null && ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.SaveJournalToFile)
             {
                 try
                 {
-                    _fileWriter = new StreamWriter(File.Open($"{DateTime.Now:yyyy_MM_dd_HH_mm_ss}_journal.txt", FileMode.Create, FileAccess.Write, FileShare.Read))
+                    string path = FileSystemHelper.CreateFolderIfNotExists(Path.Combine(CUOEnviroment.ExecutablePath, "Data"), "Client", "JournalLogs");
+
+                    _fileWriter = new StreamWriter(File.Open(Path.Combine(path, $"{DateTime.Now:yyyy_MM_dd_HH_mm_ss}_journal.txt"), FileMode.Create, FileAccess.Write, FileShare.Read))
                     {
                         AutoFlush = true
                     };
+
+                    try
+                    {
+                        string[] files = Directory.GetFiles(path, "*_journal.txt");
+                        Array.Sort(files);
+
+                        for (int i = files.Length - 1; i >= 100; --i)
+                        {
+                            File.Delete(files[i]);
+                        }
+                    }
+                    catch
+                    {
+                    }
                 }
-                catch
+                catch (Exception ex)
                 {
+                    Log.Error(ex.ToString());
+                    // we don't want to wast time.
+                    _writerHasException = true;
                 }
             }
-            else
-            {
-                _fileWriter?.Flush();
-                _fileWriter?.Dispose();
-                _fileWriter = null;
-            }
+        }
+
+        public void CloseWriter()
+        {
+            _fileWriter?.Flush();
+            _fileWriter?.Dispose();
+            _fileWriter = null;
         }
 
         public void Clear()
         {
-            Entries.Clear();
-            CreateWriter(false);
+            //Entries.Clear();
+            CloseWriter();
         }
     }
 
     internal class JournalEntry
     {
-        public readonly byte Font;
-        public readonly Hue Hue;
+        public byte Font;
+        public ushort Hue;
 
-        public readonly bool IsUnicode;
-        public readonly string Name;
-        public readonly string Text;
-        public readonly DateTime Time;
+        public bool IsUnicode;
+        public string Name;
+        public string Text;
 
-        public JournalEntry(string text, byte font, Hue hue, string name, bool isunicode, DateTime time)
-        {
-            IsUnicode = isunicode;
-            Font = font;
-            Hue = hue;
-            Name = name;
-            Text = text;
-            Time = time;
-        }
+        public TextType TextType;
+        public DateTime Time;
     }
 }

@@ -1,0 +1,37 @@
+name: Build
+
+on:
+  push:
+    branches: "*"
+  pull_request:
+    branches: "*"
+
+env:
+  DOTNET_NOLOGO: false
+  DOTNET_CLI_TELEMETRY_OPTOUT: 1
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
+  NUGET_XMLDOC_MODE: skip
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+       os: [ macos-latest, ubuntu-latest, windows-latest ]
+
+    steps:
+    - uses: actions/checkout@v2
+      
+    - name: Install FNA
+      run: git submodule update --init --recursive
+        
+    - name: Setup .NET 5
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 5.0.100
+            
+    - name: Build
+      run: dotnet build -c Release
+      
+    - name: Test
+      run: dotnet test --verbosity normal

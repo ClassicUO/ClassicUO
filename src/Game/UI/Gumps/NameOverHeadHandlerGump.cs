@@ -1,31 +1,39 @@
 ﻿#region license
 
-//  Copyright (C) 2019 ClassicUO Development Community on Github
-//
-//	This project is an alternative client for the game Ultima Online.
-//	The goal of this is to develop a lightweight client considering 
-//	new technologies.  
-//      
-//  This program is free software: you can redistribute it and/or modify
-//  it under the terms of the GNU General Public License as published by
-//  the Free Software Foundation, either version 3 of the License, or
-//  (at your option) any later version.
-//
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-//
-//  You should have received a copy of the GNU General Public License
-//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// Copyright (c) 2021, andreakarasho
+// All rights reserved.
+// 
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+// 1. Redistributions of source code must retain the above copyright
+//    notice, this list of conditions and the following disclaimer.
+// 2. Redistributions in binary form must reproduce the above copyright
+//    notice, this list of conditions and the following disclaimer in the
+//    documentation and/or other materials provided with the distribution.
+// 3. All advertising materials mentioning features or use of this software
+//    must display the following acknowledgement:
+//    This product includes software developed by andreakarasho - https://github.com/andreakarasho
+// 4. Neither the name of the copyright holder nor the
+//    names of its contributors may be used to endorse or promote products
+//    derived from this software without specific prior written permission.
+// 
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ''AS IS'' AND ANY
+// EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+// WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+// DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY
+// DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+// (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+// LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+// ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+// SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #endregion
 
 using System;
-
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
-using ClassicUO.Renderer;
+using ClassicUO.Resources;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -37,44 +45,87 @@ namespace ClassicUO.Game.UI.Gumps
         {
             CanMove = true;
             AcceptMouseInput = true;
-
+            CanCloseWithRightClick = true;
             X = _lastX;
             Y = _lastY;
             WantUpdateSize = false;
 
-            ControlInfo.Layer = UILayer.Over;
+            LayerOrder = UILayer.Over;
 
             RadioButton all, mobiles, items, mobilesCorpses;
             AlphaBlendControl alpha;
 
-            Add(alpha = new AlphaBlendControl(0.2f)
-            {
-                Hue = 34
-            });
+            Add
+            (
+                alpha = new AlphaBlendControl(0.2f)
+                {
+                    Hue = 34
+                }
+            );
 
 
-            Add(all = new RadioButton(0, 0x00D0, 0x00D1, "All", color: 0xFFFF)
-            {
-                IsChecked = NameOverHeadManager.TypeAllowed == NameOverheadTypeAllowed.All
-            });
+            Add
+            (
+                all = new RadioButton
+                (
+                    0,
+                    0x00D0,
+                    0x00D1,
+                    ResGumps.All,
+                    color: 0xFFFF
+                )
+                {
+                    IsChecked = NameOverHeadManager.TypeAllowed == NameOverheadTypeAllowed.All
+                }
+            );
 
-            Add(mobiles = new RadioButton(0, 0x00D0, 0x00D1, "Mobiles only", color: 0xFFFF)
-            {
-                Y = all.Y + all.Height,
-                IsChecked = NameOverHeadManager.TypeAllowed == NameOverheadTypeAllowed.Mobiles
-            });
+            Add
+            (
+                mobiles = new RadioButton
+                (
+                    0,
+                    0x00D0,
+                    0x00D1,
+                    ResGumps.MobilesOnly,
+                    color: 0xFFFF
+                )
+                {
+                    Y = all.Y + all.Height,
+                    IsChecked = NameOverHeadManager.TypeAllowed == NameOverheadTypeAllowed.Mobiles
+                }
+            );
 
-            Add(items = new RadioButton(0, 0x00D0, 0x00D1, "Items only", color: 0xFFFF)
-            {
-                Y = mobiles.Y + mobiles.Height,
-                IsChecked = NameOverHeadManager.TypeAllowed == NameOverheadTypeAllowed.Items
-            });
+            Add
+            (
+                items = new RadioButton
+                (
+                    0,
+                    0x00D0,
+                    0x00D1,
+                    ResGumps.ItemsOnly,
+                    color: 0xFFFF
+                )
+                {
+                    Y = mobiles.Y + mobiles.Height,
+                    IsChecked = NameOverHeadManager.TypeAllowed == NameOverheadTypeAllowed.Items
+                }
+            );
 
-            Add(mobilesCorpses = new RadioButton(0, 0x00D0, 0x00D1, "Mobiles and Corpses only", color: 0xFFFF)
-            {
-                Y = items.Y + items.Height,
-                IsChecked = NameOverHeadManager.TypeAllowed == NameOverheadTypeAllowed.MobilesCorpses
-            });
+            Add
+            (
+                mobilesCorpses = new RadioButton
+                (
+                    0,
+                    0x00D0,
+                    0x00D1,
+                    ResGumps.MobilesAndCorpsesOnly,
+                    color: 0xFFFF
+                )
+                {
+                    Y = items.Y + items.Height,
+                    IsChecked = NameOverHeadManager.TypeAllowed == NameOverheadTypeAllowed.MobilesCorpses
+                }
+            );
 
             alpha.Width = Math.Max(mobilesCorpses.Width, Math.Max(items.Width, Math.Max(all.Width, mobiles.Width)));
             alpha.Height = all.Height + mobiles.Height + items.Height + mobilesCorpses.Height;
@@ -84,22 +135,34 @@ namespace ClassicUO.Game.UI.Gumps
 
             all.ValueChanged += (sender, e) =>
             {
-                if (all.IsChecked) NameOverHeadManager.TypeAllowed = NameOverheadTypeAllowed.All;
+                if (all.IsChecked)
+                {
+                    NameOverHeadManager.TypeAllowed = NameOverheadTypeAllowed.All;
+                }
             };
 
             mobiles.ValueChanged += (sender, e) =>
             {
-                if (mobiles.IsChecked) NameOverHeadManager.TypeAllowed = NameOverheadTypeAllowed.Mobiles;
+                if (mobiles.IsChecked)
+                {
+                    NameOverHeadManager.TypeAllowed = NameOverheadTypeAllowed.Mobiles;
+                }
             };
 
             items.ValueChanged += (sender, e) =>
             {
-                if (items.IsChecked) NameOverHeadManager.TypeAllowed = NameOverheadTypeAllowed.Items;
+                if (items.IsChecked)
+                {
+                    NameOverHeadManager.TypeAllowed = NameOverheadTypeAllowed.Items;
+                }
             };
 
             mobilesCorpses.ValueChanged += (sender, e) =>
             {
-                if (mobilesCorpses.IsChecked) NameOverHeadManager.TypeAllowed = NameOverheadTypeAllowed.MobilesCorpses;
+                if (mobilesCorpses.IsChecked)
+                {
+                    NameOverHeadManager.TypeAllowed = NameOverheadTypeAllowed.MobilesCorpses;
+                }
             };
         }
 

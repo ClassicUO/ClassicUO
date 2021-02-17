@@ -1,168 +1,279 @@
 ﻿#region license
 
-//  Copyright (C) 2019 ClassicUO Development Community on Github
-//
-//	This project is an alternative client for the game Ultima Online.
-//	The goal of this is to develop a lightweight client considering 
-//	new technologies.  
-//      
-//  This program is free software: you can redistribute it and/or modify
-//  it under the terms of the GNU General Public License as published by
-//  the Free Software Foundation, either version 3 of the License, or
-//  (at your option) any later version.
-//
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-//
-//  You should have received a copy of the GNU General Public License
-//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// Copyright (c) 2021, andreakarasho
+// All rights reserved.
+// 
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+// 1. Redistributions of source code must retain the above copyright
+//    notice, this list of conditions and the following disclaimer.
+// 2. Redistributions in binary form must reproduce the above copyright
+//    notice, this list of conditions and the following disclaimer in the
+//    documentation and/or other materials provided with the distribution.
+// 3. All advertising materials mentioning features or use of this software
+//    must display the following acknowledgement:
+//    This product includes software developed by andreakarasho - https://github.com/andreakarasho
+// 4. Neither the name of the copyright holder nor the
+//    names of its contributors may be used to endorse or promote products
+//    derived from this software without specific prior written permission.
+// 
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ''AS IS'' AND ANY
+// EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+// WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+// DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY
+// DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+// (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+// LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+// ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+// SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #endregion
 
-using System.Linq;
 using System.Text;
-
+using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
-using ClassicUO.Game.Managers;
-using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
-
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI
 {
     internal class Tooltip
     {
-        private static readonly char[] _titleFormatChars = {' ', '-', '\n', '['};
-        private readonly StringBuilder _sb = new StringBuilder();
-        private readonly StringBuilder _sbHTML = new StringBuilder();
-        private Entity _gameObject;
         private uint _hash;
-        private float _lastHoverTime;
+        private uint _lastHoverTime;
         private int _maxWidth;
         private RenderedText _renderedText;
+        private readonly StringBuilder _sb = new StringBuilder();
+        private readonly StringBuilder _sbHTML = new StringBuilder();
         private string _textHTML;
 
         public string Text { get; protected set; }
 
         public bool IsEmpty => Text == null;
 
-        public GameObject Object => _gameObject;
+        public uint Serial { get; private set; }
 
         public bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
-            if (_gameObject != null && World.OPL.TryGetRevision(_gameObject, out uint revision) && _hash != revision)
+            if (SerialHelper.IsValid(Serial) && World.OPL.TryGetRevision(Serial, out uint revision) && _hash != revision)
             {
                 _hash = revision;
-                Text = ReadProperties(_gameObject, out _textHTML);
+                Text = ReadProperties(Serial, out _textHTML);
             }
 
             if (string.IsNullOrEmpty(Text))
+            {
                 return false;
+            }
 
             if (_lastHoverTime > Time.Ticks)
+            {
                 return false;
+            }
+
+
+            byte font = 1;
+            float alpha = 0.3f;
+            ushort hue = 0xFFFF;
+            float zoom = 1;
+
+            if (ProfileManager.CurrentProfile != null)
+            {
+                font = ProfileManager.CurrentProfile.TooltipFont;
+                alpha = 1f - ProfileManager.CurrentProfile.TooltipBackgroundOpacity / 100f;
+
+                if (float.IsNaN(alpha))
+                {
+                    alpha = 1f;
+                }
+
+                hue = ProfileManager.CurrentProfile.TooltipTextHue;
+                zoom = ProfileManager.CurrentProfile.TooltipDisplayZoom / 100f;
+            }
+
+            FontsLoader.Instance.SetUseHTML(true);
+            FontsLoader.Instance.RecalculateWidthByInfo = true;
 
             if (_renderedText == null)
             {
-                _renderedText = RenderedText.Create(string.Empty,font: 1, isunicode: true, style: FontStyle.BlackBorder, cell: 5, isHTML: true, align: TEXT_ALIGN_TYPE.TS_CENTER, recalculateWidthByInfo: true);
+                _renderedText = RenderedText.Create
+                (
+                    null,
+                    font: font,
+                    isunicode: true,
+                    style: FontStyle.BlackBorder,
+                    cell: 5,
+                    isHTML: true,
+                    align: TEXT_ALIGN_TYPE.TS_CENTER,
+                    recalculateWidthByInfo: true,
+                    hue: hue
+                );
             }
-            else if (_renderedText.Text != Text)
+
+            if (_renderedText.Text != Text)
             {
                 if (_maxWidth == 0)
                 {
-                    FileManager.Fonts.SetUseHTML(true);
-                    FileManager.Fonts.RecalculateWidthByInfo = true;
-
-                    int width = FileManager.Fonts.GetWidthUnicode(1, Text);
+                    int width = FontsLoader.Instance.GetWidthUnicode(font, Text);
 
                     if (width > 600)
+                    {
                         width = 600;
+                    }
 
-                    width = FileManager.Fonts.GetWidthExUnicode(1, Text, width, TEXT_ALIGN_TYPE.TS_CENTER, (ushort) FontStyle.BlackBorder);
+                    width = FontsLoader.Instance.GetWidthExUnicode
+                    (
+                        font,
+                        Text,
+                        width,
+                        TEXT_ALIGN_TYPE.TS_CENTER,
+                        (ushort) FontStyle.BlackBorder
+                    );
 
                     if (width > 600)
+                    {
                         width = 600;
+                    }
 
                     _renderedText.MaxWidth = width;
-
-                    FileManager.Fonts.RecalculateWidthByInfo = false;
-                    FileManager.Fonts.SetUseHTML(false);
                 }
                 else
+                {
                     _renderedText.MaxWidth = _maxWidth;
+                }
 
+                _renderedText.Font = font;
+                _renderedText.Hue = hue;
                 _renderedText.Text = _textHTML;
             }
 
+            FontsLoader.Instance.RecalculateWidthByInfo = false;
+            FontsLoader.Instance.SetUseHTML(false);
+
+            if (_renderedText.Texture == null)
+            {
+                return false;
+            }
+
+            int z_width = _renderedText.Width + 8;
+            int z_height = _renderedText.Height + 8;
+
             if (x < 0)
+            {
                 x = 0;
-            else if (x > CUOEnviroment.Client.Window.ClientBounds.Width - (_renderedText.Width + 8))
-                x = CUOEnviroment.Client.Window.ClientBounds.Width - (_renderedText.Width + 8);
+            }
+            else if (x > Client.Game.Window.ClientBounds.Width - z_width)
+            {
+                x = Client.Game.Window.ClientBounds.Width - z_width;
+            }
 
             if (y < 0)
+            {
                 y = 0;
-            else if (y > CUOEnviroment.Client.Window.ClientBounds.Height - (_renderedText.Height + 8))
-                y = CUOEnviroment.Client.Window.ClientBounds.Height - (_renderedText.Height + 8);
+            }
+            else if (y > Client.Game.Window.ClientBounds.Height - z_height)
+            {
+                y = Client.Game.Window.ClientBounds.Height - z_height;
+            }
 
-            Vector3 hue = Vector3.Zero;
-            ShaderHuesTraslator.GetHueVector(ref hue, 0, false, 0.3f, true);
 
-            batcher.Draw2D(Textures.GetTexture(Color.Black), x - 4, y - 2, _renderedText.Width + 8, _renderedText.Height + 4, ref hue);
+            Vector3 hue_vec = Vector3.Zero;
+            ShaderHueTranslator.GetHueVector(ref hue_vec, 0, false, alpha);
 
-            return _renderedText.Draw(batcher, x, y);
+            batcher.Draw2D
+            (
+                SolidColorTextureCache.GetTexture(Color.Black),
+                x - 4,
+                y - 2,
+                z_width * zoom,
+                z_height * zoom,
+                ref hue_vec
+            );
+
+            batcher.DrawRectangle
+            (
+                SolidColorTextureCache.GetTexture(Color.Gray),
+                x - 4,
+                y - 2,
+                (int) (z_width * zoom),
+                (int) (z_height * zoom),
+                ref hue_vec
+            );
+
+            hue_vec.X = 0;
+            hue_vec.Y = 0;
+            hue_vec.Z = 0;
+
+            return batcher.Draw2D
+            (
+                _renderedText.Texture,
+                x + 3,
+                y + 3,
+                z_width * zoom,
+                z_height * zoom,
+                0,
+                0,
+                z_width,
+                z_height,
+                ref hue_vec
+            );
         }
 
         public void Clear()
         {
-            _gameObject = null;
+            Serial = 0;
             _hash = 0;
             _textHTML = Text = null;
             _maxWidth = 0;
         }
 
-        public void SetGameObject(Entity obj)
+        public void SetGameObject(uint serial)
         {
-            if (_gameObject == null || obj != _gameObject)
+            if (Serial == 0 || serial != Serial)
             {
                 uint revision2 = 0;
-                if (_gameObject == null || (World.OPL.TryGetRevision(_gameObject, out uint revision) && World.OPL.TryGetRevision(obj, out revision2) && revision != revision2))
+
+                if (Serial == 0 || Serial != serial || World.OPL.TryGetRevision(Serial, out uint revision) && World.OPL.TryGetRevision(serial, out revision2) && revision != revision2)
                 {
                     _maxWidth = 0;
-                    _gameObject = obj;
+                    Serial = serial;
                     _hash = revision2;
-                    Text = ReadProperties(obj, out _textHTML);
-                    _lastHoverTime = Time.Ticks + 250;
+                    Text = ReadProperties(serial, out _textHTML);
+
+                    _lastHoverTime = (uint) (Time.Ticks + (ProfileManager.CurrentProfile != null ? ProfileManager.CurrentProfile.TooltipDelayBeforeDisplay : 250));
                 }
             }
         }
 
 
-        private string ReadProperties(Entity obj, out string htmltext)
+        private string ReadProperties(uint serial, out string htmltext)
         {
             _sb.Clear();
             _sbHTML.Clear();
 
             bool hasStartColor = false;
 
-
-            if (obj != null && World.OPL.TryGetNameAndData(obj, out string name, out string data))
+            if (SerialHelper.IsValid(serial) && World.OPL.TryGetNameAndData(serial, out string name, out string data))
             {
                 if (!string.IsNullOrEmpty(name))
                 {
-                    if (obj is Item)
+                    if (SerialHelper.IsItem(serial))
                     {
                         _sbHTML.Append("<basefont color=\"yellow\">");
                         hasStartColor = true;
                     }
-                    else if (obj is Mobile mob)
+                    else
                     {
-                        _sbHTML.Append(Notoriety.GetHTMLHue(mob.NotorietyFlag));
-                        hasStartColor = true;
+                        Mobile mob = World.Mobiles.Get(serial);
+
+                        if (mob != null)
+                        {
+                            _sbHTML.Append(Notoriety.GetHTMLHue(mob.NotorietyFlag));
+                            hasStartColor = true;
+                        }
                     }
 
                     _sb.Append(name);
@@ -184,81 +295,27 @@ namespace ClassicUO.Game.UI
             }
 
 
-
-            //for (int i = 0; i < obj.Properties.Count; i++)
-            //{
-            //    Property property = obj.Properties[i];
-
-            //    if (property.Cliloc <= 0)
-            //        continue;
-
-            //    if (i == 0 /*&& !string.IsNullOrEmpty(obj.Name)*/)
-            //    {
-            //        if (obj is Mobile mobile)
-            //        {
-            //            //ushort hue = Notoriety.GetHue(mobile.NotorietyFlag);
-            //            _sbHTML.Append(Notoriety.GetHTMLHue(mobile.NotorietyFlag));
-            //        }
-            //        else
-            //            _sbHTML.Append("<basefont color=\"yellow\">");
-
-            //        hasStartColor = true;
-            //    }
-
-            //    string text = FormatTitle(FileManager.Cliloc.Translate((int) property.Cliloc, property.Args, true));
-
-            //    if (string.IsNullOrEmpty(text)) continue;
-
-            //    _sb.Append(text);
-            //    _sbHTML.Append(text);
-
-            //    if (hasStartColor)
-            //    {
-            //        _sbHTML.Append("<basefont color=\"#FFFFFFFF\">");
-            //        hasStartColor = false;
-            //    }
-
-            //    if (i < obj.Properties.Count - 1)
-            //    {
-            //        _sb.Append("\n");
-            //        _sbHTML.Append("\n");
-            //    }
-            //}
-
             htmltext = _sbHTML.ToString();
             string result = _sb.ToString();
 
             return string.IsNullOrEmpty(result) ? null : result;
         }
 
-        public unsafe string FormatTitle(string text)
-        {
-            if (text != null)
-            {
-                int index = 0;
-
-                fixed (char* value = text)
-                {
-                    while (index < text.Length)
-                    {
-                        if (index <= 0 || _titleFormatChars.Contains(value[index - 1]))
-                            value[index] = char.ToUpper(value[index]);
-
-                        index++;
-                    }
-
-                    return new string(value);
-                }
-            }
-
-            return text;
-        }
-
         public void SetText(string text, int maxWidth = 0)
         {
-            _maxWidth = maxWidth;
-            _gameObject = null;
-            Text = _textHTML = text;
+            if (ProfileManager.CurrentProfile != null && !ProfileManager.CurrentProfile.UseTooltip)
+            {
+                return;
+            }
+
+            //if (Text != text)
+            {
+                _maxWidth = maxWidth;
+                Serial = 0;
+                Text = _textHTML = text;
+
+                _lastHoverTime = (uint) (Time.Ticks + (ProfileManager.CurrentProfile != null ? ProfileManager.CurrentProfile.TooltipDelayBeforeDisplay : 250));
+            }
         }
     }
 }

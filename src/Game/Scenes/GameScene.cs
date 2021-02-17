@@ -1,23 +1,32 @@
 ﻿#region license
 
-//  Copyright (C) 2019 ClassicUO Development Community on Github
-//
-//	This project is an alternative client for the game Ultima Online.
-//	The goal of this is to develop a lightweight client considering 
-//	new technologies.  
-//      
-//  This program is free software: you can redistribute it and/or modify
-//  it under the terms of the GNU General Public License as published by
-//  the Free Software Foundation, either version 3 of the License, or
-//  (at your option) any later version.
-//
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-//
-//  You should have received a copy of the GNU General Public License
-//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// Copyright (c) 2021, andreakarasho
+// All rights reserved.
+// 
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+// 1. Redistributions of source code must retain the above copyright
+//    notice, this list of conditions and the following disclaimer.
+// 2. Redistributions in binary form must reproduce the above copyright
+//    notice, this list of conditions and the following disclaimer in the
+//    documentation and/or other materials provided with the distribution.
+// 3. All advertising materials mentioning features or use of this software
+//    must display the following acknowledgement:
+//    This product includes software developed by andreakarasho - https://github.com/andreakarasho
+// 4. Neither the name of the copyright holder nor the
+//    names of its contributors may be used to endorse or promote products
+//    derived from this software without specific prior written permission.
+// 
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ''AS IS'' AND ANY
+// EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+// WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+// DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY
+// DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+// (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+// LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+// ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+// SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #endregion
 
@@ -25,22 +34,19 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Sockets;
-
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
-using ClassicUO.Game.Map;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Input;
-using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Network;
 using ClassicUO.Renderer;
+using ClassicUO.Resources;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
-
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using SDL2;
@@ -49,60 +55,61 @@ namespace ClassicUO.Game.Scenes
 {
     internal partial class GameScene : Scene
     {
-        private readonly LightData[] _lights = new LightData[Constants.MAX_LIGHTS_DATA_INDEX_COUNT];
-        private readonly float[] _scaleArray = Enumerable.Range(5, 21).Select(i => i / 10.0f).ToArray(); // 0.5 => 2.5
+        private static readonly Lazy<BlendState> _darknessBlend = new Lazy<BlendState>
+        (
+            () =>
+            {
+                BlendState state = new BlendState();
+                state.ColorSourceBlend = Blend.Zero;
+                state.ColorDestinationBlend = Blend.SourceColor;
+                state.ColorBlendFunction = BlendFunction.Add;
+
+                return state;
+            }
+        );
+
+        private static readonly Lazy<BlendState> _altLightsBlend = new Lazy<BlendState>
+        (
+            () =>
+            {
+                BlendState state = new BlendState();
+                state.ColorSourceBlend = Blend.DestinationColor;
+                state.ColorDestinationBlend = Blend.One;
+                state.ColorBlendFunction = BlendFunction.Add;
+
+                return state;
+            }
+        );
+
+
+        private static XBREffect _xbr;
         private bool _alphaChanged;
         private long _alphaTimer;
-        private bool _deathScreenActive;
-        private Label _deathScreenLabel;
         private bool _forceStopScene;
         private HealthLinesManager _healthLinesManager;
+
+        private bool _isListReady;
+        private Point _lastSelectedMultiPositionInHouseCustomization;
         private int _lightCount;
+        private readonly LightData[] _lights = new LightData[Constants.MAX_LIGHTS_DATA_INDEX_COUNT];
+        private Item _multi;
         private Rectangle _rectangleObj = Rectangle.Empty, _rectanglePlayer;
-        private RenderTarget2D _viewportRenderTarget, _lightRenderTarget;
-        private int _scale = 5; // 1.0
-        private bool _useObjectHandles;
-
-
+        private Vector3 _selectionLines = Vector3.Zero;
         private long _timePing;
+
+        private uint _timeToPlaceMultiInHouseCustomization;
+        private readonly bool _use_render_target = false;
         private UseItemQueue _useItemQueue = new UseItemQueue();
+        private bool _useObjectHandles;
         private Vector4 _vectorClear = new Vector4(Vector3.Zero, 1);
-        private WorldViewport _viewPortGump;
-        private Weather _weather;
+        private RenderTarget2D _world_render_target, _lightRenderTarget;
 
 
-        public GameScene() : base(
-            ProfileManager.Current.WindowClientBounds.X,
-            ProfileManager.Current.WindowClientBounds.Y,
-            true,
-            !ProfileManager.Current.RestoreLastGameSize,
-            true)
+        public GameScene() : base((int) SceneType.Game, true, true, true)
         {
-
         }
-
 
         public bool UpdateDrawPosition { get; set; }
-
-        private int ScalePos
-        {
-            get => _scale;
-            set
-            {
-                if (value < 0)
-                    value = 0;
-                else if (value >= _scaleArray.Length - 1)
-                    value = _scaleArray.Length - 1;
-
-                _scale = value;
-            }
-        }
-
-        public float Scale
-        {
-            get => _scaleArray[_scale];
-            set => ScalePos = (int) (value * 10) - 5;
-        }
 
         public HotkeysManager Hotkeys { get; private set; }
 
@@ -110,122 +117,153 @@ namespace ClassicUO.Game.Scenes
 
         public InfoBarManager InfoBars { get; private set; }
 
-        public Texture2D ViewportTexture => _viewportRenderTarget;
+        public Weather Weather { get; private set; }
 
-        public Texture2D LightRenderTarget => _lightRenderTarget;
+        public bool UseLights => ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.UseCustomLightLevel ? World.Light.Personal < World.Light.Overall : World.Light.RealPersonal < World.Light.RealOverall;
 
-        public Weather Weather => _weather;
+        public bool UseAltLights => ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.UseAlternativeLights;
 
-        public bool UseLights => ProfileManager.Current != null && ProfileManager.Current.UseCustomLightLevel ? World.Light.Personal < World.Light.Overall : World.Light.RealPersonal < World.Light.RealOverall;
-        public bool UseAltLights => ProfileManager.Current != null && ProfileManager.Current.UseAlternativeLights;
-       
-        public void DoubleClickDelayed(Serial serial)
+        public void DoubleClickDelayed(uint serial)
         {
             _useItemQueue.Add(serial);
-        }
-
-        private void ClearDequeued()
-        {
-            if (_inqueue)
-            {
-                _inqueue = false;
-                _queuedObject = null;
-                _queuedAction = null;
-                _dequeueAt = 0;
-            }
         }
 
         public override void Load()
         {
             base.Load();
 
-            if (!ProfileManager.Current.DebugGumpIsDisabled)
-            {
-                UIManager.Add(new DebugGump
-                {
-                    X = ProfileManager.Current.DebugGumpPosition.X,
-                    Y = ProfileManager.Current.DebugGumpPosition.Y
-                });
-                //Engine.DropFpsMinMaxValues();
-            }
-
-            HeldItem = new ItemHold();
+            ItemHold.Clear();
             Hotkeys = new HotkeysManager();
-            Macros = new MacroManager(ProfileManager.Current.Macros);
+            Macros = new MacroManager();
+
+            // #########################################################
+            // [FILE_FIX]
+            // TODO: this code is a workaround to port old macros to the new xml system.
+            if (ProfileManager.CurrentProfile.Macros != null)
+            {
+                for (int i = 0; i < ProfileManager.CurrentProfile.Macros.Length; i++)
+                {
+                    Macros.PushToBack(ProfileManager.CurrentProfile.Macros[i]);
+                }
+
+                Macros.Save();
+
+                ProfileManager.CurrentProfile.Macros = null;
+            }
+            // #########################################################
+
+            Macros.Load();
+
             InfoBars = new InfoBarManager();
+            InfoBars.Load();
             _healthLinesManager = new HealthLinesManager();
-            _weather = new Weather();
+            Weather = new Weather();
 
             WorldViewportGump viewport = new WorldViewportGump(this);
 
             UIManager.Add(viewport);
 
-            if (!ProfileManager.Current.TopbarGumpIsDisabled)
+            if (!ProfileManager.CurrentProfile.TopbarGumpIsDisabled)
+            {
                 TopBarGump.Create();
-
-            _viewPortGump = viewport.FindControls<WorldViewport>().SingleOrDefault();
-
-            GameActions.Initialize(PickupItemBegin);
+            }
 
 
             CommandManager.Initialize();
             NetClient.Socket.Disconnected += SocketOnDisconnected;
 
-            Chat.MessageReceived += ChatOnMessageReceived;
+            MessageManager.MessageReceived += ChatOnMessageReceived;
 
-            if (!ProfileManager.Current.EnableScaleZoom || !ProfileManager.Current.SaveScaleAfterClose)
-                Scale = 1f;
-            else
-                Scale = ProfileManager.Current.ScaleZoom;
+            UIManager.ContainerScale = ProfileManager.CurrentProfile.ContainersScale / 100f;
 
-            ProfileManager.Current.RestoreScaleValue = ProfileManager.Current.ScaleZoom = Scale;
-            UIManager.ContainerScale = ProfileManager.Current.ContainersScale / 100f;
+            SDL.SDL_SetWindowMinimumSize(Client.Game.Window.Handle, 640, 480);
 
-            if (ProfileManager.Current.WindowBorderless) CUOEnviroment.Client.SetWindowBorderless(false);
+            if (ProfileManager.CurrentProfile.WindowBorderless)
+            {
+                Client.Game.SetWindowBorderless(true);
+            }
+            else if (Settings.GlobalSettings.IsWindowMaximized)
+            {
+                Client.Game.MaximizeWindow();
+            }
+            else if (Settings.GlobalSettings.WindowSize.HasValue)
+            {
+                int w = Settings.GlobalSettings.WindowSize.Value.X;
+                int h = Settings.GlobalSettings.WindowSize.Value.Y;
 
+                w = Math.Max(640, w);
+                h = Math.Max(480, h);
+
+                Client.Game.SetWindowSize(w, h);
+            }
+
+
+            CircleOfTransparency.Create(ProfileManager.CurrentProfile.CircleOfTransparencyRadius);
             Plugin.OnConnected();
+
+
+            Camera.SetZoomValues
+            (
+                new[]
+                {
+                    .5f, .6f, .7f, .8f, 0.9f, 1f, 1.1f, 1.2f, 1.3f, 1.5f, 1.6f, 1.7f, 1.8f, 1.9f, 2.0f, 2.1f, 2.2f,
+                    2.3f, 2.4f, 2.5f
+                }
+            );
+
+            Camera.Zoom = ProfileManager.CurrentProfile.DefaultScale;
         }
 
-        private void ChatOnMessageReceived(object sender, UOMessageEventArgs e)
+        private void ChatOnMessageReceived(object sender, MessageEventArgs e)
         {
             if (e.Type == MessageType.Command)
+            {
                 return;
+            }
 
             string name;
             string text;
 
-            Hue hue = e.Hue;
+            ushort hue = e.Hue;
 
             switch (e.Type)
             {
                 case MessageType.Regular:
+                case MessageType.Limit3Spell:
 
-                    if (e.Parent == null || e.Parent.Serial == Serial.INVALID)
-                        name = "System";
+                    if (e.Parent == null || !SerialHelper.IsValid(e.Parent.Serial))
+                    {
+                        name = ResGeneral.System;
+                    }
                     else
+                    {
                         name = e.Name;
+                    }
 
                     text = e.Text;
 
                     break;
 
                 case MessageType.System:
-                    name = "System";
+                    name = string.IsNullOrEmpty(e.Name) || e.Name.ToLowerInvariant() == "system" ? ResGeneral.System : e.Name;
+
                     text = e.Text;
 
                     break;
 
                 case MessageType.Emote:
                     name = e.Name;
-                    text = $"*{e.Text}*";
+                    text = $"{e.Text}";
 
                     if (e.Hue == 0)
-                        hue = ProfileManager.Current.EmoteHue;
+                    {
+                        hue = ProfileManager.CurrentProfile.EmoteHue;
+                    }
 
                     break;
 
                 case MessageType.Label:
-                    name = "You see";
+                    name = ResGeneral.YouSee;
                     text = e.Text;
 
                     break;
@@ -238,22 +276,22 @@ namespace ClassicUO.Game.Scenes
 
                 case MessageType.Party:
                     text = e.Text;
-                    name = $"[Party][{e.Name}]";
-                    hue = ProfileManager.Current.PartyMessageHue;
+                    name = string.Format(ResGeneral.Party0, e.Name);
+                    hue = ProfileManager.CurrentProfile.PartyMessageHue;
 
                     break;
 
                 case MessageType.Alliance:
                     text = e.Text;
-                    name = $"[Alliance][{e.Name}]";
-                    hue = ProfileManager.Current.AllyMessageHue;
+                    name = string.Format(ResGeneral.Alliance0, e.Name);
+                    hue = ProfileManager.CurrentProfile.AllyMessageHue;
 
                     break;
 
                 case MessageType.Guild:
                     text = e.Text;
-                    name = $"[Guild][{e.Name}]";
-                    hue = ProfileManager.Current.GuildMessageHue;
+                    name = string.Format(ResGeneral.Guild0, e.Name);
+                    hue = ProfileManager.CurrentProfile.GuildMessageHue;
 
                     break;
 
@@ -262,23 +300,30 @@ namespace ClassicUO.Game.Scenes
                     name = e.Name;
                     hue = e.Hue;
 
-                    Log.Warn( $"Unhandled text type {e.Type}  -  text: '{e.Text}'");
+                    Log.Warn($"Unhandled text type {e.Type}  -  text: '{e.Text}'");
 
                     break;
             }
 
-            World.Journal.Add(text, hue, name, e.IsUnicode);
+            if (!string.IsNullOrEmpty(text))
+            {
+                World.Journal.Add
+                (
+                    text,
+                    hue,
+                    name,
+                    e.TextType,
+                    e.IsUnicode
+                );
+            }
         }
 
         public override void Unload()
         {
-            HeldItem?.Clear();
+            Client.Game.SetWindowTitle(string.Empty);
 
-            if (ProfileManager.Current != null)
-            {
-                SDL.SDL_GetWindowPosition(CUOEnviroment.Client.Window.Handle, out int x, out int y);
-            }
-            
+            ItemHold.Clear();
+
             try
             {
                 Plugin.OnDisconnected();
@@ -287,30 +332,43 @@ namespace ClassicUO.Game.Scenes
             {
             }
 
-            _renderList = null;
+            TargetManager.Reset();
 
-            TargetManager.ClearTargetingWithoutTargetCancelPacket();
+            // special case for wmap. this allow us to save settings
+            UIManager.GetGump<WorldMapGump>()?.SaveSettings();
 
-            ProfileManager.Current?.Save(UIManager.Gumps.OfType<Gump>().Where(s => s.CanBeSaved).Reverse().ToList());
+            ProfileManager.CurrentProfile?.Save(ProfileManager.ProfilePath);
+
+            Macros.Save();
+            InfoBars.Save();
             ProfileManager.UnLoadProfile();
+
+            StaticFilters.CleanCaveTextures();
+            StaticFilters.CleanTreeTextures();
 
             NetClient.Socket.Disconnected -= SocketOnDisconnected;
             NetClient.Socket.Disconnect();
-            _viewportRenderTarget?.Dispose();
             _lightRenderTarget?.Dispose();
-            
-            CommandManager.UnRegisterAll();
-            _weather.Reset();
+            _world_render_target?.Dispose();
 
+            CommandManager.UnRegisterAll();
+            Weather.Reset();
             UIManager.Clear();
             World.Clear();
+            ChatManager.Clear();
+            DelayedObjectClickManager.Clear();
 
-          
             _useItemQueue?.Clear();
             _useItemQueue = null;
             Hotkeys = null;
             Macros = null;
-            Chat.MessageReceived -= ChatOnMessageReceived;
+            MessageManager.MessageReceived -= ChatOnMessageReceived;
+
+
+            Settings.GlobalSettings.WindowSize = new Point(Client.Game.Window.ClientBounds.Width, Client.Game.Window.ClientBounds.Height);
+
+            Settings.GlobalSettings.IsWindowMaximized = Client.Game.IsWindowMaximized();
+            Client.Game.SetWindowBorderless(false);
 
             base.Unload();
         }
@@ -318,47 +376,73 @@ namespace ClassicUO.Game.Scenes
         private void SocketOnDisconnected(object sender, SocketError e)
         {
             if (Settings.GlobalSettings.Reconnect)
+            {
                 _forceStopScene = true;
+            }
             else
             {
-                UIManager.Add(new MessageBoxGump(200, 200, $"Connection lost:\n{e}", s =>
-                {
-                    if (s)
-                        CUOEnviroment.Client.SetScene(new LoginScene());
-                }));
+                UIManager.Add
+                (
+                    new MessageBoxGump
+                    (
+                        200,
+                        200,
+                        string.Format(ResGeneral.ConnectionLost0, StringHelper.AddSpaceBeforeCapital(e.ToString())),
+                        s =>
+                        {
+                            if (s)
+                            {
+                                Client.Game.SetScene(new LoginScene());
+                            }
+                        }
+                    )
+                );
             }
         }
 
         public void RequestQuitGame()
         {
-            UIManager.Add(new QuestionGump("Quit\nUltima Online?", s =>
-            {
-                if (s)
-                    CUOEnviroment.Client.SetScene(new LoginScene());
-            }));
+            UIManager.Add
+            (
+                new QuestionGump
+                (
+                    ResGeneral.QuitPrompt,
+                    s =>
+                    {
+                        if (s)
+                        {
+                            NetClient.Socket.Disconnect();
+                            Client.Game.SetScene(new LoginScene());
+                        }
+                    }
+                )
+            );
         }
 
         public void AddLight(GameObject obj, GameObject lightObject, int x, int y)
         {
-            if (_lightCount >= Constants.MAX_LIGHTS_DATA_INDEX_COUNT || (!UseLights && !UseAltLights) || obj == null)
+            if (_lightCount >= Constants.MAX_LIGHTS_DATA_INDEX_COUNT || !UseLights && !UseAltLights || obj == null)
+            {
                 return;
+            }
 
             bool canBeAdded = true;
 
             int testX = obj.X + 1;
             int testY = obj.Y + 1;
 
-            Tile tile = World.Map.GetTile(testX, testY);
+            GameObject tile = World.Map.GetTile(testX, testY);
 
             if (tile != null)
             {
                 sbyte z5 = (sbyte) (obj.Z + 5);
 
-                for (GameObject o = tile.FirstNode; o != null; o = o.Right)
+                for (GameObject o = tile; o != null; o = o.TNext)
                 {
-                    if ((!(o is Static s) || s.ItemData.IsTransparent) &&
-                        (!(o is Multi m) || m.ItemData.IsTransparent) || !o.AllowedToDraw)
+                    if ((!(o is Static s) || s.ItemData.IsTransparent) && (!(o is Multi m) || m.ItemData.IsTransparent) || !o.AllowedToDraw)
+                    {
                         continue;
+                    }
 
                     if (o.Z < _maxZ && o.Z >= z5)
                     {
@@ -372,39 +456,46 @@ namespace ClassicUO.Game.Scenes
 
             if (canBeAdded)
             {
-                ref var light = ref _lights[_lightCount];
+                ref LightData light = ref _lights[_lightCount];
 
                 ushort graphic = lightObject.Graphic;
 
-                if (graphic >= 0x3E02 && graphic <= 0x3E0B ||
-                    graphic >= 0x3914 && graphic <= 0x3929 ||
-                    graphic == 0x0B1D)
+                if (graphic >= 0x3E02 && graphic <= 0x3E0B || graphic >= 0x3914 && graphic <= 0x3929 || graphic == 0x0B1D)
+                {
                     light.ID = 2;
+                }
                 else
                 {
                     if (obj == lightObject && obj is Item item)
+                    {
                         light.ID = item.LightID;
+                    }
                     else if (lightObject is Item it)
+                    {
                         light.ID = (byte) it.ItemData.LightIndex;
+                    }
                     else if (obj is Mobile _)
+                    {
                         light.ID = 1;
+                    }
                     else
                     {
-                        ref readonly var data = ref FileManager.TileData.StaticData[obj.Graphic];
+                        ref StaticTiles data = ref TileDataLoader.Instance.StaticData[obj.Graphic];
                         light.ID = data.Layer;
                     }
-                    //else if (GameObjectHelper.TryGetStaticData(lightObject, out StaticTiles data))
-                    //    light.ID = data.Layer;
-                   
-                    //else
-                    //    return;
                 }
 
-
                 if (light.ID >= Constants.MAX_LIGHTS_DATA_INDEX_COUNT)
+                {
                     return;
+                }
 
-                light.Color = ProfileManager.Current.UseColoredLights ? LightColors.GetHue(graphic) : (ushort) 0;
+                light.Color = ProfileManager.CurrentProfile.UseColoredLights ? LightColors.GetHue(graphic) : (ushort) 0;
+
+                if (light.Color != 0)
+                {
+                    light.Color++;
+                }
 
                 light.DrawX = x;
                 light.DrawY = y;
@@ -414,25 +505,47 @@ namespace ClassicUO.Game.Scenes
 
         private void FillGameObjectList()
         {
+            _renderListCount = 0;
+            _foliageCount = 0;
+
+            if (!World.InGame)
+            {
+                return;
+            }
+
+            _isListReady = false;
             _alphaChanged = _alphaTimer < Time.Ticks;
 
             if (_alphaChanged)
+            {
                 _alphaTimer = Time.Ticks + Constants.ALPHA_TIME;
+            }
+
+            FoliageIndex++;
+
+            if (FoliageIndex >= 100)
+            {
+                FoliageIndex = 1;
+            }
 
             GetViewPort();
 
-            _renderListCount = 0;
             _objectHandlesCount = 0;
-
-            _useObjectHandles = NameOverHeadManager.IsToggled || _ctrlAndShiftPressed;
+            _useObjectHandles = NameOverHeadManager.IsToggled || Keyboard.Ctrl && Keyboard.Shift;
 
             if (_useObjectHandles)
+            {
                 NameOverHeadManager.Open();
+            }
             else
+            {
                 NameOverHeadManager.Close();
+            }
 
             _rectanglePlayer.X = (int) (World.Player.RealScreenPosition.X - World.Player.FrameInfo.X + 22 + World.Player.Offset.X);
+
             _rectanglePlayer.Y = (int) (World.Player.RealScreenPosition.Y - World.Player.FrameInfo.Y + 22 + (World.Player.Offset.Y - World.Player.Offset.Z));
+
             _rectanglePlayer.Width = World.Player.FrameInfo.Width;
             _rectanglePlayer.Height = World.Player.FrameInfo.Height;
 
@@ -441,8 +554,10 @@ namespace ClassicUO.Game.Scenes
             int minY = _minTile.Y;
             int maxX = _maxTile.X;
             int maxY = _maxTile.Y;
+            Map.Map map = World.Map;
+            bool use_handles = _useObjectHandles;
 
-            for (int i = 0; i < 2; i++)
+            for (int i = 0; i < 2; ++i)
             {
                 int minValue = minY;
                 int maxValue = maxY;
@@ -453,7 +568,7 @@ namespace ClassicUO.Game.Scenes
                     maxValue = maxX;
                 }
 
-                for (int lead = minValue; lead < maxValue; lead++)
+                for (int lead = minValue; lead < maxValue; ++lead)
                 {
                     int x = minX;
                     int y = lead;
@@ -464,96 +579,110 @@ namespace ClassicUO.Game.Scenes
                         y = maxY;
                     }
 
-                    while (true)
+                    while (x >= minX && x <= maxX && y >= minY && y <= maxY)
                     {
-                        if (x < minX || x > maxX || y < minY || y > maxY)
-                            break;
+                        AddTileToRenderList
+                        (
+                            map.GetTile(x, y),
+                            x,
+                            y,
+                            use_handles,
+                            150 /*, null*/
+                        );
 
-                        Tile tile = World.Map.GetTile(x, y);
+                        ++x;
+                        --y;
+                    }
+                }
+            }
 
-                        if (tile != null)
-                            AddTileToRenderList(tile.FirstNode, x, y, _useObjectHandles, 150/*, null*/);
-                        x++;
-                        y--;
+            if (_alphaChanged)
+            {
+                for (int i = 0; i < _foliageCount; i++)
+                {
+                    GameObject f = _foliages[i];
+
+                    if (f.FoliageIndex == FoliageIndex)
+                    {
+                        f.ProcessAlpha(Constants.FOLIAGE_ALPHA);
+                    }
+                    else
+                    {
+                        f.ProcessAlpha(0xFF);
                     }
                 }
             }
 
 
-            UpdateTextServerEntities(World.Mobiles);
-            UpdateTextServerEntities(World.Items);
+            UpdateTextServerEntities(World.Mobiles, true);
+            UpdateTextServerEntities(World.Items, false);
 
             _renderIndex++;
 
             if (_renderIndex >= 100)
+            {
                 _renderIndex = 1;
+            }
+
             UpdateDrawPosition = false;
+            _isListReady = true;
         }
 
-        private void UpdateTextServerEntities(IEnumerable<Entity> entities)
+        private void UpdateTextServerEntities<T>(IEnumerable<T> entities, bool force) where T : Entity
         {
-            foreach (Entity e in entities)
+            foreach (T e in entities)
             {
-                if (e.UseInRender != _renderIndex && e.TextContainer != null)
+                if (e.UseInRender != _renderIndex && e.TextContainer != null && !e.TextContainer.IsEmpty && (force || e.Graphic == 0x2006))
                 {
                     e.UpdateRealScreenPosition(_offset.X, _offset.Y);
-                    e.UseInRender = (byte)_renderIndex;
+                    e.UseInRender = (byte) _renderIndex;
                 }
             }
         }
 
-        public override void Update(double totalMS, double frameMS)
+        public override void Update(double totalTime, double frameTime)
         {
-            base.Update(totalMS, frameMS);
+            Profile currentProfile = ProfileManager.CurrentProfile;
+            Camera.SetGameWindowBounds(currentProfile.GameWindowPosition.X + 5, currentProfile.GameWindowPosition.Y + 5, currentProfile.GameWindowSize.X, currentProfile.GameWindowSize.Y);
+
+            SelectedObject.TranslatedMousePositionByViewport = Camera.MouseToWorldPosition();
+
+            base.Update(totalTime, frameTime);
 
             PacketHandlers.SendMegaClilocRequests();
 
             if (_forceStopScene)
             {
-                var loginScene = new LoginScene();
-                CUOEnviroment.Client.SetScene(loginScene);
+                LoginScene loginScene = new LoginScene();
+                Client.Game.SetScene(loginScene);
                 loginScene.Reconnect = true;
 
                 return;
             }
 
             if (!World.InGame)
-                return;
-
-            
-            World.Update(totalMS, frameMS);
-            Pathfinder.ProcessAutoWalk();
-
-
-            if (_inqueue)
             {
-                _dequeueAt -= frameMS;
+                return;
+            }
 
-                if (_dequeueAt <= 0)
+            _healthLinesManager.Update();
+            World.Update(totalTime, frameTime);
+            AnimatedStaticsManager.Process();
+            BoatMovingManager.Update();
+            Pathfinder.ProcessAutoWalk();
+            DelayedObjectClickManager.Update();
+
+            if (!MoveCharacterByMouseInput() && !currentProfile.DisableArrowBtn)
+            {
+                Direction dir = DirectionHelper.DirectionFromKeyboardArrows(_flags[0], _flags[2], _flags[1], _flags[3]);
+
+                if (World.InGame && !Pathfinder.AutoWalking && dir != Direction.NONE)
                 {
-                    _inqueue = false;
-
-                    if (_queuedObject != null && !_queuedObject.IsDestroyed)
-                    {
-                        _queuedAction();
-                        _queuedObject = null;
-                        _queuedAction = null;
-                        _dequeueAt = 0;
-                    }
+                    World.Player.Walk(dir, currentProfile.AlwaysRun);
                 }
             }
 
-            if (_rightMousePressed || _continueRunning)
-                MoveCharacterByMouseInput();
-            else if (!ProfileManager.Current.DisableArrowBtn || _isMacroMoveDown)
-            {
-                if (_arrowKeyPressed)
-                    MoveCharacterByKeyboardInput(false);
-                else if (_numPadKeyPressed)
-                    MoveCharacterByKeyboardInput(true);
-            }
-
-            if (_followingMode && _followingTarget.IsMobile && !Pathfinder.AutoWalking)
+            if (_followingMode && SerialHelper.IsMobile(_followingTarget) && !Pathfinder.AutoWalking)
             {
                 Mobile follow = World.Mobiles.Get(_followingTarget);
 
@@ -562,69 +691,101 @@ namespace ClassicUO.Game.Scenes
                     int distance = follow.Distance;
 
                     if (distance > World.ClientViewRange)
+                    {
                         StopFollowing();
+                    }
                     else if (distance > 3)
+                    {
                         Pathfinder.WalkTo(follow.X, follow.Y, follow.Z, 1);
+                    }
                 }
                 else
+                {
                     StopFollowing();
+                }
             }
 
 
-            if (totalMS > _timePing)
+            if (totalTime > _timePing)
             {
                 NetClient.Socket.Statistics.SendPing();
-                _timePing = (long) totalMS + 1000;
+                _timePing = (long) totalTime + 1000;
             }
 
             Macros.Update();
-            _useItemQueue.Update(totalMS, frameMS);
 
-            if (!IsMouseOverViewport)
-                SelectedObject.Object = SelectedObject.LastObject = null;
-            else
+            if ((currentProfile.CorpseOpenOptions == 1 || currentProfile.CorpseOpenOptions == 3) && TargetManager.IsTargeting || (currentProfile.CorpseOpenOptions == 2 || currentProfile.CorpseOpenOptions == 3) && World.Player.IsHidden)
             {
-                if (_viewPortGump != null)
-                {
-                    SelectedObject.TranslatedMousePositionByViewport.X = (int) ((Mouse.Position.X - _viewPortGump.ScreenCoordinateX) * Scale);
-                    SelectedObject.TranslatedMousePositionByViewport.Y = (int) ((Mouse.Position.Y - _viewPortGump.ScreenCoordinateY) * Scale);
-                }
-                else
-                    SelectedObject.TranslatedMousePositionByViewport = Point.Zero;
+                _useItemQueue.ClearCorpses();
             }
+
+            _useItemQueue.Update(totalTime, frameTime);
+
+            if (!UIManager.IsMouseOverWorld)
+            {
+                SelectedObject.Object = SelectedObject.LastObject = null;
+            }
+
 
             if (TargetManager.IsTargeting && TargetManager.TargetingState == CursorTarget.MultiPlacement && World.CustomHouseManager == null && TargetManager.MultiTargetInfo != null)
             {
                 if (_multi == null)
-                    _multi = new Item(Serial.INVALID)
-                    {
-                        Graphic = TargetManager.MultiTargetInfo.Model,
-                        Hue = TargetManager.MultiTargetInfo.Hue,
-                        IsMulti = true,
-                    };
+                {
+                    _multi = Item.Create(0);
+                    _multi.Graphic = TargetManager.MultiTargetInfo.Model;
+                    _multi.Hue = TargetManager.MultiTargetInfo.Hue;
+                    _multi.IsMulti = true;
+                }
 
                 if (SelectedObject.Object is GameObject gobj)
                 {
-                    Position pos2 = gobj.Tile?.FirstNode?.Position ?? gobj.Position;
+                    ushort x, y;
+                    sbyte z;
 
-                    World.Map.GetMapZ(pos2.X, pos2.Y, out sbyte groundZ, out sbyte _);
+                    int cellX = gobj.X % 8;
+                    int cellY = gobj.Y % 8;
+
+                    GameObject o = World.Map.GetChunk(gobj.X, gobj.Y)?.Tiles[cellX, cellY];
+
+                    if (o != null)
+                    {
+                        x = o.X;
+                        y = o.Y;
+                        z = o.Z;
+                    }
+                    else
+                    {
+                        x = gobj.X;
+                        y = gobj.Y;
+                        z = gobj.Z;
+                    }
+
+                    World.Map.GetMapZ(x, y, out sbyte groundZ, out sbyte _);
 
                     if (gobj is Static st && st.ItemData.IsWet)
+                    {
                         groundZ = gobj.Z;
+                    }
 
-                    var pos = new Position(
-                                           (ushort) (pos2.X - TargetManager.MultiTargetInfo.XOff),
-                                           (ushort) (pos2.Y - TargetManager.MultiTargetInfo.YOff), (sbyte) (groundZ - TargetManager.MultiTargetInfo.ZOff));
+                    x = (ushort) (x - TargetManager.MultiTargetInfo.XOff);
+                    y = (ushort) (y - TargetManager.MultiTargetInfo.YOff);
+                    z = (sbyte) (groundZ - TargetManager.MultiTargetInfo.ZOff);
 
-                    _multi.Position = pos;
+                    _multi.X = x;
+                    _multi.Y = y;
+                    _multi.Z = z;
+                    _multi.UpdateScreenPosition();
                     _multi.CheckGraphicChange();
                     _multi.AddToTile();
-                    World.HouseManager.TryGetHouse(_multi.Serial, out var house);
+                    World.HouseManager.TryGetHouse(_multi.Serial, out House house);
 
                     foreach (Multi s in house.Components)
                     {
-                        s.IsFromTarget = true;
-                        s.Position = new Position((ushort) (_multi.X + s.MultiOffsetX), (ushort) (_multi.Y + s.MultiOffsetY), (sbyte) (_multi.Z + s.MultiOffsetZ));
+                        s.IsHousePreview = true;
+                        s.X = (ushort) (_multi.X + s.MultiOffsetX);
+                        s.Y = (ushort) (_multi.Y + s.MultiOffsetY);
+                        s.Z = (sbyte) (_multi.Z + s.MultiOffsetZ);
+                        s.UpdateScreenPosition();
                         s.AddToTile();
                     }
                 }
@@ -637,197 +798,433 @@ namespace ClassicUO.Game.Scenes
             }
 
 
-            if (_isMouseLeftDown && !IsHoldingItem && Time.Ticks - _holdMouse2secOverItemTime >= 1000)
+            if (_isMouseLeftDown && !ItemHold.Enabled)
             {
-                if (PickupItemBegin(SelectedObject.LastObject as Item, 0, 0))
+                if (World.CustomHouseManager != null && World.CustomHouseManager.SelectedGraphic != 0 && !World.CustomHouseManager.SeekTile && !World.CustomHouseManager.Erasing && Time.Ticks > _timeToPlaceMultiInHouseCustomization)
                 {
-                    _isMouseLeftDown = false;
-                    _holdMouse2secOverItemTime = 0;
+                    if (SelectedObject.LastObject is GameObject obj && (obj.X != _lastSelectedMultiPositionInHouseCustomization.X || obj.Y != _lastSelectedMultiPositionInHouseCustomization.Y))
+                    {
+                        World.CustomHouseManager.OnTargetWorld(obj);
+                        _timeToPlaceMultiInHouseCustomization = Time.Ticks + 50;
+                        _lastSelectedMultiPositionInHouseCustomization.X = obj.X;
+                        _lastSelectedMultiPositionInHouseCustomization.Y = obj.Y;
+                    }
+                }
+                else if (Time.Ticks - _holdMouse2secOverItemTime >= 1000)
+                {
+                    if (SelectedObject.LastObject is Item it && GameActions.PickUp(it.Serial, 0, 0))
+                    {
+                        _isMouseLeftDown = false;
+                        _holdMouse2secOverItemTime = 0;
+                    }
                 }
             }
         }
 
-        public override void FixedUpdate(double totalMS, double frameMS)
+        public override void FixedUpdate(double totalTime, double frameTime)
         {
             FillGameObjectList();
         }
 
 
-
         public override bool Draw(UltimaBatcher2D batcher)
         {
-            if (!World.InGame)
-                return false;
-
-            if (ProfileManager.Current.EnableDeathScreen)
+            if (!World.InGame || !_isListReady)
             {
-                if (_deathScreenLabel == null || _deathScreenLabel.IsDisposed)
-                {
-                    if (World.Player.IsDead && World.Player.DeathScreenTimer > Time.Ticks)
-                    {
-                        UIManager.Add(_deathScreenLabel = new Label("You are dead.", false, 999, 200, 3)
-                        {
-                            X = (CUOEnviroment.Client.Window.ClientBounds.Width >> 1) - 50,
-                            Y = (CUOEnviroment.Client.Window.ClientBounds.Height >> 1) - 50
-                        });
-                        _deathScreenActive = true;
-                    }
-                }
-                else if (World.Player.DeathScreenTimer < Time.Ticks)
-                {
-                    _deathScreenActive = false;
-                    _deathScreenLabel.Dispose();
-                }
+                return false;
             }
 
-            DrawWorld(batcher);
+
+            int posX = ProfileManager.CurrentProfile.GameWindowPosition.X + 5;
+            int posY = ProfileManager.CurrentProfile.GameWindowPosition.Y + 5;
+            int width = ProfileManager.CurrentProfile.GameWindowSize.X;
+            int height = ProfileManager.CurrentProfile.GameWindowSize.Y;
+
+            if (CheckDeathScreen
+            (
+                batcher,
+                posX,
+                posY,
+                width,
+                height
+            ))
+            {
+                return true;
+            }
+
+
+            Viewport r_viewport = batcher.GraphicsDevice.Viewport;
+            Viewport camera_viewport = Camera.GetViewport();
+
+            Matrix matrix = _use_render_target ? Matrix.Identity : Camera.ViewTransformMatrix;
+
+
+            bool can_draw_lights = false;
+
+            if (!_use_render_target)
+            {
+                can_draw_lights = PrepareLightsRendering(batcher, ref matrix);
+                batcher.GraphicsDevice.Viewport = camera_viewport;
+            }
+
+            DrawWorld(batcher, ref matrix, _use_render_target);
+
+            if (_use_render_target)
+            {
+                can_draw_lights = PrepareLightsRendering(batcher, ref matrix);
+                batcher.GraphicsDevice.Viewport = camera_viewport;
+            }
+
+            // draw world rt
+            Vector3 hue = Vector3.Zero;
+
+
+            if (_use_render_target)
+            {
+                //switch (ProfileManager.CurrentProfile.FilterType)
+                //{
+                //    default:
+                //    case 0:
+                //        batcher.SetSampler(SamplerState.PointClamp);
+                //        break;
+                //    case 1:
+                //        batcher.SetSampler(SamplerState.AnisotropicClamp);
+                //        break;
+                //    case 2:
+                //        batcher.SetSampler(SamplerState.LinearClamp);
+                //        break;
+                //}
+
+                if (_xbr == null)
+                {
+                    _xbr = new XBREffect(batcher.GraphicsDevice);
+                }
+
+                _xbr.SetSize(width, height);
+
+
+                //Point p = Point.Zero;
+
+                //p = Camera.ScreenToWorld(p);
+                //int minPixelsX = p.X;
+                //int minPixelsY = p.Y;
+
+                //p.X = Camera.Bounds.Width;
+                //p.Y = Camera.Bounds.Height;
+                //p = Camera.ScreenToWorld(p);
+                //int maxPixelsX = p.X;
+                //int maxPixelsY = p.Y;
+
+                batcher.Begin(null, Camera.ViewTransformMatrix);
+
+                batcher.Draw2D
+                (
+                    _world_render_target,
+                    0,
+                    0,
+                    width,
+                    height,
+                    ref hue
+                );
+
+                batcher.End();
+
+                //batcher.SetSampler(null);
+            }
+
+            // draw lights
+            if (can_draw_lights)
+            {
+                batcher.Begin();
+
+                if (UseAltLights)
+                {
+                    hue.Z = .5f;
+                    batcher.SetBlendState(_altLightsBlend.Value);
+                }
+                else
+                {
+                    batcher.SetBlendState(_darknessBlend.Value);
+                }
+
+                batcher.Draw2D
+                (
+                    _lightRenderTarget,
+                    0,
+                    0,
+                    width,
+                    height,
+                    ref hue
+                );
+
+                batcher.SetBlendState(null);
+                batcher.End();
+
+                hue.Z = 0f;
+            }
+
+
+            batcher.Begin();
+            DrawOverheads(batcher, posX, posY);
+            DrawSelection(batcher);
+            batcher.End();
+
+
+            batcher.GraphicsDevice.Viewport = r_viewport;
 
             return base.Draw(batcher);
         }
 
-
-
-        private void DrawWorld(UltimaBatcher2D batcher)
+        private void DrawWorld(UltimaBatcher2D batcher, ref Matrix matrix, bool use_render_target)
         {
             SelectedObject.Object = null;
 
-            batcher.GraphicsDevice.Clear(Color.Black);
-            batcher.GraphicsDevice.SetRenderTarget(_viewportRenderTarget);
-
-            //if (CircleOfTransparency.Circle == null)
-            //    CircleOfTransparency.Create(200);
-            //CircleOfTransparency.Circle.Draw(batcher,
-            //                                 ((ProfileManager.Current.GameWindowSize.X / 2)),
-            //                                 ((ProfileManager.Current.GameWindowSize.Y / 2)));
-
-            //batcher.GraphicsDevice.Clear(ClearOptions.Stencil | ClearOptions.Target | ClearOptions.DepthBuffer, Color.Black, 0, 0);
-
-
-            batcher.SetBrightlight(ProfileManager.Current.Brighlight);
-
-            batcher.Begin();
-
-            //batcher.SetStencil(s2);
-
-            if (!_deathScreenActive)
+            if (use_render_target)
             {
-                RenderedObjectsCount = 0;
-
-                int z = World.Player.Z + 5;
-                bool usecircle = ProfileManager.Current.UseCircleOfTransparency;
-
-                for (int i = 0; i < _renderListCount; i++)
-                {
-                    GameObject obj = _renderList[i];
-
-                    if (obj.Z <= _maxGroundZ)
-                    {
-                        obj.DrawTransparent = usecircle && obj.TransparentTest(z);
-
-                        if (obj.Draw(batcher, obj.RealScreenPosition.X, obj.RealScreenPosition.Y))
-                            RenderedObjectsCount++;
-                    }
-                }
-
-                if (_multi != null && TargetManager.IsTargeting && TargetManager.TargetingState == CursorTarget.MultiPlacement)
-                    _multi.Draw(batcher, _multi.RealScreenPosition.X, _multi.RealScreenPosition.Y);
-            }
-
-            //batcher.SetStencil(null);
-            batcher.End();
-
-            DrawLights(batcher);
-
-            // draw weather
-            batcher.Begin();
-            _weather.Draw(batcher, 0, 0 /*ProfileManager.Current.GameWindowPosition.X, ProfileManager.Current.GameWindowPosition.Y*/);
-            batcher.End();
-
-            batcher.GraphicsDevice.SetRenderTarget(null);
-        }
-
-        private Item _multi;
-
-        private void DrawLights(UltimaBatcher2D batcher)
-        {
-            if (_deathScreenActive || (!UseLights && !UseAltLights))
-                return;
-
-            batcher.GraphicsDevice.SetRenderTarget(_lightRenderTarget);
-
-            if (UseAltLights)
-            {
-                batcher.GraphicsDevice.Clear(ClearOptions.Target, Color.Black, 0, 0);
+                batcher.GraphicsDevice.SetRenderTarget(_world_render_target);
+                batcher.GraphicsDevice.Clear(ClearOptions.Target, Color.Black, 0f, 0);
             }
             else
             {
-                var lightColor = World.Light.IsometricLevel;
+                switch (ProfileManager.CurrentProfile.FilterType)
+                {
+                    default:
+                    case 0:
+                        batcher.SetSampler(SamplerState.PointClamp);
 
-                if (ProfileManager.Current.UseDarkNights)
-                    lightColor -= 0.02f;
+                        break;
+
+                    case 1:
+                        batcher.SetSampler(SamplerState.AnisotropicClamp);
+
+                        break;
+
+                    case 2:
+                        batcher.SetSampler(SamplerState.LinearClamp);
+
+                        break;
+                }
+            }
+
+
+            batcher.Begin(null, matrix);
+
+
+            bool usecircle = ProfileManager.CurrentProfile.UseCircleOfTransparency;
+
+
+            if (usecircle)
+            {
+                int fx = (int) (World.Player.RealScreenPosition.X + World.Player.Offset.X);
+                int fy = (int) (World.Player.RealScreenPosition.Y + (World.Player.Offset.Y - World.Player.Offset.Z));
+
+                fx += 22;
+                //fy -= 22;
+
+                CircleOfTransparency.Draw(batcher, fx, fy);
+            }
+
+            RenderedObjectsCount = 0;
+
+            int z = World.Player.Z + 5;
+
+            for (int i = 0; i < _renderListCount; ++i)
+            {
+                GameObject obj = _renderList[i];
+
+                if (obj.Z <= _maxGroundZ)
+                {
+                    GameObject.DrawTransparent = usecircle && obj.TransparentTest(z);
+
+                    if (obj.Draw(batcher, obj.RealScreenPosition.X, obj.RealScreenPosition.Y))
+                    {
+                        ++RenderedObjectsCount;
+                    }
+                }
+            }
+
+            if (_multi != null && TargetManager.IsTargeting && TargetManager.TargetingState == CursorTarget.MultiPlacement)
+            {
+                _multi.Draw(batcher, _multi.RealScreenPosition.X, _multi.RealScreenPosition.Y);
+            }
+
+            // draw weather
+            Weather.Draw(batcher, 0, 0);
+            batcher.End();
+            batcher.SetSampler(null);
+
+            if (use_render_target)
+            {
+                batcher.GraphicsDevice.SetRenderTarget(null);
+            }
+        }
+
+        private bool PrepareLightsRendering(UltimaBatcher2D batcher, ref Matrix matrix)
+        {
+            if (!UseLights && !UseAltLights || World.Player.IsDead && ProfileManager.CurrentProfile.EnableBlackWhiteEffect || _lightRenderTarget == null)
+            {
+                return false;
+            }
+
+            batcher.GraphicsDevice.SetRenderTarget(_lightRenderTarget);
+            batcher.GraphicsDevice.Clear(ClearOptions.Target, Color.Black, 0f, 0);
+
+            if (!UseAltLights)
+            {
+                float lightColor = World.Light.IsometricLevel;
+
+                if (ProfileManager.CurrentProfile.UseDarkNights)
+                {
+                    lightColor -= 0.04f;
+                }
 
                 _vectorClear.X = _vectorClear.Y = _vectorClear.Z = lightColor;
 
-                batcher.GraphicsDevice.Clear(ClearOptions.Target, Color.Black, 0, 0);
-                batcher.GraphicsDevice.Clear(ClearOptions.Target, _vectorClear, 0, 0);
+                batcher.GraphicsDevice.Clear(ClearOptions.Target, _vectorClear, 0f, 0);
             }
-            
-            batcher.Begin();
+
+            batcher.Begin(null, matrix);
             batcher.SetBlendState(BlendState.Additive);
 
             Vector3 hue = Vector3.Zero;
+            hue.Y = ShaderHueTranslator.SHADER_LIGHTS;
+            hue.Z = 0;
 
             for (int i = 0; i < _lightCount; i++)
             {
-                ref var l = ref _lights[i];
+                ref LightData l = ref _lights[i];
 
-                UOTexture texture = FileManager.Lights.GetTexture(l.ID);
+                UOTexture texture = LightsLoader.Instance.GetTexture(l.ID);
+
+                if (texture == null)
+                {
+                    continue;
+                }
 
                 hue.X = l.Color;
-                hue.Y = ShaderHuesTraslator.SHADER_LIGHTS;
-                hue.Z = 0;
 
-                batcher.DrawSprite(texture, l.DrawX - (texture.Width >> 1), l.DrawY - (texture.Height >> 1), false, ref hue);
+                batcher.DrawSprite
+                (
+                    texture,
+                    l.DrawX - (texture.Width >> 1),
+                    l.DrawY - (texture.Height >> 1),
+                    false,
+                    ref hue
+                );
             }
 
             _lightCount = 0;
 
             batcher.SetBlendState(null);
             batcher.End();
+
+            batcher.GraphicsDevice.SetRenderTarget(null);
+
+            return true;
         }
 
         public void DrawOverheads(UltimaBatcher2D batcher, int x, int y)
         {
-            _healthLinesManager.Draw(batcher, Scale);
+            _healthLinesManager.Draw(batcher);
 
             int renderIndex = _renderIndex - 1;
 
             if (renderIndex < 1)
+            {
                 renderIndex = 99;
+            }
 
+            if (!UIManager.IsMouseOverWorld)
+            {
+                SelectedObject.Object = null;
+            }
 
             World.WorldTextManager.ProcessWorldText(true);
             World.WorldTextManager.Draw(batcher, x, y, renderIndex);
 
-            if (!IsMouseOverViewport)
-                SelectedObject.Object = null;
-
             SelectedObject.LastObject = SelectedObject.Object;
         }
 
-        private Vector3 _selectionLines = Vector3.Zero;
-
-        public void DrawSelection(UltimaBatcher2D batcher, int x, int y)
+        public void DrawSelection(UltimaBatcher2D batcher)
         {
             if (_isSelectionActive)
             {
                 _selectionLines.Z = 0.3F;
-                batcher.Draw2D(Textures.GetTexture(Color.Black), _selectionStart.Item1, _selectionStart.Item2, Mouse.Position.X - _selectionStart.Item1, Mouse.Position.Y - _selectionStart.Item2, ref _selectionLines);
+
+                batcher.Draw2D
+                (
+                    SolidColorTextureCache.GetTexture(Color.Black),
+                    _selectionStart.X - Camera.Bounds.X,
+                    _selectionStart.Y - Camera.Bounds.Y,
+                    Mouse.Position.X - _selectionStart.X,
+                    Mouse.Position.Y - _selectionStart.Y,
+                    ref _selectionLines
+                );
+
                 _selectionLines.Z = 0.7f;
-                batcher.DrawRectangle(Textures.GetTexture(Color.DeepSkyBlue), _selectionStart.Item1, _selectionStart.Item2, Mouse.Position.X - _selectionStart.Item1, Mouse.Position.Y - _selectionStart.Item2, ref _selectionLines);
+
+                batcher.DrawRectangle
+                (
+                    SolidColorTextureCache.GetTexture(Color.DeepSkyBlue),
+                    _selectionStart.X - Camera.Bounds.X,
+                    _selectionStart.Y - Camera.Bounds.Y,
+                    Mouse.Position.X - _selectionStart.X,
+                    Mouse.Position.Y - _selectionStart.Y,
+                    ref _selectionLines
+                );
             }
         }
 
+        private static readonly RenderedText _youAreDeadText = RenderedText.Create
+        (
+            ResGeneral.YouAreDead,
+            0xFFFF,
+            3,
+            false,
+            FontStyle.BlackBorder,
+            TEXT_ALIGN_TYPE.TS_LEFT
+        );
+
+        private bool CheckDeathScreen(UltimaBatcher2D batcher, int x, int y, int width, int height)
+        {
+            if (ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.EnableDeathScreen)
+            {
+                if (World.InGame)
+                {
+                    if (World.Player.IsDead && World.Player.DeathScreenTimer > Time.Ticks)
+                    {
+                        batcher.Begin();
+                        _youAreDeadText.Draw(batcher, x + (width / 2 - _youAreDeadText.Width / 2), y + height / 2);
+                        batcher.End();
+
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        private void StopFollowing()
+        {
+            if (_followingMode)
+            {
+                _followingMode = false;
+                _followingTarget = 0;
+                Pathfinder.StopAutoWalk();
+
+                MessageManager.HandleMessage
+                (
+                    World.Player,
+                    ResGeneral.StoppedFollowing,
+                    string.Empty,
+                    0,
+                    MessageType.Regular,
+                    3,
+                    TextType.CLIENT
+                );
+            }
+        }
 
         private struct LightData
         {

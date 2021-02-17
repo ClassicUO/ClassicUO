@@ -1,240 +1,322 @@
 #region license
 
-//  Copyright (C) 2019 ClassicUO Development Community on Github
-//
-//	This project is an alternative client for the game Ultima Online.
-//	The goal of this is to develop a lightweight client considering 
-//	new technologies.  
-//      
-//  This program is free software: you can redistribute it and/or modify
-//  it under the terms of the GNU General Public License as published by
-//  the Free Software Foundation, either version 3 of the License, or
-//  (at your option) any later version.
-//
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-//
-//  You should have received a copy of the GNU General Public License
-//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// Copyright (c) 2021, andreakarasho
+// All rights reserved.
+// 
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+// 1. Redistributions of source code must retain the above copyright
+//    notice, this list of conditions and the following disclaimer.
+// 2. Redistributions in binary form must reproduce the above copyright
+//    notice, this list of conditions and the following disclaimer in the
+//    documentation and/or other materials provided with the distribution.
+// 3. All advertising materials mentioning features or use of this software
+//    must display the following acknowledgement:
+//    This product includes software developed by andreakarasho - https://github.com/andreakarasho
+// 4. Neither the name of the copyright holder nor the
+//    names of its contributors may be used to endorse or promote products
+//    derived from this software without specific prior written permission.
+// 
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ''AS IS'' AND ANY
+// EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+// WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+// DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY
+// DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+// (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+// LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+// ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+// SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #endregion
 
 using System;
-using System.Linq;
-
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
-using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
-using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
-
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Gumps
 {
     internal class NameOverheadGump : Gump
     {
-        private readonly AlphaBlendControl _background;
-
-        private readonly RenderedText _renderedText;
-        private float _clickTiming;
-        private bool _isPressed;
-        private const int MIN_WIDTH = 60;
-        private bool _positionLocked;
+        private AlphaBlendControl _background;
         private Point _lockedPosition;
+        private bool _positionLocked;
+        private readonly RenderedText _renderedText;
 
-        public NameOverheadGump(Entity entity) : base(entity.Serial, 0)
+
+        public NameOverheadGump(uint serial) : base(serial, 0)
         {
             CanMove = false;
             AcceptMouseInput = true;
             CanCloseWithRightClick = true;
-            Entity = entity;
 
-            Hue hue = entity is Mobile m ? Notoriety.GetHue(m.NotorietyFlag) : (Hue)0x0481;
+            Entity entity = World.Get(serial);
 
-            _renderedText = RenderedText.Create(String.Empty, hue, 0xFF, true, FontStyle.BlackBorder, TEXT_ALIGN_TYPE.TS_CENTER, 100, 30, true);
-
-            Add(_background = new AlphaBlendControl(.3f)
+            if (entity == null)
             {
-                WantUpdateSize = false,
-                Hue = hue
-            });
+                Dispose();
+
+                return;
+            }
+
+            _renderedText = RenderedText.Create
+            (
+                string.Empty,
+                entity is Mobile m ? Notoriety.GetHue(m.NotorietyFlag) : (ushort) 0x0481,
+                0xFF,
+                true,
+                FontStyle.BlackBorder,
+                TEXT_ALIGN_TYPE.TS_CENTER,
+                100,
+                30,
+                true
+            );
+
+            SetTooltip(entity);
+
+            BuildGump();
         }
 
-        public Entity Entity { get; }
-
-        private bool SetName()
+        public bool SetName()
         {
-            if (string.IsNullOrEmpty(_renderedText.Text))
+            Entity entity = World.Get(LocalSerial);
+
+            if (entity == null)
             {
-                if (Entity is Item item)
-                {
-                    if (!World.OPL.TryGetNameAndData(item, out string t, out _))
-                    {
-                        t = StringHelper.CapitalizeAllWords(item.ItemData.Name);
-
-                        if (string.IsNullOrEmpty(t))
-                            t = FileManager.Cliloc.Translate(1020000 + item.Graphic, capitalize: true);
-                    }
-
-                    if (string.IsNullOrEmpty(t))
-                        return false;
-
-                    if (!item.IsCorpse && item.Amount > 1)
-                        t += ": " + item.Amount;
-
-                    FileManager.Fonts.SetUseHTML(true);
-                    FileManager.Fonts.RecalculateWidthByInfo = true;
-
-
-                    int width = FileManager.Fonts.GetWidthUnicode(_renderedText.Font, t);
-
-                    if (width > 100)
-                    {
-                        t = FileManager.Fonts.GetTextByWidthUnicode(_renderedText.Font, t, 100, true, TEXT_ALIGN_TYPE.TS_CENTER, (ushort)FontStyle.BlackBorder);
-                        width = 100;
-                    }
-
-                    //if (width > 100)
-                    //    width = 100;
-
-                    //width = FileManager.Fonts.GetWidthExUnicode(_renderedText.Font, t, width, TEXT_ALIGN_TYPE.TS_CENTER, (ushort) (FontStyle.BlackBorder /*| FontStyle.Cropped*/));
-
-                    //if (width > 100)
-                    //    width = 100;
-
-                    _renderedText.MaxWidth = width;
-
-                    _renderedText.Text = t;
-
-                    FileManager.Fonts.RecalculateWidthByInfo = false;
-                    FileManager.Fonts.SetUseHTML(false);
-
-                    Width = _background.Width = _renderedText.Width + 4;
-                    Height = _background.Height = _renderedText.Height + 4;
-
-                    WantUpdateSize = false;
-
-                    return true;
-                }
-
-
-                if (!string.IsNullOrEmpty(Entity.Name))
-                {
-                    string t = Entity.Name;
-
-                    int width = FileManager.Fonts.GetWidthUnicode(_renderedText.Font, t);
-
-                    if (width > 100)
-                    {
-                        t = FileManager.Fonts.GetTextByWidthUnicode(_renderedText.Font, t, 100, true, TEXT_ALIGN_TYPE.TS_CENTER, (ushort)FontStyle.BlackBorder);
-                        width = 100;
-                    }
-
-                    //int width = FileManager.Fonts.GetWidthUnicode(_renderedText.Font, Entity.Name);
-
-                    //if (width > 200)
-                    //    width = 200;
-
-                    //width = FileManager.Fonts.GetWidthExUnicode(_renderedText.Font, Entity.Name, width, TEXT_ALIGN_TYPE.TS_CENTER, (ushort)(FontStyle.BlackBorder));
-
-                    //if (width > 200)
-                    //    width = 200;
-
-                    _renderedText.MaxWidth = width;
-
-                    _renderedText.Text = t;
-
-                    Width = _background.Width = Math.Max(_renderedText.Width + 4, MIN_WIDTH);
-                    Height = _background.Height = _renderedText.Height + 4;
-
-                    WantUpdateSize = false;
-
-                    return true;
-                }
-
                 return false;
             }
 
-            return true;
+            if (entity is Item item)
+            {
+                if (!World.OPL.TryGetNameAndData(item, out string t, out _))
+                {
+                    t = StringHelper.CapitalizeAllWords(item.ItemData.Name);
+
+                    if (string.IsNullOrEmpty(t))
+                    {
+                        t = ClilocLoader.Instance.GetString(1020000 + item.Graphic, true, t);
+                    }
+                }
+
+                if (string.IsNullOrEmpty(t))
+                {
+                    return false;
+                }
+
+                if (!item.IsCorpse && item.Amount > 1)
+                {
+                    t += ": " + item.Amount;
+                }
+
+                FontsLoader.Instance.SetUseHTML(true);
+                FontsLoader.Instance.RecalculateWidthByInfo = true;
+
+
+                int width = FontsLoader.Instance.GetWidthUnicode(_renderedText.Font, t);
+
+                if (width > Constants.OBJECT_HANDLES_GUMP_WIDTH)
+                {
+                    t = FontsLoader.Instance.GetTextByWidthUnicode
+                    (
+                        _renderedText.Font,
+                        t,
+                        Constants.OBJECT_HANDLES_GUMP_WIDTH,
+                        true,
+                        TEXT_ALIGN_TYPE.TS_CENTER,
+                        (ushort) FontStyle.BlackBorder
+                    );
+
+                    width = Constants.OBJECT_HANDLES_GUMP_WIDTH;
+                }
+
+                _renderedText.MaxWidth = width;
+                _renderedText.Text = t;
+
+                FontsLoader.Instance.RecalculateWidthByInfo = false;
+                FontsLoader.Instance.SetUseHTML(false);
+
+                Width = _background.Width = Math.Max(60, _renderedText.Width) + 4;
+                Height = _background.Height = Constants.OBJECT_HANDLES_GUMP_HEIGHT + 4;
+
+                WantUpdateSize = false;
+
+                return true;
+            }
+
+            if (!string.IsNullOrEmpty(entity.Name))
+            {
+                string t = entity.Name;
+
+                int width = FontsLoader.Instance.GetWidthUnicode(_renderedText.Font, t);
+
+                if (width > Constants.OBJECT_HANDLES_GUMP_WIDTH)
+                {
+                    t = FontsLoader.Instance.GetTextByWidthUnicode
+                    (
+                        _renderedText.Font,
+                        t,
+                        Constants.OBJECT_HANDLES_GUMP_WIDTH,
+                        true,
+                        TEXT_ALIGN_TYPE.TS_CENTER,
+                        (ushort) FontStyle.BlackBorder
+                    );
+
+                    width = Constants.OBJECT_HANDLES_GUMP_WIDTH;
+                }
+
+                _renderedText.MaxWidth = width;
+
+                _renderedText.Text = t;
+
+                Width = _background.Width = Math.Max(60, _renderedText.Width) + 4;
+                Height = _background.Height = Constants.OBJECT_HANDLES_GUMP_HEIGHT + 4;
+
+                WantUpdateSize = false;
+
+                return true;
+            }
+
+            return false;
         }
 
+        private void BuildGump()
+        {
+            Entity entity = World.Get(LocalSerial);
+
+            if (entity == null)
+            {
+                Dispose();
+
+                return;
+            }
+
+            Add
+            (
+                _background = new AlphaBlendControl(.3f)
+                {
+                    WantUpdateSize = false,
+                    Hue = entity is Mobile m ? Notoriety.GetHue(m.NotorietyFlag) : (ushort) 0x0481
+                }
+            );
+        }
 
         protected override void CloseWithRightClick()
         {
-            Entity.ClosedObjectHandles = true;
+            Entity entity = World.Get(LocalSerial);
+
+            if (entity != null)
+            {
+                entity.ClosedObjectHandles = true;
+            }
+
             base.CloseWithRightClick();
         }
 
         protected override void OnDragBegin(int x, int y)
         {
-            if (Entity is Mobile || Entity is Item it && it.IsDamageable)
+            _positionLocked = false;
+
+            Entity entity = World.Get(LocalSerial);
+
+            if (entity is Mobile || entity is Item it && it.IsDamageable)
             {
                 if (UIManager.IsDragging)
+                {
                     return;
+                }
 
-                GameActions.RequestMobileStatus(Entity);
-                BaseHealthBarGump gump = UIManager.GetGump<BaseHealthBarGump>(Entity);
+                BaseHealthBarGump gump = UIManager.GetGump<BaseHealthBarGump>(LocalSerial);
                 gump?.Dispose();
 
-                if (Entity == World.Player)
+                if (entity == World.Player)
+                {
                     StatusGumpBase.GetStatusGump()?.Dispose();
+                }
 
-                if (ProfileManager.Current.CustomBarsToggled)
+                if (ProfileManager.CurrentProfile.CustomBarsToggled)
                 {
                     Rectangle rect = new Rectangle(0, 0, HealthBarGumpCustom.HPB_WIDTH, HealthBarGumpCustom.HPB_HEIGHT_SINGLELINE);
-                    UIManager.Add(gump = new HealthBarGumpCustom(Entity) { X = Mouse.Position.X - (rect.Width >> 1), Y = Mouse.Position.Y - (rect.Height >> 1) });
+
+                    UIManager.Add
+                    (
+                        gump = new HealthBarGumpCustom(entity)
+                        {
+                            X = Mouse.Position.X - (rect.Width >> 1),
+                            Y = Mouse.Position.Y - (rect.Height >> 1)
+                        }
+                    );
                 }
                 else
                 {
-                    Rectangle rect = FileManager.Gumps.GetTexture(0x0804).Bounds;
-                    UIManager.Add(gump = new HealthBarGump(Entity) { X = Mouse.Position.X - (rect.Width >> 1), Y = Mouse.Position.Y - (rect.Height >> 1) });
+                    Rectangle rect = GumpsLoader.Instance.GetTexture(0x0804).Bounds;
+
+                    UIManager.Add
+                    (
+                        gump = new HealthBarGump(entity)
+                        {
+                            X = Mouse.LClickPosition.X - (rect.Width >> 1),
+                            Y = Mouse.LClickPosition.Y - (rect.Height >> 1)
+                        }
+                    );
                 }
 
-                UIManager.AttemptDragControl(gump, Mouse.Position, true);
+                UIManager.AttemptDragControl(gump, true);
             }
-            else
+            else if (entity != null)
             {
-                if (Entity.Texture != null)
-                    GameActions.PickUp(Entity, Entity.Texture.Width >> 1, Entity.Texture.Height >> 1);
-                else
-                    GameActions.PickUp(Entity, 0, 0);
+                GameActions.PickUp(LocalSerial, 0, 0);
+
+                //if (entity.Texture != null)
+                //    GameActions.PickUp(LocalSerial, entity.Texture.Width >> 1, entity.Texture.Height >> 1);
+                //else
+                //    GameActions.PickUp(LocalSerial, 0, 0);
             }
         }
 
-        protected override bool OnMouseDoubleClick(int x, int y, MouseButton button)
+        protected override bool OnMouseDoubleClick(int x, int y, MouseButtonType button)
         {
-            if (button == MouseButton.Left)
+            if (button == MouseButtonType.Left)
             {
-                _isPressed = false;
-                _clickTiming = 0;
-
-                if (World.Player.InWarMode && Entity is Mobile)
-                    GameActions.Attack(Entity);
-                else if (!GameActions.OpenCorpse(Entity))
-                    GameActions.DoubleClick(Entity);
-            }
-
-            return true;
-        }
-
-        protected override void OnMouseUp(int x, int y, MouseButton button)
-        {
-            if (button == MouseButton.Left)
-            {
-                GameScene scene = CUOEnviroment.Client.GetScene<GameScene>();
-
-                if (!scene.IsHoldingItem)
+                if (SerialHelper.IsMobile(LocalSerial))
                 {
-                    if (UIManager.IsDragging || Math.Max(Math.Abs(Mouse.LDroppedOffset.X), Math.Abs(Mouse.LDroppedOffset.Y)) >= 1)
+                    if (World.Player.InWarMode)
+                    {
+                        GameActions.Attack(LocalSerial);
+                    }
+                    else
+                    {
+                        GameActions.DoubleClick(LocalSerial);
+                    }
+                }
+                else
+                {
+                    if (!GameActions.OpenCorpse(LocalSerial))
+                    {
+                        GameActions.DoubleClick(LocalSerial);
+                    }
+                }
+
+                return true;
+            }
+
+            return false;
+        }
+
+        protected override void OnMouseUp(int x, int y, MouseButtonType button)
+        {
+            if (button == MouseButtonType.Left)
+            {
+                if (!ItemHold.Enabled)
+                {
+                    if (UIManager.IsDragging || Math.Max(Math.Abs(Mouse.LDragOffset.X), Math.Abs(Mouse.LDragOffset.Y)) >= 1)
                     {
                         _positionLocked = false;
 
@@ -250,46 +332,95 @@ namespace ClassicUO.Game.UI.Gumps
                         case CursorTarget.Object:
                         case CursorTarget.Grab:
                         case CursorTarget.SetGrabBag:
-                            TargetManager.TargetGameObject(Entity);
+                            TargetManager.Target(LocalSerial);
                             Mouse.LastLeftButtonClickTime = 0;
 
                             break;
 
                         case CursorTarget.SetTargetClientSide:
-                            TargetManager.TargetGameObject(Entity);
+                            TargetManager.Target(LocalSerial);
                             Mouse.LastLeftButtonClickTime = 0;
-                            UIManager.Add(new InfoGump(Entity));
+                            UIManager.Add(new InspectorGump(World.Get(LocalSerial)));
 
                             break;
 
                         case CursorTarget.HueCommandTarget:
-                            CommandManager.OnHueTarget(Entity);
+                            CommandManager.OnHueTarget(World.Get(LocalSerial));
 
                             break;
-
                     }
                 }
                 else
                 {
-                    if (scene.IsHoldingItem)
+                    if (ItemHold.Enabled && !ItemHold.IsFixedPosition)
                     {
-                        if (Entity.Distance < Constants.DRAG_ITEMS_DISTANCE)
+                        uint drop_container = 0xFFFF_FFFF;
+                        bool can_drop = false;
+                        ushort dropX = 0;
+                        ushort dropY = 0;
+                        sbyte dropZ = 0;
+
+                        Entity obj = World.Get(LocalSerial);
+
+                        if (obj != null)
                         {
-                            if (Entity.Serial.IsItem)
-                                scene.DropHeldItemToContainer(World.Items.Get(Entity));
-                            else if (Entity.Serial.IsMobile)
-                                scene.MergeHeldItem(World.Mobiles.Get(Entity));
+                            can_drop = obj.Distance <= Constants.DRAG_ITEMS_DISTANCE;
+
+                            if (can_drop)
+                            {
+                                if (obj is Item it && it.ItemData.IsContainer || obj is Mobile)
+                                {
+                                    dropX = 0xFFFF;
+                                    dropY = 0xFFFF;
+                                    dropZ = 0;
+                                    drop_container = obj.Serial;
+                                }
+                                else if (obj is Item it2 && (it2.ItemData.IsSurface || it2.ItemData.IsStackable && it2.DisplayedGraphic == ItemHold.DisplayedGraphic))
+                                {
+                                    dropX = obj.X;
+                                    dropY = obj.Y;
+                                    dropZ = obj.Z;
+
+                                    if (it2.ItemData.IsSurface)
+                                    {
+                                        dropZ += (sbyte) (it2.ItemData.Height == 0xFF ? 0 : it2.ItemData.Height);
+                                    }
+                                    else
+                                    {
+                                        drop_container = obj.Serial;
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                Client.Game.Scene.Audio.PlaySound(0x0051);
+                            }
+
+                            if (can_drop)
+                            {
+                                if (drop_container == 0xFFFF_FFFF && dropX == 0 && dropY == 0)
+                                {
+                                    can_drop = false;
+                                }
+
+                                if (can_drop)
+                                {
+                                    GameActions.DropItem
+                                    (
+                                        ItemHold.Serial,
+                                        dropX,
+                                        dropY,
+                                        dropZ,
+                                        drop_container
+                                    );
+                                }
+                            }
                         }
-                        else
-                            scene.Audio.PlaySound(0x0051);
-
-                        return;
                     }
-
-                    _clickTiming += Mouse.MOUSE_DELAY_DOUBLE_CLICK;
-
-                    if (_clickTiming > 0)
-                        _isPressed = true;
+                    else if (!DelayedObjectClickManager.IsEnabled)
+                    {
+                        DelayedObjectClickManager.Set(LocalSerial, Mouse.Position.X, Mouse.Position.Y, Time.Ticks + Mouse.MOUSE_DELAY_DOUBLE_CLICK);
+                    }
                 }
             }
 
@@ -299,31 +430,46 @@ namespace ClassicUO.Game.UI.Gumps
         protected override void OnMouseOver(int x, int y)
         {
             if (_positionLocked)
-                return;
-
-            float scale = CUOEnviroment.Client.GetScene<GameScene>().Scale;
-
-            if (Entity is Mobile m)
             {
+                return;
+            }
+
+            if (SerialHelper.IsMobile(LocalSerial))
+            {
+                Mobile m = World.Mobiles.Get(LocalSerial);
+
+                if (m == null)
+                {
+                    Dispose();
+
+                    return;
+                }
+
                 _positionLocked = true;
 
-                FileManager.Animations.GetAnimationDimensions(m.AnimIndex,
-                                                              m.GetGraphicForAnimation(),
-                                                              /*(byte) m.GetDirectionForAnimation()*/ 0,
-                                                              /*Mobile.GetGroupForAnimation(m, isParent:true)*/ 0,
-                                                              m.IsMounted,
-                                                              /*(byte) m.AnimIndex*/ 0,
-                                                              out int centerX,
-                                                              out int centerY,
-                                                              out int width,
-                                                              out int height);
+                AnimationsLoader.Instance.GetAnimationDimensions
+                (
+                    m.AnimIndex,
+                    m.GetGraphicForAnimation(),
+                    /*(byte) m.GetDirectionForAnimation()*/
+                    0,
+                    /*Mobile.GetGroupForAnimation(m, isParent:true)*/
+                    0,
+                    m.IsMounted,
+                    /*(byte) m.AnimIndex*/
+                    0,
+                    out int centerX,
+                    out int centerY,
+                    out int width,
+                    out int height
+                );
 
-                _lockedPosition.X = (int)((Entity.RealScreenPosition.X + m.Offset.X + 22) / scale);
-                _lockedPosition.Y = (int)((Entity.RealScreenPosition.Y + (m.Offset.Y - m.Offset.Z) - (height + centerY + 8) + (!m.IsMounted ? 22 : 0)) / scale);
+                _lockedPosition.X = (int) (m.RealScreenPosition.X + m.Offset.X + 22 + 5);
+
+                _lockedPosition.Y = (int) (m.RealScreenPosition.Y + (m.Offset.Y - m.Offset.Z) - (height + centerY + 8) + (m.IsGargoyle && m.IsFlying ? -22 : !m.IsMounted ? 22 : 0));
             }
 
             base.OnMouseOver(x, y);
-
         }
 
         protected override void OnMouseExit(int x, int y)
@@ -332,50 +478,41 @@ namespace ClassicUO.Game.UI.Gumps
             base.OnMouseExit(x, y);
         }
 
-        public override void Update(double totalMS, double frameMS)
+        public override void Update(double totalTime, double frameTime)
         {
-            base.Update(totalMS, frameMS);
+            base.Update(totalTime, frameTime);
 
-            if (Entity == null || Entity.IsDestroyed || !Entity.UseObjectHandles || Entity.ClosedObjectHandles) Dispose();
+            Entity entity = World.Get(LocalSerial);
 
-            if (_isPressed)
+            if (entity == null || entity.IsDestroyed || !entity.UseObjectHandles || entity.ClosedObjectHandles)
             {
-                if (UIManager.IsDragging)
-                {
-                    _clickTiming = 0;
-                    _isPressed = false;
-
-                    return;
-                }
-
-                _clickTiming -= (float)frameMS;
-
-                if (_clickTiming <= 0)
-                {
-                    _clickTiming = 0;
-                    _isPressed = false;
-
-                    if (!World.ClientFeatures.TooltipsEnabled)
-                        GameActions.SingleClick(Entity);
-                    GameActions.OpenPopupMenu(Entity);
-                }
+                Dispose();
             }
         }
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
             if (IsDisposed || !SetName())
-                return false;
-
-            float scale = CUOEnviroment.Client.GetScene<GameScene>().Scale;
-
-            int gx = ProfileManager.Current.GameWindowPosition.X;
-            int gy = ProfileManager.Current.GameWindowPosition.Y;
-            int w = ProfileManager.Current.GameWindowSize.X;
-            int h = ProfileManager.Current.GameWindowSize.Y;
-
-            if (Entity is Mobile m)
             {
+                return false;
+            }
+
+            int gx = ProfileManager.CurrentProfile.GameWindowPosition.X;
+            int gy = ProfileManager.CurrentProfile.GameWindowPosition.Y;
+            int w = ProfileManager.CurrentProfile.GameWindowSize.X;
+            int h = ProfileManager.CurrentProfile.GameWindowSize.Y;
+
+            if (SerialHelper.IsMobile(LocalSerial))
+            {
+                Mobile m = World.Mobiles.Get(LocalSerial);
+
+                if (m == null)
+                {
+                    Dispose();
+
+                    return false;
+                }
+
                 if (_positionLocked)
                 {
                     x = _lockedPosition.X;
@@ -383,65 +520,103 @@ namespace ClassicUO.Game.UI.Gumps
                 }
                 else
                 {
+                    AnimationsLoader.Instance.GetAnimationDimensions
+                    (
+                        m.AnimIndex,
+                        m.GetGraphicForAnimation(),
+                        /*(byte) m.GetDirectionForAnimation()*/
+                        0,
+                        /*Mobile.GetGroupForAnimation(m, isParent:true)*/
+                        0,
+                        m.IsMounted,
+                        /*(byte) m.AnimIndex*/
+                        0,
+                        out int centerX,
+                        out int centerY,
+                        out int width,
+                        out int height
+                    );
 
-                    FileManager.Animations.GetAnimationDimensions(m.AnimIndex,
-                                                                  m.GetGraphicForAnimation(),
-                                                                  /*(byte) m.GetDirectionForAnimation()*/ 0,
-                                                                  /*Mobile.GetGroupForAnimation(m, isParent:true)*/ 0,
-                                                                  m.IsMounted,
-                                                                  /*(byte) m.AnimIndex*/ 0,
-                                                                  out int centerX,
-                                                                  out int centerY,
-                                                                  out int width,
-                                                                  out int height);
+                    x = (int) (m.RealScreenPosition.X + m.Offset.X + 22 + 5);
 
-                    x = (int)((Entity.RealScreenPosition.X + m.Offset.X + 22) / scale);
-                    y = (int)((Entity.RealScreenPosition.Y + (m.Offset.Y - m.Offset.Z) - (height + centerY + 8) + (!m.IsMounted ? 22 : 0)) / scale);
+                    y = (int) (m.RealScreenPosition.Y + (m.Offset.Y - m.Offset.Z) - (height + centerY + 8) + (m.IsGargoyle && m.IsFlying ? -22 : !m.IsMounted ? 22 : 0));
                 }
             }
-            else if (Entity.Texture != null)
+            else if (SerialHelper.IsItem(LocalSerial))
             {
-                switch (Entity.Texture)
+                Item item = World.Items.Get(LocalSerial);
+
+                if (item == null)
                 {
-                    case ArtTexture artText:
-                        x = (int)((Entity.RealScreenPosition.X + 22) / scale);
-                        y = (int)((Entity.RealScreenPosition.Y - (artText.ImageRectangle.Height >> 1)) / scale);
-                        break;
-                    default:
-                        x = (int)((Entity.RealScreenPosition.X + 22) / scale);
-                        y = (int)((Entity.RealScreenPosition.Y - (Entity.Texture.Height >> 1)) / scale);
-                        break;
+                    Dispose();
+
+                    return false;
+                }
+
+                ArtTexture texture = ArtLoader.Instance.GetTexture(item.Graphic);
+
+                if (texture != null)
+                {
+                    x = item.RealScreenPosition.X + (int) item.Offset.X + 22 + 5;
+
+                    y = item.RealScreenPosition.Y + (int) (item.Offset.Y - item.Offset.Z) + (texture.ImageRectangle.Height >> 1);
+                }
+                else
+                {
+                    x = item.RealScreenPosition.X + (int) item.Offset.X + 22 + 5;
+                    y = item.RealScreenPosition.Y + (int) (item.Offset.Y - item.Offset.Z) + 22;
                 }
             }
-            else
+
+
+            ResetHueVector();
+
+            Point p = Client.Game.Scene.Camera.WorldToScreen(new Point(x, y));
+            x = p.X - (Width >> 1);
+            y = p.Y - (Height >> 1);
+
+            x += gx;
+            y += gy;
+
+            if (x < gx || x + Width > gx + w)
             {
-                x = (int)((Entity.RealScreenPosition.X + 22) / scale);
-                y = (int)((Entity.RealScreenPosition.Y + 22) / scale);
+                return false;
             }
 
-            x -= Width >> 1;
-            y -= Height >> 1;
-            x += gx + 6;
-            y += gy;
+            if (y < gy || y + Height > gy + h)
+            {
+                return false;
+            }
 
             X = x;
             Y = y;
 
-            if (x < gx || x + Width > gx + w)
-                return false;
-
-            if (y < gy || y + Height > gy + h)
-                return false;
-
-            ResetHueVector();
-
-            batcher.DrawRectangle(Textures.GetTexture(Color.Black), x - 1, y - 1, Width + 1, Height + 1, ref _hueVector);
+            batcher.DrawRectangle
+            (
+                SolidColorTextureCache.GetTexture(Color.Black),
+                x - 1,
+                y - 1,
+                Width + 1,
+                Height + 1,
+                ref HueVector
+            );
 
             base.Draw(batcher, x, y);
 
             int renderedTextOffset = Math.Max(0, Width - _renderedText.Width - 4) >> 1;
 
-            return _renderedText.Draw(batcher, x + 2 + renderedTextOffset, y + 2, Width, Height, 0, 0);
+            return _renderedText.Draw
+            (
+                batcher,
+                Width,
+                Height,
+                x + 2 + renderedTextOffset,
+                y + 2,
+                Width,
+                Height,
+                0,
+                0
+            );
         }
 
 

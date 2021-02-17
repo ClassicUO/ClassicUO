@@ -1,380 +1,310 @@
 ﻿#region license
 
-//  Copyright (C) 2019 ClassicUO Development Community on Github
-//
-//	This project is an alternative client for the game Ultima Online.
-//	The goal of this is to develop a lightweight client considering 
-//	new technologies.  
-//      
-//  This program is free software: you can redistribute it and/or modify
-//  it under the terms of the GNU General Public License as published by
-//  the Free Software Foundation, either version 3 of the License, or
-//  (at your option) any later version.
-//
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-//
-//  You should have received a copy of the GNU General Public License
-//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// Copyright (c) 2021, andreakarasho
+// All rights reserved.
+// 
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+// 1. Redistributions of source code must retain the above copyright
+//    notice, this list of conditions and the following disclaimer.
+// 2. Redistributions in binary form must reproduce the above copyright
+//    notice, this list of conditions and the following disclaimer in the
+//    documentation and/or other materials provided with the distribution.
+// 3. All advertising materials mentioning features or use of this software
+//    must display the following acknowledgement:
+//    This product includes software developed by andreakarasho - https://github.com/andreakarasho
+// 4. Neither the name of the copyright holder nor the
+//    names of its contributors may be used to endorse or promote products
+//    derived from this software without specific prior written permission.
+// 
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ''AS IS'' AND ANY
+// EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+// WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+// DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY
+// DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+// (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+// LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+// ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+// SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #endregion
 
 using System;
-
 using ClassicUO.Configuration;
+using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
-using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Input;
-using ClassicUO.IO;
+using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
-using ClassicUO.Game.Data;
-
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Controls
 {
     internal class ItemGump : Control
     {
-        protected bool _clickedCanDrag;
+        private ushort _graphic;
+        private readonly bool _is_gump;
 
-        private Point _lastClickPosition;
-        private float _picUpTime;
-        private float _sClickTime;
-        private bool _sendClickIfNotDClick;
-
-        public ItemGump(Item item)
+        public ItemGump
+        (
+            uint serial,
+            ushort graphic,
+            ushort hue,
+            int x,
+            int y,
+            bool is_gump = false
+        )
         {
-            if (item == null)
-            {
-                Dispose();
-                return;
-            }
+            _is_gump = is_gump;
 
-            Item = item;
             AcceptMouseInput = true;
-            X = item.X;
-            Y = item.Y;
+            X = (short) x;
+            Y = (short) y;
             HighlightOnMouseOver = true;
             CanPickUp = true;
-            ArtTexture texture = FileManager.Art.GetTexture(item.DisplayedGraphic);
-            Texture = texture;
-
-            Width = texture.Width;
-            Height = texture.Height;
-            LocalSerial = item;
-
+            LocalSerial = serial;
             WantUpdateSize = false;
+            CanMove = false;
+
+
+            Graphic = graphic;
+            Hue = hue;
+
+            SetTooltip(serial);
         }
 
 
-        public bool HighlightOnMouseOver { get; set; }
+        public ushort Graphic
+        {
+            get => _graphic;
+            set
+            {
+                _graphic = value;
 
+                UOTexture texture = _is_gump ? GumpsLoader.Instance.GetTexture(value) : ArtLoader.Instance.GetTexture(value);
+
+                if (texture == null)
+                {
+                    Dispose();
+
+                    return;
+                }
+
+                Width = texture.Width;
+                Height = texture.Height;
+
+                IsPartialHue = !_is_gump && TileDataLoader.Instance.StaticData[value].IsPartialHue;
+            }
+        }
+
+        public ushort Hue { get; set; }
+        public bool IsPartialHue { get; set; }
+        public bool HighlightOnMouseOver { get; set; }
         public bool CanPickUp { get; set; }
 
-        public Item Item { get; }
 
-        public override void Update(double totalMS, double frameMS)
+        public override void Update(double totalTime, double frameTime)
         {
-            if (Item == null || Item.IsDestroyed)
-            {
-                Dispose();
-            }
-
             if (IsDisposed)
+            {
                 return;
-
-            Texture.Ticks = (long) totalMS;
-
-            if (_clickedCanDrag && totalMS >= _picUpTime)
-            {
-                _clickedCanDrag = false;
-                AttempPickUp();
             }
 
-            if (_sendClickIfNotDClick && totalMS >= _sClickTime)
-            {
-                if (!World.ClientFeatures.TooltipsEnabled) GameActions.SingleClick(LocalSerial);
-                GameActions.OpenPopupMenu(LocalSerial);
-                _sendClickIfNotDClick = false;
-            }
+            base.Update(totalTime, frameTime);
 
-            base.Update(totalMS, frameMS);
+            if (World.InGame)
+            {
+                if (CanPickUp && !ItemHold.Enabled && Mouse.LButtonPressed && UIManager.LastControlMouseDown(MouseButtonType.Left) == this && (Mouse.LastLeftButtonClickTime != 0xFFFF_FFFF && Mouse.LastLeftButtonClickTime != 0 && Mouse.LastLeftButtonClickTime + Mouse.MOUSE_DELAY_DOUBLE_CLICK < Time.Ticks || CanPickup()))
+                {
+                    AttemptPickUp();
+                }
+                else if (MouseIsOver)
+                {
+                    SelectedObject.Object = World.Get(LocalSerial);
+                }
+            }
         }
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
-            if (Item == null || Item.IsDestroyed)
+            if (IsDisposed)
             {
-                Dispose();
+                return false;
             }
 
-            if (IsDisposed)
-                return false;
+            base.Draw(batcher, x, y);
 
             ResetHueVector();
-            ShaderHuesTraslator.GetHueVector(ref _hueVector, MouseIsOver && HighlightOnMouseOver ? 0x0035 : Item.Hue, Item.ItemData.IsPartialHue, 0, true);
 
-            batcher.Draw2D(Texture, x, y, Width, Height, ref _hueVector);
+            ShaderHueTranslator.GetHueVector(ref HueVector, HighlightOnMouseOver && MouseIsOver ? 0x0035 : Hue, IsPartialHue, 0);
 
-            if (Item.Amount > 1 && Item.ItemData.IsStackable && Item.DisplayedGraphic == Item.Graphic)
-                batcher.Draw2D(Texture, x + 5, y + 5, Width, Height, ref _hueVector);
+            UOTexture texture = _is_gump ? GumpsLoader.Instance.GetTexture(Graphic) : ArtLoader.Instance.GetTexture(Graphic);
 
-            return base.Draw(batcher, x, y);
+            if (texture != null)
+            {
+                batcher.Draw2D
+                (
+                    texture,
+                    x,
+                    y,
+                    Width,
+                    Height,
+                    ref HueVector
+                );
+
+                Item item = World.Items.Get(LocalSerial);
+
+                if (item != null && !item.IsMulti && !item.IsCoin && item.Amount > 1 && item.ItemData.IsStackable)
+                {
+                    batcher.Draw2D
+                    (
+                        texture,
+                        x + 5,
+                        y + 5,
+                        Width,
+                        Height,
+                        ref HueVector
+                    );
+                }
+            }
+
+            return true;
         }
 
         public override bool Contains(int x, int y)
         {
-            if (ProfileManager.Current != null && ProfileManager.Current.ScaleItemsInsideContainers)
+            UOTexture texture = _is_gump ? GumpsLoader.Instance.GetTexture(Graphic) : ArtLoader.Instance.GetTexture(Graphic);
+
+            if (texture == null)
+            {
+                return false;
+            }
+
+            x -= Offset.X;
+            y -= Offset.Y;
+
+            if (ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.ScaleItemsInsideContainers)
             {
                 float scale = UIManager.ContainerScale;
 
-                x = (int)(x / scale);
-                y = (int)(y / scale);
+                x = (int) (x / scale);
+                y = (int) (y / scale);
             }
 
-            if (Texture.Contains(x, y))
+            if (texture.Contains(x, y))
+            {
                 return true;
-
-            if (Item == null || Item.IsDestroyed)
-            {
-                Dispose();
             }
 
-            if (IsDisposed)
-                return false;
+            Item item = World.Items.Get(LocalSerial);
 
-            if (!Item.IsCoin && Item.Amount > 1 && Item.ItemData.IsStackable)
+            if (item != null && !item.IsCoin && item.Amount > 1 && item.ItemData.IsStackable)
             {
-                if (Texture.Contains(x - 5, y - 5))
+                if (texture.Contains(x - 5, y - 5))
+                {
                     return true;
+                }
             }
 
             return false;
         }
 
-        protected override void OnMouseDown(int x, int y, MouseButton button)
+        protected override void OnMouseUp(int x, int y, MouseButtonType button)
         {
-            if (button != MouseButton.Left)
-                return;
-
-            _lastClickPosition.X = Mouse.Position.X;
-            _lastClickPosition.Y = Mouse.Position.Y;
-
-            if (TargetManager.IsTargeting)
-            {
-                if (Mouse.IsDragging && Mouse.LDroppedOffset != Point.Zero)
-                    return;
-            }
-
-            _clickedCanDrag = true;
-            _picUpTime = Time.Ticks + 500f;
-        }
-
-        protected override void OnMouseUp(int x, int y, MouseButton button)
-        {
+            SelectedObject.Object = World.Get(LocalSerial);
             base.OnMouseUp(x, y, button);
-
-            if (button == MouseButton.Left)
-            {
-                GameScene gs = CUOEnviroment.Client.GetScene<GameScene>();
-                if (gs == null)
-                    return;
-
-                if (Item == null || Item.IsDestroyed)
-                {
-                    Dispose();
-                }
-
-                if (IsDisposed)
-                    return;
-
-                if (TargetManager.IsTargeting)
-                {
-                    _clickedCanDrag = false;
-
-                    if (Mouse.IsDragging && CanPickup())
-                    {
-                        if (!gs.IsHoldingItem || !gs.IsMouseOverUI) 
-                            return;
-
-                        SelectedObject.Object = Item;
-
-                        if (Item.ItemData.IsContainer)
-                            gs.DropHeldItemToContainer(Item);
-                        else if (gs.HeldItem.Graphic == Item.Graphic && gs.HeldItem.IsStackable)
-                            gs.MergeHeldItem(Item);
-                        else
-                        {
-                            if (Item.Container.IsItem)
-                                gs.DropHeldItemToContainer(World.Items.Get(Item.Container), X + (Mouse.Position.X - ScreenCoordinateX), Y + (Mouse.Position.Y - ScreenCoordinateY));
-                        }
-
-                        return;
-                    }
-
-                    switch (TargetManager.TargetingState)
-                    {
-                        case CursorTarget.Position:
-                        case CursorTarget.Object:
-                        case CursorTarget.Grab:
-                        case CursorTarget.SetGrabBag:
-                            SelectedObject.Object = Item;
-
-
-                            if (Item != null)
-                            {
-                                TargetManager.TargetGameObject(Item);
-                                Mouse.LastLeftButtonClickTime = 0;
-                            }
-
-                            break;
-
-                        case CursorTarget.SetTargetClientSide:
-                            SelectedObject.Object = Item;
-
-                            if (Item != null)
-                            {
-                                TargetManager.TargetGameObject(Item);
-                                Mouse.LastLeftButtonClickTime = 0;
-                                UIManager.Add(new InfoGump(Item));
-                            }
-
-                            break;
-
-                        case CursorTarget.HueCommandTarget:
-                            SelectedObject.Object = Item;
-
-                            if (Item != null)
-                            {
-                                CommandManager.OnHueTarget(Item);
-                            }
-
-                            break;
-
-                    }
-                }
-                else
-                {
-                    if (!gs.IsHoldingItem || !gs.IsMouseOverUI)
-                    {
-                        if (_clickedCanDrag)
-                        {
-                            _clickedCanDrag = false;
-                            _sendClickIfNotDClick = true;
-                            float totalMS = Time.Ticks;
-                            _sClickTime = totalMS + Mouse.MOUSE_DELAY_DOUBLE_CLICK;
-                            _lastClickPosition.X = Mouse.Position.X;
-                            _lastClickPosition.Y = Mouse.Position.Y;
-                        }
-                    }
-                    else
-                    {
-                        SelectedObject.Object = Item;
-
-                        if (Item.ItemData.IsContainer)
-                            gs.DropHeldItemToContainer(Item);
-                        else if (gs.HeldItem.Graphic == Item.Graphic && gs.HeldItem.IsStackable)
-                            gs.MergeHeldItem(Item);
-                        else
-                        {
-                            if (Item.Container.IsItem)
-                                gs.DropHeldItemToContainer(World.Items.Get(Item.Container), X + (Mouse.Position.X - ScreenCoordinateX), Y + (Mouse.Position.Y - ScreenCoordinateY));
-                        }
-                    }
-                    
-                }
-
-                _clickedCanDrag = false;
-            }
         }
 
         protected override void OnMouseOver(int x, int y)
         {
-            if (_clickedCanDrag)
-            {
-                if (CanPickup())
-                {
-                    _clickedCanDrag = false;
-                    AttempPickUp();
-                }
-            }
+            SelectedObject.Object = World.Get(LocalSerial);
         }
 
         private bool CanPickup()
         {
-            Point offset = Mouse.LDroppedOffset;
-            var split = UIManager.GetGump<SplitMenuGump>(LocalSerial);
+            Point offset = Mouse.LDragOffset;
 
-            split?.Dispose();
+            if (Math.Abs(offset.X) < Constants.MIN_PICKUP_DRAG_DISTANCE_PIXELS && Math.Abs(offset.Y) < Constants.MIN_PICKUP_DRAG_DISTANCE_PIXELS)
+            {
+                return false;
+            }
 
-            return (split != null || (Math.Abs(offset.X) > Constants.MIN_PICKUP_DRAG_DISTANCE_PIXELS || Math.Abs(offset.Y) > Constants.MIN_PICKUP_DRAG_DISTANCE_PIXELS));
+            SplitMenuGump split = UIManager.GetGump<SplitMenuGump>(LocalSerial);
+
+            if (split == null)
+            {
+                return true;
+            }
+
+            split.X = Mouse.LClickPosition.X - 80;
+            split.Y = Mouse.LClickPosition.Y - 40;
+            UIManager.AttemptDragControl(split, true);
+            split.BringOnTop();
+
+            return false;
         }
 
 
-        protected override bool OnMouseDoubleClick(int x, int y, MouseButton button)
+        protected override bool OnMouseDoubleClick(int x, int y, MouseButtonType button)
         {
-            if (button != MouseButton.Left)
+            if (button != MouseButtonType.Left || TargetManager.IsTargeting)
+            {
                 return false;
- 
+            }
+
+            Item item = World.Items.Get(LocalSerial);
             Item container;
 
-            if ( !Input.Keyboard.Ctrl &&
-                ProfileManager.Current.DoubleClickToLootInsideContainers &&
-                Item != null && !Item.IsDestroyed &&
-                !Item.ItemData.IsContainer && Item.Items.Count == 0 &&
-                (container = World.Items.Get(Item.RootContainer)) != null &&
-                container != World.Player.Equipment[(int) Layer.Backpack]
-            ){
-                GameActions.GrabItem(Item, Item.Amount);
-            } else
+            if (!Keyboard.Ctrl && ProfileManager.CurrentProfile.DoubleClickToLootInsideContainers && item != null && !item.IsDestroyed && !item.ItemData.IsContainer && item.IsEmpty && (container = World.Items.Get(item.RootContainer)) != null && container != World.Player.FindItemByLayer(Layer.Backpack))
+            {
+                GameActions.GrabItem(LocalSerial, item.Amount);
+            }
+            else
+            {
                 GameActions.DoubleClick(LocalSerial);
- 
-            _sendClickIfNotDClick = false;
-            _lastClickPosition = Point.Zero;
- 
+            }
+
             return true;
         }
 
 
-        private void AttempPickUp()
+        private void AttemptPickUp()
         {
             if (CanPickUp)
             {
-                // fetch texture for item
-                Rectangle bounds = Texture.Bounds;
-                Point offset = Point.Zero;
+                UOTexture texture = _is_gump ? GumpsLoader.Instance.GetTexture(Graphic) : ArtLoader.Instance.GetTexture(Graphic);
 
-                if (this is ItemGumpPaperdoll)
+                Rectangle bounds = texture.Bounds;
+                int centerX = bounds.Width >> 1;
+                int centerY = bounds.Height >> 1;
+
+                if (ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.ScaleItemsInsideContainers)
                 {
-                    if (Item == null || Item.IsDestroyed)
-                        Dispose();
-
-                    if (IsDisposed)
-                        return;
-
-                    // fetch DisplayedGraphic for paperdoll item
-                    bounds = FileManager.Art.GetTexture(Item.DisplayedGraphic).Bounds;
-                }
-                else if (Parent != null && Parent is ContainerGump)
-                {
-                    float scale = 1;
-                    if (ProfileManager.Current != null && ProfileManager.Current.ScaleItemsInsideContainers)
-                        scale = UIManager.ContainerScale;
-
-                    // drag with mouse offset from containers
-                    offset = new Point(
-                        (int)((_lastClickPosition.X - (ParentX + X)) / scale),
-                        (int)((_lastClickPosition.Y - (ParentY + Y)) / scale));
+                    float scale = UIManager.ContainerScale;
+                    centerX = (int) (centerX * scale);
+                    centerY = (int) (centerY * scale);
                 }
 
-                if (offset == Point.Zero) // drag from center by default
-                    offset = new Point(bounds.Width >> 1, bounds.Height >> 1);
+                if (ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.RelativeDragAndDropItems)
+                {
+                    Point p = new Point(centerX - (Mouse.Position.X - ScreenCoordinateX), centerY - (Mouse.Position.Y - ScreenCoordinateY));
 
-                GameActions.PickUp(LocalSerial, offset);
+                    GameActions.PickUp
+                    (
+                        LocalSerial,
+                        centerX,
+                        centerY,
+                        offset: p,
+                        is_gump: _is_gump
+                    );
+                }
+                else
+                {
+                    GameActions.PickUp(LocalSerial, centerX, centerY, is_gump: _is_gump);
+                }
             }
         }
     }

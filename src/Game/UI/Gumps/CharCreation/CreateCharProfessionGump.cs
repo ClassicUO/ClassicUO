@@ -1,33 +1,41 @@
 ﻿#region license
 
-//  Copyright (C) 2019 ClassicUO Development Community on Github
-//
-//	This project is an alternative client for the game Ultima Online.
-//	The goal of this is to develop a lightweight client considering 
-//	new technologies.  
-//      
-//  This program is free software: you can redistribute it and/or modify
-//  it under the terms of the GNU General Public License as published by
-//  the Free Software Foundation, either version 3 of the License, or
-//  (at your option) any later version.
-//
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-//
-//  You should have received a copy of the GNU General Public License
-//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// Copyright (c) 2021, andreakarasho
+// All rights reserved.
+// 
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+// 1. Redistributions of source code must retain the above copyright
+//    notice, this list of conditions and the following disclaimer.
+// 2. Redistributions in binary form must reproduce the above copyright
+//    notice, this list of conditions and the following disclaimer in the
+//    documentation and/or other materials provided with the distribution.
+// 3. All advertising materials mentioning features or use of this software
+//    must display the following acknowledgement:
+//    This product includes software developed by andreakarasho - https://github.com/andreakarasho
+// 4. Neither the name of the copyright holder nor the
+//    names of its contributors may be used to endorse or promote products
+//    derived from this software without specific prior written permission.
+// 
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ''AS IS'' AND ANY
+// EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+// WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+// DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY
+// DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+// (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+// LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+// ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+// SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #endregion
 
 using System;
 using System.Collections.Generic;
-
+using ClassicUO.Data;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
-using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 
 namespace ClassicUO.Game.UI.Gumps.CharCreation
@@ -39,54 +47,70 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
         public CreateCharProfessionGump(ProfessionInfo parent = null) : base(0, 0)
         {
             _Parent = parent;
-            if (parent == null || !FileManager.Profession.Professions.TryGetValue(parent, out List<ProfessionInfo> professions) || professions == null) professions = new List<ProfessionInfo>(FileManager.Profession.Professions.Keys);
+
+            if (parent == null || !ProfessionLoader.Instance.Professions.TryGetValue(parent, out List<ProfessionInfo> professions) || professions == null)
+            {
+                professions = new List<ProfessionInfo>(ProfessionLoader.Instance.Professions.Keys);
+            }
 
             /* Build the gump */
-            Add(new ResizePic(2600)
-            {
-                X = 100,
-                Y = 80,
-                Width = 470,
-                Height = 372
-            });
+            Add
+            (
+                new ResizePic(2600)
+                {
+                    X = 100,
+                    Y = 80,
+                    Width = 470,
+                    Height = 372
+                }
+            );
 
             Add(new GumpPic(291, 42, 0x0589, 0));
             Add(new GumpPic(214, 58, 0x058B, 0));
             Add(new GumpPic(300, 51, 0x15A9, 0));
 
-            ClilocLoader localization = FileManager.Cliloc;
+            ClilocLoader localization = ClilocLoader.Instance;
 
-            Add(new Label(localization.Translate(3000326), false, 0x0386, font: 2)
-            {
-                X = 158,
-                Y = 132
-            });
+            Add
+            (
+                new Label(localization.GetString(3000326, "Choose a Trade for Your Character"), false, 0x0386, font: 2)
+                {
+                    X = 158,
+                    Y = 132
+                }
+            );
 
             for (int i = 0; i < professions.Count; i++)
             {
                 int cx = i % 2;
                 int cy = i >> 1;
 
-                Add(new ProfessionInfoGump(professions[i])
-                {
-                    X = 145 + cx * 195,
-                    Y = 168 + cy * 70,
+                Add
+                (
+                    new ProfessionInfoGump(professions[i])
+                    {
+                        X = 145 + cx * 195,
+                        Y = 168 + cy * 70,
 
-                    Selected = SelectProfession
-                });
+                        Selected = SelectProfession
+                    }
+                );
             }
 
-            Add(new Button((int) Buttons.Prev, 0x15A1, 0x15A3, 0x15A2)
-            {
-                X = 586,
-                Y = 445,
-                ButtonAction = ButtonAction.Activate
-            });
+            Add
+            (
+                new Button((int) Buttons.Prev, 0x15A1, 0x15A3, 0x15A2)
+                {
+                    X = 586,
+                    Y = 445,
+                    ButtonAction = ButtonAction.Activate
+                }
+            );
         }
 
         public void SelectProfession(ProfessionInfo info)
         {
-            if (info.Type == ProfessionLoader.PROF_TYPE.CATEGORY && FileManager.Profession.Professions.TryGetValue(info, out List<ProfessionInfo> list) && list != null)
+            if (info.Type == ProfessionLoader.PROF_TYPE.CATEGORY && ProfessionLoader.Instance.Professions.TryGetValue(info, out List<ProfessionInfo> list) && list != null)
             {
                 Parent.Add(new CreateCharProfessionGump(info));
                 Parent.Remove(this);
@@ -135,45 +159,57 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
     {
         private readonly ProfessionInfo _info;
 
-        public Action<ProfessionInfo> Selected;
-
         public ProfessionInfoGump(ProfessionInfo info)
         {
             _info = info;
 
-            ClilocLoader localization = FileManager.Cliloc;
+            ClilocLoader localization = ClilocLoader.Instance;
 
             ResizePic background = new ResizePic(3000)
             {
                 Width = 175,
                 Height = 34
             };
-            background.SetTooltip(localization.Translate(info.Description), 250);
+
+            background.SetTooltip(localization.GetString(info.Description), 250);
 
             Add(background);
 
-            Add(new Label(localization.Translate(info.Localization), true, 0x00, font: 1)
-            {
-                X = 7,
-                Y = 8
-            });
+            Add
+            (
+                new Label(localization.GetString(info.Localization), true, 0x00, font: 1)
+                {
+                    X = 7,
+                    Y = 8
+                }
+            );
 
             Add(new GumpPic(121, -12, info.Graphic, 0));
         }
 
-        protected override void OnMouseUp(int x, int y, MouseButton button)
+        public Action<ProfessionInfo> Selected;
+
+        protected override void OnMouseUp(int x, int y, MouseButtonType button)
         {
             base.OnMouseUp(x, y, button);
-            if (button == MouseButton.Left) Selected?.Invoke(_info);
+
+            if (button == MouseButtonType.Left)
+            {
+                Selected?.Invoke(_info);
+            }
         }
     }
 
     internal class ProfessionInfo
     {
-        internal static readonly int[,] _VoidSkills = new int[4, 2] {{0, InitialSkillValue}, {0, InitialSkillValue}, {0, FileManager.ClientVersion < ClientVersions.CV_70160 ? 0 : InitialSkillValue}, {0, 10}};
-        internal static readonly int[] _VoidStats = new int[3] {60, RemainStatValue, RemainStatValue};
-        public static int InitialSkillValue => FileManager.ClientVersion >= ClientVersions.CV_70160 ? 30 : 50;
-        public static int RemainStatValue => FileManager.ClientVersion >= ClientVersions.CV_70160 ? 15 : 10;
+        internal static readonly int[,] _VoidSkills = new int[4, 2]
+        {
+            { 0, InitialSkillValue }, { 0, InitialSkillValue },
+            { 0, Client.Version < ClientVersion.CV_70160 ? 0 : InitialSkillValue }, { 0, InitialSkillValue }
+        };
+        internal static readonly int[] _VoidStats = new int[3] { 60, RemainStatValue, RemainStatValue };
+        public static int InitialSkillValue => Client.Version >= ClientVersion.CV_70160 ? 30 : 50;
+        public static int RemainStatValue => Client.Version >= ClientVersion.CV_70160 ? 15 : 10;
         public string Name { get; set; }
         public string TrueName { get; set; }
         public int Localization { get; set; }
@@ -181,7 +217,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
         public int DescriptionIndex { get; set; }
         public ProfessionLoader.PROF_TYPE Type { get; set; }
 
-        public Graphic Graphic { get; set; }
+        public ushort Graphic { get; set; }
 
         public bool TopLevel { get; set; }
         public int[,] SkillDefVal { get; set; } = _VoidSkills;

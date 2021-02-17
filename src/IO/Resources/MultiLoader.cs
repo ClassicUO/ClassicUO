@@ -1,180 +1,113 @@
 ﻿#region license
 
-//  Copyright (C) 2019 ClassicUO Development Community on Github
-//
-//	This project is an alternative client for the game Ultima Online.
-//	The goal of this is to develop a lightweight client considering 
-//	new technologies.  
-//      
-//  This program is free software: you can redistribute it and/or modify
-//  it under the terms of the GNU General Public License as published by
-//  the Free Software Foundation, either version 3 of the License, or
-//  (at your option) any later version.
-//
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-//
-//  You should have received a copy of the GNU General Public License
-//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// Copyright (c) 2021, andreakarasho
+// All rights reserved.
+// 
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+// 1. Redistributions of source code must retain the above copyright
+//    notice, this list of conditions and the following disclaimer.
+// 2. Redistributions in binary form must reproduce the above copyright
+//    notice, this list of conditions and the following disclaimer in the
+//    documentation and/or other materials provided with the distribution.
+// 3. All advertising materials mentioning features or use of this software
+//    must display the following acknowledgement:
+//    This product includes software developed by andreakarasho - https://github.com/andreakarasho
+// 4. Neither the name of the copyright holder nor the
+//    names of its contributors may be used to endorse or promote products
+//    derived from this software without specific prior written permission.
+// 
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ''AS IS'' AND ANY
+// EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+// WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+// DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY
+// DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+// (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+// LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+// ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+// SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #endregion
 
-using System;
-using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
-
+using ClassicUO.Data;
 using ClassicUO.Game;
-using ClassicUO.Utility;
-using ClassicUO.Utility.Logging;
 
 namespace ClassicUO.IO.Resources
 {
     internal class MultiLoader : UOFileLoader
     {
-        private UOFile _file;
-        private int _itemOffset;
+        private static MultiLoader _instance;
         private DataReader _reader;
 
+        private MultiLoader()
+        {
+        }
+
+        public static MultiLoader Instance => _instance ?? (_instance = new MultiLoader());
+
         public int Count { get; private set; }
+        public UOFile File { get; private set; }
 
-        public override Task Load()
+        public bool IsUOP { get; private set; }
+        public int Offset { get; private set; }
+
+
+        public override unsafe Task Load()
         {
-            return Task.Run(() =>
-            {
-                string uopPath = Path.Combine(FileManager.UoFolderPath, "MultiCollection.uop");
-
-                if (File.Exists(uopPath))
+            return Task.Run
+            (
+                () =>
                 {
-                    Count = Constants.MAX_MULTI_DATA_INDEX_COUNT;
-                    _file = new UOFileUop(uopPath, "build/multicollection/{0:D6}.bin");
-                    Entries = new UOFileIndex[Count];
-                    _reader = new DataReader();
-                }
-                else
-                {
-                    string path = Path.Combine(FileManager.UoFolderPath, "multi.mul");
-                    string pathidx = Path.Combine(FileManager.UoFolderPath, "multi.idx");
+                    string uopPath = UOFileManager.GetUOFilePath("MultiCollection.uop");
 
-                    if (File.Exists(path) && File.Exists(pathidx))
+                    if (Client.IsUOPInstallation && System.IO.File.Exists(uopPath))
                     {
-                        _file = new UOFileMul(path, pathidx, Constants.MAX_MULTI_DATA_INDEX_COUNT, 14);
-                        Count = _itemOffset = FileManager.ClientVersion >= ClientVersions.CV_7090 ? UnsafeMemoryManager.SizeOf<MultiBlockNew>() : UnsafeMemoryManager.SizeOf<MultiBlock>();
+                        Count = Constants.MAX_MULTI_DATA_INDEX_COUNT;
+                        File = new UOFileUop(uopPath, "build/multicollection/{0:D6}.bin");
+                        Entries = new UOFileIndex[Count];
+                        _reader = new DataReader();
+                        IsUOP = true;
                     }
+                    else
+                    {
+                        string path = UOFileManager.GetUOFilePath("multi.mul");
+                        string pathidx = UOFileManager.GetUOFilePath("multi.idx");
+
+                        if (System.IO.File.Exists(path) && System.IO.File.Exists(pathidx))
+                        {
+                            File = new UOFileMul(path, pathidx, Constants.MAX_MULTI_DATA_INDEX_COUNT, 14);
+
+                            Count = Offset = Client.Version >= ClientVersion.CV_7090 ? sizeof(MultiBlockNew) + 2 : sizeof(MultiBlock);
+                        }
+                    }
+
+                    File.FillEntries(ref Entries);
                 }
-
-                _file.FillEntries(ref Entries);
-
-            });
+            );
         }
+    }
 
-        public override void CleanResources()
-        {
-            // do nothing
-        }
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    internal ref struct MultiBlock
+    {
+        public ushort ID;
+        public short X;
+        public short Y;
+        public short Z;
+        public uint Flags;
+    }
 
-        public unsafe void GetMultiData(int index, ushort g, bool uopValid, out ushort graphic, out short x, out short y, out short z, out bool add)
-        {
-            if (_file is UOFileUop)
-            {
-                graphic = _reader.ReadUShort();
-
-                x = _reader.ReadShort();
-                y = _reader.ReadShort();
-                z = _reader.ReadShort();
-                ushort flags = _reader.ReadUShort();
-
-                uint clilocsCount = _reader.ReadUInt();
-
-                if (clilocsCount != 0)
-                    _reader.Skip((int) (clilocsCount * 4));
-
-                add = flags == 0;
-            }
-            else
-            {
-                MultiBlock* block = (MultiBlock*) (_file.PositionAddress + index * _itemOffset);
-
-                graphic = block->ID;
-                x = block->X;
-                y = block->Y;
-                z = block->Z;
-                uint flags = block->Flags;
-
-                add = flags != 0;
-            }
-        }
-
-        public void ReleaseLastMultiDataRead()
-        {
-            _reader?.ReleaseData();
-        }
-
-
-        public int GetCount(int graphic, out bool uopValid)
-        {
-            int count;
-            ref readonly var entry = ref GetValidRefEntry(graphic);
-
-            if (_file is UOFileUop uop)
-            {
-                long offset = entry.Offset;
-                int csize = entry.Length;
-                int dsize = entry.DecompressedLength;
-
-                if (csize > 0 && dsize > 0)
-                {
-                    uopValid = true;
-
-                    _file.Seek(offset);
-
-                    byte[] ddata = uop.GetData(csize, dsize);
-
-                    _reader.SetData(ddata, dsize);
-                    _reader.Skip(4);
-                    count = (int) _reader.ReadUInt();
-
-                }
-                else
-                {
-                    uopValid = false;
-                    count = 0;
-
-                    Log.Warn( $"[MultiCollection.uop] invalid entry (0x{graphic:X4})");
-                }
-
-                return count;
-            }
-
-            uopValid = false;
-
-            count = entry.Length / _itemOffset;
-            _file.Seek(entry.Offset);
-
-            return count;
-        }
-
-        [StructLayout(LayoutKind.Sequential, Pack = 1)]
-        readonly struct MultiBlock
-        {
-            public readonly ushort ID;
-            public readonly short X;
-            public readonly short Y;
-            public readonly short Z;
-            public readonly uint Flags;
-        }
-
-        [StructLayout(LayoutKind.Sequential, Pack = 1)]
-        readonly struct MultiBlockNew
-        {
-            public readonly ushort ID;
-            public readonly short X;
-            public readonly short Y;
-            public readonly short Z;
-            public readonly uint Flags;
-            public readonly int Unknown;
-        }
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    internal ref struct MultiBlockNew
+    {
+        public ushort ID;
+        public short X;
+        public short Y;
+        public short Z;
+        public ushort Flags;
+        public uint Unknown;
     }
 }

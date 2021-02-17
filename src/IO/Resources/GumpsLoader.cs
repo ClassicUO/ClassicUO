@@ -1,23 +1,32 @@
 ﻿#region license
 
-//  Copyright (C) 2019 ClassicUO Development Community on Github
-//
-//	This project is an alternative client for the game Ultima Online.
-//	The goal of this is to develop a lightweight client considering 
-//	new technologies.  
-//      
-//  This program is free software: you can redistribute it and/or modify
-//  it under the terms of the GNU General Public License as published by
-//  the Free Software Foundation, either version 3 of the License, or
-//  (at your option) any later version.
-//
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-//
-//  You should have received a copy of the GNU General Public License
-//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// Copyright (c) 2021, andreakarasho
+// All rights reserved.
+// 
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+// 1. Redistributions of source code must retain the above copyright
+//    notice, this list of conditions and the following disclaimer.
+// 2. Redistributions in binary form must reproduce the above copyright
+//    notice, this list of conditions and the following disclaimer in the
+//    documentation and/or other materials provided with the distribution.
+// 3. All advertising materials mentioning features or use of this software
+//    must display the following acknowledgement:
+//    This product includes software developed by andreakarasho - https://github.com/andreakarasho
+// 4. Neither the name of the copyright holder nor the
+//    names of its contributors may be used to endorse or promote products
+//    derived from this software without specific prior written permission.
+// 
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ''AS IS'' AND ANY
+// EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+// WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+// DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY
+// DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+// (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+// LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+// ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+// SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #endregion
 
@@ -25,104 +34,142 @@ using System;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
-
 using ClassicUO.Game;
 using ClassicUO.Renderer;
+using ClassicUO.Utility;
 
 namespace ClassicUO.IO.Resources
 {
-    internal class GumpsLoader : UOFileLoader<UOTexture16>
+    internal class GumpsLoader : UOFileLoader<UOTexture>
     {
+        private static GumpsLoader _instance;
         private UOFile _file;
+
+        private GumpsLoader(int count) : base(count)
+        {
+        }
+
+        public static GumpsLoader Instance =>
+            _instance ?? (_instance = new GumpsLoader(Constants.MAX_GUMP_DATA_INDEX_COUNT));
 
         public override Task Load()
         {
-            return Task.Run(() => {
-
-                string path = Path.Combine(FileManager.UoFolderPath, "gumpartLegacyMUL.uop");
-
-                if (File.Exists(path))
+            return Task.Run
+            (
+                () =>
                 {
-                    _file = new UOFileUop(path, "build/gumpartlegacymul/{0:D8}.tga", true);
-                    Entries = new UOFileIndex[Constants.MAX_GUMP_DATA_INDEX_COUNT];
-                    FileManager.UseUOPGumps = true;
-                }
-                else
-                {
-                    path = Path.Combine(FileManager.UoFolderPath, "Gumpart.mul");
-                    string pathidx = Path.Combine(FileManager.UoFolderPath, "Gumpidx.mul");
+                    string path = UOFileManager.GetUOFilePath("gumpartLegacyMUL.uop");
 
-                    if (File.Exists(path) && File.Exists(pathidx))
+                    if (Client.IsUOPInstallation && File.Exists(path))
                     {
-                        _file = new UOFileMul(path, pathidx, Constants.MAX_GUMP_DATA_INDEX_COUNT, 12);
+                        _file = new UOFileUop(path, "build/gumpartlegacymul/{0:D8}.tga", true);
+                        Entries = new UOFileIndex[Math.Max(((UOFileUop) _file).TotalEntriesCount, Constants.MAX_GUMP_DATA_INDEX_COUNT)];
+                        Client.UseUOPGumps = true;
                     }
-                    FileManager.UseUOPGumps = false;
-                }
-
-                _file.FillEntries(ref Entries);
-
-                string pathdef = Path.Combine(FileManager.UoFolderPath, "gump.def");
-
-                if (!File.Exists(pathdef))
-                    return;
-
-                using (DefReader defReader = new DefReader(pathdef, 3))
-                {
-                    while (defReader.Next())
+                    else
                     {
-                        int ingump = defReader.ReadInt();
+                        path = UOFileManager.GetUOFilePath("gumpart.mul");
+                        string pathidx = UOFileManager.GetUOFilePath("gumpidx.mul");
 
-                        if (ingump < 0 || ingump >= Constants.MAX_GUMP_DATA_INDEX_COUNT ||
-                            ingump >= Entries.Length ||
-                            Entries[ingump].Length > 0)
-                            continue;
-
-                        int[] group = defReader.ReadGroup();
-
-                        for (int i = 0; i < group.Length; i++)
+                        if (!File.Exists(path))
                         {
-                            int checkIndex = group[i];
+                            path = UOFileManager.GetUOFilePath("Gumpart.mul");
+                        }
 
-                            if (checkIndex < 0 || checkIndex >= Constants.MAX_GUMP_DATA_INDEX_COUNT || checkIndex >= Entries.Length ||
-                                Entries[checkIndex].Length <= 0)
+                        if (!File.Exists(pathidx))
+                        {
+                            pathidx = UOFileManager.GetUOFilePath("Gumpidx.mul");
+                        }
+
+                        _file = new UOFileMul(path, pathidx, Constants.MAX_GUMP_DATA_INDEX_COUNT, 12);
+
+                        Client.UseUOPGumps = false;
+                    }
+
+                    _file.FillEntries(ref Entries);
+
+                    string pathdef = UOFileManager.GetUOFilePath("gump.def");
+
+                    if (!File.Exists(pathdef))
+                    {
+                        return;
+                    }
+
+                    using (DefReader defReader = new DefReader(pathdef, 3))
+                    {
+                        while (defReader.Next())
+                        {
+                            int ingump = defReader.ReadInt();
+
+                            if (ingump < 0 || ingump >= Constants.MAX_GUMP_DATA_INDEX_COUNT || ingump >= Entries.Length || Entries[ingump].Length > 0)
+                            {
                                 continue;
+                            }
 
-                            Entries[ingump] = Entries[checkIndex];
+                            int[] group = defReader.ReadGroup();
 
-                            break;
+                            if (group == null)
+                            {
+                                continue;
+                            }
+
+                            for (int i = 0; i < group.Length; i++)
+                            {
+                                int checkIndex = group[i];
+
+                                if (checkIndex < 0 || checkIndex >= Constants.MAX_GUMP_DATA_INDEX_COUNT || checkIndex >= Entries.Length || Entries[checkIndex].Length <= 0)
+                                {
+                                    continue;
+                                }
+
+                                Entries[ingump] = Entries[checkIndex];
+
+                                Entries[ingump].Hue = (ushort) defReader.ReadInt();
+
+                                break;
+                            }
                         }
                     }
                 }
-            });
+            );
         }
 
-        public override UOTexture16 GetTexture(uint g)
+        public override UOTexture GetTexture(uint g)
         {
-            if (!ResourceDictionary.TryGetValue(g, out UOTexture16 texture) || texture.IsDisposed)
+            if (g >= Resources.Length)
             {
-                ushort[] pixels = GetGumpPixels(g, out int w, out int h);
+                return null;
+            }
+
+            ref UOTexture texture = ref Resources[g];
+
+            if (texture == null || texture.IsDisposed)
+            {
+                uint[] pixels = GetGumpPixels(g, out int w, out int h);
 
                 if (pixels == null || pixels.Length == 0)
+                {
                     return null;
+                }
 
-                texture = new UOTexture16(w, h);
+                texture = new UOTexture(w, h);
                 texture.PushData(pixels);
-                ResourceDictionary.Add(g, texture);
+
+                SaveId(g);
+            }
+            else
+            {
+                texture.Ticks = Time.Ticks;
             }
 
             return texture;
         }
 
-        public override void CleanResources()
+        private unsafe uint[] GetGumpPixels(uint index, out int width, out int height)
         {
-           
-        }
+            ref UOFileIndex entry = ref GetValidRefEntry((int) index);
 
-        public unsafe ushort[] GetGumpPixels(uint index, out int width, out int height)
-        {
-            ref readonly var entry = ref GetValidRefEntry((int) index);
-
-            if (entry.Extra == -1)
+            if (entry.Width <= 0 && entry.Height <= 0)
             {
                 width = 0;
                 height = 0;
@@ -130,60 +177,61 @@ namespace ClassicUO.IO.Resources
                 return null;
             }
 
-            width = (entry.Extra >> 16) & 0xFFFF;
-            height = entry.Extra & 0xFFFF;
+            width = entry.Width;
+            height = entry.Height;
+            ushort color = entry.Hue;
 
             if (width == 0 || height == 0)
+            {
                 return null;
+            }
 
+            _file.SetData(entry.Address, entry.FileSize);
             _file.Seek(entry.Offset);
-            //width = PaddedRowWidth(16, width, 4) >> 1;
+
             IntPtr dataStart = _file.PositionAddress;
-            ushort[] pixels = new ushort[width * height];
+
+            uint[] pixels = new uint[width * height];
             int* lookuplist = (int*) dataStart;
 
-            for (int y = 0; y < height; y++)
-            {
-                int gsize = 0;
+            int gsize;
 
+            for (int y = 0, half_len = entry.Length >> 2; y < height; y++)
+            {
                 if (y < height - 1)
+                {
                     gsize = lookuplist[y + 1] - lookuplist[y];
+                }
                 else
-                    gsize = (entry.Length >> 2) - lookuplist[y];
+                {
+                    gsize = half_len - lookuplist[y];
+                }
+
                 GumpBlock* gmul = (GumpBlock*) (dataStart + (lookuplist[y] << 2));
+
                 int pos = y * width;
 
                 for (int i = 0; i < gsize; i++)
                 {
-                    ushort val = gmul[i].Value;
-                    ushort hue = (ushort) ((val != 0 ? 0x8000 : 0) | val);
+                    uint val = gmul[i].Value;
+
+                    if (color != 0 && val != 0)
+                    {
+                        val = HuesLoader.Instance.GetColor16(gmul[i].Value, color);
+                    }
+
+                    if (val != 0)
+                    {
+                        //val = 0x8000 | val;
+                        val = HuesHelper.Color16To32(gmul[i].Value) | 0xFF_00_00_00;
+                    }
 
                     int count = gmul[i].Run;
 
-                    //byte a = (byte)(((val & 0x8000) >> 0) << 0);
-                    //byte r = (byte)(((val & 0x7C00) >> 0) << 0);
-                    //byte g = (byte)(((val & 0x3E0) >> 0) << 0);
-                    //byte b = (byte)(((val & 0x1F) >> 0) << 0);
-
-                    //byte r = (byte) (( (val >> 10) ) );
-                    //byte g = (byte) (( (val >> 5)  ) );
-                    //byte b = (byte) (( (val >> 0)  ) );
-                    //byte a = (byte) (( (val >> 15) ) );
-
-
-                    //if (b == 8)
-                    //{
-                    //    hue = (ushort)((
-                    //                       (a << 15) |
-                    //                       (r << 10) |
-                    //                       (g << 5)  |
-                    //                       b)
-                    //                   );
-                    //    hue |= 0x8000;
-                    //}
-
                     for (int j = 0; j < count; j++)
-                        pixels[pos++] = hue == 0 && count == 1 ? (ushort)1 : hue;//avoid single zero pixels
+                    {
+                        pixels[pos++] = val;
+                    }
                 }
             }
 
@@ -191,7 +239,7 @@ namespace ClassicUO.IO.Resources
         }
 
         [StructLayout(LayoutKind.Sequential, Pack = 1)]
-        private readonly struct GumpBlock
+        private ref struct GumpBlock
         {
             public readonly ushort Value;
             public readonly ushort Run;

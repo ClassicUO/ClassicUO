@@ -1,73 +1,90 @@
 ﻿#region license
 
-//  Copyright (C) 2019 ClassicUO Development Community on Github
-//
-//	This project is an alternative client for the game Ultima Online.
-//	The goal of this is to develop a lightweight client considering 
-//	new technologies.  
-//      
-//  This program is free software: you can redistribute it and/or modify
-//  it under the terms of the GNU General Public License as published by
-//  the Free Software Foundation, either version 3 of the License, or
-//  (at your option) any later version.
-//
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-//
-//  You should have received a copy of the GNU General Public License
-//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// Copyright (c) 2021, andreakarasho
+// All rights reserved.
+// 
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+// 1. Redistributions of source code must retain the above copyright
+//    notice, this list of conditions and the following disclaimer.
+// 2. Redistributions in binary form must reproduce the above copyright
+//    notice, this list of conditions and the following disclaimer in the
+//    documentation and/or other materials provided with the distribution.
+// 3. All advertising materials mentioning features or use of this software
+//    must display the following acknowledgement:
+//    This product includes software developed by andreakarasho - https://github.com/andreakarasho
+// 4. Neither the name of the copyright holder nor the
+//    names of its contributors may be used to endorse or promote products
+//    derived from this software without specific prior written permission.
+// 
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ''AS IS'' AND ANY
+// EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+// WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+// DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY
+// DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+// (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+// LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+// ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+// SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #endregion
 
-using ClassicUO.Utility;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
+using ClassicUO.Data;
 
 namespace ClassicUO.IO.Resources
 {
     internal class SpeechesLoader : UOFileLoader
     {
+        private static SpeechesLoader _instance;
         private SpeechEntry[] _speech;
+
+        private SpeechesLoader()
+        {
+        }
+
+        public static SpeechesLoader Instance => _instance ?? (_instance = new SpeechesLoader());
 
         public override unsafe Task Load()
         {
-            return Task.Run(() =>
-            {
-                string path = Path.Combine(FileManager.UoFolderPath, "speech.mul");
-
-                if (!File.Exists(path))
+            return Task.Run
+            (
+                () =>
                 {
-                    _speech = Array.Empty<SpeechEntry>();
-                    return;
-                }
+                    string path = UOFileManager.GetUOFilePath("speech.mul");
 
-                UOFileMul file = new UOFileMul(path);
-                List<SpeechEntry> entries = new List<SpeechEntry>();
-
-                while (file.Position < file.Length)
-                {
-                    int id = file.ReadUShortReversed();
-                    int length = file.ReadUShortReversed();
-
-                    if (length > 0)
+                    if (!File.Exists(path))
                     {
-                        entries.Add(new SpeechEntry(id, string.Intern(Encoding.UTF8.GetString((byte*) file.PositionAddress, length))));
-                        file.Skip(length);
+                        _speech = Array.Empty<SpeechEntry>();
+
+                        return;
                     }
+
+                    UOFileMul file = new UOFileMul(path);
+                    List<SpeechEntry> entries = new List<SpeechEntry>();
+
+                    while (file.Position < file.Length)
+                    {
+                        int id = file.ReadUShortReversed();
+                        int length = file.ReadUShortReversed();
+
+                        if (length > 0)
+                        {
+                            entries.Add(new SpeechEntry(id, string.Intern(Encoding.UTF8.GetString((byte*) file.PositionAddress, length))));
+
+                            file.Skip(length);
+                        }
+                    }
+
+                    _speech = entries.ToArray();
+                    file.Dispose();
                 }
-
-                _speech = entries.ToArray();
-                file.Dispose();
-            });
-        }
-
-        public override void CleanResources()
-        {
+            );
         }
 
         public bool IsMatch(string input, in SpeechEntry entry)
@@ -77,22 +94,30 @@ namespace ClassicUO.IO.Resources
             for (int i = 0; i < split.Length; i++)
             {
                 if (split[i].Length > input.Length || split[i].Length == 0)
+                {
                     continue;
+                }
 
                 if (!entry.CheckStart)
                 {
-                    if (input.IndexOf(split[i], 0, split[i].Length) == -1)
+                    if (input.IndexOf(split[i], 0, split[i].Length, StringComparison.InvariantCultureIgnoreCase) == -1)
+                    {
                         continue;
+                    }
                 }
 
                 if (!entry.CheckEnd)
                 {
-                    if (input.IndexOf(split[i], input.Length - split[i].Length) == -1)
+                    if (input.IndexOf(split[i], input.Length - split[i].Length, StringComparison.InvariantCultureIgnoreCase) == -1)
+                    {
                         continue;
+                    }
                 }
 
-                if (input.IndexOf(split[i]) != -1)
+                if (input.IndexOf(split[i], StringComparison.InvariantCultureIgnoreCase) != -1)
+                {
                     return true;
+                }
             }
 
             return false;
@@ -102,15 +127,21 @@ namespace ClassicUO.IO.Resources
         {
             List<SpeechEntry> list = new List<SpeechEntry>();
 
-            if (FileManager.ClientVersion < ClientVersions.CV_305D) return list;
+            if (Client.Version < ClientVersion.CV_305D)
+            {
+                return list;
+            }
 
-            text = text.ToLower().TrimStart(' ').TrimEnd(' ');
+            text = text.TrimStart(' ').TrimEnd(' ');
 
             for (int i = 0; i < _speech.Length; i++)
             {
                 SpeechEntry entry = _speech[i];
 
-                if (IsMatch(text, in entry)) list.Add(entry);
+                if (IsMatch(text, in entry))
+                {
+                    list.Add(entry);
+                }
             }
 
             list.Sort();
@@ -125,10 +156,14 @@ namespace ClassicUO.IO.Resources
         {
             KeywordID = (short) id;
 
-            Keywords = keyword.Split(new[]
-            {
-                '*'
-            }, StringSplitOptions.RemoveEmptyEntries);
+            Keywords = keyword.Split
+            (
+                new[]
+                {
+                    '*'
+                },
+                StringSplitOptions.RemoveEmptyEntries
+            );
 
             CheckStart = keyword.Length > 0 && keyword[0] == '*';
             CheckEnd = keyword.Length > 0 && keyword[keyword.Length - 1] == '*';
@@ -145,7 +180,9 @@ namespace ClassicUO.IO.Resources
         public int CompareTo(SpeechEntry obj)
         {
             if (KeywordID < obj.KeywordID)
+            {
                 return -1;
+            }
 
             return KeywordID > obj.KeywordID ? 1 : 0;
         }

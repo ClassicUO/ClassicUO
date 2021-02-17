@@ -1,33 +1,41 @@
 ﻿#region license
 
-//  Copyright (C) 2019 ClassicUO Development Community on Github
-//
-//	This project is an alternative client for the game Ultima Online.
-//	The goal of this is to develop a lightweight client considering 
-//	new technologies.  
-//      
-//  This program is free software: you can redistribute it and/or modify
-//  it under the terms of the GNU General Public License as published by
-//  the Free Software Foundation, either version 3 of the License, or
-//  (at your option) any later version.
-//
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-//
-//  You should have received a copy of the GNU General Public License
-//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// Copyright (c) 2021, andreakarasho
+// All rights reserved.
+// 
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+// 1. Redistributions of source code must retain the above copyright
+//    notice, this list of conditions and the following disclaimer.
+// 2. Redistributions in binary form must reproduce the above copyright
+//    notice, this list of conditions and the following disclaimer in the
+//    documentation and/or other materials provided with the distribution.
+// 3. All advertising materials mentioning features or use of this software
+//    must display the following acknowledgement:
+//    This product includes software developed by andreakarasho - https://github.com/andreakarasho
+// 4. Neither the name of the copyright holder nor the
+//    names of its contributors may be used to endorse or promote products
+//    derived from this software without specific prior written permission.
+// 
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ''AS IS'' AND ANY
+// EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+// WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+// DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY
+// DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+// (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+// LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+// ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+// SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #endregion
-
-using System;
 
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
+using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -40,7 +48,7 @@ namespace ClassicUO.Game.UI.Gumps
         private bool _needHue;
         private float _timer;
 
-        public QuestArrowGump(Serial serial, int mx, int my) : base(serial, serial)
+        public QuestArrowGump(uint serial, int mx, int my) : base(serial, serial)
         {
             CanMove = false;
             CanCloseWithRightClick = false;
@@ -57,18 +65,31 @@ namespace ClassicUO.Game.UI.Gumps
             _my = y;
         }
 
-        public override void Update(double totalMS, double frameMS)
+        public override void Update(double totalTime, double frameTime)
         {
-            base.Update(totalMS, frameMS);
+            base.Update(totalTime, frameTime);
 
-            if (!World.InGame) Dispose();
+            if (!World.InGame)
+            {
+                Dispose();
+            }
 
-            var scene = CUOEnviroment.Client.GetScene<GameScene>();
+            GameScene scene = Client.Game.GetScene<GameScene>();
 
-            if (IsDisposed || ProfileManager.Current == null || scene == null)
+            if (IsDisposed || ProfileManager.CurrentProfile == null || scene == null)
+            {
                 return;
+            }
 
-            Direction dir = (Direction) GameCursor.GetMouseDirection(World.Player.X, World.Player.Y, _mx, _my, 0);
+            Direction dir = (Direction) GameCursor.GetMouseDirection
+            (
+                World.Player.X,
+                World.Player.Y,
+                _mx,
+                _my,
+                0
+            );
+
             ushort gumpID = (ushort) (0x1194 + ((int) dir + 1) % 8);
 
             if (_direction != dir || _arrow == null)
@@ -76,38 +97,101 @@ namespace ClassicUO.Game.UI.Gumps
                 _direction = dir;
 
                 if (_arrow == null)
+                {
                     Add(_arrow = new GumpPic(0, 0, gumpID, 0));
+                }
                 else
+                {
                     _arrow.Graphic = gumpID;
+                }
 
                 Width = _arrow.Width;
                 Height = _arrow.Height;
             }
 
-            var scale = scene.Scale;
+            int gox = World.Player.X - _mx;
+            int goy = World.Player.Y - _my;
 
 
-            int gox = _mx - World.Player.X;
-            int goy = _my - World.Player.Y;
+            int x = (ProfileManager.CurrentProfile.GameWindowSize.X >> 1) - (gox - goy) * 22;
+            int y = (ProfileManager.CurrentProfile.GameWindowSize.Y >> 1) - (gox + goy) * 22;
+
+            x -= (int) World.Player.Offset.X;
+            y -= (int) (World.Player.Offset.Y - World.Player.Offset.Z);
+            y += World.Player.Z << 2;
 
 
-            int x = (ProfileManager.Current.GameWindowPosition.X + (ProfileManager.Current.GameWindowSize.X >> 1)) + 6 + ((gox - goy) * (int) (22 / scale)) - (int) ((_arrow.Width / 2f) / scale);
-            int y = (ProfileManager.Current.GameWindowPosition.Y + (ProfileManager.Current.GameWindowSize.Y >> 1)) + 6 + ((gox + goy) * (int) (22 / scale)) + (int) ((_arrow.Height) / scale);
+            switch (dir)
+            {
+                case Direction.North:
+                    x -= _arrow.Width;
 
-            x -= (int) (World.Player.Offset.X / scale);
-            y -= (int) (((World.Player.Offset.Y - World.Player.Offset.Z) + (World.Player.Z >> 2)) / scale);
+                    break;
 
-         
-            if (x < ProfileManager.Current.GameWindowPosition.X)
-                x = ProfileManager.Current.GameWindowPosition.X;
-            else if (x > ProfileManager.Current.GameWindowPosition.X + ProfileManager.Current.GameWindowSize.X - _arrow.Width)
-                x = ProfileManager.Current.GameWindowPosition.X + ProfileManager.Current.GameWindowSize.X - _arrow.Width;
+                case Direction.South:
+                    y -= _arrow.Height;
+
+                    break;
+
+                case Direction.East:
+                    x -= _arrow.Width;
+                    y -= _arrow.Height;
+
+                    break;
+
+                case Direction.West: break;
+
+                case Direction.Right:
+                    x -= _arrow.Width;
+                    y -= _arrow.Height / 2;
+
+                    break;
+
+                case Direction.Left:
+                    x += _arrow.Width / 2;
+                    y -= _arrow.Height / 2;
+
+                    break;
+
+                case Direction.Up:
+                    x -= _arrow.Width / 2;
+                    y += _arrow.Height / 2;
+
+                    break;
+
+                case Direction.Down:
+                    x -= _arrow.Width / 2;
+                    y -= _arrow.Height;
+
+                    break;
+            }
 
 
-            if (y < ProfileManager.Current.GameWindowPosition.Y)
-                y = ProfileManager.Current.GameWindowPosition.Y;
-            else if (y > ProfileManager.Current.GameWindowPosition.Y + ProfileManager.Current.GameWindowSize.Y - _arrow.Height)
-                y = ProfileManager.Current.GameWindowPosition.Y + ProfileManager.Current.GameWindowSize.Y - _arrow.Height;
+            Point p = new Point(x, y);
+            p = Client.Game.Scene.Camera.WorldToScreen(p);
+            p.X += ProfileManager.CurrentProfile.GameWindowPosition.X;
+            p.Y += ProfileManager.CurrentProfile.GameWindowPosition.Y;
+            x = p.X;
+            y = p.Y;
+
+            if (x < ProfileManager.CurrentProfile.GameWindowPosition.X)
+            {
+                x = ProfileManager.CurrentProfile.GameWindowPosition.X;
+            }
+            else if (x > ProfileManager.CurrentProfile.GameWindowPosition.X + ProfileManager.CurrentProfile.GameWindowSize.X - _arrow.Width)
+            {
+                x = ProfileManager.CurrentProfile.GameWindowPosition.X + ProfileManager.CurrentProfile.GameWindowSize.X - _arrow.Width;
+            }
+
+
+            if (y < ProfileManager.CurrentProfile.GameWindowPosition.Y)
+            {
+                y = ProfileManager.CurrentProfile.GameWindowPosition.Y;
+            }
+            else if (y > ProfileManager.CurrentProfile.GameWindowPosition.Y + ProfileManager.CurrentProfile.GameWindowSize.Y - _arrow.Height)
+            {
+                y = ProfileManager.CurrentProfile.GameWindowPosition.Y + ProfileManager.CurrentProfile.GameWindowSize.Y - _arrow.Height;
+            }
 
             X = x;
             Y = y;
@@ -118,25 +202,29 @@ namespace ClassicUO.Game.UI.Gumps
                 _needHue = !_needHue;
             }
 
-            _arrow.Hue = (Hue) (_needHue ? 0 : 0x21);
+            _arrow.Hue = (ushort) (_needHue ? 0 : 0x21);
         }
 
 
-        protected override void OnMouseUp(int x, int y, MouseButton button)
+        protected override void OnMouseUp(int x, int y, MouseButtonType button)
         {
-            var leftClick = button == MouseButton.Left;
-            var rightClick = button == MouseButton.Right;
+            bool leftClick = button == MouseButtonType.Left;
+            bool rightClick = button == MouseButtonType.Right;
 
             if (leftClick || rightClick)
+            {
                 GameActions.QuestArrow(rightClick);
+            }
         }
 
         public override bool Contains(int x, int y)
         {
             if (_arrow == null)
+            {
                 return true;
+            }
 
-            return _arrow.Texture.Contains(x, y);
+            return _arrow.Contains(x, y);
         }
     }
 }

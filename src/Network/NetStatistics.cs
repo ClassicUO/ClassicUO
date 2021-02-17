@@ -1,131 +1,168 @@
 ﻿#region license
 
-//  Copyright (C) 2019 ClassicUO Development Community on Github
-//
-//	This project is an alternative client for the game Ultima Online.
-//	The goal of this is to develop a lightweight client considering 
-//	new technologies.  
-//      
-//  This program is free software: you can redistribute it and/or modify
-//  it under the terms of the GNU General Public License as published by
-//  the Free Software Foundation, either version 3 of the License, or
-//  (at your option) any later version.
-//
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-//
-//  You should have received a copy of the GNU General Public License
-//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// Copyright (c) 2021, andreakarasho
+// All rights reserved.
+// 
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+// 1. Redistributions of source code must retain the above copyright
+//    notice, this list of conditions and the following disclaimer.
+// 2. Redistributions in binary form must reproduce the above copyright
+//    notice, this list of conditions and the following disclaimer in the
+//    documentation and/or other materials provided with the distribution.
+// 3. All advertising materials mentioning features or use of this software
+//    must display the following acknowledgement:
+//    This product includes software developed by andreakarasho - https://github.com/andreakarasho
+// 4. Neither the name of the copyright holder nor the
+//    names of its contributors may be used to endorse or promote products
+//    derived from this software without specific prior written permission.
+// 
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ''AS IS'' AND ANY
+// EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+// WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+// DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY
+// DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+// (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+// LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+// ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+// SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #endregion
 
 using System;
 using System.Diagnostics;
 
-using ClassicUO.Renderer;
-
 namespace ClassicUO.Network
 {
     internal class NetStatistics
     {
+        private NetClient _socket;
+        private uint _lastTotalBytesReceived, _lastTotalBytesSent, _lastTotalPacketsReceived, _lastTotalPacketsSent;
+        private byte _pingIdx;
+
+        private readonly uint[] _pings = new uint[5];
         private readonly Stopwatch _pingStopwatch = new Stopwatch();
 
-        private readonly RenderedText _renderedText = RenderedText.Create(String.Empty, style: FontStyle.BlackBorder);
 
-        private uint _currentTotalBytesSended, _currentTotalByteReceived, _currentTotalPacketsSended, _currentTotalPacketsReceived;
-        private uint _lastTotalBytesSended, _lastTotalByteReceived, _lastTotalPacketsSended, _lastTotalPacketsReceived;
+        public NetStatistics(NetClient socket)
+        {
+            _socket = socket;
+        }
+
 
         public DateTime ConnectedFrom { get; set; }
 
-        public uint TotalBytesSended { get; set; }
-
         public uint TotalBytesReceived { get; set; }
 
-        public uint TotalPacketsSended { get; set; }
+        public uint TotalBytesSent { get; set; }
 
         public uint TotalPacketsReceived { get; set; }
 
-        public uint Ping { get; private set; }
+        public uint TotalPacketsSent { get; set; }
 
+        public uint DeltaBytesReceived { get; private set; }
+
+        public uint DeltaBytesSent { get; private set; }
+
+        public uint DeltaPacketsReceived { get; private set; }
+
+        public uint DeltaPacketsSent { get; private set; }
+
+        public uint Ping
+        {
+            get
+            {
+                byte count = 0;
+                uint sum = 0;
+
+                for (byte i = 0; i < 5; i++)
+                {
+                    if (_pings[i] != 0)
+                    {
+                        count++;
+                        sum += _pings[i];
+                    }
+                }
+
+                if (count == 0)
+                {
+                    return 0;
+                }
+
+                return sum / count;
+            }
+        }
 
         public void PingReceived()
         {
-            Ping = (uint) _pingStopwatch.ElapsedMilliseconds;
+            _pings[_pingIdx++] = (uint) _pingStopwatch.ElapsedMilliseconds;
+
+            if (_pingIdx >= _pings.Length)
+            {
+                _pingIdx = 0;
+            }
+
             _pingStopwatch.Stop();
         }
 
         public void SendPing()
         {
-            if (!NetClient.Socket.IsConnected || NetClient.Socket.IsDisposed)
+            if (!_socket.IsConnected || _socket.IsDisposed)
+            {
                 return;
+            }
 
             _pingStopwatch.Restart();
-            NetClient.Socket.Send(new PPing());
-        }
-
-        public void Draw(UltimaBatcher2D batcher, int x, int y)
-        {
-            batcher.Begin();
-            _renderedText.Draw(batcher, x, y);
-            batcher.End();
+            _socket.Send(new PPing());
         }
 
         public void Reset()
         {
+            _pingStopwatch.Reset();
             ConnectedFrom = DateTime.MinValue;
-            _currentTotalBytesSended = _currentTotalByteReceived = _currentTotalPacketsSended = _currentTotalPacketsReceived = 0;
-            _lastTotalBytesSended = _lastTotalByteReceived = _lastTotalPacketsSended = _lastTotalPacketsReceived = 0;
-            TotalBytesReceived = TotalBytesSended = TotalPacketsReceived = TotalPacketsSended = 0;
+            _lastTotalBytesReceived = _lastTotalBytesSent = _lastTotalPacketsReceived = _lastTotalPacketsSent = 0;
+            TotalBytesReceived = TotalBytesSent = TotalPacketsReceived = TotalPacketsSent = 0;
+            DeltaBytesReceived = DeltaBytesSent = DeltaPacketsReceived = DeltaPacketsSent = 0;
         }
 
         public void Update()
         {
-            _currentTotalByteReceived = _lastTotalByteReceived;
-            _currentTotalBytesSended = _lastTotalBytesSended;
-            _currentTotalPacketsReceived = _lastTotalPacketsReceived;
-            _currentTotalPacketsSended = _lastTotalPacketsSended;
-            _lastTotalByteReceived = TotalBytesReceived;
-            _lastTotalBytesSended = TotalBytesSended;
+            DeltaBytesReceived = TotalBytesReceived - _lastTotalBytesReceived;
+            DeltaBytesSent = TotalBytesSent - _lastTotalBytesSent;
+            DeltaPacketsReceived = TotalPacketsReceived - _lastTotalPacketsReceived;
+            DeltaPacketsSent = TotalPacketsSent - _lastTotalPacketsSent;
+            _lastTotalBytesReceived = TotalBytesReceived;
+            _lastTotalBytesSent = TotalBytesSent;
             _lastTotalPacketsReceived = TotalPacketsReceived;
-            _lastTotalPacketsSended = TotalPacketsSended;
-
-            ushort hue;
-
-            if (Ping < 100)
-                hue = 0x44; // green
-            else if (Ping < 150)
-                hue = 0x034; // yellow
-            else if (Ping < 200)
-                hue = 0x0031; // orange
-            else
-                hue = 0x20; // red
-
-            _renderedText.Hue = hue;
-            _renderedText.Text = $"Ping: {Ping} ms\nIn: {GetSizeAdaptive(_lastTotalByteReceived - _currentTotalByteReceived)}   Out: {GetSizeAdaptive(_lastTotalBytesSended - _currentTotalBytesSended)}";
+            _lastTotalPacketsSent = TotalPacketsSent;
         }
 
         public override string ToString()
         {
-            return $"Packets:\n >> {_lastTotalPacketsReceived - _currentTotalPacketsReceived}\n << {_lastTotalPacketsSended - _currentTotalPacketsSended}\nBytes:\n >> {GetSizeAdaptive(_lastTotalByteReceived - _currentTotalByteReceived)}\n << {GetSizeAdaptive(_lastTotalBytesSended - _currentTotalBytesSended)}";
+            return $"Packets:\n >> {DeltaPacketsReceived}\n << {DeltaPacketsSent}\nBytes:\n >> {GetSizeAdaptive(DeltaBytesReceived)}\n << {GetSizeAdaptive(DeltaBytesSent)}";
         }
 
         public static string GetSizeAdaptive(long bytes)
         {
             decimal num = bytes;
-            var arg = "KB";
-            num /= 1024m;
+            string arg = "B";
 
             if (!(num < 1024m))
             {
-                arg = "MB";
+                arg = "KB";
                 num /= 1024m;
 
                 if (!(num < 1024m))
                 {
-                    arg = "GB";
+                    arg = "MB";
                     num /= 1024m;
+
+                    if (!(num < 1024m))
+                    {
+                        arg = "GB";
+                        num /= 1024m;
+                    }
                 }
             }
 

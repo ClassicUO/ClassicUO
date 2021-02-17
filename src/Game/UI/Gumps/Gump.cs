@@ -1,43 +1,51 @@
 #region license
 
-//  Copyright (C) 2019 ClassicUO Development Community on Github
-//
-//	This project is an alternative client for the game Ultima Online.
-//	The goal of this is to develop a lightweight client considering 
-//	new technologies.  
-//      
-//  This program is free software: you can redistribute it and/or modify
-//  it under the terms of the GNU General Public License as published by
-//  the Free Software Foundation, either version 3 of the License, or
-//  (at your option) any later version.
-//
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-//
-//  You should have received a copy of the GNU General Public License
-//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// Copyright (c) 2021, andreakarasho
+// All rights reserved.
+// 
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+// 1. Redistributions of source code must retain the above copyright
+//    notice, this list of conditions and the following disclaimer.
+// 2. Redistributions in binary form must reproduce the above copyright
+//    notice, this list of conditions and the following disclaimer in the
+//    documentation and/or other materials provided with the distribution.
+// 3. All advertising materials mentioning features or use of this software
+//    must display the following acknowledgement:
+//    This product includes software developed by andreakarasho - https://github.com/andreakarasho
+// 4. Neither the name of the copyright holder nor the
+//    names of its contributors may be used to endorse or promote products
+//    derived from this software without specific prior written permission.
+// 
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ''AS IS'' AND ANY
+// EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+// WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+// DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY
+// DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+// (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+// LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+// ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+// SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #endregion
 
 using System;
 using System.Collections.Generic;
 using System.IO;
-
+using System.Xml;
+using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
-using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
-
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Gumps
 {
     internal class Gump : Control
     {
-        public Gump(Serial local, Serial server)
+        public Gump(uint local, uint server)
         {
             LocalSerial = local;
             ServerSerial = server;
@@ -47,9 +55,12 @@ namespace ClassicUO.Game.UI.Gumps
 
         public bool BlockMovement { get; set; }
 
-        public bool CloseIfClickOutside { get; set; }
+        public bool CanBeSaved => GumpType != Gumps.GumpType.None;
 
-        public bool CanBeSaved { get; protected set; }
+        public virtual GumpType GumpType { get; }
+
+        public bool InvalidateContents { get; set; }
+
 
         public override bool CanMove
         {
@@ -57,36 +68,67 @@ namespace ClassicUO.Game.UI.Gumps
             set => base.CanMove = value;
         }
 
-        public override void Update(double totalMS, double frameMS)
+        public uint MasterGumpSerial { get; set; }
+
+
+        public override void Update(double totalTime, double frameTime)
         {
+            if (InvalidateContents)
+            {
+                UpdateContents();
+                InvalidateContents = false;
+            }
+
             if (ActivePage == 0)
+            {
                 ActivePage = 1;
-            base.Update(totalMS, frameMS);
+            }
+
+            base.Update(totalTime, frameTime);
         }
 
-        public virtual void Save(BinaryWriter writer)
+        public override void Dispose()
         {
-            // the header         
-            Type type = GetType();
-            ushort typeLen = (ushort) type.FullName.Length;
-            writer.Write(typeLen);
-            writer.WriteUTF8String(type.FullName);
-            writer.Write(X);
-            writer.Write(Y);
+            Item it = World.Items.Get(LocalSerial);
+
+            if (it != null && it.Opened)
+            {
+                it.Opened = false;
+            }
+
+            base.Dispose();
+        }
+
+
+        public virtual void Save(XmlTextWriter writer)
+        {
+            writer.WriteAttributeString("type", ((int) GumpType).ToString());
+            writer.WriteAttributeString("x", X.ToString());
+            writer.WriteAttributeString("y", Y.ToString());
+            writer.WriteAttributeString("serial", LocalSerial.ToString());
         }
 
         public void SetInScreen()
         {
-            Rectangle rect = new Rectangle(0, 0, CUOEnviroment.Client.Window.ClientBounds.Width, CUOEnviroment.Client.Window.ClientBounds.Height);
-
-            if (rect.Intersects(Bounds))
+            if (Bounds.Width >= 0 && Bounds.X <= Client.Game.Window.ClientBounds.Width && Bounds.Height >= 0 && Bounds.Y <= Client.Game.Window.ClientBounds.Height)
+            {
                 return;
+            }
 
             X = 0;
             Y = 0;
         }
 
-        public virtual void Restore(BinaryReader reader)
+        public virtual void Restore(XmlElement xml)
+        {
+        }
+
+        public void RequestUpdateContents()
+        {
+            InvalidateContents = true;
+        }
+
+        protected virtual void UpdateContents()
         {
         }
 
@@ -97,16 +139,25 @@ namespace ClassicUO.Game.UI.Gumps
             int halfHeight = Height - (Height >> 2);
 
             if (X < -halfWidth)
+            {
                 position.X = -halfWidth;
+            }
 
             if (Y < -halfHeight)
+            {
                 position.Y = -halfHeight;
+            }
 
-            if (X > CUOEnviroment.Client.Window.ClientBounds.Width - (Width - halfWidth))
-                position.X = CUOEnviroment.Client.Window.ClientBounds.Width - (Width - halfWidth);
+            if (X > Client.Game.Window.ClientBounds.Width - (Width - halfWidth))
+            {
+                position.X = Client.Game.Window.ClientBounds.Width - (Width - halfWidth);
+            }
 
-            if (Y > CUOEnviroment.Client.Window.ClientBounds.Height - (Height - halfHeight))
-                position.Y = CUOEnviroment.Client.Window.ClientBounds.Height - (Height - halfHeight);
+            if (Y > Client.Game.Window.ClientBounds.Height - (Height - halfHeight))
+            {
+                position.Y = Client.Game.Window.ClientBounds.Height - (Height - halfHeight);
+            }
+
             Location = position;
         }
 
@@ -117,9 +168,9 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override void OnButtonClick(int buttonID)
         {
-            if (!IsDisposed && LocalSerial != 0 && !LocalSerial.IsValidLocalGumpSerial)
+            if (!IsDisposed && LocalSerial != 0)
             {
-                List<Serial> switches = new List<Serial>();
+                List<uint> switches = new List<uint>();
                 List<Tuple<ushort, string>> entries = new List<Tuple<ushort, string>>();
 
                 foreach (Control control in Children)
@@ -131,16 +182,32 @@ namespace ClassicUO.Game.UI.Gumps
 
                             break;
 
-                        case TextBox textBox:
+                        case StbTextBox textBox:
                             entries.Add(new Tuple<ushort, string>((ushort) textBox.LocalSerial, textBox.Text));
 
                             break;
                     }
                 }
 
-                GameActions.ReplyGump(LocalSerial, ServerSerial, buttonID, switches.ToArray(), entries.ToArray());
+                GameActions.ReplyGump
+                (
+                    LocalSerial,
+                    // Seems like MasterGump serial does not work as expected.
+                    /*MasterGumpSerial != 0 ? MasterGumpSerial :*/ ServerSerial,
+                    buttonID,
+                    switches.ToArray(),
+                    entries.ToArray()
+                );
 
-                UIManager.SavePosition(ServerSerial, Location);
+                if (CanMove)
+                {
+                    UIManager.SavePosition(ServerSerial, Location);
+                }
+                else
+                {
+                    UIManager.RemovePosition(ServerSerial);
+                }
+
                 Dispose();
             }
         }
@@ -148,10 +215,15 @@ namespace ClassicUO.Game.UI.Gumps
         protected override void CloseWithRightClick()
         {
             if (!CanCloseWithRightClick)
+            {
                 return;
+            }
 
             if (ServerSerial != 0)
+            {
                 OnButtonClick(0);
+            }
+
             base.CloseWithRightClick();
         }
 
@@ -160,116 +232,5 @@ namespace ClassicUO.Game.UI.Gumps
             // For a gump, Page is the page that is drawing.
             ActivePage = pageIndex;
         }
-    }
-
-    internal abstract class MinimizableGump : TextContainerGump
-    {
-        internal bool IsMinimized
-        {
-            get => Iconized != null && IconizerArea != null && _MinimizedSave.TryGetValue(LocalSerial, out bool minimized) && minimized;
-            private set
-            {
-                if (Iconized != null && IconizerArea != null && Iconized.IsVisible != value)
-                {
-                    _MinimizedSave[LocalSerial] = Iconized.IsVisible = value;
-                }
-            }
-        }
-
-        internal MinimizableGump(Serial local, Serial server) : base(local, server)
-        {
-        }
-
-        public override void Update(double totalMS, double frameMS)
-        {
-            base.Update(totalMS, frameMS);
-            if(!_IsUpdated)
-            {
-                _IsUpdated = true;
-                AfterCreationCall();
-            }
-        }
-
-        private void Iconized_MouseDoubleClick(object sender, Input.MouseDoubleClickEventArgs e)
-        {
-            if(e.Button == Input.MouseButton.Left)
-            {
-                IsMinimized = false;
-            }
-        }
-
-        private void IconizerButton_MouseUp(object sender, Input.MouseEventArgs e)
-        {
-            if(e.Button == Input.MouseButton.Left)
-            {
-                IsMinimized = true;
-            }
-        }
-
-        public override bool Draw(UltimaBatcher2D batcher, int x, int y)
-        {
-            if (IsMinimized && Iconized != null)
-                return Iconized.Draw(batcher, x + Iconized.X, y + Iconized.Y);
-            else
-                return base.Draw(batcher, x, y);
-        }
-
-        public override bool Contains(int x, int y)
-        {
-            return IsMinimized && Iconized != null ? Iconized.Contains(x, y) : base.Contains(x, y);
-        }
-
-        internal abstract GumpPic Iconized { get; }
-        internal abstract HitBox IconizerArea { get; }
-
-        public override void Save(BinaryWriter writer)
-        {
-            base.Save(writer);
-            writer.Write(LocalSerial);
-            writer.Write(IsMinimized);
-        }
-
-        public override void Restore(BinaryReader reader)
-        {
-            base.Restore(reader);
-            if(Configuration.Profile.GumpsVersion > 1)
-            {
-                _MinimizedSave[reader.ReadUInt32()] = reader.ReadBoolean();
-            }
-        }
-
-        //some gumps generate properties after it's main generation, this is here only to delay the generation of main properties AFTER the principal gump itself.
-        private void AfterCreationCall()
-        {
-            if (IconizerArea != null && Iconized != null)
-            {
-                Iconized.Initialize();
-                Iconized.IsVisible = false;
-                Iconized.AcceptMouseInput = true;
-                Iconized.CanMove = true;
-                Add(Iconized);
-
-                Add(IconizerArea);
-                IconizerArea.MouseUp += IconizerButton_MouseUp;
-                IconizerArea.Alpha = 0.95f;
-                Iconized.MouseDoubleClick += Iconized_MouseDoubleClick;
-                if (LocalSerial != Serial.INVALID)
-                {
-                    if (_MinimizedSave.TryGetValue(LocalSerial, out bool minimized))
-                        _MinimizedSave[LocalSerial] = IsMinimized = minimized;
-                    else
-                        _MinimizedSave[LocalSerial] = IsMinimized;
-                }
-            }
-        }
-
-        protected override void CloseWithRightClick()
-        {
-            _MinimizedSave.Remove(LocalSerial);
-            base.CloseWithRightClick();
-        }
-
-        private static readonly Dictionary<Serial, bool> _MinimizedSave = new Dictionary<Serial, bool>();
-        private bool _IsUpdated = false;
     }
 }

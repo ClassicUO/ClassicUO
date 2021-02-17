@@ -1,23 +1,32 @@
 ﻿#region license
 
-//  Copyright (C) 2019 ClassicUO Development Community on Github
-//
-//	This project is an alternative client for the game Ultima Online.
-//	The goal of this is to develop a lightweight client considering 
-//	new technologies.  
-//      
-//  This program is free software: you can redistribute it and/or modify
-//  it under the terms of the GNU General Public License as published by
-//  the Free Software Foundation, either version 3 of the License, or
-//  (at your option) any later version.
-//
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-//
-//  You should have received a copy of the GNU General Public License
-//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// Copyright (c) 2021, andreakarasho
+// All rights reserved.
+// 
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+// 1. Redistributions of source code must retain the above copyright
+//    notice, this list of conditions and the following disclaimer.
+// 2. Redistributions in binary form must reproduce the above copyright
+//    notice, this list of conditions and the following disclaimer in the
+//    documentation and/or other materials provided with the distribution.
+// 3. All advertising materials mentioning features or use of this software
+//    must display the following acknowledgement:
+//    This product includes software developed by andreakarasho - https://github.com/andreakarasho
+// 4. Neither the name of the copyright holder nor the
+//    names of its contributors may be used to endorse or promote products
+//    derived from this software without specific prior written permission.
+// 
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ''AS IS'' AND ANY
+// EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+// WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+// DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY
+// DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+// (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+// LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+// ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+// SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #endregion
 
@@ -28,7 +37,7 @@ namespace ClassicUO.Utility.Logging
 {
     internal class Logger
     {
-        public static readonly Dictionary<LogTypes, Tuple<ConsoleColor, string>> LogTypeInfo = new Dictionary<LogTypes, Tuple<ConsoleColor, string>>
+        private static readonly Dictionary<LogTypes, Tuple<ConsoleColor, string>> _logTypesInfo = new Dictionary<LogTypes, Tuple<ConsoleColor, string>>
         {
             {
                 LogTypes.None, Tuple.Create(ConsoleColor.White, "")
@@ -53,24 +62,10 @@ namespace ClassicUO.Utility.Logging
             }
         };
 
-        private static readonly Dictionary<ConsoleColor, ConsoleColor> _foreGroundsColors = new Dictionary<ConsoleColor, ConsoleColor>
-        {
-            {ConsoleColor.Green, ConsoleColor.Black},
-            {ConsoleColor.Black, ConsoleColor.White},
-            {ConsoleColor.White, ConsoleColor.Black},
-            {ConsoleColor.DarkBlue, ConsoleColor.White},
-            {ConsoleColor.Cyan, ConsoleColor.Black},
-            {ConsoleColor.Magenta, ConsoleColor.Black},
-            {ConsoleColor.DarkGreen, ConsoleColor.Black},
-            {ConsoleColor.DarkGray, ConsoleColor.White},
-            {ConsoleColor.DarkCyan, ConsoleColor.Black},
-            {ConsoleColor.Gray, ConsoleColor.White},
-            {ConsoleColor.DarkRed, ConsoleColor.White},
-            {ConsoleColor.Yellow, ConsoleColor.Black}
-        };
         private int _indent;
 
         private bool _isLogging;
+        private readonly object _syncObject = new object();
 
         // No volatile support for properties, let's use a private backing field.
         public LogTypes LogTypes { get; set; }
@@ -85,16 +80,20 @@ namespace ClassicUO.Utility.Logging
             _isLogging = false;
         }
 
-        public void Message(LogTypes logType, string text, ConsoleColor highlightColor)
+        public void Message(LogTypes logType, string text)
         {
             lock (_syncObject)
-                SetLogger(logType, text, highlightColor);
+            {
+                SetLogger(logType, text);
+            }
         }
 
         public void NewLine()
         {
             lock (_syncObject)
-                SetLogger(LogTypes.None, string.Empty, ConsoleColor.Black);
+            {
+                SetLogger(LogTypes.None, string.Empty);
+            }
         }
 
         public void Clear()
@@ -112,22 +111,20 @@ namespace ClassicUO.Utility.Logging
             _indent--;
 
             if (_indent < 0)
+            {
                 _indent = 0;
+            }
         }
-        private readonly object _syncObject = new object();
 
-        private void SetLogger(LogTypes type, string text, ConsoleColor highlightColor)
+        private void SetLogger(LogTypes type, string text)
         {
             if (!_isLogging)
+            {
                 return;
+            }
 
             if ((LogTypes & type) == type)
             {
-                var temp = Console.BackgroundColor;
-                Console.BackgroundColor = highlightColor;
-
-                Console.ForegroundColor = _foreGroundsColors[highlightColor];
-
                 if (type == LogTypes.None)
                 {
                     if (_indent > 0)
@@ -136,14 +133,20 @@ namespace ClassicUO.Utility.Logging
                         Console.WriteLine(text);
                     }
                     else
+                    {
                         Console.WriteLine(text);
+                    }
                 }
                 else
                 {
                     Console.Write($"{DateTime.Now:T} |");
-                    Console.ForegroundColor = LogTypeInfo[type].Item1;
-                    Console.Write(LogTypeInfo[type].Item2);
-                    Console.ForegroundColor = _foreGroundsColors[highlightColor];
+                    ConsoleColor temp = Console.ForegroundColor;
+
+                    Console.ForegroundColor = _logTypesInfo[type].Item1;
+
+                    Console.Write(_logTypesInfo[type].Item2);
+
+                    Console.ForegroundColor = temp;
 
                     if (_indent > 0)
                     {
@@ -152,10 +155,10 @@ namespace ClassicUO.Utility.Logging
                         Console.WriteLine(text);
                     }
                     else
+                    {
                         Console.WriteLine($"| {text}");
+                    }
                 }
-
-                Console.BackgroundColor = temp;
             }
         }
     }

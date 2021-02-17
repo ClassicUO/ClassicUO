@@ -1,4 +1,36 @@
-﻿using System;
+﻿#region license
+
+// Copyright (c) 2021, andreakarasho
+// All rights reserved.
+// 
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+// 1. Redistributions of source code must retain the above copyright
+//    notice, this list of conditions and the following disclaimer.
+// 2. Redistributions in binary form must reproduce the above copyright
+//    notice, this list of conditions and the following disclaimer in the
+//    documentation and/or other materials provided with the distribution.
+// 3. All advertising materials mentioning features or use of this software
+//    must display the following acknowledgement:
+//    This product includes software developed by andreakarasho - https://github.com/andreakarasho
+// 4. Neither the name of the copyright holder nor the
+//    names of its contributors may be used to endorse or promote products
+//    derived from this software without specific prior written permission.
+// 
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ''AS IS'' AND ANY
+// EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+// WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+// DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY
+// DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+// (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+// LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+// ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+// SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+#endregion
+
+using System;
 
 namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
 {
@@ -27,7 +59,11 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
                 m_NumValid = cdb.m_NumValid;
                 m_Index = cdb.m_Index;
                 m_DataArray = new byte[m_Length];
-                for (int c = 0; c < m_Length; c++) m_DataArray[c] = cdb.m_DataArray[c];
+
+                for (int c = 0; c < m_Length; c++)
+                {
+                    m_DataArray[c] = cdb.m_DataArray[c];
+                }
             }
         }
 
@@ -42,7 +78,12 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
                 byte[] newDataArray = new byte[value];
 
                 int minLength = m_Length > value ? value : m_Length;
-                for (int i = 0; i < minLength; i++) newDataArray[i] = InternalGet(i - m_Length + 1);
+
+                for (int i = 0; i < minLength; i++)
+                {
+                    newDataArray[i] = InternalGet(i - m_Length + 1);
+                }
+
                 m_DataArray = newDataArray;
                 m_Index = minLength - 1;
                 m_Length = value;
@@ -68,8 +109,7 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
             {
                 if (value > m_NumValid)
                 {
-                    throw new Exception("Can't set NumValid to " + value +
-                                        " which is greater than the current numValid value of " + m_NumValid);
+                    throw new Exception("Can't set NumValid to " + value + " which is greater than the current numValid value of " + m_NumValid);
                 }
 
                 m_NumValid = value;
@@ -99,7 +139,12 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
                 ret = InternalGet(m_Length);
                 m_DataArray[m_Index] = newValue;
                 m_NumValid++;
-                if (m_NumValid > m_Length) m_NumValid = m_Length;
+
+                if (m_NumValid > m_Length)
+                {
+                    m_NumValid = m_Length;
+                }
+
                 m_Index++;
                 m_Index %= m_Length;
             }
@@ -114,7 +159,10 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
         {
             lock (this)
             {
-                if (m_NumValid == 0) throw new Exception("Can't pop off an empty CircularByteBuffer");
+                if (m_NumValid == 0)
+                {
+                    throw new Exception("Can't pop off an empty CircularByteBuffer");
+                }
 
                 m_NumValid--;
 
@@ -127,7 +175,10 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
         /// </summary>
         public byte Peek()
         {
-            lock (this) return InternalGet(m_Length);
+            lock (this)
+            {
+                return InternalGet(m_Length);
+            }
         }
 
         private byte InternalGet(int offset)
@@ -172,7 +223,10 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
         {
             byte[] outByte = new byte[str - stp + 1];
 
-            for (int i = str, j = 0; i >= stp; i--, j++) outByte[j] = this[i];
+            for (int i = str, j = 0; i >= stp; i--, j++)
+            {
+                outByte[j] = this[i];
+            }
 
             return outByte;
         }
@@ -180,7 +234,12 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
         public override string ToString()
         {
             string ret = "";
-            for (int i = 0; i < m_DataArray.Length; i++) ret += m_DataArray[i] + " ";
+
+            for (int i = 0; i < m_DataArray.Length; i++)
+            {
+                ret += m_DataArray[i] + " ";
+            }
+
             ret += "\n index = " + m_Index + " numValid = " + NumValid;
 
             return ret;

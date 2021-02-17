@@ -1,27 +1,34 @@
 #region license
 
-//  Copyright (C) 2019 ClassicUO Development Community on Github
-//
-//	This project is an alternative client for the game Ultima Online.
-//	The goal of this is to develop a lightweight client considering 
-//	new technologies.  
-//      
-//  This program is free software: you can redistribute it and/or modify
-//  it under the terms of the GNU General Public License as published by
-//  the Free Software Foundation, either version 3 of the License, or
-//  (at your option) any later version.
-//
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-//
-//  You should have received a copy of the GNU General Public License
-//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// Copyright (c) 2021, andreakarasho
+// All rights reserved.
+// 
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+// 1. Redistributions of source code must retain the above copyright
+//    notice, this list of conditions and the following disclaimer.
+// 2. Redistributions in binary form must reproduce the above copyright
+//    notice, this list of conditions and the following disclaimer in the
+//    documentation and/or other materials provided with the distribution.
+// 3. All advertising materials mentioning features or use of this software
+//    must display the following acknowledgement:
+//    This product includes software developed by andreakarasho - https://github.com/andreakarasho
+// 4. Neither the name of the copyright holder nor the
+//    names of its contributors may be used to endorse or promote products
+//    derived from this software without specific prior written permission.
+// 
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ''AS IS'' AND ANY
+// EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+// WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+// DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY
+// DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+// (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+// LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+// ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+// SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #endregion
-
-using System;
 
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
@@ -30,154 +37,106 @@ using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 
-using Microsoft.Xna.Framework.Graphics;
-
 namespace ClassicUO.Game.GameObjects
 {
     internal sealed partial class Static
     {
         private int _canBeTransparent;
-        private uint _lastAnimationFrameTime;
-
-        public bool CharacterIsBehindFoliage { get; set; }
 
         public override bool TransparentTest(int z)
         {
             bool r = true;
 
             if (Z <= z - ItemData.Height)
+            {
                 r = false;
+            }
             else if (z < Z && (_canBeTransparent & 0xFF) == 0)
+            {
                 r = false;
+            }
 
             return r;
-        }
-
-        private void SetTextureByGraphic(ushort graphic)
-        {
-            ArtTexture texture = FileManager.Art.GetTexture(graphic);
-            Texture = texture;
-            Bounds.X = (Texture.Width >> 1) - 22;
-            Bounds.Y = Texture.Height - 44;
-            Bounds.Width = Texture.Width;
-            Bounds.Height = texture.Height;
-
-            FrameInfo.Width = texture.ImageRectangle.Width;
-            FrameInfo.Height = texture.ImageRectangle.Height;
-
-            FrameInfo.X = (Texture.Width >> 1) - 22 - texture.ImageRectangle.X;
-            FrameInfo.Y = Texture.Height - 44 - texture.ImageRectangle.Y;
         }
 
         public override bool Draw(UltimaBatcher2D batcher, int posX, int posY)
         {
             if (!AllowedToDraw || IsDestroyed)
+            {
                 return false;
+            }
 
             ushort graphic = Graphic;
-
-            if (ItemData.IsFoliage)
-            {
-                if (CharacterIsBehindFoliage)
-                {
-                    if (AlphaHue != Constants.FOLIAGE_ALPHA)
-                        ProcessAlpha(Constants.FOLIAGE_ALPHA);
-                }
-                else
-                {
-                    if (AlphaHue != 0xFF)
-                        ProcessAlpha(0xFF);
-                }
-            }
-            else if (ItemData.IsAnimated && _lastAnimationFrameTime < Time.Ticks)
-            {
-                IntPtr ptr = FileManager.AnimData.GetAddressToAnim(Graphic);
-
-                if (ptr != IntPtr.Zero)
-                {
-                    unsafe
-                    {
-                        AnimDataFrame2* animData = (AnimDataFrame2*)ptr;
-
-                        if (animData->FrameCount != 0)
-                        {
-                            graphic = (Graphic)(Graphic + animData->FrameData[AnimIndex++]);
-
-                            if (AnimIndex >= animData->FrameCount)
-                                AnimIndex = 0;
-
-                            _lastAnimationFrameTime = Time.Ticks + (uint)(animData->FrameInterval !=  0 ?
-                                                          animData->FrameInterval * Constants.ITEM_EFFECT_ANIMATION_DELAY + 25 : Constants.ITEM_EFFECT_ANIMATION_DELAY);
-                        }
-                    }
-                }
-            }
+            ushort hue = Hue;
+            bool partial = ItemData.IsPartialHue;
 
             ResetHueVector();
 
-            if (Texture == null || Texture.IsDisposed || Graphic != graphic)
+            if (ProfileManager.CurrentProfile.HighlightGameObjects && SelectedObject.LastObject == this)
             {
-                SetTextureByGraphic(graphic);
+                hue = Constants.HIGHLIGHT_CURRENT_OBJECT_HUE;
+                partial = false;
+            }
+            else if (ProfileManager.CurrentProfile.NoColorObjectsOutOfRange && Distance > World.ClientViewRange)
+            {
+                hue = Constants.OUT_RANGE_COLOR;
+                partial = false;
+            }
+            else if (World.Player.IsDead && ProfileManager.CurrentProfile.EnableBlackWhiteEffect)
+            {
+                hue = Constants.DEAD_RANGE_COLOR;
+                partial = false;
             }
 
-           
+            ShaderHueTranslator.GetHueVector(ref HueVector, hue, partial, 0);
 
-            if (ProfileManager.Current.HighlightGameObjects && SelectedObject.LastObject == this)
+            bool isTree = StaticFilters.IsTree(graphic, out _);
+
+            if (isTree && ProfileManager.CurrentProfile.TreeToStumps)
             {
-                HueVector.X = 0x0023;
-                HueVector.Y = 1;
+                graphic = Constants.TREE_REPLACE_GRAPHIC;
             }
-            else if (ProfileManager.Current.NoColorObjectsOutOfRange && Distance > World.ClientViewRange)
+
+            if (AlphaHue != 255)
             {
-                HueVector.X = Constants.OUT_RANGE_COLOR;
-                HueVector.Y = 1;
+                HueVector.Z = 1f - AlphaHue / 255f;
             }
-            else if (World.Player.IsDead && ProfileManager.Current.EnableBlackWhiteEffect)
+
+            DrawStaticAnimated
+            (
+                batcher,
+                graphic,
+                posX,
+                posY,
+                ref HueVector,
+                ref DrawTransparent,
+                ProfileManager.CurrentProfile.ShadowsEnabled && ProfileManager.CurrentProfile.ShadowsStatics && (isTree || ItemData.IsFoliage || StaticFilters.IsRock(graphic))
+            );
+
+            if (ItemData.IsLight)
             {
-                HueVector.X = Constants.DEAD_RANGE_COLOR;
-                HueVector.Y = 1;
+                Client.Game.GetScene<GameScene>().AddLight(this, this, posX + 22, posY + 22);
             }
-            else
-                ShaderHuesTraslator.GetHueVector(ref HueVector, Hue, ItemData.IsPartialHue, 0);
 
-            //Engine.DebugInfo.StaticsRendered++;
-
-            //if ((StaticFilters.IsTree(Graphic) || ItemData.IsFoliage || StaticFilters.IsRock(Graphic)))
-            //{
-            //    batcher.DrawSpriteShadow(Texture, posX - Bounds.X, posY - Bounds.Y /*- 10*/, false);
-            //}
-
-            if (base.Draw(batcher, posX, posY))
+            if (!(SelectedObject.Object == this || FoliageIndex != -1 && Client.Game.GetScene<GameScene>().FoliageIndex == FoliageIndex))
             {
-                if (ItemData.IsLight)
+                if (DrawTransparent)
                 {
-                    CUOEnviroment.Client.GetScene<GameScene>()
-                          .AddLight(this, this, posX + 22, posY + 22);
+                    return true;
                 }
 
-                return true;
+                ref UOFileIndex index = ref ArtLoader.Instance.GetValidRefEntry(graphic + 0x4000);
+
+                posX -= index.Width;
+                posY -= index.Height;
+
+                if (SelectedObject.IsPointInStatic(ArtLoader.Instance.GetTexture(graphic), posX, posY))
+                {
+                    SelectedObject.Object = this;
+                }
             }
 
-            return false;
-        }
-
-
-        public override void Select(int x, int y)
-        {
-            if (SelectedObject.Object == this || CharacterIsBehindFoliage)
-                return;
-
-            if (DrawTransparent)
-            {
-                int d = Distance;
-                int maxD = ProfileManager.Current.CircleOfTransparencyRadius + 1;
-
-                if (d <= maxD && d <= 3)
-                    return;
-            }
-
-            if (SelectedObject.IsPointInStatic(Texture, x - Bounds.X, y - Bounds.Y))
-                SelectedObject.Object = this;
+            return true;
         }
     }
 }

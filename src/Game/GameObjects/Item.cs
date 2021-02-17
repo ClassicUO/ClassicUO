@@ -1,31 +1,36 @@
 ﻿#region license
 
-//  Copyright (C) 2019 ClassicUO Development Community on Github
-//
-//	This project is an alternative client for the game Ultima Online.
-//	The goal of this is to develop a lightweight client considering 
-//	new technologies.  
-//      
-//  This program is free software: you can redistribute it and/or modify
-//  it under the terms of the GNU General Public License as published by
-//  the Free Software Foundation, either version 3 of the License, or
-//  (at your option) any later version.
-//
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-//
-//  You should have received a copy of the GNU General Public License
-//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// Copyright (c) 2021, andreakarasho
+// All rights reserved.
+// 
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+// 1. Redistributions of source code must retain the above copyright
+//    notice, this list of conditions and the following disclaimer.
+// 2. Redistributions in binary form must reproduce the above copyright
+//    notice, this list of conditions and the following disclaimer in the
+//    documentation and/or other materials provided with the distribution.
+// 3. All advertising materials mentioning features or use of this software
+//    must display the following acknowledgement:
+//    This product includes software developed by andreakarasho - https://github.com/andreakarasho
+// 4. Neither the name of the copyright holder nor the
+//    names of its contributors may be used to endorse or promote products
+//    derived from this software without specific prior written permission.
+// 
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ''AS IS'' AND ANY
+// EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+// WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+// DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY
+// DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+// (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+// LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+// ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+// SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #endregion
 
 using System;
-using System.Collections.Generic;
-using System.Runtime.CompilerServices;
-
-using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
@@ -34,107 +39,104 @@ using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
-using ClassicUO.Utility.Collections;
+using ClassicUO.Utility.Logging;
 using ClassicUO.Utility.Platforms;
+using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.GameObjects
 {
     internal partial class Item : Entity
     {
-        private int _animSpeed;
-        private Graphic? _displayedGraphic;
-        private bool _isMulti;
-        private ulong _spellsBitFiled;
+        private static readonly QueuedPool<Item> _pool = new QueuedPool<Item>
+        (
+            Constants.PREDICTABLE_CHUNKS * 3,
+            i =>
+            {
+                i.IsDestroyed = false;
+                i.Graphic = 0;
+                i.Amount = 0;
+                i.Container = 0xFFFF_FFFF;
+                i._isMulti = false;
+                i.Layer = 0;
+                i.Price = 0;
+                i.UsedLayer = false;
+                i._displayedGraphic = null;
+                i.X = 0;
+                i.Y = 0;
+                i.Z = 0;
 
+                i.LightID = 0;
+                i.MultiDistanceBonus = 0;
+                i.Flags = 0;
+                i.WantUpdateMulti = true;
+                i.MultiInfo = null;
+                i.MultiGraphic = 0;
 
-        //private static readonly Queue<Item> _pool = new Queue<Item>();
+                i.AlphaHue = 0;
+                i.Name = null;
+                i.Direction = 0;
+                i.AnimIndex = 0;
+                i.Hits = 0;
+                i.HitsMax = 0;
+                i.LastStepTime = 0;
+                i.LastAnimationChangeTime = 0;
 
-        public Item(Serial serial) : base(serial)
-        {
-        }
+                i.Clear();
 
+                i.IsClicked = false;
+                i.IsDamageable = false;
+                i.Offset = Vector3.Zero;
 
-        public static Item Create(Serial serial)
-        {
-            //if (_pool.Count != 0)
-            //{
-            //    var i = _pool.Dequeue();
-            //    i.IsDestroyed = false;
-            //    i.Graphic = 0;
-            //    i.Serial = serial;
-            //    i._amount = 0;
-            //    i._animDataFrame = default;
-            //    i._animSpeed = 0;
-            //    i._container = 0;
-            //    i._isMulti = false;
-            //    i._layer = 0;
-            //    i._price = 0;
-            //    i._spellsBitFiled = 0;
-            //    i.UsedLayer = false;
-            //    i._originalGraphic = 0;
-            //    i._displayedGraphic = null;
-
-            //    i.LightID = 0;
-            //    i.MultiDistanceBonus = 0;
-            //    i.BookType = SpellBookType.Unknown;
-            //    i.Flags = 0;
-            //    i.WantUpdateMulti = true;
-            //    i._force = false;
-            //    i.MultiInfo = null;
-            //    i.MultiGraphic = 0;
-            //    i.CharacterIsBehindFoliage = false;
-
-            //    i.AlphaHue = 0;
-            //    i.Name = null;
-            //    i.Direction = 0;
-            //    i.Equipment = null;
-            //    i.LastAnimationChangeTime = 0;
-            //    i.Items = new EntityCollection<Item>();
-            //    i.IsClicked = false;
-            //    i.Properties.Clear();
-            //    i._delta = 0;
-            //    i.PropertiesHash = 0;
-
-            //    i._itemData = null;
+                i.Opened = false;
+                i.TextContainer?.Clear();
+                i.IsFlipped = false;
+                i.FrameInfo = Rectangle.Empty;
+                i.UseObjectHandles = false;
+                i.ClosedObjectHandles = false;
+                i.ObjectHandlesOpened = false;
+                i.AlphaHue = 0;
+                i.AllowedToDraw = true;
                 
+                i.HitsRequested = false;
+            }
+        );
 
-            //    return i;
-            //}
+        private static readonly DataReader _reader = new DataReader();
+        private ushort? _displayedGraphic;
+        private bool _isMulti;
 
-            return new Item(serial);
-        }
 
-        public override void Destroy()
+        public Item() : base(0)
         {
-            if (IsDestroyed)
-                return;
-
-            base.Destroy();
-            //_pool.Enqueue(this);
         }
-
-        public uint Price;
-        public ushort Amount;
-        public Serial Container;
-        public Layer Layer;
-        public bool UsedLayer;
 
         public bool IsCoin => Graphic >= 0x0EEA && Graphic <= 0x0EF2;
 
-        public Graphic DisplayedGraphic
+        public ushort DisplayedGraphic
         {
             get
             {
                 if (_displayedGraphic.HasValue)
+                {
                     return _displayedGraphic.Value;
+                }
 
                 if (IsCoin)
                 {
-                    if (Amount > 5) return (Graphic) (Graphic + 2);
-                    if (Amount > 1) return (Graphic) (Graphic + 1);
+                    if (Amount > 5)
+                    {
+                        return (ushort) (Graphic + 2);
+                    }
+
+                    if (Amount > 1)
+                    {
+                        return (ushort) (Graphic + 1);
+                    }
                 }
                 else if (IsMulti)
+                {
                     return MultiGraphic;
+                }
 
                 return Graphic;
             }
@@ -143,7 +145,7 @@ namespace ClassicUO.Game.GameObjects
 
         public bool IsLocked => (Flags & Flags.Movable) == 0 && ItemData.Weight > 90;
 
-        public Graphic MultiGraphic { get; private set; }
+        public ushort MultiGraphic { get; private set; }
 
         public bool IsMulti
         {
@@ -160,58 +162,93 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
-        public bool IsDamageable;
-        public byte LightID;
-        public bool WantUpdateMulti = true;
-
-        public MultiInfo MultiInfo { get; private set; }
-
         public int MultiDistanceBonus { get; private set; }
 
         public bool IsCorpse => /*MathHelper.InRange(Graphic, 0x0ECA, 0x0ED2) ||*/ Graphic == 0x2006;
 
-        public bool IsSpellBook => Graphic == 0x0E38 || Graphic == 0x0EFA || Graphic == 0x2252 || Graphic == 0x2253 || Graphic == 0x238C || Graphic == 0x23A0 || Graphic == 0x2D50 || Graphic == 0x2D9D; // mysticism
+        public bool OnGround => !SerialHelper.IsValid(Container);
 
-        public bool OnGround => !Container.IsValid;
-
-        public Serial RootContainer
+        public uint RootContainer
         {
             get
             {
                 Item item = this;
 
-                while (item.Container.IsItem)
+                while (SerialHelper.IsItem(item.Container))
                 {
                     item = World.Items.Get(item.Container);
 
                     if (item == null)
-                        return Serial.INVALID;
+                    {
+                        return 0;
+                    }
                 }
 
-                return item.Container.IsMobile ? item.Container : item;
+                return SerialHelper.IsMobile(item.Container) ? item.Container : item;
             }
         }
 
-        public SpellBookType BookType { get; private set; } = SpellBookType.Unknown;
-
-
-        public bool CharacterIsBehindFoliage;
-
-        public ref readonly StaticTiles ItemData => ref FileManager.TileData.StaticData[IsMulti ? MultiGraphic : Graphic];
+        public ref StaticTiles ItemData => ref TileDataLoader.Instance.StaticData[IsMulti ? MultiGraphic : Graphic];
 
         public bool IsLootable =>
-            ItemData.Layer != (int) Layer.Hair &&
-            ItemData.Layer != (int) Layer.Beard &&
-            ItemData.Layer != (int) Layer.Face &&
-            // TODO: Remove this check when the issue with non-lootable items will be resolved on the server side
-            // Skip non-lootable items (the check below is for UO:Outlands only)
-            // These items appear only on humanoid NPC corpses so they don't look naked
-            // They are always a piece of equipment and server always sends their position as 0,0,0
-            // So the check works next way: it's true if not Outlands, it's true if it isn't equipment, it's true if position in container is not "0.0.0"
-            // NOTE: There are still items that aren't lootable but still have invalid layer
-            (Settings.GlobalSettings.ShardType != 2 /* || ItemData.Layer == (int) Layer.Invalid */ || (X != 0 || Y != 0 || Z != 0));
+            ItemData.Layer != (int) Layer.Hair && ItemData.Layer != (int) Layer.Beard && ItemData.Layer != (int) Layer.Face && Graphic != 0;
 
-        private void LoadMulti()
+        public ushort Amount;
+        public uint Container = 0xFFFF_FFFF;
+
+        public bool IsDamageable;
+        public Layer Layer;
+        public byte LightID;
+
+        public Rectangle? MultiInfo;
+        public bool Opened;
+
+        public uint Price;
+        public bool UsedLayer;
+        public bool WantUpdateMulti = true;
+
+
+        public static Item Create(uint serial)
+        {
+            Item i = _pool.GetOne();
+            i.Serial = serial;
+
+            return i;
+        }
+
+        public override void Destroy()
+        {
+            if (IsDestroyed)
+            {
+                return;
+            }
+
+            if (Opened)
+            {
+                UIManager.GetGump<ContainerGump>(Serial)?.Dispose();
+
+                UIManager.GetGump<SpellbookGump>(Serial)?.Dispose();
+
+                UIManager.GetGump<MapGump>(Serial)?.Dispose();
+
+                if (IsCorpse)
+                {
+                    UIManager.GetGump<GridLootGump>(Serial)?.Dispose();
+                }
+
+                UIManager.GetGump<BulletinBoardGump>(Serial)?.Dispose();
+
+                UIManager.GetGump<SplitMenuGump>(Serial)?.Dispose();
+
+                Opened = false;
+            }
+
+            base.Destroy();
+
+            _pool.ReturnOne(this);
+        }
+
+        private unsafe void LoadMulti()
         {
             WantUpdateMulti = false;
 
@@ -220,7 +257,6 @@ namespace ClassicUO.Game.GameObjects
             short maxX = 0;
             short maxY = 0;
 
-            int count = FileManager.Multi.GetCount(Graphic, out bool uopValid);
 
             if (!World.HouseManager.TryGetHouse(Serial, out House house))
             {
@@ -229,110 +265,177 @@ namespace ClassicUO.Game.GameObjects
             }
             else
             {
-                foreach (Multi multi in Multis)
-                {
-                    multi.Destroy();
-                }
-                Multis.Clear();
                 house.ClearComponents();
             }
 
-            for (int i = 0; i < count; i++)
+
+            ref UOFileIndex entry = ref MultiLoader.Instance.GetValidRefEntry(Graphic);
+            MultiLoader.Instance.File.SetData(entry.Address, entry.FileSize);
+
+            if (MultiLoader.Instance.IsUOP)
             {
-                FileManager.Multi.GetMultiData(i, Graphic, uopValid, out ushort graphic, out short x, out short y, out short z, out bool add);
-
-                if (x < minX) minX = x;
-                if (x > maxX) maxX = x;
-                if (y < minY) minY = y;
-                if (y > maxY) maxY = y;
-
-                if (add)
+                if (entry.Length > 0 && entry.DecompressedLength > 0)
                 {
-                    if (Multis == null)
-                        Multis = new List<Multi>();
+                    MultiLoader.Instance.File.Seek(entry.Offset);
 
-                    Multi m = Multi.Create(graphic);
-                    m.Position = new Position((ushort) (X + x), (ushort) (Y + y), (sbyte) (Z + z));
-                    m.MultiOffsetX = x;
-                    m.MultiOffsetY = y;
-                    m.MultiOffsetZ = z;
-                    m.Hue = Hue;
-                    m.AlphaHue = 255;
-                    m.IsCustom = false;
-                    m.State = 0;
-                    m.AddToTile();
-                    house.Components.Add(m);
+                    byte* data = stackalloc byte[entry.DecompressedLength];
 
-                    //m.State = (Z + 7 == m.Z ? CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FLOOR | CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_IGNORE_IN_RENDER : 0); //CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_IGNORE_IN_RENDER;
-                    //m.AddToTile();
-                    //var m = house.Add(graphic, Hue, x, y, (sbyte) (Z + z), false);
-                    //m.MultiOffsetX = x;
-                    //m.MultiOffsetY = y;
-                    //m.MultiOffsetZ = z;
-                    //m.State = 0;
-                    //m.AlphaHue = 0xFF;
-                    //Multis.Add(m);
+                    ZLib.Decompress
+                    (
+                        MultiLoader.Instance.File.PositionAddress,
+                        entry.Length,
+                        0,
+                        (IntPtr) data,
+                        entry.DecompressedLength
+                    );
+
+                    _reader.SetData(data, entry.DecompressedLength);
+                    _reader.Skip(4);
+                    int count = (int) _reader.ReadUInt();
+
+                    int sizeOf = sizeof(MultiBlockNew);
+
+                    for (int i = 0; i < count; i++)
+                    {
+                        MultiBlockNew* block = (MultiBlockNew*) (_reader.PositionAddress + i * sizeOf);
+
+                        if (block->Unknown != 0)
+                        {
+                            _reader.Skip((int) (block->Unknown * 4));
+                        }
+
+                        if (block->X < minX)
+                        {
+                            minX = block->X;
+                        }
+
+                        if (block->X > maxX)
+                        {
+                            maxX = block->X;
+                        }
+
+                        if (block->Y < minY)
+                        {
+                            minY = block->Y;
+                        }
+
+                        if (block->Y > maxY)
+                        {
+                            maxY = block->Y;
+                        }
+
+                        if (block->Flags == 0 || block->Flags == 0x100)
+                        {
+                            Multi m = Multi.Create(block->ID);
+                            m.X = (ushort) (X + block->X);
+                            m.Y = (ushort) (Y + block->Y);
+                            m.Z = (sbyte) (Z + block->Z);
+                            m.UpdateScreenPosition();
+                            m.MultiOffsetX = block->X;
+                            m.MultiOffsetY = block->Y;
+                            m.MultiOffsetZ = block->Z;
+                            m.Hue = Hue;
+                            m.AlphaHue = 255;
+                            m.IsCustom = false;
+                            m.State = CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_DONT_REMOVE;
+                            m.AddToTile();
+                            house.Components.Add(m);
+                        }
+                        else if (i == 0)
+                        {
+                            MultiGraphic = block->ID;
+                        }
+                    }
+
+                    _reader.ReleaseData();
                 }
-                else if (i == 0)
+                else
                 {
-                    MultiGraphic = graphic;
+                    Log.Warn($"[MultiCollection.uop] invalid entry (0x{Graphic:X4})");
+                }
+            }
+            else
+            {
+                int count = entry.Length / MultiLoader.Instance.Offset;
+                MultiLoader.Instance.File.Seek(entry.Offset);
+
+                for (int i = 0; i < count; i++)
+                {
+                    MultiBlock* block = (MultiBlock*) (MultiLoader.Instance.File.PositionAddress + i * MultiLoader.Instance.Offset);
+
+                    if (block->X < minX)
+                    {
+                        minX = block->X;
+                    }
+
+                    if (block->X > maxX)
+                    {
+                        maxX = block->X;
+                    }
+
+                    if (block->Y < minY)
+                    {
+                        minY = block->Y;
+                    }
+
+                    if (block->Y > maxY)
+                    {
+                        maxY = block->Y;
+                    }
+
+                    if (block->Flags != 0)
+                    {
+                        Multi m = Multi.Create(block->ID);
+                        m.X = (ushort) (X + block->X);
+                        m.Y = (ushort) (Y + block->Y);
+                        m.Z = (sbyte) (Z + block->Z);
+                        m.UpdateScreenPosition();
+                        m.MultiOffsetX = block->X;
+                        m.MultiOffsetY = block->Y;
+                        m.MultiOffsetZ = block->Z;
+                        m.Hue = Hue;
+                        m.AlphaHue = 255;
+                        m.IsCustom = false;
+                        m.State = CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_DONT_REMOVE;
+                        m.AddToTile();
+                        house.Components.Add(m);
+                    }
+                    else if (i == 0)
+                    {
+                        MultiGraphic = block->ID;
+                    }
                 }
             }
 
-            FileManager.Multi.ReleaseLastMultiDataRead();
-
-            MultiInfo = new MultiInfo((short) X, (short) Y)
+            MultiInfo = new Rectangle
             {
-                MinX = minX,
-                MaxX = maxX,
-                MinY = minY,
-                MaxY = maxY
+                X = minX,
+                Y = minY,
+                Width = maxX,
+                Height = maxY
             };
 
             MultiDistanceBonus = Math.Max(Math.Max(Math.Abs(minX), maxX), Math.Max(Math.Abs(minY), maxY));
 
-            //house.Generate();
+            house.Bounds = MultiInfo.Value;
 
-            UIManager.GetGump<MiniMapGump>()?.ForceUpdate();
+            UIManager.GetGump<MiniMapGump>()?.RequestUpdateContents();
 
             if (World.HouseManager.EntityIntoHouse(Serial, World.Player))
-                CUOEnviroment.Client.GetScene<GameScene>()?.UpdateMaxDrawZ(true);
+            {
+                Client.Game.GetScene<GameScene>()?.UpdateMaxDrawZ(true);
+            }
+
+            BoatMovingManager.ClearSteps(Serial);
         }
 
-        public List<Multi> Multis;
-
-        public void CheckGraphicChange(sbyte animIndex = 0)
+        public override void CheckGraphicChange(sbyte animIndex = 0)
         {
             if (!IsMulti)
             {
                 if (!IsCorpse)
                 {
                     AllowedToDraw = !GameObjectHelper.IsNoDrawable(Graphic);
-
-                    if (OnGround && ItemData.IsAnimated)
-                    {
-                        AnimIndex = animIndex;
-
-                        IntPtr ptr = FileManager.AnimData.GetAddressToAnim(Graphic);
-
-                        if (ptr != IntPtr.Zero)
-                        {
-                            unsafe
-                            {
-                                AnimDataFrame2* animData = (AnimDataFrame2*) ptr;
-
-                                if (animData->FrameCount != 0)
-                                {
-                                    _animSpeed = animData->FrameInterval != 0 ? animData->FrameInterval * 25 + Constants.ITEM_EFFECT_ANIMATION_DELAY : Constants.ITEM_EFFECT_ANIMATION_DELAY;
-                                }
-                            }
-                        }
-
-                        LastAnimationChangeTime = Time.Ticks;
-                    }
-
-                    _originalGraphic = DisplayedGraphic;
-                    _force = true;
                 }
                 else
                 {
@@ -344,7 +447,9 @@ namespace ClassicUO.Game.GameObjects
                         Direction &= (Direction) 0x7F;
                     }
                     else
+                    {
                         UsedLayer = false;
+                    }
 
                     Layer = (Layer) Direction;
                     AllowedToDraw = true;
@@ -352,30 +457,31 @@ namespace ClassicUO.Game.GameObjects
             }
             else if (WantUpdateMulti)
             {
-                UoAssist.SignalAddMulti((ushort) (Graphic | 0x4000), Position);
+                UoAssist.SignalAddMulti((ushort) (Graphic | 0x4000), X, Y);
 
                 if (MultiDistanceBonus == 0 || World.HouseManager.IsHouseInRange(Serial, World.ClientViewRange))
                 {
                     LoadMulti();
                     AllowedToDraw = MultiGraphic > 2;
-                    _originalGraphic = MultiGraphic;
-                    _force = true;
                 }
             }
         }
 
-        public override void Update(double totalMS, double frameMS)
+        public override void Update(double totalTime, double frameTime)
         {
             if (IsDestroyed)
+            {
                 return;
+            }
 
-            base.Update(totalMS, frameMS);
+            base.Update(totalTime, frameTime);
 
             ProcessAnimation(out _);
         }
-        public override Graphic GetGraphicForAnimation()
+
+        public override ushort GetGraphicForAnimation()
         {
-            Graphic graphic = Graphic;
+            ushort graphic = Graphic;
 
             if (Layer == Layer.Mount)
             {
@@ -457,7 +563,7 @@ namespace ClassicUO.Game.GameObjects
                     {
                         graphic = 0x00BF;
 
-                        return  graphic;
+                        return graphic;
                     }
 
                     case 0x3E9E: // 16030
@@ -708,6 +814,13 @@ namespace ClassicUO.Game.GameObjects
                         break;
                     }
 
+                    case 0x3ECE: // serpentine dragon
+                    {
+                        graphic = 0x059A;
+
+                        break;
+                    }
+
                     case 0x3EC5: // 16069
                     case 0x3F3A: // 16186 snow bear ???
 
@@ -721,6 +834,7 @@ namespace ClassicUO.Game.GameObjects
 
                     {
                         graphic = 0x01B0;
+
                         break;
                     }
 
@@ -728,6 +842,7 @@ namespace ClassicUO.Game.GameObjects
 
                     {
                         graphic = 0x04E6;
+
                         break;
                     }
 
@@ -735,6 +850,7 @@ namespace ClassicUO.Game.GameObjects
 
                     {
                         graphic = 0x04E7;
+
                         break;
                     }
 
@@ -742,6 +858,7 @@ namespace ClassicUO.Game.GameObjects
 
                     {
                         graphic = 0x042D;
+
                         break;
                     }
 
@@ -749,98 +866,134 @@ namespace ClassicUO.Game.GameObjects
 
                     {
                         graphic = 0x0579;
+
+                        break;
+                    }
+
+                    case 0x3ECC:
+                    {
+                        graphic = 0x0582;
+
+                        break;
+                    }
+
+                    case 0x3ED1: // CoconutCrab
+                    {
+                        graphic = 0x05E6;
+
+                        break;
+                    }
+
+                    case 0x3ECB: // Lasher
+                    {
+                        graphic = 0x057F;
+
+                        break;
+                    }
+
+                    case 0x3ED0: //SkeletalCat
+                    {
+                        graphic = 0x05A1;
+
+                        break;
+                    }
+
+                    case 0x3ED2: // war boar
+                    {
+                        graphic = 0x05F6;
+
+                        break;
+                    }
+
+                    case 0x3ECD: //Palomino
+                    {
+                        graphic = 0x0580;
+
+                        break;
+                    }
+
+                    case 0x3ECF: //Eowmu
+                    {
+                        graphic = 0x05A0;
+
+                        break;
+                    }
+
+                    case 0x3ED3: // capybara
+                    {
+                        graphic = 0x05F7;
+
                         break;
                     }
                 }
 
                 if (ItemData.AnimID != 0)
+                {
                     graphic = ItemData.AnimID;
+                }
+
                 //else
                 //    graphic = 0xFFFF;
             }
             else if (IsCorpse)
+            {
                 return Amount;
+            }
 
             return graphic;
-        }
-
-        public bool HasSpell(int circle, int index)
-        {
-            index = (3 - circle % 4 + (circle >> 2) * 4) * 8 + (index - 1);
-            ulong flag = (ulong) 1 << index;
-
-            return (_spellsBitFiled & flag) == flag;
-        }
-
-        public bool FillSpellbook(SpellBookType type, ulong field)
-        {
-            if (!IsSpellBook)
-                return false;
-
-            bool needUpdate = false;
-
-            if (BookType != type)
-            {
-                BookType = type;
-                needUpdate = true;
-            }
-
-            if (_spellsBitFiled != field)
-            {
-                _spellsBitFiled = field;
-                needUpdate = true;
-            }
-
-            return needUpdate;
         }
 
         public override void UpdateTextCoordsV()
         {
             if (TextContainer == null)
+            {
                 return;
+            }
 
-            var last = TextContainer.Items;
+            TextObject last = (TextObject) TextContainer.Items;
 
-            while (last?.ListRight != null)
-                last = last.ListRight;
+            while (last?.Next != null)
+            {
+                last = (TextObject) last.Next;
+            }
 
             if (last == null)
+            {
                 return;
+            }
 
             int offY = 0;
 
-            int startX = ProfileManager.Current.GameWindowPosition.X + 6;
-            int startY = ProfileManager.Current.GameWindowPosition.Y + 6;
-
-            int x = RealScreenPosition.X;
-            int y = RealScreenPosition.Y;
-
-
             if (OnGround)
             {
-                var scene = CUOEnviroment.Client.GetScene<GameScene>();
-                float scale = scene?.Scale ?? 1;
+                Point p = RealScreenPosition;
 
-                if (Texture != null)
-                    y -= Texture is ArtTexture t ? (t.ImageRectangle.Height >> 1) : (Texture.Height >> 1);
-                x += 22;
+                ArtTexture texture = ArtLoader.Instance.GetTexture(Graphic);
 
-                x = (int)(x / scale);
-                y = (int)(y / scale);
+                if (texture != null)
+                {
+                    p.Y -= texture.ImageRectangle.Height >> 1;
+                }
 
-                for (; last != null; last = last.ListLeft)
+                p.X += (int) Offset.X + 22;
+                p.Y += (int) (Offset.Y - Offset.Z) + 22;
+
+                p = Client.Game.Scene.Camera.WorldToScreen(p);
+
+                for (; last != null; last = (TextObject) last.Previous)
                 {
                     if (last.RenderedText != null && !last.RenderedText.IsDestroyed)
                     {
                         if (offY == 0 && last.Time < Time.Ticks)
+                        {
                             continue;
-
+                        }
 
                         last.OffsetY = offY;
                         offY += last.RenderedText.Height;
 
-                        last.RealScreenPosition.X = startX + (x - (last.RenderedText.Width >> 1));
-                        last.RealScreenPosition.Y = startY + (y - offY);
+                        last.RealScreenPosition.X = p.X - (last.RenderedText.Width >> 1);
+                        last.RealScreenPosition.Y = p.Y - offY;
                     }
                 }
 
@@ -848,26 +1001,24 @@ namespace ClassicUO.Game.GameObjects
             }
             else
             {
-                for (; last != null; last = last.ListLeft)
+                for (; last != null; last = (TextObject) last.Previous)
                 {
                     if (last.RenderedText != null && !last.RenderedText.IsDestroyed)
                     {
                         if (offY == 0 && last.Time < Time.Ticks)
+                        {
                             continue;
-
-                        x = last.X - startX;
-                        y = last.Y - startY;
+                        }
 
                         last.OffsetY = offY;
                         offY += last.RenderedText.Height;
 
-                        last.RealScreenPosition.X = startX + ((x - (last.RenderedText.Width >> 1)));
-                        last.RealScreenPosition.Y = startY + ((y - offY));
+                        last.RealScreenPosition.X = last.X - (last.RenderedText.Width >> 1);
+                        last.RealScreenPosition.Y = last.Y - offY;
                     }
                 }
             }
         }
-
 
         public override void ProcessAnimation(out byte dir, bool evalutate = false)
         {
@@ -890,20 +1041,20 @@ namespace ClassicUO.Game.GameObjects
                     //    id = corpseGraphic;
 
                     bool mirror = false;
-                    FileManager.Animations.GetAnimDirection(ref dir, ref mirror);
+                    AnimationsLoader.Instance.GetAnimDirection(ref dir, ref mirror);
 
                     if (id < Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT && dir < 5)
                     {
-                        byte animGroup = FileManager.Animations.GetDieGroupIndex(id, UsedLayer);
+                        byte animGroup = AnimationsLoader.Instance.GetDieGroupIndex(id, UsedLayer);
 
                         ushort hue = 0;
-                        ref var direction = ref FileManager.Animations.GetCorpseAnimationGroup(ref id, ref animGroup, ref hue).Direction[dir];
-                        FileManager.Animations.AnimID = id;
-                        FileManager.Animations.AnimGroup = animGroup;
-                        FileManager.Animations.Direction = dir;
+
+                        AnimationDirection direction = AnimationsLoader.Instance.GetCorpseAnimationGroup(ref id, ref animGroup, ref hue).Direction[dir];
 
                         if (direction.FrameCount == 0 || direction.Frames == null)
-                            FileManager.Animations.LoadDirectionGroup(ref direction);
+                        {
+                            AnimationsLoader.Instance.LoadAnimationFrames(id, animGroup, dir, ref direction);
+                        }
 
                         if (direction.Address != 0 && direction.Size != 0 || direction.IsUOP)
                         {
@@ -911,36 +1062,15 @@ namespace ClassicUO.Game.GameObjects
                             int fc = direction.FrameCount;
 
                             if (frameIndex >= fc)
+                            {
                                 frameIndex = (sbyte) (fc - 1);
+                            }
+
                             AnimIndex = frameIndex;
                         }
                     }
 
                     LastAnimationChangeTime = Time.Ticks + Constants.CHARACTER_ANIMATION_DELAY;
-                }
-            }
-            else if (OnGround && ItemData.IsAnimated && LastAnimationChangeTime < Time.Ticks)
-            {
-                IntPtr ptr = FileManager.AnimData.GetAddressToAnim(Graphic);
-
-                if (ptr != IntPtr.Zero)
-                {
-                    unsafe
-                    {
-                        AnimDataFrame2* animData = (AnimDataFrame2*) ptr;
-
-                        if (animData->FrameCount != 0)
-                        {
-                            _originalGraphic = (Graphic) (DisplayedGraphic + animData->FrameData[AnimIndex++]);
-
-                            if (AnimIndex >= animData->FrameCount)
-                                AnimIndex = 0;
-
-                            _force = _originalGraphic == DisplayedGraphic;
-
-                            LastAnimationChangeTime = Time.Ticks + _animSpeed;
-                        }
-                    }
                 }
             }
         }

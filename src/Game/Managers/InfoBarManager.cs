@@ -1,47 +1,60 @@
 ﻿#region license
 
-//  Copyright (C) 2019 ClassicUO Development Community on Github
-//
-//	This project is an alternative client for the game Ultima Online.
-//	The goal of this is to develop a lightweight client considering 
-//	new technologies.  
-//      
-//  This program is free software: you can redistribute it and/or modify
-//  it under the terms of the GNU General Public License as published by
-//  the Free Software Foundation, either version 3 of the License, or
-//  (at your option) any later version.
-//
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-//
-//  You should have received a copy of the GNU General Public License
-//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// Copyright (c) 2021, andreakarasho
+// All rights reserved.
+// 
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+// 1. Redistributions of source code must retain the above copyright
+//    notice, this list of conditions and the following disclaimer.
+// 2. Redistributions in binary form must reproduce the above copyright
+//    notice, this list of conditions and the following disclaimer in the
+//    documentation and/or other materials provided with the distribution.
+// 3. All advertising materials mentioning features or use of this software
+//    must display the following acknowledgement:
+//    This product includes software developed by andreakarasho - https://github.com/andreakarasho
+// 4. Neither the name of the copyright holder nor the
+//    names of its contributors may be used to endorse or promote products
+//    derived from this software without specific prior written permission.
+// 
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ''AS IS'' AND ANY
+// EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+// WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+// DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY
+// DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+// (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+// LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+// ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+// SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #endregion
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
-
+using System.IO;
+using System.Text;
+using System.Xml;
 using ClassicUO.Configuration;
-
-using Newtonsoft.Json;
+using ClassicUO.Resources;
+using ClassicUO.Utility.Logging;
 
 namespace ClassicUO.Game.Managers
 {
     internal class InfoBarManager
     {
-        private List<InfoBarItem> infoBarItems;
+        private readonly List<InfoBarItem> infoBarItems;
 
         public InfoBarManager()
         {
             infoBarItems = new List<InfoBarItem>();
 
-            if (ProfileManager.Current.InfoBarItems != null)
+            if (ProfileManager.CurrentProfile.InfoBarItems != null)
             {
-                infoBarItems = ProfileManager.Current.InfoBarItems?.ToList<InfoBarItem>();
+                infoBarItems.AddRange(ProfileManager.CurrentProfile.InfoBarItems);
+
+                ProfileManager.CurrentProfile.InfoBarItems = null;
+                Save();
             }
         }
 
@@ -50,12 +63,14 @@ namespace ClassicUO.Game.Managers
             return infoBarItems;
         }
 
-        public static string[] GetVars(int shardtype)
+        public static string[] GetVars()
         {
-            if(shardtype != 2)
+            if (!CUOEnviroment.IsOutlands)
+            {
                 return Enum.GetNames(typeof(InfoBarVars));
-            else
-                return Enum.GetNames(typeof(InfoBarVarsOutlands));
+            }
+
+            return Enum.GetNames(typeof(InfoBarVarsOutlands));
         }
 
         public void AddItem(InfoBarItem ibi)
@@ -73,6 +88,79 @@ namespace ClassicUO.Game.Managers
             infoBarItems.Clear();
         }
 
+        public void Save()
+        {
+            string path = Path.Combine(ProfileManager.ProfilePath, "infobar.xml");
+
+            using (XmlTextWriter xml = new XmlTextWriter(path, Encoding.UTF8)
+            {
+                Formatting = Formatting.Indented,
+                IndentChar = '\t',
+                Indentation = 1
+            })
+            {
+                xml.WriteStartDocument(true);
+                xml.WriteStartElement("infos");
+
+                foreach (InfoBarItem info in infoBarItems)
+                {
+                    info.Save(xml);
+                }
+
+                xml.WriteEndElement();
+                xml.WriteEndDocument();
+            }
+        }
+
+        public void Load()
+        {
+            string path = Path.Combine(ProfileManager.ProfilePath, "infobar.xml");
+
+            if (!File.Exists(path))
+            {
+                CreateDefault();
+                Save();
+
+                return;
+            }
+
+            XmlDocument doc = new XmlDocument();
+
+            try
+            {
+                doc.Load(path);
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex.ToString());
+
+                return;
+            }
+
+            infoBarItems.Clear();
+
+            XmlElement root = doc["infos"];
+
+            if (root != null)
+            {
+                foreach (XmlElement xml in root.GetElementsByTagName("info"))
+                {
+                    InfoBarItem item = new InfoBarItem(xml);
+                    infoBarItems.Add(item);
+                }
+            }
+        }
+
+        public void CreateDefault()
+        {
+            infoBarItems.Clear();
+
+            infoBarItems.Add(new InfoBarItem("", InfoBarVars.NameNotoriety, 0x3D2));
+            infoBarItems.Add(new InfoBarItem(ResGeneral.Hits, InfoBarVars.HP, 0x1B6));
+            infoBarItems.Add(new InfoBarItem(ResGeneral.Mana, InfoBarVars.Mana, 0x1ED));
+            infoBarItems.Add(new InfoBarItem(ResGeneral.Stam, InfoBarVars.Stamina, 0x22E));
+            infoBarItems.Add(new InfoBarItem(ResGeneral.Weight, InfoBarVars.Weight, 0x3D2));
+        }
     }
 
     internal enum InfoBarVars
@@ -100,7 +188,8 @@ namespace ClassicUO.Game.Managers
         DamageChanceInc,
         SwingSpeedInc,
         StatsCap,
-        NameNotoriety
+        NameNotoriety,
+        TithingPoints
     }
 
     internal enum InfoBarVarsOutlands
@@ -128,22 +217,44 @@ namespace ClassicUO.Game.Managers
         DamageChanceInc,
         SwingSpeedInc,
         MurderCount,
-        NameNotoriety
+        NameNotoriety,
+        TithingPoints
     }
 
-    [JsonObject]
     internal class InfoBarItem
     {
-        [JsonProperty] public string label;
-        [JsonProperty] public InfoBarVars var;
-        [JsonProperty] public ushort hue;
-
-        [JsonConstructor]
-        public InfoBarItem(string _label, InfoBarVars _var, Hue _labelColor)
+        public InfoBarItem(string label, InfoBarVars var, ushort labelColor)
         {
-            label = _label;
-            var = _var;
-            hue = _labelColor;
+            this.label = label;
+            this.var = var;
+            hue = labelColor;
+        }
+
+
+        public InfoBarItem(XmlElement xml)
+        {
+            if (xml == null)
+            {
+                return;
+            }
+
+            label = xml.GetAttribute("text");
+            var = (InfoBarVars) int.Parse(xml.GetAttribute("var"));
+            hue = ushort.Parse(xml.GetAttribute("hue"));
+        }
+
+        public ushort hue;
+
+        public string label;
+        public InfoBarVars var;
+
+        public void Save(XmlTextWriter writer)
+        {
+            writer.WriteStartElement("info");
+            writer.WriteAttributeString("text", label);
+            writer.WriteAttributeString("var", ((int) var).ToString());
+            writer.WriteAttributeString("hue", hue.ToString());
+            writer.WriteEndElement();
         }
     }
 }

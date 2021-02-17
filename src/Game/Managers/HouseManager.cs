@@ -1,63 +1,67 @@
 ﻿#region license
 
-//  Copyright (C) 2019 ClassicUO Development Community on Github
-//
-//	This project is an alternative client for the game Ultima Online.
-//	The goal of this is to develop a lightweight client considering 
-//	new technologies.  
-//      
-//  This program is free software: you can redistribute it and/or modify
-//  it under the terms of the GNU General Public License as published by
-//  the Free Software Foundation, either version 3 of the License, or
-//  (at your option) any later version.
-//
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-//
-//  You should have received a copy of the GNU General Public License
-//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// Copyright (c) 2021, andreakarasho
+// All rights reserved.
+// 
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+// 1. Redistributions of source code must retain the above copyright
+//    notice, this list of conditions and the following disclaimer.
+// 2. Redistributions in binary form must reproduce the above copyright
+//    notice, this list of conditions and the following disclaimer in the
+//    documentation and/or other materials provided with the distribution.
+// 3. All advertising materials mentioning features or use of this software
+//    must display the following acknowledgement:
+//    This product includes software developed by andreakarasho - https://github.com/andreakarasho
+// 4. Neither the name of the copyright holder nor the
+//    names of its contributors may be used to endorse or promote products
+//    derived from this software without specific prior written permission.
+// 
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ''AS IS'' AND ANY
+// EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+// WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+// DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY
+// DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+// (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+// LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+// ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+// SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #endregion
 
 using System;
 using System.Collections.Generic;
-
 using ClassicUO.Game.GameObjects;
 
 namespace ClassicUO.Game.Managers
 {
     internal class HouseManager
     {
-        private readonly Dictionary<Serial, House> _houses = new Dictionary<Serial, House>();
+        private readonly Dictionary<uint, House> _houses = new Dictionary<uint, House>();
 
         public IReadOnlyCollection<House> Houses => _houses.Values;
 
-        public void Add(Serial serial, House revision)
+        public void Add(uint serial, House revision)
         {
             _houses[serial] = revision;
         }
 
-        public bool TryGetHouse(Serial serial, out House house)
+        public bool TryGetHouse(uint serial, out House house)
         {
             return _houses.TryGetValue(serial, out house);
         }
 
-        public bool TryToRemove(Serial serial, int distance)
+        public bool TryToRemove(uint serial, int distance)
         {
             if (!IsHouseInRange(serial, distance))
             {
-                if (_houses.TryGetValue(serial, out var house))
+                if (_houses.TryGetValue(serial, out House house))
                 {
                     house.ClearComponents();
                     _houses.Remove(serial);
                 }
-                else
-                {
 
-                }
-            
 
                 return true;
             }
@@ -65,7 +69,7 @@ namespace ClassicUO.Game.Managers
             return false;
         }
 
-        public bool IsHouseInRange(Serial serial, int distance)
+        public bool IsHouseInRange(uint serial, int distance)
         {
             if (TryGetHouse(serial, out _))
             {
@@ -88,7 +92,9 @@ namespace ClassicUO.Game.Managers
                 Item found = World.Items.Get(serial);
 
                 if (found == null)
+                {
                     return true;
+                }
 
                 distance += found.MultiDistanceBonus;
 
@@ -98,30 +104,29 @@ namespace ClassicUO.Game.Managers
             return false;
         }
 
-        public bool EntityIntoHouse(Serial house, GameObject obj)
+        public bool EntityIntoHouse(uint house, GameObject obj)
         {
             if (obj != null && TryGetHouse(house, out _))
             {
                 Item found = World.Items.Get(house);
 
-                if (found == null)
+                if (found == null || !found.MultiInfo.HasValue)
+                {
                     return true;
+                }
 
-                int minX = found.X + found.MultiInfo.MinX;
-                int maxX = found.X + found.MultiInfo.MaxX;
-                int minY = found.Y + found.MultiInfo.MinY;
-                int maxY = found.Y + found.MultiInfo.MaxY;
+                int minX = found.X + found.MultiInfo.Value.X;
+                int maxX = found.X + found.MultiInfo.Value.Width;
+                int minY = found.Y + found.MultiInfo.Value.Y;
+                int maxY = found.Y + found.MultiInfo.Value.Height;
 
-                return obj.X >= minX &&
-                       obj.X <= maxX &&
-                       obj.Y >= minY &&
-                       obj.Y <= maxY;
+                return obj.X >= minX && obj.X <= maxX && obj.Y >= minY && obj.Y <= maxY;
             }
 
             return false;
         }
 
-        public void Remove(Serial serial)
+        public void Remove(uint serial)
         {
             if (TryGetHouse(serial, out House house))
             {
@@ -132,21 +137,25 @@ namespace ClassicUO.Game.Managers
 
         public void RemoveMultiTargetHouse()
         {
-            if (_houses.TryGetValue(0, out var house))
+            if (_houses.TryGetValue(0, out House house))
             {
                 house.ClearComponents();
                 _houses.Remove(0);
             }
         }
 
-        public bool Exists(Serial serial)
+        public bool Exists(uint serial)
         {
             return _houses.ContainsKey(serial);
         }
 
         public void Clear()
         {
-            foreach (KeyValuePair<Serial, House> house in _houses) house.Value.ClearComponents();
+            foreach (KeyValuePair<uint, House> house in _houses)
+            {
+                house.Value.ClearComponents();
+            }
+
             _houses.Clear();
         }
     }

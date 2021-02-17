@@ -1,5 +1,36 @@
-﻿using System;
+﻿#region license
 
+// Copyright (c) 2021, andreakarasho
+// All rights reserved.
+// 
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+// 1. Redistributions of source code must retain the above copyright
+//    notice, this list of conditions and the following disclaimer.
+// 2. Redistributions in binary form must reproduce the above copyright
+//    notice, this list of conditions and the following disclaimer in the
+//    documentation and/or other materials provided with the distribution.
+// 3. All advertising materials mentioning features or use of this software
+//    must display the following acknowledgement:
+//    This product includes software developed by andreakarasho - https://github.com/andreakarasho
+// 4. Neither the name of the copyright holder nor the
+//    names of its contributors may be used to endorse or promote products
+//    derived from this software without specific prior written permission.
+// 
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ''AS IS'' AND ANY
+// EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+// WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+// DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY
+// DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+// (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+// LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+// ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+// SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+#endregion
+
+using System;
 using ClassicUO.IO.Audio.MP3Sharp.Decoding;
 
 namespace ClassicUO.IO.Audio.MP3Sharp
@@ -14,7 +45,7 @@ namespace ClassicUO.IO.Audio.MP3Sharp
         private static readonly int CHANNELS = 2;
         // Write offset used in append_bytes
         private readonly byte[] m_Buffer = new byte[OBUFFERSIZE * 2]; // all channels interleaved
-        private readonly int[] m_Bufferp = new int[MAXCHANNELS]; // offset in each channel not same!
+        private readonly int[] m_Bufferp = new int[MAXCHANNELS];      // offset in each channel not same!
         // end marker, one past end of array. Same as bufferp[0], but
         // without the array bounds check.
         private int m_End;
@@ -43,15 +74,23 @@ namespace ClassicUO.IO.Audio.MP3Sharp
         /// </returns>
         public int Read(byte[] bufferOut, int offset, int count)
         {
-            if (bufferOut == null) throw new ArgumentNullException(nameof(bufferOut));
+            if (bufferOut == null)
+            {
+                throw new ArgumentNullException(nameof(bufferOut));
+            }
 
-            if (count + offset > bufferOut.Length) throw new ArgumentException("The sum of offset and count is larger than the buffer length");
+            if (count + offset > bufferOut.Length)
+            {
+                throw new ArgumentException("The sum of offset and count is larger than the buffer length");
+            }
 
             int remaining = BytesLeft;
             int copySize;
 
             if (count > remaining)
+            {
                 copySize = remaining;
+            }
             else
             {
                 // Copy an even number of sample frames
@@ -59,7 +98,14 @@ namespace ClassicUO.IO.Audio.MP3Sharp
                 copySize = count - remainder;
             }
 
-            Array.Copy(m_Buffer, m_Offset, bufferOut, offset, copySize);
+            Array.Copy
+            (
+                m_Buffer,
+                m_Offset,
+                bufferOut,
+                offset,
+                copySize
+            );
 
             m_Offset += copySize;
 
@@ -96,7 +142,10 @@ namespace ClassicUO.IO.Audio.MP3Sharp
                 throw new ArgumentNullException(nameof(samples));
             }
 
-            if (samples.Length < 32) throw new ArgumentException("samples must have 32 values");
+            if (samples.Length < 32)
+            {
+                throw new ArgumentException("samples must have 32 values");
+            }
 
             // Always, 32 samples are appended
             int pos = m_Bufferp[channel];
@@ -106,9 +155,13 @@ namespace ClassicUO.IO.Audio.MP3Sharp
                 float fs = samples[i];
 
                 if (fs > 32767.0f) // can this happen?
+                {
                     fs = 32767.0f;
+                }
                 else if (fs < -32767.0f)
+                {
                     fs = -32767.0f;
+                }
 
                 int sample = (int) fs;
                 m_Buffer[pos] = (byte) (sample & 0xff);
@@ -129,7 +182,9 @@ namespace ClassicUO.IO.Audio.MP3Sharp
             m_End = 0;
 
             for (int i = 0; i < CHANNELS; i++)
+            {
                 m_Bufferp[i] = i * 2; // two bytes per channel
+            }
         }
 
         public override void SetStopFlag()

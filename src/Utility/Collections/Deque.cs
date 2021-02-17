@@ -1,23 +1,32 @@
 ﻿#region license
 
-//  Copyright (C) 2019 ClassicUO Development Community on Github
-//
-//	This project is an alternative client for the game Ultima Online.
-//	The goal of this is to develop a lightweight client considering 
-//	new technologies.  
-//      
-//  This program is free software: you can redistribute it and/or modify
-//  it under the terms of the GNU General Public License as published by
-//  the Free Software Foundation, either version 3 of the License, or
-//  (at your option) any later version.
-//
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-//
-//  You should have received a copy of the GNU General Public License
-//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// Copyright (c) 2021, andreakarasho
+// All rights reserved.
+// 
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+// 1. Redistributions of source code must retain the above copyright
+//    notice, this list of conditions and the following disclaimer.
+// 2. Redistributions in binary form must reproduce the above copyright
+//    notice, this list of conditions and the following disclaimer in the
+//    documentation and/or other materials provided with the distribution.
+// 3. All advertising materials mentioning features or use of this software
+//    must display the following acknowledgement:
+//    This product includes software developed by andreakarasho - https://github.com/andreakarasho
+// 4. Neither the name of the copyright holder nor the
+//    names of its contributors may be used to endorse or promote products
+//    derived from this software without specific prior written permission.
+// 
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ''AS IS'' AND ANY
+// EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+// WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+// DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY
+// DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+// (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+// LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+// ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+// SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #endregion
 
@@ -60,7 +69,9 @@ namespace ClassicUO.Utility.Collections
         public Deque(int capacity)
         {
             if (capacity < 0)
+            {
                 throw new ArgumentOutOfRangeException(nameof(capacity), "Capacity may not be negative.");
+            }
 
             _buffer = new T[capacity];
         }
@@ -73,10 +84,12 @@ namespace ClassicUO.Utility.Collections
         public Deque(IEnumerable<T> collection)
         {
             if (collection == null)
+            {
                 throw new ArgumentNullException(nameof(collection));
+            }
 
-            var source = CollectionHelper.ReifyCollection(collection);
-            var count = source.Count;
+            IReadOnlyCollection<T> source = CollectionHelper.ReifyCollection(collection);
+            int count = source.Count;
 
             if (count > 0)
             {
@@ -84,7 +97,9 @@ namespace ClassicUO.Utility.Collections
                 DoInsertRange(0, source);
             }
             else
+            {
                 _buffer = new T[DefaultCapacity];
+            }
         }
 
         /// <summary>
@@ -122,10 +137,14 @@ namespace ClassicUO.Utility.Collections
             set
             {
                 if (value < Count)
+                {
                     throw new ArgumentOutOfRangeException(nameof(value), "Capacity cannot be set to a value less than Count");
+                }
 
                 if (value == _buffer.Length)
+                {
                     return;
+                }
 
                 // Create the new _buffer and copy our existing range.
                 T[] newBuffer = new T[value];
@@ -208,10 +227,14 @@ namespace ClassicUO.Utility.Collections
                 return;
             }
 
-            DoInsertRange(index, new[]
-            {
-                item
-            });
+            DoInsertRange
+            (
+                index,
+                new[]
+                {
+                    item
+                }
+            );
         }
 
         /// <summary>
@@ -264,7 +287,9 @@ namespace ClassicUO.Utility.Collections
             _offset -= value;
 
             if (_offset < 0)
+            {
                 _offset += Capacity;
+            }
 
             return _offset;
         }
@@ -322,7 +347,7 @@ namespace ClassicUO.Utility.Collections
         /// </param>
         private void DoInsertRange(int index, IReadOnlyCollection<T> collection)
         {
-            var collectionCount = collection.Count;
+            int collectionCount = collection.Count;
 
             // Make room in the existing list
             if (index < Count >> 1)
@@ -336,7 +361,9 @@ namespace ClassicUO.Utility.Collections
                 int writeIndex = Capacity - collectionCount;
 
                 for (int j = 0; j != copyCount; ++j)
+                {
                     _buffer[DequeIndexToBufferIndex(writeIndex + j)] = _buffer[DequeIndexToBufferIndex(j)];
+                }
 
                 // Rotate to the new view
                 PreDecrement(collectionCount);
@@ -350,7 +377,9 @@ namespace ClassicUO.Utility.Collections
                 int writeIndex = index + collectionCount;
 
                 for (int j = copyCount - 1; j != -1; --j)
+                {
                     _buffer[DequeIndexToBufferIndex(writeIndex + j)] = _buffer[DequeIndexToBufferIndex(index + j)];
+                }
             }
 
             // Copy new items into place
@@ -402,7 +431,9 @@ namespace ClassicUO.Utility.Collections
                 int writeIndex = collectionCount;
 
                 for (int j = copyCount - 1; j != -1; --j)
+                {
                     _buffer[DequeIndexToBufferIndex(writeIndex + j)] = _buffer[DequeIndexToBufferIndex(j)];
+                }
 
                 // Rotate to new view
                 PostIncrement(collectionCount);
@@ -416,7 +447,9 @@ namespace ClassicUO.Utility.Collections
                 int readIndex = index + collectionCount;
 
                 for (int j = 0; j != copyCount; ++j)
+                {
                     _buffer[DequeIndexToBufferIndex(index + j)] = _buffer[DequeIndexToBufferIndex(readIndex + j)];
+                }
             }
 
             // Adjust valid count
@@ -429,7 +462,10 @@ namespace ClassicUO.Utility.Collections
         /// </summary>
         private void EnsureCapacityForOneElement()
         {
-            if (IsFull) Capacity = Capacity == 0 ? 1 : Capacity * 2;
+            if (IsFull)
+            {
+                Capacity = Capacity == 0 ? 1 : Capacity * 2;
+            }
         }
 
         /// <summary>
@@ -464,13 +500,19 @@ namespace ClassicUO.Utility.Collections
         public void InsertRange(int index, IEnumerable<T> collection)
         {
             CheckNewIndexArgument(Count, index);
-            var source = CollectionHelper.ReifyCollection(collection);
+            IReadOnlyCollection<T> source = CollectionHelper.ReifyCollection(collection);
             int collectionCount = source.Count;
 
             // Overflow-safe check for "Count + collectionCount > Capacity"
-            if (collectionCount > Capacity - Count) Capacity = checked(Count + collectionCount);
+            if (collectionCount > Capacity - Count)
+            {
+                Capacity = checked(Count + collectionCount);
+            }
 
-            if (collectionCount == 0) return;
+            if (collectionCount == 0)
+            {
+                return;
+            }
 
             DoInsertRange(index, source);
         }
@@ -492,7 +534,10 @@ namespace ClassicUO.Utility.Collections
         {
             CheckRangeArguments(Count, offset, count);
 
-            if (count == 0) return;
+            if (count == 0)
+            {
+                return;
+            }
 
             DoRemoveRange(offset, count);
         }
@@ -505,7 +550,9 @@ namespace ClassicUO.Utility.Collections
         public T RemoveFromBack()
         {
             if (IsEmpty)
+            {
                 throw new InvalidOperationException("The deque is empty.");
+            }
 
             return DoRemoveFromBack();
         }
@@ -518,7 +565,9 @@ namespace ClassicUO.Utility.Collections
         public T RemoveFromFront()
         {
             if (IsEmpty)
+            {
                 throw new InvalidOperationException("The deque is empty.");
+            }
 
             return DoRemoveFromFront();
         }
@@ -528,7 +577,7 @@ namespace ClassicUO.Utility.Collections
         /// </summary>
         public T[] ToArray()
         {
-            var result = new T[Count];
+            T[] result = new T[Count];
             ((ICollection<T>) this).CopyTo(result, 0);
 
             return result;
@@ -576,6 +625,11 @@ namespace ClassicUO.Utility.Collections
                 CheckExistingIndexArgument(Count, index);
                 DoSetItem(index, value);
             }
+        }
+
+        public ref T GetAt(int index)
+        {
+            return ref _buffer[DequeIndexToBufferIndex(index)];
         }
 
         public ref T Front()
@@ -628,13 +682,15 @@ namespace ClassicUO.Utility.Collections
         /// <returns>The index of <paramref name="item" /> if found in this list; otherwise, -1.</returns>
         public int IndexOf(T item)
         {
-            var comparer = EqualityComparer<T>.Default;
+            EqualityComparer<T> comparer = EqualityComparer<T>.Default;
             int ret = 0;
 
-            foreach (var sourceItem in this)
+            foreach (T sourceItem in this)
             {
                 if (comparer.Equals(item, sourceItem))
+                {
                     return ret;
+                }
 
                 ++ret;
             }
@@ -663,12 +719,14 @@ namespace ClassicUO.Utility.Collections
         /// </returns>
         bool ICollection<T>.Contains(T item)
         {
-            var comparer = EqualityComparer<T>.Default;
+            EqualityComparer<T> comparer = EqualityComparer<T>.Default;
 
-            foreach (var entry in this)
+            foreach (T entry in this)
             {
                 if (comparer.Equals(item, entry))
+                {
                     return true;
+                }
             }
 
             return false;
@@ -698,7 +756,9 @@ namespace ClassicUO.Utility.Collections
         void ICollection<T>.CopyTo(T[] array, int arrayIndex)
         {
             if (array == null)
+            {
                 throw new ArgumentNullException(nameof(array));
+            }
 
             int count = Count;
             CheckRangeArguments(array.Length, arrayIndex, count);
@@ -713,19 +773,44 @@ namespace ClassicUO.Utility.Collections
         private void CopyToArray(Array array, int arrayIndex = 0)
         {
             if (array == null)
+            {
                 throw new ArgumentNullException(nameof(array));
+            }
 
             if (IsSplit)
             {
                 // The existing buffer is split, so we have to copy it in parts
                 int length = Capacity - _offset;
-                Array.Copy(_buffer, _offset, array, arrayIndex, length);
-                Array.Copy(_buffer, 0, array, arrayIndex + length, Count - length);
+
+                Array.Copy
+                (
+                    _buffer,
+                    _offset,
+                    array,
+                    arrayIndex,
+                    length
+                );
+
+                Array.Copy
+                (
+                    _buffer,
+                    0,
+                    array,
+                    arrayIndex + length,
+                    Count - length
+                );
             }
             else
             {
                 // The existing buffer is whole
-                Array.Copy(_buffer, _offset, array, arrayIndex, Count);
+                Array.Copy
+                (
+                    _buffer,
+                    _offset,
+                    array,
+                    arrayIndex,
+                    Count
+                );
             }
         }
 
@@ -745,7 +830,9 @@ namespace ClassicUO.Utility.Collections
             int index = IndexOf(item);
 
             if (index == -1)
+            {
                 return false;
+            }
 
             DoRemoveAt(index);
 
@@ -762,7 +849,10 @@ namespace ClassicUO.Utility.Collections
         {
             int count = Count;
 
-            for (int i = 0; i != count; ++i) yield return DoGetItem(i);
+            for (int i = 0; i != count; ++i)
+            {
+                yield return DoGetItem(i);
+            }
         }
 
         /// <summary>
@@ -783,10 +873,14 @@ namespace ClassicUO.Utility.Collections
         private static bool IsT(object value)
         {
             if (value is T)
+            {
                 return true;
+            }
 
             if (value != null)
+            {
                 return false;
+            }
 
             return default(T) == null;
         }
@@ -794,10 +888,14 @@ namespace ClassicUO.Utility.Collections
         int IList.Add(object value)
         {
             if (value == null && default(T) != null)
+            {
                 throw new ArgumentNullException(nameof(value), "Value cannot be null.");
+            }
 
             if (!IsT(value))
+            {
                 throw new ArgumentException("Value is of incorrect type.", nameof(value));
+            }
 
             AddToBack((T) value);
 
@@ -817,10 +915,14 @@ namespace ClassicUO.Utility.Collections
         void IList.Insert(int index, object value)
         {
             if (value == null && default(T) != null)
+            {
                 throw new ArgumentNullException("value", "Value cannot be null.");
+            }
 
             if (!IsT(value))
+            {
                 throw new ArgumentException("Value is of incorrect type.", "value");
+            }
 
             Insert(index, (T) value);
         }
@@ -832,7 +934,9 @@ namespace ClassicUO.Utility.Collections
         void IList.Remove(object value)
         {
             if (IsT(value))
+            {
                 Remove((T) value);
+            }
         }
 
         object IList.this[int index]
@@ -842,10 +946,14 @@ namespace ClassicUO.Utility.Collections
             set
             {
                 if (value == null && default(T) != null)
+                {
                     throw new ArgumentNullException(nameof(value), "Value cannot be null.");
+                }
 
                 if (!IsT(value))
+                {
                     throw new ArgumentException("Value is of incorrect type.", nameof(value));
+                }
 
                 this[index] = (T) value;
             }
@@ -854,7 +962,9 @@ namespace ClassicUO.Utility.Collections
         void ICollection.CopyTo(Array array, int index)
         {
             if (array == null)
+            {
                 throw new ArgumentNullException(nameof(array), "Destination array cannot be null.");
+            }
 
             CheckRangeArguments(array.Length, index, Count);
 
@@ -892,7 +1002,10 @@ namespace ClassicUO.Utility.Collections
         /// </exception>
         private static void CheckNewIndexArgument(int sourceLength, int index)
         {
-            if (index < 0 || index > sourceLength) throw new ArgumentOutOfRangeException(nameof(index), "Invalid new index " + index + " for source length " + sourceLength);
+            if (index < 0 || index > sourceLength)
+            {
+                throw new ArgumentOutOfRangeException(nameof(index), "Invalid new index " + index + " for source length " + sourceLength);
+            }
         }
 
         /// <summary>
@@ -907,7 +1020,10 @@ namespace ClassicUO.Utility.Collections
         /// </exception>
         private static void CheckExistingIndexArgument(int sourceLength, int index)
         {
-            if (index < 0 || index >= sourceLength) throw new ArgumentOutOfRangeException(nameof(index), "Invalid existing index " + index + " for source length " + sourceLength);
+            if (index < 0 || index >= sourceLength)
+            {
+                throw new ArgumentOutOfRangeException(nameof(index), "Invalid existing index " + index + " for source length " + sourceLength);
+            }
         }
 
         /// <summary>
@@ -924,11 +1040,20 @@ namespace ClassicUO.Utility.Collections
         /// <exception cref="ArgumentException">The range [offset, offset + count) is not within the range [0, sourceLength).</exception>
         private static void CheckRangeArguments(int sourceLength, int offset, int count)
         {
-            if (offset < 0) throw new ArgumentOutOfRangeException(nameof(offset), "Invalid offset " + offset);
+            if (offset < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(offset), "Invalid offset " + offset);
+            }
 
-            if (count < 0) throw new ArgumentOutOfRangeException(nameof(count), "Invalid count " + count);
+            if (count < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(count), "Invalid count " + count);
+            }
 
-            if (sourceLength - offset < count) throw new ArgumentException("Invalid offset (" + offset + ") or count + (" + count + ") for source length " + sourceLength);
+            if (sourceLength - offset < count)
+            {
+                throw new ArgumentException("Invalid offset (" + offset + ") or count + (" + count + ") for source length " + sourceLength);
+            }
         }
 
         #endregion

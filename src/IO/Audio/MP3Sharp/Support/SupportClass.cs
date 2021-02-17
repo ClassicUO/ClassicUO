@@ -1,3 +1,35 @@
+#region license
+
+// Copyright (c) 2021, andreakarasho
+// All rights reserved.
+// 
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+// 1. Redistributions of source code must retain the above copyright
+//    notice, this list of conditions and the following disclaimer.
+// 2. Redistributions in binary form must reproduce the above copyright
+//    notice, this list of conditions and the following disclaimer in the
+//    documentation and/or other materials provided with the distribution.
+// 3. All advertising materials mentioning features or use of this software
+//    must display the following acknowledgement:
+//    This product includes software developed by andreakarasho - https://github.com/andreakarasho
+// 4. Neither the name of the copyright holder nor the
+//    names of its contributors may be used to endorse or promote products
+//    derived from this software without specific prior written permission.
+// 
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ''AS IS'' AND ANY
+// EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+// WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+// DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY
+// DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+// (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+// LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+// ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+// SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+#endregion
+
 using System;
 using System.IO;
 
@@ -8,7 +40,9 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Support
         public static int URShift(int number, int bits)
         {
             if (number >= 0)
+            {
                 return number >> bits;
+            }
 
             return (number >> bits) + (2 << ~bits);
         }
@@ -21,7 +55,9 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Support
         public static long URShift(long number, int bits)
         {
             if (number >= 0)
+            {
                 return number >> bits;
+            }
 
             return (number >> bits) + (2L << ~bits);
         }
@@ -101,7 +137,9 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Support
             int bytesRead = sourceStream.Read(receiver, start, count);
 
             for (int i = start; i < start + bytesRead; i++)
+            {
                 target[i] = (sbyte) receiver[i];
+            }
 
             return bytesRead;
         }
@@ -118,7 +156,9 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Support
             byte[] byteArray = new byte[sbyteArray.Length];
 
             for (int index = 0; index < sbyteArray.Length; index++)
+            {
                 byteArray[index] = (byte) sbyteArray[index];
+            }
 
             return byteArray;
         }
@@ -133,7 +173,9 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Support
             byte[] byteArray = new byte[sourceString.Length];
 
             for (int index = 0; index < sourceString.Length; index++)
+            {
                 byteArray[index] = (byte) sourceString[index];
+            }
 
             return byteArray;
         }
@@ -147,8 +189,7 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Support
         /// <param name="destinationArray">Array to store the bytes.</param>
         /// <param name="destinationStart">Position in the destination array to start storing the sbytes.</param>
         /// <returns>An array of sbytes</returns>
-        public static void GetSBytesFromString(string sourceString, int sourceStart, int sourceEnd,
-                                               ref sbyte[] destinationArray, int destinationStart)
+        public static void GetSBytesFromString(string sourceString, int sourceStart, int sourceEnd, ref sbyte[] destinationArray, int destinationStart)
         {
             int sourceCounter;
             int destinationCounter;

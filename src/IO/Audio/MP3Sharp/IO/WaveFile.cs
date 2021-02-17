@@ -1,5 +1,36 @@
-using System.IO;
+#region license
 
+// Copyright (c) 2021, andreakarasho
+// All rights reserved.
+// 
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+// 1. Redistributions of source code must retain the above copyright
+//    notice, this list of conditions and the following disclaimer.
+// 2. Redistributions in binary form must reproduce the above copyright
+//    notice, this list of conditions and the following disclaimer in the
+//    documentation and/or other materials provided with the distribution.
+// 3. All advertising materials mentioning features or use of this software
+//    must display the following acknowledgement:
+//    This product includes software developed by andreakarasho - https://github.com/andreakarasho
+// 4. Neither the name of the copyright holder nor the
+//    names of its contributors may be used to endorse or promote products
+//    derived from this software without specific prior written permission.
+// 
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ''AS IS'' AND ANY
+// EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+// WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+// DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY
+// DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+// (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+// LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+// ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+// SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+#endregion
+
+using System.IO;
 using ClassicUO.IO.Audio.MP3Sharp.Support;
 
 namespace ClassicUO.IO.Audio.MP3Sharp.IO
@@ -10,11 +41,11 @@ namespace ClassicUO.IO.Audio.MP3Sharp.IO
     internal class WaveFile : RiffFile
     {
         public const int MAX_WAVE_CHANNELS = 2;
+        private bool m_JustWriteLengthBytes;
         private readonly int m_NumSamples;
         private readonly RiffChunkHeader m_PcmData;
-        private readonly WaveFormatChunk m_WaveFormat;
-        private bool m_JustWriteLengthBytes;
         private long m_PcmDataOffset; // offset of 'pcm_data' in output file
+        private readonly WaveFormatChunk m_WaveFormat;
 
         /// <summary>
         ///     Constructs a new WaveFile instance.
@@ -79,20 +110,26 @@ namespace ClassicUO.IO.Audio.MP3Sharp.IO
         /// <summary>
         ///     Pass in either a FileName or a Stream.
         /// </summary>
-        public virtual int OpenForWrite(string filename, Stream stream, int samplingRate, short bitsPerSample,
-                                        short numChannels)
+        public virtual int OpenForWrite(string filename, Stream stream, int samplingRate, short bitsPerSample, short numChannels)
         {
             // Verify parameters...
-            if (bitsPerSample != 8 && bitsPerSample != 16 || numChannels < 1 || numChannels > 2) return DDC_INVALID_CALL;
+            if (bitsPerSample != 8 && bitsPerSample != 16 || numChannels < 1 || numChannels > 2)
+            {
+                return DDC_INVALID_CALL;
+            }
 
             m_WaveFormat.Data.Config(samplingRate, bitsPerSample, numChannels);
 
             int retcode = 0;
 
             if (stream != null)
+            {
                 Open(stream, RFM_WRITE);
+            }
             else
+            {
                 Open(filename, RFM_WRITE);
+            }
 
             if (retcode == DDC_SUCCESS)
             {
@@ -101,6 +138,7 @@ namespace ClassicUO.IO.Audio.MP3Sharp.IO
                     (sbyte) SupportClass.Identity('W'), (sbyte) SupportClass.Identity('A'),
                     (sbyte) SupportClass.Identity('V'), (sbyte) SupportClass.Identity('E')
                 };
+
                 retcode = Write(theWave, 4);
 
                 if (retcode == DDC_SUCCESS)
@@ -141,12 +179,16 @@ namespace ClassicUO.IO.Audio.MP3Sharp.IO
             int rc = DDC_SUCCESS;
 
             if (Fmode == RFM_WRITE)
+            {
                 rc = Backpatch(m_PcmDataOffset, m_PcmData, 8);
+            }
 
             if (!m_JustWriteLengthBytes)
             {
                 if (rc == DDC_SUCCESS)
+                {
                     rc = base.Close();
+                }
             }
 
             return rc;
@@ -187,19 +229,18 @@ namespace ClassicUO.IO.Audio.MP3Sharp.IO
         /// </summary>
         public virtual int OpenForWrite(string filename, WaveFile otherWave)
         {
-            return OpenForWrite(filename, null, otherWave.SamplingRate(), otherWave.BitsPerSample(),
-                                otherWave.NumChannels());
+            return OpenForWrite
+            (
+                filename,
+                null,
+                otherWave.SamplingRate(),
+                otherWave.BitsPerSample(),
+                otherWave.NumChannels()
+            );
         }
 
         internal sealed class WaveFormatChunkData
         {
-            public short FormatTag; // Format category (PCM=1)
-            public int NumAvgBytesPerSec;
-            public short NumBitsPerSample;
-            public short NumBlockAlign;
-            public short NumChannels; // Number of channels (mono=1, stereo=2)
-            public int NumSamplesPerSec; // Sampling rate [Hz]
-
             public WaveFormatChunkData(WaveFile enclosingInstance)
             {
                 InitBlock(enclosingInstance);
@@ -208,6 +249,12 @@ namespace ClassicUO.IO.Audio.MP3Sharp.IO
             }
 
             public WaveFile EnclosingInstance { get; private set; }
+            public short FormatTag; // Format category (PCM=1)
+            public int NumAvgBytesPerSec;
+            public short NumBitsPerSample;
+            public short NumBlockAlign;
+            public short NumChannels;    // Number of channels (mono=1, stereo=2)
+            public int NumSamplesPerSec; // Sampling rate [Hz]
 
             private void InitBlock(WaveFile enclosingInstance)
             {
@@ -226,9 +273,6 @@ namespace ClassicUO.IO.Audio.MP3Sharp.IO
 
         internal class WaveFormatChunk
         {
-            public WaveFormatChunkData Data;
-            public RiffChunkHeader Header;
-
             public WaveFormatChunk(WaveFile enclosingInstance)
             {
                 InitBlock(enclosingInstance);
@@ -239,6 +283,8 @@ namespace ClassicUO.IO.Audio.MP3Sharp.IO
             }
 
             public WaveFile EnclosingInstance { get; private set; }
+            public WaveFormatChunkData Data;
+            public RiffChunkHeader Header;
 
             private void InitBlock(WaveFile enclosingInstance)
             {
@@ -247,9 +293,7 @@ namespace ClassicUO.IO.Audio.MP3Sharp.IO
 
             public virtual int VerifyValidity()
             {
-                bool ret = Header.CkId == FourCC("fmt ") && (Data.NumChannels == 1 || Data.NumChannels == 2) &&
-                           Data.NumAvgBytesPerSec == Data.NumChannels * Data.NumSamplesPerSec * Data.NumBitsPerSample / 8 &&
-                           Data.NumBlockAlign == Data.NumChannels * Data.NumBitsPerSample / 8;
+                bool ret = Header.CkId == FourCC("fmt ") && (Data.NumChannels == 1 || Data.NumChannels == 2) && Data.NumAvgBytesPerSec == Data.NumChannels * Data.NumSamplesPerSec * Data.NumBitsPerSample / 8 && Data.NumBlockAlign == Data.NumChannels * Data.NumBitsPerSample / 8;
 
                 return ret ? 1 : 0;
             }
@@ -257,8 +301,6 @@ namespace ClassicUO.IO.Audio.MP3Sharp.IO
 
         internal class WaveFileSample
         {
-            public short[] Chan;
-
             public WaveFileSample(WaveFile enclosingInstance)
             {
                 InitBlock(enclosingInstance);
@@ -266,6 +308,7 @@ namespace ClassicUO.IO.Audio.MP3Sharp.IO
             }
 
             public WaveFile EnclosingInstance { get; private set; }
+            public short[] Chan;
 
             private void InitBlock(WaveFile enclosingInstance)
             {

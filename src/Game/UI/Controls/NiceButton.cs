@@ -1,34 +1,39 @@
 ﻿#region license
 
-//  Copyright (C) 2019 ClassicUO Development Community on Github
-//
-//	This project is an alternative client for the game Ultima Online.
-//	The goal of this is to develop a lightweight client considering 
-//	new technologies.  
-//      
-//  This program is free software: you can redistribute it and/or modify
-//  it under the terms of the GNU General Public License as published by
-//  the Free Software Foundation, either version 3 of the License, or
-//  (at your option) any later version.
-//
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-//
-//  You should have received a copy of the GNU General Public License
-//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// Copyright (c) 2021, andreakarasho
+// All rights reserved.
+// 
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+// 1. Redistributions of source code must retain the above copyright
+//    notice, this list of conditions and the following disclaimer.
+// 2. Redistributions in binary form must reproduce the above copyright
+//    notice, this list of conditions and the following disclaimer in the
+//    documentation and/or other materials provided with the distribution.
+// 3. All advertising materials mentioning features or use of this software
+//    must display the following acknowledgement:
+//    This product includes software developed by andreakarasho - https://github.com/andreakarasho
+// 4. Neither the name of the copyright holder nor the
+//    names of its contributors may be used to endorse or promote products
+//    derived from this software without specific prior written permission.
+// 
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ''AS IS'' AND ANY
+// EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+// WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+// DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY
+// DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+// (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+// LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+// ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+// SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #endregion
 
 using System.Collections.Generic;
-using System.Linq;
-
 using ClassicUO.Input;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
-
-using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Controls
 {
@@ -38,18 +43,40 @@ namespace ClassicUO.Game.UI.Controls
         private readonly int _groupnumber;
         private bool _isSelected;
 
-        public NiceButton(int x, int y, int w, int h, ButtonAction action, string text, int groupnumber = 0, TEXT_ALIGN_TYPE align = TEXT_ALIGN_TYPE.TS_CENTER) : base(x, y, w, h)
+        public NiceButton
+        (
+            int x,
+            int y,
+            int w,
+            int h,
+            ButtonAction action,
+            string text,
+            int groupnumber = 0,
+            TEXT_ALIGN_TYPE align = TEXT_ALIGN_TYPE.TS_CENTER,
+            ushort hue = 0xFFFF
+        ) : base(x, y, w, h)
         {
             _action = action;
-            Label label;
 
-            Add(label = new Label(text, true, 999, w, 0xFF, FontStyle.BlackBorder | FontStyle.Cropped, align)
-            {
-                X = align == TEXT_ALIGN_TYPE.TS_CENTER ? -2 : 0
-            });
-            label.Y = (h - label.Height) >> 1;
+            Add
+            (
+                TextLabel = new Label
+                (
+                    text,
+                    true,
+                    hue,
+                    w,
+                    0xFF,
+                    FontStyle.BlackBorder | FontStyle.Cropped,
+                    align
+                )
+            );
+
+            TextLabel.Y = (h - TextLabel.Height) >> 1;
             _groupnumber = groupnumber;
         }
+
+        internal Label TextLabel { get; }
 
         public int ButtonParameter { get; set; }
 
@@ -61,7 +88,9 @@ namespace ClassicUO.Game.UI.Controls
             set
             {
                 if (!IsSelectable)
+                {
                     return;
+                }
 
                 _isSelected = value;
 
@@ -70,46 +99,52 @@ namespace ClassicUO.Game.UI.Controls
                     Control p = Parent;
 
                     if (p == null)
-                        return;
-
-                    IEnumerable<NiceButton> list;
-
-                    if (p is ScrollAreaItem)
                     {
-                        p = p.Parent;
-                        list = p.FindControls<ScrollAreaItem>().SelectMany(s => s.Children.OfType<NiceButton>());
+                        return;
                     }
-                    else
-                        list = p.FindControls<NiceButton>();
 
-                    foreach (var b in list)
+                    IEnumerable<NiceButton> list = p.FindControls<NiceButton>();
+
+                    foreach (NiceButton b in list)
+                    {
                         if (b != this && b._groupnumber == _groupnumber)
+                        {
                             b.IsSelected = false;
+                        }
+                    }
                 }
             }
         }
 
         internal static NiceButton GetSelected(Control p, int group)
         {
-            IEnumerable<NiceButton> list = p is ScrollArea ? p.FindControls<ScrollAreaItem>().SelectMany(s => s.Children.OfType<NiceButton>()) : p.FindControls<NiceButton>();
+            IEnumerable<NiceButton> list = p.FindControls<NiceButton>();
 
-            foreach (var b in list)
+            foreach (NiceButton b in list)
+            {
                 if (b._groupnumber == group && b.IsSelected)
+                {
                     return b;
+                }
+            }
 
             return null;
         }
 
-        protected override void OnMouseUp(int x, int y, MouseButton button)
+        protected override void OnMouseUp(int x, int y, MouseButtonType button)
         {
-            if (button == MouseButton.Left)
+            if (button == MouseButtonType.Left)
             {
                 IsSelected = true;
 
                 if (_action == ButtonAction.SwitchPage)
+                {
                     ChangePage(ButtonParameter);
+                }
                 else
+                {
                     OnButtonClick(ButtonParameter);
+                }
             }
         }
 
@@ -118,8 +153,19 @@ namespace ClassicUO.Game.UI.Controls
             if (IsSelected)
             {
                 ResetHueVector();
-                ShaderHuesTraslator.GetHueVector(ref _hueVector, 0, false, Alpha);
-                batcher.Draw2D(_texture, x, y, 0, 0, Width, Height, ref _hueVector);
+                ShaderHueTranslator.GetHueVector(ref HueVector, 0, false, Alpha);
+
+                batcher.Draw2D
+                (
+                    _texture,
+                    x,
+                    y,
+                    0,
+                    0,
+                    Width,
+                    Height,
+                    ref HueVector
+                );
             }
 
             return base.Draw(batcher, x, y);
