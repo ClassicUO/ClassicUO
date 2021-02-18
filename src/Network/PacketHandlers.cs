@@ -5217,12 +5217,12 @@ namespace ClassicUO.Network
 
                 p.Skip((int) clen);
 
-                for (int i = 0, index = 0; i < linesNum; i++)
+                for (int i = 0, index = 0; i < linesNum && index < dlen; i++)
                 {
                     int length = ((decData[index++] << 8) | decData[index++]) << 1;
                     int true_length = 0;
 
-                    for (int k = 0; k < length && true_length < length; ++k, true_length += 2)
+                    for (int k = 0; k < length && true_length < length && index + true_length < dlen; ++k, true_length += 2)
                     {
                         ushort c = (ushort)(((decData[index + true_length] << 8) | decData[index + true_length + 1]) << 1);
 
