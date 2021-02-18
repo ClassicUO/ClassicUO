@@ -70,7 +70,7 @@ namespace ClassicUO.Game.UI.Gumps
         private Checkbox _buffBarTime, _castSpellsByOneClick, _queryBeforAttackCheckbox, _queryBeforeBeneficialCheckbox, _spellColoringCheckbox, _spellFormatCheckbox;
         private HSliderBar _cellSize;
         private Checkbox _containerScaleItems, _containerDoubleClickToLoot, _relativeDragAnDropItems, _useLargeContianersGumps, _highlightContainersWhenMouseIsOver;
-
+        private Combobox _customBarType;
 
         // containers
         private HSliderBar _containersScale;
@@ -970,6 +970,26 @@ namespace ClassicUO.Game.UI.Gumps
                     0
                 )
             );
+
+            section3.Add(AddLabel(null, ResGumps.CustomBarType, 0, 0));
+
+            mode = _currentProfile.CustomBarType;
+
+            if (mode < 0 || mode > 2)
+            {
+                mode = 1;
+            }
+
+            _customBarType = AddCombobox
+            (
+                null,
+                new[] { ResGumps.Small, ResGumps.Normal, ResGumps.Large },
+                mode,
+                0,
+                0,
+                150
+            );
+            section3.AddRight(_customBarType);
 
             section3.Add
             (
@@ -3382,6 +3402,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _showTargetRangeIndicator.IsChecked = false;
                     _customBars.IsChecked = false;
                     _customBarsBBG.IsChecked = false;
+                    _customBarType.SelectedIndex = 1;
                     _autoOpenCorpse.IsChecked = false;
                     _autoOpenDoors.IsChecked = false;
                     _smoothDoors.IsChecked = false;
@@ -3986,6 +4007,21 @@ namespace ClassicUO.Game.UI.Gumps
             }
 
             _currentProfile.CBBlackBGToggled = _customBarsBBG.IsChecked;
+
+            if (_currentProfile.CustomBarType != _customBarType.SelectedIndex)
+            {
+                _currentProfile.CustomBarType = _customBarType.SelectedIndex;
+
+                List<HealthBarGumpCustom> hbgcustom2 = UIManager.Gumps.OfType<HealthBarGumpCustom>().ToList();
+                foreach (HealthBarGumpCustom customhealthbar in hbgcustom2)
+                {
+                    UIManager.Add
+                        (new HealthBarGumpCustom(customhealthbar.LocalSerial) { X = customhealthbar.X, Y = customhealthbar.Y });
+
+                    customhealthbar.Dispose();
+                }
+            }
+
             _currentProfile.SaveHealthbars = _saveHealthbars.IsChecked;
 
 

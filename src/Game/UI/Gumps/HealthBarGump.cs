@@ -329,17 +329,22 @@ namespace ClassicUO.Game.UI.Gumps
 
     internal class HealthBarGumpCustom : BaseHealthBarGump
     {
-        internal const int HPB_WIDTH = 120;
-        internal const int HPB_HEIGHT_MULTILINE = 60;
-        internal const int HPB_HEIGHT_SINGLELINE = 36;
-        private const int HPB_BORDERSIZE = 1;
-        private const int HPB_OUTLINESIZE = 1;
+        internal static int HPB_WIDTH = 120;
+        internal static int HPB_HEIGHT_MULTILINE = 60;
+        internal static int HPB_HEIGHT_SINGLELINE = 36;
+        private static int HPB_BORDERSIZE = 1;
+        private static int HPB_OUTLINESIZE = 1;
 
+        internal static int HPB_BAR_WIDTH = 100;
+        private static int HPB_BAR_HEIGHT = 8;
+        private static int HPB_BAR_SPACELEFT = (HPB_WIDTH - HPB_BAR_WIDTH) / 2;
 
-        internal const int HPB_BAR_WIDTH = 100;
-        private const int HPB_BAR_HEIGHT = 8;
-        private const int HPB_BAR_SPACELEFT = (HPB_WIDTH - HPB_BAR_WIDTH) / 2;
-
+        internal int SIZE = ProfileManager.CurrentProfile.CustomBarType;
+        internal byte FONT = 1;
+        internal int YLine1 = 27;
+        internal int YLine1S = 21;
+        internal int YLine2 = 36;
+        internal int YLine3 = 45;
 
         private static Color HPB_COLOR_DRAW_RED = Color.Red;
         private static Color HPB_COLOR_DRAW_BLUE = Color.DodgerBlue;
@@ -717,6 +722,55 @@ namespace ClassicUO.Game.UI.Gumps
         {
             WantUpdateSize = false;
 
+            if (SIZE == 0)
+            {
+                HPB_WIDTH = 96;
+                HPB_HEIGHT_MULTILINE = 48;
+                HPB_HEIGHT_SINGLELINE = 29;
+                HPB_BORDERSIZE = 1;
+                HPB_OUTLINESIZE = 1;
+                HPB_BAR_WIDTH = 80;
+                HPB_BAR_HEIGHT = 6;
+                HPB_BAR_SPACELEFT = 8;
+                YLine1 = 22;
+                YLine1S = 19;
+                YLine2 = 29;
+                YLine3 = 36;
+                FONT = 1;
+            }
+            else if (SIZE == 1)
+            {
+                HPB_WIDTH = 120;
+                HPB_HEIGHT_MULTILINE = 60;
+                HPB_HEIGHT_SINGLELINE = 36;
+                HPB_BORDERSIZE = 1;
+                HPB_OUTLINESIZE = 1;
+                HPB_BAR_WIDTH = 100;
+                HPB_BAR_HEIGHT = 8;
+                HPB_BAR_SPACELEFT = 10;
+                YLine1 = 27;
+                YLine1S = 21;
+                YLine2 = 36;
+                YLine3 = 45;
+                FONT = 1;
+            }
+            else if (SIZE == 2)
+            {
+                HPB_WIDTH = 144;
+                HPB_HEIGHT_MULTILINE = 72;
+                HPB_HEIGHT_SINGLELINE = 43;
+                HPB_BORDERSIZE = 1;
+                HPB_OUTLINESIZE = 1;
+                HPB_BAR_WIDTH = 120;
+                HPB_BAR_HEIGHT = 10;
+                HPB_BAR_SPACELEFT = 12;
+                YLine1 = 32;
+                YLine1S = 25;
+                YLine2 = 43;
+                YLine3 = 54;
+                FONT = 1;
+            }
+
             Entity entity = World.Get(LocalSerial);
 
 
@@ -734,7 +788,7 @@ namespace ClassicUO.Game.UI.Gumps
                     (
                         _textBox = new StbTextBox
                         (
-                            1,
+                            FONT,
                             32,
                             HPB_WIDTH,
                             true,
@@ -757,7 +811,7 @@ namespace ClassicUO.Game.UI.Gumps
                     (
                         _textBox = new StbTextBox
                         (
-                            1,
+                            FONT,
                             32,
                             HPB_WIDTH,
                             true,
@@ -780,7 +834,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _outline = new LineCHB
                     (
                         HPB_BAR_SPACELEFT - HPB_OUTLINESIZE,
-                        27 - HPB_OUTLINESIZE,
+                        YLine1 - HPB_OUTLINESIZE,
                         HPB_BAR_WIDTH + HPB_OUTLINESIZE * 2,
                         HPB_BAR_HEIGHT * 3 + 2 + HPB_OUTLINESIZE * 2,
                         HPB_COLOR_DRAW_BLACK.PackedValue
@@ -792,7 +846,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _hpLineRed = new LineCHB
                     (
                         HPB_BAR_SPACELEFT,
-                        27,
+                        YLine1,
                         HPB_BAR_WIDTH,
                         HPB_BAR_HEIGHT,
                         HPB_COLOR_DRAW_RED.PackedValue
@@ -804,7 +858,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _manaLineRed = new LineCHB
                     (
                         HPB_BAR_SPACELEFT,
-                        36,
+                        YLine2,
                         HPB_BAR_WIDTH,
                         HPB_BAR_HEIGHT,
                         HPB_COLOR_DRAW_RED.PackedValue
@@ -816,7 +870,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _stamLineRed = new LineCHB
                     (
                         HPB_BAR_SPACELEFT,
-                        45,
+                        YLine3,
                         HPB_BAR_WIDTH,
                         HPB_BAR_HEIGHT,
                         HPB_COLOR_DRAW_RED.PackedValue
@@ -828,7 +882,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _bars[0] = new LineCHB
                     (
                         HPB_BAR_SPACELEFT,
-                        27,
+                        YLine1,
                         HPB_BAR_WIDTH,
                         HPB_BAR_HEIGHT,
                         HPB_COLOR_DRAW_BLUE.PackedValue
@@ -840,7 +894,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _bars[1] = new LineCHB
                     (
                         HPB_BAR_SPACELEFT,
-                        36,
+                        YLine2,
                         HPB_BAR_WIDTH,
                         HPB_BAR_HEIGHT,
                         HPB_COLOR_DRAW_BLUE.PackedValue
@@ -852,7 +906,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _bars[2] = new LineCHB
                     (
                         HPB_BAR_SPACELEFT,
-                        45,
+                        YLine3,
                         HPB_BAR_WIDTH,
                         HPB_BAR_HEIGHT,
                         HPB_COLOR_DRAW_BLUE.PackedValue
@@ -921,7 +975,7 @@ namespace ClassicUO.Game.UI.Gumps
                     (
                         _textBox = new StbTextBox
                         (
-                            1,
+                            FONT,
                             32,
                             isunicode: true,
                             style: FontStyle.Cropped | FontStyle.BlackBorder,
@@ -943,7 +997,7 @@ namespace ClassicUO.Game.UI.Gumps
                         _outline = new LineCHB
                         (
                             HPB_BAR_SPACELEFT - HPB_OUTLINESIZE,
-                            27 - HPB_OUTLINESIZE,
+                            YLine1 - HPB_OUTLINESIZE,
                             HPB_BAR_WIDTH + HPB_OUTLINESIZE * 2,
                             HPB_BAR_HEIGHT * 3 + 2 + HPB_OUTLINESIZE * 2,
                             HPB_COLOR_DRAW_BLACK.PackedValue
@@ -955,7 +1009,7 @@ namespace ClassicUO.Game.UI.Gumps
                         _hpLineRed = new LineCHB
                         (
                             HPB_BAR_SPACELEFT,
-                            27,
+                            YLine1,
                             HPB_BAR_WIDTH,
                             HPB_BAR_HEIGHT,
                             HPB_COLOR_DRAW_RED.PackedValue
@@ -967,7 +1021,7 @@ namespace ClassicUO.Game.UI.Gumps
                         new LineCHB
                         (
                             HPB_BAR_SPACELEFT,
-                            36,
+                            YLine2,
                             HPB_BAR_WIDTH,
                             HPB_BAR_HEIGHT,
                             HPB_COLOR_DRAW_RED.PackedValue
@@ -979,7 +1033,7 @@ namespace ClassicUO.Game.UI.Gumps
                         new LineCHB
                         (
                             HPB_BAR_SPACELEFT,
-                            45,
+                            YLine3,
                             HPB_BAR_WIDTH,
                             HPB_BAR_HEIGHT,
                             HPB_COLOR_DRAW_RED.PackedValue
@@ -991,7 +1045,7 @@ namespace ClassicUO.Game.UI.Gumps
                         _bars[0] = new LineCHB
                         (
                             HPB_BAR_SPACELEFT,
-                            27,
+                            YLine1,
                             HPB_BAR_WIDTH,
                             HPB_BAR_HEIGHT,
                             HPB_COLOR_DRAW_BLUE.PackedValue
@@ -1003,7 +1057,7 @@ namespace ClassicUO.Game.UI.Gumps
                         _bars[1] = new LineCHB
                         (
                             HPB_BAR_SPACELEFT,
-                            36,
+                            YLine2,
                             HPB_BAR_WIDTH,
                             HPB_BAR_HEIGHT,
                             HPB_COLOR_DRAW_BLUE.PackedValue
@@ -1015,7 +1069,7 @@ namespace ClassicUO.Game.UI.Gumps
                         _bars[2] = new LineCHB
                         (
                             HPB_BAR_SPACELEFT,
-                            45,
+                            YLine3,
                             HPB_BAR_WIDTH,
                             HPB_BAR_HEIGHT,
                             HPB_COLOR_DRAW_BLUE.PackedValue
@@ -1091,7 +1145,7 @@ namespace ClassicUO.Game.UI.Gumps
                         _outline = new LineCHB
                         (
                             HPB_BAR_SPACELEFT - HPB_OUTLINESIZE,
-                            21 - HPB_OUTLINESIZE,
+                            YLine1S - HPB_OUTLINESIZE,
                             HPB_BAR_WIDTH + HPB_OUTLINESIZE * 2,
                             HPB_BAR_HEIGHT + HPB_OUTLINESIZE * 2,
                             HPB_COLOR_DRAW_BLACK.PackedValue
@@ -1103,7 +1157,7 @@ namespace ClassicUO.Game.UI.Gumps
                         _hpLineRed = new LineCHB
                         (
                             HPB_BAR_SPACELEFT,
-                            21,
+                            YLine1S,
                             HPB_BAR_WIDTH,
                             HPB_BAR_HEIGHT,
                             HPB_COLOR_DRAW_RED.PackedValue
@@ -1115,7 +1169,7 @@ namespace ClassicUO.Game.UI.Gumps
                         _bars[0] = new LineCHB
                         (
                             HPB_BAR_SPACELEFT,
-                            21,
+                            YLine1S,
                             HPB_BAR_WIDTH,
                             HPB_BAR_HEIGHT,
                             HPB_COLOR_DRAW_BLUE.PackedValue
@@ -1175,7 +1229,7 @@ namespace ClassicUO.Game.UI.Gumps
                     (
                         _textBox = new StbTextBox
                         (
-                            1,
+                            FONT,
                             32,
                             HPB_WIDTH,
                             true,

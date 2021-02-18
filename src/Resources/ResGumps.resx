@@ -1441,4 +1441,16 @@ Client version: '{0}'</value>
   <data name="BackpackStyle_GhoulSkin" xml:space="preserve">
     <value>GhoulSkin</value>
   </data>
+  <data name="CustomBarType" xml:space="preserve">
+    <value>Custom bar type:</value>
+  </data>
+  <data name="Large" xml:space="preserve">
+    <value>Large</value>
+  </data>
+  <data name="Normal" xml:space="preserve">
+    <value>Normal</value>
+  </data>
+  <data name="Small" xml:space="preserve">
+    <value>Small</value>
+  </data>
 </root>
