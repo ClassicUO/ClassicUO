@@ -356,7 +356,7 @@ namespace ClassicUO.Resources {
                 return ResourceManager.GetString("BackpackStyle_Default", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to BackpackStyle_GhoulSkin.
         /// </summary>
@@ -365,7 +365,7 @@ namespace ClassicUO.Resources {
                 return ResourceManager.GetString("BackpackStyle_GhoulSkin", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to BackpackStyle_PolarBear.
         /// </summary>
@@ -374,7 +374,7 @@ namespace ClassicUO.Resources {
                 return ResourceManager.GetString("BackpackStyle_PolarBear", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to BackpackStyle_Suede.
         /// </summary>
@@ -383,7 +383,7 @@ namespace ClassicUO.Resources {
                 return ResourceManager.GetString("BackpackStyle_Suede", resourceCulture);
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized string similar to Backup.
         /// </summary>
@@ -392,7 +392,7 @@ namespace ClassicUO.Resources {
                 return ResourceManager.GetString("Backup", resourceCulture);
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized string similar to Base.
         /// </summary>
@@ -894,6 +894,15 @@ namespace ClassicUO.Resources {
         public static string CUOVersion0 {
             get {
                 return ResourceManager.GetString("CUOVersion0", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Custom bar type:.
+        /// </summary>
+        public static string CustomBarType {
+            get {
+                return ResourceManager.GetString("CustomBarType", resourceCulture);
             }
         }
         
@@ -2034,6 +2043,15 @@ namespace ClassicUO.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Large.
+        /// </summary>
+        public static string Large {
+            get {
+                return ResourceManager.GetString("Large", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Latency:.
         /// </summary>
         public static string Latency {
@@ -2410,6 +2428,15 @@ namespace ClassicUO.Resources {
         public static string NoOneHasInvitedYouToBeInAParty {
             get {
                 return ResourceManager.GetString("NoOneHasInvitedYouToBeInAParty", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Normal.
+        /// </summary>
+        public static string Normal {
+            get {
+                return ResourceManager.GetString("Normal", resourceCulture);
             }
         }
         
@@ -3293,6 +3320,15 @@ namespace ClassicUO.Resources {
         public static string SkipEmptyCorpses {
             get {
                 return ResourceManager.GetString("SkipEmptyCorpses", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Small.
+        /// </summary>
+        public static string Small {
+            get {
+                return ResourceManager.GetString("Small", resourceCulture);
             }
         }
         
