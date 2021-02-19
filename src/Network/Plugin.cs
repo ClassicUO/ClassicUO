@@ -702,6 +702,7 @@ namespace ClassicUO.Network
             const int CMD_NEW_RASTERIZE_STATE = 20;
             const int CMD_NEW_STENCIL_STATE = 21;
             const int CMD_NEW_SAMPLER_STATE = 22;
+            const int CMD_PRESENT_WND = 23;
 
 
             Effect current_effect = null;
@@ -763,7 +764,7 @@ namespace ClassicUO.Network
                 {
                     case CMD_VIEWPORT:
                         ref ViewportCommand viewportCommand = ref command.ViewportCommand;
-
+                        
                         device.Viewport = new Viewport(viewportCommand.X, viewportCommand.y, viewportCommand.w, viewportCommand.h);
 
                         break;
@@ -1077,6 +1078,23 @@ namespace ClassicUO.Network
                         resources.Remove(destroyResourceCommand.id);
 
                         break;
+
+                    case CMD_PRESENT_WND:
+
+                        ref PresentWindowCommand presentWnd = ref command.PresentWindowCommand;
+
+                        /*if (presentWnd.window != IntPtr.Zero)
+                        {
+                            Client.Game.AddWindow(presentWnd.window);
+                        }
+
+                        var bck = device.PresentationParameters.DeviceWindowHandle;
+                        device.PresentationParameters.DeviceWindowHandle = presentWnd.window;
+                        device.Present(null, null, presentWnd.window);
+                        device.PresentationParameters.DeviceWindowHandle = bck;
+                        */
+
+                        break;
                 }
             }
 
@@ -1089,6 +1107,8 @@ namespace ClassicUO.Network
             device.DepthStencilState = lastDepthStencilState;
             device.SamplerStates[0] = lastsampler;
         }
+
+       
 
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]

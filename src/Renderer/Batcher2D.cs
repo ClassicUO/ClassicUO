@@ -1627,6 +1627,8 @@ namespace ClassicUO.Renderer
             _transformMatrix = transform_matrix;
         }
 
+        public ref Matrix TransformMatrix => ref _transformMatrix;
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void End()
         {

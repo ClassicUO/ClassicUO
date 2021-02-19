@@ -1477,7 +1477,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 Rectangle rect = ScissorStack.CalculateScissors
                 (
-                    Matrix.Identity,
+                    batcher.TransformMatrix,
                     gX,
                     gY,
                     gWidth,

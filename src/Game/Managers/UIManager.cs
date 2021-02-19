@@ -384,12 +384,28 @@ namespace ClassicUO.Game.Managers
         {
             SortControlsByInfo();
 
-            batcher.Begin();
+            var viewport = batcher.GraphicsDevice.Viewport;
+
+            int viewportWidth = viewport.Width;
+            int viewportHeight = viewport.Height;
+
+            float zoom = 1f;
+
+            Matrix matrix = //Matrix.CreateTranslation(-viewportWidth / 2f,  -viewportHeight /2f, 0) *
+                Matrix.CreateScale(zoom, zoom, 1f);
+                            //Matrix.CreateTranslation(viewportWidth / 2f, viewportHeight / 2f, 0);
+
+
+            batcher.Begin(null, matrix);
 
             for (LinkedListNode<Gump> last = Gumps.Last; last != null; last = last.Previous)
             {
                 Control g = last.Value;
-                g.Draw(batcher, g.X, g.Y);
+
+                int x = (int) (g.X / 1);
+                int y = (int) (g.Y / 1);
+
+                g.Draw(batcher, x, y);
             }
 
             GameCursor?.Draw(batcher);
@@ -453,17 +469,23 @@ namespace ClassicUO.Game.Managers
 
         private static void HandleMouseInput()
         {
-            Control gump = GetMouseOverControl(Mouse.Position);
+            Point mousePosition = Mouse.Position;
+            float zoom = 1f;
+
+            mousePosition.X = (int) (mousePosition.X / zoom);
+            mousePosition.Y = (int) (mousePosition.Y / zoom);
+
+            Control gump = GetMouseOverControl(mousePosition);
 
             if (MouseOverControl != null && gump != MouseOverControl)
             {
-                MouseOverControl.InvokeMouseExit(Mouse.Position);
+                MouseOverControl.InvokeMouseExit(mousePosition);
 
                 if (MouseOverControl.RootParent != null)
                 {
                     if (gump == null || gump.RootParent != MouseOverControl.RootParent)
                     {
-                        MouseOverControl.RootParent.InvokeMouseExit(Mouse.Position);
+                        MouseOverControl.RootParent.InvokeMouseExit(mousePosition);
                     }
                 }
             }
@@ -472,18 +494,18 @@ namespace ClassicUO.Game.Managers
             {
                 if (gump != MouseOverControl)
                 {
-                    gump.InvokeMouseEnter(Mouse.Position);
+                    gump.InvokeMouseEnter(mousePosition);
 
                     if (gump.RootParent != null)
                     {
                         if (MouseOverControl == null || gump.RootParent != MouseOverControl.RootParent)
                         {
-                            gump.RootParent.InvokeMouseEnter(Mouse.Position);
+                            gump.RootParent.InvokeMouseEnter(mousePosition);
                         }
                     }
                 }
 
-                gump.InvokeMouseOver(Mouse.Position);
+                gump.InvokeMouseOver(mousePosition);
             }
 
             MouseOverControl = gump;
@@ -492,7 +514,7 @@ namespace ClassicUO.Game.Managers
             {
                 if (_mouseDownControls[i] != null && _mouseDownControls[i] != gump)
                 {
-                    _mouseDownControls[i].InvokeMouseOver(Mouse.Position);
+                    _mouseDownControls[i].InvokeMouseOver(mousePosition);
                 }
             }
         }

@@ -254,7 +254,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 Rectangle scissor = ScissorStack.CalculateScissors
                 (
-                    Matrix.Identity,
+                    batcher.TransformMatrix,
                     x,
                     y,
                     Width,

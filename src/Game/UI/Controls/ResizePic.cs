@@ -358,7 +358,7 @@ namespace ClassicUO.Game.UI.Controls
 
             Rectangle rect = ScissorStack.CalculateScissors
             (
-                Matrix.Identity,
+                batcher.TransformMatrix,
                 x,
                 y,
                 Width,

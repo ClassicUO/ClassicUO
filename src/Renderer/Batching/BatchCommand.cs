@@ -73,6 +73,7 @@ namespace ClassicUO.Renderer.Batching
         [FieldOffset(0)] public IndexedPrimitiveDataCommand IndexedPrimitiveDataCommand;
         [FieldOffset(0)] public DestroyResourceCommand DestroyResourceCommand;
 
+        [FieldOffset(0)] public PresentWindowCommand PresentWindowCommand;
 
         public static readonly int SIZE = sizeof(BatchCommand);
     }

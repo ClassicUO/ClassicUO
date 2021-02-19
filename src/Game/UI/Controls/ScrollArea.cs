@@ -136,7 +136,7 @@ namespace ClassicUO.Game.UI.Controls
 
             Rectangle scissor = ScissorStack.CalculateScissors
             (
-                Matrix.Identity,
+                batcher.TransformMatrix,
                 x + ScissorRectangle.X,
                 y + ScissorRectangle.Y,
                 Width - 14 + ScissorRectangle.Width,
