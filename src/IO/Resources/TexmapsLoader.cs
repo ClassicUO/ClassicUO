@@ -78,7 +78,7 @@ namespace ClassicUO.IO.Resources
                         {
                             int index = defReader.ReadInt();
 
-                            if (index < 0 || index >= Constants.MAX_LAND_TEXTURES_DATA_INDEX_COUNT)
+                            if (index < 0 || index >= Entries.Length)
                             {
                                 continue;
                             }
@@ -94,7 +94,7 @@ namespace ClassicUO.IO.Resources
                             {
                                 int checkindex = group[i];
 
-                                if (checkindex < 0 || checkindex >= Constants.MAX_LAND_TEXTURES_DATA_INDEX_COUNT)
+                                if (checkindex < 0 || checkindex >= Entries.Length)
                                 {
                                     continue;
                                 }
