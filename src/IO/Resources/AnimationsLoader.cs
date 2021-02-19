@@ -2231,7 +2231,7 @@ namespace ClassicUO.IO.Resources
                         }
                     }
 
-                    if (Client.Version < ClientVersion.CV_305D)
+                    if (Client.Version < ClientVersion.CV_300)
                     {
                         return;
                     }
