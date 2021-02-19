@@ -63,7 +63,7 @@ namespace ClassicUO.IO
 
             List<Task> tasks = new List<Task>
             {
-                UOFileOverrideMap.Instance.Load(), // need to load this first so that it manages 
+                UOFilesOverrideMap.Instance.Load(), // need to load this first so that it manages 
 
                 AnimationsLoader.Instance.Load(),
                 AnimDataLoader.Instance.Load(),
