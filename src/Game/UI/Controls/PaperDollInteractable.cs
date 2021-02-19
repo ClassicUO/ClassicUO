@@ -31,6 +31,7 @@
 #endregion
 
 using System.Collections.Generic;
+using ClassicUO.Configuration;
 using ClassicUO.Data;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
@@ -284,6 +285,44 @@ namespace ClassicUO.Game.UI.Controls
             if (equipItem != null && equipItem.ItemData.AnimID != 0)
             {
                 ushort backpackGraphic = (ushort) (equipItem.ItemData.AnimID + Constants.MALE_GUMP_OFFSET);
+                
+                // If player, apply backpack skin
+                if (mobile.Serial == World.Player.Serial)
+                {
+                    GumpsLoader loader = GumpsLoader.Instance;
+
+                    switch (ProfileManager.CurrentProfile.BackpackStyle)
+                    {
+                        case 1:
+                            if (loader.GetTexture(0x777B) != null)
+                            {
+                                backpackGraphic = 0x777B; // Suede Backpack
+                            }
+
+                            break;
+                        case 2:
+                            if (loader.GetTexture(0x777C) != null)
+                            {
+                                backpackGraphic = 0x777C; // Polar Bear Backpack
+                            }
+
+                            break;
+                        case 3:
+                            if (loader.GetTexture(0x777D) != null)
+                            {
+                                backpackGraphic = 0x777D; // Ghoul Skin Backpack
+                            }
+
+                            break;
+                        default:
+                            if (loader.GetTexture(0xC4F6) != null)
+                            {
+                                backpackGraphic = 0xC4F6; // Default Backpack
+                            }
+
+                            break;
+                    }
+                }
 
                 int bx = 0;
 

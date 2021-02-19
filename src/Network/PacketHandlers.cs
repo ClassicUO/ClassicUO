@@ -2908,7 +2908,7 @@ namespace ClassicUO.Network
                     ushort hue = p.ReadUShort();
                     name = p.ReadASCII(p.ReadByte());
 
-                    Rectangle rect = ArtLoader.Instance.GetTexture(graphic).Bounds;
+                    Rectangle rect = ArtLoader.Instance.GetTexture(graphic)?.Bounds ?? Rectangle.Empty;
 
                     if (rect.Width != 0 && rect.Height != 0)
                     {
@@ -4531,19 +4531,25 @@ namespace ClassicUO.Network
                     ushort spell = p.ReadUShort();
                     bool active = p.ReadBool();
 
-                    UseSpellButtonGump g = UIManager.GetGump<UseSpellButtonGump>(spell);
-
-                    if (g != null)
+                    foreach (Gump g in UIManager.Gumps)
                     {
-                        if (active)
+                        if (!g.IsDisposed && g.IsVisible)
                         {
-                            g.Hue = 38;
-                            World.ActiveSpellIcons.Add(spell);
-                        }
-                        else
-                        {
-                            g.Hue = 0;
-                            World.ActiveSpellIcons.Remove(spell);
+                            if (g is UseSpellButtonGump spellButton && spellButton.SpellID == spell)
+                            {
+                                if (active)
+                                {
+                                    spellButton.Hue = 38;
+                                    World.ActiveSpellIcons.Add(spell);
+                                }
+                                else
+                                {
+                                    spellButton.Hue = 0;
+                                    World.ActiveSpellIcons.Remove(spell);
+                                }
+
+                                break;
+                            }
                         }
                     }
 
@@ -5203,12 +5209,12 @@ namespace ClassicUO.Network
 
                 p.Skip((int) clen);
 
-                for (int i = 0, index = 0; i < linesNum; i++)
+                for (int i = 0, index = 0; i < linesNum && index < dlen; i++)
                 {
                     int length = ((decData[index++] << 8) | decData[index++]) << 1;
                     int true_length = 0;
 
-                    for (int k = 0; k < length && true_length < length; ++k, true_length += 2)
+                    for (int k = 0; k < length && true_length < length && index + true_length < dlen; ++k, true_length += 2)
                     {
                         ushort c = (ushort)(((decData[index + true_length] << 8) | decData[index + true_length + 1]) << 1);
 
@@ -5660,7 +5666,7 @@ namespace ClassicUO.Network
                             cSerial,
                             ent.Graphic,
                             0,
-                            0,
+                            (ushort) (ent.Graphic == 0x2006 ? ((Item) ent).Amount : 0),
                             cx,
                             cy,
                             (sbyte) cz,

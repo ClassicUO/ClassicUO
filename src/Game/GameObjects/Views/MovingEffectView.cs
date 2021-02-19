@@ -63,35 +63,18 @@ namespace ClassicUO.Game.GameObjects
 
             //Engine.DebugInfo.EffectsRendered++;
 
-            if (FixedDir)
-            {
-                DrawStatic
-                (
-                    batcher,
-                    AnimationGraphic,
-                    posX,
-                    posY,
-                    ref HueVector
-                );
-            }
-            else
-            {
-                posX += (int) Offset.X;
-                posY += (int) (Offset.Y + Offset.Z);
+            posX += (int)Offset.X;
+            posY += (int)(Offset.Y + Offset.Z);
 
-                DrawStaticRotated
-                (
-                    batcher,
-                    AnimationGraphic,
-                    posX,
-                    posY,
-                    0,
-                    0,
-                    AngleToTarget,
-                    ref HueVector
-                );
-            }
-
+            DrawStaticRotated
+            (
+                batcher,
+                AnimationGraphic,
+                posX,
+                posY,
+                AngleToTarget,
+                ref HueVector
+            );
 
             ref StaticTiles data = ref TileDataLoader.Instance.StaticData[AnimationGraphic];
 

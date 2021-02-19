@@ -133,7 +133,7 @@ namespace ClassicUO.Game.Managers
                         o.time = Time.Ticks + delay;
                     }
 
-                    if (offset < info->FrameCount)
+                    if (offset < info->FrameCount && o.index + 0x4000 < static_data.Length)
                     {
                         static_data[o.index + 0x4000].AnimOffset = info->FrameData[offset++];
                     }

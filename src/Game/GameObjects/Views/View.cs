@@ -256,8 +256,6 @@ namespace ClassicUO.Game.GameObjects
             ushort graphic,
             int x,
             int y,
-            int destX,
-            int destY,
             float angle,
             ref Vector3 hue
         )
@@ -283,8 +281,8 @@ namespace ClassicUO.Game.GameObjects
                     y,
                     texture.Width * 0.5f,
                     texture.Height * 0.5f,
-                    destX - offX,
-                    destY - offY,
+                    -offX,
+                    -offY,
                     ref hue,
                     angle
                 );

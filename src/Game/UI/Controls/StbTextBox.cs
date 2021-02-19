@@ -906,6 +906,7 @@ namespace ClassicUO.Game.UI.Controls
 
                 int drawY = 1;
                 int start = 0;
+                int diffX = _rendererText.Align != TEXT_ALIGN_TYPE.TS_LEFT ? _rendererText.GetCaretPosition(0).X - 1 : 0;
 
                 while (info != null && selectStart < selectEnd)
                 {
@@ -938,7 +939,7 @@ namespace ClassicUO.Game.UI.Controls
                             batcher.Draw2D
                             (
                                 SolidColorTextureCache.GetTexture(SELECTION_COLOR),
-                                x + drawX,
+                                x + drawX + diffX,
                                 y + drawY,
                                 endX,
                                 info.MaxHeight + 1,
@@ -953,7 +954,7 @@ namespace ClassicUO.Game.UI.Controls
                         batcher.Draw2D
                         (
                             SolidColorTextureCache.GetTexture(SELECTION_COLOR),
-                            x + drawX,
+                            x + drawX + diffX,
                             y + drawY,
                             info.Width - drawX,
                             info.MaxHeight + 1,

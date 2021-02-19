@@ -37,6 +37,7 @@ using System.Linq;
 using ClassicUO.Configuration;
 using ClassicUO.Data;
 using ClassicUO.Game.Data;
+using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
@@ -77,6 +78,7 @@ namespace ClassicUO.Game.UI.Gumps
         private DataBox _databox;
         private HSliderBar _delay_before_display_tooltip, _tooltip_zoom, _tooltip_background_opacity;
         private Combobox _dragSelectModifierKey;
+        private Combobox _backpackStyle;
 
 
         //counters
@@ -1966,8 +1968,8 @@ namespace ClassicUO.Game.UI.Gumps
 
                             MacroButtonGump macroButtonGump = new MacroButtonGump(control.Macro, Mouse.Position.X, Mouse.Position.Y);
 
-                            macroButtonGump.X = Mouse.Position.X + (macroButtonGump.Width >> 1);
-                            macroButtonGump.Y = Mouse.Position.Y + (macroButtonGump.Height >> 1);
+                            macroButtonGump.X = Mouse.LClickPosition.X + (macroButtonGump.Width >> 1);
+                            macroButtonGump.Y = Mouse.LClickPosition.Y + (macroButtonGump.Height >> 1);
 
                             UIManager.Add(macroButtonGump);
 
@@ -2075,8 +2077,8 @@ namespace ClassicUO.Game.UI.Gumps
 
                     MacroButtonGump macroButtonGump = new MacroButtonGump(m, Mouse.Position.X, Mouse.Position.Y);
 
-                    macroButtonGump.X = Mouse.Position.X + (macroButtonGump.Width >> 1);
-                    macroButtonGump.Y = Mouse.Position.Y + (macroButtonGump.Height >> 1);
+                    macroButtonGump.X = Mouse.LClickPosition.X + (macroButtonGump.Width >> 1);
+                    macroButtonGump.Y = Mouse.LClickPosition.Y + (macroButtonGump.Height >> 1);
 
                     UIManager.Add(macroButtonGump);
 
@@ -3132,8 +3134,39 @@ namespace ClassicUO.Game.UI.Gumps
 
             int startX = 5;
             int startY = 5;
+            Label text;
 
-            Label text = AddLabel(rightArea, ResGumps.ContainerScale, startX, startY);
+            bool hasBackpacks = Client.Version >= ClientVersion.CV_705301;
+
+            if(hasBackpacks)
+            {
+                text = AddLabel(rightArea, ResGumps.BackpackStyle, startX, startY);
+                startX += text.Width + 5;
+            }
+
+            _backpackStyle = AddCombobox
+            (
+                rightArea,
+                new[]
+                {
+                    ResGumps.BackpackStyle_Default, ResGumps.BackpackStyle_Suede,
+                    ResGumps.BackpackStyle_PolarBear, ResGumps.BackpackStyle_GhoulSkin
+                },
+                _currentProfile.BackpackStyle,
+                startX,
+                startY,
+                200
+            );
+
+            _backpackStyle.IsVisible = hasBackpacks;
+
+            if (hasBackpacks)
+            {
+                startX = 5;
+                startY += _backpackStyle.Height + 2 + 10;
+            }
+
+            text = AddLabel(rightArea, ResGumps.ContainerScale, startX, startY);
             startX += text.Width + 5;
 
             _containersScale = AddHSlider
@@ -3495,6 +3528,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _highlightContainersWhenMouseIsOver.IsChecked = false;
                     _overrideContainerLocation.IsChecked = false;
                     _overrideContainerLocationSetting.SelectedIndex = 0;
+                    _backpackStyle.SelectedIndex = 0;
 
                     break;
 
@@ -4016,6 +4050,14 @@ namespace ClassicUO.Game.UI.Gumps
             _currentProfile.DoubleClickToLootInsideContainers = _containerDoubleClickToLoot.IsChecked;
             _currentProfile.RelativeDragAndDropItems = _relativeDragAnDropItems.IsChecked;
             _currentProfile.HighlightContainerWhenSelected = _highlightContainersWhenMouseIsOver.IsChecked;
+
+            if (_currentProfile.BackpackStyle != _backpackStyle.SelectedIndex)
+            {
+                _currentProfile.BackpackStyle = _backpackStyle.SelectedIndex;
+                UIManager.GetGump<PaperDollGump>(World.Player.Serial)?.RequestUpdateContents();
+                Item backpack = World.Player.FindItemByLayer(Layer.Backpack);
+                GameActions.DoubleClick(backpack);
+            }
 
 
             // tooltip
