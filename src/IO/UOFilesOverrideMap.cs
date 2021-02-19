@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace ClassicUO.IO
 {
-    public class UOFilesOverrideMap : Dictionary<string, string>
+    internal class UOFilesOverrideMap : Dictionary<string, string>
     {
         public static string OverrideFile { get; set; }
 
@@ -14,7 +14,7 @@ namespace ClassicUO.IO
 
         private UOFilseOverrideMap() { }
 
-        public Task Load()
+        internal Task Load()
         {
             return Task.Run(() =>
             {
