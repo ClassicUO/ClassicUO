@@ -313,7 +313,7 @@ namespace ClassicUO
 
                     case "filesoverride":
                     case "uofilesoverride":
-                        UOFileOverrideMap.OverrideFile = value;
+                        UOFilesOverrideMap.OverrideFile = value;
 
                         break;
 
