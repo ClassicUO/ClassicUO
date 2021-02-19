@@ -6,13 +6,13 @@ using System.Threading.Tasks;
 
 namespace ClassicUO.IO
 {
-    internal class UOFilseOverrideMap : Dictionary<string, string>
+    internal class UOFilesOverrideMap : Dictionary<string, string>
     {
         public static string OverrideFile { get; set; }
 
-        public static UOFilseOverrideMap Instance { get; private set; } = new UOFilseOverrideMap();
+        public static UOFilesOverrideMap Instance { get; private set; } = new UOFilesOverrideMap();
 
-        private UOFilseOverrideMap() : base()
+        private UOFilesOverrideMap() : base()
         {
         }
 
