@@ -81,6 +81,7 @@ namespace ClassicUO.IO
                 Log.Panic("Loading files timeout.");
             }
 
+            Read_Art_def();
 
             UOFileMul verdata = Verdata.File;
 
@@ -271,6 +272,72 @@ namespace ClassicUO.IO
         {
             MapLoader.Instance?.Dispose();
             MapLoader.Instance = newloader;
+        }
+
+        private static void Read_Art_def()
+        {
+            string pathdef = GetUOFilePath("art.def");
+
+            if (File.Exists(pathdef))
+            {
+                TileDataLoader tiledataLoader =  TileDataLoader.Instance;
+                ArtLoader artLoader = ArtLoader.Instance;
+                
+                using (DefReader reader = new DefReader(pathdef, 1))
+                {
+                    while (reader.Next())
+                    {
+                        int index = reader.ReadInt();
+
+                        if (index < 0 || index >= Constants.MAX_LAND_DATA_INDEX_COUNT + tiledataLoader.StaticData.Length)
+                        {
+                            continue;
+                        }
+
+                        int[] group = reader.ReadGroup();
+
+                        if (group == null)
+                        {
+                            continue;
+                        }
+
+                        for (int i = 0; i < group.Length; i++)
+                        {
+                            int checkIndex = group[i];
+
+                            if (checkIndex < 0 || checkIndex >= Constants.MAX_LAND_DATA_INDEX_COUNT + tiledataLoader.StaticData.Length)
+                            {
+                                continue;
+                            }
+
+                            if (index < artLoader.Entries.Length && checkIndex < artLoader.Entries.Length)
+                            {
+                                artLoader.Entries[index] = artLoader.Entries[checkIndex];
+                            }
+
+                            if (index < Constants.MAX_LAND_DATA_INDEX_COUNT &&
+                                checkIndex < Constants.MAX_LAND_DATA_INDEX_COUNT && 
+                                checkIndex < tiledataLoader.LandData.Length && 
+                                index < tiledataLoader.LandData.Length &&
+                                !tiledataLoader.LandData[checkIndex].Equals(default) &&
+                                tiledataLoader.LandData[index].Equals(default))
+                            {
+                                tiledataLoader.LandData[index] = tiledataLoader.LandData[checkIndex];
+
+                                break;
+                            }
+
+                            if (index >= Constants.MAX_LAND_DATA_INDEX_COUNT && checkIndex >= Constants.MAX_LAND_DATA_INDEX_COUNT &&
+                                tiledataLoader.StaticData[index].Equals(default) && !tiledataLoader.StaticData[checkIndex].Equals(default))
+                            {
+                                tiledataLoader.StaticData[index] = tiledataLoader.StaticData[checkIndex];
+
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 }
