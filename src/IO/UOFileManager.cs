@@ -312,7 +312,13 @@ namespace ClassicUO.IO
 
                             if (index < artLoader.Entries.Length && checkIndex < artLoader.Entries.Length)
                             {
-                                artLoader.Entries[index] = artLoader.Entries[checkIndex];
+                                ref UOFileIndex currentEntry = ref artLoader.GetValidRefEntry(index);
+                                ref UOFileIndex checkEntry = ref artLoader.GetValidRefEntry(checkIndex);
+
+                                if (currentEntry.Equals(UOFileIndex.Invalid) && !checkEntry.Equals(UOFileIndex.Invalid))
+                                {
+                                    artLoader.Entries[index] = artLoader.Entries[checkIndex];
+                                }
                             }
 
                             if (index < Constants.MAX_LAND_DATA_INDEX_COUNT &&
