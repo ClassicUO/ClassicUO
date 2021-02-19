@@ -311,6 +311,12 @@ namespace ClassicUO
 
                         break;
 
+                    case "filesoverride":
+                    case "uofilesoverride":
+                        UOFileOverrideMap.OverrideFile = value;
+
+                        break;
+
                     case "ultimaonlinedirectory":
                     case "uopath":
                         Settings.GlobalSettings.UltimaOnlineDirectory = value;
