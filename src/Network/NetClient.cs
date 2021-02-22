@@ -55,7 +55,7 @@ namespace ClassicUO.Network
 
         private int _incompletePacketLength;
         private bool _isCompressionEnabled;
-        private byte[] _recvBuffer, _incompletePacketBuffer, _decompBuffer, _packetBuffer;
+        private byte[] _recvBuffer, _incompletePacketBuffer, _decompBuffer;
         private CircularBuffer _circularBuffer;
         private ConcurrentQueue<byte[]> _pluginRecvQueue = new ConcurrentQueue<byte[]>();
         private readonly bool _is_login_socket;
@@ -171,7 +171,6 @@ namespace ClassicUO.Network
             _recvBuffer = new byte[BUFF_SIZE];
             _incompletePacketBuffer = new byte[BUFF_SIZE];
             _decompBuffer = new byte[BUFF_SIZE];
-            _packetBuffer = new byte[4096 * 4];
             _circularBuffer = new CircularBuffer();
             _pluginRecvQueue = new ConcurrentQueue<byte[]>();
             Statistics.Reset();
