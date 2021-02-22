@@ -30,6 +30,10 @@
 
 #endregion
 
+#if !NETFRAMEWORK
+    #define NETFRAMEWORK
+#endif
+
 using System;
 using System.Diagnostics;
 using System.Globalization;
