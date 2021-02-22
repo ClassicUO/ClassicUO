@@ -30,10 +30,6 @@
 
 #endregion
 
-#if !NETFRAMEWORK
-    #define NETFRAMEWORK
-#endif
-
 using System;
 using System.Diagnostics;
 using System.Globalization;
@@ -63,6 +59,14 @@ namespace ClassicUO
         [STAThread]
         public static void Main(string[] args)
         {
+            #if DEV_BUILD
+            Console.WriteLine("DEV");
+            #else
+            Console.WriteLine("NORMAL");
+            #endif
+            Console.ReadLine();
+            return;
+
             CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
 
             Log.Start(LogTypes.All);

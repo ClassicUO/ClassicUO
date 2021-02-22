@@ -6,8 +6,11 @@
     <ApplicationIcon>cuoicon.ico</ApplicationIcon>
   </PropertyGroup>
 
+
+
   <PropertyGroup Condition="'$(IS_DEV_BUILD)' == 'true'">
     <OutputType>WinExe</OutputType>
+    <DefineConstants>$(DefineConstants);DEV_BUILD</DefineConstants>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
@@ -49,6 +52,7 @@
       <_Parameter1>ClassicUO.UnitTests</_Parameter1>
     </AssemblyAttribute>
   </ItemGroup>
+
 
   <ItemGroup>
     <EmbeddedResource Include="cuologo.png" />
