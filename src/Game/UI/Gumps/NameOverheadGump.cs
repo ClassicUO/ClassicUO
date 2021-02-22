@@ -488,6 +488,18 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 Dispose();
             }
+            else
+            {
+                if (entity == World.Get(TargetManager.LastTargetInfo.Serial))
+                {
+                    _background.Hue = 0x26;
+                    _renderedText.Hue = entity is Mobile m ? Notoriety.GetHue(m.NotorietyFlag) : (ushort) 0x0481;
+                }
+                else
+                {
+                    _background.Hue = _renderedText.Hue = entity is Mobile m ? Notoriety.GetHue(m.NotorietyFlag) : (ushort) 0x0481;
+                }
+            }
         }
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
