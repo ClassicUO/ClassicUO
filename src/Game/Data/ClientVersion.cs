@@ -51,6 +51,7 @@ namespace ClassicUO.Data
         CV_308Z = (3 << 24) | (0 << 16) | (8 << 8) | ('z' & 0xFF),   // Age of Shadows. Adds paladin, necromancer, custom housing, resists, profession selection window, removes save password checkbox
         CV_400B = (4 << 24) | (0 << 16) | (0 << 8) | ('b' & 0xFF),   // Deletes tooltips
         CV_405A = (4 << 24) | (0 << 16) | (5 << 8) | ('a' & 0xFF),   // Adds ninja, samurai
+        CV_4011C = (4 << 24) | (0 << 16) | (11 << 8) | ('c' & 0xFF), // Music/* vs Music/Digital/* switchover
         CV_4011D = (4 << 24) | (0 << 16) | (11 << 8) | ('d' & 0xFF), // Adds elven race
         CV_500A = (5 << 24) | (0 << 16) | (0 << 8) | ('a' & 0xFF),   // Paperdoll buttons journal becomes quests, chat becomes guild. Use mega FileManager.Cliloc. Removes verdata.mul.
         CV_5020 = (5 << 24) | (0 << 16) | (2 << 8) | 0,              // Adds buff bar
