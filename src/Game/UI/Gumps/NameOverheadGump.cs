@@ -490,7 +490,7 @@ namespace ClassicUO.Game.UI.Gumps
             }
             else
             {
-                if (entity == World.Get(TargetManager.LastTargetInfo.Serial))
+                if (entity == TargetManager.LastTargetInfo.Serial)
                 {
                     _background.Hue = 0x26;
                     _renderedText.Hue = entity is Mobile m ? Notoriety.GetHue(m.NotorietyFlag) : (ushort) 0x0481;
