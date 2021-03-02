@@ -41,6 +41,7 @@ using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -50,7 +51,7 @@ namespace ClassicUO.Game.UI.Gumps
         private Point _lockedPosition;
         private bool _positionLocked;
         private readonly RenderedText _renderedText;
-
+        private Texture2D _borderColor = SolidColorTextureCache.GetTexture(Color.Black);
 
         public NameOverheadGump(uint serial) : base(serial, 0)
         {
@@ -492,11 +493,12 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 if (entity == TargetManager.LastTargetInfo.Serial)
                 {
-                    _background.Hue = 0x26;
+                    _borderColor = SolidColorTextureCache.GetTexture(Color.Red);
                     _renderedText.Hue = entity is Mobile m ? Notoriety.GetHue(m.NotorietyFlag) : (ushort) 0x0481;
                 }
                 else
                 {
+                    _borderColor = SolidColorTextureCache.GetTexture(Color.Black);
                     _background.Hue = _renderedText.Hue = entity is Mobile m ? Notoriety.GetHue(m.NotorietyFlag) : (ushort) 0x0481;
                 }
             }
@@ -605,7 +607,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             batcher.DrawRectangle
             (
-                SolidColorTextureCache.GetTexture(Color.Black),
+                _borderColor,
                 x - 1,
                 y - 1,
                 Width + 1,
