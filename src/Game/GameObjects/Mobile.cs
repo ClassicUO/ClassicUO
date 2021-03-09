@@ -605,28 +605,6 @@ namespace ClassicUO.Game.GameObjects
                 ushort id = GetGraphicForAnimation();
                 byte animGroup = GetGroupForAnimation(this, id, true);
 
-                //if (animGroup == 64 || animGroup == 65)
-                //{
-                //    animGroup = (byte) (InWarMode ? 65 : 64);
-                //    AnimationGroup = animGroup;
-                //}
-
-                //Item mount = HasEquipment ? Equipment[(int) Layer.Mount] : null;
-
-                //if (mount != null)
-                //{
-                //    switch (animGroup)
-                //    {
-                //        case (byte)PEOPLE_ANIMATION_GROUP.PAG_FIDGET_1:
-                //        case (byte)PEOPLE_ANIMATION_GROUP.PAG_FIDGET_2:
-                //        case (byte)PEOPLE_ANIMATION_GROUP.PAG_FIDGET_3:
-                //            id = mount.GetGraphicForAnimation();
-                //            animGroup = GetGroupForAnimation(this, id, true);
-
-                //            break;
-                //    }
-                //}
-
                 bool mirror = false;
                 AnimationsLoader.Instance.GetAnimDirection(ref dir, ref mirror);
                 int currentDelay = Constants.CHARACTER_ANIMATION_DELAY;
@@ -752,6 +730,12 @@ namespace ClassicUO.Game.GameObjects
                     World.CorpseManager.Remove(0, Serial);
                     World.RemoveMobile(Serial);
                 }
+
+                //for (var item = Items; item != null; item = item.Next)
+                //{
+                //    Item it = (Item)item;
+                //    it.ProcessAnimation(out _, true);
+                //}
 
                 LastAnimationChangeTime = Time.Ticks + currentDelay;
             }

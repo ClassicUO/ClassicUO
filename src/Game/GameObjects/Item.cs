@@ -1073,7 +1073,7 @@ namespace ClassicUO.Game.GameObjects
                     LastAnimationChangeTime = Time.Ticks + Constants.CHARACTER_ANIMATION_DELAY;
                 }
             }
-            else if (SerialHelper.IsMobile(Container) && Layer != Layer.Invalid && LastAnimationChangeTime < Time.Ticks)
+            /*else if (evalutate && SerialHelper.IsMobile(Container) && Layer != Layer.Invalid)
             {
                 ushort id = ItemData.AnimID;
 
@@ -1129,11 +1129,6 @@ namespace ClassicUO.Game.GameObjects
                                 }
                                 else
                                 {
-                                    /*fc -= AnimationFrameCount;
-
-                                    if (fc <= 0)
-                                        fc = AnimationFrameCount;*/
-
                                     fc = parent.AnimationFrameCount;
                                 }
 
@@ -1182,9 +1177,10 @@ namespace ClassicUO.Game.GameObjects
                         }
                     }
 
-                    LastAnimationChangeTime = Time.Ticks + currentDelay;
+                    //LastAnimationChangeTime = Time.Ticks + currentDelay;
                 }
             }
+            */
         }
     }
 }
