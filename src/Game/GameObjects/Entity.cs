@@ -87,7 +87,7 @@ namespace ClassicUO.Game.GameObjects
         public string Name;
         public uint Serial;
 
-        protected long LastAnimationChangeTime;
+        internal long LastAnimationChangeTime;
 
 
         public void FixHue(ushort hue)

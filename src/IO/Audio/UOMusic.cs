@@ -54,7 +54,7 @@ namespace ClassicUO.IO.Audio
             Channels = AudioChannels.Stereo;
             Delay = 0;
 
-            Path = System.IO.Path.Combine(Settings.GlobalSettings.UltimaOnlineDirectory, Client.Version > ClientVersion.CV_5090 ? $"Music/Digital/{Name}.mp3" : $"music/{Name}.mp3");
+            Path = System.IO.Path.Combine(Settings.GlobalSettings.UltimaOnlineDirectory, Client.Version >= ClientVersion.CV_4011C ? $"Music/Digital/{Name}.mp3" : $"music/{Name}.mp3");
         }
 
         private string Path { get; }
