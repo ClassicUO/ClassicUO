@@ -345,11 +345,6 @@ namespace ClassicUO.Game.Managers
                 writer.WriteEndElement();
             }
 
-            public void Load(AnchorableGump control)
-            {
-            }
-
-
             public void MakeTopMost()
             {
                 for (int x = 0; x < controlMatrix.GetLength(0); x++)

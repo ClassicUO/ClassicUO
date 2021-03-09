@@ -653,6 +653,72 @@ namespace ClassicUO.IO.Resources
             ),
             new SittingInfoData
             (
+                0x0E50,
+                4,
+                4,
+                4,
+                4,
+                4,
+                4,
+                false
+            ), // SOUTH ONLY
+            new SittingInfoData
+            (
+                0x0E51,
+                4,
+                4,
+                4,
+                4,
+                4,
+                4,
+                false
+            ), // SOUTH ONLY
+            new SittingInfoData
+            (
+                0x0E52,
+                2,
+                2,
+                2,
+                2,
+                0,
+                0,
+                false
+            ), // EAST ONLY
+            new SittingInfoData
+            (
+                0x0E53,
+                2,
+                2,
+                2,
+                2,
+                0,
+                0,
+                false
+            ), // EAST ONLY
+            new SittingInfoData
+            (
+                0x1049,
+                -1,
+                2,
+                -1,
+                6,
+                2,
+                2,
+                false
+            ), // EAST/WEST
+            new SittingInfoData
+            (
+                0x104A,
+                0,
+                -1,
+                4,
+                -1,
+                2,
+                2,
+                false
+            ), // NORTH/SOUTH
+            new SittingInfoData
+            (
                 0x11FC,
                 0,
                 2,
@@ -661,7 +727,73 @@ namespace ClassicUO.IO.Resources
                 2,
                 7,
                 false
-            ),
+            ), // ANY
+            new SittingInfoData
+            (
+                0x1207,
+                0,
+                -1,
+                4,
+                -1,
+                3,
+                10,
+                false
+            ), // NORTH/SOUTH
+            new SittingInfoData
+            (
+                0x1208,
+                0,
+                -1,
+                4,
+                -1,
+                3,
+                10,
+                false
+            ), // NORTH/SOUTH
+            new SittingInfoData
+            (
+                0x1209,
+                0,
+                -1,
+                4,
+                -1,
+                3,
+                10,
+                false
+            ), // NORTH/SOUTH
+            new SittingInfoData
+            (
+                0x120A,
+                0,
+                -1,
+                4,
+                -1,
+                3,
+                10,
+                false
+            ), // NORTH/SOUTH
+            new SittingInfoData
+            (
+                0x120B,
+                0,
+                -1,
+                4,
+                -1,
+                3,
+                10,
+                false
+            ), // NORTH/SOUTH
+            new SittingInfoData
+            (
+                0x120C,
+                0,
+                -1,
+                4,
+                -1,
+                3,
+                10,
+                false
+            ), // NORTH/SOUTH
             new SittingInfoData
             (
                 0x1218,
@@ -672,7 +804,7 @@ namespace ClassicUO.IO.Resources
                 4,
                 4,
                 false
-            ),
+            ), // SOUTH ONLY
             new SittingInfoData
             (
                 0x1219,
@@ -683,7 +815,7 @@ namespace ClassicUO.IO.Resources
                 4,
                 4,
                 false
-            ),
+            ), // EAST ONLY
             new SittingInfoData
             (
                 0x121A,
@@ -694,7 +826,7 @@ namespace ClassicUO.IO.Resources
                 0,
                 8,
                 true
-            ),
+            ), // NORTH ONLY
             new SittingInfoData
             (
                 0x121B,
@@ -705,7 +837,7 @@ namespace ClassicUO.IO.Resources
                 0,
                 8,
                 true
-            ),
+            ), // WEST ONLY
             new SittingInfoData
             (
                 0x1527,
@@ -1127,6 +1259,28 @@ namespace ClassicUO.IO.Resources
             ),
             new SittingInfoData
             (
+                0x319A,
+                -1,
+                2,
+                -1,
+                6,
+                2,
+                2,
+                false
+            ), // EAST/WEST
+            new SittingInfoData
+            (
+                0x319B,
+                0,
+                -1,
+                4,
+                -1,
+                2,
+                2,
+                false
+            ), // NORTH/SOUTH
+            new SittingInfoData
+            (
                 0x35ED,
                 0,
                 2,
@@ -1170,326 +1324,9 @@ namespace ClassicUO.IO.Resources
                 2,
                 false
             ),
-
-            // TODO: new expansion
             new SittingInfoData
             (
-                0x4C8D,
-                4,
-                4,
-                4,
-                4,
-                4,
-                4,
-                false
-            ),
-            new SittingInfoData
-            (
-                0x4C8E,
-                4,
-                4,
-                4,
-                4,
-                4,
-                4,
-                false
-            ),
-            new SittingInfoData
-            (
-                0x4C8F,
-                4,
-                4,
-                4,
-                4,
-                4,
-                4,
-                false
-            ),
-
-            new SittingInfoData
-            (
-                0x4C1E,
-                2,
-                2,
-                2,
-                2,
-                6,
-                6,
-                false
-            ),
-            //new SittingInfoData(0x4C1F, 2, 2, 2, 2, 6, 6, false),
-
-            new SittingInfoData
-            (
-                0x4C8B,
-                2,
-                2,
-                2,
-                2,
-                0,
-                0,
-                false
-            ),
-            new SittingInfoData
-            (
-                0x4C8C,
-                2,
-                2,
-                2,
-                2,
-                0,
-                0,
-                false
-            ),
-            new SittingInfoData
-            (
-                0x4C8D,
-                4,
-                4,
-                4,
-                4,
-                4,
-                4,
-                false
-            ),
-            new SittingInfoData
-            (
-                0x4C8E,
-                4,
-                4,
-                4,
-                4,
-                4,
-                4,
-                false
-            ),
-            new SittingInfoData
-            (
-                0x4C8F,
-                4,
-                4,
-                4,
-                4,
-                4,
-                4,
-                false
-            ),
-
-            new SittingInfoData
-            (
-                0x4C1E,
-                2,
-                2,
-                2,
-                2,
-                6,
-                6,
-                false
-            ),
-            new SittingInfoData
-            (
-                0x4C80,
-                4,
-                4,
-                4,
-                4,
-                4,
-                4,
-                false
-            ),
-            new SittingInfoData
-            (
-                0x4C81,
-                2,
-                2,
-                2,
-                2,
-                0,
-                0,
-                false
-            ),
-            new SittingInfoData
-            (
-                0x4C82,
-                4,
-                4,
-                4,
-                4,
-                4,
-                4,
-                false
-            ),
-            new SittingInfoData
-            (
-                0x4C83,
-                4,
-                4,
-                4,
-                4,
-                4,
-                4,
-                false
-            ),
-            new SittingInfoData
-            (
-                0x4C84,
-                2,
-                2,
-                2,
-                2,
-                0,
-                0,
-                false
-            ),
-            new SittingInfoData
-            (
-                0x4C85,
-                2,
-                2,
-                2,
-                2,
-                0,
-                0,
-                false
-            ),
-            new SittingInfoData
-            (
-                0x4C86,
-                4,
-                4,
-                4,
-                4,
-                4,
-                4,
-                false
-            ),
-            new SittingInfoData
-            (
-                0x4C87,
-                4,
-                4,
-                4,
-                4,
-                4,
-                4,
-                false
-            ),
-            new SittingInfoData
-            (
-                0x4C88,
-                2,
-                2,
-                2,
-                2,
-                0,
-                0,
-                false
-            ),
-            new SittingInfoData
-            (
-                0x4C89,
-                2,
-                2,
-                2,
-                2,
-                0,
-                0,
-                false
-            ),
-            new SittingInfoData
-            (
-                0x4C8A,
-                2,
-                2,
-                2,
-                2,
-                0,
-                0,
-                false
-            ),
-            new SittingInfoData
-            (
-                0x4C8B,
-                2,
-                2,
-                2,
-                2,
-                0,
-                0,
-                false
-            ),
-            new SittingInfoData
-            (
-                0x4C8C,
-                2,
-                2,
-                2,
-                2,
-                0,
-                0,
-                false
-            ),
-            new SittingInfoData
-            (
-                0x4C8D,
-                4,
-                4,
-                4,
-                4,
-                4,
-                4,
-                false
-            ),
-            new SittingInfoData
-            (
-                0x4C8E,
-                4,
-                4,
-                4,
-                4,
-                4,
-                4,
-                false
-            ),
-            new SittingInfoData
-            (
-                0x4C8F,
-                4,
-                4,
-                4,
-                4,
-                4,
-                4,
-                false
-            ),
-            //new SittingInfoData(0x4C1F, 2, 2, 2, 2, 6, 6, false),
-
-            // thanks Tony!
-            new SittingInfoData
-            (
-                0xA05F,
-                2,
-                2,
-                2,
-                2,
-                0,
-                0,
-                false
-            ), // EAST ONLY
-            new SittingInfoData
-            (
-                0xA05E,
-                0,
-                0,
-                0,
-                0,
-                4,
-                4,
-                false
-            ), // NORTH ONLY
-            new SittingInfoData
-            (
-                0xA05D,
+                0x4023,
                 4,
                 4,
                 4,
@@ -1500,19 +1337,7 @@ namespace ClassicUO.IO.Resources
             ), // SOUTH ONLY
             new SittingInfoData
             (
-                0xA05C,
-                6,
-                6,
-                6,
-                6,
-                6,
-                4,
-                false
-            ), // WEST ONLY
-
-            new SittingInfoData
-            (
-                0x9EA2,
+                0x4024,
                 2,
                 2,
                 2,
@@ -1523,7 +1348,480 @@ namespace ClassicUO.IO.Resources
             ), // EAST ONLY
             new SittingInfoData
             (
-                0x9EA1,
+                0x4027,
+                4,
+                4,
+                4,
+                4,
+                4,
+                4,
+                false
+            ), // SOUTH ONLY
+            new SittingInfoData
+            (
+                0x4028,
+                4,
+                4,
+                4,
+                4,
+                4,
+                4,
+                false
+            ), // SOUTH ONLY
+            new SittingInfoData
+            (
+                0x4029,
+                2,
+                2,
+                2,
+                2,
+                0,
+                0,
+                false
+            ), // EAST ONLY
+            new SittingInfoData
+            (
+                0x402A,
+                2,
+                2,
+                2,
+                2,
+                0,
+                0,
+                false
+            ), // EAST ONLY
+            new SittingInfoData
+            (
+                0x4BDC,
+                4,
+                4,
+                4,
+                4,
+                4,
+                4,
+                false
+            ), // SOUTH ONLY
+            new SittingInfoData
+            (
+                0x4C1B,
+                4,
+                4,
+                4,
+                4,
+                4,
+                4,
+                false
+            ), // SOUTH ONLY
+            new SittingInfoData
+            (
+                0x4C1E,
+                2,
+                2,
+                2,
+                2,
+                6,
+                6,
+                false
+            ), // EAST ONLY
+            new SittingInfoData
+            (
+                0x4C80,
+                4,
+                4,
+                4,
+                4,
+                4,
+                4,
+                false
+            ), // SOUTH ONLY
+            new SittingInfoData
+            (
+                0x4C81,
+                2,
+                2,
+                2,
+                2,
+                0,
+                0,
+                false
+            ), // EAST ONLY
+            new SittingInfoData
+            (
+                0x4C82,
+                4,
+                4,
+                4,
+                4,
+                4,
+                4,
+                false
+            ), // SOUTH ONLY
+            new SittingInfoData
+            (
+                0x4C83,
+                4,
+                4,
+                4,
+                4,
+                4,
+                4,
+                false
+            ), // SOUTH ONLY
+            new SittingInfoData
+            (
+                0x4C84,
+                2,
+                2,
+                2,
+                2,
+                0,
+                0,
+                false
+            ), // EAST ONLY
+            new SittingInfoData
+            (
+                0x4C85,
+                2,
+                2,
+                2,
+                2,
+                0,
+                0,
+                false
+            ), // EAST ONLY
+            new SittingInfoData
+            (
+                0x4C86,
+                4,
+                4,
+                4,
+                4,
+                4,
+                4,
+                false
+            ), // SOUTH ONLY
+            new SittingInfoData
+            (
+                0x4C87,
+                4,
+                4,
+                4,
+                4,
+                4,
+                4,
+                false
+            ), // SOUTH ONLY
+            new SittingInfoData
+            (
+                0x4C88,
+                2,
+                2,
+                2,
+                2,
+                0,
+                0,
+                false
+            ), // EAST ONLY
+            new SittingInfoData
+            (
+                0x4C89,
+                2,
+                2,
+                2,
+                2,
+                0,
+                0,
+                false
+            ), // EAST ONLY
+            new SittingInfoData
+            (
+                0x4C8A,
+                2,
+                2,
+                2,
+                2,
+                0,
+                0,
+                false
+            ), // EAST ONLY
+            new SittingInfoData
+            (
+                0x4C8B,
+                2,
+                2,
+                2,
+                2,
+                0,
+                0,
+                false
+            ), // EAST ONLY
+            new SittingInfoData
+            (
+                0x4C8C,
+                2,
+                2,
+                2,
+                2,
+                0,
+                0,
+                false
+            ), // EAST ONLY
+            new SittingInfoData
+            (
+                0x4C8D,
+                4,
+                4,
+                4,
+                4,
+                4,
+                4,
+                false
+            ), // SOUTH ONLY
+            new SittingInfoData
+            (
+                0x4C8E,
+                4,
+                4,
+                4,
+                4,
+                4,
+                4,
+                false
+            ), // SOUTH ONLY
+            new SittingInfoData
+            (
+                0x4C8F,
+                4,
+                4,
+                4,
+                4,
+                4,
+                4,
+                false
+            ), // SOUTH ONLY
+            new SittingInfoData
+            (
+                0x4DE0,
+                2,
+                2,
+                2,
+                2,
+                0,
+                0,
+                false
+            ), // EAST ONLY
+            new SittingInfoData
+            (
+                0x63BC,
+                0,
+                -1,
+                4,
+                -1,
+                3,
+                10,
+                false
+            ),
+            new SittingInfoData
+            (
+                0x63BD,
+                0,
+                -1,
+                4,
+                -1,
+                3,
+                10,
+                false
+            ),
+            new SittingInfoData
+            (
+                0x63C3,
+                -1,
+                2,
+                -1,
+                6,
+                3,
+                14,
+                false
+            ),
+            new SittingInfoData
+            (
+                0x63C4,
+                -1,
+                2,
+                -1,
+                6,
+                3,
+                14,
+                false
+            ),
+            new SittingInfoData
+            (
+                0x996C,
+                4,
+                4,
+                4,
+                4,
+                4,
+                4,
+                false
+            ), // SOUTH ONLY
+            new SittingInfoData
+            (
+                0x9977,
+                2,
+                2,
+                2,
+                2,
+                0,
+                0,
+                false
+            ), // EAST ONLY
+            new SittingInfoData
+            (
+                0x9C57,
+                6,
+                6,
+                6,
+                6,
+                6,
+                4,
+                false
+            ), // WEST ONLY
+            new SittingInfoData
+            (
+                0x9C58,
+                6,
+                6,
+                6,
+                6,
+                6,
+                4,
+                false
+            ), // WEST ONLY
+            new SittingInfoData
+            (
+                0x9C59,
+                0,
+                0,
+                0,
+                0,
+                4,
+                4,
+                false
+            ), // NORTH ONLY
+            new SittingInfoData
+            (
+                0x9C5A,
+                0,
+                0,
+                0,
+                0,
+                4,
+                4,
+                false
+            ), // NORTH ONLY
+            new SittingInfoData
+            (
+                0x9C5D,
+                6,
+                6,
+                6,
+                6,
+                6,
+                4,
+                false
+            ), // WEST ONLY
+            new SittingInfoData
+            (
+                0x9C5E,
+                6,
+                6,
+                6,
+                6,
+                6,
+                4,
+                false
+            ), // WEST ONLY
+            new SittingInfoData
+            (
+                0x9C5F,
+                6,
+                6,
+                6,
+                6,
+                6,
+                4,
+                false
+            ), // WEST ONLY
+            new SittingInfoData
+            (
+                0x9C60,
+                0,
+                0,
+                0,
+                0,
+                4,
+                4,
+                false
+            ), // NORTH ONLY
+            new SittingInfoData
+            (
+                0x9C61,
+                0,
+                0,
+                0,
+                0,
+                4,
+                4,
+                false
+            ), // NORTH ONLY
+            new SittingInfoData
+            (
+                0x9C62,
+                0,
+                0,
+                0,
+                0,
+                4,
+                4,
+                false
+            ), // NORTH ONLY
+            new SittingInfoData
+            (
+                0x9E8E,
+                0,
+                0,
+                0,
+                0,
+                4,
+                4,
+                false
+            ), // NORTH ONLY
+            new SittingInfoData
+            (
+                0x9E8F,
+                6,
+                6,
+                6,
+                6,
+                6,
+                4,
+                false
+            ), // WEST ONLY
+            new SittingInfoData
+            (
+                0x9E90,
+                2,
+                2,
+                2,
+                2,
+                0,
+                0,
+                false
+            ), // EAST ONLY
+            new SittingInfoData
+            (
+                0x9E91,
                 4,
                 4,
                 4,
@@ -1554,10 +1852,9 @@ namespace ClassicUO.IO.Resources
                 4,
                 false
             ), // WEST ONLY
-
             new SittingInfoData
             (
-                0x9E91,
+                0x9EA1,
                 4,
                 4,
                 4,
@@ -1568,7 +1865,7 @@ namespace ClassicUO.IO.Resources
             ), // SOUTH ONLY
             new SittingInfoData
             (
-                0x9E90,
+                0x9EA2,
                 2,
                 2,
                 2,
@@ -1579,7 +1876,7 @@ namespace ClassicUO.IO.Resources
             ), // EAST ONLY
             new SittingInfoData
             (
-                0x9E8F,
+                0xA05C,
                 6,
                 6,
                 6,
@@ -1590,156 +1887,7 @@ namespace ClassicUO.IO.Resources
             ), // WEST ONLY
             new SittingInfoData
             (
-                0x9E8E,
-                0,
-                0,
-                0,
-                0,
-                4,
-                4,
-                false
-            ), // NORTH ONLY
-
-            new SittingInfoData
-            (
-                0x9C62,
-                0,
-                0,
-                0,
-                0,
-                4,
-                4,
-                false
-            ), // NORTH ONLY
-            new SittingInfoData
-            (
-                0x9C61,
-                0,
-                0,
-                0,
-                0,
-                4,
-                4,
-                false
-            ), // NORTH ONLY
-            new SittingInfoData
-            (
-                0x9C60,
-                0,
-                0,
-                0,
-                0,
-                4,
-                4,
-                false
-            ), // NORTH ONLY
-
-            new SittingInfoData
-            (
-                0x9C5F,
-                6,
-                6,
-                6,
-                6,
-                6,
-                4,
-                false
-            ), // WEST ONLY
-            new SittingInfoData
-            (
-                0x9C5E,
-                6,
-                6,
-                6,
-                6,
-                6,
-                4,
-                false
-            ), // WEST ONLY
-            new SittingInfoData
-            (
-                0x9C5D,
-                6,
-                6,
-                6,
-                6,
-                6,
-                4,
-                false
-            ), // WEST ONLY
-
-            new SittingInfoData
-            (
-                0x9C5A,
-                0,
-                0,
-                0,
-                0,
-                4,
-                4,
-                false
-            ), // NORTH ONLY
-            new SittingInfoData
-            (
-                0x9C59,
-                0,
-                0,
-                0,
-                0,
-                4,
-                4,
-                false
-            ), // NORTH ONLY
-
-            new SittingInfoData
-            (
-                0x9C58,
-                6,
-                6,
-                6,
-                6,
-                6,
-                4,
-                false
-            ), // WEST ONLY
-            new SittingInfoData
-            (
-                0x9C57,
-                6,
-                6,
-                6,
-                6,
-                6,
-                4,
-                false
-            ), // WEST ONLY
-
-            new SittingInfoData
-            (
-                0x402A,
-                2,
-                2,
-                2,
-                2,
-                0,
-                0,
-                false
-            ), // EAST ONLY
-            new SittingInfoData
-            (
-                0x4029,
-                2,
-                2,
-                2,
-                2,
-                0,
-                0,
-                false
-            ), // EAST ONLY
-
-            new SittingInfoData
-            (
-                0x4028,
+                0xA05D,
                 4,
                 4,
                 4,
@@ -1750,29 +1898,18 @@ namespace ClassicUO.IO.Resources
             ), // SOUTH ONLY
             new SittingInfoData
             (
-                0x4027,
-                4,
-                4,
-                4,
-                4,
-                4,
-                4,
-                false
-            ), // SOUTH ONLY
-            new SittingInfoData
-            (
-                0x4023,
-                4,
-                4,
-                4,
-                4,
+                0xA05E,
+                0,
+                0,
+                0,
+                0,
                 4,
                 4,
                 false
-            ), // SOUTH ONLY
+            ), // NORTH ONLY
             new SittingInfoData
             (
-                0x4024,
+                0xA05F,
                 2,
                 2,
                 2,
@@ -1783,18 +1920,18 @@ namespace ClassicUO.IO.Resources
             ), // EAST ONLY
             new SittingInfoData
             (
-                0x4C1E,
-                2,
-                2,
-                2,
-                2,
+                0xA211,
                 0,
-                0,
+                2,
+                4,
+                6,
+                -4,
+                -4,
                 false
-            ), // EAST ONLY
+            ), // ANY
             new SittingInfoData
             (
-                0x4C1B,
+                0xA4EA,
                 4,
                 4,
                 4,
@@ -1805,7 +1942,7 @@ namespace ClassicUO.IO.Resources
             ), // SOUTH ONLY
             new SittingInfoData
             (
-                0x7132,
+                0xA4EB,
                 2,
                 2,
                 2,
@@ -1816,7 +1953,7 @@ namespace ClassicUO.IO.Resources
             ), // EAST ONLY
             new SittingInfoData
             (
-                0x71C2,
+                0xA586,
                 4,
                 4,
                 4,
@@ -1825,10 +1962,9 @@ namespace ClassicUO.IO.Resources
                 4,
                 false
             ), // SOUTH ONLY
-
             new SittingInfoData
             (
-                0x9977,
+                0xA587,
                 2,
                 2,
                 2,
@@ -1836,18 +1972,7 @@ namespace ClassicUO.IO.Resources
                 0,
                 0,
                 false
-            ), // EAST ONLY
-            new SittingInfoData
-            (
-                0x996C,
-                4,
-                4,
-                4,
-                4,
-                4,
-                4,
-                false
-            ) // SOUTH ONLY
+            ) // EAST ONLY
         };
 
 
@@ -2106,7 +2231,7 @@ namespace ClassicUO.IO.Resources
                         }
                     }
 
-                    if (Client.Version < ClientVersion.CV_305D)
+                    if (Client.Version < ClientVersion.CV_300)
                     {
                         return;
                     }

@@ -82,12 +82,12 @@ namespace ClassicUO.Game.GameObjects
 
         public byte HitsPercentage;
         public RenderedText HitsTexture;
-        public bool IsClicked;
+        public bool IsClicked, HitsRequested;
         public uint LastStepTime;
         public string Name;
         public uint Serial;
 
-        protected long LastAnimationChangeTime;
+        internal long LastAnimationChangeTime;
 
 
         public void FixHue(ushort hue)
@@ -183,10 +183,7 @@ namespace ClassicUO.Game.GameObjects
         {
             base.Destroy();
 
-            if (HitsMax != 0)
-            {
-                GameActions.SendCloseStatus(Serial);
-            }
+            GameActions.SendCloseStatus(Serial, HitsRequested);
 
             AnimIndex = 0;
             LastAnimationChangeTime = 0;

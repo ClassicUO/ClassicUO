@@ -41,7 +41,6 @@ namespace ClassicUO.Game.GameObjects
 {
     internal sealed partial class Land : GameObject
     {
-        private static Vector3[,,] _vectCache = new Vector3[3, 3, 4];
         private static readonly QueuedPool<Land> _pool = new QueuedPool<Land>
         (
             Constants.PREDICTABLE_TILE_COUNT,
@@ -74,6 +73,7 @@ namespace ClassicUO.Game.GameObjects
             land.OriginalGraphic = graphic;
             land.IsStretched = land.TileData.TexID == 0 && land.TileData.IsWet;
             land.AllowedToDraw = graphic > 2;
+            land.UpdateGraphicBySeason();
 
             return land;
         }
@@ -162,7 +162,7 @@ namespace ClassicUO.Game.GameObjects
         }
 
 
-        public void ApplyStretch(Map.Map map, int x, int y, sbyte z)
+        public unsafe void ApplyStretch(Map.Map map, int x, int y, sbyte z)
         {
             if (IsStretched || TexmapsLoader.Instance.GetTexture(TileData.TexID) == null || !TestStretched(x, y, z, true))
             {
@@ -175,10 +175,11 @@ namespace ClassicUO.Game.GameObjects
 
                 UpdateZ(map.GetTileZ(x, y + 1), map.GetTileZ(x + 1, y + 1), map.GetTileZ(x + 1, y), z);
 
-                //Vector3[,,] vec = new Vector3[3, 3, 4];
-
                 int i;
                 int j;
+
+                const int SIZE = 3 * 3 * 4;
+                Vector3* vectBuffer = stackalloc Vector3[SIZE];
 
                 for (i = -1; i < 2; ++i)
                 {
@@ -198,7 +199,7 @@ namespace ClassicUO.Game.GameObjects
                         {
                             for (int k = 0; k < 4; ++k)
                             {
-                                ref Vector3 v = ref _vectCache[curI, curJ, k];
+                                ref Vector3 v = ref vectBuffer[k + curJ * 3 + curI * 3 * 4];
                                 v.X = 0;
                                 v.Y = 0;
                                 v.Z = 1;
@@ -211,26 +212,25 @@ namespace ClassicUO.Game.GameObjects
                             int half_2 = (rightZ - bottomZ) << 2;
                             int half_3 = (bottomZ - leftZ) << 2;
 
-                            ref Vector3 v0 = ref _vectCache[curI, curJ, 0];
+                            ref Vector3 v0 = ref vectBuffer[0 + curJ * 3 + curI * 3 * 4];
                             v0.X = -22;
                             v0.Y = 22;
                             v0.Z = half_0;
                             MergeAndNormalize(ref v0, -22.0f, -22.0f, half_1);
 
-
-                            ref Vector3 v1 = ref _vectCache[curI, curJ, 1];
+                            ref Vector3 v1 = ref vectBuffer[1 + curJ * 3 + curI * 3 * 4];
                             v1.X = 22;
                             v1.Y = 22;
                             v1.Z = half_2;
                             MergeAndNormalize(ref v1, -22.0f, 22.0f, half_0);
 
-                            ref Vector3 v2 = ref _vectCache[curI, curJ, 2];
+                            ref Vector3 v2 = ref vectBuffer[2 + curJ * 3 + curI * 3 * 4];
                             v2.X = 22;
                             v2.Y = -22;
                             v2.Z = half_3;
                             MergeAndNormalize(ref v2, 22.0f, 22.0f, half_2);
 
-                            ref Vector3 v3 = ref _vectCache[curI, curJ, 3];
+                            ref Vector3 v3 = ref vectBuffer[3 + curJ * 3 + curI * 3 * 4];
                             v3.X = -22;
                             v3.Y = -22;
                             v3.Z = half_1;
@@ -239,82 +239,39 @@ namespace ClassicUO.Game.GameObjects
                     }
                 }
 
-                i = 1;
-                j = 1;
-
-                // 0
                 SumAndNormalize
                 (
-                    ref _vectCache,
-                    i - 1,
-                    j - 1,
-                    2,
-                    i - 1,
-                    j,
-                    1,
-                    i,
-                    j - 1,
-                    3,
-                    i,
-                    j,
-                    0,
+                    ref vectBuffer[2 + 0 * 3 + 0 * 3 * 4], 
+                    ref vectBuffer[1 + 1 * 3 + 0 * 3 * 4], 
+                    ref vectBuffer[3 + 0 * 3 + 1 * 3 * 4], 
+                    ref vectBuffer[0 + 1 * 3 + 1 * 3 * 4], 
                     out Normal0
                 );
 
-                // 1
                 SumAndNormalize
                 (
-                    ref _vectCache,
-                    i,
-                    j - 1,
-                    2,
-                    i,
-                    j,
-                    1,
-                    i + 1,
-                    j - 1,
-                    3,
-                    i + 1,
-                    j,
-                    0,
+                    ref vectBuffer[2 + 0 * 3 + 1 * 3 * 4],
+                    ref vectBuffer[1 + 1 * 3 + 1 * 3 * 4],
+                    ref vectBuffer[3 + 0 * 3 + 2 * 3 * 4],
+                    ref vectBuffer[0 + 1 * 3 + 2 * 3 * 4],
                     out Normal1
                 );
 
-                // 2
                 SumAndNormalize
                 (
-                    ref _vectCache,
-                    i,
-                    j,
-                    2,
-                    i,
-                    j + 1,
-                    1,
-                    i + 1,
-                    j,
-                    3,
-                    i + 1,
-                    j + 1,
-                    0,
+                    ref vectBuffer[2 + 1 * 3 + 1 * 3 * 4],
+                    ref vectBuffer[1 + 2 * 3 + 1 * 3 * 4],
+                    ref vectBuffer[3 + 1 * 3 + 2 * 3 * 4],
+                    ref vectBuffer[0 + 2 * 3 + 2 * 3 * 4],
                     out Normal2
                 );
 
-                // 3
                 SumAndNormalize
                 (
-                    ref _vectCache,
-                    i - 1,
-                    j,
-                    2,
-                    i - 1,
-                    j + 1,
-                    1,
-                    i,
-                    j,
-                    3,
-                    i,
-                    j + 1,
-                    0,
+                    ref vectBuffer[2 + 1 * 3 + 0 * 3 * 4],
+                    ref vectBuffer[1 + 2 * 3 + 0 * 3 * 4],
+                    ref vectBuffer[3 + 1 * 3 + 1 * 3 * 4],
+                    ref vectBuffer[0 + 2 * 3 + 1 * 3 * 4],
                     out Normal3
                 );
             }
@@ -324,31 +281,20 @@ namespace ClassicUO.Game.GameObjects
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static void SumAndNormalize
         (
-            ref Vector3[,,] vec,
-            int index0_x,
-            int index0_y,
-            int index0_z,
-            int index1_x,
-            int index1_y,
-            int index1_z,
-            int index2_x,
-            int index2_y,
-            int index2_z,
-            int index3_x,
-            int index3_y,
-            int index3_z,
+            ref Vector3 v0,
+            ref Vector3 v1,
+            ref Vector3 v2,
+            ref Vector3 v3,
             out Vector3 result
         )
         {
-            Vector3.Add(ref vec[index0_x, index0_y, index0_z], ref vec[index1_x, index1_y, index1_z], out Vector3 v0Result);
-
-            Vector3.Add(ref vec[index2_x, index2_y, index2_z], ref vec[index3_x, index3_y, index3_z], out Vector3 v1Result);
-
-            Vector3.Add(ref v0Result, ref v1Result, out result);
+            Vector3.Add(ref v0, ref v1, out v0);
+            Vector3.Add(ref v2, ref v3, out v1);
+            Vector3.Add(ref v0, ref v1, out result);
             Vector3.Normalize(ref result, out result);
         }
 
-        private static bool TestStretched(int x, int y, sbyte z, bool recurse)
+       private static bool TestStretched(int x, int y, sbyte z, bool recurse)
         {
             bool result = false;
 

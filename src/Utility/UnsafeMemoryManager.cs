@@ -47,14 +47,22 @@ namespace ClassicUO.Utility
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void* AsPointer<T>(ref T v)
         {
+#if NETFRAMEWORK
             TypedReference t = __makeref(v);
 
             return (void*) *((IntPtr*) &t + (PlatformHelper.IsMonoRuntime ? 1 : 0));
+#else
+            return Unsafe.AsPointer<T>(ref v);
+#endif
         }
 
         public static T ToStruct<T>(IntPtr ptr)
         {
+#if NETFRAMEWORK
             return ToStruct<T>(ptr, SizeOf<T>());
+#else
+            return Unsafe.Read<T>((void*) ptr);
+#endif
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -72,14 +80,20 @@ namespace ClassicUO.Utility
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static T As<T>(object v)
         {
+#if NETFRAMEWORK
             int size = SizeOf<T>();
 
             return Reinterpret<object, T>(v, size);
+#else
+            return Unsafe.As<object, T>(ref v);
+#endif          
         }
+        
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int SizeOf<T>()
         {
+#if NETFRAMEWORK
             DoubleStruct<T> doubleStruct = DoubleStruct<T>.Value;
             TypedReference tRef0 = __makeref(doubleStruct.First);
             TypedReference tRef1 = __makeref(doubleStruct.Second);
@@ -97,33 +111,29 @@ namespace ClassicUO.Utility
             }
 
             return (int) ((byte*) ptrToT1 - (byte*) ptrToT0);
+#else
+            return Unsafe.SizeOf<T>();
+#endif
         }
 
 
+#if NETFRAMEWORK
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static TOut Reinterpret<TIn, TOut>(TIn curValue, int sizeBytes) //where TIn : struct where TOut : struct
         {
             TOut result = default;
-
-            //SingleStruct<TIn> inS = SingleStruct<TIn>.Value;
-            //SingleStruct<TOut> outS = SingleStruct<TOut>.Value;
-
             TypedReference resultRef = __makeref(result);
             TypedReference curValueRef = __makeref(curValue);
-
 
             int offset = PlatformHelper.IsMonoRuntime ? 1 : 0;
 
             byte* resultPtr = (byte*) *((IntPtr*) &resultRef + offset);
             byte* curValuePtr = (byte*) *((IntPtr*) &curValueRef + offset);
-
-            //for (int i = 0; i < sizeBytes; ++i)
-            //    resultPtr[i] = curValuePtr[i];
-
             Buffer.MemoryCopy(curValuePtr, resultPtr, sizeBytes, sizeBytes);
 
             return result;
         }
+#endif        
 
         [StructLayout(LayoutKind.Sequential, Pack = 1)]
         private struct DoubleStruct<T>

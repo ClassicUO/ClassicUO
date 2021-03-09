@@ -297,7 +297,7 @@ namespace ClassicUO.Game.Managers
             }
 
 
-            ushort fixedColor = (ushort) (hue & 0x3FFF);
+            ushort fixedColor = (ushort)(hue & 0x3FFF);
 
             if (fixedColor != 0)
             {
@@ -306,24 +306,24 @@ namespace ClassicUO.Game.Managers
                     fixedColor = 1;
                 }
 
-                fixedColor |= (ushort) (hue & 0xC000);
+                fixedColor |= (ushort)(hue & 0xC000);
             }
             else
             {
-                fixedColor = (ushort) (hue & 0x8000);
+                fixedColor = (ushort)(hue & 0x8000);
             }
+
 
             TextObject textObject = TextObject.Create();
             textObject.Alpha = 0xFF;
             textObject.Type = type;
             textObject.Hue = fixedColor;
 
-
             if (!isunicode && textType == TextType.OBJECT)
             {
-                fixedColor = 0;
+                fixedColor = 0x7FFF;
             }
-
+            
             textObject.RenderedText = RenderedText.Create
             (
                 msg,
@@ -347,9 +347,14 @@ namespace ClassicUO.Game.Managers
 
         private static long CalculateTimeToLive(RenderedText rtext)
         {
-            long timeToLive;
-
             Profile currentProfile = ProfileManager.CurrentProfile;
+
+            if (currentProfile == null)
+            {
+                return 0;
+            }
+
+            long timeToLive;
 
             if (currentProfile.ScaleSpeechDelay)
             {

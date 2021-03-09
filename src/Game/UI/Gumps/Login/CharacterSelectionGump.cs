@@ -187,7 +187,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
             {
                 int empty = scene.Characters.Count(string.IsNullOrEmpty);
 
-                if (empty > 0 && scene.Characters.Length - empty < World.ClientFeatures.MaxChars)
+                if (empty >= 0 && scene.Characters.Length - empty < World.ClientFeatures.MaxChars)
                 {
                     return true;
                 }

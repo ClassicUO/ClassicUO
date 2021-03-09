@@ -195,6 +195,7 @@ namespace ClassicUO.Utility
             writer.Write(Encoding.UTF8.GetBytes(str));
         }
 
+#if NETFRAMEWORK
         public static void ExtractToDirectory(this ZipArchive archive, string destinationDirectoryName, bool overwrite)
         {
             if (!overwrite)
@@ -227,6 +228,7 @@ namespace ClassicUO.Utility
                 file.ExtractToFile(completeFileName, true);
             }
         }
+#endif
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static string ToHex(this uint serial)

@@ -243,7 +243,7 @@ namespace ClassicUO.IO.Resources
                 return HuesHelper.Color16To32(HuesRange[g].Entries[e].ColorTable[(c >> 10) & 0x1F]);
             }
 
-            return HuesHelper.Color16To32(c);
+            return color != 0 ? HuesHelper.Color16To32(color) : HuesHelper.Color16To32(c);
         }
 
         public uint GetPartialHueColor(ushort c, ushort color)

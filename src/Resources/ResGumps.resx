@@ -992,7 +992,7 @@ Time left: {1:00}:{2:00}:{3:00}</value>
     <value>Decline</value>
   </data>
   <data name="P0HasInvitedYouToParty" xml:space="preserve">
-    <value>{0}has invited you to join a party.</value>
+    <value>{0} has invited you to join a party.</value>
   </data>
   <data name="NoName" xml:space="preserve">
     <value>No Name</value>
@@ -1425,5 +1425,20 @@ Client version: '{0}'</value>
   </data>
   <data name="ShadowStatics" xml:space="preserve">
     <value>Show tree and rock shadows</value>
+  </data>
+  <data name="BackpackStyle" xml:space="preserve">
+    <value>Select Character Backpack Style</value>
+  </data>
+  <data name="BackpackStyle_Default" xml:space="preserve">
+    <value>Default</value>
+  </data>
+  <data name="BackpackStyle_Suede" xml:space="preserve">
+    <value>Suede</value>
+  </data>
+  <data name="BackpackStyle_PolarBear" xml:space="preserve">
+    <value>PolarBear</value>
+  </data>
+  <data name="BackpackStyle_GhoulSkin" xml:space="preserve">
+    <value>GhoulSkin</value>
   </data>
 </root>

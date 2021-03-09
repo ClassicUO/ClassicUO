@@ -106,35 +106,15 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override void Dispose()
         {
-            GameActions.SendCloseStatus(LocalSerial);
-
+            /*if (TargetManager.LastAttack != LocalSerial)
+            {
+                GameActions.SendCloseStatus(LocalSerial);
+            }*/
+            
             _textBox?.Dispose();
             _textBox = null;
             base.Dispose();
         }
-
-        public override void Save(BinaryWriter writer)
-        {
-            base.Save(writer);
-            writer.Write(LocalSerial);
-        }
-
-        public override void Restore(BinaryReader reader)
-        {
-            base.Restore(reader);
-            LocalSerial = reader.ReadUInt32();
-
-            if (LocalSerial == World.Player)
-            {
-                _name = World.Player.Name;
-                BuildGump();
-            }
-            else
-            {
-                Dispose();
-            }
-        }
-
 
         public override void Save(XmlTextWriter writer)
         {
@@ -145,7 +125,6 @@ namespace ClassicUO.Game.UI.Gumps
                 writer.WriteAttributeString("name", _name);
             }
         }
-
 
         public override void Restore(XmlElement xml)
         {
@@ -459,7 +438,11 @@ namespace ClassicUO.Game.UI.Gumps
                     _outOfRange = true;
                     textColor = 912;
 
-
+                    if (TargetManager.LastAttack != LocalSerial)
+                    {
+                        GameActions.SendCloseStatus(LocalSerial);
+                    }
+                    
                     if (inparty)
                     {
                         if (_textBox != null && _textBox.Hue != textColor)
@@ -1647,6 +1630,11 @@ namespace ClassicUO.Game.UI.Gumps
                     //_normalHits = true;
 
                     _outOfRange = true;
+
+                    if (TargetManager.LastAttack != LocalSerial)
+                    {
+                        GameActions.SendCloseStatus(LocalSerial);
+                    }
 
                     if (inparty)
                     {

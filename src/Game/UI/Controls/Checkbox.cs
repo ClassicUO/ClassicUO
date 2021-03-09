@@ -109,6 +109,8 @@ namespace ClassicUO.Game.UI.Controls
             }
         }
 
+        public override ClickPriority Priority => ClickPriority.High;
+
         public string Text => _text.Text;
 
         public event EventHandler ValueChanged;

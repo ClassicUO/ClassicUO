@@ -74,6 +74,44 @@ namespace ClassicUO.Game.UI.Gumps
 
             Graphic = gumpid;
 
+            // New Backpack gumps. Client Version 7.0.53.1
+            if (item == World.Player.FindItemByLayer(Layer.Backpack) && Client.Version >= ClassicUO.Data.ClientVersion.CV_705301 && ProfileManager.CurrentProfile != null)
+            {
+                GumpsLoader loader = GumpsLoader.Instance;
+
+                switch (ProfileManager.CurrentProfile.BackpackStyle)
+                {
+                    case 1:
+                        if (loader.GetTexture(0x775E) != null)
+                        {
+                            Graphic = 0x775E; // Suede Backpack
+                        }
+
+                        break;
+                    case 2:
+                        if (loader.GetTexture(0x7760) != null)
+                        {
+                            Graphic = 0x7760; // Polar Bear Backpack
+                        }
+
+                        break;
+                    case 3:
+                        if (loader.GetTexture(0x7762) != null)
+                        {
+                            Graphic = 0x7762; // Ghoul Skin Backpack
+                        }
+
+                        break;
+                    default:
+                        if (loader.GetTexture(0x003C) != null)
+                        {
+                            Graphic = 0x003C; // Default Backpack
+                        }
+
+                        break;
+                }
+            }
+
             BuildGump();
 
             if (Graphic == 0x0009)
@@ -422,38 +460,6 @@ namespace ClassicUO.Game.UI.Gumps
             BuildGump();
             IsMinimized = IsMinimized;
             ItemsOnAdded();
-        }
-
-        public override void Save(BinaryWriter writer)
-        {
-            base.Save(writer);
-            writer.Write(LocalSerial);
-            writer.Write(Graphic);
-            writer.Write(IsMinimized);
-        }
-
-        public override void Restore(BinaryReader reader)
-        {
-            base.Restore(reader);
-
-            if (Profile.GumpsVersion == 2)
-            {
-                reader.ReadUInt32();
-                _isMinimized = reader.ReadBoolean();
-            }
-
-            LocalSerial = reader.ReadUInt32();
-
-            Client.Game.GetScene<GameScene>()?.DoubleClickDelayed(LocalSerial);
-
-            reader.ReadUInt16();
-
-            if (Profile.GumpsVersion >= 3)
-            {
-                _isMinimized = reader.ReadBoolean();
-            }
-
-            Dispose();
         }
 
         public override void Save(XmlTextWriter writer)

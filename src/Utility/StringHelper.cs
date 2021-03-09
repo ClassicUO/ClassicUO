@@ -220,5 +220,19 @@ namespace ClassicUO.Utility
 
             return null;
         }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static unsafe bool UnsafeCompare(char* buffer, string str, int length)
+        {
+            for (int i = 0; i < length && i < str.Length; ++i)
+            {
+                if (buffer[i] != str[i])
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
     }
 }
