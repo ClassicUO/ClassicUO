@@ -61,10 +61,10 @@ namespace ClassicUO.IO
         {
             Stopwatch stopwatch = Stopwatch.StartNew();
 
+            UOFilesOverrideMap.Instance.Load(); // need to load this first so that it manages can perform the file overrides if needed
+
             List<Task> tasks = new List<Task>
             {
-                UOFilesOverrideMap.Instance.Load(), // need to load this first so that it manages 
-
                 AnimationsLoader.Instance.Load(),
                 AnimDataLoader.Instance.Load(),
                 ArtLoader.Instance.Load(),
