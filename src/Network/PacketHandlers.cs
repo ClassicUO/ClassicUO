@@ -33,6 +33,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.Text;
 using ClassicUO.Configuration;
 using ClassicUO.Game;
@@ -790,7 +791,7 @@ namespace ClassicUO.Network
                     NetClient.Socket.Send(new PGameWindowSize((uint) ProfileManager.CurrentProfile.GameWindowSize.X, (uint) ProfileManager.CurrentProfile.GameWindowSize.Y));
                 }
 
-                NetClient.Socket.Send(new PLanguage("ENU"));
+                NetClient.Socket.Send(new PLanguage(CultureInfo.InstalledUICulture.ThreeLetterWindowsLanguageName));
             }
 
             NetClient.Socket.Send(new PClientVersion(Settings.GlobalSettings.ClientVersion));
