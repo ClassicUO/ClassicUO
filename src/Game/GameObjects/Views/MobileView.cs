@@ -650,12 +650,13 @@ namespace ClassicUO.Game.GameObjects
                     ShaderHueTranslator.GetHueVector(ref HueVector, hue, partialHue, alpha);
 
                     // this is an hack to make entities partially hued. OG client seems to ignore this.
-                    if (entity != null && entity.ItemData.AnimID == 0 && entity.ItemData.IsLight)
+                    /*if (entity != null && entity.ItemData.AnimID == 0 && entity.ItemData.IsLight)
                     {
                         HueVector.X = entity.Hue == 0 ? owner.Hue : entity.Hue;
                         HueVector.Y = ShaderHueTranslator.SHADER_LIGHTS;
                         HueVector.Z = alpha;
                     }
+                    */
 
                     if (_transform)
                     {
