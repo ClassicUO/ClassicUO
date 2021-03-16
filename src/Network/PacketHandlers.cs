@@ -5302,16 +5302,17 @@ namespace ClassicUO.Network
                         uint wtfCliloc = p.ReadUInt();
 
                         ushort arg_length = p.ReadUShort();
-                        string args = p.ReadUnicodeReversed();
+                        p.Skip(4);
+                        string args = p.ReadUnicodeReversed();     
                         string title = ClilocLoader.Instance.Translate((int) titleCliloc, args, true);
 
                         arg_length = p.ReadUShort();
-                        args = p.ReadUnicodeReversed();
+                        string args_2 = p.ReadUnicodeReversed();
                         string description = string.Empty;
 
                         if (descriptionCliloc != 0)
                         {
-                            description = "\n" + ClilocLoader.Instance.Translate((int) descriptionCliloc, args, true);
+                            description = "\n" + ClilocLoader.Instance.Translate((int) descriptionCliloc, String.IsNullOrEmpty(args_2) ? args : args_2, true);
 
                             if (description.Length < 2)
                             {
@@ -5320,12 +5321,12 @@ namespace ClassicUO.Network
                         }
 
                         arg_length = p.ReadUShort();
-                        args = p.ReadUnicodeReversed();
+                        string args_3 = p.ReadUnicodeReversed();
                         string wtf = string.Empty;
 
                         if (wtfCliloc != 0)
                         {
-                            wtf = ClilocLoader.Instance.Translate((int) wtfCliloc, args, true);
+                            wtf = ClilocLoader.Instance.Translate((int) wtfCliloc, String.IsNullOrEmpty(args_3) ? args : args_3, true);
 
                             if (!string.IsNullOrWhiteSpace(wtf))
                             {
