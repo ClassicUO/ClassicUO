@@ -53,7 +53,9 @@ namespace ClassicUO.Game.UI.Controls
             string text,
             int groupnumber = 0,
             TEXT_ALIGN_TYPE align = TEXT_ALIGN_TYPE.TS_CENTER,
-            ushort hue = 0xFFFF
+            ushort hue = 0xFFFF,
+            bool unicode = true,
+            byte font = 0xFF
         ) : base(x, y, w, h)
         {
             _action = action;
@@ -63,10 +65,10 @@ namespace ClassicUO.Game.UI.Controls
                 TextLabel = new Label
                 (
                     text,
-                    true,
+                    unicode,
                     hue,
                     w,
-                    0xFF,
+                    font,
                     FontStyle.BlackBorder | FontStyle.Cropped,
                     align
                 )
