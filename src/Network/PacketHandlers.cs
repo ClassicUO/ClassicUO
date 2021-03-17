@@ -4923,23 +4923,26 @@ namespace ClassicUO.Network
             ref RawList<CustomBuildObject> list
         )
         {
-            byte* decompressedBytes = stackalloc byte[dlen];
+            //byte* decompressedBytes = stackalloc byte[dlen];
 
-            fixed (byte* srcPtr = &source[sourcePosition])
+            byte[] decompressedBytes = new byte[dlen];
+
+            fixed (byte* dbytesPtr = decompressedBytes)
             {
-                ZLib.Decompress
-                (
-                    (IntPtr) srcPtr,
-                    clen,
-                    0,
-                    (IntPtr) decompressedBytes,
-                    dlen
-                );
-            }
+                fixed (byte* srcPtr = &source[sourcePosition])
+                {
+                    ZLib.Decompress
+                    (
+                        (IntPtr) srcPtr,
+                        clen,
+                        0,
+                        (IntPtr) dbytesPtr,
+                        dlen
+                    );
+                }
 
-            _reader.SetData(decompressedBytes, dlen);
+                _reader.SetData(dbytesPtr, dlen);
 
-            {
                 ushort id = 0;
                 sbyte x = 0, y = 0, z = 0;
 
