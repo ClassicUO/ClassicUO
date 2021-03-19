@@ -471,7 +471,7 @@ namespace ClassicUO.Game.GameObjects
                         {
                             Client.Game.GetScene<GameScene>().AddLight(this, this, drawX, drawY);
 
-                            DrawInternal
+                            /*DrawInternal
                             (
                                 batcher,
                                 this,
@@ -488,7 +488,7 @@ namespace ClassicUO.Game.GameObjects
                                 false,
                                 alpha: HueVector.Z
                             );
-
+                            */
                             //break;
                         }
                     }
