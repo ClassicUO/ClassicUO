@@ -303,8 +303,6 @@ namespace ClassicUO.Game.UI.Gumps
 
             bool wantUpdate = _container.WantUpdateSize;
 
-            base.Update(totalTime, frameTime);
-
             _bottomLine.Y = Height - 98;
             _bottomComment.Y = Height - 85;
             _area.Height = _container.Height = Height - (150 + _diffY);
@@ -312,7 +310,9 @@ namespace ClassicUO.Game.UI.Gumps
             _skillsLabelSum.Y = _bottomComment.Y + 2;
             _checkReal.Y = _newGroupButton.Y - 6;
             _checkCaps.Y = _newGroupButton.Y + 7;
-            
+
+
+            base.Update(totalTime, frameTime);
 
             if (wantUpdate)
             {
