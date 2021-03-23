@@ -167,12 +167,14 @@ namespace ClassicUO.Network
             }
 
             int start = Position;
+            int i = 0;
 
             while (ReadUShort() != 0)
             {
+                i += 2;
             }
 
-            return Position == start ? string.Empty : Encoding.BigEndianUnicode.GetString(_buffer.ptr, start, Position - start);
+            return i <= 0 ? string.Empty : Encoding.BigEndianUnicode.GetString(_buffer.ptr, start, i);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -198,12 +200,13 @@ namespace ClassicUO.Network
             }
 
             int start = Position;
-
+            int i = 0;
             while (ReadUShortReversed() != 0)
             {
+                i += 2;
             }
 
-            return start == Position ? string.Empty : Encoding.Unicode.GetString(_buffer.ptr, start, Position - start);
+            return i <= 0 ? string.Empty : Encoding.Unicode.GetString(_buffer.ptr, start, i);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
