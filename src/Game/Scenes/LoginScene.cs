@@ -783,8 +783,8 @@ namespace ClassicUO.Game.Scenes
                         cityName,
                         cityBuilding,
                         descriptions != null ? descriptions[i] : string.Empty,
-                        (ushort) oldtowns[i].X,
-                        (ushort) oldtowns[i].Y,
+                        (ushort) oldtowns[i % oldtowns.Length].X,
+                        (ushort) oldtowns[i % oldtowns.Length].Y,
                         0,
                         0,
                         isNew
