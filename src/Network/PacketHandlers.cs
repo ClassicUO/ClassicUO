@@ -5315,7 +5315,7 @@ namespace ClassicUO.Network
 
                         if (descriptionCliloc != 0)
                         {
-                            description = "\n" + ClilocLoader.Instance.Translate((int) descriptionCliloc, String.IsNullOrEmpty(args_2) ? args : args_2, true);
+                            description = "\n" + ClilocLoader.Instance.Translate((int) descriptionCliloc, /*String.IsNullOrEmpty(args_2) ? args :*/ args_2, true);
 
                             if (description.Length < 2)
                             {
@@ -5329,7 +5329,7 @@ namespace ClassicUO.Network
 
                         if (wtfCliloc != 0)
                         {
-                            wtf = ClilocLoader.Instance.Translate((int) wtfCliloc, String.IsNullOrEmpty(args_3) ? args : args_3, true);
+                            wtf = ClilocLoader.Instance.Translate((int) wtfCliloc, /*String.IsNullOrEmpty(args_3) ? args :*/ args_3, true);
 
                             if (!string.IsNullOrWhiteSpace(wtf))
                             {
