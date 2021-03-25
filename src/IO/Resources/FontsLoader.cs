@@ -3028,14 +3028,13 @@ namespace ClassicUO.IO.Resources
                 if (c == ' ' || c == '=' || c == '\\')
                 {
                     ++i;
-
+                    bool inside = false;
                     int valueLength = 0;
-
                     for (; i < length; ++i)
                     {
                         c = content[i + start];
 
-                        if (c == ' ' || c == '=' || c == '\\' || c == '<' || c == '>')
+                        if (c == ' ' || c == '\\' || c == '<' || c == '>' || (c == '=' && !inside))
                         {
                             break;
                         }
@@ -3043,6 +3042,10 @@ namespace ClassicUO.IO.Resources
                         if (c != '"')
                         {
                             bufferValue[valueLength++] = char.IsLetter(c) ? char.ToLowerInvariant(c) : c;
+                        }
+                        else
+                        {
+                            inside = !inside;
                         }
                     }
 
@@ -3171,7 +3174,7 @@ namespace ClassicUO.IO.Resources
                 }
             }
 
-            ushort linkID = (ushort)_webLinks.Count;
+            ushort linkID = (ushort)(_webLinks.Count + 1);
 
             if (!_webLinks.TryGetValue(linkID, out WebLink webLink))
             {
