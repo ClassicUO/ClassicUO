@@ -344,6 +344,10 @@ namespace ClassicUO
 
                         break;
 
+                    case "last_server_name": 
+                        Settings.GlobalSettings.LastServerName = value;
+                        break;
+
                     case "fps":
                         int v = int.Parse(value);
 
