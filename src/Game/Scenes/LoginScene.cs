@@ -364,7 +364,7 @@ namespace ClassicUO.Game.Scenes
                 {
                     if (Servers[i].Name.Equals(name, StringComparison.InvariantCultureIgnoreCase))
                     {
-                        return Servers[i].Index;
+                        return i;
                     }
                 }
             }
