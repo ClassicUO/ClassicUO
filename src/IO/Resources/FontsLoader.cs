@@ -3163,7 +3163,7 @@ namespace ClassicUO.IO.Resources
         {
             foreach (KeyValuePair<ushort, WebLink> ll in _webLinks)
             {
-                if (StringHelper.UnsafeCompare(link, ll.Value.Link, linkLength))
+                if (ll.Value.Link.Length == linkLength && StringHelper.UnsafeCompare(link, ll.Value.Link, linkLength))
                 {
                     if (ll.Value.IsVisited)
                     {
