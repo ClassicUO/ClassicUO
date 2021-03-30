@@ -410,14 +410,15 @@ namespace ClassicUO.Game.UI.Gumps
                         if (radioButton.IsChecked)
                         {
                             NetClient.Socket.Send(new PGrayMenuResponse(LocalSerial, (ushort) ServerSerial, index));
-
+                            
+                            Dispose();
                             break;
                         }
 
                         index++;
                     }
 
-                    Dispose();
+                   
 
                     break;
             }
