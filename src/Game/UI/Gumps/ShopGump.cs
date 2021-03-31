@@ -689,7 +689,7 @@ namespace ClassicUO.Game.UI.Gumps
                 if (SerialHelper.IsMobile(LocalSerial))
                 {
                     ushort hue2 = Hue;
-                    AnimationFrameTexture frame = AnimationsLoader.Instance.GetBodyFrame(ref graphic, ref hue2, 1, 0, 1, true); 
+                    AnimationFrameTexture frame = AnimationsLoader.Instance.GetBodyFrame(ref graphic, ref hue2, GetAnimGroup(graphic), 1, 0, true); 
 
                     Add
                     (
