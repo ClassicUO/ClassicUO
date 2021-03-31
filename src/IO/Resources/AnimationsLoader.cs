@@ -4043,7 +4043,7 @@ namespace ClassicUO.IO.Resources
             ref AnimationEntry entry = ref _indexEntries[graphic];
 
             return ref entry;
-    }
+        }
     
         public ref AnimationDirectionEntry GetDirectionEntry(ushort animID, byte group, byte direction, bool uop = false)
         {
