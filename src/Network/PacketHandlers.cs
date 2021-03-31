@@ -6679,7 +6679,7 @@ namespace ClassicUO.Network
                         }
                         else
                         {
-                            text = ClilocLoader.Instance.Translate(int.Parse(gparams[1]), args, true);
+                            text = ClilocLoader.Instance.Translate(int.Parse(gparams[1]), args, false);
                         }
                     }
                     else
@@ -6705,6 +6705,7 @@ namespace ClassicUO.Network
                         }
 
                         last.Priority = ClickPriority.High;
+                        last.AcceptMouseInput = true;
                     }
                 }
                 else if (string.Equals(entry, "itemproperty", StringComparison.InvariantCultureIgnoreCase))
