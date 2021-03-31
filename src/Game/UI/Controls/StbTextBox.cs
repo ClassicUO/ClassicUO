@@ -748,9 +748,16 @@ namespace ClassicUO.Game.UI.Controls
             }
             else
             {
-                if (_maxCharCount >= 0 && text.Length > _maxCharCount)
+                if (_maxCharCount >= 0)
                 {
-                    text = text.Substring(0, _maxCharCount);
+                    if (NumbersOnly)
+                    {
+                        // TODO ?
+                    }
+                    else if (text.Length > _maxCharCount)
+                    {
+                        text = text.Substring(0, _maxCharCount);
+                    }
                 }
 
                 Stb.ClearState(!Multiline);
@@ -834,6 +841,17 @@ namespace ClassicUO.Game.UI.Controls
                         if (!char.IsNumber(c[i]))
                         {
                             _is_writing = false;
+
+                            return;
+                        }
+                    }
+
+                    if (_maxCharCount > 0 && int.TryParse(Stb.text + c, out int val))
+                    {
+                        if (val > _maxCharCount)
+                        {
+                            _is_writing = false;
+                            SetText(_maxCharCount.ToString());
 
                             return;
                         }

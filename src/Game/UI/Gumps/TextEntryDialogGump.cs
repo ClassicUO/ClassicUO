@@ -61,16 +61,17 @@ namespace ClassicUO.Game.UI.Gumps
             X = x;
             Y = y;
 
-            Add(new GumpPic(0, 0, 0x0474, 0));
+            GumpPic background = new GumpPic(0, 0, 0x0474, 0);
+            Add(background);
 
-            Label label = new Label(text, false, 0x0386, font: 2)
+            Label label = new Label(text, false, 0x0386, font: 2, maxwidth: background.Width - 110)
             {
                 X = 60, Y = 50
             };
 
             Add(label);
 
-            label = new Label(description, false, 0x0386, font: 2)
+            label = new Label(description, false, 0x0386, font: 2, maxwidth: background.Width - 110)
             {
                 X = 60,
                 Y = 108

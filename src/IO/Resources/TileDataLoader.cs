@@ -287,61 +287,7 @@ namespace ClassicUO.IO.Resources
                     //    reader.ReleaseData();
                     //}
 
-                    string pathdef = UOFileManager.GetUOFilePath("art.def");
-
-                    if (File.Exists(pathdef))
-                    {
-                        using (DefReader reader = new DefReader(pathdef, 1))
-                        {
-                            while (reader.Next())
-                            {
-                                int index = reader.ReadInt();
-
-                                if (index < 0 || index >= Constants.MAX_LAND_DATA_INDEX_COUNT + StaticData.Length)
-                                {
-                                    continue;
-                                }
-
-                                int[] group = reader.ReadGroup();
-
-                                if (group == null)
-                                {
-                                    continue;
-                                }
-
-                                for (int i = 0; i < group.Length; i++)
-                                {
-                                    int checkIndex = group[i];
-
-                                    if (checkIndex < 0 || checkIndex >= Constants.MAX_LAND_DATA_INDEX_COUNT + StaticData.Length)
-                                    {
-                                        continue;
-                                    }
-
-                                    if (index < Constants.MAX_LAND_DATA_INDEX_COUNT && checkIndex < Constants.MAX_LAND_DATA_INDEX_COUNT && checkIndex < LandData.Length && index < LandData.Length && !LandData[checkIndex].Equals(default) && LandData[index].Equals(default))
-                                    {
-                                        LandData[index] = LandData[checkIndex];
-
-                                        break;
-                                    }
-
-                                    if (index >= Constants.MAX_LAND_DATA_INDEX_COUNT && checkIndex >= Constants.MAX_LAND_DATA_INDEX_COUNT)
-                                    {
-                                        checkIndex -= Constants.MAX_LAND_DATA_INDEX_COUNT;
-                                        checkIndex &= 0x3FFF;
-                                        index -= Constants.MAX_LAND_DATA_INDEX_COUNT;
-
-                                        if (StaticData[index].Equals(default) && !StaticData[checkIndex].Equals(default))
-                                        {
-                                            StaticData[index] = StaticData[checkIndex];
-
-                                            break;
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
+                  
 
                     END_2:
                     tileData.Dispose();

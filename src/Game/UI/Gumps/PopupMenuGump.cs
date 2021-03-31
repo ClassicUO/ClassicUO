@@ -67,17 +67,9 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (item.ReplacedHue != 0)
                 {
-                    uint h = HuesHelper.Color16To32(item.ReplacedHue);
-                    (byte b, byte g, byte r, byte a) = HuesHelper.GetBGRA(h);
-
-                    Color c = new Color(r, g, b, a);
-
-                    if (c.A == 0)
-                    {
-                        c.A = 0xFF;
-                    }
-
-                    FontsLoader.Instance.SetUseHTML(true, HuesHelper.RgbaToArgb(c.PackedValue));
+                    uint h = (HuesHelper.Color16To32(item.ReplacedHue) << 8) | 0xFF;
+                    
+                    FontsLoader.Instance.SetUseHTML(true, h);
                 }
 
                 Label label = new Label(text, true, hue, font: 1)

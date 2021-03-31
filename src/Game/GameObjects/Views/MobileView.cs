@@ -444,7 +444,7 @@ namespace ClassicUO.Game.GameObjects
                                     drawX,
                                     drawY,
                                     IsFlipped,
-                                    animIndex,
+                                     animIndex, //item.AnimIndex,
                                     false,
                                     graphic,
                                     animGroup,
@@ -471,7 +471,25 @@ namespace ClassicUO.Game.GameObjects
                         {
                             Client.Game.GetScene<GameScene>().AddLight(this, this, drawX, drawY);
 
-                            break;
+                            /*DrawInternal
+                            (
+                                batcher,
+                                this,
+                                item,
+                                drawX,
+                                drawY,
+                                IsFlipped,
+                                animIndex,
+                                false,
+                                graphic,
+                                animGroup,
+                                dir,
+                                isHuman,
+                                false,
+                                alpha: HueVector.Z
+                            );
+                            */
+                            //break;
                         }
                     }
                 }
@@ -588,11 +606,20 @@ namespace ClassicUO.Game.GameObjects
                 ResetHueVector();
                 ShaderHueTranslator.GetHueVector(ref HueVector, hue, partialHue, alpha);
 
-                if (_transform)
-                {
-                    const float UPPER_BODY_RATIO = 0.35f;
-                    const float MID_BODY_RATIO = 0.60f;
-                    const float LOWER_BODY_RATIO = 0.94f;
+                    // this is an hack to make entities partially hued. OG client seems to ignore this.
+                    /*if (entity != null && entity.ItemData.AnimID == 0 && entity.ItemData.IsLight)
+                    {
+                        HueVector.X = entity.Hue == 0 ? owner.Hue : entity.Hue;
+                        HueVector.Y = ShaderHueTranslator.SHADER_LIGHTS;
+                        HueVector.Z = alpha;
+                    }
+                    */
+
+                    if (_transform)
+                    {
+                        const float UPPER_BODY_RATIO = 0.35f;
+                        const float MID_BODY_RATIO = 0.60f;
+                        const float LOWER_BODY_RATIO = 0.94f;
 
                     if (entity == null && isHuman)
                     {

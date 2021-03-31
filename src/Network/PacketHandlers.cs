@@ -4915,23 +4915,26 @@ namespace ClassicUO.Network
             ref RawList<CustomBuildObject> list
         )
         {
-            byte* decompressedBytes = stackalloc byte[dlen];
+            //byte* decompressedBytes = stackalloc byte[dlen];
 
-            fixed (byte* srcPtr = &source[sourcePosition])
+            byte[] decompressedBytes = new byte[dlen];
+
+            fixed (byte* dbytesPtr = decompressedBytes)
             {
-                ZLib.Decompress
-                (
-                    (IntPtr) srcPtr,
-                    clen,
-                    0,
-                    (IntPtr) decompressedBytes,
-                    dlen
-                );
-            }
+                fixed (byte* srcPtr = &source[sourcePosition])
+                {
+                    ZLib.Decompress
+                    (
+                        (IntPtr) srcPtr,
+                        clen,
+                        0,
+                        (IntPtr) dbytesPtr,
+                        dlen
+                    );
+                }
 
-            _reader.SetData(decompressedBytes, dlen);
+                _reader.SetData(dbytesPtr, dlen);
 
-            {
                 ushort id = 0;
                 sbyte x = 0, y = 0, z = 0;
 
@@ -5294,16 +5297,17 @@ namespace ClassicUO.Network
                         uint wtfCliloc = p.ReadUInt();
 
                         ushort arg_length = p.ReadUShort();
-                        string args = p.ReadUnicodeReversed();
+                        p.Skip(4);
+                        string args = p.ReadUnicodeReversed();     
                         string title = ClilocLoader.Instance.Translate((int) titleCliloc, args, true);
 
                         arg_length = p.ReadUShort();
-                        args = p.ReadUnicodeReversed();
+                        string args_2 = p.ReadUnicodeReversed();
                         string description = string.Empty;
 
                         if (descriptionCliloc != 0)
                         {
-                            description = "\n" + ClilocLoader.Instance.Translate((int) descriptionCliloc, args, true);
+                            description = "\n" + ClilocLoader.Instance.Translate((int) descriptionCliloc, String.IsNullOrEmpty(args_2) ? args : args_2, true);
 
                             if (description.Length < 2)
                             {
@@ -5312,12 +5316,12 @@ namespace ClassicUO.Network
                         }
 
                         arg_length = p.ReadUShort();
-                        args = p.ReadUnicodeReversed();
+                        string args_3 = p.ReadUnicodeReversed();
                         string wtf = string.Empty;
 
                         if (wtfCliloc != 0)
                         {
-                            wtf = ClilocLoader.Instance.Translate((int) wtfCliloc, args, true);
+                            wtf = ClilocLoader.Instance.Translate((int) wtfCliloc, String.IsNullOrEmpty(args_3) ? args : args_3, true);
 
                             if (!string.IsNullOrWhiteSpace(wtf))
                             {
@@ -6659,7 +6663,7 @@ namespace ClassicUO.Network
                         }
                         else
                         {
-                            text = ClilocLoader.Instance.Translate(int.Parse(gparams[1]), args, true);
+                            text = ClilocLoader.Instance.Translate(int.Parse(gparams[1]), args, false);
                         }
                     }
                     else
@@ -6685,6 +6689,7 @@ namespace ClassicUO.Network
                         }
 
                         last.Priority = ClickPriority.High;
+                        last.AcceptMouseInput = true;
                     }
                 }
                 else if (string.Equals(entry, "itemproperty", StringComparison.InvariantCultureIgnoreCase))

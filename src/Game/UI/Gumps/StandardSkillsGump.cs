@@ -63,6 +63,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         private readonly List<SkillsGroupControl> _skillsControl = new List<SkillsGroupControl>();
         private readonly Label _skillsLabelSum;
+        private readonly NiceButton _resetGroups;
 
         public StandardSkillsGump() : base(0, 0)
         {
@@ -118,11 +119,13 @@ namespace ClassicUO.Game.UI.Gumps
             );
 
             //new group
+            int x = 60;
+
             Add
             (
                 _newGroupButton = new Button(0, 0x083A, 0x083A, 0x083A)
                 {
-                    X = 60,
+                    X = x,
                     Y = Height,
                     ContainsByBounds = true,
                     ButtonAction = ButtonAction.Activate
@@ -159,29 +162,17 @@ namespace ClassicUO.Game.UI.Gumps
             _checkCaps.ValueChanged += UpdateSkillsValues;
 
 
-            if (World.Player != null)
+            LoadSkills();
+
+            Add(_resetGroups = new NiceButton(_scrollArea.X + 25, _scrollArea.Y + 7, 100, 18,
+                                              ButtonAction.Activate, ResGumps.ResetGroups,
+                                              unicode: false,
+                                              font: 6)
             {
-                foreach (SkillsGroup g in SkillsGroupManager.Groups)
-                {
-                    SkillsGroupControl control = new SkillsGroupControl(g, 3, 3);
-                    _skillsControl.Add(control);
-                    _container.Add(control);
-
-                    control.IsMinimized = true;
-
-                    int count = g.Count;
-
-                    for (int i = 0; i < count; i++)
-                    {
-                        byte index = g.GetSkill(i);
-
-                        if (index < SkillsLoader.Instance.SkillsCount)
-                        {
-                            control.AddSkill(index, 0, 17 + i * 17);
-                        }
-                    }
-                }
-            }
+                ButtonParameter = 1,
+                IsSelectable = false,
+                //Alpha = 1f
+            });
 
             _hitBox = new HitBox(160, 0, 23, 24);
             Add(_hitBox);
@@ -264,11 +255,53 @@ namespace ClassicUO.Game.UI.Gumps
                 _container.WantUpdateSize = true;
                 _container.ReArrangeChildren();
             }
+            else if (buttonID == 1) // reset
+            {
+                _skillsControl.Clear();
+                _container.Clear();
+
+                SkillsGroupManager.Groups.Clear();
+                SkillsGroupManager.MakeDefault();
+
+                LoadSkills();
+                
+                _container.WantUpdateSize = true;
+                _container.ReArrangeChildren();
+            }
+        }
+
+        private void LoadSkills()
+        {
+            if (World.Player != null)
+            {
+                foreach (SkillsGroup g in SkillsGroupManager.Groups)
+                {
+                    SkillsGroupControl control = new SkillsGroupControl(g, 3, 3);
+                    _skillsControl.Add(control);
+                    _container.Add(control);
+
+                    control.IsMinimized = true;
+
+                    int count = g.Count;
+
+                    for (int i = 0; i < count; i++)
+                    {
+                        byte index = g.GetSkill(i);
+
+                        if (index < SkillsLoader.Instance.SkillsCount)
+                        {
+                            control.AddSkill(index, 0, 17 + i * 17);
+                        }
+                    }
+                }
+            }
         }
 
         public override void Update(double totalTime, double frameTime)
         {
             WantUpdateSize = true;
+
+            bool wantUpdate = _container.WantUpdateSize;
 
             _bottomLine.Y = Height - 98;
             _bottomComment.Y = Height - 85;
@@ -278,11 +311,10 @@ namespace ClassicUO.Game.UI.Gumps
             _checkReal.Y = _newGroupButton.Y - 6;
             _checkCaps.Y = _newGroupButton.Y + 7;
 
-            bool wantedResize = _container.WantUpdateSize;
 
             base.Update(totalTime, frameTime);
 
-            if (wantedResize)
+            if (wantUpdate)
             {
                 _container.ReArrangeChildren();
             }

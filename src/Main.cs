@@ -311,6 +311,12 @@ namespace ClassicUO
 
                         break;
 
+                    case "filesoverride":
+                    case "uofilesoverride":
+                        UOFilesOverrideMap.OverrideFile = value;
+
+                        break;
+
                     case "ultimaonlinedirectory":
                     case "uopath":
                         Settings.GlobalSettings.UltimaOnlineDirectory = value;
@@ -336,6 +342,10 @@ namespace ClassicUO
                     case "lastservernum":
                         Settings.GlobalSettings.LastServerNum = ushort.Parse(value);
 
+                        break;
+
+                    case "last_server_name": 
+                        Settings.GlobalSettings.LastServerName = value;
                         break;
 
                     case "fps":

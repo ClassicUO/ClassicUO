@@ -86,7 +86,7 @@ namespace ClassicUO.Game.Data
 
                     if ((flags & 0x20) != 0)
                     {
-                        replaced = (ushort) (p.ReadUShort() & 0x3FFF);
+                        replaced = (ushort) (p.ReadUShort() );
                     }
                 }
 

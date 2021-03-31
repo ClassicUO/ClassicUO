@@ -607,6 +607,7 @@ namespace ClassicUO.Game.GameObjects
                 int currentDelay = Constants.CHARACTER_ANIMATION_DELAY;
 
                 byte animGroup = GetGroupForAnimation(this, id, true);
+
                 bool mirror = false;
                 AnimationsLoader.Instance.GetAnimDirection(ref dir, ref mirror);
 
@@ -702,6 +703,12 @@ namespace ClassicUO.Game.GameObjects
                     World.CorpseManager.Remove(0, Serial);
                     World.RemoveMobile(Serial);
                 }
+
+                //for (var item = Items; item != null; item = item.Next)
+                //{
+                //    Item it = (Item)item;
+                //    it.ProcessAnimation(out _, true);
+                //}
 
                 LastAnimationChangeTime = Time.Ticks + currentDelay;
             }

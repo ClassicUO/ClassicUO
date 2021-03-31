@@ -338,18 +338,18 @@ namespace ClassicUO.Resources {
                 return ResourceManager.GetString("AutoOpenDoors", resourceCulture);
             }
         }
-
+        
         /// <summary>
-        ///   Looks up a localized string similar to BackpackStyle.
+        ///   Looks up a localized string similar to Select Character Backpack Style.
         /// </summary>
         public static string BackpackStyle {
             get {
                 return ResourceManager.GetString("BackpackStyle", resourceCulture);
             }
         }
-
+        
         /// <summary>
-        ///   Looks up a localized string similar to BackpackStyle_Default.
+        ///   Looks up a localized string similar to Default.
         /// </summary>
         public static string BackpackStyle_Default {
             get {
@@ -358,7 +358,7 @@ namespace ClassicUO.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to BackpackStyle_GhoulSkin.
+        ///   Looks up a localized string similar to GhoulSkin.
         /// </summary>
         public static string BackpackStyle_GhoulSkin {
             get {
@@ -367,7 +367,7 @@ namespace ClassicUO.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to BackpackStyle_PolarBear.
+        ///   Looks up a localized string similar to PolarBear.
         /// </summary>
         public static string BackpackStyle_PolarBear {
             get {
@@ -376,14 +376,14 @@ namespace ClassicUO.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to BackpackStyle_Suede.
+        ///   Looks up a localized string similar to Suede.
         /// </summary>
         public static string BackpackStyle_Suede {
             get {
                 return ResourceManager.GetString("BackpackStyle_Suede", resourceCulture);
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized string similar to Backup.
         /// </summary>
@@ -392,7 +392,7 @@ namespace ClassicUO.Resources {
                 return ResourceManager.GetString("Backup", resourceCulture);
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized string similar to Base.
         /// </summary>
@@ -2807,6 +2807,15 @@ namespace ClassicUO.Resources {
         public static string ReproduceSoundsAndMusic {
             get {
                 return ResourceManager.GetString("ReproduceSoundsAndMusic", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Reset groups.
+        /// </summary>
+        public static string ResetGroups {
+            get {
+                return ResourceManager.GetString("ResetGroups", resourceCulture);
             }
         }
         

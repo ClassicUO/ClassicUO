@@ -356,6 +356,40 @@ namespace ClassicUO.Game.Scenes
             }
         }
 
+        public int GetServerIndexByName(string name)
+        {
+            if (!string.IsNullOrWhiteSpace(name))
+            {
+                for (int i = 0; i < Servers.Length; i++)
+                {
+                    if (Servers[i].Name.Equals(name, StringComparison.InvariantCultureIgnoreCase))
+                    {
+                        return i;
+                    }
+                }
+            }
+
+            return -1;
+        }
+
+        public int GetServerIndexFromSettings()
+        {
+            string name = Settings.GlobalSettings.LastServerName;
+            int index = GetServerIndexByName(name);
+
+            if (index == -1)
+            {
+                index = Settings.GlobalSettings.LastServerNum;
+            }
+
+            if (index < 0 || index >= Servers.Length)
+            {
+                index = 0;
+            }
+
+            return index;
+        }
+
         public void SelectServer(byte index)
         {
             if (CurrentLoginStep == LoginSteps.ServerSelection)
@@ -371,6 +405,7 @@ namespace ClassicUO.Game.Scenes
                 }
 
                 Settings.GlobalSettings.LastServerNum = (ushort) (1 + ServerIndex);
+                Settings.GlobalSettings.LastServerName = Servers[ServerIndex].Name;
                 Settings.GlobalSettings.Save();
 
                 CurrentLoginStep = LoginSteps.LoginInToServer;
@@ -594,15 +629,9 @@ namespace ClassicUO.Game.Scenes
             {
                 if (Servers.Length != 0)
                 {
-                    int index = Settings.GlobalSettings.LastServerNum;
+                    int index = GetServerIndexFromSettings();
 
-                    if (index <= 0 || index > Servers.Length)
-                    {
-                        Log.Warn($"Wrong server index: {index}");
-                        index = 1;
-                    }
-
-                    SelectServer((byte) Servers[index - 1].Index);
+                    SelectServer((byte)Servers[index].Index);
                 }
             }
         }
@@ -783,8 +812,8 @@ namespace ClassicUO.Game.Scenes
                         cityName,
                         cityBuilding,
                         descriptions != null ? descriptions[i] : string.Empty,
-                        (ushort) oldtowns[i].X,
-                        (ushort) oldtowns[i].Y,
+                        (ushort) oldtowns[i % oldtowns.Length].X,
+                        (ushort) oldtowns[i % oldtowns.Length].Y,
                         0,
                         0,
                         isNew
