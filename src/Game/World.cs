@@ -31,6 +31,7 @@
 #endregion
 
 using System.Collections.Generic;
+using System.Linq;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
@@ -576,32 +577,13 @@ namespace ClassicUO.Game
             );
         }
 
-        public static uint SearchObject(uint serial, ScanTypeObject scanType, ScanModeObject scanMode)
+        public static uint FindNearest(ScanTypeObject scanType)
         {
-            Entity first = null, selected = null;
             int distance = int.MaxValue;
-            bool currentTargetFound = false;
+            uint serial = 0;
 
             if (scanType == ScanTypeObject.Objects)
             {
-                if (scanMode == ScanModeObject.Nearest)
-                {
-                    foreach (Item item in Items)
-                    {
-                        if (item.IsMulti || item.IsDestroyed || !item.OnGround)
-                        {
-                            continue;
-                        }
-
-                        int dist = item.Distance;
-
-                        if (dist < distance)
-                        {
-                            distance = dist;
-                        }
-                    }
-                }
-
                 foreach (Item item in Items)
                 {
                     if (item.IsMulti || item.IsDestroyed || !item.OnGround)
@@ -609,122 +591,15 @@ namespace ClassicUO.Game
                         continue;
                     }
 
-                    if (!SerialHelper.IsValid(serial))
+                    if (item.Distance < distance)
                     {
-                        return item;
-                    }
-
-                    if (scanMode == ScanModeObject.Next)
-                    {
-                        if (serial == item)
-                        {
-                            currentTargetFound = true;
-
-                            continue;
-                        }
-
-                        if (first == null)
-                        {
-                            first = item;
-                        }
-
-                        if (currentTargetFound)
-                        {
-                            selected = item;
-
-                            break;
-                        }
-                    }
-                    else if (scanMode == ScanModeObject.Previous)
-                    {
-                        if (!currentTargetFound && first != null)
-                        {
-                            selected = first;
-                        }
-
-                        if (serial == item)
-                        {
-                            currentTargetFound = true;
-
-                            continue;
-                        }
-
-                        first = item;
-                    }
-                    else if (scanMode == ScanModeObject.Nearest)
-                    {
-                        if (item.Distance > distance)
-                        {
-                            continue;
-                        }
-
-                        if (serial == item.Serial)
-                        {
-                            currentTargetFound = true;
-
-                            continue;
-                        }
-
-                        if (first == null)
-                        {
-                            first = item;
-                        }
-
-                        if (currentTargetFound)
-                        {
-                            selected = item;
-
-                            break;
-                        }
-                    }
-                    else
-                    {
-                        break;
+                        distance = item.Distance;
+                        serial = item.Serial;
                     }
                 }
             }
             else
             {
-                if (scanMode == ScanModeObject.Nearest)
-                {
-                    foreach (Mobile mobile in Mobiles)
-                    {
-                        if (mobile.IsDestroyed || mobile == Player)
-                        {
-                            continue;
-                        }
-
-                        if (scanType == ScanTypeObject.Party)
-                        {
-                            if (!Party.Contains(mobile))
-                            {
-                                continue;
-                            }
-                        }
-                        else if (scanType == ScanTypeObject.Followers)
-                        {
-                            if (!(mobile.IsRenamable && mobile.NotorietyFlag != NotorietyFlag.Invulnerable && mobile.NotorietyFlag != NotorietyFlag.Enemy))
-                            {
-                                continue;
-                            }
-                        }
-                        else if (scanType == ScanTypeObject.Hostile)
-                        {
-                            if (mobile.NotorietyFlag == NotorietyFlag.Ally || mobile.NotorietyFlag == NotorietyFlag.Innocent || mobile.NotorietyFlag == NotorietyFlag.Invulnerable)
-                            {
-                                continue;
-                            }
-                        }
-
-                        int dist = mobile.Distance;
-
-                        if (dist < distance)
-                        {
-                            distance = dist;
-                        }
-                    }
-                }
-
                 foreach (Mobile mobile in Mobiles)
                 {
                     if (mobile.IsDestroyed || mobile == Player)
@@ -732,148 +607,128 @@ namespace ClassicUO.Game
                         continue;
                     }
 
-                    if (scanMode == ScanModeObject.Next)
+                    switch (scanType)
                     {
-                        if (scanType == ScanTypeObject.Party)
-                        {
+                        case ScanTypeObject.Party:
                             if (!Party.Contains(mobile))
                             {
                                 continue;
                             }
-                        }
-                        else if (scanType == ScanTypeObject.Followers)
-                        {
-                            if (!(mobile.IsRenamable && mobile.NotorietyFlag != NotorietyFlag.Invulnerable && mobile.NotorietyFlag != NotorietyFlag.Enemy))
-                            {
-                                continue;
-                            }
-                        }
-                        else if (scanType == ScanTypeObject.Hostile)
-                        {
-                            if (mobile.NotorietyFlag == NotorietyFlag.Ally || mobile.NotorietyFlag == NotorietyFlag.Innocent || mobile.NotorietyFlag == NotorietyFlag.Invulnerable)
-                            {
-                                continue;
-                            }
-                        }
-
-                        if (serial == mobile)
-                        {
-                            currentTargetFound = true;
-
-                            continue;
-                        }
-
-                        if (first == null)
-                        {
-                            first = mobile;
-                        }
-
-                        if (currentTargetFound)
-                        {
-                            selected = mobile;
-
                             break;
-                        }
-                    }
-                    else if (scanMode == ScanModeObject.Previous)
-                    {
-                        if (scanType == ScanTypeObject.Party)
-                        {
-                            if (!Party.Contains(mobile))
-                            {
-                                continue;
-                            }
-                        }
-                        else if (scanType == ScanTypeObject.Followers)
-                        {
+                        case ScanTypeObject.Followers:
                             if (!(mobile.IsRenamable && mobile.NotorietyFlag != NotorietyFlag.Invulnerable && mobile.NotorietyFlag != NotorietyFlag.Enemy))
                             {
                                 continue;
                             }
-                        }
-                        else if (scanType == ScanTypeObject.Hostile)
-                        {
-                            if (mobile.NotorietyFlag == NotorietyFlag.Ally || mobile.NotorietyFlag == NotorietyFlag.Innocent || mobile.NotorietyFlag == NotorietyFlag.Invulnerable)
-                            {
-                                continue;
-                            }
-                        }
-
-                        if (!currentTargetFound && first != null)
-                        {
-                            selected = first;
-                        }
-
-                        if (serial == mobile)
-                        {
-                            currentTargetFound = true;
-
-                            continue;
-                        }
-
-                        first = mobile;
-                    }
-                    else if (scanMode == ScanModeObject.Nearest)
-                    {
-                        if (scanType == ScanTypeObject.Party)
-                        {
-                            if (!Party.Contains(mobile))
-                            {
-                                continue;
-                            }
-                        }
-                        else if (scanType == ScanTypeObject.Followers)
-                        {
-                            if (!(mobile.IsRenamable && mobile.NotorietyFlag != NotorietyFlag.Invulnerable && mobile.NotorietyFlag != NotorietyFlag.Enemy))
-                            {
-                                continue;
-                            }
-                        }
-                        else if (scanType == ScanTypeObject.Hostile)
-                        {
-                            if (mobile.NotorietyFlag == NotorietyFlag.Ally || mobile.NotorietyFlag == NotorietyFlag.Innocent || mobile.NotorietyFlag == NotorietyFlag.Invulnerable)
-                            {
-                                continue;
-                            }
-                        }
-
-                        if (mobile.Distance > distance)
-                        {
-                            continue;
-                        }
-
-                        if (serial == mobile.Serial)
-                        {
-                            currentTargetFound = true;
-
-                            continue;
-                        }
-
-                        if (first == null)
-                        {
-                            first = mobile;
-                        }
-
-                        if (currentTargetFound)
-                        {
-                            selected = mobile;
-
                             break;
-                        }
+                        case ScanTypeObject.Hostile:
+                            if (mobile.NotorietyFlag == NotorietyFlag.Ally || mobile.NotorietyFlag == NotorietyFlag.Innocent || mobile.NotorietyFlag == NotorietyFlag.Invulnerable)
+                            {
+                                continue;
+                            }
+                            break;
+                        case ScanTypeObject.Objects:
+                            /* This was handled separately above */
+                            continue;
                     }
-                    else
+
+                    if (mobile.Distance < distance)
                     {
-                        break;
+                        distance = mobile.Distance;
+                        serial = mobile.Serial;
                     }
                 }
             }
 
-            if (first != null && selected == null)
+            return serial;
+        }
+
+        public static uint FindNext(ScanTypeObject scanType, uint lastSerial, bool reverse)
+        {
+            bool found = false;
+
+            if (scanType == ScanTypeObject.Objects)
             {
-                return first;
+                var items = reverse ? Items.Reverse() : Items;
+                foreach (Item item in items)
+                {
+                    if (item.IsMulti || item.IsDestroyed || !item.OnGround)
+                    {
+                        continue;
+                    }
+
+                    if (lastSerial == 0)
+                    {
+                        return item.Serial;
+                    }
+                    else if (item.Serial == lastSerial)
+                    {
+                        found = true;
+                    }
+                    else if (found)
+                    {
+                        return item.Serial;
+                    }
+                }
+            }
+            else
+            {
+                IEnumerable<Mobile> mobiles = reverse ? Mobiles.Reverse() : Mobiles;
+                foreach (Mobile mobile in mobiles)
+                {
+                    if (mobile.IsDestroyed || mobile == Player)
+                    {
+                        continue;
+                    }
+
+                    switch (scanType)
+                    {
+                        case ScanTypeObject.Party:
+                            if (!Party.Contains(mobile))
+                            {
+                                continue;
+                            }
+                            break;
+                        case ScanTypeObject.Followers:
+                            if (!(mobile.IsRenamable && mobile.NotorietyFlag != NotorietyFlag.Invulnerable && mobile.NotorietyFlag != NotorietyFlag.Enemy))
+                            {
+                                continue;
+                            }
+                            break;
+                        case ScanTypeObject.Hostile:
+                            if (mobile.NotorietyFlag == NotorietyFlag.Ally || mobile.NotorietyFlag == NotorietyFlag.Innocent || mobile.NotorietyFlag == NotorietyFlag.Invulnerable)
+                            {
+                                continue;
+                            }
+                            break;
+                        case ScanTypeObject.Objects:
+                            /* This was handled separately above */
+                            continue;
+                    }
+
+                    if (lastSerial == 0)
+                    {
+                        return mobile.Serial;
+                    }
+                    else if (mobile.Serial == lastSerial)
+                    {
+                        found = true;
+                    }
+                    else if (found)
+                    {
+                        return mobile.Serial;
+                    }
+                }
             }
 
-            return selected?.Serial ?? 0;
+            if (lastSerial != 0)
+            {
+                /* If we get here, it means we didn't find anything but we started with a serial number. That means
+                 * if we restart the search from the beginning it may find something again. */
+                return FindNext(scanType, 0, reverse);
+            }
+
+            return 0;
         }
 
         public static void Clear()

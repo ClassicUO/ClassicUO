@@ -1120,7 +1120,7 @@ namespace ClassicUO.Game.Managers
 
                 case MacroType.TargetNext:
 
-                    uint sel_obj = World.SearchObject(TargetManager.LastTargetInfo.Serial, ScanTypeObject.Mobiles, ScanModeObject.Next);
+                    uint sel_obj = World.FindNext(ScanTypeObject.Mobiles, TargetManager.LastTargetInfo.Serial, false);
 
                     if (SerialHelper.IsValid(sel_obj))
                     {
@@ -1373,7 +1373,7 @@ namespace ClassicUO.Game.Managers
                     // 0 - SelectNext
                     // 1 - SelectPrevious
                     // 2 - SelectNearest
-                    int scanRange = macro.Code - MacroType.SelectNext;
+                    ScanModeObject scanRange = (ScanModeObject)(macro.Code - MacroType.SelectNext);
 
                     // scantype:
                     // 0 - Hostile (only hostile mobiles: gray, criminal, enemy, murderer)
@@ -1381,9 +1381,16 @@ namespace ClassicUO.Game.Managers
                     // 2 - Follower (only your followers)
                     // 3 - Object (???)
                     // 4 - Mobile (any mobiles)
-                    int scantype = macro.SubCode - MacroSubType.Hostile;
+                    ScanTypeObject scantype = (ScanTypeObject)(macro.SubCode - MacroSubType.Hostile);
 
-                    SetLastTarget(World.SearchObject(TargetManager.SelectedTarget, (ScanTypeObject) scantype, (ScanModeObject) scanRange));
+                    if (scanRange == ScanModeObject.Nearest)
+                    {
+                        SetLastTarget(World.FindNearest(scantype));
+                    }
+                    else
+                    {
+                        SetLastTarget(World.FindNext(scantype, TargetManager.SelectedTarget, scanRange == ScanModeObject.Previous));
+                    }
 
                     break;
 
@@ -1490,7 +1497,7 @@ namespace ClassicUO.Game.Managers
                     break;
 
                 case MacroType.UsePotion:
-                    scantype = macro.SubCode - MacroSubType.ConfusionBlastPotion;
+                    scantype = (ScanTypeObject)(macro.SubCode - MacroSubType.ConfusionBlastPotion);
 
                     ushort start = (ushort) (0x0F06 + scantype);
 
