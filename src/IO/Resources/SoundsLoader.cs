@@ -33,7 +33,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -318,19 +317,21 @@ namespace ClassicUO.IO.Resources
             // This will list all case variants of the filename even on file systems that
             // are case sensitive.
             Regex  pattern = new Regex($"^{name}.mp3", RegexOptions.IgnoreCase);
-            string[] fileList = Directory.GetFiles(dir, "*.mp3", SearchOption.AllDirectories).Where(path => pattern.IsMatch(Path.GetFileName(path))).ToArray();
+            //string[] fileList = Directory.GetFiles(dir, "*.mp3", SearchOption.AllDirectories).Where(path => pattern.IsMatch(Path.GetFileName(path))).ToArray();
+            string[] fileList = Directory.GetFiles(dir, "*.mp3", SearchOption.AllDirectories);
+            fileList = Array.FindAll(fileList, path => pattern.IsMatch(Path.GetFileName(path)));
 
-            if (fileList.Any())
+            if (fileList != null && fileList.Length != 0)
             {
-                if (fileList.Count() > 1)
+                if (fileList.Length > 1)
                 {
                     // More than one file with the same name but different case spelling found
                     Log.Warn($"Ambiguous File reference for {name}. More than one file found with different spellings.");
                 }
 
-                Log.Debug($"Loading music:\t\t{fileList.First()}");
+                Log.Debug($"Loading music:\t\t{fileList[0]}");
 
-                return Path.GetFileName(fileList.First());
+                return Path.GetFileName(fileList[0]);
             }
             
             // If we've made it this far, there is no file with that name, regardless of case spelling
