@@ -3334,7 +3334,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 case 1: // general
                     _sliderFPS.Value = 60;
-                    _reduceFPSWhenInactive.IsChecked = false;
+                    _reduceFPSWhenInactive.IsChecked = true;
                     _highlightObjects.IsChecked = true;
                     _enableTopbar.IsChecked = false;
                     _holdDownKeyTab.IsChecked = true;
