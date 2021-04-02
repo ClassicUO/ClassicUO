@@ -431,7 +431,7 @@ namespace ClassicUO.Game.UI.Controls
 
             int offsetTop = Math.Max(th_0_height, th_2_height) - th_1_height;
             int offsetBottom = Math.Max(th_5_height, th_7_height) - th_6_height;
-            int offsetLeft = Math.Max(th_0_width, th_5_width) - th_2_width;
+            int offsetLeft = Math.Max(0, Math.Max(th_0_width, th_5_width) - th_2_width);
             int offsetRight = Math.Max(th_2_width, th_7_width) - th_4_width;
 
 
