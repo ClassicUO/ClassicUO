@@ -69,7 +69,7 @@ namespace ClassicUO.IO
                 AnimDataLoader.Instance.Load(),
                 ArtLoader.Instance.Load(),
                 MapLoader.Instance.Load(),
-                ClilocLoader.Instance.Load(Settings.GlobalSettings.ClilocFile),
+                ClilocLoader.Instance.Load(Settings.GlobalSettings.Language),
                 GumpsLoader.Instance.Load(),
                 FontsLoader.Instance.Load(),
                 HuesLoader.Instance.Load(),

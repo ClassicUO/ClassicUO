@@ -34,6 +34,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using ClassicUO.Configuration;
 using ClassicUO.Data;
 using ClassicUO.Game;
 using ClassicUO.Game.Data;
@@ -1120,7 +1121,7 @@ namespace ClassicUO.Network
     {
         public PChatJoinCommand(string name, string password = null) : base(0xB3)
         {
-            WriteASCII("ENU", 4);
+            WriteASCII(Settings.GlobalSettings.Language, 4);
             WriteUShort(0x0062);
 
             WriteUShort(0x0022);
@@ -1139,7 +1140,7 @@ namespace ClassicUO.Network
     {
         public PChatCreateChannelCommand(string name, string password = null) : base(0xB3)
         {
-            WriteASCII("ENU", 4);
+            WriteASCII(Settings.GlobalSettings.Language, 4);
             WriteUShort(0x0063);
 
             WriteUnicode(name);
@@ -1157,7 +1158,7 @@ namespace ClassicUO.Network
     {
         public PChatLeaveChannelCommand() : base(0xB3)
         {
-            WriteASCII("ENU", 4);
+            WriteASCII(Settings.GlobalSettings.Language, 4);
             WriteUShort(0x0043);
         }
     }
@@ -1166,7 +1167,7 @@ namespace ClassicUO.Network
     {
         public PChatMessageCommand(string msg) : base(0xB3)
         {
-            WriteASCII("ENU", 4);
+            WriteASCII(Settings.GlobalSettings.Language, 4);
             WriteUShort(0x0061);
             WriteUnicode(msg);
         }

@@ -50,11 +50,16 @@ namespace ClassicUO.IO.Resources
 
         public static ClilocLoader Instance => _instance ?? (_instance = new ClilocLoader());
 
-        public Task Load(string cliloc)
+        public Task Load(string lang)
         {
-            _cliloc = cliloc;
+            if (string.IsNullOrEmpty(lang))
+            {
+                lang = "enu";
+            }
 
-            if (!File.Exists(UOFileManager.GetUOFilePath(cliloc)))
+            _cliloc = $"Cliloc.{lang}";
+
+            if (!File.Exists(UOFileManager.GetUOFilePath(_cliloc)))
             {
                 _cliloc = "Cliloc.enu";
             }

@@ -365,7 +365,7 @@ namespace ClassicUO.Game
                         type,
                         font,
                         hue,
-                        "ENU"
+                        Settings.GlobalSettings.Language
                     )
                 );
             }
@@ -409,7 +409,7 @@ namespace ClassicUO.Game
                 font,
                 entity == null ? TextType.SYSTEM : TextType.OBJECT,
                 unicode,
-                "ENU"
+                Settings.GlobalSettings.Language
             );
         }
 

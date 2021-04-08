@@ -466,6 +466,26 @@ namespace ClassicUO
                         CUOEnviroment.PacketLog = true;
 
                         break;
+
+                    case "language":
+
+                        switch (value?.ToUpperInvariant())
+                        {
+                            case "RUS": Settings.GlobalSettings.Language = "RUS"; break;
+                            case "FRA": Settings.GlobalSettings.Language = "FRA"; break;
+                            case "DEU": Settings.GlobalSettings.Language = "DEU"; break;
+                            case "ESP": Settings.GlobalSettings.Language = "ESP"; break;
+                            case "JPN": Settings.GlobalSettings.Language = "JPN"; break;
+                            case "KOR": Settings.GlobalSettings.Language = "KOR"; break;
+                            case "PTB": Settings.GlobalSettings.Language = "PTB"; break;
+                            default:
+                            
+                                Settings.GlobalSettings.Language = "ENU";
+                                break;
+
+                        }
+
+                        break;
                 }
             }
         }
