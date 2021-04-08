@@ -622,10 +622,14 @@ namespace ClassicUO
                     }
 
                     // Fix for linux OS: https://github.com/andreakarasho/ClassicUO/pull/1263
-                    if (Keyboard.Alt || Keyboard.Ctrl)
+                    // Fix 2: SDL owns this behaviour. Cheating is not a real solution.
+                    /*if (!Utility.Platforms.PlatformHelper.IsWindows)
                     {
-                        break;
-                    }
+                        if (Keyboard.Alt || Keyboard.Ctrl)
+                        {
+                            break;
+                        }
+                    }*/
 
                     string s = UTF8_ToManaged((IntPtr) sdlEvent->text.text, false);
 
@@ -677,8 +681,6 @@ namespace ClassicUO
 
                 case SDL_EventType.SDL_MOUSEBUTTONDOWN:
                 {
-                    Mouse.Update();
-
                     SDL_MouseButtonEvent mouse = sdlEvent->button;
 
                     // The values in MouseButtonType are chosen to exactly match the SDL values
@@ -705,6 +707,8 @@ namespace ClassicUO
                     }
 
                     Mouse.ButtonPress(buttonType);
+                    Mouse.Update();
+
                     uint ticks = Time.Ticks;
 
                     if (lastClickTime + Mouse.MOUSE_DELAY_DOUBLE_CLICK >= ticks)
@@ -763,8 +767,6 @@ namespace ClassicUO
 
                 case SDL_EventType.SDL_MOUSEBUTTONUP:
                 {
-                    Mouse.Update();
-
                     if (_dragStarted)
                     {
                         _dragStarted = false;
@@ -804,6 +806,7 @@ namespace ClassicUO
                     }
 
                     Mouse.ButtonRelease(buttonType);
+                    Mouse.Update();
 
                     break;
                 }

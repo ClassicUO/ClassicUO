@@ -51,6 +51,8 @@ namespace ClassicUO.Game.GameObjects
         public uint Serial { get; }
         public List<Multi> Components { get; } = new List<Multi>();
 
+        public Rectangle Bounds;
+
         public bool Equals(uint other)
         {
             return Serial == other;

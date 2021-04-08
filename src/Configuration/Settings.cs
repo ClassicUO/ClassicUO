@@ -64,6 +64,8 @@ namespace ClassicUO.Configuration
 
         [JsonProperty("lastservernum")] public ushort LastServerNum { get; set; } = 1;
 
+        [JsonProperty("last_server_name")] public string LastServerName { get; set; } = string.Empty;
+
         [JsonProperty("fps")] public int FPS { get; set; } = 60;
 
         [JsonProperty("window_position")] public Point? WindowPosition { get; set; }

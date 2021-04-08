@@ -601,21 +601,45 @@ namespace ClassicUO.Game
             Socket.Send(new PSkillsStatusChangeRequest(skillindex, lockstate));
         }
 
-        public static void RequestMobileStatus(uint serial)
+        public static void RequestMobileStatus(uint serial, bool force = false)
         {
-            //Mobile mob = World.Mobiles.Get(serial);
-            //if (mob != null)
-            //{
-            //    mob.AddMessage(MessageType.Regular, "[PACKET REQUESTED]");
-            //}
-            Socket.Send(new PStatusRequest(serial));
+            if (World.InGame)
+            {
+                Entity ent = World.Get(serial);
+
+                if (ent != null && !ent.HitsRequested)
+                {
+                    ent.HitsRequested = true;
+                    force = true;
+                }
+
+                if (force && SerialHelper.IsValid(serial))
+                {
+                    //ent = ent ?? World.Player;
+                    //ent.AddMessage(MessageType.Regular, $"PACKET SENT: 0x{serial:X8}", 3, 0x34, true, TextType.OBJECT);
+                    Socket.Send(new PStatusRequest(serial));
+                }
+            }
         }
 
-        public static void SendCloseStatus(uint serial)
+        public static void SendCloseStatus(uint serial, bool force = false)
         {
-            if (Client.Version >= ClientVersion.CV_200)
+            if (Client.Version >= ClientVersion.CV_200 && World.InGame)
             {
-                Socket.Send(new PCloseStatusBarGump(serial));
+                Entity ent = World.Get(serial);
+
+                if (ent != null && ent.HitsRequested)
+                {
+                    ent.HitsRequested = false;
+                    force = true;
+                }
+
+                if (force && SerialHelper.IsValid(serial))
+                {
+                    //ent = ent ?? World.Player;
+                    //ent.AddMessage(MessageType.Regular, $"PACKET REMOVED SENT: 0x{serial:X8}", 3, 0x34 + 10, true, TextType.OBJECT);
+                    Socket.Send(new PCloseStatusBarGump(serial));
+                }
             }
         }
 

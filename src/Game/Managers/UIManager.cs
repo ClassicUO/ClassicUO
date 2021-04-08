@@ -618,7 +618,7 @@ namespace ClassicUO.Game.Managers
                 if (attemptAlwaysSuccessful || !_isDraggingControl)
                 {
                     DraggingControl = dragTarget;
-                    _dragOrigin = Mouse.Position;
+                    _dragOrigin = Mouse.LClickPosition;
 
                     for (int i = 0; i < (int) MouseButtonType.Size; i++)
                     {

@@ -34,7 +34,7 @@ using System;
 
 namespace ClassicUO.IO
 {
-    internal struct UOFileIndex
+    internal struct UOFileIndex : IEquatable<UOFileIndex>
     {
         public UOFileIndex
         (
@@ -70,6 +70,8 @@ namespace ClassicUO.IO
         public ushort Hue;
         public sbyte AnimOffset;
 
+
+
         public static UOFileIndex Invalid = new UOFileIndex
         (
             IntPtr.Zero,
@@ -78,6 +80,11 @@ namespace ClassicUO.IO
             0,
             0
         );
+
+        public bool Equals(UOFileIndex other)
+        {
+            return (Address, Offset, Length, DecompressedLength) == (other.Address, other.Offset, other.Length, other.DecompressedLength);
+        }
     }
 
     internal struct UOFileIndex5D

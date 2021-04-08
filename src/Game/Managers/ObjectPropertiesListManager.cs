@@ -42,13 +42,20 @@ namespace ClassicUO.Game.Managers
 
         public void Add(uint serial, uint revision, string name, string data)
         {
-            _itemsProperties[serial] = new ItemProperty
+            if (!_itemsProperties.TryGetValue(serial, out ItemProperty prop))
             {
-                Serial = serial,
-                Revision = revision,
-                Name = name,
-                Data = data
-            };
+                prop = new ItemProperty();
+                _itemsProperties[serial] = prop;
+            }
+            else
+            {
+                
+            }
+
+            prop.Serial = serial;
+            prop.Revision = revision;
+            prop.Name = name;
+            prop.Data = data;
         }
 
 

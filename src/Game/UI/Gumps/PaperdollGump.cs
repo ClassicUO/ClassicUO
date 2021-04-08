@@ -569,35 +569,6 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
-        public override void Save(BinaryWriter writer)
-        {
-            base.Save(writer);
-            writer.Write(LocalSerial);
-            writer.Write(IsMinimized);
-        }
-
-        public override void Restore(BinaryReader reader)
-        {
-            base.Restore(reader);
-
-            if (Profile.GumpsVersion == 2)
-            {
-                reader.ReadUInt32();
-                _isMinimized = reader.ReadBoolean();
-            }
-
-            LocalSerial = reader.ReadUInt32();
-
-            Client.Game.GetScene<GameScene>().DoubleClickDelayed(LocalSerial);
-
-            if (Profile.GumpsVersion >= 3)
-            {
-                _isMinimized = reader.ReadBoolean();
-            }
-
-            Dispose();
-        }
-
         public override void Save(XmlTextWriter writer)
         {
             base.Save(writer);
@@ -611,15 +582,12 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (LocalSerial == World.Player)
             {
-                LocalSerial = World.Player;
                 BuildGump();
 
+                //GameActions.DoubleClick(0x8000_0000 | LocalSerial);
                 Client.Game.GetScene<GameScene>()?.DoubleClickDelayed(LocalSerial);
 
-                //GameActions.OpenPaperdoll(World.Player);
                 IsMinimized = bool.Parse(xml.GetAttribute("isminimized"));
-
-                Dispose();
             }
             else
             {

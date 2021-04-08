@@ -466,6 +466,20 @@ namespace ClassicUO.Game.Scenes
                         dropX = gobj.X;
                         dropY = gobj.Y;
                         dropZ = gobj.Z;
+
+                        if (gobj is Land land)
+                        {
+
+                        }
+                        else
+                        {
+                            ref StaticTiles itemData = ref TileDataLoader.Instance.StaticData[gobj.Graphic];
+
+                            if (itemData.IsSurface)
+                            {
+                                dropZ += (sbyte)(itemData.Height == 0xFF ? 0 : itemData.Height);
+                            }
+                        }
                     }
                     else
                     {
@@ -964,8 +978,8 @@ namespace ClassicUO.Game.Scenes
                                 (
                                     customgump = new HealthBarGump(obj)
                                     {
-                                        X = Mouse.Position.X - (rect.Width >> 1),
-                                        Y = Mouse.Position.Y - (rect.Height >> 1)
+                                        X = Mouse.LClickPosition.X - (rect.Width >> 1),
+                                        Y = Mouse.LClickPosition.Y - (rect.Height >> 1)
                                     }
                                 );
                             }

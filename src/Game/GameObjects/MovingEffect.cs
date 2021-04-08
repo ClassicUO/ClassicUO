@@ -68,22 +68,14 @@ namespace ClassicUO.Game.GameObjects
         {
             FixedDir = fixedDir;
 
-            if (speed > 20)
-            {
-                speed = (byte) (speed - 20);
-            }
-
-            MovingDelay = (byte) (20 - speed);
-            _lastMoveTime = Time.Ticks;
+            MovingDelay = speed;
+            _lastMoveTime = Time.Ticks + MovingDelay;
 
             Entity source = World.Get(src);
 
             if (SerialHelper.IsValid(src) && source != null)
             {
                 SetSource(source);
-
-                //Offset.X = source.FrameInfo.Right;
-                //Offset.Y = source.FrameInfo.Bottom;
             }
             else
             {
@@ -113,33 +105,23 @@ namespace ClassicUO.Game.GameObjects
         {
             base.Update(totalTime, frameTime);
 
-            UpdateOffset();
+            if (_lastMoveTime < Time.Ticks)
+            {
+                UpdateOffset();
+
+                _lastMoveTime = Time.Ticks + MovingDelay;
+            }
         }
 
 
         private void UpdateOffset()
         {
-            if (_lastMoveTime >= Time.Ticks)
-            {
-                return;
-            }
-
-            int time = (int) (Time.Ticks - _lastMoveTime);
-
-            if (time < MovingDelay)
-            {
-                time = MovingDelay;
-            }
-
-            _lastMoveTime = Time.Ticks + MovingDelay;
-
             if (Target != null && Target.IsDestroyed)
             {
                 World.RemoveEffect(this);
 
                 return;
             }
-
 
             int playerX = World.Player.X;
             int playerY = World.Player.Y;
@@ -164,9 +146,9 @@ namespace ClassicUO.Game.GameObjects
 
             Vector2.Subtract(ref target, ref source, out Vector2 offset);
             Vector2.Distance(ref source, ref target, out float distance);
-            distance -= 22;
-            Vector2.Multiply(ref offset, time / distance, out Vector2 s0);
-
+            //distance -= 22;
+            Vector2.Multiply(ref offset, MovingDelay / distance, out Vector2 s0);
+            
             if (distance <= 22)
             {
                 World.RemoveEffect(this);
@@ -203,11 +185,9 @@ namespace ClassicUO.Game.GameObjects
                 Offset.X = source.X - nextSource.X;
                 Offset.Y = source.Y - nextSource.Y;
             }
-            else
-            {
-                Offset.X += s0.X;
-                Offset.Y += s0.Y;
-            }
+
+            Offset.X += s0.X;
+            Offset.Y += s0.Y;
         }
 
 

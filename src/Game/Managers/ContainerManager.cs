@@ -1007,6 +1007,48 @@ namespace ClassicUO.Game.Managers
                 155
             );
 
+            _data[0x775E] = new ContainerData
+            (
+                0x775E,
+                0x0048,
+                0x0058,
+                44,
+                65,
+                186,
+                159,
+                0x775F,
+                105,
+                178
+            );
+
+            _data[0x7760] = new ContainerData
+            (
+                0x7760,
+                0x0048,
+                0x0058,
+                44,
+                65,
+                186,
+                159,
+                0x7761,
+                105,
+                178
+            );
+
+            _data[0x7762] = new ContainerData
+            (
+                0x7762,
+                0x0048,
+                0x0058,
+                44,
+                65,
+                186,
+                159,
+                0x7763,
+                105,
+                178
+            );
+
             _data[0x777A] = new ContainerData
             (
                 0x777A,

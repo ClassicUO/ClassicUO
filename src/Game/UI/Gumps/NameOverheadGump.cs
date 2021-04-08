@@ -41,6 +41,7 @@ using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -50,7 +51,7 @@ namespace ClassicUO.Game.UI.Gumps
         private Point _lockedPosition;
         private bool _positionLocked;
         private readonly RenderedText _renderedText;
-
+        private Texture2D _borderColor = SolidColorTextureCache.GetTexture(Color.Black);
 
         public NameOverheadGump(uint serial) : base(serial, 0)
         {
@@ -262,8 +263,8 @@ namespace ClassicUO.Game.UI.Gumps
                     (
                         gump = new HealthBarGump(entity)
                         {
-                            X = Mouse.Position.X - (rect.Width >> 1),
-                            Y = Mouse.Position.Y - (rect.Height >> 1)
+                            X = Mouse.LClickPosition.X - (rect.Width >> 1),
+                            Y = Mouse.LClickPosition.Y - (rect.Height >> 1)
                         }
                     );
                 }
@@ -488,6 +489,19 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 Dispose();
             }
+            else
+            {
+                if (entity == TargetManager.LastTargetInfo.Serial)
+                {
+                    _borderColor = SolidColorTextureCache.GetTexture(Color.Red);
+                    _background.Hue = _renderedText.Hue = entity is Mobile m ? Notoriety.GetHue(m.NotorietyFlag) : (ushort) 0x0481;
+                }
+                else
+                {
+                    _borderColor = SolidColorTextureCache.GetTexture(Color.Black);
+                    _background.Hue = _renderedText.Hue = entity is Mobile m ? Notoriety.GetHue(m.NotorietyFlag) : (ushort) 0x0481;
+                }
+            }
         }
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
@@ -593,7 +607,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             batcher.DrawRectangle
             (
-                SolidColorTextureCache.GetTexture(Color.Black),
+                _borderColor,
                 x - 1,
                 y - 1,
                 Width + 1,
