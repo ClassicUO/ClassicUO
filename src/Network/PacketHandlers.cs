@@ -791,7 +791,7 @@ namespace ClassicUO.Network
                     NetClient.Socket.Send(new PGameWindowSize((uint) ProfileManager.CurrentProfile.GameWindowSize.X, (uint) ProfileManager.CurrentProfile.GameWindowSize.Y));
                 }
 
-                NetClient.Socket.Send(new PLanguage("ENU"));
+                NetClient.Socket.Send(new PLanguage(Settings.GlobalSettings.Language));
             }
 
             NetClient.Socket.Send(new PClientVersion(Settings.GlobalSettings.ClientVersion));
