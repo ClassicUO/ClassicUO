@@ -784,6 +784,8 @@ namespace ClassicUO.Network
                 World.Light.Overall = ProfileManager.CurrentProfile.LightLevel;
             }
 
+            Client.Game.Scene.Audio.UpdateCurrentMusicVolume();
+
             if (Client.Version >= Data.ClientVersion.CV_200)
             {
                 if (ProfileManager.CurrentProfile != null)
