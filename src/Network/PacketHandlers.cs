@@ -2067,6 +2067,8 @@ namespace ClassicUO.Network
             if (World.Player != null && Client.Game.Scene is LoginScene)
             {
                 GameScene scene = new GameScene();
+                scene.Audio = Client.Game.Scene.Audio;
+                Client.Game.Scene.Audio = null;
                 Client.Game.SetScene(scene);
 
                 //GameActions.OpenPaperdoll(World.Player);
