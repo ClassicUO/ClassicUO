@@ -183,7 +183,8 @@ namespace ClassicUO.Game
             }
 
             //TODO(deccer): refactor this out into _audioPlayer.PlayMusic(...)
-            if (!Client.Game.Scene.Audio.IsMusicPlaying()) {
+            if (!Client.Game.Scene.Audio.IsMusicPlaying())
+            {
                 Client.Game.Scene.Audio.PlayMusic(music, true);
             }
         }

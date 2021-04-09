@@ -60,7 +60,8 @@ namespace ClassicUO.Game
 
         public static void RequestWarMode(bool war)
         {
-            if (!World.Player.IsDead) {
+            if (!World.Player.IsDead)
+            {
                 if (war && ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.EnableMusic)
                 {
                     Client.Game.Scene.Audio.PlayMusic((RandomHelper.GetValue(0, 3) % 3) + 38, true);
