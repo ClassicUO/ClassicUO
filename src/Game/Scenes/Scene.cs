@@ -58,7 +58,7 @@ namespace ClassicUO.Game.Scenes
 
         public int RenderedObjectsCount { get; protected set; }
 
-        public AudioManager Audio { get; private set; }
+        public AudioManager Audio { get; set; }
 
         public Camera Camera { get; }
 
