@@ -160,8 +160,7 @@ namespace ClassicUO.Game.Scenes
             Weather = new Weather();
 
             WorldViewportGump viewport = new WorldViewportGump(this);
-
-            UIManager.Add(viewport);
+            UIManager.Add(viewport, false);
 
             if (!ProfileManager.CurrentProfile.TopbarGumpIsDisabled)
             {

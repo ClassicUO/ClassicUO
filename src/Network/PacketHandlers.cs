@@ -2089,7 +2089,15 @@ namespace ClassicUO.Network
                     NetClient.Socket.Send(new PClientViewRange(World.ClientViewRange));
                 }
 
-                ProfileManager.CurrentProfile.ReadGumps(ProfileManager.ProfilePath)?.ForEach(UIManager.Add);
+                List<Gump> gumps = ProfileManager.CurrentProfile.ReadGumps(ProfileManager.ProfilePath);
+
+                if (gumps != null)
+                {
+                    foreach (Gump gump in gumps)
+                    {
+                        UIManager.Add(gump);
+                    }
+                }
             }
         }
 
