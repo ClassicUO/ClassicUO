@@ -33,7 +33,7 @@
 using System;
 using ClassicUO.Configuration;
 using ClassicUO.Data;
-using ClassicUO.IO.Audio.MP3Sharp;
+using MP3Sharp;
 using ClassicUO.Utility.Logging;
 using Microsoft.Xna.Framework.Audio;
 
