@@ -88,6 +88,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\external\MP3Sharp\MP3Sharp\MP3Sharp.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Compile Update="Resources\ResErrorMessages.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
