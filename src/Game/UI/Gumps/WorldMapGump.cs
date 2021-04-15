@@ -1475,19 +1475,8 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (_mapTexture != null)
             {
-                Rectangle rect = ScissorStack.CalculateScissors
-                (
-                    Matrix.Identity,
-                    gX,
-                    gY,
-                    gWidth,
-                    gHeight
-                );
-
-                if (ScissorStack.PushScissors(batcher.GraphicsDevice, rect))
+                if (batcher.ClipBegin(gX, gY, gWidth, gHeight))
                 {
-                    batcher.EnableScissorTest(true);
-
                     int offset = size >> 1;
 
                     batcher.Draw2D
@@ -1514,8 +1503,7 @@ namespace ClassicUO.Game.UI.Gumps
                         halfHeight
                     );
 
-                    batcher.EnableScissorTest(false);
-                    ScissorStack.PopScissors(batcher.GraphicsDevice);
+                    batcher.ClipEnd();
                 }
             }
 
