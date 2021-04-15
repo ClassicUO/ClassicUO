@@ -46,14 +46,18 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 {
     internal class CreateCharAppearanceGump : Gump
     {
+        struct CharacterInfo
+        {
+            public bool IsFemale;
+            public RaceType Race;
+        }
+
         private PlayerMobile _character;
-        private readonly RadioButton _elfRadio;
-        private readonly RadioButton _femaleRadio;
-        private readonly RadioButton _gargoyleRadio;
+        private CharacterInfo _characterInfo;
+        private readonly Button _humanRadio, _elfRadio, _gargoyleRadio;
+        private readonly Button _maleRadio, _femaleRadio;
         private Combobox _hairCombobox, _facialCombobox;
         private Label _hairLabel, _facialLabel;
-        private readonly RadioButton _humanRadio;
-        private readonly RadioButton _maleRadio;
         private readonly StbTextBox _nameTextBox;
         private PaperDollInteractable _paperDoll;
         private readonly Button _nextButton;
@@ -110,25 +114,21 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             // Male/Female Radios
             Add
             (
-                _maleRadio = new RadioButton(0, 0x0768, 0x0767)
+                _maleRadio = new Button((int)Buttons.MaleButton, 0x0768, 0x0767)
                 {
-                    X = 425, Y = 435
+                    X = 425, Y = 435, ButtonAction = ButtonAction.Activate
                 },
                 1
             );
-
-            _maleRadio.ValueChanged += Genre_ValueChanged;
 
             Add
             (
-                _femaleRadio = new RadioButton(0, 0x0768, 0x0767)
+                _femaleRadio = new Button((int)Buttons.FemaleButton, 0x0768, 0x0767)
                 {
-                    X = 425, Y = 455
+                    X = 425, Y = 455, ButtonAction = ButtonAction.Activate
                 },
                 1
             );
-
-            _femaleRadio.ValueChanged += Genre_ValueChanged;
 
             Add
             (
@@ -169,9 +169,9 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             // Races
             Add
             (
-                _humanRadio = new RadioButton(1, 0x0768, 0x0767)
+                _humanRadio = new Button((int)Buttons.HumanButton, 0x0768, 0x0767)
                 {
-                    X = 180, Y = 435
+                    X = 180, Y = 435, ButtonAction = ButtonAction.Activate
                 },
                 1
             );
@@ -185,13 +185,11 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                 1
             );
 
-            _humanRadio.ValueChanged += Race_ValueChanged;
-
             Add
             (
-                _elfRadio = new RadioButton(1, 0x0768, 0x0767)
+                _elfRadio = new Button((int)Buttons.ElfButton, 0x0768, 0x0767, 0x0768)
                 {
-                    X = 180, Y = 455
+                    X = 180, Y = 455, ButtonAction = ButtonAction.Activate
                 },
                 1
             );
@@ -205,15 +203,13 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                 1
             );
 
-            _elfRadio.ValueChanged += Race_ValueChanged;
-
             if (Client.Version >= ClientVersion.CV_60144)
             {
                 Add
                 (
-                    _gargoyleRadio = new RadioButton(1, 0x0768, 0x0767)
+                    _gargoyleRadio = new Button((int)Buttons.GargoyleButton, 0x0768, 0x0767)
                     {
-                        X = 60, Y = 435
+                        X = 60, Y = 435, ButtonAction = ButtonAction.Activate
                     },
                     1
                 );
@@ -226,8 +222,6 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                     },
                     1
                 );
-
-                _gargoyleRadio.ValueChanged += Race_ValueChanged;
             }
 
             // Prev/Next
@@ -249,8 +243,13 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                 1
             );
 
-            _maleRadio.IsChecked = true;
-            _humanRadio.IsChecked = true;
+            _maleRadio.IsClicked = true;
+            _humanRadio.IsClicked = true;
+            _characterInfo.IsFemale = false;
+            _characterInfo.Race = RaceType.HUMAN;
+
+            HandleGenreChange();
+            HandleRaceChanged();
         }
 
         private void CreateCharacter(bool isFemale, RaceType race)
@@ -361,14 +360,13 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
         private void UpdateEquipments()
         {
-            bool isFemale = _femaleRadio.IsChecked;
-            RaceType race = GetSelectedRace();
+            RaceType race = _characterInfo.Race;
             Layer layer;
             CharacterCreationValues.ComboContent content;
 
             _character.Hue = CurrentColorOption[Layer.Invalid].Item2;
 
-            if (!isFemale && race != RaceType.ELF)
+            if (!_characterInfo.IsFemale && race != RaceType.ELF)
             {
                 layer = Layer.Beard;
                 content = CharacterCreationValues.GetFacialHairComboContent(race);
@@ -379,18 +377,18 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             }
 
             layer = Layer.Hair;
-            content = CharacterCreationValues.GetHairComboContent(isFemale, race);
+            content = CharacterCreationValues.GetHairComboContent(_characterInfo.IsFemale, race);
 
             Item it = CreateItem(content.GetGraphic(CurrentOption[layer]), CurrentColorOption[layer].Item2, layer);
 
             _character.PushToBack(it);
         }
 
-        private void Race_ValueChanged(object sender, EventArgs e)
+        private void HandleRaceChanged()
         {
             CurrentColorOption.Clear();
             HandleGenreChange();
-            RaceType race = GetSelectedRace();
+            RaceType race = _characterInfo.Race;
             CharacterListFlags flags = World.ClientFeatures.Flags;
             LockedFeatureFlags locks = World.ClientLockedFeatures.Flags;
 
@@ -415,15 +413,10 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             }
         }
 
-        private void Genre_ValueChanged(object sender, EventArgs e)
-        {
-            HandleGenreChange();
-        }
-
         private void HandleGenreChange()
         {
-            bool isFemale = _femaleRadio.IsChecked;
-            RaceType race = GetSelectedRace();
+            RaceType race = _characterInfo.Race;
+
             CurrentOption[Layer.Beard] = 0;
             CurrentOption[Layer.Hair] = 1;
 
@@ -450,7 +443,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             }
 
             // Hair
-            CharacterCreationValues.ComboContent content = CharacterCreationValues.GetHairComboContent(isFemale, race);
+            CharacterCreationValues.ComboContent content = CharacterCreationValues.GetHairComboContent(_characterInfo.IsFemale, race);
 
             Add
             (
@@ -477,7 +470,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             _hairCombobox.OnOptionSelected += Hair_OnOptionSelected;
 
             // Facial Hair
-            if (!isFemale && race != RaceType.ELF)
+            if (!_characterInfo.IsFemale && race != RaceType.ELF)
             {
                 content = CharacterCreationValues.GetFacialHairComboContent(race);
 
@@ -566,7 +559,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                 pallet.Length >> 3
             );
 
-            if (!isFemale && race != RaceType.ELF)
+            if (!_characterInfo.IsFemale && race != RaceType.ELF)
             {
                 // Facial
                 pallet = CharacterCreationValues.GetHairPallet(race);
@@ -583,7 +576,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                 );
             }
 
-            CreateCharacter(isFemale, race);
+            CreateCharacter(_characterInfo.IsFemale, race);
 
             UpdateEquipments();
 
@@ -696,27 +689,77 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             switch ((Buttons) buttonID)
             {
                 case Buttons.FemaleButton:
-                    _femaleRadio.IsChecked = true;
+                    _femaleRadio.IsClicked = true;
+                    _maleRadio.IsClicked = false;
+                    _characterInfo.IsFemale = true;
+
+                    HandleGenreChange();
 
                     break;
 
                 case Buttons.MaleButton:
-                    _maleRadio.IsChecked = true;
+                    _maleRadio.IsClicked = true;
+                    _femaleRadio.IsClicked = false;
+                    _characterInfo.IsFemale = false;
+
+                    HandleGenreChange();
 
                     break;
 
                 case Buttons.HumanButton:
-                    _humanRadio.IsChecked = true;
 
+                    _characterInfo.Race = RaceType.HUMAN;
+
+                    if (!_humanRadio.IsClicked)
+                    {
+                        _humanRadio.IsClicked = true;
+
+                        if (_elfRadio != null)
+                        {
+                            _elfRadio.IsClicked = false;
+                        }
+
+                        if (_gargoyleRadio != null)
+                        {
+                            _gargoyleRadio.IsClicked = false;
+                        }
+
+                        HandleRaceChanged();
+                    }
+                   
                     break;
 
                 case Buttons.ElfButton:
-                    _elfRadio.IsChecked = true;
 
+                    _characterInfo.Race = RaceType.ELF;
+
+                    if (!_elfRadio.IsClicked)
+                    {
+                        _elfRadio.IsClicked = true;
+                        _humanRadio.IsClicked = false;
+
+                        if (_gargoyleRadio != null)
+                        {
+                            _gargoyleRadio.IsClicked = false;
+                        }
+
+                        HandleRaceChanged();
+                    }
+                    
                     break;
 
                 case Buttons.GargoyleButton:
-                    _gargoyleRadio.IsChecked = true;
+
+                    _characterInfo.Race = RaceType.GARGOYLE;
+
+                    if (!_gargoyleRadio.IsClicked)
+                    {
+                        _gargoyleRadio.IsClicked = true;
+                        _elfRadio.IsClicked = false;
+                        _humanRadio.IsClicked = false;
+
+                        HandleRaceChanged();
+                    }
 
                     break;
 
@@ -741,9 +784,10 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
         private bool ValidateCharacter(PlayerMobile character)
         {
-            if (string.IsNullOrEmpty(character.Name))
+            int invalid = Validate(character.Name);
+            if (invalid > 0)
             {
-                UIManager.GetGump<CharCreationGump>()?.ShowMessage(ClilocLoader.Instance.GetString(3000612));
+                UIManager.GetGump<CharCreationGump>()?.ShowMessage(ClilocLoader.Instance.GetString(invalid));
 
                 return false;
             }
@@ -751,25 +795,182 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             return true;
         }
 
-        private RaceType GetSelectedRace()
+        public static int Validate(string name)
         {
-            if (_humanRadio.IsChecked)
-            {
-                return RaceType.HUMAN;
-            }
-
-            if (_elfRadio != null && _elfRadio.IsChecked)
-            {
-                return RaceType.ELF;
-            }
-
-            if (_gargoyleRadio != null && _gargoyleRadio.IsChecked)
-            {
-                return RaceType.GARGOYLE;
-            }
-
-            return RaceType.HUMAN;
+            return Validate(name, 2, 16, true, false, true, 1, _SpaceDashPeriodQuote, Client.Version >= ClientVersion.CV_5020 ? _Disallowed : new string[] { }, _StartDisallowed);
         }
+
+        public static int Validate(string name, int minLength, int maxLength, bool allowLetters, bool allowDigits, bool noExceptionsAtStart, int maxExceptions, char[] exceptions, string[] disallowed, string[] startDisallowed)
+        {
+            if (string.IsNullOrEmpty(name) || name.Length < minLength)
+                return 3000612;
+            else if (name.Length > maxLength)
+                return 3000611;
+
+            int exceptCount = 0;
+
+            name = name.ToLowerInvariant();
+
+            if (!allowLetters || !allowDigits || (exceptions.Length > 0 && (noExceptionsAtStart || maxExceptions < int.MaxValue)))
+            {
+                for (int i = 0; i < name.Length; ++i)
+                {
+                    char c = name[i];
+
+                    if (c >= 'a' && c <= 'z')
+                    {
+                        exceptCount = 0;
+                    }
+                    else if (c >= '0' && c <= '9')
+                    {
+                        if (!allowDigits)
+                            return 3000611;
+
+                        exceptCount = 0;
+                    }
+                    else
+                    {
+                        bool except = false;
+
+                        for (int j = 0; !except && j < exceptions.Length; ++j)
+                            if (c == exceptions[j])
+                                except = true;
+
+                        if (!except || (i == 0 && noExceptionsAtStart))
+                            return 3000611;
+
+                        if (exceptCount++ == maxExceptions)
+                            return 3000611;
+                    }
+                }
+            }
+
+            for (int i = 0; i < disallowed.Length; ++i)
+            {
+                int indexOf = name.IndexOf(disallowed[i]);
+
+                if (indexOf == -1)
+                    continue;
+
+                bool badPrefix = (indexOf == 0);
+
+                for (int j = 0; !badPrefix && j < exceptions.Length; ++j)
+                    badPrefix = (name[indexOf - 1] == exceptions[j]);
+
+                if (!badPrefix)
+                    continue;
+
+                bool badSuffix = ((indexOf + disallowed[i].Length) >= name.Length);
+
+                for (int j = 0; !badSuffix && j < exceptions.Length; ++j)
+                    badSuffix = (name[indexOf + disallowed[i].Length] == exceptions[j]);
+
+                if (badSuffix)
+                    return 3000611;
+            }
+
+            for (int i = 0; i < startDisallowed.Length; ++i)
+            {
+                if (name.StartsWith(startDisallowed[i]))
+                    return 3000611;
+            }
+
+            return 0;
+        }
+
+        private static readonly char[] _SpaceDashPeriodQuote = new char[]
+        {
+            ' ', '-', '.', '\''
+        };
+
+        private static string[] _StartDisallowed = new string[]
+        {
+            "seer",
+            "counselor",
+            "gm",
+            "admin",
+            "lady",
+            "lord"
+        };
+
+        private static readonly string[] _Disallowed = new string[]
+        {
+            "jigaboo",
+            "chigaboo",
+            "wop",
+            "kyke",
+            "kike",
+            "tit",
+            "spic",
+            "prick",
+            "piss",
+            "lezbo",
+            "lesbo",
+            "felatio",
+            "dyke",
+            "dildo",
+            "chinc",
+            "chink",
+            "cunnilingus",
+            "cum",
+            "cocksucker",
+            "cock",
+            "clitoris",
+            "clit",
+            "ass",
+            "hitler",
+            "penis",
+            "nigga",
+            "nigger",
+            "klit",
+            "kunt",
+            "jiz",
+            "jism",
+            "jerkoff",
+            "jackoff",
+            "goddamn",
+            "fag",
+            "blowjob",
+            "bitch",
+            "asshole",
+            "dick",
+            "pussy",
+            "snatch",
+            "cunt",
+            "twat",
+            "shit",
+            "fuck",
+            "tailor",
+            "smith",
+            "scholar",
+            "rogue",
+            "novice",
+            "neophyte",
+            "merchant",
+            "medium",
+            "master",
+            "mage",
+            "lb",
+            "journeyman",
+            "grandmaster",
+            "fisherman",
+            "expert",
+            "chef",
+            "carpenter",
+            "british",
+            "blackthorne",
+            "blackthorn",
+            "beggar",
+            "archer",
+            "apprentice",
+            "adept",
+            "gamemaster",
+            "frozen",
+            "squelched",
+            "invulnerable",
+            "osi",
+            "origin"
+        };
 
         private Item CreateItem(int id, ushort hue, Layer layer)
         {

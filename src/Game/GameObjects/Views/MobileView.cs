@@ -444,7 +444,7 @@ namespace ClassicUO.Game.GameObjects
                                     drawX,
                                     drawY,
                                     IsFlipped,
-                                    animIndex,
+                                     animIndex, //item.AnimIndex,
                                     false,
                                     graphic,
                                     animGroup,
@@ -471,7 +471,25 @@ namespace ClassicUO.Game.GameObjects
                         {
                             Client.Game.GetScene<GameScene>().AddLight(this, this, drawX, drawY);
 
-                            break;
+                            /*DrawInternal
+                            (
+                                batcher,
+                                this,
+                                item,
+                                drawX,
+                                drawY,
+                                IsFlipped,
+                                animIndex,
+                                false,
+                                graphic,
+                                animGroup,
+                                dir,
+                                isHuman,
+                                false,
+                                alpha: HueVector.Z
+                            );
+                            */
+                            //break;
                         }
                     }
                 }
@@ -524,6 +542,7 @@ namespace ClassicUO.Game.GameObjects
             }
 
             ushort hueFromFile = _viewHue;
+
 
             AnimationDirection direction = AnimationsLoader.Instance.GetBodyAnimationGroup
                                                            (
@@ -629,6 +648,15 @@ namespace ClassicUO.Game.GameObjects
 
                     ResetHueVector();
                     ShaderHueTranslator.GetHueVector(ref HueVector, hue, partialHue, alpha);
+
+                    // this is an hack to make entities partially hued. OG client seems to ignore this.
+                    /*if (entity != null && entity.ItemData.AnimID == 0 && entity.ItemData.IsLight)
+                    {
+                        HueVector.X = entity.Hue == 0 ? owner.Hue : entity.Hue;
+                        HueVector.Y = ShaderHueTranslator.SHADER_LIGHTS;
+                        HueVector.Z = alpha;
+                    }
+                    */
 
                     if (_transform)
                     {

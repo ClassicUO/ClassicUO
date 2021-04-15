@@ -6,8 +6,11 @@
     <ApplicationIcon>cuoicon.ico</ApplicationIcon>
   </PropertyGroup>
 
+
+
   <PropertyGroup Condition="'$(IS_DEV_BUILD)' == 'true'">
     <OutputType>WinExe</OutputType>
+    <DefineConstants>$(DefineConstants);DEV_BUILD</DefineConstants>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
@@ -37,8 +40,8 @@
   <PropertyGroup>
     <Company>ClassicUO</Company>
     <Authors>KaRaShO'</Authors>
-    <AssemblyVersion>0.1.7.0</AssemblyVersion>
-    <FileVersion>0.1.7.0</FileVersion>
+    <AssemblyVersion>0.1.8.0</AssemblyVersion>
+    <FileVersion>0.1.8.0</FileVersion>
     <Copyright>ClassicUO</Copyright>
     <PackageProjectUrl>https://www.classicuo.eu/</PackageProjectUrl>
     <Description>An open source implementation of the Ultima Online Classic Client.</Description>
@@ -49,6 +52,7 @@
       <_Parameter1>ClassicUO.UnitTests</_Parameter1>
     </AssemblyAttribute>
   </ItemGroup>
+
 
   <ItemGroup>
     <EmbeddedResource Include="cuologo.png" />

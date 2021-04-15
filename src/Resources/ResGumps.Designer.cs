@@ -340,6 +340,51 @@ namespace ClassicUO.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Select Character Backpack Style.
+        /// </summary>
+        public static string BackpackStyle {
+            get {
+                return ResourceManager.GetString("BackpackStyle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Default.
+        /// </summary>
+        public static string BackpackStyle_Default {
+            get {
+                return ResourceManager.GetString("BackpackStyle_Default", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to GhoulSkin.
+        /// </summary>
+        public static string BackpackStyle_GhoulSkin {
+            get {
+                return ResourceManager.GetString("BackpackStyle_GhoulSkin", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to PolarBear.
+        /// </summary>
+        public static string BackpackStyle_PolarBear {
+            get {
+                return ResourceManager.GetString("BackpackStyle_PolarBear", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Suede.
+        /// </summary>
+        public static string BackpackStyle_Suede {
+            get {
+                return ResourceManager.GetString("BackpackStyle_Suede", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Backup.
         /// </summary>
         public static string Backup {
@@ -2450,7 +2495,7 @@ namespace ClassicUO.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to {0}has invited you to join a party..
+        ///   Looks up a localized string similar to {0} has invited you to join a party..
         /// </summary>
         public static string P0HasInvitedYouToParty {
             get {
@@ -2762,6 +2807,15 @@ namespace ClassicUO.Resources {
         public static string ReproduceSoundsAndMusic {
             get {
                 return ResourceManager.GetString("ReproduceSoundsAndMusic", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Reset groups.
+        /// </summary>
+        public static string ResetGroups {
+            get {
+                return ResourceManager.GetString("ResetGroups", resourceCulture);
             }
         }
         

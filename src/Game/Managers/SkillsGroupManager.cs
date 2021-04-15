@@ -215,12 +215,6 @@ namespace ClassicUO.Game.Managers
             return true;
         }
 
-        public static void Clear()
-        {
-            Groups.Clear();
-        }
-
-
         public static void Load()
         {
             Groups.Clear();
@@ -230,10 +224,11 @@ namespace ClassicUO.Game.Managers
             if (!File.Exists(path))
             {
                 Log.Trace("No skillsgroups.xml file. Creating a default file.");
+             
                 MakeDefault();
-            }
 
-            Groups.Clear();
+                return;
+            }
 
             XmlDocument doc = new XmlDocument();
 
@@ -243,6 +238,8 @@ namespace ClassicUO.Game.Managers
             }
             catch (Exception ex)
             {
+                MakeDefault();
+                
                 Log.Error(ex.ToString());
 
                 return;
@@ -301,7 +298,7 @@ namespace ClassicUO.Game.Managers
 
         public static void MakeDefault()
         {
-            Clear();
+            Groups.Clear();
 
             if (!LoadMULFile(UOFileManager.GetUOFilePath("skillgrp.mul")))
             {

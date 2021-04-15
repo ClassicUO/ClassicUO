@@ -407,7 +407,7 @@ namespace ClassicUO.Game.GameObjects
                             case 0x0EC4:
                             case 0x0EC5: // Skinning Knives
                                 Abilities[0] = Ability.ShadowStrike;
-                                Abilities[1] = Ability.Disarm;
+                                Abilities[1] = Ability.BleedAttack;
 
                                 goto done;
 

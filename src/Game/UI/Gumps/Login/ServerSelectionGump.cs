@@ -217,12 +217,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
             if (loginScene.Servers.Length != 0)
             {
-                int index = Settings.GlobalSettings.LastServerNum - 1;
-
-                if (index < 0 || index >= loginScene.Servers.Length)
-                {
-                    index = 0;
-                }
+                int index = loginScene.GetServerIndexFromSettings();
 
                 Add
                 (
@@ -256,16 +251,9 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
                         if (loginScene.Servers.Length != 0)
                         {
-                            int index = Settings.GlobalSettings.LastServerNum;
+                            int index = loginScene.GetServerIndexFromSettings();
 
-                            if (index <= 0 || index > loginScene.Servers.Length)
-                            {
-                                Log.Warn($"Wrong server index: {index}");
-
-                                index = 1;
-                            }
-
-                            loginScene.SelectServer((byte) loginScene.Servers[index - 1].Index);
+                            loginScene.SelectServer((byte) loginScene.Servers[index].Index);
                         }
 
                         break;
@@ -286,16 +274,9 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
                 if (loginScene.Servers.Any())
                 {
-                    int index = Settings.GlobalSettings.LastServerNum;
+                    int index = loginScene.GetServerIndexFromSettings();
 
-                    if (index <= 0 || index > loginScene.Servers.Length)
-                    {
-                        Log.Warn($"Wrong server index: {index}");
-
-                        index = 1;
-                    }
-
-                    loginScene.SelectServer((byte) loginScene.Servers[index - 1].Index);
+                    loginScene.SelectServer((byte) loginScene.Servers[index].Index);
                 }
             }
         }

@@ -256,8 +256,6 @@ namespace ClassicUO.Game.GameObjects
             ushort graphic,
             int x,
             int y,
-            int destX,
-            int destY,
             float angle,
             ref Vector3 hue
         )
@@ -270,16 +268,21 @@ namespace ClassicUO.Game.GameObjects
 
                 ref UOFileIndex index = ref ArtLoader.Instance.GetValidRefEntry(graphic + 0x4000);
 
-                int offX = index.Width == 0 ? -44 : index.Width;
-                int offY = index.Height == 0 ? -22 : index.Height;
+                int offX = index.Width;
+                int offY = index.Height;
+
+                offX += 22;
+                offY += 22;
 
                 batcher.DrawSpriteRotated
                 (
                     texture,
-                    x - offX,
-                    y - offY,
-                    destX,
-                    destY,
+                    x,
+                    y,
+                    texture.Width * 0.5f,
+                    texture.Height * 0.5f,
+                    -offX,
+                    -offY,
                     ref hue,
                     angle
                 );
@@ -310,10 +313,10 @@ namespace ClassicUO.Game.GameObjects
 
                 if (transparent)
                 {
-                    int maxDist = ProfileManager.CurrentProfile.CircleOfTransparencyRadius + 22;
-                    int fx = (int) (World.Player.RealScreenPosition.X + World.Player.Offset.X);
+                    int maxDist = ProfileManager.CurrentProfile.CircleOfTransparencyRadius;
 
-                    int fy = (int) (World.Player.RealScreenPosition.Y + (World.Player.Offset.Y - World.Player.Offset.Z)) + 44;
+                    int fx = (int) (World.Player.RealScreenPosition.X + World.Player.Offset.X);
+                    int fy = (int) (World.Player.RealScreenPosition.Y + (World.Player.Offset.Y - World.Player.Offset.Z));
 
                     fx -= x;
                     fy -= y;
@@ -333,7 +336,11 @@ namespace ClassicUO.Game.GameObjects
                                 break;
 
                             case 1:
-                                hue.Z = MathHelper.Lerp(1f, 0f, (dist - 44) / maxDist);
+
+                                float delta = (maxDist - 44) * 0.5f;
+                                float fraction = (dist - delta) / (maxDist - delta);
+
+                                hue.Z = MathHelper.Lerp(1f, 0f, fraction);
 
                                 break;
                         }

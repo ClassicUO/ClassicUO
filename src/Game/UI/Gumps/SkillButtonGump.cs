@@ -137,26 +137,6 @@ namespace ClassicUO.Game.UI.Gumps
             return false;
         }
 
-        public override void Save(BinaryWriter writer)
-        {
-            base.Save(writer);
-            writer.Write(LocalSerial);
-            writer.Write(_skill.Index);
-        }
-
-        public override void Restore(BinaryReader reader)
-        {
-            base.Restore(reader);
-
-
-            LocalSerial = reader.ReadUInt32();
-            int skillIndex = reader.ReadInt32();
-
-            _skill = World.Player.Skills[skillIndex];
-
-            BuildGump();
-        }
-
         public override void Save(XmlTextWriter writer)
         {
             base.Save(writer);

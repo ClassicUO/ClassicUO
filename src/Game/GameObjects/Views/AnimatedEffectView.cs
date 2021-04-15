@@ -241,6 +241,11 @@ namespace ClassicUO.Game.GameObjects
                     //}
                     //else
 
+                    if (data.IsLight)
+                    {
+                        HueVector.Y = ShaderHueTranslator.SHADER_LIGHTS;
+                    }
+
                     DrawStatic
                     (
                         batcher,

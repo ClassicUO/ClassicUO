@@ -269,18 +269,8 @@ namespace ClassicUO.Game.UI.Controls
 
             ResetHueVector();
 
-            Rectangle scissor = ScissorStack.CalculateScissors
-            (
-                Matrix.Identity,
-                x,
-                y,
-                Width,
-                Height
-            );
-
-            if (ScissorStack.PushScissors(batcher.GraphicsDevice, scissor))
+            if (batcher.ClipBegin(x, y, Width, Height))
             {
-                batcher.EnableScissorTest(true);
                 base.Draw(batcher, x, y);
 
                 _gameText.Draw
@@ -296,9 +286,9 @@ namespace ClassicUO.Game.UI.Controls
                     ScrollY
                 );
 
-                batcher.EnableScissorTest(false);
-                ScissorStack.PopScissors(batcher.GraphicsDevice);
+                batcher.ClipEnd();
             }
+
 
             return true;
         }
@@ -314,12 +304,14 @@ namespace ClassicUO.Game.UI.Controls
                         ref WebLinkRect link = ref _gameText.Links[i];
 
                         bool inbounds = link.Bounds.Contains(x, (_scrollBar == null ? 0 : _scrollBar.Value) + y);
-
+                        
                         if (inbounds && FontsLoader.Instance.GetWebLink(link.LinkID, out WebLink result))
                         {
                             Log.Info("LINK CLICKED: " + result.Link);
 
                             PlatformHelper.LaunchBrowser(result.Link);
+
+                            _gameText.CreateTexture();
 
                             break;
                         }

@@ -96,6 +96,8 @@ namespace ClassicUO.Game.GameObjects
                 i.ObjectHandlesOpened = false;
                 i.AlphaHue = 0;
                 i.AllowedToDraw = true;
+                
+                i.HitsRequested = false;
             }
         );
 
@@ -276,76 +278,81 @@ namespace ClassicUO.Game.GameObjects
                 {
                     MultiLoader.Instance.File.Seek(entry.Offset);
 
-                    byte* data = stackalloc byte[entry.DecompressedLength];
+                    //byte* data = stackalloc byte[entry.DecompressedLength];
 
-                    ZLib.Decompress
-                    (
-                        MultiLoader.Instance.File.PositionAddress,
-                        entry.Length,
-                        0,
-                        (IntPtr) data,
-                        entry.DecompressedLength
-                    );
+                    byte[] data = new byte[entry.DecompressedLength];
 
-                    _reader.SetData(data, entry.DecompressedLength);
-                    _reader.Skip(4);
-                    int count = (int) _reader.ReadUInt();
-
-                    int sizeOf = sizeof(MultiBlockNew);
-
-                    for (int i = 0; i < count; i++)
+                    fixed (byte* dataPtr = data)
                     {
-                        MultiBlockNew* block = (MultiBlockNew*) (_reader.PositionAddress + i * sizeOf);
+                        ZLib.Decompress
+                        (
+                            MultiLoader.Instance.File.PositionAddress,
+                            entry.Length,
+                            0,
+                            (IntPtr) dataPtr,
+                            entry.DecompressedLength
+                        );
 
-                        if (block->Unknown != 0)
+                        _reader.SetData(dataPtr, entry.DecompressedLength);
+                        _reader.Skip(4);
+                        int count = (int) _reader.ReadUInt();
+
+                        int sizeOf = sizeof(MultiBlockNew);
+
+                        for (int i = 0; i < count; i++)
                         {
-                            _reader.Skip((int) (block->Unknown * 4));
+                            MultiBlockNew* block = (MultiBlockNew*) (_reader.PositionAddress + i * sizeOf);
+
+                            if (block->Unknown != 0)
+                            {
+                                _reader.Skip((int) (block->Unknown * 4));
+                            }
+
+                            if (block->X < minX)
+                            {
+                                minX = block->X;
+                            }
+
+                            if (block->X > maxX)
+                            {
+                                maxX = block->X;
+                            }
+
+                            if (block->Y < minY)
+                            {
+                                minY = block->Y;
+                            }
+
+                            if (block->Y > maxY)
+                            {
+                                maxY = block->Y;
+                            }
+
+                            if (block->Flags == 0 || block->Flags == 0x100)
+                            {
+                                Multi m = Multi.Create(block->ID);
+                                m.X = (ushort) (X + block->X);
+                                m.Y = (ushort) (Y + block->Y);
+                                m.Z = (sbyte) (Z + block->Z);
+                                m.UpdateScreenPosition();
+                                m.MultiOffsetX = block->X;
+                                m.MultiOffsetY = block->Y;
+                                m.MultiOffsetZ = block->Z;
+                                m.Hue = Hue;
+                                m.AlphaHue = 255;
+                                m.IsCustom = false;
+                                m.State = CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_DONT_REMOVE;
+                                m.AddToTile();
+                                house.Components.Add(m);
+                            }
+                            else if (i == 0)
+                            {
+                                MultiGraphic = block->ID;
+                            }
                         }
 
-                        if (block->X < minX)
-                        {
-                            minX = block->X;
-                        }
-
-                        if (block->X > maxX)
-                        {
-                            maxX = block->X;
-                        }
-
-                        if (block->Y < minY)
-                        {
-                            minY = block->Y;
-                        }
-
-                        if (block->Y > maxY)
-                        {
-                            maxY = block->Y;
-                        }
-
-                        if (block->Flags == 0 || block->Flags == 0x100)
-                        {
-                            Multi m = Multi.Create(block->ID);
-                            m.X = (ushort) (X + block->X);
-                            m.Y = (ushort) (Y + block->Y);
-                            m.Z = (sbyte) (Z + block->Z);
-                            m.UpdateScreenPosition();
-                            m.MultiOffsetX = block->X;
-                            m.MultiOffsetY = block->Y;
-                            m.MultiOffsetZ = block->Z;
-                            m.Hue = Hue;
-                            m.AlphaHue = 255;
-                            m.IsCustom = false;
-                            m.State = CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_DONT_REMOVE;
-                            m.AddToTile();
-                            house.Components.Add(m);
-                        }
-                        else if (i == 0)
-                        {
-                            MultiGraphic = block->ID;
-                        }
+                        _reader.ReleaseData();
                     }
-
-                    _reader.ReleaseData();
                 }
                 else
                 {
@@ -415,7 +422,7 @@ namespace ClassicUO.Game.GameObjects
 
             MultiDistanceBonus = Math.Max(Math.Max(Math.Abs(minX), maxX), Math.Max(Math.Abs(minY), maxY));
 
-            //house.Generate();
+            house.Bounds = MultiInfo.Value;
 
             UIManager.GetGump<MiniMapGump>()?.RequestUpdateContents();
 
@@ -1071,6 +1078,114 @@ namespace ClassicUO.Game.GameObjects
                     LastAnimationChangeTime = Time.Ticks + Constants.CHARACTER_ANIMATION_DELAY;
                 }
             }
+            /*else if (evalutate && SerialHelper.IsMobile(Container) && Layer != Layer.Invalid)
+            {
+                ushort id = ItemData.AnimID;
+
+                if (id == 0)
+                {
+                    return;
+                }
+
+                Mobile parent = World.Mobiles.Get(Container);
+
+                if (parent != null)
+                {
+                    byte animGroup = Mobile.GetGroupForAnimation(parent, id, true);
+
+                    bool mirror = false;
+                    AnimationsLoader.Instance.GetAnimDirection(ref dir, ref mirror);
+                    int currentDelay = Constants.CHARACTER_ANIMATION_DELAY;
+
+                    if (id < Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT && dir < 5)
+                    {
+                        ushort hue = 0;
+
+                        sbyte frameIndex = AnimIndex;
+
+                        if (parent.AnimationFromServer && !parent.AnimationForwardDirection)
+                        {
+                            frameIndex--;
+                        }
+                        else
+                        {
+                            frameIndex++;
+                        }
+
+                        AnimationDirection direction = AnimationsLoader.Instance.GetBodyAnimationGroup(ref id, ref animGroup, ref hue, true).Direction[dir];
+
+                        if (direction != null && (direction.FrameCount == 0 || direction.Frames == null))
+                        {
+                            AnimationsLoader.Instance.LoadAnimationFrames(id, animGroup, dir, ref direction);
+                        }
+
+                        if (direction != null && direction.FrameCount != 0)
+                        {
+                            direction.LastAccessTime = Time.Ticks;
+                            int fc = direction.FrameCount;
+
+                            if (parent.AnimationFromServer)
+                            {
+                                currentDelay += currentDelay * (parent.AnimationInterval + 1);
+
+                                if (parent.AnimationFrameCount == 0)
+                                {
+                                    parent.AnimationFrameCount = (byte)fc;
+                                }
+                                else
+                                {
+                                    fc = parent.AnimationFrameCount;
+                                }
+
+                                if (parent.AnimationForwardDirection)
+                                {
+                                    if (frameIndex >= fc)
+                                    {
+                                        frameIndex = 0;
+
+                                        if (parent.AnimationRepeat)
+                                        {
+                                            byte repCount = parent.AnimationRepeatMode;
+
+                                            if (repCount == 2)
+                                            {
+                                                repCount--;
+                                                parent.AnimationRepeatMode = repCount;
+                                            }
+                                        }
+                                    }
+                                }
+                                else
+                                {
+                                    if (frameIndex < 0)
+                                    {
+                                        if (fc == 0)
+                                        {
+                                            frameIndex = 0;
+                                        }
+                                        else
+                                        {
+                                            frameIndex = (sbyte)(fc - 1);
+                                        }
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                if (frameIndex >= fc)
+                                {
+                                    frameIndex = 0;
+                                }
+                            }
+
+                            AnimIndex = frameIndex;
+                        }
+                    }
+
+                    //LastAnimationChangeTime = Time.Ticks + currentDelay;
+                }
+            }
+            */
         }
     }
 }

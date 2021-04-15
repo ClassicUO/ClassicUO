@@ -80,7 +80,6 @@ namespace ClassicUO.Renderer
         private DepthStencilState _stencil;
         private readonly Texture2D[] _textureInfo;
         private Matrix _transformMatrix;
-        private bool _useScissor;
         private readonly DynamicVertexBuffer _vertexBuffer;
         private PositionNormalTextureColor4* _vertexInfo;
 
@@ -116,6 +115,8 @@ namespace ClassicUO.Renderer
             DefaultEffect = new IsometricEffect(device);
         }
 
+
+        public Matrix TransformMatrix => _transformMatrix;
 
         public MatrixEffect DefaultEffect { get; }
 
@@ -237,12 +238,11 @@ namespace ClassicUO.Renderer
 
                 float offsetY = baseOffset.Y + (curOffset.Y + cCrop.Y) * axisDirY;
 
-
                 Draw2D
                 (
                     textureValue,
-                    x + (int) offsetX,
-                    y + (int) offsetY,
+                    x + (int) Math.Round(offsetX),
+                    y + (int) Math.Round(offsetY),
                     cGlyph.X,
                     cGlyph.Y,
                     cGlyph.Width,
@@ -422,6 +422,8 @@ namespace ClassicUO.Renderer
             Texture2D texture,
             int x,
             int y,
+            float width,
+            float height,
             int destX,
             int destY,
             ref Vector3 hue,
@@ -431,21 +433,17 @@ namespace ClassicUO.Renderer
             EnsureSize();
 
             ref PositionNormalTextureColor4 vertex = ref _vertexInfo[_numSprites];
-
-            float ww = texture.Width * 0.5f;
-            float hh = texture.Height * 0.5f;
-
-
-            float startX = x - (destX + ww);
-            float startY = y - (destY + hh);
+            
+            float startX = x - (destX + width);
+            float startY = y - (destY + height);
 
             float sin = (float) Math.Sin(angle);
             float cos = (float) Math.Cos(angle);
 
-            float sinx = sin * ww;
-            float cosx = cos * ww;
-            float siny = sin * hh;
-            float cosy = cos * hh;
+            float sinx = sin * width;
+            float cosx = cos * width;
+            float siny = sin * height;
+            float cosy = cos * height;
 
 
             vertex.Position0.X = startX;
@@ -1687,7 +1685,7 @@ namespace ClassicUO.Renderer
         {
             GraphicsDevice.BlendState = _blendState;
             GraphicsDevice.DepthStencilState = _stencil;
-            GraphicsDevice.RasterizerState = _useScissor ? _rasterizerState : RasterizerState.CullNone;
+            GraphicsDevice.RasterizerState = _rasterizerState;
             GraphicsDevice.SamplerStates[0] = _sampler;
             GraphicsDevice.SamplerStates[1] = SamplerState.PointClamp;
             GraphicsDevice.SamplerStates[2] = SamplerState.PointClamp;
@@ -1700,12 +1698,12 @@ namespace ClassicUO.Renderer
 
         private void Flush()
         {
-            ApplyStates();
-
             if (_numSprites == 0)
             {
                 return;
             }
+
+            ApplyStates();
 
             int start = UpdateVertexBuffer(_numSprites);
 
@@ -1776,21 +1774,59 @@ namespace ClassicUO.Renderer
             );
         }
 
-        public void EnableScissorTest(bool enable)
+        public bool ClipBegin(int x, int y, int width, int height)
         {
-            if (enable == _useScissor)
+            if (width <= 0 || height <= 0)
             {
-                return;
+                return false;
             }
 
-            if (!enable && _useScissor && ScissorStack.HasScissors)
+            Rectangle scissor = ScissorStack.CalculateScissors
+            (
+                TransformMatrix,
+                x,
+                y,
+                width,
+                height
+            );
+
+            Flush();
+
+            if (ScissorStack.PushScissors(GraphicsDevice, scissor))
+            {
+                EnableScissorTest(true);
+
+                return true;
+            }
+            
+            return false;
+        }
+
+        public void ClipEnd()
+        {
+            EnableScissorTest(false);
+            ScissorStack.PopScissors(GraphicsDevice);
+
+            Flush();
+        }
+
+        public void EnableScissorTest(bool enable)
+        {
+            bool rasterize = GraphicsDevice.RasterizerState.ScissorTestEnable;
+
+            if (ScissorStack.HasScissors)
+            {
+                enable = true;
+            }
+
+            if (enable == rasterize)
             {
                 return;
             }
 
             Flush();
 
-            _useScissor = enable;
+            GraphicsDevice.RasterizerState.ScissorTestEnable = enable;
         }
 
         public void SetBlendState(BlendState blend)

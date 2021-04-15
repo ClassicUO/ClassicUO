@@ -32,6 +32,7 @@
 
 using ClassicUO.Configuration;
 using ClassicUO.Data;
+using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
@@ -107,6 +108,17 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 {
                     Add(new GumpPic(286, 45, 0x058A, 0));
                 }
+
+                // Credits
+                Add
+                (
+                    new Button((int)Buttons.Credits, 0x1583, 0x1585, 0x1584)
+                    {
+                        X = 60,
+                        Y = 385,
+                        ButtonAction = ButtonAction.Activate
+                    }
+                );
 
                 Add
                 (
@@ -221,6 +233,17 @@ namespace ClassicUO.Game.UI.Gumps.Login
                     {
                         X = 25,
                         Y = 240,
+                        ButtonAction = ButtonAction.Activate
+                    }
+                );
+
+                //// Credit Button
+                Add
+                (
+                    new Button((int)Buttons.Credits, 0x05D0, 0x05CF, 0x5CE)
+                    {
+                        X = 530,
+                        Y = 125,
                         ButtonAction = ButtonAction.Activate
                     }
                 );
@@ -589,6 +612,11 @@ namespace ClassicUO.Game.UI.Gumps.Login
                     Client.Game.Exit();
 
                     break;
+
+                case Buttons.Credits:
+                    UIManager.Add(new CreditsGump());
+
+                    break;
             }
         }
 
@@ -731,26 +759,14 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
             public override bool Draw(UltimaBatcher2D batcher, int x, int y)
             {
-                Rectangle scissor = ScissorStack.CalculateScissors
-                (
-                    Matrix.Identity,
-                    x,
-                    y,
-                    Width,
-                    Height
-                );
-
-                if (ScissorStack.PushScissors(batcher.GraphicsDevice, scissor))
+                if (batcher.ClipBegin(x, y, Width, Height))
                 {
-                    batcher.EnableScissorTest(true);
                     DrawSelection(batcher, x, y);
 
                     _rendererText.Draw(batcher, x, y);
 
                     DrawCaret(batcher, x, y);
-
-                    batcher.EnableScissorTest(false);
-                    ScissorStack.PopScissors(batcher.GraphicsDevice);
+                    batcher.ClipEnd();
                 }
 
                 return true;
@@ -761,7 +777,8 @@ namespace ClassicUO.Game.UI.Gumps.Login
         private enum Buttons
         {
             NextArrow,
-            Quit
+            Quit,
+            Credits
         }
     }
 }

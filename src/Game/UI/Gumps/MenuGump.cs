@@ -252,19 +252,8 @@ namespace ClassicUO.Game.UI.Gumps
 
             public override bool Draw(UltimaBatcher2D batcher, int x, int y)
             {
-                Rectangle scissor = ScissorStack.CalculateScissors
-                (
-                    Matrix.Identity,
-                    x,
-                    y,
-                    Width,
-                    Height
-                );
-
-                if (ScissorStack.PushScissors(batcher.GraphicsDevice, scissor))
+                if (batcher.ClipBegin(x, y, Width, Height))
                 {
-                    batcher.EnableScissorTest(true);
-
                     int width = 0;
                     int maxWidth = Value + Width;
                     bool drawOnly1 = true;
@@ -297,9 +286,7 @@ namespace ClassicUO.Game.UI.Gumps
                         width += child.Width;
                     }
 
-
-                    batcher.EnableScissorTest(false);
-                    ScissorStack.PopScissors(batcher.GraphicsDevice);
+                    batcher.ClipEnd();
                 }
 
                 return true; // base.Draw(batcher,position, hue);
@@ -410,14 +397,15 @@ namespace ClassicUO.Game.UI.Gumps
                         if (radioButton.IsChecked)
                         {
                             NetClient.Socket.Send(new PGrayMenuResponse(LocalSerial, (ushort) ServerSerial, index));
-
+                            
+                            Dispose();
                             break;
                         }
 
                         index++;
                     }
 
-                    Dispose();
+                   
 
                     break;
             }

@@ -51,6 +51,7 @@ namespace ClassicUO.Data
         CV_308Z = (3 << 24) | (0 << 16) | (8 << 8) | ('z' & 0xFF),   // Age of Shadows. Adds paladin, necromancer, custom housing, resists, profession selection window, removes save password checkbox
         CV_400B = (4 << 24) | (0 << 16) | (0 << 8) | ('b' & 0xFF),   // Deletes tooltips
         CV_405A = (4 << 24) | (0 << 16) | (5 << 8) | ('a' & 0xFF),   // Adds ninja, samurai
+        CV_4011C = (4 << 24) | (0 << 16) | (11 << 8) | ('c' & 0xFF), // Music/* vs Music/Digital/* switchover
         CV_4011D = (4 << 24) | (0 << 16) | (11 << 8) | ('d' & 0xFF), // Adds elven race
         CV_500A = (5 << 24) | (0 << 16) | (0 << 8) | ('a' & 0xFF),   // Paperdoll buttons journal becomes quests, chat becomes guild. Use mega FileManager.Cliloc. Removes verdata.mul.
         CV_5020 = (5 << 24) | (0 << 16) | (2 << 8) | 0,              // Adds buff bar
@@ -71,6 +72,7 @@ namespace ClassicUO.Data
         CV_70240 = (7 << 24) | (0 << 16) | (24 << 8) | 0,            // *.mul -> *.uop
         CV_70331 = (7 << 24) | (0 << 16) | (33 << 8) | 1,            //
         CV_704565 = (7 << 24) | (0 << 16) | (45 << 8) | 65,          //
+        CV_705301 = (7 << 24) | (0 << 16) | (53 << 8) | 01,          // Alternate backpack skins
         CV_706000 = (7 << 24) | (0 << 16) | (60 << 8) | 0,
         CV_706400 = (7 << 24) | (0 << 16) | (64 << 8) | 0, // Endless Journey background
         CV_70796 = (7 << 24) | (0 << 16) | (79 << 8) | 6   // Display houses content option

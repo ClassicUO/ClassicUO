@@ -206,6 +206,8 @@ namespace ClassicUO.IO
                 throw new IndexOutOfRangeException();
             }
 
+            SanitizeStringNumber(ref group[index]);
+
             return int.Parse(group[index]);
         }
 
@@ -277,10 +279,32 @@ namespace ClassicUO.IO
 
             if (!string.IsNullOrEmpty(token))
             {
+                SanitizeStringNumber(ref token);
+
                 return token.StartsWith("0x") ? int.Parse(token.Remove(0, 2), NumberStyles.HexNumber) : int.Parse(token);
             }
 
             return -1;
+        }
+
+        private static void SanitizeStringNumber(ref string token)
+        {
+            if (string.IsNullOrEmpty(token))
+            {
+                return;
+            }
+
+            for (int i = 0; i < token.Length; ++i)
+            {
+                char c = token[i];
+
+                if (!char.IsNumber(c) && c != '-' && c != '+')
+                {
+                    token = token.Substring(0, i);
+
+                    break;
+                }
+            }
         }
     }
 }
