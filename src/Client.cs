@@ -178,6 +178,7 @@ namespace ClassicUO
             StaticFilters.Load();
 
             BuffTable.Load();
+            ChairTable.Load();
 
             Log.Trace("Network calibration...");
             PacketHandlers.Load();
