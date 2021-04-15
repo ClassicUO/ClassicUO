@@ -358,16 +358,7 @@ namespace ClassicUO.Game.UI.Controls
         {
             ResetHueVector();
 
-            Rectangle rect = ScissorStack.CalculateScissors
-            (
-                Matrix.Identity,
-                x,
-                y,
-                Width,
-                Height
-            );
-
-            if (ScissorStack.PushScissors(batcher.GraphicsDevice, rect))
+            if (batcher.ClipBegin(x, y, Width, Height))
             {
                 ShaderHueTranslator.GetHueVector
                 (
@@ -378,18 +369,13 @@ namespace ClassicUO.Game.UI.Controls
                     true
                 );
 
-                batcher.EnableScissorTest(true);
-
                 DrawInternal(batcher, x, y, ref HueVector);
                 base.Draw(batcher, x, y);
 
-                batcher.EnableScissorTest(false);
-                ScissorStack.PopScissors(batcher.GraphicsDevice);
-
-                return true;
+                batcher.ClipEnd();
             }
-
-            return false;
+            
+            return true;
         }
 
         private void DrawInternal(UltimaBatcher2D batcher, int x, int y, ref Vector3 color)

@@ -269,18 +269,8 @@ namespace ClassicUO.Game.UI.Controls
 
             ResetHueVector();
 
-            Rectangle scissor = ScissorStack.CalculateScissors
-            (
-                Matrix.Identity,
-                x,
-                y,
-                Width,
-                Height
-            );
-
-            if (ScissorStack.PushScissors(batcher.GraphicsDevice, scissor))
+            if (batcher.ClipBegin(x, y, Width, Height))
             {
-                batcher.EnableScissorTest(true);
                 base.Draw(batcher, x, y);
 
                 _gameText.Draw
@@ -296,9 +286,9 @@ namespace ClassicUO.Game.UI.Controls
                     ScrollY
                 );
 
-                batcher.EnableScissorTest(false);
-                ScissorStack.PopScissors(batcher.GraphicsDevice);
+                batcher.ClipEnd();
             }
+
 
             return true;
         }
