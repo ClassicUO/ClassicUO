@@ -146,7 +146,7 @@ namespace ClassicUO.Game.GameObjects
             
             if (distance <= 22)
             {
-                World.RemoveEffect(this);
+                RemoveMe();
 
                 return;
             }
@@ -161,7 +161,7 @@ namespace ClassicUO.Game.GameObjects
 
             if (newX == tX && newY == tY)
             {
-                World.RemoveEffect(this);
+                RemoveMe();
 
                 return;
             }
@@ -185,6 +185,13 @@ namespace ClassicUO.Game.GameObjects
             Offset.Y += s0.Y;
         }
 
+
+        private void RemoveMe()
+        {
+            CreateExplosionEffect();
+
+            World.RemoveEffect(this);
+        }
 
         private static void TileOffsetOnMonitorToXY(ref int ofsX, ref int ofsY, out int x, out int y)
         {

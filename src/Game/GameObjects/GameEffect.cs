@@ -46,7 +46,6 @@ namespace ClassicUO.Game.GameObjects
             Hue = hue;
             AllowedToDraw = !GameObjectHelper.IsNoDrawable(graphic);
 
-            Children = new List<GameEffect>();
             AlphaHue = 0xFF;
 
             AnimDataFrame = AnimDataLoader.Instance.CalculateCurrentGraphic(graphic);
@@ -70,10 +69,9 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
-        public List<GameEffect> Children { get; }
-
         public bool IsMoving => Target != null || TargetX != 0 && TargetY != 0;
-       
+
+        public bool CanCreateExplosionEffect;
         public ushort AnimationGraphic = 0xFFFF;
         public AnimDataFrame2 AnimDataFrame;
         public byte AnimIndex;
@@ -160,14 +158,23 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
-        public void AddChildEffect(GameEffect effect)
-        {
-            Children.Add(effect);
-        }
-
         protected (int x, int y, int z) GetSource()
         {
             return Source == null ? (X, Y, Z) : (Source.X, Source.Y, Source.Z);
+        }
+
+        protected void CreateExplosionEffect()
+        {
+            if (CanCreateExplosionEffect)
+            {
+                (int targetX, int targetY, int targetZ) = GetTarget();
+
+                AnimatedItemEffect effect = new AnimatedItemEffect(0x36CB, Hue, 400, 0);
+                effect.Blend = Blend;
+                effect.SetSource(targetX, targetY, targetZ);
+
+                World.AddEffect(effect);
+            }
         }
 
         public void SetSource(GameObject source)

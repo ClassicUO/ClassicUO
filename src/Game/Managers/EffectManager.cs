@@ -56,22 +56,6 @@ namespace ClassicUO.Game.Managers
                     RemoveEffect(f);
                 }
 
-                if (f.IsDestroyed)
-                {
-                    if (f.Children.Count != 0)
-                    {
-                        foreach (GameEffect child in f.Children)
-                        {
-                            if (!child.IsDestroyed)
-                            {
-                                Add(child);
-                            }
-                        }
-
-                        f.Children.Clear();
-                    }
-                }
-
                 f = (GameEffect) n;
             }
         }
@@ -141,26 +125,9 @@ namespace ClassicUO.Game.Managers
                         speed
                     )
                     {
-                        Blend = blendmode
+                        Blend = blendmode,
+                        CanCreateExplosionEffect = doesExplode
                     };
-
-                    if (doesExplode)
-                    {
-                        effect.AddChildEffect
-                        (
-                            new AnimatedItemEffect
-                            (
-                                target,
-                                targetX,
-                                targetY,
-                                targetZ,
-                                0x36Cb,
-                                hue,
-                                9,
-                                speed
-                            )
-                        );
-                    }
 
                     break;
 
@@ -264,13 +231,6 @@ namespace ClassicUO.Game.Managers
             {
                 LinkedObject n = _root.Next;
 
-                foreach (GameEffect child in _root.Children)
-                {
-                    RemoveEffect(child);
-                }
-
-                _root.Children.Clear();
-
                 RemoveEffect(_root);
 
                 _root = (GameEffect) n;
@@ -306,6 +266,7 @@ namespace ClassicUO.Game.Managers
 
             effect.Next = null;
             effect.Previous = null;
+
             effect.Destroy();
         }
     }
