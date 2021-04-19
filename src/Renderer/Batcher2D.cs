@@ -258,7 +258,7 @@ namespace ClassicUO.Renderer
         }
 
 
-        public void DrawString(BaseUOFont font, string text, int x, int y, ref Vector3 hue)
+        /*public void DrawString(BaseUOFont font, string text, int x, int y, ref Vector3 hue)
         {
             int startX = x;
 
@@ -290,7 +290,7 @@ namespace ClassicUO.Renderer
                 x += rect.Width;
             }
         }
-
+        */
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool DrawSprite(Texture2D texture, int x, int y, bool mirror, ref Vector3 hue)
         {
