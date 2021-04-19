@@ -34,12 +34,9 @@ namespace ClassicUO.Game.GameObjects
 {
     internal sealed partial class LightningEffect : GameEffect
     {
-        public LightningEffect(ushort hue)
+        public LightningEffect(ushort hue) : base(0x4E20, hue, 0)
         {
-            Graphic = 0x4E20;
-            Hue = hue;
             IsEnabled = true;
-            IntervalInMs = Constants.ITEM_EFFECT_ANIMATION_DELAY;
             AnimIndex = 0;
         }
 

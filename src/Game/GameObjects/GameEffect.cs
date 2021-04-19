@@ -30,63 +30,66 @@
 
 #endregion
 
+using System;
 using System.Collections.Generic;
 using ClassicUO.Game.Data;
 using ClassicUO.IO.Resources;
+using ClassicUO.Utility;
 
 namespace ClassicUO.Game.GameObjects
 {
-    internal abstract class GameEffect : GameObject
+    internal abstract partial class GameEffect : GameObject
     {
-        protected GameEffect()
+        protected GameEffect(ushort graphic, ushort hue, byte speed)
         {
+            Graphic = graphic;
+            Hue = hue;
+            AllowedToDraw = !GameObjectHelper.IsNoDrawable(graphic);
+
             Children = new List<GameEffect>();
             AlphaHue = 0xFF;
+
+            AnimDataFrame = AnimDataLoader.Instance.CalculateCurrentGraphic(graphic);
+            IsEnabled = true;
+            AnimIndex = 0;
+
+            speed *= 10;
+
+            if (speed == 0)
+            {
+                speed = Constants.ITEM_EFFECT_ANIMATION_DELAY;
+            }
+
+            if (AnimDataFrame.FrameInterval == 0)
+            {
+                IntervalInMs = (uint)speed;
+            }
+            else
+            {
+                IntervalInMs = (uint)(AnimDataFrame.FrameInterval * speed);
+            }
         }
 
         public List<GameEffect> Children { get; }
 
         public bool IsMoving => Target != null || TargetX != 0 && TargetY != 0;
+       
         public ushort AnimationGraphic = 0xFFFF;
         public AnimDataFrame2 AnimDataFrame;
         public byte AnimIndex;
-
+        public float AngleToTarget;
         public GraphicEffectBlendMode Blend;
-
         public long Duration = -1;
-
-        public int IntervalInMs;
-
+        public uint IntervalInMs;
         public bool IsEnabled;
-
         public long NextChangeFrameTime;
-
         public GameObject Source;
-
         protected GameObject Target;
-
         protected int TargetX;
-
         protected int TargetY;
-
         protected int TargetZ;
 
-        public void Load()
-        {
-            AnimDataFrame = AnimDataLoader.Instance.CalculateCurrentGraphic(Graphic);
-            IsEnabled = true;
-            AnimIndex = 0;
-
-            if (AnimDataFrame.FrameInterval == 0)
-            {
-                IntervalInMs = Constants.ITEM_EFFECT_ANIMATION_DELAY;
-            }
-            else
-            {
-                IntervalInMs = AnimDataFrame.FrameInterval * Constants.ITEM_EFFECT_ANIMATION_DELAY;
-            }
-        }
-
+      
         public override void Update(double totalTime, double frameTime)
         {
             base.Update(totalTime, frameTime);

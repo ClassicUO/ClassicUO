@@ -42,12 +42,8 @@ namespace ClassicUO.Game.GameObjects
     {
         private uint _lastMoveTime;
 
-        private MovingEffect(ushort graphic, ushort hue)
+        private MovingEffect(ushort graphic, ushort hue, byte speed) : base(graphic, hue, speed)
         {
-            Hue = hue;
-            Graphic = graphic;
-            AllowedToDraw = !GameObjectHelper.IsNoDrawable(graphic);
-            Load();
         }
 
         public MovingEffect
@@ -64,12 +60,13 @@ namespace ClassicUO.Game.GameObjects
             ushort hue,
             bool fixedDir,
             byte speed
-        ) : this(graphic, hue)
+        ) : this(graphic, hue, speed)
         {
             FixedDir = fixedDir;
 
-            MovingDelay = speed;
-            _lastMoveTime = Time.Ticks + MovingDelay;
+            // we override interval time with speed
+            IntervalInMs = speed;
+            _lastMoveTime = Time.Ticks + IntervalInMs;
 
             Entity source = World.Get(src);
 
@@ -95,10 +92,8 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
-        public float AngleToTarget;
         public bool Explode;
         public readonly bool FixedDir;
-        public byte MovingDelay = 10;
 
 
         public override void Update(double totalTime, double frameTime)
@@ -109,7 +104,7 @@ namespace ClassicUO.Game.GameObjects
             {
                 UpdateOffset();
 
-                _lastMoveTime = Time.Ticks + MovingDelay;
+                _lastMoveTime = Time.Ticks + IntervalInMs;
             }
         }
 
@@ -147,7 +142,7 @@ namespace ClassicUO.Game.GameObjects
             Vector2.Subtract(ref target, ref source, out Vector2 offset);
             Vector2.Distance(ref source, ref target, out float distance);
             //distance -= 22;
-            Vector2.Multiply(ref offset, MovingDelay / distance, out Vector2 s0);
+            Vector2.Multiply(ref offset, IntervalInMs / distance, out Vector2 s0);
             
             if (distance <= 22)
             {
@@ -173,7 +168,7 @@ namespace ClassicUO.Game.GameObjects
 
 
             IsPositionChanged = true;
-            AngleToTarget = (float) -Math.Atan2(offset.Y, offset.X);
+            AngleToTarget = (float) Math.Atan2(-offset.Y, -offset.X);
 
             if (newX != sX || newY != sY)
             {

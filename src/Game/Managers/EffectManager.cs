@@ -119,6 +119,7 @@ namespace ClassicUO.Game.Managers
                         return;
                     }
 
+                    // TODO: speed == 0 means run at standard frameInterval got from anim.mul?
                     if (speed == 0)
                     {
                         speed++;

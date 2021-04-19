@@ -52,8 +52,10 @@ namespace ClassicUO.Game.GameObjects
             int yTarget,
             int zTarget,
             ushort graphic,
-            ushort hue
-        )
+            ushort hue,
+            byte speed
+        ) 
+            : base(graphic, hue, speed)
         {
             Entity source = World.Get(src);
 
@@ -78,10 +80,8 @@ namespace ClassicUO.Game.GameObjects
                 SetTarget(xTarget, yTarget, zTarget);
             }
 
-            AlphaHue = 255;
             Hue = hue;
             Graphic = graphic;
-            Load();
         }
 
         public override void Update(double totalTime, double frameTime)

@@ -1168,21 +1168,22 @@ namespace ClassicUO.Network
                     destY,
                     destZ,
                     graphic,
-                    hue
+                    hue,
+                    5
                 )
                 {
                     Duration = Time.Ticks + 5000
                 };
             }
 
-            if (effect.AnimDataFrame.FrameCount != 0)
-            {
-                effect.IntervalInMs = effect.AnimDataFrame.FrameInterval * 45;
-            }
-            else
-            {
-                effect.IntervalInMs = 13;
-            }
+            //if (effect.AnimDataFrame.FrameCount != 0)
+            //{
+            //    effect.IntervalInMs = (uint) (effect.AnimDataFrame.FrameInterval * 45);
+            //}
+            //else
+            //{
+            //    effect.IntervalInMs = 13;
+            //}
 
             World.AddEffect(effect);
         }

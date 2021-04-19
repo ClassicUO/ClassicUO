@@ -34,15 +34,11 @@ using ClassicUO.Utility;
 
 namespace ClassicUO.Game.GameObjects
 {
-    internal sealed partial class AnimatedItemEffect : GameEffect
+    internal sealed class AnimatedItemEffect : GameEffect
     {
-        public AnimatedItemEffect(ushort graphic, ushort hue, int duration, int speed)
+        public AnimatedItemEffect(ushort graphic, ushort hue, int duration, byte speed) : base(graphic, hue, speed)
         {
-            Graphic = graphic;
-            Hue = hue;
             Duration = duration > 0 ? Time.Ticks + duration : -1;
-            AllowedToDraw = !GameObjectHelper.IsNoDrawable(graphic);
-            Load();
         }
 
         public AnimatedItemEffect
@@ -53,7 +49,7 @@ namespace ClassicUO.Game.GameObjects
             ushort graphic,
             ushort hue,
             int duration,
-            int speed
+            byte speed
         ) : this(graphic, hue, duration, speed)
         {
             SetSource(sourceX, sourceY, sourceZ);
@@ -68,7 +64,7 @@ namespace ClassicUO.Game.GameObjects
             ushort graphic,
             ushort hue,
             int duration,
-            int speed
+            byte speed
         ) : this(graphic, hue, duration, speed)
         {
             Entity source = World.Get(sourceSerial);
