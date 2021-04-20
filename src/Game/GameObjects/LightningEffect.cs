@@ -34,24 +34,12 @@ namespace ClassicUO.Game.GameObjects
 {
     internal sealed partial class LightningEffect : GameEffect
     {
-        public LightningEffect(ushort hue) : base(0x4E20, hue, 0)
+        public LightningEffect(uint src, int x, int y, int z, ushort hue) 
+            : base(0x4E20, hue, 0)
         {
             IsEnabled = true;
             AnimIndex = 0;
-        }
 
-        public LightningEffect(GameObject source, ushort hue) : this(hue)
-        {
-            SetSource(source);
-        }
-
-        public LightningEffect(int x, int y, int z, ushort hue) : this(hue)
-        {
-            SetSource(x, y, z);
-        }
-
-        public LightningEffect(uint src, int x, int y, int z, ushort hue) : this(hue)
-        {
             Entity source = World.Get(src);
 
             if (SerialHelper.IsValid(src) && source != null)
@@ -70,7 +58,7 @@ namespace ClassicUO.Game.GameObjects
             {
                 if (AnimIndex >= 10) //TODO: fix time
                 {
-                    World.RemoveEffect(this);
+                    Destroy();
                 }
                 else
                 {

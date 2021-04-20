@@ -532,9 +532,9 @@ namespace ClassicUO.Game
             _effectManager.Add(effect);
         }
 
-        internal static void RemoveEffect(GameEffect effect)
+        public static void RemoveEffect(GameEffect effect)
         {
-            _effectManager.RemoveEffect(effect);
+            _effectManager.Remove(effect);
         }
 
         public static void AddEffect

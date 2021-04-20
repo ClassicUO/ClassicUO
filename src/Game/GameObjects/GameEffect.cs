@@ -95,7 +95,7 @@ namespace ClassicUO.Game.GameObjects
 
             if (Source != null && Source.IsDestroyed)
             {
-                World.RemoveEffect(this);
+                Destroy();
 
                 return;
             }
@@ -109,7 +109,7 @@ namespace ClassicUO.Game.GameObjects
             {
                 if (Duration < totalTime && Duration >= 0)
                 {
-                    World.RemoveEffect(this);
+                    Destroy();
                 }
                 //else
                 //{
@@ -217,6 +217,8 @@ namespace ClassicUO.Game.GameObjects
 
         public override void Destroy()
         {
+            World.RemoveEffect(this);
+
             AnimIndex = 0;
             Source = null;
             Target = null;

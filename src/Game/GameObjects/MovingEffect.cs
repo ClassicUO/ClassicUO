@@ -38,7 +38,7 @@ using MathHelper = Microsoft.Xna.Framework.MathHelper;
 
 namespace ClassicUO.Game.GameObjects
 {
-    internal sealed partial class MovingEffect : GameEffect
+    internal sealed class MovingEffect : GameEffect
     {
         private uint _lastMoveTime;
 
@@ -113,7 +113,7 @@ namespace ClassicUO.Game.GameObjects
         {
             if (Target != null && Target.IsDestroyed)
             {
-                World.RemoveEffect(this);
+                Destroy();
 
                 return;
             }
@@ -190,7 +190,7 @@ namespace ClassicUO.Game.GameObjects
         {
             CreateExplosionEffect();
 
-            World.RemoveEffect(this);
+            Destroy();
         }
 
         private static void TileOffsetOnMonitorToXY(ref int ofsX, ref int ofsY, out int x, out int y)

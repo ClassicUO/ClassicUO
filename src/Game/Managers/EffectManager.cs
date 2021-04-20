@@ -30,33 +30,31 @@
 
 #endregion
 
+using System;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Interfaces;
 using ClassicUO.Utility.Logging;
+using CUO_API;
 
 namespace ClassicUO.Game.Managers
 {
-    internal class EffectManager : IUpdateable
+    internal class EffectManager : LinkedObject, IUpdateable
     {
-        private GameEffect _root;
-
         public void Update(double totalTime, double frameTime)
         {
-            GameEffect f = _root;
-
-            while (f != null)
+            for (GameEffect f = (GameEffect) Items; f != null;)
             {
-                LinkedObject n = f.Next;
+                GameEffect next = (GameEffect) f.Next;
 
                 f.Update(totalTime, frameTime);
 
                 if (!f.IsDestroyed && f.Distance > World.ClientViewRange)
                 {
-                    RemoveEffect(f);
+                    f.Destroy();
                 }
 
-                f = (GameEffect) n;
+                f = next;
             }
         }
 
@@ -207,67 +205,23 @@ namespace ClassicUO.Game.Managers
 
         public void Add(GameEffect effect)
         {
-            if (effect != null)
-            {
-                if (_root == null)
-                {
-                    _root = effect;
-                    effect.Previous = null;
-                    effect.Next = null;
-                }
-                else
-                {
-                    effect.Next = _root;
-                    _root.Previous = effect;
-                    effect.Previous = null;
-                    _root = effect;
-                }
-            }
+            PushToBack(effect);
         }
-
-        public void Clear()
+        
+        public new void Clear()
         {
-            while (_root != null)
+            GameEffect first = (GameEffect) Items;
+
+            while (first != null)
             {
-                LinkedObject n = _root.Next;
+                LinkedObject n = first.Next;
 
-                RemoveEffect(_root);
+                Remove(first);
 
-                _root = (GameEffect) n;
-            }
-        }
-
-
-        public void RemoveEffect(GameEffect effect)
-        {
-            if (effect == null || effect.IsDestroyed)
-            {
-                return;
+                first = (GameEffect) n;
             }
 
-            if (effect.Previous == null)
-            {
-                _root = (GameEffect) effect.Next;
-
-                if (_root != null)
-                {
-                    _root.Previous = null;
-                }
-            }
-            else
-            {
-                effect.Previous.Next = effect.Next;
-
-                if (effect.Next != null)
-                {
-                    effect.Next.Previous = effect.Previous;
-                }
-            }
-
-            effect.Next = null;
-            effect.Previous = null;
-
-            effect.Destroy();
+            Items = null;
         }
     }
 }
