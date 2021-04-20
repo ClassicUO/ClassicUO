@@ -161,7 +161,7 @@ namespace ClassicUO.Game.Managers
                     {
                         Blend = blendmode,
                         CanCreateExplosionEffect = doesExplode
-                    }; ;
+                    };
 
                     break;
 
@@ -194,7 +194,7 @@ namespace ClassicUO.Game.Managers
                         graphic,
                         hue,
                         duration,
-                        speed
+                        0 //speed [use 50ms]
                     )
                     {
                         Blend = blendmode
@@ -219,7 +219,7 @@ namespace ClassicUO.Game.Managers
                         graphic,
                         hue,
                         duration,
-                        speed
+                        0 //speed [use 50ms]
                     )
                     {
                         Blend = blendmode
@@ -250,7 +250,7 @@ namespace ClassicUO.Game.Managers
             {
                 LinkedObject n = first.Next;
 
-                Remove(first);
+                first.Destroy();
 
                 first = (GameEffect) n;
             }
