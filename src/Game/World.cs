@@ -527,17 +527,7 @@ namespace ClassicUO.Game
             return true;
         }
 
-        internal static void AddEffect(GameEffect effect)
-        {
-            _effectManager.Add(effect);
-        }
-
-        public static void RemoveEffect(GameEffect effect)
-        {
-            _effectManager.Remove(effect);
-        }
-
-        public static void AddEffect
+        public static void SpawnEffect
         (
             GraphicEffectType type,
             uint source,
@@ -558,7 +548,7 @@ namespace ClassicUO.Game
             GraphicEffectBlendMode blendmode
         )
         {
-            _effectManager.Add
+            _effectManager.CreateEffect
             (
                 type,
                 source,

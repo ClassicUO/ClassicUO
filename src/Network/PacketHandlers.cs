@@ -1131,50 +1131,21 @@ namespace ClassicUO.Network
                 destZ = destEntity.Z;
             }
 
-            GameEffect effect;
-
-
-            if (!SerialHelper.IsValid(source) || !SerialHelper.IsValid(dest))
-            {
-                effect = new MovingEffect
-                (
-                    source,
-                    dest,
-                    sourceX,
-                    sourceY,
-                    sourceZ,
-                    destX,
-                    destY,
-                    destZ,
-                    graphic,
-                    hue,
-                    true,
-                    5
-                )
-                {
-                    Duration = Time.Ticks + 5000
-                };
-            }
-            else
-            {
-                effect = new DragEffect
-                (
-                    source,
-                    dest,
-                    sourceX,
-                    sourceY,
-                    sourceZ,
-                    destX,
-                    destY,
-                    destZ,
-                    graphic,
-                    hue,
-                    5
-                )
-                {
-                    Duration = Time.Ticks + 5000
-                };
-            }
+            World.SpawnEffect
+            (
+                !SerialHelper.IsValid(source) || !SerialHelper.IsValid(dest) ? GraphicEffectType.Moving : GraphicEffectType.DragEffect,
+                source,
+                dest,
+                graphic,
+                hue,
+                sourceX, sourceY, sourceZ,
+                destX, destY, destZ,
+                5, 5000,
+                true,
+                false,
+                false,
+                GraphicEffectBlendMode.Normal
+            );
 
             //if (effect.AnimDataFrame.FrameCount != 0)
             //{
@@ -1184,8 +1155,6 @@ namespace ClassicUO.Network
             //{
             //    effect.IntervalInMs = 13;
             //}
-
-            World.AddEffect(effect);
         }
 
         private static void OpenContainer(ref PacketBufferReader p)
@@ -2410,7 +2379,7 @@ namespace ClassicUO.Network
                 }
             }
 
-            World.AddEffect
+            World.SpawnEffect
             (
                 type,
                 source,

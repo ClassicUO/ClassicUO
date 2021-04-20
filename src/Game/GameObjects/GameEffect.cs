@@ -33,6 +33,7 @@
 using System;
 using System.Collections.Generic;
 using ClassicUO.Game.Data;
+using ClassicUO.Game.Managers;
 using ClassicUO.IO.Resources;
 using ClassicUO.Utility;
 
@@ -40,8 +41,11 @@ namespace ClassicUO.Game.GameObjects
 {
     internal abstract partial class GameEffect : GameObject
     {
-        protected GameEffect(ushort graphic, ushort hue, byte speed)
+        private readonly EffectManager _manager;
+
+        protected GameEffect(EffectManager manager, ushort graphic, ushort hue, byte speed)
         {
+            _manager = manager;
             Graphic = graphic;
             Hue = hue;
             AllowedToDraw = !GameObjectHelper.IsNoDrawable(graphic);
@@ -111,20 +115,6 @@ namespace ClassicUO.Game.GameObjects
                 {
                     Destroy();
                 }
-                //else
-                //{
-                //    unsafe
-                //    {
-                //        int count = AnimDataFrame.FrameCount;
-                //        if (count == 0)
-                //            count = 1;
-
-                //        AnimationGraphic = (Graphic) (Graphic + AnimDataFrame.FrameData[((int) Math.Max(1, (_start / 50d) / Speed)) % count]);
-                //    }
-
-                //    _start += frameTime;
-                //}
-
                 else if (NextChangeFrameTime < totalTime)
                 {
                     if (AnimDataFrame.FrameCount != 0)
@@ -143,16 +133,13 @@ namespace ClassicUO.Game.GameObjects
                     }
                     else
                     {
-                        if (Graphic != AnimationGraphic)
-                        {
-                            AnimationGraphic = Graphic;
-                        }
+                        AnimationGraphic = Graphic;
                     }
 
                     NextChangeFrameTime = (long) totalTime + IntervalInMs;
                 }
             }
-            else if (Graphic != AnimationGraphic)
+            else
             {
                 AnimationGraphic = Graphic;
             }
@@ -169,11 +156,11 @@ namespace ClassicUO.Game.GameObjects
             {
                 (int targetX, int targetY, int targetZ) = GetTarget();
 
-                AnimatedItemEffect effect = new AnimatedItemEffect(0x36CB, Hue, 400, 0);
+                FixedEffect effect = new FixedEffect(_manager, 0x36CB, Hue, 400, 0);
                 effect.Blend = Blend;
                 effect.SetSource(targetX, targetY, targetZ);
 
-                World.AddEffect(effect);
+                _manager.PushToBack(effect);
             }
         }
 
@@ -217,7 +204,7 @@ namespace ClassicUO.Game.GameObjects
 
         public override void Destroy()
         {
-            World.RemoveEffect(this);
+            _manager?.Remove(this);
 
             AnimIndex = 0;
             Source = null;

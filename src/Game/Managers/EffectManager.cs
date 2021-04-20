@@ -58,7 +58,8 @@ namespace ClassicUO.Game.Managers
             }
         }
 
-        public void Add
+
+        public void CreateEffect
         (
             GraphicEffectType type,
             uint source,
@@ -84,7 +85,7 @@ namespace ClassicUO.Game.Managers
                 Log.Warn("Unhandled particles in an effects packet.");
             }
 
-            GameEffect effect = null;
+            GameEffect effect;
 
             if (hue != 0)
             {
@@ -109,6 +110,7 @@ namespace ClassicUO.Game.Managers
 
                     effect = new MovingEffect
                     (
+                        this,
                         source,
                         target,
                         srcX,
@@ -129,9 +131,44 @@ namespace ClassicUO.Game.Managers
 
                     break;
 
+                case GraphicEffectType.DragEffect:
+
+                    if (graphic <= 0)
+                    {
+                        return;
+                    }
+
+                    if (speed == 0)
+                    {
+                        speed++;
+                    }
+
+                    effect = new DragEffect
+                    (
+                        this,
+                        source,
+                        target,
+                        srcX,
+                        srcY,
+                        srcZ,
+                        targetX,
+                        targetY,
+                        targetZ,
+                        graphic,
+                        hue,
+                        speed
+                    )
+                    {
+                        Blend = blendmode,
+                        CanCreateExplosionEffect = doesExplode
+                    }; ;
+
+                    break;
+
                 case GraphicEffectType.Lightning:
                     effect = new LightningEffect
                     (
+                        this,
                         source,
                         srcX,
                         srcY,
@@ -148,8 +185,9 @@ namespace ClassicUO.Game.Managers
                         return;
                     }
 
-                    effect = new AnimatedItemEffect
+                    effect = new FixedEffect
                     (
+                        this,
                         srcX,
                         srcY,
                         srcZ,
@@ -171,8 +209,9 @@ namespace ClassicUO.Game.Managers
                         return;
                     }
 
-                    effect = new AnimatedItemEffect
+                    effect = new FixedEffect
                     (
+                        this,
                         source,
                         srcX,
                         srcY,
@@ -191,7 +230,7 @@ namespace ClassicUO.Game.Managers
                 case GraphicEffectType.ScreenFade:
                     Log.Warn("Unhandled 'Screen Fade' effect.");
 
-                    break;
+                    return;
 
                 default:
                     Log.Warn("Unhandled effect.");
@@ -200,14 +239,9 @@ namespace ClassicUO.Game.Managers
             }
 
 
-            Add(effect);
-        }
-
-        public void Add(GameEffect effect)
-        {
             PushToBack(effect);
         }
-        
+
         public new void Clear()
         {
             GameEffect first = (GameEffect) Items;

@@ -32,6 +32,7 @@
 
 using System;
 using ClassicUO.Configuration;
+using ClassicUO.Game.Managers;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
 using MathHelper = Microsoft.Xna.Framework.MathHelper;
@@ -42,12 +43,14 @@ namespace ClassicUO.Game.GameObjects
     {
         private uint _lastMoveTime;
 
-        private MovingEffect(ushort graphic, ushort hue, byte speed) : base(graphic, hue, speed)
+        private MovingEffect(EffectManager manager, ushort graphic, ushort hue, byte speed) 
+            : base(manager, graphic, hue, speed)
         {
         }
 
         public MovingEffect
         (
+            EffectManager manager,
             uint src,
             uint trg,
             int xSource,
@@ -60,7 +63,7 @@ namespace ClassicUO.Game.GameObjects
             ushort hue,
             bool fixedDir,
             byte speed
-        ) : this(graphic, hue, speed)
+        ) : this(manager, graphic, hue, speed)
         {
             FixedDir = fixedDir;
 

@@ -31,6 +31,7 @@
 #endregion
 
 using ClassicUO.Configuration;
+using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
@@ -43,6 +44,7 @@ namespace ClassicUO.Game.GameObjects
 
         public DragEffect
         (
+            EffectManager manager,
             uint src,
             uint trg,
             int xSource,
@@ -55,7 +57,7 @@ namespace ClassicUO.Game.GameObjects
             ushort hue,
             byte speed
         ) 
-            : base(graphic, hue, speed)
+            : base(manager, graphic, hue, speed)
         {
             Entity source = World.Get(src);
 

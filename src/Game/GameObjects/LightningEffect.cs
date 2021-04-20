@@ -30,12 +30,14 @@
 
 #endregion
 
+using ClassicUO.Game.Managers;
+
 namespace ClassicUO.Game.GameObjects
 {
     internal sealed partial class LightningEffect : GameEffect
     {
-        public LightningEffect(uint src, int x, int y, int z, ushort hue) 
-            : base(0x4E20, hue, 0)
+        public LightningEffect(EffectManager manager, uint src, int x, int y, int z, ushort hue) 
+            : base(manager, 0x4E20, hue, 0)
         {
             IsEnabled = true;
             AnimIndex = 0;
