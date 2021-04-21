@@ -65,7 +65,10 @@ namespace ClassicUO.Game.GameObjects
 
             // we override interval time with speed
             IntervalInMs = speed;
-            _lastMoveTime = Time.Ticks + IntervalInMs;
+            //_lastMoveTime = Time.Ticks + IntervalInMs;
+
+            // moving effects want a +22 to the X
+            Offset.X += 22;
 
             Entity source = World.Get(src);
 
