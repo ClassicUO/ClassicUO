@@ -38,9 +38,9 @@ namespace ClassicUO.Game.GameObjects
     internal sealed class FixedEffect : GameEffect
     {
         public FixedEffect(EffectManager manager, ushort graphic, ushort hue, int duration, byte speed) 
-            : base(manager, graphic, hue, speed)
+            : base(manager, graphic, hue, duration, speed)
         {
-            Duration = duration > 0 ? Time.Ticks + duration : -1;
+            
         }
 
         public FixedEffect

@@ -37,7 +37,7 @@ namespace ClassicUO.Game.GameObjects
     internal sealed partial class LightningEffect : GameEffect
     {
         public LightningEffect(EffectManager manager, uint src, int x, int y, int z, ushort hue) 
-            : base(manager, 0x4E20, hue, 0)
+            : base(manager, 0x4E20, hue, 400, 0)
         {
             IsEnabled = true;
             AnimIndex = 0;
@@ -58,7 +58,7 @@ namespace ClassicUO.Game.GameObjects
         {
             if (!IsDestroyed)
             {
-                if (AnimIndex >= 10) //TODO: fix time
+                if (AnimIndex >= 10 || (Duration < totalTime && Duration >= 0))
                 {
                     Destroy();
                 }

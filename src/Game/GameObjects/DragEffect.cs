@@ -55,9 +55,10 @@ namespace ClassicUO.Game.GameObjects
             int zTarget,
             ushort graphic,
             ushort hue,
+            int duration,
             byte speed
         ) 
-            : base(manager, graphic, hue, speed)
+            : base(manager, graphic, hue, duration, speed)
         {
             Entity source = World.Get(src);
 

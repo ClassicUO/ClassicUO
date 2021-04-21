@@ -122,6 +122,7 @@ namespace ClassicUO.Game.Managers
                         graphic,
                         hue,
                         fixedDir,
+                        duration,
                         speed
                     )
                     {
@@ -156,6 +157,7 @@ namespace ClassicUO.Game.Managers
                         targetZ,
                         graphic,
                         hue,
+                        duration,
                         speed
                     )
                     {

@@ -42,12 +42,7 @@ namespace ClassicUO.Game.GameObjects
     internal sealed class MovingEffect : GameEffect
     {
         private uint _lastMoveTime;
-
-        private MovingEffect(EffectManager manager, ushort graphic, ushort hue, byte speed) 
-            : base(manager, graphic, hue, speed)
-        {
-        }
-
+        
         public MovingEffect
         (
             EffectManager manager,
@@ -62,8 +57,9 @@ namespace ClassicUO.Game.GameObjects
             ushort graphic,
             ushort hue,
             bool fixedDir,
+            int duration,
             byte speed
-        ) : this(manager, graphic, hue, speed)
+        ) : base(manager, graphic, hue, duration, speed)
         {
             FixedDir = fixedDir;
 

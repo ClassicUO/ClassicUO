@@ -43,18 +43,18 @@ namespace ClassicUO.Game.GameObjects
     {
         private readonly EffectManager _manager;
 
-        protected GameEffect(EffectManager manager, ushort graphic, ushort hue, byte speed)
+        protected GameEffect(EffectManager manager, ushort graphic, ushort hue, int duration, byte speed)
         {
             _manager = manager;
+
             Graphic = graphic;
             Hue = hue;
             AllowedToDraw = !GameObjectHelper.IsNoDrawable(graphic);
-
             AlphaHue = 0xFF;
-
             AnimDataFrame = AnimDataLoader.Instance.CalculateCurrentGraphic(graphic);
             IsEnabled = true;
             AnimIndex = 0;
+            Duration = duration > 0 ? Time.Ticks + duration : -1;
 
             speed *= 10;
 
