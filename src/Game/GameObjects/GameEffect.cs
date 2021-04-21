@@ -51,7 +51,7 @@ namespace ClassicUO.Game.GameObjects
             Hue = hue;
             AllowedToDraw = !GameObjectHelper.IsNoDrawable(graphic);
             AlphaHue = 0xFF;
-            AnimDataFrame = AnimDataLoader.Instance.CalculateCurrentGraphic(graphic);
+            AnimDataFrame = AnimDataLoader.Instance?.CalculateCurrentGraphic(graphic) ?? default;
             IsEnabled = true;
             AnimIndex = 0;
             Duration = duration > 0 ? Time.Ticks + duration : -1;
