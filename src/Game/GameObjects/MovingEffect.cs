@@ -94,7 +94,6 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
-        public bool Explode;
         public readonly bool FixedDir;
 
 
