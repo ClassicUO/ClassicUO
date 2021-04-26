@@ -704,6 +704,11 @@ namespace ClassicUO
                             lastClickTime = Mouse.LastRightButtonClickTime;
 
                             break;
+
+                        default: 
+                            Log.Warn($"No mouse button handled: {mouse.button}");
+
+                            return 0;
                     }
 
                     Mouse.ButtonPress(buttonType);
@@ -795,7 +800,12 @@ namespace ClassicUO
                             lastClickTime = Mouse.LastRightButtonClickTime;
 
                             break;
-                    }
+
+                        default:
+                            Log.Warn($"No mouse button handled: {mouse.button}");
+
+                            return 0;
+                        }
 
                     if (lastClickTime != 0xFFFF_FFFF)
                     {
