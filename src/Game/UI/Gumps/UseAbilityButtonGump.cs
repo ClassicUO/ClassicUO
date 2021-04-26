@@ -64,10 +64,9 @@ namespace ClassicUO.Game.UI.Gumps
         private void BuildGump()
         {
             Clear();
-            int abilityIndex = ((byte) World.Player.Abilities[IsPrimary ? 0 : 1] & 0x7F);
-            int index = abilityIndex - 1;
-
-            ref readonly AbilityDefinition def = ref AbilityData.Abilities[index];
+            Index = ((byte) World.Player.Abilities[IsPrimary ? 0 : 1] & 0x7F);
+            
+            ref readonly AbilityDefinition def = ref AbilityData.Abilities[Index - 1];
 
             _button = new GumpPic(0, 0, def.Icon, 0)
             {
@@ -76,14 +75,13 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add(_button);
 
-            SetTooltip(ClilocLoader.Instance.GetString(1028838 + index), 80);
+            SetTooltip(ClilocLoader.Instance.GetString(1028838 + (Index - 1)), 80);
 
             WantUpdateSize = true;
             AcceptMouseInput = true;
             GroupMatrixWidth = 44;
             GroupMatrixHeight = 44;
             AnchorType = ANCHOR_TYPE.SPELL;
-            Index = abilityIndex;
         }
 
 
