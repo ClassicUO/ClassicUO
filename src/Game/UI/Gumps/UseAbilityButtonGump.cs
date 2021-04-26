@@ -50,23 +50,22 @@ namespace ClassicUO.Game.UI.Gumps
             CanCloseWithRightClick = true;
         }
 
-        public UseAbilityButtonGump(int index, bool primary) : this()
+        public UseAbilityButtonGump(bool primary) : this()
         {
             IsPrimary = primary;
-            Index = index;
             BuildGump();
         }
 
         public override GumpType GumpType => GumpType.AbilityButton;
 
-        public int Index { get; }
+        public int Index { get; private set; }
         public bool IsPrimary { get; private set; }
 
         private void BuildGump()
         {
             Clear();
-
-            int index = ((byte) World.Player.Abilities[IsPrimary ? 0 : 1] & 0x7F) - 1;
+            int abilityIndex = ((byte) World.Player.Abilities[IsPrimary ? 0 : 1] & 0x7F);
+            int index = abilityIndex - 1;
 
             ref readonly AbilityDefinition def = ref AbilityData.Abilities[index];
 
@@ -84,6 +83,7 @@ namespace ClassicUO.Game.UI.Gumps
             GroupMatrixWidth = 44;
             GroupMatrixHeight = 44;
             AnchorType = ANCHOR_TYPE.SPELL;
+            Index = abilityIndex;
         }
 
 

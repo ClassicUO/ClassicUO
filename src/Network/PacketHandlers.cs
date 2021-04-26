@@ -6245,6 +6245,8 @@ namespace ClassicUO.Network
 
                 World.Player.UpdateScreenPosition();
                 World.Player.AddToTile();
+
+                World.Player.UpdateAbilities();
             }
         }
 
