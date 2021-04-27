@@ -117,7 +117,7 @@ namespace ClassicUO.Game.UI.Gumps
                 return false;
             }
 
-            byte index = (byte)World.Player.Abilities[IsPrimary ? 0 : 1];
+            byte index = (byte) World.Player.Abilities[IsPrimary ? 0 : 1];
 
             if ((index & 0x80) != 0)
             {
