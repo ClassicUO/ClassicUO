@@ -32,26 +32,20 @@
 
 using System;
 using ClassicUO.Configuration;
+using ClassicUO.Game.Managers;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
 using MathHelper = Microsoft.Xna.Framework.MathHelper;
 
 namespace ClassicUO.Game.GameObjects
 {
-    internal sealed partial class MovingEffect : GameEffect
+    internal sealed class MovingEffect : GameEffect
     {
         private uint _lastMoveTime;
-
-        private MovingEffect(ushort graphic, ushort hue)
-        {
-            Hue = hue;
-            Graphic = graphic;
-            AllowedToDraw = !GameObjectHelper.IsNoDrawable(graphic);
-            Load();
-        }
-
+        
         public MovingEffect
         (
+            EffectManager manager,
             uint src,
             uint trg,
             int xSource,
@@ -63,13 +57,18 @@ namespace ClassicUO.Game.GameObjects
             ushort graphic,
             ushort hue,
             bool fixedDir,
+            int duration,
             byte speed
-        ) : this(graphic, hue)
+        ) : base(manager, graphic, hue, duration, speed)
         {
             FixedDir = fixedDir;
 
-            MovingDelay = speed;
-            _lastMoveTime = Time.Ticks + MovingDelay;
+            // we override interval time with speed
+            IntervalInMs = speed;
+            //_lastMoveTime = Time.Ticks + IntervalInMs;
+
+            // moving effects want a +22 to the X
+            Offset.X += 22;
 
             Entity source = World.Get(src);
 
@@ -95,10 +94,7 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
-        public float AngleToTarget;
-        public bool Explode;
         public readonly bool FixedDir;
-        public byte MovingDelay = 10;
 
 
         public override void Update(double totalTime, double frameTime)
@@ -109,7 +105,7 @@ namespace ClassicUO.Game.GameObjects
             {
                 UpdateOffset();
 
-                _lastMoveTime = Time.Ticks + MovingDelay;
+                _lastMoveTime = Time.Ticks + IntervalInMs;
             }
         }
 
@@ -118,7 +114,7 @@ namespace ClassicUO.Game.GameObjects
         {
             if (Target != null && Target.IsDestroyed)
             {
-                World.RemoveEffect(this);
+                Destroy();
 
                 return;
             }
@@ -147,11 +143,11 @@ namespace ClassicUO.Game.GameObjects
             Vector2.Subtract(ref target, ref source, out Vector2 offset);
             Vector2.Distance(ref source, ref target, out float distance);
             //distance -= 22;
-            Vector2.Multiply(ref offset, MovingDelay / distance, out Vector2 s0);
+            Vector2.Multiply(ref offset, IntervalInMs / distance, out Vector2 s0);
             
             if (distance <= 22)
             {
-                World.RemoveEffect(this);
+                RemoveMe();
 
                 return;
             }
@@ -166,14 +162,14 @@ namespace ClassicUO.Game.GameObjects
 
             if (newX == tX && newY == tY)
             {
-                World.RemoveEffect(this);
+                RemoveMe();
 
                 return;
             }
 
 
             IsPositionChanged = true;
-            AngleToTarget = (float) -Math.Atan2(offset.Y, offset.X);
+            AngleToTarget = (float) Math.Atan2(-offset.Y, -offset.X);
 
             if (newX != sX || newY != sY)
             {
@@ -190,6 +186,13 @@ namespace ClassicUO.Game.GameObjects
             Offset.Y += s0.Y;
         }
 
+
+        private void RemoveMe()
+        {
+            CreateExplosionEffect();
+
+            Destroy();
+        }
 
         private static void TileOffsetOnMonitorToXY(ref int ofsX, ref int ofsY, out int x, out int y)
         {

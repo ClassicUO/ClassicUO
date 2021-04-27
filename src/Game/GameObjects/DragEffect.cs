@@ -31,6 +31,7 @@
 #endregion
 
 using ClassicUO.Configuration;
+using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
@@ -43,6 +44,7 @@ namespace ClassicUO.Game.GameObjects
 
         public DragEffect
         (
+            EffectManager manager,
             uint src,
             uint trg,
             int xSource,
@@ -52,8 +54,11 @@ namespace ClassicUO.Game.GameObjects
             int yTarget,
             int zTarget,
             ushort graphic,
-            ushort hue
-        )
+            ushort hue,
+            int duration,
+            byte speed
+        ) 
+            : base(manager, graphic, hue, duration, speed)
         {
             Entity source = World.Get(src);
 
@@ -78,10 +83,8 @@ namespace ClassicUO.Game.GameObjects
                 SetTarget(xTarget, yTarget, zTarget);
             }
 
-            AlphaHue = 255;
             Hue = hue;
             Graphic = graphic;
-            Load();
         }
 
         public override void Update(double totalTime, double frameTime)
