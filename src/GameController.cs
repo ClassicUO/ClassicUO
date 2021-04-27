@@ -611,7 +611,7 @@ namespace ClassicUO
                     {
                         TakeScreenshot();
                     }
-
+                    
                     break;
 
                 case SDL_EventType.SDL_TEXTINPUT:
@@ -708,7 +708,7 @@ namespace ClassicUO
                         default: 
                             Log.Warn($"No mouse button handled: {mouse.button}");
 
-                            return 0;
+                            break;
                     }
 
                     Mouse.ButtonPress(buttonType);
@@ -804,7 +804,7 @@ namespace ClassicUO
                         default:
                             Log.Warn($"No mouse button handled: {mouse.button}");
 
-                            return 0;
+                            break;
                         }
 
                     if (lastClickTime != 0xFFFF_FFFF)
