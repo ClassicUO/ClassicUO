@@ -253,10 +253,10 @@ namespace ClassicUO.Game.Map
                         priorityZ--;
                     }
 
-                    if (data.IsSurface)
-                    {
-                        priorityZ--;
-                    }
+                    //if (data.IsSurface)
+                    //{
+                    //    priorityZ--;
+                    //}
 
                     if (data.Height != 0)
                     {
