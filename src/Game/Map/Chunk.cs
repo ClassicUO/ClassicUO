@@ -181,12 +181,14 @@ namespace ClassicUO.Game.Map
 
                     if (tile.IsStretched)
                     {
-                        priorityZ = (short) (tile.AverageZ - 2);
+                        priorityZ = (short) (tile.AverageZ - 1);
                     }
                     else
                     {
                         priorityZ--;
                     }
+
+                    priorityZ--;
 
                     state = 0;
 
@@ -253,10 +255,10 @@ namespace ClassicUO.Game.Map
                         priorityZ--;
                     }
 
-                    //if (data.IsSurface)
-                    //{
-                    //    priorityZ--;
-                    //}
+                    if (data.IsSurface)
+                    {
+                        priorityZ--;
+                    }
 
                     if (data.Height != 0)
                     {
