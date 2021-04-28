@@ -233,6 +233,10 @@ namespace ClassicUO.Game.Map
                         state = 2;
                         priorityZ++;
                     }
+                    else if ((m.ItemData.Flags & TileFlag.StairRight) != 0)
+                    {
+                        priorityZ++;
+                    }
 
                     if (m.ItemData.IsMultiMovable)
                     {
@@ -245,6 +249,11 @@ namespace ClassicUO.Game.Map
                     ref StaticTiles data = ref TileDataLoader.Instance.StaticData[graphic];
 
                     if (data.IsBackground)
+                    {
+                        priorityZ--;
+                    }
+
+                    if (data.IsSurface)
                     {
                         priorityZ--;
                     }
