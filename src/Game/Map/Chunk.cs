@@ -181,7 +181,7 @@ namespace ClassicUO.Game.Map
 
                     if (tile.IsStretched)
                     {
-                        priorityZ = (short) (tile.AverageZ - 1);
+                        priorityZ = (short) (tile.AverageZ - 2);
                     }
                     else
                     {
