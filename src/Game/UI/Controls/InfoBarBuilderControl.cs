@@ -58,12 +58,6 @@ namespace ClassicUO.Game.UI.Controls
                 (int) item.var
             );
 
-            uint color = 0xFF7F7F7F;
-
-            if (item.hue != 0xFFFF)
-            {
-                color = HuesLoader.Instance.GetPolygoneColor(12, item.hue);
-            }
 
             labelColor = new ClickableColorBox
             (
@@ -71,8 +65,7 @@ namespace ClassicUO.Game.UI.Controls
                 0,
                 13,
                 14,
-                item.hue,
-                color
+                item.hue
             );
 
             NiceButton deleteButton = new NiceButton

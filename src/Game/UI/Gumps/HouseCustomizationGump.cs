@@ -1101,7 +1101,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 _dataBox.Add
                 (
-                    new ColorBox(384, 2, 0, 0xFF7F7F7F)
+                    new ColorBox(384, 2, 0)
                     {
                         X = 123,
                         Y = 96
