@@ -59,7 +59,7 @@ namespace ClassicUO.Game.GameObjects
         {
             ResetHueVector();
 
-            int sittigIndex = 0;
+            AnimationsLoader.SittingInfoData seatData = AnimationsLoader.SittingInfoData.Empty;
             _equipConvData = null;
             _transform = false;
             FrameInfo.X = 0;
@@ -238,7 +238,7 @@ namespace ClassicUO.Game.GameObjects
             }
             else
             {
-                if ((sittigIndex = IsSitting()) != 0)
+                if (TryGetSittingInfo(out seatData))
                 {
                     animGroup = (byte) PEOPLE_ANIMATION_GROUP.PAG_STAND;
                     animIndex = 0;
@@ -251,7 +251,7 @@ namespace ClassicUO.Game.GameObjects
                         ref IsFlipped,
                         ref drawX,
                         ref drawY,
-                        sittigIndex
+                        ref seatData
                     );
 
                     drawY += SIT_OFFSET_Y;
@@ -413,7 +413,7 @@ namespace ClassicUO.Game.GameObjects
                             }
 
                             // Seems like all Gargoyle equipment has the 'IsWeapon' flag
-                            if (sittigIndex == 0 && IsGargoyle /*&& item.ItemData.IsWeapon*/)
+                            if (seatData.Graphic != 0 && IsGargoyle /*&& item.ItemData.IsWeapon*/)
                             {
                                 DrawInternal
                                 (

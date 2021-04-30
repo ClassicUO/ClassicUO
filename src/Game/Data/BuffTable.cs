@@ -30,6 +30,10 @@
 
 #endregion
 
+using ClassicUO.Utility;
+using System.Collections.Generic;
+using System.IO;
+
 namespace ClassicUO.Game.Data
 {
     internal enum BuffIconType : short
@@ -225,7 +229,49 @@ namespace ClassicUO.Game.Data
 
     internal static class BuffTable
     {
-        public static ushort[] Table { get; } =
+        private static ushort[] _table;
+
+        public static ushort[] Table => _table;
+
+        public static void Load()
+        {
+            string path = Path.Combine(CUOEnviroment.ExecutablePath, "Data", "Client");
+
+            if (!Directory.Exists(path))
+            {
+                Directory.CreateDirectory(path);
+            }
+
+            string buff = Path.Combine(path, "buff.txt");
+
+            if (File.Exists(buff))
+            {
+                var tempList = new List<ushort>();
+
+                TextFileParser buffParser = new TextFileParser(File.ReadAllText(buff), new[] { ' ', '\t', ',' }, new[] { '#', ';' }, new[] { '"', '"' });
+
+                while (!buffParser.IsEOF())
+                {
+                    var buffToken = buffParser.ReadTokens();
+
+                    if (buffToken != null && buffToken.Count != 0)
+                    {
+                        if (ushort.TryParse(buffToken[0], out ushort graphic))
+                        {
+                            tempList.Add(graphic);
+                        }
+                    }
+                }
+
+                _table = tempList.ToArray();
+            }
+            else
+            {
+                _table = _defaultTable;
+            }
+        }
+
+        private static ushort[] _defaultTable =
         {
             0x754C,
             0x754A,
