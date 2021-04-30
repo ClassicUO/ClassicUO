@@ -96,6 +96,8 @@ namespace ClassicUO.Game.UI.Gumps
             _dyeTybeImage.Hue = _box.SelectedHue;
         }
 
+        public ushort Graphic => _graphic;
+
         public override void OnButtonClick(int buttonID)
         {
             switch (buttonID)
