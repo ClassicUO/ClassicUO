@@ -922,6 +922,8 @@ namespace ClassicUO.Game.GameObjects
                             return true;
                         }
                     }
+
+                    start = (GameObject) start.Next;
                 }
             }
 
