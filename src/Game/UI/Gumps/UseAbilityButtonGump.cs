@@ -50,25 +50,23 @@ namespace ClassicUO.Game.UI.Gumps
             CanCloseWithRightClick = true;
         }
 
-        public UseAbilityButtonGump(int index, bool primary) : this()
+        public UseAbilityButtonGump(bool primary) : this()
         {
             IsPrimary = primary;
-            Index = index;
             BuildGump();
         }
 
         public override GumpType GumpType => GumpType.AbilityButton;
 
-        public int Index { get; }
+        public int Index { get; private set; }
         public bool IsPrimary { get; private set; }
 
         private void BuildGump()
         {
             Clear();
+            Index = ((byte)World.Player.Abilities[IsPrimary ? 0 : 1] & 0x7F);
 
-            int index = ((byte) World.Player.Abilities[IsPrimary ? 0 : 1] & 0x7F) - 1;
-
-            ref readonly AbilityDefinition def = ref AbilityData.Abilities[index];
+            ref readonly AbilityDefinition def = ref AbilityData.Abilities[Index - 1];
 
             _button = new GumpPic(0, 0, def.Icon, 0)
             {
@@ -77,7 +75,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add(_button);
 
-            SetTooltip(ClilocLoader.Instance.GetString(1028838 + index), 80);
+            SetTooltip(ClilocLoader.Instance.GetString(1028838 + (Index - 1)), 80);
 
             WantUpdateSize = true;
             AcceptMouseInput = true;

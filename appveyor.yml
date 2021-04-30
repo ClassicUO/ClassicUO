@@ -64,7 +64,7 @@ deploy:
   username:
     secure: JaSH/LFfqcrUBZ5USwkYozDFFZUmyRZJyxsB/LSNOlI=
   password:
-    secure: yGvEu0Hl4Ep7aZZq5+dP/A==
+    secure: LxmPxo+VaKeJQxV1jqH6eecs4Mid+RaQQsG0JETnMbU=
   folder: /www.classicuo.eu/dev/deploy
   artifact: ClassicUO-dev-preview-release.zip, manifest
   active_mode: false

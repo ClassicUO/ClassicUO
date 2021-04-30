@@ -3203,16 +3203,23 @@ namespace ClassicUO.Network
             int x = (Client.Game.Window.ClientBounds.Width >> 1) - (rect.Width >> 1);
             int y = (Client.Game.Window.ClientBounds.Height >> 1) - (rect.Height >> 1);
 
-            ColorPickerGump gump = new ColorPickerGump
-            (
-                serial,
-                graphic,
-                x,
-                y,
-                null
-            );
+            ColorPickerGump gump = UIManager.GetGump<ColorPickerGump>(serial);
 
-            UIManager.Add(gump);
+            if (gump == null || gump.IsDisposed || gump.Graphic != graphic)
+            {
+                gump?.Dispose();
+
+                gump = new ColorPickerGump
+                (
+                    serial,
+                    graphic,
+                    x,
+                    y,
+                    null
+                );
+
+                UIManager.Add(gump);
+            }
         }
 
         private static void MovePlayer(ref PacketBufferReader p)
@@ -6227,6 +6234,8 @@ namespace ClassicUO.Network
 
                 World.Player.UpdateScreenPosition();
                 World.Player.AddToTile();
+
+                World.Player.UpdateAbilities();
             }
         }
 
