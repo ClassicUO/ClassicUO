@@ -80,6 +80,7 @@ namespace ClassicUO.Game.UI.Gumps
         private Combobox _dragSelectModifierKey;
         private Combobox _backpackStyle;
         private Checkbox _newReagents, _newGems;
+        private Combobox _sailStyle;
 
 
         //counters
@@ -3314,6 +3315,23 @@ namespace ClassicUO.Game.UI.Gumps
 
             startY += _newGems.Height + 2;
 
+            text = AddLabel(rightArea, ResGumps.SailType, startX, startY);
+            startX += text.Width + 10;
+
+            _sailStyle = AddCombobox
+            (
+                rightArea,
+                new[] {
+                    ResGumps.OriginalSails,
+                    ResGumps.NewSails,
+                    ResGumps.HiddenSails
+                },
+                _currentProfile.SailStyle,
+                startX,
+                startY - 3,
+                200
+            );
+
             Add(rightArea, PAGE);
         }
 
@@ -4008,7 +4026,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             _currentProfile.NewReagents = _newReagents.IsChecked;
             _currentProfile.NewGems = _newGems.IsChecked;
-
+            _currentProfile.SailStyle = _sailStyle.SelectedIndex;
 
             bool updateHealthBars = _currentProfile.CustomBarsToggled != _customBars.IsChecked;
             _currentProfile.CustomBarsToggled = _customBars.IsChecked;

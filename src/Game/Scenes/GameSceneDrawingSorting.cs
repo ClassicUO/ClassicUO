@@ -31,7 +31,7 @@
 #endregion
 
 using System;
-using System.Runtime.InteropServices;
+using System.Collections.Generic;
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
@@ -378,7 +378,9 @@ namespace ClassicUO.Game.Scenes
                         }
 
                         //we avoid to hide impassable foliage or bushes, if present...
-                        if (ProfileManager.CurrentProfile.TreeToStumps && itemData.IsFoliage && !itemData.IsMultiMovable && !(obj is Multi) || ProfileManager.CurrentProfile.HideVegetation && (obj is Multi mm && mm.IsVegetation || obj is Static st && st.IsVegetation))
+                        if (ProfileManager.CurrentProfile.TreeToStumps && itemData.IsFoliage && !itemData.IsMultiMovable && !(obj is Multi)
+                            || ProfileManager.CurrentProfile.HideVegetation && (obj is Multi mm && mm.IsVegetation || obj is Static st && st.IsVegetation)
+                            || ProfileManager.CurrentProfile.SailStyle == 2 && obj is Multi sa && SailTable.HideSails.Contains(sa.Graphic))
                         {
                             continue;
                         }

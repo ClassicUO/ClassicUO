@@ -31,6 +31,7 @@
 #endregion
 
 using ClassicUO.Configuration;
+using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
 using ClassicUO.IO;
@@ -99,6 +100,16 @@ namespace ClassicUO.Game.GameObjects
             ResetHueVector();
 
             ushort graphic = Graphic;
+
+            if (ProfileManager.CurrentProfile.SailStyle == 1 && SailTable.NewSailsMap.ContainsKey(Graphic))
+            {
+                graphic = SailTable.NewSailsMap[Graphic];
+            }
+            else if (ProfileManager.CurrentProfile.SailStyle == 2 && SailTable.NoSailsMap.ContainsKey(Graphic))
+            {
+                graphic = SailTable.NoSailsMap[Graphic];
+            }
+
             bool partial = ItemData.IsPartialHue;
 
             Profile currentProfile = ProfileManager.CurrentProfile;

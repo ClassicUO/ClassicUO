@@ -161,6 +161,14 @@ namespace ClassicUO.Game.GameObjects
                 }
                 else if (IsMulti)
                 {
+                    if (ProfileManager.CurrentProfile.SailStyle == 1 && SailTable.NewSailsMap.ContainsKey(MultiGraphic))
+                    {
+                        return SailTable.NewSailsMap[MultiGraphic];
+                    }
+                    else if (ProfileManager.CurrentProfile.SailStyle == 2 && SailTable.NoSailsMap.ContainsKey(MultiGraphic))
+                    {
+                        return SailTable.NoSailsMap[MultiGraphic];
+                    }
                     return MultiGraphic;
                 }
                 else if (ProfileManager.CurrentProfile.NewReagents && _newReagentsMap.ContainsKey(Graphic))

@@ -1453,4 +1453,16 @@ Client version: '{0}'</value>
   <data name="TerrainShadowsLevel" xml:space="preserve">
     <value>Terrain shadows level:</value>
   </data>
+  <data name="SailType" xml:space="preserve">
+    <value>Ship Sail Type</value>
+  </data>
+  <data name="NewSails" xml:space="preserve">
+    <value>New Sails</value>
+  </data>
+  <data name="HiddenSails" xml:space="preserve">
+    <value>Hidden Sails</value>
+  </data>
+  <data name="OriginalSails" xml:space="preserve">
+    <value>Original Sails</value>
+  </data>
 </root>

@@ -173,6 +173,7 @@ namespace ClassicUO.Configuration
         // Graphical Customizations
         public bool NewReagents { get; set; } = true;
         public bool NewGems { get; set; } = true;
+        public int SailStyle { get; set; } = 1;
 
         // Experimental
         public bool CastSpellsByOneClick { get; set; }

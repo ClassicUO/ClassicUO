@@ -1610,6 +1610,15 @@ namespace ClassicUO.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Hidden Sails.
+        /// </summary>
+        public static string HiddenSails {
+            get {
+                return ResourceManager.GetString("HiddenSails", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Hide Chat Gradient.
         /// </summary>
         public static string HideChatGradient {
@@ -2377,6 +2386,14 @@ namespace ClassicUO.Resources {
             }
         }
         
+        ///   Looks up a localized string similar to New Sails.
+        /// </summary>
+        public static string NewSails {
+            get {
+                return ResourceManager.GetString("NewSails", resourceCulture);
+            }
+        }
+        
         /// <summary>
         ///   Looks up a localized string similar to &gt;&gt;.
         /// </summary>
@@ -2473,6 +2490,15 @@ namespace ClassicUO.Resources {
         public static string ON {
             get {
                 return ResourceManager.GetString("ON", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Original Sails.
+        /// </summary>
+        public static string OriginalSails {
+            get {
+                return ResourceManager.GetString("OriginalSails", resourceCulture);
             }
         }
         
@@ -2816,6 +2842,15 @@ namespace ClassicUO.Resources {
         public static string Remove {
             get {
                 return ResourceManager.GetString("Remove", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Replace Sails.
+        /// </summary>
+        public static string SailType {
+            get {
+                return ResourceManager.GetString("SailType", resourceCulture);
             }
         }
         
