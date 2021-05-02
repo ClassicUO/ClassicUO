@@ -923,7 +923,7 @@ namespace ClassicUO.Game.GameObjects
                         }
                     }
 
-                    start = (GameObject) start.Next;
+                    start = (GameObject) start.TNext;
                 }
             }
 

@@ -37,7 +37,7 @@ namespace ClassicUO.Game.Data
             {
                 List<string> ss = chairParse.ReadTokens();
 
-                if (ss != null && ss.Count >= 8)
+                if (ss != null && ss.Count >= 7)
                 {
                     ushort.TryParse(ss[0], out ushort graphic);
                     sbyte.TryParse(ss[1], out sbyte d1);
