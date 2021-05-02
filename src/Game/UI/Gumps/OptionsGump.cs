@@ -66,7 +66,7 @@ namespace ClassicUO.Game.UI.Gumps
         private InputField _autoOpenCorpseRange;
 
         //experimental
-        private Checkbox _autoOpenDoors, _autoOpenCorpse, _skipEmptyCorpse, _disableTabBtn, _disableCtrlQWBtn, _disableDefaultHotkeys, _disableArrowBtn, _disableAutoMove, _overrideContainerLocation, _smoothDoors, _showTargetRangeIndicator, _customBars, _customBarsBBG, _saveHealthbars;
+        private Checkbox _autoOpenDoors, _autoOpenCorpse, _skipEmptyCorpse, _disableTabBtn, _disableCtrlQWBtn, _disableDefaultHotkeys, _disableArrowBtn, _disableAutoMove, _overrideContainerLocation, _smoothDoors, _showTargetRangeIndicator, _customBars, _customBarsBBG;
         private HSliderBar _cellSize;
         private Checkbox _containerScaleItems, _containerDoubleClickToLoot, _relativeDragAnDropItems, _useLargeContianersGumps, _highlightContainersWhenMouseIsOver;
 
@@ -969,18 +969,6 @@ namespace ClassicUO.Game.UI.Gumps
                     null,
                     ResGumps.UseBlackBackgr,
                     _currentProfile.CBBlackBGToggled,
-                    0,
-                    0
-                )
-            );
-
-            section3.Add
-            (
-                _saveHealthbars = AddCheckBox
-                (
-                    null,
-                    ResGumps.SaveHPBarsOnLogout,
-                    _currentProfile.SaveHealthbars,
                     0,
                     0
                 )
@@ -3438,7 +3426,6 @@ namespace ClassicUO.Game.UI.Gumps
                     _autoOpenDoors.IsChecked = false;
                     _smoothDoors.IsChecked = false;
                     _skipEmptyCorpse.IsChecked = false;
-                    _saveHealthbars.IsChecked = false;
                     _use_smooth_boat_movement.IsChecked = false;
                     _hideScreenshotStoredInMessage.IsChecked = false;
                     _use_old_status_gump.IsChecked = false;
@@ -4069,7 +4056,6 @@ namespace ClassicUO.Game.UI.Gumps
             }
 
             _currentProfile.CBBlackBGToggled = _customBarsBBG.IsChecked;
-            _currentProfile.SaveHealthbars = _saveHealthbars.IsChecked;
 
 
             // infobar

@@ -116,16 +116,6 @@ namespace ClassicUO.Game.UI.Gumps
             base.Dispose();
         }
 
-        public override void Save(XmlTextWriter writer)
-        {
-            base.Save(writer);
-
-            if (ProfileManager.CurrentProfile.SaveHealthbars)
-            {
-                writer.WriteAttributeString("name", _name);
-            }
-        }
-
         public override void Restore(XmlElement xml)
         {
             base.Restore(xml);
@@ -133,12 +123,6 @@ namespace ClassicUO.Game.UI.Gumps
             if (LocalSerial == World.Player)
             {
                 _name = World.Player.Name;
-                BuildGump();
-            }
-            else if (ProfileManager.CurrentProfile.SaveHealthbars)
-            {
-                _name = xml.GetAttribute("name");
-                _outOfRange = true;
                 BuildGump();
             }
             else
