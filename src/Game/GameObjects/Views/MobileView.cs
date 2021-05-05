@@ -413,7 +413,7 @@ namespace ClassicUO.Game.GameObjects
                             }
 
                             // Seems like all Gargoyle equipment has the 'IsWeapon' flag
-                            if (sittigIndex == 0 && isGargoyle /*&& item.ItemData.IsWeapon*/)
+                            if (seatData.Graphic != 0 && isGargoyle /*&& item.ItemData.IsWeapon*/)
                             {
                                 DrawInternal
                                 (
