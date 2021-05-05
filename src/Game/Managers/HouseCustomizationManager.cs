@@ -1879,6 +1879,8 @@ namespace ClassicUO.Game.Managers
                         {
                             if ((item.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_VALIDATED_PLACE) == 0)
                             {
+                                item.State |= CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_VALIDATED_PLACE;
+
                                 if (!ValidateItemPlace
                                 (
                                     foundationItem,

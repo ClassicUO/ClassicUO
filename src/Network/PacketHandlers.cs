@@ -784,6 +784,8 @@ namespace ClassicUO.Network
                 World.Light.Overall = ProfileManager.CurrentProfile.LightLevel;
             }
 
+            Client.Game.Scene.Audio.UpdateCurrentMusicVolume();
+
             if (Client.Version >= Data.ClientVersion.CV_200)
             {
                 if (ProfileManager.CurrentProfile != null)
@@ -1129,60 +1131,30 @@ namespace ClassicUO.Network
                 destZ = destEntity.Z;
             }
 
-            GameEffect effect;
+            World.SpawnEffect
+            (
+                !SerialHelper.IsValid(source) || !SerialHelper.IsValid(dest) ? GraphicEffectType.Moving : GraphicEffectType.DragEffect,
+                source,
+                dest,
+                graphic,
+                hue,
+                sourceX, sourceY, sourceZ,
+                destX, destY, destZ,
+                5, 5000,
+                true,
+                false,
+                false,
+                GraphicEffectBlendMode.Normal
+            );
 
-
-            if (!SerialHelper.IsValid(source) || !SerialHelper.IsValid(dest))
-            {
-                effect = new MovingEffect
-                (
-                    source,
-                    dest,
-                    sourceX,
-                    sourceY,
-                    sourceZ,
-                    destX,
-                    destY,
-                    destZ,
-                    graphic,
-                    hue,
-                    true,
-                    5
-                )
-                {
-                    Duration = Time.Ticks + 5000
-                };
-            }
-            else
-            {
-                effect = new DragEffect
-                (
-                    source,
-                    dest,
-                    sourceX,
-                    sourceY,
-                    sourceZ,
-                    destX,
-                    destY,
-                    destZ,
-                    graphic,
-                    hue
-                )
-                {
-                    Duration = Time.Ticks + 5000
-                };
-            }
-
-            if (effect.AnimDataFrame.FrameCount != 0)
-            {
-                effect.IntervalInMs = effect.AnimDataFrame.FrameInterval * 45;
-            }
-            else
-            {
-                effect.IntervalInMs = 13;
-            }
-
-            World.AddEffect(effect);
+            //if (effect.AnimDataFrame.FrameCount != 0)
+            //{
+            //    effect.IntervalInMs = (uint) (effect.AnimDataFrame.FrameInterval * 45);
+            //}
+            //else
+            //{
+            //    effect.IntervalInMs = 13;
+            //}
         }
 
         private static void OpenContainer(ref PacketBufferReader p)
@@ -2065,6 +2037,8 @@ namespace ClassicUO.Network
             if (World.Player != null && Client.Game.Scene is LoginScene)
             {
                 GameScene scene = new GameScene();
+                scene.Audio = Client.Game.Scene.Audio;
+                Client.Game.Scene.Audio = null;
                 Client.Game.SetScene(scene);
 
                 //GameActions.OpenPaperdoll(World.Player);
@@ -2085,7 +2059,15 @@ namespace ClassicUO.Network
                     NetClient.Socket.Send(new PClientViewRange(World.ClientViewRange));
                 }
 
-                ProfileManager.CurrentProfile.ReadGumps(ProfileManager.ProfilePath)?.ForEach(UIManager.Add);
+                List<Gump> gumps = ProfileManager.CurrentProfile.ReadGumps(ProfileManager.ProfilePath);
+
+                if (gumps != null)
+                {
+                    foreach (Gump gump in gumps)
+                    {
+                        UIManager.Add(gump);
+                    }
+                }
             }
         }
 
@@ -2396,7 +2378,7 @@ namespace ClassicUO.Network
                 }
             }
 
-            World.AddEffect
+            World.SpawnEffect
             (
                 type,
                 source,
@@ -3220,16 +3202,23 @@ namespace ClassicUO.Network
             int x = (Client.Game.Window.ClientBounds.Width >> 1) - (rect.Width >> 1);
             int y = (Client.Game.Window.ClientBounds.Height >> 1) - (rect.Height >> 1);
 
-            ColorPickerGump gump = new ColorPickerGump
-            (
-                serial,
-                graphic,
-                x,
-                y,
-                null
-            );
+            ColorPickerGump gump = UIManager.GetGump<ColorPickerGump>(serial);
 
-            UIManager.Add(gump);
+            if (gump == null || gump.IsDisposed || gump.Graphic != graphic)
+            {
+                gump?.Dispose();
+
+                gump = new ColorPickerGump
+                (
+                    serial,
+                    graphic,
+                    x,
+                    y,
+                    null
+                );
+
+                UIManager.Add(gump);
+            }
         }
 
         private static void MovePlayer(ref PacketBufferReader p)
@@ -6229,6 +6218,8 @@ namespace ClassicUO.Network
 
                 World.Player.UpdateScreenPosition();
                 World.Player.AddToTile();
+
+                World.Player.UpdateAbilities();
             }
         }
 

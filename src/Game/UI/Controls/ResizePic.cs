@@ -142,7 +142,7 @@ namespace ClassicUO.Game.UI.Controls
 
             int offsetTop = Math.Max(th_0_height, th_2_height) - th_1_height;
             int offsetBottom = Math.Max(th_5_height, th_7_height) - th_6_height;
-            int offsetLeft = Math.Max(th_0_width, th_5_width) - th_2_width;
+            int offsetLeft = Math.Abs(Math.Max(th_0_width, th_5_width) - th_2_width);
             int offsetRight = Math.Max(th_2_width, th_7_width) - th_4_width;
 
 
@@ -199,7 +199,7 @@ namespace ClassicUO.Game.UI.Controls
                         if (PixelsInXY
                         (
                             GumpsLoader.Instance.GetTexture((ushort) (Graphic + 3)),
-                            x - offsetLeft,
+                            x /*- offsetLeft*/,
                             y - th_0_height,
                             0,
                             DH
@@ -223,7 +223,7 @@ namespace ClassicUO.Game.UI.Controls
                         if (PixelsInXY
                         (
                             GumpsLoader.Instance.GetTexture((ushort) (Graphic + 5)),
-                            x - (Width - th_4_width - offsetRight),
+                            x - (Width - th_4_width /*- offsetRight*/),
                             y - th_2_height,
                             0,
                             DH
@@ -272,6 +272,8 @@ namespace ClassicUO.Game.UI.Controls
                     case 8:
 
                         DW = Width - th_0_width - th_2_width;
+
+                        DW += offsetLeft + offsetRight;
 
                         if (DW < 1)
                         {
@@ -356,16 +358,7 @@ namespace ClassicUO.Game.UI.Controls
         {
             ResetHueVector();
 
-            Rectangle rect = ScissorStack.CalculateScissors
-            (
-                Matrix.Identity,
-                x,
-                y,
-                Width,
-                Height
-            );
-
-            if (ScissorStack.PushScissors(batcher.GraphicsDevice, rect))
+            if (batcher.ClipBegin(x, y, Width, Height))
             {
                 ShaderHueTranslator.GetHueVector
                 (
@@ -376,18 +369,13 @@ namespace ClassicUO.Game.UI.Controls
                     true
                 );
 
-                batcher.EnableScissorTest(true);
-
                 DrawInternal(batcher, x, y, ref HueVector);
                 base.Draw(batcher, x, y);
 
-                batcher.EnableScissorTest(false);
-                ScissorStack.PopScissors(batcher.GraphicsDevice);
-
-                return true;
+                batcher.ClipEnd();
             }
-
-            return false;
+            
+            return true;
         }
 
         private void DrawInternal(UltimaBatcher2D batcher, int x, int y, ref Vector3 color)
@@ -431,7 +419,7 @@ namespace ClassicUO.Game.UI.Controls
 
             int offsetTop = Math.Max(th_0_height, th_2_height) - th_1_height;
             int offsetBottom = Math.Max(th_5_height, th_7_height) - th_6_height;
-            int offsetLeft = Math.Max(th_0_width, th_5_width) - th_2_width;
+            int offsetLeft = Math.Abs(Math.Max(th_0_width, th_5_width) - th_2_width);
             int offsetRight = Math.Max(th_2_width, th_7_width) - th_4_width;
 
 
@@ -498,7 +486,7 @@ namespace ClassicUO.Game.UI.Controls
                         break;
 
                     case 3:
-                        drawX += offsetLeft;
+                        //drawX += offsetLeft;
                         drawY += th_0_height;
                         drawHeight = Height - th_0_height - th_5_height;
 
@@ -515,7 +503,7 @@ namespace ClassicUO.Game.UI.Controls
                         break;
 
                     case 4:
-                        drawX += Width - drawWidth - offsetRight;
+                        drawX += Width - drawWidth /*- offsetRight*/;
                         drawY += th_2_height;
                         drawHeight = Height - th_2_height - th_7_height;
 
@@ -584,6 +572,8 @@ namespace ClassicUO.Game.UI.Controls
                         drawY += th_0_height;
                         drawWidth = Width - th_0_width - th_2_width;
                         drawHeight = Height - th_2_height - th_7_height;
+
+                        drawWidth += offsetLeft + offsetRight;
 
                         batcher.Draw2DTiled
                         (

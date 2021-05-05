@@ -92,7 +92,7 @@ namespace ClassicUO.Game
         public const int MAX_STATIC_DATA_INDEX_COUNT = 0x10000;
         public const int MAX_LAND_TEXTURES_DATA_INDEX_COUNT = 0x4000;
         public const int MAX_GUMP_DATA_INDEX_COUNT = 0x10000;
-        public const int MAX_SOUND_DATA_INDEX_COUNT = 0x0800;
+        public const int MAX_SOUND_DATA_INDEX_COUNT = 0xFFFF;
         public const int MAX_MULTI_DATA_INDEX_COUNT = 0x2200;
         public const int MAX_MUSIC_DATA_INDEX_COUNT = 150;
         public const int MAX_ANIMATIONS_DATA_INDEX_COUNT = 2048;

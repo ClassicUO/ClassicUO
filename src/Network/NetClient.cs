@@ -32,6 +32,7 @@
 
 using System;
 using System.Collections.Concurrent;
+using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
@@ -81,34 +82,10 @@ namespace ClassicUO.Network
 
         public ClientSocketStatus Status { get; private set; }
 
+        public uint LocalIP => (uint)((_tcpClient.Client?.LocalEndPoint as IPEndPoint)?.Address?.Address ?? 0x100007f);
+
         public NetStatistics Statistics { get; }
 
-        private static uint? _client_address;
-
-
-        public static uint ClientAddress
-        {
-            get
-            {
-                if (!_client_address.HasValue)
-                {
-                    try
-                    {
-                        _client_address = 0x100007f;
-
-                        //var address = GetLocalIpAddress();
-
-                        //_client_address = ((address & 0xff) << 0x18) | ((address & 65280) << 8) | ((address >> 8) & 65280) | ((address >> 0x18) & 0xff);
-                    }
-                    catch
-                    {
-                        _client_address = 0x100007f;
-                    }
-                }
-
-                return _client_address.Value;
-            }
-        }
 
         public event EventHandler Connected;
         public event EventHandler<SocketError> Disconnected;

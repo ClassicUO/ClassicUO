@@ -30,31 +30,18 @@
 
 #endregion
 
+using ClassicUO.Game.Managers;
+
 namespace ClassicUO.Game.GameObjects
 {
     internal sealed partial class LightningEffect : GameEffect
     {
-        public LightningEffect(ushort hue)
+        public LightningEffect(EffectManager manager, uint src, int x, int y, int z, ushort hue) 
+            : base(manager, 0x4E20, hue, 400, 0)
         {
-            Graphic = 0x4E20;
-            Hue = hue;
             IsEnabled = true;
-            IntervalInMs = Constants.ITEM_EFFECT_ANIMATION_DELAY;
             AnimIndex = 0;
-        }
 
-        public LightningEffect(GameObject source, ushort hue) : this(hue)
-        {
-            SetSource(source);
-        }
-
-        public LightningEffect(int x, int y, int z, ushort hue) : this(hue)
-        {
-            SetSource(x, y, z);
-        }
-
-        public LightningEffect(uint src, int x, int y, int z, ushort hue) : this(hue)
-        {
             Entity source = World.Get(src);
 
             if (SerialHelper.IsValid(src) && source != null)
@@ -71,9 +58,9 @@ namespace ClassicUO.Game.GameObjects
         {
             if (!IsDestroyed)
             {
-                if (AnimIndex >= 10) //TODO: fix time
+                if (AnimIndex >= 10 || (Duration < totalTime && Duration >= 0))
                 {
-                    World.RemoveEffect(this);
+                    Destroy();
                 }
                 else
                 {
