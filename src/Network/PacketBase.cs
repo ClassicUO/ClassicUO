@@ -192,6 +192,47 @@ namespace ClassicUO.Network
             }
         }
 
+        public void WriteUnicodeLE(string value)
+        {
+            EnsureSize((value.Length + 1) * 2);
+
+            for (int i = 0; i < value.Length; i++)
+            {
+                char c = value[i];
+
+                if (c != '\0')
+                {
+                    WriteByte((byte)(c & 0xFF));
+                    WriteByte((byte)(c >> 8));
+                }
+            }
+
+            WriteUShort(0);
+        }
+
+        public void WriteUnicodeLE(string value, int length)
+        {
+            EnsureSize(length);
+
+            for (int i = 0; i < length && i < value.Length; i++)
+            {
+                char c = value[i];
+
+                if (c != '\0')
+                {
+                    WriteByte((byte)(c & 0xFF));
+                    WriteByte((byte)(c >> 8));
+                }
+            }
+
+
+            if (value.Length < length)
+            {
+                WriteUShort(0);
+                Position += (length - value.Length - 1) * 2;
+            }
+        }
+
 
         public void WriteUTF8(string value)
         {
