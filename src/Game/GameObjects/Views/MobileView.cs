@@ -423,7 +423,7 @@ namespace ClassicUO.Game.GameObjects
                                 animIndex,
                                 false,
                                 graphic,
-                                isGargoyle && item.ItemData.IsWeapon && seatData.Graphic == 0 ? GetGroupForAnimation(this, graphic, true) : animGroup,
+                                isGargoyle /*&& item.ItemData.IsWeapon*/ && seatData.Graphic == 0 ? GetGroupForAnimation(this, graphic, true) : animGroup,
                                 dir,
                                 isHuman,
                                 false,
@@ -556,7 +556,11 @@ namespace ClassicUO.Game.GameObjects
 
             int fc = direction.FrameCount;
 
-            if (fc > 0 && frameIndex >= fc || frameIndex < 0)
+            if (fc > 0 && frameIndex >= fc)
+            {
+                frameIndex = (sbyte) (fc - 1);
+            }
+            else if (frameIndex < 0)
             {
                 frameIndex = 0;
             }
