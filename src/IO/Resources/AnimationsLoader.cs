@@ -1401,7 +1401,7 @@ namespace ClassicUO.IO.Resources
 
             ANIMATION_GROUPS_TYPE type = DataIndex[animID].Type;
 
-            animDirection.FrameCount = (byte) (type <= ANIMATION_GROUPS_TYPE.EQUIPMENT ? Math.Round(fc / 5f) : 10);
+            animDirection.FrameCount = (byte) (type < ANIMATION_GROUPS_TYPE.EQUIPMENT ? Math.Round(fc / 5f) : 10);
             animDirection.Frames = new AnimationFrameTexture[animDirection.FrameCount];
 
             int headerSize = sizeof(UOPAnimationHeader);
@@ -1413,24 +1413,14 @@ namespace ClassicUO.IO.Resources
             {
                 if (/*animHeaderInfo->FrameID != id*/ animHeaderInfo->FrameID - 1 == id || i >= animDirection.FrameCount)
                 {
-                    if (currentDir == direction)
-                    {
-                        break;
-                    }
-
                     if (currentDir != direction)
                     {
-                        dataStart = (uint)_reader.Position;
                         ++currentDir;
-                    }
-
-                    if (currentDir == direction)
-                    {
-                        break;
                     }
 
                     id = animHeaderInfo->FrameID;
                     i = 0;
+                    dataStart = (uint)_reader.Position;
                 }
                 else if (animHeaderInfo->FrameID - id > 1)
                 {
@@ -1442,6 +1432,11 @@ namespace ClassicUO.IO.Resources
 
                     i += (ushort) (animHeaderInfo->FrameID - id);
                     id = animHeaderInfo->FrameID;
+                }
+
+                if (i == 0 && currentDir == direction)
+                {
+                    break;
                 }
 
                 _reader.Skip(headerSize);
