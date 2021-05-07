@@ -880,7 +880,7 @@ namespace ClassicUO.IO.Resources
 
                 if ((index.IsUOP && (isParent || !index.IsValidMUL)) || forceUOP)
                 {
-                    AnimationGroupUop uop = index.GetUopGroup(group);
+                    AnimationGroupUop uop = index.GetUopGroup(ref group);
 
                     return uop ?? _empty;
                 }
@@ -928,7 +928,7 @@ namespace ClassicUO.IO.Resources
 
                 if (index.IsUOP)
                 {
-                    AnimationGroupUop uop = index.GetUopGroup(group);
+                    AnimationGroupUop uop = index.GetUopGroup(ref group);
 
                     return uop ?? _empty;
                 }
@@ -1310,7 +1310,10 @@ namespace ClassicUO.IO.Resources
             {
                 ushort hue = 0;
 
-                AnimationDirection direction = isCorpse ? GetCorpseAnimationGroup(ref graphic, ref group, ref hue)?.Direction[0] : GetBodyAnimationGroup(ref graphic, ref group, ref hue, true)?.Direction[0];
+                AnimationDirection direction = isCorpse ? 
+                    GetCorpseAnimationGroup(ref graphic, ref group, ref hue)?.Direction[0] 
+                    : 
+                    GetBodyAnimationGroup(ref graphic, ref group, ref hue, true, false)?.Direction[0];
 
 
                 return direction != null && (direction.Address != 0 && direction.Size != 0 || direction.IsUOP);
@@ -1334,7 +1337,7 @@ namespace ClassicUO.IO.Resources
 
             if (animDir.IsUOP || animDir.Address == 0 && animDir.Size == 0)
             {
-                AnimationGroupUop animData = DataIndex[animID].GetUopGroup(animGroup);
+                AnimationGroupUop animData = DataIndex[animID].GetUopGroup(ref animGroup);
 
                 if (animData == null || animData.Offset == 0)
                 {
@@ -1358,7 +1361,7 @@ namespace ClassicUO.IO.Resources
 
         private bool ReadUOPAnimationFrame(ushort animID, byte animGroup, byte direction, ref AnimationDirection animDirection)
         {
-            AnimationGroupUop animData = DataIndex[animID].GetUopGroup(animGroup);
+            AnimationGroupUop animData = DataIndex[animID].GetUopGroup(ref animGroup);
 
             if (animData.FileIndex < 0 || animData.FileIndex >= _filesUop.Length)
             {
@@ -1373,8 +1376,6 @@ namespace ClassicUO.IO.Resources
             }
 
             animDirection.LastAccessTime = Time.Ticks;
-            animDirection.FrameCount = 10;
-            animDirection.Frames = new AnimationFrameTexture[animDirection.FrameCount];
 
             int decLen = (int) animData.DecompressedLength;
             UOFileUop file = _filesUop[animData.FileIndex];
@@ -1391,34 +1392,56 @@ namespace ClassicUO.IO.Resources
 
             _reader.SetData(_bufferCachePtr, decLen);
             _reader.Skip(32);
-         
+
+            long end = (long)_reader.StartAddress + _reader.Length;
+
             int fc = _reader.ReadInt();
             uint dataStart = _reader.ReadUInt();
             _reader.Seek(dataStart);
 
+            ANIMATION_GROUPS_TYPE type = DataIndex[animID].Type;
+
+            animDirection.FrameCount = (byte) (type <= ANIMATION_GROUPS_TYPE.EQUIPMENT ? Math.Round(fc / 5f) : 10);
+            animDirection.Frames = new AnimationFrameTexture[animDirection.FrameCount];
+
             int headerSize = sizeof(UOPAnimationHeader);
             int count = 0;
 
-            int startFrames = animDirection.FrameCount * direction;
             UOPAnimationHeader* animHeaderInfo = (UOPAnimationHeader*)_reader.PositionAddress;
 
-            // skip until the frame we want
-            while (animHeaderInfo->FrameID < fc && animHeaderInfo->FrameID <= startFrames)
+            for (ushort i = 0, id = animHeaderInfo->FrameID, currentDir = 0; animHeaderInfo->FrameID < fc; ++i, ++id)
             {
-                _reader.Skip(headerSize);
-
-                animHeaderInfo = (UOPAnimationHeader*)_reader.PositionAddress;
-            }
-
-            dataStart = (uint)_reader.Position;
-            animHeaderInfo = (UOPAnimationHeader*)_reader.PositionAddress;
-
-            for (int i = animHeaderInfo->FrameID; count < animDirection.FrameCount; ++i, ++count)
-            {
-                // when there is an interruption between frames, we have less than 10 frames
-                if (animHeaderInfo->FrameID != i)
+                if (/*animHeaderInfo->FrameID != id*/ animHeaderInfo->FrameID - 1 == id || i >= animDirection.FrameCount)
                 {
-                    break;
+                    if (currentDir == direction)
+                    {
+                        break;
+                    }
+
+                    if (currentDir != direction)
+                    {
+                        dataStart = (uint)_reader.Position;
+                        ++currentDir;
+                    }
+
+                    if (currentDir == direction)
+                    {
+                        break;
+                    }
+
+                    id = animHeaderInfo->FrameID;
+                    i = 0;
+                }
+                else if (animHeaderInfo->FrameID - id > 1)
+                {
+                    // error handler?  
+                    // reason:
+                    //    - anim: 337
+                    //    - dir: 3
+                    //    - it skips 2 frames )35 --> 38(
+
+                    i += (ushort) (animHeaderInfo->FrameID - id);
+                    id = animHeaderInfo->FrameID;
                 }
 
                 _reader.Skip(headerSize);
@@ -1427,24 +1450,21 @@ namespace ClassicUO.IO.Resources
             }
 
             _reader.Seek(dataStart);
+            animHeaderInfo = (UOPAnimationHeader*)_reader.PositionAddress;
 
-            long end = (long)_reader.StartAddress + _reader.Length;
-
-            for (int i = 0; i < count; ++i)
+            for (ushort id = animHeaderInfo->FrameID; id == animHeaderInfo->FrameID && count < animDirection.FrameCount; ++id, ++count)
             {
                 long start = _reader.Position;
 
-                UOPAnimationHeader* headerInfo = (UOPAnimationHeader*) _reader.PositionAddress;
-
-                if (headerInfo->Group == animGroup && start + headerInfo->DataOffset < _reader.Length)
+                if (animHeaderInfo->Group == animGroup && start + animHeaderInfo->DataOffset < _reader.Length)
                 {
-                    int index = headerInfo->FrameID % animDirection.FrameCount;
+                    int index = animHeaderInfo->FrameID % animDirection.FrameCount;
 
                     if (animDirection.Frames[index] == null || animDirection.Frames[index].IsDisposed)
                     {
                         unchecked
                         {
-                            _reader.Skip((int) headerInfo->DataOffset);
+                            _reader.Skip((int)animHeaderInfo->DataOffset);
 
                             ushort* palette = (ushort*)_reader.PositionAddress;
 
@@ -1522,7 +1542,10 @@ namespace ClassicUO.IO.Resources
                 }
 
                 _reader.Seek(start + headerSize);
+                animHeaderInfo = (UOPAnimationHeader*)_reader.PositionAddress;
             }
+
+ 
 
             _usedTextures.AddLast(animDirection);
             _reader.ReleaseData();
@@ -2080,9 +2103,16 @@ namespace ClassicUO.IO.Resources
         public AnimationGroupUop[] UopGroups;
 
 
-        public AnimationGroupUop GetUopGroup(byte group)
+        public AnimationGroupUop GetUopGroup(ref byte group)
         {
-            return group < 100 && UopGroups != null ? UopGroups[_uopReplaceGroupIndex[group]] : null;
+            if (group < 100 && UopGroups != null)
+            {
+                group = _uopReplaceGroupIndex[group];
+
+                return UopGroups[group];
+            }
+
+            return  null;
         }
 
         public void InitializeUOP()
