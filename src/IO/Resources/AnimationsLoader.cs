@@ -1415,8 +1415,6 @@ namespace ClassicUO.IO.Resources
 
             for (int i = animHeaderInfo->FrameID; count < animDirection.FrameCount; ++i, ++count)
             {
-                animHeaderInfo = (UOPAnimationHeader*)_reader.PositionAddress;
-
                 // when there is an interruption between frames, we have less than 10 frames
                 if (animHeaderInfo->FrameID != i)
                 {
@@ -1424,6 +1422,8 @@ namespace ClassicUO.IO.Resources
                 }
 
                 _reader.Skip(headerSize);
+
+                animHeaderInfo = (UOPAnimationHeader*)_reader.PositionAddress;
             }
 
             _reader.Seek(dataStart);
