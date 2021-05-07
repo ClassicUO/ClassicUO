@@ -1399,30 +1399,27 @@ namespace ClassicUO.IO.Resources
             int headerSize = sizeof(UOPAnimationHeader);
             int count = 0;
 
-            for (int i = 0, startFrames = animDirection.FrameCount * direction; i < fc; ++i)
+            int startFrames = animDirection.FrameCount * direction;
+            UOPAnimationHeader* animHeaderInfo = (UOPAnimationHeader*)_reader.PositionAddress;
+
+            // skip until the frame we want
+            while (animHeaderInfo->FrameID < fc && animHeaderInfo->FrameID <= startFrames)
             {
-                UOPAnimationHeader* headerInfo = (UOPAnimationHeader*)_reader.PositionAddress;
+                _reader.Skip(headerSize);
 
-                // starting point of the current animation by direction
-                if (headerInfo->FrameID > startFrames)
+                animHeaderInfo = (UOPAnimationHeader*)_reader.PositionAddress;
+            }
+
+            dataStart = (uint)_reader.Position;
+            animHeaderInfo = (UOPAnimationHeader*)_reader.PositionAddress;
+
+            for (int i = animHeaderInfo->FrameID; count < animDirection.FrameCount; ++i, ++count)
+            {
+                animHeaderInfo = (UOPAnimationHeader*)_reader.PositionAddress;
+
+                // when there is an interruption between frames, we have less than 10 frames
+                if (animHeaderInfo->FrameID != i)
                 {
-                    dataStart = (uint)_reader.Position;
-                    _reader.Skip(headerSize);
-
-                    for (i = headerInfo->FrameID; i <= fc && count < 10; ++i, ++count)
-                    {
-                        headerInfo = (UOPAnimationHeader*)_reader.PositionAddress;
-
-                        if (headerInfo->FrameID != i + 1 && count > 0)
-                        {
-                            ++count;
-
-                            break;
-                        }
-
-                        _reader.Skip(headerSize);
-                    }
-
                     break;
                 }
 
@@ -1533,7 +1530,7 @@ namespace ClassicUO.IO.Resources
             return true;
         }
 
-        private unsafe void ReadMULAnimationFrame(ref AnimationDirection animDir, UOFile reader)
+        private void ReadMULAnimationFrame(ref AnimationDirection animDir, UOFile reader)
         {
             animDir.LastAccessTime = Time.Ticks;
 
