@@ -257,16 +257,25 @@ namespace ClassicUO.Game.UI.Gumps
             }
             else if (buttonID == 1) // reset
             {
-                _skillsControl.Clear();
-                _container.Clear();
+                UIManager.Add(
+                    new MessageBoxGump(300, 200,
+                                       "Skills will be placed in default groups.\nDo you want reset all groups?",
+                                               b =>
+                                               {
+                                                   if (b)
+                                                   {
+                                                       _skillsControl.Clear();
+                                                       _container.Clear();
 
-                SkillsGroupManager.Groups.Clear();
-                SkillsGroupManager.MakeDefault();
+                                                       SkillsGroupManager.Groups.Clear();
+                                                       SkillsGroupManager.MakeDefault();
 
-                LoadSkills();
-                
-                _container.WantUpdateSize = true;
-                _container.ReArrangeChildren();
+                                                       LoadSkills();
+
+                                                       _container.WantUpdateSize = true;
+                                                       _container.ReArrangeChildren();
+                                                   }
+                                               }, false, MessageButtonType.OK_CANCEL));
             }
         }
 
