@@ -30,6 +30,7 @@
 
 #endregion
 
+using System;
 using ClassicUO.Configuration;
 using ClassicUO.Input;
 using ClassicUO.Renderer;
@@ -38,13 +39,73 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.Game.Managers
 {
+    class Aura : IDisposable
+    {
+        private static readonly Lazy<BlendState> _blend = new Lazy<BlendState>
+        (
+            () => new BlendState
+            {
+                ColorSourceBlend = Blend.SourceAlpha,
+                ColorDestinationBlend = Blend.InverseSourceAlpha
+            }
+        );
+
+        private readonly Texture2D _texture;
+
+
+        public Aura(int radius)
+        {
+            short w = 0;
+            short h = 0;
+            uint[] data = CircleOfTransparency.CreateCircleTexture(radius, ref w, ref h);
+
+            for (int i = 0; i < data.Length; i++)
+            {
+                ref uint pixel = ref data[i];
+
+                if (pixel != 0)
+                {
+                    ushort value = (ushort)(pixel << 3);
+
+                    if (value > 0xFF)
+                    {
+                        value = 0xFF;
+                    }
+
+                    pixel = (uint)((value << 24) | (value << 16) | (value << 8) | value);
+                }
+            }
+
+            _texture = new Texture2D(Client.Game.GraphicsDevice, w, h);
+            _texture.SetData(data);
+        }
+
+
+
+        public void Draw(UltimaBatcher2D batcher, int x, int y, ushort hue)
+        {
+            x -= (_texture.Width >> 1);
+            y -= (_texture.Height >> 1);
+
+            Vector3 hueVec = new Vector3(hue, 1, 0);
+
+            batcher.SetBlendState(_blend.Value);
+            batcher.Draw2D(_texture, x, y, ref hueVec);
+            batcher.SetBlendState(null);
+        }
+
+
+        public void Dispose()
+        {
+            if (_texture != null && !_texture.IsDisposed)
+            {
+                _texture.Dispose();
+            }
+        }
+    }
+
     internal static class AuraManager
     {
-        private static readonly BlendState _blend = new BlendState
-        {
-            ColorSourceBlend = Blend.SourceAlpha,
-            ColorDestinationBlend = Blend.InverseSourceAlpha
-        };
         private static int _saveAuraUnderFeetType;
 
         public static bool IsEnabled
@@ -68,8 +129,6 @@ namespace ClassicUO.Game.Managers
             }
         }
 
-        public static Texture2D AuraTexture { get; private set; }
-
         public static void ToggleVisibility()
         {
             Profile currentProfile = ProfileManager.CurrentProfile;
@@ -83,47 +142,6 @@ namespace ClassicUO.Game.Managers
             {
                 currentProfile.AuraUnderFeetType = _saveAuraUnderFeetType;
             }
-        }
-
-        public static void CreateAuraTexture(int radius = 30)
-        {
-            AuraTexture?.Dispose();
-
-            short w = 0;
-            short h = 0;
-            uint[] data = CircleOfTransparency.CreateCircleTexture(radius, ref w, ref h);
-
-            for (int i = 0; i < data.Length; i++)
-            {
-                ref uint pixel = ref data[i];
-
-                if (pixel != 0)
-                {
-                    ushort value = (ushort)(pixel << 3);
-
-                    if (value > 0xFF)
-                    {
-                        value = 0xFF;
-                    }
-
-                    pixel = (uint)((value << 24) | (value << 16) | (value << 8) | value);
-                }
-            }
-
-            AuraTexture = new Texture2D(Client.Game.GraphicsDevice, w, h);
-            AuraTexture.SetData(data);
-        }
-
-        public static void Draw(UltimaBatcher2D batcher, int x, int y, ushort hue)
-        {
-            x -= AuraTexture.Width >> 1;
-            y -= AuraTexture.Height >> 1;
-
-            Vector3 hueVec = new Vector3(hue, 1, 0);
-
-            batcher.SetBlendState(_blend);
-            batcher.Draw2D(AuraTexture, x, y, ref hueVec);
-            batcher.SetBlendState(null);
         }
     }
 }

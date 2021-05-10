@@ -67,7 +67,7 @@ namespace ClassicUO.Game
         };
         private static Vector3 _vec = Vector3.Zero;
 
-        private readonly Texture2D _aura;
+        private readonly Aura _aura = new Aura(30);
         private readonly CustomBuildObject[] _componentsList = new CustomBuildObject[10];
         private readonly int[,] _cursorOffset = new int[2, 16];
         private readonly IntPtr[,] _cursors_ptr = new IntPtr[3, 16];
@@ -79,38 +79,8 @@ namespace ClassicUO.Game
         private readonly List<Multi> _temp = new List<Multi>();
         private readonly Tooltip _tooltip;
 
-        private static readonly BlendState _blend = new BlendState
-        {
-            ColorSourceBlend = Blend.SourceAlpha,
-            ColorDestinationBlend = Blend.InverseSourceAlpha
-        };
-
         public GameCursor()
         {
-            short ww = 0;
-            short hh = 0;
-            uint[] data = CircleOfTransparency.CreateCircleTexture(25, ref ww, ref hh);
-
-            for (int i = 0; i < data.Length; i++)
-            {
-                ref uint pixel = ref data[i];
-
-                if (pixel != 0)
-                {
-                    ushort value = (ushort) (pixel << 3);
-
-                    if (value > 0xFF)
-                    {
-                        value = 0xFF;
-                    }
-
-                    pixel = (uint) ((value << 24) | (value << 16) | (value << 8) | value);
-                }
-            }
-
-            _aura = new Texture2D(Client.Game.GraphicsDevice, ww, hh);
-            _aura.SetData(data);
-
             _tooltip = new Tooltip();
 
             for (int i = 0; i < 3; i++)
@@ -520,32 +490,27 @@ namespace ClassicUO.Game
                         id -= 0x206A;
                     }
 
-                    int hotX = _cursorOffset[0, id];
-                    int hotY = _cursorOffset[1, id];
-
-                    Vector3 hueVec = new Vector3(0, 1, 0);
+                    ushort hue = 0;
 
                     switch (TargetManager.TargetingType)
                     {
                         case TargetType.Neutral:
-                            hueVec.X = 0x03b2;
+                            hue = 0x03b2;
 
                             break;
 
                         case TargetType.Harmful:
-                            hueVec.X = 0x0023;
+                            hue = 0x0023;
 
                             break;
 
                         case TargetType.Beneficial:
-                            hueVec.X = 0x005A;
+                            hue = 0x005A;
 
                             break;
                     }
 
-                    sb.SetBlendState(_blend);
-                    sb.Draw2D(_aura, Mouse.Position.X + hotX - (25 >> 1), Mouse.Position.Y + hotY - (25 >> 1), ref hueVec);
-                    sb.SetBlendState(null);
+                    _aura.Draw(sb, Mouse.Position.X, Mouse.Position.Y, hue);
                 }
 
                 if (ProfileManager.CurrentProfile.ShowTargetRangeIndicator)

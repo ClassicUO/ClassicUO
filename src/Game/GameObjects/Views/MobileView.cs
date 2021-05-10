@@ -53,7 +53,7 @@ namespace ClassicUO.Game.GameObjects
         private static int _startCharacterKneesY;
         private static int _startCharacterFeetY;
         private static int _characterFrameHeight;
-
+        private static readonly Aura _aura = new Aura(30);
 
         public override bool Draw(UltimaBatcher2D batcher, int posX, int posY)
         {
@@ -78,7 +78,7 @@ namespace ClassicUO.Game.GameObjects
 
             if (AuraManager.IsEnabled)
             {
-                AuraManager.Draw(batcher, drawX, drawY, ProfileManager.CurrentProfile.PartyAura && World.Party.Contains(this) ? ProfileManager.CurrentProfile.PartyAuraHue : Notoriety.GetHue(NotorietyFlag));
+                _aura.Draw(batcher, drawX, drawY, ProfileManager.CurrentProfile.PartyAura && World.Party.Contains(this) ? ProfileManager.CurrentProfile.PartyAuraHue : Notoriety.GetHue(NotorietyFlag));
             }
 
             bool isHuman = IsHuman;
