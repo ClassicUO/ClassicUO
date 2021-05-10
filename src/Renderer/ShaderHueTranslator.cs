@@ -47,6 +47,7 @@ namespace ClassicUO.Renderer
         public const byte SHADER_SPECTRAL = 7;
         public const byte SHADER_SHADOW = 8;
         public const byte SHADER_LIGHTS = 9;
+        public const byte SHADER_EFFECT_HUED = 10;
 
         private const byte GUMP_OFFSET = 20;
 
@@ -62,7 +63,7 @@ namespace ClassicUO.Renderer
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void GetHueVector(ref Vector3 hueVector, int hue, bool partial, float alpha, bool gump = false)
+        public static void GetHueVector(ref Vector3 hueVector, int hue, bool partial, float alpha, bool gump = false, bool effect = false)
         {
             byte type;
 
@@ -80,6 +81,11 @@ namespace ClassicUO.Renderer
             if ((hue & SPECTRAL_COLOR_FLAG) != 0)
             {
                 type = SHADER_SPECTRAL;
+            }
+            else if (effect)
+            {
+                hue -= 1;
+                type = SHADER_EFFECT_HUED;
             }
             else if (hue != 0)
             {

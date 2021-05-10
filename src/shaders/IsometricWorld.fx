@@ -8,6 +8,7 @@
 #define SPECTRAL 7
 #define SHADOW 8
 #define LIGHTS 9
+#define EFFECT_HUED 10
 #define GUMP 20
 
 
@@ -152,6 +153,10 @@ float4 PixelShader_Hue(PS_INPUT IN) : COLOR0
 		{
 			color.rgb *= get_rgb(color.r, hue);
 		}
+	}
+	else if (mode == EFFECT_HUED)
+	{
+		color.rgb = get_rgb(color.g, hue);
 	}
 
 	return color * alpha;
