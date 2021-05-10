@@ -386,7 +386,7 @@ namespace ClassicUO.Game.Scenes
                         }
 
 
-                        if (itemData.Height != 0xFF && itemData.Flags != 0)
+                        if (itemData.Height != 0xFF /*&& itemData.Flags != 0*/)
                         {
                             height = itemData.Height;
 
