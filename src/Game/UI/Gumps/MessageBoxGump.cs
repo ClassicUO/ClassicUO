@@ -38,11 +38,18 @@ using SDL2;
 
 namespace ClassicUO.Game.UI.Gumps
 {
+    enum MessageButtonType
+    {
+        OK,
+        OK_CANCEL,
+        
+    }
+
     internal class MessageBoxGump : Gump
     {
         private readonly Action<bool> _action;
 
-        public MessageBoxGump(int w, int h, string message, Action<bool> action, bool hasBackground = false) : base(0, 0)
+        public MessageBoxGump(int w, int h, string message, Action<bool> action, bool hasBackground = false, MessageButtonType menuType = MessageButtonType.OK) : base(0, 0)
         {
             CanMove = true;
             CanCloseWithRightClick = false;
@@ -112,6 +119,26 @@ namespace ClassicUO.Game.UI.Gumps
 
             b.X = (Width - b.Width) >> 1;
 
+
+            if (menuType == MessageButtonType.OK_CANCEL)
+            {
+                Button bCancel;
+
+                Add
+                (
+                    bCancel = new Button(1, 0x047E, 0x047F, 0x0480)
+                    {
+                        Y = Height - 45,
+                        ButtonAction = ButtonAction.Activate
+                    }
+                );
+
+                b.X = Width / 2 - bCancel.Width;
+                bCancel.X = Width / 2 - bCancel.Width;
+                bCancel.X += b.Width + 5;
+            }
+
+
             WantUpdateSize = false;
 
             UIManager.KeyboardFocusControl = this;
@@ -134,6 +161,12 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 case 0:
                     _action?.Invoke(true);
+                    Dispose();
+
+                    break;
+
+                case 1:
+                    _action?.Invoke(false);
                     Dispose();
 
                     break;

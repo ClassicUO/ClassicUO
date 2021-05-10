@@ -412,48 +412,25 @@ namespace ClassicUO.Game.GameObjects
                                 }
                             }
 
-                            // Seems like all Gargoyle equipment has the 'IsWeapon' flag
-                            if (seatData.Graphic != 0 && IsGargoyle /*&& item.ItemData.IsWeapon*/)
-                            {
-                                DrawInternal
-                                (
-                                    batcher,
-                                    this,
-                                    item,
-                                    drawX,
-                                    drawY,
-                                    IsFlipped,
-                                    animIndex,
-                                    false,
-                                    graphic,
-                                    GetGroupForAnimation(this, graphic, true),
-                                    dir,
-                                    isHuman,
-                                    true,
-                                    alpha: HueVector.Z,
-                                    forceUOP: true
-                                );
-                            }
-                            else
-                            {
-                                DrawInternal
-                                (
-                                    batcher,
-                                    this,
-                                    item,
-                                    drawX,
-                                    drawY,
-                                    IsFlipped,
-                                     animIndex, //item.AnimIndex,
-                                    false,
-                                    graphic,
-                                    animGroup,
-                                    dir,
-                                    isHuman,
-                                    false,
-                                    alpha: HueVector.Z
-                                );
-                            }
+                            DrawInternal
+                            (
+                                batcher,
+                                this,
+                                item,
+                                drawX,
+                                drawY,
+                                IsFlipped, 
+                                animIndex,
+                                false,
+                                graphic,
+                                isGargoyle /*&& item.ItemData.IsWeapon*/ && seatData.Graphic == 0 ? GetGroupForAnimation(this, graphic, true) : animGroup,
+                                dir,
+                                isHuman,
+                                false,
+                                false,
+                                isGargoyle,
+                                HueVector.Z
+                            );
                         }
                         else
                         {
@@ -579,7 +556,11 @@ namespace ClassicUO.Game.GameObjects
 
             int fc = direction.FrameCount;
 
-            if (fc > 0 && frameIndex >= fc || frameIndex < 0)
+            if (fc > 0 && frameIndex >= fc)
+            {
+                frameIndex = (sbyte) (fc - 1);
+            }
+            else if (frameIndex < 0)
             {
                 frameIndex = 0;
             }

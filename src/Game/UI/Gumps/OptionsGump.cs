@@ -3876,12 +3876,36 @@ namespace ClassicUO.Game.UI.Gumps
             bool before = _currentProfile.CounterBarEnabled;
             _currentProfile.CounterBarEnabled = _enableCounters.IsChecked;
             _currentProfile.CounterBarCellSize = _cellSize.Value;
-            _currentProfile.CounterBarRows = int.Parse(_rows.Text);
-            _currentProfile.CounterBarColumns = int.Parse(_columns.Text);
+
+            if (!int.TryParse(_rows.Text, out int v))
+            {
+                v = 1;
+                _rows.SetText("1");
+            }
+
+            _currentProfile.CounterBarRows = v;
+
+            if (!int.TryParse(_columns.Text, out v))
+            {
+                v = 1;
+                _columns.SetText("1");
+            }
+            _currentProfile.CounterBarColumns = v;
             _currentProfile.CounterBarHighlightOnUse = _highlightOnUse.IsChecked;
 
-            _currentProfile.CounterBarHighlightAmount = int.Parse(_highlightAmount.Text);
-            _currentProfile.CounterBarAbbreviatedAmount = int.Parse(_abbreviatedAmount.Text);
+            if (!int.TryParse(_highlightAmount.Text, out v))
+            {
+                v = 5;
+                _highlightAmount.SetText("5");
+            }
+            _currentProfile.CounterBarHighlightAmount = v;
+
+            if (!int.TryParse(_abbreviatedAmount.Text, out v))
+            {
+                v = 1000;
+                _abbreviatedAmount.SetText("1000");
+            }
+            _currentProfile.CounterBarAbbreviatedAmount = v;
             _currentProfile.CounterBarHighlightOnAmount = _highlightOnAmount.IsChecked;
             _currentProfile.CounterBarDisplayAbbreviatedAmount = _enableAbbreviatedAmount.IsChecked;
 

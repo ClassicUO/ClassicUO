@@ -1148,7 +1148,7 @@ namespace ClassicUO.Game.GameObjects
                                 }
                                 else
                                 {
-                                    if (uop && type == ANIMATION_GROUPS_TYPE.EQUIPMENT && !AnimationsLoader.Instance.IsAnimationExists(graphic, 4))
+                                    if (uop && type == ANIMATION_GROUPS_TYPE.EQUIPMENT && AnimationsLoader.Instance.IsAnimationExists(graphic, 37))
                                     {
                                         result = 37;
                                     }
