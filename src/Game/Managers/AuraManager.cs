@@ -106,6 +106,8 @@ namespace ClassicUO.Game.Managers
 
     internal static class AuraManager
     {
+        private static readonly Aura _aura = new Aura(30);
+
         private static int _saveAuraUnderFeetType;
 
         public static bool IsEnabled
@@ -142,6 +144,11 @@ namespace ClassicUO.Game.Managers
             {
                 currentProfile.AuraUnderFeetType = _saveAuraUnderFeetType;
             }
+        }
+
+        public static void Draw(UltimaBatcher2D batcher, int x, int y, ushort hue)
+        {
+            _aura.Draw(batcher, x, y, hue);
         }
     }
 }
