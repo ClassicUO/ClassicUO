@@ -40,13 +40,11 @@ namespace ClassicUO.Game.Managers
 {
     internal static class AuraManager
     {
-        /*private readonly BlendState _blend = new BlendState
+        private static readonly BlendState _blend = new BlendState
         {
             ColorSourceBlend = Blend.SourceAlpha,
             ColorDestinationBlend = Blend.InverseSourceAlpha
-        };*/
-        private static Vector3 _auraHueVector = new Vector3(0, 13, 0);
-
+        };
         private static int _saveAuraUnderFeetType;
 
         public static bool IsEnabled
@@ -101,14 +99,14 @@ namespace ClassicUO.Game.Managers
 
                 if (pixel != 0)
                 {
-                    ushort value = (ushort) (pixel << 3);
+                    ushort value = (ushort)(pixel << 3);
 
                     if (value > 0xFF)
                     {
                         value = 0xFF;
                     }
 
-                    pixel = (uint) ((value << 24) | (value << 16) | (value << 8) | value);
+                    pixel = (uint)((value << 24) | (value << 16) | (value << 8) | value);
                 }
             }
 
@@ -121,11 +119,11 @@ namespace ClassicUO.Game.Managers
             x -= AuraTexture.Width >> 1;
             y -= AuraTexture.Height >> 1;
 
-            _auraHueVector.X = hue;
+            Vector3 hueVec = new Vector3(hue, 1, 0);
 
-            //batcher.SetBlendState(_blend);
-            batcher.Draw2D(AuraTexture, x, y, ref _auraHueVector);
-            //batcher.SetBlendState(null);
+            batcher.SetBlendState(_blend);
+            batcher.Draw2D(AuraTexture, x, y, ref hueVec);
+            batcher.SetBlendState(null);
         }
     }
 }

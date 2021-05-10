@@ -68,8 +68,6 @@ namespace ClassicUO.Game
         private static Vector3 _vec = Vector3.Zero;
 
         private readonly Texture2D _aura;
-        private Vector3 _auraVector = new Vector3(0, 13, 0);
-
         private readonly CustomBuildObject[] _componentsList = new CustomBuildObject[10];
         private readonly int[,] _cursorOffset = new int[2, 16];
         private readonly IntPtr[,] _cursors_ptr = new IntPtr[3, 16];
@@ -81,6 +79,11 @@ namespace ClassicUO.Game
         private readonly List<Multi> _temp = new List<Multi>();
         private readonly Tooltip _tooltip;
 
+        private static readonly BlendState _blend = new BlendState
+        {
+            ColorSourceBlend = Blend.SourceAlpha,
+            ColorDestinationBlend = Blend.InverseSourceAlpha
+        };
 
         public GameCursor()
         {
@@ -520,25 +523,29 @@ namespace ClassicUO.Game
                     int hotX = _cursorOffset[0, id];
                     int hotY = _cursorOffset[1, id];
 
+                    Vector3 hueVec = new Vector3(0, 1, 0);
+
                     switch (TargetManager.TargetingType)
                     {
                         case TargetType.Neutral:
-                            _auraVector.X = 0x03b2;
+                            hueVec.X = 0x03b2;
 
                             break;
 
                         case TargetType.Harmful:
-                            _auraVector.X = 0x0023;
+                            hueVec.X = 0x0023;
 
                             break;
 
                         case TargetType.Beneficial:
-                            _auraVector.X = 0x005A;
+                            hueVec.X = 0x005A;
 
                             break;
                     }
 
-                    sb.Draw2D(_aura, Mouse.Position.X + hotX - (25 >> 1), Mouse.Position.Y + hotY - (25 >> 1), ref _auraVector);
+                    sb.SetBlendState(_blend);
+                    sb.Draw2D(_aura, Mouse.Position.X + hotX - (25 >> 1), Mouse.Position.Y + hotY - (25 >> 1), ref hueVec);
+                    sb.SetBlendState(null);
                 }
 
                 if (ProfileManager.CurrentProfile.ShowTargetRangeIndicator)
