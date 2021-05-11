@@ -82,18 +82,13 @@ namespace ClassicUO.Renderer
             {
                 type = SHADER_SPECTRAL;
             }
-            else if (effect)
-            {
-                hue -= 1;
-                type = SHADER_EFFECT_HUED;
-            }
             else if (hue != 0)
             {
                 hue -= 1;
 
-                type = partial ? SHADER_PARTIAL_HUED : SHADER_HUED;
+                type = effect ? SHADER_EFFECT_HUED : partial ? SHADER_PARTIAL_HUED : SHADER_HUED;
 
-                if (gump)
+                if (gump && !effect)
                 {
                     type += GUMP_OFFSET;
                 }
