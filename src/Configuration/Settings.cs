@@ -60,7 +60,7 @@ namespace ClassicUO.Configuration
 
         [JsonProperty("lastcharactername")] public string LastCharacterName { get; set; } = string.Empty;
 
-        [JsonProperty("lang")] public string Language { get; set; } = "ENU";
+        [JsonProperty("lang")] public string Language { get; set; } = "";
 
         [JsonProperty("lastservernum")] public ushort LastServerNum { get; set; } = 1;
 
