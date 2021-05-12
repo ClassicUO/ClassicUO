@@ -149,6 +149,29 @@ namespace ClassicUO
                 SetDllDirectory(libsPath);
             }
 
+            if (string.IsNullOrWhiteSpace(Settings.GlobalSettings.Language))
+            {
+                Log.Trace("language is not set. Trying to get the OS language.");
+                try
+                {
+                    Settings.GlobalSettings.Language = CultureInfo.InstalledUICulture.ThreeLetterWindowsLanguageName;
+
+                    if (string.IsNullOrWhiteSpace(Settings.GlobalSettings.Language))
+                    {
+                        Log.Warn("cannot read the OS language. Rolled back to ENU");
+                       
+                        Settings.GlobalSettings.Language = "ENU";
+                    }
+
+                    Log.Trace($"language set: '{Settings.GlobalSettings.Language}'");
+                }
+                catch
+                {
+                    Log.Warn("cannot read the OS language. Rolled back to ENU");
+                  
+                    Settings.GlobalSettings.Language = "ENU";
+                }
+            }
 
             if (string.IsNullOrWhiteSpace(Settings.GlobalSettings.UltimaOnlineDirectory))
             {
@@ -478,6 +501,7 @@ namespace ClassicUO
                             case "JPN": Settings.GlobalSettings.Language = "JPN"; break;
                             case "KOR": Settings.GlobalSettings.Language = "KOR"; break;
                             case "PTB": Settings.GlobalSettings.Language = "PTB"; break;
+                            case "ITA": Settings.GlobalSettings.Language = "ITA"; break;
                             default:
                             
                                 Settings.GlobalSettings.Language = "ENU";
