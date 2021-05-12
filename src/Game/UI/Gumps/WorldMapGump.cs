@@ -699,8 +699,7 @@ namespace ClassicUO.Game.UI.Gumps
                 byte[] buffer = new byte[stream.Length];
                 stream.Read(buffer, 0, buffer.Length);
 
-                DataReader reader = new DataReader();
-                reader.SetData(buffer, stream.Length);
+                StackDataReader reader = new StackDataReader(buffer, stream.Length);
 
                 bool was_error;
                 long fp_offset;
@@ -720,20 +719,20 @@ namespace ClassicUO.Game.UI.Gumps
 
                 uint bi_compression, bi_size_image, bi_x_perls_per_meter, bi_y_perls_per_meter, bi_clr_used, bi_clr_important;
 
-                bf_reserved = reader.ReadUShort();
-                bf_type = reader.ReadUShort();
-                bf_count = reader.ReadUShort();
+                bf_reserved = reader.Read<ushort>();
+                bf_type = reader.Read<ushort>();
+                bf_count = reader.Read<ushort>();
 
                 for (i = 0; i < bf_count; i++)
                 {
-                    int b_width = reader.ReadByte();
-                    int b_height = reader.ReadByte();
-                    int b_color_count = reader.ReadByte();
-                    byte b_reserver = reader.ReadByte();
-                    ushort w_planes = reader.ReadUShort();
-                    ushort w_bit_count = reader.ReadUShort();
-                    uint dw_bytes_in_res = reader.ReadUInt();
-                    uint dw_image_offse = reader.ReadUInt();
+                    int b_width = reader.Read<byte>();
+                    int b_height = reader.Read<byte>();
+                    int b_color_count = reader.Read<byte>();
+                    byte b_reserver = reader.Read<byte>();
+                    ushort w_planes = reader.Read<ushort>();
+                    ushort w_bit_count = reader.Read<ushort>();
+                    uint dw_bytes_in_res = reader.Read<uint>();
+                    uint dw_image_offse = reader.Read<uint>();
 
                     if (b_width == 0)
                     {
@@ -759,20 +758,20 @@ namespace ClassicUO.Game.UI.Gumps
 
                 reader.Seek(ico_of_s);
 
-                bi_size = reader.ReadUInt();
+                bi_size = reader.Read<uint>();
 
                 if (bi_size == 40)
                 {
-                    bi_width = reader.ReadUInt();
-                    bi_height = reader.ReadUInt();
-                    bi_planes = reader.ReadUShort();
-                    bi_bit_count = reader.ReadUShort();
-                    bi_compression = reader.ReadUInt();
-                    bi_size_image = reader.ReadUInt();
-                    bi_x_perls_per_meter = reader.ReadUInt();
-                    bi_y_perls_per_meter = reader.ReadUInt();
-                    bi_clr_used = reader.ReadUInt();
-                    bi_clr_important = reader.ReadUInt();
+                    bi_width = reader.Read<uint>();
+                    bi_height = reader.Read<uint>();
+                    bi_planes = reader.Read<ushort>();
+                    bi_bit_count = reader.Read<ushort>();
+                    bi_compression = reader.Read<uint>();
+                    bi_size_image = reader.Read<uint>();
+                    bi_x_perls_per_meter = reader.Read<uint>();
+                    bi_y_perls_per_meter = reader.Read<uint>();
+                    bi_clr_used = reader.Read<uint>();
+                    bi_clr_important = reader.Read<uint>();
                 }
                 else
                 {
@@ -842,7 +841,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                     for (i = 0; i < bi_clr_used; i++)
                     {
-                        palette[i] = reader.ReadUInt();
+                        palette[i] = reader.Read<uint>();
                     }
                 }
 
@@ -893,7 +892,7 @@ namespace ClassicUO.Game.UI.Gumps
                             {
                                 if (i % (8 / expand_bmp) == 0)
                                 {
-                                    pixel = reader.ReadByte();
+                                    pixel = reader.Read<byte>();
                                 }
 
                                 *((uint*) bits + i) = palette[pixel >> shift];
@@ -907,7 +906,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                             for (int k = 0; k < surface->pitch; k++)
                             {
-                                bits[k] = reader.ReadByte();
+                                bits[k] = reader.Read<byte>();
                             }
 
                             break;
@@ -917,7 +916,7 @@ namespace ClassicUO.Game.UI.Gumps
                     {
                         for (i = 0; i < pad; i++)
                         {
-                            reader.ReadByte();
+                            reader.Read<byte>();
                         }
                     }
                 }
@@ -939,7 +938,7 @@ namespace ClassicUO.Game.UI.Gumps
                     {
                         if (i % (8 / expand_bmp) == 0)
                         {
-                            pixel = reader.ReadByte();
+                            pixel = reader.Read<byte>();
                         }
 
                         *((uint*) bits + i) |= pixel >> shift != 0 ? 0 : 0xFF000000;
@@ -951,7 +950,7 @@ namespace ClassicUO.Game.UI.Gumps
                     {
                         for (i = 0; i < pad; i++)
                         {
-                            reader.ReadByte();
+                            reader.Read<byte>();
                         }
                     }
                 }
@@ -976,7 +975,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 SDL.SDL_FreeSurface((IntPtr) surface);
 
-                reader.ReleaseData();
+                reader.Release();
 
                 return texture;
             }
