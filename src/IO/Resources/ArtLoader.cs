@@ -361,7 +361,7 @@ namespace ClassicUO.IO.Resources
             }
 
 
-            AddBlackBorder(data, 44, 44);
+            //AddBlackBorder(data, 44, 44);
 
             texture = new UOTexture(44, 44);
             // we don't need to store the data[] pointer because
