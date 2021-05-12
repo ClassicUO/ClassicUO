@@ -723,7 +723,7 @@ namespace ClassicUO.Game.UI.Gumps
                 // disable scissor
                 _dataBox.Add(new ScissorControl(false));
             }
-            else if (_customHouseManager.Category >= 0 && _customHouseManager.Category <= HouseCustomizationManager.Walls.Count)
+            else if (_customHouseManager.Category >= 0 && _customHouseManager.Category < HouseCustomizationManager.Walls.Count)
             {
                 List<CustomHouseWall> vec = HouseCustomizationManager.Walls[_customHouseManager.Category].Items;
 
@@ -1101,7 +1101,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 _dataBox.Add
                 (
-                    new ColorBox(384, 2, 0, 0xFF7F7F7F)
+                    new ColorBox(384, 2, 0)
                     {
                         X = 123,
                         Y = 96

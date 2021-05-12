@@ -188,6 +188,8 @@ namespace ClassicUO.Game.Map
                         priorityZ--;
                     }
 
+                    priorityZ--;
+
                     state = 0;
 
                     break;
@@ -233,6 +235,10 @@ namespace ClassicUO.Game.Map
                         state = 2;
                         priorityZ++;
                     }
+                    else if ((m.ItemData.Flags & TileFlag.StairRight) != 0)
+                    {
+                        priorityZ++;
+                    }
 
                     if (m.ItemData.IsMultiMovable)
                     {
@@ -248,6 +254,11 @@ namespace ClassicUO.Game.Map
                     {
                         priorityZ--;
                     }
+
+                    //if (data.IsSurface)
+                    //{
+                    //    priorityZ--;
+                    //}
 
                     if (data.Height != 0)
                     {

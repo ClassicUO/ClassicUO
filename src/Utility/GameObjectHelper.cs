@@ -75,7 +75,7 @@ namespace ClassicUO.Utility
                     return false;
                 }
 
-                if (g < TileDataLoader.Instance.StaticData.Length)
+                if (g < TileDataLoader.Instance?.StaticData?.Length)
                 {
                     ref StaticTiles data = ref TileDataLoader.Instance.StaticData[g];
 

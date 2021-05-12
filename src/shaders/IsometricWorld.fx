@@ -1,13 +1,14 @@
-#define NOCOLOR 0
-#define COLOR 1
-#define PARTIAL_COLOR 2
+#define NONE 0
+#define HUED 1
+#define PARTIAL_HUED 2
 #define HUE_TEXT_NO_BLACK 3
 #define HUE_TEXT 4
-#define LAND 6
-#define LAND_COLOR 7
-#define SPECTRAL 10
-#define SHADOW 12
-#define LIGHTS 13
+#define LAND 5
+#define LAND_COLOR 6
+#define SPECTRAL 7
+#define SHADOW 8
+#define LIGHTS 9
+#define EFFECT_HUED 10
 #define GUMP 20
 
 
@@ -41,19 +42,17 @@ struct PS_INPUT
 	float3 Hue		: TEXCOORD2;
 };
 
-
-float3 get_rgb(float red, float hue)
+float3 get_rgb(float gray, float hue)
 {
-	//float p = floor((hue / Hues_count_double) * 1000000.0f) / 1000000.0f;
 	if (hue < HuesPerTexture)
 	{
-		float2 texcoord = float2(red % 32, hue / HuesPerTexture);
+		float2 texcoord = float2(gray % 32, hue / HuesPerTexture);
 
 		return tex2D(HueSampler0, texcoord).rgb;
 	}
 	else
 	{
-		float2 texcoord = float2(red % 32, (hue - HuesPerTexture) / HuesPerTexture);
+		float2 texcoord = float2(gray % 32, (hue - HuesPerTexture) / HuesPerTexture);
 
 		return tex2D(HueSampler1, texcoord).rgb;
 	}
@@ -66,7 +65,6 @@ float3 get_light(float3 norm)
 	return max((dot(normal, light) + 0.5f), 0.0f);
 }
 
-
 PS_INPUT VertexShaderFunction(VS_INPUT IN)
 {
 	PS_INPUT OUT;
@@ -77,7 +75,7 @@ PS_INPUT VertexShaderFunction(VS_INPUT IN)
 	OUT.Normal = IN.Normal;
 	OUT.Hue = IN.Hue;
 	
-    return OUT;
+	return OUT;
 }
 
 float4 PixelShader_Hue(PS_INPUT IN) : COLOR0
@@ -89,82 +87,80 @@ float4 PixelShader_Hue(PS_INPUT IN) : COLOR0
 
 	int mode = int(IN.Hue.y);
 	float alpha = 1 - IN.Hue.z;
-	float red = color.r;
 
-	if (mode > NOCOLOR)
+	if (mode == NONE)
 	{
-		float hue = IN.Hue.x;
+		return color * alpha;
+	}
 
-		if (mode >= GUMP)
+	float hue = IN.Hue.x;
+
+	if (mode >= GUMP)
+	{
+		mode -= GUMP;
+
+		if (color.r < 0.02f)
 		{
-			mode -= GUMP;
-
-			if (color.r < 0.02f)
-			{
-				hue = 0;
-			}
+			hue = 0;
 		}
+	}
 
-		if (mode == COLOR || (mode == PARTIAL_COLOR && color.r == color.g && color.r == color.b))
+	if (mode == HUED)
+	{
+		color.rgb = get_rgb(color.r, hue);
+	}
+	else if (mode == PARTIAL_HUED)
+	{
+		if (color.r == color.g && color.r == color.b)
 		{
-			color.rgb = get_rgb(red, hue);
+			// Gray pixels are hued
+			color.rgb = get_rgb(color.r, hue);
 		}
-		else if (mode > 5)
-		{
-			if (mode > 9)
-			{
-				if (mode > 10)
-				{
-					if (mode > 11)
-					{
-						if (mode > 12)
-						{
-							if (IN.Hue.x != 0.0f)
-							{
-								color.rgb *= get_rgb(color.r, hue);
-							}
-							return color * alpha;
-						}
-
-						red = 0.6f;
-					}
-					else
-					{
-						red *= 0.5f;
-					}
-				}
-				else
-				{
-					red *= 1.5f;
-				}
-
-				alpha = 1 - red;
-				color.rgb = VEC3_ZERO;
-			}
-			else
-			{
-				float3 norm = get_light(IN.Normal);
-
-				if (mode > 6)
-				{
-					color.rgb = get_rgb(red, hue) * norm;
-				}
-				else
-				{
-					color.rgb *= norm;
-				}
-			}
-		}
-		else if (mode == 4 || (mode == 3 && (color.r > 0.04f || color.g > 0.04f || color.b > 0.04f)) /*|| (mode == 5 && color.r >= 0.08f)*/)
+	}
+	else if (mode == HUE_TEXT_NO_BLACK)
+	{
+		if (color.r > 0.04f || color.g > 0.04f || color.b > 0.04f)
 		{
 			color.rgb = get_rgb(31, hue);
 		}
 	}
+	else if (mode == HUE_TEXT)
+	{
+		// 31 is max red, so this is just selecting the color of the darkest pixel in the hue
+		color.rgb = get_rgb(31, hue);
+	}
+	else if (mode == LAND)
+	{
+		color.rgb *= get_light(IN.Normal);
+	}
+	else if (mode == LAND_COLOR)
+	{
+		color.rgb = get_rgb(color.r, hue) * get_light(IN.Normal);
+	}
+	else if (mode == SPECTRAL)
+	{
+		alpha = 1 - (color.r * 1.5f);
+		color.rgb = VEC3_ZERO;
+	}
+	else if (mode == SHADOW)
+	{
+		alpha = 0.4f;
+		color.rgb = VEC3_ZERO;
+	}
+	else if (mode == LIGHTS)
+	{
+		if (IN.Hue.x != 0.0f)
+		{
+			color.rgb *= get_rgb(color.r, hue);
+		}
+	}
+	else if (mode == EFFECT_HUED)
+	{
+		color.rgb = get_rgb(color.g, hue);
+	}
 
 	return color * alpha;
 }
-
-
 
 technique HueTechnique
 {

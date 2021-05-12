@@ -57,7 +57,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add
             (
-                new ColorBox(217, 49, 0, 0xFF000001)
+                new ColorBox(217, 49, 0)
                 {
                     X = 40,
                     Y = 42
@@ -252,19 +252,8 @@ namespace ClassicUO.Game.UI.Gumps
 
             public override bool Draw(UltimaBatcher2D batcher, int x, int y)
             {
-                Rectangle scissor = ScissorStack.CalculateScissors
-                (
-                    Matrix.Identity,
-                    x,
-                    y,
-                    Width,
-                    Height
-                );
-
-                if (ScissorStack.PushScissors(batcher.GraphicsDevice, scissor))
+                if (batcher.ClipBegin(x, y, Width, Height))
                 {
-                    batcher.EnableScissorTest(true);
-
                     int width = 0;
                     int maxWidth = Value + Width;
                     bool drawOnly1 = true;
@@ -297,9 +286,7 @@ namespace ClassicUO.Game.UI.Gumps
                         width += child.Width;
                     }
 
-
-                    batcher.EnableScissorTest(false);
-                    ScissorStack.PopScissors(batcher.GraphicsDevice);
+                    batcher.ClipEnd();
                 }
 
                 return true; // base.Draw(batcher,position, hue);

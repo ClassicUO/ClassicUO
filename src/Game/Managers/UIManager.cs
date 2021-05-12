@@ -44,7 +44,7 @@ namespace ClassicUO.Game.Managers
     internal static class UIManager
     {
         private static readonly Dictionary<uint, Point> _gumpPositionCache = new Dictionary<uint, Point>();
-        private static readonly Control[] _mouseDownControls = new Control[(int) MouseButtonType.Size];
+        private static readonly Control[] _mouseDownControls = new Control[0xFF];
 
 
         //private static readonly Dictionary<uint, TargetLineGump> _targetLineGumps = new Dictionary<uint, TargetLineGump>();
@@ -397,11 +397,19 @@ namespace ClassicUO.Game.Managers
             batcher.End();
         }
 
-        public static void Add(Gump gump)
+        public static void Add(Gump gump, bool front = true)
         {
             if (!gump.IsDisposed)
             {
-                Gumps.AddFirst(gump);
+                if (front)
+                {
+                    Gumps.AddFirst(gump);
+                }
+                else
+                {
+                    Gumps.AddLast(gump);
+                }
+
                 _needSort = Gumps.Count > 1;
             }
         }
@@ -530,23 +538,31 @@ namespace ClassicUO.Game.Managers
 
         public static void MakeTopMostGump(Control control)
         {
-            Control c = control;
-
-            while (c.Parent != null)
+            if (control?.RootParent is Gump gump)
             {
-                c = c.Parent;
-            }
-
-            LinkedListNode<Gump> first = Gumps.First?.Next; // skip game window
-
-            for (; first != null; first = first.Next)
-            {
-                if (first.Value == c)
+                for (LinkedListNode<Gump> start = Gumps.First; start != null; start = start.Next)
                 {
-                    Gumps.Remove(first);
-                    Gumps.AddFirst(first);
-                    _needSort = Gumps.Count > 1;
+                    if (start.Value == gump)
+                    {
+                        if (gump.LayerOrder == UILayer.Under)
+                        {
+                            if (start != Gumps.Last)
+                            {
+                                Gumps.Remove(gump);
+                                Gumps.AddBefore(Gumps.Last, start);
+                            }
+                        }
+                        else
+                        {
+                            Gumps.Remove(gump);
+                            Gumps.AddFirst(start);
+                        }
+
+                        break;
+                    }
                 }
+
+                _needSort = Gumps.Count > 1;
             }
         }
 
@@ -569,10 +585,10 @@ namespace ClassicUO.Game.Managers
                         {
                             if (first.Value == c)
                             {
-                                if (Gumps.Last != null)
+                                if (c != Gumps.Last.Value)
                                 {
                                     Gumps.Remove(first);
-                                    Gumps.AddAfter(Gumps.Last, c);
+                                    Gumps.AddBefore(Gumps.Last, first);
                                 }
                             }
                         }

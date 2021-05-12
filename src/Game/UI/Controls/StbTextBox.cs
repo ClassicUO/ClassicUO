@@ -249,11 +249,18 @@ namespace ClassicUO.Game.UI.Controls
 
             set
             {
-                if (_maxCharCount >= 0 && value != null && value.Length > _maxCharCount)
+                if (_maxCharCount > 0)
                 {
-                    value = value.Substring(0, _maxCharCount);
-                }
+                    if (NumbersOnly)
+                    {
 
+                    }
+                    if (value != null && value.Length > _maxCharCount)
+                    {
+                        value = value.Substring(0, _maxCharCount);
+                    }
+                }
+                
                 //Sanitize(ref value);
 
                 _rendererText.Text = value;
@@ -748,7 +755,7 @@ namespace ClassicUO.Game.UI.Controls
             }
             else
             {
-                if (_maxCharCount >= 0)
+                if (_maxCharCount > 0)
                 {
                     if (NumbersOnly)
                     {
@@ -809,7 +816,7 @@ namespace ClassicUO.Game.UI.Controls
 
             int count;
 
-            if (_maxCharCount >= 0)
+            if (_maxCharCount > 0)
             {
                 int remains = _maxCharCount - Length;
 
@@ -876,31 +883,16 @@ namespace ClassicUO.Game.UI.Controls
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
-            Rectangle scissor = ScissorStack.CalculateScissors
-            (
-                Matrix.Identity,
-                x,
-                y,
-                Width,
-                Height
-            );
-
-            if (ScissorStack.PushScissors(batcher.GraphicsDevice, scissor))
+            if (batcher.ClipBegin(x, y, Width, Height))
             {
-                batcher.EnableScissorTest(true);
-
                 base.Draw(batcher, x, y);
-
                 DrawSelection(batcher, x, y);
-
                 _rendererText.Draw(batcher, x, y);
-
                 DrawCaret(batcher, x, y);
 
-                batcher.EnableScissorTest(false);
-                ScissorStack.PopScissors(batcher.GraphicsDevice);
+                batcher.ClipEnd();
             }
-
+            
             return true;
         }
 

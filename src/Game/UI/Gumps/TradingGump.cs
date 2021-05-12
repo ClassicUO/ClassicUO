@@ -609,7 +609,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 Add
                 (
-                    new ColorBox(110, 60, 0, 0xFF000001)
+                    new ColorBox(110, 60, 0)
                     {
                         X = 45, Y = 90
                     }
@@ -617,7 +617,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 Add
                 (
-                    new ColorBox(110, 60, 0, 0xFF000001)
+                    new ColorBox(110, 60, 0)
                     {
                         X = 192, Y = 70
                     }
