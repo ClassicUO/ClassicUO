@@ -62,6 +62,7 @@ namespace ClassicUO.Network
         private readonly bool _is_login_socket;
         private TcpClient _tcpClient;
         private NetworkStream _netStream;
+        private uint? _localIP;
 
 
         private NetClient(bool is_login_socket)
@@ -82,7 +83,38 @@ namespace ClassicUO.Network
 
         public ClientSocketStatus Status { get; private set; }
 
-        public uint LocalIP => (uint)((_tcpClient.Client?.LocalEndPoint as IPEndPoint)?.Address?.Address ?? 0x100007f);
+        public uint LocalIP
+        {
+            get
+            {
+                if (!_localIP.HasValue)
+                {
+                    try
+                    {
+                        byte[] addressBytes = (_tcpClient.Client?.LocalEndPoint as IPEndPoint)?.Address.MapToIPv4().GetAddressBytes();
+
+                        if (addressBytes != null && addressBytes.Length != 0)
+                        {
+                            _localIP = (uint)(addressBytes[0] | (addressBytes[1] << 8) | (addressBytes[2] << 16) | (addressBytes[3] << 24));
+                        }
+
+                        if (!_localIP.HasValue || _localIP == 0)
+                        {
+                            _localIP = 0x100007f;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.Error($"error while retriving local endpoint address: \n{ex}");
+
+                        _localIP = 0x100007f;
+                    }
+                }
+
+                return _localIP.Value;
+            }
+        }
+
 
         public NetStatistics Statistics { get; }
 
@@ -239,6 +271,7 @@ namespace ClassicUO.Network
             _tcpClient = null;
             _netStream = null;
             _circularBuffer = null;
+            _localIP = null;
 
             if (error != 0)
             {
