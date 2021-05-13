@@ -39,9 +39,12 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
+using ClassicUO;
 using ClassicUO.Data;
 using ClassicUO.Game;
 using ClassicUO.Game.Data;
+using ClassicUO.IO;
+using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
@@ -721,58 +724,55 @@ namespace ClassicUO.IO.Resources
 
                 if (replaces != 48 && replaces != 68)
                 {
-                    continue;
-                }
+                    ref var animEntry = ref _animationCache.GetEntry((int)animID);
 
-                ref var animEntry = ref _animationCache.GetEntry((int)animID);
-
-                if ((animEntry.Flags & ANIMATION_FLAGS.AF_FOUND) != 0 && (animEntry.Flags & ANIMATION_FLAGS.AF_USE_UOP_ANIMATION) == 0)
-                {
-                    animEntry.Flags |= ANIMATION_FLAGS.AF_USE_UOP_ANIMATION;
-                }
-
-                for (int k = 0; k < replaces; k++)
-                {
-                    int oldGroup = reader.Read<int>();
-                    uint frameCount = reader.Read<uint>();
-                    int newGroup = reader.Read<int>();
-
-
-                    if (frameCount == 0)
+                    if ((animEntry.Flags & ANIMATION_FLAGS.AF_FOUND) != 0 && (animEntry.Flags & ANIMATION_FLAGS.AF_USE_UOP_ANIMATION) == 0)
                     {
-                        if (oldGroup >= 0 && newGroup >= 0)
+                        animEntry.Flags |= ANIMATION_FLAGS.AF_USE_UOP_ANIMATION;
+                    }
+
+                    for (int k = 0; k < replaces; k++)
+                    {
+                        int oldGroup = reader.Read<int>();
+                        uint frameCount = reader.Read<uint>();
+                        int newGroup = reader.Read<int>();
+
+
+                        if (frameCount == 0)
                         {
-                            _animationCache.ReplaceUopGroup((ushort)animID, (byte)oldGroup, (byte)newGroup);
+                            if (oldGroup >= 0 && newGroup >= 0)
+                            {
+                                _animationCache.ReplaceUopGroup((ushort)animID, (byte)oldGroup, (byte)newGroup);
+                            }
+                        }
+                        else
+                        {
+                            /*if (oldGroup >= 0)
+                            {
+                                for (int j = k; j < 5; ++j)
+                                {
+                                    ref var group = ref _animationCache.GetDirectionEntry((ushort)animID, (byte)oldGroup, (byte)j, true);
+
+                                    group.RealFrameCount = (byte)frameCount;
+                                }
+                            }*/
+                        }
+
+                        reader.Skip(60);
+                    }
+
+                    if (animEntry.Graphic != 0)
+                    {
+                        if (animID == 0x04E7 || animID == 0x042D || animID == 0x04E6 || animID == 0x05F7)
+                        {
+                            animEntry.MountOffsetY = 18;
+                        }
+                        else if (animID == 0x01B0 || animID == 0x0579 || animID == 0x05F6 || animID == 0x05A0)
+                        {
+                            animEntry.MountOffsetY = 9;
                         }
                     }
-                    else
-                    {
-                        /*if (oldGroup >= 0)
-                        {
-                            for (int j = k; j < 5; ++j)
-                            {
-                                ref var group = ref _animationCache.GetDirectionEntry((ushort)animID, (byte)oldGroup, (byte)j, true);
-
-                                group.RealFrameCount = (byte)frameCount;
-                            }
-                        }*/
-                    }
-
-                    reader.Skip(60);
                 }
-
-                if (animEntry.Graphic != 0)
-                {
-                    if (animID == 0x04E7 || animID == 0x042D || animID == 0x04E6 || animID == 0x05F7)
-                    {
-                        animEntry.MountOffsetY = 18;
-                    }
-                    else if (animID == 0x01B0 || animID == 0x0579 || animID == 0x05F6 || animID == 0x05A0)
-                    {
-                        animEntry.MountOffsetY = 9;
-                    }
-                }
-            }
 
                 reader.Release();
             }
@@ -1332,13 +1332,9 @@ namespace ClassicUO.IO.Resources
             if (graphic < Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT && group < 100)
             {
                 ushort hue = 0;
-                FixAnimationGraphicAndHue(ref graphic, ref hue, isCorpse, false, false, out _);
-                ref var dirEntry = ref GetAnimationDirectionEntry(graphic, group, 0);
+                FixAnimationGraphicAndHue(ref graphic, ref hue, isCorpse, false, false, out bool isUOP);
+                ref var dirEntry = ref GetAnimationDirectionEntry(graphic, group, 0, isUOP);
 
-                //AnimationDirection direction = isCorpse ?
-                //    GetCorpseAnimationGroup(ref graphic, ref group, ref hue)?.Direction[0] :
-                //    GetBodyAnimationGroup(ref graphic, ref group, ref hue, true)?.Direction[0];
-                
                 return (dirEntry.Address != IntPtr.Zero && dirEntry.Size != 0) || dirEntry.IsUOP;
             }
 
@@ -1376,7 +1372,7 @@ namespace ClassicUO.IO.Resources
 
         private bool ReadUOPAnimationFrame(ushort animID, byte animGroup, byte direction, ref AnimationDirectionEntry animDirection)
         {
-            if (!_animationCache.TryGetUopHash(animID, animGroup, out var b))
+            if (!_animationCache.TryGetUopHash(animID, ref animGroup, out var b))
             {
                 return false;
             }
@@ -1422,7 +1418,6 @@ namespace ClassicUO.IO.Resources
             ANIMATION_GROUPS_TYPE type = _animationCache.GetEntry(animID).Type;
 
             byte framesCount = (byte) (type < ANIMATION_GROUPS_TYPE.EQUIPMENT ? Math.Round(fc / 5f) : 10);
-            animDirection.FramesCount = framesCount;
 
             int headerSize = sizeof(UOPAnimationHeader);
             int count = 0;
@@ -1567,19 +1562,21 @@ namespace ClassicUO.IO.Resources
                                 );
                             }
 
-                            _reader.Seek(start + headerSize);
-                            animHeaderInfo = (UOPAnimationHeader*) _reader.PositionAddress;
+                            reader.Seek(start + headerSize);
+                            animHeaderInfo = (UOPAnimationHeader*) reader.PositionAddress;
                         }
                     }
                 }
             }
+
+            animDirection.FramesCount = (byte) count;
 
             uint packed32 = (uint)((animGroup | (direction << 8) | (0x01 << 16)));
             ulong packed = (animID | ((ulong)packed32 << 32));
 
             _usedTextures.AddLast(packed);
 
-            _reader.ReleaseData();
+            reader.Release();
 
             return true;
         }
@@ -2322,7 +2319,7 @@ namespace ClassicUO.IO.Resources
             _uopHashses[hash] = (fileNum, index);
         }
 
-        public bool TryGetUopHash(ushort animID, byte group, out (byte, UOFileIndex) index)
+        public bool TryGetUopHash(ushort animID, ref byte group, out (byte, UOFileIndex) index)
         {
             group = _uopIndexConvertionCache[animID, group];
 
