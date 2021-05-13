@@ -35,6 +35,7 @@ using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 using ClassicUO.Utility;
+using ClassicUO.Utility.Logging;
 
 namespace ClassicUO.IO.Resources
 {
@@ -50,12 +51,20 @@ namespace ClassicUO.IO.Resources
 
         public static ClilocLoader Instance => _instance ?? (_instance = new ClilocLoader());
 
-        public Task Load(string cliloc)
+        public Task Load(string lang)
         {
-            _cliloc = cliloc;
-
-            if (!File.Exists(UOFileManager.GetUOFilePath(cliloc)))
+            if (string.IsNullOrEmpty(lang))
             {
+                lang = "enu";
+            }
+
+            _cliloc = $"Cliloc.{lang}";
+            Log.Trace($"searching for: '{_cliloc}'");
+
+            if (!File.Exists(UOFileManager.GetUOFilePath(_cliloc)))
+            {
+                Log.Warn($"'{_cliloc}' not found. Rolled back to Cliloc.enu");
+
                 _cliloc = "Cliloc.enu";
             }
 
@@ -77,6 +86,7 @@ namespace ClassicUO.IO.Resources
 
                     if (!File.Exists(path))
                     {
+                        Log.Error($"cliloc not found: '{path}'");
                         return;
                     }
 

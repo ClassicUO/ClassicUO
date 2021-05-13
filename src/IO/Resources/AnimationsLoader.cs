@@ -61,7 +61,6 @@ namespace ClassicUO.IO.Resources
         private readonly UOFileMul[] _files = new UOFileMul[5];
         private readonly UOFileUop[] _filesUop = new UOFileUop[4];
 
-        private readonly DataReader _reader = new DataReader();
         private readonly LinkedList<ulong> _usedTextures = new LinkedList<ulong>();
 
         private AnimationsLoader()
@@ -700,7 +699,6 @@ namespace ClassicUO.IO.Resources
             UOFileUop animSeq = new UOFileUop(animationSequencePath, "build/animationsequence/{0:D8}.bin");
             UOFileIndex[] animseqEntries = new UOFileIndex[Math.Max(animSeq.TotalEntriesCount, Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT)];
             animSeq.FillEntries(ref animseqEntries);
-            DataReader reader = new DataReader();
 
             for (int i = 0; i < animseqEntries.Length; i++)
             {
@@ -715,12 +713,13 @@ namespace ClassicUO.IO.Resources
 
                 byte[] decbuffer = animSeq.GetData(entry.Length, entry.DecompressedLength);
 
-                reader.SetData(decbuffer, decbuffer.Length);
-                uint animID = reader.ReadUInt();
-                reader.Skip(48);
-                int replaces = reader.ReadInt();
+                StackDataReader reader = new StackDataReader(decbuffer, decbuffer.Length);
 
-                if (replaces == 48 || replaces == 68)
+                uint animID = reader.Read<uint>();
+                reader.Skip(48);
+                int replaces = reader.Read<int>();
+
+                if (replaces != 48 && replaces != 68)
                 {
                     continue;
                 }
@@ -734,9 +733,9 @@ namespace ClassicUO.IO.Resources
 
                 for (int k = 0; k < replaces; k++)
                 {
-                    int oldGroup = reader.ReadInt();
-                    uint frameCount = reader.ReadUInt();
-                    int newGroup = reader.ReadInt();
+                    int oldGroup = reader.Read<int>();
+                    uint frameCount = reader.Read<uint>();
+                    int newGroup = reader.Read<int>();
 
 
                     if (frameCount == 0)
@@ -775,8 +774,10 @@ namespace ClassicUO.IO.Resources
                 }
             }
 
+                reader.Release();
+            }
+
             animSeq.Dispose();
-            reader.ReleaseData();
         }
 
 
@@ -1409,14 +1410,14 @@ namespace ClassicUO.IO.Resources
                 decLen
             );
 
-            _reader.SetData(_bufferCachePtr, decLen);
-            _reader.Skip(32);
+            StackDataReader reader = new StackDataReader((byte*)_bufferCachePtr, decLen);
+            reader.Skip(32);
 
-            long end = (long) _reader.StartAddress + _reader.Length;
+            long end = (long)reader.StartAddress + reader.Length;
 
-            int fc = _reader.ReadInt();
-            uint dataStart = _reader.ReadUInt();
-            _reader.Seek(dataStart);
+            int fc = reader.Read<int>();
+            uint dataStart = reader.Read<uint>();
+            reader.Seek(dataStart);
 
             ANIMATION_GROUPS_TYPE type = _animationCache.GetEntry(animID).Type;
 
@@ -1426,7 +1427,7 @@ namespace ClassicUO.IO.Resources
             int headerSize = sizeof(UOPAnimationHeader);
             int count = 0;
 
-            UOPAnimationHeader* animHeaderInfo = (UOPAnimationHeader*) _reader.PositionAddress;
+            UOPAnimationHeader* animHeaderInfo = (UOPAnimationHeader*)reader.PositionAddress;
 
             for (ushort i = 0, id = animHeaderInfo->FrameID, currentDir = 0; animHeaderInfo->FrameID < fc; ++i, ++id)
             {
@@ -1439,7 +1440,7 @@ namespace ClassicUO.IO.Resources
 
                     id = animHeaderInfo->FrameID;
                     i = 0;
-                    dataStart = (uint) _reader.Position;
+                    dataStart = (uint)reader.Position;
                 }
                 else if (animHeaderInfo->FrameID - id > 1)
                 {
@@ -1458,19 +1459,19 @@ namespace ClassicUO.IO.Resources
                     break;
                 }
 
-                _reader.Skip(headerSize);
+                reader.Skip(headerSize);
 
-                animHeaderInfo = (UOPAnimationHeader*) _reader.PositionAddress;
+                animHeaderInfo = (UOPAnimationHeader*)reader.PositionAddress;
             }
 
-            _reader.Seek(dataStart);
-            animHeaderInfo = (UOPAnimationHeader*) _reader.PositionAddress;
+            reader.Seek(dataStart);
+            animHeaderInfo = (UOPAnimationHeader*)reader.PositionAddress;
 
             for (ushort id = animHeaderInfo->FrameID; id == animHeaderInfo->FrameID && count < framesCount; ++id, ++count)
             {
-                long start = _reader.Position;
+                long start = reader.Position;
 
-                if (animHeaderInfo->Group == animGroup && start + animHeaderInfo->DataOffset < _reader.Length)
+                if (animHeaderInfo->Group == animGroup && start + animHeaderInfo->DataOffset < reader.Length)
                 {
                     int index = animHeaderInfo->FrameID % framesCount;
 
@@ -1487,24 +1488,24 @@ namespace ClassicUO.IO.Resources
                     {
                         unchecked
                         {
-                            _reader.Skip((int) animHeaderInfo->DataOffset);
+                            reader.Skip((int)animHeaderInfo->DataOffset);
 
-                            ushort* palette = (ushort*) _reader.PositionAddress;
+                            ushort* palette = (ushort*)reader.PositionAddress;
 
-                            _reader.Skip(512);
+                            reader.Skip(512);
 
-                            short imageCenterX = _reader.ReadShort();
-                            short imageCenterY = _reader.ReadShort();
-                            short imageWidth = _reader.ReadShort();
-                            short imageHeight = _reader.ReadShort();
+                            short imageCenterX = reader.Read<short>();
+                            short imageCenterY = reader.Read<short>();
+                            short imageWidth = reader.Read<short>();
+                            short imageHeight = reader.Read<short>();
 
                             if (imageWidth > 0 && imageHeight > 0)
                             {
                                 uint[] data = new uint[imageWidth * imageHeight];
 
-                                uint header = _reader.ReadUInt();
+                                uint header = reader.Read<uint>();
 
-                                long pos = _reader.Position;
+                                long pos = reader.Position;
 
                                 int sum = imageCenterY + imageHeight;
 
@@ -1532,7 +1533,7 @@ namespace ClassicUO.IO.Resources
 
                                     for (int k = 0; k < runLength; ++k)
                                     {
-                                        ushort val = palette[_reader.ReadByte()];
+                                        ushort val = palette[reader.Read<byte>()];
 
                                         // FIXME: same of MUL ? Keep it as original for the moment
                                         if (val != 0)
@@ -1543,7 +1544,7 @@ namespace ClassicUO.IO.Resources
                                         block++;
                                     }
 
-                                    header = _reader.ReadUInt();
+                                    header = reader.Read<uint>();
                                 }
 
                                 AnimationFrameTexture f = new AnimationFrameTexture(imageWidth, imageHeight)

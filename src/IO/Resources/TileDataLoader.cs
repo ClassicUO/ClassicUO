@@ -31,7 +31,6 @@
 #endregion
 
 using System;
-using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
@@ -57,7 +56,7 @@ namespace ClassicUO.IO.Resources
         public ref LandTiles[] LandData => ref _landData;
         public ref StaticTiles[] StaticData => ref _staticData;
 
-        public override Task Load()
+        public override unsafe Task Load()
         {
             return Task.Run
             (
@@ -86,7 +85,8 @@ namespace ClassicUO.IO.Resources
 
                     _landData = new LandTiles[Constants.MAX_LAND_DATA_INDEX_COUNT];
                     _staticData = new StaticTiles[staticscount * 32];
-                    byte[] bufferString = new byte[20];
+
+                    byte* bufferString = stackalloc byte[20];
 
                     for (int i = 0; i < 512; i++)
                     {
@@ -102,9 +102,13 @@ namespace ClassicUO.IO.Resources
                             int idx = i * 32 + j;
                             ulong flags = isold ? tileData.ReadUInt() : tileData.ReadULong();
                             ushort textId = tileData.ReadUShort();
-                            tileData.Fill(ref bufferString, 20);
 
-                            string name = string.Intern(Encoding.UTF8.GetString(bufferString).TrimEnd('\0'));
+                            for (int k = 0; k < 20; ++k)
+                            {
+                                bufferString[k] = tileData.ReadByte();
+                            }
+
+                            string name = string.Intern(Encoding.UTF8.GetString(bufferString, 20).TrimEnd('\0'));
 
                             LandData[idx] = new LandTiles(flags, textId, name);
                         }
@@ -138,9 +142,13 @@ namespace ClassicUO.IO.Resources
                             ushort hue = tileData.ReadUShort();
                             ushort lightIndex = tileData.ReadUShort();
                             byte height = tileData.ReadByte();
-                            tileData.Fill(ref bufferString, 20);
 
-                            string name = string.Intern(Encoding.UTF8.GetString(bufferString).TrimEnd('\0'));
+                            for (int k = 0; k < 20; ++k)
+                            {
+                                bufferString[k] = tileData.ReadByte();
+                            }
+
+                            string name = string.Intern(Encoding.UTF8.GetString(bufferString, 20).TrimEnd('\0'));
 
                             StaticData[idx] = new StaticTiles
                             (
@@ -303,19 +311,15 @@ namespace ClassicUO.IO.Resources
             Flags = (TileFlag) flags;
             TexID = textId;
             Name = name;
-
-            IsWet = (Flags & TileFlag.Wet) != 0;
-            IsImpassable = (Flags & TileFlag.Impassable) != 0;
-            IsNoDiagonal = (Flags & TileFlag.NoDiagonal) != 0;
         }
 
         public TileFlag Flags;
         public ushort TexID;
         public string Name;
 
-        public bool IsWet;
-        public bool IsImpassable;
-        public bool IsNoDiagonal;
+        public bool IsWet => (Flags & TileFlag.Wet) != 0;
+        public bool IsImpassable => (Flags & TileFlag.Impassable) != 0;
+        public bool IsNoDiagonal => (Flags & TileFlag.NoDiagonal) != 0;
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
@@ -350,29 +354,6 @@ namespace ClassicUO.IO.Resources
             LightIndex = lightIndex;
             Height = height;
             Name = name;
-
-            IsAnimated = (Flags & TileFlag.Animation) != 0;
-            IsBridge = (Flags & TileFlag.Bridge) != 0;
-            IsImpassable = (Flags & TileFlag.Impassable) != 0;
-            IsSurface = (Flags & TileFlag.Surface) != 0;
-            IsWearable = (Flags & TileFlag.Wearable) != 0;
-            IsInternal = (Flags & TileFlag.Internal) != 0;
-            IsBackground = (Flags & TileFlag.Background) != 0;
-            IsNoDiagonal = (Flags & TileFlag.NoDiagonal) != 0;
-            IsWet = (Flags & TileFlag.Wet) != 0;
-            IsFoliage = (Flags & TileFlag.Foliage) != 0;
-            IsRoof = (Flags & TileFlag.Roof) != 0;
-            IsTranslucent = (Flags & TileFlag.Translucent) != 0;
-            IsPartialHue = (Flags & TileFlag.PartialHue) != 0;
-            IsStackable = (Flags & TileFlag.Generic) != 0;
-            IsTransparent = (Flags & TileFlag.Transparent) != 0;
-            IsContainer = (Flags & TileFlag.Container) != 0;
-            IsDoor = (Flags & TileFlag.Door) != 0;
-            IsWall = (Flags & TileFlag.Wall) != 0;
-            IsLight = (Flags & TileFlag.LightSource) != 0;
-            IsNoShoot = (Flags & TileFlag.NoShoot) != 0;
-            IsWeapon = (Flags & TileFlag.Weapon) != 0;
-            IsMultiMovable = (Flags & TileFlag.MultiMovable) != 0;
         }
 
         public TileFlag Flags;
@@ -385,28 +366,28 @@ namespace ClassicUO.IO.Resources
         public byte Height;
         public string Name;
 
-        public bool IsAnimated;
-        public bool IsBridge;
-        public bool IsImpassable;
-        public bool IsSurface;
-        public bool IsWearable;
-        public bool IsInternal;
-        public bool IsBackground;
-        public bool IsNoDiagonal;
-        public bool IsWet;
-        public bool IsFoliage;
-        public bool IsRoof;
-        public bool IsTranslucent;
-        public bool IsPartialHue;
-        public bool IsStackable;
-        public bool IsTransparent;
-        public bool IsContainer;
-        public bool IsDoor;
-        public bool IsWall;
-        public bool IsLight;
-        public bool IsNoShoot;
-        public bool IsWeapon;
-        public bool IsMultiMovable;
+        public bool IsAnimated => (Flags & TileFlag.Animation) != 0;
+        public bool IsBridge => (Flags & TileFlag.Bridge) != 0;
+        public bool IsImpassable => (Flags & TileFlag.Impassable) != 0;
+        public bool IsSurface => (Flags & TileFlag.Surface) != 0;
+        public bool IsWearable => (Flags & TileFlag.Wearable) != 0;
+        public bool IsInternal => (Flags & TileFlag.Internal) != 0;
+        public bool IsBackground => (Flags & TileFlag.Background) != 0;
+        public bool IsNoDiagonal => (Flags & TileFlag.NoDiagonal) != 0;
+        public bool IsWet => (Flags & TileFlag.Wet) != 0;
+        public bool IsFoliage => (Flags & TileFlag.Foliage) != 0;
+        public bool IsRoof => (Flags & TileFlag.Roof) != 0;
+        public bool IsTranslucent => (Flags & TileFlag.Translucent) != 0;
+        public bool IsPartialHue => (Flags & TileFlag.PartialHue) != 0;
+        public bool IsStackable => (Flags & TileFlag.Generic) != 0;
+        public bool IsTransparent => (Flags & TileFlag.Transparent) != 0;
+        public bool IsContainer => (Flags & TileFlag.Container) != 0;
+        public bool IsDoor => (Flags & TileFlag.Door) != 0;
+        public bool IsWall => (Flags & TileFlag.Wall) != 0;
+        public bool IsLight => (Flags & TileFlag.LightSource) != 0;
+        public bool IsNoShoot => (Flags & TileFlag.NoShoot) != 0;
+        public bool IsWeapon => (Flags & TileFlag.Weapon) != 0;
+        public bool IsMultiMovable => (Flags & TileFlag.MultiMovable) != 0;
     }
 
     // old

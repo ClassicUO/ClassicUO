@@ -54,7 +54,6 @@ namespace ClassicUO.Game.GameObjects
         private static int _startCharacterFeetY;
         private static int _characterFrameHeight;
 
-
         public override bool Draw(UltimaBatcher2D batcher, int posX, int posY)
         {
             ResetHueVector();

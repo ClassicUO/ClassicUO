@@ -134,7 +134,6 @@ namespace ClassicUO
             GraphicsDevice.Textures[1] = _hueSamplers[0];
             GraphicsDevice.Textures[2] = _hueSamplers[1];
 
-            AuraManager.CreateAuraTexture();
             UIManager.InitializeGameCursor();
             AnimatedStaticsManager.Initialize();
 

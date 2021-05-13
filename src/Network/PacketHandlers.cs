@@ -59,7 +59,6 @@ namespace ClassicUO.Network
         public delegate void OnPacketBufferReader(ref PacketBufferReader p);
 
         private static uint _requestedGridLoot;
-        private static readonly DataReader _reader = new DataReader();
 
         private static readonly TextFileParser _parser = new TextFileParser(string.Empty, new[] { ' ' }, new char[] { }, new[] { '{', '}' });
         private static readonly TextFileParser _cmdparser = new TextFileParser(string.Empty, new[] { ' ', ',' }, new char[] { }, new[] { '@', '@' });
@@ -793,7 +792,7 @@ namespace ClassicUO.Network
                     NetClient.Socket.Send(new PGameWindowSize((uint) ProfileManager.CurrentProfile.GameWindowSize.X, (uint) ProfileManager.CurrentProfile.GameWindowSize.Y));
                 }
 
-                NetClient.Socket.Send(new PLanguage("ENU"));
+                NetClient.Socket.Send(new PLanguage(Settings.GlobalSettings.Language));
             }
 
             NetClient.Socket.Send(new PClientVersion(Settings.GlobalSettings.ClientVersion));
@@ -4922,7 +4921,7 @@ namespace ClassicUO.Network
                     );
                 }
 
-                _reader.SetData(dbytesPtr, dlen);
+                StackDataReader reader = new StackDataReader(dbytesPtr, dlen);
 
                 ushort id = 0;
                 sbyte x = 0, y = 0, z = 0;
@@ -4934,10 +4933,10 @@ namespace ClassicUO.Network
 
                         for (uint i = 0; i < c; i++)
                         {
-                            id = _reader.ReadUShortReversed();
-                            x = _reader.ReadSByte();
-                            y = _reader.ReadSByte();
-                            z = _reader.ReadSByte();
+                            id = reader.ReadLE<ushort>();
+                            x = reader.Read<sbyte>();
+                            y = reader.Read<sbyte>();
+                            z = reader.Read<sbyte>();
 
                             if (id != 0)
                             {
@@ -4962,9 +4961,9 @@ namespace ClassicUO.Network
 
                         for (uint i = 0; i < c; i++)
                         {
-                            id = _reader.ReadUShortReversed();
-                            x = _reader.ReadSByte();
-                            y = _reader.ReadSByte();
+                            id = reader.ReadLE<ushort>();
+                            x = reader.Read<sbyte>();
+                            y = reader.Read<sbyte>();
 
                             if (id != 0)
                             {
@@ -5010,7 +5009,7 @@ namespace ClassicUO.Network
 
                         for (uint i = 0; i < c; i++)
                         {
-                            id = _reader.ReadUShortReversed();
+                            id = reader.ReadLE<ushort>();
                             x = (sbyte) (i / multiHeight + offX);
                             y = (sbyte) (i % multiHeight + offY);
 
@@ -5022,9 +5021,9 @@ namespace ClassicUO.Network
 
                         break;
                 }
-            }
 
-            _reader.ReleaseData();
+                reader.Release();
+            }
         }
 
         private static void CustomHouse(ref PacketBufferReader p)

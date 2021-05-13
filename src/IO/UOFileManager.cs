@@ -69,7 +69,7 @@ namespace ClassicUO.IO
                 AnimDataLoader.Instance.Load(),
                 ArtLoader.Instance.Load(),
                 MapLoader.Instance.Load(),
-                ClilocLoader.Instance.Load(Settings.GlobalSettings.ClilocFile),
+                ClilocLoader.Instance.Load(Settings.GlobalSettings.Language),
                 GumpsLoader.Instance.Load(),
                 FontsLoader.Instance.Load(),
                 HuesLoader.Instance.Load(),
@@ -164,13 +164,15 @@ namespace ClassicUO.IO
 
                             if (skill != null)
                             {
-                                DataReader reader = new DataReader();
-                                reader.SetData(verdata.StartAddress, verdata.Length);
+                                unsafe
+                                {
+                                    StackDataReader reader = new StackDataReader((byte*)verdata.StartAddress, verdata.Length);
 
-                                skill.HasAction = reader.ReadBool();
-                                skill.Name = reader.ReadASCII((int) (vh.Length - 1));
+                                    skill.HasAction = reader.Read<byte>() != 0;
+                                    skill.Name = reader.ReadASCII((int)(vh.Length - 1));
 
-                                reader.ReleaseData();
+                                    reader.Release();
+                                }
                             }
                         }
                         else if (vh.FileID == 30)
