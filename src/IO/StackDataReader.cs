@@ -11,8 +11,6 @@ namespace ClassicUO.IO
 {
     unsafe ref struct StackDataReader
     {
-        private GCHandle _handle;
-
         public StackDataReader(byte* data, long len)
         {
             this = default;
@@ -26,8 +24,7 @@ namespace ClassicUO.IO
         {
             this = default;
 
-            _handle = GCHandle.Alloc(data, GCHandleType.Pinned);
-            Data = (byte*) _handle.AddrOfPinnedObject();
+            Data = (byte*) UnsafeMemoryManager.AsPointer(ref data[0]);
             Length = len;
             Position = 0;
         }
@@ -49,10 +46,7 @@ namespace ClassicUO.IO
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Release()
         {
-            if (_handle.IsAllocated)
-            {
-                _handle.Free();
-            }
+            
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -70,11 +64,9 @@ namespace ClassicUO.IO
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public T Read<T>() where T : unmanaged
         {
-            int size = sizeof(T);
-
             T v = *(T*) PositionAddress;
             
-            Position += size;
+            Position += sizeof(T);
 
             return v;
         }
