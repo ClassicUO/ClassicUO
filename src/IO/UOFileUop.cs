@@ -151,16 +151,6 @@ namespace ClassicUO.IO
             TotalEntriesCount = real_total;
         }
 
-        public void ClearHashes()
-        {
-            _hashes.Clear();
-        }
-
-        public override void Dispose()
-        {
-            ClearHashes();
-            base.Dispose();
-        }
 
         public override void FillEntries(ref UOFileIndex[] entries)
         {
@@ -176,16 +166,7 @@ namespace ClassicUO.IO
             }
         }
 
-        public void FillEntries(ref UOFileIndex[] entries, bool clearHashes)
-        {
-            FillEntries(ref entries);
-
-            if (clearHashes)
-            {
-                ClearHashes();
-            }
-        }
-
+     
         //public unsafe T[] GetData<T>(int compressedSize, int uncompressedSize) where T : struct
         //{
         //    T[] data = new T[uncompressedSize];

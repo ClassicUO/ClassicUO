@@ -183,7 +183,7 @@ namespace ClassicUO.IO.Resources
                         {
                             _filesMap[i] = new UOFileUop(path, $"build/map{i}legacymul/{{0:D8}}.dat");
                             Entries[i] = new UOFileIndex[((UOFileUop) _filesMap[i]).TotalEntriesCount];
-                            ((UOFileUop) _filesMap[i]).FillEntries(ref Entries[i], false);
+                            ((UOFileUop) _filesMap[i]).FillEntries(ref Entries[i]);
                             foundOneMap = true;
                         }
                         else
