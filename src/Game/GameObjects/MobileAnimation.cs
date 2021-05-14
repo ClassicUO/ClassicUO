@@ -1615,7 +1615,7 @@ namespace ClassicUO.Game.GameObjects
                     return 2;
                 }
 
-                if (mode % 2 != 0)
+                if (mode % 2 != 0 && AnimationsLoader.Instance.IsAnimationExists(mobile.Graphic, 6))
                 {
                     return 6;
                 }
