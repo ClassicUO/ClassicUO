@@ -327,6 +327,7 @@ namespace ClassicUO.Game.Scenes
                         {
                             iscorpse = true;
                             push_with_priority = true;
+
                             goto default;
                         }
                         else if (it.IsMulti)
@@ -334,22 +335,18 @@ namespace ClassicUO.Game.Scenes
                             graphic = it.MultiGraphic;
                         }
 
-                        push_with_priority = it.Offset != Vector3.Zero;
+                        push_with_priority = it.ItemData.IsMultiMovable;
 
-                        //goto default;
-
-                        //push_with_priority = it.Offset != Vector3.Zero && ((
-                        //                                                       it.BoatDirection != Direction.West &&
-                        //                                                       it.BoatDirection != Direction.Up &&
-                        //                                                       it.BoatDirection != Direction.North));
                         goto default;
 
                     case MovingEffect moveEff:
+                        
                         push_with_priority = true;
                         goto default;
 
                     case Multi multi:
-                        push_with_priority = (multi.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_PREVIEW) != 0 && multi.Offset != Vector3.Zero;
+
+                        push_with_priority = multi.IsMovable;
 
                         goto default;
 
@@ -466,7 +463,7 @@ namespace ClassicUO.Game.Scenes
 
                 SKIP_INTERNAL_CHECK:
 
-                int z = obj.Z;
+                sbyte z = obj.Z;
 
                 if (!island && z >= _maxZ)
                 {
@@ -524,73 +521,77 @@ namespace ClassicUO.Game.Scenes
 
                 if (push_with_priority)
                 {
-                    AddOffsetCharacterTileToRenderList(obj, useObjectHandles);
+                    AddOffsetCharacterTileToRenderList(obj, useObjectHandles, !iscorpse && !ismobile);
                 }
-                else if (!island && itemData.IsFoliage)
+
+                if (!island)
                 {
-                    if (obj.FoliageIndex != FoliageIndex)
+                    if (!iscorpse && !ismobile && itemData.IsFoliage)
                     {
-                        sbyte index = 0;
-
-                        bool check = World.Player.X <= worldX && World.Player.Y <= worldY;
-
-                        if (!check)
+                        if (obj.FoliageIndex != FoliageIndex)
                         {
-                            check = World.Player.Y <= worldY && World.Player.X <= worldX + 1;
+                            sbyte index = 0;
+
+                            bool check = World.Player.X <= worldX && World.Player.Y <= worldY;
 
                             if (!check)
                             {
-                                check = World.Player.X <= worldX && World.Player.Y <= worldY + 1;
-                            }
-                        }
+                                check = World.Player.Y <= worldY && World.Player.X <= worldX + 1;
 
-                        if (check)
-                        {
-                            ArtTexture texture = ArtLoader.Instance.GetTexture(graphic);
-
-                            if (texture != null)
-                            {
-                                _rectangleObj.X = drawX - (texture.Width >> 1) + texture.ImageRectangle.X;
-                                _rectangleObj.Y = drawY - texture.Height + texture.ImageRectangle.Y;
-                                _rectangleObj.Width = texture.ImageRectangle.Width;
-                                _rectangleObj.Height = texture.ImageRectangle.Height;
-
-                                check = Exstentions.InRect(ref _rectangleObj, ref _rectanglePlayer);
-
-                                if (check)
+                                if (!check)
                                 {
-                                    index = FoliageIndex;
-                                    IsFoliageUnion(obj.Graphic, obj.X, obj.Y, z);
+                                    check = World.Player.X <= worldX && World.Player.Y <= worldY + 1;
                                 }
                             }
+
+                            if (check)
+                            {
+                                ArtTexture texture = ArtLoader.Instance.GetTexture(graphic);
+
+                                if (texture != null)
+                                {
+                                    _rectangleObj.X = drawX - (texture.Width >> 1) + texture.ImageRectangle.X;
+                                    _rectangleObj.Y = drawY - texture.Height + texture.ImageRectangle.Y;
+                                    _rectangleObj.Width = texture.ImageRectangle.Width;
+                                    _rectangleObj.Height = texture.ImageRectangle.Height;
+
+                                    check = Exstentions.InRect(ref _rectangleObj, ref _rectanglePlayer);
+
+                                    if (check)
+                                    {
+                                        index = FoliageIndex;
+                                        IsFoliageUnion(obj.Graphic, obj.X, obj.Y, z);
+                                    }
+                                }
+                            }
+
+                            obj.FoliageIndex = index;
                         }
 
-                        obj.FoliageIndex = index;
+                        if (_foliageCount >= _foliages.Length)
+                        {
+                            int newsize = _foliages.Length + 50;
+                            Array.Resize(ref _foliages, newsize);
+                        }
+
+                        _foliages[_foliageCount++] = obj;
+
+                        goto FOLIAGE_SKIP;
                     }
 
-                    if (_foliageCount >= _foliages.Length)
+                    if (_alphaChanged && !changinAlpha)
                     {
-                        int newsize = _foliages.Length + 50;
-                        Array.Resize(ref _foliages, newsize);
-                    }
-
-                    _foliages[_foliageCount++] = obj;
-
-                    goto FOLIAGE_SKIP;
-                }
-
-                if (!island && _alphaChanged && !changinAlpha)
-                {
-                    if (itemData.IsTranslucent)
-                    {
-                        obj.ProcessAlpha(178);
-                    }
-                    else if (!itemData.IsFoliage && obj.AlphaHue != 0xFF)
-                    {
-                        obj.ProcessAlpha(0xFF);
+                        if (itemData.IsTranslucent)
+                        {
+                            obj.ProcessAlpha(178);
+                        }
+                        else if (!itemData.IsFoliage && obj.AlphaHue != 0xFF)
+                        {
+                            obj.ProcessAlpha(0xFF);
+                        }
                     }
                 }
-
+                
                 FOLIAGE_SKIP:
 
                 if (_renderListCount >= _renderList.Length)
@@ -598,7 +599,7 @@ namespace ClassicUO.Game.Scenes
                     int newsize = _renderList.Length + 1000;
                     Array.Resize(ref _renderList, newsize);
                 }
-
+                
                 ref var info = ref _renderList[_renderListCount++];
                 info.Object = obj;
 
@@ -618,7 +619,7 @@ namespace ClassicUO.Game.Scenes
         }
 
 
-        private unsafe void AddOffsetCharacterTileToRenderList(GameObject entity, bool useObjectHandles)
+        private unsafe void AddOffsetCharacterTileToRenderList(GameObject entity, bool useObjectHandles, bool ignoreDefaultHeightOffset)
         {
             ref ushort charX = ref entity.X;
             ref ushort charY = ref entity.Y;
@@ -680,7 +681,7 @@ namespace ClassicUO.Game.Scenes
 
                 int currentMaxZ = maxZ;
 
-                if (i <= 1)
+                if (!ignoreDefaultHeightOffset && i <= 1)
                 {
                     currentMaxZ += 20;
                 }

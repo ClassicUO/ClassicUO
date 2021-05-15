@@ -52,6 +52,7 @@ namespace ClassicUO.Game.GameObjects
                 m.MultiOffsetX = m.MultiOffsetY = m.MultiOffsetZ = 0;
                 m.IsCustom = false;
                 m.State = 0;
+                m.IsMovable = false;
                 m.Offset = Vector3.Zero;
             }
         );
@@ -66,6 +67,7 @@ namespace ClassicUO.Game.GameObjects
         public int MultiOffsetX;
         public int MultiOffsetY;
         public int MultiOffsetZ;
+        public bool IsMovable;
         public CUSTOM_HOUSE_MULTI_OBJECT_FLAGS State = 0;
 
 

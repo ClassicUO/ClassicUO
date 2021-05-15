@@ -342,6 +342,7 @@ namespace ClassicUO.Game.GameObjects
                                 m.AlphaHue = 255;
                                 m.IsCustom = false;
                                 m.State = CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_DONT_REMOVE;
+                                m.IsMovable = ItemData.IsMultiMovable;
                                 m.AddToTile();
                                 house.Components.Add(m);
                             }
@@ -402,6 +403,7 @@ namespace ClassicUO.Game.GameObjects
                         m.AlphaHue = 255;
                         m.IsCustom = false;
                         m.State = CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_DONT_REMOVE;
+                        m.IsMovable = ItemData.IsMultiMovable;
                         m.AddToTile();
                         house.Components.Add(m);
                     }
