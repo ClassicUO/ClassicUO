@@ -55,6 +55,8 @@ namespace ClassicUO.IO.Resources
         private readonly Sound[] _musics = new Sound[Constants.MAX_SOUND_DATA_INDEX_COUNT];
         private readonly Sound[] _sounds = new Sound[Constants.MAX_SOUND_DATA_INDEX_COUNT];
 
+        private bool _useDigitalMusicFolder;
+
         private SoundsLoader()
         {
         }
@@ -161,7 +163,7 @@ namespace ClassicUO.IO.Resources
                             }
                         }
                     }
-                    else if (Client.Version < ClientVersion.CV_4011C)
+                    else
                     {
                         _musicData.Add(0, new Tuple<string, bool>("oldult01", true));
                         _musicData.Add(1, new Tuple<string, bool>("create1", false));
@@ -231,6 +233,8 @@ namespace ClassicUO.IO.Resources
                         _musicData.Add(65, new Tuple<string, bool>("serpentislecombat_u7", true));
                         _musicData.Add(66, new Tuple<string, bool>("valoriaships", true));
                     }
+
+                    _useDigitalMusicFolder = Directory.Exists(Path.Combine(Settings.GlobalSettings.UltimaOnlineDirectory, "Music", "Digital"));
                 }
             );
         }
@@ -383,7 +387,7 @@ namespace ClassicUO.IO.Resources
 
                 if (music == null && TryGetMusicData(index, out string name, out bool loop))
                 {
-                    music = new UOMusic(index, name, loop);
+                    music = _useDigitalMusicFolder ? new UOMusic(index, name, loop, "Music/Digital/") : new UOMusic(index, name, loop, "Music/");
                 }
 
                 return music;
