@@ -6358,8 +6358,8 @@ namespace ClassicUO.Network
                 }
                 else if (string.Equals(entry, "checkertrans", StringComparison.InvariantCultureIgnoreCase))
                 {
-                    gump.Add(new CheckerTrans(gparams), page);
-                    var checkerTrans = gump.Children.Last();
+                    var checkerTrans = new CheckerTrans(gparams);
+                    gump.Add(checkerTrans, page);
                     ApplyTrans(gump, page, checkerTrans.X, checkerTrans.Y, checkerTrans.Width, checkerTrans.Height);
                 }
                 else if (string.Equals(entry, "croppedtext", StringComparison.InvariantCultureIgnoreCase))
@@ -6738,7 +6738,7 @@ namespace ClassicUO.Network
         private static void ApplyTrans(Gump gump, int current_page, int x, int y, int width, int height)
         {
             int x2 = x + width;
-            int y2 = y + width;
+            int y2 = y + height;
             for (int i = 0; i < gump.Children.Count; i++)
             {
                 Control child = gump.Children[i];
