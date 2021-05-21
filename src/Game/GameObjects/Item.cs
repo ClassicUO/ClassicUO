@@ -270,6 +270,7 @@ namespace ClassicUO.Game.GameObjects
 
             ref UOFileIndex entry = ref MultiLoader.Instance.GetValidRefEntry(Graphic);
             MultiLoader.Instance.File.SetData(entry.Address, entry.FileSize);
+            bool movable = false;
 
             if (MultiLoader.Instance.IsUOP)
             {
@@ -345,6 +346,11 @@ namespace ClassicUO.Game.GameObjects
                                 m.IsMovable = ItemData.IsMultiMovable;
                                 m.AddToTile();
                                 house.Components.Add(m);
+
+                                if (m.ItemData.IsMultiMovable)
+                                {
+                                    movable = true;
+                                }
                             }
                             else if (i == 0)
                             {
@@ -406,6 +412,11 @@ namespace ClassicUO.Game.GameObjects
                         m.IsMovable = ItemData.IsMultiMovable;
                         m.AddToTile();
                         house.Components.Add(m);
+
+                        if (m.ItemData.IsMultiMovable)
+                        {
+                            movable = true;
+                        }
                     }
                     else if (i == 0)
                     {
@@ -421,6 +432,16 @@ namespace ClassicUO.Game.GameObjects
                 Width = maxX,
                 Height = maxY
             };
+
+            // hack to make baots movable.
+            // Mast is not the main center in bigger boats, so if we got a movable multi --> makes all multi movable
+            if (movable)
+            {
+                foreach (Multi m in house.Components)
+                {
+                    m.IsMovable = movable;
+                }
+            }
 
             MultiDistanceBonus = Math.Max(Math.Max(Math.Abs(minX), maxX), Math.Max(Math.Abs(minY), maxY));
 
