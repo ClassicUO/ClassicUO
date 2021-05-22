@@ -87,8 +87,8 @@ namespace ClassicUO.Game.GameObjects
                     ref Rectangle,
                     ref NormalTop,
                     ref NormalRight,
-                    ref NormalBottom,
                     ref NormalLeft,
+                    ref NormalBottom,
                     ref HueVector
                 );
 

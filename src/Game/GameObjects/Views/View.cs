@@ -174,8 +174,8 @@ namespace ClassicUO.Game.GameObjects
             ref Rectangle rectangle,
             ref Vector3 nTop,
             ref Vector3 nRight,
-            ref Vector3 nBottom,
             ref Vector3 nLeft,
+            ref Vector3 nBottom,
             ref Vector3 hue
         )
         {
@@ -193,8 +193,8 @@ namespace ClassicUO.Game.GameObjects
                     ref rectangle,
                     ref nTop,
                     ref nRight,
-                    ref nBottom,
                     ref nLeft,
+                    ref nBottom,
                     ref hue
                 );
             }
