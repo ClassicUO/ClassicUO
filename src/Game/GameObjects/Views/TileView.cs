@@ -85,10 +85,10 @@ namespace ClassicUO.Game.GameObjects
                     posX,
                     posY,
                     ref Rectangle,
-                    ref Normal0,
-                    ref Normal1,
-                    ref Normal2,
-                    ref Normal3,
+                    ref NormalTop,
+                    ref NormalRight,
+                    ref NormalBottom,
+                    ref NormalLeft,
                     ref HueVector
                 );
 
