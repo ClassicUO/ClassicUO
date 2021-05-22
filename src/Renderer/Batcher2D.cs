@@ -402,8 +402,8 @@ namespace ClassicUO.Renderer
             ref Rectangle rect,
             ref Vector3 normalTop,
             ref Vector3 normalRight,
-            ref Vector3 normalBottom,
             ref Vector3 normalLeft,
+            ref Vector3 normalBottom,
             ref Vector3 hue
         )
         {
@@ -426,8 +426,8 @@ namespace ClassicUO.Renderer
 
             vertex.Normal0 = normalTop;
             vertex.Normal1 = normalRight;
-            vertex.Normal3 = normalBottom; // right order!
             vertex.Normal2 = normalLeft;
+            vertex.Normal3 = normalBottom;
 
             // Top
             vertex.Position0.X = x + 22;

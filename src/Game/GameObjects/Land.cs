@@ -48,7 +48,7 @@ namespace ClassicUO.Game.GameObjects
             {
                 l.IsDestroyed = false;
                 l.AlphaHue = 255;
-                l.NormalTop = l.NormalRight = l.NormalBottom = l.NormalLeft = Vector3.Zero;
+                l.NormalTop = l.NormalRight = l.NormalLeft = l.NormalBottom = Vector3.Zero;
                 l.Rectangle = Rectangle.Empty;
                 l.MinZ = l.AverageZ = 0;
             }
@@ -61,7 +61,7 @@ namespace ClassicUO.Game.GameObjects
         public sbyte MinZ;
 
 
-        public Vector3 NormalTop, NormalRight, NormalBottom, NormalLeft;
+        public Vector3 NormalTop, NormalRight, NormalLeft, NormalBottom;
         public ushort OriginalGraphic;
         public Rectangle Rectangle;
 
@@ -259,20 +259,20 @@ namespace ClassicUO.Game.GameObjects
 
                 SumAndNormalize
                 (
-                    ref vectBuffer[2 + 1 * 3 + 1 * 3 * 4],
-                    ref vectBuffer[1 + 2 * 3 + 1 * 3 * 4],
-                    ref vectBuffer[3 + 1 * 3 + 2 * 3 * 4],
-                    ref vectBuffer[0 + 2 * 3 + 2 * 3 * 4],
-                    out NormalBottom
-                );
-
-                SumAndNormalize
-                (
                     ref vectBuffer[2 + 1 * 3 + 0 * 3 * 4],
                     ref vectBuffer[1 + 2 * 3 + 0 * 3 * 4],
                     ref vectBuffer[3 + 1 * 3 + 1 * 3 * 4],
                     ref vectBuffer[0 + 2 * 3 + 1 * 3 * 4],
                     out NormalLeft
+                );
+
+                SumAndNormalize
+                (
+                    ref vectBuffer[2 + 1 * 3 + 1 * 3 * 4],
+                    ref vectBuffer[1 + 2 * 3 + 1 * 3 * 4],
+                    ref vectBuffer[3 + 1 * 3 + 2 * 3 * 4],
+                    ref vectBuffer[0 + 2 * 3 + 2 * 3 * 4],
+                    out NormalBottom
                 );
             }
         }
