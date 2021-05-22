@@ -11,15 +11,12 @@
 #define EFFECT_HUED 10
 #define GUMP 20
 
-
 float4x4 MatrixTransform;
 float4x4 WorldMatrix;
 float2 Viewport;
 float Brightlight;
 const float HuesPerTexture = 2048;
 
-
-const static float3 LIGHT_DIRECTION = float3(-1.0f, -1.0f, .5f);
 const static float3 VEC3_ZERO = float3(0, 0, 0);
 
 sampler DrawSampler : register(s0);
@@ -58,11 +55,18 @@ float3 get_rgb(float gray, float hue)
 	}
 }
 
-float3 get_light(float3 norm)
+const static float3 LIGHT_DIRECTION = float3(0.0f, 1.0f, 1.0f);
+const static float LIGHT_SCALE = 1.5;
+
+float get_light(float3 norm)
 {
 	float3 light = normalize(LIGHT_DIRECTION);
 	float3 normal = normalize(norm);
-	return max((dot(normal, light) + 0.5f), 0.0f);
+	float base = (max(dot(normal, light), 0.0f) / 2.0f) + 0.5f;
+
+	// At 45 degrees (the angle the flat tiles are lit at) it must come out
+	// to (cos(45) / 2) + 0.5 or 0.85355339...
+	return base + ((LIGHT_SCALE * (base - 0.85355339f)) - (base - 0.85355339f));
 }
 
 PS_INPUT VertexShaderFunction(VS_INPUT IN)
