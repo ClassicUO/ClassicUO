@@ -48,7 +48,7 @@ namespace ClassicUO.Game.GameObjects
             {
                 l.IsDestroyed = false;
                 l.AlphaHue = 255;
-                l.Normal0 = l.Normal1 = l.Normal2 = l.Normal3 = Vector3.Zero;
+                l.NormalTop = l.NormalRight = l.NormalBottom = l.NormalLeft = Vector3.Zero;
                 l.Rectangle = Rectangle.Empty;
                 l.MinZ = l.AverageZ = 0;
             }
@@ -61,7 +61,7 @@ namespace ClassicUO.Game.GameObjects
         public sbyte MinZ;
 
 
-        public Vector3 Normal0, Normal1, Normal2, Normal3;
+        public Vector3 NormalTop, NormalRight, NormalBottom, NormalLeft;
         public ushort OriginalGraphic;
         public Rectangle Rectangle;
 
@@ -245,7 +245,7 @@ namespace ClassicUO.Game.GameObjects
                     ref vectBuffer[1 + 1 * 3 + 0 * 3 * 4], 
                     ref vectBuffer[3 + 0 * 3 + 1 * 3 * 4], 
                     ref vectBuffer[0 + 1 * 3 + 1 * 3 * 4], 
-                    out Normal0
+                    out NormalTop
                 );
 
                 SumAndNormalize
@@ -254,7 +254,7 @@ namespace ClassicUO.Game.GameObjects
                     ref vectBuffer[1 + 1 * 3 + 1 * 3 * 4],
                     ref vectBuffer[3 + 0 * 3 + 2 * 3 * 4],
                     ref vectBuffer[0 + 1 * 3 + 2 * 3 * 4],
-                    out Normal1
+                    out NormalRight
                 );
 
                 SumAndNormalize
@@ -263,7 +263,7 @@ namespace ClassicUO.Game.GameObjects
                     ref vectBuffer[1 + 2 * 3 + 1 * 3 * 4],
                     ref vectBuffer[3 + 1 * 3 + 2 * 3 * 4],
                     ref vectBuffer[0 + 2 * 3 + 2 * 3 * 4],
-                    out Normal2
+                    out NormalBottom
                 );
 
                 SumAndNormalize
@@ -272,7 +272,7 @@ namespace ClassicUO.Game.GameObjects
                     ref vectBuffer[1 + 2 * 3 + 0 * 3 * 4],
                     ref vectBuffer[3 + 1 * 3 + 1 * 3 * 4],
                     ref vectBuffer[0 + 2 * 3 + 1 * 3 * 4],
-                    out Normal3
+                    out NormalLeft
                 );
             }
         }
