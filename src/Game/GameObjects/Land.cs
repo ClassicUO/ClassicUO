@@ -34,6 +34,7 @@ using System;
 using System.Runtime.CompilerServices;
 using ClassicUO.Game.Managers;
 using ClassicUO.IO.Resources;
+using ClassicUO.Renderer;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
 
@@ -49,7 +50,7 @@ namespace ClassicUO.Game.GameObjects
                 l.IsDestroyed = false;
                 l.AlphaHue = 255;
                 l.NormalTop = l.NormalRight = l.NormalLeft = l.NormalBottom = Vector3.Zero;
-                l.Rectangle = Rectangle.Empty;
+                l.YOffsets.Top = l.YOffsets.Right = l.YOffsets.Left = l.YOffsets.Bottom = 0;
                 l.MinZ = l.AverageZ = 0;
             }
         );
@@ -63,8 +64,7 @@ namespace ClassicUO.Game.GameObjects
 
         public Vector3 NormalTop, NormalRight, NormalLeft, NormalBottom;
         public ushort OriginalGraphic;
-        public Rectangle Rectangle;
-
+        public UltimaBatcher2D.YOffsets YOffsets;
 
         public static Land Create(ushort graphic)
         {
@@ -95,46 +95,15 @@ namespace ClassicUO.Game.GameObjects
             AllowedToDraw = Graphic > 2;
         }
 
-        public void UpdateZ(int zTop, int zRight, int zBottom, sbyte currentZ)
+        public void UpdateZ(int zTop, int zRight, int zLeft, int zBottom)
         {
-            if (IsStretched)
-            {
-                int x = (currentZ << 2) + 1;
-                int y = zTop << 2;
-                int w = (zRight << 2) - x;
-                int h = (zBottom << 2) + 1 - y;
+            YOffsets.Top = zTop * 4;
+            YOffsets.Right = zRight * 4;
+            YOffsets.Left = zLeft * 4;
+            YOffsets.Bottom = zBottom * 4;
 
-                Rectangle.X = x;
-                Rectangle.Y = y;
-                Rectangle.Width = w;
-                Rectangle.Height = h;
-
-                if (Math.Abs(currentZ - zRight) <= Math.Abs(zBottom - zTop))
-                {
-                    AverageZ = (sbyte) ((currentZ + zRight) >> 1);
-                }
-                else
-                {
-                    AverageZ = (sbyte) ((zBottom + zTop) >> 1);
-                }
-
-                MinZ = currentZ;
-
-                if (zTop < MinZ)
-                {
-                    MinZ = (sbyte) zTop;
-                }
-
-                if (zRight < MinZ)
-                {
-                    MinZ = (sbyte) zRight;
-                }
-
-                if (zBottom < MinZ)
-                {
-                    MinZ = (sbyte) zBottom;
-                }
-            }
+            AverageZ = (sbyte)((zTop + zRight + zLeft + zBottom) / 4);
+            MinZ = (sbyte)Math.Min(zTop, Math.Min(zRight, Math.Min(zLeft, zBottom)));
         }
 
         public int CalculateCurrentAverageZ(int direction)
@@ -154,9 +123,9 @@ namespace ClassicUO.Game.GameObjects
         {
             switch (direction)
             {
-                case 1: return Rectangle.Bottom >> 2;
-                case 2: return Rectangle.Right >> 2;
-                case 3: return Rectangle.Top >> 2;
+                case 1: return YOffsets.Right >> 2;
+                case 2: return YOffsets.Bottom >> 2;
+                case 3: return YOffsets.Left >> 2;
                 default: return Z;
             }
         }
@@ -173,7 +142,7 @@ namespace ClassicUO.Game.GameObjects
             {
                 IsStretched = true;
 
-                UpdateZ(map.GetTileZ(x, y + 1), map.GetTileZ(x + 1, y + 1), map.GetTileZ(x + 1, y), z);
+                UpdateZ(z, map.GetTileZ(x + 1, y), map.GetTileZ(x, y + 1), map.GetTileZ(x + 1, y + 1));
 
                 int i;
                 int j;

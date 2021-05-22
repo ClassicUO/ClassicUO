@@ -393,13 +393,21 @@ namespace ClassicUO.Renderer
             return true;
         }
 
+        public struct YOffsets
+        {
+            public int Top;
+            public int Right;
+            public int Left;
+            public int Bottom;
+        }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool DrawSpriteLand
         (
             Texture2D texture,
             int x,
             int y,
-            ref Rectangle rect,
+            ref YOffsets yOffsets,
             ref Vector3 normalTop,
             ref Vector3 normalRight,
             ref Vector3 normalLeft,
@@ -431,22 +439,22 @@ namespace ClassicUO.Renderer
 
             // Top
             vertex.Position0.X = x + 22;
-            vertex.Position0.Y = y - rect.Left;
+            vertex.Position0.Y = y - yOffsets.Top;
             vertex.Position0.Z = 0;
 
             // Right
             vertex.Position1.X = x + 44;
-            vertex.Position1.Y = y + (22 - rect.Bottom);
+            vertex.Position1.Y = y + (22 - yOffsets.Right);
             vertex.Position1.Z = 0;
 
             // Left
             vertex.Position2.X = x;
-            vertex.Position2.Y = y + (22 - rect.Top);
+            vertex.Position2.Y = y + (22 - yOffsets.Left);
             vertex.Position2.Z = 0;
 
             // Bottom
             vertex.Position3.X = x + 22;
-            vertex.Position3.Y = y + (44 - rect.Right);
+            vertex.Position3.Y = y + (44 - yOffsets.Bottom);
             vertex.Position3.Z = 0;
 
             vertex.Hue0 = vertex.Hue1 = vertex.Hue2 = vertex.Hue3 = hue;

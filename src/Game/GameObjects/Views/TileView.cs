@@ -84,7 +84,7 @@ namespace ClassicUO.Game.GameObjects
                     Graphic,
                     posX,
                     posY,
-                    ref Rectangle,
+                    ref YOffsets,
                     ref NormalTop,
                     ref NormalRight,
                     ref NormalLeft,
@@ -92,7 +92,7 @@ namespace ClassicUO.Game.GameObjects
                     ref HueVector
                 );
 
-                if (SelectedObject.IsPointInStretchedLand(ref Rectangle, posX, posY))
+                if (SelectedObject.IsPointInStretchedLand(ref YOffsets, posX, posY))
                 {
                     SelectedObject.Object = this;
                 }
