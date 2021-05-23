@@ -31,6 +31,7 @@
 #endregion
 
 using System.Collections.Generic;
+using ClassicUO.IO.Audio;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
@@ -183,7 +184,11 @@ namespace ClassicUO.Game
             }
 
             //TODO(deccer): refactor this out into _audioPlayer.PlayMusic(...)
-            Client.Game.Scene.Audio.PlayMusic(music, true);
+            UOMusic currentMusic = Client.Game.Scene.Audio.GetCurrentMusic();
+            if (currentMusic == null || currentMusic.Index == Client.Game.Scene.Audio.LoginMusicIndex)
+            {
+                Client.Game.Scene.Audio.PlayMusic(music, false);
+            }
         }
 
 
