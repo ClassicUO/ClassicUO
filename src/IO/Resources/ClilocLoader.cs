@@ -91,7 +91,7 @@ namespace ClassicUO.IO.Resources
                         return;
                     }
 
-                    if (string.Compare(_cliloc, "cliloc.enu", StringComparison.InvariantCultureIgnoreCase) == 0)
+                    if (string.Compare(_cliloc, "cliloc.enu", StringComparison.InvariantCultureIgnoreCase) != 0)
                     { 
                         string enupath = UOFileManager.GetUOFilePath("Cliloc.enu");
 
