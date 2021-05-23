@@ -30,6 +30,7 @@
 
 #endregion
 
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
@@ -90,7 +91,7 @@ namespace ClassicUO.IO.Resources
                         return;
                     }
 
-                    if (_cliloc != "Cliloc.enu")
+                    if (string.Compare(_cliloc, "cliloc.enu", StringComparison.InvariantCultureIgnoreCase) == 0)
                     { 
                         string enupath = UOFileManager.GetUOFilePath("Cliloc.enu");
 
