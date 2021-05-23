@@ -379,5 +379,17 @@ namespace ClassicUO.Game.Managers
                 first = next;
             }
         }
+
+        public UOMusic GetCurrentMusic()
+        {
+            for (int i = 0; i < 2; i++)
+            {
+                if (_currentMusic[i] != null && _currentMusic[i].IsPlaying)
+                {
+                    return _currentMusic[i];
+                }
+            }
+            return null;
+        }
     }
 }
