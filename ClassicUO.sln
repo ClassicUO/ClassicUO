@@ -61,7 +61,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ClassicUO.UnitTests", "test
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FNA.Core", "external\FNA\FNA.Core.csproj", "{3F9AB6CE-3AD1-40B6-B2AA-C4D82F76258F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MP3Sharp", "external\MP3Sharp\MP3Sharp\MP3Sharp.csproj", "{2C379A78-8A96-48A5-81E5-EA0AE696AA5B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MP3Sharp", "external\MP3Sharp\MP3Sharp\MP3Sharp-NETStandard20.csproj", "{2C379A78-8A96-48A5-81E5-EA0AE696AA5B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
