@@ -209,8 +209,11 @@ namespace ClassicUO.Game.Managers
                 }
             }
 
-            NetClient.Socket.Send(new PTargetCancel(TargetingState, _targetCursorId, (byte) TargetingType));
-            IsTargeting = false;
+            if (IsTargeting || TargetingType == TargetType.Cancel)
+            {
+                NetClient.Socket.Send(new PTargetCancel(TargetingState, _targetCursorId, (byte)TargetingType));
+                IsTargeting = false;
+            }
 
             Reset();
         }

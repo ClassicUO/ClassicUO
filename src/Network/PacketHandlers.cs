@@ -59,7 +59,6 @@ namespace ClassicUO.Network
         public delegate void OnPacketBufferReader(ref PacketBufferReader p);
 
         private static uint _requestedGridLoot;
-        private static readonly DataReader _reader = new DataReader();
 
         private static readonly TextFileParser _parser = new TextFileParser(string.Empty, new[] { ' ' }, new char[] { }, new[] { '{', '}' });
         private static readonly TextFileParser _cmdparser = new TextFileParser(string.Empty, new[] { ' ', ',' }, new char[] { }, new[] { '@', '@' });
@@ -793,7 +792,7 @@ namespace ClassicUO.Network
                     NetClient.Socket.Send(new PGameWindowSize((uint) ProfileManager.CurrentProfile.GameWindowSize.X, (uint) ProfileManager.CurrentProfile.GameWindowSize.Y));
                 }
 
-                NetClient.Socket.Send(new PLanguage("ENU"));
+                NetClient.Socket.Send(new PLanguage(Settings.GlobalSettings.Language));
             }
 
             NetClient.Socket.Send(new PClientVersion(Settings.GlobalSettings.ClientVersion));
@@ -1131,60 +1130,30 @@ namespace ClassicUO.Network
                 destZ = destEntity.Z;
             }
 
-            GameEffect effect;
+            World.SpawnEffect
+            (
+                !SerialHelper.IsValid(source) || !SerialHelper.IsValid(dest) ? GraphicEffectType.Moving : GraphicEffectType.DragEffect,
+                source,
+                dest,
+                graphic,
+                hue,
+                sourceX, sourceY, sourceZ,
+                destX, destY, destZ,
+                5, 5000,
+                true,
+                false,
+                false,
+                GraphicEffectBlendMode.Normal
+            );
 
-
-            if (!SerialHelper.IsValid(source) || !SerialHelper.IsValid(dest))
-            {
-                effect = new MovingEffect
-                (
-                    source,
-                    dest,
-                    sourceX,
-                    sourceY,
-                    sourceZ,
-                    destX,
-                    destY,
-                    destZ,
-                    graphic,
-                    hue,
-                    true,
-                    5
-                )
-                {
-                    Duration = Time.Ticks + 5000
-                };
-            }
-            else
-            {
-                effect = new DragEffect
-                (
-                    source,
-                    dest,
-                    sourceX,
-                    sourceY,
-                    sourceZ,
-                    destX,
-                    destY,
-                    destZ,
-                    graphic,
-                    hue
-                )
-                {
-                    Duration = Time.Ticks + 5000
-                };
-            }
-
-            if (effect.AnimDataFrame.FrameCount != 0)
-            {
-                effect.IntervalInMs = effect.AnimDataFrame.FrameInterval * 45;
-            }
-            else
-            {
-                effect.IntervalInMs = 13;
-            }
-
-            World.AddEffect(effect);
+            //if (effect.AnimDataFrame.FrameCount != 0)
+            //{
+            //    effect.IntervalInMs = (uint) (effect.AnimDataFrame.FrameInterval * 45);
+            //}
+            //else
+            //{
+            //    effect.IntervalInMs = 13;
+            //}
         }
 
         private static void OpenContainer(ref PacketBufferReader p)
@@ -2409,7 +2378,7 @@ namespace ClassicUO.Network
                 }
             }
 
-            World.AddEffect
+            World.SpawnEffect
             (
                 type,
                 source,
@@ -3233,16 +3202,23 @@ namespace ClassicUO.Network
             int x = (Client.Game.Window.ClientBounds.Width >> 1) - (rect.Width >> 1);
             int y = (Client.Game.Window.ClientBounds.Height >> 1) - (rect.Height >> 1);
 
-            ColorPickerGump gump = new ColorPickerGump
-            (
-                serial,
-                graphic,
-                x,
-                y,
-                null
-            );
+            ColorPickerGump gump = UIManager.GetGump<ColorPickerGump>(serial);
 
-            UIManager.Add(gump);
+            if (gump == null || gump.IsDisposed || gump.Graphic != graphic)
+            {
+                gump?.Dispose();
+
+                gump = new ColorPickerGump
+                (
+                    serial,
+                    graphic,
+                    x,
+                    y,
+                    null
+                );
+
+                UIManager.Add(gump);
+            }
         }
 
         private static void MovePlayer(ref PacketBufferReader p)
@@ -4953,7 +4929,7 @@ namespace ClassicUO.Network
                     );
                 }
 
-                _reader.SetData(dbytesPtr, dlen);
+                StackDataReader reader = new StackDataReader(dbytesPtr, dlen);
 
                 ushort id = 0;
                 sbyte x = 0, y = 0, z = 0;
@@ -4965,10 +4941,10 @@ namespace ClassicUO.Network
 
                         for (uint i = 0; i < c; i++)
                         {
-                            id = _reader.ReadUShortReversed();
-                            x = _reader.ReadSByte();
-                            y = _reader.ReadSByte();
-                            z = _reader.ReadSByte();
+                            id = reader.ReadLE<ushort>();
+                            x = reader.Read<sbyte>();
+                            y = reader.Read<sbyte>();
+                            z = reader.Read<sbyte>();
 
                             if (id != 0)
                             {
@@ -4993,9 +4969,9 @@ namespace ClassicUO.Network
 
                         for (uint i = 0; i < c; i++)
                         {
-                            id = _reader.ReadUShortReversed();
-                            x = _reader.ReadSByte();
-                            y = _reader.ReadSByte();
+                            id = reader.ReadLE<ushort>();
+                            x = reader.Read<sbyte>();
+                            y = reader.Read<sbyte>();
 
                             if (id != 0)
                             {
@@ -5041,7 +5017,7 @@ namespace ClassicUO.Network
 
                         for (uint i = 0; i < c; i++)
                         {
-                            id = _reader.ReadUShortReversed();
+                            id = reader.ReadLE<ushort>();
                             x = (sbyte) (i / multiHeight + offX);
                             y = (sbyte) (i % multiHeight + offY);
 
@@ -5053,9 +5029,9 @@ namespace ClassicUO.Network
 
                         break;
                 }
-            }
 
-            _reader.ReleaseData();
+                reader.Release();
+            }
         }
 
         private static void CustomHouse(ref PacketBufferReader p)
@@ -6257,6 +6233,8 @@ namespace ClassicUO.Network
 
                 World.Player.UpdateScreenPosition();
                 World.Player.AddToTile();
+
+                World.Player.UpdateAbilities();
             }
         }
 
@@ -6357,7 +6335,6 @@ namespace ClassicUO.Network
             int page = 0;
 
 
-            bool applyCheckerTrans = false;
             bool textBoxFocused = false;
 
             for (int cnt = 0; cnt < cmdlen; cnt++)
@@ -6381,8 +6358,9 @@ namespace ClassicUO.Network
                 }
                 else if (string.Equals(entry, "checkertrans", StringComparison.InvariantCultureIgnoreCase))
                 {
-                    applyCheckerTrans = true;
-                    gump.Add(new CheckerTrans(gparams), page);
+                    var checkerTrans = new CheckerTrans(gparams);
+                    gump.Add(checkerTrans, page);
+                    ApplyTrans(gump, page, checkerTrans.X, checkerTrans.Y, checkerTrans.Width, checkerTrans.Height);
                 }
                 else if (string.Equals(entry, "croppedtext", StringComparison.InvariantCultureIgnoreCase))
                 {
@@ -6746,57 +6724,6 @@ namespace ClassicUO.Network
                 }
             }
 
-            if (applyCheckerTrans)
-            {
-                bool applyTrans(int ii, int current_page)
-                {
-                    bool transparent = false;
-
-                    for (; ii < gump.Children.Count; ii++)
-                    {
-                        Control child = gump.Children[ii];
-
-                        if (current_page == 0)
-                        {
-                            current_page = child.Page;
-                        }
-
-                        bool canDraw = /*current_page == 0 || child.Page == 0 ||*/
-                            current_page == child.Page;
-
-                        if (canDraw && child.IsVisible && child is CheckerTrans)
-                        {
-                            transparent = true;
-
-                            continue;
-                        }
-
-                        child.Alpha = transparent ? 0.5f : 0;
-                    }
-
-                    return transparent;
-                }
-
-
-                bool trans = applyTrans(0, 0);
-                float alpha = trans ? 0.5f : 0;
-
-                for (int i = 0; i < gump.Children.Count; i++)
-                {
-                    Control cc = gump.Children[i];
-
-                    if (cc is CheckerTrans)
-                    {
-                        trans = applyTrans(i + 1, cc.Page);
-                        alpha = trans ? 0.5f : 0;
-                    }
-                    else
-                    {
-                        cc.Alpha = alpha;
-                    }
-                }
-            }
-
             if (mustBeAdded)
             {
                 UIManager.Add(gump);
@@ -6806,6 +6733,24 @@ namespace ClassicUO.Network
             gump.SetInScreen();
 
             return gump;
+        }
+
+        private static void ApplyTrans(Gump gump, int current_page, int x, int y, int width, int height)
+        {
+            int x2 = x + width;
+            int y2 = y + height;
+            for (int i = 0; i < gump.Children.Count; i++)
+            {
+                Control child = gump.Children[i];
+                bool canDraw = child.Page == 0 || current_page == child.Page;
+
+                bool overlap = (x < child.X + child.Width) && (child.X < x2) && (y < child.Y + child.Height) && (child.Y < y2);
+
+                if (canDraw && child.IsVisible && overlap)
+                {
+                    child.Alpha = 0.5f;
+                }
+            }
         }
 
 

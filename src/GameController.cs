@@ -134,7 +134,6 @@ namespace ClassicUO
             GraphicsDevice.Textures[1] = _hueSamplers[0];
             GraphicsDevice.Textures[2] = _hueSamplers[1];
 
-            AuraManager.CreateAuraTexture();
             UIManager.InitializeGameCursor();
             AnimatedStaticsManager.Initialize();
 
@@ -611,7 +610,7 @@ namespace ClassicUO
                     {
                         TakeScreenshot();
                     }
-
+                    
                     break;
 
                 case SDL_EventType.SDL_TEXTINPUT:
@@ -702,6 +701,11 @@ namespace ClassicUO
 
                         case MouseButtonType.Right:
                             lastClickTime = Mouse.LastRightButtonClickTime;
+
+                            break;
+
+                        default: 
+                            Log.Warn($"No mouse button handled: {mouse.button}");
 
                             break;
                     }
@@ -795,7 +799,12 @@ namespace ClassicUO
                             lastClickTime = Mouse.LastRightButtonClickTime;
 
                             break;
-                    }
+
+                        default:
+                            Log.Warn($"No mouse button handled: {mouse.button}");
+
+                            break;
+                        }
 
                     if (lastClickTime != 0xFFFF_FFFF)
                     {

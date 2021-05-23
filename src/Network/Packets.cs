@@ -34,6 +34,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using ClassicUO.Configuration;
 using ClassicUO.Data;
 using ClassicUO.Game;
 using ClassicUO.Game.Data;
@@ -828,11 +829,8 @@ namespace ClassicUO.Network
         {
             WriteBytes(MessageManager.PromptData.Data, 0, 8);
             WriteUInt((uint) (cancel ? 0 : 1));
-            WriteASCII(lang, 3);
-            WriteUnicode(text, text.Length);
-            //This must be terminated with EXACTLY one null byte, unlike most unicode-containing packets which are terminated with two.
-            //Some servers are fussy about this and will reject the packet otherwise!
-            WriteByte(0x00);
+            WriteASCII(lang);
+            WriteUnicodeLE(text, text.Length);
         }
     }
 
@@ -1123,7 +1121,7 @@ namespace ClassicUO.Network
     {
         public PChatJoinCommand(string name, string password = null) : base(0xB3)
         {
-            WriteASCII("ENU", 4);
+            WriteASCII(Settings.GlobalSettings.Language, 4);
             WriteUShort(0x0062);
 
             WriteUShort(0x0022);
@@ -1142,7 +1140,7 @@ namespace ClassicUO.Network
     {
         public PChatCreateChannelCommand(string name, string password = null) : base(0xB3)
         {
-            WriteASCII("ENU", 4);
+            WriteASCII(Settings.GlobalSettings.Language, 4);
             WriteUShort(0x0063);
 
             WriteUnicode(name);
@@ -1160,7 +1158,7 @@ namespace ClassicUO.Network
     {
         public PChatLeaveChannelCommand() : base(0xB3)
         {
-            WriteASCII("ENU", 4);
+            WriteASCII(Settings.GlobalSettings.Language, 4);
             WriteUShort(0x0043);
         }
     }
@@ -1169,7 +1167,7 @@ namespace ClassicUO.Network
     {
         public PChatMessageCommand(string msg) : base(0xB3)
         {
-            WriteASCII("ENU", 4);
+            WriteASCII(Settings.GlobalSettings.Language, 4);
             WriteUShort(0x0061);
             WriteUnicode(msg);
         }

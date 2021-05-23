@@ -32,6 +32,7 @@
 
 using System;
 using System.Collections.Concurrent;
+using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
@@ -61,6 +62,7 @@ namespace ClassicUO.Network
         private readonly bool _is_login_socket;
         private TcpClient _tcpClient;
         private NetworkStream _netStream;
+        private uint? _localIP;
 
 
         private NetClient(bool is_login_socket)
@@ -81,34 +83,41 @@ namespace ClassicUO.Network
 
         public ClientSocketStatus Status { get; private set; }
 
-        public NetStatistics Statistics { get; }
-
-        private static uint? _client_address;
-
-
-        public static uint ClientAddress
+        public uint LocalIP
         {
             get
             {
-                if (!_client_address.HasValue)
+                if (!_localIP.HasValue)
                 {
                     try
                     {
-                        _client_address = 0x100007f;
+                        byte[] addressBytes = (_tcpClient.Client?.LocalEndPoint as IPEndPoint)?.Address.MapToIPv4().GetAddressBytes();
 
-                        //var address = GetLocalIpAddress();
+                        if (addressBytes != null && addressBytes.Length != 0)
+                        {
+                            _localIP = (uint)(addressBytes[0] | (addressBytes[1] << 8) | (addressBytes[2] << 16) | (addressBytes[3] << 24));
+                        }
 
-                        //_client_address = ((address & 0xff) << 0x18) | ((address & 65280) << 8) | ((address >> 8) & 65280) | ((address >> 0x18) & 0xff);
+                        if (!_localIP.HasValue || _localIP == 0)
+                        {
+                            _localIP = 0x100007f;
+                        }
                     }
-                    catch
+                    catch (Exception ex)
                     {
-                        _client_address = 0x100007f;
+                        Log.Error($"error while retriving local endpoint address: \n{ex}");
+
+                        _localIP = 0x100007f;
                     }
                 }
 
-                return _client_address.Value;
+                return _localIP.Value;
             }
         }
+
+
+        public NetStatistics Statistics { get; }
+
 
         public event EventHandler Connected;
         public event EventHandler<SocketError> Disconnected;
@@ -262,6 +271,7 @@ namespace ClassicUO.Network
             _tcpClient = null;
             _netStream = null;
             _circularBuffer = null;
+            _localIP = null;
 
             if (error != 0)
             {
@@ -628,105 +638,70 @@ namespace ClassicUO.Network
             if (_logFile == null)
                 _logFile = new LogFile(FileSystemHelper.CreateFolderIfNotExists(CUOEnviroment.ExecutablePath, "Logs", "Network"), "packets.log");
 
-            int pos = 0;
-
             StringBuilder output = new StringBuilder();
 
-            output.AppendFormat("{0}   -   ID {1:X2}   Length: {2}\n", (toServer ? "Client -> Server" : "Server -> Client"), buffer[0], buffer.Length);
+            int off = sizeof(ulong) + 2;
+
+            output.Append(' ', off);
+            output.AppendFormat("Ticks: {0} | {1} |  ID: {2:X2}   Length: {3}\n", Time.Ticks, (toServer ? "Client -> Server" : "Server -> Client"), buffer[0], buffer.Length);
 
             if (buffer[0] == 0x80 || buffer[0] == 0x91)
             {
+                output.Append(' ', off);
                 output.AppendLine("[ACCOUNT CREDENTIALS HIDDEN]");
             }
             else
             {
-                output.AppendLine("        0  1  2  3  4  5  6  7   8  9  A  B  C  D  E  F");
-                output.AppendLine("       -- -- -- -- -- -- -- --  -- -- -- -- -- -- -- --");
+                output.Append(' ', off);
+                output.AppendLine("0  1  2  3  4  5  6  7   8  9  A  B  C  D  E  F");
 
-                int byteIndex = 0;
+                output.Append(' ', off);
+                output.AppendLine("-- -- -- -- -- -- -- --  -- -- -- -- -- -- -- --");
 
-                int whole = length >> 4;
-                int rem = length & 0xF;
+                int i;
+                ulong address = 0;
 
-                for (int i = 0; i < whole; ++i, byteIndex += 16)
+                for (i = 0; i < length; ++i)
                 {
-                    StringBuilder bytes = new StringBuilder(49);
-                    StringBuilder chars = new StringBuilder(16);
+                    output.AppendFormat("{0:X8}", address);
 
                     for (int j = 0; j < 16; ++j)
                     {
-                        int c = buffer[pos++];
-
-                        bytes.Append(c.ToString("X2"));
-
-                        if (j != 7)
+                        if ((j % 8) == 0)
                         {
-                            bytes.Append(' ');
+                            output.Append(" ");
+                        }
+
+                        if (i + j < length)
+                        {
+                            output.AppendFormat(" {0:X2}", buffer[i + j]);
                         }
                         else
                         {
-                            bytes.Append("  ");
+                            output.Append("   ");
                         }
+                    }
+
+                    output.Append("  ");
+
+                    for (int j = 0; j < 16 && i + j < length; ++j)
+                    {
+                        byte c = buffer[i + j];
 
                         if (c >= 0x20 && c < 0x80)
                         {
-                            chars.Append((char) c);
+                            output.Append((char)c);
+                            
                         }
                         else
                         {
-                            chars.Append('.');
+                            output.Append('.');
                         }
                     }
 
-                    output.Append(byteIndex.ToString("X4"));
-                    output.Append("   ");
-                    output.Append(bytes);
-                    output.Append("  ");
-                    output.AppendLine(chars.ToString());
-                }
-
-                if (rem != 0)
-                {
-                    StringBuilder bytes = new StringBuilder(49);
-                    StringBuilder chars = new StringBuilder(rem);
-
-                    for (int j = 0; j < 16; ++j)
-                    {
-                        if (j < rem)
-                        {
-                            int c = buffer[pos++];
-
-                            bytes.Append(c.ToString("X2"));
-
-                            if (j != 7)
-                            {
-                                bytes.Append(' ');
-                            }
-                            else
-                            {
-                                bytes.Append("  ");
-                            }
-
-                            if (c >= 0x20 && c < 0x80)
-                            {
-                                chars.Append((char) c);
-                            }
-                            else
-                            {
-                                chars.Append('.');
-                            }
-                        }
-                        else
-                        {
-                            bytes.Append("   ");
-                        }
-                    }
-
-                    output.Append(byteIndex.ToString("X4"));
-                    output.Append("   ");
-                    output.Append(bytes);
-                    output.Append("  ");
-                    output.AppendLine(chars.ToString());
+                    output.Append('\n');
+                    address += 16;
+                    i += 16;
                 }
             }
 

@@ -69,7 +69,7 @@ namespace ClassicUO.IO.Resources
 
         public AnimDataFrame2 CalculateCurrentGraphic(ushort graphic)
         {
-            IntPtr address = _file.StartAddress;
+            IntPtr address = _file?.StartAddress ?? IntPtr.Zero;
 
             if (address != IntPtr.Zero)
             {

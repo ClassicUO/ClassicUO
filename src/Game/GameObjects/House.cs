@@ -85,6 +85,7 @@ namespace ClassicUO.Game.GameObjects
             m.Z = z;
             m.UpdateScreenPosition();
             m.IsCustom = iscustom;
+            m.IsMovable = item.ItemData.IsMultiMovable;
             m.AddToTile();
 
             //if (iscustom)

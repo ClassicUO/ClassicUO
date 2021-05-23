@@ -318,17 +318,9 @@ namespace ClassicUO.Game.Managers
                     {
                         if (house != null)
                         {
-                            bool preview = step.MovingDir != Direction.West && step.MovingDir != Direction.Up && step.MovingDir != Direction.North;
-                            //preview = false;
-
                             foreach (Multi c in house.Components)
                             {
                                 c.Offset = item.Offset;
-
-                                if (preview)
-                                {
-                                    c.State |= CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_PREVIEW;
-                                }
                             }
                         }
 

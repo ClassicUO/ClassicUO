@@ -42,11 +42,14 @@ namespace ClassicUO.Renderer
         public const byte SHADER_PARTIAL_HUED = 2;
         public const byte SHADER_TEXT_HUE_NO_BLACK = 3;
         public const byte SHADER_TEXT_HUE = 4;
-        public const byte SHADER_LAND = 6;
-        public const byte SHADER_LAND_HUED = 7;
-        public const byte SHADER_SPECTRAL = 10;
-        public const byte SHADER_SHADOW = 12;
-        public const byte SHADER_LIGHTS = 13;
+        public const byte SHADER_LAND = 5;
+        public const byte SHADER_LAND_HUED = 6;
+        public const byte SHADER_SPECTRAL = 7;
+        public const byte SHADER_SHADOW = 8;
+        public const byte SHADER_LIGHTS = 9;
+        public const byte SHADER_EFFECT_HUED = 10;
+
+        private const byte GUMP_OFFSET = 20;
 
         private const ushort SPECTRAL_COLOR_FLAG = 0x4000;
 
@@ -60,7 +63,7 @@ namespace ClassicUO.Renderer
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void GetHueVector(ref Vector3 hueVector, int hue, bool partial, float alpha, bool gump = false)
+        public static void GetHueVector(ref Vector3 hueVector, int hue, bool partial, float alpha, bool gump = false, bool effect = false)
         {
             byte type;
 
@@ -83,11 +86,11 @@ namespace ClassicUO.Renderer
             {
                 hue -= 1;
 
-                type = partial ? SHADER_PARTIAL_HUED : SHADER_HUED;
+                type = effect ? SHADER_EFFECT_HUED : partial ? SHADER_PARTIAL_HUED : SHADER_HUED;
 
-                if (gump)
+                if (gump && !effect)
                 {
-                    type |= 20;
+                    type += GUMP_OFFSET;
                 }
             }
             else

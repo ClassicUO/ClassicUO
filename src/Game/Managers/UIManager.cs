@@ -44,7 +44,7 @@ namespace ClassicUO.Game.Managers
     internal static class UIManager
     {
         private static readonly Dictionary<uint, Point> _gumpPositionCache = new Dictionary<uint, Point>();
-        private static readonly Control[] _mouseDownControls = new Control[(int) MouseButtonType.Size];
+        private static readonly Control[] _mouseDownControls = new Control[0xFF];
 
 
         //private static readonly Dictionary<uint, TargetLineGump> _targetLineGumps = new Dictionary<uint, TargetLineGump>();

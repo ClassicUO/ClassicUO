@@ -34,24 +34,21 @@ using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Input;
 using ClassicUO.IO.Resources;
+using ClassicUO.Renderer;
+using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Controls
 {
-    internal class ClickableColorBox : Control
+    internal class ClickableColorBox : ColorBox
     {
-        private const int CELL = 12;
-
-        private readonly ColorBox _colorBox;
-
         public ClickableColorBox
         (
             int x,
             int y,
             int w,
             int h,
-            ushort hue,
-            uint color
-        )
+            ushort hue
+        ) : base(w, h, hue)
         {
             X = x;
             Y = y;
@@ -59,21 +56,33 @@ namespace ClassicUO.Game.UI.Controls
 
             GumpPic background = new GumpPic(0, 0, 0x00D4, 0);
             Add(background);
-            _colorBox = new ColorBox(w, h, hue, color);
-            _colorBox.X = 3;
-            _colorBox.Y = 3;
-            Add(_colorBox);
 
             Width = background.Width;
             Height = background.Height;
         }
 
-        public ushort Hue => _colorBox.Hue;
-
-
-        public void SetColor(ushort hue, uint pol)
+        public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
-            _colorBox.SetColor(hue, pol);
+            ResetHueVector();
+
+            if (Children.Count != 0)
+            {
+                Children[0].Draw(batcher, x, y);
+            }
+
+            ResetHueVector();
+
+            ShaderHueTranslator.GetHueVector(ref HueVector, Hue);
+
+            return batcher.Draw2D
+            (
+                SolidColorTextureCache.GetTexture(Color.White),
+                x + 3,
+                y + 3,
+                Width - 6,
+                Height - 6,
+                ref HueVector
+            );
         }
 
         protected override void OnMouseUp(int x, int y, MouseButtonType button)
@@ -88,7 +97,7 @@ namespace ClassicUO.Game.UI.Controls
                     0,
                     100,
                     100,
-                    s => _colorBox.SetColor(s, HuesLoader.Instance.GetPolygoneColor(CELL, s))
+                    s => Hue = s
                 );
 
                 UIManager.Add(pickerGump);

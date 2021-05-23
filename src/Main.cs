@@ -50,8 +50,6 @@ namespace ClassicUO
 {
     internal static class Bootstrap
     {
-        private static bool _skipUpdates;
-
         [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
         private static extern bool SetDllDirectory(string lpPathName);
@@ -110,23 +108,6 @@ namespace ClassicUO
 #endif
             ReadSettingsFromArgs(args);
 
-#if DEV_BUILD
-            if (!_skipUpdates)
-            {
-                Network.Updater updater = new Network.Updater();
-                if (updater.Check())
-                    return;
-            }
-#endif
-
-            if (!_skipUpdates)
-            {
-                if (CheckUpdate(args))
-                {
-                    return;
-                }
-            }
-
             if (CUOEnviroment.IsHighDPI)
             {
                 Environment.SetEnvironmentVariable("FNA_GRAPHICS_ENABLE_HIGHDPI", "1");
@@ -168,6 +149,29 @@ namespace ClassicUO
                 SetDllDirectory(libsPath);
             }
 
+            if (string.IsNullOrWhiteSpace(Settings.GlobalSettings.Language))
+            {
+                Log.Trace("language is not set. Trying to get the OS language.");
+                try
+                {
+                    Settings.GlobalSettings.Language = CultureInfo.InstalledUICulture.ThreeLetterWindowsLanguageName;
+
+                    if (string.IsNullOrWhiteSpace(Settings.GlobalSettings.Language))
+                    {
+                        Log.Warn("cannot read the OS language. Rolled back to ENU");
+                       
+                        Settings.GlobalSettings.Language = "ENU";
+                    }
+
+                    Log.Trace($"language set: '{Settings.GlobalSettings.Language}'");
+                }
+                catch
+                {
+                    Log.Warn("cannot read the OS language. Rolled back to ENU");
+                  
+                    Settings.GlobalSettings.Language = "ENU";
+                }
+            }
 
             if (string.IsNullOrWhiteSpace(Settings.GlobalSettings.UltimaOnlineDirectory))
             {
@@ -273,11 +277,6 @@ namespace ClassicUO
                     // will override and overwrite those in the settings file because they have higher priority
                     case "settings":
                         Settings.CustomSettingsFilepath = value;
-
-                        break;
-
-                    case "skipupdate":
-                        _skipUpdates = true;
 
                         break;
 
@@ -490,115 +489,29 @@ namespace ClassicUO
                         CUOEnviroment.PacketLog = true;
 
                         break;
+
+                    case "language":
+
+                        switch (value?.ToUpperInvariant())
+                        {
+                            case "RUS": Settings.GlobalSettings.Language = "RUS"; break;
+                            case "FRA": Settings.GlobalSettings.Language = "FRA"; break;
+                            case "DEU": Settings.GlobalSettings.Language = "DEU"; break;
+                            case "ESP": Settings.GlobalSettings.Language = "ESP"; break;
+                            case "JPN": Settings.GlobalSettings.Language = "JPN"; break;
+                            case "KOR": Settings.GlobalSettings.Language = "KOR"; break;
+                            case "PTB": Settings.GlobalSettings.Language = "PTB"; break;
+                            case "ITA": Settings.GlobalSettings.Language = "ITA"; break;
+                            default:
+                            
+                                Settings.GlobalSettings.Language = "ENU";
+                                break;
+
+                        }
+
+                        break;
                 }
             }
-        }
-
-        private static bool CheckUpdate(string[] args)
-        {
-            string currentPath = CUOEnviroment.ExecutablePath;
-
-            string path = string.Empty;
-            string action = string.Empty;
-            int processId = -1;
-
-            for (int i = 0; i < args.Length; i++)
-            {
-                if (args[i] == "--source" && i < args.Length - 1)
-                {
-                    path = args[i + 1];
-                }
-                else if (args[i] == "--action" && i < args.Length - 1)
-                {
-                    action = args[i + 1];
-                }
-                else if (args[i] == "--pid" && i < args.Length - 1)
-                {
-                    processId = int.Parse(args[i + 1]);
-                }
-            }
-
-            if (action != string.Empty)
-            {
-                Console.WriteLine("[CheckUpdate] CURRENT PATH: {0}", currentPath);
-                Console.WriteLine("[CheckUpdate] Args: \tpath={0}\taction={1}\tpid={2}", path, action, processId);
-            }
-
-            if (action == "update")
-            {
-                Log.Trace("ClassicUO Updating...");
-
-                try
-                {
-                    Process processToBeKilled = Process.GetProcessById(processId);
-                    processToBeKilled.Kill();
-                    processToBeKilled.WaitForExit(5000);
-                }
-                catch
-                {
-                }
-
-                //File.SetAttributes(Path.GetDirectoryName(path), FileAttributes.Normal);
-
-                //foreach (string file in Directory.EnumerateFiles(currentPath, "*", SearchOption.AllDirectories))
-                //{
-                //    string sub = Path.Combine(file, file.Replace(currentPath, path));
-                //    Console.WriteLine("COPIED {0} over {1}", file, sub);
-                //    File.Copy(file, sub, true);
-                //}
-
-                DirectoryInfo dd = new DirectoryInfo(currentPath);
-                dd.CopyAllTo(new DirectoryInfo(path));
-
-                ProcessStartInfo processStartInfo = new ProcessStartInfo
-                {
-                    WorkingDirectory = path,
-                    UseShellExecute = false
-                };
-
-                if (CUOEnviroment.IsUnix)
-                {
-                    processStartInfo.FileName = "mono";
-
-                    processStartInfo.Arguments = $"\"{Path.Combine(path, "ClassicUO.exe")}\" --source \"{currentPath}\" --pid {Process.GetCurrentProcess().Id} --action cleanup";
-                }
-                else
-                {
-                    processStartInfo.FileName = Path.Combine(path, "ClassicUO.exe");
-
-                    processStartInfo.Arguments = $"--source \"{currentPath}\" --pid {Process.GetCurrentProcess().Id} --action cleanup";
-                }
-
-                Process.Start(processStartInfo);
-
-                return true;
-            }
-
-            if (action == "cleanup")
-            {
-                try
-                {
-                    Process.GetProcessById(processId);
-                    Thread.Sleep(1000);
-
-                    Process.GetProcessById(processId).Kill();
-                }
-                catch
-                {
-                }
-
-                try
-                {
-                    Directory.Delete(path, true);
-                }
-                catch (Exception)
-                {
-                }
-
-                Log.Trace("ClassicUO updated successfully!");
-            }
-
-            return false;
         }
     }
 }

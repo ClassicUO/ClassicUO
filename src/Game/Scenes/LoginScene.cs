@@ -342,7 +342,6 @@ namespace ClassicUO.Game.Scenes
                 CurrentLoginStep = LoginSteps.Connecting;
             }
 
-            EncryptionHelper.Initialize(true, NetClient.ClientAddress, (ENCRYPTION_TYPE) Settings.GlobalSettings.Encryption);
 
             if (!await NetClient.LoginSocket.Connect(Settings.GlobalSettings.IP, Settings.GlobalSettings.Port))
             {
@@ -419,7 +418,7 @@ namespace ClassicUO.Game.Scenes
                 Settings.GlobalSettings.LastCharacterName = Characters[index];
                 Settings.GlobalSettings.Save();
                 CurrentLoginStep = LoginSteps.EnteringBritania;
-                NetClient.Socket.Send(new PSelectCharacter(index, Characters[index], NetClient.ClientAddress));
+                NetClient.Socket.Send(new PSelectCharacter(index, Characters[index], NetClient.Socket.LocalIP));
             }
         }
 
@@ -451,7 +450,7 @@ namespace ClassicUO.Game.Scenes
                 (
                     character,
                     cityIndex,
-                    NetClient.ClientAddress,
+                    NetClient.Socket.LocalIP,
                     ServerIndex,
                     (uint) i,
                     profession
@@ -465,7 +464,7 @@ namespace ClassicUO.Game.Scenes
         {
             if (CurrentLoginStep == LoginSteps.CharacterSelection)
             {
-                NetClient.Socket.Send(new PDeleteCharacter((byte) index, NetClient.ClientAddress));
+                NetClient.Socket.Send(new PDeleteCharacter((byte) index, NetClient.Socket.LocalIP));
             }
         }
 
@@ -529,6 +528,10 @@ namespace ClassicUO.Game.Scenes
             Log.Info("Connected!");
             CurrentLoginStep = LoginSteps.VerifyingAccount;
 
+            uint address = NetClient.LoginSocket.LocalIP;
+
+            EncryptionHelper.Initialize(true, address, (ENCRYPTION_TYPE)Settings.GlobalSettings.Encryption);
+
             if (Client.Version >= ClientVersion.CV_6040)
             {
                 uint clientVersion = (uint) Client.Version;
@@ -540,7 +543,7 @@ namespace ClassicUO.Game.Scenes
 
                 PSeed packet = new PSeed
                 (
-                    NetClient.ClientAddress,
+                    address,
                     major,
                     minor,
                     build,
@@ -551,8 +554,6 @@ namespace ClassicUO.Game.Scenes
             }
             else
             {
-                uint address = NetClient.ClientAddress;
-
                 // TODO: stackalloc
                 byte[] packet = new byte[4];
                 packet[0] = (byte) (address >> 24);

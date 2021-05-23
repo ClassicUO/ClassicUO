@@ -900,224 +900,35 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
-        public int IsSitting()
+        public bool TryGetSittingInfo(out AnimationsLoader.SittingInfoData data)
         {
-            //get
+            ushort result = 0;
+
+            if (IsHuman && !IsMounted && !IsFlying && !TestStepNoChangeDirection(this, GetGroupForAnimation(this, isParent: true)))
             {
-                int result = 0;
+                GameObject start = this;
 
-                if (IsHuman && !IsMounted && !IsFlying && !TestStepNoChangeDirection(this, GetGroupForAnimation(this, isParent: true)))
+                while (start?.TPrevious != null)
                 {
-                    GameObject start = this;
-
-                    while (start?.TPrevious != null)
-                    {
-                        start = start.TPrevious;
-                    }
-
-                    while (start != null && result == 0)
-                    {
-                        if ((start is Item || start is Static || start is Multi) && Math.Abs(Z - start.Z) <= 1)
-                        {
-                            ushort graphic = start.Graphic;
-
-                            //if (start is Multi || start is Mobile)
-                            //    graphic = 0;
-
-                            switch (graphic)
-                            {
-                                case 0x0459:
-                                case 0x045A:
-                                case 0x045B:
-                                case 0x045C:
-                                case 0x0A2A:
-                                case 0x0A2B:
-                                case 0x0B2C:
-                                case 0x0B2D:
-                                case 0x0B2E:
-                                case 0x0B2F:
-                                case 0x0B30:
-                                case 0x0B31:
-                                case 0x0B32:
-                                case 0x0B33:
-                                case 0x0B4E:
-                                case 0x0B4F:
-                                case 0x0B50:
-                                case 0x0B51:
-                                case 0x0B52:
-                                case 0x0B53:
-                                case 0x0B54:
-                                case 0x0B55:
-                                case 0x0B56:
-                                case 0x0B57:
-                                case 0x0B58:
-                                case 0x0B59:
-                                case 0x0B5A:
-                                case 0x0B5B:
-                                case 0x0B5C:
-                                case 0x0B5D:
-                                case 0x0B5E:
-                                case 0x0B5F:
-                                case 0x0B60:
-                                case 0x0B61:
-                                case 0x0B62:
-                                case 0x0B63:
-                                case 0x0B64:
-                                case 0x0B65:
-                                case 0x0B66:
-                                case 0x0B67:
-                                case 0x0B68:
-                                case 0x0B69:
-                                case 0x0B6A:
-                                case 0x0B91:
-                                case 0x0B92:
-                                case 0x0B93:
-                                case 0x0B94:
-                                case 0x0CF3:
-                                case 0x0CF4:
-                                case 0x0CF6:
-                                case 0x0CF7:
-                                case 0x0E50:
-                                case 0x0E51:
-                                case 0x0E52:
-                                case 0x0E53:
-                                case 0x1049:
-                                case 0x104A:
-                                case 0x11FC:
-                                case 0x1207:
-                                case 0x1208:
-                                case 0x1209:
-                                case 0x120A:
-                                case 0x120B:
-                                case 0x120C:
-                                case 0x1218:
-                                case 0x1219:
-                                case 0x121A:
-                                case 0x121B:
-                                case 0x1527:
-                                case 0x1771:
-                                case 0x1776:
-                                case 0x1779:
-                                case 0x1DC7:
-                                case 0x1DC8:
-                                case 0x1DC9:
-                                case 0x1DCA:
-                                case 0x1DCB:
-                                case 0x1DCC:
-                                case 0x1DCD:
-                                case 0x1DCE:
-                                case 0x1DCF:
-                                case 0x1DD0:
-                                case 0x1DD1:
-                                case 0x1DD2:
-                                case 0x2A58:
-                                case 0x2A59:
-                                case 0x2A5A:
-                                case 0x2A5B:
-                                case 0x2A7F:
-                                case 0x2A80:
-                                case 0x2DDF:
-                                case 0x2DE0:
-                                case 0x2DE3:
-                                case 0x2DE4:
-                                case 0x2DE5:
-                                case 0x2DE6:
-                                case 0x2DEB:
-                                case 0x2DEC:
-                                case 0x2DED:
-                                case 0x2DEE:
-                                case 0x2DF5:
-                                case 0x2DF6:
-                                case 0x3088:
-                                case 0x3089:
-                                case 0x308A:
-                                case 0x308B:
-                                case 0x319A:
-                                case 0x319B:
-                                case 0x35ED:
-                                case 0x35EE:
-                                case 0x3DFF:
-                                case 0x3E00:
-                                case 0x4023:
-                                case 0x4024:
-                                case 0x4027:
-                                case 0x4028:
-                                case 0x4029:
-                                case 0x402A:
-                                case 0x4BDC:
-                                case 0x4C1B:
-                                case 0x4C1E:
-                                case 0x4C80:
-                                case 0x4C81:
-                                case 0x4C82:
-                                case 0x4C83:
-                                case 0x4C84:
-                                case 0x4C85:
-                                case 0x4C86:
-                                case 0x4C87:
-                                case 0x4C88:
-                                case 0x4C89:
-                                case 0x4C8A:
-                                case 0x4C8B:
-                                case 0x4C8C:
-                                case 0x4C8D:
-                                case 0x4C8E:
-                                case 0x4C8F:
-                                case 0x4DE0:
-                                case 0x63BC:
-                                case 0x63BD:
-                                case 0x63C3:
-                                case 0x63C4:
-                                case 0x996C:
-                                case 0x9977:
-                                case 0x9C57:
-                                case 0x9C58:
-                                case 0x9C59:
-                                case 0x9C5A:
-                                case 0x9C5D:
-                                case 0x9C5E:
-                                case 0x9C5F:
-                                case 0x9C60:
-                                case 0x9C61:
-                                case 0x9C62:
-                                case 0x9E8E:
-                                case 0x9E8F:
-                                case 0x9E90:
-                                case 0x9E91:
-                                case 0x9E9F:
-                                case 0x9EA0:
-                                case 0x9EA1:
-                                case 0x9EA2:
-                                case 0xA05C:
-                                case 0xA05D:
-                                case 0xA05E:
-                                case 0xA05F:
-                                case 0xA211:
-                                case 0xA4EA:
-                                case 0xA4EB:
-                                case 0xA586:
-                                case 0xA587:
-
-                                    for (int i = 0; i < AnimationsLoader.Instance.SittingInfos.Length; i++)
-                                    {
-                                        if (AnimationsLoader.Instance.SittingInfos[i].Graphic == graphic)
-                                        {
-                                            result = i + 1;
-
-                                            break;
-                                        }
-                                    }
-
-                                    break;
-                            }
-                        }
-
-                        start = start.TNext;
-                    }
+                    start = start.TPrevious;
                 }
 
-                return result;
+                while (start != null && result == 0)
+                {
+                    if ((start is Item || start is Static || start is Multi) && Math.Abs(Z - start.Z) <= 1)
+                    {
+                        if (ChairTable.Table.TryGetValue(start.Graphic, out data))
+                        {
+                            return true;
+                        }
+                    }
+
+                    start = (GameObject) start.TNext;
+                }
             }
+
+            data = AnimationsLoader.SittingInfoData.Empty;
+            return false;
         }
 
         public override void UpdateTextCoordsV()

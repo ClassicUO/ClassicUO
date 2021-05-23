@@ -30,60 +30,81 @@
 
 #endregion
 
-using ClassicUO.Configuration;
-using ClassicUO.Game.Scenes;
-using ClassicUO.IO.Resources;
-using ClassicUO.Renderer;
+using ClassicUO.Game.Managers;
+using ClassicUO.Utility;
 
 namespace ClassicUO.Game.GameObjects
 {
-    internal sealed partial class MovingEffect
+    internal sealed class FixedEffect : GameEffect
     {
-        public override bool Draw(UltimaBatcher2D batcher, int posX, int posY)
+        public FixedEffect(EffectManager manager, ushort graphic, ushort hue, int duration, byte speed) 
+            : base(manager, graphic, hue, duration, speed)
         {
-            if (IsDestroyed || !AllowedToDraw)
+            
+        }
+
+        public FixedEffect
+        (
+            EffectManager manager,
+            int sourceX,
+            int sourceY,
+            int sourceZ,
+            ushort graphic,
+            ushort hue,
+            int duration,
+            byte speed
+        ) : this(manager, graphic, hue, duration, speed)
+        {
+            SetSource(sourceX, sourceY, sourceZ);
+        }
+
+        public FixedEffect
+        (
+            EffectManager manager,
+            uint sourceSerial,
+            int sourceX,
+            int sourceY,
+            int sourceZ,
+            ushort graphic,
+            ushort hue,
+            int duration,
+            byte speed
+        ) : this(manager, graphic, hue, duration, speed)
+        {
+            Entity source = World.Get(sourceSerial);
+
+            if (source != null && SerialHelper.IsValid(sourceSerial))
             {
-                return false;
+                SetSource(source);
             }
-
-            ResetHueVector();
-
-            ushort hue = Hue;
-
-            if (ProfileManager.CurrentProfile.NoColorObjectsOutOfRange && Distance > World.ClientViewRange)
+            else
             {
-                hue = Constants.OUT_RANGE_COLOR;
+                SetSource(sourceX, sourceY, sourceZ);
             }
-            else if (World.Player.IsDead && ProfileManager.CurrentProfile.EnableBlackWhiteEffect)
+        }
+
+        public override void Update(double totalTime, double frameTime)
+        {
+            base.Update(totalTime, frameTime);
+
+            if (!IsDestroyed)
             {
-                hue = Constants.DEAD_RANGE_COLOR;
+                (int x, int y, int z) = GetSource();
+
+                if (Source != null)
+                {
+                    Offset = Source.Offset;
+                }
+
+                if (X != x || Y != y || Z != z)
+                {
+                    X = (ushort) x;
+                    Y = (ushort) y;
+                    Z = (sbyte) z;
+                    UpdateScreenPosition();
+                    AddToTile();
+                }
             }
-
-            ShaderHueTranslator.GetHueVector(ref HueVector, hue);
-
-            //Engine.DebugInfo.EffectsRendered++;
-
-            posX += (int)Offset.X;
-            posY += (int)(Offset.Y + Offset.Z);
-
-            DrawStaticRotated
-            (
-                batcher,
-                AnimationGraphic,
-                posX,
-                posY,
-                AngleToTarget,
-                ref HueVector
-            );
-
-            ref StaticTiles data = ref TileDataLoader.Instance.StaticData[AnimationGraphic];
-
-            if (data.IsLight && Source != null)
-            {
-                Client.Game.GetScene<GameScene>().AddLight(Source, Source, posX + 22, posY + 22);
-            }
-
-            return true;
         }
     }
 }

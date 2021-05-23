@@ -567,7 +567,7 @@ namespace ClassicUO.Game.UI.Gumps
                     }
                     else if (MessageManager.PromptData.Prompt == ConsolePrompt.Unicode)
                     {
-                        NetClient.Socket.Send(new PUnicodePromptResponse(string.Empty, "ENU", true));
+                        NetClient.Socket.Send(new PUnicodePromptResponse(string.Empty, Settings.GlobalSettings.Language, true));
                     }
 
                     MessageManager.PromptData = default;
@@ -605,7 +605,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }
                 else if (MessageManager.PromptData.Prompt == ConsolePrompt.Unicode)
                 {
-                    NetClient.Socket.Send(new PUnicodePromptResponse(text, "ENU", text.Length < 1));
+                    NetClient.Socket.Send(new PUnicodePromptResponse(text, Settings.GlobalSettings.Language, text.Length < 1));
                 }
 
                 MessageManager.PromptData = default;

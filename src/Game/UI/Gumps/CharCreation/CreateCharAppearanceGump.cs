@@ -1026,7 +1026,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
             public int SelectedIndex { get; }
 
-            public ushort SelectedHue => Pallet != null && SelectedIndex >= 0 && SelectedIndex < Pallet.Length ? (ushort) (Pallet[SelectedIndex] + 1) : (ushort) 0xFFFF;
+            public ushort SelectedHue => Pallet != null && SelectedIndex >= 0 && SelectedIndex < Pallet.Length ? Pallet[SelectedIndex] : (ushort) 0xFFFF;
         }
 
         private class CustomColorPicker : Control
@@ -1034,9 +1034,10 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             //private readonly ColorBox _box;
             private readonly int _cellH;
             private readonly int _cellW;
-            private readonly ColorPickerBox _colorPicker;
+            private readonly ColorBox _colorPicker;
             private ColorPickerBox _colorPickerBox;
             private readonly int _columns, _rows;
+            private int _lastSelectedIndex;
             private readonly Layer _layer;
             private readonly ushort[] _pallet;
 
@@ -1062,40 +1063,37 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
                 Add
                 (
-                    _colorPicker = new ColorPickerBox
-                    (
-                        1,
-                        15,
-                        1,
-                        1,
-                        121,
-                        23,
-                        pallet
-                    )
+                    _colorPicker = new ColorBox(121, 23, (ushort) ((pallet?[0] ?? 1) + 1))
+                    {
+                        X = 1,
+                        Y = 15
+                    }
                 );
 
                 _colorPicker.MouseUp += ColorPicker_MouseClick;
-
-                _colorPickerBox = new ColorPickerBox
-                (
-                    489,
-                    141,
-                    _rows,
-                    _columns,
-                    _cellW,
-                    _cellH,
-                    _pallet
-                )
-                {
-                    IsModal = true,
-                    LayerOrder = UILayer.Over,
-                    ModalClickOutsideAreaClosesThisControl = true
-                };
-
-                _colorPickerBox.MouseUp += ColorPickerBoxOnMouseUp;
             }
 
-            public ushort HueSelected => (ushort) (_colorPickerBox.SelectedHue + 1);
+            public ushort HueSelected => _colorPicker.Hue;
+
+            public event EventHandler<ColorSelectedEventArgs> ColorSelected;
+
+            public void SetSelectedIndex(int index)
+            {
+                if (_colorPickerBox != null)
+                {
+                    _colorPickerBox.SelectedIndex = index;
+
+                    SetCurrentHue();
+                }
+            }
+
+            private void SetCurrentHue()
+            {
+                _colorPicker.Hue = _colorPickerBox.SelectedHue;
+                _lastSelectedIndex = _colorPickerBox.SelectedIndex;
+
+                _colorPickerBox.Dispose();
+            }
 
             private void ColorPickerBoxOnMouseUp(object sender, MouseEventArgs e)
             {
@@ -1106,53 +1104,48 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                 if (selectedIndex >= 0 && selectedIndex < _colorPickerBox.Hues.Length)
                 {
                     ColorSelected?.Invoke(this, new ColorSelectedEventArgs(_layer, _colorPickerBox.Hues, selectedIndex));
+                    SetCurrentHue();
                 }
             }
-
-            public event EventHandler<ColorSelectedEventArgs> ColorSelected;
-
-            public void SetSelectedIndex(int index)
-            {
-                _colorPickerBox.SelectedIndex = index;
-                ColorPickerBox_Selected(this, EventArgs.Empty);
-            }
-
-            private void ColorPickerBox_Selected(object sender, EventArgs e)
-            {
-                _colorPicker.SetHue(_colorPickerBox.SelectedHue);
-                _colorPickerBox?.Dispose();
-                //_colorPickerBox = null;
-            }
-
+            
             private void ColorPicker_MouseClick(object sender, MouseEventArgs e)
             {
                 if (e.Button == MouseButtonType.Left)
                 {
-                    //Parent?.Add(_colorPickerBox);
                     _colorPickerBox?.Dispose();
                     _colorPickerBox = null;
 
-                    _colorPickerBox = new ColorPickerBox
-                    (
-                        489,
-                        141,
-                        _rows,
-                        _columns,
-                        _cellW,
-                        _cellH,
-                        _pallet
-                    )
+                    if (_colorPickerBox == null)
                     {
-                        IsModal = true,
-                        LayerOrder = UILayer.Over,
-                        ModalClickOutsideAreaClosesThisControl = true
-                    };
+                        _colorPickerBox = new ColorPickerBox
+                        (
+                            489,
+                            141,
+                            _rows,
+                            _columns,
+                            _cellW,
+                            _cellH,
+                            _pallet
+                        )
+                        {
+                            IsModal = true,
+                            LayerOrder = UILayer.Over,
+                            ModalClickOutsideAreaClosesThisControl = true,
+                            ShowLivePreview = false,
+                            SelectedIndex = _lastSelectedIndex
+                        };
 
-                    _colorPickerBox.MouseUp += ColorPickerBoxOnMouseUp;
-                    _colorPickerBox.ColorSelectedIndex += ColorPickerBox_Selected;
+                        UIManager.Add(_colorPickerBox);
 
-                    UIManager.Add(_colorPickerBox);
+                        _colorPickerBox.ColorSelectedIndex += ColorPickerBoxOnColorSelectedIndex;
+                        _colorPickerBox.MouseUp += ColorPickerBoxOnMouseUp;
+                    }
                 }
+            }
+
+            private void ColorPickerBoxOnColorSelectedIndex(object sender, EventArgs e)
+            {
+                ColorSelected?.Invoke(this, new ColorSelectedEventArgs(_layer, _colorPickerBox.Hues, _colorPickerBox.SelectedIndex));
             }
         }
     }
