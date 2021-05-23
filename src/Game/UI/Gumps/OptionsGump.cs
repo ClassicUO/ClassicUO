@@ -571,10 +571,10 @@ namespace ClassicUO.Game.UI.Gumps
                     50,
                     TEXTBOX_HEIGHT,
                     ResGumps.CorpseOpenRange,
-                    80,
+                    50,
                     false,
                     true,
-                    2
+                    5
                 )
             );
 
@@ -1532,10 +1532,9 @@ namespace ClassicUO.Game.UI.Gumps
                     50,
                     TEXTBOX_HEIGHT,
                     null,
-                    80,
+                    50,
                     false,
-                    true,
-                    5
+                    true
                 ),
                 4
             );
@@ -1552,10 +1551,9 @@ namespace ClassicUO.Game.UI.Gumps
                     50,
                     TEXTBOX_HEIGHT,
                     null,
-                    80,
+                    50,
                     false,
-                    true,
-                    5
+                    true
                 )
             );
 
@@ -1574,10 +1572,9 @@ namespace ClassicUO.Game.UI.Gumps
                     50,
                     TEXTBOX_HEIGHT,
                     null,
-                    80,
+                    50,
                     false,
-                    true,
-                    5
+                    true
                 )
             );
 
@@ -1593,10 +1590,9 @@ namespace ClassicUO.Game.UI.Gumps
                     50,
                     TEXTBOX_HEIGHT,
                     null,
-                    80,
+                    50,
                     false,
-                    true,
-                    5
+                    true
                 )
             );
 
@@ -2806,7 +2802,7 @@ namespace ClassicUO.Game.UI.Gumps
                 50,
                 TEXTBOX_HEIGHT,
                 null,
-                80,
+                50,
                 false,
                 true
             );
@@ -2836,10 +2832,10 @@ namespace ClassicUO.Game.UI.Gumps
                 50,
                 TEXTBOX_HEIGHT,
                 null,
-                80,
+                50,
                 false,
                 true,
-                2
+                999
             );
 
             _highlightAmount.SetText(_currentProfile.CounterBarHighlightAmount.ToString());
@@ -2882,10 +2878,10 @@ namespace ClassicUO.Game.UI.Gumps
                 50,
                 30,
                 ResGumps.Counter_Rows,
-                80,
+                50,
                 false,
                 true,
-                5
+                30
             );
 
             _rows.SetText(_currentProfile.CounterBarRows.ToString());
@@ -2901,10 +2897,10 @@ namespace ClassicUO.Game.UI.Gumps
                 50,
                 30,
                 ResGumps.Counter_Columns,
-                80,
+                50,
                 false,
                 true,
-                5
+                30
             );
 
             _columns.SetText(_currentProfile.CounterBarColumns.ToString());
@@ -4516,6 +4512,18 @@ namespace ClassicUO.Game.UI.Gumps
 
                 Add(background);
                 Add(_textbox);
+            }
+
+            public override bool Draw(UltimaBatcher2D batcher, int x, int y)
+            {
+                if (batcher.ClipBegin(x, y, Width, Height))
+                {
+                    base.Draw(batcher, x, y);
+
+                    batcher.ClipEnd();
+                }
+
+                return true;
             }
 
 

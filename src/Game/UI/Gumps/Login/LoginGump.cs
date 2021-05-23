@@ -759,26 +759,14 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
             public override bool Draw(UltimaBatcher2D batcher, int x, int y)
             {
-                Rectangle scissor = ScissorStack.CalculateScissors
-                (
-                    Matrix.Identity,
-                    x,
-                    y,
-                    Width,
-                    Height
-                );
-
-                if (ScissorStack.PushScissors(batcher.GraphicsDevice, scissor))
+                if (batcher.ClipBegin(x, y, Width, Height))
                 {
-                    batcher.EnableScissorTest(true);
                     DrawSelection(batcher, x, y);
 
                     _rendererText.Draw(batcher, x, y);
 
                     DrawCaret(batcher, x, y);
-
-                    batcher.EnableScissorTest(false);
-                    ScissorStack.PopScissors(batcher.GraphicsDevice);
+                    batcher.ClipEnd();
                 }
 
                 return true;

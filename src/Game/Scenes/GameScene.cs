@@ -105,7 +105,7 @@ namespace ClassicUO.Game.Scenes
         private RenderTarget2D _world_render_target, _lightRenderTarget;
 
 
-        public GameScene() : base((int) SceneType.Game, true, true, true)
+        public GameScene() : base((int) SceneType.Game, true, true, false)
         {
         }
 
@@ -160,8 +160,7 @@ namespace ClassicUO.Game.Scenes
             Weather = new Weather();
 
             WorldViewportGump viewport = new WorldViewportGump(this);
-
-            UIManager.Add(viewport);
+            UIManager.Add(viewport, false);
 
             if (!ProfileManager.CurrentProfile.TopbarGumpIsDisabled)
             {

@@ -140,8 +140,6 @@ namespace ClassicUO.Game.Scenes
 
         public override void Unload()
         {
-            Audio.StopMusic();
-
             UIManager.GetGump<LoginBackground>()?.Dispose();
 
             _currentGump?.Dispose();

@@ -80,7 +80,6 @@ namespace ClassicUO.Renderer
         private DepthStencilState _stencil;
         private readonly Texture2D[] _textureInfo;
         private Matrix _transformMatrix;
-        private bool _useScissor;
         private readonly DynamicVertexBuffer _vertexBuffer;
         private PositionNormalTextureColor4* _vertexInfo;
 
@@ -116,6 +115,8 @@ namespace ClassicUO.Renderer
             DefaultEffect = new IsometricEffect(device);
         }
 
+
+        public Matrix TransformMatrix => _transformMatrix;
 
         public MatrixEffect DefaultEffect { get; }
 
@@ -1684,7 +1685,7 @@ namespace ClassicUO.Renderer
         {
             GraphicsDevice.BlendState = _blendState;
             GraphicsDevice.DepthStencilState = _stencil;
-            GraphicsDevice.RasterizerState = _useScissor ? _rasterizerState : RasterizerState.CullNone;
+            GraphicsDevice.RasterizerState = _rasterizerState;
             GraphicsDevice.SamplerStates[0] = _sampler;
             GraphicsDevice.SamplerStates[1] = SamplerState.PointClamp;
             GraphicsDevice.SamplerStates[2] = SamplerState.PointClamp;
@@ -1697,12 +1698,12 @@ namespace ClassicUO.Renderer
 
         private void Flush()
         {
-            ApplyStates();
-
             if (_numSprites == 0)
             {
                 return;
             }
+
+            ApplyStates();
 
             int start = UpdateVertexBuffer(_numSprites);
 
@@ -1773,21 +1774,59 @@ namespace ClassicUO.Renderer
             );
         }
 
-        public void EnableScissorTest(bool enable)
+        public bool ClipBegin(int x, int y, int width, int height)
         {
-            if (enable == _useScissor)
+            if (width <= 0 || height <= 0)
             {
-                return;
+                return false;
             }
 
-            if (!enable && _useScissor && ScissorStack.HasScissors)
+            Rectangle scissor = ScissorStack.CalculateScissors
+            (
+                TransformMatrix,
+                x,
+                y,
+                width,
+                height
+            );
+
+            Flush();
+
+            if (ScissorStack.PushScissors(GraphicsDevice, scissor))
+            {
+                EnableScissorTest(true);
+
+                return true;
+            }
+            
+            return false;
+        }
+
+        public void ClipEnd()
+        {
+            EnableScissorTest(false);
+            ScissorStack.PopScissors(GraphicsDevice);
+
+            Flush();
+        }
+
+        public void EnableScissorTest(bool enable)
+        {
+            bool rasterize = GraphicsDevice.RasterizerState.ScissorTestEnable;
+
+            if (ScissorStack.HasScissors)
+            {
+                enable = true;
+            }
+
+            if (enable == rasterize)
             {
                 return;
             }
 
             Flush();
 
-            _useScissor = enable;
+            GraphicsDevice.RasterizerState.ScissorTestEnable = enable;
         }
 
         public void SetBlendState(BlendState blend)

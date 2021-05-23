@@ -784,6 +784,8 @@ namespace ClassicUO.Network
                 World.Light.Overall = ProfileManager.CurrentProfile.LightLevel;
             }
 
+            Client.Game.Scene.Audio.UpdateCurrentMusicVolume();
+
             if (Client.Version >= Data.ClientVersion.CV_200)
             {
                 if (ProfileManager.CurrentProfile != null)
@@ -2065,6 +2067,8 @@ namespace ClassicUO.Network
             if (World.Player != null && Client.Game.Scene is LoginScene)
             {
                 GameScene scene = new GameScene();
+                scene.Audio = Client.Game.Scene.Audio;
+                Client.Game.Scene.Audio = null;
                 Client.Game.SetScene(scene);
 
                 //GameActions.OpenPaperdoll(World.Player);
@@ -2085,7 +2089,15 @@ namespace ClassicUO.Network
                     NetClient.Socket.Send(new PClientViewRange(World.ClientViewRange));
                 }
 
-                ProfileManager.CurrentProfile.ReadGumps(ProfileManager.ProfilePath)?.ForEach(UIManager.Add);
+                List<Gump> gumps = ProfileManager.CurrentProfile.ReadGumps(ProfileManager.ProfilePath);
+
+                if (gumps != null)
+                {
+                    foreach (Gump gump in gumps)
+                    {
+                        UIManager.Add(gump);
+                    }
+                }
             }
         }
 

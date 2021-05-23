@@ -134,19 +134,8 @@ namespace ClassicUO.Game.UI.Controls
             ScrollBarBase scrollbar = (ScrollBarBase) Children[0];
             scrollbar.Draw(batcher, x + scrollbar.X, y + scrollbar.Y);
 
-            Rectangle scissor = ScissorStack.CalculateScissors
-            (
-                Matrix.Identity,
-                x + ScissorRectangle.X,
-                y + ScissorRectangle.Y,
-                Width - 14 + ScissorRectangle.Width,
-                Height + ScissorRectangle.Height
-            );
-
-            if (ScissorStack.PushScissors(batcher.GraphicsDevice, scissor))
+            if (batcher.ClipBegin(x + ScissorRectangle.X, y + ScissorRectangle.Y, Width - 14 + ScissorRectangle.Width, Height + ScissorRectangle.Height))
             {
-                batcher.EnableScissorTest(true);
-
                 for (int i = 1; i < Children.Count; i++)
                 {
                     Control child = Children[i];
@@ -157,15 +146,11 @@ namespace ClassicUO.Game.UI.Controls
                     }
 
                     int finalY = y + child.Y - scrollbar.Value + ScissorRectangle.Y;
-
-                    //if (finalY + child.Bounds.Height >= scissor.Y && finalY - child.Height < scissor.Bottom)
-                    {
-                        child.Draw(batcher, x + child.X, finalY);
-                    }
+                    
+                    child.Draw(batcher, x + child.X, finalY);
                 }
 
-                batcher.EnableScissorTest(false);
-                ScissorStack.PopScissors(batcher.GraphicsDevice);
+                batcher.ClipEnd();
             }
 
             return true;
