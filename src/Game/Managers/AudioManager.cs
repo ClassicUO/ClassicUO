@@ -375,16 +375,16 @@ namespace ClassicUO.Game.Managers
             }
         }
 
-        public bool IsMusicPlaying()
+        public UOMusic GetCurrentMusic()
         {
             for (int i = 0; i < 2; i++)
             {
                 if (_currentMusic[i] != null && _currentMusic[i].IsPlaying)
                 {
-                    return true;
+                    return _currentMusic[i];
                 }
             }
-            return false;
+            return null;
         }
     }
 }
