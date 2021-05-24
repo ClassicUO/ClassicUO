@@ -31,6 +31,7 @@
 #endregion
 
 using System;
+using ClassicUO.Configuration;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.IO.Resources;
 using SDL2;
@@ -56,13 +57,21 @@ namespace ClassicUO.Game.UI.Gumps.Login
             CanCloseWithRightClick = false;
             CanCloseWithEsc = false;
 
+            bool isAsianLang = string.Compare(Settings.GlobalSettings.Language, "CHT", StringComparison.InvariantCultureIgnoreCase) == 0 || 
+                string.Compare(Settings.GlobalSettings.Language, "KOR", StringComparison.InvariantCultureIgnoreCase) == 0 ||
+                string.Compare(Settings.GlobalSettings.Language, "JPN", StringComparison.InvariantCultureIgnoreCase) == 0;
+
+            bool unicode = isAsianLang;
+            byte font = (byte)(isAsianLang ? 1 : 2);
+            ushort hue = (ushort)(isAsianLang ? 0xFFFF : 0x0386);
+            
             _label = new Label
             (
                 labelText,
-                false,
-                0x0386,
+                unicode,
+                hue,
                 326,
-                2,
+                font,
                 align: TEXT_ALIGN_TYPE.TS_CENTER
             )
             {

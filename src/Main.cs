@@ -502,6 +502,7 @@ namespace ClassicUO
                             case "KOR": Settings.GlobalSettings.Language = "KOR"; break;
                             case "PTB": Settings.GlobalSettings.Language = "PTB"; break;
                             case "ITA": Settings.GlobalSettings.Language = "ITA"; break;
+                            case "CHT": Settings.GlobalSettings.Language = "CHT"; break;
                             default:
                             
                                 Settings.GlobalSettings.Language = "ENU";

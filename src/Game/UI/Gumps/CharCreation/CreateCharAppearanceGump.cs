@@ -33,6 +33,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using ClassicUO.Configuration;
 using ClassicUO.Data;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
@@ -445,11 +446,19 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             // Hair
             CharacterCreationValues.ComboContent content = CharacterCreationValues.GetHairComboContent(_characterInfo.IsFemale, race);
 
+            bool isAsianLang = string.Compare(Settings.GlobalSettings.Language, "CHT", StringComparison.InvariantCultureIgnoreCase) == 0 || 
+                string.Compare(Settings.GlobalSettings.Language, "KOR", StringComparison.InvariantCultureIgnoreCase) == 0 ||
+                string.Compare(Settings.GlobalSettings.Language, "JPN", StringComparison.InvariantCultureIgnoreCase) == 0;
+
+            bool unicode = isAsianLang;
+            byte font = (byte)(isAsianLang ? 3 : 9);
+            ushort hue = (ushort)(isAsianLang ? 0xFFFF : 0);
+
             Add
             (
-                _hairLabel = new Label(ClilocLoader.Instance.GetString(race == RaceType.GARGOYLE ? 1112309 : 3000121), false, 0, font: 9)
+                _hairLabel = new Label(ClilocLoader.Instance.GetString(race == RaceType.GARGOYLE ? 1112309 : 3000121), unicode, hue, font: font)
                 {
-                    X = 98, Y = 142
+                    X = 98, Y = 140
                 },
                 1
             );
@@ -476,9 +485,9 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
                 Add
                 (
-                    _facialLabel = new Label(ClilocLoader.Instance.GetString(race == RaceType.GARGOYLE ? 1112511 : 3000122), false, 0, font: 9)
+                    _facialLabel = new Label(ClilocLoader.Instance.GetString(race == RaceType.GARGOYLE ? 1112511 : 3000122), unicode, hue, font: font)
                     {
-                        X = 98, Y = 186
+                        X = 98, Y = 184
                     },
                     1
                 );
@@ -1052,9 +1061,17 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                 _layer = layer;
                 _pallet = pallet;
 
+                bool isAsianLang = string.Compare(Settings.GlobalSettings.Language, "CHT", StringComparison.InvariantCultureIgnoreCase) == 0 || 
+                    string.Compare(Settings.GlobalSettings.Language, "KOR", StringComparison.InvariantCultureIgnoreCase) == 0 ||
+                    string.Compare(Settings.GlobalSettings.Language, "JPN", StringComparison.InvariantCultureIgnoreCase) == 0;
+
+                bool unicode = isAsianLang;
+                byte font = (byte)(isAsianLang ? 3 : 9);
+                ushort hue = (ushort)(isAsianLang ? 0xFFFF : 0);
+
                 Add
                 (
-                    new Label(ClilocLoader.Instance.GetString(label), false, 0, font: 9)
+                    new Label(ClilocLoader.Instance.GetString(label), unicode, hue, font: font)
                     {
                         X = 0,
                         Y = 0
