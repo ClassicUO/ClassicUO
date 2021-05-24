@@ -31,6 +31,8 @@
 #endregion
 
 using System.Linq;
+using System;
+using ClassicUO.Configuration;
 using ClassicUO.Data;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
@@ -74,11 +76,19 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             Add(new GumpPic(214, 58, 0x058B, 0));
             Add(new GumpPic(300, 51, 0x15A9, 0));
 
+            bool isAsianLang = string.Compare(Settings.GlobalSettings.Language, "CHT", StringComparison.InvariantCultureIgnoreCase) == 0 || 
+                string.Compare(Settings.GlobalSettings.Language, "KOR", StringComparison.InvariantCultureIgnoreCase) == 0 ||
+                string.Compare(Settings.GlobalSettings.Language, "JPN", StringComparison.InvariantCultureIgnoreCase) == 0;
+
+            bool unicode = isAsianLang;
+            byte font = (byte)(isAsianLang ? 1 : 2);
+            ushort hue = (ushort)(isAsianLang ? 0xFFFF : 0x0386);
+
             // title text
             //TextLabelAscii(AControl parent, int x, int y, int font, int hue, string text, int width = 400)
             Add
             (
-                new Label(ClilocLoader.Instance.GetString(3000326), false, 0x0386, font: 2)
+                new Label(ClilocLoader.Instance.GetString(3000326), unicode, hue, font: font)
                 {
                     X = 148, Y = 132
                 }
@@ -87,7 +97,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             // strength, dexterity, intelligence
             Add
             (
-                new Label(ClilocLoader.Instance.GetString(3000111), false, 1, font: 1)
+                new Label(ClilocLoader.Instance.GetString(3000111), unicode, 1, font: 1)
                 {
                     X = 158, Y = 170
                 }
@@ -95,7 +105,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
             Add
             (
-                new Label(ClilocLoader.Instance.GetString(3000112), false, 1, font: 1)
+                new Label(ClilocLoader.Instance.GetString(3000112), unicode, 1, font: 1)
                 {
                     X = 158, Y = 250
                 }
@@ -103,7 +113,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
             Add
             (
-                new Label(ClilocLoader.Instance.GetString(3000113), false, 1, font: 1)
+                new Label(ClilocLoader.Instance.GetString(3000113), unicode, 1, font: 1)
                 {
                     X = 158, Y = 330
                 }

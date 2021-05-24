@@ -58,7 +58,7 @@ namespace ClassicUO.Game.UI.Controls
             int maxHeight = 200,
             bool showArrow = true,
             string emptyString = "",
-            byte font = 9
+            byte font = 1
         )
         {
             X = x;
@@ -82,7 +82,7 @@ namespace ClassicUO.Game.UI.Controls
 
             Add
             (
-                _label = new Label(initialText, false, 0x0453, font: _font)
+                _label = new Label(initialText, true, 0x0453, font: _font)
                 {
                     X = 2, Y = 5
                 }
@@ -209,7 +209,7 @@ namespace ClassicUO.Game.UI.Controls
                     HoveredLabel label = new HoveredLabel
                     (
                         item,
-                        false,
+                        true,
                         0x0453,
                         0x0453,
                         0x0453,
