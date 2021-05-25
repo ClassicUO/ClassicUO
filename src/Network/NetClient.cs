@@ -56,7 +56,7 @@ namespace ClassicUO.Network
 
         private int _incompletePacketLength;
         private bool _isCompressionEnabled;
-        private byte[] _recvBuffer, _incompletePacketBuffer, _decompBuffer;
+        private byte[] _recvBuffer, _incompletePacketBuffer, _decompBuffer, _packetBuffer;
         private CircularBuffer _circularBuffer;
         private ConcurrentQueue<byte[]> _pluginRecvQueue = new ConcurrentQueue<byte[]>();
         private readonly bool _is_login_socket;
@@ -180,6 +180,7 @@ namespace ClassicUO.Network
             _recvBuffer = new byte[BUFF_SIZE];
             _incompletePacketBuffer = new byte[BUFF_SIZE];
             _decompBuffer = new byte[BUFF_SIZE];
+            _packetBuffer = new byte[BUFF_SIZE];
             _circularBuffer = new CircularBuffer();
             _pluginRecvQueue = new ConcurrentQueue<byte[]>();
             Statistics.Reset();
@@ -291,7 +292,7 @@ namespace ClassicUO.Network
             ref byte[] data = ref p.ToArray();
             int length = p.Length;
 
-            if (Plugin.ProcessSendPacket(ref data, ref length))
+            if (Plugin.ProcessSendPacket(data, ref length))
             {
                 PacketSent.Raise(p);
                 Send(data, length, false);
@@ -300,7 +301,7 @@ namespace ClassicUO.Network
 
         public void Send(byte[] data, int length, bool ignorePlugin = false, bool skip_encryption = false)
         {
-            if (!ignorePlugin && !Plugin.ProcessSendPacket(ref data, ref length))
+            if (!ignorePlugin && !Plugin.ProcessSendPacket(data, ref length))
             {
                 return;
             }
@@ -408,7 +409,7 @@ namespace ClassicUO.Network
                     if (packetlength > 0)
                     {
                         // Patch to maintain a retrocompatibiliy with older cuoapi
-                        byte[] data = new byte[packetlength]; // _packetBuffer;
+                        byte[] data = _packetBuffer;
 
                         _circularBuffer.Dequeue(data, 0, packetlength);
 
@@ -417,7 +418,7 @@ namespace ClassicUO.Network
                             LogPacket(data, packetlength, false);
                         }
 
-                        if (Plugin.ProcessRecvPacket(ref data, ref packetlength))
+                        if (Plugin.ProcessRecvPacket(data, ref packetlength))
                         {
                             PacketHandlers.Handlers.AnalyzePacket(data, offset, packetlength);
 
