@@ -25,7 +25,7 @@ namespace ManifestCreator
             "FNA.dll.config",
             "monoconfig",
             "monomachineconfig",
-
+            "netstandard.dll",
 
             // Data
 
