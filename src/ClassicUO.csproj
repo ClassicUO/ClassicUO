@@ -70,10 +70,6 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.0" PrivateAssets="All" />
-    <PackageReference Include="NETStandard.Library" Version="2.0.*" />
-    <Reference Include="netstandard">
-      <Private>true</Private>
-    </Reference>
   </ItemGroup>
 
   <ItemGroup>
@@ -89,10 +85,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\external\FNA\FNA.Core.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\external\MP3Sharp\MP3Sharp\MP3Sharp-NETStandard20.csproj" />
+    <ProjectReference Include="..\external\MP3Sharp\MP3Sharp\MP3Sharp.csproj" />
   </ItemGroup>
 
 
