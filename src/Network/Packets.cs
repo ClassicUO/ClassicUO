@@ -1745,4 +1745,89 @@ namespace ClassicUO.Network
             WriteBool(show);
         }
     }
+
+
+    abstract class PluginPacketWriter : PacketWriter
+    {
+        protected PluginPacketWriter(byte type) : base(0xBF)
+        {
+            WriteUShort(0xBEEF);
+            WriteByte(type);
+        }
+    }
+
+    internal sealed class PPluginSendAllSpells : PluginPacketWriter
+    {
+        public PPluginSendAllSpells() : base(0x00)
+        {
+            var magery = SpellsMagery.GetAllSpells;
+            var necro = SpellsNecromancy.GetAllSpells;
+            var bushido = SpellsBushido.GetAllSpells;
+            var ninj = SpellsNinjitsu.GetAllSpells;
+            var chiv = SpellsChivalry.GetAllSpells;
+            var sw = SpellsSpellweaving.GetAllSpells;
+            var mastery = SpellsMastery.GetAllSpells;
+
+
+            WriteSpellDef(magery);
+            WriteSpellDef(necro);
+            WriteSpellDef(bushido);
+            WriteSpellDef(ninj);
+            WriteSpellDef(chiv);
+            WriteSpellDef(sw);
+            WriteSpellDef(mastery);
+        }
+
+        private void WriteSpellDef(IReadOnlyDictionary<int, SpellDefinition> spells)
+        {
+            WriteUShort((ushort)spells.Count);
+
+            foreach (var m in spells)
+            {
+                // spell id
+                WriteUShort((ushort)m.Key);
+
+                // mana cost
+                WriteUShort((ushort) m.Value.ManaCost);
+
+                // min skill
+                WriteUShort((ushort) m.Value.MinSkill);
+
+                // target type
+                WriteByte((byte) m.Value.TargetType);
+
+                // spell name
+                WriteUShort((ushort)(m.Value.Name.Length));
+                WriteUnicode(m.Value.Name, m.Value.Name.Length);
+
+                // power of word
+                WriteUShort((ushort) (m.Value.PowerWords.Length));
+                WriteUnicode(m.Value.PowerWords, m.Value.PowerWords.Length);
+
+                // reagents
+                WriteUShort((ushort) m.Value.Regs.Length);
+                foreach (var r in m.Value.Regs)
+                {
+                    WriteByte((byte) r);
+                }
+            }
+        }
+    }
+
+    internal sealed class PPluginSendAllSkills : PluginPacketWriter
+    {
+        public PPluginSendAllSkills() : base(0x01)
+        {
+            WriteUShort((ushort)SkillsLoader.Instance.SortedSkills.Count);
+
+            foreach (var s in SkillsLoader.Instance.SortedSkills)
+            {
+                WriteUShort((ushort)s.Index);
+                WriteBool(s.HasAction);
+
+                WriteUShort((ushort) (s.Name.Length));
+                WriteUnicode(s.Name, s.Name.Length);
+            }
+        }
+    }
 }

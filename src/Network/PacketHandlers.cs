@@ -809,6 +809,19 @@ namespace ClassicUO.Network
             {
                 NetClient.Socket.Send(new PShowPublicHouseContent(ProfileManager.CurrentProfile.ShowHouseContent));
             }
+
+
+            PPluginSendAllSpells spellsPacket = new PPluginSendAllSpells();
+            PPluginSendAllSkills skillsPacket = new PPluginSendAllSkills();
+
+            byte[] buffer = spellsPacket.ToArray();
+            int len = spellsPacket.Length;
+
+            Plugin.ProcessRecvPacket(buffer, ref len);
+
+            buffer = skillsPacket.ToArray();
+            len = skillsPacket.Length;
+            Plugin.ProcessRecvPacket(buffer, ref len);
         }
 
         private static void Talk(ref PacketBufferReader p)

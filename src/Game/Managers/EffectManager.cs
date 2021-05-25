@@ -35,7 +35,6 @@ using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Interfaces;
 using ClassicUO.Utility.Logging;
-using CUO_API;
 
 namespace ClassicUO.Game.Managers
 {
