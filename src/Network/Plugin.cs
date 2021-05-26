@@ -110,13 +110,6 @@ namespace ClassicUO.Network
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         public delegate bool dOnGetTileData(int index, ref ulong flags, ref ushort textid, ref string name);
 
-        [return: MarshalAs(UnmanagedType.I1)]
-        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        public delegate bool dOnGetCliloc(int cliloc, [MarshalAs(UnmanagedType.LPStr)] string args, bool capitalize, [Out][MarshalAs(UnmanagedType.LPStr)] out string buffer);
-
-        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        public delegate void dOnCastSpell(int idx);
-
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         public delegate void dOnGetStaticImage(ushort g, ref ArtInfo art);
 
@@ -130,7 +123,6 @@ namespace ClassicUO.Network
         
 
 
-        [MarshalAs(UnmanagedType.FunctionPtr)] private dOnCastSpell _castSpell;
         [MarshalAs(UnmanagedType.FunctionPtr)] private dOnGetStaticData _get_static_data;
         [MarshalAs(UnmanagedType.FunctionPtr)] private dOnGetTileData _get_tile_data;
         [MarshalAs(UnmanagedType.FunctionPtr)] private dOnGetStaticImage _getStaticImage;
@@ -148,6 +140,7 @@ namespace ClassicUO.Network
         private delegate*<void> _onInitialize, _onClientClose, _onConnected, _onDisconnected, _onFocusGained, _onFocusLost, _tick;
         private delegate*<int, bool, bool> _requestMove;
         private delegate*<int, byte*, bool, ref byte*, bool> _get_cliloc;
+        private delegate*<int, void> _castSpell;
 
 
         private readonly Dictionary<IntPtr, GraphicsResource> _resources = new Dictionary<IntPtr, GraphicsResource>();
@@ -205,7 +198,7 @@ namespace ClassicUO.Network
             _send_new = &OnPluginSend_new;
             _getPacketLength = &PacketsTable.GetPacketLength;
             _getPlayerPosition = &GetPlayerPosition;
-            _castSpell = GameActions.CastSpell;
+            _castSpell = &GameActions.CastSpell;
             _getStaticImage = GetStaticImage;
             _getUoFilePath = &GetUOFilePath;
             _requestMove = &RequestMove;
@@ -230,7 +223,7 @@ namespace ClassicUO.Network
                 ClientVersion = (int) Client.Version,
                 GetPacketLength = (IntPtr)_getPacketLength,
                 GetPlayerPosition = (IntPtr)_getPlayerPosition,
-                CastSpell = Marshal.GetFunctionPointerForDelegate(_castSpell),
+                CastSpell = (IntPtr) _castSpell,
                 GetStaticImage = Marshal.GetFunctionPointerForDelegate(_getStaticImage),
                 HWND = hwnd,
                 GetUOFilePath = (IntPtr) _getUoFilePath,
