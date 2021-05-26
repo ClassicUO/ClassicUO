@@ -386,15 +386,39 @@ namespace ClassicUO.Network
             }
         }
 
+        internal static int Utf8Size(string str)
+        {
+            if (str == null)
+            {
+                return 0;
+            }
+            return (str.Length * 4) + 1;
+        }
+
+        internal static unsafe byte* Utf8EncodeHeap(string str)
+        {
+            if (str == null)
+            {
+                return (byte*)0;
+            }
+
+            int bufferSize = Utf8Size(str);
+            byte* buffer = (byte*)Marshal.AllocHGlobal(bufferSize);
+            fixed (char* strPtr = str)
+            {
+                System.Text.Encoding.UTF8.GetBytes(strPtr, str.Length + 1, buffer, bufferSize);
+            }
+            return buffer;
+        }
+
         private static byte* GetUOFilePath()
         {
-            
-            return (byte*) Marshal.StringToHGlobalAnsi(Settings.GlobalSettings.UltimaOnlineDirectory);
+            return Utf8EncodeHeap(Settings.GlobalSettings.UltimaOnlineDirectory);
         }
 
         private static void SetWindowTitle(byte* str)
         {
-            Client.Game.SetWindowTitle(Marshal.PtrToStringAnsi((IntPtr)str));
+            Client.Game.SetWindowTitle(SDL.UTF8_ToManaged((IntPtr) str));
         }
 
         private static bool GetStaticData
