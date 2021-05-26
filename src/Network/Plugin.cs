@@ -357,7 +357,6 @@ namespace ClassicUO.Network
                 _tick = (delegate*<void>)(header.Tick);
             }
 
-
             if (header.OnRecv_new != IntPtr.Zero)
             {
                 _onRecv_new = (delegate*< IntPtr, ref int, bool >)header.OnRecv_new;
