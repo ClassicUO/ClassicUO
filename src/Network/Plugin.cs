@@ -310,80 +310,86 @@ namespace ClassicUO.Network
                     return;
                 }
             }
+
+            Log.Trace("plugin loaded");
+            Log.Trace("biding functions set by the plugin");
+
+            unchecked
+            {
+                if (header.OnHotkeyPressed != IntPtr.Zero)
+                {
+                    _onHotkeyPressed = (delegate*<int, int, bool, bool>)header.OnHotkeyPressed;
+                }
+
+                if (header.OnMouse != IntPtr.Zero)
+                {
+                    _onMouse = (delegate*<int, int, void>)header.OnMouse;
+                }
+
+                if (header.OnPlayerPositionChanged != IntPtr.Zero)
+                {
+                    _onUpdatePlayerPosition = (delegate*<int, int, int, void>)(header.OnPlayerPositionChanged);
+                }
+
+                if (header.OnClientClosing != IntPtr.Zero)
+                {
+                    _onClientClose = (delegate*<void>)(header.OnClientClosing);
+                }
+
+                if (header.OnInitialize != IntPtr.Zero)
+                {
+                    _onInitialize = (delegate*<void>)(header.OnInitialize);
+                }
+
+                if (header.OnConnected != IntPtr.Zero)
+                {
+                    _onConnected = (delegate*<void>)(header.OnConnected);
+                }
+
+                if (header.OnDisconnected != IntPtr.Zero)
+                {
+                    _onDisconnected = (delegate*<void>)(header.OnDisconnected);
+                }
+
+                if (header.OnFocusGained != IntPtr.Zero)
+                {
+                    _onFocusGained = (delegate*<void>)(header.OnFocusGained);
+                }
+
+                if (header.OnFocusLost != IntPtr.Zero)
+                {
+                    _onFocusLost = (delegate*<void>)(header.OnFocusLost);
+                }
+
+                if (header.Tick != IntPtr.Zero)
+                {
+                    _tick = (delegate*<void>)(header.Tick);
+                }
+
+                if (header.OnRecv_new != IntPtr.Zero)
+                {
+                    _onRecv_new = (delegate*<IntPtr, ref int, bool>)header.OnRecv_new;
+                }
+
+                if (header.OnSend_new != IntPtr.Zero)
+                {
+                    _onSend_new = (delegate*<IntPtr, ref int, bool>)header.OnSend_new;
+                }
+
+                if (header.OnDrawCmdList != IntPtr.Zero)
+                {
+                    _draw_cmd_list = (delegate*<out IntPtr, ref int, int>)header.OnDrawCmdList;
+                }
+
+                if (header.OnWndProc != IntPtr.Zero)
+                {
+                    _on_wnd_proc = (delegate*<void*, int>)header.OnWndProc;
+                }
+            }
             
-
-            if (header.OnHotkeyPressed != IntPtr.Zero)
-            {
-                _onHotkeyPressed = (delegate* <int, int, bool, bool>)header.OnHotkeyPressed;
-            }
-
-            if (header.OnMouse != IntPtr.Zero)
-            {
-                _onMouse = (delegate*<int, int, void>) header.OnMouse;
-            }
-
-            if (header.OnPlayerPositionChanged != IntPtr.Zero)
-            {
-                _onUpdatePlayerPosition = (delegate*<int, int, int, void>)(header.OnPlayerPositionChanged);
-            }
-
-            if (header.OnClientClosing != IntPtr.Zero)
-            {
-                _onClientClose = (delegate*<void>)(header.OnClientClosing);
-            }
-
-            if (header.OnInitialize != IntPtr.Zero)
-            {
-                _onInitialize = (delegate*< void > )(header.OnInitialize);
-            }
-
-            if (header.OnConnected != IntPtr.Zero)
-            {
-                _onConnected = (delegate*<void>)(header.OnConnected);
-            }
-
-            if (header.OnDisconnected != IntPtr.Zero)
-            {
-                _onDisconnected = (delegate*<void>)(header.OnDisconnected);
-            }
-
-            if (header.OnFocusGained != IntPtr.Zero)
-            {
-                _onFocusGained = (delegate*<void>)(header.OnFocusGained);
-            }
-
-            if (header.OnFocusLost != IntPtr.Zero)
-            {
-                _onFocusLost = (delegate*<void>)(header.OnFocusLost);
-            }
-
-            if (header.Tick != IntPtr.Zero)
-            {
-                _tick = (delegate*<void>)(header.Tick);
-            }
-
-            if (header.OnRecv_new != IntPtr.Zero)
-            {
-                _onRecv_new = (delegate*< IntPtr, ref int, bool >)header.OnRecv_new;
-            }
-
-            if (header.OnSend_new != IntPtr.Zero)
-            {
-                _onSend_new = (delegate*< IntPtr, ref int, bool > )header.OnSend_new;
-            }
-
-            if (header.OnDrawCmdList != IntPtr.Zero)
-            {
-                _draw_cmd_list = (delegate*<out IntPtr, ref int, int>)header.OnDrawCmdList;
-            }
-
-            if (header.OnWndProc != IntPtr.Zero)
-            {
-                _on_wnd_proc = (delegate*<void*, int>) header.OnWndProc;
-            }
-
-
             IsValid = true;
+
+            Log.Trace("done");
 
             if (_onInitialize != null)
             {
@@ -419,11 +425,6 @@ namespace ClassicUO.Network
         private static IntPtr GetUOFilePath()
         {
             return _uoPathPtr;
-            //fixed (char* ptr = Settings.GlobalSettings.UltimaOnlineDirectory)
-            //{
-
-            //    return (IntPtr) ptr;
-            //}
         }
 
         private static void SetWindowTitle(byte* str)
