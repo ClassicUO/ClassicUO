@@ -644,7 +644,7 @@ namespace ClassicUO.Network
             int off = sizeof(ulong) + 2;
 
             output.Append(' ', off);
-            output.AppendFormat("Ticks: {0} | {1} |  ID: {2:X2}   Length: {3}\n", Time.Ticks, (toServer ? "Client -> Server" : "Server -> Client"), buffer[0], buffer.Length);
+            output.AppendFormat("Ticks: {0} | {1} |  ID: {2:X2}   Length: {3}\n", Time.Ticks, (toServer ? "Client -> Server" : "Server -> Client"), buffer[0], length);
 
             if (buffer[0] == 0x80 || buffer[0] == 0x91)
             {

@@ -133,7 +133,7 @@ namespace ClassicUO.Network
         private delegate*<void*, int> _on_wnd_proc;
         private delegate*<int, short> _getPacketLength;
         private delegate*<out int, out int, out int, bool> _getPlayerPosition;
-        private delegate*<byte*> _getUoFilePath;
+        private delegate*<IntPtr> _getUoFilePath;
         private delegate*<byte*, void> _setTitle;
         private delegate*<int, int, void> _onMouse;
         private delegate*<int, int, int, void> _onUpdatePlayerPosition;
@@ -144,7 +144,12 @@ namespace ClassicUO.Network
 
 
         private readonly Dictionary<IntPtr, GraphicsResource> _resources = new Dictionary<IntPtr, GraphicsResource>();
+        private static IntPtr _uoPathPtr;
 
+        static Plugin()
+        {
+            _uoPathPtr = (IntPtr) Utf8EncodeHeap(Settings.GlobalSettings.UltimaOnlineDirectory);
+        }
 
         private Plugin(string path)
         {
@@ -224,7 +229,7 @@ namespace ClassicUO.Network
                 GetPacketLength = (IntPtr)_getPacketLength,
                 GetPlayerPosition = (IntPtr)_getPlayerPosition,
                 CastSpell = (IntPtr) _castSpell,
-                GetStaticImage = Marshal.GetFunctionPointerForDelegate(_getStaticImage),
+                GetStaticImage = IntPtr.Zero,
                 HWND = hwnd,
                 GetUOFilePath = (IntPtr) _getUoFilePath,
                 RequestMove = (IntPtr)_requestMove,
@@ -233,8 +238,8 @@ namespace ClassicUO.Network
                 Send_new = (IntPtr) _send_new,
 
                 SDL_Window = Client.Game.Window.Handle,
-                GetStaticData = Marshal.GetFunctionPointerForDelegate(_get_static_data),
-                GetTileData = Marshal.GetFunctionPointerForDelegate(_get_tile_data),
+                GetStaticData = IntPtr.Zero,
+                GetTileData = IntPtr.Zero,
                 GetCliloc =(IntPtr)_get_cliloc
             };
 
@@ -411,9 +416,14 @@ namespace ClassicUO.Network
             return buffer;
         }
 
-        private static byte* GetUOFilePath()
+        private static IntPtr GetUOFilePath()
         {
-            return Utf8EncodeHeap(Settings.GlobalSettings.UltimaOnlineDirectory);
+            return _uoPathPtr;
+            //fixed (char* ptr = Settings.GlobalSettings.UltimaOnlineDirectory)
+            //{
+
+            //    return (IntPtr) ptr;
+            //}
         }
 
         private static void SetWindowTitle(byte* str)
@@ -529,11 +539,12 @@ namespace ClassicUO.Network
 
             fixed (byte* ptr = data)
             {
+                byte* ptr2 = ptr;
                 foreach (Plugin plugin in Plugins)
                 {
                     if (plugin._onRecv_new != null)
                     {
-                        if (!plugin._onRecv_new((IntPtr) ptr, ref length))
+                        if (!plugin._onRecv_new((IntPtr)ptr2, ref length))
                         {
                             result = false;
                         }
@@ -551,11 +562,12 @@ namespace ClassicUO.Network
 
             fixed (byte* ptr = data)
             {
+                byte* ptr2 = ptr;
                 foreach (Plugin plugin in Plugins)
                 {
                     if (plugin._onSend_new != null)
                     {
-                        if (!plugin._onSend_new((IntPtr) ptr, ref length))
+                        if (!plugin._onSend_new((IntPtr)ptr2, ref length))
                         {
                             result = false;
                         }
