@@ -59,6 +59,10 @@ namespace ClassicUO
         {
             CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
 
+#if !NETFRAMEWORK
+            DllMap.Initialise();
+#endif
+
             Log.Start(LogTypes.All);
 
             CUOEnviroment.GameThread = Thread.CurrentThread;
