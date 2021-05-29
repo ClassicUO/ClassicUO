@@ -123,32 +123,50 @@ namespace ClassicUO.Network
         
 
 
-        [MarshalAs(UnmanagedType.FunctionPtr)] private dOnGetStaticData _get_static_data;
-        [MarshalAs(UnmanagedType.FunctionPtr)] private dOnGetTileData _get_tile_data;
-        [MarshalAs(UnmanagedType.FunctionPtr)] private dOnGetStaticImage _getStaticImage;
-
-        private delegate*<int, int, bool, bool> _onHotkeyPressed;
-        private delegate*<IntPtr, ref int, bool> _recv_new, _send_new, _onRecv_new, _onSend_new;
-        private delegate*<out IntPtr, ref int, int> _draw_cmd_list;
-        private delegate*<void*, int> _on_wnd_proc;
-        private delegate*<int, short> _getPacketLength;
-        private delegate*<out int, out int, out int, bool> _getPlayerPosition;
-        private delegate*<IntPtr> _getUoFilePath;
-        private delegate*<byte*, void> _setTitle;
-        private delegate*<int, int, void> _onMouse;
-        private delegate*<int, int, int, void> _onUpdatePlayerPosition;
-        private delegate*<void> _onInitialize, _onClientClose, _onConnected, _onDisconnected, _onFocusGained, _onFocusLost, _tick;
-        private delegate*<int, bool, bool> _requestMove;
-        private delegate*<int, byte*, bool, ref byte*, bool> _get_cliloc;
-        private delegate*<int, void> _castSpell;
+        [MarshalAs(UnmanagedType.FunctionPtr)] private static dOnGetStaticData _get_static_data;
+        [MarshalAs(UnmanagedType.FunctionPtr)] private static dOnGetTileData _get_tile_data;
+        [MarshalAs(UnmanagedType.FunctionPtr)] private static dOnGetStaticImage _getStaticImage;
 
 
         private readonly Dictionary<IntPtr, GraphicsResource> _resources = new Dictionary<IntPtr, GraphicsResource>();
+
+        private delegate*<int, int, bool, bool> _onHotkeyPressed;
+        private delegate*<IntPtr, ref int, bool> _onRecv_new, _onSend_new;
+        private delegate*<out IntPtr, ref int, int> _draw_cmd_list;
+        private delegate*<void*, int> _on_wnd_proc;
+        private delegate*<int, int, void> _onMouse;
+        private delegate*<int, int, int, void> _onUpdatePlayerPosition;
+        private delegate*<void> _onInitialize, _onClientClose, _onConnected, _onDisconnected, _onFocusGained, _onFocusLost, _tick;
+
+
         private static IntPtr _uoPathPtr;
+        private static delegate*<IntPtr, ref int, bool> _recv_new, _send_new;
+        private static delegate*<int, short> _getPacketLength;
+        private static delegate*<out int, out int, out int, bool> _getPlayerPosition;
+        private static delegate*<int, void> _castSpell;
+        private static delegate*<IntPtr> _getUoFilePath;
+        private static delegate*<int, bool, bool> _requestMove;
+        private static delegate*<byte*, void> _setTitle;
+        private static delegate*<int, byte*, bool, ref byte*, bool> _get_cliloc;
+
+
 
         static Plugin()
         {
             _uoPathPtr = (IntPtr) Utf8EncodeHeap(Settings.GlobalSettings.UltimaOnlineDirectory);
+
+            _recv_new = &OnPluginRecv_new;
+            _send_new = &OnPluginSend_new;
+            _getPacketLength = &PacketsTable.GetPacketLength;
+            _getPlayerPosition = &GetPlayerPosition;
+            _castSpell = &GameActions.CastSpell;
+            _getStaticImage = GetStaticImage;
+            _getUoFilePath = &GetUOFilePath;
+            _requestMove = &RequestMove;
+            _setTitle = &SetWindowTitle;
+            _get_static_data = GetStaticData;
+            _get_tile_data = GetTileData;
+            _get_cliloc = &GetCliloc;
         }
 
         private Plugin(string path)
@@ -199,19 +217,6 @@ namespace ClassicUO.Network
 
         public void Load()
         {
-            _recv_new = &OnPluginRecv_new;
-            _send_new = &OnPluginSend_new;
-            _getPacketLength = &PacketsTable.GetPacketLength;
-            _getPlayerPosition = &GetPlayerPosition;
-            _castSpell = &GameActions.CastSpell;
-            _getStaticImage = GetStaticImage;
-            _getUoFilePath = &GetUOFilePath;
-            _requestMove = &RequestMove;
-            _setTitle = &SetWindowTitle;
-            _get_static_data = GetStaticData;
-            _get_tile_data = GetTileData;
-            _get_cliloc = &GetCliloc;
-
             SDL.SDL_SysWMinfo info = new SDL.SDL_SysWMinfo();
             SDL.SDL_VERSION(out info.version);
             SDL.SDL_GetWindowWMInfo(Client.Game.Window.Handle, ref info);
@@ -482,12 +487,12 @@ namespace ClassicUO.Network
 
         private static bool GetCliloc(int cliloc, byte* argsPtr, bool capitalize, ref byte* buffer)
         {
-            string args = Marshal.PtrToStringAnsi((IntPtr) argsPtr);
+            string args = SDL.UTF8_ToManaged((IntPtr)argsPtr);
             string res = ClilocLoader.Instance.Translate(cliloc, args, capitalize);
 
             if (!string.IsNullOrEmpty(res))
             {
-                buffer = (byte*)Marshal.StringToHGlobalAnsi(res);
+                buffer = (byte*) Utf8EncodeHeap(res);
             }
 
             return buffer != null;
@@ -587,9 +592,9 @@ namespace ClassicUO.Network
                 {
                     Plugins[i]._onClientClose();
                 }
-
-                Plugins.RemoveAt(i--);
             }
+
+            Plugins.Clear();
         }
 
         internal static void OnFocusGained()
