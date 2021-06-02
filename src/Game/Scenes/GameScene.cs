@@ -1007,7 +1007,7 @@ namespace ClassicUO.Game.Scenes
 
 
             batcher.Begin(null, matrix);
-
+            batcher.SetBrightlight(ProfileManager.CurrentProfile.TerrainShadowsLevel * 0.1f);
 
             bool usecircle = ProfileManager.CurrentProfile.UseCircleOfTransparency;
 

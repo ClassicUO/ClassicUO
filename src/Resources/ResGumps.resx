@@ -1444,4 +1444,7 @@ Client version: '{0}'</value>
   <data name="ResetGroups" xml:space="preserve">
     <value>Reset groups</value>
   </data>
+  <data name="TerrainShadowsLevel" xml:space="preserve">
+    <value>Terrain shadows level:</value>
+  </data>
 </root>
