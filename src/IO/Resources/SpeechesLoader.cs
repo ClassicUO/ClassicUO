@@ -83,6 +83,9 @@ namespace ClassicUO.IO.Resources
 
                     _speech = entries.ToArray();
                     file.Dispose();
+
+                    var xx = GetKeywords("stablecount stable");
+                    var xxx = GetKeywords("culo di merda bank stablemerda");
                 }
             );
         }
@@ -90,6 +93,7 @@ namespace ClassicUO.IO.Resources
         public bool IsMatch(string input, in SpeechEntry entry)
         {
             string[] split = entry.Keywords;
+            //string[] words = input.Split(new char[1] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
 
             for (int i = 0; i < split.Length; i++)
             {
@@ -114,9 +118,17 @@ namespace ClassicUO.IO.Resources
                     }
                 }
 
-                if (input.IndexOf(split[i], StringComparison.InvariantCultureIgnoreCase) != -1)
+                int idx = input.IndexOf(split[i], StringComparison.InvariantCultureIgnoreCase);
+                while (idx >= 0)
                 {
-                    return true;
+                    // "bank" or " bank" or "bank " or " bank "
+                    if ((idx - 1 < 0 || char.IsWhiteSpace(input[idx - 1])) && 
+                        (idx + split[i].Length >= input.Length || char.IsWhiteSpace(input[idx + split[i].Length])))
+                    {
+                        return true;
+                    }
+
+                    idx = input.IndexOf(split[i], idx + 1, StringComparison.InvariantCultureIgnoreCase);
                 }
             }
 
