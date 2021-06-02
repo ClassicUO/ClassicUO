@@ -1214,6 +1214,15 @@ namespace ClassicUO.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Enable Fast Spells Assign (Ctrl + Alt).
+        /// </summary>
+        public static string EnableFastSpellsAssign {
+            get {
+                return ResourceManager.GetString("EnableFastSpellsAssign", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Enable mousewheel for in game zoom scaling (Ctrl + Scroll).
         /// </summary>
         public static string EnableMouseWheelForZoom {
@@ -2499,6 +2508,14 @@ namespace ClassicUO.Resources {
         public static string OriginalSails {
             get {
                 return ResourceManager.GetString("OriginalSails", resourceCulture);
+            }
+        }
+        
+        ///   Looks up a localized string similar to Open Macro Settings.
+        /// </summary>
+        public static string OpenMacroSettings {
+            get {
+                return ResourceManager.GetString("OpenMacroSettings", resourceCulture);
             }
         }
         

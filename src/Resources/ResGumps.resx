@@ -1465,4 +1465,10 @@ Client version: '{0}'</value>
   <data name="OriginalSails" xml:space="preserve">
     <value>Original Sails</value>
   </data>
+  <data name="OpenMacroSettings" xml:space="preserve">
+    <value>Open Macro Settings</value>
+  </data>
+  <data name="EnableFastSpellsAssign" xml:space="preserve">
+    <value>Enable Fast Spells Assign (Ctrl + Alt)</value>
+  </data>
 </root>

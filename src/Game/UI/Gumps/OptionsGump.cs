@@ -67,7 +67,6 @@ namespace ClassicUO.Game.UI.Gumps
 
         //experimental
         private Checkbox _autoOpenDoors, _autoOpenCorpse, _skipEmptyCorpse, _disableTabBtn, _disableCtrlQWBtn, _disableDefaultHotkeys, _disableArrowBtn, _disableAutoMove, _overrideContainerLocation, _smoothDoors, _showTargetRangeIndicator, _customBars, _customBarsBBG, _saveHealthbars;
-        private Checkbox _buffBarTime, _castSpellsByOneClick, _queryBeforAttackCheckbox, _queryBeforeBeneficialCheckbox, _spellColoringCheckbox, _spellFormatCheckbox;
         private HSliderBar _cellSize;
         private Checkbox _containerScaleItems, _containerDoubleClickToLoot, _relativeDragAnDropItems, _useLargeContianersGumps, _highlightContainersWhenMouseIsOver;
 
@@ -134,6 +133,7 @@ namespace ClassicUO.Game.UI.Gumps
         // combat & spells
         private ClickableColorBox _innocentColorPickerBox, _friendColorPickerBox, _crimialColorPickerBox, _canAttackColorPickerBox, _enemyColorPickerBox, _murdererColorPickerBox, _neutralColorPickerBox, _beneficColorPickerBox, _harmfulColorPickerBox;
         private HSliderBar _lightBar;
+        private Checkbox _buffBarTime, _castSpellsByOneClick, _queryBeforAttackCheckbox, _queryBeforeBeneficialCheckbox, _spellColoringCheckbox, _spellFormatCheckbox, _enableFastSpellsAssign;
 
         // macro
         private MacroControl _macroControl;
@@ -2621,7 +2621,16 @@ namespace ClassicUO.Game.UI.Gumps
 
             startY += _buffBarTime.Height + 2;
 
-            startY += 40;
+            _enableFastSpellsAssign = AddCheckBox
+            (
+                rightArea,
+                ResGumps.EnableFastSpellsAssign,
+                _currentProfile.FastSpellsAssign,
+                startX,
+                startY
+            );
+
+            startY += 30;
 
             int initialY = startY;
 
@@ -3536,6 +3545,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _queryBeforeBeneficialCheckbox.IsChecked = false;
                     _castSpellsByOneClick.IsChecked = false;
                     _buffBarTime.IsChecked = false;
+                    _enableFastSpellsAssign.IsChecked = false;
                     _beneficColorPickerBox.Hue = 0x0059;
                     _harmfulColorPickerBox.Hue = 0x0020;
                     _neutralColorPickerBox.Hue = 0x03b2;
@@ -3909,6 +3919,7 @@ namespace ClassicUO.Game.UI.Gumps
             _currentProfile.EnabledBeneficialCriminalActionQuery = _queryBeforeBeneficialCheckbox.IsChecked;
             _currentProfile.CastSpellsByOneClick = _castSpellsByOneClick.IsChecked;
             _currentProfile.BuffBarTime = _buffBarTime.IsChecked;
+            _currentProfile.FastSpellsAssign = _enableFastSpellsAssign.IsChecked;
 
             _currentProfile.BeneficHue = _beneficColorPickerBox.Hue;
             _currentProfile.HarmfulHue = _harmfulColorPickerBox.Hue;
