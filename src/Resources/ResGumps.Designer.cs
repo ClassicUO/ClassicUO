@@ -3567,6 +3567,15 @@ namespace ClassicUO.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Terrain shadows level:.
+        /// </summary>
+        public static string TerrainShadowsLevel {
+            get {
+                return ResourceManager.GetString("TerrainShadowsLevel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Text alpha fading.
         /// </summary>
         public static string TextAlphaFading {
