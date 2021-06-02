@@ -276,7 +276,7 @@ namespace ClassicUO.Game
             return x >= 0 && x < 44 && y >= 0 && y < 44 && _InternalArea[x, y];
         }
 
-        public static bool IsPointInStretchedLand(ref Rectangle rect, int x, int y)
+        public static bool IsPointInStretchedLand(ref UltimaBatcher2D.YOffsets yOffsets, int x, int y)
         {
             //y -= 22;
             x += 22;
@@ -284,10 +284,10 @@ namespace ClassicUO.Game
             int testX = TranslatedMousePositionByViewport.X - x;
             int testY = TranslatedMousePositionByViewport.Y;
 
-            int y0 = -rect.Left;
-            int y1 = 22 - rect.Top;
-            int y2 = 44 - rect.Right;
-            int y3 = 22 - rect.Bottom;
+            int y0 = -yOffsets.Top;
+            int y1 = 22 - yOffsets.Right;
+            int y2 = 44 - yOffsets.Bottom;
+            int y3 = 22 - yOffsets.Left;
 
 
             return testY >= testX * (y1 - y0) / -22 + y + y0 && testY >= testX * (y3 - y0) / 22 + y + y0 && testY <= testX * (y3 - y2) / 22 + y + y2 && testY <= testX * (y1 - y2) / -22 + y + y2;
