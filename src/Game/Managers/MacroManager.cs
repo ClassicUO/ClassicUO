@@ -1793,6 +1793,24 @@ namespace ClassicUO.Game.Managers
             return macro;
         }
 
+        public static Macro CreateFastMacro(string name, MacroType type, MacroSubType sub)
+        {
+            Macro macro = new Macro
+              (
+                  name,
+                  0,
+                  false,
+                  false,
+                  false
+              );
+
+            MacroObject item = new MacroObject(type, sub);
+
+            macro.PushToBack(item);
+
+            return macro;
+        }
+
         public static void GetBoundByCode(MacroType code, ref int count, ref int offset)
         {
             switch (code)

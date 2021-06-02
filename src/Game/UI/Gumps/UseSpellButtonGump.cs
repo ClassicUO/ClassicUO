@@ -31,14 +31,15 @@
 #endregion
 
 using System;
-using System.IO;
 using System.Xml;
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
+using ClassicUO.Game.Managers;
+using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.IO.Resources;
-using ClassicUO.Utility;
+using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Gumps
@@ -48,11 +49,30 @@ namespace ClassicUO.Game.UI.Gumps
         private GumpPic _background;
         private SpellDefinition _spell;
 
+        private readonly MacroManager _mm;
+
+        #region MacroSubType Offsets
+        // Offset for MacroSubType
+        private const int MAGERY_SPELLS_OFFSET = 61;
+        private const int NECRO_SPELLS_OFFSET = 125;
+        private const int CHIVAL_SPELLS_OFFSETS = 142;
+        private const int BUSHIDO_SPELLS_OFFSETS = 152;
+        private const int NINJITSU_SPELLS_OFFSETS = 158;
+        private const int SPELLWEAVING_SPELLS_OFFSETS = 166;
+        private const int MYSTICISM_SPELLS_OFFSETS = 182;
+        private const int MASTERY_SPELLS_OFFSETS = 198;
+
+        #endregion
+
+        public bool ShowEdit => Keyboard.Ctrl && Keyboard.Alt && ProfileManager.CurrentProfile.FastSpellsAssign;
+
         public UseSpellButtonGump() : base(0, 0)
         {
             CanMove = true;
             AcceptMouseInput = true;
             CanCloseWithRightClick = true;
+
+            _mm = Client.Game.GetScene<GameScene>().Macros;
         }
 
         public UseSpellButtonGump(SpellDefinition spell) : this()
@@ -86,6 +106,71 @@ namespace ClassicUO.Game.UI.Gumps
             GroupMatrixWidth = 44;
             GroupMatrixHeight = 44;
             AnchorType = ANCHOR_TYPE.SPELL;
+        }
+
+        public override bool Draw(UltimaBatcher2D batcher, int x, int y)
+        {
+            base.Draw(batcher, x, y);
+
+            if (ShowEdit)
+            {
+                ResetHueVector();
+
+                UOTexture lockTexture = GumpsLoader.Instance.GetTexture(0x1086);
+
+                if (lockTexture != null)
+                {
+                    lockTexture.Ticks = Time.Ticks;
+
+                    if (UIManager.MouseOverControl != null && (UIManager.MouseOverControl == this || UIManager.MouseOverControl.RootParent == this))
+                    {
+                        HueVector.X = 34;
+                        HueVector.Y = 1;
+                    }
+
+                    batcher.Draw2D(lockTexture, x + (Width - lockTexture.Width), y, ref HueVector);
+                }
+            }
+
+            return true;
+        }
+
+        private int GetSpellsGroup()
+        {
+            var spellsGroup = _spell.ID / 100;
+
+            switch (spellsGroup)
+            {
+                case (int)SpellBookType.Magery:
+                    return MAGERY_SPELLS_OFFSET;
+                case (int)SpellBookType.Necromancy:
+                    return NECRO_SPELLS_OFFSET;
+                case (int)SpellBookType.Chivalry:
+                    return CHIVAL_SPELLS_OFFSETS;
+                case (int)SpellBookType.Bushido:
+                    return BUSHIDO_SPELLS_OFFSETS;
+                case (int)SpellBookType.Ninjitsu:
+                    return NINJITSU_SPELLS_OFFSETS;
+                case (int)SpellBookType.Spellweaving:
+                    // Mysticicsm Spells Id starts from 678 and Spellweaving ends at 618
+                    if(_spell.ID > 620)
+                    {
+                        return MYSTICISM_SPELLS_OFFSETS;
+                    }
+                    return SPELLWEAVING_SPELLS_OFFSETS;
+                case (int)SpellBookType.Mastery - 1:
+                    return MASTERY_SPELLS_OFFSETS;
+            }
+            return -1;
+        }
+
+        private int GetSpellsId()
+        {
+            var rawSpellId = _spell.ID % 100;
+            // Mysticism Spells Id start from 678
+            if (rawSpellId > 78)
+                return rawSpellId - 78;
+            return rawSpellId;
         }
 
         private static int GetSpellTooltip(int id)
@@ -146,6 +231,16 @@ namespace ClassicUO.Game.UI.Gumps
             base.OnMouseUp(x, y, button);
 
             Point offset = Mouse.LDragOffset;
+
+            if (button == MouseButtonType.Left && ShowEdit)
+            {
+                Macro mCast = Macro.CreateFastMacro(_spell.Name, MacroType.CastSpell, (MacroSubType)GetSpellsId() + GetSpellsGroup());
+                if (_mm.FindMacro(_spell.Name) == null)
+                {
+                    _mm.MoveToBack(mCast);
+                }
+                GameActions.OpenMacroGump(_spell.Name);
+            }
 
             if (ProfileManager.CurrentProfile.CastSpellsByOneClick && button == MouseButtonType.Left && Math.Abs(offset.X) < 5 && Math.Abs(offset.Y) < 5)
             {
