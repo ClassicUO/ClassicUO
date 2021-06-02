@@ -83,9 +83,6 @@ namespace ClassicUO.IO.Resources
 
                     _speech = entries.ToArray();
                     file.Dispose();
-
-                    var xx = GetKeywords("stablecount stable");
-                    var xxx = GetKeywords("culo di merda bank stablemerda");
                 }
             );
         }
