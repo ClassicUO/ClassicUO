@@ -115,7 +115,6 @@ namespace ClassicUO.Game.UI.Gumps
             Y = _last_position.Y;
 
             _dumyLabel = new Label("", false, 0);
-
             Add(_dumyLabel);
 
             LoadSettings();
