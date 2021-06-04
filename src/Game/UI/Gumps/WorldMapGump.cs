@@ -70,7 +70,8 @@ namespace ClassicUO.Game.UI.Gumps
         private int _mapIndex;
         private bool _mapMarkersLoaded;
         private UOTexture _mapTexture;
-
+        // Dummy label to make MakeTopMostGump possible (method take Control as parameter and inside take Parent of it)
+        private readonly Label _dumyLabel;
 
         private readonly List<WMapMarkerFile> _markerFiles = new List<WMapMarkerFile>();
 
@@ -113,6 +114,10 @@ namespace ClassicUO.Game.UI.Gumps
             X = _last_position.X;
             Y = _last_position.Y;
 
+            _dumyLabel = new Label("", false, 0);
+
+            Add(_dumyLabel);
+
             LoadSettings();
 
             GameActions.Print(ResGumps.WorldMapLoading, 0x35);
@@ -139,6 +144,8 @@ namespace ClassicUO.Game.UI.Gumps
                 ShowBorder = !_isTopMost;
 
                 LayerOrder = _isTopMost ? UILayer.Over : UILayer.Under;
+                if(_isTopMost)
+                    UIManager.MakeTopMostGump(_dumyLabel);
             }
         }
 
