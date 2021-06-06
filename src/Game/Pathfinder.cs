@@ -290,6 +290,7 @@ namespace ClassicUO.Game
                                     if (itemdata.IsBridge)
                                     {
                                         staticAverageZ /= 2;
+                                        staticAverageZ += staticHeight % 2;
                                     }
 
                                     list.Add
