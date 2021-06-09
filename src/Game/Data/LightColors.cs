@@ -68,7 +68,7 @@ namespace ClassicUO.Game.Data
                     break;
 
                 case 0x1647:
-                    color = 51;
+                    color = 61;
 
                     break;
 
@@ -107,17 +107,17 @@ namespace ClassicUO.Game.Data
                                                 {
                                                     if (id >= 0x1ECD && id <= 0x1ECF || id >= 0x1ED0 && id <= 0x1ED2)
                                                     {
-                                                        color = 62;
+                                                        color = 1;
                                                     }
                                                 }
                                                 else
                                                 {
-                                                    color = 30;
+                                                    color = 60;
                                                 }
                                             }
                                             else
                                             {
-                                                color = 51;
+                                                color = 60;
                                             }
                                         }
                                         else
@@ -132,7 +132,7 @@ namespace ClassicUO.Game.Data
                                 }
                                 else
                                 {
-                                    color = 41;
+                                    color = 31;
                                 }
                             }
                             else
@@ -157,7 +157,7 @@ namespace ClassicUO.Game.Data
             }
             else
             {
-                color = 40;
+                color = 30;
             }
 
             if (id == 0x1FD4 || id == 0x0F6C)
@@ -270,7 +270,7 @@ namespace ClassicUO.Game.Data
                         }
                         else
                         {
-                            color = 40;
+                            color = 31;
                         }
                     }
                     else
@@ -285,10 +285,29 @@ namespace ClassicUO.Game.Data
             }
             else
             {
-                color = 0;
+                color = 62;
             }
 
             return color;
+        }
+
+        internal static void CreateLookupTables(uint[] buffer)
+        {
+
+            uint[] lightCurveTables = new uint[160]
+            {
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 16, 24, 32, 48, 64, 80, 96, 112, 128, 144, 160, 176, 192, 208, 224,
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 16, 24, 32, 40, 48, 56, 64,
+                0, 8, 16, 32, 48, 64, 88, 112, 136, 160, 184, 208, 232, 240, 248, 248, 248, 248, 248, 248, 248, 248, 248, 248, 248, 248, 248, 248, 248, 248, 248, 248,
+                0, 0, 0, 0, 0, 0, 0, 0, 8, 8, 16, 16, 24, 24, 32, 32, 40, 48, 56, 64, 72, 80, 88, 96, 104, 120, 136, 152, 168, 184, 200, 216,
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 40, 80, 120, 160, 200, 240, 240, 144, 144, 144, 144, 144, 144, 144
+            };
+
+            for (int i = 0; i < lightCurveTables.Length; i++)
+            {
+                buffer[i] = lightCurveTables[i] | 0xFF_00_00_00;
+            }
+
         }
     }
 }

@@ -24,6 +24,7 @@ const float HuesPerTexture = 2048;
 sampler DrawSampler : register(s0);
 sampler HueSampler0 : register(s1);
 sampler HueSampler1 : register(s2);
+sampler HueSampler2 : register(s3);
 
 struct VS_INPUT
 {
@@ -66,6 +67,13 @@ float get_light(float3 norm)
 	// At 45 degrees (the angle the flat tiles are lit at) it must come out
 	// to (cos(45) / 2) + 0.5 or 0.85355339...
 	return base + ((Brightlight * (base - 0.85355339f)) - (base - 0.85355339f));
+}
+
+float4 remap_light(float gray, float table)
+{
+	float2 texcoord = float2(gray, (table + 0.5) / 5);
+
+	return tex2D(HueSampler2, texcoord).r;
 }
 
 PS_INPUT VertexShaderFunction(VS_INPUT IN)
@@ -156,9 +164,88 @@ float4 PixelShader_Hue(PS_INPUT IN) : COLOR0
 	}
 	else if (mode == LIGHTS)
 	{
-		if (IN.Hue.x != 0.0f)
+		if (IN.Hue.x > 1.0f)
 		{
-			color.rgb *= get_rgb(color.r, hue);
+
+			float lightshader = IN.Hue.x - 1;
+			float intensity = color.r;
+
+			if (lightshader == 1)
+			{
+				color.r = 0;
+				color.g = remap_light(intensity, 0);
+				color.b = 0;
+			}
+			else if (lightshader == 2)
+			{
+				color.r /= 2;
+				color.g /= 2;
+			}
+			else if (lightshader == 6)
+			{
+				color.r = remap_light(intensity, 1);
+				color.g = 0;
+				color.b = remap_light(intensity, 0);
+			}
+			else if (lightshader == 10)
+			{
+				color.r /= 4;
+				color.g /= 4;
+			}
+			else if (lightshader == 20)
+			{
+				color.r = 0;
+				color.b = 0;
+			}
+			else if (lightshader == 30)
+			{
+				color.r = remap_light(intensity, 2);
+				color.g = remap_light(intensity, 2) / 2;
+				color.b = 0;
+			}
+			else if (lightshader == 31)
+			{
+				color.r = remap_light(intensity, 0);
+				color.g = remap_light(intensity, 0) / 2;
+				color.b = 0;
+			}
+			else if (lightshader == 32)
+			{
+				color.g = 0;
+			}
+			else if (lightshader == 40)
+			{
+				color.g = 0;
+				color.b = 0;
+			}
+			else if (lightshader == 50)
+			{
+				color.b = 0;
+			}
+			else if (lightshader == 60)
+			{
+				color.r = remap_light(intensity, 0);
+				color.g = remap_light(intensity, 0);
+				color.b = 0;
+			}
+			else if (lightshader == 61)
+			{
+				color.r = remap_light(intensity, 3);
+				color.g = remap_light(intensity, 3);
+				color.b = 0;
+			}
+			else if (lightshader == 62)
+			{
+				color.r = remap_light(intensity, 3);
+				color.g = remap_light(intensity, 3);
+				color.b = remap_light(intensity, 3);
+			}
+			else if (lightshader == 63)
+			{
+				color.r = remap_light(intensity, 4);
+				color.g = remap_light(intensity, 4);
+				color.b = remap_light(intensity, 4);
+			}
 		}
 	}
 	else if (mode == EFFECT_HUED)
