@@ -61,7 +61,7 @@ namespace ClassicUO
 
         private SDL_EventFilter _filter;
 
-        private readonly Texture2D[] _hueSamplers = new Texture2D[2];
+        private readonly Texture2D[] _hueSamplers = new Texture2D[3];
         private bool _ignoreNextTextInput;
         private readonly float[] _intervalFixedUpdate = new float[2];
         private double _statisticsTimer;
@@ -120,6 +120,9 @@ namespace ClassicUO
             const int TEXTURE_WIDTH = 32;
             const int TEXTURE_HEIGHT = 2048;
 
+            const int LIGHTS_TEXTURE_WIDTH = 32;
+            const int LIGHTS_TEXTURE_HEIGHT = 5;
+
             uint[] buffer = new uint[TEXTURE_WIDTH * TEXTURE_HEIGHT * 2];
             HuesLoader.Instance.CreateShaderColors(buffer);
 
@@ -131,8 +134,16 @@ namespace ClassicUO
 
             _hueSamplers[1].SetData(buffer, TEXTURE_WIDTH * TEXTURE_HEIGHT, TEXTURE_WIDTH * TEXTURE_HEIGHT);
 
+            buffer = new uint[LIGHTS_TEXTURE_WIDTH * LIGHTS_TEXTURE_HEIGHT];
+            LightColors.CreateLookupTables(buffer);
+
+            _hueSamplers[2] = new Texture2D(GraphicsDevice, LIGHTS_TEXTURE_WIDTH, LIGHTS_TEXTURE_HEIGHT);
+
+            _hueSamplers[2].SetData(buffer);
+
             GraphicsDevice.Textures[1] = _hueSamplers[0];
             GraphicsDevice.Textures[2] = _hueSamplers[1];
+            GraphicsDevice.Textures[3] = _hueSamplers[2];
 
             UIManager.InitializeGameCursor();
             AnimatedStaticsManager.Initialize();
