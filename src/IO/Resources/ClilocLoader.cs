@@ -361,7 +361,7 @@ namespace ClassicUO.IO.Resources
 
                     if (index >= 0 && index < totalArgs)
                     {
-                        pos += locations[index].Y - locations[index].X;
+                        pos += a.Length /*locations[index].Y - locations[index].X*/;
                     }
                 }
 
