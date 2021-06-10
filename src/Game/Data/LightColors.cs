@@ -34,6 +34,15 @@ namespace ClassicUO.Game.Data
 {
     internal static class LightColors
     {
+        private static readonly uint[][] _lightCurveTables = new uint[5][]
+        {
+            new uint[32] { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,2,3,4,6,8,10,12,14,16,18,20,22,24,26,28},
+            new uint[32] { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,2,3,4,5,6,7,8},
+            new uint[32] { 0,1,2,4,6,8,11,14,17,20,23,26,29,30,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31},
+            new uint[32] { 0,0,0,0,0,0,0,0,1,1,2,2,3,3,4,4,5,6,7,8,9,10,11,12,13,15,17,19,21,23,25,27},
+            new uint[32] { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,5,10,15,20,25,30,30,18,18,18,18,18,18,18},
+        };
+
         public static ushort GetHue(ushort id)
         {
             ushort color = 0;
@@ -294,20 +303,56 @@ namespace ClassicUO.Game.Data
         internal static void CreateLookupTables(uint[] buffer)
         {
 
-            uint[] lightCurveTables = new uint[160]
+            for (uint i = 0; i < 32; i++)
             {
-                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 16, 24, 32, 48, 64, 80, 96, 112, 128, 144, 160, 176, 192, 208, 224,
-                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 16, 24, 32, 40, 48, 56, 64,
-                0, 8, 16, 32, 48, 64, 88, 112, 136, 160, 184, 208, 232, 240, 248, 248, 248, 248, 248, 248, 248, 248, 248, 248, 248, 248, 248, 248, 248, 248, 248, 248,
-                0, 0, 0, 0, 0, 0, 0, 0, 8, 8, 16, 16, 24, 24, 32, 32, 40, 48, 56, 64, 72, 80, 88, 96, 104, 120, 136, 152, 168, 184, 200, 216,
-                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 40, 80, 120, 160, 200, 240, 240, 144, 144, 144, 144, 144, 144, 144
-            };
+                uint tableA = _lightCurveTables[0][i];
+                uint tableB = _lightCurveTables[1][i];
+                uint tableC = _lightCurveTables[2][i];
+                uint tableD = _lightCurveTables[3][i];
+                uint tableE = _lightCurveTables[4][i];
 
-            for (int i = 0; i < lightCurveTables.Length; i++)
-            {
-                buffer[i] = lightCurveTables[i] | 0xFF_00_00_00;
+                // green small
+                buffer[32 * 0 + i] = tableA << 11 | 0xFF_00_00_00;
+
+                // light blue
+                buffer[32 * 1 + i] = i << 19 | (i >> 1) << 11 | (i >> 1) << 3 | 0xFF_00_00_00;
+
+                // dark blue
+                buffer[32 * 5 + i] = tableA << 19 | tableB << 3 | 0xFF_00_00_00;
+
+                // blue
+                buffer[32 * 9 + i] = i << 19 | (i >> 2) << 11 | (i >> 2) << 3 | 0xFF_00_00_00;
+
+                // green
+                buffer[32 * 19 + i] = i << 11 | 0xFF_00_00_00;
+
+                // orange
+                buffer[32 * 29 + i] = (tableC >> 1) << 11 | tableC << 3 | 0xFF_00_00_00;
+
+                // orange small
+                buffer[32 * 30 + i] = (tableA >> 1) << 11 | tableA << 3 | 0xFF_00_00_00;
+
+                // purple
+                buffer[32 * 31 + i] = i << 19 | i << 3 | 0xFF_00_00_00;
+
+                // red
+                buffer[32 * 39 + i] = i << 3 | 0xFF_00_00_00;
+
+                // yellow
+                buffer[32 * 49 + i] = i << 11 | i << 3 | 0xFF_00_00_00;
+
+                // yellow small
+                buffer[32 * 59 + i] = tableA << 11 | tableA << 3 | 0xFF_00_00_00;
+
+                // yellow medium
+                buffer[32 * 60 + i] = tableD << 11 | tableD << 3 | 0xFF_00_00_00;
+
+                // white medium
+                buffer[32 * 61 + i] = tableD << 19 | tableD << 11 | tableD << 3 | 0xFF_00_00_00;
+
+                // white small full
+                buffer[32 * 62 + i] = tableE << 19 | tableE << 11 | tableE << 3 | 0xFF_00_00_00;
             }
-
         }
     }
 }
