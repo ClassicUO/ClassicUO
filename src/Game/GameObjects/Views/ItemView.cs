@@ -165,7 +165,7 @@ namespace ClassicUO.Game.GameObjects
                 );
             }
 
-            if (ItemData.IsLight)
+            if (ItemData.IsLight || graphic >= 0x3E02 && graphic <= 0x3E0B || graphic >= 0x3914 && graphic <= 0x3929)
             {
                 Client.Game.GetScene<GameScene>().AddLight(this, this, posX + 22, posY + 22);
             }
