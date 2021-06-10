@@ -71,7 +71,7 @@ float get_light(float3 norm)
 
 float3 get_colored_light(float shader, float gray)
 {
-	float2 texcoord = float2(gray, shader / 63);
+	float2 texcoord = float2(gray, (shader - 0.5) / 63);
 
 	return tex2D(HueSampler2, texcoord).rgb;
 }
