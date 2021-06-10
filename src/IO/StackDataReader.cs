@@ -92,19 +92,20 @@ namespace ClassicUO.IO
 
         public string ReadASCII(int size)
         {
-            StringBuilder sb = new StringBuilder(size);
-
-            for (int i = 0; i < size; ++i)
+            using (ValueStringBuilder sb = new ValueStringBuilder(size))
             {
-                char c = Read<char>();
-
-                if (c != 0)
+                for (int i = 0; i < size; ++i)
                 {
-                    sb.Append(c);
-                }
-            }
+                    char c = Read<char>();
 
-            return sb.ToString();
+                    if (c != 0)
+                    {
+                        sb.Append(c);
+                    }
+                }
+
+                return sb.ToString();
+            }
         }
     }
 }

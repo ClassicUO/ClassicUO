@@ -121,11 +121,13 @@ namespace ClassicUO.Game.Managers
                     {
                         if (currentProfile != null && currentProfile.EnabledSpellFormat && !string.IsNullOrWhiteSpace(currentProfile.SpellDisplayFormat))
                         {
-                            StringBuilder sb = new StringBuilder(currentProfile.SpellDisplayFormat);
-                            sb.Replace("{power}", spell.PowerWords);
-                            sb.Replace("{spell}", spell.Name);
+                            using (ValueStringBuilder sb = new ValueStringBuilder(currentProfile.SpellDisplayFormat.AsSpan()))
+                            {
+                                sb.Replace("{power}".AsSpan(), spell.PowerWords.AsSpan());
+                                sb.Replace("{spell}".AsSpan(), spell.Name.AsSpan());
 
-                            text = sb.ToString().Trim();
+                                text = sb.ToString().Trim();
+                            }
                         }
 
                         //server hue color per default if not enabled

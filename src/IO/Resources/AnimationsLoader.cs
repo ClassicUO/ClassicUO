@@ -68,6 +68,7 @@ namespace ClassicUO.IO.Resources
         private readonly Dictionary<ushort, Dictionary<ushort, EquipConvData>> _equipConv = new Dictionary<ushort, Dictionary<ushort, EquipConvData>>();
         private readonly UOFileMul[] _files = new UOFileMul[5];
         private readonly UOFileUop[] _filesUop = new UOFileUop[4];
+        private readonly PixelPicker _picker = new PixelPicker();
 
         private readonly LinkedList<AnimationDirection> _usedTextures = new LinkedList<AnimationDirection>();
 
@@ -768,42 +769,49 @@ namespace ClassicUO.IO.Resources
 
                 byte[] decbuffer = animSeq.GetData(entry.Length, entry.DecompressedLength);
 
-                StackDataReader reader = new StackDataReader(decbuffer, decbuffer.Length);
-
-                uint animID = reader.Read<uint>();
-                reader.Skip(48);
-                int replaces = reader.Read<int>();
-
-                if (replaces != 48 && replaces != 68)
+                try
                 {
-                    for (int k = 0; k < replaces; k++)
-                    {
-                        int oldGroup = reader.Read<int>();
-                        uint frameCount = reader.Read<uint>();
-                        int newGroup = reader.Read<int>();
+                    StackDataReader reader = new StackDataReader(decbuffer, decbuffer.Length);
 
-                        if (frameCount == 0 && DataIndex[animID] != null)
+                    uint animID = reader.Read<uint>();
+                    reader.Skip(48);
+                    int replaces = reader.Read<int>();
+
+                    if (replaces != 48 && replaces != 68)
+                    {
+                        for (int k = 0; k < replaces; k++)
                         {
-                            DataIndex[animID].ReplaceUopGroup((byte)oldGroup, (byte)newGroup);
+                            int oldGroup = reader.Read<int>();
+                            uint frameCount = reader.Read<uint>();
+                            int newGroup = reader.Read<int>();
+
+                            if (frameCount == 0 && DataIndex[animID] != null)
+                            {
+                                DataIndex[animID].ReplaceUopGroup((byte)oldGroup, (byte)newGroup);
+                            }
+
+                            reader.Skip(60);
                         }
 
-                        reader.Skip(60);
+                        if (DataIndex[animID] != null)
+                        {
+                            if (animID == 0x04E7 || animID == 0x042D || animID == 0x04E6 || animID == 0x05F7)
+                            {
+                                DataIndex[animID].MountedHeightOffset = 18;
+                            }
+                            else if (animID == 0x01B0 || animID == 0x0579 || animID == 0x05F6 || animID == 0x05A0)
+                            {
+                                DataIndex[animID].MountedHeightOffset = 9;
+                            }
+                        }
                     }
 
-                    if (DataIndex[animID] != null)
-                    {
-                        if (animID == 0x04E7 || animID == 0x042D || animID == 0x04E6 || animID == 0x05F7)
-                        {
-                            DataIndex[animID].MountedHeightOffset = 18;
-                        }
-                        else if (animID == 0x01B0 || animID == 0x0579 || animID == 0x05F6 || animID == 0x05A0)
-                        {
-                            DataIndex[animID].MountedHeightOffset = 9;
-                        }
-                    }
+                    reader.Release();
                 }
-
-                reader.Release();
+                finally
+                {
+                    System.Buffers.ArrayPool<byte>.Shared.Return(decbuffer);
+                }
             }
 
             animSeq.Dispose();
@@ -1002,6 +1010,15 @@ namespace ClassicUO.IO.Resources
             {
                 _usedTextures.Clear();
             }
+        }
+
+        public bool PixelCheck(ushort animID, byte group, byte direction, bool uop, int frame, int x, int y)
+        {
+            uint packed32 = (uint)((group | (direction << 8) | ((uop ? 0x01 : 0x00) << 16)));
+            uint packed32_2 = (uint)((animID | (frame << 16)));
+            ulong packed = (packed32_2 | ((ulong)packed32 << 32));
+
+            return _picker.Get(packed, x, y);
         }
 
         public void UpdateAnimationTable(uint flags)
@@ -1352,7 +1369,7 @@ namespace ClassicUO.IO.Resources
 
             UOFileMul file = _files[animDir.FileIndex];
             file.Seek(animDir.Address);
-            ReadMULAnimationFrame(ref animDir, file);
+            ReadMULAnimationFrame(animID, animGroup, direction, ref animDir, file);
 
             return true;
         }
@@ -1470,61 +1487,78 @@ namespace ClassicUO.IO.Resources
 
                             if (imageWidth > 0 && imageHeight > 0)
                             {
-                                uint[] data = new uint[imageWidth * imageHeight];
+                                uint[] data = System.Buffers.ArrayPool<uint>.Shared.Rent(imageWidth * imageHeight);
 
-                                uint header = reader.Read<uint>();
-
-                                long pos = reader.Position;
-
-                                int sum = imageCenterY + imageHeight;
-
-                                while (header != 0x7FFF7FFF && pos < end)
+                                try
                                 {
-                                    ushort runLength = (ushort)(header & 0x0FFF);
-                                    int x = (int)((header >> 22) & 0x03FF);
+                                    uint header = reader.Read<uint>();
 
-                                    if ((x & 0x0200) > 0)
+                                    long pos = reader.Position;
+
+                                    int sum = imageCenterY + imageHeight;
+
+                                    while (header != 0x7FFF7FFF && pos < end)
                                     {
-                                        x |= (int)0xFFFFFE00;
-                                    }
+                                        ushort runLength = (ushort)(header & 0x0FFF);
+                                        int x = (int)((header >> 22) & 0x03FF);
 
-                                    int y = (int)((header >> 12) & 0x3FF);
-
-                                    if ((y & 0x0200) > 0)
-                                    {
-                                        y |= (int)0xFFFFFE00;
-                                    }
-
-                                    x += imageCenterX;
-                                    y += sum;
-
-                                    int block = y * imageWidth + x;
-
-                                    for (int k = 0; k < runLength; ++k)
-                                    {
-                                        ushort val = palette[reader.Read<byte>()];
-
-                                        // FIXME: same of MUL ? Keep it as original for the moment
-                                        if (val != 0)
+                                        if ((x & 0x0200) > 0)
                                         {
-                                            data[block] = HuesHelper.Color16To32(val) | 0xFF_00_00_00;
+                                            x |= (int)0xFFFFFE00;
                                         }
 
-                                        block++;
+                                        int y = (int)((header >> 12) & 0x3FF);
+
+                                        if ((y & 0x0200) > 0)
+                                        {
+                                            y |= (int)0xFFFFFE00;
+                                        }
+
+                                        x += imageCenterX;
+                                        y += sum;
+
+                                        int block = y * imageWidth + x;
+
+                                        for (int k = 0; k < runLength; ++k)
+                                        {
+                                            ushort val = palette[reader.Read<byte>()];
+
+                                            // FIXME: same of MUL ? Keep it as original for the moment
+                                            if (val != 0)
+                                            {
+                                                data[block] = HuesHelper.Color16To32(val) | 0xFF_00_00_00;
+                                            }
+                                            else
+                                            {
+                                                data[block] = 0;
+                                            }
+      
+                                            block++;
+                                        }
+
+                                        header = reader.Read<uint>();
                                     }
 
-                                    header = reader.Read<uint>();
+                                    AnimationFrameTexture f = new AnimationFrameTexture(imageWidth, imageHeight)
+                                    {
+                                        CenterX = imageCenterX,
+                                        CenterY = imageCenterY
+                                    };
+
+                                    f.SetData(data, 0, imageWidth * imageHeight);
+
+                                    animDirection.Frames[index] = f;
+
+                                    uint packed32 = (uint)((animGroup | (direction << 8) | (0x01 << 16)));
+                                    uint packed32_2 = (uint)((animID | (index << 16)));
+                                    ulong packed = (packed32_2 | ((ulong)packed32 << 32));
+
+                                    _picker.Set(packed, imageWidth, imageHeight, data);
                                 }
-
-                                AnimationFrameTexture f = new AnimationFrameTexture(imageWidth, imageHeight)
+                                finally
                                 {
-                                    CenterX = imageCenterX,
-                                    CenterY = imageCenterY
-                                };
-
-                                f.PushData(data);
-
-                                animDirection.Frames[index] = f;
+                                    System.Buffers.ArrayPool<uint>.Shared.Return(data, true);
+                                }
                             }
                             else
                             {
@@ -1538,15 +1572,14 @@ namespace ClassicUO.IO.Resources
                 animHeaderInfo = (UOPAnimationHeader*)reader.PositionAddress;
             }
 
- 
-
+            
             _usedTextures.AddLast(animDirection);
             reader.Release();
 
             return true;
         }
 
-        private void ReadMULAnimationFrame(ref AnimationDirection animDir, UOFile reader)
+        private void ReadMULAnimationFrame(ushort animID, byte animGroup, byte direction, ref AnimationDirection animDir, UOFile reader)
         {
             animDir.LastAccessTime = Time.Ticks;
 
@@ -1587,52 +1620,63 @@ namespace ClassicUO.IO.Resources
                     continue;
                 }
 
-                uint[] data = new uint[imageWidth * imageHeight];
+                uint[] data = System.Buffers.ArrayPool<uint>.Shared.Rent(imageWidth * imageHeight);
 
-                uint header = reader.ReadUInt();
-
-                long pos = reader.Position;
-
-                while (header != 0x7FFF7FFF && pos < end)
+                try
                 {
-                    ushort runLength = (ushort) (header & 0x0FFF);
-                    int x = (int) ((header >> 22) & 0x03FF);
+                    uint header = reader.ReadUInt();
+                    long pos = reader.Position;
 
-                    if ((x & 0x0200) > 0)
+                    while (header != 0x7FFF7FFF && pos < end)
                     {
-                        x |= unchecked((int) 0xFFFFFE00);
+                        ushort runLength = (ushort)(header & 0x0FFF);
+                        int x = (int)((header >> 22) & 0x03FF);
+
+                        if ((x & 0x0200) > 0)
+                        {
+                            x |= unchecked((int)0xFFFFFE00);
+                        }
+
+                        int y = (int)((header >> 12) & 0x3FF);
+
+                        if ((y & 0x0200) > 0)
+                        {
+                            y |= unchecked((int)0xFFFFFE00);
+                        }
+
+                        x += imageCenterX;
+                        y += imageCenterY + imageHeight;
+
+                        int block = y * imageWidth + x;
+
+                        for (int k = 0; k < runLength; k++)
+                        {
+                            data[block++] = HuesHelper.Color16To32(palette[reader.ReadByte()]) | 0xFF_00_00_00;
+                        }
+
+                        header = reader.ReadUInt();
                     }
 
-                    int y = (int) ((header >> 12) & 0x3FF);
-
-                    if ((y & 0x0200) > 0)
+                    AnimationFrameTexture f = new AnimationFrameTexture(imageWidth, imageHeight)
                     {
-                        y |= unchecked((int) 0xFFFFFE00);
-                    }
+                        CenterX = imageCenterX,
+                        CenterY = imageCenterY
+                    };
+                    
+                    f.SetData(data, 0, imageWidth * imageHeight);
 
-                    x += imageCenterX;
-                    y += imageCenterY + imageHeight;
+                    animDir.Frames[i] = f;
 
-                    int block = y * imageWidth + x;
+                    uint packed32 = (uint)((animGroup | (direction << 8) | (0x00 << 16)));
+                    uint packed32_2 = (uint)((animID | (i << 16)));
+                    ulong packed = (packed32_2 | ((ulong)packed32 << 32));
 
-                    for (int k = 0; k < runLength; k++)
-                    {
-                        data[block++] = HuesHelper.Color16To32(palette[reader.ReadByte()]) | 0xFF_00_00_00;
-                    }
-
-                    header = reader.ReadUInt();
+                    _picker.Set(packed, imageWidth, imageHeight, data);
                 }
-
-
-                AnimationFrameTexture f = new AnimationFrameTexture(imageWidth, imageHeight)
+                finally
                 {
-                    CenterX = imageCenterX,
-                    CenterY = imageCenterY
-                };
-
-                f.PushData(data);
-
-                animDir.Frames[i] = f;
+                    System.Buffers.ArrayPool<uint>.Shared.Return(data, true);
+                }
             }
 
             _usedTextures.AddLast(animDir);
@@ -1771,31 +1815,38 @@ namespace ClassicUO.IO.Resources
                             file.Seek(animDataStruct.Offset);
                             byte[] decbuffer = file.GetData((int) animDataStruct.CompressedLength, decLen);
 
-                            fixed (byte* ptr = decbuffer)
+                            try
                             {
-                                StackDataReader reader = new StackDataReader(ptr, decLen);
-                                reader.Skip(32);
+                                fixed (byte* ptr = decbuffer)
+                                {
+                                    StackDataReader reader = new StackDataReader(ptr, decLen);
+                                    reader.Skip(32);
 
-                                int frameCount = reader.Read<int>();
-                                int dataStart = reader.Read<int>();
-                                reader.Seek(dataStart);
+                                    int frameCount = reader.Read<int>();
+                                    int dataStart = reader.Read<int>();
+                                    reader.Seek(dataStart);
 
-                                reader.Skip(2);
-                                short frameID = reader.Read<short>();
-                                reader.Skip(8);
-                                uint pixelOffset = reader.Read<uint>();
+                                    reader.Skip(2);
+                                    short frameID = reader.Read<short>();
+                                    reader.Skip(8);
+                                    uint pixelOffset = reader.Read<uint>();
 
-                                reader.Seek((int) (dataStart + pixelOffset));
-                                reader.Skip(512);
-                                x = reader.Read<short>();
-                                y = reader.Read<short>();
-                                w = reader.Read<short>();
-                                h = reader.Read<short>();
-                                _animDimensionCache[id] = new Rectangle(x, y, w, h);
-                                reader.Release();
-
-                                return;
+                                    reader.Seek((int)(dataStart + pixelOffset));
+                                    reader.Skip(512);
+                                    x = reader.Read<short>();
+                                    y = reader.Read<short>();
+                                    w = reader.Read<short>();
+                                    h = reader.Read<short>();
+                                    _animDimensionCache[id] = new Rectangle(x, y, w, h);
+                                    reader.Release();
+                                }
                             }
+                            finally
+                            {
+                                System.Buffers.ArrayPool<byte>.Shared.Return(decbuffer);
+                            }
+
+                            return;
                         }
                     }
                 }

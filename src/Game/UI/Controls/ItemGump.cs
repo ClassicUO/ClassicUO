@@ -194,7 +194,8 @@ namespace ClassicUO.Game.UI.Controls
                 y = (int) (y / scale);
             }
 
-            if (texture.Contains(x, y))
+
+            if (ArtLoader.Instance.PixelCheck(Graphic, x, y))
             {
                 return true;
             }
@@ -203,7 +204,7 @@ namespace ClassicUO.Game.UI.Controls
 
             if (item != null && !item.IsCoin && item.Amount > 1 && item.ItemData.IsStackable)
             {
-                if (texture.Contains(x - 5, y - 5))
+                if (ArtLoader.Instance.PixelCheck(Graphic, x - 5, y - 5))
                 {
                     return true;
                 }

@@ -169,17 +169,18 @@ namespace ClassicUO.Utility
 
         public static string MakeSafe(this string s)
         {
-            StringBuilder sb = new StringBuilder();
-
-            for (int i = 0; i < s.Length; i++)
+            using (ValueStringBuilder sb = new ValueStringBuilder(s.Length))
             {
-                if (StringHelper.IsSafeChar(s[i]))
+                for (int i = 0; i < s.Length; i++)
                 {
-                    sb.Append(s[i]);
+                    if (StringHelper.IsSafeChar(s[i]))
+                    {
+                        sb.Append(s[i]);
+                    }
                 }
-            }
 
-            return sb.ToString();
+                return sb.ToString();
+            }
         }
 
         public static string ReadUTF8String(this BinaryReader reader, int length)

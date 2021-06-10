@@ -54,9 +54,9 @@ namespace ClassicUO.Game.UI.Gumps
         private const string DEBUG_STRING_SMALL_NO_ZOOM = "FPS: {0}";
         private static Point _last_position = new Point(-1, -1);
 
-        private readonly StringBuilder _sb = new StringBuilder();
         private uint _timeToUpdate;
         private readonly AlphaBlendControl _alphaBlendControl;
+        private string _cacheText = string.Empty;
 
         public DebugGump(int x, int y) : base(0, 0)
         {
@@ -108,70 +108,74 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 _timeToUpdate = Time.Ticks + 100;
 
-                _sb.Clear();
                 GameScene scene = Client.Game.GetScene<GameScene>();
 
-                if (IsMinimized && scene != null)
+                using (ValueStringBuilder sb = new ValueStringBuilder(256))
                 {
-                    _sb.AppendFormat
-                    (
-                        DEBUG_STRING_0,
-                        CUOEnviroment.CurrentRefreshRate,
-                        0,
-                        0,
-                        !World.InGame ? 1f : scene.Camera.Zoom,
-                        scene.RenderedObjectsCount
-                    );
-
-                    _sb.AppendLine($"- CUO version: {CUOEnviroment.Version}, Client version: {Settings.GlobalSettings.ClientVersion}");
-
-                    //_sb.AppendFormat(DEBUG_STRING_1, Engine.DebugInfo.MobilesRendered, Engine.DebugInfo.ItemsRendered, Engine.DebugInfo.StaticsRendered, Engine.DebugInfo.MultiRendered, Engine.DebugInfo.LandsRendered, Engine.DebugInfo.EffectsRendered);
-                    _sb.AppendFormat(DEBUG_STRING_2, World.InGame ? $"{World.Player.X}, {World.Player.Y}, {World.Player.Z}" : "0xFFFF, 0xFFFF, 0", Mouse.Position, SelectedObject.Object is GameObject gobj ? $"{gobj.X}, {gobj.Y}, {gobj.Z}" : "0xFFFF, 0xFFFF, 0");
-
-                    _sb.AppendFormat(DEBUG_STRING_3, ReadObject(SelectedObject.Object));
-
-                    if (CUOEnviroment.Profiler)
+                    if (IsMinimized && scene != null)
                     {
-                        double timeDraw = Profiler.GetContext("RenderFrame").TimeInContext;
+                        sb.Append
+                        (string.Format(
+                             DEBUG_STRING_0,
+                             CUOEnviroment.CurrentRefreshRate,
+                             0,
+                             0,
+                             !World.InGame ? 1f : scene.Camera.Zoom,
+                             scene.RenderedObjectsCount
+                             )
+                         );
 
-                        double timeUpdate = Profiler.GetContext("Update").TimeInContext;
+                        sb.Append($"- CUO version: {CUOEnviroment.Version}, Client version: {Settings.GlobalSettings.ClientVersion}\n");
 
-                        double timeFixedUpdate = Profiler.GetContext("FixedUpdate").TimeInContext;
+                        //_sb.AppendFormat(DEBUG_STRING_1, Engine.DebugInfo.MobilesRendered, Engine.DebugInfo.ItemsRendered, Engine.DebugInfo.StaticsRendered, Engine.DebugInfo.MultiRendered, Engine.DebugInfo.LandsRendered, Engine.DebugInfo.EffectsRendered);
+                        sb.Append(string.Format(DEBUG_STRING_2, World.InGame ? $"{World.Player.X}, {World.Player.Y}, {World.Player.Z}" : "0xFFFF, 0xFFFF, 0", Mouse.Position, SelectedObject.Object is GameObject gobj ? $"{gobj.X}, {gobj.Y}, {gobj.Z}" : "0xFFFF, 0xFFFF, 0"));
 
-                        double timeOutOfContext = Profiler.GetContext("OutOfContext").TimeInContext;
+                        sb.Append(string.Format(DEBUG_STRING_3, ReadObject(SelectedObject.Object)));
 
-                        //double timeTotalCheck = timeOutOfContext + timeDraw + timeUpdate;
-                        double timeTotal = Profiler.TrackedTime;
+                        if (CUOEnviroment.Profiler)
+                        {
+                            double timeDraw = Profiler.GetContext("RenderFrame").TimeInContext;
 
-                        double avgDrawMs = Profiler.GetContext("RenderFrame").AverageTime;
+                            double timeUpdate = Profiler.GetContext("Update").TimeInContext;
 
-                        _sb.AppendLine("- Profiling");
+                            double timeFixedUpdate = Profiler.GetContext("FixedUpdate").TimeInContext;
 
-                        _sb.AppendLine
-                        (
-                            string.Format
+                            double timeOutOfContext = Profiler.GetContext("OutOfContext").TimeInContext;
+
+                            //double timeTotalCheck = timeOutOfContext + timeDraw + timeUpdate;
+                            double timeTotal = Profiler.TrackedTime;
+
+                            double avgDrawMs = Profiler.GetContext("RenderFrame").AverageTime;
+
+                            sb.Append("- Profiling\n");
+
+                            sb.Append
                             (
-                                "    Draw:{0:0.0}% Update:{1:0.0}% FixedUpd:{2:0.0} AvgDraw:{3:0.0}ms {4}",
-                                100d * (timeDraw / timeTotal),
-                                100d * (timeUpdate / timeTotal),
-                                100d * (timeFixedUpdate / timeTotal),
-                                avgDrawMs,
-                                CUOEnviroment.CurrentRefreshRate
-                            )
-                        );
+                                string.Format
+                                (
+                                    "    Draw:{0:0.0}% Update:{1:0.0}% FixedUpd:{2:0.0} AvgDraw:{3:0.0}ms {4}\n",
+                                    100d * (timeDraw / timeTotal),
+                                    100d * (timeUpdate / timeTotal),
+                                    100d * (timeFixedUpdate / timeTotal),
+                                    avgDrawMs,
+                                    CUOEnviroment.CurrentRefreshRate
+                                )
+                            );
+                        }
                     }
-                }
-                else if (scene != null && scene.Camera.Zoom != 1f)
-                {
-                    _sb.AppendFormat(DEBUG_STRING_SMALL, CUOEnviroment.CurrentRefreshRate, !World.InGame ? 1f : scene.Camera.Zoom);
-                }
-                else
-                {
-                    _sb.AppendFormat(DEBUG_STRING_SMALL_NO_ZOOM, CUOEnviroment.CurrentRefreshRate);
+                    else if (scene != null && scene.Camera.Zoom != 1f)
+                    {
+                        sb.Append(string.Format(DEBUG_STRING_SMALL, CUOEnviroment.CurrentRefreshRate, !World.InGame ? 1f : scene.Camera.Zoom));
+                    }
+                    else
+                    {
+                        sb.Append(string.Format(DEBUG_STRING_SMALL_NO_ZOOM, CUOEnviroment.CurrentRefreshRate));
+                    }
+
+                    _cacheText = sb.ToString();
                 }
 
-
-                Vector2 size = Fonts.Bold.MeasureString(_sb.ToString());
+                Vector2 size = Fonts.Bold.MeasureString(_cacheText);
 
                 _alphaBlendControl.Width = Width = (int) (size.X + 20);
                 _alphaBlendControl.Height = Height = (int) (size.Y + 20);
@@ -192,7 +196,7 @@ namespace ClassicUO.Game.UI.Gumps
             batcher.DrawString
             (
                 Fonts.Bold,
-                _sb.ToString(),
+                _cacheText,
                 x + 10,
                 y + 10,
                 ref HueVector

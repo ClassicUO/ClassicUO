@@ -91,7 +91,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 _blankGumpsPixels[index] = new uint[data.Length];
                 _blankGumpsPixels[index + 2] = new uint[data.Length];
-
+                
                 data.CopyTo(_blankGumpsPixels[index], 0);
             }
 

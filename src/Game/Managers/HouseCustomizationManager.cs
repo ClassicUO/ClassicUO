@@ -299,10 +299,11 @@ namespace ClassicUO.Game.Managers
                             (
                                 floorMulti.Graphic,
                                 0,
-                                x - foundationItem.X,
-                                y - foundationItem.Y,
+                                (ushort) (x - foundationItem.X),
+                                (ushort) (y - foundationItem.Y),
                                 (sbyte) z,
-                                true
+                                true,
+                                false
                             );
 
                             mo.AlphaHue = 0xFF;
@@ -585,10 +586,11 @@ namespace ClassicUO.Game.Managers
                             (
                                 0x0496,
                                 tempColor,
-                                x - foundationItem.X,
-                                y - foundationItem.Y,
+                                (ushort) (x - foundationItem.X),
+                                (ushort) (y - foundationItem.Y),
                                 (sbyte) z,
-                                true
+                                true,
+                                false
                             );
 
                             mo.AlphaHue = 0xFF;
@@ -811,10 +813,11 @@ namespace ClassicUO.Game.Managers
                                 (
                                     item.Graphic,
                                     0,
-                                    xx + item.X,
-                                    yy + item.Y,
+                                    (ushort) (xx + item.X),
+                                    (ushort) (yy + item.Y),
                                     (sbyte) (z + item.Z),
-                                    true
+                                    true,
+                                    false
                                 );
                             }
                         }

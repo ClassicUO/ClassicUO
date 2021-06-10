@@ -30,6 +30,7 @@
 
 #endregion
 
+using System;
 using System.Runtime.CompilerServices;
 using System.Text;
 using SDL2;
@@ -39,7 +40,6 @@ namespace ClassicUO.Utility
     internal static class StringHelper
     {
         private static readonly char[] _dots = { '.', ',', ';', '!' };
-        private static readonly StringBuilder _sb = new StringBuilder();
 
         public static string CapitalizeFirstCharacter(string str)
         {
@@ -64,26 +64,22 @@ namespace ClassicUO.Utility
                 return string.Empty;
             }
 
-            if (str.Length == 1)
+            using (ValueStringBuilder sb = new ValueStringBuilder(str.Length))
             {
-                return char.ToUpper(str[0]).ToString();
-            }
+                bool capitalizeNext = true;
 
-            _sb.Clear();
-
-            bool capitalizeNext = true;
-
-            for (int i = 0; i < str.Length; i++)
-            {
-                _sb.Append(capitalizeNext ? char.ToUpper(str[i]) : str[i]);
-
-                if (!char.IsWhiteSpace(str[i]))
+                for (int i = 0; i < str.Length; i++)
                 {
-                    capitalizeNext = i + 1 < str.Length && char.IsWhiteSpace(str[i + 1]);
-                }
-            }
+                    sb.Append(capitalizeNext ? char.ToUpper(str[i]) : str[i]);
 
-            return _sb.ToString();
+                    if (!char.IsWhiteSpace(str[i]))
+                    {
+                        capitalizeNext = i + 1 < str.Length && char.IsWhiteSpace(str[i + 1]);
+                    }
+                }
+
+                return sb.ToString();
+            }
         }
 
         public static string CapitalizeWordsByLimitator(string str)
@@ -93,32 +89,28 @@ namespace ClassicUO.Utility
                 return string.Empty;
             }
 
-            if (str.Length == 1)
+            using (ValueStringBuilder sb = new ValueStringBuilder(str.Length))
             {
-                return char.ToUpper(str[0]).ToString();
-            }
+                bool capitalizeNext = true;
 
-            _sb.Clear();
-
-            bool capitalizeNext = true;
-
-            for (int i = 0; i < str.Length; i++)
-            {
-                _sb.Append(capitalizeNext ? char.ToUpper(str[i]) : str[i]);
-                capitalizeNext = false;
-
-                for (int j = 0; j < _dots.Length; j++)
+                for (int i = 0; i < str.Length; i++)
                 {
-                    if (str[i] == _dots[j])
-                    {
-                        capitalizeNext = true;
+                    sb.Append(capitalizeNext ? char.ToUpper(str[i]) : str[i]);
+                    capitalizeNext = false;
 
-                        break;
+                    for (int j = 0; j < _dots.Length; j++)
+                    {
+                        if (str[i] == _dots[j])
+                        {
+                            capitalizeNext = true;
+
+                            break;
+                        }
                     }
                 }
-            }
 
-            return _sb.ToString();
+                return sb.ToString();
+            }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -142,23 +134,25 @@ namespace ClassicUO.Utility
                 return "";
             }
 
-            _sb.Clear();
-            _sb.Append(str[0]);
-
-            for (int i = 1, len = str.Length - 1; i <= len; i++)
+            using (ValueStringBuilder sb = new ValueStringBuilder(str.Length * 2))
             {
-                if (char.IsUpper(str[i]))
+                sb.Append(str[0]);
+
+                for (int i = 1, len = str.Length - 1; i <= len; i++)
                 {
-                    if (str[i - 1] != ' ' && !char.IsUpper(str[i - 1]) || checkAcronyms && char.IsUpper(str[i - 1]) && i < len && !char.IsUpper(str[i + 1]))
+                    if (char.IsUpper(str[i]))
                     {
-                        _sb.Append(' ');
+                        if (str[i - 1] != ' ' && !char.IsUpper(str[i - 1]) || checkAcronyms && char.IsUpper(str[i - 1]) && i < len && !char.IsUpper(str[i + 1]))
+                        {
+                            sb.Append(' ');
+                        }
                     }
+
+                    sb.Append(str[i]);
                 }
 
-                _sb.Append(str[i]);
+                return sb.ToString();
             }
-
-            return _sb.ToString();
         }
 
         public static string RemoveUpperLowerChars(string str, bool removelower = true)
@@ -168,17 +162,18 @@ namespace ClassicUO.Utility
                 return "";
             }
 
-            _sb.Clear();
-
-            for (int i = 0; i < str.Length; i++)
+            using (ValueStringBuilder sb = new ValueStringBuilder(str.Length))
             {
-                if (char.IsUpper(str[i]) == removelower || str[i] == ' ')
+                for (int i = 0; i < str.Length; i++)
                 {
-                    _sb.Append(str[i]);
+                    if (char.IsUpper(str[i]) == removelower || str[i] == ' ')
+                    {
+                        sb.Append(str[i]);
+                    }
                 }
-            }
 
-            return _sb.ToString();
+                return sb.ToString();
+            }
         }
 
         public static string IntToAbbreviatedString(int num)

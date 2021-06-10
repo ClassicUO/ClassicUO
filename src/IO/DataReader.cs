@@ -35,6 +35,7 @@ using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
+using ClassicUO.Utility;
 
 namespace ClassicUO.IO
 {
@@ -226,19 +227,20 @@ namespace ClassicUO.IO
         {
             EnsureSize(size);
 
-            StringBuilder sb = new StringBuilder(size);
-
-            for (int i = 0; i < size; i++)
+            using (ValueStringBuilder sb = new ValueStringBuilder(size))
             {
-                char c = (char) ReadByte();
-
-                if (c != 0)
+                for (int i = 0; i < size; i++)
                 {
-                    sb.Append(c);
-                }
-            }
+                    char c = (char)ReadByte();
 
-            return sb.ToString();
+                    if (c != 0)
+                    {
+                        sb.Append(c);
+                    }
+                }
+
+                return sb.ToString();
+            }
         }
 
         [Conditional("DEBUG")]

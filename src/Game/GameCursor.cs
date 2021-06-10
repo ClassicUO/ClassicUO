@@ -278,6 +278,9 @@ namespace ClassicUO.Game
                                 _cursors_ptr[i, j] = SDL.SDL_CreateColorCursor((IntPtr) surface, hotX, hotY);
                             }
                         }
+
+
+                        System.Buffers.ArrayPool<uint>.Shared.Return(pixels, true);
                     }
                 }
             }

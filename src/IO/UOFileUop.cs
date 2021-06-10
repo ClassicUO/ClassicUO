@@ -197,7 +197,7 @@ namespace ClassicUO.IO
 
         public unsafe byte[] GetData(int compressedSize, int uncompressedSize)
         {
-            byte[] data = new byte[uncompressedSize];
+            byte[] data = System.Buffers.ArrayPool<byte>.Shared.Rent(uncompressedSize);
 
             fixed (byte* destPtr = data)
             {
