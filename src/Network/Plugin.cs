@@ -128,6 +128,11 @@ namespace ClassicUO.Network
         private static delegate*<ushort, ref ArtInfo, void> _getStaticImage;
 
 
+        [Obsolete]
+        private CUO_API.OnPacketSendRecv _onSend_OLD, _onRecv_OLD;
+        [Obsolete]
+        private static IntPtr _send_OLD, _recv_OLD;
+
 
         static Plugin()
         {
@@ -143,6 +148,9 @@ namespace ClassicUO.Network
             _getStaticData = &GetStaticData;
             _getTileData = &GetTileData;
             _get_cliloc = &GetCliloc;
+
+            _send_OLD = Marshal.GetFunctionPointerForDelegate<CUO_API.OnPacketSendRecv>(OnPluginSend);
+            _recv_OLD = Marshal.GetFunctionPointerForDelegate<CUO_API.OnPacketSendRecv>(OnPluginRecv);
         }
 
         private Plugin(string path)
@@ -221,7 +229,11 @@ namespace ClassicUO.Network
                 SDL_Window = Client.Game.Window.Handle,
                 GetStaticData = (IntPtr)_getStaticData,
                 GetTileData = (IntPtr)_getTileData,
-                GetCliloc = (IntPtr)_get_cliloc
+                GetCliloc = (IntPtr)_get_cliloc,
+
+                // TODO: retrocompatibility. These functions will be removed
+                Recv_OBSOLETE_DO_NOT_USE = _recv_OLD,
+                Send_OBSOLETE_DO_NOT_USE = _send_OLD
             };
 
             void* func = &header;
@@ -297,6 +309,18 @@ namespace ClassicUO.Network
 
             unchecked
             {
+                // TODO: retrocompatibility. These functions will be removed
+                if (header.OnRecv_OBSOLETE_DO_NOT_USE != IntPtr.Zero)
+                {
+                    _onRecv_OLD = Marshal.GetDelegateForFunctionPointer<CUO_API.OnPacketSendRecv>(header.OnRecv_OBSOLETE_DO_NOT_USE);
+                }
+
+                if (header.OnSend_OBSOLETE_DO_NOT_USE != IntPtr.Zero)
+                {
+                    _onSend_OLD = Marshal.GetDelegateForFunctionPointer<CUO_API.OnPacketSendRecv>(header.OnSend_OBSOLETE_DO_NOT_USE);
+                }
+
+
                 if (header.OnHotkeyPressed != IntPtr.Zero)
                 {
                     _onHotkeyPressed = (delegate*<int, int, bool, bool>)header.OnHotkeyPressed;
@@ -531,8 +555,19 @@ namespace ClassicUO.Network
                             result = false;
                         }
                     }
-                }
+                    else if (plugin._onRecv_OLD != null)
+                    {
+                        byte[] tmp = new byte[length];
+                        Array.Copy(data, tmp, length);
 
+                        if (!plugin._onRecv_OLD(ref tmp, ref length))
+                        {
+                            result = false;
+                        }
+
+                        Array.Copy(tmp, data, length);
+                    }
+                }
             }
 
             return result;
@@ -553,6 +588,18 @@ namespace ClassicUO.Network
                         {
                             result = false;
                         }
+                    }
+                    else if (plugin._onSend_OLD != null)
+                    {
+                        byte[] tmp = new byte[length];
+                        Array.Copy(data, tmp, length);
+
+                        if (!plugin._onSend_OLD(ref tmp, ref length))
+                        {
+                            result = false;
+                        }
+
+                        Array.Copy(tmp, data, length);
                     }
                 }
             }
