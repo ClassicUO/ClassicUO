@@ -90,28 +90,8 @@ namespace ClassicUO.Network
         }
 
 
-        
-        [return: MarshalAs(UnmanagedType.I1)]
-        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        public delegate bool dOnGetStaticData
-        (
-            int index,
-            ref ulong flags,
-            ref byte weight,
-            ref byte layer,
-            ref int count,
-            ref ushort animid,
-            ref ushort lightidx,
-            ref byte height,
-            ref string name
-        );
 
-        [return: MarshalAs(UnmanagedType.I1)]
-        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        public delegate bool dOnGetTileData(int index, ref ulong flags, ref ushort textid, ref string name);
 
-        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        public delegate void dOnGetStaticImage(ushort g, ref ArtInfo art);
 
         [StructLayout(LayoutKind.Sequential, Pack = 1)]
         public struct ArtInfo
@@ -120,12 +100,8 @@ namespace ClassicUO.Network
             public long Size;
             public long CompressedSize;
         }
-        
 
 
-        [MarshalAs(UnmanagedType.FunctionPtr)] private static dOnGetStaticData _get_static_data;
-        [MarshalAs(UnmanagedType.FunctionPtr)] private static dOnGetTileData _get_tile_data;
-        [MarshalAs(UnmanagedType.FunctionPtr)] private static dOnGetStaticImage _getStaticImage;
 
 
         private readonly Dictionary<IntPtr, GraphicsResource> _resources = new Dictionary<IntPtr, GraphicsResource>();
@@ -139,7 +115,6 @@ namespace ClassicUO.Network
         private delegate*<void> _onInitialize, _onClientClose, _onConnected, _onDisconnected, _onFocusGained, _onFocusLost, _tick;
 
 
-        private static IntPtr _uoPathPtr;
         private static delegate*<IntPtr, ref int, bool> _recv_new, _send_new;
         private static delegate*<int, short> _getPacketLength;
         private static delegate*<out int, out int, out int, bool> _getPlayerPosition;
@@ -148,24 +123,25 @@ namespace ClassicUO.Network
         private static delegate*<int, bool, bool> _requestMove;
         private static delegate*<byte*, void> _setTitle;
         private static delegate*<int, byte*, bool, ref byte*, bool> _get_cliloc;
+        private static delegate*<int, ref ulong, ref byte, ref byte, ref int, ref ushort, ref ushort, ref byte, ref byte*, bool> _getStaticData;
+        private static delegate*<int, ref ulong, ref ushort, ref byte*, bool> _getTileData;
+        private static delegate*<ushort, ref ArtInfo, void> _getStaticImage;
 
 
 
         static Plugin()
         {
-            _uoPathPtr = (IntPtr) Utf8EncodeHeap(Settings.GlobalSettings.UltimaOnlineDirectory);
-
             _recv_new = &OnPluginRecv_new;
             _send_new = &OnPluginSend_new;
             _getPacketLength = &PacketsTable.GetPacketLength;
             _getPlayerPosition = &GetPlayerPosition;
             _castSpell = &GameActions.CastSpell;
-            _getStaticImage = GetStaticImage;
+            _getStaticImage = &GetStaticImage;
             _getUoFilePath = &GetUOFilePath;
             _requestMove = &RequestMove;
             _setTitle = &SetWindowTitle;
-            _get_static_data = GetStaticData;
-            _get_tile_data = GetTileData;
+            _getStaticData = &GetStaticData;
+            _getTileData = &GetTileData;
             _get_cliloc = &GetCliloc;
         }
 
@@ -230,22 +206,22 @@ namespace ClassicUO.Network
 
             PluginHeader header = new PluginHeader
             {
-                ClientVersion = (int) Client.Version,
+                ClientVersion = (int)Client.Version,
                 GetPacketLength = (IntPtr)_getPacketLength,
                 GetPlayerPosition = (IntPtr)_getPlayerPosition,
-                CastSpell = (IntPtr) _castSpell,
-                GetStaticImage = IntPtr.Zero,
+                CastSpell = (IntPtr)_castSpell,
+                GetStaticImage = (IntPtr)_getStaticImage,
                 HWND = hwnd,
-                GetUOFilePath = (IntPtr) _getUoFilePath,
+                GetUOFilePath = (IntPtr)_getUoFilePath,
                 RequestMove = (IntPtr)_requestMove,
                 SetTitle = (IntPtr)_setTitle,
-                Recv_new = (IntPtr) _recv_new,
-                Send_new = (IntPtr) _send_new,
+                Recv_new = (IntPtr)_recv_new,
+                Send_new = (IntPtr)_send_new,
 
                 SDL_Window = Client.Game.Window.Handle,
-                GetStaticData = IntPtr.Zero,
-                GetTileData = IntPtr.Zero,
-                GetCliloc =(IntPtr)_get_cliloc
+                GetStaticData = (IntPtr)_getStaticData,
+                GetTileData = (IntPtr)_getTileData,
+                GetCliloc = (IntPtr)_get_cliloc
             };
 
             void* func = &header;
@@ -277,7 +253,7 @@ namespace ClassicUO.Network
                     throw new Exception("Invalid Entry Point, Attempting managed load.");
                 }
 
-                ((delegate* <void*, void>) installPtr)(func);
+                ((delegate*<void*, void>)installPtr)(func);
 
                 Console.WriteLine(">>> ADDRESS {0}", header.OnInitialize);
             }
@@ -391,7 +367,7 @@ namespace ClassicUO.Network
                     _on_wnd_proc = (delegate*<void*, int>)header.OnWndProc;
                 }
             }
-            
+
             IsValid = true;
 
             Log.Trace("done");
@@ -429,12 +405,12 @@ namespace ClassicUO.Network
 
         private static IntPtr GetUOFilePath()
         {
-            return _uoPathPtr;
+            return (IntPtr)Utf8EncodeHeap(Settings.GlobalSettings.UltimaOnlineDirectory);
         }
 
         private static void SetWindowTitle(byte* str)
         {
-            Client.Game.SetWindowTitle(SDL.UTF8_ToManaged((IntPtr) str));
+            Client.Game.SetWindowTitle(SDL.UTF8_ToManaged((IntPtr)str));
         }
 
         private static bool GetStaticData
@@ -447,21 +423,21 @@ namespace ClassicUO.Network
             ref ushort animid,
             ref ushort lightidx,
             ref byte height,
-            ref string name
+            ref byte* name
         )
         {
             if (index >= 0 && index < Constants.MAX_STATIC_DATA_INDEX_COUNT)
             {
                 ref StaticTiles st = ref TileDataLoader.Instance.StaticData[index];
 
-                flags = (ulong) st.Flags;
+                flags = (ulong)st.Flags;
                 weight = st.Weight;
                 layer = st.Layer;
                 count = st.Count;
                 animid = st.AnimID;
                 lightidx = st.LightIndex;
                 height = st.Height;
-                name = st.Name;
+                name = Utf8EncodeHeap(st.Name);
 
                 return true;
             }
@@ -469,15 +445,15 @@ namespace ClassicUO.Network
             return false;
         }
 
-        private static bool GetTileData(int index, ref ulong flags, ref ushort textid, ref string name)
+        private static bool GetTileData(int index, ref ulong flags, ref ushort textid, ref byte* name)
         {
             if (index >= 0 && index < Constants.MAX_STATIC_DATA_INDEX_COUNT)
             {
                 ref LandTiles st = ref TileDataLoader.Instance.LandData[index];
 
-                flags = (ulong) st.Flags;
+                flags = (ulong)st.Flags;
                 textid = st.TexID;
-                name = st.Name;
+                name = Utf8EncodeHeap(st.Name);
 
                 return true;
             }
@@ -492,7 +468,7 @@ namespace ClassicUO.Network
 
             if (!string.IsNullOrEmpty(res))
             {
-                buffer = (byte*) Utf8EncodeHeap(res);
+                buffer = (byte*)Utf8EncodeHeap(res);
             }
 
             return buffer != null;
@@ -508,7 +484,7 @@ namespace ClassicUO.Network
 
         private static bool RequestMove(int dir, bool run)
         {
-            return World.Player.Walk((Direction) dir, run);
+            return World.Player.Walk((Direction)dir, run);
         }
 
         private static bool GetPlayerPosition(out int x, out int y, out int z)
@@ -875,7 +851,7 @@ namespace ClassicUO.Network
 
             for (int i = 0; i < length; i++)
             {
-                BatchCommand command = ((BatchCommand*) ptr)[i];
+                BatchCommand command = ((BatchCommand*)ptr)[i];
 
                 switch (command.type)
                 {
@@ -1034,7 +1010,7 @@ namespace ClassicUO.Network
 
                         for (int j = 0; j < elements.Length; j++)
                         {
-                            elements[j] = ((VertexElement*) createVertexBufferCommand.Declarations)[j];
+                            elements[j] = ((VertexElement*)createVertexBufferCommand.Declarations)[j];
                         }
 
                         VertexBuffer vb = createVertexBufferCommand.IsDynamic ? new DynamicVertexBuffer(device, new VertexDeclaration(createVertexBufferCommand.Size, elements), createVertexBufferCommand.VertexElementsCount, createVertexBufferCommand.BufferUsage) : new VertexBuffer(device, new VertexDeclaration(createVertexBufferCommand.Size, elements), createVertexBufferCommand.VertexElementsCount, createVertexBufferCommand.BufferUsage);
