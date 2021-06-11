@@ -85,7 +85,11 @@
     <ProjectReference Include="..\external\FNA\FNA.Core.csproj" />
     <ProjectReference Include="..\external\MP3Sharp\MP3Sharp\MP3Sharp.csproj" />
   </ItemGroup>
-
+  <ItemGroup>
+    <Reference Include="cuoapi">
+      <HintPath>..\external\cuoapi\cuoapi.dll</HintPath>
+    </Reference>
+  </ItemGroup>
 
   <ItemGroup>
     <Compile Update="Resources\ResErrorMessages.Designer.cs">
