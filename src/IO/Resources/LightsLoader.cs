@@ -123,12 +123,11 @@ namespace ClassicUO.IO.Resources
                 for (int j = 0; j < width; j++)
                 {
                     ushort val = _file.ReadByte();
-                    val = (ushort) ((val << 10) | (val << 5) | val);
+                    uint rgb24 = (uint)((val << 19) | (val << 11) | (val << 3));
 
                     if (val != 0)
                     {
-                        pixels[pos + j] = HuesHelper.Color16To32(val) | 0xFF_00_00_00;
-                        ;
+                        pixels[pos + j] = rgb24 | 0xFF_00_00_00;
                     }
                 }
             }

@@ -221,6 +221,8 @@ namespace ClassicUO.Network
             catch (SocketException e)
             {
                 Log.Error($"Socket error when connecting:\n{e}");
+                _logFile?.Write($"connection error: {e}");
+
                 Disconnect(e.SocketErrorCode);
 
                 return TaskCompletedFalse;
@@ -234,6 +236,8 @@ namespace ClassicUO.Network
 
         private void Disconnect(SocketError error)
         {
+            _logFile?.Write($"disconnection  -  socket_error: {error}");
+
             if (IsDisposed)
             {
                 return;
@@ -345,6 +349,8 @@ namespace ClassicUO.Network
                 catch (SocketException ex)
                 {
                     Log.Error("socket error when sending:\n" + ex);
+                    _logFile?.Write($"disconnection  -  error during writing to the socket buffer: {ex}");
+
                     Disconnect(ex.SocketErrorCode);
                 }
                 catch (Exception ex)
@@ -352,11 +358,16 @@ namespace ClassicUO.Network
                     if (ex.InnerException is SocketException socketEx)
                     {
                         Log.Error("socket error when sending:\n" + socketEx);
+
+                        _logFile?.Write($"disconnection  -  error during writing to the socket buffer [2]: {socketEx}");
                         Disconnect(socketEx.SocketErrorCode);
                     }
                     else
                     {
                         Log.Error("fatal error when receiving:\n" + ex);
+
+                        _logFile?.Write($"disconnection  -  error during writing to the socket buffer [3]: {ex}");
+
                         Disconnect();
                     }
                 }
@@ -514,12 +525,18 @@ namespace ClassicUO.Network
                 else
                 {
                     Log.Warn("Server sent 0 bytes. Closing connection");
+
+                    _logFile?.Write($"disconnection  -  received {received} bytes from server");
+
                     Disconnect(SocketError.SocketError);
                 }
             }
             catch (SocketException socketException)
             {
                 Log.Error("socket error when receiving:\n" + socketException);
+
+                _logFile?.Write($"disconnection  -  error while reading from socket: {socketException}");
+
                 Disconnect(socketException.SocketErrorCode);
             }
             catch (Exception ex)
@@ -527,11 +544,15 @@ namespace ClassicUO.Network
                 if (ex.InnerException is SocketException socketEx)
                 {
                     Log.Error("socket error when receiving:\n" + socketEx);
+                    _logFile?.Write($"disconnection  -  error while reading from socket [1]: {socketEx}");
+
                     Disconnect(socketEx.SocketErrorCode);
                 }
                 else
                 {
                     Log.Error("fatal error when receiving:\n" + ex);
+                    _logFile?.Write($"disconnection  -  error while reading from socket [2]: {ex}");
+
                     Disconnect();
                 }
             }

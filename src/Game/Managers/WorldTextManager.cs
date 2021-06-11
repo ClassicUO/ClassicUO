@@ -86,7 +86,7 @@ namespace ClassicUO.Game.Managers
                     {
                         Item item = World.CorpseManager.GetCorpseObject(ser);
 
-                        if (item != null && item != overheadDamage.Value.Parent)
+                        if (item != null && !ReferenceEquals(item, overheadDamage.Value.Parent))
                         {
                             _subst.Add(Tuple.Create(overheadDamage.Key, item.Serial));
                             overheadDamage.Value.SetParent(item);

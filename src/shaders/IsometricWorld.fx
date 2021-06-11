@@ -24,6 +24,7 @@ const float HuesPerTexture = 2048;
 sampler DrawSampler : register(s0);
 sampler HueSampler0 : register(s1);
 sampler HueSampler1 : register(s2);
+sampler HueSampler2 : register(s3);
 
 struct VS_INPUT
 {
@@ -66,6 +67,13 @@ float get_light(float3 norm)
 	// At 45 degrees (the angle the flat tiles are lit at) it must come out
 	// to (cos(45) / 2) + 0.5 or 0.85355339...
 	return base + ((Brightlight * (base - 0.85355339f)) - (base - 0.85355339f));
+}
+
+float3 get_colored_light(float shader, float gray)
+{
+	float2 texcoord = float2(gray, (shader - 0.5) / 63);
+
+	return tex2D(HueSampler2, texcoord).rgb;
 }
 
 PS_INPUT VertexShaderFunction(VS_INPUT IN)
@@ -156,9 +164,9 @@ float4 PixelShader_Hue(PS_INPUT IN) : COLOR0
 	}
 	else if (mode == LIGHTS)
 	{
-		if (IN.Hue.x != 0.0f)
+		if (IN.Hue.x > 1.0f)
 		{
-			color.rgb *= get_rgb(color.r, hue);
+			color.rgb = get_colored_light(IN.Hue.x - 1, color.r);
 		}
 	}
 	else if (mode == EFFECT_HUED)

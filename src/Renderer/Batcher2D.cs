@@ -1739,6 +1739,7 @@ namespace ClassicUO.Renderer
             GraphicsDevice.SamplerStates[0] = _sampler;
             GraphicsDevice.SamplerStates[1] = SamplerState.PointClamp;
             GraphicsDevice.SamplerStates[2] = SamplerState.PointClamp;
+            GraphicsDevice.SamplerStates[3] = SamplerState.PointClamp;
 
             GraphicsDevice.Indices = _indexBuffer;
             GraphicsDevice.SetVertexBuffer(_vertexBuffer);

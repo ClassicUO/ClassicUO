@@ -390,7 +390,7 @@ namespace ClassicUO.Game.Map
                     {
                         GameObject next = first.TNext;
 
-                        if (first != World.Player)
+                        if (!ReferenceEquals(first, World.Player))
                         {
                             first.Destroy();
                         }
@@ -432,7 +432,7 @@ namespace ClassicUO.Game.Map
                     {
                         GameObject next = first.TNext;
 
-                        if (first != World.Player)
+                        if (!ReferenceEquals(first, World.Player))
                         {
                             first.Destroy();
                         }
