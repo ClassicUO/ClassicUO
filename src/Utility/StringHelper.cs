@@ -221,6 +221,50 @@ namespace ClassicUO.Utility
             return null;
         }
 
+        public static string GetPluralAdjustedString(string str, bool plural = false)
+        {
+            if (str.Contains("%"))
+            {
+                string[] parts = str.Split(new[] { '%' }, System.StringSplitOptions.RemoveEmptyEntries);
+
+                if (parts.Length < 2)
+                {
+                    return str;
+                }
+
+                _sb.Clear();
+
+                _sb.Append(parts[0]);
+
+                if (parts[1].Contains("/"))
+                {
+                    string[] pluralparts = parts[1].Split('/');
+
+                    if (plural)
+                    {
+                        _sb.Append(pluralparts[0]);
+                    }
+                    else if(pluralparts.Length > 1)
+                    {
+                        _sb.Append(pluralparts[1]);
+                    }
+                }
+                else if (plural)
+                {
+                    _sb.Append(parts[1]);
+                }
+
+                if (parts.Length == 3)
+                {
+                    _sb.Append(parts[2]);
+                }
+
+                return _sb.ToString();
+            }
+
+            return str;
+        }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static unsafe bool UnsafeCompare(char* buffer, string str, int length)
         {
