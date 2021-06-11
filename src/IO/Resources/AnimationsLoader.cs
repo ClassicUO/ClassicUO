@@ -771,7 +771,7 @@ namespace ClassicUO.IO.Resources
 
                 try
                 {
-                    StackDataReader reader = new StackDataReader(decbuffer, decbuffer.Length);
+                    StackDataReader reader = new StackDataReader(decbuffer, entry.DecompressedLength);
 
                     uint animID = reader.Read<uint>();
                     reader.Skip(48);

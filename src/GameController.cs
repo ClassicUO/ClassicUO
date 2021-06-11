@@ -120,19 +120,26 @@ namespace ClassicUO
             const int TEXTURE_WIDTH = 32;
             const int TEXTURE_HEIGHT = 2048;
 
-            uint[] buffer = new uint[TEXTURE_WIDTH * TEXTURE_HEIGHT * 2];
-            HuesLoader.Instance.CreateShaderColors(buffer);
+            uint[] buffer = System.Buffers.ArrayPool<uint>.Shared.Rent(TEXTURE_WIDTH * TEXTURE_HEIGHT * 2);
 
-            _hueSamplers[0] = new Texture2D(GraphicsDevice, TEXTURE_WIDTH, TEXTURE_HEIGHT);
+            try
+            {
+                HuesLoader.Instance.CreateShaderColors(buffer);
 
-            _hueSamplers[0].SetData(buffer, 0, TEXTURE_WIDTH * TEXTURE_HEIGHT);
+                _hueSamplers[0] = new Texture2D(GraphicsDevice, TEXTURE_WIDTH, TEXTURE_HEIGHT);
+                _hueSamplers[0].SetData(buffer, 0, TEXTURE_WIDTH * TEXTURE_HEIGHT);
 
-            _hueSamplers[1] = new Texture2D(GraphicsDevice, TEXTURE_WIDTH, TEXTURE_HEIGHT);
+                _hueSamplers[1] = new Texture2D(GraphicsDevice, TEXTURE_WIDTH, TEXTURE_HEIGHT);
+                _hueSamplers[1].SetData(buffer, TEXTURE_WIDTH * TEXTURE_HEIGHT, TEXTURE_WIDTH * TEXTURE_HEIGHT);
 
-            _hueSamplers[1].SetData(buffer, TEXTURE_WIDTH * TEXTURE_HEIGHT, TEXTURE_WIDTH * TEXTURE_HEIGHT);
-
-            GraphicsDevice.Textures[1] = _hueSamplers[0];
-            GraphicsDevice.Textures[2] = _hueSamplers[1];
+                GraphicsDevice.Textures[1] = _hueSamplers[0];
+                GraphicsDevice.Textures[2] = _hueSamplers[1];
+            }
+            finally
+            {
+                System.Buffers.ArrayPool<uint>.Shared.Return(buffer, true);
+            }
+           
 
             UIManager.InitializeGameCursor();
             AnimatedStaticsManager.Initialize();
