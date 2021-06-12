@@ -122,7 +122,7 @@ namespace ClassicUO.Game.GameObjects
                 }
             }
 
-            if (ProfileManager.CurrentProfile.HighlightGameObjects && SelectedObject.LastObject == this)
+            if (ProfileManager.CurrentProfile.HighlightGameObjects && ReferenceEquals(SelectedObject.LastObject, this))
             {
                 hue = Constants.HIGHLIGHT_CURRENT_OBJECT_HUE;
                 partial = false;
@@ -137,7 +137,7 @@ namespace ClassicUO.Game.GameObjects
             }
             else
             {
-                if (!IsLocked && !IsMulti && SelectedObject.LastObject == this)
+                if (!IsLocked && !IsMulti && ReferenceEquals(SelectedObject.LastObject, this))
                 {
                     // TODO: check why i put this.
                     //isPartial = ItemData.Weight == 0xFF;
@@ -165,7 +165,7 @@ namespace ClassicUO.Game.GameObjects
                 );
             }
 
-            if (ItemData.IsLight)
+            if (ItemData.IsLight || graphic >= 0x3E02 && graphic <= 0x3E0B || graphic >= 0x3914 && graphic <= 0x3929)
             {
                 Client.Game.GetScene<GameScene>().AddLight(this, this, posX + 22, posY + 22);
             }
@@ -186,7 +186,7 @@ namespace ClassicUO.Game.GameObjects
                 false
             );
 
-            if (SelectedObject.Object == this || TargetManager.TargetingState == CursorTarget.MultiPlacement)
+            if (ReferenceEquals(SelectedObject.Object, this) || TargetManager.TargetingState == CursorTarget.MultiPlacement)
             {
                 return false;
             }
@@ -412,7 +412,7 @@ namespace ClassicUO.Game.GameObjects
                     {
                         color = 0x0034;
                     }
-                    else if (ProfileManager.CurrentProfile.HighlightGameObjects && SelectedObject.LastObject == owner)
+                    else if (ProfileManager.CurrentProfile.HighlightGameObjects && ReferenceEquals(SelectedObject.LastObject, owner))
                     {
                         color = Constants.HIGHLIGHT_CURRENT_OBJECT_HUE;
                     }
@@ -434,7 +434,7 @@ namespace ClassicUO.Game.GameObjects
                     return;
                 }
 
-                if (SelectedObject.Object == owner)
+                if (ReferenceEquals(SelectedObject.Object, owner))
                 {
                     return;
                 }
