@@ -817,11 +817,11 @@ namespace ClassicUO.Network
             byte[] buffer = spellsPacket.ToArray();
             int len = spellsPacket.Length;
 
-            Plugin.ProcessRecvPacket(buffer, ref len);
+            Plugin.ProcessRecvPacket(ref buffer, ref len);
 
             buffer = skillsPacket.ToArray();
             len = skillsPacket.Length;
-            Plugin.ProcessRecvPacket(buffer, ref len);
+            Plugin.ProcessRecvPacket(ref buffer, ref len);
         }
 
         private static void Talk(ref PacketBufferReader p)

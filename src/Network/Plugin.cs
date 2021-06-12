@@ -435,7 +435,7 @@ namespace ClassicUO.Network
         }
 
 
-        internal static bool ProcessRecvPacket(byte[] data, ref int length)
+        internal static bool ProcessRecvPacket(ref byte[] data, ref int length)
         {
             bool result = true;
 
@@ -457,7 +457,7 @@ namespace ClassicUO.Network
             return result;
         }
 
-        internal static bool ProcessSendPacket(byte[] data, ref int length)
+        internal static bool ProcessSendPacket(ref byte[] data, ref int length)
         {
             bool result = true;
 

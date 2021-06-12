@@ -296,7 +296,7 @@ namespace ClassicUO.Network
             ref byte[] data = ref p.ToArray();
             int length = p.Length;
 
-            if (Plugin.ProcessSendPacket(data, ref length))
+            if (Plugin.ProcessSendPacket(ref data, ref length))
             {
                 PacketSent.Raise(p);
                 Send(data, length, false);
@@ -305,7 +305,7 @@ namespace ClassicUO.Network
 
         public void Send(byte[] data, int length, bool ignorePlugin = false, bool skip_encryption = false)
         {
-            if (!ignorePlugin && !Plugin.ProcessSendPacket(data, ref length))
+            if (!ignorePlugin && !Plugin.ProcessSendPacket(ref data, ref length))
             {
                 return;
             }
@@ -429,7 +429,7 @@ namespace ClassicUO.Network
                             LogPacket(data, packetlength, false);
                         }
 
-                        if (Plugin.ProcessRecvPacket(data, ref packetlength))
+                        if (Plugin.ProcessRecvPacket(ref data, ref packetlength))
                         {
                             PacketHandlers.Handlers.AnalyzePacket(data, offset, packetlength);
 
