@@ -4980,10 +4980,10 @@ namespace ClassicUO.Network
 
                             for (uint i = 0; i < c; i++)
                             {
-                                id = reader.ReadLE<ushort>();
-                                x = reader.Read<sbyte>();
-                                y = reader.Read<sbyte>();
-                                z = reader.Read<sbyte>();
+                                id = reader.ReadUInt16BE();
+                                x = reader.ReadInt8();
+                                y = reader.ReadInt8();
+                                z = reader.ReadInt8();
 
                                 if (id != 0)
                                 {
@@ -5017,9 +5017,9 @@ namespace ClassicUO.Network
 
                             for (uint i = 0; i < c; i++)
                             {
-                                id = reader.ReadLE<ushort>();
-                                x = reader.Read<sbyte>();
-                                y = reader.Read<sbyte>();
+                                id = reader.ReadUInt16BE();
+                                x = reader.ReadInt8();
+                                y = reader.ReadInt8();
 
                                 if (id != 0)
                                 {
@@ -5074,7 +5074,7 @@ namespace ClassicUO.Network
 
                             for (uint i = 0; i < c; i++)
                             {
-                                id = reader.ReadLE<ushort>();
+                                id = reader.ReadUInt16BE();
                                 x = (sbyte)(i / multiHeight + offX);
                                 y = (sbyte)(i % multiHeight + offY);
 

@@ -773,17 +773,17 @@ namespace ClassicUO.IO.Resources
                 {
                     StackDataReader reader = new StackDataReader(decbuffer, entry.DecompressedLength);
 
-                    uint animID = reader.Read<uint>();
+                    uint animID = reader.ReadUInt32LE();
                     reader.Skip(48);
-                    int replaces = reader.Read<int>();
+                    int replaces = reader.ReadInt32LE();
 
                     if (replaces != 48 && replaces != 68)
                     {
                         for (int k = 0; k < replaces; k++)
                         {
-                            int oldGroup = reader.Read<int>();
-                            uint frameCount = reader.Read<uint>();
-                            int newGroup = reader.Read<int>();
+                            int oldGroup = reader.ReadInt32LE();
+                            uint frameCount = reader.ReadUInt32LE();
+                            int newGroup = reader.ReadInt32LE();
 
                             if (frameCount == 0 && DataIndex[animID] != null)
                             {
@@ -1410,8 +1410,8 @@ namespace ClassicUO.IO.Resources
 
             long end = (long)reader.StartAddress + reader.Length;
 
-            int fc = reader.Read<int>();
-            uint dataStart = reader.Read<uint>();
+            int fc = reader.ReadInt32LE();
+            uint dataStart = reader.ReadUInt32LE();
             reader.Seek(dataStart);
 
             ANIMATION_GROUPS_TYPE type = DataIndex[animID].Type;
@@ -1480,10 +1480,10 @@ namespace ClassicUO.IO.Resources
 
                             reader.Skip(512);
 
-                            short imageCenterX = reader.Read<short>();
-                            short imageCenterY = reader.Read<short>();
-                            short imageWidth = reader.Read<short>();
-                            short imageHeight = reader.Read<short>();
+                            short imageCenterX = reader.ReadInt16LE();
+                            short imageCenterY = reader.ReadInt16LE();
+                            short imageWidth = reader.ReadInt16LE();
+                            short imageHeight = reader.ReadInt16LE();
 
                             if (imageWidth > 0 && imageHeight > 0)
                             {
@@ -1491,7 +1491,7 @@ namespace ClassicUO.IO.Resources
 
                                 try
                                 {
-                                    uint header = reader.Read<uint>();
+                                    uint header = reader.ReadUInt32LE();
 
                                     long pos = reader.Position;
 
@@ -1521,7 +1521,7 @@ namespace ClassicUO.IO.Resources
 
                                         for (int k = 0; k < runLength; ++k)
                                         {
-                                            ushort val = palette[reader.Read<byte>()];
+                                            ushort val = palette[reader.ReadUInt8()];
 
                                             // FIXME: same of MUL ? Keep it as original for the moment
                                             if (val != 0)
@@ -1536,7 +1536,7 @@ namespace ClassicUO.IO.Resources
                                             block++;
                                         }
 
-                                        header = reader.Read<uint>();
+                                        header = reader.ReadUInt32LE();
                                     }
 
                                     AnimationFrameTexture f = new AnimationFrameTexture(imageWidth, imageHeight)
@@ -1822,21 +1822,21 @@ namespace ClassicUO.IO.Resources
                                     StackDataReader reader = new StackDataReader(ptr, decLen);
                                     reader.Skip(32);
 
-                                    int frameCount = reader.Read<int>();
-                                    int dataStart = reader.Read<int>();
+                                    int frameCount = reader.ReadInt32LE();
+                                    int dataStart = reader.ReadInt32LE();
                                     reader.Seek(dataStart);
 
                                     reader.Skip(2);
-                                    short frameID = reader.Read<short>();
+                                    short frameID = reader.ReadInt16LE();
                                     reader.Skip(8);
-                                    uint pixelOffset = reader.Read<uint>();
+                                    uint pixelOffset = reader.ReadUInt32LE();
 
                                     reader.Seek((int)(dataStart + pixelOffset));
                                     reader.Skip(512);
-                                    x = reader.Read<short>();
-                                    y = reader.Read<short>();
-                                    w = reader.Read<short>();
-                                    h = reader.Read<short>();
+                                    x = reader.ReadInt16LE();
+                                    y = reader.ReadInt16LE();
+                                    w = reader.ReadInt16LE();
+                                    h = reader.ReadInt16LE();
                                     _animDimensionCache[id] = new Rectangle(x, y, w, h);
                                     reader.Release();
                                 }

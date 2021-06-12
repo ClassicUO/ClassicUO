@@ -298,7 +298,7 @@ namespace ClassicUO.Game.GameObjects
                             StackDataReader reader = new StackDataReader(dataPtr, entry.DecompressedLength);
                             reader.Skip(4);
 
-                            int count = reader.Read<int>();
+                            int count = reader.ReadInt32LE();
 
                             int sizeOf = sizeof(MultiBlockNew);
 
