@@ -227,34 +227,35 @@ namespace ClassicUO.Utility
                     return str;
                 }
 
-                _sb.Clear();
-
-                _sb.Append(parts[0]);
-
-                if (parts[1].Contains("/"))
+                using (ValueStringBuilder sb = new ValueStringBuilder(str.Length))
                 {
-                    string[] pluralparts = parts[1].Split('/');
+                    sb.Append(parts[0]);
 
-                    if (plural)
+                    if (parts[1].Contains("/"))
                     {
-                        _sb.Append(pluralparts[0]);
+                        string[] pluralparts = parts[1].Split('/');
+
+                        if (plural)
+                        {
+                            sb.Append(pluralparts[0]);
+                        }
+                        else if (pluralparts.Length > 1)
+                        {
+                            sb.Append(pluralparts[1]);
+                        }
                     }
-                    else if(pluralparts.Length > 1)
+                    else if (plural)
                     {
-                        _sb.Append(pluralparts[1]);
+                        sb.Append(parts[1]);
                     }
-                }
-                else if (plural)
-                {
-                    _sb.Append(parts[1]);
-                }
 
-                if (parts.Length == 3)
-                {
-                    _sb.Append(parts[2]);
-                }
+                    if (parts.Length == 3)
+                    {
+                        sb.Append(parts[2]);
+                    }
 
-                return _sb.ToString();
+                    return sb.ToString();
+                }
             }
 
             return str;
