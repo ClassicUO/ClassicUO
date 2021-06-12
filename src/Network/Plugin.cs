@@ -273,7 +273,7 @@ namespace ClassicUO.Network
             {
                 try
                 {
-                    Assembly asm = Assembly.LoadFrom(PluginPath);
+                    Assembly asm = Assembly.LoadFile(PluginPath);
 
                     Type type = asm.GetType("Assistant.Engine");
 
