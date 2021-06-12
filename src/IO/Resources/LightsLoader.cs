@@ -112,18 +112,26 @@ namespace ClassicUO.IO.Resources
                 {
                     int pos = i * entry.Width;
 
-                for (int j = 0; j < width; j++)
-                {
-                    ushort val = _file.ReadByte();
-                    uint rgb24 = (uint)((val << 19) | (val << 11) | (val << 3));
-
-                    if (val != 0)
+                    for (int j = 0; j < entry.Width; j++)
                     {
-                        pixels[pos + j] = rgb24 | 0xFF_00_00_00;
+                        ushort val = _file.ReadByte();
+                        uint rgb24 = (uint) ((val << 19) | (val << 11) | (val << 3));
+
+                        if (val != 0)
+                        {
+                            pixels[pos + j] = rgb24 | 0xFF_00_00_00;
+                        }
                     }
                 }
+
+                texture = new UOTexture(entry.Width, entry.Height);
+                texture.SetData(pixels, 0, entry.Width * entry.Height);
             }
-            
+            finally
+            {
+                System.Buffers.ArrayPool<uint>.Shared.Return(pixels, true);
+            }
+
             return true;
         }
     }
