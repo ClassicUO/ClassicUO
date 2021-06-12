@@ -1595,7 +1595,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (_showMobiles)
             {
-                foreach (Mobile mob in World.Mobiles)
+                foreach (Mobile mob in World.Mobiles.Values)
                 {
                     if (mob == World.Player)
                     {

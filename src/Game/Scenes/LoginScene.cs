@@ -213,12 +213,12 @@ namespace ClassicUO.Game.Scenes
 
         private Gump GetGumpForStep()
         {
-            foreach (Item item in World.Items)
+            foreach (Item item in World.Items.Values)
             {
                 World.RemoveItem(item);
             }
 
-            foreach (Mobile mobile in World.Mobiles)
+            foreach (Mobile mobile in World.Mobiles.Values)
             {
                 World.RemoveMobile(mobile);
             }

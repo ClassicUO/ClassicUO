@@ -3659,7 +3659,17 @@ namespace ClassicUO.Network
 
             serial |= 0x80000000;
 
-            World.Mobiles.Replace(owner, serial);
+            if (World.Mobiles.Remove(owner.Serial))
+            {
+                for (LinkedObject i = owner.Items; i != null; i = i.Next)
+                {
+                    Item it = (Item)i;
+                    it.Container = serial;
+                }
+
+                World.Mobiles[serial] = owner;
+                owner.Serial = serial;
+            }
 
             if (SerialHelper.IsValid(corpseSerial))
             {
