@@ -847,7 +847,7 @@ namespace ClassicUO.Network
 
             if (serial == 0 && graphic == 0 && type == MessageType.Regular && font == 0xFFFF && hue == 0xFFFF && name.StartsWith("SYSTEM"))
             {
-                NetClient.Socket.Send(new PACKTalk());
+                NetClient.Socket.Send_ACKTalk();
 
                 return;
             }

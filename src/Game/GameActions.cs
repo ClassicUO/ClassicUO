@@ -319,7 +319,7 @@ namespace ClassicUO.Game
             }
             else
             {
-                Socket.Send(new PDoubleClickRequest(serial));
+                Socket.Send_DoubleClick(serial);
             }
 
             if (SerialHelper.IsItem(serial))

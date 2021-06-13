@@ -541,30 +541,15 @@ namespace ClassicUO.Game.Scenes
                 byte build = (byte) (clientVersion >> 8);
                 byte extra = (byte) clientVersion;
 
-                PSeed packet = new PSeed
-                (
-                    address,
-                    major,
-                    minor,
-                    build,
-                    extra
-                );
 
-                NetClient.LoginSocket.Send(packet.ToArray(), packet.Length, true, true);
+                NetClient.LoginSocket.Send_Seed(address, major, minor, build, extra);
             }
             else
             {
-                // TODO: stackalloc
-                byte[] packet = new byte[4];
-                packet[0] = (byte) (address >> 24);
-                packet[1] = (byte) (address >> 16);
-                packet[2] = (byte) (address >> 8);
-                packet[3] = (byte) address;
-
-                NetClient.LoginSocket.Send(packet, packet.Length, true, true);
+                NetClient.LoginSocket.Send_Seed_Old(address);
             }
 
-            NetClient.LoginSocket.Send(new PFirstLogin(Account, Password));
+            NetClient.LoginSocket.Send_FirstLogin(Account, Password);
         }
 
         private void NetClient_Disconnected(object sender, SocketError e)
