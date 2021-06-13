@@ -35,16 +35,15 @@ using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Security.Policy;
 using ClassicUO.Configuration;
 using ClassicUO.Game;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
 using ClassicUO.IO.Resources;
-using ClassicUO.Renderer;
 using ClassicUO.Renderer.Batching;
 using ClassicUO.Utility.Logging;
 using ClassicUO.Utility.Platforms;
-using CUO_API;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using SDL2;
@@ -53,33 +52,106 @@ namespace ClassicUO.Network
 {
     internal unsafe class Plugin
     {
-        [MarshalAs(UnmanagedType.FunctionPtr)] private OnCastSpell _castSpell;
-        [MarshalAs(UnmanagedType.FunctionPtr)] private OnDrawCmdList _draw_cmd_list;
-        [MarshalAs(UnmanagedType.FunctionPtr)] private OnGetCliloc _get_cliloc;
-        [MarshalAs(UnmanagedType.FunctionPtr)] private OnGetStaticData _get_static_data;
-        [MarshalAs(UnmanagedType.FunctionPtr)] private OnGetTileData _get_tile_data;
-        [MarshalAs(UnmanagedType.FunctionPtr)] private OnGetPacketLength _getPacketLength;
-        [MarshalAs(UnmanagedType.FunctionPtr)] private OnGetPlayerPosition _getPlayerPosition;
-        [MarshalAs(UnmanagedType.FunctionPtr)] private OnGetStaticImage _getStaticImage;
-        [MarshalAs(UnmanagedType.FunctionPtr)] private OnGetUOFilePath _getUoFilePath;
-        [MarshalAs(UnmanagedType.FunctionPtr)] private OnWndProc _on_wnd_proc;
-        [MarshalAs(UnmanagedType.FunctionPtr)] private OnClientClose _onClientClose;
-        [MarshalAs(UnmanagedType.FunctionPtr)] private OnConnected _onConnected;
-        [MarshalAs(UnmanagedType.FunctionPtr)] private OnDisconnected _onDisconnected;
-        [MarshalAs(UnmanagedType.FunctionPtr)] private OnFocusGained _onFocusGained;
-        [MarshalAs(UnmanagedType.FunctionPtr)] private OnFocusLost _onFocusLost;
 
-        [MarshalAs(UnmanagedType.FunctionPtr)] private OnHotkey _onHotkeyPressed;
-        [MarshalAs(UnmanagedType.FunctionPtr)] private OnInitialize _onInitialize;
-        [MarshalAs(UnmanagedType.FunctionPtr)] private OnMouse _onMouse;
-        [MarshalAs(UnmanagedType.FunctionPtr)] private OnPacketSendRecv_new _onRecv_new, _onSend_new;
-        [MarshalAs(UnmanagedType.FunctionPtr)] private OnUpdatePlayerPosition _onUpdatePlayerPosition;
-        [MarshalAs(UnmanagedType.FunctionPtr)] private OnPacketSendRecv _recv, _send, _onRecv, _onSend;
-        [MarshalAs(UnmanagedType.FunctionPtr)] private OnPacketSendRecv_new_intptr _recv_new, _send_new;
-        [MarshalAs(UnmanagedType.FunctionPtr)] private RequestMove _requestMove;
+        public struct PluginHeader
+        {
+            public int ClientVersion;
+            public IntPtr HWND;
+            [Obsolete] public IntPtr OnRecv_OBSOLETE_DO_NOT_USE;
+            [Obsolete] public IntPtr OnSend_OBSOLETE_DO_NOT_USE;
+            public IntPtr OnHotkeyPressed;
+            public IntPtr OnMouse;
+            public IntPtr OnPlayerPositionChanged;
+            public IntPtr OnClientClosing;
+            public IntPtr OnInitialize;
+            public IntPtr OnConnected;
+            public IntPtr OnDisconnected;
+            public IntPtr OnFocusGained;
+            public IntPtr OnFocusLost;
+            public IntPtr GetUOFilePath;
+            [Obsolete] public IntPtr Recv_OBSOLETE_DO_NOT_USE;
+            [Obsolete] public IntPtr Send_OBSOLETE_DO_NOT_USE;
+            public IntPtr GetPacketLength;
+            public IntPtr GetPlayerPosition;
+            public IntPtr CastSpell;
+            public IntPtr GetStaticImage;
+            public IntPtr Tick;
+            public IntPtr RequestMove;
+            public IntPtr SetTitle;
+
+            public IntPtr OnRecv_new, OnSend_new, Recv_new, Send_new;
+
+            public IntPtr OnDrawCmdList;
+            public IntPtr SDL_Window;
+            public IntPtr OnWndProc;
+            public IntPtr GetStaticData;
+            public IntPtr GetTileData;
+            public IntPtr GetCliloc;
+        }
+
+
+
+
+
+        [StructLayout(LayoutKind.Sequential, Pack = 1)]
+        public struct ArtInfo
+        {
+            public long Address;
+            public long Size;
+            public long CompressedSize;
+        }
+
+
+
+
         private readonly Dictionary<IntPtr, GraphicsResource> _resources = new Dictionary<IntPtr, GraphicsResource>();
-        [MarshalAs(UnmanagedType.FunctionPtr)] private OnSetTitle _setTitle;
-        [MarshalAs(UnmanagedType.FunctionPtr)] private OnTick _tick;
+
+        private delegate*<int, int, bool, bool> _onHotkeyPressed;
+        private delegate*<IntPtr, ref int, bool> _onRecv_new, _onSend_new;
+        private delegate*<out IntPtr, ref int, int> _draw_cmd_list;
+        private delegate*<void*, int> _on_wnd_proc;
+        private delegate*<int, int, void> _onMouse;
+        private delegate*<int, int, int, void> _onUpdatePlayerPosition;
+        private delegate*<void> _onInitialize, _onClientClose, _onConnected, _onDisconnected, _onFocusGained, _onFocusLost, _tick;
+
+
+        private static delegate*<IntPtr, ref int, bool> _recv_new, _send_new;
+        private static delegate*<int, short> _getPacketLength;
+        private static delegate*<out int, out int, out int, bool> _getPlayerPosition;
+        private static delegate*<int, void> _castSpell;
+        private static delegate*<IntPtr> _getUoFilePath;
+        private static delegate*<int, bool, bool> _requestMove;
+        private static delegate*<byte*, void> _setTitle;
+        private static delegate*<int, byte*, bool, ref byte*, bool> _get_cliloc;
+        private static delegate*<int, ref ulong, ref byte, ref byte, ref int, ref ushort, ref ushort, ref byte, ref byte*, bool> _getStaticData;
+        private static delegate*<int, ref ulong, ref ushort, ref byte*, bool> _getTileData;
+        private static delegate*<ushort, ref ArtInfo, void> _getStaticImage;
+
+
+        [Obsolete]
+        private CUO_API.OnPacketSendRecv _onSend_OLD, _onRecv_OLD;
+        [Obsolete]
+        private static IntPtr _send_OLD, _recv_OLD;
+
+
+        static Plugin()
+        {
+            _recv_new = &OnPluginRecv_new;
+            _send_new = &OnPluginSend_new;
+            _getPacketLength = &PacketsTable.GetPacketLength;
+            _getPlayerPosition = &GetPlayerPosition;
+            _castSpell = &GameActions.CastSpell;
+            _getStaticImage = &GetStaticImage;
+            _getUoFilePath = &GetUOFilePath;
+            _requestMove = &RequestMove;
+            _setTitle = &SetWindowTitle;
+            _getStaticData = &GetStaticData;
+            _getTileData = &GetTileData;
+            _get_cliloc = &GetCliloc;
+
+            _send_OLD = Marshal.GetFunctionPointerForDelegate<CUO_API.OnPacketSendRecv>(OnPluginSend);
+            _recv_OLD = Marshal.GetFunctionPointerForDelegate<CUO_API.OnPacketSendRecv>(OnPluginRecv);
+        }
 
         private Plugin(string path)
         {
@@ -127,24 +199,8 @@ namespace ClassicUO.Network
             return p;
         }
 
-
         public void Load()
         {
-            _recv = OnPluginRecv;
-            _send = OnPluginSend;
-            _recv_new = OnPluginRecv_new;
-            _send_new = OnPluginSend_new;
-            _getPacketLength = PacketsTable.GetPacketLength;
-            _getPlayerPosition = GetPlayerPosition;
-            _castSpell = GameActions.CastSpell;
-            _getStaticImage = GetStaticImage;
-            _getUoFilePath = GetUOFilePath;
-            _requestMove = RequestMove;
-            _setTitle = SetWindowTitle;
-            _get_static_data = GetStaticData;
-            _get_tile_data = GetTileData;
-            _get_cliloc = GetCliloc;
-
             SDL.SDL_SysWMinfo info = new SDL.SDL_SysWMinfo();
             SDL.SDL_VERSION(out info.version);
             SDL.SDL_GetWindowWMInfo(Client.Game.Window.Handle, ref info);
@@ -159,23 +215,25 @@ namespace ClassicUO.Network
             PluginHeader header = new PluginHeader
             {
                 ClientVersion = (int)Client.Version,
-                Recv = Marshal.GetFunctionPointerForDelegate(_recv),
-                Send = Marshal.GetFunctionPointerForDelegate(_send),
-                GetPacketLength = Marshal.GetFunctionPointerForDelegate(_getPacketLength),
-                GetPlayerPosition = Marshal.GetFunctionPointerForDelegate(_getPlayerPosition),
-                CastSpell = Marshal.GetFunctionPointerForDelegate(_castSpell),
-                GetStaticImage = Marshal.GetFunctionPointerForDelegate(_getStaticImage),
+                GetPacketLength = (IntPtr)_getPacketLength,
+                GetPlayerPosition = (IntPtr)_getPlayerPosition,
+                CastSpell = (IntPtr)_castSpell,
+                GetStaticImage = (IntPtr)_getStaticImage,
                 HWND = hwnd,
-                GetUOFilePath = Marshal.GetFunctionPointerForDelegate(_getUoFilePath),
-                RequestMove = Marshal.GetFunctionPointerForDelegate(_requestMove),
-                SetTitle = Marshal.GetFunctionPointerForDelegate(_setTitle),
-                Recv_new = Marshal.GetFunctionPointerForDelegate(_recv_new),
-                Send_new = Marshal.GetFunctionPointerForDelegate(_send_new),
+                GetUOFilePath = (IntPtr)_getUoFilePath,
+                RequestMove = (IntPtr)_requestMove,
+                SetTitle = (IntPtr)_setTitle,
+                Recv_new = (IntPtr)_recv_new,
+                Send_new = (IntPtr)_send_new,
 
                 SDL_Window = Client.Game.Window.Handle,
-                GetStaticData = Marshal.GetFunctionPointerForDelegate(_get_static_data),
-                GetTileData = Marshal.GetFunctionPointerForDelegate(_get_tile_data),
-                GetCliloc = Marshal.GetFunctionPointerForDelegate(_get_cliloc)
+                GetStaticData = (IntPtr)_getStaticData,
+                GetTileData = (IntPtr)_getTileData,
+                GetCliloc = (IntPtr)_get_cliloc,
+
+                // TODO: retrocompatibility. These functions will be removed
+                Recv_OBSOLETE_DO_NOT_USE = _recv_OLD,
+                Send_OBSOLETE_DO_NOT_USE = _send_OLD
             };
 
             void* func = &header;
@@ -207,15 +265,16 @@ namespace ClassicUO.Network
                     throw new Exception("Invalid Entry Point, Attempting managed load.");
                 }
 
-                Marshal.GetDelegateForFunctionPointer<OnInstall>(installPtr)(func);
+                ((delegate*<void*, void>)installPtr)(func);
 
                 Console.WriteLine(">>> ADDRESS {0}", header.OnInitialize);
             }
-            catch
+            catch (Exception ex)
             {
                 try
                 {
                     Assembly asm = Assembly.LoadFile(PluginPath);
+
                     Type type = asm.GetType("Assistant.Engine");
 
                     if (type == null)
@@ -234,6 +293,7 @@ namespace ClassicUO.Network
                         return;
                     }
 
+
                     meth.Invoke(null, new object[] { (IntPtr)func });
                 }
                 catch (Exception err)
@@ -244,102 +304,137 @@ namespace ClassicUO.Network
                 }
             }
 
+            Log.Trace("plugin loaded");
+            Log.Trace("biding functions set by the plugin");
 
-            if (header.OnRecv != IntPtr.Zero)
+            unchecked
             {
-                _onRecv = Marshal.GetDelegateForFunctionPointer<OnPacketSendRecv>(header.OnRecv);
+                // TODO: retrocompatibility. These functions will be removed
+                if (header.OnRecv_OBSOLETE_DO_NOT_USE != IntPtr.Zero)
+                {
+                    _onRecv_OLD = Marshal.GetDelegateForFunctionPointer<CUO_API.OnPacketSendRecv>(header.OnRecv_OBSOLETE_DO_NOT_USE);
+                }
+
+                if (header.OnSend_OBSOLETE_DO_NOT_USE != IntPtr.Zero)
+                {
+                    _onSend_OLD = Marshal.GetDelegateForFunctionPointer<CUO_API.OnPacketSendRecv>(header.OnSend_OBSOLETE_DO_NOT_USE);
+                }
+
+
+                if (header.OnHotkeyPressed != IntPtr.Zero)
+                {
+                    _onHotkeyPressed = (delegate*<int, int, bool, bool>)header.OnHotkeyPressed;
+                }
+
+                if (header.OnMouse != IntPtr.Zero)
+                {
+                    _onMouse = (delegate*<int, int, void>)header.OnMouse;
+                }
+
+                if (header.OnPlayerPositionChanged != IntPtr.Zero)
+                {
+                    _onUpdatePlayerPosition = (delegate*<int, int, int, void>)(header.OnPlayerPositionChanged);
+                }
+
+                if (header.OnClientClosing != IntPtr.Zero)
+                {
+                    _onClientClose = (delegate*<void>)(header.OnClientClosing);
+                }
+
+                if (header.OnInitialize != IntPtr.Zero)
+                {
+                    _onInitialize = (delegate*<void>)(header.OnInitialize);
+                }
+
+                if (header.OnConnected != IntPtr.Zero)
+                {
+                    _onConnected = (delegate*<void>)(header.OnConnected);
+                }
+
+                if (header.OnDisconnected != IntPtr.Zero)
+                {
+                    _onDisconnected = (delegate*<void>)(header.OnDisconnected);
+                }
+
+                if (header.OnFocusGained != IntPtr.Zero)
+                {
+                    _onFocusGained = (delegate*<void>)(header.OnFocusGained);
+                }
+
+                if (header.OnFocusLost != IntPtr.Zero)
+                {
+                    _onFocusLost = (delegate*<void>)(header.OnFocusLost);
+                }
+
+                if (header.Tick != IntPtr.Zero)
+                {
+                    _tick = (delegate*<void>)(header.Tick);
+                }
+
+                if (header.OnRecv_new != IntPtr.Zero)
+                {
+                    _onRecv_new = (delegate*<IntPtr, ref int, bool>)header.OnRecv_new;
+                }
+
+                if (header.OnSend_new != IntPtr.Zero)
+                {
+                    _onSend_new = (delegate*<IntPtr, ref int, bool>)header.OnSend_new;
+                }
+
+                if (header.OnDrawCmdList != IntPtr.Zero)
+                {
+                    _draw_cmd_list = (delegate*<out IntPtr, ref int, int>)header.OnDrawCmdList;
+                }
+
+                if (header.OnWndProc != IntPtr.Zero)
+                {
+                    _on_wnd_proc = (delegate*<void*, int>)header.OnWndProc;
+                }
             }
-
-            if (header.OnSend != IntPtr.Zero)
-            {
-                _onSend = Marshal.GetDelegateForFunctionPointer<OnPacketSendRecv>(header.OnSend);
-            }
-
-            if (header.OnHotkeyPressed != IntPtr.Zero)
-            {
-                _onHotkeyPressed = Marshal.GetDelegateForFunctionPointer<OnHotkey>(header.OnHotkeyPressed);
-            }
-
-            if (header.OnMouse != IntPtr.Zero)
-            {
-                _onMouse = Marshal.GetDelegateForFunctionPointer<OnMouse>(header.OnMouse);
-            }
-
-            if (header.OnPlayerPositionChanged != IntPtr.Zero)
-            {
-                _onUpdatePlayerPosition = Marshal.GetDelegateForFunctionPointer<OnUpdatePlayerPosition>(header.OnPlayerPositionChanged);
-            }
-
-            if (header.OnClientClosing != IntPtr.Zero)
-            {
-                _onClientClose = Marshal.GetDelegateForFunctionPointer<OnClientClose>(header.OnClientClosing);
-            }
-
-            if (header.OnInitialize != IntPtr.Zero)
-            {
-                _onInitialize = Marshal.GetDelegateForFunctionPointer<OnInitialize>(header.OnInitialize);
-            }
-
-            if (header.OnConnected != IntPtr.Zero)
-            {
-                _onConnected = Marshal.GetDelegateForFunctionPointer<OnConnected>(header.OnConnected);
-            }
-
-            if (header.OnDisconnected != IntPtr.Zero)
-            {
-                _onDisconnected = Marshal.GetDelegateForFunctionPointer<OnDisconnected>(header.OnDisconnected);
-            }
-
-            if (header.OnFocusGained != IntPtr.Zero)
-            {
-                _onFocusGained = Marshal.GetDelegateForFunctionPointer<OnFocusGained>(header.OnFocusGained);
-            }
-
-            if (header.OnFocusLost != IntPtr.Zero)
-            {
-                _onFocusLost = Marshal.GetDelegateForFunctionPointer<OnFocusLost>(header.OnFocusLost);
-            }
-
-            if (header.Tick != IntPtr.Zero)
-            {
-                _tick = Marshal.GetDelegateForFunctionPointer<OnTick>(header.Tick);
-            }
-
-
-            if (header.OnRecv_new != IntPtr.Zero)
-            {
-                _onRecv_new = Marshal.GetDelegateForFunctionPointer<OnPacketSendRecv_new>(header.OnRecv_new);
-            }
-
-            if (header.OnSend_new != IntPtr.Zero)
-            {
-                _onSend_new = Marshal.GetDelegateForFunctionPointer<OnPacketSendRecv_new>(header.OnSend_new);
-            }
-
-            if (header.OnDrawCmdList != IntPtr.Zero)
-            {
-                _draw_cmd_list = Marshal.GetDelegateForFunctionPointer<OnDrawCmdList>(header.OnDrawCmdList);
-            }
-
-            if (header.OnWndProc != IntPtr.Zero)
-            {
-                _on_wnd_proc = Marshal.GetDelegateForFunctionPointer<OnWndProc>(header.OnWndProc);
-            }
-
 
             IsValid = true;
 
-            _onInitialize?.Invoke();
+            Log.Trace("done");
+
+            if (_onInitialize != null)
+            {
+                _onInitialize();
+            }
         }
 
-        private static string GetUOFilePath()
+        internal static int Utf8Size(string str)
         {
-            return Settings.GlobalSettings.UltimaOnlineDirectory;
+            if (str == null)
+            {
+                return 0;
+            }
+            return (str.Length * 4) + 1;
         }
 
-        private static void SetWindowTitle(string str)
+        internal static unsafe byte* Utf8EncodeHeap(string str)
         {
-            Client.Game.SetWindowTitle(str);
+            if (str == null)
+            {
+                return (byte*)0;
+            }
+
+            int bufferSize = Utf8Size(str);
+            byte* buffer = (byte*)Marshal.AllocHGlobal(bufferSize);
+            fixed (char* strPtr = str)
+            {
+                System.Text.Encoding.UTF8.GetBytes(strPtr, str.Length + 1, buffer, bufferSize);
+            }
+            return buffer;
+        }
+
+        private static IntPtr GetUOFilePath()
+        {
+            return (IntPtr)Utf8EncodeHeap(Settings.GlobalSettings.UltimaOnlineDirectory);
+        }
+
+        private static void SetWindowTitle(byte* str)
+        {
+            Client.Game.SetWindowTitle(SDL.UTF8_ToManaged((IntPtr)str));
         }
 
         private static bool GetStaticData
@@ -352,7 +447,7 @@ namespace ClassicUO.Network
             ref ushort animid,
             ref ushort lightidx,
             ref byte height,
-            ref string name
+            ref byte* name
         )
         {
             if (index >= 0 && index < Constants.MAX_STATIC_DATA_INDEX_COUNT)
@@ -366,7 +461,7 @@ namespace ClassicUO.Network
                 animid = st.AnimID;
                 lightidx = st.LightIndex;
                 height = st.Height;
-                name = st.Name;
+                name = Utf8EncodeHeap(st.Name);
 
                 return true;
             }
@@ -374,7 +469,7 @@ namespace ClassicUO.Network
             return false;
         }
 
-        private static bool GetTileData(int index, ref ulong flags, ref ushort textid, ref string name)
+        private static bool GetTileData(int index, ref ulong flags, ref ushort textid, ref byte* name)
         {
             if (index >= 0 && index < Constants.MAX_STATIC_DATA_INDEX_COUNT)
             {
@@ -382,7 +477,7 @@ namespace ClassicUO.Network
 
                 flags = (ulong)st.Flags;
                 textid = st.TexID;
-                name = st.Name;
+                name = Utf8EncodeHeap(st.Name);
 
                 return true;
             }
@@ -390,9 +485,15 @@ namespace ClassicUO.Network
             return false;
         }
 
-        private static bool GetCliloc(int cliloc, string args, bool capitalize, out string buffer)
+        private static bool GetCliloc(int cliloc, byte* argsPtr, bool capitalize, ref byte* buffer)
         {
-            buffer = ClilocLoader.Instance.Translate(cliloc, args, capitalize);
+            string args = SDL.UTF8_ToManaged((IntPtr)argsPtr);
+            string res = ClilocLoader.Instance.Translate(cliloc, args, capitalize);
+
+            if (!string.IsNullOrEmpty(res))
+            {
+                buffer = (byte*)Utf8EncodeHeap(res);
+            }
 
             return buffer != null;
         }
@@ -430,49 +531,76 @@ namespace ClassicUO.Network
         {
             foreach (Plugin t in Plugins)
             {
-                t._tick?.Invoke();
+                if (t._tick != null)
+                {
+                    t._tick();
+                }
             }
         }
 
 
-        internal static bool ProcessRecvPacket(ref byte[] data, ref int length)
+        internal static bool ProcessRecvPacket(byte[] data, ref int length)
         {
             bool result = true;
 
-            foreach (Plugin plugin in Plugins)
+            fixed (byte* ptr = data)
             {
-                if (plugin._onRecv_new != null)
+                byte* ptr2 = ptr;
+                foreach (Plugin plugin in Plugins)
                 {
-                    if (!plugin._onRecv_new(data, ref length))
+                    if (plugin._onRecv_new != null)
                     {
-                        result = false;
+                        if (!plugin._onRecv_new((IntPtr)ptr2, ref length))
+                        {
+                            result = false;
+                        }
                     }
-                }
-                else if (plugin._onRecv != null && !plugin._onRecv(ref data, ref length))
-                {
-                    result = false;
+                    else if (plugin._onRecv_OLD != null)
+                    {
+                        byte[] tmp = new byte[length];
+                        Array.Copy(data, tmp, length);
+
+                        if (!plugin._onRecv_OLD(ref tmp, ref length))
+                        {
+                            result = false;
+                        }
+
+                        Array.Copy(tmp, data, length);
+                    }
                 }
             }
 
             return result;
         }
 
-        internal static bool ProcessSendPacket(ref byte[] data, ref int length)
+        internal static bool ProcessSendPacket(byte[] data, ref int length)
         {
             bool result = true;
 
-            foreach (Plugin plugin in Plugins)
+            fixed (byte* ptr = data)
             {
-                if (plugin._onSend_new != null)
+                byte* ptr2 = ptr;
+                foreach (Plugin plugin in Plugins)
                 {
-                    if (!plugin._onSend_new(data, ref length))
+                    if (plugin._onSend_new != null)
                     {
-                        result = false;
+                        if (!plugin._onSend_new((IntPtr)ptr2, ref length))
+                        {
+                            result = false;
+                        }
                     }
-                }
-                else if (plugin._onSend != null && !plugin._onSend(ref data, ref length))
-                {
-                    result = false;
+                    else if (plugin._onSend_OLD != null)
+                    {
+                        byte[] tmp = new byte[length];
+                        Array.Copy(data, tmp, length);
+
+                        if (!plugin._onSend_OLD(ref tmp, ref length))
+                        {
+                            result = false;
+                        }
+
+                        Array.Copy(tmp, data, length);
+                    }
                 }
             }
 
@@ -483,17 +611,23 @@ namespace ClassicUO.Network
         {
             for (int i = 0; i < Plugins.Count; i++)
             {
-                Plugins[i]._onClientClose?.Invoke();
-
-                Plugins.RemoveAt(i--);
+                if (Plugins[i]._onClientClose != null)
+                {
+                    Plugins[i]._onClientClose();
+                }
             }
+
+            Plugins.Clear();
         }
 
         internal static void OnFocusGained()
         {
             foreach (Plugin t in Plugins)
             {
-                t._onFocusGained?.Invoke();
+                if (t._onFocusGained != null)
+                {
+                    t._onFocusGained();
+                }
             }
         }
 
@@ -501,7 +635,10 @@ namespace ClassicUO.Network
         {
             foreach (Plugin t in Plugins)
             {
-                t._onFocusLost?.Invoke();
+                if (t._onFocusLost != null)
+                {
+                    t._onFocusLost();
+                }
             }
         }
 
@@ -510,7 +647,10 @@ namespace ClassicUO.Network
         {
             foreach (Plugin t in Plugins)
             {
-                t._onConnected?.Invoke();
+                if (t._onConnected != null)
+                {
+                    t._onConnected();
+                }
             }
         }
 
@@ -518,7 +658,10 @@ namespace ClassicUO.Network
         {
             foreach (Plugin t in Plugins)
             {
-                t._onDisconnected?.Invoke();
+                if (t._onDisconnected != null)
+                {
+                    t._onDisconnected();
+                }
             }
         }
 
@@ -546,7 +689,10 @@ namespace ClassicUO.Network
         {
             foreach (Plugin plugin in Plugins)
             {
-                plugin._onMouse?.Invoke(button, wheel);
+                if (plugin._onMouse != null)
+                {
+                    plugin._onMouse(button, wheel);
+                }
             }
         }
 
@@ -557,7 +703,7 @@ namespace ClassicUO.Network
                 if (plugin._draw_cmd_list != null)
                 {
                     int cmd_count = 0;
-                    plugin._draw_cmd_list.Invoke(out IntPtr cmdlist, ref cmd_count);
+                    plugin._draw_cmd_list(out IntPtr cmdlist, ref cmd_count);
 
                     if (cmd_count != 0 && cmdlist != IntPtr.Zero)
                     {
@@ -573,7 +719,10 @@ namespace ClassicUO.Network
 
             foreach (Plugin plugin in Plugins)
             {
-                result |= plugin._on_wnd_proc?.Invoke(e) ?? 0;
+                if (plugin._on_wnd_proc != null)
+                {
+                    result |= plugin._on_wnd_proc(e);
+                }
             }
 
             return result;
@@ -588,7 +737,11 @@ namespace ClassicUO.Network
                     // TODO: need fixed on razor side
                     // if you quick entry (0.5-1 sec after start, without razor window loaded) - breaks CUO.
                     // With this fix - the razor does not work, but client does not crashed.
-                    plugin._onUpdatePlayerPosition?.Invoke(x, y, z);
+
+                    if (plugin._onUpdatePlayerPosition != null)
+                    {
+                        plugin._onUpdatePlayerPosition(x, y, z);
+                    }
                 }
                 catch
                 {
@@ -606,18 +759,6 @@ namespace ClassicUO.Network
 
         private static bool OnPluginSend(ref byte[] data, ref int length)
         {
-            //if (data != null && data.Length != 0)
-            //{
-            //    // horrible workaround to avoid ghosting item when a plugin sends drag request item
-            //    switch (data[0])
-            //    {
-            //        case 0x07:
-            //            ItemHold.Clear();
-            //            break;
-            //    }
-            //}
-
-
             if (NetClient.LoginSocket.IsDisposed && NetClient.Socket.IsConnected)
             {
                 NetClient.Socket.Send(data, length, true);
@@ -1088,84 +1229,6 @@ namespace ClassicUO.Network
             device.RasterizerState = lastRasterizeState;
             device.DepthStencilState = lastDepthStencilState;
             device.SamplerStates[0] = lastsampler;
-        }
-
-
-        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        private delegate void OnInstall(void* header);
-
-        [return: MarshalAs(UnmanagedType.I1)]
-        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        private delegate bool OnPacketSendRecv_new(byte[] data, ref int length);
-
-        [return: MarshalAs(UnmanagedType.I1)]
-        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        private delegate bool OnPacketSendRecv_new_intptr(IntPtr data, ref int length);
-
-        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        private delegate int OnDrawCmdList([Out] out IntPtr cmdlist, ref int size);
-
-        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        private delegate int OnWndProc(SDL.SDL_Event* ev);
-
-        [return: MarshalAs(UnmanagedType.I1)]
-        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        private delegate bool OnGetStaticData
-        (
-            int index,
-            ref ulong flags,
-            ref byte weight,
-            ref byte layer,
-            ref int count,
-            ref ushort animid,
-            ref ushort lightidx,
-            ref byte height,
-            ref string name
-        );
-
-        [return: MarshalAs(UnmanagedType.I1)]
-        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        private delegate bool OnGetTileData(int index, ref ulong flags, ref ushort textid, ref string name);
-
-        [return: MarshalAs(UnmanagedType.I1)]
-        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        private delegate bool OnGetCliloc(int cliloc, [MarshalAs(UnmanagedType.LPStr)] string args, bool capitalize, [Out][MarshalAs(UnmanagedType.LPStr)] out string buffer);
-
-
-        private struct PluginHeader
-        {
-            public int ClientVersion;
-            public IntPtr HWND;
-            public IntPtr OnRecv;
-            public IntPtr OnSend;
-            public IntPtr OnHotkeyPressed;
-            public IntPtr OnMouse;
-            public IntPtr OnPlayerPositionChanged;
-            public IntPtr OnClientClosing;
-            public IntPtr OnInitialize;
-            public IntPtr OnConnected;
-            public IntPtr OnDisconnected;
-            public IntPtr OnFocusGained;
-            public IntPtr OnFocusLost;
-            public IntPtr GetUOFilePath;
-            public IntPtr Recv;
-            public IntPtr Send;
-            public IntPtr GetPacketLength;
-            public IntPtr GetPlayerPosition;
-            public IntPtr CastSpell;
-            public IntPtr GetStaticImage;
-            public IntPtr Tick;
-            public IntPtr RequestMove;
-            public IntPtr SetTitle;
-
-            public IntPtr OnRecv_new, OnSend_new, Recv_new, Send_new;
-
-            public IntPtr OnDrawCmdList;
-            public IntPtr SDL_Window;
-            public IntPtr OnWndProc;
-            public IntPtr GetStaticData;
-            public IntPtr GetTileData;
-            public IntPtr GetCliloc;
         }
     }
 }

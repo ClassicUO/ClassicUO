@@ -817,11 +817,11 @@ namespace ClassicUO.Network
             byte[] buffer = spellsPacket.ToArray();
             int len = spellsPacket.Length;
 
-            Plugin.ProcessRecvPacket(ref buffer, ref len);
+            Plugin.ProcessRecvPacket(buffer, ref len);
 
             buffer = skillsPacket.ToArray();
             len = skillsPacket.Length;
-            Plugin.ProcessRecvPacket(ref buffer, ref len);
+            Plugin.ProcessRecvPacket(buffer, ref len);
         }
 
         private static void Talk(ref PacketBufferReader p)
@@ -3657,7 +3657,17 @@ namespace ClassicUO.Network
 
             serial |= 0x80000000;
 
-            World.Mobiles.Replace(owner, serial);
+            if (World.Mobiles.Remove(owner.Serial))
+            {
+                for (LinkedObject i = owner.Items; i != null; i = i.Next)
+                {
+                    Item it = (Item)i;
+                    it.Container = serial;
+                }
+
+                World.Mobiles[serial] = owner;
+                owner.Serial = serial;
+            }
 
             if (SerialHelper.IsValid(corpseSerial))
             {

@@ -613,8 +613,8 @@ namespace ClassicUO.Game.Scenes
             }
 
 
-            UpdateTextServerEntities(World.Mobiles, true);
-            UpdateTextServerEntities(World.Items, false);
+            UpdateTextServerEntities(World.Mobiles.Values, true);
+            UpdateTextServerEntities(World.Items.Values, false);
 
             _renderIndex++;
 
