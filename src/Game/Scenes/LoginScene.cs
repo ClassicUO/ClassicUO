@@ -407,7 +407,7 @@ namespace ClassicUO.Game.Scenes
 
                 World.ServerName = Servers[ServerIndex].Name;
 
-                NetClient.LoginSocket.Send(new PSelectServer(index));
+                NetClient.LoginSocket.Send_SelectServer(index);
             }
         }
 
@@ -710,7 +710,8 @@ namespace ClassicUO.Game.Scenes
                                  // TODO: stackalloc
                                  byte[] ss = new byte[4] { (byte) (seed >> 24), (byte) (seed >> 16), (byte) (seed >> 8), (byte) seed };
                                  NetClient.Socket.Send(ss, 4, true, true);
-                                 NetClient.Socket.Send(new PSecondLogin(Account, Password, seed));
+
+                                 NetClient.Socket.Send_SecondLogin(Account, Password, seed);
                              }
                          },
                          TaskContinuationOptions.ExecuteSynchronously
