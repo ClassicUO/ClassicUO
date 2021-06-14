@@ -2993,6 +2993,12 @@ namespace ClassicUO.IO.Resources
                         j = str.IndexOf("color", StringComparison.InvariantCultureIgnoreCase);
                         endTag = false;
                     }
+                    else if (str.IndexOf("bodytext", StringComparison.InvariantCultureIgnoreCase) >= 0)
+                    {
+                        tag = HTML_TAG_TYPE.HTT_BODY;
+                        j = str.IndexOf("text", StringComparison.InvariantCultureIgnoreCase);
+                        endTag = false;
+                    }
                     else
                     {
                         Log.Warn($"Unhandled HTML param:\t{str}");
