@@ -10,7 +10,7 @@ using ClassicUO.Utility;
 
 namespace ClassicUO.IO
 {
-    public unsafe ref struct StackDataReader
+    unsafe ref struct StackDataReader
     {
         private const MethodImplOptions IMPL_OPTION = MethodImplOptions.AggressiveInlining
 #if !NETFRAMEWORK && !NETSTANDARD2_0

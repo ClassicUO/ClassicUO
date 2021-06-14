@@ -48,32 +48,102 @@ using ClassicUO.Utility;
 
 namespace ClassicUO.Network
 {
-    static unsafe class NetClientExt
+    static class NetClientExt
     {
         public static void Send_ACKTalk(this NetClient socket)
         {
-            using (StackDataWriter writer = new StackDataWriter
-            (
-                stackalloc byte[]
-                {
-                    0x20, 0x00, 0x34, 0x00, 0x03, 0xdb,
-                    0x13, 0x14, 0x3f, 0x45, 0x2c, 0x58,
-                    0x0f, 0x5d, 0x44, 0x2e, 0x50, 0x11,
-                    0xdf, 0x75, 0x5c, 0xe0, 0x3e, 0x71,
-                    0x4f, 0x31, 0x34, 0x05, 0x4e, 0x18,
-                    0x1e, 0x72, 0x0f, 0x59, 0xad, 0xf5,
-                    0x00,
-                }
-            ))
+            const byte ID = 0x03;
+
+            int length = PacketsTable.GetPacketLength(ID);
+
+            using (StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length))
             {
+                writer.WriteUInt8(ID);
+
+                if (length < 0)
+                {
+                    writer.WriteUInt16BE(0x00);
+                }
+
+                writer.WriteUInt8(0x20);
+                writer.WriteUInt8(0x00);
+                writer.WriteUInt8(0x34);
+                writer.WriteUInt8(0x00);
+                writer.WriteUInt8(0x03);
+                writer.WriteUInt8(0xdb);
+                writer.WriteUInt8(0x13);
+                writer.WriteUInt8(0x14);
+                writer.WriteUInt8(0x3f);
+                writer.WriteUInt8(0x45);
+                writer.WriteUInt8(0x2c);
+                writer.WriteUInt8(0x58);
+                writer.WriteUInt8(0x0f);
+                writer.WriteUInt8(0x5d);
+                writer.WriteUInt8(0x44);
+                writer.WriteUInt8(0x2e);
+                writer.WriteUInt8(0x50);
+                writer.WriteUInt8(0x11);
+                writer.WriteUInt8(0xdf);
+                writer.WriteUInt8(0x75);
+                writer.WriteUInt8(0x5c);
+                writer.WriteUInt8(0xe0);
+                writer.WriteUInt8(0x3e);
+                writer.WriteUInt8(0x71);
+                writer.WriteUInt8(0x4f);
+                writer.WriteUInt8(0x31);
+                writer.WriteUInt8(0x34);
+                writer.WriteUInt8(0x05);
+                writer.WriteUInt8(0x4e);
+                writer.WriteUInt8(0x18);
+                writer.WriteUInt8(0x1e);
+                writer.WriteUInt8(0x72);
+                writer.WriteUInt8(0x0f);
+                writer.WriteUInt8(0x59);
+                writer.WriteUInt8(0xad);
+                writer.WriteUInt8(0xf5);
+                writer.WriteUInt8(0x00);
+
+                if (length < 0)
+                {
+                    writer.Seek(1, SeekOrigin.Begin);
+                    writer.WriteUInt16BE((ushort)writer.BytesWritten);
+                }
+                else
+                {
+                    writer.WriteZero(length - writer.BytesWritten);
+                }
+
                 socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
             }
         }
 
         public static void Send_Ping(this NetClient socket)
         {
-            using (StackDataWriter writer = new StackDataWriter(stackalloc byte[] { 0x73, 0x00 }))
+            const byte ID = 0x73;
+
+            int length = PacketsTable.GetPacketLength(ID);
+
+            using (StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length))
             {
+                writer.WriteUInt8(ID);
+
+                if (length < 0)
+                {
+                    writer.WriteUInt16BE(0x00);
+                }
+
+                writer.WriteUInt8(0x00);
+
+                if (length < 0)
+                {
+                    writer.Seek(1, SeekOrigin.Begin);
+                    writer.WriteUInt16BE((ushort)writer.BytesWritten);
+                }
+                else
+                {
+                    writer.WriteZero(length - writer.BytesWritten);
+                }
+
                 socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
             }
         }
@@ -87,7 +157,23 @@ namespace ClassicUO.Network
             using (StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length))
             {
                 writer.WriteUInt8(ID);
+
+                if (length < 0)
+                {
+                    writer.WriteUInt16BE(0x00);
+                }
+
                 writer.WriteUInt32BE(serial);
+
+                if (length < 0)
+                {
+                    writer.Seek(1, SeekOrigin.Begin);
+                    writer.WriteUInt16BE((ushort)writer.BytesWritten);
+                }
+                else
+                {
+                    writer.WriteZero(length - writer.BytesWritten);
+                }
 
                 socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
             }
@@ -118,6 +204,10 @@ namespace ClassicUO.Network
                 {
                     writer.Seek(1, SeekOrigin.Begin);
                     writer.WriteUInt16BE((ushort) writer.BytesWritten);
+                }
+                else
+                {
+                    writer.WriteZero(length - writer.BytesWritten);
                 }
 
                 socket.Send(writer.AllocatedBuffer, writer.BytesWritten, true, true);
@@ -158,6 +248,10 @@ namespace ClassicUO.Network
                     writer.Seek(1, SeekOrigin.Begin);
                     writer.WriteUInt16BE((ushort)writer.BytesWritten);
                 }
+                else
+                {
+                    writer.WriteZero(length - writer.BytesWritten);
+                }
 
                 socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
             }
@@ -185,6 +279,10 @@ namespace ClassicUO.Network
                 {
                     writer.Seek(1, SeekOrigin.Begin);
                     writer.WriteUInt16BE((ushort)writer.BytesWritten);
+                }
+                else
+                {
+                    writer.WriteZero(length - writer.BytesWritten);
                 }
 
                 socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
@@ -214,6 +312,10 @@ namespace ClassicUO.Network
                 {
                     writer.Seek(1, SeekOrigin.Begin);
                     writer.WriteUInt16BE((ushort)writer.BytesWritten);
+                }
+                else
+                {
+                    writer.WriteZero(length - writer.BytesWritten);
                 }
 
                 socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
@@ -345,6 +447,10 @@ namespace ClassicUO.Network
                     writer.Seek(1, SeekOrigin.Begin);
                     writer.WriteUInt16BE((ushort)writer.BytesWritten);
                 }
+                else
+                {
+                    writer.WriteZero(length - writer.BytesWritten);
+                }
 
                 socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
             }
@@ -373,6 +479,10 @@ namespace ClassicUO.Network
                 {
                     writer.Seek(1, SeekOrigin.Begin);
                     writer.WriteUInt16BE((ushort)writer.BytesWritten);
+                }
+                else
+                {
+                    writer.WriteZero(length - writer.BytesWritten);
                 }
 
                 socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
@@ -407,6 +517,10 @@ namespace ClassicUO.Network
                     writer.Seek(1, SeekOrigin.Begin);
                     writer.WriteUInt16BE((ushort)writer.BytesWritten);
                 }
+                else
+                {
+                    writer.WriteZero(length - writer.BytesWritten);
+                }
 
                 socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
             }
@@ -434,6 +548,10 @@ namespace ClassicUO.Network
                 {
                     writer.Seek(1, SeekOrigin.Begin);
                     writer.WriteUInt16BE((ushort)writer.BytesWritten);
+                }
+                else
+                {
+                    writer.WriteZero(length - writer.BytesWritten);
                 }
 
                 socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
@@ -465,6 +583,10 @@ namespace ClassicUO.Network
                 {
                     writer.Seek(1, SeekOrigin.Begin);
                     writer.WriteUInt16BE((ushort)writer.BytesWritten);
+                }
+                else
+                {
+                    writer.WriteZero(length - writer.BytesWritten);
                 }
 
                 socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
@@ -498,6 +620,10 @@ namespace ClassicUO.Network
                     writer.Seek(1, SeekOrigin.Begin);
                     writer.WriteUInt16BE((ushort)writer.BytesWritten);
                 }
+                else
+                {
+                    writer.WriteZero(length - writer.BytesWritten);
+                }
 
                 socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
             }
@@ -526,6 +652,10 @@ namespace ClassicUO.Network
                 {
                     writer.Seek(1, SeekOrigin.Begin);
                     writer.WriteUInt16BE((ushort)writer.BytesWritten);
+                }
+                else
+                {
+                    writer.WriteZero(length - writer.BytesWritten);
                 }
 
                 socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
@@ -556,6 +686,10 @@ namespace ClassicUO.Network
                     writer.Seek(1, SeekOrigin.Begin);
                     writer.WriteUInt16BE((ushort)writer.BytesWritten);
                 }
+                else
+                {
+                    writer.WriteZero(length - writer.BytesWritten);
+                }
 
                 socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
             }
@@ -582,6 +716,10 @@ namespace ClassicUO.Network
                 {
                     writer.Seek(1, SeekOrigin.Begin);
                     writer.WriteUInt16BE((ushort)writer.BytesWritten);
+                }
+                else
+                {
+                    writer.WriteZero(length - writer.BytesWritten);
                 }
 
                 socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
@@ -612,6 +750,10 @@ namespace ClassicUO.Network
                     writer.Seek(1, SeekOrigin.Begin);
                     writer.WriteUInt16BE((ushort)writer.BytesWritten);
                 }
+                else
+                {
+                    writer.WriteZero(length - writer.BytesWritten);
+                }
 
                 socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
             }
@@ -641,6 +783,10 @@ namespace ClassicUO.Network
                     writer.Seek(1, SeekOrigin.Begin);
                     writer.WriteUInt16BE((ushort)writer.BytesWritten);
                 }
+                else
+                {
+                    writer.WriteZero(length - writer.BytesWritten);
+                }
 
                 socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
             }
@@ -669,6 +815,10 @@ namespace ClassicUO.Network
                     writer.Seek(1, SeekOrigin.Begin);
                     writer.WriteUInt16BE((ushort)writer.BytesWritten);
                 }
+                else
+                {
+                    writer.WriteZero(length - writer.BytesWritten);
+                }
 
                 socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
             }
@@ -695,6 +845,10 @@ namespace ClassicUO.Network
                 {
                     writer.Seek(1, SeekOrigin.Begin);
                     writer.WriteUInt16BE((ushort)writer.BytesWritten);
+                }
+                else
+                {
+                    writer.WriteZero(length - writer.BytesWritten);
                 }
 
                 socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
@@ -723,6 +877,10 @@ namespace ClassicUO.Network
                     writer.Seek(1, SeekOrigin.Begin);
                     writer.WriteUInt16BE((ushort)writer.BytesWritten);
                 }
+                else
+                {
+                    writer.WriteZero(length - writer.BytesWritten);
+                }
 
                 socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
             }
@@ -749,6 +907,10 @@ namespace ClassicUO.Network
                 {
                     writer.Seek(1, SeekOrigin.Begin);
                     writer.WriteUInt16BE((ushort)writer.BytesWritten);
+                }
+                else
+                {
+                    writer.WriteZero(length - writer.BytesWritten);
                 }
 
                 socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
@@ -787,6 +949,10 @@ namespace ClassicUO.Network
                 {
                     writer.Seek(1, SeekOrigin.Begin);
                     writer.WriteUInt16BE((ushort)writer.BytesWritten);
+                }
+                else
+                {
+                    writer.WriteZero(length - writer.BytesWritten);
                 }
 
                 socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
@@ -873,6 +1039,10 @@ namespace ClassicUO.Network
                     writer.Seek(1, SeekOrigin.Begin);
                     writer.WriteUInt16BE((ushort)writer.BytesWritten);
                 }
+                else
+                {
+                    writer.WriteZero(length - writer.BytesWritten);
+                }
 
                 socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
             }
@@ -918,6 +1088,10 @@ namespace ClassicUO.Network
                     writer.Seek(1, SeekOrigin.Begin);
                     writer.WriteUInt16BE((ushort)writer.BytesWritten);
                 }
+                else
+                {
+                    writer.WriteZero(length - writer.BytesWritten);
+                }
 
                 socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
             }
@@ -945,6 +1119,10 @@ namespace ClassicUO.Network
                 {
                     writer.Seek(1, SeekOrigin.Begin);
                     writer.WriteUInt16BE((ushort)writer.BytesWritten);
+                }
+                else
+                {
+                    writer.WriteZero(length - writer.BytesWritten);
                 }
 
                 socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
@@ -974,6 +1152,10 @@ namespace ClassicUO.Network
                     writer.Seek(1, SeekOrigin.Begin);
                     writer.WriteUInt16BE((ushort)writer.BytesWritten);
                 }
+                else
+                {
+                    writer.WriteZero(length - writer.BytesWritten);
+                }
 
                 socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
             }
@@ -1001,6 +1183,10 @@ namespace ClassicUO.Network
                 {
                     writer.Seek(1, SeekOrigin.Begin);
                     writer.WriteUInt16BE((ushort)writer.BytesWritten);
+                }
+                else
+                {
+                    writer.WriteZero(length - writer.BytesWritten);
                 }
 
                 socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
@@ -1030,6 +1216,10 @@ namespace ClassicUO.Network
                     writer.Seek(1, SeekOrigin.Begin);
                     writer.WriteUInt16BE((ushort)writer.BytesWritten);
                 }
+                else
+                {
+                    writer.WriteZero(length - writer.BytesWritten);
+                }
 
                 socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
             }
@@ -1057,6 +1247,10 @@ namespace ClassicUO.Network
                 {
                     writer.Seek(1, SeekOrigin.Begin);
                     writer.WriteUInt16BE((ushort)writer.BytesWritten);
+                }
+                else
+                {
+                    writer.WriteZero(length - writer.BytesWritten);
                 }
 
                 socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
@@ -1113,6 +1307,10 @@ namespace ClassicUO.Network
                     writer.Seek(1, SeekOrigin.Begin);
                     writer.WriteUInt16BE((ushort)writer.BytesWritten);
                 }
+                else
+                {
+                    writer.WriteZero(length - writer.BytesWritten);
+                }
 
                 socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
             }
@@ -1141,6 +1339,10 @@ namespace ClassicUO.Network
                 {
                     writer.Seek(1, SeekOrigin.Begin);
                     writer.WriteUInt16BE((ushort)writer.BytesWritten);
+                }
+                else
+                {
+                    writer.WriteZero(length - writer.BytesWritten);
                 }
 
                 socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
@@ -1177,6 +1379,11 @@ namespace ClassicUO.Network
                     writer.Seek(1, SeekOrigin.Begin);
                     writer.WriteUInt16BE((ushort)writer.BytesWritten);
                 }
+                else
+                {
+                    writer.WriteZero(length - writer.BytesWritten);
+                }
+
 
                 socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
             }
@@ -1205,6 +1412,10 @@ namespace ClassicUO.Network
                 {
                     writer.Seek(1, SeekOrigin.Begin);
                     writer.WriteUInt16BE((ushort)writer.BytesWritten);
+                }
+                else
+                {
+                    writer.WriteZero(length - writer.BytesWritten);
                 }
 
                 socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
@@ -1247,6 +1458,10 @@ namespace ClassicUO.Network
                     writer.Seek(1, SeekOrigin.Begin);
                     writer.WriteUInt16BE((ushort)writer.BytesWritten);
                 }
+                else
+                {
+                    writer.WriteZero(length - writer.BytesWritten);
+                }
 
                 socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
             }
@@ -1277,6 +1492,10 @@ namespace ClassicUO.Network
                     writer.Seek(1, SeekOrigin.Begin);
                     writer.WriteUInt16BE((ushort)writer.BytesWritten);
                 }
+                else
+                {
+                    writer.WriteZero(length - writer.BytesWritten);
+                }
 
                 socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
             }
@@ -1303,6 +1522,10 @@ namespace ClassicUO.Network
                 {
                     writer.Seek(1, SeekOrigin.Begin);
                     writer.WriteUInt16BE((ushort)writer.BytesWritten);
+                }
+                else
+                {
+                    writer.WriteZero(length - writer.BytesWritten);
                 }
 
                 socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
@@ -1336,6 +1559,10 @@ namespace ClassicUO.Network
                     writer.Seek(1, SeekOrigin.Begin);
                     writer.WriteUInt16BE((ushort)writer.BytesWritten);
                 }
+                else
+                {
+                    writer.WriteZero(length - writer.BytesWritten);
+                }
 
                 socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
             }
@@ -1364,6 +1591,10 @@ namespace ClassicUO.Network
                     writer.Seek(1, SeekOrigin.Begin);
                     writer.WriteUInt16BE((ushort)writer.BytesWritten);
                 }
+                else
+                {
+                    writer.WriteZero(length - writer.BytesWritten);
+                }
 
                 socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
             }
@@ -1390,6 +1621,10 @@ namespace ClassicUO.Network
                 {
                     writer.Seek(1, SeekOrigin.Begin);
                     writer.WriteUInt16BE((ushort)writer.BytesWritten);
+                }
+                else
+                {
+                    writer.WriteZero(length - writer.BytesWritten);
                 }
 
                 socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
@@ -1418,6 +1653,10 @@ namespace ClassicUO.Network
                 {
                     writer.Seek(1, SeekOrigin.Begin);
                     writer.WriteUInt16BE((ushort)writer.BytesWritten);
+                }
+                else
+                {
+                    writer.WriteZero(length - writer.BytesWritten);
                 }
 
                 socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
@@ -1453,6 +1692,10 @@ namespace ClassicUO.Network
                     writer.Seek(1, SeekOrigin.Begin);
                     writer.WriteUInt16BE((ushort)writer.BytesWritten);
                 }
+                else
+                {
+                    writer.WriteZero(length - writer.BytesWritten);
+                }
 
                 socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
             }
@@ -1487,6 +1730,10 @@ namespace ClassicUO.Network
                     writer.Seek(1, SeekOrigin.Begin);
                     writer.WriteUInt16BE((ushort)writer.BytesWritten);
                 }
+                else
+                {
+                    writer.WriteZero(length - writer.BytesWritten);
+                }
 
                 socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
             }
@@ -1519,6 +1766,10 @@ namespace ClassicUO.Network
                     writer.Seek(1, SeekOrigin.Begin);
                     writer.WriteUInt16BE((ushort)writer.BytesWritten);
                 }
+                else
+                {
+                    writer.WriteZero(length - writer.BytesWritten);
+                }
 
                 socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
             }
@@ -1547,6 +1798,10 @@ namespace ClassicUO.Network
                 {
                     writer.Seek(1, SeekOrigin.Begin);
                     writer.WriteUInt16BE((ushort)writer.BytesWritten);
+                }
+                else
+                {
+                    writer.WriteZero(length - writer.BytesWritten);
                 }
 
                 socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
@@ -1578,6 +1833,10 @@ namespace ClassicUO.Network
                     writer.Seek(1, SeekOrigin.Begin);
                     writer.WriteUInt16BE((ushort)writer.BytesWritten);
                 }
+                else
+                {
+                    writer.WriteZero(length - writer.BytesWritten);
+                }
 
                 socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
             }
@@ -1607,6 +1866,10 @@ namespace ClassicUO.Network
                     writer.Seek(1, SeekOrigin.Begin);
                     writer.WriteUInt16BE((ushort)writer.BytesWritten);
                 }
+                else
+                {
+                    writer.WriteZero(length - writer.BytesWritten);
+                }
 
                 socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
             }
@@ -1634,6 +1897,10 @@ namespace ClassicUO.Network
                 {
                     writer.Seek(1, SeekOrigin.Begin);
                     writer.WriteUInt16BE((ushort)writer.BytesWritten);
+                }
+                else
+                {
+                    writer.WriteZero(length - writer.BytesWritten);
                 }
 
                 socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
@@ -1666,6 +1933,10 @@ namespace ClassicUO.Network
                     writer.Seek(1, SeekOrigin.Begin);
                     writer.WriteUInt16BE((ushort)writer.BytesWritten);
                 }
+                else
+                {
+                    writer.WriteZero(length - writer.BytesWritten);
+                }
 
                 socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
             }
@@ -1694,6 +1965,10 @@ namespace ClassicUO.Network
                     writer.Seek(1, SeekOrigin.Begin);
                     writer.WriteUInt16BE((ushort)writer.BytesWritten);
                 }
+                else
+                {
+                    writer.WriteZero(length - writer.BytesWritten);
+                }
 
                 socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
             }
@@ -1721,6 +1996,10 @@ namespace ClassicUO.Network
                 {
                     writer.Seek(1, SeekOrigin.Begin);
                     writer.WriteUInt16BE((ushort)writer.BytesWritten);
+                }
+                else
+                {
+                    writer.WriteZero(length - writer.BytesWritten);
                 }
 
                 socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
@@ -1751,6 +2030,10 @@ namespace ClassicUO.Network
                     writer.Seek(1, SeekOrigin.Begin);
                     writer.WriteUInt16BE((ushort)writer.BytesWritten);
                 }
+                else
+                {
+                    writer.WriteZero(length - writer.BytesWritten);
+                }
 
                 socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
             }
@@ -1779,6 +2062,10 @@ namespace ClassicUO.Network
                 {
                     writer.Seek(1, SeekOrigin.Begin);
                     writer.WriteUInt16BE((ushort)writer.BytesWritten);
+                }
+                else
+                {
+                    writer.WriteZero(length - writer.BytesWritten);
                 }
 
                 socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
@@ -1809,6 +2096,10 @@ namespace ClassicUO.Network
                     writer.Seek(1, SeekOrigin.Begin);
                     writer.WriteUInt16BE((ushort)writer.BytesWritten);
                 }
+                else
+                {
+                    writer.WriteZero(length - writer.BytesWritten);
+                }
 
                 socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
             }
@@ -1837,6 +2128,10 @@ namespace ClassicUO.Network
                 {
                     writer.Seek(1, SeekOrigin.Begin);
                     writer.WriteUInt16BE((ushort)writer.BytesWritten);
+                }
+                else
+                {
+                    writer.WriteZero(length - writer.BytesWritten);
                 }
 
                 socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
@@ -1867,6 +2162,11 @@ namespace ClassicUO.Network
                     writer.Seek(1, SeekOrigin.Begin);
                     writer.WriteUInt16BE((ushort)writer.BytesWritten);
                 }
+                else
+                {
+                    writer.WriteZero(length - writer.BytesWritten);
+                }
+
 
                 socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
             }
@@ -1907,6 +2207,10 @@ namespace ClassicUO.Network
                     writer.Seek(1, SeekOrigin.Begin);
                     writer.WriteUInt16BE((ushort)writer.BytesWritten);
                 }
+                else
+                {
+                    writer.WriteZero(length - writer.BytesWritten);
+                }
 
                 socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
             }
@@ -1935,6 +2239,10 @@ namespace ClassicUO.Network
                 {
                     writer.Seek(1, SeekOrigin.Begin);
                     writer.WriteUInt16BE((ushort)writer.BytesWritten);
+                }
+                else
+                {
+                    writer.WriteZero(length - writer.BytesWritten);
                 }
 
                 socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
@@ -1965,6 +2273,10 @@ namespace ClassicUO.Network
                     writer.Seek(1, SeekOrigin.Begin);
                     writer.WriteUInt16BE((ushort)writer.BytesWritten);
                 }
+                else
+                {
+                    writer.WriteZero(length - writer.BytesWritten);
+                }
 
                 socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
             }
@@ -1993,6 +2305,10 @@ namespace ClassicUO.Network
                 {
                     writer.Seek(1, SeekOrigin.Begin);
                     writer.WriteUInt16BE((ushort)writer.BytesWritten);
+                }
+                else
+                {
+                    writer.WriteZero(length - writer.BytesWritten);
                 }
 
                 socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
@@ -2083,6 +2399,11 @@ namespace ClassicUO.Network
                     writer.Seek(1, SeekOrigin.Begin);
                     writer.WriteUInt16BE((ushort)writer.BytesWritten);
                 }
+                else
+                {
+                    writer.WriteZero(length - writer.BytesWritten);
+                }
+
 
                 socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
             }
@@ -2112,6 +2433,11 @@ namespace ClassicUO.Network
                     writer.Seek(1, SeekOrigin.Begin);
                     writer.WriteUInt16BE((ushort)writer.BytesWritten);
                 }
+                else
+                {
+                    writer.WriteZero(length - writer.BytesWritten);
+                }
+
 
                 socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
             }
@@ -2138,6 +2464,10 @@ namespace ClassicUO.Network
                 {
                     writer.Seek(1, SeekOrigin.Begin);
                     writer.WriteUInt16BE((ushort)writer.BytesWritten);
+                }
+                else
+                {
+                    writer.WriteZero(length - writer.BytesWritten);
                 }
 
                 socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
@@ -2167,6 +2497,10 @@ namespace ClassicUO.Network
                     writer.Seek(1, SeekOrigin.Begin);
                     writer.WriteUInt16BE((ushort)writer.BytesWritten);
                 }
+                else
+                {
+                    writer.WriteZero(length - writer.BytesWritten);
+                }
 
                 socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
             }
@@ -2193,6 +2527,10 @@ namespace ClassicUO.Network
                 {
                     writer.Seek(1, SeekOrigin.Begin);
                     writer.WriteUInt16BE((ushort)writer.BytesWritten);
+                }
+                else
+                {
+                    writer.WriteZero(length - writer.BytesWritten);
                 }
 
                 socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
@@ -2222,6 +2560,10 @@ namespace ClassicUO.Network
                 {
                     writer.Seek(1, SeekOrigin.Begin);
                     writer.WriteUInt16BE((ushort)writer.BytesWritten);
+                }
+                else
+                {
+                    writer.WriteZero(length - writer.BytesWritten);
                 }
 
                 socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
@@ -2261,6 +2603,11 @@ namespace ClassicUO.Network
                     writer.Seek(1, SeekOrigin.Begin);
                     writer.WriteUInt16BE((ushort)writer.BytesWritten);
                 }
+                else
+                {
+                    writer.WriteZero(length - writer.BytesWritten);
+                }
+
 
                 socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
             }
@@ -2288,6 +2635,10 @@ namespace ClassicUO.Network
                 {
                     writer.Seek(1, SeekOrigin.Begin);
                     writer.WriteUInt16BE((ushort)writer.BytesWritten);
+                }
+                else
+                {
+                    writer.WriteZero(length - writer.BytesWritten);
                 }
 
                 socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
@@ -2318,6 +2669,10 @@ namespace ClassicUO.Network
                     writer.Seek(1, SeekOrigin.Begin);
                     writer.WriteUInt16BE((ushort)writer.BytesWritten);
                 }
+                else
+                {
+                    writer.WriteZero(length - writer.BytesWritten);
+                }
 
                 socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
             }
@@ -2340,6 +2695,7 @@ namespace ClassicUO.Network
 
                 writer.WriteASCII(Settings.GlobalSettings.Language, 4);
                 writer.WriteUInt16BE(0x62);
+                writer.WriteUInt16BE(0x22);
                 writer.WriteUnicodeBE(name);
                 writer.WriteUInt16BE(0x22);
                 writer.WriteUInt16BE(0x020);
@@ -2354,6 +2710,11 @@ namespace ClassicUO.Network
                     writer.Seek(1, SeekOrigin.Begin);
                     writer.WriteUInt16BE((ushort)writer.BytesWritten);
                 }
+                else
+                {
+                    writer.WriteZero(length - writer.BytesWritten);
+                }
+
 
                 socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
             }
@@ -2390,6 +2751,10 @@ namespace ClassicUO.Network
                     writer.Seek(1, SeekOrigin.Begin);
                     writer.WriteUInt16BE((ushort)writer.BytesWritten);
                 }
+                else
+                {
+                    writer.WriteZero(length - writer.BytesWritten);
+                }
 
                 socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
             }
@@ -2417,6 +2782,10 @@ namespace ClassicUO.Network
                 {
                     writer.Seek(1, SeekOrigin.Begin);
                     writer.WriteUInt16BE((ushort)writer.BytesWritten);
+                }
+                else
+                {
+                    writer.WriteZero(length - writer.BytesWritten);
                 }
 
                 socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
@@ -2447,6 +2816,11 @@ namespace ClassicUO.Network
                     writer.Seek(1, SeekOrigin.Begin);
                     writer.WriteUInt16BE((ushort)writer.BytesWritten);
                 }
+                else
+                {
+                    writer.WriteZero(length - writer.BytesWritten);
+                }
+
 
                 socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
             }
@@ -2481,6 +2855,10 @@ namespace ClassicUO.Network
                     writer.Seek(1, SeekOrigin.Begin);
                     writer.WriteUInt16BE((ushort)writer.BytesWritten);
                 }
+                else
+                {
+                    writer.WriteZero(length - writer.BytesWritten);
+                }
 
                 socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
             }
@@ -2512,6 +2890,10 @@ namespace ClassicUO.Network
                     writer.Seek(1, SeekOrigin.Begin);
                     writer.WriteUInt16BE((ushort)writer.BytesWritten);
                 }
+                else
+                {
+                    writer.WriteZero(length - writer.BytesWritten);
+                }
 
                 socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
             }
@@ -2540,6 +2922,10 @@ namespace ClassicUO.Network
                 {
                     writer.Seek(1, SeekOrigin.Begin);
                     writer.WriteUInt16BE((ushort)writer.BytesWritten);
+                }
+                else
+                {
+                    writer.WriteZero(length - writer.BytesWritten);
                 }
 
                 socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
@@ -2570,6 +2956,10 @@ namespace ClassicUO.Network
                     writer.Seek(1, SeekOrigin.Begin);
                     writer.WriteUInt16BE((ushort)writer.BytesWritten);
                 }
+                else
+                {
+                    writer.WriteZero(length - writer.BytesWritten);
+                }
 
                 socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
             }
@@ -2598,6 +2988,10 @@ namespace ClassicUO.Network
                 {
                     writer.Seek(1, SeekOrigin.Begin);
                     writer.WriteUInt16BE((ushort)writer.BytesWritten);
+                }
+                else
+                {
+                    writer.WriteZero(length - writer.BytesWritten);
                 }
 
                 socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
@@ -2628,6 +3022,10 @@ namespace ClassicUO.Network
                     writer.Seek(1, SeekOrigin.Begin);
                     writer.WriteUInt16BE((ushort)writer.BytesWritten);
                 }
+                else
+                {
+                    writer.WriteZero(length - writer.BytesWritten);
+                }
 
                 socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
             }
@@ -2656,11 +3054,15 @@ namespace ClassicUO.Network
                     writer.Seek(1, SeekOrigin.Begin);
                     writer.WriteUInt16BE((ushort)writer.BytesWritten);
                 }
+                else
+                {
+                    writer.WriteZero(length - writer.BytesWritten);
+                }
 
                 socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
             }
         }
-
+     
         public static void Send_MegaClilocRequest(this NetClient socket, ref List<uint> serials)
         {
             const byte ID = 0xD6;
@@ -2689,6 +3091,10 @@ namespace ClassicUO.Network
                 {
                     writer.Seek(1, SeekOrigin.Begin);
                     writer.WriteUInt16BE((ushort)writer.BytesWritten);
+                }
+                else
+                {
+                    writer.WriteZero(length - writer.BytesWritten);
                 }
 
                 socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
@@ -2719,6 +3125,11 @@ namespace ClassicUO.Network
                     writer.Seek(1, SeekOrigin.Begin);
                     writer.WriteUInt16BE((ushort)writer.BytesWritten);
                 }
+                else
+                {
+                    writer.WriteZero(length - writer.BytesWritten);
+                }
+
 
                 socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
             }
@@ -2746,6 +3157,10 @@ namespace ClassicUO.Network
                 {
                     writer.Seek(1, SeekOrigin.Begin);
                     writer.WriteUInt16BE((ushort)writer.BytesWritten);
+                }
+                else
+                {
+                    writer.WriteZero(length - writer.BytesWritten);
                 }
 
                 socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
@@ -2779,6 +3194,11 @@ namespace ClassicUO.Network
                     writer.Seek(1, SeekOrigin.Begin);
                     writer.WriteUInt16BE((ushort)writer.BytesWritten);
                 }
+                else
+                {
+                    writer.WriteZero(length - writer.BytesWritten);
+                }
+
 
                 socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
             }
@@ -2815,6 +3235,11 @@ namespace ClassicUO.Network
                     writer.Seek(1, SeekOrigin.Begin);
                     writer.WriteUInt16BE((ushort)writer.BytesWritten);
                 }
+                else
+                {
+                    writer.WriteZero(length - writer.BytesWritten);
+                }
+
 
                 socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
             }
@@ -2868,6 +3293,11 @@ namespace ClassicUO.Network
                     writer.Seek(1, SeekOrigin.Begin);
                     writer.WriteUInt16BE((ushort)writer.BytesWritten);
                 }
+                else
+                {
+                    writer.WriteZero(length - writer.BytesWritten);
+                }
+
 
                 socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
             }
@@ -2898,6 +3328,11 @@ namespace ClassicUO.Network
                     writer.Seek(1, SeekOrigin.Begin);
                     writer.WriteUInt16BE((ushort)writer.BytesWritten);
                 }
+                else
+                {
+                    writer.WriteZero(length - writer.BytesWritten);
+                }
+
 
                 socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
             }
@@ -2942,6 +3377,11 @@ namespace ClassicUO.Network
                     writer.Seek(1, SeekOrigin.Begin);
                     writer.WriteUInt16BE((ushort)writer.BytesWritten);
                 }
+                else
+                {
+                    writer.WriteZero(length - writer.BytesWritten);
+                }
+
 
                 socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
             }
@@ -2977,6 +3417,10 @@ namespace ClassicUO.Network
                     writer.Seek(1, SeekOrigin.Begin);
                     writer.WriteUInt16BE((ushort)writer.BytesWritten);
                 }
+                else
+                {
+                    writer.WriteZero(length - writer.BytesWritten);
+                }
 
                 socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
             }
@@ -3008,6 +3452,11 @@ namespace ClassicUO.Network
                     writer.Seek(1, SeekOrigin.Begin);
                     writer.WriteUInt16BE((ushort)writer.BytesWritten);
                 }
+                else
+                {
+                    writer.WriteZero(length - writer.BytesWritten);
+                }
+
 
                 socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
             }
@@ -3037,6 +3486,11 @@ namespace ClassicUO.Network
                     writer.Seek(1, SeekOrigin.Begin);
                     writer.WriteUInt16BE((ushort)writer.BytesWritten);
                 }
+                else
+                {
+                    writer.WriteZero(length - writer.BytesWritten);
+                }
+
 
                 socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
             }
@@ -3066,6 +3520,10 @@ namespace ClassicUO.Network
                     writer.Seek(1, SeekOrigin.Begin);
                     writer.WriteUInt16BE((ushort)writer.BytesWritten);
                 }
+                else
+                {
+                    writer.WriteZero(length - writer.BytesWritten);
+                }
 
                 socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
             }
@@ -3094,6 +3552,10 @@ namespace ClassicUO.Network
                     writer.Seek(1, SeekOrigin.Begin);
                     writer.WriteUInt16BE((ushort)writer.BytesWritten);
                 }
+                else
+                {
+                    writer.WriteZero(length - writer.BytesWritten);
+                }
 
                 socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
             }
@@ -3121,6 +3583,10 @@ namespace ClassicUO.Network
                     writer.Seek(1, SeekOrigin.Begin);
                     writer.WriteUInt16BE((ushort)writer.BytesWritten);
                 }
+                else
+                {
+                    writer.WriteZero(length - writer.BytesWritten);
+                }
 
                 socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
             }
@@ -3147,6 +3613,10 @@ namespace ClassicUO.Network
                 {
                     writer.Seek(1, SeekOrigin.Begin);
                     writer.WriteUInt16BE((ushort)writer.BytesWritten);
+                }
+                else
+                {
+                    writer.WriteZero(length - writer.BytesWritten);
                 }
 
                 socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
@@ -3180,6 +3650,10 @@ namespace ClassicUO.Network
                     writer.Seek(1, SeekOrigin.Begin);
                     writer.WriteUInt16BE((ushort)writer.BytesWritten);
                 }
+                else
+                {
+                    writer.WriteZero(length - writer.BytesWritten);
+                }
 
                 socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
             }
@@ -3211,6 +3685,10 @@ namespace ClassicUO.Network
                     writer.Seek(1, SeekOrigin.Begin);
                     writer.WriteUInt16BE((ushort)writer.BytesWritten);
                 }
+                else
+                {
+                    writer.WriteZero(length - writer.BytesWritten);
+                }
 
                 socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
             }
@@ -3237,6 +3715,11 @@ namespace ClassicUO.Network
                     writer.Seek(1, SeekOrigin.Begin);
                     writer.WriteUInt16BE((ushort)writer.BytesWritten);
                 }
+                else
+                {
+                    writer.WriteZero(length - writer.BytesWritten);
+                }
+
 
                 socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
             }
@@ -3271,6 +3754,10 @@ namespace ClassicUO.Network
                     writer.Seek(1, SeekOrigin.Begin);
                     writer.WriteUInt16BE((ushort)writer.BytesWritten);
                 }
+                else
+                {
+                    writer.WriteZero(length - writer.BytesWritten);
+                }
 
                 socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
             }
@@ -3300,6 +3787,11 @@ namespace ClassicUO.Network
                     writer.Seek(1, SeekOrigin.Begin);
                     writer.WriteUInt16BE((ushort)writer.BytesWritten);
                 }
+                else
+                {
+                    writer.WriteZero(length - writer.BytesWritten);
+                }
+
 
                 socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
             }
@@ -3329,6 +3821,11 @@ namespace ClassicUO.Network
                     writer.Seek(1, SeekOrigin.Begin);
                     writer.WriteUInt16BE((ushort)writer.BytesWritten);
                 }
+                else
+                {
+                    writer.WriteZero(length - writer.BytesWritten);
+                }
+
 
                 socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
             }
@@ -3358,6 +3855,11 @@ namespace ClassicUO.Network
                     writer.Seek(1, SeekOrigin.Begin);
                     writer.WriteUInt16BE((ushort)writer.BytesWritten);
                 }
+                else
+                {
+                    writer.WriteZero(length - writer.BytesWritten);
+                }
+
 
                 socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
             }
@@ -3386,6 +3888,10 @@ namespace ClassicUO.Network
                 {
                     writer.Seek(1, SeekOrigin.Begin);
                     writer.WriteUInt16BE((ushort)writer.BytesWritten);
+                }
+                else
+                {
+                    writer.WriteZero(length - writer.BytesWritten);
                 }
 
                 socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
@@ -3418,6 +3924,11 @@ namespace ClassicUO.Network
                     writer.Seek(1, SeekOrigin.Begin);
                     writer.WriteUInt16BE((ushort)writer.BytesWritten);
                 }
+                else
+                {
+                    writer.WriteZero(length - writer.BytesWritten);
+                }
+
 
                 socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
             }
@@ -3447,6 +3958,11 @@ namespace ClassicUO.Network
                     writer.Seek(1, SeekOrigin.Begin);
                     writer.WriteUInt16BE((ushort)writer.BytesWritten);
                 }
+                else
+                {
+                    writer.WriteZero(length - writer.BytesWritten);
+                }
+
 
                 socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
             }
@@ -3476,6 +3992,11 @@ namespace ClassicUO.Network
                     writer.Seek(1, SeekOrigin.Begin);
                     writer.WriteUInt16BE((ushort)writer.BytesWritten);
                 }
+                else
+                {
+                    writer.WriteZero(length - writer.BytesWritten);
+                }
+
 
                 socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
             }
@@ -3505,6 +4026,10 @@ namespace ClassicUO.Network
                     writer.Seek(1, SeekOrigin.Begin);
                     writer.WriteUInt16BE((ushort)writer.BytesWritten);
                 }
+                else
+                {
+                    writer.WriteZero(length - writer.BytesWritten);
+                }
 
                 socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
             }
@@ -3533,6 +4058,10 @@ namespace ClassicUO.Network
                 {
                     writer.Seek(1, SeekOrigin.Begin);
                     writer.WriteUInt16BE((ushort)writer.BytesWritten);
+                }
+                else
+                {
+                    writer.WriteZero(length - writer.BytesWritten);
                 }
 
                 socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
@@ -3568,6 +4097,10 @@ namespace ClassicUO.Network
                 {
                     writer.Seek(1, SeekOrigin.Begin);
                     writer.WriteUInt16BE((ushort)writer.BytesWritten);
+                }
+                else
+                {
+                    writer.WriteZero(length - writer.BytesWritten);
                 }
 
                 socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
@@ -3606,6 +4139,10 @@ namespace ClassicUO.Network
                     writer.Seek(1, SeekOrigin.Begin);
                     writer.WriteUInt16BE((ushort)writer.BytesWritten);
                 }
+                else
+                {
+                    writer.WriteZero(length - writer.BytesWritten);
+                }
 
                 socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
             }
@@ -3642,6 +4179,10 @@ namespace ClassicUO.Network
                 {
                     writer.Seek(1, SeekOrigin.Begin);
                     writer.WriteUInt16BE((ushort)writer.BytesWritten);
+                }
+                else
+                {
+                    writer.WriteZero(length - writer.BytesWritten);
                 }
 
                 socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
@@ -3680,6 +4221,10 @@ namespace ClassicUO.Network
                     writer.Seek(1, SeekOrigin.Begin);
                     writer.WriteUInt16BE((ushort)writer.BytesWritten);
                 }
+                else
+                {
+                    writer.WriteZero(length - writer.BytesWritten);
+                }
 
                 socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
             }
@@ -3714,6 +4259,10 @@ namespace ClassicUO.Network
                 {
                     writer.Seek(1, SeekOrigin.Begin);
                     writer.WriteUInt16BE((ushort)writer.BytesWritten);
+                }
+                else
+                {
+                    writer.WriteZero(length - writer.BytesWritten);
                 }
 
                 socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
@@ -3751,6 +4300,10 @@ namespace ClassicUO.Network
                     writer.Seek(1, SeekOrigin.Begin);
                     writer.WriteUInt16BE((ushort)writer.BytesWritten);
                 }
+                else
+                {
+                    writer.WriteZero(length - writer.BytesWritten);
+                }
 
                 socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
             }
@@ -3775,6 +4328,10 @@ namespace ClassicUO.Network
                 {
                     writer.Seek(1, SeekOrigin.Begin);
                     writer.WriteUInt16BE((ushort)writer.BytesWritten);
+                }
+                else
+                {
+                    writer.WriteZero(length - writer.BytesWritten);
                 }
 
                 socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
@@ -3802,6 +4359,10 @@ namespace ClassicUO.Network
                 {
                     writer.Seek(1, SeekOrigin.Begin);
                     writer.WriteUInt16BE((ushort)writer.BytesWritten);
+                }
+                else
+                {
+                    writer.WriteZero(length - writer.BytesWritten);
                 }
 
                 socket.Send(writer.AllocatedBuffer, writer.BytesWritten);

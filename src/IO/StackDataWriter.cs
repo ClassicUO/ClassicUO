@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
@@ -10,6 +11,13 @@ namespace ClassicUO.IO
 {
     ref struct StackDataWriter
     {
+        private const MethodImplOptions IMPL_OPTION = MethodImplOptions.AggressiveInlining
+#if !NETFRAMEWORK && !NETSTANDARD2_0
+                                                      | MethodImplOptions.AggressiveOptimization
+#endif
+            ;
+
+
         private byte[] _allocatedBuffer;
         private Span<byte> _buffer;
         private int _position;
@@ -37,7 +45,10 @@ namespace ClassicUO.IO
         public ReadOnlySpan<byte> Buffer => _buffer.Slice(0, Position);
         public int Position
         {
+            [MethodImpl(IMPL_OPTION)]
             get => _position;
+
+            [MethodImpl(IMPL_OPTION)]
             set
             {
                 _position = value;
@@ -49,7 +60,7 @@ namespace ClassicUO.IO
 
 
 
-
+        [MethodImpl(IMPL_OPTION)]
         public void Seek(int position, SeekOrigin origin)
         {
             switch (origin)
@@ -76,14 +87,8 @@ namespace ClassicUO.IO
             EnsureSize(Position - _buffer.Length + 1);
         }
 
-        public void Skip(int s)
-        {
-            EnsureSize(s);
 
-            Position += s;
-        }
-
-
+        [MethodImpl(IMPL_OPTION)]
         public void WriteUInt8(byte b)
         {
             EnsureSize(1);
@@ -93,11 +98,13 @@ namespace ClassicUO.IO
             Position += 1;
         }
 
+        [MethodImpl(IMPL_OPTION)]
         public void WriteInt8(sbyte b)
         {
             WriteUInt8((byte) b);
         }
 
+        [MethodImpl(IMPL_OPTION)]
         public void WriteBool(bool b)
         {
             if (b)
@@ -110,8 +117,11 @@ namespace ClassicUO.IO
             }
         }
 
+
+
         /* Little Endian */
 
+        [MethodImpl(IMPL_OPTION)]
         public void WriteUInt16LE(ushort b)
         {
             EnsureSize(2);
@@ -122,11 +132,13 @@ namespace ClassicUO.IO
             Position += 2;
         }
 
+        [MethodImpl(IMPL_OPTION)]
         public void WriteInt16LE(short b)
         {
             WriteUInt16LE((ushort) b);
         }
 
+        [MethodImpl(IMPL_OPTION)]
         public void WriteUInt32LE(uint b)
         {
             EnsureSize(4);
@@ -139,11 +151,13 @@ namespace ClassicUO.IO
             Position += 4;
         }
 
+        [MethodImpl(IMPL_OPTION)]
         public void WriteInt32LE(int b)
         {
             WriteUInt32LE((uint) b);
         }
 
+        [MethodImpl(IMPL_OPTION)]
         public void WriteUnicodeLE(string str)
         {
             EnsureSize((str.Length + 1) * 2);
@@ -161,6 +175,7 @@ namespace ClassicUO.IO
             WriteUInt16LE(0x00);
         }
 
+        [MethodImpl(IMPL_OPTION)]
         public void WriteUnicodeLE(string str, int length)
         {
             EnsureSize(length);
@@ -186,6 +201,7 @@ namespace ClassicUO.IO
 
         /* Big Endian */
 
+        [MethodImpl(IMPL_OPTION)]
         public void WriteUInt16BE(ushort b)
         {
             EnsureSize(2);
@@ -196,11 +212,13 @@ namespace ClassicUO.IO
             Position += 2;
         }
 
+        [MethodImpl(IMPL_OPTION)]
         public void WriteInt16BE(short b)
         {
             WriteUInt16BE((ushort) b);
         }
 
+        [MethodImpl(IMPL_OPTION)]
         public void WriteUInt32BE(uint b)
         {
             EnsureSize(4);
@@ -213,11 +231,13 @@ namespace ClassicUO.IO
             Position += 4;
         }
 
+        [MethodImpl(IMPL_OPTION)]
         public void WriteInt32BE(int b)
         {
             WriteUInt32BE((uint) b);
         }
 
+        [MethodImpl(IMPL_OPTION)]
         public void WriteUnicodeBE(string str)
         {
             EnsureSize((str.Length + 1) * 2);
@@ -235,6 +255,7 @@ namespace ClassicUO.IO
             WriteUInt16BE(0x00);
         }
 
+        [MethodImpl(IMPL_OPTION)]
         public void WriteUnicodeBE(string str, int length)
         {
             EnsureSize(length);
@@ -255,6 +276,7 @@ namespace ClassicUO.IO
             }
         }
 
+        [MethodImpl(IMPL_OPTION)]
         public void WriteUTF8(string str, int len)
         {
             if (str == null)
@@ -300,18 +322,22 @@ namespace ClassicUO.IO
 
 
 
-
+        [MethodImpl(IMPL_OPTION)]
         public void WriteZero(int count)
         {
-            EnsureSize(count);
-
-            for (int i = 0; i < count; ++i)
+            if (count > 0)
             {
-                WriteUInt8(0x00);
+                EnsureSize(count);
+
+                for (int i = 0; i < count; ++i)
+                {
+                    WriteUInt8(0x00);
+                }
             }
         }
 
 
+        [MethodImpl(IMPL_OPTION)]
         public void Write(ReadOnlySpan<byte> span)
         {
             EnsureSize(span.Length);
@@ -321,7 +347,7 @@ namespace ClassicUO.IO
             Position += span.Length;
         }
 
-
+        [MethodImpl(IMPL_OPTION)]
         public void WriteASCII(string str)
         {
             EnsureSize(str.Length + 1);
@@ -338,6 +364,8 @@ namespace ClassicUO.IO
 
             WriteUInt8(0x00);
         }
+
+        [MethodImpl(IMPL_OPTION)]
         public void WriteASCII(string str, int length)
         {
             EnsureSize(length);
@@ -358,6 +386,7 @@ namespace ClassicUO.IO
             }
         }
 
+        [MethodImpl(IMPL_OPTION)]
         private void EnsureSize(int size)
         {
             if (Position + size > _buffer.Length)
@@ -366,13 +395,14 @@ namespace ClassicUO.IO
             }
         }
 
+        [MethodImpl(IMPL_OPTION)]
         private void Rent(int size)
         {
             byte[] newBuffer = System.Buffers.ArrayPool<byte>.Shared.Rent(size);
 
             if (_allocatedBuffer != null)
             {
-                _buffer.Slice(0, Position).CopyTo(newBuffer);
+                _buffer.Slice(0, BytesWritten).CopyTo(newBuffer);
 
                 Return();
             }
@@ -380,6 +410,7 @@ namespace ClassicUO.IO
             _buffer = _allocatedBuffer = newBuffer;
         }
 
+        [MethodImpl(IMPL_OPTION)]
         private void Return()
         {
             if (_allocatedBuffer != null)
@@ -390,6 +421,7 @@ namespace ClassicUO.IO
             }
         }
 
+        [MethodImpl(IMPL_OPTION)]
         public void Dispose()
         {
             Return();

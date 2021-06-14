@@ -653,11 +653,6 @@ namespace ClassicUO.Network
 
         private static void LogPacket(byte[] buffer, int length, bool toServer)
         {
-            if (!toServer)
-            {
-                return;
-            }
-
             if (_logFile == null)
                 _logFile = new LogFile(FileSystemHelper.CreateFolderIfNotExists(CUOEnviroment.ExecutablePath, "Logs", "Network"), "packets.log");
 
