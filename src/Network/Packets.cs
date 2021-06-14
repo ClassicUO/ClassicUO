@@ -349,7 +349,7 @@ namespace ClassicUO.Network
 
                 writer.WriteUInt32BE(0xEDEDEDED);
                 writer.WriteUInt32BE(0xFFFF_FFFF);
-                writer.WriteZero(1);
+                writer.WriteUInt8(0x00);
                 writer.WriteASCII(character.Name, 30);
                 writer.WriteZero(2);
 
@@ -679,7 +679,7 @@ namespace ClassicUO.Network
 
                 writer.WriteBool(state);
                 writer.WriteUInt8(0x32);
-                writer.WriteZero(1);
+                writer.WriteUInt8(0x00);
 
                 if (length < 0)
                 {
@@ -1027,7 +1027,7 @@ namespace ClassicUO.Network
                     }
 
                     writer.Write(utf8);
-                    writer.WriteZero(1);
+                    writer.WriteUInt8(0x00);
                 }
                 else
                 {
@@ -1890,7 +1890,7 @@ namespace ClassicUO.Network
                     writer.WriteUInt16BE(0x00);
                 }
 
-                writer.WriteZero(1);
+                writer.WriteUInt8(0x00);
                 writer.WriteUInt32BE(serial);
 
                 if (length < 0)
@@ -2337,7 +2337,7 @@ namespace ClassicUO.Network
 
                 byte[] title = Encoding.UTF8.GetBytes(subject);
                 writer.Write(title);
-                writer.WriteZero(1);
+                writer.WriteUInt8(0x00);
 
                 int numOfLinesPosition = writer.Position;
                 int numOfLines = 0;
@@ -2367,7 +2367,7 @@ namespace ClassicUO.Network
 
                                 writer.WriteUInt8((byte)(len + 1));
                                 writer.Write(buffer.AsSpan(0, len));
-                                writer.WriteZero(1);
+                                writer.WriteUInt8(0x00);
                             }
                             finally
                             {
@@ -2388,7 +2388,7 @@ namespace ClassicUO.Network
                 {
                     writer.WriteUInt8((byte) (text.Length + 1));
                     writer.WriteASCII(text);
-                    writer.WriteZero(1);
+                    writer.WriteUInt8(0x00);
                 }
 
                 writer.Seek(numOfLinesPosition, SeekOrigin.Begin);
@@ -2554,7 +2554,7 @@ namespace ClassicUO.Network
 
                 writer.WriteUInt16BE(0x0B);
                 writer.WriteASCII(lang, 3);
-                writer.WriteZero(1);
+                writer.WriteUInt8(0x00);
 
                 if (length < 0)
                 {
@@ -2842,7 +2842,7 @@ namespace ClassicUO.Network
                 }
 
 
-                writer.WriteZero(1);
+                writer.WriteUInt8(0x00);
                 int len = Math.Min(name.Length, 30);
 
                 if (len > 0)
@@ -3284,9 +3284,9 @@ namespace ClassicUO.Network
                         }
                     }
 
-                    writer.WriteZero(1);
+                    writer.WriteUInt8(0x00);
                 }
-                writer.WriteZero(1);
+                writer.WriteUInt8(0x00);
 
                 if (length < 0)
                 {
@@ -3368,7 +3368,7 @@ namespace ClassicUO.Network
                 }
                 else
                 {
-                    writer.WriteZero(1);
+                    writer.WriteUInt8(0x00);
                 }
                
 
@@ -4085,11 +4085,11 @@ namespace ClassicUO.Network
 
                 writer.WriteUInt32BE(World.Player.Serial);
                 writer.WriteUInt16BE(0x06);
-                writer.WriteZero(1);
+                writer.WriteUInt8(0x00);
                 writer.WriteUInt32BE(graphic);
-                writer.WriteZero(1);
+                writer.WriteUInt8(0x00);
                 writer.WriteUInt32BE((uint) x);
-                writer.WriteZero(1);
+                writer.WriteUInt8(0x00);
                 writer.WriteUInt32BE((uint) y);
                 writer.WriteUInt8(0x0A);
 
@@ -4124,13 +4124,13 @@ namespace ClassicUO.Network
 
                 writer.WriteUInt32BE(World.Player.Serial);
                 writer.WriteUInt16BE(0x05);
-                writer.WriteZero(1);
+                writer.WriteUInt8(0x00);
                 writer.WriteUInt32BE(graphic);
-                writer.WriteZero(1);
+                writer.WriteUInt8(0x00);
                 writer.WriteUInt32BE((uint)x);
-                writer.WriteZero(1);
+                writer.WriteUInt8(0x00);
                 writer.WriteUInt32BE((uint)y);
-                writer.WriteZero(1);
+                writer.WriteUInt8(0x00);
                 writer.WriteUInt32BE((uint)z);
                 writer.WriteUInt8(0x0A);
 
@@ -4165,13 +4165,13 @@ namespace ClassicUO.Network
 
                 writer.WriteUInt32BE(World.Player.Serial);
                 writer.WriteUInt16BE(0x13);
-                writer.WriteZero(1);
+                writer.WriteUInt8(0x00);
                 writer.WriteUInt32BE(graphic);
-                writer.WriteZero(1);
+                writer.WriteUInt8(0x00);
                 writer.WriteUInt32BE((uint)x);
-                writer.WriteZero(1);
+                writer.WriteUInt8(0x00);
                 writer.WriteUInt32BE((uint)y);
-                writer.WriteZero(1);
+                writer.WriteUInt8(0x00);
                 writer.WriteUInt32BE((uint)z);
                 writer.WriteUInt8(0x0A);
 
@@ -4206,13 +4206,13 @@ namespace ClassicUO.Network
 
                 writer.WriteUInt32BE(World.Player.Serial);
                 writer.WriteUInt16BE(0x14);
-                writer.WriteZero(1);
+                writer.WriteUInt8(0x00);
                 writer.WriteUInt32BE(graphic);
-                writer.WriteZero(1);
+                writer.WriteUInt8(0x00);
                 writer.WriteUInt32BE((uint)x);
-                writer.WriteZero(1);
+                writer.WriteUInt8(0x00);
                 writer.WriteUInt32BE((uint)y);
-                writer.WriteZero(1);
+                writer.WriteUInt8(0x00);
                 writer.WriteUInt32BE((uint)z);
                 writer.WriteUInt8(0x0A);
 
@@ -4247,11 +4247,11 @@ namespace ClassicUO.Network
 
                 writer.WriteUInt32BE(World.Player.Serial);
                 writer.WriteUInt16BE(0x0D);
-                writer.WriteZero(1);
+                writer.WriteUInt8(0x00);
                 writer.WriteUInt32BE(graphic);
-                writer.WriteZero(1);
+                writer.WriteUInt8(0x00);
                 writer.WriteUInt32BE((uint)x);
-                writer.WriteZero(1);
+                writer.WriteUInt8(0x00);
                 writer.WriteUInt32BE((uint)y);
                 writer.WriteUInt8(0x0A);
 
