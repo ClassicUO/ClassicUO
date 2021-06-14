@@ -459,6 +459,11 @@ namespace ClassicUO.Game.UI.Gumps
         {
             base.Update(totalTime, frameTime);
 
+            if (IsDisposed)
+            {
+                return;
+            }
+
             if (_mapIndex != World.MapIndex)
             {
                 Load();
@@ -1004,22 +1009,14 @@ namespace ClassicUO.Game.UI.Gumps
         private unsafe Task Load()
         {
             _mapIndex = World.MapIndex;
+            _mapTexture?.Dispose();
+            _mapTexture = null;
 
-            int realWidth = MapLoader.Instance.MapsDefaultSize[World.MapIndex, 0];
-            int realHeight = MapLoader.Instance.MapsDefaultSize[World.MapIndex, 1];
-
-            const int OFFSET_PIX = 2;
-            const int OFFSET_PIX_HALF = OFFSET_PIX / 2;
-
-            if (_mapTexture != null && !_mapTexture.IsDisposed)
+            if (_mapIndex < 0 || _mapIndex > Constants.MAPS_COUNT)
             {
-                if (_mapTexture.Bounds.Width != realWidth + OFFSET_PIX || _mapTexture.Bounds.Height != realHeight + OFFSET_PIX)
-                {
-                    _mapTexture?.Dispose();
-                    _mapTexture = null;
-                }
+                return Task.CompletedTask;
             }
-
+            
             return Task.Run
             (
                 () =>
@@ -1028,6 +1025,12 @@ namespace ClassicUO.Game.UI.Gumps
                     {
                         try
                         {
+                            int realWidth = MapLoader.Instance.MapsDefaultSize[World.MapIndex, 0];
+                            int realHeight = MapLoader.Instance.MapsDefaultSize[World.MapIndex, 1];
+
+                            const int OFFSET_PIX = 2;
+                            const int OFFSET_PIX_HALF = OFFSET_PIX / 2;
+
                             int fixedWidth = MapLoader.Instance.MapBlocksSize[World.MapIndex, 0];
                             int fixedHeight = MapLoader.Instance.MapBlocksSize[World.MapIndex, 1];
 
