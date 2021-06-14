@@ -89,7 +89,7 @@ namespace ClassicUO.IO
             WriteIntegerToData(height);
             bool countingTransparent = true;
             int count = 0;
-            for (int i = 0; i < pixels.Length; i++)
+            for (int i = 0, len = width * height; i < len; i++)
             {
                 bool isTransparent = pixels[i] == 0;
                 if (countingTransparent != isTransparent)
