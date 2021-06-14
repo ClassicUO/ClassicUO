@@ -224,14 +224,14 @@ namespace ClassicUO.Network
                 {
                     if (Handlers._clilocRequests.Count != 0)
                     {
-                        NetClient.Socket.Send(new PMegaClilocRequest(ref Handlers._clilocRequests));
+                        NetClient.Socket.Send_MegaClilocRequest(ref Handlers._clilocRequests);
                     }
                 }
                 else
                 {
                     foreach (uint serial in Handlers._clilocRequests)
                     {
-                        NetClient.Socket.Send(new PMegaClilocRequestOld(serial));
+                        NetClient.Socket.Send_MegaClilocRequest_Old(serial);
                     }
 
                     Handlers._clilocRequests.Clear();
@@ -789,16 +789,16 @@ namespace ClassicUO.Network
             {
                 if (ProfileManager.CurrentProfile != null)
                 {
-                    NetClient.Socket.Send(new PGameWindowSize((uint) ProfileManager.CurrentProfile.GameWindowSize.X, (uint) ProfileManager.CurrentProfile.GameWindowSize.Y));
+                    NetClient.Socket.Send_GameWindowSize((uint)ProfileManager.CurrentProfile.GameWindowSize.X, (uint)ProfileManager.CurrentProfile.GameWindowSize.Y);
                 }
 
-                NetClient.Socket.Send(new PLanguage(Settings.GlobalSettings.Language));
+                NetClient.Socket.Send_Language(Settings.GlobalSettings.Language);
             }
 
-            NetClient.Socket.Send(new PClientVersion(Settings.GlobalSettings.ClientVersion));
+            NetClient.Socket.Send_ClientVersion(Settings.GlobalSettings.ClientVersion);
 
             GameActions.SingleClick(World.Player);
-            NetClient.Socket.Send(new PSkillsRequest(World.Player));
+            NetClient.Socket.Send_SkillsRequest(World.Player.Serial);
 
             if (World.Player.IsDead)
             {
@@ -807,7 +807,7 @@ namespace ClassicUO.Network
 
             if (Client.Version >= Data.ClientVersion.CV_70796 && ProfileManager.CurrentProfile != null)
             {
-                NetClient.Socket.Send(new PShowPublicHouseContent(ProfileManager.CurrentProfile.ShowHouseContent));
+                NetClient.Socket.Send_ShowPublicHouseContent(ProfileManager.CurrentProfile.ShowHouseContent);
             }
 
 
@@ -2055,7 +2055,7 @@ namespace ClassicUO.Network
 
                 //GameActions.OpenPaperdoll(World.Player);
                 GameActions.RequestMobileStatus(World.Player);
-                NetClient.Socket.Send(new POpenChat(""));
+                NetClient.Socket.Send_OpenChat("");
 
 
                 //NetClient.Socket.Send(new PSkillsRequest(World.Player));
@@ -2063,12 +2063,12 @@ namespace ClassicUO.Network
 
                 if (Client.Version >= Data.ClientVersion.CV_306E)
                 {
-                    NetClient.Socket.Send(new PClientType());
+                    NetClient.Socket.Send_ClientType();
                 }
 
                 if (Client.Version >= Data.ClientVersion.CV_305D)
                 {
-                    NetClient.Socket.Send(new PClientViewRange(World.ClientViewRange));
+                    NetClient.Socket.Send_ClientViewRange(World.ClientViewRange);
                 }
 
                 List<Gump> gumps = ProfileManager.CurrentProfile.ReadGumps(ProfileManager.ProfilePath);
@@ -3192,7 +3192,7 @@ namespace ClassicUO.Network
                     }
                 );
 
-                NetClient.Socket.Send(new PBookPageDataRequest(serial, 1));
+                NetClient.Socket.Send_BookPageDataRequest(serial, 1);
             }
             else
             {
@@ -3777,7 +3777,7 @@ namespace ClassicUO.Network
                     p.Skip(4);
                     string username = p.ReadUnicode();
                     ChatManager.ChatIsEnabled = ChatStatus.Enabled;
-                    NetClient.Socket.Send(new PChatJoinCommand("General"));
+                    NetClient.Socket.Send_ChatJoinCommand("General");
 
                     break;
 
@@ -4008,7 +4008,7 @@ namespace ClassicUO.Network
 
         private static void ClientVersion(ref PacketBufferReader p)
         {
-            NetClient.Socket.Send(new PClientVersion(Settings.GlobalSettings.ClientVersion));
+            NetClient.Socket.Send_ClientVersion(Settings.GlobalSettings.ClientVersion);
         }
 
         private static void AssistVersion(ref PacketBufferReader p)
@@ -4228,7 +4228,7 @@ namespace ClassicUO.Network
                         }
                     }
 
-                    NetClient.Socket.Send(new PMegaClilocRequestOld(item));
+                    NetClient.Socket.Send_MegaClilocRequest_Old(item);
 
                     break;
 
@@ -4454,7 +4454,7 @@ namespace ClassicUO.Network
 
                     if (!World.HouseManager.TryGetHouse(serial, out House house) || !house.IsCustom || house.Revision != revision)
                     {
-                        NetClient.Socket.Send(new PCustomHouseDataRequest(serial));
+                        NetClient.Socket.Send_CustomHouseDataRequest(serial);
                     }
                     else
                     {
@@ -5538,7 +5538,7 @@ namespace ClassicUO.Network
 
                 case 0xFE:
                     Log.Info("Razor ACK sent");
-                    NetClient.Socket.Send(new PRazorAnswer());
+                    NetClient.Socket.Send_RazorACK();
 
                     break;
             }
@@ -5966,7 +5966,7 @@ namespace ClassicUO.Network
 
                 if (gump != null)
                 {
-                    NetClient.Socket.Send(new PBulletinBoardRequestMessageSummary(containerSerial, serial));
+                    NetClient.Socket.Send_BulletinBoardRequestMessageSummary(containerSerial, serial);
                 }
                 else
                 {

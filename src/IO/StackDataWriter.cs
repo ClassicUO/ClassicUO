@@ -14,19 +14,7 @@ namespace ClassicUO.IO
         private Span<byte> _buffer;
         private int _position;
 
-        public int Position
-        {
-            get => _position;
-            set
-            {
-                _position = value;
-                BytesWritten = Math.Max(value, BytesWritten);
-            }
-        }
 
-        public int BytesWritten { get; private set; }
-
-        
         public StackDataWriter(int initialCapacity)
         {
             this = default;
@@ -47,6 +35,19 @@ namespace ClassicUO.IO
         public byte[] AllocatedBuffer => _allocatedBuffer;
         public Span<byte> RawBuffer => _buffer;
         public ReadOnlySpan<byte> Buffer => _buffer.Slice(0, Position);
+        public int Position
+        {
+            get => _position;
+            set
+            {
+                _position = value;
+                BytesWritten = Math.Max(value, BytesWritten);
+            }
+        }
+
+        public int BytesWritten { get; private set; }
+
+
 
 
         public void Seek(int position, SeekOrigin origin)
@@ -254,7 +255,47 @@ namespace ClassicUO.IO
             }
         }
 
+        public void WriteUTF8(string str, int len)
+        {
+            if (str == null)
+            {
+                str = string.Empty;
+            }
 
+            int size = Math.Min(len, str.Length);
+
+            byte[] buffer = System.Buffers.ArrayPool<byte>.Shared.Rent(size);
+
+            try
+            {
+                EnsureSize(len);
+
+                Encoding.UTF8.GetBytes
+                (
+                    str,
+                    0,
+                    size,
+                    buffer,
+                    0
+                );
+
+                for (int i = 0; i < len; ++i)
+                {
+                    if (i < size)
+                    {
+                        WriteUInt8(buffer[i]);
+                    }
+                    else
+                    {
+                        WriteZero(1);
+                    }
+                }
+            }
+            finally
+            {
+                System.Buffers.ArrayPool<byte>.Shared.Return(buffer);
+            }
+        }
 
 
 
@@ -285,7 +326,16 @@ namespace ClassicUO.IO
         {
             EnsureSize(str.Length + 1);
 
-            Write(MemoryMarshal.Cast<char, byte>(str.AsSpan()));
+            for (int i = 0; i < str.Length; ++i)
+            {
+                char c = str[i];
+
+                if (c != '\0')
+                {
+                    WriteUInt8((byte)c);
+                }
+            }
+
             WriteUInt8(0x00);
         }
         public void WriteASCII(string str, int length)

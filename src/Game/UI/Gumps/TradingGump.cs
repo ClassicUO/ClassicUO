@@ -573,7 +573,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                         if (send)
                         {
-                            NetClient.Socket.Send(new PTradeUpdateGold(ID1, my_gold_entry, my_plat_entry));
+                            NetClient.Socket.Send_TradeUpdateGold(ID1, my_gold_entry, my_plat_entry);
                         }
                     }
                 }

@@ -565,7 +565,7 @@ namespace ClassicUO.Game.Managers
                                             break;
                                     }
 
-                                    NetClient.Socket.Send(new POpenSpellBook((byte) type));
+                                    NetClient.Socket.Send_OpenSpellBook((byte)type);
 
                                     break;
 
@@ -1292,11 +1292,11 @@ namespace ClassicUO.Game.Managers
                         {
                             if (macro.Code == MacroType.BandageSelf)
                             {
-                                NetClient.Socket.Send(new PTargetSelectedObject(bandage.Serial, World.Player.Serial));
+                                NetClient.Socket.Send_TargetSelectedObject(bandage.Serial, World.Player.Serial);
                             }
                             else if (SerialHelper.IsMobile(TargetManager.SelectedTarget))
                             {
-                                NetClient.Socket.Send(new PTargetSelectedObject(bandage.Serial, TargetManager.SelectedTarget));
+                                NetClient.Socket.Send_TargetSelectedObject(bandage.Serial, TargetManager.SelectedTarget);
                             }
                         }
                     }
@@ -1410,7 +1410,7 @@ namespace ClassicUO.Game.Managers
 
                 case MacroType.InvokeVirtue:
                     byte id = (byte) (macro.SubCode - MacroSubType.Honor + 1);
-                    NetClient.Socket.Send(new PInvokeVirtueRequest(id));
+                    NetClient.Socket.Send_InvokeVirtueRequest(id);
 
                     break;
 
@@ -1428,13 +1428,13 @@ namespace ClassicUO.Game.Managers
 
                     if (World.Player.Race == RaceType.GARGOYLE)
                     {
-                        NetClient.Socket.Send(new PToggleGargoyleFlying());
+                        NetClient.Socket.Send_ToggleGargoyleFlying();
                     }
 
                     break;
 
                 case MacroType.EquipLastWeapon:
-                    NetClient.Socket.Send(new PEquipLastWeapon());
+                    NetClient.Socket.Send_EquipLastWeapon();
 
                     break;
 

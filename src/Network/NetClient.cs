@@ -122,8 +122,6 @@ namespace ClassicUO.Network
         public event EventHandler Connected;
         public event EventHandler<SocketError> Disconnected;
 
-        public static event EventHandler<PacketWriter> PacketSent;
-
         private static readonly Task<bool> TaskCompletedFalse = new Task<bool>(() => false);
 
         public static void EnqueuePacketFromPlugin(byte[] data, int length)
@@ -298,7 +296,6 @@ namespace ClassicUO.Network
 
             if (Plugin.ProcessSendPacket(data, ref length))
             {
-                PacketSent.Raise(p);
                 Send(data, length, false);
             }
         }
@@ -310,7 +307,6 @@ namespace ClassicUO.Network
                 return;
             }
 
-            PacketSent.Raise(new PacketWriter(data, length));
             Send(data, length, skip_encryption);
         }
 
@@ -657,6 +653,11 @@ namespace ClassicUO.Network
 
         private static void LogPacket(byte[] buffer, int length, bool toServer)
         {
+            if (!toServer)
+            {
+                return;
+            }
+
             if (_logFile == null)
                 _logFile = new LogFile(FileSystemHelper.CreateFolderIfNotExists(CUOEnviroment.ExecutablePath, "Logs", "Network"), "packets.log");
 

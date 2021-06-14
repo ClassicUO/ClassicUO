@@ -128,7 +128,7 @@ namespace ClassicUO.Game.UI.Controls
         {
             if (IsVirtue && button == MouseButtonType.Left)
             {
-                NetClient.Socket.Send(new PVirtueGumpReponse(World.Player, Graphic));
+                NetClient.Socket.Send_VirtueGumpResponse(World.Player, Graphic);
 
                 return true;
             }

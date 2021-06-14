@@ -418,7 +418,7 @@ namespace ClassicUO.Game.Scenes
                 Settings.GlobalSettings.LastCharacterName = Characters[index];
                 Settings.GlobalSettings.Save();
                 CurrentLoginStep = LoginSteps.EnteringBritania;
-                NetClient.Socket.Send(new PSelectCharacter(index, Characters[index], NetClient.Socket.LocalIP));
+                NetClient.Socket.Send_SelectCharacter(index, Characters[index], NetClient.Socket.LocalIP);
             }
         }
 
@@ -444,18 +444,12 @@ namespace ClassicUO.Game.Scenes
 
             Settings.GlobalSettings.LastCharacterName = character.Name;
 
-            NetClient.Socket.Send
-            (
-                new PCreateCharacter
-                (
-                    character,
-                    cityIndex,
-                    NetClient.Socket.LocalIP,
-                    ServerIndex,
-                    (uint) i,
-                    profession
-                )
-            );
+            NetClient.Socket.Send_CreateCharacter(character,
+                                                  cityIndex,
+                                                  NetClient.Socket.LocalIP,
+                                                  ServerIndex,
+                                                  (uint)i,
+                                                  profession);
 
             CurrentLoginStep = LoginSteps.CharacterCreationDone;
         }
@@ -464,7 +458,7 @@ namespace ClassicUO.Game.Scenes
         {
             if (CurrentLoginStep == LoginSteps.CharacterSelection)
             {
-                NetClient.Socket.Send(new PDeleteCharacter((byte) index, NetClient.Socket.LocalIP));
+                NetClient.Socket.Send_DeleteCharacter((byte)index, NetClient.Socket.LocalIP);
             }
         }
 

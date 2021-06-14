@@ -661,11 +661,11 @@ namespace ClassicUO.Game.Managers
 
                             if (type == CUSTOM_HOUSE_BUILD_TYPE.CHBT_ROOF)
                             {
-                                NetClient.Socket.Send(new PCustomHouseDeleteRoof(place.Graphic, place.X - foundationItem.X, place.Y - foundationItem.Y, z));
+                                NetClient.Socket.Send_CustomHouseDeleteRoof(place.Graphic, place.X - foundationItem.X, place.Y - foundationItem.Y, z);
                             }
                             else
                             {
-                                NetClient.Socket.Send(new PCustomHouseDeleteItem(place.Graphic, place.X - foundationItem.X, place.Y - foundationItem.Y, z));
+                                NetClient.Socket.Send_CustomHouseDeleteItem(place.Graphic, place.X - foundationItem.X, place.Y - foundationItem.Y, z);
                             }
 
                             place.Destroy();
@@ -710,7 +710,7 @@ namespace ClassicUO.Game.Managers
 
                                     if (graphic != 0)
                                     {
-                                        NetClient.Socket.Send(new PCustomHouseAddStair(graphic, placeX - foundationItem.X, placeY - foundationItem.Y));
+                                        NetClient.Socket.Send_CustomHouseAddStair(graphic, placeX - foundationItem.X, placeY - foundationItem.Y);
                                     }
                                 }
                             }
@@ -784,11 +784,11 @@ namespace ClassicUO.Game.Managers
 
                                     if (type == CUSTOM_HOUSE_BUILD_TYPE.CHBT_ROOF)
                                     {
-                                        NetClient.Socket.Send(new PCustomHouseAddRoof(item.Graphic, x, y, item.Z));
+                                        NetClient.Socket.Send_CustomHouseAddRoof(item.Graphic, x, y, item.Z);
                                     }
                                     else
                                     {
-                                        NetClient.Socket.Send(new PCustomHouseAddItem(item.Graphic, x, y));
+                                        NetClient.Socket.Send_CustomHouseAddItem(item.Graphic, x, y);
                                     }
                                 }
                             }
