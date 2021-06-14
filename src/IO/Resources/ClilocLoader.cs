@@ -271,7 +271,7 @@ namespace ClassicUO.IO.Resources
             locations[totalArgs - 1].X = trueStart;
             locations[totalArgs - 1].Y = i;
 
-            using (ValueStringBuilder sb = new ValueStringBuilder(baseCliloc.AsSpan()))
+            ValueStringBuilder sb = new ValueStringBuilder(baseCliloc.AsSpan());
             {
                 int index, pos = 0;
 
@@ -366,6 +366,8 @@ namespace ClassicUO.IO.Resources
                 }
 
                 baseCliloc = sb.ToString();
+
+                sb.Dispose();
 
                 if (capitalize)
                 {

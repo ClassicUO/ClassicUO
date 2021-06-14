@@ -118,7 +118,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _deltaBytesSent = NetClient.Socket.Statistics.DeltaBytesSent;
                 }
 
-                using (ValueStringBuilder sb = new ValueStringBuilder(128))
+                ValueStringBuilder sb = new ValueStringBuilder(128);
                 {
                     if (IsMinimized)
                     {
@@ -130,6 +130,8 @@ namespace ClassicUO.Game.UI.Gumps
                     }
 
                     _cacheText = sb.ToString();
+
+                    sb.Dispose();
                 }
 
                 Vector2 size = Fonts.Bold.MeasureString(_cacheText);

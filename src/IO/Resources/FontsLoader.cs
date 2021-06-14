@@ -548,7 +548,7 @@ namespace ClassicUO.IO.Resources
 
             int strLen = str.Length;
 
-            using (ValueStringBuilder sb = new ValueStringBuilder(strLen))
+            ValueStringBuilder sb = new ValueStringBuilder(strLen);
             {
                 if (IsUsingHTML)
                 {
@@ -605,7 +605,11 @@ namespace ClassicUO.IO.Resources
                     sb.Append("...");
                 }
 
-                return sb.ToString();
+                string ss = sb.ToString();
+
+                sb.Dispose();
+
+                return ss;
             }
         }
 
@@ -1224,7 +1228,7 @@ namespace ClassicUO.IO.Resources
             uint* table = (uint*) _unicodeFontAddress[font];
             int strLen = str.Length;
 
-            using (ValueStringBuilder sb = new ValueStringBuilder(strLen))
+            ValueStringBuilder sb = new ValueStringBuilder(strLen);
             {
                 if (IsUsingHTML)
                 {
@@ -1303,7 +1307,11 @@ namespace ClassicUO.IO.Resources
                     sb.Append("...");
                 }
 
-                return sb.ToString();
+                string ss = sb.ToString();
+
+                sb.Dispose();
+                
+                return ss;
             }
         }
 

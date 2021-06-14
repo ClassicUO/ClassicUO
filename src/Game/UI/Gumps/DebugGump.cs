@@ -110,7 +110,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 GameScene scene = Client.Game.GetScene<GameScene>();
 
-                using (ValueStringBuilder sb = new ValueStringBuilder(256))
+                ValueStringBuilder sb = new ValueStringBuilder(256);
                 {
                     if (IsMinimized && scene != null)
                     {
@@ -173,6 +173,8 @@ namespace ClassicUO.Game.UI.Gumps
                     }
 
                     _cacheText = sb.ToString();
+
+                    sb.Dispose();
                 }
 
                 Vector2 size = Fonts.Bold.MeasureString(_cacheText);

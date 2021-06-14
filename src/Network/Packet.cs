@@ -119,7 +119,7 @@ namespace ClassicUO.Network
                 return string.Empty;
             }
 
-            using (ValueStringBuilder sb = new ValueStringBuilder(64))
+            ValueStringBuilder sb = new ValueStringBuilder(64);
             {
                 char c;
 
@@ -128,7 +128,11 @@ namespace ClassicUO.Network
                     sb.Append(c);
                 }
 
-                return sb.ToString();
+                string ss = sb.ToString();
+
+                sb.Dispose();
+
+                return ss;
             }
         }
 
@@ -140,7 +144,7 @@ namespace ClassicUO.Network
                 return string.Empty;
             }
 
-            using (ValueStringBuilder sb = new ValueStringBuilder(length))
+            ValueStringBuilder sb = new ValueStringBuilder(length);
             {
                 for (int i = 0; i < length; ++i)
                 {
@@ -156,7 +160,9 @@ namespace ClassicUO.Network
                     sb.Append(b);
                 }
 
-                return sb.ToString();
+                string ss = sb.ToString();
+                sb.Dispose();
+                return ss;
             }
         }
 
@@ -274,7 +280,7 @@ namespace ClassicUO.Network
                 return s;
             }
 
-            using (ValueStringBuilder sb = new ValueStringBuilder(s.Length))
+            ValueStringBuilder sb = new ValueStringBuilder(s.Length);
             {
                 for (int i = 0; i < s.Length; i++)
                 {
@@ -284,7 +290,9 @@ namespace ClassicUO.Network
                     }
                 }
 
-                return sb.ToString();
+                string ss = sb.ToString();
+                sb.Dispose();
+                return ss;
             }
         }
 
@@ -324,7 +332,7 @@ namespace ClassicUO.Network
                 return s;
             }
 
-            using (ValueStringBuilder sb = new ValueStringBuilder(s.Length))
+            ValueStringBuilder sb = new ValueStringBuilder(s.Length);
             {
                 for (int i = 0; i < s.Length; i++)
                 {
@@ -334,7 +342,9 @@ namespace ClassicUO.Network
                     }
                 }
 
-                return sb.ToString();
+                string ss = sb.ToString();
+                sb.Dispose();
+                return ss;
             }
         }
 

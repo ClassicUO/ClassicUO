@@ -64,7 +64,7 @@ namespace ClassicUO.Utility
                 return string.Empty;
             }
 
-            using (ValueStringBuilder sb = new ValueStringBuilder(str.Length))
+            ValueStringBuilder sb = new ValueStringBuilder(str.Length);
             {
                 bool capitalizeNext = true;
 
@@ -78,7 +78,11 @@ namespace ClassicUO.Utility
                     }
                 }
 
-                return sb.ToString();
+                string ss = sb.ToString();
+
+                sb.Dispose();
+
+                return ss;
             }
         }
 
@@ -89,7 +93,7 @@ namespace ClassicUO.Utility
                 return string.Empty;
             }
 
-            using (ValueStringBuilder sb = new ValueStringBuilder(str.Length))
+            ValueStringBuilder sb = new ValueStringBuilder(str.Length);
             {
                 bool capitalizeNext = true;
 
@@ -109,7 +113,11 @@ namespace ClassicUO.Utility
                     }
                 }
 
-                return sb.ToString();
+                string ss = sb.ToString();
+
+                sb.Dispose();
+
+                return ss;
             }
         }
 
@@ -134,7 +142,7 @@ namespace ClassicUO.Utility
                 return "";
             }
 
-            using (ValueStringBuilder sb = new ValueStringBuilder(str.Length * 2))
+            ValueStringBuilder sb = new ValueStringBuilder(str.Length * 2);
             {
                 sb.Append(str[0]);
 
@@ -151,7 +159,11 @@ namespace ClassicUO.Utility
                     sb.Append(str[i]);
                 }
 
-                return sb.ToString();
+                string s = sb.ToString();
+
+                sb.Dispose();
+
+                return s;
             }
         }
 
@@ -162,7 +174,7 @@ namespace ClassicUO.Utility
                 return "";
             }
 
-            using (ValueStringBuilder sb = new ValueStringBuilder(str.Length))
+            ValueStringBuilder sb = new ValueStringBuilder(str.Length);
             {
                 for (int i = 0; i < str.Length; i++)
                 {
@@ -172,7 +184,11 @@ namespace ClassicUO.Utility
                     }
                 }
 
-                return sb.ToString();
+                string ss = sb.ToString();
+
+                sb.Dispose();
+
+                return ss;
             }
         }
 
@@ -227,7 +243,7 @@ namespace ClassicUO.Utility
                     return str;
                 }
 
-                using (ValueStringBuilder sb = new ValueStringBuilder(str.Length))
+                ValueStringBuilder sb = new ValueStringBuilder(str.Length);
                 {
                     sb.Append(parts[0]);
 
@@ -254,7 +270,11 @@ namespace ClassicUO.Utility
                         sb.Append(parts[2]);
                     }
 
-                    return sb.ToString();
+                    string ss = sb.ToString();
+
+                    sb.Dispose();
+
+                    return ss;
                 }
             }
 

@@ -169,7 +169,7 @@ namespace ClassicUO.Utility
 
         public static string MakeSafe(this string s)
         {
-            using (ValueStringBuilder sb = new ValueStringBuilder(s.Length))
+            ValueStringBuilder sb = new ValueStringBuilder(s.Length);
             {
                 for (int i = 0; i < s.Length; i++)
                 {
@@ -179,7 +179,9 @@ namespace ClassicUO.Utility
                     }
                 }
 
-                return sb.ToString();
+                string ss = sb.ToString();
+                sb.Dispose();
+                return ss;
             }
         }
 

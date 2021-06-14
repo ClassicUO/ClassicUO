@@ -272,7 +272,7 @@ namespace ClassicUO.IO
 
         public string ReadASCII(int size)
         {
-            using (ValueStringBuilder sb = new ValueStringBuilder(size))
+            ValueStringBuilder sb = new ValueStringBuilder(size);
             {
                 for (int i = 0; i < size; ++i)
                 {
@@ -284,7 +284,9 @@ namespace ClassicUO.IO
                     }
                 }
 
-                return sb.ToString();
+                string ss = sb.ToString();
+                sb.Dispose();
+                return ss;
             }
         }
     }

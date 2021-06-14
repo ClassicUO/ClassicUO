@@ -257,9 +257,9 @@ namespace ClassicUO.Game.UI
 
             if (SerialHelper.IsValid(serial) && World.OPL.TryGetNameAndData(serial, out string name, out string data))
             {
-                using (ValueStringBuilder sbHTML = new ValueStringBuilder())
+                ValueStringBuilder sbHTML = new ValueStringBuilder();
                 {
-                    using (ValueStringBuilder sb = new ValueStringBuilder())
+                    ValueStringBuilder sb = new ValueStringBuilder();
                     {
                         if (!string.IsNullOrEmpty(name))
                         {
@@ -298,6 +298,9 @@ namespace ClassicUO.Game.UI
 
                         htmltext = sbHTML.ToString();
                         result = sb.ToString();
+
+                        sb.Dispose();
+                        sbHTML.Dispose();
                     }
                 }
             }

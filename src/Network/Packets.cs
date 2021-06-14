@@ -56,7 +56,7 @@ namespace ClassicUO.Network
 
             int length = PacketsTable.GetPacketLength(ID);
 
-            using (StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length))
+            StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length);
             {
                 writer.WriteUInt8(ID);
 
@@ -113,7 +113,7 @@ namespace ClassicUO.Network
                     writer.WriteZero(length - writer.BytesWritten);
                 }
 
-                socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
+                socket.Send(writer.AllocatedBuffer, writer.BytesWritten); writer.Dispose();
             }
         }
 
@@ -123,7 +123,7 @@ namespace ClassicUO.Network
 
             int length = PacketsTable.GetPacketLength(ID);
 
-            using (StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length))
+            StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length);
             {
                 writer.WriteUInt8(ID);
 
@@ -144,7 +144,7 @@ namespace ClassicUO.Network
                     writer.WriteZero(length - writer.BytesWritten);
                 }
 
-                socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
+                socket.Send(writer.AllocatedBuffer, writer.BytesWritten); writer.Dispose();
             }
         }
 
@@ -154,7 +154,7 @@ namespace ClassicUO.Network
 
             int length = PacketsTable.GetPacketLength(ID);
 
-            using (StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length))
+            StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length);
             {
                 writer.WriteUInt8(ID);
 
@@ -175,7 +175,7 @@ namespace ClassicUO.Network
                     writer.WriteZero(length - writer.BytesWritten);
                 }
 
-                socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
+                socket.Send(writer.AllocatedBuffer, writer.BytesWritten); writer.Dispose();
             }
         }
 
@@ -185,7 +185,7 @@ namespace ClassicUO.Network
 
             int length = PacketsTable.GetPacketLength(ID);
 
-            using (StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length))
+            StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length);
             {
                 writer.WriteUInt8(ID);
 
@@ -203,7 +203,7 @@ namespace ClassicUO.Network
                 if (length < 0)
                 {
                     writer.Seek(1, SeekOrigin.Begin);
-                    writer.WriteUInt16BE((ushort) writer.BytesWritten);
+                    writer.WriteUInt16BE((ushort)writer.BytesWritten);
                 }
                 else
                 {
@@ -211,16 +211,20 @@ namespace ClassicUO.Network
                 }
 
                 socket.Send(writer.AllocatedBuffer, writer.BytesWritten, true, true);
+
+                writer.Dispose();
             }
         }
 
         public static void Send_Seed_Old(this NetClient socket, uint v)
         {
-            using (StackDataWriter writer = new StackDataWriter(4))
+            StackDataWriter writer = new StackDataWriter(4);
             {
                 writer.WriteUInt32BE(v);
 
                 socket.Send(writer.AllocatedBuffer, writer.BytesWritten, true, true);
+
+                writer.Dispose();
             }
         }
 
@@ -230,7 +234,7 @@ namespace ClassicUO.Network
 
             int length = PacketsTable.GetPacketLength(ID);
 
-            using (StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length))
+            StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length);
             {
                 writer.WriteUInt8(ID);
 
@@ -253,7 +257,7 @@ namespace ClassicUO.Network
                     writer.WriteZero(length - writer.BytesWritten);
                 }
 
-                socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
+                socket.Send(writer.AllocatedBuffer, writer.BytesWritten); writer.Dispose();
             }
         }
 
@@ -263,7 +267,7 @@ namespace ClassicUO.Network
 
             int length = PacketsTable.GetPacketLength(ID);
 
-            using (StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length))
+            StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length);
             {
                 writer.WriteUInt8(ID);
 
@@ -285,7 +289,7 @@ namespace ClassicUO.Network
                     writer.WriteZero(length - writer.BytesWritten);
                 }
 
-                socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
+                socket.Send(writer.AllocatedBuffer, writer.BytesWritten); writer.Dispose();
             }
         }
 
@@ -295,7 +299,7 @@ namespace ClassicUO.Network
 
             int length = PacketsTable.GetPacketLength(ID);
 
-            using (StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length))
+            StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length);
             {
                 writer.WriteUInt8(ID);
 
@@ -318,7 +322,7 @@ namespace ClassicUO.Network
                     writer.WriteZero(length - writer.BytesWritten);
                 }
 
-                socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
+                socket.Send(writer.AllocatedBuffer, writer.BytesWritten); writer.Dispose();
             }
         }
 
@@ -338,7 +342,7 @@ namespace ClassicUO.Network
 
             int length = PacketsTable.GetPacketLength(id);
 
-            using (StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length))
+            StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length);
             {
                 writer.WriteUInt8(id);
 
@@ -353,7 +357,7 @@ namespace ClassicUO.Network
                 writer.WriteASCII(character.Name, 30);
                 writer.WriteZero(2);
 
-                writer.WriteUInt32BE((uint) Client.Protocol);
+                writer.WriteUInt32BE((uint)Client.Protocol);
                 writer.WriteUInt32BE(0x01);
                 writer.WriteUInt32BE(0x00);
                 writer.WriteUInt8(profession);
@@ -362,35 +366,35 @@ namespace ClassicUO.Network
                 byte val;
                 if (Client.Version < ClientVersion.CV_4011D)
                 {
-                    val = (byte) (character.Flags.HasFlag(Flags.Female) ? 0x01 : 0x00);
+                    val = (byte)(character.Flags.HasFlag(Flags.Female) ? 0x01 : 0x00);
                 }
                 else
                 {
-                    val = (byte) character.Race;
+                    val = (byte)character.Race;
 
                     if (Client.Version < ClientVersion.CV_7000)
                     {
                         val--;
                     }
 
-                    val = (byte) (val * 2 + (byte) (character.Flags.HasFlag(Flags.Female) ? 0x01 : 0x00));
+                    val = (byte)(val * 2 + (byte)(character.Flags.HasFlag(Flags.Female) ? 0x01 : 0x00));
                 }
 
                 writer.WriteUInt8(val);
-                writer.WriteUInt8((byte) character.Strength);
-                writer.WriteUInt8((byte) character.Dexterity);
-                writer.WriteUInt8((byte) character.Intelligence);
+                writer.WriteUInt8((byte)character.Strength);
+                writer.WriteUInt8((byte)character.Dexterity);
+                writer.WriteUInt8((byte)character.Intelligence);
 
                 List<Skill> skills = character.Skills.OrderByDescending(o => o.Value).Take(skillcount).ToList();
 
                 foreach (Skill skill in skills)
                 {
-                    writer.WriteUInt8((byte) skill.Index);
+                    writer.WriteUInt8((byte)skill.Index);
                     writer.WriteUInt8((byte)skill.ValueFixed);
                 }
 
                 writer.WriteUInt16BE(character.Hue);
-                
+
                 Item hair = character.FindItemByLayer(Layer.Hair);
 
                 if (hair != null)
@@ -415,9 +419,9 @@ namespace ClassicUO.Network
                     writer.WriteZero(2 * 2);
                 }
 
-                writer.WriteUInt16BE((ushort) cityIndex);
+                writer.WriteUInt16BE((ushort)cityIndex);
                 writer.WriteZero(2);
-                writer.WriteUInt16BE((ushort) slot);
+                writer.WriteUInt16BE((ushort)slot);
                 writer.WriteUInt32BE(clientIP);
 
                 Item shirt = character.FindItemByLayer(Layer.Shirt);
@@ -432,7 +436,7 @@ namespace ClassicUO.Network
                 }
 
                 Item pants = character.FindItemByLayer(Layer.Pants);
-               
+
                 if (pants != null)
                 {
                     writer.WriteUInt16BE(pants.Hue);
@@ -452,7 +456,7 @@ namespace ClassicUO.Network
                     writer.WriteZero(length - writer.BytesWritten);
                 }
 
-                socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
+                socket.Send(writer.AllocatedBuffer, writer.BytesWritten); writer.Dispose();
             }
         }
 
@@ -462,7 +466,7 @@ namespace ClassicUO.Network
 
             int length = PacketsTable.GetPacketLength(ID);
 
-            using (StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length))
+            StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length);
             {
                 writer.WriteUInt8(ID);
 
@@ -485,7 +489,7 @@ namespace ClassicUO.Network
                     writer.WriteZero(length - writer.BytesWritten);
                 }
 
-                socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
+                socket.Send(writer.AllocatedBuffer, writer.BytesWritten); writer.Dispose();
             }
         }
 
@@ -495,7 +499,7 @@ namespace ClassicUO.Network
 
             int length = PacketsTable.GetPacketLength(ID);
 
-            using (StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length))
+            StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length);
             {
                 writer.WriteUInt8(ID);
 
@@ -507,7 +511,7 @@ namespace ClassicUO.Network
                 writer.WriteUInt32BE(0xEDEDEDED);
                 writer.WriteASCII(name, 30);
                 writer.WriteZero(2);
-                writer.WriteUInt32BE((uint) Client.Protocol);
+                writer.WriteUInt32BE((uint)Client.Protocol);
                 writer.WriteZero(24);
                 writer.WriteUInt32BE(index);
                 writer.WriteUInt32BE(ipclient);
@@ -522,7 +526,7 @@ namespace ClassicUO.Network
                     writer.WriteZero(length - writer.BytesWritten);
                 }
 
-                socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
+                socket.Send(writer.AllocatedBuffer, writer.BytesWritten); writer.Dispose();
             }
         }
 
@@ -532,7 +536,7 @@ namespace ClassicUO.Network
 
             int length = PacketsTable.GetPacketLength(ID);
 
-            using (StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length))
+            StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length);
             {
                 writer.WriteUInt8(ID);
 
@@ -554,7 +558,7 @@ namespace ClassicUO.Network
                     writer.WriteZero(length - writer.BytesWritten);
                 }
 
-                socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
+                socket.Send(writer.AllocatedBuffer, writer.BytesWritten); writer.Dispose();
             }
         }
 
@@ -564,7 +568,7 @@ namespace ClassicUO.Network
 
             int length = PacketsTable.GetPacketLength(ID);
 
-            using (StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length))
+            StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length);
             {
                 writer.WriteUInt8(ID);
 
@@ -589,7 +593,7 @@ namespace ClassicUO.Network
                     writer.WriteZero(length - writer.BytesWritten);
                 }
 
-                socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
+                socket.Send(writer.AllocatedBuffer, writer.BytesWritten); writer.Dispose();
             }
         }
 
@@ -599,7 +603,7 @@ namespace ClassicUO.Network
 
             int length = PacketsTable.GetPacketLength(ID);
 
-            using (StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length))
+            StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length);
             {
                 writer.WriteUInt8(ID);
 
@@ -625,7 +629,7 @@ namespace ClassicUO.Network
                     writer.WriteZero(length - writer.BytesWritten);
                 }
 
-                socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
+                socket.Send(writer.AllocatedBuffer, writer.BytesWritten); writer.Dispose();
             }
         }
 
@@ -635,7 +639,7 @@ namespace ClassicUO.Network
 
             int length = PacketsTable.GetPacketLength(ID);
 
-            using (StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length))
+            StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length);
             {
                 writer.WriteUInt8(ID);
 
@@ -645,7 +649,7 @@ namespace ClassicUO.Network
                 }
 
                 writer.WriteUInt32BE(serial);
-                writer.WriteUInt8((byte) layer);
+                writer.WriteUInt8((byte)layer);
                 writer.WriteUInt32BE(container);
 
                 if (length < 0)
@@ -658,7 +662,7 @@ namespace ClassicUO.Network
                     writer.WriteZero(length - writer.BytesWritten);
                 }
 
-                socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
+                socket.Send(writer.AllocatedBuffer, writer.BytesWritten); writer.Dispose();
             }
         }
 
@@ -668,7 +672,7 @@ namespace ClassicUO.Network
 
             int length = PacketsTable.GetPacketLength(ID);
 
-            using (StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length))
+            StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length);
             {
                 writer.WriteUInt8(ID);
 
@@ -691,7 +695,7 @@ namespace ClassicUO.Network
                     writer.WriteZero(length - writer.BytesWritten);
                 }
 
-                socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
+                socket.Send(writer.AllocatedBuffer, writer.BytesWritten); writer.Dispose();
             }
         }
 
@@ -701,7 +705,7 @@ namespace ClassicUO.Network
 
             int length = PacketsTable.GetPacketLength(ID);
 
-            using (StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length))
+            StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length);
             {
                 writer.WriteUInt8(ID);
 
@@ -722,7 +726,7 @@ namespace ClassicUO.Network
                     writer.WriteZero(length - writer.BytesWritten);
                 }
 
-                socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
+                socket.Send(writer.AllocatedBuffer, writer.BytesWritten); writer.Dispose();
             }
         }
 
@@ -732,7 +736,7 @@ namespace ClassicUO.Network
 
             int length = PacketsTable.GetPacketLength(ID);
 
-            using (StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length))
+            StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length);
             {
                 writer.WriteUInt8(ID);
 
@@ -755,7 +759,7 @@ namespace ClassicUO.Network
                     writer.WriteZero(length - writer.BytesWritten);
                 }
 
-                socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
+                socket.Send(writer.AllocatedBuffer, writer.BytesWritten); writer.Dispose();
             }
         }
 
@@ -765,7 +769,7 @@ namespace ClassicUO.Network
 
             int length = PacketsTable.GetPacketLength(ID);
 
-            using (StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length))
+            StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length);
             {
                 writer.WriteUInt8(ID);
 
@@ -788,7 +792,7 @@ namespace ClassicUO.Network
                     writer.WriteZero(length - writer.BytesWritten);
                 }
 
-                socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
+                socket.Send(writer.AllocatedBuffer, writer.BytesWritten); writer.Dispose();
             }
         }
 
@@ -798,7 +802,7 @@ namespace ClassicUO.Network
 
             int length = PacketsTable.GetPacketLength(ID);
 
-            using (StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length))
+            StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length);
             {
                 writer.WriteUInt8(ID);
 
@@ -820,7 +824,7 @@ namespace ClassicUO.Network
                     writer.WriteZero(length - writer.BytesWritten);
                 }
 
-                socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
+                socket.Send(writer.AllocatedBuffer, writer.BytesWritten); writer.Dispose();
             }
         }
 
@@ -830,7 +834,7 @@ namespace ClassicUO.Network
 
             int length = PacketsTable.GetPacketLength(ID);
 
-            using (StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length))
+            StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length);
             {
                 writer.WriteUInt8(ID);
 
@@ -851,7 +855,7 @@ namespace ClassicUO.Network
                     writer.WriteZero(length - writer.BytesWritten);
                 }
 
-                socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
+                socket.Send(writer.AllocatedBuffer, writer.BytesWritten); writer.Dispose();
             }
         }
 
@@ -861,7 +865,7 @@ namespace ClassicUO.Network
 
             int length = PacketsTable.GetPacketLength(ID);
 
-            using (StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length))
+            StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length);
             {
                 writer.WriteUInt8(ID);
 
@@ -882,7 +886,7 @@ namespace ClassicUO.Network
                     writer.WriteZero(length - writer.BytesWritten);
                 }
 
-                socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
+                socket.Send(writer.AllocatedBuffer, writer.BytesWritten); writer.Dispose();
             }
         }
 
@@ -892,7 +896,7 @@ namespace ClassicUO.Network
 
             int length = PacketsTable.GetPacketLength(ID);
 
-            using (StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length))
+            StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length);
             {
                 writer.WriteUInt8(ID);
 
@@ -913,7 +917,7 @@ namespace ClassicUO.Network
                     writer.WriteZero(length - writer.BytesWritten);
                 }
 
-                socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
+                socket.Send(writer.AllocatedBuffer, writer.BytesWritten); writer.Dispose();
             }
         }
 
@@ -922,8 +926,8 @@ namespace ClassicUO.Network
             const byte ID = 0x03;
 
             int length = PacketsTable.GetPacketLength(ID);
-            
-            using (StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length))
+
+            StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length);
             {
                 writer.WriteUInt8(ID);
 
@@ -940,7 +944,7 @@ namespace ClassicUO.Network
                     type |= MessageType.Encoded;
                 }
 
-                writer.WriteUInt8((byte) type);
+                writer.WriteUInt8((byte)type);
                 writer.WriteUInt16BE(hue);
                 writer.WriteUInt16BE(font);
                 writer.WriteASCII(text);
@@ -955,7 +959,7 @@ namespace ClassicUO.Network
                     writer.WriteZero(length - writer.BytesWritten);
                 }
 
-                socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
+                socket.Send(writer.AllocatedBuffer, writer.BytesWritten); writer.Dispose();
             }
         }
 
@@ -965,7 +969,7 @@ namespace ClassicUO.Network
 
             int length = PacketsTable.GetPacketLength(ID);
 
-            using (StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length))
+            StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length);
             {
                 writer.WriteUInt8(ID);
 
@@ -1044,7 +1048,7 @@ namespace ClassicUO.Network
                     writer.WriteZero(length - writer.BytesWritten);
                 }
 
-                socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
+                socket.Send(writer.AllocatedBuffer, writer.BytesWritten); writer.Dispose();
             }
         }
 
@@ -1062,7 +1066,7 @@ namespace ClassicUO.Network
 
             int length = PacketsTable.GetPacketLength(id);
 
-            using (StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length))
+            StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length);
             {
                 writer.WriteUInt8(id);
 
@@ -1075,7 +1079,7 @@ namespace ClassicUO.Network
                 {
                     writer.WriteUInt16BE(0x1C);
                     writer.WriteUInt16BE(0x02);
-                    writer.WriteUInt16BE((ushort) idx);
+                    writer.WriteUInt16BE((ushort)idx);
                 }
                 else
                 {
@@ -1093,7 +1097,7 @@ namespace ClassicUO.Network
                     writer.WriteZero(length - writer.BytesWritten);
                 }
 
-                socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
+                socket.Send(writer.AllocatedBuffer, writer.BytesWritten); writer.Dispose();
             }
         }
 
@@ -1103,7 +1107,7 @@ namespace ClassicUO.Network
 
             int length = PacketsTable.GetPacketLength(ID);
 
-            using (StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length))
+            StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length);
             {
                 writer.WriteUInt8(ID);
 
@@ -1125,7 +1129,7 @@ namespace ClassicUO.Network
                     writer.WriteZero(length - writer.BytesWritten);
                 }
 
-                socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
+                socket.Send(writer.AllocatedBuffer, writer.BytesWritten); writer.Dispose();
             }
         }
 
@@ -1135,7 +1139,7 @@ namespace ClassicUO.Network
 
             int length = PacketsTable.GetPacketLength(ID);
 
-            using (StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length))
+            StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length);
             {
                 writer.WriteUInt8(ID);
 
@@ -1157,7 +1161,7 @@ namespace ClassicUO.Network
                     writer.WriteZero(length - writer.BytesWritten);
                 }
 
-                socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
+                socket.Send(writer.AllocatedBuffer, writer.BytesWritten); writer.Dispose();
             }
         }
 
@@ -1167,7 +1171,7 @@ namespace ClassicUO.Network
 
             int length = PacketsTable.GetPacketLength(ID);
 
-            using (StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length))
+            StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length);
             {
                 writer.WriteUInt8(ID);
 
@@ -1189,7 +1193,7 @@ namespace ClassicUO.Network
                     writer.WriteZero(length - writer.BytesWritten);
                 }
 
-                socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
+                socket.Send(writer.AllocatedBuffer, writer.BytesWritten); writer.Dispose();
             }
         }
 
@@ -1199,7 +1203,7 @@ namespace ClassicUO.Network
 
             int length = PacketsTable.GetPacketLength(ID);
 
-            using (StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length))
+            StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length);
             {
                 writer.WriteUInt8(ID);
 
@@ -1221,7 +1225,7 @@ namespace ClassicUO.Network
                     writer.WriteZero(length - writer.BytesWritten);
                 }
 
-                socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
+                socket.Send(writer.AllocatedBuffer, writer.BytesWritten); writer.Dispose();
             }
         }
 
@@ -1231,7 +1235,7 @@ namespace ClassicUO.Network
 
             int length = PacketsTable.GetPacketLength(ID);
 
-            using (StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length))
+            StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length);
             {
                 writer.WriteUInt8(ID);
 
@@ -1253,7 +1257,7 @@ namespace ClassicUO.Network
                     writer.WriteZero(length - writer.BytesWritten);
                 }
 
-                socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
+                socket.Send(writer.AllocatedBuffer, writer.BytesWritten); writer.Dispose();
             }
         }
 
@@ -1271,7 +1275,7 @@ namespace ClassicUO.Network
 
             int length = PacketsTable.GetPacketLength(ID);
 
-            using (StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length))
+            StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length);
             {
                 writer.WriteUInt8(ID);
 
@@ -1282,23 +1286,23 @@ namespace ClassicUO.Network
 
                 writer.WriteUInt32BE(local);
                 writer.WriteUInt32BE(server);
-                writer.WriteUInt32BE((uint) button);
+                writer.WriteUInt32BE((uint)button);
 
-                writer.WriteUInt32BE((uint) switches.Length);
+                writer.WriteUInt32BE((uint)switches.Length);
 
                 for (int i = 0; i < switches.Length; ++i)
                 {
                     writer.WriteUInt32BE(switches[i]);
                 }
 
-                writer.WriteUInt32BE((uint) entries.Length);
+                writer.WriteUInt32BE((uint)entries.Length);
 
                 for (int i = 0; i < entries.Length; ++i)
                 {
                     int len = Math.Min(239, entries[i].Item2.Length);
 
                     writer.WriteUInt16BE(entries[i].Item1);
-                    writer.WriteUInt16BE((ushort) len);
+                    writer.WriteUInt16BE((ushort)len);
                     writer.WriteUnicodeBE(entries[i].Item2, len);
                 }
 
@@ -1312,7 +1316,7 @@ namespace ClassicUO.Network
                     writer.WriteZero(length - writer.BytesWritten);
                 }
 
-                socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
+                socket.Send(writer.AllocatedBuffer, writer.BytesWritten); writer.Dispose();
             }
         }
 
@@ -1322,7 +1326,7 @@ namespace ClassicUO.Network
 
             int length = PacketsTable.GetPacketLength(ID);
 
-            using (StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length))
+            StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length);
             {
                 writer.WriteUInt8(ID);
 
@@ -1345,7 +1349,7 @@ namespace ClassicUO.Network
                     writer.WriteZero(length - writer.BytesWritten);
                 }
 
-                socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
+                socket.Send(writer.AllocatedBuffer, writer.BytesWritten); writer.Dispose();
             }
         }
 
@@ -1355,7 +1359,7 @@ namespace ClassicUO.Network
 
             int length = PacketsTable.GetPacketLength(ID);
 
-            using (StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length))
+            StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length);
             {
                 writer.WriteUInt8(ID);
 
@@ -1369,7 +1373,7 @@ namespace ClassicUO.Network
 
                 if (code != 0)
                 {
-                    writer.WriteUInt16BE((ushort) code);
+                    writer.WriteUInt16BE((ushort)code);
                     writer.WriteUInt16BE(itemGraphic);
                     writer.WriteUInt16BE(itemHue);
                 }
@@ -1385,7 +1389,7 @@ namespace ClassicUO.Network
                 }
 
 
-                socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
+                socket.Send(writer.AllocatedBuffer, writer.BytesWritten); writer.Dispose();
             }
         }
 
@@ -1395,7 +1399,7 @@ namespace ClassicUO.Network
 
             int length = PacketsTable.GetPacketLength(ID);
 
-            using (StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length))
+            StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length);
             {
                 writer.WriteUInt8(ID);
 
@@ -1407,7 +1411,7 @@ namespace ClassicUO.Network
                 writer.WriteUInt32BE(serial);
                 writer.WriteUInt16BE(graphic);
                 writer.WriteUInt16BE(code);
-                
+
                 if (length < 0)
                 {
                     writer.Seek(1, SeekOrigin.Begin);
@@ -1418,7 +1422,7 @@ namespace ClassicUO.Network
                     writer.WriteZero(length - writer.BytesWritten);
                 }
 
-                socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
+                socket.Send(writer.AllocatedBuffer, writer.BytesWritten); writer.Dispose();
             }
         }
 
@@ -1428,7 +1432,7 @@ namespace ClassicUO.Network
 
             int length = PacketsTable.GetPacketLength(ID);
 
-            using (StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length))
+            StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length);
             {
                 writer.WriteUInt8(ID);
 
@@ -1446,7 +1450,7 @@ namespace ClassicUO.Network
                 {
                     writer.WriteUInt8(0x02);
                     writer.WriteUInt32BE(serial);
-                    writer.WriteUInt32BE((uint) (state ? 1 : 0));
+                    writer.WriteUInt32BE((uint)(state ? 1 : 0));
                 }
                 else
                 {
@@ -1463,7 +1467,7 @@ namespace ClassicUO.Network
                     writer.WriteZero(length - writer.BytesWritten);
                 }
 
-                socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
+                socket.Send(writer.AllocatedBuffer, writer.BytesWritten); writer.Dispose();
             }
         }
 
@@ -1473,7 +1477,7 @@ namespace ClassicUO.Network
 
             int length = PacketsTable.GetPacketLength(ID);
 
-            using (StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length))
+            StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length);
             {
                 writer.WriteUInt8(ID);
 
@@ -1497,7 +1501,7 @@ namespace ClassicUO.Network
                     writer.WriteZero(length - writer.BytesWritten);
                 }
 
-                socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
+                socket.Send(writer.AllocatedBuffer, writer.BytesWritten); writer.Dispose();
             }
         }
 
@@ -1507,7 +1511,7 @@ namespace ClassicUO.Network
 
             int length = PacketsTable.GetPacketLength(ID);
 
-            using (StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length))
+            StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length);
             {
                 writer.WriteUInt8(ID);
 
@@ -1528,7 +1532,7 @@ namespace ClassicUO.Network
                     writer.WriteZero(length - writer.BytesWritten);
                 }
 
-                socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
+                socket.Send(writer.AllocatedBuffer, writer.BytesWritten); writer.Dispose();
             }
         }
 
@@ -1538,7 +1542,7 @@ namespace ClassicUO.Network
 
             int length = PacketsTable.GetPacketLength(ID);
 
-            using (StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length))
+            StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length);
             {
                 writer.WriteUInt8(ID);
 
@@ -1564,7 +1568,7 @@ namespace ClassicUO.Network
                     writer.WriteZero(length - writer.BytesWritten);
                 }
 
-                socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
+                socket.Send(writer.AllocatedBuffer, writer.BytesWritten); writer.Dispose();
             }
         }
 
@@ -1574,7 +1578,7 @@ namespace ClassicUO.Network
 
             int length = PacketsTable.GetPacketLength(ID);
 
-            using (StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length))
+            StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length);
             {
                 writer.WriteUInt8(ID);
 
@@ -1596,7 +1600,7 @@ namespace ClassicUO.Network
                     writer.WriteZero(length - writer.BytesWritten);
                 }
 
-                socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
+                socket.Send(writer.AllocatedBuffer, writer.BytesWritten); writer.Dispose();
             }
         }
 
@@ -1606,7 +1610,7 @@ namespace ClassicUO.Network
 
             int length = PacketsTable.GetPacketLength(ID);
 
-            using (StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length))
+            StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length);
             {
                 writer.WriteUInt8(ID);
 
@@ -1627,7 +1631,7 @@ namespace ClassicUO.Network
                     writer.WriteZero(length - writer.BytesWritten);
                 }
 
-                socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
+                socket.Send(writer.AllocatedBuffer, writer.BytesWritten); writer.Dispose();
             }
         }
 
@@ -1637,7 +1641,7 @@ namespace ClassicUO.Network
 
             int length = PacketsTable.GetPacketLength(ID);
 
-            using (StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length))
+            StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length);
             {
                 writer.WriteUInt8(ID);
 
@@ -1659,7 +1663,7 @@ namespace ClassicUO.Network
                     writer.WriteZero(length - writer.BytesWritten);
                 }
 
-                socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
+                socket.Send(writer.AllocatedBuffer, writer.BytesWritten); writer.Dispose();
             }
         }
 
@@ -1669,7 +1673,7 @@ namespace ClassicUO.Network
 
             int length = PacketsTable.GetPacketLength(ID);
 
-            using (StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length))
+            StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length);
             {
                 writer.WriteUInt8(ID);
 
@@ -1684,7 +1688,7 @@ namespace ClassicUO.Network
                 writer.WriteUInt32BE(entity);
                 writer.WriteUInt16BE(x);
                 writer.WriteUInt16BE(y);
-                writer.WriteUInt16BE((ushort) z);
+                writer.WriteUInt16BE((ushort)z);
                 writer.WriteUInt16BE(graphic);
 
                 if (length < 0)
@@ -1697,7 +1701,7 @@ namespace ClassicUO.Network
                     writer.WriteZero(length - writer.BytesWritten);
                 }
 
-                socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
+                socket.Send(writer.AllocatedBuffer, writer.BytesWritten); writer.Dispose();
             }
         }
 
@@ -1707,7 +1711,7 @@ namespace ClassicUO.Network
 
             int length = PacketsTable.GetPacketLength(ID);
 
-            using (StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length))
+            StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length);
             {
                 writer.WriteUInt8(ID);
 
@@ -1735,7 +1739,7 @@ namespace ClassicUO.Network
                     writer.WriteZero(length - writer.BytesWritten);
                 }
 
-                socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
+                socket.Send(writer.AllocatedBuffer, writer.BytesWritten); writer.Dispose();
             }
         }
 
@@ -1745,7 +1749,7 @@ namespace ClassicUO.Network
 
             int length = PacketsTable.GetPacketLength(ID);
 
-            using (StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length))
+            StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length);
             {
                 writer.WriteUInt8(ID);
 
@@ -1771,7 +1775,7 @@ namespace ClassicUO.Network
                     writer.WriteZero(length - writer.BytesWritten);
                 }
 
-                socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
+                socket.Send(writer.AllocatedBuffer, writer.BytesWritten); writer.Dispose();
             }
         }
 
@@ -1781,7 +1785,7 @@ namespace ClassicUO.Network
 
             int length = PacketsTable.GetPacketLength(ID);
 
-            using (StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length))
+            StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length);
             {
                 writer.WriteUInt8(ID);
 
@@ -1804,7 +1808,7 @@ namespace ClassicUO.Network
                     writer.WriteZero(length - writer.BytesWritten);
                 }
 
-                socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
+                socket.Send(writer.AllocatedBuffer, writer.BytesWritten); writer.Dispose();
             }
         }
 
@@ -1814,7 +1818,7 @@ namespace ClassicUO.Network
 
             int length = PacketsTable.GetPacketLength(ID);
 
-            using (StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length))
+            StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length);
             {
                 writer.WriteUInt8(ID);
 
@@ -1838,7 +1842,7 @@ namespace ClassicUO.Network
                     writer.WriteZero(length - writer.BytesWritten);
                 }
 
-                socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
+                socket.Send(writer.AllocatedBuffer, writer.BytesWritten); writer.Dispose();
             }
         }
 
@@ -1848,7 +1852,7 @@ namespace ClassicUO.Network
 
             int length = PacketsTable.GetPacketLength(ID);
 
-            using (StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length))
+            StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length);
             {
                 writer.WriteUInt8(ID);
 
@@ -1871,7 +1875,7 @@ namespace ClassicUO.Network
                     writer.WriteZero(length - writer.BytesWritten);
                 }
 
-                socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
+                socket.Send(writer.AllocatedBuffer, writer.BytesWritten); writer.Dispose();
             }
         }
 
@@ -1881,7 +1885,7 @@ namespace ClassicUO.Network
 
             int length = PacketsTable.GetPacketLength(ID);
 
-            using (StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length))
+            StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length);
             {
                 writer.WriteUInt8(ID);
 
@@ -1903,7 +1907,7 @@ namespace ClassicUO.Network
                     writer.WriteZero(length - writer.BytesWritten);
                 }
 
-                socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
+                socket.Send(writer.AllocatedBuffer, writer.BytesWritten); writer.Dispose();
             }
         }
 
@@ -1913,7 +1917,7 @@ namespace ClassicUO.Network
 
             int length = PacketsTable.GetPacketLength(ID);
 
-            using (StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length))
+            StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length);
             {
                 writer.WriteUInt8(ID);
 
@@ -1925,7 +1929,7 @@ namespace ClassicUO.Network
                 writer.WriteUInt8(0x01);
                 writer.WriteUInt32BE(serial);
                 writer.WriteUInt16BE(0x01);
-                writer.WriteUInt16BE((ushort) text.Length);
+                writer.WriteUInt16BE((ushort)text.Length);
                 writer.WriteUnicodeBE(text, text.Length);
 
                 if (length < 0)
@@ -1938,7 +1942,7 @@ namespace ClassicUO.Network
                     writer.WriteZero(length - writer.BytesWritten);
                 }
 
-                socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
+                socket.Send(writer.AllocatedBuffer, writer.BytesWritten); writer.Dispose();
             }
         }
 
@@ -1948,7 +1952,7 @@ namespace ClassicUO.Network
 
             int length = PacketsTable.GetPacketLength(ID);
 
-            using (StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length))
+            StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length);
             {
                 writer.WriteUInt8(ID);
 
@@ -1970,7 +1974,7 @@ namespace ClassicUO.Network
                     writer.WriteZero(length - writer.BytesWritten);
                 }
 
-                socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
+                socket.Send(writer.AllocatedBuffer, writer.BytesWritten); writer.Dispose();
             }
         }
 
@@ -1980,7 +1984,7 @@ namespace ClassicUO.Network
 
             int length = PacketsTable.GetPacketLength(ID);
 
-            using (StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length))
+            StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length);
             {
                 writer.WriteUInt8(ID);
 
@@ -2002,7 +2006,7 @@ namespace ClassicUO.Network
                     writer.WriteZero(length - writer.BytesWritten);
                 }
 
-                socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
+                socket.Send(writer.AllocatedBuffer, writer.BytesWritten); writer.Dispose();
             }
         }
 
@@ -2012,7 +2016,7 @@ namespace ClassicUO.Network
 
             int length = PacketsTable.GetPacketLength(ID);
 
-            using (StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length))
+            StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length);
             {
                 writer.WriteUInt8(ID);
 
@@ -2035,7 +2039,7 @@ namespace ClassicUO.Network
                     writer.WriteZero(length - writer.BytesWritten);
                 }
 
-                socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
+                socket.Send(writer.AllocatedBuffer, writer.BytesWritten); writer.Dispose();
             }
         }
 
@@ -2045,7 +2049,7 @@ namespace ClassicUO.Network
 
             int length = PacketsTable.GetPacketLength(ID);
 
-            using (StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length))
+            StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length);
             {
                 writer.WriteUInt8(ID);
 
@@ -2068,7 +2072,7 @@ namespace ClassicUO.Network
                     writer.WriteZero(length - writer.BytesWritten);
                 }
 
-                socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
+                socket.Send(writer.AllocatedBuffer, writer.BytesWritten); writer.Dispose();
             }
         }
 
@@ -2078,7 +2082,7 @@ namespace ClassicUO.Network
 
             int length = PacketsTable.GetPacketLength(ID);
 
-            using (StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length))
+            StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length);
             {
                 writer.WriteUInt8(ID);
 
@@ -2101,7 +2105,7 @@ namespace ClassicUO.Network
                     writer.WriteZero(length - writer.BytesWritten);
                 }
 
-                socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
+                socket.Send(writer.AllocatedBuffer, writer.BytesWritten); writer.Dispose();
             }
         }
 
@@ -2111,7 +2115,7 @@ namespace ClassicUO.Network
 
             int length = PacketsTable.GetPacketLength(ID);
 
-            using (StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length))
+            StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length);
             {
                 writer.WriteUInt8(ID);
 
@@ -2134,7 +2138,7 @@ namespace ClassicUO.Network
                     writer.WriteZero(length - writer.BytesWritten);
                 }
 
-                socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
+                socket.Send(writer.AllocatedBuffer, writer.BytesWritten); writer.Dispose();
             }
         }
 
@@ -2144,7 +2148,7 @@ namespace ClassicUO.Network
 
             int length = PacketsTable.GetPacketLength(ID);
 
-            using (StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length))
+            StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length);
             {
                 writer.WriteUInt8(ID);
 
@@ -2168,7 +2172,7 @@ namespace ClassicUO.Network
                 }
 
 
-                socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
+                socket.Send(writer.AllocatedBuffer, writer.BytesWritten); writer.Dispose();
             }
         }
 
@@ -2178,7 +2182,7 @@ namespace ClassicUO.Network
 
             int length = PacketsTable.GetPacketLength(ID);
 
-            using (StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length))
+            StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length);
             {
                 writer.WriteUInt8(ID);
 
@@ -2199,7 +2203,7 @@ namespace ClassicUO.Network
                 {
                     writer.WriteUInt8(0x04);
                 }
-               
+
                 writer.WriteUnicodeBE(text);
 
                 if (length < 0)
@@ -2212,7 +2216,7 @@ namespace ClassicUO.Network
                     writer.WriteZero(length - writer.BytesWritten);
                 }
 
-                socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
+                socket.Send(writer.AllocatedBuffer, writer.BytesWritten); writer.Dispose();
             }
         }
 
@@ -2222,7 +2226,7 @@ namespace ClassicUO.Network
 
             int length = PacketsTable.GetPacketLength(ID);
 
-            using (StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length))
+            StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length);
             {
                 writer.WriteUInt8(ID);
 
@@ -2245,7 +2249,7 @@ namespace ClassicUO.Network
                     writer.WriteZero(length - writer.BytesWritten);
                 }
 
-                socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
+                socket.Send(writer.AllocatedBuffer, writer.BytesWritten); writer.Dispose();
             }
         }
 
@@ -2255,7 +2259,7 @@ namespace ClassicUO.Network
 
             int length = PacketsTable.GetPacketLength(ID);
 
-            using (StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length))
+            StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length);
             {
                 writer.WriteUInt8(ID);
 
@@ -2278,7 +2282,7 @@ namespace ClassicUO.Network
                     writer.WriteZero(length - writer.BytesWritten);
                 }
 
-                socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
+                socket.Send(writer.AllocatedBuffer, writer.BytesWritten); writer.Dispose();
             }
         }
 
@@ -2288,7 +2292,7 @@ namespace ClassicUO.Network
 
             int length = PacketsTable.GetPacketLength(ID);
 
-            using (StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length))
+            StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length);
             {
                 writer.WriteUInt8(ID);
 
@@ -2311,7 +2315,7 @@ namespace ClassicUO.Network
                     writer.WriteZero(length - writer.BytesWritten);
                 }
 
-                socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
+                socket.Send(writer.AllocatedBuffer, writer.BytesWritten); writer.Dispose();
             }
         }
 
@@ -2321,7 +2325,7 @@ namespace ClassicUO.Network
 
             int length = PacketsTable.GetPacketLength(ID);
 
-            using (StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length))
+            StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length);
             {
                 writer.WriteUInt8(ID);
 
@@ -2333,7 +2337,7 @@ namespace ClassicUO.Network
                 writer.WriteUInt8(0x05);
                 writer.WriteUInt32BE(serial);
                 writer.WriteUInt32BE(msgSerial);
-                writer.WriteUInt8((byte) (subject.Length + 1));
+                writer.WriteUInt8((byte)(subject.Length + 1));
 
                 byte[] title = Encoding.UTF8.GetBytes(subject);
                 writer.Write(title);
@@ -2341,7 +2345,7 @@ namespace ClassicUO.Network
 
                 int numOfLinesPosition = writer.Position;
                 int numOfLines = 0;
-                
+
                 for (int i = 0, startIndex = 0; i < text.Length; ++i)
                 {
                     if (text[i] == '\n')
@@ -2386,13 +2390,13 @@ namespace ClassicUO.Network
 
                 if (numOfLines == 0)
                 {
-                    writer.WriteUInt8((byte) (text.Length + 1));
+                    writer.WriteUInt8((byte)(text.Length + 1));
                     writer.WriteASCII(text);
                     writer.WriteUInt8(0x00);
                 }
 
                 writer.Seek(numOfLinesPosition, SeekOrigin.Begin);
-                writer.WriteUInt8((byte) numOfLines);
+                writer.WriteUInt8((byte)numOfLines);
 
                 if (length < 0)
                 {
@@ -2405,7 +2409,7 @@ namespace ClassicUO.Network
                 }
 
 
-                socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
+                socket.Send(writer.AllocatedBuffer, writer.BytesWritten); writer.Dispose();
             }
         }
 
@@ -2415,7 +2419,7 @@ namespace ClassicUO.Network
 
             int length = PacketsTable.GetPacketLength(ID);
 
-            using (StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length))
+            StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length);
             {
                 writer.WriteUInt8(ID);
 
@@ -2439,7 +2443,7 @@ namespace ClassicUO.Network
                 }
 
 
-                socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
+                socket.Send(writer.AllocatedBuffer, writer.BytesWritten); writer.Dispose();
             }
         }
 
@@ -2449,7 +2453,7 @@ namespace ClassicUO.Network
 
             int length = PacketsTable.GetPacketLength(ID);
 
-            using (StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length))
+            StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length);
             {
                 writer.WriteUInt8(ID);
 
@@ -2470,7 +2474,7 @@ namespace ClassicUO.Network
                     writer.WriteZero(length - writer.BytesWritten);
                 }
 
-                socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
+                socket.Send(writer.AllocatedBuffer, writer.BytesWritten); writer.Dispose();
             }
         }
 
@@ -2480,7 +2484,7 @@ namespace ClassicUO.Network
 
             int length = PacketsTable.GetPacketLength(ID);
 
-            using (StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length))
+            StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length);
             {
                 writer.WriteUInt8(ID);
 
@@ -2502,7 +2506,7 @@ namespace ClassicUO.Network
                     writer.WriteZero(length - writer.BytesWritten);
                 }
 
-                socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
+                socket.Send(writer.AllocatedBuffer, writer.BytesWritten); writer.Dispose();
             }
         }
 
@@ -2512,7 +2516,7 @@ namespace ClassicUO.Network
 
             int length = PacketsTable.GetPacketLength(ID);
 
-            using (StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length))
+            StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length);
             {
                 writer.WriteUInt8(ID);
 
@@ -2533,7 +2537,7 @@ namespace ClassicUO.Network
                     writer.WriteZero(length - writer.BytesWritten);
                 }
 
-                socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
+                socket.Send(writer.AllocatedBuffer, writer.BytesWritten); writer.Dispose();
             }
         }
 
@@ -2543,7 +2547,7 @@ namespace ClassicUO.Network
 
             int length = PacketsTable.GetPacketLength(ID);
 
-            using (StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length))
+            StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length);
             {
                 writer.WriteUInt8(ID);
 
@@ -2566,7 +2570,7 @@ namespace ClassicUO.Network
                     writer.WriteZero(length - writer.BytesWritten);
                 }
 
-                socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
+                socket.Send(writer.AllocatedBuffer, writer.BytesWritten); writer.Dispose();
             }
         }
 
@@ -2576,7 +2580,7 @@ namespace ClassicUO.Network
 
             int length = PacketsTable.GetPacketLength(ID);
 
-            using (StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length))
+            StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length);
             {
                 writer.WriteUInt8(ID);
 
@@ -2590,9 +2594,9 @@ namespace ClassicUO.Network
 
                 uint clientFlag = 0;
 
-                for (int i = 0; i < (uint) Client.Protocol; ++i)
+                for (int i = 0; i < (uint)Client.Protocol; ++i)
                 {
-                    clientFlag |= (uint) (1 << i);
+                    clientFlag |= (uint)(1 << i);
                 }
 
 
@@ -2609,7 +2613,7 @@ namespace ClassicUO.Network
                 }
 
 
-                socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
+                socket.Send(writer.AllocatedBuffer, writer.BytesWritten); writer.Dispose();
             }
         }
 
@@ -2619,7 +2623,7 @@ namespace ClassicUO.Network
 
             int length = PacketsTable.GetPacketLength(ID);
 
-            using (StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length))
+            StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length);
             {
                 writer.WriteUInt8(ID);
 
@@ -2641,7 +2645,7 @@ namespace ClassicUO.Network
                     writer.WriteZero(length - writer.BytesWritten);
                 }
 
-                socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
+                socket.Send(writer.AllocatedBuffer, writer.BytesWritten); writer.Dispose();
             }
         }
 
@@ -2651,7 +2655,7 @@ namespace ClassicUO.Network
 
             int length = PacketsTable.GetPacketLength(ID);
 
-            using (StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length))
+            StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length);
             {
                 writer.WriteUInt8(ID);
 
@@ -2674,7 +2678,7 @@ namespace ClassicUO.Network
                     writer.WriteZero(length - writer.BytesWritten);
                 }
 
-                socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
+                socket.Send(writer.AllocatedBuffer, writer.BytesWritten); writer.Dispose();
             }
         }
 
@@ -2684,7 +2688,7 @@ namespace ClassicUO.Network
 
             int length = PacketsTable.GetPacketLength(ID);
 
-            using (StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length))
+            StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length);
             {
                 writer.WriteUInt8(ID);
 
@@ -2716,7 +2720,7 @@ namespace ClassicUO.Network
                 }
 
 
-                socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
+                socket.Send(writer.AllocatedBuffer, writer.BytesWritten); writer.Dispose();
             }
         }
 
@@ -2726,7 +2730,7 @@ namespace ClassicUO.Network
 
             int length = PacketsTable.GetPacketLength(ID);
 
-            using (StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length))
+            StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length);
             {
                 writer.WriteUInt8(ID);
 
@@ -2756,7 +2760,7 @@ namespace ClassicUO.Network
                     writer.WriteZero(length - writer.BytesWritten);
                 }
 
-                socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
+                socket.Send(writer.AllocatedBuffer, writer.BytesWritten); writer.Dispose();
             }
         }
 
@@ -2766,7 +2770,7 @@ namespace ClassicUO.Network
 
             int length = PacketsTable.GetPacketLength(ID);
 
-            using (StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length))
+            StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length);
             {
                 writer.WriteUInt8(ID);
 
@@ -2788,7 +2792,7 @@ namespace ClassicUO.Network
                     writer.WriteZero(length - writer.BytesWritten);
                 }
 
-                socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
+                socket.Send(writer.AllocatedBuffer, writer.BytesWritten); writer.Dispose();
             }
         }
 
@@ -2798,7 +2802,7 @@ namespace ClassicUO.Network
 
             int length = PacketsTable.GetPacketLength(ID);
 
-            using (StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length))
+            StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length);
             {
                 writer.WriteUInt8(ID);
 
@@ -2822,7 +2826,7 @@ namespace ClassicUO.Network
                 }
 
 
-                socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
+                socket.Send(writer.AllocatedBuffer, writer.BytesWritten); writer.Dispose();
             }
         }
 
@@ -2832,7 +2836,7 @@ namespace ClassicUO.Network
 
             int length = PacketsTable.GetPacketLength(ID);
 
-            using (StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length))
+            StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length);
             {
                 writer.WriteUInt8(ID);
 
@@ -2860,7 +2864,7 @@ namespace ClassicUO.Network
                     writer.WriteZero(length - writer.BytesWritten);
                 }
 
-                socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
+                socket.Send(writer.AllocatedBuffer, writer.BytesWritten); writer.Dispose();
             }
         }
 
@@ -2870,7 +2874,7 @@ namespace ClassicUO.Network
 
             int length = PacketsTable.GetPacketLength(ID);
 
-            using (StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length))
+            StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length);
             {
                 writer.WriteUInt8(ID);
 
@@ -2884,7 +2888,7 @@ namespace ClassicUO.Network
                 writer.WriteUInt8(pin);
                 writer.WriteUInt16BE(x);
                 writer.WriteUInt16BE(y);
-                
+
                 if (length < 0)
                 {
                     writer.Seek(1, SeekOrigin.Begin);
@@ -2895,7 +2899,7 @@ namespace ClassicUO.Network
                     writer.WriteZero(length - writer.BytesWritten);
                 }
 
-                socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
+                socket.Send(writer.AllocatedBuffer, writer.BytesWritten); writer.Dispose();
             }
         }
 
@@ -2905,7 +2909,7 @@ namespace ClassicUO.Network
 
             int length = PacketsTable.GetPacketLength(ID);
 
-            using (StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length))
+            StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length);
             {
                 writer.WriteUInt8(ID);
 
@@ -2928,7 +2932,7 @@ namespace ClassicUO.Network
                     writer.WriteZero(length - writer.BytesWritten);
                 }
 
-                socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
+                socket.Send(writer.AllocatedBuffer, writer.BytesWritten); writer.Dispose();
             }
         }
 
@@ -2938,7 +2942,7 @@ namespace ClassicUO.Network
 
             int length = PacketsTable.GetPacketLength(ID);
 
-            using (StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length))
+            StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length);
             {
                 writer.WriteUInt8(ID);
 
@@ -2961,7 +2965,7 @@ namespace ClassicUO.Network
                     writer.WriteZero(length - writer.BytesWritten);
                 }
 
-                socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
+                socket.Send(writer.AllocatedBuffer, writer.BytesWritten); writer.Dispose();
             }
         }
 
@@ -2971,7 +2975,7 @@ namespace ClassicUO.Network
 
             int length = PacketsTable.GetPacketLength(ID);
 
-            using (StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length))
+            StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length);
             {
                 writer.WriteUInt8(ID);
 
@@ -2994,7 +2998,7 @@ namespace ClassicUO.Network
                     writer.WriteZero(length - writer.BytesWritten);
                 }
 
-                socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
+                socket.Send(writer.AllocatedBuffer, writer.BytesWritten); writer.Dispose();
             }
         }
 
@@ -3004,7 +3008,7 @@ namespace ClassicUO.Network
 
             int length = PacketsTable.GetPacketLength(ID);
 
-            using (StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length))
+            StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length);
             {
                 writer.WriteUInt8(ID);
 
@@ -3027,7 +3031,7 @@ namespace ClassicUO.Network
                     writer.WriteZero(length - writer.BytesWritten);
                 }
 
-                socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
+                socket.Send(writer.AllocatedBuffer, writer.BytesWritten); writer.Dispose();
             }
         }
 
@@ -3037,7 +3041,7 @@ namespace ClassicUO.Network
 
             int length = PacketsTable.GetPacketLength(ID);
 
-            using (StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length))
+            StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length);
             {
                 writer.WriteUInt8(ID);
 
@@ -3059,17 +3063,17 @@ namespace ClassicUO.Network
                     writer.WriteZero(length - writer.BytesWritten);
                 }
 
-                socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
+                socket.Send(writer.AllocatedBuffer, writer.BytesWritten); writer.Dispose();
             }
         }
-     
+
         public static void Send_MegaClilocRequest(this NetClient socket, ref List<uint> serials)
         {
             const byte ID = 0xD6;
 
             int length = PacketsTable.GetPacketLength(ID);
 
-            using (StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length))
+            StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length);
             {
                 writer.WriteUInt8(ID);
 
@@ -3097,7 +3101,7 @@ namespace ClassicUO.Network
                     writer.WriteZero(length - writer.BytesWritten);
                 }
 
-                socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
+                socket.Send(writer.AllocatedBuffer, writer.BytesWritten); writer.Dispose();
             }
         }
 
@@ -3107,7 +3111,7 @@ namespace ClassicUO.Network
 
             int length = PacketsTable.GetPacketLength(ID);
 
-            using (StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length))
+            StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length);
             {
                 writer.WriteUInt8(ID);
 
@@ -3118,7 +3122,7 @@ namespace ClassicUO.Network
 
                 writer.WriteUInt16BE(0x1A);
                 writer.WriteUInt8(stat);
-                writer.WriteUInt8((byte) state);
+                writer.WriteUInt8((byte)state);
 
                 if (length < 0)
                 {
@@ -3131,7 +3135,7 @@ namespace ClassicUO.Network
                 }
 
 
-                socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
+                socket.Send(writer.AllocatedBuffer, writer.BytesWritten); writer.Dispose();
             }
         }
 
@@ -3141,7 +3145,7 @@ namespace ClassicUO.Network
 
             int length = PacketsTable.GetPacketLength(ID);
 
-            using (StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length))
+            StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length);
             {
                 writer.WriteUInt8(ID);
 
@@ -3163,7 +3167,7 @@ namespace ClassicUO.Network
                     writer.WriteZero(length - writer.BytesWritten);
                 }
 
-                socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
+                socket.Send(writer.AllocatedBuffer, writer.BytesWritten); writer.Dispose();
             }
         }
 
@@ -3173,7 +3177,7 @@ namespace ClassicUO.Network
 
             int length = PacketsTable.GetPacketLength(ID);
 
-            using (StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length))
+            StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length);
             {
                 writer.WriteUInt8(ID);
 
@@ -3200,7 +3204,7 @@ namespace ClassicUO.Network
                 }
 
 
-                socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
+                socket.Send(writer.AllocatedBuffer, writer.BytesWritten); writer.Dispose();
             }
         }
 
@@ -3210,7 +3214,7 @@ namespace ClassicUO.Network
 
             int length = PacketsTable.GetPacketLength(ID);
 
-            using (StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length))
+            StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length);
             {
                 writer.WriteUInt8(ID);
 
@@ -3224,7 +3228,7 @@ namespace ClassicUO.Network
                 writer.WriteUInt8(0x00);
                 writer.WriteUInt16BE(0);
                 int titleLength = Encoding.UTF8.GetByteCount(title);
-                writer.WriteUInt16BE((ushort) titleLength);
+                writer.WriteUInt16BE((ushort)titleLength);
                 writer.WriteUTF8(title, titleLength);
                 int authorLength = Encoding.UTF8.GetByteCount(author);
                 writer.WriteUInt16BE((ushort)authorLength);
@@ -3241,7 +3245,7 @@ namespace ClassicUO.Network
                 }
 
 
-                socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
+                socket.Send(writer.AllocatedBuffer, writer.BytesWritten); writer.Dispose();
             }
         }
 
@@ -3251,7 +3255,7 @@ namespace ClassicUO.Network
 
             int length = PacketsTable.GetPacketLength(ID);
 
-            using (StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length))
+            StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length);
             {
                 writer.WriteUInt8(ID);
 
@@ -3262,8 +3266,8 @@ namespace ClassicUO.Network
 
                 writer.WriteUInt32BE(serial);
                 writer.WriteUInt16BE(0x01);
-                writer.WriteUInt16BE((ushort) page);
-                writer.WriteUInt16BE((ushort) text.Length);
+                writer.WriteUInt16BE((ushort)page);
+                writer.WriteUInt16BE((ushort)text.Length);
 
                 for (int i = 0; i < text.Length; ++i)
                 {
@@ -3299,7 +3303,7 @@ namespace ClassicUO.Network
                 }
 
 
-                socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
+                socket.Send(writer.AllocatedBuffer, writer.BytesWritten); writer.Dispose();
             }
         }
 
@@ -3309,7 +3313,7 @@ namespace ClassicUO.Network
 
             int length = PacketsTable.GetPacketLength(ID);
 
-            using (StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length))
+            StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length);
             {
                 writer.WriteUInt8(ID);
 
@@ -3322,7 +3326,7 @@ namespace ClassicUO.Network
                 writer.WriteUInt16BE(0x01);
                 writer.WriteUInt16BE(page);
                 writer.WriteUInt16BE(0xFFFF);
-                
+
                 if (length < 0)
                 {
                     writer.Seek(1, SeekOrigin.Begin);
@@ -3334,7 +3338,7 @@ namespace ClassicUO.Network
                 }
 
 
-                socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
+                socket.Send(writer.AllocatedBuffer, writer.BytesWritten); writer.Dispose();
             }
         }
 
@@ -3344,7 +3348,7 @@ namespace ClassicUO.Network
 
             int length = PacketsTable.GetPacketLength(ID);
 
-            using (StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length))
+            StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length);
             {
                 writer.WriteUInt8(ID);
 
@@ -3370,7 +3374,7 @@ namespace ClassicUO.Network
                 {
                     writer.WriteUInt8(0x00);
                 }
-               
+
 
                 if (length < 0)
                 {
@@ -3383,7 +3387,7 @@ namespace ClassicUO.Network
                 }
 
 
-                socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
+                socket.Send(writer.AllocatedBuffer, writer.BytesWritten); writer.Dispose();
             }
         }
 
@@ -3393,7 +3397,7 @@ namespace ClassicUO.Network
 
             int length = PacketsTable.GetPacketLength(ID);
 
-            using (StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length))
+            StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length);
             {
                 writer.WriteUInt8(ID);
 
@@ -3403,7 +3407,7 @@ namespace ClassicUO.Network
                 }
 
                 writer.WriteUInt32BE(serial);
-                writer.WriteUInt16BE((ushort) items.Length);
+                writer.WriteUInt16BE((ushort)items.Length);
 
                 for (int i = 0; i < items.Length; ++i)
                 {
@@ -3422,7 +3426,7 @@ namespace ClassicUO.Network
                     writer.WriteZero(length - writer.BytesWritten);
                 }
 
-                socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
+                socket.Send(writer.AllocatedBuffer, writer.BytesWritten); writer.Dispose();
             }
         }
 
@@ -3432,7 +3436,7 @@ namespace ClassicUO.Network
 
             int length = PacketsTable.GetPacketLength(ID);
 
-            using (StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length))
+            StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length);
             {
                 writer.WriteUInt8(ID);
 
@@ -3458,7 +3462,7 @@ namespace ClassicUO.Network
                 }
 
 
-                socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
+                socket.Send(writer.AllocatedBuffer, writer.BytesWritten); writer.Dispose();
             }
         }
 
@@ -3468,7 +3472,7 @@ namespace ClassicUO.Network
 
             int length = PacketsTable.GetPacketLength(ID);
 
-            using (StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length))
+            StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length);
             {
                 writer.WriteUInt8(ID);
 
@@ -3492,7 +3496,7 @@ namespace ClassicUO.Network
                 }
 
 
-                socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
+                socket.Send(writer.AllocatedBuffer, writer.BytesWritten); writer.Dispose();
             }
         }
 
@@ -3502,7 +3506,7 @@ namespace ClassicUO.Network
 
             int length = PacketsTable.GetPacketLength(ID);
 
-            using (StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length))
+            StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length);
             {
                 writer.WriteUInt8(ID);
 
@@ -3525,7 +3529,7 @@ namespace ClassicUO.Network
                     writer.WriteZero(length - writer.BytesWritten);
                 }
 
-                socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
+                socket.Send(writer.AllocatedBuffer, writer.BytesWritten); writer.Dispose();
             }
         }
 
@@ -3535,7 +3539,7 @@ namespace ClassicUO.Network
 
             int length = PacketsTable.GetPacketLength(ID);
 
-            using (StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length))
+            StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length);
             {
                 writer.WriteUInt8(ID);
 
@@ -3557,7 +3561,7 @@ namespace ClassicUO.Network
                     writer.WriteZero(length - writer.BytesWritten);
                 }
 
-                socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
+                socket.Send(writer.AllocatedBuffer, writer.BytesWritten); writer.Dispose();
             }
         }
 
@@ -3567,7 +3571,7 @@ namespace ClassicUO.Network
 
             int length = PacketsTable.GetPacketLength(ID);
 
-            using (StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length))
+            StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length);
             {
                 writer.WriteUInt8(ID);
 
@@ -3588,7 +3592,7 @@ namespace ClassicUO.Network
                     writer.WriteZero(length - writer.BytesWritten);
                 }
 
-                socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
+                socket.Send(writer.AllocatedBuffer, writer.BytesWritten); writer.Dispose();
             }
         }
 
@@ -3598,7 +3602,7 @@ namespace ClassicUO.Network
 
             int length = PacketsTable.GetPacketLength(ID);
 
-            using (StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length))
+            StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length);
             {
                 writer.WriteUInt8(ID);
 
@@ -3619,7 +3623,7 @@ namespace ClassicUO.Network
                     writer.WriteZero(length - writer.BytesWritten);
                 }
 
-                socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
+                socket.Send(writer.AllocatedBuffer, writer.BytesWritten); writer.Dispose();
             }
         }
 
@@ -3629,7 +3633,7 @@ namespace ClassicUO.Network
 
             int length = PacketsTable.GetPacketLength(ID);
 
-            using (StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length))
+            StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length);
             {
                 writer.WriteUInt8(ID);
 
@@ -3655,7 +3659,7 @@ namespace ClassicUO.Network
                     writer.WriteZero(length - writer.BytesWritten);
                 }
 
-                socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
+                socket.Send(writer.AllocatedBuffer, writer.BytesWritten); writer.Dispose();
             }
         }
 
@@ -3665,7 +3669,7 @@ namespace ClassicUO.Network
 
             int length = PacketsTable.GetPacketLength(ID);
 
-            using (StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length))
+            StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length);
             {
                 writer.WriteUInt8(ID);
 
@@ -3676,8 +3680,8 @@ namespace ClassicUO.Network
 
                 writer.WriteUInt16BE(0x33);
                 writer.WriteUInt32BE(serial);
-                writer.WriteUInt8((byte) dir);
-                writer.WriteUInt8((byte) dir);
+                writer.WriteUInt8((byte)dir);
+                writer.WriteUInt8((byte)dir);
                 writer.WriteUInt8(speed);
 
                 if (length < 0)
@@ -3690,7 +3694,7 @@ namespace ClassicUO.Network
                     writer.WriteZero(length - writer.BytesWritten);
                 }
 
-                socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
+                socket.Send(writer.AllocatedBuffer, writer.BytesWritten); writer.Dispose();
             }
         }
 
@@ -3700,7 +3704,7 @@ namespace ClassicUO.Network
 
             int length = PacketsTable.GetPacketLength(ID);
 
-            using (StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length))
+            StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length);
             {
                 writer.WriteUInt8(ID);
 
@@ -3721,7 +3725,7 @@ namespace ClassicUO.Network
                 }
 
 
-                socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
+                socket.Send(writer.AllocatedBuffer, writer.BytesWritten); writer.Dispose();
             }
         }
 
@@ -3731,7 +3735,7 @@ namespace ClassicUO.Network
 
             int length = PacketsTable.GetPacketLength(ID);
 
-            using (StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length))
+            StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length);
             {
                 writer.WriteUInt8(ID);
 
@@ -3745,7 +3749,7 @@ namespace ClassicUO.Network
                     direction |= Direction.Running;
                 }
 
-                writer.WriteUInt8((byte) direction);
+                writer.WriteUInt8((byte)direction);
                 writer.WriteUInt8(seq);
                 writer.WriteUInt32BE(fastWalk);
 
@@ -3759,7 +3763,7 @@ namespace ClassicUO.Network
                     writer.WriteZero(length - writer.BytesWritten);
                 }
 
-                socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
+                socket.Send(writer.AllocatedBuffer, writer.BytesWritten); writer.Dispose();
             }
         }
 
@@ -3769,7 +3773,7 @@ namespace ClassicUO.Network
 
             int length = PacketsTable.GetPacketLength(ID);
 
-            using (StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length))
+            StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length);
             {
                 writer.WriteUInt8(ID);
 
@@ -3793,7 +3797,7 @@ namespace ClassicUO.Network
                 }
 
 
-                socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
+                socket.Send(writer.AllocatedBuffer, writer.BytesWritten); writer.Dispose();
             }
         }
 
@@ -3803,7 +3807,7 @@ namespace ClassicUO.Network
 
             int length = PacketsTable.GetPacketLength(ID);
 
-            using (StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length))
+            StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length);
             {
                 writer.WriteUInt8(ID);
 
@@ -3827,7 +3831,7 @@ namespace ClassicUO.Network
                 }
 
 
-                socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
+                socket.Send(writer.AllocatedBuffer, writer.BytesWritten); writer.Dispose();
             }
         }
 
@@ -3837,7 +3841,7 @@ namespace ClassicUO.Network
 
             int length = PacketsTable.GetPacketLength(ID);
 
-            using (StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length))
+            StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length);
             {
                 writer.WriteUInt8(ID);
 
@@ -3861,7 +3865,7 @@ namespace ClassicUO.Network
                 }
 
 
-                socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
+                socket.Send(writer.AllocatedBuffer, writer.BytesWritten); writer.Dispose();
             }
         }
 
@@ -3871,7 +3875,7 @@ namespace ClassicUO.Network
 
             int length = PacketsTable.GetPacketLength(ID);
 
-            using (StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length))
+            StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length);
             {
                 writer.WriteUInt8(ID);
 
@@ -3894,7 +3898,7 @@ namespace ClassicUO.Network
                     writer.WriteZero(length - writer.BytesWritten);
                 }
 
-                socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
+                socket.Send(writer.AllocatedBuffer, writer.BytesWritten); writer.Dispose();
             }
         }
 
@@ -3904,7 +3908,7 @@ namespace ClassicUO.Network
 
             int length = PacketsTable.GetPacketLength(ID);
 
-            using (StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length))
+            StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length);
             {
                 writer.WriteUInt8(ID);
 
@@ -3930,7 +3934,7 @@ namespace ClassicUO.Network
                 }
 
 
-                socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
+                socket.Send(writer.AllocatedBuffer, writer.BytesWritten); writer.Dispose();
             }
         }
 
@@ -3940,7 +3944,7 @@ namespace ClassicUO.Network
 
             int length = PacketsTable.GetPacketLength(ID);
 
-            using (StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length))
+            StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length);
             {
                 writer.WriteUInt8(ID);
 
@@ -3964,7 +3968,7 @@ namespace ClassicUO.Network
                 }
 
 
-                socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
+                socket.Send(writer.AllocatedBuffer, writer.BytesWritten); writer.Dispose();
             }
         }
 
@@ -3974,7 +3978,7 @@ namespace ClassicUO.Network
 
             int length = PacketsTable.GetPacketLength(ID);
 
-            using (StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length))
+            StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length);
             {
                 writer.WriteUInt8(ID);
 
@@ -3998,7 +4002,7 @@ namespace ClassicUO.Network
                 }
 
 
-                socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
+                socket.Send(writer.AllocatedBuffer, writer.BytesWritten); writer.Dispose();
             }
         }
 
@@ -4008,7 +4012,7 @@ namespace ClassicUO.Network
 
             int length = PacketsTable.GetPacketLength(ID);
 
-            using (StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length))
+            StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length);
             {
                 writer.WriteUInt8(ID);
 
@@ -4031,7 +4035,7 @@ namespace ClassicUO.Network
                     writer.WriteZero(length - writer.BytesWritten);
                 }
 
-                socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
+                socket.Send(writer.AllocatedBuffer, writer.BytesWritten); writer.Dispose();
             }
         }
 
@@ -4041,7 +4045,7 @@ namespace ClassicUO.Network
 
             int length = PacketsTable.GetPacketLength(ID);
 
-            using (StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length))
+            StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length);
             {
                 writer.WriteUInt8(ID);
 
@@ -4064,7 +4068,7 @@ namespace ClassicUO.Network
                     writer.WriteZero(length - writer.BytesWritten);
                 }
 
-                socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
+                socket.Send(writer.AllocatedBuffer, writer.BytesWritten); writer.Dispose();
             }
         }
 
@@ -4074,7 +4078,7 @@ namespace ClassicUO.Network
 
             int length = PacketsTable.GetPacketLength(ID);
 
-            using (StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length))
+            StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length);
             {
                 writer.WriteUInt8(ID);
 
@@ -4088,9 +4092,9 @@ namespace ClassicUO.Network
                 writer.WriteUInt8(0x00);
                 writer.WriteUInt32BE(graphic);
                 writer.WriteUInt8(0x00);
-                writer.WriteUInt32BE((uint) x);
+                writer.WriteUInt32BE((uint)x);
                 writer.WriteUInt8(0x00);
-                writer.WriteUInt32BE((uint) y);
+                writer.WriteUInt32BE((uint)y);
                 writer.WriteUInt8(0x0A);
 
                 if (length < 0)
@@ -4103,7 +4107,7 @@ namespace ClassicUO.Network
                     writer.WriteZero(length - writer.BytesWritten);
                 }
 
-                socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
+                socket.Send(writer.AllocatedBuffer, writer.BytesWritten); writer.Dispose();
             }
         }
 
@@ -4113,7 +4117,7 @@ namespace ClassicUO.Network
 
             int length = PacketsTable.GetPacketLength(ID);
 
-            using (StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length))
+            StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length);
             {
                 writer.WriteUInt8(ID);
 
@@ -4144,7 +4148,7 @@ namespace ClassicUO.Network
                     writer.WriteZero(length - writer.BytesWritten);
                 }
 
-                socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
+                socket.Send(writer.AllocatedBuffer, writer.BytesWritten); writer.Dispose();
             }
         }
 
@@ -4154,7 +4158,7 @@ namespace ClassicUO.Network
 
             int length = PacketsTable.GetPacketLength(ID);
 
-            using (StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length))
+            StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length);
             {
                 writer.WriteUInt8(ID);
 
@@ -4185,7 +4189,7 @@ namespace ClassicUO.Network
                     writer.WriteZero(length - writer.BytesWritten);
                 }
 
-                socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
+                socket.Send(writer.AllocatedBuffer, writer.BytesWritten); writer.Dispose();
             }
         }
 
@@ -4195,7 +4199,7 @@ namespace ClassicUO.Network
 
             int length = PacketsTable.GetPacketLength(ID);
 
-            using (StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length))
+            StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length);
             {
                 writer.WriteUInt8(ID);
 
@@ -4226,7 +4230,7 @@ namespace ClassicUO.Network
                     writer.WriteZero(length - writer.BytesWritten);
                 }
 
-                socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
+                socket.Send(writer.AllocatedBuffer, writer.BytesWritten); writer.Dispose();
             }
         }
 
@@ -4236,7 +4240,7 @@ namespace ClassicUO.Network
 
             int length = PacketsTable.GetPacketLength(ID);
 
-            using (StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length))
+            StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length);
             {
                 writer.WriteUInt8(ID);
 
@@ -4265,7 +4269,7 @@ namespace ClassicUO.Network
                     writer.WriteZero(length - writer.BytesWritten);
                 }
 
-                socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
+                socket.Send(writer.AllocatedBuffer, writer.BytesWritten); writer.Dispose();
             }
         }
 
@@ -4275,7 +4279,7 @@ namespace ClassicUO.Network
 
             int length = PacketsTable.GetPacketLength(ID);
 
-            using (StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length))
+            StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length);
             {
                 writer.WriteUInt8(ID);
 
@@ -4305,7 +4309,7 @@ namespace ClassicUO.Network
                     writer.WriteZero(length - writer.BytesWritten);
                 }
 
-                socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
+                socket.Send(writer.AllocatedBuffer, writer.BytesWritten); writer.Dispose();
             }
         }
 
@@ -4315,7 +4319,7 @@ namespace ClassicUO.Network
 
             int length = PacketsTable.GetPacketLength(ID);
 
-            using (StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length))
+            StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length);
             {
                 writer.WriteUInt8(ID);
 
@@ -4334,7 +4338,7 @@ namespace ClassicUO.Network
                     writer.WriteZero(length - writer.BytesWritten);
                 }
 
-                socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
+                socket.Send(writer.AllocatedBuffer, writer.BytesWritten); writer.Dispose();
             }
         }
 
@@ -4344,7 +4348,7 @@ namespace ClassicUO.Network
 
             int length = PacketsTable.GetPacketLength(ID);
 
-            using (StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length))
+            StackDataWriter writer = new StackDataWriter(length < 0 ? 64 : length);
             {
                 writer.WriteUInt8(ID);
 
@@ -4365,7 +4369,7 @@ namespace ClassicUO.Network
                     writer.WriteZero(length - writer.BytesWritten);
                 }
 
-                socket.Send(writer.AllocatedBuffer, writer.BytesWritten);
+                socket.Send(writer.AllocatedBuffer, writer.BytesWritten); writer.Dispose();
             }
         }
     }
@@ -4412,27 +4416,27 @@ namespace ClassicUO.Network
                 WriteUShort((ushort)m.Key);
 
                 // mana cost
-                WriteUShort((ushort) m.Value.ManaCost);
+                WriteUShort((ushort)m.Value.ManaCost);
 
                 // min skill
-                WriteUShort((ushort) m.Value.MinSkill);
+                WriteUShort((ushort)m.Value.MinSkill);
 
                 // target type
-                WriteByte((byte) m.Value.TargetType);
+                WriteByte((byte)m.Value.TargetType);
 
                 // spell name
                 WriteUShort((ushort)(m.Value.Name.Length));
                 WriteUnicode(m.Value.Name, m.Value.Name.Length);
 
                 // power of word
-                WriteUShort((ushort) (m.Value.PowerWords.Length));
+                WriteUShort((ushort)(m.Value.PowerWords.Length));
                 WriteUnicode(m.Value.PowerWords, m.Value.PowerWords.Length);
 
                 // reagents
-                WriteUShort((ushort) m.Value.Regs.Length);
+                WriteUShort((ushort)m.Value.Regs.Length);
                 foreach (var r in m.Value.Regs)
                 {
-                    WriteByte((byte) r);
+                    WriteByte((byte)r);
                 }
             }
         }
@@ -4449,7 +4453,7 @@ namespace ClassicUO.Network
                 WriteUShort((ushort)s.Index);
                 WriteBool(s.HasAction);
 
-                WriteUShort((ushort) (s.Name.Length));
+                WriteUShort((ushort)(s.Name.Length));
                 WriteUnicode(s.Name, s.Name.Length);
             }
         }

@@ -162,7 +162,7 @@ namespace ClassicUO.Game.Data
 
         public string CreateReagentListString(string separator)
         {
-            using (ValueStringBuilder sb = new ValueStringBuilder())
+            ValueStringBuilder sb = new ValueStringBuilder();
             {
                 for (int i = 0; i < Regs.Length; i++)
                 {
@@ -251,7 +251,9 @@ namespace ClassicUO.Game.Data
                     }
                 }
 
-                return sb.ToString();
+                string ss = sb.ToString();
+                sb.Dispose();
+                return ss;
             }
         }
 

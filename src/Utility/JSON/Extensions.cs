@@ -44,7 +44,7 @@ namespace TinyJson
         {
             bool next_upper = true;
 
-            using (ValueStringBuilder sb = new ValueStringBuilder(snakeCaseName.Length))
+            ValueStringBuilder sb = new ValueStringBuilder(snakeCaseName.Length);
             {
                 for (int i = 0; i < snakeCaseName.Length; i++)
                 {
@@ -66,13 +66,15 @@ namespace TinyJson
                     }
                 }
 
-                return sb.ToString();
+                string s = sb.ToString();
+                sb.Dispose();
+                return s;
             }
         }
 
         public static string CamelCaseToSnakeCase(this string camelCaseName)
         {
-            using (ValueStringBuilder sb = new ValueStringBuilder(camelCaseName.Length * 2))
+            ValueStringBuilder sb = new ValueStringBuilder(camelCaseName.Length * 2);
             {
                 if (char.IsUpper(camelCaseName[0]))
                 {
@@ -92,7 +94,11 @@ namespace TinyJson
                     }
                 }
 
-                return sb.ToString();
+                string s = sb.ToString();
+
+                sb.Dispose();
+
+                return s;
             }
         }
     }

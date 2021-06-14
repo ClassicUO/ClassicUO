@@ -2509,7 +2509,7 @@ namespace ClassicUO.Network
 
                         byte lines = p.ReadByte();
 
-                        using (ValueStringBuilder sb = new ValueStringBuilder(256))
+                        ValueStringBuilder sb = new ValueStringBuilder(256);
                         {
                             for (int i = 0; i < lines; i++)
                             {
@@ -2540,6 +2540,8 @@ namespace ClassicUO.Network
                                     )
                                     { X = 40, Y = 40 }
                             );
+
+                            sb.Dispose();
                         }
                     }
                 }
@@ -4146,7 +4148,7 @@ namespace ClassicUO.Network
                     ushort crafterNameLen = 0;
                     uint next = p.ReadUInt();
 
-                    using (ValueStringBuilder strBuffer = new ValueStringBuilder(256))
+                    ValueStringBuilder strBuffer = new ValueStringBuilder(256);
                     {
                         if (next == 0xFFFFFFFD)
                         {
@@ -4226,6 +4228,8 @@ namespace ClassicUO.Network
                                 true
                             );
                         }
+
+                        strBuffer.Dispose();
                     }
 
                     NetClient.Socket.Send_MegaClilocRequest_Old(item);
@@ -4888,7 +4892,7 @@ namespace ClassicUO.Network
 
             if (list.Count != 0)
             {
-                using (ValueStringBuilder sb = new ValueStringBuilder(totalLength))
+                ValueStringBuilder sb = new ValueStringBuilder(totalLength);
                 {
                     foreach (var s in list)
                     {
@@ -4917,6 +4921,8 @@ namespace ClassicUO.Network
                     }
 
                     data = sb.ToString();
+
+                    sb.Dispose();
                 }
             }
 

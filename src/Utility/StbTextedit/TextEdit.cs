@@ -139,7 +139,7 @@ namespace StbTextEditSharp
         {
             int count = start + length;
 
-            using (ValueStringBuilder sb = new ValueStringBuilder(count))
+            ValueStringBuilder sb = new ValueStringBuilder(count);
             {
                 for (int i = start; i < count; ++i)
                 {
@@ -147,6 +147,8 @@ namespace StbTextEditSharp
                 }
 
                 InsertChars(pos, sb.ToString());
+
+                sb.Dispose();
             }
 
             return length;
