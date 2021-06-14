@@ -101,20 +101,17 @@ namespace ClassicUO.IO
         [MethodImpl(IMPL_OPTION)]
         public void WriteInt8(sbyte b)
         {
-            WriteUInt8((byte) b);
+            EnsureSize(1);
+
+            _buffer[Position] = (byte) b;
+
+            Position += 1;
         }
 
         [MethodImpl(IMPL_OPTION)]
         public void WriteBool(bool b)
         {
-            if (b)
-            {
-                WriteUInt8(0x01);
-            }
-            else
-            {
-                WriteUInt8(0x00);
-            }
+            WriteUInt8(b ? (byte) 0x01 : (byte) 0x00);
         }
 
 
@@ -135,7 +132,12 @@ namespace ClassicUO.IO
         [MethodImpl(IMPL_OPTION)]
         public void WriteInt16LE(short b)
         {
-            WriteUInt16LE((ushort) b);
+            EnsureSize(2);
+
+            _buffer[Position] = (byte)b;
+            _buffer[Position + 1] = (byte)(b >> 8);
+
+            Position += 2;
         }
 
         [MethodImpl(IMPL_OPTION)]
@@ -154,7 +156,14 @@ namespace ClassicUO.IO
         [MethodImpl(IMPL_OPTION)]
         public void WriteInt32LE(int b)
         {
-            WriteUInt32LE((uint) b);
+            EnsureSize(4);
+
+            _buffer[Position] = (byte)b;
+            _buffer[Position + 1] = (byte)(b >> 8);
+            _buffer[Position + 2] = (byte)(b >> 16);
+            _buffer[Position + 3] = (byte)(b >> 24);
+
+            Position += 4;
         }
 
         [MethodImpl(IMPL_OPTION)]
@@ -215,7 +224,12 @@ namespace ClassicUO.IO
         [MethodImpl(IMPL_OPTION)]
         public void WriteInt16BE(short b)
         {
-            WriteUInt16BE((ushort) b);
+            EnsureSize(2);
+
+            _buffer[Position] = (byte)(b >> 8);
+            _buffer[Position + 1] = (byte)b;
+
+            Position += 2;
         }
 
         [MethodImpl(IMPL_OPTION)]
@@ -234,7 +248,14 @@ namespace ClassicUO.IO
         [MethodImpl(IMPL_OPTION)]
         public void WriteInt32BE(int b)
         {
-            WriteUInt32BE((uint) b);
+            EnsureSize(4);
+
+            _buffer[Position] = (byte)(b >> 24);
+            _buffer[Position + 1] = (byte)(b >> 16);
+            _buffer[Position + 2] = (byte)(b >> 8);
+            _buffer[Position + 3] = (byte)b;
+
+            Position += 4;
         }
 
         [MethodImpl(IMPL_OPTION)]
@@ -309,7 +330,7 @@ namespace ClassicUO.IO
                     }
                     else
                     {
-                        WriteZero(1);
+                        WriteUInt8(0x00);
                     }
                 }
             }
