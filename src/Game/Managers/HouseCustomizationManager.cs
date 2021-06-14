@@ -299,8 +299,8 @@ namespace ClassicUO.Game.Managers
                             (
                                 floorMulti.Graphic,
                                 0,
-                                (ushort) (x - foundationItem.X),
-                                (ushort) (y - foundationItem.Y),
+                                (ushort) (foundationItem.X + (x - foundationItem.X)),
+                                (ushort) (foundationItem.Y + (y - foundationItem.Y)),
                                 (sbyte) z,
                                 true,
                                 false
@@ -586,8 +586,8 @@ namespace ClassicUO.Game.Managers
                             (
                                 0x0496,
                                 tempColor,
-                                (ushort) (x - foundationItem.X),
-                                (ushort) (y - foundationItem.Y),
+                                (ushort)(foundationItem.X + (x - foundationItem.X)),
+                                (ushort)(foundationItem.Y + (y - foundationItem.Y)),
                                 (sbyte) z,
                                 true,
                                 false
@@ -813,8 +813,8 @@ namespace ClassicUO.Game.Managers
                                 (
                                     item.Graphic,
                                     0,
-                                    (ushort) (xx + item.X),
-                                    (ushort) (yy + item.Y),
+                                    (ushort) (foundationItem.X + xx + item.X),
+                                    (ushort) (foundationItem.Y + yy + item.Y),
                                     (sbyte) (z + item.Z),
                                     true,
                                     false
