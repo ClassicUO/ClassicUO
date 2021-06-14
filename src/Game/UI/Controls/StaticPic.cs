@@ -109,7 +109,7 @@ namespace ClassicUO.Game.UI.Controls
 
         public override bool Contains(int x, int y)
         {
-            return GumpsLoader.Instance.PixelCheck(Graphic, x - Offset.X, y - Offset.Y);
+            return ArtLoader.Instance.PixelCheck(Graphic, x - Offset.X, y - Offset.Y);
         }
     }
 }
