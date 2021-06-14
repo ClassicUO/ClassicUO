@@ -1004,8 +1004,21 @@ namespace ClassicUO.Game.UI.Gumps
         private unsafe Task Load()
         {
             _mapIndex = World.MapIndex;
-            _mapTexture?.Dispose();
-            _mapTexture = null;
+
+            int realWidth = MapLoader.Instance.MapsDefaultSize[World.MapIndex, 0];
+            int realHeight = MapLoader.Instance.MapsDefaultSize[World.MapIndex, 1];
+
+            const int OFFSET_PIX = 2;
+            const int OFFSET_PIX_HALF = OFFSET_PIX / 2;
+
+            if (_mapTexture != null && !_mapTexture.IsDisposed)
+            {
+                if (_mapTexture.Bounds.Width != realWidth + OFFSET_PIX || _mapTexture.Bounds.Height != realHeight + OFFSET_PIX)
+                {
+                    _mapTexture?.Dispose();
+                    _mapTexture = null;
+                }
+            }
 
             return Task.Run
             (
@@ -1015,158 +1028,147 @@ namespace ClassicUO.Game.UI.Gumps
                     {
                         try
                         {
-                            const int OFFSET_PIX = 2;
-                            const int OFFSET_PIX_HALF = OFFSET_PIX / 2;
-
-                            int realWidth = MapLoader.Instance.MapsDefaultSize[World.MapIndex, 0];
-                            int realHeight = MapLoader.Instance.MapsDefaultSize[World.MapIndex, 1];
-
                             int fixedWidth = MapLoader.Instance.MapBlocksSize[World.MapIndex, 0];
                             int fixedHeight = MapLoader.Instance.MapBlocksSize[World.MapIndex, 1];
 
                             int size = (realWidth + OFFSET_PIX) * (realHeight + OFFSET_PIX);
-                            Color[] buffer = new Color[size];
-                            sbyte[] allZ = new sbyte[size];
+                           
+                            sbyte[] allZ = System.Buffers.ArrayPool<sbyte>.Shared.Rent(size);
+                            uint[] buffer = System.Buffers.ArrayPool<uint>.Shared.Rent(size);
 
-                            int bx, by, mapX, mapY, x, y;
-
-
-                            for (bx = 0; bx < fixedWidth; ++bx)
+                            try
                             {
-                                mapX = bx << 3;
+                                int bx, by, mapX, mapY, x, y;
 
-                                for (by = 0; by < fixedHeight; ++by)
+                                for (bx = 0; bx < fixedWidth; ++bx)
                                 {
-                                    ref IndexMap indexMap = ref World.Map.GetIndex(bx, by);
+                                    mapX = bx << 3;
 
-                                    if (indexMap.MapAddress == 0)
+                                    for (by = 0; by < fixedHeight; ++by)
                                     {
-                                        continue;
-                                    }
+                                        ref IndexMap indexMap = ref World.Map.GetIndex(bx, by);
 
-                                    MapBlock* mapBlock = (MapBlock*) indexMap.MapAddress;
-                                    MapCells* cells = (MapCells*) &mapBlock->Cells;
-
-                                    mapY = by << 3;
-
-                                    for (y = 0; y < 8; ++y)
-                                    {
-                                        int block = (mapY + y + OFFSET_PIX_HALF) * (realWidth + OFFSET_PIX) + mapX + OFFSET_PIX_HALF;
-
-                                        int pos = y << 3;
-
-                                        for (x = 0; x < 8; ++x, ++pos, ++block)
+                                        if (indexMap.MapAddress == 0)
                                         {
-                                            ushort color = (ushort) (0x8000 | HuesLoader.Instance.GetRadarColorData(cells[pos].TileID & 0x3FFF));
-
-                                            ref Color cc = ref buffer[block];
-                                            cc.PackedValue = HuesHelper.Color16To32(color) | 0xFF_00_00_00;
-
-                                            allZ[block] = cells[pos].Z;
+                                            continue;
                                         }
-                                    }
 
+                                        MapBlock* mapBlock = (MapBlock*)indexMap.MapAddress;
+                                        MapCells* cells = (MapCells*)&mapBlock->Cells;
 
-                                    StaticsBlock* sb = (StaticsBlock*) indexMap.StaticAddress;
+                                        mapY = by << 3;
 
-                                    if (sb != null)
-                                    {
-                                        int count = (int) indexMap.StaticCount;
-
-                                        for (int c = 0; c < count; ++c, ++sb)
+                                        for (y = 0; y < 8; ++y)
                                         {
-                                            if (sb->Color != 0 && sb->Color != 0xFFFF && !GameObjectHelper.IsNoDrawable(sb->Color))
+                                            int block = (mapY + y + OFFSET_PIX_HALF) * (realWidth + OFFSET_PIX) + mapX + OFFSET_PIX_HALF;
+
+                                            int pos = y << 3;
+
+                                            for (x = 0; x < 8; ++x, ++pos, ++block)
                                             {
-                                                int block = (mapY + sb->Y + OFFSET_PIX_HALF) * (realWidth + OFFSET_PIX) + mapX + sb->X + OFFSET_PIX_HALF;
+                                                ushort color = (ushort)(0x8000 | HuesLoader.Instance.GetRadarColorData(cells[pos].TileID & 0x3FFF));
 
-                                                if (sb->Z >= allZ[block])
+                                                buffer[block] = HuesHelper.Color16To32(color) | 0xFF_00_00_00;
+                                                allZ[block] = cells[pos].Z;
+                                            }
+                                        }
+
+
+                                        StaticsBlock* sb = (StaticsBlock*)indexMap.StaticAddress;
+
+                                        if (sb != null)
+                                        {
+                                            int count = (int)indexMap.StaticCount;
+
+                                            for (int c = 0; c < count; ++c, ++sb)
+                                            {
+                                                if (sb->Color != 0 && sb->Color != 0xFFFF && !GameObjectHelper.IsNoDrawable(sb->Color))
                                                 {
-                                                    ushort color = (ushort) (0x8000 | (sb->Hue != 0 ? HuesLoader.Instance.GetColor16(16384, sb->Hue) : HuesLoader.Instance.GetRadarColorData(sb->Color + 0x4000)));
+                                                    int block = (mapY + sb->Y + OFFSET_PIX_HALF) * (realWidth + OFFSET_PIX) + mapX + sb->X + OFFSET_PIX_HALF;
 
-                                                    ref Color cc = ref buffer[block];
-                                                    cc.PackedValue = HuesHelper.Color16To32(color) | 0xFF_00_00_00;
+                                                    if (sb->Z >= allZ[block])
+                                                    {
+                                                        ushort color = (ushort)(0x8000 | (sb->Hue != 0 ? HuesLoader.Instance.GetColor16(16384, sb->Hue) : HuesLoader.Instance.GetRadarColorData(sb->Color + 0x4000)));
 
-                                                    allZ[block] = sb->Z;
+                                                        buffer[block] = HuesHelper.Color16To32(color) | 0xFF_00_00_00;
+                                                        allZ[block] = sb->Z;
+                                                    }
                                                 }
                                             }
                                         }
                                     }
                                 }
-                            }
 
-                            int real_width_less_one = realWidth - 1;
-                            int real_height_less_one = realHeight - 1;
-                            const float MAG_0 = 80f / 100f;
-                            const float MAG_1 = 100f / 80f;
+                                int real_width_less_one = realWidth - 1;
+                                int real_height_less_one = realHeight - 1;
+                                const float MAG_0 = 80f / 100f;
+                                const float MAG_1 = 100f / 80f;
 
-                            int mapY_plus_one;
-                            int r, g, b;
+                                int mapY_plus_one;
 
-                            for (mapY = 1; mapY < real_height_less_one; ++mapY)
-                            {
-                                mapY_plus_one = mapY + 1;
-
-                                for (mapX = 1; mapX < real_width_less_one; ++mapX)
+                                for (mapY = 1; mapY < real_height_less_one; ++mapY)
                                 {
-                                    int blockCurrent = (mapY + OFFSET_PIX_HALF) * (realWidth + OFFSET_PIX) + mapX + OFFSET_PIX_HALF;
+                                    mapY_plus_one = mapY + 1;
 
-                                    int blockNext = (mapY_plus_one + OFFSET_PIX_HALF) * (realWidth + OFFSET_PIX) + (mapX - 1) + OFFSET_PIX_HALF;
-
-                                    ref sbyte z0 = ref allZ[blockCurrent];
-                                    ref sbyte z1 = ref allZ[blockNext];
-
-                                    if (z0 == z1)
+                                    for (mapX = 1; mapX < real_width_less_one; ++mapX)
                                     {
-                                        continue;
-                                    }
+                                        int blockCurrent = (mapY + OFFSET_PIX_HALF) * (realWidth + OFFSET_PIX) + mapX + OFFSET_PIX_HALF;
 
-                                    ref Color cc = ref buffer[blockCurrent];
+                                        int blockNext = (mapY_plus_one + OFFSET_PIX_HALF) * (realWidth + OFFSET_PIX) + (mapX - 1) + OFFSET_PIX_HALF;
 
-                                    if (cc.R != 0 || cc.G != 0 || cc.B != 0)
-                                    {
-                                        if (z0 < z1)
+                                        ref sbyte z0 = ref allZ[blockCurrent];
+                                        ref sbyte z1 = ref allZ[blockNext];
+
+                                        if (z0 == z1)
                                         {
-                                            r = (int) (cc.R * MAG_0);
-                                            g = (int) (cc.G * MAG_0);
-                                            b = (int) (cc.B * MAG_0);
-                                        }
-                                        else
-                                        {
-                                            r = (int) (cc.R * MAG_1);
-                                            g = (int) (cc.G * MAG_1);
-                                            b = (int) (cc.B * MAG_1);
+                                            continue;
                                         }
 
-                                        if (r > 255)
-                                        {
-                                            r = 255;
-                                        }
+                                        ref uint cc = ref buffer[blockCurrent];
 
-                                        if (g > 255)
-                                        {
-                                            g = 255;
-                                        }
+                                        byte r = (byte) (cc & 0xFF);        
+                                        byte g = (byte)((cc >> 8) & 0xFF);  
+                                        byte b = (byte)((cc >> 16) & 0xFF); 
+                                        byte a = (byte)((cc >> 24) & 0xFF); 
 
-                                        if (b > 255)
+                                        if (r != 0 || g != 0 || b != 0)
                                         {
-                                            b = 255;
-                                        }
+                                            if (z0 < z1)
+                                            {
+                                                r = (byte)(r * MAG_0);
+                                                g = (byte)(g * MAG_0);
+                                                b = (byte)(b * MAG_0);
+                                            }
+                                            else
+                                            {
+                                                r = (byte)(r * MAG_1);
+                                                g = (byte)(g * MAG_1);
+                                                b = (byte)(b * MAG_1);
+                                            }
 
-                                        cc.R = (byte) r;
-                                        cc.G = (byte) g;
-                                        cc.B = (byte) b;
+                                            cc = (uint) (r | (g << 8) | (b << 16) | (a << 24));
+                                        }
                                     }
                                 }
-                            }
 
-                            if (OFFSET_PIX > 0)
+                                if (OFFSET_PIX > 0)
+                                {
+                                    realWidth += OFFSET_PIX;
+                                    realHeight += OFFSET_PIX;
+                                }
+
+                                if (_mapTexture == null || _mapTexture.IsDisposed)
+                                {
+                                    _mapTexture = new UOTexture(realWidth, realHeight);
+                                }
+                                
+                                _mapTexture.SetData(buffer, 0, realWidth * realHeight);
+                            }
+                            finally
                             {
-                                realWidth += OFFSET_PIX;
-                                realHeight += OFFSET_PIX;
+                                System.Buffers.ArrayPool<sbyte>.Shared.Return(allZ);
+                                System.Buffers.ArrayPool<uint>.Shared.Return(buffer);
                             }
-
-                            _mapTexture = new UOTexture(realWidth, realHeight);
-                            _mapTexture.SetData(buffer);
                         }
                         catch (Exception ex)
                         {
