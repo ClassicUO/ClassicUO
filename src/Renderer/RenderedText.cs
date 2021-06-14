@@ -276,7 +276,14 @@ namespace ClassicUO.Renderer
                 return false;
             }
 
-            ulong b = (ulong)(Text.GetHashCode() ^ Hue ^ ((int)Align) ^ ((int)FontStyle) ^ Font ^ (IsUnicode ? 0x01 : 0x00));
+            ushort hue = Hue;
+
+            if (!IsUnicode && SaveHitMap)
+            {
+                hue = 0x7FFF;
+            }
+
+            ulong b = (ulong)(Text.GetHashCode() ^ hue ^ ((int)Align) ^ ((int)FontStyle) ^ Font ^ (IsUnicode ? 0x01 : 0x00));
 
             return _picker.Get(b, x, y);
         }
