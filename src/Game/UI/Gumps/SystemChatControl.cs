@@ -563,11 +563,11 @@ namespace ClassicUO.Game.UI.Gumps
 
                     if (MessageManager.PromptData.Prompt == ConsolePrompt.ASCII)
                     {
-                        NetClient.Socket.Send(new PASCIIPromptResponse(string.Empty, true));
+                        NetClient.Socket.Send_ASCIIPromptResponse(string.Empty, true);
                     }
                     else if (MessageManager.PromptData.Prompt == ConsolePrompt.Unicode)
                     {
-                        NetClient.Socket.Send(new PUnicodePromptResponse(string.Empty, Settings.GlobalSettings.Language, true));
+                        NetClient.Socket.Send_UnicodePromptResponse(string.Empty, Settings.GlobalSettings.Language, true);
                     }
 
                     MessageManager.PromptData = default;
@@ -601,11 +601,11 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 if (MessageManager.PromptData.Prompt == ConsolePrompt.ASCII)
                 {
-                    NetClient.Socket.Send(new PASCIIPromptResponse(text, text.Length < 1));
+                    NetClient.Socket.Send_ASCIIPromptResponse(text, text.Length < 1);
                 }
                 else if (MessageManager.PromptData.Prompt == ConsolePrompt.Unicode)
                 {
-                    NetClient.Socket.Send(new PUnicodePromptResponse(text, Settings.GlobalSettings.Language, text.Length < 1));
+                    NetClient.Socket.Send_UnicodePromptResponse(text, Settings.GlobalSettings.Language, text.Length < 1);
                 }
 
                 MessageManager.PromptData = default;
@@ -739,7 +739,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                                 if (World.Party.Leader == 0 && World.Party.Inviter != 0)
                                 {
-                                    NetClient.Socket.Send(new PPartyDecline(World.Party.Inviter));
+                                    NetClient.Socket.Send_PartyDecline(World.Party.Inviter);
                                     World.Party.Leader = 0;
                                     World.Party.Inviter = 0;
                                 }
@@ -826,7 +826,7 @@ namespace ClassicUO.Game.UI.Gumps
                         break;
 
                     case ChatMode.UOChat:
-                        NetClient.Socket.Send(new PChatMessageCommand(text));
+                        NetClient.Socket.Send_ChatMessageCommand(text);
 
                         break;
                 }

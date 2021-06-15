@@ -407,7 +407,7 @@ namespace ClassicUO.Game.Scenes
 
                 World.ServerName = Servers[ServerIndex].Name;
 
-                NetClient.LoginSocket.Send(new PSelectServer(index));
+                NetClient.LoginSocket.Send_SelectServer(index);
             }
         }
 
@@ -418,7 +418,7 @@ namespace ClassicUO.Game.Scenes
                 Settings.GlobalSettings.LastCharacterName = Characters[index];
                 Settings.GlobalSettings.Save();
                 CurrentLoginStep = LoginSteps.EnteringBritania;
-                NetClient.Socket.Send(new PSelectCharacter(index, Characters[index], NetClient.Socket.LocalIP));
+                NetClient.Socket.Send_SelectCharacter(index, Characters[index], NetClient.Socket.LocalIP);
             }
         }
 
@@ -444,18 +444,12 @@ namespace ClassicUO.Game.Scenes
 
             Settings.GlobalSettings.LastCharacterName = character.Name;
 
-            NetClient.Socket.Send
-            (
-                new PCreateCharacter
-                (
-                    character,
-                    cityIndex,
-                    NetClient.Socket.LocalIP,
-                    ServerIndex,
-                    (uint) i,
-                    profession
-                )
-            );
+            NetClient.Socket.Send_CreateCharacter(character,
+                                                  cityIndex,
+                                                  NetClient.Socket.LocalIP,
+                                                  ServerIndex,
+                                                  (uint)i,
+                                                  profession);
 
             CurrentLoginStep = LoginSteps.CharacterCreationDone;
         }
@@ -464,7 +458,7 @@ namespace ClassicUO.Game.Scenes
         {
             if (CurrentLoginStep == LoginSteps.CharacterSelection)
             {
-                NetClient.Socket.Send(new PDeleteCharacter((byte) index, NetClient.Socket.LocalIP));
+                NetClient.Socket.Send_DeleteCharacter((byte)index, NetClient.Socket.LocalIP);
             }
         }
 
@@ -541,30 +535,15 @@ namespace ClassicUO.Game.Scenes
                 byte build = (byte) (clientVersion >> 8);
                 byte extra = (byte) clientVersion;
 
-                PSeed packet = new PSeed
-                (
-                    address,
-                    major,
-                    minor,
-                    build,
-                    extra
-                );
 
-                NetClient.LoginSocket.Send(packet.ToArray(), packet.Length, true, true);
+                NetClient.LoginSocket.Send_Seed(address, major, minor, build, extra);
             }
             else
             {
-                // TODO: stackalloc
-                byte[] packet = new byte[4];
-                packet[0] = (byte) (address >> 24);
-                packet[1] = (byte) (address >> 16);
-                packet[2] = (byte) (address >> 8);
-                packet[3] = (byte) address;
-
-                NetClient.LoginSocket.Send(packet, packet.Length, true, true);
+                NetClient.LoginSocket.Send_Seed_Old(address);
             }
 
-            NetClient.LoginSocket.Send(new PFirstLogin(Account, Password));
+            NetClient.LoginSocket.Send_FirstLogin(Account, Password);
         }
 
         private void NetClient_Disconnected(object sender, SocketError e)
@@ -725,7 +704,8 @@ namespace ClassicUO.Game.Scenes
                                  // TODO: stackalloc
                                  byte[] ss = new byte[4] { (byte) (seed >> 24), (byte) (seed >> 16), (byte) (seed >> 8), (byte) seed };
                                  NetClient.Socket.Send(ss, 4, true, true);
-                                 NetClient.Socket.Send(new PSecondLogin(Account, Password, seed));
+
+                                 NetClient.Socket.Send_SecondLogin(Account, Password, seed);
                              }
                          },
                          TaskContinuationOptions.ExecuteSynchronously

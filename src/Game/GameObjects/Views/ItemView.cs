@@ -200,7 +200,12 @@ namespace ClassicUO.Game.GameObjects
                 posX -= index.Width;
                 posY -= index.Height;
 
-                if (SelectedObject.IsPointInStatic(texture, posX, posY))
+                if (ArtLoader.Instance.PixelCheck
+                (
+                    graphic,
+                    SelectedObject.TranslatedMousePositionByViewport.X - posX,
+                    SelectedObject.TranslatedMousePositionByViewport.Y - posY
+                ))
                 {
                     SelectedObject.Object = this;
                 }
@@ -434,7 +439,7 @@ namespace ClassicUO.Game.GameObjects
                     return;
                 }
 
-                if (frame.Contains(flipped ? posX + frame.Width - SelectedObject.TranslatedMousePositionByViewport.X : SelectedObject.TranslatedMousePositionByViewport.X - posX, SelectedObject.TranslatedMousePositionByViewport.Y - posY))
+                if (AnimationsLoader.Instance.PixelCheck(graphic, animGroup, dir, direction.IsUOP, animIndex, flipped ? posX + frame.Width - SelectedObject.TranslatedMousePositionByViewport.X : SelectedObject.TranslatedMousePositionByViewport.X - posX, SelectedObject.TranslatedMousePositionByViewport.Y - posY))
                 {
                     SelectedObject.Object = owner;
                 }

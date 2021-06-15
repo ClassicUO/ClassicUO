@@ -316,9 +316,13 @@ namespace ClassicUO.Network.Encryption
         *	macro Mij(x).
         *
         -****************************************************************************/
-        private static uint f32(uint x, ref uint[] k32, int keyLen)
+        private static unsafe uint f32(uint x, ref uint[] k32, int keyLen)
         {
-            byte[] b = { b0(x), b1(x), b2(x), b3(x) };
+            byte* b = stackalloc byte[4];
+            b[0] = b0(x);
+            b[1] = b1(x);
+            b[2] = b2(x);
+            b[3] = b3(x);
 
             /* Run each byte thru 8x8 S-boxes, xoring with key byte at each stage. */
             /* Note that each byte goes through a different combination of S-boxes.*/

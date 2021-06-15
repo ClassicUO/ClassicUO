@@ -224,14 +224,14 @@ namespace ClassicUO.Network
                 {
                     if (Handlers._clilocRequests.Count != 0)
                     {
-                        NetClient.Socket.Send(new PMegaClilocRequest(ref Handlers._clilocRequests));
+                        NetClient.Socket.Send_MegaClilocRequest(ref Handlers._clilocRequests);
                     }
                 }
                 else
                 {
                     foreach (uint serial in Handlers._clilocRequests)
                     {
-                        NetClient.Socket.Send(new PMegaClilocRequestOld(serial));
+                        NetClient.Socket.Send_MegaClilocRequest_Old(serial);
                     }
 
                     Handlers._clilocRequests.Clear();
@@ -789,16 +789,16 @@ namespace ClassicUO.Network
             {
                 if (ProfileManager.CurrentProfile != null)
                 {
-                    NetClient.Socket.Send(new PGameWindowSize((uint) ProfileManager.CurrentProfile.GameWindowSize.X, (uint) ProfileManager.CurrentProfile.GameWindowSize.Y));
+                    NetClient.Socket.Send_GameWindowSize((uint)ProfileManager.CurrentProfile.GameWindowSize.X, (uint)ProfileManager.CurrentProfile.GameWindowSize.Y);
                 }
 
-                NetClient.Socket.Send(new PLanguage(Settings.GlobalSettings.Language));
+                NetClient.Socket.Send_Language(Settings.GlobalSettings.Language);
             }
 
-            NetClient.Socket.Send(new PClientVersion(Settings.GlobalSettings.ClientVersion));
+            NetClient.Socket.Send_ClientVersion(Settings.GlobalSettings.ClientVersion);
 
             GameActions.SingleClick(World.Player);
-            NetClient.Socket.Send(new PSkillsRequest(World.Player));
+            NetClient.Socket.Send_SkillsRequest(World.Player.Serial);
 
             if (World.Player.IsDead)
             {
@@ -807,7 +807,7 @@ namespace ClassicUO.Network
 
             if (Client.Version >= Data.ClientVersion.CV_70796 && ProfileManager.CurrentProfile != null)
             {
-                NetClient.Socket.Send(new PShowPublicHouseContent(ProfileManager.CurrentProfile.ShowHouseContent));
+                NetClient.Socket.Send_ShowPublicHouseContent(ProfileManager.CurrentProfile.ShowHouseContent);
             }
 
 
@@ -847,7 +847,7 @@ namespace ClassicUO.Network
 
             if (serial == 0 && graphic == 0 && type == MessageType.Regular && font == 0xFFFF && hue == 0xFFFF && name.StartsWith("SYSTEM"))
             {
-                NetClient.Socket.Send(new PACKTalk());
+                NetClient.Socket.Send_ACKTalk();
 
                 return;
             }
@@ -2055,7 +2055,7 @@ namespace ClassicUO.Network
 
                 //GameActions.OpenPaperdoll(World.Player);
                 GameActions.RequestMobileStatus(World.Player);
-                NetClient.Socket.Send(new POpenChat(""));
+                NetClient.Socket.Send_OpenChat("");
 
 
                 //NetClient.Socket.Send(new PSkillsRequest(World.Player));
@@ -2063,12 +2063,12 @@ namespace ClassicUO.Network
 
                 if (Client.Version >= Data.ClientVersion.CV_306E)
                 {
-                    NetClient.Socket.Send(new PClientType());
+                    NetClient.Socket.Send_ClientType();
                 }
 
                 if (Client.Version >= Data.ClientVersion.CV_305D)
                 {
-                    NetClient.Socket.Send(new PClientViewRange(World.ClientViewRange));
+                    NetClient.Socket.Send_ClientViewRange(World.ClientViewRange);
                 }
 
                 List<Gump> gumps = ProfileManager.CurrentProfile.ReadGumps(ProfileManager.ProfilePath);
@@ -2509,8 +2509,7 @@ namespace ClassicUO.Network
 
                         byte lines = p.ReadByte();
 
-                        StringBuilder sb = new StringBuilder();
-
+                        ValueStringBuilder sb = new ValueStringBuilder(256);
                         for (int i = 0; i < lines; i++)
                         {
                             byte lineLen = p.ReadByte();
@@ -2524,21 +2523,24 @@ namespace ClassicUO.Network
                         }
 
                         string msg = sb.ToString();
-                        byte variant = (byte) (1 + (poster == World.Player.Name ? 1 : 0));
+                        byte variant = (byte)(1 + (poster == World.Player.Name ? 1 : 0));
 
                         UIManager.Add
                         (
                             new BulletinBoardItem
-                            (
-                                boardSerial,
-                                serial,
-                                poster,
-                                subject,
-                                dataTime,
-                                msg.TrimStart(),
-                                variant
-                            ) { X = 40, Y = 40 }
+                                (
+                                    boardSerial,
+                                    serial,
+                                    poster,
+                                    subject,
+                                    dataTime,
+                                    msg.TrimStart(),
+                                    variant
+                                )
+                                { X = 40, Y = 40 }
                         );
+
+                        sb.Dispose();
                     }
                 }
 
@@ -3190,7 +3192,7 @@ namespace ClassicUO.Network
                     }
                 );
 
-                NetClient.Socket.Send(new PBookPageDataRequest(serial, 1));
+                NetClient.Socket.Send_BookPageDataRequest(serial, 1);
             }
             else
             {
@@ -3775,7 +3777,7 @@ namespace ClassicUO.Network
                     p.Skip(4);
                     string username = p.ReadUnicode();
                     ChatManager.ChatIsEnabled = ChatStatus.Enabled;
-                    NetClient.Socket.Send(new PChatJoinCommand("General"));
+                    NetClient.Socket.Send_ChatJoinCommand("General");
 
                     break;
 
@@ -4006,7 +4008,7 @@ namespace ClassicUO.Network
 
         private static void ClientVersion(ref PacketBufferReader p)
         {
-            NetClient.Socket.Send(new PClientVersion(Settings.GlobalSettings.ClientVersion));
+            NetClient.Socket.Send_ClientVersion(Settings.GlobalSettings.ClientVersion);
         }
 
         private static void AssistVersion(ref PacketBufferReader p)
@@ -4143,8 +4145,8 @@ namespace ClassicUO.Network
                     str = string.Empty;
                     ushort crafterNameLen = 0;
                     uint next = p.ReadUInt();
-                    StringBuilder strBuffer = new StringBuilder();
 
+                    ValueStringBuilder strBuffer = new ValueStringBuilder(256);
                     if (next == 0xFFFFFFFD)
                     {
                         crafterNameLen = p.ReadUShort();
@@ -4175,8 +4177,8 @@ namespace ClassicUO.Network
                             next = p.ReadUInt();
                         }
 
-                        short charges = (short) p.ReadUShort();
-                        string attr = ClilocLoader.Instance.GetString((int) next);
+                        short charges = (short)p.ReadUShort();
+                        string attr = ClilocLoader.Instance.GetString((int)next);
 
                         if (charges == -1)
                         {
@@ -4224,7 +4226,9 @@ namespace ClassicUO.Network
                         );
                     }
 
-                    NetClient.Socket.Send(new PMegaClilocRequestOld(item));
+                    strBuffer.Dispose();
+
+                    NetClient.Socket.Send_MegaClilocRequest_Old(item);
 
                     break;
 
@@ -4450,7 +4454,7 @@ namespace ClassicUO.Network
 
                     if (!World.HouseManager.TryGetHouse(serial, out House house) || !house.IsCustom || house.Revision != revision)
                     {
-                        NetClient.Socket.Send(new PCustomHouseDataRequest(serial));
+                        NetClient.Socket.Send_CustomHouseDataRequest(serial);
                     }
                     else
                     {
@@ -4812,6 +4816,7 @@ namespace ClassicUO.Network
             }
 
             List<(int, string)> list = new List<(int, string)>();
+            int totalLength = 0;
 
             while (p.Position < p.Length)
             {
@@ -4857,6 +4862,8 @@ namespace ClassicUO.Network
                 }
 
                 list.Add((cliloc, str));
+
+                totalLength += str.Length;
             }
 
             Item container = null;
@@ -4881,6 +4888,7 @@ namespace ClassicUO.Network
 
             if (list.Count != 0)
             {
+                ValueStringBuilder sb = new ValueStringBuilder(totalLength);
                 foreach (var s in list)
                 {
                     string str = s.Item2;
@@ -4898,14 +4906,18 @@ namespace ClassicUO.Network
                     }
                     else
                     {
-                        if (data.Length != 0)
+                        if (sb.Length != 0)
                         {
-                            data += "\n";
+                            sb.Append('\n');
                         }
 
-                        data += str;
+                        sb.Append(str);
                     }
                 }
+
+                data = sb.ToString();
+
+                sb.Dispose();
             }
 
             World.OPL.Add(serial, revision, name, data);
@@ -4931,129 +4943,165 @@ namespace ClassicUO.Network
             short minX,
             short minY,
             short maxY,
-            ref RawList<CustomBuildObject> list
+            Item item,
+            House house
         )
         {
             //byte* decompressedBytes = stackalloc byte[dlen];
+            bool ismovable = item.ItemData.IsMultiMovable;
 
-            byte[] decompressedBytes = new byte[dlen];
+            byte[] decompressedBytes = System.Buffers.ArrayPool<byte>.Shared.Rent(dlen);
 
-            fixed (byte* dbytesPtr = decompressedBytes)
+            try
             {
-                fixed (byte* srcPtr = &source[sourcePosition])
+                fixed (byte* dbytesPtr = decompressedBytes)
                 {
-                    ZLib.Decompress
-                    (
-                        (IntPtr) srcPtr,
-                        clen,
-                        0,
-                        (IntPtr) dbytesPtr,
-                        dlen
-                    );
+                    fixed (byte* srcPtr = &source[sourcePosition])
+                    {
+                        ZLib.Decompress
+                        (
+                            (IntPtr)srcPtr,
+                            clen,
+                            0,
+                            (IntPtr)dbytesPtr,
+                            dlen
+                        );
+                    }
+
+                    StackDataReader reader = new StackDataReader(dbytesPtr, dlen);
+
+                    ushort id = 0;
+                    sbyte x = 0, y = 0, z = 0;
+
+                    switch (planeMode)
+                    {
+                        case 0:
+                            int c = dlen / 5;
+
+                            for (uint i = 0; i < c; i++)
+                            {
+                                id = reader.ReadUInt16BE();
+                                x = reader.ReadInt8();
+                                y = reader.ReadInt8();
+                                z = reader.ReadInt8();
+
+                                if (id != 0)
+                                {
+                                    house.Add
+                                    (
+                                        id,
+                                        0,
+                                        (ushort) (item.X + x),
+                                        (ushort) (item.Y + y),
+                                        (sbyte)(item.Z + z),
+                                        true,
+                                        ismovable
+                                    );
+                                }
+                            }
+
+                            break;
+
+                        case 1:
+
+                            if (planeZ > 0)
+                            {
+                                z = (sbyte)((planeZ - 1) % 4 * 20 + 7);
+                            }
+                            else
+                            {
+                                z = 0;
+                            }
+
+                            c = dlen >> 2;
+
+                            for (uint i = 0; i < c; i++)
+                            {
+                                id = reader.ReadUInt16BE();
+                                x = reader.ReadInt8();
+                                y = reader.ReadInt8();
+
+                                if (id != 0)
+                                {
+                                    house.Add
+                                    (
+                                        id,
+                                        0,
+                                        (ushort)(item.X + x),
+                                        (ushort)(item.Y + y),
+                                        (sbyte)(item.Z + z),
+                                        true,
+                                        ismovable
+                                    );
+                                }
+                            }
+
+                            break;
+
+                        case 2:
+                            short offX = 0, offY = 0;
+                            short multiHeight = 0;
+
+                            if (planeZ > 0)
+                            {
+                                z = (sbyte)((planeZ - 1) % 4 * 20 + 7);
+                            }
+                            else
+                            {
+                                z = 0;
+                            }
+
+                            if (planeZ <= 0)
+                            {
+                                offX = minX;
+                                offY = minY;
+                                multiHeight = (short)(maxY - minY + 2);
+                            }
+                            else if (planeZ <= 4)
+                            {
+                                offX = (short)(minX + 1);
+                                offY = (short)(minY + 1);
+                                multiHeight = (short)(maxY - minY);
+                            }
+                            else
+                            {
+                                offX = minX;
+                                offY = minY;
+                                multiHeight = (short)(maxY - minY + 1);
+                            }
+
+                            c = dlen >> 1;
+
+                            for (uint i = 0; i < c; i++)
+                            {
+                                id = reader.ReadUInt16BE();
+                                x = (sbyte)(i / multiHeight + offX);
+                                y = (sbyte)(i % multiHeight + offY);
+
+                                if (id != 0)
+                                {
+                                    house.Add
+                                    (
+                                        id,
+                                        0,
+                                        (ushort)(item.X + x),
+                                        (ushort)(item.Y + y),
+                                        (sbyte)(item.Z + z),
+                                        true,
+                                        ismovable
+                                    );
+                                }
+                            }
+
+                            break;
+                    }
+
+                    reader.Release();
                 }
-
-                StackDataReader reader = new StackDataReader(dbytesPtr, dlen);
-
-                ushort id = 0;
-                sbyte x = 0, y = 0, z = 0;
-
-                switch (planeMode)
-                {
-                    case 0:
-                        int c = dlen / 5;
-
-                        for (uint i = 0; i < c; i++)
-                        {
-                            id = reader.ReadLE<ushort>();
-                            x = reader.Read<sbyte>();
-                            y = reader.Read<sbyte>();
-                            z = reader.Read<sbyte>();
-
-                            if (id != 0)
-                            {
-                                list.Add(new CustomBuildObject(id) { X = x, Y = y, Z = z });
-                            }
-                        }
-
-                        break;
-
-                    case 1:
-
-                        if (planeZ > 0)
-                        {
-                            z = (sbyte) ((planeZ - 1) % 4 * 20 + 7);
-                        }
-                        else
-                        {
-                            z = 0;
-                        }
-
-                        c = dlen >> 2;
-
-                        for (uint i = 0; i < c; i++)
-                        {
-                            id = reader.ReadLE<ushort>();
-                            x = reader.Read<sbyte>();
-                            y = reader.Read<sbyte>();
-
-                            if (id != 0)
-                            {
-                                list.Add(new CustomBuildObject(id) { X = x, Y = y, Z = z });
-                            }
-                        }
-
-                        break;
-
-                    case 2:
-                        short offX = 0, offY = 0;
-                        short multiHeight = 0;
-
-                        if (planeZ > 0)
-                        {
-                            z = (sbyte) ((planeZ - 1) % 4 * 20 + 7);
-                        }
-                        else
-                        {
-                            z = 0;
-                        }
-
-                        if (planeZ <= 0)
-                        {
-                            offX = minX;
-                            offY = minY;
-                            multiHeight = (short) (maxY - minY + 2);
-                        }
-                        else if (planeZ <= 4)
-                        {
-                            offX = (short) (minX + 1);
-                            offY = (short) (minY + 1);
-                            multiHeight = (short) (maxY - minY);
-                        }
-                        else
-                        {
-                            offX = minX;
-                            offY = minY;
-                            multiHeight = (short) (maxY - minY + 1);
-                        }
-
-                        c = dlen >> 1;
-
-                        for (uint i = 0; i < c; i++)
-                        {
-                            id = reader.ReadLE<ushort>();
-                            x = (sbyte) (i / multiHeight + offX);
-                            y = (sbyte) (i % multiHeight + offY);
-
-                            if (id != 0)
-                            {
-                                list.Add(new CustomBuildObject(id) { X = x, Y = y, Z = z });
-                            }
-                        }
-
-                        break;
-                }
-
-                reader.Release();
+            }
+            finally
+            {
+                System.Buffers.ArrayPool<byte>.Shared.Return(decompressedBytes);
             }
         }
 
@@ -5104,9 +5152,7 @@ namespace ClassicUO.Network
 
             byte planes = p.ReadByte();
 
-
-            RawList<CustomBuildObject> list = new RawList<CustomBuildObject>();
-
+            house.ClearCustomHouseComponents(0);
 
             for (int plane = 0; plane < planes; plane++)
             {
@@ -5132,13 +5178,13 @@ namespace ClassicUO.Network
                     minX,
                     minY,
                     maxY,
-                    ref list
+                    foundation,
+                    house
                 );
 
                 p.Skip(clen);
             }
 
-            house.Fill(list);
 
             if (World.CustomHouseManager != null)
             {
@@ -5183,84 +5229,106 @@ namespace ClassicUO.Network
             uint y = p.ReadUInt();
             uint clen = p.ReadUInt() - 4;
             int dlen = (int) p.ReadUInt();
-            byte[] decData = new byte[dlen];
+            byte[] decData = System.Buffers.ArrayPool<byte>.Shared.Rent(dlen);
             string layout;
 
-            unsafe
+            try
             {
-                fixed (byte* srcPtr = &p.Buffer[p.Position], destPtr = decData)
-                {
-                    ZLib.Decompress
-                    (
-                        (IntPtr) srcPtr,
-                        (int) clen,
-                        0,
-                        (IntPtr) destPtr,
-                        dlen
-                    );
-
-                    layout = Encoding.UTF8.GetString(destPtr, dlen);
-                }
-            }
-
-            p.Skip((int) clen);
-
-            uint linesNum = p.ReadUInt();
-            string[] lines = new string[linesNum];
-
-            if (linesNum != 0)
-            {
-                clen = p.ReadUInt() - 4;
-                dlen = (int) p.ReadUInt();
-                decData = new byte[dlen];
-
                 unsafe
                 {
                     fixed (byte* srcPtr = &p.Buffer[p.Position], destPtr = decData)
                     {
                         ZLib.Decompress
                         (
-                            (IntPtr) srcPtr,
-                            (int) clen,
+                            (IntPtr)srcPtr,
+                            (int)clen,
                             0,
-                            (IntPtr) destPtr,
+                            (IntPtr)destPtr,
                             dlen
                         );
+
+                        layout = Encoding.UTF8.GetString(destPtr, dlen);
                     }
-                }
-
-                p.Skip((int) clen);
-
-                for (int i = 0, index = 0; i < linesNum && index < dlen; i++)
-                {
-                    int length = ((decData[index++] << 8) | decData[index++]) << 1;
-                    int true_length = 0;
-
-                    for (int k = 0; k < length && true_length < length && index + true_length < dlen; ++k, true_length += 2)
-                    {
-                        ushort c = (ushort)(((decData[index + true_length] << 8) | decData[index + true_length + 1]) << 1);
-
-                        if (c == '\0')
-                        {
-                            break;
-                        }
-                    }
-
-                    lines[i] = Encoding.BigEndianUnicode.GetString(decData, index, true_length);
-
-                    index += length;
                 }
             }
+            finally
+            {
+                System.Buffers.ArrayPool<byte>.Shared.Return(decData);
+            }
 
-            CreateGump
-            (
-                sender,
-                gumpID,
-                (int) x,
-                (int) y,
-                layout,
-                lines
-            );
+ 
+            p.Skip((int) clen);
+
+            uint linesNum = p.ReadUInt();
+            string[] lines = System.Buffers.ArrayPool<string>.Shared.Rent((int) linesNum);
+
+            try
+            {
+                if (linesNum != 0)
+                {
+                    clen = p.ReadUInt() - 4;
+                    dlen = (int)p.ReadUInt();
+                    decData = System.Buffers.ArrayPool<byte>.Shared.Rent(dlen);
+
+                    try
+                    {
+                        unsafe
+                        {
+                            fixed (byte* srcPtr = &p.Buffer[p.Position], destPtr = decData)
+                            {
+                                ZLib.Decompress
+                                (
+                                    (IntPtr)srcPtr,
+                                    (int)clen,
+                                    0,
+                                    (IntPtr)destPtr,
+                                    dlen
+                                );
+                            }
+                        }
+
+                        p.Skip((int)clen);
+
+                        for (int i = 0, index = 0; i < linesNum && index < dlen; i++)
+                        {
+                            int length = ((decData[index++] << 8) | decData[index++]) << 1;
+                            int true_length = 0;
+
+                            for (int k = 0; k < length && true_length < length && index + true_length < dlen; ++k, true_length += 2)
+                            {
+                                ushort c = (ushort)(((decData[index + true_length] << 8) | decData[index + true_length + 1]) << 1);
+
+                                if (c == '\0')
+                                {
+                                    break;
+                                }
+                            }
+
+                            lines[i] = Encoding.BigEndianUnicode.GetString(decData, index, true_length);
+
+                            index += length;
+                        }
+                    }
+                    finally
+                    {
+                        System.Buffers.ArrayPool<byte>.Shared.Return(decData);
+                    }
+                }
+
+                CreateGump
+                (
+                    sender,
+                    gumpID,
+                    (int)x,
+                    (int)y,
+                    layout,
+                    lines
+                );
+            }
+            finally
+            {
+                System.Buffers.ArrayPool<string>.Shared.Return(lines);
+            }
         }
 
         private static void UpdateMobileStatus(ref PacketBufferReader p)
@@ -5470,7 +5538,7 @@ namespace ClassicUO.Network
 
                 case 0xFE:
                     Log.Info("Razor ACK sent");
-                    NetClient.Socket.Send(new PRazorAnswer());
+                    NetClient.Socket.Send_RazorACK();
 
                     break;
             }
@@ -5898,7 +5966,7 @@ namespace ClassicUO.Network
 
                 if (gump != null)
                 {
-                    NetClient.Socket.Send(new PBulletinBoardRequestMessageSummary(containerSerial, serial));
+                    NetClient.Socket.Send_BulletinBoardRequestMessageSummary(containerSerial, serial);
                 }
                 else
                 {

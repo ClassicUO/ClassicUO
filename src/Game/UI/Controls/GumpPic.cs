@@ -85,7 +85,7 @@ namespace ClassicUO.Game.UI.Controls
                 return false;
             }
 
-            if (texture.Contains(x - Offset.X, y - Offset.Y))
+            if (GumpsLoader.Instance.PixelCheck(Graphic, x - Offset.X, y - Offset.Y))
             {
                 return true;
             }
@@ -128,7 +128,7 @@ namespace ClassicUO.Game.UI.Controls
         {
             if (IsVirtue && button == MouseButtonType.Left)
             {
-                NetClient.Socket.Send(new PVirtueGumpReponse(World.Player, Graphic));
+                NetClient.Socket.Send_VirtueGumpResponse(World.Player, Graphic);
 
                 return true;
             }

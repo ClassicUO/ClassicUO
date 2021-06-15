@@ -70,25 +70,23 @@ namespace ClassicUO.Game.GameObjects
         (
             ushort graphic,
             ushort hue,
-            int x,
-            int y,
+            ushort x,
+            ushort y,
             sbyte z,
-            bool iscustom
+            bool iscustom,
+            bool ismovable
         )
         {
-            Item item = World.Items.Get(Serial);
-
             Multi m = Multi.Create(graphic);
             m.Hue = hue;
-            m.X = (ushort) (item.X + x);
-            m.Y = (ushort) (item.Y + y);
+            m.X = x;
+            m.Y = y;
             m.Z = z;
             m.UpdateScreenPosition();
             m.IsCustom = iscustom;
-            m.IsMovable = item.ItemData.IsMultiMovable;
+            m.IsMovable = ismovable;
             m.AddToTile();
 
-            //if (iscustom)
             Components.Add(m);
 
             return m;
@@ -134,28 +132,6 @@ namespace ClassicUO.Game.GameObjects
                         Components.RemoveAt(i--);
                     }
                 }
-            }
-        }
-
-        public void Fill(RawList<CustomBuildObject> list)
-        {
-            Item item = World.Items.Get(Serial);
-
-            ClearCustomHouseComponents(0);
-
-            for (int i = 0; i < list.Count; i++)
-            {
-                ref CustomBuildObject b = ref list[i];
-
-                Add
-                (
-                    b.Graphic,
-                    0,
-                    b.X,
-                    b.Y,
-                    (sbyte) (item.Z + b.Z),
-                    true
-                );
             }
         }
 

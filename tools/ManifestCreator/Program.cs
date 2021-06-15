@@ -76,6 +76,11 @@ namespace ManifestCreator
             "System.Xml.dll",
             "System.Xml.Linq.dll",
 
+            "System.Buffers.dll",
+            "System.Memory.dll",
+            "System.Numerics.Vectors.dll",
+            "System.Runtime.CompilerServices.Unsafe.dll",
+
             // removed.
             //"Newtonsoft.Json.dll"
         };

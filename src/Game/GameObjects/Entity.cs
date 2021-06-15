@@ -151,7 +151,7 @@ namespace ClassicUO.Game.GameObjects
                 //but all servers tested (latest POL, old POL, ServUO, Outlands) do.
                 if ( /*Client.Version > ClientVersion.CV_200 &&*/ SerialHelper.IsMobile(Serial))
                 {
-                    Socket.Send(new PNameRequest(Serial));
+                    Socket.Send_NameRequest(Serial);
                 }
 
                 UIManager.Add(new NameOverheadGump(this));

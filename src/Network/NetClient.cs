@@ -122,8 +122,6 @@ namespace ClassicUO.Network
         public event EventHandler Connected;
         public event EventHandler<SocketError> Disconnected;
 
-        public static event EventHandler<PacketWriter> PacketSent;
-
         private static readonly Task<bool> TaskCompletedFalse = new Task<bool>(() => false);
 
         public static void EnqueuePacketFromPlugin(byte[] data, int length)
@@ -298,7 +296,6 @@ namespace ClassicUO.Network
 
             if (Plugin.ProcessSendPacket(data, ref length))
             {
-                PacketSent.Raise(p);
                 Send(data, length, false);
             }
         }
@@ -310,7 +307,6 @@ namespace ClassicUO.Network
                 return;
             }
 
-            PacketSent.Raise(new PacketWriter(data, length));
             Send(data, length, skip_encryption);
         }
 
@@ -660,78 +656,80 @@ namespace ClassicUO.Network
             if (_logFile == null)
                 _logFile = new LogFile(FileSystemHelper.CreateFolderIfNotExists(CUOEnviroment.ExecutablePath, "Logs", "Network"), "packets.log");
 
-            StringBuilder output = new StringBuilder();
-
-            int off = sizeof(ulong) + 2;
-
-            output.Append(' ', off);
-            output.AppendFormat("Ticks: {0} | {1} |  ID: {2:X2}   Length: {3}\n", Time.Ticks, (toServer ? "Client -> Server" : "Server -> Client"), buffer[0], length);
-
-            if (buffer[0] == 0x80 || buffer[0] == 0x91)
+            ValueStringBuilder output = new ValueStringBuilder();
             {
-                output.Append(' ', off);
-                output.AppendLine("[ACCOUNT CREDENTIALS HIDDEN]");
-            }
-            else
-            {
-                output.Append(' ', off);
-                output.AppendLine("0  1  2  3  4  5  6  7   8  9  A  B  C  D  E  F");
+                int off = sizeof(ulong) + 2;
 
                 output.Append(' ', off);
-                output.AppendLine("-- -- -- -- -- -- -- --  -- -- -- -- -- -- -- --");
+                output.Append(string.Format("Ticks: {0} | {1} |  ID: {2:X2}   Length: {3}\n", Time.Ticks, (toServer ? "Client -> Server" : "Server -> Client"), buffer[0], length));
 
-                int i;
-                ulong address = 0;
-
-                for (i = 0; i < length; ++i)
+                if (buffer[0] == 0x80 || buffer[0] == 0x91)
                 {
-                    output.AppendFormat("{0:X8}", address);
-
-                    for (int j = 0; j < 16; ++j)
-                    {
-                        if ((j % 8) == 0)
-                        {
-                            output.Append(" ");
-                        }
-
-                        if (i + j < length)
-                        {
-                            output.AppendFormat(" {0:X2}", buffer[i + j]);
-                        }
-                        else
-                        {
-                            output.Append("   ");
-                        }
-                    }
-
-                    output.Append("  ");
-
-                    for (int j = 0; j < 16 && i + j < length; ++j)
-                    {
-                        byte c = buffer[i + j];
-
-                        if (c >= 0x20 && c < 0x80)
-                        {
-                            output.Append((char)c);
-                            
-                        }
-                        else
-                        {
-                            output.Append('.');
-                        }
-                    }
-
-                    output.Append('\n');
-                    address += 16;
-                    i += 16;
+                    output.Append(' ', off);
+                    output.Append("[ACCOUNT CREDENTIALS HIDDEN]\n");
                 }
+                else
+                {
+                    output.Append(' ', off);
+                    output.Append("0  1  2  3  4  5  6  7   8  9  A  B  C  D  E  F\n");
+
+                    output.Append(' ', off);
+                    output.Append("-- -- -- -- -- -- -- --  -- -- -- -- -- -- -- --\n");
+
+                    int i;
+                    ulong address = 0;
+
+                    for (i = 0; i < length; ++i)
+                    {
+                        output.Append($"{address:X8}");
+
+                        for (int j = 0; j < 16; ++j)
+                        {
+                            if ((j % 8) == 0)
+                            {
+                                output.Append(" ");
+                            }
+
+                            if (i + j < length)
+                            {
+                                output.Append($" {buffer[i + j]:X2}");
+                            }
+                            else
+                            {
+                                output.Append("   ");
+                            }
+                        }
+
+                        output.Append("  ");
+
+                        for (int j = 0; j < 16 && i + j < length; ++j)
+                        {
+                            byte c = buffer[i + j];
+
+                            if (c >= 0x20 && c < 0x80)
+                            {
+                                output.Append((char)c);
+
+                            }
+                            else
+                            {
+                                output.Append('.');
+                            }
+                        }
+
+                        output.Append('\n');
+                        address += 16;
+                        i += 16;
+                    }
+                }
+
+                output.Append('\n');
+                output.Append('\n');
+
+                _logFile.Write(output.ToString());
+
+                output.Dispose();
             }
-
-
-            output.AppendLine();
-            output.AppendLine();
-
-            _logFile.Write(output.ToString());
         }
     }
 }

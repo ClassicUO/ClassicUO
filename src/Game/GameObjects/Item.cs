@@ -280,85 +280,92 @@ namespace ClassicUO.Game.GameObjects
 
                     //byte* data = stackalloc byte[entry.DecompressedLength];
 
-                    byte[] data = new byte[entry.DecompressedLength];
+                    byte[] data = System.Buffers.ArrayPool<byte>.Shared.Rent(entry.DecompressedLength);
 
-                    fixed (byte* dataPtr = data)
+                    try
                     {
-                        ZLib.Decompress
-                        (
-                            MultiLoader.Instance.File.PositionAddress,
-                            entry.Length,
-                            0,
-                            (IntPtr) dataPtr,
-                            entry.DecompressedLength
-                        );
-
-                        StackDataReader reader = new StackDataReader(dataPtr, entry.DecompressedLength);
-                        reader.Skip(4);
-
-                        int count = reader.Read<int>();
-
-                        int sizeOf = sizeof(MultiBlockNew);
-
-                        for (int i = 0; i < count; i++)
+                        fixed (byte* dataPtr = data)
                         {
-                            MultiBlockNew* block = (MultiBlockNew*) (reader.PositionAddress + i * sizeOf);
+                            ZLib.Decompress
+                            (
+                                MultiLoader.Instance.File.PositionAddress,
+                                entry.Length,
+                                0,
+                                (IntPtr)dataPtr,
+                                entry.DecompressedLength
+                            );
 
-                            if (block->Unknown != 0)
+                            StackDataReader reader = new StackDataReader(dataPtr, entry.DecompressedLength);
+                            reader.Skip(4);
+
+                            int count = reader.ReadInt32LE();
+
+                            int sizeOf = sizeof(MultiBlockNew);
+
+                            for (int i = 0; i < count; i++)
                             {
-                                reader.Skip((int) (block->Unknown * 4));
-                            }
+                                MultiBlockNew* block = (MultiBlockNew*)(reader.PositionAddress + i * sizeOf);
 
-                            if (block->X < minX)
-                            {
-                                minX = block->X;
-                            }
-
-                            if (block->X > maxX)
-                            {
-                                maxX = block->X;
-                            }
-
-                            if (block->Y < minY)
-                            {
-                                minY = block->Y;
-                            }
-
-                            if (block->Y > maxY)
-                            {
-                                maxY = block->Y;
-                            }
-
-                            if (block->Flags == 0 || block->Flags == 0x100)
-                            {
-                                Multi m = Multi.Create(block->ID);
-                                m.X = (ushort) (X + block->X);
-                                m.Y = (ushort) (Y + block->Y);
-                                m.Z = (sbyte) (Z + block->Z);
-                                m.UpdateScreenPosition();
-                                m.MultiOffsetX = block->X;
-                                m.MultiOffsetY = block->Y;
-                                m.MultiOffsetZ = block->Z;
-                                m.Hue = Hue;
-                                m.AlphaHue = 255;
-                                m.IsCustom = false;
-                                m.State = CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_DONT_REMOVE;
-                                m.IsMovable = ItemData.IsMultiMovable;
-                                m.AddToTile();
-                                house.Components.Add(m);
-
-                                if (m.ItemData.IsMultiMovable)
+                                if (block->Unknown != 0)
                                 {
-                                    movable = true;
+                                    reader.Skip((int)(block->Unknown * 4));
+                                }
+
+                                if (block->X < minX)
+                                {
+                                    minX = block->X;
+                                }
+
+                                if (block->X > maxX)
+                                {
+                                    maxX = block->X;
+                                }
+
+                                if (block->Y < minY)
+                                {
+                                    minY = block->Y;
+                                }
+
+                                if (block->Y > maxY)
+                                {
+                                    maxY = block->Y;
+                                }
+
+                                if (block->Flags == 0 || block->Flags == 0x100)
+                                {
+                                    Multi m = Multi.Create(block->ID);
+                                    m.X = (ushort)(X + block->X);
+                                    m.Y = (ushort)(Y + block->Y);
+                                    m.Z = (sbyte)(Z + block->Z);
+                                    m.UpdateScreenPosition();
+                                    m.MultiOffsetX = block->X;
+                                    m.MultiOffsetY = block->Y;
+                                    m.MultiOffsetZ = block->Z;
+                                    m.Hue = Hue;
+                                    m.AlphaHue = 255;
+                                    m.IsCustom = false;
+                                    m.State = CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_DONT_REMOVE;
+                                    m.IsMovable = ItemData.IsMultiMovable;
+                                    m.AddToTile();
+                                    house.Components.Add(m);
+
+                                    if (m.ItemData.IsMultiMovable)
+                                    {
+                                        movable = true;
+                                    }
+                                }
+                                else if (i == 0)
+                                {
+                                    MultiGraphic = block->ID;
                                 }
                             }
-                            else if (i == 0)
-                            {
-                                MultiGraphic = block->ID;
-                            }
-                        }
 
-                        reader.Release();
+                            reader.Release();
+                        }
+                    }
+                    finally
+                    {
+                        System.Buffers.ArrayPool<byte>.Shared.Return(data);
                     }
                 }
                 else

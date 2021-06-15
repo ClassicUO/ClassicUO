@@ -123,23 +123,38 @@ namespace ClassicUO
             const int LIGHTS_TEXTURE_WIDTH = 32;
             const int LIGHTS_TEXTURE_HEIGHT = 63;
 
-            uint[] buffer = new uint[TEXTURE_WIDTH * TEXTURE_HEIGHT * 2];
-            HuesLoader.Instance.CreateShaderColors(buffer);
+            uint[] buffer = System.Buffers.ArrayPool<uint>.Shared.Rent(TEXTURE_WIDTH * TEXTURE_HEIGHT * 2);
 
-            _hueSamplers[0] = new Texture2D(GraphicsDevice, TEXTURE_WIDTH, TEXTURE_HEIGHT);
+            try
+            {
+                 HuesLoader.Instance.CreateShaderColors(buffer);
 
-            _hueSamplers[0].SetData(buffer, 0, TEXTURE_WIDTH * TEXTURE_HEIGHT);
+                _hueSamplers[0] = new Texture2D(GraphicsDevice, TEXTURE_WIDTH, TEXTURE_HEIGHT);
+                _hueSamplers[0].SetData(buffer, 0, TEXTURE_WIDTH * TEXTURE_HEIGHT);
 
-            _hueSamplers[1] = new Texture2D(GraphicsDevice, TEXTURE_WIDTH, TEXTURE_HEIGHT);
+                _hueSamplers[1] = new Texture2D(GraphicsDevice, TEXTURE_WIDTH, TEXTURE_HEIGHT);
+                _hueSamplers[1].SetData(buffer, TEXTURE_WIDTH * TEXTURE_HEIGHT, TEXTURE_WIDTH * TEXTURE_HEIGHT);
+            }
+            finally
+            {
+                System.Buffers.ArrayPool<uint>.Shared.Return(buffer, true);
+            }
 
-            _hueSamplers[1].SetData(buffer, TEXTURE_WIDTH * TEXTURE_HEIGHT, TEXTURE_WIDTH * TEXTURE_HEIGHT);
 
-            buffer = new uint[LIGHTS_TEXTURE_WIDTH * LIGHTS_TEXTURE_HEIGHT];
-            LightColors.CreateLookupTables(buffer);
+            buffer = System.Buffers.ArrayPool<uint>.Shared.Rent(LIGHTS_TEXTURE_WIDTH * LIGHTS_TEXTURE_HEIGHT);
 
-            _hueSamplers[2] = new Texture2D(GraphicsDevice, LIGHTS_TEXTURE_WIDTH, LIGHTS_TEXTURE_HEIGHT);
+            try
+            {
+                LightColors.CreateLookupTables(buffer);
 
-            _hueSamplers[2].SetData(buffer);
+                _hueSamplers[2] = new Texture2D(GraphicsDevice, LIGHTS_TEXTURE_WIDTH, LIGHTS_TEXTURE_HEIGHT);
+                _hueSamplers[2].SetData(buffer, 0, LIGHTS_TEXTURE_WIDTH * LIGHTS_TEXTURE_HEIGHT);
+            }
+            finally
+            {
+                System.Buffers.ArrayPool<uint>.Shared.Return(buffer, true);
+            }
+           
 
             GraphicsDevice.Textures[1] = _hueSamplers[0];
             GraphicsDevice.Textures[2] = _hueSamplers[1];
