@@ -273,21 +273,20 @@ namespace ClassicUO.IO
         public string ReadASCII(int size)
         {
             ValueStringBuilder sb = new ValueStringBuilder(size);
+           
+            for (int i = 0; i < size; ++i)
             {
-                for (int i = 0; i < size; ++i)
+                char c = (char)ReadUInt8();
+
+                if (c != 0)
                 {
-                    char c = (char)ReadUInt8();
-
-                    if (c != 0)
-                    {
-                        sb.Append(c);
-                    }
+                    sb.Append(c);
                 }
-
-                string ss = sb.ToString();
-                sb.Dispose();
-                return ss;
             }
+
+            string ss = sb.ToString();
+            sb.Dispose();
+            return ss;
         }
     }
 }

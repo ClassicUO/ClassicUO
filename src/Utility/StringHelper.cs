@@ -65,25 +65,23 @@ namespace ClassicUO.Utility
             }
 
             ValueStringBuilder sb = new ValueStringBuilder(str.Length);
+            bool capitalizeNext = true;
+
+            for (int i = 0; i < str.Length; i++)
             {
-                bool capitalizeNext = true;
+                sb.Append(capitalizeNext ? char.ToUpper(str[i]) : str[i]);
 
-                for (int i = 0; i < str.Length; i++)
+                if (!char.IsWhiteSpace(str[i]))
                 {
-                    sb.Append(capitalizeNext ? char.ToUpper(str[i]) : str[i]);
-
-                    if (!char.IsWhiteSpace(str[i]))
-                    {
-                        capitalizeNext = i + 1 < str.Length && char.IsWhiteSpace(str[i + 1]);
-                    }
+                    capitalizeNext = i + 1 < str.Length && char.IsWhiteSpace(str[i + 1]);
                 }
-
-                string ss = sb.ToString();
-
-                sb.Dispose();
-
-                return ss;
             }
+
+            string ss = sb.ToString();
+
+            sb.Dispose();
+
+            return ss;
         }
 
         public static string CapitalizeWordsByLimitator(string str)
@@ -94,31 +92,29 @@ namespace ClassicUO.Utility
             }
 
             ValueStringBuilder sb = new ValueStringBuilder(str.Length);
+            bool capitalizeNext = true;
+
+            for (int i = 0; i < str.Length; i++)
             {
-                bool capitalizeNext = true;
+                sb.Append(capitalizeNext ? char.ToUpper(str[i]) : str[i]);
+                capitalizeNext = false;
 
-                for (int i = 0; i < str.Length; i++)
+                for (int j = 0; j < _dots.Length; j++)
                 {
-                    sb.Append(capitalizeNext ? char.ToUpper(str[i]) : str[i]);
-                    capitalizeNext = false;
-
-                    for (int j = 0; j < _dots.Length; j++)
+                    if (str[i] == _dots[j])
                     {
-                        if (str[i] == _dots[j])
-                        {
-                            capitalizeNext = true;
+                        capitalizeNext = true;
 
-                            break;
-                        }
+                        break;
                     }
                 }
-
-                string ss = sb.ToString();
-
-                sb.Dispose();
-
-                return ss;
             }
+
+            string ss = sb.ToString();
+
+            sb.Dispose();
+
+            return ss;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -143,28 +139,26 @@ namespace ClassicUO.Utility
             }
 
             ValueStringBuilder sb = new ValueStringBuilder(str.Length * 2);
+            sb.Append(str[0]);
+
+            for (int i = 1, len = str.Length - 1; i <= len; i++)
             {
-                sb.Append(str[0]);
-
-                for (int i = 1, len = str.Length - 1; i <= len; i++)
+                if (char.IsUpper(str[i]))
                 {
-                    if (char.IsUpper(str[i]))
+                    if (str[i - 1] != ' ' && !char.IsUpper(str[i - 1]) || checkAcronyms && char.IsUpper(str[i - 1]) && i < len && !char.IsUpper(str[i + 1]))
                     {
-                        if (str[i - 1] != ' ' && !char.IsUpper(str[i - 1]) || checkAcronyms && char.IsUpper(str[i - 1]) && i < len && !char.IsUpper(str[i + 1]))
-                        {
-                            sb.Append(' ');
-                        }
+                        sb.Append(' ');
                     }
-
-                    sb.Append(str[i]);
                 }
 
-                string s = sb.ToString();
-
-                sb.Dispose();
-
-                return s;
+                sb.Append(str[i]);
             }
+
+            string s = sb.ToString();
+
+            sb.Dispose();
+
+            return s;
         }
 
         public static string RemoveUpperLowerChars(string str, bool removelower = true)
@@ -175,21 +169,19 @@ namespace ClassicUO.Utility
             }
 
             ValueStringBuilder sb = new ValueStringBuilder(str.Length);
+            for (int i = 0; i < str.Length; i++)
             {
-                for (int i = 0; i < str.Length; i++)
+                if (char.IsUpper(str[i]) == removelower || str[i] == ' ')
                 {
-                    if (char.IsUpper(str[i]) == removelower || str[i] == ' ')
-                    {
-                        sb.Append(str[i]);
-                    }
+                    sb.Append(str[i]);
                 }
-
-                string ss = sb.ToString();
-
-                sb.Dispose();
-
-                return ss;
             }
+
+            string ss = sb.ToString();
+
+            sb.Dispose();
+
+            return ss;
         }
 
         public static string IntToAbbreviatedString(int num)
@@ -244,38 +236,36 @@ namespace ClassicUO.Utility
                 }
 
                 ValueStringBuilder sb = new ValueStringBuilder(str.Length);
+                sb.Append(parts[0]);
+
+                if (parts[1].Contains("/"))
                 {
-                    sb.Append(parts[0]);
+                    string[] pluralparts = parts[1].Split('/');
 
-                    if (parts[1].Contains("/"))
+                    if (plural)
                     {
-                        string[] pluralparts = parts[1].Split('/');
-
-                        if (plural)
-                        {
-                            sb.Append(pluralparts[0]);
-                        }
-                        else if (pluralparts.Length > 1)
-                        {
-                            sb.Append(pluralparts[1]);
-                        }
+                        sb.Append(pluralparts[0]);
                     }
-                    else if (plural)
+                    else if (pluralparts.Length > 1)
                     {
-                        sb.Append(parts[1]);
+                        sb.Append(pluralparts[1]);
                     }
-
-                    if (parts.Length == 3)
-                    {
-                        sb.Append(parts[2]);
-                    }
-
-                    string ss = sb.ToString();
-
-                    sb.Dispose();
-
-                    return ss;
                 }
+                else if (plural)
+                {
+                    sb.Append(parts[1]);
+                }
+
+                if (parts.Length == 3)
+                {
+                    sb.Append(parts[2]);
+                }
+
+                string ss = sb.ToString();
+
+                sb.Dispose();
+
+                return ss;
             }
 
             return str;

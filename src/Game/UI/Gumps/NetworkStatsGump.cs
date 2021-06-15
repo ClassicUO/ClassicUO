@@ -119,20 +119,19 @@ namespace ClassicUO.Game.UI.Gumps
                 }
 
                 ValueStringBuilder sb = new ValueStringBuilder(128);
+              
+                if (IsMinimized)
                 {
-                    if (IsMinimized)
-                    {
-                        sb.Append($"Ping: {_ping} ms");
-                    }
-                    else
-                    {
-                        sb.Append($"Ping: {_ping} ms\n{"In:"} {NetStatistics.GetSizeAdaptive(_deltaBytesReceived),-6} {"Out:"} {NetStatistics.GetSizeAdaptive(_deltaBytesSent),-6}");
-                    }
-
-                    _cacheText = sb.ToString();
-
-                    sb.Dispose();
+                    sb.Append($"Ping: {_ping} ms");
                 }
+                else
+                {
+                    sb.Append($"Ping: {_ping} ms\n{"In:"} {NetStatistics.GetSizeAdaptive(_deltaBytesReceived),-6} {"Out:"} {NetStatistics.GetSizeAdaptive(_deltaBytesSent),-6}");
+                }
+
+                _cacheText = sb.ToString();
+
+                sb.Dispose();
 
                 Vector2 size = Fonts.Bold.MeasureString(_cacheText);
 

@@ -45,61 +45,57 @@ namespace TinyJson
             bool next_upper = true;
 
             ValueStringBuilder sb = new ValueStringBuilder(snakeCaseName.Length);
+            for (int i = 0; i < snakeCaseName.Length; i++)
             {
-                for (int i = 0; i < snakeCaseName.Length; i++)
+                if (snakeCaseName[i] == '_')
                 {
-                    if (snakeCaseName[i] == '_')
+                    next_upper = true;
+                }
+                else
+                {
+                    if (next_upper)
                     {
-                        next_upper = true;
+                        sb.Append(char.ToUpperInvariant(snakeCaseName[i]));
+                        next_upper = false;
                     }
                     else
                     {
-                        if (next_upper)
-                        {
-                            sb.Append(char.ToUpperInvariant(snakeCaseName[i]));
-                            next_upper = false;
-                        }
-                        else
-                        {
-                            sb.Append(snakeCaseName[i]);
-                        }
+                        sb.Append(snakeCaseName[i]);
                     }
                 }
-
-                string s = sb.ToString();
-                sb.Dispose();
-                return s;
             }
+
+            string s = sb.ToString();
+            sb.Dispose();
+            return s;
         }
 
         public static string CamelCaseToSnakeCase(this string camelCaseName)
         {
             ValueStringBuilder sb = new ValueStringBuilder(camelCaseName.Length * 2);
+            if (char.IsUpper(camelCaseName[0]))
             {
-                if (char.IsUpper(camelCaseName[0]))
-                {
-                    sb.Append(char.ToLowerInvariant(camelCaseName[0]));
-                }
-
-                for (int i = 1; i < camelCaseName.Length; i++)
-                {
-                    if (char.IsUpper(camelCaseName[i]))
-                    {
-                        sb.Append("_");
-                        sb.Append(char.ToLowerInvariant(camelCaseName[i]));
-                    }
-                    else
-                    {
-                        sb.Append(camelCaseName[i]);
-                    }
-                }
-
-                string s = sb.ToString();
-
-                sb.Dispose();
-
-                return s;
+                sb.Append(char.ToLowerInvariant(camelCaseName[0]));
             }
+
+            for (int i = 1; i < camelCaseName.Length; i++)
+            {
+                if (char.IsUpper(camelCaseName[i]))
+                {
+                    sb.Append("_");
+                    sb.Append(char.ToLowerInvariant(camelCaseName[i]));
+                }
+                else
+                {
+                    sb.Append(camelCaseName[i]);
+                }
+            }
+
+            string s = sb.ToString();
+
+            sb.Dispose();
+
+            return s;
         }
     }
 

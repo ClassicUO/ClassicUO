@@ -2510,39 +2510,37 @@ namespace ClassicUO.Network
                         byte lines = p.ReadByte();
 
                         ValueStringBuilder sb = new ValueStringBuilder(256);
+                        for (int i = 0; i < lines; i++)
                         {
-                            for (int i = 0; i < lines; i++)
+                            byte lineLen = p.ReadByte();
+
+                            if (lineLen > 0)
                             {
-                                byte lineLen = p.ReadByte();
-
-                                if (lineLen > 0)
-                                {
-                                    string putta = p.ReadUTF8StringSafe(lineLen);
-                                    sb.Append(putta);
-                                    sb.Append('\n');
-                                }
+                                string putta = p.ReadUTF8StringSafe(lineLen);
+                                sb.Append(putta);
+                                sb.Append('\n');
                             }
-
-                            string msg = sb.ToString();
-                            byte variant = (byte)(1 + (poster == World.Player.Name ? 1 : 0));
-
-                            UIManager.Add
-                            (
-                                new BulletinBoardItem
-                                    (
-                                        boardSerial,
-                                        serial,
-                                        poster,
-                                        subject,
-                                        dataTime,
-                                        msg.TrimStart(),
-                                        variant
-                                    )
-                                    { X = 40, Y = 40 }
-                            );
-
-                            sb.Dispose();
                         }
+
+                        string msg = sb.ToString();
+                        byte variant = (byte)(1 + (poster == World.Player.Name ? 1 : 0));
+
+                        UIManager.Add
+                        (
+                            new BulletinBoardItem
+                                (
+                                    boardSerial,
+                                    serial,
+                                    poster,
+                                    subject,
+                                    dataTime,
+                                    msg.TrimStart(),
+                                    variant
+                                )
+                                { X = 40, Y = 40 }
+                        );
+
+                        sb.Dispose();
                     }
                 }
 
@@ -4149,88 +4147,86 @@ namespace ClassicUO.Network
                     uint next = p.ReadUInt();
 
                     ValueStringBuilder strBuffer = new ValueStringBuilder(256);
+                    if (next == 0xFFFFFFFD)
                     {
-                        if (next == 0xFFFFFFFD)
+                        crafterNameLen = p.ReadUShort();
+
+                        if (crafterNameLen > 0)
                         {
-                            crafterNameLen = p.ReadUShort();
-
-                            if (crafterNameLen > 0)
-                            {
-                                strBuffer.Append(ResGeneral.CraftedBy);
-                                strBuffer.Append(p.ReadASCII(crafterNameLen));
-                            }
+                            strBuffer.Append(ResGeneral.CraftedBy);
+                            strBuffer.Append(p.ReadASCII(crafterNameLen));
                         }
+                    }
 
-                        if (crafterNameLen != 0)
+                    if (crafterNameLen != 0)
+                    {
+                        next = p.ReadUInt();
+                    }
+
+                    if (next == 0xFFFFFFFC)
+                    {
+                        strBuffer.Append("[Unidentified");
+                    }
+
+                    byte count = 0;
+
+                    while (p.Position < p.Length - 4)
+                    {
+                        if (count != 0 || next == 0xFFFFFFFD || next == 0xFFFFFFFC)
                         {
                             next = p.ReadUInt();
                         }
 
-                        if (next == 0xFFFFFFFC)
+                        short charges = (short)p.ReadUShort();
+                        string attr = ClilocLoader.Instance.GetString((int)next);
+
+                        if (charges == -1)
                         {
-                            strBuffer.Append("[Unidentified");
-                        }
-
-                        byte count = 0;
-
-                        while (p.Position < p.Length - 4)
-                        {
-                            if (count != 0 || next == 0xFFFFFFFD || next == 0xFFFFFFFC)
+                            if (count > 0)
                             {
-                                next = p.ReadUInt();
-                            }
-
-                            short charges = (short)p.ReadUShort();
-                            string attr = ClilocLoader.Instance.GetString((int)next);
-
-                            if (charges == -1)
-                            {
-                                if (count > 0)
-                                {
-                                    strBuffer.Append("/");
-                                    strBuffer.Append(attr);
-                                }
-                                else
-                                {
-                                    strBuffer.Append(" [");
-                                    strBuffer.Append(attr);
-                                }
+                                strBuffer.Append("/");
+                                strBuffer.Append(attr);
                             }
                             else
                             {
-                                strBuffer.Append("\n[");
+                                strBuffer.Append(" [");
                                 strBuffer.Append(attr);
-                                strBuffer.Append(" : ");
-                                strBuffer.Append(charges.ToString());
-                                strBuffer.Append("]");
-                                count += 20;
                             }
-
-                            count++;
                         }
-
-                        if (count < 20 && count > 0 || next == 0xFFFFFFFC && count == 0)
+                        else
                         {
-                            strBuffer.Append(']');
+                            strBuffer.Append("\n[");
+                            strBuffer.Append(attr);
+                            strBuffer.Append(" : ");
+                            strBuffer.Append(charges.ToString());
+                            strBuffer.Append("]");
+                            count += 20;
                         }
 
-                        if (strBuffer.Length != 0)
-                        {
-                            MessageManager.HandleMessage
-                            (
-                                item,
-                                strBuffer.ToString(),
-                                item.Name,
-                                0x3B2,
-                                MessageType.Regular,
-                                3,
-                                TextType.OBJECT,
-                                true
-                            );
-                        }
-
-                        strBuffer.Dispose();
+                        count++;
                     }
+
+                    if (count < 20 && count > 0 || next == 0xFFFFFFFC && count == 0)
+                    {
+                        strBuffer.Append(']');
+                    }
+
+                    if (strBuffer.Length != 0)
+                    {
+                        MessageManager.HandleMessage
+                        (
+                            item,
+                            strBuffer.ToString(),
+                            item.Name,
+                            0x3B2,
+                            MessageType.Regular,
+                            3,
+                            TextType.OBJECT,
+                            true
+                        );
+                    }
+
+                    strBuffer.Dispose();
 
                     NetClient.Socket.Send_MegaClilocRequest_Old(item);
 
@@ -4893,37 +4889,35 @@ namespace ClassicUO.Network
             if (list.Count != 0)
             {
                 ValueStringBuilder sb = new ValueStringBuilder(totalLength);
+                foreach (var s in list)
                 {
-                    foreach (var s in list)
+                    string str = s.Item2;
+
+                    if (first)
                     {
-                        string str = s.Item2;
+                        name = str;
 
-                        if (first)
+                        if (entity != null && !SerialHelper.IsMobile(serial))
                         {
-                            name = str;
-
-                            if (entity != null && !SerialHelper.IsMobile(serial))
-                            {
-                                entity.Name = str;
-                            }
-
-                            first = false;
+                            entity.Name = str;
                         }
-                        else
-                        {
-                            if (sb.Length != 0)
-                            {
-                                sb.Append('\n');
-                            }
 
-                            sb.Append(str);
-                        }
+                        first = false;
                     }
+                    else
+                    {
+                        if (sb.Length != 0)
+                        {
+                            sb.Append('\n');
+                        }
 
-                    data = sb.ToString();
-
-                    sb.Dispose();
+                        sb.Append(str);
+                    }
                 }
+
+                data = sb.ToString();
+
+                sb.Dispose();
             }
 
             World.OPL.Add(serial, revision, name, data);

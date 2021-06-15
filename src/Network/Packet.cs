@@ -120,20 +120,18 @@ namespace ClassicUO.Network
             }
 
             ValueStringBuilder sb = new ValueStringBuilder(64);
+            char c;
+
+            while ((c = (char)ReadByte()) != 0)
             {
-                char c;
-
-                while ((c = (char)ReadByte()) != 0)
-                {
-                    sb.Append(c);
-                }
-
-                string ss = sb.ToString();
-
-                sb.Dispose();
-
-                return ss;
+                sb.Append(c);
             }
+
+            string ss = sb.ToString();
+
+            sb.Dispose();
+
+            return ss;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -145,25 +143,24 @@ namespace ClassicUO.Network
             }
 
             ValueStringBuilder sb = new ValueStringBuilder(length);
+           
+            for (int i = 0; i < length; ++i)
             {
-                for (int i = 0; i < length; ++i)
+                char b = (char)ReadByte();
+
+                if (b == '\0')
                 {
-                    char b = (char)ReadByte();
+                    Skip(length - i - 1);
 
-                    if (b == '\0')
-                    {
-                        Skip(length - i - 1);
-
-                        break;
-                    }
-
-                    sb.Append(b);
+                    break;
                 }
 
-                string ss = sb.ToString();
-                sb.Dispose();
-                return ss;
+                sb.Append(b);
             }
+
+            string ss = sb.ToString();
+            sb.Dispose();
+            return ss;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -281,19 +278,17 @@ namespace ClassicUO.Network
             }
 
             ValueStringBuilder sb = new ValueStringBuilder(s.Length);
+            for (int i = 0; i < s.Length; i++)
             {
-                for (int i = 0; i < s.Length; i++)
+                if (StringHelper.IsSafeChar(s[i]))
                 {
-                    if (StringHelper.IsSafeChar(s[i]))
-                    {
-                        sb.Append(s[i]);
-                    }
+                    sb.Append(s[i]);
                 }
-
-                string ss = sb.ToString();
-                sb.Dispose();
-                return ss;
             }
+
+            string ss = sb.ToString();
+            sb.Dispose();
+            return ss;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -333,19 +328,17 @@ namespace ClassicUO.Network
             }
 
             ValueStringBuilder sb = new ValueStringBuilder(s.Length);
+            for (int i = 0; i < s.Length; i++)
             {
-                for (int i = 0; i < s.Length; i++)
+                if (StringHelper.IsSafeChar(s[i]))
                 {
-                    if (StringHelper.IsSafeChar(s[i]))
-                    {
-                        sb.Append(s[i]);
-                    }
+                    sb.Append(s[i]);
                 }
-
-                string ss = sb.ToString();
-                sb.Dispose();
-                return ss;
             }
+
+            string ss = sb.ToString();
+            sb.Dispose();
+            return ss;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

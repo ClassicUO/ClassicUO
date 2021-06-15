@@ -549,68 +549,67 @@ namespace ClassicUO.IO.Resources
             int strLen = str.Length;
 
             ValueStringBuilder sb = new ValueStringBuilder(strLen);
+          
+            if (IsUsingHTML)
             {
-                if (IsUsingHTML)
+                unsafe
                 {
-                    unsafe
+                    HTMLChar* chars = stackalloc HTMLChar[strLen];
+
+                    GetHTMLData
+                    (
+                        chars,
+                        font,
+                        str,
+                        ref strLen,
+                        align,
+                        flags
+                    );
+                }
+
+                int size = str.Length - strLen;
+
+                if (size > 0)
+                {
+                    sb.Append(str.Substring(0, size));
+                    str = str.Substring(str.Length - strLen, strLen);
+
+                    if (GetWidthASCII(font, str) < width)
                     {
-                        HTMLChar* chars = stackalloc HTMLChar[strLen];
-
-                        GetHTMLData
-                        (
-                            chars,
-                            font,
-                            str,
-                            ref strLen,
-                            align,
-                            flags
-                        );
-                    }
-
-                    int size = str.Length - strLen;
-
-                    if (size > 0)
-                    {
-                        sb.Append(str.Substring(0, size));
-                        str = str.Substring(str.Length - strLen, strLen);
-
-                        if (GetWidthASCII(font, str) < width)
-                        {
-                            isCropped = false;
-                        }
+                        isCropped = false;
                     }
                 }
-
-                if (isCropped)
-                {
-                    width -= fd['.' - NOPRINT_CHARS].Width * 3;
-                }
-
-                int textLength = 0;
-
-                foreach (char c in str)
-                {
-                    textLength += _fontData[font][GetASCIIIndex(c)].Width;
-
-                    if (textLength > width)
-                    {
-                        break;
-                    }
-
-                    sb.Append(c);
-                }
-
-                if (isCropped)
-                {
-                    sb.Append("...");
-                }
-
-                string ss = sb.ToString();
-
-                sb.Dispose();
-
-                return ss;
             }
+
+            if (isCropped)
+            {
+                width -= fd['.' - NOPRINT_CHARS].Width * 3;
+            }
+
+            int textLength = 0;
+
+            foreach (char c in str)
+            {
+                textLength += _fontData[font][GetASCIIIndex(c)].Width;
+
+                if (textLength > width)
+                {
+                    break;
+                }
+
+                sb.Append(c);
+            }
+
+            if (isCropped)
+            {
+                sb.Append("...");
+            }
+
+            string ss = sb.ToString();
+
+            sb.Dispose();
+
+            return ss;
         }
 
         private void GeneratePixelsASCII
@@ -1229,90 +1228,88 @@ namespace ClassicUO.IO.Resources
             int strLen = str.Length;
 
             ValueStringBuilder sb = new ValueStringBuilder(strLen);
+            if (IsUsingHTML)
             {
-                if (IsUsingHTML)
+                unsafe
                 {
-                    unsafe
-                    {
-                        HTMLChar* data = stackalloc HTMLChar[strLen];
+                    HTMLChar* data = stackalloc HTMLChar[strLen];
 
-                        GetHTMLData
-                        (
-                            data,
-                            font,
-                            str,
-                            ref strLen,
-                            align,
-                            flags
-                        );
-                    }
-
-                    int size = str.Length - strLen;
-
-                    if (size > 0)
-                    {
-                        sb.Append(str.Substring(0, size));
-                        str = str.Substring(str.Length - strLen, strLen);
-
-                        if (GetWidthUnicode(font, str) < width)
-                        {
-                            isCropped = false;
-                        }
-                    }
+                    GetHTMLData
+                    (
+                        data,
+                        font,
+                        str,
+                        ref strLen,
+                        align,
+                        flags
+                    );
                 }
 
-                if (isCropped)
-                {
-                    uint offset = table['.'];
+                int size = str.Length - strLen;
 
-                    if (offset != 0 && offset != 0xFFFFFFFF)
+                if (size > 0)
+                {
+                    sb.Append(str.Substring(0, size));
+                    str = str.Substring(str.Length - strLen, strLen);
+
+                    if (GetWidthUnicode(font, str) < width)
                     {
-                        width -= *(byte*)((IntPtr)table + (int)offset + 2) * 3 + 3;
+                        isCropped = false;
                     }
                 }
-
-
-                int textLength = 0;
-
-                foreach (char c in str)
-                {
-                    uint offset = table[c];
-                    sbyte charWidth = 0;
-
-                    if (offset != 0 && offset != 0xFFFFFFFF)
-                    {
-                        byte* ptr = (byte*)((IntPtr)table + (int)offset);
-                        charWidth = (sbyte)((sbyte)ptr[0] + (sbyte)ptr[2] + 1);
-                    }
-                    else if (c == ' ')
-                    {
-                        charWidth = UNICODE_SPACE_WIDTH;
-                    }
-
-                    if (charWidth != 0)
-                    {
-                        textLength += charWidth;
-
-                        if (textLength > width)
-                        {
-                            break;
-                        }
-
-                        sb.Append(c);
-                    }
-                }
-
-                if (isCropped)
-                {
-                    sb.Append("...");
-                }
-
-                string ss = sb.ToString();
-
-                sb.Dispose();
-                
-                return ss;
             }
+
+            if (isCropped)
+            {
+                uint offset = table['.'];
+
+                if (offset != 0 && offset != 0xFFFFFFFF)
+                {
+                    width -= *(byte*)((IntPtr)table + (int)offset + 2) * 3 + 3;
+                }
+            }
+
+
+            int textLength = 0;
+
+            foreach (char c in str)
+            {
+                uint offset = table[c];
+                sbyte charWidth = 0;
+
+                if (offset != 0 && offset != 0xFFFFFFFF)
+                {
+                    byte* ptr = (byte*)((IntPtr)table + (int)offset);
+                    charWidth = (sbyte)((sbyte)ptr[0] + (sbyte)ptr[2] + 1);
+                }
+                else if (c == ' ')
+                {
+                    charWidth = UNICODE_SPACE_WIDTH;
+                }
+
+                if (charWidth != 0)
+                {
+                    textLength += charWidth;
+
+                    if (textLength > width)
+                    {
+                        break;
+                    }
+
+                    sb.Append(c);
+                }
+            }
+
+            if (isCropped)
+            {
+                sb.Append("...");
+            }
+
+            string ss = sb.ToString();
+
+            sb.Dispose();
+
+            return ss;
         }
 
         public unsafe int GetWidthUnicode(byte font, string str)
