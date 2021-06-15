@@ -177,7 +177,16 @@ namespace ClassicUO.Game.GameObjects
             YOffsets.Left = zLeft * 4;
             YOffsets.Bottom = zBottom * 4;
 
-            AverageZ = (sbyte) Math.Floor((zTop + zRight + zLeft + zBottom) / 4f);
+            if (Math.Abs(zTop - zBottom) <= Math.Abs(zLeft - zRight))
+            {
+                AverageZ = (sbyte)((zTop + zBottom) >> 1);
+            }
+            else
+            {
+                AverageZ = (sbyte)((zLeft + zRight) >> 1);
+            }
+
+            //AverageZ = (sbyte) Math.Floor((zTop + zRight + zLeft + zBottom) / 4f);
             MinZ = (sbyte) Math.Min(zTop, Math.Min(zRight, Math.Min(zLeft, zBottom)));
             
             CalculateNormal(map, x, y, out NormalTop);
