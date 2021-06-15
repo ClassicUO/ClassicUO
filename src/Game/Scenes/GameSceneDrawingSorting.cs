@@ -276,7 +276,8 @@ namespace ClassicUO.Game.Scenes
 
             for (; obj != null; obj = obj.TNext)
             {
-                if (obj.CurrentRenderIndex == _renderIndex || !obj.AllowedToDraw)
+                // some object is invsible but it has to be processed [overhead text for now]
+                if (obj.CurrentRenderIndex == _renderIndex /*|| !obj.AllowedToDraw*/)
                 {
                     continue;
                 }

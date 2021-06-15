@@ -84,9 +84,9 @@ namespace ClassicUO.Game
             int testY = TranslatedMousePositionByViewport.Y;
 
             int y0 = -yOffsets.Top;
-            int y1 = 22 - yOffsets.Right;
+            int y1 = 22 - yOffsets.Left;
             int y2 = 44 - yOffsets.Bottom;
-            int y3 = 22 - yOffsets.Left;
+            int y3 = 22 - yOffsets.Right;
 
 
             return testY >= testX * (y1 - y0) / -22 + y + y0 && testY >= testX * (y3 - y0) / 22 + y + y0 && testY <= testX * (y3 - y2) / 22 + y + y2 && testY <= testX * (y1 - y2) / -22 + y + y2;
