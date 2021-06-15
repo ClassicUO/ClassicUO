@@ -459,7 +459,7 @@ namespace ClassicUO.Network
                     byte[] tmp = new byte[length];
                     Array.Copy(data, tmp, length);
 
-                    if (!plugin._onRecv(ref data, ref length))
+                    if (!plugin._onRecv(ref tmp, ref length))
                     {
                         result = false;
                     }
@@ -489,7 +489,7 @@ namespace ClassicUO.Network
                     byte[] tmp = new byte[length];
                     Array.Copy(data, tmp, length);
 
-                    if (!plugin._onSend(ref data, ref length))
+                    if (!plugin._onSend(ref tmp, ref length))
                     {
                         result = false;
                     }
