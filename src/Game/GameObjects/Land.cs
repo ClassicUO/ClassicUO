@@ -159,7 +159,7 @@ namespace ClassicUO.Game.GameObjects
 
         public unsafe void ApplyStretch(Map.Map map, int x, int y, sbyte z)
         {
-            if (IsStretched || TexmapsLoader.Instance.GetTexture(TileData.TexID) == null)
+            if (IsStretched || TexmapsLoader.Instance.GetValidRefEntry(TileData.TexID).Length <= 0)
             {
                 IsStretched = false;
                 AverageZ = z;
