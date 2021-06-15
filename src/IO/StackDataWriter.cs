@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Buffers.Binary;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -123,8 +124,7 @@ namespace ClassicUO.IO
         {
             EnsureSize(2);
 
-            _buffer[Position] = (byte) b;
-            _buffer[Position + 1] = (byte) (b >> 8);
+            BinaryPrimitives.WriteUInt16LittleEndian(_buffer.Slice(Position), b);
 
             Position += 2;
         }
@@ -134,8 +134,7 @@ namespace ClassicUO.IO
         {
             EnsureSize(2);
 
-            _buffer[Position] = (byte)b;
-            _buffer[Position + 1] = (byte)(b >> 8);
+            BinaryPrimitives.WriteInt16LittleEndian(_buffer.Slice(Position), b);
 
             Position += 2;
         }
@@ -145,10 +144,7 @@ namespace ClassicUO.IO
         {
             EnsureSize(4);
 
-            _buffer[Position] = (byte)b;
-            _buffer[Position + 1] = (byte)(b >> 8);
-            _buffer[Position + 2] = (byte)(b >> 16);
-            _buffer[Position + 3] = (byte)(b >> 24);
+            BinaryPrimitives.WriteUInt32LittleEndian(_buffer.Slice(Position), b);
 
             Position += 4;
         }
@@ -158,10 +154,7 @@ namespace ClassicUO.IO
         {
             EnsureSize(4);
 
-            _buffer[Position] = (byte)b;
-            _buffer[Position + 1] = (byte)(b >> 8);
-            _buffer[Position + 2] = (byte)(b >> 16);
-            _buffer[Position + 3] = (byte)(b >> 24);
+            BinaryPrimitives.WriteInt32LittleEndian(_buffer.Slice(Position), b);
 
             Position += 4;
         }
@@ -169,40 +162,13 @@ namespace ClassicUO.IO
         [MethodImpl(IMPL_OPTION)]
         public void WriteUnicodeLE(string str)
         {
-            EnsureSize((str.Length + 1) * 2);
-
-            for (int i = 0; i < str.Length; ++i)
-            {
-                char c = str[i];
-
-                if (c != '\0')
-                {
-                    WriteUInt16LE(c);
-                }
-            }
-
-            WriteUInt16LE(0x00);
+            WriteString(Encoding.Unicode, str, (str.Length + 1) * 2);
         }
 
         [MethodImpl(IMPL_OPTION)]
         public void WriteUnicodeLE(string str, int length)
         {
-            EnsureSize(length);
-
-            for (int i = 0; i < length && i < str.Length; ++i)
-            {
-                char c = str[i];
-
-                if (c != '\0')
-                {
-                    WriteUInt16LE(c);
-                }
-            }
-
-            for (int i = str.Length; i < length; ++i)
-            {
-                WriteUInt16LE(0x00);
-            }
+            WriteString(Encoding.Unicode, str, length * 2);
         }
 
 
@@ -215,8 +181,7 @@ namespace ClassicUO.IO
         {
             EnsureSize(2);
 
-            _buffer[Position] = (byte)(b >> 8);
-            _buffer[Position + 1] = (byte)b;
+            BinaryPrimitives.WriteUInt16BigEndian(_buffer.Slice(Position), b);
 
             Position += 2;
         }
@@ -226,8 +191,7 @@ namespace ClassicUO.IO
         {
             EnsureSize(2);
 
-            _buffer[Position] = (byte)(b >> 8);
-            _buffer[Position + 1] = (byte)b;
+            BinaryPrimitives.WriteInt16BigEndian(_buffer.Slice(Position), b);
 
             Position += 2;
         }
@@ -237,10 +201,7 @@ namespace ClassicUO.IO
         {
             EnsureSize(4);
 
-            _buffer[Position] = (byte)(b >> 24);
-            _buffer[Position + 1] = (byte)(b >> 16);
-            _buffer[Position + 2] = (byte)(b >> 8);
-            _buffer[Position + 3] = (byte)b;
+            BinaryPrimitives.WriteUInt32BigEndian(_buffer.Slice(Position), b);
 
             Position += 4;
         }
@@ -250,10 +211,7 @@ namespace ClassicUO.IO
         {
             EnsureSize(4);
 
-            _buffer[Position] = (byte)(b >> 24);
-            _buffer[Position + 1] = (byte)(b >> 16);
-            _buffer[Position + 2] = (byte)(b >> 8);
-            _buffer[Position + 3] = (byte)b;
+            BinaryPrimitives.WriteInt32BigEndian(_buffer.Slice(Position), b);
 
             Position += 4;
         }
@@ -261,86 +219,36 @@ namespace ClassicUO.IO
         [MethodImpl(IMPL_OPTION)]
         public void WriteUnicodeBE(string str)
         {
-            EnsureSize((str.Length + 1) * 2);
-
-            for (int i = 0; i < str.Length; ++i)
-            {
-                char c = str[i];
-
-                if (c != '\0')
-                {
-                    WriteUInt16BE(c);
-                }
-            }
-
-            WriteUInt16BE(0x00);
+            WriteString(Encoding.BigEndianUnicode, str, (str.Length + 1) * 2);
         }
 
         [MethodImpl(IMPL_OPTION)]
         public void WriteUnicodeBE(string str, int length)
         {
-            EnsureSize(length);
-
-            for (int i = 0; i < length && i < str.Length; ++i)
-            {
-                char c = str[i];
-
-                if (c != '\0')
-                {
-                    WriteUInt16BE(c);
-                }
-            }
-
-            for (int i = str.Length; i < length; ++i)
-            {
-                WriteUInt16BE(0x00);
-            }
+            WriteString(Encoding.BigEndianUnicode, str, length * 2);
         }
+
+        
+
+
 
         [MethodImpl(IMPL_OPTION)]
         public void WriteUTF8(string str, int len)
         {
-            if (str == null)
-            {
-                str = string.Empty;
-            }
-
-            int size = Math.Min(len, str.Length);
-
-            byte[] buffer = System.Buffers.ArrayPool<byte>.Shared.Rent(size);
-
-            try
-            {
-                EnsureSize(len);
-
-                Encoding.UTF8.GetBytes
-                (
-                    str,
-                    0,
-                    size,
-                    buffer,
-                    0
-                );
-
-                for (int i = 0; i < len; ++i)
-                {
-                    if (i < size)
-                    {
-                        WriteUInt8(buffer[i]);
-                    }
-                    else
-                    {
-                        WriteUInt8(0x00);
-                    }
-                }
-            }
-            finally
-            {
-                System.Buffers.ArrayPool<byte>.Shared.Return(buffer);
-            }
+            WriteString(Encoding.UTF8, str, len);
         }
 
+        [MethodImpl(IMPL_OPTION)]
+        public void WriteASCII(string str)
+        {
+            WriteString(Encoding.ASCII, str, str.Length + 1);
+        }
 
+        [MethodImpl(IMPL_OPTION)]
+        public void WriteASCII(string str, int length)
+        {
+            WriteString(Encoding.ASCII, str, length);
+        }
 
 
         [MethodImpl(IMPL_OPTION)]
@@ -357,7 +265,6 @@ namespace ClassicUO.IO
             }
         }
 
-
         [MethodImpl(IMPL_OPTION)]
         public void Write(ReadOnlySpan<byte> span)
         {
@@ -368,43 +275,29 @@ namespace ClassicUO.IO
             Position += span.Length;
         }
 
-        [MethodImpl(IMPL_OPTION)]
-        public void WriteASCII(string str)
+        private void WriteString(Encoding encoding, string str, int length)
         {
-            EnsureSize(str.Length + 1);
-
-            for (int i = 0; i < str.Length; ++i)
+            if (str == null)
             {
-                char c = str[i];
-
-                if (c != '\0')
-                {
-                    WriteUInt8((byte)c);
-                }
+                str = string.Empty;
             }
 
-            WriteUInt8(0x00);
-        }
-
-        [MethodImpl(IMPL_OPTION)]
-        public void WriteASCII(string str, int length)
-        {
             EnsureSize(length);
 
-            for (int i = 0; i < length && i < str.Length; ++i)
-            {
-                char c = str[i];
+            int size = Math.Min(length, str.Length);
 
-                if (c != '\0')
-                {
-                    WriteUInt8((byte) c);
-                }
-            }
+            int processed = encoding.GetBytes
+            (
+                str,
+                0,
+                size,
+                _allocatedBuffer,
+                Position
+            );
 
-            for (int i = str.Length; i < length; ++i)
-            {
-                WriteUInt8(0x00);
-            }
+            Position += processed;
+
+            WriteZero(length - processed);
         }
 
         [MethodImpl(IMPL_OPTION)]
@@ -412,7 +305,7 @@ namespace ClassicUO.IO
         {
             if (Position + size > _buffer.Length)
             {
-                Rent(Math.Max(size, _buffer.Length * 2));
+                Rent(Math.Max(BytesWritten + size, _buffer.Length * 2));
             }
         }
 
