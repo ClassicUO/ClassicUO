@@ -109,7 +109,7 @@ namespace ClassicUO.Game.GameObjects
         {
         }
 
-        public bool IsCoin => Graphic >= 0x0EEA && Graphic <= 0x0EF2;
+        public bool IsCoin => Graphic == 0x0EEA || Graphic == 0x0EED || Graphic == 0x0EF0;
 
         public ushort DisplayedGraphic
         {
