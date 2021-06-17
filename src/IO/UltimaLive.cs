@@ -195,7 +195,7 @@ namespace ClassicUO.IO
                         }
                     }
 
-                    NetClient.Socket.Send(new UltimaLiveHashResponse((uint) block, (byte) mapId, checkSumsToBeSent));
+                    NetClient.Socket.Send_UOLive_HashResponse((uint) block, (byte) mapId, checkSumsToBeSent.AsSpan(0, CRC_LENGTH));
 
                     break;
                 }
@@ -650,23 +650,7 @@ namespace ClassicUO.IO
             //since we are using only ascii (8bit) charset, send only normal letters! in this case we return null and invalidate ultimalive request
             return null;
         }
-
-        private sealed class UltimaLiveHashResponse : PacketWriter
-        {
-            public UltimaLiveHashResponse(uint block, byte mapId, ushort[] crcs) : base(0x3F)
-            {
-                WriteUInt(block);
-                Seek(13);
-                WriteByte(0xFF);
-                WriteByte(mapId);
-
-                for (int i = 0; i < CRC_LENGTH; i++)
-                {
-                    WriteUShort(crcs[i]);
-                }
-            }
-        }
-
+        
         private class ULFileMul : UOFileMul
         {
             public ULFileMul(string file, bool isStaticMul) : base(file)

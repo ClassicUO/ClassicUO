@@ -289,17 +289,7 @@ namespace ClassicUO.Network
             _isCompressionEnabled = true;
         }
 
-        public void Send(PacketWriter p)
-        {
-            ref byte[] data = ref p.ToArray();
-            int length = p.Length;
-
-            if (Plugin.ProcessSendPacket(data, ref length))
-            {
-                Send(data, length, false);
-            }
-        }
-
+        
         public void Send(byte[] data, int length, bool ignorePlugin = false, bool skip_encryption = false)
         {
             if (!ignorePlugin && !Plugin.ProcessSendPacket(data, ref length))

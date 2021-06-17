@@ -811,17 +811,8 @@ namespace ClassicUO.Network
             }
 
 
-            PPluginSendAllSpells spellsPacket = new PPluginSendAllSpells();
-            PPluginSendAllSkills skillsPacket = new PPluginSendAllSkills();
-
-            byte[] buffer = spellsPacket.ToArray();
-            int len = spellsPacket.Length;
-
-            Plugin.ProcessRecvPacket(buffer, ref len);
-
-            buffer = skillsPacket.ToArray();
-            len = skillsPacket.Length;
-            Plugin.ProcessRecvPacket(buffer, ref len);
+            NetClient.Socket.Send_ToPlugins_AllSkills();
+            NetClient.Socket.Send_ToPlugins_AllSpells();
         }
 
         private static void Talk(ref PacketBufferReader p)
