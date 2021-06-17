@@ -328,7 +328,6 @@ namespace ClassicUO.IO
             return ReadString(Encoding.UTF8, length, 1, false);
         }
 
-        // TODO: i ve to verify the best way
         public string ReadUTF8StringSafe()
         {
             return ReadString(Encoding.UTF8, -1, 1, true);
