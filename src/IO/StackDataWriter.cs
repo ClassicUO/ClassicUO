@@ -258,10 +258,9 @@ namespace ClassicUO.IO
             {
                 EnsureSize(count);
 
-                for (int i = 0; i < count; ++i)
-                {
-                    WriteUInt8(0x00);
-                }
+                _buffer.Slice(Position, count).Fill(0);
+
+                Position += count;
             }
         }
 
