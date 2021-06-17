@@ -392,7 +392,7 @@ namespace ClassicUO.IO
                 }
                 else
                 {
-                    size = index < 0 ? size : index;
+                    size = index;
                 }
             }
             else
