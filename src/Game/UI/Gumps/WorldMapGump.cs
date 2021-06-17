@@ -701,288 +701,296 @@ namespace ClassicUO.Game.UI.Gumps
         {
             public static unsafe Texture2D CreateTextureFromICO_Cur(Stream stream)
             {
-                byte[] buffer = new byte[stream.Length];
-                stream.Read(buffer, 0, buffer.Length);
+                byte[] buffer = System.Buffers.ArrayPool<byte>.Shared.Rent((int) stream.Length);
 
-                StackDataReader reader = new StackDataReader(buffer, stream.Length);
-
-                bool was_error;
-                long fp_offset;
-                int bmp_pitch;
-                int i, pad;
-                SDL.SDL_Surface* surface;
-                uint r_mask, g_mask, b_mask;
-                byte* bits;
-                int expand_bmp;
-                int max_col = 0;
-                uint ico_of_s = 0;
-                uint* palette = stackalloc uint[256];
-
-                ushort bf_reserved, bf_type, bf_count;
-                uint bi_size, bi_width, bi_height;
-                ushort bi_planes, bi_bit_count;
-
-                uint bi_compression, bi_size_image, bi_x_perls_per_meter, bi_y_perls_per_meter, bi_clr_used, bi_clr_important;
-
-                bf_reserved = reader.ReadUInt16LE();
-                bf_type = reader.ReadUInt16LE();
-                bf_count = reader.ReadUInt16LE();
-
-                for (i = 0; i < bf_count; i++)
+                try
                 {
-                    int b_width = reader.ReadUInt8();
-                    int b_height = reader.ReadUInt8();
-                    int b_color_count = reader.ReadUInt8();
-                    byte b_reserver = reader.ReadUInt8();
-                    ushort w_planes = reader.ReadUInt16LE();
-                    ushort w_bit_count = reader.ReadUInt16LE();
-                    uint dw_bytes_in_res = reader.ReadUInt32LE();
-                    uint dw_image_offse = reader.ReadUInt32LE();
+                    stream.Read(buffer, 0, buffer.Length);
 
-                    if (b_width == 0)
+                    StackDataReader reader = new StackDataReader(buffer, (int)stream.Length);
+
+                    bool was_error;
+                    long fp_offset;
+                    int bmp_pitch;
+                    int i, pad;
+                    SDL.SDL_Surface* surface;
+                    uint r_mask, g_mask, b_mask;
+                    byte* bits;
+                    int expand_bmp;
+                    int max_col = 0;
+                    uint ico_of_s = 0;
+                    uint* palette = stackalloc uint[256];
+
+                    ushort bf_reserved, bf_type, bf_count;
+                    uint bi_size, bi_width, bi_height;
+                    ushort bi_planes, bi_bit_count;
+
+                    uint bi_compression, bi_size_image, bi_x_perls_per_meter, bi_y_perls_per_meter, bi_clr_used, bi_clr_important;
+
+                    bf_reserved = reader.ReadUInt16LE();
+                    bf_type = reader.ReadUInt16LE();
+                    bf_count = reader.ReadUInt16LE();
+
+                    for (i = 0; i < bf_count; i++)
                     {
-                        b_width = 256;
-                    }
+                        int b_width = reader.ReadUInt8();
+                        int b_height = reader.ReadUInt8();
+                        int b_color_count = reader.ReadUInt8();
+                        byte b_reserver = reader.ReadUInt8();
+                        ushort w_planes = reader.ReadUInt16LE();
+                        ushort w_bit_count = reader.ReadUInt16LE();
+                        uint dw_bytes_in_res = reader.ReadUInt32LE();
+                        uint dw_image_offse = reader.ReadUInt32LE();
 
-                    if (b_height == 0)
-                    {
-                        b_height = 256;
-                    }
-
-                    if (b_color_count == 0)
-                    {
-                        b_color_count = 256;
-                    }
-
-                    if (b_color_count > max_col)
-                    {
-                        max_col = b_color_count;
-                        ico_of_s = dw_image_offse;
-                    }
-                }
-
-                reader.Seek(ico_of_s);
-
-                bi_size = reader.ReadUInt32LE();
-
-                if (bi_size == 40)
-                {
-                    bi_width = reader.ReadUInt32LE();
-                    bi_height = reader.ReadUInt32LE();
-                    bi_planes = reader.ReadUInt16LE();
-                    bi_bit_count = reader.ReadUInt16LE();
-                    bi_compression = reader.ReadUInt32LE();
-                    bi_size_image = reader.ReadUInt32LE();
-                    bi_x_perls_per_meter = reader.ReadUInt32LE();
-                    bi_y_perls_per_meter = reader.ReadUInt32LE();
-                    bi_clr_used = reader.ReadUInt32LE();
-                    bi_clr_important = reader.ReadUInt32LE();
-                }
-                else
-                {
-                    return null;
-                }
-
-                const int BI_RGB = 0;
-                const int BI_RLE = 1;
-                const int BI_RLE4 = 2;
-                const int BI_BITFIELDS = 3;
-
-                switch (bi_compression)
-                {
-                    case BI_RGB:
-
-                        switch (bi_bit_count)
+                        if (b_width == 0)
                         {
-                            case 1:
-                            case 4:
-                                expand_bmp = bi_bit_count;
-                                bi_bit_count = 8;
-
-                                break;
-
-                            case 8:
-                                expand_bmp = 8;
-
-                                break;
-
-                            case 32:
-                                r_mask = 0x00FF0000;
-                                g_mask = 0x0000FF00;
-                                b_mask = 0x000000FF;
-                                expand_bmp = 0;
-
-                                break;
-
-                            default: return null;
+                            b_width = 256;
                         }
 
-                        break;
+                        if (b_height == 0)
+                        {
+                            b_height = 256;
+                        }
 
-                    default: return null;
-                }
+                        if (b_color_count == 0)
+                        {
+                            b_color_count = 256;
+                        }
 
-
-                bi_height >>= 1;
-
-                surface = (SDL.SDL_Surface*) SDL.SDL_CreateRGBSurface
-                (
-                    0,
-                    (int) bi_width,
-                    (int) bi_height,
-                    32,
-                    0x00FF0000,
-                    0x0000FF00,
-                    0x000000FF,
-                    0xFF000000
-                );
-
-                if (bi_bit_count <= 8)
-                {
-                    if (bi_clr_used == 0)
-                    {
-                        bi_clr_used = (uint) (1 << bi_bit_count);
+                        if (b_color_count > max_col)
+                        {
+                            max_col = b_color_count;
+                            ico_of_s = dw_image_offse;
+                        }
                     }
 
-                    for (i = 0; i < bi_clr_used; i++)
+                    reader.Seek(ico_of_s);
+
+                    bi_size = reader.ReadUInt32LE();
+
+                    if (bi_size == 40)
                     {
-                        palette[i] = reader.ReadUInt32LE();
+                        bi_width = reader.ReadUInt32LE();
+                        bi_height = reader.ReadUInt32LE();
+                        bi_planes = reader.ReadUInt16LE();
+                        bi_bit_count = reader.ReadUInt16LE();
+                        bi_compression = reader.ReadUInt32LE();
+                        bi_size_image = reader.ReadUInt32LE();
+                        bi_x_perls_per_meter = reader.ReadUInt32LE();
+                        bi_y_perls_per_meter = reader.ReadUInt32LE();
+                        bi_clr_used = reader.ReadUInt32LE();
+                        bi_clr_important = reader.ReadUInt32LE();
                     }
-                }
+                    else
+                    {
+                        return null;
+                    }
 
-                bits = (byte*) (surface->pixels + surface->h * surface->pitch);
+                    const int BI_RGB = 0;
+                    const int BI_RLE = 1;
+                    const int BI_RLE4 = 2;
+                    const int BI_BITFIELDS = 3;
 
-                switch (expand_bmp)
-                {
-                    case 1:
-                        bmp_pitch = (int) (bi_width + 7) >> 3;
-                        pad = bmp_pitch % 4 != 0 ? 4 - bmp_pitch % 4 : 0;
+                    switch (bi_compression)
+                    {
+                        case BI_RGB:
 
-                        break;
+                            switch (bi_bit_count)
+                            {
+                                case 1:
+                                case 4:
+                                    expand_bmp = bi_bit_count;
+                                    bi_bit_count = 8;
 
-                    case 4:
-                        bmp_pitch = (int) (bi_width + 1) >> 1;
-                        pad = bmp_pitch % 4 != 0 ? 4 - bmp_pitch % 4 : 0;
+                                    break;
 
-                        break;
+                                case 8:
+                                    expand_bmp = 8;
 
-                    case 8:
-                        bmp_pitch = (int) bi_width;
-                        pad = bmp_pitch % 4 != 0 ? 4 - bmp_pitch % 4 : 0;
+                                    break;
 
-                        break;
+                                case 32:
+                                    r_mask = 0x00FF0000;
+                                    g_mask = 0x0000FF00;
+                                    b_mask = 0x000000FF;
+                                    expand_bmp = 0;
 
-                    default:
-                        bmp_pitch = (int) bi_width * 4;
-                        pad = 0;
+                                    break;
 
-                        break;
-                }
+                                default: return null;
+                            }
+
+                            break;
+
+                        default: return null;
+                    }
 
 
-                while (bits > (byte*) surface->pixels)
-                {
-                    bits -= surface->pitch;
+                    bi_height >>= 1;
+
+                    surface = (SDL.SDL_Surface*)SDL.SDL_CreateRGBSurface
+                    (
+                        0,
+                        (int)bi_width,
+                        (int)bi_height,
+                        32,
+                        0x00FF0000,
+                        0x0000FF00,
+                        0x000000FF,
+                        0xFF000000
+                    );
+
+                    if (bi_bit_count <= 8)
+                    {
+                        if (bi_clr_used == 0)
+                        {
+                            bi_clr_used = (uint)(1 << bi_bit_count);
+                        }
+
+                        for (i = 0; i < bi_clr_used; i++)
+                        {
+                            palette[i] = reader.ReadUInt32LE();
+                        }
+                    }
+
+                    bits = (byte*)(surface->pixels + surface->h * surface->pitch);
 
                     switch (expand_bmp)
                     {
                         case 1:
+                            bmp_pitch = (int)(bi_width + 7) >> 3;
+                            pad = bmp_pitch % 4 != 0 ? 4 - bmp_pitch % 4 : 0;
+
+                            break;
+
                         case 4:
+                            bmp_pitch = (int)(bi_width + 1) >> 1;
+                            pad = bmp_pitch % 4 != 0 ? 4 - bmp_pitch % 4 : 0;
+
+                            break;
+
                         case 8:
-                        {
-                            byte pixel = 0;
-                            int shift = 8 - expand_bmp;
-
-                            for (i = 0; i < surface->w; i++)
-                            {
-                                if (i % (8 / expand_bmp) == 0)
-                                {
-                                    pixel = reader.ReadUInt8();
-                                }
-
-                                *((uint*) bits + i) = palette[pixel >> shift];
-                                pixel <<= expand_bmp;
-                            }
-                        }
+                            bmp_pitch = (int)bi_width;
+                            pad = bmp_pitch % 4 != 0 ? 4 - bmp_pitch % 4 : 0;
 
                             break;
 
                         default:
-
-                            for (int k = 0; k < surface->pitch; k++)
-                            {
-                                bits[k] = reader.ReadUInt8();
-                            }
+                            bmp_pitch = (int)bi_width * 4;
+                            pad = 0;
 
                             break;
                     }
 
-                    if (pad != 0)
+
+                    while (bits > (byte*)surface->pixels)
                     {
-                        for (i = 0; i < pad; i++)
+                        bits -= surface->pitch;
+
+                        switch (expand_bmp)
                         {
-                            reader.ReadUInt8();
+                            case 1:
+                            case 4:
+                            case 8:
+                                {
+                                    byte pixel = 0;
+                                    int shift = 8 - expand_bmp;
+
+                                    for (i = 0; i < surface->w; i++)
+                                    {
+                                        if (i % (8 / expand_bmp) == 0)
+                                        {
+                                            pixel = reader.ReadUInt8();
+                                        }
+
+                                        *((uint*)bits + i) = palette[pixel >> shift];
+                                        pixel <<= expand_bmp;
+                                    }
+                                }
+
+                                break;
+
+                            default:
+
+                                for (int k = 0; k < surface->pitch; k++)
+                                {
+                                    bits[k] = reader.ReadUInt8();
+                                }
+
+                                break;
+                        }
+
+                        if (pad != 0)
+                        {
+                            for (i = 0; i < pad; i++)
+                            {
+                                reader.ReadUInt8();
+                            }
                         }
                     }
+
+
+                    bits = (byte*)(surface->pixels + surface->h * surface->pitch);
+                    expand_bmp = 1;
+                    bmp_pitch = (int)(bi_width + 7) >> 3;
+                    pad = bmp_pitch % 4 != 0 ? 4 - bmp_pitch % 4 : 0;
+
+                    while (bits > (byte*)surface->pixels)
+                    {
+                        byte pixel = 0;
+                        int shift = 8 - expand_bmp;
+
+                        bits -= surface->pitch;
+
+                        for (i = 0; i < surface->w; i++)
+                        {
+                            if (i % (8 / expand_bmp) == 0)
+                            {
+                                pixel = reader.ReadUInt8();
+                            }
+
+                            *((uint*)bits + i) |= pixel >> shift != 0 ? 0 : 0xFF000000;
+
+                            pixel <<= expand_bmp;
+                        }
+
+                        if (pad != 0)
+                        {
+                            for (i = 0; i < pad; i++)
+                            {
+                                reader.ReadUInt8();
+                            }
+                        }
+                    }
+
+                    surface = (SDL.SDL_Surface*)INTERNAL_convertSurfaceFormat((IntPtr)surface);
+
+                    int len = surface->w * surface->h * 4;
+                    byte* pixels = (byte*)surface->pixels;
+
+                    for (i = 0; i < len; i += 4, pixels += 4)
+                    {
+                        if (pixels[3] == 0)
+                        {
+                            pixels[0] = 0;
+                            pixels[1] = 0;
+                            pixels[2] = 0;
+                        }
+                    }
+
+                    Texture2D texture = new Texture2D(Client.Game.GraphicsDevice, surface->w, surface->h);
+                    texture.SetDataPointerEXT(0, new Rectangle(0, 0, surface->w, surface->h), surface->pixels, len);
+
+                    SDL.SDL_FreeSurface((IntPtr)surface);
+
+                    reader.Release();
+
+                    return texture;
                 }
-
-
-                bits = (byte*) (surface->pixels + surface->h * surface->pitch);
-                expand_bmp = 1;
-                bmp_pitch = (int) (bi_width + 7) >> 3;
-                pad = bmp_pitch % 4 != 0 ? 4 - bmp_pitch % 4 : 0;
-
-                while (bits > (byte*) surface->pixels)
+                finally
                 {
-                    byte pixel = 0;
-                    int shift = 8 - expand_bmp;
-
-                    bits -= surface->pitch;
-
-                    for (i = 0; i < surface->w; i++)
-                    {
-                        if (i % (8 / expand_bmp) == 0)
-                        {
-                            pixel = reader.ReadUInt8();
-                        }
-
-                        *((uint*) bits + i) |= pixel >> shift != 0 ? 0 : 0xFF000000;
-
-                        pixel <<= expand_bmp;
-                    }
-
-                    if (pad != 0)
-                    {
-                        for (i = 0; i < pad; i++)
-                        {
-                            reader.ReadUInt8();
-                        }
-                    }
+                    System.Buffers.ArrayPool<byte>.Shared.Return(buffer);
                 }
-
-                surface = (SDL.SDL_Surface*) INTERNAL_convertSurfaceFormat((IntPtr) surface);
-
-                int len = surface->w * surface->h * 4;
-                byte* pixels = (byte*) surface->pixels;
-
-                for (i = 0; i < len; i += 4, pixels += 4)
-                {
-                    if (pixels[3] == 0)
-                    {
-                        pixels[0] = 0;
-                        pixels[1] = 0;
-                        pixels[2] = 0;
-                    }
-                }
-
-                Texture2D texture = new Texture2D(Client.Game.GraphicsDevice, surface->w, surface->h);
-                texture.SetDataPointerEXT(0, new Rectangle(0, 0, surface->w, surface->h), surface->pixels, len);
-
-                SDL.SDL_FreeSurface((IntPtr) surface);
-
-                reader.Release();
-
-                return texture;
             }
 
             private static unsafe IntPtr INTERNAL_convertSurfaceFormat(IntPtr surface)

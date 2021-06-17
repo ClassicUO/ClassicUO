@@ -83,10 +83,10 @@ namespace ClassicUO.IO
         }
 
         //The UltimaLive packets could be also used for other things than maps and statics
-        private static void OnUltimaLivePacket(ref PacketBufferReader p)
+        private static void OnUltimaLivePacket(ref StackDataReader p)
         {
             p.Seek(13);
-            byte command = p.ReadByte();
+            byte command = p.ReadUInt8();
 
             switch (command)
             {
@@ -98,9 +98,9 @@ namespace ClassicUO.IO
                     }
 
                     p.Seek(3);
-                    int block = (int) p.ReadUInt();
+                    int block = (int) p.ReadUInt32BE();
                     p.Seek(14);
-                    int mapId = p.ReadByte();
+                    int mapId = p.ReadUInt8();
 
                     if (mapId >= _UL._filesMap.Length)
                     {
@@ -208,8 +208,8 @@ namespace ClassicUO.IO
                     }
 
                     p.Seek(3);
-                    int block = (int) p.ReadUInt();
-                    int length = (int) p.ReadUInt();
+                    int block = (int) p.ReadUInt32BE();
+                    int length = (int) p.ReadUInt32BE();
                     int totalLength = length * 7;
 
                     if (p.Length < totalLength + 15)
@@ -218,7 +218,7 @@ namespace ClassicUO.IO
                     }
 
                     p.Seek(14);
-                    int mapId = p.ReadByte();
+                    int mapId = p.ReadUInt8();
 
                     if (mapId >= _UL._filesMap.Length)
                     {
@@ -370,7 +370,7 @@ namespace ClassicUO.IO
                     }
 
                     p.Seek(7);
-                    uint maps = p.ReadUInt() * 7 / 9;
+                    uint maps = p.ReadUInt32BE() * 7 / 9;
 
                     if (p.Length < maps * 9 + 15) //the packet has padding inside, so it's usually larger or equal than what we expect
                     {
@@ -389,15 +389,15 @@ namespace ClassicUO.IO
 
                     for (int i = 0; i < maps; i++)
                     {
-                        int mapNumber = p.ReadByte();
+                        int mapNumber = p.ReadUInt8();
                         validMaps.Add(mapNumber);
 
-                        _UL.MapSizeWrapSize[mapNumber, 0] = Math.Min((ushort) MapLoader.Instance.MapsDefaultSize[0, 0], p.ReadUShort());
+                        _UL.MapSizeWrapSize[mapNumber, 0] = Math.Min((ushort) MapLoader.Instance.MapsDefaultSize[0, 0], p.ReadUInt16BE());
 
-                        _UL.MapSizeWrapSize[mapNumber, 1] = Math.Min((ushort) MapLoader.Instance.MapsDefaultSize[0, 1], p.ReadUShort());
+                        _UL.MapSizeWrapSize[mapNumber, 1] = Math.Min((ushort) MapLoader.Instance.MapsDefaultSize[0, 1], p.ReadUInt16BE());
 
-                        _UL.MapSizeWrapSize[mapNumber, 2] = Math.Min(p.ReadUShort(), _UL.MapSizeWrapSize[mapNumber, 0]);
-                        _UL.MapSizeWrapSize[mapNumber, 3] = Math.Min(p.ReadUShort(), _UL.MapSizeWrapSize[mapNumber, 1]);
+                        _UL.MapSizeWrapSize[mapNumber, 2] = Math.Min(p.ReadUInt16BE(), _UL.MapSizeWrapSize[mapNumber, 0]);
+                        _UL.MapSizeWrapSize[mapNumber, 3] = Math.Min(p.ReadUInt16BE(), _UL.MapSizeWrapSize[mapNumber, 1]);
                     }
 
                     //previously there were a minor amount of maps
@@ -476,19 +476,19 @@ namespace ClassicUO.IO
             }
         }
 
-        private static void OnUpdateTerrainPacket(ref PacketBufferReader p)
+        private static void OnUpdateTerrainPacket(ref StackDataReader p)
         {
-            int block = (int) p.ReadUInt();
+            int block = (int) p.ReadUInt32BE();
             // TODO: stackalloc
             byte[] landData = new byte[LAND_BLOCK_LENGTH];
 
             for (int i = 0; i < LAND_BLOCK_LENGTH; i++)
             {
-                landData[i] = p.ReadByte();
+                landData[i] = p.ReadUInt8();
             }
 
             p.Seek(200);
-            byte mapId = p.ReadByte();
+            byte mapId = p.ReadUInt8();
 
             if (World.Map == null || mapId != World.Map.Index)
             {

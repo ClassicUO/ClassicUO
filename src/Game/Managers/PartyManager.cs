@@ -35,6 +35,7 @@ using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.UI.Gumps;
+using ClassicUO.IO;
 using ClassicUO.Network;
 using ClassicUO.Resources;
 
@@ -54,9 +55,9 @@ namespace ClassicUO.Game.Managers
         public long PartyHealTimer { get; set; }
         public uint PartyHealTarget { get; set; }
 
-        public void ParsePacket(ref PacketBufferReader p)
+        public void ParsePacket(ref StackDataReader p)
         {
-            byte code = p.ReadByte();
+            byte code = p.ReadUInt8();
 
             bool add = false;
 
@@ -67,7 +68,7 @@ namespace ClassicUO.Game.Managers
                     goto case 2;
 
                 case 2:
-                    byte count = p.ReadByte();
+                    byte count = p.ReadUInt8();
 
                     if (count <= 1)
                     {
@@ -108,7 +109,7 @@ namespace ClassicUO.Game.Managers
 
                     if (!add)
                     {
-                        to_remove = p.ReadUInt();
+                        to_remove = p.ReadUInt32BE();
 
                         UIManager.GetGump<BaseHealthBarGump>(to_remove)?.RequestUpdateContents();
                     }
@@ -118,7 +119,7 @@ namespace ClassicUO.Game.Managers
 
                     for (int i = 0; i < count; i++)
                     {
-                        uint serial = p.ReadUInt();
+                        uint serial = p.ReadUInt32BE();
                         bool remove = !add && serial == to_remove;
 
                         if (remove && serial == to_remove && i == 0)
@@ -179,8 +180,8 @@ namespace ClassicUO.Game.Managers
 
                 case 3:
                 case 4:
-                    uint ser = p.ReadUInt();
-                    string name = p.ReadUnicode();
+                    uint ser = p.ReadUInt32BE();
+                    string name = p.ReadUnicodeBE();
 
                     for (int i = 0; i < PARTY_SIZE; i++)
                     {
@@ -204,7 +205,7 @@ namespace ClassicUO.Game.Managers
                     break;
 
                 case 7:
-                    Inviter = p.ReadUInt();
+                    Inviter = p.ReadUInt32BE();
 
                     if (ProfileManager.CurrentProfile.PartyInviteGump)
                     {

@@ -18,42 +18,48 @@ namespace ClassicUO.IO
 #endif
                                                       ;
 
+        private readonly ReadOnlySpan<byte> _data;
+
         public StackDataReader(byte* data, long len)
         {
             this = default;
 
-            Data = data;
-            Length = len;
+            _data = new ReadOnlySpan<byte>(data, (int) len);
             Position = 0;
         }
 
-        public StackDataReader(
-#if NETFRAMEWORK || NETSTANDARD2_0
-            byte[] data,
-#else
-            Span<byte> data,
-#endif
-            long len)
+        public StackDataReader(byte[] data, int length)
         {
             this = default;
 
-            Data = (byte*)UnsafeMemoryManager.AsPointer(ref data[0]);
-            Length = len;
+            _data = data.AsSpan(0, length);
             Position = 0;
         }
 
-        public byte* Data;
-        public long Position;
-        public long Length;
+        public StackDataReader(ReadOnlySpan<byte> data)
+        {
+            this = default;
 
+            _data = data;
+            Position = 0;
+        }
 
-        public IntPtr StartAddress => (IntPtr)Data;
-
+        public ReadOnlySpan<byte> Buffer => _data;
+        public int Position { get; private set; }
+        public long Length => _data.Length;
+        public int Remaining => (int) (Length - Position);
+        public byte this[int index] => _data[index];
+        public IntPtr StartAddress => (IntPtr) Unsafe.AsPointer(ref GetPinnableReference());
         public IntPtr PositionAddress
         {
             [MethodImpl(IMPL_OPTION)]
-            get => (IntPtr)(Data + Position);
+            get => (IntPtr)((byte*) Unsafe.AsPointer(ref GetPinnableReference()) + Position);
         }
+
+
+
+        [MethodImpl(IMPL_OPTION)]
+        public ref byte GetPinnableReference() => ref MemoryMarshal.GetReference(_data);
 
 
         [MethodImpl(IMPL_OPTION)]
@@ -65,7 +71,7 @@ namespace ClassicUO.IO
         [MethodImpl(IMPL_OPTION)]
         public void Seek(long p)
         {
-            Position = p;
+            Position = (int) p;
         }
 
         [MethodImpl(IMPL_OPTION)]
@@ -77,28 +83,36 @@ namespace ClassicUO.IO
         [MethodImpl(IMPL_OPTION)]
         public byte ReadUInt8()
         {
-            byte v = *(Data + Position);
+            if (Position + 1 > Length)
+            {
+                return 0;
+            }
 
-            Skip(1);
-
-            return v;
+            return _data[Position++];
         }
 
         [MethodImpl(IMPL_OPTION)]
         public sbyte ReadInt8()
         {
-            sbyte v = *(sbyte*)(Data + Position);
+            if (Position + 1 > Length)
+            {
+                return 0;
+            }
 
-            Skip(1);
-
-            return v;
+            return (sbyte)_data[Position++];
         }
+
+        public bool ReadBool() => ReadUInt8() != 0;
 
         [MethodImpl(IMPL_OPTION)]
         public ushort ReadUInt16LE()
         {
-            ushort v = (ushort)(Data[Position] |
-                                 (Data[Position + 1] << 8));
+            if (Position + 2 > Length)
+            {
+                return 0;
+            }
+
+            BinaryPrimitives.TryReadUInt16LittleEndian(_data.Slice(Position), out ushort v);
 
             Skip(2);
 
@@ -108,8 +122,12 @@ namespace ClassicUO.IO
         [MethodImpl(IMPL_OPTION)]
         public short ReadInt16LE()
         {
-            short v = (short)(Data[Position] |
-                              (Data[Position + 1] << 8));
+            if (Position + 2 > Length)
+            {
+                return 0;
+            }
+
+            BinaryPrimitives.TryReadInt16LittleEndian(_data.Slice(Position), out short v);
 
             Skip(2);
 
@@ -119,10 +137,12 @@ namespace ClassicUO.IO
         [MethodImpl(IMPL_OPTION)]
         public uint ReadUInt32LE()
         {
-            uint v = (uint)(Data[Position] |
-                            (Data[Position + 1] << 8) |
-                            (Data[Position + 2] << 16) |
-                            (Data[Position + 3] << 24));
+            if (Position + 4 > Length)
+            {
+                return 0;
+            }
+
+            BinaryPrimitives.TryReadUInt32LittleEndian(_data.Slice(Position), out uint v);
 
             Skip(4);
 
@@ -132,10 +152,12 @@ namespace ClassicUO.IO
         [MethodImpl(IMPL_OPTION)]
         public int ReadInt32LE()
         {
-            int v = (int)(Data[Position] |
-                            (Data[Position + 1] << 8) |
-                            (Data[Position + 2] << 16) |
-                            (Data[Position + 3] << 24));
+            if (Position + 4 > Length)
+            {
+                return 0;
+            }
+
+            int v = BinaryPrimitives.ReadInt32LittleEndian(_data.Slice(Position));
 
             Skip(4);
 
@@ -145,14 +167,12 @@ namespace ClassicUO.IO
         [MethodImpl(IMPL_OPTION)]
         public ulong ReadUInt64LE()
         {
-            ulong v = (ulong)((ulong)Data[Position] |
-                              ((ulong)Data[Position + 1] << 8) |
-                              ((ulong)Data[Position + 2] << 16) |
-                              ((ulong)Data[Position + 3] << 24) |
-                              ((ulong)Data[Position + 4] << 32) |
-                              ((ulong)Data[Position + 5] << 40) |
-                              ((ulong)Data[Position + 6] << 48) |
-                              ((ulong)Data[Position + 7] << 56));
+            if (Position + 8 > Length)
+            {
+                return 0;
+            }
+
+            BinaryPrimitives.TryReadUInt64LittleEndian(_data.Slice(Position), out ulong v);
 
             Skip(8);
 
@@ -162,14 +182,12 @@ namespace ClassicUO.IO
         [MethodImpl(IMPL_OPTION)]
         public long ReadInt64LE()
         {
-            long v = (long)((ulong)Data[Position] |
-                              ((ulong)Data[Position + 1] << 8) |
-                              ((ulong)Data[Position + 2] << 16) |
-                              ((ulong)Data[Position + 3] << 24) |
-                              ((ulong)Data[Position + 4] << 32) |
-                              ((ulong)Data[Position + 5] << 40) |
-                              ((ulong)Data[Position + 6] << 48) |
-                              ((ulong)Data[Position + 7] << 56));
+            if (Position + 8 > Length)
+            {
+                return 0;
+            }
+
+            BinaryPrimitives.TryReadInt64LittleEndian(_data.Slice(Position), out long v);
 
             Skip(8);
 
@@ -183,8 +201,12 @@ namespace ClassicUO.IO
         [MethodImpl(IMPL_OPTION)]
         public ushort ReadUInt16BE()
         {
-            ushort v = (ushort)((Data[Position] << 8) |
-                                 (Data[Position + 1]));
+            if (Position + 2 > Length)
+            {
+                return 0;
+            }
+
+            BinaryPrimitives.TryReadUInt16BigEndian(_data.Slice(Position), out ushort v);
 
             Skip(2);
 
@@ -194,8 +216,12 @@ namespace ClassicUO.IO
         [MethodImpl(IMPL_OPTION)]
         public short ReadInt16BE()
         {
-            short v = (short)((Data[Position] << 8) |
-                              (Data[Position + 1]));
+            if (Position + 2 > Length)
+            {
+                return 0;
+            }
+
+            BinaryPrimitives.TryReadInt16BigEndian(_data.Slice(Position), out short v);
 
             Skip(2);
 
@@ -205,10 +231,12 @@ namespace ClassicUO.IO
         [MethodImpl(IMPL_OPTION)]
         public uint ReadUInt32BE()
         {
-            uint v = (uint)((Data[Position] << 24) |
-                            (Data[Position + 1] << 16) |
-                            (Data[Position + 2] << 8) |
-                            (Data[Position + 3]));
+            if (Position + 4 > Length)
+            {
+                return 0;
+            }
+
+            BinaryPrimitives.TryReadUInt32BigEndian(_data.Slice(Position), out uint v);
 
             Skip(4);
 
@@ -218,10 +246,12 @@ namespace ClassicUO.IO
         [MethodImpl(IMPL_OPTION)]
         public int ReadInt32BE()
         {
-            int v = (int)((Data[Position] << 24) |
-                          (Data[Position + 1] << 16) |
-                          (Data[Position + 2] << 8) |
-                          (Data[Position + 3]));
+            if (Position + 4 > Length)
+            {
+                return 0;
+            }
+
+            BinaryPrimitives.TryReadInt32BigEndian(_data.Slice(Position), out int v);
 
             Skip(4);
 
@@ -231,14 +261,12 @@ namespace ClassicUO.IO
         [MethodImpl(IMPL_OPTION)]
         public ulong ReadUInt64BE()
         {
-            ulong v = (ulong)(((ulong)Data[Position] << 56) |
-                              ((ulong)Data[Position + 1] << 48) |
-                              ((ulong)Data[Position + 2] << 40) |
-                              ((ulong)Data[Position + 3] << 32) |
-                              ((ulong)Data[Position + 4] << 24) |
-                              ((ulong)Data[Position + 5] << 16) |
-                              ((ulong)Data[Position + 6] << 8) |
-                              ((ulong)Data[Position + 7]));
+            if (Position + 8 > Length)
+            {
+                return 0;
+            }
+
+            BinaryPrimitives.TryReadUInt64BigEndian(_data.Slice(Position), out ulong v);
 
             Skip(8);
 
@@ -248,45 +276,180 @@ namespace ClassicUO.IO
         [MethodImpl(IMPL_OPTION)]
         public long ReadInt64BE()
         {
-            long v = (long)(((ulong)Data[Position] << 56) |
-                              ((ulong)Data[Position + 1] << 48) |
-                              ((ulong)Data[Position + 2] << 40) |
-                              ((ulong)Data[Position + 3] << 32) |
-                              ((ulong)Data[Position + 4] << 24) |
-                              ((ulong)Data[Position + 5] << 16) |
-                              ((ulong)Data[Position + 6] << 8) |
-                              ((ulong)Data[Position + 7]));
+            if (Position + 8 > Length)
+            {
+                return 0;
+            }
+
+            BinaryPrimitives.TryReadInt64BigEndian(_data.Slice(Position), out long v);
 
             Skip(8);
 
             return v;
         }
 
-
-
-        [MethodImpl(IMPL_OPTION)]
-        public T* CastTo<T>() where T : unmanaged
+        public string ReadASCII()
         {
-            return (T*)PositionAddress;
+            return ReadString(Encoding.ASCII, -1, 1, false);
         }
 
-        public string ReadASCII(int size)
+        public string ReadASCII(int length)
         {
-            ValueStringBuilder sb = new ValueStringBuilder(size);
-           
+            return ReadString(Encoding.ASCII, length, 1, false);
+        }
+
+        public string ReadUnicodeBE()
+        {
+            return ReadString(Encoding.BigEndianUnicode, -1, 2, false);
+        }
+
+        public string ReadUnicodeBE(int length)
+        {
+            return ReadString(Encoding.BigEndianUnicode, length, 2, false);
+        }
+
+        public string ReadUnicodeLE()
+        {
+            return ReadString(Encoding.Unicode, -1, 2, false);
+        }
+
+        public string ReadUnicodeLE(int length)
+        {
+            return ReadString(Encoding.Unicode, length, 2, false);
+        }
+
+        public string ReadUTF8()
+        {
+            return ReadString(Encoding.UTF8, -1, 1, false);
+        }
+
+        public string ReadUTF8(int length)
+        {
+            return ReadString(Encoding.UTF8, length, 1, false);
+        }
+
+        // TODO: i ve to verify the best way
+        public string ReadUTF8StringSafe()
+        {
+            return ReadString(Encoding.UTF8, -1, 1, true);
+        }
+
+        public string ReadUTF8StringSafe(int length)
+        {
+            return ReadString(Encoding.UTF8, length, 1, true);
+        }
+
+        public byte[] ReadArray(int size)
+        {
+            byte[] b = new byte[size];
+
             for (int i = 0; i < size; ++i)
             {
-                char c = (char)ReadUInt8();
-
-                if (c != 0)
-                {
-                    sb.Append(c);
-                }
+                b[0] = ReadUInt8();
             }
 
-            string ss = sb.ToString();
-            sb.Dispose();
-            return ss;
+            return b;
+        }
+
+        // from modernuo <3
+        private string ReadString(Encoding encoding, int length, int sizeT, bool safe)
+        {
+            if (Position + sizeT > Length)
+            {
+                return string.Empty;
+            }
+
+            bool fixedLength = length > 0;
+            int remaining = Remaining;
+            int size;
+
+            if (fixedLength)
+            {
+                size = length * sizeT;
+
+                if (size > remaining)
+                {
+                    size = remaining;
+                }
+            }
+            else
+            {
+                size = remaining - (remaining & (sizeT - 1));
+            }
+
+            // in any case we have to check for a '\0'
+            int index = GetIndexOfZero(_data.Slice(Position, size), sizeT);
+
+            // check if there is more data after the first '\0'.
+            // the index must not point to the last char.
+            if (fixedLength && index >= 0 && Position + index < size - 1)
+            {
+                int indexMoreData = GetIndexOfZero(_data.Slice(Position + index, size - index - 1), sizeT);
+
+                if (indexMoreData >= 0)
+                {
+                    safe = true;
+                }
+                else
+                {
+                    size = index < 0 ? size : index;
+                }
+            }
+            else
+            {
+                size = index < 0 ? size : index;
+            }
+            
+
+            string result = encoding.GetString((byte*)PositionAddress, size);
+            
+            if (safe)
+            {
+                Span<char> buff = stackalloc char[256];
+                ReadOnlySpan<char> chars = result.AsSpan();
+
+                ValueStringBuilder sb = new ValueStringBuilder(buff);
+
+                bool hasDoneAnyReplacements = false;
+                int last = 0;
+                for (int i = 0; i < chars.Length; i++)
+                {
+                    if (!StringHelper.IsSafeChar(chars[i]))
+                    {
+                        hasDoneAnyReplacements = true;
+                        sb.Append(chars.Slice(last, i - last));
+                        last = i + 1; // Skip the unsafe char
+                    }
+                }
+
+                if (hasDoneAnyReplacements)
+                {
+                    // append the rest of the string
+                    if (last < chars.Length)
+                    {
+                        sb.Append(chars.Slice(last, chars.Length - last));
+                    }
+
+                    result = sb.ToString();
+                }
+
+                sb.Dispose();
+            }
+
+            Position += Math.Max(length, size);
+
+            return result;
+        }
+
+        [MethodImpl(IMPL_OPTION)]
+        private static int GetIndexOfZero(ReadOnlySpan<byte> span, int sizeT)
+        {
+            switch (sizeT)
+            {
+                case 2: return MemoryMarshal.Cast<byte, char>(span).IndexOf('\0') * 2;
+                case 4: return MemoryMarshal.Cast<byte, uint>(span).IndexOf((uint)0) * 4;
+                default: return span.IndexOf((byte)0);
+            }
         }
     }
 }
