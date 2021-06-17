@@ -60,7 +60,7 @@ namespace ClassicUO.Network
 
             if (length < 0)
             {
-                writer.WriteUInt16BE(0x00);
+                writer.WriteZero(2);
             }
 
             writer.WriteUInt8(0x20);
@@ -127,7 +127,7 @@ namespace ClassicUO.Network
 
             if (length < 0)
             {
-                writer.WriteUInt16BE(0x00);
+                writer.WriteZero(2);
             }
 
             writer.WriteUInt8(0x00);
@@ -158,7 +158,7 @@ namespace ClassicUO.Network
 
             if (length < 0)
             {
-                writer.WriteUInt16BE(0x00);
+                writer.WriteZero(2);
             }
 
             writer.WriteUInt32BE(serial);
@@ -197,7 +197,7 @@ namespace ClassicUO.Network
 
             if (length < 0)
             {
-                writer.WriteUInt16BE(0x00);
+                writer.WriteZero(2);
             }
 
             writer.WriteUInt32BE(v);
@@ -242,7 +242,7 @@ namespace ClassicUO.Network
 
             if (length < 0)
             {
-                writer.WriteUInt16BE(0x00);
+                writer.WriteZero(2);
             }
 
             writer.WriteASCII(user, 30);
@@ -275,7 +275,7 @@ namespace ClassicUO.Network
 
             if (length < 0)
             {
-                writer.WriteUInt16BE(0x00);
+                writer.WriteZero(2);
             }
 
             writer.WriteUInt8(0x00);
@@ -307,7 +307,7 @@ namespace ClassicUO.Network
 
             if (length < 0)
             {
-                writer.WriteUInt16BE(0x00);
+                writer.WriteZero(2);
             }
 
             writer.WriteUInt32BE(seed);
@@ -359,7 +359,7 @@ namespace ClassicUO.Network
 
             if (length < 0)
             {
-                writer.WriteUInt16BE(0x00);
+                writer.WriteZero(2);
             }
 
             writer.WriteUInt32BE(0xEDEDEDED);
@@ -484,7 +484,7 @@ namespace ClassicUO.Network
 
             if (length < 0)
             {
-                writer.WriteUInt16BE(0x00);
+                writer.WriteZero(2);
             }
 
             writer.WriteZero(30);
@@ -517,7 +517,7 @@ namespace ClassicUO.Network
 
             if (length < 0)
             {
-                writer.WriteUInt16BE(0x00);
+                writer.WriteZero(2);
             }
 
             writer.WriteUInt32BE(0xEDEDEDED);
@@ -554,7 +554,7 @@ namespace ClassicUO.Network
 
             if (length < 0)
             {
-                writer.WriteUInt16BE(0x00);
+                writer.WriteZero(2);
             }
 
             writer.WriteUInt32BE(serial);
@@ -593,7 +593,7 @@ namespace ClassicUO.Network
 
             if (length < 0)
             {
-                writer.WriteUInt16BE(0x00);
+                writer.WriteZero(2);
             }
 
             writer.WriteUInt32BE(serial);
@@ -636,7 +636,7 @@ namespace ClassicUO.Network
 
             if (length < 0)
             {
-                writer.WriteUInt16BE(0x00);
+                writer.WriteZero(2);
             }
 
             writer.WriteUInt32BE(serial);
@@ -671,7 +671,7 @@ namespace ClassicUO.Network
 
             if (length < 0)
             {
-                writer.WriteUInt16BE(0x00);
+                writer.WriteZero(2);
             }
 
             writer.WriteUInt32BE(serial);
@@ -703,7 +703,7 @@ namespace ClassicUO.Network
 
             if (length < 0)
             {
-                writer.WriteUInt16BE(0x00);
+                writer.WriteZero(2);
             }
 
             writer.WriteBool(state);
@@ -735,7 +735,7 @@ namespace ClassicUO.Network
 
             if (length < 0)
             {
-                writer.WriteUInt16BE(0x00);
+                writer.WriteZero(2);
             }
 
             writer.WriteZero(257);
@@ -765,7 +765,7 @@ namespace ClassicUO.Network
 
             if (length < 0)
             {
-                writer.WriteUInt16BE(0x00);
+                writer.WriteZero(2);
             }
 
             writer.WriteUInt32BE(0xEDEDEDED);
@@ -797,7 +797,7 @@ namespace ClassicUO.Network
 
             if (length < 0)
             {
-                writer.WriteUInt16BE(0x00);
+                writer.WriteZero(2);
             }
 
             writer.WriteUInt32BE(0xEDEDEDED);
@@ -829,7 +829,7 @@ namespace ClassicUO.Network
 
             if (length < 0)
             {
-                writer.WriteUInt16BE(0x00);
+                writer.WriteZero(2);
             }
 
             writer.WriteUInt16BE(skillIndex);
@@ -860,7 +860,7 @@ namespace ClassicUO.Network
 
             if (length < 0)
             {
-                writer.WriteUInt16BE(0x00);
+                writer.WriteZero(2);
             }
 
             writer.WriteUInt32BE(serial);
@@ -891,7 +891,7 @@ namespace ClassicUO.Network
 
             if (length < 0)
             {
-                writer.WriteUInt16BE(0x00);
+                writer.WriteZero(2);
             }
 
             writer.WriteUInt32BE(serial);
@@ -922,7 +922,7 @@ namespace ClassicUO.Network
 
             if (length < 0)
             {
-                writer.WriteUInt16BE(0x00);
+                writer.WriteZero(2);
             }
 
             writer.WriteASCII(version);
@@ -953,7 +953,7 @@ namespace ClassicUO.Network
 
             if (length < 0)
             {
-                writer.WriteUInt16BE(0x00);
+                writer.WriteZero(2);
             }
 
             List<SpeechEntry> entries = SpeechesLoader.Instance.GetKeywords(text);
@@ -1003,7 +1003,7 @@ namespace ClassicUO.Network
 
             if (length < 0)
             {
-                writer.WriteUInt16BE(0x00);
+                writer.WriteZero(2);
             }
 
             List<SpeechEntry> entries = SpeechesLoader.Instance.GetKeywords(text);
@@ -1100,7 +1100,7 @@ namespace ClassicUO.Network
 
             if (length < 0)
             {
-                writer.WriteUInt16BE(0x00);
+                writer.WriteZero(2);
             }
 
             if (Client.Version >= ClientVersion.CV_60142)
@@ -1141,7 +1141,7 @@ namespace ClassicUO.Network
 
             if (length < 0)
             {
-                writer.WriteUInt16BE(0x00);
+                writer.WriteZero(2);
             }
 
             writer.WriteUInt8(0x27);
@@ -1173,7 +1173,7 @@ namespace ClassicUO.Network
 
             if (length < 0)
             {
-                writer.WriteUInt16BE(0x00);
+                writer.WriteZero(2);
             }
 
             writer.WriteUInt8(0x24);
@@ -1205,7 +1205,7 @@ namespace ClassicUO.Network
 
             if (length < 0)
             {
-                writer.WriteUInt16BE(0x00);
+                writer.WriteZero(2);
             }
 
             writer.WriteUInt8(0x58);
@@ -1237,7 +1237,7 @@ namespace ClassicUO.Network
 
             if (length < 0)
             {
-                writer.WriteUInt16BE(0x00);
+                writer.WriteZero(2);
             }
 
             writer.WriteUInt8(0x43);
@@ -1269,7 +1269,7 @@ namespace ClassicUO.Network
 
             if (length < 0)
             {
-                writer.WriteUInt16BE(0x00);
+                writer.WriteZero(2);
             }
 
             writer.WriteUInt8(0xC7);
@@ -1309,7 +1309,7 @@ namespace ClassicUO.Network
 
             if (length < 0)
             {
-                writer.WriteUInt16BE(0x00);
+                writer.WriteZero(2);
             }
 
             writer.WriteUInt32BE(local);
@@ -1360,7 +1360,7 @@ namespace ClassicUO.Network
 
             if (length < 0)
             {
-                writer.WriteUInt16BE(0x00);
+                writer.WriteZero(2);
             }
 
             writer.WriteUInt32BE(serial);
@@ -1401,7 +1401,7 @@ namespace ClassicUO.Network
 
             if (length < 0)
             {
-                writer.WriteUInt16BE(0x00);
+                writer.WriteZero(2);
             }
 
             writer.WriteUInt32BE(serial);
@@ -1441,7 +1441,7 @@ namespace ClassicUO.Network
 
             if (length < 0)
             {
-                writer.WriteUInt16BE(0x00);
+                writer.WriteZero(2);
             }
 
             writer.WriteUInt32BE(serial);
@@ -1474,7 +1474,7 @@ namespace ClassicUO.Network
 
             if (length < 0)
             {
-                writer.WriteUInt16BE(0x00);
+                writer.WriteZero(2);
             }
 
             if (code == 1)
@@ -1521,7 +1521,7 @@ namespace ClassicUO.Network
 
             if (length < 0)
             {
-                writer.WriteUInt16BE(0x00);
+                writer.WriteZero(2);
             }
 
             writer.WriteUInt8(0x03);
@@ -1555,7 +1555,7 @@ namespace ClassicUO.Network
 
             if (length < 0)
             {
-                writer.WriteUInt16BE(0x00);
+                writer.WriteZero(2);
             }
 
             writer.WriteUInt32BE(0xFFFF_FFFF);
@@ -1594,7 +1594,7 @@ namespace ClassicUO.Network
 
             if (length < 0)
             {
-                writer.WriteUInt16BE(0x00);
+                writer.WriteZero(2);
             }
 
             writer.WriteUInt32BE(serial);
@@ -1630,7 +1630,7 @@ namespace ClassicUO.Network
 
             if (length < 0)
             {
-                writer.WriteUInt16BE(0x00);
+                writer.WriteZero(2);
             }
 
             writer.WriteUInt32BE(serial);
@@ -1662,7 +1662,7 @@ namespace ClassicUO.Network
 
             if (length < 0)
             {
-                writer.WriteUInt16BE(0x00);
+                writer.WriteZero(2);
             }
 
             writer.WriteUInt32BE(serial);
@@ -1693,7 +1693,7 @@ namespace ClassicUO.Network
 
             if (length < 0)
             {
-                writer.WriteUInt16BE(0x00);
+                writer.WriteZero(2);
             }
 
             writer.WriteUInt16BE(id);
@@ -1735,7 +1735,7 @@ namespace ClassicUO.Network
 
             if (length < 0)
             {
-                writer.WriteUInt16BE(0x00);
+                writer.WriteZero(2);
             }
 
             writer.WriteUInt8(0x00);
@@ -1782,7 +1782,7 @@ namespace ClassicUO.Network
 
             if (length < 0)
             {
-                writer.WriteUInt16BE(0x00);
+                writer.WriteZero(2);
             }
 
             writer.WriteUInt8(0x01);
@@ -1820,7 +1820,7 @@ namespace ClassicUO.Network
 
             if (length < 0)
             {
-                writer.WriteUInt16BE(0x00);
+                writer.WriteZero(2);
             }
 
             writer.WriteUInt8((byte) type);
@@ -1856,7 +1856,7 @@ namespace ClassicUO.Network
 
             if (length < 0)
             {
-                writer.WriteUInt16BE(0x00);
+                writer.WriteZero(2);
             }
 
             writer.Write(MessageManager.PromptData.Data.AsSpan().Slice(0, 8));
@@ -1889,7 +1889,7 @@ namespace ClassicUO.Network
 
             if (length < 0)
             {
-                writer.WriteUInt16BE(0x00);
+                writer.WriteZero(2);
             }
 
             writer.Write(MessageManager.PromptData.Data.AsSpan().Slice(0, 8));
@@ -1923,7 +1923,7 @@ namespace ClassicUO.Network
 
             if (length < 0)
             {
-                writer.WriteUInt16BE(0x00);
+                writer.WriteZero(2);
             }
 
             writer.WriteUInt32BE(serial);
@@ -1956,7 +1956,7 @@ namespace ClassicUO.Network
 
             if (length < 0)
             {
-                writer.WriteUInt16BE(0x00);
+                writer.WriteZero(2);
             }
 
             writer.WriteUInt8(0x00);
@@ -1988,7 +1988,7 @@ namespace ClassicUO.Network
 
             if (length < 0)
             {
-                writer.WriteUInt16BE(0x00);
+                writer.WriteZero(2);
             }
 
             writer.WriteUInt8(0x01);
@@ -2023,7 +2023,7 @@ namespace ClassicUO.Network
 
             if (length < 0)
             {
-                writer.WriteUInt16BE(0x00);
+                writer.WriteZero(2);
             }
 
             writer.WriteUInt16BE(0x07);
@@ -2055,7 +2055,7 @@ namespace ClassicUO.Network
 
             if (length < 0)
             {
-                writer.WriteUInt16BE(0x00);
+                writer.WriteZero(2);
             }
 
             writer.WriteUInt16BE(0x0C);
@@ -2087,7 +2087,7 @@ namespace ClassicUO.Network
 
             if (length < 0)
             {
-                writer.WriteUInt16BE(0x00);
+                writer.WriteZero(2);
             }
 
             writer.WriteUInt16BE(0x06);
@@ -2120,7 +2120,7 @@ namespace ClassicUO.Network
 
             if (length < 0)
             {
-                writer.WriteUInt16BE(0x00);
+                writer.WriteZero(2);
             }
 
             writer.WriteUInt16BE(0x06);
@@ -2153,7 +2153,7 @@ namespace ClassicUO.Network
 
             if (length < 0)
             {
-                writer.WriteUInt16BE(0x00);
+                writer.WriteZero(2);
             }
 
             writer.WriteUInt16BE(0x06);
@@ -2186,7 +2186,7 @@ namespace ClassicUO.Network
 
             if (length < 0)
             {
-                writer.WriteUInt16BE(0x00);
+                writer.WriteZero(2);
             }
 
             writer.WriteUInt16BE(0x06);
@@ -2219,7 +2219,7 @@ namespace ClassicUO.Network
 
             if (length < 0)
             {
-                writer.WriteUInt16BE(0x00);
+                writer.WriteZero(2);
             }
 
             writer.WriteUInt16BE(0x06);
@@ -2253,7 +2253,7 @@ namespace ClassicUO.Network
 
             if (length < 0)
             {
-                writer.WriteUInt16BE(0x00);
+                writer.WriteZero(2);
             }
 
 
@@ -2297,7 +2297,7 @@ namespace ClassicUO.Network
 
             if (length < 0)
             {
-                writer.WriteUInt16BE(0x00);
+                writer.WriteZero(2);
             }
 
             writer.WriteUInt16BE(0x05);
@@ -2330,7 +2330,7 @@ namespace ClassicUO.Network
 
             if (length < 0)
             {
-                writer.WriteUInt16BE(0x00);
+                writer.WriteZero(2);
             }
 
             writer.WriteUInt8(0x03);
@@ -2363,7 +2363,7 @@ namespace ClassicUO.Network
 
             if (length < 0)
             {
-                writer.WriteUInt16BE(0x00);
+                writer.WriteZero(2);
             }
 
             writer.WriteUInt8(0x04);
@@ -2396,7 +2396,7 @@ namespace ClassicUO.Network
 
             if (length < 0)
             {
-                writer.WriteUInt16BE(0x00);
+                writer.WriteZero(2);
             }
 
             writer.WriteUInt8(0x05);
@@ -2490,7 +2490,7 @@ namespace ClassicUO.Network
 
             if (length < 0)
             {
-                writer.WriteUInt16BE(0x00);
+                writer.WriteZero(2);
             }
 
             writer.WriteUInt8(0x06);
@@ -2524,7 +2524,7 @@ namespace ClassicUO.Network
 
             if (length < 0)
             {
-                writer.WriteUInt16BE(0x00);
+                writer.WriteZero(2);
             }
 
             writer.WriteUInt8(0xFF);
@@ -2555,7 +2555,7 @@ namespace ClassicUO.Network
 
             if (length < 0)
             {
-                writer.WriteUInt16BE(0x00);
+                writer.WriteZero(2);
             }
 
             writer.WriteUInt8(0x01);
@@ -2587,7 +2587,7 @@ namespace ClassicUO.Network
 
             if (length < 0)
             {
-                writer.WriteUInt16BE(0x00);
+                writer.WriteZero(2);
             }
 
             writer.WriteUInt8(0x00);
@@ -2618,7 +2618,7 @@ namespace ClassicUO.Network
 
             if (length < 0)
             {
-                writer.WriteUInt16BE(0x00);
+                writer.WriteZero(2);
             }
 
             writer.WriteUInt16BE(0x0B);
@@ -2651,7 +2651,7 @@ namespace ClassicUO.Network
 
             if (length < 0)
             {
-                writer.WriteUInt16BE(0x00);
+                writer.WriteZero(2);
             }
 
             writer.WriteUInt16BE(0x0F);
@@ -2694,7 +2694,7 @@ namespace ClassicUO.Network
 
             if (length < 0)
             {
-                writer.WriteUInt16BE(0x00);
+                writer.WriteZero(2);
             }
 
             writer.WriteUInt16BE(0x13);
@@ -2726,7 +2726,7 @@ namespace ClassicUO.Network
 
             if (length < 0)
             {
-                writer.WriteUInt16BE(0x00);
+                writer.WriteZero(2);
             }
 
             writer.WriteUInt16BE(0x15);
@@ -2759,7 +2759,7 @@ namespace ClassicUO.Network
 
             if (length < 0)
             {
-                writer.WriteUInt16BE(0x00);
+                writer.WriteZero(2);
             }
 
             writer.WriteASCII(Settings.GlobalSettings.Language, 4);
@@ -2801,7 +2801,7 @@ namespace ClassicUO.Network
 
             if (length < 0)
             {
-                writer.WriteUInt16BE(0x00);
+                writer.WriteZero(2);
             }
 
             writer.WriteASCII(Settings.GlobalSettings.Language, 4);
@@ -2841,7 +2841,7 @@ namespace ClassicUO.Network
 
             if (length < 0)
             {
-                writer.WriteUInt16BE(0x00);
+                writer.WriteZero(2);
             }
 
             writer.WriteASCII(Settings.GlobalSettings.Language, 4);
@@ -2873,7 +2873,7 @@ namespace ClassicUO.Network
 
             if (length < 0)
             {
-                writer.WriteUInt16BE(0x00);
+                writer.WriteZero(2);
             }
 
             writer.WriteASCII(Settings.GlobalSettings.Language, 4);
@@ -2907,7 +2907,7 @@ namespace ClassicUO.Network
 
             if (length < 0)
             {
-                writer.WriteUInt16BE(0x00);
+                writer.WriteZero(2);
             }
 
 
@@ -2953,7 +2953,7 @@ namespace ClassicUO.Network
 
             if (length < 0)
             {
-                writer.WriteUInt16BE(0x00);
+                writer.WriteZero(2);
             }
 
             writer.WriteUInt32BE(serial);
@@ -2988,7 +2988,7 @@ namespace ClassicUO.Network
 
             if (length < 0)
             {
-                writer.WriteUInt16BE(0x00);
+                writer.WriteZero(2);
             }
 
             writer.WriteUInt32BE(World.Player.Serial);
@@ -3021,7 +3021,7 @@ namespace ClassicUO.Network
 
             if (length < 0)
             {
-                writer.WriteUInt16BE(0x00);
+                writer.WriteZero(2);
             }
 
             writer.WriteUInt32BE(World.Player.Serial);
@@ -3054,7 +3054,7 @@ namespace ClassicUO.Network
 
             if (length < 0)
             {
-                writer.WriteUInt16BE(0x00);
+                writer.WriteZero(2);
             }
 
             writer.WriteUInt32BE(World.Player.Serial);
@@ -3087,7 +3087,7 @@ namespace ClassicUO.Network
 
             if (length < 0)
             {
-                writer.WriteUInt16BE(0x00);
+                writer.WriteZero(2);
             }
 
             writer.WriteUInt8(0xF4);
@@ -3120,7 +3120,7 @@ namespace ClassicUO.Network
 
             if (length < 0)
             {
-                writer.WriteUInt16BE(0x00);
+                writer.WriteZero(2);
             }
 
             writer.WriteUInt16BE(0x10);
@@ -3152,7 +3152,7 @@ namespace ClassicUO.Network
 
             if (length < 0)
             {
-                writer.WriteUInt16BE(0x00);
+                writer.WriteZero(2);
             }
 
             int count = Math.Min(15, serials.Count);
@@ -3190,7 +3190,7 @@ namespace ClassicUO.Network
 
             if (length < 0)
             {
-                writer.WriteUInt16BE(0x00);
+                writer.WriteZero(2);
             }
 
             writer.WriteUInt16BE(0x1A);
@@ -3224,7 +3224,7 @@ namespace ClassicUO.Network
 
             if (length < 0)
             {
-                writer.WriteUInt16BE(0x00);
+                writer.WriteZero(2);
             }
 
             writer.WriteUInt16BE(skillindex);
@@ -3256,7 +3256,7 @@ namespace ClassicUO.Network
 
             if (length < 0)
             {
-                writer.WriteUInt16BE(0x00);
+                writer.WriteZero(2);
             }
 
             writer.WriteUInt32BE(serial);
@@ -3293,7 +3293,7 @@ namespace ClassicUO.Network
 
             if (length < 0)
             {
-                writer.WriteUInt16BE(0x00);
+                writer.WriteZero(2);
             }
 
             writer.WriteUInt32BE(serial);
@@ -3334,7 +3334,7 @@ namespace ClassicUO.Network
 
             if (length < 0)
             {
-                writer.WriteUInt16BE(0x00);
+                writer.WriteZero(2);
             }
 
             writer.WriteUInt32BE(serial);
@@ -3401,7 +3401,7 @@ namespace ClassicUO.Network
 
             if (length < 0)
             {
-                writer.WriteUInt16BE(0x00);
+                writer.WriteZero(2);
             }
 
             writer.WriteUInt32BE(serial);
@@ -3436,7 +3436,7 @@ namespace ClassicUO.Network
 
             if (length < 0)
             {
-                writer.WriteUInt16BE(0x00);
+                writer.WriteZero(2);
             }
 
             writer.WriteUInt32BE(serial);
@@ -3485,7 +3485,7 @@ namespace ClassicUO.Network
 
             if (length < 0)
             {
-                writer.WriteUInt16BE(0x00);
+                writer.WriteZero(2);
             }
 
             writer.WriteUInt32BE(serial);
@@ -3524,7 +3524,7 @@ namespace ClassicUO.Network
 
             if (length < 0)
             {
-                writer.WriteUInt16BE(0x00);
+                writer.WriteZero(2);
             }
 
             writer.WriteUInt32BE(World.Player.Serial);
@@ -3560,7 +3560,7 @@ namespace ClassicUO.Network
 
             if (length < 0)
             {
-                writer.WriteUInt16BE(0x00);
+                writer.WriteZero(2);
             }
 
             writer.WriteUInt16BE(0x2C);
@@ -3594,7 +3594,7 @@ namespace ClassicUO.Network
 
             if (length < 0)
             {
-                writer.WriteUInt16BE(0x00);
+                writer.WriteZero(2);
             }
 
             writer.WriteUInt16BE(0x32);
@@ -3627,7 +3627,7 @@ namespace ClassicUO.Network
 
             if (length < 0)
             {
-                writer.WriteUInt16BE(0x00);
+                writer.WriteZero(2);
             }
 
             writer.WriteUInt16BE(0x1E);
@@ -3659,7 +3659,7 @@ namespace ClassicUO.Network
 
             if (length < 0)
             {
-                writer.WriteUInt16BE(0x00);
+                writer.WriteZero(2);
             }
 
             writer.WriteUInt16BE(0x09);
@@ -3690,7 +3690,7 @@ namespace ClassicUO.Network
 
             if (length < 0)
             {
-                writer.WriteUInt16BE(0x00);
+                writer.WriteZero(2);
             }
 
             writer.WriteUInt16BE(0x0A);
@@ -3729,7 +3729,7 @@ namespace ClassicUO.Network
 
             if (length < 0)
             {
-                writer.WriteUInt16BE(0x00);
+                writer.WriteZero(2);
             }
 
             writer.WriteUInt16BE(0x2A);
@@ -3765,7 +3765,7 @@ namespace ClassicUO.Network
 
             if (length < 0)
             {
-                writer.WriteUInt16BE(0x00);
+                writer.WriteZero(2);
             }
 
             writer.WriteUInt16BE(0x33);
@@ -3800,7 +3800,7 @@ namespace ClassicUO.Network
 
             if (length < 0)
             {
-                writer.WriteUInt16BE(0x00);
+                writer.WriteZero(2);
             }
 
 
@@ -3831,7 +3831,7 @@ namespace ClassicUO.Network
 
             if (length < 0)
             {
-                writer.WriteUInt16BE(0x00);
+                writer.WriteZero(2);
             }
 
             if (run)
@@ -3869,7 +3869,7 @@ namespace ClassicUO.Network
 
             if (length < 0)
             {
-                writer.WriteUInt16BE(0x00);
+                writer.WriteZero(2);
             }
 
             writer.WriteUInt32BE(World.Player.Serial);
@@ -3903,7 +3903,7 @@ namespace ClassicUO.Network
 
             if (length < 0)
             {
-                writer.WriteUInt16BE(0x00);
+                writer.WriteZero(2);
             }
 
             writer.WriteUInt32BE(World.Player.Serial);
@@ -3937,7 +3937,7 @@ namespace ClassicUO.Network
 
             if (length < 0)
             {
-                writer.WriteUInt16BE(0x00);
+                writer.WriteZero(2);
             }
 
             writer.WriteUInt32BE(World.Player.Serial);
@@ -3971,7 +3971,7 @@ namespace ClassicUO.Network
 
             if (length < 0)
             {
-                writer.WriteUInt16BE(0x00);
+                writer.WriteZero(2);
             }
 
             writer.WriteUInt32BE(World.Player.Serial);
@@ -4004,7 +4004,7 @@ namespace ClassicUO.Network
 
             if (length < 0)
             {
-                writer.WriteUInt16BE(0x00);
+                writer.WriteZero(2);
             }
 
             writer.WriteUInt32BE(World.Player.Serial);
@@ -4040,7 +4040,7 @@ namespace ClassicUO.Network
 
             if (length < 0)
             {
-                writer.WriteUInt16BE(0x00);
+                writer.WriteZero(2);
             }
 
             writer.WriteUInt32BE(World.Player.Serial);
@@ -4074,7 +4074,7 @@ namespace ClassicUO.Network
 
             if (length < 0)
             {
-                writer.WriteUInt16BE(0x00);
+                writer.WriteZero(2);
             }
 
             writer.WriteUInt32BE(World.Player.Serial);
@@ -4108,7 +4108,7 @@ namespace ClassicUO.Network
 
             if (length < 0)
             {
-                writer.WriteUInt16BE(0x00);
+                writer.WriteZero(2);
             }
 
             writer.WriteUInt32BE(World.Player.Serial);
@@ -4141,7 +4141,7 @@ namespace ClassicUO.Network
 
             if (length < 0)
             {
-                writer.WriteUInt16BE(0x00);
+                writer.WriteZero(2);
             }
 
             writer.WriteUInt32BE(World.Player.Serial);
@@ -4174,7 +4174,7 @@ namespace ClassicUO.Network
 
             if (length < 0)
             {
-                writer.WriteUInt16BE(0x00);
+                writer.WriteZero(2);
             }
 
             writer.WriteUInt32BE(World.Player.Serial);
@@ -4213,7 +4213,7 @@ namespace ClassicUO.Network
 
             if (length < 0)
             {
-                writer.WriteUInt16BE(0x00);
+                writer.WriteZero(2);
             }
 
             writer.WriteUInt32BE(World.Player.Serial);
@@ -4254,7 +4254,7 @@ namespace ClassicUO.Network
 
             if (length < 0)
             {
-                writer.WriteUInt16BE(0x00);
+                writer.WriteZero(2);
             }
 
             writer.WriteUInt32BE(World.Player.Serial);
@@ -4295,7 +4295,7 @@ namespace ClassicUO.Network
 
             if (length < 0)
             {
-                writer.WriteUInt16BE(0x00);
+                writer.WriteZero(2);
             }
 
             writer.WriteUInt32BE(World.Player.Serial);
@@ -4336,7 +4336,7 @@ namespace ClassicUO.Network
 
             if (length < 0)
             {
-                writer.WriteUInt16BE(0x00);
+                writer.WriteZero(2);
             }
 
             writer.WriteUInt32BE(World.Player.Serial);
@@ -4375,7 +4375,7 @@ namespace ClassicUO.Network
 
             if (length < 0)
             {
-                writer.WriteUInt16BE(0x00);
+                writer.WriteZero(2);
             }
 
             if (range < Constants.MIN_VIEW_RANGE)
@@ -4415,7 +4415,7 @@ namespace ClassicUO.Network
 
             if (length < 0)
             {
-                writer.WriteUInt16BE(0x00);
+                writer.WriteZero(2);
             }
 
             if (length < 0)
@@ -4444,7 +4444,7 @@ namespace ClassicUO.Network
 
             if (length < 0)
             {
-                writer.WriteUInt16BE(0x00);
+                writer.WriteZero(2);
             }
 
             writer.WriteBool(show);
