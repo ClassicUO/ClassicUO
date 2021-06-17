@@ -610,16 +610,14 @@ namespace ClassicUO.Game
             {
                 Entity ent = World.Get(serial);
 
-                if (ent != null && !ent.HitsRequested)
+                if (ent != null && ent.HitsRequest < HitsRequestStatus.Received)
                 {
-                    ent.HitsRequested = true;
+                    ent.HitsRequest = HitsRequestStatus.Pending;
                     force = true;
                 }
 
                 if (force && SerialHelper.IsValid(serial))
                 {
-                    //ent = ent ?? World.Player;
-                    //ent.AddMessage(MessageType.Regular, $"PACKET SENT: 0x{serial:X8}", 3, 0x34, true, TextType.OBJECT);
                     Socket.Send(new PStatusRequest(serial));
                 }
             }
@@ -631,16 +629,14 @@ namespace ClassicUO.Game
             {
                 Entity ent = World.Get(serial);
 
-                if (ent != null && ent.HitsRequested)
+                if (ent != null && ent.HitsRequest >= HitsRequestStatus.Pending)
                 {
-                    ent.HitsRequested = false;
+                    ent.HitsRequest = HitsRequestStatus.None;
                     force = true;
                 }
 
                 if (force && SerialHelper.IsValid(serial))
                 {
-                    //ent = ent ?? World.Player;
-                    //ent.AddMessage(MessageType.Regular, $"PACKET REMOVED SENT: 0x{serial:X8}", 3, 0x34 + 10, true, TextType.OBJECT);
                     Socket.Send(new PCloseStatusBarGump(serial));
                 }
             }
