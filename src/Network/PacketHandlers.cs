@@ -3314,12 +3314,10 @@ namespace ClassicUO.Network
                 return;
             }
 
-            byte[] data = p.ReadArray(8);
-
             MessageManager.PromptData = new PromptData
             {
                 Prompt = ConsolePrompt.ASCII,
-                Data = data
+                Data = p.ReadUInt64BE()
             };
         }
 
@@ -4753,12 +4751,10 @@ namespace ClassicUO.Network
                 return;
             }
 
-            byte[] data = p.ReadArray(8);
-
             MessageManager.PromptData = new PromptData
             {
                 Prompt = ConsolePrompt.Unicode,
-                Data = data
+                Data = p.ReadUInt64BE()
             };
         }
 

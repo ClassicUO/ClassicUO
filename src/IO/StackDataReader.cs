@@ -338,16 +338,10 @@ namespace ClassicUO.IO
             return ReadString(Encoding.UTF8, length, 1, true);
         }
 
-        public byte[] ReadArray(int size)
+
+        public void Read(Span<byte> data, int offset, int count)
         {
-            byte[] b = new byte[size];
-
-            for (int i = 0; i < size; ++i)
-            {
-                b[0] = ReadUInt8();
-            }
-
-            return b;
+            _data.Slice(Position + offset, count).CopyTo(data);
         }
 
         // from modernuo <3

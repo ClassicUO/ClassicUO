@@ -238,7 +238,10 @@ namespace ClassicUO.IO
                     }
 
                     // TODO(andrea): using a struct range instead of allocate the array to the heap?
-                    byte[] staticsData = p.ReadArray(totalLength);
+                    byte[] staticsData = new byte[totalLength];
+
+                    p.Read(staticsData, 0, totalLength);
+
 
                     if (block >= 0 && block < MapLoader.Instance.MapBlocksSize[mapId, 0] * MapLoader.Instance.MapBlocksSize[mapId, 1])
                     {

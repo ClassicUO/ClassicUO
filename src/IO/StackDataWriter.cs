@@ -160,6 +160,26 @@ namespace ClassicUO.IO
         }
 
         [MethodImpl(IMPL_OPTION)]
+        public void WriteUInt64LE(ulong b)
+        {
+            EnsureSize(8);
+
+            BinaryPrimitives.WriteUInt64LittleEndian(_buffer.Slice(Position), b);
+
+            Position += 8;
+        }
+
+        [MethodImpl(IMPL_OPTION)]
+        public void WriteInt64LE(long b)
+        {
+            EnsureSize(8);
+
+            BinaryPrimitives.WriteInt64LittleEndian(_buffer.Slice(Position), b);
+
+            Position += 8;
+        }
+
+        [MethodImpl(IMPL_OPTION)]
         public void WriteUnicodeLE(string str)
         {
             WriteString(Encoding.Unicode, str, (str.Length + 1) * 2);
@@ -214,6 +234,26 @@ namespace ClassicUO.IO
             BinaryPrimitives.WriteInt32BigEndian(_buffer.Slice(Position), b);
 
             Position += 4;
+        }
+
+        [MethodImpl(IMPL_OPTION)]
+        public void WriteUInt64BE(ulong b)
+        {
+            EnsureSize(8);
+
+            BinaryPrimitives.WriteUInt64BigEndian(_buffer.Slice(Position), b);
+
+            Position += 8;
+        }
+
+        [MethodImpl(IMPL_OPTION)]
+        public void WriteInt64BE(long b)
+        {
+            EnsureSize(8);
+
+            BinaryPrimitives.WriteInt64BigEndian(_buffer.Slice(Position), b);
+
+            Position += 8;
         }
 
         [MethodImpl(IMPL_OPTION)]

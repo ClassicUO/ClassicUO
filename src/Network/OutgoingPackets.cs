@@ -1860,7 +1860,7 @@ namespace ClassicUO.Network
                 writer.WriteZero(2);
             }
 
-            writer.Write(MessageManager.PromptData.Data.AsSpan().Slice(0, 8));
+            writer.WriteUInt64BE(MessageManager.PromptData.Data);
             writer.WriteUInt32BE((uint) (cancel ? 0 : 1));
             writer.WriteASCII(text);
 
@@ -1893,7 +1893,7 @@ namespace ClassicUO.Network
                 writer.WriteZero(2);
             }
 
-            writer.Write(MessageManager.PromptData.Data.AsSpan().Slice(0, 8));
+            writer.WriteUInt64BE(MessageManager.PromptData.Data);
             writer.WriteUInt32BE((uint) (cancel ? 0 : 1));
             writer.WriteASCII(lang);
             writer.WriteUnicodeLE(text, text.Length);
