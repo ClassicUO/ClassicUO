@@ -376,32 +376,13 @@ namespace ClassicUO.IO
                 size = remaining - (remaining & (sizeT - 1));
             }
 
-            // in any case we have to check for a '\0'
-            int index = GetIndexOfZero(_data.Slice(Position, size), sizeT);
+            ReadOnlySpan<byte> slice = _data.Slice(Position, size);
 
-            // check if there is more data after the first '\0'.
-            // the index must not point to the last char.
-            if (fixedLength && index >= 0 && Position + index < size - 1)
-            {
-                int indexMoreData = GetIndexOfZero(_data.Slice(Position + index, size - index - 1), sizeT);
+            int index = GetIndexOfZero(slice, sizeT);
+            size = index < 0 ? size : index;
 
-                if (indexMoreData >= 0)
-                {
-                    safe = true;
-                }
-                else
-                {
-                    size = index;
-                }
-            }
-            else
-            {
-                size = index < 0 ? size : index;
-            }
-            
+            string result = encoding.GetString((byte*) Unsafe.AsPointer(ref MemoryMarshal.GetReference(slice)), size);
 
-            string result = encoding.GetString((byte*)PositionAddress, size);
-            
             if (safe)
             {
                 Span<char> buff = stackalloc char[256];
@@ -435,7 +416,7 @@ namespace ClassicUO.IO
                 sb.Dispose();
             }
 
-            Position += Math.Max(length, size);
+            Position += Math.Max(size + (!fixedLength && index >= 0 ? sizeT : 0), length * sizeT);
 
             return result;
         }
