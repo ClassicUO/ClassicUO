@@ -586,9 +586,9 @@ namespace ClassicUO.Game
             {
                 Entity ent = World.Get(serial);
 
-                if (ent != null && !ent.HitsRequested)
+                if (ent != null && ent.HitsRequest < HitsRequestStatus.Received)
                 {
-                    ent.HitsRequested = true;
+                    ent.HitsRequest = HitsRequestStatus.Pending;
                     force = true;
                 }
 
@@ -607,9 +607,9 @@ namespace ClassicUO.Game
             {
                 Entity ent = World.Get(serial);
 
-                if (ent != null && ent.HitsRequested)
+                if (ent != null && ent.HitsRequest >= HitsRequestStatus.Pending)
                 {
-                    ent.HitsRequested = false;
+                    ent.HitsRequest = HitsRequestStatus.None;
                     force = true;
                 }
 

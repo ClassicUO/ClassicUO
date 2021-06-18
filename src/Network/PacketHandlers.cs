@@ -386,6 +386,11 @@ namespace ClassicUO.Network
             entity.Hits = p.ReadUInt16BE();
             entity.HitsMax = p.ReadUInt16BE();
 
+            if (entity.HitsRequest == HitsRequestStatus.Pending)
+            {
+                entity.HitsRequest = HitsRequestStatus.Received;
+            }
+
             if (SerialHelper.IsMobile(serial))
             {
                 Mobile mobile = entity as Mobile;
@@ -1618,6 +1623,11 @@ namespace ClassicUO.Network
 
             entity.HitsMax = p.ReadUInt16BE();
             entity.Hits = p.ReadUInt16BE();
+
+            if (entity.HitsRequest == HitsRequestStatus.Pending)
+            {
+                entity.HitsRequest = HitsRequestStatus.Received;
+            }
 
             if (SerialHelper.IsMobile(serial))
             {
@@ -3392,6 +3402,11 @@ namespace ClassicUO.Network
 
             entity.HitsMax = p.ReadUInt16BE();
             entity.Hits = p.ReadUInt16BE();
+
+            if (entity.HitsRequest == HitsRequestStatus.Pending)
+            {
+                entity.HitsRequest = HitsRequestStatus.Received;
+            }
 
             if (entity == World.Player)
             {
