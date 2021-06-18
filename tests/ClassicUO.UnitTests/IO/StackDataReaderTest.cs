@@ -12,64 +12,15 @@ namespace ClassicUO.UnitTests.IO
 {
     public class StackDataReaderTest
     {
-        [Fact]
-        public unsafe void Check_For_ASCII_Garbage_Cleanup()
-        {
-            Span<byte> data = stackalloc byte[]
-            {
-                (byte) 'C',
-                (byte) 'l',
-                (byte) 'a',
-                (byte) 's',
-                (byte) 's',
-                (byte) 'i',
-                (byte) 'c',
-                (byte) 'U',
-                (byte) 'O',
-                (byte) '\0'
-            };
-
-
-            Span<byte> dataWithGarbage = stackalloc byte[]
-            {
-                (byte)'C',
-                (byte)'l',
-                (byte)'a',
-                (byte)'s',
-                (byte)'s',
-                (byte)'i',
-                (byte)'c',
-                (byte)'\0',
-                (byte)'U',
-                (byte)'O'
-            };
-
-            StackDataReader reader = new StackDataReader(data);
-            StackDataReader reader2 = new StackDataReader(dataWithGarbage);
-
-            var s00 = reader.ReadASCII(data.Length);
-            var s01 = reader2.ReadASCII(dataWithGarbage.Length);
-
-            Assert.Equal(s00, s01);
-
-            var s0 = Encoding.ASCII.GetString((byte*) UnsafeMemoryManager.AsPointer(ref MemoryMarshal.GetReference(data)), data.Length);
-            var s1 = Encoding.ASCII.GetString((byte*) UnsafeMemoryManager.AsPointer(ref MemoryMarshal.GetReference(dataWithGarbage)), dataWithGarbage.Length);
-
-            Assert.NotEqual(s0, s1);
-
-            reader2.Release();
-            reader.Release();
-        }
-
         [Theory]
         [InlineData("ClassicUO", "ClassicUO")]
         [InlineData("ClassicUO\0", "ClassicUO")]
-        [InlineData("\0ClassicUO", "ClassicUO")]
-        [InlineData("Classic\0UO", "ClassicUO")]
-        [InlineData("Classic\0UO\0", "ClassicUO")]
-        [InlineData("Cla\0ssic\0UO\0\0\0\0\0", "ClassicUO")]
+        [InlineData("\0ClassicUO", "")]
+        [InlineData("Classic\0UO", "Classic")]
+        [InlineData("Classic\0UO\0", "Classic")]
+        [InlineData("Cla\0ssic\0UO\0\0\0\0\0", "Cla")]
 
-        public void Check_For_ASCII_With_Length_Specified(string str, string result)
+        public void Read_ASCII_With_FixedLength(string str, string result)
         {
             Span<byte> data = Encoding.ASCII.GetBytes(str);
 
@@ -78,6 +29,7 @@ namespace ClassicUO.UnitTests.IO
             string s = reader.ReadASCII(str.Length);
 
             Assert.Equal(s, result);
+            Assert.Equal(0, reader.Remaining);
 
             reader.Release();
         }
@@ -90,7 +42,7 @@ namespace ClassicUO.UnitTests.IO
         [InlineData("Classic\0UO\0", "Classic")]
         [InlineData("Cla\0ssic\0UO\0\0\0\0\0", "Cla")]
 
-        public void Check_For_ASCII_Specified(string str, string result)
+        public void Read_ASCII(string str, string result)
         {
             Span<byte> data = Encoding.ASCII.GetBytes(str);
 
@@ -106,12 +58,12 @@ namespace ClassicUO.UnitTests.IO
         [Theory]
         [InlineData("ClassicUO", "ClassicUO")]
         [InlineData("ClassicUO\0", "ClassicUO")]
-        [InlineData("\0ClassicUO", "ClassicUO")]
-        [InlineData("Classic\0UO", "ClassicUO")]
-        [InlineData("Classic\0UO\0", "ClassicUO")]
-        [InlineData("Cla\0ssic\0UO\0\0\0\0\0", "ClassicUO")]
+        [InlineData("\0ClassicUO", "")]
+        [InlineData("Classic\0UO", "Classic")]
+        [InlineData("Classic\0UO\0", "Classic")]
+        [InlineData("Cla\0ssic\0UO\0\0\0\0\0", "Cla")]
 
-        public void Check_For_Unicode_With_Length_Specified_LittleEndian(string str, string result)
+        public void Read_Unicode_LittleEndian_With_FixedLength(string str, string result)
         {
             Span<byte> data = Encoding.Unicode.GetBytes(str);
 
@@ -120,6 +72,7 @@ namespace ClassicUO.UnitTests.IO
             string s = reader.ReadUnicodeLE(str.Length);
 
             Assert.Equal(s, result);
+            Assert.Equal(0, reader.Remaining);
 
             reader.Release();
         }
@@ -132,7 +85,7 @@ namespace ClassicUO.UnitTests.IO
         [InlineData("Classic\0UO\0", "Classic")]
         [InlineData("Cla\0ssic\0UO\0\0\0\0\0", "Cla")]
 
-        public void Check_For_Unicode_Specified_LittleEndian(string str, string result)
+        public void Read_Unicode_LittleEndian(string str, string result)
         {
             Span<byte> data = Encoding.Unicode.GetBytes(str);
 
@@ -148,18 +101,84 @@ namespace ClassicUO.UnitTests.IO
         [Theory]
         [InlineData("ClassicUO", "ClassicUO")]
         [InlineData("ClassicUO\0", "ClassicUO")]
-        [InlineData("\0ClassicUO", "ClassicUO")]
-        [InlineData("Classic\0UO", "ClassicUO")]
-        [InlineData("Classic\0UO\0", "ClassicUO")]
-        [InlineData("Cla\0ssic\0UO\0\0\0\0\0", "ClassicUO")]
+        [InlineData("\0ClassicUO", "")]
+        [InlineData("Classic\0UO", "Classic")]
+        [InlineData("Classic\0UO\0", "Classic")]
+        [InlineData("Cla\0ssic\0UO\0\0\0\0\0", "Cla")]
 
-        public void Check_For_Unicode_With_Length_Specified_BigEndian(string str, string result)
+        public void Read_Unicode_BigEndian_With_FixedLength(string str, string result)
         {
             Span<byte> data = Encoding.BigEndianUnicode.GetBytes(str);
 
             StackDataReader reader = new StackDataReader(data);
 
             string s = reader.ReadUnicodeBE(str.Length);
+
+            Assert.Equal(s, result);
+            Assert.Equal(0, reader.Remaining);
+
+            reader.Release();
+        }
+
+        [Theory]
+        [InlineData("ClassicUO", "ClassicUO")]
+        [InlineData("ClassicUO\0", "ClassicUO")]
+        [InlineData("\0ClassicUO", "")]
+        [InlineData("Classic\0UO", "Classic")]
+        [InlineData("Classic\0UO\0", "Classic")]
+        [InlineData("Cla\0ssic\0UO\0\0\0\0\0", "Cla")]
+
+        public void Read_Unicode_BigEndian(string str, string result)
+        {
+            Span<byte> data = Encoding.BigEndianUnicode.GetBytes(str);
+
+            StackDataReader reader = new StackDataReader(data);
+
+            string s = reader.ReadUnicodeBE();
+
+            Assert.Equal(s, result);
+
+            reader.Release();
+        }
+
+
+        [Theory]
+        [InlineData("ClassicUO", "ClassicUO")]
+        [InlineData("ClassicUO\0", "ClassicUO")]
+        [InlineData("\0ClassicUO", "")]
+        [InlineData("Classic\0UO", "Classic")]
+        [InlineData("Classic\0UO\0", "Classic")]
+        [InlineData("Cla\0ssic\0UO\0\0\0\0\0", "Cla")]
+
+        public void Read_UTF8_With_FixedLength(string str, string result)
+        {
+            Span<byte> data = Encoding.UTF8.GetBytes(str);
+
+            StackDataReader reader = new StackDataReader(data);
+
+            string s = reader.ReadUTF8(str.Length);
+
+            Assert.Equal(s, result);
+            Assert.Equal(0, reader.Remaining);
+
+            reader.Release();
+        }
+
+        [Theory]
+        [InlineData("ClassicUO", "ClassicUO")]
+        [InlineData("ClassicUO\0", "ClassicUO")]
+        [InlineData("\0ClassicUO", "")]
+        [InlineData("Classic\0UO", "Classic")]
+        [InlineData("Classic\0UO\0", "Classic")]
+        [InlineData("Cla\0ssic\0UO\0\0\0\0\0", "Cla")]
+
+        public void Read_UTF8(string str, string result)
+        {
+            Span<byte> data = Encoding.UTF8.GetBytes(str);
+
+            StackDataReader reader = new StackDataReader(data);
+
+            string s = reader.ReadUTF8();
 
             Assert.Equal(s, result);
 
@@ -174,15 +193,228 @@ namespace ClassicUO.UnitTests.IO
         [InlineData("Classic\0UO\0", "Classic")]
         [InlineData("Cla\0ssic\0UO\0\0\0\0\0", "Cla")]
 
-        public void Check_For_Unicode_Specified_BigEndian(string str, string result)
+        public void Read_UTF8_With_FixedLength_Safe(string str, string result)
+        {
+            Span<byte> data = Encoding.UTF8.GetBytes(str);
+
+            StackDataReader reader = new StackDataReader(data);
+
+            string s = reader.ReadUTF8StringSafe(str.Length);
+
+            Assert.Equal(s, result);
+            Assert.Equal(0, reader.Remaining);
+
+            reader.Release();
+        }
+
+        [Theory]
+        [InlineData("ClassicUO", "ClassicUO")]
+        [InlineData("ClassicUO\0", "ClassicUO")]
+        [InlineData("\0ClassicUO", "")]
+        [InlineData("Classic\0UO", "Classic")]
+        [InlineData("Classic\0UO\0", "Classic")]
+        [InlineData("Cla\0ssic\0UO\0\0\0\0\0", "Cla")]
+
+        public void Read_UTF8_Safe(string str, string result)
+        {
+            Span<byte> data = Encoding.UTF8.GetBytes(str);
+
+            StackDataReader reader = new StackDataReader(data);
+
+            string s = reader.ReadUTF8StringSafe();
+
+            Assert.Equal(s, result);
+
+            reader.Release();
+        }
+
+
+        [Theory]
+        [InlineData("classicuo\0abc", 3)]
+        [InlineData("classicuoabc", 0)]
+        [InlineData("classicuoabc\0", 0)]
+        public void Check_Data_Remaining(string str, int remains)
+        {
+            Span<byte> data = Encoding.ASCII.GetBytes(str);
+
+            StackDataReader reader = new StackDataReader(data);
+
+            reader.ReadASCII();
+            Assert.Equal(remains, reader.Remaining);
+
+            reader.ReadASCII();
+            Assert.Equal(0, reader.Remaining);
+
+            reader.Release();
+        }
+
+        [Theory]
+        [InlineData("classicuo\0abc", 0)]
+        [InlineData("classicuoabc", 0)]
+        [InlineData("classicuoabc\0", 0)]
+        public void Check_Data_Remaining_FixedLength(string str, int remains)
+        {
+            Span<byte> data = Encoding.ASCII.GetBytes(str);
+
+            StackDataReader reader = new StackDataReader(data);
+
+            reader.ReadASCII(str.Length);
+            Assert.Equal(reader.Remaining, remains);
+
+            reader.ReadASCII(remains);
+            Assert.Equal(0, reader.Remaining);
+
+            reader.Release();
+        }
+
+        [Theory]
+        [InlineData("classicuo\0abc", 6)]
+        [InlineData("classicuoabc", 0)]
+        [InlineData("classicuoabc\0", 0)]
+        public void Check_Data_Remaining_Unicode_BigEndian(string str, int remains)
         {
             Span<byte> data = Encoding.BigEndianUnicode.GetBytes(str);
 
             StackDataReader reader = new StackDataReader(data);
 
-            string s = reader.ReadUnicodeBE();
+            reader.ReadUnicodeBE();
+            Assert.Equal(remains, reader.Remaining);
 
-            Assert.Equal(s, result);
+            reader.ReadUnicodeBE();
+            Assert.Equal(0, reader.Remaining);
+
+            reader.Release();
+        }
+
+        [Theory]
+        [InlineData("classicuo\0abc", 0)]
+        [InlineData("classicuoabc", 0)]
+        [InlineData("classicuoabc\0", 0)]
+        public void Check_Data_Remaining_FixedLength_Unicode_BigEndian(string str, int remains)
+        {
+            Span<byte> data = Encoding.BigEndianUnicode.GetBytes(str);
+
+            StackDataReader reader = new StackDataReader(data);
+
+            reader.ReadUnicodeBE(str.Length);
+            Assert.Equal(reader.Remaining, remains);
+
+            reader.ReadUnicodeBE(remains);
+            Assert.Equal(0, reader.Remaining);
+
+            reader.Release();
+        }
+
+        [Theory]
+        [InlineData("classicuo\0abc", 6)]
+        [InlineData("classicuoabc", 0)]
+        [InlineData("classicuoabc\0", 0)]
+        public void Check_Data_Remaining_Unicode_LittleEndian(string str, int remains)
+        {
+            Span<byte> data = Encoding.Unicode.GetBytes(str);
+
+            StackDataReader reader = new StackDataReader(data);
+
+            reader.ReadUnicodeLE();
+            Assert.Equal(remains, reader.Remaining);
+
+            reader.ReadUnicodeLE();
+            Assert.Equal(0, reader.Remaining);
+
+            reader.Release();
+        }
+
+        [Theory]
+        [InlineData("classicuo\0abc", 0)]
+        [InlineData("classicuoabc", 0)]
+        [InlineData("classicuoabc\0", 0)]
+        public void Check_Data_Remaining_FixedLength_Unicode_LittleEndian(string str, int remains)
+        {
+            Span<byte> data = Encoding.Unicode.GetBytes(str);
+
+            StackDataReader reader = new StackDataReader(data);
+
+            reader.ReadUnicodeLE(str.Length);
+            Assert.Equal(reader.Remaining, remains);
+
+            reader.ReadUnicodeLE(remains);
+            Assert.Equal(0, reader.Remaining);
+
+            reader.Release();
+        }
+
+        [Theory]
+        [InlineData("classicuo\0abc", 3)]
+        [InlineData("classicuoabc", 0)]
+        [InlineData("classicuoabc\0", 0)]
+        public void Check_Data_Remaining_UTF8(string str, int remains)
+        {
+            Span<byte> data = Encoding.UTF8.GetBytes(str);
+
+            StackDataReader reader = new StackDataReader(data);
+
+            reader.ReadUTF8();
+            Assert.Equal(remains, reader.Remaining);
+
+            reader.ReadUTF8();
+            Assert.Equal(0, reader.Remaining);
+
+            reader.Release();
+        }
+
+        [Theory]
+        [InlineData("classicuo\0abc", 0)]
+        [InlineData("classicuoabc", 0)]
+        [InlineData("classicuoabc\0", 0)]
+        public void Check_Data_Remaining_FixedLength_UTF8(string str, int remains)
+        {
+            Span<byte> data = Encoding.UTF8.GetBytes(str);
+
+            StackDataReader reader = new StackDataReader(data);
+
+            reader.ReadUTF8(str.Length);
+            Assert.Equal(reader.Remaining, remains);
+
+            reader.ReadUTF8(remains);
+            Assert.Equal(0, reader.Remaining);
+
+            reader.Release();
+        }
+
+        [Theory]
+        [InlineData("classicuo\0abc", 3)]
+        [InlineData("classicuoabc", 0)]
+        [InlineData("classicuoabc\0", 0)]
+        public void Check_Data_Remaining_Unicode_UTF8_Safe(string str, int remains)
+        {
+            Span<byte> data = Encoding.UTF8.GetBytes(str);
+
+            StackDataReader reader = new StackDataReader(data);
+
+            reader.ReadUTF8StringSafe();
+            Assert.Equal(remains, reader.Remaining);
+
+            reader.ReadUTF8StringSafe();
+            Assert.Equal(0, reader.Remaining);
+
+            reader.Release();
+        }
+
+        [Theory]
+        [InlineData("classicuo\0abc", 0)]
+        [InlineData("classicuoabc", 0)]
+        [InlineData("classicuoabc\0", 0)]
+        public void Check_Data_Remaining_FixedLength_UTF8_Safe(string str, int remains)
+        {
+            Span<byte> data = Encoding.UTF8.GetBytes(str);
+
+            StackDataReader reader = new StackDataReader(data);
+
+            reader.ReadUTF8StringSafe(str.Length);
+            Assert.Equal(reader.Remaining, remains);
+
+            reader.ReadUTF8StringSafe(remains);
+            Assert.Equal(0, reader.Remaining);
 
             reader.Release();
         }
