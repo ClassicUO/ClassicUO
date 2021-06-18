@@ -2509,6 +2509,7 @@ namespace ClassicUO.Network
                         byte lines = p.ReadUInt8();
 
                         ValueStringBuilder sb = new ValueStringBuilder(256);
+
                         for (int i = 0; i < lines; i++)
                         {
                             byte lineLen = p.ReadUInt8();
@@ -4891,7 +4892,9 @@ namespace ClassicUO.Network
 
             if (list.Count != 0)
             {
-                ValueStringBuilder sb = new ValueStringBuilder(totalLength);
+                Span<char> span = stackalloc char[totalLength];
+                ValueStringBuilder sb = new ValueStringBuilder(span);
+
                 foreach (var s in list)
                 {
                     string str = s.Item2;

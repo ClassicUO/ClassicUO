@@ -30,6 +30,7 @@
 
 #endregion
 
+using System;
 using System.Text;
 using System.Xml;
 using ClassicUO.Game.UI.Controls;
@@ -118,7 +119,8 @@ namespace ClassicUO.Game.UI.Gumps
                     _deltaBytesSent = NetClient.Socket.Statistics.DeltaBytesSent;
                 }
 
-                ValueStringBuilder sb = new ValueStringBuilder(128);
+                Span<char> span = stackalloc char[128];
+                ValueStringBuilder sb = new ValueStringBuilder(span);
               
                 if (IsMinimized)
                 {

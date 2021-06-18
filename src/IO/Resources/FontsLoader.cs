@@ -548,8 +548,10 @@ namespace ClassicUO.IO.Resources
 
             int strLen = str.Length;
 
-            ValueStringBuilder sb = new ValueStringBuilder(strLen);
-          
+           
+            Span<char> span = stackalloc char[strLen];
+            ValueStringBuilder sb = new ValueStringBuilder(span);
+
             if (IsUsingHTML)
             {
                 unsafe
@@ -1227,7 +1229,9 @@ namespace ClassicUO.IO.Resources
             uint* table = (uint*) _unicodeFontAddress[font];
             int strLen = str.Length;
 
-            ValueStringBuilder sb = new ValueStringBuilder(strLen);
+            Span<char> span = stackalloc char[strLen];
+            ValueStringBuilder sb = new ValueStringBuilder(span);
+
             if (IsUsingHTML)
             {
                 unsafe

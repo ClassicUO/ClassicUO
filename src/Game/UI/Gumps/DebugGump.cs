@@ -30,6 +30,7 @@
 
 #endregion
 
+using System;
 using System.Text;
 using System.Xml;
 using ClassicUO.Configuration;
