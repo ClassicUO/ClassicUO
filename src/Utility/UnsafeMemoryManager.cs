@@ -32,9 +32,7 @@
 
 using System;
 using System.Diagnostics;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using ClassicUO.Utility.Platforms;
 
 namespace ClassicUO.Utility
 {
@@ -163,114 +161,5 @@ namespace ClassicUO.Utility
             pool->Alloc = null;
             pool->Free = null;
         }
-
-        static UnsafeMemoryManager()
-        {
-            Console.WriteLine("Platform: {0}", PlatformHelper.IsMonoRuntime ? "Mono" : ".NET");
-        }
-
-
-
-        public static T ToStruct<T>(IntPtr ptr)
-        {
-#if NETFRAMEWORK
-            return ToStruct<T>(ptr, SizeOf<T>());
-#else
-            return Unsafe.Read<T>((void*) ptr);
-#endif
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static T ToStruct<T>(IntPtr ptr, int size)
-        {
-            byte* str = (byte*) ptr;
-
-            T result = default;
-            byte* resultPtr = (byte*) AsPointer(ref result);
-            Buffer.MemoryCopy(str, resultPtr, size, size);
-
-            return result;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static T As<T>(object v)
-        {
-#if NETFRAMEWORK
-            int size = SizeOf<T>();
-
-            return Reinterpret<object, T>(v, size);
-#else
-            return Unsafe.As<object, T>(ref v);
-#endif          
-        }
-        
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static int SizeOf<T>()
-        {
-#if NETFRAMEWORK
-            DoubleStruct<T> doubleStruct = DoubleStruct<T>.Value;
-            TypedReference tRef0 = __makeref(doubleStruct.First);
-            TypedReference tRef1 = __makeref(doubleStruct.Second);
-            IntPtr ptrToT0, ptrToT1;
-
-            if (PlatformHelper.IsMonoRuntime)
-            {
-                ptrToT0 = *((IntPtr*) &tRef0 + 1);
-                ptrToT1 = *((IntPtr*) &tRef1 + 1);
-            }
-            else
-            {
-                ptrToT0 = *(IntPtr*) &tRef0;
-                ptrToT1 = *(IntPtr*) &tRef1;
-            }
-
-            return (int) ((byte*) ptrToT1 - (byte*) ptrToT0);
-#else
-            return Unsafe.SizeOf<T>();
-#endif
-        }
-
-
-#if NETFRAMEWORK
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static TOut Reinterpret<TIn, TOut>(TIn curValue, int sizeBytes) //where TIn : struct where TOut : struct
-        {
-            TOut result = default;
-            TypedReference resultRef = __makeref(result);
-            TypedReference curValueRef = __makeref(curValue);
-
-            int offset = PlatformHelper.IsMonoRuntime ? 1 : 0;
-
-            byte* resultPtr = (byte*) *((IntPtr*) &resultRef + offset);
-            byte* curValuePtr = (byte*) *((IntPtr*) &curValueRef + offset);
-            Buffer.MemoryCopy(curValuePtr, resultPtr, sizeBytes, sizeBytes);
-
-            return result;
-        }
-#endif        
-
-        [StructLayout(LayoutKind.Sequential, Pack = 1)]
-        private struct DoubleStruct<T>
-        {
-            public T First;
-            public T Second;
-            public static readonly DoubleStruct<T> Value;
-        }
-
-        //[StructLayout(LayoutKind.Sequential, Pack = 1)]
-        //private struct DoubleStruct<T> //where T : struct
-        //{
-        //    public T First;
-        //    public T Second;
-        //    public static readonly DoubleStruct<T> Value;
-        //}
-
-        //[StructLayout(LayoutKind.Sequential, Pack = 1)]
-        //private struct SingleStruct<T> //where T : struct
-        //{
-        //    public T First;
-        //    public static readonly SingleStruct<T> Value;
-        //}
     }
 }
