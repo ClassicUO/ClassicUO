@@ -120,8 +120,8 @@
   <data name="CombatSpells" xml:space="preserve">
     <value>Combat-Spells</value>
   </data>
-  <data name="Containers" xml:space="preserve">
-    <value>Containers</value>
+  <data name="Interface" xml:space="preserve">
+    <value>Interface</value>
   </data>
   <data name="Counters" xml:space="preserve">
     <value>Counters</value>

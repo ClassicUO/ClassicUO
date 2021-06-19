@@ -691,15 +691,6 @@ namespace ClassicUO.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Containers.
-        /// </summary>
-        public static string Containers {
-            get {
-                return ResourceManager.GetString("Containers", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to - Container scale:.
         /// </summary>
         public static string ContainerScale {
@@ -1904,6 +1895,15 @@ namespace ClassicUO.Resources {
         public static string Intelligence {
             get {
                 return ResourceManager.GetString("Intelligence", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Interface.
+        /// </summary>
+        public static string Interface {
+            get {
+                return ResourceManager.GetString("Interface", resourceCulture);
             }
         }
         
