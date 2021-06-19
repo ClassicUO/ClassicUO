@@ -1146,15 +1146,15 @@ namespace ClassicUO.Game.UI.Gumps
                                         {
                                             if (z0 < z1)
                                             {
-                                                r = (byte)(r * MAG_0);
-                                                g = (byte)(g * MAG_0);
-                                                b = (byte)(b * MAG_0);
+                                                r = (byte)Math.Min(0xFF, r * MAG_0);
+                                                g = (byte)Math.Min(0xFF, g * MAG_0);
+                                                b = (byte)Math.Min(0xFF, b * MAG_0);
                                             }
                                             else
                                             {
-                                                r = (byte)(r * MAG_1);
-                                                g = (byte)(g * MAG_1);
-                                                b = (byte)(b * MAG_1);
+                                                r = (byte)Math.Min(0xFF, r * MAG_1);
+                                                g = (byte)Math.Min(0xFF, g * MAG_1);
+                                                b = (byte)Math.Min(0xFF, b * MAG_1);
                                             }
 
                                             cc = (uint) (r | (g << 8) | (b << 16) | (a << 24));
