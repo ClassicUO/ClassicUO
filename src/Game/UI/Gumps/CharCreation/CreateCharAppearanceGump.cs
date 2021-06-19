@@ -661,7 +661,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                 }
                 else
                 {
-                    item = _character.FindItemByLayer(e.Layer);
+                    item = _character.FindItemByLayer(_characterInfo.IsFemale && e.Layer == Layer.Pants ? Layer.Skirt : e.Layer);
                 }
 
                 if (item != null)
