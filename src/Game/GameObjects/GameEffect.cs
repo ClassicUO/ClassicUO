@@ -77,7 +77,7 @@ namespace ClassicUO.Game.GameObjects
 
         public bool CanCreateExplosionEffect;
         public ushort AnimationGraphic = 0xFFFF;
-        public AnimDataFrame2 AnimDataFrame;
+        public AnimDataFrame AnimDataFrame;
         public byte AnimIndex;
         public float AngleToTarget;
         public GraphicEffectBlendMode Blend;

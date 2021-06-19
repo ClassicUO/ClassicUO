@@ -169,17 +169,7 @@ namespace ClassicUO.Utility
             Console.WriteLine("Platform: {0}", PlatformHelper.IsMonoRuntime ? "Mono" : ".NET");
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void* AsPointer<T>(ref T v)
-        {
-#if NETFRAMEWORK
-            TypedReference t = __makeref(v);
 
-            return (void*) *((IntPtr*) &t + (PlatformHelper.IsMonoRuntime ? 1 : 0));
-#else
-            return Unsafe.AsPointer<T>(ref v);
-#endif
-        }
 
         public static T ToStruct<T>(IntPtr ptr)
         {
