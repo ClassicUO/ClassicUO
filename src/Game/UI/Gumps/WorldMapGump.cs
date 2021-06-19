@@ -1115,20 +1115,15 @@ namespace ClassicUO.Game.UI.Gumps
                                 const float MAG_0 = 80f / 100f;
                                 const float MAG_1 = 100f / 80f;
 
-                                int mapY_plus_one;
-
                                 for (mapY = 1; mapY < real_height_less_one; ++mapY)
                                 {
-                                    mapY_plus_one = mapY + 1;
+                                    int blockCurrent = (mapY + OFFSET_PIX_HALF) * (realWidth + OFFSET_PIX) + OFFSET_PIX_HALF;
+                                    int blockNext = (mapY + 1 + OFFSET_PIX_HALF) * (realWidth + OFFSET_PIX) + OFFSET_PIX_HALF;
 
                                     for (mapX = 1; mapX < real_width_less_one; ++mapX)
                                     {
-                                        int blockCurrent = (mapY + OFFSET_PIX_HALF) * (realWidth + OFFSET_PIX) + mapX + OFFSET_PIX_HALF;
-
-                                        int blockNext = (mapY_plus_one + OFFSET_PIX_HALF) * (realWidth + OFFSET_PIX) + (mapX - 1) + OFFSET_PIX_HALF;
-
-                                        ref sbyte z0 = ref allZ[blockCurrent];
-                                        ref sbyte z1 = ref allZ[blockNext];
+                                        sbyte z0 = allZ[++blockCurrent];
+                                        sbyte z1 = allZ[blockNext++];
 
                                         if (z0 == z1)
                                         {
@@ -1183,6 +1178,7 @@ namespace ClassicUO.Game.UI.Gumps
                         }
                         catch (Exception ex)
                         {
+                            Log.Error($"error loading worldmap: {ex}");
                         }
 
 
