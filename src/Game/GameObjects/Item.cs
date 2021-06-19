@@ -31,6 +31,8 @@
 #endregion
 
 using System;
+using System.Collections.Generic;
+using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
@@ -104,6 +106,17 @@ namespace ClassicUO.Game.GameObjects
         private ushort? _displayedGraphic;
         private bool _isMulti;
 
+        private static readonly Dictionary<ushort, ushort> _newReagentsMap = new Dictionary<ushort, ushort>
+        {
+            { 3962, 5002 },
+            { 3963, 5003 },
+            { 3980, 5004 },
+            { 3981, 5005 },
+            { 3972, 5006 },
+            { 3973, 5007 },
+            { 3974, 5008 },
+            { 3976, 5009 },
+        };
 
         public Item() : base(0)
         {
@@ -135,6 +148,10 @@ namespace ClassicUO.Game.GameObjects
                 else if (IsMulti)
                 {
                     return MultiGraphic;
+                }
+                else if (ProfileManager.CurrentProfile.NewReagents && _newReagentsMap.ContainsKey(Graphic))
+                {
+                    return _newReagentsMap[Graphic];
                 }
 
                 return Graphic;

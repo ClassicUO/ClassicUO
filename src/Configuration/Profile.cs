@@ -170,6 +170,9 @@ namespace ClassicUO.Configuration
 
         public bool HideScreenshotStoredInMessage { get; set; }
 
+        // Graphical Customizations
+        public bool NewReagents { get; set; } = true;
+
         // Experimental
         public bool CastSpellsByOneClick { get; set; }
         public bool BuffBarTime { get; set; }

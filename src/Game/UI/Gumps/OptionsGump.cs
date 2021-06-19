@@ -79,6 +79,7 @@ namespace ClassicUO.Game.UI.Gumps
         private HSliderBar _delay_before_display_tooltip, _tooltip_zoom, _tooltip_background_opacity;
         private Combobox _dragSelectModifierKey;
         private Combobox _backpackStyle;
+        private Checkbox _newReagents;
 
 
         //counters
@@ -3289,6 +3290,19 @@ namespace ClassicUO.Game.UI.Gumps
             button.MouseUp += (sender, e) => { ContainerManager.BuildContainerFile(true); };
             rightArea.Add(button);
 
+            startY += button.Height + 5;
+
+            _newReagents = AddCheckBox
+            (
+                rightArea,
+                ResGumps.NewReagents,
+                _currentProfile.NewReagents,
+                startX,
+                startY
+            );
+
+            startY += _newReagents.Height + 2;
+
             Add(rightArea, PAGE);
         }
 
@@ -3980,6 +3994,8 @@ namespace ClassicUO.Game.UI.Gumps
             _currentProfile.OverrideContainerLocationSetting = _overrideContainerLocationSetting.SelectedIndex;
 
             _currentProfile.ShowTargetRangeIndicator = _showTargetRangeIndicator.IsChecked;
+
+            _currentProfile.NewReagents = _newReagents.IsChecked;
 
 
             bool updateHealthBars = _currentProfile.CustomBarsToggled != _customBars.IsChecked;

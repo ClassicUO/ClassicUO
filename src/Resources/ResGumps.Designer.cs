@@ -2360,6 +2360,15 @@ namespace ClassicUO.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to New Reagents.
+        /// </summary>
+        public static string NewReagents {
+            get {
+                return ResourceManager.GetString("NewReagents", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to &gt;&gt;.
         /// </summary>
         public static string Next {
