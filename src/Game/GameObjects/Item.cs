@@ -106,6 +106,20 @@ namespace ClassicUO.Game.GameObjects
         private ushort? _displayedGraphic;
         private bool _isMulti;
 
+        private static readonly Dictionary<ushort, ushort> _newGemsMap = new Dictionary<ushort, ushort>
+        {
+            { 3877, 47570 },
+            { 3862, 47567 },
+            { 3861, 47566 },
+            { 3878, 47571 },
+            { 3856, 47564 },
+            { 3859, 47565 },
+            { 3865, 47568 },
+            { 3873, 47569 },
+            { 3885, 47563 }
+        };
+
+
         private static readonly Dictionary<ushort, ushort> _newReagentsMap = new Dictionary<ushort, ushort>
         {
             { 3962, 5002 },
@@ -152,6 +166,10 @@ namespace ClassicUO.Game.GameObjects
                 else if (ProfileManager.CurrentProfile.NewReagents && _newReagentsMap.ContainsKey(Graphic))
                 {
                     return _newReagentsMap[Graphic];
+                }
+                else if (ProfileManager.CurrentProfile.NewGems && _newGemsMap.ContainsKey(Graphic))
+                {
+                    return _newGemsMap[Graphic];
                 }
 
                 return Graphic;

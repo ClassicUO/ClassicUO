@@ -2342,6 +2342,15 @@ namespace ClassicUO.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to New Gems.
+        /// </summary>
+        public static string NewGems {
+            get {
+                return ResourceManager.GetString("NewGems", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to New Group.
         /// </summary>
         public static string NewGroup {

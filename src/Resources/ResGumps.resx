@@ -660,6 +660,9 @@ when amount is or exceeds</value>
   <data name="NewReagents" xml:space="preserve">
     <value>New Reagents</value>
   </data>
+  <data name="NewGems" xml:space="preserve">
+    <value>New Gems</value>
+  </data>
   <data name="DisableTab" xml:space="preserve">
     <value>Disable TAB (toggle warmode)</value>
   </data>
