@@ -199,7 +199,7 @@ namespace ClassicUO.UnitTests.IO
 
             StackDataReader reader = new StackDataReader(data);
 
-            string s = reader.ReadUTF8StringSafe(str.Length);
+            string s = reader.ReadUTF8(str.Length, true);
 
             Assert.Equal(s, result);
             Assert.Equal(0, reader.Remaining);
@@ -221,7 +221,7 @@ namespace ClassicUO.UnitTests.IO
 
             StackDataReader reader = new StackDataReader(data);
 
-            string s = reader.ReadUTF8StringSafe();
+            string s = reader.ReadUTF8(true);
 
             Assert.Equal(s, result);
 
@@ -391,10 +391,10 @@ namespace ClassicUO.UnitTests.IO
 
             StackDataReader reader = new StackDataReader(data);
 
-            reader.ReadUTF8StringSafe();
+            reader.ReadUTF8(true);
             Assert.Equal(remains, reader.Remaining);
 
-            reader.ReadUTF8StringSafe();
+            reader.ReadUTF8(true);
             Assert.Equal(0, reader.Remaining);
 
             reader.Release();
@@ -410,10 +410,10 @@ namespace ClassicUO.UnitTests.IO
 
             StackDataReader reader = new StackDataReader(data);
 
-            reader.ReadUTF8StringSafe(str.Length);
+            reader.ReadUTF8(str.Length, true);
             Assert.Equal(reader.Remaining, remains);
 
-            reader.ReadUTF8StringSafe(remains);
+            reader.ReadUTF8(remains, true);
             Assert.Equal(0, reader.Remaining);
 
             reader.Release();

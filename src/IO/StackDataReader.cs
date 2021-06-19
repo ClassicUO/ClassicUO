@@ -288,56 +288,45 @@ namespace ClassicUO.IO
             return v;
         }
 
-        public string ReadASCII()
+        public string ReadASCII(bool safe = false)
         {
-            return ReadString(Encoding.ASCII, -1, 1, false);
+            return ReadString(Encoding.ASCII, -1, 1, safe);
         }
 
-        public string ReadASCII(int length)
+        public string ReadASCII(int length, bool safe = false)
         {
-            return ReadString(Encoding.ASCII, length, 1, false);
+            return ReadString(Encoding.ASCII, length, 1, safe);
         }
 
-        public string ReadUnicodeBE()
+        public string ReadUnicodeBE(bool safe = false)
         {
-            return ReadString(Encoding.BigEndianUnicode, -1, 2, false);
+            return ReadString(Encoding.BigEndianUnicode, -1, 2, safe);
         }
 
-        public string ReadUnicodeBE(int length)
+        public string ReadUnicodeBE(int length, bool safe = false)
         {
-            return ReadString(Encoding.BigEndianUnicode, length, 2, false);
+            return ReadString(Encoding.BigEndianUnicode, length, 2, safe);
         }
 
-        public string ReadUnicodeLE()
+        public string ReadUnicodeLE(bool safe = false)
         {
-            return ReadString(Encoding.Unicode, -1, 2, false);
+            return ReadString(Encoding.Unicode, -1, 2, safe);
         }
 
-        public string ReadUnicodeLE(int length)
+        public string ReadUnicodeLE(int length, bool safe = false)
         {
-            return ReadString(Encoding.Unicode, length, 2, false);
+            return ReadString(Encoding.Unicode, length, 2, safe);
         }
 
-        public string ReadUTF8()
+        public string ReadUTF8(bool safe = false)
         {
-            return ReadString(Encoding.UTF8, -1, 1, false);
+            return ReadString(Encoding.UTF8, -1, 1, safe);
         }
 
-        public string ReadUTF8(int length)
+        public string ReadUTF8(int length, bool safe = false)
         {
-            return ReadString(Encoding.UTF8, length, 1, false);
+            return ReadString(Encoding.UTF8, length, 1, safe);
         }
-
-        public string ReadUTF8StringSafe()
-        {
-            return ReadString(Encoding.UTF8, -1, 1, true);
-        }
-
-        public string ReadUTF8StringSafe(int length)
-        {
-            return ReadString(Encoding.UTF8, length, 1, true);
-        }
-
 
         public void Read(Span<byte> data, int offset, int count)
         {

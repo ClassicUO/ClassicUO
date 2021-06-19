@@ -947,7 +947,7 @@ namespace ClassicUO.Game.Scenes
             ServerListEntry entry = new ServerListEntry()
             {
                 Index = p.ReadUInt16BE(),
-                Name = p.ReadASCII(32).MakeSafe(),
+                Name = p.ReadASCII(32, true),
                 PercentFull = p.ReadUInt8(),
                 Timezone = p.ReadUInt8(),
                 Address = p.ReadUInt32BE()

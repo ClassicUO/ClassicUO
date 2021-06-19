@@ -2272,7 +2272,7 @@ namespace ClassicUO.Network
 
                         if (index < gump.BookLines.Length)
                         {
-                            gump.BookLines[index] = ModernBookGump.IsNewBook ? p.ReadUTF8StringSafe() : p.ReadASCII();
+                            gump.BookLines[index] = ModernBookGump.IsNewBook ? p.ReadUTF8(true) : p.ReadASCII();
                         }
                         else
                         {
@@ -2440,7 +2440,7 @@ namespace ClassicUO.Network
                         int x = (Client.Game.Window.ClientBounds.Width >> 1) - 245;
                         int y = (Client.Game.Window.ClientBounds.Height >> 1) - 205;
 
-                        bulletinBoard = new BulletinBoardGump(item, x, y, p.ReadUTF8StringSafe(22)); //p.ReadASCII(22));
+                        bulletinBoard = new BulletinBoardGump(item, x, y, p.ReadUTF8(22, true)); //p.ReadASCII(22));
                         UIManager.Add(bulletinBoard);
 
                         item.Opened = true;
@@ -2462,15 +2462,15 @@ namespace ClassicUO.Network
 
                         // poster
                         int len = p.ReadUInt8();
-                        string text = p.ReadUTF8StringSafe(len) + " - ";
+                        string text = p.ReadUTF8(len, true) + " - ";
 
                         // subject
                         len = p.ReadUInt8();
-                        text += p.ReadUTF8StringSafe(len) + " - ";
+                        text += p.ReadUTF8(len, true) + " - ";
 
                         // datetime
                         len = p.ReadUInt8();
-                        text += p.ReadUTF8StringSafe(len);
+                        text += p.ReadUTF8(len, true);
 
                         bulletinBoard.AddBulletinObject(serial, text);
                     }
@@ -2492,7 +2492,7 @@ namespace ClassicUO.Network
                         string poster = len > 0 ? p.ReadASCII(len) : string.Empty;
 
                         len = p.ReadUInt8();
-                        string subject = len > 0 ? p.ReadUTF8StringSafe(len) : string.Empty;
+                        string subject = len > 0 ? p.ReadUTF8(len, true) : string.Empty;
 
                         len = p.ReadUInt8();
                         string dataTime = len > 0 ? p.ReadASCII(len) : string.Empty;
@@ -2508,7 +2508,8 @@ namespace ClassicUO.Network
 
                         byte lines = p.ReadUInt8();
 
-                        ValueStringBuilder sb = new ValueStringBuilder(256);
+                        Span<char> span = stackalloc char[256];
+                        ValueStringBuilder sb = new ValueStringBuilder(span);
 
                         for (int i = 0; i < lines; i++)
                         {
@@ -2516,7 +2517,7 @@ namespace ClassicUO.Network
 
                             if (lineLen > 0)
                             {
-                                string putta = p.ReadUTF8StringSafe(lineLen);
+                                string putta = p.ReadUTF8(lineLen, true);
                                 sb.Append(putta);
                                 sb.Append('\n');
                             }
@@ -3172,8 +3173,8 @@ namespace ClassicUO.Network
             if (bgump == null || bgump.IsDisposed)
             {
                 ushort page_count = p.ReadUInt16BE();
-                string title = oldpacket ? p.ReadUTF8StringSafe(60) : p.ReadUTF8StringSafe(p.ReadUInt16BE());
-                string author = oldpacket ? p.ReadUTF8StringSafe(30) : p.ReadUTF8StringSafe(p.ReadUInt16BE());
+                string title = oldpacket ? p.ReadUTF8(60, true) : p.ReadUTF8(p.ReadUInt16BE(), true);
+                string author = oldpacket ? p.ReadUTF8(30, true) : p.ReadUTF8(p.ReadUInt16BE(), true);
 
                 UIManager.Add
                 (
@@ -3198,8 +3199,8 @@ namespace ClassicUO.Network
             {
                 p.Skip(2);
                 bgump.IsEditable = editable;
-                bgump.SetTile(oldpacket ? p.ReadUTF8StringSafe(60) : p.ReadUTF8StringSafe(p.ReadUInt16BE()), editable);
-                bgump.SetAuthor(oldpacket ? p.ReadUTF8StringSafe(30) : p.ReadUTF8StringSafe(p.ReadUInt16BE()), editable);
+                bgump.SetTile(oldpacket ? p.ReadUTF8(60, true) : p.ReadUTF8(p.ReadUInt16BE(), true), editable);
+                bgump.SetAuthor(oldpacket ? p.ReadUTF8(30, true) : p.ReadUTF8(p.ReadUInt16BE(), true), editable);
                 bgump.UseNewHeader = !oldpacket;
                 bgump.SetInScreen();
                 bgump.BringOnTop();
@@ -4152,7 +4153,8 @@ namespace ClassicUO.Network
                     ushort crafterNameLen = 0;
                     uint next = p.ReadUInt32BE();
 
-                    ValueStringBuilder strBuffer = new ValueStringBuilder(256);
+                    Span<char> span = stackalloc char[256];
+                    ValueStringBuilder strBuffer = new ValueStringBuilder(span);
                     if (next == 0xFFFFFFFD)
                     {
                         crafterNameLen = p.ReadUInt16BE();

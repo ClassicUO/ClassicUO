@@ -110,8 +110,8 @@ namespace ClassicUO.Game.UI.Gumps
                 _timeToUpdate = Time.Ticks + 100;
 
                 GameScene scene = Client.Game.GetScene<GameScene>();
-
-                ValueStringBuilder sb = new ValueStringBuilder(256);
+                Span<char> span = stackalloc char[256];
+                ValueStringBuilder sb = new ValueStringBuilder(span);
            
                 if (IsMinimized && scene != null)
                 {
