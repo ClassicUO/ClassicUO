@@ -885,7 +885,7 @@ namespace ClassicUO.Game.GameObjects
                 case Layer.Torso:
                     robe = mobile.FindItemByLayer(Layer.Robe);
 
-                    if (robe != null && robe.Graphic != 0 && robe.Graphic != 0x9985 && robe.Graphic != 0x9986 && robe.Graphic != 0xA412)
+                    if (robe != null && robe.Graphic != 0 && robe.Graphic != 0x9985 && robe.Graphic != 0x9986 && robe.Graphic != 0xA412 && robe.Graphic != 0xA2CA)
                     {
                         return true;
                     }
