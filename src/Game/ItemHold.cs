@@ -62,6 +62,7 @@ namespace ClassicUO.Game
         public static bool IsStackable { get; private set; }
         public static bool IsPartialHue { get; private set; }
         public static bool IsWearable { get; private set; }
+        public static bool IsCoin { get; private set; }
         public static bool HasAlpha { get; private set; }
         public static Layer Layer { get; private set; }
         public static Flags Flags { get; private set; }
@@ -93,6 +94,7 @@ namespace ClassicUO.Game
             Serial = item.Serial;
             Graphic = item.Graphic;
             DisplayedGraphic = item.IsCoin && amount == 1 ? item.Graphic : item.DisplayedGraphic;
+            IsCoin = item.IsCoin;
             X = item.X;
             Y = item.Y;
             Z = item.Z;
@@ -126,7 +128,7 @@ namespace ClassicUO.Game
             Hue = 0xFFFF;
             OnGround = false;
             Amount = 0;
-            IsWearable = IsStackable = IsPartialHue = HasAlpha = false;
+            IsWearable = IsStackable = IsPartialHue = HasAlpha = IsCoin = false;
             Layer = Layer.Invalid;
             Flags = Flags.None;
             MouseOffset = Point.Zero;
