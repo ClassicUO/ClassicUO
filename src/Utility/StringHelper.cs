@@ -32,6 +32,7 @@
 
 using System;
 using System.Runtime.CompilerServices;
+using System.Security;
 using System.Text;
 using SDL2;
 
@@ -64,7 +65,8 @@ namespace ClassicUO.Utility
                 return string.Empty;
             }
 
-            ValueStringBuilder sb = new ValueStringBuilder(str.Length);
+            Span<char> span = stackalloc char[str.Length];
+            ValueStringBuilder sb = new ValueStringBuilder(span);
             bool capitalizeNext = true;
 
             for (int i = 0; i < str.Length; i++)
@@ -91,7 +93,9 @@ namespace ClassicUO.Utility
                 return string.Empty;
             }
 
-            ValueStringBuilder sb = new ValueStringBuilder(str.Length);
+            Span<char> span = stackalloc char[str.Length];
+            ValueStringBuilder sb = new ValueStringBuilder(span);
+
             bool capitalizeNext = true;
 
             for (int i = 0; i < str.Length; i++)
@@ -168,7 +172,9 @@ namespace ClassicUO.Utility
                 return "";
             }
 
-            ValueStringBuilder sb = new ValueStringBuilder(str.Length);
+            Span<char> span = stackalloc char[str.Length];
+            ValueStringBuilder sb = new ValueStringBuilder(span);
+
             for (int i = 0; i < str.Length; i++)
             {
                 if (char.IsUpper(str[i]) == removelower || str[i] == ' ')
@@ -235,7 +241,9 @@ namespace ClassicUO.Utility
                     return str;
                 }
 
-                ValueStringBuilder sb = new ValueStringBuilder(str.Length);
+                Span<char> span = stackalloc char[str.Length];
+                ValueStringBuilder sb = new ValueStringBuilder(span);
+
                 sb.Append(parts[0]);
 
                 if (parts[1].Contains("/"))

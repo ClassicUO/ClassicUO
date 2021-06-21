@@ -646,7 +646,8 @@ namespace ClassicUO.Network
             if (_logFile == null)
                 _logFile = new LogFile(FileSystemHelper.CreateFolderIfNotExists(CUOEnviroment.ExecutablePath, "Logs", "Network"), "packets.log");
 
-            ValueStringBuilder output = new ValueStringBuilder();
+            Span<char> span = stackalloc char[256];
+            ValueStringBuilder output = new ValueStringBuilder(span);
             {
                 int off = sizeof(ulong) + 2;
 

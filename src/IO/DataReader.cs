@@ -227,7 +227,8 @@ namespace ClassicUO.IO
         {
             EnsureSize(size);
 
-            ValueStringBuilder sb = new ValueStringBuilder(size);
+            Span<char> span = stackalloc char[size];
+            ValueStringBuilder sb = new ValueStringBuilder(span);
 
             for (int i = 0; i < size; i++)
             {
