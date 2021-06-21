@@ -8,6 +8,7 @@ using ClassicUO.Game.Data;
 using ClassicUO.Game.Scenes;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.Game.GameObjects
@@ -86,7 +87,7 @@ namespace ClassicUO.Game.GameObjects
         );
 
 
-        public override bool Draw(UltimaBatcher2D batcher, int posX, int posY)
+        public override bool Draw(UltimaBatcher2D batcher, int posX, int posY, ref Vector3 hueVec)
         {
             if (IsDestroyed || !AllowedToDraw)
             {
@@ -98,7 +99,7 @@ namespace ClassicUO.Game.GameObjects
                 return false;
             }
 
-            ResetHueVector();
+            hueVec = Vector3.Zero;
 
             ref StaticTiles data = ref TileDataLoader.Instance.StaticData[Graphic];
 
@@ -116,7 +117,7 @@ namespace ClassicUO.Game.GameObjects
                 hue = Constants.DEAD_RANGE_COLOR;
             }
 
-            ShaderHueTranslator.GetHueVector(ref HueVector, hue, data.IsPartialHue, data.IsTranslucent ? .5f : 0, effect: true);
+            ShaderHueTranslator.GetHueVector(ref hueVec, hue, data.IsPartialHue, data.IsTranslucent ? .5f : 0, effect: true);
 
             switch (Blend)
             {
@@ -130,7 +131,7 @@ namespace ClassicUO.Game.GameObjects
                         posX,
                         posY,
                         AngleToTarget,
-                        ref HueVector
+                        ref hueVec
                     );
 
                     batcher.SetBlendState(null);
@@ -148,7 +149,7 @@ namespace ClassicUO.Game.GameObjects
                         posX,
                         posY,
                         AngleToTarget,
-                        ref HueVector
+                        ref hueVec
                     );
 
                     batcher.SetBlendState(null);
@@ -165,7 +166,7 @@ namespace ClassicUO.Game.GameObjects
                         posX,
                         posY,
                         AngleToTarget,
-                        ref HueVector
+                        ref hueVec
                     );
 
                     batcher.SetBlendState(null);
@@ -182,7 +183,7 @@ namespace ClassicUO.Game.GameObjects
                         posX,
                         posY,
                         AngleToTarget,
-                        ref HueVector
+                        ref hueVec
                     );
 
                     batcher.SetBlendState(null);
@@ -199,7 +200,7 @@ namespace ClassicUO.Game.GameObjects
                         posX,
                         posY,
                         AngleToTarget,
-                        ref HueVector
+                        ref hueVec
                     );
 
                     batcher.SetBlendState(null);
@@ -226,7 +227,7 @@ namespace ClassicUO.Game.GameObjects
                         posX,
                         posY,
                         AngleToTarget,
-                        ref HueVector
+                        ref hueVec
                     );
 
                     break;

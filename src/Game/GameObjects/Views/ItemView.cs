@@ -38,7 +38,8 @@ using ClassicUO.Game.Scenes;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
-using ClassicUO.Utility;
+using Microsoft.Xna.Framework;
+using MathHelper = ClassicUO.Utility.MathHelper;
 
 namespace ClassicUO.Game.GameObjects
 {
@@ -46,7 +47,7 @@ namespace ClassicUO.Game.GameObjects
     {
         private static EquipConvData? _equipConvData;
 
-        public override bool Draw(UltimaBatcher2D batcher, int posX, int posY)
+        public override bool Draw(UltimaBatcher2D batcher, int posX, int posY, ref Vector3 hueVec)
         {
             if (!AllowedToDraw || IsDestroyed)
             {
@@ -55,7 +56,8 @@ namespace ClassicUO.Game.GameObjects
 
             //Engine.DebugInfo.ItemsRendered++;
 
-            ResetHueVector();
+            hueVec = Vector3.Zero;
+
             DrawTransparent = false;
 
             posX += (int) Offset.X;
@@ -63,17 +65,17 @@ namespace ClassicUO.Game.GameObjects
 
             if (ItemData.IsTranslucent)
             {
-                HueVector.Z = 0.5f;
+                hueVec.Z = 0.5f;
             }
 
             if (AlphaHue != 255)
             {
-                HueVector.Z = 1f - AlphaHue / 255f;
+                hueVec.Z = 1f - AlphaHue / 255f;
             }
 
             if (IsCorpse)
             {
-                return DrawCorpse(batcher, posX, posY - 3);
+                return DrawCorpse(batcher, posX, posY - 3, ref hueVec);
             }
 
 
@@ -149,7 +151,7 @@ namespace ClassicUO.Game.GameObjects
                 }
             }
 
-            ShaderHueTranslator.GetHueVector(ref HueVector, hue, partial, HueVector.Z);
+            ShaderHueTranslator.GetHueVector(ref hueVec, hue, partial, hueVec.Z);
 
             if (!IsMulti && !IsCoin && Amount > 1 && ItemData.IsStackable)
             {
@@ -159,7 +161,7 @@ namespace ClassicUO.Game.GameObjects
                     graphic,
                     posX - 5,
                     posY - 5,
-                    ref HueVector,
+                    ref hueVec,
                     ref DrawTransparent,
                     false
                 );
@@ -172,7 +174,7 @@ namespace ClassicUO.Game.GameObjects
 
             if (!SerialHelper.IsValid(Serial) && IsMulti && TargetManager.TargetingState == CursorTarget.MultiPlacement)
             {
-                HueVector.Z = 0.5f;
+                hueVec.Z = 0.5f;
             }
 
             DrawStaticAnimated
@@ -181,7 +183,7 @@ namespace ClassicUO.Game.GameObjects
                 graphic,
                 posX,
                 posY,
-                ref HueVector,
+                ref hueVec,
                 ref DrawTransparent,
                 false
             );
@@ -214,7 +216,7 @@ namespace ClassicUO.Game.GameObjects
             return true;
         }
 
-        private bool DrawCorpse(UltimaBatcher2D batcher, int posX, int posY)
+        private bool DrawCorpse(UltimaBatcher2D batcher, int posX, int posY, ref Vector3 hueVec)
         {
             if (IsDestroyed || World.CorpseManager.Exists(Serial, 0))
             {
@@ -245,9 +247,10 @@ namespace ClassicUO.Game.GameObjects
                 ishuman,
                 Hue,
                 IsFlipped,
-                HueVector.Z,
+                hueVec.Z,
                 group,
-                direction
+                direction,
+                ref hueVec
             );
 
             for (int i = 0; i < Constants.USED_LAYER_COUNT; i++)
@@ -265,9 +268,10 @@ namespace ClassicUO.Game.GameObjects
                     ishuman,
                     0,
                     IsFlipped,
-                    HueVector.Z,
+                    hueVec.Z,
                     group,
-                    direction
+                    direction,
+                    ref hueVec
                 );
             }
 
@@ -287,7 +291,8 @@ namespace ClassicUO.Game.GameObjects
             bool flipped,
             float alpha,
             byte animGroup,
-            byte dir
+            byte dir,
+            ref Vector3 hueVec
         )
         {
             _equipConvData = null;
@@ -394,17 +399,17 @@ namespace ClassicUO.Game.GameObjects
                     }
                 }
 
-                ResetHueVector();
+                hueVec = Vector3.Zero;
 
                 if (ProfileManager.CurrentProfile.NoColorObjectsOutOfRange && owner.Distance > World.ClientViewRange)
                 {
-                    HueVector.X = Constants.OUT_RANGE_COLOR;
-                    HueVector.Y = 1;
+                    hueVec.X = Constants.OUT_RANGE_COLOR;
+                    hueVec.Y = 1;
                 }
                 else if (World.Player.IsDead && ProfileManager.CurrentProfile.EnableBlackWhiteEffect)
                 {
-                    HueVector.X = Constants.DEAD_RANGE_COLOR;
-                    HueVector.Y = 1;
+                    hueVec.X = Constants.DEAD_RANGE_COLOR;
+                    hueVec.Y = 1;
                 }
                 else
                 {
@@ -417,7 +422,7 @@ namespace ClassicUO.Game.GameObjects
                         color = Constants.HIGHLIGHT_CURRENT_OBJECT_HUE;
                     }
 
-                    ShaderHueTranslator.GetHueVector(ref HueVector, color, ispartialhue, alpha);
+                    ShaderHueTranslator.GetHueVector(ref hueVec, color, ispartialhue, alpha);
                 }
 
                 batcher.DrawSprite
@@ -426,7 +431,7 @@ namespace ClassicUO.Game.GameObjects
                     posX,
                     posY,
                     flipped,
-                    ref HueVector
+                    ref hueVec
                 );
 
                 if (!SerialHelper.IsValid(owner))

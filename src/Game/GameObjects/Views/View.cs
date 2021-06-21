@@ -43,7 +43,6 @@ namespace ClassicUO.Game.GameObjects
 {
     internal abstract partial class GameObject
     {
-        protected static Vector3 HueVector;
         public static bool DrawTransparent;
 
         protected static readonly Lazy<DepthStencilState> StaticTransparentStencil = new Lazy<DepthStencilState>
@@ -75,16 +74,9 @@ namespace ClassicUO.Game.GameObjects
         protected bool IsFlipped;
 
 
-        public abstract bool Draw(UltimaBatcher2D batcher, int posX, int posY);
+        public abstract bool Draw(UltimaBatcher2D batcher, int posX, int posY, ref Vector3 hue);
 
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        protected static void ResetHueVector()
-        {
-            HueVector.X = 0;
-            HueVector.Y = 0;
-            HueVector.Z = 0;
-        }
 
         public Rectangle GetOnScreenRectangle()
         {
