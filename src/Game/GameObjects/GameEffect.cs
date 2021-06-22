@@ -54,7 +54,7 @@ namespace ClassicUO.Game.GameObjects
             AnimDataFrame = AnimDataLoader.Instance?.CalculateCurrentGraphic(graphic) ?? default;
             IsEnabled = true;
             AnimIndex = 0;
-            Duration = duration > 0 ? Time.Ticks + duration : -1;
+            
 
             speed *= 10;
 
@@ -65,12 +65,20 @@ namespace ClassicUO.Game.GameObjects
 
             if (AnimDataFrame.FrameInterval == 0)
             {
-                IntervalInMs = (uint)speed;
+                IntervalInMs = speed;
+
+                // NOTE:
+                // tested on outlands with arrows & bolts 
+                // server sends duration = 50 , a very small amount of time so the arrow will be destroyed suddenly
+                // im not sure if this is the right fix, but keep it atm
+                duration = -1;
             }
             else
             {
                 IntervalInMs = (uint)(AnimDataFrame.FrameInterval * speed);
             }
+
+            Duration = duration > 0 ? Time.Ticks + duration : -1;
         }
 
         public bool IsMoving => Target != null || TargetX != 0 && TargetY != 0;
