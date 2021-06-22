@@ -278,13 +278,12 @@ namespace ClassicUO.Game.GameObjects
                 {
                     MultiLoader.Instance.File.Seek(entry.Offset);
 
-                    //byte* data = stackalloc byte[entry.DecompressedLength];
-
-                    byte[] data = System.Buffers.ArrayPool<byte>.Shared.Rent(entry.DecompressedLength);
+                    byte[] buffer = null;
+                    Span<byte> span = entry.DecompressedLength <= 1024 ? stackalloc byte[entry.DecompressedLength] : (buffer = System.Buffers.ArrayPool<byte>.Shared.Rent(entry.DecompressedLength));
 
                     try
                     {
-                        fixed (byte* dataPtr = data)
+                        fixed (byte* dataPtr = span)
                         {
                             ZLib.Decompress
                             (
@@ -295,7 +294,7 @@ namespace ClassicUO.Game.GameObjects
                                 entry.DecompressedLength
                             );
 
-                            StackDataReader reader = new StackDataReader(dataPtr, entry.DecompressedLength);
+                            StackDataReader reader = new StackDataReader(span);
                             reader.Skip(4);
 
                             int count = reader.ReadInt32LE();
@@ -365,7 +364,10 @@ namespace ClassicUO.Game.GameObjects
                     }
                     finally
                     {
-                        System.Buffers.ArrayPool<byte>.Shared.Return(data);
+                        if (buffer != null)
+                        {
+                            System.Buffers.ArrayPool<byte>.Shared.Return(buffer);
+                        }
                     }
                 }
                 else

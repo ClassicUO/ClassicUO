@@ -701,13 +701,13 @@ namespace ClassicUO.Game.UI.Gumps
         {
             public static unsafe Texture2D CreateTextureFromICO_Cur(Stream stream)
             {
-                byte[] buffer = System.Buffers.ArrayPool<byte>.Shared.Rent((int) stream.Length);
+                byte[] buffer = System.Buffers.ArrayPool<byte>.Shared.Rent((int)stream.Length);
 
                 try
                 {
-                    stream.Read(buffer, 0, buffer.Length);
+                    stream.Read(buffer, 0, (int)stream.Length);
 
-                    StackDataReader reader = new StackDataReader(buffer, (int)stream.Length);
+                    StackDataReader reader = new StackDataReader(buffer.AsSpan());
 
                     bool was_error;
                     long fp_offset;

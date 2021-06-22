@@ -83,7 +83,7 @@ namespace ClassicUO.Network
 
             if (bufferReader != null)
             {
-                StackDataReader buffer = new StackDataReader(data, length);
+                StackDataReader buffer = new StackDataReader(data.AsSpan().Slice(0, length));
                 buffer.Seek(offset);
 
                 bufferReader(ref buffer);
@@ -4949,12 +4949,13 @@ namespace ClassicUO.Network
         {
             //byte* decompressedBytes = stackalloc byte[dlen];
             bool ismovable = item.ItemData.IsMultiMovable;
-
-            byte[] decompressedBytes = System.Buffers.ArrayPool<byte>.Shared.Rent(dlen);
+            
+            byte[] buffer = null;
+            Span<byte> span = dlen <= 1024 ? stackalloc byte[dlen] : (buffer = System.Buffers.ArrayPool<byte>.Shared.Rent(dlen));
 
             try
             {
-                fixed (byte* dbytesPtr = decompressedBytes)
+                fixed (byte* dbytesPtr = span)
                 {
                     fixed (byte* srcPtr = &source[sourcePosition])
                     {
@@ -4968,7 +4969,7 @@ namespace ClassicUO.Network
                         );
                     }
 
-                    StackDataReader reader = new StackDataReader(dbytesPtr, dlen);
+                    StackDataReader reader = new StackDataReader(span);
 
                     ushort id = 0;
                     sbyte x = 0, y = 0, z = 0;
@@ -5101,7 +5102,10 @@ namespace ClassicUO.Network
             }
             finally
             {
-                System.Buffers.ArrayPool<byte>.Shared.Return(decompressedBytes);
+                if (buffer != null)
+                {
+                    System.Buffers.ArrayPool<byte>.Shared.Return(buffer);
+                }
             }
         }
 

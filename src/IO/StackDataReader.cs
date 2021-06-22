@@ -20,42 +20,28 @@ namespace ClassicUO.IO
 
         private readonly ReadOnlySpan<byte> _data;
 
-        public StackDataReader(byte* data, long len)
-        {
-            this = default;
-
-            _data = new ReadOnlySpan<byte>(data, (int) len);
-            Position = 0;
-        }
-
-        public StackDataReader(byte[] data, int length)
-        {
-            this = default;
-
-            _data = data.AsSpan(0, length);
-            Position = 0;
-        }
 
         public StackDataReader(ReadOnlySpan<byte> data)
         {
-            this = default;
-
             _data = data;
+            Length = data.Length;
             Position = 0;
         }
 
-        public ReadOnlySpan<byte> Buffer => _data;
         public int Position { get; private set; }
-        public long Length => _data.Length;
+        public long Length { get; }
         public int Remaining => (int) (Length - Position);
-        public byte this[int index] => _data[index];
-        public IntPtr StartAddress => (IntPtr) Unsafe.AsPointer(ref GetPinnableReference());
+
+        public IntPtr StartAddress => (IntPtr)Unsafe.AsPointer(ref GetPinnableReference());
         public IntPtr PositionAddress
         {
             [MethodImpl(IMPL_OPTION)]
-            get => (IntPtr)((byte*) Unsafe.AsPointer(ref GetPinnableReference()) + Position);
+            get => (IntPtr)((byte*)Unsafe.AsPointer(ref GetPinnableReference()) + Position);
         }
 
+        public byte this[int index] => _data[0];
+
+        public ReadOnlySpan<byte> Buffer => _data;
 
 
         [MethodImpl(IMPL_OPTION)]
