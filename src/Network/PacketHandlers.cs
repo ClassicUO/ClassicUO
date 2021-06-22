@@ -4607,7 +4607,7 @@ namespace ClassicUO.Network
                     byte animID = p.ReadUInt8();
                     byte frameCount = p.ReadUInt8();
 
-                    foreach (Mobile m in World.Mobiles)
+                    foreach (Mobile m in World.Mobiles.Values)
                     {
                         if ((m.Serial & 0xFFFF) == serial)
                         {

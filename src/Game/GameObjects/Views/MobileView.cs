@@ -68,8 +68,8 @@ namespace ClassicUO.Game.GameObjects
             FrameInfo.Height = 0;
 
             posY -= 3;
-            int drawX = posX + (int) Offset.X;
-            int drawY = posY + (int) (Offset.Y - Offset.Z);
+            int drawX = posX + (int)Offset.X;
+            int drawY = posY + (int)(Offset.Y - Offset.Z);
 
             drawX += 22;
             drawY += 22;
@@ -243,7 +243,7 @@ namespace ClassicUO.Game.GameObjects
             {
                 if (TryGetSittingInfo(out seatData))
                 {
-                    animGroup = (byte) PEOPLE_ANIMATION_GROUP.PAG_STAND;
+                    animGroup = (byte)PEOPLE_ANIMATION_GROUP.PAG_STAND;
                     animIndex = 0;
 
                     ProcessSteps(out dir);
@@ -403,7 +403,7 @@ namespace ClassicUO.Game.GameObjects
                                         break;
 
 
-                                    // gargoyle mysticism book seems ok. Mha!
+                                        // gargoyle mysticism book seems ok. Mha!
                                 }
                             }
 
@@ -425,7 +425,7 @@ namespace ClassicUO.Game.GameObjects
                                 drawX,
                                 drawY,
                                 ref hueVec,
-                                IsFlipped, 
+                                IsFlipped,
                                 animIndex,
                                 false,
                                 graphic,
@@ -587,23 +587,23 @@ namespace ClassicUO.Game.GameObjects
                     }
                 }
 
-                    hueVec = Vector3.Zero;
-                    ShaderHueTranslator.GetHueVector(ref hueVec, hue, partialHue, alpha);
+                hueVec = Vector3.Zero;
+                ShaderHueTranslator.GetHueVector(ref hueVec, hue, partialHue, alpha);
 
-                    // this is an hack to make entities partially hued. OG client seems to ignore this.
-                    /*if (entity != null && entity.ItemData.AnimID == 0 && entity.ItemData.IsLight)
-                    {
-                        HueVector.X = entity.Hue == 0 ? owner.Hue : entity.Hue;
-                        HueVector.Y = ShaderHueTranslator.SHADER_LIGHTS;
-                        HueVector.Z = alpha;
-                    }
-                    */
+                // this is an hack to make entities partially hued. OG client seems to ignore this.
+                /*if (entity != null && entity.ItemData.AnimID == 0 && entity.ItemData.IsLight)
+                {
+                    HueVector.X = entity.Hue == 0 ? owner.Hue : entity.Hue;
+                    HueVector.Y = ShaderHueTranslator.SHADER_LIGHTS;
+                    HueVector.Z = alpha;
+                }
+                */
 
-                    if (_transform)
-                    {
-                        const float UPPER_BODY_RATIO = 0.35f;
-                        const float MID_BODY_RATIO = 0.60f;
-                        const float LOWER_BODY_RATIO = 0.94f;
+                if (_transform)
+                {
+                    const float UPPER_BODY_RATIO = 0.35f;
+                    const float MID_BODY_RATIO = 0.60f;
+                    const float LOWER_BODY_RATIO = 0.94f;
 
                     if (entity == null && isHuman)
                     {
@@ -703,28 +703,28 @@ namespace ClassicUO.Game.GameObjects
                         }
                     }
 
-                        batcher.DrawCharacterSitted
-                        (
-                            frame,
-                            x,
-                            y,
-                            mirror,
-                            h3mod,
-                            h6mod,
-                            h9mod,
-                            ref hueVec
-                        );
-                    }
-                    else if (frame != null)
-                    {
-                        batcher.DrawSprite
-                        (
-                            frame,
-                            x,
-                            y,
-                            mirror,
-                            ref hueVec
-                        );
+                    batcher.DrawCharacterSitted
+                    (
+                        frame,
+                        x,
+                        y,
+                        mirror,
+                        h3mod,
+                        h6mod,
+                        h9mod,
+                        ref hueVec
+                    );
+                }
+                else if (frame != null)
+                {
+                    batcher.DrawSprite
+                    (
+                        frame,
+                        x,
+                        y,
+                        mirror,
+                        ref hueVec
+                    );
 
                     int yy = -(frame.Height + frame.CenterY + 3);
                     int xx = -frame.CenterX;
@@ -754,12 +754,13 @@ namespace ClassicUO.Game.GameObjects
                         owner.FrameInfo.Height = yy + frame.Height;
                     }
                 }
+                
+                ref AnimationEntry entry = ref AnimationsLoader.Instance.GetAnimationEntry(id);
 
-
-                    if (AnimationsLoader.Instance.PixelCheck(id, animGroup, dir, direction.IsUOP, frameIndex, mirror ? x + frame.Width - SelectedObject.TranslatedMousePositionByViewport.X : SelectedObject.TranslatedMousePositionByViewport.X - x, SelectedObject.TranslatedMousePositionByViewport.Y - y))
-                    {
-                        SelectedObject.Object = owner;
-                    }
+                if (AnimationsLoader.Instance.PixelCheck(id, animGroup, dir, entry.IsUOP, frameIndex, mirror ? x + frame.Width - SelectedObject.TranslatedMousePositionByViewport.X : SelectedObject.TranslatedMousePositionByViewport.X - x, SelectedObject.TranslatedMousePositionByViewport.Y - y))
+                {
+                    SelectedObject.Object = owner;
+                }
 
                 if (entity != null && entity.ItemData.IsLight)
                 {
@@ -898,10 +899,10 @@ namespace ClassicUO.Game.GameObjects
 
                     break;
 
-                /*case Layer.Skirt:
-                    skirt = mobile.FindItemByLayer( Layer.Skirt];
+                    /*case Layer.Skirt:
+                        skirt = mobile.FindItemByLayer( Layer.Skirt];
 
-                    break;*/
+                        break;*/
             }
 
             return false;
