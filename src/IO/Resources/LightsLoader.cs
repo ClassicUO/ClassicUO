@@ -78,17 +78,10 @@ namespace ClassicUO.IO.Resources
 
             if (texture == null || texture.IsDisposed)
             {
-                uint[] pixels = GetLight(id, out int w, out int h);
-
-                if (w == 0 && h == 0)
+                if (GetLight(ref texture, id))
                 {
-                    return null;
+                    SaveId(id);
                 }
-
-                texture = new UOTexture(w, h);
-                texture.PushData(pixels);
-
-                SaveId(id);
             }
             else
             {
@@ -99,41 +92,47 @@ namespace ClassicUO.IO.Resources
         }
 
 
-        private uint[] GetLight(uint idx, out int width, out int height)
+        private bool GetLight(ref UOTexture texture, uint idx)
         {
             ref UOFileIndex entry = ref GetValidRefEntry((int) idx);
 
-            width = entry.Width;
-            height = entry.Height;
-
-            if (width == 0 && height == 0)
+            if (entry.Width == 0 && entry.Height == 0)
             {
-                return null;
+                return false;
             }
 
-            uint[] pixels = new uint[width * height];
+            uint[] pixels = System.Buffers.ArrayPool<uint>.Shared.Rent(entry.Width * entry.Height);
 
-            _file.SetData(entry.Address, entry.FileSize);
-            _file.Seek(entry.Offset);
-
-            for (int i = 0; i < height; i++)
+            try
             {
-                int pos = i * width;
+                _file.SetData(entry.Address, entry.FileSize);
+                _file.Seek(entry.Offset);
 
-                for (int j = 0; j < width; j++)
+                for (int i = 0; i < entry.Height; i++)
                 {
-                    ushort val = _file.ReadByte();
-                    val = (ushort) ((val << 10) | (val << 5) | val);
+                    int pos = i * entry.Width;
 
-                    if (val != 0)
+                    for (int j = 0; j < entry.Width; j++)
                     {
-                        pixels[pos + j] = HuesHelper.Color16To32(val) | 0xFF_00_00_00;
-                        ;
+                        ushort val = _file.ReadByte();
+                        uint rgb24 = (uint) ((val << 19) | (val << 11) | (val << 3));
+
+                        if (val != 0)
+                        {
+                            pixels[pos + j] = rgb24 | 0xFF_00_00_00;
+                        }
                     }
                 }
+
+                texture = new UOTexture(entry.Width, entry.Height);
+                texture.SetData(pixels, 0, entry.Width * entry.Height);
+            }
+            finally
+            {
+                System.Buffers.ArrayPool<uint>.Shared.Return(pixels, true);
             }
 
-            return pixels;
+            return true;
         }
     }
 }

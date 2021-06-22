@@ -277,7 +277,7 @@ namespace ClassicUO.Game.UI.Gumps
                 case Buttons.UOStore:
                     if (Client.Version >= ClientVersion.CV_706400)
                     {
-                        NetClient.Socket.Send(new POpenUOStore());
+                        NetClient.Socket.Send_OpenUOStore();
                     }
 
                     break;

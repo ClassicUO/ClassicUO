@@ -25,7 +25,7 @@ namespace ManifestCreator
             "FNA.dll.config",
             "monoconfig",
             "monomachineconfig",
-
+            "netstandard.dll",
 
             // Data
 
@@ -62,6 +62,7 @@ namespace ManifestCreator
             "Mono.Posix.dll",
             "Mono.Security.dll",
             "mscorlib.dll",
+            "MP3Sharp.dll",
             "System.Configuration.dll",
             "System.Core.dll",
             "System.Data.dll",
@@ -74,6 +75,11 @@ namespace ManifestCreator
             "System.Windows.Forms.dll",
             "System.Xml.dll",
             "System.Xml.Linq.dll",
+
+            "System.Buffers.dll",
+            "System.Memory.dll",
+            "System.Numerics.Vectors.dll",
+            "System.Runtime.CompilerServices.Unsafe.dll",
 
             // removed.
             //"Newtonsoft.Json.dll"

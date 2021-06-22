@@ -31,6 +31,7 @@
 #endregion
 
 using System;
+using ClassicUO.Configuration;
 using System.Collections.Generic;
 using ClassicUO.Data;
 using ClassicUO.Game.Managers;
@@ -71,9 +72,17 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
             ClilocLoader localization = ClilocLoader.Instance;
 
+            bool isAsianLang = string.Compare(Settings.GlobalSettings.Language, "CHT", StringComparison.InvariantCultureIgnoreCase) == 0 || 
+                string.Compare(Settings.GlobalSettings.Language, "KOR", StringComparison.InvariantCultureIgnoreCase) == 0 ||
+                string.Compare(Settings.GlobalSettings.Language, "JPN", StringComparison.InvariantCultureIgnoreCase) == 0;
+
+            bool unicode = isAsianLang;
+            byte font = (byte)(isAsianLang ? 1 : 2);
+            ushort hue = (ushort)(isAsianLang ? 0xFFFF : 0x0386);
+
             Add
             (
-                new Label(localization.GetString(3000326, "Choose a Trade for Your Character"), false, 0x0386, font: 2)
+                new Label(localization.GetString(3000326, "Choose a Trade for Your Character"), unicode, hue, font: font)
                 {
                     X = 158,
                     Y = 132

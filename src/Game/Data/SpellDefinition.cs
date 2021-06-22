@@ -162,96 +162,99 @@ namespace ClassicUO.Game.Data
 
         public string CreateReagentListString(string separator)
         {
-            StringBuilder sb = new StringBuilder();
-
-            for (int i = 0; i < Regs.Length; i++)
+            ValueStringBuilder sb = new ValueStringBuilder();
             {
-                switch (Regs[i])
+                for (int i = 0; i < Regs.Length; i++)
                 {
-                    // britanian reagents
-                    case Reagents.BlackPearl:
-                        sb.Append(ResGeneral.BlackPearl);
+                    switch (Regs[i])
+                    {
+                        // britanian reagents
+                        case Reagents.BlackPearl:
+                            sb.Append(ResGeneral.BlackPearl);
 
-                        break;
+                            break;
 
-                    case Reagents.Bloodmoss:
-                        sb.Append(ResGeneral.Bloodmoss);
+                        case Reagents.Bloodmoss:
+                            sb.Append(ResGeneral.Bloodmoss);
 
-                        break;
+                            break;
 
-                    case Reagents.Garlic:
-                        sb.Append(ResGeneral.Garlic);
+                        case Reagents.Garlic:
+                            sb.Append(ResGeneral.Garlic);
 
-                        break;
+                            break;
 
-                    case Reagents.Ginseng:
-                        sb.Append(ResGeneral.Ginseng);
+                        case Reagents.Ginseng:
+                            sb.Append(ResGeneral.Ginseng);
 
-                        break;
+                            break;
 
-                    case Reagents.MandrakeRoot:
-                        sb.Append(ResGeneral.MandrakeRoot);
+                        case Reagents.MandrakeRoot:
+                            sb.Append(ResGeneral.MandrakeRoot);
 
-                        break;
+                            break;
 
-                    case Reagents.Nightshade:
-                        sb.Append(ResGeneral.Nightshade);
+                        case Reagents.Nightshade:
+                            sb.Append(ResGeneral.Nightshade);
 
-                        break;
+                            break;
 
-                    case Reagents.SulfurousAsh:
-                        sb.Append(ResGeneral.SulfurousAsh);
+                        case Reagents.SulfurousAsh:
+                            sb.Append(ResGeneral.SulfurousAsh);
 
-                        break;
+                            break;
 
-                    case Reagents.SpidersSilk:
-                        sb.Append(ResGeneral.SpidersSilk);
+                        case Reagents.SpidersSilk:
+                            sb.Append(ResGeneral.SpidersSilk);
 
-                        break;
+                            break;
 
-                    // pagan reagents
-                    case Reagents.BatWing:
-                        sb.Append(ResGeneral.BatWing);
+                        // pagan reagents
+                        case Reagents.BatWing:
+                            sb.Append(ResGeneral.BatWing);
 
-                        break;
+                            break;
 
-                    case Reagents.GraveDust:
-                        sb.Append(ResGeneral.GraveDust);
+                        case Reagents.GraveDust:
+                            sb.Append(ResGeneral.GraveDust);
 
-                        break;
+                            break;
 
-                    case Reagents.DaemonBlood:
-                        sb.Append(ResGeneral.DaemonBlood);
+                        case Reagents.DaemonBlood:
+                            sb.Append(ResGeneral.DaemonBlood);
 
-                        break;
+                            break;
 
-                    case Reagents.NoxCrystal:
-                        sb.Append(ResGeneral.NoxCrystal);
+                        case Reagents.NoxCrystal:
+                            sb.Append(ResGeneral.NoxCrystal);
 
-                        break;
+                            break;
 
-                    case Reagents.PigIron:
-                        sb.Append(ResGeneral.PigIron);
+                        case Reagents.PigIron:
+                            sb.Append(ResGeneral.PigIron);
 
-                        break;
+                            break;
 
-                    default:
+                        default:
 
-                        if (Regs[i] < Reagents.None)
-                        {
-                            sb.Append(StringHelper.AddSpaceBeforeCapital(Regs[i].ToString()));
-                        }
+                            if (Regs[i] < Reagents.None)
+                            {
+                                sb.Append(StringHelper.AddSpaceBeforeCapital(Regs[i].ToString()));
+                            }
 
-                        break;
+                            break;
+                    }
+
+                    if (i < Regs.Length - 1)
+                    {
+                        sb.Append(separator);
+                    }
                 }
 
-                if (i < Regs.Length - 1)
-                {
-                    sb.Append(separator);
-                }
+                string ss = sb.ToString();
+                sb.Dispose();
+                return ss;
             }
-
-            return sb.ToString();
         }
 
         public static SpellDefinition FullIndexGetSpell(int fullidx)

@@ -106,7 +106,7 @@ namespace ClassicUO.Game.Managers
 
             int showWhen = ProfileManager.CurrentProfile.MobileHPShowWhen;
 
-            foreach (Mobile mobile in World.Mobiles)
+            foreach (Mobile mobile in World.Mobiles.Values)
             {
                 if (mobile.IsDestroyed)
                 {

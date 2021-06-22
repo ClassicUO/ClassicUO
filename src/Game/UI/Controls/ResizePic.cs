@@ -156,7 +156,7 @@ namespace ClassicUO.Game.UI.Controls
                 switch (i)
                 {
                     case 0:
-                        if (PixelsInXY(GumpsLoader.Instance.GetTexture(Graphic), x, y))
+                        if (PixelsInXY(GumpsLoader.Instance.GetTexture(Graphic), Graphic, x, y))
                         {
                             return true;
                         }
@@ -171,7 +171,7 @@ namespace ClassicUO.Game.UI.Controls
                             break;
                         }
 
-                        if (PixelsInXY(GumpsLoader.Instance.GetTexture((ushort) (Graphic + 1)), x - th_0_width, y, DW))
+                        if (PixelsInXY(GumpsLoader.Instance.GetTexture((ushort) (Graphic + 1)), (ushort)(Graphic + 1), x - th_0_width, y, DW))
                         {
                             return true;
                         }
@@ -180,7 +180,7 @@ namespace ClassicUO.Game.UI.Controls
 
                     case 2:
 
-                        if (PixelsInXY(GumpsLoader.Instance.GetTexture((ushort) (Graphic + 2)), x - (Width - th_2_width), y - offsetTop))
+                        if (PixelsInXY(GumpsLoader.Instance.GetTexture((ushort) (Graphic + 2)), (ushort)(Graphic + 2), x - (Width - th_2_width), y - offsetTop))
                         {
                             return true;
                         }
@@ -198,7 +198,7 @@ namespace ClassicUO.Game.UI.Controls
 
                         if (PixelsInXY
                         (
-                            GumpsLoader.Instance.GetTexture((ushort) (Graphic + 3)),
+                            GumpsLoader.Instance.GetTexture((ushort) (Graphic + 3)), (ushort)(Graphic + 3),
                             x /*- offsetLeft*/,
                             y - th_0_height,
                             0,
@@ -222,7 +222,7 @@ namespace ClassicUO.Game.UI.Controls
 
                         if (PixelsInXY
                         (
-                            GumpsLoader.Instance.GetTexture((ushort) (Graphic + 5)),
+                            GumpsLoader.Instance.GetTexture((ushort) (Graphic + 5)), (ushort)(Graphic + 5),
                             x - (Width - th_4_width /*- offsetRight*/),
                             y - th_2_height,
                             0,
@@ -236,7 +236,7 @@ namespace ClassicUO.Game.UI.Controls
 
                     case 5:
 
-                        if (PixelsInXY(GumpsLoader.Instance.GetTexture((ushort) (Graphic + 6)), x, y - (Height - th_5_height)))
+                        if (PixelsInXY(GumpsLoader.Instance.GetTexture((ushort) (Graphic + 6)), (ushort)(Graphic + 6), x, y - (Height - th_5_height)))
                         {
                             return true;
                         }
@@ -252,7 +252,7 @@ namespace ClassicUO.Game.UI.Controls
                             break;
                         }
 
-                        if (PixelsInXY(GumpsLoader.Instance.GetTexture((ushort) (Graphic + 7)), x - th_5_width, y - (Height - th_6_height - offsetBottom), DW))
+                        if (PixelsInXY(GumpsLoader.Instance.GetTexture((ushort) (Graphic + 7)), (ushort)(Graphic + 7), x - th_5_width, y - (Height - th_6_height - offsetBottom), DW))
                         {
                             return true;
                         }
@@ -262,7 +262,7 @@ namespace ClassicUO.Game.UI.Controls
 
                     case 7:
 
-                        if (PixelsInXY(GumpsLoader.Instance.GetTexture((ushort) (Graphic + 8)), x - (Width - th_7_width), y - (Height - th_7_height)))
+                        if (PixelsInXY(GumpsLoader.Instance.GetTexture((ushort) (Graphic + 8)), (ushort)(Graphic + 8), x - (Width - th_7_width), y - (Height - th_7_height)))
                         {
                             return true;
                         }
@@ -289,7 +289,8 @@ namespace ClassicUO.Game.UI.Controls
 
                         if (PixelsInXY
                         (
-                            GumpsLoader.Instance.GetTexture((ushort) (Graphic + 4)),
+                            GumpsLoader.Instance.GetTexture((ushort) (Graphic + 4)), 
+                            (ushort)(Graphic + 4),
                             x - th_0_width,
                             y - th_0_height,
                             DW,
@@ -308,7 +309,7 @@ namespace ClassicUO.Game.UI.Controls
         }
 
 
-        private static bool PixelsInXY(UOTexture texture, int x, int y, int width = 0, int height = 0)
+        private static bool PixelsInXY(UOTexture texture, ushort graphic, int x, int y, int width = 0, int height = 0)
         {
             if (x < 0 || y < 0 || width > 0 && x >= width || height > 0 && y >= height)
             {
@@ -351,7 +352,7 @@ namespace ClassicUO.Game.UI.Controls
                 return false;
             }
 
-            return texture.Contains(x, y);
+            return GumpsLoader.Instance.PixelCheck(graphic, x, y);
         }
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)

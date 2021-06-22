@@ -38,7 +38,8 @@ using ClassicUO.Game.Scenes;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
-using ClassicUO.Utility;
+using Microsoft.Xna.Framework;
+using MathHelper = ClassicUO.Utility.MathHelper;
 
 namespace ClassicUO.Game.GameObjects
 {
@@ -46,7 +47,7 @@ namespace ClassicUO.Game.GameObjects
     {
         private static EquipConvData? _equipConvData;
 
-        public override bool Draw(UltimaBatcher2D batcher, int posX, int posY)
+        public override bool Draw(UltimaBatcher2D batcher, int posX, int posY, ref Vector3 hueVec)
         {
             if (!AllowedToDraw || IsDestroyed)
             {
@@ -55,7 +56,8 @@ namespace ClassicUO.Game.GameObjects
 
             //Engine.DebugInfo.ItemsRendered++;
 
-            ResetHueVector();
+            hueVec = Vector3.Zero;
+
             DrawTransparent = false;
 
             posX += (int)Offset.X;
@@ -63,17 +65,17 @@ namespace ClassicUO.Game.GameObjects
 
             if (ItemData.IsTranslucent)
             {
-                HueVector.Z = 0.5f;
+                hueVec.Z = 0.5f;
             }
 
             if (AlphaHue != 255)
             {
-                HueVector.Z = 1f - AlphaHue / 255f;
+                hueVec.Z = 1f - AlphaHue / 255f;
             }
 
             if (IsCorpse)
             {
-                return DrawCorpse(batcher, posX, posY - 3);
+                return DrawCorpse(batcher, posX, posY - 3, ref hueVec);
             }
 
 
@@ -122,7 +124,7 @@ namespace ClassicUO.Game.GameObjects
                 }
             }
 
-            if (ProfileManager.CurrentProfile.HighlightGameObjects && SelectedObject.LastObject == this)
+            if (ProfileManager.CurrentProfile.HighlightGameObjects && ReferenceEquals(SelectedObject.LastObject, this))
             {
                 hue = Constants.HIGHLIGHT_CURRENT_OBJECT_HUE;
                 partial = false;
@@ -137,7 +139,7 @@ namespace ClassicUO.Game.GameObjects
             }
             else
             {
-                if (!IsLocked && !IsMulti && SelectedObject.LastObject == this)
+                if (!IsLocked && !IsMulti && ReferenceEquals(SelectedObject.LastObject, this))
                 {
                     // TODO: check why i put this.
                     //isPartial = ItemData.Weight == 0xFF;
@@ -149,7 +151,7 @@ namespace ClassicUO.Game.GameObjects
                 }
             }
 
-            ShaderHueTranslator.GetHueVector(ref HueVector, hue, partial, HueVector.Z);
+            ShaderHueTranslator.GetHueVector(ref hueVec, hue, partial, hueVec.Z);
 
             if (!IsMulti && !IsCoin && Amount > 1 && ItemData.IsStackable)
             {
@@ -159,20 +161,20 @@ namespace ClassicUO.Game.GameObjects
                     graphic,
                     posX - 5,
                     posY - 5,
-                    ref HueVector,
+                    ref hueVec,
                     ref DrawTransparent,
                     false
                 );
             }
 
-            if (ItemData.IsLight)
+            if (ItemData.IsLight || graphic >= 0x3E02 && graphic <= 0x3E0B || graphic >= 0x3914 && graphic <= 0x3929)
             {
                 Client.Game.GetScene<GameScene>().AddLight(this, this, posX + 22, posY + 22);
             }
 
             if (!SerialHelper.IsValid(Serial) && IsMulti && TargetManager.TargetingState == CursorTarget.MultiPlacement)
             {
-                HueVector.Z = 0.5f;
+                hueVec.Z = 0.5f;
             }
 
             DrawStaticAnimated
@@ -181,12 +183,12 @@ namespace ClassicUO.Game.GameObjects
                 graphic,
                 posX,
                 posY,
-                ref HueVector,
+                ref hueVec,
                 ref DrawTransparent,
                 false
             );
 
-            if (SelectedObject.Object == this || TargetManager.TargetingState == CursorTarget.MultiPlacement)
+            if (ReferenceEquals(SelectedObject.Object, this) || TargetManager.TargetingState == CursorTarget.MultiPlacement)
             {
                 return false;
             }
@@ -200,7 +202,12 @@ namespace ClassicUO.Game.GameObjects
                 posX -= index.Width;
                 posY -= index.Height;
 
-                if (SelectedObject.IsPointInStatic(texture, posX, posY))
+                if (ArtLoader.Instance.PixelCheck
+                (
+                    graphic,
+                    SelectedObject.TranslatedMousePositionByViewport.X - posX,
+                    SelectedObject.TranslatedMousePositionByViewport.Y - posY
+                ))
                 {
                     SelectedObject.Object = this;
                 }
@@ -209,7 +216,7 @@ namespace ClassicUO.Game.GameObjects
             return true;
         }
 
-        private bool DrawCorpse(UltimaBatcher2D batcher, int posX, int posY)
+        private bool DrawCorpse(UltimaBatcher2D batcher, int posX, int posY, ref Vector3 hueVec)
         {
             if (IsDestroyed || World.CorpseManager.Exists(Serial, 0))
             {
@@ -240,9 +247,10 @@ namespace ClassicUO.Game.GameObjects
                 ishuman,
                 hue,
                 IsFlipped,
-                HueVector.Z,
+                hueVec.Z,
                 group,
-                direction
+                direction,
+                ref hueVec
             );
 
             if (!IsEmpty)
@@ -251,22 +259,22 @@ namespace ClassicUO.Game.GameObjects
                 {
                     Layer layer = LayerOrder.UsedLayers[direction, i];
 
-                    DrawLayer
-                    (
-                        batcher,
-                        posX,
-                        posY,
-                        this,
-                        layer,
-                        animIndex,
-                        ishuman,
-                        0,
-                        IsFlipped,
-                        HueVector.Z,
-                        group,
-                        direction
-                    );
-                }
+                DrawLayer
+                (
+                    batcher,
+                    posX,
+                    posY,
+                    this,
+                    layer,
+                    animIndex,
+                    ishuman,
+                    0,
+                    IsFlipped,
+                    hueVec.Z,
+                    group,
+                    direction,
+                    ref hueVec
+                );
             }
 
             return true;
@@ -285,7 +293,8 @@ namespace ClassicUO.Game.GameObjects
             bool flipped,
             float alpha,
             byte animGroup,
-            byte dir
+            byte dir,
+            ref Vector3 hueVec
         )
         {
             _equipConvData = null;
@@ -371,54 +380,55 @@ namespace ClassicUO.Game.GameObjects
                 }
             }
 
-            ResetHueVector();
+                hueVec = Vector3.Zero;
 
-            if (ProfileManager.CurrentProfile.NoColorObjectsOutOfRange && owner.Distance > World.ClientViewRange)
-            {
-                HueVector.X = Constants.OUT_RANGE_COLOR;
-                HueVector.Y = 1;
-            }
-            else if (World.Player.IsDead && ProfileManager.CurrentProfile.EnableBlackWhiteEffect)
-            {
-                HueVector.X = Constants.DEAD_RANGE_COLOR;
-                HueVector.Y = 1;
-            }
-            else
-            {
-                if (ProfileManager.CurrentProfile.GridLootType > 0 && SelectedObject.CorpseObject == owner)
+                if (ProfileManager.CurrentProfile.NoColorObjectsOutOfRange && owner.Distance > World.ClientViewRange)
                 {
-                    color = 0x0034;
+                    hueVec.X = Constants.OUT_RANGE_COLOR;
+                    hueVec.Y = 1;
                 }
-                else if (ProfileManager.CurrentProfile.HighlightGameObjects && SelectedObject.LastObject == owner)
+                else if (World.Player.IsDead && ProfileManager.CurrentProfile.EnableBlackWhiteEffect)
                 {
-                    color = Constants.HIGHLIGHT_CURRENT_OBJECT_HUE;
+                    hueVec.X = Constants.DEAD_RANGE_COLOR;
+                    hueVec.Y = 1;
+                }
+                else
+                {
+                    if (ProfileManager.CurrentProfile.GridLootType > 0 && SelectedObject.CorpseObject == owner)
+                    {
+                        color = 0x0034;
+                    }
+                    else if (ProfileManager.CurrentProfile.HighlightGameObjects && ReferenceEquals(SelectedObject.LastObject, owner))
+                    {
+                        color = Constants.HIGHLIGHT_CURRENT_OBJECT_HUE;
+                    }
+
+                    ShaderHueTranslator.GetHueVector(ref hueVec, color, ispartialhue, alpha);
                 }
 
-                ShaderHueTranslator.GetHueVector(ref HueVector, color, ispartialhue, alpha);
-            }
-
-            batcher.DrawSprite
-            (
-                frame,
-                posX,
-                posY,
-                flipped,
-                ref HueVector
-            );
+                batcher.DrawSprite
+                (
+                    frame,
+                    posX,
+                    posY,
+                    flipped,
+                    ref hueVec
+                );
 
             if (!SerialHelper.IsValid(owner))
             {
                 return;
             }
 
-            if (SelectedObject.Object == owner)
-            {
-                return;
-            }
+                if (ReferenceEquals(SelectedObject.Object, owner))
+                {
+                    return;
+                }
 
-            if (frame.Contains(flipped ? posX + frame.Width - SelectedObject.TranslatedMousePositionByViewport.X : SelectedObject.TranslatedMousePositionByViewport.X - posX, SelectedObject.TranslatedMousePositionByViewport.Y - posY))
-            {
-                SelectedObject.Object = owner;
+                if (AnimationsLoader.Instance.PixelCheck(graphic, animGroup, dir, direction.IsUOP, animIndex, flipped ? posX + frame.Width - SelectedObject.TranslatedMousePositionByViewport.X : SelectedObject.TranslatedMousePositionByViewport.X - posX, SelectedObject.TranslatedMousePositionByViewport.Y - posY))
+                {
+                    SelectedObject.Object = owner;
+                }
             }
         }
     }

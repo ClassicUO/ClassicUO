@@ -264,7 +264,7 @@ namespace ClassicUO.Utility.Platforms
 
                         if (lParam == 1 && World.InGame)
                         {
-                            foreach (Item item in World.Items)
+                            foreach (Item item in World.Items.Values)
                             {
                                 if (item.IsMulti)
                                 {

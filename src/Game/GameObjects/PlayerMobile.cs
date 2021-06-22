@@ -1344,7 +1344,7 @@ namespace ClassicUO.Game.GameObjects
                     return;
                 }
 
-                foreach (Item item in World.Items)
+                foreach (Item item in World.Items.Values)
                 {
                     if (!item.IsDestroyed && item.IsCorpse && item.Distance <= ProfileManager.CurrentProfile.AutoOpenCorpseRange && !AutoOpenedCorpses.Contains(item.Serial))
                     {
@@ -1369,7 +1369,7 @@ namespace ClassicUO.Game.GameObjects
                 int x = X, y = Y, z = Z;
                 Pathfinder.GetNewXY((byte) Direction, ref x, ref y);
 
-                if (World.Items.Any(s => s.ItemData.IsDoor && s.X == x && s.Y == y && s.Z - 15 <= z && s.Z + 15 >= z))
+                if (World.Items.Values.Any(s => s.ItemData.IsDoor && s.X == x && s.Y == y && s.Z - 15 <= z && s.Z + 15 >= z))
                 {
                     GameActions.OpenDoor();
                 }
@@ -1654,7 +1654,7 @@ namespace ClassicUO.Game.GameObjects
             );
 
 
-            NetClient.Socket.Send(new PWalkRequest(direction, Walker.WalkSequence, run, Walker.FastWalkStack.GetValue()));
+            NetClient.Socket.Send_WalkRequest(direction, Walker.WalkSequence, run, Walker.FastWalkStack.GetValue());
 
 
             if (Walker.WalkSequence == 0xFF)

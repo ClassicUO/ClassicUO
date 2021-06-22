@@ -134,7 +134,7 @@ namespace ClassicUO.IO
         internal T[] ReadArray<T>(int count) where T : struct
         {
             T[] t = ReadArray<T>(Position, count);
-            Position += UnsafeMemoryManager.SizeOf<T>() * count;
+            Position += Unsafe.SizeOf<T>() * count;
 
             return t;
         }

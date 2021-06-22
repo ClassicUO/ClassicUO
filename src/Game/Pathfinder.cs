@@ -290,6 +290,8 @@ namespace ClassicUO.Game
                                     if (itemdata.IsBridge)
                                     {
                                         staticAverageZ /= 2;
+                                        // revert fix from fwiffo because it causes unwalkable stairs [down --> up]
+                                        //staticAverageZ += staticHeight % 2;
                                     }
 
                                     list.Add

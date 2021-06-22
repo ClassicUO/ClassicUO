@@ -75,7 +75,6 @@ namespace ClassicUO.Game
         private ushort _graphic = 0x2073;
         private bool _needGraphicUpdate = true;
         private Point _offset;
-        private readonly RenderedText _targetDistanceText = RenderedText.Create(string.Empty, 0x0481, style: FontStyle.BlackBorder);
         private readonly List<Multi> _temp = new List<Multi>();
         private readonly Tooltip _tooltip;
 
@@ -278,6 +277,9 @@ namespace ClassicUO.Game
                                 _cursors_ptr[i, j] = SDL.SDL_CreateColorCursor((IntPtr) surface, hotX, hotY);
                             }
                         }
+
+
+                        System.Buffers.ArrayPool<uint>.Shared.Return(pixels, true);
                     }
                 }
             }
@@ -519,9 +521,13 @@ namespace ClassicUO.Game
                     {
                         if (SelectedObject.Object is GameObject obj)
                         {
-                            _targetDistanceText.Text = obj.Distance.ToString();
+                            string dist = obj.Distance.ToString();
 
-                            _targetDistanceText.Draw(sb, Mouse.Position.X - 25, Mouse.Position.Y - 20);
+                            Vector3 hue = new Vector3(0, 1, 0);
+                            sb.DrawString(Fonts.Bold, dist, Mouse.Position.X - 26, Mouse.Position.Y - 21, ref hue);
+                            
+                            hue.Y = 0;
+                            sb.DrawString(Fonts.Bold, dist, Mouse.Position.X - 25, Mouse.Position.Y - 20, ref hue);
                         }
                     }
                 }

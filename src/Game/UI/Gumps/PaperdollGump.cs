@@ -435,7 +435,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 if (CUOEnviroment.IsOutlands)
                 {
-                    NetClient.Socket.Send(new PASCIISpeechRequest("party", MessageType.Command, 0, 0));
+                    NetClient.Socket.Send_ASCIISpeechRequest("party", MessageType.Command, 0, 0);
                 }
                 else
                 {

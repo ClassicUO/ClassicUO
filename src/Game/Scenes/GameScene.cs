@@ -101,7 +101,6 @@ namespace ClassicUO.Game.Scenes
         private readonly bool _use_render_target = false;
         private UseItemQueue _useItemQueue = new UseItemQueue();
         private bool _useObjectHandles;
-        private Vector4 _vectorClear = new Vector4(Vector3.Zero, 1);
         private RenderTarget2D _world_render_target, _lightRenderTarget;
 
 
@@ -613,8 +612,8 @@ namespace ClassicUO.Game.Scenes
             }
 
 
-            UpdateTextServerEntities(World.Mobiles, true);
-            UpdateTextServerEntities(World.Items, false);
+            UpdateTextServerEntities(World.Mobiles.Values, true);
+            UpdateTextServerEntities(World.Items.Values, false);
 
             _renderIndex++;
 
@@ -1007,7 +1006,7 @@ namespace ClassicUO.Game.Scenes
 
 
             batcher.Begin(null, matrix);
-
+            batcher.SetBrightlight(ProfileManager.CurrentProfile.TerrainShadowsLevel * 0.1f);
 
             bool usecircle = ProfileManager.CurrentProfile.UseCircleOfTransparency;
 
@@ -1028,6 +1027,9 @@ namespace ClassicUO.Game.Scenes
             int z = World.Player.Z + 5;
 
             ushort hue = 0;
+            Vector3 hueVec = Vector3.Zero;
+
+            GameObject.DrawTransparent = usecircle;
 
             for (int i = 0; i < _renderListCount; ++i)
             {
@@ -1037,12 +1039,15 @@ namespace ClassicUO.Game.Scenes
 
                 if (obj.Z <= _maxGroundZ)
                 {
-                    GameObject.DrawTransparent = usecircle && obj.TransparentTest(z);
+                    if (usecircle)
+                    {
+                        GameObject.DrawTransparent = obj.TransparentTest(z);
+                    }
 
                     hue = obj.Hue;
                     obj.Hue = info.Hue;
 
-                    if (obj.Draw(batcher, obj.RealScreenPosition.X, obj.RealScreenPosition.Y))
+                    if (obj.Draw(batcher, obj.RealScreenPosition.X, obj.RealScreenPosition.Y, ref hueVec))
                     {
                         ++RenderedObjectsCount;
                     }
@@ -1053,7 +1058,8 @@ namespace ClassicUO.Game.Scenes
 
             if (_multi != null && TargetManager.IsTargeting && TargetManager.TargetingState == CursorTarget.MultiPlacement)
             {
-                _multi.Draw(batcher, _multi.RealScreenPosition.X, _multi.RealScreenPosition.Y);
+                hueVec = Vector3.Zero;
+                _multi.Draw(batcher, _multi.RealScreenPosition.X, _multi.RealScreenPosition.Y, ref hueVec);
             }
         
             // draw weather
@@ -1085,10 +1091,8 @@ namespace ClassicUO.Game.Scenes
                 {
                     lightColor -= 0.04f;
                 }
-
-                _vectorClear.X = _vectorClear.Y = _vectorClear.Z = lightColor;
-
-                batcher.GraphicsDevice.Clear(ClearOptions.Target, _vectorClear, 0f, 0);
+                
+                batcher.GraphicsDevice.Clear(ClearOptions.Target, new Vector4(lightColor, lightColor, lightColor, 1), 0f, 0);
             }
 
             batcher.Begin(null, matrix);

@@ -591,11 +591,16 @@ namespace ClassicUO.Game.GameObjects
                                         break;
 
                                     case 26:
-                                        v13 = 9;
+
+                                        if (mobile.InWarMode && AnimationsLoader.Instance.IsAnimationExists(graphic, 9))
+                                        {
+                                            v13 = 9;
+                                        }
 
                                         break;
 
                                     case 28:
+
                                         v13 = (ushort) (AnimationsLoader.Instance.IsAnimationExists(graphic, 10) ? 10 : 5);
 
                                         break;
@@ -1616,7 +1621,7 @@ namespace ClassicUO.Game.GameObjects
                     return 2;
                 }
 
-                if (mode % 2 != 0)
+                if (mode % 2 != 0 && AnimationsLoader.Instance.IsAnimationExists(mobile.Graphic, 6))
                 {
                     return 6;
                 }

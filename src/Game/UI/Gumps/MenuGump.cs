@@ -182,18 +182,11 @@ namespace ClassicUO.Game.UI.Gumps
 
             pic.MouseDoubleClick += (sender, e) =>
             {
-                NetClient.Socket.Send
-                (
-                    new PMenuResponse
-                    (
-                        LocalSerial,
-                        (ushort) ServerSerial,
-                        index,
-                        graphic,
-                        hue
-                    )
-                );
-
+                NetClient.Socket.Send_MenuResponse(LocalSerial,
+                                                   (ushort)ServerSerial,
+                                                   index,
+                                                   graphic,
+                                                   hue);
                 Dispose();
                 e.Result = true;
             };
@@ -211,17 +204,11 @@ namespace ClassicUO.Game.UI.Gumps
         {
             base.CloseWithRightClick();
 
-            NetClient.Socket.Send
-            (
-                new PMenuResponse
-                (
-                    LocalSerial,
-                    (ushort) ServerSerial,
-                    0,
-                    0,
-                    0
-                )
-            );
+            NetClient.Socket.Send_MenuResponse(LocalSerial,
+                                               (ushort)ServerSerial,
+                                               0,
+                                               0,
+                                               0);
         }
 
 
@@ -382,7 +369,7 @@ namespace ClassicUO.Game.UI.Gumps
             switch (buttonID)
             {
                 case 0: // cancel
-                    NetClient.Socket.Send(new PGrayMenuResponse(LocalSerial, (ushort) ServerSerial, 0));
+                    NetClient.Socket.Send_GrayMenuResponse(LocalSerial, (ushort)ServerSerial, 0);
 
                     Dispose();
 
@@ -396,7 +383,7 @@ namespace ClassicUO.Game.UI.Gumps
                     {
                         if (radioButton.IsChecked)
                         {
-                            NetClient.Socket.Send(new PGrayMenuResponse(LocalSerial, (ushort) ServerSerial, index));
+                            NetClient.Socket.Send_GrayMenuResponse(LocalSerial, (ushort)ServerSerial, index);
                             
                             Dispose();
                             break;

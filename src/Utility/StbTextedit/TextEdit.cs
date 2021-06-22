@@ -32,6 +32,7 @@
 
 using System;
 using System.Text;
+using ClassicUO.Utility;
 
 namespace StbTextEditSharp
 {
@@ -136,14 +137,17 @@ namespace StbTextEditSharp
 
         public int InsertChars(int pos, int[] codepoints, int start, int length)
         {
-            StringBuilder sb = new StringBuilder();
+            int count = start + length;
 
-            for (int i = start; i < start + length; ++i)
+            ValueStringBuilder sb = new ValueStringBuilder(count);
+            for (int i = start; i < count; ++i)
             {
                 sb.Append(char.ConvertFromUtf32(codepoints[i]));
             }
 
             InsertChars(pos, sb.ToString());
+
+            sb.Dispose();
 
             return length;
         }

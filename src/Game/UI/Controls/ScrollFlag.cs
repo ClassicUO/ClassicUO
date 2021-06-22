@@ -170,7 +170,7 @@ namespace ClassicUO.Game.UI.Controls
 
             y -= _sliderPosition;
 
-            return texture_flag.Contains(x, y);
+            return GumpsLoader.Instance.PixelCheck(0x0828, x, y);
         }
     }
 }

@@ -32,6 +32,7 @@
 
 using System;
 using ClassicUO.Data;
+using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Collections;
@@ -68,7 +69,7 @@ namespace ClassicUO.Renderer
             }
         );
 
-
+        private static PixelPicker _picker = new PixelPicker();
         private static Vector3 _hueVector = Vector3.Zero;
         private byte _font;
 
@@ -266,6 +267,25 @@ namespace ClassicUO.Renderer
         public MultilinesFontInfo GetInfo()
         {
             return _info;
+        }
+
+        public bool PixelCheck(int x, int y)
+        {
+            if (string.IsNullOrWhiteSpace(Text))
+            {
+                return false;
+            }
+
+            ushort hue = Hue;
+
+            if (!IsUnicode && SaveHitMap)
+            {
+                hue = 0x7FFF;
+            }
+
+            ulong b = (ulong)(Text.GetHashCode() ^ hue ^ ((int)Align) ^ ((int)FontStyle) ^ Font ^ (IsUnicode ? 0x01 : 0x00));
+
+            return _picker.Get(b, x, y);
         }
 
         public TextEditRow GetLayoutRow(int startIndex)
@@ -637,7 +657,8 @@ namespace ClassicUO.Renderer
                     Align,
                     (ushort) FontStyle,
                     SaveHitMap,
-                    MaxHeight
+                    MaxHeight,
+                    _picker
                 );
             }
             else
@@ -652,7 +673,8 @@ namespace ClassicUO.Renderer
                     Align,
                     (ushort) FontStyle,
                     SaveHitMap,
-                    MaxHeight
+                    MaxHeight,
+                    _picker
                 );
             }
 
