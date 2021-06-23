@@ -5290,7 +5290,7 @@ namespace ClassicUO.Network
             p.Skip((int) clen);
 
             uint linesNum = p.ReadUInt32BE();
-            string[] lines = System.Buffers.ArrayPool<string>.Shared.Rent((int) linesNum);
+            string[] lines = new string[linesNum];
 
             try
             {
@@ -5386,7 +5386,7 @@ namespace ClassicUO.Network
             }
             finally
             {
-                System.Buffers.ArrayPool<string>.Shared.Return(lines);
+                //System.Buffers.ArrayPool<string>.Shared.Return(lines);
             }
         }
 
