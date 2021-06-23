@@ -77,7 +77,7 @@ namespace ClassicUO.IO
             height = ReadIntegerFromData(ref index);
         }
 
-        public void Set(ulong textureID, int width, int height, uint[] pixels)
+        public void Set(ulong textureID, int width, int height, Span<uint> pixels)
         {
             if (Has(textureID))
             {

@@ -707,7 +707,7 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     stream.Read(buffer, 0, buffer.Length);
 
-                    StackDataReader reader = new StackDataReader(buffer, (int)stream.Length);
+                    StackDataReader reader = new StackDataReader(buffer.AsSpan(0, (int)stream.Length));
 
                     bool was_error;
                     long fp_offset;
