@@ -418,5 +418,51 @@ namespace ClassicUO.UnitTests.IO
 
             reader.Release();
         }
+
+
+
+        [Theory]
+        [InlineData("this is a very long text", 1000)]
+        public void Read_More_Data_Than_Remains_ASCII(string str, int length)
+        {
+            Span<byte> data = Encoding.ASCII.GetBytes(str);
+
+            StackDataReader reader = new StackDataReader(data);
+
+            string s = reader.ReadASCII(length);
+
+            Assert.Equal(str, s);
+
+            reader.Release();
+        }
+
+        [Theory]
+        [InlineData("this is a very long text", 1000)]
+        public void Read_More_Data_Than_Remains_Unicode(string str, int length)
+        {
+            Span<byte> data = Encoding.BigEndianUnicode.GetBytes(str);
+
+            StackDataReader reader = new StackDataReader(data);
+
+            string s = reader.ReadUnicodeBE(length);
+
+            Assert.Equal(str, s);
+
+            reader.Release();
+        }
+        [Theory]
+        [InlineData("this is a very long text", 1000)]
+        public void Read_More_Data_Than_Remains_UTF8(string str, int length)
+        {
+            Span<byte> data = Encoding.UTF8.GetBytes(str);
+
+            StackDataReader reader = new StackDataReader(data);
+
+            string s = reader.ReadUTF8(length);
+
+            Assert.Equal(str, s);
+
+            reader.Release();
+        }
     }
 }
