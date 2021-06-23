@@ -71,7 +71,10 @@ namespace ClassicUO.Game.GameObjects
                 // tested on outlands with arrows & bolts 
                 // server sends duration = 50 , a very small amount of time so the arrow will be destroyed suddenly
                 // im not sure if this is the right fix, but keep it atm
-                duration = -1;
+                
+                // NOTE 2:
+                // this fix causes issue with other effects. It makes perma effects. So bad
+                //duration = -1;
             }
             else
             {
