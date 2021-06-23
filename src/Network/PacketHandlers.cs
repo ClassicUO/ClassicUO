@@ -3710,25 +3710,35 @@ namespace ClassicUO.Network
 
             string[] lines = new string[textLinesCount];
 
-            for (int i = 0, index = p.Position; i < textLinesCount; i++)
+            for (int i = 0; i < textLinesCount; ++i)
             {
-                int length = ((p[index++] << 8) | p[index++]) << 1;
-                int true_length = 0;
-
-                while (true_length < length)
-                {
-                    if (((p[index + true_length++] << 8) | p[index + true_length++]) << 1 == '\0')
-                    {
-                        break;
-                    }
-                }
-
-                unsafe
-                {
-                    lines[i] = Encoding.BigEndianUnicode.GetString(((byte*)p.StartAddress + index), true_length);
-                }
-                index += length;
+                int length = p.ReadUInt16BE();
+                lines[i] = p.ReadUnicodeBE(length);
             }
+
+            //for (int i = 0, index = p.Position; i < textLinesCount; i++)
+            //{
+            //    int length = ((p[index++] << 8) | p[index++]) << 1;
+            //    int true_length = 0;
+
+            //    while (true_length < length)
+            //    {
+            //        if (((p[index + true_length++] << 8) | p[index + true_length++]) << 1 == '\0')
+            //        {
+            //            break;
+            //        }
+            //    }
+
+            //    unsafe
+            //    {
+
+            //        fixed (byte* ptr = &p.Buffer[index])
+            //        {
+            //            lines[i] = Encoding.BigEndianUnicode.GetString(ptr, true_length);
+            //        }
+            //    }
+            //    index += length;
+            //}
 
             CreateGump
             (
@@ -5301,25 +5311,37 @@ namespace ClassicUO.Network
 
                         p.Skip((int)clen);
 
-                        for (int i = 0, index = 0; i < linesNum && index < dlen; i++)
+
+                        StackDataReader reader = new StackDataReader(decData.AsSpan(0, dlen));
+
+                        for (int i = 0; i < linesNum; ++i)
                         {
-                            int length = ((decData[index++] << 8) | decData[index++]) << 1;
-                            int true_length = 0;
-
-                            for (int k = 0; k < length && true_length < length && index + true_length < dlen; ++k, true_length += 2)
-                            {
-                                ushort c = (ushort)(((decData[index + true_length] << 8) | decData[index + true_length + 1]) << 1);
-
-                                if (c == '\0')
-                                {
-                                    break;
-                                }
-                            }
-
-                            lines[i] = Encoding.BigEndianUnicode.GetString(decData, index, true_length);
-
-                            index += length;
+                            int length = reader.ReadUInt16BE();
+                            lines[i] = reader.ReadUnicodeBE(length);
                         }
+
+
+                        reader.Release();
+
+                        //for (int i = 0, index = 0; i < linesNum && index < dlen; i++)
+                        //{
+                        //    int length = ((decData[index++] << 8) | decData[index++]) << 1;
+                        //    int true_length = 0;
+
+                        //    for (int k = 0; k < length && true_length < length && index + true_length < dlen; ++k, true_length += 2)
+                        //    {
+                        //        ushort c = (ushort)(((decData[index + true_length] << 8) | decData[index + true_length + 1]) << 1);
+
+                        //        if (c == '\0')
+                        //        {
+                        //            break;
+                        //        }
+                        //    }
+
+                        //    lines[i] = Encoding.BigEndianUnicode.GetString(decData, index, true_length);
+
+                        //    index += length;
+                        //}
                     }
                     finally
                     {
