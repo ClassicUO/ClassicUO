@@ -209,7 +209,6 @@ namespace ClassicUO.Game.UI.Gumps
             base.Dispose();
         }
 
-
         private void CreateBook()
         {
             _dataBox.Clear();
@@ -745,13 +744,15 @@ namespace ClassicUO.Game.UI.Gumps
                     GetSpellToolTip(out toolTipCliloc);
                 }
 
+                var spellDef = GetSpellDefinition(iconSerial);
                 HueGumpPic icon = new HueGumpPic
                 (
                     iconX,
                     40,
                     iconGraphic,
                     0,
-                    (ushort) GetSpellDefinition(iconSerial).ID
+                    (ushort)spellDef.ID,
+                    spellDef.Name
                 )
                 {
                     X = iconX, Y = 40, LocalSerial = iconSerial
@@ -1417,11 +1418,21 @@ namespace ClassicUO.Game.UI.Gumps
 
         private class HueGumpPic : GumpPic
         {
+            private readonly MacroManager _mm;
             private readonly ushort _spellID;
+            private readonly string _spellName;
 
-            public HueGumpPic(int x, int y, ushort graphic, ushort hue, ushort spellID) : base(x, y, graphic, hue)
+            /// <summary>
+            /// ShowEdit button when user pressing ctrl + alt
+            /// </summary>
+            private bool ShowEdit => Keyboard.Ctrl && Keyboard.Alt && ProfileManager.CurrentProfile.FastSpellsAssign;
+
+            public HueGumpPic(int x, int y, ushort graphic, ushort hue, ushort spellID, string spellName) : base(x, y, graphic, hue)
             {
                 _spellID = spellID;
+                _spellName = spellName;
+
+                _mm = Client.Game.GetScene<GameScene>().Macros;
             }
 
             public override void Update(double totalTime, double frameTime)
@@ -1436,6 +1447,68 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     Hue = 0;
                 }
+            }
+
+            /// <summary>
+            /// Overide Draw method to include + icon when ShowEdit is true
+            /// </summary>
+            /// <param name="batcher"></param>
+            /// <param name="x"></param>
+            /// <param name="y"></param>
+            /// <returns></returns>
+            public override bool Draw(UltimaBatcher2D batcher, int x, int y)
+            {
+                base.Draw(batcher, x, y);
+
+                if (ShowEdit)
+                {
+                    ResetHueVector();
+
+                    UOTexture lockTexture = GumpsLoader.Instance.GetTexture(0x1086);
+
+                    if (lockTexture != null)
+                    {
+                        lockTexture.Ticks = Time.Ticks;
+
+                        if (UIManager.MouseOverControl != null && (UIManager.MouseOverControl == this || UIManager.MouseOverControl.RootParent == this))
+                        {
+                            HueVector.X = 34;
+                            HueVector.Y = 1;
+                        }
+
+                        batcher.Draw2D(lockTexture, x + (Width - lockTexture.Width), y, ref HueVector);
+                    }
+                }
+
+                return true;
+            }
+
+            /// <summary>
+            /// On User Click and ShowEdit true we should show them macro editor
+            /// </summary>
+            /// <param name="x"></param>
+            /// <param name="y"></param>
+            /// <param name="button"></param>
+            protected override void OnMouseUp(int x, int y, MouseButtonType button)
+            {
+                if (button == MouseButtonType.Left && ShowEdit)
+                {
+                    Macro mCast = Macro.CreateFastMacro(_spellName, MacroType.CastSpell, (MacroSubType)GetSpellsId() + SpellBookDefinition.GetSpellsGroup(_spellID));
+                    if (_mm.FindMacro(_spellName) == null)
+                    {
+                        _mm.MoveToBack(mCast);
+                    }
+                    GameActions.OpenMacroGump(_spellName);
+                }
+            }
+
+            /// <summary>
+            /// Get Spell Id
+            /// </summary>
+            /// <returns></returns>
+            private int GetSpellsId()
+            {
+                return _spellID % 100;
             }
         }
     }
