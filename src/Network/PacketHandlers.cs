@@ -4977,7 +4977,7 @@ namespace ClassicUO.Network
                         );
                     }
 
-                    StackDataReader reader = new StackDataReader(span);
+                    StackDataReader reader = new StackDataReader(span.Slice(0, dlen));
 
                     ushort id = 0;
                     sbyte x = 0, y = 0, z = 0;

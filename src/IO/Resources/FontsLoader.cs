@@ -811,7 +811,7 @@ namespace ClassicUO.IO.Resources
                     texture.LineCount = linesCount;
                 }
 
-                texture.SetData(pData);
+                texture.SetData(pData, 0, width * height);
 
                 if (saveHitmap)
                 {
@@ -2341,7 +2341,7 @@ namespace ClassicUO.IO.Resources
                     texture.LineCount = linesCount;
                 }
 
-                texture.SetData(pData);
+                texture.SetData(pData, 0, width * height);
 
                 if (saveHitmap)
                 {
