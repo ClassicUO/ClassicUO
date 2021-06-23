@@ -88,11 +88,11 @@ namespace ClassicUO.Game
                 {
                     ushort id = _cursorData[i, j];
 
-                    uint[] pixels = ArtLoader.Instance.ReadStaticArt(id, out short w, out short h, out _);
-
+                    IntPtr surface = ArtLoader.Instance.CreateCursorSurfacePtr(id, (ushort) (i == 2 ? 0x0033 : 0), out short w, out short h);
+                 
                     if (i == 0)
                     {
-                        if (pixels != null && pixels.Length > 0)
+                        if (surface != IntPtr.Zero)
                         {
                             float offX = 0;
                             float offY = 0;
@@ -210,15 +210,8 @@ namespace ClassicUO.Game
                                     break;
                             }
 
-                            //if (offX == 0 && offY == 0)
-                            //{
-                            //    offX = -1;
-                            //    offY = -1;
-                            //}
-
-
-                            _cursorOffset[0, j] = (int) offX;
-                            _cursorOffset[1, j] = (int) offY;
+                            _cursorOffset[0, j] = (int)offX;
+                            _cursorOffset[1, j] = (int)offY;
                         }
                         else
                         {
@@ -227,59 +220,12 @@ namespace ClassicUO.Game
                         }
                     }
 
-                    if (pixels != null && pixels.Length != 0)
+                    if (surface != IntPtr.Zero)
                     {
-                        unsafe
-                        {
-                            fixed (uint* ptr = pixels)
-                            {
-                                SDL.SDL_Surface* surface = (SDL.SDL_Surface*) SDL.SDL_CreateRGBSurfaceWithFormatFrom
-                                (
-                                    (IntPtr) ptr,
-                                    w,
-                                    h,
-                                    32,
-                                    4 * w,
-                                    SDL.SDL_PIXELFORMAT_ABGR8888
-                                );
+                        int hotX = -_cursorOffset[0, j];
+                        int hotY = -_cursorOffset[1, j];
 
-                                if (i == 2)
-                                {
-                                    int stride = surface->pitch >> 2;
-                                    uint* pixels_ptr = (uint*) surface->pixels;
-                                    uint* p_line_end = pixels_ptr + w;
-                                    uint* p_img_end = pixels_ptr + stride * h;
-                                    int delta = stride - w;
-                                    Color c = default;
-
-                                    while (pixels_ptr < p_img_end)
-                                    {
-                                        while (pixels_ptr < p_line_end)
-                                        {
-                                            if (*pixels_ptr != 0 && *pixels_ptr != 0xFF_00_00_00)
-                                            {
-                                                c.PackedValue = *pixels_ptr;
-
-                                                *pixels_ptr = HuesHelper.Color16To32(HuesLoader.Instance.GetColor16(HuesHelper.ColorToHue(c), 0x0033)) | 0xFF_00_00_00;
-                                            }
-
-                                            ++pixels_ptr;
-                                        }
-
-                                        pixels_ptr += delta;
-                                        p_line_end += stride;
-                                    }
-                                }
-
-                                int hotX = -_cursorOffset[0, j];
-                                int hotY = -_cursorOffset[1, j];
-
-                                _cursors_ptr[i, j] = SDL.SDL_CreateColorCursor((IntPtr) surface, hotX, hotY);
-                            }
-                        }
-
-
-                        System.Buffers.ArrayPool<uint>.Shared.Return(pixels, true);
+                        _cursors_ptr[i, j] = SDL.SDL_CreateColorCursor(surface, hotX, hotY);
                     }
                 }
             }
