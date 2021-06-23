@@ -5316,8 +5316,17 @@ namespace ClassicUO.Network
 
                         for (int i = 0; i < linesNum; ++i)
                         {
-                            int length = reader.ReadUInt16BE();
-                            lines[i] = reader.ReadUnicodeBE(length);
+                            int remaining = reader.Remaining;
+
+                            if (remaining >= 2)
+                            {
+                                int length = reader.ReadUInt16BE();
+                                lines[i] = reader.ReadUnicodeBE(length);
+                            }
+                            else
+                            {
+                                lines[i] = string.Empty;
+                            }
                         }
 
 
