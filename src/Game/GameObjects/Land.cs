@@ -121,49 +121,8 @@ namespace ClassicUO.Game.GameObjects
                 default: return Z;
             }
         }
-
-        private static void CalculateNormal(Map.Map map, int x, int y, out Vector3 normal)
-        {
-            sbyte hl = map.GetTileZ(x - 1, y);
-            sbyte hr = map.GetTileZ(x + 1, y);
-            sbyte hd = map.GetTileZ(x, y - 1);
-            sbyte hu = map.GetTileZ(x, y + 1);
-
-            sbyte hll = map.GetTileZ(x - 1, y - 1);
-            sbyte hrr = map.GetTileZ(x + 1, y + 1);
-            sbyte hdd = map.GetTileZ(x + 1, y - 1);
-            sbyte huu = map.GetTileZ(x - 1, y + 1);
-
-            normal.X = (hl - hr) + (hll - hrr);
-            normal.Y = (hd - hu) + (hdd - huu);
-            normal.Z = 22f;
-
-            Vector3.Normalize(ref normal, out normal);
-        }
-
-
-
-        private static bool CloseEnough(ref Vector3 u, ref Vector3 v)
-        {
-            if (Math.Abs(u.X - v.X) > EPSILON)
-            {
-                return false;
-            }
-
-            if (Math.Abs(u.Y - v.Y) > EPSILON)
-            {
-                return false;
-            }
-
-            if (Math.Abs(u.Z - v.Z) > EPSILON)
-            {
-                return false;
-            }
-
-            return true;
-        }
-
-        public unsafe void ApplyStretch(Map.Map map, int x, int y, sbyte z)
+        
+        public void ApplyStretch(Map.Map map, int x, int y, sbyte z)
         {
             if (IsStretched || TexmapsLoader.Instance.GetValidRefEntry(TileData.TexID).Length <= 0)
             {
@@ -192,7 +151,6 @@ namespace ClassicUO.Game.GameObjects
                 AverageZ = (sbyte)((zLeft + zRight) >> 1);
             }
 
-            //AverageZ = (sbyte) Math.Floor((zTop + zRight + zLeft + zBottom) / 4f);
             MinZ = (sbyte) Math.Min(zTop, Math.Min(zRight, Math.Min(zLeft, zBottom)));
             
             CalculateNormal(map, x, y, out NormalTop);
@@ -211,6 +169,45 @@ namespace ClassicUO.Game.GameObjects
             {
                 IsStretched = true;
             }
+        }
+
+        private static void CalculateNormal(Map.Map map, int x, int y, out Vector3 normal)
+        {
+            sbyte hl = map.GetTileZ(x - 1, y);
+            sbyte hr = map.GetTileZ(x + 1, y);
+            sbyte hd = map.GetTileZ(x, y - 1);
+            sbyte hu = map.GetTileZ(x, y + 1);
+
+            sbyte hll = map.GetTileZ(x - 1, y - 1);
+            sbyte hrr = map.GetTileZ(x + 1, y + 1);
+            sbyte hdd = map.GetTileZ(x + 1, y - 1);
+            sbyte huu = map.GetTileZ(x - 1, y + 1);
+
+            normal.X = (hl - hr) + (hll - hrr);
+            normal.Y = (hd - hu) + (hdd - huu);
+            normal.Z = 22f;
+
+            Vector3.Normalize(ref normal, out normal);
+        }
+
+        private static bool CloseEnough(ref Vector3 u, ref Vector3 v)
+        {
+            if (Math.Abs(u.X - v.X) > EPSILON)
+            {
+                return false;
+            }
+
+            if (Math.Abs(u.Y - v.Y) > EPSILON)
+            {
+                return false;
+            }
+
+            if (Math.Abs(u.Z - v.Z) > EPSILON)
+            {
+                return false;
+            }
+
+            return true;
         }
     }
 }
