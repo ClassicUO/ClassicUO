@@ -136,7 +136,7 @@ namespace ClassicUO.Game.GameObjects
 
             normal.X = (hl - hr) + (hll - hrr);
             normal.Y = (hd - hu) + (hdd - huu);
-            normal.Z = 4f;
+            normal.Z = 22f;
 
             Vector3.Normalize(ref normal, out normal);
         }
