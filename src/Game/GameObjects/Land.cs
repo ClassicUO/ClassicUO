@@ -42,6 +42,9 @@ namespace ClassicUO.Game.GameObjects
 {
     internal sealed partial class Land : GameObject
     {
+        private static Vector3 STRAIGHT_UP = new Vector3(0, 0, 1);
+        private const float EPSILON = 0.0001f;
+
         private static readonly QueuedPool<Land> _pool = new QueuedPool<Land>
         (
             Constants.PREDICTABLE_TILE_COUNT,
@@ -119,25 +122,28 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
-        private static int NORMAL_LENGTH = 22;
-
-        private void CalculateNormal(Map.Map map, int x, int y, out Vector3 normal)
+        private static void CalculateNormal(Map.Map map, int x, int y, out Vector3 normal)
         {
-            sbyte z = map.GetTileZ(x, y);
-            sbyte leftZ = map.GetTileZ(x, y + 1);
-            sbyte rightZ = map.GetTileZ(x + 1, y);
+            sbyte hl = map.GetTileZ(x - 1, y);
+            sbyte hr = map.GetTileZ(x + 1, y);
+            sbyte hd = map.GetTileZ(x, y - 1);
+            sbyte hu = map.GetTileZ(x, y + 1);
 
-            Vector3 toLeft = new Vector3(0, NORMAL_LENGTH, (leftZ - z) * 4);
-            Vector3 toRight = new Vector3(NORMAL_LENGTH, 0, (rightZ - z) * 4);
+            sbyte hll = map.GetTileZ(x - 1, y - 1);
+            sbyte hrr = map.GetTileZ(x + 1, y + 1);
+            sbyte hdd = map.GetTileZ(x + 1, y - 1);
+            sbyte huu = map.GetTileZ(x - 1, y + 1);
 
-            Vector3.Cross(ref toRight, ref toLeft, out normal);
+            normal.X = (hl - hr) + (hll - hrr);
+            normal.Y = (hd - hu) + (hdd - huu);
+            normal.Z = 4f;
+
             Vector3.Normalize(ref normal, out normal);
         }
 
-        private static Vector3 STRAIGHT_UP = new Vector3(0, 0, 1);
-        private static float EPSILON = 0.0001f;
 
-        private bool CloseEnough(Vector3 u, Vector3 v)
+
+        private static bool CloseEnough(ref Vector3 u, ref Vector3 v)
         {
             if (Math.Abs(u.X - v.X) > EPSILON)
             {
@@ -194,8 +200,10 @@ namespace ClassicUO.Game.GameObjects
             CalculateNormal(map, x, y + 1, out NormalLeft);
             CalculateNormal(map, x + 1, y + 1, out NormalBottom);
 
-            if (CloseEnough(NormalTop, STRAIGHT_UP) && CloseEnough(NormalRight, STRAIGHT_UP) &&
-                CloseEnough(NormalLeft, STRAIGHT_UP) && CloseEnough(NormalBottom, STRAIGHT_UP))
+            if (CloseEnough(ref NormalTop, ref STRAIGHT_UP) && 
+                CloseEnough(ref NormalRight, ref STRAIGHT_UP) &&
+                CloseEnough(ref NormalLeft, ref STRAIGHT_UP) && 
+                CloseEnough(ref NormalBottom, ref STRAIGHT_UP))
             {
                 IsStretched = false;
             }

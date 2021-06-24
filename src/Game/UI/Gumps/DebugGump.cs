@@ -225,7 +225,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                     case TextObject overhead: return $"TextOverhead type: {overhead.Type}  hue: 0x{overhead.Hue:X4}";
 
-                    case Land land: return $"Land (0x{land.Graphic:X4})  flags: {land.TileData.Flags}";
+                    case Land land: return $"Land (0x{land.Graphic:X4})  flags: {land.TileData.Flags} stretched: {land.IsStretched}  avgZ: {land.AverageZ} minZ: {land.MinZ}";
                 }
             }
 
