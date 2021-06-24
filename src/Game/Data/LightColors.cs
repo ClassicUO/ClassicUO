@@ -47,18 +47,6 @@ namespace ClassicUO.Game.Data
         {
             ushort color = 0;
 
-            if (id < 0x3E27)
-            {
-                //color = ???;
-            }
-            else
-            {
-                color = 666;
-
-                //if (id > 0x3E3A)
-                //	color = ???;
-            }
-
             switch (id)
             {
                 case 0x088C:
