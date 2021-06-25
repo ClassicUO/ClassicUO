@@ -121,7 +121,7 @@ namespace ClassicUO.Game.GameObjects
                 default: return Z;
             }
         }
-        
+
         public void ApplyStretch(Map.Map map, int x, int y, sbyte z)
         {
             if (IsStretched || TexmapsLoader.Instance.GetValidRefEntry(TileData.TexID).Length <= 0)
@@ -142,17 +142,17 @@ namespace ClassicUO.Game.GameObjects
             YOffsets.Left = zLeft * 4;
             YOffsets.Bottom = zBottom * 4;
 
-            if (Math.Abs(zTop - zBottom) <= Math.Abs(zLeft - zRight))
+            if (Math.Abs(zTop - zBottom) > Math.Abs(zLeft - zRight))
             {
-                AverageZ = (sbyte)((zTop + zBottom) >> 1);
+                AverageZ = (sbyte) ((zTop + zBottom) >> 1);
             }
             else
             {
-                AverageZ = (sbyte)((zLeft + zRight) >> 1);
+                AverageZ = (sbyte) ((zLeft + zRight) >> 1);
             }
 
             MinZ = (sbyte) Math.Min(zTop, Math.Min(zRight, Math.Min(zLeft, zBottom)));
-            
+
             CalculateNormal(map, x, y, out NormalTop);
             CalculateNormal(map, x + 1, y, out NormalRight);
             CalculateNormal(map, x, y + 1, out NormalLeft);
@@ -183,10 +183,10 @@ namespace ClassicUO.Game.GameObjects
             sbyte hdd = map.GetTileZ(x + 1, y - 1);
             sbyte huu = map.GetTileZ(x - 1, y + 1);
 
-            normal.X = (hl - hr) + (hll - hrr);
-            normal.Y = (hd - hu) + (hdd - huu);
+            normal.X = (hl - hd) + (hll - hdd);
+            normal.Y = (hr - hu) + (hrr - huu);
             normal.Z = 22f;
-
+            
             Vector3.Normalize(ref normal, out normal);
         }
 
