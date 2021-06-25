@@ -121,6 +121,8 @@ namespace ClassicUO.Game
                 radius = Constants.MAX_CIRCLE_OF_TRANSPARENCY_RADIUS;
             }
 
+            radius += 44;
+
             if (_radius == radius && _texture != null && !_texture.IsDisposed)
             {
                 return;
