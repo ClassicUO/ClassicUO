@@ -68,6 +68,8 @@ namespace ClassicUO.Configuration
         public bool ScaleSpeechDelay { get; set; } = true;
         public bool SaveJournalToFile { get; set; } = true;
         public bool ForceUnicodeJournal { get; set; }
+        public bool IgnoreAllianceMessages { get; set; }
+        public bool IgnoreGuildMessages { get; set; }
 
         // hues
         public ushort SpeechHue { get; set; } = 0x02B2;

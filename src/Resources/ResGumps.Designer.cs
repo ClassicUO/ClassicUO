@@ -421,7 +421,7 @@ namespace ClassicUO.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Book page {0} single line too LONG, total lenght -&gt; {1} vs MAX 79 bytes allowed, some content might get lost.
+        ///   Looks up a localized string similar to Book page {0} single line too LONG, total length -&gt; {1} vs MAX 79 bytes allowed, some content might get lost.
         /// </summary>
         public static string BookPage0LineTooLong1 {
             get {
@@ -1619,7 +1619,7 @@ namespace ClassicUO.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Hide Chat Gradient.
+        ///   Looks up a localized string similar to Hide chat gradient.
         /// </summary>
         public static string HideChatGradient {
             get {
@@ -1840,6 +1840,24 @@ namespace ClassicUO.Resources {
         public static string HPType_None {
             get {
                 return ResourceManager.GetString("HPType_None", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Hide alliance chat.
+        /// </summary>
+        public static string IgnoreAllianceMessages {
+            get {
+                return ResourceManager.GetString("IgnoreAllianceMessages", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Hide guild chat.
+        /// </summary>
+        public static string IgnoreGuildMessages {
+            get {
+                return ResourceManager.GetString("IgnoreGuildMessages", resourceCulture);
             }
         }
         

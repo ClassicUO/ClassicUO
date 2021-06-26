@@ -109,12 +109,17 @@ namespace ClassicUO.Game.Managers
                 case MessageType.Encoded:
                 case MessageType.System:
                 case MessageType.Party:
-                case MessageType.Guild:
-                case MessageType.Alliance: break;
+                    break;
 
+                case MessageType.Guild:
+                    if (currentProfile.IgnoreGuildMessages) return;
+                    break;
+
+                case MessageType.Alliance:
+                    if (currentProfile.IgnoreAllianceMessages) return;
+                    break;
 
                 case MessageType.Spell:
-
                 {
                     //server hue color per default
                     if (!string.IsNullOrEmpty(text) && SpellDefinition.WordToTargettype.TryGetValue(text, out SpellDefinition spell))
@@ -222,15 +227,6 @@ namespace ClassicUO.Game.Managers
                     parent.AddMessage(msg);
 
                     break;
-
-
-                //default:
-                //    if (parent == null)
-                //        break;
-
-                //    parent.AddMessage(type, text, font, hue, unicode);
-
-                //    break;
             }
 
             MessageReceived.Raise
