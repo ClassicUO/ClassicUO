@@ -146,7 +146,7 @@ namespace ClassicUO.Game.GameObjects
             YOffsets.Left = zLeft * 4;
             YOffsets.Bottom = zBottom * 4;
 
-            if (Math.Abs(zTop - zBottom) > Math.Abs(zLeft - zRight))
+            if (Math.Abs(zTop - zBottom) <= Math.Abs(zLeft - zRight))
             {
                 AverageZ = (sbyte) ((zTop + zBottom) >> 1);
             }
