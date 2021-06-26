@@ -147,6 +147,8 @@ namespace ClassicUO.Game.UI.Gumps
         private Checkbox _scaleSpeechDelay, _saveJournalCheckBox;
         private Checkbox _showHouseContent;
         private Checkbox _showInfoBar;
+        private Checkbox _ignoreAllianceMessages;
+        private Checkbox _ignoreGuildMessages;
 
         // general
         private HSliderBar _sliderFPS, _circleOfTranspRadius;
@@ -2393,7 +2395,27 @@ namespace ClassicUO.Game.UI.Gumps
 
             startY += _hideChatGradient.Height + 2;
 
-            startY += 20;
+            _ignoreGuildMessages = AddCheckBox
+            (
+                rightArea,
+                ResGumps.IgnoreGuildMessages,
+                _currentProfile.IgnoreGuildMessages,
+                startX,
+                startY
+            );
+
+            startY += _ignoreGuildMessages.Height + 2;
+
+            _ignoreAllianceMessages = AddCheckBox
+            (
+                rightArea,
+                ResGumps.IgnoreAllianceMessages,
+                _currentProfile.IgnoreAllianceMessages,
+                startX,
+                startY
+            );
+
+            startY += 35;
 
             _randomizeColorsButton = new NiceButton
             (
@@ -3479,6 +3501,8 @@ namespace ClassicUO.Game.UI.Gumps
                     _chatShiftEnterCheckbox.IsChecked = true;
                     _saveJournalCheckBox.IsChecked = false;
                     _hideChatGradient.IsChecked = false;
+                    _ignoreGuildMessages.IsChecked = false;
+                    _ignoreAllianceMessages.IsChecked = false;
 
                     break;
 
@@ -3842,6 +3866,8 @@ namespace ClassicUO.Game.UI.Gumps
             _currentProfile.PartyAura = _partyAura.IsChecked;
             _currentProfile.PartyAuraHue = _partyAuraColorPickerBox.Hue;
             _currentProfile.HideChatGradient = _hideChatGradient.IsChecked;
+            _currentProfile.IgnoreGuildMessages = _ignoreGuildMessages.IsChecked;
+            _currentProfile.IgnoreAllianceMessages = _ignoreAllianceMessages.IsChecked;
 
             // fonts
             _currentProfile.ForceUnicodeJournal = _forceUnicodeJournal.IsChecked;
