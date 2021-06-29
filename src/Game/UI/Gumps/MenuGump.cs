@@ -57,7 +57,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add
             (
-                new ColorBox(217, 49, 0)
+                new ColorBox(217, 49, 1)
                 {
                     X = 40,
                     Y = 42
@@ -86,7 +86,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Y = 42,
                 Width = 217,
                 Height = 49,
-                WantUpdateSize = false
+                WantUpdateSize = false,
             };
 
             Add(_container);
