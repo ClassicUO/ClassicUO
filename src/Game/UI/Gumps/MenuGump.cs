@@ -171,15 +171,14 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 Texture = texture,
                 IsPartial = TileDataLoader.Instance.StaticData[graphic].IsPartialHue,
-                Hue = hue,
+                Hue = (ushort) (hue != 0 ? (hue + 1) : 0),
                 AcceptMouseInput = true,
                 X = x,
                 Y = y,
                 Width = texture.Width,
                 Height = texture.Height
             };
-
-
+            
             pic.MouseDoubleClick += (sender, e) =>
             {
                 NetClient.Socket.Send_MenuResponse(LocalSerial,
