@@ -211,6 +211,18 @@ namespace ClassicUO.Game.GameObjects
                 {
                     SelectedObject.Object = this;
                 }
+                else if (!IsMulti && !IsCoin && Amount > 1 && ItemData.IsStackable)
+                {
+                    if (ArtLoader.Instance.PixelCheck
+                    (
+                        graphic,
+                        SelectedObject.TranslatedMousePositionByViewport.X - posX + 5,
+                        SelectedObject.TranslatedMousePositionByViewport.Y - posY + 5
+                    ))
+                    {
+                        SelectedObject.Object = this;
+                    }
+                }
             }
 
             return true;
