@@ -281,7 +281,7 @@ namespace ClassicUO.Utility
             _pos = 0;
             _string = str;
             _Size = str.Length;
-            _eol = _Size;
+            _eol = _Size - 1;
 
             while (_pos < _eol)
             {
