@@ -73,6 +73,8 @@ namespace ClassicUO.Game.UI.Gumps
 
         public int SkillID => _skill.Index;
 
+        public string SkillName => _skill.Name;
+
         private void BuildGump()
         {
             Width = 88;

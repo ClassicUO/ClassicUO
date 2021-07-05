@@ -346,6 +346,13 @@ namespace ClassicUO.Game.UI.Gumps
                 ) { ButtonParameter = 12 }
             );
 
+            Add(
+                new NiceButton(
+                    10, 10 + 30 *i++, 140, 25, ButtonAction.SwitchPage, ResGumps.WindowManager)
+                {
+                    ButtonParameter = 13
+                }
+            );
 
             Add
             (
@@ -421,6 +428,7 @@ namespace ClassicUO.Game.UI.Gumps
             BuildCounters();
             BuildInfoBar();
             BuildContainers();
+            BuildWindowManager();
             BuildExperimental();
 
             ChangePage(1);
@@ -3010,7 +3018,6 @@ namespace ClassicUO.Game.UI.Gumps
             Add(rightArea, PAGE);
         }
 
-
         private void BuildInfoBar()
         {
             const int PAGE = 10;
@@ -3311,7 +3318,15 @@ namespace ClassicUO.Game.UI.Gumps
             button.MouseUp += (sender, e) => { ContainerManager.BuildContainerFile(true); };
             rightArea.Add(button);
 
+
             Add(rightArea, PAGE);
+        }
+
+        private void BuildWindowManager()
+        {
+            const int PAGE = 13;
+
+            Add(new WindowManagerControl { X = 200 }, PAGE);
         }
 
 
