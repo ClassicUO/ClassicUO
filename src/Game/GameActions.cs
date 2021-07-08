@@ -586,10 +586,21 @@ namespace ClassicUO.Game
             {
                 Entity ent = World.Get(serial);
 
-                if (ent != null && ent.HitsRequest < HitsRequestStatus.Received)
+                if (ent != null)
                 {
-                    ent.HitsRequest = HitsRequestStatus.Pending;
-                    force = true;
+                    if (force)
+                    {
+                        if (ent.HitsRequest >= HitsRequestStatus.Pending)
+                        {
+                            SendCloseStatus(serial);
+                        }
+                    }
+
+                    if (ent.HitsRequest < HitsRequestStatus.Received)
+                    {
+                        ent.HitsRequest = HitsRequestStatus.Pending;
+                        force = true;
+                    }
                 }
 
                 if (force && SerialHelper.IsValid(serial))

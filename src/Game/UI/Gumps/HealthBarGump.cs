@@ -63,7 +63,7 @@ namespace ClassicUO.Game.UI.Gumps
                 return;
             }
 
-            GameActions.RequestMobileStatus(entity.Serial);
+            GameActions.RequestMobileStatus(entity.Serial, true);
             LocalSerial = entity.Serial;
             CanCloseWithRightClick = true;
             _name = entity.Name;
