@@ -355,6 +355,8 @@ namespace ClassicUO.Network
                         _logFile?.Write($"disconnection  -  error during writing to the socket buffer [3]: {ex}");
 
                         Disconnect();
+
+                        throw;
                     }
                 }
             }
@@ -540,6 +542,8 @@ namespace ClassicUO.Network
                     _logFile?.Write($"disconnection  -  error while reading from socket [2]: {ex}");
 
                     Disconnect();
+
+                    throw;
                 }
             }
         }
