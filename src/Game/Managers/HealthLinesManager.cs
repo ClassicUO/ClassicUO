@@ -116,6 +116,11 @@ namespace ClassicUO.Game.Managers
                 int current = mobile.Hits;
                 int max = mobile.HitsMax;
 
+                if (max == 0)
+                {
+                    continue;
+                }
+
                 if (showWhen == 1 && current == max)
                 {
                     continue;
