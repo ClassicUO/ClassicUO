@@ -138,8 +138,17 @@ namespace ClassicUO.Game.UI.Controls
             base.Draw(batcher, x, y);
 
             ResetHueVector();
-
-            ShaderHueTranslator.GetHueVector(ref HueVector, HighlightOnMouseOver && MouseIsOver ? 0x0035 : Hue, IsPartialHue, 0);
+            
+            bool partialHue = IsPartialHue;
+            ushort hue = Hue;
+            
+            if (HighlightOnMouseOver && MouseIsOver)
+            {
+                hue = 0x0035;
+                partialHue = false;
+            }
+            
+            ShaderHueTranslator.GetHueVector(ref HueVector, hue, partialHue, 0);
 
             UOTexture texture = _is_gump ? GumpsLoader.Instance.GetTexture(Graphic) : ArtLoader.Instance.GetTexture(Graphic);
 
