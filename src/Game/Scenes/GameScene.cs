@@ -101,11 +101,10 @@ namespace ClassicUO.Game.Scenes
         private readonly bool _use_render_target = false;
         private UseItemQueue _useItemQueue = new UseItemQueue();
         private bool _useObjectHandles;
-        private Vector4 _vectorClear = new Vector4(Vector3.Zero, 1);
         private RenderTarget2D _world_render_target, _lightRenderTarget;
 
 
-        public GameScene() : base((int) SceneType.Game, true, true, true)
+        public GameScene() : base((int) SceneType.Game, true, true, false)
         {
         }
 
@@ -160,8 +159,7 @@ namespace ClassicUO.Game.Scenes
             Weather = new Weather();
 
             WorldViewportGump viewport = new WorldViewportGump(this);
-
-            UIManager.Add(viewport);
+            UIManager.Add(viewport, false);
 
             if (!ProfileManager.CurrentProfile.TopbarGumpIsDisabled)
             {
@@ -614,8 +612,8 @@ namespace ClassicUO.Game.Scenes
             }
 
 
-            UpdateTextServerEntities(World.Mobiles, true);
-            UpdateTextServerEntities(World.Items, false);
+            UpdateTextServerEntities(World.Mobiles.Values, true);
+            UpdateTextServerEntities(World.Items.Values, false);
 
             _renderIndex++;
 
@@ -1008,7 +1006,7 @@ namespace ClassicUO.Game.Scenes
 
 
             batcher.Begin(null, matrix);
-
+            batcher.SetBrightlight(ProfileManager.CurrentProfile.TerrainShadowsLevel * 0.1f);
 
             bool usecircle = ProfileManager.CurrentProfile.UseCircleOfTransparency;
 
@@ -1019,7 +1017,7 @@ namespace ClassicUO.Game.Scenes
                 int fy = (int) (World.Player.RealScreenPosition.Y + (World.Player.Offset.Y - World.Player.Offset.Z));
 
                 fx += 22;
-                //fy -= 22;
+                fy -= 22;
 
                 CircleOfTransparency.Draw(batcher, fx, fy);
             }
@@ -1028,26 +1026,42 @@ namespace ClassicUO.Game.Scenes
 
             int z = World.Player.Z + 5;
 
+            ushort hue = 0;
+            Vector3 hueVec = Vector3.Zero;
+
+            GameObject.DrawTransparent = usecircle;
+
             for (int i = 0; i < _renderListCount; ++i)
             {
-                GameObject obj = _renderList[i];
+                ref var info = ref _renderList[i];
+
+                var obj = info.Object;
 
                 if (obj.Z <= _maxGroundZ)
                 {
-                    GameObject.DrawTransparent = usecircle && obj.TransparentTest(z);
+                    if (usecircle)
+                    {
+                        GameObject.DrawTransparent = obj.TransparentTest(z);
+                    }
 
-                    if (obj.Draw(batcher, obj.RealScreenPosition.X, obj.RealScreenPosition.Y))
+                    hue = obj.Hue;
+                    obj.Hue = info.Hue;
+
+                    if (obj.Draw(batcher, obj.RealScreenPosition.X, obj.RealScreenPosition.Y, ref hueVec))
                     {
                         ++RenderedObjectsCount;
                     }
+
+                    obj.Hue = hue;
                 }
             }
 
             if (_multi != null && TargetManager.IsTargeting && TargetManager.TargetingState == CursorTarget.MultiPlacement)
             {
-                _multi.Draw(batcher, _multi.RealScreenPosition.X, _multi.RealScreenPosition.Y);
+                hueVec = Vector3.Zero;
+                _multi.Draw(batcher, _multi.RealScreenPosition.X, _multi.RealScreenPosition.Y, ref hueVec);
             }
-
+        
             // draw weather
             Weather.Draw(batcher, 0, 0);
             batcher.End();
@@ -1077,10 +1091,8 @@ namespace ClassicUO.Game.Scenes
                 {
                     lightColor -= 0.04f;
                 }
-
-                _vectorClear.X = _vectorClear.Y = _vectorClear.Z = lightColor;
-
-                batcher.GraphicsDevice.Clear(ClearOptions.Target, _vectorClear, 0f, 0);
+                
+                batcher.GraphicsDevice.Clear(ClearOptions.Target, new Vector4(lightColor, lightColor, lightColor, 1), 0f, 0);
             }
 
             batcher.Begin(null, matrix);

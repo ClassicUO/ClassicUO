@@ -299,10 +299,11 @@ namespace ClassicUO.Game.Managers
                             (
                                 floorMulti.Graphic,
                                 0,
-                                x - foundationItem.X,
-                                y - foundationItem.Y,
+                                (ushort) (foundationItem.X + (x - foundationItem.X)),
+                                (ushort) (foundationItem.Y + (y - foundationItem.Y)),
                                 (sbyte) z,
-                                true
+                                true,
+                                false
                             );
 
                             mo.AlphaHue = 0xFF;
@@ -585,10 +586,11 @@ namespace ClassicUO.Game.Managers
                             (
                                 0x0496,
                                 tempColor,
-                                x - foundationItem.X,
-                                y - foundationItem.Y,
+                                (ushort)(foundationItem.X + (x - foundationItem.X)),
+                                (ushort)(foundationItem.Y + (y - foundationItem.Y)),
                                 (sbyte) z,
-                                true
+                                true,
+                                false
                             );
 
                             mo.AlphaHue = 0xFF;
@@ -659,11 +661,11 @@ namespace ClassicUO.Game.Managers
 
                             if (type == CUSTOM_HOUSE_BUILD_TYPE.CHBT_ROOF)
                             {
-                                NetClient.Socket.Send(new PCustomHouseDeleteRoof(place.Graphic, place.X - foundationItem.X, place.Y - foundationItem.Y, z));
+                                NetClient.Socket.Send_CustomHouseDeleteRoof(place.Graphic, place.X - foundationItem.X, place.Y - foundationItem.Y, z);
                             }
                             else
                             {
-                                NetClient.Socket.Send(new PCustomHouseDeleteItem(place.Graphic, place.X - foundationItem.X, place.Y - foundationItem.Y, z));
+                                NetClient.Socket.Send_CustomHouseDeleteItem(place.Graphic, place.X - foundationItem.X, place.Y - foundationItem.Y, z);
                             }
 
                             place.Destroy();
@@ -708,7 +710,7 @@ namespace ClassicUO.Game.Managers
 
                                     if (graphic != 0)
                                     {
-                                        NetClient.Socket.Send(new PCustomHouseAddStair(graphic, placeX - foundationItem.X, placeY - foundationItem.Y));
+                                        NetClient.Socket.Send_CustomHouseAddStair(graphic, placeX - foundationItem.X, placeY - foundationItem.Y);
                                     }
                                 }
                             }
@@ -782,11 +784,11 @@ namespace ClassicUO.Game.Managers
 
                                     if (type == CUSTOM_HOUSE_BUILD_TYPE.CHBT_ROOF)
                                     {
-                                        NetClient.Socket.Send(new PCustomHouseAddRoof(item.Graphic, x, y, item.Z));
+                                        NetClient.Socket.Send_CustomHouseAddRoof(item.Graphic, x, y, item.Z);
                                     }
                                     else
                                     {
-                                        NetClient.Socket.Send(new PCustomHouseAddItem(item.Graphic, x, y));
+                                        NetClient.Socket.Send_CustomHouseAddItem(item.Graphic, x, y);
                                     }
                                 }
                             }
@@ -811,10 +813,11 @@ namespace ClassicUO.Game.Managers
                                 (
                                     item.Graphic,
                                     0,
-                                    xx + item.X,
-                                    yy + item.Y,
+                                    (ushort) (foundationItem.X + xx + item.X),
+                                    (ushort) (foundationItem.Y + yy + item.Y),
                                     (sbyte) (z + item.Z),
-                                    true
+                                    true,
+                                    false
                                 );
                             }
                         }
@@ -1879,6 +1882,8 @@ namespace ClassicUO.Game.Managers
                         {
                             if ((item.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_VALIDATED_PLACE) == 0)
                             {
+                                item.State |= CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_VALIDATED_PLACE;
+
                                 if (!ValidateItemPlace
                                 (
                                     foundationItem,

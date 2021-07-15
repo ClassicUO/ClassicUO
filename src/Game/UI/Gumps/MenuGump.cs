@@ -57,7 +57,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add
             (
-                new ColorBox(217, 49, 0, 0xFF000001)
+                new ColorBox(217, 49, 1)
                 {
                     X = 40,
                     Y = 42
@@ -86,7 +86,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Y = 42,
                 Width = 217,
                 Height = 49,
-                WantUpdateSize = false
+                WantUpdateSize = false,
             };
 
             Add(_container);
@@ -171,29 +171,21 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 Texture = texture,
                 IsPartial = TileDataLoader.Instance.StaticData[graphic].IsPartialHue,
-                Hue = hue,
+                Hue = (ushort) (hue != 0 ? (hue + 1) : 0),
                 AcceptMouseInput = true,
                 X = x,
                 Y = y,
                 Width = texture.Width,
                 Height = texture.Height
             };
-
-
+            
             pic.MouseDoubleClick += (sender, e) =>
             {
-                NetClient.Socket.Send
-                (
-                    new PMenuResponse
-                    (
-                        LocalSerial,
-                        (ushort) ServerSerial,
-                        index,
-                        graphic,
-                        hue
-                    )
-                );
-
+                NetClient.Socket.Send_MenuResponse(LocalSerial,
+                                                   (ushort)ServerSerial,
+                                                   index,
+                                                   graphic,
+                                                   hue);
                 Dispose();
                 e.Result = true;
             };
@@ -211,17 +203,11 @@ namespace ClassicUO.Game.UI.Gumps
         {
             base.CloseWithRightClick();
 
-            NetClient.Socket.Send
-            (
-                new PMenuResponse
-                (
-                    LocalSerial,
-                    (ushort) ServerSerial,
-                    0,
-                    0,
-                    0
-                )
-            );
+            NetClient.Socket.Send_MenuResponse(LocalSerial,
+                                               (ushort)ServerSerial,
+                                               0,
+                                               0,
+                                               0);
         }
 
 
@@ -252,19 +238,8 @@ namespace ClassicUO.Game.UI.Gumps
 
             public override bool Draw(UltimaBatcher2D batcher, int x, int y)
             {
-                Rectangle scissor = ScissorStack.CalculateScissors
-                (
-                    Matrix.Identity,
-                    x,
-                    y,
-                    Width,
-                    Height
-                );
-
-                if (ScissorStack.PushScissors(batcher.GraphicsDevice, scissor))
+                if (batcher.ClipBegin(x, y, Width, Height))
                 {
-                    batcher.EnableScissorTest(true);
-
                     int width = 0;
                     int maxWidth = Value + Width;
                     bool drawOnly1 = true;
@@ -297,9 +272,7 @@ namespace ClassicUO.Game.UI.Gumps
                         width += child.Width;
                     }
 
-
-                    batcher.EnableScissorTest(false);
-                    ScissorStack.PopScissors(batcher.GraphicsDevice);
+                    batcher.ClipEnd();
                 }
 
                 return true; // base.Draw(batcher,position, hue);
@@ -395,7 +368,7 @@ namespace ClassicUO.Game.UI.Gumps
             switch (buttonID)
             {
                 case 0: // cancel
-                    NetClient.Socket.Send(new PGrayMenuResponse(LocalSerial, (ushort) ServerSerial, 0));
+                    NetClient.Socket.Send_GrayMenuResponse(LocalSerial, (ushort)ServerSerial, 0);
 
                     Dispose();
 
@@ -409,7 +382,7 @@ namespace ClassicUO.Game.UI.Gumps
                     {
                         if (radioButton.IsChecked)
                         {
-                            NetClient.Socket.Send(new PGrayMenuResponse(LocalSerial, (ushort) ServerSerial, index));
+                            NetClient.Socket.Send_GrayMenuResponse(LocalSerial, (ushort)ServerSerial, index);
                             
                             Dispose();
                             break;

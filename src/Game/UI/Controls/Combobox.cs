@@ -32,6 +32,7 @@
 
 using System;
 using System.Linq;
+using ClassicUO.Configuration;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Input;
@@ -80,9 +81,16 @@ namespace ClassicUO.Game.UI.Controls
 
             string initialText = selected > -1 ? items[selected] : emptyString;
 
+            bool isAsianLang = string.Compare(Settings.GlobalSettings.Language, "CHT", StringComparison.InvariantCultureIgnoreCase) == 0 || 
+                string.Compare(Settings.GlobalSettings.Language, "KOR", StringComparison.InvariantCultureIgnoreCase) == 0 ||
+                string.Compare(Settings.GlobalSettings.Language, "JPN", StringComparison.InvariantCultureIgnoreCase) == 0;
+
+            bool unicode = isAsianLang;
+            byte font1 = (byte)(isAsianLang ? 1 : _font);
+
             Add
             (
-                _label = new Label(initialText, false, 0x0453, font: _font)
+                _label = new Label(initialText, unicode, 0x0453, font: font1)
                 {
                     X = 2, Y = 5
                 }
@@ -117,21 +125,10 @@ namespace ClassicUO.Game.UI.Controls
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
-            Rectangle scissor = ScissorStack.CalculateScissors
-            (
-                Matrix.Identity,
-                x,
-                y,
-                Width,
-                Height
-            );
-
-            if (ScissorStack.PushScissors(batcher.GraphicsDevice, scissor))
+            if (batcher.ClipBegin(x, y, Width, Height))
             {
-                batcher.EnableScissorTest(true);
                 base.Draw(batcher, x, y);
-                batcher.EnableScissorTest(false);
-                ScissorStack.PopScissors(batcher.GraphicsDevice);
+                batcher.ClipEnd();
             }
 
             return true;
@@ -208,6 +205,13 @@ namespace ClassicUO.Game.UI.Controls
 
                 HoveredLabel[] labels = new HoveredLabel[items.Length];
 
+                bool isAsianLang = string.Compare(Settings.GlobalSettings.Language, "CHT", StringComparison.InvariantCultureIgnoreCase) == 0 || 
+                    string.Compare(Settings.GlobalSettings.Language, "KOR", StringComparison.InvariantCultureIgnoreCase) == 0 ||
+                    string.Compare(Settings.GlobalSettings.Language, "JPN", StringComparison.InvariantCultureIgnoreCase) == 0;
+
+                bool unicode = isAsianLang;
+                byte font1 = (byte)(isAsianLang ? 1 : font);
+
                 for (int i = 0; i < items.Length; i++)
                 {
                     string item = items[i];
@@ -220,11 +224,11 @@ namespace ClassicUO.Game.UI.Controls
                     HoveredLabel label = new HoveredLabel
                     (
                         item,
-                        false,
+                        unicode,
                         0x0453,
                         0x0453,
                         0x0453,
-                        font: font
+                        font: font1
                     )
                     {
                         X = 2,
@@ -261,6 +265,19 @@ namespace ClassicUO.Game.UI.Controls
 
                 background.Width = maxWidth;
                 background.Height = totalHeight;
+            }
+
+
+            public override bool Draw(UltimaBatcher2D batcher, int x, int y)
+            {
+                if (batcher.ClipBegin(x, y, Width, Height))
+                {
+                    base.Draw(batcher, x, y);
+
+                    batcher.ClipEnd();
+                }
+
+                return true;
             }
 
             private void LabelOnMouseUp(object sender, MouseEventArgs e)

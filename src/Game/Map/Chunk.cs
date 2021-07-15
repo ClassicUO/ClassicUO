@@ -99,8 +99,6 @@ namespace ClassicUO.Game.Map
                         sbyte z = cells[pos].Z;
 
                         Land land = Land.Create(tileID);
-                        land.AverageZ = z;
-                        land.MinZ = z;
 
                         ushort tileX = (ushort) (bx + x);
 
@@ -188,6 +186,8 @@ namespace ClassicUO.Game.Map
                         priorityZ--;
                     }
 
+                    priorityZ -= 1;
+
                     state = 0;
 
                     break;
@@ -233,11 +233,15 @@ namespace ClassicUO.Game.Map
                         state = 2;
                         priorityZ++;
                     }
+                    //else if ((m.ItemData.Flags & TileFlag.StairRight) != 0)
+                    //{
+                    //    priorityZ++;
+                    //}
 
-                    if (m.ItemData.IsMultiMovable)
-                    {
-                        priorityZ++;
-                    }
+                    //if (m.IsMovable)
+                    //{
+                    //    priorityZ += 1;
+                    //}
 
                     goto default;
 
@@ -248,6 +252,11 @@ namespace ClassicUO.Game.Map
                     {
                         priorityZ--;
                     }
+
+                    //if (data.IsSurface)
+                    //{
+                    //    priorityZ--;
+                    //}
 
                     if (data.Height != 0)
                     {
@@ -381,7 +390,7 @@ namespace ClassicUO.Game.Map
                     {
                         GameObject next = first.TNext;
 
-                        if (first != World.Player)
+                        if (!ReferenceEquals(first, World.Player))
                         {
                             first.Destroy();
                         }
@@ -423,7 +432,7 @@ namespace ClassicUO.Game.Map
                     {
                         GameObject next = first.TNext;
 
-                        if (first != World.Player)
+                        if (!ReferenceEquals(first, World.Player))
                         {
                             first.Destroy();
                         }

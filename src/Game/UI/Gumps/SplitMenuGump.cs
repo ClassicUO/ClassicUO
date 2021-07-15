@@ -170,7 +170,10 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void OkButtonOnMouseClick(object sender, MouseEventArgs e)
         {
-            PickUp();
+            if (e.Button == MouseButtonType.Left)
+            {
+                PickUp();
+            }
         }
 
         public override void OnKeyboardReturn(int textID, string text)

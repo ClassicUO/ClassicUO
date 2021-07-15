@@ -565,7 +565,7 @@ namespace ClassicUO.Game.Managers
                                             break;
                                     }
 
-                                    NetClient.Socket.Send(new POpenSpellBook((byte) type));
+                                    NetClient.Socket.Send_OpenSpellBook((byte)type);
 
                                     break;
 
@@ -1120,7 +1120,7 @@ namespace ClassicUO.Game.Managers
 
                 case MacroType.TargetNext:
 
-                    uint sel_obj = World.SearchObject(TargetManager.LastTargetInfo.Serial, ScanTypeObject.Mobiles, ScanModeObject.Next);
+                    uint sel_obj = World.FindNext(ScanTypeObject.Mobiles, TargetManager.LastTargetInfo.Serial, false);
 
                     if (SerialHelper.IsValid(sel_obj))
                     {
@@ -1292,11 +1292,11 @@ namespace ClassicUO.Game.Managers
                         {
                             if (macro.Code == MacroType.BandageSelf)
                             {
-                                NetClient.Socket.Send(new PTargetSelectedObject(bandage.Serial, World.Player.Serial));
+                                NetClient.Socket.Send_TargetSelectedObject(bandage.Serial, World.Player.Serial);
                             }
                             else if (SerialHelper.IsMobile(TargetManager.SelectedTarget))
                             {
-                                NetClient.Socket.Send(new PTargetSelectedObject(bandage.Serial, TargetManager.SelectedTarget));
+                                NetClient.Socket.Send_TargetSelectedObject(bandage.Serial, TargetManager.SelectedTarget);
                             }
                         }
                     }
@@ -1373,7 +1373,7 @@ namespace ClassicUO.Game.Managers
                     // 0 - SelectNext
                     // 1 - SelectPrevious
                     // 2 - SelectNearest
-                    int scanRange = macro.Code - MacroType.SelectNext;
+                    ScanModeObject scanRange = (ScanModeObject)(macro.Code - MacroType.SelectNext);
 
                     // scantype:
                     // 0 - Hostile (only hostile mobiles: gray, criminal, enemy, murderer)
@@ -1381,9 +1381,16 @@ namespace ClassicUO.Game.Managers
                     // 2 - Follower (only your followers)
                     // 3 - Object (???)
                     // 4 - Mobile (any mobiles)
-                    int scantype = macro.SubCode - MacroSubType.Hostile;
+                    ScanTypeObject scantype = (ScanTypeObject)(macro.SubCode - MacroSubType.Hostile);
 
-                    SetLastTarget(World.SearchObject(TargetManager.SelectedTarget, (ScanTypeObject) scantype, (ScanModeObject) scanRange));
+                    if (scanRange == ScanModeObject.Nearest)
+                    {
+                        SetLastTarget(World.FindNearest(scantype));
+                    }
+                    else
+                    {
+                        SetLastTarget(World.FindNext(scantype, TargetManager.SelectedTarget, scanRange == ScanModeObject.Previous));
+                    }
 
                     break;
 
@@ -1403,7 +1410,7 @@ namespace ClassicUO.Game.Managers
 
                 case MacroType.InvokeVirtue:
                     byte id = (byte) (macro.SubCode - MacroSubType.Honor + 1);
-                    NetClient.Socket.Send(new PInvokeVirtueRequest(id));
+                    NetClient.Socket.Send_InvokeVirtueRequest(id);
 
                     break;
 
@@ -1421,13 +1428,13 @@ namespace ClassicUO.Game.Managers
 
                     if (World.Player.Race == RaceType.GARGOYLE)
                     {
-                        NetClient.Socket.Send(new PToggleGargoyleFlying());
+                        NetClient.Socket.Send_ToggleGargoyleFlying();
                     }
 
                     break;
 
                 case MacroType.EquipLastWeapon:
-                    NetClient.Socket.Send(new PEquipLastWeapon());
+                    NetClient.Socket.Send_EquipLastWeapon();
 
                     break;
 
@@ -1490,7 +1497,7 @@ namespace ClassicUO.Game.Managers
                     break;
 
                 case MacroType.UsePotion:
-                    scantype = macro.SubCode - MacroSubType.ConfusionBlastPotion;
+                    scantype = (ScanTypeObject)(macro.SubCode - MacroSubType.ConfusionBlastPotion);
 
                     ushort start = (ushort) (0x0F06 + scantype);
 

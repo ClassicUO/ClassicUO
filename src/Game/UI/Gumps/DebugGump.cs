@@ -30,6 +30,7 @@
 
 #endregion
 
+using System;
 using System.Text;
 using System.Xml;
 using ClassicUO.Configuration;
@@ -54,9 +55,9 @@ namespace ClassicUO.Game.UI.Gumps
         private const string DEBUG_STRING_SMALL_NO_ZOOM = "FPS: {0}";
         private static Point _last_position = new Point(-1, -1);
 
-        private readonly StringBuilder _sb = new StringBuilder();
         private uint _timeToUpdate;
         private readonly AlphaBlendControl _alphaBlendControl;
+        private string _cacheText = string.Empty;
 
         public DebugGump(int x, int y) : base(0, 0)
         {
@@ -108,27 +109,29 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 _timeToUpdate = Time.Ticks + 100;
 
-                _sb.Clear();
                 GameScene scene = Client.Game.GetScene<GameScene>();
-
+                Span<char> span = stackalloc char[256];
+                ValueStringBuilder sb = new ValueStringBuilder(span);
+           
                 if (IsMinimized && scene != null)
                 {
-                    _sb.AppendFormat
-                    (
-                        DEBUG_STRING_0,
-                        CUOEnviroment.CurrentRefreshRate,
-                        0,
-                        0,
-                        !World.InGame ? 1f : scene.Camera.Zoom,
-                        scene.RenderedObjectsCount
-                    );
+                    sb.Append
+                    (string.Format(
+                         DEBUG_STRING_0,
+                         CUOEnviroment.CurrentRefreshRate,
+                         0,
+                         0,
+                         !World.InGame ? 1f : scene.Camera.Zoom,
+                         scene.RenderedObjectsCount
+                         )
+                     );
 
-                    _sb.AppendLine($"- CUO version: {CUOEnviroment.Version}, Client version: {Settings.GlobalSettings.ClientVersion}");
+                    sb.Append($"- CUO version: {CUOEnviroment.Version}, Client version: {Settings.GlobalSettings.ClientVersion}\n");
 
                     //_sb.AppendFormat(DEBUG_STRING_1, Engine.DebugInfo.MobilesRendered, Engine.DebugInfo.ItemsRendered, Engine.DebugInfo.StaticsRendered, Engine.DebugInfo.MultiRendered, Engine.DebugInfo.LandsRendered, Engine.DebugInfo.EffectsRendered);
-                    _sb.AppendFormat(DEBUG_STRING_2, World.InGame ? $"{World.Player.X}, {World.Player.Y}, {World.Player.Z}" : "0xFFFF, 0xFFFF, 0", Mouse.Position, SelectedObject.Object is GameObject gobj ? $"{gobj.X}, {gobj.Y}, {gobj.Z}" : "0xFFFF, 0xFFFF, 0");
+                    sb.Append(string.Format(DEBUG_STRING_2, World.InGame ? $"{World.Player.X}, {World.Player.Y}, {World.Player.Z}" : "0xFFFF, 0xFFFF, 0", Mouse.Position, SelectedObject.Object is GameObject gobj ? $"{gobj.X}, {gobj.Y}, {gobj.Z}" : "0xFFFF, 0xFFFF, 0"));
 
-                    _sb.AppendFormat(DEBUG_STRING_3, ReadObject(SelectedObject.Object));
+                    sb.Append(string.Format(DEBUG_STRING_3, ReadObject(SelectedObject.Object)));
 
                     if (CUOEnviroment.Profiler)
                     {
@@ -145,13 +148,13 @@ namespace ClassicUO.Game.UI.Gumps
 
                         double avgDrawMs = Profiler.GetContext("RenderFrame").AverageTime;
 
-                        _sb.AppendLine("- Profiling");
+                        sb.Append("- Profiling\n");
 
-                        _sb.AppendLine
+                        sb.Append
                         (
                             string.Format
                             (
-                                "    Draw:{0:0.0}% Update:{1:0.0}% FixedUpd:{2:0.0} AvgDraw:{3:0.0}ms {4}",
+                                "    Draw:{0:0.0}% Update:{1:0.0}% FixedUpd:{2:0.0} AvgDraw:{3:0.0}ms {4}\n",
                                 100d * (timeDraw / timeTotal),
                                 100d * (timeUpdate / timeTotal),
                                 100d * (timeFixedUpdate / timeTotal),
@@ -163,15 +166,18 @@ namespace ClassicUO.Game.UI.Gumps
                 }
                 else if (scene != null && scene.Camera.Zoom != 1f)
                 {
-                    _sb.AppendFormat(DEBUG_STRING_SMALL, CUOEnviroment.CurrentRefreshRate, !World.InGame ? 1f : scene.Camera.Zoom);
+                    sb.Append(string.Format(DEBUG_STRING_SMALL, CUOEnviroment.CurrentRefreshRate, !World.InGame ? 1f : scene.Camera.Zoom));
                 }
                 else
                 {
-                    _sb.AppendFormat(DEBUG_STRING_SMALL_NO_ZOOM, CUOEnviroment.CurrentRefreshRate);
+                    sb.Append(string.Format(DEBUG_STRING_SMALL_NO_ZOOM, CUOEnviroment.CurrentRefreshRate));
                 }
 
+                _cacheText = sb.ToString();
 
-                Vector2 size = Fonts.Bold.MeasureString(_sb.ToString());
+                sb.Dispose();
+
+                Vector2 size = Fonts.Bold.MeasureString(_cacheText);
 
                 _alphaBlendControl.Width = Width = (int) (size.X + 20);
                 _alphaBlendControl.Height = Height = (int) (size.Y + 20);
@@ -192,7 +198,7 @@ namespace ClassicUO.Game.UI.Gumps
             batcher.DrawString
             (
                 Fonts.Bold,
-                _sb.ToString(),
+                _cacheText,
                 x + 10,
                 y + 10,
                 ref HueVector
@@ -219,7 +225,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                     case TextObject overhead: return $"TextOverhead type: {overhead.Type}  hue: 0x{overhead.Hue:X4}";
 
-                    case Land land: return $"Land (0x{land.Graphic:X4})  flags: {land.TileData.Flags}";
+                    case Land land: return $"Land (0x{land.Graphic:X4})  flags: {land.TileData.Flags} stretched: {land.IsStretched}  avgZ: {land.AverageZ} minZ: {land.MinZ}";
                 }
             }
 

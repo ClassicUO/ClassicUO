@@ -43,6 +43,9 @@ namespace ClassicUO.Renderer
 {
     internal sealed unsafe class UltimaBatcher2D : IDisposable
     {
+        private static readonly float[] _cornerOffsetX = new float[] { 0.0f, 1.0f, 0.0f, 1.0f };
+        private static readonly float[] _cornerOffsetY = new float[] { 0.0f, 0.0f, 1.0f, 1.0f };
+
         private const int MAX_SPRITES = 0x800;
         private const int MAX_VERTICES = MAX_SPRITES * 4;
         private const int MAX_INDICES = MAX_SPRITES * 6;
@@ -80,7 +83,6 @@ namespace ClassicUO.Renderer
         private DepthStencilState _stencil;
         private readonly Texture2D[] _textureInfo;
         private Matrix _transformMatrix;
-        private bool _useScissor;
         private readonly DynamicVertexBuffer _vertexBuffer;
         private PositionNormalTextureColor4* _vertexInfo;
 
@@ -116,6 +118,8 @@ namespace ClassicUO.Renderer
             DefaultEffect = new IsometricEffect(device);
         }
 
+
+        public Matrix TransformMatrix => _transformMatrix;
 
         public MatrixEffect DefaultEffect { get; }
 
@@ -253,6 +257,40 @@ namespace ClassicUO.Renderer
             }
         }
 
+
+        /*public void DrawString(BaseUOFont font, string text, int x, int y, ref Vector3 hue)
+        {
+            int startX = x;
+
+            foreach (char c in text)
+            {
+                if (c == '\n')
+                {
+                    x = startX;
+                    y += font.MaxHeight;
+
+                    continue;
+                }
+
+                Rectangle rect = font.GetCharBounds(c);
+                Texture2D texture = font.GetTextureByChar(c);
+
+                Draw2D
+                (
+                    texture,
+                    x,
+                    y,
+                    rect.X,
+                    rect.Y,
+                    rect.Width,
+                    rect.Height,
+                    ref hue
+                );
+
+                x += rect.Width;
+            }
+        }
+        */
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool DrawSprite(Texture2D texture, int x, int y, bool mirror, ref Vector3 hue)
         {
@@ -355,17 +393,25 @@ namespace ClassicUO.Renderer
             return true;
         }
 
+        public struct YOffsets
+        {
+            public int Top;
+            public int Right;
+            public int Left;
+            public int Bottom;
+        }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool DrawSpriteLand
         (
             Texture2D texture,
             int x,
             int y,
-            ref Rectangle rect,
-            ref Vector3 normal0,
-            ref Vector3 normal1,
-            ref Vector3 normal2,
-            ref Vector3 normal3,
+            ref YOffsets yOffsets,
+            ref Vector3 normalTop,
+            ref Vector3 normalRight,
+            ref Vector3 normalLeft,
+            ref Vector3 normalBottom,
             ref Vector3 hue
         )
         {
@@ -386,26 +432,29 @@ namespace ClassicUO.Renderer
             vertex.TextureCoordinate3.X = vertex.TextureCoordinate3.Y = 1;
             vertex.TextureCoordinate3.Z = 0;
 
+            vertex.Normal0 = normalTop;
+            vertex.Normal1 = normalRight;
+            vertex.Normal2 = normalLeft;
+            vertex.Normal3 = normalBottom;
 
-            vertex.Normal0 = normal0;
-            vertex.Normal1 = normal1;
-            vertex.Normal3 = normal2; // right order!
-            vertex.Normal2 = normal3;
-
+            // Top
             vertex.Position0.X = x + 22;
-            vertex.Position0.Y = y - rect.Left;
+            vertex.Position0.Y = y - yOffsets.Top;
             vertex.Position0.Z = 0;
 
+            // Right
             vertex.Position1.X = x + 44;
-            vertex.Position1.Y = y + (22 - rect.Bottom);
+            vertex.Position1.Y = y + (22 - yOffsets.Right);
             vertex.Position1.Z = 0;
 
+            // Left
             vertex.Position2.X = x;
-            vertex.Position2.Y = y + (22 - rect.Top);
+            vertex.Position2.Y = y + (22 - yOffsets.Left);
             vertex.Position2.Z = 0;
 
+            // Bottom
             vertex.Position3.X = x + 22;
-            vertex.Position3.Y = y + (44 - rect.Right);
+            vertex.Position3.Y = y + (44 - yOffsets.Bottom);
             vertex.Position3.Z = 0;
 
             vertex.Hue0 = vertex.Hue1 = vertex.Hue2 = vertex.Hue3 = hue;
@@ -415,6 +464,8 @@ namespace ClassicUO.Renderer
             return true;
         }
 
+        
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool DrawSpriteRotated
         (
@@ -423,8 +474,6 @@ namespace ClassicUO.Renderer
             int y,
             float width,
             float height,
-            int destX,
-            int destY,
             ref Vector3 hue,
             float angle
         )
@@ -432,61 +481,63 @@ namespace ClassicUO.Renderer
             EnsureSize();
 
             ref PositionNormalTextureColor4 vertex = ref _vertexInfo[_numSprites];
+
+
+            float sin = (float)Math.Sin(angle);
+            float cos = (float)Math.Cos(angle);
+
+            // Rotation Calculations
+            float rotationMatrix1X = cos;
+            float rotationMatrix1Y = sin;
+            float rotationMatrix2X = -sin;
+            float rotationMatrix2Y = cos;
+
             
-            float startX = x - (destX + width);
-            float startY = y - (destY + height);
-
-            float sin = (float) Math.Sin(angle);
-            float cos = (float) Math.Cos(angle);
-
-            float sinx = sin * width;
-            float cosx = cos * width;
-            float siny = sin * height;
-            float cosy = cos * height;
-
-
-            vertex.Position0.X = startX;
-            vertex.Position0.Y = startY;
-            vertex.Position0.X += cosx - -siny;
-            vertex.Position0.Y -= sinx + -cosy;
+            var cornerX = (_cornerOffsetX[0] - 0) * width;
+            var cornerY = (_cornerOffsetY[0] - 0) * height;
+            vertex.Position0.X = x + rotationMatrix2X * cornerY + rotationMatrix1X * cornerX;
+            vertex.Position0.Y = y + rotationMatrix2Y * cornerY + rotationMatrix1Y * cornerX;
             vertex.Normal0.X = 0;
             vertex.Normal0.Y = 0;
             vertex.Normal0.Z = 1;
-            vertex.TextureCoordinate0.X = 0;
-            vertex.TextureCoordinate0.Y = 0;
+            vertex.TextureCoordinate0.X = _cornerOffsetX[0];
+            vertex.TextureCoordinate0.Y = _cornerOffsetY[0];
             vertex.TextureCoordinate0.Z = 0;
 
-            vertex.Position1.X = startX;
-            vertex.Position1.Y = startY;
-            vertex.Position1.X += cosx - siny;
-            vertex.Position1.Y += -sinx + -cosy;
+
+            cornerX = (_cornerOffsetX[1] - 0) * width;
+            cornerY = (_cornerOffsetY[1] - 0) * height;
+            vertex.Position1.X = x + rotationMatrix2X * cornerY + rotationMatrix1X * cornerX;
+            vertex.Position1.Y = y + rotationMatrix2Y * cornerY + rotationMatrix1Y * cornerX;
             vertex.Normal1.X = 0;
             vertex.Normal1.Y = 0;
             vertex.Normal1.Z = 1;
-            vertex.TextureCoordinate1.X = 0;
-            vertex.TextureCoordinate1.Y = 1;
+            vertex.TextureCoordinate1.X = _cornerOffsetX[1];
+            vertex.TextureCoordinate1.Y = _cornerOffsetY[1];
             vertex.TextureCoordinate1.Z = 0;
 
-            vertex.Position2.X = startX;
-            vertex.Position2.Y = startY;
-            vertex.Position2.X += -cosx - -siny;
-            vertex.Position2.Y += sinx + cosy;
+
+            cornerX = (_cornerOffsetX[2] - 0) * width;
+            cornerY = (_cornerOffsetY[2] - 0) * height;
+            vertex.Position2.X = x + rotationMatrix2X * cornerY + rotationMatrix1X * cornerX;
+            vertex.Position2.Y = y + rotationMatrix2Y * cornerY + rotationMatrix1Y * cornerX;
             vertex.Normal2.X = 0;
             vertex.Normal2.Y = 0;
             vertex.Normal2.Z = 1;
-            vertex.TextureCoordinate2.X = 1;
-            vertex.TextureCoordinate2.Y = 0;
+            vertex.TextureCoordinate2.X = _cornerOffsetX[2];
+            vertex.TextureCoordinate2.Y = _cornerOffsetY[2];
             vertex.TextureCoordinate2.Z = 0;
 
-            vertex.Position3.X = startX;
-            vertex.Position3.Y = startY;
-            vertex.Position3.X += -cosx - siny;
-            vertex.Position3.Y += sinx + -cosy;
+
+            cornerX = (_cornerOffsetX[3] - 0) * width;
+            cornerY = (_cornerOffsetY[3] - 0) * height;
+            vertex.Position3.X = x + rotationMatrix2X * cornerY + rotationMatrix1X * cornerX;
+            vertex.Position3.Y = y + rotationMatrix2Y * cornerY + rotationMatrix1Y * cornerX;
             vertex.Normal3.X = 0;
             vertex.Normal3.Y = 0;
             vertex.Normal3.Z = 1;
-            vertex.TextureCoordinate3.X = 1;
-            vertex.TextureCoordinate3.Y = 1;
+            vertex.TextureCoordinate3.X = _cornerOffsetX[3];
+            vertex.TextureCoordinate3.Y = _cornerOffsetY[3];
             vertex.TextureCoordinate3.Z = 0;
 
 
@@ -1684,10 +1735,11 @@ namespace ClassicUO.Renderer
         {
             GraphicsDevice.BlendState = _blendState;
             GraphicsDevice.DepthStencilState = _stencil;
-            GraphicsDevice.RasterizerState = _useScissor ? _rasterizerState : RasterizerState.CullNone;
+            GraphicsDevice.RasterizerState = _rasterizerState;
             GraphicsDevice.SamplerStates[0] = _sampler;
             GraphicsDevice.SamplerStates[1] = SamplerState.PointClamp;
             GraphicsDevice.SamplerStates[2] = SamplerState.PointClamp;
+            GraphicsDevice.SamplerStates[3] = SamplerState.PointClamp;
 
             GraphicsDevice.Indices = _indexBuffer;
             GraphicsDevice.SetVertexBuffer(_vertexBuffer);
@@ -1697,25 +1749,14 @@ namespace ClassicUO.Renderer
 
         private void Flush()
         {
-            ApplyStates();
-
             if (_numSprites == 0)
             {
                 return;
             }
 
+            ApplyStates();
+
             int start = UpdateVertexBuffer(_numSprites);
-
-            //int start = 0;
-
-            //fixed (PositionNormalTextureColor4* p = &_vertexInfo[0])
-            //{
-            //    _vertexBuffer.SetDataPointerEXT(
-            //                                    0,
-            //                                    (IntPtr) p,
-            //                                    _numSprites * PositionNormalTextureColor4.SIZE_IN_BYTES,
-            //                                    SetDataOptions.None);
-            //}
 
             Texture2D current = _textureInfo[0];
             int offset = 0;
@@ -1773,21 +1814,59 @@ namespace ClassicUO.Renderer
             );
         }
 
-        public void EnableScissorTest(bool enable)
+        public bool ClipBegin(int x, int y, int width, int height)
         {
-            if (enable == _useScissor)
+            if (width <= 0 || height <= 0)
             {
-                return;
+                return false;
             }
 
-            if (!enable && _useScissor && ScissorStack.HasScissors)
+            Rectangle scissor = ScissorStack.CalculateScissors
+            (
+                TransformMatrix,
+                x,
+                y,
+                width,
+                height
+            );
+
+            Flush();
+
+            if (ScissorStack.PushScissors(GraphicsDevice, scissor))
+            {
+                EnableScissorTest(true);
+
+                return true;
+            }
+            
+            return false;
+        }
+
+        public void ClipEnd()
+        {
+            EnableScissorTest(false);
+            ScissorStack.PopScissors(GraphicsDevice);
+
+            Flush();
+        }
+
+        public void EnableScissorTest(bool enable)
+        {
+            bool rasterize = GraphicsDevice.RasterizerState.ScissorTestEnable;
+
+            if (ScissorStack.HasScissors)
+            {
+                enable = true;
+            }
+
+            if (enable == rasterize)
             {
                 return;
             }
 
             Flush();
 
-            _useScissor = enable;
+            GraphicsDevice.RasterizerState.ScissorTestEnable = enable;
         }
 
         public void SetBlendState(BlendState blend)

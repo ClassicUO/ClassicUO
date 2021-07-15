@@ -32,13 +32,13 @@
 
 using System;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 
 namespace ClassicUO.Network.Encryption
 {
     internal class TwofishEncryption : TwofishBase, ICryptoTransform
     {
-        private uint[] _block_cache = new uint[4];
         private byte[] _cipher_table, _xor_data;
         private ushort _rect_pos;
         private byte _send_pos;
@@ -68,7 +68,7 @@ namespace ClassicUO.Network.Encryption
         /// <returns></returns>
         public int TransformBlock(byte[] inputBuffer, int inputOffset, int inputCount, byte[] outputBuffer, int outputOffset)
         {
-            uint[] x = new uint[4];
+            Span<uint> x = stackalloc uint[4];
 
             // load it up
             for (int i = 0; i < 4; i++)
@@ -99,14 +99,14 @@ namespace ClassicUO.Network.Encryption
             return inputCount;
         }
 
-        public byte[] TransformFinalBlock(byte[] inputBuffer, int inputOffset, int inputCount)
+        public unsafe byte[] TransformFinalBlock(byte[] inputBuffer, int inputOffset, int inputCount)
         {
             byte[] outputBuffer; // = new byte[0];
 
             if (inputCount > 0)
             {
                 outputBuffer = new byte[16]; // blocksize
-                uint[] x = new uint[4];
+                Span<uint> x = stackalloc uint[4];
 
                 // load it up
                 for (int i = 0; i < 4; i++) // should be okay as we have already said to pad with zeros
@@ -149,11 +149,11 @@ namespace ClassicUO.Network.Encryption
         public int OutputBlockSize => outputBlockSize;
 
 
-        public void Initialize(uint seed, bool use_md5)
+        public unsafe void Initialize(uint seed, bool use_md5)
         {
             int keyLen = 128;
             _cipher_table = new byte[0x100];
-            byte[] key = new byte[16];
+            Span<byte> key = stackalloc byte[16];
             key[0] = key[4] = key[8] = key[12] = (byte) ((seed >> 24) & 0xff);
             key[1] = key[5] = key[9] = key[13] = (byte) ((seed >> 16) & 0xff);
             key[2] = key[6] = key[10] = key[14] = (byte) ((seed >> 8) & 0xff);
@@ -227,34 +227,16 @@ namespace ClassicUO.Network.Encryption
 
         private void refreshCipherTable()
         {
-            int i;
+            Span<uint> cache = stackalloc uint[4];
+            Span<byte> table = _cipher_table;
 
-            for (i = 0; i < 4; i++)
+            for (int i = 0; i < 256; i += 16)
             {
-                _block_cache[i] = 0;
-            }
+                table.Slice(i, 16).CopyTo(MemoryMarshal.AsBytes(cache));
 
-            for (i = 0; i < 256; i += 16)
-            {
-                Buffer.BlockCopy
-                (
-                    _cipher_table,
-                    i,
-                    _block_cache,
-                    0,
-                    16
-                );
+                blockEncrypt(ref cache);
 
-                blockEncrypt(ref _block_cache);
-
-                Buffer.BlockCopy
-                (
-                    _block_cache,
-                    0,
-                    _cipher_table,
-                    i,
-                    16
-                );
+                MemoryMarshal.AsBytes(cache).CopyTo(table.Slice(i, 16));
             }
 
             _rect_pos = 0;
@@ -316,9 +298,13 @@ namespace ClassicUO.Network.Encryption
         *	macro Mij(x).
         *
         -****************************************************************************/
-        private static uint f32(uint x, ref uint[] k32, int keyLen)
+        private static unsafe uint f32(uint x, ref uint[] k32, int keyLen)
         {
-            byte[] b = { b0(x), b1(x), b2(x), b3(x) };
+            byte* b = stackalloc byte[4];
+            b[0] = b0(x);
+            b[1] = b1(x);
+            b[2] = b2(x);
+            b[3] = b3(x);
 
             /* Run each byte thru 8x8 S-boxes, xoring with key byte at each stage. */
             /* Note that each byte goes through a different combination of S-boxes.*/
@@ -406,14 +392,14 @@ namespace ClassicUO.Network.Encryption
             return true;
         }
 
-        protected void blockDecrypt(ref uint[] x)
+        protected unsafe void blockDecrypt(ref Span<uint> x)
         {
             uint t0, t1;
-            uint[] xtemp = new uint[4];
+            Span<uint> xtemp = stackalloc uint[4];
 
             if (cipherMode == CipherMode.CBC)
             {
-                x.CopyTo(xtemp, 0);
+                x.CopyTo(xtemp);
             }
 
             for (int i = 0; i < BLOCK_HALF_SIZE; i++) /* copy in the block, add whitening */
@@ -454,7 +440,7 @@ namespace ClassicUO.Network.Encryption
             }
         }
 
-        public void blockEncrypt(ref uint[] x)
+        public unsafe void blockEncrypt(ref Span<uint> x)
         {
             uint t0, t1, tmp;
 

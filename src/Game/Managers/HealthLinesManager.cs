@@ -106,7 +106,7 @@ namespace ClassicUO.Game.Managers
 
             int showWhen = ProfileManager.CurrentProfile.MobileHPShowWhen;
 
-            foreach (Mobile mobile in World.Mobiles)
+            foreach (Mobile mobile in World.Mobiles.Values)
             {
                 if (mobile.IsDestroyed)
                 {
@@ -115,6 +115,11 @@ namespace ClassicUO.Game.Managers
 
                 int current = mobile.Hits;
                 int max = mobile.HitsMax;
+
+                if (max == 0)
+                {
+                    continue;
+                }
 
                 if (showWhen == 1 && current == max)
                 {

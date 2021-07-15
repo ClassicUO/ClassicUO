@@ -82,7 +82,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             slider.ValueChanged += (sender, e) => { _box.Graduation = slider.Value; };
             Add(_box = new ColorPickerBox(34, 34));
-            _box.ColorSelectedIndex += (sender, e) => { _dyeTybeImage.Hue = (ushort) (_box.SelectedHue + 1); };
+            _box.ColorSelectedIndex += (sender, e) => { _dyeTybeImage.Hue = _box.SelectedHue; };
 
             Add
             (
@@ -93,21 +93,23 @@ namespace ClassicUO.Game.UI.Gumps
             );
 
             _okClicked = okClicked;
+            _dyeTybeImage.Hue = _box.SelectedHue;
         }
+
+        public ushort Graphic => _graphic;
 
         public override void OnButtonClick(int buttonID)
         {
             switch (buttonID)
             {
                 case 0:
-                    ushort hue = (ushort) (_box.SelectedHue + 1);
 
                     if (LocalSerial != 0)
                     {
-                        NetClient.Socket.Send(new PDyeDataResponse(LocalSerial, _graphic, hue));
+                        NetClient.Socket.Send_DyeDataResponse(LocalSerial, _graphic, _box.SelectedHue);
                     }
 
-                    _okClicked?.Invoke(hue);
+                    _okClicked?.Invoke(_box.SelectedHue);
                     Dispose();
 
                     break;

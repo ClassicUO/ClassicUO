@@ -39,6 +39,7 @@ using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
+using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.GameObjects
 {
@@ -54,12 +55,11 @@ namespace ClassicUO.Game.GameObjects
         private static int _startCharacterFeetY;
         private static int _characterFrameHeight;
 
-
-        public override bool Draw(UltimaBatcher2D batcher, int posX, int posY)
+        public override bool Draw(UltimaBatcher2D batcher, int posX, int posY, ref Vector3 hueVec)
         {
-            ResetHueVector();
+            hueVec = Vector3.Zero;
 
-            int sittigIndex = 0;
+            AnimationsLoader.SittingInfoData seatData = AnimationsLoader.SittingInfoData.Empty;
             _equipConvData = null;
             _transform = false;
             FrameInfo.X = 0;
@@ -87,13 +87,13 @@ namespace ClassicUO.Game.GameObjects
 
             if (AlphaHue != 255)
             {
-                HueVector.Z = 1f - AlphaHue / 255f;
+                hueVec.Z = 1f - AlphaHue / 255f;
             }
 
-            if (ProfileManager.CurrentProfile.HighlightGameObjects && SelectedObject.LastObject == this)
+            if (ProfileManager.CurrentProfile.HighlightGameObjects && ReferenceEquals(SelectedObject.LastObject, this))
             {
                 _viewHue = Constants.HIGHLIGHT_CURRENT_OBJECT_HUE;
-                HueVector.Y = 1;
+                hueVec.Y = 1;
             }
             else if (SelectedObject.HealthbarObject == this)
             {
@@ -102,12 +102,12 @@ namespace ClassicUO.Game.GameObjects
             else if (ProfileManager.CurrentProfile.NoColorObjectsOutOfRange && Distance > World.ClientViewRange)
             {
                 _viewHue = Constants.OUT_RANGE_COLOR;
-                HueVector.Y = 1;
+                hueVec.Y = 1;
             }
             else if (World.Player.IsDead && ProfileManager.CurrentProfile.EnableBlackWhiteEffect)
             {
                 _viewHue = Constants.DEAD_RANGE_COLOR;
-                HueVector.Y = 1;
+                hueVec.Y = 1;
             }
             else if (IsHidden)
             {
@@ -145,7 +145,7 @@ namespace ClassicUO.Game.GameObjects
 
 
             bool isAttack = Serial == TargetManager.LastAttack;
-            bool isUnderMouse = TargetManager.IsTargeting && SelectedObject.LastObject == this;
+            bool isUnderMouse = TargetManager.IsTargeting && ReferenceEquals(SelectedObject.LastObject, this);
 
             if (Serial != World.Player.Serial)
             {
@@ -183,6 +183,7 @@ namespace ClassicUO.Game.GameObjects
                             null,
                             drawX,
                             drawY + 10,
+                            ref hueVec,
                             IsFlipped,
                             animIndex,
                             true,
@@ -190,7 +191,7 @@ namespace ClassicUO.Game.GameObjects
                             animGroup,
                             dir,
                             isHuman,
-                            alpha: HueVector.Z
+                            alpha: hueVec.Z
                         );
 
                         animGroupMount = GetGroupForAnimation(this, mountGraphic);
@@ -202,6 +203,7 @@ namespace ClassicUO.Game.GameObjects
                             mount,
                             drawX,
                             drawY,
+                            ref hueVec,
                             IsFlipped,
                             animIndex,
                             true,
@@ -209,7 +211,7 @@ namespace ClassicUO.Game.GameObjects
                             animGroupMount,
                             dir,
                             isHuman,
-                            alpha: HueVector.Z
+                            alpha: hueVec.Z
                         );
                     }
                     else
@@ -224,6 +226,7 @@ namespace ClassicUO.Game.GameObjects
                         mount,
                         drawX,
                         drawY,
+                        ref hueVec,
                         IsFlipped,
                         animIndex,
                         false,
@@ -232,13 +235,13 @@ namespace ClassicUO.Game.GameObjects
                         dir,
                         isHuman,
                         isMount: true,
-                        alpha: HueVector.Z
+                        alpha: hueVec.Z
                     );
                 }
             }
             else
             {
-                if ((sittigIndex = IsSitting()) != 0)
+                if (TryGetSittingInfo(out seatData))
                 {
                     animGroup = (byte) PEOPLE_ANIMATION_GROUP.PAG_STAND;
                     animIndex = 0;
@@ -251,7 +254,7 @@ namespace ClassicUO.Game.GameObjects
                         ref IsFlipped,
                         ref drawX,
                         ref drawY,
-                        sittigIndex
+                        ref seatData
                     );
 
                     drawY += SIT_OFFSET_Y;
@@ -286,6 +289,7 @@ namespace ClassicUO.Game.GameObjects
                         null,
                         drawX,
                         drawY,
+                        ref hueVec,
                         IsFlipped,
                         animIndex,
                         true,
@@ -293,7 +297,7 @@ namespace ClassicUO.Game.GameObjects
                         animGroup,
                         dir,
                         isHuman,
-                        alpha: HueVector.Z
+                        alpha: hueVec.Z
                     );
                 }
             }
@@ -305,6 +309,7 @@ namespace ClassicUO.Game.GameObjects
                 null,
                 drawX,
                 drawY,
+                ref hueVec,
                 IsFlipped,
                 animIndex,
                 false,
@@ -312,7 +317,7 @@ namespace ClassicUO.Game.GameObjects
                 animGroup,
                 dir,
                 isHuman,
-                alpha: HueVector.Z,
+                alpha: hueVec.Z,
                 forceUOP: isGargoyle
             );
 
@@ -412,48 +417,26 @@ namespace ClassicUO.Game.GameObjects
                                 }
                             }
 
-                            // Seems like all Gargoyle equipment has the 'IsWeapon' flag
-                            if (sittigIndex == 0 && IsGargoyle /*&& item.ItemData.IsWeapon*/)
-                            {
-                                DrawInternal
-                                (
-                                    batcher,
-                                    this,
-                                    item,
-                                    drawX,
-                                    drawY,
-                                    IsFlipped,
-                                    animIndex,
-                                    false,
-                                    graphic,
-                                    GetGroupForAnimation(this, graphic, true),
-                                    dir,
-                                    isHuman,
-                                    true,
-                                    alpha: HueVector.Z,
-                                    forceUOP: true
-                                );
-                            }
-                            else
-                            {
-                                DrawInternal
-                                (
-                                    batcher,
-                                    this,
-                                    item,
-                                    drawX,
-                                    drawY,
-                                    IsFlipped,
-                                     animIndex, //item.AnimIndex,
-                                    false,
-                                    graphic,
-                                    animGroup,
-                                    dir,
-                                    isHuman,
-                                    false,
-                                    alpha: HueVector.Z
-                                );
-                            }
+                            DrawInternal
+                            (
+                                batcher,
+                                this,
+                                item,
+                                drawX,
+                                drawY,
+                                ref hueVec,
+                                IsFlipped, 
+                                animIndex,
+                                false,
+                                graphic,
+                                isGargoyle /*&& item.ItemData.IsWeapon*/ && seatData.Graphic == 0 ? GetGroupForAnimation(this, graphic, true) : animGroup,
+                                dir,
+                                isHuman,
+                                false,
+                                false,
+                                isGargoyle,
+                                hueVec.Z
+                            );
                         }
                         else
                         {
@@ -523,6 +506,7 @@ namespace ClassicUO.Game.GameObjects
             Item entity,
             int x,
             int y,
+            ref Vector3 hueVec,
             bool mirror,
             sbyte frameIndex,
             bool hasShadow,
@@ -579,7 +563,11 @@ namespace ClassicUO.Game.GameObjects
 
             int fc = direction.FrameCount;
 
-            if (fc > 0 && frameIndex >= fc || frameIndex < 0)
+            if (fc > 0 && frameIndex >= fc)
+            {
+                frameIndex = (sbyte) (fc - 1);
+            }
+            else if (frameIndex < 0)
             {
                 frameIndex = 0;
             }
@@ -646,8 +634,8 @@ namespace ClassicUO.Game.GameObjects
                         }
                     }
 
-                    ResetHueVector();
-                    ShaderHueTranslator.GetHueVector(ref HueVector, hue, partialHue, alpha);
+                    hueVec = Vector3.Zero;
+                    ShaderHueTranslator.GetHueVector(ref hueVec, hue, partialHue, alpha);
 
                     // this is an hack to make entities partially hued. OG client seems to ignore this.
                     /*if (entity != null && entity.ItemData.AnimID == 0 && entity.ItemData.IsLight)
@@ -771,7 +759,7 @@ namespace ClassicUO.Game.GameObjects
                             h3mod,
                             h6mod,
                             h9mod,
-                            ref HueVector
+                            ref hueVec
                         );
                     }
                     else if (frame != null)
@@ -782,7 +770,7 @@ namespace ClassicUO.Game.GameObjects
                             x,
                             y,
                             mirror,
-                            ref HueVector
+                            ref hueVec
                         );
 
                         int yy = -(frame.Height + frame.CenterY + 3);
@@ -814,7 +802,8 @@ namespace ClassicUO.Game.GameObjects
                         }
                     }
 
-                    if (frame.Contains(mirror ? x + frame.Width - SelectedObject.TranslatedMousePositionByViewport.X : SelectedObject.TranslatedMousePositionByViewport.X - x, SelectedObject.TranslatedMousePositionByViewport.Y - y))
+
+                    if (AnimationsLoader.Instance.PixelCheck(id, animGroup, dir, direction.IsUOP, frameIndex, mirror ? x + frame.Width - SelectedObject.TranslatedMousePositionByViewport.X : SelectedObject.TranslatedMousePositionByViewport.X - x, SelectedObject.TranslatedMousePositionByViewport.Y - y))
                     {
                         SelectedObject.Object = owner;
                     }
@@ -904,7 +893,7 @@ namespace ClassicUO.Game.GameObjects
                 case Layer.Torso:
                     robe = mobile.FindItemByLayer(Layer.Robe);
 
-                    if (robe != null && robe.Graphic != 0 && robe.Graphic != 0x9985 && robe.Graphic != 0x9986 && robe.Graphic != 0xA412)
+                    if (robe != null && robe.Graphic != 0 && robe.Graphic != 0x9985 && robe.Graphic != 0x9986 && robe.Graphic != 0xA412 && robe.Graphic != 0xA2CA)
                     {
                         return true;
                     }

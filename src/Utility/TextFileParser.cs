@@ -30,6 +30,7 @@
 
 #endregion
 
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -215,7 +216,26 @@ namespace ClassicUO.Utility
                     {
                         if (save)
                         {
-                            _sb.Append(_string.Substring(start, size).TrimEnd('\r', '\n'));
+                            ReadOnlySpan<char> span = _string.AsSpan(start, size);
+                            int idx0 = span.IndexOf('\r');
+                            int idx1 = span.IndexOf('\n');
+
+                            if (idx0 >= 0)
+                            {
+                                span = span.Slice(start, idx0);
+                            }
+                            else if (idx1 >= 0)
+                            {
+                                span = span.Slice(start, idx1);
+                            }
+
+                            unsafe
+                            {
+                                fixed (char* ptr = span)
+                                {
+                                    _sb.Append(ptr, span.Length);
+                                }
+                            }
                         }
 
                         _pos = pos;
@@ -249,6 +269,11 @@ namespace ClassicUO.Utility
                 {
                     SkipToData();
 
+                    if (_pos >= _eol)
+                    {
+                        break;
+                    }
+
                     if (IsComment())
                     {
                         break;
@@ -280,12 +305,16 @@ namespace ClassicUO.Utility
 
             _pos = 0;
             _string = str;
-            _Size = str.Length;
-            _eol = _Size - 1;
+            _eol = _Size = str.Length;
 
             while (_pos < _eol)
             {
                 SkipToData();
+
+                if (_pos >= _eol)
+                {
+                    break;
+                }
 
                 if (IsComment())
                 {

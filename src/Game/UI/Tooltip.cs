@@ -36,6 +36,7 @@ using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
+using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI
@@ -46,8 +47,6 @@ namespace ClassicUO.Game.UI
         private uint _lastHoverTime;
         private int _maxWidth;
         private RenderedText _renderedText;
-        private readonly StringBuilder _sb = new StringBuilder();
-        private readonly StringBuilder _sbHTML = new StringBuilder();
         private string _textHTML;
 
         public string Text { get; protected set; }
@@ -251,53 +250,60 @@ namespace ClassicUO.Game.UI
 
         private string ReadProperties(uint serial, out string htmltext)
         {
-            _sb.Clear();
-            _sbHTML.Clear();
-
             bool hasStartColor = false;
+
+            string result = null;
+            htmltext = string.Empty;
 
             if (SerialHelper.IsValid(serial) && World.OPL.TryGetNameAndData(serial, out string name, out string data))
             {
-                if (!string.IsNullOrEmpty(name))
+                ValueStringBuilder sbHTML = new ValueStringBuilder();
                 {
-                    if (SerialHelper.IsItem(serial))
+                    ValueStringBuilder sb = new ValueStringBuilder();
                     {
-                        _sbHTML.Append("<basefont color=\"yellow\">");
-                        hasStartColor = true;
-                    }
-                    else
-                    {
-                        Mobile mob = World.Mobiles.Get(serial);
-
-                        if (mob != null)
+                        if (!string.IsNullOrEmpty(name))
                         {
-                            _sbHTML.Append(Notoriety.GetHTMLHue(mob.NotorietyFlag));
-                            hasStartColor = true;
+                            if (SerialHelper.IsItem(serial))
+                            {
+                                sbHTML.Append("<basefont color=\"yellow\">");
+                                hasStartColor = true;
+                            }
+                            else
+                            {
+                                Mobile mob = World.Mobiles.Get(serial);
+
+                                if (mob != null)
+                                {
+                                    sbHTML.Append(Notoriety.GetHTMLHue(mob.NotorietyFlag));
+                                    hasStartColor = true;
+                                }
+                            }
+
+                            sb.Append(name);
+                            sbHTML.Append(name);
+
+                            if (hasStartColor)
+                            {
+                                sbHTML.Append("<basefont color=\"#FFFFFFFF\">");
+                            }
                         }
+
+                        if (!string.IsNullOrEmpty(data))
+                        {
+                            sb.Append('\n');
+                            sb.Append(data);
+                            sbHTML.Append('\n');
+                            sbHTML.Append(data);
+                        }
+
+                        htmltext = sbHTML.ToString();
+                        result = sb.ToString();
+
+                        sb.Dispose();
+                        sbHTML.Dispose();
                     }
-
-                    _sb.Append(name);
-                    _sbHTML.Append(name);
-
-                    if (hasStartColor)
-                    {
-                        _sbHTML.Append("<basefont color=\"#FFFFFFFF\">");
-                    }
-                }
-
-
-                if (!string.IsNullOrEmpty(data))
-                {
-                    string s = $"\n{data}";
-                    _sb.Append(s);
-                    _sbHTML.Append(s);
                 }
             }
-
-
-            htmltext = _sbHTML.ToString();
-            string result = _sb.ToString();
-
             return string.IsNullOrEmpty(result) ? null : result;
         }
 

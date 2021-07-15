@@ -195,26 +195,6 @@ namespace ClassicUO.IO
         //    return data;
         //}
 
-        public unsafe byte[] GetData(int compressedSize, int uncompressedSize)
-        {
-            byte[] data = new byte[uncompressedSize];
-
-            fixed (byte* destPtr = data)
-            {
-                ZLib.Decompress
-                (
-                    PositionAddress,
-                    compressedSize,
-                    0,
-                    (IntPtr) destPtr,
-                    uncompressedSize
-                );
-            }
-
-
-            return data;
-        }
-
         internal static ulong CreateHash(string s)
         {
             uint eax, ecx, edx, ebx, esi, edi;

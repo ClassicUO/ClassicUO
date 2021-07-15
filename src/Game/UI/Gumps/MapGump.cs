@@ -148,34 +148,22 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 case ButtonType.PlotCourse:
                 case ButtonType.StopPlotting:
-                    NetClient.Socket.Send
-                    (
-                        new PMapMessage
-                        (
-                            LocalSerial,
-                            6,
-                            (byte) PlotState,
-                            unchecked((ushort) -24),
-                            unchecked((ushort) -31)
-                        )
-                    );
+                    NetClient.Socket.Send_MapMessage(LocalSerial,
+                                                     6,
+                                                     (byte)PlotState,
+                                                     unchecked((ushort)-24),
+                                                     unchecked((ushort)-31));
 
                     SetPlotState(PlotState == 0 ? 1 : 0);
 
                     break;
 
                 case ButtonType.ClearCourse:
-                    NetClient.Socket.Send
-                    (
-                        new PMapMessage
-                        (
-                            LocalSerial,
-                            5,
-                            0,
-                            unchecked((ushort) -24),
-                            unchecked((ushort) -31)
-                        )
-                    );
+                    NetClient.Socket.Send_MapMessage(LocalSerial,
+                                                     5,
+                                                     0,
+                                                     unchecked((ushort)-24),
+                                                     unchecked((ushort)-31));
 
                     ClearContainer();
 
@@ -230,17 +218,11 @@ namespace ClassicUO.Game.UI.Gumps
                     ushort x = (ushort) (e.X + 5);
                     ushort y = (ushort) e.Y;
 
-                    NetClient.Socket.Send
-                    (
-                        new PMapMessage
-                        (
-                            LocalSerial,
-                            1,
-                            0,
-                            x,
-                            y
-                        )
-                    );
+                    NetClient.Socket.Send_MapMessage(LocalSerial,
+                                                     1,
+                                                     0,
+                                                     x,
+                                                     y);
 
                     AddPin(x, y);
                 }

@@ -30,63 +30,79 @@
 
 #endregion
 
+using System;
 using System.Collections.Generic;
 using ClassicUO.Game.Data;
+using ClassicUO.Game.Managers;
 using ClassicUO.IO.Resources;
+using ClassicUO.Utility;
 
 namespace ClassicUO.Game.GameObjects
 {
-    internal abstract class GameEffect : GameObject
+    internal abstract partial class GameEffect : GameObject
     {
-        protected GameEffect()
+        private readonly EffectManager _manager;
+
+        protected GameEffect(EffectManager manager, ushort graphic, ushort hue, int duration, byte speed)
         {
-            Children = new List<GameEffect>();
+            _manager = manager;
+
+            Graphic = graphic;
+            Hue = hue;
+            AllowedToDraw = !GameObjectHelper.IsNoDrawable(graphic);
             AlphaHue = 0xFF;
-        }
-
-        public List<GameEffect> Children { get; }
-
-        public bool IsMoving => Target != null || TargetX != 0 && TargetY != 0;
-        public ushort AnimationGraphic = 0xFFFF;
-        public AnimDataFrame2 AnimDataFrame;
-        public byte AnimIndex;
-
-        public GraphicEffectBlendMode Blend;
-
-        public long Duration = -1;
-
-        public int IntervalInMs;
-
-        public bool IsEnabled;
-
-        public long NextChangeFrameTime;
-
-        public GameObject Source;
-
-        protected GameObject Target;
-
-        protected int TargetX;
-
-        protected int TargetY;
-
-        protected int TargetZ;
-
-        public void Load()
-        {
-            AnimDataFrame = AnimDataLoader.Instance.CalculateCurrentGraphic(Graphic);
+            AnimDataFrame = AnimDataLoader.Instance?.CalculateCurrentGraphic(graphic) ?? default;
             IsEnabled = true;
             AnimIndex = 0;
+            
+
+            speed *= 10;
+
+            if (speed == 0)
+            {
+                speed = Constants.ITEM_EFFECT_ANIMATION_DELAY;
+            }
 
             if (AnimDataFrame.FrameInterval == 0)
             {
-                IntervalInMs = Constants.ITEM_EFFECT_ANIMATION_DELAY;
+                IntervalInMs = speed;
+
+                // NOTE:
+                // tested on outlands with arrows & bolts 
+                // server sends duration = 50 , a very small amount of time so the arrow will be destroyed suddenly
+                // im not sure if this is the right fix, but keep it atm
+                
+                // NOTE 2:
+                // this fix causes issue with other effects. It makes perma effects. So bad
+                //duration = -1;
             }
             else
             {
-                IntervalInMs = AnimDataFrame.FrameInterval * Constants.ITEM_EFFECT_ANIMATION_DELAY;
+                IntervalInMs = (uint)(AnimDataFrame.FrameInterval * speed);
             }
+
+            Duration = duration > 0 ? Time.Ticks + duration : -1;
         }
 
+        public bool IsMoving => Target != null || TargetX != 0 && TargetY != 0;
+
+        public bool CanCreateExplosionEffect;
+        public ushort AnimationGraphic = 0xFFFF;
+        public AnimDataFrame AnimDataFrame;
+        public byte AnimIndex;
+        public float AngleToTarget;
+        public GraphicEffectBlendMode Blend;
+        public long Duration = -1;
+        public uint IntervalInMs;
+        public bool IsEnabled;
+        public long NextChangeFrameTime;
+        public GameObject Source;
+        protected GameObject Target;
+        protected int TargetX;
+        protected int TargetY;
+        protected int TargetZ;
+
+      
         public override void Update(double totalTime, double frameTime)
         {
             base.Update(totalTime, frameTime);
@@ -94,7 +110,7 @@ namespace ClassicUO.Game.GameObjects
 
             if (Source != null && Source.IsDestroyed)
             {
-                World.RemoveEffect(this);
+                Destroy();
 
                 return;
             }
@@ -108,22 +124,8 @@ namespace ClassicUO.Game.GameObjects
             {
                 if (Duration < totalTime && Duration >= 0)
                 {
-                    World.RemoveEffect(this);
+                    Destroy();
                 }
-                //else
-                //{
-                //    unsafe
-                //    {
-                //        int count = AnimDataFrame.FrameCount;
-                //        if (count == 0)
-                //            count = 1;
-
-                //        AnimationGraphic = (Graphic) (Graphic + AnimDataFrame.FrameData[((int) Math.Max(1, (_start / 50d) / Speed)) % count]);
-                //    }
-
-                //    _start += frameTime;
-                //}
-
                 else if (NextChangeFrameTime < totalTime)
                 {
                     if (AnimDataFrame.FrameCount != 0)
@@ -142,29 +144,35 @@ namespace ClassicUO.Game.GameObjects
                     }
                     else
                     {
-                        if (Graphic != AnimationGraphic)
-                        {
-                            AnimationGraphic = Graphic;
-                        }
+                        AnimationGraphic = Graphic;
                     }
 
                     NextChangeFrameTime = (long) totalTime + IntervalInMs;
                 }
             }
-            else if (Graphic != AnimationGraphic)
+            else
             {
                 AnimationGraphic = Graphic;
             }
         }
 
-        public void AddChildEffect(GameEffect effect)
-        {
-            Children.Add(effect);
-        }
-
         protected (int x, int y, int z) GetSource()
         {
             return Source == null ? (X, Y, Z) : (Source.X, Source.Y, Source.Z);
+        }
+
+        protected void CreateExplosionEffect()
+        {
+            if (CanCreateExplosionEffect)
+            {
+                (int targetX, int targetY, int targetZ) = GetTarget();
+
+                FixedEffect effect = new FixedEffect(_manager, 0x36CB, Hue, 400, 0);
+                effect.Blend = Blend;
+                effect.SetSource(targetX, targetY, targetZ);
+
+                _manager.PushToBack(effect);
+            }
         }
 
         public void SetSource(GameObject source)
@@ -207,6 +215,8 @@ namespace ClassicUO.Game.GameObjects
 
         public override void Destroy()
         {
+            _manager?.Remove(this);
+
             AnimIndex = 0;
             Source = null;
             Target = null;

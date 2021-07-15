@@ -99,13 +99,14 @@ namespace ClassicUO.Game.UI.Gumps
             switch (buttonID)
             {
                 case 1: // prev
-                    NetClient.Socket.Send(new PTipRequest((ushort) LocalSerial, 0));
+                    NetClient.Socket.Send_TipRequest((ushort)LocalSerial, 0);
                     Dispose();
 
                     break;
 
                 case 2: // next
-                    NetClient.Socket.Send(new PTipRequest((ushort) LocalSerial, 1));
+                    NetClient.Socket.Send_TipRequest((ushort)LocalSerial, 1);
+
                     Dispose();
 
                     break;

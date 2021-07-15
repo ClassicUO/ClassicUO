@@ -138,8 +138,17 @@ namespace ClassicUO.Game.UI.Controls
             base.Draw(batcher, x, y);
 
             ResetHueVector();
-
-            ShaderHueTranslator.GetHueVector(ref HueVector, HighlightOnMouseOver && MouseIsOver ? 0x0035 : Hue, IsPartialHue, 0);
+            
+            bool partialHue = IsPartialHue;
+            ushort hue = Hue;
+            
+            if (HighlightOnMouseOver && MouseIsOver)
+            {
+                hue = 0x0035;
+                partialHue = false;
+            }
+            
+            ShaderHueTranslator.GetHueVector(ref HueVector, hue, partialHue, 0);
 
             UOTexture texture = _is_gump ? GumpsLoader.Instance.GetTexture(Graphic) : ArtLoader.Instance.GetTexture(Graphic);
 
@@ -194,18 +203,38 @@ namespace ClassicUO.Game.UI.Controls
                 y = (int) (y / scale);
             }
 
-            if (texture.Contains(x, y))
+            if (_is_gump)
             {
-                return true;
-            }
-
-            Item item = World.Items.Get(LocalSerial);
-
-            if (item != null && !item.IsCoin && item.Amount > 1 && item.ItemData.IsStackable)
-            {
-                if (texture.Contains(x - 5, y - 5))
+                if (GumpsLoader.Instance.PixelCheck(Graphic, x, y))
                 {
                     return true;
+                }
+
+                Item item = World.Items.Get(LocalSerial);
+
+                if (item != null && !item.IsCoin && item.Amount > 1 && item.ItemData.IsStackable)
+                {
+                    if (GumpsLoader.Instance.PixelCheck(Graphic, x - 5, y - 5))
+                    {
+                        return true;
+                    }
+                }
+            }
+            else
+            {
+                if (ArtLoader.Instance.PixelCheck(Graphic, x, y))
+                {
+                    return true;
+                }
+
+                Item item = World.Items.Get(LocalSerial);
+
+                if (item != null && !item.IsCoin && item.Amount > 1 && item.ItemData.IsStackable)
+                {
+                    if (ArtLoader.Instance.PixelCheck(Graphic, x - 5, y - 5))
+                    {
+                        return true;
+                    }
                 }
             }
 

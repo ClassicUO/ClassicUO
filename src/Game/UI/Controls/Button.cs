@@ -327,26 +327,7 @@ namespace ClassicUO.Game.UI.Controls
 
             return _textures[NORMAL];
         }
-
-        private ushort GetGraphicByState()
-        {
-            if (_entered)
-            {
-                if (IsClicked && _textures[PRESSED] != null)
-                {
-                    return _gumpGraphics[PRESSED];
-                }
-
-                if (_textures[OVER] != null)
-                {
-                    return _gumpGraphics[OVER];
-                }
-            }
-
-            return _gumpGraphics[NORMAL];
-        }
-
-
+        
         public override bool Contains(int x, int y)
         {
             if (IsDisposed)
@@ -354,7 +335,7 @@ namespace ClassicUO.Game.UI.Controls
                 return false;
             }
 
-            return ContainsByBounds ? base.Contains(x, y) : _textures[NORMAL].Contains(x - Offset.X, y - Offset.Y);
+            return ContainsByBounds ? base.Contains(x, y) : GumpsLoader.Instance.PixelCheck(_gumpGraphics[NORMAL], x - Offset.X, y - Offset.Y);
         }
 
         public sealed override void Dispose()

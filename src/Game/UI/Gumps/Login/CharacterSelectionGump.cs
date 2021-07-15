@@ -90,16 +90,24 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 },
                 1
             );
+            
+            bool isAsianLang = string.Compare(Settings.GlobalSettings.Language, "CHT", StringComparison.InvariantCultureIgnoreCase) == 0 || 
+                string.Compare(Settings.GlobalSettings.Language, "KOR", StringComparison.InvariantCultureIgnoreCase) == 0 ||
+                string.Compare(Settings.GlobalSettings.Language, "JPN", StringComparison.InvariantCultureIgnoreCase) == 0;
+
+            bool unicode = isAsianLang;
+            byte font = (byte)(isAsianLang ? 1 : 2);
+            ushort hue = (ushort)(isAsianLang ? 0xFFFF : 0x0386);
 
             Add
             (
-                new Label(ClilocLoader.Instance.GetString(3000050, "Character Selection"), false, 0x0386, font: 2)
+                new Label(ClilocLoader.Instance.GetString(3000050, "Character Selection"), unicode, hue, font: font)
                 {
                     X = 267, Y = listTitleY
                 },
                 1
             );
-
+           
             for (int i = 0, valid = 0; i < loginScene.Characters.Length; i++)
             {
                 string character = loginScene.Characters[i];

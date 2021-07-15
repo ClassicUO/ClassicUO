@@ -109,23 +109,31 @@ namespace ClassicUO.Game.Managers
                 case MessageType.Encoded:
                 case MessageType.System:
                 case MessageType.Party:
-                case MessageType.Guild:
-                case MessageType.Alliance: break;
+                    break;
 
+                case MessageType.Guild:
+                    if (currentProfile.IgnoreGuildMessages) return;
+                    break;
+
+                case MessageType.Alliance:
+                    if (currentProfile.IgnoreAllianceMessages) return;
+                    break;
 
                 case MessageType.Spell:
-
                 {
                     //server hue color per default
                     if (!string.IsNullOrEmpty(text) && SpellDefinition.WordToTargettype.TryGetValue(text, out SpellDefinition spell))
                     {
                         if (currentProfile != null && currentProfile.EnabledSpellFormat && !string.IsNullOrWhiteSpace(currentProfile.SpellDisplayFormat))
                         {
-                            StringBuilder sb = new StringBuilder(currentProfile.SpellDisplayFormat);
-                            sb.Replace("{power}", spell.PowerWords);
-                            sb.Replace("{spell}", spell.Name);
+                            ValueStringBuilder sb = new ValueStringBuilder(currentProfile.SpellDisplayFormat.AsSpan());
+                            {
+                                sb.Replace("{power}".AsSpan(), spell.PowerWords.AsSpan());
+                                sb.Replace("{spell}".AsSpan(), spell.Name.AsSpan());
 
-                            text = sb.ToString().Trim();
+                                text = sb.ToString().Trim();
+                            }
+                            sb.Dispose();
                         }
 
                         //server hue color per default if not enabled
@@ -219,15 +227,6 @@ namespace ClassicUO.Game.Managers
                     parent.AddMessage(msg);
 
                     break;
-
-
-                //default:
-                //    if (parent == null)
-                //        break;
-
-                //    parent.AddMessage(type, text, font, hue, unicode);
-
-                //    break;
             }
 
             MessageReceived.Raise

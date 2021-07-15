@@ -53,7 +53,6 @@ namespace ClassicUO.IO.Resources
 
         private readonly Dictionary<ushort, byte> _animationSequenceReplacing = new Dictionary<ushort, byte>();
         private readonly Dictionary<ushort, Rectangle> _animDimensionCache = new Dictionary<ushort, Rectangle>();
-        private IntPtr _bufferCachePtr = Marshal.AllocHGlobal(0x800000);
         private readonly AnimationGroup _empty = new AnimationGroup
         {
             Direction = new AnimationDirection[5]
@@ -68,9 +67,8 @@ namespace ClassicUO.IO.Resources
         private readonly Dictionary<ushort, Dictionary<ushort, EquipConvData>> _equipConv = new Dictionary<ushort, Dictionary<ushort, EquipConvData>>();
         private readonly UOFileMul[] _files = new UOFileMul[5];
         private readonly UOFileUop[] _filesUop = new UOFileUop[4];
+        private readonly PixelPicker _picker = new PixelPicker();
 
-        private readonly DataReader _reader = new DataReader();
-        private readonly UOPFrameData[] _uop_frame_pixels_offsets = new UOPFrameData[1000];
         private readonly LinkedList<AnimationDirection> _usedTextures = new LinkedList<AnimationDirection>();
 
         private AnimationsLoader()
@@ -87,1894 +85,6 @@ namespace ClassicUO.IO.Resources
         {
             new List<Tuple<ushort, byte>>(), new List<Tuple<ushort, byte>>()
         };
-
-        public SittingInfoData[] SittingInfos { get; } =
-        {
-            new SittingInfoData
-            (
-                0x0459,
-                0,
-                -1,
-                4,
-                -1,
-                2,
-                2,
-                false
-            ),
-            new SittingInfoData
-            (
-                0x045A,
-                -1,
-                2,
-                -1,
-                6,
-                2,
-                2,
-                false
-            ),
-            new SittingInfoData
-            (
-                0x045B,
-                0,
-                -1,
-                4,
-                -1,
-                2,
-                2,
-                false
-            ),
-            new SittingInfoData
-            (
-                0x045C,
-                -1,
-                2,
-                -1,
-                6,
-                2,
-                2,
-                false
-            ),
-            new SittingInfoData
-            (
-                0x0A2A,
-                0,
-                2,
-                4,
-                6,
-                -4,
-                -4,
-                false
-            ),
-            new SittingInfoData
-            (
-                0x0A2B,
-                0,
-                2,
-                4,
-                6,
-                -8,
-                -8,
-                false
-            ),
-            new SittingInfoData
-            (
-                0x0B2C,
-                -1,
-                2,
-                -1,
-                6,
-                2,
-                2,
-                false
-            ),
-            new SittingInfoData
-            (
-                0x0B2D,
-                0,
-                -1,
-                4,
-                -1,
-                2,
-                2,
-                false
-            ),
-            new SittingInfoData
-            (
-                0x0B2E,
-                4,
-                4,
-                4,
-                4,
-                0,
-                0,
-                false
-            ),
-            new SittingInfoData
-            (
-                0x0B2F,
-                2,
-                2,
-                2,
-                2,
-                6,
-                6,
-                false
-            ),
-            new SittingInfoData
-            (
-                0x0B30,
-                6,
-                6,
-                6,
-                6,
-                -8,
-                8,
-                true
-            ),
-            new SittingInfoData
-            (
-                0x0B31,
-                0,
-                0,
-                0,
-                0,
-                0,
-                4,
-                true
-            ),
-            new SittingInfoData
-            (
-                0x0B32,
-                4,
-                4,
-                4,
-                4,
-                0,
-                0,
-                false
-            ),
-            new SittingInfoData
-            (
-                0x0B33,
-                2,
-                2,
-                2,
-                2,
-                0,
-                0,
-                false
-            ),
-            new SittingInfoData
-            (
-                0x0B4E,
-                2,
-                2,
-                2,
-                2,
-                0,
-                0,
-                false
-            ),
-            new SittingInfoData
-            (
-                0x0B4F,
-                4,
-                4,
-                4,
-                4,
-                0,
-                0,
-                false
-            ),
-            new SittingInfoData
-            (
-                0x0B50,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                true
-            ),
-            new SittingInfoData
-            (
-                0x0B51,
-                6,
-                6,
-                6,
-                6,
-                0,
-                0,
-                true
-            ),
-            new SittingInfoData
-            (
-                0x0B52,
-                2,
-                2,
-                2,
-                2,
-                0,
-                0,
-                false
-            ),
-            new SittingInfoData
-            (
-                0x0B53,
-                4,
-                4,
-                4,
-                4,
-                0,
-                0,
-                false
-            ),
-            new SittingInfoData
-            (
-                0x0B54,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                true
-            ),
-            new SittingInfoData
-            (
-                0x0B55,
-                6,
-                6,
-                6,
-                6,
-                0,
-                0,
-                true
-            ),
-            new SittingInfoData
-            (
-                0x0B56,
-                2,
-                2,
-                2,
-                2,
-                4,
-                4,
-                false
-            ),
-            new SittingInfoData
-            (
-                0x0B57,
-                4,
-                4,
-                4,
-                4,
-                4,
-                4,
-                false
-            ),
-            new SittingInfoData
-            (
-                0x0B58,
-                6,
-                6,
-                6,
-                6,
-                0,
-                8,
-                true
-            ),
-            new SittingInfoData
-            (
-                0x0B59,
-                0,
-                0,
-                0,
-                0,
-                0,
-                8,
-                true
-            ),
-            new SittingInfoData
-            (
-                0x0B5A,
-                2,
-                2,
-                2,
-                2,
-                8,
-                8,
-                false
-            ),
-            new SittingInfoData
-            (
-                0x0B5B,
-                4,
-                4,
-                4,
-                4,
-                8,
-                8,
-                false
-            ),
-            new SittingInfoData
-            (
-                0x0B5C,
-                0,
-                0,
-                0,
-                0,
-                0,
-                8,
-                true
-            ),
-            new SittingInfoData
-            (
-                0x0B5D,
-                6,
-                6,
-                6,
-                6,
-                0,
-                8,
-                true
-            ),
-            new SittingInfoData
-            (
-                0x0B5E,
-                0,
-                2,
-                4,
-                6,
-                -8,
-                -8,
-                false
-            ),
-            new SittingInfoData
-            (
-                0x0B5F,
-                -1,
-                2,
-                -1,
-                6,
-                3,
-                14,
-                false
-            ),
-            new SittingInfoData
-            (
-                0x0B60,
-                -1,
-                2,
-                -1,
-                6,
-                3,
-                14,
-                false
-            ),
-            new SittingInfoData
-            (
-                0x0B61,
-                -1,
-                2,
-                -1,
-                6,
-                3,
-                14,
-                false
-            ),
-            new SittingInfoData
-            (
-                0x0B62,
-                -1,
-                2,
-                -1,
-                6,
-                3,
-                10,
-                false
-            ),
-            new SittingInfoData
-            (
-                0x0B63,
-                -1,
-                2,
-                -1,
-                6,
-                3,
-                10,
-                false
-            ),
-            new SittingInfoData
-            (
-                0x0B64,
-                -1,
-                2,
-                -1,
-                6,
-                3,
-                10,
-                false
-            ),
-            new SittingInfoData
-            (
-                0x0B65,
-                0,
-                -1,
-                4,
-                -1,
-                3,
-                10,
-                false
-            ),
-            new SittingInfoData
-            (
-                0x0B66,
-                0,
-                -1,
-                4,
-                -1,
-                3,
-                10,
-                false
-            ),
-            new SittingInfoData
-            (
-                0x0B67,
-                0,
-                -1,
-                4,
-                -1,
-                3,
-                10,
-                false
-            ),
-            new SittingInfoData
-            (
-                0x0B68,
-                0,
-                -1,
-                4,
-                -1,
-                3,
-                10,
-                false
-            ),
-            new SittingInfoData
-            (
-                0x0B69,
-                0,
-                -1,
-                4,
-                -1,
-                3,
-                10,
-                false
-            ),
-            new SittingInfoData
-            (
-                0x0B6A,
-                0,
-                -1,
-                4,
-                -1,
-                3,
-                10,
-                false
-            ),
-            new SittingInfoData
-            (
-                0x0B91,
-                4,
-                4,
-                4,
-                4,
-                6,
-                6,
-                false
-            ),
-            new SittingInfoData
-            (
-                0x0B92,
-                4,
-                4,
-                4,
-                4,
-                6,
-                6,
-                false
-            ),
-            new SittingInfoData
-            (
-                0x0B93,
-                2,
-                2,
-                2,
-                2,
-                6,
-                6,
-                false
-            ),
-            new SittingInfoData
-            (
-                0x0B94,
-                2,
-                2,
-                2,
-                2,
-                6,
-                6,
-                false
-            ),
-            new SittingInfoData
-            (
-                0x0CF3,
-                -1,
-                2,
-                -1,
-                6,
-                2,
-                8,
-                false
-            ),
-            new SittingInfoData
-            (
-                0x0CF4,
-                -1,
-                2,
-                -1,
-                6,
-                2,
-                8,
-                false
-            ),
-            new SittingInfoData
-            (
-                0x0CF6,
-                0,
-                -1,
-                4,
-                -1,
-                2,
-                8,
-                false
-            ),
-            new SittingInfoData
-            (
-                0x0CF7,
-                0,
-                -1,
-                4,
-                -1,
-                2,
-                8,
-                false
-            ),
-            new SittingInfoData
-            (
-                0x0E50,
-                4,
-                4,
-                4,
-                4,
-                4,
-                4,
-                false
-            ), // SOUTH ONLY
-            new SittingInfoData
-            (
-                0x0E51,
-                4,
-                4,
-                4,
-                4,
-                4,
-                4,
-                false
-            ), // SOUTH ONLY
-            new SittingInfoData
-            (
-                0x0E52,
-                2,
-                2,
-                2,
-                2,
-                0,
-                0,
-                false
-            ), // EAST ONLY
-            new SittingInfoData
-            (
-                0x0E53,
-                2,
-                2,
-                2,
-                2,
-                0,
-                0,
-                false
-            ), // EAST ONLY
-            new SittingInfoData
-            (
-                0x1049,
-                -1,
-                2,
-                -1,
-                6,
-                2,
-                2,
-                false
-            ), // EAST/WEST
-            new SittingInfoData
-            (
-                0x104A,
-                0,
-                -1,
-                4,
-                -1,
-                2,
-                2,
-                false
-            ), // NORTH/SOUTH
-            new SittingInfoData
-            (
-                0x11FC,
-                0,
-                2,
-                4,
-                6,
-                2,
-                7,
-                false
-            ), // ANY
-            new SittingInfoData
-            (
-                0x1207,
-                0,
-                -1,
-                4,
-                -1,
-                3,
-                10,
-                false
-            ), // NORTH/SOUTH
-            new SittingInfoData
-            (
-                0x1208,
-                0,
-                -1,
-                4,
-                -1,
-                3,
-                10,
-                false
-            ), // NORTH/SOUTH
-            new SittingInfoData
-            (
-                0x1209,
-                0,
-                -1,
-                4,
-                -1,
-                3,
-                10,
-                false
-            ), // NORTH/SOUTH
-            new SittingInfoData
-            (
-                0x120A,
-                0,
-                -1,
-                4,
-                -1,
-                3,
-                10,
-                false
-            ), // NORTH/SOUTH
-            new SittingInfoData
-            (
-                0x120B,
-                0,
-                -1,
-                4,
-                -1,
-                3,
-                10,
-                false
-            ), // NORTH/SOUTH
-            new SittingInfoData
-            (
-                0x120C,
-                0,
-                -1,
-                4,
-                -1,
-                3,
-                10,
-                false
-            ), // NORTH/SOUTH
-            new SittingInfoData
-            (
-                0x1218,
-                4,
-                4,
-                4,
-                4,
-                4,
-                4,
-                false
-            ), // SOUTH ONLY
-            new SittingInfoData
-            (
-                0x1219,
-                2,
-                2,
-                2,
-                2,
-                4,
-                4,
-                false
-            ), // EAST ONLY
-            new SittingInfoData
-            (
-                0x121A,
-                0,
-                0,
-                0,
-                0,
-                0,
-                8,
-                true
-            ), // NORTH ONLY
-            new SittingInfoData
-            (
-                0x121B,
-                6,
-                6,
-                6,
-                6,
-                0,
-                8,
-                true
-            ), // WEST ONLY
-            new SittingInfoData
-            (
-                0x1527,
-                2,
-                2,
-                2,
-                2,
-                0,
-                0,
-                false
-            ),
-            new SittingInfoData
-            (
-                0x1771,
-                0,
-                2,
-                4,
-                6,
-                0,
-                0,
-                false
-            ),
-            new SittingInfoData
-            (
-                0x1776,
-                0,
-                2,
-                4,
-                6,
-                0,
-                0,
-                false
-            ),
-            new SittingInfoData
-            (
-                0x1779,
-                0,
-                2,
-                4,
-                6,
-                0,
-                0,
-                false
-            ),
-            new SittingInfoData
-            (
-                0x1DC7,
-                -1,
-                2,
-                -1,
-                6,
-                3,
-                10,
-                false
-            ),
-            new SittingInfoData
-            (
-                0x1DC8,
-                -1,
-                2,
-                -1,
-                6,
-                3,
-                10,
-                false
-            ),
-            new SittingInfoData
-            (
-                0x1DC9,
-                -1,
-                2,
-                -1,
-                6,
-                3,
-                10,
-                false
-            ),
-            new SittingInfoData
-            (
-                0x1DCA,
-                0,
-                -1,
-                4,
-                -1,
-                3,
-                10,
-                false
-            ),
-            new SittingInfoData
-            (
-                0x1DCB,
-                0,
-                -1,
-                4,
-                -1,
-                3,
-                10,
-                false
-            ),
-            new SittingInfoData
-            (
-                0x1DCC,
-                0,
-                -1,
-                4,
-                -1,
-                3,
-                10,
-                false
-            ),
-            new SittingInfoData
-            (
-                0x1DCD,
-                -1,
-                2,
-                -1,
-                6,
-                3,
-                10,
-                false
-            ),
-            new SittingInfoData
-            (
-                0x1DCE,
-                -1,
-                2,
-                -1,
-                6,
-                3,
-                10,
-                false
-            ),
-            new SittingInfoData
-            (
-                0x1DCF,
-                -1,
-                2,
-                -1,
-                6,
-                3,
-                10,
-                false
-            ),
-            new SittingInfoData
-            (
-                0x1DD0,
-                0,
-                -1,
-                4,
-                -1,
-                3,
-                10,
-                false
-            ),
-            new SittingInfoData
-            (
-                0x1DD1,
-                0,
-                -1,
-                4,
-                -1,
-                3,
-                10,
-                false
-            ),
-            new SittingInfoData
-            (
-                0x1DD2,
-                -1,
-                2,
-                -1,
-                6,
-                3,
-                10,
-                false
-            ),
-
-            new SittingInfoData
-            (
-                0x2A58,
-                4,
-                4,
-                4,
-                4,
-                0,
-                0,
-                false
-            ),
-            new SittingInfoData
-            (
-                0x2A59,
-                2,
-                2,
-                2,
-                2,
-                0,
-                0,
-                false
-            ),
-            new SittingInfoData
-            (
-                0x2A5A,
-                0,
-                2,
-                4,
-                6,
-                0,
-                0,
-                false
-            ),
-            new SittingInfoData
-            (
-                0x2A5B,
-                0,
-                2,
-                4,
-                6,
-                10,
-                10,
-                false
-            ),
-            new SittingInfoData
-            (
-                0x2A7F,
-                0,
-                2,
-                4,
-                6,
-                0,
-                0,
-                false
-            ),
-            new SittingInfoData
-            (
-                0x2A80,
-                0,
-                2,
-                4,
-                6,
-                0,
-                0,
-                false
-            ),
-            new SittingInfoData
-            (
-                0x2DDF,
-                0,
-                2,
-                4,
-                6,
-                2,
-                2,
-                false
-            ),
-            new SittingInfoData
-            (
-                0x2DE0,
-                0,
-                2,
-                4,
-                6,
-                2,
-                2,
-                false
-            ),
-            new SittingInfoData
-            (
-                0x2DE3,
-                2,
-                2,
-                2,
-                2,
-                4,
-                4,
-                false
-            ),
-            new SittingInfoData
-            (
-                0x2DE4,
-                4,
-                4,
-                4,
-                4,
-                4,
-                4,
-                false
-            ),
-            new SittingInfoData
-            (
-                0x2DE5,
-                6,
-                6,
-                6,
-                6,
-                4,
-                4,
-                false
-            ),
-            new SittingInfoData
-            (
-                0x2DE6,
-                0,
-                0,
-                0,
-                0,
-                4,
-                4,
-                false
-            ),
-            new SittingInfoData
-            (
-                0x2DEB,
-                0,
-                0,
-                0,
-                0,
-                4,
-                4,
-                false
-            ),
-            new SittingInfoData
-            (
-                0x2DEC,
-                4,
-                4,
-                4,
-                4,
-                4,
-                4,
-                false
-            ),
-            new SittingInfoData
-            (
-                0x2DED,
-                2,
-                2,
-                2,
-                2,
-                4,
-                4,
-                false
-            ),
-            new SittingInfoData
-            (
-                0x2DEE,
-                6,
-                6,
-                6,
-                6,
-                4,
-                4,
-                false
-            ),
-            new SittingInfoData
-            (
-                0x2DF5,
-                0,
-                2,
-                4,
-                6,
-                4,
-                4,
-                false
-            ),
-            new SittingInfoData
-            (
-                0x2DF6,
-                0,
-                2,
-                4,
-                6,
-                4,
-                4,
-                false
-            ),
-            new SittingInfoData
-            (
-                0x3088,
-                0,
-                2,
-                4,
-                6,
-                4,
-                4,
-                false
-            ),
-            new SittingInfoData
-            (
-                0x3089,
-                0,
-                2,
-                4,
-                6,
-                4,
-                4,
-                false
-            ),
-            new SittingInfoData
-            (
-                0x308A,
-                0,
-                2,
-                4,
-                6,
-                4,
-                4,
-                false
-            ),
-            new SittingInfoData
-            (
-                0x308B,
-                0,
-                2,
-                4,
-                6,
-                4,
-                4,
-                false
-            ),
-            new SittingInfoData
-            (
-                0x319A,
-                -1,
-                2,
-                -1,
-                6,
-                2,
-                2,
-                false
-            ), // EAST/WEST
-            new SittingInfoData
-            (
-                0x319B,
-                0,
-                -1,
-                4,
-                -1,
-                2,
-                2,
-                false
-            ), // NORTH/SOUTH
-            new SittingInfoData
-            (
-                0x35ED,
-                0,
-                2,
-                4,
-                6,
-                0,
-                0,
-                false
-            ),
-            new SittingInfoData
-            (
-                0x35EE,
-                0,
-                2,
-                4,
-                6,
-                0,
-                0,
-                false
-            ),
-
-            new SittingInfoData
-            (
-                0x3DFF,
-                0,
-                -1,
-                4,
-                -1,
-                2,
-                2,
-                false
-            ),
-            new SittingInfoData
-            (
-                0x3E00,
-                -1,
-                2,
-                -1,
-                6,
-                2,
-                2,
-                false
-            ),
-            new SittingInfoData
-            (
-                0x4023,
-                4,
-                4,
-                4,
-                4,
-                4,
-                4,
-                false
-            ), // SOUTH ONLY
-            new SittingInfoData
-            (
-                0x4024,
-                2,
-                2,
-                2,
-                2,
-                0,
-                0,
-                false
-            ), // EAST ONLY
-            new SittingInfoData
-            (
-                0x4027,
-                4,
-                4,
-                4,
-                4,
-                4,
-                4,
-                false
-            ), // SOUTH ONLY
-            new SittingInfoData
-            (
-                0x4028,
-                4,
-                4,
-                4,
-                4,
-                4,
-                4,
-                false
-            ), // SOUTH ONLY
-            new SittingInfoData
-            (
-                0x4029,
-                2,
-                2,
-                2,
-                2,
-                0,
-                0,
-                false
-            ), // EAST ONLY
-            new SittingInfoData
-            (
-                0x402A,
-                2,
-                2,
-                2,
-                2,
-                0,
-                0,
-                false
-            ), // EAST ONLY
-            new SittingInfoData
-            (
-                0x4BDC,
-                4,
-                4,
-                4,
-                4,
-                4,
-                4,
-                false
-            ), // SOUTH ONLY
-            new SittingInfoData
-            (
-                0x4C1B,
-                4,
-                4,
-                4,
-                4,
-                4,
-                4,
-                false
-            ), // SOUTH ONLY
-            new SittingInfoData
-            (
-                0x4C1E,
-                2,
-                2,
-                2,
-                2,
-                6,
-                6,
-                false
-            ), // EAST ONLY
-            new SittingInfoData
-            (
-                0x4C80,
-                4,
-                4,
-                4,
-                4,
-                4,
-                4,
-                false
-            ), // SOUTH ONLY
-            new SittingInfoData
-            (
-                0x4C81,
-                2,
-                2,
-                2,
-                2,
-                0,
-                0,
-                false
-            ), // EAST ONLY
-            new SittingInfoData
-            (
-                0x4C82,
-                4,
-                4,
-                4,
-                4,
-                4,
-                4,
-                false
-            ), // SOUTH ONLY
-            new SittingInfoData
-            (
-                0x4C83,
-                4,
-                4,
-                4,
-                4,
-                4,
-                4,
-                false
-            ), // SOUTH ONLY
-            new SittingInfoData
-            (
-                0x4C84,
-                2,
-                2,
-                2,
-                2,
-                0,
-                0,
-                false
-            ), // EAST ONLY
-            new SittingInfoData
-            (
-                0x4C85,
-                2,
-                2,
-                2,
-                2,
-                0,
-                0,
-                false
-            ), // EAST ONLY
-            new SittingInfoData
-            (
-                0x4C86,
-                4,
-                4,
-                4,
-                4,
-                4,
-                4,
-                false
-            ), // SOUTH ONLY
-            new SittingInfoData
-            (
-                0x4C87,
-                4,
-                4,
-                4,
-                4,
-                4,
-                4,
-                false
-            ), // SOUTH ONLY
-            new SittingInfoData
-            (
-                0x4C88,
-                2,
-                2,
-                2,
-                2,
-                0,
-                0,
-                false
-            ), // EAST ONLY
-            new SittingInfoData
-            (
-                0x4C89,
-                2,
-                2,
-                2,
-                2,
-                0,
-                0,
-                false
-            ), // EAST ONLY
-            new SittingInfoData
-            (
-                0x4C8A,
-                2,
-                2,
-                2,
-                2,
-                0,
-                0,
-                false
-            ), // EAST ONLY
-            new SittingInfoData
-            (
-                0x4C8B,
-                2,
-                2,
-                2,
-                2,
-                0,
-                0,
-                false
-            ), // EAST ONLY
-            new SittingInfoData
-            (
-                0x4C8C,
-                2,
-                2,
-                2,
-                2,
-                0,
-                0,
-                false
-            ), // EAST ONLY
-            new SittingInfoData
-            (
-                0x4C8D,
-                4,
-                4,
-                4,
-                4,
-                4,
-                4,
-                false
-            ), // SOUTH ONLY
-            new SittingInfoData
-            (
-                0x4C8E,
-                4,
-                4,
-                4,
-                4,
-                4,
-                4,
-                false
-            ), // SOUTH ONLY
-            new SittingInfoData
-            (
-                0x4C8F,
-                4,
-                4,
-                4,
-                4,
-                4,
-                4,
-                false
-            ), // SOUTH ONLY
-            new SittingInfoData
-            (
-                0x4DE0,
-                2,
-                2,
-                2,
-                2,
-                0,
-                0,
-                false
-            ), // EAST ONLY
-            new SittingInfoData
-            (
-                0x63BC,
-                0,
-                -1,
-                4,
-                -1,
-                3,
-                10,
-                false
-            ),
-            new SittingInfoData
-            (
-                0x63BD,
-                0,
-                -1,
-                4,
-                -1,
-                3,
-                10,
-                false
-            ),
-            new SittingInfoData
-            (
-                0x63C3,
-                -1,
-                2,
-                -1,
-                6,
-                3,
-                14,
-                false
-            ),
-            new SittingInfoData
-            (
-                0x63C4,
-                -1,
-                2,
-                -1,
-                6,
-                3,
-                14,
-                false
-            ),
-            new SittingInfoData
-            (
-                0x996C,
-                4,
-                4,
-                4,
-                4,
-                4,
-                4,
-                false
-            ), // SOUTH ONLY
-            new SittingInfoData
-            (
-                0x9977,
-                2,
-                2,
-                2,
-                2,
-                0,
-                0,
-                false
-            ), // EAST ONLY
-            new SittingInfoData
-            (
-                0x9C57,
-                6,
-                6,
-                6,
-                6,
-                6,
-                4,
-                false
-            ), // WEST ONLY
-            new SittingInfoData
-            (
-                0x9C58,
-                6,
-                6,
-                6,
-                6,
-                6,
-                4,
-                false
-            ), // WEST ONLY
-            new SittingInfoData
-            (
-                0x9C59,
-                0,
-                0,
-                0,
-                0,
-                4,
-                4,
-                false
-            ), // NORTH ONLY
-            new SittingInfoData
-            (
-                0x9C5A,
-                0,
-                0,
-                0,
-                0,
-                4,
-                4,
-                false
-            ), // NORTH ONLY
-            new SittingInfoData
-            (
-                0x9C5D,
-                6,
-                6,
-                6,
-                6,
-                6,
-                4,
-                false
-            ), // WEST ONLY
-            new SittingInfoData
-            (
-                0x9C5E,
-                6,
-                6,
-                6,
-                6,
-                6,
-                4,
-                false
-            ), // WEST ONLY
-            new SittingInfoData
-            (
-                0x9C5F,
-                6,
-                6,
-                6,
-                6,
-                6,
-                4,
-                false
-            ), // WEST ONLY
-            new SittingInfoData
-            (
-                0x9C60,
-                0,
-                0,
-                0,
-                0,
-                4,
-                4,
-                false
-            ), // NORTH ONLY
-            new SittingInfoData
-            (
-                0x9C61,
-                0,
-                0,
-                0,
-                0,
-                4,
-                4,
-                false
-            ), // NORTH ONLY
-            new SittingInfoData
-            (
-                0x9C62,
-                0,
-                0,
-                0,
-                0,
-                4,
-                4,
-                false
-            ), // NORTH ONLY
-            new SittingInfoData
-            (
-                0x9E8E,
-                0,
-                0,
-                0,
-                0,
-                4,
-                4,
-                false
-            ), // NORTH ONLY
-            new SittingInfoData
-            (
-                0x9E8F,
-                6,
-                6,
-                6,
-                6,
-                6,
-                4,
-                false
-            ), // WEST ONLY
-            new SittingInfoData
-            (
-                0x9E90,
-                2,
-                2,
-                2,
-                2,
-                0,
-                0,
-                false
-            ), // EAST ONLY
-            new SittingInfoData
-            (
-                0x9E91,
-                4,
-                4,
-                4,
-                4,
-                4,
-                4,
-                false
-            ), // SOUTH ONLY
-            new SittingInfoData
-            (
-                0x9E9F,
-                0,
-                0,
-                0,
-                0,
-                4,
-                4,
-                false
-            ), // NORTH ONLY
-            new SittingInfoData
-            (
-                0x9EA0,
-                6,
-                6,
-                6,
-                6,
-                6,
-                4,
-                false
-            ), // WEST ONLY
-            new SittingInfoData
-            (
-                0x9EA1,
-                4,
-                4,
-                4,
-                4,
-                4,
-                4,
-                false
-            ), // SOUTH ONLY
-            new SittingInfoData
-            (
-                0x9EA2,
-                2,
-                2,
-                2,
-                2,
-                0,
-                0,
-                false
-            ), // EAST ONLY
-            new SittingInfoData
-            (
-                0xA05C,
-                6,
-                6,
-                6,
-                6,
-                6,
-                4,
-                false
-            ), // WEST ONLY
-            new SittingInfoData
-            (
-                0xA05D,
-                4,
-                4,
-                4,
-                4,
-                4,
-                4,
-                false
-            ), // SOUTH ONLY
-            new SittingInfoData
-            (
-                0xA05E,
-                0,
-                0,
-                0,
-                0,
-                4,
-                4,
-                false
-            ), // NORTH ONLY
-            new SittingInfoData
-            (
-                0xA05F,
-                2,
-                2,
-                2,
-                2,
-                0,
-                0,
-                false
-            ), // EAST ONLY
-            new SittingInfoData
-            (
-                0xA211,
-                0,
-                2,
-                4,
-                6,
-                -4,
-                -4,
-                false
-            ), // ANY
-            new SittingInfoData
-            (
-                0xA4EA,
-                4,
-                4,
-                4,
-                4,
-                4,
-                4,
-                false
-            ), // SOUTH ONLY
-            new SittingInfoData
-            (
-                0xA4EB,
-                2,
-                2,
-                2,
-                2,
-                0,
-                0,
-                false
-            ), // EAST ONLY
-            new SittingInfoData
-            (
-                0xA586,
-                4,
-                4,
-                4,
-                4,
-                4,
-                4,
-                false
-            ), // SOUTH ONLY
-            new SittingInfoData
-            (
-                0xA587,
-                2,
-                2,
-                2,
-                2,
-                0,
-                0,
-                false
-            ) // EAST ONLY
-        };
-
 
         public override unsafe Task Load()
         {
@@ -2561,16 +671,6 @@ namespace ClassicUO.IO.Resources
         }
 
 
-        public override void Dispose()
-        {
-            base.Dispose();
-
-            if (_bufferCachePtr != IntPtr.Zero)
-            {
-                Marshal.FreeHGlobal(_bufferCachePtr);
-            }
-        }
-
         private void LoadUop()
         {
             if (Client.Version <= ClientVersion.CV_60144)
@@ -2644,7 +744,8 @@ namespace ClassicUO.IO.Resources
             UOFileUop animSeq = new UOFileUop(animationSequencePath, "build/animationsequence/{0:D8}.bin");
             UOFileIndex[] animseqEntries = new UOFileIndex[Math.Max(animSeq.TotalEntriesCount, Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT)];
             animSeq.FillEntries(ref animseqEntries);
-            DataReader reader = new DataReader();
+
+            Span<byte> spanAlloc = stackalloc byte[1024];
 
             for (int i = 0; i < animseqEntries.Length; i++)
             {
@@ -2657,47 +758,72 @@ namespace ClassicUO.IO.Resources
 
                 animSeq.Seek(entry.Offset);
 
-                byte[] decbuffer = animSeq.GetData(entry.Length, entry.DecompressedLength);
 
-                reader.SetData(decbuffer, decbuffer.Length);
-                uint animID = reader.ReadUInt();
-                reader.Skip(48);
-                int replaces = reader.ReadInt();
+                byte[] buffer = null;
 
-                if (replaces == 48 || replaces == 68)
+                Span<byte> span = entry.DecompressedLength <= 1024 ? spanAlloc : (buffer = System.Buffers.ArrayPool<byte>.Shared.Rent(entry.DecompressedLength));
+                
+                try
                 {
-                    continue;
-                }
-
-                for (int k = 0; k < replaces; k++)
-                {
-                    int oldGroup = reader.ReadInt();
-                    uint frameCount = reader.ReadUInt();
-                    int newGroup = reader.ReadInt();
-
-                    if (frameCount == 0 && DataIndex[animID] != null)
+                    fixed (byte* destPtr = span)
                     {
-                        DataIndex[animID].ReplaceUopGroup((byte) oldGroup, (byte) newGroup);
+                        ZLib.Decompress
+                        (
+                            animSeq.PositionAddress,
+                            entry.Length,
+                            0,
+                            (IntPtr)destPtr,
+                            entry.DecompressedLength
+                        );
                     }
 
-                    reader.Skip(60);
-                }
+                    StackDataReader reader = new StackDataReader(span.Slice(0, entry.DecompressedLength));
 
-                if (DataIndex[animID] != null)
-                {
-                    if (animID == 0x04E7 || animID == 0x042D || animID == 0x04E6 || animID == 0x05F7)
+                    uint animID = reader.ReadUInt32LE();
+                    reader.Skip(48);
+                    int replaces = reader.ReadInt32LE();
+
+                    if (replaces != 48 && replaces != 68)
                     {
-                        DataIndex[animID].MountedHeightOffset = 18;
+                        for (int k = 0; k < replaces; k++)
+                        {
+                            int oldGroup = reader.ReadInt32LE();
+                            uint frameCount = reader.ReadUInt32LE();
+                            int newGroup = reader.ReadInt32LE();
+
+                            if (frameCount == 0 && DataIndex[animID] != null)
+                            {
+                                DataIndex[animID].ReplaceUopGroup((byte)oldGroup, (byte)newGroup);
+                            }
+
+                            reader.Skip(60);
+                        }
+
+                        if (DataIndex[animID] != null)
+                        {
+                            if (animID == 0x04E7 || animID == 0x042D || animID == 0x04E6 || animID == 0x05F7)
+                            {
+                                DataIndex[animID].MountedHeightOffset = 18;
+                            }
+                            else if (animID == 0x01B0 || animID == 0x0579 || animID == 0x05F6 || animID == 0x05A0)
+                            {
+                                DataIndex[animID].MountedHeightOffset = 9;
+                            }
+                        }
                     }
-                    else if (animID == 0x01B0 || animID == 0x0579 || animID == 0x05F6 || animID == 0x05A0)
+
+                    reader.Release();
+                }
+                finally
+                {
+                    if (buffer != null)
                     {
-                        DataIndex[animID].MountedHeightOffset = 9;
+                        System.Buffers.ArrayPool<byte>.Shared.Return(buffer);
                     }
                 }
             }
 
             animSeq.Dispose();
-            reader.ReleaseData();
         }
 
 
@@ -2769,7 +895,7 @@ namespace ClassicUO.IO.Resources
 
                 if ((index.IsUOP && (isParent || !index.IsValidMUL)) || forceUOP)
                 {
-                    AnimationGroupUop uop = index.GetUopGroup(group);
+                    AnimationGroupUop uop = index.GetUopGroup(ref group);
 
                     return uop ?? _empty;
                 }
@@ -2817,7 +943,7 @@ namespace ClassicUO.IO.Resources
 
                 if (index.IsUOP)
                 {
-                    AnimationGroupUop uop = index.GetUopGroup(group);
+                    AnimationGroupUop uop = index.GetUopGroup(ref group);
 
                     return uop ?? _empty;
                 }
@@ -2893,6 +1019,15 @@ namespace ClassicUO.IO.Resources
             {
                 _usedTextures.Clear();
             }
+        }
+
+        public bool PixelCheck(ushort animID, byte group, byte direction, bool uop, int frame, int x, int y)
+        {
+            uint packed32 = (uint)((group | (direction << 8) | ((uop ? 0x01 : 0x00) << 16)));
+            uint packed32_2 = (uint)((animID | (frame << 16)));
+            ulong packed = (packed32_2 | ((ulong)packed32 << 32));
+
+            return _picker.Get(packed, x, y);
         }
 
         public void UpdateAnimationTable(uint flags)
@@ -2990,10 +1125,8 @@ namespace ClassicUO.IO.Resources
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void FixSittingDirection(ref byte direction, ref bool mirror, ref int x, ref int y, int sittingIndex)
+        public void FixSittingDirection(ref byte direction, ref bool mirror, ref int x, ref int y, ref SittingInfoData data)
         {
-            ref SittingInfoData data = ref SittingInfos[sittingIndex - 1];
-
             switch (direction)
             {
                 case 7:
@@ -3201,7 +1334,10 @@ namespace ClassicUO.IO.Resources
             {
                 ushort hue = 0;
 
-                AnimationDirection direction = isCorpse ? GetCorpseAnimationGroup(ref graphic, ref group, ref hue)?.Direction[0] : GetBodyAnimationGroup(ref graphic, ref group, ref hue, true)?.Direction[0];
+                AnimationDirection direction = isCorpse ? 
+                    GetCorpseAnimationGroup(ref graphic, ref group, ref hue)?.Direction[0] 
+                    : 
+                    GetBodyAnimationGroup(ref graphic, ref group, ref hue, true, false)?.Direction[0];
 
 
                 return direction != null && (direction.Address != 0 && direction.Size != 0 || direction.IsUOP);
@@ -3225,7 +1361,7 @@ namespace ClassicUO.IO.Resources
 
             if (animDir.IsUOP || animDir.Address == 0 && animDir.Size == 0)
             {
-                AnimationGroupUop animData = DataIndex[animID].GetUopGroup(animGroup);
+                AnimationGroupUop animData = DataIndex[animID].GetUopGroup(ref animGroup);
 
                 if (animData == null || animData.Offset == 0)
                 {
@@ -3242,14 +1378,14 @@ namespace ClassicUO.IO.Resources
 
             UOFileMul file = _files[animDir.FileIndex];
             file.Seek(animDir.Address);
-            ReadMULAnimationFrame(ref animDir, file);
+            ReadMULAnimationFrame(animID, animGroup, direction, ref animDir, file);
 
             return true;
         }
 
-        private unsafe bool ReadUOPAnimationFrame(ushort animID, byte animGroup, byte direction, ref AnimationDirection animDirection)
+        private bool ReadUOPAnimationFrame(ushort animID, byte animGroup, byte direction, ref AnimationDirection animDirection)
         {
-            AnimationGroupUop animData = DataIndex[animID].GetUopGroup(animGroup);
+            AnimationGroupUop animData = DataIndex[animID].GetUopGroup(ref animGroup);
 
             if (animData.FileIndex < 0 || animData.FileIndex >= _filesUop.Length)
             {
@@ -3264,169 +1400,212 @@ namespace ClassicUO.IO.Resources
             }
 
             animDirection.LastAccessTime = Time.Ticks;
+
             int decLen = (int) animData.DecompressedLength;
             UOFileUop file = _filesUop[animData.FileIndex];
             file.Seek(animData.Offset);
 
-            ZLib.Decompress
-            (
-                file.PositionAddress,
-                (int) animData.CompressedLength,
-                0,
-                _bufferCachePtr,
-                decLen
-            );
+            byte[] buffer = null;
 
-            _reader.SetData(_bufferCachePtr, decLen);
-            _reader.Skip(32);
+            Span<byte> span = decLen <= 1024 ? stackalloc byte[decLen] : (buffer = System.Buffers.ArrayPool<byte>.Shared.Rent(decLen));
 
-            int frameCount = _reader.ReadInt();
-            int dataStart = _reader.ReadInt();
-            _reader.Seek(dataStart);
-
-            for (int i = 0; i < frameCount; i++)
+            fixed (byte* ptr = span)
             {
-                uint start = (uint) _reader.Position;
-                ushort group = _reader.ReadUShort();
-                short frameID = _reader.ReadShort();
-                _reader.Skip(8);
-                uint pixelOffset = _reader.ReadUInt();
-                //int vsize = pixelDataOffsets.Count;
-
-                ref UOPFrameData data = ref _uop_frame_pixels_offsets[i];
-                data.DataStart = start;
-                data.PixelDataOffset = pixelOffset;
-
-                //if (vsize + 1 < data.FrameID)
-                //{
-                //    while (vsize + 1 != data.FrameID)
-                //    {
-                //        pixelDataOffsets.Add(new UOPFrameData());
-                //        vsize++;
-                //    }
-                //}
-
-                //pixelDataOffsets.Add(data);
+                ZLib.Decompress
+                (
+                    file.PositionAddress,
+                    (int)animData.CompressedLength,
+                    0,
+                    (IntPtr) ptr,
+                    decLen
+                );
             }
 
-            //int vectorSize = pixelDataOffsets.Count;
-            //if (vectorSize < 50)
-            //{
-            //    while (vectorSize != 50)
-            //    {
-            //        pixelDataOffsets.Add(new UOPFrameData());
-            //        vectorSize++;
-            //    }
-            //}
-
-            animDirection.FrameCount = (byte) (frameCount / 5);
-            int dirFrameStartIdx = animDirection.FrameCount * direction;
-
-            if (animDirection.Frames != null && animDirection.Frames.Length != 0)
+            try
             {
-                Log.Panic("MEMORY LEAK UOP ANIM");
-            }
+                StackDataReader reader = new StackDataReader(span.Slice(0, decLen));
+                reader.Skip(32);
 
-            animDirection.Frames = new AnimationFrameTexture[animDirection.FrameCount];
-            long end = (long) _reader.StartAddress + _reader.Length;
+                long end = (long)reader.StartAddress + reader.Length;
 
-            unchecked
-            {
-                for (int i = 0, count = animDirection.FrameCount; i < count; ++i)
+                int fc = reader.ReadInt32LE();
+                uint dataStart = reader.ReadUInt32LE();
+                reader.Seek(dataStart);
+
+                ANIMATION_GROUPS_TYPE type = DataIndex[animID].Type;
+
+                animDirection.FrameCount = (byte)(type < ANIMATION_GROUPS_TYPE.EQUIPMENT ? Math.Round(fc / 5f) : 10);
+                animDirection.Frames = new AnimationFrameTexture[animDirection.FrameCount];
+
+                int headerSize = sizeof(UOPAnimationHeader);
+                int count = 0;
+
+                UOPAnimationHeader* animHeaderInfo = (UOPAnimationHeader*)reader.PositionAddress;
+
+                for (ushort i = 0, id = animHeaderInfo->FrameID, currentDir = 0; animHeaderInfo->FrameID < fc; ++i, ++id)
                 {
-                    if (animDirection.Frames[i] != null)
+                    if (/*animHeaderInfo->FrameID != id*/ animHeaderInfo->FrameID - 1 == id || i >= animDirection.FrameCount)
                     {
-                        continue;
-                    }
-
-                    ref UOPFrameData frameData = ref _uop_frame_pixels_offsets[i + dirFrameStartIdx];
-
-                    if (frameData.DataStart == 0)
-                    {
-                        continue;
-                    }
-
-                    _reader.Seek((int) (frameData.DataStart + frameData.PixelDataOffset));
-                    ushort* palette = (ushort*) _reader.PositionAddress;
-                    _reader.Skip(512);
-                    short imageCenterX = _reader.ReadShort();
-                    short imageCenterY = _reader.ReadShort();
-                    short imageWidth = _reader.ReadShort();
-                    short imageHeight = _reader.ReadShort();
-
-                    if (imageWidth == 0 || imageHeight == 0)
-                    {
-                        Log.Warn("frame size is null");
-
-                        continue;
-                    }
-
-                    uint[] data = new uint[imageWidth * imageHeight];
-
-                    uint header = _reader.ReadUInt();
-
-                    long pos = _reader.Position;
-
-                    int sum = imageCenterY + imageHeight;
-
-                    while (header != 0x7FFF7FFF && pos < end)
-                    {
-                        ushort runLength = (ushort) (header & 0x0FFF);
-                        int x = (int) ((header >> 22) & 0x03FF);
-
-                        if ((x & 0x0200) > 0)
+                        if (currentDir != direction)
                         {
-                            x |= (int) 0xFFFFFE00;
+                            ++currentDir;
                         }
 
-                        int y = (int) ((header >> 12) & 0x3FF);
+                        id = animHeaderInfo->FrameID;
+                        i = 0;
+                        dataStart = (uint)reader.Position;
+                    }
+                    else if (animHeaderInfo->FrameID - id > 1)
+                    {
+                        // error handler?  
+                        // reason:
+                        //    - anim: 337
+                        //    - dir: 3
+                        //    - it skips 2 frames )35 --> 38(
 
-                        if ((y & 0x0200) > 0)
+                        i += (ushort)(animHeaderInfo->FrameID - id);
+                        id = animHeaderInfo->FrameID;
+                    }
+
+                    if (i == 0 && currentDir == direction)
+                    {
+                        break;
+                    }
+
+                    reader.Skip(headerSize);
+
+                    animHeaderInfo = (UOPAnimationHeader*)reader.PositionAddress;
+                }
+
+                reader.Seek(dataStart);
+                animHeaderInfo = (UOPAnimationHeader*)reader.PositionAddress;
+
+                for (ushort id = animHeaderInfo->FrameID; id == animHeaderInfo->FrameID && count < animDirection.FrameCount; ++id, ++count)
+                {
+                    long start = reader.Position;
+
+                    if (animHeaderInfo->Group == animGroup && start + animHeaderInfo->DataOffset < reader.Length)
+                    {
+                        int index = animHeaderInfo->FrameID % animDirection.FrameCount;
+
+                        if (animDirection.Frames[index] == null || animDirection.Frames[index].IsDisposed)
                         {
-                            y |= (int) 0xFFFFFE00;
-                        }
-
-                        x += imageCenterX;
-                        y += sum;
-
-                        int block = y * imageWidth + x;
-
-                        for (int k = 0; k < runLength; ++k)
-                        {
-                            ushort val = palette[_reader.ReadByte()];
-
-                            // FIXME: same of MUL ? Keep it as original for the moment
-                            if (val != 0)
+                            unchecked
                             {
-                                data[block] = HuesHelper.Color16To32(val) | 0xFF_00_00_00;
+                                reader.Skip((int)animHeaderInfo->DataOffset);
+
+                                ushort* palette = (ushort*)reader.PositionAddress;
+
+                                reader.Skip(512);
+
+                                short imageCenterX = reader.ReadInt16LE();
+                                short imageCenterY = reader.ReadInt16LE();
+                                short imageWidth = reader.ReadInt16LE();
+                                short imageHeight = reader.ReadInt16LE();
+
+                                if (imageWidth > 0 && imageHeight > 0)
+                                {
+                                    uint[] data = System.Buffers.ArrayPool<uint>.Shared.Rent(imageWidth * imageHeight);
+
+                                    try
+                                    {
+                                        uint header = reader.ReadUInt32LE();
+
+                                        long pos = reader.Position;
+
+                                        int sum = imageCenterY + imageHeight;
+
+                                        while (header != 0x7FFF7FFF && pos < end)
+                                        {
+                                            ushort runLength = (ushort)(header & 0x0FFF);
+                                            int x = (int)((header >> 22) & 0x03FF);
+
+                                            if ((x & 0x0200) > 0)
+                                            {
+                                                x |= (int)0xFFFFFE00;
+                                            }
+
+                                            int y = (int)((header >> 12) & 0x3FF);
+
+                                            if ((y & 0x0200) > 0)
+                                            {
+                                                y |= (int)0xFFFFFE00;
+                                            }
+
+                                            x += imageCenterX;
+                                            y += sum;
+
+                                            int block = y * imageWidth + x;
+
+                                            for (int k = 0; k < runLength; ++k)
+                                            {
+                                                ushort val = palette[reader.ReadUInt8()];
+
+                                                // FIXME: same of MUL ? Keep it as original for the moment
+                                                if (val != 0)
+                                                {
+                                                    data[block] = HuesHelper.Color16To32(val) | 0xFF_00_00_00;
+                                                }
+                                                else
+                                                {
+                                                    data[block] = 0;
+                                                }
+
+                                                block++;
+                                            }
+
+                                            header = reader.ReadUInt32LE();
+                                        }
+
+                                        AnimationFrameTexture f = new AnimationFrameTexture(imageWidth, imageHeight)
+                                        {
+                                            CenterX = imageCenterX,
+                                            CenterY = imageCenterY
+                                        };
+
+                                        f.SetData(data, 0, imageWidth * imageHeight);
+
+                                        animDirection.Frames[index] = f;
+
+                                        uint packed32 = (uint)((animGroup | (direction << 8) | (0x01 << 16)));
+                                        uint packed32_2 = (uint)((animID | (index << 16)));
+                                        ulong packed = (packed32_2 | ((ulong)packed32 << 32));
+
+                                        _picker.Set(packed, imageWidth, imageHeight, data);
+                                    }
+                                    finally
+                                    {
+                                        System.Buffers.ArrayPool<uint>.Shared.Return(data, true);
+                                    }
+                                }
+                                else
+                                {
+                                    Log.Warn("frame size is null");
+                                }
                             }
-
-                            block++;
                         }
-
-                        header = _reader.ReadUInt();
                     }
 
+                    reader.Seek(start + headerSize);
+                    animHeaderInfo = (UOPAnimationHeader*)reader.PositionAddress;
+                }
 
-                    AnimationFrameTexture f = new AnimationFrameTexture(imageWidth, imageHeight)
-                    {
-                        CenterX = imageCenterX,
-                        CenterY = imageCenterY
-                    };
 
-                    f.PushData(data);
-                    animDirection.Frames[i] = f;
+                _usedTextures.AddLast(animDirection);
+                reader.Release();
+
+                return true;
+            }
+            finally
+            {
+                if (buffer != null)
+                {
+                    System.Buffers.ArrayPool<byte>.Shared.Return(buffer);
                 }
             }
-
-            _usedTextures.AddLast(animDirection);
-
-            _reader.ReleaseData();
-
-            return true;
         }
 
-        private unsafe void ReadMULAnimationFrame(ref AnimationDirection animDir, UOFile reader)
+        private void ReadMULAnimationFrame(ushort animID, byte animGroup, byte direction, ref AnimationDirection animDir, UOFile reader)
         {
             animDir.LastAccessTime = Time.Ticks;
 
@@ -3467,52 +1646,63 @@ namespace ClassicUO.IO.Resources
                     continue;
                 }
 
-                uint[] data = new uint[imageWidth * imageHeight];
+                uint[] data = System.Buffers.ArrayPool<uint>.Shared.Rent(imageWidth * imageHeight);
 
-                uint header = reader.ReadUInt();
-
-                long pos = reader.Position;
-
-                while (header != 0x7FFF7FFF && pos < end)
+                try
                 {
-                    ushort runLength = (ushort) (header & 0x0FFF);
-                    int x = (int) ((header >> 22) & 0x03FF);
+                    uint header = reader.ReadUInt();
+                    long pos = reader.Position;
 
-                    if ((x & 0x0200) > 0)
+                    while (header != 0x7FFF7FFF && pos < end)
                     {
-                        x |= unchecked((int) 0xFFFFFE00);
+                        ushort runLength = (ushort)(header & 0x0FFF);
+                        int x = (int)((header >> 22) & 0x03FF);
+
+                        if ((x & 0x0200) > 0)
+                        {
+                            x |= unchecked((int)0xFFFFFE00);
+                        }
+
+                        int y = (int)((header >> 12) & 0x3FF);
+
+                        if ((y & 0x0200) > 0)
+                        {
+                            y |= unchecked((int)0xFFFFFE00);
+                        }
+
+                        x += imageCenterX;
+                        y += imageCenterY + imageHeight;
+
+                        int block = y * imageWidth + x;
+
+                        for (int k = 0; k < runLength; k++)
+                        {
+                            data[block++] = HuesHelper.Color16To32(palette[reader.ReadByte()]) | 0xFF_00_00_00;
+                        }
+
+                        header = reader.ReadUInt();
                     }
 
-                    int y = (int) ((header >> 12) & 0x3FF);
-
-                    if ((y & 0x0200) > 0)
+                    AnimationFrameTexture f = new AnimationFrameTexture(imageWidth, imageHeight)
                     {
-                        y |= unchecked((int) 0xFFFFFE00);
-                    }
+                        CenterX = imageCenterX,
+                        CenterY = imageCenterY
+                    };
+                    
+                    f.SetData(data, 0, imageWidth * imageHeight);
 
-                    x += imageCenterX;
-                    y += imageCenterY + imageHeight;
+                    animDir.Frames[i] = f;
 
-                    int block = y * imageWidth + x;
+                    uint packed32 = (uint)((animGroup | (direction << 8) | (0x00 << 16)));
+                    uint packed32_2 = (uint)((animID | (i << 16)));
+                    ulong packed = (packed32_2 | ((ulong)packed32 << 32));
 
-                    for (int k = 0; k < runLength; k++)
-                    {
-                        data[block++] = HuesHelper.Color16To32(palette[reader.ReadByte()]) | 0xFF_00_00_00;
-                    }
-
-                    header = reader.ReadUInt();
+                    _picker.Set(packed, imageWidth, imageHeight, data);
                 }
-
-
-                AnimationFrameTexture f = new AnimationFrameTexture(imageWidth, imageHeight)
+                finally
                 {
-                    CenterX = imageCenterX,
-                    CenterY = imageCenterY
-                };
-
-                f.PushData(data);
-
-                animDir.Frames[i] = f;
+                    System.Buffers.ArrayPool<uint>.Shared.Return(data, true);
+                }
             }
 
             _usedTextures.AddLast(animDir);
@@ -3649,34 +1839,54 @@ namespace ClassicUO.IO.Resources
                             int decLen = (int) animDataStruct.DecompressedLength;
                             UOFileUop file = _filesUop[animDataStruct.FileIndex];
                             file.Seek(animDataStruct.Offset);
-                            byte[] decbuffer = file.GetData((int) animDataStruct.CompressedLength, decLen);
 
-                            fixed (byte* ptr = decbuffer)
+                            byte[] buffer = null;
+                            Span<byte> span = decLen <= 1024 ? stackalloc byte[decLen] : (buffer = System.Buffers.ArrayPool<byte>.Shared.Rent(decLen));
+
+                            try
                             {
-                                DataReader reader = new DataReader();
-                                reader.SetData(ptr, decLen);
+                                fixed (byte* srcPtr = span)
+                                {
+                                    ZLib.Decompress
+                                    (
+                                        file.PositionAddress,
+                                        (int)animDataStruct.CompressedLength,
+                                        0,
+                                        (IntPtr)srcPtr,
+                                        decLen
+                                    );
+                                }
+
+                                StackDataReader reader = new StackDataReader(span.Slice(0, decLen));
                                 reader.Skip(32);
 
-                                int frameCount = reader.ReadInt();
-                                int dataStart = reader.ReadInt();
+                                int frameCount = reader.ReadInt32LE();
+                                int dataStart = reader.ReadInt32LE();
                                 reader.Seek(dataStart);
 
                                 reader.Skip(2);
-                                short frameID = reader.ReadShort();
+                                short frameID = reader.ReadInt16LE();
                                 reader.Skip(8);
-                                uint pixelOffset = reader.ReadUInt();
+                                uint pixelOffset = reader.ReadUInt32LE();
 
-                                reader.Seek((int) (dataStart + pixelOffset));
+                                reader.Seek((int)(dataStart + pixelOffset));
                                 reader.Skip(512);
-                                x = reader.ReadShort();
-                                y = reader.ReadShort();
-                                w = reader.ReadShort();
-                                h = reader.ReadShort();
+                                x = reader.ReadInt16LE();
+                                y = reader.ReadInt16LE();
+                                w = reader.ReadInt16LE();
+                                h = reader.ReadInt16LE();
                                 _animDimensionCache[id] = new Rectangle(x, y, w, h);
-                                reader.ReleaseData();
-
-                                return;
+                                reader.Release();
                             }
+                            finally
+                            {
+                                if (buffer != null)
+                                {
+                                    System.Buffers.ArrayPool<byte>.Shared.Return(buffer);
+                                }
+                            }
+
+                            return;
                         }
                     }
                 }
@@ -3790,13 +2000,8 @@ namespace ClassicUO.IO.Resources
             public readonly sbyte Direction1, Direction2, Direction3, Direction4;
             public readonly sbyte OffsetY, MirrorOffsetY;
             public readonly bool DrawBack;
-        }
 
-        [StructLayout(LayoutKind.Sequential, Size = 1)]
-        private struct UOPFrameData
-        {
-            public uint DataStart;
-            public uint PixelDataOffset;
+            public static SittingInfoData Empty = new SittingInfoData();
         }
 
         [StructLayout(LayoutKind.Sequential, Pack = 1)]
@@ -3805,6 +2010,20 @@ namespace ClassicUO.IO.Resources
             public readonly uint Position;
             public readonly uint Size;
             public readonly uint Unknown;
+        }
+
+        [StructLayout(LayoutKind.Sequential, Pack = 1)]
+        ref struct UOPAnimationHeader
+        {
+            public ushort Group;
+            public ushort FrameID;
+
+            public ushort Unk0;
+            public ushort Unk1;
+            public ushort Unk2;
+            public ushort Unk3;
+
+            public uint DataOffset;
         }
     }
 
@@ -3967,9 +2186,16 @@ namespace ClassicUO.IO.Resources
         public AnimationGroupUop[] UopGroups;
 
 
-        public AnimationGroupUop GetUopGroup(byte group)
+        public AnimationGroupUop GetUopGroup(ref byte group)
         {
-            return group < 100 && UopGroups != null ? UopGroups[_uopReplaceGroupIndex[group]] : null;
+            if (group < 100 && UopGroups != null)
+            {
+                group = _uopReplaceGroupIndex[group];
+
+                return UopGroups[group];
+            }
+
+            return  null;
         }
 
         public void InitializeUOP()

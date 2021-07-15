@@ -31,9 +31,11 @@
 #endregion
 
 using ClassicUO.Configuration;
+using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
+using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.GameObjects
 {
@@ -43,6 +45,7 @@ namespace ClassicUO.Game.GameObjects
 
         public DragEffect
         (
+            EffectManager manager,
             uint src,
             uint trg,
             int xSource,
@@ -52,8 +55,11 @@ namespace ClassicUO.Game.GameObjects
             int yTarget,
             int zTarget,
             ushort graphic,
-            ushort hue
-        )
+            ushort hue,
+            int duration,
+            byte speed
+        ) 
+            : base(manager, graphic, hue, duration, speed)
         {
             Entity source = World.Get(src);
 
@@ -78,10 +84,8 @@ namespace ClassicUO.Game.GameObjects
                 SetTarget(xTarget, yTarget, zTarget);
             }
 
-            AlphaHue = 255;
             Hue = hue;
             Graphic = graphic;
-            Load();
         }
 
         public override void Update(double totalTime, double frameTime)
@@ -99,29 +103,29 @@ namespace ClassicUO.Game.GameObjects
             base.Update(totalTime, frameTime);
         }
 
-        public override bool Draw(UltimaBatcher2D batcher, int posX, int posY)
+        public override bool Draw(UltimaBatcher2D batcher, int posX, int posY, ref Vector3 hueVec)
         {
             if (IsDestroyed)
             {
                 return false;
             }
 
-            ResetHueVector();
+            hueVec = Vector3.Zero;
 
 
             if (ProfileManager.CurrentProfile.NoColorObjectsOutOfRange && Distance > World.ClientViewRange)
             {
-                HueVector.X = Constants.OUT_RANGE_COLOR;
-                HueVector.Y = 1;
+                hueVec.X = Constants.OUT_RANGE_COLOR;
+                hueVec.Y = 1;
             }
             else if (World.Player.IsDead && ProfileManager.CurrentProfile.EnableBlackWhiteEffect)
             {
-                HueVector.X = Constants.DEAD_RANGE_COLOR;
-                HueVector.Y = 1;
+                hueVec.X = Constants.DEAD_RANGE_COLOR;
+                hueVec.Y = 1;
             }
             else
             {
-                ShaderHueTranslator.GetHueVector(ref HueVector, Hue);
+                ShaderHueTranslator.GetHueVector(ref hueVec, Hue);
             }
 
             //Engine.DebugInfo.EffectsRendered++;
@@ -132,7 +136,7 @@ namespace ClassicUO.Game.GameObjects
                 AnimationGraphic,
                 posX - ((int) Offset.X + 22),
                 posY - ((int) -Offset.Y + 22),
-                ref HueVector
+                ref hueVec
             );
 
             ref StaticTiles data = ref TileDataLoader.Instance.StaticData[Graphic];

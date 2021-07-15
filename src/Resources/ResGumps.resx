@@ -484,7 +484,7 @@
     <value>Use xBR effect [BETA]</value>
   </data>
   <data name="HideChatGradient" xml:space="preserve">
-    <value>Hide Chat Gradient</value>
+    <value>Hide chat gradient</value>
   </data>
   <data name="NewMacro" xml:space="preserve">
     <value>New macro</value>
@@ -766,7 +766,7 @@ when amount is or exceeds</value>
     <value>Book page {0} split into too many lines: {1} Additional lines will be lost</value>
   </data>
   <data name="BookPage0LineTooLong1" xml:space="preserve">
-    <value>Book page {0} single line too LONG, total lenght -&gt; {1} vs MAX 79 bytes allowed, some content might get lost</value>
+    <value>Book page {0} single line too LONG, total length -&gt; {1} vs MAX 79 bytes allowed, some content might get lost</value>
   </data>
   <data name="TimeLeft" xml:space="preserve">
     <value>{0}
@@ -1443,5 +1443,14 @@ Client version: '{0}'</value>
   </data>
   <data name="ResetGroups" xml:space="preserve">
     <value>Reset groups</value>
+  </data>
+  <data name="TerrainShadowsLevel" xml:space="preserve">
+    <value>Terrain shadows level:</value>
+  </data>
+  <data name="IgnoreGuildMessages" xml:space="preserve">
+    <value>Hide guild chat</value>
+  </data>
+  <data name="IgnoreAllianceMessages" xml:space="preserve">
+    <value>Hide alliance chat</value>
   </data>
 </root>

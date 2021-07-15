@@ -573,7 +573,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                         if (send)
                         {
-                            NetClient.Socket.Send(new PTradeUpdateGold(ID1, my_gold_entry, my_plat_entry));
+                            NetClient.Socket.Send_TradeUpdateGold(ID1, my_gold_entry, my_plat_entry);
                         }
                     }
                 }
@@ -609,7 +609,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 Add
                 (
-                    new ColorBox(110, 60, 0, 0xFF000001)
+                    new ColorBox(110, 60, 0)
                     {
                         X = 45, Y = 90
                     }
@@ -617,7 +617,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 Add
                 (
-                    new ColorBox(110, 60, 0, 0xFF000001)
+                    new ColorBox(110, 60, 0)
                     {
                         X = 192, Y = 70
                     }

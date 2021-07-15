@@ -270,6 +270,9 @@ namespace ClassicUO.Game.UI.Controls
             HueVector.Z = 0;
         }
 
+
+        
+
         public virtual bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
             if (IsDisposed)

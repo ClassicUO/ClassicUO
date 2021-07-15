@@ -34,21 +34,18 @@ namespace ClassicUO.Game.Data
 {
     internal static class LightColors
     {
+        private static readonly uint[][] _lightCurveTables = new uint[5][]
+        {
+            new uint[32] { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,2,3,4,6,8,10,12,14,16,18,20,22,24,26,28},
+            new uint[32] { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,2,3,4,5,6,7,8},
+            new uint[32] { 0,1,2,4,6,8,11,14,17,20,23,26,29,30,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31},
+            new uint[32] { 0,0,0,0,0,0,0,0,1,1,2,2,3,3,4,4,5,6,7,8,9,10,11,12,13,15,17,19,21,23,25,27},
+            new uint[32] { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,5,10,15,20,25,30,30,18,18,18,18,18,18,18},
+        };
+
         public static ushort GetHue(ushort id)
         {
             ushort color = 0;
-
-            if (id < 0x3E27)
-            {
-                //color = ???;
-            }
-            else
-            {
-                color = 666;
-
-                //if (id > 0x3E3A)
-                //	color = ???;
-            }
 
             switch (id)
             {
@@ -68,7 +65,7 @@ namespace ClassicUO.Game.Data
                     break;
 
                 case 0x1647:
-                    color = 51;
+                    color = 61;
 
                     break;
 
@@ -107,17 +104,17 @@ namespace ClassicUO.Game.Data
                                                 {
                                                     if (id >= 0x1ECD && id <= 0x1ECF || id >= 0x1ED0 && id <= 0x1ED2)
                                                     {
-                                                        color = 62;
+                                                        color = 1;
                                                     }
                                                 }
                                                 else
                                                 {
-                                                    color = 30;
+                                                    color = 60;
                                                 }
                                             }
                                             else
                                             {
-                                                color = 51;
+                                                color = 60;
                                             }
                                         }
                                         else
@@ -132,7 +129,7 @@ namespace ClassicUO.Game.Data
                                 }
                                 else
                                 {
-                                    color = 41;
+                                    color = 31;
                                 }
                             }
                             else
@@ -157,7 +154,7 @@ namespace ClassicUO.Game.Data
             }
             else
             {
-                color = 40;
+                color = 30;
             }
 
             if (id == 0x1FD4 || id == 0x0F6C)
@@ -270,7 +267,7 @@ namespace ClassicUO.Game.Data
                         }
                         else
                         {
-                            color = 40;
+                            color = 31;
                         }
                     }
                     else
@@ -285,10 +282,65 @@ namespace ClassicUO.Game.Data
             }
             else
             {
-                color = 0;
+                color = 62;
             }
 
             return color;
+        }
+
+        internal static void CreateLookupTables(uint[] buffer)
+        {
+
+            for (uint i = 0; i < 32; i++)
+            {
+                uint tableA = _lightCurveTables[0][i];
+                uint tableB = _lightCurveTables[1][i];
+                uint tableC = _lightCurveTables[2][i];
+                uint tableD = _lightCurveTables[3][i];
+                uint tableE = _lightCurveTables[4][i];
+
+                // green small
+                buffer[32 * 0 + i] = tableA << 11 | 0xFF_00_00_00;
+
+                // light blue
+                buffer[32 * 1 + i] = i << 19 | (i >> 1) << 11 | (i >> 1) << 3 | 0xFF_00_00_00;
+
+                // dark blue
+                buffer[32 * 5 + i] = tableA << 19 | tableB << 3 | 0xFF_00_00_00;
+
+                // blue
+                buffer[32 * 9 + i] = i << 19 | (i >> 2) << 11 | (i >> 2) << 3 | 0xFF_00_00_00;
+
+                // green
+                buffer[32 * 19 + i] = i << 11 | 0xFF_00_00_00;
+
+                // orange
+                buffer[32 * 29 + i] = (tableC >> 1) << 11 | tableC << 3 | 0xFF_00_00_00;
+
+                // orange small
+                buffer[32 * 30 + i] = (tableA >> 1) << 11 | tableA << 3 | 0xFF_00_00_00;
+
+                // purple
+                buffer[32 * 31 + i] = i << 19 | i << 3 | 0xFF_00_00_00;
+
+                // red
+                buffer[32 * 39 + i] = i << 3 | 0xFF_00_00_00;
+
+                // yellow
+                buffer[32 * 49 + i] = i << 11 | i << 3 | 0xFF_00_00_00;
+
+                // yellow small
+                buffer[32 * 59 + i] = tableA << 11 | tableA << 3 | 0xFF_00_00_00;
+
+                // yellow medium
+                buffer[32 * 60 + i] = tableD << 11 | tableD << 3 | 0xFF_00_00_00;
+
+                // white medium
+                buffer[32 * 61 + i] = tableD << 19 | tableD << 11 | tableD << 3 | 0xFF_00_00_00;
+
+                // white small full
+                buffer[32 * 62 + i] = tableE << 19 | tableE << 11 | tableE << 3 | 0xFF_00_00_00;
+            }
         }
     }
 }

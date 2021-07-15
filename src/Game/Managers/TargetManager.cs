@@ -209,8 +209,11 @@ namespace ClassicUO.Game.Managers
                 }
             }
 
-            NetClient.Socket.Send(new PTargetCancel(TargetingState, _targetCursorId, (byte) TargetingType));
-            IsTargeting = false;
+            if (IsTargeting || TargetingType == TargetType.Cancel)
+            {
+                NetClient.Socket.Send_TargetCancel(TargetingState, _targetCursorId, (byte)TargetingType);
+                IsTargeting = false;
+            }
 
             Reset();
         }
@@ -291,19 +294,13 @@ namespace ClassicUO.Game.Managers
                                         {
                                             if (s)
                                             {
-                                                NetClient.Socket.Send
-                                                (
-                                                    new PTargetObject
-                                                    (
-                                                        entity,
-                                                        entity.Graphic,
-                                                        entity.X,
-                                                        entity.Y,
-                                                        entity.Z,
-                                                        _targetCursorId,
-                                                        (byte) TargetingType
-                                                    )
-                                                );
+                                                NetClient.Socket.Send_TargetObject(entity,
+                                                                                   entity.Graphic,
+                                                                                   entity.X,
+                                                                                   entity.Y,
+                                                                                   entity.Z,
+                                                                                   _targetCursorId,
+                                                                                   (byte)TargetingType);
 
                                                 ClearTargetingWithoutTargetCancelPacket();
 
@@ -324,23 +321,42 @@ namespace ClassicUO.Game.Managers
 
                         if (TargetingState != CursorTarget.SetTargetClientSide)
                         {
-                            PTargetObject packet = new PTargetObject
-                            (
-                                entity,
-                                entity.Graphic,
-                                entity.X,
-                                entity.Y,
-                                entity.Z,
-                                _targetCursorId,
-                                (byte) TargetingType
-                            );
+                            _lastDataBuffer[0] = 0x6C;
 
-                            for (int i = 0; i < _lastDataBuffer.Length; i++)
-                            {
-                                _lastDataBuffer[i] = packet[i];
-                            }
+                            _lastDataBuffer[1] = 0x00;
 
-                            NetClient.Socket.Send(packet);
+                            _lastDataBuffer[2] = (byte)(_targetCursorId >> 24);
+                            _lastDataBuffer[3] = (byte)(_targetCursorId >> 16);
+                            _lastDataBuffer[4] = (byte)(_targetCursorId >> 8);
+                            _lastDataBuffer[5] = (byte)_targetCursorId;
+
+                            _lastDataBuffer[6] = (byte) TargetingType;
+
+                            _lastDataBuffer[7] = (byte)(entity.Serial >> 24);
+                            _lastDataBuffer[8] = (byte)(entity.Serial >> 16);
+                            _lastDataBuffer[9] = (byte)(entity.Serial >> 8);
+                            _lastDataBuffer[10] = (byte)entity.Serial;
+
+                            _lastDataBuffer[11] = (byte)(entity.X >> 8);
+                            _lastDataBuffer[12] = (byte)entity.X;
+
+                            _lastDataBuffer[13] = (byte)(entity.Y >> 8);
+                            _lastDataBuffer[14] = (byte)entity.Y;
+
+                            _lastDataBuffer[15] = (byte)(entity.Z >> 8);
+                            _lastDataBuffer[16] = (byte)entity.Z;
+
+                            _lastDataBuffer[17] = (byte)(entity.Graphic >> 8);
+                            _lastDataBuffer[18] = (byte)entity.Graphic;
+
+
+                            NetClient.Socket.Send_TargetObject(entity,
+                                                               entity.Graphic,
+                                                               entity.X,
+                                                               entity.Y,
+                                                               entity.Z,
+                                                               _targetCursorId,
+                                                               (byte)TargetingType);
 
                             if (SerialHelper.IsMobile(serial) && LastTargetInfo.Serial != serial)
                             {
@@ -447,22 +463,43 @@ namespace ClassicUO.Game.Managers
                 return;
             }
 
-            PTargetXYZ packet = new PTargetXYZ
-            (
-                x,
-                y,
-                z,
-                graphic,
-                _targetCursorId,
-                (byte) TargetingType
-            );
+            _lastDataBuffer[0] = 0x6C;
 
-            NetClient.Socket.Send(packet);
+            _lastDataBuffer[1] = 0x01;
 
-            for (int i = 0; i < _lastDataBuffer.Length; i++)
-            {
-                _lastDataBuffer[i] = packet[i];
-            }
+            _lastDataBuffer[2] = (byte)(_targetCursorId >> 24);
+            _lastDataBuffer[3] = (byte)(_targetCursorId >> 16);
+            _lastDataBuffer[4] = (byte)(_targetCursorId >> 8);
+            _lastDataBuffer[5] = (byte)_targetCursorId;
+
+            _lastDataBuffer[6] = (byte)TargetingType;
+
+            _lastDataBuffer[7] = (byte)(0 >> 24);
+            _lastDataBuffer[8] = (byte)(0 >> 16);
+            _lastDataBuffer[9] = (byte)(0 >> 8);
+            _lastDataBuffer[10] = (byte)0;
+
+            _lastDataBuffer[11] = (byte)(x >> 8);
+            _lastDataBuffer[12] = (byte)x;
+
+            _lastDataBuffer[13] = (byte)(y >> 8);
+            _lastDataBuffer[14] = (byte)y;
+
+            _lastDataBuffer[15] = (byte)(z >> 8);
+            _lastDataBuffer[16] = (byte)z;
+
+            _lastDataBuffer[17] = (byte)(graphic >> 8);
+            _lastDataBuffer[18] = (byte)graphic;
+
+            
+
+            NetClient.Socket.Send_TargetXYZ(graphic,
+                                            x,
+                                            y,
+                                            z,
+                                            _targetCursorId,
+                                            (byte)TargetingType);
+
 
             Mouse.CancelDoubleClick = true;
             ClearTargetingWithoutTargetCancelPacket();

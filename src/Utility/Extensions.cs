@@ -167,34 +167,7 @@ namespace ClassicUO.Utility
             return inrect;
         }
 
-        public static string MakeSafe(this string s)
-        {
-            StringBuilder sb = new StringBuilder();
-
-            for (int i = 0; i < s.Length; i++)
-            {
-                if (StringHelper.IsSafeChar(s[i]))
-                {
-                    sb.Append(s[i]);
-                }
-            }
-
-            return sb.ToString();
-        }
-
-        public static string ReadUTF8String(this BinaryReader reader, int length)
-        {
-            byte[] data = new byte[length];
-            reader.Read(data, 0, length);
-
-            return Encoding.UTF8.GetString(data);
-        }
-
-        public static void WriteUTF8String(this BinaryWriter writer, string str)
-        {
-            writer.Write(Encoding.UTF8.GetBytes(str));
-        }
-
+        
 #if NETFRAMEWORK
         public static void ExtractToDirectory(this ZipArchive archive, string destinationDirectoryName, bool overwrite)
         {

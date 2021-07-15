@@ -39,6 +39,9 @@ namespace ClassicUO.Game.Data
         FixedXYZ = 0x02,
         FixedFrom = 0x03,
         ScreenFade = 0x04,
+
+        DragEffect = 0x05, // custom
+
         Nothing = 0xFF
     }
 }

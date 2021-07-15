@@ -67,9 +67,7 @@ namespace ClassicUO.Game
         };
         private static Vector3 _vec = Vector3.Zero;
 
-        private readonly Texture2D _aura;
-        private Vector3 _auraVector = new Vector3(0, 13, 0);
-
+        private readonly Aura _aura = new Aura(30);
         private readonly CustomBuildObject[] _componentsList = new CustomBuildObject[10];
         private readonly int[,] _cursorOffset = new int[2, 16];
         private readonly IntPtr[,] _cursors_ptr = new IntPtr[3, 16];
@@ -77,37 +75,11 @@ namespace ClassicUO.Game
         private ushort _graphic = 0x2073;
         private bool _needGraphicUpdate = true;
         private Point _offset;
-        private readonly RenderedText _targetDistanceText = RenderedText.Create(string.Empty, 0x0481, style: FontStyle.BlackBorder);
         private readonly List<Multi> _temp = new List<Multi>();
         private readonly Tooltip _tooltip;
 
-
         public GameCursor()
         {
-            short ww = 0;
-            short hh = 0;
-            uint[] data = CircleOfTransparency.CreateCircleTexture(25, ref ww, ref hh);
-
-            for (int i = 0; i < data.Length; i++)
-            {
-                ref uint pixel = ref data[i];
-
-                if (pixel != 0)
-                {
-                    ushort value = (ushort) (pixel << 3);
-
-                    if (value > 0xFF)
-                    {
-                        value = 0xFF;
-                    }
-
-                    pixel = (uint) ((value << 24) | (value << 16) | (value << 8) | value);
-                }
-            }
-
-            _aura = new Texture2D(Client.Game.GraphicsDevice, ww, hh);
-            _aura.SetData(data);
-
             _tooltip = new Tooltip();
 
             for (int i = 0; i < 3; i++)
@@ -116,11 +88,11 @@ namespace ClassicUO.Game
                 {
                     ushort id = _cursorData[i, j];
 
-                    uint[] pixels = ArtLoader.Instance.ReadStaticArt(id, out short w, out short h, out _);
-
+                    IntPtr surface = ArtLoader.Instance.CreateCursorSurfacePtr(id, (ushort) (i == 2 ? 0x0033 : 0), out short w, out short h);
+                 
                     if (i == 0)
                     {
-                        if (pixels != null && pixels.Length > 0)
+                        if (surface != IntPtr.Zero)
                         {
                             float offX = 0;
                             float offY = 0;
@@ -238,15 +210,8 @@ namespace ClassicUO.Game
                                     break;
                             }
 
-                            //if (offX == 0 && offY == 0)
-                            //{
-                            //    offX = -1;
-                            //    offY = -1;
-                            //}
-
-
-                            _cursorOffset[0, j] = (int) offX;
-                            _cursorOffset[1, j] = (int) offY;
+                            _cursorOffset[0, j] = (int)offX;
+                            _cursorOffset[1, j] = (int)offY;
                         }
                         else
                         {
@@ -255,56 +220,12 @@ namespace ClassicUO.Game
                         }
                     }
 
-                    if (pixels != null && pixels.Length != 0)
+                    if (surface != IntPtr.Zero)
                     {
-                        unsafe
-                        {
-                            fixed (uint* ptr = pixels)
-                            {
-                                SDL.SDL_Surface* surface = (SDL.SDL_Surface*) SDL.SDL_CreateRGBSurfaceWithFormatFrom
-                                (
-                                    (IntPtr) ptr,
-                                    w,
-                                    h,
-                                    32,
-                                    4 * w,
-                                    SDL.SDL_PIXELFORMAT_ABGR8888
-                                );
+                        int hotX = -_cursorOffset[0, j];
+                        int hotY = -_cursorOffset[1, j];
 
-                                if (i == 2)
-                                {
-                                    int stride = surface->pitch >> 2;
-                                    uint* pixels_ptr = (uint*) surface->pixels;
-                                    uint* p_line_end = pixels_ptr + w;
-                                    uint* p_img_end = pixels_ptr + stride * h;
-                                    int delta = stride - w;
-                                    Color c = default;
-
-                                    while (pixels_ptr < p_img_end)
-                                    {
-                                        while (pixels_ptr < p_line_end)
-                                        {
-                                            if (*pixels_ptr != 0 && *pixels_ptr != 0xFF_00_00_00)
-                                            {
-                                                c.PackedValue = *pixels_ptr;
-
-                                                *pixels_ptr = HuesHelper.Color16To32(HuesLoader.Instance.GetColor16(HuesHelper.ColorToHue(c), 0x0033)) | 0xFF_00_00_00;
-                                            }
-
-                                            ++pixels_ptr;
-                                        }
-
-                                        pixels_ptr += delta;
-                                        p_line_end += stride;
-                                    }
-                                }
-
-                                int hotX = -_cursorOffset[0, j];
-                                int hotY = -_cursorOffset[1, j];
-
-                                _cursors_ptr[i, j] = SDL.SDL_CreateColorCursor((IntPtr) surface, hotX, hotY);
-                            }
-                        }
+                        _cursors_ptr[i, j] = SDL.SDL_CreateColorCursor(surface, hotX, hotY);
                     }
                 }
             }
@@ -517,28 +438,27 @@ namespace ClassicUO.Game
                         id -= 0x206A;
                     }
 
-                    int hotX = _cursorOffset[0, id];
-                    int hotY = _cursorOffset[1, id];
+                    ushort hue = 0;
 
                     switch (TargetManager.TargetingType)
                     {
                         case TargetType.Neutral:
-                            _auraVector.X = 0x03b2;
+                            hue = 0x03b2;
 
                             break;
 
                         case TargetType.Harmful:
-                            _auraVector.X = 0x0023;
+                            hue = 0x0023;
 
                             break;
 
                         case TargetType.Beneficial:
-                            _auraVector.X = 0x005A;
+                            hue = 0x005A;
 
                             break;
                     }
 
-                    sb.Draw2D(_aura, Mouse.Position.X + hotX - (25 >> 1), Mouse.Position.Y + hotY - (25 >> 1), ref _auraVector);
+                    _aura.Draw(sb, Mouse.Position.X, Mouse.Position.Y, hue);
                 }
 
                 if (ProfileManager.CurrentProfile.ShowTargetRangeIndicator)
@@ -547,9 +467,13 @@ namespace ClassicUO.Game
                     {
                         if (SelectedObject.Object is GameObject obj)
                         {
-                            _targetDistanceText.Text = obj.Distance.ToString();
+                            string dist = obj.Distance.ToString();
 
-                            _targetDistanceText.Draw(sb, Mouse.Position.X - 25, Mouse.Position.Y - 20);
+                            Vector3 hue = new Vector3(0, 1, 0);
+                            sb.DrawString(Fonts.Bold, dist, Mouse.Position.X - 26, Mouse.Position.Y - 21, ref hue);
+                            
+                            hue.Y = 0;
+                            sb.DrawString(Fonts.Bold, dist, Mouse.Position.X - 25, Mouse.Position.Y - 20, ref hue);
                         }
                     }
                 }

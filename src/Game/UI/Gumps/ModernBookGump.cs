@@ -316,12 +316,12 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (leftPage > 0 && !KnownPages.Contains(leftPage))
                 {
-                    NetClient.Socket.Send(new PBookPageDataRequest(LocalSerial, (ushort) leftPage));
+                    NetClient.Socket.Send_BookPageDataRequest(LocalSerial, (ushort)leftPage);
                 }
 
                 if (rightPage < MaxPage * 2 && !KnownPages.Contains(rightPage))
                 {
-                    NetClient.Socket.Send(new PBookPageDataRequest(LocalSerial, (ushort) rightPage));
+                    NetClient.Socket.Send_BookPageDataRequest(LocalSerial, (ushort)rightPage);
                 }
             }
             else
@@ -336,11 +336,11 @@ namespace ClassicUO.Game.UI.Gumps
                         {
                             if (UseNewHeader)
                             {
-                                NetClient.Socket.Send(new PBookHeaderChanged(LocalSerial, _titleTextBox.Text, _authorTextBox.Text));
+                                NetClient.Socket.Send_BookHeaderChanged(LocalSerial, _titleTextBox.Text, _authorTextBox.Text);
                             }
                             else
                             {
-                                NetClient.Socket.Send(new PBookHeaderChangedOld(LocalSerial, _titleTextBox.Text, _authorTextBox.Text));
+                                NetClient.Socket.Send_BookHeaderChanged_Old(LocalSerial, _titleTextBox.Text, _authorTextBox.Text);
                             }
                         }
                         else
@@ -352,7 +352,7 @@ namespace ClassicUO.Game.UI.Gumps
                                 text[l] = BookLines[x];
                             }
 
-                            NetClient.Socket.Send(new PBookPageData(LocalSerial, text, i));
+                            NetClient.Socket.Send_BookPageData(LocalSerial, text, i);
                         }
                     }
                 }
@@ -382,18 +382,8 @@ namespace ClassicUO.Game.UI.Gumps
         {
             base.Draw(batcher, x, y);
 
-            Rectangle scissor = ScissorStack.CalculateScissors
-            (
-                Matrix.Identity,
-                x,
-                y,
-                Width,
-                Height
-            );
-
-            if (ScissorStack.PushScissors(batcher.GraphicsDevice, scissor))
+            if (batcher.ClipBegin(x, y, Width, Height))
             {
-                batcher.EnableScissorTest(true);
                 RenderedText t = _bookPage.renderedText;
                 int startpage = (ActivePage - 1) * 2;
 
@@ -519,8 +509,7 @@ namespace ClassicUO.Game.UI.Gumps
                     }
                 }
 
-                batcher.EnableScissorTest(false);
-                ScissorStack.PopScissors(batcher.GraphicsDevice);
+                batcher.ClipEnd();
             }
 
             return true;

@@ -4,38 +4,26 @@
 
     <IsPackable>false</IsPackable>
     <DebugType>Full</DebugType>
-  </PropertyGroup>
-
-  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+    
     <PlatformTarget>x64</PlatformTarget>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
-
-  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
-    <PlatformTarget>x64</PlatformTarget>
-  </PropertyGroup>
-
+  
   <ItemGroup>
-    <PackageReference Include="FluentAssertions" Version="5.10.3"/>
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.5.0"/>
-    <PackageReference Include="xunit" Version="2.4.0"/>
-    <PackageReference Include="xunit.runner.visualstudio" Version="2.4.0"/>
-    <PackageReference Include="coverlet.collector" Version="1.2.0"/>
+    <PackageReference Include="FluentAssertions" Version="5.10.3" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.5.0" />
+    <PackageReference Include="xunit" Version="2.4.0" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.4.0" />
+    <PackageReference Include="coverlet.collector" Version="1.2.0" />
     <PackageReference Include="Microsoft.TestPlatform.ObjectModel" Version="16.6.1" Condition="$(TargetFramework.StartsWith('net4')) AND '$(OS)' == 'Unix'" />
   </ItemGroup>
-
 
   <ItemGroup>
     <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.0" PrivateAssets="All" />
   </ItemGroup>
 
-
   <ItemGroup>
-    <Folder Include="Game"/>
-    <Folder Include="Utility"/>
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\..\src\ClassicUO.csproj"/>
+    <ProjectReference Include="..\..\src\ClassicUO.csproj" />
   </ItemGroup>
 
 </Project>

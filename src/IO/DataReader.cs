@@ -35,6 +35,7 @@ using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
+using ClassicUO.Utility;
 
 namespace ClassicUO.IO
 {
@@ -226,11 +227,12 @@ namespace ClassicUO.IO
         {
             EnsureSize(size);
 
-            StringBuilder sb = new StringBuilder(size);
+            Span<char> span = stackalloc char[size];
+            ValueStringBuilder sb = new ValueStringBuilder(span);
 
             for (int i = 0; i < size; i++)
             {
-                char c = (char) ReadByte();
+                char c = (char)ReadByte();
 
                 if (c != 0)
                 {
@@ -238,7 +240,11 @@ namespace ClassicUO.IO
                 }
             }
 
-            return sb.ToString();
+            string ss = sb.ToString();
+
+            sb.Dispose();
+
+            return ss;
         }
 
         [Conditional("DEBUG")]

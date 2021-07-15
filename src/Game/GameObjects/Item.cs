@@ -96,12 +96,11 @@ namespace ClassicUO.Game.GameObjects
                 i.ObjectHandlesOpened = false;
                 i.AlphaHue = 0;
                 i.AllowedToDraw = true;
-                
-                i.HitsRequested = false;
+
+                i.HitsRequest = HitsRequestStatus.None;
             }
         );
 
-        private static readonly DataReader _reader = new DataReader();
         private ushort? _displayedGraphic;
         private bool _isMulti;
 
@@ -110,7 +109,7 @@ namespace ClassicUO.Game.GameObjects
         {
         }
 
-        public bool IsCoin => Graphic >= 0x0EEA && Graphic <= 0x0EF2;
+        public bool IsCoin => Graphic == 0x0EEA || Graphic == 0x0EED || Graphic == 0x0EF0;
 
         public ushort DisplayedGraphic
         {
@@ -271,6 +270,7 @@ namespace ClassicUO.Game.GameObjects
 
             ref UOFileIndex entry = ref MultiLoader.Instance.GetValidRefEntry(Graphic);
             MultiLoader.Instance.File.SetData(entry.Address, entry.FileSize);
+            bool movable = false;
 
             if (MultiLoader.Instance.IsUOP)
             {
@@ -278,80 +278,96 @@ namespace ClassicUO.Game.GameObjects
                 {
                     MultiLoader.Instance.File.Seek(entry.Offset);
 
-                    //byte* data = stackalloc byte[entry.DecompressedLength];
+                    byte[] buffer = null;
+                    Span<byte> span = entry.DecompressedLength <= 1024 ? stackalloc byte[entry.DecompressedLength] : (buffer = System.Buffers.ArrayPool<byte>.Shared.Rent(entry.DecompressedLength));
 
-                    byte[] data = new byte[entry.DecompressedLength];
-
-                    fixed (byte* dataPtr = data)
+                    try
                     {
-                        ZLib.Decompress
-                        (
-                            MultiLoader.Instance.File.PositionAddress,
-                            entry.Length,
-                            0,
-                            (IntPtr) dataPtr,
-                            entry.DecompressedLength
-                        );
-
-                        _reader.SetData(dataPtr, entry.DecompressedLength);
-                        _reader.Skip(4);
-                        int count = (int) _reader.ReadUInt();
-
-                        int sizeOf = sizeof(MultiBlockNew);
-
-                        for (int i = 0; i < count; i++)
+                        fixed (byte* dataPtr = span)
                         {
-                            MultiBlockNew* block = (MultiBlockNew*) (_reader.PositionAddress + i * sizeOf);
+                            ZLib.Decompress
+                            (
+                                MultiLoader.Instance.File.PositionAddress,
+                                entry.Length,
+                                0,
+                                (IntPtr)dataPtr,
+                                entry.DecompressedLength
+                            );
 
-                            if (block->Unknown != 0)
+                            StackDataReader reader = new StackDataReader(span.Slice(0, entry.DecompressedLength));
+                            reader.Skip(4);
+
+                            int count = reader.ReadInt32LE();
+
+                            int sizeOf = sizeof(MultiBlockNew);
+
+                            for (int i = 0; i < count; i++)
                             {
-                                _reader.Skip((int) (block->Unknown * 4));
+                                MultiBlockNew* block = (MultiBlockNew*)(reader.PositionAddress + i * sizeOf);
+
+                                if (block->Unknown != 0)
+                                {
+                                    reader.Skip((int)(block->Unknown * 4));
+                                }
+
+                                if (block->X < minX)
+                                {
+                                    minX = block->X;
+                                }
+
+                                if (block->X > maxX)
+                                {
+                                    maxX = block->X;
+                                }
+
+                                if (block->Y < minY)
+                                {
+                                    minY = block->Y;
+                                }
+
+                                if (block->Y > maxY)
+                                {
+                                    maxY = block->Y;
+                                }
+
+                                if (block->Flags == 0 || block->Flags == 0x100)
+                                {
+                                    Multi m = Multi.Create(block->ID);
+                                    m.X = (ushort)(X + block->X);
+                                    m.Y = (ushort)(Y + block->Y);
+                                    m.Z = (sbyte)(Z + block->Z);
+                                    m.UpdateScreenPosition();
+                                    m.MultiOffsetX = block->X;
+                                    m.MultiOffsetY = block->Y;
+                                    m.MultiOffsetZ = block->Z;
+                                    m.Hue = Hue;
+                                    m.AlphaHue = 255;
+                                    m.IsCustom = false;
+                                    m.State = CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_DONT_REMOVE;
+                                    m.IsMovable = ItemData.IsMultiMovable;
+                                    m.AddToTile();
+                                    house.Components.Add(m);
+
+                                    if (m.ItemData.IsMultiMovable)
+                                    {
+                                        movable = true;
+                                    }
+                                }
+                                else if (i == 0)
+                                {
+                                    MultiGraphic = block->ID;
+                                }
                             }
 
-                            if (block->X < minX)
-                            {
-                                minX = block->X;
-                            }
-
-                            if (block->X > maxX)
-                            {
-                                maxX = block->X;
-                            }
-
-                            if (block->Y < minY)
-                            {
-                                minY = block->Y;
-                            }
-
-                            if (block->Y > maxY)
-                            {
-                                maxY = block->Y;
-                            }
-
-                            if (block->Flags == 0 || block->Flags == 0x100)
-                            {
-                                Multi m = Multi.Create(block->ID);
-                                m.X = (ushort) (X + block->X);
-                                m.Y = (ushort) (Y + block->Y);
-                                m.Z = (sbyte) (Z + block->Z);
-                                m.UpdateScreenPosition();
-                                m.MultiOffsetX = block->X;
-                                m.MultiOffsetY = block->Y;
-                                m.MultiOffsetZ = block->Z;
-                                m.Hue = Hue;
-                                m.AlphaHue = 255;
-                                m.IsCustom = false;
-                                m.State = CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_DONT_REMOVE;
-                                m.AddToTile();
-                                house.Components.Add(m);
-                            }
-                            else if (i == 0)
-                            {
-                                MultiGraphic = block->ID;
-                            }
+                            reader.Release();
                         }
-
-                        _reader.ReleaseData();
+                    }
+                    finally
+                    {
+                        if (buffer != null)
+                        {
+                            System.Buffers.ArrayPool<byte>.Shared.Return(buffer);
+                        }
                     }
                 }
                 else
@@ -402,8 +418,14 @@ namespace ClassicUO.Game.GameObjects
                         m.AlphaHue = 255;
                         m.IsCustom = false;
                         m.State = CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_DONT_REMOVE;
+                        m.IsMovable = ItemData.IsMultiMovable;
                         m.AddToTile();
                         house.Components.Add(m);
+
+                        if (m.ItemData.IsMultiMovable)
+                        {
+                            movable = true;
+                        }
                     }
                     else if (i == 0)
                     {
@@ -419,6 +441,16 @@ namespace ClassicUO.Game.GameObjects
                 Width = maxX,
                 Height = maxY
             };
+
+            // hack to make baots movable.
+            // Mast is not the main center in bigger boats, so if we got a movable multi --> makes all multi movable
+            if (movable)
+            {
+                foreach (Multi m in house.Components)
+                {
+                    m.IsMovable = movable;
+                }
+            }
 
             MultiDistanceBonus = Math.Max(Math.Max(Math.Abs(minX), maxX), Math.Max(Math.Abs(minY), maxY));
 
