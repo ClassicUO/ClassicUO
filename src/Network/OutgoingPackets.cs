@@ -4481,7 +4481,7 @@ namespace ClassicUO.Network
             }
 
             writer.WriteUInt32BE(block);
-            writer.WriteZero(13);
+            writer.WriteZero(6);
             writer.WriteUInt8(0xFF);
             writer.WriteUInt8(mapIndex);
 
