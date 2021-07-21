@@ -78,7 +78,7 @@ namespace ClassicUO.Game.GameObjects
             m.UpdateGraphicBySeason();
             m.AllowedToDraw = !GameObjectHelper.IsNoDrawable(m.Graphic);
 
-            if (m.ItemData.Height > 5)
+            if (m.ItemData.Height > 5 || m.ItemData.Height == 0)
             {
                 m._canBeTransparent = 1;
             }

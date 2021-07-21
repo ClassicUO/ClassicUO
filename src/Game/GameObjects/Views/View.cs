@@ -294,19 +294,31 @@ namespace ClassicUO.Game.GameObjects
             {
                 texture.Ticks = Time.Ticks;
                 index = ref ArtLoader.Instance.GetValidRefEntry(graphic + 0x4000);
+              
+                x -= index.Width;
+                y -= index.Height;
 
                 if (transparent)
                 {
                     int maxDist = ProfileManager.CurrentProfile.CircleOfTransparencyRadius;
 
-                    int fx = (int) (World.Player.RealScreenPosition.X + World.Player.Offset.X);
-                    int fy = (int) (World.Player.RealScreenPosition.Y + (World.Player.Offset.Y - World.Player.Offset.Z));
+                    Vector2 pos = new Vector2
+                    {
+                        X = (World.Player.RealScreenPosition.X + World.Player.Offset.X),
+                        Y = (World.Player.RealScreenPosition.Y + (World.Player.Offset.Y - World.Player.Offset.Z))
+                    };
 
-                    fx -= x;
-                    fy -= y;
+                    //pos.X -= 22;
+                    pos.Y -= 22f;
 
-                    float dist = (float) Math.Floor(Math.Sqrt(fx * fx + fy * fy));
+                    Vector2 pos2 = new Vector2
+                    {
+                        X = x,
+                        Y = y
+                    };
 
+                    Vector2.Distance(ref pos, ref pos2, out float dist);
+                    
                     if (dist <= maxDist)
                     {
                         float alpha = hue.Z;
@@ -328,11 +340,7 @@ namespace ClassicUO.Game.GameObjects
 
                                 break;
                         }
-
-                        x -= index.Width;
-                        y -= index.Height;
-
-
+                       
                         batcher.DrawSprite
                         (
                             texture,
@@ -361,9 +369,6 @@ namespace ClassicUO.Game.GameObjects
                 }
 
                 transparent = false;
-                x -= index.Width;
-                y -= index.Height;
-
 
                 if (shadow)
                 {
