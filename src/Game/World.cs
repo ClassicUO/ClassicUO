@@ -142,6 +142,12 @@ namespace ClassicUO.Game
                         Map.Initialize();
                     }
 
+                    // force cursor update when switching map
+                    if (UIManager.GameCursor != null)
+                    {
+                        UIManager.GameCursor.Graphic = 0xFFFF;
+                    }
+                    
                     UoAssist.SignalMapChanged(value);
                 }
             }
