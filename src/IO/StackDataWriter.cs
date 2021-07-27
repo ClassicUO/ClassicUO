@@ -182,13 +182,13 @@ namespace ClassicUO.IO
         [MethodImpl(IMPL_OPTION)]
         public void WriteUnicodeLE(string str)
         {
-            WriteString(Encoding.Unicode, str, str.Length + 1);
+            WriteString(Encoding.Unicode, str, (str.Length + 1) * 2);
         }
 
         [MethodImpl(IMPL_OPTION)]
         public void WriteUnicodeLE(string str, int length)
         {
-            WriteString(Encoding.Unicode, str, length);
+            WriteString(Encoding.Unicode, str, length * 2);
         }
 
 
@@ -259,13 +259,13 @@ namespace ClassicUO.IO
         [MethodImpl(IMPL_OPTION)]
         public void WriteUnicodeBE(string str)
         {
-            WriteString(Encoding.BigEndianUnicode, str, str.Length + 1);
+            WriteString(Encoding.BigEndianUnicode, str, (str.Length + 1) * 2);
         }
 
         [MethodImpl(IMPL_OPTION)]
         public void WriteUnicodeBE(string str, int length)
         {
-            WriteString(Encoding.BigEndianUnicode, str, length);
+            WriteString(Encoding.BigEndianUnicode, str, length * 2);
         }
 
         
@@ -321,7 +321,7 @@ namespace ClassicUO.IO
                 str = string.Empty;
             }
 
-            EnsureSize(encoding.GetByteCount(str));
+            EnsureSize(length);
 
             int size = Math.Min(length, str.Length);
 
