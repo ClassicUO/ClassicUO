@@ -190,7 +190,7 @@ namespace ClassicUO.IO
         [MethodImpl(IMPL_OPTION)]
         public void WriteUnicodeLE(string str, int length)
         {
-            WriteString<char>(Encoding.Unicode, str, length * 2);
+            WriteString<char>(Encoding.Unicode, str, length);
         }
 
 
@@ -268,7 +268,7 @@ namespace ClassicUO.IO
         [MethodImpl(IMPL_OPTION)]
         public void WriteUnicodeBE(string str, int length)
         {
-            WriteString<char>(Encoding.BigEndianUnicode, str, length * 2);
+            WriteString<char>(Encoding.BigEndianUnicode, str, length);
         }
 
         
