@@ -40,10 +40,25 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.Game.UI.Gumps
 {
+    /// <summary>
+    /// Define Anchor Gump Type
+    /// </summary>
     internal enum ANCHOR_TYPE
     {
         NONE,
         SPELL,
+        HEALTHBAR,
+        SKILL,
+        MACRO
+    }
+
+    /// <summary>
+    /// Determine which anchor types can be grouped together
+    /// </summary>
+    internal enum GROUP_TYPE
+    {
+        NONE,
+        SPELL_SKILL_MACRO,
         HEALTHBAR
     }
 
@@ -58,6 +73,7 @@ namespace ClassicUO.Game.UI.Gumps
         }
 
         public ANCHOR_TYPE AnchorType { get; protected set; }
+        public GROUP_TYPE GroupType { get; protected set; }
         public virtual int GroupMatrixWidth { get; protected set; }
         public virtual int GroupMatrixHeight { get; protected set; }
         public int WidthMultiplier { get; protected set; } = 1;

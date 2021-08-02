@@ -112,7 +112,7 @@ namespace ClassicUO.Game.Managers
 
         public void DropControl(AnchorableGump draggedControl, AnchorableGump host)
         {
-            if (host.AnchorType == draggedControl.AnchorType && this[draggedControl] == null)
+            if (host.GroupType == draggedControl.GroupType && this[draggedControl] == null)
             {
                 (Point? relativePosition, _) = GetAnchorDirection(draggedControl, host);
 
@@ -135,7 +135,7 @@ namespace ClassicUO.Game.Managers
 
         public Point GetCandidateDropLocation(AnchorableGump draggedControl, AnchorableGump host)
         {
-            if (host.AnchorType == draggedControl.AnchorType && this[draggedControl] == null)
+            if (host.GroupType == draggedControl.GroupType && this[draggedControl] == null)
             {
                 (Point? relativePosition, AnchorableGump g) = GetAnchorDirection(draggedControl, host);
 
@@ -244,7 +244,7 @@ namespace ClassicUO.Game.Managers
 
             foreach (Gump c in UIManager.Gumps)
             {
-                if (!c.IsDisposed && c is AnchorableGump host && host.AnchorType == control.AnchorType)
+                if (!c.IsDisposed && c is AnchorableGump host && host.GroupType == control.GroupType)
                 {
                     if (IsOverlapping(control, host))
                     {

@@ -67,7 +67,8 @@ namespace ClassicUO.Game.UI.Gumps
             HeightMultiplier = 1;
             GroupMatrixWidth = 44;
             GroupMatrixHeight = 44;
-            AnchorType = ANCHOR_TYPE.SPELL;
+            AnchorType = ANCHOR_TYPE.MACRO;
+            GroupType = GROUP_TYPE.SPELL_SKILL_MACRO;
         }
 
         public override GumpType GumpType => GumpType.MacroButton;

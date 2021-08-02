@@ -80,6 +80,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             CanMove = true;
             AnchorType = ANCHOR_TYPE.HEALTHBAR;
+            GroupType = GROUP_TYPE.HEALTHBAR;
         }
 
         public override int GroupMatrixWidth
