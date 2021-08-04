@@ -336,12 +336,6 @@ namespace ClassicUO
 
                         break;
 
-                    case "lastcharactername":
-                    case "lastcharname":
-                        Settings.GlobalSettings.LastCharacterName = value;
-
-                        break;
-
                     case "lastservernum":
                         Settings.GlobalSettings.LastServerNum = ushort.Parse(value);
 
