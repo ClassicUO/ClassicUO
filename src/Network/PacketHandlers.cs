@@ -748,7 +748,8 @@ namespace ClassicUO.Network
         {
             if (ProfileManager.CurrentProfile == null)
             {
-                ProfileManager.Load(World.ServerName, LoginScene.Account, Settings.GlobalSettings.LastCharacterName.Trim());
+                string lastChar = LastCharacterManager.GetLastCharacter(LoginScene.Account, World.ServerName);
+                ProfileManager.Load(World.ServerName, LoginScene.Account, lastChar);
             }
 
             if (World.Player != null)
