@@ -39,6 +39,7 @@ using System.Threading;
 using ClassicUO.Configuration;
 using ClassicUO.Data;
 using ClassicUO.Game;
+using ClassicUO.Game.Managers;
 using ClassicUO.IO;
 using ClassicUO.Resources;
 using ClassicUO.Utility;
@@ -333,6 +334,12 @@ namespace ClassicUO
 
                     case "clientversion":
                         Settings.GlobalSettings.ClientVersion = value;
+
+                        break;
+
+                    case "lastcharactername":
+                    case "lastcharname": 
+                        LastCharacterManager.OverrideLastCharacter(value);
 
                         break;
 
