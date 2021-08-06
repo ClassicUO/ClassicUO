@@ -538,7 +538,13 @@ namespace ClassicUO.Game.Managers
 
         public static void MakeTopMostGump(Control control)
         {
-            if (control?.RootParent is Gump gump)
+            Gump gump = control as Gump;
+            if (gump == null && control?.RootParent is Gump)
+            {
+                gump = control.RootParent as Gump;
+            }
+
+            if (gump != null)
             {
                 for (LinkedListNode<Gump> start = Gumps.First; start != null; start = start.Next)
                 {
