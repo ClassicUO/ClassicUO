@@ -79,7 +79,6 @@ namespace ClassicUO.Game.Scenes
         private int _reconnectTryCounter = 1;
         private bool _autoLogin;
 
-
         public LoginScene() : base((int) SceneType.Login, false, false, true)
         {
         }
@@ -104,7 +103,7 @@ namespace ClassicUO.Game.Scenes
         public string Password { get; private set; }
 
         public bool CanAutologin => _autoLogin || Reconnect;
-
+        
 
         public override void Load()
         {
@@ -418,8 +417,8 @@ namespace ClassicUO.Game.Scenes
         {
             if (CurrentLoginStep == LoginSteps.CharacterSelection)
             {
-                Settings.GlobalSettings.LastCharacterName = Characters[index];
-                Settings.GlobalSettings.Save();
+                LastCharacterManager.Save(Account, World.ServerName, Characters[index]);
+
                 CurrentLoginStep = LoginSteps.EnteringBritania;
                 NetClient.Socket.Send_SelectCharacter(index, Characters[index], NetClient.Socket.LocalIP);
             }
@@ -445,7 +444,7 @@ namespace ClassicUO.Game.Scenes
                 }
             }
 
-            Settings.GlobalSettings.LastCharacterName = character.Name;
+            LastCharacterManager.Save(Account, World.ServerName, character.Name);
 
             NetClient.Socket.Send_CreateCharacter(character,
                                                   cityIndex,
@@ -656,13 +655,15 @@ namespace ClassicUO.Game.Scenes
                 _autoLogin = false;
             }
 
+            string lastCharName = LastCharacterManager.GetLastCharacter(Account, World.ServerName);
+
             for (byte i = 0; i < Characters.Length; i++)
             {
                 if (Characters[i].Length > 0)
                 {
                     haveAnyCharacter = true;
 
-                    if (Characters[i] == Settings.GlobalSettings.LastCharacterName)
+                    if (Characters[i] == lastCharName)
                     {
                         charToSelect = i;
 
