@@ -70,6 +70,13 @@ namespace ClassicUO.Configuration
             // this try catch is necessary when multiples cuo instances points to this file.
             try
             {
+                FileInfo fileInfo = new FileInfo(file);
+
+                if (fileInfo.Directory != null && !fileInfo.Directory.Exists)
+                {
+                    fileInfo.Directory.Create();
+                }
+
                 File.WriteAllText(file, obj.Encode(true));
             }
             catch (IOException e)

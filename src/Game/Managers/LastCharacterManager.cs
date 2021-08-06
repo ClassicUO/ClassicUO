@@ -62,6 +62,12 @@ namespace ClassicUO.Game.Managers
             }
 
             LastCharacters = ConfigurationResolver.Load<List<LastCharacterInfo>>(_lastCharacterFile);
+
+            // safety check
+            if (LastCharacters == null)
+            {
+                LastCharacters = new List<LastCharacterInfo>();
+            }
         }
 
         public static void Save(string account, string server, string name)
