@@ -82,21 +82,24 @@ namespace ClassicUO.Game.UI.Gumps.Login
                     }
                 ); // "Select which shard to play on:"
 
-                Add
-                (
-                    new Label(ClilocLoader.Instance.GetString(1044577), true, textColor, font: 1)
-                    {
-                        X = 400, Y = 70
-                    }
-                ); // "Latency:"
+                if (CUOEnviroment.NoServerPing == false)
+                {
+                    Add
+                    (
+                        new Label(ClilocLoader.Instance.GetString(1044577), true, textColor, font: 1)
+                        {
+                            X = 400, Y = 70
+                        }
+                    ); // "Latency:"
 
-                Add
-                (
-                    new Label(ClilocLoader.Instance.GetString(1044578), true, textColor, font: 1)
-                    {
-                        X = 470, Y = 70
-                    }
-                ); // "Packet Loss:"
+                    Add
+                    (
+                        new Label(ClilocLoader.Instance.GetString(1044578), true, textColor, font: 1)
+                        {
+                            X = 470, Y = 70
+                        }
+                    ); // "Packet Loss:"
+                }
 
                 Add
                 (
@@ -328,7 +331,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 (
                     _server_ping = new HoveredLabel
                     (
-                        "-",
+                        CUOEnviroment.NoServerPing ? string.Empty : "-",
                         false,
                         normal_hue,
                         selected_hue,
@@ -345,7 +348,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 (
                     _server_packet_loss = new HoveredLabel
                     (
-                        "-",
+                        CUOEnviroment.NoServerPing ? string.Empty : "-",
                         false,
                         normal_hue,
                         selected_hue,
@@ -396,7 +399,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
             {
                 base.Update(totalTime, frameTime);
 
-                if (_pingCheckTime < Time.Ticks)
+                if (CUOEnviroment.NoServerPing == false && _pingCheckTime < Time.Ticks)
                 {
                     _pingCheckTime = Time.Ticks + 2000;
                     _entry.DoPing();
