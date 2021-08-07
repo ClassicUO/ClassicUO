@@ -516,6 +516,12 @@ namespace ClassicUO
                         }
 
                         break;
+
+                    case "no_server_ping":
+
+                        CUOEnviroment.NoServerPing = true;
+
+                        break;
                 }
             }
         }
