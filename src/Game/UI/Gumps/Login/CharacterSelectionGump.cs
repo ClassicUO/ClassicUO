@@ -109,7 +109,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 },
                 1
             );
-           
+            
             for (int i = 0, valid = 0; i < loginScene.Characters.Length; i++)
             {
                 string character = loginScene.Characters[i];
@@ -130,14 +130,14 @@ namespace ClassicUO.Game.UI.Gumps.Login
                             break;
                         }
                     }
-
+                    
                     Add
                     (
                         new CharacterEntryGump((uint) i, character, SelectCharacter, LoginCharacter)
                         {
                             X = 224,
                             Y = yOffset + posInList * 40,
-                            Hue = posInList == _selectedCharacter ? SELECTED_COLOR : NORMAL_COLOR
+                            Hue = i == _selectedCharacter ? SELECTED_COLOR : NORMAL_COLOR
                         },
                         1
                     );
