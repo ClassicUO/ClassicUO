@@ -224,7 +224,7 @@ namespace ClassicUO.IO.Resources
 
             if (isunicode)
             {
-                width = GetWidthUnicode(font, text);
+                width = GetWidthUnicode(font, text.AsSpan());
 
                 if (width > maxWidth)
                 {
@@ -555,7 +555,7 @@ namespace ClassicUO.IO.Resources
                     (
                         chars,
                         font,
-                        str,
+                        str.AsSpan(),
                         ref strLen,
                         align,
                         flags
@@ -1115,19 +1115,19 @@ namespace ClassicUO.IO.Resources
 
             if ((flags & UOFONT_FIXED) != 0 || (flags & UOFONT_CROPPED) != 0 || (flags & UOFONT_CROPTEXTURE) != 0)
             {
-                if (width == 0 || string.IsNullOrEmpty(str))
+                if (width == 0)
                 {
                     return;
                 }
 
-                int realWidth = GetWidthUnicode(font, str);
+                int realWidth = GetWidthUnicode(font, str.AsSpan());
 
                 if (realWidth > width)
                 {
                     string newstr = GetTextByWidthUnicode
                     (
                         font,
-                        str,
+                        str.AsSpan(),
                         width,
                         (flags & UOFONT_CROPPED) != 0,
                         align,
@@ -1154,7 +1154,7 @@ namespace ClassicUO.IO.Resources
                                 newstr += GetTextByWidthUnicode
                                 (
                                     font,
-                                    str.Substring(newstr.Length),
+                                    str.AsSpan(0, newstr.Length),
                                     width,
                                     (flags & UOFONT_CROPPED) != 0,
                                     align,
@@ -1204,14 +1204,14 @@ namespace ClassicUO.IO.Resources
         public unsafe string GetTextByWidthUnicode
         (
             byte font,
-            string str,
+            ReadOnlySpan<char> str,
             int width,
             bool isCropped,
             TEXT_ALIGN_TYPE align,
             ushort flags
         )
         {
-            if (font >= 20 || _unicodeFontAddress[font] == IntPtr.Zero || string.IsNullOrEmpty(str))
+            if (font >= 20 || _unicodeFontAddress[font] == IntPtr.Zero || str.IsEmpty)
             {
                 return string.Empty;
             }
@@ -1243,8 +1243,8 @@ namespace ClassicUO.IO.Resources
 
                 if (size > 0)
                 {
-                    sb.Append(str.Substring(0, size));
-                    str = str.Substring(str.Length - strLen, strLen);
+                    sb.Append(str.Slice(0, size));
+                    str = str.Slice(str.Length - strLen, strLen);
 
                     if (GetWidthUnicode(font, str) < width)
                     {
@@ -1306,9 +1306,19 @@ namespace ClassicUO.IO.Resources
             return ss;
         }
 
-        public unsafe int GetWidthUnicode(byte font, string str)
+        public int GetWidthUnicode(byte font, string str)
         {
             if (font >= 20 || _unicodeFontAddress[font] == IntPtr.Zero || string.IsNullOrEmpty(str))
+            {
+                return 0;
+            }
+
+            return GetWidthUnicode(font, str.AsSpan());
+        }
+
+        private unsafe int GetWidthUnicode(byte font, ReadOnlySpan<char> str)
+        {
+            if (font >= 20 || _unicodeFontAddress[font] == IntPtr.Zero || str.IsEmpty)
             {
                 return 0;
             }
@@ -1719,7 +1729,7 @@ namespace ClassicUO.IO.Resources
 
             if (width == 0)
             {
-                width = GetWidthUnicode(font, str);
+                width = GetWidthUnicode(font, str.AsSpan());
 
                 if (width == 0)
                 {
@@ -2366,7 +2376,7 @@ namespace ClassicUO.IO.Resources
             (
                 htmlData,
                 font,
-                str,
+                str.AsSpan(),
                 ref len,
                 align,
                 flags
@@ -2591,7 +2601,7 @@ namespace ClassicUO.IO.Resources
             return info;
         }
 
-        private unsafe void GetHTMLData(HTMLChar* data, byte font, string str, ref int len, TEXT_ALIGN_TYPE align, ushort flags)
+        private unsafe void GetHTMLData(HTMLChar* data, byte font, ReadOnlySpan<char> str, ref int len, TEXT_ALIGN_TYPE align, ushort flags)
         {
             int newlen = 0;
 
@@ -2838,7 +2848,7 @@ namespace ClassicUO.IO.Resources
             }
         }
 
-        private HTML_TAG_TYPE ParseHTMLTag(string str, int len, ref int i, ref bool endTag, ref HTMLDataInfo info)
+        private HTML_TAG_TYPE ParseHTMLTag(ReadOnlySpan<char> str, int len, ref int i, ref bool endTag, ref HTMLDataInfo info)
         {
             HTML_TAG_TYPE tag = HTML_TAG_TYPE.HTT_NONE;
             i++;
@@ -2885,114 +2895,115 @@ namespace ClassicUO.IO.Resources
                     i++;
                 }
 
+                ReadOnlySpan<char> span = str.Slice(startIndex, cmdLen);
 
-                if (string.Compare(str, startIndex, "b", 0, cmdLen, StringComparison.InvariantCultureIgnoreCase) == 0)
+                if (span.Equals("b".AsSpan(), StringComparison.InvariantCultureIgnoreCase))
                 {
                     tag = HTML_TAG_TYPE.HTT_B;
                 }
-                else if (string.Compare(str, startIndex, "i", 0, cmdLen, StringComparison.InvariantCultureIgnoreCase) == 0)
+                else if (span.Equals("i".AsSpan(), StringComparison.InvariantCultureIgnoreCase))
                 {
                     tag = HTML_TAG_TYPE.HTT_I;
                 }
-                else if (string.Compare(str, startIndex, "a", 0, cmdLen, StringComparison.InvariantCultureIgnoreCase) == 0)
+                else if (span.Equals("a".AsSpan(), StringComparison.InvariantCultureIgnoreCase))
                 {
                     tag = HTML_TAG_TYPE.HTT_A;
                 }
-                else if (string.Compare(str, startIndex, "u", 0, cmdLen, StringComparison.InvariantCultureIgnoreCase) == 0)
+                else if (span.Equals("u".AsSpan(), StringComparison.InvariantCultureIgnoreCase))
                 {
                     tag = HTML_TAG_TYPE.HTT_U;
                 }
-                else if (string.Compare(str, startIndex, "p", 0, cmdLen, StringComparison.InvariantCultureIgnoreCase) == 0)
+                else if (span.Equals("p".AsSpan(), StringComparison.InvariantCultureIgnoreCase))
                 {
                     tag = HTML_TAG_TYPE.HTT_P;
                 }
-                else if (string.Compare(str, startIndex, "big", 0, cmdLen, StringComparison.InvariantCultureIgnoreCase) == 0)
+                else if (span.Equals("big".AsSpan(), StringComparison.InvariantCultureIgnoreCase))
                 {
                     tag = HTML_TAG_TYPE.HTT_BIG;
                 }
-                else if (string.Compare(str, startIndex, "small", 0, cmdLen, StringComparison.InvariantCultureIgnoreCase) == 0)
+                else if (span.Equals("small".AsSpan(), StringComparison.InvariantCultureIgnoreCase))
                 {
                     tag = HTML_TAG_TYPE.HTT_SMALL;
                 }
-                else if (string.Compare(str, startIndex, "body", 0, cmdLen, StringComparison.InvariantCultureIgnoreCase) == 0)
+                else if (span.Equals("body".AsSpan(), StringComparison.InvariantCultureIgnoreCase))
                 {
                     tag = HTML_TAG_TYPE.HTT_BODY;
                 }
-                else if (string.Compare(str, startIndex, "basefont", 0, cmdLen, StringComparison.InvariantCultureIgnoreCase) == 0)
+                else if (span.Equals("basefont".AsSpan(), StringComparison.InvariantCultureIgnoreCase))
                 {
                     tag = HTML_TAG_TYPE.HTT_BASEFONT;
                 }
-                else if (string.Compare(str, startIndex, "h1", 0, cmdLen, StringComparison.InvariantCultureIgnoreCase) == 0)
+                else if (span.Equals("h1".AsSpan(), StringComparison.InvariantCultureIgnoreCase))
                 {
                     tag = HTML_TAG_TYPE.HTT_H1;
                 }
-                else if (string.Compare(str, startIndex, "h2", 0, cmdLen, StringComparison.InvariantCultureIgnoreCase) == 0)
+                else if (span.Equals("h2".AsSpan(), StringComparison.InvariantCultureIgnoreCase))
                 {
                     tag = HTML_TAG_TYPE.HTT_H2;
                 }
-                else if (string.Compare(str, startIndex, "h3", 0, cmdLen, StringComparison.InvariantCultureIgnoreCase) == 0)
+                else if (span.Equals("h3".AsSpan(), StringComparison.InvariantCultureIgnoreCase))
                 {
                     tag = HTML_TAG_TYPE.HTT_H3;
                 }
-                else if (string.Compare(str, startIndex, "h4", 0, cmdLen, StringComparison.InvariantCultureIgnoreCase) == 0)
+                else if (span.Equals("h4".AsSpan(), StringComparison.InvariantCultureIgnoreCase))
                 {
                     tag = HTML_TAG_TYPE.HTT_H4;
                 }
-                else if (string.Compare(str, startIndex, "h5", 0, cmdLen, StringComparison.InvariantCultureIgnoreCase) == 0)
+                else if (span.Equals("h5".AsSpan(), StringComparison.InvariantCultureIgnoreCase))
                 {
                     tag = HTML_TAG_TYPE.HTT_H5;
                 }
-                else if (string.Compare(str, startIndex, "h6", 0, cmdLen, StringComparison.InvariantCultureIgnoreCase) == 0)
+                else if (span.Equals("h6".AsSpan(), StringComparison.InvariantCultureIgnoreCase))
                 {
                     tag = HTML_TAG_TYPE.HTT_H6;
                 }
-                else if (string.Compare(str, startIndex, "br", 0, cmdLen, StringComparison.InvariantCultureIgnoreCase) == 0)
+                else if (span.Equals("br".AsSpan(), StringComparison.InvariantCultureIgnoreCase))
                 {
                     tag = HTML_TAG_TYPE.HTT_BR;
                 }
-                else if (string.Compare(str, startIndex, "bq", 0, cmdLen, StringComparison.InvariantCultureIgnoreCase) == 0)
+                else if (span.Equals("bq".AsSpan(), StringComparison.InvariantCultureIgnoreCase))
                 {
                     tag = HTML_TAG_TYPE.HTT_BQ;
                 }
-                else if (string.Compare(str, startIndex, "left", 0, cmdLen, StringComparison.InvariantCultureIgnoreCase) == 0)
+                else if (span.Equals("left".AsSpan(), StringComparison.InvariantCultureIgnoreCase))
                 {
                     tag = HTML_TAG_TYPE.HTT_LEFT;
                 }
-                else if (string.Compare(str, startIndex, "center", 0, cmdLen, StringComparison.InvariantCultureIgnoreCase) == 0)
+                else if (span.Equals("center".AsSpan(), StringComparison.InvariantCultureIgnoreCase))
                 {
                     tag = HTML_TAG_TYPE.HTT_CENTER;
                 }
-                else if (string.Compare(str, startIndex, "right", 0, cmdLen, StringComparison.InvariantCultureIgnoreCase) == 0)
+                else if (span.Equals("right".AsSpan(), StringComparison.InvariantCultureIgnoreCase))
                 {
                     tag = HTML_TAG_TYPE.HTT_RIGHT;
                 }
-                else if (string.Compare(str, startIndex, "div", 0, cmdLen, StringComparison.InvariantCultureIgnoreCase) == 0)
+                else if (span.Equals("div".AsSpan(), StringComparison.InvariantCultureIgnoreCase))
                 {
                     tag = HTML_TAG_TYPE.HTT_DIV;
                 }
                 else
                 {
-                    if (str.IndexOf("bodybgcolor", StringComparison.InvariantCultureIgnoreCase) >= 0)
+                    if (str.IndexOf("bodybgcolor".AsSpan(), StringComparison.InvariantCultureIgnoreCase) >= 0)
                     {
                         tag = HTML_TAG_TYPE.HTT_BODYBGCOLOR;
-                        j = str.IndexOf("bgcolor", StringComparison.InvariantCultureIgnoreCase);
+                        j = str.IndexOf("bgcolor".AsSpan(), StringComparison.InvariantCultureIgnoreCase);
                         endTag = false;
                     }
-                    else if (str.IndexOf("basefont", StringComparison.InvariantCultureIgnoreCase) >= 0)
+                    else if (str.IndexOf("basefont".AsSpan(), StringComparison.InvariantCultureIgnoreCase) >= 0)
                     {
                         tag = HTML_TAG_TYPE.HTT_BASEFONT;
-                        j = str.IndexOf("color", StringComparison.InvariantCultureIgnoreCase);
+                        j = str.IndexOf("color".AsSpan(), StringComparison.InvariantCultureIgnoreCase);
                         endTag = false;
                     }
-                    else if (str.IndexOf("bodytext", StringComparison.InvariantCultureIgnoreCase) >= 0)
+                    else if (str.IndexOf("bodytext".AsSpan(), StringComparison.InvariantCultureIgnoreCase) >= 0)
                     {
                         tag = HTML_TAG_TYPE.HTT_BODY;
-                        j = str.IndexOf("text", StringComparison.InvariantCultureIgnoreCase);
+                        j = str.IndexOf("text".AsSpan(), StringComparison.InvariantCultureIgnoreCase);
                         endTag = false;
                     }
                     else
                     {
-                        Log.Warn($"Unhandled HTML param:\t{str}");
+                        Log.Warn($"Unhandled HTML param:\t{str.ToString()}");
                     }
                 }
 
@@ -3027,11 +3038,11 @@ namespace ClassicUO.IO.Resources
         }
 
 
-        private unsafe void GetHTMLInfoFromContent(ref HTMLDataInfo info, string content, int start, int length)
+        private unsafe void GetHTMLInfoFromContent(ref HTMLDataInfo info, ReadOnlySpan<char> content, int start, int length)
         {
             int i = 0;
 
-            if (!string.IsNullOrEmpty(content))
+            if (!content.IsEmpty)
             {
                 while (i < length && char.IsWhiteSpace(content[i + start]))
                 {
@@ -3455,7 +3466,7 @@ namespace ClassicUO.IO.Resources
 
             if (width <= 0)
             {
-                width = GetWidthUnicode(font, str);
+                width = GetWidthUnicode(font, str.AsSpan());
             }
 
             MultilinesFontInfo info = GetInfoUnicode
@@ -3516,7 +3527,7 @@ namespace ClassicUO.IO.Resources
 
             if (width == 0)
             {
-                width = GetWidthUnicode(font, str);
+                width = GetWidthUnicode(font, str.AsSpan());
             }
 
             if (x >= width)
@@ -3667,7 +3678,7 @@ namespace ClassicUO.IO.Resources
 
             if (width == 0)
             {
-                width = GetWidthUnicode(font, str);
+                width = GetWidthUnicode(font, str.AsSpan());
             }
 
             MultilinesFontInfo info = GetInfoUnicode
@@ -4075,7 +4086,7 @@ namespace ClassicUO.IO.Resources
         {
             if (width == 0)
             {
-                width = GetWidthUnicode(font, str);
+                width = GetWidthUnicode(font, str.AsSpan());
             }
 
             MultilinesFontInfo info = GetInfoUnicode

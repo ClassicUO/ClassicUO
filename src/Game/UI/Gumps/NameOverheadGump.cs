@@ -128,7 +128,7 @@ namespace ClassicUO.Game.UI.Gumps
                     t = FontsLoader.Instance.GetTextByWidthUnicode
                     (
                         _renderedText.Font,
-                        t,
+                        t.AsSpan(),
                         Constants.OBJECT_HANDLES_GUMP_WIDTH,
                         true,
                         TEXT_ALIGN_TYPE.TS_CENTER,
@@ -163,7 +163,7 @@ namespace ClassicUO.Game.UI.Gumps
                     t = FontsLoader.Instance.GetTextByWidthUnicode
                     (
                         _renderedText.Font,
-                        t,
+                        t.AsSpan(),
                         Constants.OBJECT_HANDLES_GUMP_WIDTH,
                         true,
                         TEXT_ALIGN_TYPE.TS_CENTER,
