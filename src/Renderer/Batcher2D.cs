@@ -557,10 +557,9 @@ namespace ClassicUO.Renderer
 
             float width = texture.Width;
             float height = texture.Height * 0.5f;
-
-            float translatedY = y + height * 0.75f;
-
+            float translatedY = y + height -22;
             float ratio = height / width;
+
 
             if (flip)
             {
