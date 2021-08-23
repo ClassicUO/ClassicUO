@@ -105,7 +105,9 @@ namespace ClassicUO.Configuration
         public bool UseOldStatusGump { get; set; }
         public int BackpackStyle { get; set; }
         public bool HighlightGameObjects { get; set; }
-        public bool HighlightMobilesByFlags { get; set; } = true;
+        public bool HighlightMobilesByParalize { get; set; } = true;
+        public bool HighlightMobilesByPoisoned { get; set; } = true;
+        public bool HighlightMobilesByInvul { get; set; } = true;
         public bool ShowMobilesHP { get; set; }
         public int MobileHPType { get; set; }     // 0 = %, 1 = line, 2 = both
         public int MobileHPShowWhen { get; set; } // 0 = Always, 1 - <100%

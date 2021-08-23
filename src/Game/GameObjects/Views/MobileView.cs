@@ -124,21 +124,28 @@ namespace ClassicUO.Game.GameObjects
                         _viewHue = 0x0386;
                     }
                 }
-                else if (ProfileManager.CurrentProfile.HighlightMobilesByFlags)
+                else
                 {
-                    if (IsPoisoned)
+                    if (ProfileManager.CurrentProfile.HighlightMobilesByPoisoned)
                     {
-                        _viewHue = ProfileManager.CurrentProfile.PoisonHue;
+                        if (IsPoisoned)
+                        {
+                            _viewHue = ProfileManager.CurrentProfile.PoisonHue;
+                        }
                     }
-
-                    if (IsParalyzed)
+                    if (ProfileManager.CurrentProfile.HighlightMobilesByParalize)
                     {
-                        _viewHue = ProfileManager.CurrentProfile.ParalyzedHue;
+                        if (IsParalyzed && NotorietyFlag != NotorietyFlag.Invulnerable)
+                        {
+                            _viewHue = ProfileManager.CurrentProfile.ParalyzedHue;
+                        }
                     }
-
-                    if (NotorietyFlag != NotorietyFlag.Invulnerable && IsYellowHits)
+                    if (ProfileManager.CurrentProfile.HighlightMobilesByInvul)
                     {
-                        _viewHue = ProfileManager.CurrentProfile.InvulnerableHue;
+                        if (NotorietyFlag != NotorietyFlag.Invulnerable && IsYellowHits)
+                        {
+                            _viewHue = ProfileManager.CurrentProfile.InvulnerableHue;
+                        }
                     }
                 }
             }
