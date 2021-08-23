@@ -1459,4 +1459,13 @@ Client version: '{0}'</value>
   <data name="EnableFastSpellsAssign" xml:space="preserve">
     <value>Enable Fast Spells Assign (Ctrl + Alt)</value>
   </data>
+  <data name="HighlightInvulnerable" xml:space="preserve">
+    <value>Highlight invulnerable</value>
+  </data>
+  <data name="HighlightParalyzed" xml:space="preserve">
+    <value>Highlight paralyzed</value>
+  </data>
+  <data name="HighlightPoisoned" xml:space="preserve">
+    <value>Highlight poisoned</value>
+  </data>
 </root>
