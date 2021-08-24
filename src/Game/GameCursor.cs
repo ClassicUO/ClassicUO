@@ -65,7 +65,6 @@ namespace ClassicUO.Game
                 0x2077, 0x2078, 0x2079
             }
         };
-        private static Vector3 _vec = Vector3.Zero;
 
         private readonly Aura _aura = new Aura(30);
         private readonly CustomBuildObject[] _componentsList = new CustomBuildObject[10];
@@ -531,6 +530,8 @@ namespace ClassicUO.Game
 
             if (!Settings.GlobalSettings.RunMouseInASeparateThread)
             {
+                Graphic = AssignGraphicByState();
+
                 ushort graphic = Graphic;
 
                 if (graphic < 0x206A)
@@ -545,18 +546,14 @@ namespace ClassicUO.Game
                 int offX = _cursorOffset[0, graphic];
                 int offY = _cursorOffset[1, graphic];
 
+                Vector3 hueVec = Vector3.Zero;
+
                 if (World.InGame && World.MapIndex != 0 && !World.Player.InWarMode)
                 {
-                    _vec.X = 0x0034;
-                    _vec.Y = 1;
-                    _vec.Z = 0;
-                }
-                else
-                {
-                    _vec = Vector3.Zero;
+                    ShaderHueTranslator.GetHueVector(ref hueVec, 0x0033);
                 }
 
-                sb.Draw2D(ArtLoader.Instance.GetTexture(Graphic), Mouse.Position.X + offX, Mouse.Position.Y + offY, ref _vec);
+                sb.Draw2D(ArtLoader.Instance.GetTexture(Graphic), Mouse.Position.X + offX, Mouse.Position.Y + offY, ref hueVec);
             }
         }
 
