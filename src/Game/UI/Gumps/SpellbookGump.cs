@@ -1464,7 +1464,7 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     ResetHueVector();
 
-                    UOTexture lockTexture = GumpsLoader.Instance.GetTexture(0x1086);
+                    UOTexture lockTexture = GumpsLoader.Instance.GetTexture(0x09CF);
 
                     if (lockTexture != null)
                     {
@@ -1473,6 +1473,11 @@ namespace ClassicUO.Game.UI.Gumps
                         if (UIManager.MouseOverControl != null && (UIManager.MouseOverControl == this || UIManager.MouseOverControl.RootParent == this))
                         {
                             HueVector.X = 34;
+                            HueVector.Y = 1;
+                        }
+                        else
+                        {
+                            HueVector.X = 0x44;
                             HueVector.Y = 1;
                         }
 
