@@ -167,7 +167,22 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                 )
             );
 
-            string[] skillList = SkillsLoader.Instance.SortedSkills.Select(s => s.Index == 52 || s.Index == 47 || s.Index == 53 && (World.ClientFeatures.Flags & CharacterListFlags.CLF_SAMURAI_NINJA) == 0 || s.Index == 54 ? "" : s.Name).ToArray();
+            string[] skillList = new string[SkillsLoader.Instance.SortedSkills.Count];
+
+            for (int i = 0; i < skillList.Length; ++i)
+            {
+                SkillEntry entry = SkillsLoader.Instance.SortedSkills[i];
+
+                if ((World.ClientFeatures.Flags & CharacterListFlags.CLF_SAMURAI_NINJA) == 0 && (entry.Index == 52 || entry.Index == 47 || entry.Index == 53) || entry.Index == 54)
+                {
+                    skillList[i] = string.Empty;
+                }
+                else
+                {
+                    skillList[i] = entry.Name;
+                }
+            }
+
 
             int y = 172;
             _skillSliders = new HSliderBar[CharCreationGump._skillsCount];
