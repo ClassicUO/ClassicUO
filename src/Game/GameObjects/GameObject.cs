@@ -33,6 +33,7 @@
 using System;
 using System.Runtime.CompilerServices;
 using ClassicUO.Configuration;
+using ClassicUO.Data;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
 using ClassicUO.IO.Resources;
@@ -373,6 +374,55 @@ namespace ClassicUO.Game.GameObjects
             Graphic = 0;
             UseObjectHandles = ClosedObjectHandles = ObjectHandlesOpened = false;
             FrameInfo = Rectangle.Empty;
+        }
+
+
+        public static bool CanBeDrawn(ushort g)
+        {
+            switch (g)
+            {
+                case 0x0001:
+                case 0x21BC:
+                    //case 0x5690:
+                    return false;
+
+                case 0x9E4C:
+                case 0x9E64:
+                case 0x9E65:
+                case 0x9E7D:
+                    ref StaticTiles data = ref TileDataLoader.Instance.StaticData[g];
+
+                    return !data.IsBackground && !data.IsSurface;
+            }
+
+            if (g != 0x63D3)
+            {
+                if (g >= 0x2198 && g <= 0x21A4)
+                {
+                    return false;
+                }
+
+                // Easel fix.
+                // In older clients the tiledata flag for this 
+                // item contains NoDiagonal for some reason.
+                // So the next check will make the item invisible.
+                if (g == 0x0F65 && Client.Version < ClientVersion.CV_60144)
+                {
+                    return true;
+                }
+
+                if (g < TileDataLoader.Instance?.StaticData?.Length)
+                {
+                    ref StaticTiles data = ref TileDataLoader.Instance.StaticData[g];
+
+                    if (!data.IsNoDiagonal || data.IsAnimated && World.Player != null && World.Player.Race == RaceType.GARGOYLE)
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
         }
     }
 }

@@ -472,7 +472,7 @@ namespace ClassicUO.Game.GameObjects
             {
                 if (!IsCorpse)
                 {
-                    AllowedToDraw = !GameObjectHelper.IsNoDrawable(Graphic);
+                    AllowedToDraw = CanBeDrawn(Graphic);
                 }
                 else
                 {

@@ -76,7 +76,7 @@ namespace ClassicUO.Game.GameObjects
             Multi m = _pool.GetOne();
             m.Graphic = m._originalGraphic = graphic;
             m.UpdateGraphicBySeason();
-            m.AllowedToDraw = !GameObjectHelper.IsNoDrawable(m.Graphic);
+            m.AllowedToDraw = CanBeDrawn(m.Graphic);
 
             if (m.ItemData.Height > 5 || m.ItemData.Height == 0)
             {

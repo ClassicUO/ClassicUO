@@ -1096,7 +1096,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                                             for (int c = 0; c < count; ++c, ++sb)
                                             {
-                                                if (sb->Color != 0 && sb->Color != 0xFFFF && !GameObjectHelper.IsNoDrawable(sb->Color))
+                                                if (sb->Color != 0 && sb->Color != 0xFFFF && GameObject.CanBeDrawn(sb->Color))
                                                 {
                                                     int block = (mapY + sb->Y + OFFSET_PIX_HALF) * (realWidth + OFFSET_PIX) + mapX + sb->X + OFFSET_PIX_HALF;
 

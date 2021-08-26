@@ -38,6 +38,7 @@ using System.Threading.Tasks;
 using ClassicUO.Configuration;
 using ClassicUO.Data;
 using ClassicUO.Game;
+using ClassicUO.Game.GameObjects;
 using ClassicUO.Network;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
@@ -625,7 +626,7 @@ namespace ClassicUO.IO.Resources
 
                 for (int c = 0; c < count; c++)
                 {
-                    if (sb->Color > 0 && sb->Color != 0xFFFF && !GameObjectHelper.IsNoDrawable(sb->Color))
+                    if (sb->Color > 0 && sb->Color != 0xFFFF && GameObject.CanBeDrawn(sb->Color))
                     {
                         ref RadarMapcells outcell = ref mb.Cells[sb->X, sb->Y];
 

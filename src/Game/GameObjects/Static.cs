@@ -99,7 +99,7 @@ namespace ClassicUO.Game.GameObjects
         public override void UpdateGraphicBySeason()
         {
             SetGraphic(SeasonManager.GetSeasonGraphic(World.Season, OriginalGraphic));
-            AllowedToDraw = !GameObjectHelper.IsNoDrawable(Graphic);
+            AllowedToDraw = CanBeDrawn(Graphic);
             IsVegetation = StaticFilters.IsVegetation(Graphic);
         }
 
