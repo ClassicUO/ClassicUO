@@ -276,8 +276,7 @@ namespace ClassicUO.Game.Scenes
 
             for (; obj != null; obj = obj.TNext)
             {
-                // some object is invsible but it has to be processed [overhead text for now]
-                if (obj.CurrentRenderIndex == _renderIndex /*|| !obj.AllowedToDraw*/)
+                if (obj.CurrentRenderIndex == _renderIndex)
                 {
                     continue;
                 }
@@ -384,7 +383,7 @@ namespace ClassicUO.Game.Scenes
                         }
 
 
-                        if (itemData.Height != 0xFF /*&& itemData.Flags != 0*/)
+                        if (itemData.Height != 0xFF && obj.AllowedToDraw /*&& itemData.Flags != 0*/)
                         {
                             height = itemData.Height;
 
