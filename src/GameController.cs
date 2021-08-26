@@ -115,8 +115,6 @@ namespace ClassicUO
         {
             base.LoadContent();
 
-            Client.Load();
-
             const int TEXTURE_WIDTH = 32;
             const int TEXTURE_HEIGHT = 2048;
 
