@@ -63,7 +63,7 @@ namespace ClassicUO.Game.GameObjects
 
         public IEnumerable<Multi> GetMultiAt(int x, int y)
         {
-            return Components.Where(s => s.X == x && s.Y == y);
+            return Components.Where(s => !s.IsDestroyed && s.X == x && s.Y == y);
         }
 
         public Multi Add
