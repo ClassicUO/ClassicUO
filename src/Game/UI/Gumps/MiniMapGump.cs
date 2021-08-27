@@ -335,7 +335,7 @@ namespace ClassicUO.Game.UI.Gumps
                     StaticsBlock* sb = (StaticsBlock*)indexMap.StaticAddress;
                     uint staticCount = indexMap.StaticCount;
 
-                    Chunk block = World.Map.Chunks[blockIndex];
+                    Chunk block = World.Map.GetChunk(blockIndex);
                     int realBlockX = i << 3;
                     int realBlockY = j << 3;
 
