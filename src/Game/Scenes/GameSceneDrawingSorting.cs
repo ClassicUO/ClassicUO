@@ -615,7 +615,6 @@ namespace ClassicUO.Game.Scenes
                         height = CalculateObjectHeight(ref maxObjectZ, ref itemData);
                     }
 
-
                     if (maxObjectZ > maxZ)
                     {
                         return itemData.Height != 0 && maxObjectZ - maxZ < height;
@@ -634,7 +633,7 @@ namespace ClassicUO.Game.Scenes
                 }
                 else if (obj is Multi multi)
                 {
-                    ref var itemData = ref multi.ItemData;
+                    ref StaticTiles itemData = ref multi.ItemData;
 
                     if (itemData.IsInternal)
                     {
@@ -647,15 +646,19 @@ namespace ClassicUO.Game.Scenes
                     }
 
                     //we avoid to hide impassable foliage or bushes, if present...
-                    if (itemData.IsFoliage && ProfileManager.CurrentProfile.TreeToStumps)
-                    {
-                        continue;
-                    }
 
-                    if (!itemData.IsMultiMovable && multi.IsVegetation && ProfileManager.CurrentProfile.HideVegetation)
+                    if (!itemData.IsMultiMovable)
                     {
-                        continue;
-                    }
+                        if (itemData.IsFoliage && ProfileManager.CurrentProfile.TreeToStumps)
+                        {
+                            continue;
+                        }
+
+                        if (multi.IsVegetation && ProfileManager.CurrentProfile.HideVegetation)
+                        {
+                            continue;
+                        }
+                    }          
 
                     byte height = 0;
 
@@ -738,7 +741,7 @@ namespace ClassicUO.Game.Scenes
                         continue;
                     }
 
-                    if (itemData.IsFoliage && ProfileManager.CurrentProfile.TreeToStumps)
+                    if (!itemData.IsMultiMovable && itemData.IsFoliage && ProfileManager.CurrentProfile.TreeToStumps)
                     {
                         continue;
                     }
