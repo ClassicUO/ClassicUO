@@ -516,6 +516,16 @@ namespace ClassicUO.Game.Scenes
 
         private void FillGameObjectList()
         {
+
+#if RENDER_LIST_LINKED_LIST
+            _first = null;
+            _renderList = null;
+
+            _firstLand = null;
+            _renderListLand = null;
+            _renderListLandCount = 0;
+#endif
+
             _renderListCount = 0;
             _foliageCount = 0;
 
@@ -541,7 +551,6 @@ namespace ClassicUO.Game.Scenes
 
             GetViewPort();
 
-            _objectHandlesCount = 0;
             _useObjectHandles = NameOverHeadManager.IsToggled || Keyboard.Ctrl && Keyboard.Shift;
 
             if (_useObjectHandles)
@@ -554,9 +563,7 @@ namespace ClassicUO.Game.Scenes
             }
 
             _rectanglePlayer.X = (int) (World.Player.RealScreenPosition.X - World.Player.FrameInfo.X + 22 + World.Player.Offset.X);
-
             _rectanglePlayer.Y = (int) (World.Player.RealScreenPosition.Y - World.Player.FrameInfo.Y + 22 + (World.Player.Offset.Y - World.Player.Offset.Z));
-
             _rectanglePlayer.Width = World.Player.FrameInfo.Width;
             _rectanglePlayer.Height = World.Player.FrameInfo.Height;
 
@@ -615,11 +622,11 @@ namespace ClassicUO.Game.Scenes
 
                     if (f.FoliageIndex == FoliageIndex)
                     {
-                        f.ProcessAlpha(Constants.FOLIAGE_ALPHA);
+                        CalculateAlpha(ref f.AlphaHue, Constants.FOLIAGE_ALPHA);
                     }
                     else
                     {
-                        f.ProcessAlpha(0xFF);
+                        CalculateAlpha(ref f.AlphaHue, 0xFF);
                     }
                 }
             }
@@ -1038,11 +1045,43 @@ namespace ClassicUO.Game.Scenes
 
             int z = World.Player.Z + 5;
 
-            ushort hue = 0;
+           
             Vector3 hueVec = Vector3.Zero;
 
             GameObject.DrawTransparent = usecircle;
 
+#if RENDER_LIST_LINKED_LIST
+            var obj = _firstLand;
+
+            for (int i = 0; i < _renderListLandCount; obj = obj.RenderListNext, ++i)
+            {
+                if (obj.Z <= _maxGroundZ)
+                {
+                    if (usecircle)
+                    {
+                        GameObject.DrawTransparent = obj.TransparentTest(z);
+                    }
+
+                    if (obj.Draw(batcher, obj.RealScreenPosition.X, obj.RealScreenPosition.Y, ref hueVec))
+                    {
+                        ++RenderedObjectsCount;
+                    }
+                }
+            }
+
+            obj = _first;
+            for (int i = 0; i < _renderListCount; obj = obj.RenderListNext, ++i)
+            {
+                if (obj.Z <= _maxGroundZ)
+                {
+                    if (obj.Draw(batcher, obj.RealScreenPosition.X, obj.RealScreenPosition.Y, ref hueVec))
+                    {
+                        ++RenderedObjectsCount;
+                    }
+                }
+            }
+#else
+            ushort hue = 0;
             for (int i = 0; i < _renderListCount; ++i)
             {
                 ref var info = ref _renderList[i];
@@ -1067,6 +1106,8 @@ namespace ClassicUO.Game.Scenes
                     obj.Hue = hue;
                 }
             }
+#endif
+
 
             if (_multi != null && TargetManager.IsTargeting && TargetManager.TargetingState == CursorTarget.MultiPlacement)
             {

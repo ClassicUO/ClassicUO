@@ -91,9 +91,7 @@ namespace ClassicUO.Game.GameObjects
                 i.TextContainer?.Clear();
                 i.IsFlipped = false;
                 i.FrameInfo = Rectangle.Empty;
-                i.UseObjectHandles = false;
-                i.ClosedObjectHandles = false;
-                i.ObjectHandlesOpened = false;
+                i.ObjectHandlesStatus = ObjectHandlesStatus.NONE;
                 i.AlphaHue = 0;
                 i.AllowedToDraw = true;
 

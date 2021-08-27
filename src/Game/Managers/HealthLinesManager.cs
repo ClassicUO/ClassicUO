@@ -170,7 +170,7 @@ namespace ClassicUO.Game.Managers
                             p1.X -= (mobile.HitsTexture.Width >> 1) + 5;
                             p1.Y -= mobile.HitsTexture.Height;
 
-                            if (mobile.ObjectHandlesOpened)
+                            if (mobile.ObjectHandlesStatus == ObjectHandlesStatus.DISPLAYING)
                             {
                                 p1.Y -= Constants.OBJECT_HANDLES_GUMP_HEIGHT + 5;
                             }

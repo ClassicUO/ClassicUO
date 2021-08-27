@@ -215,7 +215,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (entity != null)
             {
-                entity.ClosedObjectHandles = true;
+                entity.ObjectHandlesStatus = ObjectHandlesStatus.CLOSED;
             }
 
             base.CloseWithRightClick();
@@ -485,7 +485,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             Entity entity = World.Get(LocalSerial);
 
-            if (entity == null || entity.IsDestroyed || !entity.UseObjectHandles || entity.ClosedObjectHandles)
+            if (entity == null || entity.IsDestroyed || entity.ObjectHandlesStatus == ObjectHandlesStatus.NONE || entity.ObjectHandlesStatus == ObjectHandlesStatus.CLOSED)
             {
                 Dispose();
             }

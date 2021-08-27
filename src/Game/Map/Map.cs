@@ -173,7 +173,7 @@ namespace ClassicUO.Game.Map
 
         public void ClearBockAccess()
         {
-            Array.Clear(_blockAccessList, 0, _blockAccessList.Length);
+            _blockAccessList.AsSpan().Fill(false);
         }
 
         public sbyte CalculateNearZ(sbyte defaultZ, int x, int y, int z)
