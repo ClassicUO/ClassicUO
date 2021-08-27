@@ -803,106 +803,38 @@ namespace ClassicUO.Game.Scenes
 
                 switch (obj)
                 {
-                    case Mobile mobile:
-
-                        UpdateObjectHandles(mobile, useObjectHandles);
-
-                        maxObjectZ += Constants.DEFAULT_CHARACTER_HEIGHT;
+                    case Land land:
 
                         if (maxObjectZ > maxZ)
                         {
                             return false;
                         }
 
-                        StaticTiles empty = default;
-
-                        if (!ProcessAlpha(obj, ref empty))
-                        {
-                            continue;
-                        }
-
                         obj.CurrentRenderIndex = _renderIndex;
 
-                        if (screenY < _minPixel.Y || screenY > _maxPixel.Y)
+                        if (screenY > _maxPixel.Y)
                         {
                             continue;
                         }
 
-                        AddOffsetCharacterTileToRenderList(obj, useObjectHandles, false);
+                        if (land.IsStretched)
+                        {
+                            screenY += (land.Z << 2);
+                            screenY -= (land.MinZ << 2);
+                        }
 
-                        PushToRenderList(obj, parent);
-
-                        break;
-
-                    case Item item:
-
-                        ref StaticTiles itemData = ref (item.IsMulti ? ref TileDataLoader.Instance.StaticData[item.MultiGraphic] : ref item.ItemData);
-
-                        if (!item.IsCorpse && itemData.IsInternal)
+                        if (screenY < _minPixel.Y)
                         {
                             continue;
                         }
 
-                        if (item.IsCorpse || (!item.IsMulti && (!item.IsLocked || item.IsLocked && itemData.IsContainer)))
-                        {
-                            UpdateObjectHandles(item, useObjectHandles);
-                        }
-
-                        if (!IsFoliageVisibleAtSeason(ref itemData, World.Season))
-                        {
-                            continue;
-                        }
-
-                        if (!ProcessAlpha(obj, ref itemData))
-                        {
-                            continue;
-                        }
-
-                        if (itemData.IsFoliage && ProfileManager.CurrentProfile.TreeToStumps)
-                        {
-                            continue;
-                        }
-
-                        byte height = 0;
-
-                        if (obj.AllowedToDraw)
-                        {
-                            height = CalculateObjectHeight(ref maxObjectZ, ref itemData);
-                        }
-
-                        if (maxObjectZ > maxZ)
-                        {
-                            return itemData.Height != 0 && maxObjectZ - maxZ < height;
-                        }
-
-                        obj.CurrentRenderIndex = _renderIndex;
-
-                        if (screenY < _minPixel.Y || screenY > _maxPixel.Y)
-                        {
-                            continue;
-                        }
-
-                        if (item.IsCorpse)
-                        {
-                            AddOffsetCharacterTileToRenderList(obj, useObjectHandles, false);
-                        }
-                        else if (itemData.IsMultiMovable)
-                        {
-                            AddOffsetCharacterTileToRenderList(obj, useObjectHandles, true);
-                        }
-
-                        if (!item.IsCorpse)
-                        {
-                            CheckIfBehindATree(obj, worldX, worldY, ref itemData);
-                        }
-
-                        PushToRenderList(obj, parent);
+                        PushToRenderList(obj, parent, true);
 
                         break;
 
                     case Static staticc:
 
-                        itemData = ref staticc.ItemData;
+                        ref StaticTiles itemData = ref staticc.ItemData;
 
                         if (itemData.IsInternal)
                         {
@@ -930,13 +862,10 @@ namespace ClassicUO.Game.Scenes
                             continue;
                         }
 
+                        byte height = 0;
                         if (obj.AllowedToDraw)
                         {
                             height = CalculateObjectHeight(ref maxObjectZ, ref itemData);
-                        }
-                        else
-                        {
-                            height = 0;
                         }
 
                         if (maxObjectZ > maxZ)
@@ -1014,6 +943,105 @@ namespace ClassicUO.Game.Scenes
 
                         break;
 
+                    case Mobile mobile:
+
+                        UpdateObjectHandles(mobile, useObjectHandles);
+
+                        maxObjectZ += Constants.DEFAULT_CHARACTER_HEIGHT;
+
+                        if (maxObjectZ > maxZ)
+                        {
+                            return false;
+                        }
+
+                        StaticTiles empty = default;
+
+                        if (!ProcessAlpha(obj, ref empty))
+                        {
+                            continue;
+                        }
+
+                        obj.CurrentRenderIndex = _renderIndex;
+
+                        if (screenY < _minPixel.Y || screenY > _maxPixel.Y)
+                        {
+                            continue;
+                        }
+
+                        AddOffsetCharacterTileToRenderList(obj, useObjectHandles, false);
+
+                        PushToRenderList(obj, parent);
+
+                        break;
+
+                    case Item item:
+
+                        itemData = ref (item.IsMulti ? ref TileDataLoader.Instance.StaticData[item.MultiGraphic] : ref item.ItemData);
+
+                        if (!item.IsCorpse && itemData.IsInternal)
+                        {
+                            continue;
+                        }
+
+                        if (item.IsCorpse || (!item.IsMulti && (!item.IsLocked || item.IsLocked && itemData.IsContainer)))
+                        {
+                            UpdateObjectHandles(item, useObjectHandles);
+                        }
+
+                        if (!IsFoliageVisibleAtSeason(ref itemData, World.Season))
+                        {
+                            continue;
+                        }
+
+                        if (!ProcessAlpha(obj, ref itemData))
+                        {
+                            continue;
+                        }
+
+                        if (itemData.IsFoliage && ProfileManager.CurrentProfile.TreeToStumps)
+                        {
+                            continue;
+                        }
+
+                        if (obj.AllowedToDraw)
+                        {
+                            height = CalculateObjectHeight(ref maxObjectZ, ref itemData);
+                        }
+                        else
+                        {
+                            height = 0;
+                        }
+
+                        if (maxObjectZ > maxZ)
+                        {
+                            return itemData.Height != 0 && maxObjectZ - maxZ < height;
+                        }
+
+                        obj.CurrentRenderIndex = _renderIndex;
+
+                        if (screenY < _minPixel.Y || screenY > _maxPixel.Y)
+                        {
+                            continue;
+                        }
+
+                        if (item.IsCorpse)
+                        {
+                            AddOffsetCharacterTileToRenderList(obj, useObjectHandles, false);
+                        }
+                        else if (itemData.IsMultiMovable)
+                        {
+                            AddOffsetCharacterTileToRenderList(obj, useObjectHandles, true);
+                        }
+
+                        if (!item.IsCorpse)
+                        {
+                            CheckIfBehindATree(obj, worldX, worldY, ref itemData);
+                        }
+
+                        PushToRenderList(obj, parent);
+
+                        break;
+
                     case GameEffect effect:
 
                         if (!ProcessAlpha(obj, ref TileDataLoader.Instance.StaticData[effect.Graphic]))
@@ -1034,35 +1062,6 @@ namespace ClassicUO.Game.Scenes
                         }
 
                         PushToRenderList(obj, parent);
-
-                        break;
-
-                    case Land land:
-
-                        if (maxObjectZ > maxZ)
-                        {
-                            return false;
-                        }
-
-                        obj.CurrentRenderIndex = _renderIndex;
-
-                        if (screenY > _maxPixel.Y)
-                        {
-                            continue;
-                        }
-
-                        if (land.IsStretched)
-                        {
-                            screenY += (land.Z << 2);
-                            screenY -= (land.MinZ << 2);
-                        }
-
-                        if (screenY < _minPixel.Y)
-                        {
-                            continue;
-                        }
-
-                        PushToRenderList(obj, parent, true);
 
                         break;
 
