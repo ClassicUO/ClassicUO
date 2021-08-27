@@ -126,7 +126,6 @@ namespace ClassicUO.Game
                         }
 
                         Map = new Map.Map(value);
-                        Map.Initialize();
 
                         Player.X = x;
                         Player.Y = y;
@@ -139,7 +138,6 @@ namespace ClassicUO.Game
                     else
                     {
                         Map = new Map.Map(value);
-                        Map.Initialize();
                     }
 
                     // force cursor update when switching map
@@ -174,10 +172,8 @@ namespace ClassicUO.Game
         {
             Season = season;
 
-            foreach (int i in Map.GetUsedChunks())
+            foreach (Chunk chunk in Map.GetUsedChunks())
             {
-                Chunk chunk = Map.GetChunk(i);
-
                 for (int x = 0; x < 8; x++)
                 {
                     for (int y = 0; y < 8; y++)

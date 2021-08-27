@@ -277,12 +277,11 @@ namespace ClassicUO.Game.Map
             return blockX * MapLoader.Instance.MapBlocksSize[Index, 1] + blockY;
         }
 
-
-        public IEnumerable<int> GetUsedChunks()
+        public IEnumerable<Chunk> GetUsedChunks()
         {
             foreach (int i in _usedIndices)
             {
-                yield return i;
+                yield return GetChunk(i);
             }
         }
 
@@ -329,59 +328,6 @@ namespace ClassicUO.Game.Map
             }
 
             _usedIndices.Clear();
-        }
-
-        public void Initialize()
-        {
-            // do nothing
-
-            /*
-
-             const int XY_OFFSET = 30;
-
-            int minBlockX = ((Center.X - XY_OFFSET) >> 3) - 1;
-            int minBlockY = ((Center.Y - XY_OFFSET) >> 3) - 1;
-            int maxBlockX = ((Center.X + XY_OFFSET) >> 3) + 1;
-            int maxBlockY = ((Center.Y + XY_OFFSET) >> 3) + 1;
-
-            if (minBlockX < 0)
-                minBlockX = 0;
-
-            if (minBlockY < 0)
-                minBlockY = 0;
-
-            if (maxBlockX >= MapLoader.Instance.MapBlocksSize[Index, 0])
-                maxBlockX = MapLoader.Instance.MapBlocksSize[Index, 0] - 1;
-
-            if (maxBlockY >= MapLoader.Instance.MapBlocksSize[Index, 1])
-                maxBlockY = MapLoader.Instance.MapBlocksSize[Index, 1] - 1;
-            long tick = Time.Ticks;
-            long maxDelay = Engine.FrameDelay[1] >> 1;
-
-            for (int i = minBlockX; i <= maxBlockX; i++)
-            {
-                int index = i * MapLoader.Instance.MapBlocksSize[Index, 1];
-
-                for (int j = minBlockY; j <= maxBlockY; j++)
-                {
-                    int cellindex = index + j;
-                    ref Chunk chunk = ref Chunks[cellindex];
-
-                    if (chunk == null)
-                    {
-                        if (Time.Ticks - tick >= maxDelay)
-                            return;
-
-                        _usedIndices.AddLast(cellindex);
-                        chunk = Chunk.Create((ushort) i, (ushort) j);
-                        chunk.Load(Index);
-                    }
-
-                    chunk.LastAccessTime = Time.Ticks;
-                }
-            }
-
-             */
         }
     }
 }
