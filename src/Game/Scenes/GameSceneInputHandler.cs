@@ -406,7 +406,7 @@ namespace ClassicUO.Game.Scenes
                 _continueRunning = true;
             }
 
-            BaseGameObject lastObj = SelectedObject.LastLeftDownObject;
+            BaseGameObject lastObj = SelectedObject.LastObject as GameObject;// SelectedObject.LastLeftDownObject;
             SelectedObject.LastLeftDownObject = null;
 
             if (UIManager.IsDragging)
