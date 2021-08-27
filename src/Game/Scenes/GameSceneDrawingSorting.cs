@@ -1091,7 +1091,7 @@ namespace ClassicUO.Game.Scenes
         };
 
 
-        private unsafe void AddOffsetCharacterTileToRenderList(GameObject entity, bool useObjectHandles, bool ignoreDefaultHeightOffset)
+        private void AddOffsetCharacterTileToRenderList(GameObject entity, bool useObjectHandles, bool ignoreDefaultHeightOffset)
         {
             short maxZ = entity.PriorityZ;
 

@@ -47,19 +47,50 @@ namespace ClassicUO.Game.Map
 
         //private static readonly Chunk[] _chunks = new Chunk[CELL_SPAN * CELL_SPAN];
 
+        static Map()
+        {
+            int maxX = -1, maxY = -1;
+
+            for (int i = 0; i < MapLoader.Instance.MapBlocksSize.GetLength(0); i++)
+            {
+                if (maxX < MapLoader.Instance.MapBlocksSize[i, 0])
+                {
+                    maxX = MapLoader.Instance.MapBlocksSize[i, 0];
+                }
+
+                if (maxY < MapLoader.Instance.MapBlocksSize[i, 1])
+                {
+                    maxY = MapLoader.Instance.MapBlocksSize[i, 1];
+                }
+            }
+
+
+            Chunks = new Chunk[maxX * maxY];
+        }
 
         public Map(int index)
         {
             Index = index;
             BlocksCount = MapLoader.Instance.MapBlocksSize[Index, 0] * MapLoader.Instance.MapBlocksSize[Index, 1];
-            Chunks = new Chunk[BlocksCount];
+            //Chunks = new Chunk[BlocksCount];
         }
 
         public readonly int BlocksCount;
-        public Chunk[] Chunks;
-
         public readonly int Index;
 
+
+        public static Chunk[] Chunks;
+
+
+        public Chunk GetChunk(int block)
+        {
+            if (block >= 0 && block < BlocksCount)
+            {
+                return Chunks[block];
+            }
+
+            return null;
+        }
 
         public Chunk GetChunk(int x, int y, bool load = true)
         {

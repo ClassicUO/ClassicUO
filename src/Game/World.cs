@@ -176,7 +176,7 @@ namespace ClassicUO.Game
 
             foreach (int i in Map.GetUsedChunks())
             {
-                Chunk chunk = Map.Chunks[i];
+                Chunk chunk = Map.GetChunk(i);
 
                 for (int x = 0; x < 8; x++)
                 {
