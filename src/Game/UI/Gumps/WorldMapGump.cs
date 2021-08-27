@@ -1176,7 +1176,7 @@ namespace ClassicUO.Game.UI.Gumps
                             finally
                             {
                                 System.Buffers.ArrayPool<sbyte>.Shared.Return(allZ);
-                                System.Buffers.ArrayPool<uint>.Shared.Return(buffer);
+                                System.Buffers.ArrayPool<uint>.Shared.Return(buffer, true);
                             }
                         }
                         catch (Exception ex)
