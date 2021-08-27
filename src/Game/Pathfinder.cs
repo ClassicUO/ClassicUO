@@ -892,17 +892,11 @@ namespace ClassicUO.Game
             int curNode = 0;
 
             _closedList[0].Used = true;
-
             _closedList[0].X = _startPoint.X;
-
             _closedList[0].Y = _startPoint.Y;
-
             _closedList[0].Z = World.Player.Z;
-
             _closedList[0].Parent = null;
-
             _closedList[0].DistFromGoalCost = GetGoalDistCost(_startPoint, 0);
-
             _closedList[0].Cost = _closedList[0].DistFromGoalCost;
 
             if (GetGoalDistCost(_startPoint, 0) > 14)
@@ -957,7 +951,7 @@ namespace ClassicUO.Game
 
         public static bool WalkTo(int x, int y, int z, int distance)
         {
-            if (World.Player.Stamina == 0 || World.Player.IsParalyzed)
+            if (World.Player == null /*|| World.Player.Stamina == 0*/ || World.Player.IsParalyzed)
             {
                 return false;
             }
