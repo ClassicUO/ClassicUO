@@ -40,12 +40,9 @@ namespace ClassicUO.Game.Map
 {
     internal sealed class Map
     {
-        private const int CELL_NUM = 16;
-        private const int CELL_SPAN = CELL_NUM * 2;
-        private readonly bool[] _blockAccessList = new bool[0x1000];
+        private static readonly Chunk[] _terrainChunks;
+        private static readonly bool[] _blockAccessList = new bool[0x1000];
         private readonly LinkedList<int> _usedIndices = new LinkedList<int>();
-
-        //private static readonly Chunk[] _chunks = new Chunk[CELL_SPAN * CELL_SPAN];
 
         static Map()
         {
@@ -65,28 +62,27 @@ namespace ClassicUO.Game.Map
             }
 
 
-            Chunks = new Chunk[maxX * maxY];
+            _terrainChunks = new Chunk[maxX * maxY];
         }
 
         public Map(int index)
         {
             Index = index;
             BlocksCount = MapLoader.Instance.MapBlocksSize[Index, 0] * MapLoader.Instance.MapBlocksSize[Index, 1];
-            //Chunks = new Chunk[BlocksCount];
+            ClearBockAccess();
         }
 
         public readonly int BlocksCount;
         public readonly int Index;
 
 
-        public static Chunk[] Chunks;
 
 
         public Chunk GetChunk(int block)
         {
             if (block >= 0 && block < BlocksCount)
             {
-                return Chunks[block];
+                return _terrainChunks[block];
             }
 
             return null;
@@ -108,7 +104,7 @@ namespace ClassicUO.Game.Map
                 return null;
             }
 
-            ref Chunk chunk = ref Chunks[block];
+            ref Chunk chunk = ref _terrainChunks[block];
 
             if (chunk == null)
             {
@@ -302,7 +298,7 @@ namespace ClassicUO.Game.Map
             {
                 LinkedListNode<int> next = first.Next;
 
-                ref Chunk block = ref Chunks[first.Value];
+                ref Chunk block = ref _terrainChunks[first.Value];
 
                 if (block != null && block.LastAccessTime < ticks && block.HasNoExternalData())
                 {
@@ -326,7 +322,7 @@ namespace ClassicUO.Game.Map
             while (first != null)
             {
                 LinkedListNode<int> next = first.Next;
-                ref Chunk c = ref Chunks[first.Value];
+                ref Chunk c = ref _terrainChunks[first.Value];
                 c?.Destroy();
                 c = null;
                 first = next;
