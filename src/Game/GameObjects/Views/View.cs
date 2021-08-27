@@ -41,6 +41,14 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.Game.GameObjects
 {
+    enum ObjectHandlesStatus
+    {
+        NONE,
+        OPEN,
+        CLOSED,
+        DISPLAYING
+    }
+
     internal abstract partial class GameObject
     {
         public static bool DrawTransparent;
@@ -63,13 +71,10 @@ namespace ClassicUO.Game.GameObjects
                 return state;
             }
         );
-        public bool UseObjectHandles { get; set; }
-        public bool ClosedObjectHandles { get; set; }
-        public bool ObjectHandlesOpened { get; set; }
-        public byte AlphaHue { get; set; }
-        public bool AllowedToDraw { get; set; } = true;
 
-
+        public byte AlphaHue;
+        public bool AllowedToDraw = true;
+        public ObjectHandlesStatus ObjectHandlesStatus;
         public Rectangle FrameInfo;
         protected bool IsFlipped;
 
@@ -94,49 +99,6 @@ namespace ClassicUO.Game.GameObjects
         {
             return false;
         }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool ProcessAlpha(int max)
-        {
-            if (ProfileManager.CurrentProfile != null && !ProfileManager.CurrentProfile.UseObjectsFading)
-            {
-                AlphaHue = (byte) max;
-
-                return max != 0;
-            }
-
-            bool result = false;
-
-            int alpha = AlphaHue;
-
-            if (alpha > max)
-            {
-                alpha -= 25;
-
-                if (alpha < max)
-                {
-                    alpha = max;
-                }
-
-                result = true;
-            }
-            else if (alpha < max)
-            {
-                alpha += 25;
-
-                if (alpha > max)
-                {
-                    alpha = max;
-                }
-
-                result = true;
-            }
-
-            AlphaHue = (byte) alpha;
-
-            return result;
-        }
-
 
         protected static void DrawLand(UltimaBatcher2D batcher, ushort graphic, int x, int y, ref Vector3 hue)
         {
