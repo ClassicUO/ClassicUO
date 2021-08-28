@@ -191,6 +191,7 @@ namespace ClassicUO.Game
                                     break;
 
                                 case 0x2071:
+                                case 0x2073:
                                     offX = -1;
                                     offY = -1;
 
