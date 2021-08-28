@@ -57,6 +57,11 @@ namespace ClassicUO.Game.GameObjects
 
         public override bool Draw(UltimaBatcher2D batcher, int posX, int posY, ref Vector3 hueVec)
         {
+            if (IsDestroyed || !AllowedToDraw)
+            {
+                return false;
+            }
+
             hueVec = Vector3.Zero;
 
             AnimationsLoader.SittingInfoData seatData = AnimationsLoader.SittingInfoData.Empty;

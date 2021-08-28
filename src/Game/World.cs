@@ -48,6 +48,7 @@ namespace ClassicUO.Game
     {
         private static readonly EffectManager _effectManager = new EffectManager();
         private static readonly List<uint> _toRemove = new List<uint>();
+        private static readonly List<uint> _queueToRemove = new List<uint>();
         private static uint _timeToDelete;
 
         public static Point RangeSize;
@@ -330,6 +331,8 @@ namespace ClassicUO.Game
                     }
                 }
 
+                ProcessQueueToRemove();
+
                 if (_toRemove.Count != 0)
                 {
                     for (int i = 0; i < _toRemove.Count; i++)
@@ -477,6 +480,13 @@ namespace ClassicUO.Game
                 return false;
             }
 
+            if (!forceRemove)
+            {
+                _queueToRemove.Add(serial);
+
+                return true;
+            }
+
             LinkedObject first = item.Items;
             RemoveItemFromContainer(item);
 
@@ -507,6 +517,13 @@ namespace ClassicUO.Game
             if (mobile == null || mobile.IsDestroyed)
             {
                 return false;
+            }
+
+            if (!forceRemove)
+            {
+                _queueToRemove.Add(serial);
+
+                return true;
             }
 
             LinkedObject first = mobile.Items;
@@ -728,6 +745,28 @@ namespace ClassicUO.Game
             return 0;
         }
 
+        private static void ProcessQueueToRemove()
+        {
+            if (_queueToRemove.Count != 0)
+            {
+                for (int i = 0; i < _queueToRemove.Count; ++i)
+                {
+                    uint serial = _queueToRemove[i] & 0x3FFFFFFF;
+
+                    if (SerialHelper.IsMobile(serial))
+                    {
+                        RemoveMobile(_queueToRemove[i], true);
+                    }
+                    else
+                    {
+                        RemoveItem(_queueToRemove[i], true);
+                    }
+                }
+
+                _queueToRemove.Clear();
+            }
+        }
+
         public static void Clear()
         {
             foreach (Mobile mobile in Mobiles.Values)
@@ -757,6 +796,7 @@ namespace ClassicUO.Game
             MessageManager.PromptData = default;
             _effectManager.Clear();
             _toRemove.Clear();
+            _queueToRemove.Clear();
             CorpseManager.Clear();
             OPL.Clear();
             WMapManager.Clear();
