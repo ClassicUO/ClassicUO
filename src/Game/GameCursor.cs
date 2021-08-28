@@ -91,15 +91,10 @@ namespace ClassicUO.Game
 
                     if (surface != IntPtr.Zero)
                     {
-                        if (i == 0)
+                        if (hotX != 0 || hotY != 0)
                         {
                             _cursorOffset[0, j] = hotX;
                             _cursorOffset[1, j] = hotY;
-                        }
-                        else
-                        {
-                            hotX = _cursorOffset[0, j];
-                            hotY = _cursorOffset[1, j];
                         }
 
                         _cursors_ptr[i, j] = SDL.SDL_CreateColorCursor(surface, hotX, hotY);
