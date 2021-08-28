@@ -194,7 +194,11 @@ namespace ClassicUO.IO.Resources
                             {
                                 if (*pixels_ptr != 0 && *pixels_ptr != 0xFF_00_00_00)
                                 {
-                                    if (curX == 0 || curY == 0)
+                                    if (curX >= w - 1 || curY >= h - 1)
+                                    {
+                                        *pixels_ptr = 0;
+                                    }
+                                    else if (curX == 0 || curY == 0)
                                     {
                                         if (*pixels_ptr == 0xFF_00_FF_00)
                                         {
