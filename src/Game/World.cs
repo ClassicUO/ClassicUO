@@ -259,6 +259,8 @@ namespace ClassicUO.Game
                     if (do_delete && mob.Distance > ClientViewRange /*CheckToRemove(mob, ClientViewRange)*/)
                     {
                         RemoveMobile(mob);
+
+                        continue;
                     }
 
                     if (mob.IsDestroyed)
@@ -331,8 +333,6 @@ namespace ClassicUO.Game
                     }
                 }
 
-                ProcessQueueToRemove();
-
                 if (_toRemove.Count != 0)
                 {
                     for (int i = 0; i < _toRemove.Count; i++)
@@ -343,8 +343,9 @@ namespace ClassicUO.Game
                     _toRemove.Clear();
                 }
 
-                _effectManager.Update(totalTime, frameTime);
+                ProcessQueueToRemove();
 
+                _effectManager.Update(totalTime, frameTime);
                 WorldTextManager.Update(totalTime, frameTime);
                 WMapManager.RemoveUnupdatedWEntity();
             }
@@ -745,13 +746,13 @@ namespace ClassicUO.Game
             return 0;
         }
 
-        private static void ProcessQueueToRemove()
+        public static void ProcessQueueToRemove()
         {
             if (_queueToRemove.Count != 0)
             {
                 for (int i = 0; i < _queueToRemove.Count; ++i)
                 {
-                    uint serial = _queueToRemove[i] & 0x3FFFFFFF;
+                    uint serial = _queueToRemove[i] & ~0x8000_0000;
 
                     if (SerialHelper.IsMobile(serial))
                     {
@@ -778,6 +779,8 @@ namespace ClassicUO.Game
             {
                 RemoveItem(item);
             }
+
+            ProcessQueueToRemove();
 
             ObjectToRemove = 0;
             LastObject = 0;
