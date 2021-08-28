@@ -213,7 +213,7 @@ namespace ClassicUO.IO.Resources
                                             }
                                         }
 
-                                        *pixels_ptr = 0xFF_00_00_00;
+                                        *pixels_ptr = 0;
                                     }
                                     else if (customHue > 0)
                                     {
