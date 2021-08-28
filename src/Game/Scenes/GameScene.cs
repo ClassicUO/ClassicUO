@@ -1051,17 +1051,12 @@ namespace ClassicUO.Game.Scenes
             GameObject.DrawTransparent = usecircle;
 
 #if RENDER_LIST_LINKED_LIST
-            var obj = _firstLand;
 
+            GameObject obj = _firstLand;
             for (int i = 0; i < _renderListLandCount; obj = obj.RenderListNext, ++i)
             {
                 if (obj.Z <= _maxGroundZ)
                 {
-                    if (usecircle)
-                    {
-                        GameObject.DrawTransparent = obj.TransparentTest(z);
-                    }
-
                     if (obj.Draw(batcher, obj.RealScreenPosition.X, obj.RealScreenPosition.Y, ref hueVec))
                     {
                         ++RenderedObjectsCount;
@@ -1074,6 +1069,11 @@ namespace ClassicUO.Game.Scenes
             {
                 if (obj.Z <= _maxGroundZ)
                 {
+                    if (usecircle)
+                    {
+                        GameObject.DrawTransparent = obj.TransparentTest(z);
+                    }
+
                     if (obj.Draw(batcher, obj.RealScreenPosition.X, obj.RealScreenPosition.Y, ref hueVec))
                     {
                         ++RenderedObjectsCount;
