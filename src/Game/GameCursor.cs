@@ -87,143 +87,20 @@ namespace ClassicUO.Game
                 {
                     ushort id = _cursorData[i, j];
 
-                    IntPtr surface = ArtLoader.Instance.CreateCursorSurfacePtr(id, (ushort) (i == 2 ? 0x0033 : 0), out short w, out short h);
-                 
-                    if (i == 0)
-                    {
-                        if (surface != IntPtr.Zero)
-                        {
-                            float offX = 0;
-                            float offY = 0;
-                            float dw = w;
-                            float dh = h;
-
-                            if (id == 0x206A)
-                            {
-                                offX = -4f;
-                            }
-                            else if (id == 0x206B)
-                            {
-                                offX = -dw + 3f;
-                            }
-                            else if (id == 0x206C)
-                            {
-                                offX = -dw + 3f;
-                                offY = -(dh / 2f);
-                            }
-                            else if (id == 0x206D)
-                            {
-                                offX = -dw;
-                                offY = -dh;
-                            }
-                            else if (id == 0x206E)
-                            {
-                                offX = -(dw * 0.66f);
-                                offY = -dh;
-                            }
-                            else if (id == 0x206F)
-                            {
-                                offY = -dh + 4f;
-                            }
-                            else if (id == 0x2070)
-                            {
-                                offY = -dh + 4f;
-                            }
-                            else if (id == 0x2075)
-                            {
-                                offY = -4f;
-                            }
-                            else if (id == 0x2076)
-                            {
-                                offX = -12f;
-                                offY = -14f;
-                            }
-                            else if (id == 0x2077)
-                            {
-                                offX = -(dw / 2f);
-                                offY = -(dh / 2f);
-                            }
-                            else if (id == 0x2078)
-                            {
-                                offY = -(dh * 0.66f);
-                            }
-                            else if (id == 0x2079)
-                            {
-                                offY = -(dh / 2f);
-                            }
-
-                            switch (id)
-                            {
-                                case 0x206B:
-                                    offX = -29;
-                                    offY = -1;
-
-                                    break;
-
-                                case 0x206C:
-                                    offX = -41;
-                                    offY = -9;
-
-                                    break;
-
-                                case 0x206D:
-                                    offX = -36;
-                                    offY = -25;
-
-                                    break;
-
-                                case 0x206E:
-                                    offX = -14;
-                                    offY = -33;
-
-                                    break;
-
-                                case 0x206F:
-                                    offX = -2;
-                                    offY = -26;
-
-                                    break;
-
-                                case 0x2070:
-                                    offX = -3;
-                                    offY = -8;
-
-                                    break;
-
-                                case 0x2071:
-                                case 0x2073:
-                                    offX = -1;
-                                    offY = -1;
-
-                                    break;
-
-                                case 0x206A:
-                                    offX = -4;
-                                    offY = -2;
-
-                                    break;
-
-                                case 0x2075:
-                                    offX = -2;
-                                    offY = -10;
-
-                                    break;
-                            }
-
-                            _cursorOffset[0, j] = (int)offX;
-                            _cursorOffset[1, j] = (int)offY;
-                        }
-                        else
-                        {
-                            _cursorOffset[0, j] = 0;
-                            _cursorOffset[1, j] = 0;
-                        }
-                    }
+                    IntPtr surface = ArtLoader.Instance.CreateCursorSurfacePtr(id, (ushort)(i == 2 ? 0x0033 : 0), out int hotX, out int hotY);
 
                     if (surface != IntPtr.Zero)
                     {
-                        int hotX = -_cursorOffset[0, j];
-                        int hotY = -_cursorOffset[1, j];
+                        if (i == 0)
+                        {
+                            _cursorOffset[0, j] = hotX;
+                            _cursorOffset[1, j] = hotY;
+                        }
+                        else
+                        {
+                            hotX = _cursorOffset[0, j];
+                            hotY = _cursorOffset[1, j];
+                        }
 
                         _cursors_ptr[i, j] = SDL.SDL_CreateColorCursor(surface, hotX, hotY);
                     }
@@ -554,7 +431,7 @@ namespace ClassicUO.Game
                     ShaderHueTranslator.GetHueVector(ref hueVec, 0x0033);
                 }
 
-                sb.Draw2D(ArtLoader.Instance.GetTexture(Graphic), Mouse.Position.X + offX, Mouse.Position.Y + offY, ref hueVec);
+                sb.Draw2D(ArtLoader.Instance.GetTexture(Graphic), Mouse.Position.X - offX, Mouse.Position.Y - offY, ref hueVec);
             }
         }
 
