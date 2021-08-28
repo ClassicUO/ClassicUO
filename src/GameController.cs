@@ -68,6 +68,7 @@ namespace ClassicUO
         private double _totalElapsed, _currentFpsTime;
         private uint _totalFrames;
         private UltimaBatcher2D _uoSpriteBatch;
+        private bool _suppressedDraw;
 
         public GameController()
         {
@@ -426,6 +427,7 @@ namespace ClassicUO
             }
 
             double x = _intervalFixedUpdate[!IsActive && ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.ReduceFPSWhenInactive ? 1 : 0];
+            _suppressedDraw = false;
 
             if (_totalElapsed > x)
             {
@@ -442,6 +444,7 @@ namespace ClassicUO
             }
             else
             {
+                _suppressedDraw = true;
                 SuppressDraw();
 
                 if (!gameTime.IsRunningSlowly)
@@ -515,6 +518,11 @@ namespace ClassicUO
                 NetClient.Socket.Update();
                 UpdateSocketStats(NetClient.Socket, totalTime);
             }
+        }
+
+        protected override bool BeginDraw()
+        {
+            return !_suppressedDraw && base.BeginDraw();
         }
 
         private void UpdateSocketStats(NetClient socket, double totalTime)

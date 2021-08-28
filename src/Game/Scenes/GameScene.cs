@@ -684,7 +684,7 @@ namespace ClassicUO.Game.Scenes
             }
 
             _healthLinesManager.Update();
-            
+            World.Update(totalTime, frameTime);
             AnimatedStaticsManager.Process();
             BoatMovingManager.Update();
             Pathfinder.ProcessAutoWalk();
@@ -841,8 +841,6 @@ namespace ClassicUO.Game.Scenes
 
         public override void FixedUpdate(double totalTime, double frameTime)
         {
-            World.Update(totalTime, frameTime);
-
             FillGameObjectList();
         }
 

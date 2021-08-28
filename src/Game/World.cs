@@ -48,7 +48,6 @@ namespace ClassicUO.Game
     {
         private static readonly EffectManager _effectManager = new EffectManager();
         private static readonly List<uint> _toRemove = new List<uint>();
-        private static readonly List<uint> _queueToRemove = new List<uint>();
         private static uint _timeToDelete;
 
         public static Point RangeSize;
@@ -259,13 +258,11 @@ namespace ClassicUO.Game
                     if (do_delete && mob.Distance > ClientViewRange /*CheckToRemove(mob, ClientViewRange)*/)
                     {
                         RemoveMobile(mob);
-
-                        continue;
                     }
 
                     if (mob.IsDestroyed)
                     {
-                        _toRemove.Add(mob);
+                        _toRemove.Add(mob.Serial);
                     }
                     else
                     {
@@ -329,7 +326,7 @@ namespace ClassicUO.Game
 
                     if (item.IsDestroyed)
                     {
-                        _toRemove.Add(item);
+                        _toRemove.Add(item.Serial);
                     }
                 }
 
@@ -342,8 +339,6 @@ namespace ClassicUO.Game
 
                     _toRemove.Clear();
                 }
-
-                ProcessQueueToRemove();
 
                 _effectManager.Update(totalTime, frameTime);
                 WorldTextManager.Update(totalTime, frameTime);
@@ -480,14 +475,7 @@ namespace ClassicUO.Game
             {
                 return false;
             }
-
-            if (!forceRemove)
-            {
-                _queueToRemove.Add(serial);
-
-                return true;
-            }
-
+            
             LinkedObject first = item.Items;
             RemoveItemFromContainer(item);
 
@@ -519,14 +507,7 @@ namespace ClassicUO.Game
             {
                 return false;
             }
-
-            if (!forceRemove)
-            {
-                _queueToRemove.Add(serial);
-
-                return true;
-            }
-
+     
             LinkedObject first = mobile.Items;
 
             while (first != null)
@@ -746,28 +727,7 @@ namespace ClassicUO.Game
             return 0;
         }
 
-        public static void ProcessQueueToRemove()
-        {
-            if (_queueToRemove.Count != 0)
-            {
-                for (int i = 0; i < _queueToRemove.Count; ++i)
-                {
-                    uint serial = _queueToRemove[i] & ~0x8000_0000;
-
-                    if (SerialHelper.IsMobile(serial))
-                    {
-                        RemoveMobile(_queueToRemove[i], true);
-                    }
-                    else
-                    {
-                        RemoveItem(_queueToRemove[i], true);
-                    }
-                }
-
-                _queueToRemove.Clear();
-            }
-        }
-
+       
         public static void Clear()
         {
             foreach (Mobile mobile in Mobiles.Values)
@@ -779,8 +739,6 @@ namespace ClassicUO.Game
             {
                 RemoveItem(item);
             }
-
-            ProcessQueueToRemove();
 
             ObjectToRemove = 0;
             LastObject = 0;
@@ -799,7 +757,6 @@ namespace ClassicUO.Game
             MessageManager.PromptData = default;
             _effectManager.Clear();
             _toRemove.Clear();
-            _queueToRemove.Clear();
             CorpseManager.Clear();
             OPL.Clear();
             WMapManager.Clear();
