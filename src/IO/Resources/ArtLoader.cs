@@ -194,20 +194,24 @@ namespace ClassicUO.IO.Resources
                             {
                                 if (*pixels_ptr != 0 && *pixels_ptr != 0xFF_00_00_00)
                                 {
-                                    if ((curX == 0 || curY == 0) && *pixels_ptr == 0xFF_00_FF_00)
+                                    if (curX == 0 || curY == 0)
                                     {
-                                        if (curX == 0)
+                                        if (*pixels_ptr == 0xFF_00_FF_00)
                                         {
-                                            hotY = curY;
+                                            if (curX == 0)
+                                            {
+                                                hotY = curY;
+                                            }
+
+                                            if (curY == 0)
+                                            {
+                                                hotX = curX;
+                                            }
                                         }
 
-                                        if (curY == 0)
-                                        {
-                                            hotX = curX;
-                                        }
+                                        *pixels_ptr = 0xFF_00_00_00;
                                     }
-
-                                    if (customHue > 0)
+                                    else if (customHue > 0)
                                     {
                                         c.PackedValue = *pixels_ptr;
                                         *pixels_ptr = HuesHelper.Color16To32(HuesLoader.Instance.GetColor16(HuesHelper.ColorToHue(c), customHue)) | 0xFF_00_00_00;
@@ -359,21 +363,7 @@ namespace ClassicUO.IO.Resources
             int pos1 = 0;
             int minX = width, minY = height, maxX = 0, maxY = 0;
 
-            if (graphic >= 0x2053 && graphic <= 0x2062 || graphic >= 0x206A && graphic <= 0x2079)
-            {
-                for (int i = 0; i < width; i++)
-                {
-                    pixels[i] = 0;
-                    pixels[(height - 1) * width + i] = 0;
-                }
-
-                for (int i = 0; i < height; i++)
-                {
-                    pixels[i * width] = 0;
-                    pixels[i * width + width - 1] = 0;
-                }
-            }
-            else if (StaticFilters.IsCave(graphic) && ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.EnableCaveBorder)
+            if (StaticFilters.IsCave(graphic) && ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.EnableCaveBorder)
             {
                 AddBlackBorder(pixels, width, height);
             }
