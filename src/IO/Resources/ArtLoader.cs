@@ -411,6 +411,22 @@ namespace ClassicUO.IO.Resources
                 {
                     if (ReadData(pixels, width, height, _file))
                     {
+                        // keep the cursor graphic check to cleanup edges
+                        if ((graphic >= 0x2053 && graphic <= 0x2062) || (graphic >= 0x206A && graphic <= 0x2079))
+                        {
+                            for (int i = 0; i < width; i++)
+                            {
+                                pixels[i] = 0;
+                                pixels[(height - 1) * width + i] = 0;
+                            }
+
+                            for (int i = 0; i < height; i++)
+                            {
+                                pixels[i * width] = 0;
+                                pixels[i * width + width - 1] = 0;
+                            }
+                        }
+
                         texture = new ArtTexture(width, height);
 
                         FinalizeData
