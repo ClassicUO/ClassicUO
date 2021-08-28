@@ -177,52 +177,52 @@ namespace ClassicUO.IO.Resources
                             SDL.SDL_PIXELFORMAT_ABGR8888
                         );
 
-                        if (customHue > 0)
+                        int stride = surface->pitch >> 2;
+                        uint* pixels_ptr = (uint*)surface->pixels;
+                        uint* p_line_end = pixels_ptr + w;
+                        uint* p_img_end = pixels_ptr + stride * h;
+                        int delta = stride - w;
+                        short curX = 0;
+                        short curY = 0;
+                        Color c = default;
+
+                        while (pixels_ptr < p_img_end)
                         {
-                            int stride = surface->pitch >> 2;
-                            uint* pixels_ptr = (uint*)surface->pixels;
-                            uint* p_line_end = pixels_ptr + w;
-                            uint* p_img_end = pixels_ptr + stride * h;
-                            int delta = stride - w;
-                            short curX = 0;
-                            short curY = 0;
-                            Color c = default;
+                            curX = 0;
 
-                            while (pixels_ptr < p_img_end)
+                            while (pixels_ptr < p_line_end)
                             {
-                                curX = 0;
-
-                                while (pixels_ptr < p_line_end)
+                                if (*pixels_ptr != 0 && *pixels_ptr != 0xFF_00_00_00)
                                 {
-                                    if (*pixels_ptr != 0 && *pixels_ptr != 0xFF_00_00_00)
+                                    if ((curX == 0 || curY == 0) && *pixels_ptr == 0xFF_00_FF_00)
                                     {
-                                        if ((curX == 0 || curY == 0) && *pixels_ptr == 0xFF_00_FF_00)
+                                        if (curX == 0)
                                         {
-                                            if (curX == 0)
-                                            {
-                                                hotY = curY;
-                                            }
-
-                                            if (curY == 0)
-                                            {
-                                                hotX = curX;
-                                            }
+                                            hotY = curY;
                                         }
 
+                                        if (curY == 0)
+                                        {
+                                            hotX = curX;
+                                        }
+                                    }
+
+                                    if (customHue > 0)
+                                    {
                                         c.PackedValue = *pixels_ptr;
                                         *pixels_ptr = HuesHelper.Color16To32(HuesLoader.Instance.GetColor16(HuesHelper.ColorToHue(c), customHue)) | 0xFF_00_00_00;
                                     }
-
-                                    ++pixels_ptr;
-
-                                    ++curX;
                                 }
 
-                                pixels_ptr += delta;
-                                p_line_end += stride;
+                                ++pixels_ptr;
 
-                                ++curY;
+                                ++curX;
                             }
+
+                            pixels_ptr += delta;
+                            p_line_end += stride;
+
+                            ++curY;
                         }
 
                         return (IntPtr)surface;
