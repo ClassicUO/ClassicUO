@@ -84,21 +84,19 @@ namespace ClassicUO.Renderer
         private readonly Texture2D[] _textureInfo;
         private Matrix _transformMatrix;
         private readonly DynamicVertexBuffer _vertexBuffer;
-        private PositionNormalTextureColor4* _vertexInfo;
+        private PositionNormalTextureColor4[] _vertexInfo;
 
 
         public UltimaBatcher2D(GraphicsDevice device)
         {
             GraphicsDevice = device;
+
             _textureInfo = new Texture2D[MAX_SPRITES];
-
-            _vertexInfo = (PositionNormalTextureColor4*) Marshal.AllocHGlobal(sizeof(PositionNormalTextureColor4) * MAX_SPRITES);
-
+            _vertexInfo = new PositionNormalTextureColor4[MAX_SPRITES];
             _vertexBuffer = new DynamicVertexBuffer(GraphicsDevice, typeof(PositionNormalTextureColor4), MAX_VERTICES, BufferUsage.WriteOnly);
-
             _indexBuffer = new IndexBuffer(GraphicsDevice, IndexElementSize.SixteenBits, MAX_INDICES, BufferUsage.WriteOnly);
-
             _indexBuffer.SetData(GenerateIndexArray());
+
             _blendState = BlendState.AlphaBlend;
             _rasterizerState = RasterizerState.CullNone;
             _sampler = SamplerState.PointClamp;
@@ -139,12 +137,7 @@ namespace ClassicUO.Renderer
 
         public void Dispose()
         {
-            if (_vertexInfo != null)
-            {
-                Marshal.FreeHGlobal((IntPtr) _vertexInfo);
-                _vertexInfo = null;
-            }
-
+            _vertexInfo = null;
             DefaultEffect?.Dispose();
             _vertexBuffer.Dispose();
             _indexBuffer.Dispose();
@@ -401,7 +394,6 @@ namespace ClassicUO.Renderer
             public int Bottom;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool DrawSpriteLand
         (
             Texture2D texture,
@@ -466,7 +458,6 @@ namespace ClassicUO.Renderer
 
         
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool DrawSpriteRotated
         (
             Texture2D texture,
@@ -548,7 +539,6 @@ namespace ClassicUO.Renderer
             return true;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool DrawSpriteShadow(Texture2D texture, int x, int y, bool flip)
         {
             EnsureSize();
@@ -649,7 +639,6 @@ namespace ClassicUO.Renderer
             return true;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool DrawCharacterSitted
         (
             Texture2D texture,
@@ -1128,7 +1117,6 @@ namespace ClassicUO.Renderer
             return true;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Draw2D(Texture2D texture, int x, int y, ref Vector3 hue)
         {
             EnsureSize();
@@ -1182,7 +1170,6 @@ namespace ClassicUO.Renderer
             return true;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Draw2D
         (
             Texture2D texture,
@@ -1247,7 +1234,6 @@ namespace ClassicUO.Renderer
             return true;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Draw2D
         (
             Texture2D texture,
@@ -1388,7 +1374,6 @@ namespace ClassicUO.Renderer
             return false;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Draw2D
         (
             Texture2D texture,
@@ -1450,7 +1435,6 @@ namespace ClassicUO.Renderer
             return true;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Draw2DTiled
         (
             Texture2D texture,
@@ -1502,7 +1486,6 @@ namespace ClassicUO.Renderer
             return true;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool DrawRectangle
         (
             Texture2D texture,
@@ -1556,7 +1539,6 @@ namespace ClassicUO.Renderer
             return true;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool DrawLine
         (
             Texture2D texture,
@@ -1648,19 +1630,16 @@ namespace ClassicUO.Renderer
             return true;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Begin()
         {
             Begin(null, Matrix.Identity);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Begin(Effect effect)
         {
             Begin(effect, Matrix.Identity);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Begin(Effect customEffect, Matrix transform_matrix)
         {
             EnsureNotStarted();
@@ -1677,7 +1656,6 @@ namespace ClassicUO.Renderer
             _transformMatrix = transform_matrix;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void End()
         {
             EnsureStarted();
@@ -1755,10 +1733,6 @@ namespace ClassicUO.Renderer
 
             ApplyStates();
 
-            int start = UpdateVertexBuffer(_numSprites);
-
-            Texture2D current = _textureInfo[0];
-            int offset = 0;
 
             if (_customEffect != null)
             {
@@ -1772,17 +1746,34 @@ namespace ClassicUO.Renderer
                 }
             }
 
-            for (int i = 1; i < _numSprites; i++)
-            {
-                if (_textureInfo[i] != current)
-                {
-                    InternalDraw(current, start + offset, i - offset);
-                    current = _textureInfo[i];
-                    offset = i;
-                }
-            }
+            int arrayOffset = 0;
 
-            InternalDraw(current, start + offset, _numSprites - offset);
+            do
+            {
+                int batchSize = Math.Min(_numSprites, MAX_SPRITES);
+                int baseOff = UpdateVertexBuffer(arrayOffset, batchSize);
+                int offset = 0;
+
+                Texture2D curTexture = _textureInfo[arrayOffset];
+
+                for (int i = 1; i < batchSize; ++i)
+                {
+                    Texture2D tex = _textureInfo[arrayOffset + i];
+
+                    if (tex != curTexture)
+                    {
+                        InternalDraw(curTexture, baseOff + offset, i - offset);
+                        curTexture = tex;
+                        offset = i;
+                    }
+                }
+
+                InternalDraw(curTexture, baseOff + offset, batchSize - offset);
+
+                _numSprites -= MAX_SPRITES;
+                arrayOffset += MAX_SPRITES;
+            }
+            while (_numSprites > MAX_SPRITES);
 
             _numSprites = 0;
         }
@@ -1889,27 +1880,36 @@ namespace ClassicUO.Renderer
             _sampler = sampler ?? SamplerState.PointClamp;
         }
 
-        private int UpdateVertexBuffer(int len)
+        private unsafe int UpdateVertexBuffer(int start, int count)
         {
-            int pos;
+            int offset;
             SetDataOptions hint;
 
-            if (_currentBufferPosition + len > MAX_SPRITES)
+            if (_currentBufferPosition + count > MAX_SPRITES)
             {
-                pos = 0;
+                offset = 0;
                 hint = SetDataOptions.Discard;
             }
             else
             {
-                pos = _currentBufferPosition;
+                offset = _currentBufferPosition;
                 hint = SetDataOptions.NoOverwrite;
             }
 
-            _vertexBuffer.SetDataPointerEXT(pos * PositionNormalTextureColor4.SIZE_IN_BYTES, (IntPtr) _vertexInfo, len * PositionNormalTextureColor4.SIZE_IN_BYTES, hint);
+            fixed (PositionNormalTextureColor4* p = &_vertexInfo[start])
+            {
+               _vertexBuffer.SetDataPointerEXT
+               (
+                   offset * PositionNormalTextureColor4.SIZE_IN_BYTES,
+                   (IntPtr)p,
+                   count * PositionNormalTextureColor4.SIZE_IN_BYTES,
+                   hint
+               );
+            }
+           
+            _currentBufferPosition = offset + count;
 
-            _currentBufferPosition = pos + len;
-
-            return pos;
+            return offset;
         }
 
         private static short[] GenerateIndexArray()
@@ -1962,6 +1962,7 @@ namespace ClassicUO.Renderer
             }
         }
 
+
         [StructLayout(LayoutKind.Sequential, Pack = 1)]
         private struct PositionNormalTextureColor4 : IVertexType
         {
@@ -1995,14 +1996,7 @@ namespace ClassicUO.Renderer
                 new VertexElement(sizeof(float) * 9, VertexElementFormat.Vector3, VertexElementUsage.TextureCoordinate, 1)  // hue
             );
 
-            public const int SIZE_IN_BYTES = sizeof(float) * 12 * 4;
-
-            //#if DEBUG
-            //        public override string ToString()
-            //        {
-            //            return string.Format("VPNTH: <{0}> <{1}>", Position.ToString(), TextureCoordinate.ToString());
-            //        }
-            //#endif
+            public const int SIZE_IN_BYTES = sizeof(float) * 12 * 4;            
         }
     }
 
