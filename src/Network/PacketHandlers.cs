@@ -2862,6 +2862,7 @@ namespace ClassicUO.Network
                 {
                     if (World.Player.IsDead)
                     {
+                        NetClient.Socket.Send_DeathScreen();
                         World.ChangeSeason(Game.Managers.Season.Desolation, 42);
                     }
                     else
@@ -3049,6 +3050,12 @@ namespace ClassicUO.Network
             Entity corpse = World.Get(serial);
 
             if (corpse == null)
+            {
+                return;
+            }
+
+            // if it's not a corpse we should skip this [?]
+            if (corpse.Graphic != 0x2006)
             {
                 return;
             }
