@@ -434,7 +434,15 @@ namespace ClassicUO.Game
         {
             if (Client.Game.Scene is GameScene gs)
             {
-                if (!World.ClientFeatures.TooltipsEnabled || SelectedObject.Object is Item selectedItem && selectedItem.IsLocked && selectedItem.ItemData.Weight == 255 && !selectedItem.ItemData.IsContainer || ItemHold.Enabled && !ItemHold.IsFixedPosition)
+                if (!World.ClientFeatures.TooltipsEnabled ||
+                    (SelectedObject.Object is Item selectedItem && 
+                    selectedItem.IsLocked && 
+                    selectedItem.ItemData.Weight == 255 && 
+                    !selectedItem.ItemData.IsContainer &&
+                    // We need to check if OPL contains data.
+                    // If not we can ignore tooltip.
+                    !World.OPL.Contains(selectedItem)) || 
+                    (ItemHold.Enabled && !ItemHold.IsFixedPosition))
                 {
                     if (!_tooltip.IsEmpty && (UIManager.MouseOverControl == null || UIManager.IsMouseOverWorld))
                     {
