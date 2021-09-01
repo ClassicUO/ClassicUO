@@ -633,6 +633,15 @@ namespace ClassicUO.Game.Managers
 
                             switch (macro.SubCode)
                             {
+                                case MacroSubType.WorldMap:
+
+                                    if (macro.Code == MacroType.Close)
+                                    {
+                                        UIManager.GetGump<MiniMapGump>()?.Dispose();
+                                    }
+
+                                    break;
+
                                 case MacroSubType.Configuration:
 
                                     if (macro.Code == MacroType.Close)
