@@ -15,7 +15,7 @@ Individuals/hobbyists: support continued maintenance and development via PayPal:
 alt="chat on Discord"></a>
 
 [![Build status](https://ci.appveyor.com/api/projects/status/qvqctcf8oss5bqh8?svg=true)](https://ci.appveyor.com/project/andreakarasho/classicuo)
-[![GitHub Actions Status](https://github.com/andreakarasho/ClassicUO/workflows/Build/badge.svg)](https://github.com/andreakarasho/ClassicUO/actions)
+[![GitHub Actions Status](https://github.com/ClassicUO/ClassicUO/workflows/Build/badge.svg)](https://github.com/ClassicUO/ClassicUO/actions)
 
 # Introduction
 ClassicUO is an open source implementation of the Ultima Online Classic Client. This client is intended to emulate all standard client versions and is primarily tested against Ultima Online free shards.
