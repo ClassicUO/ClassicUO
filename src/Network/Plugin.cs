@@ -642,7 +642,7 @@ namespace ClassicUO.Network
 
         private static bool OnPluginRecv(ref byte[] data, ref int length)
         {
-            NetClient.EnqueuePacketFromPlugin(data, length);
+            NetClient.EnqueuePacketFromPlugin(data.AsSpan(0, length));
 
             return true;
         }
