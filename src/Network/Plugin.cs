@@ -643,7 +643,7 @@ namespace ClassicUO.Network
 
         private static bool OnPluginRecv(ref byte[] data, ref int length)
         {
-            NetClient.EnqueuePacketFromPlugin(data.AsSpan(0, length));
+            NetClient.EnqueuePacketFromPlugin(data, length);
 
             return true;
         }
@@ -666,9 +666,10 @@ namespace ClassicUO.Network
         {        
             if (buffer != IntPtr.Zero && length > 0)
             {
-                Span<byte> span = new Span<byte>((void*)buffer, length);
+                byte[] data = new byte[length];
+                Marshal.Copy(buffer, data, 0, length);
 
-                NetClient.EnqueuePacketFromPlugin(span);
+                NetClient.EnqueuePacketFromPlugin(data, length);
             }
 
             return true;
