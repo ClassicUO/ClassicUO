@@ -60,9 +60,11 @@ namespace ClassicUO.Network.Plugins
         {
             if (length > 0 && data != IntPtr.Zero)
             {
-                Span<byte> span = new Span<byte>((void*)data, length);
+                // TODO: how can we avoid to waste memory?
+                byte[] buffer = new byte[length];
+                Marshal.Copy(data, buffer, 0, length);
 
-                NetClient.EnqueuePacketFromPlugin(span);
+                NetClient.EnqueuePacketFromPlugin(buffer, length);
             }       
         }
 
