@@ -54,11 +54,11 @@ namespace ClassicUO.Network
     {
         private const int BUFF_SIZE = 0x80000;
 
+        private readonly object _lock = new object();
         private int _incompletePacketLength;
         private bool _isCompressionEnabled;
         private byte[] _recvBuffer, _incompletePacketBuffer, _decompBuffer, _packetBuffer;
         private CircularBuffer _circularBuffer;
-        private ConcurrentQueue<byte[]> _pluginRecvQueue = new ConcurrentQueue<byte[]>();
         private readonly bool _is_login_socket;
         private TcpClient _tcpClient;
         private NetworkStream _netStream;
@@ -124,17 +124,25 @@ namespace ClassicUO.Network
 
         private static readonly Task<bool> TaskCompletedFalse = new Task<bool>(() => false);
 
-        public static void EnqueuePacketFromPlugin(byte[] data, int length)
+        public static void EnqueuePacketFromPlugin(Span<byte> data)
         {
             if (LoginSocket.IsDisposed && Socket.IsConnected)
             {
-                Socket._pluginRecvQueue.Enqueue(data);
-                Socket.Statistics.TotalPacketsReceived++;
+                lock (Socket._lock)
+                {
+                    Socket._circularBuffer.Enqueue(data, 0, data.Length);
+                }
+                
+                Socket.ExtractPackets(true);
             }
             else if (Socket.IsDisposed && LoginSocket.IsConnected)
             {
-                LoginSocket._pluginRecvQueue.Enqueue(data);
-                LoginSocket.Statistics.TotalPacketsReceived++;
+                lock (LoginSocket._lock)
+                {
+                    LoginSocket._circularBuffer.Enqueue(data, 0, data.Length);
+                }
+
+                LoginSocket.ExtractPackets(true);
             }
             else
             {
@@ -180,7 +188,6 @@ namespace ClassicUO.Network
             _decompBuffer = new byte[BUFF_SIZE];
             _packetBuffer = new byte[BUFF_SIZE];
             _circularBuffer = new CircularBuffer();
-            _pluginRecvQueue = new ConcurrentQueue<byte[]>();
             Statistics.Reset();
 
             Status = ClientSocketStatus.Connecting;
@@ -290,18 +297,14 @@ namespace ClassicUO.Network
         }
 
 
-        public void Send(byte[] data, int length, bool ignorePlugin = false, bool skip_encryption = false)
+        public void Send(byte[] data, int length, bool fromPlugins = false, bool skip_encryption = false)
         {
-            if (!ignorePlugin && !Plugin.ProcessSendPacket(data, ref length))
+            if (!fromPlugins && !Plugin.ProcessSendPacket(data, ref length))
             {
                 return;
             }
 
-            Send(data, length, skip_encryption);
-        }
 
-        private void Send(byte[] data, int length, bool skip_encryption)
-        {
             if (_tcpClient == null || IsDisposed)
             {
                 return;
@@ -316,7 +319,7 @@ namespace ClassicUO.Network
             {
                 if (CUOEnviroment.PacketLog)
                 {
-                    LogPacket(data, length, true);
+                    LogPacket(data, length, true, fromPlugins);
                 }
 
                 if (!skip_encryption)
@@ -366,35 +369,16 @@ namespace ClassicUO.Network
         public void Update()
         {
             ProcessRecv();
-
-            while (_pluginRecvQueue.TryDequeue(out byte[] data) && data != null && data.Length != 0)
-            {
-                int length = PacketsTable.GetPacketLength(data[0]);
-                int offset = 1;
-
-                if (length == -1)
-                {
-                    if (data.Length < 3)
-                    {
-                        continue;
-                    }
-
-                    //length = data[2] | (data[1] << 8);
-                    offset = 3;
-                }
-
-                PacketHandlers.Handlers.AnalyzePacket(data, offset, data.Length);
-            }
         }
 
-        private void ExtractPackets()
+        private void ExtractPackets(bool isFromPlugins)
         {
             if (!IsConnected || _circularBuffer == null || _circularBuffer.Length <= 0)
             {
                 return;
             }
 
-            lock (_circularBuffer)
+            lock (_lock)
             {
                 int length = _circularBuffer.Length;
 
@@ -414,10 +398,10 @@ namespace ClassicUO.Network
 
                         if (CUOEnviroment.PacketLog)
                         {
-                            LogPacket(data, packetlength, false);
+                            LogPacket(data, packetlength, false, isFromPlugins);
                         }
 
-                        if (Plugin.ProcessRecvPacket(data, ref packetlength))
+                        if (isFromPlugins || Plugin.ProcessRecvPacket(data, ref packetlength))
                         {
                             PacketHandlers.Handlers.AnalyzePacket(data, offset, packetlength);
 
@@ -503,12 +487,12 @@ namespace ClassicUO.Network
                         DecompressBuffer(ref buffer, ref received);
                     }
 
-                    lock (_circularBuffer)
+                    lock (_lock)
                     {
                         _circularBuffer.Enqueue(buffer, 0, received);
                     }
 
-                    ExtractPackets();
+                    ExtractPackets(false);
                 }
                 else
                 {
@@ -645,7 +629,7 @@ namespace ClassicUO.Network
 
         private static LogFile _logFile;
 
-        private static void LogPacket(byte[] buffer, int length, bool toServer)
+        private static void LogPacket(byte[] buffer, int length, bool toServer, bool plugins)
         {
             if (_logFile == null)
                 _logFile = new LogFile(FileSystemHelper.CreateFolderIfNotExists(CUOEnviroment.ExecutablePath, "Logs", "Network"), "packets.log");
@@ -656,7 +640,7 @@ namespace ClassicUO.Network
                 int off = sizeof(ulong) + 2;
 
                 output.Append(' ', off);
-                output.Append(string.Format("Ticks: {0} | {1} |  ID: {2:X2}   Length: {3}\n", Time.Ticks, (toServer ? "Client -> Server" : "Server -> Client"), buffer[0], length));
+                output.Append(string.Format("Ticks: {0} | {1} |  ID: {2:X2}   Length: {3} {4}\n", Time.Ticks, (toServer ? "Client -> Server" : "Server -> Client"), buffer[0], length, plugins ? "from plugins" : string.Empty));
 
                 if (buffer[0] == 0x80 || buffer[0] == 0x91)
                 {
