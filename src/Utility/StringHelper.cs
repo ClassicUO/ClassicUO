@@ -292,5 +292,17 @@ namespace ClassicUO.Utility
 
             return true;
         }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool EqualsInvariantNoCase(this ReadOnlySpan<char> span, ReadOnlySpan<char> b)
+        {
+            return span.Equals(b, StringComparison.InvariantCultureIgnoreCase);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool EqualsInvariantNoCase(this ReadOnlySpan<char> span, string b)
+        {
+            return span.Equals(b.AsSpan(), StringComparison.InvariantCultureIgnoreCase);
+        }
     }
 }
