@@ -104,18 +104,22 @@ namespace ClassicUO.Game.GameObjects
         {
             UOTexture texture = ArtLoader.Instance.GetLandTexture(graphic);
 
+            int textureCoordX = ((graphic % 300) * 44);
+
             if (texture != null)
             {
                 texture.Ticks = Time.Ticks;
 
-                batcher.DrawSprite
-                (
-                    texture,
-                    x,
-                    y,
-                    false,
-                    ref hue
-                );
+                batcher.Draw2D(texture, x, y, textureCoordX, 0, 44, 44, ref hue);
+
+                //batcher.DrawSprite
+                //(
+                //    texture,
+                //    x,
+                //    y,
+                //    false,
+                //    ref hue
+                //);
             }
         }
 
