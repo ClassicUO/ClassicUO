@@ -607,7 +607,7 @@ namespace ClassicUO.Network
 
         private static LogFile _logFile;
 
-        private static void LogPacket(byte[] buffer, int length, bool toServer)
+        public static void LogPacket(ReadOnlySpan<byte> buffer, int length, bool toServer)
         {
             if (_logFile == null)
                 _logFile = new LogFile(FileSystemHelper.CreateFolderIfNotExists(CUOEnviroment.ExecutablePath, "Logs", "Network"), "packets.log");

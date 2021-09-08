@@ -80,6 +80,11 @@ namespace ClassicUO.Network.Plugins
                         }
                     }
 
+                    if (CUOEnviroment.PacketLog)
+                    {
+                        NetClient.LogPacket(buffer, packetLength, false);
+                    }
+
                     PacketHandlers.Handlers.AnalyzePacket(buffer.Slice(0, packetLength), offset);
 
                     buffer = buffer.Slice(packetLength);

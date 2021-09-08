@@ -665,6 +665,11 @@ namespace ClassicUO.Network
                         }
                     }
 
+                    if (CUOEnviroment.PacketLog)
+                    {
+                        NetClient.LogPacket(buffer, packetLength, false);
+                    }
+
                     PacketHandlers.Handlers.AnalyzePacket(buffer.Slice(0, packetLength), offset);
 
                     buffer = buffer.Slice(packetLength);
@@ -711,6 +716,11 @@ namespace ClassicUO.Network
                         {
                             break;
                         }
+                    }
+
+                    if (CUOEnviroment.PacketLog)
+                    {
+                        NetClient.LogPacket(buffer, packetLength, false);
                     }
 
                     PacketHandlers.Handlers.AnalyzePacket(buffer.Slice(0, packetLength), offset);
