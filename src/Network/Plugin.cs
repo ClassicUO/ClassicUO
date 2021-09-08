@@ -643,7 +643,34 @@ namespace ClassicUO.Network
 
         private static bool OnPluginRecv(ref byte[] data, ref int length)
         {
-            NetClient.EnqueuePacketFromPlugin(data, length);
+            if (data != null && data.Length >= length)
+            {
+                Span<byte> buffer = data.AsSpan(0, length);
+                int processed = 0;
+
+                while (processed < length && !buffer.IsEmpty)
+                {
+                    int packetLength = PacketsTable.GetPacketLength(buffer[0]);
+                    int offset = 1;
+
+                    if (packetLength == -1)
+                    {
+                        offset = 3;
+
+                        packetLength = buffer[2] | (buffer[1] << 8);
+
+                        if (packetLength < 3)
+                        {
+                            break;
+                        }
+                    }
+
+                    PacketHandlers.Handlers.AnalyzePacket(buffer.Slice(0, packetLength), offset);
+
+                    buffer = buffer.Slice(packetLength);
+                    processed += packetLength;
+                }
+            }
 
             return true;
         }
@@ -662,14 +689,35 @@ namespace ClassicUO.Network
             return true;
         }
 
-        private static bool OnPluginRecv_new(IntPtr buffer, ref int length)
+        private static bool OnPluginRecv_new(IntPtr data, ref int length)
         {        
-            if (buffer != IntPtr.Zero && length > 0)
+            if (data != IntPtr.Zero && length > 0)
             {
-                byte[] data = new byte[length];
-                Marshal.Copy(buffer, data, 0, length);
+                Span<byte> buffer = new Span<byte>((void*)data, length);
+                int processed = 0;
 
-                NetClient.EnqueuePacketFromPlugin(data, length);
+                while (processed < length && !buffer.IsEmpty)
+                {
+                    int packetLength = PacketsTable.GetPacketLength(buffer[0]);
+                    int offset = 1;
+
+                    if (packetLength == -1)
+                    {
+                        offset = 3;
+
+                        packetLength = buffer[2] | (buffer[1] << 8);
+
+                        if (packetLength < 3)
+                        {
+                            break;
+                        }
+                    }
+
+                    PacketHandlers.Handlers.AnalyzePacket(buffer.Slice(0, packetLength), offset);
+
+                    buffer = buffer.Slice(packetLength);
+                    processed += packetLength;
+                }
             }
 
             return true;

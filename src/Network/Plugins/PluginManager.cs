@@ -67,11 +67,11 @@ namespace ClassicUO.Network.Plugins
                 
                 try
                 {
-#if !NETFRAMEWORK
-                    ((delegate* unmanaged[Cdecl]<void*, void>)installPtr)(&pluginDescriptor);
-#else
+#if NETFRAMEWORK
                     dOnInstall install = Marshal.GetDelegateForFunctionPointer<dOnInstall>(installPtr);
                     install(&pluginDescriptor);
+#else
+                    ((delegate* unmanaged[Cdecl]<void*, void>)installPtr)(&pluginDescriptor);
 #endif
 
                     Plugin plugin = new Plugin(Path.GetFileNameWithoutExtension(path), path, pluginDescriptor.Features);

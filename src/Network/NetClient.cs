@@ -58,7 +58,6 @@ namespace ClassicUO.Network
         private bool _isCompressionEnabled;
         private byte[] _recvBuffer, _incompletePacketBuffer, _decompBuffer, _packetBuffer;
         private CircularBuffer _circularBuffer;
-        private ConcurrentQueue<byte[]> _pluginRecvQueue = new ConcurrentQueue<byte[]>();
         private readonly bool _is_login_socket;
         private TcpClient _tcpClient;
         private NetworkStream _netStream;
@@ -124,24 +123,7 @@ namespace ClassicUO.Network
 
         private static readonly Task<bool> TaskCompletedFalse = new Task<bool>(() => false);
 
-        public static void EnqueuePacketFromPlugin(byte[] data, int length)
-        {
-            if (LoginSocket.IsDisposed && Socket.IsConnected)
-            {
-                Socket._pluginRecvQueue.Enqueue(data);
-                Socket.Statistics.TotalPacketsReceived++;
-            }
-            else if (Socket.IsDisposed && LoginSocket.IsConnected)
-            {
-                LoginSocket._pluginRecvQueue.Enqueue(data);
-                LoginSocket.Statistics.TotalPacketsReceived++;
-            }
-            else
-            {
-                Log.Error("Attempt to write into a dead socket");
-            }
-        }
-
+       
         public Task<bool> Connect(string ip, ushort port)
         {
             IsDisposed = false;
@@ -180,7 +162,6 @@ namespace ClassicUO.Network
             _decompBuffer = new byte[BUFF_SIZE];
             _packetBuffer = new byte[BUFF_SIZE];
             _circularBuffer = new CircularBuffer();
-            _pluginRecvQueue = new ConcurrentQueue<byte[]>();
             Statistics.Reset();
 
             Status = ClientSocketStatus.Connecting;
@@ -366,25 +347,6 @@ namespace ClassicUO.Network
         public void Update()
         {
             ProcessRecv();
-
-            while (_pluginRecvQueue.TryDequeue(out byte[] data) && data != null && data.Length != 0)
-            {
-                int length = PacketsTable.GetPacketLength(data[0]);
-                int offset = 1;
-
-                if (length == -1)
-                {
-                    if (data.Length < 3)
-                    {
-                        continue;
-                    }
-
-                    //length = data[2] | (data[1] << 8);
-                    offset = 3;
-                }
-
-                PacketHandlers.Handlers.AnalyzePacket(data, offset, data.Length);
-            }
         }
 
         private void ExtractPackets()
@@ -419,7 +381,7 @@ namespace ClassicUO.Network
 
                         if (Plugin.ProcessRecvPacket(data, ref packetlength))
                         {
-                            PacketHandlers.Handlers.AnalyzePacket(data, offset, packetlength);
+                            PacketHandlers.Handlers.AnalyzePacket(data.AsSpan(0, packetlength), offset);
 
                             Statistics.TotalPacketsReceived++;
                         }

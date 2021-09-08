@@ -60,11 +60,31 @@ namespace ClassicUO.Network.Plugins
         {
             if (length > 0 && data != IntPtr.Zero)
             {
-                // TODO: how can we avoid to waste memory?
-                byte[] buffer = new byte[length];
-                Marshal.Copy(data, buffer, 0, length);
+                Span<byte> buffer = new Span<byte>((void*) data, length);
+                int processed = 0;
 
-                NetClient.EnqueuePacketFromPlugin(buffer, length);
+                while (processed < length && !buffer.IsEmpty)
+                {
+                    int packetLength = PacketsTable.GetPacketLength(buffer[0]);
+                    int offset = 1;
+
+                    if (packetLength == -1)
+                    {
+                        offset = 3;
+
+                        packetLength = buffer[2] | (buffer[1] << 8);
+
+                        if (packetLength < 3)
+                        {
+                            break;
+                        }
+                    }
+
+                    PacketHandlers.Handlers.AnalyzePacket(buffer.Slice(0, packetLength), offset);
+
+                    buffer = buffer.Slice(packetLength);
+                    processed += packetLength;
+                }
             }       
         }
 

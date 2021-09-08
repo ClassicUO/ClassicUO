@@ -77,13 +77,13 @@ namespace ClassicUO.Network
         }
 
 
-        public void AnalyzePacket(byte[] data, int offset, int length)
+        public void AnalyzePacket(Span<byte> data, int offset)
         {
             OnPacketBufferReader bufferReader = _handlers[data[0]];
 
             if (bufferReader != null)
             {
-                StackDataReader buffer = new StackDataReader(data.AsSpan(0, length));
+                StackDataReader buffer = new StackDataReader(data);
                 buffer.Seek(offset);
 
                 bufferReader(ref buffer);
