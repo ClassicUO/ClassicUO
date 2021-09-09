@@ -80,8 +80,7 @@ namespace ClassicUO.Network.Plugins
                 }
                 catch (Exception ex)
                 {
-                    Error($"error while loading plugin: '{path}'");
-                    Error(ex.ToString());
+                    Error($"error while loading plugin: '{path}'\n{ex}");
                 }
             }
 
