@@ -691,14 +691,11 @@ namespace ClassicUO.Game.Scenes
         }
 
         public void HandleRelayServerPacket(ref StackDataReader p)
-        {
-            byte[] ip =
-            {
-                p.ReadUInt8(), p.ReadUInt8(), p.ReadUInt8(), p.ReadUInt8()
-            };
-
+        {           
+            long ip = p.ReadUInt32LE(); // use LittleEndian here
             ushort port = p.ReadUInt16BE();
             uint seed = p.ReadUInt32BE();
+
             NetClient.LoginSocket.Disconnect();
             EncryptionHelper.Initialize(false, seed, (ENCRYPTION_TYPE) Settings.GlobalSettings.Encryption);
 
@@ -710,9 +707,14 @@ namespace ClassicUO.Game.Scenes
                              if (!t.IsFaulted)
                              {
                                  NetClient.Socket.EnableCompression();
-                                 // TODO: stackalloc
-                                 byte[] ss = new byte[4] { (byte) (seed >> 24), (byte) (seed >> 16), (byte) (seed >> 8), (byte) seed };
-                                 NetClient.Socket.Send(ss, 4, true, true);
+
+                                 unsafe
+                                 {
+                                     Span<byte> b = stackalloc byte[4] { (byte)(seed >> 24), (byte)(seed >> 16), (byte)(seed >> 8), (byte)seed };
+                                     StackDataWriter writer = new StackDataWriter(b);
+                                     NetClient.Socket.Send(writer.AllocatedBuffer, writer.BytesWritten, true, true);
+                                     writer.Dispose();
+                                 }
 
                                  NetClient.Socket.Send_SecondLogin(Account, Password, seed);
                              }
