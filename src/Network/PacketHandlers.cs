@@ -4813,6 +4813,22 @@ namespace ClassicUO.Network
 
         private static void Logout(ref StackDataReader p)
         {
+            // http://docs.polserver.com/packets/index.php?Packet=0xD1
+
+            if (Client.Game.GetScene<GameScene>().DisconnectionRequested &&
+                (World.ClientFeatures.Flags & CharacterListFlags.CLF_OWERWRITE_CONFIGURATION_BUTTON) != 0)
+            {
+                if (p.ReadBool())
+                {
+                    // client can disconnect
+                    NetClient.Socket.Disconnect();
+                    Client.Game.SetScene(new LoginScene());
+                }
+                else
+                {
+                    Log.Warn("0x1D - client asked to disconnect but server answered 'NO!'");
+                }
+            }
         }
 
         private static void MegaCliloc(ref StackDataReader p)
