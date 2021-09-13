@@ -4657,8 +4657,7 @@ namespace ClassicUO.Network
 
                 case 0xBEEF: // ClassicUO commands
 
-                    type = p.ReadUInt16BE();
-
+                    Plugins.PluginManager.ParsePacket(ref p);
 
                     break;
 
