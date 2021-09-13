@@ -130,34 +130,27 @@ namespace ClassicUO.Utility.Logging
                     if (_indent > 0)
                     {
                         Console.Write(new string('\t', _indent * 2));
-                        Console.WriteLine(text);
                     }
-                    else
-                    {
-                        Console.WriteLine(text);
-                    }
+
+                    Console.WriteLine(text);
                 }
                 else
                 {
-                    Console.Write($"{DateTime.Now:T} |");
+                    Console.Write(DateTime.UtcNow);
+                    Console.Write(" | ");
                     ConsoleColor temp = Console.ForegroundColor;
 
                     Console.ForegroundColor = _logTypesInfo[type].Item1;
-
                     Console.Write(_logTypesInfo[type].Item2);
-
                     Console.ForegroundColor = temp;
+                    Console.Write(" | ");
 
                     if (_indent > 0)
                     {
-                        Console.Write("| ");
                         Console.Write(new string('\t', _indent * 2));
-                        Console.WriteLine(text);
                     }
-                    else
-                    {
-                        Console.WriteLine($"| {text}");
-                    }
+
+                    Console.WriteLine(text);
                 }
             }
         }
