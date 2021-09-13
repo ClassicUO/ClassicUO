@@ -118,6 +118,8 @@ namespace ClassicUO.Game.Scenes
 
         public Weather Weather { get; private set; }
 
+        public bool DisconnectionRequested { get; set; }
+
         public bool UseLights => ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.UseCustomLightLevel ? World.Light.Personal < World.Light.Overall : World.Light.RealPersonal < World.Light.RealOverall;
 
         public bool UseAltLights => ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.UseAlternativeLights;
@@ -422,8 +424,16 @@ namespace ClassicUO.Game.Scenes
                     {
                         if (s)
                         {
-                            NetClient.Socket.Disconnect();
-                            Client.Game.SetScene(new LoginScene());
+                            if ((World.ClientFeatures.Flags & CharacterListFlags.CLF_OWERWRITE_CONFIGURATION_BUTTON) != 0)
+                            {
+                                DisconnectionRequested = true;
+                                NetClient.Socket.Send_LogoutNotification();
+                            }
+                            else
+                            {
+                                NetClient.Socket.Disconnect();
+                                Client.Game.SetScene(new LoginScene());
+                            }
                         }
                     }
                 )

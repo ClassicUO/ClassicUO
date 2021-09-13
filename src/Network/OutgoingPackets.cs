@@ -1544,9 +1544,9 @@ namespace ClassicUO.Network
             writer.Dispose();
         }
 
-        public static void Send_LogoutNotification(this NetClient socket, uint serial, uint gold, uint platinum)
+        public static void Send_LogoutNotification(this NetClient socket)
         {
-            const byte ID = 0x05;
+            const byte ID = 0xD1;
 
             int length = PacketsTable.GetPacketLength(ID);
 
@@ -1559,7 +1559,7 @@ namespace ClassicUO.Network
                 writer.WriteZero(2);
             }
 
-            writer.WriteUInt32BE(0xFFFF_FFFF);
+            writer.WriteUInt8(0x00);
 
             if (length < 0)
             {
