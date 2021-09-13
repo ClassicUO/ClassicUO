@@ -1290,36 +1290,38 @@ namespace ClassicUO.Game.UI.Gumps
 
                             if (mapFile != null && Path.GetExtension(mapFile).ToLower().Equals(".xml")) // Ultima Mapper
                             {
-                                XmlTextReader reader = new XmlTextReader(mapFile);
-
-                                while (reader.Read())
+                                using (XmlTextReader reader = new XmlTextReader(File.Open(mapFile, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
                                 {
-                                    if (reader.Name.Equals("Marker"))
+                                    while (reader.Read())
                                     {
-                                        WMapMarker marker = new WMapMarker
+                                        if (reader.Name.Equals("Marker"))
                                         {
-                                            X = int.Parse(reader.GetAttribute("X")),
-                                            Y = int.Parse(reader.GetAttribute("Y")),
-                                            Name = reader.GetAttribute("Name"),
-                                            MapId = int.Parse(reader.GetAttribute("Facet")),
-                                            Color = Color.White,
-                                            ZoomIndex = 3
-                                        };
+                                            WMapMarker marker = new WMapMarker
+                                            {
+                                                X = int.Parse(reader.GetAttribute("X")),
+                                                Y = int.Parse(reader.GetAttribute("Y")),
+                                                Name = reader.GetAttribute("Name"),
+                                                MapId = int.Parse(reader.GetAttribute("Facet")),
+                                                Color = Color.White,
+                                                ZoomIndex = 3
+                                            };
 
-                                        if (_markerIcons.TryGetValue(reader.GetAttribute("Icon").ToLower(), out Texture2D value))
-                                        {
-                                            marker.MarkerIcon = value;
+                                            if (_markerIcons.TryGetValue(reader.GetAttribute("Icon").ToLower(), out Texture2D value))
+                                            {
+                                                marker.MarkerIcon = value;
 
-                                            marker.MarkerIconName = reader.GetAttribute("Icon").ToLower();
+                                                marker.MarkerIconName = reader.GetAttribute("Icon").ToLower();
+                                            }
+
+                                            markerFile.Markers.Add(marker);
                                         }
-
-                                        markerFile.Markers.Add(marker);
                                     }
+
                                 }
                             }
                             else if (mapFile != null && Path.GetExtension(mapFile).ToLower().Equals(".map")) //UOAM
                             {
-                                using (StreamReader reader = new StreamReader(mapFile))
+                                using (StreamReader reader = new StreamReader(File.Open(mapFile, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
                                 {
                                     while (!reader.EndOfStream)
                                     {
@@ -1371,7 +1373,7 @@ namespace ClassicUO.Game.UI.Gumps
                             }
                             else if (mapFile != null) //CSV x,y,mapindex,name of marker,iconname,color,zoom
                             {
-                                using (StreamReader reader = new StreamReader(mapFile))
+                                using (StreamReader reader = new StreamReader(File.Open(mapFile, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
                                 {
                                     while (!reader.EndOfStream)
                                     {
