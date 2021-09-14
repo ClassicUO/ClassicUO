@@ -783,6 +783,29 @@ namespace ClassicUO.Game.UI.Gumps
 
                                 break;
 
+                            case "rem":
+
+                                if (World.Party.Leader != 0 && World.Party.Leader == World.Player)
+                                {
+                                    GameActions.RequestPartyRemoveMemberByTarget();
+                                }
+                                else
+                                {
+                                    MessageManager.HandleMessage
+                                    (
+                                        null,
+                                        ResGumps.YouAreNotPartyLeader,
+                                        "System",
+                                        0xFFFF,
+                                        MessageType.Regular,
+                                        3,
+                                        TextType.SYSTEM
+                                    );
+                                }
+
+
+                                break;
+
                             default:
 
                                 if (World.Party.Leader != 0)
