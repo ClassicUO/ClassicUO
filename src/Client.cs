@@ -78,10 +78,10 @@ namespace ClassicUO
 
                 Network.Plugins.PluginManager.LoadPlugins(Settings.GlobalSettings.Plugins);
 
-                foreach (string p in Settings.GlobalSettings.Plugins)
-                {
-                    Plugin.Create(p);
-                }
+                //foreach (string p in Settings.GlobalSettings.Plugins)
+                //{
+                //    Plugin.Create(p);
+                //}
 
                 Log.Trace("Done!");
 

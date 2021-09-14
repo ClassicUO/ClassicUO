@@ -31,14 +31,22 @@ namespace ClassicUO.Network.Plugins
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         private delegate int dGetPacketLength(ushort packetID);
 
+        private static readonly dSocketAction _sendPacketToClientDelegate = SendPacketToClient;
+        private static readonly dSocketAction _sendPacketToServerDelegate = SendPacketToServer;
+        private static readonly dMovePlayer _movePlayerDelegate = MovePlayer;
+        private static readonly dSetGameWindowTitle _setGameWindowTitleDelegate = SetGameWindowTitle;
+        private static readonly dGetCliloc _getClilocDelegate = GetCliloc;
+        private static readonly dGetUltimaOnlinePath _getUltimaOnlinePathDelegate = GetUOFilePath;
+        private static readonly dGetPacketLength _getPacketLengthDelegate = GetPacketLength;
 
-        private static readonly IntPtr _sendPacketToClientPtr = Marshal.GetFunctionPointerForDelegate<dSocketAction>(SendPacketToClient);
-        private static readonly IntPtr _sendPacketToServerPtr = Marshal.GetFunctionPointerForDelegate<dSocketAction>(SendPacketToServer);
-        private static readonly IntPtr _movePlayerPtr = Marshal.GetFunctionPointerForDelegate<dMovePlayer>(MovePlayer);
-        private static readonly IntPtr _setGameWindowTitlePtr = Marshal.GetFunctionPointerForDelegate<dSetGameWindowTitle>(SetGameWindowTitle);
-        private static readonly IntPtr _getClilocPtr = Marshal.GetFunctionPointerForDelegate<dGetCliloc>(GetCliloc);
-        private static readonly IntPtr _getUltimaOnlinePathPtr = Marshal.GetFunctionPointerForDelegate<dGetUltimaOnlinePath>(GetUOFilePath);
-        private static readonly IntPtr _getPacketLengthPtr = Marshal.GetFunctionPointerForDelegate<dGetPacketLength>(GetPacketLength);
+
+        private static readonly IntPtr _sendPacketToClientPtr = Marshal.GetFunctionPointerForDelegate(_sendPacketToClientDelegate);
+        private static readonly IntPtr _sendPacketToServerPtr = Marshal.GetFunctionPointerForDelegate(_sendPacketToServerDelegate);
+        private static readonly IntPtr _movePlayerPtr = Marshal.GetFunctionPointerForDelegate(_movePlayerDelegate);
+        private static readonly IntPtr _setGameWindowTitlePtr = Marshal.GetFunctionPointerForDelegate(_setGameWindowTitleDelegate);
+        private static readonly IntPtr _getClilocPtr = Marshal.GetFunctionPointerForDelegate(_getClilocDelegate);
+        private static readonly IntPtr _getUltimaOnlinePathPtr = Marshal.GetFunctionPointerForDelegate(_getUltimaOnlinePathDelegate);
+        private static readonly IntPtr _getPacketLengthPtr = Marshal.GetFunctionPointerForDelegate(_getPacketLengthDelegate);
 
 #else
         private static readonly IntPtr _sendPacketToClientPtr = (IntPtr)(delegate*<IntPtr, int, void>)(&SendPacketToClient);

@@ -446,28 +446,36 @@ namespace ClassicUO.Network
         {
             bool result = true;
 
-            foreach (Plugin plugin in Plugins)
+            fixed (byte* dataPtr = data)
             {
-                if (plugin._onRecv_new != null)
-                {
-                    if (!plugin._onRecv_new(data, ref length))
-                    {
-                        result = false;
-                    }
-                }
-                else if (plugin._onRecv != null)
-                {
-                    byte[] tmp = new byte[length];
-                    Array.Copy(data, tmp, length);
+                Network.Plugins.PluginManager.OnPacketRecv((IntPtr)dataPtr, ref length, out result);
 
-                    if (!plugin._onRecv(ref tmp, ref length))
-                    {
-                        result = false;
-                    }
-
-                    Array.Copy(tmp, data, length);
-                }
+                result = !result;
             }
+            
+
+            //foreach (Plugin plugin in Plugins)
+            //{
+            //    if (plugin._onRecv_new != null)
+            //    {
+            //        if (!plugin._onRecv_new(data, ref length))
+            //        {
+            //            result = false;
+            //        }
+            //    }
+            //    else if (plugin._onRecv != null)
+            //    {
+            //        byte[] tmp = new byte[length];
+            //        Array.Copy(data, tmp, length);
+
+            //        if (!plugin._onRecv(ref tmp, ref length))
+            //        {
+            //            result = false;
+            //        }
+
+            //        Array.Copy(tmp, data, length);
+            //    }
+            //}
 
             return result;
         }
@@ -476,28 +484,35 @@ namespace ClassicUO.Network
         {
             bool result = true;
 
-            foreach (Plugin plugin in Plugins)
+            fixed (byte* dataPtr = data)
             {
-                if (plugin._onSend_new != null)
-                {
-                    if (!plugin._onSend_new(data, ref length))
-                    {
-                        result = false;
-                    }
-                }
-                else if (plugin._onSend != null)
-                {
-                    byte[] tmp = new byte[length];
-                    Array.Copy(data, tmp, length);
+                Network.Plugins.PluginManager.OnPacketSend((IntPtr)dataPtr, ref length, out result);
 
-                    if (!plugin._onSend(ref tmp, ref length))
-                    {
-                        result = false;
-                    }
-
-                    Array.Copy(tmp, data, length);
-                }
+                result = !result;
             }
+
+            //foreach (Plugin plugin in Plugins)
+            //{
+            //    if (plugin._onSend_new != null)
+            //    {
+            //        if (!plugin._onSend_new(data, ref length))
+            //        {
+            //            result = false;
+            //        }
+            //    }
+            //    else if (plugin._onSend != null)
+            //    {
+            //        byte[] tmp = new byte[length];
+            //        Array.Copy(data, tmp, length);
+
+            //        if (!plugin._onSend(ref tmp, ref length))
+            //        {
+            //            result = false;
+            //        }
+
+            //        Array.Copy(tmp, data, length);
+            //    }
+            //}
 
             return result;
         }
@@ -622,23 +637,25 @@ namespace ClassicUO.Network
 
         internal static void UpdatePlayerPosition(int x, int y, int z)
         {
-            foreach (Plugin plugin in Plugins)
-            {
-                try
-                {
-                    // TODO: need fixed on razor side
-                    // if you quick entry (0.5-1 sec after start, without razor window loaded) - breaks CUO.
-                    // With this fix - the razor does not work, but client does not crashed.
-                    if (plugin._onUpdatePlayerPosition != null)
-                    {
-                        plugin._onUpdatePlayerPosition(x, y, z);
-                    }
-                }
-                catch
-                {
-                    Log.Error("Plugin initialization failed, please re login");
-                }
-            }
+            Network.Plugins.PluginManager.OnPlayerPosition(x, y, z);
+
+            //foreach (Plugin plugin in Plugins)
+            //{
+            //    try
+            //    {
+            //        // TODO: need fixed on razor side
+            //        // if you quick entry (0.5-1 sec after start, without razor window loaded) - breaks CUO.
+            //        // With this fix - the razor does not work, but client does not crashed.
+            //        if (plugin._onUpdatePlayerPosition != null)
+            //        {
+            //            plugin._onUpdatePlayerPosition(x, y, z);
+            //        }
+            //    }
+            //    catch
+            //    {
+            //        Log.Error("Plugin initialization failed, please re login");
+            //    }
+            //}
         }
 
         private static bool OnPluginRecv(ref byte[] data, ref int length)
