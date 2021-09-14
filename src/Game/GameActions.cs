@@ -428,6 +428,11 @@ namespace ClassicUO.Game
             UIManager.GetGump<PartyInviteGump>()?.Dispose();
         }
 
+        public static void RequestPartyRemoveMemberByTarget()
+        {
+            Socket.Send_PartyRemoveRequest(0x00);
+        }
+
         public static void RequestPartyRemoveMember(uint serial)
         {
             Socket.Send_PartyRemoveRequest(serial);
