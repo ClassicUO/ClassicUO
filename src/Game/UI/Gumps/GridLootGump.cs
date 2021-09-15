@@ -408,8 +408,9 @@ namespace ClassicUO.Game.UI.Gumps
                     0,
                     size,
                     1,
-                    item.Amount,
-                    item.Amount,
+                    // OSI has an odd behaviour. It uses the Amount field to store unknown data for non stackable items.
+                    item.ItemData.IsStackable ? item.Amount : 1,
+                    item.ItemData.IsStackable ? item.Amount : 1,
                     HSliderBarStyle.MetalWidgetRecessedBar,
                     true,
                     color: 0xFFFF,

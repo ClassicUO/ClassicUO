@@ -1408,7 +1408,7 @@ namespace ClassicUO.IO.Resources
                 ptr = null;
             }
 
-            return textWidth;
+            return textWidth + 4;
         }
 
         public unsafe MultilinesFontInfo GetInfoUnicode

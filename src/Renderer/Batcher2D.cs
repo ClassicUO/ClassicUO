@@ -53,8 +53,6 @@ namespace ClassicUO.Renderer
         private int _currentBufferPosition;
 
         private Effect _customEffect;
-        private BoundingBox _drawingArea;
-
 
         private readonly IndexBuffer _indexBuffer;
         private int _numSprites;
@@ -1645,12 +1643,6 @@ namespace ClassicUO.Renderer
             EnsureNotStarted();
             _started = true;
 
-            _drawingArea.Min.X = 0;
-            _drawingArea.Min.Y = 0;
-            _drawingArea.Min.Z = -150;
-            _drawingArea.Max.X = GraphicsDevice.Viewport.Width;
-            _drawingArea.Max.Y = GraphicsDevice.Viewport.Height;
-            _drawingArea.Max.Z = 150;
 
             _customEffect = customEffect;
             _transformMatrix = transform_matrix;
@@ -1747,33 +1739,33 @@ namespace ClassicUO.Renderer
             }
 
             int arrayOffset = 0;
+        nextbatch:
+            int batchSize = Math.Min(_numSprites, MAX_SPRITES);
+            int baseOff = UpdateVertexBuffer(arrayOffset, batchSize);
+            int offset = 0;
 
-            do
+            Texture2D curTexture = _textureInfo[arrayOffset];
+
+            for (int i = 1; i < batchSize; ++i)
             {
-                int batchSize = Math.Min(_numSprites, MAX_SPRITES);
-                int baseOff = UpdateVertexBuffer(arrayOffset, batchSize);
-                int offset = 0;
+                Texture2D tex = _textureInfo[arrayOffset + i];
 
-                Texture2D curTexture = _textureInfo[arrayOffset];
-
-                for (int i = 1; i < batchSize; ++i)
+                if (tex != curTexture)
                 {
-                    Texture2D tex = _textureInfo[arrayOffset + i];
-
-                    if (tex != curTexture)
-                    {
-                        InternalDraw(curTexture, baseOff + offset, i - offset);
-                        curTexture = tex;
-                        offset = i;
-                    }
+                    InternalDraw(curTexture, baseOff + offset, i - offset);
+                    curTexture = tex;
+                    offset = i;
                 }
+            }
 
-                InternalDraw(curTexture, baseOff + offset, batchSize - offset);
+            InternalDraw(curTexture, baseOff + offset, batchSize - offset);
 
+            if (_numSprites > MAX_SPRITES)
+            {
                 _numSprites -= MAX_SPRITES;
                 arrayOffset += MAX_SPRITES;
+                goto nextbatch;
             }
-            while (_numSprites > MAX_SPRITES);
 
             _numSprites = 0;
         }
