@@ -92,155 +92,90 @@ namespace ClassicUO.IO.Resources
         }
 
         private UOTexture[] _terrainAtlas;
-        private UOTexture[] _artAtlas;
 
-        public void CreateTerrainAtlasTextures()
+        public unsafe void CreateTerrainAtlasTextures()
         {
-            ushort increase = 300;          
+            const int MAX_TEXTURE_SIZE = 1024 * 1024;
 
-            _terrainAtlas = new UOTexture[(0x4000 / increase) + 1];
+            int textureCount = ((44 * 44 * 0x4000) / MAX_TEXTURE_SIZE) + 1;
+            int maxSize = 1024 / 44;
+           
+            ushort graphic = 0;
 
-            ushort start = 0;
-            ushort end = increase;
+            _terrainAtlas = new UOTexture[textureCount];
+            Span<uint> data = stackalloc uint[44 * 44];
 
-            for (int i = 0; i < _terrainAtlas.Length; ++i)
+            for (int k = 0; k < textureCount; k++)
             {
-                _terrainAtlas[i] = CreateTerrainAtlasTexture(start, end);
+                _terrainAtlas[k] = new UOTexture(1024, 1024);
+                Rectangle rect = new Rectangle(0, 0, 44, 44);
+                
+                for (int h = 0; h < maxSize; h += 1)
+                {
+                    rect.X = 0;
 
-                start = end;
-                end += increase;
+                    for (int w = 0; w < maxSize; w += 1)
+                    {
+                        //graphic &= _graphicMask;
+
+                        if (graphic >= 0x4000)
+                        {
+                            h = maxSize;
+                            break;
+                        }
+
+                        ref UOFileIndex entry = ref GetValidRefEntry(graphic);
+
+                        if (entry.Length == 0)
+                        {
+                            data.Fill(0);
+                        }
+                        else
+                        {
+                            _file.SetData(entry.Address, entry.FileSize);
+                            _file.Seek(entry.Offset);
+
+                            for (int i = 0; i < 22; ++i)
+                            {
+                                int start = 22 - (i + 1);
+                                int pos = i * 44 + start;
+                                int end = start + ((i + 1) << 1);
+
+                                for (int j = start; j < end; ++j)
+                                {
+                                    data[pos++] = HuesHelper.Color16To32(_file.ReadUShort()) | 0xFF_00_00_00;
+                                }
+                            }
+
+                            for (int i = 0; i < 22; ++i)
+                            {
+                                int pos = (i + 22) * 44 + i;
+                                int end = i + ((22 - i) << 1);
+
+                                for (int j = i; j < end; ++j)
+                                {
+                                    data[pos++] = HuesHelper.Color16To32(_file.ReadUShort()) | 0xFF_00_00_00;
+                                }
+                            }
+                        }
+
+                        _terrainAtlas[k].SetDataPointerEXT(0, rect, (IntPtr)System.Runtime.CompilerServices.Unsafe.AsPointer(ref data[0]), 44 * 44 * sizeof(uint));
+
+                        rect.X += 44;
+
+                        ++graphic;
+                    }
+
+                    rect.Y += 44;
+                }
+
+
+                //using (var writer = File.Create($"atlas/texture{k}.png"))
+                //    atlas[k].SaveAsPng(writer, 1024, 1024);
             }
         }
+
    
-        private unsafe UOTexture CreateTerrainAtlasTexture(ushort graphicStart, ushort graphicEnd)
-        {
-            const int WIDTH = 44;
-            const int HEIGHT = 44;
-            const int SIZE = WIDTH * HEIGHT;
-
-            int count = Math.Max(0, graphicEnd - graphicStart);
-
-            if (count == 0)
-            {
-                return null;
-            }
-
-            int width = WIDTH * count;
-
-
-            var texture = new UOTexture(width, HEIGHT);
-
-            Span<uint> data = stackalloc uint[SIZE];
-            Rectangle rect = new Rectangle(0, 0, WIDTH, HEIGHT);
-
-            for (ushort graphic = graphicStart; graphic <= graphicEnd; graphic++)
-            {
-                graphic &= _graphicMask;
-
-                ref UOFileIndex entry = ref GetValidRefEntry(graphic);
-
-                if (entry.Length == 0)
-                {
-                    data.Fill(0);
-                }
-                else
-                {
-                    _file.SetData(entry.Address, entry.FileSize);
-                    _file.Seek(entry.Offset);
-
-                    for (int i = 0; i < 22; ++i)
-                    {
-                        int start = 22 - (i + 1);
-                        int pos = i * 44 + start;
-                        int end = start + ((i + 1) << 1);
-
-                        for (int j = start; j < end; ++j)
-                        {
-                            data[pos++] = HuesHelper.Color16To32(_file.ReadUShort()) | 0xFF_00_00_00;
-                        }
-                    }
-
-                    for (int i = 0; i < 22; ++i)
-                    {
-                        int pos = (i + 22) * 44 + i;
-                        int end = i + ((22 - i) << 1);
-
-                        for (int j = i; j < end; ++j)
-                        {
-                            data[pos++] = HuesHelper.Color16To32(_file.ReadUShort()) | 0xFF_00_00_00;
-                        }
-                    }
-                }
-
-                texture.SetDataPointerEXT(0, rect, (IntPtr)System.Runtime.CompilerServices.Unsafe.AsPointer(ref data[0]), SIZE * sizeof(uint));
-
-                rect.X += WIDTH;
-            }
-
-            return texture;
-        }
-
-        //private unsafe UOTexture CreateArtAtlasTexture(ushort graphicStart, ushort graphicEnd)
-        //{
-
-        //    var texture = new UOTexture(1, 1);
-
-        //    for (ushort graphic = graphicStart; graphic <= graphicEnd; graphic++)
-        //    {
-        //        ref UOFileIndex entry = ref GetValidRefEntry(graphic + 0x4000);
-
-        //        if (ReadHeader(_file, ref entry, out short width, out short height))
-        //        {
-        //            uint[] buffer = null;
-
-        //            Span<uint> pixels = width * height <= 1024 ? stackalloc uint[1024] : (buffer = System.Buffers.ArrayPool<uint>.Shared.Rent(width * height));
-
-        //            try
-        //            {
-        //                if (ReadData(pixels, width, height, _file))
-        //                {
-        //                    // keep the cursor graphic check to cleanup edges
-        //                    if ((graphic >= 0x2053 && graphic <= 0x2062) || (graphic >= 0x206A && graphic <= 0x2079))
-        //                    {
-        //                        for (int i = 0; i < width; i++)
-        //                        {
-        //                            pixels[i] = 0;
-        //                            pixels[(height - 1) * width + i] = 0;
-        //                        }
-
-        //                        for (int i = 0; i < height; i++)
-        //                        {
-        //                            pixels[i * width] = 0;
-        //                            pixels[i * width + width - 1] = 0;
-        //                        }
-        //                    }
-
-
-        //                    FinalizeData
-        //                    (
-        //                        pixels,
-        //                        ref entry,
-        //                        graphic,
-        //                        width,
-        //                        height,
-        //                        out var rect
-        //                    );
-
-        //                    texture.SetDataPointerEXT(0, rect, (IntPtr)System.Runtime.CompilerServices.Unsafe.AsPointer(ref pixels[0]), SIZE * sizeof(uint));
-        //                }
-        //            }
-        //            finally
-        //            {
-        //                if (buffer != null)
-        //                {
-        //                    System.Buffers.ArrayPool<uint>.Shared.Return(buffer, true);
-        //                }
-        //            }
-        //        }
-        //    }
-          
-        //}
-
         public override ArtTexture GetTexture(uint g)
         {
             if (g >= Resources.Length)
@@ -269,32 +204,10 @@ namespace ClassicUO.IO.Resources
 
         public UOTexture GetLandTexture(uint g)
         {
-            //if (g >= _landResources.Length)
-            //{
-            //    return null;
-            //}
-
-            int index = ((int)(g / 300));
+            int maxSize = 1024 / 44;
+            int index = ((int)(g / (maxSize * maxSize)));
 
             return _terrainAtlas[index];
-
-            //ref UOTexture texture = ref _landResources[g];
-
-            //if (texture == null || texture.IsDisposed)
-            //{
-            //    ReadLandArt(ref texture, (ushort) g);
-
-            //    if (texture != null)
-            //    {
-            //        _usedLandTextureIds.AddLast(g);
-            //    }
-            //}
-            //else
-            //{
-            //    texture.Ticks = Time.Ticks;
-            //}
-
-            //return texture;
         }
 
         public unsafe IntPtr CreateCursorSurfacePtr(int index, ushort customHue, out int hotX, out int hotY)
