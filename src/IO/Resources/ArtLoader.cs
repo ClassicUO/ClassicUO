@@ -93,8 +93,80 @@ namespace ClassicUO.IO.Resources
 
         private UOTexture[] _terrainAtlas;
 
+        private void FillArtPixels(ushort graphic, ref UOFileIndex entry, ref Span<uint> pixels, out Rectangle bounds)
+        {
+            bounds = Rectangle.Empty;
+
+            if (ReadHeader(_file, ref entry, out short width, out short height))
+            {
+                if (ReadData(pixels, width, height, _file))
+                {
+                    // keep the cursor graphic check to cleanup edges
+                    if ((graphic >= 0x2053 && graphic <= 0x2062) || (graphic >= 0x206A && graphic <= 0x2079))
+                    {
+                        for (int i = 0; i < width; i++)
+                        {
+                            pixels[i] = 0;
+                            pixels[(height - 1) * width + i] = 0;
+                        }
+
+                        for (int i = 0; i < height; i++)
+                        {
+                            pixels[i * width] = 0;
+                            pixels[i * width + width - 1] = 0;
+                        }
+                    }
+
+                    FinalizeData
+                    (
+                        pixels,
+                        ref entry,
+                        graphic,
+                        width,
+                        height,
+                        out bounds
+                    );
+                }
+            }
+        }
+
+        private void CreateNewAtlas()
+        {
+            TextureAtlas atlas = new TextureAtlas(Client.Game.GraphicsDevice, 1024, 1024, Microsoft.Xna.Framework.Graphics.SurfaceFormat.Color);
+
+            ushort g = 0x1234;
+
+            ref UOFileIndex entry = ref GetValidRefEntry(g + 0x4000);
+
+            if (ReadHeader(_file, ref entry, out short width, out short height))
+            {
+                uint[] buffer = null;
+
+                Span<uint> artPixels = width * height <= 1024 ? stackalloc uint[1024] : (buffer = System.Buffers.ArrayPool<uint>.Shared.Rent(width * height));
+
+                try
+                {
+                    FillArtPixels(g, ref entry, ref artPixels, out var artBounds);
+
+                    atlas.AddSprite(g, artPixels, artBounds);
+                }
+                finally
+                {
+                    if (buffer != null)
+                    {
+                        System.Buffers.ArrayPool<uint>.Shared.Return(buffer, true);
+                    }
+                }
+            }
+        }
+
         public unsafe void CreateTerrainAtlasTextures()
         {
+            CreateNewAtlas();
+
+
+
+
             const int MAX_TEXTURE_SIZE = 1024 * 1024;
 
             int textureCount = ((44 * 44 * 0x4000) / MAX_TEXTURE_SIZE) + 1;
@@ -159,7 +231,13 @@ namespace ClassicUO.IO.Resources
                             }
                         }
 
-                        _terrainAtlas[k].SetDataPointerEXT(0, rect, (IntPtr)System.Runtime.CompilerServices.Unsafe.AsPointer(ref data[0]), 44 * 44 * sizeof(uint));
+                        _terrainAtlas[k].SetDataPointerEXT
+                        (
+                            0, 
+                            rect,
+                            (IntPtr)System.Runtime.CompilerServices.Unsafe.AsPointer(ref data.GetPinnableReference()),
+                            44 * 44 * sizeof(uint)
+                        );
 
                         rect.X += 44;
 
@@ -175,7 +253,7 @@ namespace ClassicUO.IO.Resources
             }
         }
 
-   
+
         public override ArtTexture GetTexture(uint g)
         {
             if (g >= Resources.Length)
