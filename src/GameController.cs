@@ -159,7 +159,7 @@ namespace ClassicUO
             GraphicsDevice.Textures[2] = _hueSamplers[1];
             GraphicsDevice.Textures[3] = _hueSamplers[2];
 
-            ArtLoader.Instance.CreateTerrainAtlasTextures();
+            ArtLoader.Instance.CreateTerrainAtlasTextures(GraphicsDevice);
 
             UIManager.InitializeGameCursor();
             AnimatedStaticsManager.Initialize();

@@ -102,28 +102,11 @@ namespace ClassicUO.Game.GameObjects
 
         protected static void DrawLand(UltimaBatcher2D batcher, ushort graphic, int x, int y, ref Vector3 hue)
         {
-            UOTexture texture = ArtLoader.Instance.GetLandTexture(graphic);
+            var texture = ArtLoader.Instance.GetLandTexture(graphic, out var bounds);
 
             if (texture != null)
             {
-                int maxSize = 23 * 23;
-                graphic = (ushort)(graphic % maxSize);
-
-                int textureCoordX = ((graphic % 23) * 44);
-                int textureCoordY = (graphic / 23) * 44;
-
-                texture.Ticks = Time.Ticks;
-
-                batcher.Draw2D(texture, x, y, textureCoordX, textureCoordY, 44, 44, ref hue);
-
-                //batcher.DrawSprite
-                //(
-                //    texture,
-                //    x,
-                //    y,
-                //    false,
-                //    ref hue
-                //);
+                batcher.Draw2D(texture, x, y, bounds.X, bounds.Y, 44, 44, ref hue);
             }
         }
 
@@ -258,11 +241,10 @@ namespace ClassicUO.Game.GameObjects
 
             graphic = (ushort) (graphic + index.AnimOffset);
 
-            ArtTexture texture = ArtLoader.Instance.GetTexture(graphic);
+            var texture = ArtLoader.Instance.GetStaticTexture(graphic, out var bounds);
 
             if (texture != null)
             {
-                texture.Ticks = Time.Ticks;
                 index = ref ArtLoader.Instance.GetValidRefEntry(graphic + 0x4000);
               
                 x -= index.Width;
@@ -323,14 +305,16 @@ namespace ClassicUO.Game.GameObjects
                         batcher.SetStencil(StaticTransparentStencil.Value);
                         hue.Z = alpha;
 
-                        batcher.DrawSprite
-                        (
-                            texture,
-                            x,
-                            y,
-                            false,
-                            ref hue
-                        );
+                        //batcher.DrawSprite
+                        //(
+                        //    texture,
+                        //    x,
+                        //    y,
+                        //    false,
+                        //    ref hue
+                        //);
+
+                        batcher.Draw2D(texture, x, y, bounds.X, bounds.Y, bounds.Width, bounds.Height, ref hue);
 
                         batcher.SetStencil(null);
 
@@ -345,14 +329,16 @@ namespace ClassicUO.Game.GameObjects
                     batcher.DrawSpriteShadow(texture, x, y, false);
                 }
 
-                batcher.DrawSprite
-                (
-                    texture,
-                    x,
-                    y,
-                    false,
-                    ref hue
-                );
+                //batcher.DrawSprite
+                //(
+                //    texture,
+                //    x,
+                //    y,
+                //    false,
+                //    ref hue
+                //);
+
+                batcher.Draw2D(texture, x, y, bounds.X, bounds.Y, bounds.Width, bounds.Height, ref hue);
             }
         }
     }

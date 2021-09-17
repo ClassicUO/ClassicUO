@@ -91,7 +91,6 @@ namespace ClassicUO.IO.Resources
             );
         }
 
-        private UOTexture[] _terrainAtlas;
 
         private void FillArtPixels(ushort graphic, ref UOFileIndex entry, ref Span<uint> pixels, out Rectangle bounds)
         {
@@ -130,126 +129,91 @@ namespace ClassicUO.IO.Resources
             }
         }
 
-        private void CreateNewAtlas()
+        private void CreateNewAtlas(TextureAtlas atlas, ushort g, bool isTerrain)
         {
-            TextureAtlas atlas = new TextureAtlas(Client.Game.GraphicsDevice, 1024, 1024, Microsoft.Xna.Framework.Graphics.SurfaceFormat.Color);
+            ref UOFileIndex entry = ref GetValidRefEntry(g + (isTerrain ? 0 : 0x4000));
 
-            ushort g = 0x1234;
-
-            ref UOFileIndex entry = ref GetValidRefEntry(g + 0x4000);
-
-            if (ReadHeader(_file, ref entry, out short width, out short height))
+            if (isTerrain)
             {
-                uint[] buffer = null;
-
-                Span<uint> artPixels = width * height <= 1024 ? stackalloc uint[1024] : (buffer = System.Buffers.ArrayPool<uint>.Shared.Rent(width * height));
-
-                try
+                if (entry.Length == 0)
                 {
-                    FillArtPixels(g, ref entry, ref artPixels, out var artBounds);
-
-                    atlas.AddSprite(g, artPixels, artBounds);
+                    return;
                 }
-                finally
+
+                Span<uint> data = stackalloc uint[44 * 44];
+
+                _file.SetData(entry.Address, entry.FileSize);
+                _file.Seek(entry.Offset);
+
+                for (int i = 0; i < 22; ++i)
                 {
-                    if (buffer != null)
+                    int start = 22 - (i + 1);
+                    int pos = i * 44 + start;
+                    int end = start + ((i + 1) << 1);
+
+                    for (int j = start; j < end; ++j)
                     {
-                        System.Buffers.ArrayPool<uint>.Shared.Return(buffer, true);
+                        data[pos++] = HuesHelper.Color16To32(_file.ReadUShort()) | 0xFF_00_00_00;
+                    }
+                }
+
+                for (int i = 0; i < 22; ++i)
+                {
+                    int pos = (i + 22) * 44 + i;
+                    int end = i + ((22 - i) << 1);
+
+                    for (int j = i; j < end; ++j)
+                    {
+                        data[pos++] = HuesHelper.Color16To32(_file.ReadUShort()) | 0xFF_00_00_00;
+                    }
+                }
+
+                atlas.AddSprite(g, data, 44, 44);
+            }
+            else
+            {
+                if (ReadHeader(_file, ref entry, out short width, out short height))
+                {
+                    uint[] buffer = null;
+
+                    Span<uint> artPixels = width * height <= 1024 ? stackalloc uint[1024] : (buffer = System.Buffers.ArrayPool<uint>.Shared.Rent(width * height));
+
+                    try
+                    {
+                        FillArtPixels(g, ref entry, ref artPixels, out var artBounds);
+
+                        atlas.AddSprite(g, artPixels, width, height);
+                    }
+                    finally
+                    {
+                        if (buffer != null)
+                        {
+                            System.Buffers.ArrayPool<uint>.Shared.Return(buffer, true);
+                        }
                     }
                 }
             }
         }
 
-        public unsafe void CreateTerrainAtlasTextures()
+        const int ATLAS_SIZE = 1024 * 4;
+
+        private TextureAtlas _terrainAtlas, _staticAtlas;
+
+
+        public unsafe void CreateTerrainAtlasTextures(Microsoft.Xna.Framework.Graphics.GraphicsDevice device)
         {
-            CreateNewAtlas();
+            _staticAtlas = new TextureAtlas(device, ATLAS_SIZE, ATLAS_SIZE, Microsoft.Xna.Framework.Graphics.SurfaceFormat.Color);
 
-
-
-
-            const int MAX_TEXTURE_SIZE = 1024 * 1024;
-
-            int textureCount = ((44 * 44 * 0x4000) / MAX_TEXTURE_SIZE) + 1;
-            int maxSize = 1024 / 44;
-           
-            ushort graphic = 0;
-
-            _terrainAtlas = new UOTexture[textureCount];
-            Span<uint> data = stackalloc uint[44 * 44];
-
-            for (int k = 0; k < textureCount; k++)
+            for (ushort g = 0, count = (ushort)(Entries.Length - 0x4000); g < count; g++)
             {
-                _terrainAtlas[k] = new UOTexture(1024, 1024);
-                Rectangle rect = new Rectangle(0, 0, 44, 44);
-                
-                for (int h = 0; h < maxSize; h += 1)
-                {
-                    rect.X = 0;
+                CreateNewAtlas(_staticAtlas, g, false);
+            }
 
-                    for (int w = 0; w < maxSize; w += 1)
-                    {
-                        //graphic &= _graphicMask;
-
-                        if (graphic >= 0x4000)
-                        {
-                            h = maxSize;
-                            break;
-                        }
-
-                        ref UOFileIndex entry = ref GetValidRefEntry(graphic);
-
-                        if (entry.Length == 0)
-                        {
-                            data.Fill(0);
-                        }
-                        else
-                        {
-                            _file.SetData(entry.Address, entry.FileSize);
-                            _file.Seek(entry.Offset);
-
-                            for (int i = 0; i < 22; ++i)
-                            {
-                                int start = 22 - (i + 1);
-                                int pos = i * 44 + start;
-                                int end = start + ((i + 1) << 1);
-
-                                for (int j = start; j < end; ++j)
-                                {
-                                    data[pos++] = HuesHelper.Color16To32(_file.ReadUShort()) | 0xFF_00_00_00;
-                                }
-                            }
-
-                            for (int i = 0; i < 22; ++i)
-                            {
-                                int pos = (i + 22) * 44 + i;
-                                int end = i + ((22 - i) << 1);
-
-                                for (int j = i; j < end; ++j)
-                                {
-                                    data[pos++] = HuesHelper.Color16To32(_file.ReadUShort()) | 0xFF_00_00_00;
-                                }
-                            }
-                        }
-
-                        _terrainAtlas[k].SetDataPointerEXT
-                        (
-                            0, 
-                            rect,
-                            (IntPtr)System.Runtime.CompilerServices.Unsafe.AsPointer(ref data.GetPinnableReference()),
-                            44 * 44 * sizeof(uint)
-                        );
-
-                        rect.X += 44;
-
-                        ++graphic;
-                    }
-
-                    rect.Y += 44;
-                }
-
-
-                //using (var writer = File.Create($"atlas/texture{k}.png"))
-                //    atlas[k].SaveAsPng(writer, 1024, 1024);
+            _terrainAtlas = new TextureAtlas(device, ATLAS_SIZE, ATLAS_SIZE, Microsoft.Xna.Framework.Graphics.SurfaceFormat.Color);
+         
+            for (ushort g = 0; g < 0x4000; g++)
+            {
+                CreateNewAtlas(_terrainAtlas, g, true);
             }
         }
 
@@ -280,12 +244,14 @@ namespace ClassicUO.IO.Resources
             return texture;
         }
 
-        public UOTexture GetLandTexture(uint g)
+        public Microsoft.Xna.Framework.Graphics.Texture2D GetLandTexture(uint g, out Rectangle bounds)
         {
-            int maxSize = 1024 / 44;
-            int index = ((int)(g / (maxSize * maxSize)));
+            return _terrainAtlas.GetTexture(g, out bounds);
+        }
 
-            return _terrainAtlas[index];
+        public Microsoft.Xna.Framework.Graphics.Texture2D GetStaticTexture(uint g, out Rectangle bounds)
+        {
+            return _staticAtlas.GetTexture(g, out bounds);
         }
 
         public unsafe IntPtr CreateCursorSurfacePtr(int index, ushort customHue, out int hotX, out int hotY)
