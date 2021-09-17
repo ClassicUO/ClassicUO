@@ -133,6 +133,8 @@ namespace ClassicUO.Renderer
 
         public GraphicsDevice GraphicsDevice { get; }
 
+        public int TextureSwitches, FlushesDone;
+
         public void Dispose()
         {
             _vertexInfo = null;
@@ -1642,7 +1644,8 @@ namespace ClassicUO.Renderer
         {
             EnsureNotStarted();
             _started = true;
-
+            TextureSwitches = 0;
+            FlushesDone = 0;
 
             _customEffect = customEffect;
             _transformMatrix = transform_matrix;
@@ -1740,6 +1743,8 @@ namespace ClassicUO.Renderer
 
             int arrayOffset = 0;
         nextbatch:
+            ++FlushesDone;
+
             int batchSize = Math.Min(_numSprites, MAX_SPRITES);
             int baseOff = UpdateVertexBuffer(arrayOffset, batchSize);
             int offset = 0;
@@ -1752,6 +1757,7 @@ namespace ClassicUO.Renderer
 
                 if (tex != curTexture)
                 {
+                    ++TextureSwitches;
                     InternalDraw(curTexture, baseOff + offset, i - offset);
                     curTexture = tex;
                     offset = i;

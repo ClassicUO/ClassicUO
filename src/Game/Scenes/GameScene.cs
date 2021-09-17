@@ -1125,6 +1125,10 @@ namespace ClassicUO.Game.Scenes
                 _multi.Draw(batcher, _multi.RealScreenPosition.X, _multi.RealScreenPosition.Y, ref hueVec);
             }
 
+            hueVec.Y = 0;
+
+            batcher.DrawString(Fonts.Bold, $"Flushes: {batcher.FlushesDone}\nSwitches: {batcher.TextureSwitches}", 200, 200, ref hueVec);
+
             // draw weather
             Weather.Draw(batcher, 0, 0);
             batcher.End();
