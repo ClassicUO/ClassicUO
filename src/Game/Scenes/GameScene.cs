@@ -494,6 +494,41 @@ namespace ClassicUO.Game.Scenes
                     else if (lightObject is Item it)
                     {
                         light.ID = (byte) it.ItemData.LightIndex;
+
+                        if (obj is Mobile mob)
+                        {
+                            switch (mob.Direction)
+                            {
+                                case Direction.Right:
+                                    y += 33;
+                                    x += 22;
+
+                                    break;
+
+                                case Direction.Left:
+                                    y += 33;
+                                    x -= 22;
+
+                                    break;
+
+                                case Direction.East:
+                                    x += 22;
+                                    y += 55;
+
+                                    break;
+
+                                case Direction.Down:
+                                    y += 55;
+
+                                    break;
+
+                                case Direction.South:
+                                    x -= 22;
+                                    y += 55;
+
+                                    break;
+                            }
+                        }
                     }
                     else if (obj is Mobile _)
                     {
