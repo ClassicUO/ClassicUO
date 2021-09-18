@@ -180,7 +180,7 @@ namespace ClassicUO.IO.Resources
 
                     try
                     {
-                        FillArtPixels((ushort) g, ref entry, ref artPixels, out var artBounds);
+                        FillArtPixels((ushort) (g & ~0x4000), ref entry, ref artPixels, out var artBounds);
 
                         atlas.AddSprite((uint) g, artPixels, width, height);
                     }
@@ -246,6 +246,7 @@ namespace ClassicUO.IO.Resources
 
         public Microsoft.Xna.Framework.Graphics.Texture2D GetLandTexture(uint g, out Rectangle bounds)
         {
+            g &= _graphicMask;
             if (!_staticAtlas.IsHashExists(g))
             {
                 CreateNewAtlas(_staticAtlas, (int) g, true);
@@ -486,11 +487,6 @@ namespace ClassicUO.IO.Resources
 
         private void FinalizeData(Span<uint> pixels, ref UOFileIndex entry, ushort graphic, int width, int height, out Rectangle bounds)
         {
-            if ((graphic & 0x4000) != 0)
-            {
-                graphic = (ushort)(graphic & ~0x4000);
-            }
-
             int pos1 = 0;
             int minX = width, minY = height, maxX = 0, maxY = 0;
 

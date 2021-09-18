@@ -18,8 +18,6 @@ namespace ClassicUO.Renderer
         private readonly GraphicsDevice _device;
         private readonly List<Texture2D> _textureList;
         private Packer _packer;
-        //private readonly Dictionary<uint, (int, Rectangle)> _spritesBounds = new Dictionary<uint, (int, Rectangle)>();
-
         private readonly Rectangle[] _spriteBounds;
         private readonly int[] _spriteTextureIndices;
 
@@ -41,11 +39,6 @@ namespace ClassicUO.Renderer
 
         public unsafe void AddSprite<T>(uint hash, Span<T> pixels, int width, int height) where T : unmanaged
         {
-            //if (_spritesBounds.ContainsKey(hash))
-            //{
-            //    return;
-            //}
-
             if (IsHashExists(hash))
             {
                 return;
@@ -59,9 +52,8 @@ namespace ClassicUO.Renderer
                 CreateNewTexture2D();
             }
 
-
-            PackerRectangle pr;
-            while (!_packer.PackRect(width, height, hash, out pr))
+            ref Rectangle pr = ref _spriteBounds[hash];
+            while (!_packer.PackRect(width, height, null, out pr))
             {
                 CreateNewTexture2D();
                 index = _textureList.Count - 1;
@@ -74,15 +66,12 @@ namespace ClassicUO.Renderer
                 texture.SetDataPointerEXT
                 (
                     0,
-                    pr.Rectangle,
+                    pr,
                     (IntPtr)src,
                     sizeof(T) * pixels.Length
                 );
             }
 
-            //_spritesBounds[hash] = (index, pr.Rectangle);
-
-            _spriteBounds[hash] = pr.Rectangle;
             _spriteTextureIndices[hash] = index;
         }
 
@@ -97,15 +86,6 @@ namespace ClassicUO.Renderer
 
         public Texture2D GetTexture(uint hash, out Rectangle bounds)
         {
-            //if (_spritesBounds.TryGetValue(hash, out var v))
-            //{
-            //    bounds = v.Item2;
-            //    return _textureList[v.Item1];
-            //}
-
-            //bounds = Rectangle.Empty;
-            //return null;
-
             bounds = _spriteBounds[(int)hash];
             return _textureList[_spriteTextureIndices[(int) hash]];
         }
@@ -134,9 +114,9 @@ namespace ClassicUO.Renderer
                     texture.Dispose();
                 }
             }
+
             _packer.Dispose();
             _textureList.Clear();
-            //_spritesBounds.Clear();
         }
     }
 }
