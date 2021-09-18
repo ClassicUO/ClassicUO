@@ -5,37 +5,9 @@ using static StbRectPackSharp.StbRectPack;
 
 namespace StbRectPackSharp
 {
-//#if !STBSHARP_INTERNAL
-//	public
-//#else
-//	internal
-//#endif
-//	struct PackerRectangle
-//	{
-//		public Rectangle Rectangle { get; private set; }
-
-//		public int X => Rectangle.X;
-//		public int Y => Rectangle.Y;
-//		public int Width => Rectangle.Width;
-//		public int Height => Rectangle.Height;
-
-//		public object Data { get; private set; }
-
-//		public PackerRectangle(Rectangle rect, object data)
-//		{
-//			Rectangle = rect;
-//			Data = data;
-//		}
-//	}
-
 	/// <summary>
 	/// Simple Packer class that doubles size of the atlas if the place runs out
 	/// </summary>
-#if !STBSHARP_INTERNAL
-	public
-#else
-	internal
-#endif
 	unsafe class Packer : IDisposable
 	{
 		private readonly stbrp_context _context;
@@ -79,9 +51,8 @@ namespace StbRectPackSharp
 		/// </summary>
 		/// <param name="width"></param>
 		/// <param name="height"></param>
-		/// <param name="userData"></param>
 		/// <returns></returns>
-		public bool PackRect(int width, int height, object userData, out Rectangle packRectangle)
+		public bool PackRect(int width, int height, out Rectangle packRectangle)
 		{
 			var rect = new stbrp_rect
 			{
@@ -98,7 +69,7 @@ namespace StbRectPackSharp
 
 			if (result == 0)
 			{
-				packRectangle = default;
+				packRectangle = Rectangle.Empty;
 				return false;
 			}
 

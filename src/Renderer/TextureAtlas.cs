@@ -19,7 +19,7 @@ namespace ClassicUO.Renderer
         private readonly List<Texture2D> _textureList;
         private Packer _packer;
         private readonly Rectangle[] _spriteBounds;
-        private readonly int[] _spriteTextureIndices;
+        private readonly byte[] _spriteTextureIndices;
 
         public TextureAtlas(GraphicsDevice device, int width, int height, SurfaceFormat format, int maxSpriteCount)
         {
@@ -30,7 +30,7 @@ namespace ClassicUO.Renderer
 
             _textureList = new List<Texture2D>();
             _spriteBounds = new Rectangle[maxSpriteCount];
-            _spriteTextureIndices = new int[maxSpriteCount];
+            _spriteTextureIndices = new byte[maxSpriteCount];
         }
 
 
@@ -53,7 +53,7 @@ namespace ClassicUO.Renderer
             }
 
             ref Rectangle pr = ref _spriteBounds[hash];
-            while (!_packer.PackRect(width, height, null, out pr))
+            while (!_packer.PackRect(width, height, out pr))
             {
                 CreateNewTexture2D();
                 index = _textureList.Count - 1;
@@ -72,7 +72,7 @@ namespace ClassicUO.Renderer
                 );
             }
 
-            _spriteTextureIndices[hash] = index;
+            _spriteTextureIndices[hash] = (byte) index;
         }
 
         private void CreateNewTexture2D()
