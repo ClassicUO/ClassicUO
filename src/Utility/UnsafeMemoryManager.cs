@@ -138,6 +138,16 @@ namespace ClassicUO.Utility
             }
         }
 
+        public static void Free(ref UnmanagedMemoryPool pool, void* ptr)
+        {
+            if (ptr != null)
+            {
+                void** pHead = (void**)ptr;
+                *pHead = pool.Free;
+                pool.Free = pHead;
+            }
+        }
+
         public static void FreeAll(UnmanagedMemoryPool* pool)
         {
             void** pCur = (void**) pool->Alloc;

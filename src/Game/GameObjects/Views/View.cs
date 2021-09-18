@@ -106,7 +106,7 @@ namespace ClassicUO.Game.GameObjects
 
             if (texture != null)
             {
-                batcher.Draw2D(texture, x, y, bounds.X, bounds.Y, 44, 44, ref hue);
+                batcher.Draw2D(texture, x, y, bounds.X, bounds.Y, bounds.Width, bounds.Height, ref hue);
             }
         }
 
@@ -158,21 +158,17 @@ namespace ClassicUO.Game.GameObjects
 
         protected static void DrawStatic(UltimaBatcher2D batcher, ushort graphic, int x, int y, ref Vector3 hue)
         {
-            ArtTexture texture = ArtLoader.Instance.GetTexture(graphic);
+            var texture = ArtLoader.Instance.GetStaticTexture(graphic, out var bounds);
 
             if (texture != null)
             {
-                texture.Ticks = Time.Ticks;
+                //texture.Ticks = Time.Ticks;
                 ref UOFileIndex index = ref ArtLoader.Instance.GetValidRefEntry(graphic + 0x4000);
 
-                batcher.DrawSprite
-                (
-                    texture,
-                    x - index.Width,
-                    y - index.Height,
-                    false,
-                    ref hue
-                );
+                x -= index.Width;
+                y -= index.Height;
+
+                batcher.Draw2D(texture, x, y, bounds.X, bounds.Y, bounds.Width, bounds.Height, ref hue);
             }
         }
 

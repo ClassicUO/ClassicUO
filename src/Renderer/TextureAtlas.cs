@@ -16,19 +16,23 @@ namespace ClassicUO.Renderer
         private readonly int _width, _height;
         private readonly SurfaceFormat _format;
         private readonly GraphicsDevice _device;
-        private readonly List<Texture2D> _textureList = new List<Texture2D>();
-        private readonly List<Packer> _packers = new List<Packer>();
+        private readonly List<Texture2D> _textureList;
+        private Packer _packer;
         //private readonly Dictionary<uint, (int, Rectangle)> _spritesBounds = new Dictionary<uint, (int, Rectangle)>();
 
-        private readonly Rectangle[] _spriteBounds = new Rectangle[ushort.MaxValue];
-        private readonly int[] _spriteTextureIndices = new int[ushort.MaxValue];
+        private readonly Rectangle[] _spriteBounds;
+        private readonly int[] _spriteTextureIndices;
 
-        public TextureAtlas(GraphicsDevice device, int width, int height, SurfaceFormat format)
+        public TextureAtlas(GraphicsDevice device, int width, int height, SurfaceFormat format, int maxSpriteCount)
         {
             _device = device;
             _width = width;
             _height= height;
             _format = format;
+
+            _textureList = new List<Texture2D>();
+            _spriteBounds = new Rectangle[maxSpriteCount];
+            _spriteTextureIndices = new int[maxSpriteCount];
         }
 
 
@@ -42,6 +46,11 @@ namespace ClassicUO.Renderer
             //    return;
             //}
 
+            if (IsHashExists(hash))
+            {
+                return;
+            }
+
             var index = _textureList.Count - 1;
 
             if (index < 0)
@@ -50,14 +59,12 @@ namespace ClassicUO.Renderer
                 CreateNewTexture2D();
             }
 
-            Packer packer = _packers[index];
 
             PackerRectangle pr;
-            while (!packer.PackRect(width, height, hash, out pr))
+            while (!_packer.PackRect(width, height, hash, out pr))
             {
                 CreateNewTexture2D();
                 index = _textureList.Count - 1;
-                packer = _packers[index];
             }
 
             Texture2D texture = _textureList[index];
@@ -84,8 +91,8 @@ namespace ClassicUO.Renderer
             Texture2D texture = new Texture2D(_device, _width, _height, false, _format);
             _textureList.Add(texture);
 
-            Packer packer = new Packer(_width, _height);
-            _packers.Add(packer);
+            _packer?.Dispose();
+            _packer = new Packer(_width, _height);
         }
 
         public Texture2D GetTexture(uint hash, out Rectangle bounds)
@@ -102,6 +109,8 @@ namespace ClassicUO.Renderer
             bounds = _spriteBounds[(int)hash];
             return _textureList[_spriteTextureIndices[(int) hash]];
         }
+
+        public bool IsHashExists(uint hash) => _spriteTextureIndices[(int)hash] > 0;
 
         public void SaveImages(string name)
         {
@@ -125,13 +134,7 @@ namespace ClassicUO.Renderer
                     texture.Dispose();
                 }
             }
-
-            foreach (Packer packer in _packers)
-            {
-                packer.Dispose();
-            }
-
-            _packers.Clear();
+            _packer.Dispose();
             _textureList.Clear();
             //_spritesBounds.Clear();
         }

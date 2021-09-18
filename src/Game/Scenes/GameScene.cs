@@ -1125,9 +1125,11 @@ namespace ClassicUO.Game.Scenes
                 _multi.Draw(batcher, _multi.RealScreenPosition.X, _multi.RealScreenPosition.Y, ref hueVec);
             }
 
-            hueVec.Y = 0;
+            
 
-            batcher.DrawString(Fonts.Bold, $"Flushes: {batcher.FlushesDone}\nSwitches: {batcher.TextureSwitches}", 200, 200, ref hueVec);
+            int flushes = batcher.FlushesDone;
+            int switches = batcher.TextureSwitches;
+
 
             // draw weather
             Weather.Draw(batcher, 0, 0);
@@ -1138,6 +1140,12 @@ namespace ClassicUO.Game.Scenes
             {
                 batcher.GraphicsDevice.SetRenderTarget(null);
             }
+
+
+            batcher.Begin();
+            hueVec = Vector3.Zero;
+            batcher.DrawString(Fonts.Bold, $"Flushes: {flushes}\nSwitches: {switches}", 200, 200, ref hueVec);
+            batcher.End();
         }
 
         private bool PrepareLightsRendering(UltimaBatcher2D batcher, ref Matrix matrix)
