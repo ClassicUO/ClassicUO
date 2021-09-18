@@ -30,7 +30,7 @@ namespace ClassicUO.Renderer
 
             _textureList = new List<Texture2D>();
             _spriteBounds = new Rectangle[maxSpriteCount];
-            _spriteTextureIndices = new byte[maxSpriteCount];
+            _spriteTextureIndices = Enumerable.Repeat<byte>(0xFF, maxSpriteCount).ToArray();
         }
 
 
@@ -86,11 +86,19 @@ namespace ClassicUO.Renderer
 
         public Texture2D GetTexture(uint hash, out Rectangle bounds)
         {
-            bounds = _spriteBounds[(int)hash];
-            return _textureList[_spriteTextureIndices[(int) hash]];
+            if (IsHashExists(hash))
+            {
+                bounds = _spriteBounds[(int)hash];
+              
+                return _textureList[_spriteTextureIndices[(int)hash]];
+            }
+
+            bounds = Rectangle.Empty;
+            return null;
         }
 
-        public bool IsHashExists(uint hash) => _spriteTextureIndices[(int)hash] > 0;
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool IsHashExists(uint hash) => _spriteTextureIndices[(int)hash] != 0xFF;
 
         public void SaveImages(string name)
         {

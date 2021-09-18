@@ -2907,12 +2907,12 @@ namespace ClassicUO.Network
                     ushort graphic = p.ReadUInt16BE();
                     ushort hue = p.ReadUInt16BE();
                     name = p.ReadASCII(p.ReadUInt8());
+      
+                    _ = ArtLoader.Instance.GetStaticTexture(graphic, out var bounds);
 
-                    Rectangle rect = ArtLoader.Instance.GetTexture(graphic)?.Bounds ?? Rectangle.Empty;
-
-                    if (rect.Width != 0 && rect.Height != 0)
+                    if (bounds.Width != 0 && bounds.Height != 0)
                     {
-                        int posY = rect.Height;
+                        int posY = bounds.Height;
 
                         if (posY >= 47)
                         {
@@ -2933,7 +2933,7 @@ namespace ClassicUO.Network
                             i + 1
                         );
 
-                        posX += rect.Width;
+                        posX += bounds.Width;
                     }
                 }
 

@@ -70,10 +70,8 @@ namespace ClassicUO.Game
         private readonly CustomBuildObject[] _componentsList = new CustomBuildObject[10];
         private readonly int[,] _cursorOffset = new int[2, 16];
         private readonly IntPtr[,] _cursors_ptr = new IntPtr[3, 16];
-        private UOTexture _draggedItemTexture;
         private ushort _graphic = 0x2073;
         private bool _needGraphicUpdate = true;
-        private Point _offset;
         private readonly List<Multi> _temp = new List<Multi>();
         private readonly Tooltip _tooltip;
 
@@ -120,31 +118,43 @@ namespace ClassicUO.Game
         public bool IsDraggingCursorForced { get; set; }
         public bool AllowDrawSDLCursor { get; set; } = true;
 
-
-        public void SetDraggedItem(Point? offset)
+        private ushort GetDraggingItemGraphic()
         {
-            _draggedItemTexture = ItemHold.IsGumpTexture ? GumpsLoader.Instance.GetTexture((ushort) (ItemHold.DisplayedGraphic - Constants.ITEM_GUMP_TEXTURE_OFFSET)) : ArtLoader.Instance.GetTexture(ItemHold.DisplayedGraphic);
-
-            if (_draggedItemTexture == null)
+            if (ItemHold.Enabled)
             {
-                return;
+                if (ItemHold.IsGumpTexture)
+                {
+                    return (ushort)(ItemHold.DisplayedGraphic - Constants.ITEM_GUMP_TEXTURE_OFFSET);
+                }
+
+                return ItemHold.DisplayedGraphic;
             }
 
-            float scale = 1;
-
-            if (ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.ScaleItemsInsideContainers)
-            {
-                scale = UIManager.ContainerScale;
-            }
-
-            _offset.X = (int) ((_draggedItemTexture.Width >> 1) * scale);
-            _offset.Y = (int) ((_draggedItemTexture.Height >> 1) * scale);
-
-            if (offset.HasValue)
-            {
-                _offset -= offset.Value;
-            }
+            return 0xFFFF;
         }
+
+        private Point GetDraggingItemOffset()
+        {
+            ushort graphic = GetDraggingItemGraphic();
+
+            if (graphic != 0xFFFF)
+            {
+                _ = ArtLoader.Instance.GetStaticTexture(graphic, out var bounds);
+
+                float scale = 1;
+
+                if (ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.ScaleItemsInsideContainers)
+                {
+                    scale = UIManager.ContainerScale;
+                }
+
+                return  new Point((int)((bounds.Width >> 1) * scale) - ItemHold.MouseOffset.X, (int)((bounds.Height >> 1) * scale) - ItemHold.MouseOffset.Y);
+            }
+
+            return Point.Zero;
+        }
+
+
 
         public void Update(double totalTime, double frameTime)
         {
@@ -180,14 +190,18 @@ namespace ClassicUO.Game
 
             if (ItemHold.Enabled)
             {
-                _draggedItemTexture.Ticks = (long) totalTime;
+                ushort draggingGraphic = GetDraggingItemGraphic();
 
-                if (ItemHold.IsFixedPosition && !UIManager.IsDragging)
+                if (draggingGraphic != 0xFFFF && ItemHold.IsFixedPosition && !UIManager.IsDragging)
                 {
-                    int x = ItemHold.FixedX - _offset.X;
-                    int y = ItemHold.FixedY - _offset.Y;
+                    _ = ArtLoader.Instance.GetStaticTexture(draggingGraphic, out var bounds);
 
-                    if (Mouse.Position.X >= x && Mouse.Position.X < x + _draggedItemTexture.Width && Mouse.Position.Y >= y && Mouse.Position.Y < y + _draggedItemTexture.Height)
+                    Point offset = GetDraggingItemOffset();
+
+                    int x = ItemHold.FixedX - offset.X;
+                    int y = ItemHold.FixedY - offset.Y;
+
+                    if (Mouse.Position.X >= x && Mouse.Position.X < x + bounds.Width && Mouse.Position.Y >= y && Mouse.Position.Y < y + bounds.Height)
                     {
                         if (!ItemHold.IgnoreFixedPosition)
                         {
@@ -365,8 +379,14 @@ namespace ClassicUO.Game
                     scale = UIManager.ContainerScale;
                 }
 
-                int x = (ItemHold.IsFixedPosition ? ItemHold.FixedX : Mouse.Position.X) - _offset.X;
-                int y = (ItemHold.IsFixedPosition ? ItemHold.FixedY : Mouse.Position.Y) - _offset.Y;
+                ushort draggingGraphic = GetDraggingItemGraphic();
+
+                var texture = ArtLoader.Instance.GetStaticTexture(draggingGraphic, out var bounds);
+
+                Point offset = GetDraggingItemOffset();
+
+                int x = (ItemHold.IsFixedPosition ? ItemHold.FixedX : Mouse.Position.X) - offset.X;
+                int y = (ItemHold.IsFixedPosition ? ItemHold.FixedY : Mouse.Position.Y) - offset.Y;
 
                 Vector3 hue = Vector3.Zero;
 
@@ -374,11 +394,15 @@ namespace ClassicUO.Game
 
                 sb.Draw2D
                 (
-                    _draggedItemTexture,
+                    texture,
                     x,
                     y,
-                    _draggedItemTexture.Width * scale,
-                    _draggedItemTexture.Height * scale,
+                    bounds.Width * scale,
+                    bounds.Height * scale,
+                    bounds.X,
+                    bounds.Y,
+                    bounds.Width,
+                    bounds.Height,
                     ref hue
                 );
 
@@ -389,11 +413,15 @@ namespace ClassicUO.Game
 
                     sb.Draw2D
                     (
-                        _draggedItemTexture,
+                        texture,
                         x,
                         y,
-                        _draggedItemTexture.Width * scale,
-                        _draggedItemTexture.Height * scale,
+                        bounds.Width * scale,
+                        bounds.Height * scale,
+                        bounds.X,
+                        bounds.Y,
+                        bounds.Width,
+                        bounds.Height,
                         ref hue
                     );
                 }
@@ -426,7 +454,9 @@ namespace ClassicUO.Game
                     ShaderHueTranslator.GetHueVector(ref hueVec, 0x0033);
                 }
 
-                sb.Draw2D(ArtLoader.Instance.GetTexture(Graphic), Mouse.Position.X - offX, Mouse.Position.Y - offY, ref hueVec);
+                var texture = ArtLoader.Instance.GetStaticTexture(Graphic, out var bounds);
+
+                sb.Draw2D(texture, Mouse.Position.X - offX, Mouse.Position.Y - offY, bounds.X, bounds.Y, bounds.Width, bounds.Height, ref hueVec);
             }
         }
 

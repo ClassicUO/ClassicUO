@@ -193,7 +193,8 @@ namespace ClassicUO.Game.GameObjects
                 return false;
             }
 
-            ArtTexture texture = ArtLoader.Instance.GetTexture(graphic);
+            // TODO: is this check necessary?
+            var texture = ArtLoader.Instance.GetStaticTexture(graphic, out var bounds);
 
             if (texture != null)
             {

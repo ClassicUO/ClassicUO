@@ -49,14 +49,11 @@ namespace ClassicUO.IO.Resources
         private static ArtLoader _instance;
         private UOFile _file;
         private readonly ushort _graphicMask;
-        private readonly UOTexture[] _landResources;
-        private readonly LinkedList<uint> _usedLandTextureIds = new LinkedList<uint>();
         private readonly PixelPicker _picker = new PixelPicker();
 
         private ArtLoader(int staticCount, int landCount) : base(staticCount)
         {
             _graphicMask = Client.IsUOPInstallation ? (ushort) 0xFFFF : (ushort) 0x3FFF;
-            _landResources = new UOTexture[landCount];
         }
 
         public static ArtLoader Instance => _instance ?? (_instance = new ArtLoader(Constants.MAX_STATIC_DATA_INDEX_COUNT, Constants.MAX_LAND_DATA_INDEX_COUNT));
@@ -92,6 +89,11 @@ namespace ClassicUO.IO.Resources
         }
 
 
+
+
+        const int ATLAS_SIZE = 1024 * 4;
+
+        private TextureAtlas _staticAtlas;
         private void FillArtPixels(ushort graphic, ref UOFileIndex entry, ref Span<uint> pixels, out Rectangle bounds)
         {
             bounds = Rectangle.Empty;
@@ -129,7 +131,7 @@ namespace ClassicUO.IO.Resources
             }
         }
 
-        private void CreateNewAtlas(TextureAtlas atlas, int g, bool isTerrain)
+        private void AddSpriteToAtlas(TextureAtlas atlas, int g, bool isTerrain)
         {
             ref UOFileIndex entry = ref GetValidRefEntry(g);
 
@@ -195,27 +197,35 @@ namespace ClassicUO.IO.Resources
             }
         }
 
-        const int ATLAS_SIZE = 1024 * 4;
-
-        private TextureAtlas _terrainAtlas, _staticAtlas;
-
-
-        public unsafe void CreateTerrainAtlasTextures(Microsoft.Xna.Framework.Graphics.GraphicsDevice device)
+        // shitty initialization.
+        public unsafe void CreateAtlas(Microsoft.Xna.Framework.Graphics.GraphicsDevice device)
         {
             _staticAtlas = new TextureAtlas(device, ATLAS_SIZE, ATLAS_SIZE, Microsoft.Xna.Framework.Graphics.SurfaceFormat.Color, Entries.Length);
-
-            //for (ushort g = 0, count = (ushort)(Entries.Length - 0x4000); g < count; g++)
-            //{
-            //    CreateNewAtlas(_staticAtlas, g, false);
-            //}
-
-            //_terrainAtlas = new TextureAtlas(device, ATLAS_SIZE, ATLAS_SIZE, Microsoft.Xna.Framework.Graphics.SurfaceFormat.Color);
-         
-            //for (ushort g = 0; g < 0x4000; g++)
-            //{
-            //    CreateNewAtlas(_terrainAtlas, g, true);
-            //}
         }
+      
+        public Microsoft.Xna.Framework.Graphics.Texture2D GetLandTexture(uint g, out Rectangle bounds)
+        {
+            g &= _graphicMask;
+            if (!_staticAtlas.IsHashExists(g))
+            {
+                AddSpriteToAtlas(_staticAtlas, (int)g, true);
+            }
+
+            return _staticAtlas.GetTexture(g, out bounds);
+        }
+
+        public Microsoft.Xna.Framework.Graphics.Texture2D GetStaticTexture(uint g, out Rectangle bounds)
+        {
+            g += 0x4000;
+            if (!_staticAtlas.IsHashExists(g))
+            {
+                AddSpriteToAtlas(_staticAtlas, (int)g, false);
+            }
+
+            return _staticAtlas.GetTexture(g, out bounds);
+        }
+
+
 
 
         public override ArtTexture GetTexture(uint g)
@@ -242,28 +252,6 @@ namespace ClassicUO.IO.Resources
             }
 
             return texture;
-        }
-
-        public Microsoft.Xna.Framework.Graphics.Texture2D GetLandTexture(uint g, out Rectangle bounds)
-        {
-            g &= _graphicMask;
-            if (!_staticAtlas.IsHashExists(g))
-            {
-                CreateNewAtlas(_staticAtlas, (int) g, true);
-            }
-
-            return _staticAtlas.GetTexture(g, out bounds);
-        }
-
-        public Microsoft.Xna.Framework.Graphics.Texture2D GetStaticTexture(uint g, out Rectangle bounds)
-        {
-            g += 0x4000;
-            if (!_staticAtlas.IsHashExists(g))
-            {
-                CreateNewAtlas(_staticAtlas, (int) g, false);
-            }
-
-            return _staticAtlas.GetTexture(g, out bounds);
         }
 
         public unsafe IntPtr CreateCursorSurfacePtr(int index, ushort customHue, out int hotX, out int hotY)
@@ -387,36 +375,7 @@ namespace ClassicUO.IO.Resources
             return base.TryGetEntryInfo(entry, out address, out size, out compressedSize);
         }
 
-        public override void ClearResources()
-        {
-            base.ClearResources();
-
-            LinkedListNode<uint> first = _usedLandTextureIds.First;
-
-            while (first != null)
-            {
-                LinkedListNode<uint> next = first.Next;
-                uint idx = first.Value;
-
-                if (idx < _landResources.Length)
-                {
-                    ref UOTexture texture = ref _landResources[idx];
-                    texture?.Dispose();
-                    texture = null;
-                }
-
-                _usedLandTextureIds.Remove(first);
-
-                first = next;
-            }
-        }
-
-        public override void CleaUnusedResources(int count)
-        {
-            base.CleaUnusedResources(count);
-            ClearUnusedResources(_landResources, count);
-        }
-
+         
 
 
         private bool ReadHeader(DataReader file, ref UOFileIndex entry, out short width, out short height)
@@ -580,56 +539,6 @@ namespace ClassicUO.IO.Resources
         }
 
 
-        private unsafe void ReadLandArt(ref UOTexture texture, ushort graphic)
-        {
-            const int SIZE = 44 * 44;
-
-            graphic &= _graphicMask;
-            ref UOFileIndex entry = ref GetValidRefEntry(graphic);
-
-            if (entry.Length == 0)
-            {
-                texture = null;
-
-                return;
-            }
-
-            _file.SetData(entry.Address, entry.FileSize);
-            _file.Seek(entry.Offset);
-
-            uint* data = stackalloc uint[SIZE];
-
-            for (int i = 0; i < 22; ++i)
-            {
-                int start = 22 - (i + 1);
-                int pos = i * 44 + start;
-                int end = start + ((i + 1) << 1);
-
-                for (int j = start; j < end; ++j)
-                {
-                    data[pos++] = HuesHelper.Color16To32(_file.ReadUShort()) | 0xFF_00_00_00;
-                }
-            }
-
-            for (int i = 0; i < 22; ++i)
-            {
-                int pos = (i + 22) * 44 + i;
-                int end = i + ((22 - i) << 1);
-
-                for (int j = i; j < end; ++j)
-                {
-                    data[pos++] = HuesHelper.Color16To32(_file.ReadUShort()) | 0xFF_00_00_00;
-                }
-            }
-
-
-            //AddBlackBorder(data, 44, 44);
-
-            texture = new UOTexture(44, 44);
-            // we don't need to store the data[] pointer because
-            // land is always hoverable
-            texture.SetDataPointerEXT(0, null, (IntPtr) data, SIZE * sizeof(uint));
-        }
 
         private void AddBlackBorder(Span<uint> pixels, int width, int height)
         {

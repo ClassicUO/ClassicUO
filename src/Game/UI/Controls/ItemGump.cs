@@ -84,7 +84,10 @@ namespace ClassicUO.Game.UI.Controls
             {
                 _graphic = value;
 
-                UOTexture texture = _is_gump ? GumpsLoader.Instance.GetTexture(value) : ArtLoader.Instance.GetTexture(value);
+                var texture = _is_gump ?
+                    GumpsLoader.Instance.GetGumpTexture(value, out Rectangle bounds)
+                    :
+                    ArtLoader.Instance.GetStaticTexture(value, out bounds);
 
                 if (texture == null)
                 {
@@ -93,8 +96,8 @@ namespace ClassicUO.Game.UI.Controls
                     return;
                 }
 
-                Width = texture.Width;
-                Height = texture.Height;
+                Width = bounds.Width;
+                Height = bounds.Height;
 
                 IsPartialHue = !_is_gump && TileDataLoader.Instance.StaticData[value].IsPartialHue;
             }
@@ -150,7 +153,10 @@ namespace ClassicUO.Game.UI.Controls
             
             ShaderHueTranslator.GetHueVector(ref HueVector, hue, partialHue, 0);
 
-            UOTexture texture = _is_gump ? GumpsLoader.Instance.GetTexture(Graphic) : ArtLoader.Instance.GetTexture(Graphic);
+            var texture = _is_gump ?
+                   GumpsLoader.Instance.GetGumpTexture(Graphic, out Rectangle bounds)
+                   :
+                   ArtLoader.Instance.GetStaticTexture(Graphic, out bounds);
 
             if (texture != null)
             {
@@ -159,6 +165,8 @@ namespace ClassicUO.Game.UI.Controls
                     texture,
                     x,
                     y,
+                    bounds.X,
+                    bounds.Y,
                     Width,
                     Height,
                     ref HueVector
@@ -185,7 +193,10 @@ namespace ClassicUO.Game.UI.Controls
 
         public override bool Contains(int x, int y)
         {
-            UOTexture texture = _is_gump ? GumpsLoader.Instance.GetTexture(Graphic) : ArtLoader.Instance.GetTexture(Graphic);
+            var texture = _is_gump ?
+                   GumpsLoader.Instance.GetGumpTexture(Graphic, out Rectangle bounds)
+                   :
+                   ArtLoader.Instance.GetStaticTexture(Graphic, out bounds);
 
             if (texture == null)
             {
@@ -304,9 +315,11 @@ namespace ClassicUO.Game.UI.Controls
         {
             if (CanPickUp)
             {
-                UOTexture texture = _is_gump ? GumpsLoader.Instance.GetTexture(Graphic) : ArtLoader.Instance.GetTexture(Graphic);
+                _ = _is_gump ?
+                   GumpsLoader.Instance.GetGumpTexture(Graphic, out Rectangle bounds)
+                   :
+                   ArtLoader.Instance.GetStaticTexture(Graphic, out bounds);
 
-                Rectangle bounds = texture.Bounds;
                 int centerX = bounds.Width >> 1;
                 int centerY = bounds.Height >> 1;
 

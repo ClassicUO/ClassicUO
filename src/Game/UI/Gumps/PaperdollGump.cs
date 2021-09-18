@@ -902,7 +902,7 @@ namespace ClassicUO.Game.UI.Gumps
                         true
                     );
 
-                    ArtTexture texture = ArtLoader.Instance.GetTexture(item.DisplayedGraphic);
+                    var texture = ArtLoader.Instance.GetStaticTexture(item.DisplayedGraphic, out var bounds);
 
                     if (texture != null)
                     {
@@ -913,8 +913,8 @@ namespace ClassicUO.Game.UI.Gumps
                             y + _point.Y,
                             _originalSize.X,
                             _originalSize.Y,
-                            _rect.X,
-                            _rect.Y,
+                            bounds.X + _rect.X,
+                            bounds.Y + _rect.Y,
                             _rect.Width,
                             _rect.Height,
                             ref HueVector

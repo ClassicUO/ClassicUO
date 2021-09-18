@@ -67,7 +67,7 @@ namespace ClassicUO.Game.UI.Controls
             {
                 _graphic = value;
 
-                ArtTexture texture = ArtLoader.Instance.GetTexture(value);
+                var texture = ArtLoader.Instance.GetStaticTexture(value, out var bounds);
 
                 if (texture == null)
                 {
@@ -76,8 +76,8 @@ namespace ClassicUO.Game.UI.Controls
                     return;
                 }
 
-                Width = texture.Width;
-                Height = texture.Height;
+                Width = bounds.Width;
+                Height = bounds.Height;
 
                 IsPartialHue = TileDataLoader.Instance.StaticData[value].IsPartialHue;
             }
@@ -89,7 +89,7 @@ namespace ClassicUO.Game.UI.Controls
             ResetHueVector();
             ShaderHueTranslator.GetHueVector(ref HueVector, Hue, IsPartialHue, 0);
 
-            ArtTexture texture = ArtLoader.Instance.GetTexture(Graphic);
+            var texture = ArtLoader.Instance.GetStaticTexture(Graphic, out var bounds);
 
             if (texture != null)
             {
@@ -98,6 +98,8 @@ namespace ClassicUO.Game.UI.Controls
                     texture,
                     x,
                     y,
+                    bounds.X,
+                    bounds.Y,
                     Width,
                     Height,
                     ref HueVector

@@ -201,12 +201,10 @@ namespace ClassicUO.Game.GameObjects
             ref Vector3 hue
         )
         {
-            ArtTexture texture = ArtLoader.Instance.GetTexture(graphic);
+            var texture = ArtLoader.Instance.GetStaticTexture(graphic, out var bounds);
 
             if (texture != null)
             {
-                texture.Ticks = Time.Ticks;
-
                 ref UOFileIndex index = ref ArtLoader.Instance.GetValidRefEntry(graphic + 0x4000);
 
                 batcher.DrawSpriteRotated
@@ -214,8 +212,8 @@ namespace ClassicUO.Game.GameObjects
                     texture,
                     x - index.Width,
                     y - index.Height,
-                    texture.Width,
-                    texture.Height,
+                    bounds.Width,
+                    bounds.Height,
                     ref hue,
                     angle
                 );
