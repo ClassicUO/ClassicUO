@@ -41,11 +41,9 @@ namespace ClassicUO.Game.UI.Controls
 {
     internal class Checkbox : Control
     {
-        private const int INACTIVE = 0;
-        private const int ACTIVE = 1;
         private bool _isChecked;
         private readonly RenderedText _text;
-        private readonly UOTexture[] _textures = new UOTexture[2];
+        private ushort _inactive, _active;
 
         public Checkbox
         (
@@ -58,18 +56,20 @@ namespace ClassicUO.Game.UI.Controls
             int maxWidth = 0
         )
         {
-            _textures[INACTIVE] = GumpsLoader.Instance.GetTexture(inactive);
-            _textures[ACTIVE] = GumpsLoader.Instance.GetTexture(active);
+            _inactive = inactive;
+            _active = active;
 
-            if (_textures[0] == null || _textures[1] == null)
+            var textureInactive = GumpsLoader.Instance.GetGumpTexture(inactive, out var boundsInactive);
+            var textureActive = GumpsLoader.Instance.GetGumpTexture(active, out var boundsActive);
+
+            if (textureInactive == null || textureActive == null)
             {
                 Dispose();
 
                 return;
             }
 
-            UOTexture t = _textures[INACTIVE];
-            Width = t.Width;
+            Width = boundsInactive.Width;
 
             _text = RenderedText.Create
             (
@@ -82,7 +82,7 @@ namespace ClassicUO.Game.UI.Controls
 
             Width += _text.Width;
 
-            Height = Math.Max(t.Width, _text.Height);
+            Height = Math.Max(boundsInactive.Width, _text.Height);
             CanMove = false;
             AcceptMouseInput = true;
         }
@@ -115,20 +115,6 @@ namespace ClassicUO.Game.UI.Controls
 
         public event EventHandler ValueChanged;
 
-        public override void Update(double totalTime, double frameTime)
-        {
-            for (int i = 0; i < _textures.Length; i++)
-            {
-                UOTexture t = _textures[i];
-
-                if (t != null)
-                {
-                    t.Ticks = (long) totalTime;
-                }
-            }
-
-            base.Update(totalTime, frameTime);
-        }
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
@@ -140,9 +126,22 @@ namespace ClassicUO.Game.UI.Controls
             ResetHueVector();
 
             bool ok = base.Draw(batcher, x, y);
-            batcher.Draw2D(IsChecked ? _textures[ACTIVE] : _textures[INACTIVE], x, y, ref HueVector);
 
-            _text.Draw(batcher, x + _textures[ACTIVE].Width + 2, y);
+            var texture = GumpsLoader.Instance.GetGumpTexture(IsChecked ? _active : _inactive, out var bounds);
+
+            batcher.Draw2D
+            (
+                texture,
+                x,
+                y, 
+                bounds.X,
+                bounds.Y,
+                bounds.Width,
+                bounds.Height,
+                ref HueVector
+            );
+
+            _text.Draw(batcher, x + bounds.Width + 2, y);
 
             return ok;
         }

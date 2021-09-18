@@ -51,7 +51,7 @@ namespace ClassicUO.Game.UI.Controls
             ResetHueVector();
             ShaderHueTranslator.GetHueVector(ref HueVector, Hue);
 
-            UOTexture texture = GumpsLoader.Instance.GetTexture(Graphic);
+            var texture = GumpsLoader.Instance.GetGumpTexture(Graphic, out var bounds);
 
             if (texture != null)
             {
@@ -62,6 +62,10 @@ namespace ClassicUO.Game.UI.Controls
                     y,
                     Percent,
                     Height,
+                    bounds.X,
+                    bounds.Y,
+                    bounds.Width,
+                    bounds.Height,
                     ref HueVector
                 );
             }

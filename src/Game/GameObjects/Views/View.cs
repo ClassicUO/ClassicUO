@@ -174,18 +174,19 @@ namespace ClassicUO.Game.GameObjects
 
         protected static void DrawGump(UltimaBatcher2D batcher, ushort graphic, int x, int y, ref Vector3 hue)
         {
-            UOTexture texture = GumpsLoader.Instance.GetTexture(graphic);
+            var texture = GumpsLoader.Instance.GetGumpTexture(graphic, out var bounds);
 
             if (texture != null)
             {
-                texture.Ticks = Time.Ticks;
-
-                batcher.DrawSprite
+                batcher.Draw2D
                 (
                     texture,
                     x,
                     y,
-                    false,
+                    bounds.X,
+                    bounds.Y,
+                    bounds.Width,
+                    bounds.Height,
                     ref hue
                 );
             }

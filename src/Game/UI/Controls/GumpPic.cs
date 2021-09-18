@@ -54,22 +54,19 @@ namespace ClassicUO.Game.UI.Controls
             get => _graphic;
             set
             {
-                //if (_graphic != value)
+                _graphic = value;
+
+                var texture = GumpsLoader.Instance.GetGumpTexture(_graphic, out var bounds);
+
+                if (texture == null)
                 {
-                    _graphic = value;
+                    Dispose();
 
-                    UOTexture texture = GumpsLoader.Instance.GetTexture(_graphic);
-
-                    if (texture == null)
-                    {
-                        Dispose();
-
-                        return;
-                    }
-
-                    Width = texture.Width;
-                    Height = texture.Height;
+                    return;
                 }
+
+                Width = bounds.Width;
+                Height = bounds.Height;
             }
         }
 
@@ -78,7 +75,7 @@ namespace ClassicUO.Game.UI.Controls
 
         public override bool Contains(int x, int y)
         {
-            UOTexture texture = GumpsLoader.Instance.GetTexture(Graphic);
+            var texture = GumpsLoader.Instance.GetGumpTexture(_graphic, out _);
 
             if (texture == null)
             {
@@ -171,7 +168,7 @@ namespace ClassicUO.Game.UI.Controls
                 true
             );
 
-            UOTexture texture = GumpsLoader.Instance.GetTexture(Graphic);
+            var texture = GumpsLoader.Instance.GetGumpTexture(Graphic, out var bounds);
 
             if (texture != null)
             {
@@ -180,6 +177,8 @@ namespace ClassicUO.Game.UI.Controls
                     texture,
                     x,
                     y,
+                    bounds.X,
+                    bounds.Y,
                     Width,
                     Height,
                     ref HueVector

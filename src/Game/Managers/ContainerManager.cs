@@ -89,14 +89,14 @@ namespace ClassicUO.Game.Managers
             }
             else
             {
-                UOTexture texture = GumpsLoader.Instance.GetTexture(g);
+                var texture = GumpsLoader.Instance.GetGumpTexture(g, out var bounds);
 
                 if (texture != null)
                 {
                     float scale = UIManager.ContainerScale;
 
-                    int width = (int) (texture.Width * scale);
-                    int height = (int) (texture.Height * scale);
+                    int width = (int) (bounds.Width * scale);
+                    int height = (int) (bounds.Height * scale);
 
                     if (ProfileManager.CurrentProfile.OverrideContainerLocation)
                     {

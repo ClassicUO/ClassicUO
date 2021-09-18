@@ -1435,6 +1435,62 @@ namespace ClassicUO.Renderer
             return true;
         }
 
+
+        public bool Draw2DTiled
+        (
+            Texture2D texture,
+            int dx,
+            int dy,
+            float dwidth,
+            float dheight,
+            int sx,
+            int sy,
+            int sw,
+            int sh,
+            ref Vector3 hue
+        )
+        {
+            int y = dy;
+            int h = (int)dheight;
+
+            while (h > 0)
+            {
+                int x = dx;
+                int w = (int)dwidth;
+
+                int rw = sw;
+                int rh = h < sh ? h : sh;
+
+                while (w > 0)
+                {
+                    if (w < sw)
+                    {
+                        rw = w;
+                    }
+
+                    Draw2D
+                    (
+                        texture,
+                        x,
+                        y,
+                        sx,
+                        sy,
+                        rw,
+                        rh,
+                        ref hue
+                    );
+
+                    w -= sw;
+                    x += sw;
+                }
+
+                h -= sh;
+                y += sh;
+            }
+
+            return true;
+        }
+
         public bool Draw2DTiled
         (
             Texture2D texture,
@@ -1445,45 +1501,7 @@ namespace ClassicUO.Renderer
             ref Vector3 hue
         )
         {
-            int y = dy;
-            int h = (int) dheight;
-
-            while (h > 0)
-            {
-                int x = dx;
-                int w = (int) dwidth;
-
-                int rw = texture.Width;
-                int rh = h < texture.Height ? h : texture.Height;
-
-                while (w > 0)
-                {
-                    if (w < texture.Width)
-                    {
-                        rw = w;
-                    }
-
-                    Draw2D
-                    (
-                        texture,
-                        x,
-                        y,
-                        0,
-                        0,
-                        rw,
-                        rh,
-                        ref hue
-                    );
-
-                    w -= texture.Width;
-                    x += texture.Width;
-                }
-
-                h -= texture.Height;
-                y += texture.Height;
-            }
-
-            return true;
+            return Draw2DTiled(texture, dx, dy, dwidth, dheight, 0, 0, texture.Width, texture.Height, ref hue);
         }
 
         public bool DrawRectangle

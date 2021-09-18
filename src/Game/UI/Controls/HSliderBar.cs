@@ -49,8 +49,6 @@ namespace ClassicUO.Game.UI.Controls
     {
         private bool _clicked;
         private readonly bool _drawUp;
-        private readonly UOTexture[] _gumpSpliderBackground;
-        private readonly UOTexture _gumpWidget;
         private readonly List<HSliderBar> _pairedSliders = new List<HSliderBar>();
         private int _sliderX;
         private readonly HSliderBarStyle _style;
@@ -88,38 +86,16 @@ namespace ClassicUO.Game.UI.Controls
             _style = style;
             AcceptMouseInput = true;
 
+            var texture = GumpsLoader.Instance.GetGumpTexture((uint)(_style == HSliderBarStyle.MetalWidgetRecessedBar ? 216 : 0x845), out var bounds);
 
-            if (_gumpWidget == null)
+            Width = BarWidth;
+
+            if (texture != null)
             {
-                switch (_style)
-                {
-                    case HSliderBarStyle.MetalWidgetRecessedBar:
-
-                        _gumpSpliderBackground = new UOTexture[3]
-                        {
-                            GumpsLoader.Instance.GetTexture(213), GumpsLoader.Instance.GetTexture(214),
-                            GumpsLoader.Instance.GetTexture(215)
-                        };
-
-                        _gumpWidget = GumpsLoader.Instance.GetTexture(216);
-
-                        break;
-
-                    case HSliderBarStyle.BlueWidgetNoBar:
-                        _gumpWidget = GumpsLoader.Instance.GetTexture(0x845);
-
-                        break;
-                }
-
-                Width = BarWidth;
-
-                if (_gumpWidget != null)
-                {
-                    Height = _gumpWidget.Height;
-                }
-
-                CalculateOffset();
+                Height = bounds.Height;
             }
+
+            CalculateOffset();
 
             Value = value;
         }
@@ -172,43 +148,86 @@ namespace ClassicUO.Game.UI.Controls
 
         public event EventHandler ValueChanged;
 
-        public override void Update(double totalTime, double frameTime)
-        {
-            if (_gumpSpliderBackground != null)
-            {
-                foreach (UOTexture t in _gumpSpliderBackground)
-                {
-                    t.Ticks = (long) totalTime;
-                }
-            }
-
-            _gumpWidget.Ticks = (long) totalTime;
-
-            base.Update(totalTime, frameTime);
-        }
-
+      
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
             ResetHueVector();
 
-            if (_gumpSpliderBackground != null)
-            {
-                batcher.Draw2D(_gumpSpliderBackground[0], x, y, ref HueVector);
 
-                batcher.Draw2DTiled
+            if (_style == HSliderBarStyle.MetalWidgetRecessedBar)
+            {
+                var texture0 = GumpsLoader.Instance.GetGumpTexture(213, out var bounds0);
+                var texture1 = GumpsLoader.Instance.GetGumpTexture(214, out var bounds1);
+                var texture2 = GumpsLoader.Instance.GetGumpTexture(215, out var bounds2);
+                var texture3 = GumpsLoader.Instance.GetGumpTexture(216, out var bounds3);
+
+                batcher.Draw2D
                 (
-                    _gumpSpliderBackground[1],
-                    x + _gumpSpliderBackground[0].Width,
+                    texture0,
+                    x,
                     y,
-                    BarWidth - _gumpSpliderBackground[2].Width - _gumpSpliderBackground[0].Width,
-                    _gumpSpliderBackground[1].Height,
+                    bounds0.X,
+                    bounds0.Y,
+                    bounds0.Width,
+                    bounds0.Height,
                     ref HueVector
                 );
 
-                batcher.Draw2D(_gumpSpliderBackground[2], x + BarWidth - _gumpSpliderBackground[2].Width, y, ref HueVector);
+                batcher.Draw2DTiled
+                (
+                    texture1,
+                    x + bounds0.Width,
+                    y,
+                    BarWidth - bounds2.Width - bounds0.Width,
+                    bounds1.Height,
+                    bounds1.X,
+                    bounds1.Y,
+                    bounds1.Width,
+                    bounds1.Height,
+                    ref HueVector
+                );
+
+                batcher.Draw2D
+                (
+                    texture2,
+                    x + BarWidth - bounds2.Width,
+                    y,
+                    bounds2.X,
+                    bounds2.Y,
+                    bounds2.Width,
+                    bounds2.Height,
+                    ref HueVector
+                );
+    
+                batcher.Draw2D
+                (
+                    texture3,
+                    x + _sliderX, 
+                    y,
+                    bounds3.X,
+                    bounds3.Y,
+                    bounds3.Width,
+                    bounds3.Height,
+                    ref HueVector
+                );
+            }
+            else
+            {
+                var texture = GumpsLoader.Instance.GetGumpTexture(0x845, out var bounds);
+              
+                batcher.Draw2D
+                (
+                    texture,
+                    x + _sliderX,
+                    y,
+                    bounds.X,
+                    bounds.Y,
+                    bounds.Width,
+                    bounds.Height,
+                    ref HueVector
+                );
             }
 
-            batcher.Draw2D(_gumpWidget, x + _sliderX, y, ref HueVector);
 
             if (_text != null)
             {
@@ -288,7 +307,10 @@ namespace ClassicUO.Game.UI.Controls
         {
             int len = BarWidth;
             int maxValue = MaxValue - MinValue;
-            len -= _gumpWidget.Width;
+
+            _ = GumpsLoader.Instance.GetGumpTexture((uint)(_style == HSliderBarStyle.MetalWidgetRecessedBar ? 216 : 0x845), out var bounds);
+
+            len -= bounds.Width;
             float perc = x / (float) len * 100.0f;
             Value = (int) (maxValue * perc / 100.0f) + MinValue;
             CalculateOffset();
@@ -308,7 +330,9 @@ namespace ClassicUO.Game.UI.Controls
             int value = Value - MinValue;
             int maxValue = MaxValue - MinValue;
             int length = BarWidth;
-            length -= _gumpWidget.Width;
+
+            _ = GumpsLoader.Instance.GetGumpTexture((uint)(_style == HSliderBarStyle.MetalWidgetRecessedBar ? 216 : 0x845), out var bounds);
+            length -= bounds.Width;
 
             if (maxValue > 0)
             {

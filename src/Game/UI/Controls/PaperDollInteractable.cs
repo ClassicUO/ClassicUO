@@ -294,28 +294,28 @@ namespace ClassicUO.Game.UI.Controls
                     switch (ProfileManager.CurrentProfile.BackpackStyle)
                     {
                         case 1:
-                            if (loader.GetTexture(0x777B) != null)
+                            if (loader.GetGumpTexture(0x777B, out _) != null)
                             {
                                 backpackGraphic = 0x777B; // Suede Backpack
                             }
 
                             break;
                         case 2:
-                            if (loader.GetTexture(0x777C) != null)
+                            if (loader.GetGumpTexture(0x777C, out _) != null)
                             {
                                 backpackGraphic = 0x777C; // Polar Bear Backpack
                             }
 
                             break;
                         case 3:
-                            if (loader.GetTexture(0x777D) != null)
+                            if (loader.GetGumpTexture(0x777D, out _) != null)
                             {
                                 backpackGraphic = 0x777D; // Ghoul Skin Backpack
                             }
 
                             break;
                         default:
-                            if (loader.GetTexture(0xC4F6) != null)
+                            if (loader.GetGumpTexture(0xC4F6, out _) != null)
                             {
                                 backpackGraphic = 0xC4F6; // Default Backpack
                             }
@@ -382,13 +382,13 @@ namespace ClassicUO.Game.UI.Controls
                 }
             }
 
-            if (GumpsLoader.Instance.GetTexture((ushort) (animID + offset)) == null)
+            if (GumpsLoader.Instance.GetGumpTexture((ushort) (animID + offset), out _) == null)
             {
                 // inverse
                 offset = isfemale ? Constants.MALE_GUMP_OFFSET : Constants.FEMALE_GUMP_OFFSET;
             }
 
-            if (GumpsLoader.Instance.GetTexture((ushort) (animID + offset)) == null)
+            if (GumpsLoader.Instance.GetGumpTexture((ushort) (animID + offset), out _) == null)
             {
                 Log.Error($"Texture not found in paperdoll: gump_graphic: {(ushort) (animID + offset)}");
             }

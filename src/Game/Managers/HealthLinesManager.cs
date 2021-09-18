@@ -46,31 +46,12 @@ namespace ClassicUO.Game.Managers
         private const int BAR_WIDTH_HALF = BAR_WIDTH >> 1;
         private const int BAR_HEIGHT_HALF = BAR_HEIGHT >> 1;
 
+        const ushort BACKGROUND_GRAPHIC = 0x1068;
+        const ushort HP_GRAPHIC = 0x1069;
 
-        private readonly UOTexture _background_texture, _hp_texture;
-        private Vector3 _vectorHue = Vector3.Zero;
-
-        public HealthLinesManager()
-        {
-            _background_texture = GumpsLoader.Instance.GetTexture(0x1068);
-            _hp_texture = GumpsLoader.Instance.GetTexture(0x1069);
-        }
-
+        
         public bool IsEnabled => ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.ShowMobilesHP;
 
-
-        public void Update()
-        {
-            if (_background_texture != null)
-            {
-                _background_texture.Ticks = Time.Ticks;
-            }
-
-            if (_hp_texture != null)
-            {
-                _hp_texture.Ticks = Time.Ticks;
-            }
-        }
 
         public void Draw(UltimaBatcher2D batcher)
         {
@@ -268,10 +249,11 @@ namespace ClassicUO.Game.Managers
 
             float alpha = passive ? 0.5f : 0.0f;
 
-            _vectorHue.X = mobile != null ? Notoriety.GetHue(mobile.NotorietyFlag) : Notoriety.GetHue(NotorietyFlag.Gray);
+            Vector3 hueVec = new Vector3();
 
-            _vectorHue.Y = 1;
-            _vectorHue.Z = alpha;
+            hueVec.X = mobile != null ? Notoriety.GetHue(mobile.NotorietyFlag) : Notoriety.GetHue(NotorietyFlag.Gray);
+            hueVec.Y = 1;
+            hueVec.Z = alpha;
 
             if (mobile == null)
             {
@@ -281,18 +263,24 @@ namespace ClassicUO.Game.Managers
 
             const int MULTIPLER = 1;
 
+            var texture = GumpsLoader.Instance.GetGumpTexture(BACKGROUND_GRAPHIC, out var bounds);
+
             batcher.Draw2D
             (
-                _background_texture,
+                texture,
                 x,
                 y,
-                _background_texture.Width * MULTIPLER,
-                _background_texture.Height * MULTIPLER,
-                ref _vectorHue
+                bounds.Width * MULTIPLER,
+                bounds.Height * MULTIPLER,
+                bounds.X,
+                bounds.Y,
+                bounds.Width,
+                bounds.Height,
+                ref hueVec
             );
 
 
-            _vectorHue.X = 0x21;
+            hueVec.X = 0x21;
 
 
             if (entity.Hits != entity.HitsMax || entity.HitsMax == 0)
@@ -304,14 +292,20 @@ namespace ClassicUO.Game.Managers
                     offset = per;
                 }
 
+                texture = GumpsLoader.Instance.GetGumpTexture(HP_GRAPHIC, out bounds);
+
                 batcher.Draw2DTiled
                 (
-                    _hp_texture,
+                    texture,
                     x + per * MULTIPLER - offset,
                     y,
                     (BAR_WIDTH - per) * MULTIPLER - offset / 2,
-                    _hp_texture.Height * MULTIPLER,
-                    ref _vectorHue
+                    bounds.Height * MULTIPLER,
+                    bounds.X,
+                    bounds.Y,
+                    bounds.Width,
+                    bounds.Height,
+                    ref hueVec
                 );
             }
 
@@ -331,17 +325,22 @@ namespace ClassicUO.Game.Managers
                     }
                 }
 
-                _vectorHue.X = hue;
+                hueVec.X = hue;
 
+                texture = GumpsLoader.Instance.GetGumpTexture(HP_GRAPHIC, out bounds);
 
                 batcher.Draw2DTiled
                 (
-                    _hp_texture,
+                    texture,
                     x,
                     y,
                     per * MULTIPLER,
-                    _hp_texture.Height * MULTIPLER,
-                    ref _vectorHue
+                    bounds.Height * MULTIPLER,
+                    bounds.X,
+                    bounds.Y,
+                    bounds.Width,
+                    bounds.Height,
+                    ref hueVec
                 );
             }
         }

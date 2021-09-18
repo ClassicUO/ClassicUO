@@ -184,7 +184,16 @@ namespace ClassicUO.Game.Scenes
 
             bool useCHB = ProfileManager.CurrentProfile.CustomBarsToggled;
 
-            Rectangle rect = useCHB ? new Rectangle(0, 0, HealthBarGumpCustom.HPB_BAR_WIDTH, HealthBarGumpCustom.HPB_HEIGHT_MULTILINE) : GumpsLoader.Instance.GetTexture(0x0804).Bounds;
+            Rectangle rect;
+
+            if (useCHB)
+            {
+                rect = new Rectangle(0, 0, HealthBarGumpCustom.HPB_BAR_WIDTH, HealthBarGumpCustom.HPB_HEIGHT_MULTILINE);
+            }
+            else
+            {
+                _ = GumpsLoader.Instance.GetGumpTexture(0x0804, out rect);
+            }
 
             foreach (Mobile mobile in World.Mobiles.Values)
             {
@@ -973,14 +982,14 @@ namespace ClassicUO.Game.Scenes
                             }
                             else
                             {
-                                Rectangle rect = GumpsLoader.Instance.GetTexture(0x0804).Bounds;
+                                _ = GumpsLoader.Instance.GetGumpTexture(0x0804, out var bounds);
 
                                 UIManager.Add
                                 (
                                     customgump = new HealthBarGump(obj)
                                     {
-                                        X = Mouse.LClickPosition.X - (rect.Width >> 1),
-                                        Y = Mouse.LClickPosition.Y - (rect.Height >> 1)
+                                        X = Mouse.LClickPosition.X - (bounds.Width >> 1),
+                                        Y = Mouse.LClickPosition.Y - (bounds.Height >> 1)
                                     }
                                 );
                             }
