@@ -257,14 +257,14 @@ namespace ClassicUO.Game.UI.Gumps
                 }
                 else
                 {
-                    Rectangle rect = GumpsLoader.Instance.GetTexture(0x0804).Bounds;
+                    _ = GumpsLoader.Instance.GetGumpTexture(0x0804, out var bounds);
 
                     UIManager.Add
                     (
                         gump = new HealthBarGump(entity)
                         {
-                            X = Mouse.LClickPosition.X - (rect.Width >> 1),
-                            Y = Mouse.LClickPosition.Y - (rect.Height >> 1)
+                            X = Mouse.LClickPosition.X - (bounds.Width >> 1),
+                            Y = Mouse.LClickPosition.Y - (bounds.Height >> 1)
                         }
                     );
                 }

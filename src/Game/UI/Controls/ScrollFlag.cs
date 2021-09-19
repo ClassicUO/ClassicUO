@@ -42,6 +42,9 @@ namespace ClassicUO.Game.UI.Controls
     {
         private readonly bool _showButtons;
 
+        const ushort BUTTON_UP = 0x0824;
+        const ushort BUTTON_DOWN = 0x0825;
+        const ushort BUTTON_FLAG = 0x0828;
 
         public ScrollFlag(int x, int y, int height, bool showbuttons) : this()
         {
@@ -57,23 +60,22 @@ namespace ClassicUO.Game.UI.Controls
         {
             AcceptMouseInput = true;
 
-            UOTexture texture_flag = GumpsLoader.Instance.GetTexture(0x0828);
+            var textureFlag = GumpsLoader.Instance.GetGumpTexture(BUTTON_FLAG, out var boundsFlag);
+            var textureButtonUp = GumpsLoader.Instance.GetGumpTexture(BUTTON_UP, out var boundsButtonUp);
+            var textureButtonDown = GumpsLoader.Instance.GetGumpTexture(BUTTON_DOWN, out var boundsButtonDown);
 
-            if (texture_flag == null)
+            if (textureFlag == null)
             {
                 Dispose();
 
                 return;
             }
 
-            Width = texture_flag.Width;
-            Height = texture_flag.Height;
+            Width = boundsFlag.Width;
+            Height = boundsFlag.Height;
 
-            UOTexture texture_button_up = GumpsLoader.Instance.GetTexture(0x0824);
-            UOTexture texture_button_down = GumpsLoader.Instance.GetTexture(0x0825);
-
-            _rectUpButton = new Rectangle(0, 0, texture_button_up.Width, texture_button_up.Height);
-            _rectDownButton = new Rectangle(0, Height, texture_button_down.Width, texture_button_down.Height);
+            _rectUpButton = new Rectangle(0, 0, boundsButtonUp.Width, boundsButtonUp.Height);
+            _rectDownButton = new Rectangle(0, Height, boundsButtonDown.Width, boundsButtonDown.Height);
 
             WantUpdateSize = false;
         }
@@ -85,26 +87,56 @@ namespace ClassicUO.Game.UI.Controls
         {
             ResetHueVector();
 
-            UOTexture texture_flag = GumpsLoader.Instance.GetTexture(0x0828);
-            UOTexture texture_button_up = GumpsLoader.Instance.GetTexture(0x0824);
-            UOTexture texture_button_down = GumpsLoader.Instance.GetTexture(0x0825);
+            var textureFlag = GumpsLoader.Instance.GetGumpTexture(BUTTON_FLAG, out var boundsFlag);
+            var textureButtonUp = GumpsLoader.Instance.GetGumpTexture(BUTTON_UP, out var boundsButtonUp);
+            var textureButtonDown = GumpsLoader.Instance.GetGumpTexture(BUTTON_DOWN, out var boundsButtonDown);
 
 
-            if (MaxValue != MinValue && texture_flag != null)
+            if (MaxValue != MinValue && textureFlag != null)
             {
-                batcher.Draw2D(texture_flag, x, (int) (y + _sliderPosition), ref HueVector);
+                batcher.Draw2D
+                (
+                    textureFlag,
+                    x, 
+                    y + _sliderPosition,
+                    boundsFlag.X,
+                    boundsFlag.Y,
+                    boundsFlag.Width,
+                    boundsFlag.Height,
+                    ref HueVector
+                );
             }
 
             if (_showButtons)
             {
-                if (texture_button_up != null)
+                if (textureButtonUp != null)
                 {
-                    batcher.Draw2D(texture_button_up, x, y, ref HueVector);
+                    batcher.Draw2D
+                    (
+                        textureButtonUp,
+                        x,
+                        y,
+                        boundsButtonUp.X,
+                        boundsButtonUp.Y,
+                        boundsButtonUp.Width,
+                        boundsButtonUp.Height,
+                        ref HueVector
+                    );
                 }
 
-                if (texture_button_down != null)
+                if (textureButtonDown != null)
                 {
-                    batcher.Draw2D(texture_button_down, x, y + Height, ref HueVector);
+                    batcher.Draw2D
+                    (
+                        textureButtonDown,
+                        x,
+                        y + Height,
+                        boundsButtonDown.X,
+                        boundsButtonDown.Y,
+                        boundsButtonDown.Width,
+                        boundsButtonDown.Height,
+                        ref HueVector
+                    );
                 }
             }
 
@@ -113,9 +145,9 @@ namespace ClassicUO.Game.UI.Controls
 
         protected override int GetScrollableArea()
         {
-            UOTexture texture = GumpsLoader.Instance.GetTexture(0x0828);
+            _ = GumpsLoader.Instance.GetGumpTexture(BUTTON_FLAG, out var boundsFlag);
 
-            return Height - texture?.Height ?? 0;
+            return Height - boundsFlag.Height;
         }
 
 
@@ -123,8 +155,8 @@ namespace ClassicUO.Game.UI.Controls
         {
             if (y != _clickPosition.Y)
             {
-                UOTexture texture = GumpsLoader.Instance.GetTexture(0x0828);
-                int height = texture?.Height ?? 0;
+                _ = GumpsLoader.Instance.GetGumpTexture(BUTTON_FLAG, out var boundsFlag);
+                int height = boundsFlag.Height;
 
                 y -= (height >> 1);
 
@@ -161,16 +193,14 @@ namespace ClassicUO.Game.UI.Controls
 
         public override bool Contains(int x, int y)
         {
-            UOTexture texture_flag = GumpsLoader.Instance.GetTexture(0x0828);
-
-            if (texture_flag == null)
+            if (GumpsLoader.Instance.GetGumpTexture(BUTTON_FLAG, out _) == null)
             {
                 return false;
             }
 
             y -= _sliderPosition;
 
-            return GumpsLoader.Instance.PixelCheck(0x0828, x, y);
+            return GumpsLoader.Instance.PixelCheck(BUTTON_FLAG, x, y);
         }
     }
 }

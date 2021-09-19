@@ -82,28 +82,28 @@ namespace ClassicUO.Game.UI.Gumps
                 switch (ProfileManager.CurrentProfile.BackpackStyle)
                 {
                     case 1:
-                        if (loader.GetTexture(0x775E) != null)
+                        if (loader.GetGumpTexture(0x775E, out _) != null)
                         {
                             Graphic = 0x775E; // Suede Backpack
                         }
 
                         break;
                     case 2:
-                        if (loader.GetTexture(0x7760) != null)
+                        if (loader.GetGumpTexture(0x7760, out _) != null)
                         {
                             Graphic = 0x7760; // Polar Bear Backpack
                         }
 
                         break;
                     case 3:
-                        if (loader.GetTexture(0x7762) != null)
+                        if (loader.GetGumpTexture(0x7762, out _) != null)
                         {
                             Graphic = 0x7762; // Ghoul Skin Backpack
                         }
 
                         break;
                     default:
-                        if (loader.GetTexture(0x003C) != null)
+                        if (loader.GetGumpTexture(0x003C, out _) != null)
                         {
                             Graphic = 0x003C; // Default Backpack
                         }

@@ -76,21 +76,18 @@ namespace ClassicUO.Game.UI.Gumps
 
 
             // big
-            UOTexture th1 = GumpsLoader.Instance.GetTexture(0x098B);
-            UOTexture th2 = GumpsLoader.Instance.GetTexture(0x098D);
-
             int smallWidth = 50;
 
-            if (th1 != null)
+            if (GumpsLoader.Instance.GetGumpTexture(0x098B, out var bounds) != null)
             {
-                smallWidth = th1.Width;
+                smallWidth = bounds.Width;
             }
 
             int largeWidth = 100;
 
-            if (th2 != null)
+            if (GumpsLoader.Instance.GetGumpTexture(0x098D, out bounds) != null)
             {
-                largeWidth = th2.Width;
+                largeWidth = bounds.Width;
             }
 
             int[][] textTable =

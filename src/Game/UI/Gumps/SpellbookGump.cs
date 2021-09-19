@@ -1464,12 +1464,10 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     ResetHueVector();
 
-                    UOTexture lockTexture = GumpsLoader.Instance.GetTexture(0x09CF);
+                    var texture = GumpsLoader.Instance.GetGumpTexture(0x09CF, out var bounds);
 
-                    if (lockTexture != null)
+                    if (texture != null)
                     {
-                        lockTexture.Ticks = Time.Ticks;
-
                         if (UIManager.MouseOverControl != null && (UIManager.MouseOverControl == this || UIManager.MouseOverControl.RootParent == this))
                         {
                             HueVector.X = 34;
@@ -1481,7 +1479,17 @@ namespace ClassicUO.Game.UI.Gumps
                             HueVector.Y = 1;
                         }
 
-                        batcher.Draw2D(lockTexture, x + (Width - lockTexture.Width), y, ref HueVector);
+                        batcher.Draw2D
+                        (
+                            texture,
+                            x + (Width - bounds.Width), 
+                            y, 
+                            bounds.X,
+                            bounds.Y,
+                            bounds.Width,
+                            bounds.Height,
+                            ref HueVector
+                        );
                     }
                 }
 

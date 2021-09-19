@@ -1290,7 +1290,7 @@ namespace ClassicUO.Network
                         switch (graphic)
                         {
                             case 0x0048:
-                                if (loader.GetTexture(0x06E8) != null)
+                                if (loader.GetGumpTexture(0x06E8, out _) != null)
                                 {
                                     graphic = 0x06E8;
                                 }
@@ -1298,7 +1298,7 @@ namespace ClassicUO.Network
                                 break;
 
                             case 0x0049:
-                                if (loader.GetTexture(0x9CDF) != null)
+                                if (loader.GetGumpTexture(0x9CDF, out _) != null)
                                 {
                                     graphic = 0x9CDF;
                                 }
@@ -1306,7 +1306,7 @@ namespace ClassicUO.Network
                                 break;
 
                             case 0x0051:
-                                if (loader.GetTexture(0x06E7) != null)
+                                if (loader.GetGumpTexture(0x06E7, out _) != null)
                                 {
                                     graphic = 0x06E7;
                                 }
@@ -1314,7 +1314,7 @@ namespace ClassicUO.Network
                                 break;
 
                             case 0x003E:
-                                if (loader.GetTexture(0x06E9) != null)
+                                if (loader.GetGumpTexture(0x06E9, out _) != null)
                                 {
                                     graphic = 0x06E9;
                                 }
@@ -1322,7 +1322,7 @@ namespace ClassicUO.Network
                                 break;
 
                             case 0x004D:
-                                if (loader.GetTexture(0x06EA) != null)
+                                if (loader.GetGumpTexture(0x06EA, out _) != null)
                                 {
                                     graphic = 0x06EA;
                                 }
@@ -1330,7 +1330,7 @@ namespace ClassicUO.Network
                                 break;
 
                             case 0x004E:
-                                if (loader.GetTexture(0x06E6) != null)
+                                if (loader.GetGumpTexture(0x06E6, out _) != null)
                                 {
                                     graphic = 0x06E6;
                                 }
@@ -1338,7 +1338,7 @@ namespace ClassicUO.Network
                                 break;
 
                             case 0x004F:
-                                if (loader.GetTexture(0x06E5) != null)
+                                if (loader.GetGumpTexture(0x06E5, out _) != null)
                                 {
                                     graphic = 0x06E5;
                                 }
@@ -1346,7 +1346,7 @@ namespace ClassicUO.Network
                                 break;
 
                             case 0x004A:
-                                if (loader.GetTexture(0x9CDD) != null)
+                                if (loader.GetGumpTexture(0x9CDD, out _) != null)
                                 {
                                     graphic = 0x9CDD;
                                 }
@@ -1354,7 +1354,7 @@ namespace ClassicUO.Network
                                 break;
 
                             case 0x0044:
-                                if (loader.GetTexture(0x9CE3) != null)
+                                if (loader.GetGumpTexture(0x9CE3, out _) != null)
                                 {
                                     graphic = 0x9CE3;
                                 }
@@ -3221,10 +3221,10 @@ namespace ClassicUO.Network
             p.Skip(2);
             ushort graphic = p.ReadUInt16BE();
 
-            Rectangle rect = GumpsLoader.Instance.GetTexture(0x0906).Bounds;
+            _ = GumpsLoader.Instance.GetGumpTexture(0x0906, out var bounds);
 
-            int x = (Client.Game.Window.ClientBounds.Width >> 1) - (rect.Width >> 1);
-            int y = (Client.Game.Window.ClientBounds.Height >> 1) - (rect.Height >> 1);
+            int x = (Client.Game.Window.ClientBounds.Width >> 1) - (bounds.Width >> 1);
+            int y = (Client.Game.Window.ClientBounds.Height >> 1) - (bounds.Height >> 1);
 
             ColorPickerGump gump = UIManager.GetGump<ColorPickerGump>(serial);
 

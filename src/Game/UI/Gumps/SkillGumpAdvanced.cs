@@ -421,9 +421,9 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 GetSpellFloatingButton(_skill.Index)?.Dispose();
 
-                Rectangle rect = GumpsLoader.Instance.GetTexture(0x24B8).Bounds;
+                _ = GumpsLoader.Instance.GetGumpTexture(0x24B8, out var bounds);
 
-                SkillButtonGump skillButtonGump = new SkillButtonGump(_skill, Mouse.LClickPosition.X + (rect.Width >> 1), Mouse.LClickPosition.Y + (rect.Height >> 1));
+                SkillButtonGump skillButtonGump = new SkillButtonGump(_skill, Mouse.LClickPosition.X + (bounds.Width >> 1), Mouse.LClickPosition.Y + (bounds.Height >> 1));
 
                 UIManager.Add(skillButtonGump);
                 UIManager.AttemptDragControl(skillButtonGump, true);

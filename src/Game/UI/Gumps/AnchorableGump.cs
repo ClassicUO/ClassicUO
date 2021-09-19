@@ -53,6 +53,8 @@ namespace ClassicUO.Game.UI.Gumps
         //private GumpPic _lockGumpPic;
         private int _prevX, _prevY;
 
+        const ushort LOCK_GRAPHIC = 0x082C;
+
         protected AnchorableGump(uint local, uint server) : base(local, server)
         {
         }
@@ -119,11 +121,9 @@ namespace ClassicUO.Game.UI.Gumps
         {
             if (button == MouseButtonType.Left && ShowLock)
             {
-                Texture2D lock_texture = GumpsLoader.Instance.GetTexture(0x082C);
-
-                if (lock_texture != null)
+                if (GumpsLoader.Instance.GetGumpTexture(LOCK_GRAPHIC, out var bounds) != null)
                 {
-                    if (x >= Width - lock_texture.Width && x < Width && y >= 0 && y <= lock_texture.Height)
+                    if (x >= Width - bounds.Width && x < Width && y >= 0 && y <= bounds.Height)
                     {
                         UIManager.AnchorManager.DetachControl(this);
                     }
@@ -142,19 +142,27 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 ResetHueVector();
 
-                UOTexture lock_texture = GumpsLoader.Instance.GetTexture(0x082C);
+                var texture = GumpsLoader.Instance.GetGumpTexture(LOCK_GRAPHIC, out var bounds);
 
-                if (lock_texture != null)
+                if (texture != null)
                 {
-                    lock_texture.Ticks = Time.Ticks;
-
                     if (UIManager.MouseOverControl != null && (UIManager.MouseOverControl == this || UIManager.MouseOverControl.RootParent == this))
                     {
                         HueVector.X = 34;
                         HueVector.Y = 1;
                     }
 
-                    batcher.Draw2D(lock_texture, x + (Width - lock_texture.Width), y, ref HueVector);
+                    batcher.Draw2D
+                    (
+                        texture, 
+                        x + (Width - bounds.Width),
+                        y, 
+                        bounds.X,
+                        bounds.Y,
+                        bounds.Width,
+                        bounds.Height,
+                        ref HueVector
+                    );
                 }
             }
 

@@ -386,21 +386,29 @@ namespace ClassicUO.Game.UI.Gumps
                     true
                 );
 
-                UOTexture texture = GumpsLoader.Instance.GetTexture(Graphic);
+                var texture = GumpsLoader.Instance.GetGumpTexture(Graphic, out var bounds);
 
                 if (texture != null)
                 {
+                    batcher.Draw2D
+                    (
+                        texture, 
+                        x,
+                        y, 
+                        bounds.X,
+                        bounds.Y,
+                        bounds.Height,
+                        bounds.Width,
+                        ref HueVector
+                    );
+                   
                     if (ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.BuffBarTime)
                     {
-                        batcher.Draw2D(texture, x, y, ref HueVector);
-
-                        return _gText.Draw(batcher, x - 3, y + texture.Height / 2 - 3, HueVector.Z);
+                        _gText.Draw(batcher, x - 3, y + bounds.Height / 2 - 3, HueVector.Z);
                     }
-
-                    return batcher.Draw2D(texture, x, y, ref HueVector);
                 }
 
-                return false;
+                return true;
             }
 
             public override void Dispose()

@@ -710,7 +710,7 @@ namespace ClassicUO.Game.UI.Gumps
                         }
                         else
                         {
-                            Rectangle bounds = GumpsLoader.Instance.GetTexture(0x0804).Bounds;
+                            _ = GumpsLoader.Instance.GetGumpTexture(0x0804, out var bounds);
 
                             UIManager.Add
                             (

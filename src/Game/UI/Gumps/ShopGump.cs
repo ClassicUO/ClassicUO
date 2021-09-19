@@ -1117,7 +1117,6 @@ namespace ClassicUO.Game.UI.Gumps
         private class ResizePicLine : Control
         {
             private readonly ushort _graphic;
-            private readonly UOTexture[] _gumpTexture = new UOTexture[3];
 
             public ResizePicLine(ushort graphic)
             {
@@ -1125,32 +1124,19 @@ namespace ClassicUO.Game.UI.Gumps
                 CanMove = true;
                 CanCloseWithRightClick = true;
 
-                for (int i = 0; i < _gumpTexture.Length; i++)
-                {
-                    if (_gumpTexture[i] == null)
-                    {
-                        _gumpTexture[i] = GumpsLoader.Instance.GetTexture((ushort) (_graphic + i));
-                    }
-                }
+                _ = GumpsLoader.Instance.GetGumpTexture((ushort)(_graphic + 0), out var bounds0);
+                _ = GumpsLoader.Instance.GetGumpTexture((ushort)(_graphic + 1), out var bounds1);
+                _ = GumpsLoader.Instance.GetGumpTexture((ushort)(_graphic + 2), out var bounds2);
 
-                Height = _gumpTexture.Max(o => o.Height);
-            }
-
-            public override void Update(double totalTime, double frameTime)
-            {
-                foreach (UOTexture t in _gumpTexture)
-                {
-                    if (t != null)
-                    {
-                        t.Ticks = (long) totalTime;
-                    }
-                }
-
-                base.Update(totalTime, frameTime);
+                Height = Math.Max(bounds0.Height, Math.Max(bounds1.Height, bounds2.Height));
             }
 
             public override bool Draw(UltimaBatcher2D batcher, int x, int y)
             {
+                var texture0 = GumpsLoader.Instance.GetGumpTexture((ushort)(_graphic + 0), out var bounds0);
+                var texture1 = GumpsLoader.Instance.GetGumpTexture((ushort)(_graphic + 1), out var bounds1);
+                var texture2 = GumpsLoader.Instance.GetGumpTexture((ushort)(_graphic + 2), out var bounds2);
+
                 ResetHueVector();
 
                 ShaderHueTranslator.GetHueVector
@@ -1162,21 +1148,45 @@ namespace ClassicUO.Game.UI.Gumps
                     true
                 );
 
-                int middleWidth = Width - _gumpTexture[0].Width - _gumpTexture[2].Width;
+                int middleWidth = Width - bounds0.Width - bounds2.Width;
 
-                batcher.Draw2D(_gumpTexture[0], x, y, ref HueVector);
-
-                batcher.Draw2DTiled
+                batcher.Draw2D
                 (
-                    _gumpTexture[1],
-                    x + _gumpTexture[0].Width,
-                    y,
-                    middleWidth,
-                    _gumpTexture[1].Height,
+                    texture0,
+                    x,
+                    y, 
+                    bounds0.X,
+                    bounds0.Y,
+                    bounds0.Width,
+                    bounds0.Height,
                     ref HueVector
                 );
 
-                batcher.Draw2D(_gumpTexture[2], x + Width - _gumpTexture[2].Width, y, ref HueVector);
+                batcher.Draw2DTiled
+                (
+                    texture1,
+                    x + bounds0.Width,
+                    y,
+                    middleWidth,
+                    bounds1.Height,
+                    bounds1.X,
+                    bounds1.Y,
+                    bounds1.Width,
+                    bounds1.Height,
+                    ref HueVector
+                );
+
+                batcher.Draw2D
+                (
+                    texture2,
+                    x + Width - bounds2.Width,
+                    y,
+                    bounds2.X,
+                    bounds2.Y,
+                    bounds2.Width,
+                    bounds2.Height,
+                    ref HueVector
+                );
 
                 return base.Draw(batcher, x, y);
             }
