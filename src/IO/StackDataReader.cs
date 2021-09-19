@@ -276,12 +276,12 @@ namespace ClassicUO.IO
 
         public string ReadASCII(bool safe = false)
         {
-            return ReadString(Encoding.ASCII, -1, 1, safe);
+            return ReadString(Encoding.GetEncoding("iso-8859-1"), -1, 1, safe);
         }
 
         public string ReadASCII(int length, bool safe = false)
         {
-            return ReadString(Encoding.ASCII, length, 1, safe);
+            return ReadString(Encoding.GetEncoding("iso-8859-1"), length, 1, safe);
         }
 
         public string ReadUnicodeBE(bool safe = false)
