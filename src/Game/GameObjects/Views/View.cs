@@ -124,17 +124,19 @@ namespace ClassicUO.Game.GameObjects
             ref Vector3 hue
         )
         {
-            UOTexture texture = TexmapsLoader.Instance.GetTexture(TileDataLoader.Instance.LandData[graphic].TexID);
+            var texture = TexmapsLoader.Instance.GetLandTexture(TileDataLoader.Instance.LandData[graphic].TexID, out var bounds);
 
             if (texture != null)
             {
-                texture.Ticks = Time.Ticks;
-
                 batcher.DrawSpriteLand
                 (
                     texture,
                     x,
                     y,
+                    bounds.X,
+                    bounds.Y,
+                    bounds.Width,
+                    bounds.Height,
                     ref yOffsets,
                     ref nTop,
                     ref nRight,

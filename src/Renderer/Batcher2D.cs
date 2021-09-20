@@ -399,6 +399,10 @@ namespace ClassicUO.Renderer
             Texture2D texture,
             int x,
             int y,
+            int sx,
+            int sy,
+            float swidth,
+            float sheight,
             ref YOffsets yOffsets,
             ref Vector3 normalTop,
             ref Vector3 normalRight,
@@ -407,21 +411,29 @@ namespace ClassicUO.Renderer
             ref Vector3 hue
         )
         {
+            float minX = sx / (float)texture.Width;
+            float maxX = (sx + swidth) / texture.Width;
+            float minY = sy / (float)texture.Height;
+            float maxY = (sy + sheight) / texture.Height;
+
             EnsureSize();
 
             ref PositionNormalTextureColor4 vertex = ref _vertexInfo[_numSprites];
 
-            vertex.TextureCoordinate0.X = 0;
-            vertex.TextureCoordinate0.Y = 0;
+            vertex.TextureCoordinate0.X = minX;
+            vertex.TextureCoordinate0.Y = minY;
             vertex.TextureCoordinate0.Z = 0;
 
-            vertex.TextureCoordinate1.X = 1;
-            vertex.TextureCoordinate1.Y = vertex.TextureCoordinate1.Z = 0;
+            vertex.TextureCoordinate1.X = maxX;
+            vertex.TextureCoordinate1.Y = minY;
+            vertex.TextureCoordinate1.Z = 0;
 
-            vertex.TextureCoordinate2.X = vertex.TextureCoordinate2.Z = 0;
-            vertex.TextureCoordinate2.Y = 1;
+            vertex.TextureCoordinate2.X = minX;
+            vertex.TextureCoordinate2.Y = maxY;
+            vertex.TextureCoordinate2.Z = 0;
 
-            vertex.TextureCoordinate3.X = vertex.TextureCoordinate3.Y = 1;
+            vertex.TextureCoordinate3.X = maxX;
+            vertex.TextureCoordinate3.Y = maxY;
             vertex.TextureCoordinate3.Z = 0;
 
             vertex.Normal0 = normalTop;

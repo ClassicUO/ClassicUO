@@ -161,6 +161,7 @@ namespace ClassicUO
 
             ArtLoader.Instance.CreateAtlas(GraphicsDevice);
             GumpsLoader.Instance.CreateAtlas(GraphicsDevice);
+            TexmapsLoader.Instance.CreateAtlas(GraphicsDevice);
 
             UIManager.InitializeGameCursor();
             AnimatedStaticsManager.Initialize();

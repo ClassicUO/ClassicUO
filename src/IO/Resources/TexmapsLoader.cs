@@ -36,6 +36,8 @@ using System.Threading.Tasks;
 using ClassicUO.Game;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.IO.Resources
 {
@@ -146,6 +148,56 @@ namespace ClassicUO.IO.Resources
                     //}
                 }
             );
+        }
+      
+        
+        const int ATLAS_SIZE = 1024 * 4;
+
+        private TextureAtlas _staticAtlas;
+
+        public unsafe void CreateAtlas(Microsoft.Xna.Framework.Graphics.GraphicsDevice device)
+        {
+            _staticAtlas = new TextureAtlas(device, ATLAS_SIZE, ATLAS_SIZE, Microsoft.Xna.Framework.Graphics.SurfaceFormat.Color, Entries.Length);
+        }
+
+        public Texture2D GetLandTexture(uint g, out Rectangle bounds)
+        {
+            if (!_staticAtlas.IsHashExists(g))
+            {
+                AddSpriteToAtlas(_staticAtlas, (int)g);
+            }
+
+            return _staticAtlas.GetTexture(g, out bounds);
+        }
+
+        private unsafe void AddSpriteToAtlas(TextureAtlas atlas, int index)
+        {
+            ref UOFileIndex entry = ref GetValidRefEntry(index);
+
+            if (entry.Length <= 0)
+            {
+                return;
+            }
+
+            int size = entry.Width == 0 && entry.Height == 0 ? 64 : 128;
+            int size_pot = size * size;
+
+            Span<uint> data = stackalloc uint[size_pot];
+
+            _file.SetData(entry.Address, entry.FileSize);
+            _file.Seek(entry.Offset);
+
+            for (int i = 0; i < size; ++i)
+            {
+                int pos = i * size;
+
+                for (int j = 0; j < size; ++j)
+                {
+                    data[pos + j] = HuesHelper.Color16To32(_file.ReadUShort()) | 0xFF_00_00_00;
+                }
+            }
+
+            atlas.AddSprite((uint) index, data, size, size);
         }
 
         public override UOTexture GetTexture(uint g)
