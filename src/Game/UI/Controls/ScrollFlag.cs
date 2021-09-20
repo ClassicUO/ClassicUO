@@ -59,17 +59,16 @@ namespace ClassicUO.Game.UI.Controls
         public ScrollFlag()
         {
             AcceptMouseInput = true;
-
-            var textureFlag = GumpsLoader.Instance.GetGumpTexture(BUTTON_FLAG, out var boundsFlag);
-            var textureButtonUp = GumpsLoader.Instance.GetGumpTexture(BUTTON_UP, out var boundsButtonUp);
-            var textureButtonDown = GumpsLoader.Instance.GetGumpTexture(BUTTON_DOWN, out var boundsButtonDown);
-
-            if (textureFlag == null)
+          
+            if (GumpsLoader.Instance.GetGumpTexture(BUTTON_FLAG, out var boundsFlag) == null)
             {
                 Dispose();
 
                 return;
             }
+
+            _ = GumpsLoader.Instance.GetGumpTexture(BUTTON_UP, out var boundsButtonUp);
+            _ = GumpsLoader.Instance.GetGumpTexture(BUTTON_DOWN, out var boundsButtonDown);
 
             Width = boundsFlag.Width;
             Height = boundsFlag.Height;
