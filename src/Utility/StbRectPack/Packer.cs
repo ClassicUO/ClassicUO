@@ -52,14 +52,14 @@ namespace StbRectPackSharp
 		/// <param name="width"></param>
 		/// <param name="height"></param>
 		/// <returns></returns>
-		public bool PackRect(int width, int height, out Rectangle packRectangle)
+		public bool PackRect(int width, int height, out Rectangle packRectangle, int offset = 1)
 		{
 			var rect = new stbrp_rect
 			{
 				id = _rectangles.Count,
-				w = width,
-				h = height
-			};
+				w = width + offset,
+				h = height + offset
+            };
 
 			int result;
 			fixed (stbrp_context* contextPtr = &_context)
@@ -73,7 +73,7 @@ namespace StbRectPackSharp
 				return false;
 			}
 
-			packRectangle = new Rectangle(rect.x, rect.y, rect.w, rect.h);
+			packRectangle = new Rectangle(rect.x + offset, rect.y + offset, rect.w - offset, rect.h - offset);
 			_rectangles.Add(packRectangle);
 
 			return true;
