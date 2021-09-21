@@ -35,7 +35,6 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Runtime.InteropServices;
-using System.Text;
 using System.Threading;
 using ClassicUO.Configuration;
 using ClassicUO.Data;
@@ -155,9 +154,6 @@ namespace ClassicUO
                 SetDllDirectory(libsPath);
             }
 
-            // Register the encoding provider that provides CP-1252, a text encoding used by UO.
-            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
-            
             if (string.IsNullOrWhiteSpace(Settings.GlobalSettings.Language))
             {
                 Log.Trace("language is not set. Trying to get the OS language.");

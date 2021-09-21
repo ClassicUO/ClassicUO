@@ -81,7 +81,6 @@ namespace ManifestCreator
             "System.Numerics.Vectors.dll",
             "System.Runtime.CompilerServices.Unsafe.dll",
 
-            "System.Text.Encoding.CodePages.dll",
             // removed.
             //"Newtonsoft.Json.dll"
         };
