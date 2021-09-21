@@ -199,15 +199,22 @@ namespace ClassicUO.Game.GameObjects
             {
                 ref UOFileIndex index = ref ArtLoader.Instance.GetValidRefEntry(graphic + 0x4000);
 
-                batcher.DrawSpriteRotated
+                batcher.Draw
                 (
                     texture,
-                    x - index.Width,
-                    y - index.Height,
-                    bounds.Width,
-                    bounds.Height,
-                    ref hue,
-                    angle
+                    new Rectangle
+                    (
+                        x - index.Width,
+                        y - index.Height, 
+                        bounds.Width,
+                        bounds.Height
+                    ),
+                    bounds,
+                    hue,
+                    MathHelper.ToRadians(angle),
+                    Vector2.Zero,
+                    SpriteEffects.None,
+                    0
                 );
             }
         }
