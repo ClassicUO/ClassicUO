@@ -92,158 +92,92 @@ namespace ClassicUO.Game.UI.Controls
             int offsetRight = Math.Max(bounds2.Width, bounds7.Width) - bounds4.Width;
 
 
-            for (int i = 0; i < 9; i++)
+
+            if (PixelsInXY(ref bounds0, Graphic, x, y))
             {
-                switch (i)
-                {
-                    case 0:
-                        if (PixelsInXY(ref bounds0, Graphic, x, y))
-                        {
-                            return true;
-                        }
-
-                        break;
-
-                    case 1:
-                        int DW = Width - bounds0.Width - bounds2.Width;
-
-                        if (DW < 1)
-                        {
-                            break;
-                        }
-
-                        if (PixelsInXY(ref bounds1, (ushort)(Graphic + 1), x - bounds0.Width, y, DW))
-                        {
-                            return true;
-                        }
-
-                        break;
-
-                    case 2:
-
-                        if (PixelsInXY(ref bounds2, (ushort)(Graphic + 2), x - (Width - bounds2.Width), y - offsetTop))
-                        {
-                            return true;
-                        }
-
-                        break;
-
-                    case 3:
-
-                        int DH = Height - bounds0.Height - bounds5.Height;
-
-                        if (DH < 1)
-                        {
-                            break;
-                        }
-
-                        if (PixelsInXY
-                        (
-                            ref bounds3, (ushort)(Graphic + 3),
-                            x /*- offsetLeft*/,
-                            y - bounds0.Height,
-                            0,
-                            DH
-                        ))
-                        {
-                            return true;
-                        }
+                return true;
+            }
 
 
-                        break;
+            int DW = Width - bounds0.Width - bounds2.Width;
 
-                    case 4:
-
-                        DH = Height - bounds2.Height - bounds7.Height;
-
-                        if (DH < 1)
-                        {
-                            break;
-                        }
-
-                        if (PixelsInXY
-                        (
-                            ref bounds5, (ushort)(Graphic + 5),
-                            x - (Width - bounds4.Width /*- offsetRight*/),
-                            y - bounds2.Height,
-                            0,
-                            DH
-                        ))
-                        {
-                            return true;
-                        }
-
-                        break;
-
-                    case 5:
-
-                        if (PixelsInXY(ref bounds6, (ushort)(Graphic + 6), x, y - (Height - bounds5.Height)))
-                        {
-                            return true;
-                        }
-
-                        break;
-
-                    case 6:
-
-                        DW = Width - bounds5.Width - bounds2.Width;
-
-                        if (DW < 1)
-                        {
-                            break;
-                        }
-
-                        if (PixelsInXY(ref bounds7, (ushort)(Graphic + 7), x - bounds5.Width, y - (Height - bounds6.Height - offsetBottom), DW))
-                        {
-                            return true;
-                        }
+            if (DW >= 1 && PixelsInXY(ref bounds1, (ushort)(Graphic + 1), x - bounds0.Width, y, DW))
+            {
+                return true;
+            }
 
 
-                        break;
-
-                    case 7:
-
-                        if (PixelsInXY(ref bounds8, (ushort)(Graphic + 8), x - (Width - bounds7.Width), y - (Height - bounds7.Height)))
-                        {
-                            return true;
-                        }
-
-                        break;
-
-                    case 8:
-
-                        DW = Width - bounds0.Width - bounds2.Width;
-
-                        DW += offsetLeft + offsetRight;
-
-                        if (DW < 1)
-                        {
-                            break;
-                        }
-
-                        DH = Height - bounds2.Height - bounds7.Height;
-
-                        if (DH < 1)
-                        {
-                            break;
-                        }
-
-                        if (PixelsInXY
-                        (
-                            ref bounds4, 
-                            (ushort)(Graphic + 4),
-                            x - bounds0.Width,
-                            y - bounds0.Height,
-                            DW,
-                            DH
-                        ))
-                        {
-                            return true;
-                        }
+            if (PixelsInXY(ref bounds2, (ushort)(Graphic + 2), x - (Width - bounds2.Width), y - offsetTop))
+            {
+                return true;
+            }
 
 
-                        break;
-                }
+            int DH = Height - bounds0.Height - bounds5.Height;
+
+            if (DH >= 1 && PixelsInXY
+            (
+                ref bounds3, (ushort)(Graphic + 3),
+                x /*- offsetLeft*/,
+                y - bounds0.Height,
+                0,
+                DH
+            ))
+            {
+                return true;
+            }
+
+
+            DH = Height - bounds2.Height - bounds7.Height;
+          
+            if (DH >= 1 && PixelsInXY
+            (
+                ref bounds4, (ushort)(Graphic + 5),
+                x - (Width - bounds4.Width /*- offsetRight*/),
+                y - bounds2.Height,
+                0,
+                DH
+            ))
+            {
+                return true;
+            }
+
+
+            if (PixelsInXY(ref bounds5, (ushort)(Graphic + 6), x, y - (Height - bounds5.Height)))
+            {
+                return true;
+            }
+
+
+            DW = Width - bounds5.Width - bounds2.Width;
+
+            if (DH >= 1 && PixelsInXY(ref bounds6, (ushort)(Graphic + 7), x - bounds5.Width, y - (Height - bounds6.Height - offsetBottom), DW))
+            {
+                return true;
+            }
+
+           
+            if (PixelsInXY(ref bounds7, (ushort)(Graphic + 8), x - (Width - bounds7.Width), y - (Height - bounds7.Height)))
+            {
+                return true;
+            }
+
+
+            DW = Width - bounds0.Width - bounds2.Width;
+            DW += offsetLeft + offsetRight;
+            DH = Height - bounds2.Height - bounds7.Height;
+
+            if (DW >= 1 && DH >= 1 && PixelsInXY
+            (
+                ref bounds8,
+                (ushort)(Graphic + 4),
+                x - bounds0.Width,
+                y - bounds0.Height,
+                DW,
+                DH
+            ))
+            {
+                return true;
             }
 
             return false;
