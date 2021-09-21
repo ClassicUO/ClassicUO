@@ -284,14 +284,14 @@ namespace ClassicUO.IO
         [MethodImpl(IMPL_OPTION)]
         public void WriteASCII(string str)
         {
-            WriteString<byte>(Encoding.ASCII, str, -1);
+            WriteString<byte>(Encoding.GetEncoding(1252), str, -1);
             WriteUInt8(0x00);
         }
 
         [MethodImpl(IMPL_OPTION)]
         public void WriteASCII(string str, int length)
         {
-            WriteString<byte>(Encoding.ASCII, str, length);
+            WriteString<byte>(Encoding.GetEncoding(1252), str, length);
         }
 
 

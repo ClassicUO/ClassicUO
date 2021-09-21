@@ -125,6 +125,10 @@
     <DataFiles_vulkan Include="$(ProjectDir)..\external\vulkan\icd.d\*.*" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="System.Text.Encoding.CodePages" Version="5.0.0" />
+  </ItemGroup>
+
   <Target Name="CopyExternalDeps_build" AfterTargets="Build">
     <Copy SourceFiles="@(DataFiles_x64)" DestinationFolder="$(TargetDir)\x64\" SkipUnchangedFiles="true" />
     <Copy SourceFiles="@(DataFiles_lib64)" DestinationFolder="$(TargetDir)\lib64\" SkipUnchangedFiles="true" />
