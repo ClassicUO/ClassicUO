@@ -160,16 +160,13 @@ namespace ClassicUO.Game.UI.Controls
 
             if (texture != null)
             {
-                Vector2 pos = new Vector2(x, y);
-                Rectangle rect = bounds;
-                rect.Width = Width;
-                rect.Height = Height;
+                Rectangle rect = new Rectangle(x, y, Width, Height);
 
                 batcher.Draw
                 (
                     texture,
-                    pos,
                     rect,
+                    bounds,
                     HueVector
                 );
 
@@ -177,14 +174,14 @@ namespace ClassicUO.Game.UI.Controls
 
                 if (item != null && !item.IsMulti && !item.IsCoin && item.Amount > 1 && item.ItemData.IsStackable)
                 {
-                    pos.X += 5;
-                    pos.Y += 5;
+                    rect.X += 5;
+                    rect.Y += 5;
 
                     batcher.Draw
                     (
                        texture,
-                       pos,
                        rect,
+                       bounds,
                        HueVector
                     );
                 }

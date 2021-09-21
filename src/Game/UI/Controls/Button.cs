@@ -232,7 +232,7 @@ namespace ClassicUO.Game.UI.Controls
             batcher.Draw
             (
                 texture,
-                new Vector2(x, y),
+                new Rectangle(x, y, Width, Height),
                 bounds,
                 HueVector
             );

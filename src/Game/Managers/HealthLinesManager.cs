@@ -265,18 +265,19 @@ namespace ClassicUO.Game.Managers
 
             var texture = GumpsLoader.Instance.GetGumpTexture(BACKGROUND_GRAPHIC, out var bounds);
 
-            batcher.Draw2D
+
+            batcher.Draw
             (
                 texture,
-                x,
-                y,
-                bounds.Width * MULTIPLER,
-                bounds.Height * MULTIPLER,
-                bounds.X,
-                bounds.Y,
-                bounds.Width,
-                bounds.Height,
-                ref hueVec
+                new Rectangle
+                (
+                    x,
+                    y,
+                    bounds.Width * MULTIPLER,
+                    bounds.Height * MULTIPLER
+                ),
+                bounds,
+                hueVec
             );
 
 

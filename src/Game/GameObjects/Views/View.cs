@@ -106,7 +106,6 @@ namespace ClassicUO.Game.GameObjects
 
             if (texture != null)
             {
-                //batcher.Draw2D(texture, x, y, bounds.X, bounds.Y, bounds.Width, bounds.Height, ref hue);
                 batcher.Draw(texture, new Vector2(x, y), bounds, hue);
             }
         }
@@ -165,13 +164,10 @@ namespace ClassicUO.Game.GameObjects
 
             if (texture != null)
             {
-                //texture.Ticks = Time.Ticks;
                 ref UOFileIndex index = ref ArtLoader.Instance.GetValidRefEntry(graphic + 0x4000);
 
                 x -= index.Width;
                 y -= index.Height;
-
-                //batcher.Draw2D(texture, x, y, bounds.X, bounds.Y, bounds.Width, bounds.Height, ref hue);
 
                 batcher.Draw(texture, new Vector2(x, y), bounds, hue);
             }
@@ -184,18 +180,6 @@ namespace ClassicUO.Game.GameObjects
             if (texture != null)
             {
                 batcher.Draw(texture, new Vector2(x, y), bounds, hue);
-
-                //batcher.Draw2D
-                //(
-                //    texture,
-                //    x,
-                //    y,
-                //    bounds.X,
-                //    bounds.Y,
-                //    bounds.Width,
-                //    bounds.Height,
-                //    ref hue
-                //);
             }
         }
 
@@ -330,17 +314,6 @@ namespace ClassicUO.Game.GameObjects
                 {
                     //batcher.DrawSpriteShadow(texture, x, y, false);
                 }
-
-                //batcher.DrawSprite
-                //(
-                //    texture,
-                //    x,
-                //    y,
-                //    false,
-                //    ref hue
-                //);
-
-                //batcher.Draw2D(texture, x, y, bounds.X, bounds.Y, bounds.Width, bounds.Height, ref hue);
 
                 batcher.Draw(texture, new Vector2(x, y), bounds, hue);
             }

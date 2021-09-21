@@ -392,37 +392,33 @@ namespace ClassicUO.Game
 
                 ShaderHueTranslator.GetHueVector(ref hue, ItemHold.Hue, ItemHold.IsPartialHue, ItemHold.HasAlpha ? .5f : 0);
 
-                sb.Draw2D
+                var rect = new Rectangle
                 (
-                    texture,
                     x,
                     y,
-                    bounds.Width * scale,
-                    bounds.Height * scale,
-                    bounds.X,
-                    bounds.Y,
-                    bounds.Width,
-                    bounds.Height,
-                    ref hue
+                    (int)(bounds.Width * scale),
+                    (int)(bounds.Height * scale)
+                );
+
+                sb.Draw
+                (
+                    texture,
+                    rect,
+                    bounds,
+                    hue
                 );
 
                 if (ItemHold.Amount > 1 && ItemHold.DisplayedGraphic == ItemHold.Graphic && ItemHold.IsStackable)
                 {
-                    x += 5;
-                    y += 5;
+                    rect.X += 5;
+                    rect.Y += 5;
 
-                    sb.Draw2D
+                    sb.Draw
                     (
                         texture,
-                        x,
-                        y,
-                        bounds.Width * scale,
-                        bounds.Height * scale,
-                        bounds.X,
-                        bounds.Y,
-                        bounds.Width,
-                        bounds.Height,
-                        ref hue
+                        rect,
+                        bounds,
+                        hue
                     );
                 }
             }
