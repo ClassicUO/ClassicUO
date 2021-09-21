@@ -1142,8 +1142,13 @@ namespace ClassicUO.Game.Scenes
 
 
             batcher.Begin();
+            hueVec.X = 0;
+            hueVec.Y = 1;
+            hueVec.Z = 0;
+            string s = $"Flushes: {flushes}\nSwitches: {switches}";
+            batcher.DrawString(Fonts.Bold, s, 200, 200, ref hueVec);
             hueVec = Vector3.Zero;
-            batcher.DrawString(Fonts.Bold, $"Flushes: {flushes}\nSwitches: {switches}", 200, 200, ref hueVec);
+            batcher.DrawString(Fonts.Bold, s, 200 + 1, 200 - 1, ref hueVec);
             batcher.End();
         }
 

@@ -42,13 +42,13 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.IO.Resources
 {
-    internal class GumpsLoader : UOFileLoader<UOTexture>
+    internal class GumpsLoader : UOFileLoader
     {
         private static GumpsLoader _instance;
         private UOFile _file;
         private PixelPicker _picker = new PixelPicker();
 
-        private GumpsLoader(int count) : base(count)
+        private GumpsLoader(int count)
         {
         }
 
@@ -234,114 +234,10 @@ namespace ClassicUO.IO.Resources
         }
 
 
-        public override UOTexture GetTexture(uint g)
-        {
-            if (g >= Resources.Length)
-            {
-                return null;
-            }
-
-            ref UOTexture texture = ref Resources[g];
-
-            if (texture == null || texture.IsDisposed)
-            {
-                if (GetGumpPixels(ref texture, g))
-                {
-                    SaveId(g);
-                }
-            }
-            else
-            {
-                texture.Ticks = Time.Ticks;
-            }
-
-            return texture;
-        }
-
+       
         public bool PixelCheck(int index, int x, int y)
         {
             return _picker.Get((ulong) index, x, y);
-        }
-
-        private unsafe bool GetGumpPixels(ref UOTexture texture, uint index)
-        {
-            ref UOFileIndex entry = ref GetValidRefEntry((int) index);
-
-            if (entry.Width <= 0 && entry.Height <= 0)
-            {
-                return false;
-            }
-
-            ushort color = entry.Hue;
-
-            if (entry.Width == 0 || entry.Height == 0)
-            {
-                return false;
-            }
-
-            _file.SetData(entry.Address, entry.FileSize);
-            _file.Seek(entry.Offset);
-
-            IntPtr dataStart = _file.PositionAddress;
-
-            uint[] pixels = System.Buffers.ArrayPool<uint>.Shared.Rent(entry.Width * entry.Height);
-
-            try
-            {
-                int* lookuplist = (int*)dataStart;
-
-                int gsize;
-
-                for (int y = 0, half_len = entry.Length >> 2; y < entry.Height; y++)
-                {
-                    if (y < entry.Height - 1)
-                    {
-                        gsize = lookuplist[y + 1] - lookuplist[y];
-                    }
-                    else
-                    {
-                        gsize = half_len - lookuplist[y];
-                    }
-
-                    GumpBlock* gmul = (GumpBlock*)(dataStart + (lookuplist[y] << 2));
-
-                    int pos = y * entry.Width;
-
-                    for (int i = 0; i < gsize; i++)
-                    {
-                        uint val = gmul[i].Value;
-
-                        if (color != 0 && val != 0)
-                        {
-                            val = HuesLoader.Instance.GetColor16(gmul[i].Value, color);
-                        }
-
-                        if (val != 0)
-                        {
-                            //val = 0x8000 | val;
-                            val = HuesHelper.Color16To32(gmul[i].Value) | 0xFF_00_00_00;
-                        }
-
-                        int count = gmul[i].Run;
-
-                        for (int j = 0; j < count; j++)
-                        {
-                            pixels[pos++] = val;
-                        }
-                    }
-                }
-
-                texture = new UOTexture(entry.Width, entry.Height);
-                texture.SetData(pixels, 0, entry.Width * entry.Height);
-
-                _picker.Set(index, entry.Width, entry.Height, pixels);
-            }
-            finally
-            {
-                System.Buffers.ArrayPool<uint>.Shared.Return(pixels, true);
-            }
-
-            return true;
         }
 
         [StructLayout(LayoutKind.Sequential, Pack = 1)]

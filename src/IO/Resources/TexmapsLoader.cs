@@ -41,12 +41,12 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.IO.Resources
 {
-    internal class TexmapsLoader : UOFileLoader<UOTexture>
+    internal class TexmapsLoader : UOFileLoader
     {
         private static TexmapsLoader _instance;
         private UOFile _file;
 
-        private TexmapsLoader(int count) : base(count)
+        private TexmapsLoader(int count)
         {
         }
 
@@ -105,47 +105,6 @@ namespace ClassicUO.IO.Resources
                             }
                         }
                     }
-
-                    //using (StreamReader reader = new StreamReader(File.OpenRead(pathdef)))
-                    //{
-                    //    string line;
-
-                    //    while ((line = reader.ReadLine()) != null)
-                    //    {
-                    //        line = line.Trim();
-
-                    //        if (line.Length <= 0 || line[0] == '#')
-                    //            continue;
-
-                    //        string[] defs = line.Split(new[]
-                    //        {
-                    //            '\t', ' ', '#'
-                    //        }, StringSplitOptions.RemoveEmptyEntries);
-
-                    //        if (defs.Length < 2)
-                    //            continue;
-                    //        int index = int.Parse(defs[0]);
-
-                    //        if (index < 0 || index >= TEXTMAP_COUNT)
-                    //            continue;
-                    //        int first = defs[1].IndexOf("{");
-                    //        int last = defs[1].IndexOf("}");
-
-                    //        string[] newdef = defs[1].Substring(first + 1, last - 1).Split(new[]
-                    //        {
-                    //            ' ', ','
-                    //        }, StringSplitOptions.RemoveEmptyEntries);
-
-                    //        foreach (string s in newdef)
-                    //        {
-                    //            int checkindex = int.Parse(s);
-
-                    //            if (checkindex < 0 || checkindex >= TEXTMAP_COUNT)
-                    //                continue;
-                    //            _file.Entries[index] = _file.Entries[checkindex];
-                    //        }
-                    //    }
-                    //}
                 }
             );
         }
@@ -155,37 +114,39 @@ namespace ClassicUO.IO.Resources
 
         private TextureAtlas _staticAtlas;
 
+        // this is really really tricky. But it's for speedup testing phase.
         public unsafe void CreateAtlas(Microsoft.Xna.Framework.Graphics.GraphicsDevice device)
         {
-            _staticAtlas = new TextureAtlas(device, ATLAS_SIZE, ATLAS_SIZE, Microsoft.Xna.Framework.Graphics.SurfaceFormat.Color, Entries.Length);
+            _staticAtlas = ArtLoader.Instance.Atlas;
+            //_staticAtlas = new TextureAtlas(device, ATLAS_SIZE, ATLAS_SIZE, Microsoft.Xna.Framework.Graphics.SurfaceFormat.Color, Entries.Length);
         }
 
         public Texture2D GetLandTexture(uint g, out Rectangle bounds)
         {
+            // avoid to mix land with statics
+            g += Constants.MAX_STATIC_DATA_INDEX_COUNT;
             if (!_staticAtlas.IsHashExists(g))
             {
-                AddSpriteToAtlas(_staticAtlas, (int)g);
+                AddSpriteToAtlas(_staticAtlas, g);
             }
 
             return _staticAtlas.GetTexture(g, out bounds);
         }
 
-        private unsafe void AddSpriteToAtlas(TextureAtlas atlas, int index)
+        private unsafe void AddSpriteToAtlas(TextureAtlas atlas, uint index)
         {
-            ref UOFileIndex entry = ref GetValidRefEntry(index);
+            ref UOFileIndex entry = ref GetValidRefEntry((int) (index & ~Constants.MAX_STATIC_DATA_INDEX_COUNT));
 
             if (entry.Length <= 0)
             {
                 return;
             }
 
-            int size = entry.Width == 0 && entry.Height == 0 ? 64 : 128;
-            int size_pot = size * size;
-
-            Span<uint> data = stackalloc uint[size_pot];
-
             _file.SetData(entry.Address, entry.FileSize);
             _file.Seek(entry.Offset);
+
+            int size = entry.Length == 0x2000 ? 64 : 128;
+            Span<uint> data = stackalloc uint[size * size];
 
             for (int i = 0; i < size; ++i)
             {
@@ -197,68 +158,7 @@ namespace ClassicUO.IO.Resources
                 }
             }
 
-            atlas.AddSprite((uint) index, data, size, size);
-        }
-
-        public override UOTexture GetTexture(uint g)
-        {
-            if (g >= Resources.Length)
-            {
-                return null;
-            }
-
-            ref UOTexture texture = ref Resources[g];
-
-            if (texture == null || texture.IsDisposed)
-            {
-                ReadTexmapTexture(ref texture, (ushort) g);
-
-                if (texture != null)
-                {
-                    SaveId(g);
-                }
-            }
-            else
-            {
-                texture.Ticks = Time.Ticks;
-            }
-
-            return texture;
-        }
-
-        private unsafe void ReadTexmapTexture(ref UOTexture texture, ushort index)
-        {
-            ref UOFileIndex entry = ref GetValidRefEntry(index);
-
-            if (entry.Length <= 0)
-            {
-                texture = null;
-
-                return;
-            }
-
-            int size = entry.Width == 0 && entry.Height == 0 ? 64 : 128;
-            int size_pot = size * size;
-
-            uint* data = stackalloc uint[size_pot];
-
-            _file.SetData(entry.Address, entry.FileSize);
-            _file.Seek(entry.Offset);
-
-            for (int i = 0; i < size; ++i)
-            {
-                int pos = i * size;
-
-                for (int j = 0; j < size; ++j)
-                {
-                    data[pos + j] = HuesHelper.Color16To32(_file.ReadUShort()) | 0xFF_00_00_00;
-                }
-            }
-
-            texture = new UOTexture(size, size);
-            // we don't need to store the data[] pointer because
-            // land is always hoverable
-            texture.SetDataPointerEXT(0, null, (IntPtr) data, size_pot * sizeof(uint));
+            atlas.AddSprite(index, data, size, size);
         }
     }
 }

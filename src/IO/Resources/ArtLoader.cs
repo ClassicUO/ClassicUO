@@ -51,7 +51,7 @@ namespace ClassicUO.IO.Resources
         private readonly ushort _graphicMask;
         private readonly PixelPicker _picker = new PixelPicker();
 
-        private ArtLoader(int staticCount, int landCount) : base(staticCount)
+        private ArtLoader(int staticCount, int landCount) : base(0)
         {
             _graphicMask = Client.IsUOPInstallation ? (ushort) 0xFFFF : (ushort) 0x3FFF;
         }
@@ -200,8 +200,10 @@ namespace ClassicUO.IO.Resources
         // shitty initialization.
         public unsafe void CreateAtlas(Microsoft.Xna.Framework.Graphics.GraphicsDevice device)
         {
-            _staticAtlas = new TextureAtlas(device, ATLAS_SIZE, ATLAS_SIZE, Microsoft.Xna.Framework.Graphics.SurfaceFormat.Color, Entries.Length);
+            _staticAtlas = new TextureAtlas(device, ATLAS_SIZE, ATLAS_SIZE, Microsoft.Xna.Framework.Graphics.SurfaceFormat.Color, Constants.MAX_STATIC_DATA_INDEX_COUNT * 2);
         }
+
+        public TextureAtlas Atlas => _staticAtlas;
       
         public Microsoft.Xna.Framework.Graphics.Texture2D GetLandTexture(uint g, out Rectangle bounds)
         {
