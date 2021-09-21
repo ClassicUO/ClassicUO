@@ -34,6 +34,7 @@ using System.Collections.Generic;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
+using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Controls
 {
@@ -81,7 +82,15 @@ namespace ClassicUO.Game.UI.Controls
 
             if (texture != null)
             {
-                return batcher.Draw2D(texture, x + _tileX, y + _tileY, bounds.X, bounds.Y, bounds.Width, bounds.Height, ref HueVector);
+                batcher.Draw
+                (
+                    texture, 
+                    new Vector2(x + _tileX, y + _tileY),
+                    bounds,
+                    HueVector
+                );
+
+                return true;
             }
 
             return false;

@@ -1479,16 +1479,12 @@ namespace ClassicUO.Game.UI.Gumps
                             HueVector.Y = 1;
                         }
 
-                        batcher.Draw2D
+                        batcher.Draw
                         (
                             texture,
-                            x + (Width - bounds.Width), 
-                            y, 
-                            bounds.X,
-                            bounds.Y,
-                            bounds.Width,
-                            bounds.Height,
-                            ref HueVector
+                            new Vector2(x + (Width - bounds.Width),  y), 
+                            bounds,
+                            HueVector
                         );
                     }
                 }

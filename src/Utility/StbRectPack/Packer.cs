@@ -1,6 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
 using System;
-using System.Collections.Generic;
 using static StbRectPackSharp.StbRectPack;
 
 namespace StbRectPackSharp
@@ -11,12 +10,10 @@ namespace StbRectPackSharp
 	unsafe class Packer : IDisposable
 	{
 		private readonly stbrp_context _context;
-		private readonly List<Rectangle> _rectangles = new List<Rectangle>();
 
 		public int Width => _context.width;
 		public int Height => _context.height;
-
-		public List<Rectangle> PackRectangles => _rectangles;
+        public int PackeRectanglesCount { get; private set; }
 
 
 		public Packer(int width = 256, int height = 256)
@@ -56,7 +53,7 @@ namespace StbRectPackSharp
 		{
 			var rect = new stbrp_rect
 			{
-				id = _rectangles.Count,
+				id = PackeRectanglesCount,
 				w = width + offset,
 				h = height + offset
             };
@@ -80,9 +77,10 @@ namespace StbRectPackSharp
                 rect.w - offset,
                 rect.h - offset
             );
-			_rectangles.Add(packRectangle);
 
-			return true;
+            ++PackeRectanglesCount;
+
+            return true;
 		}
 	}
 }

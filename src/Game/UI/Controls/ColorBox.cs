@@ -59,15 +59,20 @@ namespace ClassicUO.Game.UI.Controls
 
             ShaderHueTranslator.GetHueVector(ref HueVector, Hue);
 
-            return batcher.Draw2D
+            batcher.Draw
             (
                 SolidColorTextureCache.GetTexture(Color.White),
-                x,
-                y,
-                Width,
-                Height,
-                ref HueVector
+                new Rectangle
+                (
+                    x,
+                    y,
+                    Width,
+                    Height
+                ),
+                HueVector
             );
+
+            return true;
         }
     }
 }

@@ -32,6 +32,7 @@
 
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
+using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Controls
 {
@@ -55,19 +56,21 @@ namespace ClassicUO.Game.UI.Controls
 
             if (texture != null)
             {
-                return batcher.Draw2DTiled
+                batcher.DrawTiled
                 (
                     texture,
-                    x,
-                    y,
-                    Percent,
-                    Height,
-                    bounds.X,
-                    bounds.Y,
-                    bounds.Width,
-                    bounds.Height,
-                    ref HueVector
+                    new Rectangle
+                    (
+                        x,
+                        y,
+                        Percent,
+                        Height
+                    ),
+                    bounds,
+                    HueVector
                 );
+
+                return true;
             }
 
             return false;

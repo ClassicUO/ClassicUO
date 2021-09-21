@@ -294,18 +294,18 @@ namespace ClassicUO.Game.Managers
 
                 texture = GumpsLoader.Instance.GetGumpTexture(HP_GRAPHIC, out bounds);
 
-                batcher.Draw2DTiled
+                batcher.DrawTiled
                 (
                     texture,
-                    x + per * MULTIPLER - offset,
-                    y,
-                    (BAR_WIDTH - per) * MULTIPLER - offset / 2,
-                    bounds.Height * MULTIPLER,
-                    bounds.X,
-                    bounds.Y,
-                    bounds.Width,
-                    bounds.Height,
-                    ref hueVec
+                    new Rectangle
+                    (
+                        x + per * MULTIPLER - offset,
+                        y,
+                        (BAR_WIDTH - per) * MULTIPLER - offset / 2,
+                        bounds.Height * MULTIPLER
+                    ),
+                    bounds,
+                    hueVec
                 );
             }
 
@@ -329,18 +329,18 @@ namespace ClassicUO.Game.Managers
 
                 texture = GumpsLoader.Instance.GetGumpTexture(HP_GRAPHIC, out bounds);
 
-                batcher.Draw2DTiled
+                batcher.DrawTiled
                 (
                     texture,
-                    x,
-                    y,
-                    per * MULTIPLER,
-                    bounds.Height * MULTIPLER,
-                    bounds.X,
-                    bounds.Y,
-                    bounds.Width,
-                    bounds.Height,
-                    ref hueVec
+                    new Rectangle
+                    (
+                        x,
+                        y,
+                        per * MULTIPLER,
+                        bounds.Height * MULTIPLER
+                    ),
+                    bounds,
+                    hueVec
                 );
             }
         }

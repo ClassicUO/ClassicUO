@@ -229,16 +229,12 @@ namespace ClassicUO.Game.UI.Controls
 
             HueVector.Z = Alpha;
 
-            batcher.Draw2D
+            batcher.Draw
             (
                 texture,
-                x,
-                y,
-                bounds.X,
-                bounds.Y,
-                Width,
-                Height,
-                ref HueVector
+                new Vector2(x, y),
+                bounds,
+                HueVector
             );
 
             if (!string.IsNullOrEmpty(_caption))

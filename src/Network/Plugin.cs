@@ -403,10 +403,10 @@ namespace ClassicUO.Network
 
         private static void GetStaticImage(ushort g, ref ArtInfo info)
         {
-            ArtLoader.Instance.TryGetEntryInfo(g, out long address, out long size, out long compressedsize);
-            info.Address = address;
-            info.Size = size;
-            info.CompressedSize = compressedsize;
+            //ArtLoader.Instance.TryGetEntryInfo(g, out long address, out long size, out long compressedsize);
+            //info.Address = address;
+            //info.Size = size;
+            //info.CompressedSize = compressedsize;
         }
 
         private static bool RequestMove(int dir, bool run)

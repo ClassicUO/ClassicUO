@@ -92,6 +92,8 @@ namespace ClassicUO.Game.Managers
                 s =>
                 {
                     CUOEnviroment.Debug = !CUOEnviroment.Debug;
+
+                    Renderer.TextureAtlas.Shared.SaveImages("static_new");
                 }
             );
         }

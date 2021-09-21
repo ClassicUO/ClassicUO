@@ -4183,14 +4183,17 @@ namespace ClassicUO.Game.UI.Gumps
         {
             ResetHueVector();
 
-            batcher.Draw2D
+            batcher.Draw
             (
                 LogoTexture,
-                x + 190,
-                y + 20,
-                WIDTH - 250,
-                400,
-                ref HueVector
+                new Rectangle
+                (
+                    x + 190,
+                    y + 20,
+                    WIDTH - 250,
+                    400
+                ),
+                HueVector
             );
 
             batcher.DrawRectangle

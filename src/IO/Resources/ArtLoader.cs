@@ -44,14 +44,16 @@ using SDL2;
 
 namespace ClassicUO.IO.Resources
 {
-    internal class ArtLoader : UOFileLoader<ArtTexture>
+    internal class ArtLoader : UOFileLoader
     {
         private static ArtLoader _instance;
         private UOFile _file;
         private readonly ushort _graphicMask;
         private readonly PixelPicker _picker = new PixelPicker();
 
-        private ArtLoader(int staticCount, int landCount) : base(0)
+        public Rectangle[] RealGraphicsBounds;
+
+        private ArtLoader(int staticCount, int landCount)
         {
             _graphicMask = Client.IsUOPInstallation ? (ushort) 0xFFFF : (ushort) 0x3FFF;
         }
@@ -84,52 +86,12 @@ namespace ClassicUO.IO.Resources
                     }
 
                     _file.FillEntries(ref Entries);
+                    RealGraphicsBounds = new Rectangle[Entries.Length];
                 }
             );
         }
 
 
-
-
-        const int ATLAS_SIZE = 1024 * 4;
-
-        private TextureAtlas _staticAtlas;
-        private void FillArtPixels(ushort graphic, ref UOFileIndex entry, ref Span<uint> pixels, out Rectangle bounds)
-        {
-            bounds = Rectangle.Empty;
-
-            if (ReadHeader(_file, ref entry, out short width, out short height))
-            {
-                if (ReadData(pixels, width, height, _file))
-                {
-                    // keep the cursor graphic check to cleanup edges
-                    if ((graphic >= 0x2053 && graphic <= 0x2062) || (graphic >= 0x206A && graphic <= 0x2079))
-                    {
-                        for (int i = 0; i < width; i++)
-                        {
-                            pixels[i] = 0;
-                            pixels[(height - 1) * width + i] = 0;
-                        }
-
-                        for (int i = 0; i < height; i++)
-                        {
-                            pixels[i * width] = 0;
-                            pixels[i * width + width - 1] = 0;
-                        }
-                    }
-
-                    FinalizeData
-                    (
-                        pixels,
-                        ref entry,
-                        graphic,
-                        width,
-                        height,
-                        out bounds
-                    );
-                }
-            }
-        }
 
         private void AddSpriteToAtlas(TextureAtlas atlas, int g, bool isTerrain)
         {
@@ -182,8 +144,40 @@ namespace ClassicUO.IO.Resources
 
                     try
                     {
-                        FillArtPixels((ushort) (g & ~0x4000), ref entry, ref artPixels, out var artBounds);
+                        ushort fixedGraphic = (ushort)(g - 0x4000);
 
+                        if (ReadData(artPixels, width, height, _file))
+                        {
+                            // keep the cursor graphic check to cleanup edges
+                            if ((fixedGraphic >= 0x2053 && fixedGraphic <= 0x2062) || (fixedGraphic >= 0x206A && fixedGraphic <= 0x2079))
+                            {
+                                for (int i = 0; i < width; i++)
+                                {
+                                    artPixels[i] = 0;
+                                    artPixels[(height - 1) * width + i] = 0;
+                                }
+
+                                for (int i = 0; i < height; i++)
+                                {
+                                    artPixels[i * width] = 0;
+                                    artPixels[i * width + width - 1] = 0;
+                                }
+                            }
+
+                            ref var realBounds = ref RealGraphicsBounds[fixedGraphic];
+
+                            FinalizeData
+                            (
+                                artPixels,
+                                ref entry,
+                                fixedGraphic,
+                                width,
+                                height,
+                                out realBounds
+                            );
+                        }
+
+                        _picker.Set(fixedGraphic, width, height, artPixels);
                         atlas.AddSprite((uint) g, artPixels, width, height);
                     }
                     finally
@@ -196,65 +190,37 @@ namespace ClassicUO.IO.Resources
                 }
             }
         }
-
-        // shitty initialization.
-        public unsafe void CreateAtlas(Microsoft.Xna.Framework.Graphics.GraphicsDevice device)
-        {
-            _staticAtlas = new TextureAtlas(device, ATLAS_SIZE, ATLAS_SIZE, Microsoft.Xna.Framework.Graphics.SurfaceFormat.Color, Constants.MAX_STATIC_DATA_INDEX_COUNT * 2);
-        }
-
-        public TextureAtlas Atlas => _staticAtlas;
       
         public Microsoft.Xna.Framework.Graphics.Texture2D GetLandTexture(uint g, out Rectangle bounds)
         {
             g &= _graphicMask;
-            if (!_staticAtlas.IsHashExists(g))
+
+            var atlas = TextureAtlas.Shared;
+
+            if (!atlas.IsHashExists(g))
             {
-                AddSpriteToAtlas(_staticAtlas, (int)g, true);
+                AddSpriteToAtlas(atlas, (int)g, true);
             }
 
-            return _staticAtlas.GetTexture(g, out bounds);
+            return atlas.GetTexture(g, out bounds);
         }
 
         public Microsoft.Xna.Framework.Graphics.Texture2D GetStaticTexture(uint g, out Rectangle bounds)
         {
             g += 0x4000;
-            if (!_staticAtlas.IsHashExists(g))
+
+            var atlas = TextureAtlas.Shared;
+
+            if (!atlas.IsHashExists(g))
             {
-                AddSpriteToAtlas(_staticAtlas, (int)g, false);
+                AddSpriteToAtlas(atlas, (int)g, false);
             }
 
-            return _staticAtlas.GetTexture(g, out bounds);
+            return atlas.GetTexture(g, out bounds);
         }
 
 
-
-
-        public override ArtTexture GetTexture(uint g)
-        {
-            if (g >= Resources.Length)
-            {
-                return null;
-            }
-          
-            ref ArtTexture texture = ref Resources[g];
-
-            if (texture == null || texture.IsDisposed)
-            {
-                ReadStaticArt(ref texture, (ushort) g);
-
-                if (texture != null)
-                {
-                    SaveId(g);
-                }
-            }
-            else
-            {
-                texture.Ticks = Time.Ticks;
-            }
-
-            return texture;
-        }
+        public ArtTexture GetTexture(uint g) => null;
 
         public unsafe IntPtr CreateCursorSurfacePtr(int index, ushort customHue, out int hotX, out int hotY)
         {
@@ -264,7 +230,7 @@ namespace ClassicUO.IO.Resources
 
             if (ReadHeader(_file, ref entry, out short w, out short h))
             {
-                uint[] pixels = new uint[w * h];
+                Span<uint> pixels = new uint[w * h];
 
                 if (ReadData(pixels, w, h, _file))
                 {
@@ -359,27 +325,6 @@ namespace ClassicUO.IO.Resources
             return _picker.Get((ulong) index, x, y);
         }
 
-        public override bool TryGetEntryInfo(int entry, out long address, out long size, out long compressedSize)
-        {
-            entry += 0x4000;
-
-            if (entry < _file.Length && entry >= 0)
-            {
-                ref UOFileIndex e = ref GetValidRefEntry(entry);
-
-                address = _file.StartAddress.ToInt64() + e.Offset;
-                size = e.DecompressedLength == 0 ? e.Length : e.DecompressedLength;
-                compressedSize = e.Length;
-
-                return true;
-            }
-
-            return base.TryGetEntryInfo(entry, out address, out size, out compressedSize);
-        }
-
-         
-
-
         private bool ReadHeader(DataReader file, ref UOFileIndex entry, out short width, out short height)
         {
             if (entry.Length == 0)
@@ -470,8 +415,6 @@ namespace ClassicUO.IO.Resources
                 }
             }
 
-            _picker.Set(graphic, width, height, pixels);
-
             entry.Width = (short)((width >> 1) - 22);
             entry.Height = (short)(height - 44);
 
@@ -480,66 +423,6 @@ namespace ClassicUO.IO.Resources
             bounds.Width = maxX - minX;
             bounds.Height = maxY - minY;
         }
-
-        private unsafe void ReadStaticArt(ref ArtTexture texture, ushort graphic)
-        {
-            ref UOFileIndex entry = ref GetValidRefEntry(graphic + 0x4000);
-
-            if (ReadHeader(_file, ref entry, out short width, out short height))
-            {
-                uint[] buffer = null;
-
-                Span<uint> pixels = width * height <= 1024 ? stackalloc uint[1024] : (buffer = System.Buffers.ArrayPool<uint>.Shared.Rent(width * height));
-
-                try
-                {
-                    if (ReadData(pixels, width, height, _file))
-                    {
-                        // keep the cursor graphic check to cleanup edges
-                        if ((graphic >= 0x2053 && graphic <= 0x2062) || (graphic >= 0x206A && graphic <= 0x2079))
-                        {
-                            for (int i = 0; i < width; i++)
-                            {
-                                pixels[i] = 0;
-                                pixels[(height - 1) * width + i] = 0;
-                            }
-
-                            for (int i = 0; i < height; i++)
-                            {
-                                pixels[i * width] = 0;
-                                pixels[i * width + width - 1] = 0;
-                            }
-                        }
-
-                        texture = new ArtTexture(width, height);
-
-                        FinalizeData
-                        (
-                            pixels,
-                            ref entry,
-                            graphic,
-                            width,
-                            height,
-                            out texture.ImageRectangle
-                        );
-
-
-                        fixed (uint* ptr = pixels)
-                        {
-                            texture.SetDataPointerEXT(0, null, (IntPtr) ptr, width * height * sizeof(uint));
-                        }
-                    }
-                }
-                finally
-                {
-                    if (buffer != null)
-                    {
-                        System.Buffers.ArrayPool<uint>.Shared.Return(buffer, true);
-                    }
-                }
-            }
-        }
-
 
 
         private void AddBlackBorder(Span<uint> pixels, int width, int height)

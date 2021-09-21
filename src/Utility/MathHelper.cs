@@ -38,6 +38,9 @@ namespace ClassicUO.Utility
 {
     internal static class MathHelper
     {
+        public static readonly float MachineEpsilonFloat = GetMachineEpsilonFloat();
+
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool InRange(int input, int low, int high)
         {
@@ -106,6 +109,25 @@ namespace ClassicUO.Utility
         public static double Hypotenuse(float a, float b)
         {
             return Math.Sqrt(Math.Pow(a, 2) + Math.Pow(b, 2));
+        }
+
+
+        private static float GetMachineEpsilonFloat()
+        {
+            float machineEpsilon = 1.0f;
+            float comparison;
+
+            /* Keep halving the working value of machineEpsilon until we get a number that
+			 * when added to 1.0f will still evaluate as equal to 1.0f.
+			 */
+            do
+            {
+                machineEpsilon *= 0.5f;
+                comparison = 1.0f + machineEpsilon;
+            }
+            while (comparison > 1.0f);
+
+            return machineEpsilon;
         }
     }
 }

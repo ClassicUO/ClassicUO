@@ -516,14 +516,17 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (MouseIsOver)
                 {
-                    batcher.Draw2D
+                    batcher.Draw
                     (
                         SolidColorTextureCache.GetTexture(Color.Cyan),
-                        x,
-                        y,
-                        Width,
-                        Height,
-                        ref HueVector
+                        new Rectangle
+                        (
+                            x,
+                            y,
+                            Width, 
+                            Height
+                        ),                    
+                        HueVector
                     );
                 }
 

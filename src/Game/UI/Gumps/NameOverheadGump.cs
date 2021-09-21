@@ -567,19 +567,10 @@ namespace ClassicUO.Game.UI.Gumps
                     return false;
                 }
 
-                ArtTexture texture = ArtLoader.Instance.GetTexture(item.Graphic);
+                ref var bounds = ref ArtLoader.Instance.RealGraphicsBounds[item.Graphic];
 
-                if (texture != null)
-                {
-                    x = item.RealScreenPosition.X + (int) item.Offset.X + 22 + 5;
-
-                    y = item.RealScreenPosition.Y + (int) (item.Offset.Y - item.Offset.Z) + (texture.ImageRectangle.Height >> 1);
-                }
-                else
-                {
-                    x = item.RealScreenPosition.X + (int) item.Offset.X + 22 + 5;
-                    y = item.RealScreenPosition.Y + (int) (item.Offset.Y - item.Offset.Z) + 22;
-                }
+                x = item.RealScreenPosition.X + (int)item.Offset.X + 22 + 5;
+                y = item.RealScreenPosition.Y + (int)(item.Offset.Y - item.Offset.Z) + (bounds.Height >> 1);
             }
 
 

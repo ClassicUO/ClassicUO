@@ -340,130 +340,114 @@ namespace ClassicUO.Game.UI.Controls
 
 
 
-            batcher.Draw2D
+            batcher.Draw
             (
                 texture0,
-                x,
-                y,
-                bounds0.X,
-                bounds0.Y,
-                bounds0.Width,
-                bounds0.Height,
-                ref color
+                new Vector2(x, y), 
+                bounds0,
+                color
             );
 
 
-            batcher.Draw2DTiled
+            batcher.DrawTiled
             (
                 texture1,
-                x + bounds0.Width,
-                y,
-                Width - bounds0.Width - bounds2.Width,
-                bounds1.Height,
-                bounds1.X,
-                bounds1.Y,
-                bounds1.Width,
-                bounds1.Height,
-                ref color
+                new Rectangle
+                (
+                    x + bounds0.Width,
+                    y,
+                    Width - bounds0.Width - bounds2.Width,
+                    bounds1.Height
+                ),
+                bounds1,
+                color
             );
 
 
-            batcher.Draw2D
+            batcher.Draw
             (
                 texture2,
-                x + (Width - bounds2.Width),
-                y + offsetTop,
-                bounds2.X,
-                bounds2.Y,
-                bounds2.Width,
-                bounds2.Height,
-                ref color
+                new Vector2(x + (Width - bounds2.Width), y + offsetTop),
+                bounds2,
+                color
             );
 
 
-            batcher.Draw2DTiled
+            batcher.DrawTiled
             (
                 texture3,
-                x,
-                y + bounds0.Height,
-                bounds3.Width,
-                Height - bounds0.Height - bounds5.Height,
-                bounds3.X,
-                bounds3.Y,
-                bounds3.Width,
-                bounds3.Height,
-                ref color
+                new Rectangle
+                (
+                    x,
+                    y + bounds0.Height,
+                    bounds3.Width,
+                    Height - bounds0.Height - bounds5.Height
+                ),
+                bounds3,
+                color
             );
 
 
-            batcher.Draw2DTiled
+            batcher.DrawTiled
             (
                 texture4,
-                x + (Width - bounds4.Width),
-                y + bounds2.Height,
-                bounds4.Width,
-                Height - bounds2.Height - bounds7.Height,
-                bounds4.X,
-                bounds4.Y,
-                bounds4.Width,
-                bounds4.Height,
-                ref color
+                new Rectangle
+                (
+                    x + (Width - bounds4.Width),
+                    y + bounds2.Height,
+                    bounds4.Width,
+                    Height - bounds2.Height - bounds7.Height
+                ),
+                bounds4,
+                color
             );
 
 
-            batcher.Draw2D
+            batcher.Draw
             (
                 texture5,
-                x,
-                y + (Height - bounds5.Height),
-                bounds5.X,
-                bounds5.Y,
-                bounds5.Width,
-                bounds5.Height,
-                ref color
+                new Vector2(x, y + (Height - bounds5.Height)),
+                bounds5,
+                color
             );
 
 
-            batcher.Draw2DTiled
+            batcher.DrawTiled
             (
                 texture6,
-                x + bounds5.Width,
-                y + (Height - bounds6.Height - offsetBottom),
-                Width - bounds5.Width - bounds7.Width,
-                bounds6.Height,
-                bounds6.X,
-                bounds6.Y,
-                bounds6.Width,
-                bounds6.Height,
-                ref color
+                new Rectangle
+                (
+                    x + bounds5.Width,
+                    y + (Height - bounds6.Height - offsetBottom),
+                    Width - bounds5.Width - bounds7.Width,
+                    bounds6.Height
+                ),
+                bounds6,
+                color
             );
 
 
-            batcher.Draw2D
+            batcher.Draw
             (
                 texture7,
-                x + (Width - bounds7.Width),
-                y + (Height - bounds7.Height),
-                bounds7.X,
-                bounds7.Y,
-                bounds7.Width,
-                bounds7.Height,
-                ref color
+                new Vector2(x + (Width - bounds7.Width), y + (Height - bounds7.Height)),
+                bounds7,
+                color
             );
 
 
-            batcher.Draw2DTiled
+            batcher.DrawTiled
             (
                 texture8,
-                x + bounds0.Width,
-                y + bounds0.Height,
-                (Width - bounds0.Width - bounds2.Width) + (offsetLeft + offsetRight),
-                Height - bounds2.Height - bounds7.Height,
-                bounds8.X,
-                bounds8.Y,
-                bounds8.Width,
-                bounds8.Height,
-                ref color
+                new Rectangle
+                (
+                    x + bounds0.Width,
+                    y + bounds0.Height,
+                    (Width - bounds0.Width - bounds2.Width) + (offsetLeft + offsetRight),
+                    Height - bounds2.Height - bounds7.Height
+                ),
+                bounds8,
+                color
             );
         }
     }

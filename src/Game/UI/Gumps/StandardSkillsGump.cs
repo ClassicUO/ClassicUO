@@ -743,26 +743,32 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (_status == 2)
                 {
-                    batcher.Draw2D
+                    batcher.Draw
                     (
                         SolidColorTextureCache.GetTexture(Color.Beige),
-                        x,
-                        y,
-                        Width,
-                        17,
-                        ref HueVector
+                        new Rectangle
+                        (
+                            x,
+                            y,
+                            Width,
+                            17
+                        ),
+                        HueVector
                     );
                 }
                 else if (_status == 1)
                 {
-                    batcher.Draw2D
+                    batcher.Draw
                     (
                         SolidColorTextureCache.GetTexture(Color.Bisque),
-                        x + 16,
-                        y,
-                        200,
-                        17,
-                        ref HueVector
+                        new Rectangle
+                        (
+                            x + 16,
+                            y,
+                            200,
+                            17
+                        ),
+                        HueVector
                     );
                 }
 
@@ -976,14 +982,17 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (UIManager.LastControlMouseDown(MouseButtonType.Left) == this)
                 {
-                    batcher.Draw2D
+                    batcher.Draw
                     (
                         SolidColorTextureCache.GetTexture(Color.Wheat),
-                        x,
-                        y,
-                        Width,
-                        Height,
-                        ref HueVector
+                        new Rectangle
+                        (
+                            x,
+                            y,
+                            Width,
+                            Height
+                        ),
+                        HueVector
                     );
                 }
 

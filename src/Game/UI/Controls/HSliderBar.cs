@@ -36,6 +36,7 @@ using ClassicUO.Input;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
+using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Controls
 {
@@ -161,70 +162,54 @@ namespace ClassicUO.Game.UI.Controls
                 var texture2 = GumpsLoader.Instance.GetGumpTexture(215, out var bounds2);
                 var texture3 = GumpsLoader.Instance.GetGumpTexture(216, out var bounds3);
 
-                batcher.Draw2D
+                batcher.Draw
                 (
                     texture0,
-                    x,
-                    y,
-                    bounds0.X,
-                    bounds0.Y,
-                    bounds0.Width,
-                    bounds0.Height,
-                    ref HueVector
+                    new Vector2(x, y),
+                    bounds0,
+                    HueVector
                 );
 
-                batcher.Draw2DTiled
+                batcher.DrawTiled
                 (
                     texture1,
-                    x + bounds0.Width,
-                    y,
-                    BarWidth - bounds2.Width - bounds0.Width,
-                    bounds1.Height,
-                    bounds1.X,
-                    bounds1.Y,
-                    bounds1.Width,
-                    bounds1.Height,
-                    ref HueVector
+                    new Rectangle
+                    (
+                        x + bounds0.Width,
+                        y,
+                        BarWidth - bounds2.Width - bounds0.Width,
+                        bounds1.Height
+                    ),
+                    bounds1,
+                    HueVector
                 );
 
-                batcher.Draw2D
+                batcher.Draw
                 (
                     texture2,
-                    x + BarWidth - bounds2.Width,
-                    y,
-                    bounds2.X,
-                    bounds2.Y,
-                    bounds2.Width,
-                    bounds2.Height,
-                    ref HueVector
+                    new Vector2(x + BarWidth - bounds2.Width, y),
+                    bounds2,
+                    HueVector
                 );
     
-                batcher.Draw2D
+                batcher.Draw
                 (
                     texture3,
-                    x + _sliderX, 
-                    y,
-                    bounds3.X,
-                    bounds3.Y,
-                    bounds3.Width,
-                    bounds3.Height,
-                    ref HueVector
+                    new Vector2(x + _sliderX, y),
+                    bounds3,
+                    HueVector
                 );
             }
             else
             {
                 var texture = GumpsLoader.Instance.GetGumpTexture(0x845, out var bounds);
               
-                batcher.Draw2D
+                batcher.Draw
                 (
                     texture,
-                    x + _sliderX,
-                    y,
-                    bounds.X,
-                    bounds.Y,
-                    bounds.Width,
-                    bounds.Height,
-                    ref HueVector
+                    new Vector2(x + _sliderX, y),
+                    bounds,
+                    HueVector
                 );
             }
 

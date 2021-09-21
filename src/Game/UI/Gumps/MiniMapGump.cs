@@ -179,16 +179,12 @@ namespace ClassicUO.Game.UI.Gumps
                 return false;
             }
 
-            batcher.Draw2D
+            batcher.Draw
             (
                 texture,
-                x,
-                y,
-                bounds.X,
-                bounds.Y,
-                bounds.Width,
-                bounds.Height,
-                ref HueVector
+                new Vector2(x, y),
+                bounds,
+                HueVector
             );
 
             CreateMiniMapTexture();
@@ -218,28 +214,34 @@ namespace ClassicUO.Game.UI.Gumps
 
                     ShaderHueTranslator.GetHueVector(ref HueVector, Notoriety.GetHue(mob.NotorietyFlag));
 
-                    batcher.Draw2D
+                    batcher.Draw
                     (
                         mobilesTextureDot,
-                        x + w + gx,
-                        y + h + gy,
-                        2,
-                        2,
-                        ref HueVector
+                        new Rectangle
+                        (
+                            x + w + gx,
+                            y + h + gy,
+                            2,
+                            2
+                        ),
+                        HueVector
                     );
                 }
 
                 //DRAW DOT OF PLAYER
                 ResetHueVector();
 
-                batcher.Draw2D
+                batcher.Draw
                 (
                     SolidColorTextureCache.GetTexture(Color.White),
-                    x + w,
-                    y + h,
-                    2,
-                    2,
-                    ref HueVector
+                    new Rectangle
+                    (
+                        x + w,
+                        y + h,
+                        2,
+                        2
+                    ),
+                    HueVector
                 );
             }
 

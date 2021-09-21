@@ -93,16 +93,12 @@ namespace ClassicUO.Game.UI.Controls
 
             if (MaxValue != MinValue && textureFlag != null)
             {
-                batcher.Draw2D
+                batcher.Draw
                 (
                     textureFlag,
-                    x, 
-                    y + _sliderPosition,
-                    boundsFlag.X,
-                    boundsFlag.Y,
-                    boundsFlag.Width,
-                    boundsFlag.Height,
-                    ref HueVector
+                    new Vector2(x,  y + _sliderPosition),
+                    boundsFlag,
+                    HueVector
                 );
             }
 
@@ -110,31 +106,23 @@ namespace ClassicUO.Game.UI.Controls
             {
                 if (textureButtonUp != null)
                 {
-                    batcher.Draw2D
+                    batcher.Draw
                     (
                         textureButtonUp,
-                        x,
-                        y,
-                        boundsButtonUp.X,
-                        boundsButtonUp.Y,
-                        boundsButtonUp.Width,
-                        boundsButtonUp.Height,
-                        ref HueVector
+                        new Vector2(x, y),
+                        boundsButtonUp,
+                        HueVector
                     );
                 }
 
                 if (textureButtonDown != null)
                 {
-                    batcher.Draw2D
+                    batcher.Draw
                     (
                         textureButtonDown,
-                        x,
-                        y + Height,
-                        boundsButtonDown.X,
-                        boundsButtonDown.Y,
-                        boundsButtonDown.Width,
-                        boundsButtonDown.Height,
-                        ref HueVector
+                        new Vector2(x, y + Height),
+                        boundsButtonDown,
+                        HueVector
                     );
                 }
             }

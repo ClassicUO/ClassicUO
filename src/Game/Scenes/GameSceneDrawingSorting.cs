@@ -320,22 +320,17 @@ namespace ClassicUO.Game.Scenes
 
                     if (check)
                     {
-                        ArtTexture texture = ArtLoader.Instance.GetTexture(obj.Graphic);
+                        var rect = ArtLoader.Instance.RealGraphicsBounds[obj.Graphic];
 
-                        if (texture != null)
+                        rect.X = obj.RealScreenPosition.X - (rect.Width >> 1) + rect.X;
+                        rect.Y = obj.RealScreenPosition.Y - rect.Height + rect.Y;
+
+                        check = Exstentions.InRect(ref rect, ref _rectanglePlayer);
+
+                        if (check)
                         {
-                            Rectangle rect = texture.ImageRectangle;
-
-                            rect.X = obj.RealScreenPosition.X - (rect.Width >> 1) + rect.X;
-                            rect.Y = obj.RealScreenPosition.Y - rect.Height + rect.Y;
-
-                            check = Exstentions.InRect(ref rect, ref _rectanglePlayer);
-
-                            if (check)
-                            {
-                                index = FoliageIndex;
-                                IsFoliageUnion(obj.Graphic, obj.X, obj.Y, obj.Z);
-                            }
+                            index = FoliageIndex;
+                            IsFoliageUnion(obj.Graphic, obj.X, obj.Y, obj.Z);
                         }
                     }
 

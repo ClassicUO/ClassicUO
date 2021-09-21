@@ -41,6 +41,7 @@ using ClassicUO.Game.UI.Controls;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 using ClassicUO.Resources;
+using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -390,16 +391,12 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (texture != null)
                 {
-                    batcher.Draw2D
+                    batcher.Draw
                     (
                         texture, 
-                        x,
-                        y, 
-                        bounds.X,
-                        bounds.Y,
-                        bounds.Height,
-                        bounds.Width,
-                        ref HueVector
+                        new Vector2(x, y),
+                        bounds,
+                        HueVector
                     );
                    
                     if (ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.BuffBarTime)

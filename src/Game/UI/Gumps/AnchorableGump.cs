@@ -152,16 +152,12 @@ namespace ClassicUO.Game.UI.Gumps
                         HueVector.Y = 1;
                     }
 
-                    batcher.Draw2D
+                    batcher.Draw
                     (
                         texture, 
-                        x + (Width - bounds.Width),
-                        y, 
-                        bounds.X,
-                        bounds.Y,
-                        bounds.Width,
-                        bounds.Height,
-                        ref HueVector
+                        new Vector2(x + (Width - bounds.Width), y), 
+                        bounds,
+                        HueVector
                     );
                 }
             }
@@ -178,14 +174,17 @@ namespace ClassicUO.Game.UI.Gumps
                     ResetHueVector();
                     HueVector.Z = 0.5f;
 
-                    batcher.Draw2D
+                    batcher.Draw
                     (
                         previewColor,
-                        drawLoc.X,
-                        drawLoc.Y,
-                        Width,
-                        Height,
-                        ref HueVector
+                        new Rectangle
+                        (
+                            drawLoc.X,
+                            drawLoc.Y,
+                            Width,
+                            Height
+                        ),
+                        HueVector
                     );
 
                     HueVector.Z = 0;

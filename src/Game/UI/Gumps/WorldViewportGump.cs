@@ -319,65 +319,65 @@ namespace ClassicUO.Game.UI.Gumps
             var texture = GumpsLoader.Instance.GetGumpTexture(H_BORDER, out var bounds);
 
             // sopra
-            batcher.Draw2DTiled
+            batcher.DrawTiled
             (
                 texture,
-                x,
-                y,
-                Width,
-                _borderSize,
-                bounds.X,
-                bounds.Y,
-                bounds.Width,
-                bounds.Height,
-                ref HueVector
+                new Rectangle
+                (
+                    x,
+                    y,
+                    Width,
+                    _borderSize
+                ),
+                bounds,
+                HueVector
             );
 
             // sotto
-            batcher.Draw2DTiled
+            batcher.DrawTiled
             (
                 texture,
-                x,
-                y + Height - _borderSize,
-                Width,
-                _borderSize,
-                bounds.X,
-                bounds.Y,
-                bounds.Width,
-                bounds.Height,
-                ref HueVector
+                new Rectangle
+                (
+                    x,
+                    y + Height - _borderSize,
+                    Width,
+                    _borderSize
+                ),
+                bounds,
+                HueVector
             );
 
             texture = GumpsLoader.Instance.GetGumpTexture(V_BORDER, out bounds);
 
             //sx
-            batcher.Draw2DTiled
+            batcher.DrawTiled
             (
                 texture,
-                x,
-                y,
-                _borderSize,
-                Height,
-                bounds.X,
-                bounds.Y,
-                bounds.Width,
-                bounds.Height,
-                ref HueVector
+                new Rectangle
+                (
+                    x,
+                    y,
+                    _borderSize,
+                    Height
+                ),
+                bounds,
+                HueVector
             );
 
             //dx
-            batcher.Draw2DTiled
+            batcher.DrawTiled
             (
                 texture,
-                x + Width - _borderSize,
-                y + (bounds.Width >> 1),
-                _borderSize,
-                Height - _borderSize,
-                bounds.X,
-                bounds.Y,
-                bounds.Width,
-                bounds.Height,
-                ref HueVector
+                new Rectangle
+                (
+                    x + Width - _borderSize,
+                    y + (bounds.Width >> 1),
+                    _borderSize,
+                    Height - _borderSize
+                ),
+                bounds,
+                HueVector
             );
 
             return base.Draw(batcher, x, y);

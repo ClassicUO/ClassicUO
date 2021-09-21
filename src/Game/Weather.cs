@@ -44,7 +44,6 @@ namespace ClassicUO.Game
         private const int MAX_WEATHER_EFFECT = 70;
 
         private readonly WeatherEffect[] _effects = new WeatherEffect[MAX_WEATHER_EFFECT];
-        private Vector3 _hueVector;
         public sbyte? CurrentWeather { get; set; }
         public float SimulationRation = 37.0f;
         public uint Timer, WindTimer, LastTick;
@@ -169,6 +168,8 @@ namespace ClassicUO.Game
 
             //Point winpos = ProfileManager.CurrentProfile.GameWindowPosition;
             Point winsize = ProfileManager.CurrentProfile.GameWindowSize;
+
+            Rectangle rect = new Rectangle(0, 0, 2, 2);
 
             for (int i = 0; i < CurrentCount; i++)
             {
@@ -305,14 +306,14 @@ namespace ClassicUO.Game
                         effect.X += effect.SpeedX * speedOffset;
                         effect.Y += effect.SpeedY * speedOffset;
 
-                        batcher.Draw2D
+                        rect.X = x + (int) effect.X;
+                        rect.Y = y + (int) effect.Y;
+
+                        batcher.Draw
                         (
                             SolidColorTextureCache.GetTexture(Color.White),
-                            x + (int) effect.X,
-                            y + (int) effect.Y,
-                            2,
-                            2,
-                            ref _hueVector
+                            rect,
+                            Vector3.Zero
                         );
 
                         break;

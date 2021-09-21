@@ -21,6 +21,24 @@ namespace ClassicUO.Renderer
         private readonly Rectangle[] _spriteBounds;
         private readonly byte[] _spriteTextureIndices;
 
+
+        public static TextureAtlas Shared { get; }
+
+        static TextureAtlas()
+        {
+            const int TEXTURE_SIZE = 1024 * 4;
+
+            Shared = new TextureAtlas 
+            (
+                Client.Game.GraphicsDevice,
+                TEXTURE_SIZE,
+                TEXTURE_SIZE,
+                SurfaceFormat.Color,
+                ushort.MaxValue * 2
+            );
+        }
+
+
         public TextureAtlas(GraphicsDevice device, int width, int height, SurfaceFormat format, int maxSpriteCount)
         {
             _device = device;
@@ -30,7 +48,8 @@ namespace ClassicUO.Renderer
 
             _textureList = new List<Texture2D>();
             _spriteBounds = new Rectangle[maxSpriteCount];
-            _spriteTextureIndices = Enumerable.Repeat<byte>(0xFF, maxSpriteCount).ToArray();
+            _spriteTextureIndices = new byte[maxSpriteCount];
+            _spriteTextureIndices.AsSpan().Fill(0xFF);
         }
 
 
@@ -125,6 +144,7 @@ namespace ClassicUO.Renderer
 
             _packer.Dispose();
             _textureList.Clear();
+            _spriteTextureIndices.AsSpan().Fill(0xFF);
         }
     }
 }

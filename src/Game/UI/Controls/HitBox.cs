@@ -87,16 +87,12 @@ namespace ClassicUO.Game.UI.Controls
                     true
                 );
 
-                batcher.Draw2D
+                batcher.Draw
                 (
                     _texture,
-                    x,
-                    y,
-                    0,
-                    0,
-                    Width,
-                    Height,
-                    ref HueVector
+                    new Vector2(x, y),
+                    new Rectangle(0, 0, Width, Height),
+                    HueVector
                 );
             }
 

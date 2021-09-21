@@ -1476,14 +1476,17 @@ namespace ClassicUO.Game.UI.Gumps
             ResetHueVector();
 
 
-            batcher.Draw2D
+            batcher.Draw
             (
                 SolidColorTextureCache.GetTexture(Color.Black),
-                gX,
-                gY,
-                gWidth,
-                gHeight,
-                ref HueVector
+                new Rectangle
+                (
+                    gX,
+                    gY,
+                    gWidth,
+                    gHeight
+                ),
+                HueVector
             );
 
             if (_mapTexture != null)
@@ -1868,14 +1871,17 @@ namespace ClassicUO.Game.UI.Gumps
                 rot.Y = y + Height - 8 - DOT_SIZE;
             }
 
-            batcher.Draw2D
+            batcher.Draw
             (
                 SolidColorTextureCache.GetTexture(color),
-                rot.X - DOT_SIZE_HALF,
-                rot.Y - DOT_SIZE_HALF,
-                DOT_SIZE,
-                DOT_SIZE,
-                ref HueVector
+                new Rectangle
+                (
+                    rot.X - DOT_SIZE_HALF,
+                    rot.Y - DOT_SIZE_HALF,
+                    DOT_SIZE,
+                    DOT_SIZE
+                ),
+                HueVector
             );
 
             if (drawName && !string.IsNullOrEmpty(mobile.Name))
@@ -2004,14 +2010,17 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (_zoomIndex < marker.ZoomIndex || !_showMarkerIcons || marker.MarkerIcon == null)
             {
-                batcher.Draw2D
+                batcher.Draw
                 (
                     SolidColorTextureCache.GetTexture(marker.Color),
-                    rot.X - DOT_SIZE_HALF,
-                    rot.Y - DOT_SIZE_HALF,
-                    DOT_SIZE,
-                    DOT_SIZE,
-                    ref HueVector
+                    new Rectangle
+                    (
+                        rot.X - DOT_SIZE_HALF,
+                        rot.Y - DOT_SIZE_HALF,
+                        DOT_SIZE,
+                        DOT_SIZE
+                    ),
+                    HueVector
                 );
 
                 if (Mouse.Position.X >= rot.X - DOT_SIZE && Mouse.Position.X <= rot.X + DOT_SIZE_HALF &&
@@ -2092,14 +2101,17 @@ namespace ClassicUO.Game.UI.Gumps
             HueVector.Y = 1;
             HueVector.Z = 0.5f;
 
-            batcher.Draw2D
+            batcher.Draw
             (
                 SolidColorTextureCache.GetTexture(Color.Black),
-                xx - 2,
-                yy - 2,
-                size.X + 4,
-                size.Y + 4,
-                ref HueVector
+                new Rectangle
+                (
+                    xx - 2,
+                    yy - 2,
+                    (int) (size.X + 4),
+                    (int) (size.Y + 4)
+                ),
+                HueVector
             );
 
             ResetHueVector();
@@ -2268,14 +2280,17 @@ namespace ClassicUO.Game.UI.Gumps
                 rot.Y = y + Height - 8 - DOT_SIZE;
             }
 
-            batcher.Draw2D
+            batcher.Draw
             (
                 SolidColorTextureCache.GetTexture(color),
-                rot.X - DOT_SIZE_HALF,
-                rot.Y - DOT_SIZE_HALF,
-                DOT_SIZE,
-                DOT_SIZE,
-                ref HueVector
+                new Rectangle
+                (
+                    rot.X - DOT_SIZE_HALF,
+                    rot.Y - DOT_SIZE_HALF,
+                    DOT_SIZE,
+                    DOT_SIZE
+                ),
+                HueVector
             );
 
             if (_showGroupName)
@@ -2348,24 +2363,30 @@ namespace ClassicUO.Game.UI.Gumps
             const int BAR_MAX_HEIGHT_HALF = BAR_MAX_HEIGHT / 2;
 
 
-            batcher.Draw2D
+            batcher.Draw
             (
                 SolidColorTextureCache.GetTexture(Color.Black),
-                x - BAR_MAX_WIDTH_HALF - 1,
-                y - BAR_MAX_HEIGHT_HALF - 1,
-                BAR_MAX_WIDTH + 2,
-                BAR_MAX_HEIGHT + 2,
-                ref HueVector
+                new Rectangle
+                (
+                    x - BAR_MAX_WIDTH_HALF - 1,
+                    y - BAR_MAX_HEIGHT_HALF - 1,
+                    BAR_MAX_WIDTH + 2,
+                    BAR_MAX_HEIGHT + 2
+                ),
+                HueVector
             );
 
-            batcher.Draw2D
+            batcher.Draw
             (
                 SolidColorTextureCache.GetTexture(Color.Red),
-                x - BAR_MAX_WIDTH_HALF,
-                y - BAR_MAX_HEIGHT_HALF,
-                BAR_MAX_WIDTH,
-                BAR_MAX_HEIGHT,
-                ref HueVector
+                new Rectangle
+                (
+                    x - BAR_MAX_WIDTH_HALF,
+                    y - BAR_MAX_HEIGHT_HALF,
+                    BAR_MAX_WIDTH,
+                    BAR_MAX_HEIGHT
+                ),
+                HueVector
             );
 
             int max = 100;
@@ -2386,14 +2407,17 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             }
 
-            batcher.Draw2D
+            batcher.Draw
             (
                 SolidColorTextureCache.GetTexture(Color.CornflowerBlue),
-                x - BAR_MAX_WIDTH_HALF,
-                y - BAR_MAX_HEIGHT_HALF,
-                max,
-                BAR_MAX_HEIGHT,
-                ref HueVector
+                new Rectangle
+                (
+                    x - BAR_MAX_WIDTH_HALF,
+                    y - BAR_MAX_HEIGHT_HALF,
+                    max,
+                    BAR_MAX_HEIGHT
+                ),
+                HueVector
             );
         }
 

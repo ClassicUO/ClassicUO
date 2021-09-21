@@ -99,136 +99,112 @@ namespace ClassicUO.Game.UI.Controls
 
             if (middleHeight > 0)
             {
-                batcher.Draw2D
+                batcher.Draw
                 (
                     textureBackground0,
-                    x,
-                    y + boundsUp0.Height,
-                    boundsBackground0.X,
-                    boundsBackground0.Y,
-                    boundsBackground0.Width,
-                    boundsBackground0.Height,
-                    ref HueVector
+                    new Vector2(x, y + boundsUp0.Height),
+                    boundsBackground0,
+                    HueVector
                 );
 
-                batcher.Draw2DTiled
+                batcher.DrawTiled
                 (
                     textureBackground1,
-                    x,
-                    y + boundsUp1.Height + boundsBackground0.Height,
-                    boundsBackground0.Width,
-                    middleHeight,
-                    boundsBackground1.X,
-                    boundsBackground1.Y,
-                    boundsBackground1.Width,
-                    boundsBackground1.Height,
-                    ref HueVector
+                    new Rectangle
+                    (
+                        x,
+                        y + boundsUp1.Height + boundsBackground0.Height,
+                        boundsBackground0.Width,
+                        middleHeight
+                    ),
+                    boundsBackground1,
+                    HueVector
                 );
 
-                batcher.Draw2D
+                batcher.Draw
                 (
                     textureBackground2,
-                    x,
-                    y + Height - boundsDown0.Height - boundsBackground2.Height,
-                    boundsBackground2.X,
-                    boundsBackground2.Y,
-                    boundsBackground2.Width,
-                    boundsBackground2.Height,
-                    ref HueVector
+                    new Vector2(x, y + Height - boundsDown0.Height - boundsBackground2.Height),
+                    boundsBackground2,
+                    HueVector
                 );
             }
             else
             {
                 middleHeight = Height - boundsUp0.Height - boundsDown0.Height;
 
-                batcher.Draw2DTiled
+                batcher.DrawTiled
                 (
                     textureBackground1,
-                    x,
-                    y + boundsUp0.Height,
-                    boundsBackground0.Width,
-                    middleHeight,
-                    boundsBackground1.X,
-                    boundsBackground1.Y,
-                    boundsBackground1.Width,
-                    boundsBackground1.Height,
-                    ref HueVector
+                    new Rectangle
+                    (
+                        x,
+                        y + boundsUp0.Height,
+                        boundsBackground0.Width,
+                        middleHeight
+                    ),
+                    boundsBackground1,
+                    HueVector
                 );
             }
 
             // draw up button
             if (_btUpClicked)
             {
-                batcher.Draw2D
+                batcher.Draw
                 (
                     textureUp1,
-                    x,
-                    y, 
-                    boundsUp1.X,
-                    boundsUp1.Y,
-                    boundsUp1.Width,
-                    boundsUp1.Height,
-                    ref HueVector
+                    new Vector2(x, y),
+                    boundsUp1,
+                    HueVector
                 );
             }
             else
             {
-                batcher.Draw2D
+                batcher.Draw
                 (
                     textureUp0,
-                    x,
-                    y,
-                    boundsUp0.X,
-                    boundsUp0.Y,
-                    boundsUp0.Width,
-                    boundsUp0.Height,
-                    ref HueVector
+                    new Vector2(x, y),
+                    boundsUp0,
+                    HueVector
                 );
             }
 
             // draw down button
             if (_btDownClicked)
             {
-                batcher.Draw2D
+                batcher.Draw
                 (
                     textureDown1,
-                    x,
-                    y + Height - boundsDown0.Height,
-                    boundsDown1.X,
-                    boundsDown1.Y,
-                    boundsDown1.Width,
-                    boundsDown1.Height,
-                    ref HueVector
+                    new Vector2(x, y + Height - boundsDown0.Height),
+                    boundsDown1,
+                    HueVector
                 );
             }
             else
             {
-                batcher.Draw2D
+                batcher.Draw
                 (
                     textureDown0,
-                    x,
-                    y + Height - boundsDown0.Height,
-                    boundsDown0.X,
-                    boundsDown0.Y,
-                    boundsDown0.Width,
-                    boundsDown0.Height,
-                    ref HueVector
+                    new Vector2(x, y + Height - boundsDown0.Height),
+                    boundsDown0,
+                    HueVector
                 );
             }        
 
             // draw slider
             if (MaxValue > MinValue && middleHeight > 0)
             {
-                batcher.Draw2D
+                batcher.Draw
                 (
                     textureSlider,
-                    x + ((boundsBackground0.Width - boundsSlider.Width) >> 1), 
-                    y + boundsUp0.Height + _sliderPosition,
-                    boundsSlider.X,
-                    boundsSlider.Y,
-                    boundsSlider.Width,
-                    boundsSlider.Height,
-                    ref HueVector
+                    new Vector2
+                    (
+                        x + ((boundsBackground0.Width - boundsSlider.Width) >> 1), 
+                        y + boundsUp0.Height + _sliderPosition
+                    ),
+                    boundsSlider,
+                    HueVector
                 );
             }
 

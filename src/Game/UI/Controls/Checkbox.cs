@@ -36,6 +36,7 @@ using ClassicUO.Input;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
+using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Controls
 {
@@ -129,16 +130,12 @@ namespace ClassicUO.Game.UI.Controls
 
             var texture = GumpsLoader.Instance.GetGumpTexture(IsChecked ? _active : _inactive, out var bounds);
 
-            batcher.Draw2D
+            batcher.Draw
             (
                 texture,
-                x,
-                y, 
-                bounds.X,
-                bounds.Y,
-                bounds.Width,
-                bounds.Height,
-                ref HueVector
+                new Vector2(x, y),
+                bounds,
+                HueVector
             );
 
             _text.Draw(batcher, x + bounds.Width + 2, y);

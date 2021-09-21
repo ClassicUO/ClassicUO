@@ -239,32 +239,32 @@ namespace ClassicUO.Game.Data
 
         public static void CleanCaveTextures()
         {
-            foreach (ushort graphic in CaveTiles)
-            {
-                ArtTexture texture = ArtLoader.Instance.GetTexture(graphic);
+            //foreach (ushort graphic in CaveTiles)
+            //{
+            //    ArtTexture texture = ArtLoader.Instance.GetTexture(graphic);
 
-                if (texture != null)
-                {
-                    texture.Ticks = 0;
-                }
-            }
+            //    if (texture != null)
+            //    {
+            //        texture.Ticks = 0;
+            //    }
+            //}
 
-            ArtLoader.Instance.CleaUnusedResources(short.MaxValue);
+            //ArtLoader.Instance.CleaUnusedResources(short.MaxValue);
         }
 
         public static void CleanTreeTextures()
         {
-            foreach (ushort graphic in TreeTiles)
-            {
-                ArtTexture texture = ArtLoader.Instance.GetTexture(graphic);
+            //foreach (ushort graphic in TreeTiles)
+            //{
+            //    ArtTexture texture = ArtLoader.Instance.GetTexture(graphic);
 
-                if (texture != null)
-                {
-                    texture.Ticks = 0;
-                }
-            }
+            //    if (texture != null)
+            //    {
+            //        texture.Ticks = 0;
+            //    }
+            //}
 
-            ArtLoader.Instance.CleaUnusedResources(short.MaxValue);
+            //ArtLoader.Instance.CleaUnusedResources(short.MaxValue);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

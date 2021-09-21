@@ -853,12 +853,7 @@ namespace ClassicUO.Game.UI.Gumps
                     Height = h;
                     WantUpdateSize = false;
 
-                    ArtTexture texture = ArtLoader.Instance.GetTexture(item.DisplayedGraphic);
-
-                    if (texture != null)
-                    {
-                        _rect = texture.ImageRectangle;
-                    }
+                    _rect = ArtLoader.Instance.RealGraphicsBounds[item.DisplayedGraphic];
 
                     _originalSize.X = Width;
                     _originalSize.Y = Height;

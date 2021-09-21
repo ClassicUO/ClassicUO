@@ -1252,15 +1252,20 @@ namespace ClassicUO.Game.UI.Gumps
                 ResetHueVector();
                 ShaderHueTranslator.GetHueVector(ref HueVector, 0, false, Alpha);
 
-                return batcher.Draw2D
+                batcher.Draw
                 (
                     LineColor,
-                    x,
-                    y,
-                    LineWidth,
-                    Height,
-                    ref HueVector
+                    new Rectangle
+                    (
+                        x,
+                        y,
+                        LineWidth,
+                        Height
+                    ),
+                    HueVector
                 );
+
+                return true;
             }
         }
 

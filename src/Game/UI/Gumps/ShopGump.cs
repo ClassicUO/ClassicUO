@@ -1079,42 +1079,34 @@ namespace ClassicUO.Game.UI.Gumps
 
                 int middleWidth = Width - bounds0.Width - bounds2.Width;
 
-                batcher.Draw2D
+                batcher.Draw
                 (
                     texture0,
-                    x,
-                    y, 
-                    bounds0.X,
-                    bounds0.Y,
-                    bounds0.Width,
-                    bounds0.Height,
-                    ref HueVector
+                    new Vector2(x, y),
+                    bounds0,
+                    HueVector
                 );
 
-                batcher.Draw2DTiled
+                batcher.DrawTiled
                 (
                     texture1,
-                    x + bounds0.Width,
-                    y,
-                    middleWidth,
-                    bounds1.Height,
-                    bounds1.X,
-                    bounds1.Y,
-                    bounds1.Width,
-                    bounds1.Height,
-                    ref HueVector
+                    new Rectangle
+                    (
+                        x + bounds0.Width,
+                        y,
+                        middleWidth,
+                        bounds1.Height
+                    ),
+                    bounds1,
+                    HueVector
                 );
 
-                batcher.Draw2D
+                batcher.Draw
                 (
                     texture2,
-                    x + Width - bounds2.Width,
-                    y,
-                    bounds2.X,
-                    bounds2.Y,
-                    bounds2.Width,
-                    bounds2.Height,
-                    ref HueVector
+                    new Vector2(x + Width - bounds2.Width, y),
+                    bounds2,
+                    HueVector
                 );
 
                 return base.Draw(batcher, x, y);
@@ -1150,18 +1142,24 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (_tiled)
                 {
-                    batcher.Draw2DTiled
+                    batcher.DrawTiled
                     (
                         texture,
-                        x,
-                        y,
-                        Width,
-                        Height,
-                        bounds.X + _rect.X,
-                        bounds.Y + _rect.Y,
-                        _rect.Width,
-                        _rect.Height,
-                        ref HueVector
+                        new Rectangle
+                        (
+                            x,
+                            y,
+                            Width,
+                            Height
+                        ),
+                        new Rectangle
+                        (
+                            bounds.X + _rect.X,
+                            bounds.Y + _rect.Y,
+                            _rect.Width,
+                            _rect.Height
+                        ),
+                        HueVector
                     );
                 }
                 else

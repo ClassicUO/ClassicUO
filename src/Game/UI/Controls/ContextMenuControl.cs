@@ -356,14 +356,17 @@ namespace ClassicUO.Game.UI.Controls
                 {
                     ResetHueVector();
 
-                    batcher.Draw2D
+                    batcher.Draw
                     (
                         SolidColorTextureCache.GetTexture(Color.Gray),
-                        x + 2,
-                        y + 5,
-                        Width - 4,
-                        Height - 10,
-                        ref HueVector
+                        new Rectangle
+                        (
+                            x + 2,
+                            y + 5,
+                            Width - 4,
+                            Height - 10
+                        ),
+                        HueVector
                     );
                 }
 

@@ -223,24 +223,30 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 ShaderHueTranslator.GetHueVector(ref HueVector, _warningLinesHue);
 
-                batcher.Draw2D
+                batcher.Draw
                 (
                     SolidColorTextureCache.GetTexture(Color.White),
-                    _data.ScreenCoordinateX,
-                    _data.ScreenCoordinateY,
-                    _data.Width,
-                    2,
-                    ref HueVector
+                    new Rectangle
+                    (
+                        _data.ScreenCoordinateX,
+                        _data.ScreenCoordinateY,
+                        _data.Width,
+                        2
+                    ),
+                    HueVector
                 );
 
-                batcher.Draw2D
+                batcher.Draw
                 (
                     SolidColorTextureCache.GetTexture(Color.White),
-                    _data.ScreenCoordinateX,
-                    _data.ScreenCoordinateY + Parent.Height - 2,
-                    _data.Width,
-                    2,
-                    ref HueVector
+                    new Rectangle
+                    (
+                        _data.ScreenCoordinateX,
+                        _data.ScreenCoordinateY + Parent.Height - 2,
+                        _data.Width,
+                        2
+                    ),
+                    HueVector
                 );
             }
 

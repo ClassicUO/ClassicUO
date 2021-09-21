@@ -70,7 +70,6 @@ namespace ClassicUO.Renderer
         );
 
         private static PixelPicker _picker = new PixelPicker();
-        private static Vector3 _hueVector = Vector3.Zero;
         private byte _font;
 
         private MultilinesFontInfo _info;
@@ -464,29 +463,29 @@ namespace ClassicUO.Renderer
                 --hue;
             }
 
-            _hueVector.X = hue;
+            Vector3 hueVector = new Vector3(hue, 0, 0);
 
             if (hue != 0)
             {
                 if (IsUnicode)
                 {
-                    _hueVector.Y = ShaderHueTranslator.SHADER_TEXT_HUE_NO_BLACK;
+                    hueVector.Y = ShaderHueTranslator.SHADER_TEXT_HUE_NO_BLACK;
                 }
                 else if (Font != 5 && Font != 8)
                 {
-                    _hueVector.Y = ShaderHueTranslator.SHADER_PARTIAL_HUED;
+                    hueVector.Y = ShaderHueTranslator.SHADER_PARTIAL_HUED;
                 }
                 else
                 {
-                    _hueVector.Y = ShaderHueTranslator.SHADER_HUED;
+                    hueVector.Y = ShaderHueTranslator.SHADER_HUED;
                 }
             }
             else
             {
-                _hueVector.Y = 0;
+                hueVector.Y = 0;
             }
 
-            _hueVector.Z = alpha;
+            hueVector.Z = alpha;
 
             return batcher.Draw2D
             (
@@ -499,7 +498,7 @@ namespace ClassicUO.Renderer
                 srcY,
                 srcWidth,
                 srcHeight,
-                ref _hueVector
+                ref hueVector
             );
         }
 
@@ -535,44 +534,50 @@ namespace ClassicUO.Renderer
                 --hue;
             }
 
+            Vector3 hueVector = new Vector3(hue, 0, 0);
+
             if (hue != -1)
             {
-                _hueVector.X = hue;
+                hueVector.X = hue;
 
                 if (hue != 0)
                 {
                     if (IsUnicode)
                     {
-                        _hueVector.Y = ShaderHueTranslator.SHADER_TEXT_HUE_NO_BLACK;
+                        hueVector.Y = ShaderHueTranslator.SHADER_TEXT_HUE_NO_BLACK;
                     }
                     else if (Font != 5 && Font != 8)
                     {
-                        _hueVector.Y = ShaderHueTranslator.SHADER_PARTIAL_HUED;
+                        hueVector.Y = ShaderHueTranslator.SHADER_PARTIAL_HUED;
                     }
                     else
                     {
-                        _hueVector.Y = ShaderHueTranslator.SHADER_HUED;
+                        hueVector.Y = ShaderHueTranslator.SHADER_HUED;
                     }
                 }
                 else
                 {
-                    _hueVector.Y = 0;
+                    hueVector.Y = 0;
                 }
             }
 
-            _hueVector.Z = 0;
+            hueVector.Z = 0;
 
-            return batcher.Draw2D
+            batcher.Draw
             (
                 Texture,
-                dx,
-                dy,
-                sx,
-                sy,
-                swidth,
-                sheight,
-                ref _hueVector
+                new Vector2(dx, dy),
+                new Rectangle
+                (
+                    sx,
+                    sy,
+                    swidth,
+                    sheight
+                ),
+                hueVector
             );
+
+            return true;
         }
 
         public bool Draw(UltimaBatcher2D batcher, int x, int y, float alpha = 0, ushort hue = 0)
@@ -592,40 +597,45 @@ namespace ClassicUO.Renderer
                 --hue;
             }
 
-            _hueVector.X = hue;
+            Vector3 hueVector = new Vector3(hue, 0, 0);
 
 
             if (hue != 0)
             {
                 if (IsUnicode)
                 {
-                    _hueVector.Y = ShaderHueTranslator.SHADER_TEXT_HUE_NO_BLACK;
+                    hueVector.Y = ShaderHueTranslator.SHADER_TEXT_HUE_NO_BLACK;
                 }
                 else if (Font != 5 && Font != 8)
                 {
-                    _hueVector.Y = ShaderHueTranslator.SHADER_PARTIAL_HUED;
+                    hueVector.Y = ShaderHueTranslator.SHADER_PARTIAL_HUED;
                 }
                 else
                 {
-                    _hueVector.Y = ShaderHueTranslator.SHADER_HUED;
+                    hueVector.Y = ShaderHueTranslator.SHADER_HUED;
                 }
             }
             else
             {
-                _hueVector.Y = 0;
+                hueVector.Y = 0;
             }
 
-            _hueVector.Z = alpha;
+            hueVector.Z = alpha;
 
-            return batcher.Draw2D
+            batcher.Draw
             (
                 Texture,
-                x,
-                y,
-                Width,
-                Height,
-                ref _hueVector
+                new Rectangle
+                (
+                    x,
+                    y,
+                    Width,
+                    Height
+                ),
+                hueVector
             );
+
+            return true;
         }
 
         public void CreateTexture()

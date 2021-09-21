@@ -160,30 +160,32 @@ namespace ClassicUO.Game.UI.Controls
 
             if (texture != null)
             {
-                batcher.Draw2D
+                Vector2 pos = new Vector2(x, y);
+                Rectangle rect = bounds;
+                rect.Width = Width;
+                rect.Height = Height;
+
+                batcher.Draw
                 (
                     texture,
-                    x,
-                    y,
-                    bounds.X,
-                    bounds.Y,
-                    Width,
-                    Height,
-                    ref HueVector
+                    pos,
+                    rect,
+                    HueVector
                 );
 
                 Item item = World.Items.Get(LocalSerial);
 
                 if (item != null && !item.IsMulti && !item.IsCoin && item.Amount > 1 && item.ItemData.IsStackable)
                 {
-                    batcher.Draw2D
+                    pos.X += 5;
+                    pos.Y += 5;
+
+                    batcher.Draw
                     (
-                        texture,
-                        x + 5,
-                        y + 5,
-                        Width,
-                        Height,
-                        ref HueVector
+                       texture,
+                       pos,
+                       rect,
+                       HueVector
                     );
                 }
             }

@@ -110,32 +110,25 @@ namespace ClassicUO.IO.Resources
         }
       
         
-        const int ATLAS_SIZE = 1024 * 4;
-
-        private TextureAtlas _staticAtlas;
-
-        // this is really really tricky. But it's for speedup testing phase.
-        public unsafe void CreateAtlas(Microsoft.Xna.Framework.Graphics.GraphicsDevice device)
-        {
-            _staticAtlas = ArtLoader.Instance.Atlas;
-            //_staticAtlas = new TextureAtlas(device, ATLAS_SIZE, ATLAS_SIZE, Microsoft.Xna.Framework.Graphics.SurfaceFormat.Color, Entries.Length);
-        }
 
         public Texture2D GetLandTexture(uint g, out Rectangle bounds)
         {
             // avoid to mix land with statics
-            g += Constants.MAX_STATIC_DATA_INDEX_COUNT;
-            if (!_staticAtlas.IsHashExists(g))
+            g += ushort.MaxValue;
+
+            var atlas = TextureAtlas.Shared;
+
+            if (!atlas.IsHashExists(g))
             {
-                AddSpriteToAtlas(_staticAtlas, g);
+                AddSpriteToAtlas(atlas, g);
             }
 
-            return _staticAtlas.GetTexture(g, out bounds);
+            return atlas.GetTexture(g, out bounds);
         }
 
         private unsafe void AddSpriteToAtlas(TextureAtlas atlas, uint index)
         {
-            ref UOFileIndex entry = ref GetValidRefEntry((int) (index & ~Constants.MAX_STATIC_DATA_INDEX_COUNT));
+            ref UOFileIndex entry = ref GetValidRefEntry((int) (index - ushort.MaxValue));
 
             if (entry.Length <= 0)
             {

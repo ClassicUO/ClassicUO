@@ -456,7 +456,17 @@ namespace ClassicUO.Game
 
                 var texture = ArtLoader.Instance.GetStaticTexture(Graphic, out var bounds);
 
-                sb.Draw2D(texture, Mouse.Position.X - offX, Mouse.Position.Y - offY, bounds.X, bounds.Y, bounds.Width, bounds.Height, ref hueVec);
+                sb.Draw
+                (
+                    texture,
+                    new Vector2
+                    (
+                        Mouse.Position.X - offX,
+                        Mouse.Position.Y - offY
+                    ), 
+                    bounds,
+                    hueVec
+                );
             }
         }
 

@@ -34,6 +34,7 @@ using System.Collections.Generic;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
+using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Controls
 {
@@ -118,18 +119,18 @@ namespace ClassicUO.Game.UI.Controls
 
             if (texture != null)
             {
-                batcher.Draw2DTiled
+                batcher.DrawTiled
                 (
                     texture,
-                    x,
-                    y,
-                    Width,
-                    Height,
-                    bounds.X,
-                    bounds.Y,
-                    bounds.Width,
-                    bounds.Height,
-                    ref HueVector
+                    new Rectangle
+                    (
+                        x,
+                        y,
+                        Width,
+                        Height
+                    ),
+                    bounds,
+                    HueVector
                 );
             }
 

@@ -154,14 +154,17 @@ namespace ClassicUO.Game.UI.Gumps
             ResetHueVector();
             HueVector.Z = 0.1f;
 
-            batcher.Draw2D
+            batcher.Draw
             (
                 backgroundTexture,
-                x,
-                y,
-                Width,
-                Height,
-                ref HueVector
+                new Rectangle
+                (
+                    x,
+                    y,
+                    Width,
+                    Height
+                ),
+                HueVector
             );
 
             HueVector.Z = 0;

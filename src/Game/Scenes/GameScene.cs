@@ -94,7 +94,6 @@ namespace ClassicUO.Game.Scenes
         private readonly LightData[] _lights = new LightData[Constants.MAX_LIGHTS_DATA_INDEX_COUNT];
         private Item _multi;
         private Rectangle _rectangleObj = Rectangle.Empty, _rectanglePlayer;
-        private Vector3 _selectionLines = Vector3.Zero;
         private long _timePing;
 
         private uint _timeToPlaceMultiInHouseCustomization;
@@ -944,14 +943,11 @@ namespace ClassicUO.Game.Scenes
 
                 batcher.Begin(null, Camera.ViewTransformMatrix);
 
-                batcher.Draw2D
+                batcher.Draw
                 (
                     _world_render_target,
-                    0,
-                    0,
-                    width,
-                    height,
-                    ref hue
+                    new Rectangle(0, 0, width, height),
+                    hue
                 );
 
                 batcher.End();
@@ -974,14 +970,11 @@ namespace ClassicUO.Game.Scenes
                     batcher.SetBlendState(_darknessBlend.Value);
                 }
 
-                batcher.Draw2D
+                batcher.Draw
                 (
                     _lightRenderTarget,
-                    0,
-                    0,
-                    width,
-                    height,
-                    ref hue
+                    new Rectangle(0, 0, width, height),
+                    hue
                 );
 
                 batcher.SetBlendState(null);
@@ -1145,7 +1138,7 @@ namespace ClassicUO.Game.Scenes
             hueVec.X = 0;
             hueVec.Y = 1;
             hueVec.Z = 0;
-            string s = $"Flushes: {flushes}\nSwitches: {switches}";
+            string s = $"Flushes: {flushes}\nSwitches: {switches}\nArt texture count: {TextureAtlas.Shared.TexturesCount}";
             batcher.DrawString(Fonts.Bold, s, 200, 200, ref hueVec);
             hueVec = Vector3.Zero;
             batcher.DrawString(Fonts.Bold, s, 200 + 1, 200 - 1, ref hueVec);
@@ -1240,19 +1233,23 @@ namespace ClassicUO.Game.Scenes
         {
             if (_isSelectionActive)
             {
-                _selectionLines.Z = 0.3F;
+                Vector3 selectionHue = new Vector3();
+                selectionHue.Z = 0.3f;
 
-                batcher.Draw2D
+                batcher.Draw
                 (
                     SolidColorTextureCache.GetTexture(Color.Black),
-                    _selectionStart.X - Camera.Bounds.X,
-                    _selectionStart.Y - Camera.Bounds.Y,
-                    Mouse.Position.X - _selectionStart.X,
-                    Mouse.Position.Y - _selectionStart.Y,
-                    ref _selectionLines
+                    new Rectangle
+                    (
+                        _selectionStart.X - Camera.Bounds.X,
+                        _selectionStart.Y - Camera.Bounds.Y,
+                        Mouse.Position.X - _selectionStart.X,
+                        Mouse.Position.Y - _selectionStart.Y
+                    ),
+                    selectionHue
                 );
 
-                _selectionLines.Z = 0.7f;
+                selectionHue.Z = 0.7f;
 
                 batcher.DrawRectangle
                 (
@@ -1261,7 +1258,7 @@ namespace ClassicUO.Game.Scenes
                     _selectionStart.Y - Camera.Bounds.Y,
                     Mouse.Position.X - _selectionStart.X,
                     Mouse.Position.Y - _selectionStart.Y,
-                    ref _selectionLines
+                    ref selectionHue
                 );
             }
         }

@@ -200,12 +200,9 @@ namespace ClassicUO.Game.GameObjects
 
             Point p = RealScreenPosition;
 
-            ArtTexture texture = ArtLoader.Instance.GetTexture(Graphic);
+            ref var bounds = ref ArtLoader.Instance.RealGraphicsBounds[Graphic];
 
-            if (texture != null)
-            {
-                p.Y -= texture.ImageRectangle.Height >> 1;
-            }
+            p.Y -= bounds.Height >> 1;
 
             p.X += (int) Offset.X + 22;
             p.Y += (int) (Offset.Y - Offset.Z) + 44;

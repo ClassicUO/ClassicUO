@@ -946,14 +946,17 @@ namespace ClassicUO.Game.UI.Controls
                                 endX += _rendererText.GetCharWidth(info.Data[startSelectionIndex + k].Item);
                             }
 
-                            batcher.Draw2D
+                            batcher.Draw
                             (
                                 SolidColorTextureCache.GetTexture(SELECTION_COLOR),
-                                x + drawX + diffX,
-                                y + drawY,
-                                endX,
-                                info.MaxHeight + 1,
-                                ref HueVector
+                                new Rectangle
+                                (
+                                    x + drawX + diffX,
+                                    y + drawY,
+                                    endX,
+                                    info.MaxHeight + 1
+                                ),
+                                HueVector
                             );
 
                             break;
@@ -961,14 +964,17 @@ namespace ClassicUO.Game.UI.Controls
 
 
                         // do the whole line
-                        batcher.Draw2D
+                        batcher.Draw
                         (
                             SolidColorTextureCache.GetTexture(SELECTION_COLOR),
-                            x + drawX + diffX,
-                            y + drawY,
-                            info.Width - drawX,
-                            info.MaxHeight + 1,
-                            ref HueVector
+                            new Rectangle
+                            (
+                                x + drawX + diffX,
+                                y + drawY,
+                                info.Width - drawX,
+                                info.MaxHeight + 1
+                            ),
+                            HueVector
                         );
 
                         // first selection is gone. M

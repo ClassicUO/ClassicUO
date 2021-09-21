@@ -74,15 +74,20 @@ namespace ClassicUO.Game.UI.Controls
 
             ShaderHueTranslator.GetHueVector(ref HueVector, Hue);
 
-            return batcher.Draw2D
+            batcher.Draw
             (
-                SolidColorTextureCache.GetTexture(Color.White),
-                x + 3,
-                y + 3,
-                Width - 6,
-                Height - 6,
-                ref HueVector
+               SolidColorTextureCache.GetTexture(Color.White),
+               new Rectangle
+               (
+                   x + 3,
+                   y + 3,
+                   Width - 6,
+                   Height - 6
+                ),
+                HueVector
             );
+
+            return true;
         }
 
         protected override void OnMouseUp(int x, int y, MouseButtonType button)
