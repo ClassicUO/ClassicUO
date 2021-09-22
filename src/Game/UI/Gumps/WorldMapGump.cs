@@ -1462,8 +1462,8 @@ namespace ClassicUO.Game.UI.Gumps
             int gWidth = Width - 8;
             int gHeight = Height - 8;
 
-            int sx = _center.X + 1;
-            int sy = _center.Y + 1;
+            int centerX = _center.X + 1;
+            int centerY = _center.Y + 1;
 
             int size = (int) Math.Max(gWidth * 1.75f, gHeight * 1.75f);
 
@@ -1493,21 +1493,38 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 if (batcher.ClipBegin(gX, gY, gWidth, gHeight))
                 {
-                    int offset = size >> 1;
+                    var destRect = new Rectangle
+                    (
+                        gX + halfWidth,
+                        gY + halfHeight,
+                        size,
+                        size
+                    );
 
-                    batcher.Draw2D
+                    var srcRect = new Rectangle
+                    (
+                        centerX - size_zoom_half,
+                        centerY - size_zoom_half,
+                        size_zoom,
+                        size_zoom
+                    );
+
+                    var origin = new Vector2
+                    (
+                        srcRect.Width / 2f,
+                        srcRect.Height / 2f
+                    );
+            
+                    batcher.Draw
                     (
                         _mapTexture,
-                        gX - offset + halfWidth,
-                        gY - offset + halfHeight,
-                        size,
-                        size,
-                        sx - size_zoom_half,
-                        sy - size_zoom_half,
-                        size_zoom,
-                        size_zoom,
-                        ref HueVector,
-                        _flipMap ? 45 : 0
+                        destRect,
+                        srcRect,
+                        HueVector,
+                        _flipMap ? Microsoft.Xna.Framework.MathHelper.ToRadians(45) : 0,
+                        origin,
+                        SpriteEffects.None,
+                        0
                     );
 
                     DrawAll
