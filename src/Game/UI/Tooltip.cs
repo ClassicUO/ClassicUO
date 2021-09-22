@@ -211,19 +211,21 @@ namespace ClassicUO.Game.UI
             hue_vec.Y = 0;
             hue_vec.Z = 0;
 
-            return batcher.Draw2D
+            batcher.Draw
             (
                 _renderedText.Texture,
-                x + 3,
-                y + 3,
-                z_width * zoom,
-                z_height * zoom,
-                0,
-                0,
-                z_width,
-                z_height,
-                ref hue_vec
+                new Rectangle
+                (
+                    x + 3,
+                    y + 3,
+                    (int)(_renderedText.Texture.Width * zoom),
+                    (int)(_renderedText.Texture.Height * zoom)
+                ),
+                null,
+                hue_vec
             );
+
+            return true;
         }
 
         public void Clear()

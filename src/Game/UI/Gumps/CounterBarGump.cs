@@ -488,22 +488,15 @@ namespace ClassicUO.Game.UI.Gumps
             private class ImageWithText : Control
             {
                 private readonly Label _label;
-                private readonly TextureControl _textureControl;
+                private ushort _graphic;
+                private ushort _hue;
+                private bool _partial;
 
                 public ImageWithText()
                 {
                     CanMove = true;
                     WantUpdateSize = true;
                     AcceptMouseInput = false;
-
-                    _textureControl = new TextureControl
-                    {
-                        ScaleTexture = true,
-                        AcceptMouseInput = false
-                    };
-
-                    Add(_textureControl);
-
 
                     _label = new Label
                     (
@@ -527,21 +520,77 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     if (graphic != 0)
                     {
-                        _textureControl.Texture = ArtLoader.Instance.GetTexture(graphic);
-                        _textureControl.Hue = hue;
-
-                        _textureControl.IsPartial = TileDataLoader.Instance.StaticData[graphic].IsPartialHue;
-
-                        _textureControl.Width = Parent.Width;
-                        _textureControl.Height = Parent.Height;
+                        _graphic = graphic;
+                        _hue = hue;
+                        _partial = TileDataLoader.Instance.StaticData[graphic].IsPartialHue;
                         _label.Y = Parent.Height - 15;
                     }
                     else
                     {
-                        _textureControl.Texture = null;
+                        _graphic = 0;
                     }
                 }
 
+                public override void Update(double totalTime, double frameTime)
+                {
+                    base.Update(totalTime, frameTime);
+
+                    if (Parent != null)
+                    {
+                        Width = Parent.Width;
+                        Height = Parent.Height;
+                    }
+                }
+
+                public override bool Draw(UltimaBatcher2D batcher, int x, int y)
+                {
+                    ResetHueVector();
+
+                    if (_graphic != 0)
+                    {
+                        var texture = ArtLoader.Instance.GetStaticTexture(_graphic, out var bounds);
+                        ref var rect = ref ArtLoader.Instance.RealGraphicsBounds[_graphic];
+
+                        ShaderHueTranslator.GetHueVector(ref HueVector, _hue, _partial, 0f);
+
+                        Point originalSize = new Point(Width, Height);
+                        Point point = new Point();
+
+                        if (rect.Width < Width)
+                        {
+                            originalSize.X = rect.Width;
+                            point.X = (Width >> 1) - (originalSize.X >> 1);
+                        }
+
+                        if (rect.Height < Height)
+                        {
+                            originalSize.Y = rect.Height;
+                            point.Y = (Height >> 1) - (originalSize.Y >> 1);
+                        }
+
+                        batcher.Draw
+                        (
+                            texture,
+                            new Rectangle
+                            (
+                                x + point.X,
+                                y + point.Y,
+                                originalSize.X,
+                                originalSize.Y
+                            ),
+                            new Rectangle
+                            (
+                                bounds.X + rect.X,
+                                bounds.Y + rect.Y,
+                                rect.Width,
+                                rect.Height
+                            ),
+                            HueVector
+                        );
+                    }
+                        
+                    return base.Draw(batcher, x, y);
+                }
 
                 public void SetAmount(string amount)
                 {

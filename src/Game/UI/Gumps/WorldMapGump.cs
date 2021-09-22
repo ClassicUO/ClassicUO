@@ -2048,7 +2048,7 @@ namespace ClassicUO.Game.UI.Gumps
             }
             else
             {
-                batcher.Draw2D(marker.MarkerIcon, rot.X - (marker.MarkerIcon.Width >> 1), rot.Y - (marker.MarkerIcon.Height >> 1), ref HueVector);
+                batcher.Draw(marker.MarkerIcon, new Vector2(rot.X - (marker.MarkerIcon.Width >> 1), rot.Y - (marker.MarkerIcon.Height >> 1)), HueVector);
                
                 if (!showMarkerName)
                 {
@@ -2200,19 +2200,22 @@ namespace ClassicUO.Game.UI.Gumps
 
             Texture2D texture = SolidColorTextureCache.GetTexture(Color.DarkGray);
 
-            batcher.Draw2D
+            batcher.Draw
             (
                 texture,
-                rot.X - sW / 2f * zoom,
-                rot.Y - sH / 2f * zoom,
-                sW * zoom,
-                sH * zoom,
-                0,
-                0,
-                sW,
-                sH,
-                ref HueVector,
-                _flipMap ? 45f : 0f
+                new Rectangle
+                (
+                    rot.X - (int)(sW / 2f),
+                    rot.Y - (int)(sH / 2f),
+                    (int)(sW * zoom),
+                    (int)(sH * zoom)
+                ),
+                null,
+                HueVector,
+                _flipMap ? Microsoft.Xna.Framework.MathHelper.ToRadians(45) : 0,
+                new Vector2(0.5f, 0.5f),
+                SpriteEffects.None,
+                0
             );
         }
 

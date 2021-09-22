@@ -487,19 +487,27 @@ namespace ClassicUO.Renderer
 
             hueVector.Z = alpha;
 
-            return batcher.Draw2D
+            batcher.Draw
             (
                 Texture,
-                dx,
-                dy,
-                dwidth,
-                dheight,
-                srcX,
-                srcY,
-                srcWidth,
-                srcHeight,
-                ref hueVector
+                new Rectangle
+                (
+                    dx,
+                    dy,
+                    dwidth,
+                    dheight
+                ),
+                new Rectangle
+                (
+                    srcX,
+                    srcY,
+                    srcWidth,
+                    srcHeight
+                ),
+                hueVector
             );
+
+            return true;
         }
 
         public bool Draw

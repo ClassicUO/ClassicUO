@@ -158,28 +158,13 @@ namespace ClassicUO.Game.UI.Gumps
             int index
         )
         {
-            ArtTexture texture = ArtLoader.Instance.GetTexture(graphic);
-
-            if (texture == null)
+            ItemView view = new ItemView(graphic, (ushort)(hue != 0 ? (hue + 1) : 0))
             {
-                Log.Error($"invalid texture 0x{graphic:X4}");
-
-                return;
-            }
-
-            TextureControl pic = new TextureControl
-            {
-                Texture = texture,
-                IsPartial = TileDataLoader.Instance.StaticData[graphic].IsPartialHue,
-                Hue = (ushort) (hue != 0 ? (hue + 1) : 0),
-                AcceptMouseInput = true,
                 X = x,
-                Y = y,
-                Width = texture.Width,
-                Height = texture.Height
+                Y = y
             };
-            
-            pic.MouseDoubleClick += (sender, e) =>
+
+            view.MouseDoubleClick += (sender, e) =>
             {
                 NetClient.Socket.Send_MenuResponse(LocalSerial,
                                                    (ushort)ServerSerial,
@@ -190,10 +175,10 @@ namespace ClassicUO.Game.UI.Gumps
                 e.Result = true;
             };
 
-            pic.SetTooltip(name);
+            view.SetTooltip(name);
 
 
-            _container.Add(pic);
+            _container.Add(view);
 
             _container.CalculateWidth();
             _slider.MaxValue = _container.MaxValue;
@@ -210,6 +195,49 @@ namespace ClassicUO.Game.UI.Gumps
                                                0);
         }
 
+        class ItemView : Control
+        {
+            private readonly ushort _graphic;
+            private readonly ushort _hue;
+            private readonly bool _isPartial;
+
+            public ItemView(ushort graphic, ushort hue)
+            {
+                AcceptMouseInput = true;
+                WantUpdateSize = true;
+
+                _graphic = graphic;
+
+                _ = ArtLoader.Instance.GetStaticTexture(_graphic, out var bounds);
+
+                Width = bounds.Width;
+                Height = bounds.Height;
+                _hue = hue;
+                _isPartial = TileDataLoader.Instance.StaticData[graphic].IsPartialHue;
+            }
+
+            public override bool Draw(UltimaBatcher2D batcher, int x, int y)
+            {
+                ResetHueVector();
+
+                if (_graphic != 0)
+                {
+                    var texture = ArtLoader.Instance.GetStaticTexture(_graphic, out var bounds);
+
+                    ShaderHueTranslator.GetHueVector(ref HueVector, _hue, _isPartial, 0f);
+
+                    batcher.Draw
+                    (
+                        texture,
+                        new Vector2(x, y),
+                        bounds,
+                        HueVector
+                    );
+                }
+
+                return base.Draw(batcher, x, y);
+            }
+        }
 
         private class ContainerHorizontal : Control
         {

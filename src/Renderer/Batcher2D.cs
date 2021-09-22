@@ -1135,330 +1135,6 @@ namespace ClassicUO.Renderer
             return true;
         }
 
-        public bool Draw2D(Texture2D texture, int x, int y, ref Vector3 hue)
-        {
-            EnsureSize();
-
-            ref PositionNormalTextureColor4 vertex = ref _vertexInfo[_numSprites];
-
-            vertex.Position0.X = x;
-            vertex.Position0.Y = y;
-            vertex.Position0.Z = 0;
-            vertex.Normal0.X = 0;
-            vertex.Normal0.Y = 0;
-            vertex.Normal0.Z = 1;
-            vertex.TextureCoordinate0.X = 0;
-            vertex.TextureCoordinate0.Y = 0;
-            vertex.TextureCoordinate0.Z = 0;
-
-            vertex.Position1.X = x + texture.Width;
-            vertex.Position1.Y = y;
-            vertex.Position1.Z = 0;
-            vertex.Normal1.X = 0;
-            vertex.Normal1.Y = 0;
-            vertex.Normal1.Z = 1;
-            vertex.TextureCoordinate1.X = 1;
-            vertex.TextureCoordinate1.Y = 0;
-            vertex.TextureCoordinate1.Z = 0;
-
-            vertex.Position2.X = x;
-            vertex.Position2.Y = y + texture.Height;
-            vertex.Position2.Z = 0;
-            vertex.Normal2.X = 0;
-            vertex.Normal2.Y = 0;
-            vertex.Normal2.Z = 1;
-            vertex.TextureCoordinate2.X = 0;
-            vertex.TextureCoordinate2.Y = 1;
-            vertex.TextureCoordinate2.Z = 0;
-
-            vertex.Position3.X = x + texture.Width;
-            vertex.Position3.Y = y + texture.Height;
-            vertex.Position3.Z = 0;
-            vertex.Normal3.X = 0;
-            vertex.Normal3.Y = 0;
-            vertex.Normal3.Z = 1;
-            vertex.TextureCoordinate3.X = 1;
-            vertex.TextureCoordinate3.Y = 1;
-            vertex.TextureCoordinate3.Z = 0;
-
-            vertex.Hue0 = vertex.Hue1 = vertex.Hue2 = vertex.Hue3 = hue;
-
-            PushSprite(texture);
-
-            return true;
-        }
-
-        public bool Draw2D
-        (
-            Texture2D texture,
-            int x,
-            int y,
-            int sx,
-            int sy,
-            float swidth,
-            float sheight,
-            ref Vector3 hue
-        )
-        {
-            EnsureSize();
-
-            //float minX = ((sx + 0.5f) / (float)texture.Width);
-            //float minY = ((sy + 0.5f) / (float)texture.Height);
-            //float maxX = (((sx + swidth) - 1f) / (float)texture.Width);
-            //float maxY = (((sy + sheight) - 1f) / (float)texture.Height);
-
-            float minX = sx / (float)texture.Width;
-            float maxX = (sx + swidth) / texture.Width;
-            float minY = sy / (float)texture.Height;
-            float maxY = (sy + sheight) / texture.Height;
-
-            ref PositionNormalTextureColor4 vertex = ref _vertexInfo[_numSprites];
-
-            vertex.Position0.X = x;
-            vertex.Position0.Y = y;
-            vertex.Position0.Z = 0;
-            vertex.Normal0.X = 0;
-            vertex.Normal0.Y = 0;
-            vertex.Normal0.Z = 1;
-            vertex.TextureCoordinate0.X = minX;
-            vertex.TextureCoordinate0.Y = minY;
-            vertex.TextureCoordinate0.Z = 0;
-            vertex.Position1.X = x + swidth;
-            vertex.Position1.Y = y;
-            vertex.Position1.Z = 0;
-            vertex.Normal1.X = 0;
-            vertex.Normal1.Y = 0;
-            vertex.Normal1.Z = 1;
-            vertex.TextureCoordinate1.X = maxX;
-            vertex.TextureCoordinate1.Y = minY;
-            vertex.TextureCoordinate1.Z = 0;
-            vertex.Position2.X = x;
-            vertex.Position2.Y = y + sheight;
-            vertex.Position2.Z = 0;
-            vertex.Normal2.X = 0;
-            vertex.Normal2.Y = 0;
-            vertex.Normal2.Z = 1;
-            vertex.TextureCoordinate2.X = minX;
-            vertex.TextureCoordinate2.Y = maxY;
-            vertex.TextureCoordinate2.Z = 0;
-            vertex.Position3.X = x + swidth;
-            vertex.Position3.Y = y + sheight;
-            vertex.Position3.Z = 0;
-            vertex.Normal3.X = 0;
-            vertex.Normal3.Y = 0;
-            vertex.Normal3.Z = 1;
-            vertex.TextureCoordinate3.X = maxX;
-            vertex.TextureCoordinate3.Y = maxY;
-            vertex.TextureCoordinate3.Z = 0;
-            vertex.Hue0 = vertex.Hue1 = vertex.Hue2 = vertex.Hue3 = hue;
-
-            PushSprite(texture);
-
-            return true;
-        }
-
-        public bool Draw2D
-        (
-            Texture2D texture,
-            float dx,
-            float dy,
-            float dwidth,
-            float dheight,
-            float sx,
-            float sy,
-            float swidth,
-            float sheight,
-            ref Vector3 hue,
-            float angle = 0.0f
-        )
-        {
-            EnsureSize();
-
-            float minX = sx / texture.Width, maxX = (sx + swidth) / texture.Width;
-            float minY = sy / texture.Height, maxY = (sy + sheight) / texture.Height;
-
-            ref PositionNormalTextureColor4 vertex = ref _vertexInfo[_numSprites];
-
-            float x = dx;
-            float y = dy;
-            float w = dx + dwidth;
-            float h = dy + dheight;
-
-            if (angle != 0.0f)
-            {
-                //angle = (float)(angle * 57.295780);
-                angle = (float) (angle * Math.PI) / 180.0f;
-
-                float ww = dwidth * 0.5f;
-                float hh = dheight * 0.5f;
-
-                float sin = (float) Math.Sin(angle);
-                float cos = (float) Math.Cos(angle);
-
-                float tempX = -ww;
-                float tempY = -hh;
-                float rotX = tempX * cos - tempY * sin;
-                float rotY = tempX * sin + tempY * cos;
-                rotX += dx + ww;
-                rotY += dy + hh;
-
-                vertex.Position0.X = rotX;
-                vertex.Position0.Y = rotY;
-
-
-                tempX = dwidth - ww;
-                tempY = -hh;
-                rotX = tempX * cos - tempY * sin;
-                rotY = tempX * sin + tempY * cos;
-                rotX += dx + ww;
-                rotY += dy + hh;
-
-                vertex.Position1.X = rotX;
-                vertex.Position1.Y = rotY;
-
-
-                tempX = -ww;
-                tempY = dheight - hh;
-                rotX = tempX * cos - tempY * sin;
-                rotY = tempX * sin + tempY * cos;
-                rotX += dx + ww;
-                rotY += dy + hh;
-
-                vertex.Position2.X = rotX;
-                vertex.Position2.Y = rotY;
-
-
-                tempX = dwidth - ww;
-                tempY = dheight - hh;
-                rotX = tempX * cos - tempY * sin;
-                rotY = tempX * sin + tempY * cos;
-                rotX += dx + ww;
-                rotY += dy + hh;
-
-                vertex.Position3.X = rotX;
-                vertex.Position3.Y = rotY;
-            }
-            else
-            {
-                vertex.Position0.X = x;
-                vertex.Position0.Y = y;
-
-                vertex.Position1.X = w;
-                vertex.Position1.Y = y;
-
-                vertex.Position2.X = x;
-                vertex.Position2.Y = h;
-
-                vertex.Position3.X = w;
-                vertex.Position3.Y = h;
-            }
-
-            vertex.Position0.Z = 0;
-            vertex.Normal0.X = 0;
-            vertex.Normal0.Y = 0;
-            vertex.Normal0.Z = 1;
-            vertex.TextureCoordinate0.X = minX;
-            vertex.TextureCoordinate0.Y = minY;
-            vertex.TextureCoordinate0.Z = 0;
-
-            vertex.Position1.Z = 0;
-            vertex.Normal1.X = 0;
-            vertex.Normal1.Y = 0;
-            vertex.Normal1.Z = 1;
-            vertex.TextureCoordinate1.X = maxX;
-            vertex.TextureCoordinate1.Y = minY;
-            vertex.TextureCoordinate1.Z = 0;
-
-            vertex.Position2.Z = 0;
-            vertex.Normal2.X = 0;
-            vertex.Normal2.Y = 0;
-            vertex.Normal2.Z = 1;
-            vertex.TextureCoordinate2.X = minX;
-            vertex.TextureCoordinate2.Y = maxY;
-            vertex.TextureCoordinate2.Z = 0;
-
-            vertex.Position3.Z = 0;
-            vertex.Normal3.X = 0;
-            vertex.Normal3.Y = 0;
-            vertex.Normal3.Z = 1;
-            vertex.TextureCoordinate3.X = maxX;
-            vertex.TextureCoordinate3.Y = maxY;
-            vertex.TextureCoordinate3.Z = 0;
-            vertex.Hue0 = vertex.Hue1 = vertex.Hue2 = vertex.Hue3 = hue;
-
-
-            //if (CheckInScreen(idx))
-            {
-                PushSprite(texture);
-
-                return true;
-            }
-
-            return false;
-        }
-
-        public bool Draw2D
-        (
-            Texture2D texture,
-            float x,
-            float y,
-            float width,
-            float height,
-            ref Vector3 hue
-        )
-        {
-            EnsureSize();
-
-            ref PositionNormalTextureColor4 vertex = ref _vertexInfo[_numSprites];
-
-            vertex.Position0.X = x;
-            vertex.Position0.Y = y;
-            vertex.Position0.Z = 0;
-            vertex.Normal0.X = 0;
-            vertex.Normal0.Y = 0;
-            vertex.Normal0.Z = 1;
-            vertex.TextureCoordinate0.X = 0;
-            vertex.TextureCoordinate0.Y = 0;
-            vertex.TextureCoordinate0.Z = 0;
-
-            vertex.Position1.X = x + width;
-            vertex.Position1.Y = y;
-            vertex.Position1.Z = 0;
-            vertex.Normal1.X = 0;
-            vertex.Normal1.Y = 0;
-            vertex.Normal1.Z = 1;
-            vertex.TextureCoordinate1.X = 1;
-            vertex.TextureCoordinate1.Y = 0;
-            vertex.TextureCoordinate1.Z = 0;
-
-            vertex.Position2.X = x;
-            vertex.Position2.Y = y + height;
-            vertex.Position2.Z = 0;
-            vertex.Normal2.X = 0;
-            vertex.Normal2.Y = 0;
-            vertex.Normal2.Z = 1;
-            vertex.TextureCoordinate2.X = 0;
-            vertex.TextureCoordinate2.Y = 1;
-            vertex.TextureCoordinate2.Z = 0;
-
-            vertex.Position3.X = x + width;
-            vertex.Position3.Y = y + height;
-            vertex.Position3.Z = 0;
-            vertex.Normal3.X = 0;
-            vertex.Normal3.Y = 0;
-            vertex.Normal3.Z = 1;
-            vertex.TextureCoordinate3.X = 1;
-            vertex.TextureCoordinate3.Y = 1;
-            vertex.TextureCoordinate3.Z = 0;
-
-            vertex.Hue0 = vertex.Hue1 = vertex.Hue2 = vertex.Hue3 = hue;
-
-            PushSprite(texture);
-
-            return true;
-        }
-
-
         public void DrawTiled
         (
             Texture2D texture,
@@ -1510,45 +1186,27 @@ namespace ClassicUO.Renderer
             ref Vector3 hue
         )
         {
-            Draw2D
-            (
-                texture,
-                x,
-                y,
-                width,
-                1,
-                ref hue
-            );
+            Rectangle rect = new Rectangle(x, y, width, 1);
+            Draw(texture, rect, hue);
 
-            Draw2D
-            (
-                texture,
-                x + width,
-                y,
-                1,
-                height + 1,
-                ref hue
-            );
+            rect.X += width;
+            rect.Width = 1;
+            rect.Height += height;
+            Draw(texture, rect, hue);
 
-            Draw2D
-            (
-                texture,
-                x,
-                y + height,
-                width,
-                1,
-                ref hue
-            );
 
-            Draw2D
-            (
-                texture,
-                x,
-                y,
-                1,
-                height,
-                ref hue
-            );
+            rect.X = x;
+            rect.Y = y + height;
+            rect.Width = width;
+            rect.Height = 1;
+            Draw(texture, rect, hue);
+
+
+            rect.X = x;
+            rect.Y = y;
+            rect.Width = 1;
+            rect.Height = height;
+            Draw(texture, rect, hue);
 
             return true;
         }
@@ -1643,6 +1301,7 @@ namespace ClassicUO.Renderer
 
             return true;
         }
+
 
 
 

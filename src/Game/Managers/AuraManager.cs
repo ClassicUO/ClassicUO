@@ -90,7 +90,7 @@ namespace ClassicUO.Game.Managers
             Vector3 hueVec = new Vector3(hue, 1, 0);
 
             batcher.SetBlendState(_blend.Value);
-            batcher.Draw2D(_texture, x, y, ref hueVec);
+            batcher.Draw(_texture, new Vector2(x, y), hueVec);
             batcher.SetBlendState(null);
         }
 

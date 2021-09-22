@@ -901,19 +901,27 @@ namespace ClassicUO.Game.UI.Gumps
 
                     if (texture != null)
                     {
-                        return batcher.Draw2D
+                        batcher.Draw
                         (
                             texture,
-                            x + _point.X,
-                            y + _point.Y,
-                            _originalSize.X,
-                            _originalSize.Y,
-                            bounds.X + _rect.X,
-                            bounds.Y + _rect.Y,
-                            _rect.Width,
-                            _rect.Height,
-                            ref HueVector
+                            new Rectangle
+                            (
+                                x + _point.X,
+                                y + _point.Y,
+                                _originalSize.X,
+                                _originalSize.Y
+                            ),
+                            new Rectangle
+                            (
+                                bounds.X + _rect.X,
+                                bounds.Y + _rect.Y,
+                                _rect.Width,
+                                _rect.Height
+                            ),
+                            HueVector
                         );
+
+                        return true;
                     }
 
                     return false;

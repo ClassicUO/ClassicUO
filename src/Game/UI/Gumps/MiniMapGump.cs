@@ -188,7 +188,7 @@ namespace ClassicUO.Game.UI.Gumps
             );
 
             CreateMiniMapTexture();
-            batcher.Draw2D(_mapTexture, x, y, ref HueVector);
+            batcher.Draw(_mapTexture, new Vector2(x, y), HueVector);
 
             if (_draw)
             {

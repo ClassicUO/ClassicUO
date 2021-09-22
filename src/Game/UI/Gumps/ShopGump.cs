@@ -600,85 +600,23 @@ namespace ClassicUO.Game.UI.Gumps
                 Price = price;
                 Name = name;
 
-                Add
-                (
-                    new ResizePicLine(0x39)
-                    {
-                        X = 10,
-                        Width = 190
-                    }
-                );
+                ResizePicLine line = new ResizePicLine(0x39)
+                {
+                    X = 10,
+                    Width = 190
+                };
+                Add(line);
 
                 int offY = 15;
 
                 string itemName = StringHelper.CapitalizeAllWords(Name);
 
-                TextureControl control;
-
-                if (SerialHelper.IsMobile(LocalSerial))
-                {
-                    ushort hue2 = Hue;
-                    AnimationDirection direction = GetMobileAnimationDirection(Graphic, ref hue2, 1);
-
-                    Add
-                    (
-                        control = new TextureControl
-                        {
-                            Texture = direction != null ? direction.FrameCount != 0 ? direction.Frames[0] : null : null,
-                            X = 5,
-                            Y = 5 + offY,
-                            AcceptMouseInput = false,
-                            Hue = Hue == 0 ? hue2 : Hue,
-                            IsPartial = TileDataLoader.Instance.StaticData[Graphic].IsPartialHue
-                        }
-                    );
-
-                    if (control.Texture != null)
-                    {
-                        control.Width = control.Texture.Width;
-                        control.Height = control.Texture.Height;
-                    }
-                    else
-                    {
-                        control.Width = 35;
-                        control.Height = 35;
-                    }
-
-                    if (control.Width > 35)
-                    {
-                        control.Width = 35;
-                    }
-
-                    if (control.Height > 35)
-                    {
-                        control.Height = 35;
-                    }
-                }
-                else if (SerialHelper.IsItem(LocalSerial))
-                {
-                    ArtTexture texture = ArtLoader.Instance.GetTexture(Graphic);
-
-                    Add
-                    (
-                        control = new TextureControl
-                        {
-                            Texture = texture,
-                            X = 10 - texture?.ImageRectangle.X ?? 0,
-                            Y = 5 + offY + texture?.ImageRectangle.Y ?? 0,
-                            Width = texture?.ImageRectangle.Width ?? 0,
-                            Height = texture?.ImageRectangle.Height ?? 0,
-                            AcceptMouseInput = false,
-                            ScaleTexture = false,
-                            Hue = Hue,
-                            IsPartial = TileDataLoader.Instance.StaticData[Graphic].IsPartialHue
-                        }
-                    );
-                }
-                else
+                if (!SerialHelper.IsValid(serial))
                 {
                     return;
                 }
 
+               
                 string subname = string.Format(ResGumps.Item0Price1, itemName, Price);
 
                 Add
@@ -700,7 +638,12 @@ namespace ClassicUO.Game.UI.Gumps
                     }
                 );
 
-                int height = Math.Max(_name.Height, control.Height) + 10;
+                int height = Math.Max(_name.Height, 35) + 10;
+
+                if (SerialHelper.IsItem(serial))
+                {
+                    height = Math.Max(TileDataLoader.Instance.StaticData[graphic].Height, height);
+                }
 
                 Add
                 (
@@ -721,7 +664,7 @@ namespace ClassicUO.Game.UI.Gumps
                 );
 
                 Width = 220;
-                Height = Math.Max(50, height);
+                Height = Math.Max(50, height) + line.Height;
 
                 WantUpdateSize = false;
 
@@ -808,7 +751,7 @@ namespace ClassicUO.Game.UI.Gumps
             public void SetName(string s, bool new_name)
             {
                 _name.Text = new_name ? $"{s}: {Price}" : string.Format(ResGumps.Item0Price1, s, Price);
-                WantUpdateSize = true;
+                WantUpdateSize = false;
             }
 
             protected override bool OnMouseDoubleClick(int x, int y, MouseButtonType button)
@@ -830,6 +773,83 @@ namespace ClassicUO.Game.UI.Gumps
                         dir.LastAccessTime = Time.Ticks;
                     }
                 }
+            }
+
+            public override bool Draw(UltimaBatcher2D batcher, int x, int y)
+            {
+                ResetHueVector();
+
+                if (SerialHelper.IsMobile(LocalSerial))
+                {
+                    ushort hue2 = Hue;
+                    AnimationDirection direction = GetMobileAnimationDirection(Graphic, ref hue2, 1);
+
+                    if (direction != null && direction.Frames != null && direction.FrameCount != 0)
+                    {
+                        ShaderHueTranslator.GetHueVector(ref HueVector, hue2, TileDataLoader.Instance.StaticData[Graphic].IsPartialHue, 0f);
+
+                        batcher.Draw
+                        (
+                            direction.Frames[0],
+                            new Rectangle
+                            (
+                                x - 3, 
+                                y + 5 + 15,
+                                Math.Min(direction.Frames[0].Width, 45),
+                                Math.Min(direction.Frames[0].Height, 45)
+                            ),
+                            null,
+                            HueVector
+                        );
+                    }
+                }
+                else if (SerialHelper.IsItem(LocalSerial))
+                {
+                    var texture = ArtLoader.Instance.GetStaticTexture(Graphic, out var bounds);
+
+                    ShaderHueTranslator.GetHueVector(ref HueVector, Hue, TileDataLoader.Instance.StaticData[Graphic].IsPartialHue, 0f);
+
+                    ref var rect = ref ArtLoader.Instance.RealGraphicsBounds[Graphic];
+
+                    const int RECT_SIZE = 50;
+
+                    Point originalSize = new Point(RECT_SIZE, Height);
+                    Point point = new Point();
+
+                    if (rect.Width < RECT_SIZE)
+                    {
+                        originalSize.X = rect.Width;
+                        point.X = (RECT_SIZE >> 1) - (originalSize.X >> 1);
+                    }
+
+                    if (rect.Height < Height)
+                    {
+                        originalSize.Y = rect.Height;
+                        point.Y = (Height >> 1) - (originalSize.Y >> 1);
+                    }
+
+                    batcher.Draw
+                    (
+                        texture,
+                        new Rectangle
+                        (
+                            x + point.X - 5,
+                            y + point.Y + 10,
+                            originalSize.X,
+                            originalSize.Y
+                        ),
+                        new Rectangle
+                        (
+                            bounds.X + rect.X,
+                            bounds.Y + rect.Y,
+                            rect.Width,
+                            rect.Height
+                        ),
+                        HueVector
+                    );
+                }
+
+                return base.Draw(batcher, x, y);
             }
         }
 
@@ -1164,18 +1184,24 @@ namespace ClassicUO.Game.UI.Gumps
                 }
                 else
                 {
-                    batcher.Draw2D
+                    batcher.Draw
                     (
                         texture,
-                        x,
-                        y,
-                        Width,
-                        Height,
-                        bounds.X + _rect.X,
-                        bounds.Y + _rect.Y,
-                        _rect.Width,
-                        _rect.Height,
-                        ref HueVector
+                        new Rectangle
+                        (
+                            x,
+                            y,
+                            Width,
+                            Height
+                        ),
+                        new Rectangle
+                        (
+                            bounds.X + _rect.X,
+                            bounds.Y + _rect.Y,
+                            _rect.Width,
+                            _rect.Height
+                        ),
+                        HueVector
                     );
                 }
 

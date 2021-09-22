@@ -47,10 +47,10 @@ namespace ClassicUO.Game.UI.Gumps
         private readonly List<Control> _container = new List<Control>();
         private PinControl _currentPin;
         private Point _lastPoint;
+        private HitBox _hit;
+        private UOTexture _mapTexture;
 
         private uint _pinTimer;
-        private readonly TextureControl _textureControl;
-
 
         public MapGump(uint serial, ushort gumpid, int width, int height) : base(serial, 0)
         {
@@ -59,6 +59,8 @@ namespace ClassicUO.Game.UI.Gumps
             CanCloseWithRightClick = true;
             Width = width;
             Height = height;
+
+            WantUpdateSize = false;
 
             Add
             (
@@ -81,18 +83,12 @@ namespace ClassicUO.Game.UI.Gumps
 
             _buttons[2].IsVisible = _buttons[2].IsEnabled = PlotState == 1;
 
-            Add
-            (
-                _textureControl = new TextureControl
-                {
-                    X = 24, Y = 31,
-                    Width = width,
-                    Height = height,
-                    CanMove = true
-                }
-            );
 
-            _textureControl.MouseUp += TextureControlOnMouseUp;
+
+            _hit = new HitBox(24, 31, width, height, null, 1f);
+            Add(_hit);
+
+            _hit.MouseUp += TextureControlOnMouseUp;
 
             Add(new GumpPic(width - 20, height - 20, 0x0139D, 0));
         }
@@ -102,9 +98,10 @@ namespace ClassicUO.Game.UI.Gumps
 
         public void SetMapTexture(UOTexture texture)
         {
-            _textureControl.Texture?.Dispose();
-            _textureControl.WantUpdateSize = true;
-            _textureControl.Texture = texture;
+            _mapTexture = texture;
+
+            Width = texture.Width;
+            Height = texture.Height;
 
             WantUpdateSize = true;
         }
@@ -182,22 +179,22 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     _currentPin.Location += Mouse.LDragOffset - _lastPoint;
 
-                    if (_currentPin.X < _textureControl.X)
+                    if (_currentPin.X < _hit.X)
                     {
-                        _currentPin.X = _textureControl.X;
+                        _currentPin.X = _hit.X;
                     }
-                    else if (_currentPin.X >= _textureControl.Width)
+                    else if (_currentPin.X >= _hit.Width)
                     {
-                        _currentPin.X = _textureControl.Width;
+                        _currentPin.X = _hit.Width;
                     }
 
-                    if (_currentPin.Y < _textureControl.Y)
+                    if (_currentPin.Y < _hit.Y)
                     {
-                        _currentPin.Y = _textureControl.Y;
+                        _currentPin.Y = _hit.Y;
                     }
-                    else if (_currentPin.Y >= _textureControl.Height)
+                    else if (_currentPin.Y >= _hit.Height)
                     {
-                        _currentPin.Y = _textureControl.Height;
+                        _currentPin.Y = _hit.Height;
                     }
 
 
@@ -237,6 +234,13 @@ namespace ClassicUO.Game.UI.Gumps
             base.Draw(batcher, x, y);
 
             ResetHueVector();
+
+            batcher.Draw
+            (
+                _mapTexture,
+                new Rectangle(x + _hit.X, y + _hit.Y, _hit.Width, _hit.Height),
+                HueVector
+            );
 
             for (int i = 0; i < _container.Count; i++)
             {
@@ -371,7 +375,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override void Dispose()
         {
-            _textureControl.MouseUp -= TextureControlOnMouseUp;
+            _hit.MouseUp -= TextureControlOnMouseUp;
 
             base.Dispose();
         }

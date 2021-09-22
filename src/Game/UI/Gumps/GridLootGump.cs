@@ -385,7 +385,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         private class GridLootItem : Control
         {
-            private readonly TextureControl _texture;
+            private readonly HitBox _hit;
 
             public GridLootItem(uint serial, int size)
             {
@@ -429,25 +429,15 @@ namespace ClassicUO.Game.UI.Gumps
                 Add(background);
 
 
-                _texture = new TextureControl();
-                _texture.IsPartial = item.ItemData.IsPartialHue;
-                _texture.ScaleTexture = true;
-                _texture.Hue = item.Hue;
-                _texture.Texture = ArtLoader.Instance.GetTexture(item.DisplayedGraphic);
-                _texture.Y = 15;
-                _texture.Width = size;
-                _texture.Height = size;
-                _texture.CanMove = false;
+                _hit = new HitBox(0, 15, size, size, null, 1f);
+                Add(_hit);
 
                 if (World.ClientFeatures.TooltipsEnabled)
                 {
-                    _texture.SetTooltip(item);
+                    _hit.SetTooltip(item);
                 }
 
-                Add(_texture);
-
-
-                _texture.MouseUp += (sender, e) =>
+                _hit.MouseUp += (sender, e) =>
                 {
                     if (e.Button == MouseButtonType.Left)
                     {
@@ -465,6 +455,52 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 ResetHueVector();
                 base.Draw(batcher, x, y);
+
+                Item item = World.Items.Get(LocalSerial);
+
+                if (item != null)
+                {
+                    var texture = ArtLoader.Instance.GetStaticTexture(item.DisplayedGraphic, out var bounds);
+                    ref var rect = ref ArtLoader.Instance.RealGraphicsBounds[item.Graphic];
+
+                    ShaderHueTranslator.GetHueVector(ref HueVector, item.Hue, item.ItemData.IsPartialHue, 0f);
+
+                    Point originalSize = new Point(_hit.Width, _hit.Height);
+                    Point point = new Point();
+
+                    if (rect.Width < _hit.Width)
+                    {
+                        originalSize.X = rect.Width;
+                        point.X = (_hit.Width >> 1) - (originalSize.X >> 1);
+                    }
+
+                    if (rect.Height < _hit.Height)
+                    {
+                        originalSize.Y = rect.Height;
+                        point.Y = (_hit.Height >> 1) - (originalSize.Y >> 1);
+                    }
+
+                    batcher.Draw
+                    (
+                        texture,
+                        new Rectangle
+                        (
+                            x + point.X,
+                            y + point.Y + _hit.Y,
+                            originalSize.X,
+                            originalSize.Y
+                        ),
+                        new Rectangle
+                        (
+                            bounds.X + rect.X,
+                            bounds.Y + rect.Y,
+                            rect.Width,
+                            rect.Height
+                        ),
+                        HueVector
+                    );
+                }
+                
                 ResetHueVector();
 
                 batcher.DrawRectangle
@@ -477,7 +513,7 @@ namespace ClassicUO.Game.UI.Gumps
                     ref HueVector
                 );
 
-                if (_texture.MouseIsOver)
+                if (_hit.MouseIsOver)
                 {
                     HueVector.Z = 0.7f;
 

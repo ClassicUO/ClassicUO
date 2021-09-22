@@ -64,8 +64,6 @@ namespace ClassicUO.Game
         private static short _width, _height;
         private static int _radius;
 
-        private static Vector3 _hueVector;
-
 
         public static uint[] CreateCircleTexture(int radius, ref short width, ref short height)
         {
@@ -104,19 +102,26 @@ namespace ClassicUO.Game
                 x -= _width >> 1;
                 y -= _height >> 1;
 
+                Vector3 hueVector = new Vector3();
+
                 if (hue == 0)
                 {
-                    _hueVector.X = 0;
-                    _hueVector.Y = 0f;
+                    hueVector.X = 0;
+                    hueVector.Y = 0f;
                 }
                 else
                 {
-                    _hueVector.X = hue;
-                    _hueVector.Y = 1f;
+                    hueVector.X = hue;
+                    hueVector.Y = 1f;
                 }
                
                 batcher.SetStencil(_stencil.Value);
-                batcher.Draw2D(_texture, x, y, ref _hueVector);
+                batcher.Draw
+                (
+                    _texture,
+                    new Vector2(x, y),
+                    hueVector
+                );
                 batcher.SetStencil(null);
             }
         }
