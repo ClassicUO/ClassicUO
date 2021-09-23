@@ -245,11 +245,7 @@ namespace ClassicUO.Game.GameObjects
                 {
                     int maxDist = ProfileManager.CurrentProfile.CircleOfTransparencyRadius;
 
-                    Vector2 playerPos = new Vector2
-                    {
-                        X = (World.Player.RealScreenPosition.X + World.Player.Offset.X),
-                        Y = (World.Player.RealScreenPosition.Y + (World.Player.Offset.Y - World.Player.Offset.Z))
-                    };
+                    Vector2 playerPos = World.Player.GetScreenPosition();
 
                     //pos.X -= 22;
                     playerPos.Y -= 22f;

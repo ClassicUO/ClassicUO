@@ -1034,13 +1034,12 @@ namespace ClassicUO.Game.Scenes
 
             if (usecircle)
             {
-                int fx = (int) (World.Player.RealScreenPosition.X + World.Player.Offset.X);
-                int fy = (int) (World.Player.RealScreenPosition.Y + (World.Player.Offset.Y - World.Player.Offset.Z));
+                Vector2 playerPos = World.Player.GetScreenPosition();
 
-                fx += 22;
-                fy += 22;
+                playerPos.X += 22;
+                playerPos.Y += 22;
 
-                CircleOfTransparency.Draw(batcher, fx, fy);
+                CircleOfTransparency.Draw(batcher, playerPos);
             }
 
             RenderedObjectsCount = 0;

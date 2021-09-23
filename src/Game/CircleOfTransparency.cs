@@ -95,12 +95,12 @@ namespace ClassicUO.Game
             return pixels;
         }
 
-        public static void Draw(UltimaBatcher2D batcher, int x, int y, ushort hue = 0)
+        public static void Draw(UltimaBatcher2D batcher, Vector2 pos, ushort hue = 0)
         {
             if (_texture != null)
             {
-                x -= _width >> 1;
-                y -= _height >> 1;
+                pos.X -= _width >> 1;
+                pos.Y -= _height >> 1;
 
                 Vector3 hueVector = new Vector3();
 
@@ -119,7 +119,7 @@ namespace ClassicUO.Game
                 batcher.Draw
                 (
                     _texture,
-                    new Vector2(x, y),
+                    pos,
                     hueVector
                 );
                 batcher.SetStencil(null);

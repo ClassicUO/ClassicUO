@@ -107,6 +107,15 @@ namespace ClassicUO.Game.GameObjects
         public GameObject RenderListNext;
 #endif
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public Vector2 GetScreenPosition()
+        {
+           return new Vector2
+                (
+                    RealScreenPosition.X + World.Player.Offset.X,
+                    RealScreenPosition.Y + World.Player.Offset.Y - World.Player.Offset.Z
+                );
+        }
 
         public void AddToTile(int x, int y)
         {
