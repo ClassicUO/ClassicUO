@@ -1718,7 +1718,7 @@ namespace ClassicUO.Renderer
             return result;
         }
 
-#if DEBUG
+        [Conditional("DEBUG")]
         private void EnsureStarted()
         {
             if (!_started)
@@ -1727,6 +1727,7 @@ namespace ClassicUO.Renderer
             }
         }
 
+        [Conditional("DEBUG")]
         private void EnsureNotStarted()
         {
             if (_started)
@@ -1734,7 +1735,7 @@ namespace ClassicUO.Renderer
                 throw new InvalidOperationException();
             }
         }
-#endif
+
 
         [StructLayout(LayoutKind.Sequential, Pack = 1)]
         private struct PositionNormalTextureColor4 : IVertexType
