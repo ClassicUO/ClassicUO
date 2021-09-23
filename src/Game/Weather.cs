@@ -282,20 +282,15 @@ namespace ClassicUO.Game
                             oldY = (int) (effect.Y + MAX_OFFSET_XY);
                         }
 
-                        int startX = x + oldX;
-                        int startY = y + oldY;
-                        int endX = x + (int) effect.X;
-                        int endY = y + (int) effect.Y;
+                        Vector2 start = new Vector2(x + oldX, y + oldY);
+                        Vector2 end = new Vector2(x + effect.X, y + effect.Y);
 
                         batcher.DrawLine
                         (
-                            SolidColorTextureCache.GetTexture(Color.Gray),
-                            startX,
-                            startY,
-                            endX,
-                            endY,
-                            startX + (endX - startX) / 2,
-                            startY + (endY - startY) / 2
+                           SolidColorTextureCache.GetTexture(Color.Gray),
+                           start,
+                           end,
+                           Vector3.Zero
                         );
 
                         break;

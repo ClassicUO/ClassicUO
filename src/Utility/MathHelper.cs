@@ -111,6 +111,11 @@ namespace ClassicUO.Utility
             return Math.Sqrt(Math.Pow(a, 2) + Math.Pow(b, 2));
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float AngleBetweenVectors(Vector2 from, Vector2 to)
+        {
+            return (float) Math.Atan2(to.Y - from.Y, to.X - from.X);
+        }
 
         private static float GetMachineEpsilonFloat()
         {

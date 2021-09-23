@@ -1187,13 +1187,11 @@ namespace ClassicUO.Game.Scenes
 
                 hue.X = l.Color;
 
-                batcher.DrawSprite
+                batcher.Draw
                 (
                     texture,
-                    l.DrawX - (texture.Width >> 1),
-                    l.DrawY - (texture.Height >> 1),
-                    false,
-                    ref hue
+                    new Vector2(l.DrawX - texture.Width * 0.5f, l.DrawY - texture.Height * 0.5f), 
+                    hue
                 );
             }
 

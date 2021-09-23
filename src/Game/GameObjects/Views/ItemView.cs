@@ -438,13 +438,17 @@ namespace ClassicUO.Game.GameObjects
                     ShaderHueTranslator.GetHueVector(ref hueVec, color, ispartialhue, alpha);
                 }
 
-                batcher.DrawSprite
+                batcher.Draw
                 (
                     frame,
-                    posX,
-                    posY,
-                    flipped,
-                    ref hueVec
+                    new Vector2(posX, posY),
+                    null,
+                    hueVec,
+                    0f,
+                    Vector2.Zero,
+                    1f,
+                    flipped ? Microsoft.Xna.Framework.Graphics.SpriteEffects.FlipHorizontally : Microsoft.Xna.Framework.Graphics.SpriteEffects.None,
+                    0
                 );
 
                 if (!SerialHelper.IsValid(owner))

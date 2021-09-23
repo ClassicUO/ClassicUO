@@ -638,7 +638,7 @@ namespace ClassicUO.Game.GameObjects
 
                 if (hasShadow)
                 {
-                    batcher.DrawSpriteShadow(frame, x, y, mirror);
+                    batcher.DrawShadow(frame, new Vector2(x, y), frame.Bounds, mirror);
                 }
                 else
                 {
@@ -799,13 +799,17 @@ namespace ClassicUO.Game.GameObjects
                     }
                     else if (frame != null)
                     {
-                        batcher.DrawSprite
+                        batcher.Draw
                         (
                             frame,
-                            x,
-                            y,
-                            mirror,
-                            ref hueVec
+                            new Vector2(x, y),
+                            null,
+                            hueVec,
+                            0f,
+                            Vector2.Zero,
+                            1f,
+                            mirror ? Microsoft.Xna.Framework.Graphics.SpriteEffects.FlipHorizontally : Microsoft.Xna.Framework.Graphics.SpriteEffects.None,
+                            0
                         );
 
                         int yy = -(frame.Height + frame.CenterY + 3);

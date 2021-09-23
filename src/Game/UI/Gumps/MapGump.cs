@@ -98,6 +98,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         public void SetMapTexture(UOTexture texture)
         {
+            _mapTexture?.Dispose();
             _mapTexture = texture;
 
             Width = texture.Width;
@@ -242,6 +243,8 @@ namespace ClassicUO.Game.UI.Gumps
                 HueVector
             );
 
+            var texture = SolidColorTextureCache.GetTexture(Color.White);
+
             for (int i = 0; i < _container.Count; i++)
             {
                 if (i + 1 >= _container.Count)
@@ -249,18 +252,20 @@ namespace ClassicUO.Game.UI.Gumps
                     break;
                 }
 
+                // HACK: redraw because pins are drawn when calling base.Draw(batcher, x, y);
+                ResetHueVector();
+                _container[i].Draw(batcher, x + _container[i].X, y + _container[i].Y);
+
                 Control c0 = _container[i];
                 Control c1 = _container[i + 1];
 
+                ResetHueVector();
                 batcher.DrawLine
                 (
-                    SolidColorTextureCache.GetTexture(Color.White),
-                    c0.ScreenCoordinateX,
-                    c0.ScreenCoordinateY,
-                    c1.ScreenCoordinateX,
-                    c1.ScreenCoordinateY,
-                    c0.ScreenCoordinateX + (c1.ScreenCoordinateX - c0.ScreenCoordinateX) / 2,
-                    c0.ScreenCoordinateY + (c1.ScreenCoordinateY - c0.ScreenCoordinateY) / 2
+                    texture,
+                    new Vector2(c0.ScreenCoordinateX, c0.ScreenCoordinateY),
+                    new Vector2(c1.ScreenCoordinateX, c1.ScreenCoordinateY),
+                    HueVector
                 );
             }
 
@@ -376,7 +381,7 @@ namespace ClassicUO.Game.UI.Gumps
         public override void Dispose()
         {
             _hit.MouseUp -= TextureControlOnMouseUp;
-
+            _mapTexture?.Dispose();
             base.Dispose();
         }
 
@@ -411,6 +416,8 @@ namespace ClassicUO.Game.UI.Gumps
                 CanMove = false;
 
                 _pic.AcceptMouseInput = true;
+
+                Priority = ClickPriority.High;
             }
 
 

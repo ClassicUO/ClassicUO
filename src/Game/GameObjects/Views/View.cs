@@ -128,21 +128,17 @@ namespace ClassicUO.Game.GameObjects
 
             if (texture != null)
             {
-                batcher.DrawSpriteLand
+                batcher.DrawStrecthedLand
                 (
                     texture,
-                    x,
-                    y,
-                    bounds.X,
-                    bounds.Y,
-                    bounds.Width,
-                    bounds.Height,
+                    new Vector2(x, y),
+                    bounds,
                     ref yOffsets,
                     ref nTop,
                     ref nRight,
                     ref nLeft,
                     ref nBottom,
-                    ref hue
+                    hue
                 );
             }
             else
@@ -243,26 +239,22 @@ namespace ClassicUO.Game.GameObjects
                 x -= index.Width;
                 y -= index.Height;
 
+                Vector2 pos = new Vector2(x, y);
+
                 if (transparent)
                 {
                     int maxDist = ProfileManager.CurrentProfile.CircleOfTransparencyRadius;
 
-                    Vector2 pos = new Vector2
+                    Vector2 playerPos = new Vector2
                     {
                         X = (World.Player.RealScreenPosition.X + World.Player.Offset.X),
                         Y = (World.Player.RealScreenPosition.Y + (World.Player.Offset.Y - World.Player.Offset.Z))
                     };
 
                     //pos.X -= 22;
-                    pos.Y -= 22f;
+                    playerPos.Y -= 22f;
 
-                    Vector2 pos2 = new Vector2
-                    {
-                        X = x,
-                        Y = y
-                    };
-
-                    Vector2.Distance(ref pos, ref pos2, out float dist);
+                    Vector2.Distance(ref playerPos, ref pos, out float dist);
                     
                     if (dist <= maxDist)
                     {
@@ -285,29 +277,13 @@ namespace ClassicUO.Game.GameObjects
 
                                 break;
                         }
-                       
-                        //batcher.DrawSprite
-                        //(
-                        //    texture,
-                        //    x,
-                        //    y,
-                        //    false,
-                        //    ref hue
-                        //);
+
+                        batcher.Draw(texture, pos, bounds, hue);
 
                         batcher.SetStencil(StaticTransparentStencil.Value);
                         hue.Z = alpha;
 
-                        //batcher.DrawSprite
-                        //(
-                        //    texture,
-                        //    x,
-                        //    y,
-                        //    false,
-                        //    ref hue
-                        //);
-
-                        //batcher.Draw2D(texture, x, y, bounds.X, bounds.Y, bounds.Width, bounds.Height, ref hue);
+                        batcher.Draw(texture, pos, bounds, hue);
 
                         batcher.SetStencil(null);
 
@@ -319,10 +295,10 @@ namespace ClassicUO.Game.GameObjects
 
                 if (shadow)
                 {
-                    //batcher.DrawSpriteShadow(texture, x, y, false);
+                    batcher.DrawShadow(texture, pos, bounds, false);
                 }
 
-                batcher.Draw(texture, new Vector2(x, y), bounds, hue);
+                batcher.Draw(texture, pos, bounds, hue);
             }
         }
     }
