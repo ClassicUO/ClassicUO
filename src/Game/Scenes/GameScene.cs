@@ -926,7 +926,7 @@ namespace ClassicUO.Game.Scenes
                     _xbr = new XBREffect(batcher.GraphicsDevice);
                 }
 
-                _xbr.SetSize(width, height);
+                _xbr.TextureSize.SetValue(new Vector2(width, height));
 
 
                 //Point p = Point.Zero;

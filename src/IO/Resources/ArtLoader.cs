@@ -220,8 +220,6 @@ namespace ClassicUO.IO.Resources
         }
 
 
-        public ArtTexture GetTexture(uint g) => null;
-
         public unsafe IntPtr CreateCursorSurfacePtr(int index, ushort customHue, out int hotX, out int hotY)
         {
             hotX = hotY = 0;

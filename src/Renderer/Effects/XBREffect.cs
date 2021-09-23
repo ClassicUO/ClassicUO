@@ -35,22 +35,15 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.Renderer
 {
-    internal class XBREffect : MatrixEffect
+    internal class XBREffect : Effect
     {
-        private readonly EffectParameter _textureSizeParam;
-        private Vector2 _vectorSize;
-
         public XBREffect(GraphicsDevice graphicsDevice) : base(graphicsDevice, Resources.xBREffect)
         {
-            _textureSizeParam = Parameters["textureSize"];
+            MatrixTransform = Parameters["MatrixTransform"];
+            TextureSize = Parameters["textureSize"];
         }
 
-        public void SetSize(float w, float h)
-        {
-            _vectorSize.X = w;
-            _vectorSize.Y = h;
-
-            _textureSizeParam.SetValue(_vectorSize);
-        }
+        public EffectParameter MatrixTransform { get; }
+        public EffectParameter TextureSize { get; }
     }
 }
