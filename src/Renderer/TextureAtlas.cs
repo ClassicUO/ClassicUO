@@ -18,9 +18,6 @@ namespace ClassicUO.Renderer
         private readonly GraphicsDevice _device;
         private readonly List<Texture2D> _textureList;
         private Packer _packer;
-        private readonly Rectangle[] _spriteBounds;
-        private readonly byte[] _spriteTextureIndices;
-
 
         public static TextureAtlas Shared { get; }
 
@@ -33,13 +30,12 @@ namespace ClassicUO.Renderer
                 Client.Game.GraphicsDevice,
                 TEXTURE_SIZE,
                 TEXTURE_SIZE,
-                SurfaceFormat.Color,
-                ushort.MaxValue * 2
+                SurfaceFormat.Color
             );
         }
 
 
-        public TextureAtlas(GraphicsDevice device, int width, int height, SurfaceFormat format, int maxSpriteCount)
+        public TextureAtlas(GraphicsDevice device, int width, int height, SurfaceFormat format)
         {
             _device = device;
             _width = width;
@@ -47,22 +43,14 @@ namespace ClassicUO.Renderer
             _format = format;
 
             _textureList = new List<Texture2D>();
-            _spriteBounds = new Rectangle[maxSpriteCount];
-            _spriteTextureIndices = new byte[maxSpriteCount];
-            _spriteTextureIndices.AsSpan().Fill(0xFF);
         }
 
 
         public int TexturesCount => _textureList.Count;
 
 
-        public unsafe void AddSprite<T>(uint hash, Span<T> pixels, int width, int height) where T : unmanaged
+        public unsafe Texture2D AddSprite<T>(Span<T> pixels, int width, int height, out Rectangle pr) where T : unmanaged
         {
-            if (IsHashExists(hash))
-            {
-                return;
-            }
-
             var index = _textureList.Count - 1;
 
             if (index < 0)
@@ -71,7 +59,6 @@ namespace ClassicUO.Renderer
                 CreateNewTexture2D();
             }
 
-            ref Rectangle pr = ref _spriteBounds[hash];
             while (!_packer.PackRect(width, height, out pr))
             {
                 CreateNewTexture2D();
@@ -91,7 +78,7 @@ namespace ClassicUO.Renderer
                 );
             }
 
-            _spriteTextureIndices[hash] = (byte) index;
+            return texture;
         }
 
         private void CreateNewTexture2D()
@@ -103,22 +90,7 @@ namespace ClassicUO.Renderer
             _packer = new Packer(_width, _height);
         }
 
-        public Texture2D GetTexture(uint hash, out Rectangle bounds)
-        {
-            if (IsHashExists(hash))
-            {
-                bounds = _spriteBounds[(int)hash];
-              
-                return _textureList[_spriteTextureIndices[(int)hash]];
-            }
-
-            bounds = Rectangle.Empty;
-            return null;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool IsHashExists(uint hash) => _spriteTextureIndices[(int)hash] != 0xFF;
-
+      
         public void SaveImages(string name)
         {
             for (int i = 0, count = TexturesCount; i < count; ++i)
@@ -144,7 +116,6 @@ namespace ClassicUO.Renderer
 
             _packer.Dispose();
             _textureList.Clear();
-            _spriteTextureIndices.AsSpan().Fill(0xFF);
         }
     }
 }

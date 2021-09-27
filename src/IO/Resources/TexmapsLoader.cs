@@ -105,30 +105,43 @@ namespace ClassicUO.IO.Resources
                             }
                         }
                     }
+
+                    _spriteInfos = new SpriteInfo[Entries.Length];
                 }
             );
         }
       
-        
+
+        struct SpriteInfo
+        {
+            public Texture2D Texture;
+            public Rectangle UV;
+        }
+
+        private SpriteInfo[] _spriteInfos;
 
         public Texture2D GetLandTexture(uint g, out Rectangle bounds)
         {
             // avoid to mix land with statics
-            g += ushort.MaxValue;
+            //g += ushort.MaxValue;
 
             var atlas = TextureAtlas.Shared;
 
-            if (!atlas.IsHashExists(g))
+            ref var spriteInfo = ref _spriteInfos[g];
+
+            if (spriteInfo.Texture == null)
             {
                 AddSpriteToAtlas(atlas, g);
             }
 
-            return atlas.GetTexture(g, out bounds);
+            bounds = spriteInfo.UV;
+
+            return spriteInfo.Texture;  //atlas.GetTexture(g, out bounds);
         }
 
         private unsafe void AddSpriteToAtlas(TextureAtlas atlas, uint index)
         {
-            ref UOFileIndex entry = ref GetValidRefEntry((int) (index - ushort.MaxValue));
+            ref UOFileIndex entry = ref GetValidRefEntry((int) (index));
 
             if (entry.Length <= 0)
             {
@@ -151,7 +164,9 @@ namespace ClassicUO.IO.Resources
                 }
             }
 
-            atlas.AddSprite(index, data, size, size);
+            ref var spriteInfo = ref _spriteInfos[index];
+
+            spriteInfo.Texture = atlas.AddSprite(data, size, size, out spriteInfo.UV);
         }
     }
 }

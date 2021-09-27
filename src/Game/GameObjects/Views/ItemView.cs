@@ -361,7 +361,7 @@ namespace ClassicUO.Game.GameObjects
                 return;
             }
 
-            if ((direction.FrameCount == 0 || direction.Frames == null) && !AnimationsLoader.Instance.LoadAnimationFrames(graphic, animGroup, dir, ref direction))
+            if ((direction.FrameCount == 0 || direction.SpriteInfos == null) && !AnimationsLoader.Instance.LoadAnimationFrames(graphic, animGroup, dir, ref direction))
             {
                 return;
             }
@@ -376,25 +376,23 @@ namespace ClassicUO.Game.GameObjects
 
             if (animIndex < direction.FrameCount)
             {
-                AnimationFrameTexture frame = direction.Frames[animIndex];
+                ref var spriteInfo = ref direction.SpriteInfos[animIndex];
 
-                if (frame == null || frame.IsDisposed)
+                if (spriteInfo.Texture == null)
                 {
                     return;
                 }
 
-                frame.Ticks = Time.Ticks;
-
                 if (flipped)
                 {
-                    posX -= frame.Width - frame.CenterX;
+                    posX -= spriteInfo.UV.Width - spriteInfo.Center.X;
                 }
                 else
                 {
-                    posX -= frame.CenterX;
+                    posX -= spriteInfo.Center.X;
                 }
 
-                posY -= frame.Height + frame.CenterY;
+                posY -= spriteInfo.UV.Height + spriteInfo.Center.Y;
 
 
                 if (color == 0)
@@ -440,9 +438,9 @@ namespace ClassicUO.Game.GameObjects
 
                 batcher.Draw
                 (
-                    frame,
+                    spriteInfo.Texture,
                     new Vector2(posX, posY),
-                    null,
+                    spriteInfo.UV,
                     hueVec,
                     0f,
                     Vector2.Zero,
@@ -461,7 +459,7 @@ namespace ClassicUO.Game.GameObjects
                     return;
                 }
 
-                if (AnimationsLoader.Instance.PixelCheck(graphic, animGroup, dir, direction.IsUOP, animIndex, flipped ? posX + frame.Width - SelectedObject.TranslatedMousePositionByViewport.X : SelectedObject.TranslatedMousePositionByViewport.X - posX, SelectedObject.TranslatedMousePositionByViewport.Y - posY))
+                if (AnimationsLoader.Instance.PixelCheck(graphic, animGroup, dir, direction.IsUOP, animIndex, flipped ? posX + spriteInfo.UV.Width - SelectedObject.TranslatedMousePositionByViewport.X : SelectedObject.TranslatedMousePositionByViewport.X - posX, SelectedObject.TranslatedMousePositionByViewport.Y - posY))
                 {
                     SelectedObject.Object = owner;
                 }

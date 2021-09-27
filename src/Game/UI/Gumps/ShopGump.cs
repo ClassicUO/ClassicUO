@@ -784,21 +784,21 @@ namespace ClassicUO.Game.UI.Gumps
                     ushort hue2 = Hue;
                     AnimationDirection direction = GetMobileAnimationDirection(Graphic, ref hue2, 1);
 
-                    if (direction != null && direction.Frames != null && direction.FrameCount != 0)
+                    if (direction != null && direction.SpriteInfos != null && direction.FrameCount != 0)
                     {
                         ShaderHueTranslator.GetHueVector(ref HueVector, hue2, TileDataLoader.Instance.StaticData[Graphic].IsPartialHue, 0f);
 
                         batcher.Draw
                         (
-                            direction.Frames[0],
+                            direction.SpriteInfos[0].Texture,
                             new Rectangle
                             (
                                 x - 3, 
                                 y + 5 + 15,
-                                Math.Min(direction.Frames[0].Width, 45),
-                                Math.Min(direction.Frames[0].Height, 45)
+                                Math.Min(direction.SpriteInfos[0].UV.Width, 45),
+                                Math.Min(direction.SpriteInfos[0].UV.Height, 45)
                             ),
-                            null,
+                            direction.SpriteInfos[0].UV,
                             HueVector
                         );
                     }

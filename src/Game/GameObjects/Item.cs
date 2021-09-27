@@ -1082,7 +1082,7 @@ namespace ClassicUO.Game.GameObjects
 
                         AnimationDirection direction = AnimationsLoader.Instance.GetCorpseAnimationGroup(ref id, ref animGroup, ref hue).Direction[dir];
 
-                        if (direction.FrameCount == 0 || direction.Frames == null)
+                        if (direction.FrameCount == 0 || direction.SpriteInfos == null)
                         {
                             AnimationsLoader.Instance.LoadAnimationFrames(id, animGroup, dir, ref direction);
                         }

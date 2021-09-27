@@ -40,6 +40,7 @@ using ClassicUO.Game.Data;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using SDL2;
 
 namespace ClassicUO.IO.Resources
@@ -87,10 +88,20 @@ namespace ClassicUO.IO.Resources
 
                     _file.FillEntries(ref Entries);
                     RealGraphicsBounds = new Rectangle[Entries.Length];
+
+                    _spriteInfos = new SpriteInfo[Entries.Length];
                 }
             );
         }
 
+        struct SpriteInfo
+        {
+            public Texture2D Texture;
+            public Rectangle UV;
+            public Rectangle ArtBounds;
+        }
+
+        private SpriteInfo[] _spriteInfos;
 
 
         private void AddSpriteToAtlas(TextureAtlas atlas, int g, bool isTerrain)
@@ -132,7 +143,9 @@ namespace ClassicUO.IO.Resources
                     }
                 }
 
-                atlas.AddSprite((uint) g, data, 44, 44);
+                ref var spriteInfo = ref _spriteInfos[g];
+
+                spriteInfo.Texture = atlas.AddSprite(data, 44, 44, out spriteInfo.UV);
             }
             else
             {
@@ -166,6 +179,8 @@ namespace ClassicUO.IO.Resources
 
                             ref var realBounds = ref RealGraphicsBounds[fixedGraphic];
 
+                            ref var spriteInfo = ref _spriteInfos[g];
+
                             FinalizeData
                             (
                                 artPixels,
@@ -175,10 +190,10 @@ namespace ClassicUO.IO.Resources
                                 height,
                                 out realBounds
                             );
-                        }
 
-                        _picker.Set(fixedGraphic, width, height, artPixels);
-                        atlas.AddSprite((uint) g, artPixels, width, height);
+                            _picker.Set(fixedGraphic, width, height, artPixels);
+                            spriteInfo.Texture = atlas.AddSprite(artPixels, width, height, out spriteInfo.UV);
+                        }
                     }
                     finally
                     {
@@ -197,12 +212,16 @@ namespace ClassicUO.IO.Resources
 
             var atlas = TextureAtlas.Shared;
 
-            if (!atlas.IsHashExists(g))
+            ref var spriteInfo = ref _spriteInfos[g];
+
+            if (spriteInfo.Texture == null)
             {
                 AddSpriteToAtlas(atlas, (int)g, true);
             }
 
-            return atlas.GetTexture(g, out bounds);
+            bounds = spriteInfo.UV;
+
+            return spriteInfo.Texture; //atlas.GetTexture(g, out bounds);
         }
 
         public Microsoft.Xna.Framework.Graphics.Texture2D GetStaticTexture(uint g, out Rectangle bounds)
@@ -211,12 +230,16 @@ namespace ClassicUO.IO.Resources
 
             var atlas = TextureAtlas.Shared;
 
-            if (!atlas.IsHashExists(g))
+            ref var spriteInfo = ref _spriteInfos[g];
+
+            if (spriteInfo.Texture == null)
             {
                 AddSpriteToAtlas(atlas, (int)g, false);
             }
 
-            return atlas.GetTexture(g, out bounds);
+            bounds = spriteInfo.UV;
+
+            return spriteInfo.Texture;  //atlas.GetTexture(g, out bounds);
         }
 
 

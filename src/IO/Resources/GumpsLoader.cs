@@ -133,6 +133,8 @@ namespace ClassicUO.IO.Resources
                             }
                         }
                     }
+
+                    _spriteInfos = new SpriteInfo[Entries.Length];
                 }
             );
         }
@@ -143,17 +145,30 @@ namespace ClassicUO.IO.Resources
 
         public void CreateAtlas(GraphicsDevice device)
         {
-            _atlas = new TextureAtlas(device, ATLAS_SIZE, ATLAS_SIZE, SurfaceFormat.Color, Entries.Length);
+            _atlas = new TextureAtlas(device, ATLAS_SIZE, ATLAS_SIZE, SurfaceFormat.Color);
         }
+
+        struct SpriteInfo
+        {
+            public Texture2D Texture;
+            public Rectangle UV;
+        }
+
+        private SpriteInfo[] _spriteInfos;
 
         public Texture2D GetGumpTexture(uint g, out Rectangle bounds)
         {
-            if (!_atlas.IsHashExists(g))
+            ref var spriteInfo = ref _spriteInfos[g];
+
+            if (spriteInfo.Texture == null)
             {
                 AddSpriteToAtlas(_atlas, g);
             }
 
-            return _atlas.GetTexture(g, out bounds);
+
+            bounds = spriteInfo.UV;
+
+            return spriteInfo.Texture; //_atlas.GetTexture(g, out bounds);
         }
 
         private unsafe void AddSpriteToAtlas(TextureAtlas atlas, uint index)
@@ -221,7 +236,9 @@ namespace ClassicUO.IO.Resources
                     }
                 }
 
-                atlas.AddSprite(index, pixels, entry.Width, entry.Height);
+                ref var spriteInfo = ref _spriteInfos[index];
+
+                spriteInfo.Texture = atlas.AddSprite(pixels, entry.Width, entry.Height, out spriteInfo.UV);
                 _picker.Set(index, entry.Width, entry.Height, pixels);
             }
             finally

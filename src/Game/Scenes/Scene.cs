@@ -80,8 +80,6 @@ namespace ClassicUO.Game.Scenes
 
             if (_time_cleanup < Time.Ticks)
             {
-                AnimationsLoader.Instance.CleaUnusedResources(Constants.MAX_ANIMATIONS_OBJECT_REMOVED_BY_GARBAGE_COLLECTOR);
-
                 World.Map?.ClearUnusedBlocks();
                 LightsLoader.Instance.CleaUnusedResources(20);
 

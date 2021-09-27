@@ -581,7 +581,7 @@ namespace ClassicUO.Game.GameObjects
                 }
             }
 
-            if (direction == null || (direction.FrameCount == 0 || direction.Frames == null) && !AnimationsLoader.Instance.LoadAnimationFrames(id, animGroup, dir, ref direction))
+            if (direction == null || (direction.FrameCount == 0 || direction.SpriteInfos == null) && !AnimationsLoader.Instance.LoadAnimationFrames(id, animGroup, dir, ref direction))
             {
                 if (!(_transform && entity == null && !hasShadow))
                 {
@@ -609,9 +609,9 @@ namespace ClassicUO.Game.GameObjects
 
             if (frameIndex < direction.FrameCount)
             {
-                AnimationFrameTexture frame = direction.Frames[frameIndex];
+                ref var spriteInfo = ref direction.SpriteInfos[frameIndex];
 
-                if (frame == null || frame.IsDisposed)
+                if (spriteInfo.Texture == null)
                 {
                     if (!(_transform && entity == null && !hasShadow))
                     {
@@ -621,24 +621,22 @@ namespace ClassicUO.Game.GameObjects
                     goto SKIP;
                 }
 
-                frame.Ticks = Time.Ticks;
-
                 if (mirror)
                 {
-                    x -= frame.Width - frame.CenterX;
+                    x -= spriteInfo.UV.Width - spriteInfo.Center.X;
                 }
                 else
                 {
-                    x -= frame.CenterX;
+                    x -= spriteInfo.Center.X;
                 }
 
-                y -= frame.Height + frame.CenterY;
+                y -= spriteInfo.UV.Height + spriteInfo.Center.Y;
 
                 SKIP:
 
                 if (hasShadow)
                 {
-                    batcher.DrawShadow(frame, new Vector2(x, y), frame.Bounds, mirror);
+                    batcher.DrawShadow(spriteInfo.Texture, new Vector2(x, y), spriteInfo.UV, mirror);
                 }
                 else
                 {
@@ -689,14 +687,19 @@ namespace ClassicUO.Game.GameObjects
 
                         if (entity == null && isHuman)
                         {
-                            int frameHeight = frame?.Height ?? 61;
-                            _characterFrameStartY = y - (frame != null ? 0 : frameHeight - SIT_OFFSET_Y);
+                            int frameHeight = spriteInfo.UV.Height;
+                            if (frameHeight == 0)
+                            {
+                                frameHeight = 61;
+                            }
+
+                            _characterFrameStartY = y - (spriteInfo.Texture != null ? 0 : frameHeight - SIT_OFFSET_Y);
                             _characterFrameHeight = frameHeight;
                             _startCharacterWaistY = (int) (frameHeight * UPPER_BODY_RATIO) + _characterFrameStartY;
                             _startCharacterKneesY = (int) (frameHeight * MID_BODY_RATIO) + _characterFrameStartY;
                             _startCharacterFeetY = (int) (frameHeight * LOWER_BODY_RATIO) + _characterFrameStartY;
 
-                            if (frame == null)
+                            if (spriteInfo.Texture == null)
                             {
                                 return 0;
                             }
@@ -709,7 +712,7 @@ namespace ClassicUO.Game.GameObjects
 
                         if (entity != null)
                         {
-                            float itemsEndY = y + frame.Height;
+                            float itemsEndY = y + spriteInfo.UV.Height;
 
                             if (y >= _startCharacterWaistY)
                             {
@@ -722,7 +725,7 @@ namespace ClassicUO.Game.GameObjects
                             else
                             {
                                 float upperBodyDiff = _startCharacterWaistY - y;
-                                h3mod = upperBodyDiff / frame.Height;
+                                h3mod = upperBodyDiff / spriteInfo.UV.Height;
 
                                 if (h3mod < 0)
                                 {
@@ -756,7 +759,7 @@ namespace ClassicUO.Game.GameObjects
                                     midBodyDiff = _startCharacterKneesY - _startCharacterWaistY;
                                 }
 
-                                h6mod = h3mod + midBodyDiff / frame.Height;
+                                h6mod = h3mod + midBodyDiff / spriteInfo.UV.Height;
 
                                 if (h6mod < 0)
                                 {
@@ -776,7 +779,7 @@ namespace ClassicUO.Game.GameObjects
                             else
                             {
                                 float lowerBodyDiff = itemsEndY - _startCharacterKneesY;
-                                h9mod = h6mod + lowerBodyDiff / frame.Height;
+                                h9mod = h6mod + lowerBodyDiff / spriteInfo.UV.Height;
 
                                 if (h9mod < 0)
                                 {
@@ -785,25 +788,27 @@ namespace ClassicUO.Game.GameObjects
                             }
                         }
 
-                        batcher.DrawCharacterSitted
-                        (
-                            frame,
-                            x,
-                            y,
-                            mirror,
-                            h3mod,
-                            h6mod,
-                            h9mod,
-                            ref hueVec
-                        );
+                        // TODO: fix sitting characters
+
+                        //batcher.DrawCharacterSitted
+                        //(
+                        //    spriteInfo.Texture,
+                        //    x,
+                        //    y,
+                        //    mirror,
+                        //    h3mod,
+                        //    h6mod,
+                        //    h9mod,
+                        //    ref hueVec
+                        //);
                     }
-                    else if (frame != null)
+                    else if (spriteInfo.Texture != null)
                     {
                         batcher.Draw
                         (
-                            frame,
+                            spriteInfo.Texture,
                             new Vector2(x, y),
-                            null,
+                            spriteInfo.UV,
                             hueVec,
                             0f,
                             Vector2.Zero,
@@ -812,12 +817,12 @@ namespace ClassicUO.Game.GameObjects
                             0
                         );
 
-                        int yy = -(frame.Height + frame.CenterY + 3);
-                        int xx = -frame.CenterX;
+                        int yy = -(spriteInfo.UV.Height + spriteInfo.Center.Y + 3);
+                        int xx = -spriteInfo.Center.X;
 
                         if (mirror)
                         {
-                            xx = -(frame.Width - frame.CenterX);
+                            xx = -(spriteInfo.UV.Width - spriteInfo.Center.X);
                         }
 
                         if (xx < owner.FrameInfo.X)
@@ -830,26 +835,26 @@ namespace ClassicUO.Game.GameObjects
                             owner.FrameInfo.Y = yy;
                         }
 
-                        if (owner.FrameInfo.Width < xx + frame.Width)
+                        if (owner.FrameInfo.Width < xx + spriteInfo.UV.Width)
                         {
-                            owner.FrameInfo.Width = xx + frame.Width;
+                            owner.FrameInfo.Width = xx + spriteInfo.UV.Width;
                         }
 
-                        if (owner.FrameInfo.Height < yy + frame.Height)
+                        if (owner.FrameInfo.Height < yy + spriteInfo.UV.Height)
                         {
-                            owner.FrameInfo.Height = yy + frame.Height;
+                            owner.FrameInfo.Height = yy + spriteInfo.UV.Height;
                         }
                     }
 
 
-                    if (AnimationsLoader.Instance.PixelCheck(id, animGroup, dir, direction.IsUOP, frameIndex, mirror ? x + frame.Width - SelectedObject.TranslatedMousePositionByViewport.X : SelectedObject.TranslatedMousePositionByViewport.X - x, SelectedObject.TranslatedMousePositionByViewport.Y - y))
+                    if (AnimationsLoader.Instance.PixelCheck(id, animGroup, dir, direction.IsUOP, frameIndex, mirror ? x + spriteInfo.UV.Width - SelectedObject.TranslatedMousePositionByViewport.X : SelectedObject.TranslatedMousePositionByViewport.X - x, SelectedObject.TranslatedMousePositionByViewport.Y - y))
                     {
                         SelectedObject.Object = owner;
                     }
 
                     if (entity != null && entity.ItemData.IsLight)
                     {
-                        Client.Game.GetScene<GameScene>().AddLight(owner, entity, mirror ? x + frame.Width : x, y);
+                        Client.Game.GetScene<GameScene>().AddLight(owner, entity, mirror ? x + spriteInfo.UV.Width : x, y);
                     }
                 }
 
