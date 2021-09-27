@@ -209,7 +209,7 @@ namespace ClassicUO.Game.GameObjects
 
             Point p = RealScreenPosition;
 
-            ref var bounds = ref ArtLoader.Instance.RealGraphicsBounds[Graphic];
+            var bounds = ArtLoader.Instance.GetRealArtBounds(Graphic);
 
             p.Y -= bounds.Height >> 1;
 

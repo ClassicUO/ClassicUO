@@ -320,7 +320,7 @@ namespace ClassicUO.Game.Scenes
 
                     if (check)
                     {
-                        var rect = ArtLoader.Instance.RealGraphicsBounds[obj.Graphic];
+                        var rect = ArtLoader.Instance.GetRealArtBounds(obj.Graphic);
 
                         rect.X = obj.RealScreenPosition.X - (rect.Width >> 1) + rect.X;
                         rect.Y = obj.RealScreenPosition.Y - rect.Height + rect.Y;

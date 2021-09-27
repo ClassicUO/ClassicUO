@@ -1177,7 +1177,7 @@ namespace ClassicUO.Game.Scenes
             {
                 ref LightData l = ref _lights[i];
 
-                UOTexture texture = LightsLoader.Instance.GetTexture(l.ID);
+                var texture = LightsLoader.Instance.GetLightTexture(l.ID, out var bounds);
 
                 if (texture == null)
                 {
@@ -1189,7 +1189,8 @@ namespace ClassicUO.Game.Scenes
                 batcher.Draw
                 (
                     texture,
-                    new Vector2(l.DrawX - texture.Width * 0.5f, l.DrawY - texture.Height * 0.5f), 
+                    new Vector2(l.DrawX - bounds.Width * 0.5f, l.DrawY - bounds.Height * 0.5f), 
+                    bounds,
                     hue
                 );
             }

@@ -461,7 +461,7 @@ namespace ClassicUO.Game.UI.Gumps
                 if (item != null)
                 {
                     var texture = ArtLoader.Instance.GetStaticTexture(item.DisplayedGraphic, out var bounds);
-                    ref var rect = ref ArtLoader.Instance.RealGraphicsBounds[item.Graphic];
+                    var rect = ArtLoader.Instance.GetRealArtBounds(item.Graphic);
 
                     ShaderHueTranslator.GetHueVector(ref HueVector, item.Hue, item.ItemData.IsPartialHue, 0f);
 

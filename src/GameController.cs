@@ -160,6 +160,7 @@ namespace ClassicUO
             GraphicsDevice.Textures[3] = _hueSamplers[2];
 
             GumpsLoader.Instance.CreateAtlas(GraphicsDevice);
+            LightsLoader.Instance.CreateAtlas(GraphicsDevice);
 
             UIManager.InitializeGameCursor();
             AnimatedStaticsManager.Initialize();

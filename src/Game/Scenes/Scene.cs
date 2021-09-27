@@ -81,8 +81,6 @@ namespace ClassicUO.Game.Scenes
             if (_time_cleanup < Time.Ticks)
             {
                 World.Map?.ClearUnusedBlocks();
-                LightsLoader.Instance.CleaUnusedResources(20);
-
                 _time_cleanup = Time.Ticks + 500;
             }
         }

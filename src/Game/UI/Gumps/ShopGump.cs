@@ -809,7 +809,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                     ShaderHueTranslator.GetHueVector(ref HueVector, Hue, TileDataLoader.Instance.StaticData[Graphic].IsPartialHue, 0f);
 
-                    ref var rect = ref ArtLoader.Instance.RealGraphicsBounds[Graphic];
+                    var rect = ArtLoader.Instance.GetRealArtBounds(Graphic);
 
                     const int RECT_SIZE = 50;
 

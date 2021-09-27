@@ -165,10 +165,9 @@ namespace ClassicUO.IO.Resources
                 AddSpriteToAtlas(_atlas, g);
             }
 
-
             bounds = spriteInfo.UV;
 
-            return spriteInfo.Texture; //_atlas.GetTexture(g, out bounds);
+            return spriteInfo.Texture;
         }
 
         private unsafe void AddSpriteToAtlas(TextureAtlas atlas, uint index)

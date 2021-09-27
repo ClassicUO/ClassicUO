@@ -567,7 +567,7 @@ namespace ClassicUO.Game.UI.Gumps
                     return false;
                 }
 
-                ref var bounds = ref ArtLoader.Instance.RealGraphicsBounds[item.Graphic];
+                var bounds = ArtLoader.Instance.GetRealArtBounds(item.Graphic);
 
                 x = item.RealScreenPosition.X + (int)item.Offset.X + 22 + 5;
                 y = item.RealScreenPosition.Y + (int)(item.Offset.Y - item.Offset.Z) + (bounds.Height >> 1);
