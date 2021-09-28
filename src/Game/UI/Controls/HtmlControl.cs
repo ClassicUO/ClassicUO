@@ -273,17 +273,13 @@ namespace ClassicUO.Game.UI.Controls
             {
                 base.Draw(batcher, x, y);
 
+                int offset = HasBackground ? 4 : 0;
+
                 _gameText.Draw
                 (
                     batcher,
-                    Width + ScrollX,
-                    Height + ScrollY,
-                    x + (HasBackground ? 4 : 0),
-                    y + (HasBackground ? 4 : 0),
-                    Width - (HasBackground ? 8 : 0),
-                    Height - (HasBackground ? 8 : 0),
-                    ScrollX,
-                    ScrollY
+                    x + offset - ScrollX, 
+                    y + offset - ScrollY
                 );
 
                 batcher.ClipEnd();
