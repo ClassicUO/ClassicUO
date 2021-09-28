@@ -69,7 +69,7 @@ namespace ClassicUO.Game.UI.Gumps
         private readonly string _mapIconsPath = Path.Combine(CUOEnviroment.ExecutablePath, "Data", "Client", "MapIcons");
         private int _mapIndex;
         private bool _mapMarkersLoaded;
-        private UOTexture _mapTexture;
+        private Texture2D _mapTexture;
 
 
         private readonly List<WMapMarkerFile> _markerFiles = new List<WMapMarkerFile>();
@@ -1168,7 +1168,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                                 if (_mapTexture == null || _mapTexture.IsDisposed)
                                 {
-                                    _mapTexture = new UOTexture(realWidth, realHeight);
+                                    _mapTexture = new Texture2D(Client.Game.GraphicsDevice, realWidth, realHeight, false, SurfaceFormat.Color);
                                 }
                                 
                                 _mapTexture.SetData(buffer, 0, realWidth * realHeight);

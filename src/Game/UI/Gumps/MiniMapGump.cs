@@ -49,14 +49,12 @@ namespace ClassicUO.Game.UI.Gumps
     internal class MiniMapGump : Gump
     {
         private bool _draw;
-        //private bool _forceUpdate;
-        private UOTexture _mapTexture;
+        private Texture2D _mapTexture;
         private int _lastMap = -1;
         private long _timeMS;
         private bool _useLargeMap;
         private ushort _x, _y;
         private static readonly uint[][] _blankGumpsPixels = new uint[4][];
-        private static PixelPicker _picker = new PixelPicker();
 
         const ushort SMALL_MAP_GRAPHIC = 5010;
         const ushort BIG_MAP_GRAPHIC = 5011;
@@ -126,11 +124,6 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 CreateMap();
                 _lastMap = World.MapIndex;
-            }
-
-            if (_mapTexture != null)
-            {
-                _mapTexture.Ticks = (long) totalTime;
             }
 
             if (_timeMS < totalTime)
@@ -228,7 +221,7 @@ namespace ClassicUO.Game.UI.Gumps
                     );
                 }
 
-                //DRAW DOT OF PLAYER
+                //DRAW PLAYER DOT
                 ResetHueVector();
 
                 batcher.Draw
@@ -445,11 +438,10 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (_mapTexture == null || _mapTexture.IsDisposed)
             {
-                _mapTexture = new UOTexture(Width, Height);
+                _mapTexture = new Texture2D(Client.Game.GraphicsDevice, Width, Height, false, SurfaceFormat.Color);
             }
 
             _mapTexture.SetData(data);
-            _picker.Set((ulong) index, Width, Height, data);
         }
 
         private unsafe void CreatePixels
@@ -497,7 +489,21 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override bool Contains(int x, int y)
         {
-            return _picker.Get((ulong) (_useLargeMap ? 0x01 : 0x00), x - Offset.X, y - Offset.Y);
+            x -= Offset.X;
+            y -= Offset.Y;
+
+            if (x >= 0 && y >= 0 && x < Width && y < Height)
+            {
+                int index = (_useLargeMap ? 1 : 0) + 2;
+                int pos = (y * Width) + x;
+
+                if (pos < _blankGumpsPixels[index].Length)
+                {
+                    return _blankGumpsPixels[index][pos] != 0;
+                }
+            }
+
+            return false;
         }
 
         public override void Dispose()

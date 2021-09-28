@@ -38,6 +38,7 @@ using ClassicUO.Input;
 using ClassicUO.Network;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -48,7 +49,7 @@ namespace ClassicUO.Game.UI.Gumps
         private PinControl _currentPin;
         private Point _lastPoint;
         private HitBox _hit;
-        private UOTexture _mapTexture;
+        private Texture2D _mapTexture;
 
         private uint _pinTimer;
 
@@ -96,7 +97,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         public int PlotState { get; private set; }
 
-        public void SetMapTexture(UOTexture texture)
+        public void SetMapTexture(Texture2D texture)
         {
             _mapTexture?.Dispose();
             _mapTexture = texture;

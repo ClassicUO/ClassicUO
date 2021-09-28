@@ -32,12 +32,14 @@
 
 using ClassicUO.IO.Resources;
 using ClassicUO.Utility.Collections;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.Renderer
 {
-    internal class FontTexture : UOTexture
+    internal class FontTexture : Texture2D
     {
-        public FontTexture(int width, int height, int lineCount, RawList<WebLinkRect> links) : base(width, height)
+        public FontTexture(int width, int height, int lineCount, RawList<WebLinkRect> links) 
+            : base(Client.Game.GraphicsDevice, width, height, false, SurfaceFormat.Color)
         {
             LineCount = lineCount;
             Links = links;

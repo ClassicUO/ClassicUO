@@ -38,6 +38,7 @@ using ClassicUO.Game;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.IO.Resources
 {
@@ -84,7 +85,7 @@ namespace ClassicUO.IO.Resources
             );
         }
 
-        public unsafe UOTexture LoadMap
+        public unsafe Texture2D LoadMap
         (
             int width,
             int height,
@@ -198,7 +199,7 @@ namespace ClassicUO.IO.Resources
                 ushort* huesData = (ushort*) (byte*) (ptr + 30800);
 
                 uint[] colorTable = System.Buffers.ArrayPool<uint>.Shared.Rent(maxPixelValue);
-                UOTexture texture = new UOTexture(width, height);
+                Texture2D texture = new Texture2D(Client.Game.GraphicsDevice, width, height, false, SurfaceFormat.Color);
 
                 try
                 {
@@ -241,7 +242,7 @@ namespace ClassicUO.IO.Resources
             return null;
         }
 
-        public UOTexture LoadFacet
+        public Texture2D LoadFacet
         (
             int facet,
             int width,
@@ -278,7 +279,7 @@ namespace ClassicUO.IO.Resources
             int pheight = endY - startY;
 
             uint[] map = System.Buffers.ArrayPool<uint>.Shared.Rent(pwidth * pheight);
-            UOTexture texture = new UOTexture(pwidth, pheight);
+            Texture2D texture = new Texture2D(Client.Game.GraphicsDevice, pwidth, pheight, false, SurfaceFormat.Color);
 
             try
             {

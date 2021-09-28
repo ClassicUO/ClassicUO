@@ -33,12 +33,11 @@
 using System;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
-using ClassicUO.Interfaces;
 using ClassicUO.Utility.Logging;
 
 namespace ClassicUO.Game.Managers
 {
-    internal class EffectManager : LinkedObject, IUpdateable
+    internal class EffectManager : LinkedObject
     {
         public void Update(double totalTime, double frameTime)
         {
