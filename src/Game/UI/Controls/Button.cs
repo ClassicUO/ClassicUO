@@ -218,6 +218,11 @@ namespace ClassicUO.Game.UI.Controls
                 texture = GumpsLoader.Instance.GetGumpTexture(_normal, out bounds);
             }
 
+            if (texture == null)
+            {
+                return false;
+            }
+
             ShaderHueTranslator.GetHueVector
             (
                 ref HueVector,

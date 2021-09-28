@@ -31,12 +31,14 @@
 #endregion
 
 using System;
+using System.Collections.Generic;
 using ClassicUO.Data;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Collections;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using StbTextEditSharp;
 
 namespace ClassicUO.Renderer
@@ -65,7 +67,7 @@ namespace ClassicUO.Renderer
             r =>
             {
                 r.IsDestroyed = false;
-                r.Links.Count = 0;
+                r.Links.Clear();
             }
         );
 
@@ -74,7 +76,6 @@ namespace ClassicUO.Renderer
 
         private MultilinesFontInfo _info;
         private string _text;
-        private FontTexture _texture;
 
         public bool IsUnicode { get; set; }
 
@@ -106,7 +107,7 @@ namespace ClassicUO.Renderer
 
         public bool RecalculateWidthByInfo { get; set; }
 
-        public RawList<WebLinkRect> Links { get; set; } = new RawList<WebLinkRect>();
+        public List<WebLinkRect> Links { get; set; } = new List<WebLinkRect>();
 
         public ushort Hue { get; set; }
 
@@ -134,8 +135,8 @@ namespace ClassicUO.Renderer
                         }
 
                         Links.Clear();
-                        _texture?.Dispose();
-                        _texture = null;
+                        Texture?.Dispose();
+                        Texture = null;
                         _info = null;
                     }
                     else
@@ -175,7 +176,7 @@ namespace ClassicUO.Renderer
             }
         }
 
-        public int LinesCount => Texture == null || Texture.IsDisposed ? 0 : Texture.LineCount;
+        public int LinesCount { get; set; }
 
         public bool SaveHitMap { get; private set; }
 
@@ -185,7 +186,7 @@ namespace ClassicUO.Renderer
 
         public int Height { get; private set; }
 
-        public FontTexture Texture => _texture;
+        public Texture2D Texture { get; set; }
 
 
         public static RenderedText Create
@@ -648,10 +649,10 @@ namespace ClassicUO.Renderer
 
         public void CreateTexture()
         {
-            if (_texture != null && !_texture.IsDisposed)
+            if (Texture != null && !Texture.IsDisposed)
             {
-                _texture.Dispose();
-                _texture = null;
+                Texture.Dispose();
+                Texture = null;
             }
 
             if (IsHTML)
@@ -666,7 +667,7 @@ namespace ClassicUO.Renderer
             {
                 FontsLoader.Instance.GenerateUnicode
                 (
-                    ref _texture,
+                    this,
                     Font,
                     Text,
                     Hue,
@@ -683,7 +684,7 @@ namespace ClassicUO.Renderer
             {
                 FontsLoader.Instance.GenerateASCII
                 (
-                    ref _texture,
+                    this,
                     Font,
                     Text,
                     Hue,
@@ -700,7 +701,6 @@ namespace ClassicUO.Renderer
             {
                 Width = Texture.Width;
                 Height = Texture.Height;
-                Links = Texture.Links;
             }
 
             if (IsHTML)
