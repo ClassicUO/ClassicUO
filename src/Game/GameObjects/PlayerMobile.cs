@@ -1284,6 +1284,10 @@ namespace ClassicUO.Game.GameObjects
 
                                 break;
 
+                            case 0x0900: // Stone War Sword
+                                Abilities[0] = Ability.ArmorIgnore;
+                                Abilities[1] = Ability.ParalyzingBlow;
+
                             case 0x090A: // Soul Glaive
                                 Abilities[0] = Ability.ArmorIgnore;
                                 Abilities[1] = Ability.MortalStrike;
