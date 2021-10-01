@@ -1212,7 +1212,7 @@ namespace ClassicUO.Game.GameObjects
 
                             case 0x48C3:
                             case 0x48C2: // Gargish Maul
-                                Abilities[0] = Ability.CrushingBlow;
+                                Abilities[0] = Ability.DoubleStrike;
                                 Abilities[1] = Ability.ConcussionBlow;
 
                                 goto done;
