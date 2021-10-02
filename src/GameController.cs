@@ -69,6 +69,7 @@ namespace ClassicUO
         private uint _totalFrames;
         private UltimaBatcher2D _uoSpriteBatch;
         private bool _suppressedDraw;
+        private UOFontRenderer _fontRenderer;
 
         public GameController()
         {
@@ -111,6 +112,7 @@ namespace ClassicUO
 
             base.Initialize();
         }
+        
 
         protected override void LoadContent()
         {
@@ -161,6 +163,7 @@ namespace ClassicUO
 
             GumpsLoader.Instance.CreateAtlas(GraphicsDevice);
             LightsLoader.Instance.CreateAtlas(GraphicsDevice);
+            _fontRenderer = new UOFontRenderer(GraphicsDevice);
 
             UIManager.InitializeGameCursor();
             AnimatedStaticsManager.Initialize();
@@ -496,6 +499,18 @@ namespace ClassicUO
 
             SelectedObject.HealthbarObject = null;
             SelectedObject.SelectedContainer = null;
+
+            _uoSpriteBatch.Begin();
+            _fontRenderer.Draw
+            (
+                _uoSpriteBatch,
+                $"New engine\nawdawdawdawdawdawwadawdawdawdawdawdaw          awdawd\n --> TIME: {Time.Ticks}".AsSpan(),
+                new Vector2(200, 100),
+                2f,
+                new FontSettings() { IsUnicode = false, FontIndex = 3, Italic = false, Bold = false, Border = false },
+                new Vector3(0x44, 0, 0)
+            );
+            _uoSpriteBatch.End();
 
             base.Draw(gameTime);
 
