@@ -31,12 +31,12 @@
     <OutputPath>$(ProjectDir)..\bin\Release\</OutputPath>
     <PublishDir>$(ProjectDir)..\bin\dist\</PublishDir>
     <Optimize>true</Optimize>
-    <DefineConstants>$(DefineConstants)TRACE;RENDER_LIST_LINKED_LIST</DefineConstants>
+    <DefineConstants>$(DefineConstants)TRACE</DefineConstants>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <OutputPath>$(ProjectDir)..\bin\Debug\</OutputPath>
-    <DefineConstants>$(DefineConstants)TRACE;RENDER_LIST_LINKED_LIST</DefineConstants>
+    <DefineConstants>$(DefineConstants)TRACE</DefineConstants>
   </PropertyGroup>
 
 

@@ -72,21 +72,10 @@ namespace ClassicUO.Game.Scenes
         private int _renderIndex = 1;
 
 
-#if RENDER_LIST_LINKED_LIST
         private int _renderListCount, _foliageCount, _renderListLandCount;
         private GameObject _first, _renderList;
         private GameObject _firstLand, _renderListLand;
         private bool _useLandList = false;
-#else
-        struct DrawingInfo
-        {
-            public GameObject Object;
-            public ushort Hue;
-        }
-
-        private static DrawingInfo[] _renderList = new DrawingInfo[10000];
-        private int _renderListCount, _foliageCount;
-#endif
 
 
         public Point ScreenOffset => _offset;
@@ -475,7 +464,6 @@ namespace ClassicUO.Game.Scenes
 
         private void PushToRenderList(GameObject obj, GameObject parent, bool island = false)
         {
-#if RENDER_LIST_LINKED_LIST
             if (!_useLandList && island)
             {
                 island = false;
@@ -504,17 +492,6 @@ namespace ClassicUO.Game.Scenes
             {
                 ++_renderListCount;
             }
-#else
-            if (_renderListCount >= _renderList.Length)
-            {
-                Array.Resize(ref _renderList, _renderList.Length + 1000);
-            }
-
-            ref var r = ref _renderList[_renderListCount++];
-
-            r.Object = obj;
-            r.Hue = CUOEnviroment.Debug ? (ushort)(parent != null ? 0x0044 : 300 + obj.PriorityZ) : obj.Hue;
-#endif
 
             obj.UseInRender = (byte)_renderIndex;
         }
