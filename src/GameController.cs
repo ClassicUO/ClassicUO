@@ -504,7 +504,7 @@ namespace ClassicUO
             _fontRenderer.Draw
             (
                 _uoSpriteBatch,
-                $"New engine\nawdawdawdawdawdawwadawdawdawdawdawdaw-\t-awdawd\n --> TIME: {Time.Ticks}".AsSpan(),
+                $"New Engine ❤ 😁".AsSpan(),
                 new Vector2(200, 100),
                 2f,
                 new FontSettings() 

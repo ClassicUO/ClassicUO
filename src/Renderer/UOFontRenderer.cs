@@ -296,10 +296,15 @@ namespace ClassicUO.Renderer
             uv = Rectangle.Empty;
             
             uint* table = (uint*)_unicodeFontFiles[settings.FontIndex].StartAddress;
-
-            if (c == '\r' || (table[c] == 0 || table[c] == 0xFF_FF_FF_FF) && c != ' ')
+            
+            if (c == '\r')
             {
                 return null;
+            }
+
+            if ((table[c] == 0 || table[c] == 0xFF_FF_FF_FF) && c != ' ')
+            {
+                c = '?';
             }
 
             bool isItalic = settings.Italic;
@@ -687,6 +692,11 @@ namespace ClassicUO.Renderer
                 uv = Rectangle.Empty;
 
                 return null;
+            }
+
+            if (c > byte.MaxValue)
+            {
+                c = '?';
             }
 
             key = CreateKey(c, settings);
