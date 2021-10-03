@@ -92,23 +92,22 @@ namespace ClassicUO.Renderer
                 FixVectorColor(ref hue, settings);
             }
 
-            float startX = position.X;
+            Vector2 startPosition = position;
 
-
-            batcher.DrawRectangle
-            (
-                SolidColorTextureCache.GetTexture(Color.White),
-                (int) position.X, 
-                (int) position.Y,
-                (int) textSizeInPixels.X,
-                (int) textSizeInPixels.Y,
-                ref hue
-            );
+            //batcher.DrawRectangle
+            //(
+            //    SolidColorTextureCache.GetTexture(Color.White),
+            //    (int) position.X, 
+            //    (int) position.Y,
+            //    (int) textSizeInPixels.X,
+            //    (int) textSizeInPixels.Y,
+            //    ref hue
+            //);
 
 
             if (align == TEXT_ALIGN_TYPE.TS_CENTER)
             {
-                startX += textSizeInPixels.X / 2f;
+                startPosition.X += textSizeInPixels.X / 2f;
             }
             else if (align == TEXT_ALIGN_TYPE.TS_RIGHT)
             {
@@ -126,7 +125,7 @@ namespace ClassicUO.Renderer
 
                 if (text[i] == '\n')
                 {
-                    position.X = startX;
+                    position.X = startPosition.X;
                     position.Y += maxHeight;
 
                     continue;
@@ -159,6 +158,22 @@ namespace ClassicUO.Renderer
                     position.X += uv.Width * scale;
                 }
             }
+
+            if (settings.Underline)
+            {
+                Vector2 end = startPosition;
+                end.X += textSizeInPixels.X;
+                startPosition.Y += textSizeInPixels.Y;
+                end.Y += textSizeInPixels.Y;
+
+                batcher.DrawLine
+                (
+                    SolidColorTextureCache.GetTexture(Color.White),
+                    startPosition,
+                    end,
+                    hue
+                );
+            }          
         }
 
         public Vector2 MeasureString(ReadOnlySpan<char> text, in FontSettings settings, float scale)
@@ -639,7 +654,7 @@ namespace ClassicUO.Renderer
                 w += dw + offX + (isSolid ? 1 : 0) + 4;
             }
 
-            if (isUnderline)
+            if (1 == 2 && isUnderline)
             {
                 int minXOk = tmpW + offX > 0 ? -1 : 0;
                 int maxXOk = w + offX + dw < textureWidth ? 1 : 0;
@@ -817,7 +832,7 @@ namespace ClassicUO.Renderer
                 hash = (uint)(hash * 31 + settings.FontIndex.GetHashCode());
                 hash = (uint)(hash * 31 + settings.Bold.GetHashCode());
                 hash = (uint)(hash * 31 + settings.Italic.GetHashCode());
-                hash = (uint)(hash * 31 + settings.Underline.GetHashCode());
+                //hash = (uint)(hash * 31 + settings.Underline.GetHashCode());
                 hash = (uint)(hash * 31 + settings.Border.GetHashCode());
                 hash = (uint)(hash * 31 + settings.IsHtml.GetHashCode());
                 hash = (uint)(hash * 31 + settings.IsUnicode.GetHashCode());

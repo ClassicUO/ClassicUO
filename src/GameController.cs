@@ -513,7 +513,8 @@ namespace ClassicUO
                     FontIndex = 0, 
                     Italic = false,
                     Bold = false, 
-                    Border = true 
+                    Border = true,
+                    Underline = false,
                 },
                 new Vector3(0x44, 0, 0)
             );
