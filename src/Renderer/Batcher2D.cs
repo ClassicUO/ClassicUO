@@ -253,41 +253,6 @@ namespace ClassicUO.Renderer
             }
         }
 
-
-        /*public void DrawString(BaseUOFont font, string text, int x, int y, ref Vector3 hue)
-        {
-            int startX = x;
-
-            foreach (char c in text)
-            {
-                if (c == '\n')
-                {
-                    x = startX;
-                    y += font.MaxHeight;
-
-                    continue;
-                }
-
-                Rectangle rect = font.GetCharBounds(c);
-                Texture2D texture = font.GetTextureByChar(c);
-
-                Draw2D
-                (
-                    texture,
-                    x,
-                    y,
-                    rect.X,
-                    rect.Y,
-                    rect.Width,
-                    rect.Height,
-                    ref hue
-                );
-
-                x += rect.Width;
-            }
-        }
-        */
-
         // ==========================
         // === UO drawing methods ===
         // ==========================
