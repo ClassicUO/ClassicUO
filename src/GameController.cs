@@ -504,10 +504,17 @@ namespace ClassicUO
             _fontRenderer.Draw
             (
                 _uoSpriteBatch,
-                $"New engine\nawdawdawdawdawdawwadawdawdawdawdawdaw          awdawd\n --> TIME: {Time.Ticks}".AsSpan(),
+                $"New engine\nawdawdawdawdawdawwadawdawdawdawdawdaw-\t-awdawd\n --> TIME: {Time.Ticks}".AsSpan(),
                 new Vector2(200, 100),
                 2f,
-                new FontSettings() { IsUnicode = false, FontIndex = 3, Italic = false, Bold = false, Border = false },
+                new FontSettings() 
+                { 
+                    IsUnicode = true, 
+                    FontIndex = 0, 
+                    Italic = false,
+                    Bold = false, 
+                    Border = true 
+                },
                 new Vector3(0x44, 0, 0)
             );
             _uoSpriteBatch.End();

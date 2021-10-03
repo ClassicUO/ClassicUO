@@ -80,12 +80,7 @@ namespace ClassicUO.Renderer
             Vector3 hue,
             TEXT_ALIGN_TYPE align = TEXT_ALIGN_TYPE.TS_LEFT
         )
-        {
-            if (settings.IsUnicode && (settings.FontIndex >= _unicodeFontFiles.Length || _unicodeFontFiles[settings.FontIndex] == null))
-            {
-                return;
-            }
-     
+        {     
             Vector2 textSizeInPixels = MeasureStringAdvanced(text, settings, scale, position, out bool mouseIsOver, out float maxHeight);
 
             FixVectorColor(ref hue, settings);
@@ -93,6 +88,8 @@ namespace ClassicUO.Renderer
             if (mouseIsOver)
             {
                 hue.X = 0x35;
+
+                FixVectorColor(ref hue, settings);
             }
 
             float startX = position.X;
@@ -806,13 +803,14 @@ namespace ClassicUO.Renderer
             unchecked
             {
                 uint hash = 17;
-                hash = (uint)(hash * 31 + c.GetHashCode());
+                hash = (uint)(hash * 31 + (int)c);
                 hash = (uint)(hash * 31 + settings.FontIndex.GetHashCode());
                 hash = (uint)(hash * 31 + settings.Bold.GetHashCode());
                 hash = (uint)(hash * 31 + settings.Italic.GetHashCode());
                 hash = (uint)(hash * 31 + settings.Underline.GetHashCode());
                 hash = (uint)(hash * 31 + settings.Border.GetHashCode());
                 hash = (uint)(hash * 31 + settings.IsHtml.GetHashCode());
+                hash = (uint)(hash * 31 + settings.IsUnicode.GetHashCode());
 
                 return hash;
             }
@@ -964,5 +962,4 @@ namespace ClassicUO.Renderer
             public void* Data;
         }
     }
-
 }
