@@ -74,15 +74,15 @@ namespace ClassicUO.Game.Scenes
       
 
         // statics
-        private GameObject _first, _renderList;
-        private int _renderListCount;
+        private GameObject _renderListStaticsHead, _renderList;
+        private int _renderListStaticsCount;
 
         // lands
-        private GameObject _firstLand, _renderListLand;
+        private GameObject _renderListLandHead, _renderListLand;
         private int _renderListLandCount;
 
         // animations
-        private GameObject _firstAnimations, _renderListAnimations;
+        private GameObject _renderListAnimationsHead, _renderListAnimations;
         private int _renderListAnimationCount;
 
 
@@ -544,7 +544,7 @@ namespace ClassicUO.Game.Scenes
                         continue;
                     }
 
-                    PushToRenderList(obj, parent, ref _renderListLand, ref _firstLand, ref _renderListLandCount);
+                    PushToRenderList(obj, parent, ref _renderListLand, ref _renderListLandHead, ref _renderListLandCount);
                 }
                 else if (obj is Static staticc)
                 {
@@ -597,7 +597,7 @@ namespace ClassicUO.Game.Scenes
 
                     CheckIfBehindATree(obj, worldX, worldY, ref itemData);
 
-                    PushToRenderList(obj, parent, ref _renderList, ref _first, ref _renderListCount);
+                    PushToRenderList(obj, parent, ref _renderList, ref _renderListStaticsHead, ref _renderListStaticsCount);
                 }
                 else if (obj is Multi multi)
                 {
@@ -654,7 +654,7 @@ namespace ClassicUO.Game.Scenes
 
                     CheckIfBehindATree(obj, worldX, worldY, ref itemData);
 
-                    PushToRenderList(obj, parent, ref _renderList, ref _first, ref _renderListCount);
+                    PushToRenderList(obj, parent, ref _renderList, ref _renderListStaticsHead, ref _renderListStaticsCount);
                 }
                 else if (obj is Mobile mobile)
                 {
@@ -683,7 +683,7 @@ namespace ClassicUO.Game.Scenes
 
                     AddOffsetCharacterTileToRenderList(obj, useObjectHandles, false);
 
-                    PushToRenderList(obj, parent, ref _renderListAnimations, ref _firstAnimations, ref _renderListAnimationCount);
+                    PushToRenderList(obj, parent, ref _renderListAnimations, ref _renderListAnimationsHead, ref _renderListAnimationCount);
                 }
                 else if (obj is Item item)
                 {
@@ -749,11 +749,11 @@ namespace ClassicUO.Game.Scenes
 
                     if (item.IsCorpse)
                     {
-                        PushToRenderList(obj, parent, ref _renderListAnimations, ref _firstAnimations, ref _renderListAnimationCount);
+                        PushToRenderList(obj, parent, ref _renderListAnimations, ref _renderListAnimationsHead, ref _renderListAnimationCount);
                     }
                     else
                     {
-                        PushToRenderList(obj, parent, ref _renderList, ref _first, ref _renderListCount);
+                        PushToRenderList(obj, parent, ref _renderList, ref _renderListStaticsHead, ref _renderListStaticsCount);
                     }         
                 }
                 else if (obj is GameEffect effect)
@@ -775,7 +775,7 @@ namespace ClassicUO.Game.Scenes
                         AddOffsetCharacterTileToRenderList(obj, useObjectHandles, true);
                     }
 
-                    PushToRenderList(obj, parent, ref _renderList, ref _first, ref _renderListCount);
+                    PushToRenderList(obj, parent, ref _renderList, ref _renderListStaticsHead, ref _renderListStaticsCount);
                 }
             }
 

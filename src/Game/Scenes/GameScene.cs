@@ -525,15 +525,15 @@ namespace ClassicUO.Game.Scenes
 
         private void FillGameObjectList()
         {
-            _first = null;
+            _renderListStaticsHead = null;
             _renderList = null;
-            _renderListCount = 0;
+            _renderListStaticsCount = 0;
 
-            _firstLand = null;
+            _renderListLandHead = null;
             _renderListLand = null;
             _renderListLandCount = 0;
 
-            _firstAnimations = null;
+            _renderListAnimationsHead = null;
             _renderListAnimations = null;
             _renderListAnimationCount = 0;
 
@@ -1057,63 +1057,39 @@ namespace ClassicUO.Game.Scenes
                 CircleOfTransparency.Draw(batcher, playerPos);
             }
 
-            RenderedObjectsCount = 0;
-
             int z = World.Player.Z + 5;
 
-           
-            Vector3 hueVec = Vector3.Zero;
-
+            RenderedObjectsCount = 0;      
             GameObject.DrawTransparent = usecircle;
 
-            GameObject obj = _firstLand;
-            for (int i = 0; i < _renderListLandCount; obj = obj.RenderListNext, ++i)
+
+            RenderedObjectsCount += DrawRenderList(batcher, _renderListLandHead, _renderListLandCount, false, z);
+            RenderedObjectsCount += DrawRenderList(batcher, _renderListStaticsHead, _renderListStaticsCount, usecircle, z);
+            RenderedObjectsCount += DrawRenderList(batcher, _renderListAnimationsHead, _renderListAnimationCount, false, z);
+
+
+            /*var worldPoint = Camera.MouseToWorldPosition() + _offset;
+            worldPoint.X += 22;
+            worldPoint.Y += 22;
+
+            var isoX = (int)(0.5f * (worldPoint.X / 22f + worldPoint.Y / 22f));
+            var isoY = (int)(0.5f * (-worldPoint.X / 22f + worldPoint.Y / 22f));
+
+            GameObject selectedObject = World.Map.GetTile(isoX, isoY, false);
+
+            if (selectedObject != null)
             {
-                if (obj.Z <= _maxGroundZ)
-                {
-                    if (obj.Draw(batcher, obj.RealScreenPosition.X, obj.RealScreenPosition.Y, ref hueVec, CalculateDepth(obj)))
-                    {
-                        ++RenderedObjectsCount;
-                    }
-                }
+                selectedObject.Hue = 0x44;
             }
+            */
 
-            obj = _first;
-            for (int i = 0; i < _renderListCount; obj = obj.RenderListNext, ++i)
-            {
-                if (obj.Z <= _maxGroundZ)
-                {
-                    if (usecircle)
-                    {
-                        GameObject.DrawTransparent = obj.TransparentTest(z);
-                    }
 
-                    if (obj.Draw(batcher, obj.RealScreenPosition.X, obj.RealScreenPosition.Y, ref hueVec, CalculateDepth(obj)))
-                    {
-                        ++RenderedObjectsCount;
-                    }
-                }
-            }
-
-            obj = _firstAnimations;
-            for (int i = 0; i < _renderListAnimationCount; obj = obj.RenderListNext, ++i)
-            {
-                if (obj.Z <= _maxGroundZ)
-                {
-                    if (obj.Draw(batcher, obj.RealScreenPosition.X, obj.RealScreenPosition.Y, ref hueVec, CalculateDepth(obj)))
-                    {
-                        ++RenderedObjectsCount;
-                    }
-                }
-            }
-
+            Vector3 hueVec = Vector3.Zero;
             if (_multi != null && TargetManager.IsTargeting && TargetManager.TargetingState == CursorTarget.MultiPlacement)
             {
                 hueVec = Vector3.Zero;
                 _multi.Draw(batcher, _multi.RealScreenPosition.X, _multi.RealScreenPosition.Y, ref hueVec, CalculateDepth(_multi));
-            }
-
-            
+            } 
 
             int flushes = batcher.FlushesDone;
             int switches = batcher.TextureSwitches;
@@ -1140,6 +1116,31 @@ namespace ClassicUO.Game.Scenes
             hueVec = Vector3.Zero;
             batcher.DrawString(Fonts.Bold, s, 200 + 1, 200 - 1, ref hueVec);
             batcher.End();
+        }
+
+        private int DrawRenderList(UltimaBatcher2D batcher, GameObject first, int count, bool useCoT, int z)
+        {
+            GameObject obj = first;
+            Vector3 hueVec = Vector3.Zero;
+            int done = 0;
+
+            for (int i = 0; i < count; obj = obj.RenderListNext, ++i)
+            {
+                if (obj.Z <= _maxGroundZ)
+                {
+                    if (useCoT)
+                    {
+                        GameObject.DrawTransparent = obj.TransparentTest(z);
+                    }
+
+                    if (obj.Draw(batcher, obj.RealScreenPosition.X, obj.RealScreenPosition.Y, ref hueVec, CalculateDepth(obj)))
+                    {
+                        ++done;
+                    }
+                }
+            }
+
+            return done;
         }
 
         private float CalculateDepth(GameObject o)
