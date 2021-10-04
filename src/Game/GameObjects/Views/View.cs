@@ -106,7 +106,18 @@ namespace ClassicUO.Game.GameObjects
 
             if (texture != null)
             {
-                batcher.Draw(texture, new Vector2(x, y), bounds, hue, 0f, Vector2.Zero, 1f, SpriteEffects.None, depth);
+                batcher.Draw
+                (
+                    texture,
+                    new Vector2(x, y), 
+                    bounds,
+                    hue,
+                    0f,
+                    Vector2.Zero,
+                    1f, 
+                    SpriteEffects.None,
+                    depth
+                );
             }
         }
 
@@ -168,7 +179,18 @@ namespace ClassicUO.Game.GameObjects
                 x -= index.Width;
                 y -= index.Height;
 
-                batcher.Draw(texture, new Vector2(x, y), bounds, hue, 0f, Vector2.Zero, 1f, SpriteEffects.None, depth);
+                batcher.Draw
+                (
+                    texture,
+                    new Vector2(x, y),
+                    bounds,
+                    hue,
+                    0f,
+                    Vector2.Zero,
+                    1f,
+                    SpriteEffects.None, 
+                    depth
+                );
             }
         }
 
@@ -178,7 +200,18 @@ namespace ClassicUO.Game.GameObjects
 
             if (texture != null)
             {
-                batcher.Draw(texture, new Vector2(x, y), bounds, hue, 0f, Vector2.Zero, 1f, SpriteEffects.None, depth);
+                batcher.Draw
+                (
+                    texture,
+                    new Vector2(x, y),
+                    bounds,
+                    hue,
+                    0f,
+                    Vector2.Zero,
+                    1f,
+                    SpriteEffects.None,
+                    depth
+                );
             }
         }
 
@@ -279,12 +312,34 @@ namespace ClassicUO.Game.GameObjects
                                 break;
                         }
 
-                        batcher.Draw(texture, pos, bounds, hue, 0f, Vector2.Zero, 1f, SpriteEffects.None, depth);
+                        batcher.Draw
+                        (
+                            texture, 
+                            pos,
+                            bounds,
+                            hue, 
+                            0f,
+                            Vector2.Zero,
+                            1f,
+                            SpriteEffects.None,
+                            depth
+                        );
 
                         batcher.SetStencil(StaticTransparentStencil.Value);
                         hue.Z = alpha;
 
-                        batcher.Draw(texture, pos, bounds, hue, 0f, Vector2.Zero, 1f, SpriteEffects.None, depth);
+                        batcher.Draw
+                        (
+                            texture,
+                            pos,
+                            bounds,
+                            hue,
+                            0f,
+                            Vector2.Zero,
+                            1f,
+                            SpriteEffects.None,
+                            depth
+                        );
 
                         batcher.SetStencil(null);
 
@@ -299,7 +354,18 @@ namespace ClassicUO.Game.GameObjects
                     batcher.DrawShadow(texture, pos, bounds, false, depth);
                 }
 
-                batcher.Draw(texture, pos, bounds, hue, 0f, Vector2.Zero, 1f, SpriteEffects.None, depth);
+                batcher.Draw
+                (
+                    texture,
+                    pos,
+                    bounds,
+                    hue,
+                    0f,
+                    Vector2.Zero,
+                    1f,
+                    SpriteEffects.None,
+                    depth
+                );
             }
         }
     }
