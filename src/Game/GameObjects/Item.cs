@@ -1089,7 +1089,6 @@ namespace ClassicUO.Game.GameObjects
 
                         if (direction.Address != 0 && direction.Size != 0 || direction.IsUOP)
                         {
-                            direction.LastAccessTime = Time.Ticks;
                             int fc = direction.FrameCount;
 
                             if (frameIndex >= fc)

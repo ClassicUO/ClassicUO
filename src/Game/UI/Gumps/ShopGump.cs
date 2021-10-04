@@ -759,22 +759,6 @@ namespace ClassicUO.Game.UI.Gumps
                 return true;
             }
 
-            public override void Update(double totalTime, double frameTime)
-            {
-                base.Update(totalTime, frameTime);
-
-                if (SerialHelper.IsMobile(LocalSerial))
-                {
-                    ushort hue = Hue;
-                    AnimationDirection dir = GetMobileAnimationDirection(Graphic, ref hue, 1);
-
-                    if (dir != null)
-                    {
-                        dir.LastAccessTime = Time.Ticks;
-                    }
-                }
-            }
-
             public override bool Draw(UltimaBatcher2D batcher, int x, int y)
             {
                 ResetHueVector();

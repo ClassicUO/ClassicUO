@@ -371,7 +371,6 @@ namespace ClassicUO.Game.GameObjects
                 return;
             }
 
-            direction.LastAccessTime = Time.Ticks;
             int fc = direction.FrameCount;
 
             if (fc > 0 && animIndex >= fc)

@@ -620,7 +620,6 @@ namespace ClassicUO.Game.GameObjects
 
                     if (direction != null && direction.FrameCount != 0)
                     {
-                        direction.LastAccessTime = Time.Ticks;
                         int fc = direction.FrameCount;
 
                         if (AnimationFromServer)
