@@ -40,6 +40,7 @@ using ClassicUO.Game.Scenes;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.Game.GameObjects
 {
@@ -55,7 +56,7 @@ namespace ClassicUO.Game.GameObjects
         private static int _startCharacterFeetY;
         private static int _characterFrameHeight;
 
-        public override bool Draw(UltimaBatcher2D batcher, int posX, int posY, ref Vector3 hueVec)
+        public override bool Draw(UltimaBatcher2D batcher, int posX, int posY, ref Vector3 hueVec, float depth)
         {
             if (IsDestroyed || !AllowedToDraw)
             {
@@ -203,7 +204,11 @@ namespace ClassicUO.Game.GameObjects
                             animGroup,
                             dir,
                             isHuman,
-                            alpha: hueVec.Z
+                            true,
+                            false,
+                            false,
+                            hueVec.Z,
+                            depth
                         );
 
                         animGroupMount = GetGroupForAnimation(this, mountGraphic);
@@ -223,7 +228,11 @@ namespace ClassicUO.Game.GameObjects
                             animGroupMount,
                             dir,
                             isHuman,
-                            alpha: hueVec.Z
+                            true,
+                            false,
+                            false,
+                            hueVec.Z,
+                            depth
                         );
                     }
                     else
@@ -246,8 +255,11 @@ namespace ClassicUO.Game.GameObjects
                         animGroupMount,
                         dir,
                         isHuman,
-                        isMount: true,
-                        alpha: hueVec.Z
+                        true,
+                        true,
+                        false,
+                        hueVec.Z,
+                        depth
                     );
                 }
             }
@@ -309,7 +321,11 @@ namespace ClassicUO.Game.GameObjects
                         animGroup,
                         dir,
                         isHuman,
-                        alpha: hueVec.Z
+                        true,
+                        false,
+                        false,
+                        hueVec.Z,
+                        depth
                     );
                 }
             }
@@ -329,8 +345,11 @@ namespace ClassicUO.Game.GameObjects
                 animGroup,
                 dir,
                 isHuman,
-                alpha: hueVec.Z,
-                forceUOP: isGargoyle
+                true,
+                false,
+                isGargoyle,
+                hueVec.Z,
+                depth
             );
 
             if (!IsEmpty)
@@ -443,34 +462,35 @@ namespace ClassicUO.Game.GameObjects
                             }
 
 
-                         if (AnimationsLoader.Instance.EquipConversions.TryGetValue(Graphic, out Dictionary<ushort, EquipConvData> map))
-                        {
-                            if (map.TryGetValue(item.ItemData.AnimID, out EquipConvData data))
+                            if (AnimationsLoader.Instance.EquipConversions.TryGetValue(Graphic, out Dictionary<ushort, EquipConvData> map))
                             {
-                                _equipConvData = data;
-                                graphic = data.Graphic;
+                                if (map.TryGetValue(item.ItemData.AnimID, out EquipConvData data))
+                                {
+                                    _equipConvData = data;
+                                    graphic = data.Graphic;
+                                }
                             }
-                        }
 
-                        DrawInternal
-                        (
-                            batcher,
-                            this,
-                            item,
-                            drawX,
-                            drawY,
-                            ref hueVec,
-                            IsFlipped, 
-                            animIndex,
-                            false,
-                            graphic,
-                            isGargoyle /*&& item.ItemData.IsWeapon*/ && seatData.Graphic == 0 ? GetGroupForAnimation(this, graphic, true) : animGroup,
+                            DrawInternal
+                            (
+                                batcher,
+                                this,
+                                item,
+                                drawX,
+                                drawY,
+                                ref hueVec,
+                                IsFlipped,
+                                animIndex,
+                                false,
+                                graphic,
+                                isGargoyle /*&& item.ItemData.IsWeapon*/ && seatData.Graphic == 0 ? GetGroupForAnimation(this, graphic, true) : animGroup,
                                 dir,
                                 isHuman,
                                 false,
                                 false,
                                 isGargoyle,
-                                hueVec.Z
+                                hueVec.Z,
+                                depth
                             );
                         }
                         else
@@ -549,10 +569,11 @@ namespace ClassicUO.Game.GameObjects
             byte animGroup,
             byte dir,
             bool isHuman,
-            bool isParent = true,
-            bool isMount = false,
-            bool forceUOP = false,
-            float alpha = 0
+            bool isParent,
+            bool isMount,
+            bool forceUOP,
+            float alpha,
+            float depth
         )
         {
             if (id >= Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT || owner == null)
@@ -813,8 +834,8 @@ namespace ClassicUO.Game.GameObjects
                             0f,
                             Vector2.Zero,
                             1f,
-                            mirror ? Microsoft.Xna.Framework.Graphics.SpriteEffects.FlipHorizontally : Microsoft.Xna.Framework.Graphics.SpriteEffects.None,
-                            0
+                            mirror ? SpriteEffects.FlipHorizontally : SpriteEffects.None,
+                            depth
                         );
 
                         int yy = -(spriteInfo.UV.Height + spriteInfo.Center.Y + 3);

@@ -527,11 +527,16 @@ namespace ClassicUO.Game.Scenes
         {
             _first = null;
             _renderList = null;
+            _renderListCount = 0;
 
             _firstLand = null;
             _renderListLand = null;
             _renderListLandCount = 0;
-            _renderListCount = 0;
+
+            _firstAnimations = null;
+            _renderListAnimations = null;
+            _renderListAnimationCount = 0;
+
             _foliageCount = 0;
 
             if (!World.InGame)
@@ -991,6 +996,19 @@ namespace ClassicUO.Game.Scenes
             return base.Draw(batcher);
         }
 
+        private static readonly DepthStencilState _stencil = new DepthStencilState()
+        {
+            StencilEnable = false,
+            DepthBufferEnable = true,
+            DepthBufferFunction = CompareFunction.LessEqual,
+            StencilFunction = CompareFunction.NotEqual,
+            ReferenceStencil = 1,
+            StencilMask = 1,
+            StencilFail = StencilOperation.Keep,
+            StencilDepthBufferFail = StencilOperation.Keep,
+            StencilPass = StencilOperation.Keep
+        };
+
         private void DrawWorld(UltimaBatcher2D batcher, ref Matrix matrix, bool use_render_target)
         {
             SelectedObject.Object = null;
@@ -1025,6 +1043,7 @@ namespace ClassicUO.Game.Scenes
 
             batcher.Begin(null, matrix);
             batcher.SetBrightlight(ProfileManager.CurrentProfile.TerrainShadowsLevel * 0.1f);
+            batcher.SetStencil(_stencil);
 
             bool usecircle = ProfileManager.CurrentProfile.UseCircleOfTransparency;
 
@@ -1047,12 +1066,64 @@ namespace ClassicUO.Game.Scenes
 
             GameObject.DrawTransparent = usecircle;
 
+            float calculateDepth(GameObject o)
+            {
+                int x = o.X;
+                int y = o.Y;
+                int priorityZ = o.PriorityZ;
+
+                // Offsets are in SCREEN coordinates
+                if (o.Offset.X > 0 && o.Offset.Y < 0)
+                {
+                    // North
+                }
+                else if (o.Offset.X > 0 && o.Offset.Y == 0)
+                {
+                    // Northeast
+                    x++;
+                }
+                else if (o.Offset.X > 0 && o.Offset.Y > 0)
+                {
+                    // East
+                    priorityZ += Math.Max(0, (int)o.Offset.Z);
+                    x++;
+                }
+                else if (o.Offset.X == 0 && o.Offset.Y > 0)
+                {
+                    // Southeast
+                    x++;
+                    y++;
+                }
+                else if (o.Offset.X < 0 && o.Offset.Y > 0)
+                {
+                    // South
+                    priorityZ += Math.Max(0, (int)o.Offset.Z);
+                    y++;
+                }
+                else if (o.Offset.X < 0 && o.Offset.Y == 0)
+                {
+                    // Southwest
+                    y++;
+                }
+                else if (o.Offset.X < 0 && o.Offset.Y > 0)
+                {
+                    // West
+                }
+                else if (o.Offset.X == 0 && o.Offset.Y < 0)
+                {
+                    // Northwest
+                }
+
+                return x + y + 0.001f * priorityZ;
+            }
+
+
             GameObject obj = _firstLand;
             for (int i = 0; i < _renderListLandCount; obj = obj.RenderListNext, ++i)
             {
                 if (obj.Z <= _maxGroundZ)
                 {
-                    if (obj.Draw(batcher, obj.RealScreenPosition.X, obj.RealScreenPosition.Y, ref hueVec))
+                    if (obj.Draw(batcher, obj.RealScreenPosition.X, obj.RealScreenPosition.Y, ref hueVec, calculateDepth(obj)))
                     {
                         ++RenderedObjectsCount;
                     }
@@ -1069,7 +1140,19 @@ namespace ClassicUO.Game.Scenes
                         GameObject.DrawTransparent = obj.TransparentTest(z);
                     }
 
-                    if (obj.Draw(batcher, obj.RealScreenPosition.X, obj.RealScreenPosition.Y, ref hueVec))
+                    if (obj.Draw(batcher, obj.RealScreenPosition.X, obj.RealScreenPosition.Y, ref hueVec, calculateDepth(obj)))
+                    {
+                        ++RenderedObjectsCount;
+                    }
+                }
+            }
+
+            obj = _firstAnimations;
+            for (int i = 0; i < _renderListAnimationCount; obj = obj.RenderListNext, ++i)
+            {
+                if (obj.Z <= _maxGroundZ)
+                {
+                    if (obj.Draw(batcher, obj.RealScreenPosition.X, obj.RealScreenPosition.Y, ref hueVec, calculateDepth(obj)))
                     {
                         ++RenderedObjectsCount;
                     }
@@ -1079,7 +1162,7 @@ namespace ClassicUO.Game.Scenes
             if (_multi != null && TargetManager.IsTargeting && TargetManager.TargetingState == CursorTarget.MultiPlacement)
             {
                 hueVec = Vector3.Zero;
-                _multi.Draw(batcher, _multi.RealScreenPosition.X, _multi.RealScreenPosition.Y, ref hueVec);
+                _multi.Draw(batcher, _multi.RealScreenPosition.X, _multi.RealScreenPosition.Y, ref hueVec, 0f);
             }
 
             
@@ -1092,6 +1175,7 @@ namespace ClassicUO.Game.Scenes
             Weather.Draw(batcher, 0, 0);
             batcher.End();
             batcher.SetSampler(null);
+            batcher.SetStencil(null);
 
             if (use_render_target)
             {

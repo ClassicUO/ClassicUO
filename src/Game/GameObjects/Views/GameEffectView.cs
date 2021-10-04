@@ -87,7 +87,7 @@ namespace ClassicUO.Game.GameObjects
         );
 
 
-        public override bool Draw(UltimaBatcher2D batcher, int posX, int posY, ref Vector3 hueVec)
+        public override bool Draw(UltimaBatcher2D batcher, int posX, int posY, ref Vector3 hueVec, float depth)
         {
             if (IsDestroyed || !AllowedToDraw)
             {
@@ -131,7 +131,8 @@ namespace ClassicUO.Game.GameObjects
                         posX,
                         posY,
                         AngleToTarget,
-                        ref hueVec
+                        ref hueVec,
+                        depth
                     );
 
                     batcher.SetBlendState(null);
@@ -149,7 +150,8 @@ namespace ClassicUO.Game.GameObjects
                         posX,
                         posY,
                         AngleToTarget,
-                        ref hueVec
+                        ref hueVec,
+                        depth
                     );
 
                     batcher.SetBlendState(null);
@@ -166,7 +168,8 @@ namespace ClassicUO.Game.GameObjects
                         posX,
                         posY,
                         AngleToTarget,
-                        ref hueVec
+                        ref hueVec,
+                        depth
                     );
 
                     batcher.SetBlendState(null);
@@ -183,7 +186,8 @@ namespace ClassicUO.Game.GameObjects
                         posX,
                         posY,
                         AngleToTarget,
-                        ref hueVec
+                        ref hueVec,
+                        depth
                     );
 
                     batcher.SetBlendState(null);
@@ -200,7 +204,8 @@ namespace ClassicUO.Game.GameObjects
                         posX,
                         posY,
                         AngleToTarget,
-                        ref hueVec
+                        ref hueVec,
+                        depth
                     );
 
                     batcher.SetBlendState(null);
@@ -227,7 +232,8 @@ namespace ClassicUO.Game.GameObjects
                         posX,
                         posY,
                         AngleToTarget,
-                        ref hueVec
+                        ref hueVec,
+                        depth
                     );
 
                     break;

@@ -47,7 +47,7 @@ namespace ClassicUO.Game.GameObjects
     {
         private static EquipConvData? _equipConvData;
 
-        public override bool Draw(UltimaBatcher2D batcher, int posX, int posY, ref Vector3 hueVec)
+        public override bool Draw(UltimaBatcher2D batcher, int posX, int posY, ref Vector3 hueVec, float depth)
         {
             if (!AllowedToDraw || IsDestroyed)
             {
@@ -75,7 +75,7 @@ namespace ClassicUO.Game.GameObjects
 
             if (IsCorpse)
             {
-                return DrawCorpse(batcher, posX, posY - 3, ref hueVec);
+                return DrawCorpse(batcher, posX, posY - 3, ref hueVec, depth);
             }
 
 
@@ -163,7 +163,8 @@ namespace ClassicUO.Game.GameObjects
                     posY - 5,
                     ref hueVec,
                     ref DrawTransparent,
-                    false
+                    false,
+                    depth
                 );
             }
 
@@ -185,7 +186,8 @@ namespace ClassicUO.Game.GameObjects
                 posY,
                 ref hueVec,
                 ref DrawTransparent,
-                false
+                false,
+                depth
             );
 
             if (ReferenceEquals(SelectedObject.Object, this) || TargetManager.TargetingState == CursorTarget.MultiPlacement)
@@ -229,7 +231,7 @@ namespace ClassicUO.Game.GameObjects
             return true;
         }
 
-        private bool DrawCorpse(UltimaBatcher2D batcher, int posX, int posY, ref Vector3 hueVec)
+        private bool DrawCorpse(UltimaBatcher2D batcher, int posX, int posY, ref Vector3 hueVec, float depth)
         {
             if (IsDestroyed || World.CorpseManager.Exists(Serial, 0))
             {
@@ -263,7 +265,8 @@ namespace ClassicUO.Game.GameObjects
                 hueVec.Z,
                 group,
                 direction,
-                ref hueVec
+                ref hueVec,
+                depth
             );
 
             for (int i = 0; i < Constants.USED_LAYER_COUNT; i++)
@@ -284,7 +287,8 @@ namespace ClassicUO.Game.GameObjects
                     hueVec.Z,
                     group,
                     direction,
-                    ref hueVec
+                    ref hueVec,
+                    depth
                 );
             }
 
@@ -305,7 +309,8 @@ namespace ClassicUO.Game.GameObjects
             float alpha,
             byte animGroup,
             byte dir,
-            ref Vector3 hueVec
+            ref Vector3 hueVec,
+            float depth
         )
         {
             _equipConvData = null;
@@ -446,7 +451,7 @@ namespace ClassicUO.Game.GameObjects
                     Vector2.Zero,
                     1f,
                     flipped ? Microsoft.Xna.Framework.Graphics.SpriteEffects.FlipHorizontally : Microsoft.Xna.Framework.Graphics.SpriteEffects.None,
-                    0
+                    depth
                 );
 
                 if (!SerialHelper.IsValid(owner))

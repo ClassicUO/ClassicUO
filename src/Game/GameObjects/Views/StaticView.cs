@@ -60,7 +60,7 @@ namespace ClassicUO.Game.GameObjects
             return r;
         }
 
-        public override bool Draw(UltimaBatcher2D batcher, int posX, int posY, ref Vector3 hueVec)
+        public override bool Draw(UltimaBatcher2D batcher, int posX, int posY, ref Vector3 hueVec, float depth)
         {
             if (!AllowedToDraw || IsDestroyed)
             {
@@ -111,7 +111,8 @@ namespace ClassicUO.Game.GameObjects
                 posY,
                 ref hueVec,
                 ref DrawTransparent,
-                ProfileManager.CurrentProfile.ShadowsEnabled && ProfileManager.CurrentProfile.ShadowsStatics && (isTree || ItemData.IsFoliage || StaticFilters.IsRock(graphic))
+                ProfileManager.CurrentProfile.ShadowsEnabled && ProfileManager.CurrentProfile.ShadowsStatics && (isTree || ItemData.IsFoliage || StaticFilters.IsRock(graphic)),
+                depth
             );
 
             if (ItemData.IsLight)

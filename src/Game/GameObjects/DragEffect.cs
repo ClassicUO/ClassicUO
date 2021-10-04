@@ -103,7 +103,7 @@ namespace ClassicUO.Game.GameObjects
             base.Update(totalTime, frameTime);
         }
 
-        public override bool Draw(UltimaBatcher2D batcher, int posX, int posY, ref Vector3 hueVec)
+        public override bool Draw(UltimaBatcher2D batcher, int posX, int posY, ref Vector3 hueVec, float depth)
         {
             if (IsDestroyed)
             {
@@ -136,7 +136,8 @@ namespace ClassicUO.Game.GameObjects
                 AnimationGraphic,
                 posX - ((int) Offset.X + 22),
                 posY - ((int) -Offset.Y + 22),
-                ref hueVec
+                ref hueVec,
+                depth
             );
 
             ref StaticTiles data = ref TileDataLoader.Instance.StaticData[Graphic];

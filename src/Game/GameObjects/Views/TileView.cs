@@ -38,7 +38,7 @@ namespace ClassicUO.Game.GameObjects
 {
     internal sealed partial class Land
     {
-        public override bool Draw(UltimaBatcher2D batcher, int posX, int posY, ref Vector3 hueVec)
+        public override bool Draw(UltimaBatcher2D batcher, int posX, int posY, ref Vector3 hueVec, float depth)
         {
             if (!AllowedToDraw || IsDestroyed)
             {
@@ -90,7 +90,8 @@ namespace ClassicUO.Game.GameObjects
                     ref NormalRight,
                     ref NormalLeft,
                     ref NormalBottom,
-                    ref hueVec
+                    ref hueVec,
+                    depth
                 );
 
                 if (SelectedObject.IsPointInStretchedLand(ref YOffsets, posX, posY))
@@ -106,7 +107,8 @@ namespace ClassicUO.Game.GameObjects
                     Graphic,
                     posX,
                     posY,
-                    ref hueVec
+                    ref hueVec,
+                    depth
                 );
 
                 if (SelectedObject.IsPointInLand(posX, posY))

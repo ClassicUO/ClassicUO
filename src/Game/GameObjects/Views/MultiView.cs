@@ -61,7 +61,7 @@ namespace ClassicUO.Game.GameObjects
             return r;
         }
 
-        public override bool Draw(UltimaBatcher2D batcher, int posX, int posY, ref Vector3 hueVec)
+        public override bool Draw(UltimaBatcher2D batcher, int posX, int posY, ref Vector3 hueVec, float depth)
         {
             if (!AllowedToDraw || IsDestroyed)
             {
@@ -137,7 +137,8 @@ namespace ClassicUO.Game.GameObjects
                 posY,
                 ref hueVec,
                 ref DrawTransparent,
-                false
+                false,
+                depth
             );
 
             if (ItemData.IsLight)

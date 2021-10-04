@@ -41,7 +41,7 @@ namespace ClassicUO.Game.GameObjects
 {
     internal sealed partial class LightningEffect
     {
-        public override bool Draw(UltimaBatcher2D batcher, int posX, int posY, ref Vector3 hueVec)
+        public override bool Draw(UltimaBatcher2D batcher, int posX, int posY, ref Vector3 hueVec, float depth)
         {
             hueVec = Vector3.Zero;
 
@@ -74,7 +74,8 @@ namespace ClassicUO.Game.GameObjects
                 AnimationGraphic,
                 posX,
                 posY,
-                ref hueVec
+                ref hueVec,
+                depth
             );
 
             batcher.SetBlendState(null);

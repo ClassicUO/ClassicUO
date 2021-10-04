@@ -79,7 +79,7 @@ namespace ClassicUO.Game.GameObjects
         protected bool IsFlipped;
 
 
-        public abstract bool Draw(UltimaBatcher2D batcher, int posX, int posY, ref Vector3 hue);
+        public abstract bool Draw(UltimaBatcher2D batcher, int posX, int posY, ref Vector3 hue, float depth);
 
 
 
@@ -100,13 +100,13 @@ namespace ClassicUO.Game.GameObjects
             return false;
         }
 
-        protected static void DrawLand(UltimaBatcher2D batcher, ushort graphic, int x, int y, ref Vector3 hue)
+        protected static void DrawLand(UltimaBatcher2D batcher, ushort graphic, int x, int y, ref Vector3 hue, float depth)
         {
             var texture = ArtLoader.Instance.GetLandTexture(graphic, out var bounds);
 
             if (texture != null)
             {
-                batcher.Draw(texture, new Vector2(x, y), bounds, hue);
+                batcher.Draw(texture, new Vector2(x, y), bounds, hue, 0f, Vector2.Zero, 1f, SpriteEffects.None, depth);
             }
         }
 
@@ -121,14 +121,15 @@ namespace ClassicUO.Game.GameObjects
             ref Vector3 nRight,
             ref Vector3 nLeft,
             ref Vector3 nBottom,
-            ref Vector3 hue
+            ref Vector3 hue,
+            float depth
         )
         {
             var texture = TexmapsLoader.Instance.GetLandTexture(TileDataLoader.Instance.LandData[graphic].TexID, out var bounds);
 
             if (texture != null)
             {
-                batcher.DrawStrecthedLand
+                batcher.DrawStretchedLand
                 (
                     texture,
                     new Vector2(x, y),
@@ -138,7 +139,8 @@ namespace ClassicUO.Game.GameObjects
                     ref nRight,
                     ref nLeft,
                     ref nBottom,
-                    hue
+                    hue,
+                    depth
                 );
             }
             else
@@ -149,12 +151,13 @@ namespace ClassicUO.Game.GameObjects
                     graphic,
                     x,
                     y,
-                    ref hue
+                    ref hue,
+                    depth
                 );
             }
         }
 
-        protected static void DrawStatic(UltimaBatcher2D batcher, ushort graphic, int x, int y, ref Vector3 hue)
+        protected static void DrawStatic(UltimaBatcher2D batcher, ushort graphic, int x, int y, ref Vector3 hue, float depth)
         {
             var texture = ArtLoader.Instance.GetStaticTexture(graphic, out var bounds);
 
@@ -165,17 +168,17 @@ namespace ClassicUO.Game.GameObjects
                 x -= index.Width;
                 y -= index.Height;
 
-                batcher.Draw(texture, new Vector2(x, y), bounds, hue);
+                batcher.Draw(texture, new Vector2(x, y), bounds, hue, 0f, Vector2.Zero, 1f, SpriteEffects.None, depth);
             }
         }
 
-        protected static void DrawGump(UltimaBatcher2D batcher, ushort graphic, int x, int y, ref Vector3 hue)
+        protected static void DrawGump(UltimaBatcher2D batcher, ushort graphic, int x, int y, ref Vector3 hue, float depth)
         {
             var texture = GumpsLoader.Instance.GetGumpTexture(graphic, out var bounds);
 
             if (texture != null)
             {
-                batcher.Draw(texture, new Vector2(x, y), bounds, hue);
+                batcher.Draw(texture, new Vector2(x, y), bounds, hue, 0f, Vector2.Zero, 1f, SpriteEffects.None, depth);
             }
         }
 
@@ -186,7 +189,8 @@ namespace ClassicUO.Game.GameObjects
             int x,
             int y,
             float angle,
-            ref Vector3 hue
+            ref Vector3 hue,
+            float depth
         )
         {
             var texture = ArtLoader.Instance.GetStaticTexture(graphic, out var bounds);
@@ -210,7 +214,7 @@ namespace ClassicUO.Game.GameObjects
                     MathHelper.ToRadians(angle),
                     Vector2.Zero,
                     SpriteEffects.None,
-                    0
+                    depth
                 );
             }
         }
@@ -223,7 +227,8 @@ namespace ClassicUO.Game.GameObjects
             int y,
             ref Vector3 hue,
             ref bool transparent,
-            bool shadow
+            bool shadow,
+            float depth
         )
         {
             ref UOFileIndex index = ref ArtLoader.Instance.GetValidRefEntry(graphic + 0x4000);
@@ -294,7 +299,7 @@ namespace ClassicUO.Game.GameObjects
                     batcher.DrawShadow(texture, pos, bounds, false);
                 }
 
-                batcher.Draw(texture, pos, bounds, hue);
+                batcher.Draw(texture, pos, bounds, hue, 0f, Vector2.Zero, 1f, SpriteEffects.None, depth);
             }
         }
     }
