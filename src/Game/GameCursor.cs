@@ -344,7 +344,7 @@ namespace ClassicUO.Game
                             break;
                     }
 
-                    _aura.Draw(sb, Mouse.Position.X, Mouse.Position.Y, hue);
+                    _aura.Draw(sb, Mouse.Position.X, Mouse.Position.Y, hue, 0f);
                 }
 
                 if (ProfileManager.CurrentProfile.ShowTargetRangeIndicator)

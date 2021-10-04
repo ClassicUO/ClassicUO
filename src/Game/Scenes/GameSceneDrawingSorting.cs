@@ -496,6 +496,7 @@ namespace ClassicUO.Game.Scenes
         {
             for (; obj != null; obj = obj.TNext)
             {
+                // i think we can remove this property. It's used to the "odd sorting system"
                 if (obj.CurrentRenderIndex == _renderIndex)
                 {
                     continue;

@@ -1162,7 +1162,7 @@ namespace ClassicUO.Game.Scenes
             if (_multi != null && TargetManager.IsTargeting && TargetManager.TargetingState == CursorTarget.MultiPlacement)
             {
                 hueVec = Vector3.Zero;
-                _multi.Draw(batcher, _multi.RealScreenPosition.X, _multi.RealScreenPosition.Y, ref hueVec, 0f);
+                _multi.Draw(batcher, _multi.RealScreenPosition.X, _multi.RealScreenPosition.Y, ref hueVec, calculateDepth(_multi));
             }
 
             

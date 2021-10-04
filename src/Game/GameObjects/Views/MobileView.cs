@@ -84,7 +84,14 @@ namespace ClassicUO.Game.GameObjects
 
             if (AuraManager.IsEnabled)
             {
-                AuraManager.Draw(batcher, drawX, drawY, ProfileManager.CurrentProfile.PartyAura && World.Party.Contains(this) ? ProfileManager.CurrentProfile.PartyAuraHue : Notoriety.GetHue(NotorietyFlag));
+                AuraManager.Draw
+                (
+                    batcher, 
+                    drawX, 
+                    drawY,
+                    ProfileManager.CurrentProfile.PartyAura && World.Party.Contains(this) ? ProfileManager.CurrentProfile.PartyAuraHue : Notoriety.GetHue(NotorietyFlag),
+                    depth
+                );
             }
 
             bool isHuman = IsHuman;
@@ -657,7 +664,7 @@ namespace ClassicUO.Game.GameObjects
 
                 if (hasShadow)
                 {
-                    batcher.DrawShadow(spriteInfo.Texture, new Vector2(x, y), spriteInfo.UV, mirror);
+                    batcher.DrawShadow(spriteInfo.Texture, new Vector2(x, y), spriteInfo.UV, mirror, depth);
                 }
                 else
                 {

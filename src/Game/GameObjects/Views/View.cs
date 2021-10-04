@@ -279,12 +279,12 @@ namespace ClassicUO.Game.GameObjects
                                 break;
                         }
 
-                        batcher.Draw(texture, pos, bounds, hue);
+                        batcher.Draw(texture, pos, bounds, hue, 0f, Vector2.Zero, 1f, SpriteEffects.None, depth);
 
                         batcher.SetStencil(StaticTransparentStencil.Value);
                         hue.Z = alpha;
 
-                        batcher.Draw(texture, pos, bounds, hue);
+                        batcher.Draw(texture, pos, bounds, hue, 0f, Vector2.Zero, 1f, SpriteEffects.None, depth);
 
                         batcher.SetStencil(null);
 
@@ -296,7 +296,7 @@ namespace ClassicUO.Game.GameObjects
 
                 if (shadow)
                 {
-                    batcher.DrawShadow(texture, pos, bounds, false);
+                    batcher.DrawShadow(texture, pos, bounds, false, depth);
                 }
 
                 batcher.Draw(texture, pos, bounds, hue, 0f, Vector2.Zero, 1f, SpriteEffects.None, depth);
