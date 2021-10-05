@@ -98,7 +98,7 @@ namespace ClassicUO.Game
         public const int MAX_SOUND_DATA_INDEX_COUNT = 0xFFFF;
         public const int MAX_MULTI_DATA_INDEX_COUNT = 0x2200;
         public const int MAX_MUSIC_DATA_INDEX_COUNT = 150;
-        public const int MAX_ANIMATIONS_DATA_INDEX_COUNT = 2048;
+        public const int MAX_ANIMATIONS_DATA_INDEX_COUNT = 10000;
         public const int MAX_LIGHTS_DATA_INDEX_COUNT = 100;
 
         public const ushort FIELD_REPLACE_GRAPHIC = 0x1826;
