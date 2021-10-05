@@ -509,7 +509,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 for (int i = 0; i < _entries.Count; i++)
                 {
-                    if (CanBeDrawn(_text_types[i]))
+                    if (i < _text_types.Count && CanBeDrawn(_text_types[i]))
                     {
                         height += _entries[i].Height;
                     }
