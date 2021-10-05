@@ -1,7 +1,7 @@
 name: Build
 
 on:
-  workflow_dispatch:branches: "*"
+  workflow_dispatch
 
 env:
   DOTNET_NOLOGO: false
