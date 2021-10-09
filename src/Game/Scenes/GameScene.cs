@@ -850,13 +850,13 @@ namespace ClassicUO.Game.Scenes
 
         public override void FixedUpdate(double totalTime, double frameTime)
         {
-            FillGameObjectList();
+            //FillGameObjectList(null);
         }
 
 
         public override bool Draw(UltimaBatcher2D batcher)
         {
-            if (!World.InGame || !_isListReady)
+            if (!World.InGame /*|| !_isListReady*/)
             {
                 return false;
             }
@@ -1012,6 +1012,7 @@ namespace ClassicUO.Game.Scenes
         private void DrawWorld(UltimaBatcher2D batcher, ref Matrix matrix, bool use_render_target)
         {
             SelectedObject.Object = null;
+            FillGameObjectList();
 
             if (use_render_target)
             {
@@ -1062,7 +1063,6 @@ namespace ClassicUO.Game.Scenes
             RenderedObjectsCount = 0;      
             GameObject.DrawTransparent = usecircle;
 
-
             RenderedObjectsCount += DrawRenderList(batcher, _renderListLandHead, _renderListLandCount, false, z);
             RenderedObjectsCount += DrawRenderList(batcher, _renderListStaticsHead, _renderListStaticsCount, usecircle, z);
             RenderedObjectsCount += DrawRenderList(batcher, _renderListAnimationsHead, _renderListAnimationCount, false, z);
@@ -1111,18 +1111,20 @@ namespace ClassicUO.Game.Scenes
             hueVec.X = 0;
             hueVec.Y = 1;
             hueVec.Z = 0;
-            string s = $"Flushes: {flushes}\nSwitches: {switches}\nArt texture count: {TextureAtlas.Shared.TexturesCount}";
+            string s = $"Flushes: {flushes}\nSwitches: {switches}\nArt texture count: {TextureAtlas.Shared.TexturesCount}\nMaxZ: {_maxZ}\nMaxGround: {_maxGroundZ}";
             batcher.DrawString(Fonts.Bold, s, 200, 200, ref hueVec);
             hueVec = Vector3.Zero;
             batcher.DrawString(Fonts.Bold, s, 200 + 1, 200 - 1, ref hueVec);
             batcher.End();
         }
 
-        private int DrawRenderList(UltimaBatcher2D batcher, GameObject first, int count, bool useCoT, int z)
+        private int DrawRenderList(UltimaBatcher2D batcher, GameObject obj, int count, bool useCoT, int z)
         {
-            GameObject obj = first;
             Vector3 hueVec = Vector3.Zero;
             int done = 0;
+            //var rectTexture = SolidColorTextureCache.GetTexture(Color.White);
+
+            //float max = DepthFormula(_minTile.X, _minTile.Y, -128);
 
             for (int i = 0; i < count; obj = obj.RenderListNext, ++i)
             {
@@ -1133,66 +1135,117 @@ namespace ClassicUO.Game.Scenes
                         GameObject.DrawTransparent = obj.TransparentTest(z);
                     }
 
-                    if (obj.Draw(batcher, obj.RealScreenPosition.X, obj.RealScreenPosition.Y, ref hueVec, CalculateDepth(obj)))
+                    float depth = CalculateDepth(obj) / 1f;
+
+               
+                    //ushort hue = obj.Hue;
+                    //obj.Hue = (ushort) (60 / depth);
+
+                    if (obj.Draw(batcher, obj.RealScreenPosition.X, obj.RealScreenPosition.Y, ref hueVec, depth))
                     {
                         ++done;
                     }
+
+                    //obj.Hue = hue;
+
+                    //if (obj.FrameInfo.Width != 0)
+                    //{
+                    //    batcher.DrawRectangle
+                    //    (
+                    //        rectTexture,
+                    //        obj.RealScreenPosition.X - obj.FrameInfo.X + 22,
+                    //        obj.RealScreenPosition.Y - obj.FrameInfo.Y + 22,
+                    //        obj.FrameInfo.Width,
+                    //        obj.FrameInfo.Height,
+                    //        ref hueVec,
+                    //        depth
+                    //    );
+                    //}
                 }
             }
 
             return done;
         }
 
-        private float CalculateDepth(GameObject o)
+        public  float DepthFormula(int x, int y, int z)
         {
-            int x = o.X;
-            int y = o.Y;
-            int priorityZ = o.PriorityZ;
+            float sX = (_maxTile.X - x) * 22;
+            float sY = (_maxTile.Y - y) * 22;
+            float sZ = (_maxGroundZ - z);
+
+            //return (float) Math.Sqrt(sX * sX + sY * sY + sZ * sZ);
+
+            return sX + sY + sZ;
+        }
+
+
+        private float CalculateDepth(GameObject obj)
+        {
+            int x = obj.X;
+            int y = obj.Y;
+            int z = obj.PriorityZ;
+            //int offset = 0;
+
+            //if (obj.FrameInfo.Y > 0)
+            //{
+            //    //offset += o.FrameInfo.Height - (o.FrameInfo.Y - 22) - 3;
+            //    //offset = Math.Min(offset, 20);
+            //    //offset += 11 - 3;
+            //    //offset = CalculateDrop(o as Mobile);
+            //}
 
             // Offsets are in SCREEN coordinates
-            if (o.Offset.X > 0 && o.Offset.Y < 0)
+            if (obj.Offset.X > 0 && obj.Offset.Y < 0)
             {
                 // North
             }
-            else if (o.Offset.X > 0 && o.Offset.Y == 0)
+            else if (obj.Offset.X > 0 && obj.Offset.Y == 0)
             {
                 // Northeast
                 x++;
             }
-            else if (o.Offset.X > 0 && o.Offset.Y > 0)
+            else if (obj.Offset.X > 0 && obj.Offset.Y > 0)
             {
                 // East
-                priorityZ += Math.Max(0, (int)o.Offset.Z);
+                z += Math.Max(0, (int)obj.Offset.Z);
                 x++;
             }
-            else if (o.Offset.X == 0 && o.Offset.Y > 0)
+            else if (obj.Offset.X == 0 && obj.Offset.Y > 0)
             {
                 // Southeast
                 x++;
                 y++;
             }
-            else if (o.Offset.X < 0 && o.Offset.Y > 0)
+            else if (obj.Offset.X < 0 && obj.Offset.Y > 0)
             {
                 // South
-                priorityZ += Math.Max(0, (int)o.Offset.Z);
+                z += Math.Max(0, (int)obj.Offset.Z);
                 y++;
             }
-            else if (o.Offset.X < 0 && o.Offset.Y == 0)
+            else if (obj.Offset.X < 0 && obj.Offset.Y == 0)
             {
                 // Southwest
                 y++;
             }
-            else if (o.Offset.X < 0 && o.Offset.Y > 0)
+            else if (obj.Offset.X < 0 && obj.Offset.Y > 0)
             {
                 // West
             }
-            else if (o.Offset.X == 0 && o.Offset.Y < 0)
+            else if (obj.Offset.X == 0 && obj.Offset.Y < 0)
             {
                 // Northwest
             }
 
-            return x + y + 0.001f * priorityZ;
+            return x + y;
+            //return (x + y) /*+ priorityZ * 0.001f*/ ;
+            //return (x * 4) + (y * 4) + priorityZ;
+            //return (256 - priorityZ);
+            return DepthFormula(x, y, z);
+            //return x + y + (priorityZ);
+            //return x + y + (priorityZ - o.Z) /4;
         }
+
+        
 
         private bool PrepareLightsRendering(UltimaBatcher2D batcher, ref Matrix matrix)
         {

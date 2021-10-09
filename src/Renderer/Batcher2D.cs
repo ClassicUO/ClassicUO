@@ -80,11 +80,11 @@ namespace ClassicUO.Renderer
         private SamplerState _sampler;
         private bool _started;
         private DepthStencilState _stencil;
-        private readonly Texture2D[] _textureInfo;
         private Matrix _transformMatrix;
         private readonly DynamicVertexBuffer _vertexBuffer;
-        private PositionNormalTextureColor4[] _vertexInfo;
         private readonly BasicUOEffect _basicUOEffect;
+        private Texture2D[] _textureInfo;
+        private PositionNormalTextureColor4[] _vertexInfo;
 
 
         public UltimaBatcher2D(GraphicsDevice device)
@@ -98,17 +98,15 @@ namespace ClassicUO.Renderer
             _indexBuffer.SetData(GenerateIndexArray());
 
             _blendState = BlendState.AlphaBlend;
-            _rasterizerState = RasterizerState.CullNone;
             _sampler = SamplerState.PointClamp;
-
             _rasterizerState = new RasterizerState
             {
-                CullMode = _rasterizerState.CullMode,
-                DepthBias = _rasterizerState.DepthBias,
-                FillMode = _rasterizerState.FillMode,
-                MultiSampleAntiAlias = _rasterizerState.MultiSampleAntiAlias,
-                SlopeScaleDepthBias = _rasterizerState.SlopeScaleDepthBias,
-                ScissorTestEnable = true
+                CullMode = CullMode.CullCounterClockwiseFace,
+                FillMode = FillMode.Solid,
+                DepthBias = 0,
+                MultiSampleAntiAlias = true,
+                ScissorTestEnable = true,
+                SlopeScaleDepthBias = 0,
             };
 
             _stencil = Stencil;
@@ -130,6 +128,27 @@ namespace ClassicUO.Renderer
             StencilFail = StencilOperation.Keep,
             StencilDepthBufferFail = StencilOperation.Keep,
             StencilPass = StencilOperation.Keep
+
+            //StencilEnable = true,
+            //StencilWriteMask = -1,
+            //ReferenceStencil = 1,
+            //StencilMask = -1,
+            //StencilFunction = CompareFunction.Always,
+            //StencilFail = StencilOperation.Keep,
+            //StencilPass = StencilOperation.Replace,
+
+
+            //DepthBufferEnable = true,
+            //DepthBufferFunction = CompareFunction.LessEqual,
+            //DepthBufferWriteEnable = true,
+            //StencilDepthBufferFail = StencilOperation.Keep,
+
+
+            //CounterClockwiseStencilFunction = CompareFunction.Always,
+            //CounterClockwiseStencilFail = StencilOperation.Keep,
+            //CounterClockwiseStencilPass = StencilOperation.Replace,
+            //CounterClockwiseStencilDepthBufferFail = StencilOperation.Keep,
+            //TwoSidedStencilMode = false,
         };
 
         public GraphicsDevice GraphicsDevice { get; }
@@ -935,30 +954,29 @@ namespace ClassicUO.Renderer
             int y,
             int width,
             int height,
-            ref Vector3 hue
+            ref Vector3 hue,
+            float depth = 0f
         )
         {
             Rectangle rect = new Rectangle(x, y, width, 1);
-            Draw(texture, rect, hue);
+            Draw(texture, rect, null, hue, 0f, Vector2.Zero, SpriteEffects.None, depth);
 
             rect.X += width;
             rect.Width = 1;
             rect.Height += height;
-            Draw(texture, rect, hue);
-
+            Draw(texture, rect, null, hue, 0f, Vector2.Zero, SpriteEffects.None, depth);
 
             rect.X = x;
             rect.Y = y + height;
             rect.Width = width;
             rect.Height = 1;
-            Draw(texture, rect, hue);
-
+            Draw(texture, rect, null, hue, 0f, Vector2.Zero, SpriteEffects.None, depth);
 
             rect.X = x;
             rect.Y = y;
             rect.Width = 1;
             rect.Height = height;
-            Draw(texture, rect, hue);
+            Draw(texture, rect, null, hue, 0f, Vector2.Zero, SpriteEffects.None, depth);
 
             return true;
         }
@@ -1431,9 +1449,18 @@ namespace ClassicUO.Renderer
         {
             EnsureStarted();
 
-            if (_numSprites >= MAX_SPRITES)
+            //if (_numSprites >= MAX_SPRITES)
+            //{
+            //    Flush();
+            //}
+
+            if (_numSprites >= _vertexInfo.Length)
             {
-                Flush();
+                //Flush();
+
+                int newMax = _vertexInfo.Length + MAX_SPRITES;
+                Array.Resize(ref _vertexInfo, newMax);
+                Array.Resize(ref _textureInfo, newMax);
             }
         }
 
@@ -1469,8 +1496,17 @@ namespace ClassicUO.Renderer
             _projectionMatrix.M11 = (float)(2.0 / GraphicsDevice.Viewport.Width);
             _projectionMatrix.M22 = (float)(-2.0 / GraphicsDevice.Viewport.Height);
 
-
-            var matrix = Matrix.CreateOrthographicOffCenter(0f, GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height, 0, short.MinValue, short.MaxValue);
+            Matrix matrix = _projectionMatrix;
+            Matrix.CreateOrthographicOffCenter
+            (
+                0f,
+                GraphicsDevice.Viewport.Width,
+                GraphicsDevice.Viewport.Height,
+                0,
+                short.MinValue,
+                short.MaxValue,
+                out matrix
+            );
             Matrix.Multiply(ref _transformMatrix, ref matrix, out matrix);
 
 

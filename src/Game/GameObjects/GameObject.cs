@@ -89,6 +89,11 @@ namespace ClassicUO.Game.GameObjects
         {
         }
 
+        public virtual bool CheckMouseSelection()
+        {
+            return false;
+        }
+
         public int CurrentRenderIndex;
         // FIXME: remove it
         public sbyte FoliageIndex = -1;
@@ -103,6 +108,7 @@ namespace ClassicUO.Game.GameObjects
         public sbyte Z;
         public GameObject RenderListNext;
 
+    
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Vector2 GetScreenPosition()

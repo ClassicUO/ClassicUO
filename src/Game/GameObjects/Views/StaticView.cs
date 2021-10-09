@@ -120,30 +120,42 @@ namespace ClassicUO.Game.GameObjects
                 Client.Game.GetScene<GameScene>().AddLight(this, this, posX + 22, posY + 22);
             }
 
+            return true;
+        }
+
+        public override bool CheckMouseSelection()
+        {
             if (!(SelectedObject.Object == this || FoliageIndex != -1 && Client.Game.GetScene<GameScene>().FoliageIndex == FoliageIndex))
             {
                 if (DrawTransparent)
                 {
-                    return true;
+                    return false;
+                }
+
+                ushort graphic = Graphic;
+
+                bool isTree = StaticFilters.IsTree(graphic, out _);
+
+                if (isTree && ProfileManager.CurrentProfile.TreeToStumps)
+                {
+                    graphic = Constants.TREE_REPLACE_GRAPHIC;
                 }
 
                 ref UOFileIndex index = ref ArtLoader.Instance.GetValidRefEntry(graphic + 0x4000);
 
-                posX -= index.Width;
-                posY -= index.Height;
+                Point position = RealScreenPosition;
+                position.X -= index.Width;
+                position.Y -= index.Height;
 
-                if (ArtLoader.Instance.PixelCheck
+                return ArtLoader.Instance.PixelCheck
                 (
-                graphic,
-                    SelectedObject.TranslatedMousePositionByViewport.X - posX, 
-                    SelectedObject.TranslatedMousePositionByViewport.Y - posY
-                ))
-                {
-                    SelectedObject.Object = this;
-                }
+                    graphic,
+                    SelectedObject.TranslatedMousePositionByViewport.X - position.X,
+                    SelectedObject.TranslatedMousePositionByViewport.Y - position.Y
+                );
             }
 
-            return true;
+            return false;
         }
     }
 }

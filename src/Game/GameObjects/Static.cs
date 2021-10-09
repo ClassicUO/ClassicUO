@@ -57,6 +57,7 @@ namespace ClassicUO.Game.GameObjects
         public ref StaticTiles ItemData => ref TileDataLoader.Instance.StaticData[Graphic];
 
         public bool IsVegetation;
+        public int Index;
 
 
         public static Static Create(ushort graphic, ushort hue, int index)
@@ -65,6 +66,7 @@ namespace ClassicUO.Game.GameObjects
             s.Graphic = s.OriginalGraphic = graphic;
             s.Hue = hue;
             s.UpdateGraphicBySeason();
+            s.Index = index;
 
             if (s.ItemData.Height > 5 || s.ItemData.Height == 0)
             {

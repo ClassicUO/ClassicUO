@@ -473,8 +473,77 @@ namespace ClassicUO.Game.Scenes
             return !(itemData.IsFoliage && !itemData.IsMultiMovable && season >= Season.Winter);
         }
 
-        private void PushToRenderList(GameObject obj, GameObject parent, ref GameObject renderList, ref GameObject first, ref int renderListCount)
+        private bool HasSurfaceOverhead(Entity obj)
         {
+            if (obj.Serial == World.Player.Serial)
+            {
+                return false;
+            }
+            
+            bool found = false;
+            
+            for (int y = -1; y < 2; ++y)
+            {
+                for (int x = -1; x < 2; ++x)
+                {
+                    GameObject tile = World.Map.GetTile(obj.X + x, obj.Y + y);
+
+                    found = false;
+
+                    while (tile != null)
+                    {
+                        var next = tile.TNext;
+
+                        if (tile.Z > obj.Z && (tile is Static || tile is Multi))
+                        {
+                            ref var itemData = ref TileDataLoader.Instance.StaticData[tile.Graphic];
+
+                            if (itemData.IsSurface || itemData.IsBackground)
+                            {
+                                if (_maxZ - tile.Z + 5 >= tile.Z - obj.Z)
+                                {
+                                    found = true;
+
+                                    break;
+                                }
+                            }
+                        }
+
+                        tile = next;
+                    }
+
+                    if (!found)
+                    {
+                        return false;
+                    }
+                }
+            }
+
+            return found;
+        }
+
+        private void PushToRenderList(GameObject obj, ref GameObject renderList, ref GameObject first, ref int renderListCount)
+        {
+            //if (_renderListStaticsHead == null)
+            //{
+            //    _renderListStaticsHead = _renderList = obj;
+            //}
+            //else
+            //{
+            //    _renderList.RenderListNext = obj;
+            //    _renderList = obj;
+            //}
+
+            //obj.RenderListNext = null;
+
+            //++_renderListStaticsCount;
+
+            if (obj.AllowedToDraw && obj.CheckMouseSelection())
+            {
+                SelectedObject.Object = obj;
+            }
+
+
             if (first == null)
             {
                 first = renderList = obj;
@@ -544,7 +613,7 @@ namespace ClassicUO.Game.Scenes
                         continue;
                     }
 
-                    PushToRenderList(obj, parent, ref _renderListLand, ref _renderListLandHead, ref _renderListLandCount);
+                    PushToRenderList(obj, ref _renderListLand, ref _renderListLandHead, ref _renderListLandCount);
                 }
                 else if (obj is Static staticc)
                 {
@@ -597,7 +666,7 @@ namespace ClassicUO.Game.Scenes
 
                     CheckIfBehindATree(obj, worldX, worldY, ref itemData);
 
-                    PushToRenderList(obj, parent, ref _renderList, ref _renderListStaticsHead, ref _renderListStaticsCount);
+                    PushToRenderList(obj, ref _renderList, ref _renderListStaticsHead, ref _renderListStaticsCount);
                 }
                 else if (obj is Multi multi)
                 {
@@ -654,7 +723,7 @@ namespace ClassicUO.Game.Scenes
 
                     CheckIfBehindATree(obj, worldX, worldY, ref itemData);
 
-                    PushToRenderList(obj, parent, ref _renderList, ref _renderListStaticsHead, ref _renderListStaticsCount);
+                    PushToRenderList(obj, ref _renderList, ref _renderListStaticsHead, ref _renderListStaticsCount);
                 }
                 else if (obj is Mobile mobile)
                 {
@@ -681,9 +750,11 @@ namespace ClassicUO.Game.Scenes
                         continue;
                     }
 
+                    obj.AllowedToDraw = !HasSurfaceOverhead(mobile);
+
                     AddOffsetCharacterTileToRenderList(obj, useObjectHandles, false);
 
-                    PushToRenderList(obj, parent, ref _renderListAnimations, ref _renderListAnimationsHead, ref _renderListAnimationCount);
+                    PushToRenderList(obj, ref _renderListAnimations, ref _renderListAnimationsHead, ref _renderListAnimationCount);
                 }
                 else if (obj is Item item)
                 {
@@ -749,11 +820,11 @@ namespace ClassicUO.Game.Scenes
 
                     if (item.IsCorpse)
                     {
-                        PushToRenderList(obj, parent, ref _renderListAnimations, ref _renderListAnimationsHead, ref _renderListAnimationCount);
+                        PushToRenderList(obj, ref _renderListAnimations, ref _renderListAnimationsHead, ref _renderListAnimationCount);
                     }
                     else
                     {
-                        PushToRenderList(obj, parent, ref _renderList, ref _renderListStaticsHead, ref _renderListStaticsCount);
+                        PushToRenderList(obj, ref _renderList, ref _renderListStaticsHead, ref _renderListStaticsCount);
                     }         
                 }
                 else if (obj is GameEffect effect)
@@ -775,7 +846,7 @@ namespace ClassicUO.Game.Scenes
                         AddOffsetCharacterTileToRenderList(obj, useObjectHandles, true);
                     }
 
-                    PushToRenderList(obj, parent, ref _renderList, ref _renderListStaticsHead, ref _renderListStaticsCount);
+                    PushToRenderList(obj, ref _renderList, ref _renderListStaticsHead, ref _renderListStaticsCount);
                 }
             }
 

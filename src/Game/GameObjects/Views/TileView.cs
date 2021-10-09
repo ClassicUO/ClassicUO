@@ -93,11 +93,6 @@ namespace ClassicUO.Game.GameObjects
                     ref hueVec,
                     depth
                 );
-
-                if (SelectedObject.IsPointInStretchedLand(ref YOffsets, posX, posY))
-                {
-                    SelectedObject.Object = this;
-                }
             }
             else
             {
@@ -110,14 +105,19 @@ namespace ClassicUO.Game.GameObjects
                     ref hueVec,
                     depth
                 );
-
-                if (SelectedObject.IsPointInLand(posX, posY))
-                {
-                    SelectedObject.Object = this;
-                }
             }
 
             return true;
+        }
+
+        public override bool CheckMouseSelection()
+        {
+            if (IsStretched)
+            {
+                return SelectedObject.IsPointInStretchedLand(ref YOffsets, RealScreenPosition.X, RealScreenPosition.Y + (Z << 2));
+            }
+
+            return SelectedObject.IsPointInLand(RealScreenPosition.X, RealScreenPosition.Y);
         }
     }
 }

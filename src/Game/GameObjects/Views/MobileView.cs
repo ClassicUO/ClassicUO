@@ -63,6 +63,16 @@ namespace ClassicUO.Game.GameObjects
                 return false;
             }
 
+            //if (this is PlayerMobile)
+            //{
+            //    Graphic = 0x6a;
+            //}
+            //else
+            //{
+            //    Graphic = 666;
+            //    Flags |= Flags.Flying;
+            //}
+
             hueVec = Vector3.Zero;
 
             AnimationsLoader.SittingInfoData seatData = AnimationsLoader.SittingInfoData.Empty;
@@ -390,84 +400,8 @@ namespace ClassicUO.Game.GameObjects
 
                             if (isGargoyle)
                             {
-                                switch (graphic)
-                                {
-                                    // gargoyle robe
-                                    case 0x01D5:
-                                        graphic = 0x0156;
-
-                                        break;
-
-                                    // gargoyle dead shroud
-                                    case 0x03CA:
-                                        graphic = 0x0223;
-
-                                        break;
-
-                                    // gargoyle spellbook
-                                    case 0x03D8:
-                                        graphic = 329;
-
-                                        break;
-
-                                    // gargoyle necrobook
-                                    case 0x0372:
-                                        graphic = 330;
-
-                                        break;
-
-                                    // gargoyle chivalry book
-                                    case 0x0374:
-                                        graphic = 328;
-
-                                        break;
-
-                                    // gargoyle bushido book
-                                    case 0x036F:
-                                        graphic = 327;
-
-                                        break;
-
-                                    // gargoyle ninjitsu book
-                                    case 0x036E:
-                                        graphic = 328;
-
-                                        break;
-
-                                    // gargoyle masteries book
-                                    case 0x0426:
-                                        graphic = 0x042B;
-
-                                        break;
-                                    //NOTE: gargoyle mysticism book seems ok. Mha!
-
-
-                                    /* into the mobtypes.txt file of 7.0.90+ client version we have:
-                                     *
-                                     *   1529 	EQUIPMENT	0		# EQUIP_Shield_Pirate_Male_H
-                                     *   1530 	EQUIPMENT	0		# EQUIP_Shield_Pirate_Female_H
-                                     *   1531 	EQUIPMENT	10000	# Equip_Shield_Pirate_Male_G
-                                     *   1532 	EQUIPMENT	10000	# Equip_Shield_Pirate_Female_G
-                                     *   
-                                     *   This means that graphic 0xA649 [pirate shield] has 4 tiledata infos.
-                                     *   Standard client handles it automatically without any issue. 
-                                     *   Maybe it's hardcoded into the client
-                                     */
-
-                                    // EQUIP_Shield_Pirate_Male_H
-                                    case 1529:
-                                        graphic = 1531;
-
-                                        break;
-
-                                    // EQUIP_Shield_Pirate_Female_H
-                                    case 1530:
-                                        graphic = 1532;
-
-                                        break;
-                                }
+                                FixGargoyleEquipments(ref graphic);
                             }
-
 
                             if (AnimationsLoader.Instance.EquipConversions.TryGetValue(Graphic, out Dictionary<ushort, EquipConvData> map))
                             {
@@ -557,6 +491,172 @@ namespace ClassicUO.Game.GameObjects
             FrameInfo.Y = Math.Abs(FrameInfo.Y);
             FrameInfo.Width = FrameInfo.X + FrameInfo.Width;
             FrameInfo.Height = FrameInfo.Y + FrameInfo.Height;
+
+            return true;
+        }
+
+        private static ushort GetAnimationInfo
+        (
+            Mobile owner, 
+            Item item, 
+            bool isGargoyle
+        )
+        {
+            if (item.ItemData.AnimID != 0)
+            {
+                var graphic = item.ItemData.AnimID;
+
+                if (isGargoyle)
+                {
+                    FixGargoyleEquipments(ref graphic);
+                }
+
+                if (AnimationsLoader.Instance.EquipConversions.TryGetValue(owner.Graphic, out Dictionary<ushort, EquipConvData> map))
+                {
+                    if (map.TryGetValue(item.ItemData.AnimID, out EquipConvData data))
+                    {
+                        _equipConvData = data;
+                        graphic = data.Graphic;
+                    }
+                }
+
+                return graphic;
+            }
+
+            return 0xFFFF;
+        }
+
+        private static void FixGargoyleEquipments(ref ushort graphic)
+        {
+            switch (graphic)
+            {
+                // gargoyle robe
+                case 0x01D5:
+                    graphic = 0x0156;
+
+                    break;
+
+                // gargoyle dead shroud
+                case 0x03CA:
+                    graphic = 0x0223;
+
+                    break;
+
+                // gargoyle spellbook
+                case 0x03D8:
+                    graphic = 329;
+
+                    break;
+
+                // gargoyle necrobook
+                case 0x0372:
+                    graphic = 330;
+
+                    break;
+
+                // gargoyle chivalry book
+                case 0x0374:
+                    graphic = 328;
+
+                    break;
+
+                // gargoyle bushido book
+                case 0x036F:
+                    graphic = 327;
+
+                    break;
+
+                // gargoyle ninjitsu book
+                case 0x036E:
+                    graphic = 328;
+
+                    break;
+
+                // gargoyle masteries book
+                case 0x0426:
+                    graphic = 0x042B;
+
+                    break;
+                //NOTE: gargoyle mysticism book seems ok. Mha!
+
+
+                /* into the mobtypes.txt file of 7.0.90+ client version we have:
+                 *
+                 *   1529 	EQUIPMENT	0		# EQUIP_Shield_Pirate_Male_H
+                 *   1530 	EQUIPMENT	0		# EQUIP_Shield_Pirate_Female_H
+                 *   1531 	EQUIPMENT	10000	# Equip_Shield_Pirate_Male_G
+                 *   1532 	EQUIPMENT	10000	# Equip_Shield_Pirate_Female_G
+                 *   
+                 *   This means that graphic 0xA649 [pirate shield] has 4 tiledata infos.
+                 *   Standard client handles it automatically without any issue. 
+                 *   Maybe it's hardcoded into the client
+                 */
+
+                // EQUIP_Shield_Pirate_Male_H
+                case 1529:
+                    graphic = 1531;
+
+                    break;
+
+                // EQUIP_Shield_Pirate_Female_H
+                case 1530:
+                    graphic = 1532;
+
+                    break;
+            }
+        }
+
+        private static bool GetTexture(ref ushort graphic, ref byte animGroup, ref sbyte animIndex, byte direction, out SpriteInfo spriteInfo, out bool isUOP)
+        {
+            spriteInfo = default;
+            isUOP = false;
+
+            ushort hue = 0;
+
+            AnimationDirection animationSet = AnimationsLoader.Instance.GetBodyAnimationGroup
+            (
+                ref graphic,
+                ref animGroup,
+                ref hue,
+                true,
+                false
+            )
+            .Direction[direction];
+
+            if (animationSet == null ||
+                animationSet.Address == -1 ||
+                animationSet.FileIndex == -1 ||
+                animationSet.FrameCount == 0 || 
+                animationSet.SpriteInfos == null
+               )
+            {
+                return false;
+            }
+
+            int fc = animationSet.FrameCount;
+
+            if (fc > 0 && animIndex >= fc)
+            {
+                animIndex = (sbyte)(fc - 1);
+            }
+            else if (animIndex < 0)
+            {
+                animIndex = 0;
+            }
+
+            if (animIndex >= animationSet.FrameCount)
+            {
+                return false;
+            }
+
+            spriteInfo = animationSet.SpriteInfos[animIndex];
+
+            if (spriteInfo.Texture == null)
+            {
+                return false;
+            }
+
+            isUOP = animationSet.IsUOP;
 
             return true;
         }
@@ -830,21 +930,41 @@ namespace ClassicUO.Game.GameObjects
                     }
                     else if (spriteInfo.Texture != null)
                     {
-                        batcher.Draw
-                        (
-                            spriteInfo.Texture,
-                            new Vector2(x, y),
-                            spriteInfo.UV,
-                            hueVec,
-                            0f,
-                            Vector2.Zero,
-                            1f,
-                            mirror ? SpriteEffects.FlipHorizontally : SpriteEffects.None,
-                            depth
-                        );
+                        int value = Math.Max(1, Math.Abs(spriteInfo.UV.Height + spriteInfo.Center.Y));               
+                        int count = (spriteInfo.UV.Height / value) + 1;
 
-                        int yy = -(spriteInfo.UV.Height + spriteInfo.Center.Y + 3);
+                        Rectangle rect = spriteInfo.UV;
+                        rect.Height = Math.Min(value, rect.Height);
+                        Vector2 pos = new Vector2(x, y);
+                        int remains = spriteInfo.UV.Height - rect.Height;
+
+                        for (int i = 0; i < count; ++i)
+                        {
+                            //hueVec.Y = 1;
+                            //hueVec.X = 0x44 + (i * 20);
+
+                            batcher.Draw
+                            (
+                                spriteInfo.Texture,
+                                pos,
+                                rect,
+                                hueVec,
+                                0f,
+                                Vector2.Zero,
+                                1f,
+                                mirror ? SpriteEffects.FlipHorizontally : SpriteEffects.None,
+                                depth + (1.5f * i)
+                                //depth - (i * 0.01f)
+                            );
+
+                            pos.Y += rect.Height;
+                            rect.Y += rect.Height;                            
+                            rect.Height = Math.Min(value, remains);
+                            remains -= rect.Height;
+                        }
+
                         int xx = -spriteInfo.Center.X;
+                        int yy = -(spriteInfo.UV.Height + spriteInfo.Center.Y + 3);
 
                         if (mirror)
                         {
@@ -872,12 +992,6 @@ namespace ClassicUO.Game.GameObjects
                         }
                     }
 
-
-                    if (AnimationsLoader.Instance.PixelCheck(id, animGroup, dir, direction.IsUOP, frameIndex, mirror ? x + spriteInfo.UV.Width - SelectedObject.TranslatedMousePositionByViewport.X : SelectedObject.TranslatedMousePositionByViewport.X - x, SelectedObject.TranslatedMousePositionByViewport.Y - y))
-                    {
-                        SelectedObject.Object = owner;
-                    }
-
                     if (entity != null && entity.ItemData.IsLight)
                     {
                         Client.Game.GetScene<GameScene>().AddLight(owner, entity, mirror ? x + spriteInfo.UV.Width : x, y);
@@ -888,6 +1002,138 @@ namespace ClassicUO.Game.GameObjects
             }
 
             return 0;
+        }
+
+        public override bool CheckMouseSelection()
+        {
+            Point position = RealScreenPosition;
+            position.Y -= 3;
+            position.X += (int)Offset.X + 22;
+            position.Y += (int)(Offset.Y - Offset.Z) + 22;
+
+
+            bool isHuman = IsHuman;
+            bool isGargoyle = Client.Version >= ClientVersion.CV_7000 && 
+                              (Graphic == 666 || 
+                              Graphic == 667 ||
+                              Graphic == 0x02B7 || 
+                              Graphic == 0x02B6);
+
+
+            ProcessSteps(out byte dir);
+            AnimationsLoader.Instance.GetAnimDirection(ref dir, ref IsFlipped);
+
+            ushort graphic = GetGraphicForAnimation();
+            byte animGroup = GetGroupForAnimation(this, graphic, true);
+            sbyte animIndex = AnimIndex;
+
+            byte animGroupBackup = animGroup;
+            sbyte animIndexBackup = animIndex;
+
+            SpriteInfo spriteInfo;
+            bool isUop;
+
+
+            if (isHuman)
+            {
+                Item mount = FindItemByLayer(Layer.Mount);
+                if (mount != null)
+                {
+                    var mountGraphic = mount.GetGraphicForAnimation();
+                   
+                    if (mountGraphic != 0xFFFF)
+                    {
+                        var animGroupMount = GetGroupForAnimation(this, mountGraphic);
+
+                        if (GetTexture(ref mountGraphic, ref animGroupMount, ref animIndex, dir, out spriteInfo, out isUop))
+                        {
+                            int x = position.X - (IsFlipped ? spriteInfo.UV.Width - spriteInfo.Center.X : spriteInfo.Center.X);
+                            int y = position.Y - (spriteInfo.UV.Height + spriteInfo.Center.Y);
+
+                            if (AnimationsLoader.Instance.PixelCheck
+                            (
+                                mountGraphic,
+                                animGroupMount,
+                                dir,
+                                isUop,
+                                animIndex,
+                                IsFlipped ? x + spriteInfo.UV.Width - SelectedObject.TranslatedMousePositionByViewport.X : SelectedObject.TranslatedMousePositionByViewport.X - x,
+                                SelectedObject.TranslatedMousePositionByViewport.Y - y
+                            ))
+                            {
+                                return true;
+                            }
+
+                            position.Y += AnimationsLoader.Instance.DataIndex[mountGraphic].MountedHeightOffset;
+                        }
+                    }
+                }
+            }
+            
+
+            if (GetTexture(ref graphic, ref animGroup, ref animIndex, dir, out spriteInfo, out isUop))
+            {
+                int x = position.X - (IsFlipped ? spriteInfo.UV.Width - spriteInfo.Center.X : spriteInfo.Center.X);
+                int y = position.Y - (spriteInfo.UV.Height + spriteInfo.Center.Y);
+
+                if (AnimationsLoader.Instance.PixelCheck
+                (
+                    graphic,
+                    animGroup,
+                    dir,
+                    isUop,
+                    animIndex,
+                    IsFlipped ? x + spriteInfo.UV.Width - SelectedObject.TranslatedMousePositionByViewport.X : SelectedObject.TranslatedMousePositionByViewport.X - x,
+                    SelectedObject.TranslatedMousePositionByViewport.Y - y
+                ))
+                {
+                    return true;
+                }
+            }
+
+
+            if (!IsEmpty && isHuman)
+            {
+                for (Layer layer = Layer.Invalid + 1; layer < Layer.Mount; ++layer)
+                {
+                    Item item = FindItemByLayer(layer);
+
+                    if (item == null || (IsDead && (layer == Layer.Hair || layer == Layer.Beard)) || IsCovered(this, layer))
+                    {
+                        continue;
+                    }
+
+                    graphic = GetAnimationInfo(this, item, isGargoyle);
+
+                    if (graphic != 0xFFFF)
+                    {
+                        animGroup = animGroupBackup;
+                        animIndex = animIndexBackup;
+
+                        if (GetTexture(ref graphic, ref animGroup, ref animIndex, dir, out spriteInfo, out isUop))
+                        {
+                            int x = position.X - (IsFlipped ? spriteInfo.UV.Width - spriteInfo.Center.X : spriteInfo.Center.X);
+                            int y = position.Y - (spriteInfo.UV.Height + spriteInfo.Center.Y);
+
+                            if (AnimationsLoader.Instance.PixelCheck
+                            (
+                                graphic,
+                                animGroup,
+                                dir,
+                                isUop,
+                                animIndex,
+                                IsFlipped ? x + spriteInfo.UV.Width - SelectedObject.TranslatedMousePositionByViewport.X : SelectedObject.TranslatedMousePositionByViewport.X - x,
+                                SelectedObject.TranslatedMousePositionByViewport.Y - y
+                            ))
+                            {
+                                return true;
+                            }
+                        }
+                    }
+                }
+            }
+
+            return false;
         }
 
         internal static bool IsCovered(Mobile mobile, Layer layer)

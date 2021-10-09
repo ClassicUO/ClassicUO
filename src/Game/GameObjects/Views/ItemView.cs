@@ -190,44 +190,6 @@ namespace ClassicUO.Game.GameObjects
                 depth
             );
 
-            if (ReferenceEquals(SelectedObject.Object, this) || TargetManager.TargetingState == CursorTarget.MultiPlacement)
-            {
-                return false;
-            }
-
-            // TODO: is this check necessary?
-            var texture = ArtLoader.Instance.GetStaticTexture(graphic, out var bounds);
-
-            if (texture != null)
-            {
-                ref UOFileIndex index = ref ArtLoader.Instance.GetValidRefEntry(graphic + 0x4000);
-
-                posX -= index.Width;
-                posY -= index.Height;
-
-                if (ArtLoader.Instance.PixelCheck
-                (
-                    graphic,
-                    SelectedObject.TranslatedMousePositionByViewport.X - posX,
-                    SelectedObject.TranslatedMousePositionByViewport.Y - posY
-                ))
-                {
-                    SelectedObject.Object = this;
-                }
-                else if (!IsMulti && !IsCoin && Amount > 1 && ItemData.IsStackable)
-                {
-                    if (ArtLoader.Instance.PixelCheck
-                    (
-                        graphic,
-                        SelectedObject.TranslatedMousePositionByViewport.X - posX + 5,
-                        SelectedObject.TranslatedMousePositionByViewport.Y - posY + 5
-                    ))
-                    {
-                        SelectedObject.Object = this;
-                    }
-                }
-            }
-
             return true;
         }
 
@@ -452,22 +414,213 @@ namespace ClassicUO.Game.GameObjects
                     flipped ? Microsoft.Xna.Framework.Graphics.SpriteEffects.FlipHorizontally : Microsoft.Xna.Framework.Graphics.SpriteEffects.None,
                     depth
                 );
+            }
+        }
 
-                if (!SerialHelper.IsValid(owner))
+        public override bool CheckMouseSelection()
+        {
+            if (!IsCorpse)
+            {
+                if (ReferenceEquals(SelectedObject.Object, this) || TargetManager.TargetingState == CursorTarget.MultiPlacement)
                 {
-                    return;
+                    return false;
                 }
 
-                if (ReferenceEquals(SelectedObject.Object, owner))
+                ushort graphic = DisplayedGraphic;
+
+                if (OnGround && ItemData.IsAnimated)
                 {
-                    return;
+                    if (ProfileManager.CurrentProfile.FieldsType == 2)
+                    {
+                        if (StaticFilters.IsFireField(Graphic) ||
+                            StaticFilters.IsParalyzeField(Graphic) ||
+                            StaticFilters.IsEnergyField(Graphic) ||
+                            StaticFilters.IsPoisonField(Graphic) ||
+                            StaticFilters.IsWallOfStone(Graphic))
+                        {
+                            graphic = Constants.FIELD_REPLACE_GRAPHIC;
+                        }
+                    }
                 }
 
-                if (AnimationsLoader.Instance.PixelCheck(graphic, animGroup, dir, direction.IsUOP, animIndex, flipped ? posX + spriteInfo.UV.Width - SelectedObject.TranslatedMousePositionByViewport.X : SelectedObject.TranslatedMousePositionByViewport.X - posX, SelectedObject.TranslatedMousePositionByViewport.Y - posY))
+                if (ArtLoader.Instance.GetStaticTexture(graphic, out _) != null)
                 {
-                    SelectedObject.Object = owner;
+                    ref UOFileIndex index = ref ArtLoader.Instance.GetValidRefEntry(graphic + 0x4000);
+
+                    Point position = RealScreenPosition;
+                    position.X += (int)Offset.X;
+                    position.Y += (int)(Offset.Y + Offset.Z);
+                    position.X -= index.Width;
+                    position.Y -= index.Height;
+
+                    if (ArtLoader.Instance.PixelCheck
+                    (
+                        graphic,
+                        SelectedObject.TranslatedMousePositionByViewport.X - position.X,
+                        SelectedObject.TranslatedMousePositionByViewport.Y - position.Y
+                    ))
+                    {
+                        return true;
+                    }
+                    else if (!IsMulti && !IsCoin && Amount > 1 && ItemData.IsStackable)
+                    {
+                        if (ArtLoader.Instance.PixelCheck
+                        (
+                            graphic,
+                            SelectedObject.TranslatedMousePositionByViewport.X - position.X + 5,
+                            SelectedObject.TranslatedMousePositionByViewport.Y - position.Y + 5
+                        ))
+                        {
+                            return true;
+                        }
+                    }
                 }
             }
+            else
+            {
+                if (!SerialHelper.IsValid(Serial))
+                {
+                    return false;
+                }
+
+                if (ReferenceEquals(SelectedObject.Object, this))
+                {
+                    return true;
+                }
+
+                Point position = RealScreenPosition;
+                position.X += 22;
+                position.Y += 22;
+
+                byte direction = (byte)((byte)Layer & 0x7F & 7);
+                AnimationsLoader.Instance.GetAnimDirection(ref direction, ref IsFlipped);
+                sbyte animIndex = AnimIndex;
+                bool ishuman = MathHelper.InRange(Amount, 0x0190, 0x0193) ||
+                    MathHelper.InRange(Amount, 0x00B7, 0x00BA) ||
+                    MathHelper.InRange(Amount, 0x025D, 0x0260) ||
+                    MathHelper.InRange(Amount, 0x029A, 0x029B) ||
+                    MathHelper.InRange(Amount, 0x02B6, 0x02B7) ||
+                    Amount == 0x03DB || Amount == 0x03DF || Amount == 0x03E2 ||
+                    Amount == 0x02E8 || Amount == 0x02E9;
+
+
+                for (int i = -1; i < Constants.USED_LAYER_COUNT; i++)
+                {
+                    // yes im lazy
+                    Layer layer = i == -1 ? Layer.Invalid : LayerOrder.UsedLayers[direction, i];
+
+                    ushort graphic;
+
+                    if (layer == Layer.Invalid)
+                    {
+                        graphic = GetGraphicForAnimation();
+                        AnimationsLoader.Instance.ConvertBodyIfNeeded(ref graphic);
+                    }
+                    else if (ishuman)
+                    {
+                        Item itemEquip = FindItemByLayer(layer);
+
+                        if (itemEquip == null)
+                        {
+                            continue;
+                        }
+
+                        graphic = itemEquip.ItemData.AnimID;
+
+                        if (AnimationsLoader.Instance.EquipConversions.TryGetValue(graphic, out Dictionary<ushort, EquipConvData> map))
+                        {
+                            if (map.TryGetValue(graphic, out EquipConvData data))
+                            {
+                                _equipConvData = data;
+                                graphic = data.Graphic;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        continue;
+                    }
+
+                    byte group = AnimationsLoader.Instance.GetDieGroupIndex(graphic, UsedLayer);
+
+                    if (GetTexture(ref graphic, ref group, ref animIndex, direction, out var spriteInfo, out var isUop))
+                    {
+                        int x = position.X - (IsFlipped ? spriteInfo.UV.Width - spriteInfo.Center.X : spriteInfo.Center.X);
+                        int y = position.Y - (spriteInfo.UV.Height + spriteInfo.Center.Y);
+
+                        if (AnimationsLoader.Instance.PixelCheck
+                        (
+                            graphic,
+                            group,
+                            direction,
+                            isUop,
+                            animIndex,
+                            IsFlipped ? x + spriteInfo.UV.Width - SelectedObject.TranslatedMousePositionByViewport.X : SelectedObject.TranslatedMousePositionByViewport.X - x,
+                            SelectedObject.TranslatedMousePositionByViewport.Y - y
+                        ))
+                        {
+                            return true;
+                        }
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        private static bool GetTexture(ref ushort graphic, ref byte animGroup, ref sbyte animIndex, byte direction, out SpriteInfo spriteInfo, out bool isUOP)
+        {
+            spriteInfo = default;
+            isUOP = false;
+
+            ushort hue = 0;
+
+            AnimationDirection animationSet = AnimationsLoader.Instance.GetBodyAnimationGroup
+            (
+                ref graphic,
+                ref animGroup,
+                ref hue,
+                true,
+                false
+            )
+            .Direction[direction];
+
+            if (animationSet == null ||
+                animationSet.Address == -1 ||
+                animationSet.FileIndex == -1 ||
+                animationSet.FrameCount == 0 ||
+                animationSet.SpriteInfos == null
+               )
+            {
+                return false;
+            }
+
+            int fc = animationSet.FrameCount;
+
+            if (fc > 0 && animIndex >= fc)
+            {
+                animIndex = (sbyte)(fc - 1);
+            }
+            else if (animIndex < 0)
+            {
+                animIndex = 0;
+            }
+
+            if (animIndex >= animationSet.FrameCount)
+            {
+                return false;
+            }
+
+            spriteInfo = animationSet.SpriteInfos[animIndex];
+
+            if (spriteInfo.Texture == null)
+            {
+                return false;
+            }
+
+            isUOP = animationSet.IsUOP;
+
+            return true;
         }
     }
 }
