@@ -37,6 +37,7 @@ using ClassicUO.Data;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
+using ClassicUO.Input;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
@@ -62,16 +63,6 @@ namespace ClassicUO.Game.GameObjects
             {
                 return false;
             }
-
-            //if (this is PlayerMobile)
-            //{
-            //    Graphic = 0x6a;
-            //}
-            //else
-            //{
-            //    Graphic = 666;
-            //    Flags |= Flags.Flying;
-            //}
 
             hueVec = Vector3.Zero;
 
@@ -195,7 +186,11 @@ namespace ClassicUO.Game.GameObjects
             byte animGroup = GetGroupForAnimation(this, graphic, true);
             sbyte animIndex = AnimIndex;
 
+            //animGroup = 19;
+            //animIndex = 2;
+
             Item mount = FindItemByLayer(Layer.Mount);
+            sbyte mountOffsetY = 0;
 
             if (isHuman && mount != null)
             {
@@ -204,6 +199,8 @@ namespace ClassicUO.Game.GameObjects
 
                 if (mountGraphic != 0xFFFF)
                 {
+                    mountOffsetY = AnimationsLoader.Instance.DataIndex[mountGraphic].MountedHeightOffset;
+
                     if (hasShadow)
                     {
                         DrawInternal
@@ -225,7 +222,8 @@ namespace ClassicUO.Game.GameObjects
                             false,
                             false,
                             hueVec.Z,
-                            depth
+                            depth,
+                            mountOffsetY
                         );
 
                         animGroupMount = GetGroupForAnimation(this, mountGraphic);
@@ -249,7 +247,8 @@ namespace ClassicUO.Game.GameObjects
                             false,
                             false,
                             hueVec.Z,
-                            depth
+                            depth,
+                            mountOffsetY
                         );
                     }
                     else
@@ -257,7 +256,7 @@ namespace ClassicUO.Game.GameObjects
                         animGroupMount = GetGroupForAnimation(this, mountGraphic);
                     }
 
-                    drawY += DrawInternal
+                    DrawInternal
                     (
                         batcher,
                         this,
@@ -276,8 +275,11 @@ namespace ClassicUO.Game.GameObjects
                         true,
                         false,
                         hueVec.Z,
-                        depth
+                        depth,
+                        mountOffsetY
                     );
+
+                    drawY += mountOffsetY;
                 }
             }
             else
@@ -342,7 +344,8 @@ namespace ClassicUO.Game.GameObjects
                         false,
                         false,
                         hueVec.Z,
-                        depth
+                        depth,
+                        mountOffsetY
                     );
                 }
             }
@@ -366,7 +369,8 @@ namespace ClassicUO.Game.GameObjects
                 false,
                 isGargoyle,
                 hueVec.Z,
-                depth
+                depth,
+                mountOffsetY
             );
 
             if (!IsEmpty)
@@ -431,7 +435,8 @@ namespace ClassicUO.Game.GameObjects
                                 false,
                                 isGargoyle,
                                 hueVec.Z,
-                                depth
+                                depth,
+                                mountOffsetY
                             );
                         }
                         else
@@ -661,7 +666,7 @@ namespace ClassicUO.Game.GameObjects
             return true;
         }
 
-        private static sbyte DrawInternal
+        private static void DrawInternal
         (
             UltimaBatcher2D batcher,
             Mobile owner,
@@ -680,16 +685,16 @@ namespace ClassicUO.Game.GameObjects
             bool isMount,
             bool forceUOP,
             float alpha,
-            float depth
+            float depth,
+            sbyte mountOffset
         )
         {
             if (id >= Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT || owner == null)
             {
-                return 0;
+                return;
             }
 
             ushort hueFromFile = _viewHue;
-
 
             AnimationDirection direction = AnimationsLoader.Instance.GetBodyAnimationGroup
                                                            (
@@ -705,7 +710,7 @@ namespace ClassicUO.Game.GameObjects
             {
                 if (!(_transform && entity == null && !hasShadow))
                 {
-                    return 0;
+                    return;
                 }
             }
 
@@ -713,13 +718,13 @@ namespace ClassicUO.Game.GameObjects
             {
                 if (!(_transform && entity == null && !hasShadow))
                 {
-                    return 0;
+                    return;
                 }
             }
 
             if (direction == null)
             {
-                return 0;
+                return;
             }
 
             int fc = direction.FrameCount;
@@ -741,7 +746,7 @@ namespace ClassicUO.Game.GameObjects
                 {
                     if (!(_transform && entity == null && !hasShadow))
                     {
-                        return 0;
+                        return;
                     }
 
                     goto SKIP;
@@ -827,7 +832,7 @@ namespace ClassicUO.Game.GameObjects
 
                             if (spriteInfo.Texture == null)
                             {
-                                return 0;
+                                return;
                             }
                         }
 
@@ -930,18 +935,46 @@ namespace ClassicUO.Game.GameObjects
                     }
                     else if (spriteInfo.Texture != null)
                     {
-                        int value = Math.Max(1, Math.Abs(spriteInfo.UV.Height + spriteInfo.Center.Y));               
-                        int count = (spriteInfo.UV.Height / value) + 1;
+                        bool isMounted = isHuman && false; // owner.IsMounted;
+
+                        
+                        int diffX = spriteInfo.UV.Width - spriteInfo.Center.X;
+
+                        if (isMounted)
+                        {
+                            //if (mountOffset != 0)
+                            //{
+                            //    mountOffset += 10;
+                            //}
+                            //else
+                            //{
+                                mountOffset = (sbyte) Math.Abs(spriteInfo.Center.Y);
+                            //}                          
+                        }
+                       
+
+                        int diffY = (spriteInfo.UV.Height + spriteInfo.Center.Y) - mountOffset;
+
+                        //if (owner.Serial == World.Player.Serial && entity == null)
+                        //{
+
+                        //}
+
+                        int value = !isMounted && diffX <= 44 ? spriteInfo.UV.Height * 2 : Math.Max(1, diffY);               
+                        int count = Math.Max( (spriteInfo.UV.Height / value) + 1, 2);
 
                         Rectangle rect = spriteInfo.UV;
                         rect.Height = Math.Min(value, rect.Height);
                         Vector2 pos = new Vector2(x, y);
                         int remains = spriteInfo.UV.Height - rect.Height;
 
+                        int tiles = (byte)owner.Direction % 2 == 0 ? 2 : 2;
+                        //tiles = 999;
+
                         for (int i = 0; i < count; ++i)
                         {
-                            //hueVec.Y = 1;
-                            //hueVec.X = 0x44 + (i * 20);
+                            hueVec.Y = 1;
+                            hueVec.X = 0x44 + (i * 20);
 
                             batcher.Draw
                             (
@@ -953,13 +986,21 @@ namespace ClassicUO.Game.GameObjects
                                 Vector2.Zero,
                                 1f,
                                 mirror ? SpriteEffects.FlipHorizontally : SpriteEffects.None,
-                                depth + (1.5f * i)
+                                //owner.CalculateDepthZ(i * tiles /** (int) ration*/)
+                                depth + (i * tiles)
+                                //Client.Game.GetScene<GameScene>().CalculateDepth(owner, i * tiles)
+                                //depth - (1f - (1f / (float)(Math.Sqrt(Math.Pow(1.5f, i)))))
+                                // depth - (0.005f * i) // 
+                                //depth + (i == 0 ? 0f : (1f / (2 * i)))
+
+                                //1f - (1f / (owner.X + owner.Y + i * 2f))
+
                                 //depth - (i * 0.01f)
                             );
 
                             pos.Y += rect.Height;
-                            rect.Y += rect.Height;                            
-                            rect.Height = Math.Min(value, remains);
+                            rect.Y += rect.Height;
+                            rect.Height = remains; // Math.Min(value, remains);
                             remains -= rect.Height;
                         }
 
@@ -997,11 +1038,7 @@ namespace ClassicUO.Game.GameObjects
                         Client.Game.GetScene<GameScene>().AddLight(owner, entity, mirror ? x + spriteInfo.UV.Width : x, y);
                     }
                 }
-
-                return AnimationsLoader.Instance.DataIndex[id].MountedHeightOffset;
             }
-
-            return 0;
         }
 
         public override bool CheckMouseSelection()
@@ -1010,6 +1047,15 @@ namespace ClassicUO.Game.GameObjects
             position.Y -= 3;
             position.X += (int)Offset.X + 22;
             position.Y += (int)(Offset.Y - Offset.Z) + 22;
+
+            Rectangle r = FrameInfo;
+            r.X = position.X - r.X;
+            r.Y = position.Y - r.Y;
+
+            if (!r.Contains(Mouse.Position))
+            {
+                return false;
+            }
 
 
             bool isHuman = IsHuman;
@@ -1021,7 +1067,8 @@ namespace ClassicUO.Game.GameObjects
 
 
             ProcessSteps(out byte dir);
-            AnimationsLoader.Instance.GetAnimDirection(ref dir, ref IsFlipped);
+            bool isFlipped = IsFlipped;
+            AnimationsLoader.Instance.GetAnimDirection(ref dir, ref isFlipped);
 
             ushort graphic = GetGraphicForAnimation();
             byte animGroup = GetGroupForAnimation(this, graphic, true);

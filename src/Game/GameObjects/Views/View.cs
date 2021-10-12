@@ -62,11 +62,15 @@ namespace ClassicUO.Game.GameObjects
                     StencilEnable = true,
                     StencilFunction = CompareFunction.GreaterEqual,
                     StencilPass = StencilOperation.Keep,
-                    ReferenceStencil = 0
+                    ReferenceStencil = 0,
                     //DepthBufferEnable = true,
                     //DepthBufferWriteEnable = true,
-                };
 
+                    DepthBufferEnable = false,
+                    StencilMask = -1,
+                    StencilFail = StencilOperation.Keep,
+                    StencilDepthBufferFail = StencilOperation.Keep,
+                };
 
                 return state;
             }
@@ -81,7 +85,61 @@ namespace ClassicUO.Game.GameObjects
 
         public abstract bool Draw(UltimaBatcher2D batcher, int posX, int posY, ref Vector3 hue, float depth);
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public float CalculateDepthZ(int offset = 0)
+        {
+            int x = X;
+            int y = Y;
+            int z = PriorityZ;
 
+            // Offsets are in SCREEN coordinates
+            if (Offset.X > 0 && Offset.Y < 0)
+            {
+                // North
+            }
+            else if (Offset.X > 0 && Offset.Y == 0)
+            {
+                // Northeast
+                x++;
+            }
+            else if (Offset.X > 0 && Offset.Y > 0)
+            {
+                // East
+                z += Math.Max(0, (int)Offset.Z);
+                x++;
+            }
+            else if (Offset.X == 0 && Offset.Y > 0)
+            {
+                // Southeast
+                x++;
+                y++;
+            }
+            else if (Offset.X < 0 && Offset.Y > 0)
+            {
+                // South
+                z += Math.Max(0, (int)Offset.Z);
+                y++;
+            }
+            else if (Offset.X < 0 && Offset.Y == 0)
+            {
+                // Southwest
+                y++;
+            }
+            else if (Offset.X < 0 && Offset.Y > 0)
+            {
+                // West
+            }
+            else if (Offset.X == 0 && Offset.Y < 0)
+            {
+                // Northwest
+            }
+
+
+            //Vector3 vec = new Vector3(x + offset, y + offset, 0);
+
+            //return (float)vec.Length();
+            return x + y /*+ (z * 0.001f)*/ + offset;
+        }
 
         public Rectangle GetOnScreenRectangle()
         {

@@ -78,8 +78,8 @@ namespace ClassicUO.Game.Scenes
         private int _renderListStaticsCount;
 
         // lands
-        private GameObject _renderListLandHead, _renderListLand;
-        private int _renderListLandCount;
+        private GameObject _renderListTransparentObjectsHead, _renderListTransparentObjects;
+        private int _renderListTransparentObjectsCount;
 
         // animations
         private GameObject _renderListAnimationsHead, _renderListAnimations;
@@ -538,25 +538,45 @@ namespace ClassicUO.Game.Scenes
 
             //++_renderListStaticsCount;
 
+            // slow as fuck
             if (obj.AllowedToDraw && obj.CheckMouseSelection())
             {
                 SelectedObject.Object = obj;
             }
 
-
-            if (first == null)
+            if (obj.AlphaHue != 0xFF)
             {
-                first = renderList = obj;
+                if (_renderListTransparentObjectsHead == null)
+                {
+                    _renderListTransparentObjectsHead = _renderListTransparentObjects = obj;
+                }
+                else
+                {
+                    _renderListTransparentObjects.RenderListNext = obj;
+                    _renderListTransparentObjects = obj;
+                }
+
+                obj.RenderListNext = null;
+
+                ++_renderListTransparentObjectsCount;
             }
             else
             {
-                renderList.RenderListNext = obj;
-                renderList = obj;
+                if (first == null)
+                {
+                    first = renderList = obj;
+                }
+                else
+                {
+                    renderList.RenderListNext = obj;
+                    renderList = obj;
+                }
+
+                obj.RenderListNext = null;
+
+                ++renderListCount;
             }
 
-            obj.RenderListNext = null;
-
-            ++renderListCount;
 
             obj.UseInRender = (byte)_renderIndex;
         }
@@ -566,10 +586,10 @@ namespace ClassicUO.Game.Scenes
             for (; obj != null; obj = obj.TNext)
             {
                 // i think we can remove this property. It's used to the "odd sorting system"
-                if (obj.CurrentRenderIndex == _renderIndex)
-                {
-                    continue;
-                }
+                //if (obj.CurrentRenderIndex == _renderIndex)
+                //{
+                //    continue;
+                //}
 
                 if (UpdateDrawPosition && obj.CurrentRenderIndex != _renderIndex || obj.IsPositionChanged)
                 {
@@ -613,7 +633,9 @@ namespace ClassicUO.Game.Scenes
                         continue;
                     }
 
-                    PushToRenderList(obj, ref _renderListLand, ref _renderListLandHead, ref _renderListLandCount);
+                    PushToRenderList(obj, ref _renderList, ref _renderListStaticsHead, ref _renderListStaticsCount);
+
+                    //PushToRenderList(obj, ref _renderListLand, ref _renderListLandHead, ref _renderListLandCount);
                 }
                 else if (obj is Static staticc)
                 {

@@ -119,6 +119,11 @@ namespace ClassicUO.Game.GameObjects
 
             ShaderHueTranslator.GetHueVector(ref hueVec, hue, data.IsPartialHue, data.IsTranslucent ? .5f : 0, effect: true);
 
+            if (Source != null)
+            {
+                depth = Source.CalculateDepthZ();
+            }
+
             switch (Blend)
             {
                 case GraphicEffectBlendMode.Multiply:

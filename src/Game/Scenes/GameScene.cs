@@ -529,9 +529,9 @@ namespace ClassicUO.Game.Scenes
             _renderList = null;
             _renderListStaticsCount = 0;
 
-            _renderListLandHead = null;
-            _renderListLand = null;
-            _renderListLandCount = 0;
+            _renderListTransparentObjectsHead = null;
+            _renderListTransparentObjects = null;
+            _renderListTransparentObjectsCount = 0;
 
             _renderListAnimationsHead = null;
             _renderListAnimations = null;
@@ -850,7 +850,7 @@ namespace ClassicUO.Game.Scenes
 
         public override void FixedUpdate(double totalTime, double frameTime)
         {
-            //FillGameObjectList(null);
+            //FillGameObjectList();
         }
 
 
@@ -1063,9 +1063,9 @@ namespace ClassicUO.Game.Scenes
             RenderedObjectsCount = 0;      
             GameObject.DrawTransparent = usecircle;
 
-            RenderedObjectsCount += DrawRenderList(batcher, _renderListLandHead, _renderListLandCount, false, z);
             RenderedObjectsCount += DrawRenderList(batcher, _renderListStaticsHead, _renderListStaticsCount, usecircle, z);
             RenderedObjectsCount += DrawRenderList(batcher, _renderListAnimationsHead, _renderListAnimationCount, false, z);
+            RenderedObjectsCount += DrawRenderList(batcher, _renderListTransparentObjectsHead, _renderListTransparentObjectsCount, false, z);
 
 
             /*var worldPoint = Camera.MouseToWorldPosition() + _offset;
@@ -1124,7 +1124,7 @@ namespace ClassicUO.Game.Scenes
             int done = 0;
             //var rectTexture = SolidColorTextureCache.GetTexture(Color.White);
 
-            //float max = DepthFormula(_minTile.X, _minTile.Y, -128);
+            float max = DepthFormula(_minTile.X, _minTile.Y, -128);
 
             for (int i = 0; i < count; obj = obj.RenderListNext, ++i)
             {
@@ -1135,11 +1135,11 @@ namespace ClassicUO.Game.Scenes
                         GameObject.DrawTransparent = obj.TransparentTest(z);
                     }
 
-                    float depth = CalculateDepth(obj) / 1f;
 
-               
+                    float depth = obj.CalculateDepthZ(); // CalculateDepth(obj) / max;
+
                     //ushort hue = obj.Hue;
-                    //obj.Hue = (ushort) (60 / depth);
+                    //obj.Hue = (ushort)(((obj.X + obj.Y) % 3000) + 1);
 
                     if (obj.Draw(batcher, obj.RealScreenPosition.X, obj.RealScreenPosition.Y, ref hueVec, depth))
                     {
@@ -1167,19 +1167,23 @@ namespace ClassicUO.Game.Scenes
             return done;
         }
 
-        public  float DepthFormula(int x, int y, int z)
+        private float DepthFormula(int x, int y, int z)
         {
+            //float sX = x;
+            //float sY = y;
+            //float sZ = 0; // z * 0.001f;
+
             float sX = (_maxTile.X - x) * 22;
             float sY = (_maxTile.Y - y) * 22;
             float sZ = (_maxGroundZ - z);
 
-            //return (float) Math.Sqrt(sX * sX + sY * sY + sZ * sZ);
+            //return /*1f - 1f /*/ ((float) Math.Sqrt(sX * sX + sY * sY + sZ * sZ));
 
             return sX + sY + sZ;
         }
 
 
-        private float CalculateDepth(GameObject obj)
+        public float CalculateDepth(GameObject obj, int offset = 0)
         {
             int x = obj.X;
             int y = obj.Y;
@@ -1236,11 +1240,14 @@ namespace ClassicUO.Game.Scenes
                 // Northwest
             }
 
-            return x + y;
+
+
+            //return (1f / (float) Math.Sqrt(x * x + y * y /*+ z * z*/));
+            //return (x + y);
             //return (x + y) /*+ priorityZ * 0.001f*/ ;
             //return (x * 4) + (y * 4) + priorityZ;
             //return (256 - priorityZ);
-            return DepthFormula(x, y, z);
+            return DepthFormula(x + offset, y + offset, 0);
             //return x + y + (priorityZ);
             //return x + y + (priorityZ - o.Z) /4;
         }
