@@ -584,6 +584,8 @@ namespace ClassicUO.Game.Scenes
             int maxY = _maxTile.Y;
             Map.Map map = World.Map;
             bool use_handles = _useObjectHandles;
+            int maxCotZ = World.Player.Z + 5;
+            Vector2 playerPos = World.Player.GetScreenPosition();
 
             for (int i = 0; i < 2; ++i)
             {
@@ -615,7 +617,9 @@ namespace ClassicUO.Game.Scenes
                             x,
                             y,
                             use_handles,
-                            150 /*, null*/
+                            150,
+                            maxCotZ,
+                            ref playerPos
                         );
 
                         ++x;
@@ -1002,8 +1006,8 @@ namespace ClassicUO.Game.Scenes
             DepthBufferEnable = true,
             DepthBufferFunction = CompareFunction.LessEqual,
             StencilFunction = CompareFunction.NotEqual,
-            ReferenceStencil = 1,
-            StencilMask = 1,
+            ReferenceStencil = -1,
+            StencilMask = -1,
             StencilFail = StencilOperation.Keep,
             StencilDepthBufferFail = StencilOperation.Keep,
             StencilPass = StencilOperation.Keep
@@ -1043,9 +1047,7 @@ namespace ClassicUO.Game.Scenes
 
 
             batcher.Begin(null, matrix);
-            batcher.SetBrightlight(ProfileManager.CurrentProfile.TerrainShadowsLevel * 0.1f);
-            batcher.SetStencil(_stencil);
-
+            
             bool usecircle = ProfileManager.CurrentProfile.UseCircleOfTransparency;
 
             if (usecircle)
@@ -1058,30 +1060,29 @@ namespace ClassicUO.Game.Scenes
                 CircleOfTransparency.Draw(batcher, playerPos);
             }
 
-            int z = World.Player.Z + 5;
+            batcher.SetBrightlight(ProfileManager.CurrentProfile.TerrainShadowsLevel * 0.1f);
+            batcher.SetStencil(_stencil);
 
             RenderedObjectsCount = 0;      
-            GameObject.DrawTransparent = usecircle;
-
-            RenderedObjectsCount += DrawRenderList(batcher, _renderListStaticsHead, _renderListStaticsCount, usecircle, z);
-            RenderedObjectsCount += DrawRenderList(batcher, _renderListAnimationsHead, _renderListAnimationCount, false, z);
-            RenderedObjectsCount += DrawRenderList(batcher, _renderListTransparentObjectsHead, _renderListTransparentObjectsCount, false, z);
+            RenderedObjectsCount += DrawRenderList(batcher, _renderListStaticsHead, _renderListStaticsCount);
+            RenderedObjectsCount += DrawRenderList(batcher, _renderListAnimationsHead, _renderListAnimationCount);
+            RenderedObjectsCount += DrawRenderList(batcher, _renderListTransparentObjectsHead, _renderListTransparentObjectsCount);
 
 
-            /*var worldPoint = Camera.MouseToWorldPosition() + _offset;
-            worldPoint.X += 22;
-            worldPoint.Y += 22;
+            //var worldPoint = Camera.MouseToWorldPosition() + _offset;
+            //worldPoint.X += 22;
+            //worldPoint.Y += 22;
 
-            var isoX = (int)(0.5f * (worldPoint.X / 22f + worldPoint.Y / 22f));
-            var isoY = (int)(0.5f * (-worldPoint.X / 22f + worldPoint.Y / 22f));
+            //var isoX = (int)(0.5f * (worldPoint.X / 22f + worldPoint.Y / 22f));
+            //var isoY = (int)(0.5f * (-worldPoint.X / 22f + worldPoint.Y / 22f));
 
-            GameObject selectedObject = World.Map.GetTile(isoX, isoY, false);
+            //GameObject selectedObject = World.Map.GetTile(isoX, isoY, false);
 
-            if (selectedObject != null)
-            {
-                selectedObject.Hue = 0x44;
-            }
-            */
+            //if (selectedObject != null)
+            //{
+            //    selectedObject.Hue = 0x44;
+            //}
+            
 
 
             Vector3 hueVec = Vector3.Zero;
@@ -1118,7 +1119,7 @@ namespace ClassicUO.Game.Scenes
             batcher.End();
         }
 
-        private int DrawRenderList(UltimaBatcher2D batcher, GameObject obj, int count, bool useCoT, int z)
+        private int DrawRenderList(UltimaBatcher2D batcher, GameObject obj, int count)
         {
             Vector3 hueVec = Vector3.Zero;
             int done = 0;
@@ -1130,12 +1131,6 @@ namespace ClassicUO.Game.Scenes
             {
                 if (obj.Z <= _maxGroundZ)
                 {
-                    if (useCoT)
-                    {
-                        GameObject.DrawTransparent = obj.TransparentTest(z);
-                    }
-
-
                     float depth = obj.CalculateDepthZ(); // CalculateDepth(obj) / max;
 
                     //ushort hue = obj.Hue;

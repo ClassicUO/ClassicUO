@@ -347,8 +347,10 @@ namespace ClassicUO.Game.Scenes
             }
         }
 
-        private bool ProcessAlpha(GameObject obj, ref StaticTiles itemData)
+        private bool ProcessAlpha(GameObject obj, ref StaticTiles itemData, bool useCoT, ref Vector2 playerPos, int cotZ, out bool allowSelection)
         {
+            allowSelection = true;
+
             if (obj.Z >= _maxZ)
             {
                 bool changed;
@@ -388,15 +390,55 @@ namespace ClassicUO.Game.Scenes
                     CalculateAlpha(ref obj.AlphaHue, 178);
                 }
             }
-            else if (!itemData.IsFoliage && obj.AlphaHue != 0xFF)
+            else if (!itemData.IsFoliage)
             {
-                if (_alphaChanged)
+                if (useCoT && CheckCircleOfTransparencyRadius(obj, cotZ, ref playerPos, ref allowSelection))
+                { 
+                }
+                else if (_alphaChanged && obj.AlphaHue != 0xFF)
                 {
                     CalculateAlpha(ref obj.AlphaHue, 0xFF);
                 }
             }
 
             return true;
+        }
+
+        private bool CheckCircleOfTransparencyRadius(GameObject obj, int maxZ, ref Vector2 playerPos, ref bool allowSelection)
+        {
+            if (ProfileManager.CurrentProfile.UseCircleOfTransparency && obj.TransparentTest(maxZ))
+            {
+                int maxDist = ProfileManager.CurrentProfile.CircleOfTransparencyRadius + 44;
+                Vector2 pos = new Vector2(obj.RealScreenPosition.X, obj.RealScreenPosition.Y - 22);
+                Vector2.Distance(ref playerPos, ref pos, out float dist);
+
+                if (dist <= maxDist)
+                {
+                    switch (ProfileManager.CurrentProfile.CircleOfTransparencyType)
+                    {
+                        default:
+                        case 0:
+                            obj.AlphaHue = 127;
+
+                            break;
+
+                        case 1:
+
+                            float delta = (maxDist - 44) * 0.5f;
+                            float fraction = (dist - delta) / (maxDist - delta);
+
+                            obj.AlphaHue = (byte)Microsoft.Xna.Framework.MathHelper.Clamp(fraction * 255f, byte.MinValue, byte.MaxValue);
+
+                            break;
+                    }
+
+                    allowSelection = obj.AlphaHue >= 127;
+
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         private static bool CalculateAlpha(ref byte alphaHue, int maxAlpha)
@@ -522,7 +564,7 @@ namespace ClassicUO.Game.Scenes
             return found;
         }
 
-        private void PushToRenderList(GameObject obj, ref GameObject renderList, ref GameObject first, ref int renderListCount)
+        private void PushToRenderList(GameObject obj, ref GameObject renderList, ref GameObject first, ref int renderListCount, bool allowSelection)
         {
             //if (_renderListStaticsHead == null)
             //{
@@ -538,13 +580,18 @@ namespace ClassicUO.Game.Scenes
 
             //++_renderListStaticsCount;
 
+            if (obj.AlphaHue == 0)
+            {
+                return;
+            }
+
             // slow as fuck
-            if (obj.AllowedToDraw && obj.CheckMouseSelection())
+            if (allowSelection && obj.AllowedToDraw && obj.CheckMouseSelection())
             {
                 SelectedObject.Object = obj;
             }
 
-            if (obj.AlphaHue != 0xFF)
+            if (obj.AlphaHue != byte.MaxValue)
             {
                 if (_renderListTransparentObjectsHead == null)
                 {
@@ -581,7 +628,16 @@ namespace ClassicUO.Game.Scenes
             obj.UseInRender = (byte)_renderIndex;
         }
 
-        private unsafe bool AddTileToRenderList(GameObject obj, int worldX, int worldY, bool useObjectHandles, int maxZ, GameObject parent = null)
+        private unsafe bool AddTileToRenderList
+        (
+            GameObject obj, 
+            int worldX,
+            int worldY,
+            bool useObjectHandles, 
+            int maxZ,
+            int cotZ, 
+            ref Vector2 playerScreePos
+        )
         {
             for (; obj != null; obj = obj.TNext)
             {
@@ -633,9 +689,7 @@ namespace ClassicUO.Game.Scenes
                         continue;
                     }
 
-                    PushToRenderList(obj, ref _renderList, ref _renderListStaticsHead, ref _renderListStaticsCount);
-
-                    //PushToRenderList(obj, ref _renderListLand, ref _renderListLandHead, ref _renderListLandCount);
+                    PushToRenderList(obj, ref _renderList, ref _renderListStaticsHead, ref _renderListStaticsCount, true);
                 }
                 else if (obj is Static staticc)
                 {
@@ -651,7 +705,7 @@ namespace ClassicUO.Game.Scenes
                         continue;
                     }
 
-                    if (!ProcessAlpha(obj, ref itemData))
+                    if (!ProcessAlpha(obj, ref itemData, true, ref playerScreePos, cotZ, out bool allowSelection))
                     {
                         continue;
                     }
@@ -688,7 +742,7 @@ namespace ClassicUO.Game.Scenes
 
                     CheckIfBehindATree(obj, worldX, worldY, ref itemData);
 
-                    PushToRenderList(obj, ref _renderList, ref _renderListStaticsHead, ref _renderListStaticsCount);
+                    PushToRenderList(obj, ref _renderList, ref _renderListStaticsHead, ref _renderListStaticsCount, allowSelection);
                 }
                 else if (obj is Multi multi)
                 {
@@ -699,7 +753,7 @@ namespace ClassicUO.Game.Scenes
                         continue;
                     }
 
-                    if (!ProcessAlpha(obj, ref itemData))
+                    if (!ProcessAlpha(obj, ref itemData, true, ref playerScreePos, cotZ, out bool allowSelection))
                     {
                         continue;
                     }
@@ -740,12 +794,11 @@ namespace ClassicUO.Game.Scenes
 
                     if (multi.IsMovable)
                     {
-                        AddOffsetCharacterTileToRenderList(obj, useObjectHandles, true);
                     }
 
                     CheckIfBehindATree(obj, worldX, worldY, ref itemData);
 
-                    PushToRenderList(obj, ref _renderList, ref _renderListStaticsHead, ref _renderListStaticsCount);
+                    PushToRenderList(obj, ref _renderList, ref _renderListStaticsHead, ref _renderListStaticsCount, allowSelection);
                 }
                 else if (obj is Mobile mobile)
                 {
@@ -760,7 +813,7 @@ namespace ClassicUO.Game.Scenes
 
                     StaticTiles empty = default;
 
-                    if (!ProcessAlpha(obj, ref empty))
+                    if (!ProcessAlpha(obj, ref empty, false, ref playerScreePos, cotZ, out bool allowSelection))
                     {
                         continue;
                     }
@@ -774,9 +827,7 @@ namespace ClassicUO.Game.Scenes
 
                     obj.AllowedToDraw = !HasSurfaceOverhead(mobile);
 
-                    AddOffsetCharacterTileToRenderList(obj, useObjectHandles, false);
-
-                    PushToRenderList(obj, ref _renderListAnimations, ref _renderListAnimationsHead, ref _renderListAnimationCount);
+                    PushToRenderList(obj, ref _renderListAnimations, ref _renderListAnimationsHead, ref _renderListAnimationCount, allowSelection);
                 }
                 else if (obj is Item item)
                 {
@@ -797,7 +848,7 @@ namespace ClassicUO.Game.Scenes
                         continue;
                     }
 
-                    if (!ProcessAlpha(obj, ref itemData))
+                    if (!ProcessAlpha(obj, ref itemData, false, ref playerScreePos, cotZ, out bool allowSelection))
                     {
                         continue;
                     }
@@ -828,11 +879,9 @@ namespace ClassicUO.Game.Scenes
 
                     if (item.IsCorpse)
                     {
-                        AddOffsetCharacterTileToRenderList(obj, useObjectHandles, false);
                     }
                     else if (itemData.IsMultiMovable)
                     {
-                        AddOffsetCharacterTileToRenderList(obj, useObjectHandles, true);
                     }
 
                     if (!item.IsCorpse)
@@ -842,16 +891,16 @@ namespace ClassicUO.Game.Scenes
 
                     if (item.IsCorpse)
                     {
-                        PushToRenderList(obj, ref _renderListAnimations, ref _renderListAnimationsHead, ref _renderListAnimationCount);
+                        PushToRenderList(obj, ref _renderListAnimations, ref _renderListAnimationsHead, ref _renderListAnimationCount, allowSelection);
                     }
                     else
                     {
-                        PushToRenderList(obj, ref _renderList, ref _renderListStaticsHead, ref _renderListStaticsCount);
+                        PushToRenderList(obj, ref _renderList, ref _renderListStaticsHead, ref _renderListStaticsCount, true);
                     }         
                 }
                 else if (obj is GameEffect effect)
                 {
-                    if (!ProcessAlpha(obj, ref TileDataLoader.Instance.StaticData[effect.Graphic]))
+                    if (!ProcessAlpha(obj, ref TileDataLoader.Instance.StaticData[effect.Graphic], false, ref playerScreePos, cotZ, out _))
                     {
                         continue;
                     }
@@ -865,84 +914,15 @@ namespace ClassicUO.Game.Scenes
 
                     if (effect.IsMoving) // TODO: check for typeof(MovingEffect) ?
                     {
-                        AddOffsetCharacterTileToRenderList(obj, useObjectHandles, true);
                     }
 
-                    PushToRenderList(obj, ref _renderList, ref _renderListStaticsHead, ref _renderListStaticsCount);
+                    PushToRenderList(obj, ref _renderList, ref _renderListStaticsHead, ref _renderListStaticsCount, false);
                 }
             }
 
             return false;
         }
 
-        private static readonly sbyte[,] _offets = new sbyte[8, 2]
-        {
-            { 1, -1 },
-            { 1, -2 },
-            { 0, 1 },
-            { -1, 2 },
-            { 1, 0 },
-            { 1, 1 },
-            { 2, -2 },
-            { 2, -1 },
-        };
-
-
-        private void AddOffsetCharacterTileToRenderList(GameObject entity, bool useObjectHandles, bool ignoreDefaultHeightOffset)
-        {
-            return;
-
-            short maxZ = entity.PriorityZ;
-
-            /*  Rotation 45° side: --->
-             *
-             *      [ ][ ][ ][ ][ ][ ][ ]
-             *      [ ][ ][ ][ ][1][6][ ]
-             *      [ ][ ][ ][ ][0][7][ ]
-             *      [ ][ ][ ][+][4][ ][ ]
-             *      [ ][ ][ ][2][5][ ][ ]
-             *      [ ][ ][3][ ][ ][ ][ ]
-             *      [ ][ ][ ][ ][ ][ ][ ]
-             *
-             */
-
-            for (int i = 0; i < 8; ++i)
-            {
-                int charX = entity.X + _offets[i, 0];
-                int charY = entity.Y + _offets[i, 1];
-
-                if (charX < _minTile.X || charX > _maxTile.X ||
-                    charY < _minTile.Y || charY > _maxTile.Y)
-                {
-                    continue;
-                }
-
-                int currentMaxZ = maxZ;
-
-                if (!ignoreDefaultHeightOffset && i <= 1)
-                {
-                    currentMaxZ += 20;
-                }
-
-                GameObject tile = World.Map.GetTile(charX, charY);
-
-                if (tile != null)
-                {
-                    if (AddTileToRenderList
-                    (
-                        tile,
-                        charX,
-                        charY,
-                        useObjectHandles,
-                        currentMaxZ,
-                        entity
-                    ) && i >= 4)
-                    {
-                        break;
-                    }
-                }
-            }
-        }
 
         private void GetViewPort()
         {

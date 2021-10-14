@@ -58,8 +58,6 @@ namespace ClassicUO.Game.GameObjects
 
             hueVec = Vector3.Zero;
 
-            DrawTransparent = false;
-
             posX += (int) Offset.X;
             posY += (int) (Offset.Y + Offset.Z);
 
@@ -162,7 +160,6 @@ namespace ClassicUO.Game.GameObjects
                     posX - 5,
                     posY - 5,
                     ref hueVec,
-                    ref DrawTransparent,
                     false,
                     depth
                 );
@@ -185,7 +182,6 @@ namespace ClassicUO.Game.GameObjects
                 posX,
                 posY,
                 ref hueVec,
-                ref DrawTransparent,
                 false,
                 depth
             );

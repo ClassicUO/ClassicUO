@@ -255,5 +255,10 @@ namespace ClassicUO.Game.GameObjects
             return true;
         }
 
+        public override bool CheckMouseSelection()
+        {
+            return false;
+        }
+
     }
 }

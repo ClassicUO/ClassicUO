@@ -136,7 +136,6 @@ namespace ClassicUO.Game.GameObjects
                 posX,
                 posY,
                 ref hueVec,
-                ref DrawTransparent,
                 false,
                 depth
             );
@@ -159,11 +158,6 @@ namespace ClassicUO.Game.GameObjects
                     {
                         return false;
                     }
-                }
-
-                if (DrawTransparent)
-                {
-                    return false;
                 }
   
                 ref UOFileIndex index = ref ArtLoader.Instance.GetValidRefEntry(Graphic + 0x4000);

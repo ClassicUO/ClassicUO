@@ -98,9 +98,9 @@ namespace ClassicUO.Game.GameObjects
                 graphic = Constants.TREE_REPLACE_GRAPHIC;
             }
 
-            if (AlphaHue != 255)
+            if (AlphaHue != 0xFF)
             {
-                hueVec.Z = 1f - AlphaHue / 255f;
+                hueVec.Z = MathHelper.Clamp(1f - (AlphaHue / 255.0f), 0f, 1f);
             }
 
             DrawStaticAnimated
@@ -110,7 +110,6 @@ namespace ClassicUO.Game.GameObjects
                 posX,
                 posY,
                 ref hueVec,
-                ref DrawTransparent,
                 ProfileManager.CurrentProfile.ShadowsEnabled && ProfileManager.CurrentProfile.ShadowsStatics && (isTree || ItemData.IsFoliage || StaticFilters.IsRock(graphic)),
                 depth
             );
@@ -127,11 +126,6 @@ namespace ClassicUO.Game.GameObjects
         {
             if (!(SelectedObject.Object == this || FoliageIndex != -1 && Client.Game.GetScene<GameScene>().FoliageIndex == FoliageIndex))
             {
-                if (DrawTransparent)
-                {
-                    return false;
-                }
-
                 ushort graphic = Graphic;
 
                 bool isTree = StaticFilters.IsTree(graphic, out _);

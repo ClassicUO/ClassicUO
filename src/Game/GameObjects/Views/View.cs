@@ -51,8 +51,6 @@ namespace ClassicUO.Game.GameObjects
 
     internal abstract partial class GameObject
     {
-        public static bool DrawTransparent;
-
         protected static readonly Lazy<DepthStencilState> StaticTransparentStencil = new Lazy<DepthStencilState>
         (
             () =>
@@ -63,13 +61,6 @@ namespace ClassicUO.Game.GameObjects
                     StencilFunction = CompareFunction.GreaterEqual,
                     StencilPass = StencilOperation.Keep,
                     ReferenceStencil = 0,
-                    //DepthBufferEnable = true,
-                    //DepthBufferWriteEnable = true,
-
-                    DepthBufferEnable = false,
-                    StencilMask = -1,
-                    StencilFail = StencilOperation.Keep,
-                    StencilDepthBufferFail = StencilOperation.Keep,
                 };
 
                 return state;
@@ -317,7 +308,6 @@ namespace ClassicUO.Game.GameObjects
             int x,
             int y,
             ref Vector3 hue,
-            ref bool transparent,
             bool shadow,
             float depth
         )
@@ -336,76 +326,6 @@ namespace ClassicUO.Game.GameObjects
                 y -= index.Height;
 
                 Vector2 pos = new Vector2(x, y);
-
-                if (transparent)
-                {
-                    int maxDist = ProfileManager.CurrentProfile.CircleOfTransparencyRadius;
-
-                    Vector2 playerPos = World.Player.GetScreenPosition();
-
-                    //pos.X -= 22;
-                    playerPos.Y -= 22f;
-
-                    Vector2.Distance(ref playerPos, ref pos, out float dist);
-                    
-                    if (dist <= maxDist)
-                    {
-                        float alpha = hue.Z;
-
-                        switch (ProfileManager.CurrentProfile.CircleOfTransparencyType)
-                        {
-                            default:
-                            case 0:
-                                hue.Z = 0.75f;
-
-                                break;
-
-                            case 1:
-
-                                float delta = (maxDist - 44) * 0.5f;
-                                float fraction = (dist - delta) / (maxDist - delta);
-
-                                hue.Z = MathHelper.Lerp(1f, 0f, fraction);
-
-                                break;
-                        }
-
-                        batcher.Draw
-                        (
-                            texture, 
-                            pos,
-                            bounds,
-                            hue, 
-                            0f,
-                            Vector2.Zero,
-                            1f,
-                            SpriteEffects.None,
-                            depth
-                        );
-
-                        batcher.SetStencil(StaticTransparentStencil.Value);
-                        hue.Z = alpha;
-
-                        batcher.Draw
-                        (
-                            texture,
-                            pos,
-                            bounds,
-                            hue,
-                            0f,
-                            Vector2.Zero,
-                            1f,
-                            SpriteEffects.None,
-                            depth
-                        );
-
-                        batcher.SetStencil(null);
-
-                        return;
-                    }
-                }
-
-                transparent = false;
 
                 if (shadow)
                 {

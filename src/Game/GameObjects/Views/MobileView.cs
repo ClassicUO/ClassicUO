@@ -695,7 +695,7 @@ namespace ClassicUO.Game.GameObjects
             }
 
             ushort hueFromFile = _viewHue;
-
+            
             AnimationDirection direction = AnimationsLoader.Instance.GetBodyAnimationGroup
                                                            (
                                                                ref id,
@@ -935,12 +935,12 @@ namespace ClassicUO.Game.GameObjects
                     }
                     else if (spriteInfo.Texture != null)
                     {
-                        bool isMounted = isHuman && false; // owner.IsMounted;
+                        //bool isMounted = isHuman && owner.IsMounted;
 
-                        
-                        int diffX = spriteInfo.UV.Width - spriteInfo.Center.X;
 
-                        if (isMounted)
+                        //int diffX = spriteInfo.UV.Width /*- spriteInfo.Center.X*/;
+
+                        //if (isMounted)
                         {
                             //if (mountOffset != 0)
                             //{
@@ -948,10 +948,16 @@ namespace ClassicUO.Game.GameObjects
                             //}
                             //else
                             //{
-                                mountOffset = (sbyte) Math.Abs(spriteInfo.Center.Y);
+                            //mountOffset = (sbyte)Math.Abs(spriteInfo.Center.Y);
                             //}                          
                         }
-                       
+
+                        //var flags = AnimationsLoader.Instance.DataIndex[id].Flags;
+                        //if (AnimationsLoader.Instance.DataIndex[id].Type == ANIMATION_GROUPS_TYPE.HUMAN)
+                        //{
+
+                        //}
+
 
                         int diffY = (spriteInfo.UV.Height + spriteInfo.Center.Y) - mountOffset;
 
@@ -960,7 +966,7 @@ namespace ClassicUO.Game.GameObjects
 
                         //}
 
-                        int value = !isMounted && diffX <= 44 ? spriteInfo.UV.Height * 2 : Math.Max(1, diffY);               
+                        int value = /*!isMounted && diffX <= 44 ? spriteInfo.UV.Height * 2 :*/ Math.Max(1, diffY);               
                         int count = Math.Max( (spriteInfo.UV.Height / value) + 1, 2);
 
                         Rectangle rect = spriteInfo.UV;
