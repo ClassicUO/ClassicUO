@@ -1047,27 +1047,26 @@ namespace ClassicUO.Game.Scenes
 
 
             batcher.Begin(null, matrix);
-            
-            bool usecircle = ProfileManager.CurrentProfile.UseCircleOfTransparency;
 
-            if (usecircle)
-            {
-                Vector2 playerPos = World.Player.GetScreenPosition();
+            //bool usecircle = ProfileManager.CurrentProfile.UseCircleOfTransparency;
 
-                playerPos.X += 22;
-                playerPos.Y += 22;
+            //if (usecircle)
+            //{
+            //    Vector2 playerPos = World.Player.GetScreenPosition();
 
-                CircleOfTransparency.Draw(batcher, playerPos);
-            }
+            //    playerPos.X += 22;
+            //    playerPos.Y += 22;
+
+            //    CircleOfTransparency.Draw(batcher, playerPos);
+            //}
 
             batcher.SetBrightlight(ProfileManager.CurrentProfile.TerrainShadowsLevel * 0.1f);
             batcher.SetStencil(_stencil);
 
-            RenderedObjectsCount = 0;      
+            RenderedObjectsCount = 0;
             RenderedObjectsCount += DrawRenderList(batcher, _renderListStaticsHead, _renderListStaticsCount);
             RenderedObjectsCount += DrawRenderList(batcher, _renderListAnimationsHead, _renderListAnimationCount);
             RenderedObjectsCount += DrawRenderList(batcher, _renderListTransparentObjectsHead, _renderListTransparentObjectsCount);
-
 
             //var worldPoint = Camera.MouseToWorldPosition() + _offset;
             //worldPoint.X += 22;
@@ -1082,14 +1081,14 @@ namespace ClassicUO.Game.Scenes
             //{
             //    selectedObject.Hue = 0x44;
             //}
-            
+
 
 
             Vector3 hueVec = Vector3.Zero;
             if (_multi != null && TargetManager.IsTargeting && TargetManager.TargetingState == CursorTarget.MultiPlacement)
             {
                 hueVec = Vector3.Zero;
-                _multi.Draw(batcher, _multi.RealScreenPosition.X, _multi.RealScreenPosition.Y, ref hueVec, CalculateDepth(_multi));
+                _multi.Draw(batcher, _multi.RealScreenPosition.X, _multi.RealScreenPosition.Y, ref hueVec, _multi.CalculateDepthZ());
             } 
 
             int flushes = batcher.FlushesDone;
@@ -1123,131 +1122,22 @@ namespace ClassicUO.Game.Scenes
         {
             Vector3 hueVec = Vector3.Zero;
             int done = 0;
-            //var rectTexture = SolidColorTextureCache.GetTexture(Color.White);
-
-            float max = DepthFormula(_minTile.X, _minTile.Y, -128);
 
             for (int i = 0; i < count; obj = obj.RenderListNext, ++i)
             {
                 if (obj.Z <= _maxGroundZ)
                 {
-                    float depth = obj.CalculateDepthZ(); // CalculateDepth(obj) / max;
-
-                    //ushort hue = obj.Hue;
-                    //obj.Hue = (ushort)(((obj.X + obj.Y) % 3000) + 1);
+                    float depth = obj.CalculateDepthZ();
 
                     if (obj.Draw(batcher, obj.RealScreenPosition.X, obj.RealScreenPosition.Y, ref hueVec, depth))
                     {
                         ++done;
                     }
-
-                    //obj.Hue = hue;
-
-                    //if (obj.FrameInfo.Width != 0)
-                    //{
-                    //    batcher.DrawRectangle
-                    //    (
-                    //        rectTexture,
-                    //        obj.RealScreenPosition.X - obj.FrameInfo.X + 22,
-                    //        obj.RealScreenPosition.Y - obj.FrameInfo.Y + 22,
-                    //        obj.FrameInfo.Width,
-                    //        obj.FrameInfo.Height,
-                    //        ref hueVec,
-                    //        depth
-                    //    );
-                    //}
                 }
             }
 
             return done;
         }
-
-        private float DepthFormula(int x, int y, int z)
-        {
-            //float sX = x;
-            //float sY = y;
-            //float sZ = 0; // z * 0.001f;
-
-            float sX = (_maxTile.X - x) * 22;
-            float sY = (_maxTile.Y - y) * 22;
-            float sZ = (_maxGroundZ - z);
-
-            //return /*1f - 1f /*/ ((float) Math.Sqrt(sX * sX + sY * sY + sZ * sZ));
-
-            return sX + sY + sZ;
-        }
-
-
-        public float CalculateDepth(GameObject obj, int offset = 0)
-        {
-            int x = obj.X;
-            int y = obj.Y;
-            int z = obj.PriorityZ;
-            //int offset = 0;
-
-            //if (obj.FrameInfo.Y > 0)
-            //{
-            //    //offset += o.FrameInfo.Height - (o.FrameInfo.Y - 22) - 3;
-            //    //offset = Math.Min(offset, 20);
-            //    //offset += 11 - 3;
-            //    //offset = CalculateDrop(o as Mobile);
-            //}
-
-            // Offsets are in SCREEN coordinates
-            if (obj.Offset.X > 0 && obj.Offset.Y < 0)
-            {
-                // North
-            }
-            else if (obj.Offset.X > 0 && obj.Offset.Y == 0)
-            {
-                // Northeast
-                x++;
-            }
-            else if (obj.Offset.X > 0 && obj.Offset.Y > 0)
-            {
-                // East
-                z += Math.Max(0, (int)obj.Offset.Z);
-                x++;
-            }
-            else if (obj.Offset.X == 0 && obj.Offset.Y > 0)
-            {
-                // Southeast
-                x++;
-                y++;
-            }
-            else if (obj.Offset.X < 0 && obj.Offset.Y > 0)
-            {
-                // South
-                z += Math.Max(0, (int)obj.Offset.Z);
-                y++;
-            }
-            else if (obj.Offset.X < 0 && obj.Offset.Y == 0)
-            {
-                // Southwest
-                y++;
-            }
-            else if (obj.Offset.X < 0 && obj.Offset.Y > 0)
-            {
-                // West
-            }
-            else if (obj.Offset.X == 0 && obj.Offset.Y < 0)
-            {
-                // Northwest
-            }
-
-
-
-            //return (1f / (float) Math.Sqrt(x * x + y * y /*+ z * z*/));
-            //return (x + y);
-            //return (x + y) /*+ priorityZ * 0.001f*/ ;
-            //return (x * 4) + (y * 4) + priorityZ;
-            //return (256 - priorityZ);
-            return DepthFormula(x + offset, y + offset, 0);
-            //return x + y + (priorityZ);
-            //return x + y + (priorityZ - o.Z) /4;
-        }
-
-        
 
         private bool PrepareLightsRendering(UltimaBatcher2D batcher, ref Matrix matrix)
         {

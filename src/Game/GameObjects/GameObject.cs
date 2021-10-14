@@ -111,10 +111,10 @@ namespace ClassicUO.Game.GameObjects
         public Vector2 GetScreenPosition()
         {
            return new Vector2
-                (
-                    RealScreenPosition.X + World.Player.Offset.X,
-                    RealScreenPosition.Y + World.Player.Offset.Y - World.Player.Offset.Z
-                );
+            (
+                RealScreenPosition.X + Offset.X,
+                RealScreenPosition.Y + (Offset.Y - Offset.Z)
+            );
         }
 
         public void AddToTile(int x, int y)

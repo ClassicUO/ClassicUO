@@ -393,7 +393,7 @@ namespace ClassicUO.Game.Scenes
             else if (!itemData.IsFoliage)
             {
                 if (useCoT && CheckCircleOfTransparencyRadius(obj, cotZ, ref playerPos, ref allowSelection))
-                { 
+                {
                 }
                 else if (_alphaChanged && obj.AlphaHue != 0xFF)
                 {
@@ -414,23 +414,19 @@ namespace ClassicUO.Game.Scenes
 
                 if (dist <= maxDist)
                 {
-                    switch (ProfileManager.CurrentProfile.CircleOfTransparencyType)
-                    {
-                        default:
-                        case 0:
-                            obj.AlphaHue = 127;
+                    float delta = (maxDist - 44) * 0.5f;
+                    float fraction = (dist - delta) / (maxDist - delta);
 
-                            break;
+                    obj.AlphaHue = (byte)Microsoft.Xna.Framework.MathHelper.Clamp(fraction * 255f, byte.MinValue, byte.MaxValue);
+                   
+                    //const byte ALPHA_ERROR = 15;
 
-                        case 1:
+                    //if (obj.AlphaHue > ALPHA_ERROR && obj.AlphaHue >= byte.MaxValue - ALPHA_ERROR)
+                    //{
+                    //    obj.AlphaHue = 255;
 
-                            float delta = (maxDist - 44) * 0.5f;
-                            float fraction = (dist - delta) / (maxDist - delta);
-
-                            obj.AlphaHue = (byte)Microsoft.Xna.Framework.MathHelper.Clamp(fraction * 255f, byte.MinValue, byte.MaxValue);
-
-                            break;
-                    }
+                    //    return false;
+                    //}
 
                     allowSelection = obj.AlphaHue >= 127;
 
@@ -566,20 +562,6 @@ namespace ClassicUO.Game.Scenes
 
         private void PushToRenderList(GameObject obj, ref GameObject renderList, ref GameObject first, ref int renderListCount, bool allowSelection)
         {
-            //if (_renderListStaticsHead == null)
-            //{
-            //    _renderListStaticsHead = _renderList = obj;
-            //}
-            //else
-            //{
-            //    _renderList.RenderListNext = obj;
-            //    _renderList = obj;
-            //}
-
-            //obj.RenderListNext = null;
-
-            //++_renderListStaticsCount;
-
             if (obj.AlphaHue == 0)
             {
                 return;
@@ -591,38 +573,54 @@ namespace ClassicUO.Game.Scenes
                 SelectedObject.Object = obj;
             }
 
-            if (obj.AlphaHue != byte.MaxValue)
+            if (_renderListStaticsHead == null)
             {
-                if (_renderListTransparentObjectsHead == null)
-                {
-                    _renderListTransparentObjectsHead = _renderListTransparentObjects = obj;
-                }
-                else
-                {
-                    _renderListTransparentObjects.RenderListNext = obj;
-                    _renderListTransparentObjects = obj;
-                }
-
-                obj.RenderListNext = null;
-
-                ++_renderListTransparentObjectsCount;
+                _renderListStaticsHead = _renderList = obj;
             }
             else
             {
-                if (first == null)
-                {
-                    first = renderList = obj;
-                }
-                else
-                {
-                    renderList.RenderListNext = obj;
-                    renderList = obj;
-                }
-
-                obj.RenderListNext = null;
-
-                ++renderListCount;
+                _renderList.RenderListNext = obj;
+                _renderList = obj;
             }
+
+            obj.RenderListNext = null;
+
+            ++_renderListStaticsCount;
+
+            
+
+            //if (obj.AlphaHue != byte.MaxValue)
+            //{
+            //    if (_renderListTransparentObjectsHead == null)
+            //    {
+            //        _renderListTransparentObjectsHead = _renderListTransparentObjects = obj;
+            //    }
+            //    else
+            //    {
+            //        _renderListTransparentObjects.RenderListNext = obj;
+            //        _renderListTransparentObjects = obj;
+            //    }
+
+            //    obj.RenderListNext = null;
+
+            //    ++_renderListTransparentObjectsCount;
+            //}
+            //else
+            //{
+            //    if (first == null)
+            //    {
+            //        first = renderList = obj;
+            //    }
+            //    else
+            //    {
+            //        renderList.RenderListNext = obj;
+            //        renderList = obj;
+            //    }
+
+            //    obj.RenderListNext = null;
+
+            //    ++renderListCount;
+            //}
 
 
             obj.UseInRender = (byte)_renderIndex;

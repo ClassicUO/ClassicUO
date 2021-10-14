@@ -129,7 +129,7 @@ namespace ClassicUO.Game.GameObjects
             //Vector3 vec = new Vector3(x + offset, y + offset, 0);
 
             //return (float)vec.Length();
-            return x + y /*+ (z * 0.001f)*/ + offset;
+            return x + y + (z * 0.001f) + offset;
         }
 
         public Rectangle GetOnScreenRectangle()
