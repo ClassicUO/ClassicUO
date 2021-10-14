@@ -64,13 +64,14 @@ namespace ClassicUO.Utility
 
             if (_pool.Count != 0)
             {
-                result = _pool.Pop();
-                _on_pickup?.Invoke(result);
+                result = _pool.Pop(); 
             }
             else
             {
                 result = new T();
             }
+
+            _on_pickup?.Invoke(result);
 
             return result;
         }
