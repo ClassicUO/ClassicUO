@@ -587,7 +587,7 @@ namespace ClassicUO.Game.Scenes
 
             ++_renderListStaticsCount;
 
-            
+
 
             //if (obj.AlphaHue != byte.MaxValue)
             //{

@@ -1091,15 +1091,15 @@ namespace ClassicUO.Game.Scenes
                 _multi.Draw(batcher, _multi.RealScreenPosition.X, _multi.RealScreenPosition.Y, ref hueVec, _multi.CalculateDepthZ());
             } 
 
-            int flushes = batcher.FlushesDone;
-            int switches = batcher.TextureSwitches;
-
 
             // draw weather
             Weather.Draw(batcher, 0, 0);
             batcher.End();
             batcher.SetSampler(null);
             batcher.SetStencil(null);
+
+            int flushes = batcher.FlushesDone;
+            int switches = batcher.TextureSwitches;
 
             if (use_render_target)
             {
