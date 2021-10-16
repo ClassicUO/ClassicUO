@@ -2422,11 +2422,11 @@ namespace ClassicUO.Network
 
                     if (len > 0)
                     {
-                        byte[] buffer = ArrayPool<byte>.Shared.Rent(len);
+                        byte[] buffer = ArrayPool<byte>.Shared.Rent(len * 2);
 
                         try
                         {
-                            Encoding.UTF8.GetBytes
+                            int written = Encoding.UTF8.GetBytes
                             (
                                 text,
                                 startIndex,
@@ -2435,8 +2435,8 @@ namespace ClassicUO.Network
                                 0
                             );
 
-                            writer.WriteUInt8((byte) (len + 1));
-                            writer.Write(buffer.AsSpan(0, len));
+                            writer.WriteUInt8((byte) (written + 1));
+                            writer.Write(buffer.AsSpan(0, written));
                             writer.WriteUInt8(0x00);
                         }
                         finally
@@ -3347,13 +3347,12 @@ namespace ClassicUO.Network
             {
                 if (!string.IsNullOrEmpty(text[i]))
                 {
-                    byte[] buffer = ArrayPool<byte>.Shared.Rent(text[i].Length);
+                    string t = text[i].Replace("\n", "");
+                    byte[] buffer = ArrayPool<byte>.Shared.Rent(t.Length * 2);//we have to assume we are using all two byte chars
 
                     try
                     {
-                        string t = text[i].Replace("\n", "");
-
-                        Encoding.UTF8.GetBytes
+                        int written = Encoding.UTF8.GetBytes
                         (
                             t,
                             0,
@@ -3362,7 +3361,7 @@ namespace ClassicUO.Network
                             0
                         );
 
-                        writer.Write(buffer.AsSpan(0, t.Length));
+                        writer.Write(buffer.AsSpan(0, written));
                     }
                     finally
                     {
