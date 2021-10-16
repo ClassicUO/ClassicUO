@@ -73,11 +73,10 @@ namespace ClassicUO.Game.GameObjects
         public Rectangle FrameInfo;
         protected bool IsFlipped;
 
-
         public abstract bool Draw(UltimaBatcher2D batcher, int posX, int posY, ref Vector3 hue, float depth);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public float CalculateDepthZ(int offset = 0)
+        public float CalculateDepthZ()
         {
             int x = X;
             int y = Y;
@@ -125,11 +124,7 @@ namespace ClassicUO.Game.GameObjects
                 // Northwest
             }
 
-
-            //Vector3 vec = new Vector3(x + offset, y + offset, 0);
-
-            //return (float)vec.Length();
-            return x + y + (z * 0.001f) + offset;
+           return (x + y) + (127 + z) * 0.01f;
         }
 
         public Rectangle GetOnScreenRectangle()

@@ -408,8 +408,8 @@ namespace ClassicUO.Game.Scenes
         {
             if (ProfileManager.CurrentProfile.UseCircleOfTransparency && obj.TransparentTest(maxZ))
             {
-                int maxDist = ProfileManager.CurrentProfile.CircleOfTransparencyRadius + 44;
-                Vector2 pos = new Vector2(obj.RealScreenPosition.X, obj.RealScreenPosition.Y - 22);
+                int maxDist = ProfileManager.CurrentProfile.CircleOfTransparencyRadius + 0;
+                Vector2 pos = new Vector2(obj.RealScreenPosition.X, obj.RealScreenPosition.Y - 44);
                 Vector2.Distance(ref playerPos, ref pos, out float dist);
 
                 if (dist <= maxDist)
@@ -418,8 +418,8 @@ namespace ClassicUO.Game.Scenes
                     float fraction = (dist - delta) / (maxDist - delta);
 
                     obj.AlphaHue = (byte)Microsoft.Xna.Framework.MathHelper.Clamp(fraction * 255f, byte.MinValue, byte.MaxValue);
-                   
-                    //const byte ALPHA_ERROR = 15;
+
+                    //const byte ALPHA_ERROR = 44;
 
                     //if (obj.AlphaHue > ALPHA_ERROR && obj.AlphaHue >= byte.MaxValue - ALPHA_ERROR)
                     //{
@@ -564,7 +564,7 @@ namespace ClassicUO.Game.Scenes
         {
             if (obj.AlphaHue == 0)
             {
-                return;
+                //return;
             }
 
             // slow as fuck
@@ -573,54 +573,57 @@ namespace ClassicUO.Game.Scenes
                 SelectedObject.Object = obj;
             }
 
-            if (_renderListStaticsHead == null)
-            {
-                _renderListStaticsHead = _renderList = obj;
-            }
-            else
-            {
-                _renderList.RenderListNext = obj;
-                _renderList = obj;
-            }
-
-            obj.RenderListNext = null;
-
-            ++_renderListStaticsCount;
-
-
-
-            //if (obj.AlphaHue != byte.MaxValue)
+            //if (_renderListStaticsHead == null)
             //{
-            //    if (_renderListTransparentObjectsHead == null)
-            //    {
-            //        _renderListTransparentObjectsHead = _renderListTransparentObjects = obj;
-            //    }
-            //    else
-            //    {
-            //        _renderListTransparentObjects.RenderListNext = obj;
-            //        _renderListTransparentObjects = obj;
-            //    }
-
-            //    obj.RenderListNext = null;
-
-            //    ++_renderListTransparentObjectsCount;
+            //    _renderListStaticsHead = _renderList = obj;
             //}
             //else
             //{
-            //    if (first == null)
-            //    {
-            //        first = renderList = obj;
-            //    }
-            //    else
-            //    {
-            //        renderList.RenderListNext = obj;
-            //        renderList = obj;
-            //    }
-
-            //    obj.RenderListNext = null;
-
-            //    ++renderListCount;
+            //    _renderList.RenderListNext = obj;
+            //    _renderList = obj;
             //}
+
+            //obj.RenderListNext = null;
+
+            //++_renderListStaticsCount;
+
+
+
+            if (obj.AlphaHue < byte.MaxValue - 44)
+            {
+                if (_renderListTransparentObjectsHead == null)
+                {
+                    _renderListTransparentObjectsHead = _renderListTransparentObjects = obj;
+                }
+                else
+                {
+                    //obj.RenderListNext = _renderListTransparentObjectsHead;
+                    //_renderListTransparentObjectsHead = obj;
+
+                    _renderListTransparentObjects.RenderListNext = obj;
+                    _renderListTransparentObjects = obj;
+                }
+
+                obj.RenderListNext = null;
+
+                ++_renderListTransparentObjectsCount;
+            }
+            else
+            {
+                if (first == null)
+                {
+                    first = renderList = obj;
+                }
+                else
+                {
+                    renderList.RenderListNext = obj;
+                    renderList = obj;
+                }
+
+                obj.RenderListNext = null;
+
+                ++renderListCount;
+            }
 
 
             obj.UseInRender = (byte)_renderIndex;

@@ -992,8 +992,8 @@ namespace ClassicUO.Game.GameObjects
                                 Vector2.Zero,
                                 1f,
                                 mirror ? SpriteEffects.FlipHorizontally : SpriteEffects.None,
-                                //depth + (i * tiles)
-                                depth + (i * tiles) - (owner.PriorityZ * 0.001f)
+                                depth + 0.5f + (i * tiles)
+                                //depth + (i * tiles) + (owner.PriorityZ * 0.001f)
                             );
 
                             pos.Y += rect.Height;

@@ -1000,19 +1000,6 @@ namespace ClassicUO.Game.Scenes
             return base.Draw(batcher);
         }
 
-        private static readonly DepthStencilState _stencil = new DepthStencilState()
-        {
-            StencilEnable = false,
-            DepthBufferEnable = true,
-            DepthBufferFunction = CompareFunction.LessEqual,
-            StencilFunction = CompareFunction.NotEqual,
-            ReferenceStencil = -1,
-            StencilMask = -1,
-            StencilFail = StencilOperation.Keep,
-            StencilDepthBufferFail = StencilOperation.Keep,
-            StencilPass = StencilOperation.Keep
-        };
-
         private void DrawWorld(UltimaBatcher2D batcher, ref Matrix matrix, bool use_render_target)
         {
             SelectedObject.Object = null;
@@ -1059,14 +1046,20 @@ namespace ClassicUO.Game.Scenes
 
             //    CircleOfTransparency.Draw(batcher, playerPos);
             //}
-
-            batcher.SetBrightlight(ProfileManager.CurrentProfile.TerrainShadowsLevel * 0.1f);
-            batcher.SetStencil(_stencil);
-
             RenderedObjectsCount = 0;
+
+            // https://shawnhargreaves.com/blog/depth-sorting-alpha-blended-objects.html
+            batcher.SetBrightlight(ProfileManager.CurrentProfile.TerrainShadowsLevel * 0.1f);
+
+            batcher.SetStencil(DepthStencilState.Default);
             RenderedObjectsCount += DrawRenderList(batcher, _renderListStaticsHead, _renderListStaticsCount);
             RenderedObjectsCount += DrawRenderList(batcher, _renderListAnimationsHead, _renderListAnimationCount);
-            RenderedObjectsCount += DrawRenderList(batcher, _renderListTransparentObjectsHead, _renderListTransparentObjectsCount);
+
+           
+            batcher.SetStencil(DepthStencilState.DepthRead);
+            RenderedObjectsCount += DrawRenderList(batcher, _renderListTransparentObjectsHead, _renderListTransparentObjectsCount, false);
+            batcher.SetStencil(null);
+
 
             //var worldPoint = Camera.MouseToWorldPosition() + _offset;
             //worldPoint.X += 22;
@@ -1093,7 +1086,7 @@ namespace ClassicUO.Game.Scenes
 
 
             // draw weather
-            Weather.Draw(batcher, 0, 0);
+            Weather.Draw(batcher, 0, 0); // TODO: fix the depth
             batcher.End();
             batcher.SetSampler(null);
             batcher.SetStencil(null);
@@ -1118,7 +1111,7 @@ namespace ClassicUO.Game.Scenes
             batcher.End();
         }
 
-        private int DrawRenderList(UltimaBatcher2D batcher, GameObject obj, int count)
+        private int DrawRenderList(UltimaBatcher2D batcher, GameObject obj, int count, bool useDepth = true)
         {
             Vector3 hueVec = Vector3.Zero;
             int done = 0;
@@ -1128,6 +1121,11 @@ namespace ClassicUO.Game.Scenes
                 if (obj.Z <= _maxGroundZ)
                 {
                     float depth = obj.CalculateDepthZ();
+
+                    if (!useDepth)
+                    {
+
+                    }
 
                     if (obj.Draw(batcher, obj.RealScreenPosition.X, obj.RealScreenPosition.Y, ref hueVec, depth))
                     {
