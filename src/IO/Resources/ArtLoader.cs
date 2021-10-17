@@ -100,7 +100,7 @@ namespace ClassicUO.IO.Resources
         private SpriteInfo[] _spriteInfos;
 
 
-        public Rectangle GetRealArtBounds(int index) => _spriteInfos[index].ArtBounds;
+        public Rectangle GetRealArtBounds(int index) => index + 0x4000 >= _spriteInfos.Length ? Rectangle.Empty : _spriteInfos[index + 0x4000].ArtBounds;
 
         private void AddSpriteToAtlas(TextureAtlas atlas, int g, bool isTerrain)
         {
