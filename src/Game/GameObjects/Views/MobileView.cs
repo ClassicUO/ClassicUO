@@ -192,12 +192,12 @@ namespace ClassicUO.Game.GameObjects
             Item mount = FindItemByLayer(Layer.Mount);
             sbyte mountOffsetY = 0;
 
-            if (isHuman && mount != null)
+            if (isHuman && mount != null && mount.Graphic != 0x3E96)
             {
                 ushort mountGraphic = mount.GetGraphicForAnimation();
                 byte animGroupMount = 0;
 
-                if (mountGraphic != 0xFFFF)
+                if (mountGraphic != 0xFFFF && mountGraphic < Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT)
                 {
                     mountOffsetY = AnimationsLoader.Instance.DataIndex[mountGraphic].MountedHeightOffset;
 
@@ -941,7 +941,7 @@ namespace ClassicUO.Game.GameObjects
                         //int diffX = spriteInfo.UV.Width /*- spriteInfo.Center.X*/;
 
                         //if (isMounted)
-                        {
+                        //{
                             //if (mountOffset != 0)
                             //{
                             //    mountOffset += 10;
@@ -950,7 +950,7 @@ namespace ClassicUO.Game.GameObjects
                             //{
                             //mountOffset = (sbyte)Math.Abs(spriteInfo.Center.Y);
                             //}                          
-                        }
+                        //}
 
                         //var flags = AnimationsLoader.Instance.DataIndex[id].Flags;
                         //if (AnimationsLoader.Instance.DataIndex[id].Type == ANIMATION_GROUPS_TYPE.HUMAN)
