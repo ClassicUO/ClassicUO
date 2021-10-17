@@ -121,7 +121,7 @@ namespace ClassicUO.Game.GameObjects
 
             if (Source != null)
             {
-                depth = Source.CalculateDepthZ();
+                depth = Source.CalculateDepthZ() + 1f;
             }
 
             switch (Blend)
