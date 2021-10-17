@@ -564,7 +564,7 @@ namespace ClassicUO.Game.Scenes
         {
             if (obj.AlphaHue == 0)
             {
-                //return;
+                return;
             }
 
             // slow as fuck
@@ -589,7 +589,7 @@ namespace ClassicUO.Game.Scenes
 
 
 
-            if (obj.AlphaHue < byte.MaxValue - 44)
+            if (obj.AlphaHue != byte.MaxValue)
             {
                 if (_renderListTransparentObjectsHead == null)
                 {
