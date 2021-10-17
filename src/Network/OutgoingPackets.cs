@@ -3348,24 +3348,28 @@ namespace ClassicUO.Network
                 if (!string.IsNullOrEmpty(text[i]))
                 {
                     string t = text[i].Replace("\n", "");
-                    byte[] buffer = ArrayPool<byte>.Shared.Rent(t.Length * 2);//we have to assume we are using all two byte chars
 
-                    try
+                    if (t.Length > 0)
                     {
-                        int written = Encoding.UTF8.GetBytes
-                        (
-                            t,
-                            0,
-                            t.Length,
-                            buffer,
-                            0
-                        );
+                        byte[] buffer = ArrayPool<byte>.Shared.Rent(t.Length * 2);//we have to assume we are using all two byte chars
 
-                        writer.Write(buffer.AsSpan(0, written));
-                    }
-                    finally
-                    {
-                        ArrayPool<byte>.Shared.Return(buffer);
+                        try
+                        {
+                            int written = Encoding.UTF8.GetBytes
+                            (
+                                t,
+                                0,
+                                t.Length,
+                                buffer,
+                                0
+                            );
+
+                            writer.Write(buffer.AsSpan(0, written));
+                        }
+                        finally
+                        {
+                            ArrayPool<byte>.Shared.Return(buffer);
+                        }
                     }
                 }
 
