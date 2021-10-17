@@ -87,7 +87,7 @@ namespace ClassicUO.Game.GameObjects
         );
 
 
-        public override bool Draw(UltimaBatcher2D batcher, int posX, int posY, ref Vector3 hueVec, float depth)
+        public override bool Draw(UltimaBatcher2D batcher, int posX, int posY, float depth)
         {
             if (IsDestroyed || !AllowedToDraw)
             {
@@ -99,7 +99,7 @@ namespace ClassicUO.Game.GameObjects
                 return false;
             }
 
-            hueVec = Vector3.Zero;
+            Vector3 hueVec = Vector3.Zero;
 
             ref StaticTiles data = ref TileDataLoader.Instance.StaticData[Graphic];
 

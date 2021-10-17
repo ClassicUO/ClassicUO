@@ -1035,29 +1035,23 @@ namespace ClassicUO.Game.Scenes
 
             batcher.Begin(null, matrix);
 
-            //bool usecircle = ProfileManager.CurrentProfile.UseCircleOfTransparency;
-
-            //if (usecircle)
-            //{
-            //    Vector2 playerPos = World.Player.GetScreenPosition();
-
-            //    playerPos.X += 22;
-            //    playerPos.Y += 22;
-
-            //    CircleOfTransparency.Draw(batcher, playerPos);
-            //}
             RenderedObjectsCount = 0;
 
-            // https://shawnhargreaves.com/blog/depth-sorting-alpha-blended-objects.html
+            
             batcher.SetBrightlight(ProfileManager.CurrentProfile.TerrainShadowsLevel * 0.1f);
 
+
+            // https://shawnhargreaves.com/blog/depth-sorting-alpha-blended-objects.html
             batcher.SetStencil(DepthStencilState.Default);
             RenderedObjectsCount += DrawRenderList(batcher, _renderListStaticsHead, _renderListStaticsCount);
             RenderedObjectsCount += DrawRenderList(batcher, _renderListAnimationsHead, _renderListAnimationCount);
-
+         
+            if (_renderListTransparentObjectsCount > 0)
+            {
+                batcher.SetStencil(DepthStencilState.DepthRead);
+                RenderedObjectsCount += DrawRenderList(batcher, _renderListTransparentObjectsHead, _renderListTransparentObjectsCount);
+            }
            
-            batcher.SetStencil(DepthStencilState.DepthRead);
-            RenderedObjectsCount += DrawRenderList(batcher, _renderListTransparentObjectsHead, _renderListTransparentObjectsCount);
             batcher.SetStencil(null);
 
 
@@ -1081,7 +1075,7 @@ namespace ClassicUO.Game.Scenes
             if (_multi != null && TargetManager.IsTargeting && TargetManager.TargetingState == CursorTarget.MultiPlacement)
             {
                 hueVec = Vector3.Zero;
-                _multi.Draw(batcher, _multi.RealScreenPosition.X, _multi.RealScreenPosition.Y, ref hueVec, _multi.CalculateDepthZ());
+                _multi.Draw(batcher, _multi.RealScreenPosition.X, _multi.RealScreenPosition.Y, _multi.CalculateDepthZ());
             } 
 
 
@@ -1113,7 +1107,6 @@ namespace ClassicUO.Game.Scenes
 
         private int DrawRenderList(UltimaBatcher2D batcher, GameObject obj, int count)
         {
-            Vector3 hueVec = Vector3.Zero;
             int done = 0;
 
             for (int i = 0; i < count; obj = obj.RenderListNext, ++i)
@@ -1122,7 +1115,7 @@ namespace ClassicUO.Game.Scenes
                 {
                     float depth = obj.CalculateDepthZ();
 
-                    if (obj.Draw(batcher, obj.RealScreenPosition.X, obj.RealScreenPosition.Y, ref hueVec, depth))
+                    if (obj.Draw(batcher, obj.RealScreenPosition.X, obj.RealScreenPosition.Y, depth))
                     {
                         ++done;
                     }

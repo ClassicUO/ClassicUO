@@ -61,14 +61,14 @@ namespace ClassicUO.Game.GameObjects
             return r;
         }
 
-        public override bool Draw(UltimaBatcher2D batcher, int posX, int posY, ref Vector3 hueVec, float depth)
+        public override bool Draw(UltimaBatcher2D batcher, int posX, int posY, float depth)
         {
             if (!AllowedToDraw || IsDestroyed)
             {
                 return false;
             }
 
-            hueVec = Vector3.Zero;
+            Vector3 hueVec = Vector3.Zero;
 
             ushort hue = Hue;
 

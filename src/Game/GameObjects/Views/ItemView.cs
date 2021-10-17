@@ -47,7 +47,7 @@ namespace ClassicUO.Game.GameObjects
     {
         private static EquipConvData? _equipConvData;
 
-        public override bool Draw(UltimaBatcher2D batcher, int posX, int posY, ref Vector3 hueVec, float depth)
+        public override bool Draw(UltimaBatcher2D batcher, int posX, int posY, float depth)
         {
             if (!AllowedToDraw || IsDestroyed)
             {
@@ -56,7 +56,7 @@ namespace ClassicUO.Game.GameObjects
 
             //Engine.DebugInfo.ItemsRendered++;
 
-            hueVec = Vector3.Zero;
+            Vector3 hueVec = Vector3.Zero;
 
             posX += (int) Offset.X;
             posY += (int) (Offset.Y + Offset.Z);

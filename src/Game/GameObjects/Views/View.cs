@@ -51,29 +51,13 @@ namespace ClassicUO.Game.GameObjects
 
     internal abstract partial class GameObject
     {
-        protected static readonly Lazy<DepthStencilState> StaticTransparentStencil = new Lazy<DepthStencilState>
-        (
-            () =>
-            {
-                DepthStencilState state = new DepthStencilState
-                {
-                    StencilEnable = true,
-                    StencilFunction = CompareFunction.GreaterEqual,
-                    StencilPass = StencilOperation.Keep,
-                    ReferenceStencil = 0,
-                };
-
-                return state;
-            }
-        );
-
         public byte AlphaHue;
         public bool AllowedToDraw = true;
         public ObjectHandlesStatus ObjectHandlesStatus;
         public Rectangle FrameInfo;
         protected bool IsFlipped;
 
-        public abstract bool Draw(UltimaBatcher2D batcher, int posX, int posY, ref Vector3 hue, float depth);
+        public abstract bool Draw(UltimaBatcher2D batcher, int posX, int posY, float depth);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public float CalculateDepthZ()
