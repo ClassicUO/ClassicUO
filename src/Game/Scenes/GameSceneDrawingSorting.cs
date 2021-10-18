@@ -513,7 +513,7 @@ namespace ClassicUO.Game.Scenes
 
         private bool HasSurfaceOverhead(Entity obj)
         {
-            if (obj.Serial == World.Player.Serial || _maxZ == _maxGroundZ)
+            if (obj.Serial == World.Player.Serial/* || _maxZ == _maxGroundZ*/)
             {
                 return false;
             }
