@@ -48,9 +48,7 @@ namespace ClassicUO.Game.GameObjects
     internal partial class Mobile
     {
         private const int SIT_OFFSET_Y = 4;
-        private static ushort _viewHue;
         private static EquipConvData? _equipConvData;
-        private static bool _transform;
         private static int _characterFrameStartY;
         private static int _startCharacterWaistY;
         private static int _startCharacterKneesY;
@@ -65,10 +63,11 @@ namespace ClassicUO.Game.GameObjects
             }
 
             Vector3 hueVec = Vector3.Zero;
+            bool charSitting = false;
+            ushort overridedHue = 0;
 
             AnimationsLoader.SittingInfoData seatData = AnimationsLoader.SittingInfoData.Empty;
             _equipConvData = null;
-            _transform = false;
             FrameInfo.X = 0;
             FrameInfo.Y = 0;
             FrameInfo.Width = 0;
@@ -91,7 +90,7 @@ namespace ClassicUO.Game.GameObjects
                     drawX, 
                     drawY,
                     ProfileManager.CurrentProfile.PartyAura && World.Party.Contains(this) ? ProfileManager.CurrentProfile.PartyAuraHue : Notoriety.GetHue(NotorietyFlag),
-                    depth
+                    depth + 0.5f
                 );
             }
 
@@ -106,36 +105,36 @@ namespace ClassicUO.Game.GameObjects
 
             if (ProfileManager.CurrentProfile.HighlightGameObjects && ReferenceEquals(SelectedObject.LastObject, this))
             {
-                _viewHue = Constants.HIGHLIGHT_CURRENT_OBJECT_HUE;
+                overridedHue = Constants.HIGHLIGHT_CURRENT_OBJECT_HUE;
                 hueVec.Y = 1;
             }
             else if (SelectedObject.HealthbarObject == this)
             {
-                _viewHue = Notoriety.GetHue(NotorietyFlag);
+                overridedHue = Notoriety.GetHue(NotorietyFlag);
             }
             else if (ProfileManager.CurrentProfile.NoColorObjectsOutOfRange && Distance > World.ClientViewRange)
             {
-                _viewHue = Constants.OUT_RANGE_COLOR;
+                overridedHue = Constants.OUT_RANGE_COLOR;
                 hueVec.Y = 1;
             }
             else if (World.Player.IsDead && ProfileManager.CurrentProfile.EnableBlackWhiteEffect)
             {
-                _viewHue = Constants.DEAD_RANGE_COLOR;
+                overridedHue = Constants.DEAD_RANGE_COLOR;
                 hueVec.Y = 1;
             }
             else if (IsHidden)
             {
-                _viewHue = 0x038E;
+                overridedHue = 0x038E;
             }
             else
             {
-                _viewHue = 0;
+                overridedHue = 0;
 
                 if (IsDead)
                 {
                     if (!isHuman)
                     {
-                        _viewHue = 0x0386;
+                        overridedHue = 0x0386;
                     }
                 }
                 else
@@ -144,21 +143,21 @@ namespace ClassicUO.Game.GameObjects
                     {
                         if (IsPoisoned)
                         {
-                            _viewHue = ProfileManager.CurrentProfile.PoisonHue;
+                            overridedHue = ProfileManager.CurrentProfile.PoisonHue;
                         }
                     }
                     if (ProfileManager.CurrentProfile.HighlightMobilesByParalize)
                     {
                         if (IsParalyzed && NotorietyFlag != NotorietyFlag.Invulnerable)
                         {
-                            _viewHue = ProfileManager.CurrentProfile.ParalyzedHue;
+                            overridedHue = ProfileManager.CurrentProfile.ParalyzedHue;
                         }
                     }
                     if (ProfileManager.CurrentProfile.HighlightMobilesByInvul)
                     {
                         if (NotorietyFlag != NotorietyFlag.Invulnerable && IsYellowHits)
                         {
-                            _viewHue = ProfileManager.CurrentProfile.InvulnerableHue;
+                            overridedHue = ProfileManager.CurrentProfile.InvulnerableHue;
                         }
                     }
                 }
@@ -172,7 +171,7 @@ namespace ClassicUO.Game.GameObjects
             {
                 if (isAttack || isUnderMouse)
                 {
-                    _viewHue = Notoriety.GetHue(NotorietyFlag);
+                    overridedHue = Notoriety.GetHue(NotorietyFlag);
                 }
             }
 
@@ -218,9 +217,10 @@ namespace ClassicUO.Game.GameObjects
                             true,
                             false,
                             false,
-                            hueVec.Z,
                             depth,
-                            mountOffsetY
+                            mountOffsetY,
+                            overridedHue,
+                            charSitting
                         );
 
                         animGroupMount = GetGroupForAnimation(this, mountGraphic);
@@ -243,9 +243,10 @@ namespace ClassicUO.Game.GameObjects
                             true,
                             false,
                             false,
-                            hueVec.Z,
                             depth,
-                            mountOffsetY
+                            mountOffsetY,
+                            overridedHue,
+                            charSitting
                         );
                     }
                     else
@@ -271,9 +272,10 @@ namespace ClassicUO.Game.GameObjects
                         true,
                         true,
                         false,
-                        hueVec.Z,
                         depth,
-                        mountOffsetY
+                        mountOffsetY,
+                        overridedHue,
+                        charSitting
                     );
 
                     drawY += mountOffsetY;
@@ -317,7 +319,7 @@ namespace ClassicUO.Game.GameObjects
                     }
                     else
                     {
-                        _transform = true;
+                        charSitting = true;
                     }
                 }
                 else if (hasShadow)
@@ -340,9 +342,10 @@ namespace ClassicUO.Game.GameObjects
                         true,
                         false,
                         false,
-                        hueVec.Z,
                         depth,
-                        mountOffsetY
+                        mountOffsetY,
+                        overridedHue,
+                        charSitting
                     );
                 }
             }
@@ -365,9 +368,10 @@ namespace ClassicUO.Game.GameObjects
                 true,
                 false,
                 isGargoyle,
-                hueVec.Z,
                 depth,
-                mountOffsetY
+                mountOffsetY,
+                overridedHue,
+                charSitting
             );
 
             if (!IsEmpty)
@@ -431,9 +435,10 @@ namespace ClassicUO.Game.GameObjects
                                 false,
                                 false,
                                 isGargoyle,
-                                hueVec.Z,
                                 depth,
-                                mountOffsetY
+                                mountOffsetY,
+                                overridedHue,
+                                charSitting
                             );
                         }
                         else
@@ -681,9 +686,10 @@ namespace ClassicUO.Game.GameObjects
             bool isParent,
             bool isMount,
             bool forceUOP,
-            float alpha,
             float depth,
-            sbyte mountOffset
+            sbyte mountOffset,
+            ushort overridedHue,
+            bool charIsSitting
         )
         {
             if (id >= Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT || owner == null)
@@ -691,7 +697,7 @@ namespace ClassicUO.Game.GameObjects
                 return;
             }
 
-            ushort hueFromFile = _viewHue;
+            ushort hueFromFile = overridedHue;
             
             AnimationDirection direction = AnimationsLoader.Instance.GetBodyAnimationGroup
                                                            (
@@ -705,7 +711,7 @@ namespace ClassicUO.Game.GameObjects
 
             if (direction == null || direction.Address == -1 || direction.FileIndex == -1)
             {
-                if (!(_transform && entity == null && !hasShadow))
+                if (!(charIsSitting && entity == null && !hasShadow))
                 {
                     return;
                 }
@@ -713,7 +719,7 @@ namespace ClassicUO.Game.GameObjects
 
             if (direction == null || (direction.FrameCount == 0 || direction.SpriteInfos == null) && !AnimationsLoader.Instance.LoadAnimationFrames(id, animGroup, dir, ref direction))
             {
-                if (!(_transform && entity == null && !hasShadow))
+                if (!(charIsSitting && entity == null && !hasShadow))
                 {
                     return;
                 }
@@ -741,7 +747,7 @@ namespace ClassicUO.Game.GameObjects
 
                 if (spriteInfo.Texture == null)
                 {
-                    if (!(_transform && entity == null && !hasShadow))
+                    if (!(charIsSitting && entity == null && !hasShadow))
                     {
                         return;
                     }
@@ -768,7 +774,7 @@ namespace ClassicUO.Game.GameObjects
                 }
                 else
                 {
-                    ushort hue = _viewHue;
+                    ushort hue = overridedHue;
                     bool partialHue = false;
 
                     if (hue == 0)
@@ -795,8 +801,7 @@ namespace ClassicUO.Game.GameObjects
                         }
                     }
 
-                    hueVec = Vector3.Zero;
-                    ShaderHueTranslator.GetHueVector(ref hueVec, hue, partialHue, alpha);
+                    ShaderHueTranslator.GetHueVector(ref hueVec, hue, partialHue, hueVec.Z);
 
                     // this is an hack to make entities partially hued. OG client seems to ignore this.
                     /*if (entity != null && entity.ItemData.AnimID == 0 && entity.ItemData.IsLight)
@@ -814,9 +819,10 @@ namespace ClassicUO.Game.GameObjects
                         Vector2 pos = new Vector2(x, y);
                         Rectangle rect = spriteInfo.UV;
 
-
-                        if (CalculateSitAnimation(y, entity, isHuman, ref spriteInfo, out var mod))
+                        if (charIsSitting)
                         {
+                            Vector3 mod = CalculateSitAnimation(y, entity, isHuman, ref spriteInfo);
+
                             batcher.DrawCharacterSitted
                             (
                                 spriteInfo.Texture,
@@ -873,8 +879,8 @@ namespace ClassicUO.Game.GameObjects
 
                             for (int i = 0; i < count; ++i)
                             {
-                                hueVec.Y = 1;
-                                hueVec.X = 0x44 + (i * 20);
+                                //hueVec.Y = 1;
+                                //hueVec.X = 0x44 + (i * 20);
 
                                 batcher.Draw
                                 (
@@ -934,137 +940,118 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
-        private static bool CalculateSitAnimation(int y, Item entity, bool isHuman, ref SpriteInfo spriteInfo, out Vector3 mod)
+        private static Vector3 CalculateSitAnimation(int y, Item entity, bool isHuman, ref SpriteInfo spriteInfo)
         {
-            mod = Vector3.Zero;
+            Vector3 mod = new Vector3();
 
-            if (_transform)
+            const float UPPER_BODY_RATIO = 0.35f;
+            const float MID_BODY_RATIO = 0.60f;
+            const float LOWER_BODY_RATIO = 0.94f;
+
+            if (entity == null && isHuman)
             {
-                const float UPPER_BODY_RATIO = 0.35f;
-                const float MID_BODY_RATIO = 0.60f;
-                const float LOWER_BODY_RATIO = 0.94f;
-
-                if (entity == null && isHuman)
+                int frameHeight = spriteInfo.UV.Height;
+                if (frameHeight == 0)
                 {
-                    int frameHeight = spriteInfo.UV.Height;
-                    if (frameHeight == 0)
-                    {
-                        frameHeight = 61;
-                    }
-
-                    _characterFrameStartY = y - (spriteInfo.Texture != null ? 0 : frameHeight - SIT_OFFSET_Y);
-                    _characterFrameHeight = frameHeight;
-                    _startCharacterWaistY = (int)(frameHeight * UPPER_BODY_RATIO) + _characterFrameStartY;
-                    _startCharacterKneesY = (int)(frameHeight * MID_BODY_RATIO) + _characterFrameStartY;
-                    _startCharacterFeetY = (int)(frameHeight * LOWER_BODY_RATIO) + _characterFrameStartY;
-
-                    if (spriteInfo.Texture == null)
-                    {
-                        return true;
-                    }
+                    frameHeight = 61;
                 }
 
-                mod.X = UPPER_BODY_RATIO;
-                mod.Y = MID_BODY_RATIO;
-                mod.Z = LOWER_BODY_RATIO;
+                _characterFrameStartY = y - (spriteInfo.Texture != null ? 0 : frameHeight - SIT_OFFSET_Y);
+                _characterFrameHeight = frameHeight;
+                _startCharacterWaistY = (int)(frameHeight * UPPER_BODY_RATIO) + _characterFrameStartY;
+                _startCharacterKneesY = (int)(frameHeight * MID_BODY_RATIO) + _characterFrameStartY;
+                _startCharacterFeetY = (int)(frameHeight * LOWER_BODY_RATIO) + _characterFrameStartY;
 
-
-                if (entity != null)
+                if (spriteInfo.Texture == null)
                 {
-                    float itemsEndY = y + spriteInfo.UV.Height;
+                    return mod;
+                }
+            }
 
-                    if (y >= _startCharacterWaistY)
+            mod.X = UPPER_BODY_RATIO;
+            mod.Y = MID_BODY_RATIO;
+            mod.Z = LOWER_BODY_RATIO;
+
+
+            if (entity != null)
+            {
+                float itemsEndY = y + spriteInfo.UV.Height;
+
+                if (y >= _startCharacterWaistY)
+                {
+                    mod.X = 0;
+                }
+                else if (itemsEndY <= _startCharacterWaistY)
+                {
+                    mod.X = 1.0f;
+                }
+                else
+                {
+                    float upperBodyDiff = _startCharacterWaistY - y;
+                    mod.X = upperBodyDiff / spriteInfo.UV.Height;
+
+                    if (mod.X < 0)
                     {
                         mod.X = 0;
                     }
-                    else if (itemsEndY <= _startCharacterWaistY)
+                }
+
+
+                if (_startCharacterWaistY >= itemsEndY || y >= _startCharacterKneesY)
+                {
+                    mod.Y = 0;
+                }
+                else if (_startCharacterWaistY <= y && itemsEndY <= _startCharacterKneesY)
+                {
+                    mod.Y = 1.0f;
+                }
+                else
+                {
+                    float midBodyDiff;
+
+                    if (y >= _startCharacterWaistY)
                     {
-                        mod.X = 1.0f;
+                        midBodyDiff = _startCharacterKneesY - y;
+                    }
+                    else if (itemsEndY <= _startCharacterKneesY)
+                    {
+                        midBodyDiff = itemsEndY - _startCharacterWaistY;
                     }
                     else
                     {
-                        float upperBodyDiff = _startCharacterWaistY - y;
-                        mod.X = upperBodyDiff / spriteInfo.UV.Height;
-
-                        if (mod.X < 0)
-                        {
-                            mod.X = 0;
-                        }
+                        midBodyDiff = _startCharacterKneesY - _startCharacterWaistY;
                     }
 
+                    mod.Y = mod.X + midBodyDiff / spriteInfo.UV.Height;
 
-                    if (_startCharacterWaistY >= itemsEndY || y >= _startCharacterKneesY)
+                    if (mod.Y < 0)
                     {
                         mod.Y = 0;
                     }
-                    else if (_startCharacterWaistY <= y && itemsEndY <= _startCharacterKneesY)
-                    {
-                        mod.Y = 1.0f;
-                    }
-                    else
-                    {
-                        float midBodyDiff;
-
-                        if (y >= _startCharacterWaistY)
-                        {
-                            midBodyDiff = _startCharacterKneesY - y;
-                        }
-                        else if (itemsEndY <= _startCharacterKneesY)
-                        {
-                            midBodyDiff = itemsEndY - _startCharacterWaistY;
-                        }
-                        else
-                        {
-                            midBodyDiff = _startCharacterKneesY - _startCharacterWaistY;
-                        }
-
-                        mod.Y = mod.X + midBodyDiff / spriteInfo.UV.Height;
-
-                        if (mod.Y < 0)
-                        {
-                            mod.Y = 0;
-                        }
-                    }
+                }
 
 
-                    if (itemsEndY <= _startCharacterKneesY)
+                if (itemsEndY <= _startCharacterKneesY)
+                {
+                    mod.Z = 0;
+                }
+                else if (y >= _startCharacterKneesY)
+                {
+                    mod.Z = 1.0f;
+                }
+                else
+                {
+                    float lowerBodyDiff = itemsEndY - _startCharacterKneesY;
+                    mod.Z = mod.Y + lowerBodyDiff / spriteInfo.UV.Height;
+
+                    if (mod.Z < 0)
                     {
                         mod.Z = 0;
                     }
-                    else if (y >= _startCharacterKneesY)
-                    {
-                        mod.Z = 1.0f;
-                    }
-                    else
-                    {
-                        float lowerBodyDiff = itemsEndY - _startCharacterKneesY;
-                        mod.Z = mod.Y + lowerBodyDiff / spriteInfo.UV.Height;
-
-                        if (mod.Z < 0)
-                        {
-                            mod.Z = 0;
-                        }
-                    }
                 }
-
-                // TODO: fix sitting characters
-
-                //batcher.DrawCharacterSitted
-                //(
-                //    spriteInfo.Texture,
-                //    x,
-                //    y,
-                //    mirror,
-                //    h3mod,
-                //    h6mod,
-                //    h9mod,
-                //    ref hueVec
-                //);
-
-                return true;
             }
 
-            return false;
+            return mod;
         }
 
         public override bool CheckMouseSelection()
