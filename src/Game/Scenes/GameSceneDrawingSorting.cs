@@ -513,16 +513,16 @@ namespace ClassicUO.Game.Scenes
 
         private bool HasSurfaceOverhead(Entity obj)
         {
-            if (obj.Serial == World.Player.Serial)
+            if (obj.Serial == World.Player.Serial || _maxZ == _maxGroundZ)
             {
                 return false;
             }
             
             bool found = false;
             
-            for (int y = -1; y < 2; ++y)
+            for (int y = -1; y <= 2; ++y)
             {
-                for (int x = -1; x < 2; ++x)
+                for (int x = -1; x <= 2; ++x)
                 {
                     GameObject tile = World.Map.GetTile(obj.X + x, obj.Y + y);
 
