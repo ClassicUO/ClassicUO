@@ -186,9 +186,6 @@ namespace ClassicUO.Game.GameObjects
             byte animGroup = GetGroupForAnimation(this, graphic, true);
             sbyte animIndex = AnimIndex;
 
-            //animGroup = 19;
-            //animIndex = 2;
-
             Item mount = FindItemByLayer(Layer.Mount);
             sbyte mountOffsetY = 0;
 
@@ -810,138 +807,37 @@ namespace ClassicUO.Game.GameObjects
                     }
                     */
 
-                    if (_transform)
+                    
+
+                    if (spriteInfo.Texture != null)
                     {
-                        const float UPPER_BODY_RATIO = 0.35f;
-                        const float MID_BODY_RATIO = 0.60f;
-                        const float LOWER_BODY_RATIO = 0.94f;
+                        Vector2 pos = new Vector2(x, y);
+                        Rectangle rect = spriteInfo.UV;
 
-                        if (entity == null && isHuman)
+
+                        if (CalculateSitAnimation(y, entity, isHuman, ref spriteInfo, out var mod))
                         {
-                            int frameHeight = spriteInfo.UV.Height;
-                            if (frameHeight == 0)
-                            {
-                                frameHeight = 61;
-                            }
-
-                            _characterFrameStartY = y - (spriteInfo.Texture != null ? 0 : frameHeight - SIT_OFFSET_Y);
-                            _characterFrameHeight = frameHeight;
-                            _startCharacterWaistY = (int) (frameHeight * UPPER_BODY_RATIO) + _characterFrameStartY;
-                            _startCharacterKneesY = (int) (frameHeight * MID_BODY_RATIO) + _characterFrameStartY;
-                            _startCharacterFeetY = (int) (frameHeight * LOWER_BODY_RATIO) + _characterFrameStartY;
-
-                            if (spriteInfo.Texture == null)
-                            {
-                                return;
-                            }
+                            batcher.DrawCharacterSitted
+                            (
+                                spriteInfo.Texture,
+                                pos,
+                                rect,
+                                mod,
+                                hueVec,
+                                mirror,
+                                depth + 0.5f
+                            );
                         }
-
-                        float h3mod = UPPER_BODY_RATIO;
-                        float h6mod = MID_BODY_RATIO;
-                        float h9mod = LOWER_BODY_RATIO;
-
-
-                        if (entity != null)
+                        else
                         {
-                            float itemsEndY = y + spriteInfo.UV.Height;
 
-                            if (y >= _startCharacterWaistY)
-                            {
-                                h3mod = 0;
-                            }
-                            else if (itemsEndY <= _startCharacterWaistY)
-                            {
-                                h3mod = 1.0f;
-                            }
-                            else
-                            {
-                                float upperBodyDiff = _startCharacterWaistY - y;
-                                h3mod = upperBodyDiff / spriteInfo.UV.Height;
-
-                                if (h3mod < 0)
-                                {
-                                    h3mod = 0;
-                                }
-                            }
+                            //bool isMounted = isHuman && owner.IsMounted;
 
 
-                            if (_startCharacterWaistY >= itemsEndY || y >= _startCharacterKneesY)
-                            {
-                                h6mod = 0;
-                            }
-                            else if (_startCharacterWaistY <= y && itemsEndY <= _startCharacterKneesY)
-                            {
-                                h6mod = 1.0f;
-                            }
-                            else
-                            {
-                                float midBodyDiff;
+                            //int diffX = spriteInfo.UV.Width /*- spriteInfo.Center.X*/;
 
-                                if (y >= _startCharacterWaistY)
-                                {
-                                    midBodyDiff = _startCharacterKneesY - y;
-                                }
-                                else if (itemsEndY <= _startCharacterKneesY)
-                                {
-                                    midBodyDiff = itemsEndY - _startCharacterWaistY;
-                                }
-                                else
-                                {
-                                    midBodyDiff = _startCharacterKneesY - _startCharacterWaistY;
-                                }
-
-                                h6mod = h3mod + midBodyDiff / spriteInfo.UV.Height;
-
-                                if (h6mod < 0)
-                                {
-                                    h6mod = 0;
-                                }
-                            }
-
-
-                            if (itemsEndY <= _startCharacterKneesY)
-                            {
-                                h9mod = 0;
-                            }
-                            else if (y >= _startCharacterKneesY)
-                            {
-                                h9mod = 1.0f;
-                            }
-                            else
-                            {
-                                float lowerBodyDiff = itemsEndY - _startCharacterKneesY;
-                                h9mod = h6mod + lowerBodyDiff / spriteInfo.UV.Height;
-
-                                if (h9mod < 0)
-                                {
-                                    h9mod = 0;
-                                }
-                            }
-                        }
-
-                        // TODO: fix sitting characters
-
-                        //batcher.DrawCharacterSitted
-                        //(
-                        //    spriteInfo.Texture,
-                        //    x,
-                        //    y,
-                        //    mirror,
-                        //    h3mod,
-                        //    h6mod,
-                        //    h9mod,
-                        //    ref hueVec
-                        //);
-                    }
-                    else if (spriteInfo.Texture != null)
-                    {
-                        //bool isMounted = isHuman && owner.IsMounted;
-
-
-                        //int diffX = spriteInfo.UV.Width /*- spriteInfo.Center.X*/;
-
-                        //if (isMounted)
-                        //{
+                            //if (isMounted)
+                            //{
                             //if (mountOffset != 0)
                             //{
                             //    mountOffset += 10;
@@ -950,56 +846,55 @@ namespace ClassicUO.Game.GameObjects
                             //{
                             //mountOffset = (sbyte)Math.Abs(spriteInfo.Center.Y);
                             //}                          
-                        //}
+                            //}
 
-                        //var flags = AnimationsLoader.Instance.DataIndex[id].Flags;
-                        //if (AnimationsLoader.Instance.DataIndex[id].Type == ANIMATION_GROUPS_TYPE.HUMAN)
-                        //{
+                            //var flags = AnimationsLoader.Instance.DataIndex[id].Flags;
+                            //if (AnimationsLoader.Instance.DataIndex[id].Type == ANIMATION_GROUPS_TYPE.HUMAN)
+                            //{
 
-                        //}
+                            //}
 
 
-                        int diffY = (spriteInfo.UV.Height + spriteInfo.Center.Y) - mountOffset;
+                            int diffY = (spriteInfo.UV.Height + spriteInfo.Center.Y) - mountOffset;
 
-                        //if (owner.Serial == World.Player.Serial && entity == null)
-                        //{
+                            //if (owner.Serial == World.Player.Serial && entity == null)
+                            //{
 
-                        //}
+                            //}
 
-                        int value = /*!isMounted && diffX <= 44 ? spriteInfo.UV.Height * 2 :*/ Math.Max(1, diffY);               
-                        int count = Math.Max( (spriteInfo.UV.Height / value) + 1, 2);
+                            int value = /*!isMounted && diffX <= 44 ? spriteInfo.UV.Height * 2 :*/ Math.Max(1, diffY);
+                            int count = Math.Max((spriteInfo.UV.Height / value) + 1, 2);
 
-                        Rectangle rect = spriteInfo.UV;
-                        rect.Height = Math.Min(value, rect.Height);
-                        Vector2 pos = new Vector2(x, y);
-                        int remains = spriteInfo.UV.Height - rect.Height;
+                            rect.Height = Math.Min(value, rect.Height);
+                            int remains = spriteInfo.UV.Height - rect.Height;
 
-                        int tiles = (byte)owner.Direction % 2 == 0 ? 2 : 2;
-                        //tiles = 999;
+                            int tiles = (byte)owner.Direction % 2 == 0 ? 2 : 2;
+                            //tiles = 999;
 
-                        for (int i = 0; i < count; ++i)
-                        {
-                            hueVec.Y = 1;
-                            hueVec.X = 0x44 + (i * 20);
+                            for (int i = 0; i < count; ++i)
+                            {
+                                hueVec.Y = 1;
+                                hueVec.X = 0x44 + (i * 20);
 
-                            batcher.Draw
-                            (
-                                spriteInfo.Texture,
-                                pos,
-                                rect,
-                                hueVec,
-                                0f,
-                                Vector2.Zero,
-                                1f,
-                                mirror ? SpriteEffects.FlipHorizontally : SpriteEffects.None,
-                                depth + 0.5f + (i * tiles)
+                                batcher.Draw
+                                (
+                                    spriteInfo.Texture,
+                                    pos,
+                                    rect,
+                                    hueVec,
+                                    0f,
+                                    Vector2.Zero,
+                                    1f,
+                                    mirror ? SpriteEffects.FlipHorizontally : SpriteEffects.None,
+                                    depth + 0.5f + (i * tiles)
                                 //depth + (i * tiles) + (owner.PriorityZ * 0.001f)
-                            );
+                                );
 
-                            pos.Y += rect.Height;
-                            rect.Y += rect.Height;
-                            rect.Height = remains; // Math.Min(value, remains);
-                            remains -= rect.Height;
+                                pos.Y += rect.Height;
+                                rect.Y += rect.Height;
+                                rect.Height = remains; // Math.Min(value, remains);
+                                remains -= rect.Height;
+                            }
                         }
 
                         int xx = -spriteInfo.Center.X;
@@ -1037,6 +932,139 @@ namespace ClassicUO.Game.GameObjects
                     }
                 }
             }
+        }
+
+        private static bool CalculateSitAnimation(int y, Item entity, bool isHuman, ref SpriteInfo spriteInfo, out Vector3 mod)
+        {
+            mod = Vector3.Zero;
+
+            if (_transform)
+            {
+                const float UPPER_BODY_RATIO = 0.35f;
+                const float MID_BODY_RATIO = 0.60f;
+                const float LOWER_BODY_RATIO = 0.94f;
+
+                if (entity == null && isHuman)
+                {
+                    int frameHeight = spriteInfo.UV.Height;
+                    if (frameHeight == 0)
+                    {
+                        frameHeight = 61;
+                    }
+
+                    _characterFrameStartY = y - (spriteInfo.Texture != null ? 0 : frameHeight - SIT_OFFSET_Y);
+                    _characterFrameHeight = frameHeight;
+                    _startCharacterWaistY = (int)(frameHeight * UPPER_BODY_RATIO) + _characterFrameStartY;
+                    _startCharacterKneesY = (int)(frameHeight * MID_BODY_RATIO) + _characterFrameStartY;
+                    _startCharacterFeetY = (int)(frameHeight * LOWER_BODY_RATIO) + _characterFrameStartY;
+
+                    if (spriteInfo.Texture == null)
+                    {
+                        return true;
+                    }
+                }
+
+                mod.X = UPPER_BODY_RATIO;
+                mod.Y = MID_BODY_RATIO;
+                mod.Z = LOWER_BODY_RATIO;
+
+
+                if (entity != null)
+                {
+                    float itemsEndY = y + spriteInfo.UV.Height;
+
+                    if (y >= _startCharacterWaistY)
+                    {
+                        mod.X = 0;
+                    }
+                    else if (itemsEndY <= _startCharacterWaistY)
+                    {
+                        mod.X = 1.0f;
+                    }
+                    else
+                    {
+                        float upperBodyDiff = _startCharacterWaistY - y;
+                        mod.X = upperBodyDiff / spriteInfo.UV.Height;
+
+                        if (mod.X < 0)
+                        {
+                            mod.X = 0;
+                        }
+                    }
+
+
+                    if (_startCharacterWaistY >= itemsEndY || y >= _startCharacterKneesY)
+                    {
+                        mod.Y = 0;
+                    }
+                    else if (_startCharacterWaistY <= y && itemsEndY <= _startCharacterKneesY)
+                    {
+                        mod.Y = 1.0f;
+                    }
+                    else
+                    {
+                        float midBodyDiff;
+
+                        if (y >= _startCharacterWaistY)
+                        {
+                            midBodyDiff = _startCharacterKneesY - y;
+                        }
+                        else if (itemsEndY <= _startCharacterKneesY)
+                        {
+                            midBodyDiff = itemsEndY - _startCharacterWaistY;
+                        }
+                        else
+                        {
+                            midBodyDiff = _startCharacterKneesY - _startCharacterWaistY;
+                        }
+
+                        mod.Y = mod.X + midBodyDiff / spriteInfo.UV.Height;
+
+                        if (mod.Y < 0)
+                        {
+                            mod.Y = 0;
+                        }
+                    }
+
+
+                    if (itemsEndY <= _startCharacterKneesY)
+                    {
+                        mod.Z = 0;
+                    }
+                    else if (y >= _startCharacterKneesY)
+                    {
+                        mod.Z = 1.0f;
+                    }
+                    else
+                    {
+                        float lowerBodyDiff = itemsEndY - _startCharacterKneesY;
+                        mod.Z = mod.Y + lowerBodyDiff / spriteInfo.UV.Height;
+
+                        if (mod.Z < 0)
+                        {
+                            mod.Z = 0;
+                        }
+                    }
+                }
+
+                // TODO: fix sitting characters
+
+                //batcher.DrawCharacterSitted
+                //(
+                //    spriteInfo.Texture,
+                //    x,
+                //    y,
+                //    mirror,
+                //    h3mod,
+                //    h6mod,
+                //    h9mod,
+                //    ref hueVec
+                //);
+
+                return true;
+            }
+
+            return false;
         }
 
         public override bool CheckMouseSelection()
