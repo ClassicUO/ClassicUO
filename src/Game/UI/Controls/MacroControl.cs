@@ -50,8 +50,15 @@ namespace ClassicUO.Game.UI.Controls
         private readonly DataBox _databox;
         private readonly HotkeyBox _hotkeyBox;
 
+        private enum buttonsOption
+        {
+            AddBtn,
+            RemoveBtn,
+            CreateNewMacro,
+            OpenMacroOptions
+        }
 
-        public MacroControl(string name)
+        public MacroControl(string name, bool isFastAssign = false)
         {
             CanMove = true;
 
@@ -74,49 +81,74 @@ namespace ClassicUO.Game.UI.Controls
                     ResGumps.CreateMacroButton,
                     0,
                     TEXT_ALIGN_TYPE.TS_LEFT
-                ) { ButtonParameter = 2, IsSelectable = false }
+                ) { ButtonParameter = (int)buttonsOption.CreateNewMacro, IsSelectable = false }
             );
 
-            Add
-            (
-                new NiceButton
+            if(!isFastAssign)
+            {
+                Add
                 (
-                    0,
-                    _hotkeyBox.Height + 30,
-                    50,
-                    25,
-                    ButtonAction.Activate,
-                    ResGumps.Add
-                ) { IsSelectable = false }
-            );
+                    new NiceButton
+                    (
+                        0,
+                        _hotkeyBox.Height + 30,
+                        50,
+                        25,
+                        ButtonAction.Activate,
+                        ResGumps.Add
+                    )
+                    { ButtonParameter = (int)buttonsOption.AddBtn, IsSelectable = false }
+                );
 
-            Add
-            (
-                new NiceButton
+                Add
                 (
-                    52,
-                    _hotkeyBox.Height + 30,
-                    50,
-                    25,
-                    ButtonAction.Activate,
-                    ResGumps.Remove
-                ) { ButtonParameter = 1, IsSelectable = false }
-            );
+                    new NiceButton
+                    (
+                        52,
+                        _hotkeyBox.Height + 30,
+                        50,
+                        25,
+                        ButtonAction.Activate,
+                        ResGumps.Remove,
+                        0,
+                        TEXT_ALIGN_TYPE.TS_LEFT
+                    )
+                    { ButtonParameter = (int)buttonsOption.RemoveBtn, IsSelectable = false }
+                );
+            } else {
+                Add
+                (
+                    new NiceButton
+                    (
+                        0,
+                        _hotkeyBox.Height + 30,
+                        170,
+                        25,
+                        ButtonAction.Activate,
+                        ResGumps.OpenMacroSettings
+                    )
+                    { ButtonParameter = (int)buttonsOption.OpenMacroOptions, IsSelectable = false }
+                );
+            }
 
+            var scrollAreaH = isFastAssign ? 80 : 280;
+            var scrollAreaW = isFastAssign ? 230 : 280;
 
             ScrollArea area = new ScrollArea
             (
                 10,
                 _hotkeyBox.Bounds.Bottom + 80,
-                280,
-                280,
+                scrollAreaW,
+                scrollAreaH,
                 true
             );
 
             Add(area);
 
-            _databox = new DataBox(0, 0, 280, 280);
-            _databox.WantUpdateSize = true;
+            _databox = new DataBox(0, 0, 280, 280)
+            {
+                WantUpdateSize = true
+            };
             area.Add(_databox);
 
 
@@ -285,20 +317,25 @@ namespace ClassicUO.Game.UI.Controls
 
         public override void OnButtonClick(int buttonID)
         {
-            if (buttonID == 0) // add
+            switch (buttonID)
             {
-                AddEmptyMacro();
-            }
-            else if (buttonID == 1) // remove
-            {
-                RemoveLastCommand();
-            }
-            else if (buttonID == 2) // add macro button
-            {
-                UIManager.Gumps.OfType<MacroButtonGump>().FirstOrDefault(s => s._macro == Macro)?.Dispose();
+                case (int)buttonsOption.AddBtn:
+                    AddEmptyMacro();
+                    break;
+                case (int)buttonsOption.RemoveBtn:
+                    RemoveLastCommand();
+                    break;
+                case (int)buttonsOption.CreateNewMacro:
+                    UIManager.Gumps.OfType<MacroButtonGump>().FirstOrDefault(s => s._macro == Macro)?.Dispose();
 
-                MacroButtonGump macroButtonGump = new MacroButtonGump(Macro, Mouse.Position.X, Mouse.Position.Y);
-                UIManager.Add(macroButtonGump);
+                    MacroButtonGump macroButtonGump = new MacroButtonGump(Macro, Mouse.Position.X, Mouse.Position.Y);
+                    UIManager.Add(macroButtonGump);
+                    break;
+                case (int)buttonsOption.OpenMacroOptions:
+                    UIManager.Gumps.OfType<MacroGump>().FirstOrDefault()?.Dispose();
+
+                    GameActions.OpenSettings(4);
+                    break;
             }
         }
 

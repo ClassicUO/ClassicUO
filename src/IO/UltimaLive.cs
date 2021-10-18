@@ -293,7 +293,7 @@ namespace ClassicUO.IO
                             //update lookup AND index length on disk
                             _UL._filesIdxStatics[mapId].WriteArray(block * 12, idxData);
 
-                            Chunk mapChunk = World.Map.Chunks[block];
+                            Chunk mapChunk = World.Map.GetChunk(block);
 
                             if (mapChunk == null)
                             {
@@ -516,7 +516,7 @@ namespace ClassicUO.IO
                 {
                     for (int by = blockY; by >= miny; --by)
                     {
-                        Chunk mapChunk = World.Map.Chunks[blockX * mapHeightInBlocks + by];
+                        Chunk mapChunk = World.Map.GetChunk(blockX * mapHeightInBlocks + by);
 
                         if (mapChunk == null)
                         {

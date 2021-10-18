@@ -1223,6 +1223,15 @@ namespace ClassicUO.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Enable Fast Spells Assign (Ctrl + Alt).
+        /// </summary>
+        public static string EnableFastSpellsAssign {
+            get {
+                return ResourceManager.GetString("EnableFastSpellsAssign", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Enable mousewheel for in game zoom scaling (Ctrl + Scroll).
         /// </summary>
         public static string EnableMouseWheelForZoom {
@@ -1673,6 +1682,15 @@ namespace ClassicUO.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Highlight invulnerable.
+        /// </summary>
+        public static string HighlightInvulnerable {
+            get {
+                return ResourceManager.GetString("HighlightInvulnerable", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Highlight game objects.
         /// </summary>
         public static string HighlightObjects {
@@ -1687,6 +1705,24 @@ namespace ClassicUO.Resources {
         public static string HighlightOnUse {
             get {
                 return ResourceManager.GetString("HighlightOnUse", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Highlight paralyzed.
+        /// </summary>
+        public static string HighlightParalyzed {
+            get {
+                return ResourceManager.GetString("HighlightParalyzed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Highlight poisoned.
+        /// </summary>
+        public static string HighlightPoisoned {
+            get {
+                return ResourceManager.GetString("HighlightPoisoned", resourceCulture);
             }
         }
         
@@ -2473,6 +2509,15 @@ namespace ClassicUO.Resources {
         public static string ON {
             get {
                 return ResourceManager.GetString("ON", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Open Macro Settings.
+        /// </summary>
+        public static string OpenMacroSettings {
+            get {
+                return ResourceManager.GetString("OpenMacroSettings", resourceCulture);
             }
         }
         

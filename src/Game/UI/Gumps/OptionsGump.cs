@@ -67,7 +67,6 @@ namespace ClassicUO.Game.UI.Gumps
 
         //experimental
         private Checkbox _autoOpenDoors, _autoOpenCorpse, _skipEmptyCorpse, _disableTabBtn, _disableCtrlQWBtn, _disableDefaultHotkeys, _disableArrowBtn, _disableAutoMove, _overrideContainerLocation, _smoothDoors, _showTargetRangeIndicator, _customBars, _customBarsBBG, _saveHealthbars;
-        private Checkbox _buffBarTime, _castSpellsByOneClick, _queryBeforAttackCheckbox, _queryBeforeBeneficialCheckbox, _spellColoringCheckbox, _spellFormatCheckbox;
         private HSliderBar _cellSize;
         private Checkbox _containerScaleItems, _containerDoubleClickToLoot, _relativeDragAnDropItems, _useLargeContianersGumps, _highlightContainersWhenMouseIsOver;
 
@@ -108,7 +107,9 @@ namespace ClassicUO.Game.UI.Gumps
                          _alwaysRun,
                          _alwaysRunUnlessHidden,
                          _showHpMobile,
-                         _highlightByState,
+                         _highlightByPoisoned,
+                         _highlightByParalyzed,
+                         _highlightByInvul,
                          _drawRoofs,
                          _treeToStumps,
                          _hideVegetation,
@@ -132,6 +133,7 @@ namespace ClassicUO.Game.UI.Gumps
         // combat & spells
         private ClickableColorBox _innocentColorPickerBox, _friendColorPickerBox, _crimialColorPickerBox, _canAttackColorPickerBox, _enemyColorPickerBox, _murdererColorPickerBox, _neutralColorPickerBox, _beneficColorPickerBox, _harmfulColorPickerBox;
         private HSliderBar _lightBar;
+        private Checkbox _buffBarTime, _castSpellsByOneClick, _queryBeforAttackCheckbox, _queryBeforeBeneficialCheckbox, _spellColoringCheckbox, _spellFormatCheckbox, _enableFastSpellsAssign;
 
         // macro
         private MacroControl _macroControl;
@@ -730,11 +732,11 @@ namespace ClassicUO.Game.UI.Gumps
 
             section2.Add
             (
-                _highlightByState = AddCheckBox
+                _highlightByPoisoned = AddCheckBox
                 (
                     null,
-                    ResGumps.HighlighState,
-                    _currentProfile.HighlightMobilesByFlags,
+                    ResGumps.HighlightPoisoned,
+                    _currentProfile.HighlightMobilesByPoisoned,
                     startX,
                     startY
                 )
@@ -755,6 +757,21 @@ namespace ClassicUO.Game.UI.Gumps
             );
 
             section2.AddRight(AddLabel(null, ResGumps.PoisonedColor, 0, 0), 2);
+            section2.PopIndent();
+
+            section2.Add
+            (
+                _highlightByParalyzed = AddCheckBox
+                (
+                    null,
+                    ResGumps.HighlightParalyzed,
+                    _currentProfile.HighlightMobilesByParalize,
+                    startX,
+                    startY
+                )
+            );
+
+            section2.PushIndent();
 
             section2.Add
             (
@@ -769,6 +786,22 @@ namespace ClassicUO.Game.UI.Gumps
             );
 
             section2.AddRight(AddLabel(null, ResGumps.ParalyzedColor, 0, 0), 2);
+
+            section2.PopIndent();
+
+            section2.Add
+            (
+                _highlightByInvul = AddCheckBox
+                (
+                    null,
+                    ResGumps.HighlightInvulnerable,
+                    _currentProfile.HighlightMobilesByInvul,
+                    startX,
+                    startY
+                )
+            );
+
+            section2.PushIndent();
 
             section2.Add
             (
@@ -2641,7 +2674,16 @@ namespace ClassicUO.Game.UI.Gumps
 
             startY += _buffBarTime.Height + 2;
 
-            startY += 40;
+            _enableFastSpellsAssign = AddCheckBox
+            (
+                rightArea,
+                ResGumps.EnableFastSpellsAssign,
+                _currentProfile.FastSpellsAssign,
+                startX,
+                startY
+            );
+
+            startY += 30;
 
             int initialY = startY;
 
@@ -3376,7 +3418,9 @@ namespace ClassicUO.Game.UI.Gumps
                     _showHpMobile.IsChecked = false;
                     _hpComboBox.SelectedIndex = 0;
                     _hpComboBoxShowWhen.SelectedIndex = 0;
-                    _highlightByState.IsChecked = true;
+                    _highlightByPoisoned.IsChecked = true;
+                    _highlightByParalyzed.IsChecked = true;
+                    _highlightByInvul.IsChecked = true;
                     _poisonColorPickerBox.Hue = 0x0044;
                     _paralyzedColorPickerBox.Hue = 0x014C;
                     _invulnerableColorPickerBox.Hue = 0x0030;
@@ -3517,6 +3561,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _queryBeforeBeneficialCheckbox.IsChecked = false;
                     _castSpellsByOneClick.IsChecked = false;
                     _buffBarTime.IsChecked = false;
+                    _enableFastSpellsAssign.IsChecked = false;
                     _beneficColorPickerBox.Hue = 0x0059;
                     _harmfulColorPickerBox.Hue = 0x0020;
                     _neutralColorPickerBox.Hue = 0x03b2;
@@ -3586,7 +3631,9 @@ namespace ClassicUO.Game.UI.Gumps
             _currentProfile.AlwaysRun = _alwaysRun.IsChecked;
             _currentProfile.AlwaysRunUnlessHidden = _alwaysRunUnlessHidden.IsChecked;
             _currentProfile.ShowMobilesHP = _showHpMobile.IsChecked;
-            _currentProfile.HighlightMobilesByFlags = _highlightByState.IsChecked;
+            _currentProfile.HighlightMobilesByPoisoned = _highlightByPoisoned.IsChecked;
+            _currentProfile.HighlightMobilesByParalize = _highlightByParalyzed.IsChecked;
+            _currentProfile.HighlightMobilesByInvul = _highlightByInvul.IsChecked;
             _currentProfile.PoisonHue = _poisonColorPickerBox.Hue;
             _currentProfile.ParalyzedHue = _paralyzedColorPickerBox.Hue;
             _currentProfile.InvulnerableHue = _invulnerableColorPickerBox.Hue;
@@ -3892,6 +3939,7 @@ namespace ClassicUO.Game.UI.Gumps
             _currentProfile.EnabledBeneficialCriminalActionQuery = _queryBeforeBeneficialCheckbox.IsChecked;
             _currentProfile.CastSpellsByOneClick = _castSpellsByOneClick.IsChecked;
             _currentProfile.BuffBarTime = _buffBarTime.IsChecked;
+            _currentProfile.FastSpellsAssign = _enableFastSpellsAssign.IsChecked;
 
             _currentProfile.BeneficHue = _beneficColorPickerBox.Hue;
             _currentProfile.HarmfulHue = _harmfulColorPickerBox.Hue;

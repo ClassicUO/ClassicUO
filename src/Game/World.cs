@@ -126,7 +126,6 @@ namespace ClassicUO.Game
                         }
 
                         Map = new Map.Map(value);
-                        Map.Initialize();
 
                         Player.X = x;
                         Player.Y = y;
@@ -139,9 +138,14 @@ namespace ClassicUO.Game
                     else
                     {
                         Map = new Map.Map(value);
-                        Map.Initialize();
                     }
 
+                    // force cursor update when switching map
+                    if (UIManager.GameCursor != null)
+                    {
+                        UIManager.GameCursor.Graphic = 0xFFFF;
+                    }
+                    
                     UoAssist.SignalMapChanged(value);
                 }
             }
@@ -168,10 +172,8 @@ namespace ClassicUO.Game
         {
             Season = season;
 
-            foreach (int i in Map.GetUsedChunks())
+            foreach (Chunk chunk in Map.GetUsedChunks())
             {
-                Chunk chunk = Map.Chunks[i];
-
                 for (int x = 0; x < 8; x++)
                 {
                     for (int y = 0; y < 8; y++)
@@ -260,7 +262,7 @@ namespace ClassicUO.Game
 
                     if (mob.IsDestroyed)
                     {
-                        _toRemove.Add(mob);
+                        _toRemove.Add(mob.Serial);
                     }
                     else
                     {
@@ -324,7 +326,7 @@ namespace ClassicUO.Game
 
                     if (item.IsDestroyed)
                     {
-                        _toRemove.Add(item);
+                        _toRemove.Add(item.Serial);
                     }
                 }
 
@@ -339,7 +341,6 @@ namespace ClassicUO.Game
                 }
 
                 _effectManager.Update(totalTime, frameTime);
-
                 WorldTextManager.Update(totalTime, frameTime);
                 WMapManager.RemoveUnupdatedWEntity();
             }
@@ -474,7 +475,7 @@ namespace ClassicUO.Game
             {
                 return false;
             }
-
+            
             LinkedObject first = item.Items;
             RemoveItemFromContainer(item);
 
@@ -506,7 +507,7 @@ namespace ClassicUO.Game
             {
                 return false;
             }
-
+     
             LinkedObject first = mobile.Items;
 
             while (first != null)
@@ -726,6 +727,7 @@ namespace ClassicUO.Game
             return 0;
         }
 
+       
         public static void Clear()
         {
             foreach (Mobile mobile in Mobiles.Values)

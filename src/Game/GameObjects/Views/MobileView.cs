@@ -57,6 +57,11 @@ namespace ClassicUO.Game.GameObjects
 
         public override bool Draw(UltimaBatcher2D batcher, int posX, int posY, ref Vector3 hueVec)
         {
+            if (IsDestroyed || !AllowedToDraw)
+            {
+                return false;
+            }
+
             hueVec = Vector3.Zero;
 
             AnimationsLoader.SittingInfoData seatData = AnimationsLoader.SittingInfoData.Empty;
@@ -124,21 +129,28 @@ namespace ClassicUO.Game.GameObjects
                         _viewHue = 0x0386;
                     }
                 }
-                else if (ProfileManager.CurrentProfile.HighlightMobilesByFlags)
+                else
                 {
-                    if (IsPoisoned)
+                    if (ProfileManager.CurrentProfile.HighlightMobilesByPoisoned)
                     {
-                        _viewHue = ProfileManager.CurrentProfile.PoisonHue;
+                        if (IsPoisoned)
+                        {
+                            _viewHue = ProfileManager.CurrentProfile.PoisonHue;
+                        }
                     }
-
-                    if (IsParalyzed)
+                    if (ProfileManager.CurrentProfile.HighlightMobilesByParalize)
                     {
-                        _viewHue = ProfileManager.CurrentProfile.ParalyzedHue;
+                        if (IsParalyzed && NotorietyFlag != NotorietyFlag.Invulnerable)
+                        {
+                            _viewHue = ProfileManager.CurrentProfile.ParalyzedHue;
+                        }
                     }
-
-                    if (NotorietyFlag != NotorietyFlag.Invulnerable && IsYellowHits)
+                    if (ProfileManager.CurrentProfile.HighlightMobilesByInvul)
                     {
-                        _viewHue = ProfileManager.CurrentProfile.InvulnerableHue;
+                        if (NotorietyFlag != NotorietyFlag.Invulnerable && IsYellowHits)
+                        {
+                            _viewHue = ProfileManager.CurrentProfile.InvulnerableHue;
+                        }
                     }
                 }
             }
@@ -401,35 +413,58 @@ namespace ClassicUO.Game.GameObjects
                                         graphic = 0x042B;
 
                                         break;
+                                    //NOTE: gargoyle mysticism book seems ok. Mha!
 
 
-                                    // gargoyle mysticism book seems ok. Mha!
+                                    /* into the mobtypes.txt file of 7.0.90+ client version we have:
+                                     *
+                                     *   1529 	EQUIPMENT	0		# EQUIP_Shield_Pirate_Male_H
+                                     *   1530 	EQUIPMENT	0		# EQUIP_Shield_Pirate_Female_H
+                                     *   1531 	EQUIPMENT	10000	# Equip_Shield_Pirate_Male_G
+                                     *   1532 	EQUIPMENT	10000	# Equip_Shield_Pirate_Female_G
+                                     *   
+                                     *   This means that graphic 0xA649 [pirate shield] has 4 tiledata infos.
+                                     *   Standard client handles it automatically without any issue. 
+                                     *   Maybe it's hardcoded into the client
+                                     */
+
+                                    // EQUIP_Shield_Pirate_Male_H
+                                    case 1529:
+                                        graphic = 1531;
+
+                                        break;
+
+                                    // EQUIP_Shield_Pirate_Female_H
+                                    case 1530:
+                                        graphic = 1532;
+
+                                        break;
                                 }
                             }
 
 
-                            if (AnimationsLoader.Instance.EquipConversions.TryGetValue(Graphic, out Dictionary<ushort, EquipConvData> map))
+                         if (AnimationsLoader.Instance.EquipConversions.TryGetValue(Graphic, out Dictionary<ushort, EquipConvData> map))
+                        {
+                            if (map.TryGetValue(item.ItemData.AnimID, out EquipConvData data))
                             {
-                                if (map.TryGetValue(item.ItemData.AnimID, out EquipConvData data))
-                                {
-                                    _equipConvData = data;
-                                    graphic = data.Graphic;
-                                }
+                                _equipConvData = data;
+                                graphic = data.Graphic;
                             }
+                        }
 
-                            DrawInternal
-                            (
-                                batcher,
-                                this,
-                                item,
-                                drawX,
-                                drawY,
-                                ref hueVec,
-                                IsFlipped, 
-                                animIndex,
-                                false,
-                                graphic,
-                                isGargoyle /*&& item.ItemData.IsWeapon*/ && seatData.Graphic == 0 ? GetGroupForAnimation(this, graphic, true) : animGroup,
+                        DrawInternal
+                        (
+                            batcher,
+                            this,
+                            item,
+                            drawX,
+                            drawY,
+                            ref hueVec,
+                            IsFlipped, 
+                            animIndex,
+                            false,
+                            graphic,
+                            isGargoyle /*&& item.ItemData.IsWeapon*/ && seatData.Graphic == 0 ? GetGroupForAnimation(this, graphic, true) : animGroup,
                                 dir,
                                 isHuman,
                                 false,
@@ -442,7 +477,7 @@ namespace ClassicUO.Game.GameObjects
                         {
                             if (item.ItemData.IsLight)
                             {
-                                Client.Game.GetScene<GameScene>().AddLight(this, this, drawX, drawY);
+                                Client.Game.GetScene<GameScene>().AddLight(this, item, drawX, drawY);
                             }
                         }
 
@@ -452,7 +487,7 @@ namespace ClassicUO.Game.GameObjects
                     {
                         if (item.ItemData.IsLight)
                         {
-                            Client.Game.GetScene<GameScene>().AddLight(this, this, drawX, drawY);
+                            Client.Game.GetScene<GameScene>().AddLight(this, item, drawX, drawY);
 
                             /*DrawInternal
                             (

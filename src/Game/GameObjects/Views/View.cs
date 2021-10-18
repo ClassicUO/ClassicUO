@@ -41,6 +41,14 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.Game.GameObjects
 {
+    enum ObjectHandlesStatus
+    {
+        NONE,
+        OPEN,
+        CLOSED,
+        DISPLAYING
+    }
+
     internal abstract partial class GameObject
     {
         public static bool DrawTransparent;
@@ -63,13 +71,10 @@ namespace ClassicUO.Game.GameObjects
                 return state;
             }
         );
-        public bool UseObjectHandles { get; set; }
-        public bool ClosedObjectHandles { get; set; }
-        public bool ObjectHandlesOpened { get; set; }
-        public byte AlphaHue { get; set; }
-        public bool AllowedToDraw { get; set; } = true;
 
-
+        public byte AlphaHue;
+        public bool AllowedToDraw = true;
+        public ObjectHandlesStatus ObjectHandlesStatus;
         public Rectangle FrameInfo;
         protected bool IsFlipped;
 
@@ -94,49 +99,6 @@ namespace ClassicUO.Game.GameObjects
         {
             return false;
         }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool ProcessAlpha(int max)
-        {
-            if (ProfileManager.CurrentProfile != null && !ProfileManager.CurrentProfile.UseObjectsFading)
-            {
-                AlphaHue = (byte) max;
-
-                return max != 0;
-            }
-
-            bool result = false;
-
-            int alpha = AlphaHue;
-
-            if (alpha > max)
-            {
-                alpha -= 25;
-
-                if (alpha < max)
-                {
-                    alpha = max;
-                }
-
-                result = true;
-            }
-            else if (alpha < max)
-            {
-                alpha += 25;
-
-                if (alpha > max)
-                {
-                    alpha = max;
-                }
-
-                result = true;
-            }
-
-            AlphaHue = (byte) alpha;
-
-            return result;
-        }
-
 
         protected static void DrawLand(UltimaBatcher2D batcher, ushort graphic, int x, int y, ref Vector3 hue)
         {
@@ -294,19 +256,31 @@ namespace ClassicUO.Game.GameObjects
             {
                 texture.Ticks = Time.Ticks;
                 index = ref ArtLoader.Instance.GetValidRefEntry(graphic + 0x4000);
+              
+                x -= index.Width;
+                y -= index.Height;
 
                 if (transparent)
                 {
                     int maxDist = ProfileManager.CurrentProfile.CircleOfTransparencyRadius;
 
-                    int fx = (int) (World.Player.RealScreenPosition.X + World.Player.Offset.X);
-                    int fy = (int) (World.Player.RealScreenPosition.Y + (World.Player.Offset.Y - World.Player.Offset.Z));
+                    Vector2 pos = new Vector2
+                    {
+                        X = (World.Player.RealScreenPosition.X + World.Player.Offset.X),
+                        Y = (World.Player.RealScreenPosition.Y + (World.Player.Offset.Y - World.Player.Offset.Z))
+                    };
 
-                    fx -= x;
-                    fy -= y;
+                    //pos.X -= 22;
+                    pos.Y -= 22f;
 
-                    float dist = (float) Math.Floor(Math.Sqrt(fx * fx + fy * fy));
+                    Vector2 pos2 = new Vector2
+                    {
+                        X = x,
+                        Y = y
+                    };
 
+                    Vector2.Distance(ref pos, ref pos2, out float dist);
+                    
                     if (dist <= maxDist)
                     {
                         float alpha = hue.Z;
@@ -328,11 +302,7 @@ namespace ClassicUO.Game.GameObjects
 
                                 break;
                         }
-
-                        x -= index.Width;
-                        y -= index.Height;
-
-
+                       
                         batcher.DrawSprite
                         (
                             texture,
@@ -361,9 +331,6 @@ namespace ClassicUO.Game.GameObjects
                 }
 
                 transparent = false;
-                x -= index.Width;
-                y -= index.Height;
-
 
                 if (shadow)
                 {

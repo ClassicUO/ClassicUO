@@ -79,7 +79,6 @@ namespace ClassicUO.Game.Scenes
         private int _reconnectTryCounter = 1;
         private bool _autoLogin;
 
-
         public LoginScene() : base((int) SceneType.Login, false, false, true)
         {
         }
@@ -104,7 +103,7 @@ namespace ClassicUO.Game.Scenes
         public string Password { get; private set; }
 
         public bool CanAutologin => _autoLogin || Reconnect;
-
+        
 
         public override void Load()
         {
@@ -200,7 +199,7 @@ namespace ClassicUO.Game.Scenes
                 }
             }
 
-            if (CurrentLoginStep == LoginSteps.CharacterCreation && Time.Ticks > _pingTime)
+            if (CUOEnviroment.NoServerPing == false && CurrentLoginStep == LoginSteps.CharacterCreation && Time.Ticks > _pingTime)
             {
                 if (NetClient.Socket != null && NetClient.Socket.IsConnected)
                 {
@@ -418,8 +417,8 @@ namespace ClassicUO.Game.Scenes
         {
             if (CurrentLoginStep == LoginSteps.CharacterSelection)
             {
-                Settings.GlobalSettings.LastCharacterName = Characters[index];
-                Settings.GlobalSettings.Save();
+                LastCharacterManager.Save(Account, World.ServerName, Characters[index]);
+
                 CurrentLoginStep = LoginSteps.EnteringBritania;
                 NetClient.Socket.Send_SelectCharacter(index, Characters[index], NetClient.Socket.LocalIP);
             }
@@ -445,7 +444,7 @@ namespace ClassicUO.Game.Scenes
                 }
             }
 
-            Settings.GlobalSettings.LastCharacterName = character.Name;
+            LastCharacterManager.Save(Account, World.ServerName, character.Name);
 
             NetClient.Socket.Send_CreateCharacter(character,
                                                   cityIndex,
@@ -656,13 +655,15 @@ namespace ClassicUO.Game.Scenes
                 _autoLogin = false;
             }
 
+            string lastCharName = LastCharacterManager.GetLastCharacter(Account, World.ServerName);
+
             for (byte i = 0; i < Characters.Length; i++)
             {
                 if (Characters[i].Length > 0)
                 {
                     haveAnyCharacter = true;
 
-                    if (Characters[i] == Settings.GlobalSettings.LastCharacterName)
+                    if (Characters[i] == lastCharName)
                     {
                         charToSelect = i;
 
@@ -690,14 +691,11 @@ namespace ClassicUO.Game.Scenes
         }
 
         public void HandleRelayServerPacket(ref StackDataReader p)
-        {
-            byte[] ip =
-            {
-                p.ReadUInt8(), p.ReadUInt8(), p.ReadUInt8(), p.ReadUInt8()
-            };
-
+        {           
+            long ip = p.ReadUInt32LE(); // use LittleEndian here
             ushort port = p.ReadUInt16BE();
             uint seed = p.ReadUInt32BE();
+
             NetClient.LoginSocket.Disconnect();
             EncryptionHelper.Initialize(false, seed, (ENCRYPTION_TYPE) Settings.GlobalSettings.Encryption);
 
@@ -709,9 +707,14 @@ namespace ClassicUO.Game.Scenes
                              if (!t.IsFaulted)
                              {
                                  NetClient.Socket.EnableCompression();
-                                 // TODO: stackalloc
-                                 byte[] ss = new byte[4] { (byte) (seed >> 24), (byte) (seed >> 16), (byte) (seed >> 8), (byte) seed };
-                                 NetClient.Socket.Send(ss, 4, true, true);
+
+                                 unsafe
+                                 {
+                                     Span<byte> b = stackalloc byte[4] { (byte)(seed >> 24), (byte)(seed >> 16), (byte)(seed >> 8), (byte)seed };
+                                     StackDataWriter writer = new StackDataWriter(b);
+                                     NetClient.Socket.Send(writer.AllocatedBuffer, writer.BytesWritten, true, true);
+                                     writer.Dispose();
+                                 }
 
                                  NetClient.Socket.Send_SecondLogin(Account, Password, seed);
                              }

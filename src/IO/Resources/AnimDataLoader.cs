@@ -35,7 +35,6 @@ using System.IO;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
-using ClassicUO.Utility;
 
 namespace ClassicUO.IO.Resources
 {
@@ -76,9 +75,12 @@ namespace ClassicUO.IO.Resources
             {
                 IntPtr addr = address + (graphic * 68 + 4 * ((graphic >> 3) + 1));
 
-                ref AnimDataFrame a = ref Unsafe.AsRef<AnimDataFrame>((void*) addr);
+                if (addr.ToInt64() < address.ToInt64() + _file.Length)
+                {
+                    ref AnimDataFrame a = ref Unsafe.AsRef<AnimDataFrame>((void*)addr);
 
-                return a;
+                    return a;
+                }
             }
 
             return default;

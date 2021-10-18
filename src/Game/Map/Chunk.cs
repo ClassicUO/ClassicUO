@@ -71,7 +71,6 @@ namespace ClassicUO.Game.Map
         }
 
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public unsafe void Load(int index)
         {
             IsDestroyed = false;

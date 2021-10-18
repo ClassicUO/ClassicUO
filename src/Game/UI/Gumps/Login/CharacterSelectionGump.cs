@@ -35,6 +35,7 @@ using System.Linq;
 using ClassicUO.Configuration;
 using ClassicUO.Data;
 using ClassicUO.Game.Data;
+using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
@@ -60,8 +61,9 @@ namespace ClassicUO.Game.UI.Gumps.Login
             int listTitleY = 106;
 
             LoginScene loginScene = Client.Game.GetScene<LoginScene>();
-
-            string lastSelected = loginScene.Characters.FirstOrDefault(o => o == Settings.GlobalSettings.LastCharacterName);
+            
+            string lastCharName = LastCharacterManager.GetLastCharacter(LoginScene.Account, World.ServerName);
+            string lastSelected = loginScene.Characters.FirstOrDefault(o => o == lastCharName);
 
             LockedFeatureFlags f = World.ClientLockedFeatures.Flags;
             CharacterListFlags ff = World.ClientFeatures.Flags;
@@ -107,7 +109,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 },
                 1
             );
-           
+            
             for (int i = 0, valid = 0; i < loginScene.Characters.Length; i++)
             {
                 string character = loginScene.Characters[i];
@@ -128,14 +130,14 @@ namespace ClassicUO.Game.UI.Gumps.Login
                             break;
                         }
                     }
-
+                    
                     Add
                     (
                         new CharacterEntryGump((uint) i, character, SelectCharacter, LoginCharacter)
                         {
                             X = 224,
                             Y = yOffset + posInList * 40,
-                            Hue = posInList == _selectedCharacter ? SELECTED_COLOR : NORMAL_COLOR
+                            Hue = i == _selectedCharacter ? SELECTED_COLOR : NORMAL_COLOR
                         },
                         1
                     );

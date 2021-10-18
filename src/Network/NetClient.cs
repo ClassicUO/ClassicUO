@@ -122,8 +122,6 @@ namespace ClassicUO.Network
         public event EventHandler Connected;
         public event EventHandler<SocketError> Disconnected;
 
-        private static readonly Task<bool> TaskCompletedFalse = new Task<bool>(() => false);
-
         public static void EnqueuePacketFromPlugin(byte[] data, int length)
         {
             if (LoginSocket.IsDisposed && Socket.IsConnected)
@@ -142,20 +140,20 @@ namespace ClassicUO.Network
             }
         }
 
-        public Task<bool> Connect(string ip, ushort port)
+        public async Task<bool> Connect(string ip, ushort port)
         {
             IsDisposed = false;
             IPAddress address = ResolveIP(ip);
 
             if (address == null)
             {
-                return TaskCompletedFalse;
+                return false;
             }
 
-            return Connect(address, port);
+            return await Connect(address, port);
         }
 
-        public Task<bool> Connect(IPAddress address, ushort port)
+        public async Task<bool> Connect(IPAddress address, ushort port)
         {
             IsDisposed = false;
 
@@ -163,7 +161,7 @@ namespace ClassicUO.Network
             {
                 Log.Warn($"Socket status: {Status}");
 
-                return TaskCompletedFalse;
+                return false;
             }
 
             _tcpClient = new TcpClient
@@ -185,36 +183,37 @@ namespace ClassicUO.Network
 
             Status = ClientSocketStatus.Connecting;
 
-            return InternalConnect(address, port);
+            return await InternalConnect(address, port);
         }
 
-        private Task<bool> InternalConnect(IPAddress address, ushort port)
+        private async Task<bool> InternalConnect(IPAddress address, ushort port)
         {
             try
             {
-                return _tcpClient.ConnectAsync(address, port)
-                                 .ContinueWith
-                                 (
-                                     (t) =>
-                                     {
-                                         if (!t.IsFaulted && _tcpClient.Connected)
-                                         {
-                                             _netStream = _tcpClient.GetStream();
-                                             Status = ClientSocketStatus.Connected;
-                                             Connected.Raise();
-                                             Statistics.ConnectedFrom = DateTime.Now;
+                return await _tcpClient
+                    .ConnectAsync(address, port)
+                    .ContinueWith
+                    (
+                        (t) =>
+                        {
+                            if (!t.IsFaulted && _tcpClient.Connected)
+                            {
+                                _netStream = _tcpClient.GetStream();
+                                Status = ClientSocketStatus.Connected;
+                                Connected.Raise();
+                                Statistics.ConnectedFrom = DateTime.Now;
 
-                                             return true;
-                                         }
+                                return true;
+                            }
 
 
-                                         Status = ClientSocketStatus.Disconnected;
-                                         Log.Error("socket not connected");
+                            Status = ClientSocketStatus.Disconnected;
+                            Log.Error("socket not connected");
 
-                                         return false;
-                                     },
-                                     TaskContinuationOptions.ExecuteSynchronously
-                                 );
+                            return false;
+                        },
+                        TaskContinuationOptions.ExecuteSynchronously
+                    );
             }
             catch (SocketException e)
             {
@@ -223,7 +222,7 @@ namespace ClassicUO.Network
 
                 Disconnect(e.SocketErrorCode);
 
-                return TaskCompletedFalse;
+                return false;
             }
         }
 
@@ -289,7 +288,7 @@ namespace ClassicUO.Network
             _isCompressionEnabled = true;
         }
 
-        
+
         public void Send(byte[] data, int length, bool ignorePlugin = false, bool skip_encryption = false)
         {
             if (!ignorePlugin && !Plugin.ProcessSendPacket(data, ref length))
@@ -329,7 +328,7 @@ namespace ClassicUO.Network
                     _netStream.Write(data, 0, length);
                     _netStream.Flush();
 
-                    Statistics.TotalBytesSent += (uint) length;
+                    Statistics.TotalBytesSent += (uint)length;
                     Statistics.TotalPacketsSent++;
                 }
                 catch (SocketException ex)
@@ -485,11 +484,11 @@ namespace ClassicUO.Network
 
             try
             {
-                 int received = _netStream.Read(_recvBuffer, 0, available);
+                int received = _netStream.Read(_recvBuffer, 0, available);
 
                 if (received > 0)
                 {
-                    Statistics.TotalBytesReceived += (uint) received;
+                    Statistics.TotalBytesReceived += (uint)received;
 
                     byte[] buffer = _recvBuffer;
 

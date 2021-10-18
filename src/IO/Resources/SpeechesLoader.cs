@@ -118,12 +118,14 @@ namespace ClassicUO.IO.Resources
                 int idx = input.IndexOf(split[i], StringComparison.InvariantCultureIgnoreCase);
                 while (idx >= 0)
                 {
-                    // "bank" or " bank" or "bank " or " bank "
-                    if ((idx - 1 < 0 || char.IsWhiteSpace(input[idx - 1])) && 
-                        (idx + split[i].Length >= input.Length || char.IsWhiteSpace(input[idx + split[i].Length])))
+                    // "bank" or " bank" or "bank " or " bank " or "!bank" or "bank!"
+                    if ((idx - 1 < 0 || char.IsWhiteSpace(input[idx - 1]) || !char.IsLetter(input[idx - 1])) && 
+                        (idx + split[i].Length >= input.Length || char.IsWhiteSpace(input[idx + split[i].Length]) || !char.IsLetter(input[idx + split[i].Length]) ))
                     {
                         return true;
                     }
+
+                    
 
                     idx = input.IndexOf(split[i], idx + 1, StringComparison.InvariantCultureIgnoreCase);
                 }

@@ -66,7 +66,7 @@ namespace ClassicUO.Game.GameObjects
             s.Hue = hue;
             s.UpdateGraphicBySeason();
 
-            if (s.ItemData.Height > 5)
+            if (s.ItemData.Height > 5 || s.ItemData.Height == 0)
             {
                 s._canBeTransparent = 1;
             }
@@ -99,7 +99,7 @@ namespace ClassicUO.Game.GameObjects
         public override void UpdateGraphicBySeason()
         {
             SetGraphic(SeasonManager.GetSeasonGraphic(World.Season, OriginalGraphic));
-            AllowedToDraw = !GameObjectHelper.IsNoDrawable(Graphic);
+            AllowedToDraw = CanBeDrawn(Graphic);
             IsVegetation = StaticFilters.IsVegetation(Graphic);
         }
 

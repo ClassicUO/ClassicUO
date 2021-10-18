@@ -75,34 +75,12 @@ namespace ClassicUO.Network
             {
                 if (_head < _tail)
                 {
-                    Buffer.BlockCopy
-                    (
-                        _buffer,
-                        _head,
-                        newBuffer,
-                        0,
-                        Length
-                    );
+                    _buffer.AsSpan(_head, Length).CopyTo(newBuffer.AsSpan());
                 }
                 else
                 {
-                    Buffer.BlockCopy
-                    (
-                        _buffer,
-                        _head,
-                        newBuffer,
-                        0,
-                        _buffer.Length - _head
-                    );
-
-                    Buffer.BlockCopy
-                    (
-                        _buffer,
-                        0,
-                        newBuffer,
-                        _buffer.Length - _head,
-                        _tail
-                    );
+                    _buffer.AsSpan(_head, _buffer.Length - _head).CopyTo(newBuffer.AsSpan());
+                    _buffer.AsSpan(0, _tail).CopyTo(newBuffer.AsSpan(_buffer.Length - _head));
                 }
             }
 
@@ -117,7 +95,7 @@ namespace ClassicUO.Network
         /// <param name="buffer">Buffer to enqueue</param>
         /// <param name="offset">The zero-based byte offset in the buffer</param>
         /// <param name="size">The number of bytes to enqueue</param>
-        internal void Enqueue(byte[] buffer, int offset, int size)
+        internal void Enqueue(Span<byte> buffer, int offset, int size)
         {
             if (Length + size > _buffer.Length)
             {
@@ -130,46 +108,17 @@ namespace ClassicUO.Network
 
                 if (rightLength >= size)
                 {
-                    Buffer.BlockCopy
-                    (
-                        buffer,
-                        offset,
-                        _buffer,
-                        _tail,
-                        size
-                    );
+                    buffer.Slice(offset, size).CopyTo(_buffer.AsSpan(_tail));
                 }
                 else
                 {
-                    Buffer.BlockCopy
-                    (
-                        buffer,
-                        offset,
-                        _buffer,
-                        _tail,
-                        rightLength
-                    );
-
-                    Buffer.BlockCopy
-                    (
-                        buffer,
-                        offset + rightLength,
-                        _buffer,
-                        0,
-                        size - rightLength
-                    );
+                    buffer.Slice(offset, rightLength).CopyTo(_buffer.AsSpan(_tail));
+                    buffer.Slice(offset + rightLength, size - rightLength).CopyTo(_buffer.AsSpan());
                 }
             }
             else
             {
-                Buffer.BlockCopy
-                (
-                    buffer,
-                    offset,
-                    _buffer,
-                    _tail,
-                    size
-                );
+                buffer.Slice(offset, size).CopyTo(_buffer.AsSpan(_tail));
             }
 
             _tail = (_tail + size) % _buffer.Length;
@@ -183,7 +132,7 @@ namespace ClassicUO.Network
         /// <param name="offset">The zero-based byte offset in the buffer</param>
         /// <param name="size">The number of bytes to dequeue</param>
         /// <returns>Number of bytes dequeued</returns>
-        internal int Dequeue(byte[] buffer, int offset, int size)
+        internal int Dequeue(Span<byte> buffer, int offset, int size)
         {
             if (size > Length)
             {
@@ -197,14 +146,7 @@ namespace ClassicUO.Network
 
             if (_head < _tail)
             {
-                Buffer.BlockCopy
-                (
-                    _buffer,
-                    _head,
-                    buffer,
-                    offset,
-                    size
-                );
+                _buffer.AsSpan(_head, size).CopyTo(buffer.Slice(offset));
             }
             else
             {
@@ -212,34 +154,12 @@ namespace ClassicUO.Network
 
                 if (rightLength >= size)
                 {
-                    Buffer.BlockCopy
-                    (
-                        _buffer,
-                        _head,
-                        buffer,
-                        offset,
-                        size
-                    );
+                    _buffer.AsSpan(_head, size).CopyTo(buffer.Slice(offset));
                 }
                 else
                 {
-                    Buffer.BlockCopy
-                    (
-                        _buffer,
-                        _head,
-                        buffer,
-                        offset,
-                        rightLength
-                    );
-
-                    Buffer.BlockCopy
-                    (
-                        _buffer,
-                        0,
-                        buffer,
-                        offset + rightLength,
-                        size - rightLength
-                    );
+                    _buffer.AsSpan(_head, rightLength).CopyTo(buffer.Slice(offset));
+                    _buffer.AsSpan(0, size - rightLength).CopyTo(buffer.Slice(offset + rightLength));
                 }
             }
 

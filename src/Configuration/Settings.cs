@@ -57,9 +57,7 @@ namespace ClassicUO.Configuration
         [JsonProperty("profilespath")] public string ProfilesPath { get; set; } = string.Empty;
 
         [JsonProperty("clientversion")] public string ClientVersion { get; set; } = string.Empty;
-
-        [JsonProperty("lastcharactername")] public string LastCharacterName { get; set; } = string.Empty;
-
+        
         [JsonProperty("lang")] public string Language { get; set; } = "";
 
         [JsonProperty("lastservernum")] public ushort LastServerNum { get; set; } = 1;

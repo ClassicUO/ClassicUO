@@ -38,6 +38,7 @@ using System.Threading.Tasks;
 using ClassicUO.Configuration;
 using ClassicUO.Data;
 using ClassicUO.Game;
+using ClassicUO.Game.GameObjects;
 using ClassicUO.Network;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
@@ -586,63 +587,6 @@ namespace ClassicUO.IO.Resources
             }
         }
 
-        public unsafe RadarMapBlock? GetRadarMapBlock(int map, int blockX, int blockY)
-        {
-            SanitizeMapIndex(ref map);
-
-            ref IndexMap indexMap = ref GetIndex(map, blockX, blockY);
-
-            if (indexMap.MapAddress == 0)
-            {
-                return null;
-            }
-
-            MapBlock* mp = (MapBlock*) indexMap.MapAddress;
-            MapCells* cells = (MapCells*) &mp->Cells;
-
-            RadarMapBlock mb = new RadarMapBlock
-            {
-                Cells = new RadarMapcells[8, 8]
-            };
-
-            for (int x = 0; x < 8; x++)
-            {
-                for (int y = 0; y < 8; y++)
-                {
-                    ref MapCells cell = ref cells[(y << 3) + x];
-                    ref RadarMapcells outcell = ref mb.Cells[x, y];
-                    outcell.Graphic = cell.TileID;
-                    outcell.Z = cell.Z;
-                    outcell.IsLand = true;
-                }
-            }
-
-            StaticsBlock* sb = (StaticsBlock*) indexMap.StaticAddress;
-
-            if (sb != null)
-            {
-                int count = (int) indexMap.StaticCount;
-
-                for (int c = 0; c < count; c++)
-                {
-                    if (sb->Color > 0 && sb->Color != 0xFFFF && !GameObjectHelper.IsNoDrawable(sb->Color))
-                    {
-                        ref RadarMapcells outcell = ref mb.Cells[sb->X, sb->Y];
-
-                        if (outcell.Z <= sb->Z)
-                        {
-                            outcell.Graphic = sb->Hue > 0 ? (ushort) (sb->Hue + 0x4000) : sb->Color;
-                            outcell.Z = sb->Z;
-                            outcell.IsLand = sb->Hue > 0;
-                        }
-                    }
-
-                    sb++;
-                }
-            }
-
-            return mb;
-        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ref IndexMap GetIndex(int map, int x, int y)

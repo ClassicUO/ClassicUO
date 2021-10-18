@@ -52,7 +52,7 @@ namespace ClassicUO.Game
         public const int DEFAULT_BLOCK_HEIGHT = 16;
 
         public const float TIME_FADEOUT_TEXT = 1000;
-        public const float TIME_DISPLAY_SYSTEM_MESSAGE_TEXT = 10000;
+        public const uint TIME_DISPLAY_SYSTEM_MESSAGE_TEXT = 10000;
 
         public const int MIN_TERRAIN_SHADOWS_LEVEL = 5;
         public const int MAX_TERRAIN_SHADOWS_LEVEL = 25;

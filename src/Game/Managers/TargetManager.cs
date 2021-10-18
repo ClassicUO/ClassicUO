@@ -174,12 +174,10 @@ namespace ClassicUO.Game.Managers
                 return;
             }
 
-            TargetingState = targeting;
-            _targetCursorId = cursorID;
-            TargetingType = cursorType;
-
             bool lastTargetting = IsTargeting;
             IsTargeting = cursorType < TargetType.Cancel;
+            TargetingState = targeting;
+            TargetingType = cursorType;
 
             if (IsTargeting)
             {
@@ -189,6 +187,12 @@ namespace ClassicUO.Game.Managers
             {
                 CancelTarget();
             }
+
+            // https://github.com/andreakarasho/ClassicUO/issues/1373
+            // when receiving a cancellation target from the server we need
+            // to send the last active cursorID, so update cursor data later
+            
+            _targetCursorId = cursorID;
         }
 
 

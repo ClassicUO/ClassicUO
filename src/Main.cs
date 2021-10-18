@@ -39,6 +39,7 @@ using System.Threading;
 using ClassicUO.Configuration;
 using ClassicUO.Data;
 using ClassicUO.Game;
+using ClassicUO.Game.Managers;
 using ClassicUO.IO;
 using ClassicUO.Resources;
 using ClassicUO.Utility;
@@ -337,8 +338,8 @@ namespace ClassicUO
                         break;
 
                     case "lastcharactername":
-                    case "lastcharname":
-                        Settings.GlobalSettings.LastCharacterName = value;
+                    case "lastcharname": 
+                        LastCharacterManager.OverrideLastCharacter(value);
 
                         break;
 
@@ -513,6 +514,12 @@ namespace ClassicUO
                                 break;
 
                         }
+
+                        break;
+
+                    case "no_server_ping":
+
+                        CUOEnviroment.NoServerPing = true;
 
                         break;
                 }

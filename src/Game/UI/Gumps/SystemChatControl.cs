@@ -77,7 +77,7 @@ namespace ClassicUO.Game.UI.Gumps
         private bool _isActive;
         private ChatMode _mode = ChatMode.Default;
 
-        private readonly Deque<ChatLineTime> _textEntries;
+        private readonly LinkedList<ChatLineTime> _textEntries;
         private readonly AlphaBlendControl _trans;
 
 
@@ -87,7 +87,7 @@ namespace ClassicUO.Game.UI.Gumps
             Y = y;
             Width = w;
             Height = h;
-            _textEntries = new Deque<ChatLineTime>();
+            _textEntries = new LinkedList<ChatLineTime>();
             CanCloseWithRightClick = false;
             AcceptMouseInput = false;
             AcceptKeyboardInput = false;
@@ -347,10 +347,12 @@ namespace ClassicUO.Game.UI.Gumps
         {
             if (_textEntries.Count >= 30)
             {
-                _textEntries.RemoveFromFront().Destroy();
+                LinkedListNode<ChatLineTime> lineToRemove = _textEntries.First;
+                lineToRemove.Value.Destroy();
+                _textEntries.Remove(lineToRemove);
             }
 
-            _textEntries.AddToBack(new ChatLineTime(text, font, isunicode, hue));
+            _textEntries.AddLast(new ChatLineTime(text, font, isunicode, hue));
         }
 
         internal void Resize()
@@ -370,15 +372,23 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override void Update(double totalTime, double frameTime)
         {
-            for (int i = 0; i < _textEntries.Count; i++)
-            {
-                _textEntries[i].Update(totalTime, frameTime);
+            LinkedListNode<ChatLineTime> first = _textEntries.First;
 
-                if (_textEntries[i].IsDispose)
+            while (first != null)
+            {
+                LinkedListNode<ChatLineTime> next = first.Next;
+
+                first.Value.Update(totalTime, frameTime);
+
+                if (first.Value.IsDisposed)
                 {
-                    _textEntries.RemoveAt(i--);
+                    _textEntries.Remove(first);
                 }
+
+                first = next;
             }
+
+
 
             if (Mode == ChatMode.Default && IsActive)
             {
@@ -473,14 +483,27 @@ namespace ClassicUO.Game.UI.Gumps
         {
             int yy = TextBoxControl.Y + y - 20;
 
-            for (int i = _textEntries.Count - 1; i >= 0; i--)
-            {
-                yy -= _textEntries[i].TextHeight;
+            LinkedListNode<ChatLineTime> last = _textEntries.Last;
 
-                if (yy >= y)
+            while (last != null)
+            {
+                LinkedListNode<ChatLineTime> prev = last.Previous;
+
+                if (last.Value.IsDisposed)
                 {
-                    _textEntries[i].Draw(batcher, x + 2, yy);
+                    _textEntries.Remove(last);
                 }
+                else
+                {
+                    yy -= last.Value.TextHeight;
+
+                    if (yy >= y)
+                    {
+                        last.Value.Draw(batcher, x + 2, yy);
+                    }
+                }
+
+                last = prev;
             }
 
             return base.Draw(batcher, x, y);
@@ -760,6 +783,29 @@ namespace ClassicUO.Game.UI.Gumps
 
                                 break;
 
+                            case "rem":
+
+                                if (World.Party.Leader != 0 && World.Party.Leader == World.Player)
+                                {
+                                    GameActions.RequestPartyRemoveMemberByTarget();
+                                }
+                                else
+                                {
+                                    MessageManager.HandleMessage
+                                    (
+                                        null,
+                                        ResGumps.YouAreNotPartyLeader,
+                                        "System",
+                                        0xFFFF,
+                                        MessageType.Regular,
+                                        3,
+                                        TextType.SYSTEM
+                                    );
+                                }
+
+
+                                break;
+
                             default:
 
                                 if (World.Party.Leader != 0)
@@ -837,9 +883,8 @@ namespace ClassicUO.Game.UI.Gumps
 
         private class ChatLineTime : IUpdateable
         {
-            private float _alpha;
-            private float _createdTime;
-            private readonly RenderedText _renderedText;
+            private uint _createdTime;
+            private RenderedText _renderedText;
 
             public ChatLineTime(string text, byte font, bool isunicode, ushort hue)
             {
@@ -852,38 +897,27 @@ namespace ClassicUO.Game.UI.Gumps
                     FontStyle.BlackBorder,
                     maxWidth: 320
                 );
-
-                _createdTime = Constants.TIME_DISPLAY_SYSTEM_MESSAGE_TEXT;
+                _createdTime = Time.Ticks + Constants.TIME_DISPLAY_SYSTEM_MESSAGE_TEXT;
             }
 
-            private string Text => _renderedText.Text;
+            private string Text => _renderedText?.Text ?? string.Empty;
 
-            public bool IsDispose { get; private set; }
+            public bool IsDisposed => _renderedText == null || _renderedText.IsDestroyed;
 
-            public int TextHeight => _renderedText.Height;
+            public int TextHeight => _renderedText?.Height ?? 0;
 
             public void Update(double totalTime, double frameTime)
             {
-                _createdTime -= (float) frameTime;
-
-                if (_createdTime > 0 && _createdTime <= Constants.TIME_FADEOUT_TEXT)
-                {
-                    _alpha = 1.0f - _createdTime / Constants.TIME_FADEOUT_TEXT;
-                }
-
-                if (_createdTime <= 0.0f)
+                if (Time.Ticks > _createdTime)
                 {
                     Destroy();
                 }
-
-                //else if (time > Constants.TIME_DISPLAY_SYSTEM_MESSAGE_TEXT - Constants.TIME_FADEOUT_TEXT)
-                //    _alpha = (time - (Constants.TIME_DISPLAY_SYSTEM_MESSAGE_TEXT - Constants.TIME_FADEOUT_TEXT)) / Constants.TIME_FADEOUT_TEXT;
             }
 
 
             public bool Draw(UltimaBatcher2D batcher, int x, int y)
             {
-                return _renderedText.Draw(batcher, x, y /*, ShaderHueTranslator.GetHueVector(0, false, _alpha, true)*/);
+                return !IsDisposed && _renderedText.Draw(batcher, x, y /*, ShaderHueTranslator.GetHueVector(0, false, _alpha, true)*/);
             }
 
             public override string ToString()
@@ -893,13 +927,11 @@ namespace ClassicUO.Game.UI.Gumps
 
             public void Destroy()
             {
-                if (IsDispose)
+                if (!IsDisposed)
                 {
-                    return;
+                    _renderedText?.Destroy();
+                    _renderedText = null;
                 }
-
-                IsDispose = true;
-                _renderedText?.Destroy();
             }
         }
     }

@@ -143,11 +143,13 @@ namespace ClassicUO.IO.Resources
             return texture;
         }
 
-        public unsafe IntPtr CreateCursorSurfacePtr(int index, ushort customHue, out short w, out short h)
+        public unsafe IntPtr CreateCursorSurfacePtr(int index, ushort customHue, out int hotX, out int hotY)
         {
+            hotX = hotY = 0;
+
             ref UOFileIndex entry = ref GetValidRefEntry(index + 0x4000);
 
-            if (ReadHeader(_file, ref entry, out w, out h))
+            if (ReadHeader(_file, ref entry, out short w, out short h))
             {
                 uint[] pixels = new uint[w * h];
 
@@ -175,31 +177,60 @@ namespace ClassicUO.IO.Resources
                             SDL.SDL_PIXELFORMAT_ABGR8888
                         );
 
-                        if (customHue > 0)
-                        {
-                            int stride = surface->pitch >> 2;
-                            uint* pixels_ptr = (uint*)surface->pixels;
-                            uint* p_line_end = pixels_ptr + w;
-                            uint* p_img_end = pixels_ptr + stride * h;
-                            int delta = stride - w;
-                            Color c = default;
+                        int stride = surface->pitch >> 2;
+                        uint* pixels_ptr = (uint*)surface->pixels;
+                        uint* p_line_end = pixels_ptr + w;
+                        uint* p_img_end = pixels_ptr + stride * h;
+                        int delta = stride - w;
+                        short curX = 0;
+                        short curY = 0;
+                        Color c = default;
 
-                            while (pixels_ptr < p_img_end)
+                        while (pixels_ptr < p_img_end)
+                        {
+                            curX = 0;
+
+                            while (pixels_ptr < p_line_end)
                             {
-                                while (pixels_ptr < p_line_end)
+                                if (*pixels_ptr != 0 && *pixels_ptr != 0xFF_00_00_00)
                                 {
-                                    if (*pixels_ptr != 0 && *pixels_ptr != 0xFF_00_00_00)
+                                    if (curX >= w - 1 || curY >= h - 1)
+                                    {
+                                        *pixels_ptr = 0;
+                                    }
+                                    else if (curX == 0 || curY == 0)
+                                    {
+                                        if (*pixels_ptr == 0xFF_00_FF_00)
+                                        {
+                                            if (curX == 0)
+                                            {
+                                                hotY = curY;
+                                            }
+
+                                            if (curY == 0)
+                                            {
+                                                hotX = curX;
+                                            }
+                                        }
+
+                                        *pixels_ptr = 0;
+                                    }
+                                    else if (customHue > 0)
                                     {
                                         c.PackedValue = *pixels_ptr;
                                         *pixels_ptr = HuesHelper.Color16To32(HuesLoader.Instance.GetColor16(HuesHelper.ColorToHue(c), customHue)) | 0xFF_00_00_00;
                                     }
-
-                                    ++pixels_ptr;
                                 }
 
-                                pixels_ptr += delta;
-                                p_line_end += stride;
+                                ++pixels_ptr;
+
+                                ++curX;
                             }
+
+                            pixels_ptr += delta;
+                            p_line_end += stride;
+
+                            ++curY;
                         }
 
                         return (IntPtr)surface;
@@ -336,21 +367,7 @@ namespace ClassicUO.IO.Resources
             int pos1 = 0;
             int minX = width, minY = height, maxX = 0, maxY = 0;
 
-            if (graphic >= 0x2053 && graphic <= 0x2062 || graphic >= 0x206A && graphic <= 0x2079)
-            {
-                for (int i = 0; i < width; i++)
-                {
-                    pixels[i] = 0;
-                    pixels[(height - 1) * width + i] = 0;
-                }
-
-                for (int i = 0; i < height; i++)
-                {
-                    pixels[i * width] = 0;
-                    pixels[i * width + width - 1] = 0;
-                }
-            }
-            else if (StaticFilters.IsCave(graphic) && ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.EnableCaveBorder)
+            if (StaticFilters.IsCave(graphic) && ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.EnableCaveBorder)
             {
                 AddBlackBorder(pixels, width, height);
             }
@@ -394,6 +411,22 @@ namespace ClassicUO.IO.Resources
                 {
                     if (ReadData(pixels, width, height, _file))
                     {
+                        // keep the cursor graphic check to cleanup edges
+                        if ((graphic >= 0x2053 && graphic <= 0x2062) || (graphic >= 0x206A && graphic <= 0x2079))
+                        {
+                            for (int i = 0; i < width; i++)
+                            {
+                                pixels[i] = 0;
+                                pixels[(height - 1) * width + i] = 0;
+                            }
+
+                            for (int i = 0; i < height; i++)
+                            {
+                                pixels[i * width] = 0;
+                                pixels[i * width + width - 1] = 0;
+                            }
+                        }
+
                         texture = new ArtTexture(width, height);
 
                         FinalizeData

@@ -49,7 +49,7 @@ namespace ClassicUO.Game.GameObjects
 
             Graphic = graphic;
             Hue = hue;
-            AllowedToDraw = !GameObjectHelper.IsNoDrawable(graphic);
+            AllowedToDraw = CanBeDrawn(graphic);
             AlphaHue = 0xFF;
             AnimDataFrame = AnimDataLoader.Instance?.CalculateCurrentGraphic(graphic) ?? default;
             IsEnabled = true;

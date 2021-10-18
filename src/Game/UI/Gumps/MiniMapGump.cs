@@ -308,6 +308,8 @@ namespace ClassicUO.Game.UI.Gumps
             table[1].X = 0;
             table[1].Y = 1;
 
+            
+
             for (int i = minBlockX; i <= maxBlockX; i++)
             {
                 int blockIndexOffset = i * mapBlockHeight;
@@ -321,15 +323,19 @@ namespace ClassicUO.Game.UI.Gumps
                         break;
                     }
 
-                    RadarMapBlock? mbbv = MapLoader.Instance.GetRadarMapBlock(World.MapIndex, i, j);
+                    ref IndexMap indexMap = ref World.Map.GetIndex(i, j);
 
-                    if (!mbbv.HasValue)
+                    if (indexMap.MapAddress == 0)
                     {
                         break;
                     }
 
-                    RadarMapBlock mb = mbbv.Value;
-                    Chunk block = World.Map.Chunks[blockIndex];
+                    MapBlock* mp = (MapBlock*)indexMap.MapAddress;
+                    MapCells* cells = (MapCells*)&mp->Cells;
+                    StaticsBlock* sb = (StaticsBlock*)indexMap.StaticAddress;
+                    uint staticCount = indexMap.StaticCount;
+
+                    Chunk block = World.Map.GetChunk(blockIndex);
                     int realBlockX = i << 3;
                     int realBlockY = j << 3;
 
@@ -339,13 +345,29 @@ namespace ClassicUO.Game.UI.Gumps
 
                         for (int y = 0; y < 8; y++)
                         {
-                            int py = realBlockY + y - lastY;
-                            int gx = px - py;
-                            int gy = px + py;
+                            ref MapCells cell = ref cells[(y << 3) + x];
+                            int color = cell.TileID;
+                            bool isLand = true;
+                            int z = cell.Z;
 
-                            int color = mb.Cells[x, y].Graphic;
+                            for (int c = 0; c < staticCount; ++c)
+                            {
+                                ref StaticsBlock stblock = ref sb[c];
 
-                            bool island = mb.Cells[x, y].IsLand;
+                                if (stblock.X == x && stblock.Y == y &&
+                                    stblock.Color > 0 && stblock.Color != 0xFFFF &&
+                                    GameObject.CanBeDrawn(stblock.Color))
+                                {
+                                    if (stblock.Z >= z)
+                                    {
+                                        color = stblock.Hue > 0 ? (ushort)(stblock.Hue + 0x4000) : stblock.Color;
+                                        isLand = stblock.Hue > 0;
+
+                                        z = stblock.Z;
+                                    }
+                                }
+                            }
+
 
                             if (block != null)
                             {
@@ -363,7 +385,7 @@ namespace ClassicUO.Game.UI.Gumps
                                         if (obj.Hue == 0)
                                         {
                                             color = obj.Graphic;
-                                            island = false;
+                                            isLand = false;
                                         }
                                         else
                                         {
@@ -375,14 +397,14 @@ namespace ClassicUO.Game.UI.Gumps
                                 }
                             }
 
-                            if (!island)
+                            if (!isLand)
                             {
                                 color += 0x4000;
                             }
 
                             int tableSize = 2;
 
-                            if (island && color > 0x4000)
+                            if (isLand && color > 0x4000)
                             {
                                 color = HuesLoader.Instance.GetColor16(16384, (ushort) (color - 0x4000)); //28672 is an arbitrary position in hues.mul, is the 14 position in the range
                             }
@@ -390,6 +412,10 @@ namespace ClassicUO.Game.UI.Gumps
                             {
                                 color = HuesLoader.Instance.GetRadarColorData(color);
                             }
+
+                            int py = realBlockY + y - lastY;
+                            int gx = px - py;
+                            int gy = px + py;
 
                             CreatePixels
                             (

@@ -406,7 +406,7 @@ namespace ClassicUO.Game.Scenes
                 _continueRunning = true;
             }
 
-            BaseGameObject lastObj = SelectedObject.LastLeftDownObject;
+            BaseGameObject lastObj = SelectedObject.LastObject;// SelectedObject.LastLeftDownObject; <-- this makes the target cursor less responsive if you move the mouse fast
             SelectedObject.LastLeftDownObject = null;
 
             if (UIManager.IsDragging)

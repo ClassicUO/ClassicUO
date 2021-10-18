@@ -39,6 +39,7 @@ using ClassicUO.Configuration;
 using ClassicUO.Game;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
+using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 using ClassicUO.Renderer.Batching;
@@ -662,19 +663,37 @@ namespace ClassicUO.Network
         }
 
         private static bool OnPluginRecv_new(IntPtr buffer, ref int length)
-        {
-            byte[] data = new byte[length];
-            Marshal.Copy(buffer, data, 0, length);
+        {        
+            if (buffer != IntPtr.Zero && length > 0)
+            {
+                byte[] data = new byte[length];
+                Marshal.Copy(buffer, data, 0, length);
 
-            return OnPluginRecv(ref data, ref length);
+                NetClient.EnqueuePacketFromPlugin(data, length);
+            }
+
+            return true;
         }
 
         private static bool OnPluginSend_new(IntPtr buffer, ref int length)
         {
-            byte[] data = new byte[length];
-            Marshal.Copy(buffer, data, 0, length);
+            if (buffer != IntPtr.Zero && length > 0)
+            {
+                StackDataWriter writer = new StackDataWriter(new Span<byte>((void*)buffer, length));
 
-            return OnPluginSend(ref data, ref length);
+                if (NetClient.LoginSocket.IsDisposed && NetClient.Socket.IsConnected)
+                {
+                    NetClient.Socket.Send(writer.AllocatedBuffer, writer.BytesWritten, true);
+                }
+                else if (NetClient.Socket.IsDisposed && NetClient.LoginSocket.IsConnected)
+                {
+                    NetClient.LoginSocket.Send(writer.AllocatedBuffer, writer.BytesWritten, true);
+                }
+
+                writer.Dispose();
+            }
+
+            return true;
         }
 
 

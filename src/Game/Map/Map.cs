@@ -40,26 +40,53 @@ namespace ClassicUO.Game.Map
 {
     internal sealed class Map
     {
-        private const int CELL_NUM = 16;
-        private const int CELL_SPAN = CELL_NUM * 2;
-        private readonly bool[] _blockAccessList = new bool[0x1000];
+        private static readonly Chunk[] _terrainChunks;
+        private static readonly bool[] _blockAccessList = new bool[0x1000];
         private readonly LinkedList<int> _usedIndices = new LinkedList<int>();
 
-        //private static readonly Chunk[] _chunks = new Chunk[CELL_SPAN * CELL_SPAN];
+        static Map()
+        {
+            int maxX = -1, maxY = -1;
 
+            for (int i = 0; i < MapLoader.Instance.MapBlocksSize.GetLength(0); i++)
+            {
+                if (maxX < MapLoader.Instance.MapBlocksSize[i, 0])
+                {
+                    maxX = MapLoader.Instance.MapBlocksSize[i, 0];
+                }
+
+                if (maxY < MapLoader.Instance.MapBlocksSize[i, 1])
+                {
+                    maxY = MapLoader.Instance.MapBlocksSize[i, 1];
+                }
+            }
+
+
+            _terrainChunks = new Chunk[maxX * maxY];
+        }
 
         public Map(int index)
         {
             Index = index;
             BlocksCount = MapLoader.Instance.MapBlocksSize[Index, 0] * MapLoader.Instance.MapBlocksSize[Index, 1];
-            Chunks = new Chunk[BlocksCount];
+            ClearBockAccess();
         }
 
         public readonly int BlocksCount;
-        public Chunk[] Chunks;
-
         public readonly int Index;
 
+
+
+
+        public Chunk GetChunk(int block)
+        {
+            if (block >= 0 && block < BlocksCount)
+            {
+                return _terrainChunks[block];
+            }
+
+            return null;
+        }
 
         public Chunk GetChunk(int x, int y, bool load = true)
         {
@@ -77,7 +104,7 @@ namespace ClassicUO.Game.Map
                 return null;
             }
 
-            ref Chunk chunk = ref Chunks[block];
+            ref Chunk chunk = ref _terrainChunks[block];
 
             if (chunk == null)
             {
@@ -173,7 +200,7 @@ namespace ClassicUO.Game.Map
 
         public void ClearBockAccess()
         {
-            Array.Clear(_blockAccessList, 0, _blockAccessList.Length);
+            _blockAccessList.AsSpan().Fill(false);
         }
 
         public sbyte CalculateNearZ(sbyte defaultZ, int x, int y, int z)
@@ -250,12 +277,11 @@ namespace ClassicUO.Game.Map
             return blockX * MapLoader.Instance.MapBlocksSize[Index, 1] + blockY;
         }
 
-
-        public IEnumerable<int> GetUsedChunks()
+        public IEnumerable<Chunk> GetUsedChunks()
         {
             foreach (int i in _usedIndices)
             {
-                yield return i;
+                yield return GetChunk(i);
             }
         }
 
@@ -271,7 +297,7 @@ namespace ClassicUO.Game.Map
             {
                 LinkedListNode<int> next = first.Next;
 
-                ref Chunk block = ref Chunks[first.Value];
+                ref Chunk block = ref _terrainChunks[first.Value];
 
                 if (block != null && block.LastAccessTime < ticks && block.HasNoExternalData())
                 {
@@ -295,66 +321,13 @@ namespace ClassicUO.Game.Map
             while (first != null)
             {
                 LinkedListNode<int> next = first.Next;
-                ref Chunk c = ref Chunks[first.Value];
+                ref Chunk c = ref _terrainChunks[first.Value];
                 c?.Destroy();
                 c = null;
                 first = next;
             }
 
             _usedIndices.Clear();
-        }
-
-        public void Initialize()
-        {
-            // do nothing
-
-            /*
-
-             const int XY_OFFSET = 30;
-
-            int minBlockX = ((Center.X - XY_OFFSET) >> 3) - 1;
-            int minBlockY = ((Center.Y - XY_OFFSET) >> 3) - 1;
-            int maxBlockX = ((Center.X + XY_OFFSET) >> 3) + 1;
-            int maxBlockY = ((Center.Y + XY_OFFSET) >> 3) + 1;
-
-            if (minBlockX < 0)
-                minBlockX = 0;
-
-            if (minBlockY < 0)
-                minBlockY = 0;
-
-            if (maxBlockX >= MapLoader.Instance.MapBlocksSize[Index, 0])
-                maxBlockX = MapLoader.Instance.MapBlocksSize[Index, 0] - 1;
-
-            if (maxBlockY >= MapLoader.Instance.MapBlocksSize[Index, 1])
-                maxBlockY = MapLoader.Instance.MapBlocksSize[Index, 1] - 1;
-            long tick = Time.Ticks;
-            long maxDelay = Engine.FrameDelay[1] >> 1;
-
-            for (int i = minBlockX; i <= maxBlockX; i++)
-            {
-                int index = i * MapLoader.Instance.MapBlocksSize[Index, 1];
-
-                for (int j = minBlockY; j <= maxBlockY; j++)
-                {
-                    int cellindex = index + j;
-                    ref Chunk chunk = ref Chunks[cellindex];
-
-                    if (chunk == null)
-                    {
-                        if (Time.Ticks - tick >= maxDelay)
-                            return;
-
-                        _usedIndices.AddLast(cellindex);
-                        chunk = Chunk.Create((ushort) i, (ushort) j);
-                        chunk.Load(Index);
-                    }
-
-                    chunk.LastAccessTime = Time.Ticks;
-                }
-            }
-
-             */
         }
     }
 }

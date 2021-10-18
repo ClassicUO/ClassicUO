@@ -93,9 +93,7 @@ namespace ClassicUO.Game.GameObjects
                 mobile.HitsTexture = null;
                 mobile.IsFlipped = false;
                 mobile.FrameInfo = Rectangle.Empty;
-                mobile.UseObjectHandles = false;
-                mobile.ClosedObjectHandles = false;
-                mobile.ObjectHandlesOpened = false;
+                mobile.ObjectHandlesStatus = ObjectHandlesStatus.NONE;
                 mobile.AlphaHue = 0;
                 mobile.AllowedToDraw = true;
                 mobile.IsClicked = false;
@@ -989,7 +987,7 @@ namespace ClassicUO.Game.GameObjects
             p.Y += (int) (Offset.Y - Offset.Z - (height + centerY + 8));
             p = Client.Game.Scene.Camera.WorldToScreen(p);
 
-            if (ObjectHandlesOpened)
+            if (ObjectHandlesStatus == ObjectHandlesStatus.DISPLAYING)
             {
                 p.Y -= Constants.OBJECT_HANDLES_GUMP_HEIGHT;
             }

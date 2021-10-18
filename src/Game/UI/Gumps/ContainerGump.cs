@@ -506,7 +506,12 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 Item item = (Item) i;
 
-                if (item.Layer == 0 || is_corpse && Constants.BAD_CONTAINER_LAYERS[(int) item.Layer] && item.Amount > 0)
+                if (((item.Layer == 0 && 
+                    (Layer) item.ItemData.Layer != Layer.Face &&
+                    (Layer)item.ItemData.Layer != Layer.Beard &&
+                    (Layer)item.ItemData.Layer != Layer.Hair) || 
+                    (is_corpse && Constants.BAD_CONTAINER_LAYERS[(int) item.Layer])) 
+                    && item.Amount > 0)
                 {
                     ItemGump itemControl = new ItemGump
                     (

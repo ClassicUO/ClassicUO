@@ -85,15 +85,8 @@ namespace ClassicUO.Game.GameObjects
                 }
 
                 if ((State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_TRANSPARENT) != 0)
-                {
-                    if (AlphaHue >= 192)
-                    {
-                        AlphaHue = 0xFF;
-                    }
-                    else
-                    {
-                        ProcessAlpha(192);
-                    }
+                { 
+                    AlphaHue = 192;
                 }
             }
 

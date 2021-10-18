@@ -30,6 +30,7 @@
 
 #endregion
 
+using System;
 using System.Text;
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
@@ -152,7 +153,7 @@ namespace ClassicUO.Game.UI
             FontsLoader.Instance.RecalculateWidthByInfo = false;
             FontsLoader.Instance.SetUseHTML(false);
 
-            if (_renderedText.Texture == null)
+            if (_renderedText.Texture == null || _renderedText.Texture.IsDisposed)
             {
                 return false;
             }

@@ -149,7 +149,7 @@ namespace ClassicUO.Game.UI.Gumps
             databox.WantUpdateSize = true;
             scrollArea.Add(databox);
 
-            Dictionary<string, string> dict = ReflectionHolder.GetGameObjectProperties(obj);
+            Dictionary<string, string> dict = GetGameObjectProperties(obj);
 
             if (dict != null)
             {
@@ -215,14 +215,14 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             }
 
-            databox.ReArrangeChildren();
+            //databox.ReArrangeChildren();
         }
 
         public override void OnButtonClick(int buttonID)
         {
             if (buttonID == 0) // dump
             {
-                Dictionary<string, string> dict = ReflectionHolder.GetGameObjectProperties(_obj);
+                Dictionary<string, string> dict = GetGameObjectProperties(_obj);
 
                 if (dict != null)
                 {
@@ -244,7 +244,7 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
-        private static void OnLabelClick(object sender, EventArgs e)
+        private void OnLabelClick(object sender, EventArgs e)
         {
             Label l = (Label) sender;
 
@@ -252,6 +252,86 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 SDL.SDL_SetClipboardText(l.Text);
             }
+        }
+
+        private Dictionary<string, string> GetGameObjectProperties(GameObject obj)
+        {
+            Dictionary<string, string> dict = new Dictionary<string, string>();
+
+            dict["Graphics"] = $"0x{obj.Graphic:X4}";
+            dict["Hue"] = $"0x{obj.Hue:X4}";
+            dict["Position"] = $"X={obj.X}, Y={obj.Y}, Z={obj.Z}";
+            dict["PriorityZ"] = obj.PriorityZ.ToString();
+            dict["Distance"] = obj.Distance.ToString();
+            dict["AllowedToDraw"] = obj.AllowedToDraw.ToString();
+            dict["AlphaHue"] = obj.AlphaHue.ToString();
+
+            switch (obj)
+            {
+                case Mobile mob:
+
+                    dict["Serial"] = $"0x{mob.Serial:X8}";
+                    dict["Flags"] = mob.Flags.ToString();
+                    dict["Notoriety"] = mob.NotorietyFlag.ToString();
+                    dict["Title"] = mob.Title ?? string.Empty;
+                    dict["Name"] = mob.Name ?? string.Empty;
+                    dict["HP"] = $"{mob.Hits}/{mob.HitsMax}";
+                    dict["Mana"] = $"{mob.Mana}/{mob.ManaMax}";
+                    dict["Stamina"] = $"{mob.Stamina}/{mob.StaminaMax}";
+                    dict["SpeedMode"] = mob.SpeedMode.ToString();
+                    dict["Race"] = mob.Race.ToString();
+                    dict["IsRenamable"] = mob.IsRenamable.ToString();
+                    dict["Direction"] = mob.Direction.ToString();
+                    dict["IsDead"] = mob.IsDead.ToString();
+                    dict["IsDrivingABoat"] = mob.IsDrivingBoat.ToString();
+                    dict["IsMounted"] = mob.IsMounted.ToString();
+
+                    break;
+
+                case Item it:
+
+                    dict["Serial"] = $"0x{it.Serial:X8}";
+                    dict["Flags"] = it.Flags.ToString();
+                    dict["HP"] = $"{it.Hits}/{it.HitsMax}";
+                    dict["IsCoins"] = it.IsCoin.ToString();
+                    dict["Amount"] = it.Amount.ToString();
+                    dict["Container"] = it.Container.ToString();
+                    dict["Layer"] = it.Layer.ToString();
+                    dict["Price"] = it.Price.ToString();
+                    dict["Direction"] = it.Direction.ToString();
+                    dict["IsMulti"] = it.IsMulti.ToString();
+                    dict["MultiGraphic"] = $"0x{it.MultiGraphic:X4}";
+
+                    break;
+
+                case Static st:
+
+                    dict["IsVegetation"] = st.IsVegetation.ToString();
+
+                    break;
+
+                case Multi multi:
+
+                    dict["State"] = multi.State.ToString();
+                    dict["IsMovable"] = multi.IsMovable.ToString();
+
+                    break;
+
+                case Land land:
+
+                    dict["IsFlat"] = (!land.IsStretched).ToString();
+                    dict["NormalLeft"] = land.NormalLeft.ToString();
+                    dict["NormalRight"] = land.NormalRight.ToString();
+                    dict["NormalTop"] = land.NormalTop.ToString();
+                    dict["NormalBottom"] = land.NormalBottom.ToString();
+                    dict["MinZ"] = land.MinZ.ToString();
+                    dict["AvgZ"] = land.AverageZ.ToString();
+                    dict["YOffsets"] = land.YOffsets.ToString();
+
+                    break;
+            }
+
+            return dict;
         }
     }
 }

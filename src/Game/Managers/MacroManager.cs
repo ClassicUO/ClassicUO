@@ -633,6 +633,15 @@ namespace ClassicUO.Game.Managers
 
                             switch (macro.SubCode)
                             {
+                                case MacroSubType.WorldMap:
+
+                                    if (macro.Code == MacroType.Close)
+                                    {
+                                        UIManager.GetGump<MiniMapGump>()?.Dispose();
+                                    }
+
+                                    break;
+
                                 case MacroSubType.Configuration:
 
                                     if (macro.Code == MacroType.Close)
@@ -1787,6 +1796,24 @@ namespace ClassicUO.Game.Managers
             );
 
             MacroObject item = new MacroObject(MacroType.None, MacroSubType.MSC_NONE);
+
+            macro.PushToBack(item);
+
+            return macro;
+        }
+
+        public static Macro CreateFastMacro(string name, MacroType type, MacroSubType sub)
+        {
+            Macro macro = new Macro
+              (
+                  name,
+                  0,
+                  false,
+                  false,
+                  false
+              );
+
+            MacroObject item = new MacroObject(type, sub);
 
             macro.PushToBack(item);
 

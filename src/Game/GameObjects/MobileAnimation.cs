@@ -591,7 +591,7 @@ namespace ClassicUO.Game.GameObjects
 
                                     case 26:
 
-                                        if (mobile.InWarMode && AnimationsLoader.Instance.IsAnimationExists(graphic, 9))
+                                        if (!AnimationsLoader.Instance.IsAnimationExists(graphic, 26) || (mobile.InWarMode && AnimationsLoader.Instance.IsAnimationExists(graphic, 9)))
                                         {
                                             v13 = 9;
                                         }

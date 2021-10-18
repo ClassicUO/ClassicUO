@@ -350,7 +350,12 @@ namespace ClassicUO.IO
             int index = GetIndexOfZero(slice, sizeT);
             size = index < 0 ? size : index;
 
-            string result = encoding.GetString((byte*)Unsafe.AsPointer(ref MemoryMarshal.GetReference(slice)), size);
+            string result;
+
+            fixed (byte* ptr = slice)
+            {
+                result = encoding.GetString(ptr, size);
+            }
 
             if (safe)
             {

@@ -51,6 +51,7 @@ namespace ClassicUO
         public static bool SkipLoginScreen;
         public static bool IsOutlands;
         public static bool PacketLog;
+        public static bool NoServerPing;
 
         public static readonly bool IsUnix = Environment.OSVersion.Platform != PlatformID.Win32NT && Environment.OSVersion.Platform != PlatformID.Win32Windows && Environment.OSVersion.Platform != PlatformID.Win32S && Environment.OSVersion.Platform != PlatformID.WinCE;
 
