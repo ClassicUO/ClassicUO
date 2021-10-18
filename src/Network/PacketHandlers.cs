@@ -2141,103 +2141,14 @@ namespace ClassicUO.Network
             }
 
             Weather weather = scene.Weather;
-            byte type = p.ReadUInt8();
+            WEATHER_TYPE type = (WEATHER_TYPE) p.ReadUInt8();
 
             if (weather.CurrentWeather != type)
             {
-                weather.Reset();
+                byte count = p.ReadUInt8();
+                byte temp = p.ReadUInt8();
 
-                weather.Type = type;
-                weather.Count = p.ReadUInt8();
-
-                bool showMessage = weather.Count > 0;
-
-                if (weather.Count > 70)
-                {
-                    weather.Count = 70;
-                }
-
-                weather.Temperature = p.ReadUInt8();
-                weather.Timer = Time.Ticks + Constants.WEATHER_TIMER;
-                weather.Generate();
-
-                switch (type)
-                {
-                    case 0:
-                        if (showMessage)
-                        {
-                            GameActions.Print
-                            (
-                                ResGeneral.ItBeginsToRain,
-                                1154,
-                                MessageType.System,
-                                3,
-                                false
-                            );
-
-                            weather.CurrentWeather = 0;
-                        }
-
-                        break;
-
-                    case 1:
-                        if (showMessage)
-                        {
-                            GameActions.Print
-                            (
-                                ResGeneral.AFierceStormApproaches,
-                                1154,
-                                MessageType.System,
-                                3,
-                                false
-                            );
-
-                            weather.CurrentWeather = 1;
-                        }
-
-                        break;
-
-                    case 2:
-                        if (showMessage)
-                        {
-                            GameActions.Print
-                            (
-                                ResGeneral.ItBeginsToSnow,
-                                1154,
-                                MessageType.System,
-                                3,
-                                false
-                            );
-
-                            weather.CurrentWeather = 2;
-                        }
-
-                        break;
-
-                    case 3:
-                        if (showMessage)
-                        {
-                            GameActions.Print
-                            (
-                                ResGeneral.AStormIsBrewing,
-                                1154,
-                                MessageType.System,
-                                3,
-                                false
-                            );
-
-                            weather.CurrentWeather = 3;
-                        }
-
-                        break;
-
-                    case 0xFE:
-                    case 0xFF:
-                        weather.Timer = 0;
-                        weather.CurrentWeather = null;
-
-                        break;
-                }
+                weather.Generate(type, count, temp);
             }
         }
 
