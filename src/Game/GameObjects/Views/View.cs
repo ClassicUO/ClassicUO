@@ -179,7 +179,7 @@ namespace ClassicUO.Game.GameObjects
                     ref nLeft,
                     ref nBottom,
                     hue,
-                    depth
+                    depth + 0.5f
                 );
             }
             else
@@ -217,7 +217,7 @@ namespace ClassicUO.Game.GameObjects
                     Vector2.Zero,
                     1f,
                     SpriteEffects.None, 
-                    depth
+                    depth + 0.5f
                 );
             }
         }
@@ -238,7 +238,7 @@ namespace ClassicUO.Game.GameObjects
                     Vector2.Zero,
                     1f,
                     SpriteEffects.None,
-                    depth
+                    depth + 0.5f
                 );
             }
         }
@@ -275,7 +275,7 @@ namespace ClassicUO.Game.GameObjects
                     MathHelper.ToRadians(angle),
                     Vector2.Zero,
                     SpriteEffects.None,
-                    depth
+                    depth + 0.5f
                 );
             }
         }
@@ -308,7 +308,7 @@ namespace ClassicUO.Game.GameObjects
 
                 if (shadow)
                 {
-                    batcher.DrawShadow(texture, pos, bounds, false, depth);
+                    batcher.DrawShadow(texture, pos, bounds, false, depth + 0.25f);
                 }
 
                 batcher.Draw
@@ -321,7 +321,7 @@ namespace ClassicUO.Game.GameObjects
                     Vector2.Zero,
                     1f,
                     SpriteEffects.None,
-                    depth
+                    depth + 0.5f
                 );
             }
         }

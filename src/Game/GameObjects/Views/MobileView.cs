@@ -831,7 +831,7 @@ namespace ClassicUO.Game.GameObjects
                                 mod,
                                 hueVec,
                                 mirror,
-                                depth + 0.5f
+                                depth + 1f
                             );
                         }
                         else
@@ -892,7 +892,7 @@ namespace ClassicUO.Game.GameObjects
                                     Vector2.Zero,
                                     1f,
                                     mirror ? SpriteEffects.FlipHorizontally : SpriteEffects.None,
-                                    depth + 0.5f + (i * tiles)
+                                    depth + 1f + (i * tiles)
                                 //depth + (i * tiles) + (owner.PriorityZ * 0.001f)
                                 );
 
