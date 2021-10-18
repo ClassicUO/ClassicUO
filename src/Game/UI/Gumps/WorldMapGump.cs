@@ -1166,11 +1166,7 @@ namespace ClassicUO.Game.UI.Gumps
                                     realHeight += OFFSET_PIX;
                                 }
 
-                                if (_mapTexture == null || _mapTexture.IsDisposed)
-                                {
-                                    _mapTexture = new UOTexture(realWidth, realHeight);
-                                }
-                                
+                                _mapTexture = new UOTexture(realWidth, realHeight);
                                 _mapTexture.SetData(buffer, 0, realWidth * realHeight);
                             }
                             finally

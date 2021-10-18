@@ -1212,7 +1212,7 @@ namespace ClassicUO.Game.GameObjects
 
                             case 0x48C3:
                             case 0x48C2: // Gargish Maul
-                                Abilities[0] = Ability.CrushingBlow;
+                                Abilities[0] = Ability.DoubleStrike;
                                 Abilities[1] = Ability.ConcussionBlow;
 
                                 goto done;
@@ -1281,6 +1281,12 @@ namespace ClassicUO.Game.GameObjects
                             case 0x08FF: // Boomerang
                                 Abilities[0] = Ability.MysticArc;
                                 Abilities[1] = Ability.ConcussionBlow;
+
+                                break;
+
+                            case 0x0900: // Stone War Sword
+                                Abilities[0] = Ability.ArmorIgnore;
+                                Abilities[1] = Ability.ParalyzingBlow;
 
                                 break;
 
