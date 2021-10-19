@@ -69,7 +69,6 @@ namespace ClassicUO
         private uint _totalFrames;
         private UltimaBatcher2D _uoSpriteBatch;
         private bool _suppressedDraw;
-        private UOFontRenderer _fontRenderer;
 
         public GameController()
         {
@@ -164,8 +163,7 @@ namespace ClassicUO
             GumpsLoader.Instance.CreateAtlas(GraphicsDevice);
             LightsLoader.Instance.CreateAtlas(GraphicsDevice);
             AnimationsLoader.Instance.CreateAtlas(GraphicsDevice);
-
-            _fontRenderer = new UOFontRenderer(GraphicsDevice);
+            UOFontRenderer.Create(GraphicsDevice);
 
             UIManager.InitializeGameCursor();
             AnimatedStaticsManager.Initialize();
@@ -503,7 +501,7 @@ namespace ClassicUO
             SelectedObject.SelectedContainer = null;
 
             _uoSpriteBatch.Begin();
-            _fontRenderer.Draw
+            UOFontRenderer.Shared.Draw
             (
                 _uoSpriteBatch,
                 $"New Engine ❤ 😁".AsSpan(),

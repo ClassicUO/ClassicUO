@@ -41,7 +41,17 @@ namespace ClassicUO.Renderer
         private int _asciiFontCount;
 
 
-        public UOFontRenderer(GraphicsDevice device)
+        public static UOFontRenderer Shared { get; private set; }
+
+        public static void Create(GraphicsDevice device)
+        {
+            if (Shared == null)
+            {
+                Shared = new UOFontRenderer(device);
+            }
+        }
+
+        private UOFontRenderer(GraphicsDevice device)
         {
             const int ATLAS_SIZE = 1024;
             _atlas = new TextureAtlas(device, ATLAS_SIZE, ATLAS_SIZE, SurfaceFormat.Color);
@@ -69,6 +79,22 @@ namespace ClassicUO.Renderer
             }
         }
 
+        public void Draw
+        (
+            UltimaBatcher2D batcher,
+            ReadOnlySpan<char> text,
+            Vector2 position,
+            float scale,
+            in FontSettings settings,
+            ushort hue,
+            TEXT_ALIGN_TYPE align = TEXT_ALIGN_TYPE.TS_LEFT,
+            bool allowSelection = false
+        )
+        {
+            Vector3 hueVec = new Vector3();
+            ShaderHueTranslator.GetHueVector(ref hueVec, hue);
+            Draw(batcher, text, position, scale, settings, hueVec, align, allowSelection);
+        }
 
         public void Draw
         (
@@ -78,14 +104,15 @@ namespace ClassicUO.Renderer
             float scale, 
             in FontSettings settings,
             Vector3 hue,
-            TEXT_ALIGN_TYPE align = TEXT_ALIGN_TYPE.TS_LEFT
+            TEXT_ALIGN_TYPE align = TEXT_ALIGN_TYPE.TS_LEFT,
+            bool allowSelection = false
         )
         {     
             Vector2 textSizeInPixels = MeasureStringAdvanced(text, settings, scale, position, out bool mouseIsOver, out float maxHeight);
 
             FixVectorColor(ref hue, settings);
 
-            if (mouseIsOver)
+            if (allowSelection && mouseIsOver)
             {
                 hue.X = 0x35;
 
