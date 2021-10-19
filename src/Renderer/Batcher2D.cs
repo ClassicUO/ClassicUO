@@ -697,7 +697,8 @@ namespace ClassicUO.Renderer
             Texture2D texture,
             Vector2 start,
             Vector2 end,
-            Vector3 color
+            Vector3 color,
+            float stroke
         )
         {
             var radians = ClassicUO.Utility.MathHelper.AngleBetweenVectors(start, end);
@@ -711,7 +712,7 @@ namespace ClassicUO.Renderer
                 color,
                 radians, 
                 Vector2.Zero,
-                new Vector2(length, 1), 
+                new Vector2(length, stroke), 
                 SpriteEffects.None,
                 0
             );

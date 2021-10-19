@@ -266,7 +266,8 @@ namespace ClassicUO.Game.UI.Gumps
                     texture,
                     new Vector2(c0.ScreenCoordinateX, c0.ScreenCoordinateY),
                     new Vector2(c1.ScreenCoordinateX, c1.ScreenCoordinateY),
-                    HueVector
+                    HueVector,
+                    1
                 );
             }
 

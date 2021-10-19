@@ -508,7 +508,7 @@ namespace ClassicUO
                 _uoSpriteBatch,
                 $"New Engine ❤ 😁".AsSpan(),
                 new Vector2(200, 100),
-                2f,
+                5f,
                 new FontSettings() 
                 { 
                     IsUnicode = true, 
@@ -516,7 +516,7 @@ namespace ClassicUO
                     Italic = false,
                     Bold = false, 
                     Border = true,
-                    Underline = false,
+                    Underline = true,
                 },
                 new Vector3(0x44, 0, 0)
             );

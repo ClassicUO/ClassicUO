@@ -166,12 +166,44 @@ namespace ClassicUO.Renderer
                 startPosition.Y += textSizeInPixels.Y;
                 end.Y += textSizeInPixels.Y;
 
+                var texture = SolidColorTextureCache.GetTexture(Color.White);
+               
+                float stroke = 1f;
+
+                if (settings.Border)
+                {
+                    Vector2 startPositionBlack = startPosition;
+                    startPositionBlack.X -= stroke * scale;
+                    startPositionBlack.Y -= stroke * scale;
+                    Rectangle destRect = new Rectangle
+                    (
+                        0,
+                        0,
+                        (int)(((end.X + stroke * scale) - startPositionBlack.X) / scale),
+                        (int)(((end.Y + (stroke * 2f) * scale) - startPositionBlack.Y) / scale)
+                    );
+                  
+                    batcher.Draw
+                    (
+                        texture, 
+                        startPositionBlack, 
+                        destRect, 
+                        new Vector3(0, 1, 0), 
+                        0f,
+                        Vector2.Zero,
+                        scale,
+                        0,
+                        0
+                    );
+                }
+               
                 batcher.DrawLine
                 (
-                    SolidColorTextureCache.GetTexture(Color.White),
-                    startPosition,
-                    end,
-                    hue
+                   texture,
+                   startPosition,
+                   end,
+                   hue,
+                   stroke * scale
                 );
             }          
         }
