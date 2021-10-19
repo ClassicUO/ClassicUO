@@ -36,6 +36,7 @@ using ClassicUO.Game.GameObjects;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
+using System;
 
 namespace ClassicUO.Game.Managers
 {
@@ -51,6 +52,12 @@ namespace ClassicUO.Game.Managers
 
         
         public bool IsEnabled => ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.ShowMobilesHP;
+
+        private readonly static FontSettings _fontSettings = new FontSettings()
+        { 
+            FontIndex = 3,
+            IsUnicode = false
+        };
 
 
         public void Draw(UltimaBatcher2D batcher)
@@ -148,17 +155,37 @@ namespace ClassicUO.Game.Managers
                             }
 
                             p1 = Client.Game.Scene.Camera.WorldToScreen(p1);
-                            p1.X -= (mobile.HitsTexture.Width >> 1) + 5;
-                            p1.Y -= mobile.HitsTexture.Height;
+
+
+                            var span = mobile.HitsPercentageString.AsSpan();
+                            var size = UOFontRenderer.Shared.MeasureString(span, _fontSettings, 1f);
+
+                            p1.X -= (int) (size.X * 0.5f) + 5;
+                            p1.Y -= (int) size.Y;
 
                             if (mobile.ObjectHandlesStatus == ObjectHandlesStatus.DISPLAYING)
                             {
                                 p1.Y -= Constants.OBJECT_HANDLES_GUMP_HEIGHT + 5;
                             }
 
-                            if (!(p1.X < 0 || p1.X > screenW - mobile.HitsTexture.Width || p1.Y < 0 || p1.Y > screenH))
-                            {
-                                mobile.HitsTexture.Draw(batcher, p1.X, p1.Y);
+                            if (!(p1.X < 0 || p1.X > screenW - size.X || p1.Y < 0 || p1.Y > screenH))
+                            {                            
+                                ushort color = 0x0044;
+
+                                if (mobile.HitsPercentage < 30)
+                                {
+                                    color = 0x0021;
+                                }
+                                else if (mobile.HitsPercentage < 50)
+                                {
+                                    color = 0x0030;
+                                }
+                                else if (mobile.HitsPercentage < 80)
+                                {
+                                    color = 0x0058;
+                                }
+
+                                UOFontRenderer.Shared.Draw(batcher, span, new Vector2(p1.X, p1.Y), 1f, _fontSettings, color);
                             }
                         }
                     }

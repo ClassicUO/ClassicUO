@@ -89,8 +89,7 @@ namespace ClassicUO.Game.GameObjects
                 mobile.LastAnimationChangeTime = Time.Ticks;
                 mobile.TextContainer?.Clear();
                 mobile.HitsPercentage = 0;
-                mobile.HitsTexture?.Destroy();
-                mobile.HitsTexture = null;
+                mobile.HitsPercentageString = string.Empty;
                 mobile.IsFlipped = false;
                 mobile.FrameInfo = Rectangle.Empty;
                 mobile.ObjectHandlesStatus = ObjectHandlesStatus.NONE;
@@ -991,9 +990,12 @@ namespace ClassicUO.Game.GameObjects
                 p.Y -= Constants.OBJECT_HANDLES_GUMP_HEIGHT;
             }
 
-            if (health && HitsTexture != null && mode != 1 && (alwaysHP >= 1 && Hits != HitsMax || alwaysHP == 0))
+            if (health && mode != 1 && (alwaysHP >= 1 && Hits != HitsMax || alwaysHP == 0))
             {
-                p.Y -= HitsTexture.Height;
+                //var span = HitsPercentageString.AsSpan();
+                //var size = UOFontRenderer.Shared.MeasureString(span, _fontSettings, 1f);
+
+                p.Y -= 22;
             }
 
             for (; last != null; last = (TextObject) last.Previous)

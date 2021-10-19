@@ -87,8 +87,8 @@ namespace ClassicUO.Game.GameObjects
         public ushort HitsMax;
 
 
+        public string HitsPercentageString = string.Empty;
         public byte HitsPercentage;
-        public RenderedText HitsTexture;
         public bool IsClicked;
         public uint LastStepTime;
         public string Name;
@@ -120,27 +120,10 @@ namespace ClassicUO.Game.GameObjects
 
         public void UpdateHits(byte perc)
         {
-            if (perc != HitsPercentage || HitsTexture == null || HitsTexture.IsDestroyed)
+            if (perc != HitsPercentage)
             {
                 HitsPercentage = perc;
-
-                ushort color = 0x0044;
-
-                if (perc < 30)
-                {
-                    color = 0x0021;
-                }
-                else if (perc < 50)
-                {
-                    color = 0x0030;
-                }
-                else if (perc < 80)
-                {
-                    color = 0x0058;
-                }
-
-                HitsTexture?.Destroy();
-                HitsTexture = RenderedText.Create($"[{perc}%]", color, 3, false);
+                HitsPercentageString = $"[{perc}%]";
             }
         }
 
@@ -194,8 +177,6 @@ namespace ClassicUO.Game.GameObjects
 
             AnimIndex = 0;
             LastAnimationChangeTime = 0;
-            HitsTexture?.Destroy();
-            HitsTexture = null;
         }
 
         public Item FindItem(ushort graphic, ushort hue = 0xFFFF)
