@@ -2,6 +2,21 @@
 
 namespace ClassicUO.Renderer.Effects
 {
+    enum BasicUOEffectTechnique
+    {
+        None,
+        FullHue,
+        Partialhue,
+        TextHueNoBorder,
+        TextHue,
+        LandNoHue,
+        LandHue,
+        Shadows,
+        Lights,
+        EffectHue,
+        RGBA
+    }
+
     class BasicUOEffect : Effect
     {
         public BasicUOEffect(GraphicsDevice graphicsDevice) : base(graphicsDevice, Resources.IsometricEffect)
@@ -20,5 +35,10 @@ namespace ClassicUO.Renderer.Effects
         public EffectParameter Viewport { get; }
         public EffectParameter Brighlight { get; }
         public EffectPass Pass { get; }
+
+        protected override void OnApply()
+        {
+            base.OnApply();
+        }
     }
 }

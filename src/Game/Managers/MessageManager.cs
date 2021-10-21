@@ -41,6 +41,7 @@ using ClassicUO.Game.UI.Gumps;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
+using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.Managers
 {
@@ -268,34 +269,6 @@ namespace ClassicUO.Game.Managers
                 isunicode = ProfileManager.CurrentProfile.OverrideAllFontsIsUnicode;
             }
 
-            int width = isunicode ? FontsLoader.Instance.GetWidthUnicode(font, msg) : FontsLoader.Instance.GetWidthASCII(font, msg);
-
-            if (width > 200)
-            {
-                width = isunicode ?
-                    FontsLoader.Instance.GetWidthExUnicode
-                    (
-                        font,
-                        msg,
-                        200,
-                        TEXT_ALIGN_TYPE.TS_LEFT,
-                        (ushort) FontStyle.BlackBorder
-                    ) :
-                    FontsLoader.Instance.GetWidthExASCII
-                    (
-                        font,
-                        msg,
-                        200,
-                        TEXT_ALIGN_TYPE.TS_LEFT,
-                        (ushort) FontStyle.BlackBorder
-                    );
-            }
-            else
-            {
-                width = 0;
-            }
-
-
             ushort fixedColor = (ushort)(hue & 0x3FFF);
 
             if (fixedColor != 0)
@@ -312,39 +285,25 @@ namespace ClassicUO.Game.Managers
                 fixedColor = (ushort)(hue & 0x8000);
             }
 
-
             TextObject textObject = TextObject.Create();
             textObject.Alpha = 0xFF;
             textObject.Type = type;
             textObject.Hue = fixedColor;
+            textObject.Text = msg;
+            textObject.ObjectTextType = textType;
 
-            if (!isunicode && textType == TextType.OBJECT)
-            {
-                fixedColor = 0x7FFF;
-            }
-            
-            textObject.RenderedText = RenderedText.Create
-            (
-                msg,
-                fixedColor,
-                font,
-                isunicode,
-                FontStyle.BlackBorder,
-                TEXT_ALIGN_TYPE.TS_LEFT,
-                width,
-                30,
-                false,
-                false,
-                textType == TextType.OBJECT
-            );
+            textObject.FontSettings.FontIndex = font;
+            textObject.FontSettings.IsUnicode = isunicode;
+            textObject.FontSettings.Border = true;
 
-            textObject.Time = CalculateTimeToLive(textObject.RenderedText);
-            textObject.RenderedText.Hue = textObject.Hue;
+            // TODO: maxwidth ?
+            textObject.TextSize = UOFontRenderer.Shared.MeasureStringAdvanced(textObject.Text.AsSpan(), textObject.FontSettings, 1f, Vector2.Zero, out _, out var maxHeight);
+            textObject.Time = CalculateTimeToLive(Math.Min(1, (int) (textObject.TextSize.Y / maxHeight)));
 
             return textObject;
         }
 
-        private static long CalculateTimeToLive(RenderedText rtext)
+        private static long CalculateTimeToLive(int lines)
         {
             Profile currentProfile = ProfileManager.CurrentProfile;
 
@@ -364,7 +323,7 @@ namespace ClassicUO.Game.Managers
                     delay = 10;
                 }
 
-                timeToLive = (long) (4000 * rtext.LinesCount * delay / 100.0f);
+                timeToLive = (long) (4000 * lines * delay / 100.0f);
             }
             else
             {

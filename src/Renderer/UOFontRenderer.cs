@@ -79,7 +79,7 @@ namespace ClassicUO.Renderer
             }
         }
 
-        public void Draw
+        public bool Draw
         (
             UltimaBatcher2D batcher,
             ReadOnlySpan<char> text,
@@ -93,10 +93,28 @@ namespace ClassicUO.Renderer
         {
             Vector3 hueVec = new Vector3();
             ShaderHueTranslator.GetHueVector(ref hueVec, hue);
-            Draw(batcher, text, position, scale, settings, hueVec, align, allowSelection);
+            return Draw(batcher, text, position, scale, settings, hueVec, align, allowSelection);
         }
 
-        public void Draw
+        public bool Draw
+       (
+           UltimaBatcher2D batcher,
+           ReadOnlySpan<char> text,
+           Vector2 position,
+           float scale,
+           in FontSettings settings,
+           Color color,
+           TEXT_ALIGN_TYPE align = TEXT_ALIGN_TYPE.TS_LEFT,
+           bool allowSelection = false
+       )
+        {
+            // TODO: shaders should support RGBA without using the UO colors
+
+            Vector3 hueVec = new Vector3(0, -1, 0);
+            return Draw(batcher, text, position, scale, settings, hueVec, align, allowSelection);
+        }
+
+        public bool Draw
         (
             UltimaBatcher2D batcher, 
             ReadOnlySpan<char> text, 
@@ -119,28 +137,17 @@ namespace ClassicUO.Renderer
                 FixVectorColor(ref hue, settings);
             }
 
-            Vector2 startPosition = position;
-
-            //batcher.DrawRectangle
-            //(
-            //    SolidColorTextureCache.GetTexture(Color.White),
-            //    (int) position.X, 
-            //    (int) position.Y,
-            //    (int) textSizeInPixels.X,
-            //    (int) textSizeInPixels.Y,
-            //    ref hue
-            //);
-
 
             if (align == TEXT_ALIGN_TYPE.TS_CENTER)
             {
-                startPosition.X += textSizeInPixels.X / 2f;
+                position.X -= textSizeInPixels.X * 0.5f;
             }
             else if (align == TEXT_ALIGN_TYPE.TS_RIGHT)
             {
 
             }
 
+            Vector2 startPosition = position;
             Rectangle uv;
 
             for (int i = 0; i < text.Length; ++i)
@@ -232,7 +239,9 @@ namespace ClassicUO.Renderer
                    hue,
                    stroke * scale
                 );
-            }          
+            }
+
+            return allowSelection && mouseIsOver;
         }
 
         public Vector2 MeasureString(ReadOnlySpan<char> text, in FontSettings settings, float scale)
@@ -299,7 +308,7 @@ namespace ClassicUO.Renderer
             var mouseScreenPosition = Mouse.Position;
             mouseIsOver = false;
 
-            for (int i = 0; i< text.Length; ++i)
+            for (int i = 0; i < text.Length; ++i)
             {
                 if (text[i] == '\r')
                 {
@@ -359,7 +368,7 @@ namespace ClassicUO.Renderer
             const uint UO_BLACK = 0xFF010101;
             const uint DEFAULT_HUE = 0xFF_FF_FF_FF;
 
-            key = CreateKey(c, settings);
+            key = CreateKey(c, in settings);
 
             if (_spriteKeyInfo.TryGetValue(key, out var spriteInfo))
             {
@@ -773,7 +782,7 @@ namespace ClassicUO.Renderer
                 c = '?';
             }
 
-            key = CreateKey(c, settings);
+            key = CreateKey(c, in settings);
 
             if (_spriteKeyInfo.TryGetValue(key, out var spriteInfo))
             {
@@ -875,26 +884,26 @@ namespace ClassicUO.Renderer
                     color.Y = ShaderHueTranslator.SHADER_HUED;
                 }
             }
-            else
+            else if (color.Y > 0)
             {
                 color.Y = ShaderHueTranslator.SHADER_NONE;
             }
         }
         
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        //[MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static uint CreateKey(char c, in FontSettings settings)
         {
             unchecked
             {
                 uint hash = 17;
                 hash = (uint)(hash * 31 + (int)c);
-                hash = (uint)(hash * 31 + settings.FontIndex.GetHashCode());
-                hash = (uint)(hash * 31 + settings.Bold.GetHashCode());
-                hash = (uint)(hash * 31 + settings.Italic.GetHashCode());
+                hash = (uint)(hash * 31 + settings.FontIndex);
+                hash = (uint)(hash * 31 + (settings.Bold ? 1 : 0));
+                hash = (uint)(hash * 31 + (settings.Italic ? 1 : 0));
                 //hash = (uint)(hash * 31 + settings.Underline.GetHashCode());
-                hash = (uint)(hash * 31 + settings.Border.GetHashCode());
-                hash = (uint)(hash * 31 + settings.IsHtml.GetHashCode());
-                hash = (uint)(hash * 31 + settings.IsUnicode.GetHashCode());
+                hash = (uint)(hash * 31 + (settings.Border ? 1 : 0));
+                //hash = (uint)(hash * 31 + (settings.IsHtml ? 1 : 0));
+                hash = (uint)(hash * 31 + (settings.IsUnicode ? 1 : 0));
 
                 return hash;
             }

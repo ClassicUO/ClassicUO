@@ -1274,16 +1274,6 @@ namespace ClassicUO.Game.Scenes
             }
         }
 
-        private static readonly RenderedText _youAreDeadText = RenderedText.Create
-        (
-            ResGeneral.YouAreDead,
-            0xFFFF,
-            3,
-            false,
-            FontStyle.BlackBorder,
-            TEXT_ALIGN_TYPE.TS_LEFT
-        );
-
         private bool CheckDeathScreen(UltimaBatcher2D batcher, int x, int y, int width, int height)
         {
             if (ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.EnableDeathScreen)
@@ -1293,7 +1283,28 @@ namespace ClassicUO.Game.Scenes
                     if (World.Player.IsDead && World.Player.DeathScreenTimer > Time.Ticks)
                     {
                         batcher.Begin();
-                        _youAreDeadText.Draw(batcher, x + (width / 2 - _youAreDeadText.Width / 2), y + height / 2);
+
+                        FontSettings settings = new FontSettings()
+                        {
+                            IsUnicode = false,
+                            FontIndex = 3,
+                            Border = true
+                        };
+
+                        ushort hue = HuesHelper.Color32To16(Color.White.PackedValue);
+
+                        UOFontRenderer.Shared.Draw
+                        (
+                            batcher,
+                            ResGeneral.YouAreDead.AsSpan(),
+                            new Vector2(x + (width * 0.5f), y + (height * 0.5f)),
+                            1f,
+                            settings,
+                            Color.Red,
+                            TEXT_ALIGN_TYPE.TS_CENTER,
+                            false
+                        );
+
                         batcher.End();
 
                         return true;

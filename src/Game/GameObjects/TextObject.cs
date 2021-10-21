@@ -59,8 +59,10 @@ namespace ClassicUO.Game.GameObjects
                 o.Owner = null;
                 o.UnlinkD();
                 o.IsTextGump = false;
-                o.RenderedText?.Destroy();
-                o.RenderedText = null;
+                o.Text = string.Empty;
+                o.TextSize = Vector2.Zero;
+                o.FontSettings = default;
+                o.ObjectTextType = 0;
                 o.Clear();
             }
         );
@@ -72,11 +74,13 @@ namespace ClassicUO.Game.GameObjects
         public bool IsTextGump;
         public bool IsTransparent;
         public GameObject Owner;
-
-        public RenderedText RenderedText;
+        public string Text = string.Empty;
         public long Time, SecondTime;
         public MessageType Type;
         public int X, Y, OffsetY;
+        public Vector2 TextSize;
+        public FontSettings FontSettings;
+        public TextType ObjectTextType;
 
 
         public static TextObject Create()
@@ -96,8 +100,6 @@ namespace ClassicUO.Game.GameObjects
 
             RealScreenPosition = Point.Zero;
             IsDestroyed = true;
-            RenderedText?.Destroy();
-            RenderedText = null;
             Owner = null;
 
             _queue.ReturnOne(this);

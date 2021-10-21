@@ -30,18 +30,21 @@
 
 #endregion
 
+using System;
 using System.Collections.Generic;
 using ClassicUO.Configuration;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Input;
 using ClassicUO.Renderer;
+using ClassicUO.Utility.Collections;
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.Managers
 {
     internal class TextRenderer : TextObject
     {
-        private readonly List<Rectangle> _bounds = new List<Rectangle>();
+        private Rectangle[] _bounds = new Rectangle[100];
+        private int _count;
 
         public TextRenderer()
         {
@@ -53,7 +56,6 @@ namespace ClassicUO.Game.Managers
 
         public override void Destroy()
         {
-            //Clear();
         }
 
         public virtual void Update(double totalTime, double frameTime)
@@ -61,65 +63,21 @@ namespace ClassicUO.Game.Managers
             ProcessWorldText(false);
         }
 
-        public void Select(int startX, int startY, int renderIndex, bool isGump = false)
-        {
-            int mouseX = Mouse.Position.X;
-            int mouseY = Mouse.Position.Y;
-
-            for (TextObject item = DrawPointer; item != null; item = item.DLeft)
-            {
-                if (item.RenderedText == null || item.RenderedText.IsDestroyed || item.RenderedText.Texture == null)
-                {
-                    continue;
-                }
-
-                if (item.Time >= ClassicUO.Time.Ticks)
-                {
-                    if (item.Owner == null || item.Owner.UseInRender != renderIndex)
-                    {
-                        continue;
-                    }
-                }
-
-                if (item.RenderedText.PixelCheck(mouseX - startX - item.RealScreenPosition.X, mouseY - startY - item.RealScreenPosition.Y))
-                {
-                    SelectedObject.LastObject = item;
-                }
-            }
-
-            if (SelectedObject.LastObject is TextObject t)
-            {
-                if (isGump)
-                {
-                    if (t.IsTextGump)
-                    {
-                        t.ToTopD();
-                    }
-                }
-                else
-                {
-                    MoveToTop(t);
-                }
-            }
-        }
 
         public virtual void Draw(UltimaBatcher2D batcher, int startX, int startY, int renderIndex, bool isGump = false)
         {
             ProcessWorldText(false);
 
-            int mouseX = Mouse.Position.X;
-            int mouseY = Mouse.Position.Y;
-
             BaseGameObject last = SelectedObject.LastObject;
+
+            Vector3 hueVec = new Vector3();
 
             for (TextObject o = DrawPointer; o != null; o = o.DLeft)
             {
-                if (o.IsDestroyed || o.RenderedText == null || o.RenderedText.IsDestroyed || o.RenderedText.Texture == null || o.Time < ClassicUO.Time.Ticks || o.Owner.UseInRender != renderIndex && !isGump)
+                if (o.IsDestroyed || string.IsNullOrEmpty(o.Text) || o.Time < ClassicUO.Time.Ticks || o.Owner.UseInRender != renderIndex && !isGump)
                 {
                     continue;
                 }
-
-                ushort hue = 0;
 
                 float alpha = 1f - o.Alpha / 255f;
 
@@ -134,7 +92,34 @@ namespace ClassicUO.Game.Managers
                 int x = o.RealScreenPosition.X;
                 int y = o.RealScreenPosition.Y;
 
-                if (o.RenderedText.PixelCheck(mouseX - x - startX, mouseY - y - startY))
+                if (!isGump)
+                {
+                    if (o.Owner is Entity && last == o)
+                    {
+                        //hue = 0x0035;
+                    }
+                }
+                else
+                {
+                    x += startX;
+                    y += startY;
+                }
+
+                ShaderHueTranslator.GetHueVector(ref hueVec, o.Hue, false, alpha);
+
+                bool selected = UOFontRenderer.Shared.Draw
+                (
+                    batcher,
+                    o.Text.AsSpan(),
+                    new Vector2(x, y),
+                    1f,
+                    o.FontSettings,
+                    hueVec,
+                    IO.Resources.TEXT_ALIGN_TYPE.TS_LEFT,
+                    o.ObjectTextType == Data.TextType.OBJECT         
+                );
+
+                if (selected)
                 {
                     if (isGump)
                     {
@@ -145,28 +130,6 @@ namespace ClassicUO.Game.Managers
                         SelectedObject.Object = o;
                     }
                 }
-
-                if (!isGump)
-                {
-                    if (o.Owner is Entity && last == o)
-                    {
-                        hue = 0x0035;
-                    }
-                }
-                else
-                {
-                    x += startX;
-                    y += startY;
-                }
-
-                o.RenderedText.Draw
-                (
-                    batcher,
-                    x,
-                    y,
-                    alpha,
-                    hue
-                );
             }
         }
 
@@ -194,9 +157,9 @@ namespace ClassicUO.Game.Managers
         {
             if (doit)
             {
-                if (_bounds.Count != 0)
+                if (_count != 0)
                 {
-                    _bounds.Clear();
+                    _count = 0;
                 }
             }
 
@@ -206,7 +169,7 @@ namespace ClassicUO.Game.Managers
                 {
                     TextObject t = DrawPointer;
 
-                    if (t.Time >= ClassicUO.Time.Ticks && t.RenderedText != null && !t.RenderedText.IsDestroyed)
+                    if (t.Time >= ClassicUO.Time.Ticks && !string.IsNullOrEmpty(t.Text))
                     {
                         if (t.Owner != null)
                         {
@@ -254,21 +217,27 @@ namespace ClassicUO.Game.Managers
             }
         }
 
+        private static bool Intersects(ref Rectangle r0, ref Rectangle r1)
+        {
+            return (r1.X < (r0.X + r0.Width) &&
+                    r0.X < (r1.X + r1.Width) &&
+                    r1.Y < (r0.Y + r0.Height) &&
+                    r0.Y < (r1.Y + r1.Height));
+        }
+
         private bool Collides(TextObject msg)
         {
             bool result = false;
 
-            Rectangle rect = new Rectangle
+            ref var rect = ref _bounds[_count];
+            rect.X = msg.RealScreenPosition.X;
+            rect.Y = msg.RealScreenPosition.Y;
+            rect.Width = (int)msg.TextSize.X;
+            rect.Height = (int)msg.TextSize.Y;
+        
+            for (int i = 0; i < _count; i++)
             {
-                X = msg.RealScreenPosition.X,
-                Y = msg.RealScreenPosition.Y,
-                Width = msg.RenderedText.Width,
-                Height = msg.RenderedText.Height
-            };
-
-            for (int i = 0; i < _bounds.Count; i++)
-            {
-                if (_bounds[i].Intersects(rect))
+                if (Intersects(ref _bounds[i], ref rect))
                 {
                     result = true;
 
@@ -276,7 +245,12 @@ namespace ClassicUO.Game.Managers
                 }
             }
 
-            _bounds.Add(rect);
+            ++_count;
+
+            if (_count >= _bounds.Length)
+            {
+                Array.Resize(ref _bounds, _count * 2);
+            }
 
             return result;
         }

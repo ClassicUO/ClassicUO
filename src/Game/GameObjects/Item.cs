@@ -1013,7 +1013,7 @@ namespace ClassicUO.Game.GameObjects
 
                 for (; last != null; last = (TextObject) last.Previous)
                 {
-                    if (last.RenderedText != null && !last.RenderedText.IsDestroyed)
+                    if (!string.IsNullOrEmpty(last.Text))
                     {
                         if (offY == 0 && last.Time < Time.Ticks)
                         {
@@ -1021,9 +1021,9 @@ namespace ClassicUO.Game.GameObjects
                         }
 
                         last.OffsetY = offY;
-                        offY += last.RenderedText.Height;
+                        offY += (int) last.TextSize.Y;
 
-                        last.RealScreenPosition.X = p.X - (last.RenderedText.Width >> 1);
+                        last.RealScreenPosition.X = p.X - (int) (last.TextSize.X * 0.5f);
                         last.RealScreenPosition.Y = p.Y - offY;
                     }
                 }
@@ -1034,7 +1034,7 @@ namespace ClassicUO.Game.GameObjects
             {
                 for (; last != null; last = (TextObject) last.Previous)
                 {
-                    if (last.RenderedText != null && !last.RenderedText.IsDestroyed)
+                    if (!string.IsNullOrEmpty(last.Text))
                     {
                         if (offY == 0 && last.Time < Time.Ticks)
                         {
@@ -1042,9 +1042,9 @@ namespace ClassicUO.Game.GameObjects
                         }
 
                         last.OffsetY = offY;
-                        offY += last.RenderedText.Height;
+                        offY += (int) last.TextSize.Y;
 
-                        last.RealScreenPosition.X = last.X - (last.RenderedText.Width >> 1);
+                        last.RealScreenPosition.X = last.X - (int)(last.TextSize.X * 0.5f);
                         last.RealScreenPosition.Y = last.Y - offY;
                     }
                 }
