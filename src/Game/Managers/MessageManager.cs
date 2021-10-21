@@ -296,8 +296,17 @@ namespace ClassicUO.Game.Managers
             textObject.FontSettings.IsUnicode = isunicode;
             textObject.FontSettings.Border = true;
 
-            // TODO: maxwidth ?
-            textObject.TextSize = UOFontRenderer.Shared.MeasureStringAdvanced(textObject.Text.AsSpan(), textObject.FontSettings, 1f, Vector2.Zero, out _, out var maxHeight);
+            textObject.MaxTextWidth = 200;
+            textObject.TextSize = UOFontRenderer.Shared.MeasureStringAdvanced
+            (
+                textObject.Text.AsSpan(),
+                textObject.FontSettings,
+                1f,
+                Vector2.Zero,
+                out _, 
+                out var maxHeight,
+                textObject.MaxTextWidth
+            );
             textObject.Time = CalculateTimeToLive(Math.Min(1, (int) (textObject.TextSize.Y / maxHeight)));
 
             return textObject;

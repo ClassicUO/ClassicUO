@@ -268,7 +268,10 @@ namespace ClassicUO.Game.GameObjects
                     new Vector2(item.X, item.Y),
                     1f,
                     item.FontSettings,
-                    hueVec
+                    hueVec,
+                    TEXT_ALIGN_TYPE.TS_LEFT,
+                    false,
+                    item.MaxTextWidth
                 );
 
                 offY += (int) item.TextSize.Y;

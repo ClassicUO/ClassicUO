@@ -63,6 +63,7 @@ namespace ClassicUO.Game.GameObjects
                 o.TextSize = Vector2.Zero;
                 o.FontSettings = default;
                 o.ObjectTextType = 0;
+                o.MaxTextWidth = 0;
                 o.Clear();
             }
         );
@@ -80,6 +81,7 @@ namespace ClassicUO.Game.GameObjects
         public int X, Y, OffsetY;
         public Vector2 TextSize;
         public FontSettings FontSettings;
+        public float MaxTextWidth;
         public TextType ObjectTextType;
 
 

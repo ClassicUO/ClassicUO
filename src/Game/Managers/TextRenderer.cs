@@ -43,7 +43,7 @@ namespace ClassicUO.Game.Managers
 {
     internal class TextRenderer : TextObject
     {
-        private Rectangle[] _bounds = new Rectangle[100];
+        private Rectangle[] _bounds = new Rectangle[2000];
         private int _count;
 
         public TextRenderer()
@@ -116,7 +116,8 @@ namespace ClassicUO.Game.Managers
                     o.FontSettings,
                     hueVec,
                     IO.Resources.TEXT_ALIGN_TYPE.TS_LEFT,
-                    o.ObjectTextType == Data.TextType.OBJECT         
+                    o.ObjectTextType == Data.TextType.OBJECT,
+                    o.MaxTextWidth
                 );
 
                 if (selected)
@@ -235,7 +236,7 @@ namespace ClassicUO.Game.Managers
             rect.Width = (int)msg.TextSize.X;
             rect.Height = (int)msg.TextSize.Y;
         
-            for (int i = 0; i < _count; i++)
+            for (int i = 0; i < _count - 1; i++)
             {
                 if (Intersects(ref _bounds[i], ref rect))
                 {

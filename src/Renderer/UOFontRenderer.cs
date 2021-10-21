@@ -97,7 +97,7 @@ namespace ClassicUO.Renderer
         }
 
         public bool Draw
-       (
+        (
            UltimaBatcher2D batcher,
            ReadOnlySpan<char> text,
            Vector2 position,
@@ -106,7 +106,7 @@ namespace ClassicUO.Renderer
            Color color,
            TEXT_ALIGN_TYPE align = TEXT_ALIGN_TYPE.TS_LEFT,
            bool allowSelection = false
-       )
+        )
         {
             // TODO: shaders should support RGBA without using the UO colors
 
@@ -123,10 +123,11 @@ namespace ClassicUO.Renderer
             in FontSettings settings,
             Vector3 hue,
             TEXT_ALIGN_TYPE align = TEXT_ALIGN_TYPE.TS_LEFT,
-            bool allowSelection = false
+            bool allowSelection = false,
+            float maxTextWidth = 0
         )
         {     
-            Vector2 textSizeInPixels = MeasureStringAdvanced(text, settings, scale, position, out bool mouseIsOver, out float maxHeight);
+            Vector2 textSizeInPixels = MeasureStringAdvanced(text, settings, scale, position, out bool mouseIsOver, out float maxHeight, maxTextWidth);
 
             FixVectorColor(ref hue, settings);
 
@@ -147,8 +148,11 @@ namespace ClassicUO.Renderer
 
             }
 
+            maxTextWidth *= scale;
+
             Vector2 startPosition = position;
             Rectangle uv;
+            float textWidth = 0;
 
             for (int i = 0; i < text.Length; ++i)
             {
@@ -157,17 +161,23 @@ namespace ClassicUO.Renderer
                     continue;
                 }
 
-                if (text[i] == '\n')
+                if (text[i] == '\n' || (maxTextWidth > 0.0f && textWidth > maxTextWidth))
                 {
                     position.X = startPosition.X;
                     position.Y += maxHeight;
+                    textWidth = 0;
 
-                    continue;
+                    if (text[i] == '\n')
+                    {
+                        continue;
+                    }           
                 }
 
                 if (text[i] == ' ')
                 {
-                    position.X += DEFAULT_SPACE_SIZE * scale;
+                    float spaceWidth = DEFAULT_SPACE_SIZE * scale;
+                    position.X += spaceWidth;
+                    textWidth += spaceWidth;
 
                     continue;
                 }
@@ -189,7 +199,9 @@ namespace ClassicUO.Renderer
                         0f
                     );
 
-                    position.X += uv.Width * scale;
+                    float charWidth = uv.Width * scale;
+                    position.X += charWidth;
+                    textWidth += charWidth;
                 }
             }
 
@@ -244,7 +256,7 @@ namespace ClassicUO.Renderer
             return allowSelection && mouseIsOver;
         }
 
-        public Vector2 MeasureString(ReadOnlySpan<char> text, in FontSettings settings, float scale)
+        public Vector2 MeasureString(ReadOnlySpan<char> text, in FontSettings settings, float scale, float maxTextWidth = 0)
         {
             Vector2 size = new Vector2();
 
@@ -253,6 +265,8 @@ namespace ClassicUO.Renderer
             float maxWidth = 0;
             float maxHeight = 0;
 
+            maxTextWidth *= scale;
+
             for (int i = 0; i < text.Length; ++i)
             {
                 if (text[i] == '\r')
@@ -260,14 +274,17 @@ namespace ClassicUO.Renderer
                     continue;
                 }
 
-                if (text[i] == '\n')
+                if (text[i] == '\n' || (maxTextWidth > 0.0f && size.X > maxTextWidth))
                 {
                     ++returns;
 
                     maxWidth = size.X;
                     size.X = 0;
 
-                    continue;
+                    if (text[i] == '\n')
+                    {
+                        continue;
+                    }
                 }
 
                 if (text[i] == ' ')
@@ -290,12 +307,22 @@ namespace ClassicUO.Renderer
             return size;
         }
   
-        public Vector2 MeasureStringAdvanced(ReadOnlySpan<char> text, in FontSettings settings, float scale, Vector2 position, out bool mouseIsOver, out float maxHeight)
+        public Vector2 MeasureStringAdvanced
+        (
+            ReadOnlySpan<char> text, 
+            in FontSettings settings, 
+            float scale, 
+            Vector2 position,
+            out bool mouseIsOver,
+            out float maxHeight,
+            float maxTextWidth = 0
+        )
         {
             Vector2 size = new Vector2();
 
             int returns = 0;
             float maxWidth = 0;
+            maxTextWidth *= scale;
 
             Rectangle uv;
             _ = ReadChar('W', settings, out uv, out _);
@@ -315,14 +342,17 @@ namespace ClassicUO.Renderer
                     continue;
                 }
 
-                if (text[i] == '\n')
+                if (text[i] == '\n' || (maxTextWidth > 0.0f && size.X > maxTextWidth))
                 {
                     ++returns;
 
                     maxWidth = size.X;
                     size.X = 0;
 
-                    continue;
+                    if (text[i] == '\n')
+                    {
+                        continue;
+                    }
                 }
 
                 if (text[i] == ' ')
