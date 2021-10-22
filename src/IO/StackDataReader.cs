@@ -322,7 +322,7 @@ namespace ClassicUO.IO
         // from modernuo <3
         private string ReadString(Encoding encoding, int length, int sizeT, bool safe)
         {
-            if (Position + sizeT > Length)
+            if (length == 0 || Position + sizeT > Length)
             {
                 return string.Empty;
             }
