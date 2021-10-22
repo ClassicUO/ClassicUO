@@ -1,10 +1,7 @@
 name: Build
 
 on:
-  push:
-    branches: "*"
-  pull_request:
-    branches: "*"
+  workflow_dispatch
 
 env:
   DOTNET_NOLOGO: false
@@ -35,3 +32,28 @@ jobs:
       
     - name: Test
       run: dotnet test --verbosity normal
+      
+    - name: Zip Razor
+      id: create_zip
+      uses: papeloto/action-zip@v1
+      with:
+        files: bin\Release\ClassicUO.exe
+        recursive: false
+        dest: ClassicUO-${{ steps.get_version.outputs.version }}.zip
+
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1
+      with:
+        tag_name: "v${{steps.get_version.outputs.version}}"
+        release_name: ClassicUO ${{steps.get_version.outputs.version}}
+        draft: false
+        prerelease: false
+
+    - name: Deploy        
+      uses: actions/upload-release-asset@v1
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
+        asset_path: ./ClassicUO-${{ steps.get_version.outputs.version }}.zip
+        asset_name: ClassicUO-${{ steps.get_version.outputs.version }}.zip
+        asset_content_type: application/zip
