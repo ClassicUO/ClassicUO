@@ -712,12 +712,9 @@ namespace ClassicUO.Game.UI.Gumps
 
                     StackDataReader reader = new StackDataReader(buffer.AsSpan(0, (int)stream.Length));
 
-                    bool was_error;
-                    long fp_offset;
                     int bmp_pitch;
                     int i, pad;
                     SDL.SDL_Surface* surface;
-                    uint r_mask, g_mask, b_mask;
                     byte* bits;
                     int expand_bmp;
                     int max_col = 0;
@@ -790,9 +787,6 @@ namespace ClassicUO.Game.UI.Gumps
                     }
 
                     const int BI_RGB = 0;
-                    const int BI_RLE = 1;
-                    const int BI_RLE4 = 2;
-                    const int BI_BITFIELDS = 3;
 
                     switch (bi_compression)
                     {
@@ -813,9 +807,6 @@ namespace ClassicUO.Game.UI.Gumps
                                     break;
 
                                 case 32:
-                                    r_mask = 0x00FF0000;
-                                    g_mask = 0x0000FF00;
-                                    b_mask = 0x000000FF;
                                     expand_bmp = 0;
 
                                     break;
@@ -2156,7 +2147,6 @@ namespace ClassicUO.Game.UI.Gumps
             rot.Y += y + height;
 
             const int DOT_SIZE = 4;
-            const int DOT_SIZE_HALF = DOT_SIZE >> 1;
 
             if (rot.X < x || rot.X > x + Width - 8 - DOT_SIZE || rot.Y < y || rot.Y > y + Height - 8 - DOT_SIZE)
             {

@@ -96,7 +96,6 @@ namespace ClassicUO.IO.Resources
 
             Palette = new FloatHues[HuesCount];
             int entrycount = HuesCount >> 3;
-            int iddd = 0;
 
             for (int i = 0; i < entrycount; i++)
             {
