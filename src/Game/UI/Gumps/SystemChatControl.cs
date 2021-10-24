@@ -43,6 +43,7 @@ using ClassicUO.Renderer;
 using ClassicUO.Resources;
 using ClassicUO.Utility.Collections;
 using ClassicUO.Utility.Platforms;
+using Microsoft.Xna.Framework;
 using SDL2;
 
 namespace ClassicUO.Game.UI.Gumps
@@ -494,7 +495,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }
                 else
                 {
-                    yy -= last.Value.TextHeight;
+                    yy -= (int) last.Value.TextHeight;
 
                     if (yy >= y)
                     {
@@ -883,27 +884,39 @@ namespace ClassicUO.Game.UI.Gumps
         private class ChatLineTime
         {
             private uint _createdTime;
-            private RenderedText _renderedText;
+            private readonly string _text;
+            private readonly ushort _hue;
+            private float _maxheight;
+            private FontSettings _settings;
 
             public ChatLineTime(string text, byte font, bool isunicode, ushort hue)
             {
-                _renderedText = RenderedText.Create
+                _text = text;
+                _hue = hue;
+
+                _settings.FontIndex = font;
+                _settings.IsUnicode = isunicode;
+                _settings.Border = true;
+
+                UOFontRenderer.Shared.MeasureStringAdvanced
                 (
-                    text,
-                    hue,
-                    font,
-                    isunicode,
-                    FontStyle.BlackBorder,
-                    maxWidth: 320
+                    _text.AsSpan(),
+                    _settings,
+                    1f,
+                    Vector2.Zero,
+                    out _,
+                    out _maxheight,
+                    320
                 );
+
                 _createdTime = Time.Ticks + Constants.TIME_DISPLAY_SYSTEM_MESSAGE_TEXT;
             }
 
-            private string Text => _renderedText?.Text ?? string.Empty;
+            private string Text { get; set; }
+            public bool IsDisposed { get; set; } 
+            public float TextHeight => _maxheight;
 
-            public bool IsDisposed => _renderedText == null || _renderedText.IsDestroyed;
 
-            public int TextHeight => _renderedText?.Height ?? 0;
 
             public void Update(double totalTime, double frameTime)
             {
@@ -916,7 +929,28 @@ namespace ClassicUO.Game.UI.Gumps
 
             public bool Draw(UltimaBatcher2D batcher, int x, int y)
             {
-                return !IsDisposed && _renderedText.Draw(batcher, x, y /*, ShaderHueTranslator.GetHueVector(0, false, _alpha, true)*/);
+                if (IsDisposed)
+                {
+                    return false;
+                }
+
+                Vector3 hueVec = new Vector3();
+                ShaderHueTranslator.GetHueVector(ref hueVec, _hue);
+
+                UOFontRenderer.Shared.Draw
+                (
+                    batcher,
+                    _text.AsSpan(),
+                    new Vector2(x, y),
+                    1f,
+                    _settings,
+                    hueVec,
+                    IO.Resources.TEXT_ALIGN_TYPE.TS_LEFT,
+                    false,
+                    320
+                );
+
+                return true;
             }
 
             public override string ToString()
@@ -926,11 +960,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             public void Destroy()
             {
-                if (!IsDisposed)
-                {
-                    _renderedText?.Destroy();
-                    _renderedText = null;
-                }
+                IsDisposed = true;
             }
         }
     }

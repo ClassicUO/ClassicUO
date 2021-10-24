@@ -289,7 +289,7 @@ namespace ClassicUO.Renderer
 
                 if (text[i] == ' ')
                 {
-                    size.X += 8 * scale;
+                    size.X += DEFAULT_SPACE_SIZE * scale;
 
                     continue;
                 }
