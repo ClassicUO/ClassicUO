@@ -32,6 +32,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 using ClassicUO.Utility;
@@ -66,6 +67,11 @@ namespace ClassicUO.IO.Resources
 
                     string path = UOFileManager.GetUOFilePath("skills.mul");
                     string pathidx = UOFileManager.GetUOFilePath("Skills.idx");
+                    
+                    if (!File.Exists(pathidx))
+                    {
+                        path = UOFileManager.GetUOFilePath("skills.idx");
+                    }
 
                     FileSystemHelper.EnsureFileExists(path);
                     FileSystemHelper.EnsureFileExists(pathidx);
