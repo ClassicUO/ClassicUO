@@ -41,6 +41,7 @@ using ClassicUO.Data;
 using ClassicUO.Game;
 using ClassicUO.IO.Resources;
 using ClassicUO.Utility.Logging;
+using ClassicUO.Utility.Platforms;
 
 namespace ClassicUO.IO
 {
@@ -48,12 +49,31 @@ namespace ClassicUO.IO
     {
         public static string GetUOFilePath(string file)
         {
-            if (UOFilesOverrideMap.Instance.TryGetValue(file.ToLowerInvariant(), out string uoFilePath))
+            if (!UOFilesOverrideMap.Instance.TryGetValue(file.ToLowerInvariant(), out string uoFilePath))
             {
-                return uoFilePath;
+                uoFilePath = Path.Combine(Settings.GlobalSettings.UltimaOnlineDirectory, file);
             }
 
-            return Path.Combine(Settings.GlobalSettings.UltimaOnlineDirectory, file);
+            //If the file with the given name doesn't exist, check for it with alternative casing if not on windows
+            if (!PlatformHelper.IsWindows && !File.Exists(uoFilePath))
+            {
+                FileInfo finfo = new FileInfo(uoFilePath);
+
+                char firstChar = finfo.Name[0];
+
+                if (char.IsUpper(firstChar))
+                {
+                    file = char.ToLowerInvariant(firstChar) + finfo.Name.Substring(1);
+                }
+                else
+                {
+                    file = char.ToUpperInvariant(firstChar) + finfo.Name.Substring(1);
+                }
+
+                uoFilePath = Path.Combine(finfo.DirectoryName ?? Settings.GlobalSettings.UltimaOnlineDirectory, file);
+            }
+
+            return uoFilePath;
         }
 
 
