@@ -59,22 +59,26 @@ namespace ClassicUO.IO
             {
                 FileInfo finfo = new FileInfo(uoFilePath);
                 var dir = Path.GetFullPath(finfo.DirectoryName ?? Settings.GlobalSettings.UltimaOnlineDirectory);
-                var files = Directory.GetFiles(dir);
-                var matches = 0;
-                
-                foreach (var f in files)
-                {
-                    if (string.Equals(f, uoFilePath, StringComparison.OrdinalIgnoreCase))
-                    {
-                        matches++;
-                        uoFilePath = f;
-                    }
-                }
 
-                if (matches > 1)
+                if (Directory.Exists(dir))
                 {
-                    Log.Warn($"Multiple files with ambiguous case found for {file}, using {Path.GetFileName(uoFilePath)}. Check your data directory for duplicate files.");
-                }
+                    var files = Directory.GetFiles(dir);
+                    var matches = 0;
+                    
+                    foreach (var f in files)
+                    {
+                        if (string.Equals(f, uoFilePath, StringComparison.OrdinalIgnoreCase))
+                        {
+                            matches++;
+                            uoFilePath = f;
+                        }
+                    }
+
+                    if (matches > 1)
+                    {
+                        Log.Warn($"Multiple files with ambiguous case found for {file}, using {Path.GetFileName(uoFilePath)}. Check your data directory for duplicate files.");
+                    }
+                }             
             }
 
             return uoFilePath;
