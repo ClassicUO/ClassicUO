@@ -127,7 +127,16 @@ namespace ClassicUO.Renderer
             float maxTextWidth = 0
         )
         {     
-            Vector2 textSizeInPixels = MeasureStringAdvanced(text, settings, scale, position, out bool mouseIsOver, out float maxHeight, maxTextWidth);
+            Vector2 textSizeInPixels = MeasureString
+            (
+                text, 
+                settings,
+                scale,
+                maxTextWidth,
+                out float maxHeight,
+                position, 
+                out bool mouseIsOver
+            );
 
             FixVectorColor(ref hue, settings);
 
@@ -152,58 +161,132 @@ namespace ClassicUO.Renderer
 
             Vector2 startPosition = position;
             Rectangle uv;
-            float textWidth = 0;
+            Vector2 size = new Vector2();
 
-            for (int i = 0; i < text.Length; ++i)
+            int last = 0;
+            float lineHeight = 0;
+
+            if (maxTextWidth > 0.0f)
             {
-                if (text[i] == '\r')
+                for (int i = 0; i < text.Length; i++)
                 {
-                    continue;
-                }
+                    char c = text[i];
 
-                if (text[i] == '\n' || (maxTextWidth > 0.0f && textWidth > maxTextWidth))
-                {
-                    position.X = startPosition.X;
-                    position.Y += maxHeight;
-                    textWidth = 0;
-
-                    if (text[i] == '\n')
+                    if (c == ' ')
                     {
-                        continue;
-                    }           
-                }
+                        var wordSize = MeasureStringInternal
+                        (
+                            text.Slice(last, i - last),
+                            settings,
+                            scale,
+                            position,
+                            0,
+                            out lineHeight,
+                            ref mouseIsOver
+                        );
 
-                if (text[i] == ' ')
-                {
-                    float spaceWidth = DEFAULT_SPACE_SIZE * scale;
-                    position.X += spaceWidth;
-                    textWidth += spaceWidth;
+                        for (int j = last; j < i; j++)
+                        {
+                            var texture = ReadChar(text[j], settings, out uv, out uint key);
 
-                    continue;
-                }
+                            if (texture != null)
+                            {
+                                batcher.Draw
+                                (
+                                    texture,
+                                    position,
+                                    uv,
+                                    hue,
+                                    0f,
+                                    Vector2.Zero,
+                                    scale,
+                                    SpriteEffects.None,
+                                    0f
+                                );
 
-                var texture = ReadChar(text[i], settings, out uv, out _);
+                                position.X += uv.Width * scale;
+                            }
+                        }
 
-                if (texture != null)
-                {
-                    batcher.Draw
-                    (
-                        texture, 
-                        position,
-                        uv,
-                        hue, 
-                        0f,
-                        Vector2.Zero,
-                        scale,
-                        SpriteEffects.None,
-                        0f
-                    );
+                        if ( (maxTextWidth > 0.0f && size.X + wordSize.X > maxTextWidth))
+                        {
+                            position.X = startPosition.X;
+                            position.Y += lineHeight;
+                            wordSize.Y += lineHeight;
+                        }
+                        else
+                        {
+                            position.X += wordSize.X;
+                            size.X += wordSize.X;
+                        }
 
-                    float charWidth = uv.Width * scale;
-                    position.X += charWidth;
-                    textWidth += charWidth;
+                        size.Y = Math.Max(wordSize.Y, size.Y);
+                        last = i + 1;
+                    }
                 }
             }
+
+            if (last < text.Length - 1)
+            {
+                var wordSize = MeasureStringInternal
+                (
+                    text.Slice(last, text.Length - last),
+                    settings,
+                    scale,
+                    position,
+                    0f,
+                    out lineHeight,
+                    ref mouseIsOver
+                );
+
+
+                for (int j = last; j < text.Length; j++)
+                {
+                    if (text[j] == '\r')
+                    {
+                        continue;
+                    }
+
+                    if (text[j] == '\n')
+                    {
+                        position.X = startPosition.X;
+                        position.Y += lineHeight;
+
+                        continue;
+                    }
+
+                    if (text[j] == ' ')
+                    {
+                        position.X += DEFAULT_SPACE_SIZE * scale;
+
+                        continue;
+                    }
+
+                    var texture = ReadChar(text[j], settings, out uv, out uint key);
+
+                    if (texture != null)
+                    {
+                        batcher.Draw
+                        (
+                            texture,
+                            position,
+                            uv,
+                            hue,
+                            0f,
+                            Vector2.Zero,
+                            scale,
+                            SpriteEffects.None,
+                            0f
+                        );
+
+                        position.X += uv.Width * scale;
+                    }
+                }
+
+                size.X += wordSize.X;
+                size.Y = Math.Max(wordSize.Y, size.Y);
+            }
+
 
             if (settings.Underline)
             {
@@ -256,84 +339,124 @@ namespace ClassicUO.Renderer
             return allowSelection && mouseIsOver;
         }
 
-        public Vector2 MeasureString(ReadOnlySpan<char> text, in FontSettings settings, float scale, float maxTextWidth = 0)
+        public Vector2 MeasureString
+        
+            (ReadOnlySpan<char> text,
+            in FontSettings settings,
+            float scale
+        )
         {
+            return MeasureString(text, settings, scale, 0, out _, Vector2.Zero, out _);
+        }
+
+        public Vector2 MeasureString
+        (
+            ReadOnlySpan<char> text,
+            in FontSettings settings, 
+            float scale,
+            float maxTextWidth
+        )
+        {
+            return MeasureString(text, settings, scale, maxTextWidth, out _, Vector2.Zero, out _);
+        }
+
+        public Vector2 MeasureString
+        (
+            ReadOnlySpan<char> text,
+            in FontSettings settings, 
+            float scale,
+            float maxTextWidth,
+            out float lineHeight,
+            Vector2 position,
+            out bool mouseIsOver
+        )
+        {
+            lineHeight = 0;
+            mouseIsOver = false;
+
+            Vector2 startPoint = position;
             Vector2 size = new Vector2();
+            Vector2 wordSize;
+            int last = 0;
 
-            Rectangle uv;
-            int returns = 0;
-            float maxWidth = 0;
-            float maxHeight = 0;
-
-            maxTextWidth *= scale;
-
-            for (int i = 0; i < text.Length; ++i)
+            if (maxTextWidth > 0.0f)
             {
-                if (text[i] == '\r')
+                for (int i = 0; i < text.Length; i++)
                 {
-                    continue;
-                }
+                    char c = text[i];
 
-                if (text[i] == '\n' || (maxTextWidth > 0.0f && size.X > maxTextWidth))
-                {
-                    ++returns;
-
-                    maxWidth = size.X;
-                    size.X = 0;
-
-                    if (text[i] == '\n')
+                    if (c == ' ')
                     {
-                        continue;
+                        wordSize = MeasureStringInternal
+                        (
+                            text.Slice(last, i - last),
+                            settings,
+                            scale,
+                            position,
+                            0,
+                            out lineHeight,
+                            ref mouseIsOver
+                        );
+
+                        if ((maxTextWidth > 0.0f && size.X + wordSize.X > maxTextWidth))
+                        {
+                            position.X = startPoint.X;
+                            position.Y += lineHeight;
+                            wordSize.Y += lineHeight;
+                        }
+                        else
+                        {
+                            position.X += wordSize.X;
+                            size.X += wordSize.X;
+                        }
+
+                        size.Y = Math.Max(wordSize.Y, size.Y);
+                        last = i + 1;
                     }
-                }
-
-                if (text[i] == ' ')
-                {
-                    size.X += DEFAULT_SPACE_SIZE * scale;
-
-                    continue;
-                }
-
-                if (ReadChar(text[i], settings, out uv, out _) != null)
-                {
-                    maxHeight = Math.Max(maxHeight, uv.Height);
-                    size.X += uv.Width * scale;
                 }
             }
 
-            size.X = Math.Max(size.X, maxWidth);
-            size.Y += (returns + 1) * maxHeight;
+            if (last < text.Length - 1)
+            {
+                wordSize = MeasureStringInternal
+                (
+                    text.Slice(last, text.Length - last - 0), 
+                    settings, 
+                    scale, 
+                    position,
+                    0f,
+                    out lineHeight,
+                    ref mouseIsOver
+                );
+
+                size.X += wordSize.X;
+                size.Y = Math.Max(wordSize.Y, size.Y);
+            }
 
             return size;
         }
-  
-        public Vector2 MeasureStringAdvanced
+
+       
+        private Vector2 MeasureStringInternal
         (
             ReadOnlySpan<char> text, 
             in FontSettings settings, 
             float scale, 
             Vector2 position,
-            out bool mouseIsOver,
-            out float maxHeight,
-            float maxTextWidth = 0
+            float maxTextWidth,
+            out float lineHeight,
+            ref bool mouseIsOver
         )
         {
             Vector2 size = new Vector2();
 
+            Rectangle uv;
             int returns = 0;
             float maxWidth = 0;
+            lineHeight = 0;
             maxTextWidth *= scale;
-
-            Rectangle uv;
-            _ = ReadChar('W', settings, out uv, out _);
-            maxHeight = uv.Height;
-            _ = ReadChar('g', settings, out uv, out _);
-            maxHeight = Math.Max(maxHeight, uv.Height);
-            maxHeight += 1;
-            maxHeight *= scale;
-
-            var mouseScreenPosition = Mouse.Position;
-            mouseIsOver = false;
+            
+            Point mouseScreenPosition = Mouse.Position;
 
             for (int i = 0; i < text.Length; ++i)
             {
@@ -363,27 +486,109 @@ namespace ClassicUO.Renderer
                 }
 
                 if (ReadChar(text[i], settings, out uv, out uint key) != null)
-                {                   
-                    maxHeight = Math.Max(maxHeight, uv.Height);
+                {
+                    lineHeight = Math.Max(lineHeight, uv.Height * scale);
 
                     if (!mouseIsOver)
                     {
-                        mouseIsOver = _picker.Get
-                        (
-                            key,
-                            (int)((mouseScreenPosition.X - (position.X + size.X)) / scale),
-                            (int)((mouseScreenPosition.Y - (position.Y + (maxHeight * returns))) / scale)
-                        );
+                        Point p = new Point();
+                        p.X = (int)((mouseScreenPosition.X - (position.X + size.X)) / scale);
+                        p.Y = (int)((mouseScreenPosition.Y - (position.Y + (lineHeight * returns))) / scale);
+
+                        mouseIsOver = Contains(key, p);
                     }
 
                     size.X += uv.Width * scale;
                 }
             }
 
-            size.X = Math.Max(size.X, maxWidth);
-            size.Y += (returns + 1) * maxHeight;
+            size.X = Math.Max(size.X, maxWidth) ;
+            size.Y = (returns + 1) * lineHeight;
 
             return size;
+        }
+
+        //private Vector2 MeasureStringAdvanced
+        //(
+        //    ReadOnlySpan<char> text, 
+        //    in FontSettings settings, 
+        //    float scale, 
+        //    Vector2 position,
+        //    out bool mouseIsOver,
+        //    out float maxHeight,
+        //    float maxTextWidth = 0
+        //)
+        //{
+        //    Vector2 size = new Vector2();
+
+        //    int returns = 0;
+        //    float maxWidth = 0;
+        //    maxTextWidth *= scale;
+        //    maxHeight = 0;
+
+        //    Rectangle uv;
+
+        //    var mouseScreenPosition = Mouse.Position;
+        //    mouseIsOver = false;
+
+        //    for (int i = 0; i < text.Length; ++i)
+        //    {
+        //        if (text[i] == '\r')
+        //        {
+        //            continue;
+        //        }
+
+        //        if (text[i] == '\n' || (maxTextWidth > 0.0f && size.X > maxTextWidth))
+        //        {
+        //            ++returns;
+
+        //            maxWidth = size.X;
+        //            size.X = 0;
+
+        //            if (text[i] == '\n')
+        //            {
+        //                continue;
+        //            }
+        //        }
+
+        //        if (text[i] == ' ')
+        //        {
+        //            size.X += DEFAULT_SPACE_SIZE * scale;
+
+        //            continue;
+        //        }
+
+        //        if (ReadChar(text[i], settings, out uv, out uint key) != null)
+        //        {                   
+        //            maxHeight = Math.Max(maxHeight, uv.Height * scale);
+
+        //            if (!mouseIsOver)
+        //            {
+        //                Point p = new Point();
+        //                p.X = (int)((mouseScreenPosition.X - (position.X + size.X)) / scale);
+        //                p.Y = (int)((mouseScreenPosition.Y - (position.Y + (maxHeight * returns))) / scale);
+                      
+        //                mouseIsOver = Contains(key, p);
+        //            }
+
+        //            size.X += uv.Width * scale;
+        //        }
+        //    }
+
+        //    size.X = Math.Max(size.X, maxWidth);
+        //    size.Y += (returns + 1) * maxHeight;
+
+        //    return size;
+        //}
+
+        private bool Contains(uint key, Point point)
+        {
+            return _picker.Get
+            (
+                key,
+                point.X,
+                point.Y
+            );
         }
 
         private unsafe Texture2D ReadChar(char c, in FontSettings settings, out Rectangle uv, out uint key)

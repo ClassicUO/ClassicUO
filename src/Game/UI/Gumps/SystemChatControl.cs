@@ -898,15 +898,15 @@ namespace ClassicUO.Game.UI.Gumps
                 _settings.IsUnicode = isunicode;
                 _settings.Border = true;
 
-                UOFontRenderer.Shared.MeasureStringAdvanced
+                UOFontRenderer.Shared.MeasureString
                 (
                     _text.AsSpan(),
                     _settings,
                     1f,
-                    Vector2.Zero,
-                    out _,
+                    320,
                     out _maxheight,
-                    320
+                    Vector2.Zero,
+                    out _
                 );
 
                 _createdTime = Time.Ticks + Constants.TIME_DISPLAY_SYSTEM_MESSAGE_TEXT;

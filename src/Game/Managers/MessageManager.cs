@@ -297,15 +297,15 @@ namespace ClassicUO.Game.Managers
             textObject.FontSettings.Border = true;
 
             textObject.MaxTextWidth = 200;
-            textObject.TextSize = UOFontRenderer.Shared.MeasureStringAdvanced
+            textObject.TextSize = UOFontRenderer.Shared.MeasureString
             (
                 textObject.Text.AsSpan(),
                 textObject.FontSettings,
                 1f,
-                Vector2.Zero,
-                out _, 
+                textObject.MaxTextWidth,
                 out var maxHeight,
-                textObject.MaxTextWidth
+                Vector2.Zero,
+                out _
             );
             textObject.Time = CalculateTimeToLive(Math.Min(1, (int) (textObject.TextSize.Y / maxHeight)));
 

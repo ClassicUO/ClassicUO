@@ -504,9 +504,9 @@ namespace ClassicUO
             UOFontRenderer.Shared.Draw
             (
                 _uoSpriteBatch,
-                $"New Engine ❤ 😁".AsSpan(),
+                $"New ABCDEFG\nXXXX".AsSpan(),
                 new Vector2(200, 100),
-                5f,
+                1f,
                 new FontSettings() 
                 { 
                     IsUnicode = true, 
@@ -518,7 +518,8 @@ namespace ClassicUO
                 },
                 new Vector3(0x44, 0, 0),
                 TEXT_ALIGN_TYPE.TS_LEFT,
-                true
+                true,
+                50
             );
             _uoSpriteBatch.End();
 
