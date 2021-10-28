@@ -504,13 +504,14 @@ namespace ClassicUO
             UOFontRenderer.Shared.Draw
             (
                 _uoSpriteBatch,
-                $"New ABCDEFG\nXXXX".AsSpan(),
+                "AA AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA".AsSpan(),
+                //$"You must wait to perform another action. You must wait to perform another action.".AsSpan(),
                 new Vector2(200, 100),
                 1f,
                 new FontSettings() 
                 { 
                     IsUnicode = true, 
-                    FontIndex = 0, 
+                    FontIndex = 3, 
                     Italic = false,
                     Bold = false, 
                     Border = true,
@@ -519,7 +520,7 @@ namespace ClassicUO
                 new Vector3(0x44, 0, 0),
                 TEXT_ALIGN_TYPE.TS_LEFT,
                 true,
-                50
+                280
             );
             _uoSpriteBatch.End();
 

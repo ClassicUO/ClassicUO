@@ -883,6 +883,8 @@ namespace ClassicUO.Game.UI.Gumps
 
         private class ChatLineTime
         {
+            const int MAX_LINE_WIDTH = 280;
+
             private uint _createdTime;
             private readonly string _text;
             private readonly ushort _hue;
@@ -898,16 +900,18 @@ namespace ClassicUO.Game.UI.Gumps
                 _settings.IsUnicode = isunicode;
                 _settings.Border = true;
 
-                UOFontRenderer.Shared.MeasureString
+                Vector2 size = UOFontRenderer.Shared.MeasureString
                 (
                     _text.AsSpan(),
                     _settings,
                     1f,
-                    320,
-                    out _maxheight,
+                    MAX_LINE_WIDTH,
+                    out _,
                     Vector2.Zero,
                     out _
                 );
+
+                _maxheight = size.Y;
 
                 _createdTime = Time.Ticks + Constants.TIME_DISPLAY_SYSTEM_MESSAGE_TEXT;
             }
@@ -947,7 +951,7 @@ namespace ClassicUO.Game.UI.Gumps
                     hueVec,
                     IO.Resources.TEXT_ALIGN_TYPE.TS_LEFT,
                     false,
-                    320
+                    MAX_LINE_WIDTH
                 );
 
                 return true;
