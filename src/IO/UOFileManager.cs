@@ -58,7 +58,7 @@ namespace ClassicUO.IO
             if (!PlatformHelper.IsWindows && !File.Exists(uoFilePath))
             {
                 FileInfo finfo = new FileInfo(uoFilePath);
-                var dir = finfo.DirectoryName ?? Settings.GlobalSettings.UltimaOnlineDirectory;
+                var dir = Path.GetFullPath(finfo.DirectoryName ?? Settings.GlobalSettings.UltimaOnlineDirectory);
                 var files = Directory.GetFiles(dir);
                 var matches = 0;
                 
