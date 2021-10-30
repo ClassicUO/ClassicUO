@@ -907,8 +907,7 @@ namespace ClassicUO.Game.UI.Gumps
                     1f,
                     MAX_LINE_WIDTH,
                     out _,
-                    Vector2.Zero,
-                    out _
+                    Vector2.Zero
                 );
 
                 _maxheight = size.Y;

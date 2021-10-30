@@ -2,6 +2,7 @@
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Utility;
+using ClassicUO.Utility.Logging;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
@@ -136,30 +137,6 @@ namespace ClassicUO.Renderer
 
             FixVectorColor(ref hue, settings);
 
-
-            //Vector2 textSizeInPixels = MeasureString
-            //(
-            //    text, 
-            //    settings,
-            //    scale,
-            //    maxTextWidth,
-            //    out _,
-            //    position, 
-            //    out _
-            //);
-
-
-            
-
-
-            //batcher.DrawRectangle(SolidColorTextureCache.GetTexture(Color.Red),
-            //    (int)(position.X),
-            //    (int)(position.Y),
-            //    (int)(textSizeInPixels.X),
-            //    (int)(textSizeInPixels.Y),
-            //    ref hue
-            //    );
-
             if (align == TEXT_ALIGN_TYPE.TS_CENTER)
             {
                 //position.X -= textSizeInPixels.X * 0.5f;
@@ -200,8 +177,7 @@ namespace ClassicUO.Renderer
                         scale,
                         position,
                         0,
-                        out lineHeight,
-                        ref mouseIsOver
+                        out lineHeight
                     );
 
                     if (allowSelection && mouseIsOver)
@@ -276,8 +252,7 @@ namespace ClassicUO.Renderer
                     scale,
                     position,
                     maxTextWidth,
-                    out lineHeight,
-                    ref mouseIsOver
+                    out lineHeight
                 );
 
                 if (allowSelection && mouseIsOver)
@@ -416,11 +391,21 @@ namespace ClassicUO.Renderer
 
       
 
-        private void PushFontDrawCmd(Texture2D texture, Vector2 pos, Rectangle uv, Vector3 hue, Color color, float scale)
+        private void PushFontDrawCmd
+        (
+            Texture2D texture, 
+            Vector2 pos, 
+            Rectangle uv, 
+            Vector3 hue, 
+            Color color,
+            float scale
+        )
         {
             if (_cmdCount >= _commands.Length)
             {
                 Array.Resize(ref _commands, _cmdCount * 2);
+
+                Log.Trace($"Font renderer ---> new font cmd length: {_commands.Length}");
             }
 
             ref var cmd = ref _commands[_cmdCount++];
@@ -439,12 +424,7 @@ namespace ClassicUO.Renderer
 
         private void FixFontCmdHue(int startIndex, int endIndex, ref Vector3 hue)
         {
-            if (startIndex < 0 || startIndex >= endIndex)
-            {
-                return;
-            }
-
-            if (endIndex > _cmdCount)
+            if (startIndex < 0 || startIndex >= endIndex || endIndex > _cmdCount)
             {
                 return;
             }
@@ -480,13 +460,13 @@ namespace ClassicUO.Renderer
         }
 
         public Vector2 MeasureString
-        
-            (ReadOnlySpan<char> text,
+        (
+            ReadOnlySpan<char> text,
             in FontSettings settings,
             float scale
         )
         {
-            return MeasureString(text, settings, scale, 0, out _, Vector2.Zero, out _);
+            return MeasureString(text, settings, scale, 0, out _, Vector2.Zero);
         }
 
         public Vector2 MeasureString
@@ -497,7 +477,7 @@ namespace ClassicUO.Renderer
             float maxTextWidth
         )
         {
-            return MeasureString(text, settings, scale, maxTextWidth, out _, Vector2.Zero, out _);
+            return MeasureString(text, settings, scale, maxTextWidth, out _, Vector2.Zero);
         }
 
         public Vector2 MeasureString
@@ -507,12 +487,10 @@ namespace ClassicUO.Renderer
             float scale,
             float maxTextWidth,
             out float lineHeight,
-            Vector2 position,
-            out bool mouseIsOver
+            Vector2 position
         )
         {
             lineHeight = 0;
-            mouseIsOver = false;
 
             Vector2 startPoint = position;
             Vector2 size = new Vector2();
@@ -537,8 +515,7 @@ namespace ClassicUO.Renderer
                         scale,
                         position,
                         0,
-                        out lineHeight,
-                        ref mouseIsOver
+                        out lineHeight
                     );
 
                     if (c == '\n' || (maxTextWidth > 0.0f && size.X + wordSize.X > maxTextWidth))
@@ -576,8 +553,7 @@ namespace ClassicUO.Renderer
                     scale, 
                     position,
                     maxTextWidth,
-                    out lineHeight,
-                    ref mouseIsOver
+                    out lineHeight
                 );
 
                 if ((maxTextWidth > 0.0f && size.X + wordSize.X > maxTextWidth))
@@ -604,20 +580,16 @@ namespace ClassicUO.Renderer
             float scale, 
             Vector2 position,
             float maxTextWidth,
-            out float lineHeight,
-            ref bool mouseIsOver
+            out float lineHeight
         )
         {
             Vector2 size = new Vector2();
-
             Rectangle uv;
             int returns = 0;
             float maxWidth = 0;
             lineHeight = 0;
             maxTextWidth *= scale;
             Vector2 startPoint = position;
-
-            Point mouseScreenPosition = Mouse.Position;
 
             for (int i = 0; i < text.Length; ++i)
             {
@@ -653,21 +625,6 @@ namespace ClassicUO.Renderer
                 if (ReadChar(text[i], settings, out uv, out uint key) != null)
                 {
                     lineHeight = Math.Max(lineHeight, uv.Height * scale);
-
-                    //if (!mouseIsOver)
-                    //{
-                    //    Point p = new Point();
-                    //    p.X = (int)((mouseScreenPosition.X - (position.X + size.X)) / scale);
-                    //    p.Y = (int)((mouseScreenPosition.Y - (position.Y + (lineHeight * returns))) / scale);
-
-                    //    mouseIsOver = Contains(key, p);
-
-                    //    if (mouseIsOver)
-                    //    {
-
-                    //    }
-                    //}
-
                     size.X += uv.Width * scale;
                 }
             }

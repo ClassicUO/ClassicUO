@@ -304,8 +304,7 @@ namespace ClassicUO.Game.Managers
                 1f,
                 textObject.MaxTextWidth,
                 out var maxHeight,
-                Vector2.Zero,
-                out _
+                Vector2.Zero
             );
             textObject.Time = CalculateTimeToLive(Math.Min(1, (int) (textObject.TextSize.Y / maxHeight)));
 
