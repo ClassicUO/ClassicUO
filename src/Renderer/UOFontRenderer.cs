@@ -510,6 +510,7 @@ namespace ClassicUO.Renderer
 
             Vector2 startPoint = position;
             Vector2 size = new Vector2();
+            Vector2 fullSize = new Vector2();
             Vector2 wordSize;
             int last = 0;
             int returns = 0;
@@ -557,6 +558,9 @@ namespace ClassicUO.Renderer
 
                     size.Y = Math.Max(wordSize.Y, size.Y);
                     last = i + 1;
+
+                    fullSize.X = Math.Max(size.X, fullSize.X);
+                    fullSize.Y = Math.Max(size.Y, fullSize.Y);
                 }
             }
 
@@ -583,9 +587,12 @@ namespace ClassicUO.Renderer
 
                 size.X = Math.Max(wordSize.X, size.X);
                 size.Y = Math.Max(wordSize.Y, size.Y);
+
+                fullSize.X = Math.Max(size.X, fullSize.X);
+                fullSize.Y = Math.Max(size.Y, fullSize.Y);
             }
 
-            return size;
+            return fullSize;
         }
 
        
