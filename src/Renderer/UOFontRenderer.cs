@@ -259,7 +259,7 @@ namespace ClassicUO.Renderer
                 }
             }
 
-            if (last < text.Length - 1)
+            if (last < text.Length)
             {
                 var wordSize = MeasureStringInternal
                 (
@@ -506,14 +506,15 @@ namespace ClassicUO.Renderer
             Vector2 position
         )
         {
-            float lineHeight = GetFontHeight(settings) * scale;
+            maxTextWidth *= scale;
 
-            Vector2 startPoint = position;
+            Vector2 startPosition = position;
+            Rectangle uv;
             Vector2 size = new Vector2();
             Vector2 fullSize = new Vector2();
-            Vector2 wordSize;
+
             int last = 0;
-            int returns = 0;
+            float lineHeight = GetFontHeight(settings) * scale;
 
             for (int i = 0; i < text.Length; i++)
             {
@@ -526,9 +527,10 @@ namespace ClassicUO.Renderer
 
                 if (c == ' ' || c == '\n')
                 {
-                    wordSize = MeasureStringInternal
+                    var slice = text.Slice(last, i - last);
+                    var wordSize = MeasureStringInternal
                     (
-                        text.Slice(last, i - last),
+                        slice,
                         settings,
                         scale,
                         position,
@@ -537,23 +539,47 @@ namespace ClassicUO.Renderer
 
                     if (c == '\n' || (maxTextWidth > 0.0f && size.X + wordSize.X > maxTextWidth))
                     {
-                        ++returns;
                         size.X = 0;
-                        size.Y += lineHeight;
-                        position.X = startPoint.X;
+                        position.X = startPosition.X;
                         position.Y += lineHeight;
                         wordSize.Y += lineHeight;
                     }
-                    else
+
+                    for (int j = last; j <= i; ++j)
                     {
-                        if (c == ' ')
+                        if (text[j] == '\r')
+                        {
+                            continue;
+                        }
+
+                        if (text[j] == ' ')
                         {
                             position.X += DEFAULT_SPACE_SIZE * scale;
                             size.X += DEFAULT_SPACE_SIZE * scale;
+
+                            continue;
                         }
 
-                        position.X += wordSize.X;
-                        size.X += wordSize.X;
+                        if (text[j] == '\n' || (maxTextWidth > 0.0f && size.X > maxTextWidth))
+                        {
+                            position.X = startPosition.X;
+                            position.Y += lineHeight;
+                            size.X = 0;
+                            size.Y += lineHeight;
+
+                            if (text[j] == '\n')
+                            {
+                                continue;
+                            }
+                        }
+
+                        var texture = ReadChar(text[j], settings, out uv, out uint key);
+
+                        if (texture != null)
+                        {
+                            position.X += uv.Width * scale;
+                            size.X += uv.Width * scale;
+                        }
                     }
 
                     size.Y = Math.Max(wordSize.Y, size.Y);
@@ -564,32 +590,65 @@ namespace ClassicUO.Renderer
                 }
             }
 
-            if (last < text.Length - 1)
+            if (last < text.Length)
             {
-                var slice = text.Slice(last, text.Length - last);
-                wordSize = MeasureStringInternal
+                var wordSize = MeasureStringInternal
                 (
-                    slice, 
-                    settings, 
-                    scale, 
+                    text.Slice(last, text.Length - last),
+                    settings,
+                    scale,
                     position,
                     maxTextWidth
                 );
 
-                if ((maxTextWidth > 0.0f && size.X + wordSize.X > maxTextWidth))
+                if (maxTextWidth > 0.0f && wordSize.X + size.X > maxTextWidth)
                 {
+                    position.X = startPosition.X;
+                    position.Y += lineHeight;
                     size.X = 0;
                     size.Y += lineHeight;
-                    position.X = startPoint.X;
-                    position.Y += lineHeight;
-                    wordSize.Y += lineHeight;
                 }
 
-                size.X = Math.Max(wordSize.X, size.X);
-                size.Y = Math.Max(wordSize.Y, size.Y);
+                for (int j = last; j < text.Length; j++)
+                {
+                    if (text[j] == '\r')
+                    {
+                        continue;
+                    }
 
-                fullSize.X = Math.Max(size.X, fullSize.X);
-                fullSize.Y = Math.Max(size.Y, fullSize.Y);
+                    if (text[j] == ' ')
+                    {
+                        position.X += DEFAULT_SPACE_SIZE * scale;
+                        size.X += DEFAULT_SPACE_SIZE * scale;
+
+                        continue;
+                    }
+
+                    if (text[j] == '\n' || (maxTextWidth > 0.0f && size.X > maxTextWidth))
+                    {
+                        position.X = startPosition.X;
+                        position.Y += lineHeight;
+                        size.X = 0;
+                        size.Y += lineHeight;
+
+                        if (text[j] == '\n')
+                        {
+                            continue;
+                        }
+                    }
+
+                    var texture = ReadChar(text[j], settings, out uv, out uint key);
+
+                    if (texture != null)
+                    {
+                        position.X += uv.Width * scale;
+                        size.X += uv.Width * scale;
+                        size.Y = Math.Max(uv.Height, size.Y);
+
+                        fullSize.X = Math.Max(size.X, fullSize.X);
+                        fullSize.Y = Math.Max(size.Y, fullSize.Y);
+                    }
+                }
             }
 
             return fullSize;
@@ -607,7 +666,6 @@ namespace ClassicUO.Renderer
         {
             Vector2 size = new Vector2();
             Rectangle uv;
-            int returns = 0;
             float maxWidth = 0;
             float lineHeight = GetFontHeight(settings) * scale;
             maxTextWidth *= scale;
@@ -629,8 +687,6 @@ namespace ClassicUO.Renderer
 
                 if (text[i] == '\n' || (maxTextWidth > 0.0f && size.X > maxTextWidth))
                 {
-                    ++returns;
-
                     maxWidth = size.X;
                     size.X = 0;
                     size.Y += lineHeight;
@@ -652,7 +708,7 @@ namespace ClassicUO.Renderer
             }
 
             size.X = Math.Max(size.X, maxWidth);
-            size.Y = (returns + 1) * lineHeight;
+            size.Y = Math.Max(size.Y, lineHeight);
 
             return size;
         }
