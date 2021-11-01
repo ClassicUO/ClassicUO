@@ -150,12 +150,12 @@ namespace ClassicUO.Renderer
 
             Vector2 startPosition = position;
             Rectangle uv;
-            Vector2 size = new Vector2();
-            Vector2 fullSize = new Vector2();
+            float lineHeight = GetFontHeight(settings) * scale;
+            Vector2 size = new Vector2(0, lineHeight);
+            Vector2 fullSize = size;
             Point mousePosition = Mouse.Position;
 
             int last = 0;
-            float lineHeight = GetFontHeight(settings) * scale;
             bool mouseIsOver = false;
 
             for (int i = 0; i < text.Length; i++)
@@ -182,6 +182,7 @@ namespace ClassicUO.Renderer
                     if (c == '\n' || (maxTextWidth > 0.0f && size.X + wordSize.X > maxTextWidth))
                     {
                         size.X = 0;
+                        size.Y += lineHeight;
                         position.X = startPosition.X;
                         position.Y += lineHeight;
                         wordSize.Y += lineHeight;
@@ -510,11 +511,11 @@ namespace ClassicUO.Renderer
 
             Vector2 startPosition = position;
             Rectangle uv;
-            Vector2 size = new Vector2();
-            Vector2 fullSize = new Vector2();
+            float lineHeight = GetFontHeight(settings) * scale;
+            Vector2 size = new Vector2(0, lineHeight);
+            Vector2 fullSize = size;
 
             int last = 0;
-            float lineHeight = GetFontHeight(settings) * scale;
 
             for (int i = 0; i < text.Length; i++)
             {
@@ -540,6 +541,7 @@ namespace ClassicUO.Renderer
                     if (c == '\n' || (maxTextWidth > 0.0f && size.X + wordSize.X > maxTextWidth))
                     {
                         size.X = 0;
+                        size.Y += lineHeight;
                         position.X = startPosition.X;
                         position.Y += lineHeight;
                         wordSize.Y += lineHeight;
