@@ -883,7 +883,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         private class ChatLineTime
         {
-            const int MAX_LINE_WIDTH = 280;
+            const int MAX_LINE_WIDTH = 320;
 
             private uint _createdTime;
             private readonly string _text;
@@ -906,7 +906,6 @@ namespace ClassicUO.Game.UI.Gumps
                     _settings,
                     1f,
                     MAX_LINE_WIDTH,
-                    out _,
                     Vector2.Zero
                 );
 

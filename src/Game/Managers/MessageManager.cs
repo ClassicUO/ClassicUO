@@ -303,10 +303,12 @@ namespace ClassicUO.Game.Managers
                 textObject.FontSettings,
                 1f,
                 textObject.MaxTextWidth,
-                out var maxHeight,
                 Vector2.Zero
             );
-            textObject.Time = CalculateTimeToLive(Math.Min(1, (int) (textObject.TextSize.Y / maxHeight)));
+
+            float fontHeight = UOFontRenderer.Shared.GetFontHeight(textObject.FontSettings);
+
+            textObject.Time = CalculateTimeToLive(Math.Min(1, (int) (textObject.TextSize.Y / fontHeight)));
 
             return textObject;
         }

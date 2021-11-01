@@ -504,7 +504,7 @@ namespace ClassicUO
             UOFontRenderer.Shared.Draw
             (
                 _uoSpriteBatch,
-                "AA AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA".AsSpan(),
+                "awdwa awd awd awdawd aw daw daw ".AsSpan(),
                 //$"You must wait to perform another action. You must wait to perform another action.".AsSpan(),
                 new Vector2(200, 100),
                 1f,

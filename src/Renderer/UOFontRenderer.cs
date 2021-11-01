@@ -155,7 +155,7 @@ namespace ClassicUO.Renderer
             Point mousePosition = Mouse.Position;
 
             int last = 0;
-            float lineHeight = 0;
+            float lineHeight = GetFontHeight(settings) * scale;
             bool mouseIsOver = false;
 
             for (int i = 0; i < text.Length; i++)
@@ -176,9 +176,16 @@ namespace ClassicUO.Renderer
                         settings,
                         scale,
                         position,
-                        0,
-                        out lineHeight
+                        0
                     );
+
+                    if (c == '\n' || (maxTextWidth > 0.0f && size.X + wordSize.X > maxTextWidth))
+                    {
+                        size.X = 0;
+                        position.X = startPosition.X;
+                        position.Y += lineHeight;
+                        wordSize.Y += lineHeight;
+                    }
 
                     if (allowSelection && mouseIsOver)
                     {
@@ -188,8 +195,34 @@ namespace ClassicUO.Renderer
                         FixFontCmdHue(0, _cmdCount, ref hue);
                     }
 
-                    for (int j = last; j < i; ++j)
+                    for (int j = last; j <= i; ++j)
                     {
+                        if (text[j] == '\r')
+                        {
+                            continue;
+                        }
+
+                        if (text[j] == ' ')
+                        {
+                            position.X += DEFAULT_SPACE_SIZE * scale;
+                            size.X += DEFAULT_SPACE_SIZE * scale;
+
+                            continue;
+                        }
+
+                        if (text[j] == '\n' || (maxTextWidth > 0.0f && size.X > maxTextWidth))
+                        {
+                            position.X = startPosition.X;
+                            position.Y += lineHeight;
+                            size.X = 0;
+                            size.Y += lineHeight;
+
+                            if (text[j] == '\n')
+                            {
+                                continue;
+                            }
+                        }
+
                         var texture = ReadChar(text[j], settings, out uv, out uint key);
 
                         if (texture != null)
@@ -197,8 +230,8 @@ namespace ClassicUO.Renderer
                             if (allowSelection && !mouseIsOver)
                             {
                                 Point p = new Point();
-                                p.X = (int)((mousePosition.X - (position.X + size.X)) / scale);
-                                p.Y = (int)((mousePosition.Y - (position.Y + size.Y)) / scale);
+                                p.X = (int)((mousePosition.X - position.X) / scale);
+                                p.Y = (int)((mousePosition.Y - position.Y) / scale);
 
                                 mouseIsOver = Contains(key, p);
 
@@ -214,25 +247,8 @@ namespace ClassicUO.Renderer
                             PushFontDrawCmd(texture, position, uv, hue, Color.White, scale);
 
                             position.X += uv.Width * scale;
+                            size.X += uv.Width * scale;
                         }
-                    }
-
-                    if (c == '\n' || (maxTextWidth > 0.0f && size.X + wordSize.X > maxTextWidth))
-                    {
-                        size.X = 0;
-                        position.X = startPosition.X;
-                        position.Y += lineHeight;
-                        wordSize.Y += lineHeight;
-                    }
-                    else
-                    {
-                        if (c == ' ')
-                        {                           
-                            position.X += DEFAULT_SPACE_SIZE * scale;
-                            size.X += DEFAULT_SPACE_SIZE * scale;
-                        }
-
-                        size.X += wordSize.X;
                     }
 
                     size.Y = Math.Max(wordSize.Y, size.Y);
@@ -251,8 +267,7 @@ namespace ClassicUO.Renderer
                     settings,
                     scale,
                     position,
-                    maxTextWidth,
-                    out lineHeight
+                    maxTextWidth
                 );
 
                 if (allowSelection && mouseIsOver)
@@ -306,8 +321,8 @@ namespace ClassicUO.Renderer
                         if (allowSelection && !mouseIsOver)
                         {
                             Point p = new Point();
-                            p.X = (int)((mousePosition.X - (position.X)) / scale);
-                            p.Y = (int)((mousePosition.Y - (position.Y)) / scale);
+                            p.X = (int)((mousePosition.X - position.X) / scale);
+                            p.Y = (int)((mousePosition.Y - position.Y) / scale);
 
                             mouseIsOver = Contains(key, p);
 
@@ -331,6 +346,8 @@ namespace ClassicUO.Renderer
                     }
                 }
             }
+
+            batcher.DrawRectangle(SolidColorTextureCache.GetTexture(Color.Red), (int)startPosition.X, (int)startPosition.Y, (int) fullSize.X, (int)fullSize.Y, ref hue);
 
             RenderDrawCommands(batcher);
 
@@ -466,7 +483,7 @@ namespace ClassicUO.Renderer
             float scale
         )
         {
-            return MeasureString(text, settings, scale, 0, out _, Vector2.Zero);
+            return MeasureString(text, settings, scale, 0, Vector2.Zero);
         }
 
         public Vector2 MeasureString
@@ -477,7 +494,7 @@ namespace ClassicUO.Renderer
             float maxTextWidth
         )
         {
-            return MeasureString(text, settings, scale, maxTextWidth, out _, Vector2.Zero);
+            return MeasureString(text, settings, scale, maxTextWidth, Vector2.Zero);
         }
 
         public Vector2 MeasureString
@@ -486,16 +503,16 @@ namespace ClassicUO.Renderer
             in FontSettings settings, 
             float scale,
             float maxTextWidth,
-            out float lineHeight,
             Vector2 position
         )
         {
-            lineHeight = 0;
+            float lineHeight = GetFontHeight(settings) * scale;
 
             Vector2 startPoint = position;
             Vector2 size = new Vector2();
             Vector2 wordSize;
             int last = 0;
+            int returns = 0;
 
             for (int i = 0; i < text.Length; i++)
             {
@@ -514,12 +531,12 @@ namespace ClassicUO.Renderer
                         settings,
                         scale,
                         position,
-                        0,
-                        out lineHeight
+                        0
                     );
 
                     if (c == '\n' || (maxTextWidth > 0.0f && size.X + wordSize.X > maxTextWidth))
                     {
+                        ++returns;
                         size.X = 0;
                         size.Y += lineHeight;
                         position.X = startPoint.X;
@@ -552,8 +569,7 @@ namespace ClassicUO.Renderer
                     settings, 
                     scale, 
                     position,
-                    maxTextWidth,
-                    out lineHeight
+                    maxTextWidth
                 );
 
                 if ((maxTextWidth > 0.0f && size.X + wordSize.X > maxTextWidth))
@@ -579,15 +595,14 @@ namespace ClassicUO.Renderer
             in FontSettings settings, 
             float scale, 
             Vector2 position,
-            float maxTextWidth,
-            out float lineHeight
+            float maxTextWidth
         )
         {
             Vector2 size = new Vector2();
             Rectangle uv;
             int returns = 0;
             float maxWidth = 0;
-            lineHeight = 0;
+            float lineHeight = GetFontHeight(settings) * scale;
             maxTextWidth *= scale;
             Vector2 startPoint = position;
 
@@ -633,6 +648,23 @@ namespace ClassicUO.Renderer
             size.Y = (returns + 1) * lineHeight;
 
             return size;
+        }
+
+        public float GetFontHeight(in FontSettings settings)
+        {
+            float height = 14;
+
+            if (ReadChar('W', settings, out var uv, out _) != null)
+            {
+                height = Math.Max(height, uv.Height);
+            }
+
+            if (ReadChar('g', settings, out uv, out _) != null)
+            {
+                height = Math.Max(height, uv.Height);
+            }
+          
+            return height;
         }
 
        
