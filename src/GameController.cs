@@ -518,7 +518,6 @@ namespace ClassicUO
                     Underline = true,
                 },
                 new Vector3(0x44, 0, 0),
-                TEXT_ALIGN_TYPE.TS_LEFT,
                 true,
                 280
             );

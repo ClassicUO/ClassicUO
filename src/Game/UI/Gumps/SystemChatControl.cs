@@ -947,7 +947,6 @@ namespace ClassicUO.Game.UI.Gumps
                     1f,
                     _settings,
                     hueVec,
-                    IO.Resources.TEXT_ALIGN_TYPE.TS_LEFT,
                     false,
                     MAX_LINE_WIDTH
                 );

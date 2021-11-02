@@ -115,7 +115,6 @@ namespace ClassicUO.Game.Managers
                     1f,
                     o.FontSettings,
                     hueVec,
-                    IO.Resources.TEXT_ALIGN_TYPE.TS_LEFT,
                     o.ObjectTextType == Data.TextType.OBJECT,
                     o.MaxTextWidth
                 );

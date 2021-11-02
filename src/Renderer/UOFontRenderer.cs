@@ -94,13 +94,12 @@ namespace ClassicUO.Renderer
             float scale,
             in FontSettings settings,
             ushort hue,
-            TEXT_ALIGN_TYPE align = TEXT_ALIGN_TYPE.TS_LEFT,
             bool allowSelection = false
         )
         {
             Vector3 hueVec = new Vector3();
             ShaderHueTranslator.GetHueVector(ref hueVec, hue);
-            return Draw(batcher, text, position, scale, settings, hueVec, align, allowSelection);
+            return Draw(batcher, text, position, scale, settings, hueVec, allowSelection);
         }
 
         public bool Draw
@@ -111,14 +110,13 @@ namespace ClassicUO.Renderer
            float scale,
            in FontSettings settings,
            Color color,
-           TEXT_ALIGN_TYPE align = TEXT_ALIGN_TYPE.TS_LEFT,
            bool allowSelection = false
         )
         {
             // TODO: shaders should support RGBA without using the UO colors
 
             Vector3 hueVec = new Vector3(0, -1, 0);
-            return Draw(batcher, text, position, scale, settings, hueVec, align, allowSelection);
+            return Draw(batcher, text, position, scale, settings, hueVec, allowSelection);
         }
 
         public bool Draw
@@ -129,22 +127,12 @@ namespace ClassicUO.Renderer
             float scale, 
             in FontSettings settings,
             Vector3 hue,
-            TEXT_ALIGN_TYPE align = TEXT_ALIGN_TYPE.TS_LEFT,
             bool allowSelection = false,
             float maxTextWidth = 0
         )
         {
 
             FixVectorColor(ref hue, settings);
-
-            if (align == TEXT_ALIGN_TYPE.TS_CENTER)
-            {
-                //position.X -= textSizeInPixels.X * 0.5f;
-            }
-            else if (align == TEXT_ALIGN_TYPE.TS_RIGHT)
-            {
-
-            }
 
             maxTextWidth *= scale;
 

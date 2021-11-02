@@ -1291,17 +1291,25 @@ namespace ClassicUO.Game.Scenes
                             Border = true
                         };
 
-                        ushort hue = HuesHelper.Color32To16(Color.White.PackedValue);
+                        var span = ResGeneral.YouAreDead.AsSpan();
+
+                        Vector2 size = UOFontRenderer.Shared.MeasureString
+                        (
+                            span,
+                            settings,
+                            1f
+                        );
+
+                        Vector2 position = new Vector2(x + (width * 0.5f) - (size.X * 0.5f), y + (height * 0.5f));
 
                         UOFontRenderer.Shared.Draw
                         (
                             batcher,
-                            ResGeneral.YouAreDead.AsSpan(),
-                            new Vector2(x + (width * 0.5f), y + (height * 0.5f)),
+                            span,
+                            position,
                             1f,
                             settings,
                             Color.Red,
-                            TEXT_ALIGN_TYPE.TS_CENTER,
                             false
                         );
 

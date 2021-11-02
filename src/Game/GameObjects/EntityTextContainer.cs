@@ -269,7 +269,6 @@ namespace ClassicUO.Game.GameObjects
                     1f,
                     item.FontSettings,
                     hueVec,
-                    TEXT_ALIGN_TYPE.TS_LEFT,
                     false,
                     item.MaxTextWidth
                 );
