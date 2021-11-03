@@ -731,7 +731,7 @@ namespace ClassicUO.Game.Scenes
                         UpdateObjectHandles(item, useObjectHandles);
                     }
 
-                    if (!IsFoliageVisibleAtSeason(ref itemData, World.Season))
+                    if (!item.IsMulti && !IsFoliageVisibleAtSeason(ref itemData, World.Season))
                     {
                         continue;
                     }
