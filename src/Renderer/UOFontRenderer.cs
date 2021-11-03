@@ -21,7 +21,6 @@ namespace ClassicUO.Renderer
         public byte FontIndex;
         public bool IsUnicode;
         public bool IsHtml;
-        public int CharsCount;
         public bool Bold;
         public bool Italic;
         public bool Underline;
@@ -131,210 +130,42 @@ namespace ClassicUO.Renderer
             float maxTextWidth = 0
         )
         {
-
             FixVectorColor(ref hue, settings);
 
-            maxTextWidth *= scale;
+            if (maxTextWidth <= 0.0f)
+            {
+                maxTextWidth = MeasureStringInternal(text, settings, scale, position, 0f).X;
+            }
+            else
+            {
+                maxTextWidth *= scale;
+            }         
 
             Vector2 startPosition = position;
-            Rectangle uv;
             float lineHeight = GetFontHeight(settings) * scale;
             Vector2 size = new Vector2(0, lineHeight);
             Vector2 fullSize = size;
             Point mousePosition = Mouse.Position;
 
-            int last = 0;
             bool mouseIsOver = false;
 
-            for (int i = 0; i < text.Length; i++)
-            {
-                char c = text[i];
-
-                if (c == '\r')
-                {
-                    continue;
-                }
-
-                if (c == ' ' || c == '\n')
-                {
-                    var slice = text.Slice(last, i - last);
-                    var wordSize = MeasureStringInternal
-                    (
-                        slice,
-                        settings,
-                        scale,
-                        position,
-                        0
-                    );
-
-                    if (c == '\n' || (maxTextWidth > 0.0f && size.X + wordSize.X > maxTextWidth))
-                    {
-                        size.X = 0;
-                        size.Y += lineHeight;
-                        position.X = startPosition.X;
-                        position.Y += lineHeight;
-                        wordSize.Y += lineHeight;
-                    }
-
-                    if (allowSelection && mouseIsOver)
-                    {
-                        hue.X = 0x35;
-
-                        FixVectorColor(ref hue, settings);
-                        FixFontCmdHue(0, _cmdCount, ref hue);
-                    }
-
-                    for (int j = last; j <= i; ++j)
-                    {
-                        if (text[j] == '\r')
-                        {
-                            continue;
-                        }
-
-                        if (text[j] == ' ')
-                        {
-                            position.X += DEFAULT_SPACE_SIZE * scale;
-                            size.X += DEFAULT_SPACE_SIZE * scale;
-
-                            continue;
-                        }
-
-                        if (text[j] == '\n' || (maxTextWidth > 0.0f && size.X > maxTextWidth))
-                        {
-                            position.X = startPosition.X;
-                            position.Y += lineHeight;
-                            size.X = 0;
-                            size.Y += lineHeight;
-
-                            if (text[j] == '\n')
-                            {
-                                continue;
-                            }
-                        }
-
-                        var texture = ReadChar(text[j], settings, out uv, out uint key);
-
-                        if (texture != null)
-                        {
-                            if (allowSelection && !mouseIsOver)
-                            {
-                                Point p = new Point();
-                                p.X = (int)((mousePosition.X - position.X) / scale);
-                                p.Y = (int)((mousePosition.Y - position.Y) / scale);
-
-                                mouseIsOver = Contains(key, p);
-
-                                if (mouseIsOver)
-                                {
-                                    hue.X = 0x35;
-
-                                    FixVectorColor(ref hue, settings);
-                                    FixFontCmdHue(0, _cmdCount, ref hue);
-                                }
-                            }
-
-                            PushFontDrawCmd(texture, position, uv, hue, Color.White, scale);
-
-                            position.X += uv.Width * scale;
-                            size.X += uv.Width * scale;
-                        }
-                    }
-
-                    size.Y = Math.Max(wordSize.Y, size.Y);
-                    last = i + 1;
-
-                    fullSize.X = Math.Max(size.X, fullSize.X);
-                    fullSize.Y = Math.Max(size.Y, fullSize.Y);
-                }
-            }
-
-            if (last < text.Length)
-            {
-                var wordSize = MeasureStringInternal
-                (
-                    text.Slice(last, text.Length - last),
-                    settings,
-                    scale,
-                    position,
-                    maxTextWidth
-                );
-
-                if (allowSelection && mouseIsOver)
-                {
-                    hue.X = 0x35;
-
-                    FixVectorColor(ref hue, settings);
-                    FixFontCmdHue(0, _cmdCount, ref hue);
-                }
-
-                if (maxTextWidth > 0.0f && wordSize.X + size.X > maxTextWidth)
-                {
-                    position.X = startPosition.X;
-                    position.Y += lineHeight;
-                    size.X = 0;
-                    size.Y += lineHeight;             
-                }
-
-                for (int j = last; j < text.Length; j++)
-                {
-                    if (text[j] == '\r')
-                    {
-                        continue;
-                    }
-
-                    if (text[j] == ' ')
-                    {
-                        position.X += DEFAULT_SPACE_SIZE * scale;
-                        size.X += DEFAULT_SPACE_SIZE * scale;
-
-                        continue;
-                    }
-
-                    if (text[j] == '\n' || (maxTextWidth > 0.0f && size.X > maxTextWidth))
-                    {
-                        position.X = startPosition.X;
-                        position.Y += lineHeight;
-                        size.X = 0;
-                        size.Y += lineHeight;
-
-                        if (text[j] == '\n')
-                        {
-                            continue;
-                        }                      
-                    }
-
-                    var texture = ReadChar(text[j], settings, out uv, out uint key);
-
-                    if (texture != null)
-                    {
-                        if (allowSelection && !mouseIsOver)
-                        {
-                            Point p = new Point();
-                            p.X = (int)((mousePosition.X - position.X) / scale);
-                            p.Y = (int)((mousePosition.Y - position.Y) / scale);
-
-                            mouseIsOver = Contains(key, p);
-
-                            if (mouseIsOver)
-                            {
-                                hue.X = 0x35;
-
-                                FixVectorColor(ref hue, settings);
-                                FixFontCmdHue(0, _cmdCount, ref hue);
-                            }
-                        }
-
-                        PushFontDrawCmd(texture, position, uv, hue, Color.White, scale);
-
-                        position.X += uv.Width * scale;
-                        size.X += uv.Width * scale;
-                        size.Y = Math.Max(uv.Height, size.Y);
-
-                        fullSize.X = Math.Max(size.X, fullSize.X);
-                        fullSize.Y = Math.Max(size.Y, fullSize.Y);
-                    }
-                }
-            }
+            InternalDraw
+            (
+                text,
+                settings,
+                ref position,
+                ref size,
+                ref fullSize,
+                ref hue,
+                mousePosition,
+                allowSelection,
+                ref mouseIsOver,
+                startPosition,
+                maxTextWidth,
+                lineHeight,
+                scale,
+                true
+            );
 
             batcher.DrawRectangle(SolidColorTextureCache.GetTexture(Color.Red), (int)startPosition.X, (int)startPosition.Y, (int) fullSize.X, (int)fullSize.Y, ref hue);
 
@@ -394,17 +225,200 @@ namespace ClassicUO.Renderer
             return allowSelection && mouseIsOver;
         }
 
+     
+        private void InternalDraw
+        (
+            ReadOnlySpan<char> text,
+            in FontSettings settings,
+            ref Vector2 position,
+            ref Vector2 size, 
+            ref Vector2 fullSize,
+            ref Vector3 hue,
+            Point mousePosition,
+            bool allowSelection,
+            ref bool mouseIsOver,
+            Vector2 startPosition,
+            float maxTextWidth, 
+            float lineHeight,
+            float scale,
+            bool draw
+        )
+        {
+            ResetFontDrawCmd();
 
+            Color color = Color.Red;
+
+            int last = 0;
+            for (int i = 0; i < text.Length; ++i)
+            {
+                char c = text[i];
+
+                if (c == '\r')
+                {
+                    continue;
+                }
+
+                if (c == ' ' || c == '\n')
+                {
+                    for (int j = last; j < i; ++j)
+                    {
+                        if (text[j] == '\r' || text[j] == '\n' || text[j] == ' ')
+                        {
+                            continue;
+                        }
+
+                        var texture = ReadChar(text[j], settings, out var uv, out var key);
+
+                        if (texture != null)
+                        {
+                            PushFontDrawCmd(CommandType.Char, texture, position, uv, hue, color, scale, key);
+
+                            position.X += uv.Width * scale;
+                        }
+                    }
+
+                    if (c == ' ')
+                    {
+                        PushFontDrawCmd(CommandType.Space, null, position, Rectangle.Empty, hue, color, scale, 0);
+
+                        position.X += DEFAULT_SPACE_SIZE * scale;
+                    }
+                    else if(c == '\n')
+                    {
+                        PushFontDrawCmd(CommandType.NewLine, null, position, Rectangle.Empty, hue, color, scale, 0);
+
+                        //position.Y += lineHeight;
+                    }
+                   
+                    last = i + 1;
+                }
+            }
+
+            if (last < text.Length)
+            {
+                for (int i = last; i < text.Length; ++i)
+                {
+                    if (text[i] == '\r')
+                    {
+                        continue;
+                    }
+
+                    if (text[i] == ' ')
+                    {
+                        PushFontDrawCmd(CommandType.Space, null, position, Rectangle.Empty, hue, color, scale, 0);
+
+                        position.X += DEFAULT_SPACE_SIZE * scale;
+
+                        continue;
+                    }
+
+                    if (text[i] == '\n')
+                    {
+                        PushFontDrawCmd(CommandType.NewLine, null, position, Rectangle.Empty, hue, color, scale, 0);
+
+                        //position.Y += lineHeight;
+
+                        continue;
+                    }
+
+                    var texture = ReadChar(text[i], settings, out var uv, out var key);
+
+                    if (texture != null)
+                    {
+                        PushFontDrawCmd(CommandType.Char, texture, position, uv, hue, color, scale, key);
+
+                        position.X += uv.Width * scale;
+                    }
+                }
+            }
+
+            position = startPosition;
+
+            Vector2 wordSize = new Vector2(0, lineHeight);
+            float offsetY = 0.0f;
+
+            for (int i = 0; i < _cmdCount; ++i)
+            {
+                ref var cmd = ref _commands[i];
+
+                float value = 0;
+
+                switch (cmd.Type)
+                {
+                    case CommandType.Char:
+
+                        value = cmd.UV.Width * scale;
+
+                        if (draw && allowSelection && !mouseIsOver)
+                        {
+                            Point p = new Point();
+                            p.X = (int)((mousePosition.X - position.X) / scale);
+                            p.Y = (int)((mousePosition.Y - position.Y) / scale);
+
+                            mouseIsOver = Contains(cmd.Key, p);
+
+                            if (mouseIsOver)
+                            {
+                                hue.X = 0x35;
+
+                                FixVectorColor(ref hue, settings);
+                                FixFontCmdHue(0, i, ref hue);
+                            }
+                        }
+
+                        break;
+
+                    case CommandType.Space:
+
+                        if (wordSize.X > maxTextWidth)
+                        {
+                            wordSize.X = 0;
+                            position.X = startPosition.X;
+                            position.Y += lineHeight;
+                            offsetY += lineHeight;
+                        }
+                        else
+                        {
+                            value = DEFAULT_SPACE_SIZE * scale;
+                        }
+                        
+                        break;
+
+                    case CommandType.NewLine:
+
+                        wordSize.X = 0;
+                        position.X = startPosition.X;
+                        position.Y += lineHeight;
+                        offsetY += lineHeight;
+
+                        break;
+
+                    default: continue;
+                }
+
+                cmd.Position.X = position.X;                
+                cmd.Position.Y += offsetY;
+                cmd.UOHue = hue;
+
+                wordSize.X += value;
+                position.X += value;
+
+                fullSize.X = Math.Max(fullSize.X, wordSize.X);
+                fullSize.Y = Math.Max(fullSize.Y, wordSize.Y + offsetY);
+            }
+        }
       
 
         private void PushFontDrawCmd
         (
+            CommandType type,
             Texture2D texture, 
             Vector2 pos, 
             Rectangle uv, 
             Vector3 hue, 
             Color color,
-            float scale
+            float scale,
+            uint key
         )
         {
             if (_cmdCount >= _commands.Length)
@@ -415,12 +429,14 @@ namespace ClassicUO.Renderer
             }
 
             ref var cmd = ref _commands[_cmdCount++];
+            cmd.Type = type;
             cmd.Texture = texture;
             cmd.Position = pos;
             cmd.UV = uv;
             cmd.UOHue = hue;
             cmd.Color = color;
             cmd.Scale = scale;
+            cmd.Key = key;
         }
 
         private void ResetFontDrawCmd()
@@ -447,7 +463,7 @@ namespace ClassicUO.Renderer
             {
                 ref var cmd = ref _commands[i];
 
-                if (cmd.Texture != null)
+                if (cmd.Texture != null && cmd.Type == CommandType.Char)
                 {
                     batcher.Draw
                     (
@@ -495,151 +511,39 @@ namespace ClassicUO.Renderer
             Vector2 position
         )
         {
-            maxTextWidth *= scale;
+            if (maxTextWidth <= 0.0f)
+            {
+                maxTextWidth = MeasureStringInternal(text, settings, scale, position, 0f).X;
+            }
+            else
+            {
+                maxTextWidth *= scale;
+            }
 
             Vector2 startPosition = position;
-            Rectangle uv;
             float lineHeight = GetFontHeight(settings) * scale;
             Vector2 size = new Vector2(0, lineHeight);
             Vector2 fullSize = size;
+            Vector3 hue = Vector3.Zero;
+            bool mouseIsOver = false;
 
-            int last = 0;
-
-            for (int i = 0; i < text.Length; i++)
-            {
-                char c = text[i];
-
-                if (c == '\r')
-                {
-                    continue;
-                }
-
-                if (c == ' ' || c == '\n')
-                {
-                    var slice = text.Slice(last, i - last);
-                    var wordSize = MeasureStringInternal
-                    (
-                        slice,
-                        settings,
-                        scale,
-                        position,
-                        0
-                    );
-
-                    if (c == '\n' || (maxTextWidth > 0.0f && size.X + wordSize.X > maxTextWidth))
-                    {
-                        size.X = 0;
-                        size.Y += lineHeight;
-                        position.X = startPosition.X;
-                        position.Y += lineHeight;
-                        wordSize.Y += lineHeight;
-                    }
-
-                    for (int j = last; j <= i; ++j)
-                    {
-                        if (text[j] == '\r')
-                        {
-                            continue;
-                        }
-
-                        if (text[j] == ' ')
-                        {
-                            position.X += DEFAULT_SPACE_SIZE * scale;
-                            size.X += DEFAULT_SPACE_SIZE * scale;
-
-                            continue;
-                        }
-
-                        if (text[j] == '\n' || (maxTextWidth > 0.0f && size.X > maxTextWidth))
-                        {
-                            position.X = startPosition.X;
-                            position.Y += lineHeight;
-                            size.X = 0;
-                            size.Y += lineHeight;
-
-                            if (text[j] == '\n')
-                            {
-                                continue;
-                            }
-                        }
-
-                        var texture = ReadChar(text[j], settings, out uv, out uint key);
-
-                        if (texture != null)
-                        {
-                            position.X += uv.Width * scale;
-                            size.X += uv.Width * scale;
-                        }
-                    }
-
-                    size.Y = Math.Max(wordSize.Y, size.Y);
-                    last = i + 1;
-
-                    fullSize.X = Math.Max(size.X, fullSize.X);
-                    fullSize.Y = Math.Max(size.Y, fullSize.Y);
-                }
-            }
-
-            if (last < text.Length)
-            {
-                var wordSize = MeasureStringInternal
-                (
-                    text.Slice(last, text.Length - last),
-                    settings,
-                    scale,
-                    position,
-                    maxTextWidth
-                );
-
-                if (maxTextWidth > 0.0f && wordSize.X + size.X > maxTextWidth)
-                {
-                    position.X = startPosition.X;
-                    position.Y += lineHeight;
-                    size.X = 0;
-                    size.Y += lineHeight;
-                }
-
-                for (int j = last; j < text.Length; j++)
-                {
-                    if (text[j] == '\r')
-                    {
-                        continue;
-                    }
-
-                    if (text[j] == ' ')
-                    {
-                        position.X += DEFAULT_SPACE_SIZE * scale;
-                        size.X += DEFAULT_SPACE_SIZE * scale;
-
-                        continue;
-                    }
-
-                    if (text[j] == '\n' || (maxTextWidth > 0.0f && size.X > maxTextWidth))
-                    {
-                        position.X = startPosition.X;
-                        position.Y += lineHeight;
-                        size.X = 0;
-                        size.Y += lineHeight;
-
-                        if (text[j] == '\n')
-                        {
-                            continue;
-                        }
-                    }
-
-                    var texture = ReadChar(text[j], settings, out uv, out uint key);
-
-                    if (texture != null)
-                    {
-                        position.X += uv.Width * scale;
-                        size.X += uv.Width * scale;
-                        size.Y = Math.Max(uv.Height, size.Y);
-
-                        fullSize.X = Math.Max(size.X, fullSize.X);
-                        fullSize.Y = Math.Max(size.Y, fullSize.Y);
-                    }
-                }
-            }
+            InternalDraw
+            (
+                text,
+                settings,
+                ref position,
+                ref size,
+                ref fullSize,
+                ref hue,
+                Point.Zero,
+                false,
+                ref mouseIsOver,
+                startPosition,
+                maxTextWidth,
+                lineHeight,
+                scale,
+                false
+            );
 
             return fullSize;
         }
@@ -1130,7 +1034,6 @@ namespace ClassicUO.Renderer
 
             spriteInfo = new SpriteInfo();
             spriteInfo.Char = c;
-            spriteInfo.Settings = settings;
             spriteInfo.Texture = _atlas.AddSprite(buffer, textureWidth, textureHeight, out spriteInfo.UV);
 
             _spriteKeyInfo[key] = spriteInfo;
@@ -1229,7 +1132,6 @@ namespace ClassicUO.Renderer
 
             spriteInfo = new SpriteInfo();
             spriteInfo.Char = c;
-            spriteInfo.Settings = settings;
             spriteInfo.Texture = _atlas.AddSprite(buffer, textureWidth, textureHeight, out spriteInfo.UV);
 
             _spriteKeyInfo[key] = spriteInfo;
@@ -1414,7 +1316,6 @@ namespace ClassicUO.Renderer
             public Texture2D Texture;
             public char Char;
             public Rectangle UV;
-            public FontSettings Settings;
         }
 
         [StructLayout(LayoutKind.Sequential)]
@@ -1430,16 +1331,24 @@ namespace ClassicUO.Renderer
             public void* Data;
         }
 
+        private enum CommandType : byte
+        {
+            Char,
+            NewLine,
+            Space
+        }
 
         [StructLayout(LayoutKind.Sequential, Pack = 1)]
         private struct FontDrawCmd
         {
+            public CommandType Type;
             public Texture2D Texture;
             public Vector2 Position;
             public Rectangle UV;
             public Vector3 UOHue;
             public Color Color;
             public float Scale;
+            public uint Key;
         }
     }
 }

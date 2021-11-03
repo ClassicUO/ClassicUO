@@ -68,8 +68,6 @@ namespace ClassicUO.Game.Managers
         {
             ProcessWorldText(false);
 
-            BaseGameObject last = SelectedObject.LastObject;
-
             Vector3 hueVec = new Vector3();
 
             for (TextObject o = DrawPointer; o != null; o = o.DLeft)
@@ -92,14 +90,7 @@ namespace ClassicUO.Game.Managers
                 int x = o.RealScreenPosition.X;
                 int y = o.RealScreenPosition.Y;
 
-                if (!isGump)
-                {
-                    if (o.Owner is Entity && last == o)
-                    {
-                        //hue = 0x0035;
-                    }
-                }
-                else
+                if (isGump)
                 {
                     x += startX;
                     y += startY;
