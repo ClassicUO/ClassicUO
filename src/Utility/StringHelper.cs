@@ -50,8 +50,9 @@ namespace ClassicUO.Utility
             {
                 if (_cp1252Encoding == null)
                 {
-                    Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
-                    _cp1252Encoding = Encoding.GetEncoding(1252);
+                    //Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+                    //_cp1252Encoding = Encoding.GetEncoding(1252);
+                    _cp1252Encoding = Encoding.ASCII;
                 }
                 return _cp1252Encoding;
             }
