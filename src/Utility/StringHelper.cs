@@ -31,6 +31,7 @@
 #endregion
 
 using System;
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Security;
 using System.Text;
@@ -41,23 +42,7 @@ namespace ClassicUO.Utility
     internal static class StringHelper
     {
         private static readonly char[] _dots = { '.', ',', ';', '!' };
-
-        private static Encoding _cp1252Encoding;
-
-        public static Encoding Cp1252Encoding
-        {
-            get
-            {
-                if (_cp1252Encoding == null)
-                {
-                    //Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
-                    //_cp1252Encoding = Encoding.GetEncoding(1252);
-                    _cp1252Encoding = Encoding.ASCII;
-                }
-                return _cp1252Encoding;
-            }
-        }
-
+        
         public static string CapitalizeFirstCharacter(string str)
         {
             if (string.IsNullOrEmpty(str))
@@ -307,6 +292,142 @@ namespace ClassicUO.Utility
             }
 
             return true;
+        }
+        
+        /// <summary>
+        /// Converts a unicode code point into a cp1252 code point
+        /// </summary>
+        private static byte UnicodeToCp1252 (int codepoint)
+        {
+          if ( codepoint >= 0x80 && codepoint <= 0x9f )
+            return (byte)'?';
+          else if ( codepoint <= 0xff )
+            return (byte)codepoint;
+          else
+          {
+            switch ( codepoint )
+            {
+              case 0x20AC: return 128; //€
+              case 0x201A: return 130; //‚
+              case 0x0192: return 131; //ƒ
+              case 0x201E: return 132; //„
+              case 0x2026: return 133; //…
+              case 0x2020: return 134; //†
+              case 0x2021: return 135; //‡
+              case 0x02C6: return 136; //ˆ
+              case 0x2030: return 137; //‰
+              case 0x0160: return 138; //Š
+              case 0x2039: return 139; //‹
+              case 0x0152: return 140; //Œ
+              case 0x017D: return 142; //Ž
+              case 0x2018: return 145; //‘
+              case 0x2019: return 146; //’
+              case 0x201C: return 147; //“
+              case 0x201D: return 148; //”
+              case 0x2022: return 149; //•
+              case 0x2013: return 150; //–
+              case 0x2014: return 151; //—
+              case 0x02DC: return 152; //˜
+              case 0x2122: return 153; //™
+              case 0x0161: return 154; //š
+              case 0x203A: return 155; //›
+              case 0x0153: return 156; //œ
+              case 0x017E: return 158; //ž
+              case 0x0178: return 159; //Ÿ
+              default: return (byte)'?';
+            }
+          }
+        }
+        
+        /// <summary>
+        /// Converts a cp1252 code point into a unicode code point
+        /// </summary>
+        private static int Cp1252ToUnicode(byte codepoint)
+        {
+          switch ( codepoint )
+          {
+            case 128: return 0x20AC; //€
+            case 130: return 0x201A; //‚
+            case 131: return 0x0192; //ƒ
+            case 132: return 0x201E; //„
+            case 133: return 0x2026; //…
+            case 134: return 0x2020; //†
+            case 135: return 0x2021; //‡
+            case 136: return 0x02C6; //ˆ
+            case 137: return 0x2030; //‰
+            case 138: return 0x0160; //Š
+            case 139: return 0x2039; //‹
+            case 140: return 0x0152; //Œ
+            case 142: return 0x017D; //Ž
+            case 145: return 0x2018; //‘
+            case 146: return 0x2019; //’
+            case 147: return 0x201C; //“
+            case 148: return 0x201D; //”
+            case 149: return 0x2022; //•
+            case 150: return 0x2013; //–
+            case 151: return 0x2014; //—
+            case 152: return 0x02DC; //˜
+            case 153: return 0x2122; //™
+            case 154: return 0x0161; //š
+            case 155: return 0x203A; //›
+            case 156: return 0x0153; //œ
+            case 158: return 0x017E; //ž
+            case 159: return 0x0178; //Ÿ
+            default: return codepoint;
+          }
+        }
+        
+        /// <summary>
+        /// Converts a string into a list of cp1252 encoded bytes.
+        /// </summary>
+        /// <param name="input"></param>
+        /// <returns></returns>
+        public static byte[] StringToCp1252Bytes(string input)
+        {
+            List<byte> cp1252Bytes = new List<byte>();
+
+            for (var i = 0; i < input.Length; i += char.IsSurrogatePair(input, i) ? 2 : 1)
+            {
+                int codepoint = char.ConvertToUtf32(input, i);
+                byte cp1252Byte = UnicodeToCp1252(codepoint);
+                cp1252Bytes.Add(cp1252Byte);
+            }
+
+            return cp1252Bytes.ToArray();
+        }
+
+        /// <summary>
+        /// Converts cp1252 encoded bytes into a string.
+        /// </summary>
+        /// <param name="cp1252Bytes"></param>
+        /// <returns></returns>
+        public static string Cp1252BytesToString(List<byte> cp1252Bytes)
+        {
+            string converted = string.Empty;
+
+            //Some EPIC premature optimization... for lots of bytes, use StringBuilder as it is marginally faster
+            if (cp1252Bytes.Count >= 1000)
+            {
+                StringBuilder sb = new StringBuilder("", cp1252Bytes.Count);
+
+                foreach (byte b in cp1252Bytes)
+                {
+                    int codepoint = Cp1252ToUnicode(b);
+                    sb.Append(char.ConvertFromUtf32(codepoint));
+                }
+
+                return sb.ToString();
+            }
+            else
+            {
+                foreach (byte b in cp1252Bytes)
+                {
+                    int codepoint = Cp1252ToUnicode(b);
+                    converted += char.ConvertFromUtf32(codepoint);
+                }
+
+                return converted;
+            }
         }
     }
 }

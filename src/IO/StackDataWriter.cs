@@ -285,14 +285,25 @@ namespace ClassicUO.IO
         [MethodImpl(IMPL_OPTION)]
         public void WriteASCII(string str)
         {
-            WriteString<byte>(StringHelper.Cp1252Encoding, str, -1);
+            //This is a horrible HORRIBLE kludge, but Encoding doesn't support CP-1252 without a dependency which we cannot (currently) use
+            var bytes = StringHelper.StringToCp1252Bytes(str);
+            Write(bytes);
             WriteUInt8(0x00);
         }
 
         [MethodImpl(IMPL_OPTION)]
         public void WriteASCII(string str, int length)
         {
-            WriteString<byte>(StringHelper.Cp1252Encoding, str, length);
+            //Even more horrible than above.
+            var cp1252bytes = StringHelper.StringToCp1252Bytes(str);
+            var bytesLength = cp1252bytes.Length;
+            ReadOnlySpan<byte> bytes = new ReadOnlySpan<byte>(cp1252bytes, 0, bytesLength);
+            Write(bytes);
+
+            if (bytesLength < length)
+            {
+                WriteZero(length - bytesLength);
+            }
         }
 
 

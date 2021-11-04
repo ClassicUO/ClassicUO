@@ -276,12 +276,17 @@ namespace ClassicUO.IO
 
         public string ReadASCII(bool safe = false)
         {
-            return ReadString(StringHelper.Cp1252Encoding, -1, 1, safe);
+            //Abandon all hope ye who enter here
+            //We have to read these as bytes because Encoding does not support this encoding.
+            //Then we convert the bytes to a string using a custom converter.
+            var bytes = ReadStringBytes(-1, safe);
+            return StringHelper.Cp1252BytesToString(bytes);
         }
 
         public string ReadASCII(int length, bool safe = false)
         {
-            return ReadString(StringHelper.Cp1252Encoding, length, 1, safe);
+            var bytes = ReadStringBytes(length, safe);
+            return StringHelper.Cp1252BytesToString(bytes);
         }
 
         public string ReadUnicodeBE(bool safe = false)
@@ -393,6 +398,61 @@ namespace ClassicUO.IO
             Position += Math.Max(size + (!fixedLength && index >= 0 ? sizeT : 0), length * sizeT);
 
             return result;
+        }
+        
+        /// <summary>
+        /// Reads a string as bytes so that we can get encodings unsupported by Encoding (CP1252) out of packets without mangling the text.
+        /// Reads up to <paramref name="length"/> bytes, terminating on a null character. The null character is not included in the output.
+        /// You will want to convert the bytes to an actual string manually later, using eg. StringHelper's conversion methods.
+        /// </summary>
+        /// <param name="length">
+        /// Number of bytes to read. -1 to read until either a null character or the end of the stream.
+        /// If specified, the stream will be advanced according to this parameter; if unspecified, the stream will be advanced
+        /// according to the length of the string read.
+        /// </param>
+        /// <param name="safe"></param>
+        /// <returns></returns>
+        private List<byte> ReadStringBytes(int length, bool safe = false)
+        {
+            if (length == 0 || Position + 1 > Length)
+            {
+                return new List<byte>();
+            }
+
+            int size = length > 0 ? length : Remaining;
+            size = Math.Min(size, Remaining);
+            ReadOnlySpan<byte> slice = _data.Slice(Position, size);
+            int nullTerminator = slice.IndexOf((byte)0);
+            size = nullTerminator < 0 ? size : nullTerminator;
+            slice = slice.Slice(0, size);
+
+            List<byte> bytes;
+            if (safe)
+            {
+                bytes = new List<byte>(slice.Length);
+                foreach (var b in slice)
+                {
+                    if (StringHelper.IsSafeChar(b))
+                    {
+                        bytes.Add(b);
+                    }
+                }
+            }
+            else
+            {
+                bytes = new List<byte>(slice.ToArray());
+            }
+
+            if (length > 0)
+            {
+                Position += length;
+            }
+            else
+            {
+                Position += Math.Min(size + 1, Remaining);
+            }
+
+            return bytes;
         }
 
         [MethodImpl(IMPL_OPTION)]
