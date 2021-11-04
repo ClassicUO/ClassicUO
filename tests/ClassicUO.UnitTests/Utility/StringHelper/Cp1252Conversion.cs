@@ -80,5 +80,17 @@ namespace ClassicUO.UnitTests.Utility.StringHelper
             byte[] utf8bytes = Encoding.UTF8.GetBytes(converted);
             utf8bytes.Should().Equal(utf8data);
         }
+
+        /// <summary>
+        /// This tests the StringBuilder, mostly. We already know code points get converted correctly if the above test passes.
+        /// </summary>
+        [Fact]
+        public void Cp1252Conversion_ConvertLotsOfCp1252BytesToString()
+        {
+            string verylongstring = new string('a', 8192);
+            List<byte> asciiBytes = new List<byte>(Encoding.ASCII.GetBytes(verylongstring)); //the ascii 'a' character is identical to cp1252 'a'
+            string converted = ClassicUO.Utility.StringHelper.Cp1252BytesToString(asciiBytes);
+            converted.Should().Be(verylongstring);
+        }
     }
 }
