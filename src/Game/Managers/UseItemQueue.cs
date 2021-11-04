@@ -31,12 +31,11 @@
 #endregion
 
 using ClassicUO.Game.GameObjects;
-using ClassicUO.Interfaces;
 using ClassicUO.Utility.Collections;
 
 namespace ClassicUO.Game.Managers
 {
-    internal class UseItemQueue : IUpdateable
+    internal class UseItemQueue
     {
         private readonly Deque<uint> _actions = new Deque<uint>();
         private long _timer;

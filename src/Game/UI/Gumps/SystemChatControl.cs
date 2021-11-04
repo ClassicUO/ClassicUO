@@ -38,7 +38,6 @@ using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
-using ClassicUO.Interfaces;
 using ClassicUO.Network;
 using ClassicUO.Renderer;
 using ClassicUO.Resources;
@@ -881,7 +880,7 @@ namespace ClassicUO.Game.UI.Gumps
             DisposeChatModePrefix();
         }
 
-        private class ChatLineTime : IUpdateable
+        private class ChatLineTime
         {
             private uint _createdTime;
             private RenderedText _renderedText;
