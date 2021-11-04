@@ -561,15 +561,12 @@ namespace ClassicUO.Game.Scenes
 
         private void FillGameObjectList()
         {
-
-#if RENDER_LIST_LINKED_LIST
             _first = null;
             _renderList = null;
 
             _firstLand = null;
             _renderListLand = null;
             _renderListLandCount = 0;
-#endif
 
             _renderListCount = 0;
             _foliageCount = 0;
@@ -1095,8 +1092,6 @@ namespace ClassicUO.Game.Scenes
 
             GameObject.DrawTransparent = usecircle;
 
-#if RENDER_LIST_LINKED_LIST
-
             GameObject obj = _firstLand;
             for (int i = 0; i < _renderListLandCount; obj = obj.RenderListNext, ++i)
             {
@@ -1125,34 +1120,6 @@ namespace ClassicUO.Game.Scenes
                     }
                 }
             }
-#else
-            ushort hue = 0;
-            for (int i = 0; i < _renderListCount; ++i)
-            {
-                ref var info = ref _renderList[i];
-
-                var obj = info.Object;
-
-                if (obj.Z <= _maxGroundZ)
-                {
-                    if (usecircle)
-                    {
-                        GameObject.DrawTransparent = obj.TransparentTest(z);
-                    }
-
-                    hue = obj.Hue;
-                    obj.Hue = info.Hue;
-
-                    if (obj.Draw(batcher, obj.RealScreenPosition.X, obj.RealScreenPosition.Y, ref hueVec))
-                    {
-                        ++RenderedObjectsCount;
-                    }
-
-                    obj.Hue = hue;
-                }
-            }
-#endif
-
 
             if (_multi != null && TargetManager.IsTargeting && TargetManager.TargetingState == CursorTarget.MultiPlacement)
             {

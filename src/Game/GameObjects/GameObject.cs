@@ -103,10 +103,7 @@ namespace ClassicUO.Game.GameObjects
         public ushort X, Y;
         public sbyte Z;
 
-#if RENDER_LIST_LINKED_LIST
         public GameObject RenderListNext;
-#endif
-
 
         public void AddToTile(int x, int y)
         {
@@ -354,9 +351,7 @@ namespace ClassicUO.Game.GameObjects
             Next = null;
             Previous = null;
 
-#if RENDER_LIST_LINKED_LIST
             RenderListNext = null;
-#endif
 
             Clear();
             RemoveFromTile();
