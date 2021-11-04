@@ -282,6 +282,10 @@ namespace ClassicUO.IO
             WriteString<byte>(Encoding.UTF8, str, len);
         }
 
+        /// <summary>
+        /// Writes a string into the buffer encoded in CP-1252 (*not* ASCII; CP-1252 is a 8-bit encoding used by UO, and is a superset of ASCII)
+        /// </summary>
+        /// <param name="str"></param>
         [MethodImpl(IMPL_OPTION)]
         public void WriteASCII(string str)
         {
@@ -291,13 +295,19 @@ namespace ClassicUO.IO
             WriteUInt8(0x00);
         }
 
+        /// <summary>
+        /// Writes a string up to <paramref name="length"/> bytes long encoded in CP-1252 (*not* ASCII; CP-1252 is a 8-bit encoding used by UO, and is a superset of ASCII),
+        /// padding with null characters if <paramref name="length"/> is greater than the length of the string.
+        /// </summary>
+        /// <param name="str"></param>
+        /// <param name="length"></param>
         [MethodImpl(IMPL_OPTION)]
         public void WriteASCII(string str, int length)
         {
             //Even more horrible than above.
             var cp1252bytes = StringHelper.StringToCp1252Bytes(str);
             var bytesLength = cp1252bytes.Length;
-            ReadOnlySpan<byte> bytes = new ReadOnlySpan<byte>(cp1252bytes, 0, bytesLength);
+            ReadOnlySpan<byte> bytes = new ReadOnlySpan<byte>(cp1252bytes, 0, Math.Min(length, bytesLength));
             Write(bytes);
 
             if (bytesLength < length)
