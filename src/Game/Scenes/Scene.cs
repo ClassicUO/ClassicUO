@@ -33,14 +33,13 @@
 using System;
 using ClassicUO.Game.Managers;
 using ClassicUO.Input;
-using ClassicUO.Interfaces;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 using SDL2;
 
 namespace ClassicUO.Game.Scenes
 {
-    internal abstract class Scene : IUpdateable, IDisposable
+    internal abstract class Scene : IDisposable
     {
         private uint _time_cleanup = Time.Ticks + 5000;
 

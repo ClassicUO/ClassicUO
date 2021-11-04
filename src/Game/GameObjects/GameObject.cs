@@ -39,7 +39,6 @@ using ClassicUO.Game.Managers;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
-using IUpdateable = ClassicUO.Interfaces.IUpdateable;
 
 namespace ClassicUO.Game.GameObjects
 {
@@ -48,7 +47,7 @@ namespace ClassicUO.Game.GameObjects
         public Point RealScreenPosition;
     }
 
-    internal abstract partial class GameObject : BaseGameObject, IUpdateable
+    internal abstract partial class GameObject : BaseGameObject
     {
         private Point _screenPosition;
 
