@@ -143,8 +143,7 @@ namespace ClassicUO.Renderer
 
             Vector2 startPosition = position;
             float lineHeight = GetFontHeight(settings) * scale;
-            Vector2 size = new Vector2(0, lineHeight);
-            Vector2 fullSize = size;
+            Vector2 fullSize = new Vector2(0, lineHeight);
             Point mousePosition = Mouse.Position;
 
             bool mouseIsOver = false;
@@ -154,7 +153,6 @@ namespace ClassicUO.Renderer
                 text,
                 settings,
                 ref position,
-                ref size,
                 ref fullSize,
                 ref hue,
                 mousePosition,
@@ -163,8 +161,7 @@ namespace ClassicUO.Renderer
                 startPosition,
                 maxTextWidth,
                 lineHeight,
-                scale,
-                true
+                scale
             );
 
             batcher.DrawRectangle(SolidColorTextureCache.GetTexture(Color.Red), (int)startPosition.X, (int)startPosition.Y, (int) fullSize.X, (int)fullSize.Y, ref hue);
@@ -224,14 +221,12 @@ namespace ClassicUO.Renderer
 
             return allowSelection && mouseIsOver;
         }
-
      
         private void InternalDraw
         (
             ReadOnlySpan<char> text,
             in FontSettings settings,
             ref Vector2 position,
-            ref Vector2 size, 
             ref Vector2 fullSize,
             ref Vector3 hue,
             Point mousePosition,
@@ -240,8 +235,7 @@ namespace ClassicUO.Renderer
             Vector2 startPosition,
             float maxTextWidth, 
             float lineHeight,
-            float scale,
-            bool draw
+            float scale
         )
         {
             ResetFontDrawCmd();
@@ -249,6 +243,9 @@ namespace ClassicUO.Renderer
             Color color = Color.Red;
 
             int last = 0;
+            Vector2 wordSize = new Vector2(0, lineHeight);
+            float offsetY = 0.0f;
+
             for (int i = 0; i < text.Length; ++i)
             {
                 char c = text[i];
@@ -273,23 +270,59 @@ namespace ClassicUO.Renderer
                         {
                             PushFontDrawCmd(CommandType.Char, texture, position, uv, hue, color, scale, key);
 
+                            wordSize.X += uv.Width * scale;
                             position.X += uv.Width * scale;
                         }
                     }
 
+                    if (c == '\n' || wordSize.X > maxTextWidth)
+                    {
+                        if (c == '\n')
+                        {
+                            PushFontDrawCmd(CommandType.NewLine, null, position, Rectangle.Empty, hue, color, scale, 0);
+                        }
+
+                        wordSize.X = 0;
+                        wordSize.Y += lineHeight;
+
+                        position.X = startPosition.X;
+                        position.Y += lineHeight;
+                        offsetY += lineHeight;
+
+                        if (c != '\n')
+                        {
+                            for (int j = last; j < i; ++j)
+                            {
+                                ref var cmd = ref _commands[j];
+
+                                if (wordSize.X > maxTextWidth)
+                                {
+                                    wordSize.X = 0;
+                                    wordSize.Y += lineHeight;
+                                    offsetY += lineHeight;
+                                }
+
+                                cmd.Position.X = startPosition.X + wordSize.X;
+                                cmd.Position.Y += lineHeight;
+
+                                wordSize.X += cmd.UV.Width * scale;
+                            }
+                           
+                            position.X += wordSize.X;                            
+                        }   
+                    }
+
                     if (c == ' ')
                     {
-                        PushFontDrawCmd(CommandType.Space, null, position, Rectangle.Empty, hue, color, scale, 0);
+                        PushFontDrawCmd(CommandType.Space, null, position, new Rectangle(0, 0, DEFAULT_SPACE_SIZE, 0), hue, color, scale, 0);
 
+                        wordSize.X += DEFAULT_SPACE_SIZE * scale;
                         position.X += DEFAULT_SPACE_SIZE * scale;
                     }
-                    else if(c == '\n')
-                    {
-                        PushFontDrawCmd(CommandType.NewLine, null, position, Rectangle.Empty, hue, color, scale, 0);
 
-                        //position.Y += lineHeight;
-                    }
-                   
+                    fullSize.X = Math.Max(fullSize.X, wordSize.X);
+                    fullSize.Y = Math.Max(fullSize.Y, wordSize.Y);
+
                     last = i + 1;
                 }
             }
@@ -303,20 +336,25 @@ namespace ClassicUO.Renderer
                         continue;
                     }
 
-                    if (text[i] == ' ')
-                    {
-                        PushFontDrawCmd(CommandType.Space, null, position, Rectangle.Empty, hue, color, scale, 0);
-
-                        position.X += DEFAULT_SPACE_SIZE * scale;
-
-                        continue;
-                    }
-
                     if (text[i] == '\n')
                     {
                         PushFontDrawCmd(CommandType.NewLine, null, position, Rectangle.Empty, hue, color, scale, 0);
 
-                        //position.Y += lineHeight;
+                        position.X = startPosition.X;
+                        position.Y += lineHeight;
+
+                        wordSize.X = 0;
+                        wordSize.Y += lineHeight;
+
+                        continue;
+                    }
+
+                    if (text[i] == ' ')
+                    {
+                        PushFontDrawCmd(CommandType.Space, null, position, new Rectangle(0, 0, DEFAULT_SPACE_SIZE, 0), hue, color, scale, 0);
+
+                        wordSize.X += DEFAULT_SPACE_SIZE * scale;
+                        position.X += DEFAULT_SPACE_SIZE * scale;
 
                         continue;
                     }
@@ -327,35 +365,58 @@ namespace ClassicUO.Renderer
                     {
                         PushFontDrawCmd(CommandType.Char, texture, position, uv, hue, color, scale, key);
 
+                        wordSize.X += uv.Width * scale;
                         position.X += uv.Width * scale;
                     }
                 }
+
+                if (wordSize.X > maxTextWidth)
+                {
+                    wordSize.X = 0;
+                    offsetY = last > 0.0f ? lineHeight : 0f;
+                    wordSize.Y = lineHeight + offsetY;
+
+                    for (int i = last; i < _cmdCount; ++i)
+                    {
+                        ref var cmd = ref _commands[i];
+
+                        if (last == 0 && wordSize.X > maxTextWidth)
+                        {
+                            fullSize.X = Math.Max(fullSize.X, wordSize.X);
+
+                            wordSize.X = 0;
+                            wordSize.Y += lineHeight;
+                            offsetY += lineHeight;
+                        }
+
+                        cmd.Position.X = startPosition.X + wordSize.X;
+                        cmd.Position.Y += offsetY;
+
+                        wordSize.X += cmd.UV.Width * scale;
+                    }
+                }
+
+                fullSize.X = Math.Max(fullSize.X, wordSize.X);
+                fullSize.Y = Math.Max(fullSize.Y, wordSize.Y) + (offsetY > 0.0f ? lineHeight : 0f);
             }
 
-            position = startPosition;
-
-            Vector2 wordSize = new Vector2(0, lineHeight);
-            float offsetY = 0.0f;
 
             for (int i = 0; i < _cmdCount; ++i)
             {
                 ref var cmd = ref _commands[i];
 
-                float value = 0;
-
                 switch (cmd.Type)
                 {
                     case CommandType.Char:
-
-                        value = cmd.UV.Width * scale;
-
-                        if (draw && allowSelection && !mouseIsOver)
+                        
+                        if (allowSelection && !mouseIsOver)
                         {
-                            Point p = new Point();
-                            p.X = (int)((mousePosition.X - position.X) / scale);
-                            p.Y = (int)((mousePosition.Y - position.Y) / scale);
-
-                            mouseIsOver = Contains(cmd.Key, p);
+                            mouseIsOver = _picker.Get
+                            (
+                                cmd.Key,
+                                (int)((mousePosition.X - cmd.Position.X) / scale),
+                                (int)((mousePosition.Y - cmd.Position.Y) / scale)
+                            );
 
                             if (mouseIsOver)
                             {
@@ -370,41 +431,33 @@ namespace ClassicUO.Renderer
 
                     case CommandType.Space:
 
-                        if (wordSize.X > maxTextWidth)
-                        {
-                            wordSize.X = 0;
-                            position.X = startPosition.X;
-                            position.Y += lineHeight;
-                            offsetY += lineHeight;
-                        }
-                        else
-                        {
-                            value = DEFAULT_SPACE_SIZE * scale;
-                        }
+                        //if (wordSize.X > maxTextWidth)
+                        //{
+                        //    wordSize.X = 0;
+                        //    position.X = startPosition.X;
+                        //    position.Y += lineHeight;
+                        //    offsetY += lineHeight;
+                        //}
+                        //else
+                        //{
+                        //    value = DEFAULT_SPACE_SIZE * scale;
+                        //}
                         
                         break;
 
                     case CommandType.NewLine:
 
-                        wordSize.X = 0;
-                        position.X = startPosition.X;
-                        position.Y += lineHeight;
-                        offsetY += lineHeight;
+                        //wordSize.X = 0;
+                        //position.X = startPosition.X;
+                        //position.Y += lineHeight;
+                        //offsetY += lineHeight;
 
                         break;
 
                     default: continue;
                 }
 
-                cmd.Position.X = position.X;                
-                cmd.Position.Y += offsetY;
                 cmd.UOHue = hue;
-
-                wordSize.X += value;
-                position.X += value;
-
-                fullSize.X = Math.Max(fullSize.X, wordSize.X);
-                fullSize.Y = Math.Max(fullSize.Y, wordSize.Y + offsetY);
             }
         }
       
@@ -522,8 +575,7 @@ namespace ClassicUO.Renderer
 
             Vector2 startPosition = position;
             float lineHeight = GetFontHeight(settings) * scale;
-            Vector2 size = new Vector2(0, lineHeight);
-            Vector2 fullSize = size;
+            Vector2 fullSize = new Vector2(0, lineHeight);
             Vector3 hue = Vector3.Zero;
             bool mouseIsOver = false;
 
@@ -532,7 +584,6 @@ namespace ClassicUO.Renderer
                 text,
                 settings,
                 ref position,
-                ref size,
                 ref fullSize,
                 ref hue,
                 Point.Zero,
@@ -541,8 +592,7 @@ namespace ClassicUO.Renderer
                 startPosition,
                 maxTextWidth,
                 lineHeight,
-                scale,
-                false
+                scale
             );
 
             return fullSize;
@@ -624,17 +674,7 @@ namespace ClassicUO.Renderer
             return height;
         }
 
-       
-        private bool Contains(uint key, Point point)
-        {
-            return _picker.Get
-            (
-                key,
-                point.X,
-                point.Y
-            );
-        }
-
+      
         private unsafe Texture2D ReadChar(char c, in FontSettings settings, out Rectangle uv, out uint key)
         {
             return settings.IsUnicode ? ReadCharUnicode(c, settings, out uv, out key) : ReadCharASCII(c, settings, out uv, out key);
