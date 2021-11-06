@@ -316,7 +316,7 @@ namespace ClassicUO.Renderer
                         }   
                     }
 
-                    if (c == ' ')
+                    if (c == ' ' && last != i && i + 1 != text.Length)
                     {
                         PushFontDrawCmd(CommandType.Space, null, position, new Rectangle(0, 0, DEFAULT_SPACE_SIZE, 0), hue, color, scale, 0);
 
