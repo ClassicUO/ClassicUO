@@ -169,52 +169,54 @@ namespace ClassicUO.Renderer
             RenderDrawCommands(batcher);
 
             if (settings.Underline)
-            {
-                // TODO: multiline
-                Vector2 end = startPosition;
-                end.X += fullSize.X;
-                startPosition.Y += fullSize.Y;
-                end.Y += fullSize.Y;
-
+            {                      
                 var texture = SolidColorTextureCache.GetTexture(Color.White);
-               
-                float stroke = 1f;
 
-                if (settings.Border)
+                int count = Math.Max(1, (int) (fullSize.Y / lineHeight));
+                float stroke = 1f;
+                Vector2 end = new Vector2(startPosition.X + fullSize.X, startPosition.Y);
+
+                for (int i = 0; i < count; ++i)
                 {
-                    Vector2 startPositionBlack = startPosition;
-                    startPositionBlack.X -= stroke * scale;
-                    startPositionBlack.Y -= stroke * scale;
-                    Rectangle destRect = new Rectangle
+                    startPosition.Y += lineHeight;
+                    end.Y += lineHeight;
+
+                    if (settings.Border)
+                    {
+                        Vector2 startPositionBlack = startPosition;
+                        startPositionBlack.X -= stroke * scale;
+                        startPositionBlack.Y -= stroke * scale;
+                        Rectangle destRect = new Rectangle
+                        (
+                            0,
+                            0,
+                            (int)(((end.X + stroke * scale) - startPositionBlack.X) / scale),
+                            (int)(((end.Y + (stroke * 2f) * scale) - startPositionBlack.Y) / scale)
+                        );
+                        
+                        batcher.Draw
+                        (
+                            texture,
+                            startPositionBlack,
+                            destRect,
+                            Vector3.UnitY,
+                            0f,
+                            Vector2.Zero,
+                            scale,
+                            0,
+                            0
+                        );
+                    }
+
+                    batcher.DrawLine
                     (
-                        0,
-                        0,
-                        (int)(((end.X + stroke * scale) - startPositionBlack.X) / scale),
-                        (int)(((end.Y + (stroke * 2f) * scale) - startPositionBlack.Y) / scale)
+                       texture,
+                       startPosition,
+                       end,
+                       hue,
+                       stroke * scale
                     );
-                  
-                    batcher.Draw
-                    (
-                        texture, 
-                        startPositionBlack, 
-                        destRect, 
-                        new Vector3(0, 1, 0), 
-                        0f,
-                        Vector2.Zero,
-                        scale,
-                        0,
-                        0
-                    );
-                }
-               
-                batcher.DrawLine
-                (
-                   texture,
-                   startPosition,
-                   end,
-                   hue,
-                   stroke * scale
-                );
+                }               
             }
 
             ResetFontDrawCmd();
