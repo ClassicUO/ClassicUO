@@ -242,8 +242,11 @@ namespace ClassicUO.Renderer
 
             Color color = Color.Red;
 
+            maxTextWidth += 4 * scale;
+
             int last = 0;
             Vector2 wordSize = new Vector2(0, lineHeight);
+            float totalSpaceWidth = 0.0f;
 
             for (int i = 0; i < text.Length; ++i)
             {
@@ -294,7 +297,7 @@ namespace ClassicUO.Renderer
                             {
                                 ref var cmd = ref _commands[j];
 
-                                if (wordSize.X > maxTextWidth)
+                                if (wordSize.X - totalSpaceWidth > maxTextWidth)
                                 {
                                     wordSize.X = 0;
                                     wordSize.Y += lineHeight;
@@ -317,6 +320,7 @@ namespace ClassicUO.Renderer
 
                         wordSize.X += DEFAULT_SPACE_SIZE * scale;
                         position.X += DEFAULT_SPACE_SIZE * scale;
+                        totalSpaceWidth += DEFAULT_SPACE_SIZE * scale;
                     }
 
                     fullSize.X = Math.Max(fullSize.X, wordSize.X);
@@ -354,6 +358,7 @@ namespace ClassicUO.Renderer
 
                         wordSize.X += DEFAULT_SPACE_SIZE * scale;
                         position.X += DEFAULT_SPACE_SIZE * scale;
+                        totalSpaceWidth += DEFAULT_SPACE_SIZE * scale;
 
                         continue;
                     }
@@ -369,7 +374,7 @@ namespace ClassicUO.Renderer
                     }
                 }
 
-                if (wordSize.X > maxTextWidth)
+                if (wordSize.X - totalSpaceWidth > maxTextWidth)
                 {
                     wordSize.X = 0;
                     float offsetY = last > 0.0f ? lineHeight : 0f;
