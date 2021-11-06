@@ -244,7 +244,6 @@ namespace ClassicUO.Renderer
 
             int last = 0;
             Vector2 wordSize = new Vector2(0, lineHeight);
-            float offsetY = 0.0f;
 
             for (int i = 0; i < text.Length; ++i)
             {
@@ -287,7 +286,7 @@ namespace ClassicUO.Renderer
 
                         position.X = startPosition.X;
                         position.Y += lineHeight;
-                        offsetY += lineHeight;
+                        float offsetY = lineHeight;
 
                         if (c != '\n')
                         {
@@ -303,7 +302,7 @@ namespace ClassicUO.Renderer
                                 }
 
                                 cmd.Position.X = startPosition.X + wordSize.X;
-                                cmd.Position.Y += lineHeight;
+                                cmd.Position.Y += offsetY;
 
                                 wordSize.X += cmd.UV.Width * scale;
                             }
@@ -373,8 +372,8 @@ namespace ClassicUO.Renderer
                 if (wordSize.X > maxTextWidth)
                 {
                     wordSize.X = 0;
-                    offsetY = last > 0.0f ? lineHeight : 0f;
-                    wordSize.Y = lineHeight + offsetY;
+                    float offsetY = last > 0.0f ? lineHeight : 0f;
+                    wordSize.Y += offsetY;
 
                     for (int i = last; i < _cmdCount; ++i)
                     {
@@ -397,7 +396,7 @@ namespace ClassicUO.Renderer
                 }
 
                 fullSize.X = Math.Max(fullSize.X, wordSize.X);
-                fullSize.Y = Math.Max(fullSize.Y, wordSize.Y) + (offsetY > 0.0f ? lineHeight : 0f);
+                fullSize.Y = Math.Max(fullSize.Y, wordSize.Y);
             }
 
 
