@@ -164,7 +164,10 @@ namespace ClassicUO.Renderer
                 scale
             );
 
-            batcher.DrawRectangle(SolidColorTextureCache.GetTexture(Color.Red), (int)startPosition.X, (int)startPosition.Y, (int) fullSize.X, (int)fullSize.Y, ref hue);
+            //if (CUOEnviroment.Debug)
+            {
+                batcher.DrawRectangle(SolidColorTextureCache.GetTexture(Color.Red), (int)startPosition.X, (int)startPosition.Y, (int)fullSize.X, (int)fullSize.Y, ref hue);
+            }
 
             RenderDrawCommands(batcher);
 
@@ -249,6 +252,7 @@ namespace ClassicUO.Renderer
             int last = 0;
             Vector2 wordSize = new Vector2(0, lineHeight);
             float totalSpaceWidth = 0.0f;
+            float anotherYOffset = 0f;
 
             for (int i = 0; i < text.Length; ++i)
             {
@@ -279,7 +283,7 @@ namespace ClassicUO.Renderer
                         }
                     }
 
-                    if (c == '\n' || wordSize.X > maxTextWidth)
+                    if (c == '\n' || (last > 0 && wordSize.X > maxTextWidth))
                     {
                         if (c == '\n')
                         {
@@ -299,11 +303,13 @@ namespace ClassicUO.Renderer
                             {
                                 ref var cmd = ref _commands[j];
 
-                                if (wordSize.X - totalSpaceWidth > maxTextWidth)
+                                if (/*last > 0 &&*/ wordSize.X - 0 > maxTextWidth)
                                 {
+                                    fullSize.X = Math.Max(fullSize.X, wordSize.X);
                                     wordSize.X = 0;
                                     wordSize.Y += lineHeight;
                                     offsetY += lineHeight;
+                                    anotherYOffset += lineHeight;
                                 }
 
                                 cmd.Position.X = startPosition.X + wordSize.X;
@@ -316,7 +322,7 @@ namespace ClassicUO.Renderer
                         }   
                     }
 
-                    if (c == ' ' && last != i && i + 1 != text.Length)
+                    if (c == ' ' && last != i + 1 && i + 1 != text.Length)
                     {
                         PushFontDrawCmd(CommandType.Space, null, position, new Rectangle(0, 0, DEFAULT_SPACE_SIZE, 0), hue, color, scale, 0);
 
@@ -334,6 +340,8 @@ namespace ClassicUO.Renderer
 
             if (last < text.Length)
             {
+                position.Y += anotherYOffset;
+
                 for (int i = last; i < text.Length; ++i)
                 {
                     if (text[i] == '\r')
@@ -386,7 +394,7 @@ namespace ClassicUO.Renderer
                     {
                         ref var cmd = ref _commands[i];
 
-                        if (last == 0 && wordSize.X > maxTextWidth)
+                        if (/*last == 0 &&*/ wordSize.X > maxTextWidth)
                         {
                             fullSize.X = Math.Max(fullSize.X, wordSize.X);
 
@@ -600,6 +608,8 @@ namespace ClassicUO.Renderer
                 lineHeight,
                 scale
             );
+
+            //fullSize.X = Math.Max(maxTextWidth, fullSize.X);
 
             return fullSize;
         }
@@ -1209,7 +1219,7 @@ namespace ClassicUO.Renderer
             }
             else if (color.Y > 0)
             {
-                color.Y = ShaderHueTranslator.SHADER_NONE;
+                //color.Y = ShaderHueTranslator.SHADER_NONE;
             }
         }
         
