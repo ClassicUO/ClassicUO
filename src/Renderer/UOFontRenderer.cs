@@ -166,7 +166,8 @@ namespace ClassicUO.Renderer
 
             //if (CUOEnviroment.Debug)
             {
-                batcher.DrawRectangle(SolidColorTextureCache.GetTexture(Color.Red), (int)startPosition.X, (int)startPosition.Y, (int)fullSize.X, (int)fullSize.Y, ref hue);
+                Vector3 hueVec2 = Vector3.Zero;
+                batcher.DrawRectangle(SolidColorTextureCache.GetTexture(Color.Red), (int)startPosition.X, (int)startPosition.Y, (int)fullSize.X, (int)fullSize.Y, ref hueVec2);
             }
 
             RenderDrawCommands(batcher);
