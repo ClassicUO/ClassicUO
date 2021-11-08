@@ -30,7 +30,9 @@
 
 #endregion
 
+using System;
 using System.Collections.Generic;
+using ClassicUO.Data;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Input;
 using ClassicUO.IO.Resources;
@@ -51,8 +53,9 @@ namespace ClassicUO.Game.UI.Controls
     internal class Button : Control
     {
         private readonly string _caption;
+        private FontSettings _fontSettings;
+        private Vector2 _captionSize;
         private bool _entered;
-        private readonly RenderedText[] _fontTexture;
         private ushort _normal, _pressed, _over;
 
         public Button
@@ -87,16 +90,11 @@ namespace ClassicUO.Game.UI.Controls
 
             if (!string.IsNullOrEmpty(caption) && normalHue != ushort.MaxValue)
             {
-                _fontTexture = new RenderedText[2];
-
                 _caption = caption;
+                _fontSettings.FontIndex = font == 0xFF ? (byte)(Client.Version >= ClientVersion.CV_305D ? 1 : 0) : font;
+                _fontSettings.IsUnicode = isunicode;
 
-                _fontTexture[0] = RenderedText.Create(caption, FontHue, font, isunicode);
-
-                if (hoverHue != ushort.MaxValue)
-                {
-                    _fontTexture[1] = RenderedText.Create(caption, HueHover, font, isunicode);
-                }
+                _captionSize = UOFontRenderer.Shared.MeasureString(caption.AsSpan(), _fontSettings, 1f);
             }
 
             CanMove = false;
@@ -177,11 +175,8 @@ namespace ClassicUO.Game.UI.Controls
 
         public int Hue { get; set; }
         public ushort FontHue { get; }
-
         public ushort HueHover { get; }
-
         public bool FontCenter { get; set; }
-
         public bool ContainsByBounds { get; set; }
 
        
@@ -244,18 +239,29 @@ namespace ClassicUO.Game.UI.Controls
 
             if (!string.IsNullOrEmpty(_caption))
             {
-                RenderedText textTexture = _fontTexture[_entered ? 1 : 0];
+                Vector2 position = new Vector2(x, y);
+                Vector3 hueVec = new Vector3(_entered ? HueHover : FontHue, 1f, Alpha);
 
                 if (FontCenter)
                 {
-                    int yoffset = IsClicked ? 1 : 0;
+                    position.X += (Width - _captionSize.X) * 0.5f;
+                    position.Y += (Height -  _captionSize.Y) * 0.5f;
+                }
 
-                    textTexture.Draw(batcher, x + ((Width - textTexture.Width) >> 1), y + yoffset + ((Height - textTexture.Height) >> 1));
-                }
-                else
+                if (IsClicked)
                 {
-                    textTexture.Draw(batcher, x, y);
+                    position.Y += 1f;
                 }
+
+                UOFontRenderer.Shared.Draw
+                (
+                    batcher,
+                    _caption.AsSpan(),
+                    position,
+                    1f,
+                    _fontSettings,
+                    hueVec
+                );
             }
 
             return base.Draw(batcher, x, y);
@@ -310,19 +316,6 @@ namespace ClassicUO.Game.UI.Controls
             }
 
             return ContainsByBounds ? base.Contains(x, y) : GumpsLoader.Instance.PixelCheck(_normal, x - Offset.X, y - Offset.Y);
-        }
-
-        public sealed override void Dispose()
-        {
-            if (_fontTexture != null)
-            {
-                foreach (RenderedText t in _fontTexture)
-                {
-                    t?.Destroy();
-                }
-            }
-
-            base.Dispose();
         }
     }
 }

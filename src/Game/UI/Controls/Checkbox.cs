@@ -32,6 +32,7 @@
 
 using System;
 using System.Collections.Generic;
+using ClassicUO.Data;
 using ClassicUO.Input;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
@@ -42,8 +43,12 @@ namespace ClassicUO.Game.UI.Controls
 {
     internal class Checkbox : Control
     {
+        private string _text;
+        private FontSettings _fontSettings;
+        private float _maxWidth;
+        private ushort _hue;
+
         private bool _isChecked;
-        private readonly RenderedText _text;
         private ushort _inactive, _active;
 
         public Checkbox
@@ -72,18 +77,22 @@ namespace ClassicUO.Game.UI.Controls
 
             Width = boundsInactive.Width;
 
-            _text = RenderedText.Create
-            (
-                text,
-                color,
-                font,
-                isunicode,
-                maxWidth: maxWidth
-            );
+            _fontSettings.FontIndex = font == 0xFF ? (byte)(Client.Version >= ClientVersion.CV_305D ? 1 : 0) : font;
+            _fontSettings.IsUnicode = isunicode;
+            _maxWidth = maxWidth;
+            _text = text;
 
-            Width += _text.Width;
+            if (color == 0xFFFF)
+            {
+                color = 1;
+            }
 
-            Height = Math.Max(boundsInactive.Width, _text.Height);
+            _hue = (ushort)(color - 1);
+            var textSize = UOFontRenderer.Shared.MeasureString(_text.AsSpan(), _fontSettings, 1f, _maxWidth);
+
+            Width += (int)Math.Max(textSize.X, _maxWidth);
+            Height = (int) Math.Max(boundsInactive.Width, textSize.Y);
+
             CanMove = false;
             AcceptMouseInput = true;
         }
@@ -112,8 +121,6 @@ namespace ClassicUO.Game.UI.Controls
 
         public override ClickPriority Priority => ClickPriority.High;
 
-        public string Text => _text.Text;
-
         public event EventHandler ValueChanged;
 
 
@@ -130,15 +137,35 @@ namespace ClassicUO.Game.UI.Controls
 
             var texture = GumpsLoader.Instance.GetGumpTexture(IsChecked ? _active : _inactive, out var bounds);
 
+            Vector2 pos = new Vector2(x, y);
+
             batcher.Draw
             (
                 texture,
-                new Vector2(x, y),
+                pos,
                 bounds,
                 HueVector
             );
 
-            _text.Draw(batcher, x + bounds.Width + 2, y);
+
+            Vector3 hueVec = new Vector3(_hue, 0f, Alpha);
+            if (_hue != 0)
+            {
+                hueVec.Y = 1f;
+            }
+            pos.X += bounds.Width + 2;
+
+            UOFontRenderer.Shared.Draw
+            (
+                batcher,
+                _text.AsSpan(),
+                pos,
+                1f,
+                _fontSettings,
+                hueVec,
+                false,
+                _maxWidth
+            );
 
             return ok;
         }
@@ -154,12 +181,6 @@ namespace ClassicUO.Game.UI.Controls
             {
                 IsChecked = !IsChecked;
             }
-        }
-
-        public override void Dispose()
-        {
-            base.Dispose();
-            _text?.Destroy();
         }
     }
 }

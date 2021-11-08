@@ -30,16 +30,23 @@
 
 #endregion
 
+using System;
 using System.Collections.Generic;
+using ClassicUO.Data;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
+using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Controls
 {
     internal class Label : Control
     {
-        private readonly RenderedText _gText;
+        private string _text;
+        private FontSettings _fontSettings;
+        private float _maxWidth;
+        private readonly TEXT_ALIGN_TYPE _align;
+        private Vector2 _textSize;
 
         public Label
         (
@@ -53,21 +60,26 @@ namespace ClassicUO.Game.UI.Controls
             bool ishtml = false
         )
         {
-            _gText = RenderedText.Create
-            (
-                text,
-                hue,
-                font,
-                isunicode,
-                style,
-                align,
-                maxwidth,
-                isHTML: ishtml
-            );
+            _fontSettings.FontIndex = font == 0xFF ? (byte)(Client.Version >= ClientVersion.CV_305D ? 1 : 0) : font;
+            _fontSettings.IsUnicode = isunicode;
+
+            _fontSettings.Border = (style & FontStyle.BlackBorder) != 0;
+            _fontSettings.Italic = (style & FontStyle.Italic) != 0;
+            _fontSettings.Bold = (style & FontStyle.Solid) != 0;
+            _fontSettings.Underline = (style & FontStyle.Underline) != 0;
+
+            _maxWidth = maxwidth;
+            _align = align;
+
+            if (hue == 0xFFFF)
+            {
+                hue = 1;
+            }
+
+            Hue = (ushort)(hue - 1);
+            Text = text;
 
             AcceptMouseInput = false;
-            Width = _gText.Width;
-            Height = _gText.Height;
         }
 
         public Label(List<string> parts, string[] lines) : this
@@ -86,33 +98,25 @@ namespace ClassicUO.Game.UI.Controls
 
         public string Text
         {
-            get => _gText.Text;
+            get => _text;
             set
             {
-                _gText.Text = value;
-                Width = _gText.Width;
-                Height = _gText.Height;
-            }
-        }
-
-
-        public ushort Hue
-        {
-            get => _gText.Hue;
-            set
-            {
-                if (_gText.Hue != value)
+                if (_text != value)
                 {
-                    _gText.Hue = value;
-                    _gText.CreateTexture();
+                    _text = value;
+
+                    _textSize = UOFontRenderer.Shared.MeasureString(_text.AsSpan(), _fontSettings, 1f, _maxWidth);
+                    Width = (int) Math.Max(_textSize.X, _maxWidth);
+                    Height = (int)_textSize.Y;
                 }
             }
         }
 
+        public ushort Hue { get; set; }
+        public byte Font => _fontSettings.FontIndex;
+        public bool Unicode => _fontSettings.IsUnicode;
 
-        public byte Font => _gText.Font;
 
-        public bool Unicode => _gText.IsUnicode;
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
@@ -121,15 +125,32 @@ namespace ClassicUO.Game.UI.Controls
                 return false;
             }
 
-            _gText.Draw(batcher, x, y, Alpha);
+            Vector2 pos = new Vector2(x, y);
+
+            if (_align == TEXT_ALIGN_TYPE.TS_CENTER)
+            {
+                pos.X = x + (_maxWidth * 0.5f) - (_textSize.X * 0.5f);
+            }
+
+            Vector3 hueVec = new Vector3(Hue, 0f, Alpha);
+            if (Hue != 0)
+            {
+                hueVec.Y = 1f;
+            }
+
+            UOFontRenderer.Shared.Draw
+            (
+                batcher,
+                Text.AsSpan(),
+                pos,
+                1f,
+                _fontSettings,
+                hueVec,
+                false,
+                _maxWidth
+            );
 
             return base.Draw(batcher, x, y);
-        }
-
-        public override void Dispose()
-        {
-            base.Dispose();
-            _gText.Destroy();
         }
     }
 }

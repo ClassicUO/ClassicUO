@@ -30,28 +30,60 @@
 
 #endregion
 
+using System;
 using System.Collections.Generic;
 using ClassicUO.Data;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
+using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Controls
 {
     internal class CroppedText : Control
     {
-        private readonly RenderedText _gameText;
+        private readonly string _text;
+        private FontSettings _fontSettings;
+        private Vector2 _textSize;
+        private readonly bool _cropped;
+        private readonly ushort _hue;
+        private readonly float _maxWidth;
+        private readonly int _textLength;
 
         public CroppedText(string text, ushort hue, int maxWidth = 0)
         {
-            _gameText = RenderedText.Create
-            (
-                text,
-                hue,
-                (byte) (Client.Version >= ClientVersion.CV_305D ? 1 : 0),
-                true,
-                maxWidth > 0 ? FontStyle.BlackBorder | FontStyle.Cropped : FontStyle.BlackBorder,
-                maxWidth: maxWidth
-            );
+            _text = text;
+
+            if (hue == 0xFFFF)
+            {
+                hue = 1;
+            }
+
+            _hue = (ushort)(hue - 1);
+            _maxWidth = maxWidth;
+            _cropped = maxWidth > 0.0f;
+
+            _fontSettings.FontIndex = (byte)(Client.Version >= ClientVersion.CV_305D ? 1 : 0);
+            _fontSettings.IsUnicode = true;
+            _fontSettings.Border = true;
+
+            _textLength = text.Length;
+            _textSize.Y = UOFontRenderer.Shared.GetFontHeight(_fontSettings) * 1f;
+         
+            if (_cropped)
+            {
+                for (int i = 0; i < _text.Length; ++i)
+                {
+                    _textSize.X += UOFontRenderer.Shared.MeasureString(_text.AsSpan(i, 1), _fontSettings, 1f).X;
+                    
+                    if (_textSize.X > _maxWidth)
+                    {
+                        _textLength = i;
+
+                        break;
+                    }
+                }
+            }
+            
 
             AcceptMouseInput = false;
         }
@@ -67,15 +99,22 @@ namespace ClassicUO.Game.UI.Controls
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
-            _gameText.Draw(batcher, x, y);
+            Vector2 position = new Vector2(x, y);
+            Vector3 hueVec = new Vector3(_hue, 1f, 0);
+
+            UOFontRenderer.Shared.Draw
+            (
+                batcher,
+                _text.AsSpan(0, _textLength),
+                position,
+                1f,
+                _fontSettings,
+                hueVec,
+                false,
+                _maxWidth
+            );
 
             return base.Draw(batcher, x, y);
-        }
-
-        public override void Dispose()
-        {
-            base.Dispose();
-            _gameText?.Destroy();
         }
     }
 }
