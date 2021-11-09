@@ -32,6 +32,7 @@
 
 using System;
 using System.Collections.Generic;
+using ClassicUO.Data;
 using ClassicUO.Input;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
@@ -53,8 +54,12 @@ namespace ClassicUO.Game.UI.Controls
         private readonly List<HSliderBar> _pairedSliders = new List<HSliderBar>();
         private int _sliderX;
         private readonly HSliderBarStyle _style;
-        private readonly RenderedText _text;
         private int _value = -1;
+
+        private string _text = null;
+        private FontSettings _fontSettings;
+        private Vector2 _textSize;
+        private ushort _hue;
 
         public HSliderBar
         (
@@ -77,7 +82,17 @@ namespace ClassicUO.Game.UI.Controls
 
             if (hasText)
             {
-                _text = RenderedText.Create(string.Empty, color, font, unicode);
+                _text = string.Empty;
+
+                if (color == 0xFFFF)
+                {
+                    color = 0;
+                }
+
+                _hue = color;
+                _fontSettings.FontIndex = (byte) (font == 0xFF ? (Client.Version >= ClientVersion.CV_305D ? 1 : 0) : font);
+                _fontSettings.IsUnicode = unicode;
+
                 _drawUp = drawUp;
             }
 
@@ -132,7 +147,8 @@ namespace ClassicUO.Game.UI.Controls
 
                     if (_text != null)
                     {
-                        _text.Text = Value.ToString();
+                        _text = Value.ToString();
+                        _textSize = UOFontRenderer.Shared.MeasureString(_text.AsSpan(), _fontSettings, 1f);
                     }
 
                     if (_value != oldValue)
@@ -214,16 +230,29 @@ namespace ClassicUO.Game.UI.Controls
             }
 
 
-            if (_text != null)
+            if (!string.IsNullOrEmpty(_text))
             {
+                Vector2 position = new Vector2(x, y);
+
                 if (_drawUp)
                 {
-                    _text.Draw(batcher, x, y - _text.Height);
+                    position.Y -= _textSize.Y;
                 }
                 else
                 {
-                    _text.Draw(batcher, x + BarWidth + 2, y + (Height >> 1) - (_text.Height >> 1));
+                    position.X += BarWidth + 2;
+                    position.Y += (Height - _textSize.Y) * 0.5f;
                 }
+
+                UOFontRenderer.Shared.Draw
+                (
+                    batcher,
+                    _text.AsSpan(),
+                    position,
+                    1f,
+                    _fontSettings,
+                    _hue
+                );
             }
 
             return base.Draw(batcher, x, y);
@@ -236,7 +265,7 @@ namespace ClassicUO.Game.UI.Controls
 
             if (_text != null)
             {
-                _text.Text = Value.ToString();
+                _text = Value.ToString();
             }
         }
 
@@ -391,12 +420,6 @@ namespace ClassicUO.Game.UI.Controls
                     sliderIndex = 0;
                 }
             }
-        }
-
-        public override void Dispose()
-        {
-            _text?.Destroy();
-            base.Dispose();
         }
     }
 }
