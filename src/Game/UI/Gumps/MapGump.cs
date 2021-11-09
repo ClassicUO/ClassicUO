@@ -397,15 +397,18 @@ namespace ClassicUO.Game.UI.Gumps
         private class PinControl : Control
         {
             private readonly GumpPic _pic;
-            private readonly RenderedText _text;
+            private string _text = string.Empty;
+            private FontSettings _fontSettings = new FontSettings()
+            {
+                FontIndex = 0,
+                IsUnicode = false
+            };
+            private Vector2 _textSize;
 
             public PinControl(int x, int y)
             {
                 X = x;
                 Y = y;
-
-
-                _text = RenderedText.Create(string.Empty, font: 0, isunicode: false);
 
                 _pic = new GumpPic(0, 0, 0x139B, 0);
                 Add(_pic);
@@ -433,8 +436,15 @@ namespace ClassicUO.Game.UI.Gumps
 
             public string NumberText
             {
-                get => _text.Text;
-                set => _text.Text = value;
+                get => _text;
+                set
+                {
+                    if (_text != value)
+                    {
+                        _text = value;
+                        _textSize = UOFontRenderer.Shared.MeasureString(_text.AsSpan(), _fontSettings, 1f);
+                    }
+                }
             }
 
 
@@ -450,16 +460,19 @@ namespace ClassicUO.Game.UI.Gumps
                 }
 
                 base.Draw(batcher, x, y);
-                _text.Draw(batcher, x - _text.Width - 1, y);
+
+                UOFontRenderer.Shared.Draw
+                (
+                    batcher,
+                    _text.AsSpan(),
+                    new Vector2(x - _textSize.X - 1, y),
+                    1f,
+                    _fontSettings,
+                    Vector3.Zero,
+                    false
+                );
 
                 return true;
-            }
-
-            public override void Dispose()
-            {
-                _text?.Destroy();
-
-                base.Dispose();
             }
         }
     }
