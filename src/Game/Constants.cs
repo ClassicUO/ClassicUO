@@ -44,7 +44,7 @@ namespace ClassicUO.Game
         public const int ITEM_EFFECT_ANIMATION_DELAY = 50;
 
         public const int MAX_STEP_COUNT = 5;
-        public const int TURN_DELAY = 100; // original client 12.5 fps = 80ms delay. FIXME: this patch causes a packet throttle. Reverted back to 100ms
+        public const int TURN_DELAY = 80; // original client 12.5 fps = 80ms delay.
         public const int TURN_DELAY_FAST = 45;
         public const int WALKING_DELAY = 150; // 750
         public const int PLAYER_WALKING_DELAY = 150;
