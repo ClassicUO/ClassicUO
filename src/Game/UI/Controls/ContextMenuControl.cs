@@ -32,6 +32,7 @@
 
 using System;
 using System.Collections.Generic;
+using ClassicUO.Data;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Input;
@@ -219,7 +220,14 @@ namespace ClassicUO.Game.UI.Controls
 
         private class ContextMenuItem : Control
         {
-            private static readonly RenderedText _moreMenuLabel = RenderedText.Create(">", 0xFFFF, isunicode: true, style: FontStyle.BlackBorder);
+            private static FontSettings _fontSettings = new FontSettings()
+            {
+                IsUnicode = true,
+                Border = true,
+                FontIndex = (byte)(Client.Version >= ClientVersion.CV_305D ? 1 : 0)
+            };
+            private static readonly Vector2 _textSize = UOFontRenderer.Shared.MeasureString(">".AsSpan(), _fontSettings, 1f);
+
             private readonly ContextMenuItemEntry _entry;
             private readonly Label _label;
             private readonly GumpPic _selectedPic;
@@ -374,7 +382,17 @@ namespace ClassicUO.Game.UI.Controls
 
                 if (_entry.Items != null && _entry.Items.Count != 0)
                 {
-                    _moreMenuLabel.Draw(batcher, x + Width - _moreMenuLabel.Width, y + (Height >> 1) - (_moreMenuLabel.Height >> 1) - 1);
+                    Vector2 position = new Vector2(x + Width - _textSize.X - 1, y + (Height - _textSize.Y) * 0.5f - 1);
+
+                    UOFontRenderer.Shared.Draw
+                    (
+                        batcher,
+                        ">".AsSpan(),
+                        position,
+                        1f,
+                        _fontSettings,
+                        0
+                    );
                 }
 
                 return true;
