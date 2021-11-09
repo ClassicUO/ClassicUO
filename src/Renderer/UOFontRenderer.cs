@@ -430,56 +430,25 @@ namespace ClassicUO.Renderer
             {
                 ref var cmd = ref _commands[i];
 
-                switch (cmd.Type)
+                if (cmd.Type == CommandType.Char)
                 {
-                    case CommandType.Char:
-                        
-                        if (allowSelection && !mouseIsOver)
+                    if (allowSelection && !mouseIsOver)
+                    {
+                        mouseIsOver = _picker.Get
+                        (
+                            cmd.Key,
+                            (int)((mousePosition.X - cmd.Position.X) / scale),
+                            (int)((mousePosition.Y - cmd.Position.Y) / scale)
+                        );
+
+                        if (mouseIsOver)
                         {
-                            mouseIsOver = _picker.Get
-                            (
-                                cmd.Key,
-                                (int)((mousePosition.X - cmd.Position.X) / scale),
-                                (int)((mousePosition.Y - cmd.Position.Y) / scale)
-                            );
+                            hue.X = 0x35;
 
-                            if (mouseIsOver)
-                            {
-                                hue.X = 0x35;
-
-                                FixVectorColor(ref hue, settings);
-                                FixFontCmdHue(0, i, ref hue);
-                            }
+                            FixVectorColor(ref hue, settings);
+                            FixFontCmdHue(0, i, ref hue);
                         }
-
-                        break;
-
-                    case CommandType.Space:
-
-                        //if (wordSize.X > maxTextWidth)
-                        //{
-                        //    wordSize.X = 0;
-                        //    position.X = startPosition.X;
-                        //    position.Y += lineHeight;
-                        //    offsetY += lineHeight;
-                        //}
-                        //else
-                        //{
-                        //    value = DEFAULT_SPACE_SIZE * scale;
-                        //}
-                        
-                        break;
-
-                    case CommandType.NewLine:
-
-                        //wordSize.X = 0;
-                        //position.X = startPosition.X;
-                        //position.Y += lineHeight;
-                        //offsetY += lineHeight;
-
-                        break;
-
-                    default: continue;
+                    }
                 }
 
                 cmd.UOHue = hue;
