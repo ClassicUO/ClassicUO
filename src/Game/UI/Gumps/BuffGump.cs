@@ -264,8 +264,19 @@ namespace ClassicUO.Game.UI.Gumps
         {
             private byte _alpha;
             private bool _decreaseAlpha;
-            private readonly RenderedText _gText;
             private float _updateTooltipTime;
+
+            private string _text;
+            private FontSettings _fontSettings = new FontSettings()
+            {
+                FontIndex = 2,
+                IsUnicode = true,
+                Border = true
+            };
+
+            private Vector2 _textSize;
+
+
 
             public BuffControlEntry(BuffIcon icon) : base(0, 0, icon.Graphic, 0)
             {
@@ -277,18 +288,6 @@ namespace ClassicUO.Game.UI.Gumps
                 Icon = icon;
                 _alpha = 0xFF;
                 _decreaseAlpha = true;
-
-                _gText = RenderedText.Create
-                (
-                    "",
-                    0xFFFF,
-                    2,
-                    true,
-                    FontStyle.Fixed | FontStyle.BlackBorder,
-                    TEXT_ALIGN_TYPE.TS_CENTER,
-                    Width
-                );
-
 
                 AcceptMouseInput = true;
                 WantUpdateSize = false;
@@ -328,11 +327,16 @@ namespace ClassicUO.Game.UI.Gumps
 
                         if (span.Hours > 0)
                         {
-                            _gText.Text = string.Format(ResGumps.Span0Hours, span.Hours);
+                            _text = string.Format(ResGumps.Span0Hours, span.Hours);
                         }
                         else
                         {
-                            _gText.Text = span.Minutes > 0 ? $"{span.Minutes}:{span.Seconds}" : $"{span.Seconds}";
+                            _text = span.Minutes > 0 ? $"{span.Minutes}:{span.Seconds}" : $"{span.Seconds}";
+                        }
+
+                        if (!string.IsNullOrEmpty(_text))
+                        {
+                            _textSize = UOFontRenderer.Shared.MeasureString(_text.AsSpan(), _fontSettings, 1f);
                         }
                     }
 
@@ -399,19 +403,25 @@ namespace ClassicUO.Game.UI.Gumps
                         HueVector
                     );
                    
-                    if (ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.BuffBarTime)
+                    if (!string.IsNullOrWhiteSpace(_text) && ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.BuffBarTime)
                     {
-                        _gText.Draw(batcher, x - 3, y + bounds.Height / 2 - 3, HueVector.Z);
+                        Vector2 position = new Vector2(x, y + bounds.Height * 0.5f);
+                        Vector3 hueVec = new Vector3(1, 1, 0);
+                        ShaderHueTranslator.GetHueVector(ref hueVec, 0, false, HueVector.Z);
+
+                        UOFontRenderer.Shared.Draw
+                        (
+                            batcher,
+                            _text.AsSpan(),
+                            position,
+                            1f,
+                            _fontSettings,
+                            hueVec
+                        );
                     }
                 }
 
                 return true;
-            }
-
-            public override void Dispose()
-            {
-                _gText?.Destroy();
-                base.Dispose();
             }
         }
     }
