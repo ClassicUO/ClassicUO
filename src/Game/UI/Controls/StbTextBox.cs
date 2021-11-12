@@ -33,6 +33,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using ClassicUO.Data;
 using ClassicUO.Game.Managers;
 using ClassicUO.Input;
 using ClassicUO.IO.Resources;
@@ -51,6 +52,12 @@ namespace ClassicUO.Game.UI.Controls
         private readonly FontStyle _fontStyle;
 
         private readonly int _maxCharCount = -1;
+
+        private FontSettings _fontSettings;
+        private ushort _hue;
+        private string _text = string.Empty;
+        private Vector2 _textSize;
+        private float _maxWidth;
 
 
         public StbTextBox
@@ -89,28 +96,14 @@ namespace ClassicUO.Game.UI.Controls
             // stb_textedit will handle part of these tag
             style &= ~( /*FontStyle.Fixed | */FontStyle.Cropped | FontStyle.CropTexture);
 
-            _rendererText = RenderedText.Create
-            (
-                string.Empty,
-                hue,
-                font,
-                isunicode,
-                style,
-                align,
-                maxWidth
-            );
 
-            _rendererCaret = RenderedText.Create
-            (
-                "_",
-                hue,
-                font,
-                isunicode,
-                (style & FontStyle.BlackBorder) != 0 ? FontStyle.BlackBorder : FontStyle.None,
-                align
-            );
+            _hue = hue;
+            _maxWidth = maxWidth;
+            _fontSettings.FontIndex = (byte)(font == 0xFF ? (Client.Version >= ClientVersion.CV_305D ? 1 : 0) : font);
+            _fontSettings.Border = (style & FontStyle.BlackBorder) != 0;
+            _fontSettings.IsUnicode = isunicode;
 
-            Height = _rendererCaret.Height;
+            Height = (int) UOFontRenderer.Shared.GetFontHeight(_fontSettings);
         }
 
         public StbTextBox(List<string> parts, string[] lines) : this
@@ -124,8 +117,8 @@ namespace ClassicUO.Game.UI.Controls
         {
             X = int.Parse(parts[1]);
             Y = int.Parse(parts[2]);
-            Width = _rendererText.MaxWidth; //int.Parse(parts[3]);
-            Height = _rendererText.MaxHeight = int.Parse(parts[4]);
+            Width = (int) _maxWidth; //int.Parse(parts[3]);
+            Height = /*_rendererText.MaxHeight =*/ int.Parse(parts[4]);
             Multiline = false;
             _fromServer = true;
             LocalSerial = SerialHelper.Parse(parts[6]);
@@ -146,15 +139,12 @@ namespace ClassicUO.Game.UI.Controls
 
         public byte Font
         {
-            get => _rendererText.Font;
+            get => _fontSettings.FontIndex;
             set
             {
-                if (_rendererText.Font != value)
+                if (_fontSettings.FontIndex != value)
                 {
-                    _rendererText.Font = value;
-                    _rendererText.CreateTexture();
-                    _rendererCaret.Font = value;
-                    _rendererCaret.CreateTexture();
+                    _fontSettings.FontIndex = (byte)(value == 0xFF ? (Client.Version >= ClientVersion.CV_305D ? 1 : 0) : value);
 
                     UpdateCaretScreenPosition();
                 }
@@ -208,44 +198,25 @@ namespace ClassicUO.Game.UI.Controls
 
         public bool AllowSelection { get; set; } = true;
 
-        public bool IsUnicode => _rendererText.IsUnicode;
+        public bool IsUnicode => _fontSettings.IsUnicode;
 
         public ushort Hue
         {
-            get => _rendererText.Hue;
-            set
-            {
-                if (_rendererText.Hue != value)
-                {
-                    _rendererText.Hue = value;
-                    _rendererCaret.Hue = value;
-
-                    _rendererText.CreateTexture();
-                    _rendererCaret.CreateTexture();
-                }
-            }
+            get => _hue;
+            set => _hue = value;
         }
 
         internal int TotalHeight
         {
             get
-            {
-                int h = 20;
-                MultilinesFontInfo info = GetInfo();
-
-                while (info != null)
-                {
-                    h += info.MaxHeight;
-                    info = info.Next;
-                }
-
-                return h;
+            { 
+                return (int) _textSize.Y;
             }
         }
 
         public string Text
         {
-            get => _rendererText.Text;
+            get => _text;
 
             set
             {
@@ -263,7 +234,8 @@ namespace ClassicUO.Game.UI.Controls
                 
                 //Sanitize(ref value);
 
-                _rendererText.Text = value;
+                _text = value;
+                _textSize = UOFontRenderer.Shared.MeasureString(_text.AsSpan(), _fontSettings, 1f, _maxWidth);
 
                 if (!_is_writing)
                 {
@@ -276,12 +248,27 @@ namespace ClassicUO.Game.UI.Controls
 
         public float GetWidth(int index)
         {
-            return _rendererText.GetCharWidthAtIndex(index);
+            float width = 0;
+            if (!string.IsNullOrEmpty(_text))
+            {
+                width = UOFontRenderer.Shared.MeasureString(_text.AsSpan(index, 1), _fontSettings, 1f, _maxWidth).X;               
+            }
+
+            return width;
         }
 
         public TextEditRow LayoutRow(int startIndex)
         {
-            TextEditRow r = _rendererText.GetLayoutRow(startIndex);
+            TextEditRow r = new TextEditRow();
+
+            if (!string.IsNullOrEmpty(_text))
+            {
+                r.x0 = 0;
+                r.x1 = _textSize.X;
+                r.num_chars = _text.Length - 1; //TODO: need to be fixed
+
+                r.baseline_y_delta = r.ymax = UOFontRenderer.Shared.GetFontHeight(_fontSettings);
+            }
 
             int sx = ScreenCoordinateX;
             int sy = ScreenCoordinateY;
@@ -297,37 +284,9 @@ namespace ClassicUO.Game.UI.Controls
         protected Point _caretScreenPosition;
         protected bool _is_writing;
         protected bool _leftWasDown, _fromServer;
-        protected RenderedText _rendererText, _rendererCaret;
 
         public event EventHandler TextChanged;
 
-        public MultilinesFontInfo CalculateFontInfo(string text, bool countret = true)
-        {
-            if (IsUnicode)
-            {
-                return FontsLoader.Instance.GetInfoUnicode
-                (
-                    _rendererText.Font,
-                    text,
-                    text.Length,
-                    _rendererText.Align,
-                    (ushort) _rendererText.FontStyle,
-                    _rendererText.MaxWidth,
-                    countret
-                );
-            }
-
-            return FontsLoader.Instance.GetInfoASCII
-            (
-                _rendererText.Font,
-                text,
-                text.Length,
-                _rendererText.Align,
-                (ushort) _rendererText.FontStyle,
-                _rendererText.MaxWidth,
-                countret
-            );
-        }
 
         public void SelectAll()
         {
@@ -340,7 +299,11 @@ namespace ClassicUO.Game.UI.Controls
 
         protected void UpdateCaretScreenPosition()
         {
-            _caretScreenPosition = _rendererText.GetCaretPosition(Stb.CursorIndex);
+            var cursorIndex = Math.Min(Stb.CursorIndex, Math.Max(0, _text.Length));
+
+            var size = UOFontRenderer.Shared.MeasureString(_text.AsSpan(0, cursorIndex), _fontSettings, 1f);
+            _caretScreenPosition.X = (int)size.X;
+            _caretScreenPosition.Y = (int)size.Y;
         }
 
         private ControlKeys ApplyShiftIfNecessary(ControlKeys k)
@@ -358,117 +321,11 @@ namespace ClassicUO.Game.UI.Controls
             return _maxCharCount >= 0 && Length + count >= _maxCharCount;
         }
 
-        private void Sanitize(ref string text)
-        {
-            if ((_fontStyle & FontStyle.Fixed) != 0 || (_fontStyle & FontStyle.Cropped) != 0 || (_fontStyle & FontStyle.CropTexture) != 0)
-            {
-                if (_rendererText.MaxWidth == 0)
-                {
-                    Log.Warn("maxwidth must be setted.");
-
-                    return;
-                }
-
-                if (string.IsNullOrEmpty(text))
-                {
-                    return;
-                }
-
-
-                int realWidth = _rendererText.IsUnicode ? FontsLoader.Instance.GetWidthUnicode(_rendererText.Font, text) : FontsLoader.Instance.GetWidthASCII(_rendererText.Font, text);
-
-                if (realWidth > _rendererText.MaxWidth)
-                {
-                    if ((_fontStyle & FontStyle.Fixed) != 0)
-                    {
-                        text = Text;
-                        Stb.CursorIndex = Math.Max(0, text.Length - 1);
-
-                        return;
-                    }
-
-                    //MultilinesFontInfo info = _rendererText.IsUnicode
-                    //                              ? FontsLoader.Instance.GetInfoUnicode(
-                    //                                                                    _rendererText.Font,
-                    //                                                                    text,
-                    //                                                                    text.Length,
-                    //                                                                    _rendererText.Align,
-                    //                                                                    (ushort) _rendererText.FontStyle,
-                    //                                                                    realWidth
-                    //                                                                   )
-                    //                              : FontsLoader.Instance.GetInfoASCII(
-                    //                                                                  _rendererText.Font,
-                    //                                                                  text,
-                    //                                                                  text.Length,
-                    //                                                                  _rendererText.Align,
-                    //                                                                  (ushort) _rendererText.FontStyle,
-                    //                                                                  realWidth
-                    //                                                                 );
-
-
-                    if ((_fontStyle & FontStyle.CropTexture) != 0)
-                    {
-                        //string sb = text;
-                        //int total_height = 0;
-                        //int start = 0;
-
-                        //while (info != null)
-                        //{
-                        //    total_height += info.MaxHeight;
-
-                        //    if (total_height >= Height)
-                        //    {
-                        //        if (Text != null && Text.Length <= text.Length)
-                        //            text = Text;
-
-                        //        _stb.CursorIndex = Math.Max(0, text.Length - 1);
-                        //        return;
-                        //    }
-
-                        //    uint count = info.Data.Count;
-
-                        //    //if (_stb.CursorIndex >= start && _stb.CursorIndex <= start + info.CharCount)
-                        //    {
-                        //        int pixel_width = 0;
-
-                        //        for (int i = 0; i < count; i++)
-                        //        {
-                        //            pixel_width += _rendererText.GetCharWidth(info.Data[i].Item);
-
-                        //            if (pixel_width >= _rendererText.MaxWidth)
-                        //            {
-                        //                sb = sb.Insert(start + i, "\n");
-                        //                _stb.CursorIndex = start + i + 1;
-                        //                pixel_width = 0;
-                        //            }
-                        //        }
-                        //    }
-
-                        //    start += (int) count;
-                        //    info = info.Next;
-                        //}
-
-                        //text = sb.ToString();
-                    }
-
-                    if ((_fontStyle & FontStyle.Cropped) != 0)
-                    {
-                    }
-                }
-            }
-        }
-
-
         protected virtual void OnTextChanged()
         {
             TextChanged?.Raise(this);
 
             UpdateCaretScreenPosition();
-        }
-
-        protected MultilinesFontInfo GetInfo()
-        {
-            return _rendererText.GetInfo();
         }
 
         internal override void OnFocusEnter()
@@ -871,7 +728,7 @@ namespace ClassicUO.Game.UI.Controls
                     Stb.Paste(c);
                     OnTextChanged();
                 }
-                else if (_rendererText.GetCharWidth(c[0]) > 0 || c[0] == '\n')
+                else if (UOFontRenderer.Shared.MeasureString(c.AsSpan(0, 1), _fontSettings, 1f).X > 0.0f || c[0] == '\n' || c[0] == ' ')
                 {
                     Stb.InputChar(c[0]);
                     OnTextChanged();
@@ -883,11 +740,21 @@ namespace ClassicUO.Game.UI.Controls
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
-            if (batcher.ClipBegin(x, y, Width, Height))
+            if (batcher.ClipBegin(x - 1, y - 1, Width + 2, Height + 2))
             {
                 base.Draw(batcher, x, y);
                 DrawSelection(batcher, x, y);
-                _rendererText.Draw(batcher, x, y);
+
+                UOFontRenderer.Shared.Draw
+                (
+                    batcher,
+                    _text.AsSpan(),
+                    new Vector2(x, y),
+                    1f,
+                    _fontSettings,
+                    _hue
+                );
+
                 DrawCaret(batcher, x, y);
 
                 batcher.ClipEnd();
@@ -912,79 +779,88 @@ namespace ClassicUO.Game.UI.Controls
 
             if (selectStart < selectEnd)
             {
-                MultilinesFontInfo info = _rendererText.GetInfo();
+                //MultilinesFontInfo info = _rendererText.GetInfo();
 
                 int drawY = 1;
                 int start = 0;
-                int diffX = _rendererText.Align != TEXT_ALIGN_TYPE.TS_LEFT ? _rendererText.GetCaretPosition(0).X - 1 : 0;
 
-                while (info != null && selectStart < selectEnd)
-                {
-                    // ok we are inside the selection
-                    if (selectStart >= start && selectStart < start + info.CharCount)
-                    {
-                        int startSelectionIndex = selectStart - start;
+                //for (int i = 0; i < _text.Length; ++i)
+                //{
+                //    if (selectStart >= i)
+                //    {
 
-                        // calculate offset x
-                        int drawX = 0;
+                //    }
+                //}
 
-                        for (int i = 0; i < startSelectionIndex; i++)
-                        {
-                            drawX += _rendererText.GetCharWidth(info.Data[i].Item);
-                        }
+                //int diffX = _rendererText.Align != TEXT_ALIGN_TYPE.TS_LEFT ? _rendererText.GetCaretPosition(0).X - 1 : 0;
 
-                        // selection is gone. Bye bye
-                        if (selectEnd >= start && selectEnd < start + info.CharCount)
-                        {
-                            int count = selectEnd - selectStart;
+                //while (info != null && selectStart < selectEnd)
+                //{
+                //    // ok we are inside the selection
+                //    if (selectStart >= start && selectStart < start + info.CharCount)
+                //    {
+                //        int startSelectionIndex = selectStart - start;
 
-                            int endX = 0;
+                //        // calculate offset x
+                //        int drawX = 0;
 
-                            // calculate width 
-                            for (int k = 0; k < count; k++)
-                            {
-                                endX += _rendererText.GetCharWidth(info.Data[startSelectionIndex + k].Item);
-                            }
+                //        for (int i = 0; i < startSelectionIndex; i++)
+                //        {
+                //            drawX += _rendererText.GetCharWidth(info.Data[i].Item);
+                //        }
 
-                            batcher.Draw
-                            (
-                                SolidColorTextureCache.GetTexture(SELECTION_COLOR),
-                                new Rectangle
-                                (
-                                    x + drawX + diffX,
-                                    y + drawY,
-                                    endX,
-                                    info.MaxHeight + 1
-                                ),
-                                HueVector
-                            );
+                //        // selection is gone. Bye bye
+                //        if (selectEnd >= start && selectEnd < start + info.CharCount)
+                //        {
+                //            int count = selectEnd - selectStart;
 
-                            break;
-                        }
+                //            int endX = 0;
+
+                //            // calculate width 
+                //            for (int k = 0; k < count; k++)
+                //            {
+                //                endX += _rendererText.GetCharWidth(info.Data[startSelectionIndex + k].Item);
+                //            }
+
+                //            batcher.Draw
+                //            (
+                //                SolidColorTextureCache.GetTexture(SELECTION_COLOR),
+                //                new Rectangle
+                //                (
+                //                    x + drawX + diffX,
+                //                    y + drawY,
+                //                    endX,
+                //                    info.MaxHeight + 1
+                //                ),
+                //                HueVector
+                //            );
+
+                //            break;
+                //        }
 
 
-                        // do the whole line
-                        batcher.Draw
-                        (
-                            SolidColorTextureCache.GetTexture(SELECTION_COLOR),
-                            new Rectangle
-                            (
-                                x + drawX + diffX,
-                                y + drawY,
-                                info.Width - drawX,
-                                info.MaxHeight + 1
-                            ),
-                            HueVector
-                        );
+                //        // do the whole line
+                //        batcher.Draw
+                //        (
+                //            SolidColorTextureCache.GetTexture(SELECTION_COLOR),
+                //            new Rectangle
+                //            (
+                //                x + drawX + diffX,
+                //                y + drawY,
+                //                info.Width - drawX,
+                //                info.MaxHeight + 1
+                //            ),
+                //            HueVector
+                //        );
 
-                        // first selection is gone. M
-                        selectStart = start + info.CharCount;
-                    }
+                //        // first selection is gone. M
+                //        selectStart = start + info.CharCount;
+                //    }
 
-                    start += info.CharCount;
-                    drawY += info.MaxHeight;
-                    info = info.Next;
-                }
+                //    start += info.CharCount;
+                //    drawY += info.MaxHeight;
+                //    info = info.Next;
+                //}
             }
 
 
@@ -995,7 +871,15 @@ namespace ClassicUO.Game.UI.Controls
         {
             if (HasKeyboardFocus)
             {
-                _rendererCaret.Draw(batcher, x + _caretScreenPosition.X, y + _caretScreenPosition.Y);
+                UOFontRenderer.Shared.Draw
+                (
+                    batcher,
+                    "_".AsSpan(),
+                    new Vector2(x + _caretScreenPosition.X, y + _caretScreenPosition.Y),
+                    1f,
+                    _fontSettings,
+                    _hue
+                );
             }
         }
 
@@ -1035,14 +919,6 @@ namespace ClassicUO.Game.UI.Controls
             }
 
             Stb.Drag(Mouse.Position.X, Mouse.Position.Y);
-        }
-
-        public override void Dispose()
-        {
-            _rendererText?.Destroy();
-            _rendererCaret?.Destroy();
-
-            base.Dispose();
         }
 
         protected override bool OnMouseDoubleClick(int x, int y, MouseButtonType button)

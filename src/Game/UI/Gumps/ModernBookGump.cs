@@ -99,7 +99,7 @@ namespace ClassicUO.Game.UI.Gumps
             }
 
             StringBuilder sb = new StringBuilder();
-            int sw = _bookPage.renderedText.GetCharWidth(' ');
+            //int sw = _bookPage.renderedText.GetCharWidth(' ');
 
             for (int i = 0, l = BookLines.Length; i < l; i++)
             {
@@ -111,18 +111,18 @@ namespace ClassicUO.Game.UI.Gumps
 
             for (int i = 0, l = BookLines.Length; i < l; i++)
             {
-                int w = IsNewBook ? FontsLoader.Instance.GetWidthUnicode(_bookPage.renderedText.Font, BookLines[i]) : FontsLoader.Instance.GetWidthASCII(_bookPage.renderedText.Font, BookLines[i]);
+                //int w = IsNewBook ? FontsLoader.Instance.GetWidthUnicode(_bookPage.renderedText.Font, BookLines[i]) : FontsLoader.Instance.GetWidthASCII(_bookPage.renderedText.Font, BookLines[i]);
 
-                sb.Append(BookLines[i]);
+                //sb.Append(BookLines[i]);
 
-                if (BookLines[i] == null)
-                    continue;
+                //if (BookLines[i] == null)
+                //    continue;
 
-                if (i + 1 < l && (string.IsNullOrWhiteSpace(BookLines[i]) && !BookLines[i].Contains("\n") || w + sw < _bookPage.renderedText.MaxWidth))
-                {
-                    sb.Append('\n');
-                    BookLines[i] += '\n';
-                }
+                //if (i + 1 < l && (string.IsNullOrWhiteSpace(BookLines[i]) && !BookLines[i].Contains("\n") || w + sw < _bookPage.renderedText.MaxWidth))
+                //{
+                //    sb.Append('\n');
+                //    BookLines[i] += '\n';
+                //}
             }
 
             _bookPage._ServerUpdate = true;
@@ -384,130 +384,134 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (batcher.ClipBegin(x, y, Width, Height))
             {
-                RenderedText t = _bookPage.renderedText;
-                int startpage = (ActivePage - 1) * 2;
+                //RenderedText t = _bookPage.renderedText;
+                //int startpage = (ActivePage - 1) * 2;
 
-                if (startpage < BookPageCount)
-                {
-                    int poy = _bookPage._pageCoords[startpage, 0], phy = _bookPage._pageCoords[startpage, 1];
+                //if (startpage < BookPageCount)
+                //{
+                //    int poy = _bookPage._pageCoords[startpage, 0], phy = _bookPage._pageCoords[startpage, 1];
 
-                    _bookPage.DrawSelection
-                    (
-                        batcher,
-                        x + RIGHT_X,
-                        y + UPPER_MARGIN,
-                        poy,
-                        poy + phy
-                    );
+                //    _bookPage.DrawSelection
+                //    (
+                //        batcher,
+                //        x + RIGHT_X,
+                //        y + UPPER_MARGIN,
+                //        poy,
+                //        poy + phy
+                //    );
 
-                    t.Draw
-                    (
-                        batcher,
-                        x + RIGHT_X,
-                        y + UPPER_MARGIN,
-                        0,
-                        poy,
-                        t.Width,
-                        phy
-                    );
+                //    t.Draw
+                //    (
+                //        batcher,
+                //        x + RIGHT_X,
+                //        y + UPPER_MARGIN,
+                //        0,
+                //        poy,
+                //        t.Width,
+                //        phy
+                //    );
 
-                    if (startpage == _bookPage._caretPage)
-                    {
-                        if (_bookPage._caretPos.Y < poy + phy)
-                        {
-                            if (_bookPage._caretPos.Y >= poy)
-                            {
-                                if (_bookPage.HasKeyboardFocus)
-                                {
-                                    _bookPage.renderedCaret.Draw
-                                    (
-                                        batcher,
-                                        _bookPage._caretPos.X + x + RIGHT_X,
-                                        _bookPage._caretPos.Y + y + UPPER_MARGIN - poy,
-                                        0,
-                                        0,
-                                        _bookPage.renderedCaret.Width,
-                                        _bookPage.renderedCaret.Height
-                                    );
-                                }
-                            }
-                            else
-                            {
-                                _bookPage._caretPage = _bookPage.GetCaretPage();
-                            }
-                        }
-                        else if (_bookPage._caretPos.Y <= _bookPage.Height)
-                        {
-                            if (_bookPage._caretPage + 2 < _bookPage._pagesChanged.Length)
-                            {
-                                _bookPage._focusPage = _bookPage._caretPage++;
-                                SetActivePage(_bookPage._caretPage / 2 + 2);
-                            }
-                        }
-                    }
-                }
+                //    if (startpage == _bookPage._caretPage)
+                //    {
+                //        if (_bookPage._caretPos.Y < poy + phy)
+                //        {
+                //            if (_bookPage._caretPos.Y >= poy)
+                //            {
+                //                if (_bookPage.HasKeyboardFocus)
+                //                {
+                //                    //TODO: fix caret
 
-                startpage--;
+                //                    //_bookPage.renderedCaret.Draw
+                //                    //(
+                //                    //    batcher,
+                //                    //    _bookPage._caretPos.X + x + RIGHT_X,
+                //                    //    _bookPage._caretPos.Y + y + UPPER_MARGIN - poy,
+                //                    //    0,
+                //                    //    0,
+                //                    //    _bookPage.renderedCaret.Width,
+                //                    //    _bookPage.renderedCaret.Height
+                //                    //);
+                //                }
+                //            }
+                //            else
+                //            {
+                //                _bookPage._caretPage = _bookPage.GetCaretPage();
+                //            }
+                //        }
+                //        else if (_bookPage._caretPos.Y <= _bookPage.Height)
+                //        {
+                //            if (_bookPage._caretPage + 2 < _bookPage._pagesChanged.Length)
+                //            {
+                //                _bookPage._focusPage = _bookPage._caretPage++;
+                //                SetActivePage(_bookPage._caretPage / 2 + 2);
+                //            }
+                //        }
+                //    }
+                //}
 
-                if (startpage > 0)
-                {
-                    int poy = _bookPage._pageCoords[startpage, 0], phy = _bookPage._pageCoords[startpage, 1];
+                //startpage--;
 
-                    _bookPage.DrawSelection
-                    (
-                        batcher,
-                        x + LEFT_X,
-                        y + UPPER_MARGIN,
-                        poy,
-                        poy + phy
-                    );
+                //if (startpage > 0)
+                //{
+                //    int poy = _bookPage._pageCoords[startpage, 0], phy = _bookPage._pageCoords[startpage, 1];
 
-                    t.Draw
-                    (
-                        batcher,
-                        x + LEFT_X,
-                        y + UPPER_MARGIN,
-                        0,
-                        poy,
-                        t.Width,
-                        phy
-                    );
+                //    _bookPage.DrawSelection
+                //    (
+                //        batcher,
+                //        x + LEFT_X,
+                //        y + UPPER_MARGIN,
+                //        poy,
+                //        poy + phy
+                //    );
 
-                    if (startpage == _bookPage._caretPage)
-                    {
-                        if (_bookPage._caretPos.Y < poy + phy)
-                        {
-                            if (_bookPage._caretPos.Y >= poy)
-                            {
-                                if (_bookPage.HasKeyboardFocus)
-                                {
-                                    _bookPage.renderedCaret.Draw
-                                    (
-                                        batcher,
-                                        _bookPage._caretPos.X + x + LEFT_X,
-                                        _bookPage._caretPos.Y + y + UPPER_MARGIN - poy,
-                                        0,
-                                        0,
-                                        _bookPage.renderedCaret.Width,
-                                        _bookPage.renderedCaret.Height
-                                    );
-                                }
-                            }
-                            else if (_bookPage._caretPage > 0)
-                            {
-                                _bookPage._focusPage = _bookPage._caretPage--;
-                                SetActivePage(_bookPage._caretPage / 2 + 1);
-                            }
-                        }
-                        else if (_bookPage._caretPos.Y <= _bookPage.Height)
-                        {
-                            if (_bookPage._caretPage + 2 < _bookPage._pagesChanged.Length)
-                            {
-                                _bookPage._caretPage++;
-                            }
-                        }
-                    }
-                }
+                //    t.Draw
+                //    (
+                //        batcher,
+                //        x + LEFT_X,
+                //        y + UPPER_MARGIN,
+                //        0,
+                //        poy,
+                //        t.Width,
+                //        phy
+                //    );
+
+                //    if (startpage == _bookPage._caretPage)
+                //    {
+                //        if (_bookPage._caretPos.Y < poy + phy)
+                //        {
+                //            if (_bookPage._caretPos.Y >= poy)
+                //            {
+                //                if (_bookPage.HasKeyboardFocus)
+                //                {
+                //                    //TODO: fix caret
+
+                //                    //_bookPage.renderedCaret.Draw
+                //                    //(
+                //                    //    batcher,
+                //                    //    _bookPage._caretPos.X + x + LEFT_X,
+                //                    //    _bookPage._caretPos.Y + y + UPPER_MARGIN - poy,
+                //                    //    0,
+                //                    //    0,
+                //                    //    _bookPage.renderedCaret.Width,
+                //                    //    _bookPage.renderedCaret.Height
+                //                    //);
+                //                }
+                //            }
+                //            else if (_bookPage._caretPage > 0)
+                //            {
+                //                _bookPage._focusPage = _bookPage._caretPage--;
+                //                SetActivePage(_bookPage._caretPage / 2 + 1);
+                //            }
+                //        }
+                //        else if (_bookPage._caretPos.Y <= _bookPage.Height)
+                //        {
+                //            if (_bookPage._caretPage + 2 < _bookPage._pagesChanged.Length)
+                //            {
+                //                _bookPage._caretPage++;
+                //            }
+                //        }
+                //    }
+                //}
 
                 batcher.ClipEnd();
             }
@@ -579,8 +583,6 @@ namespace ClassicUO.Game.UI.Gumps
 
             internal Point _caretPos => _caretScreenPosition;
 
-            internal RenderedText renderedText => _rendererText;
-            internal RenderedText renderedCaret => _rendererCaret;
             internal int _caretPage, _focusPage;
             internal readonly int[,] _pageCoords;
             internal readonly string[] _pageLines;
@@ -590,15 +592,15 @@ namespace ClassicUO.Game.UI.Gumps
 
             internal int GetCaretPage()
             {
-                Point p = _rendererText.GetCaretPosition(CaretIndex);
+                //Point p = _rendererText.GetCaretPosition(CaretIndex);
 
-                for (int i = 0, l = _pageCoords.GetLength(0); i < l; i++)
-                {
-                    if (p.Y >= _pageCoords[i, 0] && p.Y < _pageCoords[i, 0] + _pageCoords[i, 1])
-                    {
-                        return i;
-                    }
-                }
+                //for (int i = 0, l = _pageCoords.GetLength(0); i < l; i++)
+                //{
+                //    if (p.Y >= _pageCoords[i, 0] && p.Y < _pageCoords[i, 0] + _pageCoords[i, 1])
+                //    {
+                //        return i;
+                //    }
+                //}
 
                 return 0;
             }
@@ -680,26 +682,26 @@ namespace ClassicUO.Game.UI.Gumps
 
             internal void UpdatePageCoords()
             {
-                MultilinesFontInfo info = _rendererText.GetInfo();
+                //MultilinesFontInfo info = _rendererText.GetInfo();
 
-                for (int page = 0, y = 0; page < _pageCoords.GetLength(0); page++)
-                {
-                    _pageCoords[page, 0] = y;
-                    _pageCoords[page, 1] = 0;
+                //for (int page = 0, y = 0; page < _pageCoords.GetLength(0); page++)
+                //{
+                //    _pageCoords[page, 0] = y;
+                //    _pageCoords[page, 1] = 0;
 
-                    for (int i = 0; i < MAX_BOOK_LINES; i++)
-                    {
-                        if (info == null)
-                        {
-                            break;
-                        }
+                //    for (int i = 0; i < MAX_BOOK_LINES; i++)
+                //    {
+                //        if (info == null)
+                //        {
+                //            break;
+                //        }
 
-                        _pageCoords[page, 1] += info.MaxHeight;
-                        info = info.Next;
-                    }
+                //        _pageCoords[page, 1] += info.MaxHeight;
+                //        info = info.Next;
+                //    }
 
-                    y += _pageCoords[page, 1];
-                }
+                //    y += _pageCoords[page, 1];
+                //}
             }
 
             internal void DrawSelection(UltimaBatcher2D batcher, int x, int y, int starty, int endy)
@@ -707,90 +709,90 @@ namespace ClassicUO.Game.UI.Gumps
                 ResetHueVector();
                 HueVector.Z = 0.5f;
 
-                int selectStart = Math.Min(Stb.SelectStart, Stb.SelectEnd);
-                int selectEnd = Math.Max(Stb.SelectStart, Stb.SelectEnd);
+                //int selectStart = Math.Min(Stb.SelectStart, Stb.SelectEnd);
+                //int selectEnd = Math.Max(Stb.SelectStart, Stb.SelectEnd);
 
-                if (selectStart < selectEnd)
-                {
-                    MultilinesFontInfo info = _rendererText.GetInfo();
+                //if (selectStart < selectEnd)
+                //{
+                //    MultilinesFontInfo info = _rendererText.GetInfo();
 
-                    int drawY = 1;
-                    int start = 0;
+                //    int drawY = 1;
+                //    int start = 0;
 
-                    while (info != null && selectStart < selectEnd)
-                    {
-                        // ok we are inside the selection
-                        if (selectStart >= start && selectStart < start + info.CharCount)
-                        {
-                            int startSelectionIndex = selectStart - start;
+                //    while (info != null && selectStart < selectEnd)
+                //    {
+                //        // ok we are inside the selection
+                //        if (selectStart >= start && selectStart < start + info.CharCount)
+                //        {
+                //            int startSelectionIndex = selectStart - start;
 
-                            // calculate offset x
-                            int drawX = 0;
+                //            // calculate offset x
+                //            int drawX = 0;
 
-                            for (int i = 0; i < startSelectionIndex; i++)
-                            {
-                                drawX += _rendererText.GetCharWidth(info.Data[i].Item);
-                            }
+                //            for (int i = 0; i < startSelectionIndex; i++)
+                //            {
+                //                drawX += _rendererText.GetCharWidth(info.Data[i].Item);
+                //            }
 
-                            // selection is gone. Bye bye
-                            if (selectEnd >= start && selectEnd < start + info.CharCount)
-                            {
-                                int count = selectEnd - selectStart;
+                //            // selection is gone. Bye bye
+                //            if (selectEnd >= start && selectEnd < start + info.CharCount)
+                //            {
+                //                int count = selectEnd - selectStart;
 
-                                int endX = 0;
+                //                int endX = 0;
 
-                                // calculate width 
-                                for (int k = 0; k < count; k++)
-                                {
-                                    endX += _rendererText.GetCharWidth(info.Data[startSelectionIndex + k].Item);
-                                }
+                //                // calculate width 
+                //                for (int k = 0; k < count; k++)
+                //                {
+                //                    endX += _rendererText.GetCharWidth(info.Data[startSelectionIndex + k].Item);
+                //                }
 
-                                if (drawY >= starty && drawY <= endy)
-                                {
-                                    batcher.Draw
-                                    (
-                                        SolidColorTextureCache.GetTexture(SELECTION_COLOR),
-                                        new Rectangle
-                                        (
-                                            x + drawX,
-                                            y + drawY - starty,
-                                            endX,
-                                            info.MaxHeight + 1
-                                        ),
-                                        HueVector
-                                    );
-                                }
+                //                if (drawY >= starty && drawY <= endy)
+                //                {
+                //                    batcher.Draw
+                //                    (
+                //                        SolidColorTextureCache.GetTexture(SELECTION_COLOR),
+                //                        new Rectangle
+                //                        (
+                //                            x + drawX,
+                //                            y + drawY - starty,
+                //                            endX,
+                //                            info.MaxHeight + 1
+                //                        ),
+                //                        HueVector
+                //                    );
+                //                }
 
-                                break;
-                            }
+                //                break;
+                //            }
 
 
-                            // do the whole line
-                            if (drawY >= starty && drawY <= endy)
-                            {
-                                batcher.Draw
-                                (
-                                    SolidColorTextureCache.GetTexture(SELECTION_COLOR),
-                                    new Rectangle
-                                    (
-                                        x + drawX,
-                                        y + drawY - starty,
-                                        info.Width - drawX,
-                                        info.MaxHeight + 1
-                                    ),
-                                    HueVector
-                                );
-                            }
+                //            // do the whole line
+                //            if (drawY >= starty && drawY <= endy)
+                //            {
+                //                batcher.Draw
+                //                (
+                //                    SolidColorTextureCache.GetTexture(SELECTION_COLOR),
+                //                    new Rectangle
+                //                    (
+                //                        x + drawX,
+                //                        y + drawY - starty,
+                //                        info.Width - drawX,
+                //                        info.MaxHeight + 1
+                //                    ),
+                //                    HueVector
+                //                );
+                //            }
 
-                            // first selection is gone. M
-                            selectStart = start + info.CharCount;
-                        }
+                //            // first selection is gone. M
+                //            selectStart = start + info.CharCount;
+                //        }
 
-                        start += info.CharCount;
-                        drawY += info.MaxHeight;
-                        info = info.Next;
-                    }
-                }
+                //        start += info.CharCount;
+                //        drawY += info.MaxHeight;
+                //        info = info.Next;
+                //    }
+                //}
             }
 
             protected override void OnTextChanged()
@@ -804,66 +806,66 @@ namespace ClassicUO.Game.UI.Gumps
                         _handler = new string[_pageLines.Length];
                     }
 
-                    string[] split = Text.Split('\n');
+                    //string[] split = Text.Split('\n');
 
-                    for (int i = 0, l = 0; i < split.Length && l < _pageLines.Length; i++)
-                    {
-                        if (split[i].Length > 0)
-                        {
-                            for (int p = 0, w = 0, pw = _rendererText.GetCharWidth(split[i][p]);; pw = _rendererText.GetCharWidth(split[i][p]))
-                            {
-                                if (w + pw > _rendererText.MaxWidth)
-                                {
-                                    _handler[l] = _sb.ToString();
-                                    _sb.Clear();
-                                    l++;
-                                    //CaretIndex++;
-                                    w = 0;
+                    //for (int i = 0, l = 0; i < split.Length && l < _pageLines.Length; i++)
+                    //{
+                    //    if (split[i].Length > 0)
+                    //    {
+                    //        for (int p = 0, w = 0, pw = _rendererText.GetCharWidth(split[i][p]);; pw = _rendererText.GetCharWidth(split[i][p]))
+                    //        {
+                    //            if (w + pw > _rendererText.MaxWidth)
+                    //            {
+                    //                _handler[l] = _sb.ToString();
+                    //                _sb.Clear();
+                    //                l++;
+                    //                //CaretIndex++;
+                    //                w = 0;
 
-                                    if (l >= _pageLines.Length)
-                                    {
-                                        break;
-                                    }
-                                }
+                    //                if (l >= _pageLines.Length)
+                    //                {
+                    //                    break;
+                    //                }
+                    //            }
 
-                                w += pw;
-                                _sb.Append(split[i][p]);
-                                p++;
+                    //            w += pw;
+                    //            _sb.Append(split[i][p]);
+                    //            p++;
 
-                                if (p >= split[i].Length)
-                                {
-                                    _sb.Append('\n');
-                                    _handler[l] = _sb.ToString();
-                                    _sb.Clear();
-                                    l++;
+                    //            if (p >= split[i].Length)
+                    //            {
+                    //                _sb.Append('\n');
+                    //                _handler[l] = _sb.ToString();
+                    //                _sb.Clear();
+                    //                l++;
 
-                                    break;
-                                }
-                            }
-                        }
-                        else
-                        {
-                            _handler[l] = "\n";
-                            l++;
-                            //_sb.Append('\n');
-                        }
-                    }
+                    //                break;
+                    //            }
+                    //        }
+                    //    }
+                    //    else
+                    //    {
+                    //        _handler[l] = "\n";
+                    //        l++;
+                    //        //_sb.Append('\n');
+                    //    }
+                    //}
 
-                    _sb.Clear();
+                    //_sb.Clear();
 
-                    for (int i = 0; i < _pageLines.Length; i++)
-                    {
-                        if (!_pagesChanged[(i >> 3) + 1] && _handler[i] != _pageLines[i])
-                        {
-                            _pagesChanged[(i >> 3) + 1] = true;
-                        }
+                    //for (int i = 0; i < _pageLines.Length; i++)
+                    //{
+                    //    if (!_pagesChanged[(i >> 3) + 1] && _handler[i] != _pageLines[i])
+                    //    {
+                    //        _pagesChanged[(i >> 3) + 1] = true;
+                    //    }
 
-                        _sb.Append(_pageLines[i] = _handler[i]);
-                    }
+                    //    _sb.Append(_pageLines[i] = _handler[i]);
+                    //}
 
-                    _rendererText.Text = _sb.ToString(); //whole reformatted book
-                    _sb.Clear();
-                    UpdatePageCoords();
+                    //_rendererText.Text = _sb.ToString(); //whole reformatted book
+                    //_sb.Clear();
+                    //UpdatePageCoords();
                 }
 
                 base.OnTextChanged();

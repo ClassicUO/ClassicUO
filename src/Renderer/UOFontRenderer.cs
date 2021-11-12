@@ -255,15 +255,15 @@ namespace ClassicUO.Renderer
             float totalSpaceWidth = 0.0f;
             float anotherYOffset = 0f;
 
-            while (!text.IsEmpty && text[0] == ' ')
-            {
-                text = text.Slice(1);
-            }
+            //while (!text.IsEmpty && text[0] == ' ')
+            //{
+            //    text = text.Slice(1);
+            //}
 
-            while (!text.IsEmpty && text[text.Length - 1] == ' ')
-            {
-                text = text.Slice(0, text.Length - 1);
-            }
+            //while (!text.IsEmpty && text[text.Length - 1] == ' ')
+            //{
+            //    text = text.Slice(0, text.Length - 1);
+            //}
 
             for (int i = 0; i < text.Length; ++i)
             {
@@ -333,7 +333,7 @@ namespace ClassicUO.Renderer
                         }   
                     }
 
-                    if (c == ' ' && last != i + 1 && i + 1 != text.Length)
+                    if (c == ' ' /*&& last != i + 1 && i + 1 != text.Length*/)
                     {
                         PushFontDrawCmd(CommandType.Space, null, position, new Rectangle(0, 0, DEFAULT_SPACE_SIZE, 0), hue, color, scale, 0);
 
