@@ -265,7 +265,7 @@ namespace ClassicUO.Game.UI.Controls
             {
                 r.x0 = 0;
                 r.x1 = _textSize.X;
-                r.num_chars = _text.Length - 1; //TODO: need to be fixed
+                r.num_chars = _text.Length - startIndex - 1; //TODO: need to be fixed
 
                 r.baseline_y_delta = r.ymax = UOFontRenderer.Shared.GetFontHeight(_fontSettings);
             }
@@ -774,95 +774,37 @@ namespace ClassicUO.Game.UI.Controls
 
             int selectStart = Math.Min(Stb.SelectStart, Stb.SelectEnd);
             int selectEnd = Math.Max(Stb.SelectStart, Stb.SelectEnd);
-
+            int count = Math.Max(0, selectEnd - selectStart);
             HueVector.Z = 0.5f;
 
-            if (selectStart < selectEnd)
+            if (count > 0)
             {
-                //MultilinesFontInfo info = _rendererText.GetInfo();
+                // TODO: this is a single line selection. It's necessary to manage multilines too
+                var texture = SolidColorTextureCache.GetTexture(SELECTION_COLOR);
 
-                int drawY = 1;
-                int start = 0;
+                ++count;
 
-                //for (int i = 0; i < _text.Length; ++i)
-                //{
-                //    if (selectStart >= i)
-                //    {
+                if (count >= _text.Length - selectStart)
+                {
+                    count = _text.Length - selectStart;
+                }
 
-                //    }
-                //}
+                Vector2 size = UOFontRenderer.Shared.MeasureString(_text.AsSpan(0, selectStart), _fontSettings, 1f);
+                var rect = new Rectangle(x, y, (int)size.X, (int)size.Y);
 
-                //int diffX = _rendererText.Align != TEXT_ALIGN_TYPE.TS_LEFT ? _rendererText.GetCaretPosition(0).X - 1 : 0;
-
-                //while (info != null && selectStart < selectEnd)
-                //{
-                //    // ok we are inside the selection
-                //    if (selectStart >= start && selectStart < start + info.CharCount)
-                //    {
-                //        int startSelectionIndex = selectStart - start;
-
-                //        // calculate offset x
-                //        int drawX = 0;
-
-                //        for (int i = 0; i < startSelectionIndex; i++)
-                //        {
-                //            drawX += _rendererText.GetCharWidth(info.Data[i].Item);
-                //        }
-
-                //        // selection is gone. Bye bye
-                //        if (selectEnd >= start && selectEnd < start + info.CharCount)
-                //        {
-                //            int count = selectEnd - selectStart;
-
-                //            int endX = 0;
-
-                //            // calculate width 
-                //            for (int k = 0; k < count; k++)
-                //            {
-                //                endX += _rendererText.GetCharWidth(info.Data[startSelectionIndex + k].Item);
-                //            }
-
-                //            batcher.Draw
-                //            (
-                //                SolidColorTextureCache.GetTexture(SELECTION_COLOR),
-                //                new Rectangle
-                //                (
-                //                    x + drawX + diffX,
-                //                    y + drawY,
-                //                    endX,
-                //                    info.MaxHeight + 1
-                //                ),
-                //                HueVector
-                //            );
-
-                //            break;
-                //        }
-
-
-                //        // do the whole line
-                //        batcher.Draw
-                //        (
-                //            SolidColorTextureCache.GetTexture(SELECTION_COLOR),
-                //            new Rectangle
-                //            (
-                //                x + drawX + diffX,
-                //                y + drawY,
-                //                info.Width - drawX,
-                //                info.MaxHeight + 1
-                //            ),
-                //            HueVector
-                //        );
-
-                //        // first selection is gone. M
-                //        selectStart = start + info.CharCount;
-                //    }
-
-                //    start += info.CharCount;
-                //    drawY += info.MaxHeight;
-                //    info = info.Next;
-                //}
+                rect.X += (int)size.X;
+                rect.Y = Math.Max((int)size.Y, rect.Y);
+                size = UOFontRenderer.Shared.MeasureString(_text.AsSpan(selectStart, count), _fontSettings, 1f);
+                rect.Y = Math.Max((int)size.Y, rect.Y);
+                rect.Width = (int)size.X;
+                rect.Height = (int)size.Y + 1;
+                batcher.Draw
+                (
+                   texture,
+                   rect,
+                   HueVector
+                );               
             }
-
 
             ResetHueVector();
         }
