@@ -1896,6 +1896,15 @@ namespace ClassicUO.Resources {
                 return ResourceManager.GetString("IgnoreGuildMessages", resourceCulture);
             }
         }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Speech max width.
+        /// </summary>
+        public static string SpeechMaxWidth {
+            get {
+                return ResourceManager.GetString("SpeechMaxWidth", resourceCulture);
+            }
+        }
         
         /// <summary>
         ///   Looks up a localized string similar to Impossible to define the client version.

@@ -151,6 +151,7 @@ namespace ClassicUO.Game.UI.Gumps
         private Checkbox _showInfoBar;
         private Checkbox _ignoreAllianceMessages;
         private Checkbox _ignoreGuildMessages;
+        private HSliderBar _speechMaxWidth;
 
         // general
         private HSliderBar _sliderFPS, _circleOfTranspRadius;
@@ -2450,6 +2451,23 @@ namespace ClassicUO.Game.UI.Gumps
 
             startY += 35;
 
+            Label text = AddLabel(rightArea, ResGumps.SpeechMaxWidth, startX, startY);
+            startX += text.Bounds.Right + 5;
+
+            _speechMaxWidth = AddHSlider
+            (
+                rightArea,
+                200,
+                1000,
+                _currentProfile.SpeechMaxWidth,
+                startX,
+                startY,
+                180
+            );
+
+            startX = 5;
+            startY += 35;
+
             _randomizeColorsButton = new NiceButton
             (
                 startX,
@@ -3547,6 +3565,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _hideChatGradient.IsChecked = false;
                     _ignoreGuildMessages.IsChecked = false;
                     _ignoreAllianceMessages.IsChecked = false;
+                    _speechMaxWidth.Value = 200;
 
                     break;
 
@@ -3915,6 +3934,7 @@ namespace ClassicUO.Game.UI.Gumps
             _currentProfile.HideChatGradient = _hideChatGradient.IsChecked;
             _currentProfile.IgnoreGuildMessages = _ignoreGuildMessages.IsChecked;
             _currentProfile.IgnoreAllianceMessages = _ignoreAllianceMessages.IsChecked;
+            _currentProfile.SpeechMaxWidth = _speechMaxWidth.Value;
 
             // fonts
             _currentProfile.ForceUnicodeJournal = _forceUnicodeJournal.IsChecked;
