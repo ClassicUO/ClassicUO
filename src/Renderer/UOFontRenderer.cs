@@ -255,6 +255,8 @@ namespace ClassicUO.Renderer
             float totalSpaceWidth = 0.0f;
             float anotherYOffset = 0f;
 
+            int offsetWidth = settings.Border ? -1 : 0;
+
 
             for (int i = 0; i < text.Length; ++i)
             {
@@ -280,8 +282,9 @@ namespace ClassicUO.Renderer
                         {
                             PushFontDrawCmd(CommandType.Char, texture, position, uv, hue, color, scale, key);
 
-                            wordSize.X += uv.Width * scale;
-                            position.X += uv.Width * scale;
+                            var w = (uv.Width + offsetWidth) * scale;
+                            wordSize.X += w;
+                            position.X += w;
                         }
                     }
 
@@ -327,7 +330,7 @@ namespace ClassicUO.Renderer
                                 cmd.Position.X = startPosition.X + wordSize.X;
                                 cmd.Position.Y += offsetY;
 
-                                wordSize.X += cmd.UV.Width * scale;
+                                wordSize.X += (cmd.UV.Width + offsetWidth) * scale;
                             }
                            
                             position.X += wordSize.X;
@@ -389,8 +392,9 @@ namespace ClassicUO.Renderer
                     {
                         PushFontDrawCmd(CommandType.Char, texture, position, uv, hue, color, scale, key);
 
-                        wordSize.X += uv.Width * scale;
-                        position.X += uv.Width * scale;
+                        var w = (uv.Width + offsetWidth) * scale;
+                        wordSize.X += w;
+                        position.X += w;
                     }
                 }
 
@@ -416,7 +420,7 @@ namespace ClassicUO.Renderer
                         cmd.Position.X = startPosition.X + wordSize.X;
                         cmd.Position.Y += offsetY;
 
-                        wordSize.X += cmd.UV.Width * scale;
+                        wordSize.X += (cmd.UV.Width + offsetWidth) * scale;
                     }
                 }
 
@@ -1062,8 +1066,6 @@ namespace ClassicUO.Renderer
                     }
                 }
             }
-
-
 
             spriteInfo = new SpriteInfo();
             spriteInfo.Char = c;
