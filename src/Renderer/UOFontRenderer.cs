@@ -255,15 +255,6 @@ namespace ClassicUO.Renderer
             float totalSpaceWidth = 0.0f;
             float anotherYOffset = 0f;
 
-            //while (!text.IsEmpty && text[0] == ' ')
-            //{
-            //    text = text.Slice(1);
-            //}
-
-            //while (!text.IsEmpty && text[text.Length - 1] == ' ')
-            //{
-            //    text = text.Slice(0, text.Length - 1);
-            //}
 
             for (int i = 0; i < text.Length; ++i)
             {
@@ -294,19 +285,28 @@ namespace ClassicUO.Renderer
                         }
                     }
 
-                    if (c == '\n' || (last > 0 && wordSize.X > maxTextWidth))
+                    if (c == '\n' || wordSize.X > maxTextWidth)
                     {
+                        float offsetY;
+
                         if (c == '\n')
                         {
                             PushFontDrawCmd(CommandType.NewLine, null, position, Rectangle.Empty, hue, color, scale, 0);
+
+                            wordSize.Y += lineHeight;
+                            position.Y += lineHeight;
+                            offsetY = lineHeight;
+                        }
+                        else
+                        {
+                            wordSize.Y += last > 0 ? lineHeight: 0;
+                            position.Y += last > 0 ? lineHeight : 0;
+                            offsetY = last > 0 ? lineHeight : 0;
                         }
 
                         wordSize.X = 0;
-                        wordSize.Y += lineHeight;
-
                         position.X = startPosition.X;
-                        position.Y += lineHeight;
-                        float offsetY = lineHeight;
+                                           
 
                         if (c != '\n')
                         {
@@ -314,13 +314,14 @@ namespace ClassicUO.Renderer
                             {
                                 ref var cmd = ref _commands[j];
 
-                                if (/*last > 0 &&*/ wordSize.X - 0 > maxTextWidth)
+                                if (wordSize.X - 0 > maxTextWidth)
                                 {
                                     fullSize.X = Math.Max(fullSize.X, wordSize.X);
                                     wordSize.X = 0;
                                     wordSize.Y += lineHeight;
                                     offsetY += lineHeight;
                                     anotherYOffset += lineHeight;
+                                    position.Y += lineHeight;
                                 }
 
                                 cmd.Position.X = startPosition.X + wordSize.X;
@@ -329,11 +330,11 @@ namespace ClassicUO.Renderer
                                 wordSize.X += cmd.UV.Width * scale;
                             }
                            
-                            position.X += wordSize.X;                            
+                            position.X += wordSize.X;
                         }   
                     }
 
-                    if (c == ' ' /*&& last != i + 1 && i + 1 != text.Length*/)
+                    if (c == ' ')
                     {
                         PushFontDrawCmd(CommandType.Space, null, position, new Rectangle(0, 0, DEFAULT_SPACE_SIZE, 0), hue, color, scale, 0);
 
@@ -351,8 +352,6 @@ namespace ClassicUO.Renderer
 
             if (last < text.Length)
             {
-                position.Y += anotherYOffset;
-
                 for (int i = last; i < text.Length; ++i)
                 {
                     if (text[i] == '\r')
@@ -395,7 +394,7 @@ namespace ClassicUO.Renderer
                     }
                 }
 
-                if (wordSize.X - totalSpaceWidth > maxTextWidth)
+                if (wordSize.X - 0 > maxTextWidth)
                 {
                     wordSize.X = 0;
                     float offsetY = last > 0.0f ? lineHeight : 0f;
@@ -588,8 +587,6 @@ namespace ClassicUO.Renderer
                 lineHeight,
                 scale
             );
-
-            //fullSize.X = Math.Max(maxTextWidth, fullSize.X);
 
             return fullSize;
         }
