@@ -360,6 +360,8 @@ namespace ClassicUO.Game.UI.Gumps
 
             _options["show_coordinates"] = new ContextMenuItemEntry(ResGumps.ShowYourCoordinates, () => { _showCoordinates = !_showCoordinates; }, true, _showCoordinates);
 
+            _options["add_marker_on_player"] = new ContextMenuItemEntry(ResGumps.AddMarkerOnPlayer, () => AddMarkerOnPlayer());
+
             _options["saveclose"] = new ContextMenuItemEntry(ResGumps.SaveClose, Dispose);
         }
 
@@ -448,6 +450,8 @@ namespace ClassicUO.Game.UI.Gumps
             ContextMenu.Add(_options["show_mobiles"]);
             ContextMenu.Add(_options["show_multis"]);
             ContextMenu.Add(_options["show_coordinates"]);
+            ContextMenu.Add("", null);
+            ContextMenu.Add(_options["add_marker_on_player"]);
             ContextMenu.Add("", null);
             ContextMenu.Add(_options["saveclose"]);
         }
@@ -1423,6 +1427,81 @@ namespace ClassicUO.Game.UI.Gumps
             }
 
             //);
+        }
+
+        private void AddMarkerOnPlayer()
+        {
+            if (!World.InGame)
+            {
+                return;
+            }
+
+            var entryDialog = new EntryDialog(250, 150, ResGumps.EnterMarkerName, SaveMakerOnPlayer)
+            {
+                CanCloseWithRightClick = true
+            };
+
+            UIManager.Add(entryDialog);
+        }
+
+        private void SaveMakerOnPlayer(string markerName)
+        {
+            if (!World.InGame)
+            {
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(markerName))
+            {
+                GameActions.Print(ResGumps.InvalidMarkerName, 0x2A);
+            }
+
+            var markerColor = "blue";
+            var markerIcon = "bank";
+            var markerZoomLevel = 3;
+
+            var markerCsv = $"{World.Player.X},{World.Player.Y},{World.Map.Index},{markerName},{markerIcon},{markerColor},{markerZoomLevel}";
+            var markerFilePath = Path.Combine(_mapFilesPath, "player-map-markers.csv");
+
+            using (var fileStream = File.Open(markerFilePath, FileMode.OpenOrCreate, FileAccess.Write, FileShare.Write))
+            using (var streamWriter = new StreamWriter(fileStream))
+            {
+                streamWriter.BaseStream.Seek(0, SeekOrigin.End);
+                streamWriter.WriteLine(markerCsv);
+            }
+
+            var mapMarker = new WMapMarker
+            {
+                X = World.Player.X,
+                Y = World.Player.Y,
+                Color = GetColor(markerColor),
+                MapId = World.Map.Index,
+                MarkerIconName = markerIcon,
+                Name = markerName,
+                ZoomIndex = markerZoomLevel
+            };
+
+            if (!string.IsNullOrWhiteSpace(mapMarker.MarkerIconName) && _markerIcons.TryGetValue(mapMarker.MarkerIconName, out Texture2D markerIconTexture))
+            {
+                mapMarker.MarkerIcon = markerIconTexture;
+            }
+
+            var mapMarkerFile = _markerFiles.FirstOrDefault(x => x.FullPath == markerFilePath);
+
+            if (mapMarkerFile == null)
+            {
+                mapMarkerFile = new WMapMarkerFile
+                {
+                    Hidden = false,
+                    Name = Path.GetFileNameWithoutExtension(markerFilePath),
+                    FullPath = markerFilePath,
+                    Markers = new List<WMapMarker>()
+                };
+
+                _markerFiles.Add(mapMarkerFile);
+            }
+
+            mapMarkerFile.Markers.Add(mapMarker);
         }
 
         #endregion
